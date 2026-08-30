@@ -324,6 +324,10 @@ input::placeholder {
   animation: end-turn-pass-blink 1.15s ease-in-out infinite;
 }
 .end-turn-pass-toast-mobile-hand { display: none; }
+.turn-summary-toast {
+  font-size: 15px;
+  animation: toast-in 0.18s ease-out;
+}
 @keyframes end-turn-pass-blink {
   50% {
     border-color: #fff0a6;

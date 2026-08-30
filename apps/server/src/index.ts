@@ -2,7 +2,7 @@ import http from "node:http";
 import { randomUUID } from "node:crypto";
 import { WebSocketServer, WebSocket } from "ws";
 import type { ClientMessage, Format, HeroId, ServerMessage } from "@fyendal/shared";
-import { cardData, formatLegalityErrors } from "@fyendal/cards";
+import { cardData, formatLegalityIssues } from "@fyendal/cards";
 import { botDefinition } from "@fyendal/bot";
 import { deleteExpiredSessions, hashSessionToken, sessionForToken, type AuthUser } from "./auth.js";
 import type { Queryable } from "./db.js";
@@ -371,19 +371,30 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
     hero: HeroId | undefined,
     deckId: string | undefined,
     allowFutureCards = false,
-  ): Promise<{ hero?: HeroId; deckId?: string; deckName?: string } | { error: string }> {
+  ): Promise<{
+    choice: { hero?: HeroId; deckId?: string; deckName?: string };
+    requiresFutureCards: boolean;
+  } | { error: string }> {
     if (format === "classic-battles") {
       if (hero !== "dorinthea" && hero !== "rhinar") return { error: "pick a hero" };
-      return { hero };
+      return { choice: { hero }, requiresFutureCards: false };
     }
     if (!deckId) return { error: `choose a ${format} deck` };
     const refreshed = await resolveFreshDeck(deps.db, user.id, deckId, fabraryClient);
     if (!refreshed.ok) return { error: refreshed.error };
     const deck = refreshed.deck;
     if (deck.format !== format) return { error: `that is a ${deck.format} deck, not ${format}` };
-    const legality = formatLegalityErrors(cardData, deck.decklist, format, { allowFutureCards });
-    if (legality.length > 0) return { error: legality.join("; ") };
-    return { deckId: deck.id, deckName: deck.name };
+    const legality = formatLegalityIssues(cardData, deck.decklist, format);
+    const blockingIssues = allowFutureCards
+      ? legality.filter((issue) => issue.kind !== "future-card")
+      : legality;
+    if (blockingIssues.length > 0) {
+      return { error: blockingIssues.map((issue) => issue.message).join("; ") };
+    }
+    return {
+      choice: { deckId: deck.id, deckName: deck.name },
+      requiresFutureCards: legality.some((issue) => issue.kind === "future-card"),
+    };
   }
 
   async function handleMessage(ws: WebSocket, ctx: ClientCtx, msg: ClientMessage): Promise<void> {
@@ -425,7 +436,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           return;
         }
         const { code, seat, token } = await rooms.createRoom(msg.format, {
-          ...choice,
+          ...choice.choice,
           username: ctx.user.username,
           userId: ctx.user.id,
         }, msg.private ? "private" : "public", msg.allowFutureCards === true);
@@ -459,13 +470,13 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           msg.deckId,
           msg.allowFutureCards === true,
         );
-        if ("error" in choice || !choice.deckId) {
+        if ("error" in choice || !choice.choice.deckId) {
           send(ws, { type: "error", message: "error" in choice ? choice.error : `choose a ${botFormat} deck` });
           return;
         }
         const { code, seat, token } = await rooms.createBotRoom(botFormat, {
-          deckId: choice.deckId,
-          deckName: choice.deckName,
+          deckId: choice.choice.deckId,
+          deckName: choice.choice.deckName,
           username: ctx.user.username,
           userId: ctx.user.id,
         }, msg.allowFutureCards === true, botOpponent);
@@ -595,8 +606,8 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         const result = await rooms.queueForMatch(msg.format, {
           userId: ctx.user.id,
           username: ctx.user.username,
-          ...choice,
-          allowFutureCards: msg.allowFutureCards === true,
+          ...choice.choice,
+          allowFutureCards: choice.requiresFutureCards,
           avoidRoomCodes: msg.avoidRoomCodes,
         });
         if (!result.ok) {

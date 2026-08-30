@@ -212,7 +212,7 @@ export function answerArsenal(
     while (used.has(slot)) slot++;
     card.arsenalSlot = slot;
     player.arsenal.push(card);
-    logPublic(state, `${nameOf(state, player.heroCardId)} puts a card into arsenal`);
+    logPublic(state, `${nameOf(state, player.heroCardId)} puts a card face down into arsenal`);
   }
   finishEndPhase(state, runtime);
   return undefined;

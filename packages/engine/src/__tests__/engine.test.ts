@@ -805,6 +805,7 @@ describe("game setup & turn structure", () => {
     expect(projectStateFor(s, 0).players[0]!.arsenal[0]!.cardId).toBe(card.cardId);
     expect(projectStateFor(s, 1).players[0]!.arsenal).toHaveLength(0);
     expect(projectStateFor(s, 1).players[0]!.arsenalCount).toBe(1);
+    expect(projectStateFor(s, 1).log).toContain("Hero A puts a card face down into arsenal");
   });
 
   it("omits inactive arena state from graveyard and banished card views", () => {

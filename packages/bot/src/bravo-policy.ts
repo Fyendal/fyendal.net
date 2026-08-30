@@ -81,6 +81,26 @@ function offensiveCards(input: BotPolicyInput): readonly CardView[] {
   return [...me.hand, ...me.arsenal, ...me.weapons];
 }
 
+/** Static Shock asks Bravo to spend a card either now for three physical
+ * defense or later as Arcane Barrier pitch for only one prevention. When its
+ * Lightning Flow on-hit is represented and a three-block is available, take
+ * the efficient use of the card during defense. */
+function shouldBlockStaticShockWithThree(input: BotPolicyInput): boolean {
+  const link = currentLink(input);
+  const attack = input.cards[link?.attackingCard.cardId ?? ""];
+  if (attack?.name.trim().toLowerCase() !== "static shock") return false;
+  if (!link?.onHitEffects?.some((effect) => /arcane damage/i.test(effect.text))) return false;
+
+  const me = input.view.players[input.seat];
+  const hand = new Map(me.hand.map((card) => [card.instanceId, card]));
+  return input.legal.some((intent) =>
+    intent.kind === "stage-defenders" && intent.instanceIds.some((id) => {
+      const card = hand.get(id);
+      return card !== undefined && (card.defense ?? input.cards[card.cardId]?.defense ?? 0) >= 3;
+    })
+  );
+}
+
 function scoreDefend(
   intent: Extract<GameIntent, { kind: "defend" }>,
   input: BotPolicyInput,
@@ -92,6 +112,18 @@ function scoreDefend(
       damageThreatened: estimateBravoDamage(cards, policyInput),
     }),
     cardOpportunity,
+    defensePermission: (candidate) => {
+      if (!shouldBlockStaticShockWithThree(candidate.input)) return "allow";
+      const handIds = new Set(candidate.input.view.players[candidate.input.seat].hand.map(
+        (card) => card.instanceId,
+      ));
+      return candidate.chosen.some((card) =>
+          handIds.has(card.instanceId) &&
+          (card.defense ?? candidate.input.cards[card.cardId]?.defense ?? 0) >= 3
+        )
+        ? "require"
+        : "allow";
+    },
   });
 }
 

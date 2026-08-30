@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from "react";
+import { memo, useLayoutEffect, useRef } from "react";
 import type { DeckPool, EquipmentSlot } from "@fyendal/shared";
 import { cardData, equipmentFitsSlot } from "@fyendal/cards/client";
 import {
@@ -83,7 +83,7 @@ function CardStack({
   );
 }
 
-export function PrepPresentation({
+export const PrepPresentation = memo(function PrepPresentation({
   pool,
   selection,
   selectionKey,
@@ -229,4 +229,13 @@ export function PrepPresentation({
       </div>
     </section>
   );
-}
+}, (previous, current) =>
+  previous.pool === current.pool &&
+  previous.selection === current.selection &&
+  previous.selectionKey === current.selectionKey &&
+  previous.locked === current.locked &&
+  previous.mainCount === current.mainCount &&
+  previous.minimumMainCount === current.minimumMainCount &&
+  previous.exactMainCount === current.exactMainCount &&
+  previous.inventoryCount === current.inventoryCount
+);

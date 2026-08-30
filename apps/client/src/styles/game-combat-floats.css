@@ -26,13 +26,13 @@
   transform: translate(-50%, -50%);
   max-width: min(874px, 80vw);
 }
-/* the stack floats center-left, mirroring the life float on the right —
-   vertically centered just right of the equipment column, and stacks above
-   the combat chain (and below the decision prompts) when they overlap */
+/* The stack is a primary game-state surface, so keep it on the same central
+   axis as timing, decisions, and combat. It sits above the combat chain and
+   below decision prompts when those surfaces coexist. */
 .stack-float {
-  left: clamp(96px, 12.2vh, 158px); /* board padding + responsive equipment col + gap */
-  top: 50%;
-  transform: translateY(-50%);
+  left: var(--mat-cx);
+  top: 18%;
+  transform: translateX(-50%);
   z-index: 7;
 }
 .chain-float:active,
