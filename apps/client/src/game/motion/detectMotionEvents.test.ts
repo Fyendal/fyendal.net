@@ -145,6 +145,37 @@ describe("game motion detection", () => {
     }]);
   });
 
+  it("moves a resolved attack from the stack onto its combat-chain link", () => {
+    const attack = face(4);
+    const stackLink = {
+      attackingCard: attack,
+      defendingCards: [],
+      attackValue: 4,
+      defenseValue: 0,
+      damage: 0,
+      resolved: false,
+      onStack: true,
+      reactions: [],
+    };
+    const previous = view([player(0), player(1)], { chain: [stackLink] });
+    const current = view(
+      [player(0), player(1)],
+      { chain: [{ ...stackLink, onStack: false }] },
+    );
+
+    expect(detectGameMotionEvents(previous, current)).toEqual([{
+      kind: "move",
+      source: { kind: "stack-attack" },
+      destination: { kind: "chain-attack", link: 0 },
+      visual: { kind: "face", card: attack },
+      instanceId: attack.instanceId,
+      sourcePresentationKey: `stack:attack:${attack.instanceId}`,
+      destinationPresentationKey: `chain:0:attack:${attack.instanceId}`,
+      count: 1,
+      confidence: "exact",
+    }]);
+  });
+
   it("does not carry a visible identity into a newly hidden destination", () => {
     const known = face(4);
     const hidden = { ...known, cardId: "", hidden: true };

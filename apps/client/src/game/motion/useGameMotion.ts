@@ -11,6 +11,12 @@ import type { ViewUpdate } from "../../store/types.js";
 import { classifyViewUpdate } from "./classifyViewUpdate.js";
 import { detectGameMotionEvents } from "./detectMotionEvents.js";
 import {
+  completeMotionBatch,
+  EMPTY_MOTION_BATCH_QUEUE,
+  enqueueMotionBatch,
+  type MotionBatchQueue,
+} from "./motionBatchQueue.js";
+import {
   measureMotionAnchors,
   reducedMotionBatch,
   resolveMotionBatch,
@@ -46,42 +52,60 @@ export function useGameMotion({
   const previousViewRef = useRef<GameView | null>(null);
   const previousAnchorsRef = useRef<MotionAnchorSnapshot>(EMPTY_ANCHORS);
   const processedSequenceRef = useRef<number | null>(null);
-  const activeBatchIdRef = useRef<number | null>(null);
-  const maskedElementsRef = useRef(new Map<string, HTMLElement>());
+  const batchQueueRef = useRef<MotionBatchQueue>(EMPTY_MOTION_BATCH_QUEUE);
+  const maskedElementsRef = useRef(new Map<number, Map<string, HTMLElement>>());
 
-  const clearMaskedElements = useCallback(() => {
-    for (const element of maskedElementsRef.current.values()) {
-      element.classList.remove("game-motion-destination-hidden");
+  const releaseBatchMasks = useCallback((batchId: number) => {
+    const batchMasks = maskedElementsRef.current.get(batchId);
+    if (!batchMasks) return;
+    maskedElementsRef.current.delete(batchId);
+    for (const element of batchMasks.values()) {
+      const stillMasked = [...maskedElementsRef.current.values()].some((masks) => (
+        [...masks.values()].includes(element)
+      ));
+      if (!stillMasked) element.classList.remove("game-motion-destination-hidden");
     }
-    maskedElementsRef.current.clear();
   }, []);
 
-  const cancelActiveBatch = useCallback(() => {
-    activeBatchIdRef.current = null;
+  const clearMaskedElements = useCallback(() => {
+    for (const batchId of maskedElementsRef.current.keys()) releaseBatchMasks(batchId);
+    maskedElementsRef.current.clear();
+  }, [releaseBatchMasks]);
+
+  const cancelMotionQueue = useCallback(() => {
+    batchQueueRef.current = EMPTY_MOTION_BATCH_QUEUE;
     clearMaskedElements();
     setBatch(null);
   }, [clearMaskedElements]);
 
   const completeBatch = useCallback((batchId: number) => {
-    if (activeBatchIdRef.current !== batchId) return;
-    cancelActiveBatch();
-  }, [cancelActiveBatch]);
+    if (batchQueueRef.current.active?.id !== batchId) return;
+    releaseBatchMasks(batchId);
+    const nextQueue = completeMotionBatch(batchQueueRef.current, batchId);
+    batchQueueRef.current = nextQueue;
+    setBatch(nextQueue.active);
+  }, [releaseBatchMasks]);
 
   const arriveFlight = useCallback((
     batchId: number,
     destinationPresentationKey?: string,
   ) => {
     if (
-      activeBatchIdRef.current !== batchId
+      batchQueueRef.current.active?.id !== batchId
       || destinationPresentationKey === undefined
     ) return;
-    const element = maskedElementsRef.current.get(destinationPresentationKey);
+    const batchMasks = maskedElementsRef.current.get(batchId);
+    const element = batchMasks?.get(destinationPresentationKey);
     if (!element) return;
+    batchMasks?.delete(destinationPresentationKey);
+    if (batchMasks?.size === 0) maskedElementsRef.current.delete(batchId);
     // Hand off from the overlay to the real destination on this flight's own
     // arrival. Waiting for a later staggered card is what caused the visible
     // empty-frame blink in pitch and combat-chain batches.
-    element.classList.remove("game-motion-destination-hidden");
-    maskedElementsRef.current.delete(destinationPresentationKey);
+    const stillMasked = [...maskedElementsRef.current.values()].some((masks) => (
+      [...masks.values()].includes(element)
+    ));
+    if (!stillMasked) element.classList.remove("game-motion-destination-hidden");
   }, []);
 
   // Run after every commit: view-independent layout changes (hand collapse,
@@ -93,7 +117,7 @@ export function useGameMotion({
       previousViewRef.current = view;
       previousAnchorsRef.current = EMPTY_ANCHORS;
       processedSequenceRef.current = viewUpdate.sequence;
-      cancelActiveBatch();
+      cancelMotionQueue();
       return;
     }
 
@@ -122,19 +146,26 @@ export function useGameMotion({
       }
     }
 
-    clearMaskedElements();
-    activeBatchIdRef.current = nextBatch?.id ?? null;
+    if (!previousView || classification.kind !== "animate") {
+      cancelMotionQueue();
+    }
     if (nextBatch && nextBatch.flights.length > 0) {
+      const batchMasks = new Map<string, HTMLElement>();
       for (const flight of nextBatch.flights) {
         const key = flight.destinationPresentationKey;
         if (!key) continue;
         const element = measured.cardElements.get(key);
         if (!element) continue;
         element.classList.add("game-motion-destination-hidden");
-        maskedElementsRef.current.set(key, element);
+        batchMasks.set(key, element);
       }
+      if (batchMasks.size > 0) maskedElementsRef.current.set(nextBatch.id, batchMasks);
     }
-    setBatch(nextBatch);
+    if (nextBatch) {
+      const nextQueue = enqueueMotionBatch(batchQueueRef.current, nextBatch);
+      batchQueueRef.current = nextQueue;
+      setBatch(nextQueue.active);
+    }
     previousViewRef.current = view;
     previousAnchorsRef.current = measured.snapshot;
     processedSequenceRef.current = viewUpdate.sequence;
@@ -142,7 +173,7 @@ export function useGameMotion({
 
   useEffect(() => {
     const settleAfterResize = () => {
-      cancelActiveBatch();
+      cancelMotionQueue();
       const root = rootRef.current;
       if (root) previousAnchorsRef.current = measureMotionAnchors(root).snapshot;
     };
@@ -150,7 +181,7 @@ export function useGameMotion({
     return () => {
       window.removeEventListener("resize", settleAfterResize);
     };
-  }, [cancelActiveBatch, rootRef]);
+  }, [cancelMotionQueue, rootRef]);
 
   return { batch, arriveFlight, completeBatch };
 }

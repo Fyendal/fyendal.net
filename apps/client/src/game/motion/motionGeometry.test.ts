@@ -151,7 +151,7 @@ describe("motion geometry", () => {
     ]);
   });
 
-  it("schedules pitch payment before a played card enters the stack", () => {
+  it("starts the played card before overlapping pitch payment", () => {
     const playedSource = rect(220, 680, 140, 193);
     const pitchSource = rect(380, 680, 140, 193);
     const stackDestination = rect(520, 260, 100, 138);
@@ -200,8 +200,8 @@ describe("motion geometry", () => {
 
     const stackFlight = batch?.flights.find((flight) => flight.phase === "stack-entry");
     const pitchFlight = batch?.flights.find((flight) => flight.phase === "payment");
-    expect(pitchFlight?.delayMs).toBe(0);
-    expect(stackFlight?.delayMs).toBe(390);
+    expect(stackFlight?.delayMs).toBe(0);
+    expect(pitchFlight?.delayMs).toBe(45);
   });
 
   it("waits for stack resolution before fading in a resulting token", () => {
