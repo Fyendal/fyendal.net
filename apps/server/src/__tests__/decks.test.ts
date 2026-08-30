@@ -441,6 +441,15 @@ describe("validateDeck", () => {
     expect(r.errors.some((e) => e.includes("too many copies"))).toBe(true);
   });
 
+  it("allows any number of a card with Unlimited", () => {
+    const lines = parseDecklistText(`${ccExportText()}\n5x Copper Cog (blue)`);
+    const r = validateDeck(lines, "cc");
+
+    expect(r).toMatchObject({ ok: true });
+    if (!r.ok) return;
+    expect(r.decklist.deck.filter((id) => cardData[id]?.name === "Copper Cog")).toHaveLength(5);
+  });
+
   it("imports banned cards so current legality can be checked per game", () => {
     const banned = printings.find((card) => card.name === "Art of War")!;
     const lines = parseDecklistText(ccExportText());

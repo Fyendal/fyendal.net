@@ -214,8 +214,13 @@ export function validateDeck(lines: ParsedLine[], format: Format): ValidationRes
     }
     const target = line.section === "sideboard" ? sideboard : deck;
     for (let i = 0; i < line.qty; i++) target.push(card.id);
-    const key = normalizeCardName(card.name) + "|" + (card.pitch ?? 0);
-    copies.set(key, (copies.get(key) ?? 0) + line.qty);
+    const unlimited = card.keywords?.some(
+      (keyword) => keyword.trim().toLowerCase() === "unlimited",
+    ) === true;
+    if (!unlimited) {
+      const key = normalizeCardName(card.name) + "|" + (card.pitch ?? 0);
+      copies.set(key, (copies.get(key) ?? 0) + line.qty);
+    }
   }
 
   if (!heroId) errors.push("no hero found in the decklist");
