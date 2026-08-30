@@ -151,6 +151,104 @@ describe("motion geometry", () => {
     ]);
   });
 
+  it("schedules pitch payment before a played card enters the stack", () => {
+    const playedSource = rect(220, 680, 140, 193);
+    const pitchSource = rect(380, 680, 140, 193);
+    const stackDestination = rect(520, 260, 100, 138);
+    const pitchDestination = rect(690, 500, 100, 138);
+    const batch = resolveMotionBatch(
+      [
+        {
+          kind: "move",
+          source: { kind: "hand", seat: 0 },
+          destination: { kind: "stack-layer", index: 0 },
+          visual: {
+            kind: "face",
+            card: { instanceId: 60, cardId: "TST060", owner: 0 },
+          },
+          instanceId: 60,
+          sourcePresentationKey: "0:hand:60",
+          destinationPresentationKey: "stack:layer:60",
+          count: 1,
+          confidence: "exact",
+        },
+        {
+          kind: "move",
+          source: { kind: "hand", seat: 0 },
+          destination: { kind: "pitch", seat: 0 },
+          visual: {
+            kind: "face",
+            card: { instanceId: 61, cardId: "TST061", owner: 0 },
+          },
+          instanceId: 61,
+          sourcePresentationKey: "0:hand:61",
+          destinationPresentationKey: "0:pitch:61",
+          count: 1,
+          confidence: "exact",
+        },
+      ],
+      anchors({ cards: [
+        ["0:hand:60", playedSource],
+        ["0:hand:61", pitchSource],
+      ] }),
+      anchors({ cards: [
+        ["stack:layer:60", stackDestination],
+        ["0:pitch:61", pitchDestination],
+      ] }),
+      11,
+    );
+
+    const stackFlight = batch?.flights.find((flight) => flight.phase === "stack-entry");
+    const pitchFlight = batch?.flights.find((flight) => flight.phase === "payment");
+    expect(pitchFlight?.delayMs).toBe(0);
+    expect(stackFlight?.delayMs).toBe(390);
+  });
+
+  it("waits for stack resolution before fading in a resulting token", () => {
+    const stackSource = rect(520, 260, 100, 138);
+    const graveyardDestination = rect(850, 500, 100, 138);
+    const tokenDestination = rect(340, 120, 100, 138);
+    const batch = resolveMotionBatch(
+      [
+        {
+          kind: "appear",
+          destination: { kind: "board", seat: 0 },
+          visual: {
+            kind: "face",
+            card: { instanceId: 71, cardId: "ARC112", owner: 0 },
+          },
+          instanceId: 71,
+          destinationPresentationKey: "0:board:71",
+        },
+        {
+          kind: "move",
+          source: { kind: "stack-layer", index: 0 },
+          destination: { kind: "graveyard", seat: 0 },
+          visual: {
+            kind: "face",
+            card: { instanceId: 70, cardId: "TST070", owner: 0 },
+          },
+          instanceId: 70,
+          sourcePresentationKey: "stack:layer:70",
+          destinationPresentationKey: "0:graveyard:70",
+          count: 1,
+          confidence: "exact",
+        },
+      ],
+      anchors({ cards: [["stack:layer:70", stackSource]] }),
+      anchors({ cards: [
+        ["0:graveyard:70", graveyardDestination],
+        ["0:board:71", tokenDestination],
+      ] }),
+      12,
+    );
+
+    const resolution = batch?.flights.find((flight) => flight.phase === "resolution");
+    const result = batch?.flights.find((flight) => flight.phase === "result");
+    expect(resolution?.delayMs).toBe(0);
+    expect(result?.delayMs).toBe(390);
+  });
+
   it("centers an anonymous card-sized flight inside broad zone anchors", () => {
     const event: GameMotionEvent = {
       kind: "move",
@@ -277,6 +375,7 @@ describe("motion geometry", () => {
     expect(batch?.flights).toEqual([]);
     expect(batch?.connectors).toEqual([{
       id: "8:connector:0",
+      phase: "trigger",
       start: source,
       end: destination,
       delayMs: 0,

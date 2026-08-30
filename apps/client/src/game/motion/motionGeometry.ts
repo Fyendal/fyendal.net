@@ -4,6 +4,11 @@ import {
   type MotionLocation,
   type MotionVisual,
 } from "./motionTypes.js";
+import {
+  motionTimelinePhase,
+  scheduleMotionTimeline,
+  type MotionTimelinePhase,
+} from "./motionTimeline.js";
 
 export const MOTION_TRAVEL_MS = 320;
 export const MOTION_STAGGER_MS = 45;
@@ -32,6 +37,7 @@ export interface MeasuredMotionAnchors {
 
 export interface MotionFlight {
   id: string;
+  phase: MotionTimelinePhase;
   mode: "move" | "arsenal" | "draw" | "appear" | "settle";
   start: MotionRect;
   end: MotionRect;
@@ -44,12 +50,14 @@ export interface MotionFlight {
 
 export interface MotionPulse {
   id: string;
+  phase: MotionTimelinePhase;
   rect: MotionRect;
   delayMs: number;
 }
 
 export interface MotionConnector {
   id: string;
+  phase: MotionTimelinePhase;
   start: MotionRect;
   end: MotionRect;
   delayMs: number;
@@ -130,11 +138,15 @@ function addPulse(
   id: number,
   key: string,
   rect: MotionRect | undefined,
-  delayMs: number,
+  phase: MotionTimelinePhase,
 ): void {
   if (!rect || pulseKeys.has(key)) return;
   pulseKeys.add(key);
-  pulses.push({ id: `${id}:pulse:${pulses.length}`, rect, delayMs });
+  pulses.push({ id: `${id}:pulse:${pulses.length}`, phase, rect, delayMs: 0 });
+}
+
+function phaseStaggerMs(phase: MotionTimelinePhase): number {
+  return phase === "draw" ? MOTION_DRAW_STAGGER_MS : MOTION_STAGGER_MS;
 }
 
 export function resolveMotionBatch(
@@ -150,9 +162,10 @@ export function resolveMotionBatch(
   const boardAppearances = new Map<string, MotionFlight>();
 
   for (const event of events) {
+    const phase = motionTimelinePhase(event);
     if (event.kind === "pulse") {
       const key = motionLocationKey(event.location);
-      addPulse(pulses, pulseKeys, id, key, current.zones.get(key), 0);
+      addPulse(pulses, pulseKeys, id, key, current.zones.get(key), phase);
       continue;
     }
     if (event.kind === "connect") {
@@ -166,13 +179,14 @@ export function resolveMotionBatch(
       if (source && destination) {
         connectors.push({
           id: `${id}:connector:${connectors.length}`,
+          phase,
           start: source.rect,
           end: destination.rect,
           delayMs: 0,
         });
       } else {
         const key = motionLocationKey(event.destination);
-        addPulse(pulses, pulseKeys, id, key, current.zones.get(key), 0);
+        addPulse(pulses, pulseKeys, id, key, current.zones.get(key), phase);
       }
       continue;
     }
@@ -203,20 +217,21 @@ export function resolveMotionBatch(
       if (flights.length < MAX_DETAILED_FLIGHTS) {
         const flight: MotionFlight = {
           id: `${id}:flight:${flights.length}`,
+          phase,
           mode: event.kind,
           start: rect,
           end: rect,
           visual: event.visual,
           count: 1,
           showCount: false,
-          delayMs: flights.length * MOTION_STAGGER_MS,
+          delayMs: 0,
           destinationPresentationKey: event.destinationPresentationKey,
         };
         flights.push(flight);
         if (groupedAppearanceKey) boardAppearances.set(groupedAppearanceKey, flight);
       } else {
         const key = motionLocationKey(event.destination);
-        addPulse(pulses, pulseKeys, id, key, current.zones.get(key), 0);
+        addPulse(pulses, pulseKeys, id, key, current.zones.get(key), phase);
       }
       continue;
     }
@@ -229,7 +244,7 @@ export function resolveMotionBatch(
     );
     if (!source || !destination || flights.length >= MAX_DETAILED_FLIGHTS) {
       const key = motionLocationKey(event.destination);
-      addPulse(pulses, pulseKeys, id, key, current.zones.get(key), 0);
+      addPulse(pulses, pulseKeys, id, key, current.zones.get(key), phase);
       continue;
     }
     const start = source.exact
@@ -243,45 +258,56 @@ export function resolveMotionBatch(
       : event.source.kind === "deck" && event.destination.kind === "hand"
         ? "draw"
         : "move";
-    const previousDraws = flights.filter((flight) => flight.mode === "draw").length;
-    const arsenalFlight = mode === "draw"
-      ? flights.find((flight) => flight.mode === "arsenal")
-      : undefined;
-    const ordinaryDelay = flights.length * MOTION_STAGGER_MS;
-    const delayMs = arsenalFlight
-      ? Math.max(
-          ordinaryDelay,
-          arsenalFlight.delayMs
-            + MOTION_TRAVEL_MS
-            + MOTION_SEQUENCE_GAP_MS
-            + previousDraws * MOTION_DRAW_STAGGER_MS,
-        )
-      : ordinaryDelay;
     flights.push({
       id: `${id}:flight:${flights.length}`,
+      phase,
       mode,
       start,
       end,
       visual: event.visual,
       count: event.count,
       showCount: event.count > 1,
-      delayMs,
+      delayMs: 0,
       destinationPresentationKey: event.destinationPresentationKey,
     });
   }
 
   if (flights.length === 0 && connectors.length === 0 && pulses.length === 0) return null;
-  const lastFlightDelay = flights.at(-1)?.delayMs ?? 0;
+  const delayById = scheduleMotionTimeline([
+    ...flights.map((flight) => ({
+      id: flight.id,
+      phase: flight.phase,
+      durationMs: MOTION_TRAVEL_MS,
+      staggerMs: phaseStaggerMs(flight.phase),
+    })),
+    ...connectors.map((connector) => ({
+      id: connector.id,
+      phase: connector.phase,
+      durationMs: MOTION_CONNECT_MS,
+      staggerMs: phaseStaggerMs(connector.phase),
+    })),
+    ...pulses.map((pulse) => ({
+      id: pulse.id,
+      phase: pulse.phase,
+      durationMs: MOTION_PULSE_MS,
+      staggerMs: phaseStaggerMs(pulse.phase),
+    })),
+  ], MOTION_SEQUENCE_GAP_MS);
+  for (const flight of flights) flight.delayMs = delayById.get(flight.id) ?? 0;
+  for (const connector of connectors) connector.delayMs = delayById.get(connector.id) ?? 0;
+  for (const pulse of pulses) pulse.delayMs = delayById.get(pulse.id) ?? 0;
+  const durationMs = Math.max(
+    0,
+    ...flights.map((flight) => flight.delayMs + MOTION_TRAVEL_MS),
+    ...connectors.map((connector) => connector.delayMs + MOTION_CONNECT_MS),
+    ...pulses.map((pulse) => pulse.delayMs + MOTION_PULSE_MS),
+  );
   return {
     id,
     flights,
     connectors,
     pulses,
-    durationMs: Math.max(
-      pulses.length > 0 ? MOTION_PULSE_MS : 0,
-      connectors.length > 0 ? MOTION_CONNECT_MS : 0,
-      flights.length > 0 ? lastFlightDelay + MOTION_TRAVEL_MS : 0,
-    ),
+    durationMs,
   };
 }
 
@@ -301,13 +327,23 @@ export function reducedMotionBatch(
     const key = `${rect.left}:${rect.top}:${rect.width}:${rect.height}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    pulses.push({ id: `${batch.id}:reduced:${pulses.length}`, rect, delayMs: 0 });
+    pulses.push({
+      id: `${batch.id}:reduced:${pulses.length}`,
+      phase: "result",
+      rect,
+      delayMs: 0,
+    });
   }
   for (const connector of batch.connectors) {
     const key = `${connector.end.left}:${connector.end.top}:${connector.end.width}:${connector.end.height}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    pulses.push({ id: `${batch.id}:reduced:${pulses.length}`, rect: connector.end, delayMs: 0 });
+    pulses.push({
+      id: `${batch.id}:reduced:${pulses.length}`,
+      phase: "result",
+      rect: connector.end,
+      delayMs: 0,
+    });
   }
   return {
     ...batch,
