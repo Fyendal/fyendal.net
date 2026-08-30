@@ -29,43 +29,47 @@ const player: PlayerView = {
   ],
 };
 
+function renderPlayerHalf(playerView: PlayerView): string {
+  return renderToStaticMarkup(
+    <PlayerHalf
+      player={playerView}
+      mine
+      mirrored={false}
+      ongoing={[]}
+      gameOver={false}
+      replaying={false}
+      deckShuffling={false}
+      interaction={{
+        legal: {
+          playableHand: new Set(),
+          playableArsenal: new Set(),
+          playableZones: new Map(),
+          activatable: new Set(),
+          stageableDefenders: new Set(),
+          canPass: false,
+          canCloseChain: false,
+        },
+        selection: { kind: "none" },
+        stagedIds: new Set(),
+        committedDefenderIds: new Set(),
+        optimisticallyHiddenIds: new Set(),
+        defending: false,
+        onStage: () => undefined,
+        onActivate: () => undefined,
+        onSelect: () => undefined,
+      }}
+      latestEmote={null}
+      canSendEmote={false}
+      mobileFloatViewport={false}
+      onSendEmote={() => undefined}
+      onOpenOverlay={() => undefined}
+    />,
+  );
+}
+
 describe("PlayerHalf", () => {
   it("marks tapped board-card wrappers with a landscape layout footprint", () => {
-    const html = renderToStaticMarkup(
-      <PlayerHalf
-        player={player}
-        mine
-        mirrored={false}
-        ongoing={[]}
-        gameOver={false}
-        replaying={false}
-        deckShuffling={false}
-        interaction={{
-          legal: {
-            playableHand: new Set(),
-            playableArsenal: new Set(),
-            playableZones: new Map(),
-            activatable: new Set(),
-            stageableDefenders: new Set(),
-            canPass: false,
-            canCloseChain: false,
-          },
-          selection: { kind: "none" },
-          stagedIds: new Set(),
-          committedDefenderIds: new Set(),
-          optimisticallyHiddenIds: new Set(),
-          defending: false,
-          onStage: () => undefined,
-          onActivate: () => undefined,
-          onSelect: () => undefined,
-        }}
-        latestEmote={null}
-        canSendEmote={false}
-        mobileFloatViewport={false}
-        onSendEmote={() => undefined}
-        onOpenOverlay={() => undefined}
-      />,
-    );
+    const html = renderPlayerHalf(player);
 
     expect(html).toContain('class="board-card-stack" data-cardid="TST-UPRIGHT"');
     expect(html).toContain(
@@ -82,5 +86,20 @@ describe("PlayerHalf", () => {
     expect(html).toContain('data-motion-zone="0:banish"');
     expect(html).toContain('data-motion-card="0:board:2"');
     expect(html).toContain('data-motion-card="0:board:3"');
+  });
+
+  it("anchors every grouped copy to the wrapper that also owns its count badge", () => {
+    const html = renderPlayerHalf({
+      ...player,
+      board: [
+        { instanceId: 2, cardId: "TST-UPRIGHT", owner: 0 },
+        { instanceId: 4, cardId: "TST-UPRIGHT", owner: 0 },
+      ],
+    });
+
+    expect(html).toMatch(
+      /class="board-card-stack"[^>]*data-motion-card="0:board:2"[^>]*data-motion-card-aliases="0:board:4"[^>]*>.*board-card-count">×2</,
+    );
+    expect(html.match(/data-motion-card="0:board:/g)).toHaveLength(1);
   });
 });

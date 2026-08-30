@@ -97,7 +97,6 @@ export function GameBoard() {
     })),
   );
   const tableRef = useRef<HTMLDivElement>(null);
-  const gameMotion = useGameMotion({ rootRef: tableRef, view, viewUpdate });
   const [overlay, setOverlay] = useState<BoardOverlay | null>(null);
   const [inspectedCardId, setInspectedCardId] = useState<string | null>(null);
   const cardLongPressHandlers = useMobileCardLongPress((cardId, target) => {
@@ -138,14 +137,22 @@ export function GameBoard() {
   } = useGameViewport();
   const {
     lessGuidance,
+    motionPreference,
     priorityWindowMode,
     skipPlayConfirmation,
     updatePriorityWindowMode,
     updateLessGuidance,
+    updateMotionPreference,
     updateSkipPlayConfirmation,
   } = useGameSettings({
     syncPriorityMode: connected && screen !== "replay" && !spectating && yourSeat !== null,
     sendPriorityMode,
+  });
+  const gameMotion = useGameMotion({
+    rootRef: tableRef,
+    view,
+    viewUpdate,
+    motionPreference,
   });
   // end-of-game popup can be dismissed to inspect the final board; re-arm it
   // whenever a new winner is decided (fresh game in the same room)
@@ -1037,6 +1044,8 @@ export function GameBoard() {
         onLessGuidanceChange={updateLessGuidance}
         skipPlayConfirmation={skipPlayConfirmation}
         onSkipPlayConfirmationChange={updateSkipPlayConfirmation}
+        motionPreference={motionPreference}
+        onMotionPreferenceChange={updateMotionPreference}
         log={view.log}
         friendlyHeroName={me.heroName}
         opponentHeroName={opp.heroName}

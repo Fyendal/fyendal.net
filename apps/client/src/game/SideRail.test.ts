@@ -31,6 +31,8 @@ function sideRailProps(
     onLessGuidanceChange: vi.fn(),
     skipPlayConfirmation: false,
     onSkipPlayConfirmationChange: vi.fn(),
+    motionPreference: "system",
+    onMotionPreferenceChange: vi.fn(),
     log: [],
     friendlyHeroName: "Dash",
     opponentHeroName: "Bravo",

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   loadGameSettings,
   saveGameSettings,
+  type MotionPreference,
   type PriorityWindowMode,
 } from "../../storage.js";
 
@@ -40,11 +41,19 @@ export function useGameSettings({
       return next;
     });
   };
+  const updateMotionPreference = (motionPreference: MotionPreference) => {
+    setSettings((current) => {
+      const next = { ...current, motionPreference };
+      saveGameSettings(localStorage, next);
+      return next;
+    });
+  };
 
   return {
     ...settings,
     updatePriorityWindowMode,
     updateLessGuidance,
     updateSkipPlayConfirmation,
+    updateMotionPreference,
   };
 }

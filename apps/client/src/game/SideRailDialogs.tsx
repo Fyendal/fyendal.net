@@ -1,6 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
 import type { UndoTarget } from "@fyendal/shared";
-import type { PriorityWindowMode } from "../storage.js";
+import type { MotionPreference, PriorityWindowMode } from "../storage.js";
+
+const MOTION_PREFERENCES: readonly MotionPreference[] = ["system", "full", "reduced"];
+const MOTION_PREFERENCE_LABEL: Readonly<Record<MotionPreference, string>> = {
+  system: "Default",
+  full: "Full",
+  reduced: "Reduced",
+};
+const MOTION_PREFERENCE_DESCRIPTION: Readonly<Record<MotionPreference, string>> = {
+  system: "Default: follow your operating system's reduced-motion setting",
+  full: "Full: show card travel and connection animations",
+  reduced: "Reduced: replace card travel with brief destination highlights",
+};
 
 export function GameSettingsDialog({
   turn,
@@ -12,6 +24,8 @@ export function GameSettingsDialog({
   onLessGuidanceChange,
   skipPlayConfirmation,
   onSkipPlayConfirmationChange,
+  motionPreference,
+  onMotionPreferenceChange,
   onClose,
 }: {
   turn: number;
@@ -23,6 +37,8 @@ export function GameSettingsDialog({
   onLessGuidanceChange: (enabled: boolean) => void;
   skipPlayConfirmation: boolean;
   onSkipPlayConfirmationChange: (enabled: boolean) => void;
+  motionPreference: MotionPreference;
+  onMotionPreferenceChange: (preference: MotionPreference) => void;
   onClose: () => void;
 }) {
   const [confirmConcede, setConfirmConcede] = useState(false);
@@ -99,6 +115,36 @@ export function GameSettingsDialog({
               />
               <span className="switch-track" aria-hidden="true" />
             </label>
+            <div className="settings-control-row settings-motion-row">
+              <span className="settings-control-name">
+                Animations
+                <span
+                  className="settings-info-tooltip"
+                  data-tooltip="Default follows your operating system's reduced-motion setting."
+                  aria-hidden="true"
+                >
+                  i
+                </span>
+              </span>
+              <div
+                className="settings-segmented settings-motion-segmented"
+                role="group"
+                aria-label="Animation preference"
+              >
+                {MOTION_PREFERENCES.map((preference) => (
+                  <button
+                    key={preference}
+                    type="button"
+                    className={motionPreference === preference ? "settings-selected" : ""}
+                    aria-pressed={motionPreference === preference}
+                    aria-label={MOTION_PREFERENCE_DESCRIPTION[preference]}
+                    onClick={() => onMotionPreferenceChange(preference)}
+                  >
+                    {MOTION_PREFERENCE_LABEL[preference]}
+                  </button>
+                ))}
+              </div>
+            </div>
             <label className="toggle-switch settings-control-row">
               <span className="settings-control-name">
                 Show guidance

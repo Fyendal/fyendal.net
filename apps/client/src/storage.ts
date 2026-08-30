@@ -291,19 +291,22 @@ export function saveLobbySettings(
 }
 
 export type { PriorityWindowMode };
+export type MotionPreference = "system" | "full" | "reduced";
 
 export interface GameSettings {
-  version: 2;
+  version: 3;
   priorityWindowMode: PriorityWindowMode;
   lessGuidance: boolean;
   skipPlayConfirmation: boolean;
+  motionPreference: MotionPreference;
 }
 
 export const DEFAULT_GAME_SETTINGS: GameSettings = {
-  version: 2,
+  version: 3,
   priorityWindowMode: "always-pause",
   lessGuidance: false,
   skipPlayConfirmation: true,
+  motionPreference: "system",
 };
 
 export function replayStorageKey(code: string): string {
@@ -328,16 +331,28 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
       };
     }
     if (
-      record.version !== 2 ||
-      (record.priorityWindowMode !== "auto-pass" && record.priorityWindowMode !== "always-pause")
+      (record.version !== 2 && record.version !== 3)
+      || (
+        record.priorityWindowMode !== "auto-pass"
+        && record.priorityWindowMode !== "always-pause"
+      )
     ) return DEFAULT_GAME_SETTINGS;
+    const motionPreference = record.version === 3
+      && (
+        record.motionPreference === "system"
+        || record.motionPreference === "full"
+        || record.motionPreference === "reduced"
+      )
+      ? record.motionPreference
+      : "system";
     return {
-      version: 2,
+      version: 3,
       priorityWindowMode: record.priorityWindowMode,
       lessGuidance: typeof record.lessGuidance === "boolean" ? record.lessGuidance : false,
       skipPlayConfirmation: typeof record.skipPlayConfirmation === "boolean"
         ? record.skipPlayConfirmation
         : true,
+      motionPreference,
     };
   } catch {
     return DEFAULT_GAME_SETTINGS;

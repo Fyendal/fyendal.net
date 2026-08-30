@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import type { EmoteMessage, UndoTarget } from "@fyendal/shared";
-import type { PriorityWindowMode } from "../storage.js";
+import type { MotionPreference, PriorityWindowMode } from "../storage.js";
 import {
   logTextSegments,
   parseTurnBoundaryLogLine,
@@ -141,6 +141,8 @@ export function SideRail({
   onLessGuidanceChange,
   skipPlayConfirmation,
   onSkipPlayConfirmationChange,
+  motionPreference,
+  onMotionPreferenceChange,
   log,
   friendlyHeroName,
   opponentHeroName,
@@ -177,6 +179,8 @@ export function SideRail({
   onLessGuidanceChange: (enabled: boolean) => void;
   skipPlayConfirmation: boolean;
   onSkipPlayConfirmationChange: (enabled: boolean) => void;
+  motionPreference: MotionPreference;
+  onMotionPreferenceChange: (preference: MotionPreference) => void;
   log: string[];
   friendlyHeroName: string;
   opponentHeroName: string;
@@ -362,6 +366,8 @@ export function SideRail({
           onLessGuidanceChange={onLessGuidanceChange}
           skipPlayConfirmation={skipPlayConfirmation}
           onSkipPlayConfirmationChange={onSkipPlayConfirmationChange}
+          motionPreference={motionPreference}
+          onMotionPreferenceChange={onMotionPreferenceChange}
           onClose={() => setShowSettings(false)}
         />
       ) : null}

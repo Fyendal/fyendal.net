@@ -92,7 +92,7 @@ export function GameMotionLayer({
   if (!batch || typeof document === "undefined") return null;
   return createPortal(
     <div
-      className="game-motion-layer"
+      className={`game-motion-layer${batch.reducedMotion ? " game-motion-layer-reduced" : ""}`}
       data-game-motion-batch={batch.id}
       aria-hidden="true"
     >

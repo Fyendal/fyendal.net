@@ -35,22 +35,42 @@ describe("client storage keys", () => {
     };
 
     expect(loadGameSettings(storage)).toEqual({
-      version: 2,
+      version: 3,
       priorityWindowMode: "always-pause",
       lessGuidance: false,
       skipPlayConfirmation: true,
+      motionPreference: "system",
     });
     saveGameSettings(storage, {
-      version: 2,
+      version: 3,
       priorityWindowMode: "auto-pass",
       lessGuidance: true,
       skipPlayConfirmation: false,
+      motionPreference: "reduced",
     });
     expect(loadGameSettings(storage)).toEqual({
-      version: 2,
+      version: 3,
       priorityWindowMode: "auto-pass",
       lessGuidance: true,
       skipPlayConfirmation: false,
+      motionPreference: "reduced",
+    });
+  });
+
+  it("migrates version 2 settings with the default motion preference", () => {
+    expect(loadGameSettings({
+      getItem: () => JSON.stringify({
+        version: 2,
+        priorityWindowMode: "auto-pass",
+        lessGuidance: true,
+        skipPlayConfirmation: false,
+      }),
+    })).toEqual({
+      version: 3,
+      priorityWindowMode: "auto-pass",
+      lessGuidance: true,
+      skipPlayConfirmation: false,
+      motionPreference: "system",
     });
   });
 
@@ -71,7 +91,7 @@ describe("client storage keys", () => {
   it("falls back safely for invalid or future settings", () => {
     expect(loadGameSettings({ getItem: () => "not json" })).toEqual(DEFAULT_GAME_SETTINGS);
     expect(loadGameSettings({
-      getItem: () => JSON.stringify({ version: 3, priorityWindowMode: "auto-pass" }),
+      getItem: () => JSON.stringify({ version: 4, priorityWindowMode: "auto-pass" }),
     })).toEqual(DEFAULT_GAME_SETTINGS);
   });
 

@@ -6,6 +6,7 @@ export interface BoardCardGroup {
   card: CardView;
   count: number;
   activatable: boolean;
+  instanceIds: number[];
 }
 
 /** Flatten public cards retained under equipment from oldest/deepest to the
@@ -80,8 +81,9 @@ export function groupBoardCards(
     const existing = groups.get(key);
     if (existing) {
       existing.count += 1;
+      existing.instanceIds.push(card.instanceId);
     } else {
-      groups.set(key, { card, count: 1, activatable });
+      groups.set(key, { card, count: 1, activatable, instanceIds: [card.instanceId] });
     }
   }
   return [...groups.values()];
