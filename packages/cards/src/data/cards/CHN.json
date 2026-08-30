@@ -1,0 +1,540 @@
+[
+ {
+  "id": "CHN001",
+  "name": "Chane",
+  "cardType": "hero",
+  "text": "Once per Turn Action - Create a Soul Shackle token: Your next Runeblade or Shadow action this turn gains go again. Go again",
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "CHN"
+ },
+ {
+  "id": "CHN002",
+  "name": "Lord Sutcliffe",
+  "cardType": "mentor",
+  "text": "While Sutcliffe is face down in arsenal, at the start of your turn, you may turn him face up.\nWhile Sutcliffe is face up in arsenal, whenever you play a 'non-attack' action card, deal 1 arcane damage to each hero and put a lesson counter on Sutcliffe for each damage dealt this way. Then if there are 3 or more lesson counters on him, banish him, search your deck for a specialization card, put it face up into arsenal, and shuffle.",
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN003",
+  "name": "Galaxxi Black",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nIf you have played a card from your banished zone this turn, Galaxxi Black gains +2{p} until end of turn.\nIf Galaxxi Black hits a hero, deal 1 arcane damage to that hero.",
+  "attack": 1,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow",
+   "sword",
+   "2h"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN004",
+  "name": "Ebon Fold",
+  "cardType": "equipment",
+  "text": "Instant - {r}, destroy Ebon Fold: Banish a card from your hand. If it's a Shadow card, draw a card.\nSpellvoid 2",
+  "defense": 0,
+  "subtypes": [
+   "shadow",
+   "head"
+  ],
+  "keywords": [
+   "Spellvoid 2"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN005",
+  "name": "Aether Ironweave",
+  "cardType": "equipment",
+  "text": "Action - Destroy Aether Ironweave: Gain {r}{r}. Activate this ability only if you have played an attack action card and a 'non-attack' action card this turn. Go again\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN006",
+  "name": "Spell Fray Gloves",
+  "cardType": "equipment",
+  "text": "Spellvoid 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Spellvoid 1"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN007",
+  "name": "Snapdragon Scalers",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy this: Target attack action card with cost 1 or less gets go again.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN008",
+  "name": "Soul Reaping",
+  "cardType": "action",
+  "text": "Legendary Chane Specialization\nYou may banish 1 or more cards from your hand rather than pay Soul Reaping's {r} cost. If you do, gain {r} for each card with blood debt banished this way.\nWhile Soul Reaping is attacking a hero with 1 or more cards in their soul, it has go again.",
+  "pitch": 1,
+  "cost": 6,
+  "attack": 6,
+  "defense": 3,
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Legendary",
+   "Chane Specialization",
+   "Go again"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN009",
+  "name": "Bounding Demigon",
+  "cardType": "action",
+  "text": "If you have played a 'non-attack' action card this turn, you may play Bounding Demigon from your banished zone. If you do, it gains +1{p}.\nBlood Debt",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN010",
+  "name": "Piercing Shadow Vise",
+  "cardType": "action",
+  "text": "You may play Piercing Shadow Vise from your banished zone.\nIf you have dealt arcane damage to an opposing hero this turn, Piercing Shadow Vise gains +2{p}.\nBlood Debt",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN011",
+  "name": "Rift Bind",
+  "cardType": "action",
+  "text": "You may play Rift Bind from your banished zone. If you do, it gains +X{p}, where X is the number of 'non-attack' action cards you have played this turn.\nBlood Debt",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN012",
+  "name": "Rifted Torment",
+  "cardType": "action",
+  "text": "You may play Rifted Torment from your banished zone. If you do, deal 1 arcane damage to target hero.\nBlood Debt",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN013",
+  "name": "Rip Through Reality",
+  "cardType": "action",
+  "text": "You may play Rip Through Reality from your banished zone.\nIf you have dealt arcane damage to an opposing hero this turn, Rip Through Reality gains go again.\nBlood Debt",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Blood Debt"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN014",
+  "name": "Seeds of Agony",
+  "cardType": "action",
+  "text": "You may play Seeds of Agony from your banished zone.\nThe next attack action card with cost 2 or less you play this turn gains \"When you attack with this, deal 1 arcane damage to target hero.\"\nGo again\nBlood Debt",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow"
+  ],
+  "keywords": [
+   "Go again",
+   "Blood Debt"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN015",
+  "name": "Unhallowed Rites",
+  "cardType": "action",
+  "text": "If you have played a 'non-attack' action card this turn, you may play Unhallowed Rites from your banished zone.\nYou may put a 'non-attack' action card with blood debt from your graveyard on the bottom of your deck.\nBlood Debt",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN016",
+  "name": "Seeds of Agony",
+  "cardType": "action",
+  "text": "You may play Seeds of Agony from your banished zone.\nThe next attack action card with cost 1 or less you play this turn gains \"When you attack with this, deal 1 arcane damage to target hero.\"\nGo again\nBlood Debt",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow"
+  ],
+  "keywords": [
+   "Go again",
+   "Blood Debt"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN017",
+  "name": "Seeping Shadows",
+  "cardType": "action",
+  "text": "You may play Seeping Shadows from your banished zone.\nThe next attack action card with cost 1 or less you play this turns gains +1{p} and go again.\nGo again\nBlood Debt",
+  "pitch": 2,
+  "cost": 3,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow"
+  ],
+  "keywords": [
+   "Go again",
+   "Blood Debt"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN018",
+  "name": "Piercing Shadow Vise",
+  "cardType": "action",
+  "text": "You may play Piercing Shadow Vise from your banished zone.\nIf you have dealt arcane damage to an opposing hero this turn, Piercing Shadow Vise gains +2{p}.\nBlood Debt",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN019",
+  "name": "Rift Bind",
+  "cardType": "action",
+  "text": "You may play Rift Bind from your banished zone. If you do, it gains +X{p}, where X is the number of 'non-attack' action cards you have played this turn.\nBlood Debt",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN020",
+  "name": "Rifted Torment",
+  "cardType": "action",
+  "text": "You may play Rifted Torment from your banished zone. If you do, deal 1 arcane damage to target hero.\nBlood Debt",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN021",
+  "name": "Ghostly Visit",
+  "cardType": "action",
+  "text": "You may play Ghostly Visit from your banished zone.\nBlood Debt",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN022",
+  "name": "Howl from Beyond",
+  "cardType": "action",
+  "text": "You may play Howl from Beyond from your banished zone.\nThe next attack action card you play this turn gains +3{p}.\nGo again\nBlood Debt",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "subtypes": [
+   "shadow"
+  ],
+  "keywords": [
+   "Go again",
+   "Blood Debt"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN023",
+  "name": "Lunartide Plunderer",
+  "cardType": "action",
+  "text": "If Lunartide Plunderer hits a hero, banish it and a card from their soul.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN024",
+  "name": "Spew Shadow",
+  "cardType": "action",
+  "text": "Choose an attack action card with cost 1 or less in your banished zone. You may play it this turn. If it attacks a Light hero, it gains +2{p}.\nGo again",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 2,
+  "subtypes": [
+   "shadow"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN025",
+  "name": "Consuming Volition",
+  "cardType": "action",
+  "text": "If you've dealt arcane damage this turn, this gets \"When this hits a hero, they discard a card.\"",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN026",
+  "name": "Vexing Malice",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to target hero.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN027",
+  "name": "Arcanic Crackle",
+  "cardType": "action",
+  "text": "Deal 1 arcane damage to target hero.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN028",
+  "name": "Warmonger's Recital",
+  "cardType": "action",
+  "text": "The next attack action card you play this turn gains +3{p} and \"When this hits, put it on the bottom of its owner's deck.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN029",
+  "name": "Warmonger's Recital",
+  "cardType": "action",
+  "text": "The next attack action card you play this turn gains +2{p} and \"When this hits, put it on the bottom of its owner's deck.\"\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "CHN"
+ },
+ {
+  "id": "CHN030",
+  "name": "Soul Shackle",
+  "cardType": "token",
+  "text": "At the beginning of your action phase, banish the top card of your deck.",
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow",
+   "aura"
+  ],
+  "set": "CHN"
+ }
+]

@@ -1,0 +1,456 @@
+/* ── card frames ── */
+.card {
+  position: relative;
+  background: linear-gradient(160deg, #2c2113, #1b1309);
+  border: 1px solid #5a4426;
+  border-radius: 3px;
+  padding: 6px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  flex-shrink: 0;
+}
+.card-hand {
+  width: clamp(87px, 13.1vh, 160px);
+  height: clamp(120px, 18vh, 220px);
+}
+.card-zone {
+  width: clamp(63px, 9.49vh, 124px);
+  height: clamp(86px, 13vh, 170px);
+}
+
+/* ── hover preview (positioned next to the hovered card via inline style) ── */
+.card-preview {
+  position: fixed;
+  /* above in-game floats and the deck-card toast (z-index 45), below modals */
+  z-index: 46;
+  pointer-events: none;
+}
+.card-preview-frame { width: 100%; height: 100%; padding: 14px; }
+.card-preview-frame .c-name { font-size: 20px; }
+.card-preview-frame .c-type {
+  font-size: 14px;
+  color: #a89878;
+  margin-top: 3px;
+  text-transform: capitalize;
+  font-variant: small-caps;
+  letter-spacing: 1px;
+}
+.card-preview-frame .c-text { font-size: 15px; -webkit-line-clamp: 14; margin-top: 9px; }
+.card-preview-frame .c-cost { width: 34px; height: 34px; font-size: 18px; top: -10px; right: -10px; }
+.card-preview-frame .c-atk,
+.card-preview-frame .c-def { font-size: 28px; }
+.card-clickable { cursor: pointer; }
+.card-highlight {
+  border-color: #62ffa0;
+  outline: 2px solid #d7ffe5;
+  outline-offset: 1px;
+  box-shadow:
+    0 0 0 2px #62ffa0cc,
+    0 0 18px 6px #37c871bb,
+    inset 0 0 8px #37c87166;
+}
+/* Decision windows identify card ownership relative to the viewer. Keep the
+   glow softer than the selectable highlight so eligibility remains legible. */
+.decision-float .card-friendly {
+  border-color: #62ffa0;
+  box-shadow: 0 0 0 1px #62ffa099, 0 0 10px #37c87177;
+}
+.decision-float .card-opponent {
+  border-color: #ff5b4d;
+  box-shadow: 0 0 0 1px #ff5b4dcc, 0 0 10px #c23a2c99;
+}
+.decision-float .card-highlight.card-friendly {
+  box-shadow:
+    0 0 0 2px #62ffa0cc,
+    0 0 18px 6px #37c871bb,
+    inset 0 0 8px #37c87166;
+}
+.decision-float .card-highlight.card-opponent {
+  box-shadow:
+    0 0 0 2px #ff5b4dcc,
+    0 0 18px 6px #c23a2cbb,
+    inset 0 0 8px #c23a2c66;
+}
+.card-selected { border-color: #ffd479; box-shadow: 0 0 12px #ffd47988; }
+.card-hand.card-selected { transform: translateY(-12px); }
+.card-pitched {
+  border-color: #67b7ff;
+  box-shadow: 0 0 10px #3b9dff, 0 0 22px #237bd899;
+}
+.card-dim::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  border-radius: inherit;
+  background: #0009;
+  pointer-events: none;
+}
+.card-explained { overflow: visible; }
+.card-explained:focus-visible {
+  outline: 2px solid #b8933f88;
+  outline-offset: 2px;
+}
+.card-explanation {
+  position: absolute;
+  z-index: 12;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  width: min(310px, 72vw);
+  transform: translateX(-50%);
+  display: none;
+  padding: 10px 12px;
+  border: 1px solid #b8933f66;
+  border-radius: 3px;
+  background: #120d09f7;
+  box-shadow: 0 8px 22px #000a;
+  color: #d5c8b1;
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: left;
+  white-space: normal;
+}
+.card-explanation::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -8px;
+  height: 8px;
+}
+.card-explained:hover .card-explanation,
+.card-explained:focus .card-explanation,
+.card-explained:focus-within .card-explanation {
+  display: block;
+}
+/* A horizontally scrolling hand must clip vertical overflow. Keep its card
+   explanations available to assistive technology without rendering a clipped
+   tooltip edge that looks like a stray scrollbar above the cards. */
+.hand .card-explanation {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}
+/* A mouse preview opens 12px to either side of the hovered card. Extend card
+   explanations to that boundary so the facing edges align without overlap. */
+.card-explained[data-preview-side="right"]:hover .card-explanation {
+  right: -12px;
+  left: auto;
+  transform: none;
+}
+.card-explained[data-preview-side="left"]:hover .card-explanation {
+  right: auto;
+  left: -12px;
+  transform: none;
+}
+/* Tapped permanents stay full-size and rotate clockwise. Descendant tooltips
+   counter-rotate from the card's left edge, which becomes its top edge after
+   tapping, so their text remains horizontal above the sideways card. */
+.card-tapped { transform: rotate(90deg); filter: brightness(0.75); }
+.card-tapped .card-explanation,
+.card-tapped.card-explained[data-preview-side]:hover .card-explanation,
+.card-tapped .c-counter-tip {
+  top: 50%;
+  right: calc(100% + 9px);
+  bottom: auto;
+  left: auto;
+  transform: translateY(-50%) rotate(-90deg);
+}
+.card-tapped .card-explanation::after {
+  top: 0;
+  right: -9px;
+  bottom: 0;
+  left: auto;
+  width: 9px;
+  height: auto;
+}
+/* Playable from another zone (banish/graveyard), shown in hand faded. Fade
+   the card contents rather than the frame so its hover tooltip stays crisp. */
+.card-ghost > :not(.card-explanation) { opacity: 0.6; }
+
+/* real card image fills the frame; text layout is the fallback */
+.card-hasimg { padding: 0; overflow: hidden; }
+.card-hasimg.card-explained,
+.card-hasimg.card-countered { overflow: visible; }
+.c-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+}
+.card-hasimg .c-zonelabel {
+  bottom: 5px;
+  text-shadow: 0 1px 3px #000, 0 0 7px #000;
+}
+
+.c-cost {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  background: radial-gradient(circle at 35% 35%, #5a6a8a, #45331f);
+  border: 1px solid #a8854a;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  z-index: 1;
+}
+.c-name {
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 1.2;
+  padding-right: 14px;
+}
+/* named-counter badges — top-left stack */
+.c-chips {
+  position: absolute;
+  top: -7px;
+  left: -7px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 1;
+}
+.c-chip {
+  background: radial-gradient(circle at 35% 35%, #3a3a46, #221a10);
+  border: 1px solid #a8854a;
+  border-radius: 12px;
+  padding: 3px 10px;
+  font-weight: 700;
+  font-size: 15px;
+  color: #ffd479;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px #000;
+}
+/* Marked is a binary hero condition, represented by its token art over the
+   hero rather than a numeric named-counter chip. Keep the hero recognizable. */
+.c-marked-token {
+  position: absolute;
+  inset: 7px;
+  z-index: 2;
+  opacity: 0.52;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 5px #000c);
+}
+.c-marked-token img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 3px;
+}
+/* Give every status/counter a stable high-contrast surface so it stays
+   readable over both light and dark card art. */
+.c-ovls {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  pointer-events: none;
+  z-index: 1;
+}
+.c-ovl {
+  --counter-box-size: 30px;
+  --counter-icon-size: 20px;
+  --counter-number-size: 13px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--counter-box-size);
+  height: var(--counter-box-size);
+  box-sizing: border-box;
+  border: 1px solid #d2ad32;
+  border-radius: 5px;
+  background: #080705eb;
+  box-shadow: 0 2px 5px #000c;
+  pointer-events: auto;
+  outline: none;
+}
+.c-ovl:hover,
+.c-ovl:focus { z-index: 3; }
+.c-ovl:focus-visible {
+  border-radius: 5px;
+  box-shadow: 0 0 0 2px #e0c46c;
+}
+.c-ovl-icon {
+  display: block;
+  width: var(--counter-icon-size);
+  height: var(--counter-icon-size);
+  object-fit: contain;
+  filter: brightness(0) invert(90%);
+}
+.c-attacked .c-ovl-icon,
+.c-atkc .c-ovl-icon,
+.c-lifec .c-ovl-icon,
+.c-defc .c-ovl-icon {
+  filter: none;
+}
+.c-holo .c-ovl-icon {
+  filter: invert(1);
+}
+.c-ovl-num {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 17px;
+  min-height: 17px;
+  font-size: var(--counter-number-size);
+  font-weight: 800;
+  line-height: 1;
+  color: #ffd84a;
+  text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000,
+    0 2px 2px #000;
+}
+.c-counter-tip {
+  box-sizing: border-box;
+  width: max-content;
+  max-width: min(230px, 72vw);
+  padding: 8px 10px;
+  border: 1px solid #b8933f66;
+  border-radius: 3px;
+  background: #120d09f7;
+  box-shadow: 0 8px 22px #000a;
+  color: #d5c8b1;
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: center;
+  white-space: normal;
+  pointer-events: none;
+}
+.c-counter-tip-floating {
+  position: fixed;
+  z-index: 100;
+  transform: translateX(-50%);
+}
+.c-counter-tip-accessible {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.card-zone .c-name { font-size: 11px; padding-right: 0; }
+.c-text {
+  margin-top: 5px;
+  font-size: 10px;
+  line-height: 1.3;
+  color: #b5a88e;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+}
+.c-zonelabel {
+  position: absolute;
+  bottom: 23px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: #ffd479;
+  font-size: 13px;
+  font-weight: 700;
+}
+.c-stats {
+  position: absolute;
+  bottom: 3px;
+  left: 6px;
+  right: 6px;
+  display: flex;
+  justify-content: space-between;
+}
+.c-atk { font-size: 21px; font-weight: 800; color: #ff9d76; }
+.c-def { font-size: 21px; font-weight: 800; color: #7bc8ff; margin-left: auto; }
+.card-zone .c-atk, .card-zone .c-def { font-size: 17px; }
+
+.pitch-red { border-top: 3px solid #e5534b; }
+.pitch-yellow { border-top: 3px solid #e3b341; }
+.pitch-blue { border-top: 3px solid #539bf5; }
+
+.card-back {
+  background:
+    repeating-linear-gradient(45deg, #3a1d1d 0 7px, #2a1414 7px 14px);
+  border: 1px solid #6b5326;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.c-backimg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+/* Keep public overlays anchored to the hidden card back they describe. */
+.card-hidden-wrap {
+  position: relative;
+  display: inline-flex;
+}
+.c-backlabel {
+  position: absolute;
+  z-index: 1;
+  right: 4px;
+  bottom: 4px;
+  left: 4px;
+  padding: 2px 3px;
+  border-radius: 2px;
+  background: #080504c7;
+  color: #efd797;
+  font-size: 9px;
+  font-family: Georgia, serif;
+  font-variant: small-caps;
+  letter-spacing: 1px;
+  text-align: center;
+  text-shadow: 0 1px 2px #000;
+}
+.c-count {
+  position: absolute;
+  z-index: 1;
+  top: 4px;
+  right: 4px;
+  display: grid;
+  min-width: 27px;
+  height: 27px;
+  padding: 0 5px;
+  place-items: center;
+  border: 1px solid #d7c27d;
+  border-radius: 999px;
+  background: #080504db;
+  color: #fff4c7;
+  font-weight: 800;
+  font-size: 16px;
+  line-height: 1;
+  text-shadow: 0 1px 2px #000;
+  box-shadow: 0 2px 7px #000c;
+}

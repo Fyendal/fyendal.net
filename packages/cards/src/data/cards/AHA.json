@@ -1,0 +1,416 @@
+[
+ {
+  "id": "AHA001",
+  "name": "Hala, Bladesaint of the Vow",
+  "cardType": "hero",
+  "text": "Action - {r}{r}{r}, {t}: Sharpen target sword you control. Go again",
+  "classes": [
+   "warrior"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "AHA"
+ },
+ {
+  "id": "AHA002",
+  "name": "Zenith Blade",
+  "cardType": "weapon",
+  "text": "Hala Specialization\nOnce per Turn Action - {r}: Attack\nIf this has been sharpened this turn, its first attack this turn gets go again.",
+  "attack": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "sword",
+   "2h"
+  ],
+  "keywords": [
+   "Hala Specialization",
+   "Go again"
+  ],
+  "set": "AHA"
+ },
+ {
+  "id": "AHA003",
+  "name": "Anticipating Gaze",
+  "cardType": "equipment",
+  "text": "When a sword attack you control hits, you may remove a +1{p} counter from the sword. If you do, destroy this and draw a card.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "AHA"
+ },
+ {
+  "id": "AHA004",
+  "name": "Paragon Plate",
+  "cardType": "equipment",
+  "text": "Attack Reaction - {t}, remove a +1{p} counter from an attacking sword you control: Gain {r}\nTemper",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "AHA"
+ },
+ {
+  "id": "AHA005",
+  "name": "Reverent Rerebrace",
+  "cardType": "equipment",
+  "text": "If you would sharpen a Zenith Blade, instead you may pay {r} and destroy this. If you do, sharpen it an additional time.\nTemper",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Temper"
+  ],
+  "set": "AHA"
+ },
+ {
+  "id": "AHA006",
+  "name": "Silverstride Dodgers",
+  "cardType": "equipment",
+  "text": "If you control a Flurry token, this gets +1{d}.\nTemper",
+  "defense": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "AHA"
+ },
+ {
+  "id": "AHA007",
+  "name": "Deadly Display",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets +3{p}. If the weapon has been sharpened this turn, the attack gets \"When this hits a hero, create a Flurry token.\"",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "AHA"
+ },
+ {
+  "id": "AHA008",
+  "name": "Gleam of the Blade",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets +3{p}.\nInstant - Discard this: Create a Flurry token.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "AHA"
+ },
+ {
+  "id": "AHA009",
+  "name": "Polished Blade",
+  "cardType": "attack-reaction",
+  "text": "As an additional cost to play this, remove 1 or more +1{p} counters from an attacking sword on the active chain link. Choose that many modes plus 1:\n- The sword's attack gets go again.\n- You may attack an additional time with the sword this turn.\n- Your next attack with the sword this turn costs {r} less to activate.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "AHA"
+ },
+ {
+  "id": "AHA010",
+  "name": "Silverdrop Downpour",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets +4{p}.\nIf the weapon has been sharpened this turn, this costs {r} less to play.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "AHA"
+ },
+ {
+  "id": "AHA011",
+  "name": "Brimming Blade",
+  "cardType": "action",
+  "text": "Sharpen target sword you control twice.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "AHA"
+ },
+ {
+  "id": "AHA012",
+  "name": "Edict of Steel",
+  "cardType": "action",
+  "text": "Sharpen target sword you control.\nIf it has 1 or more +1{p} counters, create a Flurry token.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "AHA"
+ },
+ {
+  "id": "AHA013",
+  "name": "Sharp Incline",
+  "cardType": "action",
+  "text": "Sharpen target sword you control.\nIf it has 1 or more +1{p} counters, your next attack with it this turn costs {r} less to activate.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "AHA"
+ },
+ {
+  "id": "AHA014",
+  "name": "Swordmaster's Path",
+  "cardType": "action",
+  "text": "Your next sword attack this turn gets +3{p}.\nThe next time you would sharpen a sword this turn, instead sharpen it an additional time.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "AHA"
+ },
+ {
+  "id": "AHA015",
+  "name": "Toe the Line",
+  "cardType": "instant",
+  "text": "The next time you would be dealt damage this turn, prevent 2 of that damage. If you prevent damage this way, create a Flurry token.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "warrior"
+  ],
+  "set": "AHA"
+ },
+ {
+  "id": "AHA016",
+  "name": "Flurry Foot Dance",
+  "cardType": "defense-reaction",
+  "text": "While this is defending, if you control a Flurry token, this gets +2{d}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "AHA"
+ },
+ {
+  "id": "AHA017",
+  "name": "Edict of Steel",
+  "cardType": "action",
+  "text": "Sharpen target sword you control.\nIf it has 2 or more +1{p} counters, create a Flurry token.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "AHA"
+ },
+ {
+  "id": "AHA018",
+  "name": "Sharp Incline",
+  "cardType": "action",
+  "text": "Sharpen target sword you control.\nIf it has 2 or more +1{p} counters, your next attack with it this turn costs {r} less to activate.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "AHA"
+ },
+ {
+  "id": "AHA019",
+  "name": "Backside of the Blade",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets +1{p}. If it has go again, you may attack an additional time with the weapon this turn.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "AHA"
+ },
+ {
+  "id": "AHA020",
+  "name": "Deadly Display",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets +1{p}. If the weapon has been sharpened this turn, the attack gets \"When this hits a hero, create a Flurry token.\"",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "AHA"
+ },
+ {
+  "id": "AHA021",
+  "name": "Olé",
+  "cardType": "attack-reaction",
+  "text": "Remove a +1{p} counter from target attacking weapon. If you do, create a Flurry token and draw a card.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "AHA"
+ },
+ {
+  "id": "AHA022",
+  "name": "Edict of Steel",
+  "cardType": "action",
+  "text": "Sharpen target sword you control.\nIf it has 3 or more +1{p} counters, create a Flurry token.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "AHA"
+ },
+ {
+  "id": "AHA023",
+  "name": "Indefensibly Honed",
+  "cardType": "action",
+  "text": "Sharpen target sword you control.\nIf it has 3 or more +1{p} counters, your next attack with it this turn gets \"When this is defended by 1 or more cards, deal 1 damage to the defending hero.\" Go again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "AHA"
+ },
+ {
+  "id": "AHA024",
+  "name": "Shuck",
+  "cardType": "action",
+  "text": "Create a Flurry token.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "AHA"
+ },
+ {
+  "id": "AHA025",
+  "name": "Swordmaster's Path",
+  "cardType": "action",
+  "text": "Your next sword attack this turn gets +1{p}.\nThe next time you would sharpen a sword this turn, instead sharpen it an additional time.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "AHA"
+ },
+ {
+  "id": "AHA026",
+  "name": "Visit the Dawnsmith",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy this and sharpen all swords you control.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Sharpen"
+  ],
+  "set": "AHA"
+ },
+ {
+  "id": "AHA027",
+  "name": "Flurry",
+  "cardType": "token",
+  "text": "When you activate a weapon attack, destroy this and you may attack with the weapon twice this turn.",
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "AHA"
+ }
+]

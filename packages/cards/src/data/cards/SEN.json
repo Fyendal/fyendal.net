@@ -1,0 +1,598 @@
+[
+ {
+  "id": "SEN001",
+  "name": "Enigma",
+  "cardType": "hero",
+  "text": "Your first Spectral Shield attack each turn costs {r} less to activate.\nOnce per Turn Instant - {c}{c}{c}: Create a Spectral Shield token with a +1{p} counter.",
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "SEN"
+ },
+ {
+  "id": "SEN002",
+  "name": "Cosmo, Scroll of Ancestral Tapestry",
+  "cardType": "weapon",
+  "text": "During your turn, auras you control with ward are weapons with base {p} equal to their ward and Once per Turn Action - {r}: Attack\nYour aura attacks with one or more +1{p} counters get go again.",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "scroll",
+   "2h"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN003",
+  "name": "Blade Beckoner Helm",
+  "cardType": "equipment",
+  "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN004",
+  "name": "Nullrune Hood",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN005",
+  "name": "Blossom of Spring",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Gain {r}. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN006",
+  "name": "Nullrune Robe",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN007",
+  "name": "Uphold Tradition",
+  "cardType": "equipment",
+  "text": "Cloaked\nInstant - {r}, turn this face-up: Put a +1{p} counter on an aura you control with ward.\nWard 1",
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Cloaked",
+   "Ward 1"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN008",
+  "name": "Blade Beckoner Boots",
+  "cardType": "equipment",
+  "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN009",
+  "name": "Silent Stilettos",
+  "cardType": "equipment",
+  "text": "Whenever an attacking ally you control dies or an attack action card you control is destroyed by phantasm, you may pay {r}{r}{r}. If you do, destroy Silent Stilettos and gain 1 action point.\nArcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN010",
+  "name": "Enigma Chimera",
+  "cardType": "action",
+  "text": "Phantasm",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN011",
+  "name": "Look Tuff",
+  "cardType": "action",
+  "text": "When this attacks, it gets -1{p} unless you pay {r}.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN012",
+  "name": "Unmovable",
+  "cardType": "defense-reaction",
+  "text": "If this was played from arsenal, it gets +1{d}.",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 7,
+  "classes": [
+   "generic"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN013",
+  "name": "Astral Etchings",
+  "cardType": "action",
+  "text": "Put three +1{p} counters on target aura with ward you control.\nIf you control a Spectral Shield, you may play this as though it were an instant.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN014",
+  "name": "Spectral Manifestations",
+  "cardType": "action",
+  "text": "Create a Spectral Shield token, then if you control no other Illusionist auras, put three +1{p} counters on it.\nGo again",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN015",
+  "name": "Waning Vengeance",
+  "cardType": "instant",
+  "text": "When this leaves the arena, if you've pitched a blue card this turn, create a Spectral Shield token.\nWard 3",
+  "pitch": 1,
+  "cost": 1,
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "keywords": [
+   "Ward 3"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN016",
+  "name": "Waxing Specter",
+  "cardType": "instant",
+  "text": "If you've pitched a blue card this turn, this enters the arena with a +1{p} counter.\nWard 3",
+  "pitch": 1,
+  "cost": 2,
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "keywords": [
+   "Ward 3"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN017",
+  "name": "Oasis Respite",
+  "cardType": "instant",
+  "text": "Prevent the next 4 damage that would be dealt to target hero this turn by a source of your choice. If they have less life than each other hero, they may gain 1{h}.",
+  "pitch": 1,
+  "cost": 1,
+  "classes": [
+   "generic"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN018",
+  "name": "On the Horizon",
+  "cardType": "block",
+  "text": "When this defends, look at the top card of your deck.",
+  "pitch": 1,
+  "defense": 4,
+  "classes": [
+   "generic"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN019",
+  "name": "Test of Strength",
+  "cardType": "block",
+  "text": "When this defends, clash with the attacking hero. The winner creates a Gold token.",
+  "pitch": 1,
+  "defense": 4,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN020",
+  "name": "Springboard Somersault",
+  "cardType": "defense-reaction",
+  "text": "If Springboard Somersault is played from arsenal, it gains +2{d}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN021",
+  "name": "Enigma Chimera",
+  "cardType": "action",
+  "text": "Phantasm",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN022",
+  "name": "Fluid Motion",
+  "cardType": "action",
+  "text": "If you've created a card this turn, this gets go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN023",
+  "name": "Manifest Muscle",
+  "cardType": "action",
+  "text": "If you've created a card this turn, this gets +1{p}.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN024",
+  "name": "Phantasmal Haze",
+  "cardType": "action",
+  "text": "Phantasm\nWhen Phantasmal Haze is destroyed, create a Spectral Shield token.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN025",
+  "name": "Second Tenet of Chi: Wind",
+  "cardType": "action",
+  "text": "If you've transcended this turn, this gets go again.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN026",
+  "name": "Spears of Surreality",
+  "cardType": "action",
+  "text": "Phantasm\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm",
+   "Go again"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN027",
+  "name": "Spectral Rider",
+  "cardType": "action",
+  "text": "When you play Spectral Rider, if you control a Spectral Shield, this gains overpower.\nPhantasm",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Overpower",
+   "Phantasm"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN028",
+  "name": "Big Blue Sky",
+  "cardType": "defense-reaction",
+  "text": "This gets +1{d} for each blue card you've pitched this turn.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "mystic"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN029",
+  "name": "Put in Context",
+  "cardType": "defense-reaction",
+  "text": "This can only defend an attack with 3 or less base {p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN030",
+  "name": "Unmovable",
+  "cardType": "defense-reaction",
+  "text": "If Unmovable is played from arsenal, it gains +1{d}.",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 5,
+  "classes": [
+   "generic"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN031",
+  "name": "A Drop in the Ocean",
+  "cardType": "instant",
+  "text": "Legendary\nTarget attack gets -1{p}.\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "SEN",
+  "backId": "FAB232B"
+ },
+ {
+  "id": "SEN032",
+  "name": "Homage to Ancestors",
+  "cardType": "instant",
+  "text": "Legendary\nGain 1{h}\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "SEN",
+  "backId": "FAB232B"
+ },
+ {
+  "id": "SEN033",
+  "name": "Pass Over",
+  "cardType": "instant",
+  "text": "Legendary\nBanish target card from an opposing hero's graveyard.\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "set": "SEN",
+  "cost": 0,
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "backId": "FAB232B"
+ },
+ {
+  "id": "SEN034",
+  "name": "Preserve Tradition",
+  "cardType": "instant",
+  "text": "Legendary\nPut target action card from your graveyard on the bottom of your deck.\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "set": "SEN",
+  "cost": 0,
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "backId": "FAB232B"
+ },
+ {
+  "id": "SEN035",
+  "name": "Rising Sun, Setting Moon",
+  "cardType": "instant",
+  "text": "Legendary\nDraw a card, then put a card from your hand on the bottom of your deck.\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "set": "SEN",
+  "cost": 0,
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "backId": "FAB232B"
+ },
+ {
+  "id": "SEN036",
+  "name": "Gold",
+  "cardType": "token",
+  "text": "Action - {r}{r}, destroy this: Draw a card. Go again",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "SEN"
+ },
+ {
+  "id": "SEN037",
+  "name": "Spectral Shield",
+  "cardType": "token",
+  "text": "Ward 1",
+  "classes": [
+   "illusionist"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "SEN"
+ }
+]

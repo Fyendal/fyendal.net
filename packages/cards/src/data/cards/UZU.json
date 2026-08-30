@@ -1,0 +1,533 @@
+[
+ {
+  "id": "UZU001",
+  "name": "Uzuri",
+  "cardType": "hero",
+  "text": "Once per Turn Attack Reaction - Banish a card from your hand face down: Turn the card banished this way face up. If it's an attack action card with cost 2 or less, put target attacking card with stealth from the active chain link on the bottom of its owner's deck, then put the banished card onto the active chain link as the attacking card.",
+  "classes": [
+   "assassin"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "UZU"
+ },
+ {
+  "id": "UZU002",
+  "name": "Spider's Bite",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nPiercing 1\nWhen this hits a hero, the next time they defend with 1 or more attack action cards this turn, those cards have -1{d} while defending.",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Piercing 1"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU003",
+  "name": "Mask of Shifting Perspectives",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy Mask of Shifting Perspectives: Whenever a dagger hits this turn, you may put a card from your hand on the bottom of your deck. If you do, draw a card.",
+  "defense": 1,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU004",
+  "name": "Quelling Robe",
+  "cardType": "equipment",
+  "text": "Quell 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Quell 1"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU005",
+  "name": "Fisticuffs",
+  "cardType": "equipment",
+  "text": "Attack Reaction - {r}{r}, destroy Fisticuffs: Target attack action card gains +1{p}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU006",
+  "name": "Ironhide Legs",
+  "cardType": "equipment",
+  "text": "When you defend with Ironhide Legs, you may pay {r}. If you do, it gains +2{d} and \"When the combat chain closes, destroy Ironhide Legs.\"",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU007",
+  "name": "Sneak Attack",
+  "cardType": "action",
+  "text": "If you've played or activated an attack reaction this chain link, Sneak Attack has +4{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU008",
+  "name": "Death Touch",
+  "cardType": "action",
+  "text": "Death Touch can't be played from hand.\nWhen this hits a hero, create a Frailty, Inertia, or Bloodrot Pox token under their control.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU009",
+  "name": "Cut Down to Size",
+  "cardType": "action",
+  "text": "When this hits a hero, if they have 4 or more cards in hand, they discard a card.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU010",
+  "name": "Demolition Crew",
+  "cardType": "action",
+  "text": "As an additional cost to play Demolition Crew, reveal a card in your hand with cost 2 or greater.\nDominate",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Dominate"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU011",
+  "name": "Destructive Deliberation",
+  "cardType": "action",
+  "text": "When this hits a hero, create a Ponder token.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU012",
+  "name": "Humble",
+  "cardType": "action",
+  "text": "When this hits a hero, they lose all hero card abilities until the end of their next turn.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU013",
+  "name": "Infect",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, create a Bloodrot Pox token under their control.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU014",
+  "name": "Isolate",
+  "cardType": "action",
+  "text": "Stealth\nDominate",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth",
+   "Dominate"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU015",
+  "name": "Sedate",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, create an Inertia token under their control.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU016",
+  "name": "Peace of Mind",
+  "cardType": "instant",
+  "text": "The next time you would be dealt {p} damage, prevent 4 of that damage.\nCreate a Ponder token.",
+  "pitch": 1,
+  "cost": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU017",
+  "name": "Infect",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, create a Bloodrot Pox token under their control.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU018",
+  "name": "Isolate",
+  "cardType": "action",
+  "text": "Stealth\nDominate",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth",
+   "Dominate"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU019",
+  "name": "Sedate",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, create an Inertia token under their control.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU020",
+  "name": "Wither",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, create a Frailty token under their control.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU021",
+  "name": "Infect",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, create a Bloodrot Pox token under their control.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU022",
+  "name": "Isolate",
+  "cardType": "action",
+  "text": "Stealth\nDominate",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth",
+   "Dominate"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU023",
+  "name": "Prowl",
+  "cardType": "action",
+  "text": "Stealth\nThe next attack with stealth you play this combat chain gains +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU024",
+  "name": "Sedate",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, create an Inertia token under their control.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU025",
+  "name": "Wither",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, create a Frailty token under their control.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU026",
+  "name": "Razor's Edge",
+  "cardType": "attack-reaction",
+  "text": "Target attack action card with stealth gets +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU027",
+  "name": "Unmovable",
+  "cardType": "defense-reaction",
+  "text": "If Unmovable is played from arsenal, it gains +1{d}.",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 5,
+  "classes": [
+   "generic"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU028",
+  "name": "Bloodrot Pox",
+  "cardType": "token",
+  "text": "At the beginning of your end phase, destroy Bloodrot Pox, then it deals 2 damage to you unless you pay {r}{r}{r}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU029",
+  "name": "Frailty",
+  "cardType": "token",
+  "text": "Your attack action cards played from arsenal and weapon attacks have -1{p}.\nAt the beginning of your end phase destroy Frailty.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU030",
+  "name": "Inertia",
+  "cardType": "token",
+  "text": "At the beginning of your end phase, destroy Inertia, then put all cards from your hand and arsenal on the bottom of your deck.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "UZU"
+ },
+ {
+  "id": "UZU031",
+  "name": "Ponder",
+  "cardType": "token",
+  "text": "At the beginning of your end phase, destroy Ponder and draw a card.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "UZU"
+ }
+]

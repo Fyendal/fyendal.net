@@ -1,0 +1,4280 @@
+[
+ {
+  "id": "OMN000",
+  "name": "Voltaris",
+  "cardType": "resource",
+  "text": "Legendary\nWhen this is pitched, create a Lightning Flow token.",
+  "pitch": 3,
+  "subtypes": [
+   "lightning",
+   "gem"
+  ],
+  "keywords": [
+   "Legendary"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN001",
+  "name": "Zyggy Starlight",
+  "cardType": "hero",
+  "text": "Instant - {r}{r}, {t}, destroy a Lightning Flow you control, banish another Lightning aura permanent you control with no holo counters: Return the banished aura to the arena with a holo counter.",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "OMN"
+ },
+ {
+  "id": "OMN002",
+  "name": "Zyggy",
+  "cardType": "hero",
+  "text": "Instant - {r}{r}, {t}, destroy a Lightning Flow you control, banish another Lightning aura permanent you control with no holo counters: Return the banished aura to the arena with a holo counter.",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "OMN"
+ },
+ {
+  "id": "OMN003",
+  "name": "Aphrodias",
+  "cardType": "weapon",
+  "text": "Instant - {r}, {t}: Deal 2 arcane damage to target hero. Activate this only if an aura with a holo counter has entered the arena under your control this turn.",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "orb",
+   "2h"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN004",
+  "name": "Unwinding Finality",
+  "cardType": "action",
+  "text": "When this hits, draw a card.\nWhenever this fragments, you may put a Lightning instant card from your graveyard on top of your deck.\nFragment",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN005",
+  "name": "Flicker Reality",
+  "cardType": "instant",
+  "text": "When this leaves the arena, you may banish another Lightning aura permanent you control with no holo counters, then return it to the arena with a holo counter.\nWard 1",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN006",
+  "name": "Blink of an Eye",
+  "cardType": "action",
+  "text": "Whenever this fragments, you may banish a Lightning aura permanent you control with no holo counters, then return it to the arena with a holo counter.\nFragment",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN007",
+  "name": "Fraying Lifeforce",
+  "cardType": "action",
+  "text": "Whenever this fragments, gain 1{h}.\nFragment",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN008",
+  "name": "Scattering Conflux",
+  "cardType": "action",
+  "text": "Whenever this fragments, create an Embodiment of Lightning token.\nFragment",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN009",
+  "name": "Polarus Pulse Ray",
+  "cardType": "action",
+  "text": "Whenever this fragments, deal 1 arcane damage to the defending hero.\nFragment",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN010",
+  "name": "Polarus Pulse Ray",
+  "cardType": "action",
+  "text": "Whenever this fragments, deal 1 arcane damage to the defending hero.\nFragment",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN011",
+  "name": "Polarus Pulse Ray",
+  "cardType": "action",
+  "text": "Whenever this fragments, deal 1 arcane damage to the defending hero.\nFragment",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN012",
+  "name": "Corrosive Space Dust",
+  "cardType": "instant",
+  "text": "When this leaves the arena, deal 1 arcane damage to target hero.\nWard X, where X is 4 if this has a holo counter. Otherwise, X is 1.",
+  "pitch": 1,
+  "cost": 1,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Ward X"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN013",
+  "name": "Corrosive Space Dust",
+  "cardType": "instant",
+  "text": "When this leaves the arena, deal 1 arcane damage to target hero.\nWard X, where X is 3 if this has a holo counter. Otherwise, X is 1.",
+  "pitch": 2,
+  "cost": 1,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Ward X"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN014",
+  "name": "Corrosive Space Dust",
+  "cardType": "instant",
+  "text": "When this leaves the arena, deal 1 arcane damage to target hero.\nWard X, where X is 2 if this has a holo counter. Otherwise, X is 1.",
+  "pitch": 3,
+  "cost": 1,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Ward X"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN015",
+  "name": "Cosmic Duality",
+  "cardType": "action",
+  "text": "Instant - {r}, discard this: Deal 1 arcane damage to target hero. Create a Lightning Flow token.\nFragment",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN016",
+  "name": "Cosmic Duality",
+  "cardType": "action",
+  "text": "Instant - {r}, discard this: Deal 1 arcane damage to target hero. Create a Lightning Flow token.\nFragment",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN017",
+  "name": "Cosmic Duality",
+  "cardType": "action",
+  "text": "Instant - {r}, discard this: Deal 1 arcane damage to target hero. Create a Lightning Flow token.\nFragment",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN018",
+  "name": "Ebbing Arcstride",
+  "cardType": "action",
+  "text": "Whenever this fragments, it gets go again.\nFragment",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Fragment"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN019",
+  "name": "Ebbing Arcstride",
+  "cardType": "action",
+  "text": "Whenever this fragments, it gets go again.\nFragment",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Fragment"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN020",
+  "name": "Ebbing Arcstride",
+  "cardType": "action",
+  "text": "Whenever this fragments, it gets go again.\nFragment",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Fragment"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN021",
+  "name": "Pulsing Cardia",
+  "cardType": "action",
+  "text": "Whenever this fragments, gain {r}.\nFragment",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN022",
+  "name": "Pulsing Cardia",
+  "cardType": "action",
+  "text": "Whenever this fragments, gain {r}.\nFragment",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN023",
+  "name": "Pulsing Cardia",
+  "cardType": "action",
+  "text": "Whenever this fragments, gain {r}.\nFragment",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN024",
+  "name": "Shattering Flowtide",
+  "cardType": "action",
+  "text": "Whenever this fragments, create a Lightning Flow token.\nFragment",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN025",
+  "name": "Shattering Flowtide",
+  "cardType": "action",
+  "text": "Whenever this fragments, create a Lightning Flow token.\nFragment",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN026",
+  "name": "Shattering Flowtide",
+  "cardType": "action",
+  "text": "Whenever this fragments, create a Lightning Flow token.\nFragment",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN027",
+  "name": "Auric Shards",
+  "cardType": "instant",
+  "text": "When this enters the arena, up to 1 target attack with fragment gets +1{p}. If this has a holo counter, instead the attack gets +4{p}.\nWard 1",
+  "pitch": 1,
+  "cost": 1,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN028",
+  "name": "Auric Shards",
+  "cardType": "instant",
+  "text": "When this enters the arena, up to 1 target attack with fragment gets +1{p}. If this has a holo counter, instead the attack gets +3{p}.\nWard 1",
+  "pitch": 2,
+  "cost": 1,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN029",
+  "name": "Auric Shards",
+  "cardType": "instant",
+  "text": "When this enters the arena, up to 1 target attack with fragment gets +1{p}. If this has a holo counter, instead the attack gets +2{p}.\nWard 1",
+  "pitch": 3,
+  "cost": 1,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN030",
+  "name": "Holo Shield",
+  "cardType": "instant",
+  "text": "Ward X, where X is 4 if this has a holo counter. Otherwise, X is 1.",
+  "pitch": 1,
+  "cost": 1,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Ward X"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN031",
+  "name": "Holo Shield",
+  "cardType": "instant",
+  "text": "Ward X, where X is 3 if this has a holo counter. Otherwise, X is 1.",
+  "pitch": 2,
+  "cost": 1,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Ward X"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN032",
+  "name": "Holo Shield",
+  "cardType": "instant",
+  "text": "Ward X, where X is 2 if this has a holo counter. Otherwise, X is 1.",
+  "pitch": 3,
+  "cost": 1,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Ward X"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN033",
+  "name": "Circular Flowtide",
+  "cardType": "instant",
+  "text": "When this leaves the arena, create a Lightning Flow token.\nWard 2",
+  "pitch": 2,
+  "cost": 1,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Ward 2"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN034",
+  "name": "Elliptical Conflux",
+  "cardType": "instant",
+  "text": "When this leaves the arena, create an Embodiment of Lightning token.\nWard 2",
+  "pitch": 2,
+  "cost": 1,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Ward 2"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN035",
+  "name": "Nebulus Cycle",
+  "cardType": "instant",
+  "text": "When this leaves the arena, create a Ponder token.\nWard 2",
+  "pitch": 2,
+  "cost": 1,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Ward 2"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN036",
+  "name": "Crackle from Afar",
+  "cardType": "instant",
+  "text": "When this enters the arena, up to 1 target attack gets +1{p}.\nWard 1",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN037",
+  "name": "Fleeing Starbreeze",
+  "cardType": "instant",
+  "text": "When this enters the arena, up to 1 target attack gets go again.\nWard 1",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN038",
+  "name": "Nourishing Glow",
+  "cardType": "instant",
+  "text": "When this enters the arena, gain 1{h}.\nWard 1",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN039",
+  "name": "Fingers of Fragmentation",
+  "cardType": "equipment",
+  "text": "Instant - {r}{r}, destroy this: Target attack action card that has fragmented gets +2{p}.",
+  "defense": 0,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN040",
+  "name": "Fractal Creation",
+  "cardType": "action",
+  "text": "When this hits, you may create a token copy of an aura you control.\nFragment",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN041",
+  "name": "Clear Conscience",
+  "cardType": "action",
+  "text": "When this hits a hero, each hero puts a card from their hand on the bottom of their deck and creates a Ponder token.\nFragment",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN042",
+  "name": "Clear Conscience",
+  "cardType": "action",
+  "text": "When this hits a hero, each hero puts a card from their hand on the bottom of their deck and creates a Ponder token.\nFragment",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN043",
+  "name": "Clear Conscience",
+  "cardType": "action",
+  "text": "When this hits a hero, each hero puts a card from their hand on the bottom of their deck and creates a Ponder token.\nFragment",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN044",
+  "name": "Erode Authority",
+  "cardType": "action",
+  "text": "Dominate\nFragment",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Dominate",
+   "Fragment"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN045",
+  "name": "Erode Authority",
+  "cardType": "action",
+  "text": "Dominate\nFragment",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Dominate",
+   "Fragment"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN046",
+  "name": "Erode Authority",
+  "cardType": "action",
+  "text": "Dominate\nFragment",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Dominate",
+   "Fragment"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN047",
+  "name": "Aurora, Legacy of Tempest",
+  "cardType": "hero",
+  "text": "Instant - {r}{r}, {t}, destroy a Lightning Flow you control: Create an Embodiment of Lightning token.",
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "OMN"
+ },
+ {
+  "id": "OMN048",
+  "name": "Aurora, Emissary of Lightning",
+  "cardType": "hero",
+  "text": "Instant - {r}{r}, {t}, destroy a Lightning Flow you control: Create an Embodiment of Lightning token.",
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "OMN"
+ },
+ {
+  "id": "OMN049",
+  "name": "Scorpio, Comet Tail",
+  "cardType": "weapon",
+  "text": "Action - {t}: Attack. Activate this only if you control a Lightning attack.\nWhen this hits a hero, deal 1 arcane damage to them.",
+  "attack": 1,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "sword",
+   "2h"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN050",
+  "name": "Snap Fingers",
+  "cardType": "equipment",
+  "text": "Instant - {r}, destroy this: Target Lightning attack action card you control on the active chain link deals 1 arcane damage to the defending hero.",
+  "defense": 0,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "arms"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN051",
+  "name": "Tempestuous Kiss",
+  "cardType": "action",
+  "text": "Quickstrike - If this has go again, it gets +1{p} and \"When this attacks a hero, deal 1 arcane damage to them.\"\nThe first time this deals damage to a hero, they discard a card.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Quickstrike"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN052",
+  "name": "Arcanic Reproach",
+  "cardType": "instant",
+  "text": "The first time an opposing hero deals damage to you each turn, you may reveal a Lightning card from your hand. If you do, deal 1 arcane damage to them.\nAt the start of your action phase, destroy an aura you control.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN053",
+  "name": "Dashing Flashfoot",
+  "cardType": "action",
+  "text": "Quickstrike - If this has go again, it gets +1{p} and \"When this attacks a hero, deal 1 arcane damage to them.\"\nThe first time this deals damage to a hero, create an Embodiment of Lightning token.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Quickstrike"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN054",
+  "name": "Electryn Mindmeld",
+  "cardType": "action",
+  "text": "Quickstrike - If this has go again, it gets +1{p} and \"When this attacks a hero, deal 1 arcane damage to them.\"\nThe first time this deals damage to a hero, you may put an instant card from your graveyard on the bottom of your deck.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Quickstrike"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN055",
+  "name": "Prophetic Quickstep",
+  "cardType": "action",
+  "text": "Quickstrike - If this has go again, it gets +1{p} and \"When this attacks a hero, deal 1 arcane damage to them.\"\nThe first time this deals damage to a hero, create a Ponder token.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Quickstrike"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN056",
+  "name": "Stinging Sprite",
+  "cardType": "action",
+  "text": "When this attacks or defends, deal 1 arcane damage to target hero.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN057",
+  "name": "Stinging Sprite",
+  "cardType": "action",
+  "text": "When this attacks or defends, deal 1 arcane damage to target hero.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN058",
+  "name": "Stinging Sprite",
+  "cardType": "action",
+  "text": "When this attacks or defends, deal 1 arcane damage to target hero.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN059",
+  "name": "Mercurial Skies",
+  "cardType": "action",
+  "text": "The next Runeblade or Lightning attack action card you play this turn gets go again and \"The first time this deals damage to a hero, you may destroy a Lightning Flow you control. If you do, deal 3 arcane damage to them.\"\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN060",
+  "name": "Mercurial Skies",
+  "cardType": "action",
+  "text": "The next Runeblade or Lightning attack action card you play this turn gets go again and \"The first time this deals damage to a hero, you may destroy a Lightning Flow you control. If you do, deal 2 arcane damage to them.\"\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN061",
+  "name": "Mercurial Skies",
+  "cardType": "action",
+  "text": "The next Runeblade or Lightning attack action card you play this turn gets go again and \"The first time this deals damage to a hero, you may destroy a Lightning Flow you control. If you do, deal 1 arcane damage to them.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN062",
+  "name": "Destructive Fleetfoot",
+  "cardType": "action",
+  "text": "Quickstrike - If this has go again, it gets +1{p}.\nWhen this hits a hero, destroy an aura token they control.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Quickstrike"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN063",
+  "name": "Destructive Fleetfoot",
+  "cardType": "action",
+  "text": "Quickstrike - If this has go again, it gets +1{p}.\nWhen this hits a hero, destroy an aura token they control.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Quickstrike"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN064",
+  "name": "Destructive Fleetfoot",
+  "cardType": "action",
+  "text": "Quickstrike - If this has go again, it gets +1{p}.\nWhen this hits a hero, destroy an aura token they control.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Quickstrike"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN065",
+  "name": "Path of Same Ends",
+  "cardType": "action",
+  "text": "When this attacks a hero, deal 1 arcane damage to them. If damage is dealt this way, this gets go again.\nInstant - {r}: This gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN066",
+  "name": "Path of Same Ends",
+  "cardType": "action",
+  "text": "When this attacks a hero, deal 1 arcane damage to them. If damage is dealt this way, this gets go again.\nInstant - {r}: This gets go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN067",
+  "name": "Path of Same Ends",
+  "cardType": "action",
+  "text": "When this attacks a hero, deal 1 arcane damage to them. If damage is dealt this way, this gets go again.\nInstant - {r}: This gets go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN068",
+  "name": "Rush of Power",
+  "cardType": "action",
+  "text": "Quickstrike - If this has go again, it gets +1{p}.\nWhen this hits a hero, deal 1 arcane damage to them.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Quickstrike"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN069",
+  "name": "Rush of Power",
+  "cardType": "action",
+  "text": "Quickstrike - If this has go again, it gets +1{p}.\nWhen this hits a hero, deal 1 arcane damage to them.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Quickstrike"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN070",
+  "name": "Rush of Power",
+  "cardType": "action",
+  "text": "Quickstrike - If this has go again, it gets +1{p}.\nWhen this hits a hero, deal 1 arcane damage to them.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Quickstrike"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN071",
+  "name": "Singeing Flowstride",
+  "cardType": "action",
+  "text": "Quickstrike - If this has go again, it gets \"When this attacks a hero, deal 1 arcane damage to them.\"\nThe first time this deals damage to a hero, create a Lightning Flow token.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Quickstrike"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN072",
+  "name": "Singeing Flowstride",
+  "cardType": "action",
+  "text": "Quickstrike - If this has go again, it gets \"When this attacks a hero, deal 1 arcane damage to them.\"\nThe first time this deals damage to a hero, create a Lightning Flow token.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Quickstrike"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN073",
+  "name": "Singeing Flowstride",
+  "cardType": "action",
+  "text": "Quickstrike - If this has go again, it gets \"When this attacks a hero, deal 1 arcane damage to them.\"\nThe first time this deals damage to a hero, create a Lightning Flow token.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Quickstrike"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN074",
+  "name": "Stunning Swipe",
+  "cardType": "action",
+  "text": "Quickstrike - If this has go again, it gets \"When this attacks a hero, deal 1 arcane damage to them.\"\nThe first time this deals damage to a Lightning hero, {t} them or a weapon they control.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Quickstrike"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN075",
+  "name": "Stunning Swipe",
+  "cardType": "action",
+  "text": "Quickstrike - If this has go again, it gets \"When this attacks a hero, deal 1 arcane damage to them.\"\nThe first time this deals damage to a Lightning hero, {t} them or a weapon they control.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Quickstrike"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN076",
+  "name": "Stunning Swipe",
+  "cardType": "action",
+  "text": "Quickstrike - If this has go again, it gets \"When this attacks a hero, deal 1 arcane damage to them.\"\nThe first time this deals damage to a Lightning hero, {t} them or a weapon they control.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Quickstrike"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN077",
+  "name": "Voltbound Duality",
+  "cardType": "action",
+  "text": "Instant - {r}, discard this: Deal 1 arcane damage to target hero. Create a Lightning Flow token.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN078",
+  "name": "Voltbound Duality",
+  "cardType": "action",
+  "text": "Instant - {r}, discard this: Deal 1 arcane damage to target hero. Create a Lightning Flow token.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN079",
+  "name": "Voltbound Duality",
+  "cardType": "action",
+  "text": "Instant - {r}, discard this: Deal 1 arcane damage to target hero. Create a Lightning Flow token.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN080",
+  "name": "Electryn Joltstep",
+  "cardType": "action",
+  "text": "Your next Runeblade or Lightning attack this turn gets +3{p}.\nCreate a Lightning Flow token.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN081",
+  "name": "Electryn Joltstep",
+  "cardType": "action",
+  "text": "Your next Runeblade or Lightning attack this turn gets +2{p}.\nCreate a Lightning Flow token.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN082",
+  "name": "Electryn Joltstep",
+  "cardType": "action",
+  "text": "Your next Runeblade or Lightning attack this turn gets +1{p}.\nCreate a Lightning Flow token.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN083",
+  "name": "Quick Succession",
+  "cardType": "action",
+  "text": "The next Runeblade or Lightning attack action card you play this turn gets go again.\nYour next 3 attacks this turn get +1{p} while they have go again.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN084",
+  "name": "Quick Succession",
+  "cardType": "action",
+  "text": "The next Runeblade or Lightning attack action card you play this turn gets go again.\nYour next 2 attacks this turn get +1{p} while they have go again.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN085",
+  "name": "Quick Succession",
+  "cardType": "action",
+  "text": "The next Runeblade or Lightning attack action card you play this turn gets go again.\nYour next attack this turn get +1{p} while it has go again.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN086",
+  "name": "Gauntlet of Sword and Sorcery",
+  "cardType": "equipment",
+  "text": "Action - {r}{r}, {t} this and your hero: The next attack action card you play this turn gets \"When this attacks, deal 1 arcane damage to any opposing target. If damage is dealt this way, this gets +1{p}.\" Go again\nArcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN087",
+  "name": "Caress of the Reaper",
+  "cardType": "action",
+  "text": "Whenever this deals damage to a hero, destroy target aura they control.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN088",
+  "name": "Arcanic Cunning",
+  "cardType": "action",
+  "text": "While this is attacking, defending, or on the stack, if you would be dealt arcane damage, prevent 1 of that damage.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN089",
+  "name": "Arcanic Cunning",
+  "cardType": "action",
+  "text": "While this is attacking, defending, or on the stack, if you would be dealt arcane damage, prevent 1 of that damage.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN090",
+  "name": "Arcanic Cunning",
+  "cardType": "action",
+  "text": "While this is attacking, defending, or on the stack, if you would be dealt arcane damage, prevent 1 of that damage.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN091",
+  "name": "Leech Memory",
+  "cardType": "action",
+  "text": "The next attack action card you play this turn gets +3{p} and \"Whenever this deals damage to a hero, you may put an attack action card from your graveyard on the bottom of your deck.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN092",
+  "name": "Leech Renown",
+  "cardType": "action",
+  "text": "The next attack action card you play this turn gets +3{p} and \"Whenever this deals damage to a hero, destroy an aura token they control.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN093",
+  "name": "Leech Vitality",
+  "cardType": "action",
+  "text": "The next attack action card you play this turn gets +3{p} and \"Whenever this deals damage to a hero, gain 1{h}.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN094",
+  "name": "Oscilio, Forked Continuum",
+  "cardType": "hero",
+  "text": "Instant - {r}, {t}, destroy a Lightning Flow you control: Discard a card and create a Ponder token. If an instant is discard this way, you may play it this turn.",
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "life": 38,
+  "intellect": 4,
+  "set": "OMN"
+ },
+ {
+  "id": "OMN095",
+  "name": "Oscilio, Scion of the Third Age",
+  "cardType": "hero",
+  "text": "Instant - {r}, {t}, destroy a Lightning Flow you control: Discard a card and create a Ponder token. If an instant is discard this way, you may play it this turn.",
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "life": 19,
+  "intellect": 4,
+  "set": "OMN"
+ },
+ {
+  "id": "OMN096",
+  "name": "Volzar, Meteor Storm",
+  "cardType": "weapon",
+  "text": "Instant - {t}: Amp 1. Activate this only if an instant card has been put into your graveyard this turn.",
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning",
+   "staff",
+   "2h"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN097",
+  "name": "Constella Waves",
+  "cardType": "equipment",
+  "text": "Instant - {t} your hero, destroy this: Amp 1",
+  "defense": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning",
+   "arms"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN098",
+  "name": "Astral Bridge",
+  "cardType": "instant",
+  "text": "Put the top card of your deck into your graveyard. If it's an instant, you may play it this turn.\nStarfall - If an instant has been put into your graveyard this turn, deal 1 arcane damage to target hero.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Starfall"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN099",
+  "name": "Echoflash",
+  "cardType": "instant",
+  "text": "Deal 1 arcane damage to target hero.\nWhen this is put into your graveyard from anywhere, your hero deals 1 arcane damage to target hero.",
+  "pitch": 2,
+  "cost": 1,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN100",
+  "name": "Arc Ramp",
+  "cardType": "action",
+  "text": "Amp 3\nYou may destroy a Lightning Flow you control. If you do, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again",
+   "Amp 3"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN101",
+  "name": "Arc Ramp",
+  "cardType": "action",
+  "text": "Amp 2\nYou may destroy a Lightning Flow you control. If you do, this gets go again.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again",
+   "Amp 2"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN102",
+  "name": "Arc Ramp",
+  "cardType": "action",
+  "text": "Amp 1\nYou may destroy a Lightning Flow you control. If you do, this gets go again.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again",
+   "Amp 1"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN103",
+  "name": "Core Reaction",
+  "cardType": "instant",
+  "text": "At the beginning of your action phase, destroy this and deal 4 arcane damage to any target.",
+  "pitch": 1,
+  "cost": 2,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN104",
+  "name": "Core Reaction",
+  "cardType": "instant",
+  "text": "At the beginning of your action phase, destroy this and deal 3 arcane damage to any target.",
+  "pitch": 2,
+  "cost": 2,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN105",
+  "name": "Core Reaction",
+  "cardType": "instant",
+  "text": "At the beginning of your action phase, destroy this and deal 2 arcane damage to any target.",
+  "pitch": 3,
+  "cost": 2,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN106",
+  "name": "Flash Bolt",
+  "cardType": "instant",
+  "text": "Deal 3 arcane damage to target hero.",
+  "pitch": 1,
+  "cost": 2,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN107",
+  "name": "Flash Bolt",
+  "cardType": "instant",
+  "text": "Deal 2 arcane damage to target hero.",
+  "pitch": 2,
+  "cost": 2,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN108",
+  "name": "Flash Bolt",
+  "cardType": "instant",
+  "text": "Deal 1 arcane damage to target hero.",
+  "pitch": 3,
+  "cost": 2,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN109",
+  "name": "Comet Collision",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to any target.\nStarfall - If an instant card has been put into your graveyard this turn, instead deal 4 arcane damage.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Starfall"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN110",
+  "name": "Comet Collision",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to any target.\nStarfall - If an instant card has been put into your graveyard this turn, instead deal 3 arcane damage.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Starfall"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN111",
+  "name": "Comet Collision",
+  "cardType": "action",
+  "text": "Deal 1 arcane damage to any target.\nStarfall - If an instant card has been put into your graveyard this turn, instead deal 2 arcane damage.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Starfall"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN112",
+  "name": "Enion Surge",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to any target.\nIf this deals damage, you may {t} your hero. If you do, create a Lightning Flow token.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN113",
+  "name": "Enion Surge",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to any target.\nIf this deals damage, you may {t} your hero. If you do, create a Lightning Flow token.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN114",
+  "name": "Enion Surge",
+  "cardType": "action",
+  "text": "Deal 1 arcane damage to any target.\nIf this deals damage, you may {t} your hero. If you do, create a Lightning Flow token.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN115",
+  "name": "Lightning Overload",
+  "cardType": "action",
+  "text": "Deal 4 arcane damage to any target.\nStarfall - If an instant card has been put into your graveyard this turn, create a Lightning Flow token.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Starfall"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN116",
+  "name": "Lightning Overload",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to any target.\nStarfall - If an instant card has been put into your graveyard this turn, create a Lightning Flow token.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Starfall"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN117",
+  "name": "Lightning Overload",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to any target.\nStarfall - If an instant card has been put into your graveyard this turn, create a Lightning Flow token.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Starfall"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN118",
+  "name": "Meteoric Impact",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to any target.\nStarfall - If an instant card has been put into your graveyard this turn, instead deal 5 arcane damage.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Starfall"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN119",
+  "name": "Meteoric Impact",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to any target.\nStarfall - If an instant card has been put into your graveyard this turn, instead deal 4 arcane damage.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Starfall"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN120",
+  "name": "Meteoric Impact",
+  "cardType": "action",
+  "text": "Deal 1 arcane damage to any target.\nStarfall - If an instant card has been put into your graveyard this turn, instead deal 3 arcane damage.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Starfall"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN121",
+  "name": "Nebula Duality",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to any target.\nInstant - {r}, discard this: Deal 1 arcane damage to target hero. Create a Lightning Flow token.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN122",
+  "name": "Nebula Duality",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to any target.\nInstant - {r}, discard this: Deal 1 arcane damage to target hero. Create a Lightning Flow token.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN123",
+  "name": "Nebula Duality",
+  "cardType": "action",
+  "text": "Deal 1 arcane damage to any target.\nInstant - {r}, discard this: Deal 1 arcane damage to target hero. Create a Lightning Flow token.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN124",
+  "name": "Tap Lessons Past",
+  "cardType": "action",
+  "text": "Deal 4 arcane damage to any target.\nIf this deals damage, you may {t} your hero. If you do, put an instant card from your graveyard on the bottom of your deck.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN125",
+  "name": "Tap Lessons Past",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to any target.\nIf this deals damage, you may {t} your hero. If you do, put an instant card from your graveyard on the bottom of your deck.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN126",
+  "name": "Tap Lessons Past",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to any target.\nIf this deals damage, you may {t} your hero. If you do, put an instant card from your graveyard on the bottom of your deck.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN127",
+  "name": "Cosmic Suture",
+  "cardType": "instant",
+  "text": "Prevent the next 4 damage that would be dealt to you this turn.\nStarfall - If an instant card has been put into your graveyard this turn, deal 1 arcane damage to target hero.",
+  "pitch": 1,
+  "cost": 2,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Starfall"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN128",
+  "name": "Cosmic Suture",
+  "cardType": "instant",
+  "text": "Prevent the next 3 damage that would be dealt to you this turn.\nStarfall - If an instant card has been put into your graveyard this turn, deal 1 arcane damage to target hero.",
+  "pitch": 2,
+  "cost": 2,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Starfall"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN129",
+  "name": "Cosmic Suture",
+  "cardType": "instant",
+  "text": "Prevent the next 2 damage that would be dealt to you this turn.\nStarfall - If an instant card has been put into your graveyard this turn, deal 1 arcane damage to target hero.",
+  "pitch": 3,
+  "cost": 2,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Starfall"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN130",
+  "name": "Constella Contemplation",
+  "cardType": "instant",
+  "text": "Create a Ponder token.\nStarfall - If an instant card has been put into your graveyard this turn, deal 1 arcane damage to target hero.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Starfall"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN131",
+  "name": "Constella Flowslide",
+  "cardType": "instant",
+  "text": "Create a Lightning Flow token.\nStarfall - If an instant card has been put into your graveyard this turn, deal 1 arcane damage to target hero.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Starfall"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN132",
+  "name": "Constella Uplift",
+  "cardType": "instant",
+  "text": "{u} a staff you control.\nStarfall - If an instant card has been put into your graveyard this turn, deal 1 arcane damage to target hero.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Starfall"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN133",
+  "name": "Tome of Quandaries",
+  "cardType": "instant",
+  "text": "Create 2 Ponder tokens.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN134",
+  "name": "Aethersling",
+  "cardType": "action",
+  "text": "Deal 4 arcane damage to any target.\nIf this deals damage, you may {t} your hero. If you do, this gets go again.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN135",
+  "name": "Nucleus Aetherbolt",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to any target.\nIf this deals damage, you may {t} your hero. If you do, your hero deals 1 arcane damage to any target.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN136",
+  "name": "Turn to Mindfire",
+  "cardType": "action",
+  "text": "Deal 5 arcane damage to any target.\nIf this deals damage, you may {t} your hero. If you do, create a Ponder token.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN137",
+  "name": "Haven Veil",
+  "cardType": "instant",
+  "text": "When this enters the arena, prevent the next 3 arcane damage that would be dealt to you this turn.\nAt the beginning of your action phase, destroy this.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN138",
+  "name": "Haven Veil",
+  "cardType": "instant",
+  "text": "When this enters the arena, prevent the next 2 arcane damage that would be dealt to you this turn.\nAt the beginning of your action phase, destroy this.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN139",
+  "name": "Haven Veil",
+  "cardType": "instant",
+  "text": "When this enters the arena, prevent the next 1 arcane damage that would be dealt to you this turn.\nAt the beginning of your action phase, destroy this.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN140",
+  "name": "Third Eye of the Sphinx",
+  "cardType": "equipment",
+  "text": "Instant - {r}, {t}, destroy a Ponder token you control: Draw a card.\nSpellvoid 1\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "illusionist",
+   "wizard"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Spellvoid 1",
+   "Blade Break"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN141",
+  "name": "Plutonic Starplate",
+  "cardType": "equipment",
+  "text": "The first time you play a Lightning card during each of your opponent's turns, gain {r}.\nArcane Barrer 1",
+  "defense": 0,
+  "subtypes": [
+   "lightning",
+   "chest"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN142",
+  "name": "Constella Tiara",
+  "cardType": "equipment",
+  "text": "Instant - {r}{r}, destroy this: Prevent the next 1 damage that would be dealt to you this turn. If you prevent damage this way, create a Ponder token.",
+  "defense": 0,
+  "subtypes": [
+   "lightning",
+   "head"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN143",
+  "name": "Starflow Robes",
+  "cardType": "equipment",
+  "text": "Instant - {r}{r}, destroy this: Prevent the next 1 damage that would be dealt to you this turn. If you prevent damage this way, create a Lightning Flow token.",
+  "defense": 0,
+  "subtypes": [
+   "lightning",
+   "chest"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN144",
+  "name": "Laced Lightning",
+  "cardType": "equipment",
+  "text": "Instant - {r}{r}, destroy this: Prevent the next 1 damage that would be dealt to you this turn. If you prevent damage this way, create an Embodiment of Lightning token.",
+  "defense": 0,
+  "subtypes": [
+   "lightning",
+   "legs"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN145",
+  "name": "Astral Strike",
+  "cardType": "action",
+  "text": "When this attacks, if you've destroyed a Lightning Flow this turn, choose 1;\n- Draw a card.\n- This gets +2{p}.\n- This gets go again.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN146",
+  "name": "Flowstate Embodiment",
+  "cardType": "action",
+  "text": "Whenever you play an instant card this chain link, create an Embodiment of Lightning or Lightning Flow token.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN147",
+  "name": "Static Shelter",
+  "cardType": "defense-reaction",
+  "text": "When this defends, you may pay {r}. If you do, create a Lightning Flow token.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN148",
+  "name": "Beckoning Brilliance",
+  "cardType": "action",
+  "text": "When this attacks, the next instant card you play this chain link costs {r} less to play.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN149",
+  "name": "Flowshard Elemental",
+  "cardType": "action",
+  "text": "When this attacks, you may discard an instant card. If you do, create a Lightning Flow token and this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN150",
+  "name": "Lightning Form",
+  "cardType": "action",
+  "text": "When this hits, create an Embodiment of Lightning token.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN151",
+  "name": "Visionary of Orbits",
+  "cardType": "action",
+  "text": "When this hits, you may put an instant card from your graveyard on the bottom of your deck.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN152",
+  "name": "Flowing Stormstrike",
+  "cardType": "action",
+  "text": "Twice per Turn Instant - {r}: This gets +1{p}.\nWhen this hits, create a Lightning Flow token.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN153",
+  "name": "Meteoric Rise",
+  "cardType": "action",
+  "text": "Twice per Turn Instant - {r}: This gets +1{p}.\nWhen this hits, create a Lightning Flow token.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN154",
+  "name": "Voltic Impact",
+  "cardType": "action",
+  "text": "Twice per Turn Instant - {r}: This gets +1{p}.\nWhen this hits, create a Lightning Flow token.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN155",
+  "name": "Rift Breaker",
+  "cardType": "action",
+  "text": "When this hits a hero, destroy a Lightning Flow token they control.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN156",
+  "name": "Rift Breaker",
+  "cardType": "action",
+  "text": "When this hits a hero, destroy a Lightning Flow token they control.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN157",
+  "name": "Rift Breaker",
+  "cardType": "action",
+  "text": "When this hits a hero, destroy a Lightning Flow token they control.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN158",
+  "name": "Flow Through",
+  "cardType": "instant",
+  "text": "Target Lightning attack gets +1{p} and \"When this hits, create a Lightning Flow token.\"",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN159",
+  "name": "Livewire Press",
+  "cardType": "instant",
+  "text": "Target Lightning attack action card gets \"When this hits a hero, deal 4 damage to them.\"",
+  "pitch": 1,
+  "cost": 1,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN160",
+  "name": "Astral Assault",
+  "cardType": "action",
+  "text": "When this attacks, you may destroy a Lightning Flow you control. If you do, this gets +2{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN161",
+  "name": "Astral Assault",
+  "cardType": "action",
+  "text": "When this attacks, you may destroy a Lightning Flow you control. If you do, this gets +2{p}.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN162",
+  "name": "Astral Assault",
+  "cardType": "action",
+  "text": "When this attacks, you may destroy a Lightning Flow you control. If you do, this gets +2{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 3,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN163",
+  "name": "Electrolyze",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 0,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN164",
+  "name": "Electrolyze",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 0,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN165",
+  "name": "Electrolyze",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 0,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN166",
+  "name": "Flittering Spike",
+  "cardType": "action",
+  "text": "If you've played an instant card this chain link, this gets +2{p}.\nWhen this hits, create a Lightning Flow token.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN167",
+  "name": "Flittering Spike",
+  "cardType": "action",
+  "text": "If you've played an instant card this chain link, this gets +2{p}.\nWhen this hits, create a Lightning Flow token.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN168",
+  "name": "Flittering Spike",
+  "cardType": "action",
+  "text": "If you've played an instant card this chain link, this gets +2{p}.\nWhen this hits, create a Lightning Flow token.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 3,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN169",
+  "name": "Glide Through Starlight",
+  "cardType": "action",
+  "text": "Instant - {r}, discard this: Prevent the next 1 damage that would be dealt to you this turn. If you prevent damage this way, create a Lightning Flow token.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN170",
+  "name": "Glide Through Starlight",
+  "cardType": "action",
+  "text": "Instant - {r}, discard this: Prevent the next 1 damage that would be dealt to you this turn. If you prevent damage this way, create a Lightning Flow token.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN171",
+  "name": "Glide Through Starlight",
+  "cardType": "action",
+  "text": "Instant - {r}, discard this: Prevent the next 1 damage that would be dealt to you this turn. If you prevent damage this way, create a Lightning Flow token.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN172",
+  "name": "Heaven's Claws",
+  "cardType": "action",
+  "text": "",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN173",
+  "name": "Heaven's Claws",
+  "cardType": "action",
+  "text": "",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN174",
+  "name": "Heaven's Claws",
+  "cardType": "action",
+  "text": "",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN175",
+  "name": "Stellar Glide",
+  "cardType": "action",
+  "text": "When this attacks, you may destroy a Lightning Flow you control. If you do, this gets go again.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN176",
+  "name": "Stellar Glide",
+  "cardType": "action",
+  "text": "When this attacks, you may destroy a Lightning Flow you control. If you do, this gets go again.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN177",
+  "name": "Stellar Glide",
+  "cardType": "action",
+  "text": "When this attacks, you may destroy a Lightning Flow you control. If you do, this gets go again.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 3,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN178",
+  "name": "Volatile Fluxor",
+  "cardType": "action",
+  "text": "If you've played an instant card this chain link, this gets +3{p}.\nWhen this hits, create a Lightning Flow token.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 0,
+  "defense": 3,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN179",
+  "name": "Volatile Fluxor",
+  "cardType": "action",
+  "text": "If you've played an instant card this chain link, this gets +2{p}.\nWhen this hits, create a Lightning Flow token.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 0,
+  "defense": 3,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN180",
+  "name": "Volatile Fluxor",
+  "cardType": "action",
+  "text": "If you've played an instant card this chain link, this gets +1{p}.\nWhen this hits, create a Lightning Flow token.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 0,
+  "defense": 3,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN181",
+  "name": "Flittering Forcefield",
+  "cardType": "defense-reaction",
+  "text": "While this is defending, if you've played an instant card this chain link, this gets +1{d}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN182",
+  "name": "Flittering Forcefield",
+  "cardType": "defense-reaction",
+  "text": "While this is defending, if you've played an instant card this chain link, this gets +1{d}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN183",
+  "name": "Flittering Forcefield",
+  "cardType": "defense-reaction",
+  "text": "While this is defending, if you've played an instant card this chain link, this gets +1{d}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 1,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN184",
+  "name": "Calmveil of Volthaven",
+  "cardType": "instant",
+  "text": "Prevent the next 3 damage that would be dealt to you this turn. The first time you prevent damage this way, create a Lightning Flow token.",
+  "pitch": 1,
+  "cost": 2,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN185",
+  "name": "Calmveil of Volthaven",
+  "cardType": "instant",
+  "text": "Prevent the next 2 damage that would be dealt to you this turn. The first time you prevent damage this way, create a Lightning Flow token.",
+  "pitch": 2,
+  "cost": 2,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN186",
+  "name": "Calmveil of Volthaven",
+  "cardType": "instant",
+  "text": "Prevent the next 1 damage that would be dealt to you this turn. The first time you prevent damage this way, create a Lightning Flow token.",
+  "pitch": 3,
+  "cost": 2,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN187",
+  "name": "Cosmic Flare",
+  "cardType": "instant",
+  "text": "Gain {r}{r}{r}",
+  "pitch": 1,
+  "cost": 0,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN188",
+  "name": "Starworld Warning",
+  "cardType": "instant",
+  "text": "Create 2 Lightning Flow tokens.",
+  "pitch": 2,
+  "cost": 1,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN189",
+  "name": "Starlight Road",
+  "cardType": "instant",
+  "text": "Create an Embodiment of Lightning or Lightning Flow token.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN190",
+  "name": "Stormshard",
+  "cardType": "instant",
+  "text": "You may destroy a Lightning Flow you control rather than pay this card's {r} cost.\nTarget Lightning attack gets +3{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN191",
+  "name": "Stormshatter",
+  "cardType": "instant",
+  "text": "You may destroy a Lightning Flow you control rather than pay this card's {r} cost.\nTarget Lightning attack gets -3{p}.",
+  "pitch": 2,
+  "cost": 1,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN192",
+  "name": "Stormwhirl",
+  "cardType": "instant",
+  "text": "You may destroy a Lightning Flow you control rather than pay this card's {r} cost.\nTarget Lightning attack gets go again.",
+  "pitch": 3,
+  "cost": 1,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN193",
+  "name": "Chromatic Refinement",
+  "cardType": "instant",
+  "text": "At the beginning of your action phase, destroy this, then the next red card you play this turn costs {r} less to play. The first time that card would deal damage this turn, instead it deals that much plus 1.",
+  "pitch": 1,
+  "cost": 0,
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN194",
+  "name": "Chromatic Refinement",
+  "cardType": "instant",
+  "text": "At the beginning of your action phase, destroy this, then the next yellow card you play this turn costs {r} less to play. The first time that card would deal damage this turn, instead it deals that much plus 1.",
+  "pitch": 2,
+  "cost": 0,
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN195",
+  "name": "Chromatic Refinement",
+  "cardType": "instant",
+  "text": "At the beginning of your action phase, destroy this, then the next blue card you play this turn costs {r} less to play. The first time that card would deal damage this turn, instead it deals that much plus 1.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN196",
+  "name": "Thunderous Retort",
+  "cardType": "instant",
+  "text": "At the beginning of your action phase, destroy this, then your next attack this turn gets go again.\nArcane Barrier 3",
+  "pitch": 1,
+  "cost": 0,
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Arcane Barrier 3"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN197",
+  "name": "Thunderous Retort",
+  "cardType": "instant",
+  "text": "At the beginning of your action phase, destroy this, then your next attack this turn gets go again.\nArcane Barrier 2",
+  "pitch": 2,
+  "cost": 0,
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Arcane Barrier 2"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN198",
+  "name": "Thunderous Retort",
+  "cardType": "instant",
+  "text": "At the beginning of your action phase, destroy this, then your next attack this turn gets go again.\nArcane Barrier 1",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN199",
+  "name": "Sigil of Astral Flow",
+  "cardType": "instant",
+  "text": "At the beginning of your action phase, destroy this.\nWhen this leaves the arena, create a Lightning Flow token.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN200",
+  "name": "Sigil of Lightning",
+  "cardType": "instant",
+  "text": "At the beginning of your action phase, destroy this.\nWhen this leaves the arena, create an Embodiment of Lightning token.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN201",
+  "name": "Spellbane Sigil",
+  "cardType": "instant",
+  "text": "At the beginning of your action phase, destroy this.\nArcane Barrier X",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Arcane Barrier X"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN202",
+  "name": "Embodiment of Lightning",
+  "cardType": "token",
+  "text": "When you play an attack action card, destroy this, then the attack gets go again.",
+  "subtypes": [
+   "elemental",
+   "aura"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN203",
+  "name": "Lightning Flow",
+  "cardType": "token",
+  "text": "",
+  "subtypes": [
+   "elemental",
+   "aura"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN204",
+  "name": "Boots of Omnis Ward",
+  "cardType": "equipment",
+  "text": "If you've been dealt arcane damage this turn, this gets +1{d}.\nInstant - {t} your hero, destroy this: Prevent the next 1 damage that would be dealt to you this turn.\nTemper",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN205",
+  "name": "Seeker's Hood",
+  "cardType": "equipment",
+  "text": "Instant - {r}, destroy Seeker's Hood: Prevent the next 1 damage that would be dealt to your hero this turn. Opt 1",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN206",
+  "name": "Seeker's Gilet",
+  "cardType": "equipment",
+  "text": "Instant - {r}, destroy Seeker's Gilet: Prevent the next 1 damage that would be dealt to your hero this turn. Opt 1",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN207",
+  "name": "Seeker's Mitts",
+  "cardType": "equipment",
+  "text": "Instant - {r}, destroy Seeker's Mitts: Prevent the next 1 damage that would be dealt to your hero this turn. Opt 1",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN208",
+  "name": "Seeker's Leggings",
+  "cardType": "equipment",
+  "text": "Instant - {r}, destroy Seeker's Leggings: Prevent the next 1 damage that would be dealt to your hero this turn. Opt 1",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN209",
+  "name": "Helm of Astral Sanctuary",
+  "cardType": "equipment",
+  "text": "Instant - {t} your hero, destroy this: Prevent the next 1 damage that would be dealt to you this turn.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN210",
+  "name": "Robe of Astral Sanctuary",
+  "cardType": "equipment",
+  "text": "Instant - {t} your hero, destroy this: Prevent the next 1 damage that would be dealt to you this turn.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN211",
+  "name": "Gloves of Astral Sanctuary",
+  "cardType": "equipment",
+  "text": "Instant - {t} your hero, destroy this: Prevent the next 1 damage that would be dealt to you this turn.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN212",
+  "name": "Boots of Astral Sanctuary",
+  "cardType": "equipment",
+  "text": "Instant - {t} your hero, destroy this: Prevent the next 1 damage that would be dealt to you this turn.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN213",
+  "name": "Browbeat",
+  "cardType": "action",
+  "text": "This gets +1{p} for each card in your hand.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN214",
+  "name": "Step Between",
+  "cardType": "action",
+  "text": "While this is attacking or on the stack, opponents can't play or activate instants.\nInstant - {r}, {t} your hero: This gets +1{p} and {p} damage can't be prevented this combat chain.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN215",
+  "name": "Tempt Over",
+  "cardType": "action",
+  "text": "When this attacks a hero, steal an aura token they control until end of turn.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Steal"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN216",
+  "name": "Ominous Aggression",
+  "cardType": "instant",
+  "text": "Target attack action card gets +2{p}. If an aura you control was destroyed this turn, instead the card gets +4{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN217",
+  "name": "Ominous Excavation",
+  "cardType": "instant",
+  "text": "You may shuffle an instant card from your graveyard into your deck.\nIf an aura you control was destroyed this turn, create a Ponder token.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN218",
+  "name": "Ominous Respite",
+  "cardType": "instant",
+  "text": "Gain 2{h}. If an aura you control was destroyed this turn, instead gain 3{h}.",
+  "pitch": 2,
+  "cost": 1,
+  "classes": [
+   "generic"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN219",
+  "name": "Conflicting Thoughts",
+  "cardType": "action",
+  "text": "When this attacks, opt 1.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Opt 1"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN220",
+  "name": "Conflicting Thoughts",
+  "cardType": "action",
+  "text": "When this attacks, opt 1.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Opt 1"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN221",
+  "name": "Conflicting Thoughts",
+  "cardType": "action",
+  "text": "When this attacks, opt 1.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Opt 1"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN222",
+  "name": "Brush Off",
+  "cardType": "instant",
+  "text": "The next time you would be dealt 3 or less damage this turn, prevent it.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN223",
+  "name": "Brush Off",
+  "cardType": "instant",
+  "text": "The next time you would be dealt 2 or less damage this turn, prevent it.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN224",
+  "name": "Brush Off",
+  "cardType": "instant",
+  "text": "The next time you would be dealt 1 damage this turn, prevent it.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN225",
+  "name": "Ponder",
+  "cardType": "token",
+  "text": "At the beginning of your end phase, destroy Ponder and draw a card.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN226",
+  "name": "Cracked Bauble",
+  "cardType": "resource",
+  "text": "(A player may add any number of Cracked Baubles to their card-pool in sealed deck or booster draft formats.)",
+  "pitch": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN227",
+  "name": "Omens of Arcana",
+  "cardType": "token",
+  "text": "Each hero starts the game with a Lightning Flow token.\nLightning Flow tokens get spellvoid 1.",
+  "subtypes": [
+   "omens of the third age",
+   "macro"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN228",
+  "name": "Unmake the Underlings",
+  "cardType": "action",
+  "text": "Stealth\nWhen this attacks a hero, turn an ally in their graveyard face-down.\nWhen this hits an ally, destroy that ally.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN229",
+  "name": "Feral Instinct",
+  "cardType": "action",
+  "text": "If you've intimidated an opponent this turn, this costs {r}{r}{r} less to play.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN230",
+  "name": "Pile Driver",
+  "cardType": "weapon",
+  "text": "Betsy Specialization\nAction - {r}{r}{r}{r}, {t}: Attack\nWhen this attacks, you may wager a Gold token with the defending hero.",
+  "attack": 6,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "log",
+   "2h"
+  ],
+  "keywords": [
+   "Betsy Specialization",
+   "Wager"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN231",
+  "name": "Swift Pickup",
+  "cardType": "action",
+  "text": "When this attacks, you may put a shuriken item from your graveyard on the bottom of your deck. If you do, this gets +1{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN232",
+  "name": "Evasive Nageboshi",
+  "cardType": "instant",
+  "text": "Legendary\nAction - {r}, {t}, destroy this when the combat chain closes: Attack. Go again\nThis can't be defended by equipment or reaction cards.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "shuriken",
+   "item"
+  ],
+  "keywords": [
+   "Legendary"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN233",
+  "name": "Razor Ring",
+  "cardType": "instant",
+  "text": "Legendary\nAction - {r}, {t}, destroy this when the combat chain closes: Attack. Go again\nWhen this hits a hero, the next action card they defend with this combat chain gets -1{d} until end of turn.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "shuriken",
+   "item"
+  ],
+  "keywords": [
+   "Legendary"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN234",
+  "name": "Stun Star",
+  "cardType": "instant",
+  "text": "Legendary\nAction - {r}, {t}, destroy this when the combat chain closes: Attack. Go again\nWhen this hits a hero, {t} them.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "shuriken",
+   "item"
+  ],
+  "keywords": [
+   "Legendary"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN235",
+  "name": "Gear Turner",
+  "cardType": "action",
+  "text": "When this hits, you may search your deck for a cog, put it into the arena, then shuffle.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN236",
+  "name": "Arcbane Grasp",
+  "cardType": "equipment",
+  "text": "If you have a base arms equipped, transform it into this, then equip this.\nWhen this is equipped, create a Spellbane Aegis token.\nArcane Barrier 1",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 0,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "evo",
+   "base",
+   "arms"
+  ],
+  "keywords": [
+   "Arcane Barrier 1",
+   "Transform"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN237",
+  "name": "Settle the Bill",
+  "cardType": "action",
+  "text": "You may put an arrow from your hand face-up into your arsenal. If you do, until end of turn, it gets +3{p} and \"When this hits a hero, destroy a card in their arsenal.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN238",
+  "name": "Beckon Steel",
+  "cardType": "attack-reaction",
+  "text": "Target sword attack gets \"When this hits, sharpen this sword. Then if the sword has 3 or more +1{p} counters, attack with it.\"",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN239",
+  "name": "Crash Site Salvage",
+  "cardType": "action",
+  "text": "Scrap\nWhen this attacks, if it scrapped a card, this gets go again. If a cog was scrapped this way, create a Gold token.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "pirate",
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Scrap",
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN240",
+  "name": "Golden Skull",
+  "cardType": "action",
+  "text": "Go again\nThis counts as a Gold.\nWatery Grave",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "item"
+  ],
+  "keywords": [
+   "Go again",
+   "Watery Grave"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN241",
+  "name": "Red Lure Harpoon",
+  "cardType": "action",
+  "text": "If you've activated a cannon this turn, this gets \"When this hits a hero, banish a red action card from their graveyard. You may play it until the end of your next turn.\"",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "pirate",
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN242",
+  "name": "Fortitude of Anvilheim",
+  "cardType": "equipment",
+  "text": "Attack Reaction - {r}{r}, {t} your hero, destroy this: Return an action card defending a weapon attack to its owner's hand. Guardwell",
+  "defense": 2,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "subtypes": [
+   "off-hand"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN243",
+  "name": "A Bit off the Side",
+  "cardType": "action",
+  "text": "Until end of turn, axes you control get \"When this hits a hero, they discard a card.\"\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN244",
+  "name": "Blessing of Aegis",
+  "cardType": "action",
+  "text": "Go again\nWhenever a card is put into your soul, gain 1{h}.\nAt the start of your turn, put this into your soul.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "light",
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN245",
+  "name": "Draco Fire",
+  "cardType": "instant",
+  "text": "Your next Draconic attack this turn gets +2{p} and costs {r} less to play or activate.\nWhile this is in your graveyard, at the start of your turn, you may banish 2 cards named Draco Fire from your graveyard. If you do, gain {r}.",
+  "pitch": 1,
+  "cost": 0,
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN246",
+  "name": "Induce Panic",
+  "cardType": "block",
+  "text": "When this defends, choose a color. Each hero reveals a random card from their hand. If it's the chosen color, they discard it.",
+  "pitch": 2,
+  "defense": 2,
+  "classes": [
+   "chaos"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN247",
+  "name": "Lionclaw Maul",
+  "cardType": "weapon",
+  "text": "Action - {r}{r}, {t}: Attack\nIf this has {p} greater than its base, it gets +1{p}.\nWhen this hits a hero, the crowd boos you.",
+  "attack": 1,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "reviled",
+   "hammer",
+   "axe",
+   "1h"
+  ],
+  "keywords": [
+   "The Crowd Boos"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN248",
+  "name": "Starfield Veil",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: The next aura you play this turn enters the arena with a holo counter. Activate this only if an attack has fragmented this turn.\nGuardwell",
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "head"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN249",
+  "name": "Starfield Carapace",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Until end of turn, an Aphrodias you control costs {r} less to activate and gets \"Whenever this deals damage to an opposing hero, create a Lightning Flow token.\"\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "OMN"
+ },
+ {
+  "id": "OMN250",
+  "name": "Starfield Touch",
+  "cardType": "equipment",
+  "text": "Instant - {r}, destroy this: {u} an Aphrodias you control.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "OMN"
+ }
+]

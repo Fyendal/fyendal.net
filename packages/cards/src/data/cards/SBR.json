@@ -1,0 +1,631 @@
+[
+ {
+  "id": "SBR001",
+  "name": "Bravo, Flattering Showman",
+  "cardType": "hero",
+  "text": "Action - {r}{r}, {t}: Turn a face-down card in your arsenal face-up. If it has crush, it gets +2{p} and dominate this turn. Go again",
+  "classes": [
+   "guardian"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "SBR"
+ },
+ {
+  "id": "SBR002",
+  "name": "Sledge of Anvilheim",
+  "cardType": "weapon",
+  "text": "Action - {r}{r}{r}{r}: Attack",
+  "attack": 6,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "hammer",
+   "2h"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR003",
+  "name": "Titan's Fist",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}{r}: Attack\nIf there is a card with cost 3 or greater in your pitch zone, Titan's Fist has +1{p}.",
+  "attack": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "hammer",
+   "1h"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR004",
+  "name": "Steelbraid Buckler",
+  "cardType": "equipment",
+  "text": "Temper",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "off-hand"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR005",
+  "name": "Blade Beckoner Helm",
+  "cardType": "equipment",
+  "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR006",
+  "name": "Enclosed Firemind",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR007",
+  "name": "Magmatic Carapace",
+  "cardType": "equipment",
+  "text": "Whenever you play an aura, you may {t} this and pay {r}. If you do, create a Seismic Surge token.\nGuardwell",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR008",
+  "name": "Nullrune Robe",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR009",
+  "name": "Blade Beckoner Gauntlets",
+  "cardType": "equipment",
+  "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR010",
+  "name": "Nullrune Gloves",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR011",
+  "name": "Nullrune Boots",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR012",
+  "name": "Basalt Boots",
+  "cardType": "equipment",
+  "text": "If you control a Seismic Surge token, this gets +1{d}.\nTemper",
+  "defense": 1,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR013",
+  "name": "Boulder Drop",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, they put a card from their hand on top of their deck.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR014",
+  "name": "Buckling Blow",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, put a -1{d} counter on an equipment they control.",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR015",
+  "name": "Cartilage Crush",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, their first action during their next turn costs an additional {r} to play or activate.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR016",
+  "name": "Chokeslam",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, attack action cards they control can't gain {p} during their next action phase.",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR017",
+  "name": "Debilitate",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, their first attack during their next turn gets -2{p}.",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR018",
+  "name": "Fault Line",
+  "cardType": "action",
+  "text": "If you have a card in your arsenal, this gets +1{p}.\nCrush - When this deals 4 or more damage to a hero, put all cards in all arsenals on bottom of their owner's deck.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR019",
+  "name": "Zealous Belting",
+  "cardType": "action",
+  "text": "While there is a card in your pitch zone with {p} greater than Zealous Belting's base {p}, Zealous Belting has go again.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR020",
+  "name": "Pummel",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target club or hammer weapon attack gains +4{p}.\n- Target attack action card with cost 2 or more gets +4{p} and \"When this hits a hero, they discard a card.\"",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR021",
+  "name": "Staunch Response",
+  "cardType": "defense-reaction",
+  "text": "As an additional cost to play Staunch Response you may pay {r}{r}{r}{r}. If you do, Staunch Response gains +3{d}.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 7,
+  "classes": [
+   "guardian"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR022",
+  "name": "Crash and Bash",
+  "cardType": "block",
+  "text": "When this defends, you may reveal a card with crush from your hand. If you do, create a Seismic Surge token.",
+  "pitch": 1,
+  "defense": 4,
+  "classes": [
+   "guardian"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR023",
+  "name": "Boulder Drop",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, they put a card from their hand on top of their deck.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR024",
+  "name": "Buckling Blow",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, put a -1{d} counter on an equipment they control.",
+  "pitch": 3,
+  "cost": 4,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR025",
+  "name": "Chokeslam",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, attack action cards they control can't gain {p} during their next action phase.",
+  "pitch": 3,
+  "cost": 4,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR026",
+  "name": "Clash of Vigor",
+  "cardType": "action",
+  "text": "When this defends, clash with the attacking hero. The winner creates a Vigor token.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR027",
+  "name": "Crush the Weak",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, they can't play attack action cards with 3 or less base {p} during their next action phase.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR028",
+  "name": "Debilitate",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, their first attack during their next turn gets -2{p}.",
+  "pitch": 3,
+  "cost": 4,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR029",
+  "name": "Disable",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, put a card from their arsenal on the bottom of their deck.",
+  "pitch": 3,
+  "cost": 5,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR030",
+  "name": "Flatten the Field",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, destroy a Seismic Surge token they control.",
+  "pitch": 3,
+  "cost": 4,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR031",
+  "name": "Macho Grande",
+  "cardType": "action",
+  "text": "Dominate",
+  "pitch": 3,
+  "cost": 7,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Dominate"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR032",
+  "name": "Thunder Quake",
+  "cardType": "action",
+  "text": "Heave 3",
+  "pitch": 3,
+  "cost": 6,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Heave 3"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR033",
+  "name": "Edge of Their Seats",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this leaves the arena, your next attack this turn gets +3{p}.",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR034",
+  "name": "The Suspense is Killing Me",
+  "cardType": "instant",
+  "text": "Suspense\nYour first attack each turn gets +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR035",
+  "name": "Seismic Surge",
+  "cardType": "token",
+  "text": "At the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn costs {r} less to play.",
+  "classes": [
+   "guardian"
+  ],
+  "set": "SBR"
+ },
+ {
+  "id": "SBR036",
+  "name": "Vigor",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then gain {r}.",
+  "classes": [
+   "generic"
+  ],
+  "set": "SBR"
+ }
+]

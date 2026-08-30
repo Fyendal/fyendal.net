@@ -1,0 +1,555 @@
+[
+ {
+  "id": "OLD001",
+  "name": "Oldhim",
+  "cardType": "hero",
+  "text": "Essence of Earth and Ice\nOnce per Turn Defense Reaction - {r}{r}{r}: If an Earth card is pitched this way, prevent the next 2 damage that would be dealt to Oldhim this turn. If an Ice card is pitched this way, the attacking hero puts a card from their hand on top of their deck.",
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Essence of Earth and Ice"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "OLD"
+ },
+ {
+  "id": "OLD002",
+  "name": "Titan's Fist",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}{r}: Attack\nIf there is a card with cost 3 or greater in your pitch zone, Titan's Fist has +1{p}.",
+  "attack": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "hammer",
+   "1h"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD003",
+  "name": "Rotten Old Buckler",
+  "cardType": "equipment",
+  "text": "Blade Break",
+  "defense": 1,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "off-hand"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD004",
+  "name": "Helm of Isen's Peak",
+  "cardType": "equipment",
+  "text": "Action - {r}, destroy this: Your hero gains +1{i} this turn.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD005",
+  "name": "Coat of Frost",
+  "cardType": "equipment",
+  "text": "Action - Destroy Coat of Frost: Create a Frostbite token under target hero's control. Go again",
+  "defense": 0,
+  "subtypes": [
+   "ice",
+   "chest"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD006",
+  "name": "Goliath Gauntlet",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: The next attack action card with cost 2 or more you play this turn gets +2{p}. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD007",
+  "name": "Ironhide Legs",
+  "cardType": "equipment",
+  "text": "When you defend with Ironhide Legs, you may pay {r}. If you do, it gains +2{d} and \"When the combat chain closes, destroy Ironhide Legs.\"",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD008",
+  "name": "Glacial Footsteps",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf Glacial Footsteps was fused, it gains dominate.",
+  "pitch": 1,
+  "cost": 6,
+  "attack": 10,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion",
+   "Dominate"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD009",
+  "name": "Snow Under",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf Snow Under was fused, it gains \"If this hits a hero, create a Frostbite token under their control.\"",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD010",
+  "name": "Glacial Footsteps",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf Glacial Footsteps was fused, it gains dominate.",
+  "pitch": 3,
+  "cost": 6,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion",
+   "Dominate"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD011",
+  "name": "Snow Under",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf Snow Under was fused, it gains \"If this hits a hero, create a Frostbite token under their control.\"",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD012",
+  "name": "Biting Gale",
+  "cardType": "defense-reaction",
+  "text": "Ice Fusion\nIf Biting Gale was fused, the attacking hero discards a card unless they pay {r}{r}.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Ice Fusion"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD013",
+  "name": "Frost Fang",
+  "cardType": "action",
+  "text": "If Frost Fang hits a hero, they discard a card unless they pay {r}{r}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "ice",
+   "attack"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD014",
+  "name": "Weave Ice",
+  "cardType": "action",
+  "text": "The next Ice or Elemental attack action card you play this turn gains +3{p}.\nIf it's fused, it gains dominate.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "ice"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD015",
+  "name": "Polar Blast",
+  "cardType": "action",
+  "text": "Target opposing hero may pay {r}{r}. If they don't your next attack this turn gains dominate.\nIf Polar Blast is played from arsenal, draw a card.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "ice"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD016",
+  "name": "Winter's Bite",
+  "cardType": "action",
+  "text": "Target hero discards a card unless they pay {r}{r}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "ice"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD017",
+  "name": "Winter's Grasp",
+  "cardType": "action",
+  "text": "",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "subtypes": [
+   "ice",
+   "attack"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD018",
+  "name": "Amulet of Ice",
+  "cardType": "action",
+  "text": "Go again\nInstant - Destroy Amulet of Ice: Target hero discards a card unless they pay {r}{r}. Activate this ability only if you have Ice fused this turn.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "ice",
+   "item"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD019",
+  "name": "Turn Timber",
+  "cardType": "defense-reaction",
+  "text": "Earth Fusion\nIf Turn Timber was fused, it gains +2{d}.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 6,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Earth Fusion"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD020",
+  "name": "Strength of Sequoia",
+  "cardType": "action",
+  "text": "Earth Fusion\nGo again\nWhen Strength of Sequoia enters the arena, if it was fused, create a Seismic Surge token.\nAt the beginning of your action phase, destroy Strength of Sequoia then the next attack action card you play this turn gains +3{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "aura"
+  ],
+  "keywords": [
+   "Earth Fusion",
+   "Go again"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD021",
+  "name": "Entangle",
+  "cardType": "action",
+  "text": "Earth Fusion\nIf Entangle was fused, it gains \"If this hits a hero, their first attack during their next turn has -2{p}.\"",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth Fusion"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD022",
+  "name": "Mulch",
+  "cardType": "action",
+  "text": "Earth Fusion\nIf Mulch was fused, it gains \"If this hits a hero, put a card from their arsenal on the bottom of their deck.\"",
+  "pitch": 3,
+  "cost": 4,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth Fusion"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD023",
+  "name": "Strength of Sequoia",
+  "cardType": "action",
+  "text": "Earth Fusion\nGo again\nWhen Strength of Sequoia enters the arena, if it was fused, create a Seismic Surge token.\nAt the beginning of your action phase, destroy Strength of Sequoia then the next attack action card you play this turn gains +1{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "aura"
+  ],
+  "keywords": [
+   "Earth Fusion",
+   "Go again"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD024",
+  "name": "Autumn's Touch",
+  "cardType": "action",
+  "text": "",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD025",
+  "name": "Break Ground",
+  "cardType": "action",
+  "text": "When you attack with Break Ground, you may put a card from your arsenal on the bottom of your deck. If you do, draw a card.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD026",
+  "name": "Evergreen",
+  "cardType": "action",
+  "text": "If Evergreen is played from arsenal, put it on the bottom of its owner's deck when the combat chain closes.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD027",
+  "name": "Earthlore Surge",
+  "cardType": "action",
+  "text": "The next attack action card you play this turn gains +3{p}.\nGo again",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 2,
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD028",
+  "name": "Thump",
+  "cardType": "action",
+  "text": "While Thump's {p} is greater than its base {p}, it gains dominate and \"If this hits a hero, they discard a card.\"",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Dominate"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD029",
+  "name": "Thump",
+  "cardType": "action",
+  "text": "While Thump's {p} is greater than its base {p}, it gains dominate and \"If this hits a hero, they discard a card.\"",
+  "pitch": 3,
+  "cost": 4,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Dominate"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD030",
+  "name": "Embolden",
+  "cardType": "action",
+  "text": "Go again\nWhen this enters the arena, if you control another non-token aura, draw a card.\nAt the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn gets +5{p}.",
+  "pitch": 1,
+  "cost": 4,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD031",
+  "name": "Frostbite",
+  "cardType": "token",
+  "text": "Cards and abilities cost you an additional {r} to play or activate.\nAt the beginning of your end phase or when you play a card or activate an ability, destroy Frostbite.",
+  "subtypes": [
+   "elemental",
+   "aura"
+  ],
+  "set": "OLD"
+ },
+ {
+  "id": "OLD032",
+  "name": "Seismic Surge",
+  "cardType": "token",
+  "text": "At the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn costs {r} less to play.",
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "OLD"
+ }
+]

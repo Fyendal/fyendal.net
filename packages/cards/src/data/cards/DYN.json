@@ -1,0 +1,4256 @@
+[
+ {
+  "id": "DYN000",
+  "name": "Command and Conquer",
+  "cardType": "action",
+  "text": "Defense reaction cards can't be played this chain link. When this hits a hero, destroy all cards in their arsenal.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN001",
+  "name": "Emperor, Dracai of Aesir",
+  "cardType": "hero",
+  "text": "You may only have red cards in your deck.\nAction - {r}{r}{r}: Search your deck for Command and Conquer, attack with it, then shuffle.",
+  "classes": [
+   "royal",
+   "warrior",
+   "wizard"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "life": 15,
+  "intellect": 4,
+  "set": "DYN"
+ },
+ {
+  "id": "DYN002",
+  "name": "Dust from the Golden Plains",
+  "cardType": "action",
+  "text": "Material - While this is under a permanent other than Themai, that permanent has phantasm.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "draconic",
+   "ash"
+  ],
+  "keywords": [
+   "Material"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN003",
+  "name": "Dust from the Red Desert",
+  "cardType": "action",
+  "text": "Material - While this is under a permanent other than Vynserakai, that permanent has phantasm.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "draconic",
+   "ash"
+  ],
+  "keywords": [
+   "Material"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN004",
+  "name": "Dust from the Shadow Crypts",
+  "cardType": "action",
+  "text": "Material - While this is under a permanent other than Nekria, that permanent has phantasm.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "draconic",
+   "ash"
+  ],
+  "keywords": [
+   "Material"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN005",
+  "name": "Rok",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}{r}: Attack\nActivate Rok only if you have no cards in hand.\nDamage that would be dealt by Rok can't be prevented.",
+  "attack": 7,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "rock",
+   "2h"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN006",
+  "name": "Beaten Trackers",
+  "cardType": "equipment",
+  "text": "Whenever you discard a random card with 6 or more {p}, you may destroy this. If you do, gain 1 action point.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN007",
+  "name": "Savage Beatdown",
+  "cardType": "action",
+  "text": "Play this only if you've discarded a card with 6 or more {p} this turn.\nAs an additional cost to play this, discard a random card.\nIf the discarded card has 6 or more {p}, this gets +6{p}.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN008",
+  "name": "Skull Crack",
+  "cardType": "action",
+  "text": "When Skull Crack is discarded at random, gain {r}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN009",
+  "name": "Berserk",
+  "cardType": "action",
+  "text": "Until end of turn, whenever you discard a random card with 6 or more {p}, banish it. If you do, reveal the top card of your deck. If it has 6 or more {p}, draw a card.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN010",
+  "name": "Reincarnate",
+  "cardType": "action",
+  "text": "When this is discarded at random, put it on the bottom of its owner's deck.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN011",
+  "name": "Reincarnate",
+  "cardType": "action",
+  "text": "When this is discarded at random, put it on the bottom of its owner's deck.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN012",
+  "name": "Reincarnate",
+  "cardType": "action",
+  "text": "When this is discarded at random, put it on the bottom of its owner's deck.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN013",
+  "name": "Blessing of Savagery",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Blessing of Savagery then your next attack with 6 or more base {p} this turn gains +3{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN014",
+  "name": "Blessing of Savagery",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Blessing of Savagery then your next attack with 6 or more base {p} this turn gains +2{p}.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN015",
+  "name": "Blessing of Savagery",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Blessing of Savagery then your next attack with 6 or more base {p} this turn gains +1{p}.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN016",
+  "name": "Madcap Charger",
+  "cardType": "action",
+  "text": "As an additional cost to play Madcap Charger, discard a random card.\nIf the discarded card has 6 or more {p}, Madcap Charger has go again.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN017",
+  "name": "Madcap Charger",
+  "cardType": "action",
+  "text": "As an additional cost to play Madcap Charger, discard a random card.\nIf the discarded card has 6 or more {p}, Madcap Charger has go again.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN018",
+  "name": "Madcap Charger",
+  "cardType": "action",
+  "text": "As an additional cost to play Madcap Charger, discard a random card.\nIf the discarded card has 6 or more {p}, Madcap Charger has go again.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN019",
+  "name": "Madcap Muscle",
+  "cardType": "action",
+  "text": "As an additional cost to play Madcap Muscle, discard a random card.\nIf the discarded card has 6 or more {p}, Madcap Muscle has +3{p}.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN020",
+  "name": "Madcap Muscle",
+  "cardType": "action",
+  "text": "As an additional cost to play Madcap Muscle, discard a random card.\nIf the discarded card has 6 or more {p}, Madcap Muscle has +3{p}.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN021",
+  "name": "Madcap Muscle",
+  "cardType": "action",
+  "text": "As an additional cost to play Madcap Muscle, discard a random card.\nIf the discarded card has 6 or more {p}, Madcap Muscle has +3{p}.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN022",
+  "name": "Rumble Grunting",
+  "cardType": "action",
+  "text": "Play Rumble Grunting only if you've discarded a card with 6 or more {p} this turn.\nYour next Brute attack this turn gains +4{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN023",
+  "name": "Rumble Grunting",
+  "cardType": "action",
+  "text": "Play Rumble Grunting only if you've discarded a card with 6 or more {p} this turn.\nYour next Brute attack this turn gains +3{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN024",
+  "name": "Rumble Grunting",
+  "cardType": "action",
+  "text": "Play Rumble Grunting only if you've discarded a card with 6 or more {p} this turn.\nYour next Brute attack this turn gains +2{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN025",
+  "name": "Yoji, Royal Protector",
+  "cardType": "hero",
+  "text": "Once per Turn Instant - {r}{r}{r}: The next time another target hero would be dealt damage this turn, instead that damage is dealt to Yoji and prevent 1 of that damage.",
+  "classes": [
+   "guardian"
+  ],
+  "life": 22,
+  "intellect": 4,
+  "set": "DYN"
+ },
+ {
+  "id": "DYN026",
+  "name": "Seasoned Saviour",
+  "cardType": "equipment",
+  "text": "When you equip Seasoned Saviour, put two -1{d} counters on it. Battleworn",
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "off-hand"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN027",
+  "name": "Steelbraid Buckler",
+  "cardType": "equipment",
+  "text": "Temper",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "off-hand"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN028",
+  "name": "Buckle",
+  "cardType": "action",
+  "text": "Your next Guardian attack this turn gains +1{p}, dominate, and \"When this hits a hero, destroy an equipment they control with a -1{d} counter on it.\"\nGo again",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN029",
+  "name": "Never Yield",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Never Yield then if you have no cards in hand, draw a card. If you have less {h} than all other heroes, gain 2{h}. If you control less equipment than all other heroes, remove a -1{d} counter from an equipment you control.",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN030",
+  "name": "Shield Bash",
+  "cardType": "defense-reaction",
+  "text": "If a Guardian off-hand with 1 or more {d} is defending this chain link, deal 1 damage to the attacking hero unless they discard a card.",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 6,
+  "classes": [
+   "guardian"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN031",
+  "name": "Shield Bash",
+  "cardType": "defense-reaction",
+  "text": "If a Guardian off-hand with 1 or more {d} is defending this chain link, deal 1 damage to the attacking hero unless they discard a card.",
+  "pitch": 2,
+  "cost": 3,
+  "defense": 5,
+  "classes": [
+   "guardian"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN032",
+  "name": "Shield Bash",
+  "cardType": "defense-reaction",
+  "text": "If a Guardian off-hand with 1 or more {d} is defending this chain link, deal 1 damage to the attacking hero unless they discard a card.",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 4,
+  "classes": [
+   "guardian"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN033",
+  "name": "Blessing of Patience",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Blessing of Patience then target hero gains 3{h}.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN034",
+  "name": "Blessing of Patience",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Blessing of Patience then target hero gains 2{h}.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN035",
+  "name": "Blessing of Patience",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Blessing of Patience then target hero gains 1{h}.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN036",
+  "name": "Shield Wall",
+  "cardType": "defense-reaction",
+  "text": "If you control a Guardian off-hand, Shield Wall has +4{d}.",
+  "pitch": 1,
+  "cost": 6,
+  "defense": 7,
+  "classes": [
+   "guardian"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN037",
+  "name": "Shield Wall",
+  "cardType": "defense-reaction",
+  "text": "If you control a Guardian off-hand, Shield Wall has +4{d}.",
+  "pitch": 2,
+  "cost": 6,
+  "defense": 6,
+  "classes": [
+   "guardian"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN038",
+  "name": "Shield Wall",
+  "cardType": "defense-reaction",
+  "text": "If you control a Guardian off-hand, Shield Wall has +4{d}.",
+  "pitch": 3,
+  "cost": 6,
+  "defense": 5,
+  "classes": [
+   "guardian"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN039",
+  "name": "Reinforce Steel",
+  "cardType": "action",
+  "text": "Remove a -1{d} counter from a Guardian off-hand you control with 3 or less base {d}.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN040",
+  "name": "Reinforce Steel",
+  "cardType": "action",
+  "text": "Remove a -1{d} counter from a Guardian off-hand you control with 2 or less base {d}.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN041",
+  "name": "Reinforce Steel",
+  "cardType": "action",
+  "text": "Remove a -1{d} counter from a Guardian off-hand you control with 1 or less base {d}.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN042",
+  "name": "Withstand",
+  "cardType": "instant",
+  "text": "The next time target Guardian off-hand defends this turn, it gains +6{d} until the combat chain closes.",
+  "pitch": 1,
+  "cost": 2,
+  "classes": [
+   "guardian"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN043",
+  "name": "Withstand",
+  "cardType": "instant",
+  "text": "The next time target Guardian off-hand defends this turn, it gains +5{d} until the combat chain closes.",
+  "pitch": 2,
+  "cost": 2,
+  "classes": [
+   "guardian"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN044",
+  "name": "Withstand",
+  "cardType": "instant",
+  "text": "The next time target Guardian off-hand defends this turn, it gains +4{d} until the combat chain closes.",
+  "pitch": 3,
+  "cost": 2,
+  "classes": [
+   "guardian"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN045",
+  "name": "Blazen Yoroi",
+  "cardType": "equipment",
+  "text": "While Blazen Yoroi is defending on chain link 4 or higher, it has +4{d}.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN046",
+  "name": "Tearing Shuko",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: The next Crouching Tiger you play this turn gains +2{p}.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN047",
+  "name": "Tiger Swipe",
+  "cardType": "action",
+  "text": "Combo - If Crouching Tiger was the last attack this combat chain, this has +2{p}, go again and \"When this hits, create X Crouching Tigers in your banished zone, where X is the number of Crouching Tigers you control. You may play them this turn.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN048",
+  "name": "Mindstate of Tiger",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Mindstate of Tiger then create a Crouching Tiger in your hand.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN049",
+  "name": "Roar of the Tiger",
+  "cardType": "action",
+  "text": "Create a Crouching Tiger in your hand.\nCrouching Tigers you control gain +1{p} this turn.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN050",
+  "name": "Flex Claws",
+  "cardType": "action",
+  "text": "When this hits, create a Crouching Tiger in your banished zone. You may play it this turn.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN051",
+  "name": "Flex Claws",
+  "cardType": "action",
+  "text": "When this hits, create a Crouching Tiger in your banished zone. You may play it this turn.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN052",
+  "name": "Flex Claws",
+  "cardType": "action",
+  "text": "When this hits, create a Crouching Tiger in your banished zone. You may play it this turn.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN053",
+  "name": "Blessing of Qi",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy this, then create a Crouching Tiger in your banished zone. It gains +3{p} and you may play it this turn.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN054",
+  "name": "Blessing of Qi",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy this, then create a Crouching Tiger in your banished zone. It gains +2{p} and you may play it this turn.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN055",
+  "name": "Blessing of Qi",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy this, then create a Crouching Tiger in your banished zone. It gains +1{p} and you may play it this turn.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN056",
+  "name": "Pouncing Qi",
+  "cardType": "action",
+  "text": "Combo - If Crouching Tiger was the last attack this combat chain, this gets +1{p} and go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN057",
+  "name": "Pouncing Qi",
+  "cardType": "action",
+  "text": "Combo - If Crouching Tiger was the last attack this combat chain, this gets +1{p} and go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN058",
+  "name": "Pouncing Qi",
+  "cardType": "action",
+  "text": "Combo - If Crouching Tiger was the last attack this combat chain, this gets +1{p} and go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN059",
+  "name": "Qi Unleashed",
+  "cardType": "action",
+  "text": "Combo - If Crouching Tiger was the last attack this combat chain, this gets +4{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN060",
+  "name": "Qi Unleashed",
+  "cardType": "action",
+  "text": "Combo - If Crouching Tiger was the last attack this combat chain, this gets +4{p}.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN061",
+  "name": "Qi Unleashed",
+  "cardType": "action",
+  "text": "Combo - If Crouching Tiger was the last attack this combat chain, this gets +4{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN062",
+  "name": "Predatory Streak",
+  "cardType": "action",
+  "text": "Create 3 Crouching Tigers in your banished zone. You may play them this turn.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN063",
+  "name": "Predatory Streak",
+  "cardType": "action",
+  "text": "Create 2 Crouching Tigers in your banished zone. You may play them this turn.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN064",
+  "name": "Predatory Streak",
+  "cardType": "action",
+  "text": "Create a Crouching Tiger in your banished zone. You may play it this turn.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN065",
+  "name": "Crouching Tiger",
+  "cardType": "action",
+  "text": "Ephemeral\nGo again",
+  "cost": 0,
+  "attack": 0,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Ephemeral",
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN066",
+  "name": "Spirit of Eirina",
+  "cardType": "action",
+  "text": "Legendary\nIf Spirit of Eirina would be put into your soul, instead put it into the arena.\nYou may play Lumina Ascension as though it were an instant.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "item"
+  ],
+  "keywords": [
+   "Legendary"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN067",
+  "name": "Jubeel, Spellbane",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nWhenever this hits a hero and you don't control a Spellbane Aegis, create a Spellbane Aegis token.",
+  "attack": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "sword",
+   "2h"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN068",
+  "name": "Merciless Battleaxe",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}{r}: Atttack\nWhen this attacks, if the attack's {p} is greater than twice its base, the attack gets overpower.",
+  "attack": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "axe",
+   "2h"
+  ],
+  "keywords": [
+   "Overpower"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN069",
+  "name": "Quicksilver Dagger",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nIf another weapon you control has gained go again this turn, this card's attacks get go again.",
+  "attack": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN070",
+  "name": "Quicksilver Dagger",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nIf another weapon you control has gained go again this turn, this card's attacks get go again.",
+  "attack": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN071",
+  "name": "Cleave",
+  "cardType": "action",
+  "text": "Your next axe attack this turn gains +4{p} and \"When this hits a hero or ally, you may deal that much damage to another ally controlled by the same hero.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN072",
+  "name": "Ironsong Pride",
+  "cardType": "instant",
+  "text": "When this enters the arena, put a +1{p} counter on target sword you control.\nWhen this leaves the arena, remove all +1{p} counters from swords you control.\nAt the beginning of your end phase, if a sword has not hit this turn, destroy this.",
+  "pitch": 1,
+  "cost": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN073",
+  "name": "Blessing of Steel",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Blessing of Steel then your next weapon attack this turn gains +3{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN074",
+  "name": "Blessing of Steel",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Blessing of Steel then your next weapon attack this turn gains +2{p}.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN075",
+  "name": "Blessing of Steel",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Blessing of Steel then your next weapon attack this turn gains +1{p}.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN076",
+  "name": "Precision Press",
+  "cardType": "action",
+  "text": "Your next sword or dagger attack this turn has go again and piercing 3.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN077",
+  "name": "Precision Press",
+  "cardType": "action",
+  "text": "Your next sword or dagger attack this turn has go again and piercing 2.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN078",
+  "name": "Precision Press",
+  "cardType": "action",
+  "text": "Your next sword or dagger attack this turn has go again and piercing 1.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN079",
+  "name": "Puncture",
+  "cardType": "attack-reaction",
+  "text": "Target sword or dagger attack gains +3{p} and piercing 1.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN080",
+  "name": "Puncture",
+  "cardType": "attack-reaction",
+  "text": "Target sword or dagger attack gains +2{p} and piercing 1.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN081",
+  "name": "Puncture",
+  "cardType": "attack-reaction",
+  "text": "Target sword or dagger attack gains +1{p} and piercing 1.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN082",
+  "name": "Felling Swing",
+  "cardType": "action",
+  "text": "Your next axe attack this turn gains +6{p}.\nGo again",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN083",
+  "name": "Felling Swing",
+  "cardType": "action",
+  "text": "Your next axe attack this turn gains +5{p}.\nGo again",
+  "pitch": 2,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN084",
+  "name": "Felling Swing",
+  "cardType": "action",
+  "text": "Your next axe attack this turn gains +4{p}.\nGo again",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN085",
+  "name": "Visit the Imperial Forge",
+  "cardType": "action",
+  "text": "Sword and dagger attacks have piercing 3 this turn.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN086",
+  "name": "Visit the Imperial Forge",
+  "cardType": "action",
+  "text": "Sword and dagger attacks have piercing 2 this turn.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN087",
+  "name": "Visit the Imperial Forge",
+  "cardType": "action",
+  "text": "Sword and dagger attacks have piercing 1 this turn.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN088",
+  "name": "Hanabi Blaster",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - Remove 2 steam counters from Hanabi Blaster: Atttack\nOverpower\nThe third time you play a card with boost each turn, put a steam counter on Hanabi Blaster.",
+  "attack": 5,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "gun",
+   "2h"
+  ],
+  "keywords": [
+   "Overpower"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN089",
+  "name": "Galvanic Bender",
+  "cardType": "equipment",
+  "text": "Material - While this is under a permanent, that permanent has +1{p}.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Material",
+   "Battleworn"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN090",
+  "name": "Pulsewave Harpoon",
+  "cardType": "action",
+  "text": "When this attacks a hero, they reveal X cards from their hand, where X is the number of times you've boosted this combat chain. Choose an action card with {d} less than or equal to X, then add it to this chain link as a defending card.\nBoost",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN091",
+  "name": "Bios Update",
+  "cardType": "action",
+  "text": "The next attack action card you boost this turn gains +3{p}.\nThe next time a Mechanologist item with cost 2 or less is banished to pay a boost cost this turn, put it into the arena.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN092",
+  "name": "Construct Nitro Mechanoid",
+  "cardType": "action",
+  "text": "Transform target Mechanologist head, chest, arms, legs, weapon and 3 Hyper Drivers you control into Nitro Mechanoid. If you don't, negate this.\nGo again",
+  "pitch": 2,
+  "cost": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "construct"
+  ],
+  "keywords": [
+   "Transform",
+   "Negate",
+   "Go again"
+  ],
+  "set": "DYN",
+  "backId": "DYN092B"
+ },
+ {
+  "id": "DYN092B",
+  "name": "Nitro Mechanoid",
+  "cardType": "weapon",
+  "text": "Action - Banish a card from under Nitro Mechanoid: Attack\nOverpower\nTemper",
+  "attack": 5,
+  "defense": 5,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Overpower",
+   "Temper"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN093",
+  "name": "Plasma Mainline",
+  "cardType": "action",
+  "text": "Plasma Mainline enters the arena with 5 steam counters on it. When it has no steam counters, destroy it.\nWhen a Mechanologist item with cost 2 or less enters the arena under your control, you may move a steam counter from Plasma Mainline to that item.",
+  "pitch": 1,
+  "cost": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN094",
+  "name": "Powder Keg",
+  "cardType": "action",
+  "text": "Whenever a Mechanologist gun you control hits, you may destroy Powder Keg and a defending equipment.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN095",
+  "name": "Scramble Pulse",
+  "cardType": "action",
+  "text": "Equipment have -1{d} while defending this combat chain.\nBoost",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN096",
+  "name": "Scramble Pulse",
+  "cardType": "action",
+  "text": "Equipment have -1{d} while defending this combat chain.\nBoost",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN097",
+  "name": "Scramble Pulse",
+  "cardType": "action",
+  "text": "Equipment have -1{d} while defending this combat chain.\nBoost",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN098",
+  "name": "Blessing of Ingenuity",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Blessing of Ingenuity then put up to 3 Hyper Drivers from your graveyard and/or banished zone into the arena.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN099",
+  "name": "Blessing of Ingenuity",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Blessing of Ingenuity then put up to 2 Hyper Drivers from your graveyard and/or banished zone into the arena.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN100",
+  "name": "Blessing of Ingenuity",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Blessing of Ingenuity then put up to 1 Hyper Driver from your graveyard or banished zone into the arena.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN101",
+  "name": "Crankshaft",
+  "cardType": "action",
+  "text": "Boost\nWhen this is banished from boosting, put a steam counter on a Hyper Driver you control.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN102",
+  "name": "Crankshaft",
+  "cardType": "action",
+  "text": "Boost\nWhen this is banished from boosting, put a steam counter on a Hyper Driver you control.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN103",
+  "name": "Crankshaft",
+  "cardType": "action",
+  "text": "Boost\nWhen this is banished from boosting, put a steam counter on a Hyper Driver you control.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN104",
+  "name": "Jump Start",
+  "cardType": "action",
+  "text": "If you control a Hyper Driver, this costs {r} less to play.\nBoost",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN105",
+  "name": "Jump Start",
+  "cardType": "action",
+  "text": "If you control a Hyper Driver, this costs {r} less to play.\nBoost",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN106",
+  "name": "Jump Start",
+  "cardType": "action",
+  "text": "If you control a Hyper Driver, this costs {r} less to play.\nBoost",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN107",
+  "name": "Urgent Delivery",
+  "cardType": "action",
+  "text": "When this hits, you may put a Mechanologist item from your hand into the arena with cost less than or equal to the number of times you've boosted this combat chain.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN108",
+  "name": "Urgent Delivery",
+  "cardType": "action",
+  "text": "When this hits, you may put a Mechanologist item from your hand into the arena with cost less than or equal to the number of times you've boosted this combat chain.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN109",
+  "name": "Urgent Delivery",
+  "cardType": "action",
+  "text": "When this hits, you may put a Mechanologist item from your hand into the arena with cost less than or equal to the number of times you've boosted this combat chain.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN110",
+  "name": "Hyper Driver",
+  "cardType": "action",
+  "text": "This enters the arena with 3 steam counters. When it has none, destroy it.\nOnce per turn, when you boost a card, remove a steam counter from this and gain {r}.",
+  "pitch": 1,
+  "cost": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN111",
+  "name": "Hyper Driver",
+  "cardType": "action",
+  "text": "This enters the arena with 2 steam counters on it. When this has no steam counters on it, destroy it.\nOnce per turn, when you boost a card, remove a steam counter from this and gain {r}.",
+  "pitch": 2,
+  "cost": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN112",
+  "name": "Hyper Driver",
+  "cardType": "action",
+  "text": "This enters the arena with a steam counters on it. When this has no steam counters on it, destroy it.\nOnce per turn, when you boost a card, remove a steam counter from this and gain {r}.",
+  "pitch": 3,
+  "cost": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN113",
+  "name": "Arakni, Huntsman",
+  "cardType": "hero",
+  "text": "Whenever you play a card with contract, you may look at the top card of target opponent's deck. You may put it on the bottom.",
+  "classes": [
+   "assassin"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "DYN"
+ },
+ {
+  "id": "DYN114",
+  "name": "Arakni",
+  "cardType": "hero",
+  "text": "Whenever you play a card with contract, you may look at the top card of target opponent's deck. You may put it on the bottom.",
+  "classes": [
+   "assassin"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "DYN"
+ },
+ {
+  "id": "DYN115",
+  "name": "Spider's Bite",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nPiercing 1\nWhen this hits a hero, the next time they defend with 1 or more attack action cards this turn, those cards have -1{d} while defending.",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Piercing 1"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN116",
+  "name": "Spider's Bite",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nPiercing 1\nWhen this hits a hero, the next time they defend with 1 or more attack action cards this turn, those cards have -1{d} while defending.",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Piercing 1"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN117",
+  "name": "Blacktek Whisperers",
+  "cardType": "equipment",
+  "text": "While Blacktek Whisperers is in your graveyard, at the start of your turn, you may destroy 2 Silvers you control. If you do, equip Blacktek Whisperers.\nAttack Reaction - Destroy Blacktek Whisperers: Target Assassin attack action card gains \"When this hits a hero, it gains go again.\"\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN118",
+  "name": "Mask of Perdition",
+  "cardType": "equipment",
+  "text": "While Mask of Perdition is in your graveyard, at the start of your turn, you may destroy 2 Silvers you control. If you do, equip Mask of Perdition.\nAttack Reaction - Destroy Mask of Perdition: Target Assassin attack action card gains \"When this hits a hero, banish the top card of their deck.\"\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN119",
+  "name": "Eradicate",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' yellow cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top X cards of their deck, where X is the damage dealt by Eradicate.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN120",
+  "name": "Leave No Witnesses",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' red cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck and up to 1 card in their arsenal.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN121",
+  "name": "Regicide",
+  "cardType": "action",
+  "text": "Legendary Arakni Specialization\nWhen this hits a Royal hero, they lose the game.\nWhen the combat chain closes, you lose the game.\nRegicide can't be defended by cards with the same name as cards in the defending hero's banished zone.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Legendary",
+   "Arakni Specialization"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN122",
+  "name": "Surgical Extraction",
+  "cardType": "action",
+  "text": "Contract  - You are contracted to banish opponents' blue cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck, then look at their hand and banish a card.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN123",
+  "name": "Pay Day",
+  "cardType": "action",
+  "text": "If you've completed a contract this turn, create 4 Silver tokens.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN124",
+  "name": "Plunder the Poor",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' cards with cost 1 or less. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN125",
+  "name": "Plunder the Poor",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' cards with cost 1 or less. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN126",
+  "name": "Plunder the Poor",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' cards with cost 1 or less. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN127",
+  "name": "Rob the Rich",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' cards with cost 2 or greater. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN128",
+  "name": "Rob the Rich",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' cards with cost 2 or greater. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN129",
+  "name": "Rob the Rich",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' cards with cost 2 or greater. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN130",
+  "name": "Shred",
+  "cardType": "attack-reaction",
+  "text": "Target card defending an Assassin attack gets -4{d} this combat chain.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN131",
+  "name": "Shred",
+  "cardType": "attack-reaction",
+  "text": "Target card defending an Assassin attack gets -3{d} this combat chain.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN132",
+  "name": "Shred",
+  "cardType": "attack-reaction",
+  "text": "Target card defending an Assassin attack gets -2{d} this combat chain.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN133",
+  "name": "Annihilate the Armed",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' attack action cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN134",
+  "name": "Annihilate the Armed",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' attack action cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN135",
+  "name": "Annihilate the Armed",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' attack action cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN136",
+  "name": "Fleece the Frail",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' cards with 2 or less {d}. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN137",
+  "name": "Fleece the Frail",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' cards with 2 or less {d}. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN138",
+  "name": "Fleece the Frail",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' cards with 2 or less {d}. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN139",
+  "name": "Nix the Nimble",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' reaction cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN140",
+  "name": "Nix the Nimble",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' reaction cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN141",
+  "name": "Nix the Nimble",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' reaction cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN142",
+  "name": "Sack the Shifty",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' cards with base go again. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN143",
+  "name": "Sack the Shifty",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' cards with base go again. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN144",
+  "name": "Sack the Shifty",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' cards with base go again. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN145",
+  "name": "Slay the Scholars",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' 'non-attack' action cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN146",
+  "name": "Slay the Scholars",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' 'non-attack' action cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN147",
+  "name": "Slay the Scholars",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' 'non-attack' action cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN148",
+  "name": "Cut to the Chase",
+  "cardType": "attack-reaction",
+  "text": "Target Assassin attack action card with contract gains +3{p}.\nLook at the top card of the defending hero's deck. You may put it on the bottom.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN149",
+  "name": "Cut to the Chase",
+  "cardType": "attack-reaction",
+  "text": "Target Assassin attack action card with contract gains +2{p}.\nLook at the top card of the defending hero's deck. You may put it on the bottom.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN150",
+  "name": "Cut to the Chase",
+  "cardType": "attack-reaction",
+  "text": "Target Assassin attack action card with contract gains +1{p}.\nLook at the top card of the defending hero's deck. You may put it on the bottom.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN151",
+  "name": "Sandscour Greatbow",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Look at the top card of your deck. You may put an arrow from your hand or the top of your deck face up into your arsenal. Go again\nWhenever an arrow is put face up in arsenal from your deck, put an aim counter on it.",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "bow",
+   "2h"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN152",
+  "name": "Hornet's Sting",
+  "cardType": "equipment",
+  "text": "Whenever Hornet's Sting defends, reveal the top card of your deck. If it's an arrow, deal 1 damage to the attacking hero or ally. Otherwise, put it on the bottom of your deck.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN153",
+  "name": "Heat Seeker",
+  "cardType": "action",
+  "text": "When this hits, at the beginning of your end phase, put the top card of your deck face up into your arsenal.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN154",
+  "name": "Immobilizing Shot",
+  "cardType": "action",
+  "text": "If Immobilizing Shot has an aim counter, it has \"When this hits a hero, they can't play more than 1 attack action card and 1 'non-attack' action card during their next action phase.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN155",
+  "name": "Dead Eye",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gains +3{p}.\nIf it has an aim counter, it gains \"When this hits a hero, look at their hand and choose a card. They discard it.\"\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN156",
+  "name": "Drill Shot",
+  "cardType": "action",
+  "text": "If Drill Shot has an aim counter, it has piercing 1.\nWhen this hits a hero, put a -1{d} counter on an equipment they control.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Piercing 1"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN157",
+  "name": "Drill Shot",
+  "cardType": "action",
+  "text": "If Drill Shot has an aim counter, it has piercing 1.\nWhen this hits a hero, put a -1{d} counter on an equipment they control.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Piercing 1"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN158",
+  "name": "Drill Shot",
+  "cardType": "action",
+  "text": "If Drill Shot has an aim counter, it has piercing 1.\nWhen this hits a hero, put a -1{d} counter on an equipment they control.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Piercing 1"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN159",
+  "name": "Blessing of Focus",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Blessing of Focus then opt 3 and reveal the top card of your deck. If it's an arrow, put it face up into your arsenal with an aim counter.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Opt 1"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN160",
+  "name": "Blessing of Focus",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Blessing of Focus then opt 2 and reveal the top card of your deck. If it's an arrow, put it face up into your arsenal with an aim counter.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Opt 2"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN161",
+  "name": "Blessing of Focus",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Blessing of Focus then opt 1 and reveal the top card of your deck. If it's an arrow, put it face up into your arsenal with an aim counter.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Opt 3"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN162",
+  "name": "Hemorrhage Bore",
+  "cardType": "action",
+  "text": "If Hemorrhage Bore has an aim counter, it has \"When this hits a hero, destroy a card in their arsenal.\"",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN163",
+  "name": "Hemorrhage Bore",
+  "cardType": "action",
+  "text": "If Hemorrhage Bore has an aim counter, it has \"When this hits a hero, destroy a card in their arsenal.\"",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN164",
+  "name": "Hemorrhage Bore",
+  "cardType": "action",
+  "text": "If Hemorrhage Bore has an aim counter, it has \"When this hits a hero, destroy a card in their arsenal.\"",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN165",
+  "name": "Long Shot",
+  "cardType": "action",
+  "text": "If Long Shot has an aim counter, it has +2{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN166",
+  "name": "Long Shot",
+  "cardType": "action",
+  "text": "If Long Shot has an aim counter, it has +2{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN167",
+  "name": "Long Shot",
+  "cardType": "action",
+  "text": "If Long Shot has an aim counter, it has +2{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN168",
+  "name": "Point the Tip",
+  "cardType": "action",
+  "text": "Target face up arrow in your arsenal gains +3{p} until end of turn. Put an aim counter on it.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN169",
+  "name": "Point the Tip",
+  "cardType": "action",
+  "text": "Target face up arrow in your arsenal gains +2{p} until end of turn. Put an aim counter on it.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN170",
+  "name": "Point the Tip",
+  "cardType": "action",
+  "text": "Target face up arrow in your arsenal gains +1{p} until end of turn. Put an aim counter on it.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN171",
+  "name": "Amethyst Tiara",
+  "cardType": "equipment",
+  "text": "Instant - Destroy Amethyst Tiara: Runechants you control have spellvoid 1 this turn.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN172",
+  "name": "Annals of Sutcliffe",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}{r}: Draw a card. If an attack action card and a 'non-attack' action card were pitched this way, create a Runechant token.",
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "book",
+   "2h"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN173",
+  "name": "Cryptic Crossing",
+  "cardType": "action",
+  "text": "If an attack action card and a 'non-attack' action card were pitched to play Cryptic Crossing, it has \"The first time this deals damage to the defending hero, they discard a card and you draw a card.\"",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN174",
+  "name": "Diabolic Ultimatum",
+  "cardType": "action",
+  "text": "If an attack action card was pitched to play Diabolic Ultimatum, each hero chooses and destroys an ally they control.\nIf a 'non-attack' action card was pitched to play Diabolic Ultimatum, each hero chooses and destroys an aura they control.",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN175",
+  "name": "Looming Doom",
+  "cardType": "action",
+  "text": "When Looming Doom enters the arena, destroy all Runechants you control and put that many doom counters on Looming Doom.\nAt the beginning of your end phase, remove a doom counter from Looming Doom. If you do, deal 2 arcane damage to any target. Otherwise, destroy Looming Doom.",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN176",
+  "name": "Deathly Duet",
+  "cardType": "action",
+  "text": "When Deathly Duet attacks, if an attack action card was pitched to play it, it gains +2{p}. If a 'non-attack' action card was pitched to play it, create 2 Runechant tokens.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN177",
+  "name": "Deathly Duet",
+  "cardType": "action",
+  "text": "When Deathly Duet attacks, if an attack action card was pitched to play it, it gains +2{p}. If a 'non-attack' action card was pitched to play it, create 2 Runechant tokens.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN178",
+  "name": "Deathly Duet",
+  "cardType": "action",
+  "text": "When Deathly Duet attacks, if an attack action card was pitched to play it, it gains +2{p}. If a 'non-attack' action card was pitched to play it, create 2 Runechant tokens.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN179",
+  "name": "Blessing of Occult",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Blessing of Occult then create 3 Runechant tokens.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN180",
+  "name": "Blessing of Occult",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Blessing of Occult then create 2 Runechant tokens.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN181",
+  "name": "Blessing of Occult",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Blessing of Occult then create a Runechant token.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN182",
+  "name": "Aether Slash",
+  "cardType": "action",
+  "text": "When Aether Slash attacks, if a 'non-attack' action card was pitched to play it, deal 1 arcane damage to any target.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN183",
+  "name": "Aether Slash",
+  "cardType": "action",
+  "text": "When Aether Slash attacks, if a 'non-attack' action card was pitched to play it, deal 1 arcane damage to any target.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN184",
+  "name": "Aether Slash",
+  "cardType": "action",
+  "text": "When Aether Slash attacks, if a 'non-attack' action card was pitched to play it, deal 1 arcane damage to any target.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN185",
+  "name": "Runic Reaping",
+  "cardType": "action",
+  "text": "The next Runeblade attack action card you play this turn gains \"When this hits, create 3 Runechant tokens\".\nIf an attack card was pitched to play Runic Reaping, the next Runeblade attack action card you play this turn gains +1{p}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN186",
+  "name": "Runic Reaping",
+  "cardType": "action",
+  "text": "The next Runeblade attack action card you play this turn gains \"When this hits, create 2 Runechant tokens\".\nIf an attack card was pitched to play Runic Reaping, the next Runeblade attack action card you play this turn gains +1{p}.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN187",
+  "name": "Runic Reaping",
+  "cardType": "action",
+  "text": "The next Runeblade attack action card you play this turn gains \"When this hits, create a Runechant token\".\nIf an attack card was pitched to play Runic Reaping, the next Runeblade attack action card you play this turn gains +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN188",
+  "name": "Sky Fire Lanterns",
+  "cardType": "action",
+  "text": "Reveal the top card of your deck. If it's red, create a Runechant token.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN189",
+  "name": "Sky Fire Lanterns",
+  "cardType": "action",
+  "text": "Reveal the top card of your deck. If it's yellow, create a Runechant token.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN190",
+  "name": "Sky Fire Lanterns",
+  "cardType": "action",
+  "text": "Reveal the top card of your deck. If it's blue, create a Runechant token.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN191",
+  "name": "Runechant",
+  "cardType": "token",
+  "text": "When you play an attack action card or activate a weapon attack, destroy this and deal 1 arcane damage to target opposing hero.",
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN192",
+  "name": "Surgent Aethertide",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Deal 1 arcane damage to an opposing hero. Go again\nThe first card you play each turn with an arcane damage effect, instead deals that much arcane damage plus X, where X is the damage dealt by Surgent Aethertide this turn.",
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "staff",
+   "2h"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN193",
+  "name": "Seerstone",
+  "cardType": "weapon",
+  "text": "Action - {r}{r}{r}: Look at the top card of your deck. You may put it on the bottom. Create a Ponder token.",
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "orb",
+   "2h"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN194",
+  "name": "Mind Warp",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to target hero.\nSurge - If this deals more than 2 damage to a hero, they shuffle their hand into their deck, then they draw that many cards minus 1.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Surge"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN195",
+  "name": "Swell Tidings",
+  "cardType": "action",
+  "text": "Deal 5 arcane damage to target hero.\nSurge - If this deals more than 5 damage, create a Ponder token.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Surge"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN196",
+  "name": "Brainstorm",
+  "cardType": "instant",
+  "text": "Until end of turn, your hero gains \"Whenever you draw a card this action phase, deal 1 arcane damage to any target\".",
+  "pitch": 3,
+  "cost": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN197",
+  "name": "Aether Quickening",
+  "cardType": "action",
+  "text": "Deal 4 arcane damage to target hero.\nSurge - If this deals more than 4 damage, it gets go again.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Surge",
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN198",
+  "name": "Aether Quickening",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to target hero.\nSurge - If this deals more than 3 damage, it gets go again.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Surge",
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN199",
+  "name": "Aether Quickening",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to target hero.\nSurge - If this deals more than 2 damage, it gets go again.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Surge",
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN200",
+  "name": "Blessing of Aether",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Blessing of Aether then if the next card you play this turn has an arcane damage effect, instead it deals that much arcane damage plus 3.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN201",
+  "name": "Blessing of Aether",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Blessing of Aether then if the next card you play this turn has an arcane damage effect, instead it deals that much arcane damage plus 2.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN202",
+  "name": "Blessing of Aether",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Blessing of Aether then if the next card you play this turn has an arcane damage effect, instead it deals that much arcane damage plus 1.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN203",
+  "name": "Prognosticate",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to target hero.\nSurge - If this deals more than 3 damage, opt 1.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Surge",
+   "Opt 1"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN204",
+  "name": "Prognosticate",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to target hero.\nSurge - If this deals more than 2 damage, opt 1.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Surge",
+   "Opt 1"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN205",
+  "name": "Prognosticate",
+  "cardType": "action",
+  "text": "Deal 1 arcane damage to target hero.\nSurge - If this deals more than 1 damage, opt 1.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Surge",
+   "Opt 1"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN206",
+  "name": "Sap",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to target hero.\nSurge - If this deals more than 3 damage to a hero, you may remove an energy counter from a permanent they control.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Surge"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN207",
+  "name": "Sap",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to target hero.\nSurge - If this deals more than 2 damage to a hero, you may remove an energy counter from a permanent they control.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Surge"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN208",
+  "name": "Sap",
+  "cardType": "action",
+  "text": "Deal 1 arcane damage to target hero.\nSurge - If this deals more than 1 damage to a hero, you may remove an energy counter from a permanent they control.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Surge"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN209",
+  "name": "Tempest Aurora",
+  "cardType": "action",
+  "text": "The next card you play this turn with cost 2 or less and an arcane damage effect, instead deals that much arcane damage plus 1.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN210",
+  "name": "Tempest Aurora",
+  "cardType": "action",
+  "text": "The next card you play this turn with cost 1 or less and an arcane damage effect, instead deals that much arcane damage plus 1.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN211",
+  "name": "Tempest Aurora",
+  "cardType": "action",
+  "text": "The next card you play this turn with cost 0 and an arcane damage effect, instead deals that much arcane damage plus 1.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN212",
+  "name": "Invoke Suraya",
+  "cardType": "action",
+  "text": "Legendary\nTransform target Spectral Shield you control into Suraya, Arcane Herald.\nGo again",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "invocation"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transform",
+   "Go again"
+  ],
+  "set": "DYN",
+  "backId": "DYN212B"
+ },
+ {
+  "id": "DYN212B",
+  "name": "Suraya, Archangel of Knowledge",
+  "cardType": "action",
+  "text": "Once per Turn Action - {p}{p}: Attack. Whenever Suraya attacks, you may banish a Light card from your hero's soul. If you do, Suraya deals 1 arcane damage to any target.\nWhenever Suraya deals damage, you gain that much {h}.\nWard 4",
+  "attack": 4,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "angel",
+   "ally"
+  ],
+  "keywords": [
+   "Ward 4"
+  ],
+  "life": 4,
+  "set": "DYN"
+ },
+ {
+  "id": "DYN213",
+  "name": "Celestial Kimono",
+  "cardType": "equipment",
+  "text": "Once per turn, when Celestial Kimono or a non-token permanent you control with ward is destroyed, gain {r}.\nWard 1",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN214",
+  "name": "Wave of Reality",
+  "cardType": "equipment",
+  "text": "When Wave of Reality is destroyed, create a Spectral Shield token.\nWard 1",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN215",
+  "name": "Phantasmal Symbiosis",
+  "cardType": "action",
+  "text": "When this attacks, name a card.  Cards with that name are Illusionist until end of turn.\nPhantasm",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN216",
+  "name": "Spectral Procession",
+  "cardType": "action",
+  "text": "Spectral Procession's {p} is equal to the number of Spectral Shields you control.\nPhantasm",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN217",
+  "name": "Tome of Aeo",
+  "cardType": "action",
+  "text": "At the beginning of your action phase, destroy Tome of Aeo then draw a card.\nWard 1",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN218",
+  "name": "Blessing of Spirits",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Blessing of Spirits then create 3 Spectral Shield tokens.\nWard 1",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN219",
+  "name": "Blessing of Spirits",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Blessing of Spirits then create 2 Spectral Shield tokens.\nWard 1",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN220",
+  "name": "Blessing of Spirits",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Blessing of Spirits then create a Spectral Shield token.\nWard 1",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN221",
+  "name": "Tranquil Passing",
+  "cardType": "action",
+  "text": "When Tranquil Passing enters the arena, you may banish target aura token or aura permanent with cost 3 or less controlled by an opponent until Tranquil Passing leaves the arena.\nWard 1",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN222",
+  "name": "Tranquil Passing",
+  "cardType": "action",
+  "text": "When Tranquil Passing enters the arena, you may banish target aura token or aura permanent with cost 2 or less controlled by an opponent until Tranquil Passing leaves the arena.\nWard 1",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN223",
+  "name": "Tranquil Passing",
+  "cardType": "action",
+  "text": "When Tranquil Passing enters the arena, you may banish target aura token or aura permanent with cost 1 or less controlled by an opponent until Tranquil Passing leaves the arena.\nWard 1",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN224",
+  "name": "Spectral Prowler",
+  "cardType": "action",
+  "text": "When you play Spectral Prowler, if you control a Spectral Shield, this gains go again.\nPhantasm",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Phantasm"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN225",
+  "name": "Spectral Prowler",
+  "cardType": "action",
+  "text": "When you play Spectral Prowler, if you control a Spectral Shield, this gains go again.\nPhantasm",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Phantasm"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN226",
+  "name": "Spectral Prowler",
+  "cardType": "action",
+  "text": "When you play Spectral Prowler, if you control a Spectral Shield, this gains go again.\nPhantasm",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Phantasm"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN227",
+  "name": "Spectral Rider",
+  "cardType": "action",
+  "text": "When you play Spectral Rider, if you control a Spectral Shield, this gains overpower.\nPhantasm",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Overpower",
+   "Phantasm"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN228",
+  "name": "Spectral Rider",
+  "cardType": "action",
+  "text": "When you play Spectral Rider, if you control a Spectral Shield, this gains overpower.\nPhantasm",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Overpower",
+   "Phantasm"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN229",
+  "name": "Spectral Rider",
+  "cardType": "action",
+  "text": "When you play Spectral Rider, if you control a Spectral Shield, this gains overpower.\nPhantasm",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Overpower",
+   "Phantasm"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN230",
+  "name": "Water Glow Lanterns",
+  "cardType": "action",
+  "text": "Reveal the top card of your deck. If it's red, create a Spectral Shield token.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN231",
+  "name": "Water Glow Lanterns",
+  "cardType": "action",
+  "text": "Reveal the top card of your deck. If it's yellow, create a Spectral Shield token.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN232",
+  "name": "Water Glow Lanterns",
+  "cardType": "action",
+  "text": "Reveal the top card of your deck. If it's blue, create a Spectral Shield token.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN233",
+  "name": "Spectral Shield",
+  "cardType": "token",
+  "text": "Ward 1",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN234",
+  "name": "Crown of Dominion",
+  "cardType": "equipment",
+  "text": "Your hero is Royal.\nWhen you equip Crown of Dominion, create a Gold token.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN235",
+  "name": "Ornate Tessen",
+  "cardType": "equipment",
+  "text": "Instant - {r}, destroy Ornate Tessen: Put a card from your hand on the bottom of your deck. If you do, draw a card.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "off-hand"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN236",
+  "name": "Spell Fray Tiara",
+  "cardType": "equipment",
+  "text": "Spellvoid 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Spellvoid 1"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN237",
+  "name": "Spell Fray Cloak",
+  "cardType": "equipment",
+  "text": "Spellvoid 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Spellvoid 1"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN238",
+  "name": "Spell Fray Gloves",
+  "cardType": "equipment",
+  "text": "Spellvoid 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Spellvoid 1"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN239",
+  "name": "Spell Fray Leggings",
+  "cardType": "equipment",
+  "text": "Spellvoid 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Spellvoid 1"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN240",
+  "name": "Imperial Edict",
+  "cardType": "action",
+  "text": "Legendary\nAction - Destroy Imperial Edict: Name a card. The named card can't be played until the start of your next turn. If you are Royal, instead each opponent reveals their hand, then name a card. Go again",
+  "pitch": 1,
+  "cost": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Legendary"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN241",
+  "name": "Imperial Ledger",
+  "cardType": "action",
+  "text": "Legendary\nAction - Shuffle Imperial Ledger into its owner's deck: Create a Copper token. If you are Royal, instead create a Gold token.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Legendary"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN242",
+  "name": "Imperial Warhorn",
+  "cardType": "action",
+  "text": "Legendary\nAction - {r}, destroy Imperial Warhorn: Choose any number of heroes. Each of them chooses an ally, aura, item, or landmark permanent they control. Destroy each permanent chosen this way. If you are Royal, instead you choose the permanents.",
+  "pitch": 1,
+  "cost": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Legendary"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN243",
+  "name": "Gold",
+  "cardType": "token",
+  "text": "Action - {r}{r}, destroy this: Draw a card. Go again",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN244",
+  "name": "Ponder",
+  "cardType": "token",
+  "text": "At the beginning of your end phase, destroy Ponder and draw a card.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN245",
+  "name": "Silver",
+  "cardType": "token",
+  "text": "Action - {r}{r}{r}, destroy Silver: Draw a card. Go again",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "DYN"
+ },
+ {
+  "id": "DYN246",
+  "name": "Spellbane Aegis",
+  "cardType": "token",
+  "text": "Spellvoid 1",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Spellvoid 1"
+  ],
+  "set": "DYN"
+ }
+]

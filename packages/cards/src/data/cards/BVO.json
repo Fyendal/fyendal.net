@@ -1,0 +1,500 @@
+[
+ {
+  "id": "BVO001",
+  "name": "Bravo, Showstopper",
+  "cardType": "hero",
+  "text": "Action - {r}{r}: Until end of turn, your attack action cards with cost 3 or greater gains dominate. Go again",
+  "classes": [
+   "guardian"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "BVO"
+ },
+ {
+  "id": "BVO002",
+  "name": "Bravo",
+  "cardType": "hero",
+  "text": "Action - {r}{r}: Until end of turn, your attack action cards with cost 3 or more get dominate. Go again",
+  "classes": [
+   "guardian"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "BVO"
+ },
+ {
+  "id": "BVO003",
+  "name": "Anothos",
+  "cardType": "weapon",
+  "text": "Once per turn Action - {r}{r}{r}: Attack\nWhile there are 2 or more cards with cost 3 or greater in your pitch zone, Anothos has +2{p}.",
+  "attack": 4,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "hammer",
+   "2h"
+  ],
+  "set": "BVO"
+ },
+ {
+  "id": "BVO004",
+  "name": "Helm of Isen's Peak",
+  "cardType": "equipment",
+  "text": "Action - {r}, destroy this: Your hero gains +1{i} this turn.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "BVO"
+ },
+ {
+  "id": "BVO005",
+  "name": "Ironrot Plate",
+  "cardType": "equipment",
+  "text": "Blade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "BVO"
+ },
+ {
+  "id": "BVO006",
+  "name": "Goliath Gauntlet",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: The next attack action card with cost 2 or more you play this turn gets +2{p}. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "BVO"
+ },
+ {
+  "id": "BVO007",
+  "name": "Ironrot Legs",
+  "cardType": "equipment",
+  "text": "Blade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "BVO"
+ },
+ {
+  "id": "BVO008",
+  "name": "Buckling Blow",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, put a -1{d} counter on an equipment they control.",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "BVO"
+ },
+ {
+  "id": "BVO009",
+  "name": "Cartilage Crush",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, their first action during their next turn costs an additional {r} to play or activate.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "BVO"
+ },
+ {
+  "id": "BVO010",
+  "name": "Debilitate",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, their first attack during their next turn gets -2{p}.",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "BVO"
+ },
+ {
+  "id": "BVO011",
+  "name": "Disable",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, put a card from their arsenal on the bottom of their deck.",
+  "pitch": 1,
+  "cost": 5,
+  "attack": 9,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "BVO"
+ },
+ {
+  "id": "BVO012",
+  "name": "Emerging Power",
+  "cardType": "action",
+  "text": "Go again\nAt the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn gets +3{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "BVO"
+ },
+ {
+  "id": "BVO013",
+  "name": "Debilitate",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, their first attack during their next turn gets -2{p}.",
+  "pitch": 2,
+  "cost": 4,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "BVO"
+ },
+ {
+  "id": "BVO014",
+  "name": "Emerging Power",
+  "cardType": "action",
+  "text": "Go again\nAt the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn gets +2{p}.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "BVO"
+ },
+ {
+  "id": "BVO015",
+  "name": "Springboard Somersault",
+  "cardType": "defense-reaction",
+  "text": "If Springboard Somersault is played from arsenal, it gains +2{d}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "BVO"
+ },
+ {
+  "id": "BVO016",
+  "name": "Buckling Blow",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, put a -1{d} counter on an equipment they control.",
+  "pitch": 3,
+  "cost": 4,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "BVO"
+ },
+ {
+  "id": "BVO017",
+  "name": "Cartilage Crush",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, their first action during their next turn costs an additional {r} to play or activate.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "BVO"
+ },
+ {
+  "id": "BVO018",
+  "name": "Crush Confidence",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, they lose all hero card abilities until the end of their next turn.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "BVO"
+ },
+ {
+  "id": "BVO019",
+  "name": "Disable",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, put a card from their arsenal on the bottom of their deck.",
+  "pitch": 3,
+  "cost": 5,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "BVO"
+ },
+ {
+  "id": "BVO020",
+  "name": "Staunch Response",
+  "cardType": "defense-reaction",
+  "text": "As an additional cost to play Staunch Response you may pay {r}{r}{r}{r}. If you do, Staunch Response gains +3{d}.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 5,
+  "classes": [
+   "guardian"
+  ],
+  "set": "BVO"
+ },
+ {
+  "id": "BVO021",
+  "name": "Blessing of Deliverance",
+  "cardType": "action",
+  "text": "Go again\nWhen Blessing of Deliverance enters the arena, if you have a card with cost 3 or greater in your pitch zone, draw a card.\nAt the beginning of your action phase, destroy Blessing of Deliverance then reveal the top card of your deck. Gain 1{h} for each card with cost 3 or greater revealed this way.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "BVO"
+ },
+ {
+  "id": "BVO022",
+  "name": "Stonewall Confidence",
+  "cardType": "action",
+  "text": "Go again\nCards you control with cost 3 or more get +2{d} while defending.\nAt the beginning of your action phase, destroy this.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "BVO"
+ },
+ {
+  "id": "BVO023",
+  "name": "Barraging Brawnhide",
+  "cardType": "action",
+  "text": "While Barraging Brawnhide is defended by less than 2 non-equipment cards, it has +1{p}.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "BVO"
+ },
+ {
+  "id": "BVO024",
+  "name": "Raging Onslaught",
+  "cardType": "action",
+  "text": "",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "BVO"
+ },
+ {
+  "id": "BVO025",
+  "name": "Drone of Brutality",
+  "cardType": "action",
+  "text": "If Drone of Brutality would be put into your graveyard from anywhere, instead put it on the bottom of your deck.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "BVO"
+ },
+ {
+  "id": "BVO026",
+  "name": "Wounded Bull",
+  "cardType": "action",
+  "text": "When you play this, if you have less {h} than an opposing hero, this gains +1{p}.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "BVO"
+ },
+ {
+  "id": "BVO027",
+  "name": "Pummel",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target club or hammer weapon attack gains +2{p}.\n- Target attack action card with cost 2 or more gets +2{p} and \"When this hits a hero, they discard a card.\"",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "BVO"
+ },
+ {
+  "id": "BVO028",
+  "name": "Potion of Strength",
+  "cardType": "action",
+  "text": "Action - Destroy this: Your next attack this turn gains +2{p}. Go again",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "BVO"
+ },
+ {
+  "id": "BVO029",
+  "name": "Sloggism",
+  "cardType": "action",
+  "text": "The next attack action card with cost 2 or greater you play this turn gains +4{p}.\nGo again",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "BVO"
+ }
+]

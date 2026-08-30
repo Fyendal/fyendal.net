@@ -1,0 +1,462 @@
+[
+ {
+  "id": "AUA001",
+  "name": "Aurora",
+  "cardType": "hero",
+  "text": "Once per Turn Instant - {r}{r}: Create an Embodiment of Lightning token. Activate this only if you've played a Lightning card this turn.\nEssence of Lightning",
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Essence of Lightning"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "AUA"
+ },
+ {
+  "id": "AUA002",
+  "name": "Star Fall",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nIf you've played a Lightning card this turn, this card's attacks get +1{p} and go again.",
+  "attack": 1,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "sword",
+   "2h"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AUA"
+ },
+ {
+  "id": "AUA003",
+  "name": "Flash of Brilliance",
+  "cardType": "equipment",
+  "text": "When this defends, you may discard a Lightning card. If you do, return an aura you control to its owner's hand.\nBlade Break",
+  "defense": 1,
+  "subtypes": [
+   "lightning",
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "AUA"
+ },
+ {
+  "id": "AUA004",
+  "name": "Bloodtorn Bodice",
+  "cardType": "equipment",
+  "text": "Action - Destroy this and an aura you control: Gain {r}. Go again",
+  "defense": 0,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "AUA"
+ },
+ {
+  "id": "AUA005",
+  "name": "Runehold Release",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Create a Runechant token. Go again",
+  "defense": 0,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "AUA"
+ },
+ {
+  "id": "AUA006",
+  "name": "Runaways",
+  "cardType": "equipment",
+  "text": "Instant - Destroy Runaways: Prevent the next 1 damage that would be dealt to your hero this turn. Activate this ability only if your hero has been dealt damage this turn.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "AUA"
+ },
+ {
+  "id": "AUA007",
+  "name": "Blast to Oblivion",
+  "cardType": "action",
+  "text": "When this attacks, the next time you play an instant card this chain link, you may return target aura permanent with cost 1 or less or target aura token to it's owner's hand.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "AUA"
+ },
+ {
+  "id": "AUA008",
+  "name": "Flittering Charge",
+  "cardType": "action",
+  "text": "If you've played an instant card this chain link, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AUA"
+ },
+ {
+  "id": "AUA009",
+  "name": "Fry",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 0,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AUA"
+ },
+ {
+  "id": "AUA010",
+  "name": "Heaven's Claws",
+  "cardType": "action",
+  "text": "",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "AUA"
+ },
+ {
+  "id": "AUA011",
+  "name": "Hit the High Notes",
+  "cardType": "action",
+  "text": "If you've played or created an aura this turn, this gets +2{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "AUA"
+ },
+ {
+  "id": "AUA012",
+  "name": "Lightning Form",
+  "cardType": "action",
+  "text": "When this hits, create an Embodiment of Lightning token.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "AUA"
+ },
+ {
+  "id": "AUA013",
+  "name": "Lightning Surge",
+  "cardType": "action",
+  "text": "If this was played from arsenal, it gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AUA"
+ },
+ {
+  "id": "AUA014",
+  "name": "Meat and Greet",
+  "cardType": "action",
+  "text": "When this hits, create a Runechant token.\nIf you've dealt arcane damage to an opposing hero this turn, this gets go again.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AUA"
+ },
+ {
+  "id": "AUA015",
+  "name": "Runerager Swarm",
+  "cardType": "action",
+  "text": "If you've played or created an aura this turn, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AUA"
+ },
+ {
+  "id": "AUA016",
+  "name": "Second Strike",
+  "cardType": "action",
+  "text": "When this attacks, if you've dealt damage this turn, this gets +1{p} and go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AUA"
+ },
+ {
+  "id": "AUA017",
+  "name": "Burn Up // Shock",
+  "cardType": "instant",
+  "text": "Meld\nThe next time an attack you control hits a hero this turn, deal 4 arcane damage to them.\nGo again\n//\nDeal 1 arcane damage to any target.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again",
+   "Meld"
+  ],
+  "set": "AUA"
+ },
+ {
+  "id": "AUA018",
+  "name": "Electrostatic Discharge",
+  "cardType": "instant",
+  "text": "The next attack action card you play this turn with cost 1 or less gets +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "AUA"
+ },
+ {
+  "id": "AUA019",
+  "name": "Hit the High Notes",
+  "cardType": "action",
+  "text": "If you've played or created an aura this turn, this gets +2{p}.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "AUA"
+ },
+ {
+  "id": "AUA020",
+  "name": "Heaven's Claws",
+  "cardType": "action",
+  "text": "",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "AUA"
+ },
+ {
+  "id": "AUA021",
+  "name": "Hit the High Notes",
+  "cardType": "action",
+  "text": "If you've played or created an aura this turn, this gets +2{p}.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "AUA"
+ },
+ {
+  "id": "AUA022",
+  "name": "Hocus Pocus",
+  "cardType": "action",
+  "text": "When this attacks, create a Runechant token.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "AUA"
+ },
+ {
+  "id": "AUA023",
+  "name": "Trip the Light Fantastic",
+  "cardType": "action",
+  "text": "Instant - Discard this: Prevent the next 2 damage that would be dealt to you this turn.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "AUA"
+ },
+ {
+  "id": "AUA024",
+  "name": "Electrostatic Discharge",
+  "cardType": "instant",
+  "text": "The next attack action card you play this turn with cost 1 or less gets +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "AUA"
+ },
+ {
+  "id": "AUA025",
+  "name": "Sigil of Deadwood",
+  "cardType": "action",
+  "text": "Go again\nAt the beginning of your action phase, destroy this.\nWhen this leaves the arena, create a Runechant token.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AUA"
+ },
+ {
+  "id": "AUA026",
+  "name": "Sigil of Lightning",
+  "cardType": "instant",
+  "text": "At the beginning of your action phase, destroy this.\nWhen this leaves the arena, create an Embodiment of Lightning token.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "set": "AUA"
+ },
+ {
+  "id": "AUA027",
+  "name": "Embodiment of Lightning",
+  "cardType": "token",
+  "text": "When you play an attack action card, destroy this, then the attack gets go again.",
+  "subtypes": [
+   "elemental",
+   "aura"
+  ],
+  "set": "AUA"
+ },
+ {
+  "id": "AUA028",
+  "name": "Runechant",
+  "cardType": "token",
+  "text": "When you play an attack action card or activate a weapon attack, destroy this and deal 1 arcane damage to target opposing hero.",
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "AUA"
+ },
+ {
+  "id": "AUA029",
+  "name": "Sanctuary of Aria",
+  "cardType": "token",
+  "text": "Instant - {r}{r}: Prevent the next 1 damage that would be dealt to you this turn by a source of your choice. Destroy this at the beginning of the end phase.",
+  "subtypes": [
+   "rosetta",
+   "macro"
+  ],
+  "set": "AUA"
+ }
+]

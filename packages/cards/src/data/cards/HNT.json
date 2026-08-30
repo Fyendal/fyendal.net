@@ -1,0 +1,4518 @@
+[
+ {
+  "id": "HNT000",
+  "name": "Schism of Chaos",
+  "cardType": "resource",
+  "text": "Legendary\nWhen this is pitched, each hero shuffles, then puts the top card of their deck facedown into their arsenal.",
+  "pitch": 3,
+  "classes": [
+   "chaos"
+  ],
+  "subtypes": [
+   "gem"
+  ],
+  "keywords": [
+   "Legendary"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT001",
+  "name": "Arakni, Marionette",
+  "cardType": "hero",
+  "text": "Your attacks with stealth that are attacking a marked hero get +1{p} and \"When this hits, this gets go again.\"\nAt the beginning of your end phase, if an opponent is marked, you become a random Agent of Chaos.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "HNT"
+ },
+ {
+  "id": "HNT002",
+  "name": "Arakni, Web of Deceit",
+  "cardType": "hero",
+  "text": "Your attacks with stealth that are attacking a marked hero get +1{p} and \"When this hits, this gets go again.\"\nAt the beginning of your end phase, if an opponent is marked, you become a random Agent of Chaos.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "HNT"
+ },
+ {
+  "id": "HNT003",
+  "name": "Arakni, Black Widow",
+  "cardType": "hero",
+  "text": "Once per Turn Attack Reaction - Discard an Assassin card: Target Assassin attack gets +3{p}. If it has stealth, it gets \"When this hits a hero, they banish a card from their hand.\"\nAt the beginning of your end phase, return to the brood.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "intellect": 4,
+  "set": "HNT"
+ },
+ {
+  "id": "HNT004",
+  "name": "Arakni, Funnel Web",
+  "cardType": "hero",
+  "text": "Once per Turn Attack Reaction - Discard an Assassin card: Target Assassin attack gets +3{p}. If it has stealth, it gets \"When this hits a hero, banish a card in their arsenal.\"\nAt the beginning of your end phase, return to the brood.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "intellect": 4,
+  "set": "HNT"
+ },
+ {
+  "id": "HNT005",
+  "name": "Arakni, Orb-Weaver",
+  "cardType": "hero",
+  "text": "Graphene Chelicerae cost you {r} less to activate.\nOnce per Turn Instant - Discard an Assassin card: Equip a Graphene Chelicera token. Your next attack with stealth this turn gets +3{p}.\nAt the beginning of your end phase, return to the brood.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "intellect": 4,
+  "set": "HNT"
+ },
+ {
+  "id": "HNT006",
+  "name": "Arakni, Redback",
+  "cardType": "hero",
+  "text": "Once per Turn Attack Reaction - Discard an Assassin card: Target Assassin attack gets +3{p}. If it has stealth, it gets go again.\nAt the beginning of your end phase, return to the brood.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "intellect": 4,
+  "set": "HNT"
+ },
+ {
+  "id": "HNT007",
+  "name": "Arakni, Tarantula",
+  "cardType": "hero",
+  "text": "Whenever a dagger you own hits a hero, they lose 1{h}.\nOnce per Turn Attack Reaction - Discard an Assassin card: Target dagger attack gets +3{p}.\nAt the beginning of your end phase, return to the brood.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "intellect": 4,
+  "set": "HNT"
+ },
+ {
+  "id": "HNT008",
+  "name": "Arakni, Trap-Door",
+  "cardType": "hero",
+  "text": "When you become this, you may search your deck for a card, banish it face-down, then shuffle. If it's a trap, you may play it until the start of your next turn.\nAt the beginning of your end phase, return to the brood.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "intellect": 4,
+  "set": "HNT"
+ },
+ {
+  "id": "HNT009",
+  "name": "Hunter's Klaive",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nWhen this hits a hero, mark them.\nPiercing 1",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Mark",
+   "Piercing 1"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT010",
+  "name": "Mark of the Huntsman",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nWhen this hits a hero, you may choose to destroy this and mark them.\nIf this is attacking a marked hero, this gets +1{p}.",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Mark"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT011",
+  "name": "Mask of Deceit",
+  "cardType": "equipment",
+  "text": "Arakni Specialization\nWhen this defends, become a random Agent of Chaos. If the attacking hero is marked, instead choose the Agent of Chaos.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Arakni Specialization",
+   "Blade Break"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT012",
+  "name": "Kiss of Death",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, they lose 1{h}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT013",
+  "name": "Under the Trap-Door",
+  "cardType": "action",
+  "text": "Stealth\nInstant - Discard this: Banish target trap from your graveyard. If you do, you may play it this turn and if it would be put into the graveyard this turn, instead banish it.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT014",
+  "name": "Take Up the Mantle",
+  "cardType": "attack-reaction",
+  "text": "Target attack action card with stealth gets +2{p}. If it's attacking a marked hero, instead it gets +3{p} and you may banish an attack action card with stealth from your graveyard. If you do, the target becomes a copy of the banished card.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT015",
+  "name": "Tarantula Toxin",
+  "cardType": "attack-reaction",
+  "text": "Choose 1 or both;\n\nTarget dagger attack gets +3{p}.\nTarget card defending an attack with stealth gets -3{d} this turn.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT016",
+  "name": "Anaphylactic Shock",
+  "cardType": "instant",
+  "text": "Each opposing hero and ally that has dealt damage to you this turn loses 1{h}.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT017",
+  "name": "Bite",
+  "cardType": "action",
+  "text": "Stealth\nWhen this attacks a hero, you may have target dagger you control deal 1 damage to them. If damage is dealt this way, the dagger has hit. Destroy the dagger.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT018",
+  "name": "Bite",
+  "cardType": "action",
+  "text": "Stealth\nWhen this attacks a hero, you may have target dagger you control deal 1 damage to them. If damage is dealt this way, the dagger has hit. Destroy the dagger.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT019",
+  "name": "Bite",
+  "cardType": "action",
+  "text": "Stealth\nWhen this attacks a hero, you may have target dagger you control deal 1 damage to them. If damage is dealt this way, the dagger has hit. Destroy the dagger.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT020",
+  "name": "Whittle from Bone",
+  "cardType": "action",
+  "text": "Stealth\nWhen this attacks a marked hero, equip a Graphene Chelicera token.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT021",
+  "name": "Whittle from Bone",
+  "cardType": "action",
+  "text": "Stealth\nWhen this attacks a marked hero, equip a Graphene Chelicera token.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT022",
+  "name": "Whittle from Bone",
+  "cardType": "action",
+  "text": "Stealth\nWhen this attacks a marked hero, equip a Graphene Chelicera token.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT023",
+  "name": "Stains of the Redback",
+  "cardType": "attack-reaction",
+  "text": "If the defending hero is marked, this costs {r} less to play.\nTarget attack with stealth gets +3{p} and go again.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT024",
+  "name": "Stains of the Redback",
+  "cardType": "attack-reaction",
+  "text": "If the defending hero is marked, this costs {r} less to play.\nTarget attack with stealth gets +2{p} and go again.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT025",
+  "name": "Stains of the Redback",
+  "cardType": "attack-reaction",
+  "text": "If the defending hero is marked, this costs {r} less to play.\nTarget attack with stealth gets +1{p} and go again.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT026",
+  "name": "Orb-Weaver Spinneret",
+  "cardType": "action",
+  "text": "Equip a Graphene Chelicera token.\nYour next attack with stealth this turn gets +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT027",
+  "name": "Orb-Weaver Spinneret",
+  "cardType": "action",
+  "text": "Equip a Graphene Chelicera token.\nYour next attack with stealth this turn gets +2{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT028",
+  "name": "Orb-Weaver Spinneret",
+  "cardType": "action",
+  "text": "Equip a Graphene Chelicera token.\nYour next attack with stealth this turn gets +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT029",
+  "name": "Back Stab",
+  "cardType": "action",
+  "text": "Stealth\nDefense reaction cards can't be played this chain link.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT030",
+  "name": "Defang the Dragon",
+  "cardType": "action",
+  "text": "Stealth\nContract - You are contracted to hit a marked hero named Fang. Whenever you complete this contract, draw a card.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth",
+   "Contract"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT031",
+  "name": "Extinguish the Flames",
+  "cardType": "action",
+  "text": "Stealth\nContract - You are contracted to hit a marked hero named Cindra. Whenever you complete this contract, draw a card.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth",
+   "Contract"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT032",
+  "name": "Mark of the Black Widow",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a marked hero, they banish a card from their hand.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT033",
+  "name": "Mark of the Black Widow",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a marked hero, they banish a card from their hand.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT034",
+  "name": "Mark of the Black Widow",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a marked hero, they banish a card from their hand.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT035",
+  "name": "Mark of the Funnel Web",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a marked hero, banish a card in their arsenal.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT036",
+  "name": "Mark of the Funnel Web",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a marked hero, banish a card in their arsenal.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT037",
+  "name": "Mark of the Funnel Web",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a marked hero, banish a card in their arsenal.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT038",
+  "name": "Mark the Prey",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, mark them.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth",
+   "Mark"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT039",
+  "name": "Mark the Prey",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, mark them.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth",
+   "Mark"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT040",
+  "name": "Mark the Prey",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, mark them.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth",
+   "Mark"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT041",
+  "name": "Plunge the Prospect",
+  "cardType": "action",
+  "text": "Stealth\nIf this is attacking a marked hero, this gets +1{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT042",
+  "name": "Plunge the Prospect",
+  "cardType": "action",
+  "text": "Stealth\nIf this is attacking a marked hero, this gets +1{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT043",
+  "name": "Plunge the Prospect",
+  "cardType": "action",
+  "text": "Stealth\nIf this is attacking a marked hero, this gets +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT044",
+  "name": "Reaper's Call",
+  "cardType": "action",
+  "text": "Stealth\nInstant - Discard this: Mark target opposing hero.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT045",
+  "name": "Reaper's Call",
+  "cardType": "action",
+  "text": "Stealth\nInstant - Discard this: Mark target opposing hero.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT046",
+  "name": "Reaper's Call",
+  "cardType": "action",
+  "text": "Stealth\nInstant - Discard this: Mark target opposing hero.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT047",
+  "name": "Scuttle the Canal",
+  "cardType": "action",
+  "text": "Stealth\nWhen this attacks a marked hero, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth",
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT048",
+  "name": "Scuttle the Canal",
+  "cardType": "action",
+  "text": "Stealth\nWhen this attacks a marked hero, this gets go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth",
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT049",
+  "name": "Scuttle the Canal",
+  "cardType": "action",
+  "text": "Stealth\nWhen this attacks a marked hero, this gets go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth",
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT050",
+  "name": "Razor's Edge",
+  "cardType": "attack-reaction",
+  "text": "Target attack action card with stealth gets +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT051",
+  "name": "Two Sides to the Blade",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target dagger attack gets +3{p}.\n- Target attack action card with stealth gets +3{p} and \"When this hits a hero, mark them.\"",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT052",
+  "name": "Hunted or Hunter",
+  "cardType": "defense-reaction",
+  "text": "When this defends and the attacking hero has played or activated an attack reaction this chain link, they lose 1{h}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT053",
+  "name": "Graphene Chelicera",
+  "cardType": "weapon",
+  "text": "Stealth\nOnce per Turn Action - {r}: Attack\nWhen this attacks a marked hero, the attack gets go again.",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Stealth",
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT054",
+  "name": "Cindra, Dracai of Retribution",
+  "cardType": "hero",
+  "text": "Whenever you hit a marked hero, create a Fealty token.\nOnce per Turn Instant - {r}{r}{r}: Equip up to 2 Draconic daggers from your graveyard. This costs {r} less to activate for each Draconic chain link you control.",
+  "classes": [
+   "royal",
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "HNT"
+ },
+ {
+  "id": "HNT055",
+  "name": "Cindra",
+  "cardType": "hero",
+  "text": "Whenever you hit a marked hero, create a Fealty token.\nOnce per Turn Instant - {r}{r}{r}: Equip up to 2 Draconic daggers from your graveyard. This costs {r} less to activate for each Draconic chain link you control.",
+  "classes": [
+   "royal",
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "HNT"
+ },
+ {
+  "id": "HNT056",
+  "name": "Kunai of Retribution",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}, destroy this when the combat chain closes: Attack. Go again",
+  "attack": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "dagger",
+   "1h"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT057",
+  "name": "Blood Runs Deep",
+  "cardType": "action",
+  "text": "This costs {r} less to play for each Draconic chain link you control.\nWhen this attacks a hero, each dagger you control deals 1 damage to them. If damage is dealt this way, the dagger has hit. Destroy the daggers.\nGo again",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT058",
+  "name": "Ignite",
+  "cardType": "action",
+  "text": "When this attacks, the next Draconic card you play or activate this combat chain costs {r} less to play or activate.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT059",
+  "name": "Demonstrate Devotion",
+  "cardType": "action",
+  "text": "If you control 2 or more Draconic chain links, this gets go again and \"When this attacks a hero, create a Fealty token.\"",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT060",
+  "name": "Display Loyalty",
+  "cardType": "action",
+  "text": "If you control 2 or more Draconic chain links, this gets go again and \"When this attacks a hero, create a Fealty token.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT061",
+  "name": "Wrath of Retribution",
+  "cardType": "action",
+  "text": "Legendary\nThis costs {r} less to play for each Draconic chain link you control.\nWhen this attacks, daggers you control get +1{p} and cost {r} less to activate this combat chain.\nGo again",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Legendary",
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT062",
+  "name": "Blood Drop",
+  "cardType": "action",
+  "text": "This costs {r} less to play for each Draconic chain link you control.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT063",
+  "name": "Blood Line",
+  "cardType": "action",
+  "text": "This costs {r} less to play for each Draconic chain link you control.\nGo again",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT064",
+  "name": "Burning Blade Dance",
+  "cardType": "action",
+  "text": "If you control 2 or more Draconic chain links, this gets go again and \"When this hits a hero, you may have target dagger you control deal 1 damage to them. If damage is dealt this way, the dagger has hit. Destroy the dagger.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT065",
+  "name": "Cinderskin Devotion",
+  "cardType": "action",
+  "text": "If you control 2 or more Draconic chain links, this gets go again.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT066",
+  "name": "Dust Runner Outlaw",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT067",
+  "name": "Hot on Their Heels",
+  "cardType": "action",
+  "text": "If you control 2 or more Draconic chain links, this gets go again and \"When this hits a hero, mark them.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Mark"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT068",
+  "name": "Lava Vein Loyalty",
+  "cardType": "action",
+  "text": "If you control 2 or more Draconic chain links, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT069",
+  "name": "Mark with Magma",
+  "cardType": "action",
+  "text": "If you control 2 or more Draconic chain links, this gets go again and \"When this hits a hero, mark them.\"",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Mark"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT070",
+  "name": "Ronin Renegade",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT071",
+  "name": "Art of the Dragon: Blood",
+  "cardType": "action",
+  "text": "When this attacks, if it is Draconic, it gets go again and the next 3 Draconic cards you play this turn cost {r} less to play.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT072",
+  "name": "Devotion Never Dies",
+  "cardType": "action",
+  "text": "When this hits, if a Draconic attack was the last attack this combat chain, banish this. If you do, you may play it this turn.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT073",
+  "name": "Prowess of Agility",
+  "cardType": "action",
+  "text": "When you attack for the fourth time during a turn, you may destroy this. If you do, draw a card.\nAt the beginning of your end phase, if you've attacked less than 3 times this turn, destroy this.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT074",
+  "name": "Art of the Dragon: Claw",
+  "cardType": "action",
+  "text": "When this attacks, if it is Draconic, it gets \"When this hits a hero, destroy all cards in their arsenal.\"",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT075",
+  "name": "Art of the Dragon: Fire",
+  "cardType": "action",
+  "text": "When this attacks, if it is Draconic, deal 2 damage to any target.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT076",
+  "name": "Art of the Dragon: Scale",
+  "cardType": "action",
+  "text": "When this attacks, if it is Draconic, it gets \"When this hits a hero, put a -1{d} counter on an equipment they control. Then if it has 0{d}, destroy it.\"",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT077",
+  "name": "Dragon Power",
+  "cardType": "action",
+  "text": "When this attacks, if it is Draconic, it gets +3{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT078",
+  "name": "Dragon Power",
+  "cardType": "action",
+  "text": "When this attacks, if it is Draconic, it gets +3{p}.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT079",
+  "name": "Dragon Power",
+  "cardType": "action",
+  "text": "When this attacks, if it is Draconic, it gets +3{p}.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT080",
+  "name": "Silver Talons",
+  "cardType": "action",
+  "text": "When this attacks a hero, if it is Draconic, you may have target dagger you control deal 1 damage to them. If damage is dealt this way, the dagger has hit. Destroy the dagger.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT081",
+  "name": "Silver Talons",
+  "cardType": "action",
+  "text": "When this attacks a hero, if it is Draconic, you may have target dagger you control deal 1 damage to them. If damage is dealt this way, the dagger has hit. Destroy the dagger.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT082",
+  "name": "Silver Talons",
+  "cardType": "action",
+  "text": "When this attacks a hero, if it is Draconic, you may have target dagger you control deal 1 damage to them. If damage is dealt this way, the dagger has hit. Destroy the dagger.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT083",
+  "name": "Fire Tenet: Strike First",
+  "cardType": "action",
+  "text": "When this attacks, your next Draconic attack this combat chain gets +1{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT084",
+  "name": "Fire Tenet: Strike First",
+  "cardType": "action",
+  "text": "When this attacks, your next Draconic attack this combat chain gets +1{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT085",
+  "name": "Fire Tenet: Strike First",
+  "cardType": "action",
+  "text": "When this attacks, your next Draconic attack this combat chain gets +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT086",
+  "name": "Grow Claws",
+  "cardType": "action",
+  "text": "If a Draconic attack was the last attack this combat chain, this gets +1{p}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT087",
+  "name": "Grow Claws",
+  "cardType": "action",
+  "text": "If a Draconic attack was the last attack this combat chain, this gets +1{p}.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT088",
+  "name": "Grow Claws",
+  "cardType": "action",
+  "text": "If a Draconic attack was the last attack this combat chain, this gets +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT089",
+  "name": "Grow Wings",
+  "cardType": "action",
+  "text": "If a Draconic attack was the last attack this combat chain, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT090",
+  "name": "Grow Wings",
+  "cardType": "action",
+  "text": "If a Draconic attack was the last attack this combat chain, this gets go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT091",
+  "name": "Grow Wings",
+  "cardType": "action",
+  "text": "If a Draconic attack was the last attack this combat chain, this gets go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT092",
+  "name": "Tag the Target",
+  "cardType": "action",
+  "text": "When this hits a hero, mark them.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Mark"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT093",
+  "name": "Tag the Target",
+  "cardType": "action",
+  "text": "When this hits a hero, mark them.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Mark"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT094",
+  "name": "Tag the Target",
+  "cardType": "action",
+  "text": "When this hits a hero, mark them.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Mark"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT095",
+  "name": "Trap and Release",
+  "cardType": "action",
+  "text": "When this hits a hero, mark them.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Mark"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT096",
+  "name": "Trap and Release",
+  "cardType": "action",
+  "text": "When this hits a hero, mark them.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Mark"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT097",
+  "name": "Trap and Release",
+  "cardType": "action",
+  "text": "When this hits a hero, mark them.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Mark"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT098",
+  "name": "Fang, Dracai of Blades",
+  "cardType": "hero",
+  "text": "Whenever you hit a marked hero, create a Fealty token.\nIf you control 3 or more Fealty tokens, dagger attacks cost you {r} less to activate.",
+  "classes": [
+   "royal",
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "HNT"
+ },
+ {
+  "id": "HNT099",
+  "name": "Fang",
+  "cardType": "hero",
+  "text": "Whenever you hit a marked hero, create a Fealty token.\nIf you control 3 or more Fealty tokens, dagger attacks cost you {r} less to activate.",
+  "classes": [
+   "royal",
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "HNT"
+ },
+ {
+  "id": "HNT100",
+  "name": "Obsidian Fire Vein",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack. If you've played a Draconic card this chain link, this attack gets +1{p} and go again.",
+  "attack": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic",
+   "dagger",
+   "1h"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT101",
+  "name": "Hunt's End",
+  "cardType": "attack-reaction",
+  "text": "Play this only if you control 3 or more Fealty tokens.\nTarget dagger attack gets +4{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT102",
+  "name": "Long Whisker Loyalty",
+  "cardType": "attack-reaction",
+  "text": "For each Draconic chain link you control, choose 1;\n\nTarget dagger attack gains +2{p}.\nYou may attack with target dagger an additional time this turn.\nThe next time target dagger hits a hero this turn, mark them.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT103",
+  "name": "Affirm Loyalty",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +2{p}. If you control 2 or more Draconic chain links, create a Fealty token.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT104",
+  "name": "Endear Devotion",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +3{p}. If you control 2 or more Draconic chain links, create a Fealty token.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT105",
+  "name": "Fire and Brimstone",
+  "cardType": "attack-reaction",
+  "text": "Legendary\nThis costs {r} less to play for each Draconic chain link you control.\nDaggers you control get +1{p} and you may attack with each of them an additional time this turn.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "keywords": [
+   "Legendary"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT106",
+  "name": "Blistering Blade",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +2{p}. If you control 2 or more Draconic chain links, instead it gets +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT107",
+  "name": "Brothers of Flame",
+  "cardType": "attack-reaction",
+  "text": "Play this only if you control 2 or more Draconic chain links.\nTarget dagger attack gets +4{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT108",
+  "name": "Dynastic Dedication",
+  "cardType": "attack-reaction",
+  "text": "This costs {r} less to play for each Draconic chain link you control.\nTarget dagger attack gets +3{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT109",
+  "name": "Imperial Intent",
+  "cardType": "attack-reaction",
+  "text": "This costs {r} less to play for each Draconic chain link you control.\nTarget dagger attack gets +2{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT110",
+  "name": "Scalding Iron",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +X{p}, where X is the number of Draconic chain links you control.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT111",
+  "name": "Searing Gaze",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +2{p}. If you control 2 or more Draconic chain links, it gets \"When this hits a hero, mark them.\"",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT112",
+  "name": "Sisters of Fire",
+  "cardType": "attack-reaction",
+  "text": "Play this only if you control 2 or more Draconic chain links.\nTarget dagger attack gets +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT113",
+  "name": "Sizzling Steel",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +3{p}. If you control 2 or more Draconic chain links, instead it gets +4{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT114",
+  "name": "Stabbing Pain",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +3{p}. If you control 2 or more Draconic chain links, it gets \"When this hits a hero, mark them.\"",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT115",
+  "name": "Kabuto of Imperial Authority",
+  "cardType": "equipment",
+  "text": "When this defends, until end of turn, opponents can't attack with weapons.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT116",
+  "name": "Jagged Edge",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets +3{p} and \"Damage this would deal can't be prevented.\"",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT117",
+  "name": "Provoke",
+  "cardType": "attack-reaction",
+  "text": "If you're attacking with a weapon this chain link, the defending hero reveals a card from their hand. If it's an action card, add it to this chain link as a defending card, otherwise they discard it.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT118",
+  "name": "Sharpened Senses",
+  "cardType": "action",
+  "text": "Go again\nYour weapon attacks get +1{p}. If their {p} is greater than twice their base, they get go again.\nAt the beginning of your end phase, destroy this.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT119",
+  "name": "Diced",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +1{p}.\nYour next dagger attack this turn gets +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT120",
+  "name": "Diced",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +1{p}.\nYour next dagger attack this turn gets +2{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT121",
+  "name": "Diced",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +1{p}.\nYour next dagger attack this turn gets +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT122",
+  "name": "Twist and Turn",
+  "cardType": "action",
+  "text": "Your next dagger attack this turn gets +4{p} and \"When this hits, you may attack with it an additional time this turn.\"\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT123",
+  "name": "Twist and Turn",
+  "cardType": "action",
+  "text": "Your next dagger attack this turn gets +3{p} and \"When this hits, you may attack with it an additional time this turn.\"\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT124",
+  "name": "Twist and Turn",
+  "cardType": "action",
+  "text": "Your next dagger attack this turn gets +2{p} and \"When this hits, you may attack with it an additional time this turn.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT125",
+  "name": "Agility Stance",
+  "cardType": "action",
+  "text": "Go again\nAt the start of your turn, destroy this, then your dagger attacks get go again this turn.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT126",
+  "name": "Flurry Stance",
+  "cardType": "action",
+  "text": "Go again\nAt the start of your turn, destroy this, then you may attack with each dagger you control an additional time this turn.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT127",
+  "name": "Power Stance",
+  "cardType": "action",
+  "text": "Go again\nAt the start of your turn, destroy this, then your dagger attacks get +1{p} this turn.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT128",
+  "name": "Cut Deep",
+  "cardType": "action",
+  "text": "Your next dagger attack this turn gets +4{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT129",
+  "name": "Cut Deep",
+  "cardType": "action",
+  "text": "Your next dagger attack this turn gets +3{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT130",
+  "name": "Cut Deep",
+  "cardType": "action",
+  "text": "Your next dagger attack this turn gets +2{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT131",
+  "name": "Hunt a Killer",
+  "cardType": "action",
+  "text": "Your next dagger attack this turn gets +4{p} and \"When this hits a hero, mark them.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT132",
+  "name": "Hunt a Killer",
+  "cardType": "action",
+  "text": "Your next dagger attack this turn gets +3{p} and \"When this hits a hero, mark them.\"\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT133",
+  "name": "Hunt a Killer",
+  "cardType": "action",
+  "text": "Your next dagger attack this turn gets +2{p} and \"When this hits a hero, mark them.\"\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT134",
+  "name": "Knife Through Butter",
+  "cardType": "action",
+  "text": "Your next dagger attack this turn gets +4{p}.\nWhenever you attack a marked hero this turn, the attack gets go again.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT135",
+  "name": "Knife Through Butter",
+  "cardType": "action",
+  "text": "Your next dagger attack this turn gets +3{p}.\nWhenever you attack a marked hero this turn, the attack gets go again.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT136",
+  "name": "Knife Through Butter",
+  "cardType": "action",
+  "text": "Your next dagger attack this turn gets +2{p}.\nWhenever you attack a marked hero this turn, the attack gets go again.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT137",
+  "name": "Point of Engagement",
+  "cardType": "action",
+  "text": "Your next dagger attack this turn gets +3{p}.\nUntil end of turn, your attacks get +1{p} while attacking a marked hero.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT138",
+  "name": "Point of Engagement",
+  "cardType": "action",
+  "text": "Your next dagger attack this turn gets +2{p}.\nUntil end of turn, your attacks get +1{p} while attacking a marked hero.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT139",
+  "name": "Point of Engagement",
+  "cardType": "action",
+  "text": "Your next dagger attack this turn gets +1{p}.\nUntil end of turn, your attacks get +1{p} while attacking a marked hero.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT140",
+  "name": "Sworn Vengeance",
+  "cardType": "action",
+  "text": "Your next dagger attack this turn gets +3{p} and \"When this hits a hero, mark them.\"\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT141",
+  "name": "Sworn Vengeance",
+  "cardType": "action",
+  "text": "Your next dagger attack this turn gets +2{p} and \"When this hits a hero, mark them.\"\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT142",
+  "name": "Sworn Vengeance",
+  "cardType": "action",
+  "text": "Your next dagger attack this turn gets +1{p} and \"When this hits a hero, mark them.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT143",
+  "name": "Dragonscaler Flight Path",
+  "cardType": "equipment",
+  "text": "Instant - {r}{r}{r}, destroy this: Target Draconic attack gets go again. If it's a weapon or ally attack, you may attack with it an additional time this turn. This ability costs {r} less to activate for each Draconic chain link you control.\nBattleworn",
+  "defense": 1,
+  "subtypes": [
+   "draconic",
+   "legs"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT144",
+  "name": "Vow of Vengeance",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy this: Mark target Arakni.\nBlade Break",
+  "defense": 1,
+  "subtypes": [
+   "draconic",
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT145",
+  "name": "Heart of Vengeance",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Your next attack this turn that targets Arakni costs {r} less to play or activate.\nBlade Break",
+  "defense": 1,
+  "subtypes": [
+   "draconic",
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT146",
+  "name": "Hand of Vengeance",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy this: Target attack that is attacking Arakni gets +1{p}.\nBlade Break",
+  "defense": 1,
+  "subtypes": [
+   "draconic",
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT147",
+  "name": "Path of Vengeance",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy this: Target attack that is attacking Arakni gets go again.\nBlade Break",
+  "defense": 1,
+  "subtypes": [
+   "draconic",
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT148",
+  "name": "Coat of Allegiance",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Gain {r}. Until end of turn, you may only play cards that are Draconic. Go again",
+  "defense": 0,
+  "subtypes": [
+   "draconic",
+   "chest"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT149",
+  "name": "Oath of Loyalty",
+  "cardType": "action",
+  "text": "This may only be played if it's the first action of your turn.\nWhen this is played, until end of turn, you may only play cards that are Draconic.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT150",
+  "name": "Loyalty Beyond the Grave",
+  "cardType": "defense-reaction",
+  "text": "While this is in your graveyard, at the start of your turn, you may banish 2 cards named Loyalty Beyond the Grave from your graveyard. If you do, draw a card.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT151",
+  "name": "Compounding Anger",
+  "cardType": "action",
+  "text": "This costs {r} less to play for each Draconic chain link you control.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT152",
+  "name": "Hunt to the Ends of Rathe",
+  "cardType": "action",
+  "text": "When this attacks Arakni, mark them.\nIf this is attacking a marked hero, this gets +2{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Mark",
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT153",
+  "name": "March of Loyalty",
+  "cardType": "action",
+  "text": "If you've created a Fealty token this turn, this gets go again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT154",
+  "name": "Bubble to the Surface",
+  "cardType": "instant",
+  "text": "This costs {r} less to play for each Draconic chain link you control.\nReveal cards from the top of your deck until you've revealed a red card. Banish it. You may play it this turn. Shuffle.",
+  "pitch": 1,
+  "cost": 2,
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT155",
+  "name": "Drop of Dragon Blood",
+  "cardType": "instant",
+  "text": "Legendary\nThis costs {r} less to play for each Draconic chain link you control.\nGain {r}. Draw a card.",
+  "pitch": 1,
+  "cost": 2,
+  "subtypes": [
+   "draconic"
+  ],
+  "keywords": [
+   "Legendary"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT156",
+  "name": "Rake Over the Coals",
+  "cardType": "instant",
+  "text": "Draconic attacks get +1{p} this turn.",
+  "pitch": 1,
+  "cost": 0,
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT157",
+  "name": "Blaze Headlong",
+  "cardType": "action",
+  "text": "If you've played another red card this turn, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT158",
+  "name": "For the Dracai",
+  "cardType": "action",
+  "text": "When this attacks a marked hero, create a Fealty token.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT159",
+  "name": "For the Emperor",
+  "cardType": "action",
+  "text": "When this attacks a marked hero, create a Fealty token.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT160",
+  "name": "For the Realm",
+  "cardType": "action",
+  "text": "When this attacks a marked hero, create a Fealty token.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT161",
+  "name": "Hunt the Hunter",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you've played another red card this turn, mark them.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Mark"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT162",
+  "name": "Smoke Out",
+  "cardType": "defense-reaction",
+  "text": "When this defends a red card, mark the attacking hero.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "draconic"
+  ],
+  "keywords": [
+   "Mark"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT163",
+  "name": "Blessing of Vynserakai",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy this, then your next attack this turn is Draconic and gets +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "draconic",
+   "aura"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT164",
+  "name": "Pledge Fealty",
+  "cardType": "instant",
+  "text": "Create a Fealty token.",
+  "pitch": 1,
+  "cost": 0,
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT165",
+  "name": "Proclaim Vengeance",
+  "cardType": "instant",
+  "text": "Mark target opposing hero. If that hero is Arakni, gain {r}.",
+  "pitch": 1,
+  "cost": 0,
+  "subtypes": [
+   "draconic"
+  ],
+  "keywords": [
+   "Mark"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT166",
+  "name": "Tooth of the Dragon",
+  "cardType": "instant",
+  "text": "Your next Draconic attack this turn gets +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT167",
+  "name": "Fealty",
+  "cardType": "token",
+  "text": "Instant - Destroy this: The next card you play this turn is Draconic. At the beginning of your end phase, if you haven't created a Fealty token or played a Dragonic card this turn, destroy this.",
+  "subtypes": [
+   "draconic",
+   "aura"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT168",
+  "name": "Blood Splattered Vest",
+  "cardType": "equipment",
+  "text": "Whenever a dagger you control hits, you may gain {r} and put a stain counter on this. Then if there are 3 or more stain counters on this, destroy it.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT169",
+  "name": "Leap Frog Vocal Sac",
+  "cardType": "equipment",
+  "text": "When an opponent plays or activates an attack reaction, you may add this to the active chain link as a defending card.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT170",
+  "name": "Leap Frog Slime Skin",
+  "cardType": "equipment",
+  "text": "When an opponent plays or activates an attack reaction, you may add this to the active chain link as a defending card.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT171",
+  "name": "Leap Frog Gloves",
+  "cardType": "equipment",
+  "text": "When an opponent plays or activates an attack reaction, you may add this to the active chain link as a defending card.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT172",
+  "name": "Leap Frog Leggings",
+  "cardType": "equipment",
+  "text": "When an opponent plays or activates an attack reaction, you may add this to the active chain link as a defending card.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT173",
+  "name": "Danger Digits",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy this: Target dagger you control that isn't on the active chain link deals 1 damage to the defending hero. If damage is dealt this way, the dagger has hit. Destroy the dagger.",
+  "defense": 0,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT174",
+  "name": "Pain in the Backside",
+  "cardType": "action",
+  "text": "When this hits a hero, target dagger you control deals 1 damage to them. If damage is dealt this way, the dagger has hit.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT175",
+  "name": "Throw Dagger",
+  "cardType": "attack-reaction",
+  "text": "Target dagger you control that isn't on the active chain link deals 1 damage to the defending hero. If damage is dealt this way, the dagger has hit and you draw a card. Destroy the dagger.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT176",
+  "name": "Cut Through",
+  "cardType": "action",
+  "text": "If you've hit with a dagger this combat chain, this gets +1{p} and go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT177",
+  "name": "Cut Through",
+  "cardType": "action",
+  "text": "If you've hit with a dagger this combat chain, this gets +1{p} and go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT178",
+  "name": "Cut Through",
+  "cardType": "action",
+  "text": "If you've hit with a dagger this combat chain, this gets +1{p} and go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT179",
+  "name": "Up Sticks and Run",
+  "cardType": "action",
+  "text": "You may retrieve a dagger from your graveyard.\nYour next dagger attack this turn gets +4{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "keywords": [
+   "Go again",
+   "Retrieve"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT180",
+  "name": "Up Sticks and Run",
+  "cardType": "action",
+  "text": "You may retrieve a dagger from your graveyard.\nYour next dagger attack this turn gets +3{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "keywords": [
+   "Go again",
+   "Retrieve"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT181",
+  "name": "Up Sticks and Run",
+  "cardType": "action",
+  "text": "You may retrieve a dagger from your graveyard.\nYour next dagger attack this turn gets +2{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "keywords": [
+   "Go again",
+   "Retrieve"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT182",
+  "name": "Pick Up the Point",
+  "cardType": "action",
+  "text": "When this attacks, you may retrieve a dagger from your graveyard.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Retrieve"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT183",
+  "name": "Pick Up the Point",
+  "cardType": "action",
+  "text": "When this attacks, you may retrieve a dagger from your graveyard.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Retrieve"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT184",
+  "name": "Pick Up the Point",
+  "cardType": "action",
+  "text": "When this attacks, you may retrieve a dagger from your graveyard.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Retrieve"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT185",
+  "name": "Poisoned Blade",
+  "cardType": "action",
+  "text": "Whenever a dagger you own hits a hero this combat chain, they lose 1{h}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT186",
+  "name": "Poisoned Blade",
+  "cardType": "action",
+  "text": "Whenever a dagger you own hits a hero this combat chain, they lose 1{h}.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT187",
+  "name": "Poisoned Blade",
+  "cardType": "action",
+  "text": "Whenever a dagger you own hits a hero this combat chain, they lose 1{h}.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT188",
+  "name": "Throw Yourself at Them",
+  "cardType": "action",
+  "text": "When this attacks a hero, you may have target dagger you control deal 1 damage to them. If damage is dealt this way, the dagger has hit. Destroy the dagger.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT189",
+  "name": "Throw Yourself at Them",
+  "cardType": "action",
+  "text": "When this attacks a hero, you may have target dagger you control deal 1 damage to them. If damage is dealt this way, the dagger has hit. Destroy the dagger.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT190",
+  "name": "Throw Yourself at Them",
+  "cardType": "action",
+  "text": "When this attacks a hero, you may have target dagger you control deal 1 damage to them. If damage is dealt this way, the dagger has hit. Destroy the dagger.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT191",
+  "name": "Lair of the Spider",
+  "cardType": "defense-reaction",
+  "text": "When this defends an attack with go again, mark the attacking hero.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "keywords": [
+   "Mark"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT192",
+  "name": "Red Alert Visor",
+  "cardType": "equipment",
+  "text": "If an attack reaction has been played or activated this chain link, this gets +1{d}.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT193",
+  "name": "Red Alert Vest",
+  "cardType": "equipment",
+  "text": "If an attack reaction has been played or activated this chain link, this gets +1{d}.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT194",
+  "name": "Red Alert Gloves",
+  "cardType": "equipment",
+  "text": "If an attack reaction has been played or activated this chain link, this gets +1{d}.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT195",
+  "name": "Red Alert Boots",
+  "cardType": "equipment",
+  "text": "If an attack reaction has been played or activated this chain link, this gets +1{d}.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT196",
+  "name": "Starting Point",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy this: Target attack gets go again. Activate this only if you've played a card or activated an ability this reaction step.",
+  "defense": 0,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT197",
+  "name": "Perforate",
+  "cardType": "attack-reaction",
+  "text": "You may attack with target dagger an additional time and its attacks cost you {r} less to activate this turn.\nDraw a card.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT198",
+  "name": "Savor Bloodshed",
+  "cardType": "action",
+  "text": "Your next dagger attack this turn gets +4{p}.\nThe next time you hit a marked hero with a dagger this turn, draw a card.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT199",
+  "name": "To the Point",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +3{p}. If the defending hero is marked, instead it gets +4{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT200",
+  "name": "To the Point",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +2{p}. If the defending hero is marked, instead it gets +3{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT201",
+  "name": "To the Point",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +1{p}. If the defending hero is marked, instead it gets +2{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT202",
+  "name": "Cut from the Same Cloth",
+  "cardType": "action",
+  "text": "Target opposing hero reveals their hand. If an attack reaction card is revealed this way, mark them.\nYour next dagger attack this turn gets +4{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "keywords": [
+   "Mark",
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT203",
+  "name": "Cut from the Same Cloth",
+  "cardType": "action",
+  "text": "Target opposing hero reveals their hand. If an attack reaction card is revealed this way, mark them.\nYour next dagger attack this turn gets +3{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "keywords": [
+   "Mark",
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT204",
+  "name": "Cut from the Same Cloth",
+  "cardType": "action",
+  "text": "Target opposing hero reveals their hand. If an attack reaction card is revealed this way, mark them.\nYour next dagger attack this turn gets +2{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "keywords": [
+   "Mark",
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT205",
+  "name": "Incision",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT206",
+  "name": "Incision",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +2{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT207",
+  "name": "Incision",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT208",
+  "name": "Scar Tissue",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +3{p} and \"When this hits a hero, mark them.\"",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT209",
+  "name": "Scar Tissue",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +2{p} and \"When this hits a hero, mark them.\"",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT210",
+  "name": "Scar Tissue",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +1{p} and \"When this hits a hero, mark them.\"",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT211",
+  "name": "Take a Stab",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +3{p} and \"When this hits a marked hero, you may attack with it an additional time this turn.\"",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT212",
+  "name": "Take a Stab",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +2{p} and \"When this hits a marked hero, you may attack with it an additional time this turn.\"",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT213",
+  "name": "Take a Stab",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +1{p} and \"When this hits a marked hero, you may attack with it an additional time this turn.\"",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT214",
+  "name": "Den of the Spider",
+  "cardType": "defense-reaction",
+  "text": "When this defends an attack with {p} greater than its base, mark the attacking hero.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT215",
+  "name": "Quickdodge Flexors",
+  "cardType": "equipment",
+  "text": "Defense Reaction - {r}: Add this to the active chain link as a defending card. It has 2 base {d} this chain link.\nAt the beginning of the end phase, if this defendend this turn, destroy it.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT216",
+  "name": "Blade Beckoner Helm",
+  "cardType": "equipment",
+  "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT217",
+  "name": "Blade Beckoner Plating",
+  "cardType": "equipment",
+  "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT218",
+  "name": "Blade Beckoner Gauntlets",
+  "cardType": "equipment",
+  "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT219",
+  "name": "Blade Beckoner Boots",
+  "cardType": "equipment",
+  "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT220",
+  "name": "Bunker Beard",
+  "cardType": "equipment",
+  "text": "Defense Reaction - Destroy this: You may add an action card from your arsenal to the active chain link as a defending card.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT221",
+  "name": "Rotten Remains",
+  "cardType": "action",
+  "text": "When this attacks, you may banish a card with 1{p} from each hero's graveyard. If you do, this gets +1{p}, then repeat this process.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT222",
+  "name": "Shelter from the Storm",
+  "cardType": "defense-reaction",
+  "text": "Instant - Discard this: The next 3 times you would be dealt damage this turn, prevent 1 of that damage.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 4,
+  "classes": [
+   "generic"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT223",
+  "name": "Dual Threat",
+  "cardType": "action",
+  "text": "If you've attacked with a weapon this turn, the next attack action card you play this turn gets +3{p}.\nIf you've attacked with an attack action card this turn, your next weapon attack this turn gets +3{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT224",
+  "name": "Pursue to the Edge of Oblivion",
+  "cardType": "action",
+  "text": "When this hits a hero, mark them.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Mark"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT225",
+  "name": "Pursue to the Pits of Despair",
+  "cardType": "action",
+  "text": "When this hits a hero, mark them.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Mark"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT226",
+  "name": "Sound the Alarm",
+  "cardType": "action",
+  "text": "When this attacks a hero, they reveal their hand. If an attack reaction card is revealed this way, you may search your deck for a defense reaction card, reveal it, then shuffle and put it on top.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT227",
+  "name": "Razor Reflex",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target dagger or sword weapon attack gets +3{p}.\n- Target attack action card with cost 1 or less gets +3{p} and \"When this hits, it gets go again.\"",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT228",
+  "name": "Imperial Seal of Command",
+  "cardType": "action",
+  "text": "Legendary\nAction - Destroy this: Defense reaction cards can't be played this turn. If you are Royal, the next time you hit a hero this turn, destroy all cards in their arsenal. Go again",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Legendary"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT229",
+  "name": "Relentless Pursuit",
+  "cardType": "action",
+  "text": "Mark target opposing hero.\nIf you've attacked them this turn, put this on the bottom of its owner's deck.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Mark",
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT230",
+  "name": "Calming Breeze",
+  "cardType": "instant",
+  "text": "The next 3 times you would be dealt damage this turn, prevent 1 of that damage.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT231",
+  "name": "Sigil of Solace",
+  "cardType": "instant",
+  "text": "Gain 3{h}",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT232",
+  "name": "Tip-Off",
+  "cardType": "action",
+  "text": "Instant - Discard this: Mark target opposing hero.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT233",
+  "name": "Tip-Off",
+  "cardType": "action",
+  "text": "Instant - Discard this: Mark target opposing hero.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT234",
+  "name": "Tip-Off",
+  "cardType": "action",
+  "text": "Instant - Discard this: Mark target opposing hero.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT235",
+  "name": "Outed",
+  "cardType": "action",
+  "text": "If you are marked, you can't play this.\nIf the defending hero is marked, this gets +1{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT236",
+  "name": "Lay Low",
+  "cardType": "defense-reaction",
+  "text": "If you are marked, you can't play this.\nIf the defending hero is marked, their next attack this turn gets -1{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT237",
+  "name": "Exposed",
+  "cardType": "attack-reaction",
+  "text": "If you are marked, you can't play this.\nTarget attack gets +1{p}.\nMark the defending hero.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Mark"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT238",
+  "name": "Put in Context",
+  "cardType": "defense-reaction",
+  "text": "This can only defend an attack with 3 or less base {p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT239",
+  "name": "Nip at the Heels",
+  "cardType": "attack-reaction",
+  "text": "Target attack with 3 or less base {p} gets +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT240",
+  "name": "Trot Along",
+  "cardType": "action",
+  "text": "Your next attack with 3 or less base {p} this turn gets go again.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT241",
+  "name": "Public Bounty",
+  "cardType": "action",
+  "text": "Mark target opposing hero.\nThe next time you attack a marked hero this turn, the attack gets +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Mark",
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT242",
+  "name": "Public Bounty",
+  "cardType": "action",
+  "text": "Mark target opposing hero.\nThe next time you attack a marked hero this turn, the attack gets +2{p}.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Mark",
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT243",
+  "name": "Public Bounty",
+  "cardType": "action",
+  "text": "Mark target opposing hero.\nThe next time you attack a marked hero this turn, the attack gets +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Mark",
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT244",
+  "name": "Marked",
+  "cardType": "token",
+  "text": "You are marked until an opponent hits you",
+  "keywords": [
+   "Mark"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT245",
+  "name": "Cracked Bauble",
+  "cardType": "resource",
+  "text": "(A player may add any number of Cracked Baubles to their card-pool in sealed deck or booster draft formats.)",
+  "pitch": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT246",
+  "name": "Thick Hide Hunter",
+  "cardType": "action",
+  "text": "When this attacks or defends, discard a random card.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 6,
+  "defense": 6,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT247",
+  "name": "Tremorshield Sabatons",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Prevent the next 1 arcane damage that would be dealt to you this turn. If you've controlled a Seismic Surge token this turn, instead prevent the next 2.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT248",
+  "name": "Roiling Fissure",
+  "cardType": "action",
+  "text": "Destroy an aura with cost X or less, then you may destroy a Seismic Surge you control. If you do, repeat this process.\nGo again",
+  "pitch": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT249",
+  "name": "Retrace the Past",
+  "cardType": "action",
+  "text": "Katsu Specialization\nCombo - When this attacks, if a card with Gustwave in its name was the last attack this combat chain, name a card, then this gets that name, +2{p}, and go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Katsu Specialization",
+   "Combo"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT250",
+  "name": "Misfire Dampener",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Prevent the next 1 arcane damage that would be dealt to you this turn. If you've boosted this turn, instead prevent the next 2.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT251",
+  "name": "Null Time Zone",
+  "cardType": "action",
+  "text": "Crank\nThis enters the arena with 2 steam counters. At the start of your turn, destroy this unless you remove a steam counter from it.\nWhen this enters the arena, name a card. The named card can't be pitched or played from hand while this is in the arena.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Crank"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT252",
+  "name": "Enchanted Quiver",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Prevent the next 1 arcane damage that would be dealt to you this turn. If there is a face-up arrow in your arsenal, instead prevent the next 2.",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "quiver"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT253",
+  "name": "Chain Reaction",
+  "cardType": "defense-reaction",
+  "text": "When this defends an attack with go again, you may turn a non-attack action card in your arsenal face-up. If you do, you may play it this turn as though it were an instant.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT254",
+  "name": "Douse in Runeblood",
+  "cardType": "action",
+  "text": "When this attacks, create Runechant tokens equal to the number of non-attack action cards you've played this turn. If 3 or more Runechants are created this way, this gets go again.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT255",
+  "name": "Spur Locked",
+  "cardType": "action",
+  "text": "Each hero secretly chooses a number between 1 and 6, then those numbers are revealed. The hero that chose the highest number loses that much {h}, searches their deck for a card with cost less than or equal to the chosen number, reveales it, puts it in their hand, then shuffles.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "chaos"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT256",
+  "name": "Ring of Roses",
+  "cardType": "action",
+  "text": "Legendary Verdance Specialization\nThe first time you deal arcane damage each turn, gain 1{h}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "earth",
+   "aura"
+  ],
+  "keywords": [
+   "Legendary",
+   "Verdance Specialization"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT257",
+  "name": "War Cry of Themis",
+  "cardType": "action",
+  "text": "Your next angel attack this turn gets +4{p}.\nGo again\nInstant - Discard this, banish X cards from your soul: Turn X target cards in a banished zone face-down.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT258",
+  "name": "War Cry of Bellona",
+  "cardType": "attack-reaction",
+  "text": "Target Raydn gets +2{p} this turn.\nInstant - Discard this, banish X cards from your soul: The next time target weapon deals X or less damage to you this turn, deal that much damage to its controller and that damage can't be prevented.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT259",
+  "name": "Cull",
+  "cardType": "action",
+  "text": "You may play this from your banished zone.\nIf a hero has lost {h} this turn, you may play this as thought it were an instant.\nEach hero banishes a card from their hand.\nBlood Debt",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT260",
+  "name": "Command and Conquer",
+  "cardType": "action",
+  "text": "Defense reaction cards can't be played this chain link. When this hits a hero, destroy all cards in their arsenal.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HNT"
+ },
+ {
+  "id": "HNT261",
+  "name": "Arakni, 5L!p3d 7hRu 7h3 cR4X",
+  "cardType": "hero",
+  "text": "The first attack with stealth each turn gets go again.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "life": 38,
+  "intellect": 4,
+  "set": "HNT"
+ },
+ {
+  "id": "HNT262",
+  "name": "Arakni, Solitary Confinement",
+  "cardType": "hero",
+  "text": "Your first attack with stealth each turn has go again.",
+  "classes": [
+   "assassin"
+  ],
+  "life": 19,
+  "intellect": 4,
+  "set": "HNT"
+ },
+ {
+  "id": "HNT263",
+  "name": "Arakni, Huntsman",
+  "cardType": "hero",
+  "text": "Whenever you play a card with contract, you may look at the top card of target opponent's deck. You may put it on the bottom.",
+  "classes": [
+   "assassin"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "HNT"
+ },
+ {
+  "id": "HNT264",
+  "name": "Arakni",
+  "cardType": "hero",
+  "text": "Whenever you play a card with contract, you may look at the top card of target opponent's deck. You may put it on the bottom.",
+  "classes": [
+   "assassin"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "HNT"
+ }
+]

@@ -1,0 +1,3216 @@
+[
+ {
+  "id": "GEM001",
+  "name": "Uzuri, Switchblade",
+  "cardType": "hero",
+  "text": "Once per Turn Attack Reaction - Banish a card from your hand face down: Turn the card banished this way face up. If it's an attack action card with cost 2 or less, put target attacking card with stealth from the active chain link on the bottom of its owner's deck, then put the banished card onto the active chain link as the attacking card.",
+  "classes": [
+   "assassin"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "GEM"
+ },
+ {
+  "id": "GEM002",
+  "name": "Kunai of Retribution",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}, destroy this when the combat chain closes: Attack. Go again",
+  "attack": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "dagger",
+   "1h"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM003",
+  "name": "Kunai of Retribution",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}, destroy this when the combat chain closes: Attack. Go again",
+  "attack": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "dagger",
+   "1h"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM004",
+  "name": "Obsidian Fire Vein",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack. If you've played a Draconic card this chain link, this attack gets +1{p} and go again.",
+  "attack": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic",
+   "dagger",
+   "1h"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM005",
+  "name": "Obsidian Fire Vein",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack. If you've played a Draconic card this chain link, this attack gets +1{p} and go again.",
+  "attack": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic",
+   "dagger",
+   "1h"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM006",
+  "name": "Mark of the Huntsman",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nWhen this hits a hero, you may choose to destroy this and mark them.\nIf this is attacking a marked hero, this gets +1{p}.",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Mark"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM007",
+  "name": "Mark of the Huntsman",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nWhen this hits a hero, you may choose to destroy this and mark them.\nIf this is attacking a marked hero, this gets +1{p}.",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Mark"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM008",
+  "name": "Graphene Chelicera",
+  "cardType": "weapon",
+  "text": "Stealth\nOnce per Turn Action - {r}: Attack\nWhen this attacks a marked hero, the attack gets go again.",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Stealth",
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM009",
+  "name": "Graphene Chelicera",
+  "cardType": "weapon",
+  "text": "Stealth\nOnce per Turn Action - {r}: Attack\nWhen this attacks a marked hero, the attack gets go again.",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Stealth",
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM010",
+  "name": "Display Loyalty",
+  "cardType": "action",
+  "text": "If you control 2 or more Draconic chain links, this gets go again and \"When this attacks a hero, create a Fealty token.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM011",
+  "name": "Demonstrate Devotion",
+  "cardType": "action",
+  "text": "If you control 2 or more Draconic chain links, this gets go again and \"When this attacks a hero, create a Fealty token.\"",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM012",
+  "name": "Affirm Loyalty",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +2{p}. If you control 2 or more Draconic chain links, create a Fealty token.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM013",
+  "name": "Endear Devotion",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +3{p}. If you control 2 or more Draconic chain links, create a Fealty token.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM014",
+  "name": "Hunt the Hunter",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you've played another red card this turn, mark them.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Mark"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM015",
+  "name": "Hunt to the Ends of Rathe",
+  "cardType": "action",
+  "text": "When this attacks Arakni, mark them.\nIf this is attacking a marked hero, this gets +2{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Mark",
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM016",
+  "name": "March of Loyalty",
+  "cardType": "action",
+  "text": "If you've created a Fealty token this turn, this gets go again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM017",
+  "name": "Smoke Out",
+  "cardType": "defense-reaction",
+  "text": "When this defends a red card, mark the attacking hero.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "draconic"
+  ],
+  "keywords": [
+   "Mark"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM018",
+  "name": "Proclaim Vengeance",
+  "cardType": "instant",
+  "text": "Mark target opposing hero. If that hero is Arakni, gain {r}.",
+  "pitch": 1,
+  "cost": 0,
+  "subtypes": [
+   "draconic"
+  ],
+  "keywords": [
+   "Mark"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM019",
+  "name": "Rake Over the Coals",
+  "cardType": "instant",
+  "text": "Draconic attacks get +1{p} this turn.",
+  "pitch": 1,
+  "cost": 0,
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM020",
+  "name": "Tooth of the Dragon",
+  "cardType": "instant",
+  "text": "Your next Draconic attack this turn gets +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM021",
+  "name": "Mark of the Black Widow",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a marked hero, they banish a card from their hand.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM022",
+  "name": "Mark of the Funnel Web",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a marked hero, banish a card in their arsenal.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM023",
+  "name": "Mark the Prey",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, mark them.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth",
+   "Mark"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM024",
+  "name": "Plunge the Prospect",
+  "cardType": "action",
+  "text": "Stealth\nIf this is attacking a marked hero, this gets +1{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM025",
+  "name": "Scuttle the Canal",
+  "cardType": "action",
+  "text": "Stealth\nWhen this attacks a marked hero, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth",
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM026",
+  "name": "Whittle from Bone",
+  "cardType": "action",
+  "text": "Stealth\nWhen this attacks a marked hero, equip a Graphene Chelicera token.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM027",
+  "name": "Cut Through",
+  "cardType": "action",
+  "text": "If you've hit with a dagger this combat chain, this gets +1{p} and go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM028",
+  "name": "Pick Up the Point",
+  "cardType": "action",
+  "text": "When this attacks, you may retrieve a dagger from your graveyard.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Retrieve"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM029",
+  "name": "Incision",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM030",
+  "name": "Scar Tissue",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +3{p} and \"When this hits a hero, mark them.\"",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM031",
+  "name": "Calming Breeze",
+  "cardType": "instant",
+  "text": "The next 3 times you would be dealt damage this turn, prevent 1 of that damage.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM032",
+  "name": "Razor Reflex",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target dagger or sword weapon attack gets +3{p}.\n- Target attack action card with cost 1 or less gets +3{p} and \"When this hits, it gets go again.\"",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM033",
+  "name": "Riptide, Lurker of the Deep",
+  "cardType": "hero",
+  "text": "Whenever you play a card from hand, you may put a card from hand face down into your arsenal.\nWhenever a trap you control triggers, deal 1 damage to the attacking hero.",
+  "classes": [
+   "ranger"
+  ],
+  "life": 38,
+  "intellect": 4,
+  "set": "GEM"
+ },
+ {
+  "id": "GEM034",
+  "name": "Claw of Vynserakai",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nSpellvoid 1",
+  "attack": 1,
+  "subtypes": [
+   "draconic",
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Spellvoid 1"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM035",
+  "name": "Cogwerx Blunderbuss",
+  "cardType": "weapon",
+  "text": "Action - {r}{r}, {t}: Attack\nInstant - {t} a cog you control: This card's next attack this turn gets go again.",
+  "attack": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "gun",
+   "2h"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM036",
+  "name": "Spitfire",
+  "cardType": "weapon",
+  "text": "Action - {t}, {t} a cog you control: Attack\nWhen this attacks, you may {t} a cog you control. If you do, the attack gets +1{p}.",
+  "attack": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "gun",
+   "2h"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM037",
+  "name": "Compass of Sunken Depths",
+  "cardType": "equipment",
+  "text": "Instant - {t}: Look at the top card of your deck.\nThe first card with watery grave you play from your graveyard each turn gets go again.",
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "off-hand"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM038",
+  "name": "Hammerhead, Harpoon Cannon",
+  "cardType": "weapon",
+  "text": "Action - {r}{r}{r}{r}, {t}: Your next arrow attack this turn gets +4{p}. If it has harpoon in its name, it gets overpower. Go again",
+  "classes": [
+   "pirate",
+   "ranger"
+  ],
+  "subtypes": [
+   "bow",
+   "cannon",
+   "2h"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM039",
+  "name": "Redspine Manta",
+  "cardType": "weapon",
+  "text": "Action - {t}: Put an arrow from your hand face-up into your arsenal. Go again",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "bow",
+   "2h"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM040",
+  "name": "Boom Grenade",
+  "cardType": "action",
+  "text": "Crank\nThis enters the arena with a steam counter. At the start of your turn, destroy this unless you remove a steam counter from it.\nWhen a Mechanologist attack action card you control hits a hero, destroy this and deal 4 damage to them.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Crank"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM041",
+  "name": "Cloud Skiff",
+  "cardType": "action",
+  "text": "Once per Turn Instant - {t} a cog you control: This gets +1{p} or go again.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM042",
+  "name": "Sky Skimmer",
+  "cardType": "action",
+  "text": "Once per Turn Instant - {t} a cog you control: This gets +1{p} or go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM043",
+  "name": "Goldwing Turbine",
+  "cardType": "action",
+  "text": "Your next Mechanologist attack this turn gets +3{p}.\nCreate a Golden Cog token.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM044",
+  "name": "Lubricate",
+  "cardType": "instant",
+  "text": "{u} up to 3 cogs you control.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mechanologist"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM045",
+  "name": "Pinion Sentry",
+  "cardType": "block",
+  "text": "When this defends, you may {t} a cog you control. If you do, create a Golden Cog token.",
+  "pitch": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM046",
+  "name": "Chum, Friendly First Mate",
+  "cardType": "action",
+  "text": "Action - {t}: Attack\nInstant - {t}, discard a card with watery grave: Until end of turn, opponents must choose this as the target of attacks if able.\nWatery Grave",
+  "pitch": 2,
+  "cost": 4,
+  "attack": 4,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 6,
+  "set": "GEM"
+ },
+ {
+  "id": "GEM047",
+  "name": "Moray le Fay",
+  "cardType": "action",
+  "text": "Action - {t}: Attack\nInstant - {r}, {t}: Put a +1{p} counter on target ally.\nWatery Grave",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 0,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 3,
+  "set": "GEM"
+ },
+ {
+  "id": "GEM048",
+  "name": "Wailer Humperdinck",
+  "cardType": "action",
+  "text": "Action - {r}{r}{r} {r}{r}{r}, {t}: Attack\nWatery Grave",
+  "pitch": 2,
+  "cost": 6,
+  "attack": 11,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 7,
+  "set": "GEM"
+ },
+ {
+  "id": "GEM049",
+  "name": "Jittery Bones",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card or destroy the top card of your deck. If that card has watery grave, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM050",
+  "name": "Restless Bones",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card or destroy the top card of your deck. If that card has watery grave, this gets go again.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM051",
+  "name": "Avast Ye!",
+  "cardType": "action",
+  "text": "Your next Pirate ally attack this turn gets go again and \"When this hits a hero, create a Gold token.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM052",
+  "name": "Heave Ho!",
+  "cardType": "action",
+  "text": "Your next Pirate ally attack this turn gets overpower and \"When this hits a hero, create a Gold token.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM053",
+  "name": "Yo Ho Ho!",
+  "cardType": "action",
+  "text": "Your next Pirate ally attack this turn gets +1{p} and \"When this hits a hero, create a Gold token.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM054",
+  "name": "Blue Fin Harpoon",
+  "cardType": "action",
+  "text": "Go Fish - When this hits a hero, they choose and reveal a card from their hand. If it's blue, they discard it and you create a Gold token. If you've activated a cannon this turn, instead look at their hand and you choose the card.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "pirate",
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go Fish"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM055",
+  "name": "Red Fin Harpoon",
+  "cardType": "action",
+  "text": "Go Fish - When this hits a hero, they choose and reveal a card from their hand. If it's red, they discard it and you create a Gold token. If you've activated a cannon this turn, instead look at their hand and you choose the card.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "pirate",
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go Fish"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM056",
+  "name": "Yellow Fin Harpoon",
+  "cardType": "action",
+  "text": "Go Fish - When this hits a hero, they choose and reveal a card from their hand. If it's yellow, they discard it and you create a Gold token. If you've activated a cannon this turn, instead look at their hand and you choose the card.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "pirate",
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go Fish"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM057",
+  "name": "Rusty Harpoon",
+  "cardType": "action",
+  "text": "",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "pirate",
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM058",
+  "name": "Bolt'n' Shot",
+  "cardType": "action",
+  "text": "If Bolt'n' Shot's {p} is greater than its base {p}, it has go again and \"If this hits, reload.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Reload"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM059",
+  "name": "Dry Powder Shot",
+  "cardType": "action",
+  "text": "When this is put face-up into your arsenal, it gets +2{p} this turn.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM060",
+  "name": "Entangling Shot",
+  "cardType": "action",
+  "text": "When this is put face-up into your arsenal, you may {t} target hero.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM061",
+  "name": "Swift Shot",
+  "cardType": "action",
+  "text": "When this is put face-up into your arsenal, it gets go again this turn.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM062",
+  "name": "Nimby",
+  "cardType": "action",
+  "text": "When this attacks, you may search your deck for a Nimblism, reveal it, put it into your hand, then shuffle.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM063",
+  "name": "Sirens of Safe Harbor",
+  "cardType": "action",
+  "text": "When this is put into your graveyard from anywhere, gain 1{h}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM064",
+  "name": "Strike Gold",
+  "cardType": "action",
+  "text": "When this hits, create a Gold token.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM065",
+  "name": "Nimblism",
+  "cardType": "action",
+  "text": "The next attack action card with cost 1 or less you play this turn gains +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM066",
+  "name": "Fiddler's Green",
+  "cardType": "block",
+  "text": "When this is put into your graveyard from anywhere, gain 3{h}.",
+  "pitch": 1,
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM067",
+  "name": "On the Horizon",
+  "cardType": "block",
+  "text": "When this defends, look at the top card of your deck.",
+  "pitch": 1,
+  "defense": 4,
+  "classes": [
+   "generic"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM068",
+  "name": "Hunter's Klaive",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nWhen this hits a hero, mark them.\nPiercing 1",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Mark",
+   "Piercing 1"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM069",
+  "name": "Prism, Awakener of Sol",
+  "cardType": "hero",
+  "text": "Whenever a card with Herald in its name is put into Prism's soul during an action phase, you may search your deck for a figment, put it into the arena, then shuffle.\nOnce per Turn Instant - {r}{r}, banish a card from Prism's soul: Awaken target figment you control.",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light"
+  ],
+  "life": 32,
+  "intellect": 4,
+  "set": "GEM"
+ },
+ {
+  "id": "GEM070",
+  "name": "Summit, the Unforgiving",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}{r} {r}{r}{r}: Attack\nWhen this hits a hero, create a Frostbite token in their exposed head, chest, arms, or legs zone.\nHeavy - If this is the only card equipped to your weapon zones, it gets +2{p}.",
+  "attack": 4,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "earth",
+   "ice",
+   "polearm",
+   "1h"
+  ],
+  "keywords": [
+   "Heavy"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM071",
+  "name": "Moment Maker",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}{r}: Attack\nIf you control 3 or more auras of suspense, this gets +2{p} and \"When this hits a hero, the crowd cheers you.\"",
+  "attack": 4,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered",
+   "hammer",
+   "axe",
+   "2h"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM072",
+  "name": "Standing Ovation",
+  "cardType": "action",
+  "text": "If 3 or more auras of suspense have left the arena this turn, this gets \"When this hits a hero, take an extra turn after this one. At the beginning of the next end phase, they draw up to their {i}.\"",
+  "pitch": 3,
+  "cost": 6,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM073",
+  "name": "Backup Protocol: RED",
+  "cardType": "action",
+  "text": "Crank\nThis enters the arena with a steam counter. At the start of your turn, destroy this unless you remove a steam counter from it.\nInstant - {r}{r}, destroy this: Return a red Mechanologist attack action card from your graveyard to your hand.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Crank"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM074",
+  "name": "Clamp Press",
+  "cardType": "action",
+  "text": "Crank\nThis enters the arena with 2 steam counters. At the start of your turn, destroy this unless you remove a steam counter from it.\nWrenches you control get +2{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Crank"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM075",
+  "name": "Malefic Incantation",
+  "cardType": "action",
+  "text": "Go again\nThis enters the arena with 3 verse counters. When it has none, destroy it.\nOnce per turn, when you play an attack action card, remove a verse counter from this. If you do, create a Runechant token.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM076",
+  "name": "Jarl Vetreiði",
+  "cardType": "hero",
+  "text": "Whenever you play an Ice card, create a Frostbite token in an opponent's exposed head, chest, arms, or legs zone.\nEssence of Earth and Ice",
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Essence of Earth and Ice"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "GEM"
+ },
+ {
+  "id": "GEM077",
+  "name": "Bravo, Flattering Showman",
+  "cardType": "hero",
+  "text": "Action - {r}{r}, {t}: Turn a face-down card in your arsenal face-up. If it has crush, it gets +2{p} and dominate this turn. Go again",
+  "classes": [
+   "guardian"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "GEM"
+ },
+ {
+  "id": "GEM078",
+  "name": "Rok",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}{r}: Attack\nActivate Rok only if you have no cards in hand.\nDamage that would be dealt by Rok can't be prevented.",
+  "attack": 7,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "rock",
+   "2h"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM079",
+  "name": "Rampart of the Ram's Head",
+  "cardType": "equipment",
+  "text": "Whenever you defend with Rampart of the Ram's Head, you may pay {r}. If you do, it gains +1{d} until end of turn.",
+  "defense": 0,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "off-hand"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM080",
+  "name": "Halo of Lumina Light",
+  "cardType": "equipment",
+  "text": "When this is destroyed, you may put a yellow aura from your banished zone into the arena.\nSpellvoid 2",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "head"
+  ],
+  "keywords": [
+   "Spellvoid 2"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM081",
+  "name": "Helm of the Arknight",
+  "cardType": "equipment",
+  "text": "Temper",
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM082",
+  "name": "Savage Sash",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Attack action cards with 6 or more {p} cost you {r} less to play this turn. Go again\nTemper",
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM083",
+  "name": "Loot the Arsenal",
+  "cardType": "action",
+  "text": "Your next Pirate ally attack this turn gets \"When this hits a hero, destroy a card in their arsenal. If you do, create a Gold token.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM084",
+  "name": "Loot the Hold",
+  "cardType": "action",
+  "text": "Your next Pirate ally attack this turn gets \"When this hits a hero, they discard a card. If they do, create a Gold token.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM085",
+  "name": "Wind Up the Crowd",
+  "cardType": "action",
+  "text": "Instant - Discard this: Create a Toughness and a Vigor token.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 6,
+  "defense": 0,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM086",
+  "name": "Turning Point",
+  "cardType": "block",
+  "text": "When this defends, if you have less {h} than the attacking hero, the crowd cheers you.\nWhile this is defending, if you've been cheered this turn, it gets +3{d}.",
+  "pitch": 3,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM087",
+  "name": "Steal Victory",
+  "cardType": "block",
+  "text": "When this defends, steal an aura token the attacking hero controls.",
+  "pitch": 3,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "reviled"
+  ],
+  "keywords": [
+   "Steal"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM088",
+  "name": "A Good Clean Fight",
+  "cardType": "action",
+  "text": "If this is attacking a hero, non-equipment cards they own lose and can't gain abilities.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM089",
+  "name": "Rapturous Applause",
+  "cardType": "action",
+  "text": "When you win a clash revealing this, the crowd cheers you.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM090",
+  "name": "Shining Courage",
+  "cardType": "instant",
+  "text": "Up to one target defending action card gets +3{d} this turn.\nThe crowd cheers you.",
+  "pitch": 1,
+  "cost": 0,
+  "subtypes": [
+   "revered"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM091",
+  "name": "Heroic Pose",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +3{p}.\nThe crowd cheers you.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "revered"
+  ],
+  "keywords": [
+   "Go again",
+   "The Crowd Cheers"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM092",
+  "name": "Humble Entrance",
+  "cardType": "action",
+  "text": "Create 3 Toughness tokens.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "revered"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM093",
+  "name": "Low Blow",
+  "cardType": "action",
+  "text": "If you've been booed this turn, this gets +3{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM094",
+  "name": "Overturn the Results",
+  "cardType": "action",
+  "text": "If you would fail to win a clash revealing this, instead you win the clash and the crowd boos you.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Boos"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM095",
+  "name": "Take That!",
+  "cardType": "action",
+  "text": "When the combat chain closes, if this didn't hit, the defending hero creates a Might token.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM096",
+  "name": "Cruel Ambition",
+  "cardType": "action",
+  "text": "Create 3 Might tokens.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "reviled"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM097",
+  "name": "Villainous Pose",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +4{p}.\nThe crowd boos you.\nGo again",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "subtypes": [
+   "reviled"
+  ],
+  "keywords": [
+   "Go again",
+   "The Crowd Boos"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM098",
+  "name": "Energetic Impact",
+  "cardType": "action",
+  "text": "When this defends together with a card with 6 or more {p}, create a Vigor token.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM099",
+  "name": "Flex Strength",
+  "cardType": "action",
+  "text": "If this has 6 or more {p}, it gets +3{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM100",
+  "name": "Smashing Ground",
+  "cardType": "action",
+  "text": "If this has 6 or more {p}, it gets \"When this hits a hero, destroy a card in their arsenal.\"",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM101",
+  "name": "Buckwild",
+  "cardType": "action",
+  "text": "If there is a card with 6 or more {p} in your pitch zone, this gets go again.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM102",
+  "name": "Boulder Drop",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, they put a card from their hand on top of their deck.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM103",
+  "name": "Power Play",
+  "cardType": "action",
+  "text": "If this was played from arsenal, it gets +5{p}.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM104",
+  "name": "Fast and Furious",
+  "cardType": "action",
+  "text": "Boost\nIf you've cranked this turn, this gets +1{p}.\nWhen this is banished from boosting, put a steam counter on an item you control with crank.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM105",
+  "name": "Maxx 'The Hype' Nitro",
+  "cardType": "hero",
+  "text": "Once per Turn Action - {r}{r}: Create a Hyper Driver token with 2 steam counters.  Activate this ability only if you've boosted this turn.\nHyper Drivers you control get crank.",
+  "classes": [
+   "mechanologist"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "GEM"
+ },
+ {
+  "id": "GEM106",
+  "name": "Graven Gaslight",
+  "cardType": "equipment",
+  "text": "Instant - Destroy 2 Silver you control: Equip this. Activate this only while this is in your graveyard.\nSpellvoid 1",
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "off-hand"
+  ],
+  "keywords": [
+   "Spellvoid 1"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM107",
+  "name": "Savage Claw",
+  "cardType": "weapon",
+  "text": "Action - {r}{r}, {t}: Attack\nIf a card with 6 or more {p} was pitched to attack with this, the attack gets +1{p}.",
+  "attack": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "claw",
+   "1h"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM108",
+  "name": "Shield Beater",
+  "cardType": "weapon",
+  "text": "Action - {r}{r}{r}{r}, {t}: Attack\nCards you own named Visit Anvilheim get go again.",
+  "attack": 5,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "hammer",
+   "1h"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM109",
+  "name": "Farflight Longbow",
+  "cardType": "weapon",
+  "text": "Instant - {r}, {t}: Put an arrow from your hand face-up into your arsenal.\nYour arrow attacks may target any opposing hero or ally.",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "bow",
+   "2h"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM110",
+  "name": "Grimoire of Fellingsong",
+  "cardType": "equipment",
+  "text": "Instant - {r}, destroy this: Create a Runechant token.",
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "off-hand"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM111",
+  "name": "Seeker Kunai",
+  "cardType": "instant",
+  "text": "Attack Reaction - {r}, destroy this: Target Assassin attack action card gets +1{p}.\nWhile this is in your graveyard, at the start of your turn, you may destroy 2 Silver you control. If you do, return this to the arena.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM112",
+  "name": "Crown of Dominion",
+  "cardType": "equipment",
+  "text": "Your hero is Royal.\nWhen you equip Crown of Dominion, create a Gold token.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM113",
+  "name": "Knife Through",
+  "cardType": "action",
+  "text": "Stealth\nIf you've hit with a dagger this combat chain, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth",
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM114",
+  "name": "Aggressive Pounce",
+  "cardType": "action",
+  "text": "If you've intimidated an opponent this turn, this gets go again.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM115",
+  "name": "Valahai Riven",
+  "cardType": "block",
+  "text": "When this defends, you may pay up to {r}{r}{r}. Create that many Seismic Surge tokens.",
+  "pitch": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM116",
+  "name": "Enact Vengeance",
+  "cardType": "action",
+  "text": "Combo - If Edge of Autumn or a card with Vengeance in its name was the last attack this combat chain, this gets \"When this hits a hero, destroy all cards in their arsenal.\"",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM117",
+  "name": "Feign Vengeance",
+  "cardType": "action",
+  "text": "When this chain link resolves, if there is a card defending this, draw a card.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 0,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM118",
+  "name": "Glistening Steelblade",
+  "cardType": "action",
+  "text": "Dorinthea Specialization\nYour next Dawnblade attack this turn has go again.\nWhenever Dawnblade hits a hero this turn, put a +1{p} counter on it.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Dorinthea Specialization",
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM119",
+  "name": "Construct Nitro Mechanoid",
+  "cardType": "action",
+  "text": "Transform target Mechanologist head, chest, arms, legs, weapon and 3 Hyper Drivers you control into Nitro Mechanoid. If you don't, negate this.\nGo again",
+  "pitch": 2,
+  "cost": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "construct"
+  ],
+  "keywords": [
+   "Transform",
+   "Negate",
+   "Go again"
+  ],
+  "set": "GEM",
+  "backId": "GEM119B"
+ },
+ {
+  "id": "GEM119B",
+  "name": "Nitro Mechanoid",
+  "cardType": "weapon",
+  "text": "Action - Banish a card from under Nitro Mechanoid: Attack\nOverpower\nTemper",
+  "attack": 5,
+  "defense": 5,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Overpower",
+   "Temper"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM120",
+  "name": "Blast Rig",
+  "cardType": "action",
+  "text": "Evo Upgrade - This gets +1{p} for each Evo you have equipped.\nBoost",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Evo Upgrade",
+   "Boost"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM121",
+  "name": "Teklo Trebuchet 2000",
+  "cardType": "action",
+  "text": "When this attacks, the next attack you boost this combat chain gets +2{p}.\nBoost",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM122",
+  "name": "Rainbow Goo Trap",
+  "cardType": "defense-reaction",
+  "text": "When this defends an attack with {p} greater than its base, dominate, and go again, the attack gets -2{p} and loses and can't gain abilities.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM123",
+  "name": "Weeping Battleground",
+  "cardType": "defense-reaction",
+  "text": "You may banish an aura from your graveyard. If you do, deal 1 arcane damage to target hero.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM124",
+  "name": "Future Sight",
+  "cardType": "instant",
+  "text": "Create 3 Sigil of Fate tokens.",
+  "pitch": 1,
+  "cost": 1,
+  "classes": [
+   "wizard"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM125",
+  "name": "Shimmering Mirage",
+  "cardType": "defense-reaction",
+  "text": "While this is defending, when this chain link resolves, banish this. You may play it this combat chain.\nMirage",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "keywords": [
+   "Mirage"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM126",
+  "name": "Man Overboard",
+  "cardType": "action",
+  "text": "When this attacks, you may discard an ally. If you do, this gets +1{p} and go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM127",
+  "name": "Shallow Water Shark Harpoon",
+  "cardType": "action",
+  "text": "If you've activated a cannon this turn, this gets \"When this hits a hero, destroy a card in their arsenal. If you do, create a Gold token.\"",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "pirate",
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM128",
+  "name": "Submerge",
+  "cardType": "action",
+  "text": "As an additional cost to play this, put a card from your hand into your deck fifth from the top.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM129",
+  "name": "Roaring Beam",
+  "cardType": "attack-reaction",
+  "text": "Create a Courage token.\nIf there are no cards in your soul, return this to its owner's hand, then charge your soul.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light"
+  ],
+  "keywords": [
+   "Charge"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM130",
+  "name": "Frost Spike",
+  "cardType": "instant",
+  "text": "Create a Frostbite token in an exposed head, chest, arms, or legs zone.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "ice"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM131",
+  "name": "Hyper Inflation",
+  "cardType": "action",
+  "text": "When this attacks, cards cost {r} more to play this turn.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "chaos"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM132",
+  "name": "Fire that Burns Within",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a Phoenix Flame. If you do, draw a card and this gets +2{p}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM133",
+  "name": "Doubling Season",
+  "cardType": "action",
+  "text": "While this is face-up in any zone, if it would gain {p}, instead it gains that much plus 1.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 0,
+  "defense": 3,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM134",
+  "name": "Conquer the Icy Terrain",
+  "cardType": "action",
+  "text": "When this hits a hero, they may pay {r}{r}. If they don't, you may destroy a frozen card in their arsenal or a frozen non-hero permanent they control.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "subtypes": [
+   "ice",
+   "attack"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM135",
+  "name": "Ion Charged",
+  "cardType": "instant",
+  "text": "Until end of turn, Lightning and Elemental attacks get +1{p} while they have go again.",
+  "pitch": 2,
+  "cost": 0,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM136",
+  "name": "Duty Bound Blitz",
+  "cardType": "action",
+  "text": "Play this only if a yellow card has been put into your soul this turn.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM137",
+  "name": "Engulfing Shadows",
+  "cardType": "defense-reaction",
+  "text": "If this would be put into your graveyard from anywhere, instead banish it.\nBlood Debt",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 4,
+  "subtypes": [
+   "shadow"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM138",
+  "name": "Hulk Up",
+  "cardType": "action",
+  "text": "If you have less {h} than each other hero, this costs {r} less to play.",
+  "pitch": 3,
+  "cost": 4,
+  "attack": 6,
+  "defense": 2,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM139",
+  "name": "Snarky Prick",
+  "cardType": "action",
+  "text": "When this attacks a hero, look at the top card of their deck. If it's red, you may destroy it. If you do, this gets +4{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM140",
+  "name": "Reinforce the Line",
+  "cardType": "instant",
+  "text": "Target defending attack action card gains +4{d}.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM141",
+  "name": "Dash I/O",
+  "cardType": "hero",
+  "text": "You may look at the top card of your deck at any time.\nOnce per turn, you may play a Mechanologist item with cost 0 or 1 from the top of your deck as though it were an instant. It costs an additional {r} to play.",
+  "classes": [
+   "mechanologist"
+  ],
+  "life": 36,
+  "intellect": 4,
+  "set": "GEM"
+ },
+ {
+  "id": "GEM142",
+  "name": "Aphrodias",
+  "cardType": "weapon",
+  "text": "Instant - {r}, {t}: Deal 2 arcane damage to target hero. Activate this only if an aura with a holo counter has entered the arena under your control this turn.",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "orb",
+   "2h"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM143",
+  "name": "Scorpio, Comet Tail",
+  "cardType": "weapon",
+  "text": "Action - {t}: Attack. Activate this only if you control a Lightning attack.\nWhen this hits a hero, deal 1 arcane damage to them.",
+  "attack": 1,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "sword",
+   "2h"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM144",
+  "name": "Volzar, Meteor Storm",
+  "cardType": "weapon",
+  "text": "Instant - {t}: Amp 1. Activate this only if an instant card has been put into your graveyard this turn.",
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning",
+   "staff",
+   "2h"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM145",
+  "name": "Lionclaw Maul",
+  "cardType": "weapon",
+  "text": "Action - {r}{r}, {t}: Attack\nIf this has {p} greater than its base, it gets +1{p}.\nWhen this hits a hero, the crowd boos you.",
+  "attack": 1,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "reviled",
+   "hammer",
+   "axe",
+   "1h"
+  ],
+  "keywords": [
+   "The Crowd Boos"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM146",
+  "name": "Pile Driver",
+  "cardType": "weapon",
+  "text": "Betsy Specialization\nAction - {r}{r}{r}{r}, {t}: Attack\nWhen this attacks, you may wager a Gold token with the defending hero.",
+  "attack": 6,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "log",
+   "2h"
+  ],
+  "keywords": [
+   "Betsy Specialization",
+   "Wager"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM147",
+  "name": "Teklo Pounder",
+  "cardType": "action",
+  "text": "This enters the arena with 3 steam counters on it. When this has none, destroy it.\nOnce per turn, when you boost an attack action card, remove a steam counter from this. If you do, the attack gets +2{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM148",
+  "name": "Stardust Spike",
+  "cardType": "instant",
+  "text": "When this leaves the arena, gain {r} and amp 1.\nWard 2",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Amp 1",
+   "Ward 2"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM149",
+  "name": "Dyadic Carapace",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 2\nTemper",
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Arcane Barrier 2",
+   "Temper"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM150",
+  "name": "Ebbing Arcstride",
+  "cardType": "action",
+  "text": "Whenever this fragments, it gets go again.\nFragment",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Fragment"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM151",
+  "name": "Pulsing Cardia",
+  "cardType": "action",
+  "text": "Whenever this fragments, gain {r}.\nFragment",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM152",
+  "name": "Shattering Flowtide",
+  "cardType": "action",
+  "text": "Whenever this fragments, create a Lightning Flow token.\nFragment",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM153",
+  "name": "Stinging Sprite",
+  "cardType": "action",
+  "text": "When this attacks or defends, deal 1 arcane damage to target hero.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM154",
+  "name": "Electryn Joltstep",
+  "cardType": "action",
+  "text": "Your next Runeblade or Lightning attack this turn gets +3{p}.\nCreate a Lightning Flow token.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM155",
+  "name": "Path of Same Ends",
+  "cardType": "action",
+  "text": "When this attacks a hero, deal 1 arcane damage to them. If damage is dealt this way, this gets go again.\nInstant - {r}: This gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM156",
+  "name": "Constella Contemplation",
+  "cardType": "instant",
+  "text": "Create a Ponder token.\nStarfall - If an instant card has been put into your graveyard this turn, deal 1 arcane damage to target hero.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Starfall"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM157",
+  "name": "Constella Flowslide",
+  "cardType": "instant",
+  "text": "Create a Lightning Flow token.\nStarfall - If an instant card has been put into your graveyard this turn, deal 1 arcane damage to target hero.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Starfall"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM158",
+  "name": "Constella Uplift",
+  "cardType": "instant",
+  "text": "{u} a staff you control.\nStarfall - If an instant card has been put into your graveyard this turn, deal 1 arcane damage to target hero.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Starfall"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM159",
+  "name": "Energy of the Audience",
+  "cardType": "action",
+  "text": "If you have less {h} than each other hero, this gets +1{p} for each aura of suspense you control.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM160",
+  "name": "Creep",
+  "cardType": "action",
+  "text": "Stealth\nWhen this attacks, the next attack with stealth you play this combat chain gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM161",
+  "name": "Alpha Instinct",
+  "cardType": "action",
+  "text": "Rhinar Specialization\nWhen this is discard to beat chest, create a Might token.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 6,
+  "defense": 0,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Rhinar Specialization"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM162",
+  "name": "Run Roughshod",
+  "cardType": "action",
+  "text": "Play this only if you've discarded a card with 6 or more {p} this turn.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM163",
+  "name": "Seek Vengeance",
+  "cardType": "action",
+  "text": "Combo - If Edge of Autumn was the last attack this combat chain, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM164",
+  "name": "Brimming Blade",
+  "cardType": "action",
+  "text": "Sharpen target sword you control twice.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM165",
+  "name": "Toe the Line",
+  "cardType": "instant",
+  "text": "The next time you would be dealt damage this turn, prevent 2 of that damage. If you prevent damage this way, create a Flurry token.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "warrior"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM166",
+  "name": "Speed Demon",
+  "cardType": "action",
+  "text": "Scrap\nIf you control a Hyper Driver, this gets +1{p}.\nWhen this attacks, if it scrapped a Hyper Driver, create a Hyper Driver token with 2 steam counters.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Scrap"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM167",
+  "name": "Beneath the Surface",
+  "cardType": "defense-reaction",
+  "text": "Watery Grave\nWhile this is defending, when it's put into your graveyard from the arena, turn it face-down.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 5,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM168",
+  "name": "Lighten the Load",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card or destroy an item you control. If you do, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM169",
+  "name": "Flourish",
+  "cardType": "action",
+  "text": "The next time an attack would gain {p} this turn, instead it gains that much plus 3.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM170",
+  "name": "Beckoning Brilliance",
+  "cardType": "action",
+  "text": "When this attacks, the next instant card you play this chain link costs {r} less to play.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM171",
+  "name": "Electrolyze",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 0,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM172",
+  "name": "Flowshard Elemental",
+  "cardType": "action",
+  "text": "When this attacks, you may discard an instant card. If you do, create a Lightning Flow token and this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM173",
+  "name": "Flittering Forcefield",
+  "cardType": "defense-reaction",
+  "text": "While this is defending, if you've played an instant card this chain link, this gets +1{d}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM174",
+  "name": "Starlight Road",
+  "cardType": "instant",
+  "text": "Create an Embodiment of Lightning or Lightning Flow token.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM175",
+  "name": "Conflicting Thoughts",
+  "cardType": "action",
+  "text": "When this attacks, opt 1.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Opt 1"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM176",
+  "name": "Toughen Up",
+  "cardType": "defense-reaction",
+  "text": "",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 4,
+  "classes": [
+   "generic"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM177",
+  "name": "Runechant of Greed",
+  "cardType": "instant",
+  "text": "This counts as a Runechant. When an attack usurps this, draw a card.\nWhen this is destroyed, create a Runechant token.\nAt the beginning of your action phase or when you play an attack action card, destroy this.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM178",
+  "name": "Runechant of Envy",
+  "cardType": "instant",
+  "text": "This counts as a Runechant. When an attack usurps this, gain 1{h}.\nWhen this is destroyed, create a Runechant token.\nAt the beginning of your action phase or when you play an attack action card, destroy this.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM179",
+  "name": "Runechant of Gluttony",
+  "cardType": "instant",
+  "text": "This counts as a Runechant. When an attack usurps this, gain {r}.\nWhen this is destroyed, create a Runechant token.\nAt the beginning of your action phase or when you play an attack action card, destroy this.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM180",
+  "name": "Runechant of Lust",
+  "cardType": "instant",
+  "text": "This counts as a Runechant. When an attack usurps this, create a Runechant token.\nWhen this is destroyed, create a Runechant token.\nAt the beginning of your action phase or when you play an attack action card, destroy this.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM181",
+  "name": "Runechant of Pride",
+  "cardType": "instant",
+  "text": "This counts as a Runechant. When an attack usurps this, it gets +1{p}.\nWhen this is destroyed, create a Runechant token.\nAt the beginning of your action phase or when you play an attack action card, destroy this.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM182",
+  "name": "Runechant of Sloth",
+  "cardType": "instant",
+  "text": "This counts as a Runechant. When an attack usurps this, it gets go again.\nWhen this is destroyed, create a Runechant token.\nAt the beginning of your action phase or when you play an attack action card, destroy this.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM183",
+  "name": "Runechant of Wrath",
+  "cardType": "instant",
+  "text": "This counts as a Runechant. When an attack usurps this, it gets overpower.\nWhen this is destroyed, create a Runechant token.\nAt the beginning of your action phase or when you play an attack action card, destroy this.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM193",
+  "name": "Consuming Appetite",
+  "cardType": "action",
+  "text": "Instant - {r}, banish this from your hand: Until end of turn, Blasmophet, the Insatiable Hunger tokens you control get \"Action - {r}: Attack. Go again.\"\nBlood Debt",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM198",
+  "name": "Ominous Toll",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a zombie. If you do, create a Gate to i'Arathael token.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "necromancer"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "GEM"
+ },
+ {
+  "id": "GEM205",
+  "name": "Embrace Ursur",
+  "cardType": "action",
+  "text": "When this attacks, you may banish a card from your hand. If it's Runeblade, create a Runechant token. If it's Shadow, this gets go again.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "set": "GEM"
+ }
+]

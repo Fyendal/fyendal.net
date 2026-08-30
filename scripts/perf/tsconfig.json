@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "declaration": false,
+    "noEmit": true,
+    "typeRoots": ["../../apps/server/node_modules/@types", "../../node_modules/@types"]
+  },
+  "include": ["*.mts"]
+}

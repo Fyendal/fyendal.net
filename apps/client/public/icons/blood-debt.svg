@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 76">
+  <defs>
+    <linearGradient id="blood" x1="18" y1="10" x2="49" y2="69" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ff625e"/>
+      <stop offset="0.48" stop-color="#bd171d"/>
+      <stop offset="1" stop-color="#5d050a"/>
+    </linearGradient>
+  </defs>
+  <path d="M32 3C28 14 8 34 8 51a24 24 0 0 0 48 0C56 34 36 14 32 3Z" fill="#160205" stroke="#f0b0a2" stroke-width="3"/>
+  <path d="M32 9C27 21 13 36 13 51a19 19 0 0 0 38 0C51 36 37 21 32 9Z" fill="url(#blood)"/>
+  <path d="M20 49c1-8 6-14 12-21" fill="none" stroke="#ffaaa1" stroke-width="4" stroke-linecap="round" opacity=".55"/>
+</svg>

@@ -1,0 +1,536 @@
+[
+ {
+  "id": "AAC001",
+  "name": "Arakni, 5L!p3d 7hRu 7h3 cR4X",
+  "cardType": "hero",
+  "text": "The first attack with stealth each turn gets go again.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "life": 38,
+  "intellect": 4,
+  "set": "AAC"
+ },
+ {
+  "id": "AAC002",
+  "name": "Hunter's Klaive",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nWhen this hits a hero, mark them.\nPiercing 1",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Mark",
+   "Piercing 1"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC003",
+  "name": "Spider's Bite",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nPiercing 1\nWhen this hits a hero, the next time they defend with 1 or more attack action cards this turn, those cards have -1{d} while defending.",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Piercing 1"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC004",
+  "name": "Prey Spotters",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy this: Mark target opposing hero.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC005",
+  "name": "Inverter's Nightcowl",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Until end of turn, whenever you play an attack action card with stealth, gain {r}. Go again\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC006",
+  "name": "Rage Baiters",
+  "cardType": "equipment",
+  "text": "Attack Reaction - {r}, {t}: Target attack with stealth gets \"When this hits a hero, mark them.\"\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC007",
+  "name": "Stalker's Steps",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy this: Target attack with stealth gets go again\nArcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC008",
+  "name": "Art of Desire: Body",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, banish the top card of their deck.\nWhenever this banishes a red card, draw a card and gain 1{h}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC009",
+  "name": "Creep",
+  "cardType": "action",
+  "text": "Stealth\nWhen this attacks, the next attack with stealth you play this combat chain gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC010",
+  "name": "Infect",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, create a Bloodrot Pox token under their control.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC011",
+  "name": "Infiltrate",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, banish the top card of their deck. You may play it until the end of your next turn.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC012",
+  "name": "Mark of the Black Widow",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a marked hero, they banish a card from their hand.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC013",
+  "name": "Mark of the Funnel Web",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a marked hero, banish a card in their arsenal.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC014",
+  "name": "Meet Madness",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, choose 1 at random;\n- They choose a card in their hand. Banish it.\n- They choose a card in their arsenal. Banish it.\n- Banish the top card of their deck.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC015",
+  "name": "Pick to Pieces",
+  "cardType": "action",
+  "text": "Stealth\nIf you've played or activated an attack reaction this chain link, this gets +1{p} and \"Damage that would be dealt by this can't be prevented.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC016",
+  "name": "Prowl",
+  "cardType": "action",
+  "text": "Stealth\nThe next attack with stealth you play this combat chain gains +1{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC017",
+  "name": "Scuttle the Canal",
+  "cardType": "action",
+  "text": "Stealth\nWhen this attacks a marked hero, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth",
+   "Go again"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC018",
+  "name": "Undercover Acquisition",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, steal an item they control.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth",
+   "Steal"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC019",
+  "name": "Razor's Edge",
+  "cardType": "attack-reaction",
+  "text": "Target attack action card with stealth gets +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC020",
+  "name": "Spike with Bloodrot",
+  "cardType": "attack-reaction",
+  "text": "Target attack action card with stealth gains +3{p} and \"When this hits a hero, create a Bloodrot Pox token under their control.\"",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC021",
+  "name": "Stains of the Redback",
+  "cardType": "attack-reaction",
+  "text": "If the defending hero is marked, this costs {r} less to play.\nTarget attack with stealth gets +3{p} and go again.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC022",
+  "name": "Horrors of the Past",
+  "cardType": "action",
+  "text": "Stealth\nWhen this attacks, it gets the base abilities of the last attack action card with stealth you control on the combat chain.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC023",
+  "name": "Shred",
+  "cardType": "attack-reaction",
+  "text": "Target card defending an Assassin attack gets -3{d} this combat chain.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC024",
+  "name": "Take Up the Mantle",
+  "cardType": "attack-reaction",
+  "text": "Target attack action card with stealth gets +2{p}. If it's attacking a marked hero, instead it gets +3{p} and you may banish an attack action card with stealth from your graveyard. If you do, the target becomes a copy of the banished card.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC025",
+  "name": "Mark of the Black Widow",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a marked hero, they banish a card from their hand.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC026",
+  "name": "Mark of the Funnel Web",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a marked hero, banish a card in their arsenal.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC027",
+  "name": "Reaper's Call",
+  "cardType": "action",
+  "text": "Stealth\nInstant - Discard this: Mark target opposing hero.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC028",
+  "name": "Night's Embrace",
+  "cardType": "attack-reaction",
+  "text": "Your attacks with stealth get +1{p} this turn.",
+  "pitch": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC029",
+  "name": "Shred",
+  "cardType": "attack-reaction",
+  "text": "Target card defending an Assassin attack gets -2{d} this combat chain.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC030",
+  "name": "Bloodrot Pox",
+  "cardType": "token",
+  "text": "At the beginning of your end phase, destroy Bloodrot Pox, then it deals 2 damage to you unless you pay {r}{r}{r}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "AAC"
+ },
+ {
+  "id": "AAC031",
+  "name": "Marked",
+  "cardType": "token",
+  "text": "You are marked until an opponent hits you",
+  "keywords": [
+   "Mark"
+  ],
+  "set": "AAC"
+ }
+]

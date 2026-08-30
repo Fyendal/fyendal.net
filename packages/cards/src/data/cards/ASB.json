@@ -1,0 +1,521 @@
+[
+ {
+  "id": "ASB001",
+  "name": "Ser Boltyn, Breaker of Dawn",
+  "cardType": "hero",
+  "text": "If you've charged this turn, your attacks get +1{p} while defended by an attack action card.\nAttack Reaction - Banish a card from Boltyn's soul: Target attack with {p} greater than its base {p} gains go again.",
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "ASB"
+ },
+ {
+  "id": "ASB002",
+  "name": "Raydn, Duskbane",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - 0: Attack\nIf you've charged this turn, Raydn gains +3{p}.",
+  "attack": 0,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "sword",
+   "2h"
+  ],
+  "set": "ASB"
+ },
+ {
+  "id": "ASB003",
+  "name": "Helm of Halo's Grace",
+  "cardType": "equipment",
+  "text": "When this defends, you may charge your hero's soul. If a yellow card is charged this way, draw a card.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "head"
+  ],
+  "keywords": [
+   "Charge",
+   "Blade Break"
+  ],
+  "set": "ASB"
+ },
+ {
+  "id": "ASB004",
+  "name": "Solar Plexus",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this, banish a card from your soul: Yellow cards cost you {r} less to play this turn.",
+  "subtypes": [
+   "light",
+   "chest"
+  ],
+  "set": "ASB"
+ },
+ {
+  "id": "ASB005",
+  "name": "Bracers of Bellona's Grace",
+  "cardType": "equipment",
+  "text": "When this defends, you may charge your hero's soul. If a yellow card is charged this way, create a Courage token.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "arms"
+  ],
+  "keywords": [
+   "Charge",
+   "Blade Break"
+  ],
+  "set": "ASB"
+ },
+ {
+  "id": "ASB006",
+  "name": "Warpath of Winged Grace",
+  "cardType": "equipment",
+  "text": "When this defends, you may charge your hero's soul. If a yellow card is charged this way, create a Quicken token.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "legs"
+  ],
+  "keywords": [
+   "Charge",
+   "Blade Break"
+  ],
+  "set": "ASB"
+ },
+ {
+  "id": "ASB007",
+  "name": "Beaming Bravado",
+  "cardType": "action",
+  "text": "As an additional cost to play this, you may charge your hero's soul.\nIf a yellow card is charged this way, this gets +1{p}",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Charge"
+  ],
+  "set": "ASB"
+ },
+ {
+  "id": "ASB008",
+  "name": "Bolt of Courage",
+  "cardType": "action",
+  "text": "As an additional cost to play Bolt of Courage, you may charge your hero's soul.\nIf you've charged this turn, Bolt of Courage gains \"If this hits, draw a card.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Charge"
+  ],
+  "set": "ASB"
+ },
+ {
+  "id": "ASB009",
+  "name": "Engulfing Light",
+  "cardType": "action",
+  "text": "As an additional cost to play Engulfing Light, you may charge your hero's soul.\nIf you've charged this turn, Engulfing Light gains \"If this hits, put it into your hero's soul.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Charge"
+  ],
+  "set": "ASB"
+ },
+ {
+  "id": "ASB010",
+  "name": "Express Lightning",
+  "cardType": "action",
+  "text": "As an additional cost to play Express Lightning, you may charge your hero's soul.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Charge"
+  ],
+  "set": "ASB"
+ },
+ {
+  "id": "ASB011",
+  "name": "Light the Way",
+  "cardType": "action",
+  "text": "As an additional cost to play this, you may charge your hero's soul.\nWhen this hits, if a yellow card was charged this way, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Charge",
+   "Go again"
+  ],
+  "set": "ASB"
+ },
+ {
+  "id": "ASB012",
+  "name": "Snatch",
+  "cardType": "action",
+  "text": "When this hits, draw a card.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "ASB"
+ },
+ {
+  "id": "ASB013",
+  "name": "Take Flight",
+  "cardType": "action",
+  "text": "As an additional cost to play Take Flight, you may charge your hero's soul.\nIf you've charged this turn, Take Flight gains go again.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Charge"
+  ],
+  "set": "ASB"
+ },
+ {
+  "id": "ASB014",
+  "name": "Courageous Steelhand",
+  "cardType": "attack-reaction",
+  "text": "If you've charged this turn, target attack gains +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light"
+  ],
+  "set": "ASB"
+ },
+ {
+  "id": "ASB015",
+  "name": "Resounding Courage",
+  "cardType": "attack-reaction",
+  "text": "Target Light Warrior attack gets +3{p}.\nIf you've charged this turn, create a Courage token.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light"
+  ],
+  "set": "ASB"
+ },
+ {
+  "id": "ASB016",
+  "name": "Sink Below",
+  "cardType": "defense-reaction",
+  "text": "You may put a card from your hand on the bottom of your deck. If you do, draw a card.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 4,
+  "classes": [
+   "generic"
+  ],
+  "set": "ASB"
+ },
+ {
+  "id": "ASB017",
+  "name": "Banneret of Resilience",
+  "cardType": "action",
+  "text": "Solflare - When this is charged to your hero's soul, the next action card you defend with this turn gets +1{d}.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Solflare"
+  ],
+  "set": "ASB"
+ },
+ {
+  "id": "ASB018",
+  "name": "Banneret of Vigor",
+  "cardType": "action",
+  "text": "Solflare - When this is charged to your hero's soul, the next time you hit this turn, gain {r}.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Solflare"
+  ],
+  "set": "ASB"
+ },
+ {
+  "id": "ASB019",
+  "name": "Battlefield Blitz",
+  "cardType": "action",
+  "text": "If you've charged this turn, Battlefield Blitz gains go again.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ASB"
+ },
+ {
+  "id": "ASB020",
+  "name": "Beaming Bravado",
+  "cardType": "action",
+  "text": "As an additional cost to play this, you may charge your hero's soul.\nIf a yellow card is charged this way, this gets +1{p}",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Charge"
+  ],
+  "set": "ASB"
+ },
+ {
+  "id": "ASB021",
+  "name": "Bolt of Courage",
+  "cardType": "action",
+  "text": "As an additional cost to play Bolt of Courage, you may charge your hero's soul.\nIf you've charged this turn, Bolt of Courage gains \"If this hits, draw a card.\"",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Charge"
+  ],
+  "set": "ASB"
+ },
+ {
+  "id": "ASB022",
+  "name": "Take Flight",
+  "cardType": "action",
+  "text": "As an additional cost to play Take Flight, you may charge your hero's soul.\nIf you've charged this turn, Take Flight gains go again.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Charge"
+  ],
+  "set": "ASB"
+ },
+ {
+  "id": "ASB023",
+  "name": "V of the Vanguard",
+  "cardType": "action",
+  "text": "Boltyn Specialization\nAs an additional cost to play V of the Vanguard, you may charge your hero's soul any number of times.\nAttacks on this combat chain gain +1{p} for each Light card charged this way.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Boltyn Specialization",
+   "Charge"
+  ],
+  "set": "ASB"
+ },
+ {
+  "id": "ASB024",
+  "name": "Valiant Thrust",
+  "cardType": "action",
+  "text": "If you've charged this turn, Valiant Thrust gains +3{p}.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "set": "ASB"
+ },
+ {
+  "id": "ASB025",
+  "name": "Saving Grace",
+  "cardType": "defense-reaction",
+  "text": "As an additional cost to play this, you may charge your hero's soul.\nIf you've charged this turn, target attack gets -2{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light"
+  ],
+  "keywords": [
+   "Charge"
+  ],
+  "set": "ASB"
+ },
+ {
+  "id": "ASB026",
+  "name": "Lumina Ascension",
+  "cardType": "action",
+  "text": "Boltyn Specialization\nUntil end of turn, weapons you control gain +1{p} and \"If this hits, reveal the top card of your deck. If it's a Light card, put it into your hero's soul and gain 1{h}, otherwise put it on the bottom of your deck.\"\nIf you've charged this turn, you may attack an additional time with each weapon you control.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light"
+  ],
+  "keywords": [
+   "Boltyn Specialization",
+   "Go again"
+  ],
+  "set": "ASB"
+ },
+ {
+  "id": "ASB027",
+  "name": "Courage",
+  "cardType": "token",
+  "text": "When you play an attack action card or activate a weapon attack, destroy this and the attack gets +1{p}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "ASB"
+ },
+ {
+  "id": "ASB028",
+  "name": "Quicken",
+  "cardType": "token",
+  "text": "When you play an attack action card or activate a weapon attack, destroy this and the attack gains go again.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "ASB"
+ }
+]

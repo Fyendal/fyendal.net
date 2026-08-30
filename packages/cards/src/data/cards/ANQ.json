@@ -1,0 +1,603 @@
+[
+ {
+  "id": "ANQ000",
+  "name": "Enlightened Strike",
+  "cardType": "action",
+  "text": "As an additional cost to play Enlightened Strike, put a card from your hand on the bottom of your deck.\nChoose 1;\n- When you attack with Enlightened Strike, draw a card.\n- Enlightened Strike gains +2{p}.\n- Enlightened Strike gains go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ001",
+  "name": "Heart of Fyendal",
+  "cardType": "resource",
+  "text": "Legendary\nWhen you pitch Heart of Fyendal, if you have less {h} than an opposing hero, gain 1{h}.",
+  "pitch": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "gem"
+  ],
+  "keywords": [
+   "Legendary"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ002",
+  "name": "Eye of Ophidia",
+  "cardType": "resource",
+  "text": "Legendary\nWhen you pitch Eye of Ophidia, opt 2.",
+  "pitch": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "gem"
+  ],
+  "keywords": [
+   "Legendary",
+   "Opt 2"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ003",
+  "name": "Riches of Trōpal-Dhani",
+  "cardType": "resource",
+  "text": "Legendary\nWhen this is pitched, create a Gold token.",
+  "pitch": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "gem"
+  ],
+  "keywords": [
+   "Legendary"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ004",
+  "name": "Balance of Justice",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Draw a card. Activate this only if an opponent has drawn 2 or more cards this turn.\nGuardwell",
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ005",
+  "name": "Crown of Providence",
+  "cardType": "equipment",
+  "text": "When you defend with Crown of Providence, you may put a card from your hand or arsenal on the bottom of your deck. If you do, draw a card.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ006",
+  "name": "Fyendal's Spring Tunic",
+  "cardType": "equipment",
+  "text": "At the start of your turn, if this has fewer than 3 energy counters, you may put an energy counter on it.\nInstant - Remove 3 energy counters from this: Gain {r}\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ007",
+  "name": "Stonewall Gauntlet",
+  "cardType": "equipment",
+  "text": "When this defends an attack with {p} greater than its base, opposing attacks get -1{p} this combat chain.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ008",
+  "name": "Quickdodge Flexors",
+  "cardType": "equipment",
+  "text": "Defense Reaction - {r}: Add this to the active chain link as a defending card. It has 2 base {d} this chain link.\nAt the beginning of the end phase, if this defendend this turn, destroy it.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ009",
+  "name": "Command and Conquer",
+  "cardType": "action",
+  "text": "Defense reaction cards can't be played this chain link. When this hits a hero, destroy all cards in their arsenal.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ010",
+  "name": "Shelter from the Storm",
+  "cardType": "defense-reaction",
+  "text": "Instant - Discard this: The next 3 times you would be dealt damage this turn, prevent 1 of that damage.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 4,
+  "classes": [
+   "generic"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ011",
+  "name": "Amnesia",
+  "cardType": "action",
+  "text": "When this hits a hero, cards and tokens they own lose and can't gain names until the start of your next turn.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ012",
+  "name": "Censor",
+  "cardType": "action",
+  "text": "When this hits a hero, name a card. They can't play the named card until the end of their next turn.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ013",
+  "name": "Cut Through the Facade",
+  "cardType": "action",
+  "text": "This can't be defended by auras.\nWhen this hits a hero, you may destroy an aura they control.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ014",
+  "name": "Ripple Away",
+  "cardType": "action",
+  "text": "Instant - Discard this: If an action card effect would create 1 or more tokens this turn, instead it creates that many minus 1 of each of those tokens.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ015",
+  "name": "Tenacity",
+  "cardType": "action",
+  "text": "When this attacks, it gets +X{p}, where X is the number of defending cards on the combat chain.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ016",
+  "name": "The Weakest Link",
+  "cardType": "action",
+  "text": "When this hits a hero, look at their hand and choose a card without base {d}. If you do, they discard it and you draw a card.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ017",
+  "name": "Hold the Line",
+  "cardType": "defense-reaction",
+  "text": "If the attacking hero has drawn 2 or more cards this turn, prevent the next 3 damage that would be dealt to your hero this turn.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ018",
+  "name": "That All You Got?",
+  "cardType": "defense-reaction",
+  "text": "While this is defending an attack with 2 or less {p}, when the combat chain closes, draw a card.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ019",
+  "name": "Call to the Grave",
+  "cardType": "action",
+  "text": "Search your deck for a card, put it into your graveyard, then shuffle.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ020",
+  "name": "Gorganian Tome",
+  "cardType": "action",
+  "text": "Legendary\nDraw X cards, where X is 1 plus the number of Gorganian Tomes in all graveyards.\nGo again",
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Go again"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ021",
+  "name": "Midas Touch",
+  "cardType": "action",
+  "text": "Destroy target ally. Its controller creates Gold tokens equal to its cost.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ022",
+  "name": "Premeditate",
+  "cardType": "action",
+  "text": "The next time an attack action card hits a hero this turn, create a Ponder token.\nThe next attack action card you play from arsenal this turn gains +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ023",
+  "name": "Rusted Relic",
+  "cardType": "action",
+  "text": "Arcane Barrier 1",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ024",
+  "name": "This Round's on Me",
+  "cardType": "action",
+  "text": "Each hero draws a card.\nUntil the start of your next turn, attacks that target you have -1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ025",
+  "name": "Truce",
+  "cardType": "action",
+  "text": "When this enters the arena, choose an opponent.\nAt the beginning of their end phase, destroy this and you each gain 3{h}.\nWhen you or a card you control is the target of an attack they control, destroy this and draw a card.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ026",
+  "name": "Remembrance",
+  "cardType": "instant",
+  "text": "Shuffle up to 3 action cards from your graveyard into your deck.\nBanish Remembrance.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ027",
+  "name": "Seduce Secrets",
+  "cardType": "instant",
+  "text": "Look at target hero's hand and the top card of their deck.\nIf this was played from arsenal, draw a card.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ028",
+  "name": "Looking for a Scrap",
+  "cardType": "action",
+  "text": "As an additional cost to play Looking for a Scrap, you may banish a card with 1{p} from your graveyard. When you do, this gains +1{p} and go again.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ029",
+  "name": "Ravenous Rabble",
+  "cardType": "action",
+  "text": "When this attacks, reveal the top card of your deck. This gets -X{p}, where X is the pitch value of the card revealed this way.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ030",
+  "name": "Scar for a Scar",
+  "cardType": "action",
+  "text": "When this is played, if you have less {h} than an opposing hero, it gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ031",
+  "name": "Snatch",
+  "cardType": "action",
+  "text": "When this hits, draw a card.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ032",
+  "name": "Pummel",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target club or hammer weapon attack gains +4{p}.\n- Target attack action card with cost 2 or more gets +4{p} and \"When this hits a hero, they discard a card.\"",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ033",
+  "name": "Fate Foreseen",
+  "cardType": "defense-reaction",
+  "text": "Opt 1",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 4,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Opt 1"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ034",
+  "name": "Sink Below",
+  "cardType": "defense-reaction",
+  "text": "You may put a card from your hand on the bottom of your deck. If you do, draw a card.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 4,
+  "classes": [
+   "generic"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ035",
+  "name": "Oasis Respite",
+  "cardType": "instant",
+  "text": "Prevent the next 4 damage that would be dealt to target hero this turn by a source of your choice. If they have less life than each other hero, they may gain 1{h}.",
+  "pitch": 1,
+  "cost": 1,
+  "classes": [
+   "generic"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ036",
+  "name": "Sigil of Solace",
+  "cardType": "instant",
+  "text": "Gain 3{h}",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "ANQ"
+ },
+ {
+  "id": "ANQ037",
+  "name": "Fiddler's Green",
+  "cardType": "block",
+  "text": "When this is put into your graveyard from anywhere, gain 3{h}.",
+  "pitch": 1,
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "set": "ANQ"
+ }
+]

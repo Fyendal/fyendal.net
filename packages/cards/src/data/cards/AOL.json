@@ -1,0 +1,437 @@
+[
+ {
+  "id": "AOL001",
+  "name": "Olympia, Prized Fighter",
+  "cardType": "hero",
+  "text": "The first time each of your attacks wins a wager, create a Gold token.",
+  "classes": [
+   "warrior"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "AOL"
+ },
+ {
+  "id": "AOL002",
+  "name": "Golden Grail",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r} or destroy a Gold you control: Attack. If this attack has wagered, it gets +1{p}.",
+  "attack": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "sword",
+   "2h"
+  ],
+  "set": "AOL"
+ },
+ {
+  "id": "AOL003",
+  "name": "Prized Galea",
+  "cardType": "equipment",
+  "text": "Olympia Specialization\nAttack Reaction - {r}, destroy this: Target weapon attack you control wagers a Gold token with the defending hero.\nTemper",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Olympia Specialization",
+   "Temper"
+  ],
+  "set": "AOL"
+ },
+ {
+  "id": "AOL004",
+  "name": "Prizeworn Plating",
+  "cardType": "equipment",
+  "text": "Whenever you win a wager, you may {t} your hero and destroy this. If you do, create a Vigor token.\nGuardwell",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "AOL"
+ },
+ {
+  "id": "AOL005",
+  "name": "Prizeworn Gauntlet",
+  "cardType": "equipment",
+  "text": "Whenever you win a wager, you may {t} your hero and destroy this. If you do, create a Courage token.\nGuardwell",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "AOL"
+ },
+ {
+  "id": "AOL006",
+  "name": "Prizeworn Pathfinders",
+  "cardType": "equipment",
+  "text": "Whenever you win a wager, you may pay {r}. If you do, remove a -1{d} counter from this.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "AOL"
+ },
+ {
+  "id": "AOL007",
+  "name": "Into the Muck",
+  "cardType": "attack-reaction",
+  "text": "Play this only if you've wagered this chain link.\nBanish a non-equipment defending card on the active chain link.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "AOL"
+ },
+ {
+  "id": "AOL008",
+  "name": "Ironsong Response",
+  "cardType": "attack-reaction",
+  "text": "Reprise - If the defending hero has defended with a card from their hand this chain link, target weapon attack gains +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "AOL"
+ },
+ {
+  "id": "AOL009",
+  "name": "Take the Upper Hand",
+  "cardType": "attack-reaction",
+  "text": "Play this only if you've wagered this chain link.\nTarget attack gets +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "AOL"
+ },
+ {
+  "id": "AOL010",
+  "name": "Belly Buster",
+  "cardType": "action",
+  "text": "Your next Warrior attack this turn gets +3{p} and \"When this attacks a hero, you may wager with them. The winner creates a Courage token.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AOL"
+ },
+ {
+  "id": "AOL011",
+  "name": "Big Slick",
+  "cardType": "action",
+  "text": "Your next sword attack this turn gets +5{p} and \"When this attacks, wager with the defending hero. The winner draws a card.\"\nGo again",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AOL"
+ },
+ {
+  "id": "AOL012",
+  "name": "Check-Raise",
+  "cardType": "action",
+  "text": "The next time an attack you control wagers this turn, it gets +4{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AOL"
+ },
+ {
+  "id": "AOL013",
+  "name": "Cut n' Carve",
+  "cardType": "action",
+  "text": "Sharpen target sword you control.\nIf it has 1 or more +1{p} counters, its next attack this turn gets dominate.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "AOL"
+ },
+ {
+  "id": "AOL014",
+  "name": "Heads Up",
+  "cardType": "action",
+  "text": "Your next sword attack this turn gets +3{p} and \"When this attacks, if it wagered, it gets dominate.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AOL"
+ },
+ {
+  "id": "AOL015",
+  "name": "Hold 'em",
+  "cardType": "action",
+  "text": "Your next Warrior attack this turn gets +3{p} and \"When this attacks a hero, you may wager a Vigor token with them.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AOL"
+ },
+ {
+  "id": "AOL016",
+  "name": "Money Where Ya Mouth Is",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +3{p} and \"When this attacks a hero, you may wager with them. The winner creates a Gold token.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AOL"
+ },
+ {
+  "id": "AOL017",
+  "name": "Drawing Dead",
+  "cardType": "attack-reaction",
+  "text": "Target sword attack gets +1{p} and wagers with the defending hero. The winner discards a card.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "AOL"
+ },
+ {
+  "id": "AOL018",
+  "name": "Bluff Catcher",
+  "cardType": "action",
+  "text": "You may destroy a Gold you control rather than pay this card's {r} cost.\nYour next sword attack this turn gets +3{p} and \"When this attacks, wager with the defending hero. The winner gets +1{i} during their next end phase.\"\nGo again",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AOL"
+ },
+ {
+  "id": "AOL019",
+  "name": "Check-Raise",
+  "cardType": "action",
+  "text": "The next time an attack you control wagers this turn, it gets +3{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AOL"
+ },
+ {
+  "id": "AOL020",
+  "name": "Donkey",
+  "cardType": "attack-reaction",
+  "text": "Target sword attack gets +1{p} and wagers with the defending hero. The winner destroys a card in their own arsenal.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "AOL"
+ },
+ {
+  "id": "AOL021",
+  "name": "Shove Off",
+  "cardType": "attack-reaction",
+  "text": "Choose a non-equipment card defending a sword attack you control. Return it to its owner's hand.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "AOL"
+ },
+ {
+  "id": "AOL022",
+  "name": "Golden Company",
+  "cardType": "defense-reaction",
+  "text": "You may destroy a Gold you control rather than pay this card's {r} cost.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 6,
+  "classes": [
+   "warrior"
+  ],
+  "set": "AOL"
+ },
+ {
+  "id": "AOL023",
+  "name": "Belly Buster",
+  "cardType": "action",
+  "text": "Your next Warrior attack this turn gets +1{p} and \"When this attacks a hero, you may wager with them. The winner creates a Courage token.\"\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AOL"
+ },
+ {
+  "id": "AOL024",
+  "name": "Check-Raise",
+  "cardType": "action",
+  "text": "The next time an attack you control wagers this turn, it gets +2{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AOL"
+ },
+ {
+  "id": "AOL025",
+  "name": "Hold 'em",
+  "cardType": "action",
+  "text": "Your next Warrior attack this turn gets +1{p} and \"When this attacks a hero, you may wager a Vigor token with them.\"\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again",
+   "Wager"
+  ],
+  "set": "AOL"
+ },
+ {
+  "id": "AOL026",
+  "name": "Odds on Favorite",
+  "cardType": "action",
+  "text": "Your next sword attack this turn gets \"When this attacks, wager with the defending hero. The winner searches their deck for a card, shuffles, then puts that card on top.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again",
+   "Wager"
+  ],
+  "set": "AOL"
+ },
+ {
+  "id": "AOL027",
+  "name": "Rake Back",
+  "cardType": "action",
+  "text": "You may destroy a Gold you control rather than pay this card's {r} cost.\nYour next sword attack this turn gets +2{p} and \"When this attacks, wager with the defending hero. The winner may equip an equipment card from their graveyard.\"\nGo again",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AOL"
+ },
+ {
+  "id": "AOL028",
+  "name": "Visit the Prize Room",
+  "cardType": "action",
+  "text": "Olympia Specialization\nYou may destroy a Gold you control. If you do, equip a Prized Galea from your inventory.\nCreate a Vigor and a Courage token. Go again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Olympia Specialization",
+   "Go again"
+  ],
+  "set": "AOL"
+ }
+]

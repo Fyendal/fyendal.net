@@ -1,0 +1,5873 @@
+[
+ {
+  "id": "PEN001",
+  "name": "Savage Claw",
+  "cardType": "weapon",
+  "text": "Action - {r}{r}, {t}: Attack\nIf a card with 6 or more {p} was pitched to attack with this, the attack gets +1{p}.",
+  "attack": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "claw",
+   "1h"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN002",
+  "name": "Buzzard Helm",
+  "cardType": "equipment",
+  "text": "When this defends, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, this gets +1{d} this turn.\nTemper",
+  "defense": 1,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN003",
+  "name": "Predatory Plating",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Gain {r}. Activate this only if you control a card with 6 or more {p}.\nGuardwell",
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN004",
+  "name": "Skera Strapping",
+  "cardType": "equipment",
+  "text": "If you've pitched a card with 6 or more {p} this turn, this gets spellvoid 3.",
+  "defense": 0,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Spellvoid 3"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN005",
+  "name": "Shamanic Shinbones",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN006",
+  "name": "Reckless Arithmetic",
+  "cardType": "action",
+  "text": "When this attacks, roll a 6 sided die. This gets +X{p}, where X is the number rolled.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN007",
+  "name": "Lay Down the Challenge",
+  "cardType": "action",
+  "text": "Intimidate target hero, then if they have more cards in hand than you, draw a card.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate",
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN008",
+  "name": "Rip Off the Top",
+  "cardType": "action",
+  "text": "Draw a card, then pitch a random card from your hand. If it has 6 or more {p}, your next attack this turn gets +3{p}.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN009",
+  "name": "Aggressive Pounce",
+  "cardType": "action",
+  "text": "If you've intimidated an opponent this turn, this gets go again.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN010",
+  "name": "Aggressive Pounce",
+  "cardType": "action",
+  "text": "If you've intimidated an opponent this turn, this gets go again.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN011",
+  "name": "Aggressive Pounce",
+  "cardType": "action",
+  "text": "If you've intimidated an opponent this turn, this gets go again.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN012",
+  "name": "Bear Hug",
+  "cardType": "action",
+  "text": "Play this only if you've pitched a card with 6 or more {p} this turn.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN013",
+  "name": "Bear Hug",
+  "cardType": "action",
+  "text": "Play this only if you've pitched a card with 6 or more {p} this turn.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN014",
+  "name": "Bear Hug",
+  "cardType": "action",
+  "text": "Play this only if you've pitched a card with 6 or more {p} this turn.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN015",
+  "name": "Shield Beater",
+  "cardType": "weapon",
+  "text": "Action - {r}{r}{r}{r}, {t}: Attack\nCards you own named Visit Anvilheim get go again.",
+  "attack": 5,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "hammer",
+   "1h"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN016",
+  "name": "Enclosed Firemind",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN017",
+  "name": "Magmatic Carapace",
+  "cardType": "equipment",
+  "text": "Whenever you play an aura, you may {t} this and pay {r}. If you do, create a Seismic Surge token.\nGuardwell",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN018",
+  "name": "Volcanic Vice",
+  "cardType": "equipment",
+  "text": "If you've created a Seismic Surge this turn, this gets spellvoid 3.",
+  "defense": 0,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Spellvoid 3"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN019",
+  "name": "Basalt Boots",
+  "cardType": "equipment",
+  "text": "If you control a Seismic Surge token, this gets +1{d}.\nTemper",
+  "defense": 1,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN020",
+  "name": "Seismic Shift",
+  "cardType": "action",
+  "text": "As an additional cost to play this, {t} X Seismic Surge tokens you control.\nDestroy X target aura tokens.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN021",
+  "name": "Sense Weakness",
+  "cardType": "action",
+  "text": "Your next Guardian attack this turn gets +1{p}, dominate, and \"When this hits a hero, deal damage to all allies they control equal to the damage dealt this way.\"\nGo again",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN022",
+  "name": "Valahai Riven",
+  "cardType": "block",
+  "text": "When this defends, you may pay up to {r}{r}{r}. Create that many Seismic Surge tokens.",
+  "pitch": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN023",
+  "name": "Distant Rumbling",
+  "cardType": "action",
+  "text": "When this enters the arena, draw a card, then put a card from your hand into your deck fifth from the top.\nAt the start of your turn, destroy this, then create 3 Seismic Surge tokens.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN024",
+  "name": "Distant Rumbling",
+  "cardType": "action",
+  "text": "When this enters the arena, draw a card, then put a card from your hand into your deck fifth from the top.\nAt the start of your turn, destroy this, then create 2 Seismic Surge tokens.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN025",
+  "name": "Distant Rumbling",
+  "cardType": "action",
+  "text": "When this enters the arena, draw a card, then put a card from your hand into your deck fifth from the top.\nAt the start of your turn, destroy this, then create a Seismic Surge token.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN026",
+  "name": "Rites of Earthlore",
+  "cardType": "action",
+  "text": "When this enters the arena, create a Seismic Surge token.\nAt the start of your turn, destroy this, then the next Guardian attack action card you play this turn gets +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN027",
+  "name": "Rites of Earthlore",
+  "cardType": "action",
+  "text": "When this enters the arena, create a Seismic Surge token.\nAt the start of your turn, destroy this, then the next Guardian attack action card you play this turn gets +2{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN028",
+  "name": "Rites of Earthlore",
+  "cardType": "action",
+  "text": "When this enters the arena, create a Seismic Surge token.\nAt the start of your turn, destroy this, then the next Guardian attack action card you play this turn gets +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN029",
+  "name": "Wind Cutter",
+  "cardType": "equipment",
+  "text": "Attack Reaction - {r}, {t}: Search your deck for a Shuriken item, put it into the arena, then shuffle. Activate this only if you've hit 2 or more times this combat chain.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN030",
+  "name": "Mask of the Swarming Claw",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1\nSpellvoid X, where X is the number of chain links you control.",
+  "defense": 0,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Arcane Barrier 1",
+   "Spellvoid X"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN031",
+  "name": "Double Cross Strap",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Gain {r}. Activate this only if you've hit 2 or more times this combat chain.\nArcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN032",
+  "name": "Dyed Silk Sleeves",
+  "cardType": "equipment",
+  "text": "Attack Reaction - {r}, {t}, destroy a dagger you control that's not on the active chain link: Target Ninja attack action card on the active chain link gets +1{p}. When the chain link resolves, if the attack didn't hit, destroy this.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN033",
+  "name": "Two Steps Forward",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Create an Agility token. Activate this only if you've hit 2 or more times this combat chain.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN034",
+  "name": "Gentle Breeze",
+  "cardType": "action",
+  "text": "Your other attacks have 1 base {p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN035",
+  "name": "Tigrine Reflex",
+  "cardType": "action",
+  "text": "Combo - If Crouching Tiger was the last attack this combat chain, this gets +1{p} and go again.\nAttack Reaction - Discard this: Target Ninja attack gets +1{p}. Create a Crouching Tiger in your hand.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN036",
+  "name": "Feign Vengeance",
+  "cardType": "action",
+  "text": "When this chain link resolves, if there is a card defending this, draw a card.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 0,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN037",
+  "name": "Become the Bottle",
+  "cardType": "action",
+  "text": "When this attacks, choose a card on the combat chain. This gets the chosen card's name.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN038",
+  "name": "Become the Bottle",
+  "cardType": "action",
+  "text": "When this attacks, choose a card on the combat chain. This gets the chosen card's name.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN039",
+  "name": "Become the Bottle",
+  "cardType": "action",
+  "text": "When this attacks, choose a card on the combat chain. This gets the chosen card's name.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN040",
+  "name": "Become the Cup",
+  "cardType": "action",
+  "text": "As you play this, choose a color. This gets the chosen color.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN041",
+  "name": "Become the Cup",
+  "cardType": "action",
+  "text": "As you play this, choose a color. This gets the chosen color.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN042",
+  "name": "Become the Cup",
+  "cardType": "action",
+  "text": "As you play this, choose a color. This gets the chosen color.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN043",
+  "name": "Templar Spellbane",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Prevent the next 1 arcane damage that would be dealt to you this turn. If you've activated a weapon this turn, instead prevent the next 2.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN044",
+  "name": "Helm of Unity",
+  "cardType": "equipment",
+  "text": "Unity - When this defends together with a card from hand, this gets +1{d} until end of turn.\nTemper",
+  "defense": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Unity",
+   "Temper"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN045",
+  "name": "Plating of Unity",
+  "cardType": "equipment",
+  "text": "Unity - When this defends together with a card from hand, this gets +1{d} until end of turn.\nTemper",
+  "defense": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Unity",
+   "Temper"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN046",
+  "name": "Gauntlets of Unity",
+  "cardType": "equipment",
+  "text": "Unity - When this defends together with a card from hand, this gets +1{d} until end of turn.\nTemper",
+  "defense": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Unity",
+   "Temper"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN047",
+  "name": "Pillar of Unity",
+  "cardType": "equipment",
+  "text": "Unity - When this defends together with a card from hand, this gets +1{d} until end of turn.\nTemper",
+  "defense": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Unity",
+   "Temper"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN048",
+  "name": "Swordmaster's Shine",
+  "cardType": "attack-reaction",
+  "text": "This costs {r} less to play for each +1{p} counter on swords you control.\nTarget weapon attack gets +5{p}.",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN049",
+  "name": "Blunten",
+  "cardType": "block",
+  "text": "When this defends a weapon attack, the attacking hero discards a card.",
+  "pitch": 2,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN050",
+  "name": "Rend Flesh",
+  "cardType": "action",
+  "text": "Until end of turn, whenever a sword you control hits a hero, you may remove a +1{p} counter from it. If you do, they lose 2{h}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN051",
+  "name": "Display of Craftsmanship",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets +4{p}. If the weapon has been sharpened this turn, put a +1{p} counter on it.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN052",
+  "name": "Display of Craftsmanship",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets +3{p}. If the weapon has been sharpened this turn, put a +1{p} counter on it.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN053",
+  "name": "Display of Craftsmanship",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets +2{p}. If the weapon has been sharpened this turn, put a +1{p} counter on it.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN054",
+  "name": "Cut n' Carve",
+  "cardType": "action",
+  "text": "Sharpen target sword you control.\nIf it has 1 or more +1{p} counters, its next attack this turn gets dominate.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN055",
+  "name": "Cut n' Carve",
+  "cardType": "action",
+  "text": "Sharpen target sword you control.\nIf it has 2 or more +1{p} counters, its next attack this turn gets dominate.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN056",
+  "name": "Cut n' Carve",
+  "cardType": "action",
+  "text": "Sharpen target sword you control.\nIf it has 3 or more +1{p} counters, its next attack this turn gets dominate.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN057",
+  "name": "Synapse Sparkcap",
+  "cardType": "equipment",
+  "text": "Action - {t}, banish an Evo from your hand: Create a Ponder token.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "base",
+   "head"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN058",
+  "name": "mBrio Base Vizier",
+  "cardType": "equipment",
+  "text": "If you would be dealt arcane damage, you may remove a steam counter from a Hyper Driver you control to prevent 1 of that damage.\nArcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "base",
+   "head"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN059",
+  "name": "mBrio Base Cortex",
+  "cardType": "equipment",
+  "text": "If you control a Hyper Driver, this gets +2{d}.\nGuardwell",
+  "defense": 0,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "base",
+   "chest"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN060",
+  "name": "mBrio Base Digits",
+  "cardType": "equipment",
+  "text": "Instant - {t} this and a cog you control: This gets +1{d} until end of turn.\nTemper",
+  "defense": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "base",
+   "arms"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN061",
+  "name": "mBrio Base Walkers",
+  "cardType": "equipment",
+  "text": "Quell 1",
+  "defense": 0,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "base",
+   "legs"
+  ],
+  "keywords": [
+   "Quell 1"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN062",
+  "name": "Ghost Protocol: Architect",
+  "cardType": "action",
+  "text": "If this was banished from boosting this turn, you may play this from your banished zone.\nEvo Upgrade - When this attacks, search your deck for an Evo with cost less than or equal to the number of Evos you have equipped, banish it, then shuffle.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Evo Upgrade"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN063",
+  "name": "Ghost Protocol: Mainframe",
+  "cardType": "action",
+  "text": "If this was banished from boosting this turn, you may play this from your banished zone.\nEvo Upgrade - This gets +1{p} for each Evo you have equipped.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Evo Upgrade"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN064",
+  "name": "Blast Rig",
+  "cardType": "action",
+  "text": "Evo Upgrade - This gets +1{p} for each Evo you have equipped.\nBoost",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Evo Upgrade",
+   "Boost"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN065",
+  "name": "Speed Demon",
+  "cardType": "action",
+  "text": "Scrap\nIf you control a Hyper Driver, this gets +1{p}.\nWhen this attacks, if it scrapped a Hyper Driver, create a Hyper Driver token with 2 steam counters.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Scrap"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN066",
+  "name": "Teklo Trebuchet 2000",
+  "cardType": "action",
+  "text": "When this attacks, the next attack you boost this combat chain gets +2{p}.\nBoost",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN067",
+  "name": "Assembly Module",
+  "cardType": "action",
+  "text": "Crank\nThis enters the arena with a stream counter. At the start of your turn, destroy this unless you remove a steam counter from it.\nAction - {t}: Search your deck for a Hyper Driver, put it into the arena, then shuffle.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Crank"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN068",
+  "name": "Evo Beta Base Head",
+  "cardType": "equipment",
+  "text": "If you have a base head equipped, transform it into this, then equip this.\nEvo heads cost you {r} less to play.\nBattleworn",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "evo",
+   "base",
+   "head"
+  ],
+  "keywords": [
+   "Transform",
+   "Battleworn"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN069",
+  "name": "Evo Beta Base Chest",
+  "cardType": "equipment",
+  "text": "If you have a base chest equipped, transform it into this, then equip this.\nEvo chests cost you {r} less to play.\nBattleworn",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "evo",
+   "base",
+   "chest"
+  ],
+  "keywords": [
+   "Transform",
+   "Battleworn"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN070",
+  "name": "Evo Beta Base Arms",
+  "cardType": "equipment",
+  "text": "If you have a base arms equipped, transform it into this, then equip this.\nEvo arms cost you {r} less to play.\nBattleworn",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "evo",
+   "base",
+   "arms"
+  ],
+  "keywords": [
+   "Transform",
+   "Battleworn"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN071",
+  "name": "Evo Beta Base Legs",
+  "cardType": "equipment",
+  "text": "If you have a base legs equipped, transform it into this, then equip this.\nEvo legs cost you {r} less to play.\nBattleworn",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "evo",
+   "base",
+   "legs"
+  ],
+  "keywords": [
+   "Transform",
+   "Battleworn"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN072",
+  "name": "Heavy Metal Hardcore",
+  "cardType": "action",
+  "text": "If an Evo has been banished from boosting this turn, this gets +1{p}.\nBoost",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN073",
+  "name": "Heavy Metal Hardcore",
+  "cardType": "action",
+  "text": "If an Evo has been banished from boosting this turn, this gets +1{p}.\nBoost",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN074",
+  "name": "Heavy Metal Hardcore",
+  "cardType": "action",
+  "text": "If an Evo has been banished from boosting this turn, this gets +1{p}.\nBoost",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN075",
+  "name": "Heart Wrencher",
+  "cardType": "action",
+  "text": "Boost",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "wrench",
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN076",
+  "name": "Heart Wrencher",
+  "cardType": "action",
+  "text": "Boost",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "wrench",
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN077",
+  "name": "Heart Wrencher",
+  "cardType": "action",
+  "text": "Boost",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "wrench",
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN078",
+  "name": "Farflight Longbow",
+  "cardType": "weapon",
+  "text": "Instant - {r}, {t}: Put an arrow from your hand face-up into your arsenal.\nYour arrow attacks may target any opposing hero or ally.",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "bow",
+   "2h"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN079",
+  "name": "Concealed Nerve Gas",
+  "cardType": "equipment",
+  "text": "Cloaked\nWhile this is equipped face-down, when an attack with go again hits you, destroy this and create a Frailty token under each opponent's control.",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "chest",
+   "trap"
+  ],
+  "keywords": [
+   "Cloaked"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN080",
+  "name": "Concealed Pathogen",
+  "cardType": "equipment",
+  "text": "Cloaked\nWhile this is equipped face-down, when an attack hits you and its controller has played or activated an attack reaction this chain link, destroy this and create a Bloodrot Pox token under each opponent's control.",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "chest",
+   "trap"
+  ],
+  "keywords": [
+   "Cloaked"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN081",
+  "name": "Concealed Sedative",
+  "cardType": "equipment",
+  "text": "Cloaked\nWhile this is equipped face-down, when an attack with {p} greater than its base hits you, destroy this and create an Inertia token under each opponent's control.",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "chest",
+   "trap"
+  ],
+  "keywords": [
+   "Cloaked"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN082",
+  "name": "Bolt'n Boots",
+  "cardType": "equipment",
+  "text": "Attack Reaction - {r}, destroy this: Target arrow attack with {p} greater than its base gets go again.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN083",
+  "name": "Tiger Trap",
+  "cardType": "defense-reaction",
+  "text": "When this defends and the attacking hero controls 3 or more attacks with {p} greater than their base, attacks they control can't gain {p} this turn.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN084",
+  "name": "Rune Snare",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gets +3{p}.\nGo again\nWhen this defends and the attacking hero has played or created 2 or more auras this turn, destroy an aura they control.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN085",
+  "name": "Rainbow Goo Trap",
+  "cardType": "defense-reaction",
+  "text": "When this defends an attack with {p} greater than its base, dominate, and go again, the attack gets -2{p} and loses and can't gain abilities.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN086",
+  "name": "Courageous Crossing",
+  "cardType": "action",
+  "text": "Create a Courage token under target hero's control.\nGo again\nWhen this defends an attack with {p} greater than its base, remove a +1{p} counter from target permanent.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN087",
+  "name": "Frail Swingline",
+  "cardType": "action",
+  "text": "Create a Frailty token under target hero's control.\nGo again\nWhen this defends an attack with {p} less than its base, its controller discards a card.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN088",
+  "name": "Quickening Sand",
+  "cardType": "action",
+  "text": "Create a Quicken token under target hero's control.\nGo again\nWhen this defends an attack with go again, {t} target hero or ally.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN089",
+  "name": "Spellbane Trap",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gets +3{p}.\nGo again\nWhen this defends and the attacking hero has dealt arcane damage this turn, create a Spellbane Aegis token.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN090",
+  "name": "Spellbane Trap",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gets +2{p}.\nGo again\nWhen this defends and the attacking hero has dealt arcane damage this turn, create a Spellbane Aegis token.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN091",
+  "name": "Spellbane Trap",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gets +1{p}.\nGo again\nWhen this defends and the attacking hero has dealt arcane damage this turn, create a Spellbane Aegis token.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN092",
+  "name": "Grimoire of Fellingsong",
+  "cardType": "equipment",
+  "text": "Instant - {r}, destroy this: Create a Runechant token.",
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "off-hand"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN093",
+  "name": "Helm of Might and Magic",
+  "cardType": "equipment",
+  "text": "Blade Break\nSpellvoid 1",
+  "defense": 1,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break",
+   "Spellvoid 1"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN094",
+  "name": "Runebleed Robe",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this and a Runechant you control: Prevent the next 1 arcane damage that would be dealt to you this turn.\nArcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN095",
+  "name": "Beckoning Haunt",
+  "cardType": "equipment",
+  "text": "Action - {x}{x}{r}, destroy this: Return target aura with cost X from your graveyard to your hand.\nGuardwell",
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN096",
+  "name": "Blackstone Greaves",
+  "cardType": "equipment",
+  "text": "If you've dealt arcane damage this turn, this gets +1{d}.\nTemper",
+  "defense": 1,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN097",
+  "name": "Doomsaying",
+  "cardType": "action",
+  "text": "Go again\nAt the beginning of your end phase, put a doom counter on this, then each hero destroys X auras they control, where X is the number of doom counters on this.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN098",
+  "name": "Sigil of Gravespawning",
+  "cardType": "action",
+  "text": "Go again\nWhenever an aura leaves your graveyard, deal 1 arcane damage to target hero.\nAt the beginning of your action phase, destroy this.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN099",
+  "name": "Sigil of Silphidae",
+  "cardType": "action",
+  "text": "Go again\nWhen this enters or leaves the arena, you may banish another aura from your graveyard. If you do, deal 1 arcane damage to target hero.\nAt the beginning of your action phase, destroy this.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN100",
+  "name": "Runic Fellingsong",
+  "cardType": "action",
+  "text": "When this attacks, you may banish an aura from your graveyard. If you do, deal 1 arcane damage to target hero.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN101",
+  "name": "Runic Fellingsong",
+  "cardType": "action",
+  "text": "When this attacks, you may banish an aura from your graveyard. If you do, deal 1 arcane damage to target hero.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN102",
+  "name": "Runic Fellingsong",
+  "cardType": "action",
+  "text": "When this attacks, you may banish an aura from your graveyard. If you do, deal 1 arcane damage to target hero.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN103",
+  "name": "Weeping Battleground",
+  "cardType": "defense-reaction",
+  "text": "You may banish an aura from your graveyard. If you do, deal 1 arcane damage to target hero.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN104",
+  "name": "Weeping Battleground",
+  "cardType": "defense-reaction",
+  "text": "You may banish an aura from your graveyard. If you do, deal 1 arcane damage to target hero.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN105",
+  "name": "Weeping Battleground",
+  "cardType": "defense-reaction",
+  "text": "You may banish an aura from your graveyard. If you do, deal 1 arcane damage to target hero.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN106",
+  "name": "Tempest Dancers",
+  "cardType": "equipment",
+  "text": "When this leaves the arena, you may play your next non-attack action card this turn as though it were an instant.\nBlade Break",
+  "defense": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN107",
+  "name": "Shroud of the Fate Watcher",
+  "cardType": "equipment",
+  "text": "When this leaves the arena, create a Sigil of Fate token.\nBlade Break",
+  "defense": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN108",
+  "name": "Robe of Resourcefulness",
+  "cardType": "equipment",
+  "text": "When this leaves the arena, gain {r}{r}.\nBlade Break",
+  "defense": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN109",
+  "name": "Gloves of Erasure",
+  "cardType": "equipment",
+  "text": "When this leaves the arena, destroy target aura token.\nBlade Break",
+  "defense": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN110",
+  "name": "Aetherstorm Wellingtons",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 2",
+  "defense": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Arcane Barrier 2"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN111",
+  "name": "Glyph Destruction Nodes",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to up to X target heroes and/or allies, where X is the number of aura permanents you control with Sigil in their name.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN112",
+  "name": "Temporal Wobble",
+  "cardType": "instant",
+  "text": "Negate target non-attack action card with cost less than the number of aura permanents you control with Sigil in their name. Its controller gains 1 action point.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Negate"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN113",
+  "name": "Glyph Power Spell",
+  "cardType": "action",
+  "text": "Deal 4 arcane damage to any target. If you control a card with Sigil in its name, instead deal 6 arcane damage.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN114",
+  "name": "Painful Premonition",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to any target.\nIf this deals damage, create a Sigil of Fate token.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN115",
+  "name": "Painful Premonition",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to any target.\nIf this deals damage, create a Sigil of Fate token.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN116",
+  "name": "Painful Premonition",
+  "cardType": "action",
+  "text": "Deal 1 arcane damage to any target.\nIf this deals damage, create a Sigil of Fate token.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN117",
+  "name": "Future Sight",
+  "cardType": "instant",
+  "text": "Create 3 Sigil of Fate tokens.",
+  "pitch": 1,
+  "cost": 1,
+  "classes": [
+   "wizard"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN118",
+  "name": "Future Sight",
+  "cardType": "instant",
+  "text": "Create 2 Sigil of Fate tokens.",
+  "pitch": 2,
+  "cost": 1,
+  "classes": [
+   "wizard"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN119",
+  "name": "Future Sight",
+  "cardType": "instant",
+  "text": "Create a Sigil of Fate token.",
+  "pitch": 3,
+  "cost": 1,
+  "classes": [
+   "wizard"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN120",
+  "name": "Sigil of Fate",
+  "cardType": "token",
+  "text": "When this leaves the arena, opt 1.\nAt the beginning of your action phase, destroy this.",
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Opt 1"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN121",
+  "name": "Embody Greatness",
+  "cardType": "instant",
+  "text": "Shiyana Specialization\nName a living legend hero. Become that hero until the start of your next turn, except your base {h} doesn't change.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "shapeshifter"
+  ],
+  "keywords": [
+   "Shiyana Specialization"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN122",
+  "name": "Touch of Reality",
+  "cardType": "equipment",
+  "text": "Instant - {x}, {t}: This gets ward X until end of turn. Destroy this at the beginning of the end phase.",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Ward X"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN123",
+  "name": "Silken Shroud",
+  "cardType": "equipment",
+  "text": "When this is destroyed, create a Ponder token.\nWard 1",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN124",
+  "name": "Silken Shawl",
+  "cardType": "equipment",
+  "text": "When this is destroyed, create a Vigor token.\nWard 1",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN125",
+  "name": "Silken Symphony",
+  "cardType": "equipment",
+  "text": "When this is destroyed, create a Might token.\nWard 1",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN126",
+  "name": "Silken Slippers",
+  "cardType": "equipment",
+  "text": "When this is destroyed, create an Agility token.\nWard 1",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN127",
+  "name": "Lunar Mirage",
+  "cardType": "action",
+  "text": "When an attack action card with 6 or more {p} defends this, this becomes a copy of that card.\nGo again\nMirage",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Mirage"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN128",
+  "name": "Mind Meets Might",
+  "cardType": "action",
+  "text": "When this hits a hero, they reveal their hand and discard all cards with 6 or more {p}, then they draw that many cards.\nMirage",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Mirage"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN129",
+  "name": "Shimmering Mirage",
+  "cardType": "defense-reaction",
+  "text": "While this is defending, when this chain link resolves, banish this. You may play it this combat chain.\nMirage",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "keywords": [
+   "Mirage"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN130",
+  "name": "Power of Make Believe",
+  "cardType": "action",
+  "text": "This gets +1{p} for each card with 6 or more {p} defending it.\nMirage",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Mirage"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN131",
+  "name": "Power of Make Believe",
+  "cardType": "action",
+  "text": "This gets +1{p} for each card with 6 or more {p} defending it.\nMirage",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Mirage"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN132",
+  "name": "Power of Make Believe",
+  "cardType": "action",
+  "text": "This gets +1{p} for each card with 6 or more {p} defending it.\nMirage",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Mirage"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN133",
+  "name": "Shimmering Specter",
+  "cardType": "action",
+  "text": "While this is attacking or defending, when this leaves the arena, create a Spectral Shield token.\nMirage",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Mirage"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN134",
+  "name": "Shimmering Specter",
+  "cardType": "action",
+  "text": "While this is attacking or defending, when this leaves the arena, create a Spectral Shield token.\nMirage",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Mirage"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN135",
+  "name": "Shimmering Specter",
+  "cardType": "action",
+  "text": "While this is attacking or defending, when this leaves the arena, create a Spectral Shield token.\nMirage",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Mirage"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN136",
+  "name": "Graven Gaslight",
+  "cardType": "equipment",
+  "text": "Instant - Destroy 2 Silver you control: Equip this. Activate this only while this is in your graveyard.\nSpellvoid 1",
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "off-hand"
+  ],
+  "keywords": [
+   "Spellvoid 1"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN137",
+  "name": "Graven Cowl",
+  "cardType": "equipment",
+  "text": "While this is in your graveyard, at the start of your turn, you may destroy 2 Silver you control. If you do, equip this.\nWhen this is equipped from anywhere other than your graveyard, put a -1{d} counter on it.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN138",
+  "name": "Graven Vestment",
+  "cardType": "equipment",
+  "text": "While this is in your graveyard, at the start of your turn, you may destroy 2 Silver you control. If you do, equip this.\nWhen this is equipped from anywhere other than your graveyard, put a -1{d} counter on it.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN139",
+  "name": "Graven Gloves",
+  "cardType": "equipment",
+  "text": "While this is in your graveyard, at the start of your turn, you may destroy 2 Silver you control. If you do, equip this.\nWhen this is equipped from anywhere other than your graveyard, put a -1{d} counter on it.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN140",
+  "name": "Graven Walkers",
+  "cardType": "equipment",
+  "text": "While this is in your graveyard, at the start of your turn, you may destroy 2 Silver you control. If you do, equip this.\nWhen this is equipped from anywhere other than your graveyard, put a -1{d} counter on it.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN141",
+  "name": "Lobotomy",
+  "cardType": "action",
+  "text": "Stealth\nWhen this attacks, you may equip an Orbitoclast from your inventory.\nWhen this hits a hero, if you control an Orbitoclast, they lose all hero card abilities during their next action phase.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN142",
+  "name": "Seeker Kunai",
+  "cardType": "instant",
+  "text": "Attack Reaction - {r}, destroy this: Target Assassin attack action card gets +1{p}.\nWhile this is in your graveyard, at the start of your turn, you may destroy 2 Silver you control. If you do, return this to the arena.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN143",
+  "name": "Mist Hunter",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' blue cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a Mystic hero, search their deck for any number of Inner Chi and banish them. Then shuffle.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN144",
+  "name": "Excessive Bloodloss",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' red cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck. If it's red, repeat this process once.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN145",
+  "name": "Excessive Bloodloss",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' red cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck. If it's red, repeat this process once.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN146",
+  "name": "Excessive Bloodloss",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' red cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck. If it's red, repeat this process once.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN147",
+  "name": "Knife Through",
+  "cardType": "action",
+  "text": "Stealth\nIf you've hit with a dagger this combat chain, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth",
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN148",
+  "name": "Knife Through",
+  "cardType": "action",
+  "text": "Stealth\nIf you've hit with a dagger this combat chain, this gets go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth",
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN149",
+  "name": "Knife Through",
+  "cardType": "action",
+  "text": "Stealth\nIf you've hit with a dagger this combat chain, this gets go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth",
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN150",
+  "name": "Song of Larinkmorth White",
+  "cardType": "action",
+  "text": "Create a Frostbite token under each other hero's control.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "bard"
+  ],
+  "subtypes": [
+   "song"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN151",
+  "name": "Bone Puppetry",
+  "cardType": "equipment",
+  "text": "When this defends, you may return an ally from your graveyard to the arena. If you do, at the beginning of the end phase, destroy it and discard your hand.\nBlade Break",
+  "defense": 2,
+  "subtypes": [
+   "necromancer",
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN152",
+  "name": "Carrion Crown",
+  "cardType": "equipment",
+  "text": "Action - Discard an ally, destroy this: Draw a card. Go again\nBlade Break",
+  "defense": 2,
+  "subtypes": [
+   "necromancer",
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN153",
+  "name": "Mournful Casket",
+  "cardType": "equipment",
+  "text": "If an ally has been put into your graveyard this turn, this gets +1{d}.\nTemper",
+  "defense": 1,
+  "subtypes": [
+   "necromancer",
+   "chest"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN154",
+  "name": "Reach Beyond the Grave",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Return an ally card from your graveyard to your hand, then discard a card. Go again\nBattleworn",
+  "defense": 1,
+  "subtypes": [
+   "necromancer",
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN155",
+  "name": "Scuttle Toes",
+  "cardType": "equipment",
+  "text": "Instant - {r}{r}, destroy this: {u} target ally you control. Destroy it at the beginning of the end phase.\nArcane Barrier 1",
+  "defense": 0,
+  "subtypes": [
+   "necromancer",
+   "legs"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN156",
+  "name": "Boo, Resident Spook",
+  "cardType": "action",
+  "text": "Action - {t}: Attack\nIf this is untapped, it gets spellvoid 2.\nWatery Grave",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Spellvoid 2",
+   "Watery Grave"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN157",
+  "name": "Bubba-Lubba, Run Aground",
+  "cardType": "action",
+  "text": "This enters the arena with a +1{p} counter.\nAction - {r}, {t}: Attack\nAction - Remove a +1{p} counter from an ally you control: Destroy an aura token. Go again\nWatery Grave",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 1,
+  "defense": 5,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN158",
+  "name": "Beneath the Surface",
+  "cardType": "defense-reaction",
+  "text": "Watery Grave\nWhile this is defending, when it's put into your graveyard from the arena, turn it face-down.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 5,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN159",
+  "name": "Man Overboard",
+  "cardType": "action",
+  "text": "When this attacks, you may discard an ally. If you do, this gets +1{p} and go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN160",
+  "name": "Man Overboard",
+  "cardType": "action",
+  "text": "When this attacks, you may discard an ally. If you do, this gets +1{p} and go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN161",
+  "name": "Man Overboard",
+  "cardType": "action",
+  "text": "When this attacks, you may discard an ally. If you do, this gets +1{p} and go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN162",
+  "name": "Tentacular Toll",
+  "cardType": "action",
+  "text": "Turn up to 3 ally cards in your graveyard face-down, then create that many Gold tokens.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN163",
+  "name": "Tentacular Toll",
+  "cardType": "action",
+  "text": "Turn up to 2 ally cards in your graveyard face-down, then create that many Gold tokens.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN164",
+  "name": "Tentacular Toll",
+  "cardType": "action",
+  "text": "Turn up to 1 ally card in your graveyard face-down, then create that many Gold tokens.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN165",
+  "name": "Skywarden no.161803",
+  "cardType": "action",
+  "text": "Galvanize - When this defends, you may destroy an item you control. If you do, this gets +1{d}. If a Golden Cog is destroyed this way, create a Gold token.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "pirate",
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Galvanize"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN166",
+  "name": "Shallow Water Shark Harpoon",
+  "cardType": "action",
+  "text": "If you've activated a cannon this turn, this gets \"When this hits a hero, destroy a card in their arsenal. If you do, create a Gold token.\"",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "pirate",
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN167",
+  "name": "Gloves of Azure Waves",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1\nHigh Tide - If there are 2 or more blue cards in your pitch zone, this gets +3{d} and blade break.",
+  "defense": 0,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Arcane Barrier 1",
+   "High Tide",
+   "Blade Break"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN168",
+  "name": "Trench of Watery Depths",
+  "cardType": "equipment",
+  "text": "When this defends, you may pitch a blue card from your graveyard.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN169",
+  "name": "Cheating Scoundrel",
+  "cardType": "action",
+  "text": "The next attack action card you play this turn gets +3{p} and \"When this attacks, wager with the defending hero. The winner creates a Gold token.\"\nThe next time you would lose a wager this turn, instead you may discard a card. If you do, you win the wager.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN170",
+  "name": "Break Open the Chests!",
+  "cardType": "action",
+  "text": "Turn all cards in all arsenals face-up. Then if there's a face-up yellow card in any arsenal, create 2 Gold tokens.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN171",
+  "name": "Lighten the Load",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card or destroy an item you control. If you do, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN172",
+  "name": "Lighten the Load",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card or destroy an item you control. If you do, this gets go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN173",
+  "name": "Lighten the Load",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card or destroy an item you control. If you do, this gets go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN174",
+  "name": "Submerge",
+  "cardType": "action",
+  "text": "As an additional cost to play this, put a card from your hand into your deck fifth from the top.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN175",
+  "name": "Submerge",
+  "cardType": "action",
+  "text": "As an additional cost to play this, put a card from your hand into your deck fifth from the top.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN176",
+  "name": "Submerge",
+  "cardType": "action",
+  "text": "As an additional cost to play this, put a card from your hand into your deck fifth from the top.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN177",
+  "name": "Herald of Victoria",
+  "cardType": "action",
+  "text": "Instant - Discard this: Until end of turn, attack action cards your opponents control get -1{p} while attacking and defending.\nPhantasm",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN178",
+  "name": "Roaring Beam",
+  "cardType": "attack-reaction",
+  "text": "Create a Courage token.\nIf there are no cards in your soul, return this to its owner's hand, then charge your soul.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light"
+  ],
+  "keywords": [
+   "Charge"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN179",
+  "name": "Solforge Gauntlet",
+  "cardType": "equipment",
+  "text": "When the combat chain closes, if this defended, put it into your soul.\nArcane Barrier 1",
+  "defense": 1,
+  "subtypes": [
+   "light",
+   "arms"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN180",
+  "name": "Solray Plating",
+  "cardType": "equipment",
+  "text": "If you would be dealt damage, you may banish a card from your soul to prevent 1 of that damage. If you do, destroy this at the beginning of the end phase.\nBlade Break",
+  "defense": 1,
+  "subtypes": [
+   "light",
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN181",
+  "name": "Blessing of Bellona",
+  "cardType": "action",
+  "text": "Go again\nWhenever a card is put into your soul, create a Courage token.\nAt the start of your turn, put this into your soul.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "light",
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN182",
+  "name": "Blessing of Themis",
+  "cardType": "action",
+  "text": "Go again\nWhen this enters the arena, name a card. Turn all cards with that name in banished zones face-down. Whenever a card with that name is banished while this is in the arena, turn that card face-down.\nAt the start of your turn, put this into your soul.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "light",
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN183",
+  "name": "Duty Bound Blitz",
+  "cardType": "action",
+  "text": "Play this only if a yellow card has been put into your soul this turn.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN184",
+  "name": "Duty Bound Blitz",
+  "cardType": "action",
+  "text": "Play this only if a yellow card has been put into your soul this turn.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN185",
+  "name": "Duty Bound Blitz",
+  "cardType": "action",
+  "text": "Play this only if a yellow card has been put into your soul this turn.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN186",
+  "name": "Soul Bond Belief",
+  "cardType": "action",
+  "text": "When this attacks, reveal the top card of your deck. If it's yellow, put it into your soul and this gets +1{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN187",
+  "name": "Soul Bond Belief",
+  "cardType": "action",
+  "text": "When this attacks, reveal the top card of your deck. If it's yellow, put it into your soul and this gets +1{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN188",
+  "name": "Soul Bond Belief",
+  "cardType": "action",
+  "text": "When this attacks, reveal the top card of your deck. If it's yellow, put it into your soul and this gets +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN189",
+  "name": "Pound of Flesh",
+  "cardType": "action",
+  "text": "Each hero banishes a card from their hand. Each hero who didn't banish a card with 6 or more {p} this way loses 1{h}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "shadow"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN190",
+  "name": "Deep Recesses of Existence",
+  "cardType": "action",
+  "text": "Rune Gate\nWhen the combat chain closes, you may banish this face-down. If you do, for each hero who has lost {h} this turn, banish a card from their graveyard.\nBlood Debt",
+  "pitch": 3,
+  "cost": 4,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Rune Gate",
+   "Blood Debt"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN191",
+  "name": "Vestige of Flagellation",
+  "cardType": "equipment",
+  "text": "The first time an opponent would gain {h} each turn, instead you lose that much and create that many Vigor tokens.\nBlade Break",
+  "defense": 2,
+  "subtypes": [
+   "shadow",
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN192",
+  "name": "Embraforged Gauntlet",
+  "cardType": "equipment",
+  "text": "If this would be put into your graveyard from anywhere, instead banish it.\nTemper\nBlood Debt",
+  "defense": 2,
+  "subtypes": [
+   "shadow",
+   "arms"
+  ],
+  "keywords": [
+   "Temper",
+   "Blood Debt"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN193",
+  "name": "Embalm",
+  "cardType": "action",
+  "text": "You may play this from your banished zone. If you do, it gets go again.\nPut an attack action card with blood debt from your graveyard on the bottom of your deck.\nBlood Debt",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "shadow"
+  ],
+  "keywords": [
+   "Go again",
+   "Blood Debt"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN194",
+  "name": "Engulfing Shadows",
+  "cardType": "defense-reaction",
+  "text": "If this would be put into your graveyard from anywhere, instead banish it.\nBlood Debt",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 4,
+  "subtypes": [
+   "shadow"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN195",
+  "name": "Depths of Despair",
+  "cardType": "action",
+  "text": "When this defends, banish it when the combat chain closes.\nBlood Debt",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN196",
+  "name": "Depths of Despair",
+  "cardType": "action",
+  "text": "When this defends, banish it when the combat chain closes.\nBlood Debt",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN197",
+  "name": "Depths of Despair",
+  "cardType": "action",
+  "text": "When this defends, banish it when the combat chain closes.\nBlood Debt",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN198",
+  "name": "Fasting Carcass",
+  "cardType": "action",
+  "text": "The next red action card you play this turn gets go again.\nGo again\nBlood Debt",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "shadow"
+  ],
+  "keywords": [
+   "Go again",
+   "Blood Debt"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN199",
+  "name": "Fasting Carcass",
+  "cardType": "action",
+  "text": "The next yellow action card you play this turn gets go again.\nGo again\nBlood Debt",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "shadow"
+  ],
+  "keywords": [
+   "Go again",
+   "Blood Debt"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN200",
+  "name": "Fasting Carcass",
+  "cardType": "action",
+  "text": "The next blue action card you play this turn gets go again.\nGo again\nBlood Debt",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "shadow"
+  ],
+  "keywords": [
+   "Go again",
+   "Blood Debt"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN201",
+  "name": "Seeds of Strength",
+  "cardType": "action",
+  "text": "Create 3 Might tokens.\nEarth Bond - If an Earth card was pitched to play this, instead create 4 Might tokens",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Earth Bond"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN202",
+  "name": "Arc Bending",
+  "cardType": "action",
+  "text": "When this attacks, if a Lightning or Elemental attack would deal damage this combat chain, instead it deals that much damage plus 1.\nLightning Bond - If a Lightning card was pitched to play this, this gets go again.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Lightning Bond",
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN203",
+  "name": "Verdant Tide",
+  "cardType": "action",
+  "text": "Until end of turn, if you would create 1 or more Elemental or Runeblade aura tokens, instead create that many plus 1 of each of those tokens.\nEarth Bond - If an Earth card was pitched to play this, create an Embodiment of Earth token.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Earth Bond",
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN204",
+  "name": "Voltic Veil",
+  "cardType": "instant",
+  "text": "Prevent the next 4 damage that would be dealt to you this turn.\nLightning Bond - If a Lightning card was pitched to play this, deal 1 arcane damage to all opposing heroes.",
+  "pitch": 1,
+  "cost": 1,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Lightning Bond"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN205",
+  "name": "Elemental Strike",
+  "cardType": "action",
+  "text": "As an additional cost to play this, banish a card from your hand. If it's Earth, this gets +2{p}. Lightning, this gets go again. Ice, this gets dominate.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Dominate"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN206",
+  "name": "Colors of Aria",
+  "cardType": "action",
+  "text": "While this is face-up in any zone, it's Earth, Ice, and Lightning.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN207",
+  "name": "Frosthaven Sheath",
+  "cardType": "defense-reaction",
+  "text": "Ice Bond - If an Ice card was pitched to play this, create a Frostbite token under the attacking hero's control.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 5,
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Ice Bond"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN208",
+  "name": "Leaven Sheath",
+  "cardType": "defense-reaction",
+  "text": "Earth Bond - If an Earth card was pitched to play this, create an Embodiment of Earth token.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 5,
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Earth Bond"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN209",
+  "name": "Stormwind Sheath",
+  "cardType": "defense-reaction",
+  "text": "Lightning Bond - If a Lightning card was pitched to play this, create an Embodiment of Lightning token.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 5,
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Lightning Bond"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN210",
+  "name": "Laden with Earth",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +3{p}.\nEarth Bond - If an Earth card was pitched to play this, create an Embodiment of Earth token.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Earth Bond",
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN211",
+  "name": "Laden with Frost",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +3{p}.\nIce Bond - If an Ice card was pitched to play this, create a Frostbite token under target hero's control.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Ice Bond",
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN212",
+  "name": "Laden with Lightning",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +3{p}.\nLightning Bond - If a Lightning card was pitched to play this, create an Embodiment of Lightning token.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Lightning Bond",
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN213",
+  "name": "Chorus of Rotwood",
+  "cardType": "action",
+  "text": "Decompose - You may banish 2 Earth cards and an action card from your graveyard. If you do, create an Embodiment of Earth token.\nCreate 3 Runechant tokens.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Decompose"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN214",
+  "name": "Sowing Thorns",
+  "cardType": "action",
+  "text": "Gain 1{h}\nDecompose - You may banish 2 Earth cards and an action card from your graveyard. If you do, you may search your deck for an Earth aura with cost less than the {h} you've gained this turn, reveal it, then shuffle and put it on top.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Decompose"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN215",
+  "name": "Crown of Everbloom",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Put a card from your arsenal on the bottom of your deck. If you do, draw a card and create a Spellbane Aegis token.\nArcane Barrier 2",
+  "defense": 0,
+  "subtypes": [
+   "earth",
+   "head"
+  ],
+  "keywords": [
+   "Arcane Barrier 2"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN216",
+  "name": "Limbs of Lignum Vitae",
+  "cardType": "equipment",
+  "text": "If there are 4 or more Earth cards in your banished zone, this gets +1{d}.\nBlade Break",
+  "defense": 1,
+  "subtypes": [
+   "earth",
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN217",
+  "name": "Channel the Skybreaker",
+  "cardType": "action",
+  "text": "Go again\nWhen this enters the arena and at the beginning of your action phase, create 2 Might tokens.\nChannel Earth - At the beginning of your end phase, put a flow counter on this, then destroy it unless you put an Earth card from your pitch zone on the bottom of your deck for each flow counter on it.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "subtypes": [
+   "earth",
+   "aura"
+  ],
+  "keywords": [
+   "Go again",
+   "Channel Earth"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN218",
+  "name": "Doubling Season",
+  "cardType": "action",
+  "text": "While this is face-up in any zone, if it would gain {p}, instead it gains that much plus 1.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 0,
+  "defense": 3,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN219",
+  "name": "Oath of Oak",
+  "cardType": "action",
+  "text": "Create 3 Embodiment of Earth tokens.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "earth"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN220",
+  "name": "Oath of Oak",
+  "cardType": "action",
+  "text": "Create 2 Embodiment of Earth tokens.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "earth"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN221",
+  "name": "Oath of Oak",
+  "cardType": "action",
+  "text": "Create an Embodiment of Earth token.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "earth"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN222",
+  "name": "Sprout Strength",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +1{p}.\nYour next attack this turn gets +1{p}.\nYour next attack this turn gets +1{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN223",
+  "name": "Sprout Strength",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +1{p}.\nYour next attack this turn gets +1{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN224",
+  "name": "Sprout Strength",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN225",
+  "name": "Monolith of Galcia",
+  "cardType": "action",
+  "text": "Choose 1 or more;\n\nDestroy target frozen ally.\nDestroy target frozen aura.\nDestroy target frozen equipment.\nDestroy target frozen item.",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "ice"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN226",
+  "name": "Frost Spike",
+  "cardType": "instant",
+  "text": "Create a Frostbite token in an exposed head, chest, arms, or legs zone.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "ice"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN227",
+  "name": "Crown of Frozen Thoughts",
+  "cardType": "equipment",
+  "text": "When this defends, freeze the attacking hero until the start of their next turn.\nBlade Break",
+  "defense": 2,
+  "subtypes": [
+   "ice",
+   "head"
+  ],
+  "keywords": [
+   "Freeze",
+   "Blade Break"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN228",
+  "name": "Shattering Grasp",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Destroy target frozen ally. Go again\nBattleworn",
+  "defense": 1,
+  "subtypes": [
+   "ice",
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN229",
+  "name": "Channel Iceloch Glaze",
+  "cardType": "action",
+  "text": "Go again\nCards in opponents' arsenals are frozen while they control a Frostbite or a frozen permanent.\nChannel Ice - At the beginning of your end phase, put a flow counter on this, then destroy it unless you put an Ice card from your pitch zone on the bottom of your deck for each flow counter on it.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "ice",
+   "aura"
+  ],
+  "keywords": [
+   "Go again",
+   "Freeze",
+   "Channel Ice"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN230",
+  "name": "Channel Galcia's Cradle",
+  "cardType": "action",
+  "text": "When this enters the arena and at the start of your turn, freeze target ally, aura, item, or equipment while this is in the arena.\nChannel Ice - At the beginning of your end phase, put a flow counter on this, then destroy it unless you put an Ice card from your pitch zone on the bottom of your deck for each flow counter on it.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "ice",
+   "aura"
+  ],
+  "keywords": [
+   "Freeze",
+   "Channel Ice"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN231",
+  "name": "Conquer the Icy Terrain",
+  "cardType": "action",
+  "text": "When this hits a hero, they may pay {r}{r}. If they don't, you may destroy a frozen card in their arsenal or a frozen non-hero permanent they control.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "subtypes": [
+   "ice",
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN232",
+  "name": "Conquer the Icy Terrain",
+  "cardType": "action",
+  "text": "When this hits a hero, they may pay {r}{r}. If they don't, you may destroy a frozen card in their arsenal or a frozen non-hero permanent they control.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "subtypes": [
+   "ice",
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN233",
+  "name": "Conquer the Icy Terrain",
+  "cardType": "action",
+  "text": "When this hits a hero, they may pay {r}{r}. If they don't, you may destroy a frozen card in their arsenal or a frozen non-hero permanent they control.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "ice",
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN234",
+  "name": "Put on Ice",
+  "cardType": "action",
+  "text": "Freeze up to 3 target allies until the start of your next turn.\nIf this was played from arsenal, draw a card.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "ice"
+  ],
+  "keywords": [
+   "Freeze",
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN235",
+  "name": "Put on Ice",
+  "cardType": "action",
+  "text": "Freeze up to 2 target allies until the start of your next turn.\nIf this was played from arsenal, draw a card.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "ice"
+  ],
+  "keywords": [
+   "Freeze",
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN236",
+  "name": "Put on Ice",
+  "cardType": "action",
+  "text": "Freeze up to 1 target ally until the start of your next turn.\nIf this was played from arsenal, draw a card.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "ice"
+  ],
+  "keywords": [
+   "Freeze",
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN237",
+  "name": "Sigil of Voltaris",
+  "cardType": "instant",
+  "text": "When this enters or leaves the arena, deal 1 arcane damage to target hero.\nAt the beginning of your action phase, destroy this.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN238",
+  "name": "Strike Twice",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to any target.\nIf you've dealt arcane damage to an opposing hero this turn, you may play this as though it were an instant.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN239",
+  "name": "Stormweaver's Aegis",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Until end of turn, instant cards you own get \"Instant - Discard this: Prevent the next 2 damage that would be dealt to you this turn.\"\nArcane Barrier 1",
+  "defense": 0,
+  "subtypes": [
+   "lightning",
+   "chest"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN240",
+  "name": "Voltic Vanguard",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Prevent the next 2 damage that would be dealt to you this turn. Activate this only if you've played an instant card this turn.",
+  "defense": 0,
+  "subtypes": [
+   "lightning",
+   "head"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN241",
+  "name": "Astravolt Elemental",
+  "cardType": "action",
+  "text": "When this attacks, you may discard an instant card. If you do, draw a card and create an Embodiment of Lightning token.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN242",
+  "name": "Ion Charged",
+  "cardType": "instant",
+  "text": "Until end of turn, Lightning and Elemental attacks get +1{p} while they have go again.",
+  "pitch": 2,
+  "cost": 0,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN243",
+  "name": "Overcharge",
+  "cardType": "action",
+  "text": "If you've played an instant card this chain link, this gets +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 1,
+  "defense": 3,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN244",
+  "name": "Overcharge",
+  "cardType": "action",
+  "text": "If you've played an instant card this chain link, this gets +2{p}.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 1,
+  "defense": 3,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN245",
+  "name": "Overcharge",
+  "cardType": "action",
+  "text": "If you've played an instant card this chain link, this gets +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 1,
+  "defense": 3,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN246",
+  "name": "Cloud Cover",
+  "cardType": "instant",
+  "text": "The next time you would be dealt damage this turn, prevent 3 of that damage.",
+  "pitch": 1,
+  "cost": 0,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN247",
+  "name": "Cloud Cover",
+  "cardType": "instant",
+  "text": "The next time you would be dealt damage this turn, prevent 2 of that damage.",
+  "pitch": 2,
+  "cost": 0,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN248",
+  "name": "Cloud Cover",
+  "cardType": "instant",
+  "text": "The next time you would be dealt damage this turn, prevent 1 of that damage.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN249",
+  "name": "Haboob",
+  "cardType": "action",
+  "text": "Go again\nAt the start of each turn, put a storm counter on this, then destroy it unless you destroy an ash you control for each storm counter on it.\nAttack action cards get -1{p} while attacking or defending.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "draconic",
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN250",
+  "name": "Enflame the Firebrand",
+  "cardType": "action",
+  "text": "When this attacks, if you control 2 or more Draconic chain links, this gets go again, 3 or more, your attacks are Draconic this combat chain, 4 or more, this gets +2{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN251",
+  "name": "Smoldering Steel",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +1{p} and \"When this hits a hero, deal 1 damage to them.\"\nWhile this is in your graveyard, if 1 or more Frostbite tokens would be created under your control, instead you may banish this.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN252",
+  "name": "Dynastic Diadem",
+  "cardType": "equipment",
+  "text": "Fealty tokens you control can't be destroyed by opponents' effects.\nIf you control 3 or more Fealty tokens, this gets +1{d}.\nTemper",
+  "defense": 1,
+  "subtypes": [
+   "draconic",
+   "head"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN253",
+  "name": "Smoldering Scales",
+  "cardType": "equipment",
+  "text": "If one or more Frostbite tokens would be created under your control, instead you may destroy this.\nGuardwell",
+  "defense": 2,
+  "subtypes": [
+   "draconic",
+   "chest"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN254",
+  "name": "Art of the Phoenix: War",
+  "cardType": "instant",
+  "text": "As an additional cost to play this, discard a Phoenix Flame.\nDraconic attack action cards you control get +1{p} this turn.\nDraw 2 card.",
+  "pitch": 1,
+  "cost": 1,
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN255",
+  "name": "Fire that Burns Within",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a Phoenix Flame. If you do, draw a card and this gets +2{p}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN256",
+  "name": "Four Feathers One Crown",
+  "cardType": "action",
+  "text": "When this attacks, it gets +1{p} for each card with Phoenix Bannerman in its name in your graveyard.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN257",
+  "name": "Phoenix Bannerman: Head",
+  "cardType": "action",
+  "text": "Legendary\nSearch your deck for a Phoenix Flame, reveal it, put it into your hand, then shuffle.\nCreate a Ponder token.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "draconic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN258",
+  "name": "Phoenix Bannerman: Chest",
+  "cardType": "action",
+  "text": "Legendary\nSearch your deck for a Phoenix Flame, reveal it, put it into your hand, then shuffle.\nCreate a Vigor token.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "draconic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN259",
+  "name": "Phoenix Bannerman: Arms",
+  "cardType": "action",
+  "text": "Legendary\nSearch your deck for a Phoenix Flame, reveal it, put it into your hand, then shuffle.\nCreate a Might token.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "draconic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN260",
+  "name": "Phoenix Bannerman: Legs",
+  "cardType": "action",
+  "text": "Legendary\nSearch your deck for a Phoenix Flame, reveal it, put it into your hand, then shuffle.\nCreate an Agility token.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "draconic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN261",
+  "name": "Phoenix Flame",
+  "cardType": "action",
+  "text": "If you control 2 or more Draconic chain links, this gets +1{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 0,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN262",
+  "name": "Serpent's Kiss",
+  "cardType": "action",
+  "text": "Stealth\nWhen this attacks, create a Fang Strike or Slither in your hand. If you've transcended this turn, instead create both.\nWhen this hits a hero, look at the top 2 cards of their deck. Banish 1 of them.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN263",
+  "name": "Wax and Wane",
+  "cardType": "instant",
+  "text": "Choose 1 or both:\n- Put a +1{p} counter on target blue aura you control.\n- Put a +1{p} counter on target aura with ward you control.\nIf you choose both, search your deck for an Inner Chi, reveal it, shuffle, then put it on top of your deck.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN264",
+  "name": "Shapeless Form",
+  "cardType": "action",
+  "text": "Whenever you play an attack action card with ephemeral, choose a name. It gets the chosen name.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN265",
+  "name": "Rippling Wave",
+  "cardType": "equipment",
+  "text": "Cloaked\nInstant - {c}{c}{c}, turn this face-up: You may return a defending blue attack action card to its owner's hand.\nBlade Break",
+  "defense": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Cloaked",
+   "Blade Break"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN266",
+  "name": "Kimono of Layered Lessons",
+  "cardType": "equipment",
+  "text": "Cloaked\nInstant - {c}{c}{c}, turn this face-up: Put a +1{d} counter on this.\nAt the start of your turn, destroy this.",
+  "defense": 1,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Cloaked"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN267",
+  "name": "Whispering Mist",
+  "cardType": "instant",
+  "text": "Until end of turn, blue attacks and attacks with ephemeral get +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN268",
+  "name": "Recede to Mistform",
+  "cardType": "instant",
+  "text": "Choose X equipment with cloaked you have equipped. Turn them face-down.",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN269",
+  "name": "Fluid Motion",
+  "cardType": "action",
+  "text": "If you've created a card this turn, this gets go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN270",
+  "name": "Manifest Muscle",
+  "cardType": "action",
+  "text": "If you've created a card this turn, this gets +1{p}.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN271",
+  "name": "Mistborn Protector",
+  "cardType": "defense-reaction",
+  "text": "While this is defending, if you've created a card this turn, this gets +1{d}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "mystic"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN272",
+  "name": "Billowing Mist",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +1{p}.\nThe next time you would create a card with ephemeral this turn, instead create that many plus 1.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN273",
+  "name": "Look Within",
+  "cardType": "action",
+  "text": "Search your deck for a Chi, reveal it, shuffle, then put it on top.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN274",
+  "name": "Spreading Mist",
+  "cardType": "action",
+  "text": "Your next attack this turn gets go again.\nThe next time you would create a card with ephemeral this turn, instead create that many plus 1.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN275",
+  "name": "Havoc Wrap",
+  "cardType": "equipment",
+  "text": "Action - {t}: Go again\nIf this is tapped, cards cost {r} less to play, this doesn't untap during the end phase, and this gets \"At the start of your turn, destroy this.\"\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "chaos"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN276",
+  "name": "Topsy Turvy",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Until end of turn, if one or more cards would be put on top of a deck, instead they're put on the bottom.\nArcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "chaos"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN277",
+  "name": "Tome of Pandemonium",
+  "cardType": "action",
+  "text": "Banish the top card of each hero's deck. You may play them this turn.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "chaos"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN278",
+  "name": "Descend into Madness",
+  "cardType": "attack-reaction",
+  "text": "Banish a random card from the defending hero's hand, then they draw a card.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "chaos"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN279",
+  "name": "Concoct Disorder",
+  "cardType": "action",
+  "text": "When this attacks, each hero puts the top card of their deck face-down into their arsenal. If 2 or more cards are put into arsenals this way, this gets go again.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "chaos"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN280",
+  "name": "Concoct Disorder",
+  "cardType": "action",
+  "text": "When this attacks, each hero puts the top card of their deck face-down into their arsenal. If 2 or more cards are put into arsenals this way, this gets go again.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "chaos"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN281",
+  "name": "Concoct Disorder",
+  "cardType": "action",
+  "text": "When this attacks, each hero puts the top card of their deck face-down into their arsenal. If 2 or more cards are put into arsenals this way, this gets go again.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "chaos"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN282",
+  "name": "Hyper Inflation",
+  "cardType": "action",
+  "text": "When this attacks, cards cost {r} more to play this turn.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "chaos"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN283",
+  "name": "Hyper Inflation",
+  "cardType": "action",
+  "text": "When this attacks, cards cost {r} more to play this turn.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "chaos"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN284",
+  "name": "Hyper Inflation",
+  "cardType": "action",
+  "text": "When this attacks, cards cost {r} more to play this turn.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "chaos"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN285",
+  "name": "Tough as a Rok",
+  "cardType": "action",
+  "text": "If you have less {h} than each other hero, this card's base {p} is 6, otherwise it's 0.",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN286",
+  "name": "Energy of the Audience",
+  "cardType": "action",
+  "text": "If you have less {h} than each other hero, this gets +1{p} for each aura of suspense you control.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN287",
+  "name": "Glory Plate",
+  "cardType": "equipment",
+  "text": "This gets +1{d} for each Toughness token that has left the arena this turn.\nGuardwell",
+  "defense": 0,
+  "subtypes": [
+   "revered",
+   "chest"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN288",
+  "name": "Comeback Kicks",
+  "cardType": "equipment",
+  "text": "Whenever the crowd cheers you, if you have less {h} than each other hero, you may destroy this. If you do, gain 1 action point.\nBattleworn",
+  "defense": 1,
+  "subtypes": [
+   "revered",
+   "legs"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN289",
+  "name": "By the Book",
+  "cardType": "action",
+  "text": "If you have less {h} than each other hero, you may play this as though it were an instant.\nHeroes can't draw cards during action phases.\nAt the beginning of your action phase, destroy this.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "revered",
+   "aura"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN290",
+  "name": "Emboldened by the Crowd",
+  "cardType": "defense-reaction",
+  "text": "If you've been cheered this turn, this costs {r}{r}{r} less to play.",
+  "pitch": 2,
+  "cost": 3,
+  "defense": 6,
+  "subtypes": [
+   "revered"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN291",
+  "name": "Hulk Up",
+  "cardType": "action",
+  "text": "If you have less {h} than each other hero, this costs {r} less to play.",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 8,
+  "defense": 2,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN292",
+  "name": "Hulk Up",
+  "cardType": "action",
+  "text": "If you have less {h} than each other hero, this costs {r} less to play.",
+  "pitch": 2,
+  "cost": 4,
+  "attack": 7,
+  "defense": 2,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN293",
+  "name": "Hulk Up",
+  "cardType": "action",
+  "text": "If you have less {h} than each other hero, this costs {r} less to play.",
+  "pitch": 3,
+  "cost": 4,
+  "attack": 6,
+  "defense": 2,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN294",
+  "name": "Stadium Security",
+  "cardType": "action",
+  "text": "While this is in your arsenal, if you've controlled a Toughness token this turn, this gets ambush.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "keywords": [
+   "Ambush"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN295",
+  "name": "Stadium Security",
+  "cardType": "action",
+  "text": "While this is in your arsenal, if you've controlled a Toughness token this turn, this gets ambush.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "keywords": [
+   "Ambush"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN296",
+  "name": "Stadium Security",
+  "cardType": "action",
+  "text": "While this is in your arsenal, if you've controlled a Toughness token this turn, this gets ambush.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "keywords": [
+   "Ambush"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN297",
+  "name": "Chain of Brutality",
+  "cardType": "action",
+  "text": "If this has 6 or more {p}, it gets go again and \"When this hits a hero, the next attack action card you play this turn has 6 base {p}.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN298",
+  "name": "Walk in My Shoes",
+  "cardType": "action",
+  "text": "If this has {p} greater than its base, it gets +1{p}.\nCrush - When this deals 4 or more damage to a hero, until the end of their next turn, the base {p} and {d} of attack action cards they control are halved, rounded up.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN299",
+  "name": "Two-Faced",
+  "cardType": "equipment",
+  "text": "When this defends, the attacking hero draws a card, then look at their hand and choose a card. They discard the chosen card.",
+  "defense": 1,
+  "subtypes": [
+   "reviled",
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN300",
+  "name": "Line Crossers",
+  "cardType": "equipment",
+  "text": "If you have the same {h} as a hero, it also counts as you having more {h} than them, and them having less {h} than you.\nBlade Break",
+  "defense": 1,
+  "subtypes": [
+   "reviled",
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN301",
+  "name": "Leave 'Em Speechless",
+  "cardType": "action",
+  "text": "If you have more {h} than each other hero, you may play this as though it were an instant.\nWhen this enters the arena, name a card. The named card can't be played from hand while this is in the arena.\nAt the beginning of your action phase, destroy this.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "reviled",
+   "aura"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN302",
+  "name": "Snarky Prick",
+  "cardType": "action",
+  "text": "When this attacks a hero, look at the top card of their deck. If it's red, you may destroy it. If you do, this gets +4{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN303",
+  "name": "Insult to Injury",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you have more {h} than them, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN304",
+  "name": "Insult to Injury",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you have more {h} than them, this gets go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN305",
+  "name": "Insult to Injury",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you have more {h} than them, this gets go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN306",
+  "name": "Bad Breath",
+  "cardType": "action",
+  "text": "Intimidate target hero.\nThe next time an attack you control hits this turn, create 3 Might tokens.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "reviled"
+  ],
+  "keywords": [
+   "Intimidate",
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN307",
+  "name": "Bad Breath",
+  "cardType": "action",
+  "text": "Intimidate target hero.\nThe next time an attack you control hits this turn, create 2 Might tokens.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "reviled"
+  ],
+  "keywords": [
+   "Intimidate",
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN308",
+  "name": "Bad Breath",
+  "cardType": "action",
+  "text": "Intimidate target hero.\nThe next time an attack you control hits this turn, create a Might token.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "reviled"
+  ],
+  "keywords": [
+   "Intimidate",
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN309",
+  "name": "Balance of Justice",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Draw a card. Activate this only if an opponent has drawn 2 or more cards this turn.\nGuardwell",
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN310",
+  "name": "Crown of Providence",
+  "cardType": "equipment",
+  "text": "When you defend with Crown of Providence, you may put a card from your hand or arsenal on the bottom of your deck. If you do, draw a card.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN311",
+  "name": "Fyendal's Spring Tunic",
+  "cardType": "equipment",
+  "text": "At the start of your turn, if this has fewer than 3 energy counters, you may put an energy counter on it.\nInstant - Remove 3 energy counters from this: Gain {r}\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN312",
+  "name": "Stonewall Gauntlet",
+  "cardType": "equipment",
+  "text": "When this defends an attack with {p} greater than its base, opposing attacks get -1{p} this combat chain.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN313",
+  "name": "Quickdodge Flexors",
+  "cardType": "equipment",
+  "text": "Defense Reaction - {r}: Add this to the active chain link as a defending card. It has 2 base {d} this chain link.\nAt the beginning of the end phase, if this defendend this turn, destroy it.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN314",
+  "name": "Helm of Safe Haven",
+  "cardType": "equipment",
+  "text": "When this defends, reveal the top card of your deck. If it's an attack action card, add it to this chain link as a defending card and discard a card.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN315",
+  "name": "Myrkhellir Helm",
+  "cardType": "equipment",
+  "text": "If you control a Gold, this gets +1{d}.\nAction - {r}{r}, destroy this: The next time you would draw a card from a Gold token this turn, instead draw 2 cards. Go again\nTemper",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN316",
+  "name": "Burnished Bunkerplate",
+  "cardType": "equipment",
+  "text": "Defense Reaction - Destroy this: You may add an action card from your arsenal to the active chain link as a defending card.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN317",
+  "name": "Unyielding Grip",
+  "cardType": "equipment",
+  "text": "If you have no cards in your hand, this gets +3{d}.\nBlade Break",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN318",
+  "name": "Unflinching Foothold",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Target attack loses and can't gain dominate.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN319",
+  "name": "Command and Conquer",
+  "cardType": "action",
+  "text": "Defense reaction cards can't be played this chain link. When this hits a hero, destroy all cards in their arsenal.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN320",
+  "name": "Enlightened Strike",
+  "cardType": "action",
+  "text": "As an additional cost to play Enlightened Strike, put a card from your hand on the bottom of your deck.\nChoose 1;\n- When you attack with Enlightened Strike, draw a card.\n- Enlightened Strike gains +2{p}.\n- Enlightened Strike gains go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN321",
+  "name": "Shelter from the Storm",
+  "cardType": "defense-reaction",
+  "text": "Instant - Discard this: The next 3 times you would be dealt damage this turn, prevent 1 of that damage.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 4,
+  "classes": [
+   "generic"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN322",
+  "name": "Rockyard Rodeo",
+  "cardType": "action",
+  "text": "This card's {p} is equal to the highest base {p} of weapons you control.",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN323",
+  "name": "High Current Currency",
+  "cardType": "action",
+  "text": "Remove all energy counters from target non-hero permanent an opponent controls. Create that many Gold tokens.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN324",
+  "name": "Clearwater Elixir",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +3{p}.\nYou may destroy a Bloodrot Pox token you control. If you do, gain 1{h}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN325",
+  "name": "Restvine Elixir",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +3{p}.\nYou may destroy an Inertia token you control. If you do, gain 1{h}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN326",
+  "name": "Sapwood Elixir",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +3{p}.\nYou may destroy a Frailty token you control. If you do, gain 1{h}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN327",
+  "name": "Ransack and Raze",
+  "cardType": "action",
+  "text": "Destroy target landmark with cost X. Create X Gold tokens.\nGo again",
+  "pitch": 3,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN328",
+  "name": "Destructive Tendencies",
+  "cardType": "instant",
+  "text": "Choose 1 or both;\n\nRemove all counters from target item token.\nRemove all counters from target aura token.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN329",
+  "name": "Pilfer the Tomb",
+  "cardType": "instant",
+  "text": "Choose 1 or both;\n\nBanish target instant from an opposing hero's graveyard.\nBanish target yellow card from an opposing hero's graveyard.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN330",
+  "name": "Shatter Sorcery",
+  "cardType": "instant",
+  "text": "Choose 1 or both;\n\nDestroy target aura permanent with Sigil in its name.\nPrevent the next 1 arcane damage that would be dealt to target hero this turn.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN331",
+  "name": "Drag Down",
+  "cardType": "defense-reaction",
+  "text": "When this defends an attack, it gets -3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN332",
+  "name": "Drag Down",
+  "cardType": "defense-reaction",
+  "text": "When this defends an attack, it gets -2{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN333",
+  "name": "Drag Down",
+  "cardType": "defense-reaction",
+  "text": "When this defends an attack, it gets -1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "PEN"
+ },
+ {
+  "id": "PEN334",
+  "name": "Rhinar",
+  "cardType": "hero",
+  "text": "Whenever you discard a card with 6 or more {p} during your action phase, intimidate.",
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "PEN"
+ },
+ {
+  "id": "PEN335",
+  "name": "Benji, the Piercing Wind",
+  "cardType": "hero",
+  "text": "Your attack action cards with 2 or less {p} can't be defended by cards from hand.\nThe first time an attack action card you control hits each turn, your next attack gains +1{p}.",
+  "classes": [
+   "ninja"
+  ],
+  "life": 17,
+  "intellect": 4,
+  "set": "PEN"
+ },
+ {
+  "id": "PEN336",
+  "name": "Kassai, Cintari Sellsword",
+  "cardType": "hero",
+  "text": "Your second sword attack each turn costs {r} less.\nAt the beginning of your end phase, if you have attacked 2 or more times with weapons this turn, create a Copper token for each weapon attack that hit.",
+  "classes": [
+   "warrior"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "PEN"
+ },
+ {
+  "id": "PEN337",
+  "name": "Dash, Database",
+  "cardType": "hero",
+  "text": "You may look at the top card of your deck at any time.\nOnce per turn, you may play a Mechanologist item with cost 0 or 1 from the top of your deck as though it were an instant. It costs an additional {r} to play.",
+  "classes": [
+   "mechanologist"
+  ],
+  "life": 18,
+  "intellect": 4,
+  "set": "PEN"
+ },
+ {
+  "id": "PEN338",
+  "name": "Dash",
+  "cardType": "hero",
+  "text": "You may start the game with a Mechanologist item with cost 2 or less in the arena.",
+  "classes": [
+   "mechanologist"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "PEN"
+ },
+ {
+  "id": "PEN339",
+  "name": "Teklovossen",
+  "cardType": "hero",
+  "text": "You may play Evos from your banished zone.\nOnce per Turn Instant - {r}{r}{r}: You may play your next Evo this turn as though it were an instant. When you do, draw a card.",
+  "classes": [
+   "mechanologist"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "PEN"
+ },
+ {
+  "id": "PEN340",
+  "name": "Azalea",
+  "cardType": "hero",
+  "text": "Once per Turn Action - 0: Put a card from your arsenal on the bottom of your deck. If you do, put the top card of your deck face up into your arsenal. If it's an arrow card, it gains dominate until end of turn. Go again",
+  "classes": [
+   "ranger"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "PEN"
+ },
+ {
+  "id": "PEN341",
+  "name": "Riptide",
+  "cardType": "hero",
+  "text": "Whenever you play a card from hand, you may put a card from hand face down into your arsenal.\nWhenever a trap you control triggers, deal 1 damage to the attacking hero.",
+  "classes": [
+   "ranger"
+  ],
+  "life": 19,
+  "intellect": 4,
+  "set": "PEN"
+ },
+ {
+  "id": "PEN342",
+  "name": "Kano",
+  "cardType": "hero",
+  "text": "Instant - {r}{r}{r}: Look at the top card of your deck. If it's a 'non-attack' action card, you may banish it. If you do, you may play it this turn as though it were an instant.",
+  "classes": [
+   "wizard"
+  ],
+  "life": 15,
+  "intellect": 4,
+  "set": "PEN"
+ },
+ {
+  "id": "PEN343",
+  "name": "Prism",
+  "cardType": "hero",
+  "text": "Once per Turn Instant - {r}{r}, banish a card from Prism's soul: Create a Spectral Shield token.",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "PEN"
+ },
+ {
+  "id": "PEN344",
+  "name": "Chane",
+  "cardType": "hero",
+  "text": "Once per Turn Action - Create a Soul Shackle token: Your next Runeblade or Shadow action this turn gains go again. Go again",
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "PEN"
+ },
+ {
+  "id": "PEN345",
+  "name": "Oldhim",
+  "cardType": "hero",
+  "text": "Essence of Earth and Ice\nOnce per Turn Defense Reaction - {r}{r}{r}: If an Earth card is pitched this way, prevent the next 2 damage that would be dealt to Oldhim this turn. If an Ice card is pitched this way, the attacking hero puts a card from their hand on top of their deck.",
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Essence of Earth and Ice"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "PEN"
+ },
+ {
+  "id": "PEN346",
+  "name": "Lexi",
+  "cardType": "hero",
+  "text": "Essence of Ice and Lightning\nOnce per Turn Action - Turn a face down card in your arsenal face up: If it's a Lightning card, your next attack this turn gains go again. If it's an Ice card, create a Frostbite token under target hero's control. Go again",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Essence of Ice and Lightning"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "PEN"
+ },
+ {
+  "id": "PEN347",
+  "name": "Dromai",
+  "cardType": "hero",
+  "text": "Whenever you pitch a red card, create an Ash Token.\nIf you've played a red card this turn, dragons you control have go again while attacking.",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "PEN"
+ },
+ {
+  "id": "PEN348",
+  "name": "Fai",
+  "cardType": "hero",
+  "text": "You may start the game with a Phoenix Flame in your graveyard.\nOnce per Turn Instant - {r}{r}{r}: Return a Phoenix Flame from your graveyard to your hand. This ability costs {r} less for each Draconic chain link you control.",
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "PEN"
+ }
+]

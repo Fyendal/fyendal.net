@@ -1,0 +1,207 @@
+[
+ {
+  "id": "IRA001",
+  "name": "Ira, Crimson Haze",
+  "cardType": "hero",
+  "text": "Your second attack each turn gets +1{p}.",
+  "classes": [
+   "ninja"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "IRA"
+ },
+ {
+  "id": "IRA002",
+  "name": "Edge of Autumn",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack. Go again",
+  "attack": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "sword",
+   "2h"
+  ],
+  "set": "IRA"
+ },
+ {
+  "id": "IRA003",
+  "name": "Whirling Mist Blossom",
+  "cardType": "action",
+  "text": "Ira Specialization\nWhen this hits and it's the second or higher chain link in a row to hit, draw 2 cards.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Ira Specialization",
+   "Go again"
+  ],
+  "set": "IRA"
+ },
+ {
+  "id": "IRA004",
+  "name": "Salt the Wound",
+  "cardType": "action",
+  "text": "This gets +1{p} for each attack that has hit this combat chain.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "IRA"
+ },
+ {
+  "id": "IRA005",
+  "name": "Bittering Thorns",
+  "cardType": "action",
+  "text": "When this hits, your next attack this turn gets +1{p}.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "IRA"
+ },
+ {
+  "id": "IRA006",
+  "name": "Torrent of Tempo",
+  "cardType": "action",
+  "text": "When this hits, it gets go again.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "IRA"
+ },
+ {
+  "id": "IRA007",
+  "name": "Flying Kick",
+  "cardType": "action",
+  "text": "If this was played as chain link 3 or higher, it gets +2{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "IRA"
+ },
+ {
+  "id": "IRA008",
+  "name": "Head Jab",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "IRA"
+ },
+ {
+  "id": "IRA009",
+  "name": "Scar for a Scar",
+  "cardType": "action",
+  "text": "When this is played, if you have less {h} than an opposing hero, it gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "IRA"
+ },
+ {
+  "id": "IRA010",
+  "name": "Brutal Assault",
+  "cardType": "action",
+  "text": "",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "IRA"
+ },
+ {
+  "id": "IRA011",
+  "name": "Lunging Press",
+  "cardType": "attack-reaction",
+  "text": "Target attack action card gains +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "IRA"
+ },
+ {
+  "id": "IRA012",
+  "name": "Springboard Somersault",
+  "cardType": "defense-reaction",
+  "text": "If Springboard Somersault is played from arsenal, it gains +2{d}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "IRA"
+ }
+]

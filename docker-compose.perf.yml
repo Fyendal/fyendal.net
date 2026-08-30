@@ -1,0 +1,100 @@
+# Isolated local capacity-test stack. This intentionally does not extend the
+# self-host compose file: performance runs get their own database and volumes.
+name: fyendal-perf
+
+x-perf-app: &perf-app
+  build: .
+  image: fyendal-perf-app
+  environment: &perf-app-environment
+    NODE_ENV: production
+    DATABASE_URL: postgres://fyendal:fyendal-perf@db-proxy:5432/fyendal_perf
+    APP_ORIGIN: http://127.0.0.1:${PERF_APP_PORT:-8080}
+    RULESET_VERSION: perf-v1
+    TRUSTED_PROXY_HOPS: "0"
+    AUTH_KDF_CONCURRENCY: "1"
+    DB_POOL_MAX: "5"
+    # 500 games plus spectators use more than 1,000 localhost sockets.
+    WS_MAX_PER_IP: "2000"
+    PORT: "8080"
+  cpus: ${PERF_APP_CPUS:-1.0}
+  mem_limit: ${PERF_APP_MEMORY:-768m}
+  depends_on:
+    db-proxy:
+      condition: service_healthy
+  healthcheck:
+    test:
+      - CMD
+      - node
+      - -e
+      - "fetch('http://127.0.0.1:8080/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+    interval: 2s
+    timeout: 2s
+    retries: 60
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: fyendal
+      POSTGRES_PASSWORD: fyendal-perf
+      POSTGRES_DB: fyendal_perf
+    command:
+      - postgres
+      - -c
+      - max_connections=${PERF_DB_MAX_CONNECTIONS:-40}
+      - -c
+      - shared_buffers=${PERF_DB_SHARED_BUFFERS:-192MB}
+      - -c
+      - shared_preload_libraries=pg_stat_statements
+      - -c
+      - track_io_timing=on
+    cpus: ${PERF_DB_CPUS:-0.5}
+    mem_limit: ${PERF_DB_MEMORY:-614m}
+    ports:
+      - "127.0.0.1:${PERF_DB_PORT:-55432}:5432"
+    volumes:
+      - perf_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fyendal -d fyendal_perf"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  db-proxy:
+    image: node:24-slim@sha256:cb4e8f7c443347358b7875e717c29e27bf9befc8f5a26cf18af3c3dec80e58c5
+    environment:
+      PERF_PROXY_LISTEN_PORT: "5432"
+      PERF_PROXY_TARGET_HOST: db
+      PERF_PROXY_TARGET_PORT: "5432"
+      PERF_DB_ONE_WAY_DELAY_MS: ${PERF_DB_ONE_WAY_DELAY_MS:-2}
+    command: ["node", "/perf/db-latency-proxy.mjs"]
+    volumes:
+      - ./scripts/perf/db-latency-proxy.mjs:/perf/db-latency-proxy.mjs:ro
+    read_only: true
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "const s=require('net').connect(5432,'127.0.0.1',()=>{s.end();process.exit(0)});s.on('error',()=>process.exit(1))"
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  app-1:
+    <<: *perf-app
+    ports:
+      - "127.0.0.1:${PERF_APP_PORT:-8080}:8080"
+
+  app-2:
+    <<: *perf-app
+    environment:
+      <<: *perf-app-environment
+    ports:
+      - "127.0.0.1:${PERF_APP_PORT_2:-8081}:8080"
+
+volumes:
+  perf_pgdata:

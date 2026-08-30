@@ -1,0 +1,4643 @@
+[
+ {
+  "id": "SEA000",
+  "name": "Riches of Trōpal-Dhani",
+  "cardType": "resource",
+  "text": "Legendary\nWhen this is pitched, create a Gold token.",
+  "pitch": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "gem"
+  ],
+  "keywords": [
+   "Legendary"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA001",
+  "name": "Puffin, Hightail",
+  "cardType": "hero",
+  "text": "Action - {t}, destroy a Gold you control: Create a Golden Cog token.\nThe second time you crank each turn, draw a card.",
+  "classes": [
+   "pirate",
+   "mechanologist"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "SEA"
+ },
+ {
+  "id": "SEA002",
+  "name": "Puffin",
+  "cardType": "hero",
+  "text": "Action - {t}, destroy a Gold you control: Create a Golden Cog token.\nThe second time you crank each turn, draw a card.",
+  "classes": [
+   "pirate",
+   "mechanologist"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "SEA"
+ },
+ {
+  "id": "SEA003",
+  "name": "Polly Cranka",
+  "cardType": "action",
+  "text": "Action - {t}, banish this: Return this to the arena under its owner's control, unequipped, tapped, and with a steam counter.\nCrank\nPerched",
+  "subtypes": [
+   "puffin",
+   "companion",
+   "off-hand",
+   "ally"
+  ],
+  "keywords": [
+   "Crank",
+   "Perched"
+  ],
+  "life": 1,
+  "set": "SEA"
+ },
+ {
+  "id": "SEA004",
+  "name": "Golden Skywarden",
+  "cardType": "action",
+  "text": "Galvanize - When this defends, you may destroy an item you control. If you do, this gets +1{d}. If a Golden Cog is destroyed this way, create a Gold token and repeat this process.",
+  "pitch": 2,
+  "cost": 4,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "pirate",
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Galvanize"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA005",
+  "name": "Jolly Bludger",
+  "cardType": "action",
+  "text": "When this attacks, you may {t} a cog you control. If you do, this gets overpower.\nWhen this deals damage to a hero, steal that many items they control.\nThrice per Turn Instant - {t} a cog you control: This gets +1{p}.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "pirate",
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Overpower",
+   "Steal"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA006",
+  "name": "Cogwerx Blunderbuss",
+  "cardType": "weapon",
+  "text": "Action - {r}{r}, {t}: Attack\nInstant - {t} a cog you control: This card's next attack this turn gets go again.",
+  "attack": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "gun",
+   "2h"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA007",
+  "name": "Spitfire",
+  "cardType": "weapon",
+  "text": "Action - {t}, {t} a cog you control: Attack\nWhen this attacks, you may {t} a cog you control. If you do, the attack gets +1{p}.",
+  "attack": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "gun",
+   "2h"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA008",
+  "name": "Cogwerx Tinker Rings",
+  "cardType": "equipment",
+  "text": "When this defends, create a Golden Cog token.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA009",
+  "name": "Rust Belt",
+  "cardType": "equipment",
+  "text": "Instant - {t} a cog you control, destroy this: Gain {r}.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA010",
+  "name": "Unicycle",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: {u} a cog you control.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA011",
+  "name": "Cogwerx Dovetail",
+  "cardType": "action",
+  "text": "When this hits a hero, {u} all cogs you control.\nThrice per Turn Instant - {t} a cog you control: This gets +1{p} or go again.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA012",
+  "name": "Palantir Aeronought",
+  "cardType": "action",
+  "text": "The defending hero must defend this with an equipment they control if able.\nThrice per Turn Instant - {t} a cog you control: This gets +1{p}. If this is the third time you've activated this ability, destroy a defending card.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA013",
+  "name": "Cog in the Machine",
+  "cardType": "action",
+  "text": "Create 2 Golden Cog tokens.\nYou may {t} a cog you control. If you do, put this on the bottom of its owner's deck.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA014",
+  "name": "Cogwerx Workshop",
+  "cardType": "action",
+  "text": "Create a Golden Cog token.\nPut a steam counter on up to 2 cogs you control.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA015",
+  "name": "Cloud City Steamboat",
+  "cardType": "action",
+  "text": "When this hits a hero, you may {t} a cog you control. If you do, put a steam counter on a cog you control.\nTwice per Turn Instant - {t} a cog you control: This gets +1{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA016",
+  "name": "Cloud City Steamboat",
+  "cardType": "action",
+  "text": "When this hits a hero, you may {t} a cog you control. If you do, put a steam counter on a cog you control.\nTwice per Turn Instant - {t} a cog you control: This gets +1{p}.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA017",
+  "name": "Cloud City Steamboat",
+  "cardType": "action",
+  "text": "When this hits a hero, you may {t} a cog you control. If you do, put a steam counter on a cog you control.\nTwice per Turn Instant - {t} a cog you control: This gets +1{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA018",
+  "name": "Cogwerx Zeppelin",
+  "cardType": "action",
+  "text": "When this hits a hero, you may {t} a cog you control. If you do, create a Golden Cog token.\nTwice per Turn Instant - {t} a cog you control: This gets +1{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA019",
+  "name": "Cogwerx Zeppelin",
+  "cardType": "action",
+  "text": "When this hits a hero, you may {t} a cog you control. If you do, create a Golden Cog token.\nTwice per Turn Instant - {t} a cog you control: This gets +1{p}.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA020",
+  "name": "Cogwerx Zeppelin",
+  "cardType": "action",
+  "text": "When this hits a hero, you may {t} a cog you control. If you do, create a Golden Cog token.\nTwice per Turn Instant - {t} a cog you control: This gets +1{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA021",
+  "name": "Copper Cog",
+  "cardType": "action",
+  "text": "Unlimited\nCrank\nThis enters the arena with 2 steam counters. At the start of your turn, destroy this unless you remove a steam counter from it.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "cog",
+   "item"
+  ],
+  "keywords": [
+   "Unlimited",
+   "Crank"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA022",
+  "name": "Lubricate",
+  "cardType": "instant",
+  "text": "{u} up to 3 cogs you control.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mechanologist"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA023",
+  "name": "Pinion Sentry",
+  "cardType": "block",
+  "text": "When this defends, you may {t} a cog you control. If you do, create a Golden Cog token.",
+  "pitch": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA024",
+  "name": "Cloud Skiff",
+  "cardType": "action",
+  "text": "Once per Turn Instant - {t} a cog you control: This gets +1{p} or go again.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA025",
+  "name": "Cloud Skiff",
+  "cardType": "action",
+  "text": "Once per Turn Instant - {t} a cog you control: This gets +1{p} or go again.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA026",
+  "name": "Cloud Skiff",
+  "cardType": "action",
+  "text": "Once per Turn Instant - {t} a cog you control: This gets +1{p} or go again.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA027",
+  "name": "Sky Skimmer",
+  "cardType": "action",
+  "text": "Once per Turn Instant - {t} a cog you control: This gets +1{p} or go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA028",
+  "name": "Sky Skimmer",
+  "cardType": "action",
+  "text": "Once per Turn Instant - {t} a cog you control: This gets +1{p} or go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA029",
+  "name": "Sky Skimmer",
+  "cardType": "action",
+  "text": "Once per Turn Instant - {t} a cog you control: This gets +1{p} or go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA030",
+  "name": "Teeth of the Cog",
+  "cardType": "action",
+  "text": "Galvanize - When this defends, you may destroy an item you control. If you do, create a Golden Cog token.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Galvanize"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA031",
+  "name": "Teeth of the Cog",
+  "cardType": "action",
+  "text": "Galvanize - When this defends, you may destroy an item you control. If you do, create a Golden Cog token.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Galvanize"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA032",
+  "name": "Teeth of the Cog",
+  "cardType": "action",
+  "text": "Galvanize - When this defends, you may destroy an item you control. If you do, create a Golden Cog token.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Galvanize"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA033",
+  "name": "Tough Old Wrench",
+  "cardType": "action",
+  "text": "Galvanize - When this defends, you may destroy an item you control. If you do, create a Golden Cog token.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Galvanize"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA034",
+  "name": "Tough Old Wrench",
+  "cardType": "action",
+  "text": "Galvanize - When this defends, you may destroy an item you control. If you do, create a Golden Cog token.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Galvanize"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA035",
+  "name": "Tough Old Wrench",
+  "cardType": "action",
+  "text": "Galvanize - When this defends, you may destroy an item you control. If you do, create a Golden Cog token.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Galvanize"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA036",
+  "name": "Goldwing Turbine",
+  "cardType": "action",
+  "text": "Your next Mechanologist attack this turn gets +3{p}.\nCreate a Golden Cog token.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA037",
+  "name": "Goldwing Turbine",
+  "cardType": "action",
+  "text": "Your next Mechanologist attack this turn gets +2{p}.\nCreate a Golden Cog token.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA038",
+  "name": "Goldwing Turbine",
+  "cardType": "action",
+  "text": "Your next Mechanologist attack this turn gets +1{p}.\nCreate a Golden Cog token.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA039",
+  "name": "Draw Back the Hammer",
+  "cardType": "action",
+  "text": "Your next Mechanologist attack this turn gets +4{p}.\nYou may {u} a gun you control.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA040",
+  "name": "Perk Up",
+  "cardType": "action",
+  "text": "Your next Mechanologist attack this turn gets +4{p}.\nYou may {u} your hero.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA041",
+  "name": "Tighten the Screws",
+  "cardType": "action",
+  "text": "Your next Mechanologist attack this turn gets +4{p}.\nYou may {u} a cog you control.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA042",
+  "name": "Golden Cog",
+  "cardType": "token",
+  "text": "Crank\nThis enters the arena with a steam counter. At the start of your turn, destroy this unless you remove a steam counter from it.",
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "cog",
+   "item"
+  ],
+  "keywords": [
+   "Crank"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA043",
+  "name": "Gravy Bones, Shipwrecked Looter",
+  "cardType": "hero",
+  "text": "Instant - {t}, destroy a Gold you control: Draw a card, then discard a card.\nIf a blue card has been put into your graveyard this turn, you may play cards with watery grave from your graveyard.",
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "SEA"
+ },
+ {
+  "id": "SEA044",
+  "name": "Gravy Bones",
+  "cardType": "hero",
+  "text": "Instant - {t}, destroy a Gold you control: Draw a card, then discard a card.\nIf a blue card has been put into your graveyard this turn, you may play cards with watery grave from your graveyard.",
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "SEA"
+ },
+ {
+  "id": "SEA045",
+  "name": "Compass of Sunken Depths",
+  "cardType": "equipment",
+  "text": "Instant - {t}: Look at the top card of your deck.\nThe first card with watery grave you play from your graveyard each turn gets go again.",
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "off-hand"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA046",
+  "name": "Washed Up Wave",
+  "cardType": "equipment",
+  "text": "When this defends, you may discard a card or destroy the top card of your deck. If that card has watery grave, this gets +2{d}.\nBlade Break",
+  "defense": 0,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA047",
+  "name": "Blood in the Water",
+  "cardType": "defense-reaction",
+  "text": "When this defends, you may discard a card or destroy the top card of your deck. If that card has watery grave, this gets +2{d}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 4,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA048",
+  "name": "Chart the High Seas",
+  "cardType": "action",
+  "text": "Look at the top 2 cards of your deck. You may pitch a blue card from among them. Put the rest into your graveyard.\nCreate a Gold token for each yellow card put into your graveyard this way.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA049",
+  "name": "Give No Quarter",
+  "cardType": "action",
+  "text": "The next 2 ally cards with watery grave you play this turn cost {r}{r}{r} less to play.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA050",
+  "name": "Chum, Friendly First Mate",
+  "cardType": "action",
+  "text": "Action - {t}: Attack\nInstant - {t}, discard a card with watery grave: Until end of turn, opponents must choose this as the target of attacks if able.\nWatery Grave",
+  "pitch": 2,
+  "cost": 4,
+  "attack": 4,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 6,
+  "set": "SEA"
+ },
+ {
+  "id": "SEA051",
+  "name": "Moray le Fay",
+  "cardType": "action",
+  "text": "Action - {t}: Attack\nInstant - {r}, {t}: Put a +1{p} counter on target ally.\nWatery Grave",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 0,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 3,
+  "set": "SEA"
+ },
+ {
+  "id": "SEA052",
+  "name": "Wailer Humperdinck",
+  "cardType": "action",
+  "text": "Action - {r}{r}{r} {r}{r}{r}, {t}: Attack\nWatery Grave",
+  "pitch": 2,
+  "cost": 6,
+  "attack": 11,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 7,
+  "set": "SEA"
+ },
+ {
+  "id": "SEA053",
+  "name": "Board the Ship",
+  "cardType": "action",
+  "text": "When this attacks, you may {t} an ally you control. If you do, this gets overpower.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "keywords": [
+   "Overpower"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA054",
+  "name": "Paddle Faster",
+  "cardType": "action",
+  "text": "When this attacks, you may {t} an ally you control. If you do, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA055",
+  "name": "Hoist 'Em Up",
+  "cardType": "block",
+  "text": "When this defends, you may {t} an ally you control. If you do, this gets +1{d}.",
+  "pitch": 1,
+  "defense": 4,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA056",
+  "name": "Avast Ye!",
+  "cardType": "action",
+  "text": "Your next Pirate ally attack this turn gets go again and \"When this hits a hero, create a Gold token.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA057",
+  "name": "Heave Ho!",
+  "cardType": "action",
+  "text": "Your next Pirate ally attack this turn gets overpower and \"When this hits a hero, create a Gold token.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA058",
+  "name": "Yo Ho Ho!",
+  "cardType": "action",
+  "text": "Your next Pirate ally attack this turn gets +1{p} and \"When this hits a hero, create a Gold token.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA059",
+  "name": "Kelpie, Tangled Mess",
+  "cardType": "action",
+  "text": "Action - {t}: Attack\nAction - {r}, {t}: {t} target hero or ally. Go again\nWatery Grave",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 1,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 3,
+  "set": "SEA"
+ },
+ {
+  "id": "SEA060",
+  "name": "Limpit, Hop-a-long",
+  "cardType": "action",
+  "text": "Action - {r}, {t}: Attack. Go again\nWatery Grave",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 1,
+  "set": "SEA"
+ },
+ {
+  "id": "SEA061",
+  "name": "Scooba, Salty Sea Dog",
+  "cardType": "action",
+  "text": "Action - {r}{r}{r}, {t}: Attack\nWhen this attacks, you may put a yellow card from a graveyard on the bottom of its owner's deck. If you do, create a Gold token.\nWatery Grave",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 4,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 4,
+  "set": "SEA"
+ },
+ {
+  "id": "SEA062",
+  "name": "Angry Bones",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card or destroy the top card of your deck. If that card has watery grave, this gets +1{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA063",
+  "name": "Angry Bones",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card or destroy the top card of your deck. If that card has watery grave, this gets +1{p}.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA064",
+  "name": "Angry Bones",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card or destroy the top card of your deck. If that card has watery grave, this gets +1{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA065",
+  "name": "Burly Bones",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card or destroy the top card of your deck. If that card has watery grave, this gets overpower.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "keywords": [
+   "Overpower"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA066",
+  "name": "Burly Bones",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card or destroy the top card of your deck. If that card has watery grave, this gets overpower.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "keywords": [
+   "Overpower"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA067",
+  "name": "Burly Bones",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card or destroy the top card of your deck. If that card has watery grave, this gets overpower.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "keywords": [
+   "Overpower"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA068",
+  "name": "Jittery Bones",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card or destroy the top card of your deck. If that card has watery grave, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA069",
+  "name": "Jittery Bones",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card or destroy the top card of your deck. If that card has watery grave, this gets go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA070",
+  "name": "Jittery Bones",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card or destroy the top card of your deck. If that card has watery grave, this gets go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA071",
+  "name": "Restless Bones",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card or destroy the top card of your deck. If that card has watery grave, this gets go again.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA072",
+  "name": "Restless Bones",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card or destroy the top card of your deck. If that card has watery grave, this gets go again.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA073",
+  "name": "Restless Bones",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card or destroy the top card of your deck. If that card has watery grave, this gets go again.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA074",
+  "name": "Barnacle",
+  "cardType": "action",
+  "text": "Action - {t}: Attack\nWatery Grave",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 4,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 3,
+  "set": "SEA"
+ },
+ {
+  "id": "SEA075",
+  "name": "Chowder, Hearty Cook",
+  "cardType": "action",
+  "text": "Action - {t}: Attack\nInstant - {t}: Gain 1{h}\nWatery Grave",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 3,
+  "set": "SEA"
+ },
+ {
+  "id": "SEA076",
+  "name": "Cutty Shark, Quick Clip",
+  "cardType": "action",
+  "text": "Action - {r}, {t}: Attack\nOnce per Turn Action - {r}: Your next ally attack this turn gets +1{p}. Go again\nWatery Grave",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 4,
+  "set": "SEA"
+ },
+ {
+  "id": "SEA077",
+  "name": "Riggermortis",
+  "cardType": "action",
+  "text": "Action - {r}, {t}: Attack\nWatery Grave",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 6,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 1,
+  "set": "SEA"
+ },
+ {
+  "id": "SEA078",
+  "name": "Shelly, Hardened Traveler",
+  "cardType": "action",
+  "text": "Action - {r}{r}{r}, {t}: Attack\nInstant - {t}: The next attack action card you defend with this turn gets +1{d}.\nWatery Grave",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 4,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 5,
+  "set": "SEA"
+ },
+ {
+  "id": "SEA079",
+  "name": "Swabbie",
+  "cardType": "action",
+  "text": "Action - {r}{r}, {t}: Attack\nWatery Grave",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 7,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 3,
+  "set": "SEA"
+ },
+ {
+  "id": "SEA080",
+  "name": "Dead Threads",
+  "cardType": "equipment",
+  "text": "Instant - {t}: Gain {r}. Activate this only if an ally has been put into your graveyard this turn.\nBlade Break",
+  "defense": 1,
+  "subtypes": [
+   "necromancer",
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA081",
+  "name": "Head Stone",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Destroy the top card of your deck.\nBattleworn",
+  "defense": 1,
+  "subtypes": [
+   "necromancer",
+   "head"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA082",
+  "name": "Marlynn, Treasure Hunter",
+  "cardType": "hero",
+  "text": "Action - {t}, destroy a Gold you control: Create a Goldfin Harpoon in your hand. Go again\nWhenever you draw a card during your action phase, you may put an arrow from your hand face-up into your arsenal.",
+  "classes": [
+   "pirate",
+   "ranger"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "SEA"
+ },
+ {
+  "id": "SEA083",
+  "name": "Marlynn",
+  "cardType": "hero",
+  "text": "Action - {t}, destroy a Gold you control: Create a Goldfin Harpoon in your hand. Go again\nWhenever you draw a card during your action phase, you may put an arrow from your hand face-up into your arsenal.",
+  "classes": [
+   "pirate",
+   "ranger"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "SEA"
+ },
+ {
+  "id": "SEA084",
+  "name": "Hammerhead, Harpoon Cannon",
+  "cardType": "weapon",
+  "text": "Action - {r}{r}{r}{r}, {t}: Your next arrow attack this turn gets +4{p}. If it has harpoon in its name, it gets overpower. Go again",
+  "classes": [
+   "pirate",
+   "ranger"
+  ],
+  "subtypes": [
+   "bow",
+   "cannon",
+   "2h"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA085",
+  "name": "King Kraken Harpoon",
+  "cardType": "action",
+  "text": "Go Fish - When this hits a hero, they choose and reveal a card from their hand. If it's a non-attack action card, they discard it and you create a Gold token. If you've activated a cannon this turn, instead look at their hand and you choose the card.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "pirate",
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go Fish"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA086",
+  "name": "King Shark Harpoon",
+  "cardType": "action",
+  "text": "Go Fish - When this hits a hero, they choose and reveal a card from their hand. If it's an attack action card, they discard it and you create a Gold token. If you've activated a cannon this turn, instead look at their hand and you choose the card.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "pirate",
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go Fish"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA087",
+  "name": "Big Game Trophy Shot",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gets +4{p}. If it has harpoon in its name, it gets \"When this hits a hero, create a Gold token.\"\nDraw a card, then discard a card.\nGo again",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "pirate",
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA088",
+  "name": "Gold the Tip",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gets +3{p}.\nIf there is a yellow arrow face-up in your arsenal, create a Gold token.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "pirate",
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA089",
+  "name": "Blue Fin Harpoon",
+  "cardType": "action",
+  "text": "Go Fish - When this hits a hero, they choose and reveal a card from their hand. If it's blue, they discard it and you create a Gold token. If you've activated a cannon this turn, instead look at their hand and you choose the card.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "pirate",
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go Fish"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA090",
+  "name": "Red Fin Harpoon",
+  "cardType": "action",
+  "text": "Go Fish - When this hits a hero, they choose and reveal a card from their hand. If it's red, they discard it and you create a Gold token. If you've activated a cannon this turn, instead look at their hand and you choose the card.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "pirate",
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go Fish"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA091",
+  "name": "Yellow Fin Harpoon",
+  "cardType": "action",
+  "text": "Go Fish - When this hits a hero, they choose and reveal a card from their hand. If it's yellow, they discard it and you create a Gold token. If you've activated a cannon this turn, instead look at their hand and you choose the card.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "pirate",
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go Fish"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA092",
+  "name": "Rusty Harpoon",
+  "cardType": "action",
+  "text": "",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "pirate",
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA093",
+  "name": "Goldfin Harpoon",
+  "cardType": "action",
+  "text": "If this would be put into a graveyard, instead remove it from the game.",
+  "cost": 0,
+  "attack": 2,
+  "classes": [
+   "pirate",
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA094",
+  "name": "Redspine Manta",
+  "cardType": "weapon",
+  "text": "Action - {t}: Put an arrow from your hand face-up into your arsenal. Go again",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "bow",
+   "2h"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA095",
+  "name": "Sealace Sarong",
+  "cardType": "equipment",
+  "text": "Instant - {t}, turn a blue arrow in your arsenal face-up: it gets go again this turn.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA096",
+  "name": "Patch the Hole",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Return a card from your arsenal to your hand.",
+  "defense": 0,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA097",
+  "name": "Glidewell Fins",
+  "cardType": "equipment",
+  "text": "Action - {r}, destroy this: Put an arrow from your hand face-up into your arsenal. It gets +1{p} this turn. Go again\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA098",
+  "name": "Barbed Barrage",
+  "cardType": "action",
+  "text": "As an additional cost to play this, you may pay {r}{r}{r}. If you do, this attacks an additional target.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA099",
+  "name": "Return Fire",
+  "cardType": "block",
+  "text": "When this defends, you may banish an arrow from your hand. If you do, at the start of your next turn, put it face-up into your arsenal and it gets +3{p} until end of turn.",
+  "pitch": 1,
+  "defense": 4,
+  "classes": [
+   "ranger"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA100",
+  "name": "Drop the Anchor",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gets +3{p} and \"When this hits a hero, {t} them and all allies they control.\"\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA101",
+  "name": "Fire in the Hole",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gets +3{p}.\nYou may {u} a bow you control.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA102",
+  "name": "Monkey Powder",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gets +1{p} and overpower.\nDraw a card.\nGo again",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA103",
+  "name": "Hook",
+  "cardType": "action",
+  "text": "Look at the top card of your deck. If it's an arrow, you may put it face-up into your arsenal. If you do, it gets +1{p} this turn.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA104",
+  "name": "Line",
+  "cardType": "action",
+  "text": "Look at the top card of your deck. If it's an arrow, you may put it face-up into your arsenal. If you do, it gets go again this turn.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA105",
+  "name": "Sinker",
+  "cardType": "action",
+  "text": "Look at the top card of your deck. If it's an arrow, you may put it face-up into your arsenal. If you do, it gets overpower this turn.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA106",
+  "name": "Dry Powder Shot",
+  "cardType": "action",
+  "text": "When this is put face-up into your arsenal, it gets +2{p} this turn.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA107",
+  "name": "Entangling Shot",
+  "cardType": "action",
+  "text": "When this is put face-up into your arsenal, you may {t} target hero.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA108",
+  "name": "Nettling Shot",
+  "cardType": "action",
+  "text": "When this is put face-up into your arsenal, you may {t} target ally.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA109",
+  "name": "Scouting Shot",
+  "cardType": "action",
+  "text": "When this is put face-up into your arsenal, you may look at the top card of your deck.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA110",
+  "name": "Swift Shot",
+  "cardType": "action",
+  "text": "When this is put face-up into your arsenal, it gets go again this turn.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA111",
+  "name": "Head Shot",
+  "cardType": "action",
+  "text": "When this is put into your arsenal face up, it gains +2{p} until end of turn.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA112",
+  "name": "Head Shot",
+  "cardType": "action",
+  "text": "When this is put into your arsenal face up, it gains +2{p} until end of turn.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA113",
+  "name": "Head Shot",
+  "cardType": "action",
+  "text": "When this is put into your arsenal face up, it gains +2{p} until end of turn.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA114",
+  "name": "Salvage Shot",
+  "cardType": "action",
+  "text": "When this hits, put it on the bottom of its owner's deck.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA115",
+  "name": "Salvage Shot",
+  "cardType": "action",
+  "text": "When this hits, put it on the bottom of its owner's deck.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA116",
+  "name": "Salvage Shot",
+  "cardType": "action",
+  "text": "When this hits, put it on the bottom of its owner's deck.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA117",
+  "name": "Sic 'Em Shot",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA118",
+  "name": "Sic 'Em Shot",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA119",
+  "name": "Sic 'Em Shot",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA120",
+  "name": "Call in the Big Guns",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gets +3{p}.\nYou may put an arrow from your hand face-up into your arsenal.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA121",
+  "name": "Call in the Big Guns",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gets +2{p}.\nYou may put an arrow from your hand face-up into your arsenal.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA122",
+  "name": "Call in the Big Guns",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gets +1{p}.\nYou may put an arrow from your hand face-up into your arsenal.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA123",
+  "name": "Scurv, Stowaway",
+  "cardType": "hero",
+  "text": "Action - {t}, destroy a Gold you control: Create a Goldkiss Rum token. Go again\nWhenever you activate a Goldkiss Rum, gain {r}.",
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "thief"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "SEA"
+ },
+ {
+  "id": "SEA124",
+  "name": "Sticky Fingers",
+  "cardType": "action",
+  "text": "Action - {t}: Attack. If this is equipped, unequip it.\nWhen this attacks a hero, steal a Gold token they control.\nPerched",
+  "attack": 2,
+  "subtypes": [
+   "scurv",
+   "companion",
+   "off-hand",
+   "ally"
+  ],
+  "keywords": [
+   "Perched",
+   "Steal"
+  ],
+  "life": 2,
+  "set": "SEA"
+ },
+ {
+  "id": "SEA125",
+  "name": "Gold-Baited Hook",
+  "cardType": "equipment",
+  "text": "Action - {t}: Your next Pirate attack this turn gets \"When this hits a hero, steal a Gold token they control, otherwise create a Gold token.\" At the beginning of your end phase, if you haven't created or stolen a Gold token this turn, destroy this. Go again\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA126",
+  "name": "Blue Sea Tricorn",
+  "cardType": "equipment",
+  "text": "Action - {r}{r}{r}, destroy this: Draw a card. Go again\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA127",
+  "name": "Buccaneer's Bounty",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Gain {r}. Go again\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA128",
+  "name": "Fish Fingers",
+  "cardType": "equipment",
+  "text": "Action - {r}, destroy this: Your next attack this turn gets +1{p}. Go again\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA129",
+  "name": "Peg Leg",
+  "cardType": "equipment",
+  "text": "Action - {r}{r}{r}, destroy this: Your next attack this turn gets go again. Go again.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA130",
+  "name": "Conqueror of the High Seas",
+  "cardType": "action",
+  "text": "When this hits a hero, destroy all cards in their arsenal. Create a Gold token for each card destroyed this way.\nHigh Tide - If there are 2 or more blue cards in your pitch zone, this gets +1{p} and go again.",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "High Tide",
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA131",
+  "name": "Loan Shark",
+  "cardType": "action",
+  "text": "Go again\nWhen this enters the arena, create 2 Gold tokens.\nAt the beginning of your end phase, if you haven't created or stolen a Gold this turn, destroy this, then lose 2{h} unless you discard a card.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA132",
+  "name": "Tip the Barkeep",
+  "cardType": "action",
+  "text": "Create a Goldkiss Rum token.\nYou may give a Gold token you control to another hero. If you do, put this on the bottom of its owner's deck.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA133",
+  "name": "Sunken Treasure",
+  "cardType": "block",
+  "text": "When this defends, you may turn a card in a graveyard face-down. If it's yellow, create a Gold token.",
+  "pitch": 3,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA134",
+  "name": "HMS Barracuda",
+  "cardType": "action",
+  "text": "When this hits a hero, destroy an ally they control.\nHigh Tide - If there are 2 or more blue cards in your pitch zone, this gets +1{p} and overpower.",
+  "pitch": 2,
+  "cost": 4,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "High Tide",
+   "Overpower"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA135",
+  "name": "HMS Kraken",
+  "cardType": "action",
+  "text": "When this hits a hero, destroy an item they control.\nHigh Tide - If there are 2 or more blue cards in your pitch zone, this gets +1{p} and overpower.",
+  "pitch": 2,
+  "cost": 4,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "High Tide",
+   "Overpower"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA136",
+  "name": "HMS Marlin",
+  "cardType": "action",
+  "text": "When this hits a hero, destroy the top card of their deck.\nHigh Tide - If there are 2 or more blue cards in your pitch zone, this gets +1{p} and overpower.",
+  "pitch": 2,
+  "cost": 4,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "High Tide",
+   "Overpower"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA137",
+  "name": "Murderous Rabble",
+  "cardType": "action",
+  "text": "When this attacks, reveal the top card of your deck. This gets +X{p}, where X is the pitch value of the card revealed this way.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA138",
+  "name": "Pilfer the Wreck",
+  "cardType": "action",
+  "text": "When this hits a hero, you may turn a card in their graveyard face-down. If it's yellow, create a Gold token.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA139",
+  "name": "Pilfer the Wreck",
+  "cardType": "action",
+  "text": "When this hits a hero, you may turn a card in their graveyard face-down. If it's yellow, create a Gold token.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA140",
+  "name": "Pilfer the Wreck",
+  "cardType": "action",
+  "text": "When this hits a hero, you may turn a card in their graveyard face-down. If it's yellow, create a Gold token.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA141",
+  "name": "Saltwater Swell",
+  "cardType": "action",
+  "text": "When this attacks, reveal the top card of your deck. If it's blue, pitch it.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA142",
+  "name": "Saltwater Swell",
+  "cardType": "action",
+  "text": "When this attacks, reveal the top card of your deck. If it's blue, pitch it.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA143",
+  "name": "Saltwater Swell",
+  "cardType": "action",
+  "text": "When this attacks, reveal the top card of your deck. If it's blue, pitch it.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA144",
+  "name": "Divvy Up",
+  "cardType": "action",
+  "text": "Remove half the gold counters from Treasure Island, rounded up. If you are a Thief, instead remove all of them.\nCreate Gold tokens equal to the number of gold counters removed this way.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA145",
+  "name": "Portside Exchange",
+  "cardType": "action",
+  "text": "Discard a card, then draw a card. If a yellow card is discarded this way, create a Gold token.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA146",
+  "name": "Sea Floor Salvage",
+  "cardType": "action",
+  "text": "Turn a card in a graveyard face-down. If it's yellow, create a Gold token.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA147",
+  "name": "Scrub the Deck",
+  "cardType": "action",
+  "text": "Destroy the top card of target hero's deck. If it's yellow, create a Gold token.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA148",
+  "name": "Shifting Tides",
+  "cardType": "action",
+  "text": "Go again\nAt the start of your turn, pitch the top card of your deck. If it's blue, put this on the bottom of its owner's deck, otherwise destroy this.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA149",
+  "name": "Not So Fast",
+  "cardType": "instant",
+  "text": "Scurv Specialization\nThe next time an opponent would draw a card from the effect of a Gold token this turn, instead you draw a card.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "pirate"
+  ],
+  "keywords": [
+   "Scurv Specialization"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA150",
+  "name": "Throw Caution to the Wind",
+  "cardType": "instant",
+  "text": "Reveal the top card of your deck. The next time you would be dealt damage this turn, prevent X of that damage, where X is the pitch value of the card revealed this way.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "pirate"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA151",
+  "name": "Lost in Transit",
+  "cardType": "block",
+  "text": "When this defends, you may remove a gold counter from Treasure Island. If you do and you are a Thief, create a Gold token.",
+  "pitch": 2,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA152",
+  "name": "Battalion Barque",
+  "cardType": "action",
+  "text": "High Tide - If there are 2 or more blue cards in your pitch zone, this gets +2{p}.",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "High Tide"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA153",
+  "name": "Battalion Barque",
+  "cardType": "action",
+  "text": "High Tide - If there are 2 or more blue cards in your pitch zone, this gets +2{p}.",
+  "pitch": 2,
+  "cost": 4,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "High Tide"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA154",
+  "name": "Battalion Barque",
+  "cardType": "action",
+  "text": "High Tide - If there are 2 or more blue cards in your pitch zone, this gets +2{p}.",
+  "pitch": 3,
+  "cost": 4,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "High Tide"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA155",
+  "name": "Expedition to Azuro Keys",
+  "cardType": "action",
+  "text": "When this attacks, you may put a gold counter on Treasure Island.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA156",
+  "name": "Expedition to Blackwater Strait",
+  "cardType": "action",
+  "text": "When this attacks, you may put a gold counter on Treasure Island.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA157",
+  "name": "Expedition to Dreadfall Reach",
+  "cardType": "action",
+  "text": "When this attacks, you may put a gold counter on Treasure Island.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA158",
+  "name": "Expedition to Horizon's Mantle",
+  "cardType": "action",
+  "text": "When this attacks, you may put a gold counter on Treasure Island.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA159",
+  "name": "Golden Tipple",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a yellow card. If you do, draw a card and create a Gold token.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA160",
+  "name": "Golden Tipple",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a yellow card. If you do, draw a card and create a Gold token.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA161",
+  "name": "Golden Tipple",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a yellow card. If you do, draw a card and create a Gold token.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA162",
+  "name": "Gold Hunter Lightsail",
+  "cardType": "action",
+  "text": "When this attacks, if you control less Gold than an opponent, this gets go again.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA163",
+  "name": "Gold Hunter Longboat",
+  "cardType": "action",
+  "text": "If you control less Gold than an opponent, this gets +2{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA164",
+  "name": "Gold Hunter Marauder",
+  "cardType": "action",
+  "text": "If you control less Gold than an opponent, this gets overpower.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Overpower"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA165",
+  "name": "Gold Hunter Ketch",
+  "cardType": "action",
+  "text": "If you control less Gold than an opponent, this costs {r}{r} less to play.",
+  "pitch": 2,
+  "cost": 4,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA166",
+  "name": "Swiftwater Sloop",
+  "cardType": "action",
+  "text": "High Tide - If there are 2 or more blue cards in your pitch zone, this gets go again.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "High Tide"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA167",
+  "name": "Swiftwater Sloop",
+  "cardType": "action",
+  "text": "High Tide - If there are 2 or more blue cards in your pitch zone, this gets go again.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "High Tide"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA168",
+  "name": "Swiftwater Sloop",
+  "cardType": "action",
+  "text": "High Tide - If there are 2 or more blue cards in your pitch zone, this gets go again.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "High Tide"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA169",
+  "name": "Swindler's Grift",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a yellow card. If you do, draw a card and create a Gold token.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA170",
+  "name": "Swindler's Grift",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a yellow card. If you do, draw a card and create a Gold token.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA171",
+  "name": "Swindler's Grift",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a yellow card. If you do, draw a card and create a Gold token.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA172",
+  "name": "Thiev'n Varmints",
+  "cardType": "action",
+  "text": "When this attacks, you may remove a gold counter from Treasure Island. If you do and you are a Thief, create a Gold token.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA173",
+  "name": "Chart a Course",
+  "cardType": "action",
+  "text": "Your first attack this turn gets +3{p}.\nYou may put a gold counter on Treasure Island.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA174",
+  "name": "Chart a Course",
+  "cardType": "action",
+  "text": "Your second attack this turn gets +3{p}.\nYou may put a gold counter on Treasure Island.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA175",
+  "name": "Chart a Course",
+  "cardType": "action",
+  "text": "Your third attack this turn gets +3{p}.\nYou may put a gold counter on Treasure Island.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA176",
+  "name": "Mutiny on the Battalion Barque",
+  "cardType": "action",
+  "text": "For each hero that controls more Gold than you, steal a Gold token they control.\nIf you gain control of 1 or more Gold tokens this way, your next attack this turn gets +2{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "keywords": [
+   "Go again",
+   "Steal"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA177",
+  "name": "Mutiny on the Nimbus Sovereign",
+  "cardType": "action",
+  "text": "For each hero that controls more Gold than you, steal a Gold token they control.\nIf you gain control of 1 or more Gold tokens this way, your next attack this turn gets overpower.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "keywords": [
+   "Go again",
+   "Steal"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA178",
+  "name": "Mutiny on the Swiftwater",
+  "cardType": "action",
+  "text": "For each hero that controls more Gold than you, steal a Gold token they control.\nIf you gain control of 1 or more Gold tokens this way, your next attack this turn gets go again.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "keywords": [
+   "Go again",
+   "Steal"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA179",
+  "name": "Bandana of the Blue Beyond",
+  "cardType": "equipment",
+  "text": "Action - Discard a card, destroy this: Put a blue card from your graveyard on the bottom of your deck. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA180",
+  "name": "Helmsman's Peak",
+  "cardType": "equipment",
+  "text": "When this defends, look at the top card of your deck.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA181",
+  "name": "Captain's Coat",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Gain {r}. Activate this only if you've drawn a card this turn. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA182",
+  "name": "Old Knocker",
+  "cardType": "equipment",
+  "text": "Instant - {t} your hero, destroy this: Gain {r}\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA183",
+  "name": "Swiftstrike Bracers",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Your next attack this turn gets +2{p}. Activate this only if you've played a Nimblism this turn. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA184",
+  "name": "Light Fingers",
+  "cardType": "equipment",
+  "text": "When this defends, if you are a Thief, steal a Gold token the attacking hero controls.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA185",
+  "name": "Quartermaster's Boots",
+  "cardType": "equipment",
+  "text": "Action - {r}{r}, destroy this: The next non-attack action card you play this turn gets go again. Go again\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA186",
+  "name": "Quick Clicks",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Your next attack this turn gets go again. Activate this only if you've played a Nimblism this turn. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA187",
+  "name": "Sea Legs",
+  "cardType": "action",
+  "text": "When this is discarded, create a Goldkiss Rum token.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA188",
+  "name": "Midas Touch",
+  "cardType": "action",
+  "text": "Destroy target ally. Its controller creates Gold tokens equal to its cost.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA189",
+  "name": "Amethyst Amulet",
+  "cardType": "action",
+  "text": "Instant - Destroy this: Your next attack this turn gets +2{p}.\nLegend of the Watery Grave",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Legendary",
+   "Watery Grave"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA190",
+  "name": "Diamond Amulet",
+  "cardType": "action",
+  "text": "Instant - Destroy this: gain 1 action point.\nLegend of the Watery Grave",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Legendary",
+   "Watery Grave"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA191",
+  "name": "Onyx Amulet",
+  "cardType": "action",
+  "text": "Action - Destroy this: {t} all heroes and allies. Go again\nLegend of the Watery Grave",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Legendary",
+   "Watery Grave"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA192",
+  "name": "Opal Amulet",
+  "cardType": "action",
+  "text": "Instant - Destroy this: Opt 2\nLegend of the Watery Grave",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Legendary",
+   "Watery Grave"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA193",
+  "name": "Pearl Amulet",
+  "cardType": "action",
+  "text": "Action - Destroy this: {u} target permanent. Go again\nLegend of the Watery Grave",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Legendary",
+   "Watery Grave"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA194",
+  "name": "Platinum Amulet",
+  "cardType": "action",
+  "text": "Instant - Destroy this: Target defending card gets +1{d} until end of turn.\nLegend of the Watery Grave",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Legendary",
+   "Watery Grave"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA195",
+  "name": "Pounamu Amulet",
+  "cardType": "action",
+  "text": "Action - Destroy this: Gain 2{h}. Go again\nLegend of the Watery Grave",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Legendary",
+   "Watery Grave"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA196",
+  "name": "Ruby Amulet",
+  "cardType": "action",
+  "text": "Instant - Destroy this: Gain {r}{r}\nLegend of the Watery Grave",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Legendary",
+   "Watery Grave"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA197",
+  "name": "Sapphire Amulet",
+  "cardType": "action",
+  "text": "Action - Destroy this: You get +1{i} this turn.\nLegend of the Watery Grave",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Legendary",
+   "Watery Grave"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA198",
+  "name": "Crash Down the Gates",
+  "cardType": "action",
+  "text": "When this attacks a hero, they reveal the top card of their deck. If this has {p} greater than the revealed card, this gets +2{p}.\nWhen this hits a hero, destroy the top card of their deck.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA199",
+  "name": "Crash Down the Gates",
+  "cardType": "action",
+  "text": "When this attacks a hero, they reveal the top card of their deck. If this has {p} greater than the revealed card, this gets +2{p}.\nWhen this hits a hero, destroy the top card of their deck.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA200",
+  "name": "Crash Down the Gates",
+  "cardType": "action",
+  "text": "When this attacks a hero, they reveal the top card of their deck. If this has {p} greater than the revealed card, this gets +2{p}.\nWhen this hits a hero, destroy the top card of their deck.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA201",
+  "name": "Jack Be Nimble",
+  "cardType": "action",
+  "text": "When this attacks, you may banish a Nimblism from your graveyard. If you do, this gets +1{p} and go again.\nWhen this hits a hero, steal an item they control until the end of this action phase.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Steal"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA202",
+  "name": "Jack Be Quick",
+  "cardType": "action",
+  "text": "When this attacks, you may banish a Nimblism from your graveyard. If you do, this gets +1{p} and go again.\nWhen this hits a hero, {u} an ally they control, then steal it until the end of this action phase.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Steal"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA203",
+  "name": "Money or Your Life?",
+  "cardType": "action",
+  "text": "When this hits a hero, deal 2 damage to them unless they give you a Gold token they control. If you are a Thief, repeat this process once.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA204",
+  "name": "Money or Your Life?",
+  "cardType": "action",
+  "text": "When this hits a hero, deal 2 damage to them unless they give you a Gold token they control. If you are a Thief, repeat this process once.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA205",
+  "name": "Money or Your Life?",
+  "cardType": "action",
+  "text": "When this hits a hero, deal 2 damage to them unless they give you a Gold token they control. If you are a Thief, repeat this process once.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA206",
+  "name": "Flying High",
+  "cardType": "action",
+  "text": "Your next attack this turn gets go again. If it's red, it gets +1{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA207",
+  "name": "Flying High",
+  "cardType": "action",
+  "text": "Your next attack this turn gets go again. If it's yellow, it gets +1{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA208",
+  "name": "Flying High",
+  "cardType": "action",
+  "text": "Your next attack this turn gets go again. If it's blue, it gets +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA209",
+  "name": "Clap 'Em in Irons",
+  "cardType": "action",
+  "text": "Go again\nWhen this enters the arena, {t} target Pirate hero or ally. It can't {u} while this is in the arena.\nAt the start of your turn, destroy this.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA210",
+  "name": "Regain Composure",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +1{p} and \"When this hits, {u} your hero.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA211",
+  "name": "Tit for Tat",
+  "cardType": "action",
+  "text": "{t} target hero. {u} another target hero.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA212",
+  "name": "Fiddler's Green",
+  "cardType": "block",
+  "text": "When this is put into your graveyard from anywhere, gain 3{h}.",
+  "pitch": 1,
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA213",
+  "name": "Fiddler's Green",
+  "cardType": "block",
+  "text": "When this is put into your graveyard from anywhere, gain 2{h}.",
+  "pitch": 2,
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA214",
+  "name": "Fiddler's Green",
+  "cardType": "block",
+  "text": "When this is put into your graveyard from anywhere, gain 1{h}.",
+  "pitch": 3,
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA215",
+  "name": "Fool's Gold",
+  "cardType": "resource",
+  "text": "When this is discarded, create a Gold token.",
+  "pitch": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA216",
+  "name": "Blow for a Blow",
+  "cardType": "action",
+  "text": "When this is played, if you have less {h} than an opposing hero, it gets go again.\nWhen this hits, deal 1 damage to any target.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA217",
+  "name": "Life for a Life",
+  "cardType": "action",
+  "text": "When this is played, if you have less {h} than an opposing hero, it gets go again.\nWhen this hits, gain 1{h}.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA218",
+  "name": "Scar for a Scar",
+  "cardType": "action",
+  "text": "When this is played, if you have less {h} than an opposing hero, it gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA219",
+  "name": "Ravenous Rabble",
+  "cardType": "action",
+  "text": "When this attacks, reveal the top card of your deck. This gets -X{p}, where X is the pitch value of the card revealed this way.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA220",
+  "name": "Nimby",
+  "cardType": "action",
+  "text": "When this attacks, you may search your deck for a Nimblism, reveal it, put it into your hand, then shuffle.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA221",
+  "name": "Nimby",
+  "cardType": "action",
+  "text": "When this attacks, you may search your deck for a Nimblism, reveal it, put it into your hand, then shuffle.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA222",
+  "name": "Nimby",
+  "cardType": "action",
+  "text": "When this attacks, you may search your deck for a Nimblism, reveal it, put it into your hand, then shuffle.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA223",
+  "name": "Rally the Coast Guard",
+  "cardType": "action",
+  "text": "Once per Turn Instant - Discard a card: This gets +3{d}. Activate this only while this card is defending.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA224",
+  "name": "Rally the Coast Guard",
+  "cardType": "action",
+  "text": "Once per Turn Instant - Discard a card: This gets +3{d}. Activate this only while this card is defending.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA225",
+  "name": "Rally the Coast Guard",
+  "cardType": "action",
+  "text": "Once per Turn Instant - Discard a card: This gets +3{d}. Activate this only while this card is defending.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA226",
+  "name": "Sirens of Safe Harbor",
+  "cardType": "action",
+  "text": "When this is put into your graveyard from anywhere, gain 1{h}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA227",
+  "name": "Sirens of Safe Harbor",
+  "cardType": "action",
+  "text": "When this is put into your graveyard from anywhere, gain 1{h}.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA228",
+  "name": "Sirens of Safe Harbor",
+  "cardType": "action",
+  "text": "When this is put into your graveyard from anywhere, gain 1{h}.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA229",
+  "name": "Strike Gold",
+  "cardType": "action",
+  "text": "When this hits, create a Gold token.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA230",
+  "name": "Strike Gold",
+  "cardType": "action",
+  "text": "When this hits, create a Gold token.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA231",
+  "name": "Strike Gold",
+  "cardType": "action",
+  "text": "When this hits, create a Gold token.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA232",
+  "name": "Trade In",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card. If you do, draw a card.\nIf this was played from arsenal, it gains go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA233",
+  "name": "Trade In",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card. If you do, draw a card.\nIf this was played from arsenal, it gains go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA234",
+  "name": "Trade In",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card. If you do, draw a card.\nIf this was played from arsenal, it gains go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA235",
+  "name": "Walk the Plank",
+  "cardType": "action",
+  "text": "When this hits a Pirate hero, {t} them or an ally they control.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA236",
+  "name": "Walk the Plank",
+  "cardType": "action",
+  "text": "When this hits a Pirate hero, {t} them or an ally they control.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA237",
+  "name": "Walk the Plank",
+  "cardType": "action",
+  "text": "When this hits a Pirate hero, {t} them or an ally they control.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA238",
+  "name": "Nimblism",
+  "cardType": "action",
+  "text": "The next attack action card with cost 1 or less you play this turn gains +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA239",
+  "name": "Nimblism",
+  "cardType": "action",
+  "text": "The next attack action card with cost 1 or less you play this turn gains +2{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA240",
+  "name": "Nimblism",
+  "cardType": "action",
+  "text": "The next attack action card with cost 1 or less you play this turn gains +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA241",
+  "name": "On the Horizon",
+  "cardType": "block",
+  "text": "When this defends, look at the top card of your deck.",
+  "pitch": 1,
+  "defense": 4,
+  "classes": [
+   "generic"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA242",
+  "name": "On the Horizon",
+  "cardType": "block",
+  "text": "When this defends, look at the top card of your deck.",
+  "pitch": 2,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA243",
+  "name": "On the Horizon",
+  "cardType": "block",
+  "text": "When this defends, look at the top card of your deck.",
+  "pitch": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA244",
+  "name": "Gold",
+  "cardType": "token",
+  "text": "Action - {r}{r}, destroy this: Draw a card. Go again",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA245",
+  "name": "Goldkiss Rum",
+  "cardType": "token",
+  "text": "Instant - {t} your hero, destroy this: Your next action this turn gets go again. Your hero can't {u} this turn unless they're a Pirate.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA246",
+  "name": "Cracked Bauble",
+  "cardType": "resource",
+  "text": "(A player may add any number of Cracked Baubles to their card-pool in sealed deck or booster draft formats.)",
+  "pitch": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA247",
+  "name": "Treasure Island",
+  "cardType": "token",
+  "text": "The first time a hero is attacked each turn, put a gold counter on this.\nWhenever you or an ally you control deals damage to an opposing hero, you remove that many gold counters from this, then create Gold tokens equal to the number of counters removed this way.",
+  "subtypes": [
+   "high seas",
+   "macro",
+   "landmark"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA248",
+  "name": "Codex of Frailty",
+  "cardType": "action",
+  "text": "Each hero puts an attack action card from their graveyard face down into their arsenal. Each hero that does, discards a card.\nCreate a Ponder token under your control and a Frailty token under each opponent's control.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA249",
+  "name": "Undercover Acquisition",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, steal an item they control.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth",
+   "Steal"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA250",
+  "name": "Bam Bam",
+  "cardType": "action",
+  "text": "When this hits a hero, destroy an item they control.\nInstant - Discard this: Your club attacks this turn get \"When this hits a hero, destroy an item they control.\"",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA251",
+  "name": "Surface Shaking",
+  "cardType": "action",
+  "text": "Go again\nWhen this enters the arena, create 3 Seismic Surge tokens.\nAt the beginning of your action phase, destroy this, then you may put up to X cards from your hand on the bottom of your deck, where X is the number of Seismic Surge tokens you control. Draw cards equal to the number of cards put on the bottom this way.",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA252",
+  "name": "Preach Modesty",
+  "cardType": "action",
+  "text": "This enters the arena with a balance counter. At the beginning of your action phase, destroy this unless you remove a balance counter from it.\nHero abilities can't create cards.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA253",
+  "name": "Escalate Bloodshed",
+  "cardType": "instant",
+  "text": "Whenever a hero draws a card during an action phase, they lose 1{h}.\nAt the beginning of each hero's action phase, they draw a card.\nAt the beginning of each hero's end phase, if a weapon did not attack this turn, destroy this.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA254",
+  "name": "Deny Redemption",
+  "cardType": "action",
+  "text": "When this attacks a hero with more {h} than you, deal 1 arcane damage to them. This damage can't be prevented.\nInstant - Discard this: Heroes can't gain {h} this turn.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA255",
+  "name": "Burn Bare",
+  "cardType": "action",
+  "text": "Deal 6 arcane damage to any target.\nInstant - Discard this: Destroy target card with phantasm that is attacking you.",
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA256",
+  "name": "Riddle with Regret",
+  "cardType": "action",
+  "text": "Go again\nAt the beginning of each hero's end phase, they lose X{h}, where X is the number of auras they controlled when this triggered. If X is 3 or more, destroy this.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "chaos"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA257",
+  "name": "Claw of Vynserakai",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nSpellvoid 1",
+  "attack": 1,
+  "subtypes": [
+   "draconic",
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Spellvoid 1"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA258",
+  "name": "Everbloom // Life",
+  "cardType": "instant",
+  "text": "Meld\nChoose an action card in a graveyard with cost less than the total {h} you've gained this turn. Put it on the bottom of its owner's deck.\nGo again\n//\nGain 1{h}",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Go again",
+   "Meld"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA259",
+  "name": "Consign to Cosmos // Shock",
+  "cardType": "instant",
+  "text": "Meld\nBanish X instant and/or aura cards from any graveyard, where X is the amount of arcane damage you've dealt this turn.\n//\nDeal 1 arcane damage to any target.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Meld"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA260",
+  "name": "Herald of Sekem",
+  "cardType": "action",
+  "text": "When this attacks, you may put a yellow card from your hand into your soul. If you do, deal 2 arcane damage to any target.\nPhantasm",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA261",
+  "name": "Arcane Compliance",
+  "cardType": "instant",
+  "text": "Until end of turn, effects can't increase arcane damage that target action card on the stack would deal.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "SEA"
+ },
+ {
+  "id": "SEA262",
+  "name": "Anka, Drag Under",
+  "cardType": "action",
+  "text": "Action - {r}, {t}: Attack\nInstant - {t}, discard a card with watery grave: The next time an opponent draws one or more cards this action phase, they discard a card.\nWatery Grave",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 3,
+  "set": "SEA"
+ },
+ {
+  "id": "SEA263",
+  "name": "Oysten, Heart of Gold",
+  "cardType": "action",
+  "text": "Action - {t}: Attack\nWhen this dies, create a Gold token.\nWatery Grave",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 1,
+  "set": "SEA"
+ },
+ {
+  "id": "SEA264",
+  "name": "Sawbones, Dock Hand",
+  "cardType": "action",
+  "text": "Action - {r}, {t}: Attack\nInstant - {t}: The next time you or a Pirate you control would be dealt damage this turn, prevent 1 of that damage.\nWatery Grave",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 6,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 2,
+  "set": "SEA"
+ }
+]

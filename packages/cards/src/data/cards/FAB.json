@@ -1,0 +1,6081 @@
+[
+ {
+  "id": "FAB001",
+  "name": "Fyendal's Spring Tunic",
+  "cardType": "equipment",
+  "text": "At the start of your turn, if this has fewer than 3 energy counters, you may put an energy counter on it.\nInstant - Remove 3 energy counters from this: Gain {r}\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB002",
+  "name": "Fyendal's Spring Tunic",
+  "cardType": "equipment",
+  "text": "At the start of your turn, if this has fewer than 3 energy counters, you may put an energy counter on it.\nInstant - Remove 3 energy counters from this: Gain {r}\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB003",
+  "name": "Scabskin Leathers",
+  "cardType": "equipment",
+  "text": "Once per turn Action - 0: Roll a 6 sided die. Gain action points equal to half the number rolled, rounded down.\nBattleworn",
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB004",
+  "name": "Tectonic Plating",
+  "cardType": "equipment",
+  "text": "Once per turn Action - {r}: Create a Seismic Surge aura token. Go again\nBattleworn",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB005",
+  "name": "Mask of Momentum",
+  "cardType": "equipment",
+  "text": "Once per Turn Effect - When an attack action card you control is the third or higher chain link in a row to hit, draw a card.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB006",
+  "name": "Braveforge Bracers",
+  "cardType": "equipment",
+  "text": "Once per turn Action - {r}: Your next weapon attack this turn gains +1{p}. Activate this ability only if a weapon you control has hit this turn. Go again\nBattleworn",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB007",
+  "name": "Arcanite Skullcap",
+  "cardType": "equipment",
+  "text": "If you have less {h} than your opponent, Arcanite Skullcap gains +1{d} and Arcane Barrier 3.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Arcane Barrier 3",
+   "Battleworn"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB008",
+  "name": "Teklo Foundry Heart",
+  "cardType": "equipment",
+  "text": "Once per Turn Action - {r}: Banish the top 2 cards of your deck. Gain {r} for each Mechanologist card banished this way. Activate this ability only if you've boosted this turn. Go again\nBattleworn",
+  "defense": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB009",
+  "name": "Skullbone Crosswrap",
+  "cardType": "equipment",
+  "text": "Once per Turn Action - Turn a face down card in your arsenal face up: Opt 1. Go again\nArcane Barrier 1\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Arcane Barrier 1",
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB010",
+  "name": "Grasp of the Arknight",
+  "cardType": "equipment",
+  "text": "Once per Turn Action - {r}{r}: Create a Runechant token. This ability costs an additional {r} to activate for each Runechant you control. Go again\nBattleworn",
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB011",
+  "name": "Storm Striders",
+  "cardType": "equipment",
+  "text": "Instant - {r}, destroy Storm Striders: You may play your next Wizard 'non-attack' action card this turn as though it were an instant.\nArcane Barrier 2",
+  "defense": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Arcane Barrier 2"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB012",
+  "name": "Energy Potion",
+  "cardType": "action",
+  "text": "Instant - Destroy this: Gain {r}{r}",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB013",
+  "name": "Potion of Strength",
+  "cardType": "action",
+  "text": "Action - Destroy this: Your next attack this turn gains +2{p}. Go again",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB014",
+  "name": "Timesnap Potion",
+  "cardType": "action",
+  "text": "Action - Destroy this: Gain 2 action points.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB015",
+  "name": "Scar for a Scar",
+  "cardType": "action",
+  "text": "When this is played, if you have less {h} than an opposing hero, it gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB016",
+  "name": "Crazy Brew",
+  "cardType": "action",
+  "text": "Action - Destroy this: Roll a 6 sided die. On;\n\n1 or 2 - Lose 2{h}. Go again\n3 or 4 - Gain 2{h}. Go again\n5 or 6 - Gain {r}{r}, gain 2 action points, and your next attack this turn gains +2{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB017",
+  "name": "Vestige of Sol",
+  "cardType": "equipment",
+  "text": "If a card has been put into your hero's soul this turn, whenever you pitch a Light card, instead gain that many {r} plus 1.\nBlade Break",
+  "defense": 1,
+  "subtypes": [
+   "light",
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB018",
+  "name": "Carrion Husk",
+  "cardType": "equipment",
+  "text": "If you defend with Carrion Husk, banish it when the combat chain closes.\nAt the start of your turn, if you have 13 or less {h}, banish Carrion Husk.\nBlood Debt",
+  "defense": 6,
+  "subtypes": [
+   "shadow",
+   "chest"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB019",
+  "name": "Phantasmal Footsteps",
+  "cardType": "equipment",
+  "text": "Once per turn, when an Illusionist attack action card you control is destroyed, you may pay {r}. If you do, gain 1 action point.\nWhenever this defends, you may pay {r}. If you do, its {d} becomes 1 until end of turn.\nWhen Phantasmal Footsteps is defending a non-Illusionist attack with 6 or more {p}, destroy it when the combat chain closes.",
+  "defense": 0,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB020",
+  "name": "Valiant Dynamo",
+  "cardType": "equipment",
+  "text": "At the beginning of your end phase, if you've attacked 2 or more times with weapons this turn, you may remove a -1{d} counter from this.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB021",
+  "name": "Blasmophet, the Soul Harvester",
+  "cardType": "token",
+  "text": "Once per Turn Action - 0: Attack\nWhenever Blasmophet attacks, you may banish a Shadow card from your hand. If you do, you may banish a card from the defending hero's soul.",
+  "attack": 6,
+  "subtypes": [
+   "shadow",
+   "demon",
+   "ally"
+  ],
+  "life": 6,
+  "set": "FAB"
+ },
+ {
+  "id": "FAB022",
+  "name": "Ursur, the Soul Reaper",
+  "cardType": "token",
+  "text": "Once per Turn Action - 0: Attack\nWhile Ursur is attacking a hero with 1 or more cards in their soul, the attack has go again.",
+  "attack": 6,
+  "subtypes": [
+   "shadow",
+   "demon",
+   "ally"
+  ],
+  "life": 6,
+  "set": "FAB"
+ },
+ {
+  "id": "FAB023",
+  "name": "Boneyard Marauder",
+  "cardType": "action",
+  "text": "As an additional cost to play Boneyard Marauder, banish 3 random cards from your graveyard.\nBlood Debt",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB024",
+  "name": "Fate Foreseen",
+  "cardType": "defense-reaction",
+  "text": "Opt 1",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 4,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Opt 1"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB025",
+  "name": "Parable of Humility",
+  "cardType": "instant",
+  "text": "Attack action cards your opponents control get -1{p} while attacking and defending.\nSpectra",
+  "pitch": 2,
+  "cost": 4,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "aura"
+  ],
+  "keywords": [
+   "Spectra"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB026",
+  "name": "Merciful Retribution",
+  "cardType": "instant",
+  "text": "Whenever an aura or attack action card you control is destroyed, deal 1 arcane damage to target hero. If it's a non-token Light card, put it into your soul.\nSpectra",
+  "pitch": 2,
+  "cost": 4,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "aura"
+  ],
+  "keywords": [
+   "Spectra"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB027",
+  "name": "Ode to Wrath",
+  "cardType": "instant",
+  "text": "Whenever a source you control deals damage to an opponent, they lose 1 {h}.\nIllusionist attack action cards you control get go again.\nSpectra",
+  "pitch": 2,
+  "cost": 4,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "aura"
+  ],
+  "keywords": [
+   "Spectra"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB028",
+  "name": "Herald of Judgment",
+  "cardType": "action",
+  "text": "Prism Specialization\nWhen this hits, put it into your hero's soul and the defending hero can't play cards from their banished zone during their next action phase.\nPhantasm",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Prism Specialization",
+   "Phantasm"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB029",
+  "name": "Herald of Protection",
+  "cardType": "action",
+  "text": "When this hits, put it into your soul and create a Spectral Shield token.\nPhantasm",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB030",
+  "name": "Herald of Protection",
+  "cardType": "action",
+  "text": "When this hits, put it into your soul and create a Spectral Shield token.\nPhantasm",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB031",
+  "name": "Herald of Protection",
+  "cardType": "action",
+  "text": "When this hits, put it into your soul and create a Spectral Shield token.\nPhantasm",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB032",
+  "name": "Herald of Rebirth",
+  "cardType": "action",
+  "text": "When this hits, put it into your hero's soul and put up to 1 card with phantasm from your graveyard on top of your deck.\nPhantasm",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB033",
+  "name": "Herald of Rebirth",
+  "cardType": "action",
+  "text": "When this hits, put it into your hero's soul and put up to 1 card with phantasm from your graveyard on top of your deck.\nPhantasm",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB034",
+  "name": "Herald of Rebirth",
+  "cardType": "action",
+  "text": "When this hits, put it into your hero's soul and put up to 1 card with phantasm from your graveyard on top of your deck.\nPhantasm",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB035",
+  "name": "Wartune Herald",
+  "cardType": "action",
+  "text": "When this hits, put it into your soul.\nPhantasm",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB036",
+  "name": "Wartune Herald",
+  "cardType": "action",
+  "text": "When this hits, put it into your soul.\nPhantasm",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB037",
+  "name": "Wartune Herald",
+  "cardType": "action",
+  "text": "When this hits, put it into your soul.\nPhantasm",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB038",
+  "name": "Ghostly Visit",
+  "cardType": "action",
+  "text": "You may play Ghostly Visit from your banished zone.\nBlood Debt",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB039",
+  "name": "Ghostly Visit",
+  "cardType": "action",
+  "text": "You may play Ghostly Visit from your banished zone.\nBlood Debt",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB040",
+  "name": "Ghostly Visit",
+  "cardType": "action",
+  "text": "You may play Ghostly Visit from your banished zone.\nBlood Debt",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 3,
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB041",
+  "name": "Blasmophet, the Soul Harvester",
+  "cardType": "token",
+  "text": "Once per Turn Action - 0: Attack\nWhenever Blasmophet attacks, you may banish a Shadow card from your hand. If you do, you may banish a card from the defending hero's soul.",
+  "attack": 6,
+  "subtypes": [
+   "shadow",
+   "demon",
+   "ally"
+  ],
+  "life": 6,
+  "set": "FAB"
+ },
+ {
+  "id": "FAB042",
+  "name": "Ursur, the Soul Reaper",
+  "cardType": "token",
+  "text": "Once per Turn Action - 0: Attack\nWhile Ursur is attacking a hero with 1 or more cards in their soul, the attack has go again.",
+  "attack": 6,
+  "subtypes": [
+   "shadow",
+   "demon",
+   "ally"
+  ],
+  "life": 6,
+  "set": "FAB"
+ },
+ {
+  "id": "FAB043",
+  "name": "The Librarian",
+  "cardType": "mentor",
+  "text": "While The Librarian is face down in arsenal, at the start of your turn, you may turn him face up.\nWhile The Librarian is face up in arsenal, once per turn when you create a Spectral Shield token, draw a card and put a lesson counter on The Librarian. Then if there are 3 or more lesson counters on him, banish him, search your deck for a specialization card, put it face up into arsenal, and shuffle.",
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB044",
+  "name": "Minerva Themis",
+  "cardType": "mentor",
+  "text": "While Minerva is face down in arsenal, at the start of your turn, you may turn her face up.\nWhile Minerva is face up in arsenal, 1H weapons you control have +1{p}. Whenever a weapon you control hits, put a lesson counter on Minerva. Then if there are 3 or more lesson counters on her, banish her, search your deck for a specialization card, put it face up into arsenal, and shuffle.",
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB045",
+  "name": "Lady Barthimont",
+  "cardType": "mentor",
+  "text": "While Barthimont is face down in arsenal, at the start of your turn, you may turn her face up.\nWhile Barthimont is face up in arsenal, whenever you play an attack action card, banish the top card of your deck. If the banished card has 6 or more {p}, the attack gains dominate and put a lesson counter on Barthimont. Then if there are 2 or more lesson counters on her, banish her, search your deck for a specialization card, put it face up into arsenal, and shuffle.",
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB046",
+  "name": "Lord Sutcliffe",
+  "cardType": "mentor",
+  "text": "While Sutcliffe is face down in arsenal, at the start of your turn, you may turn him face up.\nWhile Sutcliffe is face up in arsenal, whenever you play a 'non-attack' action card, deal 1 arcane damage to each hero and put a lesson counter on Sutcliffe for each damage dealt this way. Then if there are 3 or more lesson counters on him, banish him, search your deck for a specialization card, put it face up into arsenal, and shuffle.",
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB047",
+  "name": "Stir the Wildwood",
+  "cardType": "action",
+  "text": "Earth Fusion\nIf you have dealt arcane damage to an opposing hero this turn, Stir the Wildwood gains +2{p}.\nIf Stir the Wildwood was fused, it gains +2{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth Fusion"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB048",
+  "name": "Electrify",
+  "cardType": "action",
+  "text": "The next time an attack action card hits a hero this turn, it deals 1 damage to them.\nIf Electrify is played from arsenal, draw a card.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB049",
+  "name": "Rampart of the Ram's Head",
+  "cardType": "equipment",
+  "text": "Whenever you defend with Rampart of the Ram's Head, you may pay {r}. If you do, it gains +1{d} until end of turn.",
+  "defense": 0,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "off-hand"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB050",
+  "name": "New Horizon",
+  "cardType": "equipment",
+  "text": "If you have a face up card in your arsenal, you have an additional arsenal zone.\nWhen this is destroyed, destroy all cards in your arsenal.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB051",
+  "name": "Spellbound Creepers",
+  "cardType": "equipment",
+  "text": "Once per Turn Instant - {r}, put a bind counter on Spellbound Creepers: You may play your next 'non-attack' action card this turn as though it were an instant. Activate this ability only if you have attacked or defended with an attack action card this turn.\nAt the beginning of your end phase, destroy Spellbound Creepers unless you have dealt arcane damage equal to or greater than the number of bind counters on Spellbound Creepers.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB052",
+  "name": "Crown of Seeds",
+  "cardType": "equipment",
+  "text": "Once per Turn Instant - {r}, put a face down card from your arsenal on the bottom of your deck: Draw a card and prevent the next 1 damage that would be dealt to your hero this turn.",
+  "defense": 0,
+  "subtypes": [
+   "earth",
+   "head"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB053",
+  "name": "Heart of Ice",
+  "cardType": "equipment",
+  "text": "Once per Turn Action - {r}: Cards and activated abilities cost opposing heroes additional {r} this turn. Go again\nArcane Barrier 1\nBlade Break",
+  "defense": 1,
+  "subtypes": [
+   "ice",
+   "chest"
+  ],
+  "keywords": [
+   "Arcane Barrier 1",
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB054",
+  "name": "Shock Charmers",
+  "cardType": "equipment",
+  "text": "Instant - {r}{r}: The next time an attack action card you control hits a hero this turn, it deals 1 damage to them.\nSpellvoid 2",
+  "defense": 0,
+  "subtypes": [
+   "lightning",
+   "arms"
+  ],
+  "keywords": [
+   "Spellvoid 2"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB055",
+  "name": "Copper",
+  "cardType": "token",
+  "text": "Action - {r}{r}{r}{r}, destroy this: Draw a card. Go again",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB056",
+  "name": "Silver",
+  "cardType": "token",
+  "text": "Action - {r}{r}{r}, destroy Silver: Draw a card. Go again",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB057",
+  "name": "In the Swing",
+  "cardType": "attack-reaction",
+  "text": "Play this only if you've attacked 2 or more times with weapons this turn.\nTarget weapon attack gets +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB058",
+  "name": "Even Bigger Than That!",
+  "cardType": "instant",
+  "text": "Play Even Bigger Than That! only if you've dealt {p} this turn.\nOpt 3, then reveal the top card of your deck. If it has {p} greater than the amount of damage you've dealt this turn, create a Quicken token and draw a card.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Opt 3"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB059",
+  "name": "Even Bigger Than That!",
+  "cardType": "instant",
+  "text": "Play Even Bigger Than That! only if you've dealt {p} this turn.\nOpt 2, then reveal the top card of your deck. If it has {p} greater than the amount of damage you've dealt this turn, create a Quicken token and draw a card.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Opt 2"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB060",
+  "name": "Even Bigger Than That!",
+  "cardType": "instant",
+  "text": "Play Even Bigger Than That! only if you've dealt {p} this turn.\nOpt 1, then reveal the top card of your deck. If it has {p} greater than the amount of damage you've dealt this turn, create a Quicken token and draw a card.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Opt 1"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB061",
+  "name": "Anothos",
+  "cardType": "weapon",
+  "text": "Once per turn Action - {r}{r}{r}: Attack\nWhile there are 2 or more cards with cost 3 or greater in your pitch zone, Anothos has +2{p}.",
+  "attack": 4,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "hammer",
+   "2h"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB062",
+  "name": "Dawnblade",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nThe second time this hits each turn, put a +1{p} counter on it.\nAt the beginning of your end phase, if this hasn't hit this turn, remove all +1{p} counters from it.",
+  "attack": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "sword",
+   "2h"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB063",
+  "name": "Heartened Cross Strap",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: The next attack action card you play this turn costs {r}{r} less to play. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB064",
+  "name": "Goliath Gauntlet",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: The next attack action card with cost 2 or more you play this turn gets +2{p}. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB065",
+  "name": "Snapdragon Scalers",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy this: Target attack action card with cost 1 or less gets go again.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB066",
+  "name": "Talismanic Lens",
+  "cardType": "equipment",
+  "text": "Instant - Destroy Talismanic Lens: Opt 2",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB067",
+  "name": "Mage Master Boots",
+  "cardType": "equipment",
+  "text": "Action - {r}, destroy this: The next non-attack action card you play this turn gets go again. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB068",
+  "name": "Nullrune Hood",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB069",
+  "name": "Nullrune Robe",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB070",
+  "name": "Nullrune Gloves",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB071",
+  "name": "Nullrune Boots",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB072",
+  "name": "Ebon Fold",
+  "cardType": "equipment",
+  "text": "Instant - {r}, destroy Ebon Fold: Banish a card from your hand. If it's a Shadow card, draw a card.\nSpellvoid 2",
+  "defense": 0,
+  "subtypes": [
+   "shadow",
+   "head"
+  ],
+  "keywords": [
+   "Spellvoid 2"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB073",
+  "name": "Courage of Bladehold",
+  "cardType": "equipment",
+  "text": "Action - Destroy Courage of Bladehold: Your sword attacks cost {r} less this turn. Go again\nTemper",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB074",
+  "name": "Gambler's Gloves",
+  "cardType": "equipment",
+  "text": "If a hero would roll one or more 6 sided dice, instead after the roll you may destroy Gambler's Gloves. If you do, that hero rerolls all 6 sided dice rolled this way.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB075",
+  "name": "Voltaire, Strike Twice",
+  "cardType": "weapon",
+  "text": "Twice per Turn Instant - {r}: You may put an arrow card from your hand face up into an empty arsenal zone you control. If you do, choose 1;\n\nIt gains +1{p} until end of turn.\nIt gains go again until end of turn.",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "bow",
+   "2h"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB076",
+  "name": "Earthlore Bounty",
+  "cardType": "equipment",
+  "text": "Whenever you draw 1 or more cards from an action card effect, create that many Seismic Surge tokens.\nTemper",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB077",
+  "name": "Silver Palms",
+  "cardType": "equipment",
+  "text": "At the start of each other hero's turn, if they have less {h} than you, they may draw a card. If they do, you create a Silver token.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "merchant"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB078",
+  "name": "Stalagmite, Bastion of Isenloft",
+  "cardType": "equipment",
+  "text": "Whenever you defend with Stalagmite, create a Frostbite token under the attacking hero's control. Temper",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "ice",
+   "off-hand"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB079",
+  "name": "Mask of the Pouncing Lynx",
+  "cardType": "equipment",
+  "text": "When an attack action card you control hits, you may destroy Mask of the Pouncing Lynx. If you do, search your deck for an attack action card with 2 or less {p}, banish it, then shuffle. You may play it this turn.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB080",
+  "name": "Vexing Quillhand",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Create 2 Runechant tokens. Go again\nArcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB081",
+  "name": "Frostbite",
+  "cardType": "token",
+  "text": "Cards and abilities cost you an additional {r} to play or activate.\nAt the beginning of your end phase or when you play a card or activate an ability, destroy Frostbite.",
+  "subtypes": [
+   "elemental",
+   "aura"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB082",
+  "name": "Spectral Shield",
+  "cardType": "token",
+  "text": "Ward 1",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB083",
+  "name": "Tiger Stripe Shuko",
+  "cardType": "equipment",
+  "text": "The second attack action card with 2 or less base {p} you play each turn has +1{p} and \"Damage that would be dealt by this can't be prevented.\"\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB084",
+  "name": "Alluvion Constellas",
+  "cardType": "equipment",
+  "text": "The first time Alluvion Constellas prevents arcane damage each turn, if it has less than 4 energy counters, you may put an energy counter on it.\nInstant - Remove 2 energy counters from Alluvion Constellas: The next staff ability you activate this turn costs {r}{r}{r} less.\nArcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB085",
+  "name": "Ghostly Touch",
+  "cardType": "equipment",
+  "text": "Whenever an Illusionist attack you control is destroyed by phantasm, put a haunt counter on Ghostly Touch.\nOnce per Turn Action - Remove a haunt counter from Ghostly Touch: Until end of turn, this becomes an Illusionist ally with phantasm, base {p} and {h} equal to the number of haunt counters on it, and \"Once per Turn Action - {r}{r}{r}: Attack\". Go again",
+  "defense": 0,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB086",
+  "name": "Coronet Peak",
+  "cardType": "equipment",
+  "text": "Action - {r}{r}{r}: Target hero discards a card unless they pay {r}.\nBlade Break",
+  "defense": 2,
+  "subtypes": [
+   "ice",
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB087",
+  "name": "Flamescale Furnace",
+  "cardType": "equipment",
+  "text": "Once per Turn Instant - {r}: Gain {r} for each red card in your pitch zone. Activate this ability only if you've played a red card this turn.\nTemper",
+  "defense": 2,
+  "subtypes": [
+   "draconic",
+   "chest"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB088",
+  "name": "Crown of Providence",
+  "cardType": "equipment",
+  "text": "When you defend with Crown of Providence, you may put a card from your hand or arsenal on the bottom of your deck. If you do, draw a card.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB089",
+  "name": "Blaze Headlong",
+  "cardType": "action",
+  "text": "If you've played another red card this turn, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB090",
+  "name": "Sand Cover",
+  "cardType": "instant",
+  "text": "Target ash you control gains ward 4 until end of turn.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB091",
+  "name": "Breaking Point",
+  "cardType": "action",
+  "text": "Rupture - If Breaking Point is played as chain link 4 or higher, it has \"When this hits a hero, destroy all cards in their arsenal.\"",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Rupture"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB092",
+  "name": "Read the Ripples",
+  "cardType": "action",
+  "text": "At the beginning of your end phase, destroy Read the Ripples then opt 1 and draw a card.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Opt 1"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB093",
+  "name": "Brothers in Arms",
+  "cardType": "action",
+  "text": "When this defends, you may pay {r}. If you do, it gets +2{d}.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB095",
+  "name": "Romping Club",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nOnce per Turn Effect - When you discard a card with 6 or more {p}, Romping Club gains +1{p} until end of turn.",
+  "attack": 4,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "club",
+   "2h"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB096",
+  "name": "Death Dealer",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: If you have no cards in your arsenal, you may put an arrow card from your hand face up into your arsenal. If you do, draw a card. Go again",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "bow",
+   "2h"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB097",
+  "name": "Crucible of Aetherweave",
+  "cardType": "weapon",
+  "text": "Once per Turn Instant - {r}: The next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus 1.",
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "staff",
+   "2h"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB098",
+  "name": "Iris of Reality",
+  "cardType": "weapon",
+  "text": "During your action phase, Illusionist auras you control are weapons with 4{p} and Once per Turn Action - {r}{r}{r}: Attack. Go again",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "orb",
+   "2h"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB099",
+  "name": "Rosetta Thorn",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nWhenever you attack with Rosetta Thorn, if you've played an attack action card and a 'non-attack' action card this turn, deal 2 arcane damage to target hero.",
+  "attack": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "sword",
+   "2h"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB100",
+  "name": "Vest of the First Fist",
+  "cardType": "equipment",
+  "text": "When an attack action card you control hits, you may destroy Vest of the First Fist. If you do, gain {r}{r}.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB101",
+  "name": "Achilles Accelerator",
+  "cardType": "equipment",
+  "text": "Instant - Destroy Achilles Accelerator: Gain 1 action point. Activate this ability only if you have boosted this turn.\nArcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB102",
+  "name": "Bull's Eye Bracers",
+  "cardType": "equipment",
+  "text": "Action - Destroy Bull's Eye Bracers: If you have no cards in your arsenal, you may put an arrow card from your hand face up into your arsenal. It gains +1{p} until end of turn. Go again\nArcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB103",
+  "name": "Halo of Illumination",
+  "cardType": "equipment",
+  "text": "Instant - {r}, destroy Halo of Illumination: Put a card from your hand into your hero's soul. If it's a Light card, draw a card.\nSpellvoid 2",
+  "defense": 0,
+  "subtypes": [
+   "light",
+   "head"
+  ],
+  "keywords": [
+   "Spellvoid 2"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB105",
+  "name": "Coat of Frost",
+  "cardType": "equipment",
+  "text": "Action - Destroy Coat of Frost: Create a Frostbite token under target hero's control. Go again",
+  "defense": 0,
+  "subtypes": [
+   "ice",
+   "chest"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB106",
+  "name": "Bone Vizier",
+  "cardType": "equipment",
+  "text": "When Bone Vizier is destroyed, reveal the top card of your deck. If it has 6 or more {p}, put it on top of your deck. Otherwise, put it on the bottom.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB107",
+  "name": "Crater Fist",
+  "cardType": "equipment",
+  "text": "Action - {r}{r}{r}, destroy Crater Fist: Your attacks with crush gain +2{p} this turn. Go again\nTemper",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB108",
+  "name": "Metacarpus Node",
+  "cardType": "equipment",
+  "text": "Whenever you play a card with an effect that deals arcane damage, you may pay {r}. If you do, instead it deals that much arcane damage plus 1, and destroy Metacarpus Node at the beginning of the end phase.\nArcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB109",
+  "name": "Luminaris",
+  "cardType": "weapon",
+  "text": "During your action phase, Illusionist auras you control are weapons with 1 base {p} and \"Once per Turn Action - 0: Attack\"\nIf there is a yellow card in your pitch zone, your Illusionist attacks get go again.",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "scepter",
+   "2h"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB110",
+  "name": "Blacktek Whisperers",
+  "cardType": "equipment",
+  "text": "While Blacktek Whisperers is in your graveyard, at the start of your turn, you may destroy 2 Silvers you control. If you do, equip Blacktek Whisperers.\nAttack Reaction - Destroy Blacktek Whisperers: Target Assassin attack action card gains \"When this hits a hero, it gains go again.\"\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB111",
+  "name": "Crown of Dominion",
+  "cardType": "equipment",
+  "text": "Your hero is Royal.\nWhen you equip Crown of Dominion, create a Gold token.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB112",
+  "name": "Aether Quickening",
+  "cardType": "action",
+  "text": "Deal 4 arcane damage to target hero.\nSurge - If this deals more than 4 damage, it gets go again.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Surge",
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB113",
+  "name": "Aether Quickening",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to target hero.\nSurge - If this deals more than 3 damage, it gets go again.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Surge",
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB114",
+  "name": "Aether Quickening",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to target hero.\nSurge - If this deals more than 2 damage, it gets go again.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Surge",
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB115",
+  "name": "Sap",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to target hero.\nSurge - If this deals more than 3 damage to a hero, you may remove an energy counter from a permanent they control.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Surge"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB116",
+  "name": "Sap",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to target hero.\nSurge - If this deals more than 2 damage to a hero, you may remove an energy counter from a permanent they control.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Surge"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB117",
+  "name": "Sap",
+  "cardType": "action",
+  "text": "Deal 1 arcane damage to target hero.\nSurge - If this deals more than 1 damage to a hero, you may remove an energy counter from a permanent they control.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Surge"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB118",
+  "name": "Embodiment of Earth",
+  "cardType": "token",
+  "text": "'Non-attack' action cards you control have +1{d} while defending.\nAt the beginning of your action phase, destroy Embodiment of Earth.",
+  "subtypes": [
+   "elemental",
+   "aura"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB119",
+  "name": "Embodiment of Lightning",
+  "cardType": "token",
+  "text": "When you play an attack action card, destroy this, then the attack gets go again.",
+  "subtypes": [
+   "elemental",
+   "aura"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB120",
+  "name": "Soul Shackle",
+  "cardType": "token",
+  "text": "At the beginning of your action phase, banish the top card of your deck.",
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow",
+   "aura"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB121",
+  "name": "Gold",
+  "cardType": "token",
+  "text": "Action - {r}{r}, destroy this: Draw a card. Go again",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB122",
+  "name": "Regicide",
+  "cardType": "action",
+  "text": "Legendary Arakni Specialization\nWhen this hits a Royal hero, they lose the game.\nWhen the combat chain closes, you lose the game.\nRegicide can't be defended by cards with the same name as cards in the defending hero's banished zone.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Legendary",
+   "Arakni Specialization"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB123",
+  "name": "Redback Shroud",
+  "cardType": "equipment",
+  "text": "While Redback Shroud is in your graveyard, at the start of your turn, you may destroy 2 Silver you control. If you do, equip Redback Shroud.\nAttack Reaction - Destroy Redback Shroud: The next attack reaction card you play this turn costs {r} less to play.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB124",
+  "name": "Flick Knives",
+  "cardType": "equipment",
+  "text": "Once per Turn Attack Reaction - 0: Target dagger you control that isn't on the active chain link deals 1 damage to target hero. If damage is dealt this way, the dagger has hit. Destroy the dagger.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB125",
+  "name": "Trench of Sunken Treasure",
+  "cardType": "equipment",
+  "text": "Once per Turn Instant - Put a face down card from your arsenal on the bottom of your deck: Gain {r}\nArcane Barrier 1\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Arcane Barrier 1",
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB126",
+  "name": "Quiver of Abyssal Depths",
+  "cardType": "equipment",
+  "text": "Instant - {r}{r}{r}, destroy Quiver of Abyssal Depths: Shuffle up to 3 arrows with different names from your graveyard into your deck.",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "quiver"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB127",
+  "name": "Vambrace of Determination",
+  "cardType": "equipment",
+  "text": "Once per Turn Attack Reaction - {r}: The next prevention effect that prevents {p} damage this turn, prevents 1 less of that damage.\nWhen this defends, you may pay {r}. If you do, it gains +1{d} and blade break.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB128",
+  "name": "Toxicity",
+  "cardType": "action",
+  "text": "The next Assassin or Ranger attack action card you play this turn gains \"When this hits a hero, they lose 5{h}.\"\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB129",
+  "name": "Toxicity",
+  "cardType": "action",
+  "text": "The next Assassin or Ranger attack action card you play this turn gains \"When this hits a hero, they lose 4{h}.\"\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB130",
+  "name": "Toxicity",
+  "cardType": "action",
+  "text": "The next Assassin or Ranger attack action card you play this turn gains \"When this hits a hero, they lose 3{h}.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB131",
+  "name": "Peace of Mind",
+  "cardType": "instant",
+  "text": "The next time you would be dealt {p} damage, prevent 4 of that damage.\nCreate a Ponder token.",
+  "pitch": 1,
+  "cost": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB132",
+  "name": "Death Touch",
+  "cardType": "action",
+  "text": "Death Touch can't be played from hand.\nWhen this hits a hero, create a Frailty, Inertia, or Bloodrot Pox token under their control.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB133",
+  "name": "Bloodrot Pox",
+  "cardType": "token",
+  "text": "At the beginning of your end phase, destroy Bloodrot Pox, then it deals 2 damage to you unless you pay {r}{r}{r}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB134",
+  "name": "Frailty",
+  "cardType": "token",
+  "text": "Your attack action cards played from arsenal and weapon attacks have -1{p}.\nAt the beginning of your end phase destroy Frailty.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB135",
+  "name": "Inertia",
+  "cardType": "token",
+  "text": "At the beginning of your end phase, destroy Inertia, then put all cards from your hand and arsenal on the bottom of your deck.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB136",
+  "name": "Sigil of Solace",
+  "cardType": "instant",
+  "text": "Gain 3{h}",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB137",
+  "name": "Jubeel, Spellbane",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nWhenever this hits a hero and you don't control a Spellbane Aegis, create a Spellbane Aegis token.",
+  "attack": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "sword",
+   "2h"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB138",
+  "name": "Empyrean Rapture",
+  "cardType": "equipment",
+  "text": "If a card with Herald in its name has been put into your hero's soul during your turn, the first hero ability you activate that turn costs {r}{r} less to activate.\nOnce per Turn Instant - {r}: This gets ward 1 until end of turn.",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "chest"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB139",
+  "name": "Soulbond Resolve",
+  "cardType": "equipment",
+  "text": "When this defends, you may charge your hero's soul.\nThe first time you would be dealt damage each turn, if you've charged this turn, prevent 1 of that damage.\nTemper",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "chest"
+  ],
+  "keywords": [
+   "Charge",
+   "Temper"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB140",
+  "name": "Scowling Flesh Bag",
+  "cardType": "equipment",
+  "text": "When this defends, intimidate.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Intimidate",
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB141",
+  "name": "Ironsong Versus",
+  "cardType": "equipment",
+  "text": "Once per Turn Action - {r}: Your next sword attack this turn gets \"When this hits a hero, create a Courage token.\"  Go again\nTemper",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB142",
+  "name": "Dyadic Carapace",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 2\nTemper",
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Arcane Barrier 2",
+   "Temper"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB143",
+  "name": "Diadem of Dreamstate",
+  "cardType": "equipment",
+  "text": "Once per turn, when this or a non-token permanent you control with ward is destroyed, you may pay {r}. If you do, create a Ponder token.\nWard 2",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Ward 2"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB144",
+  "name": "Teklo Plasma Pistol",
+  "cardType": "weapon",
+  "text": "Action - Remove a steam counter from Teklo Plasma Pistol: Attack\nAction - {r}: If there are no steam counters on Teklo Plasma Pistol, put a steam counter on it. Go again",
+  "attack": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "pistol",
+   "2h"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB145",
+  "name": "Raydn, Duskbane",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - 0: Attack\nIf you've charged this turn, Raydn gains +3{p}.",
+  "attack": 0,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "sword",
+   "2h"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB146",
+  "name": "Arcane Lantern",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "off-hand"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB147",
+  "name": "Searing Emberblade",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nIf you control 2 or more Draconic chain links, this card's attacks get go again.",
+  "attack": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "sword",
+   "2h"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB148",
+  "name": "Breaking Scales",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy Breaking Scales: Target attack action card with combo gains +1{p}.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB149",
+  "name": "Aether Ironweave",
+  "cardType": "equipment",
+  "text": "Action - Destroy Aether Ironweave: Gain {r}{r}. Activate this ability only if you have played an attack action card and a 'non-attack' action card this turn. Go again\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB150",
+  "name": "Ironhide Gauntlet",
+  "cardType": "equipment",
+  "text": "When you defend with Ironhide Gauntlet, you may pay {r}. If you do, it gains +2{d} and \"When the combat chain closes, destroy Ironhide Gauntlet.\"",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB151",
+  "name": "Silken Form",
+  "cardType": "equipment",
+  "text": "Instant - Destroy Silken Form: Transform target ash you control into an Aether Ashwing.\nQuell 1",
+  "defense": 0,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "draconic",
+   "arms"
+  ],
+  "keywords": [
+   "Quell 1"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB152",
+  "name": "Runechant",
+  "cardType": "token",
+  "text": "When you play an attack action card or activate a weapon attack, destroy this and deal 1 arcane damage to target opposing hero.",
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB153",
+  "name": "Courage",
+  "cardType": "token",
+  "text": "When you play an attack action card or activate a weapon attack, destroy this and the attack gets +1{p}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB154",
+  "name": "Eloquence",
+  "cardType": "token",
+  "text": "When you play a non-attack action card, destroy this and the card gets go again.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB155",
+  "name": "Spellbane Aegis",
+  "cardType": "token",
+  "text": "Spellvoid 1",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Spellvoid 1"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB156",
+  "name": "Iris of Reality",
+  "cardType": "weapon",
+  "text": "During your action phase, Illusionist auras you control are weapons with 4{p} and Once per Turn Action - {r}{r}{r}: Attack. Go again",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "orb",
+   "2h"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB158",
+  "name": "Herald of Triumph",
+  "cardType": "action",
+  "text": "Attack action cards have -1{p} while defending this.\nWhen this hits, put it into your hero's soul.\nPhantasm",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB159",
+  "name": "Herald of Triumph",
+  "cardType": "action",
+  "text": "Attack action cards get -1{p} while defending this.\nWhen this hits, put it into your soul.\nPhantasm",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB160",
+  "name": "Herald of Triumph",
+  "cardType": "action",
+  "text": "Attack action cards get -1{p} while defending this.\nWhen this hits, put it into your soul.\nPhantasm",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB161",
+  "name": "Banneret of Courage",
+  "cardType": "action",
+  "text": "Solflare - When this is charged to your hero's soul, create a Courage token.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Solflare"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB162",
+  "name": "Banneret of Gallantry",
+  "cardType": "action",
+  "text": "Solflare - When this is charged to your hero's soul, create a Quicken token.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Solflare"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB163",
+  "name": "Banneret of Protection",
+  "cardType": "action",
+  "text": "Solflare - When this is charged to your hero's soul, create a Spellbane Aegis token.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Solflare"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB164",
+  "name": "Diabolic Offering",
+  "cardType": "action",
+  "text": "If a card with 6 ore more {p} has been put into your banished zone this turn, Daibolic Offering's {p} and {d} are 6, otherwise they are 0.\nBlood Debt",
+  "pitch": 3,
+  "cost": 1,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB165",
+  "name": "Diamond",
+  "cardType": "token",
+  "text": "Action - Destroy Diamond: Draw a card. Go again",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB166",
+  "name": "Luminaris, Celestial Fury",
+  "cardType": "weapon",
+  "text": "Once per Turn Instant - {r}{r}: Target angel attack or attack action card with Herald in its name gets go again.",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "scepter",
+   "2h"
+  ],
+  "keywords": [
+   "Instant",
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB167",
+  "name": "Flail of Agony",
+  "cardType": "weapon",
+  "text": "Vynnset Specialization\nOnce per Turn Action - {h}: Attack\nWhen this hits, create a Runechant token.",
+  "attack": 1,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow",
+   "flail",
+   "1h"
+  ],
+  "keywords": [
+   "Vynnset Specialization"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB168",
+  "name": "Shriek Razors",
+  "cardType": "equipment",
+  "text": "While this is in your graveyard, at the start of your turn, you may destroy 2 Silvers you control. If you do, equip this.\nAttack Reaction - {r}{r}, destroy this: Target attack action card defending an Assassin attack gets -1{d}.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB169",
+  "name": "Adaptive Plating",
+  "cardType": "equipment",
+  "text": "Modular\nAction - 0: Equip this to another equipment zone.\nGalvanize - When this defends, you may destroy an item you control. If you do, this gets +2{d} until end of turn.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "keywords": [
+   "Modular",
+   "Galvanize",
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB170",
+  "name": "Hyper-X3",
+  "cardType": "equipment",
+  "text": "Whenever you banish a Hyper Driver from boosting, put it under this.\nOnce per turn, when a Hyper Driver is put under this, if there are 3 or more Hyper Drivers under this, draw a card.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB171",
+  "name": "Warband of Bellona",
+  "cardType": "equipment",
+  "text": "Action - {r}{r}, destroy this: The next time you attack this turn, you may charge your hero's soul. If a yellow card is charged this way, draw a card. Go again\nTemper",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "head"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB172",
+  "name": "Meganetic Protocol",
+  "cardType": "action",
+  "text": "Evo Upgrade - The defending hero must defend this with X equipment they control with -1{d} counters if able, where X is the number of Evos you have equipped.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Evo Upgrade"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB173",
+  "name": "Pulsewave Protocol",
+  "cardType": "action",
+  "text": "Evo Upgrade - When this attacks a hero, they reveal X cards from their hand, where X is the number of Evos you have equipped. Choose an action card with {d} less than X, then add it to this chain link as a defending card.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Evo Upgrade"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB174",
+  "name": "Demolition Protocol",
+  "cardType": "action",
+  "text": "Evo Upgrade - When this attacks a hero, remove all steam counters from up to X equipment, items, and/or weapons they control, where X is the number of Evos you have equipped.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Evo Upgrade"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB175",
+  "name": "Apocalypse Automaton",
+  "cardType": "action",
+  "text": "Play this only if you have 1 or more Evos equipped.\nEvo Upgrade - This attacks up to X target opposing heroes, where X is the number of Evos you have equipped.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Evo Upgrade"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB176",
+  "name": "Hyper Driver",
+  "cardType": "token",
+  "text": "When this has no steam counters, destroy it.\nOnce per turn, when you boost a card, remove a steam counter from this and gain {r}.",
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB177",
+  "name": "Zero to Sixty",
+  "cardType": "action",
+  "text": "Boost",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB178",
+  "name": "Sigil of Solace",
+  "cardType": "instant",
+  "text": "Gain 3{h}",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB179",
+  "name": "Apex Bonebreaker",
+  "cardType": "equipment",
+  "text": "When this defends together with a card with 6 or more {p}, create a Might token.\nTemper",
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB180",
+  "name": "Aurum Aegis",
+  "cardType": "equipment",
+  "text": "Victor Specialization\nThis counts as a Gold.\nTemper",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "off-hand"
+  ],
+  "keywords": [
+   "Victor Specialization",
+   "Temper"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB181",
+  "name": "Gauntlets of Iron Will",
+  "cardType": "equipment",
+  "text": "When this defends, the next time an attack would gain {p} this chain link, instead it gains that much minus 1.\nTemper",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB182",
+  "name": "Grains of Bloodspill",
+  "cardType": "equipment",
+  "text": "Whenever a weapon attack you control hits, you may pay {r}. If you do, create a Vigor token. \nTemper",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB183",
+  "name": "Balance of Justice",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Draw a card. Activate this only if an opponent has drawn 2 or more cards this turn.\nGuardwell",
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB184",
+  "name": "Cintari Saber",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nWhenever Cintari Saber is defended by 1 or more attack action cards, it gains +1{p} until end of turn.",
+  "attack": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "sword",
+   "1h"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB185",
+  "name": "Cintari Saber",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nWhenever Cintari Saber is defended by 1 or more attack action cards, it gains +1{p} until end of turn.",
+  "attack": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "sword",
+   "1h"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB186",
+  "name": "Hexagore, the Death Hydra",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nWhenever you attack with Hexagore, it deals damage to you equal to 6 minus the number of cards with blood debt in your banished zone.",
+  "attack": 6,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "shadow",
+   "flail",
+   "2h"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB187",
+  "name": "Ragamuffin's Hat",
+  "cardType": "equipment",
+  "text": "Instant - Destroy Ragamuffin's Hat: Draw a card then put a card from your hand on the top or bottom of your deck. Activate this ability only if you have 1 card in hand.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB188",
+  "name": "Galvanic Bender",
+  "cardType": "equipment",
+  "text": "Material - While this is under a permanent, that permanent has +1{p}.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Material",
+   "Battleworn"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB189",
+  "name": "Boast",
+  "cardType": "block",
+  "text": "This gets +X{d} while defending, where X is twice the number of clashes you've won this turn.",
+  "pitch": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB190",
+  "name": "Ravenous Rabble",
+  "cardType": "action",
+  "text": "When this attacks, reveal the top card of your deck. This gets -X{p}, where X is the pitch value of the card revealed this way.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB191",
+  "name": "Cintari Sellsword",
+  "cardType": "token",
+  "text": "Once per Turn Action - {r}: Attack. Go again\nCintari Sellsword can only attack if you've attacked with a weapon this turn.",
+  "attack": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "mercenary",
+   "ally"
+  ],
+  "life": 2,
+  "set": "FAB"
+ },
+ {
+  "id": "FAB192",
+  "name": "Raise an Army",
+  "cardType": "action",
+  "text": "Kassai Specialization\nAs an additional cost to play this, destroy X Gold you control.\nCreate X Cintari Sellsword tokens.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Kassai Specialization",
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB193",
+  "name": "Runner Runner",
+  "cardType": "action",
+  "text": "When this attacks, if it has go again, create an Agility token.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB194",
+  "name": "Double Down",
+  "cardType": "action",
+  "text": "You may destroy a Gold you control rather than pay Double Down's {r} cost.\nThe next attack that wagers this turn gets +3{p} and overpower.\nIf a hero would create 1 or more tokens from a wager this turn, instead they create that many plus 1 of each of those tokens.\nGo again",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB195",
+  "name": "Talk a Big Game",
+  "cardType": "action",
+  "text": "Choose a number. The next time you deal that much or more {p} damage to a hero this turn, create that many Might tokens.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB196",
+  "name": "Wage Gold",
+  "cardType": "action",
+  "text": "Universal\nWhen this attacks a hero, you may wager a Gold token with them.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Universal",
+   "Wager"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB197",
+  "name": "Wage Gold",
+  "cardType": "action",
+  "text": "Universal\nWhen this attacks a hero, you may wager a Gold token with them.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Universal",
+   "Wager"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB198",
+  "name": "Wage Gold",
+  "cardType": "action",
+  "text": "Universal\nWhen this attacks a hero, you may wager a Gold token with them.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Universal",
+   "Wager"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB199",
+  "name": "Test of Strength",
+  "cardType": "block",
+  "text": "When this defends, clash with the attacking hero. The winner creates a Gold token.",
+  "pitch": 1,
+  "defense": 4,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB200",
+  "name": "Wrecker Romp",
+  "cardType": "action",
+  "text": "As an additional cost to play this, discard a random card.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB201",
+  "name": "Cintari Sellsword",
+  "cardType": "token",
+  "text": "Once per Turn Action - {r}: Attack. Go again\nCintari Sellsword can only attack if you've attacked with a weapon this turn.",
+  "attack": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "mercenary",
+   "ally"
+  ],
+  "life": 2,
+  "set": "FAB"
+ },
+ {
+  "id": "FAB202",
+  "name": "Performance Bonus",
+  "cardType": "action",
+  "text": "When this hits, create a Gold token.\nIf this was played from arsenal, it gets Go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB203",
+  "name": "Seismic Surge",
+  "cardType": "token",
+  "text": "At the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn costs {r} less to play.",
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB204",
+  "name": "Agility",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then your next attack this turn gets go again.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB205",
+  "name": "Might",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then your next attack this turn gets +1{p}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB206",
+  "name": "Vigor",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then gain {r}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB207",
+  "name": "Evo Command Center",
+  "cardType": "equipment",
+  "text": "If you have a base head equipped, transform it into this, then equip this.\nOnce per Turn Instant - Destroy a card under this: Your next weapon attack this turn gets \"When this hits, draw a card.\"\nBlade Break",
+  "pitch": 2,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "evo",
+   "head"
+  ],
+  "keywords": [
+   "Transform",
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB223",
+  "name": "Energy Potion",
+  "cardType": "action",
+  "text": "Instant - Destroy this: Gain {r}{r}",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB224",
+  "name": "Timesnap Potion",
+  "cardType": "action",
+  "text": "Action - Destroy this: Gain 2 action points.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB229",
+  "name": "Stonewall Gauntlet",
+  "cardType": "equipment",
+  "text": "When this defends an attack with {p} greater than its base, opposing attacks get -1{p} this combat chain.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB231",
+  "name": "Oasis Respite",
+  "cardType": "instant",
+  "text": "Prevent the next 4 damage that would be dealt to target hero this turn by a source of your choice. If they have less life than each other hero, they may gain 1{h}.",
+  "pitch": 1,
+  "cost": 1,
+  "classes": [
+   "generic"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB232",
+  "name": "Sacred Art: Undercurrent Desires",
+  "cardType": "instant",
+  "text": "Legendary\nIf you've played another blue card this turn, choose 3. Otherwise, choose 1;\n- Create a Fang Strike and Slither in your hand.\n- Banish up to 2 cards in an opposing hero's graveyard.\n- Transcend",
+  "pitch": 3,
+  "cost": 3,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "FAB",
+  "backId": "FAB232B"
+ },
+ {
+  "id": "FAB232B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB233",
+  "name": "Sacred Art: Jade Tiger Domain",
+  "cardType": "instant",
+  "text": "Legendary\nIf you've played another blue card this turn, choose 3. Otherwise, choose 1;\n- Create 2 Crouching Tigers in your hand.\n- Your Crouching Tigers get +1{p} this turn.\n- Transcend",
+  "pitch": 3,
+  "cost": 3,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "FAB",
+  "backId": "FAB233B"
+ },
+ {
+  "id": "FAB233B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB234",
+  "name": "Sacred Art: Immortal Lunar Shrine",
+  "cardType": "instant",
+  "text": "Legendary\nIf you've played another blue card this turn, choose 3. Otherwise, choose 1;\n- Create 2 Spectral Shield tokens.\n- Put a +1{p} counter on each aura with ward you control.\n- Transcend",
+  "pitch": 3,
+  "cost": 3,
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "FAB",
+  "backId": "FAB234B"
+ },
+ {
+  "id": "FAB234B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB235",
+  "name": "Battlefront Bastion",
+  "cardType": "action",
+  "text": "When this defends alone, prevent the next 1 damage that would be dealt to you this turn.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB236",
+  "name": "Battlefront Bastion",
+  "cardType": "action",
+  "text": "When this defends alone, prevent the next 1 damage that would be dealt to you this turn.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB237",
+  "name": "Battlefront Bastion",
+  "cardType": "action",
+  "text": "When this defends alone, prevent the next 1 damage that would be dealt to you this turn.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB238",
+  "name": "Big Blue Sky",
+  "cardType": "defense-reaction",
+  "text": "This gets +1{d} for each blue card you've pitched this turn.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "mystic"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB239",
+  "name": "Wide Blue Yonder",
+  "cardType": "attack-reaction",
+  "text": "Target attack gets +1{p} for each blue card you've pitched this turn.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "mystic"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB240",
+  "name": "Deep Blue Sea",
+  "cardType": "action",
+  "text": "This gets +1{p} for each blue card you've pitched this turn.",
+  "pitch": 3,
+  "cost": 4,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB241",
+  "name": "Flic Flak",
+  "cardType": "defense-reaction",
+  "text": "If the next card you defend with this turn is a card with combo, it gains +2{d}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 4,
+  "classes": [
+   "ninja"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB242",
+  "name": "Slither",
+  "cardType": "attack-reaction",
+  "text": "Ephemeral\nTarget attack action card gets go again.",
+  "cost": 0,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "keywords": [
+   "Ephemeral"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB243",
+  "name": "Fang Strike",
+  "cardType": "attack-reaction",
+  "text": "Ephemeral\nTarget attack action card gets +1{p}.",
+  "cost": 0,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "keywords": [
+   "Ephemeral"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB244",
+  "name": "Zen State",
+  "cardType": "token",
+  "text": "This enters the arena with a balance counter. At the beginning of your action phase, destroy this unless you remove a balance counter from it.\nIf you would be dealt damage, prevent 1 of that damage.",
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB245",
+  "name": "Nullrune Hood",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB246",
+  "name": "Nullrune Robe",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB247",
+  "name": "Nullrune Gloves",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB248",
+  "name": "Nullrune Boots",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB249",
+  "name": "Whelming Gustwave",
+  "cardType": "action",
+  "text": "Combo - If Surging Strike was the last attack this combat chain, Whelming Gustwave gains +1{p}, go again, and \"If this hits, draw a card.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB250",
+  "name": "Barkskin of the Millennium Tree",
+  "cardType": "equipment",
+  "text": "When this defends, if there are 4 or more Earth cards in your banished zone, create an Embodiment of Earth token.\nTemper",
+  "defense": 2,
+  "subtypes": [
+   "earth",
+   "chest"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB251",
+  "name": "Lightning Greaves",
+  "cardType": "equipment",
+  "text": "Instant - {r}, destroy this: Instant cards you play this turn get go again.\nArcane Barrier 1\nBattleworn",
+  "defense": 1,
+  "subtypes": [
+   "lightning",
+   "legs"
+  ],
+  "keywords": [
+   "Arcane Barrier 1",
+   "Battleworn"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB252",
+  "name": "Face Purgatory",
+  "cardType": "equipment",
+  "text": "When this defends together with an attack action card and a non-attack action card, the attacking hero discards a card and you draw a card.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB253",
+  "name": "Aether Bindings of the Third Age",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Until end of turn, whenever an aura permanent you control with Sigil in its name leaves the arena, amp 1.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB254",
+  "name": "Arcanite Fortress",
+  "cardType": "equipment",
+  "text": "This card's {d} is equal to the number of equipment you control with Arcanite in their name.\nSpellvoid X, where X is the number of equipment you control with Arcanite in their name.\nGuardwell",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Spellvoid X",
+   "Guardwell"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB255",
+  "name": "Dread Scythe",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}{r}: Attack\nWhenever you attack with Dread Scythe, deal 1 arcane damage to the defending hero.\nA hero dealt damage by Dread Scythe can't gain {h} during their next action phase.",
+  "attack": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "scythe",
+   "2h"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB256",
+  "name": "Time Skippers",
+  "cardType": "equipment",
+  "text": "Action - {r}{r}{r}, destroy this: Gain 2 action points.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB257",
+  "name": "Plume of Evergrowth",
+  "cardType": "equipment",
+  "text": "Instant - {r}{r}{r}, destroy Plume of Evergrowth: Return target Earth action card or Earth instant card from your graveyard to your hand.",
+  "defense": 0,
+  "subtypes": [
+   "earth",
+   "head"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB258",
+  "name": "Threadbare Tunic",
+  "cardType": "equipment",
+  "text": "Instant - Destroy Threadbare Tunic: Gain {r}. Activate this ability only if you have no cards in hand.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB259",
+  "name": "Wave of Reality",
+  "cardType": "equipment",
+  "text": "When Wave of Reality is destroyed, create a Spectral Shield token.\nWard 1",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB260",
+  "name": "Felling of the Crown",
+  "cardType": "action",
+  "text": "If there are 4 or more Earth cards in your banished zone, this gets +4{p}.\nDecompose - When this attacks, you may banish 2 Earth cards and an action card from your graveyard. If you do, each hero puts a card from their hand on the bottom of their deck.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 4,
+  "defense": 3,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "keywords": [
+   "Decompose"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB261",
+  "name": "Fyendal's Fighting Spirit",
+  "cardType": "action",
+  "text": "When this attacks or defends, if you have less {h} than an opposing hero, gain 1{h}.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB262",
+  "name": "Lightning Press",
+  "cardType": "instant",
+  "text": "Target attack action card with cost 1 or less gains +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB263",
+  "name": "Channel the Millennium Tree",
+  "cardType": "action",
+  "text": "Go again\nWhen this enters the arena and at the beginning of your action phase, amp 3.\nChannel Earth - At the beginning of your end phase, put a flow counter on this, then destroy it unless you put an Earth card from your pitch zone on the bottom of your deck for each flow counter on it.",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 3,
+  "subtypes": [
+   "earth",
+   "aura"
+  ],
+  "keywords": [
+   "Go again",
+   "Channel Earth",
+   "Amp 3"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB264",
+  "name": "Channel Lightning Valley",
+  "cardType": "instant",
+  "text": "The first time you deal damage to an opposing hero each turn, draw a card.\nChannel Lightning - At the beginning of your end phase, put a flow counter on this, then destroy it unless you put a Lightning card from your pitch zone on the bottom of your deck for each flow counter on it.",
+  "pitch": 2,
+  "cost": 0,
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Channel Lightning"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB265",
+  "name": "Runechant",
+  "cardType": "token",
+  "text": "When you play an attack action card or activate a weapon attack, destroy this and deal 1 arcane damage to target opposing hero.",
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB266",
+  "name": "Runechant",
+  "cardType": "token",
+  "text": "When you play an attack action card or activate a weapon attack, destroy this and deal 1 arcane damage to target opposing hero.",
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB267",
+  "name": "Germinate",
+  "cardType": "action",
+  "text": "Florian Specialization\nCreate a Runechant or Embodiment of Earth token. Repeat this process X more times.\nGain X+1{h}",
+  "pitch": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Florian Specialization"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB268",
+  "name": "Arc Lightning",
+  "cardType": "action",
+  "text": "Aurora Specialization\nWhenever you go again this turn, deal 1 arcane damage to any target.\nThe next action card you play this turn gets go again.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Aurora Specialization",
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB269",
+  "name": "Heartbeat of Candlehold",
+  "cardType": "action",
+  "text": "Verdance Specialization\nGain 1{h}. Gain 1{h}. Gain 1{h}.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Verdance Specialization",
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB270",
+  "name": "Sigil of Brilliance",
+  "cardType": "instant",
+  "text": "Oscilio Specialization\nAt the beginning of your action phase, destroy this.\nWhen this leaves the arena, draw a card.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Oscilio Specialization"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB271",
+  "name": "Hand Behind the Pen",
+  "cardType": "action",
+  "text": "When this hits a hero, turn a card in their arsenal face-up, then banish a non-attack action card from their arsenal.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB272",
+  "name": "Smash Up",
+  "cardType": "action",
+  "text": "When this hits a hero, turn a card in their arsenal face-up, then banish an attack action card from their arsenal.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB273",
+  "name": "Tongue Tied",
+  "cardType": "action",
+  "text": "When this hits a hero, turn a card in their arsenal face-up, then banish an instant card from their arsenal.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB274",
+  "name": "Sizzle",
+  "cardType": "action",
+  "text": "Your next Lightning or Elemental attack this turn gets +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB275",
+  "name": "Trip the Light Fantastic",
+  "cardType": "action",
+  "text": "Instant - Discard this: Prevent the next 2 damage that would be dealt to you this turn.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB277",
+  "name": "Glyph Overlay",
+  "cardType": "action",
+  "text": "Deal X+3 arcane damage to target hero, where X is the number of aura permanents you control with Sigil in their name.\nSurge - If this deals more than 3 damage, gain 1{h}, then shuffle all aura permanents you control with Sigil in their name into their owner's deck.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Surge"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB278",
+  "name": "Command and Conquer",
+  "cardType": "action",
+  "text": "Defense reaction cards can't be played this chain link. When this hits a hero, destroy all cards in their arsenal.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB279",
+  "name": "Gold",
+  "cardType": "token",
+  "text": "Action - {r}{r}, destroy this: Draw a card. Go again",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB280",
+  "name": "Might",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then your next attack this turn gets +1{p}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB281",
+  "name": "Quicken",
+  "cardType": "token",
+  "text": "When you play an attack action card or activate a weapon attack, destroy this and the attack gains go again.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB282",
+  "name": "Quicken",
+  "cardType": "token",
+  "text": "When you play an attack action card or activate a weapon attack, destroy this and the attack gains go again.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB283",
+  "name": "Runechant",
+  "cardType": "token",
+  "text": "When you play an attack action card or activate a weapon attack, destroy this and deal 1 arcane damage to target opposing hero.",
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB284",
+  "name": "Runechant",
+  "cardType": "token",
+  "text": "When you play an attack action card or activate a weapon attack, destroy this and deal 1 arcane damage to target opposing hero.",
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB285",
+  "name": "Spectral Shield",
+  "cardType": "token",
+  "text": "Ward 1",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB286",
+  "name": "Spectral Shield",
+  "cardType": "token",
+  "text": "Ward 1",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB287",
+  "name": "Spectral Shield",
+  "cardType": "token",
+  "text": "Ward 1",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB288",
+  "name": "Vigor",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then gain {r}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB290",
+  "name": "Dragonscaler Flight Path",
+  "cardType": "equipment",
+  "text": "Instant - {r}{r}{r}, destroy this: Target Draconic attack gets go again. If it's a weapon or ally attack, you may attack with it an additional time this turn. This ability costs {r} less to activate for each Draconic chain link you control.\nBattleworn",
+  "defense": 1,
+  "subtypes": [
+   "draconic",
+   "legs"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB291",
+  "name": "Mask of Deceit",
+  "cardType": "equipment",
+  "text": "Arakni Specialization\nWhen this defends, become a random Agent of Chaos. If the attacking hero is marked, instead choose the Agent of Chaos.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Arakni Specialization",
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB292",
+  "name": "Kabuto of Imperial Authority",
+  "cardType": "equipment",
+  "text": "When this defends, until end of turn, opponents can't attack with weapons.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB293",
+  "name": "Blood Splattered Vest",
+  "cardType": "equipment",
+  "text": "Whenever a dagger you control hits, you may gain {r} and put a stain counter on this. Then if there are 3 or more stain counters on this, destroy it.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB294",
+  "name": "Quickdodge Flexors",
+  "cardType": "equipment",
+  "text": "Defense Reaction - {r}: Add this to the active chain link as a defending card. It has 2 base {d} this chain link.\nAt the beginning of the end phase, if this defendend this turn, destroy it.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB305",
+  "name": "Imperial Seal of Command",
+  "cardType": "action",
+  "text": "Legendary\nAction - Destroy this: Defense reaction cards can't be played this turn. If you are Royal, the next time you hit a hero this turn, destroy all cards in their arsenal. Go again",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Legendary"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB306",
+  "name": "Unmovable",
+  "cardType": "defense-reaction",
+  "text": "If this was played from arsenal, it gets +1{d}.",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 7,
+  "classes": [
+   "generic"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB307",
+  "name": "Art of the Dragon: Blood",
+  "cardType": "action",
+  "text": "When this attacks, if it is Draconic, it gets go again and the next 3 Draconic cards you play this turn cost {r} less to play.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB308",
+  "name": "Art of the Dragon: Claw",
+  "cardType": "action",
+  "text": "When this attacks, if it is Draconic, it gets \"When this hits a hero, destroy all cards in their arsenal.\"",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB309",
+  "name": "Art of the Dragon: Fire",
+  "cardType": "action",
+  "text": "When this attacks, if it is Draconic, deal 2 damage to any target.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB310",
+  "name": "Art of the Dragon: Scale",
+  "cardType": "action",
+  "text": "When this attacks, if it is Draconic, it gets \"When this hits a hero, put a -1{d} counter on an equipment they control. Then if it has 0{d}, destroy it.\"",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB311",
+  "name": "Jagged Edge",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets +3{p} and \"Damage this would deal can't be prevented.\"",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB312",
+  "name": "Flurry Stance",
+  "cardType": "action",
+  "text": "Go again\nAt the start of your turn, destroy this, then you may attack with each dagger you control an additional time this turn.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB313",
+  "name": "Agility Stance",
+  "cardType": "action",
+  "text": "Go again\nAt the start of your turn, destroy this, then your dagger attacks get go again this turn.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB314",
+  "name": "Power Stance",
+  "cardType": "action",
+  "text": "Go again\nAt the start of your turn, destroy this, then your dagger attacks get +1{p} this turn.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB315",
+  "name": "Tarantula Toxin",
+  "cardType": "attack-reaction",
+  "text": "Choose 1 or both;\n\nTarget dagger attack gets +3{p}.\nTarget card defending an attack with stealth gets -3{d} this turn.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB316",
+  "name": "Blood Runs Deep",
+  "cardType": "action",
+  "text": "This costs {r} less to play for each Draconic chain link you control.\nWhen this attacks a hero, each dagger you control deals 1 damage to them. If damage is dealt this way, the dagger has hit. Destroy the daggers.\nGo again",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB317",
+  "name": "Long Whisker Loyalty",
+  "cardType": "attack-reaction",
+  "text": "For each Draconic chain link you control, choose 1;\n\nTarget dagger attack gains +2{p}.\nYou may attack with target dagger an additional time this turn.\nThe next time target dagger hits a hero this turn, mark them.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB318",
+  "name": "For the Dracai",
+  "cardType": "action",
+  "text": "When this attacks a marked hero, create a Fealty token.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB319",
+  "name": "For the Emperor",
+  "cardType": "action",
+  "text": "When this attacks a marked hero, create a Fealty token.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB320",
+  "name": "For the Realm",
+  "cardType": "action",
+  "text": "When this attacks a marked hero, create a Fealty token.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB321",
+  "name": "Compounding Anger",
+  "cardType": "action",
+  "text": "This costs {r} less to play for each Draconic chain link you control.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB322",
+  "name": "Stains of the Redback",
+  "cardType": "attack-reaction",
+  "text": "If the defending hero is marked, this costs {r} less to play.\nTarget attack with stealth gets +3{p} and go again.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB323",
+  "name": "Orb-Weaver Spinneret",
+  "cardType": "action",
+  "text": "Equip a Graphene Chelicera token.\nYour next attack with stealth this turn gets +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB324",
+  "name": "Spike with Bloodrot",
+  "cardType": "attack-reaction",
+  "text": "Target attack action card with stealth gains +3{p} and \"When this hits a hero, create a Bloodrot Pox token under their control.\"",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB325",
+  "name": "Put in Context",
+  "cardType": "defense-reaction",
+  "text": "This can only defend an attack with 3 or less base {p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB326",
+  "name": "Nip at the Heels",
+  "cardType": "attack-reaction",
+  "text": "Target attack with 3 or less base {p} gets +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB327",
+  "name": "Trot Along",
+  "cardType": "action",
+  "text": "Your next attack with 3 or less base {p} this turn gets go again.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB328",
+  "name": "Fault Line",
+  "cardType": "action",
+  "text": "If you have a card in your arsenal, this gets +1{p}.\nCrush - When this deals 4 or more damage to a hero, put all cards in all arsenals on bottom of their owner's deck.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB329",
+  "name": "Hostile Encroachment",
+  "cardType": "action",
+  "text": "When this attacks a hero, they draw a card.\nCrush - When this deals 4 or more damage to a hero, they discard a card.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB330",
+  "name": "Renounce Grandeur",
+  "cardType": "action",
+  "text": "If the defending hero controls an aura token, this gets +1{p}.\nCrush - When this deals 4 or more damage to a hero, they can't create aura tokens during their next turn.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB331",
+  "name": "Snatch",
+  "cardType": "action",
+  "text": "When this hits, draw a card.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB332",
+  "name": "Sink Below",
+  "cardType": "defense-reaction",
+  "text": "You may put a card from your hand on the bottom of your deck. If you do, draw a card.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 4,
+  "classes": [
+   "generic"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB333",
+  "name": "Marked",
+  "cardType": "token",
+  "text": "You are marked until an opponent hits you",
+  "keywords": [
+   "Mark"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB334",
+  "name": "Aether Crackers",
+  "cardType": "equipment",
+  "text": "When an attack you control hits a hero, you may destroy this. If you do, deal 1 arcane damage to them.",
+  "defense": 0,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB335",
+  "name": "Hard Knuckle",
+  "cardType": "equipment",
+  "text": "When you play an attack action card, you may destroy this. If you do, the attack gets +1{p}.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB336",
+  "name": "Cogwerx Tinker Rings",
+  "cardType": "equipment",
+  "text": "When this defends, create a Golden Cog token.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB337",
+  "name": "Dead Threads",
+  "cardType": "equipment",
+  "text": "Instant - {t}: Gain {r}. Activate this only if an ally has been put into your graveyard this turn.\nBlade Break",
+  "defense": 1,
+  "subtypes": [
+   "necromancer",
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB338",
+  "name": "Sealace Sarong",
+  "cardType": "equipment",
+  "text": "Instant - {t}, turn a blue arrow in your arsenal face-up: it gets go again this turn.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB339",
+  "name": "Gold-Baited Hook",
+  "cardType": "equipment",
+  "text": "Action - {t}: Your next Pirate attack this turn gets \"When this hits a hero, steal a Gold token they control, otherwise create a Gold token.\" At the beginning of your end phase, if you haven't created or stolen a Gold token this turn, destroy this. Go again\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB340",
+  "name": "Treasure Island",
+  "cardType": "token",
+  "text": "The first time a hero is attacked each turn, put a gold counter on this.\nWhenever you or an ally you control deals damage to an opposing hero, you remove that many gold counters from this, then create Gold tokens equal to the number of counters removed this way.",
+  "subtypes": [
+   "high seas",
+   "macro",
+   "landmark"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB341",
+  "name": "Sea Legs",
+  "cardType": "action",
+  "text": "When this is discarded, create a Goldkiss Rum token.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB342",
+  "name": "Gravekeeping",
+  "cardType": "action",
+  "text": "When this attacks a hero, you may banish a card from their graveyard.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB343",
+  "name": "Golden Skywarden",
+  "cardType": "action",
+  "text": "Galvanize - When this defends, you may destroy an item you control. If you do, this gets +1{d}. If a Golden Cog is destroyed this way, create a Gold token and repeat this process.",
+  "pitch": 2,
+  "cost": 4,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "pirate",
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Galvanize"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB344",
+  "name": "Chart the High Seas",
+  "cardType": "action",
+  "text": "Look at the top 2 cards of your deck. You may pitch a blue card from among them. Put the rest into your graveyard.\nCreate a Gold token for each yellow card put into your graveyard this way.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB345",
+  "name": "Big Game Trophy Shot",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gets +4{p}. If it has harpoon in its name, it gets \"When this hits a hero, create a Gold token.\"\nDraw a card, then discard a card.\nGo again",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "pirate",
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB346",
+  "name": "Gold",
+  "cardType": "token",
+  "text": "Action - {r}{r}, destroy this: Draw a card. Go again",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB347",
+  "name": "Board the Ship",
+  "cardType": "action",
+  "text": "When this attacks, you may {t} an ally you control. If you do, this gets overpower.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "keywords": [
+   "Overpower"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB348",
+  "name": "Paddle Faster",
+  "cardType": "action",
+  "text": "When this attacks, you may {t} an ally you control. If you do, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB349",
+  "name": "Hoist 'Em Up",
+  "cardType": "block",
+  "text": "When this defends, you may {t} an ally you control. If you do, this gets +1{d}.",
+  "pitch": 1,
+  "defense": 4,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB350",
+  "name": "Fool's Gold",
+  "cardType": "resource",
+  "text": "When this is discarded, create a Gold token.",
+  "pitch": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB351",
+  "name": "Copper Cog",
+  "cardType": "action",
+  "text": "Unlimited\nCrank\nThis enters the arena with 2 steam counters. At the start of your turn, destroy this unless you remove a steam counter from it.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "cog",
+   "item"
+  ],
+  "keywords": [
+   "Unlimited",
+   "Crank"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB352",
+  "name": "Captain's Call",
+  "cardType": "action",
+  "text": "Choose 1;\nThe next attack action card with cost 0 you play this turn gains +2{p}.\nThe next attack action card with cost 0 you play this turn gains go again.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB353",
+  "name": "Golden Cog",
+  "cardType": "token",
+  "text": "Crank\nThis enters the arena with a steam counter. At the start of your turn, destroy this unless you remove a steam counter from it.",
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "cog",
+   "item"
+  ],
+  "keywords": [
+   "Crank"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB354",
+  "name": "Goldkiss Rum",
+  "cardType": "token",
+  "text": "Instant - {t} your hero, destroy this: Your next action this turn gets go again. Your hero can't {u} this turn unless they're a Pirate.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB355",
+  "name": "Conqueror of the High Seas",
+  "cardType": "action",
+  "text": "When this hits a hero, destroy all cards in their arsenal. Create a Gold token for each card destroyed this way.\nHigh Tide - If there are 2 or more blue cards in your pitch zone, this gets +1{p} and go again.",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "High Tide",
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB356",
+  "name": "Looking for a Scrap",
+  "cardType": "action",
+  "text": "As an additional cost to play Looking for a Scrap, you may banish a card with 1{p} from your graveyard. When you do, this gains +1{p} and go again.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB359",
+  "name": "Sink Below",
+  "cardType": "defense-reaction",
+  "text": "You may put a card from your hand on the bottom of your deck. If you do, draw a card.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 4,
+  "classes": [
+   "generic"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB370",
+  "name": "Numbskull Charm",
+  "cardType": "instant",
+  "text": "Choose any number;\n- Destroy a Confidence or Might token.\n- The crowd cheers you.\n- Pitch the top card of your deck. If it has 6 or more {p}, create a Vigor token.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "revered"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB371",
+  "name": "Thespian Charm",
+  "cardType": "instant",
+  "text": "Choose any number;\n- Destroy a Might or Vigor token.\n- The crowd cheers you.\n- Return an aura permanent you control to its owner's hand.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB372",
+  "name": "Cheater's Charm",
+  "cardType": "instant",
+  "text": "Choose any number;\n- Steal a Confidence or Toughness token.\n- The crowd boos you.\n- If you control an attack with 6 or more {p}, deal 2 damage to target hero unless they discard a card.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "reviled"
+  ],
+  "keywords": [
+   "Steal",
+   "The Crowd Boos"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB373",
+  "name": "Liar's Charm",
+  "cardType": "instant",
+  "text": "Choose any number;\n- Steal a Toughness or Vigor token.\n- The crowd boos you.\n- Target hero loses and can't gain abilities this action phase unless they discard a card.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "reviled"
+  ],
+  "keywords": [
+   "Steal",
+   "The Crowd Boos"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB374",
+  "name": "Punch Above Your Weight",
+  "cardType": "action",
+  "text": "When this attacks, you may pay {r}{r}{r}. If you do, this gets +5{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB375",
+  "name": "Pummel",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target club or hammer weapon attack gains +4{p}.\n- Target attack action card with cost 2 or more gets +4{p} and \"When this hits a hero, they discard a card.\"",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB376",
+  "name": "Crowd Goes Wild",
+  "cardType": "action",
+  "text": "If you've been cheered this turn, this costs {r}{r}{r} less to play.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB377",
+  "name": "Comeback Kid",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you have less {h} than them, the crowd cheers you.\nIf you've been cheered this turn, this gets +1{p}.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB378",
+  "name": "Comeback Kid",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you have less {h} than them, the crowd cheers you.\nIf you've been cheered this turn, this gets +1{p}.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB379",
+  "name": "Comeback Kid",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you have less {h} than them, the crowd cheers you.\nIf you've been cheered this turn, this gets +1{p}.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB380",
+  "name": "Bully Tactics",
+  "cardType": "action",
+  "text": "When this attacks a hero, you may pay up to {r}{r}{r}. Intimidate them that many times.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB381",
+  "name": "Mocking Blow",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you have more {h} than them, the crowd boos you.\nIf you've been booed this turn, this gets +4{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Boos"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB382",
+  "name": "Mocking Blow",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you have more {h} than them, the crowd boos you.\nIf you've been booed this turn, this gets +3{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Boos"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB383",
+  "name": "Mocking Blow",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you have more {h} than them, the crowd boos you.\nIf you've been booed this turn, this gets +2{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Boos"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB384",
+  "name": "Dig In",
+  "cardType": "action",
+  "text": "When this defends, you may pay up to {r}{r}{r}. Create that many Toughness tokens.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB385",
+  "name": "Dig In",
+  "cardType": "action",
+  "text": "When this defends, you may pay up to {r}{r}{r}. Create that many Toughness tokens.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB386",
+  "name": "Dig In",
+  "cardType": "action",
+  "text": "When this defends, you may pay up to {r}{r}{r}. Create that many Toughness tokens.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB387",
+  "name": "Bask in Your Own Greatness",
+  "cardType": "action",
+  "text": "When this attacks, you may pay up to {r}{r}{r}. Create that many Might tokens.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB388",
+  "name": "Bask in Your Own Greatness",
+  "cardType": "action",
+  "text": "When this attacks, you may pay up to {r}{r}{r}. Create that many Might tokens.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB389",
+  "name": "Bask in Your Own Greatness",
+  "cardType": "action",
+  "text": "When this attacks, you may pay up to {r}{r}{r}. Create that many Might tokens.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB393",
+  "name": "Bait",
+  "cardType": "token",
+  "text": "You can't play or activate cards you own.\nAction - Destroy this when the chain link resolves: Attack\nOnce per Turn Attack Reaction - 0: This gets +1{p} and go again.",
+  "attack": 0,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB394",
+  "name": "Confidence",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then the next attack card you play this turn can't be defended by more than 2 non-block cards.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB395",
+  "name": "Toughness",
+  "cardType": "token",
+  "text": "At the start of your opponent's turn, destroy this, then the next action card you defend with this turn gets +1{d} this chain link.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB399",
+  "name": "Romping Club",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nOnce per Turn Effect - When you discard a card with 6 or more {p}, Romping Club gains +1{p} until end of turn.",
+  "attack": 4,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "club",
+   "2h"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB402",
+  "name": "Sigil of Fate",
+  "cardType": "token",
+  "text": "When this leaves the arena, opt 1.\nAt the beginning of your action phase, destroy this.",
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Opt 1"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB414",
+  "name": "Two-Faced",
+  "cardType": "equipment",
+  "text": "When this defends, the attacking hero draws a card, then look at their hand and choose a card. They discard the chosen card.",
+  "defense": 1,
+  "subtypes": [
+   "reviled",
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB425",
+  "name": "Elemental Strike",
+  "cardType": "action",
+  "text": "As an additional cost to play this, banish a card from your hand. If it's Earth, this gets +2{p}. Lightning, this gets go again. Ice, this gets dominate.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Dominate"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB426",
+  "name": "Colors of Aria",
+  "cardType": "action",
+  "text": "While this is face-up in any zone, it's Earth, Ice, and Lightning.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB427",
+  "name": "Frosthaven Sheath",
+  "cardType": "defense-reaction",
+  "text": "Ice Bond - If an Ice card was pitched to play this, create a Frostbite token under the attacking hero's control.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 5,
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Ice Bond"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB428",
+  "name": "Leaven Sheath",
+  "cardType": "defense-reaction",
+  "text": "Earth Bond - If an Earth card was pitched to play this, create an Embodiment of Earth token.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 5,
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Earth Bond"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB429",
+  "name": "Stormwind Sheath",
+  "cardType": "defense-reaction",
+  "text": "Lightning Bond - If a Lightning card was pitched to play this, create an Embodiment of Lightning token.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 5,
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Lightning Bond"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB464",
+  "name": "Cosmic Duality",
+  "cardType": "action",
+  "text": "Instant - {r}, discard this: Deal 1 arcane damage to target hero. Create a Lightning Flow token.\nFragment",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB465",
+  "name": "Nebula Duality",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to any target.\nInstant - {r}, discard this: Deal 1 arcane damage to target hero. Create a Lightning Flow token.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB466",
+  "name": "Voltbound Duality",
+  "cardType": "action",
+  "text": "Instant - {r}, discard this: Deal 1 arcane damage to target hero. Create a Lightning Flow token.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB467",
+  "name": "Omens of Arcana",
+  "cardType": "token",
+  "text": "Each hero starts the game with a Lightning Flow token.\nLightning Flow tokens get spellvoid 1.",
+  "subtypes": [
+   "omens of the third age",
+   "macro"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB469",
+  "name": "Astral Strike",
+  "cardType": "action",
+  "text": "When this attacks, if you've destroyed a Lightning Flow this turn, choose 1;\n- Draw a card.\n- This gets +2{p}.\n- This gets go again.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB470",
+  "name": "Lightning Flow",
+  "cardType": "token",
+  "text": "",
+  "subtypes": [
+   "elemental",
+   "aura"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB471",
+  "name": "Flowing Stormstrike",
+  "cardType": "action",
+  "text": "Twice per Turn Instant - {r}: This gets +1{p}.\nWhen this hits, create a Lightning Flow token.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB472",
+  "name": "Meteoric Rise",
+  "cardType": "action",
+  "text": "Twice per Turn Instant - {r}: This gets +1{p}.\nWhen this hits, create a Lightning Flow token.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB473",
+  "name": "Voltic Impact",
+  "cardType": "action",
+  "text": "Twice per Turn Instant - {r}: This gets +1{p}.\nWhen this hits, create a Lightning Flow token.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB475",
+  "name": "Razor Reflex",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target dagger or sword weapon attack gets +3{p}.\n- Target attack action card with cost 1 or less gets +3{p} and \"When this hits, it gets go again.\"",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB476",
+  "name": "Flowstate Embodiment",
+  "cardType": "action",
+  "text": "Whenever you play an instant card this chain link, create an Embodiment of Lightning or Lightning Flow token.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB477",
+  "name": "Runic Reaving",
+  "cardType": "action",
+  "text": "Usurp (As an additional cost to play this, destroy a Runechant if able. If you do, this gets +2{p}.)\nInstant - Discard this: Create a Runechant token.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Usurp"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB478",
+  "name": "Stormshard",
+  "cardType": "instant",
+  "text": "You may destroy a Lightning Flow you control rather than pay this card's {r} cost.\nTarget Lightning attack gets +3{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB481",
+  "name": "Golden Company",
+  "cardType": "defense-reaction",
+  "text": "You may destroy a Gold you control rather than pay this card's {r} cost.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 6,
+  "classes": [
+   "warrior"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB482",
+  "name": "Golden Company",
+  "cardType": "defense-reaction",
+  "text": "You may destroy a Gold you control rather than pay this card's {r} cost.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 6,
+  "classes": [
+   "warrior"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB483",
+  "name": "Golden Company",
+  "cardType": "defense-reaction",
+  "text": "You may destroy a Gold you control rather than pay this card's {r} cost.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 6,
+  "classes": [
+   "warrior"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB484",
+  "name": "Donkey",
+  "cardType": "attack-reaction",
+  "text": "Target sword attack gets +1{p} and wagers with the defending hero. The winner destroys a card in their own arsenal.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB485",
+  "name": "Downswing",
+  "cardType": "attack-reaction",
+  "text": "Target sword attack gets +1{p} and wagers with the defending hero. The winner loses 1{h}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB486",
+  "name": "Drawing Dead",
+  "cardType": "attack-reaction",
+  "text": "Target sword attack gets +1{p} and wagers with the defending hero. The winner discards a card.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB487",
+  "name": "Fate Foreseen",
+  "cardType": "defense-reaction",
+  "text": "Opt 1",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 4,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Opt 1"
+  ],
+  "set": "FAB"
+ },
+ {
+  "id": "FAB489",
+  "name": "Ponder",
+  "cardType": "token",
+  "text": "At the beginning of your end phase, destroy Ponder and draw a card.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "FAB"
+ }
+]

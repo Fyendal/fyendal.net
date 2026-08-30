@@ -1,0 +1,490 @@
+[
+ {
+  "id": "SBZ001",
+  "name": "Blaze, Firemind",
+  "cardType": "hero",
+  "text": "Whenever you opt, put energy counters on Blaze equal to the number of cards looked at this way.\nOnce per Turn Instant - Remove X energy counters from Blaze: Banish a Wizard non-attack action card from your hand with an effect that deals arcane damage equal to X. You may play it this turn as though it were an instant.",
+  "classes": [
+   "wizard"
+  ],
+  "life": 17,
+  "intellect": 4,
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ002",
+  "name": "Crucible of Aetherweave",
+  "cardType": "weapon",
+  "text": "Once per Turn Instant - {r}: The next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus 1.",
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "staff",
+   "2h"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ003",
+  "name": "Talismanic Lens",
+  "cardType": "equipment",
+  "text": "Instant - Destroy Talismanic Lens: Opt 2",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ004",
+  "name": "Spellfire Cloak",
+  "cardType": "equipment",
+  "text": "Instant - Destroy Spellfire Cloak: Gain {r}. Activate this ability only during an opponent's turn.\nArcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ005",
+  "name": "Blade Beckoner Gauntlets",
+  "cardType": "equipment",
+  "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ006",
+  "name": "Seeker's Mitts",
+  "cardType": "equipment",
+  "text": "Instant - {r}, destroy Seeker's Mitts: Prevent the next 1 damage that would be dealt to your hero this turn. Opt 1",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ007",
+  "name": "Aetherstorm Wellingtons",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 2",
+  "defense": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Arcane Barrier 2"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ008",
+  "name": "Blade Beckoner Boots",
+  "cardType": "equipment",
+  "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ009",
+  "name": "Fyendal's Fighting Spirit",
+  "cardType": "action",
+  "text": "When this attacks or defends, if you have less {h} than an opposing hero, gain 1{h}.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ010",
+  "name": "Look Tuff",
+  "cardType": "action",
+  "text": "When this attacks, it gets -1{p} unless you pay {r}.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ011",
+  "name": "Wounded Bull",
+  "cardType": "action",
+  "text": "When you play this, if you have less {h} than an opposing hero, this gains +1{p}.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ012",
+  "name": "Absorb in Aether",
+  "cardType": "defense-reaction",
+  "text": "The next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus 2.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 4,
+  "classes": [
+   "wizard"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ013",
+  "name": "Aether Spindle",
+  "cardType": "action",
+  "text": "Deal 4 arcane damage to target opposing hero.\nOpt X, where X is the damage dealt by Aether Spindle.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Opt X"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ014",
+  "name": "Cindering Foresight",
+  "cardType": "action",
+  "text": "If it's not your turn, you may play Cindering Foresight as though it were an instant.\nThe next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus 1.\nOpt 3",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Opt 3"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ015",
+  "name": "Emeritus Scolding",
+  "cardType": "action",
+  "text": "Deal 4 arcane damage to target hero. If Emeritus Scolding is played during an opponents turn, instead deal 6 arcane damage to them.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ016",
+  "name": "Snapback",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to target hero.\nIf you have played another Wizard 'non-attack' action card this turn, you may play Snapback as though it were an instant.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ017",
+  "name": "Turn to Mindfire",
+  "cardType": "action",
+  "text": "Deal 5 arcane damage to any target.\nIf this deals damage, you may {t} your hero. If you do, create a Ponder token.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ018",
+  "name": "Voltic Bolt",
+  "cardType": "action",
+  "text": "Deal 5 arcane damage to target hero.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ019",
+  "name": "Whisper of the Oracle",
+  "cardType": "action",
+  "text": "Opt 4\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Opt 4",
+   "Go again"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ020",
+  "name": "Arcane Polarity",
+  "cardType": "instant",
+  "text": "Gain 1{h}\nIf you've been dealt arcane damage this turn, instead gain 4{h}.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ021",
+  "name": "Cindering Foresight",
+  "cardType": "action",
+  "text": "If it's not your turn, you may play Cindering Foresight as though it were an instant.\nThe next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus 1.\nOpt 2",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Opt 2"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ022",
+  "name": "Emeritus Scolding",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to target hero. If Emeritus Scolding is played during an opponents turn, instead deal 5 arcane damage to them.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ023",
+  "name": "Whisper of the Oracle",
+  "cardType": "action",
+  "text": "Opt 3\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Opt 3",
+   "Go again"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ024",
+  "name": "Aether Quickening",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to target hero.\nSurge - If this deals more than 2 damage, it gets go again.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Surge",
+   "Go again"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ025",
+  "name": "Aether Spindle",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to target opposing hero.\nOpt X, where X is the damage dealt by Aether Spindle.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Opt X"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ026",
+  "name": "Arcane Twining",
+  "cardType": "action",
+  "text": "Deal 1 arcane damage to any target.\nInstant - Discard this: Amp 1",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ027",
+  "name": "Cindering Foresight",
+  "cardType": "action",
+  "text": "If it's not your turn, you may play Cindering Foresight as though it were an instant.\nThe next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus 1.\nOpt 1",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Opt 1"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ028",
+  "name": "Emeritus Scolding",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to target hero. If Emeritus Scolding is played during an opponents turn, instead deal 4 arcane damage to them.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ029",
+  "name": "Open the Flood Gates",
+  "cardType": "action",
+  "text": "Deal 1 arcane damage to target hero.\nSurge - If this deals more than 1 damage, draw 2 cards.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Surge"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ030",
+  "name": "Photon Splicing",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to any target.\nInstant - Discard this: Amp 1",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ031",
+  "name": "Voltic Bolt",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to target hero.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ032",
+  "name": "Whisper of the Oracle",
+  "cardType": "action",
+  "text": "Opt 2\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Opt 2",
+   "Go again"
+  ],
+  "set": "SBZ"
+ },
+ {
+  "id": "SBZ033",
+  "name": "Ponder",
+  "cardType": "token",
+  "text": "At the beginning of your end phase, destroy Ponder and draw a card.",
+  "classes": [
+   "generic"
+  ],
+  "set": "SBZ"
+ }
+]

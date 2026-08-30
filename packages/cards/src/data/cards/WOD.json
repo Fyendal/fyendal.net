@@ -1,0 +1,555 @@
+[
+ {
+  "id": "WOD001",
+  "name": "Arakni, Web of Deceit",
+  "cardType": "hero",
+  "text": "Your attacks with stealth that are attacking a marked hero get +1{p} and \"When this hits, this gets go again.\"\nAt the beginning of your end phase, if an opponent is marked, you become a random Agent of Chaos.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "WOD"
+ },
+ {
+  "id": "WOD002",
+  "name": "Mark of the Huntsman",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nWhen this hits a hero, you may choose to destroy this and mark them.\nIf this is attacking a marked hero, this gets +1{p}.",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Mark"
+  ],
+  "set": "WOD"
+ },
+ {
+  "id": "WOD003",
+  "name": "Leap Frog Vocal Sac",
+  "cardType": "equipment",
+  "text": "When an opponent plays or activates an attack reaction, you may add this to the active chain link as a defending card.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "WOD"
+ },
+ {
+  "id": "WOD004",
+  "name": "Red Alert Vest",
+  "cardType": "equipment",
+  "text": "If an attack reaction has been played or activated this chain link, this gets +1{d}.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "WOD"
+ },
+ {
+  "id": "WOD005",
+  "name": "Danger Digits",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy this: Target dagger you control that isn't on the active chain link deals 1 damage to the defending hero. If damage is dealt this way, the dagger has hit. Destroy the dagger.",
+  "defense": 0,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "WOD"
+ },
+ {
+  "id": "WOD006",
+  "name": "Starting Point",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy this: Target attack gets go again. Activate this only if you've played a card or activated an ability this reaction step.",
+  "defense": 0,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "WOD"
+ },
+ {
+  "id": "WOD007",
+  "name": "Back Stab",
+  "cardType": "action",
+  "text": "Stealth\nDefense reaction cards can't be played this chain link.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "WOD"
+ },
+ {
+  "id": "WOD008",
+  "name": "Bite",
+  "cardType": "action",
+  "text": "Stealth\nWhen this attacks a hero, you may have target dagger you control deal 1 damage to them. If damage is dealt this way, the dagger has hit. Destroy the dagger.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "WOD"
+ },
+ {
+  "id": "WOD009",
+  "name": "Mark of the Black Widow",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a marked hero, they banish a card from their hand.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "WOD"
+ },
+ {
+  "id": "WOD010",
+  "name": "Mark of the Funnel Web",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a marked hero, banish a card in their arsenal.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "WOD"
+ },
+ {
+  "id": "WOD011",
+  "name": "Reaper's Call",
+  "cardType": "action",
+  "text": "Stealth\nInstant - Discard this: Mark target opposing hero.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "WOD"
+ },
+ {
+  "id": "WOD012",
+  "name": "Tip-Off",
+  "cardType": "action",
+  "text": "Instant - Discard this: Mark target opposing hero.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WOD"
+ },
+ {
+  "id": "WOD013",
+  "name": "Razor's Edge",
+  "cardType": "attack-reaction",
+  "text": "Target attack action card with stealth gets +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "WOD"
+ },
+ {
+  "id": "WOD014",
+  "name": "Scar Tissue",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +3{p} and \"When this hits a hero, mark them.\"",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "set": "WOD"
+ },
+ {
+  "id": "WOD015",
+  "name": "Two Sides to the Blade",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target dagger attack gets +3{p}.\n- Target attack action card with stealth gets +3{p} and \"When this hits a hero, mark them.\"",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "WOD"
+ },
+ {
+  "id": "WOD016",
+  "name": "Den of the Spider",
+  "cardType": "defense-reaction",
+  "text": "When this defends an attack with {p} greater than its base, mark the attacking hero.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "WOD"
+ },
+ {
+  "id": "WOD017",
+  "name": "Lair of the Spider",
+  "cardType": "defense-reaction",
+  "text": "When this defends an attack with go again, mark the attacking hero.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "keywords": [
+   "Mark"
+  ],
+  "set": "WOD"
+ },
+ {
+  "id": "WOD018",
+  "name": "Orb-Weaver Spinneret",
+  "cardType": "action",
+  "text": "Equip a Graphene Chelicera token.\nYour next attack with stealth this turn gets +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WOD"
+ },
+ {
+  "id": "WOD019",
+  "name": "Reaper's Call",
+  "cardType": "action",
+  "text": "Stealth\nInstant - Discard this: Mark target opposing hero.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "WOD"
+ },
+ {
+  "id": "WOD020",
+  "name": "Mark of the Black Widow",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a marked hero, they banish a card from their hand.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "WOD"
+ },
+ {
+  "id": "WOD021",
+  "name": "Mark of the Funnel Web",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a marked hero, banish a card in their arsenal.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "WOD"
+ },
+ {
+  "id": "WOD022",
+  "name": "Reaper's Call",
+  "cardType": "action",
+  "text": "Stealth\nInstant - Discard this: Mark target opposing hero.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "WOD"
+ },
+ {
+  "id": "WOD023",
+  "name": "Whittle from Bone",
+  "cardType": "action",
+  "text": "Stealth\nWhen this attacks a marked hero, equip a Graphene Chelicera token.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "WOD"
+ },
+ {
+  "id": "WOD024",
+  "name": "Stains of the Redback",
+  "cardType": "attack-reaction",
+  "text": "If the defending hero is marked, this costs {r} less to play.\nTarget attack with stealth gets +1{p} and go again.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "WOD"
+ },
+ {
+  "id": "WOD025",
+  "name": "Take a Stab",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +1{p} and \"When this hits a marked hero, you may attack with it an additional time this turn.\"",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "set": "WOD"
+ },
+ {
+  "id": "WOD026",
+  "name": "Up Sticks and Run",
+  "cardType": "action",
+  "text": "You may retrieve a dagger from your graveyard.\nYour next dagger attack this turn gets +2{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "keywords": [
+   "Go again",
+   "Retrieve"
+  ],
+  "set": "WOD"
+ },
+ {
+  "id": "WOD027",
+  "name": "Arakni, Black Widow",
+  "cardType": "hero",
+  "text": "Once per Turn Attack Reaction - Discard an Assassin card: Target Assassin attack gets +3{p}. If it has stealth, it gets \"When this hits a hero, they banish a card from their hand.\"\nAt the beginning of your end phase, return to the brood.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "intellect": 4,
+  "set": "WOD"
+ },
+ {
+  "id": "WOD028",
+  "name": "Arakni, Funnel Web",
+  "cardType": "hero",
+  "text": "Once per Turn Attack Reaction - Discard an Assassin card: Target Assassin attack gets +3{p}. If it has stealth, it gets \"When this hits a hero, banish a card in their arsenal.\"\nAt the beginning of your end phase, return to the brood.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "intellect": 4,
+  "set": "WOD"
+ },
+ {
+  "id": "WOD029",
+  "name": "Arakni, Orb-Weaver",
+  "cardType": "hero",
+  "text": "Graphene Chelicerae cost you {r} less to activate.\nOnce per Turn Instant - Discard an Assassin card: Equip a Graphene Chelicera token. Your next attack with stealth this turn gets +3{p}.\nAt the beginning of your end phase, return to the brood.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "intellect": 4,
+  "set": "WOD"
+ },
+ {
+  "id": "WOD030",
+  "name": "Arakni, Redback",
+  "cardType": "hero",
+  "text": "Once per Turn Attack Reaction - Discard an Assassin card: Target Assassin attack gets +3{p}. If it has stealth, it gets go again.\nAt the beginning of your end phase, return to the brood.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "intellect": 4,
+  "set": "WOD"
+ },
+ {
+  "id": "WOD031",
+  "name": "Arakni, Tarantula",
+  "cardType": "hero",
+  "text": "Whenever a dagger you own hits a hero, they lose 1{h}.\nOnce per Turn Attack Reaction - Discard an Assassin card: Target dagger attack gets +3{p}.\nAt the beginning of your end phase, return to the brood.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "intellect": 4,
+  "set": "WOD"
+ },
+ {
+  "id": "WOD032",
+  "name": "Arakni, Trap-Door",
+  "cardType": "hero",
+  "text": "When you become this, you may search your deck for a card, banish it face-down, then shuffle. If it's a trap, you may play it until the start of your next turn.\nAt the beginning of your end phase, return to the brood.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "intellect": 4,
+  "set": "WOD"
+ },
+ {
+  "id": "WOD033",
+  "name": "Graphene Chelicera",
+  "cardType": "weapon",
+  "text": "Stealth\nOnce per Turn Action - {r}: Attack\nWhen this attacks a marked hero, the attack gets go again.",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Stealth",
+   "Go again"
+  ],
+  "set": "WOD"
+ },
+ {
+  "id": "WOD034",
+  "name": "Marked",
+  "cardType": "token",
+  "text": "You are marked until an opponent hits you",
+  "keywords": [
+   "Mark"
+  ],
+  "set": "WOD"
+ }
+]

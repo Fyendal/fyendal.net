@@ -1,0 +1,515 @@
+[
+ {
+  "id": "VIC001",
+  "name": "Victor Goldmane",
+  "cardType": "hero",
+  "text": "The first time each turn you create a Gold token from an effect you control, draw a card.\nThe first time each turn you would fail to win a clash, instead you may destroy a Gold you control. If you do, put 1 of the revealed cards on the bottom of its owner's deck, then clash again.",
+  "classes": [
+   "guardian"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "VIC"
+ },
+ {
+  "id": "VIC002",
+  "name": "Miller's Grindstone",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}{r}: Attack\nWhen this hits a hero, clash with them. If you win, destroy the top card of their deck. If they win, put a -1{p} counter on this.",
+  "attack": 4,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "hammer",
+   "1h"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC003",
+  "name": "Stonewall Impasse",
+  "cardType": "equipment",
+  "text": "When this defends, clash with the attacking hero. If you win, this gets +1{d} until end of turn.\nTemper",
+  "defense": 1,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "off-hand"
+  ],
+  "keywords": [
+   "Temper",
+   "Clash"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC004",
+  "name": "Golden Glare",
+  "cardType": "equipment",
+  "text": "Victor Specialization\nWhen this defends together with 2 or more yellow cards, create a Gold token.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Victor Specialization",
+   "Blade Break"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC005",
+  "name": "Vigor Girth",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Create a Vigor token. Go again\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC006",
+  "name": "Gauntlet of Might",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Create a Might token. Go again\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC007",
+  "name": "Stand Ground",
+  "cardType": "equipment",
+  "text": "If you control a Might token, this gets +1{d}.\nIf you control a Vigor token, this gets +1{d}.\nTemper",
+  "defense": 0,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC008",
+  "name": "Command Respect",
+  "cardType": "action",
+  "text": "When this hits a hero, if this has {p} greater than its base, destroy a card in their arsenal.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC009",
+  "name": "Concuss",
+  "cardType": "action",
+  "text": "When this hits a hero, if this has {p} greater than its base, they discard a card.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC010",
+  "name": "Rally the Rearguard",
+  "cardType": "action",
+  "text": "Once per Turn Instant - Discard a card: This gets +3{d}. Activate this ability only while this is defending.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC011",
+  "name": "Thunk",
+  "cardType": "action",
+  "text": "When you win a clash revealing this, create a Might token.",
+  "pitch": 1,
+  "cost": 5,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC012",
+  "name": "Test of Might",
+  "cardType": "block",
+  "text": "When this defends, clash with the attacking hero. The winner creates a Might token.",
+  "pitch": 1,
+  "defense": 4,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC013",
+  "name": "Test of Strength",
+  "cardType": "block",
+  "text": "When this defends, clash with the attacking hero. The winner creates a Gold token.",
+  "pitch": 1,
+  "defense": 4,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC014",
+  "name": "Test of Vigor",
+  "cardType": "block",
+  "text": "When this defends, clash with the attacking hero. The winner creates a Vigor token.",
+  "pitch": 1,
+  "defense": 4,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC015",
+  "name": "Mighty Windup",
+  "cardType": "action",
+  "text": "Instant - Discard this: Create a Might token.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC016",
+  "name": "Performance Bonus",
+  "cardType": "action",
+  "text": "When this hits, create a Gold token.\nIf this was played from arsenal, it gets go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC017",
+  "name": "Rally the Rearguard",
+  "cardType": "action",
+  "text": "Once per Turn Instant - Discard a card: This gets +3{d}. Activate this ability only while this is defending.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC018",
+  "name": "Thunk",
+  "cardType": "action",
+  "text": "When you win a clash revealing this, create a Might token.",
+  "pitch": 2,
+  "cost": 5,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC019",
+  "name": "Wallop",
+  "cardType": "action",
+  "text": "When you win a clash revealing this, create a Vigor token.",
+  "pitch": 2,
+  "cost": 4,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC020",
+  "name": "Clash of Might",
+  "cardType": "action",
+  "text": "When this defends, clash with the attacking hero. The winner creates a Might token.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC021",
+  "name": "Clash of Vigor",
+  "cardType": "action",
+  "text": "When this defends, clash with the attacking hero. The winner creates a Vigor token.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC022",
+  "name": "Command Respect",
+  "cardType": "action",
+  "text": "When this hits a hero, if this has {p} greater than its base, destroy a card in their arsenal.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC023",
+  "name": "Concuss",
+  "cardType": "action",
+  "text": "When this hits a hero, if this has {p} greater than its base, they discard a card.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC024",
+  "name": "Mighty Windup",
+  "cardType": "action",
+  "text": "Instant - Discard this: Create a Might token.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC025",
+  "name": "Thunk",
+  "cardType": "action",
+  "text": "When you win a clash revealing this, create a Might token.",
+  "pitch": 3,
+  "cost": 5,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC026",
+  "name": "Wallop",
+  "cardType": "action",
+  "text": "When you win a clash revealing this, create a Vigor token.",
+  "pitch": 3,
+  "cost": 4,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC027",
+  "name": "Performance Bonus",
+  "cardType": "action",
+  "text": "When this hits, create a Gold token.\nIf this was played from arsenal, it gets Go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC028",
+  "name": "Might",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then your next attack this turn gets +1{p}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC029",
+  "name": "Vigor",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then gain {r}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "VIC"
+ },
+ {
+  "id": "VIC030",
+  "name": "Gold",
+  "cardType": "token",
+  "text": "Action - {r}{r}, destroy this: Draw a card. Go again",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "VIC"
+ }
+]

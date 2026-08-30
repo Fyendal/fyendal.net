@@ -1,0 +1,312 @@
+[
+ {
+  "id": "BDD001",
+  "name": "Bravo, Flattering Showman",
+  "cardType": "hero",
+  "text": "Action - {r}{r}, {t}: Turn a face-down card in your arsenal face-up. If it has crush, it gets +2{p} and dominate this turn. Go again",
+  "classes": [
+   "guardian"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "BDD"
+ },
+ {
+  "id": "BDD003",
+  "name": "Ironrot Helm",
+  "cardType": "equipment",
+  "text": "Blade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "BDD"
+ },
+ {
+  "id": "BDD004",
+  "name": "Blossom of Spring",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Gain {r}. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "BDD"
+ },
+ {
+  "id": "BDD005",
+  "name": "Cracker Jax",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: The next attack action card you play this turn gets +1{p}. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "BDD"
+ },
+ {
+  "id": "BDD006",
+  "name": "Ironrot Legs",
+  "cardType": "equipment",
+  "text": "Blade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "BDD"
+ },
+ {
+  "id": "BDD007",
+  "name": "Debilitate",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, their first attack during their next turn gets -2{p}.",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "BDD"
+ },
+ {
+  "id": "BDD008",
+  "name": "Knock 'Em Off Their Feet",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, {t} them.",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "BDD"
+ },
+ {
+  "id": "BDD009",
+  "name": "Thunder Quake",
+  "cardType": "action",
+  "text": "Heave 3",
+  "pitch": 1,
+  "cost": 6,
+  "attack": 10,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Heave 3"
+  ],
+  "set": "BDD"
+ },
+ {
+  "id": "BDD010",
+  "name": "Crash Down",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy this, then the next Guardian attack action card you play this turn gets +6{p}.",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "BDD"
+ },
+ {
+  "id": "BDD011",
+  "name": "Buckling Blow",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, put a -1{d} counter on an equipment they control.",
+  "pitch": 2,
+  "cost": 4,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "BDD"
+ },
+ {
+  "id": "BDD012",
+  "name": "Clash of Mountains",
+  "cardType": "action",
+  "text": "When this defends a Guardian attack, clash with the attacking hero. The winner creates a Seismic Surge token.",
+  "pitch": 3,
+  "cost": 4,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "BDD"
+ },
+ {
+  "id": "BDD013",
+  "name": "Disable",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, put a card from their arsenal on the bottom of their deck.",
+  "pitch": 3,
+  "cost": 5,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "BDD"
+ },
+ {
+  "id": "BDD014",
+  "name": "Flatten the Field",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, destroy a Seismic Surge token they control.",
+  "pitch": 3,
+  "cost": 4,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "BDD"
+ },
+ {
+  "id": "BDD015",
+  "name": "Grind Them Down",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, destroy the top card of their deck.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "BDD"
+ },
+ {
+  "id": "BDD016",
+  "name": "Macho Grande",
+  "cardType": "action",
+  "text": "Dominate",
+  "pitch": 3,
+  "cost": 7,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Dominate"
+  ],
+  "set": "BDD"
+ },
+ {
+  "id": "BDD017",
+  "name": "Reinforce the Line",
+  "cardType": "instant",
+  "text": "Target defending attack action card gets +2{d}.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "BDD"
+ },
+ {
+  "id": "BDD018",
+  "name": "Crash and Bash",
+  "cardType": "block",
+  "text": "When this defends, you may reveal a card with crush from your hand. If you do, create a Seismic Surge token.",
+  "pitch": 3,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "set": "BDD"
+ },
+ {
+  "id": "BDD019",
+  "name": "Seismic Surge",
+  "cardType": "token",
+  "text": "At the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn costs {r} less to play.",
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "BDD"
+ }
+]

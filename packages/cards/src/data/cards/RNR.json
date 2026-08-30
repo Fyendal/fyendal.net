@@ -1,0 +1,519 @@
+[
+ {
+  "id": "RNR001",
+  "name": "Rhinar, Reckless Rampage",
+  "cardType": "hero",
+  "text": "Whenever you discard a card with 6 or more {p} during your action phase, intimidate.",
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "RNR"
+ },
+ {
+  "id": "RNR002",
+  "name": "Rhinar",
+  "cardType": "hero",
+  "text": "Whenever you discard a card with 6 or more {p} during your action phase, intimidate.",
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "RNR"
+ },
+ {
+  "id": "RNR003",
+  "name": "Romping Club",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nOnce per Turn Effect - When you discard a card with 6 or more {p}, Romping Club gains +1{p} until end of turn.",
+  "attack": 4,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "club",
+   "2h"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR004",
+  "name": "Ironrot Helm",
+  "cardType": "equipment",
+  "text": "Blade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR005",
+  "name": "Barkbone Strapping",
+  "cardType": "equipment",
+  "text": "Instant - Destroy Barkbone Strapping: Roll a 6 die. Gain {r} equal to half the number rolled, rounded down.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR006",
+  "name": "Ironrot Gauntlet",
+  "cardType": "equipment",
+  "text": "Blade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR007",
+  "name": "Snapdragon Scalers",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy this: Target attack action card with cost 1 or less gets go again.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR008",
+  "name": "Breakneck Battery",
+  "cardType": "action",
+  "text": "As an additional cost to play Breakneck Battery, discard a random card.\nIf the discarded card has 6 or more {p}, Breakneck Battery gains go again.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR009",
+  "name": "Pack Hunt",
+  "cardType": "action",
+  "text": "When this attacks, intimidate.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR010",
+  "name": "Savage Feast",
+  "cardType": "action",
+  "text": "As an additional cost to play Savage Feast discard a random card.\nWhen you attack with Savage Feast, if a card with 6 or more {p} was discarded as an additional cost to play it, draw a card.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR011",
+  "name": "Savage Swing",
+  "cardType": "action",
+  "text": "As an additional cost to play Savage Swing, discard a random card.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR012",
+  "name": "Smash Instinct",
+  "cardType": "action",
+  "text": "When this attacks, intimidate.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR013",
+  "name": "Wrecker Romp",
+  "cardType": "action",
+  "text": "As an additional cost to play this, discard a random card.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR014",
+  "name": "Awakening Bellow",
+  "cardType": "action",
+  "text": "The next Brute attack action card you play this turn gains +3{p}.\nIntimidate\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate",
+   "Go again"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR015",
+  "name": "Drone of Brutality",
+  "cardType": "action",
+  "text": "If Drone of Brutality would be put into your graveyard from anywhere, instead put it on the bottom of your deck.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR016",
+  "name": "Savage Swing",
+  "cardType": "action",
+  "text": "As an additional cost to play Savage Swing, discard a random card.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR017",
+  "name": "Smash Instinct",
+  "cardType": "action",
+  "text": "When this attacks, intimidate.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR018",
+  "name": "Barraging Beatdown",
+  "cardType": "action",
+  "text": "Your next Brute attack this turn gains \"While this attack is defended by less than 2 non-equipment cards, it has +3{p}.\"\nIntimidate\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate",
+   "Go again"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR019",
+  "name": "Barraging Brawnhide",
+  "cardType": "action",
+  "text": "While Barraging Brawnhide is defended by less than 2 non-equipment cards, it has +1{p}.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR020",
+  "name": "Raging Onslaught",
+  "cardType": "action",
+  "text": "",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR021",
+  "name": "Wounded Bull",
+  "cardType": "action",
+  "text": "When you play this, if you have less {h} than an opposing hero, this gains +1{p}.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR022",
+  "name": "Springboard Somersault",
+  "cardType": "defense-reaction",
+  "text": "If Springboard Somersault is played from arsenal, it gains +2{d}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR023",
+  "name": "Wrecker Romp",
+  "cardType": "action",
+  "text": "As an additional cost to play this, discard a random card.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR024",
+  "name": "Awakening Bellow",
+  "cardType": "action",
+  "text": "The next Brute attack action card you play this turn gains +1{p}.\nIntimidate\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate",
+   "Go again"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR025",
+  "name": "Barraging Beatdown",
+  "cardType": "action",
+  "text": "Your next Brute attack this turn gains \"While this attack is defended by less than 2 non-equipment cards, it has +2{p}.\"\nIntimidate\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate",
+   "Go again"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR026",
+  "name": "Primeval Bellow",
+  "cardType": "action",
+  "text": "As an additional cost to play Primeval Bellow, discard a random card.\nYour next Brute attack this turn gains +3{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR027",
+  "name": "Flock of the Feather Walkers",
+  "cardType": "action",
+  "text": "As an additional cost to play Flock of the Feather Walkers, reveal a card in your hand with cost 1 or less.\nWhen you attack with Flock of the Feather Walkers, create a Quicken token.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR028",
+  "name": "Scour the Battlescape",
+  "cardType": "action",
+  "text": "You may put a card from your hand on the bottom of your deck. If you do, draw a card.\nIf Scour the Battlescape is played from arsenal, it gains go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR029",
+  "name": "Timesnap Potion",
+  "cardType": "action",
+  "text": "Action - Destroy this: Gain 2 action points.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR030",
+  "name": "Sigil of Solace",
+  "cardType": "instant",
+  "text": "Gain 1{h}",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "RNR"
+ },
+ {
+  "id": "RNR031",
+  "name": "Quicken",
+  "cardType": "token",
+  "text": "When you play an attack action card or activate a weapon attack, destroy this and the attack gains go again.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "RNR"
+ }
+]

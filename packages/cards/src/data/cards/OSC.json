@@ -1,0 +1,438 @@
+[
+ {
+  "id": "OSC001",
+  "name": "Oscilio",
+  "cardType": "hero",
+  "text": "Once per Turn Instant - Discard an instant: Draw a card.\nEssence of Lightning",
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Essence of Lightning"
+  ],
+  "life": 18,
+  "intellect": 4,
+  "set": "OSC"
+ },
+ {
+  "id": "OSC002",
+  "name": "Volzar, the Lightning Rod",
+  "cardType": "weapon",
+  "text": "If you control an aura permanent with Sigil in its name, this costs {r} less to activate.\nOnce per Turn Instant - {r}: Amp X, where X is the number of Lightning cards you've played this turn.",
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning",
+   "staff",
+   "2h"
+  ],
+  "set": "OSC"
+ },
+ {
+  "id": "OSC003",
+  "name": "Flash of Brilliance",
+  "cardType": "equipment",
+  "text": "When this defends, you may discard a Lightning card. If you do, return an aura you control to its owner's hand.\nBlade Break",
+  "defense": 1,
+  "subtypes": [
+   "lightning",
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "OSC"
+ },
+ {
+  "id": "OSC004",
+  "name": "Ink-lined Cloak",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Gain {r}. Activate this only if you control an aura permanent with Sigil in its name.",
+  "defense": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "OSC"
+ },
+ {
+  "id": "OSC005",
+  "name": "Hold Focus",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Amp 1. Go again",
+  "defense": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "OSC"
+ },
+ {
+  "id": "OSC006",
+  "name": "Twinkle Toes",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Prevent the next 2 damage that would be dealt to you this turn. Activate this only if you've played an instant card this turn.",
+  "defense": 0,
+  "subtypes": [
+   "lightning",
+   "legs"
+  ],
+  "set": "OSC"
+ },
+ {
+  "id": "OSC007",
+  "name": "Blast to Oblivion",
+  "cardType": "action",
+  "text": "When this attacks, the next time you play an instant card this chain link, you may return target aura permanent with cost 1 or less or target aura token to it's owner's hand.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "OSC"
+ },
+ {
+  "id": "OSC008",
+  "name": "Flittering Charge",
+  "cardType": "action",
+  "text": "If you've played an instant card this chain link, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OSC"
+ },
+ {
+  "id": "OSC009",
+  "name": "Fry",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 0,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OSC"
+ },
+ {
+  "id": "OSC010",
+  "name": "Lightning Surge",
+  "cardType": "action",
+  "text": "If this was played from arsenal, it gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OSC"
+ },
+ {
+  "id": "OSC011",
+  "name": "Aether Quickening",
+  "cardType": "action",
+  "text": "Deal 4 arcane damage to target hero.\nSurge - If this deals more than 4 damage, it gets go again.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Surge",
+   "Go again"
+  ],
+  "set": "OSC"
+ },
+ {
+  "id": "OSC012",
+  "name": "Arcane Twining",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to any target.\nInstant - Discard this: Amp 1",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "OSC"
+ },
+ {
+  "id": "OSC013",
+  "name": "Comet Storm // Shock",
+  "cardType": "instant",
+  "text": "Meld\nDeal 5 arcane damage to any target.\n//\nDeal 1 arcane damage to any target.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Meld"
+  ],
+  "set": "OSC"
+ },
+ {
+  "id": "OSC014",
+  "name": "Etchings of Arcana",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to target hero.\nSurge - If this deals more than 3 damage, you may return an aura with Sigil in its name from your graveyard to your hand.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Surge"
+  ],
+  "set": "OSC"
+ },
+ {
+  "id": "OSC015",
+  "name": "Exploding Aether",
+  "cardType": "action",
+  "text": "Amp 3\nGo again",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Amp 3",
+   "Go again"
+  ],
+  "set": "OSC"
+ },
+ {
+  "id": "OSC016",
+  "name": "Flash",
+  "cardType": "action",
+  "text": "The next action card you play this turn with cost 0 or greater gets go again.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OSC"
+ },
+ {
+  "id": "OSC017",
+  "name": "Glyph Overlay",
+  "cardType": "action",
+  "text": "Deal X+3 arcane damage to target hero, where X is the number of aura permanents you control with Sigil in their name.\nSurge - If this deals more than 3 damage, gain 1{h}, then shuffle all aura permanents you control with Sigil in their name into their owner's deck.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Surge"
+  ],
+  "set": "OSC"
+ },
+ {
+  "id": "OSC018",
+  "name": "Photon Splicing",
+  "cardType": "action",
+  "text": "Deal 4 arcane damage to any target.\nInstant - Discard this: Amp 1",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "OSC"
+ },
+ {
+  "id": "OSC019",
+  "name": "Trailblazing Aether",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to target hero.\nSurge - If this deals more than 3 damage, it gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Surge"
+  ],
+  "set": "OSC"
+ },
+ {
+  "id": "OSC020",
+  "name": "Electrostatic Discharge",
+  "cardType": "instant",
+  "text": "The next attack action card you play this turn with cost 1 or less gets +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "OSC"
+ },
+ {
+  "id": "OSC021",
+  "name": "Etchings of Arcana",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to target hero.\nSurge - If this deals more than 2 damage, you may return an aura with Sigil in its name from your graveyard to your hand.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Surge"
+  ],
+  "set": "OSC"
+ },
+ {
+  "id": "OSC022",
+  "name": "Chorus of the Amphitheater",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to any target.\nInstant - Discard this: If an action or instant card you control would deal arcane damage this turn, instead it deals that much plus 1.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "set": "OSC"
+ },
+ {
+  "id": "OSC023",
+  "name": "Etchings of Arcana",
+  "cardType": "action",
+  "text": "Deal 1 arcane damage to target hero.\nSurge - If this deals more than 1 damage, you may return an aura with Sigil in its name from your graveyard to your hand.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Surge"
+  ],
+  "set": "OSC"
+ },
+ {
+  "id": "OSC024",
+  "name": "Sigil of Conductivity",
+  "cardType": "instant",
+  "text": "Arcane Shelter 1\nWhen this leaves the arena, create an Embodiment of Lightning token.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Arcane Shelter 1"
+  ],
+  "set": "OSC"
+ },
+ {
+  "id": "OSC025",
+  "name": "Sigil of Forethought",
+  "cardType": "instant",
+  "text": "At the beginning of your action phase, destroy this.\nWhen this leaves the arena, create a Ponder token.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "OSC"
+ },
+ {
+  "id": "OSC026",
+  "name": "Sigil of Lightning",
+  "cardType": "instant",
+  "text": "At the beginning of your action phase, destroy this.\nWhen this leaves the arena, create an Embodiment of Lightning token.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "set": "OSC"
+ },
+ {
+  "id": "OSC027",
+  "name": "Embodiment of Lightning",
+  "cardType": "token",
+  "text": "When you play an attack action card, destroy this, then the attack gets go again.",
+  "subtypes": [
+   "elemental",
+   "aura"
+  ],
+  "set": "OSC"
+ },
+ {
+  "id": "OSC028",
+  "name": "Sanctuary of Aria",
+  "cardType": "token",
+  "text": "Instant - {r}{r}: Prevent the next 1 damage that would be dealt to you this turn by a source of your choice. Destroy this at the beginning of the end phase.",
+  "subtypes": [
+   "rosetta",
+   "macro"
+  ],
+  "set": "OSC"
+ },
+ {
+  "id": "OSC029",
+  "name": "Ponder",
+  "cardType": "token",
+  "text": "At the beginning of your end phase, destroy Ponder and draw a card.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "OSC"
+ }
+]

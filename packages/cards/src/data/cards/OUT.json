@@ -1,0 +1,4178 @@
+[
+ {
+  "id": "OUT000",
+  "name": "Plague Hive",
+  "cardType": "resource",
+  "text": "Legendary\nWhen you pitch Plague Hive, for each opposing hero, choose Inertia, Frailty, or Bloodrot Pox at random and create that token under their control.",
+  "pitch": 2,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "subtypes": [
+   "gem"
+  ],
+  "keywords": [
+   "Legendary"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT001",
+  "name": "Uzuri, Switchblade",
+  "cardType": "hero",
+  "text": "Once per Turn Attack Reaction - Banish a card from your hand face down: Turn the card banished this way face up. If it's an attack action card with cost 2 or less, put target attacking card with stealth from the active chain link on the bottom of its owner's deck, then put the banished card onto the active chain link as the attacking card.",
+  "classes": [
+   "assassin"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "OUT"
+ },
+ {
+  "id": "OUT002",
+  "name": "Uzuri",
+  "cardType": "hero",
+  "text": "Once per Turn Attack Reaction - Banish a card from your hand face down: Turn the card banished this way face up. If it's an attack action card with cost 2 or less, put target attacking card with stealth from the active chain link on the bottom of its owner's deck, then put the banished card onto the active chain link as the attacking card.",
+  "classes": [
+   "assassin"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "OUT"
+ },
+ {
+  "id": "OUT003",
+  "name": "Arakni, Solitary Confinement",
+  "cardType": "hero",
+  "text": "Your first attack with stealth each turn has go again.",
+  "classes": [
+   "assassin"
+  ],
+  "life": 19,
+  "intellect": 4,
+  "set": "OUT"
+ },
+ {
+  "id": "OUT004",
+  "name": "Spider's Bite",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nPiercing 1\nWhen this hits a hero, the next time they defend with 1 or more attack action cards this turn, those cards have -1{d} while defending.",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Piercing 1"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT005",
+  "name": "Nerve Scalpel",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nPiercing 1\nWhen this hits a hero, the next time they defend with 1 or more reaction cards this turn, those cards have -1{d} while defending.",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Piercing 1"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT006",
+  "name": "Nerve Scalpel",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nPiercing 1\nWhen this hits a hero, the next time they defend with 1 or more reaction cards this turn, those cards have -1{d} while defending.",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Piercing 1"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT007",
+  "name": "Orbitoclast",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nPiercing 1\nWhen this hits a hero, the next time they defend with 1 or more 'non-attack' action cards this turn, those cards have -1{d} while defending.",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Piercing 1"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT008",
+  "name": "Orbitoclast",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nPiercing 1\nWhen this hits a hero, the next time they defend with 1 or more 'non-attack' action cards this turn, those cards have -1{d} while defending.",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Piercing 1"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT009",
+  "name": "Scale Peeler",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nPiercing 1\nWhen this hits a hero, the next time they defend with 1 or more equipment this turn, those equipment have -1{d} while defending.",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Piercing 1"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT010",
+  "name": "Scale Peeler",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nPiercing 1\nWhen this hits a hero, the next time they defend with 1 or more equipment this turn, those equipment have -1{d} while defending.",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Piercing 1"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT011",
+  "name": "Redback Shroud",
+  "cardType": "equipment",
+  "text": "While Redback Shroud is in your graveyard, at the start of your turn, you may destroy 2 Silver you control. If you do, equip Redback Shroud.\nAttack Reaction - Destroy Redback Shroud: The next attack reaction card you play this turn costs {r} less to play.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT012",
+  "name": "Infiltrate",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, banish the top card of their deck. You may play it until the end of your next turn.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT013",
+  "name": "Shake Down",
+  "cardType": "action",
+  "text": "Uzuri Specialization\nIf you've played or activated an attack reaction this chain link, Shake Down has \"When this hits a hero, choose red, yellow, or blue. They reveal their hand. Banish a card of the chosen color.\"",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Uzuri Specialization"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT014",
+  "name": "Spreading Plague",
+  "cardType": "attack-reaction",
+  "text": "Create X Bloodrot Pox tokens under the defending hero's control, where X is the number of defending cards this chain link.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT015",
+  "name": "Back Stab",
+  "cardType": "action",
+  "text": "Stealth\nDefense reaction cards can't be played this chain link.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT016",
+  "name": "Back Stab",
+  "cardType": "action",
+  "text": "Stealth\nDefense reaction cards can't be played this chain link.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT017",
+  "name": "Back Stab",
+  "cardType": "action",
+  "text": "Stealth\nDefense reaction cards can't be played this chain link.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT018",
+  "name": "Sneak Attack",
+  "cardType": "action",
+  "text": "If you've played or activated an attack reaction this chain link, Sneak Attack has +4{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT019",
+  "name": "Sneak Attack",
+  "cardType": "action",
+  "text": "If you've played or activated an attack reaction this chain link, Sneak Attack has +4{p}.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT020",
+  "name": "Sneak Attack",
+  "cardType": "action",
+  "text": "If you've played or activated an attack reaction this chain link, Sneak Attack has +4{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT021",
+  "name": "Spike with Bloodrot",
+  "cardType": "attack-reaction",
+  "text": "Target attack action card with stealth gains +3{p} and \"When this hits a hero, create a Bloodrot Pox token under their control.\"",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT022",
+  "name": "Spike with Frailty",
+  "cardType": "attack-reaction",
+  "text": "Target attack action card with stealth gains +3{p} and \"When this hits a hero, create a Frailty token under their control.\"",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT023",
+  "name": "Spike with Inertia",
+  "cardType": "attack-reaction",
+  "text": "Target attack action card with stealth gains +3{p} and \"When this hits a hero, create an Inertia token under their control.\"",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT024",
+  "name": "Infect",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, create a Bloodrot Pox token under their control.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT025",
+  "name": "Infect",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, create a Bloodrot Pox token under their control.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT026",
+  "name": "Infect",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, create a Bloodrot Pox token under their control.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT027",
+  "name": "Isolate",
+  "cardType": "action",
+  "text": "Stealth\nDominate",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth",
+   "Dominate"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT028",
+  "name": "Isolate",
+  "cardType": "action",
+  "text": "Stealth\nDominate",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth",
+   "Dominate"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT029",
+  "name": "Isolate",
+  "cardType": "action",
+  "text": "Stealth\nDominate",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth",
+   "Dominate"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT030",
+  "name": "Malign",
+  "cardType": "action",
+  "text": "Stealth\nDamage that would be dealt by Malign can't be prevented.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT031",
+  "name": "Malign",
+  "cardType": "action",
+  "text": "Stealth\nDamage that would be dealt by Malign can't be prevented.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT032",
+  "name": "Malign",
+  "cardType": "action",
+  "text": "Stealth\nDamage that would be dealt by Malign can't be prevented.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT033",
+  "name": "Prowl",
+  "cardType": "action",
+  "text": "Stealth\nThe next attack with stealth you play this combat chain gains +1{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT034",
+  "name": "Prowl",
+  "cardType": "action",
+  "text": "Stealth\nThe next attack with stealth you play this combat chain gains +1{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT035",
+  "name": "Prowl",
+  "cardType": "action",
+  "text": "Stealth\nThe next attack with stealth you play this combat chain gains +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT036",
+  "name": "Sedate",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, create an Inertia token under their control.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT037",
+  "name": "Sedate",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, create an Inertia token under their control.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT038",
+  "name": "Sedate",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, create an Inertia token under their control.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT039",
+  "name": "Wither",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, create a Frailty token under their control.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT040",
+  "name": "Wither",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, create a Frailty token under their control.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT041",
+  "name": "Wither",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, create a Frailty token under their control.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT042",
+  "name": "Razor's Edge",
+  "cardType": "attack-reaction",
+  "text": "Target attack action card with stealth gets +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT043",
+  "name": "Razor's Edge",
+  "cardType": "attack-reaction",
+  "text": "Target attack action card with stealth gets +2{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT044",
+  "name": "Razor's Edge",
+  "cardType": "attack-reaction",
+  "text": "Target attack action card with stealth gets +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT045",
+  "name": "Katsu, the Wanderer",
+  "cardType": "hero",
+  "text": "The first time an attack action card you control hits each turn, you may discard a card with cost 0. If you do, search your deck for a card with combo, banish it face up, then shuffle your deck. You may play it this turn.",
+  "classes": [
+   "ninja"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "OUT"
+ },
+ {
+  "id": "OUT046",
+  "name": "Katsu",
+  "cardType": "hero",
+  "text": "The first time an attack action card you control hits each turn, you may discard a card with cost 0. If you do, search your deck for a card with combo, banish it face up, then shuffle your deck. You may play it this turn.",
+  "classes": [
+   "ninja"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "OUT"
+ },
+ {
+  "id": "OUT047",
+  "name": "Benji, the Piercing Wind",
+  "cardType": "hero",
+  "text": "Your attack action cards with 2 or less {p} can't be defended by cards from hand.\nThe first time an attack action card you control hits each turn, your next attack gains +1{p}.",
+  "classes": [
+   "ninja"
+  ],
+  "life": 17,
+  "intellect": 4,
+  "set": "OUT"
+ },
+ {
+  "id": "OUT048",
+  "name": "Harmonized Kodachi",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nIf you have a card in your pitch zone with cost 0, this card's attacks get go again.",
+  "attack": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT049",
+  "name": "Mask of Many Faces",
+  "cardType": "equipment",
+  "text": "Instant - {r}, destroy Mask of Many Faces: Name a card. The next attack action card you play this turn gains that name.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT050",
+  "name": "Cyclone Roundhouse",
+  "cardType": "action",
+  "text": "Combo - If Spinning Wheel Kick was the last attack this combat chain, this has \"At the beginning of the reaction step, banish a random defending card from each chain link.\"",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT051",
+  "name": "Dishonor",
+  "cardType": "action",
+  "text": "Combo - If Bonds of Ancestry was the last attack this combat chain, this has +2{p}.\nWhen this hits a hero, if you control Surging Strike, Descendent Gustwave, and Bonds of Ancestry, that hero loses all abilities for the rest of the game.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT052",
+  "name": "Head Leads the Tail",
+  "cardType": "action",
+  "text": "When this attacks, name another card. Attack action cards with that name have +1{p} this combat chain.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT053",
+  "name": "Wander With Purpose",
+  "cardType": "action",
+  "text": "Benji Specialization\nWhen this hits, you may discard a card with cost 0. If you do, search your deck for a card with combo, banish it, then shuffle. You may play it this turn.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Benji Specialization",
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT054",
+  "name": "Silverwind Shuriken",
+  "cardType": "action",
+  "text": "Attack Reaction - Destroy Silverwind Shuriken: Target attack action card with combo gains +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "shuriken",
+   "item"
+  ],
+  "keywords": [
+   "Attack Reaction"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT055",
+  "name": "Visit the Floating Dojo",
+  "cardType": "instant",
+  "text": "Katsu Specialization\nPut a Surging Strike and a card with combo from your graveyard on the top and/or bottom of your deck.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "ninja"
+  ],
+  "keywords": [
+   "Katsu Specialization"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT056",
+  "name": "Bonds of Ancestry",
+  "cardType": "action",
+  "text": "Combo - If a card with Gustwave in its name was the last attack this combat chain, this costs {r}{r} less to play, and has go again and \"When this attacks, you may banish a card with combo from your graveyard. If you do, search your deck for a card with the same name, banish it, then shuffle. You may play it this combat chain.\"",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT057",
+  "name": "Bonds of Ancestry",
+  "cardType": "action",
+  "text": "Combo - If a card with Gustwave in its name was the last attack this combat chain, this costs {r}{r} less to play, and has go again and \"When this attacks, you may banish a card with combo from your graveyard. If you do, search your deck for a card with the same name, banish it, then shuffle. You may play it this combat chain.\"",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT058",
+  "name": "Bonds of Ancestry",
+  "cardType": "action",
+  "text": "Combo - If a card with Gustwave in its name was the last attack this combat chain, this costs {r}{r} less to play, and has go again and \"When this attacks, you may banish a card with combo from your graveyard. If you do, search your deck for a card with the same name, banish it, then shuffle. You may play it this combat chain.\"",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT059",
+  "name": "Recoil",
+  "cardType": "action",
+  "text": "Combo - If Head Jab was the last attack this combat chain, this has \"When this hits a hero, they put a card from their hand on top of their deck.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT060",
+  "name": "Recoil",
+  "cardType": "action",
+  "text": "Combo - If Head Jab was the last attack this combat chain, this has \"When this hits a hero, they put a card from their hand on top of their deck.\"",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT061",
+  "name": "Recoil",
+  "cardType": "action",
+  "text": "Combo - If Head Jab was the last attack this combat chain, this has \"When this hits a hero, they put a card from their hand on top of their deck.\"",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT062",
+  "name": "Spinning Wheel Kick",
+  "cardType": "action",
+  "text": "Combo - If Twin Twisters or Spinning Wheel Kick was the last attack this combat chain, this has +1{p} and \"When this hits, put it on the bottom of its owner's deck.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT063",
+  "name": "Spinning Wheel Kick",
+  "cardType": "action",
+  "text": "Combo - If Twin Twisters or Spinning Wheel Kick was the last attack this combat chain, this has +1{p} and \"When this hits, put it on the bottom of its owner's deck.\"\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT064",
+  "name": "Spinning Wheel Kick",
+  "cardType": "action",
+  "text": "Combo - If Twin Twisters or Spinning Wheel Kick was the last attack this combat chain, this has +1{p} and \"When this hits, put it on the bottom of its owner's deck.\"\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT065",
+  "name": "Back Heel Kick",
+  "cardType": "action",
+  "text": "Combo - If Twin Twisters was the last attack this combat chain, while this is face-up in any zone and would gain {p}, instead it gains that much plus 1.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT066",
+  "name": "Back Heel Kick",
+  "cardType": "action",
+  "text": "Combo - If Twin Twisters was the last attack this combat chain, while this is face-up in any zone and would gain {p}, instead it gains that much plus 1.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT067",
+  "name": "Back Heel Kick",
+  "cardType": "action",
+  "text": "Combo - If Twin Twisters was the last attack this combat chain, while this is face-up in any zone and would gain {p}, instead it gains that much plus 1.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT068",
+  "name": "Be Like Water",
+  "cardType": "action",
+  "text": "When this hits, you may pay {r}. If you do, choose Head Jab, Surging Strike, or Twin Twisters. This gains the chosen name.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT069",
+  "name": "Be Like Water",
+  "cardType": "action",
+  "text": "When this hits, you may pay {r}. If you do, choose Head Jab, Surging Strike, or Twin Twisters. This gains the chosen name.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT070",
+  "name": "Be Like Water",
+  "cardType": "action",
+  "text": "When this hits, you may pay {r}. If you do, choose Head Jab, Surging Strike, or Twin Twisters. This gains the chosen name.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT071",
+  "name": "Deadly Duo",
+  "cardType": "action",
+  "text": "When this hits, the next attack action card with 2 or less base {p} you play this combat chain gains +2 {p}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT072",
+  "name": "Deadly Duo",
+  "cardType": "action",
+  "text": "When this hits, the next attack action card with 2 or less base {p} you play this combat chain gains +2 {p}.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT073",
+  "name": "Deadly Duo",
+  "cardType": "action",
+  "text": "When this hits, the next attack action card with 2 or less base {p} you play this combat chain gains +2 {p}.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT074",
+  "name": "Descendent Gustwave",
+  "cardType": "action",
+  "text": "Combo - If Surging Strike was the last attack this combat chain, this costs {r} less to play and has +2{p}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT075",
+  "name": "Descendent Gustwave",
+  "cardType": "action",
+  "text": "Combo - If Surging Strike was the last attack this combat chain, this costs {r} less to play and has +2{p}.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT076",
+  "name": "Descendent Gustwave",
+  "cardType": "action",
+  "text": "Combo - If Surging Strike was the last attack this combat chain, this costs {r} less to play and has +2{p}.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT077",
+  "name": "Head Jab",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT078",
+  "name": "Head Jab",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT079",
+  "name": "Head Jab",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT080",
+  "name": "One-Two Punch",
+  "cardType": "action",
+  "text": "Combo - If Head Jab was the last attack this combat chain, this has \"When this hits a hero, deal 2 damage to them.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT081",
+  "name": "One-Two Punch",
+  "cardType": "action",
+  "text": "Combo - If Head Jab was the last attack this combat chain, this has \"When this hits a hero, deal 2 damage to them.\"",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT082",
+  "name": "One-Two Punch",
+  "cardType": "action",
+  "text": "Combo - If Head Jab was the last attack this combat chain, this has \"When this hits a hero, deal 2 damage to them.\"",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT083",
+  "name": "Surging Strike",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT084",
+  "name": "Surging Strike",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT085",
+  "name": "Surging Strike",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT086",
+  "name": "Twin Twisters",
+  "cardType": "action",
+  "text": "Choose 1:\n\nTwin Twisters gains \"When this hits, your next attack this combat chain gains +1{p}.\"\nTwin Twisters gains +1{p}.\n\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT087",
+  "name": "Twin Twisters",
+  "cardType": "action",
+  "text": "Choose 1:\n\nTwin Twisters gains \"When this hits, your next attack this combat chain gains +1{p}.\"\nTwin Twisters gains +1{p}.\n\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT088",
+  "name": "Twin Twisters",
+  "cardType": "action",
+  "text": "Choose 1:\n\nTwin Twisters gains \"When this hits, your next attack this combat chain gains +1{p}.\"\nTwin Twisters gains +1{p}.\n\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT089",
+  "name": "Azalea, Ace in the Hole",
+  "cardType": "hero",
+  "text": "Once per Turn Action - 0: Put a card from your arsenal on the bottom of your deck. If you do, put the top card of your deck face up into your arsenal. If it's an arrow card, it gains dominate until end of turn. Go again",
+  "classes": [
+   "ranger"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "OUT"
+ },
+ {
+  "id": "OUT090",
+  "name": "Azalea",
+  "cardType": "hero",
+  "text": "Once per Turn Action - 0: Put a card from your arsenal on the bottom of your deck. If you do, put the top card of your deck face up into your arsenal. If it's an arrow card, it gains dominate until end of turn. Go again",
+  "classes": [
+   "ranger"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "OUT"
+ },
+ {
+  "id": "OUT091",
+  "name": "Riptide, Lurker of the Deep",
+  "cardType": "hero",
+  "text": "Whenever you play a card from hand, you may put a card from hand face down into your arsenal.\nWhenever a trap you control triggers, deal 1 damage to the attacking hero.",
+  "classes": [
+   "ranger"
+  ],
+  "life": 38,
+  "intellect": 4,
+  "set": "OUT"
+ },
+ {
+  "id": "OUT092",
+  "name": "Riptide",
+  "cardType": "hero",
+  "text": "Whenever you play a card from hand, you may put a card from hand face down into your arsenal.\nWhenever a trap you control triggers, deal 1 damage to the attacking hero.",
+  "classes": [
+   "ranger"
+  ],
+  "life": 19,
+  "intellect": 4,
+  "set": "OUT"
+ },
+ {
+  "id": "OUT093",
+  "name": "Barbed Castaway",
+  "cardType": "weapon",
+  "text": "Once per Turn Instant - {r}: You may put an arrow card from your hand face up into your arsenal.\nOnce per Turn Instant - {r}: You may turn a face down arrow in your arsenal face up. If you do, put an aim counter on it.",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "bow",
+   "2h"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT094",
+  "name": "Trench of Sunken Treasure",
+  "cardType": "equipment",
+  "text": "Once per Turn Instant - Put a face down card from your arsenal on the bottom of your deck: Gain {r}\nArcane Barrier 1\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Arcane Barrier 1",
+   "Blade Break"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT095",
+  "name": "Quiver of Abyssal Depths",
+  "cardType": "equipment",
+  "text": "Instant - {r}{r}{r}, destroy Quiver of Abyssal Depths: Shuffle up to 3 arrows with different names from your graveyard into your deck.",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "quiver"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT096",
+  "name": "Quiver of Rustling Leaves",
+  "cardType": "equipment",
+  "text": "Instant - {r}{r}{r}: Reveal the top card of your deck. If it's an arrow, put it face up into your arsenal and destroy Quiver of Rustling Leaves.",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "quiver"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT097",
+  "name": "Crow's Nest",
+  "cardType": "equipment",
+  "text": "Azalea Specialization\nWhenever an arrow is put face up into your arsenal from your deck, you may pay {r}. If you do, put an aim counter on it.",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "quiver"
+  ],
+  "keywords": [
+   "Azalea Specialization"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT098",
+  "name": "Driftwood Quiver",
+  "cardType": "equipment",
+  "text": "Riptide Specialization\nInstant - Destroy Driftwood Quiver: Put a card from your arsenal on the bottom of your deck.",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "quiver"
+  ],
+  "keywords": [
+   "Riptide Specialization"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT099",
+  "name": "Wayfinder's Crest",
+  "cardType": "equipment",
+  "text": "When you defend with Wayfinder's Crest, look at the top card of target hero's deck.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT100",
+  "name": "Amplifying Arrow",
+  "cardType": "action",
+  "text": "While Amplifying Arrow is face up in any zone, if it would gain {p}, instead it gains that much plus 1.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT101",
+  "name": "Barbed Undertow",
+  "cardType": "action",
+  "text": "If Barbed Undertow has an aim counter, it gains \"When this hits a hero, choose red, yellow, or blue. Until the start of your next turn, they can't pitch cards of the chosen color.\"",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT102",
+  "name": "Buzzsaw Trap",
+  "cardType": "defense-reaction",
+  "text": "Legendary Riptide Specialization\nWhen this defends an attack with {p} greater than its base, the attack can't gain {p} this turn.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "keywords": [
+   "Legendary",
+   "Riptide Specialization"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT103",
+  "name": "Collapsing Trap",
+  "cardType": "defense-reaction",
+  "text": "Legendary Riptide Specialization\nWhen this defends an attack with go again, the attacking hero discards their hand then draws that many cards minus 1.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "keywords": [
+   "Legendary",
+   "Riptide Specialization"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT104",
+  "name": "Spike Pit Trap",
+  "cardType": "defense-reaction",
+  "text": "Legendary Riptide Specialization\nWhen this defends and the attacking hero has played or activated a reaction this chain link, put the top card of their deck into their graveyard, then they lose X{h}, where X is the number of cards in their graveyard with that name.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "keywords": [
+   "Legendary",
+   "Riptide Specialization"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT105",
+  "name": "Melting Point",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gains +4{p}.\nIf it has an aim counter, it gains \"When this hits a hero, destroy a 1H weapon they control with 1 base {p}.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT106",
+  "name": "Boulder Trap",
+  "cardType": "defense-reaction",
+  "text": "When this defends an attack with {p} greater than its base, put a -1{d} counter on an equipment the attacking hero controls.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT107",
+  "name": "Pendulum Trap",
+  "cardType": "defense-reaction",
+  "text": "When this defends and the attacking hero has played or activated a reaction this chain link, put the top 2 cards of their deck into their graveyard.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT108",
+  "name": "Tarpit Trap",
+  "cardType": "defense-reaction",
+  "text": "When this defends an attack with go again, the next time an attack action card hits this turn, effects don't trigger.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT109",
+  "name": "Fletch a Red Tail",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gains +4{p}.\nIf it has an aim counter, it gains \"Red cards have -1{d} while defending this.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT110",
+  "name": "Fletch a Yellow Tail",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gains +3{p}.\nIf it has an aim counter, it gains \"Yellow cards have -1{d} while defending this.\"\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT111",
+  "name": "Fletch a Blue Tail",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gains +2{p}.\nIf it has an aim counter, it gains \"Blue cards have -1{d} while defending this.\"\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT112",
+  "name": "Lace with Bloodrot",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gains +3{p} and \"When this hits a hero, create a Bloodrot Pox token under their control.\"\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT113",
+  "name": "Lace with Frailty",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gains +3{p} and \"When this hits a hero, create a Frailty token under their control.\"\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT114",
+  "name": "Lace with Inertia",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gains +3{p} and \"When this hits a hero, create an Inertia token under their control.\"\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT115",
+  "name": "Falcon Wing",
+  "cardType": "action",
+  "text": "If Falcon Wing has an aim counter, it has +1{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT116",
+  "name": "Falcon Wing",
+  "cardType": "action",
+  "text": "If Falcon Wing has an aim counter, it has +1{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT117",
+  "name": "Falcon Wing",
+  "cardType": "action",
+  "text": "If Falcon Wing has an aim counter, it has +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT118",
+  "name": "Infecting Shot",
+  "cardType": "action",
+  "text": "If Infecting Shot has an aim counter, it has +1{p}.\nWhen this hits a hero, create a Bloodrot Pox token under their control.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT119",
+  "name": "Infecting Shot",
+  "cardType": "action",
+  "text": "If Infecting Shot has an aim counter, it has +1{p}.\nWhen this hits a hero, create a Bloodrot Pox token under their control.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT120",
+  "name": "Infecting Shot",
+  "cardType": "action",
+  "text": "If Infecting Shot has an aim counter, it has +1{p}.\nWhen this hits a hero, create a Bloodrot Pox token under their control.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT121",
+  "name": "Murkmire Grapnel",
+  "cardType": "action",
+  "text": "If Murkmire Grapnel has an aim counter, it has +1{p}.\nDamage that would be dealt by Murkmire Grapnel can't be prevented.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT122",
+  "name": "Murkmire Grapnel",
+  "cardType": "action",
+  "text": "If Murkmire Grapnel has an aim counter, it has +1{p}.\nDamage that would be dealt by Murkmire Grapnel can't be prevented.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT123",
+  "name": "Murkmire Grapnel",
+  "cardType": "action",
+  "text": "If Murkmire Grapnel has an aim counter, it has +1{p}.\nDamage that would be dealt by Murkmire Grapnel can't be prevented.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT124",
+  "name": "Sedation Shot",
+  "cardType": "action",
+  "text": "If Sedation Shot has an aim counter, it has +1{p}.\nWhen this hits a hero, create an Inertia token under their control.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT125",
+  "name": "Sedation Shot",
+  "cardType": "action",
+  "text": "If Sedation Shot has an aim counter, it has +1{p}.\nWhen this hits a hero, create an Inertia token under their control.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT126",
+  "name": "Sedation Shot",
+  "cardType": "action",
+  "text": "If Sedation Shot has an aim counter, it has +1{p}.\nWhen this hits a hero, create an Inertia token under their control.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT127",
+  "name": "Skybound Shot",
+  "cardType": "action",
+  "text": "If Skybound Shot has an aim counter, it has +1{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT128",
+  "name": "Skybound Shot",
+  "cardType": "action",
+  "text": "If Skybound Shot has an aim counter, it has +1{p}.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT129",
+  "name": "Skybound Shot",
+  "cardType": "action",
+  "text": "If Skybound Shot has an aim counter, it has +1{p}.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT130",
+  "name": "Spire Sniping",
+  "cardType": "action",
+  "text": "When Spire Sniping is put or turned face up in arsenal, look at the top 2 cards of your deck, then put them back in any order.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT131",
+  "name": "Spire Sniping",
+  "cardType": "action",
+  "text": "When Spire Sniping is put or turned face up in arsenal, look at the top 2 cards of your deck, then put them back in any order.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT132",
+  "name": "Spire Sniping",
+  "cardType": "action",
+  "text": "When Spire Sniping is put or turned face up in arsenal, look at the top 2 cards of your deck, then put them back in any order.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT133",
+  "name": "Widowmaker",
+  "cardType": "action",
+  "text": "Defense reactions can't be played to Widowmaker's chain link.\nIf Widowmaker is defended by fewer than 2 cards, it has +3{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT134",
+  "name": "Widowmaker",
+  "cardType": "action",
+  "text": "Defense reactions can't be played to Widowmaker's chain link.\nIf Widowmaker is defended by fewer than 2 cards, it has +3{p}.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT135",
+  "name": "Widowmaker",
+  "cardType": "action",
+  "text": "Defense reactions can't be played to Widowmaker's chain link.\nIf Widowmaker is defended by fewer than 2 cards, it has +3{p}.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT136",
+  "name": "Withering Shot",
+  "cardType": "action",
+  "text": "If Withering Shot has an aim counter, it has +1{p}.\nWhen this hits a hero, create a Frailty token under their control.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT137",
+  "name": "Withering Shot",
+  "cardType": "action",
+  "text": "If Withering Shot has an aim counter, it has +1{p}.\nWhen this hits a hero, create a Frailty token under their control.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT138",
+  "name": "Withering Shot",
+  "cardType": "action",
+  "text": "If Withering Shot has an aim counter, it has +1{p}.\nWhen this hits a hero, create a Frailty token under their control.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT139",
+  "name": "Flick Knives",
+  "cardType": "equipment",
+  "text": "Once per Turn Attack Reaction - 0: Target dagger you control that isn't on the active chain link deals 1 damage to target hero. If damage is dealt this way, the dagger has hit. Destroy the dagger.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT140",
+  "name": "Mask of Shifting Perspectives",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy Mask of Shifting Perspectives: Whenever a dagger hits this turn, you may put a card from your hand on the bottom of your deck. If you do, draw a card.",
+  "defense": 1,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT141",
+  "name": "Blade Cuff",
+  "cardType": "equipment",
+  "text": "Action - {r}{r}, destroy Blade Cuff: Your daggers gain +1{p} this turn. Go again\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT142",
+  "name": "Stab Wound",
+  "cardType": "action",
+  "text": "When this hits a hero, they lose X{h}, where X is the number of times a dagger has hit this combat chain.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT143",
+  "name": "Concealed Blade",
+  "cardType": "attack-reaction",
+  "text": "Target Assassin or Ninja attack action card gains +1{p} and \"When this hits, equip a dagger from your inventory.\"",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT144",
+  "name": "Knives Out",
+  "cardType": "attack-reaction",
+  "text": "Your daggers gain +1{p} this turn.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT145",
+  "name": "Bleed Out",
+  "cardType": "action",
+  "text": "Bleed Out costs X resource points less to play, where X is the total damage you've dealt with daggers this combat chain.\nGo again",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT146",
+  "name": "Bleed Out",
+  "cardType": "action",
+  "text": "Bleed Out costs X resource points less to play, where X is the total damage you've dealt with daggers this combat chain.\nGo again",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT147",
+  "name": "Bleed Out",
+  "cardType": "action",
+  "text": "Bleed Out costs X resource points less to play, where X is the total damage you've dealt with daggers this combat chain.\nGo again",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT148",
+  "name": "Hurl",
+  "cardType": "action",
+  "text": "As an additional cost to play Hurl, you may pay {r}. When you do, it gains \"When this attacks, target dagger you control deals 1 damage to target hero. If damage is dealt this way, the dagger has hit. Destroy the dagger.\"\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT149",
+  "name": "Hurl",
+  "cardType": "action",
+  "text": "As an additional cost to play Hurl, you may pay {r}. When you do, it gains \"When this attacks, target dagger you control deals 1 damage to target hero. If damage is dealt this way, the dagger has hit. Destroy the dagger.\"\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT150",
+  "name": "Hurl",
+  "cardType": "action",
+  "text": "As an additional cost to play Hurl, you may pay {r}. When you do, it gains \"When this attacks, target dagger you control deals 1 damage to target hero. If damage is dealt this way, the dagger has hit. Destroy the dagger.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT151",
+  "name": "Plunge",
+  "cardType": "action",
+  "text": "When this hits, your next dagger attack this turn gains +1{p}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT152",
+  "name": "Plunge",
+  "cardType": "action",
+  "text": "When this hits, your next dagger attack this turn gains +1{p}.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT153",
+  "name": "Plunge",
+  "cardType": "action",
+  "text": "When this hits, your next dagger attack this turn gains +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT154",
+  "name": "Short and Sharp",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target dagger attack gains +3{p}.\n- Target attack action card with 2 or less base {p} gains +3{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT155",
+  "name": "Short and Sharp",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target dagger attack gains +2{p}.\n- Target attack action card with 2 or less base {p} gains +2{p}.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT156",
+  "name": "Short and Sharp",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target dagger attack gains +1{p}.\n- Target attack action card with 2 or less base {p} gains +1{p}.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT157",
+  "name": "Mask of Malicious Manifestations",
+  "cardType": "equipment",
+  "text": "Action - {r}, put a card from your hand or arsenal on the bottom of your deck, destroy Mask of Malicious Manifestations: Reveal cards from the top of your deck until you reveal an attack action card. Put it into your hand, then shuffle. Go again\nBlade break",
+  "defense": 1,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade break"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT158",
+  "name": "Toxic Tips",
+  "cardType": "equipment",
+  "text": "Action - {r}, destroy Toxic Tips: The next attack action card you play this turn gains \"When this hits a hero, create a Frailty, Inertia, or Bloodrot Pox token under their control.\" Go again\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT159",
+  "name": "Codex of Bloodrot",
+  "cardType": "action",
+  "text": "Each hero puts a card from their hand face-down into their arsenal.\nCreate a Ponder token under your control and a Bloodrot Pox token under each opponent's control.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT160",
+  "name": "Codex of Frailty",
+  "cardType": "action",
+  "text": "Each hero puts an attack action card from their graveyard face down into their arsenal. Each hero that does, discards a card.\nCreate a Ponder token under your control and a Frailty token under each opponent's control.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT161",
+  "name": "Codex of Inertia",
+  "cardType": "action",
+  "text": "Each hero puts the top card of their deck face down into their arsenal. Each hero that does, discards a card.\nCreate a Ponder token under your control and an Inertia token under each opponent's control.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT162",
+  "name": "Death Touch",
+  "cardType": "action",
+  "text": "Death Touch can't be played from hand.\nWhen this hits a hero, create a Frailty, Inertia, or Bloodrot Pox token under their control.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT163",
+  "name": "Death Touch",
+  "cardType": "action",
+  "text": "Death Touch can't be played from hand.\nWhen this hits a hero, create a Frailty, Inertia, or Bloodrot Pox token under their control.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT164",
+  "name": "Death Touch",
+  "cardType": "action",
+  "text": "Death Touch can't be played from hand.\nWhen this hits a hero, create a Frailty, Inertia, or Bloodrot Pox token under their control.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT165",
+  "name": "Toxicity",
+  "cardType": "action",
+  "text": "The next Assassin or Ranger attack action card you play this turn gains \"When this hits a hero, they lose 5{h}.\"\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT166",
+  "name": "Toxicity",
+  "cardType": "action",
+  "text": "The next Assassin or Ranger attack action card you play this turn gains \"When this hits a hero, they lose 4{h}.\"\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT167",
+  "name": "Toxicity",
+  "cardType": "action",
+  "text": "The next Assassin or Ranger attack action card you play this turn gains \"When this hits a hero, they lose 3{h}.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT168",
+  "name": "Virulent Touch",
+  "cardType": "action",
+  "text": "Virulent Touch can't be played from hand.\nWhen this chain link resolves, if Virulent Touch is defended by a card from hand, create a Bloodrot Pox token under the defending hero's control.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT169",
+  "name": "Virulent Touch",
+  "cardType": "action",
+  "text": "Virulent Touch can't be played from hand.\nWhen this chain link resolves, if Virulent Touch is defended by a card from hand, create a Bloodrot Pox token under the defending hero's control.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT170",
+  "name": "Virulent Touch",
+  "cardType": "action",
+  "text": "Virulent Touch can't be played from hand.\nWhen this chain link resolves, if Virulent Touch is defended by a card from hand, create a Bloodrot Pox token under the defending hero's control.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT171",
+  "name": "Bloodrot Trap",
+  "cardType": "defense-reaction",
+  "text": "When this defends and the attacking hero has played or activated a reaction this chain link, create a Bloodrot Pox token under their control.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT172",
+  "name": "Frailty Trap",
+  "cardType": "defense-reaction",
+  "text": "When this defends an attack with go again, create a Frailty token under the attacking hero's control.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT173",
+  "name": "Inertia Trap",
+  "cardType": "defense-reaction",
+  "text": "When this defends an attack with {p} greater than its base, create an Inertia token under the attacking hero's control.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT174",
+  "name": "Vambrace of Determination",
+  "cardType": "equipment",
+  "text": "Once per Turn Attack Reaction - {r}: The next prevention effect that prevents {p} damage this turn, prevents 1 less of that damage.\nWhen this defends, you may pay {r}. If you do, it gains +1{d} and blade break.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT175",
+  "name": "Seeker's Hood",
+  "cardType": "equipment",
+  "text": "Instant - {r}, destroy Seeker's Hood: Prevent the next 1 damage that would be dealt to your hero this turn. Opt 1",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT176",
+  "name": "Seeker's Gilet",
+  "cardType": "equipment",
+  "text": "Instant - {r}, destroy Seeker's Gilet: Prevent the next 1 damage that would be dealt to your hero this turn. Opt 1",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT177",
+  "name": "Seeker's Mitts",
+  "cardType": "equipment",
+  "text": "Instant - {r}, destroy Seeker's Mitts: Prevent the next 1 damage that would be dealt to your hero this turn. Opt 1",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT178",
+  "name": "Seeker's Leggings",
+  "cardType": "equipment",
+  "text": "Instant - {r}, destroy Seeker's Leggings: Prevent the next 1 damage that would be dealt to your hero this turn. Opt 1",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT179",
+  "name": "Silken Gi",
+  "cardType": "equipment",
+  "text": "Instant - Destroy Silken Gi: The next attack action card you play this turn has -1{p} and costs {r} less to play.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT180",
+  "name": "Threadbare Tunic",
+  "cardType": "equipment",
+  "text": "Instant - Destroy Threadbare Tunic: Gain {r}. Activate this ability only if you have no cards in hand.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT181",
+  "name": "Fisticuffs",
+  "cardType": "equipment",
+  "text": "Attack Reaction - {r}{r}, destroy Fisticuffs: Target attack action card gains +1{p}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT182",
+  "name": "Fleet Foot Sandals",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy Fleet Foot Sandals: Target attack with 1 or less base {p} gains go again.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT183",
+  "name": "Amnesia",
+  "cardType": "action",
+  "text": "When this hits a hero, cards and tokens they own lose and can't gain names until the start of your next turn.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT184",
+  "name": "Down and Dirty",
+  "cardType": "action",
+  "text": "While Down and Dirty is in your arsenal, you may defend with it.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT185",
+  "name": "Give and Take",
+  "cardType": "action",
+  "text": "Whenever an action card defends this, you may put an action card with cost less than this card's {p} from your graveyard on top of your deck.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT186",
+  "name": "Gore Belching",
+  "cardType": "action",
+  "text": "When this attacks, reveal cards from the top of your deck until you reveal an attack action card. If you do, banish it and this gets -X{p}, where X is the {p} of the card banished this way. Otherwise, this gets -7{p}. Shuffle.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 7,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT187",
+  "name": "Burdens of the Past",
+  "cardType": "action",
+  "text": "Until end of turn, target hero can't play defense reaction cards with the same name as a card in their graveyard.\nIf there are 10 or more defense reaction cards in their graveyard, draw a card.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT188",
+  "name": "Premeditate",
+  "cardType": "action",
+  "text": "The next time an attack action card hits a hero this turn, create a Ponder token.\nThe next attack action card you play from arsenal this turn gains +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT189",
+  "name": "Humble",
+  "cardType": "action",
+  "text": "When this hits a hero, they lose all hero card abilities until the end of their next turn.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT190",
+  "name": "Humble",
+  "cardType": "action",
+  "text": "When this hits a hero, they lose all hero card abilities until the end of their next turn.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT191",
+  "name": "Humble",
+  "cardType": "action",
+  "text": "When this hits a hero, they lose all hero card abilities until the end of their next turn.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT192",
+  "name": "Infectious Host",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you control a Frailty token, create a Frailty token under their control, then repeat for Inertia and Bloodrot Pox.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT193",
+  "name": "Infectious Host",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you control a Frailty token, create a Frailty token under their control, then repeat for Inertia and Bloodrot Pox.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT194",
+  "name": "Infectious Host",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you control a Frailty token, create a Frailty token under their control, then repeat for Inertia and Bloodrot Pox.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT195",
+  "name": "Looking for a Scrap",
+  "cardType": "action",
+  "text": "As an additional cost to play Looking for a Scrap, you may banish a card with 1{p} from your graveyard. When you do, this gains +1{p} and go again.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT196",
+  "name": "Looking for a Scrap",
+  "cardType": "action",
+  "text": "As an additional cost to play Looking for a Scrap, you may banish a card with 1{p} from your graveyard. When you do, this gains +1{p} and go again.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT197",
+  "name": "Looking for a Scrap",
+  "cardType": "action",
+  "text": "As an additional cost to play Looking for a Scrap, you may banish a card with 1{p} from your graveyard. When you do, this gains +1{p} and go again.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT198",
+  "name": "Wreck Havoc",
+  "cardType": "action",
+  "text": "Defense reactions can't be played to this chain link.\nWhen this hits a hero, you may turn a card in their arsenal face up, then destroy a defense reaction in their arsenal.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT199",
+  "name": "Wreck Havoc",
+  "cardType": "action",
+  "text": "Defense reactions can't be played to this chain link.\nWhen this hits a hero, you may turn a card in their arsenal face up, then destroy a defense reaction in their arsenal.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT200",
+  "name": "Wreck Havoc",
+  "cardType": "action",
+  "text": "Defense reactions can't be played to this chain link.\nWhen this hits a hero, you may turn a card in their arsenal face up, then destroy a defense reaction in their arsenal.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT201",
+  "name": "Cut Down to Size",
+  "cardType": "action",
+  "text": "When this hits a hero, if they have 4 or more cards in hand, they discard a card.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT202",
+  "name": "Cut Down to Size",
+  "cardType": "action",
+  "text": "When this hits a hero, if they have 4 or more cards in hand, they discard a card.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT203",
+  "name": "Cut Down to Size",
+  "cardType": "action",
+  "text": "When this hits a hero, if they have 4 or more cards in hand, they discard a card.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT204",
+  "name": "Destructive Deliberation",
+  "cardType": "action",
+  "text": "When this hits a hero, create a Ponder token.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT205",
+  "name": "Destructive Deliberation",
+  "cardType": "action",
+  "text": "When this hits a hero, create a Ponder token.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT206",
+  "name": "Destructive Deliberation",
+  "cardType": "action",
+  "text": "When this hits a hero, create a Ponder token.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT207",
+  "name": "Feisty Locals",
+  "cardType": "action",
+  "text": "If this is defended by an action card, this gets +2{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT208",
+  "name": "Feisty Locals",
+  "cardType": "action",
+  "text": "If this is defended by an action card, this gets +2{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT209",
+  "name": "Feisty Locals",
+  "cardType": "action",
+  "text": "If this is defended by an action card, this gets +2{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT210",
+  "name": "Freewheeling Renegades",
+  "cardType": "action",
+  "text": "If this is defended by an action card, this has -2{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT211",
+  "name": "Freewheeling Renegades",
+  "cardType": "action",
+  "text": "If this is defended by an action card, this has -2{p}.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT212",
+  "name": "Freewheeling Renegades",
+  "cardType": "action",
+  "text": "If this is defended by an action card, this has -2{p}.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT213",
+  "name": "Ravenous Rabble",
+  "cardType": "action",
+  "text": "When this attacks, reveal the top card of your deck. This gets -X{p}, where X is the pitch value of the card revealed this way.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT214",
+  "name": "Ravenous Rabble",
+  "cardType": "action",
+  "text": "When this attacks, reveal the top card of your deck. This gets -X{p}, where X is the pitch value of the card revealed this way.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT215",
+  "name": "Ravenous Rabble",
+  "cardType": "action",
+  "text": "When this attacks, reveal the top card of your deck. This gets -X{p}, where X is the pitch value of the card revealed this way.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT216",
+  "name": "Seek Horizon",
+  "cardType": "action",
+  "text": "As an additional cost to play Seek Horizon, you may put a card from your hand on top of your deck. If you do, Seek Horizon gains go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT217",
+  "name": "Seek Horizon",
+  "cardType": "action",
+  "text": "As an additional cost to play Seek Horizon, you may put a card from your hand on top of your deck. If you do, Seek Horizon gains go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT218",
+  "name": "Seek Horizon",
+  "cardType": "action",
+  "text": "As an additional cost to play Seek Horizon, you may put a card from your hand on top of your deck. If you do, Seek Horizon gains go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT219",
+  "name": "Spring Load",
+  "cardType": "action",
+  "text": "When this attacks, if you have no cards in hand, it gains +3{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT220",
+  "name": "Spring Load",
+  "cardType": "action",
+  "text": "When this attacks, if you have no cards in hand, it gains +2{p}.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT221",
+  "name": "Spring Load",
+  "cardType": "action",
+  "text": "When this attacks, if you have no cards in hand, it gains +1{p}.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT222",
+  "name": "Come to Fight",
+  "cardType": "action",
+  "text": "The next attack action card you play this turn gains +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT223",
+  "name": "Come to Fight",
+  "cardType": "action",
+  "text": "The next attack action card you play this turn gains +2{p}.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT224",
+  "name": "Come to Fight",
+  "cardType": "action",
+  "text": "The next attack action card you play this turn gains +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT225",
+  "name": "Scout the Periphery",
+  "cardType": "action",
+  "text": "Look at the top card of target hero's deck.\nThe next attack action card you play from arsenal this turn gains +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT226",
+  "name": "Scout the Periphery",
+  "cardType": "action",
+  "text": "Look at the top card of target hero's deck.\nThe next attack action card you play from arsenal this turn gains +2{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT227",
+  "name": "Scout the Periphery",
+  "cardType": "action",
+  "text": "Look at the top card of target hero's deck.\nThe next attack action card you play from arsenal this turn gains +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT228",
+  "name": "Brush Off",
+  "cardType": "instant",
+  "text": "The next time you would be dealt 3 or less damage this turn, prevent it.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT229",
+  "name": "Brush Off",
+  "cardType": "instant",
+  "text": "The next time you would be dealt 2 or less damage this turn, prevent it.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT230",
+  "name": "Brush Off",
+  "cardType": "instant",
+  "text": "The next time you would be dealt 1 damage this turn, prevent it.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT231",
+  "name": "Peace of Mind",
+  "cardType": "instant",
+  "text": "The next time you would be dealt {p} damage, prevent 4 of that damage.\nCreate a Ponder token.",
+  "pitch": 1,
+  "cost": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT232",
+  "name": "Peace of Mind",
+  "cardType": "instant",
+  "text": "The next time you would be dealt {p} damage, prevent 3 of that damage.\nCreate a Ponder token.",
+  "pitch": 2,
+  "cost": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT233",
+  "name": "Peace of Mind",
+  "cardType": "instant",
+  "text": "The next time you would be dealt {p} damage, prevent 2 of that damage.\nCreate a Ponder token.",
+  "pitch": 3,
+  "cost": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT234",
+  "name": "Bloodrot Pox",
+  "cardType": "token",
+  "text": "At the beginning of your end phase, destroy Bloodrot Pox, then it deals 2 damage to you unless you pay {r}{r}{r}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT235",
+  "name": "Frailty",
+  "cardType": "token",
+  "text": "Your attack action cards played from arsenal and weapon attacks have -1{p}.\nAt the beginning of your end phase destroy Frailty.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT236",
+  "name": "Inertia",
+  "cardType": "token",
+  "text": "At the beginning of your end phase, destroy Inertia, then put all cards from your hand and arsenal on the bottom of your deck.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT237",
+  "name": "Ponder",
+  "cardType": "token",
+  "text": "At the beginning of your end phase, destroy Ponder and draw a card.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "OUT"
+ },
+ {
+  "id": "OUT238",
+  "name": "Cracked Bauble",
+  "cardType": "resource",
+  "text": "(A player may add any number of Cracked Baubles to their card-pool in sealed deck or booster draft formats.)",
+  "pitch": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "OUT"
+ }
+]

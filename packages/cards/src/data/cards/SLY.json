@@ -1,0 +1,575 @@
+[
+ {
+  "id": "SLY001",
+  "name": "Lyath Goldmane",
+  "cardType": "hero",
+  "text": "The base {p} and {d} of cards you control are halved, rounded up.\nInstant - {r}{r}, {t}: The crowd boos you. Defending action cards you control get +1{d} this turn.\nWhenever the crowd boos you, create a Might token.",
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "reviled"
+  ],
+  "life": 20,
+  "intellect": 5,
+  "set": "SLY"
+ },
+ {
+  "id": "SLY002",
+  "name": "Titan's Fist",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}{r}: Attack\nIf there is a card with cost 3 or greater in your pitch zone, Titan's Fist has +1{p}.",
+  "attack": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "hammer",
+   "1h"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY003",
+  "name": "Arcane Lantern",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "off-hand"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY004",
+  "name": "Stonewall Impasse",
+  "cardType": "equipment",
+  "text": "When this defends, clash with the attacking hero. If you win, this gets +1{d} until end of turn.\nTemper",
+  "defense": 1,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "off-hand"
+  ],
+  "keywords": [
+   "Temper",
+   "Clash"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY005",
+  "name": "Blade Beckoner Helm",
+  "cardType": "equipment",
+  "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY006",
+  "name": "Nullrune Hood",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY007",
+  "name": "Blade Beckoner Plating",
+  "cardType": "equipment",
+  "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY008",
+  "name": "Nullrune Robe",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY009",
+  "name": "Line Crossers",
+  "cardType": "equipment",
+  "text": "If you have the same {h} as a hero, it also counts as you having more {h} than them, and them having less {h} than you.\nBlade Break",
+  "defense": 1,
+  "subtypes": [
+   "reviled",
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY010",
+  "name": "Stand Strong",
+  "cardType": "equipment",
+  "text": "Action - {r}{r}{r}, destroy this: Create a Confidence token. Activate this only if you control an aura of suspense. Go again\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY011",
+  "name": "Mocking Blow",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you have more {h} than them, the crowd boos you.\nIf you've been booed this turn, this gets +4{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Boos"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY012",
+  "name": "Drag Down",
+  "cardType": "defense-reaction",
+  "text": "When this defends an attack, it gets -3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY013",
+  "name": "Prime the Crowd",
+  "cardType": "action",
+  "text": "The next attack action card you play this turn gets +4{p}.\nThe crowd cheers each Revered hero.\nThe crowd boos each Reviled hero.\nGo again",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "The Crowd Cheers",
+   "The Crowd Boos",
+   "Go again"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY014",
+  "name": "Sadistic Scowl",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +5{p}.\nIntimidate target hero.\nGo again",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 2,
+  "subtypes": [
+   "reviled"
+  ],
+  "keywords": [
+   "Intimidate",
+   "Go again"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY015",
+  "name": "Villainous Pose",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +4{p}.\nThe crowd boos you.\nGo again",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "subtypes": [
+   "reviled"
+  ],
+  "keywords": [
+   "Go again",
+   "The Crowd Boos"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY016",
+  "name": "Act of Glory",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this leaves the arena, your next attack this turn gets +6{p}.",
+  "pitch": 1,
+  "cost": 4,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY017",
+  "name": "Edge of Their Seats",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this leaves the arena, your next attack this turn gets +5{p}.",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY018",
+  "name": "Tension in the Air",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this leaves the arena, your next attack this turn gets +4{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY019",
+  "name": "Oasis Respite",
+  "cardType": "instant",
+  "text": "Prevent the next 4 damage that would be dealt to target hero this turn by a source of your choice. If they have less life than each other hero, they may gain 1{h}.",
+  "pitch": 1,
+  "cost": 1,
+  "classes": [
+   "generic"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY020",
+  "name": "Mocking Blow",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you have more {h} than them, the crowd boos you.\nIf you've been booed this turn, this gets +3{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Boos"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY021",
+  "name": "Short Shrift",
+  "cardType": "action",
+  "text": "If this has {p} greater than its base, it gets +1{p}.\nCrush - When this deals 4 or more damage to a hero, they discard a card.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY022",
+  "name": "Walk in My Shoes",
+  "cardType": "action",
+  "text": "If this has {p} greater than its base, it gets +1{p}.\nCrush - When this deals 4 or more damage to a hero, until the end of their next turn, the base {p} and {d} of attack action cards they control are halved, rounded up.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY023",
+  "name": "Wee Wrecking Ball",
+  "cardType": "action",
+  "text": "If this has {p} greater than its base, it gets +1{p}.\nCrush - When this deals 4 or more damage to a hero, destroy a card in their arsenal.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY024",
+  "name": "Brothers in Arms",
+  "cardType": "action",
+  "text": "When this defends, you may pay {r}. If you do, it gets +2{d}.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY025",
+  "name": "Full of Bravado",
+  "cardType": "action",
+  "text": "When this attacks or defends, if you control an aura of suspense, create a Confidence token.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY026",
+  "name": "Goon Beatdown",
+  "cardType": "action",
+  "text": "If you control 3 or more auras, this gets +3{p} and \"When this hits a hero, the crowd boos you.\"",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Boos"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY027",
+  "name": "Goon Tactics",
+  "cardType": "action",
+  "text": "If you control 3 or more auras, this gets +3{p} and \"When this hits a hero, destroy the top card of their deck.\"",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY028",
+  "name": "Mocking Blow",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you have more {h} than them, the crowd boos you.\nIf you've been booed this turn, this gets +2{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Boos"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY029",
+  "name": "Power Play",
+  "cardType": "action",
+  "text": "If this was played from arsenal, it gets +5{p}.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY030",
+  "name": "Booze!",
+  "cardType": "action",
+  "text": "Go again\nWhen this enters or leaves the arena, the crowd boos you.\nAt the start of your turn, destroy this.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "reviled"
+  ],
+  "keywords": [
+   "Go again",
+   "The Crowd Boos"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY031",
+  "name": "Concealed Object",
+  "cardType": "instant",
+  "text": "When this enters the arena, the crowd boos you.\nInstant - {t}: Target attack gets +1{p}.\nAt the beginning of your end phase, destroy this.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "reviled",
+   "item"
+  ],
+  "keywords": [
+   "The Crowd Boos"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY032",
+  "name": "Edge of Their Seats",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this leaves the arena, your next attack this turn gets +3{p}.",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY033",
+  "name": "The Suspense is Killing Me",
+  "cardType": "instant",
+  "text": "Suspense\nYour first attack each turn gets +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY034",
+  "name": "Confidence",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then the next attack card you play this turn can't be defended by more than 2 non-block cards.",
+  "classes": [
+   "generic"
+  ],
+  "set": "SLY"
+ },
+ {
+  "id": "SLY035",
+  "name": "Might",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then your next attack this turn gets +1{p}.",
+  "classes": [
+   "generic"
+  ],
+  "set": "SLY"
+ }
+]

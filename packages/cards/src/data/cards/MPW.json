@@ -1,0 +1,2322 @@
+[
+ {
+  "id": "MPW001",
+  "name": "Dorinthea, Quicksilver Prodigy",
+  "cardType": "hero",
+  "text": "The first time your Dawnblade, Resplendent's attack gets go again each turn, you may attack an additional time with it this turn.",
+  "classes": [
+   "warrior"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "MPW"
+ },
+ {
+  "id": "MPW002",
+  "name": "Dawnblade, Resplendent",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nThe second time you attack with this each turn, it gets +1{p} until end of turn.",
+  "attack": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "sword",
+   "2h"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW003",
+  "name": "Hala, Bladesaint of the Vow",
+  "cardType": "hero",
+  "text": "Action - {r}{r}{r}, {t}: Sharpen target sword you control. Go again",
+  "classes": [
+   "warrior"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "MPW"
+ },
+ {
+  "id": "MPW004",
+  "name": "Hala",
+  "cardType": "hero",
+  "text": "Action - {r}{r}{r}, {t}: Sharpen target sword you control. Go again",
+  "classes": [
+   "warrior"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "MPW"
+ },
+ {
+  "id": "MPW005",
+  "name": "Zenith Blade",
+  "cardType": "weapon",
+  "text": "Hala Specialization\nOnce per Turn Action - {r}: Attack\nIf this has been sharpened this turn, its first attack this turn gets go again.",
+  "attack": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "sword",
+   "2h"
+  ],
+  "keywords": [
+   "Hala Specialization",
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW006",
+  "name": "Olympia",
+  "cardType": "hero",
+  "text": "The first time each of your attacks wins a wager, create a Gold token.",
+  "classes": [
+   "warrior"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "MPW"
+ },
+ {
+  "id": "MPW007",
+  "name": "Golden Grail",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r} or destroy a Gold you control: Attack. If this attack has wagered, it gets +1{p}.",
+  "attack": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "sword",
+   "2h"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW008",
+  "name": "Durendal",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nIf this has a +1{p} counter, reaction cards get -1{d} while defending it.",
+  "attack": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "sword",
+   "2h"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW009",
+  "name": "Paragon Plate",
+  "cardType": "equipment",
+  "text": "Attack Reaction - {t}, remove a +1{p} counter from an attacking sword you control: Gain {r}\nTemper",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW010",
+  "name": "Grains of Bloodspill",
+  "cardType": "equipment",
+  "text": "Whenever a weapon attack you control hits, you may pay {r}. If you do, create a Vigor token. \nTemper",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW011",
+  "name": "Braveforge Bracers",
+  "cardType": "equipment",
+  "text": "Once per turn Action - {r}: Your next weapon attack this turn gains +1{p}. Activate this ability only if a weapon you control has hit this turn. Go again\nBattleworn",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW012",
+  "name": "Valiant Dynamo",
+  "cardType": "equipment",
+  "text": "At the beginning of your end phase, if you've attacked 2 or more times with weapons this turn, you may remove a -1{d} counter from this.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW013",
+  "name": "Blunt Retort",
+  "cardType": "equipment",
+  "text": "When this defends a weapon attack, you may remove a +1{p} counter from the weapon.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW014",
+  "name": "Edge Laden Plate",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Gain {r}. Activate this only if you've sharpened a sword this turn.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW015",
+  "name": "Duelist Gauntlets",
+  "cardType": "equipment",
+  "text": "Attack Reaction - {r}, destroy this: Target sword attack gets \"Reaction cards get -1{d} while defending this.\"\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW016",
+  "name": "Longsword Leggings",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Create a Blade Dance or Flurry token.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW017",
+  "name": "Hot Top",
+  "cardType": "equipment",
+  "text": "When this defends a weapon attack, you may put an attack reaction card from your graveyard on top of your deck.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW018",
+  "name": "Heart of Bladehold",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: You may activate your second sword attack this turn without paying its {r} cost. Go again\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Battleworn",
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW019",
+  "name": "Dealer's Grip",
+  "cardType": "equipment",
+  "text": "Attack Reaction - {r}{r}, destroy this: Target attack that has wagered gets +1{p}.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW020",
+  "name": "Refraction Bolters",
+  "cardType": "equipment",
+  "text": "When a weapon attack you control hits, you may destroy this. If you do, the attack gets go again.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW021",
+  "name": "Blade Flurry",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets +2{p}.\nYour next weapon attack this turn gets +2{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW022",
+  "name": "Glint the Quicksilver",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets go again.\nReprise - If the defending hero has defended with a card from their hand this chain link, draw a card.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW023",
+  "name": "Into the Muck",
+  "cardType": "attack-reaction",
+  "text": "Play this only if you've wagered this chain link.\nBanish a non-equipment defending card on the active chain link.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW024",
+  "name": "Overwhelming Swing",
+  "cardType": "attack-reaction",
+  "text": "This costs an additional {r} to play for each card defending on the active chain link.\nTarget weapon attack gets +X{p}, where X is twice the number of cards defending it plus 1.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW025",
+  "name": "Point of Escalation",
+  "cardType": "attack-reaction",
+  "text": "Target sword attack gets +2{p} for each time you've attacked with the sword this turn.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW026",
+  "name": "Sharpening Sparks",
+  "cardType": "attack-reaction",
+  "text": "Target sword attack gets +2{p} and \"When this hits, sharpen this sword.\"",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW027",
+  "name": "All In",
+  "cardType": "action",
+  "text": "The next time a sword you control attacks this turn, destroy all Gold you control. The attack gets +2{p} for each Gold destroyed this way. When the chain link resolves, if the attack didn't hit, you lose the game.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW028",
+  "name": "And Again...",
+  "cardType": "action",
+  "text": "Attack with target sword that has been sharpened and you've attacked with this turn.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Attack"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW029",
+  "name": "Bluff Catcher",
+  "cardType": "action",
+  "text": "You may destroy a Gold you control rather than pay this card's {r} cost.\nYour next sword attack this turn gets +3{p} and \"When this attacks, wager with the defending hero. The winner gets +1{i} during their next end phase.\"\nGo again",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW030",
+  "name": "Drawn to the Blade",
+  "cardType": "action",
+  "text": "Sharpen target sword you control.\nIf it has 2 or more +1{p} counters, the next time it hits this turn, draw a card.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW031",
+  "name": "Honed for Honor",
+  "cardType": "action",
+  "text": "Sharpen target sword you control.\nIf it has 3 or more +1{p} counters, you may put an attack reaction card from your graveyard on top of your deck.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW032",
+  "name": "Raise Blades",
+  "cardType": "action",
+  "text": "Draw a card. Put a card from your hand on top of your deck.\nYour next sword attack this turn gets +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW033",
+  "name": "Rake Back",
+  "cardType": "action",
+  "text": "You may destroy a Gold you control rather than pay this card's {r} cost.\nYour next sword attack this turn gets +2{p} and \"When this attacks, wager with the defending hero. The winner may equip an equipment card from their graveyard.\"\nGo again",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW034",
+  "name": "Terms of Combat",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gets +4{p} and \"Whenever a defense reaction is played or activated this chain link, draw a card.\"\nGo again",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW035",
+  "name": "Unsheathed",
+  "cardType": "action",
+  "text": "Your next sword attack this turn gets +3{p} and \"When this attacks, if its {p} is greater than twice its base, it gets go again.\"\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW036",
+  "name": "Lessons Learned",
+  "cardType": "instant",
+  "text": "Shuffle up to 3 attack reaction cards with different names from your graveyard into your deck.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW037",
+  "name": "Stand Tall",
+  "cardType": "block",
+  "text": "While this is defending, whenever the attacking hero plays or activates a reaction this chain link, this gets +2{p}.",
+  "pitch": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW038",
+  "name": "Backside of the Blade",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets +1{p}. If it has go again, you may attack an additional time with the weapon this turn.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW039",
+  "name": "Display of Artistry",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets +3{p}. If the weapon has been sharpened this turn, the attack gets \"Reaction cards get -1{d} while defending this.\"",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW040",
+  "name": "Display of Artistry",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets +2{p}. If the weapon has been sharpened this turn, the attack gets \"Reaction cards get -1{d} while defending this.\"",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW041",
+  "name": "Display of Artistry",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets +1{p}. If the weapon has been sharpened this turn, the attack gets \"Reaction cards get -1{d} while defending this.\"",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW042",
+  "name": "Donkey",
+  "cardType": "attack-reaction",
+  "text": "Target sword attack gets +1{p} and wagers with the defending hero. The winner destroys a card in their own arsenal.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW043",
+  "name": "Downswing",
+  "cardType": "attack-reaction",
+  "text": "Target sword attack gets +1{p} and wagers with the defending hero. The winner loses 1{h}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW044",
+  "name": "Drawing Dead",
+  "cardType": "attack-reaction",
+  "text": "Target sword attack gets +1{p} and wagers with the defending hero. The winner discards a card.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW045",
+  "name": "Gleam of the Blade",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets +3{p}.\nInstant - Discard this: Create a Flurry token.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW046",
+  "name": "Olé",
+  "cardType": "attack-reaction",
+  "text": "Remove a +1{p} counter from target attacking weapon. If you do, create a Flurry token and draw a card.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW047",
+  "name": "Quicksilver Dance",
+  "cardType": "attack-reaction",
+  "text": "Remove a +1{p} counter from target attacking weapon. If you do, create a Blade Dance token and draw a card.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW048",
+  "name": "Run Through",
+  "cardType": "attack-reaction",
+  "text": "Target sword attack gets go again.\nYour next sword attack this turn gets +3{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW049",
+  "name": "Run Through",
+  "cardType": "attack-reaction",
+  "text": "Target sword attack gains go again.\nYour next sword attack this turn gets +2{p}.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW050",
+  "name": "Run Through",
+  "cardType": "attack-reaction",
+  "text": "Target sword attack gets go again.\nYour next sword attack this turn gets +1{p}.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW051",
+  "name": "Shimmer of the Blade",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets +3{p}.\nInstant - Discard this: Create a Blade Dance token.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW052",
+  "name": "Shove Off",
+  "cardType": "attack-reaction",
+  "text": "Choose a non-equipment card defending a sword attack you control. Return it to its owner's hand.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW053",
+  "name": "Golden Company",
+  "cardType": "defense-reaction",
+  "text": "You may destroy a Gold you control rather than pay this card's {r} cost.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 6,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW054",
+  "name": "Golden Company",
+  "cardType": "defense-reaction",
+  "text": "You may destroy a Gold you control rather than pay this card's {r} cost.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 6,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW055",
+  "name": "Golden Company",
+  "cardType": "defense-reaction",
+  "text": "You may destroy a Gold you control rather than pay this card's {r} cost.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 6,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW056",
+  "name": "Steelblade Shunt",
+  "cardType": "defense-reaction",
+  "text": "If Steelblade Shunt defends a weapon attack, deal 1 damage to the attacking hero.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 6,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW057",
+  "name": "Steelblade Shunt",
+  "cardType": "defense-reaction",
+  "text": "If Steelblade Shunt defends a weapon attack, deal 1 damage to the attacking hero.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 5,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW058",
+  "name": "Steelblade Shunt",
+  "cardType": "defense-reaction",
+  "text": "If Steelblade Shunt defends a weapon attack, deal 1 damage to the attacking hero.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 4,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW059",
+  "name": "Below the Belt",
+  "cardType": "action",
+  "text": "Your next sword attack this turn gets +4{p} and \"When this hits a Warrior hero, destroy a card in their arsenal.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW060",
+  "name": "Big Slick",
+  "cardType": "action",
+  "text": "Your next sword attack this turn gets +5{p} and \"When this attacks, wager with the defending hero. The winner draws a card.\"\nGo again",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW061",
+  "name": "Big Slick",
+  "cardType": "action",
+  "text": "Your next sword attack this turn gets +4{p} and \"When this attacks, wager with the defending hero. The winner draws a card.\"\nGo again",
+  "pitch": 2,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW062",
+  "name": "Big Slick",
+  "cardType": "action",
+  "text": "Your next sword attack this turn gets +3{p} and \"When this attacks, wager with the defending hero. The winner draws a card.\"\nGo again",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW063",
+  "name": "Blade Rush",
+  "cardType": "action",
+  "text": "Your first sword attack this turn gets go again.\nYour second sword attack this turn gets +1{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW064",
+  "name": "Crimson Waltz",
+  "cardType": "action",
+  "text": "Your next sword attack this turn gets +4{p}.\nThe next time you attack with a sword this turn, draw a card, then put a card from your hand on top of your deck.\nGo again",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW065",
+  "name": "Dusk Path Pilgrimage",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gains +3{p} and \"If this hits, you may attack an additional time with this weapon this turn.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW066",
+  "name": "Off Beat",
+  "cardType": "action",
+  "text": "Destroy up to 1 Blade Dance and/or Flurry token. Sharpen target sword you control for each token destroyed this way.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW067",
+  "name": "Rest Before Battle",
+  "cardType": "action",
+  "text": "Play this only if you've attacked with a weapon this turn.\nAt the start of your turn, destroy this and draw a card.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW068",
+  "name": "Shatter the Weakpoint",
+  "cardType": "action",
+  "text": "Your next sword attack this turn gets +4{p} and \"When this hits a Warrior hero, destroy an equipment they control with 0{d}.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW069",
+  "name": "Slice and Dice",
+  "cardType": "action",
+  "text": "Your first sword or dagger attack this turn gets +1{p}.\nYour second sword or dagger attack this turn gets +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW070",
+  "name": "Steel to the Dome",
+  "cardType": "action",
+  "text": "Your next sword attack this turn gets +4{p} and \"When this hits a Warrior hero, they discard a card.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW071",
+  "name": "Visit the Dawnsmith",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy this and sharpen all swords you control.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Sharpen"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW072",
+  "name": "Warrior's Valor",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gets +3{p} and \"When this hits, it gets go again.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW073",
+  "name": "Take the Lead",
+  "cardType": "instant",
+  "text": "The next time you would be dealt damage this turn, prevent 2 of that damage. If you prevent damage this way, create a Blade Dance token.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW074",
+  "name": "Toe the Line",
+  "cardType": "instant",
+  "text": "The next time you would be dealt damage this turn, prevent 2 of that damage. If you prevent damage this way, create a Flurry token.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW075",
+  "name": "A Moment's Peace",
+  "cardType": "block",
+  "text": "When this defends a sword attack, you can't be attacked by the sword again this turn.",
+  "pitch": 3,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW076",
+  "name": "Big Blinder",
+  "cardType": "attack-reaction",
+  "text": "Target sword attack gets +4{p} and wagers with the defending hero. The winner creates a Flurry token.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Wager"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW077",
+  "name": "Big Blinder",
+  "cardType": "attack-reaction",
+  "text": "Target sword attack gets +3{p} and wagers with the defending hero. The winner creates a Flurry token.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Wager"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW078",
+  "name": "Big Blinder",
+  "cardType": "attack-reaction",
+  "text": "Target sword attack gets +2{p} and wagers with the defending hero. The winner creates a Flurry token.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Wager"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW079",
+  "name": "Carve Up",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets \"When this hits a hero, you may remove a +1{p} counter from this weapon. If you do, destroy a card in their arsenal.\"",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW080",
+  "name": "Deadly Display",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets +3{p}. If the weapon has been sharpened this turn, the attack gets \"When this hits a hero, create a Flurry token.\"",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW081",
+  "name": "Deadly Display",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets +2{p}. If the weapon has been sharpened this turn, the attack gets \"When this hits a hero, create a Flurry token.\"",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW082",
+  "name": "Deadly Display",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets +1{p}. If the weapon has been sharpened this turn, the attack gets \"When this hits a hero, create a Flurry token.\"",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW083",
+  "name": "Dice Up",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets \"When this hits a hero, you may remove a +1{p} counter from this weapon. If you do, destroy an aura they control.\"",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW084",
+  "name": "In the Swing",
+  "cardType": "attack-reaction",
+  "text": "Play this only if you've attacked 2 or more times with weapons this turn.\nTarget weapon attack gets +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW085",
+  "name": "Ironsong Response",
+  "cardType": "attack-reaction",
+  "text": "Reprise - If the defending hero has defended with a card from their hand this chain link, target weapon attack gains +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW086",
+  "name": "Silverdrop Downpour",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets +4{p}.\nIf the weapon has been sharpened this turn, this costs {r} less to play.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW087",
+  "name": "Silverdrop Downpour",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets +3{p}.\nIf the weapon has been sharpened this turn, this costs {r} less to play.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW088",
+  "name": "Silverdrop Downpour",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets +2{p}.\nIf the weapon has been sharpened this turn, this costs {r} less to play.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW089",
+  "name": "Slice Up",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets \"When this hits a hero, you may remove a +1{p} counter from this weapon. If you do, they discard a card.\"",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW090",
+  "name": "Small Blinder",
+  "cardType": "attack-reaction",
+  "text": "Target sword attack gets +4{p} and wagers with the defending hero. The winner creates a Blade Dance token.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW091",
+  "name": "Small Blinder",
+  "cardType": "attack-reaction",
+  "text": "Target sword attack gets +3{p} and wagers with the defending hero. The winner creates a Blade Dance token.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW092",
+  "name": "Small Blinder",
+  "cardType": "attack-reaction",
+  "text": "Target sword attack gets +2{p} and wagers with the defending hero. The winner creates a Blade Dance token.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW093",
+  "name": "Take the Upper Hand",
+  "cardType": "attack-reaction",
+  "text": "Play this only if you've wagered this chain link.\nTarget attack gets +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW094",
+  "name": "Take the Upper Hand",
+  "cardType": "attack-reaction",
+  "text": "Play this only if you've wagered this chain link.\nTarget attack gets +2{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW095",
+  "name": "Take the Upper Hand",
+  "cardType": "attack-reaction",
+  "text": "Play this only if you've wagered this chain link.\nTarget attack gets +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW096",
+  "name": "Steel on Steel",
+  "cardType": "defense-reaction",
+  "text": "While this is defending a weapon attack, this gets +1{d}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW097",
+  "name": "Steel on Steel",
+  "cardType": "defense-reaction",
+  "text": "While this is defending a weapon attack, this gets +1{d}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW098",
+  "name": "Steel on Steel",
+  "cardType": "defense-reaction",
+  "text": "While this is defending a weapon attack, this gets +1{d}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 1,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW099",
+  "name": "Check-Raise",
+  "cardType": "action",
+  "text": "The next time an attack you control wagers this turn, it gets +4{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW100",
+  "name": "Check-Raise",
+  "cardType": "action",
+  "text": "The next time an attack you control wagers this turn, it gets +3{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW101",
+  "name": "Check-Raise",
+  "cardType": "action",
+  "text": "The next time an attack you control wagers this turn, it gets +2{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW102",
+  "name": "Driving Blade",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gains +3{p} and go again.\nGo again",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW103",
+  "name": "Edict of Steel",
+  "cardType": "action",
+  "text": "Sharpen target sword you control.\nIf it has 1 or more +1{p} counters, create a Flurry token.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW104",
+  "name": "Edict of Steel",
+  "cardType": "action",
+  "text": "Sharpen target sword you control.\nIf it has 2 or more +1{p} counters, create a Flurry token.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW105",
+  "name": "Edict of Steel",
+  "cardType": "action",
+  "text": "Sharpen target sword you control.\nIf it has 3 or more +1{p} counters, create a Flurry token.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW106",
+  "name": "Engage Steel",
+  "cardType": "action",
+  "text": "Your next sword attack this turn gets +3{p} and \"If this is defended by a Warrior card, this gets +1{p}.\"\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW107",
+  "name": "Engage Steel",
+  "cardType": "action",
+  "text": "Your next sword attack this turn gets +3{p} and \"If this is defended by a Warrior card, this gets +1{p}.\"\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW108",
+  "name": "Engage Steel",
+  "cardType": "action",
+  "text": "Your next sword attack this turn gets +3{p} and \"If this is defended by a Warrior card, this gets +1{p}.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW109",
+  "name": "Gutshot",
+  "cardType": "action",
+  "text": "Your next sword attack this turn gets +3{p} and \"When this attacks, wager with the defending hero. The winner creates a Blade Dance token.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again",
+   "Wager"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW110",
+  "name": "Gutshot",
+  "cardType": "action",
+  "text": "Your next sword attack this turn gets +2{p} and \"When this attacks, wager with the defending hero. The winner creates a Blade Dance token.\"\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again",
+   "Wager"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW111",
+  "name": "Gutshot",
+  "cardType": "action",
+  "text": "Your next sword attack this turn gets +1{p} and \"When this attacks, wager with the defending hero. The winner creates a Blade Dance token.\"\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again",
+   "Wager"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW112",
+  "name": "Hit and Run",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gets go again.\nIf you've attacked with a weapon this turn, your next attack this turn gets +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW113",
+  "name": "Hit and Run",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gets go again.\nIf you've attacked with a weapon this turn, your next attack this turn gets +2{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW114",
+  "name": "Hit and Run",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gets go again.\nIf you've attacked with a weapon this turn, your next attack this turn gets +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW115",
+  "name": "Jive",
+  "cardType": "action",
+  "text": "Create a Blade Dance token.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW116",
+  "name": "Nature's Path Pilgrimage",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gets +3{p} and \"When this hits and you have no cards in your arsenal, reveal the top card of your deck. If it's an action card, put it face down into your arsenal.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW117",
+  "name": "Push Forward",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gets +3{p}.\nIf you've attacked with a weapon this turn, your next attack this turn gets dominate.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW118",
+  "name": "Second Swing",
+  "cardType": "action",
+  "text": "If you've attacked with a weapon this turn, your next attack this turn gets +4{p}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW119",
+  "name": "Sharp Incline",
+  "cardType": "action",
+  "text": "Sharpen target sword you control.\nIf it has 1 or more +1{p} counters, your next attack with it this turn costs {r} less to activate.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW120",
+  "name": "Sharp Incline",
+  "cardType": "action",
+  "text": "Sharpen target sword you control.\nIf it has 2 or more +1{p} counters, your next attack with it this turn costs {r} less to activate.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW121",
+  "name": "Sharp Incline",
+  "cardType": "action",
+  "text": "Sharpen target sword you control.\nIf it has 1 or more +1{p} counters, your next attack with it this turn costs {r} less to activate.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW122",
+  "name": "Sharpen Steel",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gets +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW123",
+  "name": "Sharp 'n Shine",
+  "cardType": "action",
+  "text": "Sharpen target sword you control.\nIf it has 1 or more +1{p} counters, create a Blade Dance token.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW124",
+  "name": "Sharp 'n Shine",
+  "cardType": "action",
+  "text": "Sharpen target sword you control.\nIf it has 2 or more +1{p} counters, create a Blade Dance token.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW125",
+  "name": "Sharp 'n Shine",
+  "cardType": "action",
+  "text": "Sharpen target sword you control.\nIf it has 3 or more +1{p} counters, create a Blade Dance token.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW126",
+  "name": "Showdown",
+  "cardType": "action",
+  "text": "Your next sword attack this turn gets +3{p} and \"When this attacks, wager with the defending hero. The winner creates a Flurry token.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW127",
+  "name": "Showdown",
+  "cardType": "action",
+  "text": "Your next sword attack this turn gets +2{p} and \"When this attacks, wager with the defending hero. The winner creates a Flurry token.\"\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW128",
+  "name": "Showdown",
+  "cardType": "action",
+  "text": "Your next sword attack this turn gets +1{p} and \"When this attacks, wager with the defending hero. The winner creates a Flurry token.\"\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW129",
+  "name": "Shuck",
+  "cardType": "action",
+  "text": "Create a Flurry token.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW130",
+  "name": "Swordmaster's Path",
+  "cardType": "action",
+  "text": "Your next sword attack this turn gets +3{p}.\nThe next time you would sharpen a sword this turn, instead sharpen it an additional time.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW131",
+  "name": "Swordmaster's Path",
+  "cardType": "action",
+  "text": "Your next sword attack this turn gets +2{p}.\nThe next time you would sharpen a sword this turn, instead sharpen it an additional time.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW132",
+  "name": "Swordmaster's Path",
+  "cardType": "action",
+  "text": "Your next sword attack this turn gets +1{p}.\nThe next time you would sharpen a sword this turn, instead sharpen it an additional time.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Sharpen",
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW133",
+  "name": "Heavy Swing",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy this and your next sword attack this turn gets +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW134",
+  "name": "Blade Dance",
+  "cardType": "token",
+  "text": "When you activate a weapon attack, destroy this and the attack gets go again.",
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW135",
+  "name": "Flurry",
+  "cardType": "token",
+  "text": "When you activate a weapon attack, destroy this and you may attack with the weapon twice this turn.",
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW136",
+  "name": "Hope Merchant's Hood",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Shuffle any number of cards from your hand into your deck, then draw that many cards.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW137",
+  "name": "Deep Blue",
+  "cardType": "equipment",
+  "text": "Action - Put a card from your hand on the bottom of your deck, destroy this: Gain {r}{r}{r}. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW138",
+  "name": "Clip Flexor",
+  "cardType": "equipment",
+  "text": "Defense Reaction - Destroy this: You may add an attack reaction card from your hand to the active chain link as a defending card.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW139",
+  "name": "Vigilant Dodgers",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Prevent the next 1 damage that would be dealt to you this turn. Activate this only if a weapon has attacked this turn.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW140",
+  "name": "Olde Leather Helm",
+  "cardType": "equipment",
+  "text": "If you've been attacked 2 or more times this turn, this gets +2{d}.\nBlade Break",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW141",
+  "name": "Olde Leather Plate",
+  "cardType": "equipment",
+  "text": "If you've been attacked 2 or more times this turn, this gets +2{d}.\nBlade Break",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW142",
+  "name": "Olde Leather Gloves",
+  "cardType": "equipment",
+  "text": "If you've been attacked 2 or more times this turn, this gets +2{d}.\nBlade Break",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW143",
+  "name": "Olde Leather Boots",
+  "cardType": "equipment",
+  "text": "If you've been attacked 2 or more times this turn, this gets +2{d}.\nBlade Break",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW144",
+  "name": "Peaceful Sanctuary",
+  "cardType": "action",
+  "text": "Heroes can't create aura tokens.\nAt the start of your action phase, destroy this.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW145",
+  "name": "Thwart",
+  "cardType": "block",
+  "text": "When this defends, remove all +1{p} counters from the attacking card.",
+  "pitch": 2,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW146",
+  "name": "Energy Potion",
+  "cardType": "action",
+  "text": "Instant - Destroy this: Gain {r}{r}",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW147",
+  "name": "Timesnap Potion",
+  "cardType": "action",
+  "text": "Action - Destroy this: Gain 2 action points.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW148",
+  "name": "Nip at the Heels",
+  "cardType": "attack-reaction",
+  "text": "Target attack with 3 or less base {p} gets +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW149",
+  "name": "Put in Context",
+  "cardType": "defense-reaction",
+  "text": "This can only defend an attack with 3 or less base {p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW150",
+  "name": "Money Where Ya Mouth Is",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +3{p} and \"When this attacks a hero, you may wager with them. The winner creates a Gold token.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW151",
+  "name": "Overbear",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gets dominate.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW152",
+  "name": "Starting Stake",
+  "cardType": "action",
+  "text": "If you control no Gold tokens, create a Gold token.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW153",
+  "name": "Trot Along",
+  "cardType": "action",
+  "text": "Your next attack with 3 or less base {p} this turn gets go again.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW154",
+  "name": "Gold",
+  "cardType": "token",
+  "text": "Action - {r}{r}, destroy this: Draw a card. Go again",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "MPW"
+ },
+ {
+  "id": "MPW155",
+  "name": "Dorinthea",
+  "cardType": "hero",
+  "text": "Once per turn Effect - When a weapon you control hits, you may attack an additional time with that weapon this turn.",
+  "classes": [
+   "warrior"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "MPW"
+ },
+ {
+  "id": "MPW156",
+  "name": "Dawnblade",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nThe second time this hits each turn, put a +1{p} counter on it.\nAt the beginning of your end phase, if this hasn't hit this turn, remove all +1{p} counters from it.",
+  "attack": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "sword",
+   "2h"
+  ],
+  "set": "MPW"
+ }
+]

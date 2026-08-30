@@ -1,0 +1,508 @@
+[
+ {
+  "id": "RHI001",
+  "name": "Rhinar",
+  "cardType": "hero",
+  "text": "Whenever you discard a card with 6 or more {p} during your action phase, intimidate.",
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "RHI"
+ },
+ {
+  "id": "RHI002",
+  "name": "Ball Breaker",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nIf you've discarded a card with 6 or more {p} this turn, this gets +1{p}.",
+  "attack": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "flail",
+   "1h"
+  ],
+  "set": "RHI"
+ },
+ {
+  "id": "RHI003",
+  "name": "Mandible Claw",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nIf you have discarded a card with 6 or more {p} this turn, this card's attacks go again.",
+  "attack": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "claw",
+   "1h"
+  ],
+  "set": "RHI"
+ },
+ {
+  "id": "RHI004",
+  "name": "Monstrous Veil",
+  "cardType": "equipment",
+  "text": "Rhinar Specialization\nAction - Destroy this: Draw a card then discard a random card. Go again\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Rhinar Specialization",
+   "Battleworn"
+  ],
+  "set": "RHI"
+ },
+ {
+  "id": "RHI005",
+  "name": "Raw Meat",
+  "cardType": "equipment",
+  "text": "If you control an Agility token, this gets +1{d}.\nIf you control a Might token, this gets +1{d}.\nTemper",
+  "defense": 0,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "RHI"
+ },
+ {
+  "id": "RHI006",
+  "name": "Gauntlet of Might",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Create a Might token. Go again\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "RHI"
+ },
+ {
+  "id": "RHI007",
+  "name": "Flat Trackers",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Create an Agility token. Go again\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "RHI"
+ },
+ {
+  "id": "RHI008",
+  "name": "Agile Windup",
+  "cardType": "action",
+  "text": "Instant - Discard this: Create an Agility token.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "RHI"
+ },
+ {
+  "id": "RHI009",
+  "name": "Assault and Battery",
+  "cardType": "action",
+  "text": "Beat Chest\nWhen this attacks, if you've beaten chest this turn, create an Agility token.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Beat Chest"
+  ],
+  "set": "RHI"
+ },
+ {
+  "id": "RHI010",
+  "name": "Bare Fangs",
+  "cardType": "action",
+  "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, Bare Fangs gains +2{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "RHI"
+ },
+ {
+  "id": "RHI011",
+  "name": "Beast Mode",
+  "cardType": "action",
+  "text": "If you've intimidated this turn, this gets +2{p}.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "RHI"
+ },
+ {
+  "id": "RHI012",
+  "name": "Mighty Windup",
+  "cardType": "action",
+  "text": "Instant - Discard this: Create a Might token.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "RHI"
+ },
+ {
+  "id": "RHI013",
+  "name": "Pack Hunt",
+  "cardType": "action",
+  "text": "When this attacks, intimidate.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "RHI"
+ },
+ {
+  "id": "RHI014",
+  "name": "Pound Town",
+  "cardType": "action",
+  "text": "Beat Chest\nWhen this attacks, if you've beaten chest this turn, create a Might token.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Beat Chest"
+  ],
+  "set": "RHI"
+ },
+ {
+  "id": "RHI015",
+  "name": "Rawhide Rumble",
+  "cardType": "action",
+  "text": "Beat Chest\nWhen this attacks a hero, if you've beaten chest this turn, intimidate them.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Beat Chest",
+   "Intimidate"
+  ],
+  "set": "RHI"
+ },
+ {
+  "id": "RHI016",
+  "name": "Bonebreaker Bellow",
+  "cardType": "action",
+  "text": "Beat Chest\nYour next Brute attack this turn gains +3{p}. If you've beaten chest this turn, instead it gains +5{p}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Beat Chest",
+   "Go again"
+  ],
+  "set": "RHI"
+ },
+ {
+  "id": "RHI017",
+  "name": "Agile Windup",
+  "cardType": "action",
+  "text": "Instant - Discard this: Create an Agility token.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "RHI"
+ },
+ {
+  "id": "RHI018",
+  "name": "Mighty Windup",
+  "cardType": "action",
+  "text": "Instant - Discard this: Create a Might token.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "RHI"
+ },
+ {
+  "id": "RHI019",
+  "name": "Pack Call",
+  "cardType": "action",
+  "text": "When this defends, reveal the top card of your deck. If it has 6 or more {p}, put it on top. Otherwise, put it on the bottom.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "RHI"
+ },
+ {
+  "id": "RHI020",
+  "name": "Bonebreaker Bellow",
+  "cardType": "action",
+  "text": "Beat Chest\nYour next Brute attack this turn gains +2{p}. If you've beaten chest this turn, instead it gains +4{p}.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Beat Chest",
+   "Go again"
+  ],
+  "set": "RHI"
+ },
+ {
+  "id": "RHI021",
+  "name": "Assault and Battery",
+  "cardType": "action",
+  "text": "Beat Chest\nWhen this attacks, if you've beaten chest this turn, create an Agility token.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Beat Chest"
+  ],
+  "set": "RHI"
+ },
+ {
+  "id": "RHI022",
+  "name": "Pack Hunt",
+  "cardType": "action",
+  "text": "When this attacks, intimidate.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "RHI"
+ },
+ {
+  "id": "RHI023",
+  "name": "Pound Town",
+  "cardType": "action",
+  "text": "Beat Chest\nWhen this attacks, if you've beaten chest this turn, create a Might token.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Beat Chest"
+  ],
+  "set": "RHI"
+ },
+ {
+  "id": "RHI024",
+  "name": "Bonebreaker Bellow",
+  "cardType": "action",
+  "text": "Beat Chest\nYour next Brute attack this turn gains +1{p}. If you've beaten chest this turn, instead it gains +3{p}.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Beat Chest",
+   "Go again"
+  ],
+  "set": "RHI"
+ },
+ {
+  "id": "RHI025",
+  "name": "Lead with Power",
+  "cardType": "action",
+  "text": "Your next Brute or Guardian attack this turn gets +1{p}.\nCreate a Might token.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "RHI"
+ },
+ {
+  "id": "RHI026",
+  "name": "Lead with Speed",
+  "cardType": "action",
+  "text": "Your next Brute or Warrior attack this turn gets +1{p}.\nCreate an Agility token.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "RHI"
+ },
+ {
+  "id": "RHI027",
+  "name": "Smashback Alehorn",
+  "cardType": "action",
+  "text": "Create an Agility and a Might token.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "RHI"
+ },
+ {
+  "id": "RHI028",
+  "name": "Might",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then your next attack this turn gets +1{p}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "RHI"
+ },
+ {
+  "id": "RHI029",
+  "name": "Agility",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then your next attack this turn gets go again.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "RHI"
+ }
+]

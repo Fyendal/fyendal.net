@@ -1,0 +1,1579 @@
+[
+  {
+    "id": "IAR000",
+    "name": "Soul of Existence",
+    "cardType": "resource",
+    "subtypes": [
+      "shadow",
+      "gem"
+    ],
+    "text": "Legendary (You may only have 1 Soul of Existence in your deck.)\nWhen this is pitched, lose 1{h}.",
+    "pitch": 4,
+    "keywords": [
+      "Legendary"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR001",
+    "name": "Arknight Shard",
+    "cardType": "resource",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "gem"
+    ],
+    "text": "Legendary Viserai Specialization (You may only have 1 Arknight Shard in your deck and only if your hero is Viserai.)\nWhen this is pitched, create a Runechant token.",
+    "pitch": 3,
+    "keywords": [
+      "Legendary",
+      "Viserai Specialization"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR002",
+    "name": "Levia",
+    "cardType": "hero",
+    "classes": [
+      "brute"
+    ],
+    "subtypes": [
+      "shadow"
+    ],
+    "text": "If a card with 6 or more {p} has been put into your banished zone this turn, you don't lose {h} from blood debt during the end phase.",
+    "intellect": 4,
+    "life": 20,
+    "set": "IAR"
+  },
+  {
+    "id": "IAR003",
+    "name": "Hell Hammer",
+    "cardType": "weapon",
+    "classes": [
+      "brute"
+    ],
+    "subtypes": [
+      "shadow",
+      "hammer",
+      "2h"
+    ],
+    "text": "Once per Turn Action - {r}{r}: Attack\nWhen the combat chain closes, if you've attacked with this, banish it.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
+    "attack": 6,
+    "keywords": [
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR004",
+    "name": "Hex Gauntlet",
+    "cardType": "equipment",
+    "classes": [
+      "brute"
+    ],
+    "subtypes": [
+      "shadow",
+      "arms"
+    ],
+    "text": "(You may add this to your card-pool in Usurp the Shadow Throne limited formats.)\nInstant - Banish this: Turn a card with blood debt in your banished zone face-down.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
+    "attack": 6,
+    "keywords": [
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR005",
+    "name": "Blood Harvest",
+    "cardType": "action",
+    "classes": [
+      "brute"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "Instant - Banish this from your hand: Gain {r}{r}{r}\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
+    "cost": 3,
+    "attack": 6,
+    "defense": 0,
+    "keywords": [
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR009",
+    "name": "Consuming Lash",
+    "cardType": "action",
+    "classes": [
+      "brute"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "Play this only if you control a Blasmophet.\nInstant - {r}, banish this from your hand: Your next attack this turn gets go again.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
+    "pitch": 2,
+    "cost": 2,
+    "attack": 6,
+    "defense": 3,
+    "keywords": [
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR010",
+    "name": "Consuming Strength",
+    "cardType": "action",
+    "classes": [
+      "brute"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "Play this only if you control a Blasmophet.\nInstant - {r}, banish this from your hand: Your next attack this turn gets +2{p}.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
+    "pitch": 2,
+    "cost": 2,
+    "attack": 6,
+    "defense": 3,
+    "keywords": [
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR017",
+    "name": "Beckoning Hunger",
+    "cardType": "action",
+    "classes": [
+      "brute"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "When this attacks, banish the top card of your deck.\nWhen this hits, create a Blasmophet, the Insatiable Hunger token.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
+    "pitch": 1,
+    "cost": 3,
+    "attack": 7,
+    "defense": 3,
+    "keywords": [
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR018",
+    "name": "Beckoning Hunger",
+    "cardType": "action",
+    "classes": [
+      "brute"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "When this attacks, banish the top card of your deck.\nWhen this hits, create a Blasmophet, the Insatiable Hunger token.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
+    "pitch": 2,
+    "cost": 3,
+    "attack": 6,
+    "defense": 3,
+    "keywords": [
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR019",
+    "name": "Beckoning Hunger",
+    "cardType": "action",
+    "classes": [
+      "brute"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "When this attacks, banish the top card of your deck.\nWhen this hits, create a Blasmophet, the Insatiable Hunger token.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
+    "pitch": 3,
+    "cost": 3,
+    "attack": 5,
+    "defense": 3,
+    "keywords": [
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR039",
+    "name": "Apex Burster",
+    "cardType": "action",
+    "classes": [
+      "brute"
+    ],
+    "subtypes": [
+      "attack"
+    ],
+    "text": "Instant - {r}{r}, discard this: Destroy target card that is defending an attack you control with 6 or more base {p}.",
+    "pitch": 3,
+    "cost": 3,
+    "attack": 6,
+    "defense": 3,
+    "set": "IAR"
+  },
+  {
+    "id": "IAR040",
+    "name": "Battle Clearing Bellow",
+    "cardType": "action",
+    "classes": [
+      "brute"
+    ],
+    "text": "Your next attack with 6 or more base {p} this turn gets +6{p}.\nGo again",
+    "pitch": 3,
+    "cost": 3,
+    "defense": 3,
+    "keywords": [
+      "Go again"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR053",
+    "name": "Malice, Domina of the Dead",
+    "cardType": "hero",
+    "classes": [
+      "necromancer"
+    ],
+    "subtypes": [
+      "shadow"
+    ],
+    "text": "Action - {r}, {t}: Until end of turn, you may play target zombie from your graveyard. Go again\nWhenever a zombie you control dies, banish it face-down and create a Corrupted Corpse in your banished zone.",
+    "intellect": 4,
+    "life": 40,
+    "set": "IAR"
+  },
+  {
+    "id": "IAR054",
+    "name": "Malice",
+    "cardType": "hero",
+    "classes": [
+      "necromancer"
+    ],
+    "subtypes": [
+      "shadow"
+    ],
+    "text": "Action - {r}, {t}: Until end of turn, you may play target zombie from your graveyard. Go again\nWhenever a zombie you control dies, banish it face-down and create a Corrupted Corpse in your banished zone.",
+    "intellect": 4,
+    "life": 20,
+    "keywords": [
+      "Go again"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR055",
+    "name": "Vox Necropolis",
+    "cardType": "weapon",
+    "classes": [
+      "necromancer"
+    ],
+    "subtypes": [
+      "shadow",
+      "staff",
+      "2h"
+    ],
+    "text": "During your action phase, zombies you've played from a graveyard or banished zone enter the arena tapped and get \"When this enters the arena, attack with it.\"\nZombies you control get \"Action - {r}, {t}: Attack\"",
+    "set": "IAR"
+  },
+  {
+    "id": "IAR056",
+    "name": "Appalling Bearers",
+    "cardType": "equipment",
+    "classes": [
+      "necromancer"
+    ],
+    "subtypes": [
+      "shadow",
+      "arms"
+    ],
+    "text": "(You may add this to your card-pool in Usurp the Shadow Throne limited formats.)\nInstant - Discard a zombie, destroy this: Prevent the next 2 damage that would be dealt to you this turn.",
+    "defense": 0,
+    "set": "IAR"
+  },
+  {
+    "id": "IAR057",
+    "name": "Forsaken Strike",
+    "cardType": "action",
+    "classes": [
+      "necromancer"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "As an additional cost to play this, you may destroy up to 3 zombies you control and/or discard up to 3 zombies. Choose a mode for each zombie destroyed or discarded this way:\n- Create a Gate to i'Arathael token.\n- This gets +2{p}.\n- This gets go again.",
+    "pitch": 2,
+    "cost": 0,
+    "attack": 3,
+    "defense": 3,
+    "set": "IAR"
+  },
+  {
+    "id": "IAR058",
+    "name": "Bridge of Damnation",
+    "cardType": "action",
+    "classes": [
+      "necromancer"
+    ],
+    "subtypes": [
+      "shadow",
+      "aura"
+    ],
+    "text": "Go again\nAt the start of each turn, destroy this unless you put a zombie from your banished zone into your graveyard.",
+    "pitch": 3,
+    "cost": 0,
+    "defense": 3,
+    "keywords": [
+      "Go again"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR064",
+    "name": "Restless Magister",
+    "cardType": "action",
+    "classes": [
+      "necromancer"
+    ],
+    "subtypes": [
+      "shadow",
+      "zombie",
+      "ally"
+    ],
+    "text": "When this hits a hero, they banish a card from their hand.\nDecay (At the beginning of your end phase, put a -1{h} counter on this.)",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 3,
+    "life": 3,
+    "keywords": [
+      "Decay"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR065",
+    "name": "Restless Quartermaster",
+    "cardType": "action",
+    "classes": [
+      "necromancer"
+    ],
+    "subtypes": [
+      "shadow",
+      "zombie",
+      "ally"
+    ],
+    "text": "When this hits a hero, they banish a card in their arsenal.\nDecay (At the beginning of your end phase, put a -1{h} counter on this.)",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 3,
+    "life": 3,
+    "keywords": [
+      "Decay"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR066",
+    "name": "Restless Outlaw",
+    "cardType": "action",
+    "classes": [
+      "necromancer"
+    ],
+    "subtypes": [
+      "shadow",
+      "zombie",
+      "ally"
+    ],
+    "text": "When this dies, create a Corrupted Corpse in your banished zone.\nDecay (At the beginning of your end phase, put a -1{h} counter on this.)",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 3,
+    "life": 3,
+    "keywords": [
+      "Decay"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR082",
+    "name": "Shadowrealm Strength",
+    "cardType": "action",
+    "text": "You may put a card from your banished zone into your graveyard. If it's a zombie, your next attack this turn gets +3{p}.\nGo again",
+    "pitch": 1,
+    "cost": 0,
+    "defense": 3,
+    "classes": [
+      "necromancer"
+    ],
+    "subtypes": [
+      "shadow"
+    ],
+    "keywords": [
+      "Go again"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR083",
+    "name": "Shadowrealm Strength",
+    "cardType": "action",
+    "text": "You may put a card from your banished zone into your graveyard. If it's a zombie, your next attack this turn gets +1{p}.\nGo again",
+    "pitch": 3,
+    "cost": 0,
+    "defense": 3,
+    "classes": [
+      "necromancer"
+    ],
+    "subtypes": [
+      "shadow"
+    ],
+    "keywords": [
+      "Go again"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR084",
+    "name": "Restless Cleric",
+    "cardType": "action",
+    "classes": [
+      "necromancer"
+    ],
+    "subtypes": [
+      "shadow",
+      "zombie",
+      "ally"
+    ],
+    "text": "Action - {t}: Gain 1{h}. Go again\nDecay (At the beginning of your end phase, put a -1{h} counter on this.)",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 3,
+    "life": 3,
+    "keywords": [
+      "Decay"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR085",
+    "name": "Restless Corporal",
+    "cardType": "action",
+    "classes": [
+      "necromancer"
+    ],
+    "subtypes": [
+      "shadow",
+      "zombie",
+      "ally"
+    ],
+    "text": "Action - {t}: Put a card from your banished zone into your graveyard. Go again\nDecay (At the beginning of your end phase, put a -1{h} counter on this.)",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 3,
+    "life": 3,
+    "keywords": [
+      "Decay"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR090",
+    "name": "Corrupted Corpse",
+    "cardType": "action",
+    "classes": [
+      "necromancer"
+    ],
+    "subtypes": [
+      "shadow",
+      "zombie",
+      "ally"
+    ],
+    "text": "Incarnate (This can't start in your deck. If this would die, instead it ceases to exist.)\nThis card's attacks get go again.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
+    "cost": 2,
+    "attack": 3,
+    "life": 3,
+    "keywords": [
+      "Incarnate",
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR091",
+    "name": "Danse Macabre",
+    "cardType": "equipment",
+    "classes": [
+      "necromancer"
+    ],
+    "subtypes": [
+      "legs"
+    ],
+    "text": "Whenever an ally you control enters the arena, you may pay {r}{r} and {t} this. If you do, that ally's first attack this turn gets go again and destroy that ally at the beginning of the end phase.\nBlade Break",
+    "defense": 1,
+    "keywords": [
+      "Blade Break"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR093",
+    "name": "Bone Barrier",
+    "cardType": "defense-reaction",
+    "classes": [
+      "necromancer"
+    ],
+    "text": "When this defends, you may destroy an ally you control or discard an ally. If you do, this gets +2{d}.",
+    "pitch": 3,
+    "cost": 0,
+    "defense": 2,
+    "set": "IAR"
+  },
+  {
+    "id": "IAR106",
+    "name": "Viserai, the Forsaken",
+    "cardType": "hero",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "shadow"
+    ],
+    "text": "Whenever you create 1 or more Runechants, banish the top card of your deck. Then if you've created 3 or more Runechants this turn, traverse. (Flip. Your {h} does not change.)",
+    "intellect": 4,
+    "life": 40,
+    "set": "IAR",
+    "backId": "IAR106B"
+  },
+  {
+    "id": "IAR106B",
+    "name": "Viserai, Usurper",
+    "cardType": "hero",
+    "text": "The first attack action card with blood debt you play each turn gets go again.\nAt the beginning of each end phase, if you've created or activated a Gate to i'Arathael this turn, you may traverse.",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "shadow",
+      "demon"
+    ],
+    "intellect": 4,
+    "keywords": [
+      "Go again"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR107",
+    "name": "Viserai, Between Worlds",
+    "cardType": "hero",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "shadow"
+    ],
+    "text": "Whenever you create 1 or more Runechants, banish the top card of your deck. Then if you've created 3 or more Runechants this turn, traverse. (Flip. Your {h} does not change.)",
+    "intellect": 4,
+    "life": 20,
+    "set": "IAR",
+    "backId": "IAR107B"
+  },
+  {
+    "id": "IAR107B",
+    "name": "Viserai, Usurper",
+    "cardType": "hero",
+    "text": "The first attack action card with blood debt you play each turn gets go again.\nAt the beginning of each end phase, if you've created or activated a Gate to i'Arathael this turn, you may traverse.",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "shadow",
+      "demon"
+    ],
+    "intellect": 4,
+    "keywords": [
+      "Go again"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR108",
+    "name": "Seven Sin Nebula",
+    "cardType": "weapon",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "shadow",
+      "sword",
+      "2h"
+    ],
+    "text": "Action - {r}, {t}: Attack. Activate this only if you've played a card from a banished zone this turn.\nWhen this hits a hero, create a Runechant token.",
+    "attack": 3,
+    "set": "IAR"
+  },
+  {
+    "id": "IAR109",
+    "name": "Grasp of the Darknight",
+    "cardType": "equipment",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "shadow",
+      "arms"
+    ],
+    "text": "(You may add this to your card-pool in Usurp the Shadow Throne limited formats.)\nAction - {r}, destroy this: Opt 1, then create a Runechant token. Go again (Look at the top card of your deck. Put it on the top or bottom.)",
+    "defense": 0,
+    "keywords": [
+      "Opt 1",
+      "Go again"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR110",
+    "name": "Usurp the Shadow Throne",
+    "cardType": "action",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "Viserai Specialization\nIf you've usurped this turn, this costs 6{r} less to play and you may play it from your banished zone.\nWhen this hits a hero, turn all cards in their banished zone face-down. They lose X{h} and you gain X{h}, where X is the number of cards turned face-down this way.\nBlood Debt",
+    "pitch": 3,
+    "cost": 13,
+    "attack": 13,
+    "defense": 3,
+    "keywords": [
+      "Viserai Specialization",
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR112",
+    "name": "Sinspeaker Gloomblade",
+    "cardType": "action",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "You may play this from your banished zone.\nUsurp (As an additional cost to play this, destroy a Runechant if able. If you do, this gets +2{p}.)\nIf this was played from your banished zone, it gets \"When this attacks, you may search your deck for an aura with Runechant in its name, put it into the arena, then shuffle.\"\nBlood Debt",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 2,
+    "defense": 3,
+    "keywords": [
+      "Usurp",
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR113",
+    "name": "Become the Shadow Lord",
+    "cardType": "action",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "shadow"
+    ],
+    "text": "Banish a card from your hand. If it's Runeblade, create a Runechant token. If it's Shadow, create a Gate to i'Arathael token.\nGo again",
+    "pitch": 3,
+    "cost": 0,
+    "defense": 3,
+    "keywords": [
+      "Go again"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR114",
+    "name": "Bloodsong Gloomblade",
+    "cardType": "action",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "You may play this from your banished zone.\nUsurp (As an additional cost to play this, destroy a Runechant if able. If you do, this gets +2{p}.)\nWhen this hits a hero, you may banish target aura permanent they control.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 2,
+    "defense": 3,
+    "keywords": [
+      "Usurp",
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR116",
+    "name": "Plundersong Gloomblade",
+    "cardType": "action",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "You may play this from your banished zone.\nUsurp (As an additional cost to play this, destroy a Runechant if able. If you do, this gets +2{p}.)\nWhen this hits a hero, they banish a card in their arsenal.\nBlood Debt",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 2,
+    "defense": 3,
+    "keywords": [
+      "Usurp",
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR117",
+    "name": "Vexing Gloomblade",
+    "cardType": "action",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "You may play this from your banished zone.\nUsurp (As an additional cost to play this, destroy a Runechant if able. If you do, this gets +2{p}.)\nWhen this hits a hero, deal 2 arcane damage to any target.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
+    "pitch": 1,
+    "cost": 3,
+    "attack": 5,
+    "defense": 3,
+    "keywords": [
+      "Usurp",
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR120",
+    "name": "Embrace Sin",
+    "cardType": "action",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "shadow"
+    ],
+    "text": "Your next attack this turn gets +2{p}.\nYou may play an aura with Runechant in its name from your banished zone this turn.\nGo again",
+    "pitch": 2,
+    "cost": 1,
+    "defense": 2,
+    "keywords": [
+      "Go again"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR126",
+    "name": "Demonbound Gloomblade",
+    "cardType": "action",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "You may play this from your banished zone.\nUsurp (As an additional cost to play this, destroy a Runechant if able. If you do, this gets +2{p}.)\nBlood Debt",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 3,
+    "defense": 3,
+    "keywords": [
+      "Usurp",
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR141",
+    "name": "Otherworldly Sins",
+    "cardType": "action",
+    "text": "Your next Runeblade or Shadow attack this turn gets +3{p}.\nCreate a Runechant token.\nGo again",
+    "pitch": 1,
+    "cost": 1,
+    "defense": 2,
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "shadow"
+    ],
+    "keywords": [
+      "Go again"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR142",
+    "name": "Otherworldly Sins",
+    "cardType": "action",
+    "text": "Your next Runeblade or Shadow attack this turn gets +2{p}.\nCreate a Runechant token.\nGo again",
+    "pitch": 2,
+    "cost": 1,
+    "defense": 2,
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "shadow"
+    ],
+    "keywords": [
+      "Go again"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR143",
+    "name": "Otherworldly Sins",
+    "cardType": "action",
+    "text": "Your next Runeblade or Shadow attack this turn gets +1{p}.\nCreate a Runechant token.\nGo again",
+    "pitch": 3,
+    "cost": 1,
+    "defense": 2,
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "shadow"
+    ],
+    "keywords": [
+      "Go again"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR145",
+    "name": "Runechant of Greed",
+    "cardType": "instant",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "text": "This counts as a Runechant. When an attack usurps this, draw a card.\nWhen this is destroyed, create a Runechant token.\nAt the beginning of your action phase or when you play an attack action card, destroy this.",
+    "pitch": 2,
+    "cost": 0,
+    "set": "IAR"
+  },
+  {
+    "id": "IAR146",
+    "name": "Runic Disposition",
+    "cardType": "action",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "attack"
+    ],
+    "text": "Usurp (As an additional cost to play this, destroy a Runechant if able. If you do, this gets +2{p}.)\nInstant - Discard this: Create a Runechant token.",
+    "pitch": 1,
+    "cost": 2,
+    "attack": 6,
+    "defense": 2,
+    "keywords": [
+      "Usurp"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR152",
+    "name": "Runechant of Envy",
+    "cardType": "instant",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "text": "This counts as a Runechant. When an attack usurps this, gain 1{h}.\nWhen this is destroyed, create a Runechant token.\nAt the beginning of your action phase or when you play an attack action card, destroy this.",
+    "pitch": 2,
+    "cost": 0,
+    "set": "IAR"
+  },
+  {
+    "id": "IAR153",
+    "name": "Runechant of Gluttony",
+    "cardType": "instant",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "text": "This counts as a Runechant. When an attack usurps this, gain {r}.\nWhen this is destroyed, create a Runechant token.\nAt the beginning of your action phase or when you play an attack action card, destroy this.",
+    "pitch": 2,
+    "cost": 0,
+    "set": "IAR"
+  },
+  {
+    "id": "IAR154",
+    "name": "Runechant of Lust",
+    "cardType": "instant",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "text": "This counts as a Runechant. When an attack usurps this, create a Runechant token.\nWhen this is destroyed, create a Runechant token.\nAt the beginning of your action phase or when you play an attack action card, destroy this.",
+    "pitch": 2,
+    "cost": 0,
+    "set": "IAR"
+  },
+  {
+    "id": "IAR155",
+    "name": "Runechant of Pride",
+    "cardType": "instant",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "text": "This counts as a Runechant. When an attack usurps this, it gets +1{p}.\nWhen this is destroyed, create a Runechant token.\nAt the beginning of your action phase or when you play an attack action card, destroy this.",
+    "pitch": 2,
+    "cost": 0,
+    "set": "IAR"
+  },
+  {
+    "id": "IAR156",
+    "name": "Runechant of Sloth",
+    "cardType": "instant",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "text": "This counts as a Runechant. When an attack usurps this, it gets go again.\nWhen this is destroyed, create a Runechant token.\nAt the beginning of your action phase or when you play an attack action card, destroy this.",
+    "pitch": 2,
+    "cost": 0,
+    "set": "IAR"
+  },
+  {
+    "id": "IAR157",
+    "name": "Runechant of Wrath",
+    "cardType": "instant",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "text": "This counts as a Runechant. When an attack usurps this, it gets overpower. (It can't be defended by more than 1 action card.)\nWhen this is destroyed, create a Runechant token.\nAt the beginning of your action phase or when you play an attack action card, destroy this.",
+    "pitch": 2,
+    "cost": 0,
+    "set": "IAR"
+  },
+  {
+    "id": "IAR159",
+    "name": "Baalghor, Omen of the End",
+    "cardType": "hero",
+    "subtypes": [
+      "shadow",
+      "demon"
+    ],
+    "text": "Whenever you pitch a card, banish it.\nAttack action cards played from your banished zone get +3{p}.",
+    "intellect": 3,
+    "life": 33,
+    "set": "IAR"
+  },
+  {
+    "id": "IAR161",
+    "name": "Grille of Repentance",
+    "cardType": "equipment",
+    "subtypes": [
+      "shadow",
+      "head"
+    ],
+    "text": "Instant - Destroy this: Turn a card with blood debt in your banished zone face-down.",
+    "defense": 0,
+    "set": "IAR"
+  },
+  {
+    "id": "IAR162",
+    "name": "Robe of Repentance",
+    "cardType": "equipment",
+    "subtypes": [
+      "shadow",
+      "chest"
+    ],
+    "text": "Instant - Destroy this: Turn a card with blood debt in your banished zone face-down.",
+    "defense": 0,
+    "set": "IAR"
+  },
+  {
+    "id": "IAR163",
+    "name": "Path of Repentance",
+    "cardType": "equipment",
+    "subtypes": [
+      "shadow",
+      "legs"
+    ],
+    "text": "Instant - Destroy this: Turn a card with blood debt in your banished zone face-down.",
+    "defense": 0,
+    "set": "IAR"
+  },
+  {
+    "id": "IAR164",
+    "name": "Corrupt and Conquer",
+    "cardType": "action",
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "If this was played from your banished zone, it gets \"Defense reaction cards can't be played this chain link.\"\nWhen this hits a hero, banish all cards in their arsenal.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
+    "pitch": 1,
+    "cost": 2,
+    "attack": 6,
+    "defense": 3,
+    "keywords": [
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR166",
+    "name": "Open the Gate to i'Arathael",
+    "cardType": "action",
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "When this hits or is banished from hand or deck, create a Gate to i'Arathael token.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 4,
+    "defense": 3,
+    "keywords": [
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR167",
+    "name": "Countdown to Extinction",
+    "cardType": "action",
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "When this attacks, create a Gate to i'Arathael token.\nWhen this hits, you may search your deck for a Darkest Hour, banish it, then shuffle.\nBlood Debt",
+    "pitch": 1,
+    "cost": 3,
+    "attack": 6,
+    "defense": 3,
+    "keywords": [
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR170",
+    "name": "Harbinger of Destruction",
+    "cardType": "action",
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "As an additional cost to play this, banish a card from your hand. If a Shadow card was banished this way, this gets \"When this hits, create 2 Gate to i'Arathael tokens.\"\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
+    "pitch": 1,
+    "cost": 8,
+    "attack": 13,
+    "defense": 3,
+    "keywords": [
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR174",
+    "name": "Shadowrealm Harrower",
+    "cardType": "action",
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "If this was played from your banished zone, it gets +1{p} and \"When this hits a hero, gain {h} equal to the damage dealt this way.\"\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
+    "pitch": 3,
+    "cost": 2,
+    "attack": 4,
+    "defense": 3,
+    "keywords": [
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR175",
+    "name": "Shadowrealm Harvester",
+    "cardType": "action",
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "If this was played from your banished zone, it gets +1{p} and overpower. (This can't be defended by more than 1 action card.)\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
+    "pitch": 1,
+    "cost": 2,
+    "attack": 6,
+    "defense": 3,
+    "keywords": [
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR176",
+    "name": "Shadowrealm Reaper",
+    "cardType": "action",
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "If this was played from your banished zone, it gets +1{p} and go again.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
+    "pitch": 2,
+    "cost": 2,
+    "attack": 5,
+    "defense": 3,
+    "keywords": [
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR177",
+    "name": "Tribute to Greater Power",
+    "cardType": "action",
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "Instant - Banish this from your hand: Your next attack this turn gets overpower. (It can't be defended by more than 1 action card.)\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
+    "pitch": 1,
+    "cost": 2,
+    "attack": 6,
+    "defense": 2,
+    "keywords": [
+      "Overpower",
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR178",
+    "name": "Unbound by Shadow",
+    "cardType": "action",
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "When this attacks, if it was played from your banished zone, create a Gate to i'Arathael token.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 4,
+    "defense": 3,
+    "keywords": [
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR179",
+    "name": "Dimenxxional Ferryman",
+    "cardType": "action",
+    "subtypes": [
+      "shadow"
+    ],
+    "text": "Put this and an action card with blood debt from your banished zone on the bottom of your deck.\nGo again",
+    "pitch": 3,
+    "cost": 0,
+    "defense": 3,
+    "keywords": [
+      "Go again"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR180",
+    "name": "Planar Chaos",
+    "cardType": "action",
+    "subtypes": [
+      "shadow"
+    ],
+    "text": "Create a Gate to i'Arathael token.\nThe next Gate to i'Arathael token you activate this turn can target an action card with blood debt in any banished zone.\nGo again",
+    "pitch": 1,
+    "cost": 0,
+    "defense": 3,
+    "keywords": [
+      "Go again"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR209",
+    "name": "Darkest Hour",
+    "cardType": "action",
+    "subtypes": [
+      "shadow"
+    ],
+    "text": "You may put a card from your hand on top of your deck rather than pay this card's {r} cost.\nYour next Shadow attack this turn gets +4{p}. Go again\nBlood Debt",
+    "pitch": 1,
+    "cost": 2,
+    "defense": 3,
+    "keywords": [
+      "Go again",
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR211",
+    "name": "Darkest Hour",
+    "cardType": "action",
+    "subtypes": [
+      "shadow"
+    ],
+    "text": "You may put a card from your hand on top of your deck rather than pay this card's {r} cost.\nYour next Shadow attack this turn gets +2{p}. Go again\nBlood Debt",
+    "pitch": 3,
+    "cost": 2,
+    "defense": 3,
+    "keywords": [
+      "Go again",
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR212",
+    "name": "Pull from Beyond",
+    "cardType": "action",
+    "subtypes": [
+      "shadow"
+    ],
+    "text": "Opt 2 (Look at the top 2 cards of your deck. Put them on the top and/or bottom in any order.)\nBanish the top card of your deck. If it's red, create a Gate to i'Arathael token. Go again",
+    "pitch": 1,
+    "cost": 0,
+    "defense": 3,
+    "keywords": [
+      "Opt 2",
+      "Go again"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR213",
+    "name": "Pull from Beyond",
+    "cardType": "action",
+    "subtypes": [
+      "shadow"
+    ],
+    "text": "Opt 2 (Look at the top 2 cards of your deck. Put them on the top and/or bottom in any order.)\nBanish the top card of your deck. If it's yellow, create a Gate to i'Arathael token. Go again",
+    "pitch": 2,
+    "cost": 0,
+    "defense": 3,
+    "keywords": [
+      "Opt 2",
+      "Go again"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR214",
+    "name": "Pull from Beyond",
+    "cardType": "action",
+    "subtypes": [
+      "shadow"
+    ],
+    "text": "Opt 2 (Look at the top 2 cards of your deck. Put them on the top and/or bottom in any order.)\nBanish the top card of your deck. If it's blue, create a Gate to i'Arathael token. Go again",
+    "pitch": 3,
+    "cost": 0,
+    "defense": 3,
+    "keywords": [
+      "Opt 2",
+      "Go again"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR221",
+    "name": "Blasmophet, the Insatiable Hunger",
+    "cardType": "token",
+    "subtypes": [
+      "shadow",
+      "demon",
+      "ally"
+    ],
+    "text": "Unique (You can only control 1 Blasmophet.)\nOnce per turn, you may play an action card with blood debt from your banished zone.\nAt the beginning of each end phase, you may banish a card from your hand. Then if you haven't banished a card with blood debt this turn, destroy this.",
+    "attack": 6,
+    "life": 6,
+    "keywords": [
+      "Unique"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR222",
+    "name": "Gate to i'Arathael",
+    "cardType": "token",
+    "subtypes": [
+      "shadow",
+      "aura"
+    ],
+    "text": "Instant - {r}, destroy this: You may play target action card with blood debt from your banished zone this turn.",
+    "set": "IAR"
+  },
+  {
+    "id": "IAR223",
+    "name": "Circlet of Eternal End",
+    "cardType": "equipment",
+    "classes": [
+      "generic"
+    ],
+    "subtypes": [
+      "head"
+    ],
+    "text": "When this defends, turn a card in the attacking hero's banished zone face-down.\nBlade Break (When the combat chain closes, if this defended, destroy it.)",
+    "defense": 2,
+    "keywords": [
+      "Blade Break"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR243",
+    "name": "Deadly Spinneret",
+    "cardType": "action",
+    "classes": [
+      "assassin"
+    ],
+    "subtypes": [
+      "attack"
+    ],
+    "text": "Stealth\nInstant - Discard this: Equip a Graphene Chelicera token to each of your empty weapon zones.",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 3,
+    "defense": 3,
+    "keywords": [
+      "Stealth"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR244",
+    "name": "Crushing Headache",
+    "cardType": "action",
+    "classes": [
+      "guardian"
+    ],
+    "subtypes": [
+      "attack"
+    ],
+    "text": "Crush - When this deals 4 or more damage to a hero, they reveal their arsenal and hand. Destroy all non-attack action cards in their arsenal and they discard all non-attack action cards in their hand revealed this way.",
+    "pitch": 1,
+    "cost": 6,
+    "attack": 10,
+    "defense": 3,
+    "keywords": [
+      "Crush"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR245",
+    "name": "Stoke Vengeance",
+    "cardType": "action",
+    "classes": [
+      "ninja"
+    ],
+    "subtypes": [
+      "attack"
+    ],
+    "text": "Combo - If Edge of Autumn was the last attack this combat chain, this gets go again and \"When this hits, your next attack this combat chain gets +2{p}.\"",
+    "pitch": 1,
+    "cost": 1,
+    "attack": 4,
+    "defense": 3,
+    "keywords": [
+      "Combo"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR248",
+    "name": "Echoing Trap",
+    "cardType": "block",
+    "classes": [
+      "ranger"
+    ],
+    "subtypes": [
+      "trap"
+    ],
+    "text": "Ambush (While this is in your arsenal, you may defend with it.)\nWhen this defends an attack action card with the same name as another card played this turn, the attacking hero discards a card.",
+    "pitch": 3,
+    "defense": 3,
+    "keywords": [
+      "Ambush"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR249",
+    "name": "Sigil of the Muse",
+    "cardType": "action",
+    "classes": [
+      "wizard"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "text": "If a hero would draw 1 or more cards during an action phase, instead they create that many Ponder tokens.\nAt the beginning of your action phase, destroy this and create a Ponder token.",
+    "pitch": 1,
+    "cost": 0,
+    "defense": 3,
+    "set": "IAR"
+  },
+  {
+    "id": "IAR250",
+    "name": "Astral Ambience",
+    "cardType": "action",
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "attack"
+    ],
+    "text": "Whenever this fragments, create a Spectral Shield token.\nInstant - Destroy a Spectral Shield you control: This gets go again.\nFragment (Whenever a card with 2 or more {d} defends this, this gets -2{p}.)",
+    "pitch": 2,
+    "cost": 2,
+    "attack": 6,
+    "defense": 3,
+    "keywords": [
+      "Fragment"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR252",
+    "name": "Rush of Knowledge",
+    "cardType": "action",
+    "classes": [
+      "illusionist",
+      "wizard"
+    ],
+    "subtypes": [
+      "attack"
+    ],
+    "text": "When this attacks, you may destroy a Ponder token you control. If you do, draw a card and gain 1 action point.\nPhantasm (When this is defended by a non-Illusionist attack action card with 6 or more {p}, destroy this.)",
+    "pitch": 3,
+    "cost": 0,
+    "attack": 4,
+    "defense": 2,
+    "keywords": [
+      "Phantasm"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR256",
+    "name": "Head Banging Chorus",
+    "cardType": "instant",
+    "classes": [
+      "guardian"
+    ],
+    "subtypes": [
+      "revered",
+      "aura"
+    ],
+    "text": "Suspense (This enters the arena with 2 suspense counters. At the start of your turn, remove a suspense counter from it. When it has none, destroy it.)\nThe first Guardian or Revered attack action card you play each turn gets \"When this hits a hero, if you have no cards in hand, draw a card.\"",
+    "pitch": 2,
+    "cost": 1,
+    "defense": 3,
+    "keywords": [
+      "Suspense"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR259",
+    "name": "Chains of Consecration",
+    "cardType": "instant",
+    "classes": [
+      "light"
+    ],
+    "text": "Prevent all damage target ally would deal this turn. If damage is prevented from a Shadow ally this way, banish it face-down.",
+    "pitch": 2,
+    "cost": 0,
+    "set": "IAR"
+  },
+  {
+    "id": "IAR260",
+    "name": "Ice Aged Oak",
+    "cardType": "action",
+    "subtypes": [
+      "earth",
+      "attack"
+    ],
+    "text": "When this hits a hero, create an Embodiment of Earth token.\nIce Bond - If an Ice card was pitched to play this, this gets dominate and \"When this hits a hero, create a Frostbite token in each of their exposed head, chest, arms, and legs zones.\"",
+    "pitch": 3,
+    "cost": 3,
+    "attack": 4,
+    "defense": 3,
+    "keywords": [
+      "Ice Bond",
+      "Dominate"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR261",
+    "name": "Ancient Earth Oak",
+    "cardType": "action",
+    "subtypes": [
+      "ice",
+      "attack"
+    ],
+    "text": "When this hits a hero, create a Frostbite token under their control.\nEarth Bond - If an Earth card was pitched to play this, this gets +2{p} and \"When this hits a hero, put this on the bottom of its owner's deck.\"",
+    "pitch": 1,
+    "cost": 3,
+    "attack": 6,
+    "defense": 3,
+    "keywords": [
+      "Earth Bond"
+    ],
+    "set": "IAR"
+  }
+]

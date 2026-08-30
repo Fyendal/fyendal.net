@@ -1,0 +1,530 @@
+[
+ {
+  "id": "AMX001",
+  "name": "Maxx 'The Hype' Nitro",
+  "cardType": "hero",
+  "text": "Once per Turn Action - {r}{r}: Create a Hyper Driver token with 2 steam counters.  Activate this ability only if you've boosted this turn.\nHyper Drivers you control get crank.",
+  "classes": [
+   "mechanologist"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "AMX"
+ },
+ {
+  "id": "AMX002",
+  "name": "Banksy",
+  "cardType": "weapon",
+  "text": "Maxx Specialization\nOnce per Turn Action - {r}: Attack. Activate this ability only if you've cranked this turn.\nWhen this hits a hero, put a steam counter on an item you control with crank.",
+  "attack": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "wrench",
+   "2h"
+  ],
+  "keywords": [
+   "Maxx Specialization"
+  ],
+  "set": "AMX"
+ },
+ {
+  "id": "AMX003",
+  "name": "Breaker Helm Protos",
+  "cardType": "equipment",
+  "text": "When this defends, you may discard a Hyper Driver. If you do, draw a card and this gets +1{d} until end of turn.\nTemper",
+  "defense": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "base",
+   "head"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "AMX"
+ },
+ {
+  "id": "AMX004",
+  "name": "Puffer Jacket",
+  "cardType": "equipment",
+  "text": "Non-token Hyper Drivers you control enter the arena with an additional steam counter.\nTemper",
+  "defense": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "AMX"
+ },
+ {
+  "id": "AMX005",
+  "name": "Fist Pump",
+  "cardType": "equipment",
+  "text": "Whenever you banish a Hyper Driver from boosting, target wrench you control gets +1{p} this turn.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "AMX"
+ },
+ {
+  "id": "AMX006",
+  "name": "Drive Brake",
+  "cardType": "equipment",
+  "text": "Whenever you banish a Hyper Driver from boosting, remove a -1{d} counter from this.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "AMX"
+ },
+ {
+  "id": "AMX007",
+  "name": "Crankshaft",
+  "cardType": "action",
+  "text": "Boost\nWhen this is banished from boosting, put a steam counter on a Hyper Driver you control.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "AMX"
+ },
+ {
+  "id": "AMX008",
+  "name": "Data Link",
+  "cardType": "action",
+  "text": "Boost\nWhen this hits, opt 1.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost",
+   "Opt 1"
+  ],
+  "set": "AMX"
+ },
+ {
+  "id": "AMX009",
+  "name": "Expedite",
+  "cardType": "action",
+  "text": "Boost\nWhen this hits, you may put an item with cost 0 or 1 from your hand into the arena.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "AMX"
+ },
+ {
+  "id": "AMX010",
+  "name": "Heist",
+  "cardType": "action",
+  "text": "Boost\nWhen this hits a hero, you may put an item with cost 0 or 1 from any banished zone into the arena under your control.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "AMX"
+ },
+ {
+  "id": "AMX011",
+  "name": "Jump Start",
+  "cardType": "action",
+  "text": "If you control a Hyper Driver, this costs {r} less to play.\nBoost",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "AMX"
+ },
+ {
+  "id": "AMX012",
+  "name": "Sprocket Rocket",
+  "cardType": "action",
+  "text": "Boost\nIf an item or equipment was banished from boosting this, this gets +1{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "AMX"
+ },
+ {
+  "id": "AMX013",
+  "name": "T-Bone",
+  "cardType": "action",
+  "text": "If you control a card on the combat chain that was boosted, the defending hero must defend this with an equipment they control if able.\nBoost",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "AMX"
+ },
+ {
+  "id": "AMX014",
+  "name": "Throttle",
+  "cardType": "action",
+  "text": "Boost",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "AMX"
+ },
+ {
+  "id": "AMX015",
+  "name": "Zero to Fifty",
+  "cardType": "action",
+  "text": "Boost",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "AMX"
+ },
+ {
+  "id": "AMX016",
+  "name": "Zero to Sixty",
+  "cardType": "action",
+  "text": "Boost",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "AMX"
+ },
+ {
+  "id": "AMX017",
+  "name": "Zipper Hit",
+  "cardType": "action",
+  "text": "Boost",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "AMX"
+ },
+ {
+  "id": "AMX018",
+  "name": "Twintek Charging Station",
+  "cardType": "action",
+  "text": "The next attack you boost this turn gets +3{p}.\nYou may shuffle a Hyper Driver from your graveyard into your deck. If you do, gain {r}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AMX"
+ },
+ {
+  "id": "AMX019",
+  "name": "Hyper Driver",
+  "cardType": "action",
+  "text": "This enters the arena with 3 steam counters. When it has none, destroy it.\nOnce per turn, when you boost a card, remove a steam counter from this and gain {r}.",
+  "pitch": 1,
+  "cost": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "AMX"
+ },
+ {
+  "id": "AMX020",
+  "name": "Crankshaft",
+  "cardType": "action",
+  "text": "Boost\nWhen this is banished from boosting, put a steam counter on a Hyper Driver you control.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "AMX"
+ },
+ {
+  "id": "AMX021",
+  "name": "Zero to Sixty",
+  "cardType": "action",
+  "text": "Boost",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "AMX"
+ },
+ {
+  "id": "AMX022",
+  "name": "Construct Bank Breaker",
+  "cardType": "action",
+  "text": "If you have a wrench weapon equipped, transform it and 3 Hyper Drivers you control into Bank Breaker, then equip Bank Breaker.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "construct"
+  ],
+  "keywords": [
+   "Transform",
+   "Go again"
+  ],
+  "set": "AMX",
+  "backId": "AMX022B"
+ },
+ {
+  "id": "AMX022B",
+  "name": "Bank Breaker",
+  "cardType": "weapon",
+  "text": "Twice per Turn Action - {r}: Attack. Activate this only if you've cranked this turn.\nWhen this attacks, you may banish a card from under it. If you do, the attack gets overpower and go again.",
+  "attack": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "wrench",
+   "2h"
+  ],
+  "set": "AMX"
+ },
+ {
+  "id": "AMX023",
+  "name": "Hyper Driver",
+  "cardType": "action",
+  "text": "This enters the arena with 2 steam counters on it. When this has no steam counters on it, destroy it.\nOnce per turn, when you boost a card, remove a steam counter from this and gain {r}.",
+  "pitch": 2,
+  "cost": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "AMX"
+ },
+ {
+  "id": "AMX024",
+  "name": "Big Bertha",
+  "cardType": "action",
+  "text": "Boost\nWhen this is banished from boosting, put a steam counter on a Hyper Driver you control.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "AMX"
+ },
+ {
+  "id": "AMX025",
+  "name": "Crankshaft",
+  "cardType": "action",
+  "text": "Boost\nWhen this is banished from boosting, put a steam counter on a Hyper Driver you control.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "AMX"
+ },
+ {
+  "id": "AMX026",
+  "name": "Clamp Press",
+  "cardType": "action",
+  "text": "Crank\nThis enters the arena with 2 steam counters. At the start of your turn, destroy this unless you remove a steam counter from it.\nWrenches you control get +2{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Crank"
+  ],
+  "set": "AMX"
+ },
+ {
+  "id": "AMX027",
+  "name": "Hyper Driver",
+  "cardType": "action",
+  "text": "This enters the arena with a steam counters on it. When this has no steam counters on it, destroy it.\nOnce per turn, when you boost a card, remove a steam counter from this and gain {r}.",
+  "pitch": 3,
+  "cost": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "AMX"
+ },
+ {
+  "id": "AMX028",
+  "name": "Hyper Driver",
+  "cardType": "token",
+  "text": "When this has no steam counters, destroy it.\nOnce per turn, when you boost a card, remove a steam counter from this and gain {r}.",
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "AMX"
+ }
+]

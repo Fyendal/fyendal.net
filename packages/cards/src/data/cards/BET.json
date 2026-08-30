@@ -1,0 +1,506 @@
+[
+ {
+  "id": "BET001",
+  "name": "Betsy",
+  "cardType": "hero",
+  "text": "Whenever an attack you control wagers, you may pay {r}{r}. If you do, the attack gets +1{p} and overpower.",
+  "classes": [
+   "guardian"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "BET"
+ },
+ {
+  "id": "BET002",
+  "name": "High Riser",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}{r}: Attack\nIf you've drawn a card this turn, this gets +1{p}.",
+  "attack": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "hammer",
+   "1h"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET003",
+  "name": "Bloodied Oval",
+  "cardType": "equipment",
+  "text": "Bloodied Oval's {d} is equal to the number of opposing heroes with greater {h} than you.\nBlade Break",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "off-hand"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET004",
+  "name": "Good Time Chapeau",
+  "cardType": "equipment",
+  "text": "Betsy Specialization\nAction - Destroy a Gold you control: Your next attack this turn gets \"When this attacks a hero, wager a Might and a Vigor token with them.\" Go again\nTemper",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Betsy Specialization",
+   "Temper"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET005",
+  "name": "Vigor Girth",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Create a Vigor token. Go again\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET006",
+  "name": "Gauntlet of Might",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Create a Might token. Go again\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET007",
+  "name": "Stand Ground",
+  "cardType": "equipment",
+  "text": "If you control a Might token, this gets +1{d}.\nIf you control a Vigor token, this gets +1{d}.\nTemper",
+  "defense": 0,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET008",
+  "name": "Command Respect",
+  "cardType": "action",
+  "text": "When this hits a hero, if this has {p} greater than its base, destroy a card in their arsenal.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET009",
+  "name": "Concuss",
+  "cardType": "action",
+  "text": "When this hits a hero, if this has {p} greater than its base, they discard a card.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET010",
+  "name": "Over the Top",
+  "cardType": "action",
+  "text": "If this has {p} greater than its base, it gets overpower.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Overpower"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET011",
+  "name": "Smack of Reality",
+  "cardType": "action",
+  "text": "Tower - If this has 13 or more {p}, it gets \"When this hits a hero, destroy all aura tokens they control.\"",
+  "pitch": 1,
+  "cost": 5,
+  "attack": 9,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Tower"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET012",
+  "name": "Wage Gold",
+  "cardType": "action",
+  "text": "Universal\nWhen this attacks a hero, you may wager a Gold token with them.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Universal",
+   "Wager"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET013",
+  "name": "Wage Might",
+  "cardType": "action",
+  "text": "When this attacks a hero, you may wager a Might token with them.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Wager"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET014",
+  "name": "Wage Vigor",
+  "cardType": "action",
+  "text": "When this attacks a hero, you may wager a Vigor token with them.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Wager"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET015",
+  "name": "Big Bop",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy this, then your next Guardian attack this turn gets +5{p} and \"When this attacks a hero, you may wager a Vigor token with them.\"",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET016",
+  "name": "Bigger Than Big",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy this, then your next Guardian attack this turn gets +5{p} and \"When this attacks a hero, you may wager a Might token with them.\"",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET017",
+  "name": "Money Where Ya Mouth Is",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +3{p} and \"When this attacks a hero, you may wager with them. The winner creates a Gold token.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET018",
+  "name": "Money Where Ya Mouth Is",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +2{p} and \"When this attacks a hero, you may wager with them. The winner creates a Gold token.\"\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET019",
+  "name": "Command Respect",
+  "cardType": "action",
+  "text": "When this hits a hero, if this has {p} greater than its base, destroy a card in their arsenal.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET020",
+  "name": "Concuss",
+  "cardType": "action",
+  "text": "When this hits a hero, if this has {p} greater than its base, they discard a card.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET021",
+  "name": "Over the Top",
+  "cardType": "action",
+  "text": "If this has {p} greater than its base, it gets overpower.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Overpower"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET022",
+  "name": "Lunging Press",
+  "cardType": "attack-reaction",
+  "text": "Target attack action card gains +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET023",
+  "name": "Big Bop",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy this, then your next Guardian attack this turn gets +3{p} and \"When this attacks a hero, you may wager a Vigor token with them.\"",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET024",
+  "name": "Bigger Than Big",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy this, then your next Guardian attack this turn gets +3{p} and \"When this attacks a hero, you may wager a Might token with them.\"",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET025",
+  "name": "Money Where Ya Mouth Is",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +1{p} and \"When this attacks a hero, you may wager with them. The winner creates a Gold token.\"\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET026",
+  "name": "Pint of Strong and Stout",
+  "cardType": "action",
+  "text": "Create a Might and a Vigor token.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET027",
+  "name": "Stacked in Your Favor",
+  "cardType": "action",
+  "text": "Go again\nYour attack action cards get +1{d} while defending.\nAt the start of your turn, destroy this, draw a card, then put a card from your hand on top of your deck.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET028",
+  "name": "Might",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then your next attack this turn gets +1{p}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET029",
+  "name": "Vigor",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then gain {r}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "BET"
+ },
+ {
+  "id": "BET030",
+  "name": "Gold",
+  "cardType": "token",
+  "text": "Action - {r}{r}, destroy this: Draw a card. Go again",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "BET"
+ }
+]

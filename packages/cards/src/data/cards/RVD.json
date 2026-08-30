@@ -1,0 +1,447 @@
+[
+ {
+  "id": "RVD001",
+  "name": "Rhinar",
+  "cardType": "hero",
+  "text": "Whenever you discard a card with 6 or more {p} during your action phase, intimidate.",
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "RVD"
+ },
+ {
+  "id": "RVD002",
+  "name": "Bone Basher",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack",
+  "attack": 4,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "club",
+   "2h"
+  ],
+  "set": "RVD"
+ },
+ {
+  "id": "RVD003",
+  "name": "Bone Vizier",
+  "cardType": "equipment",
+  "text": "When Bone Vizier is destroyed, reveal the top card of your deck. If it has 6 or more {p}, put it on top of your deck. Otherwise, put it on the bottom.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "RVD"
+ },
+ {
+  "id": "RVD004",
+  "name": "Blossom of Spring",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Gain {r}. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "RVD"
+ },
+ {
+  "id": "RVD005",
+  "name": "Ironhide Gauntlet",
+  "cardType": "equipment",
+  "text": "When you defend with Ironhide Gauntlet, you may pay {r}. If you do, it gains +2{d} and \"When the combat chain closes, destroy Ironhide Gauntlet.\"",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "RVD"
+ },
+ {
+  "id": "RVD006",
+  "name": "Ironhide Legs",
+  "cardType": "equipment",
+  "text": "When you defend with Ironhide Legs, you may pay {r}. If you do, it gains +2{d} and \"When the combat chain closes, destroy Ironhide Legs.\"",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "RVD"
+ },
+ {
+  "id": "RVD007",
+  "name": "Chief Ruk'utan",
+  "cardType": "mentor",
+  "text": "While Ruk'utan is face down in arsenal, at the start of your turn, you may turn him face up.\nWhile Ruk'utan is face up in arsenal, whenever you play a card with 6 or more {p}, intimidate, and put a lesson counter on him. Then if there are 2 or more lesson counters on Ruk'utan, banish him, search your deck for Alpha Rampage, put it face up in arsenal, and shuffle.",
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "RVD"
+ },
+ {
+  "id": "RVD008",
+  "name": "Alpha Rampage",
+  "cardType": "action",
+  "text": "Rhinar Specialization\nAs an additional cost to play Alpha Rampage, discard a random card.\nWhen you attack with Alpha Rampage, intimidate.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 9,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Rhinar Specialization",
+   "Intimidate"
+  ],
+  "set": "RVD"
+ },
+ {
+  "id": "RVD009",
+  "name": "Beast Mode",
+  "cardType": "action",
+  "text": "If you've intimidated this turn, this gets +2{p}.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "RVD"
+ },
+ {
+  "id": "RVD010",
+  "name": "Pack Hunt",
+  "cardType": "action",
+  "text": "When this attacks, intimidate.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "RVD"
+ },
+ {
+  "id": "RVD011",
+  "name": "Bare Fangs",
+  "cardType": "action",
+  "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, Bare Fangs gains +2{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "RVD"
+ },
+ {
+  "id": "RVD012",
+  "name": "Wild Ride",
+  "cardType": "action",
+  "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, this gets go again.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "RVD"
+ },
+ {
+  "id": "RVD013",
+  "name": "Wrecking Ball",
+  "cardType": "action",
+  "text": "When you attack with Wrecking Ball, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, intimidate.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "RVD"
+ },
+ {
+  "id": "RVD014",
+  "name": "Awakening Bellow",
+  "cardType": "action",
+  "text": "The next Brute attack action card you play this turn gains +3{p}.\nIntimidate\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate",
+   "Go again"
+  ],
+  "set": "RVD"
+ },
+ {
+  "id": "RVD015",
+  "name": "Pack Call",
+  "cardType": "action",
+  "text": "When this defends, reveal the top card of your deck. If it has 6 or more {p}, put it on top. Otherwise, put it on the bottom.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "RVD"
+ },
+ {
+  "id": "RVD016",
+  "name": "Smash Instinct",
+  "cardType": "action",
+  "text": "When this attacks, intimidate.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "RVD"
+ },
+ {
+  "id": "RVD017",
+  "name": "Smash with Big Tree",
+  "cardType": "action",
+  "text": "",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 6,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "RVD"
+ },
+ {
+  "id": "RVD018",
+  "name": "Muscle Mutt",
+  "cardType": "action",
+  "text": "",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "RVD"
+ },
+ {
+  "id": "RVD019",
+  "name": "Raging Onslaught",
+  "cardType": "action",
+  "text": "",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "RVD"
+ },
+ {
+  "id": "RVD020",
+  "name": "Wounded Bull",
+  "cardType": "action",
+  "text": "When you play this, if you have less {h} than an opposing hero, this gains +1{p}.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "RVD"
+ },
+ {
+  "id": "RVD021",
+  "name": "Barraging Beatdown",
+  "cardType": "action",
+  "text": "Your next Brute attack this turn gains \"While this attack is defended by less than 2 non-equipment cards, it has +3{p}.\"\nIntimidate\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate",
+   "Go again"
+  ],
+  "set": "RVD"
+ },
+ {
+  "id": "RVD022",
+  "name": "Rally the Rearguard",
+  "cardType": "action",
+  "text": "Once per Turn Instant - Discard a card: This gets +3{d}. Activate this ability only while this is defending.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "RVD"
+ },
+ {
+  "id": "RVD023",
+  "name": "Wrecker Romp",
+  "cardType": "action",
+  "text": "As an additional cost to play this, discard a random card.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "RVD"
+ },
+ {
+  "id": "RVD024",
+  "name": "Come to Fight",
+  "cardType": "action",
+  "text": "The next attack action card you play this turn gains +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "RVD"
+ },
+ {
+  "id": "RVD025",
+  "name": "Clearing Bellow",
+  "cardType": "action",
+  "text": "Intimidate\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate",
+   "Go again"
+  ],
+  "set": "RVD"
+ },
+ {
+  "id": "RVD026",
+  "name": "Dodge",
+  "cardType": "defense-reaction",
+  "text": "",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "RVD"
+ },
+ {
+  "id": "RVD027",
+  "name": "Titanium Bauble",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "set": "RVD"
+ }
+]

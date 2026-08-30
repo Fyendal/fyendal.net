@@ -1,0 +1,575 @@
+[
+ {
+  "id": "APS001",
+  "name": "Pleiades, Superstar",
+  "cardType": "hero",
+  "text": "Instant - {t}, remove a suspense counter from an aura you control: You may put a suspense counter on an aura of suspense you control.\nWhenever the crowd cheers you, create a Confidence token.",
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "APS"
+ },
+ {
+  "id": "APS002",
+  "name": "Pleiades",
+  "cardType": "hero",
+  "text": "Instant - {t}, remove a suspense counter from an aura you control: You may put a suspense counter on an aura of suspense you control.\nWhenever the crowd cheers you, create a Confidence token.",
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "APS"
+ },
+ {
+  "id": "APS003",
+  "name": "Moment Maker",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}{r}: Attack\nIf you control 3 or more auras of suspense, this gets +2{p} and \"When this hits a hero, the crowd cheers you.\"",
+  "attack": 4,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered",
+   "hammer",
+   "axe",
+   "2h"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS004",
+  "name": "Tiara of Suspense",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Put a suspense counter on an aura of suspense you control. Activate this only if you've been cheered this turn.\nGuardwell",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered",
+   "head"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS005",
+  "name": "Virtuoso Bodice",
+  "cardType": "equipment",
+  "text": "When this defends, you may remove a suspense counter from an aura you control. If you do, gain {r}{r}.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS006",
+  "name": "Attention Grabbers",
+  "cardType": "equipment",
+  "text": "When this defends, you may remove a suspense counter from an aura you control. If you do, this gets +2{d} this chain link.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS007",
+  "name": "Boots to the Boards",
+  "cardType": "equipment",
+  "text": "When this defends, pay up to {r}{r}{r}. Create that many Toughness tokens.\nTemper",
+  "defense": 2,
+  "subtypes": [
+   "revered",
+   "legs"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS008",
+  "name": "Boulder Drop",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, they put a card from their hand on top of their deck.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS009",
+  "name": "Fault Line",
+  "cardType": "action",
+  "text": "If you have a card in your arsenal, this gets +1{p}.\nCrush - When this deals 4 or more damage to a hero, put all cards in all arsenals on bottom of their owner's deck.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS010",
+  "name": "Spinal Crush",
+  "cardType": "action",
+  "text": "Crush - If Spinal Crush deals 4 or more damage to a hero, action cards, activated abilities, and attacks they control lose and can't gain go again during their next action phase.",
+  "pitch": 1,
+  "cost": 5,
+  "attack": 9,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS011",
+  "name": "Act of Glory",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this leaves the arena, your next attack this turn gets +6{p}.",
+  "pitch": 1,
+  "cost": 4,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS012",
+  "name": "Edge of Their Seats",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this leaves the arena, your next attack this turn gets +5{p}.",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS013",
+  "name": "Tension in the Air",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this leaves the arena, your next attack this turn gets +4{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS014",
+  "name": "Thespian Charm",
+  "cardType": "instant",
+  "text": "Choose any number;\n- Destroy a Might or Vigor token.\n- The crowd cheers you.\n- Return an aura permanent you control to its owner's hand.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS015",
+  "name": "Never Give Up",
+  "cardType": "block",
+  "text": "Instant - {r}{r}, put this on the bottom of your deck: Target defending action card gets +3{d} this chain link. Activate this only while it's in your graveyard, you have less {h} than each hero, and you've been cheered this turn.",
+  "pitch": 2,
+  "defense": 3,
+  "subtypes": [
+   "revered"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS016",
+  "name": "Boulder Drop",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, they put a card from their hand on top of their deck.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS017",
+  "name": "Comeback Kid",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you have less {h} than them, the crowd cheers you.\nIf you've been cheered this turn, this gets +1{p}.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS018",
+  "name": "Macho Grande",
+  "cardType": "action",
+  "text": "Dominate",
+  "pitch": 3,
+  "cost": 7,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Dominate"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS019",
+  "name": "Standing Ovation",
+  "cardType": "action",
+  "text": "If 3 or more auras of suspense have left the arena this turn, this gets \"When this hits a hero, take an extra turn after this one. At the beginning of the next end phase, they draw up to their {i}.\"",
+  "pitch": 3,
+  "cost": 6,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS020",
+  "name": "Uplifting Performance",
+  "cardType": "action",
+  "text": "If you control a Confidence or Toughness token, this gets +1{p}.\nWhen this hits a hero, create a Confidence and a Toughness token.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS021",
+  "name": "Tear Asunder",
+  "cardType": "action",
+  "text": "Your next Guardian attack this turn gains +1{p}, dominate, and \"When this hits a hero, they discard 2 cards.\"\nGo again",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS022",
+  "name": "Act of Glory",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this leaves the arena, your next attack this turn gets +4{p}.",
+  "pitch": 3,
+  "cost": 4,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS023",
+  "name": "Edge of Their Seats",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this leaves the arena, your next attack this turn gets +3{p}.",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS024",
+  "name": "Superstar",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this enters or leaves the arena, the crowd cheers you.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered",
+   "aura"
+  ],
+  "keywords": [
+   "Suspense",
+   "The Crowd Cheers"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS025",
+  "name": "Tension in the Air",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this leaves the arena, your next attack this turn gets +2{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS026",
+  "name": "The Suspense is Killing Me",
+  "cardType": "instant",
+  "text": "Suspense\nYour first attack each turn gets +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS027",
+  "name": "To Be Continued...",
+  "cardType": "instant",
+  "text": "Suspense\nThe first time you would be dealt damage each turn, prevent 1 of that damage.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS028",
+  "name": "Up on a Pedestal",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this enters or leaves the arena, you may put a Revered or Guardian attack action card from your graveyard on top of your deck.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered",
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS029",
+  "name": "What Happens Next?",
+  "cardType": "instant",
+  "text": "Suspense\nThe first card with cost 1 or more you play each turn costs {r} less to play.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS030",
+  "name": "Turning Point",
+  "cardType": "block",
+  "text": "When this defends, if you have less {h} than the attacking hero, the crowd cheers you.\nWhile this is defending, if you've been cheered this turn, it gets +3{d}.",
+  "pitch": 3,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS031",
+  "name": "Confidence",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then the next attack card you play this turn can't be defended by more than 2 non-block cards.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "APS"
+ },
+ {
+  "id": "APS032",
+  "name": "Toughness",
+  "cardType": "token",
+  "text": "At the start of your opponent's turn, destroy this, then the next action card you defend with this turn gets +1{d} this chain link.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "APS"
+ }
+]
