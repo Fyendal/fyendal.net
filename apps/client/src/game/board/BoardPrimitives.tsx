@@ -26,6 +26,7 @@ export function MatZone({
   count,
   onClick,
   children,
+  motionZone,
 }: {
   area: string;
   label: string;
@@ -33,11 +34,13 @@ export function MatZone({
   count?: number;
   onClick?: () => void;
   children?: React.ReactNode;
+  motionZone?: string;
 }) {
   return (
     <div
       className={`mat-zone ${className} ${onClick ? "card-clickable" : ""}`}
       style={{ gridArea: area }}
+      data-motion-zone={motionZone}
       onClick={onClick}
       title={label}
     >

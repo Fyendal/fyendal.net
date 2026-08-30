@@ -122,7 +122,7 @@ function CounterOverlay({
 }
 
 // Fabrary's CDN serves ~546px-wide images (vs 376px on the LSS bucket).
-const CARD_BACK_URL = "https://content.fabrary.net/cards/cardback.webp";
+export const CARD_BACK_IMAGE_URL = "https://content.fabrary.net/cards/cardback.webp";
 
 export function cardImageUrl(cardId: string): string {
   return resolveCardImageUrl(cardId, cardData[cardId]);
@@ -148,6 +148,7 @@ export function CardFace({
   onClick,
   label,
   explanation,
+  motionKey,
 }: {
   card: CardView;
   size?: "hand" | "zone" | "preview";
@@ -180,6 +181,8 @@ export function CardFace({
   label?: string;
   /** Availability context shown on hover or keyboard focus. */
   explanation?: string;
+  /** Stable viewer-safe presentation key used only for board motion geometry. */
+  motionKey?: string;
 }) {
   // Try temporary Fabrary variants before falling back to the text layout.
   const [imageFailure, setImageFailure] = useState<{ cardId: string; attempts: number } | null>(null);
@@ -187,7 +190,7 @@ export function CardFace({
   // marker is public, so its standard card overlay shows on the back too
   if (card.hidden) {
     return (
-      <span className="card-hidden-wrap">
+      <span className="card-hidden-wrap" data-motion-card={motionKey}>
         <CardBack label={label ?? "Face down"} />
         {showOverlays && card.intimidated ? (
           <div className="c-ovls">
@@ -269,6 +272,7 @@ export function CardFace({
     <div
       className={cls}
       data-cardid={card.cardId}
+      data-motion-card={motionKey}
       onClick={onClick}
       tabIndex={explanation ? 0 : undefined}
       aria-describedby={explanationId}
@@ -486,7 +490,7 @@ export function CardBack({ count, label, onClick }: { count?: number; label: str
     <div className={`card card-zone card-back ${onClick ? "card-clickable" : ""}`} onClick={onClick}>
       <img
         className="c-backimg"
-        src={CARD_BACK_URL}
+        src={CARD_BACK_IMAGE_URL}
         alt=""
         aria-hidden="true"
         draggable={false}
@@ -506,21 +510,37 @@ export function InactiveZoneCard({
   card,
   showOverlays = true,
   revealOwnerIntimidated = false,
+  motionKey,
 }: {
   card: CardView;
   showOverlays?: boolean;
   revealOwnerIntimidated?: boolean;
+  motionKey?: string;
 }) {
   const revealIntimidated = revealOwnerIntimidated &&
     card.faceDown === true &&
     card.intimidated === true &&
     card.hidden !== true;
   if (card.faceDown !== true || revealIntimidated) {
-    return <CardFace card={card} size="zone" showOverlays={showOverlays} />;
+    return (
+      <CardFace
+        card={card}
+        size="zone"
+        showOverlays={showOverlays}
+        motionKey={motionKey}
+      />
+    );
   }
 
   const faceDownCard = card.hidden
     ? card
     : { ...card, cardId: "", hidden: true as const };
-  return <CardFace card={faceDownCard} size="zone" showOverlays={showOverlays} />;
+  return (
+    <CardFace
+      card={faceDownCard}
+      size="zone"
+      showOverlays={showOverlays}
+      motionKey={motionKey}
+    />
+  );
 }

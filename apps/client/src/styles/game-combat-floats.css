@@ -26,13 +26,12 @@
   transform: translate(-50%, -50%);
   max-width: min(874px, 80vw);
 }
-/* The stack is a primary game-state surface, so keep it on the same central
-   axis as timing, decisions, and combat. It sits above the combat chain and
-   below decision prompts when those surfaces coexist. */
+/* On laptop/desktop, keep the stack beside the board's left equipment column.
+   Compact layouts override this below and center the bounded sheet. */
 .stack-float {
-  left: var(--mat-cx);
-  top: 18%;
-  transform: translateX(-50%);
+  left: clamp(96px, 12.2vh, 158px);
+  top: 50%;
+  transform: translateY(-50%);
   z-index: 7;
 }
 .chain-float:active,

@@ -1,0 +1,231 @@
+.game-motion-layer {
+  position: fixed;
+  /* Above game floats, below modal/zone overlays. */
+  z-index: 9;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.game-motion-flight,
+.game-motion-connector,
+.game-motion-pulse {
+  position: fixed;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.game-motion-connector {
+  z-index: -1;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, #fff1a9 28%, #e7b84f 72%, transparent);
+  filter: blur(4px);
+  transform-origin: left center;
+  will-change: clip-path, filter, opacity, transform;
+  animation: game-motion-connect var(--motion-duration) ease-out var(--motion-delay) both;
+}
+
+.game-motion-flight {
+  transform-origin: top left;
+  will-change: transform, opacity;
+  animation-name: game-motion-travel;
+  animation-duration: var(--motion-duration);
+  animation-delay: var(--motion-delay);
+  animation-timing-function: cubic-bezier(.2, .82, .2, 1);
+  animation-fill-mode: both;
+}
+
+.game-motion-flight-appear {
+  animation-name: game-motion-appear;
+}
+
+.game-motion-flight-arsenal {
+  animation-name: game-motion-arsenal;
+}
+
+.game-motion-flight-draw {
+  animation-name: game-motion-draw;
+}
+
+.game-motion-flight-settle {
+  transform-origin: center;
+  animation-name: game-motion-settle;
+}
+
+.game-motion-visual {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid #d7bd70;
+  border-radius: 5px;
+  background: #160e08;
+  box-shadow: 0 9px 25px #000c, 0 0 14px #e5bc5a66;
+}
+
+.game-motion-image {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.game-motion-visual-back-reveal .game-motion-back {
+  animation: game-motion-hide-back var(--motion-duration) step-end var(--motion-delay) both;
+}
+
+.game-motion-visual-back-reveal .game-motion-face {
+  animation: game-motion-reveal-face var(--motion-duration) step-end var(--motion-delay) both;
+}
+
+.game-motion-flight-settle .game-motion-back {
+  animation-name: game-motion-hide-back-settle;
+}
+
+.game-motion-flight-settle .game-motion-face {
+  animation-name: game-motion-reveal-face-settle;
+}
+
+.game-motion-count {
+  position: absolute;
+  z-index: 2;
+  right: 5px;
+  bottom: 5px;
+  min-width: 27px;
+  padding: 4px 7px;
+  border: 1px solid #e1c66d;
+  border-radius: 999px;
+  background: #110b07ed;
+  color: #fff2bd;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+}
+
+.game-motion-pulse {
+  border: 2px solid #f2d67b;
+  border-radius: 7px;
+  box-shadow: 0 0 15px #e7bd4faa, inset 0 0 13px #e7bd4f44;
+  animation: game-motion-pulse 460ms ease-out both;
+}
+
+.game-motion-destination-hidden {
+  opacity: 0 !important;
+}
+
+@keyframes game-motion-travel {
+  from { opacity: 1; transform: translate3d(0, 0, 0) scale(1, 1); }
+  to {
+    opacity: 1;
+    transform: translate3d(var(--motion-x), var(--motion-y), 0)
+      scale(var(--motion-scale-x), var(--motion-scale-y));
+  }
+}
+
+@keyframes game-motion-appear {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes game-motion-arsenal {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1, 1) rotateZ(0);
+  }
+  82% {
+    opacity: 1;
+    transform: translate3d(var(--motion-x), var(--motion-y), 0)
+      scale(var(--motion-scale-x), var(--motion-scale-y)) rotateZ(-4deg);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(var(--motion-x), var(--motion-y), 0)
+      scale(var(--motion-scale-x), var(--motion-scale-y)) rotateZ(0);
+  }
+}
+
+@keyframes game-motion-draw {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1, 1) rotateZ(0);
+  }
+  78% {
+    opacity: 1;
+    transform: translate3d(var(--motion-x), var(--motion-y), 0)
+      scale(var(--motion-scale-x), var(--motion-scale-y)) rotateZ(3deg);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(var(--motion-x), var(--motion-y), 0)
+      scale(var(--motion-scale-x), var(--motion-scale-y)) rotateZ(0);
+  }
+}
+
+@keyframes game-motion-settle {
+  from { opacity: 1; transform: rotateY(0); }
+  49% { opacity: 1; transform: rotateY(90deg); }
+  51% { opacity: 1; transform: rotateY(-90deg); }
+  to { opacity: 1; transform: rotateY(0); }
+}
+
+@keyframes game-motion-hide-back {
+  0%, 88% { opacity: 1; }
+  89%, 100% { opacity: 0; }
+}
+
+@keyframes game-motion-reveal-face {
+  0%, 88% { opacity: 0; }
+  89%, 100% { opacity: 1; }
+}
+
+@keyframes game-motion-hide-back-settle {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes game-motion-reveal-face-settle {
+  0%, 49% { opacity: 0; }
+  50%, 100% { opacity: 1; }
+}
+
+@keyframes game-motion-pulse {
+  from { opacity: 0; transform: scale(.94); }
+  35% { opacity: 1; }
+  to { opacity: 0; transform: scale(1.05); }
+}
+
+@keyframes game-motion-connect {
+  from {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0 round 999px);
+    filter: blur(7px);
+    transform: rotate(var(--motion-angle)) scaleX(.15);
+  }
+  35% { opacity: .95; }
+  70% {
+    opacity: .8;
+    clip-path: inset(0 0 0 0 round 999px);
+  }
+  to {
+    opacity: 0;
+    clip-path: inset(0 0 0 100% round 999px);
+    filter: blur(3px);
+    transform: rotate(var(--motion-angle)) scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-motion-flight { display: none; }
+  .game-motion-connector { display: none; }
+  .game-motion-pulse { animation-name: game-motion-pulse-reduced; }
+
+  @keyframes game-motion-pulse-reduced {
+    from { opacity: 0; }
+    30% { opacity: 1; }
+    to { opacity: 0; }
+  }
+}

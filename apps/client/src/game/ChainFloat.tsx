@@ -10,6 +10,7 @@ import { cardData } from "@fyendal/cards/client";
 import { CardFace } from "./Card.js";
 import { chainTimelineRevision } from "./chainTimeline.js";
 import type { FloatVisibilityController } from "./floatVisibility.js";
+import { motionLocationKey, motionPresentationKey } from "./motion/motionTypes.js";
 import { useFloatDrag } from "./useFloatDrag.js";
 
 function ChainStat({
@@ -407,9 +408,19 @@ export function ChainFloat({
               ) : (
                 <>
                   <div className="chain-group">
-                    <div className="chain-atk-card">
+                    <div
+                      className="chain-atk-card"
+                      data-motion-zone={motionLocationKey({
+                        kind: "chain-attack",
+                        link: chainIdx,
+                      })}
+                    >
                       <CardFace
                         card={chain.attackingCard}
+                        motionKey={motionPresentationKey(
+                          { kind: "chain-attack", link: chainIdx },
+                          chain.attackingCard.instanceId,
+                        )}
                         goAgain={chain.goAgain}
                         dominate={chain.dominate}
                         overpower={chain.overpower}
@@ -434,13 +445,24 @@ export function ChainFloat({
                         />
                       ) : null}
                     </div>
-                    {chain.reactions
-                      // Projected reactions include played reaction cards and
-                      // resolved activated-ability sources, but never instants.
-                      .filter((r) => r.owner === chain.attackingCard.owner)
-                      .map((r) => (
-                        <CardFace key={r.instanceId} card={r} size="zone" showTapped={false} />
-                      ))}
+                    {chain.reactions.map((reaction, reactionIndex) => (
+                      reaction.owner === chain.attackingCard.owner ? (
+                        <CardFace
+                          key={reaction.instanceId}
+                          card={reaction}
+                          size="zone"
+                          showTapped={false}
+                          motionKey={motionPresentationKey(
+                            {
+                              kind: "chain-reaction",
+                              link: chainIdx,
+                              index: reactionIndex,
+                            },
+                            reaction.instanceId,
+                          )}
+                        />
+                      ) : null
+                    ))}
                   </div>
                   <div className="chain-vs">
                     <ChainStat
@@ -479,13 +501,34 @@ export function ChainFloat({
                   <div className="chain-blockers">
                     <div className="chain-group">
                       {chain.targetAlly ? (
-                        <CardFace card={chain.targetAlly} size="zone" showTapped={false} />
+                        <CardFace
+                          card={chain.targetAlly}
+                          size="zone"
+                          showTapped={false}
+                          motionKey={motionPresentationKey(
+                            { kind: "chain-target", link: chainIdx },
+                            chain.targetAlly.instanceId,
+                          )}
+                        />
                       ) : null}
-                      {chain.defendingCards.map((d) => (
-                        <CardFace key={d.instanceId} card={d} size="zone" showTapped={false} />
+                      {chain.defendingCards.map((defender, defenderIndex) => (
+                        <CardFace
+                          key={defender.instanceId}
+                          card={defender}
+                          size="zone"
+                          showTapped={false}
+                          motionKey={motionPresentationKey(
+                            {
+                              kind: "chain-defender",
+                              link: chainIdx,
+                              index: defenderIndex,
+                            },
+                            defender.instanceId,
+                          )}
+                        />
                       ))}
                       {showStaged &&
-                        staged.map((c) => {
+                        staged.map((c, stagedIndex) => {
                           const cardName = cardData[c.cardId]?.name ?? c.name ?? "defender";
                           return (
                             <span
@@ -502,6 +545,14 @@ export function ChainFloat({
                                 size="zone"
                                 showTapped={false}
                                 ghost
+                                motionKey={motionPresentationKey(
+                                  {
+                                    kind: "chain-staged",
+                                    link: chainIdx,
+                                    index: stagedIndex,
+                                  },
+                                  c.instanceId,
+                                )}
                                 onClick={onUnstage ? () => onUnstage(c.instanceId) : undefined}
                               />
                               {onUnstage ? (
@@ -510,11 +561,24 @@ export function ChainFloat({
                             </span>
                           );
                         })}
-                      {chain.reactions
-                        .filter((r) => r.owner !== chain.attackingCard.owner)
-                        .map((r) => (
-                          <CardFace key={r.instanceId} card={r} size="zone" showTapped={false} />
-                        ))}
+                      {chain.reactions.map((reaction, reactionIndex) => (
+                        reaction.owner !== chain.attackingCard.owner ? (
+                          <CardFace
+                            key={reaction.instanceId}
+                            card={reaction}
+                            size="zone"
+                            showTapped={false}
+                            motionKey={motionPresentationKey(
+                              {
+                                kind: "chain-reaction",
+                                link: chainIdx,
+                                index: reactionIndex,
+                              },
+                              reaction.instanceId,
+                            )}
+                          />
+                        ) : null
+                      ))}
                     </div>
                     {showStaged && onUnstageAll ? (
                       <button className="chain-unblock-all" onClick={onUnstageAll}>

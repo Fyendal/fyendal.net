@@ -1,15 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import type { CardView, GameIntent, MeldSide } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import { useStore } from "../store.js";
 import { CARD_PREVIEW_HEIGHT, CARD_PREVIEW_WIDTH, CardBack, CardFace } from "./Card.js";
 import { ChainFloat } from "./ChainFloat.js";
-import {
-  EndTurnPassToast,
-  OpponentTurnSummaryToast,
-  previousOpponentTurnSummary,
-} from "./EndTurnPassToast.js";
+import { EndTurnPassToast } from "./EndTurnPassToast.js";
 import { StatusFloat } from "./StatusFloat.js";
 import {
   ChainPriorityStatus,
@@ -60,13 +56,17 @@ import { PlayerHalf } from "./board/PlayerHalf.js";
 import { PlayerHand } from "./board/PlayerHand.js";
 import { BoardOverlays, type BoardPreview } from "./board/BoardOverlays.js";
 import { optimisticCardPlayHiddenIds } from "./pendingCardPlay.js";
+import { motionLocationKey, motionPresentationKey } from "./motion/motionTypes.js";
+import { GameMotionLayer } from "./motion/GameMotionLayer.js";
+import { useGameMotion } from "./motion/useGameMotion.js";
 
 const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
-  const { view, playerProfiles, legal, actionCandidates, pendingCardPlay, yourSeat, spectating, spectatorCount, botGame, sendIntent, sendPriorityMode, sendRunechantSkip, sendEmote, latestEmote, undo, error, leave, opponentConnected, connected, roomCode, screen, replayFrames, watchReplay, downloadReplay, getRecordedViews, lastActionAt, claimVictory, reportBug } = useStore(
+  const { view, viewUpdate, playerProfiles, legal, actionCandidates, pendingCardPlay, yourSeat, spectating, spectatorCount, botGame, sendIntent, sendPriorityMode, sendRunechantSkip, sendEmote, latestEmote, undo, error, leave, opponentConnected, connected, roomCode, screen, replayFrames, watchReplay, downloadReplay, getRecordedViews, lastActionAt, claimVictory, reportBug } = useStore(
     useShallow((state) => ({
       view: state.view,
+      viewUpdate: state.viewUpdate,
       playerProfiles: state.playerProfiles,
       legal: state.legal,
       actionCandidates: state.actionCandidates,
@@ -96,6 +96,8 @@ export function GameBoard() {
       reportBug: state.reportBug,
     })),
   );
+  const tableRef = useRef<HTMLDivElement>(null);
+  const gameMotion = useGameMotion({ rootRef: tableRef, view, viewUpdate });
   const [overlay, setOverlay] = useState<BoardOverlay | null>(null);
   const [inspectedCardId, setInspectedCardId] = useState<string | null>(null);
   const cardLongPressHandlers = useMobileCardLongPress((cardId, target) => {
@@ -289,9 +291,6 @@ export function GameBoard() {
     ? Math.max(0, resourcePayment.cost - me.resources - (me.chi ?? 0))
     : 0;
   const myTurn = view.activePlayer === seat;
-  const opponentTurnSummary = !spectating && !replaying && myTurn
-    ? previousOpponentTurnSummary(view.log, opp.heroName)
-    : null;
   const activeHeroName = view.players[view.activePlayer]?.heroName ?? "";
   const turnLabel = spectating
     ? `${activeHeroName}'s turn`
@@ -734,6 +733,7 @@ export function GameBoard() {
 
   return (
     <div
+      ref={tableRef}
       className={`table${railCollapsed ? " rail-is-collapsed" : ""}${view.winner !== null ? " game-is-over" : ""}${hasActiveCombatChain ? " has-active-combat-chain" : ""}${mobileHandIsHidden ? " mobile-hand-is-hidden" : ""}`}
       onMouseOver={onHoverCard}
       onMouseLeave={() => setPreview(null)}
@@ -755,9 +755,21 @@ export function GameBoard() {
               : "Waiting for opponent…"}
           </div>
         )}
-        <div className={`opp-hand${view.winner !== null || replaying ? " opp-hand-revealed" : ""}`}>
+        <div
+          className={`opp-hand${view.winner !== null || replaying ? " opp-hand-revealed" : ""}`}
+          data-motion-zone={motionLocationKey({ kind: "hand", seat: opp.seat })}
+        >
           {view.winner !== null || replaying
-            ? opp.hand.map((card) => <CardFace key={card.instanceId} card={card} />)
+            ? opp.hand.map((card) => (
+                <CardFace
+                  key={card.instanceId}
+                  card={card}
+                  motionKey={motionPresentationKey(
+                    { kind: "hand", seat: opp.seat },
+                    card.instanceId,
+                  )}
+                />
+              ))
             : Array.from({ length: opp.handCount }, (_, i) => (
                 <CardBack key={i} label="" />
               ))}
@@ -786,9 +798,6 @@ export function GameBoard() {
           <div className="mat-divider-center">
             {showEndTurnPassToast && !mobileFloatViewport
               ? <EndTurnPassToast placement="divider" />
-              : null}
-            {opponentTurnSummary && !mobileFloatViewport
-              ? <OpponentTurnSummaryToast message={opponentTurnSummary} placement="divider" />
               : null}
             {timingFloat}
             <div className="mat-divider-mini-dock" ref={setSplitLineMiniHost} />
@@ -848,9 +857,6 @@ export function GameBoard() {
 
       {showEndTurnPassToast && mobileFloatViewport
         ? <EndTurnPassToast placement="mobile-hand" />
-        : null}
-      {opponentTurnSummary && mobileFloatViewport
-        ? <OpponentTurnSummaryToast message={opponentTurnSummary} placement="mobile-hand" />
         : null}
 
       {/* ── floating status window: life + remaining AP + pass.
@@ -1068,6 +1074,11 @@ export function GameBoard() {
         onDismissGameOver={() => setGameOverDismissed(true)}
         onCloseOverlay={() => setOverlay(null)}
         onInspectCard={setInspectedCardId}
+      />
+      <GameMotionLayer
+        batch={gameMotion.batch}
+        onFlightArrive={gameMotion.arriveFlight}
+        onComplete={gameMotion.completeBatch}
       />
     </div>
   );

@@ -139,6 +139,32 @@ describe("stack context", () => {
     expect(html).toContain('role="tooltip">Go again');
     expect(html).not.toContain("stack-label\">Go again");
     expect(html).not.toContain("card-tapped");
+    expect(html).toContain('data-motion-zone="stack:attack"');
+    expect(html).toContain('data-motion-card="stack:attack:42"');
+  });
+
+  it("uses stable motion card keys when resolving layers compact the stack", () => {
+    const html = renderToStaticMarkup(createElement(StackFloat, {
+      layers: [
+        {
+          card: { instanceId: 42, cardId: "SBA016", owner: 0 },
+          seat: 0,
+          label: "First",
+          optional: false,
+        },
+        {
+          card: { instanceId: 84, cardId: "OUT139", owner: 0 },
+          seat: 0,
+          label: "Second",
+          optional: false,
+        },
+      ],
+    }));
+
+    expect(html).toContain('data-motion-zone="stack:layer:0"');
+    expect(html).toContain('data-motion-zone="stack:layer:1"');
+    expect(html).toContain('data-motion-card="stack:layer:42"');
+    expect(html).toContain('data-motion-card="stack:layer:84"');
   });
 
   it("shows dominate on a pending attack as a tooltip icon", () => {

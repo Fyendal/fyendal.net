@@ -4,6 +4,7 @@ import type { ChainLinkView, StackLayerView } from "@fyendal/shared";
 import { CardBack, CardFace } from "./Card.js";
 import { BloodDebtTriggerTile, isBloodDebtTrigger } from "./BloodDebtTriggerTile.js";
 import type { FloatVisibilityController } from "./floatVisibility.js";
+import { motionLocationKey, motionPresentationKey } from "./motion/motionTypes.js";
 import { useFloatDrag } from "./useFloatDrag.js";
 
 export function stackActivityRevision(
@@ -39,8 +40,8 @@ export function stackLayerLabel(label: string): string {
 /** Floating stack window: played cards and triggered/activated ability layers
  *  awaiting resolution (index 0 resolves first and appears rightmost). An
  *  attack still on the stack renders as the bottom/leftmost layer — its combat
- *  chain link only starts once the attack resolves. Defaults to the board's
- *  central game-state axis; draggable vertically only. */
+ *  chain link only starts once the attack resolves. Defaults beside the left
+ *  equipment column on desktop; draggable vertically only. */
 export function StackFloat({
   layers,
   attack,
@@ -69,6 +70,17 @@ export function StackFloat({
   const setStackHidden = visibility?.setHidden ?? setLocalHidden;
   const stackFloat = useFloatDrag({ axis: "y", hTransform: "none" });
   const stackSize = layers.length + (attack ? 1 : 0);
+  const layerOccurrences = new Map<number, number>();
+  const layerMotionKeys = layers.map((layer, index) => {
+    if (!layer.card) return undefined;
+    const occurrence = layerOccurrences.get(layer.card.instanceId) ?? 0;
+    layerOccurrences.set(layer.card.instanceId, occurrence + 1);
+    return motionPresentationKey(
+      { kind: "stack-layer", index },
+      layer.card.instanceId,
+      occurrence,
+    );
+  });
   const stackRevision = stackActivityRevision(layers, attack);
   const previousStackRevision = useRef("");
   useEffect(() => {
@@ -123,11 +135,20 @@ export function StackFloat({
           const bloodDebt = isBloodDebtTrigger(l.label);
           const count = l.count ?? 1;
           return (
-            <div key={`${l.card?.instanceId ?? "x"}-${i}`} className="stack-layer">
+            <div
+              key={`${l.card?.instanceId ?? "x"}-${i}`}
+              className="stack-layer"
+              data-motion-zone={motionLocationKey({ kind: "stack-layer", index: i })}
+            >
               {bloodDebt ? (
                 <BloodDebtTriggerTile count={count} />
               ) : l.card ? (
-                <CardFace card={l.card} size="zone" dimmed={l.card.faceDown} />
+                <CardFace
+                  card={l.card}
+                  size="zone"
+                  dimmed={l.card.faceDown}
+                  motionKey={layerMotionKeys[i]}
+                />
               ) : (
                 <CardBack label="Trigger" />
               )}
@@ -146,9 +167,16 @@ export function StackFloat({
           );
         })}
         {attack && (
-          <div className="stack-layer stack-attack">
+          <div
+            className="stack-layer stack-attack"
+            data-motion-zone={motionLocationKey({ kind: "stack-attack" })}
+          >
             <CardFace
               card={attack.attackingCard}
+              motionKey={motionPresentationKey(
+                { kind: "stack-attack" },
+                attack.attackingCard.instanceId,
+              )}
               size="zone"
               goAgain={attack.goAgain}
               dominate={attack.dominate}
