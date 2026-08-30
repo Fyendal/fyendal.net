@@ -15,6 +15,10 @@ import {
   canAddResourcePaymentPitch,
 } from "../legalSelection.js";
 import { playableZoneTooltip } from "../playableZoneTooltip.js";
+import {
+  motionLocationKey,
+  motionPresentationKey,
+} from "../motion/motionTypes.js";
 import type { Sel } from "../useActionAnnouncement.js";
 import type { BoardLegalState } from "./boardModel.js";
 
@@ -72,6 +76,7 @@ export function PlayerHand({
   replaying: boolean;
   interaction: PlayerHandInteraction;
 }) {
+  const handMotionLocation = { kind: "hand" as const, seat: player.seat };
   const visibleCards = player.hand.filter((card) =>
     !interaction.stagedIds.has(card.instanceId)
     && !interaction.optimisticallyHiddenIds.has(card.instanceId)
@@ -139,7 +144,12 @@ export function PlayerHand({
 
   return (
     <>
-      <div className="hand" id="player-hand" ref={handRef}>
+      <div
+        className="hand"
+        id="player-hand"
+        ref={handRef}
+        data-motion-zone={motionLocationKey(handMotionLocation)}
+      >
         {spectating && view.winner === null && !(replaying && player.hand.length > 0)
           ? Array.from({ length: player.handCount }, (_, index) => <CardBack key={index} label="" />)
           : visibleCards.map((card) => {
@@ -185,6 +195,7 @@ export function PlayerHand({
               <CardFace
                 key={card.instanceId}
                 card={card}
+                motionKey={motionPresentationKey(handMotionLocation, card.instanceId)}
                 onClick={actionable ? () => interaction.onCardClick(card) : undefined}
                 explanation={explanation}
                 selected={selected}

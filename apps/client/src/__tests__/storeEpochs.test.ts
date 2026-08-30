@@ -378,6 +378,69 @@ describe("client connection and account race fences", () => {
     });
   });
 
+  it("marks the first room view as a replacement and consecutive versions as forward", async () => {
+    const { useStore } = await import("../store.js");
+    useStore.getState().joinRoom("AAAAAA");
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    socket.message({ type: "joined", code: "AAAAAA", seat: 0, token: "seat", version: 1 });
+    socket.message({ ...staleState, version: 2 });
+
+    expect(useStore.getState().viewUpdate).toMatchObject({
+      source: "live",
+      transition: "replace",
+      roomVersion: 2,
+    });
+
+    socket.message({
+      ...staleState,
+      version: 3,
+      view: { ...staleState.view, log: ["action resolved"] },
+    });
+    expect(useStore.getState().viewUpdate).toMatchObject({
+      source: "live",
+      transition: "forward",
+      roomVersion: 3,
+    });
+  });
+
+  it("classifies adjacent replay steps separately from replay jumps", async () => {
+    const { useStore } = await import("../store.js");
+    useStore.getState().joinRoom("AAAAAA");
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    socket.message({ type: "joined", code: "AAAAAA", seat: 0, token: "seat", version: 1 });
+    socket.message({ ...staleState, version: 2 });
+    const first = useStore.getState().view!;
+    const second = { ...first, log: ["first action"] };
+    const third = { ...second, log: ["first action", "second action"] };
+    useStore.setState({
+      screen: "replay",
+      replayViews: [first, second, third],
+      replayStep: 0,
+      view: first,
+    });
+
+    useStore.getState().setReplayStep(1);
+    expect(useStore.getState().viewUpdate).toMatchObject({
+      source: "replay",
+      transition: "forward",
+      replayStep: 1,
+    });
+    useStore.getState().setReplayStep(0);
+    expect(useStore.getState().viewUpdate).toMatchObject({
+      source: "replay",
+      transition: "backward",
+      replayStep: 0,
+    });
+    useStore.getState().setReplayStep(2);
+    expect(useStore.getState().viewUpdate).toMatchObject({
+      source: "replay",
+      transition: "jump",
+      replayStep: 2,
+    });
+  });
+
   it("moves a restored prep spectator from loading to the waiting screen", async () => {
     localStorage.setItem("fyendal-auth", JSON.stringify({ token: "account-token", username: "Alice" }));
     localStorage.setItem("fyendal-room-session", JSON.stringify({

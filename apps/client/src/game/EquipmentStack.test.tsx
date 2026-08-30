@@ -46,6 +46,8 @@ describe("EquipmentStack", () => {
     const html = renderToStaticMarkup(createElement(EquipmentStack, {
       card: hero,
       underCards: soul,
+      motionLocation: { kind: "board", seat: 0 },
+      underCardMotionLocation: { kind: "soul", seat: 0 },
       highlighted: true,
       selected: true,
       onClick: () => undefined,
@@ -57,5 +59,8 @@ describe("EquipmentStack", () => {
     expect(html.match(/card-highlight/g)).toHaveLength(1);
     expect(html.match(/card-selected/g)).toHaveLength(1);
     expect(html).toContain('class="pip pile-pip equipment-stack-pip">2</span>');
+    expect(html).toContain('data-motion-card="0:board:10"');
+    expect(html).toContain('data-motion-card="0:soul:11"');
+    expect(html).toContain('data-motion-card="0:soul:12"');
   });
 });

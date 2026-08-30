@@ -17,6 +17,7 @@ export function initialStoreProjection(
     botGame: false,
     playerProfiles: null,
     view: null,
+    viewUpdate: { sequence: 0, source: "restore" as const, transition: "replace" as const },
     legal: [],
     actionCandidates: [],
     pendingCardPlay: null,
@@ -66,6 +67,7 @@ export function clearedRoomProjection(): Pick<
   | "botGame"
   | "playerProfiles"
   | "view"
+  | "viewUpdate"
   | "legal"
   | "actionCandidates"
   | "pendingCardPlay"
@@ -94,6 +96,7 @@ export function clearedRoomProjection(): Pick<
     botGame: false,
     playerProfiles: null,
     view: null,
+    viewUpdate: { sequence: 0, source: "restore", transition: "replace" },
     legal: [],
     actionCandidates: [],
     pendingCardPlay: null,

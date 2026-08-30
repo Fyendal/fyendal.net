@@ -12,12 +12,16 @@ describe("PitchStack", () => {
         { instanceId: 13, cardId: "WTR162", owner: 0 },
       ],
       resources: 4,
+      motionSeat: 0,
     }));
 
     expect(html.match(/pitch-stack-card/g)).toHaveLength(3);
     expect(html).toContain('data-cardid="WTR160"');
     expect(html).toContain('data-cardid="WTR161"');
     expect(html).toContain('data-cardid="WTR162"');
+    expect(html).toContain('data-motion-card="0:pitch:11"');
+    expect(html).toContain('data-motion-card="0:pitch:12"');
+    expect(html).toContain('data-motion-card="0:pitch:13"');
     expect(html).toContain("translateY(-24px)");
     expect(html).toContain("translateY(-12px)");
     expect(html).toContain("translateY(-0px)");

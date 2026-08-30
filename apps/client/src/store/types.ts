@@ -55,6 +55,20 @@ export interface PendingCardPlay {
   intent: CardPlayIntent;
 }
 
+export type ViewUpdateSource = "live" | "replay" | "restore";
+export type ViewTransition = "forward" | "backward" | "jump" | "replace";
+
+/** Presentation-only provenance for the latest authoritative GameView
+ * replacement. Consumers use it to avoid replaying motion across initial
+ * loads, reconnect snapshots, replay scrubs, and other discontinuities. */
+export interface ViewUpdate {
+  sequence: number;
+  source: ViewUpdateSource;
+  transition: ViewTransition;
+  roomVersion?: number;
+  replayStep?: number;
+}
+
 /** The single public Zustand contract. Implementation details stay in store.ts. */
 export interface StoreState {
   connected: boolean;
@@ -99,6 +113,7 @@ export interface StoreState {
   botGame: boolean;
   playerProfiles: [PlayerProfileView, PlayerProfileView] | null;
   view: GameView | null;
+  viewUpdate: ViewUpdate;
   legal: GameIntent[];
   actionCandidates: GameIntent[];
   pendingCardPlay: PendingCardPlay | null;

@@ -1,14 +1,17 @@
 import type { CardView } from "@fyendal/shared";
 import { CardFace } from "./Card.js";
+import { motionPresentationKey } from "./motion/motionTypes.js";
 import { cardStackStep } from "./stackLayout.js";
 
 /** Face-up pitch cards, oldest at the back and newest in front. */
 export function PitchStack({
   cards,
   resources,
+  motionSeat,
 }: {
   cards: readonly CardView[];
   resources: number;
+  motionSeat?: number;
 }) {
   if (cards.length === 0) {
     return resources > 0
@@ -31,7 +34,13 @@ export function PitchStack({
               zIndex: index,
             }}
           >
-            <CardFace card={card} size="zone" />
+            <CardFace
+              card={card}
+              size="zone"
+              motionKey={motionSeat === undefined
+                ? undefined
+                : motionPresentationKey({ kind: "pitch", seat: motionSeat }, card.instanceId)}
+            />
           </div>
         );
       })}

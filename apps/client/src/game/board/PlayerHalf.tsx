@@ -7,6 +7,11 @@ import { EquipmentStack } from "../EquipmentStack.js";
 import { HeroEmote } from "../HeroEmote.js";
 import { PitchStack } from "../PitchStack.js";
 import {
+  motionLocationKey,
+  motionPresentationKey,
+  type MotionLocation,
+} from "../motion/motionTypes.js";
+import {
   boardCardInEquipmentZone,
   boardCardsOutsideEquipmentZones,
   groupBoardCards,
@@ -76,14 +81,36 @@ export function PlayerHalf({
 
   const activate = (instanceId: number) => () => interaction.onActivate(instanceId);
   const equipmentZone = (slot: "head" | "chest" | "arms" | "legs", area: string) => {
-    const candidate = player.equipment[slot] ?? boardCardInEquipmentZone(player.board, slot);
+    const equippedCard = player.equipment[slot];
+    const candidate = equippedCard ?? boardCardInEquipmentZone(player.board, slot);
     const card = candidate && !optimisticallyHiddenIds.has(candidate.instanceId) ? candidate : undefined;
-    if (!card) return <MatZone key={slot} area={area} label={slot} className={`zone-${slot}`} />;
+    const zoneLocation = { kind: "equipment" as const, seat: player.seat, slot };
+    const cardLocation: MotionLocation = equippedCard
+      ? zoneLocation
+      : { kind: "board", seat: player.seat };
+    if (!card) {
+      return (
+        <MatZone
+          key={slot}
+          area={area}
+          label={slot}
+          className={`zone-${slot}`}
+          motionZone={motionLocationKey(zoneLocation)}
+        />
+      );
+    }
     if (!mine) {
       return (
-        <MatZone key={slot} area={area} label={slot} className={`zone-${slot}`}>
+        <MatZone
+          key={slot}
+          area={area}
+          label={slot}
+          className={`zone-${slot}`}
+          motionZone={motionLocationKey(zoneLocation)}
+        >
           <EquipmentStack
             card={card}
+            motionLocation={cardLocation}
             dimmed={interaction.stagedIds.has(card.instanceId) ||
               interaction.committedDefenderIds.has(card.instanceId)}
           />
@@ -96,9 +123,16 @@ export function PlayerHalf({
       interaction.legal.stageableDefenders.has(card.instanceId);
     const canActivate = !interaction.defending && interaction.legal.activatable.has(card.instanceId);
     return (
-      <MatZone key={slot} area={area} label={slot} className={`zone-${slot}`}>
+      <MatZone
+        key={slot}
+        area={area}
+        label={slot}
+        className={`zone-${slot}`}
+        motionZone={motionLocationKey(zoneLocation)}
+      >
         <EquipmentStack
           card={card}
+          motionLocation={cardLocation}
           highlighted={canActivate || canBlock}
           selected={interaction.selection.kind === "activate" &&
             interaction.selection.sourceInstanceId === card.instanceId}
@@ -123,11 +157,19 @@ export function PlayerHalf({
       interaction.legal.stageableDefenders.has(card.instanceId);
     const canActivate = mine && card !== undefined && !interaction.defending &&
       interaction.legal.activatable.has(card.instanceId);
+    const location = { kind: "weapon" as const, seat: player.seat, index };
     return (
-      <MatZone key={area} area={area} label="Weapon" className={`zone-weapon-${index}`}>
+      <MatZone
+        key={area}
+        area={area}
+        label="Weapon"
+        className={`zone-weapon-${index}`}
+        motionZone={motionLocationKey(location)}
+      >
         {card ? (
           <EquipmentStack
             card={card}
+            motionLocation={location}
             highlighted={canActivate || canBlock}
             selected={mine && interaction.selection.kind === "activate" &&
               interaction.selection.sourceInstanceId === card.instanceId}
@@ -154,27 +196,43 @@ export function PlayerHalf({
     label: "Graveyard" | "Banished",
     cards: CardView[],
     title: string,
-  ) => (
-    <MatZone
+  ) => {
+    const location = {
+      kind: label === "Graveyard" ? "graveyard" as const : "banish" as const,
+      seat: player.seat,
+    };
+    return (
+      <MatZone
       area={area}
       label={label}
       className={`zone-${label.toLowerCase().replaceAll(" ", "-")}`}
+      motionZone={motionLocationKey(location)}
       onClick={cards.length ? () => onOpenOverlay({ title, cards, inactiveZone: true }) : undefined}
     >
       {cards.length > 0 ? (
         <div className="pitch-top">
-          <InactiveZoneCard card={cards[cards.length - 1]!} showOverlays={false} />
+          <InactiveZoneCard
+            card={cards[cards.length - 1]!}
+            showOverlays={false}
+            motionKey={motionPresentationKey(location, cards[cards.length - 1]!.instanceId)}
+          />
           <span className="pip pile-pip">{cards.length}</span>
         </div>
       ) : null}
       {label === "Banished" ? <BloodDebtCounter cards={cards} /> : null}
     </MatZone>
-  );
+    );
+  };
 
   return (
     <div className={`mat-half ${mirrored ? "mat-opp" : ""}`}>
       {equipmentZone("head", `${row(1)} / 1`)}
-      <MatZone area={`${row(1)} / 2 / span 1 / span 7`} label="Board" className="zone-board">
+      <MatZone
+        area={`${row(1)} / 2 / span 1 / span 7`}
+        label="Board"
+        className="zone-board"
+        motionZone={motionLocationKey({ kind: "board", seat: player.seat })}
+      >
         {arenaBoard.length > 0 ? (
           <div className="board-strip board-cards">
             {groupBoardCards(arenaBoard, mine ? interaction.legal.activatable : undefined).map((group) => (
@@ -185,6 +243,7 @@ export function PlayerHalf({
               >
                 <EquipmentStack
                   card={group.card}
+                  motionLocation={{ kind: "board", seat: player.seat }}
                   highlighted={group.activatable}
                   selected={mine && interaction.selection.kind === "activate" &&
                     interaction.selection.sourceInstanceId === group.card.instanceId}
@@ -206,7 +265,10 @@ export function PlayerHalf({
       {equipmentZone("arms", "2 / 2")}
       {weaponZone(0, "2 / 4")}
       <MatZone area="2 / 5" label="Hero" className="zone-hero">
-        <div className="mat-hero">
+        <div
+          className="mat-hero"
+          data-motion-zone={motionLocationKey({ kind: "soul", seat: player.seat })}
+        >
           <HeroEmote
             seat={player.seat}
             event={replaying ? null : latestEmote}
@@ -216,6 +278,7 @@ export function PlayerHalf({
             <EquipmentStack
               card={hero}
               underCards={player.soul}
+              underCardMotionLocation={{ kind: "soul", seat: player.seat }}
               highlighted={heroCanActivate || heroCanBlock}
               selected={mine && interaction.selection.kind === "activate" &&
                 interaction.selection.sourceInstanceId === hero.instanceId}
@@ -234,16 +297,22 @@ export function PlayerHalf({
         area="2 / 8"
         label="Pitch"
         className="zone-pitch"
+        motionZone={motionLocationKey({ kind: "pitch", seat: player.seat })}
         onClick={player.pitchCount
           ? () => onOpenOverlay({ title: `${side} Pitch`, cards: player.pitch })
           : undefined}
       >
-        <PitchStack cards={player.pitch} resources={player.resources} />
+        <PitchStack
+          cards={player.pitch}
+          resources={player.resources}
+          motionSeat={player.seat}
+        />
       </MatZone>
       <MatZone
         area="2 / 9"
         label="Deck"
         className={`zone-deck${deckShuffling ? " deck-shuffling" : ""}`}
+        motionZone={motionLocationKey({ kind: "deck", seat: player.seat })}
         count={presentedDeckTop ? player.deckCount : undefined}
         onClick={visibleReplayDeck?.length
           ? () => onOpenOverlay({
@@ -256,6 +325,10 @@ export function PlayerHalf({
           <CardFace
             card={presentedDeckTop}
             size="zone"
+            motionKey={motionPresentationKey(
+              { kind: "deck", seat: player.seat },
+              presentedDeckTop.instanceId,
+            )}
             highlighted={deckTopPlayable}
             selected={interaction.selection.kind === "play-zone" &&
               interaction.selection.instanceId === presentedDeckTop.instanceId}
@@ -286,12 +359,21 @@ export function PlayerHalf({
       </MatZone>
       {equipmentZone("legs", `${row(3)} / 1`)}
       <EffectChips effects={ongoing} area={`${row(3)} / 2 / span 1 / span 3`} />
-      <MatZone area={`${row(3)} / 5`} label="Arsenal" className="zone-arsenal">
+      <MatZone
+        area={`${row(3)} / 5`}
+        label="Arsenal"
+        className="zone-arsenal"
+        motionZone={motionLocationKey({ kind: "arsenal", seat: player.seat })}
+      >
         {mine ? (
           arsenalCard ? (
             <CardFace
               card={arsenalCard}
               size="zone"
+              motionKey={motionPresentationKey(
+                { kind: "arsenal", seat: player.seat },
+                arsenalCard.instanceId,
+              )}
               dimmed={arsenalCard.faceDown && !interaction.legal.playableArsenal.has(arsenalCard.instanceId)}
               highlighted={interaction.legal.playableArsenal.has(arsenalCard.instanceId)}
               selected={interaction.selection.kind === "play-arsenal" &&
@@ -303,7 +385,14 @@ export function PlayerHalf({
             />
           ) : undefined
         ) : arsenalCard ? (
-          <CardFace card={arsenalCard} size="zone" />
+          <CardFace
+            card={arsenalCard}
+            size="zone"
+            motionKey={motionPresentationKey(
+              { kind: "arsenal", seat: player.seat },
+              arsenalCard.instanceId,
+            )}
+          />
         ) : player.arsenalCount > 0 ? (
           <CardBack label="Arsenal" />
         ) : undefined}

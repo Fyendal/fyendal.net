@@ -74,5 +74,13 @@ describe("PlayerHalf", () => {
     expect(html).toMatch(
       /board-card-stack board-card-stack-tapped[^>]*>.*equipment-stack.*card-tapped/,
     );
+    expect(html).toContain('data-motion-zone="0:board"');
+    expect(html).toContain('data-motion-zone="0:deck"');
+    expect(html).toContain('data-motion-zone="0:pitch"');
+    expect(html).toContain('data-motion-zone="0:arsenal"');
+    expect(html).toContain('data-motion-zone="0:graveyard"');
+    expect(html).toContain('data-motion-zone="0:banish"');
+    expect(html).toContain('data-motion-card="0:board:2"');
+    expect(html).toContain('data-motion-card="0:board:3"');
   });
 });

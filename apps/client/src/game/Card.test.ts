@@ -97,6 +97,20 @@ describe("CardBack", () => {
     expect(html).toContain("https://content.fabrary.net/cards/cardback.webp");
     expect(html).toContain("Face down");
   });
+
+  it("keeps motion geometry keys on both visible and hidden presentations", () => {
+    const visible = renderToStaticMarkup(createElement(CardFace, {
+      card: { instanceId: 7, cardId: "SBA016", owner: 0 },
+      motionKey: "0:hand:7",
+    }));
+    const hidden = renderToStaticMarkup(createElement(CardFace, {
+      card: { instanceId: 8, cardId: "", owner: 1, hidden: true },
+      motionKey: "1:arsenal:8",
+    }));
+
+    expect(visible).toContain('data-motion-card="0:hand:7"');
+    expect(hidden).toContain('data-motion-card="1:arsenal:8"');
+  });
 });
 
 describe("CardFace payment state", () => {

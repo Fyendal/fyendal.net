@@ -173,6 +173,30 @@ describe("combat-chain browsing", () => {
     }));
 
     expect(html).toContain('data-cardid="OUT139"');
+    expect(html).toContain('data-motion-card="chain:0:attack:42"');
+    expect(html).toContain('data-motion-card="chain:0:reaction:0:84"');
+  });
+
+  it("anchors defenders and targets to their exact chain presentations", () => {
+    const link: ChainLinkView = {
+      attackingCard: { instanceId: 42, cardId: "SBA016", owner: 0 },
+      defendingCards: [{ instanceId: 84, cardId: "OUT139", owner: 1 }],
+      targetAlly: { instanceId: 85, cardId: "TST-ALLY", owner: 1 },
+      targetAllyName: "Test Ally",
+      reactions: [],
+      attackValue: 3,
+      defenseValue: 2,
+      damage: 1,
+      resolved: false,
+    };
+    const html = renderToStaticMarkup(createElement(ChainFloat, {
+      links: [link],
+      onRect: vi.fn(),
+    }));
+
+    expect(html).toContain('data-motion-zone="chain:0:attack"');
+    expect(html).toContain('data-motion-card="chain:0:defender:0:84"');
+    expect(html).toContain('data-motion-card="chain:0:target:85"');
   });
 
   it("shows dominate as a tooltip icon instead of a text label", () => {

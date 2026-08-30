@@ -31,7 +31,13 @@ import {
   saveRoomSession,
   saveStoredAuth,
 } from "./store/sessionStorage.js";
-import type { CardPlayIntent, PreReplaySnapshot, StoreState } from "./store/types.js";
+import type {
+  CardPlayIntent,
+  PreReplaySnapshot,
+  StoreState,
+  ViewTransition,
+  ViewUpdate,
+} from "./store/types.js";
 import { createReplayRuntime, downloadReplayFile } from "./store/replayRuntime.js";
 import {
   clearedRoomProjection,
@@ -56,8 +62,15 @@ let ws: WebSocket | null = null;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 let reconnectAttempts = 0;
 let emoteSequence = 0;
+let viewUpdateSequence = 0;
 const roomVersions = new RoomVersionGate();
 const replayRuntime = createReplayRuntime(localStorage);
+
+function nextViewUpdate(
+  update: Omit<ViewUpdate, "sequence">,
+): ViewUpdate {
+  return { sequence: ++viewUpdateSequence, ...update };
+}
 
 // Local recordings are reload fallbacks, not a compatibility surface. Remove
 // pre-launch entries before any room can attempt to resume one.
@@ -611,8 +624,20 @@ export const useStore = create<StoreState>((set, get) => {
           if (commandState.acknowledged) set({ pendingCardPlay: null });
           break; // replay viewer owns the screen
         }
+        const current = get();
+        const previousLiveVersion = current.viewUpdate.source === "live"
+          ? current.viewUpdate.roomVersion
+          : undefined;
+        const continuousLiveState = current.view?.gameId === msg.view.gameId
+          && previousLiveVersion !== undefined
+          && msg.version === previousLiveVersion + 1;
         set({
           view: msg.view,
+          viewUpdate: nextViewUpdate({
+            source: "live",
+            transition: continuousLiveState ? "forward" : "replace",
+            roomVersion: msg.version,
+          }),
           legal: msg.legal,
           actionCandidates: msg.actionCandidates ?? msg.legal,
           pendingCardPlay: commandState.acknowledged ? null : get().pendingCardPlay,
@@ -1147,7 +1172,19 @@ export const useStore = create<StoreState>((set, get) => {
       const views = get().replayViews;
       if (!views || views.length === 0) return;
       const n = Math.max(0, Math.min(step, views.length - 1));
-      set({ replayStep: n, view: views[n]! });
+      const currentStep = get().replayStep;
+      if (n === currentStep) return;
+      const delta = n - currentStep;
+      const transition: ViewTransition = delta === 1
+        ? "forward"
+        : delta === -1
+          ? "backward"
+          : "jump";
+      set({
+        replayStep: n,
+        view: views[n]!,
+        viewUpdate: nextViewUpdate({ source: "replay", transition, replayStep: n }),
+      });
     },
     closeReplay: () => {
       const snap = preReplay;
@@ -1159,9 +1196,23 @@ export const useStore = create<StoreState>((set, get) => {
       }
       // back to the live game if the room is still there, else to the lobby
       if (snap && get().roomCode) {
-        set({ ...base, screen: "game", ...snap });
+        set({
+          ...base,
+          screen: "game",
+          ...snap,
+          viewUpdate: nextViewUpdate({ source: "restore", transition: "replace" }),
+        });
       } else {
-        set({ ...base, screen: "lobby", view: null, legal: [], actionCandidates: [], yourSeat: null, spectating: false });
+        set({
+          ...base,
+          screen: "lobby",
+          view: null,
+          viewUpdate: nextViewUpdate({ source: "restore", transition: "replace" }),
+          legal: [],
+          actionCandidates: [],
+          yourSeat: null,
+          spectating: false,
+        });
       }
     },
   };
@@ -1171,7 +1222,14 @@ export const useStore = create<StoreState>((set, get) => {
 function openReplay(file: ReplayFile, savedReplayId: string | null = null): void {
   const s = useStore.getState();
   preReplay = snapshotBeforeReplay(s);
-  useStore.setState(replayViewerProjection(file, savedReplayId));
+  useStore.setState({
+    ...replayViewerProjection(file, savedReplayId),
+    viewUpdate: nextViewUpdate({
+      source: "replay",
+      transition: "replace",
+      replayStep: 0,
+    }),
+  });
 }
 
 /** Reconnect helper: returns the saved session code, if any. */
