@@ -1,0 +1,506 @@
+[
+ {
+  "id": "TER001",
+  "name": "Terra",
+  "cardType": "hero",
+  "text": "At the beginning of each end phase, if there is an Earth card in your pitch zone, you may pay {r}. If you do, create a Might token.\nEssence of Earth",
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Essence of Earth"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "TER"
+ },
+ {
+  "id": "TER002",
+  "name": "Redwood Hammer",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}{r}: Attack\nIf an Earth card was pitched to attack with this, the attack gets +1{p}.",
+  "attack": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "earth",
+   "hammer",
+   "1h"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER003",
+  "name": "Rotten Old Buckler",
+  "cardType": "equipment",
+  "text": "Blade Break",
+  "defense": 1,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "off-hand"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER004",
+  "name": "Ironrot Helm",
+  "cardType": "equipment",
+  "text": "Blade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER005",
+  "name": "Blossom of Spring",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Gain {r}. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER006",
+  "name": "Hard Knuckle",
+  "cardType": "equipment",
+  "text": "When you play an attack action card, you may destroy this. If you do, the attack gets +1{p}.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER007",
+  "name": "Ironrot Legs",
+  "cardType": "equipment",
+  "text": "Blade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER008",
+  "name": "Bracken Rap",
+  "cardType": "action",
+  "text": "Earth Bond - When this attacks, if an Earth card was pitched to play this, create a Might token.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth Bond"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER009",
+  "name": "Burgeoning",
+  "cardType": "action",
+  "text": "If this was played from arsenal, it gains +1{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER010",
+  "name": "Concuss",
+  "cardType": "action",
+  "text": "When this hits a hero, if this has {p} greater than its base, they discard a card.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER011",
+  "name": "Log Fall",
+  "cardType": "action",
+  "text": "Earth Bond - If an Earth card was pitched to play this, this gets overpower.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth Bond",
+   "Overpower"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER012",
+  "name": "Strong Wood",
+  "cardType": "action",
+  "text": "Earth Bond - If an Earth card was pitched to play this, this gets +1{p}.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth Bond"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER013",
+  "name": "Autumn's Touch",
+  "cardType": "action",
+  "text": "",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER014",
+  "name": "Bracken Rap",
+  "cardType": "action",
+  "text": "Earth Bond - When this attacks, if an Earth card was pitched to play this, create a Might token.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth Bond"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER015",
+  "name": "Log Fall",
+  "cardType": "action",
+  "text": "Earth Bond - If an Earth card was pitched to play this, this gets overpower.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth Bond",
+   "Overpower"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER016",
+  "name": "Strong Wood",
+  "cardType": "action",
+  "text": "Earth Bond - If an Earth card was pitched to play this, this gets +1{p}.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth Bond"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER017",
+  "name": "Flourish",
+  "cardType": "action",
+  "text": "The next time an attack would gain {p} this turn, instead it gains that much plus 3.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER018",
+  "name": "Seeds of Strength",
+  "cardType": "action",
+  "text": "Create 2 Might tokens.\nEarth Bond - If an Earth card was pitched to play this, instead create 3 Might tokens.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Earth Bond"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER019",
+  "name": "Thrive",
+  "cardType": "action",
+  "text": "If an attack would gain {p} this turn, instead it gains that much plus 1.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER020",
+  "name": "Sigil of Shelter",
+  "cardType": "instant",
+  "text": "The next time you would be dealt damage this turn, prevent 2 of that damage.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "guardian"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER021",
+  "name": "Autumn's Touch",
+  "cardType": "action",
+  "text": "",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER022",
+  "name": "Burgeoning",
+  "cardType": "action",
+  "text": "If this was played from arsenal, it gains +1{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER023",
+  "name": "Concuss",
+  "cardType": "action",
+  "text": "When this hits a hero, if this has {p} greater than its base, they discard a card.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER024",
+  "name": "Flourish",
+  "cardType": "action",
+  "text": "The next time an attack would gain {p} this turn, instead it gains that much plus 2.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER025",
+  "name": "Seeds of Strength",
+  "cardType": "action",
+  "text": "Create a Might token.\nEarth Bond - If an Earth card was pitched to play this, instead create 2 Might tokens.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Earth Bond"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER026",
+  "name": "Sigil of Shelter",
+  "cardType": "instant",
+  "text": "The next time you would be dealt damage this turn, prevent 1 of that damage.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "guardian"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER027",
+  "name": "Canopy Shelter",
+  "cardType": "block",
+  "text": "When this defends, create a Might token.",
+  "pitch": 3,
+  "defense": 2,
+  "subtypes": [
+   "earth"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER028",
+  "name": "Might",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then your next attack this turn gets +1{p}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER029",
+  "name": "Spell Fray Tiara",
+  "cardType": "equipment",
+  "text": "Spellvoid 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Spellvoid 1"
+  ],
+  "set": "TER"
+ },
+ {
+  "id": "TER030",
+  "name": "Spell Fray Leggings",
+  "cardType": "equipment",
+  "text": "Spellvoid 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Spellvoid 1"
+  ],
+  "set": "TER"
+ }
+]

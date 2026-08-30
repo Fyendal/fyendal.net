@@ -1,0 +1,536 @@
+[
+ {
+  "id": "KSU001",
+  "name": "Katsu, the Wanderer",
+  "cardType": "hero",
+  "text": "The first time an attack action card you control hits each turn, you may discard a card with cost 0. If you do, search your deck for a card with combo, banish it face up, then shuffle your deck. You may play it this turn.",
+  "classes": [
+   "ninja"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "KSU"
+ },
+ {
+  "id": "KSU002",
+  "name": "Katsu",
+  "cardType": "hero",
+  "text": "The first time an attack action card you control hits each turn, you may discard a card with cost 0. If you do, search your deck for a card with combo, banish it face up, then shuffle your deck. You may play it this turn.",
+  "classes": [
+   "ninja"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "KSU"
+ },
+ {
+  "id": "KSU003",
+  "name": "Harmonized Kodachi",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nIf you have a card in your pitch zone with cost 0, this card's attacks get go again.",
+  "attack": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "KSU"
+ },
+ {
+  "id": "KSU004",
+  "name": "Harmonized Kodachi",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nIf you have a card in your pitch zone with cost 0, this card's attacks get go again.",
+  "attack": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "KSU"
+ },
+ {
+  "id": "KSU005",
+  "name": "Ironrot Helm",
+  "cardType": "equipment",
+  "text": "Blade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "KSU"
+ },
+ {
+  "id": "KSU006",
+  "name": "Heartened Cross Strap",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: The next attack action card you play this turn costs {r}{r} less to play. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "KSU"
+ },
+ {
+  "id": "KSU007",
+  "name": "Breaking Scales",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy Breaking Scales: Target attack action card with combo gains +1{p}.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "KSU"
+ },
+ {
+  "id": "KSU008",
+  "name": "Ironrot Legs",
+  "cardType": "equipment",
+  "text": "Blade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "KSU"
+ },
+ {
+  "id": "KSU009",
+  "name": "Blackout Kick",
+  "cardType": "action",
+  "text": "Combo - If Rising Knee Thrust was the last attack this combat chain, Blackout Kick gains +3{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "KSU"
+ },
+ {
+  "id": "KSU010",
+  "name": "Fluster Fist",
+  "cardType": "action",
+  "text": "Combo - If Open the Center was the last attack this combat chain, Fluster Fist gains +1{p} for each attack that has hit this combat chain.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "KSU"
+ },
+ {
+  "id": "KSU011",
+  "name": "Head Jab",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "KSU"
+ },
+ {
+  "id": "KSU012",
+  "name": "Leg Tap",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "KSU"
+ },
+ {
+  "id": "KSU013",
+  "name": "Open the Center",
+  "cardType": "action",
+  "text": "Combo - If Head Jab was the last attack this combat chain, Open the Center gains +1{p}, go again, and dominate.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again",
+   "Dominate"
+  ],
+  "set": "KSU"
+ },
+ {
+  "id": "KSU014",
+  "name": "Rising Knee Thrust",
+  "cardType": "action",
+  "text": "Combo - If Leg Tap was the last attack this combat chain, Rising Knee Thrust gains +2{p} and go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "KSU"
+ },
+ {
+  "id": "KSU015",
+  "name": "Surging Strike",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "KSU"
+ },
+ {
+  "id": "KSU016",
+  "name": "Whelming Gustwave",
+  "cardType": "action",
+  "text": "Combo - If Surging Strike was the last attack this combat chain, Whelming Gustwave gains +1{p}, go again, and \"If this hits, draw a card.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "KSU"
+ },
+ {
+  "id": "KSU017",
+  "name": "Scar for a Scar",
+  "cardType": "action",
+  "text": "When this is played, if you have less {h} than an opposing hero, it gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "KSU"
+ },
+ {
+  "id": "KSU018",
+  "name": "Leg Tap",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "KSU"
+ },
+ {
+  "id": "KSU019",
+  "name": "Rising Knee Thrust",
+  "cardType": "action",
+  "text": "Combo - If Leg Tap was the last attack this combat chain, Rising Knee Thrust gains +2{p} and go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "KSU"
+ },
+ {
+  "id": "KSU020",
+  "name": "Surging Strike",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "KSU"
+ },
+ {
+  "id": "KSU021",
+  "name": "Springboard Somersault",
+  "cardType": "defense-reaction",
+  "text": "If Springboard Somersault is played from arsenal, it gains +2{d}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "KSU"
+ },
+ {
+  "id": "KSU022",
+  "name": "Fluster Fist",
+  "cardType": "action",
+  "text": "Combo - If Open the Center was the last attack this combat chain, Fluster Fist gains +1{p} for each attack that has hit this combat chain.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "KSU"
+ },
+ {
+  "id": "KSU023",
+  "name": "Head Jab",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "KSU"
+ },
+ {
+  "id": "KSU024",
+  "name": "Whelming Gustwave",
+  "cardType": "action",
+  "text": "Combo - If Surging Strike was the last attack this combat chain, Whelming Gustwave gains +1{p}, go again, and \"If this hits, draw a card.\"",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "KSU"
+ },
+ {
+  "id": "KSU025",
+  "name": "Flic Flak",
+  "cardType": "defense-reaction",
+  "text": "If the next card you defend with this turn is a card with combo, it gains +2{d}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "set": "KSU"
+ },
+ {
+  "id": "KSU026",
+  "name": "Scour the Battlescape",
+  "cardType": "action",
+  "text": "You may put a card from your hand on the bottom of your deck. If you do, draw a card.\nIf Scour the Battlescape is played from arsenal, it gains go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "KSU"
+ },
+ {
+  "id": "KSU027",
+  "name": "Wounding Blow",
+  "cardType": "action",
+  "text": "",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "KSU"
+ },
+ {
+  "id": "KSU028",
+  "name": "Lunging Press",
+  "cardType": "attack-reaction",
+  "text": "Target attack action card gains +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "KSU"
+ },
+ {
+  "id": "KSU029",
+  "name": "Energy Potion",
+  "cardType": "action",
+  "text": "Instant - Destroy this: Gain {r}{r}",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "KSU"
+ },
+ {
+  "id": "KSU030",
+  "name": "Sigil of Solace",
+  "cardType": "instant",
+  "text": "Gain 1{h}",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "KSU"
+ }
+]

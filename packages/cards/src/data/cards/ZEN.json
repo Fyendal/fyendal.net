@@ -1,0 +1,601 @@
+[
+ {
+  "id": "ZEN001",
+  "name": "Zen",
+  "cardType": "hero",
+  "text": "Once per Turn Instant - {c}{c}{c}: Create a Crouching Tiger in your hand. Search your deck for a card with combo, banish it, then shuffle. You may play it this turn.",
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN002",
+  "name": "Tiger Taming Khakkara",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nWhen this attacks, the next Crouching Tiger you play this combat chain gets +1{p}.",
+  "attack": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "staff",
+   "2h"
+  ],
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN003",
+  "name": "Mask of Wizened Whiskers",
+  "cardType": "equipment",
+  "text": "When this defends, put a card with combo from your graveyard on the bottom of your deck.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN004",
+  "name": "Heirloom of Tiger Hide",
+  "cardType": "equipment",
+  "text": "Cloaked\nWhile this is equipped face-down, at the start of your turn, if you have exactly 1{h}, you may turn this face-up.\nBlade Break",
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Cloaked",
+   "Blade Break"
+  ],
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN005",
+  "name": "Waves of Aqua Marine",
+  "cardType": "equipment",
+  "text": "Cloaked\nAttack Reaction - {r}, turn this face-up: Target attack gets +1{p}.\nAt the start of your turn, destroy this.",
+  "defense": 1,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Cloaked"
+  ],
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN006",
+  "name": "Stride of Reprisal",
+  "cardType": "equipment",
+  "text": "When this defends, create a Crouching Tiger in your hand.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN007",
+  "name": "Biting Breeze",
+  "cardType": "action",
+  "text": "When this hits, create a Crouching Tiger in your banished zone. You may play it this turn.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN008",
+  "name": "Companion of the Claw",
+  "cardType": "action",
+  "text": "When this attacks, if you've pitched a blue card this turn, create a Crouching Tiger in your hand.\nGo again",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN009",
+  "name": "Flex Claws",
+  "cardType": "action",
+  "text": "When this hits, create a Crouching Tiger in your banished zone. You may play it this turn.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN010",
+  "name": "Harmony of the Hunt",
+  "cardType": "action",
+  "text": "When this attacks, if you've pitched a blue card this turn, create a Crouching Tiger in your hand.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN011",
+  "name": "Pouncing Qi",
+  "cardType": "action",
+  "text": "Combo - If Crouching Tiger was the last attack this combat chain, this gets +1{p} and go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN012",
+  "name": "Qi Unleashed",
+  "cardType": "action",
+  "text": "Combo - If Crouching Tiger was the last attack this combat chain, this gets +4{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN013",
+  "name": "Untamed",
+  "cardType": "action",
+  "text": "When this attacks, the next Crouching Tiger you play this combat chain gets +1{p}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN014",
+  "name": "Water the Seeds",
+  "cardType": "action",
+  "text": "When this attacks, your next attack this combat chain with 1 or less base {p} gets +1{p}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN015",
+  "name": "Tiger Form Incantation",
+  "cardType": "action",
+  "text": "The next Crouching Tiger you play this turn gets +3{p}.\nIf you've pitched a blue card this turn, create a Crouching Tiger in your hand.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN016",
+  "name": "Wind Chakra",
+  "cardType": "action",
+  "text": "The next Crouching Tiger you play this turn gets +3{p}. If you've transcended this turn, instead it gets +5{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN017",
+  "name": "Biting Breeze",
+  "cardType": "action",
+  "text": "When this hits, create a Crouching Tiger in your banished zone. You may play it this turn.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN018",
+  "name": "Tiger Form Incantation",
+  "cardType": "action",
+  "text": "The next Crouching Tiger you play this turn gets +2{p}.\nIf you've pitched a blue card this turn, create a Crouching Tiger in your hand.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN019",
+  "name": "Aspect of Tiger: Mind",
+  "cardType": "action",
+  "text": "Combo - When this attacks, if a blue attack action card was the last attack this combat chain, this gets go again and create a Crouching Tiger in your banished zone. You may play it this turn.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN020",
+  "name": "Biting Breeze",
+  "cardType": "action",
+  "text": "When this hits, create a Crouching Tiger in your banished zone. You may play it this turn.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN021",
+  "name": "Flex Claws",
+  "cardType": "action",
+  "text": "When this hits, create a Crouching Tiger in your banished zone. You may play it this turn.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN022",
+  "name": "Harmony of the Hunt",
+  "cardType": "action",
+  "text": "When this attacks, if you've pitched a blue card this turn, create a Crouching Tiger in your hand.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN023",
+  "name": "Pouncing Qi",
+  "cardType": "action",
+  "text": "Combo - If Crouching Tiger was the last attack this combat chain, this gets +1{p} and go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN024",
+  "name": "Untamed",
+  "cardType": "action",
+  "text": "When this attacks, the next Crouching Tiger you play this combat chain gets +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN025",
+  "name": "Preserve Tradition",
+  "cardType": "instant",
+  "text": "Legendary\nPut target action card from your graveyard on the bottom of your deck.\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "ZEN",
+  "backId": "ZEN025B"
+ },
+ {
+  "id": "ZEN025B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN026",
+  "name": "Rising Sun, Setting Moon",
+  "cardType": "instant",
+  "text": "Legendary\nDraw a card, then put a card from your hand on the bottom of your deck.\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "ZEN",
+  "backId": "ZEN026B"
+ },
+ {
+  "id": "ZEN026B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN027",
+  "name": "Stir the Pot",
+  "cardType": "instant",
+  "text": "Legendary\nShuffle.\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "ZEN",
+  "backId": "ZEN027B"
+ },
+ {
+  "id": "ZEN027B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN028",
+  "name": "The Grain that Tips the Scale",
+  "cardType": "instant",
+  "text": "Legendary\nTarget attack gets +1{p}.\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "ZEN",
+  "backId": "ZEN028B"
+ },
+ {
+  "id": "ZEN028B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "ZEN"
+ },
+ {
+  "id": "ZEN029",
+  "name": "Crouching Tiger",
+  "cardType": "action",
+  "text": "Ephemeral\nGo again",
+  "cost": 0,
+  "attack": 0,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Ephemeral",
+   "Go again"
+  ],
+  "set": "ZEN"
+ }
+]

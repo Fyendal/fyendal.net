@@ -1,0 +1,619 @@
+[
+ {
+  "id": "SDA001",
+  "name": "Dash",
+  "cardType": "hero",
+  "text": "You may start the game with a Mechanologist item with cost 2 or less in the arena.",
+  "classes": [
+   "mechanologist"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "SDA"
+ },
+ {
+  "id": "SDA002",
+  "name": "Plasma Barrel Shot",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - Remove a steam counter from Plasma Barrel Shot: Attack\nAction - {r}{r}: If there are no steam counters on Plasma Barrel Shot, put a steam counter on it. Go again\nX is equal to 1 plus the number of times you have boosted this combat chain.",
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "gun",
+   "2h"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA003",
+  "name": "Talishar, the Lost Prince",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}, put a rust counter on Talishar, the Lost Prince: Attack\nAt the beginning of your end phase, if Talishar, the Lost Prince has 3 or more rust counters on it, destroy it.",
+  "attack": 4,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "sword",
+   "2h"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA004",
+  "name": "Blade Beckoner Helm",
+  "cardType": "equipment",
+  "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA005",
+  "name": "Hope Merchant's Hood",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Shuffle any number of cards from your hand into your deck, then draw that many cards.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA006",
+  "name": "Nullrune Hood",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA007",
+  "name": "Blossom of Spring",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Gain {r}. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA008",
+  "name": "Blade Beckoner Gauntlets",
+  "cardType": "equipment",
+  "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA009",
+  "name": "Nullrune Gloves",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA010",
+  "name": "Achilles Accelerator",
+  "cardType": "equipment",
+  "text": "Instant - Destroy Achilles Accelerator: Gain 1 action point. Activate this ability only if you have boosted this turn.\nArcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA011",
+  "name": "Blade Beckoner Boots",
+  "cardType": "equipment",
+  "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA012",
+  "name": "Crankshaft",
+  "cardType": "action",
+  "text": "Boost\nWhen this is banished from boosting, put a steam counter on a Hyper Driver you control.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA013",
+  "name": "Fender Bender",
+  "cardType": "action",
+  "text": "Boost\nThis gets +X{p}, where X is the number of equipment defending it.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA014",
+  "name": "Jump Start",
+  "cardType": "action",
+  "text": "If you control a Hyper Driver, this costs {r} less to play.\nBoost",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA015",
+  "name": "Out Pace",
+  "cardType": "action",
+  "text": "Boost\nThis can't be defended by equipment.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA016",
+  "name": "Overblast",
+  "cardType": "action",
+  "text": "Overblast gains +X{p}, where X is the number of times you have boosted this combat chain.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA017",
+  "name": "Rev Up",
+  "cardType": "action",
+  "text": "If you control a Hyper Driver, this costs {r} less to play.\nBoost",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA018",
+  "name": "Throttle",
+  "cardType": "action",
+  "text": "Boost",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA019",
+  "name": "Under Loop",
+  "cardType": "action",
+  "text": "Boost\nWhen this hits, put it on the bottom of its owner's deck.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA020",
+  "name": "Zero to Sixty",
+  "cardType": "action",
+  "text": "Boost",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA021",
+  "name": "Zipper Hit",
+  "cardType": "action",
+  "text": "Boost",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA022",
+  "name": "Re-Charge!",
+  "cardType": "action",
+  "text": "Put a steam counter on a Hyper Driver you control.\nThe next attack you boost this turn gets +4{p}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA023",
+  "name": "Boom Grenade",
+  "cardType": "action",
+  "text": "Crank\nThis enters the arena with a steam counter. At the start of your turn, destroy this unless you remove a steam counter from it.\nWhen a Mechanologist attack action card you control hits a hero, destroy this and deal 4 damage to them.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Crank"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA024",
+  "name": "Hyper Driver",
+  "cardType": "action",
+  "text": "This enters the arena with 3 steam counters. When it has none, destroy it.\nOnce per turn, when you boost a card, remove a steam counter from this and gain {r}.",
+  "pitch": 1,
+  "cost": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA025",
+  "name": "Jump Start",
+  "cardType": "action",
+  "text": "If you control a Hyper Driver, this costs {r} less to play.\nBoost",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA026",
+  "name": "Zero to Sixty",
+  "cardType": "action",
+  "text": "Boost",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA027",
+  "name": "Zipper Hit",
+  "cardType": "action",
+  "text": "Boost",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA028",
+  "name": "Big Bertha",
+  "cardType": "action",
+  "text": "Boost\nWhen this is banished from boosting, put a steam counter on a Hyper Driver you control.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA029",
+  "name": "Crankshaft",
+  "cardType": "action",
+  "text": "Boost\nWhen this is banished from boosting, put a steam counter on a Hyper Driver you control.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA030",
+  "name": "Jump Start",
+  "cardType": "action",
+  "text": "If you control a Hyper Driver, this costs {r} less to play.\nBoost",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA031",
+  "name": "Teklo Trebuchet 2000",
+  "cardType": "action",
+  "text": "When this attacks, the next attack you boost this combat chain gets +2{p}.\nBoost",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA032",
+  "name": "Throttle",
+  "cardType": "action",
+  "text": "Boost",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA033",
+  "name": "Zero to Sixty",
+  "cardType": "action",
+  "text": "Boost",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "SDA"
+ },
+ {
+  "id": "SDA034",
+  "name": "Zipper Hit",
+  "cardType": "action",
+  "text": "Boost",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "SDA"
+ }
+]

@@ -1,0 +1,511 @@
+[
+ {
+  "id": "AVS001",
+  "name": "Viserai, Rune Blood",
+  "cardType": "hero",
+  "text": "Whenever you play a Runeblade card, if you've played another non-attack action card this turn, create a Runechant token.",
+  "classes": [
+   "runeblade"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "AVS"
+ },
+ {
+  "id": "AVS002",
+  "name": "Nebula Blade",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nWhen this hits, create a Runechant token.\nIf you've played a non-attack action card this turn, this gets +3{p}.",
+  "attack": 1,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "sword",
+   "2h"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS003",
+  "name": "Helm of the Arknight",
+  "cardType": "equipment",
+  "text": "Temper",
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS004",
+  "name": "Bloodsheath Skeleta",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: The next attack action card and non-attack action card you play this turn get \"This card costs {r} less to play for each Runechant you control.\"\nTemper",
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS005",
+  "name": "Vexing Quillhand",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Create 2 Runechant tokens. Go again\nArcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS006",
+  "name": "Sutcliffe's Suede Hides",
+  "cardType": "equipment",
+  "text": "Attack Reaction - {r}, destroy this: Target attack action card gets go again. Activate this only if you've played a non-attack action card this turn.",
+  "defense": 0,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS007",
+  "name": "Amplify the Arknight",
+  "cardType": "action",
+  "text": "This costs {r} less to play for each Runechant you control.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS008",
+  "name": "Arknight Ascendancy",
+  "cardType": "action",
+  "text": "Viserai Specialization\nThis costs {r} less to play for each Runechant you control.\nWhen this hits, create Runechant tokens equal to the damage dealt this way.\nDominate",
+  "pitch": 1,
+  "cost": 6,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Viserai Specialization",
+   "Dominate"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS009",
+  "name": "Drawn to the Dark Dimension",
+  "cardType": "action",
+  "text": "This costs {r} less to play for each Runechant you control.\nWhen this attacks, draw a card.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS010",
+  "name": "Hocus Pocus",
+  "cardType": "action",
+  "text": "When this attacks, create a Runechant token.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS011",
+  "name": "Rune Flash",
+  "cardType": "action",
+  "text": "This costs {r} less to play for each Runechant token you control.\nGo again",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS012",
+  "name": "Runerager Swarm",
+  "cardType": "action",
+  "text": "If you've played or created an aura this turn, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS013",
+  "name": "Condemn to Slaughter",
+  "cardType": "action",
+  "text": "Your next Runeblade attack this turn gets +3{p}.\nYou may destroy an aura you control. If you do, each opponent destroys an aura permanent they control.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS014",
+  "name": "Deadwood Dirge",
+  "cardType": "action",
+  "text": "Destroy an aura you control. If you do, create 3 Runechant tokens.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS015",
+  "name": "Malefic Incantation",
+  "cardType": "action",
+  "text": "Go again\nThis enters the arena with 3 verse counters. When it has none, destroy it.\nOnce per turn, when you play an attack action card, remove a verse counter from this. If you do, create a Runechant token.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS016",
+  "name": "Mordred Tide",
+  "cardType": "action",
+  "text": "Until end of turn, if you would create one or more Runechant tokens, instead create that many plus 1.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS017",
+  "name": "Read the Runes",
+  "cardType": "action",
+  "text": "Create 3 Runechant tokens.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS018",
+  "name": "Revel in Runeblood",
+  "cardType": "action",
+  "text": "If you've played an attack action card and another non-attack action card this turn, create 4 Runechant tokens.\nAt the beginning of your end phase, destroy all Runechants you control.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS019",
+  "name": "Sonata Arcanix",
+  "cardType": "action",
+  "text": "Reveal the top X+3 cards of your deck.\nFor each non-attack action card revealed this way, put an attack action card revealed this way into your hand. Then deal arcane damage to target hero equal to the number of cards put into your hand this way. Shuffle, then banish this.\nGo again",
+  "pitch": 1,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS020",
+  "name": "Ninth Blade of the Blood Oath",
+  "cardType": "action",
+  "text": "This costs {r} less to play for each Runechant you control.",
+  "pitch": 2,
+  "cost": 9,
+  "attack": 9,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS021",
+  "name": "Runerager Swarm",
+  "cardType": "action",
+  "text": "If you've played or created an aura this turn, this gets go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS022",
+  "name": "Malefic Incantation",
+  "cardType": "action",
+  "text": "Go again\nThis enters the arena with 2 verse counters. When it has none, destroy it.\nOnce per turn, when you play an attack action card, remove a verse counter from this. If you do, create a Runechant token.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS023",
+  "name": "Amplify the Arknight",
+  "cardType": "action",
+  "text": "This costs {r} less to play for each Runechant you control.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS024",
+  "name": "Rune Flash",
+  "cardType": "action",
+  "text": "This costs {r} less to play for each Runechant token you control.\nGo again",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS025",
+  "name": "Runerager Swarm",
+  "cardType": "action",
+  "text": "If you've played or created an aura this turn, this gets go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS026",
+  "name": "Become the Arknight",
+  "cardType": "action",
+  "text": "Viserai Specialization\nYou may discard an action card. If you discard an attack action card this way, search your deck for a Runeblade non-attack action card, reveal it, and put it into your hand. If you discard a non-attack action card this way, search your deck for a Runeblade attack action card, reveal it, and put it into your hand. Shuffle. Go again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Viserai Specialization",
+   "Go again"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS027",
+  "name": "Mauvrion Skies",
+  "cardType": "action",
+  "text": "The next Runeblade attack action card you play this turn gets go again and \"When this hits, create a Runechant token.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS028",
+  "name": "Sigil of the Arknight",
+  "cardType": "action",
+  "text": "Go again\nAt the beginning of your action phase, destroy this.\nWhen this leaves the arena, reveal the top card of your deck. If it's an attack action card, put it into your hand.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS029",
+  "name": "Tome of the Arknight",
+  "cardType": "action",
+  "text": "Reveal the top 2 cards of your deck. If you reveal an attack action card and a non-attack action card this way, put them into your hand.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AVS"
+ },
+ {
+  "id": "AVS030",
+  "name": "Runechant",
+  "cardType": "token",
+  "text": "When you play an attack action card or activate a weapon attack, destroy this and deal 1 arcane damage to target opposing hero.",
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "AVS"
+ }
+]

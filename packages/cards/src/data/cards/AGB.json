@@ -1,0 +1,572 @@
+[
+ {
+  "id": "AGB001",
+  "name": "Gravy Bones, Shipwrecked Looter",
+  "cardType": "hero",
+  "text": "Instant - {t}, destroy a Gold you control: Draw a card, then discard a card.\nIf a blue card has been put into your graveyard this turn, you may play cards with watery grave from your graveyard.",
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "AGB"
+ },
+ {
+  "id": "AGB002",
+  "name": "Gravy Bones",
+  "cardType": "hero",
+  "text": "Instant - {t}, destroy a Gold you control: Draw a card, then discard a card.\nIf a blue card has been put into your graveyard this turn, you may play cards with watery grave from your graveyard.",
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "AGB"
+ },
+ {
+  "id": "AGB003",
+  "name": "Compass of Sunken Depths",
+  "cardType": "equipment",
+  "text": "Instant - {t}: Look at the top card of your deck.\nThe first card with watery grave you play from your graveyard each turn gets go again.",
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "off-hand"
+  ],
+  "set": "AGB"
+ },
+ {
+  "id": "AGB004",
+  "name": "Tricorn of Saltwater Death",
+  "cardType": "equipment",
+  "text": "When this defends, you may discard a card with watery grave. If you do, draw a card.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "AGB"
+ },
+ {
+  "id": "AGB005",
+  "name": "Graven Justaucorpse",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Discard a card. Gain {r} equal to its pitch value.\nBattleworn",
+  "defense": 1,
+  "subtypes": [
+   "necromancer",
+   "chest"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "AGB"
+ },
+ {
+  "id": "AGB006",
+  "name": "Washed Up Wave",
+  "cardType": "equipment",
+  "text": "When this defends, you may discard a card or destroy the top card of your deck. If that card has watery grave, this gets +2{d}.\nBlade Break",
+  "defense": 0,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "AGB"
+ },
+ {
+  "id": "AGB007",
+  "name": "Breakwater Undertow",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy this: Target Pirate ally attack gets go again. When the combat chain closes, destroy the ally.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "AGB"
+ },
+ {
+  "id": "AGB008",
+  "name": "Battalion Barque",
+  "cardType": "action",
+  "text": "High Tide - If there are 2 or more blue cards in your pitch zone, this gets +2{p}.",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "High Tide"
+  ],
+  "set": "AGB"
+ },
+ {
+  "id": "AGB009",
+  "name": "Jittery Bones",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card or destroy the top card of your deck. If that card has watery grave, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AGB"
+ },
+ {
+  "id": "AGB010",
+  "name": "Paddle Faster",
+  "cardType": "action",
+  "text": "When this attacks, you may {t} an ally you control. If you do, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AGB"
+ },
+ {
+  "id": "AGB011",
+  "name": "Restless Bones",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card or destroy the top card of your deck. If that card has watery grave, this gets go again.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AGB"
+ },
+ {
+  "id": "AGB012",
+  "name": "Scar for a Scar",
+  "cardType": "action",
+  "text": "When this is played, if you have less {h} than an opposing hero, it gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AGB"
+ },
+ {
+  "id": "AGB013",
+  "name": "Fiddler's Green",
+  "cardType": "block",
+  "text": "When this is put into your graveyard from anywhere, gain 3{h}.",
+  "pitch": 1,
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "set": "AGB"
+ },
+ {
+  "id": "AGB014",
+  "name": "Anka, Drag Under",
+  "cardType": "action",
+  "text": "Action - {r}, {t}: Attack\nInstant - {t}, discard a card with watery grave: The next time an opponent draws one or more cards this action phase, they discard a card.\nWatery Grave",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 3,
+  "set": "AGB"
+ },
+ {
+  "id": "AGB015",
+  "name": "Barnacle",
+  "cardType": "action",
+  "text": "Action - {t}: Attack\nWatery Grave",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 4,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 3,
+  "set": "AGB"
+ },
+ {
+  "id": "AGB016",
+  "name": "Limpit, Hop-a-long",
+  "cardType": "action",
+  "text": "Action - {r}, {t}: Attack. Go again\nWatery Grave",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 1,
+  "set": "AGB"
+ },
+ {
+  "id": "AGB017",
+  "name": "Oysten, Heart of Gold",
+  "cardType": "action",
+  "text": "Action - {t}: Attack\nWhen this dies, create a Gold token.\nWatery Grave",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 1,
+  "set": "AGB"
+ },
+ {
+  "id": "AGB018",
+  "name": "Riggermortis",
+  "cardType": "action",
+  "text": "Action - {r}, {t}: Attack\nWatery Grave",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 6,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 1,
+  "set": "AGB"
+ },
+ {
+  "id": "AGB019",
+  "name": "Sawbones, Dock Hand",
+  "cardType": "action",
+  "text": "Action - {r}, {t}: Attack\nInstant - {t}: The next time you or a Pirate you control would be dealt damage this turn, prevent 1 of that damage.\nWatery Grave",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 6,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 2,
+  "set": "AGB"
+ },
+ {
+  "id": "AGB020",
+  "name": "Back Alley Breakline",
+  "cardType": "action",
+  "text": "If an activated ability or action card effect puts Back Alley Breakline face up into a zone from your deck, gain 1 action point.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "AGB"
+ },
+ {
+  "id": "AGB021",
+  "name": "Golden Tipple",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a yellow card. If you do, draw a card and create a Gold token.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AGB"
+ },
+ {
+  "id": "AGB022",
+  "name": "Jittery Bones",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card or destroy the top card of your deck. If that card has watery grave, this gets go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AGB"
+ },
+ {
+  "id": "AGB023",
+  "name": "Murderous Rabble",
+  "cardType": "action",
+  "text": "When this attacks, reveal the top card of your deck. This gets +X{p}, where X is the pitch value of the card revealed this way.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AGB"
+ },
+ {
+  "id": "AGB024",
+  "name": "Restless Bones",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card or destroy the top card of your deck. If that card has watery grave, this gets go again.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AGB"
+ },
+ {
+  "id": "AGB025",
+  "name": "Avast Ye!",
+  "cardType": "action",
+  "text": "Your next Pirate ally attack this turn gets go again and \"When this hits a hero, create a Gold token.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AGB"
+ },
+ {
+  "id": "AGB026",
+  "name": "Call to the Grave",
+  "cardType": "action",
+  "text": "Search your deck for a card, put it into your graveyard, then shuffle.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AGB"
+ },
+ {
+  "id": "AGB027",
+  "name": "Loot the Arsenal",
+  "cardType": "action",
+  "text": "Your next Pirate ally attack this turn gets \"When this hits a hero, destroy a card in their arsenal. If you do, create a Gold token.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AGB"
+ },
+ {
+  "id": "AGB028",
+  "name": "Loot the Hold",
+  "cardType": "action",
+  "text": "Your next Pirate ally attack this turn gets \"When this hits a hero, they discard a card. If they do, create a Gold token.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AGB"
+ },
+ {
+  "id": "AGB029",
+  "name": "Portside Exchange",
+  "cardType": "action",
+  "text": "Discard a card, then draw a card. If a yellow card is discarded this way, create a Gold token.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AGB"
+ },
+ {
+  "id": "AGB030",
+  "name": "Timesnap Potion",
+  "cardType": "action",
+  "text": "Action - Destroy this: Gain 2 action points.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "AGB"
+ },
+ {
+  "id": "AGB031",
+  "name": "Gold",
+  "cardType": "token",
+  "text": "Action - {r}{r}, destroy this: Draw a card. Go again",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "AGB"
+ }
+]

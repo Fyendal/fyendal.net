@@ -1,0 +1,628 @@
+/* ── table: playmat board + side panel ── */
+.table {
+  --mat-zone-col: clamp(68px, 10vh, 130px);
+  --mat-column-gap: clamp(4px, .55vh, 7px);
+  display: grid;
+  grid-template-columns: 1fr var(--rail-w);
+  height: 100vh;
+  background: #0d0703;
+}
+.table.rail-is-collapsed { --rail-w: 40px; }
+
+/* leather playmat */
+.board {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  padding: 0 18px;
+  background:
+    radial-gradient(ellipse at 50% 0%, #5a3a2050 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 100%, #5a3a2050 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 50%, #38220f 0%, #251405 60%, #180c03 100%);
+}
+.board::before {
+  content: "";
+  position: fixed;
+  inset: 0 var(--rail-w) 0 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(115deg, #ffffff05 0 2px, transparent 2px 7px),
+    repeating-linear-gradient(25deg, #00000012 0 3px, transparent 3px 10px);
+}
+
+.player-nameplate {
+  position: fixed;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  max-width: min(260px, calc(50vw - 24px));
+  padding: 6px 10px;
+  border: 1px solid #73582f99;
+  border-radius: 4px;
+  background: #140d07e8;
+  box-shadow: 0 2px 10px #0008;
+  color: #f0e5d0;
+  font-family: var(--font-display);
+  font-size: 14px;
+  letter-spacing: .6px;
+  line-height: 1;
+  pointer-events: none;
+}
+.player-nameplate-username {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.player-nameplate-opponent { top: 12px; left: 12px; }
+.player-nameplate-self { bottom: 12px; left: 12px; }
+.player-nameplate-badge {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+.player-badge-mark {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  border-radius: 3px;
+  outline: none;
+  cursor: help;
+}
+.player-nameplate .player-badge-mark { pointer-events: auto; }
+.player-badge-mark:focus-visible {
+  box-shadow: 0 0 0 2px #e3bd58;
+}
+.player-badge-tooltip {
+  position: absolute;
+  z-index: 80;
+  bottom: calc(100% + 8px);
+  left: 0;
+  display: none;
+  width: min(250px, 72vw);
+  padding: 9px 11px;
+  border: 1px solid #8b6b37;
+  border-radius: 4px;
+  background: #100b07fa;
+  box-shadow: 0 7px 20px #000b;
+  color: #d7c9ad;
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: normal;
+  line-height: 1.35;
+  text-align: left;
+  white-space: normal;
+}
+.player-badge-tooltip strong,
+.player-badge-tooltip > span {
+  display: block;
+  overflow: visible;
+  white-space: normal;
+}
+.player-badge-tooltip strong { margin-bottom: 3px; color: #f0d995; }
+.player-badge-mark:hover .player-badge-tooltip,
+.player-badge-mark:focus .player-badge-tooltip,
+.player-badge-mark:focus-within .player-badge-tooltip,
+.account-badge-option:hover .player-badge-tooltip,
+.account-badge-option:focus-within .player-badge-tooltip { display: block; }
+.player-nameplate-opponent .player-badge-tooltip,
+.account-badge-option .player-badge-tooltip {
+  top: calc(100% + 8px);
+  bottom: auto;
+}
+/* ── one player's half of the mat ── */
+.mat-half {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  --mat-outer-col: clamp(68px, 10vh, 130px);
+  --mat-arms-col: clamp(68px, 10vh, 130px);
+  --mat-weapon-0-col: clamp(68px, 10vh, 130px);
+  --mat-hero-col: clamp(68px, 10vh, 130px);
+  --mat-weapon-1-col: clamp(68px, 10vh, 130px);
+  --mat-tapped-col: clamp(86px, 13vh, 170px);
+  /* Three card clusters with flexible spacers. Their width follows the card
+     height, which is calculated from the six rows across both mat halves. */
+  grid-template-columns:
+    var(--mat-outer-col)
+    var(--mat-arms-col)
+    1fr
+    var(--mat-weapon-0-col)
+    var(--mat-hero-col)
+    var(--mat-weapon-1-col)
+    1fr
+    var(--mat-zone-col)
+    var(--mat-zone-col);
+  grid-template-rows: repeat(3, clamp(86px, 13vh, 170px));
+  align-content: start;
+  column-gap: var(--mat-column-gap);
+  row-gap: clamp(4px, .7vh, 9px);
+}
+.mat-half.mat-opp { align-content: end; }
+
+/* Full-size tapped arena cards need a landscape-width grid track. Only the
+   affected semantic column expands; the neighboring flexible spacer absorbs
+   the change without moving the other card clusters off the mat. */
+.mat-half:has(> .zone-head .card-tapped),
+.mat-half:has(> .zone-chest .card-tapped),
+.mat-half:has(> .zone-legs .card-tapped) {
+  --mat-outer-col: var(--mat-tapped-col);
+}
+.mat-half:has(> .zone-arms .card-tapped) {
+  --mat-arms-col: var(--mat-tapped-col);
+}
+.mat-half:has(> .zone-weapon-0 .card-tapped) {
+  --mat-weapon-0-col: var(--mat-tapped-col);
+}
+.mat-half:has(> .zone-hero .card-tapped) {
+  --mat-hero-col: var(--mat-tapped-col);
+}
+.mat-half:has(> .zone-weapon-1 .card-tapped) {
+  --mat-weapon-1-col: var(--mat-tapped-col);
+}
+
+/* Keep the packed desktop rows off the center inlay. The remaining slack
+   stays on the outer edge, where it separates lingering effects from hand. */
+@media (min-width: 701px) and (min-height: 701px) {
+  .mat-half { padding-top: clamp(10px, 1.8vh, 22px); }
+  .mat-half.mat-opp {
+    padding-top: 0;
+    padding-bottom: clamp(10px, 1.8vh, 22px);
+  }
+}
+
+/* center divider between the two mat halves: a brass-inlay strip — hard
+   gradient edges, no blur, so the seam stays crisp (both halves keep the
+   same leather) */
+.mat-divider {
+  position: relative;
+  z-index: 5;
+  flex-shrink: 0;
+  height: 7px;
+  margin: -1px -18px 0; /* full-bleed past the board's padding */
+  background: linear-gradient(
+    180deg,
+    #000000b0 0%,
+    #6a5326 30%,
+    var(--bronze) 45%,
+    #ffd479 50%,
+    var(--bronze) 55%,
+    #3a2c12 75%,
+    #000000b0 100%
+  );
+}
+.mat-divider-center {
+  position: absolute;
+  z-index: 7;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: max-content;
+  max-width: calc(100vw - var(--rail-w) - 20px);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.mat-divider-center > .priority-float {
+  position: static;
+  flex: 0 0 auto;
+  transform: none;
+}
+.mat-divider-mini-dock {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: max-content;
+  pointer-events: none;
+}
+.mat-divider-mini-dock:empty { display: none; }
+.mat-divider-mini-dock > button { pointer-events: auto; }
+.mini-title-short { display: none; }
+.mat-divider-mini-dock:has(.chain-mini-anchored):has(.stack-mini-anchored) .mini-title-long {
+  display: none;
+}
+.mat-divider-mini-dock:has(.chain-mini-anchored):has(.stack-mini-anchored) .mini-title-short {
+  display: inline;
+}
+
+.mat-zone {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+}
+.mat-zone-label {
+  font-family: Georgia, "Times New Roman", serif;
+  font-variant: small-caps;
+  letter-spacing: 2px;
+  font-size: 13px;
+  color: #c9a6274d;
+  text-shadow: 0 1px 2px #000;
+}
+/* board-state strip right of the helmet: tokens/auras/items/allies */
+.board-strip {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 9px;
+  width: 100%;
+  padding-inline: 7px;
+  overflow: hidden;
+}
+/* board cards: same size as other zone cards, but inset further from the
+   helmet and the arms piece than the equipment grid gap; colored border to
+   tell board cards apart — steel-blue for yours, blood-red for the opponent's */
+.board-cards {
+  /* Keep the expanded highlight inside the strip's vertical clip boundary.
+     Negative margins preserve the previous card position and row footprint. */
+  padding-block: 28px;
+  padding-left: 41px;
+  margin-block: -10px;
+}
+.board-cards .card:not(.card-highlight):not(.card-selected) {
+  border-color: #5a8a9c;
+  box-shadow: 0 0 7px #5a8a9c33;
+}
+.board-card-stack {
+  position: relative;
+  flex: 0 0 auto;
+}
+/* A transform does not change flex layout dimensions. Swap the wrapper's
+   footprint for tapped cards so both neighbors start after the full landscape
+   card instead of overlapping its rotated overflow. */
+.board-card-stack-tapped {
+  width: clamp(86px, 13vh, 170px);
+  height: clamp(63px, 9.49vh, 124px);
+}
+.board-card-stack-tapped > .equipment-stack {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.board-card-count {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 3;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #d7c27d;
+  border-radius: 999px;
+  background: #17100a;
+  color: #fff4c7;
+  box-shadow: 0 2px 7px #000c;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+  pointer-events: none;
+}
+.mat-opp .board-cards .card:not(.card-highlight):not(.card-selected) {
+  border-color: #c23a2c;
+  box-shadow: 0 0 7px #c23a2c44;
+}
+.mat-count {
+  position: absolute;
+  bottom: 2px;
+  right: 5px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #e6c96a;
+  text-shadow: 0 1px 2px #000;
+  z-index: 1;
+}
+.zone-deck > .mat-count {
+  right: -5px;
+  bottom: -5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 2px solid #d7c27d;
+  border-radius: 50%;
+  background: #17100af2;
+  box-shadow: 0 2px 7px #000c;
+  color: #fff4c7;
+  font-size: 12px;
+  line-height: 1;
+  z-index: 3;
+}
+.mat-hero .card:not(.card-highlight):not(.card-selected) {
+  border-color: #c9a627;
+}
+.hero-emote {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.hero-emote:has(> .hero-emote-button)::before {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  z-index: 7; /* keep the hover bridge above the combat chain (z-index 6) */
+  width: calc(100% + 16px);
+  height: 50px;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+.hero-emote:hover::before,
+.hero-emote:focus-within::before,
+.hero-emote-open::before {
+  pointer-events: auto;
+}
+.hero-emote-button {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  z-index: 12;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid #ead685;
+  border-radius: 50%;
+  background: #17100af2;
+  box-shadow: 0 3px 10px #000b;
+  color: #fff8db;
+  font-size: 17px;
+  line-height: 1;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 4px) scale(.92);
+  transition: opacity 120ms ease, transform 120ms ease, background 120ms ease;
+}
+.hero-emote-button::before {
+  content: "";
+  position: absolute;
+  inset: -7px;
+}
+.hero-emote:hover .hero-emote-button,
+.hero-emote:focus-within .hero-emote-button,
+.hero-emote-open .hero-emote-button {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) scale(1);
+}
+.hero-emote-button:hover,
+.hero-emote-button:focus-visible {
+  background: #3b2a17;
+  outline: 2px solid #f4dc77;
+  outline-offset: 2px;
+}
+.hero-emote-picker {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 54px);
+  z-index: 13;
+  width: min(230px, 72vw);
+  padding: 10px;
+  border: 1px solid #b89b4c;
+  border-radius: 12px;
+  background: #17100af7;
+  box-shadow: 0 10px 30px #000d;
+  color: #fff3c4;
+  transform: translateX(-50%);
+}
+.hero-emote-picker::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  border: 8px solid transparent;
+  border-top-color: #b89b4c;
+  transform: translateX(-50%);
+}
+.hero-emote-picker-title {
+  margin: 0 2px 8px;
+  color: #d9c47e;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.hero-emote-options {
+  display: grid;
+  gap: 6px;
+}
+.hero-emote-options button {
+  width: 100%;
+  padding: 7px 9px;
+  border: 1px solid #715d2f;
+  border-radius: 7px;
+  background: #2b2115;
+  color: #fff7db;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+}
+.hero-emote-options button:hover,
+.hero-emote-options button:focus-visible {
+  border-color: #ead685;
+  background: #4a3820;
+  outline: none;
+}
+.hero-emote-toast {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 10px);
+  z-index: 13;
+  width: max-content;
+  max-width: min(240px, 70vw);
+  padding: 9px 13px;
+  border: 1px solid #ead685;
+  border-radius: 14px;
+  background: #fff8e7;
+  box-shadow: 0 5px 18px #000b;
+  color: #25170b;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+  pointer-events: none;
+  transform: translateX(-50%);
+  animation: hero-emote-toast 4s ease both;
+}
+.hero-emote:has(> .hero-emote-toast) .hero-emote-button {
+  opacity: 0;
+  pointer-events: none;
+}
+.hero-emote-toast::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  border: 7px solid transparent;
+  border-top-color: #fff8e7;
+  transform: translateX(-50%);
+}
+@keyframes hero-emote-toast {
+  0% { opacity: 0; transform: translate(-50%, 8px) scale(.96); }
+  8%, 82% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -4px) scale(.98); }
+}
+@media (hover: none), (pointer: coarse) {
+  .hero-emote-button {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-emote-button { transition: none; }
+  .hero-emote-toast { animation: none; }
+}
+
+/* ── hands: floating over the mat edges, with their inner halves visible ── */
+.opp-hand {
+  position: absolute;
+  top: 0;
+  left: 9px;
+  right: 9px;
+  height: clamp(48px, 6.9vh, 90px);
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  pointer-events: none;
+  z-index: 3;
+}
+.opp-hand .card-back {
+  width: clamp(68px, 9.45vh, 123px);
+  height: clamp(95px, 13.2vh, 173px);
+  flex-shrink: 0;
+}
+.opp-hand .card-back + .card-back { margin-left: clamp(-62px, -4.73vh, -35px); }
+.opp-hand .muted { align-self: flex-start; padding-top: 12px; }
+.opp-hand-revealed { pointer-events: auto; }
+.opp-hand-revealed .card-hand {
+  width: clamp(68px, 9.45vh, 123px);
+  height: clamp(95px, 13.2vh, 173px);
+  flex-shrink: 0;
+  transform: rotate(180deg);
+}
+.opp-hand-revealed .card-hand + .card-hand {
+  margin-left: clamp(-62px, -4.73vh, -35px);
+}
+.game-is-over .mat-opp .zone-arsenal .card {
+  transform: rotate(180deg);
+}
+
+.hand {
+  --hand-card-height: clamp(180px, 27vh, 330px);
+  --hand-rest-offset: clamp(90px, 13.5vh, 165px);
+  --hand-selected-lift: clamp(18px, 2.4vh, 27px);
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  box-sizing: border-box;
+  height: calc(var(--hand-card-height) + var(--hand-selected-lift));
+  display: flex;
+  gap: 10px;
+  justify-content: flex-start;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-top: var(--hand-selected-lift);
+  scrollbar-width: none;
+  z-index: 4;
+  /* Let empty space in this full-width overlay pass hover events through to
+     mat cards, including lingering effects on the bottom row. */
+  pointer-events: none;
+}
+.hand::-webkit-scrollbar { display: none; }
+/* Auto margins center a hand while it fits. They resolve to zero once the row
+   overflows, keeping the first and last cards reachable by horizontal scroll. */
+.hand > :first-child { margin-left: auto; }
+.hand > :last-child { margin-right: auto; }
+.hand .card-hand {
+  width: clamp(131px, 19.65vh, 240px);
+  height: var(--hand-card-height);
+  transform: translateY(var(--hand-rest-offset));
+  transition: transform 0.12s ease;
+  pointer-events: auto;
+}
+.hand .card-hand:hover { transform: none; }
+.hand .card-hand.card-selected,
+.hand .card-hand.card-selected:hover { transform: translateY(calc(-1 * var(--hand-selected-lift))); }
+.hand .card-hand.card-pitched,
+.hand .card-hand.card-pitched:hover { transform: translateY(calc(-1 * var(--hand-selected-lift))); }
+.hand .muted { transform: translateY(calc(-1 * var(--hand-selected-lift))); }
+.hand-scroll-button {
+  position: absolute;
+  bottom: clamp(20px, 4.5vh, 52px);
+  z-index: 6;
+  display: none;
+  min-width: 60px;
+  min-height: 76px;
+  padding: 0;
+  border: 0;
+  clip-path: none;
+  background: transparent;
+  box-shadow: none;
+  color: #f6dfa2;
+  opacity: .55;
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1;
+  text-shadow: 0 2px 4px #000, 0 0 8px #000;
+}
+.hand-scroll-button:hover,
+.hand-scroll-button:focus-visible {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #fff4c7;
+  opacity: .9;
+}
+.hand-scroll-glyph {
+  display: block;
+  transform: scale(.62, 2);
+  transform-origin: center;
+}
+.hand-scroll-button-left { left: 6px; }
+.hand-scroll-button-right { right: 6px; }
+@media (min-width: 701px) {
+  .hand-scroll-button { display: inline-flex; align-items: center; justify-content: center; }
+}
+.mobile-hand-toggle { display: none; }

@@ -1,0 +1,514 @@
+[
+ {
+  "id": "APR001",
+  "name": "Prism, Sculptor of Arc Light",
+  "cardType": "hero",
+  "text": "Once per Turn Instant - {r}{r}, banish a card from Prism's soul: Create a Spectral Shield token.",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "APR"
+ },
+ {
+  "id": "APR002",
+  "name": "Luminaris",
+  "cardType": "weapon",
+  "text": "During your action phase, Illusionist auras you control are weapons with 1 base {p} and \"Once per Turn Action - 0: Attack\"\nIf there is a yellow card in your pitch zone, your Illusionist attacks get go again.",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "scepter",
+   "2h"
+  ],
+  "set": "APR"
+ },
+ {
+  "id": "APR003",
+  "name": "Halo of Lumina Light",
+  "cardType": "equipment",
+  "text": "When this is destroyed, you may put a yellow aura from your banished zone into the arena.\nSpellvoid 2",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "head"
+  ],
+  "keywords": [
+   "Spellvoid 2"
+  ],
+  "set": "APR"
+ },
+ {
+  "id": "APR004",
+  "name": "Heartened Cross Strap",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: The next attack action card you play this turn costs {r}{r} less to play. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "APR"
+ },
+ {
+  "id": "APR005",
+  "name": "Calming Gesture",
+  "cardType": "equipment",
+  "text": "Instant - {r}, destroy this: Create a Spectral Shield token.\nArcane Barrier 1",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "APR"
+ },
+ {
+  "id": "APR006",
+  "name": "Mage Master Boots",
+  "cardType": "equipment",
+  "text": "Action - {r}, destroy this: The next non-attack action card you play this turn gets go again. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "APR"
+ },
+ {
+  "id": "APR007",
+  "name": "Herald of Protection",
+  "cardType": "action",
+  "text": "When this hits, put it into your soul and create a Spectral Shield token.\nPhantasm",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "APR"
+ },
+ {
+  "id": "APR008",
+  "name": "Wartune Herald",
+  "cardType": "action",
+  "text": "When this hits, put it into your soul.\nPhantasm",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "APR"
+ },
+ {
+  "id": "APR009",
+  "name": "Oasis Respite",
+  "cardType": "instant",
+  "text": "Prevent the next 4 damage that would be dealt to target hero this turn by a source of your choice. If they have less life than each other hero, they may gain 1{h}.",
+  "pitch": 1,
+  "cost": 1,
+  "classes": [
+   "generic"
+  ],
+  "set": "APR"
+ },
+ {
+  "id": "APR010",
+  "name": "Celestial Cataclysm",
+  "cardType": "action",
+  "text": "As an additional cost to play this, banish 3 cards from your soul.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 7,
+  "defense": 3,
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "APR"
+ },
+ {
+  "id": "APR011",
+  "name": "Herald of Erudition",
+  "cardType": "action",
+  "text": "When this hits, put it into your soul and draw 2 cards.\nDominate\nPhantasm",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Dominate",
+   "Phantasm"
+  ],
+  "set": "APR"
+ },
+ {
+  "id": "APR012",
+  "name": "Herald of Protection",
+  "cardType": "action",
+  "text": "When this hits, put it into your soul and create a Spectral Shield token.\nPhantasm",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "APR"
+ },
+ {
+  "id": "APR013",
+  "name": "Herald of Triumph",
+  "cardType": "action",
+  "text": "Attack action cards get -1{p} while defending this.\nWhen this hits, put it into your soul.\nPhantasm",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "APR"
+ },
+ {
+  "id": "APR014",
+  "name": "Wartune Herald",
+  "cardType": "action",
+  "text": "When this hits, put it into your soul.\nPhantasm",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "APR"
+ },
+ {
+  "id": "APR015",
+  "name": "Soul Shield",
+  "cardType": "defense-reaction",
+  "text": "Put this into your soul when the combat chain closes.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 6,
+  "subtypes": [
+   "light"
+  ],
+  "set": "APR"
+ },
+ {
+  "id": "APR016",
+  "name": "Arc Light Sentinel",
+  "cardType": "instant",
+  "text": "Prism Specialization\nOpponents must choose this as the target of attacks if able.\nSpectra",
+  "pitch": 2,
+  "cost": 6,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "aura"
+  ],
+  "keywords": [
+   "Prism Specialization",
+   "Spectra"
+  ],
+  "set": "APR"
+ },
+ {
+  "id": "APR017",
+  "name": "Genesis",
+  "cardType": "instant",
+  "text": "At the start of your turn, you may put a card from your hand into your soul. If it's an Illusionist card, create a Spectral Shield token. If it's a Light card, draw a card.\nSpectra",
+  "pitch": 2,
+  "cost": 4,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "aura"
+  ],
+  "keywords": [
+   "Spectra"
+  ],
+  "set": "APR"
+ },
+ {
+  "id": "APR018",
+  "name": "Merciful Retribution",
+  "cardType": "instant",
+  "text": "Whenever an aura or attack action card you control is destroyed, deal 1 arcane damage to target hero. If it's a non-token Light card, put it into your soul.\nSpectra",
+  "pitch": 2,
+  "cost": 4,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "aura"
+  ],
+  "keywords": [
+   "Spectra"
+  ],
+  "set": "APR"
+ },
+ {
+  "id": "APR019",
+  "name": "Ode to Wrath",
+  "cardType": "instant",
+  "text": "Whenever a source you control deals damage to an opponent, they lose 1 {h}.\nIllusionist attack action cards you control get go again.\nSpectra",
+  "pitch": 2,
+  "cost": 4,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "aura"
+  ],
+  "keywords": [
+   "Spectra"
+  ],
+  "set": "APR"
+ },
+ {
+  "id": "APR020",
+  "name": "Parable of Humility",
+  "cardType": "instant",
+  "text": "Attack action cards your opponents control get -1{p} while attacking and defending.\nSpectra",
+  "pitch": 2,
+  "cost": 4,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "aura"
+  ],
+  "keywords": [
+   "Spectra"
+  ],
+  "set": "APR"
+ },
+ {
+  "id": "APR021",
+  "name": "Herald of Protection",
+  "cardType": "action",
+  "text": "When this hits, put it into your soul and create a Spectral Shield token.\nPhantasm",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "APR"
+ },
+ {
+  "id": "APR022",
+  "name": "Herald of Triumph",
+  "cardType": "action",
+  "text": "Attack action cards get -1{p} while defending this.\nWhen this hits, put it into your soul.\nPhantasm",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "APR"
+ },
+ {
+  "id": "APR023",
+  "name": "Wartune Herald",
+  "cardType": "action",
+  "text": "When this hits, put it into your soul.\nPhantasm",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "APR"
+ },
+ {
+  "id": "APR024",
+  "name": "Haze Bending",
+  "cardType": "action",
+  "text": "Once per turn, when this or an Illusionist non-token aura you control is destroyed, create a Spectral Shield token.\nSpectra",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Spectra"
+  ],
+  "set": "APR"
+ },
+ {
+  "id": "APR025",
+  "name": "Passing Mirage",
+  "cardType": "action",
+  "text": "Your first Illusionist attack each turn loses and can't get phantasm.\nSpectra",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Spectra"
+  ],
+  "set": "APR"
+ },
+ {
+  "id": "APR026",
+  "name": "Pierce Reality",
+  "cardType": "action",
+  "text": "Your first Illusionist attack action card you play each turn gets +2{p}.\nSpectra",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Spectra"
+  ],
+  "set": "APR"
+ },
+ {
+  "id": "APR027",
+  "name": "Shimmers of Silver",
+  "cardType": "action",
+  "text": "Once per turn, when you attack with an Illusionist aura weapon, put a +1{p} counter on it.\nSpectra",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Spectra"
+  ],
+  "set": "APR"
+ },
+ {
+  "id": "APR028",
+  "name": "Spectral Shield",
+  "cardType": "token",
+  "text": "Ward 1",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "APR"
+ }
+]

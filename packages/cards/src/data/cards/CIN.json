@@ -1,0 +1,532 @@
+[
+ {
+  "id": "CIN001",
+  "name": "Cindra",
+  "cardType": "hero",
+  "text": "Whenever you hit a marked hero, create a Fealty token.\nOnce per Turn Instant - {r}{r}{r}: Equip up to 2 Draconic daggers from your graveyard. This costs {r} less to activate for each Draconic chain link you control.",
+  "classes": [
+   "royal",
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "CIN"
+ },
+ {
+  "id": "CIN002",
+  "name": "Kunai of Retribution",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}, destroy this when the combat chain closes: Attack. Go again",
+  "attack": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "dagger",
+   "1h"
+  ],
+  "set": "CIN"
+ },
+ {
+  "id": "CIN003",
+  "name": "Vow of Vengeance",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy this: Mark target Arakni.\nBlade Break",
+  "defense": 1,
+  "subtypes": [
+   "draconic",
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "CIN"
+ },
+ {
+  "id": "CIN004",
+  "name": "Blade Beckoner Plating",
+  "cardType": "equipment",
+  "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "CIN"
+ },
+ {
+  "id": "CIN005",
+  "name": "Danger Digits",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy this: Target dagger you control that isn't on the active chain link deals 1 damage to the defending hero. If damage is dealt this way, the dagger has hit. Destroy the dagger.",
+  "defense": 0,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "CIN"
+ },
+ {
+  "id": "CIN006",
+  "name": "Leap Frog Leggings",
+  "cardType": "equipment",
+  "text": "When an opponent plays or activates an attack reaction, you may add this to the active chain link as a defending card.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "CIN"
+ },
+ {
+  "id": "CIN007",
+  "name": "Art of the Dragon: Fire",
+  "cardType": "action",
+  "text": "When this attacks, if it is Draconic, deal 2 damage to any target.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "CIN"
+ },
+ {
+  "id": "CIN008",
+  "name": "Blaze Headlong",
+  "cardType": "action",
+  "text": "If you've played another red card this turn, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "CIN"
+ },
+ {
+  "id": "CIN009",
+  "name": "Burning Blade Dance",
+  "cardType": "action",
+  "text": "If you control 2 or more Draconic chain links, this gets go again and \"When this hits a hero, you may have target dagger you control deal 1 damage to them. If damage is dealt this way, the dagger has hit. Destroy the dagger.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "CIN"
+ },
+ {
+  "id": "CIN010",
+  "name": "Display Loyalty",
+  "cardType": "action",
+  "text": "If you control 2 or more Draconic chain links, this gets go again and \"When this attacks a hero, create a Fealty token.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "CIN"
+ },
+ {
+  "id": "CIN011",
+  "name": "Dust Runner Outlaw",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "CIN"
+ },
+ {
+  "id": "CIN012",
+  "name": "Fire Tenet: Strike First",
+  "cardType": "action",
+  "text": "When this attacks, your next Draconic attack this combat chain gets +1{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "CIN"
+ },
+ {
+  "id": "CIN013",
+  "name": "Grow Claws",
+  "cardType": "action",
+  "text": "If a Draconic attack was the last attack this combat chain, this gets +1{p}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "CIN"
+ },
+ {
+  "id": "CIN014",
+  "name": "Hot on Their Heels",
+  "cardType": "action",
+  "text": "If you control 2 or more Draconic chain links, this gets go again and \"When this hits a hero, mark them.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Mark"
+  ],
+  "set": "CIN"
+ },
+ {
+  "id": "CIN015",
+  "name": "Hunt to the Ends of Rathe",
+  "cardType": "action",
+  "text": "When this attacks Arakni, mark them.\nIf this is attacking a marked hero, this gets +2{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Mark",
+   "Go again"
+  ],
+  "set": "CIN"
+ },
+ {
+  "id": "CIN016",
+  "name": "Mark with Magma",
+  "cardType": "action",
+  "text": "If you control 2 or more Draconic chain links, this gets go again and \"When this hits a hero, mark them.\"",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Mark"
+  ],
+  "set": "CIN"
+ },
+ {
+  "id": "CIN017",
+  "name": "Poisoned Blade",
+  "cardType": "action",
+  "text": "Whenever a dagger you own hits a hero this combat chain, they lose 1{h}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "CIN"
+ },
+ {
+  "id": "CIN018",
+  "name": "Ronin Renegade",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "CIN"
+ },
+ {
+  "id": "CIN019",
+  "name": "Silver Talons",
+  "cardType": "action",
+  "text": "When this attacks a hero, if it is Draconic, you may have target dagger you control deal 1 damage to them. If damage is dealt this way, the dagger has hit. Destroy the dagger.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "CIN"
+ },
+ {
+  "id": "CIN020",
+  "name": "Tag the Target",
+  "cardType": "action",
+  "text": "When this hits a hero, mark them.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Mark"
+  ],
+  "set": "CIN"
+ },
+ {
+  "id": "CIN021",
+  "name": "Wrath of Retribution",
+  "cardType": "action",
+  "text": "Legendary\nThis costs {r} less to play for each Draconic chain link you control.\nWhen this attacks, daggers you control get +1{p} and cost {r} less to activate this combat chain.\nGo again",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Legendary",
+   "Go again"
+  ],
+  "set": "CIN"
+ },
+ {
+  "id": "CIN022",
+  "name": "Tag the Target",
+  "cardType": "action",
+  "text": "When this hits a hero, mark them.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Mark"
+  ],
+  "set": "CIN"
+ },
+ {
+  "id": "CIN023",
+  "name": "Dragon Power",
+  "cardType": "action",
+  "text": "When this attacks, if it is Draconic, it gets +3{p}.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "CIN"
+ },
+ {
+  "id": "CIN024",
+  "name": "Grow Wings",
+  "cardType": "action",
+  "text": "If a Draconic attack was the last attack this combat chain, this gets go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "CIN"
+ },
+ {
+  "id": "CIN025",
+  "name": "Silver Talons",
+  "cardType": "action",
+  "text": "When this attacks a hero, if it is Draconic, you may have target dagger you control deal 1 damage to them. If damage is dealt this way, the dagger has hit. Destroy the dagger.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "CIN"
+ },
+ {
+  "id": "CIN026",
+  "name": "Tag the Target",
+  "cardType": "action",
+  "text": "When this hits a hero, mark them.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Mark"
+  ],
+  "set": "CIN"
+ },
+ {
+  "id": "CIN027",
+  "name": "Put in Context",
+  "cardType": "defense-reaction",
+  "text": "This can only defend an attack with 3 or less base {p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "set": "CIN"
+ },
+ {
+  "id": "CIN028",
+  "name": "Fealty",
+  "cardType": "token",
+  "text": "Instant - Destroy this: The next card you play this turn is Draconic. At the beginning of your end phase, if you haven't created a Fealty token or played a Dragonic card this turn, destroy this.",
+  "subtypes": [
+   "draconic",
+   "aura"
+  ],
+  "set": "CIN"
+ },
+ {
+  "id": "CIN029",
+  "name": "Marked",
+  "cardType": "token",
+  "text": "You are marked until an opponent hits you",
+  "keywords": [
+   "Mark"
+  ],
+  "set": "CIN"
+ }
+]

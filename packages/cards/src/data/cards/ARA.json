@@ -1,0 +1,502 @@
+[
+ {
+  "id": "ARA001",
+  "name": "Arakni, Solitary Confinement",
+  "cardType": "hero",
+  "text": "Your first attack with stealth each turn has go again.",
+  "classes": [
+   "assassin"
+  ],
+  "life": 19,
+  "intellect": 4,
+  "set": "ARA"
+ },
+ {
+  "id": "ARA002",
+  "name": "Spider's Bite",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nPiercing 1\nWhen this hits a hero, the next time they defend with 1 or more attack action cards this turn, those cards have -1{d} while defending.",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Piercing 1"
+  ],
+  "set": "ARA"
+ },
+ {
+  "id": "ARA003",
+  "name": "Mask of Malicious Manifestations",
+  "cardType": "equipment",
+  "text": "Action - {r}, put a card from your hand or arsenal on the bottom of your deck, destroy Mask of Malicious Manifestations: Reveal cards from the top of your deck until you reveal an attack action card. Put it into your hand, then shuffle. Go again\nBlade break",
+  "defense": 1,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade break"
+  ],
+  "set": "ARA"
+ },
+ {
+  "id": "ARA004",
+  "name": "Blossom of Spring",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Gain {r}. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "ARA"
+ },
+ {
+  "id": "ARA005",
+  "name": "Toxic Tips",
+  "cardType": "equipment",
+  "text": "Action - {r}, destroy Toxic Tips: The next attack action card you play this turn gains \"When this hits a hero, create a Frailty, Inertia, or Bloodrot Pox token under their control.\" Go again\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "ARA"
+ },
+ {
+  "id": "ARA006",
+  "name": "Snapdragon Scalers",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy this: Target attack action card with cost 1 or less gets go again.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "ARA"
+ },
+ {
+  "id": "ARA007",
+  "name": "Hurl",
+  "cardType": "action",
+  "text": "As an additional cost to play Hurl, you may pay {r}. When you do, it gains \"When this attacks, target dagger you control deals 1 damage to target hero. If damage is dealt this way, the dagger has hit. Destroy the dagger.\"\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ARA"
+ },
+ {
+  "id": "ARA008",
+  "name": "Infect",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, create a Bloodrot Pox token under their control.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "ARA"
+ },
+ {
+  "id": "ARA009",
+  "name": "Isolate",
+  "cardType": "action",
+  "text": "Stealth\nDominate",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth",
+   "Dominate"
+  ],
+  "set": "ARA"
+ },
+ {
+  "id": "ARA010",
+  "name": "Malign",
+  "cardType": "action",
+  "text": "Stealth\nDamage that would be dealt by Malign can't be prevented.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "ARA"
+ },
+ {
+  "id": "ARA011",
+  "name": "Prowl",
+  "cardType": "action",
+  "text": "Stealth\nThe next attack with stealth you play this combat chain gains +1{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "ARA"
+ },
+ {
+  "id": "ARA012",
+  "name": "Sedate",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, create an Inertia token under their control.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "ARA"
+ },
+ {
+  "id": "ARA013",
+  "name": "Wither",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, create a Frailty token under their control.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "ARA"
+ },
+ {
+  "id": "ARA014",
+  "name": "Virulent Touch",
+  "cardType": "action",
+  "text": "Virulent Touch can't be played from hand.\nWhen this chain link resolves, if Virulent Touch is defended by a card from hand, create a Bloodrot Pox token under the defending hero's control.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "ARA"
+ },
+ {
+  "id": "ARA015",
+  "name": "Spring Load",
+  "cardType": "action",
+  "text": "When this attacks, if you have no cards in hand, it gains +3{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "ARA"
+ },
+ {
+  "id": "ARA016",
+  "name": "Razor's Edge",
+  "cardType": "attack-reaction",
+  "text": "Target attack action card with stealth gets +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "ARA"
+ },
+ {
+  "id": "ARA017",
+  "name": "Short and Sharp",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target dagger attack gains +3{p}.\n- Target attack action card with 2 or less base {p} gains +3{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "set": "ARA"
+ },
+ {
+  "id": "ARA018",
+  "name": "Spike with Bloodrot",
+  "cardType": "attack-reaction",
+  "text": "Target attack action card with stealth gains +3{p} and \"When this hits a hero, create a Bloodrot Pox token under their control.\"",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "ARA"
+ },
+ {
+  "id": "ARA019",
+  "name": "Bloodrot Trap",
+  "cardType": "defense-reaction",
+  "text": "When this defends and the attacking hero has played or activated a reaction this chain link, create a Bloodrot Pox token under their control.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "ARA"
+ },
+ {
+  "id": "ARA020",
+  "name": "Infect",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, create a Bloodrot Pox token under their control.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "ARA"
+ },
+ {
+  "id": "ARA021",
+  "name": "Prowl",
+  "cardType": "action",
+  "text": "Stealth\nThe next attack with stealth you play this combat chain gains +1{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "ARA"
+ },
+ {
+  "id": "ARA022",
+  "name": "Infect",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, create a Bloodrot Pox token under their control.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "ARA"
+ },
+ {
+  "id": "ARA023",
+  "name": "Prowl",
+  "cardType": "action",
+  "text": "Stealth\nThe next attack with stealth you play this combat chain gains +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "ARA"
+ },
+ {
+  "id": "ARA024",
+  "name": "Sedate",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, create an Inertia token under their control.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "ARA"
+ },
+ {
+  "id": "ARA025",
+  "name": "Wither",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, create a Frailty token under their control.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "ARA"
+ },
+ {
+  "id": "ARA026",
+  "name": "Razor's Edge",
+  "cardType": "attack-reaction",
+  "text": "Target attack action card with stealth gets +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "ARA"
+ },
+ {
+  "id": "ARA027",
+  "name": "Bloodrot Pox",
+  "cardType": "token",
+  "text": "At the beginning of your end phase, destroy Bloodrot Pox, then it deals 2 damage to you unless you pay {r}{r}{r}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "ARA"
+ },
+ {
+  "id": "ARA028",
+  "name": "Frailty",
+  "cardType": "token",
+  "text": "Your attack action cards played from arsenal and weapon attacks have -1{p}.\nAt the beginning of your end phase destroy Frailty.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "ARA"
+ },
+ {
+  "id": "ARA029",
+  "name": "Inertia",
+  "cardType": "token",
+  "text": "At the beginning of your end phase, destroy Inertia, then put all cards from your hand and arsenal on the bottom of your deck.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "ARA"
+ }
+]

@@ -1,0 +1,4203 @@
+[
+ {
+  "id": "ELE000",
+  "name": "Korshem, Crossroad of Elements",
+  "cardType": "action",
+  "text": "Legendary\nGo again\nWhenever a hero reveals 1 or more cards, they choose 1; Gain {r}, or gain 1{h}, or their next attack this turn gains +1{p}, or the next action card they defend with this turn gains +1{d}.\nAt the beginning of the end phase, if no hero has gained {r} or {h} from a card effect and no card or token controlled by a hero has had {p} or {d} increased this turn, destroy Korshem, Crossroads of the Elements.",
+  "cost": 1,
+  "subtypes": [
+   "elemental",
+   "landmark"
+  ],
+  "keywords": [
+   "Legendary",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE001",
+  "name": "Oldhim, Grandfather of Eternity",
+  "cardType": "hero",
+  "text": "Essence of Earth and Ice\nOnce per Turn Defense Reaction - {r}{r}{r}: If an Earth card is pitched this way, prevent the next 2 damage that would be dealt to Oldhim this turn. If an Ice card is pitched this way, the attacking hero puts a card from their hand on top of their deck.",
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Essence of Earth and Ice"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "ELE"
+ },
+ {
+  "id": "ELE002",
+  "name": "Oldhim",
+  "cardType": "hero",
+  "text": "Essence of Earth and Ice\nOnce per Turn Defense Reaction - {r}{r}{r}: If an Earth card is pitched this way, prevent the next 2 damage that would be dealt to Oldhim this turn. If an Ice card is pitched this way, the attacking hero puts a card from their hand on top of their deck.",
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Essence of Earth and Ice"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "ELE"
+ },
+ {
+  "id": "ELE003",
+  "name": "Winter's Wail",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}{r}: Attack\nIf an Ice card is pitched this way, Winter's Wail gains \"If this hits a hero, create a Frostbite token under their control.\"",
+  "attack": 4,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "hammer",
+   "1h"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE004",
+  "name": "Endless Winter",
+  "cardType": "action",
+  "text": "Oldhim Specialization\nIce Fusion\nIf Endless Winter was fused, whenever the defending hero adds a defending card to this chain link, create a Frostbite token under their control.\nIf Endless Winter hits a hero, until the end of their next turn, whenever they activate an ability, create a Frostbite token under their control.",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Oldhim Specialization",
+   "Ice Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE005",
+  "name": "Oaken Old",
+  "cardType": "action",
+  "text": "Earth and Ice Fusion\nIf Oaken Old was fused, it gains +2{p}, dominate, and \"If this hits a hero, they put 2 random cards from their hand on the bottom of their deck in any order.\"",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth and Ice Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE006",
+  "name": "Awakening",
+  "cardType": "instant",
+  "text": "Earth Fusion\nIf you have less {h} than an opposing hero, create Seismic Surge tokens equal to the difference. If Awakening was fused, instead create twice that many Seismic Surge tokens.\nSearch your deck for a Guardian attack action card with cost less than or equal to the number of Seismic Surge tokens you control, reveal it, put it into your hand, then shuffle your deck.",
+  "pitch": 3,
+  "cost": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Earth Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE007",
+  "name": "Biting Gale",
+  "cardType": "defense-reaction",
+  "text": "Ice Fusion\nIf Biting Gale was fused, the attacking hero discards a card unless they pay {r}{r}.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 4,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Ice Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE008",
+  "name": "Biting Gale",
+  "cardType": "defense-reaction",
+  "text": "Ice Fusion\nIf Biting Gale was fused, the attacking hero discards a card unless they pay {r}{r}.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Ice Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE009",
+  "name": "Biting Gale",
+  "cardType": "defense-reaction",
+  "text": "Ice Fusion\nIf Biting Gale was fused, the attacking hero discards a card unless they pay {r}{r}.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Ice Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE010",
+  "name": "Turn Timber",
+  "cardType": "defense-reaction",
+  "text": "Earth Fusion\nIf Turn Timber was fused, it gains +2{d}.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 6,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Earth Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE011",
+  "name": "Turn Timber",
+  "cardType": "defense-reaction",
+  "text": "Earth Fusion\nIf Turn Timber was fused, it gains +2{d}.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 5,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Earth Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE012",
+  "name": "Turn Timber",
+  "cardType": "defense-reaction",
+  "text": "Earth Fusion\nIf Turn Timber was fused, it gains +2{d}.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 4,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Earth Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE013",
+  "name": "Entangle",
+  "cardType": "action",
+  "text": "Earth Fusion\nIf Entangle was fused, it gains \"If this hits a hero, their first attack during their next turn has -2{p}.\"",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE014",
+  "name": "Entangle",
+  "cardType": "action",
+  "text": "Earth Fusion\nIf Entangle was fused, it gains \"If this hits a hero, their first attack during their next turn has -2{p}.\"",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE015",
+  "name": "Entangle",
+  "cardType": "action",
+  "text": "Earth Fusion\nIf Entangle was fused, it gains \"If this hits a hero, their first attack during their next turn has -2{p}.\"",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE016",
+  "name": "Glacial Footsteps",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf Glacial Footsteps was fused, it gains dominate.",
+  "pitch": 1,
+  "cost": 6,
+  "attack": 10,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion",
+   "Dominate"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE017",
+  "name": "Glacial Footsteps",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf Glacial Footsteps was fused, it gains dominate.",
+  "pitch": 2,
+  "cost": 6,
+  "attack": 9,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion",
+   "Dominate"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE018",
+  "name": "Glacial Footsteps",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf Glacial Footsteps was fused, it gains dominate.",
+  "pitch": 3,
+  "cost": 6,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion",
+   "Dominate"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE019",
+  "name": "Mulch",
+  "cardType": "action",
+  "text": "Earth Fusion\nIf Mulch was fused, it gains \"If this hits a hero, put a card from their arsenal on the bottom of their deck.\"",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE020",
+  "name": "Mulch",
+  "cardType": "action",
+  "text": "Earth Fusion\nIf Mulch was fused, it gains \"If this hits a hero, put a card from their arsenal on the bottom of their deck.\"",
+  "pitch": 2,
+  "cost": 4,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE021",
+  "name": "Mulch",
+  "cardType": "action",
+  "text": "Earth Fusion\nIf Mulch was fused, it gains \"If this hits a hero, put a card from their arsenal on the bottom of their deck.\"",
+  "pitch": 3,
+  "cost": 4,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE022",
+  "name": "Snow Under",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf Snow Under was fused, it gains \"If this hits a hero, create a Frostbite token under their control.\"",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE023",
+  "name": "Snow Under",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf Snow Under was fused, it gains \"If this hits a hero, create a Frostbite token under their control.\"",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE024",
+  "name": "Snow Under",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf Snow Under was fused, it gains \"If this hits a hero, create a Frostbite token under their control.\"",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE025",
+  "name": "Emerging Avalanche",
+  "cardType": "action",
+  "text": "Ice Fusion\nGo again\nWhen Emerging Avalanche enters the arena, if it was fused, create a Frostbite token under target hero control.\nAt the beginning of your action phase, destroy Emerging Avalanche then the next attack action card you play this turn gains +3{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "aura"
+  ],
+  "keywords": [
+   "Ice Fusion",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE026",
+  "name": "Emerging Avalanche",
+  "cardType": "action",
+  "text": "Ice Fusion\nGo again\nWhen Emerging Avalanche enters the arena, if it was fused, create a Frostbite token under target hero control.\nAt the beginning of your action phase, destroy Emerging Avalanche then the next attack action card you play this turn gains +2{p}.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "aura"
+  ],
+  "keywords": [
+   "Ice Fusion",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE027",
+  "name": "Emerging Avalanche",
+  "cardType": "action",
+  "text": "Ice Fusion\nGo again\nWhen Emerging Avalanche enters the arena, if it was fused, create a Frostbite token under target hero control.\nAt the beginning of your action phase, destroy Emerging Avalanche then the next attack action card you play this turn gains +1{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "aura"
+  ],
+  "keywords": [
+   "Ice Fusion",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE028",
+  "name": "Strength of Sequoia",
+  "cardType": "action",
+  "text": "Earth Fusion\nGo again\nWhen Strength of Sequoia enters the arena, if it was fused, create a Seismic Surge token.\nAt the beginning of your action phase, destroy Strength of Sequoia then the next attack action card you play this turn gains +3{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "aura"
+  ],
+  "keywords": [
+   "Earth Fusion",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE029",
+  "name": "Strength of Sequoia",
+  "cardType": "action",
+  "text": "Earth Fusion\nGo again\nWhen Strength of Sequoia enters the arena, if it was fused, create a Seismic Surge token.\nAt the beginning of your action phase, destroy Strength of Sequoia then the next attack action card you play this turn gains +2{p}.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "aura"
+  ],
+  "keywords": [
+   "Earth Fusion",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE030",
+  "name": "Strength of Sequoia",
+  "cardType": "action",
+  "text": "Earth Fusion\nGo again\nWhen Strength of Sequoia enters the arena, if it was fused, create a Seismic Surge token.\nAt the beginning of your action phase, destroy Strength of Sequoia then the next attack action card you play this turn gains +1{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "aura"
+  ],
+  "keywords": [
+   "Earth Fusion",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE031",
+  "name": "Lexi, Livewire",
+  "cardType": "hero",
+  "text": "Essence of Ice and Lightning\nOnce per Turn Action - Turn a face down card in your arsenal face up: If it's a Lightning card, your next attack this turn gains go again. If it's an Ice card, create a Frostbite token under target hero's control. Go again",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Essence of Ice and Lightning"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "ELE"
+ },
+ {
+  "id": "ELE032",
+  "name": "Lexi",
+  "cardType": "hero",
+  "text": "Essence of Ice and Lightning\nOnce per Turn Action - Turn a face down card in your arsenal face up: If it's a Lightning card, your next attack this turn gains go again. If it's an Ice card, create a Frostbite token under target hero's control. Go again",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Essence of Ice and Lightning"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "ELE"
+ },
+ {
+  "id": "ELE033",
+  "name": "Shiver",
+  "cardType": "weapon",
+  "text": "Once per Turn Instant - {r}: You may put an arrow card from your hand face up into an empty arsenal zone you control. If you do, choose 1;\n\nIt gains +1{p} until end of turn.\nIt gains dominate until end of turn.",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "bow",
+   "2h"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE034",
+  "name": "Voltaire, Strike Twice",
+  "cardType": "weapon",
+  "text": "Twice per Turn Instant - {r}: You may put an arrow card from your hand face up into an empty arsenal zone you control. If you do, choose 1;\n\nIt gains +1{p} until end of turn.\nIt gains go again until end of turn.",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "bow",
+   "2h"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE035",
+  "name": "Frost Lock",
+  "cardType": "action",
+  "text": "Ice Fusion\nCards and activated abilities cost opposing heroes an additional {r} this turn.\nIf Frost Lock was fused, it gains +1{p} and \"If this hits a hero, until the end of their next turn they can't pitch or play cards with base cost 0.\"",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE036",
+  "name": "Light it Up",
+  "cardType": "action",
+  "text": "Lexi Specialization\nLightning Fusion\nIf Light it Up was fused, it gains \"If this hits a hero, deal 1 damage to them for each equipment they control.\"\nIf Light it Up deals damage to a hero equal to or greater than the number of equipment they control, equipment they control lose and can't gain activated abilities until the end of their next turn.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Lexi Specialization",
+   "Lightning Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE037",
+  "name": "Ice Storm",
+  "cardType": "action",
+  "text": "Ice and Lightning Fusion\nYour next arrow attack this turn gains +3{p}.\nIf Ice Storm was fused, your next arrow attack this turn gains \"If this hits a hero, deal 1 damage to them\" and \"Whenever this attack deals damage to a hero, create that many Frostbite tokens under their control.\"\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Ice and Lightning Fusion",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE038",
+  "name": "Cold Wave",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf Cold Wave was fused, cards and activated abilities cost opposing heroes an additional {r} this turn.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE039",
+  "name": "Cold Wave",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf Cold Wave was fused, cards and activated abilities cost opposing heroes an additional {r} this turn.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE040",
+  "name": "Cold Wave",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf Cold Wave was fused, cards and activated abilities cost opposing heroes an additional {r} this turn.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE041",
+  "name": "Snap Shot",
+  "cardType": "action",
+  "text": "Lightning Fusion\nIf Snap Shot was fused, you may activate abilities of bows you control an additional time this turn and as though they were an instant.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Lightning Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE042",
+  "name": "Snap Shot",
+  "cardType": "action",
+  "text": "Lightning Fusion\nIf Snap Shot was fused, you may activate abilities of bows you control an additional time this turn and as though they were an instant.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Lightning Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE043",
+  "name": "Snap Shot",
+  "cardType": "action",
+  "text": "Lightning Fusion\nIf Snap Shot was fused, you may activate abilities of bows you control an additional time this turn and as though they were an instant.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Lightning Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE044",
+  "name": "Blizzard Bolt",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf Blizzard Bolt was fused, whenever an attack deals damage to a hero this turn, create a Frostbite token under their control.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE045",
+  "name": "Blizzard Bolt",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf Blizzard Bolt was fused, whenever an attack deals damage to a hero this turn, create a Frostbite token under their control.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE046",
+  "name": "Blizzard Bolt",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf Blizzard Bolt was fused, whenever an attack deals damage to a hero this turn, create a Frostbite token under their control.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE047",
+  "name": "Buzz Bolt",
+  "cardType": "action",
+  "text": "Lightning Fusion\nIf Buzz Bolt was fused, whenever an attack hits a hero this turn, it deals 1 damage to them.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Lightning Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE048",
+  "name": "Buzz Bolt",
+  "cardType": "action",
+  "text": "Lightning Fusion\nIf Buzz Bolt was fused, whenever an attack hits a hero this turn, it deals 1 damage to them.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Lightning Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE049",
+  "name": "Buzz Bolt",
+  "cardType": "action",
+  "text": "Lightning Fusion\nIf Buzz Bolt was fused, whenever an attack hits a hero this turn, it deals 1 damage to them.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Lightning Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE050",
+  "name": "Chilling Icevein",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf Chilling Icevein was fused, whenever an attack deals damage to a hero this turn, they discard a card unless they pay {r}.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE051",
+  "name": "Chilling Icevein",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf Chilling Icevein was fused, whenever an attack deals damage to a hero this turn, they discard a card unless they pay {r}.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE052",
+  "name": "Chilling Icevein",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf Chilling Icevein was fused, whenever an attack deals damage to a hero this turn, they discard a card unless they pay {r}.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE053",
+  "name": "Dazzling Crescendo",
+  "cardType": "action",
+  "text": "Lightning Fusion\nIf Dazzling Crescendo was fused, it gains go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Lightning Fusion",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE054",
+  "name": "Dazzling Crescendo",
+  "cardType": "action",
+  "text": "Lightning Fusion\nIf Dazzling Crescendo was fused, it gains go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Lightning Fusion",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE055",
+  "name": "Dazzling Crescendo",
+  "cardType": "action",
+  "text": "Lightning Fusion\nIf Dazzling Crescendo was fused, it gains go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Lightning Fusion",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE056",
+  "name": "Flake Out",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf Flake Out was fused, it gains dominate.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion",
+   "Dominate"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE057",
+  "name": "Flake Out",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf Flake Out was fused, it gains dominate.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion",
+   "Dominate"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE058",
+  "name": "Flake Out",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf Flake Out was fused, it gains dominate.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion",
+   "Dominate"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE059",
+  "name": "Frazzle",
+  "cardType": "action",
+  "text": "Lightning Fusion\nIf Frazzle was fused, whenever an attack would deal damage this turn, instead it deals that much damage plus 1.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Lightning Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE060",
+  "name": "Frazzle",
+  "cardType": "action",
+  "text": "Lightning Fusion\nIf Frazzle was fused, whenever an attack would deal damage this turn, instead it deals that much damage plus 1.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Lightning Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE061",
+  "name": "Frazzle",
+  "cardType": "action",
+  "text": "Lightning Fusion\nIf Frazzle was fused, whenever an attack would deal damage this turn, instead it deals that much damage plus 1.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Lightning Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE062",
+  "name": "Briar, Warden of Thorns",
+  "cardType": "hero",
+  "text": "Essence of Earth and Lightning\nThe first time an attack action card you control deals damage to an opposing hero, create an Embodiment of Earth token.\nWhenever you play your second 'non-attack' action card each turn, create an Embodiment of Lightning token.",
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Essence of Earth and Lightning"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "ELE"
+ },
+ {
+  "id": "ELE063",
+  "name": "Briar",
+  "cardType": "hero",
+  "text": "Essence of Earth and Lightning\nThe first time an attack action card you control deals damage to an opposing hero, create an Embodiment of Earth token.\nWhenever you play your second 'non-attack' action card each turn, create an Embodiment of Lightning token.",
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Essence of Earth and Lightning"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "ELE"
+ },
+ {
+  "id": "ELE064",
+  "name": "Blossoming Spellblade",
+  "cardType": "action",
+  "text": "Earth and Lightning Fusion\nIf Blossoming Spellblade was fused, it gains \"Whenever this deals damage to an opposing hero, you may banish a 'non-attack' action card from your graveyard. If you do, you may play it this turn as though it were an instant and if it would be put into your graveyard this turn, instead banish it.\"\nWhen you attack with Blossoming Spellblade, if it was fused, deal 1 arcane damage to target hero.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth and Lightning Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE065",
+  "name": "Flicker Wisp",
+  "cardType": "action",
+  "text": "Lightning Fusion\nIf Flicker Wisp was fused, until end of turn, action card effects you control that deal arcane damage, instead deal that much arcane damage plus 1.\nDeal 1 arcane damage to target hero.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Lightning Fusion",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE066",
+  "name": "Force of Nature",
+  "cardType": "action",
+  "text": "Briar Specialization\nEarth Fusion\nWhenever an attack action card you control hits this turn, if its {p} is greater than its base {p}, draw a card.\nIf Force of Nature was fused, your next attack this turn gains +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Briar Specialization",
+   "Earth Fusion",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE067",
+  "name": "Explosive Growth",
+  "cardType": "action",
+  "text": "Earth Fusion\nIf Explosive Growth was fused, whenever it deals damage, attacks gain +1{p} this combat chain.\nWhen you attack with Explosive Growth, deal 1 arcane damage to target hero.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE068",
+  "name": "Explosive Growth",
+  "cardType": "action",
+  "text": "Earth Fusion\nIf Explosive Growth was fused, whenever it deals damage, attacks gain +1{p} this combat chain.\nWhen you attack with Explosive Growth, deal 1 arcane damage to target hero.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE069",
+  "name": "Explosive Growth",
+  "cardType": "action",
+  "text": "Earth Fusion\nIf Explosive Growth was fused, whenever it deals damage, attacks gain +1{p} this combat chain.\nWhen you attack with Explosive Growth, deal 1 arcane damage to target hero.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE070",
+  "name": "Rites of Lightning",
+  "cardType": "action",
+  "text": "Lightning Fusion\nWhen you attack with Rites of Lightning, if it was fused, deal 1 arcane damage to target hero.\nIf you have dealt arcane damage this turn, Rites of Lightning gains go again.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Lightning Fusion",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE071",
+  "name": "Rites of Lightning",
+  "cardType": "action",
+  "text": "Lightning Fusion\nWhen you attack with Rites of Lightning, if it was fused, deal 1 arcane damage to target hero.\nIf you have dealt arcane damage this turn, Rites of Lightning gains go again.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Lightning Fusion",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE072",
+  "name": "Rites of Lightning",
+  "cardType": "action",
+  "text": "Lightning Fusion\nWhen you attack with Rites of Lightning, if it was fused, deal 1 arcane damage to target hero.\nIf you have dealt arcane damage this turn, Rites of Lightning gains go again.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Lightning Fusion",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE073",
+  "name": "Arcanic Shockwave",
+  "cardType": "action",
+  "text": "Lightning Fusion\nWhen you attack with Arcanic Shockwave, if it was fused, deal 1 arcane damage to target hero.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Lightning Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE074",
+  "name": "Arcanic Shockwave",
+  "cardType": "action",
+  "text": "Lightning Fusion\nWhen you attack with Arcanic Shockwave, if it was fused, deal 1 arcane damage to target hero.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Lightning Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE075",
+  "name": "Arcanic Shockwave",
+  "cardType": "action",
+  "text": "Lightning Fusion\nWhen you attack with Arcanic Shockwave, if it was fused, deal 1 arcane damage to target hero.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Lightning Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE076",
+  "name": "Vela Flash",
+  "cardType": "action",
+  "text": "Lightning Fusion\nIf Vela Flash was fused, you may play your next 'non-attack' action card this turn as though it were an instant.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Lightning Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE077",
+  "name": "Vela Flash",
+  "cardType": "action",
+  "text": "Lightning Fusion\nIf Vela Flash was fused, you may play your next 'non-attack' action card this turn as though it were an instant.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Lightning Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE078",
+  "name": "Vela Flash",
+  "cardType": "action",
+  "text": "Lightning Fusion\nIf Vela Flash was fused, you may play your next 'non-attack' action card this turn as though it were an instant.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Lightning Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE079",
+  "name": "Rites of Replenishment",
+  "cardType": "action",
+  "text": "Earth Fusion\nWhen you attack with Rites of Replenishment, if you have dealt arcane damage this turn, you may put a 'non-attack' action card from your graveyard on the bottom of your deck.\nWhen you attack with Rites of Replenishment, if it was fused, you may put an attack action card from your graveyard on the bottom of your deck.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE080",
+  "name": "Rites of Replenishment",
+  "cardType": "action",
+  "text": "Earth Fusion\nWhen you attack with Rites of Replenishment, if you have dealt arcane damage this turn, you may put a 'non-attack' action card from your graveyard on the bottom of your deck.\nWhen you attack with Rites of Replenishment, if it was fused, you may put an attack action card from your graveyard on the bottom of your deck.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE081",
+  "name": "Rites of Replenishment",
+  "cardType": "action",
+  "text": "Earth Fusion\nWhen you attack with Rites of Replenishment, if you have dealt arcane damage this turn, you may put a 'non-attack' action card from your graveyard on the bottom of your deck.\nWhen you attack with Rites of Replenishment, if it was fused, you may put an attack action card from your graveyard on the bottom of your deck.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE082",
+  "name": "Stir the Wildwood",
+  "cardType": "action",
+  "text": "Earth Fusion\nIf you have dealt arcane damage to an opposing hero this turn, Stir the Wildwood gains +2{p}.\nIf Stir the Wildwood was fused, it gains +2{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE083",
+  "name": "Stir the Wildwood",
+  "cardType": "action",
+  "text": "Earth Fusion\nIf you have dealt arcane damage to an opposing hero this turn, Stir the Wildwood gains +2{p}.\nIf Stir the Wildwood was fused, it gains +2{p}.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE084",
+  "name": "Stir the Wildwood",
+  "cardType": "action",
+  "text": "Earth Fusion\nIf you have dealt arcane damage to an opposing hero this turn, Stir the Wildwood gains +2{p}.\nIf Stir the Wildwood was fused, it gains +2{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE085",
+  "name": "Bramble Spark",
+  "cardType": "action",
+  "text": "Earth Fusion\nThe next attack action card you play this turn gains \"When you attack with this, deal 1 arcane damage to target hero.\"\nIf Bramble Spark was fused, the next attack action card you play this turn gains +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Earth Fusion",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE086",
+  "name": "Bramble Spark",
+  "cardType": "action",
+  "text": "Earth Fusion\nThe next attack action card you play this turn gains \"When you attack with this, deal 1 arcane damage to target hero.\"\nIf Bramble Spark was fused, the next attack action card you play this turn gains +2{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Earth Fusion",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE087",
+  "name": "Bramble Spark",
+  "cardType": "action",
+  "text": "Earth Fusion\nThe next attack action card you play this turn gains \"When you attack with this, deal 1 arcane damage to target hero.\"\nIf Bramble Spark was fused, the next attack action card you play this turn gains +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Earth Fusion",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE088",
+  "name": "Inspire Lightning",
+  "cardType": "action",
+  "text": "Lightning Fusion\nIf Inspire Lightning was fused, deal 3 arcane damage to target hero.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Lightning Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE089",
+  "name": "Inspire Lightning",
+  "cardType": "action",
+  "text": "Lightning Fusion\nIf Inspire Lightning was fused, deal 2 arcane damage to target hero.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Lightning Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE090",
+  "name": "Inspire Lightning",
+  "cardType": "action",
+  "text": "Lightning Fusion\nIf Inspire Lightning was fused, deal 1 arcane damage to target hero.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Lightning Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE091",
+  "name": "Fulminate",
+  "cardType": "action",
+  "text": "Earth and/or Lightning Fusion\nIf Fulminate was fused with an Earth card, attack action cards you control gain +3{p} this turn.\nIf Fulminate was fused with a Lightning card, attack action cards you control gain go again this turn.\nGo again",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 2,
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Earth and/or Lightning Fusion",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE092",
+  "name": "Flashfreeze",
+  "cardType": "action",
+  "text": "Ice and/or Lightning Fusion\nIf Flashfreeze was fused with an Ice card, attacks you control this turn gain \"When you attack with this, it gains dominate, unless the defending hero pays {r}{r}.\"\nIf Flashfreeze was fused with a Lightning card, attacks you control this turn gain \"If this hits a hero, deal 3 damage to them.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Ice and/or Lightning Fusion",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE093",
+  "name": "Exposed to the Elements",
+  "cardType": "instant",
+  "text": "Earth and/or Ice Fusion\nIf Exposed to the Elements was fused with an Earth card, put a -1{d} counter on target equipment.\nIf Exposed to the Elements was fused with an Ice card, destroy an equipment with 0{d} controlled by target hero unless they pay {r}{r}.",
+  "pitch": 3,
+  "cost": 2,
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Earth and/or Ice Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE094",
+  "name": "Entwine Earth",
+  "cardType": "action",
+  "text": "Earth Fusion\nIf Entwine Earth was fused, it gains +2{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE095",
+  "name": "Entwine Earth",
+  "cardType": "action",
+  "text": "Earth Fusion\nIf Entwine Earth was fused, it gains +2{p}.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE096",
+  "name": "Entwine Earth",
+  "cardType": "action",
+  "text": "Earth Fusion\nIf Entwine Earth was fused, it gains +2{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Earth Fusion"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE097",
+  "name": "Entwine Ice",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf Entwine Ice was fused, it gains dominate.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion",
+   "Dominate"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE098",
+  "name": "Entwine Ice",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf Entwine Ice was fused, it gains dominate.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion",
+   "Dominate"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE099",
+  "name": "Entwine Ice",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf Entwine Ice was fused, it gains dominate.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion",
+   "Dominate"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE100",
+  "name": "Entwine Lightning",
+  "cardType": "action",
+  "text": "Lightning Fusion\nIf Entwine Lightning was fused, it gains go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Lightning Fusion",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE101",
+  "name": "Entwine Lightning",
+  "cardType": "action",
+  "text": "Lightning Fusion\nIf Entwine Lightning was fused, it gains go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Lightning Fusion",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE102",
+  "name": "Entwine Lightning",
+  "cardType": "action",
+  "text": "Lightning Fusion\nIf Entwine Lightning was fused, it gains go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Lightning Fusion",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE103",
+  "name": "Invigorate",
+  "cardType": "action",
+  "text": "The next attack you fuse this turn gains +4{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE104",
+  "name": "Invigorate",
+  "cardType": "action",
+  "text": "The next attack you fuse this turn gains +3{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE105",
+  "name": "Invigorate",
+  "cardType": "action",
+  "text": "The next attack you fuse this turn gains +2{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE106",
+  "name": "Rejuvenate",
+  "cardType": "action",
+  "text": "Gain 3{h}\nIf you've fused this turn, you may play Rejuvenate as though it were an instant.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "elemental"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE107",
+  "name": "Rejuvenate",
+  "cardType": "action",
+  "text": "Gain 2{h}\nIf you've fused this turn, you may play Rejuvenate as though it were an instant.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "elemental"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE108",
+  "name": "Rejuvenate",
+  "cardType": "action",
+  "text": "Gain 1{h}\nIf you've fused this turn, you may play Rejuvenate as though it were an instant.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "elemental"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE109",
+  "name": "Embodiment of Earth",
+  "cardType": "token",
+  "text": "'Non-attack' action cards you control have +1{d} while defending.\nAt the beginning of your action phase, destroy Embodiment of Earth.",
+  "subtypes": [
+   "elemental",
+   "aura"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE110",
+  "name": "Embodiment of Lightning",
+  "cardType": "token",
+  "text": "When you play an attack action card, destroy this, then the attack gets go again.",
+  "subtypes": [
+   "elemental",
+   "aura"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE111B",
+  "name": "Frostbite",
+  "cardType": "token",
+  "text": "Cards and abilities cost you an additional {r} to play or activate.\nAt the beginning of your end phase or when you play a card or activate an ability, destroy Frostbite.",
+  "subtypes": [
+   "elemental",
+   "aura"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE112",
+  "name": "Pulse of Volthaven",
+  "cardType": "instant",
+  "text": "Legendary\nYour next Ice, Lightning, or Elemental attack this turn gains +4{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "subtypes": [
+   "lightning",
+   "ice"
+  ],
+  "keywords": [
+   "Legendary"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE113",
+  "name": "Pulse of Candlehold",
+  "cardType": "action",
+  "text": "Legendary\nPut up to 2 target Earth, Lightning and/or Elemental action cards from your graveyard on top of your deck. Banish Pulse of Candlehold.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "earth",
+   "lightning"
+  ],
+  "keywords": [
+   "Legendary",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE114",
+  "name": "Pulse of Isenloft",
+  "cardType": "defense-reaction",
+  "text": "Legendary\nEarth, Ice, and Elemental action cards have +1{d} while defending this turn.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 6,
+  "subtypes": [
+   "ice",
+   "earth"
+  ],
+  "keywords": [
+   "Legendary"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE115",
+  "name": "Crown of Seeds",
+  "cardType": "equipment",
+  "text": "Once per Turn Instant - {r}, put a face down card from your arsenal on the bottom of your deck: Draw a card and prevent the next 1 damage that would be dealt to your hero this turn.",
+  "defense": 0,
+  "subtypes": [
+   "earth",
+   "head"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE116",
+  "name": "Plume of Evergrowth",
+  "cardType": "equipment",
+  "text": "Instant - {r}{r}{r}, destroy Plume of Evergrowth: Return target Earth action card or Earth instant card from your graveyard to your hand.",
+  "defense": 0,
+  "subtypes": [
+   "earth",
+   "head"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE117",
+  "name": "Channel Mount Heroic",
+  "cardType": "action",
+  "text": "Go again\nAttack action cards you control have +3{p}.\nChannel Earth - At the beginning of your end phase, put an flow counter on Channel Mount Heroic then destroy it unless you put an Earth card from your pitch zone on the bottom of your deck for each flow counter on it.",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 3,
+  "subtypes": [
+   "earth",
+   "aura"
+  ],
+  "keywords": [
+   "Go again",
+   "Channel Earth"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE118",
+  "name": "Tome of Harvests",
+  "cardType": "action",
+  "text": "As an additional cost to play Tome of Harvests, put a card from your arsenal on the bottom of your deck.\nDraw 3 cards.\nGo again",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 2,
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE119",
+  "name": "Evergreen",
+  "cardType": "action",
+  "text": "If Evergreen is played from arsenal, put it on the bottom of its owner's deck when the combat chain closes.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE120",
+  "name": "Evergreen",
+  "cardType": "action",
+  "text": "If Evergreen is played from arsenal, put it on the bottom of its owner's deck when the combat chain closes.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE121",
+  "name": "Evergreen",
+  "cardType": "action",
+  "text": "If Evergreen is played from arsenal, put it on the bottom of its owner's deck when the combat chain closes.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE122",
+  "name": "Weave Earth",
+  "cardType": "action",
+  "text": "The next Earth or Elemental attack action card you play this turn gains +3{p}.\nIf it's fused, instead it gains +4{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE123",
+  "name": "Weave Earth",
+  "cardType": "action",
+  "text": "The next Earth or Elemental attack action card you play this turn gains +2{p}.\nIf it's fused, instead it gains +3{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE124",
+  "name": "Weave Earth",
+  "cardType": "action",
+  "text": "The next Earth or Elemental attack action card you play this turn gains +1{p}.\nIf it's fused, instead it gains +2{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE125",
+  "name": "Summerwood Shelter",
+  "cardType": "instant",
+  "text": "Target defending Earth or Elemental action card gains +4{d}.",
+  "pitch": 1,
+  "cost": 0,
+  "subtypes": [
+   "earth"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE126",
+  "name": "Summerwood Shelter",
+  "cardType": "instant",
+  "text": "Target defending Earth or Elemental action card gains +3{d}.",
+  "pitch": 2,
+  "cost": 0,
+  "subtypes": [
+   "earth"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE127",
+  "name": "Summerwood Shelter",
+  "cardType": "instant",
+  "text": "Target defending Earth or Elemental action card gains +2{d}.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "earth"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE128",
+  "name": "Autumn's Touch",
+  "cardType": "action",
+  "text": "",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE129",
+  "name": "Autumn's Touch",
+  "cardType": "action",
+  "text": "",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE130",
+  "name": "Autumn's Touch",
+  "cardType": "action",
+  "text": "",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE131",
+  "name": "Break Ground",
+  "cardType": "action",
+  "text": "When you attack with Break Ground, you may put a card from your arsenal on the bottom of your deck. If you do, draw a card.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE132",
+  "name": "Break Ground",
+  "cardType": "action",
+  "text": "When you attack with Break Ground, you may put a card from your arsenal on the bottom of your deck. If you do, draw a card.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE133",
+  "name": "Break Ground",
+  "cardType": "action",
+  "text": "When you attack with Break Ground, you may put a card from your arsenal on the bottom of your deck. If you do, draw a card.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE134",
+  "name": "Burgeoning",
+  "cardType": "action",
+  "text": "If this was played from arsenal, it gains +1{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE135",
+  "name": "Burgeoning",
+  "cardType": "action",
+  "text": "If this was played from arsenal, it gains +1{p}.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE136",
+  "name": "Burgeoning",
+  "cardType": "action",
+  "text": "If this was played from arsenal, it gains +1{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE137",
+  "name": "Earthlore Surge",
+  "cardType": "action",
+  "text": "The next attack action card you play this turn gains +5{p}.\nGo again",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE138",
+  "name": "Earthlore Surge",
+  "cardType": "action",
+  "text": "The next attack action card you play this turn gains +4{p}.\nGo again",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 2,
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE139",
+  "name": "Earthlore Surge",
+  "cardType": "action",
+  "text": "The next attack action card you play this turn gains +3{p}.\nGo again",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 2,
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE140",
+  "name": "Sow Tomorrow",
+  "cardType": "action",
+  "text": "Put target Earth or Elemental action card with cost 0 or greater from your graveyard on the bottom of your deck. Banish Sow Tomorrow.\nIf Sow Tomorrow is played from arsenal, draw a card.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE141",
+  "name": "Sow Tomorrow",
+  "cardType": "action",
+  "text": "Put target Earth or Elemental action card with cost 1 or greater from your graveyard on the bottom of your deck. Banish Sow Tomorrow.\nIf Sow Tomorrow is played from arsenal, draw a card.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE142",
+  "name": "Sow Tomorrow",
+  "cardType": "action",
+  "text": "Put target Earth or Elemental action card with cost 2 or greater from your graveyard on the bottom of your deck. Banish Sow Tomorrow.\nIf Sow Tomorrow is played from arsenal, draw a card.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE143",
+  "name": "Amulet of Earth",
+  "cardType": "action",
+  "text": "Go again\nInstant - Destroy Amulet of Earth: Attack action cards you control gain +1{p} and +1{d} this turn. Activate this ability only if you have Earth fused this turn.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "earth",
+   "item"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE144",
+  "name": "Heart of Ice",
+  "cardType": "equipment",
+  "text": "Once per Turn Action - {r}: Cards and activated abilities cost opposing heroes additional {r} this turn. Go again\nArcane Barrier 1\nBlade Break",
+  "defense": 1,
+  "subtypes": [
+   "ice",
+   "chest"
+  ],
+  "keywords": [
+   "Arcane Barrier 1",
+   "Blade Break"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE145",
+  "name": "Coat of Frost",
+  "cardType": "equipment",
+  "text": "Action - Destroy Coat of Frost: Create a Frostbite token under target hero's control. Go again",
+  "defense": 0,
+  "subtypes": [
+   "ice",
+   "chest"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE146",
+  "name": "Channel Lake Frigid",
+  "cardType": "action",
+  "text": "Go again\nCards and activated abilities cost opposing heroes an additional {r}.\nChannel Ice - At the beginning of your end phase, put a flow counter on Channel Lake Frigid then destroy it unless you put an Ice card from your pitch zone on the bottom of your deck for each flow counter on it.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "subtypes": [
+   "ice",
+   "aura"
+  ],
+  "keywords": [
+   "Go again",
+   "Channel Ice"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE147",
+  "name": "Blizzard",
+  "cardType": "instant",
+  "text": "Target attack loses and can't gain go again unless its controller pays {r}{r}.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "ice"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE148",
+  "name": "Frost Fang",
+  "cardType": "action",
+  "text": "If Frost Fang hits a hero, they discard a card unless they pay {r}{r}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "ice",
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE149",
+  "name": "Frost Fang",
+  "cardType": "action",
+  "text": "If Frost Fang hits a hero, they discard a card unless they pay {r}{r}.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "ice",
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE150",
+  "name": "Frost Fang",
+  "cardType": "action",
+  "text": "If Frost Fang hits a hero, they discard a card unless they pay {r}{r}.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 3,
+  "defense": 2,
+  "subtypes": [
+   "ice",
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE151",
+  "name": "Ice Quake",
+  "cardType": "action",
+  "text": "Your next attack this turn gains +3{p}.\nWhenever an attack hits a hero this turn, create a Frostbite token under their control.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "ice"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE152",
+  "name": "Ice Quake",
+  "cardType": "action",
+  "text": "Your next attack this turn gains +2{p}.\nWhenever an attack hits a hero this turn, create a Frostbite token under their control.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "ice"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE153",
+  "name": "Ice Quake",
+  "cardType": "action",
+  "text": "Your next attack this turn gains +1{p}.\nWhenever an attack hits a hero this turn, create a Frostbite token under their control.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "ice"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE154",
+  "name": "Weave Ice",
+  "cardType": "action",
+  "text": "The next Ice or Elemental attack action card you play this turn gains +3{p}.\nIf it's fused, it gains dominate.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "ice"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE155",
+  "name": "Weave Ice",
+  "cardType": "action",
+  "text": "The next Ice or Elemental attack action card you play this turn gains +2{p}.\nIf it's fused, it gains dominate.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "ice"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE156",
+  "name": "Weave Ice",
+  "cardType": "action",
+  "text": "The next Ice or Elemental attack action card you play this turn gains +1{p}.\nIf it's fused, it gains dominate.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "ice"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE157",
+  "name": "Icy Encounter",
+  "cardType": "action",
+  "text": "If Icy Encounter hits a hero, create a Frostbite token under their control.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "subtypes": [
+   "ice",
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE158",
+  "name": "Icy Encounter",
+  "cardType": "action",
+  "text": "If Icy Encounter hits a hero, create a Frostbite token under their control.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "ice",
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE159",
+  "name": "Icy Encounter",
+  "cardType": "action",
+  "text": "If Icy Encounter hits a hero, create a Frostbite token under their control.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "ice",
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE160",
+  "name": "Winter's Grasp",
+  "cardType": "action",
+  "text": "",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "subtypes": [
+   "ice",
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE161",
+  "name": "Winter's Grasp",
+  "cardType": "action",
+  "text": "",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "ice",
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE162",
+  "name": "Winter's Grasp",
+  "cardType": "action",
+  "text": "",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "subtypes": [
+   "ice",
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE163",
+  "name": "Chill to the Bone",
+  "cardType": "action",
+  "text": "The next time an Ice or Elemental attack hits a hero this turn, create 3 Frostbite tokens under their control.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "ice"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE164",
+  "name": "Chill to the Bone",
+  "cardType": "action",
+  "text": "The next time an Ice or Elemental attack hits a hero this turn, create 2 Frostbite tokens under their control.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "ice"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE165",
+  "name": "Chill to the Bone",
+  "cardType": "action",
+  "text": "The next time an Ice or Elemental attack hits a hero this turn, create a Frostbite token under their control.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "ice"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE166",
+  "name": "Polar Blast",
+  "cardType": "action",
+  "text": "Target opposing hero may pay {r}{r}{r}. If they don't your next attack this turn gains dominate.\nIf Polar Blast is played from arsenal, draw a card.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "ice"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE167",
+  "name": "Polar Blast",
+  "cardType": "action",
+  "text": "Target opposing hero may pay {r}{r}. If they don't your next attack this turn gains dominate.\nIf Polar Blast is played from arsenal, draw a card.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "ice"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE168",
+  "name": "Polar Blast",
+  "cardType": "action",
+  "text": "Target opposing hero may pay {r}. If they don't your next attack this turn gains dominate.\nIf Polar Blast is played from arsenal, draw a card.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "ice"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE169",
+  "name": "Winter's Bite",
+  "cardType": "action",
+  "text": "Target hero discards a card unless they pay {r}{r}{r}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "ice"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE170",
+  "name": "Winter's Bite",
+  "cardType": "action",
+  "text": "Target hero discards a card unless they pay {r}{r}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "ice"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE171",
+  "name": "Winter's Bite",
+  "cardType": "action",
+  "text": "Target hero discards a card unless they pay {r}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "ice"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE172",
+  "name": "Amulet of Ice",
+  "cardType": "action",
+  "text": "Go again\nInstant - Destroy Amulet of Ice: Target hero discards a card unless they pay {r}{r}. Activate this ability only if you have Ice fused this turn.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "ice",
+   "item"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE173",
+  "name": "Shock Charmers",
+  "cardType": "equipment",
+  "text": "Instant - {r}{r}: The next time an attack action card you control hits a hero this turn, it deals 1 damage to them.\nSpellvoid 2",
+  "defense": 0,
+  "subtypes": [
+   "lightning",
+   "arms"
+  ],
+  "keywords": [
+   "Spellvoid 2"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE174",
+  "name": "Mark of Lightning",
+  "cardType": "equipment",
+  "text": "Whenever a Lightning or Elemental attack you control is defended by a card from hand, you may destroy Mark of Lightning. If you do, the attack deals 1 damage to the defending hero.",
+  "defense": 0,
+  "subtypes": [
+   "lightning",
+   "arms"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE175",
+  "name": "Channel Thunder Steppe",
+  "cardType": "action",
+  "text": "Go again\nWhenever you play an action card, you may pay {r}. If you do, it gains go again.\nChannel Lightning - At the beginning of your end phase, put a flow counter on Channel Thunder Steppe then destroy it unless you put a Lightning card from your pitch zone on the bottom of your deck for each flow counter on it.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Go again",
+   "Channel Lightning"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE176",
+  "name": "Blink",
+  "cardType": "instant",
+  "text": "Gain 1 action point.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE177",
+  "name": "Flash",
+  "cardType": "action",
+  "text": "The next action card you play this turn with cost 0 or greater gets go again.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE178",
+  "name": "Flash",
+  "cardType": "action",
+  "text": "The next action card you play this turn with cost 1 or greater gets go again.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE179",
+  "name": "Flash",
+  "cardType": "action",
+  "text": "The next action card you play this turn with cost 2 or greater gets go again.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE180",
+  "name": "Weave Lightning",
+  "cardType": "action",
+  "text": "The next Lightning or Elemental attack action card you play this turn gains +3{p}. If it's fused, it gains go again.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE181",
+  "name": "Weave Lightning",
+  "cardType": "action",
+  "text": "The next Lightning or Elemental attack action card you play this turn gains +2{p}. If it's fused, it gains go again.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE182",
+  "name": "Weave Lightning",
+  "cardType": "action",
+  "text": "The next Lightning or Elemental attack action card you play this turn gains +1{p}. If it's fused, it gains go again.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE183",
+  "name": "Lightning Press",
+  "cardType": "instant",
+  "text": "Target attack action card with cost 1 or less gains +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE184",
+  "name": "Lightning Press",
+  "cardType": "instant",
+  "text": "Target attack action card with cost 1 or less gains +2{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE185",
+  "name": "Lightning Press",
+  "cardType": "instant",
+  "text": "Target attack action card with cost 1 or less gains +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE186",
+  "name": "Ball Lightning",
+  "cardType": "action",
+  "text": "Whenever a Lightning or Elemental action card would deal damage this combat chain, instead it deals that much damage plus 1.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 0,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE187",
+  "name": "Ball Lightning",
+  "cardType": "action",
+  "text": "Whenever a Lightning or Elemental action card would deal damage this combat chain, instead it deals that much damage plus 1.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 0,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE188",
+  "name": "Ball Lightning",
+  "cardType": "action",
+  "text": "Whenever a Lightning or Elemental action card would deal damage this combat chain, instead it deals that much damage plus 1.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 0,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE189",
+  "name": "Lightning Surge",
+  "cardType": "action",
+  "text": "If this was played from arsenal, it gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE190",
+  "name": "Lightning Surge",
+  "cardType": "action",
+  "text": "If this was played from arsenal, it gets go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE191",
+  "name": "Lightning Surge",
+  "cardType": "action",
+  "text": "If this was played from arsenal, it gets go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE192",
+  "name": "Heaven's Claws",
+  "cardType": "action",
+  "text": "",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE193",
+  "name": "Heaven's Claws",
+  "cardType": "action",
+  "text": "",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE194",
+  "name": "Heaven's Claws",
+  "cardType": "action",
+  "text": "",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE195",
+  "name": "Shock Striker",
+  "cardType": "action",
+  "text": "Once per Turn Instant - {r}{r}: Shock Striker gains \"If Shock Striker hits a hero, deal 1 damage to them.\"",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE196",
+  "name": "Shock Striker",
+  "cardType": "action",
+  "text": "Once per Turn Instant - {r}{r}: Shock Striker gains \"If Shock Striker hits a hero, deal 1 damage to them.\"",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE197",
+  "name": "Shock Striker",
+  "cardType": "action",
+  "text": "Once per Turn Instant - {r}{r}: Shock Striker gains \"If Shock Striker hits a hero, deal 1 damage to them.\"",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE198",
+  "name": "Electrify",
+  "cardType": "action",
+  "text": "The next time an attack action card hits a hero this turn, it deals 3 damage to them.\nIf Electrify is played from arsenal, draw a card.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE199",
+  "name": "Electrify",
+  "cardType": "action",
+  "text": "The next time an attack action card hits a hero this turn, it deals 2 damage to them.\nIf Electrify is played from arsenal, draw a card.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE200",
+  "name": "Electrify",
+  "cardType": "action",
+  "text": "The next time an attack action card hits a hero this turn, it deals 1 damage to them.\nIf Electrify is played from arsenal, draw a card.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE201",
+  "name": "Amulet of Lightning",
+  "cardType": "action",
+  "text": "Go again\nInstant - Destroy Amulet of Lightning: Target action card gains go again. Activate this ability only if you have Lightning fused this turn.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "lightning",
+   "item"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE202B",
+  "name": "Titan's Fist",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}{r}: Attack\nIf there is a card with cost 3 or greater in your pitch zone, Titan's Fist has +1{p}.",
+  "attack": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "hammer",
+   "1h"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE203",
+  "name": "Rampart of the Ram's Head",
+  "cardType": "equipment",
+  "text": "Whenever you defend with Rampart of the Ram's Head, you may pay {r}. If you do, it gains +1{d} until end of turn.",
+  "defense": 0,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "off-hand"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE204",
+  "name": "Rotten Old Buckler",
+  "cardType": "equipment",
+  "text": "Blade Break",
+  "defense": 1,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "off-hand"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE205",
+  "name": "Tear Asunder",
+  "cardType": "action",
+  "text": "Your next Guardian attack this turn gains +1{p}, dominate, and \"When this hits a hero, they discard 2 cards.\"\nGo again",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE206",
+  "name": "Embolden",
+  "cardType": "action",
+  "text": "Go again\nWhen this enters the arena, if you control another non-token aura, draw a card.\nAt the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn gets +5{p}.",
+  "pitch": 1,
+  "cost": 4,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE207",
+  "name": "Embolden",
+  "cardType": "action",
+  "text": "Go again\nWhen this enters the arena, if you control another non-token aura, draw a card.\nAt the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn gets +4{p}.",
+  "pitch": 2,
+  "cost": 4,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE208",
+  "name": "Embolden",
+  "cardType": "action",
+  "text": "Go again\nWhen this enters the arena, if you control another non-token aura, draw a card.\nAt the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn gets +3{p}.",
+  "pitch": 3,
+  "cost": 4,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE209",
+  "name": "Thump",
+  "cardType": "action",
+  "text": "While Thump's {p} is greater than its base {p}, it gains dominate and \"If this hits a hero, they discard a card.\"",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Dominate"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE210",
+  "name": "Thump",
+  "cardType": "action",
+  "text": "While Thump's {p} is greater than its base {p}, it gains dominate and \"If this hits a hero, they discard a card.\"",
+  "pitch": 2,
+  "cost": 4,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Dominate"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE211",
+  "name": "Thump",
+  "cardType": "action",
+  "text": "While Thump's {p} is greater than its base {p}, it gains dominate and \"If this hits a hero, they discard a card.\"",
+  "pitch": 3,
+  "cost": 4,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Dominate"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE212",
+  "name": "Seismic Surge",
+  "cardType": "token",
+  "text": "At the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn costs {r} less to play.",
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE213",
+  "name": "New Horizon",
+  "cardType": "equipment",
+  "text": "If you have a face up card in your arsenal, you have an additional arsenal zone.\nWhen this is destroyed, destroy all cards in your arsenal.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE214",
+  "name": "Honing Hood",
+  "cardType": "equipment",
+  "text": "Instant - Destroy Honing Hood: Return all cards in your arsenal to your hand, then put a card from your hand face down into your arsenal.",
+  "cost": 0,
+  "defense": 0,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE215",
+  "name": "Seek and Destroy",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gains +3{p} and \"If this hits a hero, at the beginning of their next end phase, they discard all cards in their hand and destroy all cards in their arsenal.\"\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE216",
+  "name": "Bolt'n' Shot",
+  "cardType": "action",
+  "text": "If Bolt'n' Shot's {p} is greater than its base {p}, it has go again and \"If this hits, reload.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Reload"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE217",
+  "name": "Bolt'n' Shot",
+  "cardType": "action",
+  "text": "If Bolt'n' Shot's {p} is greater than its base {p}, it has go again and \"If this hits, reload.\"",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Reload"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE218",
+  "name": "Bolt'n' Shot",
+  "cardType": "action",
+  "text": "If Bolt'n' Shot's {p} is greater than its base {p}, it has go again and \"If this hits, reload.\"",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Reload"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE219",
+  "name": "Over Flex",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gains +4{p}.\nReload\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Reload",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE220",
+  "name": "Over Flex",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gains +3{p}.\nReload\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Reload",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE221",
+  "name": "Over Flex",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gains +2{p}.\nReload\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Reload",
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE222B",
+  "name": "Rosetta Thorn",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nWhenever you attack with Rosetta Thorn, if you've played an attack action card and a 'non-attack' action card this turn, deal 2 arcane damage to target hero.",
+  "attack": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "sword",
+   "2h"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE223",
+  "name": "Duskblade",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nWhenever you attack with Duskblade, if you've played an attack action card and a 'non-attack' action card this turn, put a +1{p} counter on Duskblade.\nAt the beginning of your end phase, if you haven't played an attack action card and a 'non-attack' action card this turn, remove all +1{p} counters from Duskblade.",
+  "attack": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "sword",
+   "2h"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE224",
+  "name": "Spellbound Creepers",
+  "cardType": "equipment",
+  "text": "Once per Turn Instant - {r}, put a bind counter on Spellbound Creepers: You may play your next 'non-attack' action card this turn as though it were an instant. Activate this ability only if you have attacked or defended with an attack action card this turn.\nAt the beginning of your end phase, destroy Spellbound Creepers unless you have dealt arcane damage equal to or greater than the number of bind counters on Spellbound Creepers.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE225",
+  "name": "Sutcliffe's Suede Hides",
+  "cardType": "equipment",
+  "text": "Attack Reaction - {r}, destroy this: Target attack action card gets go again. Activate this only if you've played a non-attack action card this turn.",
+  "defense": 0,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE226",
+  "name": "Sting of Sorcery",
+  "cardType": "action",
+  "text": "Go again\nAttack action cards you control gain \"When you attack with this, deal 1 arcane damage to target hero.\"\nAt the beginning of your end phase, destroy Sting of Sorcery.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE227",
+  "name": "Sigil of Suffering",
+  "cardType": "defense-reaction",
+  "text": "Deal 1 arcane damage to the attacking hero.\nIf you have dealt arcane damage this turn, Sigil of Suffering gains +1{d}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE228",
+  "name": "Sigil of Suffering",
+  "cardType": "defense-reaction",
+  "text": "Deal 1 arcane damage to the attacking hero.\nIf you have dealt arcane damage this turn, Sigil of Suffering gains +1{d}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE229",
+  "name": "Sigil of Suffering",
+  "cardType": "defense-reaction",
+  "text": "Deal 1 arcane damage to the attacking hero.\nIf you have dealt arcane damage this turn, Sigil of Suffering gains +1{d}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 1,
+  "classes": [
+   "runeblade"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE230",
+  "name": "Singeing Steelblade",
+  "cardType": "action",
+  "text": "When you attack with Singeing Steelblade, deal 1 arcane damage to target hero.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE231",
+  "name": "Singeing Steelblade",
+  "cardType": "action",
+  "text": "When you attack with Singeing Steelblade, deal 1 arcane damage to target hero.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE232",
+  "name": "Singeing Steelblade",
+  "cardType": "action",
+  "text": "When you attack with Singeing Steelblade, deal 1 arcane damage to target hero.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE233",
+  "name": "Ragamuffin's Hat",
+  "cardType": "equipment",
+  "text": "Instant - Destroy Ragamuffin's Hat: Draw a card then put a card from your hand on the top or bottom of your deck. Activate this ability only if you have 1 card in hand.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE234",
+  "name": "Deep Blue",
+  "cardType": "equipment",
+  "text": "Action - Put a card from your hand on the bottom of your deck, destroy this: Gain {r}{r}{r}. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE235",
+  "name": "Cracker Jax",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: The next attack action card you play this turn gets +1{p}. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE236",
+  "name": "Runaways",
+  "cardType": "equipment",
+  "text": "Instant - Destroy Runaways: Prevent the next 1 damage that would be dealt to your hero this turn. Activate this ability only if your hero has been dealt damage this turn.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "ELE"
+ },
+ {
+  "id": "ELE237",
+  "name": "Cracked Bauble",
+  "cardType": "resource",
+  "text": "(A player may add any number of Cracked Baubles to their card-pool in sealed deck or booster draft formats.)",
+  "pitch": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "ELE"
+ }
+]

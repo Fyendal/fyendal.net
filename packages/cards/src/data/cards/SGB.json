@@ -1,0 +1,634 @@
+[
+ {
+  "id": "SGB001",
+  "name": "Gravy Bones",
+  "cardType": "hero",
+  "text": "Instant - {t}, destroy a Gold you control: Draw a card, then discard a card.\nIf a blue card has been put into your graveyard this turn, you may play cards with watery grave from your graveyard.",
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "SGB"
+ },
+ {
+  "id": "SGB002",
+  "name": "Compass of Sunken Depths",
+  "cardType": "equipment",
+  "text": "Instant - {t}: Look at the top card of your deck.\nThe first card with watery grave you play from your graveyard each turn gets go again.",
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "off-hand"
+  ],
+  "set": "SGB"
+ },
+ {
+  "id": "SGB003",
+  "name": "Carrion Crown",
+  "cardType": "equipment",
+  "text": "Action - Discard an ally, destroy this: Draw a card. Go again\nBlade Break",
+  "defense": 2,
+  "subtypes": [
+   "necromancer",
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SGB"
+ },
+ {
+  "id": "SGB004",
+  "name": "Mournful Casket",
+  "cardType": "equipment",
+  "text": "If an ally has been put into your graveyard this turn, this gets +1{d}.\nTemper",
+  "defense": 1,
+  "subtypes": [
+   "necromancer",
+   "chest"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "SGB"
+ },
+ {
+  "id": "SGB005",
+  "name": "Nullrune Robe",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "SGB"
+ },
+ {
+  "id": "SGB006",
+  "name": "Nullrune Gloves",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "SGB"
+ },
+ {
+  "id": "SGB007",
+  "name": "Washed Up Wave",
+  "cardType": "equipment",
+  "text": "When this defends, you may discard a card or destroy the top card of your deck. If that card has watery grave, this gets +2{d}.\nBlade Break",
+  "defense": 0,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SGB"
+ },
+ {
+  "id": "SGB008",
+  "name": "Mage Master Boots",
+  "cardType": "equipment",
+  "text": "Action - {r}, destroy this: The next non-attack action card you play this turn gets go again. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "SGB"
+ },
+ {
+  "id": "SGB009",
+  "name": "Scuttle Toes",
+  "cardType": "equipment",
+  "text": "Instant - {r}{r}, destroy this: {u} target ally you control. Destroy it at the beginning of the end phase.\nArcane Barrier 1",
+  "defense": 0,
+  "subtypes": [
+   "necromancer",
+   "legs"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "SGB"
+ },
+ {
+  "id": "SGB010",
+  "name": "Battalion Barque",
+  "cardType": "action",
+  "text": "High Tide - If there are 2 or more blue cards in your pitch zone, this gets +2{p}.",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "High Tide"
+  ],
+  "set": "SGB"
+ },
+ {
+  "id": "SGB011",
+  "name": "Golden Tipple",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a yellow card. If you do, draw a card and create a Gold token.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SGB"
+ },
+ {
+  "id": "SGB012",
+  "name": "Saltwater Swell",
+  "cardType": "action",
+  "text": "When this attacks, reveal the top card of your deck. If it's blue, pitch it.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SGB"
+ },
+ {
+  "id": "SGB013",
+  "name": "Swiftwater Sloop",
+  "cardType": "action",
+  "text": "High Tide - If there are 2 or more blue cards in your pitch zone, this gets go again.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "High Tide"
+  ],
+  "set": "SGB"
+ },
+ {
+  "id": "SGB014",
+  "name": "Golden Tipple",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a yellow card. If you do, draw a card and create a Gold token.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SGB"
+ },
+ {
+  "id": "SGB015",
+  "name": "Barnacle",
+  "cardType": "action",
+  "text": "Action - {t}: Attack\nWatery Grave",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 4,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 3,
+  "set": "SGB"
+ },
+ {
+  "id": "SGB016",
+  "name": "Cutty Shark, Quick Clip",
+  "cardType": "action",
+  "text": "Action - {r}, {t}: Attack\nOnce per Turn Action - {r}: Your next ally attack this turn gets +1{p}. Go again\nWatery Grave",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 4,
+  "set": "SGB"
+ },
+ {
+  "id": "SGB017",
+  "name": "Limpit, Hop-a-long",
+  "cardType": "action",
+  "text": "Action - {r}, {t}: Attack. Go again\nWatery Grave",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 1,
+  "set": "SGB"
+ },
+ {
+  "id": "SGB018",
+  "name": "Oysten, Heart of Gold",
+  "cardType": "action",
+  "text": "Action - {t}: Attack\nWhen this dies, create a Gold token.\nWatery Grave",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 1,
+  "set": "SGB"
+ },
+ {
+  "id": "SGB019",
+  "name": "Riggermortis",
+  "cardType": "action",
+  "text": "Action - {r}, {t}: Attack\nWatery Grave",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 6,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 1,
+  "set": "SGB"
+ },
+ {
+  "id": "SGB020",
+  "name": "Swabbie",
+  "cardType": "action",
+  "text": "Action - {r}{r}, {t}: Attack\nWatery Grave",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 7,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 3,
+  "set": "SGB"
+ },
+ {
+  "id": "SGB021",
+  "name": "Back Alley Breakline",
+  "cardType": "action",
+  "text": "If an activated ability or action card effect puts Back Alley Breakline face up into a zone from your deck, gain 1 action point.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SGB"
+ },
+ {
+  "id": "SGB022",
+  "name": "Golden Tipple",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a yellow card. If you do, draw a card and create a Gold token.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SGB"
+ },
+ {
+  "id": "SGB023",
+  "name": "Jittery Bones",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card or destroy the top card of your deck. If that card has watery grave, this gets go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SGB"
+ },
+ {
+  "id": "SGB024",
+  "name": "Murderous Rabble",
+  "cardType": "action",
+  "text": "When this attacks, reveal the top card of your deck. This gets +X{p}, where X is the pitch value of the card revealed this way.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SGB"
+ },
+ {
+  "id": "SGB025",
+  "name": "Saltwater Swell",
+  "cardType": "action",
+  "text": "When this attacks, reveal the top card of your deck. If it's blue, pitch it.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SGB"
+ },
+ {
+  "id": "SGB026",
+  "name": "Swiftwater Sloop",
+  "cardType": "action",
+  "text": "High Tide - If there are 2 or more blue cards in your pitch zone, this gets go again.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "High Tide"
+  ],
+  "set": "SGB"
+ },
+ {
+  "id": "SGB027",
+  "name": "Avast Ye!",
+  "cardType": "action",
+  "text": "Your next Pirate ally attack this turn gets go again and \"When this hits a hero, create a Gold token.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SGB"
+ },
+ {
+  "id": "SGB028",
+  "name": "Flying High",
+  "cardType": "action",
+  "text": "Your next attack this turn gets go again. If it's blue, it gets +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SGB"
+ },
+ {
+  "id": "SGB029",
+  "name": "Loot the Arsenal",
+  "cardType": "action",
+  "text": "Your next Pirate ally attack this turn gets \"When this hits a hero, destroy a card in their arsenal. If you do, create a Gold token.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SGB"
+ },
+ {
+  "id": "SGB030",
+  "name": "Loot the Hold",
+  "cardType": "action",
+  "text": "Your next Pirate ally attack this turn gets \"When this hits a hero, they discard a card. If they do, create a Gold token.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SGB"
+ },
+ {
+  "id": "SGB031",
+  "name": "Portside Exchange",
+  "cardType": "action",
+  "text": "Discard a card, then draw a card. If a yellow card is discarded this way, create a Gold token.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SGB"
+ },
+ {
+  "id": "SGB032",
+  "name": "Timesnap Potion",
+  "cardType": "action",
+  "text": "Action - Destroy this: Gain 2 action points.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "SGB"
+ },
+ {
+  "id": "SGB033",
+  "name": "Yo Ho Ho!",
+  "cardType": "action",
+  "text": "Your next Pirate ally attack this turn gets +1{p} and \"When this hits a hero, create a Gold token.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SGB"
+ },
+ {
+  "id": "SGB034",
+  "name": "Throw Caution to the Wind",
+  "cardType": "instant",
+  "text": "Reveal the top card of your deck. The next time you would be dealt damage this turn, prevent X of that damage, where X is the pitch value of the card revealed this way.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "pirate"
+  ],
+  "set": "SGB"
+ },
+ {
+  "id": "SGB035",
+  "name": "Gold",
+  "cardType": "token",
+  "text": "Action - {r}{r}, destroy this: Draw a card. Go again",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "SGB"
+ }
+]

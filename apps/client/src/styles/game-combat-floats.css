@@ -1,0 +1,698 @@
+/* ── combat chain: floating draggable panel ── */
+/* shared chrome for all floating windows (chain, stack, status, decision) */
+.float {
+  position: fixed;
+  z-index: 6;
+  background: #140d07f2;
+  border: 1px solid #b8933f66;
+  border-radius: 12px;
+  box-shadow: 0 12px 46px #000000aa;
+  user-select: none;
+  touch-action: none;
+}
+.chain-float,
+.stack-float {
+  left: var(--mat-cx);
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  padding: 0 16px 14px;
+  cursor: grab;
+}
+.chain-float {
+  top: 42%;
+  transform: translate(-50%, -50%);
+  max-width: min(874px, 80vw);
+}
+/* the stack floats center-left, mirroring the life float on the right —
+   vertically centered just right of the equipment column, and stacks above
+   the combat chain (and below the decision prompts) when they overlap */
+.stack-float {
+  left: clamp(96px, 12.2vh, 158px); /* board padding + responsive equipment col + gap */
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 7;
+}
+.chain-float:active,
+.stack-float:active,
+.decision-float:active,
+.chain-float-bar:active { cursor: grabbing; }
+
+/* Turn timing is anchored to the divider while either player has priority.
+   Its compact height keeps it on the seam instead of over arena cards. */
+.priority-float {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9;
+  display: flex;
+  min-width: 250px;
+  max-height: 52px;
+  box-sizing: border-box;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 7px 16px;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.priority-turn {
+  color: #c9a627;
+  font-family: var(--font-fantasy-title);
+  font-variant: normal;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  line-height: 1.1;
+}
+.priority-timing {
+  color: #b7a581;
+  font-family: var(--font-fantasy-meta);
+  font-variant: normal;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  line-height: 1.25;
+}
+@media (min-width: 701px) {
+  .table:has(.chain-float) .mat-divider-center > .priority-float { display: none; }
+}
+/* Fixed game HUD: one authoritative life/AP/action surface. */
+.status-float {
+  /* Clear the mat's outer graveyard/deck/banish column instead of covering it. */
+  right: calc(var(--rail-w) + 30px + var(--mat-zone-col) + var(--mat-column-gap));
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  cursor: default;
+  box-shadow: 0 12px 38px #000c, inset 0 1px 0 #ffd4791c;
+}
+.ap-pip {
+  font-size: 15px;
+  font-weight: 700;
+  color: #e6dcc6;
+  border: 1px solid #b8933f44;
+  border-radius: 3px;
+  padding: 5px 9px;
+  background: #00000033;
+  font-variant-numeric: tabular-nums;
+}
+.ap-count strong { font: inherit; }
+/* prompts/choices float above the hand; inner .decision boxes carry the chrome */
+.decision-float {
+  left: var(--mat-cx);
+  bottom: clamp(132px, 19vh, 222px);
+  z-index: 8;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  padding: 5px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  cursor: grab;
+}
+.chain-float-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 7px 0;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+.chain-float-title {
+  text-align: center;
+  font-family: var(--font-fantasy-title);
+  font-variant: normal;
+  letter-spacing: .12em;
+  font-size: 17px;
+  font-weight: 700;
+  color: #c9a627;
+  text-shadow: 0 1px 3px #000;
+}
+.chain-priority-slot {
+  min-width: 0;
+  flex: 1;
+  color: #b7a581;
+  font-family: var(--font-fantasy-meta);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+}
+.chain-float-bar > button:first-of-type { margin-left: auto; }
+.chain-hide {
+  padding: 0 9px;
+  font-size: 14px;
+  line-height: 1.4;
+  background: transparent;
+  border-color: #b8933f55;
+  clip-path: none;
+  color: #c9a627;
+}
+.chain-hide-corner { display: none; }
+.chain-close {
+  padding: 0 9px;
+  font-size: 13px;
+  line-height: 1.5;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: transparent;
+  border-color: #b8933f55;
+  color: #e8d9b0;
+}
+/* The selected link stays compact in the center while the numbered history
+   rail remains visible on its right edge. */
+.chain-body {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.chain-dots {
+  position: relative;
+  flex-shrink: 0;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 2px;
+}
+.chain-dots-title {
+  position: relative;
+  z-index: 1;
+  color: #a99778;
+  font-family: var(--font-fantasy-meta);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.chain-dots::before {
+  content: "";
+  position: absolute;
+  top: 25px;
+  bottom: 14px;
+  left: 50%;
+  width: 1px;
+  background: #b8933f44;
+}
+.chain-dot {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  min-width: 32px;
+  min-height: 32px;
+  place-items: center;
+  padding: 3px;
+  border: 1px solid #5b4528;
+  border-radius: 999px;
+  background: #140d07;
+  clip-path: none;
+  cursor: pointer;
+}
+.chain-dot img {
+  display: block;
+  width: 16px;
+  height: 16px;
+  opacity: .6;
+}
+.chain-dot.active {
+  border-color: #c9a627;
+  background: #2d1e0c;
+  box-shadow: 0 0 8px #c9a6272e;
+}
+.chain-dot.active img { opacity: 1; }
+.chain-dot-pending {
+  display: block;
+  width: 8px;
+  height: 8px;
+  margin: 2px;
+  border-radius: 50%;
+  border: 1px solid #c9a627;
+}
+.chain-dot.active .chain-dot-pending { background: #c9a627; }
+/* empty slot shown for the next link once the newest link has resolved */
+.chain-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 0;
+}
+.chain-empty-slot {
+  width: 103px;
+  height: 145px;
+  border: 1px dashed #b8933f55;
+  border-radius: 3px;
+  background: #00000022;
+}
+.chain-mini {
+  position: fixed;
+  left: var(--mat-cx);
+  top: 42%;
+  transform: translate(-50%, -50%);
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 9px 16px;
+  background: #140d07f2;
+  border: 1px solid #b8933f66;
+  border-radius: 3px;
+  clip-path: none;
+  box-shadow: 0 7px 23px #000000aa;
+}
+.chain-mini.chain-mini-anchored {
+  position: static;
+  order: 1;
+  flex-direction: row;
+  gap: 7px;
+  min-height: 43px;
+  transform: none;
+  padding: 7px 11px;
+}
+.chain-mini-title,
+.stack-mini-title {
+  font-family: var(--font-fantasy-title);
+  font-variant: normal;
+  letter-spacing: .08em;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: none;
+  color: #c9a627;
+}
+.chain-mini-score,
+.stack-mini-count {
+  color: #e6dcc6;
+  font-size: 15px;
+  font-weight: 700;
+}
+.stack-hide { display: none; }
+.stack-mini {
+  position: fixed;
+  left: var(--mat-cx);
+  top: 24%;
+  z-index: 7;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transform: translate(-50%, -50%);
+  padding: 9px 13px;
+  border: 1px solid #b8933f66;
+  border-radius: 3px;
+  clip-path: none;
+  background: #140d07f2;
+  box-shadow: 0 7px 23px #000000aa;
+  color: #e6dcc6;
+}
+.stack-mini-count {
+  display: grid;
+  place-items: center;
+  min-width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #3a2815;
+}
+.stack-mini.stack-mini-anchored {
+  position: static;
+  order: 2;
+  min-height: 43px;
+  transform: none;
+  padding: 7px 11px;
+}
+
+/* top-down chain: attacker + reactions on top, defenders below */
+.chain {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+}
+/* card rows wrap instead of overflowing when reactions pile up */
+.chain-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  align-items: center;
+  max-width: 690px;
+}
+.chain-vs { position: relative; display: flex; align-items: center; gap: 9px; }
+.chain-defense-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.chain-blockers {
+  display: flex;
+  width: max-content;
+  max-width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+.chain-unblock-all {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 30px;
+  flex: 0 0 auto;
+  padding: 4px 10px;
+  border-radius: 3px;
+  clip-path: none;
+  background: #25170c;
+  border-color: #b8933f77;
+  color: #d9c9a4;
+  font-size: 10px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+/* wrapper giving the attack card a hover target for its keyword tooltip */
+.chain-atk-card {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+.chain-on-hit {
+  position: relative;
+  z-index: 4;
+  display: inline-block;
+  padding: 0;
+  clip-path: none;
+  border: 0;
+  background: transparent;
+  cursor: help;
+  outline: none;
+}
+.chain-on-hit:hover { border-color: transparent; background: transparent; }
+.chain-on-hit-label {
+  display: block;
+  padding: 4px 9px;
+  border: 1px solid #e0b849;
+  border-radius: 2px;
+  background: #171008e8;
+  box-shadow: 0 2px 9px #000d, inset 0 0 0 1px #6c4b1e;
+  color: #f0d77f;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant: small-caps;
+  letter-spacing: 1.5px;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px #000;
+}
+.chain-on-hit:hover .chain-on-hit-label,
+.chain-on-hit:focus-visible .chain-on-hit-label,
+.chain-on-hit:focus-within .chain-on-hit-label {
+  border-color: #ffe49a;
+  box-shadow: 0 2px 9px #000d, 0 0 9px #d4a53188, inset 0 0 0 1px #6c4b1e;
+}
+.chain-on-hit-tip {
+  position: absolute;
+  z-index: 5;
+  top: 50%;
+  left: calc(100% + 10px);
+  width: min(330px, 72vw);
+  transform: translateY(-50%);
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  padding: 11px 13px;
+  border: 1px solid #b8933f77;
+  border-radius: 3px;
+  background: #120d09fa;
+  box-shadow: 0 8px 22px #000c;
+  color: #cbbd9d;
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  font-variant: normal;
+  font-weight: 400;
+  letter-spacing: normal;
+  line-height: 1.35;
+  text-align: left;
+  text-transform: none;
+  white-space: normal;
+}
+/* Invisible bridge keeps the tooltip open while moving from badge to panel. */
+.chain-on-hit-tip::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -11px;
+  width: 11px;
+}
+.chain-on-hit:hover .chain-on-hit-tip,
+.chain-on-hit:focus .chain-on-hit-tip,
+.chain-on-hit:focus-within .chain-on-hit-tip {
+  display: flex;
+}
+.chain-on-hit-effect {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 7px;
+  border-top: 1px solid #b8933f2e;
+}
+.chain-on-hit-effect .card-ref { color: #e2c66e; font-weight: 700; }
+.chain-on-hit-mobile-backdrop { display: none; }
+.chain-atk { font-size: 30px; font-weight: 800; color: #ff9d76; }
+.chain-def { font-size: 30px; font-weight: 800; color: #7bc8ff; }
+.chain-prevent { font-size: 30px; font-weight: 800; color: #80d66b; }
+.chain-prevent-plus { color: #80d66b; font-size: 18px; font-weight: 800; }
+.chain-mini-prevent { color: #80d66b; }
+.chain-sep { font-size: 13px; color: #a89878; }
+
+/* ── pitch zone: all cards layered oldest-to-newest, resources centered ── */
+.pitch-top { position: relative; display: flex; }
+.pitch-stack {
+  position: relative;
+  display: flex;
+}
+.pitch-stack-card {
+  position: absolute;
+  inset: 0;
+}
+.pitch-stack-card:last-of-type {
+  position: relative;
+  inset: auto;
+}
+/* Arena stacks stay collapsed during play, then fan their public cards like
+   pitch on hover so transformed sub-cards and hero soul cards can be previewed. */
+.equipment-stack {
+  position: relative;
+  display: flex;
+  /* Keep each card's depth index local so large stacks cannot rise above
+     decision and other floating windows. */
+  isolation: isolate;
+}
+.equipment-stack-card {
+  position: absolute;
+  inset: 0;
+  transform: translateY(0);
+  transition: transform 120ms ease;
+}
+.equipment-stack-card:last-of-type {
+  position: relative;
+  inset: auto;
+}
+@media (hover: hover) and (pointer: fine) {
+  .equipment-stack:hover { z-index: 3; }
+  .equipment-stack:hover .equipment-stack-card {
+    transform: translateY(var(--equipment-stack-offset));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .equipment-stack-card { transition: none; }
+}
+/* centered circular counter pip — pitch pips and pile counts share the base */
+.pip {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 1px 3px #000;
+  box-shadow: 0 2px 9px #000c;
+}
+.pitch-pip {
+  width: 48px;
+  height: 48px;
+  font-size: 23px;
+  background: url("/icons/resource.png") center / cover no-repeat; /* red swirl = resources */
+  text-shadow: 0 1px 3px #000, 0 0 7px #000;
+}
+.pitch-pip-bare { position: static; transform: none; }
+
+/* graveyard/banish pile counts: neutral circle, same placement as the pitch pip */
+.pile-pip {
+  width: 44px;
+  height: 44px;
+  font-size: 22px;
+  background: #2a2118ee;
+  border: 2px solid #ffffff66;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+@media (hover: hover) {
+  .pitch-top:hover .pile-pip,
+  .pitch-top:focus-within .pile-pip,
+  .equipment-stack:hover .equipment-stack-pip,
+  .equipment-stack:focus-within .equipment-stack-pip { opacity: 1; }
+}
+.equipment-stack-pip {
+  z-index: 20;
+  pointer-events: none;
+}
+
+/* Number of cards with Blood Debt in this banished zone. */
+.blood-debt-counter {
+  position: absolute;
+  right: -7px;
+  bottom: -9px;
+  z-index: 4;
+  width: 38px;
+  height: 45px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 1px 3px #000, 0 0 5px #000;
+  filter: drop-shadow(0 2px 4px #000c);
+  pointer-events: none;
+}
+.blood-debt-counter img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.blood-debt-counter > span {
+  position: relative;
+  padding-top: 7px;
+}
+
+/* inline stat icons (UI chrome only, not on cards) */
+.ico { width: 16px; height: 16px; vertical-align: -2px; }
+.ico-lg { width: 23px; height: 23px; vertical-align: -5px; }
+.chain-atk, .chain-def, .chain-prevent { display: inline-flex; align-items: center; gap: 5px; }
+.chain-stat {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 5px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  cursor: help;
+}
+.chain-stat:hover,
+.chain-stat:focus-visible {
+  border-color: #b8933f66;
+  background: #0004;
+  outline: none;
+}
+.chain-breakdown {
+  position: absolute;
+  z-index: 2;
+  top: calc(100% + 8px);
+  left: 50%;
+  width: min(310px, 72vw);
+  transform: translateX(-50%);
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px 12px;
+  border: 1px solid #b8933f66;
+  border-radius: 3px;
+  background: #120d09f7;
+  box-shadow: 0 8px 22px #000a;
+  color: #cbbd9d;
+  font-size: 12px;
+  text-align: left;
+}
+.chain-breakdown::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -8px;
+  height: 8px;
+}
+.chain-stat:hover .chain-breakdown,
+.chain-stat:focus .chain-breakdown,
+.chain-stat:focus-within .chain-breakdown {
+  display: flex;
+}
+.chain-modifier {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 18px;
+}
+.modifier-positive { color: #a8cf9d; }
+.modifier-negative { color: #d5aa91; }
+.chain-mini-score { display: inline-flex; align-items: center; gap: 3px; }
+/* staged (not yet committed) defenders on the chain: dashed blue frame drawn
+   as a wrapper border — Safari misaligns outline-offset on rounded cards */
+.chain-staged {
+  position: relative;
+  display: inline-flex;
+  padding: 3px;
+  border: 2px dashed #7bc8ff99;
+  border-radius: 7px;
+}
+.chain-staged-remove-cue {
+  position: absolute;
+  z-index: 5;
+  inset: 3px;
+  border-radius: 4px;
+  background: #1a06062e;
+  pointer-events: none;
+}
+.chain-staged-remove-cue::before,
+.chain-staged-remove-cue::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 46%;
+  border-radius: 999px;
+  background: #ffe1b8;
+  box-shadow: 0 1px 5px #000;
+  opacity: .62;
+}
+.chain-staged-remove-cue::before { transform: translate(-50%, -50%) rotate(45deg); }
+.chain-staged-remove-cue::after { transform: translate(-50%, -50%) rotate(-45deg); }

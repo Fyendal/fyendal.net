@@ -1,0 +1,63 @@
+[
+ {
+  "id": "CON001",
+  "name": "Luminaris",
+  "cardType": "weapon",
+  "text": "During your action phase, Illusionist auras you control are weapons with 1 base {p} and \"Once per Turn Action - 0: Attack\"\nIf there is a yellow card in your pitch zone, your Illusionist attacks get go again.",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "scepter",
+   "2h"
+  ],
+  "set": "CON"
+ },
+ {
+  "id": "CON002",
+  "name": "Phantasmal Footsteps",
+  "cardType": "equipment",
+  "text": "Once per turn, when an Illusionist attack action card you control is destroyed, you may pay {r}. If you do, gain 1 action point.\nWhenever this defends, you may pay {r}. If you do, its {d} becomes 1 until end of turn.\nWhen Phantasmal Footsteps is defending a non-Illusionist attack with 6 or more {p}, destroy it when the combat chain closes.",
+  "defense": 0,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "CON"
+ },
+ {
+  "id": "CON003",
+  "name": "Reaping Blade",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nIf a hero has more {h} than any other hero, they can't gain {h}.",
+  "attack": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "sword",
+   "2h"
+  ],
+  "set": "CON"
+ },
+ {
+  "id": "CON004",
+  "name": "Spellbound Creepers",
+  "cardType": "equipment",
+  "text": "Once per Turn Instant - {r}, put a bind counter on Spellbound Creepers: You may play your next 'non-attack' action card this turn as though it were an instant. Activate this ability only if you have attacked or defended with an attack action card this turn.\nAt the beginning of your end phase, destroy Spellbound Creepers unless you have dealt arcane damage equal to or greater than the number of bind counters on Spellbound Creepers.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "CON"
+ }
+]

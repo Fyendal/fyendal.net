@@ -1,0 +1,502 @@
+[
+ {
+  "id": "RIP001",
+  "name": "Riptide",
+  "cardType": "hero",
+  "text": "Whenever you play a card from hand, you may put a card from hand face down into your arsenal.\nWhenever a trap you control triggers, deal 1 damage to the attacking hero.",
+  "classes": [
+   "ranger"
+  ],
+  "life": 19,
+  "intellect": 4,
+  "set": "RIP"
+ },
+ {
+  "id": "RIP002",
+  "name": "Barbed Castaway",
+  "cardType": "weapon",
+  "text": "Once per Turn Instant - {r}: You may put an arrow card from your hand face up into your arsenal.\nOnce per Turn Instant - {r}: You may turn a face down arrow in your arsenal face up. If you do, put an aim counter on it.",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "bow",
+   "2h"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP003",
+  "name": "Driftwood Quiver",
+  "cardType": "equipment",
+  "text": "Riptide Specialization\nInstant - Destroy Driftwood Quiver: Put a card from your arsenal on the bottom of your deck.",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "quiver"
+  ],
+  "keywords": [
+   "Riptide Specialization"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP004",
+  "name": "Mask of Malicious Manifestations",
+  "cardType": "equipment",
+  "text": "Action - {r}, put a card from your hand or arsenal on the bottom of your deck, destroy Mask of Malicious Manifestations: Reveal cards from the top of your deck until you reveal an attack action card. Put it into your hand, then shuffle. Go again\nBlade break",
+  "defense": 1,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade break"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP005",
+  "name": "Threadbare Tunic",
+  "cardType": "equipment",
+  "text": "Instant - Destroy Threadbare Tunic: Gain {r}. Activate this ability only if you have no cards in hand.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP006",
+  "name": "Toxic Tips",
+  "cardType": "equipment",
+  "text": "Action - {r}, destroy Toxic Tips: The next attack action card you play this turn gains \"When this hits a hero, create a Frailty, Inertia, or Bloodrot Pox token under their control.\" Go again\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP007",
+  "name": "Ironrot Legs",
+  "cardType": "equipment",
+  "text": "Blade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP008",
+  "name": "Bloodrot Trap",
+  "cardType": "defense-reaction",
+  "text": "When this defends and the attacking hero has played or activated a reaction this chain link, create a Bloodrot Pox token under their control.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP009",
+  "name": "Frailty Trap",
+  "cardType": "defense-reaction",
+  "text": "When this defends an attack with go again, create a Frailty token under the attacking hero's control.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP010",
+  "name": "Inertia Trap",
+  "cardType": "defense-reaction",
+  "text": "When this defends an attack with {p} greater than its base, create an Inertia token under the attacking hero's control.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP011",
+  "name": "Boulder Trap",
+  "cardType": "defense-reaction",
+  "text": "When this defends an attack with {p} greater than its base, put a -1{d} counter on an equipment the attacking hero controls.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP012",
+  "name": "Pendulum Trap",
+  "cardType": "defense-reaction",
+  "text": "When this defends and the attacking hero has played or activated a reaction this chain link, put the top 2 cards of their deck into their graveyard.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP013",
+  "name": "Tarpit Trap",
+  "cardType": "defense-reaction",
+  "text": "When this defends an attack with go again, the next time an attack action card hits this turn, effects don't trigger.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP014",
+  "name": "Falcon Wing",
+  "cardType": "action",
+  "text": "If Falcon Wing has an aim counter, it has +1{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP015",
+  "name": "Hemorrhage Bore",
+  "cardType": "action",
+  "text": "If Hemorrhage Bore has an aim counter, it has \"When this hits a hero, destroy a card in their arsenal.\"",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP016",
+  "name": "Murkmire Grapnel",
+  "cardType": "action",
+  "text": "If Murkmire Grapnel has an aim counter, it has +1{p}.\nDamage that would be dealt by Murkmire Grapnel can't be prevented.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP017",
+  "name": "Salvage Shot",
+  "cardType": "action",
+  "text": "When this hits, put it on the bottom of its owner's deck.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP018",
+  "name": "Searing Shot",
+  "cardType": "action",
+  "text": "If Searing Shot hits a hero, they lose 1{h}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP019",
+  "name": "Sedation Shot",
+  "cardType": "action",
+  "text": "If Sedation Shot has an aim counter, it has +1{p}.\nWhen this hits a hero, create an Inertia token under their control.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP020",
+  "name": "Withering Shot",
+  "cardType": "action",
+  "text": "If Withering Shot has an aim counter, it has +1{p}.\nWhen this hits a hero, create a Frailty token under their control.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP021",
+  "name": "Ravenous Rabble",
+  "cardType": "action",
+  "text": "When this attacks, reveal the top card of your deck. This gets -X{p}, where X is the pitch value of the card revealed this way.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP022",
+  "name": "Increase the Tension",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gains +3{p} and \"Defense reactions can't be played from hand this chain link.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP023",
+  "name": "Scout the Periphery",
+  "cardType": "action",
+  "text": "Look at the top card of target hero's deck.\nThe next attack action card you play from arsenal this turn gains +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP024",
+  "name": "Falcon Wing",
+  "cardType": "action",
+  "text": "If Falcon Wing has an aim counter, it has +1{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP025",
+  "name": "Infecting Shot",
+  "cardType": "action",
+  "text": "If Infecting Shot has an aim counter, it has +1{p}.\nWhen this hits a hero, create a Bloodrot Pox token under their control.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP026",
+  "name": "Murkmire Grapnel",
+  "cardType": "action",
+  "text": "If Murkmire Grapnel has an aim counter, it has +1{p}.\nDamage that would be dealt by Murkmire Grapnel can't be prevented.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP027",
+  "name": "Scout the Periphery",
+  "cardType": "action",
+  "text": "Look at the top card of target hero's deck.\nThe next attack action card you play from arsenal this turn gains +2{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP028",
+  "name": "Bloodrot Pox",
+  "cardType": "token",
+  "text": "At the beginning of your end phase, destroy Bloodrot Pox, then it deals 2 damage to you unless you pay {r}{r}{r}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP029",
+  "name": "Frailty",
+  "cardType": "token",
+  "text": "Your attack action cards played from arsenal and weapon attacks have -1{p}.\nAt the beginning of your end phase destroy Frailty.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "RIP"
+ },
+ {
+  "id": "RIP030",
+  "name": "Inertia",
+  "cardType": "token",
+  "text": "At the beginning of your end phase, destroy Inertia, then put all cards from your hand and arsenal on the bottom of your deck.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "RIP"
+ }
+]

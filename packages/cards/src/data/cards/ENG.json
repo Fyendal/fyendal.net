@@ -1,0 +1,549 @@
+[
+ {
+  "id": "ENG001",
+  "name": "Enigma",
+  "cardType": "hero",
+  "text": "Your first Spectral Shield attack each turn costs {r} less to activate.\nOnce per Turn Instant - {c}{c}{c}: Create a Spectral Shield token with a +1{p} counter.",
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "ENG"
+ },
+ {
+  "id": "ENG002",
+  "name": "Cosmo, Scroll of Ancestral Tapestry",
+  "cardType": "weapon",
+  "text": "During your turn, auras you control with ward are weapons with base {p} equal to their ward and Once per Turn Action - {r}: Attack\nYour aura attacks with one or more +1{p} counters get go again.",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "scroll",
+   "2h"
+  ],
+  "set": "ENG"
+ },
+ {
+  "id": "ENG003",
+  "name": "Truths Retold",
+  "cardType": "equipment",
+  "text": "Cloaked\nInstant - {r}, turn this face-up: Put an aura from your graveyard on the bottom of your deck.\nWard 1",
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Cloaked",
+   "Ward 1"
+  ],
+  "set": "ENG"
+ },
+ {
+  "id": "ENG004",
+  "name": "Heirloom of Rabbit Hide",
+  "cardType": "equipment",
+  "text": "Cloaked\nWhile this is equipped face-down, at the start of your turn, if you have exactly 1{h}, you may turn this face-up.\nWard 4",
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Cloaked",
+   "Ward 4"
+  ],
+  "set": "ENG"
+ },
+ {
+  "id": "ENG005",
+  "name": "Uphold Tradition",
+  "cardType": "equipment",
+  "text": "Cloaked\nInstant - {r}, turn this face-up: Put a +1{p} counter on an aura you control with ward.\nWard 1",
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Cloaked",
+   "Ward 1"
+  ],
+  "set": "ENG"
+ },
+ {
+  "id": "ENG006",
+  "name": "Skywalker Keikoi",
+  "cardType": "equipment",
+  "text": "Cloaked\nInstant - Destroy this: Prevent the next 1 damage that would be dealt to you this turn. Activate this ability only while this is face-down.",
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Cloaked"
+  ],
+  "set": "ENG"
+ },
+ {
+  "id": "ENG007",
+  "name": "Battlefront Bastion",
+  "cardType": "action",
+  "text": "When this defends alone, prevent the next 1 damage that would be dealt to you this turn.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "ENG"
+ },
+ {
+  "id": "ENG008",
+  "name": "Spectral Manifestations",
+  "cardType": "action",
+  "text": "Create a Spectral Shield token, then if you control no other Illusionist auras, put three +1{p} counters on it.\nGo again",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ENG"
+ },
+ {
+  "id": "ENG009",
+  "name": "Haze Shelter",
+  "cardType": "instant",
+  "text": "Ward X, where X is 4 if you've pitched a blue card this turn, otherwise X is 1.",
+  "pitch": 1,
+  "cost": 2,
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward X"
+  ],
+  "set": "ENG"
+ },
+ {
+  "id": "ENG010",
+  "name": "Waxing Specter",
+  "cardType": "instant",
+  "text": "If you've pitched a blue card this turn, this enters the arena with a +1{p} counter.\nWard 3",
+  "pitch": 1,
+  "cost": 2,
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 3"
+  ],
+  "set": "ENG"
+ },
+ {
+  "id": "ENG011",
+  "name": "Waning Vengeance",
+  "cardType": "instant",
+  "text": "When this leaves the arena, if you've pitched a blue card this turn, create a Spectral Shield token.\nWard 3",
+  "pitch": 1,
+  "cost": 1,
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 3"
+  ],
+  "set": "ENG"
+ },
+ {
+  "id": "ENG012",
+  "name": "Battlefront Bastion",
+  "cardType": "action",
+  "text": "When this defends alone, prevent the next 1 damage that would be dealt to you this turn.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "ENG"
+ },
+ {
+  "id": "ENG013",
+  "name": "Waning Vengeance",
+  "cardType": "instant",
+  "text": "When this leaves the arena, if you've pitched a blue card this turn, create a Spectral Shield token.\nWard 2",
+  "pitch": 2,
+  "cost": 1,
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 2"
+  ],
+  "set": "ENG"
+ },
+ {
+  "id": "ENG014",
+  "name": "Spillover",
+  "cardType": "action",
+  "text": "If you've played another blue card this turn, this gets +2{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "ENG"
+ },
+ {
+  "id": "ENG015",
+  "name": "Big Blue Sky",
+  "cardType": "defense-reaction",
+  "text": "This gets +1{d} for each blue card you've pitched this turn.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "mystic"
+  ],
+  "set": "ENG"
+ },
+ {
+  "id": "ENG016",
+  "name": "Astral Etchings",
+  "cardType": "action",
+  "text": "Put a +1{p} counter on target aura with ward you control.\nIf you control a Spectral Shield, you may play this as though it were an instant.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "set": "ENG"
+ },
+ {
+  "id": "ENG017",
+  "name": "Essence of Ancestry: Mind",
+  "cardType": "action",
+  "text": "When this leaves the arena, if you control no Illusionist auras, the next time you would be dealt damage by a blue source this turn, prevent it.\nWard 2",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 2"
+  ],
+  "set": "ENG"
+ },
+ {
+  "id": "ENG018",
+  "name": "First Tenet of Chi: Moon",
+  "cardType": "action",
+  "text": "Your next blue attack this turn gets \"When this attacks, draw a card.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ENG"
+ },
+ {
+  "id": "ENG019",
+  "name": "Second Tenet of Chi: Tide",
+  "cardType": "action",
+  "text": "If you've transcended this turn, this gets +2{p}.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "ENG"
+ },
+ {
+  "id": "ENG020",
+  "name": "Single Minded Determination",
+  "cardType": "action",
+  "text": "When this enters the arena, if you control no other Illusionist auras, put a +1{p} counter on this.\nWard 2",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 2"
+  ],
+  "set": "ENG"
+ },
+ {
+  "id": "ENG021",
+  "name": "Solitary Companion",
+  "cardType": "action",
+  "text": "When this enters the arena, if you control no other Illusionist auras, create a Spectral Shield token.\nWard 1",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "ENG"
+ },
+ {
+  "id": "ENG022",
+  "name": "Vengeful Apparition",
+  "cardType": "action",
+  "text": "When this leaves the arena, if you control no Illusionist auras, you may play your next aura with cost 0 this turn as though it were an instant. If you do, it enters the arena with a +1{p} counter.\nWard 1",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "ENG"
+ },
+ {
+  "id": "ENG023",
+  "name": "Moon Chakra",
+  "cardType": "instant",
+  "text": "The next time you would be dealt damage this turn, prevent 1 of that damage. If you've transcended this turn, instead prevent 3.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "set": "ENG"
+ },
+ {
+  "id": "ENG024",
+  "name": "Waning Vengeance",
+  "cardType": "instant",
+  "text": "When this leaves the arena, if you've pitched a blue card this turn, create a Spectral Shield token.\nWard 1",
+  "pitch": 3,
+  "cost": 1,
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "ENG"
+ },
+ {
+  "id": "ENG025",
+  "name": "A Drop in the Ocean",
+  "cardType": "instant",
+  "text": "Legendary\nTarget attack gets -1{p}.\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "ENG",
+  "backId": "ENG025B"
+ },
+ {
+  "id": "ENG025B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "ENG"
+ },
+ {
+  "id": "ENG026",
+  "name": "Homage to Ancestors",
+  "cardType": "instant",
+  "text": "Legendary\nGain 1{h}\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "ENG",
+  "backId": "ENG026B"
+ },
+ {
+  "id": "ENG026B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "ENG"
+ },
+ {
+  "id": "ENG027",
+  "name": "Preserve Tradition",
+  "cardType": "instant",
+  "text": "Legendary\nPut target action card from your graveyard on the bottom of your deck.\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "ENG",
+  "backId": "ENG027B"
+ },
+ {
+  "id": "ENG027B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "ENG"
+ },
+ {
+  "id": "ENG028",
+  "name": "Rising Sun, Setting Moon",
+  "cardType": "instant",
+  "text": "Legendary\nDraw a card, then put a card from your hand on the bottom of your deck.\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "ENG",
+  "backId": "ENG028B"
+ },
+ {
+  "id": "ENG028B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "ENG"
+ },
+ {
+  "id": "ENG029",
+  "name": "Spectral Shield",
+  "cardType": "token",
+  "text": "Ward 1",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "ENG"
+ }
+]

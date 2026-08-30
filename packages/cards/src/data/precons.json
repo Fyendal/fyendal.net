@@ -1,0 +1,803 @@
+{
+    "_comment": "Hardcoded official LSS precon pools from fabtcg.com: Silver Age Chapters 1-3 and Classic Constructed Armory Decks, plus explicitly botOnly practice lists. Player precons are available to every user and not editable. Ids are referenced anywhere a saved-deck id is (rooms, queue, prep). Entries without an explicit format are Silver Age. Off-hand and quiver equipment lives in weaponIds — presentation offers it as the second weapon slot (EquipmentSlot has no off-hand).",
+    "precon-sba": {
+        "name": "Briar Precon",
+        "pool": {
+            "heroId": "SBA001",
+            "weaponIds": ["SBA002", "SBA003"],
+            "equipmentPool": ["SBA004", "SBA005", "SBA006", "SBA007", "SBA008", "SBA009", "SBA010"],
+            "deck": [
+                "SBA011", "SBA011", "SBA012", "SBA012", "SBA013", "SBA013", "SBA014", "SBA014",
+                "SBA015", "SBA015", "SBA016", "SBA016", "SBA017", "SBA017", "SBA018", "SBA018",
+                "SBA019", "SBA019", "SBA020", "SBA020", "SBA021", "SBA021", "SBA022", "SBA022",
+                "SBA023", "SBA023", "SBA024", "SBA024", "SBA025", "SBA025", "SBA026", "SBA026",
+                "SBA027", "SBA027", "SBA028", "SBA028", "SBA029", "SBA029", "SBA030", "SBA030",
+                "SBA031", "SBA031", "SBA032", "SBA032",
+                "SBA033", "SBA033"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-sly": {
+        "name": "Lyath Goldmane Precon",
+        "pool": {
+            "heroId": "SLY001",
+            "weaponIds": ["SLY002", "SLY004", "SLY003"],
+            "equipmentPool": ["SLY005", "SLY006", "SLY007", "SLY008", "SLY009", "SLY010"],
+            "deck": [
+                "SLY011", "SLY011", "SLY012", "SLY012", "SLY013", "SLY013", "SLY014", "SLY014",
+                "SLY015", "SLY015", "SLY016", "SLY016", "SLY017", "SLY017", "SLY018", "SLY018",
+                "SLY019", "SLY019",
+                "SLY020", "SLY020", "SLY021", "SLY021", "SLY022", "SLY022", "SLY023", "SLY023",
+                "SLY024", "SLY024", "SLY025", "SLY025", "SLY026", "SLY026", "SLY027", "SLY027",
+                "SLY028", "SLY028", "SLY029", "SLY029", "SLY030", "SLY030", "SLY031", "SLY031",
+                "SLY032", "SLY032", "SLY033", "SLY033"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-sgb": {
+        "name": "Gravy Bones Precon",
+        "pool": {
+            "heroId": "SGB001",
+            "weaponIds": ["SGB002"],
+            "equipmentPool": ["SGB003", "SGB004", "SGB005", "SGB006", "SGB007", "SGB008", "SGB009"],
+            "deck": [
+                "SGB010", "SGB010", "SGB011", "SGB011", "SGB012", "SGB012", "SGB013", "SGB013",
+                "SGB014", "SGB014", "SGB015", "SGB015", "SGB016", "SGB016", "SGB017", "SGB017",
+                "SGB018", "SGB018", "SGB019", "SGB019", "SGB020", "SGB020",
+                "SGB021", "SGB022", "SGB022", "SGB023", "SGB023", "SGB024", "SGB024",
+                "SGB025", "SGB025", "SGB026", "SGB026", "SGB027", "SGB027", "SGB028", "SGB028",
+                "SGB029", "SGB029", "SGB030", "SGB030", "SGB031", "SGB031", "SGB032",
+                "SGB033", "SGB034", "SGB034"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-sbz": {
+        "name": "Blaze, Firemind Precon",
+        "pool": {
+            "heroId": "SBZ001",
+            "weaponIds": ["SBZ002"],
+            "equipmentPool": ["SBZ003", "SBZ004", "SBZ005", "SBZ006", "SBZ007", "SBZ008"],
+            "deck": [
+                "SBZ009", "SBZ009", "SBZ010", "SBZ010", "SBZ011", "SBZ011", "SBZ012", "SBZ012",
+                "SBZ013", "SBZ013", "SBZ014", "SBZ014", "SBZ015", "SBZ015", "SBZ016", "SBZ016",
+                "SBZ017", "SBZ017", "SBZ018", "SBZ018", "SBZ019", "SBZ019", "SBZ020", "SBZ020",
+                "SBZ021", "SBZ021", "SBZ022", "SBZ022", "SBZ023", "SBZ023",
+                "SBZ024", "SBZ024", "SBZ025", "SBZ025", "SBZ026", "SBZ026", "SBZ027", "SBZ027",
+                "SBZ028", "SBZ028", "SBZ029", "SBZ029", "SBZ030", "SBZ030", "SBZ031", "SBZ031",
+                "SBZ032", "SBZ032"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-sbl": {
+        "name": "Boltyn Precon",
+        "pool": {
+            "heroId": "SBL001",
+            "weaponIds": ["SBL002"],
+            "equipmentPool": ["SBL003", "SBL004", "SBL005", "SBL006", "SBL007", "SBL008", "SBL009", "SBL010"],
+            "deck": [
+                "SBL011", "SBL011", "SBL012", "SBL012", "SBL019", "SBL019", "SBL013", "SBL013",
+                "SBL020", "SBL020", "SBL014", "SBL014", "SBL021", "SBL021", "SBL015", "SBL015",
+                "SBL016", "SBL016", "SBL017", "SBL017", "SBL018", "SBL018", "SBL022", "SBL022",
+                "SBL023", "SBL023", "SBL024", "SBL024", "SBL025", "SBL025", "SBL026", "SBL026",
+                "SBL027", "SBL027", "SBL028", "SBL028", "SBL032", "SBL032", "SBL033", "SBL033",
+                "SBL029", "SBL029", "SBL031", "SBL031", "SBL030", "SBL030"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-sen": {
+        "name": "Enigma Precon",
+        "pool": {
+            "heroId": "SEN001",
+            "weaponIds": ["SEN002"],
+            "equipmentPool": ["SEN003", "SEN004", "SEN005", "SEN006", "SEN007", "SEN008", "SEN009"],
+            "deck": [
+                "SEN013", "SEN013", "SEN010", "SEN010", "SEN011", "SEN011", "SEN017", "SEN017",
+                "SEN018", "SEN018", "SEN014", "SEN014", "SEN019", "SEN019", "SEN012", "SEN012",
+                "SEN015", "SEN015", "SEN016", "SEN016",
+                "MON099", "MON099", "SEN020", "SEN020",
+                "SEN031", "SEN028", "SEN028", "SEN022", "SEN022", "SEN032", "SEN023", "SEN023",
+                "SEN033", "SEN024", "SEN024", "SEN034", "SEN029", "SEN029", "SEN035", "SEN025",
+                "SEN025", "SEN026", "SEN026", "SEN027", "SEN027", "SEN030", "SEN030"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-sfa": {
+        "name": "Fai Precon",
+        "pool": {
+            "heroId": "SFA001",
+            "weaponIds": ["SFA002"],
+            "equipmentPool": ["SFA003", "SFA004", "SFA005", "SFA006", "SFA007", "SFA008", "SFA009"],
+            "deck": [
+                "SFA028",
+                "SFA010",
+                "SFA011", "SFA011", "SFA012", "SFA012", "SFA013", "SFA013", "SFA014", "SFA014",
+                "SFA015", "SFA015", "SFA016", "SFA016", "SFA017", "SFA017", "SFA018", "SFA018",
+                "SFA019", "SFA019", "SFA020", "SFA020", "SFA021", "SFA021", "SFA027", "SFA027",
+                "SFA022", "SFA022", "SFA023", "SFA023", "SFA024", "SFA024", "SFA025", "SFA025",
+                "SFA026",
+                "SFA029", "SFA029",
+                "SFA030",
+                "SFA031", "SFA031", "SFA032", "SFA032", "SFA033", "SFA033",
+                "SFA035",
+                "SFA034", "SFA034"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-saz": {
+        "name": "Azalea Precon",
+        "pool": {
+            "heroId": "SAZ001",
+            "weaponIds": ["SAZ002", "SAZ003"],
+            "equipmentPool": ["SAZ004", "SAZ005", "SAZ006", "SAZ007", "SAZ008", "SAZ009"],
+            "deck": [
+                "SAZ010", "SAZ010", "SAZ020", "SAZ020", "SAZ011", "SAZ011", "SAZ021", "SAZ021",
+                "SAZ012", "SAZ012", "SAZ013", "SAZ013", "SAZ014", "SAZ014", "SAZ022", "SAZ022",
+                "SAZ023", "SAZ023", "SAZ024", "SAZ024", "SAZ015", "SAZ015", "SAZ025", "SAZ025",
+                "SAZ019", "SAZ019", "SAZ026", "SAZ026", "SAZ027", "SAZ027", "SAZ016", "SAZ016",
+                "SAZ028", "SAZ028", "SAZ017", "SAZ017", "SAZ018", "SAZ018", "SAZ029", "SAZ029",
+                "SAZ030", "SAZ030",
+                "SAZ033",
+                "SAZ031", "SAZ031",
+                "SAZ032", "SAZ032"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-sdo": {
+        "name": "Dorinthea Precon",
+        "pool": {
+            "heroId": "SDO001",
+            "weaponIds": ["SDO002"],
+            "equipmentPool": ["SDO003", "SDO004", "SDO005", "SDO006", "SDO007", "SDO008", "SDO009"],
+            "deck": [
+                "SDO012", "SDO012", "SDO013", "SDO013", "SDO018", "SDO018", "SDO021", "SDO021",
+                "SDO014", "SDO014", "SDO015", "SDO015", "SDO016", "SDO016", "SDO011", "SDO011",
+                "SDO019", "SDO019", "SDO017", "SDO017", "SDO020", "SDO020", "SDO010", "SDO010",
+                "SDO022",
+                "SDO023", "SDO023", "SDO024", "SDO024",
+                "SDO030",
+                "SDO031", "SDO031", "SDO032", "SDO032", "SDO025", "SDO025", "SDO026", "SDO026",
+                "SDO027", "SDO027",
+                "SDO028",
+                "SDO029", "SDO029", "SDO033", "SDO033", "SDO034", "SDO034"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-sar": {
+        "name": "Arakni Precon",
+        "pool": {
+            "heroId": "SAR001",
+            "weaponIds": ["SAR002", "SAR002"],
+            "equipmentPool": ["SAR003", "SAR004", "SAR005", "SAR006", "SAR007", "SAR008", "SAR009"],
+            "deck": [
+                "SAR010", "SAR010", "SAR011", "SAR011", "SAR023", "SAR023", "SAR024", "SAR024",
+                "SAR012", "SAR012", "SAR025", "SAR025", "SAR013", "SAR013", "SAR026", "SAR026",
+                "SAR014", "SAR014", "SAR015", "SAR015", "SAR016", "SAR016", "SAR018", "SAR018",
+                "SAR017", "SAR017", "SAR019", "SAR019", "SAR020", "SAR020", "SAR021", "SAR021",
+                "SAR022", "SAR022", "SAR027", "SAR027",
+                "SAR028", "SAR028", "SAR029", "SAR029", "SAR031", "SAR031", "SAR030", "SAR030",
+                "SAR032", "SAR032"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-svi": {
+        "name": "Viserai Precon",
+        "pool": {
+            "heroId": "SVI001",
+            "weaponIds": ["SVI002"],
+            "equipmentPool": ["SVI007", "SVI009", "SVI003", "SVI005", "SVI004", "SVI010", "SVI008", "SVI006"],
+            "deck": [
+                "SVI011", "SVI011", "SVI020", "SVI020", "SVI012", "SVI012", "SVI021", "SVI021",
+                "SVI022", "SVI022", "SVI023", "SVI023", "SVI018", "SVI018", "SVI013", "SVI013",
+                "SVI014", "SVI014", "SVI015", "SVI015", "SVI016", "SVI016", "SVI019", "SVI019",
+                "SVI017", "SVI017", "SVI025", "SVI025", "SVI024", "SVI024", "SVI029", "SVI029",
+                "SVI030", "SVI030", "SVI031", "SVI031", "SVI026", "SVI026", "SVI032", "SVI032",
+                "SVI027", "SVI027", "SVI033", "SVI033", "SVI028", "SVI028"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-sda": {
+        "name": "Dash Precon",
+        "pool": {
+            "heroId": "SDA001",
+            "weaponIds": ["SDA002", "SDA003"],
+            "equipmentPool": ["SDA004", "SDA005", "SDA006", "SDA007", "SDA008", "SDA009", "SDA010", "SDA011"],
+            "deck": [
+                "SDA012", "SDA012", "SDA013", "SDA013", "SDA014", "SDA014", "SDA015", "SDA015",
+                "SDA016", "SDA016", "SDA017", "SDA017", "SDA018", "SDA018", "SDA019", "SDA019",
+                "SDA020", "SDA020", "SDA021", "SDA021", "SDA022", "SDA022", "SDA023", "SDA023",
+                "SDA024",
+                "SDA025", "SDA025", "SDA026", "SDA026", "SDA027", "SDA027",
+                "SDA028", "SDA028", "SDA029", "SDA029", "SDA030", "SDA030", "SDA031", "SDA031",
+                "SDA032", "SDA032", "SDA033", "SDA033", "SDA034", "SDA034"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-sbr": {
+        "name": "Bravo, Flattering Showman Precon",
+        "pool": {
+            "heroId": "SBR001",
+            "weaponIds": ["SBR002", "SBR003", "SBR004"],
+            "equipmentPool": ["SBR005", "SBR006", "SBR007", "SBR008", "SBR009", "SBR010", "SBR011", "SBR012"],
+            "deck": [
+                "SBR013", "SBR013", "SBR014", "SBR014", "SBR015", "SBR015", "SBR016", "SBR016",
+                "SBR017", "SBR017", "SBR018", "SBR018", "SBR019", "SBR019", "SBR020", "SBR020",
+                "SBR021", "SBR021", "SBR022", "SBR022", "SBR023", "SBR023", "SBR024", "SBR024",
+                "SBR025", "SBR025", "SBR026", "SBR026", "SBR027", "SBR027", "SBR028", "SBR028",
+                "SBR029", "SBR029", "SBR030", "SBR030", "SBR031", "SBR031", "SBR032", "SBR032",
+                "SBR033", "SBR033", "SBR034", "SBR034"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-ska": {
+        "name": "Kayo Precon",
+        "pool": {
+            "heroId": "SKA001",
+            "weaponIds": ["SKA002"],
+            "equipmentPool": ["SKA003", "SKA004", "SKA005", "SKA006", "SKA007", "SKA008", "SKA009"],
+            "deck": [
+                "SKA010", "SKA010", "SKA011", "SKA011", "SKA012", "SKA012", "SKA013", "SKA013",
+                "SKA014", "SKA014", "SKA015", "SKA015", "SKA016", "SKA016", "SKA017", "SKA017",
+                "SKA018", "SKA018", "SKA019", "SKA019", "SKA020", "SKA020",
+                "SKA021", "SKA021", "SKA022", "SKA023", "SKA023", "SKA024", "SKA024",
+                "SKA025", "SKA025", "SKA026", "SKA026", "SKA027", "SKA027", "SKA028", "SKA028",
+                "SKA029", "SKA029", "SKA030", "SKA030", "SKA031", "SKA031", "SKA032", "SKA032",
+                "SKA033", "SKA033"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-siy": {
+        "name": "Iyslander Precon",
+        "pool": {
+            "heroId": "SIY001",
+            "weaponIds": ["SIY002"],
+            "equipmentPool": ["SIY003", "SIY004", "SIY005", "SIY006", "SIY007", "SIY008", "SIY009"],
+            "deck": [
+                "SIY010", "SIY010", "SIY011", "SIY012", "SIY012", "SIY013", "SIY013",
+                "SIY014", "SIY014", "SIY015", "SIY015", "SIY016", "SIY016", "SIY017", "SIY017",
+                "SIY018", "SIY018", "SIY019", "SIY019", "SIY020", "SIY020", "SIY021", "SIY021",
+                "SIY022", "SIY022", "SIY023", "SIY023", "SIY024", "SIY024", "SIY025", "SIY025",
+                "SIY026", "SIY026", "SIY027", "SIY027", "SIY028", "SIY028", "SIY029", "SIY029",
+                "SIY030", "SIY031", "SIY032", "SIY032", "SIY033", "SIY033", "SIY034", "SIY034"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-ako": {
+        "name": "Armory Deck: Kayo",
+        "format": "cc",
+        "pool": {
+            "heroId": "AKO001",
+            "weaponIds": ["AKO002"],
+            "equipmentPool": ["AKO003", "AKO004", "AKO005", "AKO006"],
+            "deck": [
+                "AKO007", "AKO007", "AKO007", "AKO008", "AKO008", "AKO008", "AKO009", "AKO009", "AKO009",
+                "AKO010", "AKO010", "AKO010", "AKO011", "AKO011", "AKO011", "AKO012", "AKO012", "AKO012",
+                "AKO013", "AKO013", "AKO013", "AKO014", "AKO014", "AKO014", "AKO015", "AKO015", "AKO015",
+                "AKO016", "AKO016", "AKO016",
+                "AKO017", "AKO017", "AKO017", "AKO018", "AKO018", "AKO018", "AKO019", "AKO019", "AKO019",
+                "AKO020", "AKO020", "AKO020", "AKO021", "AKO021", "AKO021", "AKO022", "AKO022", "AKO022",
+                "AKO023", "AKO023", "AKO023", "AKO024", "AKO024", "AKO024", "AKO025", "AKO025", "AKO025",
+                "AKO026", "AKO026", "AKO026"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-asb": {
+        "name": "Armory Deck: Boltyn",
+        "format": "cc",
+        "pool": {
+            "heroId": "ASB001",
+            "weaponIds": ["ASB002"],
+            "equipmentPool": ["ASB003", "ASB004", "ASB005", "ASB006"],
+            "deck": [
+                "ASB007", "ASB007", "ASB007", "ASB008", "ASB008", "ASB008", "ASB009", "ASB009", "ASB009",
+                "ASB010", "ASB010", "ASB010", "ASB011", "ASB011", "ASB011", "ASB012", "ASB012", "ASB012",
+                "ASB013", "ASB013", "ASB013", "ASB014", "ASB014", "ASB014", "ASB015", "ASB015", "ASB015",
+                "ASB016", "ASB016", "ASB016",
+                "ASB017", "ASB017", "ASB017", "ASB018", "ASB018", "ASB018", "ASB019", "ASB019", "ASB019",
+                "ASB020", "ASB020", "ASB020", "ASB021", "ASB021", "ASB021", "ASB026", "ASB026", "ASB026",
+                "ASB025", "ASB025", "ASB025", "ASB022", "ASB022", "ASB022", "ASB023", "ASB023", "ASB023",
+                "ASB024", "ASB024", "ASB024"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-aaz": {
+        "name": "Armory Deck: Azalea",
+        "format": "cc",
+        "pool": {
+            "heroId": "AAZ001",
+            "weaponIds": ["AAZ002", "AAZ003"],
+            "equipmentPool": ["AAZ004", "AAZ005", "AAZ006", "AAZ007"],
+            "deck": [
+                "AAZ008",
+                "AAZ009", "AAZ009", "AAZ009", "AAZ010", "AAZ010", "AAZ010", "AAZ011", "AAZ011", "AAZ011",
+                "AAZ017", "AAZ017", "AAZ017", "AAZ018", "AAZ018", "AAZ018", "AAZ019", "AAZ019", "AAZ019",
+                "AAZ020", "AAZ020", "AAZ020", "AAZ012", "AAZ012", "AAZ012", "AAZ021", "AAZ021", "AAZ021",
+                "AAZ013",
+                "AAZ022", "AAZ022", "AAZ022", "AAZ014", "AAZ014", "AAZ014", "AAZ015", "AAZ015", "AAZ015",
+                "AAZ016", "AAZ016", "AAZ016",
+                "AAZ024", "AAZ024", "AAZ024", "AAZ026", "AAZ025", "AAZ025", "AAZ025", "AAZ023", "AAZ023", "AAZ023",
+                "AAZ027", "AAZ027", "AAZ027", "AAZ029", "AAZ029", "AAZ029", "AAZ028", "AAZ028", "AAZ028"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-aio": {
+        "name": "Armory Deck: Dash I/O",
+        "format": "cc",
+        "pool": {
+            "heroId": "AIO001",
+            "weaponIds": ["AIO002"],
+            "equipmentPool": ["AIO003", "AIO004", "AIO005", "AIO006"],
+            "deck": [
+                "AIO014", "AIO014", "AIO014", "AIO015", "AIO015", "AIO015", "AIO016",
+                "AIO007", "AIO007", "AIO007", "AIO017", "AIO017", "AIO017",
+                "AIO008", "AIO008", "AIO008", "AIO009", "AIO009", "AIO009",
+                "AIO010", "AIO010", "AIO011", "AIO011", "AIO011",
+                "AIO012", "AIO012", "AIO012", "AIO013", "AIO013", "AIO013",
+                "AIO020", "AIO020", "AIO020", "AIO018", "AIO018", "AIO018",
+                "AIO019", "AIO019", "AIO019",
+                "AIO025", "AIO025", "AIO025", "AIO026", "AIO026", "AIO026",
+                "AIO021", "AIO021", "AIO021", "AIO022", "AIO022", "AIO022",
+                "AIO027", "AIO027", "AIO027", "AIO023", "AIO023", "AIO023",
+                "AIO024", "AIO024", "AIO024"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-ajv": {
+        "name": "Armory Deck: Jarl Vetreiði",
+        "format": "cc",
+        "pool": {
+            "heroId": "AJV001",
+            "weaponIds": ["AJV002", "AJV003"],
+            "equipmentPool": ["AJV004", "AJV005", "AJV006", "AJV007"],
+            "deck": [
+                "AJV008", "AJV008", "AJV008", "AJV009", "AJV009", "AJV009",
+                "AJV010", "AJV010", "AJV010", "AJV011", "AJV011", "AJV011",
+                "AJV012", "AJV012", "AJV012", "AJV013", "AJV013", "AJV013",
+                "AJV014", "AJV014", "AJV014", "AJV015", "AJV015", "AJV015",
+                "AJV016", "AJV016", "AJV016", "AJV017", "AJV017", "AJV017",
+                "AJV018", "AJV018", "AJV018", "AJV019", "AJV019", "AJV019",
+                "AJV020", "AJV020", "AJV020", "AJV021", "AJV021", "AJV021",
+                "AJV022", "AJV022", "AJV022", "AJV023", "AJV023", "AJV023",
+                "AJV024", "AJV024", "AJV024", "AJV025", "AJV025", "AJV025",
+                "AJV026", "AJV026", "AJV026", "AJV027", "AJV027", "AJV027"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-ast": {
+        "name": "Armory Deck: Aurora",
+        "format": "cc",
+        "pool": {
+            "heroId": "AST001",
+            "weaponIds": ["AST002"],
+            "equipmentPool": ["AST003", "AST004", "AST005", "AST006"],
+            "deck": [
+                "AST007", "AST007", "AST007", "AST008", "AST008", "AST008",
+                "AST017", "AST017", "AST017", "AST019",
+                "AST020", "AST020", "AST020", "AST009", "AST009", "AST009",
+                "AST010", "AST010", "AST010", "AST021", "AST021", "AST021",
+                "AST011", "AST011", "AST011", "AST012", "AST012", "AST012",
+                "AST018", "AST018", "AST018", "AST013", "AST013", "AST013",
+                "AST014", "AST014", "AST014", "AST015", "AST015", "AST015",
+                "AST016", "AST016", "AST016",
+                "AST022", "AST022", "AST023", "AST023", "AST023",
+                "AST024", "AST024", "AST024", "AST026", "AST026", "AST026",
+                "AST025", "AST025", "AST025", "AST027", "AST027", "AST027"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-amx": {
+        "name": "Armory Deck: Maxx Nitro",
+        "format": "cc",
+        "pool": {
+            "heroId": "AMX001",
+            "weaponIds": ["AMX002"],
+            "equipmentPool": ["AMX003", "AMX004", "AMX005", "AMX006"],
+            "deck": [
+                "AMX007", "AMX007", "AMX007", "AMX008", "AMX008", "AMX008",
+                "AMX009", "AMX009", "AMX009", "AMX010",
+                "AMX019", "AMX019", "AMX019", "AMX011", "AMX011", "AMX011",
+                "AMX012", "AMX012", "AMX012", "AMX013", "AMX013", "AMX013",
+                "AMX014", "AMX014", "AMX018", "AMX018", "AMX018",
+                "AMX015", "AMX015", "AMX015", "AMX016", "AMX016", "AMX016",
+                "AMX017", "AMX017", "AMX017",
+                "AMX022", "AMX022", "AMX022", "AMX020", "AMX020", "AMX020",
+                "AMX023", "AMX023", "AMX023", "AMX021", "AMX021", "AMX021",
+                "AMX024", "AMX024", "AMX024", "AMX026", "AMX026", "AMX026",
+                "AMX025", "AMX025", "AMX025", "AMX027", "AMX027", "AMX027"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-agb": {
+        "name": "Armory Deck: Gravy Bones",
+        "format": "cc",
+        "pool": {
+            "heroId": "AGB001",
+            "weaponIds": ["AGB003"],
+            "equipmentPool": ["AGB004", "AGB005", "AGB006", "AGB007"],
+            "deck": [
+                "AGB008", "AGB008", "AGB008", "AGB013",
+                "AGB009", "AGB009", "AGB009", "AGB010", "AGB010", "AGB010",
+                "AGB011", "AGB011", "AGB011", "AGB012", "AGB012", "AGB012",
+                "AGB014", "AGB014", "AGB014", "AGB015", "AGB015", "AGB015",
+                "AGB016", "AGB016", "AGB016", "AGB017", "AGB017", "AGB017",
+                "AGB018", "AGB018", "AGB018", "AGB019", "AGB019", "AGB019",
+                "AGB022", "AGB022", "AGB022", "AGB024", "AGB024", "AGB024",
+                "AGB025", "AGB025", "AGB020", "AGB026",
+                "AGB021", "AGB021", "AGB021", "AGB027", "AGB027", "AGB027",
+                "AGB028", "AGB028", "AGB028", "AGB023", "AGB023",
+                "AGB029", "AGB029", "AGB029", "AGB030", "AGB030"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-asr": {
+        "name": "Armory Deck: Ira, Scarlet Revenger",
+        "format": "cc",
+        "pool": {
+            "heroId": "ASR001",
+            "weaponIds": ["ASR002"],
+            "equipmentPool": ["ASR003", "ASR004", "ASR005", "ASR006"],
+            "deck": [
+                "ASR007", "ASR007", "ASR007", "ASR008", "ASR008", "ASR008",
+                "ASR017", "ASR017", "ASR017", "ASR009", "ASR009", "ASR009",
+                "ASR010", "ASR010", "ASR016", "ASR016", "ASR016",
+                "ASR011", "ASR011", "ASR011", "ASR012", "ASR012", "ASR012",
+                "ASR018", "ASR018", "ASR018", "ASR013", "ASR013", "ASR013",
+                "ASR014", "ASR014", "ASR014", "ASR015", "ASR015", "ASR015",
+                "ASR019", "ASR019", "ASR019",
+                "ASR020", "ASR020", "ASR020", "ASR027",
+                "ASR021", "ASR021", "ASR021", "ASR026", "ASR026", "ASR026",
+                "ASR022", "ASR022", "ASR022", "ASR023", "ASR023", "ASR023",
+                "ASR024", "ASR024", "ASR024", "ASR025", "ASR025", "ASR025"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-aps": {
+        "name": "Armory Deck: Pleiades, Superstar",
+        "format": "cc",
+        "pool": {
+            "heroId": "APS001",
+            "weaponIds": ["APS003"],
+            "equipmentPool": ["APS004", "APS005", "APS006", "APS007"],
+            "deck": [
+                "APS011", "APS011", "APS011", "APS008", "APS008", "APS008",
+                "APS012", "APS012", "APS012", "APS009", "APS009", "APS010", "APS010",
+                "APS013", "APS013", "APS013", "APS015", "APS014",
+                "APS022", "APS022", "APS022", "APS016", "APS016", "APS016",
+                "APS017", "APS017", "APS017", "APS023", "APS023", "APS023",
+                "APS018", "APS018", "APS018", "APS019", "APS019", "APS019",
+                "APS024", "APS024", "APS024", "APS021", "APS021",
+                "APS025", "APS025", "APS025", "APS026", "APS026", "APS026",
+                "APS027", "APS027", "APS027", "APS030", "APS030", "APS030",
+                "APS020", "APS020", "APS020", "APS028", "APS029", "APS029", "APS029"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-arr": {
+        "name": "Armory Deck: Rhinar, Reckless Rampage",
+        "format": "cc",
+        "pool": {
+            "heroId": "ARR001",
+            "weaponIds": ["ARR002"],
+            "equipmentPool": ["ARR003", "ARR004", "ARR005", "ARR006"],
+            "deck": [
+                "ARR007", "ARR007", "ARR007", "ARR008", "ARR008", "ARR008",
+                "ARR009", "ARR009", "ARR009", "ARR015", "ARR015", "ARR015",
+                "ARR010", "ARR011", "ARR011", "ARR011", "ARR012", "ARR012", "ARR012",
+                "ARR013", "ARR014", "ARR014", "ARR014",
+                "ARR016", "ARR016", "ARR016", "ARR017", "ARR017", "ARR017",
+                "ARR018", "ARR019", "ARR019", "ARR019", "ARR020", "ARR020", "ARR020",
+                "ARR021", "ARR021", "ARR021",
+                "ARR022", "ARR022", "ARR022", "ARR024", "ARR024", "ARR024",
+                "ARR025", "ARR025", "ARR025", "ARR026", "ARR026", "ARR026",
+                "ARR027", "ARR027", "ARR027", "ARR028", "ARR028", "ARR028",
+                "ARR023", "ARR023", "ARR023"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-aac": {
+        "name": "Armory Deck: Arakni, 5L!p3d 7hRu 7h3 cR4X",
+        "format": "cc",
+        "pool": {
+            "heroId": "AAC001",
+            "weaponIds": ["AAC002", "AAC003"],
+            "equipmentPool": ["AAC004", "AAC005", "AAC006", "AAC007"],
+            "deck": [
+                "AAC008", "AAC008", "AAC008", "AAC009", "AAC009", "AAC009",
+                "AAC010", "AAC010", "AAC010", "AAC011",
+                "AAC012", "AAC012", "AAC012", "AAC013", "AAC013", "AAC013",
+                "AAC014", "AAC014", "AAC014", "AAC015", "AAC015", "AAC015",
+                "AAC016", "AAC016", "AAC016", "AAC019", "AAC019", "AAC019",
+                "AAC017", "AAC017", "AAC017", "AAC020", "AAC020", "AAC020",
+                "AAC021", "AAC021", "AAC021", "AAC018",
+                "AAC022", "AAC022", "AAC022", "AAC023", "AAC023", "AAC023",
+                "AAC024", "AAC024",
+                "AAC025", "AAC025", "AAC025", "AAC026", "AAC026",
+                "AAC028", "AAC028", "AAC028", "AAC027", "AAC027", "AAC027",
+                "AAC029", "AAC029", "AAC029"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-aha": {
+        "name": "Armory Deck Origins: Hala",
+        "format": "cc",
+        "pool": {
+            "heroId": "AHA001",
+            "weaponIds": ["AHA002"],
+            "equipmentPool": ["AHA003", "AHA004", "AHA005", "AHA006"],
+            "deck": [
+                "AHA007", "AHA007", "AHA007", "AHA008", "AHA008", "AHA008",
+                "AHA009", "AHA009", "AHA009", "AHA010", "AHA010", "AHA010",
+                "AHA011", "AHA011", "AHA011", "AHA012", "AHA012", "AHA012",
+                "AHA013", "AHA013", "AHA013", "AHA014", "AHA014", "AHA014",
+                "AHA015", "AHA015", "AHA015", "AHA016", "AHA016", "AHA016",
+                "AHA017", "AHA017", "AHA017", "AHA018", "AHA018", "AHA018",
+                "AHA019", "AHA019", "AHA019", "AHA020", "AHA020", "AHA020",
+                "AHA021", "AHA021", "AHA021", "AHA022", "AHA022", "AHA022",
+                "AHA023", "AHA023", "AHA023", "AHA024", "AHA024", "AHA024",
+                "AHA025", "AHA025", "AHA025", "AHA026", "AHA026", "AHA026"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-azs": {
+        "name": "Armory Deck: Zyggy",
+        "format": "cc",
+        "pool": {
+            "heroId": "AZS001",
+            "weaponIds": ["AZS002"],
+            "equipmentPool": ["AZS003", "AZS004", "AZS005", "AZS006"],
+            "deck": [
+                "AZS015", "AZS015", "AZS015", "AZS007", "AZS007", "AZS007",
+                "AZS016", "AZS016", "AZS016", "AZS008", "AZS008", "AZS008",
+                "AZS009", "AZS009", "AZS009", "AZS010",
+                "AZS011", "AZS011", "AZS012", "AZS012",
+                "AZS013", "AZS013", "AZS013", "AZS014", "AZS014", "AZS014",
+                "AZS017", "AZS017", "AZS017", "AZS018", "AZS018",
+                "AZS019", "AZS019", "AZS025", "AZS025", "AZS025",
+                "AZS020", "AZS020", "AZS020", "AZS021", "AZS021", "AZS021",
+                "AZS026", "AZS026", "AZS026", "AZS022", "AZS022", "AZS022",
+                "AZS027", "AZS027", "AZS027", "AZS024", "AZS024", "AZS024",
+                "AZS023", "AZS023", "AZS023", "AZS028", "AZS028", "AZS028"
+            ],
+            "sideboard": []
+        }
+    },
+    "precon-aol": {
+        "name": "Armory Deck: Olympia",
+        "format": "cc",
+        "pool": {
+            "heroId": "AOL001",
+            "weaponIds": ["AOL002"],
+            "equipmentPool": ["AOL003", "AOL004", "AOL005", "AOL006"],
+            "deck": [
+                "AOL008", "AOL008", "AOL008", "AOL009", "AOL009", "AOL009",
+                "AOL010", "AOL010", "AOL010", "AOL012", "AOL012", "AOL012",
+                "AOL013", "AOL013", "AOL013", "AOL015", "AOL015", "AOL015",
+                "AOL016", "AOL016", "AOL016", "AOL019", "AOL019", "AOL019",
+                "AOL023", "AOL023", "AOL023", "AOL024", "AOL024", "AOL024",
+                "AOL025", "AOL025", "AOL025",
+                "AOL011", "AOL011", "AOL011", "AOL017", "AOL017", "AOL017",
+                "AOL020", "AOL020", "AOL020", "AOL021", "AOL021", "AOL021",
+                "AOL022", "AOL022", "AOL022", "AOL028", "AOL028", "AOL028",
+                "AOL007", "AOL007", "AOL014", "AOL014", "AOL018", "AOL018",
+                "AOL026", "AOL026", "AOL027"
+            ],
+            "sideboard": []
+        }
+    },
+    "_comment_bot_briar": "Source: https://fabrary.net/decks/01KSQ4VJB4J94KJYYWCPMY996H. The source SAT009 Blade Beckoner Boots printing is represented by the functionally identical SBA009 printing because SAT is not in the local card catalog.",
+    "bot-briar-broccoli": {
+        "name": "🥦 Broccoli Deck in Format",
+        "botOnly": true,
+        "pool": {
+            "heroId": "SBA001",
+            "weaponIds": ["SBA003"],
+            "equipmentPool": [
+                "SBA009", "SBA007", "SLY005", "SBL005",
+                "PEN093", "SBL010", "SBA008"
+            ],
+            "deck": [
+                "SBA024", "SBA024", "SBA011", "SBA011",
+                "SBA025", "SBA025", "SBA012", "SBA012",
+                "SBA013", "SBA013", "SEA201", "SBA032", "SBA032",
+                "SBA015", "SBA015", "SBA026", "SBA026", "SBA033",
+                "SBA016", "SBA016", "OMN085", "OMN083", "OMN083",
+                "SBA017", "SBA017", "SBA018", "IRA009", "IRA009",
+                "SBA020", "SBA020", "SBA027", "SBA027",
+                "SBA021", "SBA021", "SBA028", "SBA028",
+                "SBA022", "SBA022", "SBA029", "SBA029"
+            ],
+            "sideboard": [
+                "SBA031", "SBA031", "ELE119", "ELE119",
+                "OMN085", "SBA023", "SBA023"
+            ]
+        }
+    },
+    "bot-bravo-flarvo": {
+        "name": "Flarvo - Skirmish Season 15 Winner!",
+        "botOnly": true,
+        "pool": {
+            "heroId": "SBR001",
+            "weaponIds": ["SLY002", "SBR004"],
+            "equipmentPool": [
+                "SBA007", "SLY005", "TCC033", "SBR007",
+                "SBR006", "SBL010", "SGB006"
+            ],
+            "deck": [
+                "SBR013", "SBR013", "SBR023", "SBR023",
+                "SBR015", "SBR015", "MPG057", "MPG057",
+                "SBR022", "SBR022", "SBR017", "SBR017",
+                "SBR028", "SBR028", "SBR018", "SBR018",
+                "MPG047", "MPG047", "SBR024", "SBR024",
+                "SBR025", "SBR025", "SBR026", "SBR026",
+                "SBR029", "SBR029", "SLY032", "SLY032",
+                "SBR030", "SBR030", "SBR031", "SBR031",
+                "SBR032", "SBR032", "HVY079", "HVY079"
+            ],
+            "sideboard": [
+                "SBA030", "SBA030", "SBR016", "SBR016",
+                "SLY019", "SLY019", "SBR020", "SBR020",
+                "SBR021", "SBR021"
+            ]
+        }
+    },
+    "bot-cindra-head-jabs": {
+        "name": "Art of the Dragon: Head Jab",
+        "format": "cc",
+        "botOnly": true,
+        "pool": {
+            "heroId": "HNT054",
+            "weaponIds": ["GEM003", "GEM003", "SEA257"],
+            "equipmentPool": ["WTR079", "HNT168", "UPR084", "SUP244", "HNT143"],
+            "deck": [
+                "WTR082", "WTR082", "WTR082",
+                "FAB307", "FAB307", "FAB307",
+                "HNT157", "HNT157", "HNT157",
+                "HNT057", "HNT057",
+                "UPR093", "UPR093",
+                "HNT064", "HNT064", "HNT064",
+                "GEM027", "GEM027", "GEM027",
+                "GEM011", "GEM011", "GEM011",
+                "GEM010", "GEM010", "GEM010",
+                "OMN245", "OMN245", "OMN245",
+                "PEN250",
+                "HNT083", "HNT083", "HNT083",
+                "HNT067", "HNT067", "HNT067",
+                "GEM014", "GEM014",
+                "HNT058", "HNT058", "HNT058",
+                "UPR098", "UPR098",
+                "HNT149", "HNT149",
+                "ANQ029", "ANQ029", "ANQ029",
+                "UPR075", "UPR075", "UPR075",
+                "HNT070", "HNT070", "HNT070",
+                "ANQ031", "ANQ031",
+                "CIN020", "CIN020", "CIN020",
+                "HNT175", "HNT175"
+            ],
+            "sideboard": [
+                "GEM015", "GEM015", "GEM015",
+                "SUP216",
+                "PEN321", "PEN321", "PEN321",
+                "ANQ034", "ANQ034", "ANQ034",
+                "DTD230", "DTD230"
+            ]
+        }
+    },
+    "precon-hala-masterclass": {
+        "name": "Masterclass: Hala, Bladesaint of the Vow",
+        "format": "cc",
+        "botOnly": true,
+        "pool": {
+            "heroId": "MPW003",
+            "weaponIds": ["MPW005"],
+            "equipmentPool": [
+                "PEN310", "MPW010", "HNT115", "ARC155",
+                "ARC156", "ARC158", "AHA005", "MPW012"
+            ],
+            "deck": [
+                "AHA011", "AHA011", "AHA011",
+                "PEN319", "PEN319", "PEN319",
+                "MPW103", "MPW103", "MPW103",
+                "PEN048", "PEN048", "PEN048",
+                "MPW074", "MPW074", "MPW074",
+                "MPW030", "MPW030", "MPW030",
+                "MPW104", "MPW104", "MPW104",
+                "MPW025", "MPW025", "MPW025",
+                "MPW028", "MPW028", "MPW028",
+                "OMN238", "OMN238", "OMN238",
+                "PEN056", "PEN056", "PEN056",
+                "PEN053",
+                "MPW105", "MPW105", "MPW105",
+                "MPW046", "MPW046", "MPW046",
+                "LGS426",
+                "HNT117", "HNT117", "HNT117",
+                "HVY209", "HVY209", "HVY209",
+                "MPW121", "MPW121", "MPW121",
+                "MPW052", "MPW052",
+                "MPW076",
+                "MPW126", "MPW126",
+                "MPW130", "MPW130", "MPW130",
+                "MST192", "MST192"
+            ],
+            "sideboard": [
+                "PEN321", "PEN321", "PEN321",
+                "ASB016", "ASB016", "ASB016",
+                "MPW089", "MPW089",
+                "PEN049", "PEN049", "PEN049"
+            ]
+        }
+    },
+    "_comment_bot_jarl": "Source: https://fabrary.net/decks/01M0K4BKRHN7J89ZSB6XGDHRSH. The registered pool preserves the source printings; one Mangle is stored in deck rather than sideboard so every CC bot-only registration retains a sixty-card default while matchup presentation reconstructs the published branches from the complete pool.",
+    "bot-jarl": {
+        "name": "Jarl",
+        "format": "cc",
+        "botOnly": true,
+        "pool": {
+            "heroId": "MPG000",
+            "weaponIds": ["SBR002", "EVR018", "SLY002"],
+            "equipmentPool": [
+                "ROS028", "OMN204", "PEN215", "PEN310",
+                "EVO249", "AJV006", "ELE144", "SBL010"
+            ],
+            "deck": [
+                "AJV014", "AJV014", "AJV014",
+                "ELE147",
+                "ELE146", "ELE146", "ELE146",
+                "PEN206", "PEN206",
+                "PEN319", "PEN319", "PEN319",
+                "AJV018", "AJV018", "AJV018",
+                "PEN320", "PEN320", "PEN320",
+                "SEA258", "SEA258", "SEA258",
+                "SUP261", "SUP261", "SUP261",
+                "AJV020", "AJV020", "AJV020",
+                "ROS057", "ROS057", "ROS057",
+                "EVR022", "EVR022", "EVR022",
+                "ELE005", "ELE005", "ELE005",
+                "SUP262", "SUP262",
+                "ELE114",
+                "HVY209", "HVY209",
+                "ROS042", "ROS042", "ROS042",
+                "PEN321", "PEN321", "PEN321",
+                "ASR018", "ASR018", "ASR018",
+                "ELE142",
+                "SBA028", "SBA028", "SBA028",
+                "APS021", "APS021", "APS021",
+                "SIY033", "SIY033",
+                "AJV011"
+            ],
+            "sideboard": [
+                "AJV017",
+                "WTR161", "WTR161",
+                "AJV011", "AJV011",
+                "HNT231", "HNT231",
+                "SBR021", "SBR021"
+            ]
+        }
+    }
+}

@@ -1,0 +1,7579 @@
+[
+ {
+  "id": "LGS001",
+  "name": "Romping Club",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nOnce per Turn Effect - When you discard a card with 6 or more {p}, Romping Club gains +1{p} until end of turn.",
+  "attack": 4,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "club",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS002",
+  "name": "Anothos",
+  "cardType": "weapon",
+  "text": "Once per turn Action - {r}{r}{r}: Attack\nWhile there are 2 or more cards with cost 3 or greater in your pitch zone, Anothos has +2{p}.",
+  "attack": 4,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "hammer",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS003",
+  "name": "Harmonized Kodachi",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nIf you have a card in your pitch zone with cost 0, this card's attacks get go again.",
+  "attack": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS004",
+  "name": "Dawnblade",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nThe second time this hits each turn, put a +1{p} counter on it.\nAt the beginning of your end phase, if this hasn't hit this turn, remove all +1{p} counters from it.",
+  "attack": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "sword",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS005",
+  "name": "Wrecker Romp",
+  "cardType": "action",
+  "text": "As an additional cost to play this, discard a random card.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS006",
+  "name": "Blessing of Deliverance",
+  "cardType": "action",
+  "text": "Go again\nWhen Blessing of Deliverance enters the arena, if you have a card with cost 3 or greater in your pitch zone, draw a card.\nAt the beginning of your action phase, destroy Blessing of Deliverance then reveal the top 3 cards of your deck. Gain 1{h} for each card with cost 3 or greater revealed this way.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS007",
+  "name": "Whelming Gustwave",
+  "cardType": "action",
+  "text": "Combo - If Surging Strike was the last attack this combat chain, Whelming Gustwave gains +1{p}, go again, and \"If this hits, draw a card.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS008",
+  "name": "Ironsong Response",
+  "cardType": "attack-reaction",
+  "text": "Reprise - If the defending hero has defended with a card from their hand this chain link, target weapon attack gains +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS009",
+  "name": "Teklo Plasma Pistol",
+  "cardType": "weapon",
+  "text": "Action - Remove a steam counter from Teklo Plasma Pistol: Attack\nAction - {r}: If there are no steam counters on Teklo Plasma Pistol, put a steam counter on it. Go again",
+  "attack": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "pistol",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS010",
+  "name": "Death Dealer",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: If you have no cards in your arsenal, you may put an arrow card from your hand face up into your arsenal. If you do, draw a card. Go again",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "bow",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS011",
+  "name": "Nebula Blade",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nWhen this hits, create a Runechant token.\nIf you've played a non-attack action card this turn, this gets +3{p}.",
+  "attack": 1,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "sword",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS012",
+  "name": "Crucible of Aetherweave",
+  "cardType": "weapon",
+  "text": "Once per Turn Instant - {r}: The next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus 1.",
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "staff",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS013",
+  "name": "Over Loop",
+  "cardType": "action",
+  "text": "Boost\nWhen this hits, put it on the bottom of its owner's deck.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS014",
+  "name": "Sic 'Em Shot",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS015",
+  "name": "Reduce to Runechant",
+  "cardType": "defense-reaction",
+  "text": "Reduce to Runechant costs {r} less to play for each Runechant you control.\nCreate a Runechant token.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 4,
+  "classes": [
+   "runeblade"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS016",
+  "name": "Voltic Bolt",
+  "cardType": "action",
+  "text": "Deal 5 arcane damage to target hero.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS017",
+  "name": "Head Jab",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS018",
+  "name": "Head Jab",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS019",
+  "name": "Head Jab",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS020",
+  "name": "Wrecker Romp",
+  "cardType": "action",
+  "text": "As an additional cost to play this, discard a random card.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS021",
+  "name": "Wrecker Romp",
+  "cardType": "action",
+  "text": "As an additional cost to play this, discard a random card.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS022",
+  "name": "Wrecker Romp",
+  "cardType": "action",
+  "text": "As an additional cost to play this, discard a random card.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS023",
+  "name": "Blessing of Deliverance",
+  "cardType": "action",
+  "text": "Go again\nWhen Blessing of Deliverance enters the arena, if you have a card with cost 3 or greater in your pitch zone, draw a card.\nAt the beginning of your action phase, destroy Blessing of Deliverance then reveal the top 3 cards of your deck. Gain 1{h} for each card with cost 3 or greater revealed this way.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS024",
+  "name": "Blessing of Deliverance",
+  "cardType": "action",
+  "text": "Go again\nWhen Blessing of Deliverance enters the arena, if you have a card with cost 3 or greater in your pitch zone, draw a card.\nAt the beginning of your action phase, destroy Blessing of Deliverance then reveal the top 2 cards of your deck. Gain 1{h} for each card with cost 3 or greater revealed this way.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS025",
+  "name": "Blessing of Deliverance",
+  "cardType": "action",
+  "text": "Go again\nWhen Blessing of Deliverance enters the arena, if you have a card with cost 3 or greater in your pitch zone, draw a card.\nAt the beginning of your action phase, destroy Blessing of Deliverance then reveal the top card of your deck. Gain 1{h} for each card with cost 3 or greater revealed this way.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS026",
+  "name": "Whelming Gustwave",
+  "cardType": "action",
+  "text": "Combo - If Surging Strike was the last attack this combat chain, Whelming Gustwave gains +1{p}, go again, and \"If this hits, draw a card.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS027",
+  "name": "Whelming Gustwave",
+  "cardType": "action",
+  "text": "Combo - If Surging Strike was the last attack this combat chain, Whelming Gustwave gains +1{p}, go again, and \"If this hits, draw a card.\"",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS028",
+  "name": "Whelming Gustwave",
+  "cardType": "action",
+  "text": "Combo - If Surging Strike was the last attack this combat chain, Whelming Gustwave gains +1{p}, go again, and \"If this hits, draw a card.\"",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS029",
+  "name": "Ironsong Response",
+  "cardType": "attack-reaction",
+  "text": "Reprise - If the defending hero has defended with a card from their hand this chain link, target weapon attack gains +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS030",
+  "name": "Ironsong Response",
+  "cardType": "attack-reaction",
+  "text": "Reprise - If the defending hero has defended with a card from their hand this chain link, target weapon attack gains +2{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS031",
+  "name": "Ironsong Response",
+  "cardType": "attack-reaction",
+  "text": "Reprise - If the defending hero has defended with a card from their hand this chain link, target weapon attack gains +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS032",
+  "name": "Over Loop",
+  "cardType": "action",
+  "text": "Boost\nWhen this hits, put it on the bottom of its owner's deck.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS033",
+  "name": "Over Loop",
+  "cardType": "action",
+  "text": "Boost\nWhen this hits, put it on the bottom of its owner's deck.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS034",
+  "name": "Over Loop",
+  "cardType": "action",
+  "text": "Boost\nWhen this hits, put it on the bottom of its owner's deck.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS035",
+  "name": "Sic 'Em Shot",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS036",
+  "name": "Sic 'Em Shot",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS037",
+  "name": "Sic 'Em Shot",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS038",
+  "name": "Reduce to Runechant",
+  "cardType": "defense-reaction",
+  "text": "Reduce to Runechant costs {r} less to play for each Runechant you control.\nCreate a Runechant token.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 4,
+  "classes": [
+   "runeblade"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS039",
+  "name": "Reduce to Runechant",
+  "cardType": "defense-reaction",
+  "text": "Reduce to Runechant costs {r} less to play for each Runechant you control.\nCreate a Runechant token.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS040",
+  "name": "Reduce to Runechant",
+  "cardType": "defense-reaction",
+  "text": "Reduce to Runechant costs {r} less to play for each Runechant you control.\nCreate a Runechant token.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS041",
+  "name": "Voltic Bolt",
+  "cardType": "action",
+  "text": "Deal 5 arcane damage to target hero.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS042",
+  "name": "Voltic Bolt",
+  "cardType": "action",
+  "text": "Deal 4 arcane damage to target hero.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS043",
+  "name": "Voltic Bolt",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to target hero.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS044",
+  "name": "Ray of Hope",
+  "cardType": "instant",
+  "text": "Attacks you control have +1{p} while attacking a Shadow hero this turn.\nIf you have less {h} than an opposing Shadow hero, put Ray of Hope into your hero's soul.",
+  "pitch": 2,
+  "cost": 1,
+  "subtypes": [
+   "light"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS045",
+  "name": "Eclipse Existence",
+  "cardType": "instant",
+  "text": "Until end of turn, whenever an attack hits a Light hero, you may banish a card from their soul. If they do, they lose 1{h}.\nIf you have more {h} than an opposing Light hero, you may banish an action card from your graveyard.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "shadow"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS046",
+  "name": "Galaxxi Black",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nIf you have played a card from your banished zone this turn, Galaxxi Black gains +2{p} until end of turn.\nIf Galaxxi Black hits a hero, deal 1 arcane damage to that hero.",
+  "attack": 1,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow",
+   "sword",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS047",
+  "name": "Ravenous Meataxe",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nWhenever you attack with Ravenous Meataxe, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, Ravenous Meataxe gains +2{p} until end of turn.",
+  "attack": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "axe",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS048",
+  "name": "Iris of Reality",
+  "cardType": "weapon",
+  "text": "During your action phase, Illusionist auras you control are weapons with 4{p} and Once per Turn Action - {r}{r}{r}: Attack. Go again",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "orb",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS049",
+  "name": "Hatchet of Body",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nWhenever you attack with Hatchet of Body, if Hatchet of Mind was the last attack this turn, Hatchet of Body gains +1{p} until end of turn.",
+  "attack": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "axe",
+   "1h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS050",
+  "name": "Hatchet of Mind",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nWhenever you attack with Hatchet of Mind, if Hatchet of Body was the last attack this turn, Hatchet of Mind gains +1{p} until end of turn.",
+  "attack": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "axe",
+   "1h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS051",
+  "name": "Pulping",
+  "cardType": "action",
+  "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, this gets dominate.\nIf this is defended by fewer than 2 non-equipment cards, it gets go again.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Dominate",
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS052",
+  "name": "Pulping",
+  "cardType": "action",
+  "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, this gets dominate.\nIf this is defended by fewer than 2 non-equipment cards, it gets go again.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Dominate",
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS053",
+  "name": "Pulping",
+  "cardType": "action",
+  "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, this gets dominate.\nIf this is defended by fewer than 2 non-equipment cards, it gets go again.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Dominate",
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS054",
+  "name": "Phantasmify",
+  "cardType": "action",
+  "text": "The next attack action card you play this turn is Illusionist in addition to its other class types, and gains +5{p} and phantasm.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS055",
+  "name": "Phantasmify",
+  "cardType": "action",
+  "text": "The next attack action card you play this turn is Illusionist in addition to its other class types, and gains +4{p} and phantasm.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS056",
+  "name": "Phantasmify",
+  "cardType": "action",
+  "text": "The next attack action card you play this turn is Illusionist in addition to its other class types, and gains +3{p} and phantasm.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS057",
+  "name": "Vexing Malice",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to target hero.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS058",
+  "name": "Vexing Malice",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to target hero.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS059",
+  "name": "Vexing Malice",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to target hero.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS060",
+  "name": "Dusk Path Pilgrimage",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gains +3{p} and \"If this hits, you may attack an additional time with this weapon this turn.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS061",
+  "name": "Dusk Path Pilgrimage",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gains +2{p} and \"If this hits, you may attack an additional time with this weapon this turn.\"\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS062",
+  "name": "Dusk Path Pilgrimage",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gains +1{p} and \"If this hits, you may attack an additional time with this weapon this turn.\"\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS063",
+  "name": "Amulet of Earth",
+  "cardType": "action",
+  "text": "Go again\nInstant - Destroy Amulet of Earth: Attack action cards you control gain +1{p} and +1{d} this turn. Activate this ability only if you have Earth fused this turn.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "earth",
+   "item"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS064",
+  "name": "Amulet of Ice",
+  "cardType": "action",
+  "text": "Go again\nInstant - Destroy Amulet of Ice: Target hero discards a card unless they pay {r}{r}. Activate this ability only if you have Ice fused this turn.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "ice",
+   "item"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS065",
+  "name": "Amulet of Lightning",
+  "cardType": "action",
+  "text": "Go again\nInstant - Destroy Amulet of Lightning: Target action card gains go again. Activate this ability only if you have Lightning fused this turn.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "lightning",
+   "item"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS066",
+  "name": "Titan's Fist",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}{r}: Attack\nIf there is a card with cost 3 or greater in your pitch zone, Titan's Fist has +1{p}.",
+  "attack": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "hammer",
+   "1h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS067",
+  "name": "Shiver",
+  "cardType": "weapon",
+  "text": "Once per Turn Instant - {r}: You may put an arrow card from your hand face up into an empty arsenal zone you control. If you do, choose 1;\n\nIt gains +1{p} until end of turn.\nIt gains dominate until end of turn.",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "elemental",
+   "bow",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS068",
+  "name": "Rosetta Thorn",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nWhenever you attack with Rosetta Thorn, if you've played an attack action card and a 'non-attack' action card this turn, deal 2 arcane damage to target hero.",
+  "attack": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "sword",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS069",
+  "name": "Burgeoning",
+  "cardType": "action",
+  "text": "If this was played from arsenal, it gains +1{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS070",
+  "name": "Burgeoning",
+  "cardType": "action",
+  "text": "If this was played from arsenal, it gains +1{p}.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS071",
+  "name": "Burgeoning",
+  "cardType": "action",
+  "text": "If this was played from arsenal, it gains +1{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS072",
+  "name": "Polar Blast",
+  "cardType": "action",
+  "text": "Target opposing hero may pay {r}{r}{r}. If they don't your next attack this turn gains dominate.\nIf Polar Blast is played from arsenal, draw a card.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "ice"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS073",
+  "name": "Polar Blast",
+  "cardType": "action",
+  "text": "Target opposing hero may pay {r}{r}. If they don't your next attack this turn gains dominate.\nIf Polar Blast is played from arsenal, draw a card.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "ice"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS074",
+  "name": "Polar Blast",
+  "cardType": "action",
+  "text": "Target opposing hero may pay {r}. If they don't your next attack this turn gains dominate.\nIf Polar Blast is played from arsenal, draw a card.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "ice"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS075",
+  "name": "Weave Lightning",
+  "cardType": "action",
+  "text": "The next Lightning or Elemental attack action card you play this turn gains +3{p}. If it's fused, it gains go again.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS076",
+  "name": "Weave Lightning",
+  "cardType": "action",
+  "text": "The next Lightning or Elemental attack action card you play this turn gains +2{p}. If it's fused, it gains go again.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS077",
+  "name": "Weave Lightning",
+  "cardType": "action",
+  "text": "The next Lightning or Elemental attack action card you play this turn gains +1{p}. If it's fused, it gains go again.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS078",
+  "name": "Strength of Sequoia",
+  "cardType": "action",
+  "text": "Earth Fusion\nGo again\nWhen Strength of Sequoia enters the arena, if it was fused, create a Seismic Surge token.\nAt the beginning of your action phase, destroy Strength of Sequoia then the next attack action card you play this turn gains +3{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "aura"
+  ],
+  "keywords": [
+   "Earth Fusion",
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS079",
+  "name": "Arcanic Shockwave",
+  "cardType": "action",
+  "text": "Lightning Fusion\nWhen you attack with Arcanic Shockwave, if it was fused, deal 1 arcane damage to target hero.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Lightning Fusion"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS080",
+  "name": "Invigorate",
+  "cardType": "action",
+  "text": "The next attack you fuse this turn gains +4{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS081",
+  "name": "Invigorate",
+  "cardType": "action",
+  "text": "The next attack you fuse this turn gains +3{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS082",
+  "name": "Invigorate",
+  "cardType": "action",
+  "text": "The next attack you fuse this turn gains +2{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS083",
+  "name": "Cracked Bauble",
+  "cardType": "resource",
+  "text": "(A player may add any number of Cracked Baubles to their card-pool in sealed deck or booster draft formats.)",
+  "pitch": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS084",
+  "name": "Life of the Party",
+  "cardType": "action",
+  "text": "You may discard or destroy a card you control named Crazy Brew rather than pay Life of the Party's {r} cost. If you do, choose all modes, otherwise choose 1 at random;\n\nThis gets \"When this hits, gain life 2{h}.\"\nThis gets +2{p}.\nThis gets go again.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS085",
+  "name": "Life of the Party",
+  "cardType": "action",
+  "text": "You may discard or destroy a card you control named Crazy Brew rather than pay Life of the Party's {r} cost. If you do, choose all modes, otherwise choose 1 at random;\n\nThis gets \"When this hits, gain life 2{h}.\"\nThis gets +2{p}.\nThis gets go again.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS086",
+  "name": "Life of the Party",
+  "cardType": "action",
+  "text": "You may discard or destroy a card you control named Crazy Brew rather than pay Life of the Party's {r} cost. If you do, choose all modes, otherwise choose 1 at random;\n\nThis gets \"When this hits, gain life 2{h}.\"\nThis gets +2{p}.\nThis gets go again.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS087",
+  "name": "Macho Grande",
+  "cardType": "action",
+  "text": "Dominate",
+  "pitch": 1,
+  "cost": 7,
+  "attack": 10,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Dominate"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS088",
+  "name": "Macho Grande",
+  "cardType": "action",
+  "text": "Dominate",
+  "pitch": 2,
+  "cost": 7,
+  "attack": 9,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Dominate"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS089",
+  "name": "Macho Grande",
+  "cardType": "action",
+  "text": "Dominate",
+  "pitch": 3,
+  "cost": 7,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Dominate"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS090",
+  "name": "Emeritus Scolding",
+  "cardType": "action",
+  "text": "Deal 4 arcane damage to target hero. If Emeritus Scolding is played during an opponents turn, instead deal 6 arcane damage to them.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS091",
+  "name": "Emeritus Scolding",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to target hero. If Emeritus Scolding is played during an opponents turn, instead deal 5 arcane damage to them.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS092",
+  "name": "Emeritus Scolding",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to target hero. If Emeritus Scolding is played during an opponents turn, instead deal 4 arcane damage to them.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS093",
+  "name": "Haze Bending",
+  "cardType": "action",
+  "text": "Once per turn, when this or an Illusionist non-token aura you control is destroyed, create a Spectral Shield token.\nSpectra",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Spectra"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS094",
+  "name": "Passing Mirage",
+  "cardType": "action",
+  "text": "Your first Illusionist attack each turn loses and can't get phantasm.\nSpectra",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Spectra"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS095",
+  "name": "Pierce Reality",
+  "cardType": "action",
+  "text": "Your first Illusionist attack action card you play each turn gets +2{p}.\nSpectra",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Spectra"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS096",
+  "name": "Release the Tension",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gains +3{p} and \"Defense reactions can't be played from arsenal this chain link.\"\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS097",
+  "name": "Release the Tension",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gains +2{p} and \"Defense reactions can't be played from arsenal this chain link.\"\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS098",
+  "name": "Release the Tension",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gains +1{p} and \"Defense reactions can't be played from arsenal this chain link.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS100",
+  "name": "Blossom of Spring",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Gain {r}. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS101",
+  "name": "Wrecking Ball",
+  "cardType": "action",
+  "text": "When you attack with Wrecking Ball, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, intimidate.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS102",
+  "name": "Run Through",
+  "cardType": "attack-reaction",
+  "text": "Target sword attack gains go again.\nYour next sword attack this turn gets +2{p}.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS103",
+  "name": "Helio's Mitre",
+  "cardType": "equipment",
+  "text": "(A player may add a Helio's Mitre to their card pool in an Uprising limited format.)\nInstant - {r}{r}: Prevent the next 1 damage that would be dealt to your hero this turn by a source of your choice. Destroy Helio's Mitre at the beginning of the end phase.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS104",
+  "name": "Phoenix Flame",
+  "cardType": "action",
+  "text": "If you control 2 or more Draconic chain links, this gets +1{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 0,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS105",
+  "name": "Searing Emberblade",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nIf you control 2 or more Draconic chain links, this card's attacks get go again.",
+  "attack": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "sword",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS106",
+  "name": "Rise Up",
+  "cardType": "action",
+  "text": "Dromai or Fai Specialization\nRupture - If Rise Up is played as chain link 4 or higher, it has dominate and +X{p}, where X is twice the number of Phoenix Flames you control.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Dromai or Fai Specialization",
+   "Rupture",
+   "Dominate"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS107",
+  "name": "Storm of Sandikai",
+  "cardType": "weapon",
+  "text": "Dragon allies you control have \"Once per Turn Action - 0: Attack\".",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "draconic",
+   "scepter",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS108",
+  "name": "Red Hot",
+  "cardType": "action",
+  "text": "Dromai or Fai Specialization\nRupture - If Red Hot is played as chain link 4 or higher, it has \"When you attack with this, reveal the top X cards of your deck, where X is the number of Draconic chain links you control. Deal damage equal to the number of red cards revealed this way to any target, then shuffle.\"",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Dromai or Fai Specialization",
+   "Rupture"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS109",
+  "name": "Waning Moon",
+  "cardType": "weapon",
+  "text": "Once per Turn Instant - {r}{r}: Deal 2 arcane damage to target hero. If it's not your turn, instead deal 3 arcane damage to them. Activate this ability only if you've played a 'non-attack' action card this turn.",
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "staff",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS110",
+  "name": "Ice Eternal",
+  "cardType": "action",
+  "text": "Iyslander Specialization\nIce Fusion\nCreate X Frostbite tokens under target hero's control. Then, if Ice Eternal was fused, deal arcane damage to that hero equal to the number of Frostbites they control.",
+  "pitch": 3,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Iyslander Specialization",
+   "Ice Fusion"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS111",
+  "name": "Spider's Bite",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nPiercing 1\nWhen this hits a hero, the next time they defend with 1 or more attack action cards this turn, those cards have -1{d} while defending.",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Piercing 1"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS112",
+  "name": "Quicksilver Dagger",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nIf another weapon you control has gained go again this turn, this card's attacks get go again.",
+  "attack": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS113",
+  "name": "Cut to the Chase",
+  "cardType": "attack-reaction",
+  "text": "Target Assassin attack action card with contract gains +3{p}.\nLook at the top card of the defending hero's deck. You may put it on the bottom.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS114",
+  "name": "Cut to the Chase",
+  "cardType": "attack-reaction",
+  "text": "Target Assassin attack action card with contract gains +2{p}.\nLook at the top card of the defending hero's deck. You may put it on the bottom.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS115",
+  "name": "Cut to the Chase",
+  "cardType": "attack-reaction",
+  "text": "Target Assassin attack action card with contract gains +1{p}.\nLook at the top card of the defending hero's deck. You may put it on the bottom.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS116",
+  "name": "Blessing of Aether",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Blessing of Aether then if the next card you play this turn has an arcane damage effect, instead it deals that much arcane damage plus 3.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS117",
+  "name": "Blessing of Aether",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Blessing of Aether then if the next card you play this turn has an arcane damage effect, instead it deals that much arcane damage plus 2.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS118",
+  "name": "Blessing of Aether",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy Blessing of Aether then if the next card you play this turn has an arcane damage effect, instead it deals that much arcane damage plus 1.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS119",
+  "name": "Hemorrhage Bore",
+  "cardType": "action",
+  "text": "If Hemorrhage Bore has an aim counter, it has \"When this hits a hero, destroy a card in their arsenal.\"",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS120",
+  "name": "Hemorrhage Bore",
+  "cardType": "action",
+  "text": "If Hemorrhage Bore has an aim counter, it has \"When this hits a hero, destroy a card in their arsenal.\"",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS121",
+  "name": "Hemorrhage Bore",
+  "cardType": "action",
+  "text": "If Hemorrhage Bore has an aim counter, it has \"When this hits a hero, destroy a card in their arsenal.\"",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS122",
+  "name": "Predatory Streak",
+  "cardType": "action",
+  "text": "Create 3 Crouching Tigers in your banished zone. You may play them this turn.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS123",
+  "name": "Predatory Streak",
+  "cardType": "action",
+  "text": "Create 2 Crouching Tigers in your banished zone. You may play them this turn.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS124",
+  "name": "Predatory Streak",
+  "cardType": "action",
+  "text": "Create a Crouching Tiger in your banished zone. You may play it this turn.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS125",
+  "name": "Bloodrot Pox",
+  "cardType": "token",
+  "text": "At the beginning of your end phase, destroy Bloodrot Pox, then it deals 2 damage to you unless you pay {r}{r}{r}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS126",
+  "name": "Frailty",
+  "cardType": "token",
+  "text": "Your attack action cards played from arsenal and weapon attacks have -1{p}.\nAt the beginning of your end phase destroy Frailty.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS127",
+  "name": "Inertia",
+  "cardType": "token",
+  "text": "At the beginning of your end phase, destroy Inertia, then put all cards from your hand and arsenal on the bottom of your deck.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS128",
+  "name": "Ponder",
+  "cardType": "token",
+  "text": "At the beginning of your end phase, destroy Ponder and draw a card.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS129",
+  "name": "Barbed Castaway",
+  "cardType": "weapon",
+  "text": "Once per Turn Instant - {r}: You may put an arrow card from your hand face up into your arsenal.\nOnce per Turn Instant - {r}: You may turn a face down arrow in your arsenal face up. If you do, put an aim counter on it.",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "bow",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS130",
+  "name": "Spike with Bloodrot",
+  "cardType": "attack-reaction",
+  "text": "Target attack action card with stealth gains +3{p} and \"When this hits a hero, create a Bloodrot Pox token under their control.\"",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS131",
+  "name": "Spike with Frailty",
+  "cardType": "attack-reaction",
+  "text": "Target attack action card with stealth gains +3{p} and \"When this hits a hero, create a Frailty token under their control.\"",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS132",
+  "name": "Spike with Inertia",
+  "cardType": "attack-reaction",
+  "text": "Target attack action card with stealth gains +3{p} and \"When this hits a hero, create an Inertia token under their control.\"",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS133",
+  "name": "Crow's Nest",
+  "cardType": "equipment",
+  "text": "Azalea Specialization\nWhenever an arrow is put face up into your arsenal from your deck, you may pay {r}. If you do, put an aim counter on it.",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "quiver"
+  ],
+  "keywords": [
+   "Azalea Specialization"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS134",
+  "name": "Lace with Bloodrot",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gains +3{p} and \"When this hits a hero, create a Bloodrot Pox token under their control.\"\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS135",
+  "name": "Lace with Frailty",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gains +3{p} and \"When this hits a hero, create a Frailty token under their control.\"\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS136",
+  "name": "Lace with Inertia",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gains +3{p} and \"When this hits a hero, create an Inertia token under their control.\"\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS137",
+  "name": "Driftwood Quiver",
+  "cardType": "equipment",
+  "text": "Riptide Specialization\nInstant - Destroy Driftwood Quiver: Put a card from your arsenal on the bottom of your deck.",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "quiver"
+  ],
+  "keywords": [
+   "Riptide Specialization"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS138",
+  "name": "Boulder Trap",
+  "cardType": "defense-reaction",
+  "text": "When this defends an attack with {p} greater than its base, put a -1{d} counter on an equipment the attacking hero controls.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS139",
+  "name": "Pendulum Trap",
+  "cardType": "defense-reaction",
+  "text": "When this defends and the attacking hero has played or activated a reaction this chain link, put the top 2 cards of their deck into their graveyard.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS140",
+  "name": "Tarpit Trap",
+  "cardType": "defense-reaction",
+  "text": "When this defends an attack with go again, the next time an attack action card hits this turn, effects don't trigger.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS141",
+  "name": "Spinning Wheel Kick",
+  "cardType": "action",
+  "text": "Combo - If Twin Twisters or Spinning Wheel Kick was the last attack this combat chain, this has +1{p} and \"When this hits, put it on the bottom of its owner's deck.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS142",
+  "name": "Spinning Wheel Kick",
+  "cardType": "action",
+  "text": "Combo - If Twin Twisters or Spinning Wheel Kick was the last attack this combat chain, this has +1{p} and \"When this hits, put it on the bottom of its owner's deck.\"\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS143",
+  "name": "Spinning Wheel Kick",
+  "cardType": "action",
+  "text": "Combo - If Twin Twisters or Spinning Wheel Kick was the last attack this combat chain, this has +1{p} and \"When this hits, put it on the bottom of its owner's deck.\"\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS144",
+  "name": "Hala Goldenhelm",
+  "cardType": "mentor",
+  "text": "While Hala is face down in arsenal, at the start of your turn, you may turn her face up.\nWhile Hala is face up in arsenal, whenever a sword attack you control hits, it gains go again and put a lesson counter on Hala. Then if there are 2 or more lesson counters on Hala, banish her, search your deck for Glistening Steelblade, put it face up in arsenal, and shuffle.",
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS145",
+  "name": "Chief Ruk'utan",
+  "cardType": "mentor",
+  "text": "While Ruk'utan is face down in arsenal, at the start of your turn, you may turn him face up.\nWhile Ruk'utan is face up in arsenal, whenever you play a card with 6 or more {p}, intimidate, and put a lesson counter on him. Then if there are 2 or more lesson counters on Ruk'utan, banish him, search your deck for Alpha Rampage, put it face up in arsenal, and shuffle.",
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS146",
+  "name": "Beast Mode",
+  "cardType": "action",
+  "text": "If you've intimidated this turn, this gets +2{p}.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS147",
+  "name": "Clearing Bellow",
+  "cardType": "action",
+  "text": "Intimidate\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate",
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS148",
+  "name": "En Garde",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gains +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS149",
+  "name": "Blade Flash",
+  "cardType": "attack-reaction",
+  "text": "Target sword attack gains go again.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS150",
+  "name": "Tripwire Trap",
+  "cardType": "defense-reaction",
+  "text": "Tripwire Trap can only be played from arsenal.\nWhen this defends, effects don't trigger when an attack hits this chain link unless the attacking hero pays {r}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 4,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS151",
+  "name": "Pitfall Trap",
+  "cardType": "defense-reaction",
+  "text": "Pitfall Trap can only be played from arsenal.\nWhen this defends, deal 2 damage to the attacking hero unless they pay {r}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS152",
+  "name": "Rockslide Trap",
+  "cardType": "defense-reaction",
+  "text": "Rockslide Trap can only be played from arsenal.\nWhen this defends, target attack gets -2{p}, unless the attacking hero pays {r}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS153",
+  "name": "Herald of Ravages",
+  "cardType": "action",
+  "text": "When this hits, put it into your hero's soul and deal 1 arcane damage to target hero.\nPhantasm",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS154",
+  "name": "Herald of Ravages",
+  "cardType": "action",
+  "text": "When this hits, put it into your hero's soul and deal 1 arcane damage to target hero.\nPhantasm",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS155",
+  "name": "Herald of Ravages",
+  "cardType": "action",
+  "text": "When this hits, put it into your hero's soul and deal 1 arcane damage to target hero.\nPhantasm",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS156",
+  "name": "Flail of Agony",
+  "cardType": "weapon",
+  "text": "Vynnset Specialization\nOnce per Turn Action - {h}: Attack\nWhen this hits, create a Runechant token.",
+  "attack": 1,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow",
+   "flail",
+   "1h"
+  ],
+  "keywords": [
+   "Vynnset Specialization"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS157",
+  "name": "Vantom Banshee",
+  "cardType": "action",
+  "text": "Rune Gate\nBlood Debt",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Rune Gate",
+   "Blood Debt"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS158",
+  "name": "Vantom Banshee",
+  "cardType": "action",
+  "text": "Rune Gate\nBlood Debt",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Rune Gate",
+   "Blood Debt"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS159",
+  "name": "Vantom Banshee",
+  "cardType": "action",
+  "text": "Rune Gate\nBlood Debt",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Rune Gate",
+   "Blood Debt"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS160",
+  "name": "Luminaris, Celestial Fury",
+  "cardType": "weapon",
+  "text": "Once per Turn Instant - {r}{r}: Target angel attack or attack action card with Herald in its name gets go again.",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "scepter",
+   "2h"
+  ],
+  "keywords": [
+   "Instant",
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS161",
+  "name": "Angelic Wrath",
+  "cardType": "instant",
+  "text": "Target attack action card with Herald in its name gets +4{p}",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS162",
+  "name": "Angelic Wrath",
+  "cardType": "instant",
+  "text": "Target attack action card with Herald in its name gets +3{p}",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS163",
+  "name": "Angelic Wrath",
+  "cardType": "instant",
+  "text": "Target attack action card with Herald in its name gets +2{p}",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS164",
+  "name": "Hell Hammer",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nWhen the combat chain closes, if this attacked, banish it.\nBlood Debt",
+  "attack": 6,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "shadow",
+   "hammer",
+   "2h"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS165",
+  "name": "Hungering Demigon",
+  "cardType": "action",
+  "text": "If an opposing hero has 1 or more cards in their soul, you may play this from your banished zone.\nWhen this hits a hero, banish a card from their soul.\nBlood Debt",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS166",
+  "name": "Hungering Demigon",
+  "cardType": "action",
+  "text": "If an opposing hero has 1 or more cards in their soul, you may play this from your banished zone.\nWhen this hits a hero, banish a card from their soul.\nBlood Debt",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS167",
+  "name": "Hungering Demigon",
+  "cardType": "action",
+  "text": "If an opposing hero has 1 or more cards in their soul, you may play this from your banished zone.\nWhen this hits a hero, banish a card from their soul.\nBlood Debt",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS168",
+  "name": "Beaming Blade",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nIf a yellow card has been put into your hero's soul this turn, this gets +5{p}.",
+  "attack": 0,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "sword",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS169",
+  "name": "Break of Dawn",
+  "cardType": "instant",
+  "text": "The next time a Shadow source would deal damage this turn, prevent 4 of that damage.",
+  "pitch": 1,
+  "cost": 0,
+  "subtypes": [
+   "light"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS170",
+  "name": "Break of Dawn",
+  "cardType": "instant",
+  "text": "The next time a Shadow source would deal damage this turn, prevent 3 of that damage.",
+  "pitch": 2,
+  "cost": 0,
+  "subtypes": [
+   "light"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS171",
+  "name": "Break of Dawn",
+  "cardType": "instant",
+  "text": "The next time a Shadow source would deal damage this turn, prevent 2 of that damage.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "light"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS172",
+  "name": "Genesis",
+  "cardType": "instant",
+  "text": "At the start of your turn, you may put a card from your hand into your soul. If it's an Illusionist card, create a Spectral Shield token. If it's a Light card, draw a card.\nSpectra",
+  "pitch": 2,
+  "cost": 4,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "aura"
+  ],
+  "keywords": [
+   "Spectra"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS173",
+  "name": "Herald of Tenacity",
+  "cardType": "action",
+  "text": "Dominate\nWhen this hits, put it into your hero's soul.\nPhantasm",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Dominate",
+   "Phantasm"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS174",
+  "name": "Herald of Tenacity",
+  "cardType": "action",
+  "text": "Dominate\nWhen this hits, put it into your hero's soul.\nPhantasm",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Dominate",
+   "Phantasm"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS175",
+  "name": "Herald of Tenacity",
+  "cardType": "action",
+  "text": "Dominate\nWhen this hits, put it into your hero's soul.\nPhantasm",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Dominate",
+   "Phantasm"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS176",
+  "name": "Jack-o'-lantern",
+  "cardType": "action",
+  "text": "Banish the top card of your deck. If it's red, create a Runechant token.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS177",
+  "name": "Jack-o'-lantern",
+  "cardType": "action",
+  "text": "Banish the top card of your deck. If it's yellow, create a Runechant token.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS178",
+  "name": "Jack-o'-lantern",
+  "cardType": "action",
+  "text": "Banish the top card of your deck. If it's blue, create a Runechant token.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS179",
+  "name": "Banneret of Resilience",
+  "cardType": "action",
+  "text": "Solflare - When this is charged to your hero's soul, the next action card you defend with this turn gets +1{d}.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Solflare"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS180",
+  "name": "Banneret of Salvation",
+  "cardType": "action",
+  "text": "Solflare - When this is charged to your hero's soul, the next time you hit this turn, gain 1{h}.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Solflare"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS181",
+  "name": "Banneret of Vigor",
+  "cardType": "action",
+  "text": "Solflare - When this is charged to your hero's soul, the next time you hit this turn, gain {r}.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "keywords": [
+   "Solflare"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS182",
+  "name": "Proto Base Head",
+  "cardType": "equipment",
+  "text": "",
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "base",
+   "head"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS183",
+  "name": "Proto Base Chest",
+  "cardType": "equipment",
+  "text": "",
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "base",
+   "chest"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS184",
+  "name": "Proto Base Arms",
+  "cardType": "equipment",
+  "text": "",
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "base",
+   "arms"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS185",
+  "name": "Proto Base Legs",
+  "cardType": "equipment",
+  "text": "",
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "base",
+   "legs"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS186",
+  "name": "Teklo Base Head",
+  "cardType": "equipment",
+  "text": "Blade Break",
+  "defense": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "base",
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS187",
+  "name": "Teklo Base Chest",
+  "cardType": "equipment",
+  "text": "Blade Break",
+  "defense": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "base",
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS188",
+  "name": "Teklo Base Arms",
+  "cardType": "equipment",
+  "text": "Blade Break",
+  "defense": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "base",
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS189",
+  "name": "Teklo Base Legs",
+  "cardType": "equipment",
+  "text": "Blade Break",
+  "defense": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "base",
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS190",
+  "name": "Teklo Leveler",
+  "cardType": "weapon",
+  "text": "If you have 1 or more Evos equipped, this gets \"Once per Turn Action - {r}{r}{r}: Attack,\"\n\n2 or more, this costs {r}{r} less to activate,\n3 or more, this gets go again,\n4 or more, this gets +1{p}.",
+  "attack": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "gun",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS191",
+  "name": "Heavy Artillery",
+  "cardType": "action",
+  "text": "Evo Upgrade - The defending hero can't defend this with attack action cards with cost less than X, where X is the number of Evos you have equipped.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Evo Upgrade"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS192",
+  "name": "Heavy Artillery",
+  "cardType": "action",
+  "text": "Evo Upgrade - The defending hero can't defend this with attack action cards with cost less than X, where X is the number of Evos you have equipped.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Evo Upgrade"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS193",
+  "name": "Heavy Artillery",
+  "cardType": "action",
+  "text": "Evo Upgrade - The defending hero can't defend this with attack action cards with cost less than X, where X is the number of Evos you have equipped.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Evo Upgrade"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS194",
+  "name": "Symbiosis Shot",
+  "cardType": "weapon",
+  "text": "Dash Specialization\nAction - Remove a steam counter from this: Attack\nWhenever a Mechanologist item enters the arena under your control, if this has fewer than 6 steam counters, you may put a steam counter on this.",
+  "attack": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "gun",
+   "2h"
+  ],
+  "keywords": [
+   "Dash Specialization"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS195",
+  "name": "Soup Up",
+  "cardType": "action",
+  "text": "If an item you control has been destroyed this turn, this gets go again.\nGalvanize - When this defends, you may destroy an item you control. If you do, this gets +2{d}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Galvanize"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS196",
+  "name": "Soup Up",
+  "cardType": "action",
+  "text": "If an item you control has been destroyed this turn, this gets go again.\nGalvanize - When this defends, you may destroy an item you control. If you do, this gets +2{d}.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Galvanize"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS197",
+  "name": "Soup Up",
+  "cardType": "action",
+  "text": "If an item you control has been destroyed this turn, this gets go again.\nGalvanize - When this defends, you may destroy an item you control. If you do, this gets +2{d}.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Galvanize"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS198",
+  "name": "Liquid-Cooled Mayhem",
+  "cardType": "action",
+  "text": "Evo Upgrade - This costs {r} less to play for each Evo you have equipped.",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Evo Upgrade"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS199",
+  "name": "Liquid-Cooled Mayhem",
+  "cardType": "action",
+  "text": "Evo Upgrade - This costs {r} less to play for each Evo you have equipped.",
+  "pitch": 2,
+  "cost": 4,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Evo Upgrade"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS200",
+  "name": "Liquid-Cooled Mayhem",
+  "cardType": "action",
+  "text": "Evo Upgrade - This costs {r} less to play for each Evo you have equipped.",
+  "pitch": 3,
+  "cost": 4,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Evo Upgrade"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS201",
+  "name": "Banksy",
+  "cardType": "weapon",
+  "text": "Maxx Specialization\nOnce per Turn Action - {r}: Attack. Activate this ability only if you've cranked this turn.\nWhen this hits a hero, put a steam counter on an item you control with crank.",
+  "attack": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "wrench",
+   "2h"
+  ],
+  "keywords": [
+   "Maxx Specialization"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS202",
+  "name": "Gas Up",
+  "cardType": "action",
+  "text": "The next attack you boost this turn gets +4{p}.\nYou may put a Hyper Driver from your banished zone into the arena.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS203",
+  "name": "Gas Up",
+  "cardType": "action",
+  "text": "The next attack you boost this turn gets +3{p}.\nYou may put a Hyper Driver from your banished zone into the arena.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS204",
+  "name": "Gas Up",
+  "cardType": "action",
+  "text": "The next attack you boost this turn gets +2{p}.\nYou may put a Hyper Driver from your banished zone into the arena.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS205",
+  "name": "Hammer of Havenhold",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}{r}: Attack\nIf you have a Chivalry in your pitch zone, this gets +1{p}.",
+  "attack": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "hammer",
+   "1h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS206",
+  "name": "Bastion of Duty",
+  "cardType": "equipment",
+  "text": "Protect\nTemper",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "off-hand"
+  ],
+  "keywords": [
+   "Protect",
+   "Temper"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS207",
+  "name": "Civic Peak",
+  "cardType": "equipment",
+  "text": "Whenever this defends, another target hero draws a card.\nTemper",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS208",
+  "name": "Civic Duty",
+  "cardType": "equipment",
+  "text": "Whenever this defends, create a Vigor token under another hero's control.\nTemper",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS209",
+  "name": "Civic Guide",
+  "cardType": "equipment",
+  "text": "Whenever this defends, create a Might token under another hero's control.\nTemper",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS210",
+  "name": "Civic Steps",
+  "cardType": "equipment",
+  "text": "Whenever this defends, create a Quicken token under another hero's control.\nTemper",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS211",
+  "name": "Chivalry",
+  "cardType": "block",
+  "text": "Protect",
+  "pitch": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "keywords": [
+   "Protect"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS212",
+  "name": "Jinglewood, Smash Hit",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}{r}: Target opposing hero chooses and creates a Might, Quicken, or Vigor token. You create a Copper token. Go again\nAction - 0: Attack. When this hits, destroy it.",
+  "attack": 2,
+  "classes": [
+   "bard"
+  ],
+  "subtypes": [
+   "fiddle",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS213",
+  "name": "Nom de Plume",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Each hero draws a card.  Go again",
+  "defense": 0,
+  "classes": [
+   "bard"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS214",
+  "name": "Heart-throb",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Each hero creates a Vigor token.  Go again",
+  "defense": 0,
+  "classes": [
+   "bard"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS215",
+  "name": "Fiddle-dee",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Each hero creates a Might token.  Go again",
+  "defense": 0,
+  "classes": [
+   "bard"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS216",
+  "name": "Quickstep",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Each hero creates a Quicken token.  Go again",
+  "defense": 0,
+  "classes": [
+   "bard"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS217",
+  "name": "Song of Jack-be-Quick",
+  "cardType": "action",
+  "text": "Create a Quicken token under each other hero's control.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "bard"
+  ],
+  "subtypes": [
+   "song"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS218",
+  "name": "Song of the Rosen Matador",
+  "cardType": "action",
+  "text": "Create a Vigor token under each other hero's control.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "bard"
+  ],
+  "subtypes": [
+   "song"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS219",
+  "name": "Song of the Shining Knight",
+  "cardType": "action",
+  "text": "Create a Might token under each other hero's control.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "bard"
+  ],
+  "subtypes": [
+   "song"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS220",
+  "name": "Song of Sweet Nectar",
+  "cardType": "action",
+  "text": "Each other hero gains 1{h}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "bard"
+  ],
+  "subtypes": [
+   "song"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS221",
+  "name": "Song of the Wandering Mind",
+  "cardType": "action",
+  "text": "Each other hero draws a card.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "bard"
+  ],
+  "subtypes": [
+   "song"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS222",
+  "name": "Song of Yesteryears",
+  "cardType": "action",
+  "text": "Each other hero puts an attack action card from their graveyard on the bottom of their deck.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "bard"
+  ],
+  "subtypes": [
+   "song"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS223",
+  "name": "Teklo Core",
+  "cardType": "action",
+  "text": "Dash Specialization\nTeklo Core enters the arena with 2 steam counters on it. When Teklo Core has no steam counters on it, destroy it.\nAt the beginning of your action phase, remove a steam counter from Teklo Core and gain {r}{r}.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Dash Specialization"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS224",
+  "name": "Mechanical Strength",
+  "cardType": "action",
+  "text": "Evo Upgrade - This gets +X{p}, where X is the number of Evos you have equipped.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Evo Upgrade"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS225",
+  "name": "Mechanical Strength",
+  "cardType": "action",
+  "text": "Evo Upgrade - This gets +X{p}, where X is the number of Evos you have equipped.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Evo Upgrade"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS226",
+  "name": "Mechanical Strength",
+  "cardType": "action",
+  "text": "Evo Upgrade - This gets +X{p}, where X is the number of Evos you have equipped.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Evo Upgrade"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS227",
+  "name": "Cracked Bauble",
+  "cardType": "resource",
+  "text": "(A player may add any number of Cracked Baubles to their card-pool in sealed deck or booster draft formats.)",
+  "pitch": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS228",
+  "name": "Starting Stake",
+  "cardType": "action",
+  "text": "If you control no Gold tokens, create a Gold token.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS229",
+  "name": "Agility",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then your next attack this turn gets go again.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "LGS",
+  "backId": "LGS229B"
+ },
+ {
+  "id": "LGS229B",
+  "name": "Gold",
+  "cardType": "token",
+  "text": "Action - {r}{r}, destroy this: Draw a card. Go again",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS230",
+  "name": "Might",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then your next attack this turn gets +1{p}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "LGS",
+  "backId": "LGS230B"
+ },
+ {
+  "id": "LGS230B",
+  "name": "Vigor",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then gain {r}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS231",
+  "name": "Knucklehead",
+  "cardType": "equipment",
+  "text": "Kayo Specialization \nAction - Destroy this: Roll a 6-sided die. Until end of turn, your base {i} is the number rolled.\nTemper",
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Kayo Specialization",
+   "Temper"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS232",
+  "name": "Monstrous Veil",
+  "cardType": "equipment",
+  "text": "Rhinar Specialization\nAction - Destroy this: Draw a card then discard a random card. Go again\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Rhinar Specialization",
+   "Battleworn"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS233",
+  "name": "Golden Glare",
+  "cardType": "equipment",
+  "text": "Victor Specialization\nWhen this defends together with 2 or more yellow cards, create a Gold token.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Victor Specialization",
+   "Blade Break"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS234",
+  "name": "Good Time Chapeau",
+  "cardType": "equipment",
+  "text": "Betsy Specialization\nAction - Destroy a Gold you control: Your next attack this turn gets \"When this attacks a hero, wager a Might and a Vigor token with them.\" Go again\nTemper",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Betsy Specialization",
+   "Temper"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS235",
+  "name": "Hood of Red Sand",
+  "cardType": "equipment",
+  "text": "Kassai Specialization\nAttack Reaction - {r}, banish a red and yellow card from your graveyard, destroy this: Target sword attack gets \"When this hits, draw a card.\"\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Kassai Specialization",
+   "Battleworn"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS236",
+  "name": "Prized Galea",
+  "cardType": "equipment",
+  "text": "Olympia Specialization\nAttack Reaction - {r}, destroy this: Target weapon attack you control wagers a Gold token with the defending hero.\nTemper",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Olympia Specialization",
+   "Temper"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS237",
+  "name": "Ball Breaker",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nIf you've discarded a card with 6 or more {p} this turn, this gets +1{p}.",
+  "attack": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "flail",
+   "1h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS238",
+  "name": "Mini Meataxe",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nWhen this attacks, draw a card then discard a random card.",
+  "attack": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "axe",
+   "1h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS239",
+  "name": "High Riser",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}{r}: Attack\nIf you've drawn a card this turn, this gets +1{p}.",
+  "attack": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "hammer",
+   "1h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS240",
+  "name": "Miller's Grindstone",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}{r}: Attack\nWhen this hits a hero, clash with them. If you win, destroy the top card of their deck. If they win, put a -1{p} counter on this.",
+  "attack": 4,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "hammer",
+   "1h"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS241",
+  "name": "Hot Streak",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nWhen this is defended by 1 or more attack action cards, Hot Streak's attacks get go again this turn.",
+  "attack": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "sword",
+   "1h"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS242",
+  "name": "Parry Blade",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nThis gets +2{d} while defending a weapon attack.\nBlade Break",
+  "attack": 2,
+  "defense": 0,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "sword",
+   "1h"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS243",
+  "name": "Knucklehead",
+  "cardType": "equipment",
+  "text": "Kayo Specialization \nAction - Destroy this: Roll a 6-sided die. Until end of turn, your base {i} is the number rolled.\nTemper",
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Kayo Specialization",
+   "Temper"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS244",
+  "name": "Golden Glare",
+  "cardType": "equipment",
+  "text": "Victor Specialization\nWhen this defends together with 2 or more yellow cards, create a Gold token.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Victor Specialization",
+   "Blade Break"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS245",
+  "name": "Smashback Alehorn",
+  "cardType": "action",
+  "text": "Create an Agility and a Might token.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS246",
+  "name": "Pint of Strong and Stout",
+  "cardType": "action",
+  "text": "Create a Might and a Vigor token.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS247",
+  "name": "Goblet of Bloodrun Wine",
+  "cardType": "action",
+  "text": "Create an Agility and a Vigor token.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS248",
+  "name": "Good Time Chapeau",
+  "cardType": "equipment",
+  "text": "Betsy Specialization\nAction - Destroy a Gold you control: Your next attack this turn gets \"When this attacks a hero, wager a Might and a Vigor token with them.\" Go again\nTemper",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Betsy Specialization",
+   "Temper"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS249",
+  "name": "Hood of Red Sand",
+  "cardType": "equipment",
+  "text": "Kassai Specialization\nAttack Reaction - {r}, banish a red and yellow card from your graveyard, destroy this: Target sword attack gets \"When this hits, draw a card.\"\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Kassai Specialization",
+   "Battleworn"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS250",
+  "name": "Wall of Meat and Muscle",
+  "cardType": "block",
+  "text": "When this defends, if you control a Might token, you may put an attack action card from your graveyard on top of your deck.",
+  "pitch": 1,
+  "defense": 3,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS251",
+  "name": "Run into Trouble",
+  "cardType": "block",
+  "text": "When this defends, if you control an Agility token, deal damage to the attacking hero.",
+  "pitch": 1,
+  "defense": 3,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS252",
+  "name": "Hearty Block",
+  "cardType": "block",
+  "text": "When this defends, if you control a Vigor token, gain 1{h}.",
+  "pitch": 1,
+  "defense": 3,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS253",
+  "name": "Monstrous Veil",
+  "cardType": "equipment",
+  "text": "Rhinar Specialization\nAction - Destroy this: Draw a card then discard a random card. Go again\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Rhinar Specialization",
+   "Battleworn"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS254",
+  "name": "Prized Galea",
+  "cardType": "equipment",
+  "text": "Olympia Specialization\nAttack Reaction - {r}, destroy this: Target weapon attack you control wagers a Gold token with the defending hero.\nTemper",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Olympia Specialization",
+   "Temper"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS255",
+  "name": "Battered Not Broken",
+  "cardType": "instant",
+  "text": "The next time you would be dealt damage this turn, prevent 2 of that damage. If you do, create a Might token.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS256",
+  "name": "Take it on the Chin",
+  "cardType": "instant",
+  "text": "The next time you would be dealt damage this turn, prevent 2 of that damage. If you do, create an Agility token.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS257",
+  "name": "Slap-Happy",
+  "cardType": "instant",
+  "text": "The next time you would be dealt damage this turn, prevent 2 of that damage. If you do, create a Vigor token.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS258",
+  "name": "Mask of Three Tails",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Draw a card. Activate this ability only if you've hit 3 or more times this combat chain.",
+  "defense": 0,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS259",
+  "name": "Blood Scent",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Gain {r}. Activate this only if you've attacked with a Crouching Tiger this turn.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS260",
+  "name": "Test of Might",
+  "cardType": "block",
+  "text": "When this defends, clash with the attacking hero. The winner creates a Might token.",
+  "pitch": 1,
+  "defense": 4,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS261",
+  "name": "Test of Agility",
+  "cardType": "block",
+  "text": "When this defends, clash with the attacking hero. The winner creates an Agility token.",
+  "pitch": 1,
+  "defense": 4,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS262",
+  "name": "Test of Vigor",
+  "cardType": "block",
+  "text": "When this defends, clash with the attacking hero. The winner creates a Vigor token.",
+  "pitch": 1,
+  "defense": 4,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS263",
+  "name": "Moon Chakra",
+  "cardType": "instant",
+  "text": "The next time you would be dealt damage this turn, prevent 3 of that damage. If you've transcended this turn, instead prevent 5.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS264",
+  "name": "Tide Chakra",
+  "cardType": "attack-reaction",
+  "text": "Target Assassin or Mystic attack action card gets +3{p}. If you've transcended this turn, instead it gets +5{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS265",
+  "name": "Wind Chakra",
+  "cardType": "action",
+  "text": "The next Crouching Tiger you play this turn gets +3{p}. If you've transcended this turn, instead it gets +5{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS266",
+  "name": "Fang Strike",
+  "cardType": "attack-reaction",
+  "text": "Ephemeral\nTarget attack action card gets +1{p}.",
+  "cost": 0,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "keywords": [
+   "Ephemeral"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS267",
+  "name": "Slither",
+  "cardType": "attack-reaction",
+  "text": "Ephemeral\nTarget attack action card gets go again.",
+  "cost": 0,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "keywords": [
+   "Ephemeral"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS268",
+  "name": "Mask of Wizened Whiskers",
+  "cardType": "equipment",
+  "text": "When this defends, put a card with combo from your graveyard on the bottom of your deck.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS269",
+  "name": "Arousing Wave",
+  "cardType": "equipment",
+  "text": "Attack Reaction - {r}, destroy this: Create a Fang Strike in your hand.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS270",
+  "name": "Undertow Stilettos",
+  "cardType": "equipment",
+  "text": "Attack Reaction - {r}, destroy this: Create a Slither in your hand.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS271",
+  "name": "Truths Retold",
+  "cardType": "equipment",
+  "text": "Cloaked\nInstant - {r}, turn this face-up: Put an aura from your graveyard on the bottom of your deck.\nWard 1",
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Cloaked",
+   "Ward 1"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS272",
+  "name": "Uphold Tradition",
+  "cardType": "equipment",
+  "text": "Cloaked\nInstant - {r}, turn this face-up: Put a +1{p} counter on an aura you control with ward.\nWard 1",
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Cloaked",
+   "Ward 1"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS273",
+  "name": "Stride of Reprisal",
+  "cardType": "equipment",
+  "text": "When this defends, create a Crouching Tiger in your hand.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS274",
+  "name": "Aqua Seeing Shell",
+  "cardType": "equipment",
+  "text": "Cloaked\nInstant - {r}{r}{r}, turn this face-up: Draw a card.\nAt the start of your turn, destroy this.",
+  "defense": 1,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Cloaked"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS275",
+  "name": "Koi Blessed Kimono",
+  "cardType": "equipment",
+  "text": "Cloaked\nWhile this is equipped face-down, at the start of your turn, if you have exactly 1{h}, you may turn this face-up.\nWhen this is turned face-up, destroy it. Search your deck for an Inner Chi, reveal it, put it into your hand, then shuffle.",
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Cloaked"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS276",
+  "name": "Waves of Aqua Marine",
+  "cardType": "equipment",
+  "text": "Cloaked\nAttack Reaction - {r}, turn this face-up: Target attack gets +1{p}.\nAt the start of your turn, destroy this.",
+  "defense": 1,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Cloaked"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS277",
+  "name": "Aqua Laps",
+  "cardType": "equipment",
+  "text": "Cloaked\nAttack Reaction - {r}, turn this face up: Target attack gets go again.\nAt the start of your turn, destroy this.",
+  "defense": 1,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Cloaked"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS278",
+  "name": "Skycrest Keikoi",
+  "cardType": "equipment",
+  "text": "Cloaked\nInstant - Destroy this: Prevent the next 1 damage that would be dealt to you this turn. Activate this ability only while this is face-down.",
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Cloaked"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS279",
+  "name": "Skybody Keikoi",
+  "cardType": "equipment",
+  "text": "Cloaked\nInstant - Destroy this: Prevent the next 1 damage that would be dealt to you this turn. Activate this ability only while this is face-down.",
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Cloaked"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS280",
+  "name": "Skyhold Keikoi",
+  "cardType": "equipment",
+  "text": "Cloaked\nInstant - Destroy this: Prevent the next 1 damage that would be dealt to you this turn. Activate this ability only while this is face-down.",
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Cloaked"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS281",
+  "name": "Skywalker Keikoi",
+  "cardType": "equipment",
+  "text": "Cloaked\nInstant - Destroy this: Prevent the next 1 damage that would be dealt to you this turn. Activate this ability only while this is face-down.",
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Cloaked"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS282",
+  "name": "A Drop in the Ocean",
+  "cardType": "instant",
+  "text": "Legendary\nTarget attack gets -1{p}.\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "LGS",
+  "backId": "LGS282B"
+ },
+ {
+  "id": "LGS282B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS283",
+  "name": "Homage to Ancestors",
+  "cardType": "instant",
+  "text": "Legendary\nGain 1{h}\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "LGS",
+  "backId": "LGS283B"
+ },
+ {
+  "id": "LGS283B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS284",
+  "name": "Pass Over",
+  "cardType": "instant",
+  "text": "Legendary\nBanish target card from an opposing hero's graveyard.\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "LGS",
+  "backId": "LGS284B"
+ },
+ {
+  "id": "LGS284B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS285",
+  "name": "Path Well Traveled",
+  "cardType": "instant",
+  "text": "Legendary\nTarget attack gets go again.\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "LGS",
+  "backId": "LGS285B"
+ },
+ {
+  "id": "LGS285B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS286",
+  "name": "Preserve Tradition",
+  "cardType": "instant",
+  "text": "Legendary\nPut target action card from your graveyard on the bottom of your deck.\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "LGS",
+  "backId": "LGS286B"
+ },
+ {
+  "id": "LGS286B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS287",
+  "name": "Rising Sun, Setting Moon",
+  "cardType": "instant",
+  "text": "Legendary\nDraw a card, then put a card from your hand on the bottom of your deck.\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "LGS",
+  "backId": "LGS287B"
+ },
+ {
+  "id": "LGS287B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS288",
+  "name": "Stir the Pot",
+  "cardType": "instant",
+  "text": "Legendary\nShuffle.\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "LGS",
+  "backId": "LGS288B"
+ },
+ {
+  "id": "LGS288B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS289",
+  "name": "The Grain that Tips the Scale",
+  "cardType": "instant",
+  "text": "Legendary\nTarget attack gets +1{p}.\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "LGS",
+  "backId": "LGS289B"
+ },
+ {
+  "id": "LGS289B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS290",
+  "name": "Beckoning Mistblade",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nWhen this hits, your next blue attack this turn gets +1{p} and go again.",
+  "attack": 1,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS291",
+  "name": "Cosmo, Scroll of Ancestral Tapestry",
+  "cardType": "weapon",
+  "text": "During your turn, auras you control with ward are weapons with base {p} equal to their ward and Once per Turn Action - {r}: Attack\nYour aura attacks with one or more +1{p} counters get go again.",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "scroll",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS292",
+  "name": "Tiger Taming Khakkara",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nWhen this attacks, the next Crouching Tiger you play this combat chain gets +1{p}.",
+  "attack": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "staff",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS293",
+  "name": "Beckoning Mistblade",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nWhen this hits, your next blue attack this turn gets +1{p} and go again.",
+  "attack": 1,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS294",
+  "name": "Beckoning Mistblade",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nWhen this hits, your next blue attack this turn gets +1{p} and go again.",
+  "attack": 1,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS295",
+  "name": "Emissary of Tides",
+  "cardType": "action",
+  "text": "When this attacks, you may put a card from your hand on the bottom of your deck. If you do, this gets +2{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS296",
+  "name": "First Tenet of Chi: Tide",
+  "cardType": "action",
+  "text": "Your next blue attack this turn gets +2{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS297",
+  "name": "Second Tenet of Chi: Tide",
+  "cardType": "action",
+  "text": "If you've transcended this turn, this gets +2{p}.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS298",
+  "name": "Cosmo, Scroll of Ancestral Tapestry",
+  "cardType": "weapon",
+  "text": "During your turn, auras you control with ward are weapons with base {p} equal to their ward and Once per Turn Action - {r}: Attack\nYour aura attacks with one or more +1{p} counters get go again.",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "scroll",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS299",
+  "name": "Emissary of Moon",
+  "cardType": "action",
+  "text": "When this attacks, you may put a card from your hand on the bottom of your deck. If you do, draw a card.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS300",
+  "name": "First Tenet of Chi: Moon",
+  "cardType": "action",
+  "text": "Your next blue attack this turn gets \"When this attacks, draw a card.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS301",
+  "name": "Second Tenet of Chi: Moon",
+  "cardType": "action",
+  "text": "If you've transcended this turn, this gets \"When this chain link resolves, draw a card.\"",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS302",
+  "name": "Tiger Taming Khakkara",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nWhen this attacks, the next Crouching Tiger you play this combat chain gets +1{p}.",
+  "attack": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "staff",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS303",
+  "name": "Emissary of Wind",
+  "cardType": "action",
+  "text": "When this attacks, you may put a card from your hand on the bottom of your deck. If you do, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS304",
+  "name": "First Tenet of Chi: Wind",
+  "cardType": "action",
+  "text": "The next blue action card you play this turn gets go again.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS305",
+  "name": "Second Tenet of Chi: Wind",
+  "cardType": "action",
+  "text": "If you've transcended this turn, this gets go again.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS306",
+  "name": "Channel Mount Heroic",
+  "cardType": "action",
+  "text": "Go again\nAttack action cards you control have +3{p}.\nChannel Earth - At the beginning of your end phase, put an flow counter on Channel Mount Heroic then destroy it unless you put an Earth card from your pitch zone on the bottom of your deck for each flow counter on it.",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 3,
+  "subtypes": [
+   "earth",
+   "aura"
+  ],
+  "keywords": [
+   "Go again",
+   "Channel Earth"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS307",
+  "name": "Earth Form",
+  "cardType": "action",
+  "text": "When this hits, create an Embodiment of Earth token.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS308",
+  "name": "Lightning Form",
+  "cardType": "action",
+  "text": "When this hits, create an Embodiment of Lightning token.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS309",
+  "name": "Sanctuary of Aria",
+  "cardType": "token",
+  "text": "Instant - {r}{r}: Prevent the next 1 damage that would be dealt to you this turn by a source of your choice. Destroy this at the beginning of the end phase.",
+  "subtypes": [
+   "rosetta",
+   "macro"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS310",
+  "name": "Sigil of Earth",
+  "cardType": "action",
+  "text": "Go again\nAt the beginning of your action phase, destroy this.\nWhen this leaves the arena, create an Embodiment of Earth token.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "earth",
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS311",
+  "name": "Sigil of Lightning",
+  "cardType": "instant",
+  "text": "At the beginning of your action phase, destroy this.\nWhen this leaves the arena, create an Embodiment of Lightning token.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS312",
+  "name": "Helm of Lignum Vitae",
+  "cardType": "equipment",
+  "text": "If there are 4 or more Earth cards in your banished zone, this gets +1{d}.\nBlade Break",
+  "defense": 1,
+  "subtypes": [
+   "earth",
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS313",
+  "name": "Well Grounded",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Prevent the next 2 damage that would be dealt to you this turn. Activate this only if there are 4 or more Earth cards in your banished zone.",
+  "defense": 0,
+  "subtypes": [
+   "earth",
+   "legs"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS314",
+  "name": "Flash of Brilliance",
+  "cardType": "equipment",
+  "text": "When this defends, you may discard a Lightning card. If you do, return an aura you control to its owner's hand.\nBlade Break",
+  "defense": 1,
+  "subtypes": [
+   "lightning",
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS315",
+  "name": "Twinkle Toes",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Prevent the next 2 damage that would be dealt to you this turn. Activate this only if you've played an instant card this turn.",
+  "defense": 0,
+  "subtypes": [
+   "lightning",
+   "legs"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS316",
+  "name": "Bloodtorn Bodice",
+  "cardType": "equipment",
+  "text": "Action - Destroy this and an aura you control: Gain {r}. Go again",
+  "defense": 0,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS317",
+  "name": "Runehold Release",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Create a Runechant token. Go again",
+  "defense": 0,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS318",
+  "name": "Ink-lined Cloak",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Gain {r}. Activate this only if you control an aura permanent with Sigil in its name.",
+  "defense": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS319",
+  "name": "Hold Focus",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Amp 1. Go again",
+  "defense": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS320",
+  "name": "Hood of Second Thoughts",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Prevent the next 1 damage that would be dealt to you this turn. Activate this only if you've been dealt damage this turn.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS321",
+  "name": "Bruised Leather",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Prevent the next 1 damage that would be dealt to you this turn. Activate this only if you've been dealt damage this turn.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS322",
+  "name": "Four Finger Gloves",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Prevent the next 1 damage that would be dealt to you this turn. Activate this only if you've been dealt damage this turn.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS323",
+  "name": "Sigil of Sanctuary",
+  "cardType": "instant",
+  "text": "Arcane Shelter 1\nWhen this leaves the arena, create an Embodiment of Earth token.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "earth",
+   "aura"
+  ],
+  "keywords": [
+   "Arcane Shelter 1"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS324",
+  "name": "Sigil of Conductivity",
+  "cardType": "instant",
+  "text": "Arcane Shelter 1\nWhen this leaves the arena, create an Embodiment of Lightning token.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Arcane Shelter 1"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS325",
+  "name": "Sigil of the Arknight",
+  "cardType": "action",
+  "text": "Go again\nAt the beginning of your action phase, destroy this.\nWhen this leaves the arena, reveal the top card of your deck. If it's an attack action card, put it into your hand.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS326",
+  "name": "Sigil of Deadwood",
+  "cardType": "action",
+  "text": "Go again\nAt the beginning of your action phase, destroy this.\nWhen this leaves the arena, create a Runechant token.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS327",
+  "name": "Sigil of Forethought",
+  "cardType": "instant",
+  "text": "At the beginning of your action phase, destroy this.\nWhen this leaves the arena, create a Ponder token.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS328",
+  "name": "Sigil of Temporal Manipulation",
+  "cardType": "instant",
+  "text": "At the beginning of your action phase, destroy this.\nWhen this leaves the arena, banish the top card of your deck. If it's a non-attack action card, you may play it this turn as though it were an instant.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS329",
+  "name": "Sigil of Cycles",
+  "cardType": "action",
+  "text": "Go again\nAt the beginning of your action phase, destroy this.\nWhen this leaves the arena, discard a card then draw a card.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS330",
+  "name": "Sigil of Fyendal",
+  "cardType": "action",
+  "text": "Go again\nAt the beginning of your action phase, destroy this.\nWhen this leaves the arena, gain 1{h}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS331",
+  "name": "Rotwood Reaper",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nIf you've played or created an aura this turn, this gets +2{p}.",
+  "attack": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "earth",
+   "sword",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS332",
+  "name": "Star Fall",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nIf you've played a Lightning card this turn, this card's attacks get +1{p} and go again.",
+  "attack": 1,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning",
+   "sword",
+   "2h"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS333",
+  "name": "Staff of Verdant Shoots",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}{r}: Amp 1. Go again\nWhen one or more Earth cards are pitched this way, the next time you deal arcane damage this turn, create an Embodiment of Earth token.",
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "earth",
+   "staff",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS334",
+  "name": "Volzar, the Lightning Rod",
+  "cardType": "weapon",
+  "text": "If you control an aura permanent with Sigil in its name, this costs {r} less to activate.\nOnce per Turn Instant - {r}: Amp X, where X is the number of Lightning cards you've played this turn.",
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning",
+   "staff",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS335",
+  "name": "Comet Storm // Shock",
+  "cardType": "instant",
+  "text": "Meld\nDeal 5 arcane damage to any target.\n//\nDeal 1 arcane damage to any target.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Meld"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS336",
+  "name": "Null // Shock",
+  "cardType": "instant",
+  "text": "Meld\nIf target instant card has cost less than the total arcane damage you've dealt to opposing heroes this turn, negate it.\n//\nDeal 1 arcane damage to any target.",
+  "pitch": 2,
+  "cost": 1,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Meld",
+   "Negate"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS337",
+  "name": "Flittering Charge",
+  "cardType": "action",
+  "text": "If you've played an instant card this chain link, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS338",
+  "name": "Flittering Charge",
+  "cardType": "action",
+  "text": "If you've played an instant card this chain link, this gets go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS339",
+  "name": "Flittering Charge",
+  "cardType": "action",
+  "text": "If you've played an instant card this chain link, this gets go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS340",
+  "name": "Pulsing Aether // Life",
+  "cardType": "instant",
+  "text": "Meld\nDeal 4 arcane damage to any target.\n//\nGain 1{h}",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Meld"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS341",
+  "name": "Rampant Growth // Life",
+  "cardType": "instant",
+  "text": "Meld\nAmp X, where X is the total {h} you've gained this turn.\n//\nGain 1{h}",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Meld",
+   "Amp X"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS342",
+  "name": "Fruits of the Forest",
+  "cardType": "action",
+  "text": "Instant - Discard this: Gain 2{h}",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS343",
+  "name": "Fruits of the Forest",
+  "cardType": "action",
+  "text": "Instant - Discard this: Gain 2{h}",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS344",
+  "name": "Fruits of the Forest",
+  "cardType": "action",
+  "text": "Instant - Discard this: Gain 2{h}",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS345",
+  "name": "Burn Up // Shock",
+  "cardType": "instant",
+  "text": "Meld\nThe next time an attack you control hits a hero this turn, deal 4 arcane damage to them.\nGo again\n//\nDeal 1 arcane damage to any target.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Go again",
+   "Meld"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS346",
+  "name": "Vaporize // Shock",
+  "cardType": "instant",
+  "text": "Meld\nDestroy an aura permanent with cost X or less and/or up to X aura tokens, where X is the total arcane damage you've dealt to opposing heroes this turn.\n//\nDeal 1 arcane damage to any target.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "keywords": [
+   "Meld"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS347",
+  "name": "Electrostatic Discharge",
+  "cardType": "instant",
+  "text": "The next attack action card you play this turn with cost 1 or less gets +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS348",
+  "name": "Electrostatic Discharge",
+  "cardType": "instant",
+  "text": "The next attack action card you play this turn with cost 1 or less gets +2{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS349",
+  "name": "Electrostatic Discharge",
+  "cardType": "instant",
+  "text": "The next attack action card you play this turn with cost 1 or less gets +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS350",
+  "name": "Arcane Seeds // Life",
+  "cardType": "instant",
+  "text": "Meld\nCreate a Runechant token. Create a Runechant token.\nGo again\n//\nGain 1{h}",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Meld",
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS351",
+  "name": "Thistle Bloom // Life",
+  "cardType": "instant",
+  "text": "Meld\nCreate X Runechant tokens, where X is the total {h} you've gained this turn.\n//\nGain 1{h}",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Meld"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS352",
+  "name": "Rootbound Carapace",
+  "cardType": "defense-reaction",
+  "text": "Decompose - You may banish 2 Earth cards and an action card from your graveyard. If you do, this gets +1{d}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Decompose"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS353",
+  "name": "Rootbound Carapace",
+  "cardType": "defense-reaction",
+  "text": "Decompose - You may banish 2 Earth cards and an action card from your graveyard. If you do, this gets +1{d}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Decompose"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS354",
+  "name": "Rootbound Carapace",
+  "cardType": "defense-reaction",
+  "text": "Decompose - You may banish 2 Earth cards and an action card from your graveyard. If you do, this gets +1{d}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 1,
+  "subtypes": [
+   "earth"
+  ],
+  "keywords": [
+   "Decompose"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS356",
+  "name": "Regrowth // Shock",
+  "cardType": "instant",
+  "text": "Meld\nReturn an attack action card with cost less than X from your graveyard to your hand, where X is the total arcane damage you've dealt to opposing heroes this turn. Go again\n//\nDeal 1 arcane damage to any target.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "earth",
+   "lightning"
+  ],
+  "keywords": [
+   "Meld",
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS357",
+  "name": "Count Your Blessings",
+  "cardType": "instant",
+  "text": "Gain X{h}, where X is 3 plus the number of Count Your Blessings in your graveyard.",
+  "pitch": 1,
+  "cost": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS358",
+  "name": "Count Your Blessings",
+  "cardType": "instant",
+  "text": "Gain X{h}, where X is 2 plus the number of Count Your Blessings in your graveyard.",
+  "pitch": 2,
+  "cost": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS359",
+  "name": "Count Your Blessings",
+  "cardType": "instant",
+  "text": "Gain X{h}, where X is 1 plus the number of Count Your Blessings in your graveyard.",
+  "pitch": 3,
+  "cost": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS361",
+  "name": "Gesture of Goodwill",
+  "cardType": "block",
+  "text": "Protect\nWhen this protects another hero, they may give you a token they control.",
+  "pitch": 3,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Protect"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS362",
+  "name": "Runerager Swarm",
+  "cardType": "action",
+  "text": "If you've played or created an aura this turn, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS363",
+  "name": "Deadwood Dirge",
+  "cardType": "action",
+  "text": "Destroy an aura you control. If you do, create 3 Runechant tokens.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS364",
+  "name": "Redwood Hammer",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}{r}: Attack\nIf an Earth card was pitched to attack with this, the attack gets +1{p}.",
+  "attack": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "earth",
+   "hammer",
+   "1h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS365",
+  "name": "Channel Thunder Steppe",
+  "cardType": "action",
+  "text": "Go again\nWhenever you play an action card, you may pay {r}. If you do, it gains go again.\nChannel Lightning - At the beginning of your end phase, put a flow counter on Channel Thunder Steppe then destroy it unless you put a Lightning card from your pitch zone on the bottom of your deck for each flow counter on it.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Go again",
+   "Channel Lightning"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS366",
+  "name": "Sigil of Aether",
+  "cardType": "instant",
+  "text": "At the beginning of your action phase, destroy this.\nWhen this leaves the arena, deal 1 arcane damage to any target. If damage is dealt this way, amp 1.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Amp 1"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS367",
+  "name": "Harvest Season",
+  "cardType": "action",
+  "text": "Go again\nAt the beginning of your action phase, destroy this, then gain 3{h}.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "earth",
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS368",
+  "name": "Fry",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 0,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS369",
+  "name": "Nullrune Hood",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS370",
+  "name": "Nullrune Robe",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS371",
+  "name": "Nullrune Gloves",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS372",
+  "name": "Nullrune Boots",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS373",
+  "name": "Kunai of Retribution",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}, destroy this when the combat chain closes: Attack. Go again",
+  "attack": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "draconic",
+   "dagger",
+   "1h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS374",
+  "name": "Obsidian Fire Vein",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack. If you've played a Draconic card this chain link, this attack gets +1{p} and go again.",
+  "attack": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic",
+   "dagger",
+   "1h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS375",
+  "name": "Mark of the Huntsman",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nWhen this hits a hero, you may choose to destroy this and mark them.\nIf this is attacking a marked hero, this gets +1{p}.",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Mark"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS376",
+  "name": "Arakni, Black Widow",
+  "cardType": "hero",
+  "text": "Once per Turn Attack Reaction - Discard an Assassin card: Target Assassin attack gets +3{p}. If it has stealth, it gets \"When this hits a hero, they banish a card from their hand.\"\nAt the beginning of your end phase, return to the brood.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "intellect": 4,
+  "set": "LGS"
+ },
+ {
+  "id": "LGS377",
+  "name": "Arakni, Funnel Web",
+  "cardType": "hero",
+  "text": "Once per Turn Attack Reaction - Discard an Assassin card: Target Assassin attack gets +3{p}. If it has stealth, it gets \"When this hits a hero, banish a card in their arsenal.\"\nAt the beginning of your end phase, return to the brood.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "intellect": 4,
+  "set": "LGS"
+ },
+ {
+  "id": "LGS378",
+  "name": "Arakni, Orb-Weaver",
+  "cardType": "hero",
+  "text": "Graphene Chelicerae cost you {r} less to activate.\nOnce per Turn Instant - Discard an Assassin card: Equip a Graphene Chelicera token. Your next attack with stealth this turn gets +3{p}.\nAt the beginning of your end phase, return to the brood.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "intellect": 4,
+  "set": "LGS"
+ },
+ {
+  "id": "LGS379",
+  "name": "Arakni, Redback",
+  "cardType": "hero",
+  "text": "Once per Turn Attack Reaction - Discard an Assassin card: Target Assassin attack gets +3{p}. If it has stealth, it gets go again.\nAt the beginning of your end phase, return to the brood.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "intellect": 4,
+  "set": "LGS"
+ },
+ {
+  "id": "LGS380",
+  "name": "Arakni, Tarantula",
+  "cardType": "hero",
+  "text": "Whenever a dagger you own hits a hero, they lose 1{h}.\nOnce per Turn Attack Reaction - Discard an Assassin card: Target dagger attack gets +3{p}.\nAt the beginning of your end phase, return to the brood.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "intellect": 4,
+  "set": "LGS"
+ },
+ {
+  "id": "LGS381",
+  "name": "Arakni, Trap-Door",
+  "cardType": "hero",
+  "text": "When you become this, you may search your deck for a card, banish it face-down, then shuffle. If it's a trap, you may play it until the start of your next turn.\nAt the beginning of your end phase, return to the brood.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "intellect": 4,
+  "set": "LGS"
+ },
+ {
+  "id": "LGS382",
+  "name": "Lair of the Spider",
+  "cardType": "defense-reaction",
+  "text": "When this defends an attack with go again, mark the attacking hero.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "keywords": [
+   "Mark"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS383",
+  "name": "Den of the Spider",
+  "cardType": "defense-reaction",
+  "text": "When this defends an attack with {p} greater than its base, mark the attacking hero.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS384",
+  "name": "Relentless Pursuit",
+  "cardType": "action",
+  "text": "Mark target opposing hero.\nIf you've attacked them this turn, put this on the bottom of its owner's deck.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Mark",
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS385",
+  "name": "Pledge Fealty",
+  "cardType": "instant",
+  "text": "Create a Fealty token.",
+  "pitch": 1,
+  "cost": 0,
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS386",
+  "name": "Channel Lake Frigid",
+  "cardType": "action",
+  "text": "Go again\nCards and activated abilities cost opposing heroes an additional {r}.\nChannel Ice - At the beginning of your end phase, put a flow counter on Channel Lake Frigid then destroy it unless you put an Ice card from your pitch zone on the bottom of your deck for each flow counter on it.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "subtypes": [
+   "ice",
+   "aura"
+  ],
+  "keywords": [
+   "Go again",
+   "Channel Ice"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS387",
+  "name": "Batter to a Pulp",
+  "cardType": "action",
+  "text": "If this would deal 4 or more damage, that damage can't be prevented.\nCrush - When this deals 4 or more damage to a hero, destroy an equipment they control with no defense value.",
+  "pitch": 1,
+  "cost": 6,
+  "attack": 10,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS388",
+  "name": "Batter to a Pulp",
+  "cardType": "action",
+  "text": "If this would deal 4 or more damage, that damage can't be prevented.\nCrush - When this deals 4 or more damage to a hero, destroy an equipment they control with no defense value.",
+  "pitch": 1,
+  "cost": 6,
+  "attack": 10,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS389",
+  "name": "Draw a Crowd",
+  "cardType": "action",
+  "text": "Go again\nWhen this enters the arena, each hero draws a card.\nAt the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn gets +3{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS390",
+  "name": "Promising Terrain",
+  "cardType": "action",
+  "text": "Go again\nIf you would create 1 or more Seismic Surge tokens, instead create that many plus 1.\nAt the beginning of your action phase, destroy this, then if you control 3 or more Seismic Surge tokens, draw a card and gain 1{h}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS391",
+  "name": "The Hand that Pulls the Strings",
+  "cardType": "mentor",
+  "text": "Once per Turn Attack Reaction - 0: Turn this face-up. Activate this only while this is face-down in your arsenal.\nWhile this is face-up in arsenal, your first attack with contract each turn gets go again. If it's attacking a Royal hero, it gets +1{p}.\nAt the beginning of your end phase, destroy a Silver you control. If you don't, put this on the bottom of your deck and draw a card.",
+  "defense": 4,
+  "subtypes": [
+   "arakni"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS392",
+  "name": "Blue Sea Tricorn",
+  "cardType": "equipment",
+  "text": "Action - {r}{r}{r}, destroy this: Draw a card. Go again\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS393",
+  "name": "Buccaneer's Bounty",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Gain {r}. Go again\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS394",
+  "name": "Fish Fingers",
+  "cardType": "equipment",
+  "text": "Action - {r}, destroy this: Your next attack this turn gets +1{p}. Go again\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS395",
+  "name": "Peg Leg",
+  "cardType": "equipment",
+  "text": "Action - {r}{r}{r}, destroy this: Your next attack this turn gets go again. Go again.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS396",
+  "name": "Cogwerx Blunderbuss",
+  "cardType": "weapon",
+  "text": "Action - {r}{r}, {t}: Attack\nInstant - {t} a cog you control: This card's next attack this turn gets go again.",
+  "attack": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "gun",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS397",
+  "name": "Spitfire",
+  "cardType": "weapon",
+  "text": "Action - {t}, {t} a cog you control: Attack\nWhen this attacks, you may {t} a cog you control. If you do, the attack gets +1{p}.",
+  "attack": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "gun",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS398",
+  "name": "Compass of Sunken Depths",
+  "cardType": "equipment",
+  "text": "Instant - {t}: Look at the top card of your deck.\nThe first card with watery grave you play from your graveyard each turn gets go again.",
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "off-hand"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS399",
+  "name": "Hammerhead, Harpoon Cannon",
+  "cardType": "weapon",
+  "text": "Action - {r}{r}{r}{r}, {t}: Your next arrow attack this turn gets +4{p}. If it has harpoon in its name, it gets overpower. Go again",
+  "classes": [
+   "pirate",
+   "ranger"
+  ],
+  "subtypes": [
+   "bow",
+   "cannon",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS400",
+  "name": "Redspine Manta",
+  "cardType": "weapon",
+  "text": "Action - {t}: Put an arrow from your hand face-up into your arsenal. Go again",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "bow",
+   "2h"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS401",
+  "name": "Barnacle",
+  "cardType": "action",
+  "text": "Action - {t}: Attack\nWatery Grave",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 4,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 3,
+  "set": "LGS"
+ },
+ {
+  "id": "LGS402",
+  "name": "Chowder, Hearty Cook",
+  "cardType": "action",
+  "text": "Action - {t}: Attack\nInstant - {t}: Gain 1{h}\nWatery Grave",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 3,
+  "set": "LGS"
+ },
+ {
+  "id": "LGS403",
+  "name": "Cutty Shark, Quick Clip",
+  "cardType": "action",
+  "text": "Action - {r}, {t}: Attack\nOnce per Turn Action - {r}: Your next ally attack this turn gets +1{p}. Go again\nWatery Grave",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 4,
+  "set": "LGS"
+ },
+ {
+  "id": "LGS404",
+  "name": "Kelpie, Tangled Mess",
+  "cardType": "action",
+  "text": "Action - {t}: Attack\nAction - {r}, {t}: {t} target hero or ally. Go again\nWatery Grave",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 1,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 3,
+  "set": "LGS"
+ },
+ {
+  "id": "LGS405",
+  "name": "Limpit, Hop-a-long",
+  "cardType": "action",
+  "text": "Action - {r}, {t}: Attack. Go again\nWatery Grave",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 1,
+  "set": "LGS"
+ },
+ {
+  "id": "LGS406",
+  "name": "Riggermortis",
+  "cardType": "action",
+  "text": "Action - {r}, {t}: Attack\nWatery Grave",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 6,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 1,
+  "set": "LGS"
+ },
+ {
+  "id": "LGS407",
+  "name": "Scooba, Salty Sea Dog",
+  "cardType": "action",
+  "text": "Action - {r}{r}{r}, {t}: Attack\nWhen this attacks, you may put a yellow card from a graveyard on the bottom of its owner's deck. If you do, create a Gold token.\nWatery Grave",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 4,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 4,
+  "set": "LGS"
+ },
+ {
+  "id": "LGS408",
+  "name": "Shelly, Hardened Traveler",
+  "cardType": "action",
+  "text": "Action - {r}{r}{r}, {t}: Attack\nInstant - {t}: The next attack action card you defend with this turn gets +1{d}.\nWatery Grave",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 4,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 5,
+  "set": "LGS"
+ },
+ {
+  "id": "LGS409",
+  "name": "Swabbie",
+  "cardType": "action",
+  "text": "Action - {r}{r}, {t}: Attack\nWatery Grave",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 7,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 3,
+  "set": "LGS"
+ },
+ {
+  "id": "LGS410",
+  "name": "Cerebellum Processor",
+  "cardType": "action",
+  "text": "Crank\nThis enters the arena with 2 steam counters. At the start of your turn, destroy this unless you remove a steam counter from it.\nOnce per Turn Action - 0: Draw a card.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Crank"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS411",
+  "name": "Flying High",
+  "cardType": "action",
+  "text": "Your next attack this turn gets go again. If it's red, it gets +1{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS412",
+  "name": "Flying High",
+  "cardType": "action",
+  "text": "Your next attack this turn gets go again. If it's yellow, it gets +1{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS413",
+  "name": "Flying High",
+  "cardType": "action",
+  "text": "Your next attack this turn gets go again. If it's blue, it gets +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS414",
+  "name": "Helm of Hindsight",
+  "cardType": "equipment",
+  "text": "Instant - {r}{r}{r}, destroy this: Put target attack action card from your graveyard on top of your deck.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS415",
+  "name": "Garland of Spring",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Gain {r}. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS416",
+  "name": "Punching Gloves",
+  "cardType": "equipment",
+  "text": "Action - {r}{r}, destroy this: The next attack card you play this turn gets +2{p}. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS417",
+  "name": "Toby Jugs",
+  "cardType": "equipment",
+  "text": "When this defends, you may pay {r}. If you do, it gets +2{d} this turn.\nBlade Break",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS418",
+  "name": "Old Leather and Vim",
+  "cardType": "action",
+  "text": "If you control a Toughness or Vigor token, this gets +1{p}.\nWhen this hits a hero, create a Toughness and a Vigor token.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS419",
+  "name": "Uplifting Performance",
+  "cardType": "action",
+  "text": "If you control a Confidence or Toughness token, this gets +1{p}.\nWhen this hits a hero, create a Confidence and a Toughness token.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS420",
+  "name": "Offensive Behavior",
+  "cardType": "action",
+  "text": "If you control a Might or Vigor token, this gets +1{p}.\nWhen this hits a hero, create a Might and a Vigor token.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS421",
+  "name": "Spew Obscenities",
+  "cardType": "action",
+  "text": "If you control a Confidence or Might token, this gets +1{p}.\nWhen this hits a hero, create a Confidence and a Might token.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS422",
+  "name": "Numbskull Charm",
+  "cardType": "instant",
+  "text": "Choose any number;\n- Destroy a Confidence or Might token.\n- The crowd cheers you.\n- Pitch the top card of your deck. If it has 6 or more {p}, create a Vigor token.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "revered"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS423",
+  "name": "Thespian Charm",
+  "cardType": "instant",
+  "text": "Choose any number;\n- Destroy a Might or Vigor token.\n- The crowd cheers you.\n- Return an aura permanent you control to its owner's hand.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS424",
+  "name": "Cheater's Charm",
+  "cardType": "instant",
+  "text": "Choose any number;\n- Steal a Confidence or Toughness token.\n- The crowd boos you.\n- If you control an attack with 6 or more {p}, deal 2 damage to target hero unless they discard a card.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "reviled"
+  ],
+  "keywords": [
+   "Steal",
+   "The Crowd Boos"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS425",
+  "name": "Liar's Charm",
+  "cardType": "instant",
+  "text": "Choose any number;\n- Steal a Toughness or Vigor token.\n- The crowd boos you.\n- Target hero loses and can't gain abilities this action phase unless they discard a card.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "reviled"
+  ],
+  "keywords": [
+   "Steal",
+   "The Crowd Boos"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS426",
+  "name": "Overcrowded",
+  "cardType": "action",
+  "text": "Ambush\nWhen this attacks or defends, it gets +1{p} +1{d} for each different name among aura tokens in the arena.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Ambush"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS427",
+  "name": "Swing Big",
+  "cardType": "action",
+  "text": "When the combat chain closes, if this didn't hit, the defending hero creates a Quicken token.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS431",
+  "name": "In the Palm of Your Hand",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this enters or leaves the arena, draw a card.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS432",
+  "name": "Twin Drive",
+  "cardType": "action",
+  "text": "Boost\nBoost",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS433",
+  "name": "Booze!",
+  "cardType": "action",
+  "text": "Go again\nWhen this enters or leaves the arena, the crowd boos you.\nAt the start of your turn, destroy this.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "aura"
+  ],
+  "keywords": [
+   "Go again",
+   "The Crowd Boos"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS434",
+  "name": "Cheers!",
+  "cardType": "action",
+  "text": "Go again\nWhen this enters or leaves the arena, the crowd cheers you.\nAt the start of your turn, destroy this.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "aura"
+  ],
+  "keywords": [
+   "Go again",
+   "The Crowd Cheers"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS435",
+  "name": "Act of Glory",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this leaves the arena, your next attack this turn gets +6{p}.",
+  "pitch": 1,
+  "cost": 4,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS436",
+  "name": "Dramatic Pause",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this enters the arena, target defending action card gets +3{d} this chain link.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS437",
+  "name": "Edge of Their Seats",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this leaves the arena, your next attack this turn gets +5{p}.",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS438",
+  "name": "Hungry for More",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this leaves the arena, gain 3{h}.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS439",
+  "name": "Superstar",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this enters or leaves the arena, the crowd cheers you.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered",
+   "aura"
+  ],
+  "keywords": [
+   "Suspense",
+   "The Crowd Cheers"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS440",
+  "name": "Tension in the Air",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this leaves the arena, your next attack this turn gets +4{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS441",
+  "name": "Up on a Pedestal",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this enters or leaves the arena, you may put a Revered or Guardian attack action card from your graveyard on top of your deck.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered",
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS442",
+  "name": "Pursuit of Knowledge",
+  "cardType": "action",
+  "text": "When this hits, your hero gets +1{i} until end of turn.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS443",
+  "name": "Ghost Protocol: Mainframe",
+  "cardType": "action",
+  "text": "If this was banished from boosting this turn, you may play this from your banished zone.\nEvo Upgrade - This gets +1{p} for each Evo you have equipped.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Evo Upgrade"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS444",
+  "name": "Ghost Protocol: Architect",
+  "cardType": "action",
+  "text": "If this was banished from boosting this turn, you may play this from your banished zone.\nEvo Upgrade - When this attacks, search your deck for an Evo with cost less than or equal to the number of Evos you have equipped, banish it, then shuffle.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Evo Upgrade"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS445",
+  "name": "Bittering Thorns",
+  "cardType": "action",
+  "text": "When this hits, your next attack this turn gets +1{p}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS451",
+  "name": "Glide Through Starlight",
+  "cardType": "action",
+  "text": "Instant - {r}, discard this: Prevent the next 1 damage that would be dealt to you this turn. If you prevent damage this way, create a Lightning Flow token.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS452",
+  "name": "Helm of Astral Sanctuary",
+  "cardType": "equipment",
+  "text": "Instant - {t} your hero, destroy this: Prevent the next 1 damage that would be dealt to you this turn.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS453",
+  "name": "Robe of Astral Sanctuary",
+  "cardType": "equipment",
+  "text": "Instant - {t} your hero, destroy this: Prevent the next 1 damage that would be dealt to you this turn.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS454",
+  "name": "Gloves of Astral Sanctuary",
+  "cardType": "equipment",
+  "text": "Instant - {t} your hero, destroy this: Prevent the next 1 damage that would be dealt to you this turn.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS455",
+  "name": "Boots of Astral Sanctuary",
+  "cardType": "equipment",
+  "text": "Instant - {t} your hero, destroy this: Prevent the next 1 damage that would be dealt to you this turn.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS457",
+  "name": "Shove Off",
+  "cardType": "attack-reaction",
+  "text": "Choose a non-equipment card defending a sword attack you control. Return it to its owner's hand.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "LGS"
+ },
+ {
+  "id": "LGS458",
+  "name": "Arcane Polarity",
+  "cardType": "instant",
+  "text": "Gain 1{h}\nIf you've been dealt arcane damage this turn, instead gain 4{h}.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "LGS"
+ }
+]

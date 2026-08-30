@@ -1,0 +1,13 @@
+# Fyendal production reverse proxy.
+# DOMAIN comes from .env (compose `environment:` block).
+# Automatic HTTPS via Let's Encrypt — DNS for DOMAIN must point at this VM
+# and ports 80/443 must be open before the first `docker compose up`.
+#
+# For local testing without a domain, set DOMAIN=:80 in .env (plain HTTP).
+#
+# Websockets need no extra config: reverse_proxy handles the Upgrade
+# handshake transparently.
+
+{$DOMAIN} {
+	reverse_proxy app:8080
+}

@@ -1,0 +1,4356 @@
+[
+ {
+  "id": "MST000",
+  "name": "Mistcloak Gully",
+  "cardType": "instant",
+  "text": "Legendary\nThe first attack that targets you each turn gets -1{p}.\nAt the beginning of each end phase, destroy this unless you've pitched, played, or defended with a blue card this turn. If you've pitched, played, and defended with a blue card this turn, transcend.",
+  "cost": 1,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "landmark"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "MST",
+  "backId": "MST000B"
+ },
+ {
+  "id": "MST000B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST001",
+  "name": "Nuu, Alluring Desire",
+  "cardType": "hero",
+  "text": "Your attacks with stealth get \"When this chain link resolves, banish all action cards defending this.\"\nInstant - {c}{c}{c}: Look at the top card of an opposing hero's deck. If it's blue, you may banish it. Until end of turn, you may play blue cards from that hero's banished zone without paying their {r} cost.",
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "MST"
+ },
+ {
+  "id": "MST002",
+  "name": "Nuu",
+  "cardType": "hero",
+  "text": "Your attacks with stealth get \"When this chain link resolves, banish all action cards defending this.\"\nInstant - {c}{c}{c}: Look at the top card of an opposing hero's deck. If it's blue, you may banish it. Until end of turn, you may play blue cards from that hero's banished zone without paying their {r} cost.",
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "MST"
+ },
+ {
+  "id": "MST003",
+  "name": "Beckoning Mistblade",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nWhen this hits, your next blue attack this turn gets +1{p} and go again.",
+  "attack": 1,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST004",
+  "name": "Mask of Recurring Nightmares",
+  "cardType": "equipment",
+  "text": "Once per Turn Attack Reaction - {c}{c}{c}: Target defending hero banishes a card from their hand.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST005",
+  "name": "Heirloom of Snake Hide",
+  "cardType": "equipment",
+  "text": "Cloaked\nWhile this is equipped face-down, at the start of your turn, if you have exactly 1{h}, you may turn this face-up.\nBattleworn",
+  "defense": 2,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Cloaked",
+   "Battleworn"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST006",
+  "name": "Arousing Wave",
+  "cardType": "equipment",
+  "text": "Attack Reaction - {r}, destroy this: Create a Fang Strike in your hand.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST007",
+  "name": "Undertow Stilettos",
+  "cardType": "equipment",
+  "text": "Attack Reaction - {r}, destroy this: Create a Slither in your hand.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST008",
+  "name": "Gorgon's Gaze",
+  "cardType": "attack-reaction",
+  "text": "Create a Slither in your hand.\nBanish all defending attack action cards on the combat chain. If a Chi was pitched to play this, you may play the banished cards this combat chain without paying their {r} cost.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST009",
+  "name": "Siren's Call",
+  "cardType": "attack-reaction",
+  "text": "Look at the defending hero's hand and choose a blue card. Add it to this chain link as a defending card. If you do, draw a card.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST010",
+  "name": "Sacred Art: Undercurrent Desires",
+  "cardType": "instant",
+  "text": "Legendary\nIf you've played another blue card this turn, choose 3. Otherwise, choose 1;\n- Create a Fang Strike and Slither in your hand.\n- Banish up to 2 cards in an opposing hero's graveyard.\n- Transcend",
+  "pitch": 3,
+  "cost": 3,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "MST",
+  "backId": "MST010B"
+ },
+ {
+  "id": "MST010B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST011",
+  "name": "Tide Chakra",
+  "cardType": "attack-reaction",
+  "text": "Target Assassin or Mystic attack action card gets +3{p}. If you've transcended this turn, instead it gets +5{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST012",
+  "name": "Tide Chakra",
+  "cardType": "attack-reaction",
+  "text": "Target Assassin or Mystic attack action card gets +2{p}. If you've transcended this turn, instead it gets +4{p}.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST013",
+  "name": "Tide Chakra",
+  "cardType": "attack-reaction",
+  "text": "Target Assassin or Mystic attack action card gets +1{p}. If you've transcended this turn, instead it gets +3{p}.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST014",
+  "name": "Hiss",
+  "cardType": "attack-reaction",
+  "text": "Target Assassin or Mystic attack action card gets +3{p}.\nIf you've pitched a blue card this turn, create a Slither in your hand.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST015",
+  "name": "Hiss",
+  "cardType": "attack-reaction",
+  "text": "Target Assassin or Mystic attack action card gets +2{p}.\nIf you've pitched a blue card this turn, create a Slither in your hand.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST016",
+  "name": "Hiss",
+  "cardType": "attack-reaction",
+  "text": "Target Assassin or Mystic attack action card gets +1{p}.\nIf you've pitched a blue card this turn, create a Slither in your hand.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST017",
+  "name": "Intimate Inducement",
+  "cardType": "attack-reaction",
+  "text": "Target Assassin or Mystic attack action card gets +1{p}.\nLook at the top 4 cards of the defending hero's deck and choose a card. If it's blue, it has 0 base {d}. Put the chosen card onto the active chain link as a defending card and the rest on top in any order.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST018",
+  "name": "Intimate Inducement",
+  "cardType": "attack-reaction",
+  "text": "Target Assassin or Mystic attack action card gets +1{p}.\nLook at the top 3 cards of the defending hero's deck and choose a card. If it's blue, it has 0 base {d}. Put the chosen card onto the active chain link as a defending card and the rest on top in any order.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST019",
+  "name": "Intimate Inducement",
+  "cardType": "attack-reaction",
+  "text": "Target Assassin or Mystic attack action card gets +1{p}.\nLook at the top 2 cards of the defending hero's deck and choose a card. If it's blue, it has 0 base {d}. Put the chosen card onto the active chain link as a defending card and the rest on top in any order.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST020",
+  "name": "Venomous Bite",
+  "cardType": "attack-reaction",
+  "text": "Target Assassin or Mystic attack action card gets +3{p}.\nIf you've pitched a blue card this turn, create a Fang Strike in your hand.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST021",
+  "name": "Venomous Bite",
+  "cardType": "attack-reaction",
+  "text": "Target Assassin or Mystic attack action card gets +2{p}.\nIf you've pitched a blue card this turn, create a Fang Strike in your hand.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST022",
+  "name": "Venomous Bite",
+  "cardType": "attack-reaction",
+  "text": "Target Assassin or Mystic attack action card gets +1{p}.\nIf you've pitched a blue card this turn, create a Fang Strike in your hand.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST023",
+  "name": "Fang Strike",
+  "cardType": "attack-reaction",
+  "text": "Ephemeral\nTarget attack action card gets +1{p}.",
+  "cost": 0,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "keywords": [
+   "Ephemeral"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST024",
+  "name": "Slither",
+  "cardType": "attack-reaction",
+  "text": "Ephemeral\nTarget attack action card gets go again.",
+  "cost": 0,
+  "classes": [
+   "mystic",
+   "assassin"
+  ],
+  "keywords": [
+   "Ephemeral"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST025",
+  "name": "Enigma, Ledger of Ancestry",
+  "cardType": "hero",
+  "text": "Your first Spectral Shield attack each turn costs {r} less to activate.\nOnce per Turn Instant - {c}{c}{c}: Create a Spectral Shield token with a +1{p} counter.",
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "MST"
+ },
+ {
+  "id": "MST026",
+  "name": "Enigma",
+  "cardType": "hero",
+  "text": "Your first Spectral Shield attack each turn costs {r} less to activate.\nOnce per Turn Instant - {c}{c}{c}: Create a Spectral Shield token with a +1{p} counter.",
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "MST"
+ },
+ {
+  "id": "MST027",
+  "name": "Meridian Pathway",
+  "cardType": "equipment",
+  "text": "Instant - {c}{c}{c}: You may play auras this turn as though they were instants.\nWhenever you pitch a Chi, you may have this get ward 3 until end of turn.",
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Ward 3"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST028",
+  "name": "Heirloom of Rabbit Hide",
+  "cardType": "equipment",
+  "text": "Cloaked\nWhile this is equipped face-down, at the start of your turn, if you have exactly 1{h}, you may turn this face-up.\nWard 4",
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Cloaked",
+   "Ward 4"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST029",
+  "name": "Truths Retold",
+  "cardType": "equipment",
+  "text": "Cloaked\nInstant - {r}, turn this face-up: Put an aura from your graveyard on the bottom of your deck.\nWard 1",
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Cloaked",
+   "Ward 1"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST030",
+  "name": "Uphold Tradition",
+  "cardType": "equipment",
+  "text": "Cloaked\nInstant - {r}, turn this face-up: Put a +1{p} counter on an aura you control with ward.\nWard 1",
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Cloaked",
+   "Ward 1"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST031",
+  "name": "Manifestation of Miragai",
+  "cardType": "instant",
+  "text": "This enters the arena with two +1{p} counters. If a Chi was pitched to play this, instead this enters the arena with four +1{p} counters.\nWard X, where X is the number of +1{p} counters on this.",
+  "pitch": 3,
+  "cost": 3,
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward X"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST032",
+  "name": "Sacred Art: Immortal Lunar Shrine",
+  "cardType": "instant",
+  "text": "Legendary\nIf you've played another blue card this turn, choose 3. Otherwise, choose 1;\n- Create 2 Spectral Shield tokens.\n- Put a +1{p} counter on each aura with ward you control.\n- Transcend",
+  "pitch": 3,
+  "cost": 3,
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "MST",
+  "backId": "MST032B"
+ },
+ {
+  "id": "MST032B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST033",
+  "name": "Three Visits",
+  "cardType": "instant",
+  "text": "Ward X, where X is three times the number of blue cards you've pitched this turn.",
+  "pitch": 1,
+  "cost": 3,
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward X"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST034",
+  "name": "Moon Chakra",
+  "cardType": "instant",
+  "text": "The next time you would be dealt damage this turn, prevent 3 of that damage. If you've transcended this turn, instead prevent 5.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST035",
+  "name": "Moon Chakra",
+  "cardType": "instant",
+  "text": "The next time you would be dealt damage this turn, prevent 2 of that damage. If you've transcended this turn, instead prevent 4.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST036",
+  "name": "Moon Chakra",
+  "cardType": "instant",
+  "text": "The next time you would be dealt damage this turn, prevent 1 of that damage. If you've transcended this turn, instead prevent 3.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST037",
+  "name": "Haze Shelter",
+  "cardType": "instant",
+  "text": "Ward X, where X is 4 if you've pitched a blue card this turn, otherwise X is 1.",
+  "pitch": 1,
+  "cost": 2,
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward X"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST038",
+  "name": "Haze Shelter",
+  "cardType": "instant",
+  "text": "Ward X, where X is 3 if you've pitched a blue card this turn, otherwise X is 1.",
+  "pitch": 2,
+  "cost": 2,
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward X"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST039",
+  "name": "Haze Shelter",
+  "cardType": "instant",
+  "text": "Ward X, where X is 2 if you've pitched a blue card this turn, otherwise X is 1.",
+  "pitch": 3,
+  "cost": 2,
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward X"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST040",
+  "name": "Waning Vengeance",
+  "cardType": "instant",
+  "text": "When this leaves the arena, if you've pitched a blue card this turn, create a Spectral Shield token.\nWard 3",
+  "pitch": 1,
+  "cost": 1,
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 3"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST041",
+  "name": "Waning Vengeance",
+  "cardType": "instant",
+  "text": "When this leaves the arena, if you've pitched a blue card this turn, create a Spectral Shield token.\nWard 2",
+  "pitch": 2,
+  "cost": 1,
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 2"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST042",
+  "name": "Waning Vengeance",
+  "cardType": "instant",
+  "text": "When this leaves the arena, if you've pitched a blue card this turn, create a Spectral Shield token.\nWard 1",
+  "pitch": 3,
+  "cost": 1,
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST043",
+  "name": "Waxing Specter",
+  "cardType": "instant",
+  "text": "If you've pitched a blue card this turn, this enters the arena with a +1{p} counter.\nWard 3",
+  "pitch": 1,
+  "cost": 2,
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 3"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST044",
+  "name": "Waxing Specter",
+  "cardType": "instant",
+  "text": "If you've pitched a blue card this turn, this enters the arena with a +1{p} counter.\nWard 2",
+  "pitch": 2,
+  "cost": 2,
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 2"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST045",
+  "name": "Waxing Specter",
+  "cardType": "instant",
+  "text": "If you've pitched a blue card this turn, this enters the arena with a +1{p} counter.\nWard 1",
+  "pitch": 3,
+  "cost": 2,
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST046",
+  "name": "Zen, Tamer of Purpose",
+  "cardType": "hero",
+  "text": "Once per Turn Instant - {c}{c}{c}: Create a Crouching Tiger in your hand. Search your deck for a card with combo, banish it, then shuffle. You may play it this turn.",
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "MST"
+ },
+ {
+  "id": "MST047",
+  "name": "Zen",
+  "cardType": "hero",
+  "text": "Once per Turn Instant - {c}{c}{c}: Create a Crouching Tiger in your hand. Search your deck for a card with combo, banish it, then shuffle. You may play it this turn.",
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "MST"
+ },
+ {
+  "id": "MST048",
+  "name": "Twelve Petal Kāṣāya",
+  "cardType": "equipment",
+  "text": "Whenever you transcend, you may gain {r}.\nInstant - {c}{c}{c}, destroy this: Create a Zen State token.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST049",
+  "name": "Heirloom of Tiger Hide",
+  "cardType": "equipment",
+  "text": "Cloaked\nWhile this is equipped face-down, at the start of your turn, if you have exactly 1{h}, you may turn this face-up.\nBlade Break",
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Cloaked",
+   "Blade Break"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST050",
+  "name": "Stride of Reprisal",
+  "cardType": "equipment",
+  "text": "When this defends, create a Crouching Tiger in your hand.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST051",
+  "name": "Tooth and Claw",
+  "cardType": "action",
+  "text": "When this attacks, you may reveal any number of Crouching Tigers from your hand. If you reveal 1 or more, this gets go again. 2 or more, this gets +1{p}. 3 or more, draw a card.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST052",
+  "name": "Shifting Winds of the Mystic Beast",
+  "cardType": "action",
+  "text": "Whenever you play a Crouching Tiger this turn, name a card. It gets that name.\nIf a Chi was pitched to play this, create 2 Crouching Tigers in your hand.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST053",
+  "name": "Sacred Art: Jade Tiger Domain",
+  "cardType": "instant",
+  "text": "Legendary\nIf you've played another blue card this turn, choose 3. Otherwise, choose 1;\n- Create 2 Crouching Tigers in your hand.\n- Your Crouching Tigers get +1{p} this turn.\n- Transcend",
+  "pitch": 3,
+  "cost": 3,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "MST",
+  "backId": "MST053B"
+ },
+ {
+  "id": "MST053B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST054",
+  "name": "Wind Chakra",
+  "cardType": "action",
+  "text": "The next Crouching Tiger you play this turn gets +3{p}. If you've transcended this turn, instead it gets +5{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST055",
+  "name": "Wind Chakra",
+  "cardType": "action",
+  "text": "The next Crouching Tiger you play this turn gets +2{p}. If you've transcended this turn, instead it gets +4{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST056",
+  "name": "Wind Chakra",
+  "cardType": "action",
+  "text": "The next Crouching Tiger you play this turn gets +2{p}. If you've transcended this turn, instead it gets +4{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST057",
+  "name": "Companion of the Claw",
+  "cardType": "action",
+  "text": "When this attacks, if you've pitched a blue card this turn, create a Crouching Tiger in your hand.\nGo again",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST058",
+  "name": "Companion of the Claw",
+  "cardType": "action",
+  "text": "When this attacks, if you've pitched a blue card this turn, create a Crouching Tiger in your hand.\nGo again",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST059",
+  "name": "Companion of the Claw",
+  "cardType": "action",
+  "text": "When this attacks, if you've pitched a blue card this turn, create a Crouching Tiger in your hand.\nGo again",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST060",
+  "name": "Harmony of the Hunt",
+  "cardType": "action",
+  "text": "When this attacks, if you've pitched a blue card this turn, create a Crouching Tiger in your hand.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST061",
+  "name": "Harmony of the Hunt",
+  "cardType": "action",
+  "text": "When this attacks, if you've pitched a blue card this turn, create a Crouching Tiger in your hand.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST062",
+  "name": "Harmony of the Hunt",
+  "cardType": "action",
+  "text": "When this attacks, if you've pitched a blue card this turn, create a Crouching Tiger in your hand.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST063",
+  "name": "Tiger Form Incantation",
+  "cardType": "action",
+  "text": "The next Crouching Tiger you play this turn gets +3{p}.\nIf you've pitched a blue card this turn, create a Crouching Tiger in your hand.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST064",
+  "name": "Tiger Form Incantation",
+  "cardType": "action",
+  "text": "The next Crouching Tiger you play this turn gets +2{p}.\nIf you've pitched a blue card this turn, create a Crouching Tiger in your hand.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST065",
+  "name": "Tiger Form Incantation",
+  "cardType": "action",
+  "text": "The next Crouching Tiger you play this turn gets +1{p}.\nIf you've pitched a blue card this turn, create a Crouching Tiger in your hand.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "mystic",
+   "ninja"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST066",
+  "name": "Traverse the Universe",
+  "cardType": "equipment",
+  "text": "When this defends, search your deck for an Inner Chi, reveal it, put it into your hand, then shuffle.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST067",
+  "name": "Aqua Seeing Shell",
+  "cardType": "equipment",
+  "text": "Cloaked\nInstant - {r}{r}{r}, turn this face-up: Draw a card.\nAt the start of your turn, destroy this.",
+  "defense": 1,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Cloaked"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST068",
+  "name": "Koi Blessed Kimono",
+  "cardType": "equipment",
+  "text": "Cloaked\nWhile this is equipped face-down, at the start of your turn, if you have exactly 1{h}, you may turn this face-up.\nWhen this is turned face-up, destroy it. Search your deck for an Inner Chi, reveal it, put it into your hand, then shuffle.",
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Cloaked"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST069",
+  "name": "Waves of Aqua Marine",
+  "cardType": "equipment",
+  "text": "Cloaked\nAttack Reaction - {r}, turn this face-up: Target attack gets +1{p}.\nAt the start of your turn, destroy this.",
+  "defense": 1,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Cloaked"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST070",
+  "name": "Aqua Laps",
+  "cardType": "equipment",
+  "text": "Cloaked\nAttack Reaction - {r}, turn this face up: Target attack gets go again.\nAt the start of your turn, destroy this.",
+  "defense": 1,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Cloaked"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST071",
+  "name": "Skycrest Keikoi",
+  "cardType": "equipment",
+  "text": "Cloaked\nInstant - Destroy this: Prevent the next 1 damage that would be dealt to you this turn. Activate this ability only while this is face-down.",
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Cloaked"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST072",
+  "name": "Skybody Keikoi",
+  "cardType": "equipment",
+  "text": "Cloaked\nInstant - Destroy this: Prevent the next 1 damage that would be dealt to you this turn. Activate this ability only while this is face-down.",
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Cloaked"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST073",
+  "name": "Skyhold Keikoi",
+  "cardType": "equipment",
+  "text": "Cloaked\nInstant - Destroy this: Prevent the next 1 damage that would be dealt to you this turn. Activate this ability only while this is face-down.",
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Cloaked"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST074",
+  "name": "Skywalker Keikoi",
+  "cardType": "equipment",
+  "text": "Cloaked\nInstant - Destroy this: Prevent the next 1 damage that would be dealt to you this turn. Activate this ability only while this is face-down.",
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Cloaked"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST075",
+  "name": "Attune with Cosmic Vibrations",
+  "cardType": "action",
+  "text": "When this attacks a hero or defends a hero's attack, reveal the top card of their deck. If the revealed card is blue, this gets +3{p} and +3{d}.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST076",
+  "name": "Cosmic Awakening",
+  "cardType": "action",
+  "text": "If 1 Chi was pitched to play this, Cosmic Awakening's {p} is 10.\nIf 2 Chi were pitched to play this, Cosmic Awakening's {p} is 15.\nIf 3 or more Chi were pitched to play this, Cosmic Awakening's {p} is 20.",
+  "pitch": 3,
+  "cost": 9,
+  "defense": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST077",
+  "name": "Levels of Enlightenment",
+  "cardType": "action",
+  "text": "When this attacks, choose 1 for each blue card you've pitched this turn;\n- Draw a card.\n- This gets +2{p}.\n- This gets go again.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST078",
+  "name": "Unravel Aggression",
+  "cardType": "defense-reaction",
+  "text": "If a Chi was pitched to play this, draw a card.",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 5,
+  "classes": [
+   "mystic"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST079",
+  "name": "Dense Blue Mist",
+  "cardType": "instant",
+  "text": "Attacks that target you this turn get -1{p}.\nIf a Chi was pitched to play this, effects don't trigger if an attack hits you this turn.",
+  "pitch": 3,
+  "cost": 1,
+  "classes": [
+   "mystic"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST080",
+  "name": "Orihon of Mystic Tenets",
+  "cardType": "instant",
+  "text": "Legendary\nDraw 2 cards. If a Chi was pitched to play this, instead draw 3 cards.",
+  "pitch": 3,
+  "cost": 4,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Legendary"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST081",
+  "name": "Second Tenet of Chi: Moon",
+  "cardType": "action",
+  "text": "If you've transcended this turn, this gets \"When this chain link resolves, draw a card.\"",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST082",
+  "name": "Second Tenet of Chi: Tide",
+  "cardType": "action",
+  "text": "If you've transcended this turn, this gets +2{p}.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST083",
+  "name": "Second Tenet of Chi: Wind",
+  "cardType": "action",
+  "text": "If you've transcended this turn, this gets go again.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST084",
+  "name": "Deep Blue Sea",
+  "cardType": "action",
+  "text": "This gets +1{p} for each blue card you've pitched this turn.",
+  "pitch": 3,
+  "cost": 4,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST085",
+  "name": "Wide Blue Yonder",
+  "cardType": "attack-reaction",
+  "text": "Target attack gets +1{p} for each blue card you've pitched this turn.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "mystic"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST086",
+  "name": "Big Blue Sky",
+  "cardType": "defense-reaction",
+  "text": "This gets +1{d} for each blue card you've pitched this turn.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "mystic"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST087",
+  "name": "Droplet",
+  "cardType": "action",
+  "text": "If you've played another blue card this turn, this gets +2{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST088",
+  "name": "Rising Tide",
+  "cardType": "action",
+  "text": "If you've played another blue card this turn, this gets +2{p}.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST089",
+  "name": "Spillover",
+  "cardType": "action",
+  "text": "If you've played another blue card this turn, this gets +2{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST090",
+  "name": "Tidal Surge",
+  "cardType": "action",
+  "text": "If you've played another blue card this turn, this gets +2{p}.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST091",
+  "name": "Wash Away",
+  "cardType": "defense-reaction",
+  "text": "If you've played another blue card this turn, this gets +2{d}.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "mystic"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST092",
+  "name": "First Tenet of Chi: Moon",
+  "cardType": "action",
+  "text": "Your next blue attack this turn gets \"When this attacks, draw a card.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST093",
+  "name": "First Tenet of Chi: Tide",
+  "cardType": "action",
+  "text": "Your next blue attack this turn gets +2{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST094",
+  "name": "First Tenet of Chi: Wind",
+  "cardType": "action",
+  "text": "The next blue action card you play this turn gets go again.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST095",
+  "name": "A Drop in the Ocean",
+  "cardType": "instant",
+  "text": "Legendary\nTarget attack gets -1{p}.\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "MST",
+  "backId": "MST095B"
+ },
+ {
+  "id": "MST095B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST096",
+  "name": "Homage to Ancestors",
+  "cardType": "instant",
+  "text": "Legendary\nGain 1{h}\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "MST",
+  "backId": "MST096B"
+ },
+ {
+  "id": "MST096B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST097",
+  "name": "Pass Over",
+  "cardType": "instant",
+  "text": "Legendary\nBanish target card from an opposing hero's graveyard.\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "MST",
+  "backId": "MST097B"
+ },
+ {
+  "id": "MST097B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST098",
+  "name": "Path Well Traveled",
+  "cardType": "instant",
+  "text": "Legendary\nTarget attack gets go again.\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "MST",
+  "backId": "MST098B"
+ },
+ {
+  "id": "MST098B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST099",
+  "name": "Preserve Tradition",
+  "cardType": "instant",
+  "text": "Legendary\nPut target action card from your graveyard on the bottom of your deck.\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "MST",
+  "backId": "MST099B"
+ },
+ {
+  "id": "MST099B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST100",
+  "name": "Rising Sun, Setting Moon",
+  "cardType": "instant",
+  "text": "Legendary\nDraw a card, then put a card from your hand on the bottom of your deck.\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "MST",
+  "backId": "MST100B"
+ },
+ {
+  "id": "MST100B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST101",
+  "name": "Stir the Pot",
+  "cardType": "instant",
+  "text": "Legendary\nShuffle.\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "MST",
+  "backId": "MST101B"
+ },
+ {
+  "id": "MST101B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST102",
+  "name": "The Grain that Tips the Scale",
+  "cardType": "instant",
+  "text": "Legendary\nTarget attack gets +1{p}.\nIf you've played another blue card this turn, transcend.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mystic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Transcend"
+  ],
+  "set": "MST",
+  "backId": "MST102B"
+ },
+ {
+  "id": "MST102B",
+  "name": "Inner Chi",
+  "cardType": "resource",
+  "text": "",
+  "pitch": 3,
+  "classes": [
+   "mystic"
+  ],
+  "subtypes": [
+   "chi"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST103",
+  "name": "Bonds of Agony",
+  "cardType": "action",
+  "text": "Stealth\nIf you've played or activated 3 or more attack reactions this chain link, this gets +3{p} and \"When this hits a hero, look at their hand and choose a card. Search their hand, deck, and graveyard and banish up to 3 cards with the same name as the chosen card. They shuffle.\"",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST104",
+  "name": "Persuasive Prognosis",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, banish the top card of their deck. Then look at their hand and banish a card with the same color as the banished card.\nWhenever this banishes an action card, gain 1{h}.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST105",
+  "name": "Just a Nick",
+  "cardType": "attack-reaction",
+  "text": "Choose 1 or both;\n- Target attack action card with 1 or less base {p} gets +5{p}.\n- Target attack with stealth gets \"When this hits a hero, banish the top card of their deck.\"",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST106",
+  "name": "Art of Desire: Body",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, banish the top card of their deck.\nWhenever this banishes a red card, draw a card and gain 1{h}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST107",
+  "name": "Art of Desire: Soul",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, banish the top card of their deck.\nWhenever this banishes a yellow card, draw a card and gain 1{h}.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST108",
+  "name": "Art of Desire: Mind",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, banish the top card of their deck.\nWhenever this banishes a blue card, draw a card and gain 1{h}.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST109",
+  "name": "Bonds of Attraction",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, banish the top card of their deck, then banish a card from their graveyard.\nWhenever this banishes a card and this has banished another card with the same color, gain 1{h}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST110",
+  "name": "Bonds of Attraction",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, banish the top card of their deck, then banish a card from their graveyard.\nWhenever this banishes a card and this has banished another card with the same color, gain 1{h}.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST111",
+  "name": "Bonds of Attraction",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, banish the top card of their deck, then banish a card from their graveyard.\nWhenever this banishes a card and this has banished another card with the same color, gain 1{h}.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST112",
+  "name": "Double Trouble",
+  "cardType": "action",
+  "text": "Stealth\nIf you've played or activated 2 or more attack reactions this chain link, this gets +2{p} and \"When this hits a hero, banish the top 2 cards of their deck.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST113",
+  "name": "Double Trouble",
+  "cardType": "action",
+  "text": "Stealth\nIf you've played or activated 2 or more attack reactions this chain link, this gets +2{p} and \"When this hits a hero, banish the top 2 cards of their deck.\"",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST114",
+  "name": "Double Trouble",
+  "cardType": "action",
+  "text": "Stealth\nIf you've played or activated 2 or more attack reactions this chain link, this gets +2{p} and \"When this hits a hero, banish the top 2 cards of their deck.\"",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST115",
+  "name": "Bonds of Memory",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, banish the top card of their deck, then banish a card from their graveyard.\nWhenever this banishes a card and this has banished another card with the same name, gain 1{h}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST116",
+  "name": "Bonds of Memory",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, banish the top card of their deck, then banish a card from their graveyard.\nWhenever this banishes a card and this has banished another card with the same name, gain 1{h}.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST117",
+  "name": "Bonds of Memory",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, banish the top card of their deck, then banish a card from their graveyard.\nWhenever this banishes a card and this has banished another card with the same name, gain 1{h}.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST118",
+  "name": "Desires of Flesh",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, banish the top card of their deck.\nWhenever this banishes an attack action card, gain 1{h}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST119",
+  "name": "Desires of Flesh",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, banish the top card of their deck.\nWhenever this banishes an attack action card, gain 1{h}.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST120",
+  "name": "Desires of Flesh",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, banish the top card of their deck.\nWhenever this banishes an attack action card, gain 1{h}.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST121",
+  "name": "Impulsive Desire",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, banish the top card of their deck.\nWhenever this banishes a reaction or instant card, gain 1{h}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST122",
+  "name": "Impulsive Desire",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, banish the top card of their deck.\nWhenever this banishes a reaction or instant card, gain 1{h}.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST123",
+  "name": "Impulsive Desire",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, banish the top card of their deck.\nWhenever this banishes a reaction or instant card, gain 1{h}.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST124",
+  "name": "Mind's Desire",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, banish the top card of their deck.\nWhenever this banishes a non-attack action card, gain 1{h}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST125",
+  "name": "Mind's Desire",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, banish the top card of their deck.\nWhenever this banishes a non-attack action card, gain 1{h}.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST126",
+  "name": "Mind's Desire",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, banish the top card of their deck.\nWhenever this banishes a non-attack action card, gain 1{h}.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST127",
+  "name": "Pick to Pieces",
+  "cardType": "action",
+  "text": "Stealth\nIf you've played or activated an attack reaction this chain link, this gets +1{p} and \"Damage that would be dealt by this can't be prevented.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST128",
+  "name": "Pick to Pieces",
+  "cardType": "action",
+  "text": "Stealth\nIf you've played or activated an attack reaction this chain link, this gets +1{p} and \"Damage that would be dealt by this can't be prevented.\"",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST129",
+  "name": "Pick to Pieces",
+  "cardType": "action",
+  "text": "Stealth\nIf you've played or activated an attack reaction this chain link, this gets +1{p} and \"Damage that would be dealt by this can't be prevented.\"",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST130",
+  "name": "Cosmo, Scroll of Ancestral Tapestry",
+  "cardType": "weapon",
+  "text": "During your turn, auras you control with ward are weapons with base {p} equal to their ward and Once per Turn Action - {r}: Attack\nYour aura attacks with one or more +1{p} counters get go again.",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "scroll",
+   "2h"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST131",
+  "name": "10,000 Year Reunion",
+  "cardType": "action",
+  "text": "You may remove three +1{p} counters from among auras you control rather than pay 10,000 Year Reunion's {r} cost.\nWard 10",
+  "pitch": 1,
+  "cost": 8,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 10"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST132",
+  "name": "Rage Specter",
+  "cardType": "action",
+  "text": "When this enters the arena, if you control no other Illusionist auras, gain 1 action point.\nDuring your turn, this has ward 6. Otherwise, this has ward 1.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1",
+   "Ward 6"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST133",
+  "name": "Restless Coalescence",
+  "cardType": "instant",
+  "text": "When this enters the arena, move any number of +1{p} counters from auras you control onto this.\nOnce per Turn Instant - Remove a +1{p} counter from this: Create a Spectral Shield token.\nWard 2",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 2"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST134",
+  "name": "Astral Etchings",
+  "cardType": "action",
+  "text": "Put three +1{p} counters on target aura with ward you control.\nIf you control a Spectral Shield, you may play this as though it were an instant.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST135",
+  "name": "Astral Etchings",
+  "cardType": "action",
+  "text": "Put two +1{p} counters on target aura with ward you control.\nIf you control a Spectral Shield, you may play this as though it were an instant.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST136",
+  "name": "Astral Etchings",
+  "cardType": "action",
+  "text": "Put a +1{p} counter on target aura with ward you control.\nIf you control a Spectral Shield, you may play this as though it were an instant.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST137",
+  "name": "Essence of Ancestry: Body",
+  "cardType": "action",
+  "text": "When this leaves the arena, if you control no Illusionist auras, the next time you would be dealt damage by a red source this turn, prevent it.\nWard 2",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 2"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST138",
+  "name": "Essence of Ancestry: Soul",
+  "cardType": "action",
+  "text": "When this leaves the arena, if you control no Illusionist auras, the next time you would be dealt damage by a yellow source this turn, prevent it.\nWard 2",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 2"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST139",
+  "name": "Essence of Ancestry: Mind",
+  "cardType": "action",
+  "text": "When this leaves the arena, if you control no Illusionist auras, the next time you would be dealt damage by a blue source this turn, prevent it.\nWard 2",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 2"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST140",
+  "name": "Haunting Specter",
+  "cardType": "action",
+  "text": "When this leaves the arena, create a Spectral Shield token, then if you control no other Illusionist auras, put a +1{p} counter on it.\nWard 4",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 4"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST141",
+  "name": "Haunting Specter",
+  "cardType": "action",
+  "text": "When this leaves the arena, create a Spectral Shield token, then if you control no other Illusionist auras, put a +1{p} counter on it.\nWard 3",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 3"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST142",
+  "name": "Haunting Specter",
+  "cardType": "action",
+  "text": "When this leaves the arena, create a Spectral Shield token, then if you control no other Illusionist auras, put a +1{p} counter on it.\nWard 2",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 2"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST143",
+  "name": "Sigil of Solitude",
+  "cardType": "action",
+  "text": "At the start of your turn, if you control another Illusionist aura, destroy this.\nWard 4",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 4"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST144",
+  "name": "Sigil of Solitude",
+  "cardType": "action",
+  "text": "At the start of your turn, if you control another Illusionist aura, destroy this.\nWard 3",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 3"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST145",
+  "name": "Sigil of Solitude",
+  "cardType": "action",
+  "text": "At the start of your turn, if you control another Illusionist aura, destroy this.\nWard 2",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 2"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST146",
+  "name": "Single Minded Determination",
+  "cardType": "action",
+  "text": "When this enters the arena, if you control no other Illusionist auras, put three +1{p} counters on this.\nWard 2",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 2"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST147",
+  "name": "Single Minded Determination",
+  "cardType": "action",
+  "text": "When this enters the arena, if you control no other Illusionist auras, put two +1{p} counters on this.\nWard 2",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 2"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST148",
+  "name": "Single Minded Determination",
+  "cardType": "action",
+  "text": "When this enters the arena, if you control no other Illusionist auras, put a +1{p} counter on this.\nWard 2",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 2"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST149",
+  "name": "Solitary Companion",
+  "cardType": "action",
+  "text": "When this enters the arena, if you control no other Illusionist auras, create a Spectral Shield token.\nWard 1",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 3"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST150",
+  "name": "Solitary Companion",
+  "cardType": "action",
+  "text": "When this enters the arena, if you control no other Illusionist auras, create a Spectral Shield token.\nWard 1",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 2"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST151",
+  "name": "Solitary Companion",
+  "cardType": "action",
+  "text": "When this enters the arena, if you control no other Illusionist auras, create a Spectral Shield token.\nWard 1",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST152",
+  "name": "Spectral Manifestations",
+  "cardType": "action",
+  "text": "Create a Spectral Shield token, then if you control no other Illusionist auras, put three +1{p} counters on it.\nGo again",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST153",
+  "name": "Spectral Manifestations",
+  "cardType": "action",
+  "text": "Create a Spectral Shield token, then if you control no other Illusionist auras, put two +1{p} counters on it.\nGo again",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST154",
+  "name": "Spectral Manifestations",
+  "cardType": "action",
+  "text": "Create a Spectral Shield token, then if you control no other Illusionist auras, put a +1{p} counter on it.\nGo again",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST155",
+  "name": "Vengeful Apparition",
+  "cardType": "action",
+  "text": "When this leaves the arena, if you control no Illusionist auras, you may play your next aura with cost 2 or less this turn as though it were an instant. If you do, it enters the arena with a +1{p} counter.\nWard 1",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST156",
+  "name": "Vengeful Apparition",
+  "cardType": "action",
+  "text": "When this leaves the arena, if you control no Illusionist auras, you may play your next aura with cost 1 or less this turn as though it were an instant. If you do, it enters the arena with a +1{p} counter.\nWard 1",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST157",
+  "name": "Vengeful Apparition",
+  "cardType": "action",
+  "text": "When this leaves the arena, if you control no Illusionist auras, you may play your next aura with cost 0 this turn as though it were an instant. If you do, it enters the arena with a +1{p} counter.\nWard 1",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST158",
+  "name": "Spectral Shield",
+  "cardType": "token",
+  "text": "Ward 1",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST159",
+  "name": "Tiger Taming Khakkara",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nWhen this attacks, the next Crouching Tiger you play this combat chain gets +1{p}.",
+  "attack": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "staff",
+   "2h"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST160",
+  "name": "Mask of Wizened Whiskers",
+  "cardType": "equipment",
+  "text": "When this defends, put a card with combo from your graveyard on the bottom of your deck.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST161",
+  "name": "Chase the Tail",
+  "cardType": "action",
+  "text": "Combo - When this attacks, if Crouching Tiger was the last attack this combat chain, this gets go again and the next Crouching Tiger you play this combat chain gets +3{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST162",
+  "name": "Maul",
+  "cardType": "attack-reaction",
+  "text": "Choose 1 or both;\n- Target attack action card with 1 or less base {p} gets +3{p}.\n- Target Crouching Tiger gets \"When this hits, create 2 Crouching Tigers in your banished zone. You may play them this turn.\"",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST163",
+  "name": "Territorial Domain",
+  "cardType": "defense-reaction",
+  "text": "While this is defending, if you've created a Crouching Tiger this turn, this gets +3{d}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST164",
+  "name": "Aspect of Tiger: Body",
+  "cardType": "action",
+  "text": "Combo - When this attacks, if a red attack action card was the last attack this combat chain, this gets go again and create a Crouching Tiger in your banished zone. You may play it this turn.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST165",
+  "name": "Aspect of Tiger: Soul",
+  "cardType": "action",
+  "text": "Combo - When this attacks, if a yellow attack action card was the last attack this combat chain, this gets go again and create a Crouching Tiger in your banished zone. You may play it this turn.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST166",
+  "name": "Aspect of Tiger: Mind",
+  "cardType": "action",
+  "text": "Combo - When this attacks, if a blue attack action card was the last attack this combat chain, this gets go again and create a Crouching Tiger in your banished zone. You may play it this turn.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST167",
+  "name": "Qi Unleashed",
+  "cardType": "action",
+  "text": "Combo - If Crouching Tiger was the last attack this combat chain, this gets +4{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST168",
+  "name": "Qi Unleashed",
+  "cardType": "action",
+  "text": "Combo - If Crouching Tiger was the last attack this combat chain, this gets +4{p}.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST169",
+  "name": "Qi Unleashed",
+  "cardType": "action",
+  "text": "Combo - If Crouching Tiger was the last attack this combat chain, this gets +4{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST170",
+  "name": "Blessing of Qi",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy this, then create a Crouching Tiger in your banished zone. It gains +3{p} and you may play it this turn.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST171",
+  "name": "Blessing of Qi",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy this, then create a Crouching Tiger in your banished zone. It gains +2{p} and you may play it this turn.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST172",
+  "name": "Blessing of Qi",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy this, then create a Crouching Tiger in your banished zone. It gains +1{p} and you may play it this turn.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST173",
+  "name": "Biting Breeze",
+  "cardType": "action",
+  "text": "When this hits, create a Crouching Tiger in your banished zone. You may play it this turn.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST174",
+  "name": "Biting Breeze",
+  "cardType": "action",
+  "text": "When this hits, create a Crouching Tiger in your banished zone. You may play it this turn.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST175",
+  "name": "Biting Breeze",
+  "cardType": "action",
+  "text": "When this hits, create a Crouching Tiger in your banished zone. You may play it this turn.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST176",
+  "name": "Breed Anger",
+  "cardType": "action",
+  "text": "Combo - When this attacks, if Crouching Tiger was the last attack this combat chain, this gets go again and create a Crouching Tiger in your banished zone. You may play it this turn.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST177",
+  "name": "Breed Anger",
+  "cardType": "action",
+  "text": "Combo - When this attacks, if Crouching Tiger was the last attack this combat chain, this gets go again and create a Crouching Tiger in your banished zone. You may play it this turn.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST178",
+  "name": "Breed Anger",
+  "cardType": "action",
+  "text": "Combo - When this attacks, if Crouching Tiger was the last attack this combat chain, this gets go again and create a Crouching Tiger in your banished zone. You may play it this turn.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST179",
+  "name": "Flex Claws",
+  "cardType": "action",
+  "text": "When this hits, create a Crouching Tiger in your banished zone. You may play it this turn.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST180",
+  "name": "Flex Claws",
+  "cardType": "action",
+  "text": "When this hits, create a Crouching Tiger in your banished zone. You may play it this turn.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST181",
+  "name": "Flex Claws",
+  "cardType": "action",
+  "text": "When this hits, create a Crouching Tiger in your banished zone. You may play it this turn.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST182",
+  "name": "Pouncing Qi",
+  "cardType": "action",
+  "text": "Combo - If Crouching Tiger was the last attack this combat chain, this gets +1{p} and go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST183",
+  "name": "Pouncing Qi",
+  "cardType": "action",
+  "text": "Combo - If Crouching Tiger was the last attack this combat chain, this gets +1{p} and go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST184",
+  "name": "Pouncing Qi",
+  "cardType": "action",
+  "text": "Combo - If Crouching Tiger was the last attack this combat chain, this gets +1{p} and go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST185",
+  "name": "Untamed",
+  "cardType": "action",
+  "text": "When this attacks, the next Crouching Tiger you play this combat chain gets +1{p}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST186",
+  "name": "Untamed",
+  "cardType": "action",
+  "text": "When this attacks, the next Crouching Tiger you play this combat chain gets +1{p}.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST187",
+  "name": "Untamed",
+  "cardType": "action",
+  "text": "When this attacks, the next Crouching Tiger you play this combat chain gets +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST188",
+  "name": "Crouching Tiger",
+  "cardType": "action",
+  "text": "Ephemeral\nGo again",
+  "cost": 0,
+  "attack": 0,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Ephemeral",
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST189",
+  "name": "Zen State",
+  "cardType": "token",
+  "text": "This enters the arena with a balance counter. At the beginning of your action phase, destroy this unless you remove a balance counter from it.\nIf you would be dealt damage, prevent 1 of that damage.",
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST190",
+  "name": "Stonewall Gauntlet",
+  "cardType": "equipment",
+  "text": "When this defends an attack with {p} greater than its base, opposing attacks get -1{p} this combat chain.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST191",
+  "name": "Rowdy Locals",
+  "cardType": "action",
+  "text": "If this is defended by an action card, this gets +2{p}.\nWhen this hits a hero, discard a card. If you do, they discard a card.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST192",
+  "name": "The Weakest Link",
+  "cardType": "action",
+  "text": "When this hits a hero, look at their hand and choose a card without base {d}. If you do, they discard it and you draw a card.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST193",
+  "name": "Prismatic Leyline",
+  "cardType": "action",
+  "text": "Your next red attack this turn gets +1{p}, your next yellow gets +2{p}, and your next blue gets +3{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST194",
+  "name": "Blanch",
+  "cardType": "action",
+  "text": "When this hits a hero, cards they own lose all colors until the end of their next turn.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST195",
+  "name": "Blanch",
+  "cardType": "action",
+  "text": "When this hits a hero, cards they own lose all colors until the end of their next turn.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST196",
+  "name": "Blanch",
+  "cardType": "action",
+  "text": "When this hits a hero, cards they own lose all colors until the end of their next turn.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST197",
+  "name": "Emissary of Moon",
+  "cardType": "action",
+  "text": "When this attacks, you may put a card from your hand on the bottom of your deck. If you do, draw a card.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST198",
+  "name": "Emissary of Tides",
+  "cardType": "action",
+  "text": "When this attacks, you may put a card from your hand on the bottom of your deck. If you do, this gets +2{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST199",
+  "name": "Emissary of Wind",
+  "cardType": "action",
+  "text": "When this attacks, you may put a card from your hand on the bottom of your deck. If you do, this gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST200",
+  "name": "Gravekeeping",
+  "cardType": "action",
+  "text": "When this attacks a hero, you may banish a card from their graveyard.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST201",
+  "name": "Gravekeeping",
+  "cardType": "action",
+  "text": "When this attacks a hero, you may banish a card from their graveyard.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST202",
+  "name": "Gravekeeping",
+  "cardType": "action",
+  "text": "When this attacks a hero, you may banish a card from their graveyard.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST203",
+  "name": "Battlefront Bastion",
+  "cardType": "action",
+  "text": "When this defends alone, prevent the next 1 damage that would be dealt to you this turn.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST204",
+  "name": "Battlefront Bastion",
+  "cardType": "action",
+  "text": "When this defends alone, prevent the next 1 damage that would be dealt to you this turn.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST205",
+  "name": "Battlefront Bastion",
+  "cardType": "action",
+  "text": "When this defends alone, prevent the next 1 damage that would be dealt to you this turn.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST206",
+  "name": "Fact-Finding Mission",
+  "cardType": "action",
+  "text": "When this hits a hero, you may look at a face-down card in their arsenal or equipment zones.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST207",
+  "name": "Fact-Finding Mission",
+  "cardType": "action",
+  "text": "When this hits a hero, you may look at a face-down card in their arsenal or equipment zones.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST208",
+  "name": "Fact-Finding Mission",
+  "cardType": "action",
+  "text": "When this hits a hero, you may look at a face-down card in their arsenal or equipment zones.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST209",
+  "name": "Nimble Strike",
+  "cardType": "action",
+  "text": "As an additional cost to play Nimble Strike, you may banish a card named Nimblism from your graveyard. If you do, Nimble Strike gain +1{p} and go again.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST210",
+  "name": "Nimble Strike",
+  "cardType": "action",
+  "text": "As an additional cost to play Nimble Strike, you may banish a card named Nimblism from your graveyard. If you do, Nimble Strike gain +1{p} and go again.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST211",
+  "name": "Nimble Strike",
+  "cardType": "action",
+  "text": "As an additional cost to play Nimble Strike, you may banish a card named Nimblism from your graveyard. If you do, Nimble Strike gain +1{p} and go again.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST212",
+  "name": "Water the Seeds",
+  "cardType": "action",
+  "text": "When this attacks, your next attack this combat chain with 1 or less base {p} gets +1{p}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST213",
+  "name": "Water the Seeds",
+  "cardType": "action",
+  "text": "When this attacks, your next attack this combat chain with 1 or less base {p} gets +1{p}.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST214",
+  "name": "Water the Seeds",
+  "cardType": "action",
+  "text": "When this attacks, your next attack this combat chain with 1 or less base {p} gets +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST215",
+  "name": "Wounding Blow",
+  "cardType": "action",
+  "text": "",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST216",
+  "name": "Wounding Blow",
+  "cardType": "action",
+  "text": "",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST217",
+  "name": "Wounding Blow",
+  "cardType": "action",
+  "text": "",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST218",
+  "name": "Evasive Leap",
+  "cardType": "defense-reaction",
+  "text": "",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST219",
+  "name": "Evasive Leap",
+  "cardType": "defense-reaction",
+  "text": "",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST220",
+  "name": "Evasive Leap",
+  "cardType": "defense-reaction",
+  "text": "",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST221",
+  "name": "Nimblism",
+  "cardType": "action",
+  "text": "The next attack action card with cost 1 or less you play this turn gains +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST222",
+  "name": "Nimblism",
+  "cardType": "action",
+  "text": "The next attack action card with cost 1 or less you play this turn gains +2{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST223",
+  "name": "Nimblism",
+  "cardType": "action",
+  "text": "The next attack action card with cost 1 or less you play this turn gains +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST224",
+  "name": "Cracked Bauble",
+  "cardType": "resource",
+  "text": "(A player may add any number of Cracked Baubles to their card-pool in sealed deck or booster draft formats.)",
+  "pitch": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST225",
+  "name": "Visit Goldmane Estate",
+  "cardType": "action",
+  "text": "Victor Specialization\nCreate a Gold token. Then if you control 3 or more Gold, create that many Might tokens.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "keywords": [
+   "Victor Specialization",
+   "Go again"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST226",
+  "name": "Visit the Golden Anvil",
+  "cardType": "action",
+  "text": "Olympia Specialization\nAs an additional cost to play this, destroy X Gold you control.\nEquip X weapons and/or equipment from your inventory.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Olympia Specialization"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST227",
+  "name": "Supercell",
+  "cardType": "action",
+  "text": "Put X steam counters on X target Hyper Drivers you control.\nCreate a Hyper Driver token with X steam counters.\nIf X is 3 or greater, you may shuffle a Construct Nitro Mechanoid from your banished zone into your deck.",
+  "pitch": 3,
+  "defense": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST228",
+  "name": "Evo Recall",
+  "cardType": "equipment",
+  "text": "If you have a base head equipped, transform it into this, then equip this.\nWhen this is equipped, put up to 1 Mechanologist action card from your banished zone on top of your deck.\nArcane Barrier 1",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 0,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "evo",
+   "head"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST229",
+  "name": "Evo Heartdrive",
+  "cardType": "equipment",
+  "text": "If you have a base chest equipped, transform it into this, then equip this.\nWhen this is equipped, the next attack action card you play this turn costs {r} less to play.\nArcane Barrier 1",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 0,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "evo",
+   "chest"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST230",
+  "name": "Evo Shortcircuit",
+  "cardType": "equipment",
+  "text": "If you have a base arms equipped, transform it into this, then equip this.\nWhen this is equipped, deal 1 damage to any target.\nArcane Barrier 1",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 0,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "evo",
+   "arms"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST231",
+  "name": "Evo Speedslip",
+  "cardType": "equipment",
+  "text": "If you have a base legs equipped, transform it into this, then equip this.\nWhen this is equipped, the next attack action card you play this turn gets boost.\nArcane Barrier 1",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 0,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "evo",
+   "legs"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST232",
+  "name": "Longdraw Half-glove",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this, put 2 cards from your hand and/or arsenal on the bottom of your deck: Your next arrow attack this turn gets +4{p}.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST233",
+  "name": "Murky Water",
+  "cardType": "action",
+  "text": "Riptide Specialization\nIf this has an aim counter, it gets +1{p} and dominate.\nWhen this hits, you may banish 3 traps with cost 0 or more from your graveyard face-down. If you do, choose one at random and put it into your arsenal.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Riptide Specialization",
+   "Dominate"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST234",
+  "name": "Kindle",
+  "cardType": "instant",
+  "text": "Amp 1\nIf you have no cards in hand, draw a card.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Amp 1"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST235",
+  "name": "Dust from Stillwater Shrine",
+  "cardType": "action",
+  "text": "Material - While this is under a permanent other than Miragai, that permanent has phantasm.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "draconic",
+   "ash"
+  ],
+  "keywords": [
+   "Material"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST236",
+  "name": "Shadowrealm Horror",
+  "cardType": "action",
+  "text": "As an additional cost to play this, banish 3 random cards in your graveyard.\nIf 1 or more cards with 6 or more {p} are banished this way, this gets +1{p}. 2 or more, this gets go again. 3 or more, you may play a card banished this way this turn.\nBlood Debt",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Blood Debt"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST237",
+  "name": "Eloquent Eulogy",
+  "cardType": "action",
+  "text": "Rune Gate\nWhen the combat chain closes, if a hero has lost {h} this turn, create an Eloquence token.\nBlood Debt",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Rune Gate",
+   "Blood Debt"
+  ],
+  "set": "MST"
+ },
+ {
+  "id": "MST238",
+  "name": "Enigma, New Moon",
+  "cardType": "hero",
+  "text": "Equipment you own gets cloaked\nInstant - {c}{c}{c}: Turn target face-down equipment you have equipped face-up. If it has ward, create 3 Spectral Shield tokens.",
+  "classes": [
+   "mystic",
+   "illusionist"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "MST"
+ }
+]

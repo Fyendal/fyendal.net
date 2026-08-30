@@ -1,0 +1,644 @@
+[
+ {
+  "id": "SAR001",
+  "name": "Arakni, Web of Deceit",
+  "cardType": "hero",
+  "text": "Your attacks with stealth that are attacking a marked hero get +1{p} and \"When this hits, this gets go again.\"\nAt the beginning of your end phase, if an opponent is marked, you become a random Agent of Chaos.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "SAR"
+ },
+ {
+  "id": "SAR002",
+  "name": "Mark of the Huntsman",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nWhen this hits a hero, you may choose to destroy this and mark them.\nIf this is attacking a marked hero, this gets +1{p}.",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Mark"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR003",
+  "name": "Prey Spotters",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy this: Mark target opposing hero.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR004",
+  "name": "Topsy Turvy",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Until end of turn, if one or more cards would be put on top of a deck, instead they're put on the bottom.\nArcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "chaos"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR005",
+  "name": "Blossom of Spring",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Gain {r}. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR006",
+  "name": "Nullrune Robe",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR007",
+  "name": "Danger Digits",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy this: Target dagger you control that isn't on the active chain link deals 1 damage to the defending hero. If damage is dealt this way, the dagger has hit. Destroy the dagger.",
+  "defense": 0,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR008",
+  "name": "Blade Beckoner Boots",
+  "cardType": "equipment",
+  "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR009",
+  "name": "Stalker's Steps",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy this: Target attack with stealth gets go again\nArcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR010",
+  "name": "Art of Desire: Body",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, banish the top card of their deck.\nWhenever this banishes a red card, draw a card and gain 1{h}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR011",
+  "name": "Concoct Disorder",
+  "cardType": "action",
+  "text": "When this attacks, each hero puts the top card of their deck face-down into their arsenal. If 2 or more cards are put into arsenals this way, this gets go again.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "chaos"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR012",
+  "name": "Hyper Inflation",
+  "cardType": "action",
+  "text": "When this attacks, cards cost {r} more to play this turn.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "chaos"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR013",
+  "name": "Infect",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, create a Bloodrot Pox token under their control.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR014",
+  "name": "Mark of the Black Widow",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a marked hero, they banish a card from their hand.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR015",
+  "name": "Mark of the Funnel Web",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a marked hero, banish a card in their arsenal.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR016",
+  "name": "Mark the Prey",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, mark them.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth",
+   "Mark"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR017",
+  "name": "Pick Up the Point",
+  "cardType": "action",
+  "text": "When this attacks, you may retrieve a dagger from your graveyard.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Retrieve"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR018",
+  "name": "Orb-Weaver Spinneret",
+  "cardType": "action",
+  "text": "Equip a Graphene Chelicera token.\nYour next attack with stealth this turn gets +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR019",
+  "name": "Scar Tissue",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +3{p} and \"When this hits a hero, mark them.\"",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR020",
+  "name": "Spike with Bloodrot",
+  "cardType": "attack-reaction",
+  "text": "Target attack action card with stealth gains +3{p} and \"When this hits a hero, create a Bloodrot Pox token under their control.\"",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR021",
+  "name": "Stains of the Redback",
+  "cardType": "attack-reaction",
+  "text": "If the defending hero is marked, this costs {r} less to play.\nTarget attack with stealth gets +3{p} and go again.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR022",
+  "name": "Two Sides to the Blade",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target dagger attack gets +3{p}.\n- Target attack action card with stealth gets +3{p} and \"When this hits a hero, mark them.\"",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR023",
+  "name": "Den of the Spider",
+  "cardType": "defense-reaction",
+  "text": "When this defends an attack with {p} greater than its base, mark the attacking hero.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR024",
+  "name": "Frailty Trap",
+  "cardType": "defense-reaction",
+  "text": "When this defends an attack with go again, create a Frailty token under the attacking hero's control.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR025",
+  "name": "Inertia Trap",
+  "cardType": "defense-reaction",
+  "text": "When this defends an attack with {p} greater than its base, create an Inertia token under the attacking hero's control.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR026",
+  "name": "Lair of the Spider",
+  "cardType": "defense-reaction",
+  "text": "When this defends an attack with go again, mark the attacking hero.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "keywords": [
+   "Mark"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR027",
+  "name": "Up Sticks and Run",
+  "cardType": "action",
+  "text": "You may retrieve a dagger from your graveyard.\nYour next dagger attack this turn gets +4{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "keywords": [
+   "Go again",
+   "Retrieve"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR028",
+  "name": "Art of Desire: Mind",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a hero, banish the top card of their deck.\nWhenever this banishes a blue card, draw a card and gain 1{h}.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR029",
+  "name": "Mark of the Black Widow",
+  "cardType": "action",
+  "text": "Stealth\nWhen this hits a marked hero, they banish a card from their hand.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR030",
+  "name": "Reaper's Call",
+  "cardType": "action",
+  "text": "Stealth\nInstant - Discard this: Mark target opposing hero.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Stealth"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR031",
+  "name": "Night's Embrace",
+  "cardType": "attack-reaction",
+  "text": "Your attacks with stealth get +1{p} this turn.",
+  "pitch": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR032",
+  "name": "Shred",
+  "cardType": "attack-reaction",
+  "text": "Target card defending an Assassin attack gets -2{d} this combat chain.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR033",
+  "name": "Graphene Chelicera",
+  "cardType": "weapon",
+  "text": "Stealth\nOnce per Turn Action - {r}: Attack\nWhen this attacks a marked hero, the attack gets go again.",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Stealth",
+   "Go again"
+  ],
+  "set": "SAR"
+ },
+ {
+  "id": "SAR034",
+  "name": "Arakni, Black Widow",
+  "cardType": "hero",
+  "text": "Once per Turn Attack Reaction - Discard an Assassin card: Target Assassin attack gets +3{p}. If it has stealth, it gets \"When this hits a hero, they banish a card from their hand.\"\nAt the beginning of your end phase, return to the brood.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "intellect": 4,
+  "set": "SAR"
+ },
+ {
+  "id": "SAR035",
+  "name": "Arakni, Funnel Web",
+  "cardType": "hero",
+  "text": "Once per Turn Attack Reaction - Discard an Assassin card: Target Assassin attack gets +3{p}. If it has stealth, it gets \"When this hits a hero, banish a card in their arsenal.\"\nAt the beginning of your end phase, return to the brood.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "intellect": 4,
+  "set": "SAR"
+ },
+ {
+  "id": "SAR036",
+  "name": "Arakni, Orb-Weaver",
+  "cardType": "hero",
+  "text": "Graphene Chelicerae cost you {r} less to activate.\nOnce per Turn Instant - Discard an Assassin card: Equip a Graphene Chelicera token. Your next attack with stealth this turn gets +3{p}.\nAt the beginning of your end phase, return to the brood.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "intellect": 4,
+  "set": "SAR"
+ },
+ {
+  "id": "SAR037",
+  "name": "Arakni, Redback",
+  "cardType": "hero",
+  "text": "Once per Turn Attack Reaction - Discard an Assassin card: Target Assassin attack gets +3{p}. If it has stealth, it gets go again.\nAt the beginning of your end phase, return to the brood.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "intellect": 4,
+  "set": "SAR"
+ },
+ {
+  "id": "SAR038",
+  "name": "Arakni, Tarantula",
+  "cardType": "hero",
+  "text": "Whenever a dagger you own hits a hero, they lose 1{h}.\nOnce per Turn Attack Reaction - Discard an Assassin card: Target dagger attack gets +3{p}.\nAt the beginning of your end phase, return to the brood.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "intellect": 4,
+  "set": "SAR"
+ },
+ {
+  "id": "SAR039",
+  "name": "Arakni, Trap-Door",
+  "cardType": "hero",
+  "text": "When you become this, you may search your deck for a card, banish it face-down, then shuffle. If it's a trap, you may play it until the start of your next turn.\nAt the beginning of your end phase, return to the brood.",
+  "classes": [
+   "chaos",
+   "assassin"
+  ],
+  "intellect": 4,
+  "set": "SAR"
+ }
+]

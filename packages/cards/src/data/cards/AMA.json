@@ -1,0 +1,92 @@
+[
+  {
+    "id": "AMA001",
+    "name": "Malice, Domina of the Dead",
+    "cardType": "hero",
+    "text": "Action - {r}, {t}: Until end of turn, you may play target zombie from your graveyard. Go again\nWhenever a zombie you control dies, banish it face-down and create a Corrupted Corpse in your banished zone.",
+    "classes": ["necromancer"],
+    "subtypes": ["shadow"],
+    "life": 40,
+    "intellect": 4,
+    "set": "AMA"
+  },
+  {
+    "id": "AMA002",
+    "name": "Vox Necropolis",
+    "cardType": "weapon",
+    "text": "During your action phase, zombies you've played from a graveyard or banished zone enter the arena tapped and get \"When this enters the arena, attack with it.\"\nZombies you control get \"Action - {r}, {t}: Attack\".",
+    "classes": ["necromancer"],
+    "subtypes": ["shadow", "staff", "2h"],
+    "set": "AMA"
+  },
+  {
+    "id": "AMA003",
+    "name": "Corrupted Crown",
+    "cardType": "equipment",
+    "text": "When this defends, you may banish a card from your hand. If you do, this gets +1{d}.\nBlade Break",
+    "defense": 1,
+    "subtypes": ["shadow", "head"],
+    "keywords": ["Blade Break"],
+    "set": "AMA"
+  },
+  {
+    "id": "AMA005",
+    "name": "Undead Grasp",
+    "cardType": "equipment",
+    "text": "Action - {r}, discard a zombie, destroy this: Your next zombie attack this turn gets +3{p} and \"When this hits, destroy this zombie.\" Go again\nBattleworn",
+    "defense": 1,
+    "classes": ["necromancer"],
+    "subtypes": ["shadow", "arms"],
+    "keywords": ["Battleworn"],
+    "set": "AMA"
+  },
+  {
+    "id": "AMA006",
+    "name": "Mage Master Boots",
+    "cardType": "equipment",
+    "text": "Action - {r}, destroy this: The next non-attack action card you play this turn gets go again. Go again",
+    "defense": 0,
+    "classes": ["generic"],
+    "subtypes": ["legs"],
+    "set": "AMA"
+  },
+  {
+    "id": "AMA011",
+    "name": "Dig for Souls",
+    "cardType": "action",
+    "text": "Look at the top X cards of your deck. You may put a zombie from among them into your graveyard, then put the rest on the bottom of your deck in any order.\nYour next zombie attack this turn gets +4{p} and \"When this hits, destroy this zombie.\"\nGo again",
+    "pitch": 1,
+    "defense": 3,
+    "classes": ["necromancer"],
+    "subtypes": ["shadow"],
+    "keywords": ["Go again"],
+    "set": "AMA"
+  },
+  {
+    "id": "AMA014",
+    "name": "Restless Commander",
+    "cardType": "action",
+    "text": "Zombies you control get +1{p}.\nDecay (At the beginning of your end phase, put a -1{h} counter on this.)",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 3,
+    "classes": ["necromancer"],
+    "subtypes": ["shadow", "zombie", "ally"],
+    "keywords": ["Decay"],
+    "life": 3,
+    "set": "AMA"
+  },
+  {
+    "id": "AMA026",
+    "name": "Shadowrealm Strength",
+    "cardType": "action",
+    "text": "You may put a card from your banished zone into your graveyard. If it's a zombie, your next attack this turn gets +1{p}.\nGo again",
+    "pitch": 3,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["necromancer"],
+    "subtypes": ["shadow"],
+    "keywords": ["Go again"],
+    "set": "AMA"
+  }
+]

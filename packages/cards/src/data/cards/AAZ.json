@@ -1,0 +1,537 @@
+[
+ {
+  "id": "AAZ001",
+  "name": "Azalea, Ace in the Hole",
+  "cardType": "hero",
+  "text": "Once per Turn Action - 0: Put a card from your arsenal on the bottom of your deck. If you do, put the top card of your deck face up into your arsenal. If it's an arrow card, it gains dominate until end of turn. Go again",
+  "classes": [
+   "ranger"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ002",
+  "name": "Death Dealer",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: If you have no cards in your arsenal, you may put an arrow card from your hand face up into your arsenal. If you do, draw a card. Go again",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "bow",
+   "2h"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ003",
+  "name": "Crow's Nest",
+  "cardType": "equipment",
+  "text": "Azalea Specialization\nWhenever an arrow is put face up into your arsenal from your deck, you may pay {r}. If you do, put an aim counter on it.",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "quiver"
+  ],
+  "keywords": [
+   "Azalea Specialization"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ004",
+  "name": "Target Totalizer",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Whenever an arrow with an aim counter hits this turn, draw a card. Go again",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ005",
+  "name": "Hidden Agenda",
+  "cardType": "equipment",
+  "text": "Instant - Turn a face-down arrow in your arsenal face-up: Gain {r}. At the beginning of the end phase, destroy this.\nArcane Barrier 1",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ006",
+  "name": "Sharp Shooters",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Put an arrow from your hand face-up into your arsenal with an aim counter. Go again\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ007",
+  "name": "Flight Path",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy this: Target arrow attack with an aim counter gets go again.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ008",
+  "name": "Barbed Undertow",
+  "cardType": "action",
+  "text": "If Barbed Undertow has an aim counter, it gains \"When this hits a hero, choose red, yellow, or blue. Until the start of your next turn, they can't pitch cards of the chosen color.\"",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ009",
+  "name": "Bolt'n' Shot",
+  "cardType": "action",
+  "text": "If Bolt'n' Shot's {p} is greater than its base {p}, it has go again and \"If this hits, reload.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Reload"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ010",
+  "name": "Drill Shot",
+  "cardType": "action",
+  "text": "If Drill Shot has an aim counter, it has piercing 1.\nWhen this hits a hero, put a -1{d} counter on an equipment they control.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Piercing 1"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ011",
+  "name": "Infecting Shot",
+  "cardType": "action",
+  "text": "If Infecting Shot has an aim counter, it has +1{p}.\nWhen this hits a hero, create a Bloodrot Pox token under their control.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ012",
+  "name": "Ravenous Rabble",
+  "cardType": "action",
+  "text": "When this attacks, reveal the top card of your deck. This gets -X{p}, where X is the pitch value of the card revealed this way.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ013",
+  "name": "Red in the Ledger",
+  "cardType": "action",
+  "text": "Azalea Specialization\nIf Red in the Ledger hits a hero, they can't play or activate more than 1 action during their next turn.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Azalea Specialization"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ014",
+  "name": "Sedation Shot",
+  "cardType": "action",
+  "text": "If Sedation Shot has an aim counter, it has +1{p}.\nWhen this hits a hero, create an Inertia token under their control.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ015",
+  "name": "Sleep Dart",
+  "cardType": "action",
+  "text": "If Sleep Dart hits a hero, they lose all hero card effects and activated abilities until the end of their next turn.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ016",
+  "name": "Stone Rain",
+  "cardType": "action",
+  "text": "If this has an aim counter, it gets dominate and \"When this hits a hero, they banish face-down a card from their hand. At the beginning of their next end phase, they return it to their hand.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Dominate"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ017",
+  "name": "Lace with Bloodrot",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gains +3{p} and \"When this hits a hero, create a Bloodrot Pox token under their control.\"\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ018",
+  "name": "Lace with Frailty",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gains +3{p} and \"When this hits a hero, create a Frailty token under their control.\"\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ019",
+  "name": "Lace with Inertia",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gains +3{p} and \"When this hits a hero, create an Inertia token under their control.\"\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ020",
+  "name": "Point the Tip",
+  "cardType": "action",
+  "text": "Target face up arrow in your arsenal gains +3{p} until end of turn. Put an aim counter on it.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ021",
+  "name": "Read the Glide Path",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gains +3{p}.\nOpt 1\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Opt 1",
+   "Go again"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ022",
+  "name": "Scout the Periphery",
+  "cardType": "action",
+  "text": "Look at the top card of target hero's deck.\nThe next attack action card you play from arsenal this turn gains +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ023",
+  "name": "Spire Sniping",
+  "cardType": "action",
+  "text": "When Spire Sniping is put or turned face up in arsenal, look at the top 2 cards of your deck, then put them back in any order.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ024",
+  "name": "Line It Up",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gets +3{p}.\nYou may turn a face-down arrow in your arsenal face-up. If you do, put an aim counter on it.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ025",
+  "name": "Read the Glide Path",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gains +2{p}.\nOpt 1\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Opt 1",
+   "Go again"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ026",
+  "name": "Memorial Ground",
+  "cardType": "instant",
+  "text": "Put target attack action card with cost 1 or less from your graveyard on top of your deck.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ027",
+  "name": "Infecting Shot",
+  "cardType": "action",
+  "text": "If Infecting Shot has an aim counter, it has +1{p}.\nWhen this hits a hero, create a Bloodrot Pox token under their control.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ028",
+  "name": "Spire Sniping",
+  "cardType": "action",
+  "text": "When Spire Sniping is put or turned face up in arsenal, look at the top 2 cards of your deck, then put them back in any order.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ029",
+  "name": "Nock the Deathwhistle",
+  "cardType": "action",
+  "text": "Azalea Specialization\nSearch your deck for an arrow card, reveal it, then shuffle your deck and put it on top of your deck.\nReload\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Azalea Specialization",
+   "Reload",
+   "Go again"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ030",
+  "name": "Bloodrot Pox",
+  "cardType": "token",
+  "text": "At the beginning of your end phase, destroy Bloodrot Pox, then it deals 2 damage to you unless you pay {r}{r}{r}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ031",
+  "name": "Frailty",
+  "cardType": "token",
+  "text": "Your attack action cards played from arsenal and weapon attacks have -1{p}.\nAt the beginning of your end phase destroy Frailty.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "AAZ"
+ },
+ {
+  "id": "AAZ032",
+  "name": "Inertia",
+  "cardType": "token",
+  "text": "At the beginning of your end phase, destroy Inertia, then put all cards from your hand and arsenal on the bottom of your deck.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "AAZ"
+ }
+]

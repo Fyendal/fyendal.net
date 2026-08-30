@@ -1,0 +1,507 @@
+[
+ {
+  "id": "AZL001",
+  "name": "Azalea",
+  "cardType": "hero",
+  "text": "Once per Turn Action - 0: Put a card from your arsenal on the bottom of your deck. If you do, put the top card of your deck face up into your arsenal. If it's an arrow card, it gains dominate until end of turn. Go again",
+  "classes": [
+   "ranger"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "AZL"
+ },
+ {
+  "id": "AZL002",
+  "name": "Barbed Castaway",
+  "cardType": "weapon",
+  "text": "Once per Turn Instant - {r}: You may put an arrow card from your hand face up into your arsenal.\nOnce per Turn Instant - {r}: You may turn a face down arrow in your arsenal face up. If you do, put an aim counter on it.",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "bow",
+   "2h"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL003",
+  "name": "Crow's Nest",
+  "cardType": "equipment",
+  "text": "Azalea Specialization\nWhenever an arrow is put face up into your arsenal from your deck, you may pay {r}. If you do, put an aim counter on it.",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "quiver"
+  ],
+  "keywords": [
+   "Azalea Specialization"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL004",
+  "name": "Wayfinder's Crest",
+  "cardType": "equipment",
+  "text": "When you defend with Wayfinder's Crest, look at the top card of target hero's deck.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL005",
+  "name": "Threadbare Tunic",
+  "cardType": "equipment",
+  "text": "Instant - Destroy Threadbare Tunic: Gain {r}. Activate this ability only if you have no cards in hand.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL006",
+  "name": "Bracers of Belief",
+  "cardType": "equipment",
+  "text": "Action - Destroy Bracers of Belief: Reveal the top card of your deck. If you do, the next attack action card you play this turn, gains +X{p}, where X is 3 minus the pitch value of the card revealed this way. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL007",
+  "name": "Ironrot Legs",
+  "cardType": "equipment",
+  "text": "Blade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL008",
+  "name": "Falcon Wing",
+  "cardType": "action",
+  "text": "If Falcon Wing has an aim counter, it has +1{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL009",
+  "name": "Infecting Shot",
+  "cardType": "action",
+  "text": "If Infecting Shot has an aim counter, it has +1{p}.\nWhen this hits a hero, create a Bloodrot Pox token under their control.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL010",
+  "name": "Murkmire Grapnel",
+  "cardType": "action",
+  "text": "If Murkmire Grapnel has an aim counter, it has +1{p}.\nDamage that would be dealt by Murkmire Grapnel can't be prevented.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL011",
+  "name": "Salvage Shot",
+  "cardType": "action",
+  "text": "When this hits, put it on the bottom of its owner's deck.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL012",
+  "name": "Sedation Shot",
+  "cardType": "action",
+  "text": "If Sedation Shot has an aim counter, it has +1{p}.\nWhen this hits a hero, create an Inertia token under their control.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL013",
+  "name": "Skybound Shot",
+  "cardType": "action",
+  "text": "If Skybound Shot has an aim counter, it has +1{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL014",
+  "name": "Spire Sniping",
+  "cardType": "action",
+  "text": "When Spire Sniping is put or turned face up in arsenal, look at the top 2 cards of your deck, then put them back in any order.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL015",
+  "name": "Widowmaker",
+  "cardType": "action",
+  "text": "Defense reactions can't be played to Widowmaker's chain link.\nIf Widowmaker is defended by fewer than 2 cards, it has +3{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL016",
+  "name": "Withering Shot",
+  "cardType": "action",
+  "text": "If Withering Shot has an aim counter, it has +1{p}.\nWhen this hits a hero, create a Frailty token under their control.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL017",
+  "name": "Ravenous Rabble",
+  "cardType": "action",
+  "text": "When this attacks, reveal the top card of your deck. This gets -X{p}, where X is the pitch value of the card revealed this way.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL018",
+  "name": "Seek Horizon",
+  "cardType": "action",
+  "text": "As an additional cost to play Seek Horizon, you may put a card from your hand on top of your deck. If you do, Seek Horizon gains go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL019",
+  "name": "Fletch a Red Tail",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gains +4{p}.\nIf it has an aim counter, it gains \"Red cards have -1{d} while defending this.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL020",
+  "name": "Scout the Periphery",
+  "cardType": "action",
+  "text": "Look at the top card of target hero's deck.\nThe next attack action card you play from arsenal this turn gains +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL021",
+  "name": "Sedation Shot",
+  "cardType": "action",
+  "text": "If Sedation Shot has an aim counter, it has +1{p}.\nWhen this hits a hero, create an Inertia token under their control.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL022",
+  "name": "Spire Sniping",
+  "cardType": "action",
+  "text": "When Spire Sniping is put or turned face up in arsenal, look at the top 2 cards of your deck, then put them back in any order.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL023",
+  "name": "Falcon Wing",
+  "cardType": "action",
+  "text": "If Falcon Wing has an aim counter, it has +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL024",
+  "name": "Sedation Shot",
+  "cardType": "action",
+  "text": "If Sedation Shot has an aim counter, it has +1{p}.\nWhen this hits a hero, create an Inertia token under their control.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL025",
+  "name": "Spire Sniping",
+  "cardType": "action",
+  "text": "When Spire Sniping is put or turned face up in arsenal, look at the top 2 cards of your deck, then put them back in any order.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL026",
+  "name": "Scout the Periphery",
+  "cardType": "action",
+  "text": "Look at the top card of target hero's deck.\nThe next attack action card you play from arsenal this turn gains +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL027",
+  "name": "Toxicity",
+  "cardType": "action",
+  "text": "The next Assassin or Ranger attack action card you play this turn gains \"When this hits a hero, they lose 3{h}.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL028",
+  "name": "Bloodrot Pox",
+  "cardType": "token",
+  "text": "At the beginning of your end phase, destroy Bloodrot Pox, then it deals 2 damage to you unless you pay {r}{r}{r}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL029",
+  "name": "Frailty",
+  "cardType": "token",
+  "text": "Your attack action cards played from arsenal and weapon attacks have -1{p}.\nAt the beginning of your end phase destroy Frailty.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "AZL"
+ },
+ {
+  "id": "AZL030",
+  "name": "Inertia",
+  "cardType": "token",
+  "text": "At the beginning of your end phase, destroy Inertia, then put all cards from your hand and arsenal on the bottom of your deck.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "AZL"
+ }
+]

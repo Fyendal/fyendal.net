@@ -1,0 +1,553 @@
+[
+ {
+  "id": "AZS001",
+  "name": "Zyggy Starlight",
+  "cardType": "hero",
+  "text": "Instant - {r}{r}, {t}, destroy a Lightning Flow you control, banish another Lightning aura permanent you control with no holo counters: Return the banished aura to the arena with a holo counter.",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "AZS"
+ },
+ {
+  "id": "AZS002",
+  "name": "Aphrodias",
+  "cardType": "weapon",
+  "text": "Instant - {r}, {t}: Deal 2 arcane damage to target hero. Activate this only if an aura with a holo counter has entered the arena under your control this turn.",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "orb",
+   "2h"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS003",
+  "name": "Starfield Veil",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: The next aura you play this turn enters the arena with a holo counter. Activate this only if an attack has fragmented this turn.\nGuardwell",
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "head"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS004",
+  "name": "Starfield Carapace",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Until end of turn, an Aphrodias you control costs {r} less to activate and gets \"Whenever this deals damage to an opposing hero, create a Lightning Flow token.\"\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS005",
+  "name": "Starfield Touch",
+  "cardType": "equipment",
+  "text": "Instant - {r}, destroy this: {u} an Aphrodias you control.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS006",
+  "name": "Blitz Kicks",
+  "cardType": "equipment",
+  "text": "Instant - {r}, destroy this: Create an Embodiment of Lightning token. Activate this only if you've played an instant card this turn.\nArcane Barrier 1",
+  "defense": 0,
+  "subtypes": [
+   "lightning",
+   "legs"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS007",
+  "name": "Blink of an Eye",
+  "cardType": "action",
+  "text": "Whenever this fragments, you may banish a Lightning aura permanent you control with no holo counters, then return it to the arena with a holo counter.\nFragment",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS008",
+  "name": "Ebbing Arcstride",
+  "cardType": "action",
+  "text": "Whenever this fragments, it gets go again.\nFragment",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Fragment"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS009",
+  "name": "Flowing Stormstrike",
+  "cardType": "action",
+  "text": "Twice per Turn Instant - {r}: This gets +1{p}.\nWhen this hits, create a Lightning Flow token.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS010",
+  "name": "Miraging Metamorph",
+  "cardType": "action",
+  "text": "Phantasm\nWhen Miraging Metamorph is destroyed, create a token that's a copy of an aura you control.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Phantasm"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS011",
+  "name": "Polarus Pulse Ray",
+  "cardType": "action",
+  "text": "Whenever this fragments, deal 1 arcane damage to the defending hero.\nFragment",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS012",
+  "name": "Scattering Conflux",
+  "cardType": "action",
+  "text": "Whenever this fragments, create an Embodiment of Lightning token.\nFragment",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS013",
+  "name": "Shattering Flowtide",
+  "cardType": "action",
+  "text": "Whenever this fragments, create a Lightning Flow token.\nFragment",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS014",
+  "name": "Shattering Stardust",
+  "cardType": "action",
+  "text": "Whenever this fragments, amp 1.\nWhen this hits a hero, you may banish a lightning aura permanent you control with no holo counters, then return it to the arena with a holo counter.\nFragment",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Amp 1",
+   "Fragment"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS015",
+  "name": "Auric Shards",
+  "cardType": "instant",
+  "text": "When this enters the arena, up to 1 target attack with fragment gets +1{p}. If this has a holo counter, instead the attack gets +4{p}.\nWard 1",
+  "pitch": 1,
+  "cost": 1,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS016",
+  "name": "Corrosive Space Dust",
+  "cardType": "instant",
+  "text": "When this leaves the arena, deal 1 arcane damage to target hero.\nWard X, where X is 4 if this has a holo counter. Otherwise, X is 1.",
+  "pitch": 1,
+  "cost": 1,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Ward X"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS017",
+  "name": "Stardust Spike",
+  "cardType": "instant",
+  "text": "When this leaves the arena, gain {r} and amp 1.\nWard 2",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Amp 1",
+   "Ward 2"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS018",
+  "name": "Circular Flowtide",
+  "cardType": "instant",
+  "text": "When this leaves the arena, create a Lightning Flow token.\nWard 2",
+  "pitch": 2,
+  "cost": 1,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Ward 2"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS019",
+  "name": "Elliptical Conflux",
+  "cardType": "instant",
+  "text": "When this leaves the arena, create an Embodiment of Lightning token.\nWard 2",
+  "pitch": 2,
+  "cost": 1,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Ward 2"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS020",
+  "name": "Clear Conscience",
+  "cardType": "action",
+  "text": "When this hits a hero, each hero puts a card from their hand on the bottom of their deck and creates a Ponder token.\nFragment",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS021",
+  "name": "Cosmic Duality",
+  "cardType": "action",
+  "text": "Instant - {r}, discard this: Deal 1 arcane damage to target hero. Create a Lightning Flow token.\nFragment",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS022",
+  "name": "Ebbing Arcstride",
+  "cardType": "action",
+  "text": "Whenever this fragments, it gets go again.\nFragment",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Fragment"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS023",
+  "name": "Shattering Flowtide",
+  "cardType": "action",
+  "text": "Whenever this fragments, create a Lightning Flow token.\nFragment",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "attack"
+  ],
+  "keywords": [
+   "Fragment"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS024",
+  "name": "Pierce Reality",
+  "cardType": "action",
+  "text": "Your first Illusionist attack action card you play each turn gets +2{p}.\nSpectra",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Spectra"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS025",
+  "name": "Blur Reality",
+  "cardType": "instant",
+  "text": "Banish a Lightning aura permanent you control with no holo counters, then return it to the arena with a holo counter.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS026",
+  "name": "Crackle from Afar",
+  "cardType": "instant",
+  "text": "When this enters the arena, up to 1 target attack gets +1{p}.\nWard 1",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS027",
+  "name": "Fleeing Starbreeze",
+  "cardType": "instant",
+  "text": "When this enters the arena, up to 1 target attack gets go again.\nWard 1",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "keywords": [
+   "Ward 1"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS028",
+  "name": "Sigil of Astral Flow",
+  "cardType": "instant",
+  "text": "At the beginning of your action phase, destroy this.\nWhen this leaves the arena, create a Lightning Flow token.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "lightning",
+   "aura"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS029",
+  "name": "Embodiment of Lightning",
+  "cardType": "token",
+  "text": "When you play an attack action card, destroy this, then the attack gets go again.",
+  "subtypes": [
+   "elemental",
+   "aura"
+  ],
+  "set": "AZS"
+ },
+ {
+  "id": "AZS031",
+  "name": "Ponder",
+  "cardType": "token",
+  "text": "At the beginning of your end phase, destroy Ponder and draw a card.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "AZS"
+ }
+]

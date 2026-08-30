@@ -1,0 +1,80 @@
+# Full-stack local / self-host stack: caddy (TLS) → app (game server) →
+# postgres, plus daily backups. Production Cloud Run and Cloud SQL operations
+# are managed separately from this source repository.
+# Copy .env.example to .env and fill in DOMAIN + POSTGRES_PASSWORD first.
+name: fyendal
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-fyendal}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-fyendal}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    # internal only — reached as `db` on the compose network, no published port
+
+  app:
+    build: .
+    image: fyendal-app
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-fyendal}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-fyendal}
+      APP_ORIGIN: ${APP_ORIGIN:?set APP_ORIGIN in .env (public https browser origin)}
+      RULESET_VERSION: ${RULESET_VERSION:?set RULESET_VERSION in .env (stable room compatibility id)}
+      # Only the directly connected Caddy proxy is trusted to append XFF.
+      TRUSTED_PROXY_HOPS: "1"
+      AUTH_KDF_CONCURRENCY: ${AUTH_KDF_CONCURRENCY:-1}
+      FABRARY_API_SECRET: ${FABRARY_API_SECRET:-}
+      PORT: 8080
+    depends_on:
+      db:
+        condition: service_healthy
+    # fronted by caddy — no published port
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    depends_on:
+      - app
+
+  backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      PGHOST: db
+      PGUSER: ${POSTGRES_USER:-fyendal}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB:-fyendal}
+      # optional: also upload each dump to this GCS bucket (requires a custom
+      # image with gsutil and workload credentials; the stock image has neither)
+      GCS_BUCKET: ${GCS_BUCKET:-}
+    volumes:
+      - pgbackups:/backups
+      - ./scripts/backup.sh:/backup.sh:ro
+      # optional, for GCS uploads with a custom image:
+      # - ${GCS_KEY_PATH}:/gcs-key.json:ro
+    entrypoint: ["sh", "/backup.sh"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  pgbackups:
+  caddy_data:

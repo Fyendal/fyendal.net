@@ -1,0 +1,54 @@
+[
+  {
+    "id": "MPA002",
+    "name": "Dr. Mortimer, Blight of the Pits",
+    "cardType": "hero",
+    "text": "Instant - {t}: Cure a disease an opponent controls. If you do, create a Silver token.\nAttack Reaction - {t}, destroy 2 Silver you control: Target Assassin attack gets go again.",
+    "classes": ["assassin"],
+    "keywords": ["Cure", "Go again"],
+    "life": 40,
+    "intellect": 4,
+    "set": "MPA"
+  },
+  {
+    "id": "MPA022",
+    "name": "Mutually Assured Destruction",
+    "cardType": "action",
+    "text": "Contract - You are contracted to banish infected opponents' cards. Whenever you complete this contract, create a Silver token.\nThe first time each hero plays a reaction card this chain link, create a Bloodrot Pox token under each hero's control, then banish the top card of each hero's deck.",
+    "pitch": 1,
+    "cost": 2,
+    "attack": 6,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Contract"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA024",
+    "name": "Prey on Insecurity",
+    "cardType": "action",
+    "text": "Stealth\nAttack Reaction - Put a card from your hand on the bottom of your deck, destroy this: Another target attack with stealth gets +3{p}.",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 3,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Stealth"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA026",
+    "name": "Remember the Mists",
+    "cardType": "action",
+    "text": "When this hits a hero, look at their hand and banish a card. They may play the banished card until the end of their next turn.\nIf this wasn't played from hand or arsenal, it gets +2{p}.",
+    "pitch": 3,
+    "cost": 2,
+    "attack": 4,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "set": "MPA"
+  }
+]

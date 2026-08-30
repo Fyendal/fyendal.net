@@ -1,0 +1,27 @@
+{
+  "name": "@fyendal/bot",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./evaluation": "./src/evaluation.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "evaluate": "vitest run src/evaluation.test.ts --reporter=verbose",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run src --maxWorkers=2"
+  },
+  "dependencies": {
+    "@fyendal/cards": "workspace:*",
+    "@fyendal/engine": "workspace:*",
+    "@fyendal/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.2",
+    "typescript": "^5.6.0",
+    "vitest": "^4.1.10"
+  }
+}

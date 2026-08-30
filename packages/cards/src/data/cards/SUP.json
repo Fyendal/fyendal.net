@@ -1,0 +1,4685 @@
+[
+ {
+  "id": "SUP000",
+  "name": "Authority of Ataya",
+  "cardType": "resource",
+  "text": "Legendary\nWhen this is pitched, defense reaction cards cost opponents an additional {r} to play this turn.",
+  "pitch": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "gem"
+  ],
+  "keywords": [
+   "Legendary"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP001",
+  "name": "Tuffnut, Bumbling Hulkster",
+  "cardType": "hero",
+  "text": "Instant - {t}: Pitch the top card of your deck. If it has 6 or more {p}, the crowd cheers you.\nWhenever the crowd cheers you, create a Toughness token.",
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "revered"
+  ],
+  "life": 40,
+  "intellect": 3,
+  "set": "SUP"
+ },
+ {
+  "id": "SUP002",
+  "name": "Tuffnut",
+  "cardType": "hero",
+  "text": "Instant - {t}: Pitch the top card of your deck. If it has 6 or more {p}, the crowd cheers you.\nWhenever the crowd cheers you, create a Toughness token.",
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "revered"
+  ],
+  "life": 20,
+  "intellect": 3,
+  "set": "SUP"
+ },
+ {
+  "id": "SUP003",
+  "name": "Tough Leather Boots",
+  "cardType": "equipment",
+  "text": "If you control a Toughness and a Vigor token, this gets +2{d}.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "revered",
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP004",
+  "name": "Good Natured Brutality",
+  "cardType": "action",
+  "text": "When this defends, if you have no cards in hand, it gets +6{d} and the crowd cheers you.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 6,
+  "defense": 0,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP005",
+  "name": "Jaws of Victory",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you have less {h} than them, the crowd cheers you.\nIf you've been cheered this turn, this gets go again.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Cheers",
+   "Go again"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP006",
+  "name": "Wind Up the Crowd",
+  "cardType": "action",
+  "text": "Instant - Discard this: Create a Toughness and a Vigor token.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 6,
+  "defense": 0,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP007",
+  "name": "Numbskull Charm",
+  "cardType": "instant",
+  "text": "Choose any number;\n- Destroy a Confidence or Might token.\n- The crowd cheers you.\n- Pitch the top card of your deck. If it has 6 or more {p}, create a Vigor token.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "revered"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP008",
+  "name": "Old Leather and Vim",
+  "cardType": "action",
+  "text": "If you control a Toughness or Vigor token, this gets +1{p}.\nWhen this hits a hero, create a Toughness and a Vigor token.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP009",
+  "name": "Pleiades, Superstar",
+  "cardType": "hero",
+  "text": "Instant - {t}, remove a suspense counter from an aura you control: You may put a suspense counter on an aura of suspense you control.\nWhenever the crowd cheers you, create a Confidence token.",
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "SUP"
+ },
+ {
+  "id": "SUP010",
+  "name": "Pleiades",
+  "cardType": "hero",
+  "text": "Instant - {t}, remove a suspense counter from an aura you control: You may put a suspense counter on an aura of suspense you control.\nWhenever the crowd cheers you, create a Confidence token.",
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "SUP"
+ },
+ {
+  "id": "SUP011",
+  "name": "Plate of Tough Love",
+  "cardType": "equipment",
+  "text": "If you control a Confidence and a Toughness token, this gets +2{d}.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered",
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP012",
+  "name": "Cries of Encore",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you have less {h} than them, the crowd cheers you.\nIf you've been cheered this turn, this gets \"When this hits a hero, you may plan an aura of suspense from your graveyard this turn.\"",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP013",
+  "name": "Thespian Charm",
+  "cardType": "instant",
+  "text": "Choose any number;\n- Destroy a Might or Vigor token.\n- The crowd cheers you.\n- Return an aura permanent you control to its owner's hand.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP014",
+  "name": "Up on a Pedestal",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this enters or leaves the arena, you may put a Revered or Guardian attack action card from your graveyard on top of your deck.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered",
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP015",
+  "name": "Turning Point",
+  "cardType": "block",
+  "text": "When this defends, if you have less {h} than the attacking hero, the crowd cheers you.\nWhile this is defending, if you've been cheered this turn, it gets +3{d}.",
+  "pitch": 3,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP016",
+  "name": "Uplifting Performance",
+  "cardType": "action",
+  "text": "If you control a Confidence or Toughness token, this gets +1{p}.\nWhen this hits a hero, create a Confidence and a Toughness token.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP017",
+  "name": "Helm of the Adored",
+  "cardType": "equipment",
+  "text": "When this defends, the crowd cheers you.\nBlade Break",
+  "defense": 1,
+  "subtypes": [
+   "revered",
+   "head"
+  ],
+  "keywords": [
+   "The Crowd Cheers",
+   "Blade Break"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP018",
+  "name": "Hold Firm",
+  "cardType": "equipment",
+  "text": "Action - {r}{r}, destroy this: Create 3 Toughness tokens. Activate this only if you have less {h} than each other hero. Go again\nBlade Break",
+  "defense": 1,
+  "subtypes": [
+   "revered",
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP019",
+  "name": "Crowd Goes Wild",
+  "cardType": "action",
+  "text": "If you've been cheered this turn, this costs {r}{r}{r} less to play.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP020",
+  "name": "No Hero Stands Alone",
+  "cardType": "action",
+  "text": "While this is in any zone, if you've controlled a Toughness token this turn, this gets +3{d} and ambush.\nWhen this defends, clash with the attacking hero. The winner may choose an attacking or defending card to get -3{p} -3{d} this chain link.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 0,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "keywords": [
+   "Ambush",
+   "Clash"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP021",
+  "name": "A Good Clean Fight",
+  "cardType": "action",
+  "text": "If this is attacking a hero, non-equipment cards they own lose and can't gain abilities.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP022",
+  "name": "Escalate Order",
+  "cardType": "action",
+  "text": "When this attacks, if you control a Toughness token, create 3 more.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP023",
+  "name": "Old Favorite",
+  "cardType": "action",
+  "text": "When this attacks, if you've been cheered this turn, create a Toughness token.\nWhen this defends, if it has 6 or more {d}, put it on the bottom of its owner's deck when the combat chain closes.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP024",
+  "name": "Tame the Beastly Behavior",
+  "cardType": "action",
+  "text": "When this attacks a Reviled hero, this gets +1{p}.\nWhen this hits a Reviled hero, put a card from their arsenal on the bottom of their deck.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP025",
+  "name": "Renounce Violence",
+  "cardType": "instant",
+  "text": "Destroy up to 3 Might tokens. Create a Toughness token for each token destroyed this way.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "revered"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP026",
+  "name": "Never Give Up",
+  "cardType": "block",
+  "text": "Instant - {r}{r}, put this on the bottom of your deck: Target defending action card gets +3{d} this chain link. Activate this only while it's in your graveyard, you have less {h} than each hero, and you've been cheered this turn.",
+  "pitch": 2,
+  "defense": 3,
+  "subtypes": [
+   "revered"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP027",
+  "name": "Comeback Kid",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you have less {h} than them, the crowd cheers you.\nIf you've been cheered this turn, this gets +1{p}.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP028",
+  "name": "Comeback Kid",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you have less {h} than them, the crowd cheers you.\nIf you've been cheered this turn, this gets +1{p}.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP029",
+  "name": "Comeback Kid",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you have less {h} than them, the crowd cheers you.\nIf you've been cheered this turn, this gets +1{p}.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP030",
+  "name": "Disarm",
+  "cardType": "action",
+  "text": "When this attacks, if you've been cheered this turn, create a Toughness token.\nWhen this defends, if it has 6 or more {d}, the attacking hero puts a card from their hand on the bottom of their deck.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP031",
+  "name": "Disembody",
+  "cardType": "action",
+  "text": "When this attacks, if you've been cheered this turn, create a Toughness token.\nWhen this defends, if it has 6 or more {d}, the attacking hero puts an aura they control on the bottom of their deck.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP032",
+  "name": "Disperse",
+  "cardType": "action",
+  "text": "When this attacks, if you've been cheered this turn, create a Toughness token.\nWhen this defends, if it has 6 or more {d}, the attacking hero puts a card from their arsenal on the bottom of their deck.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP033",
+  "name": "Fight Fair",
+  "cardType": "action",
+  "text": "If this is defended by a Reviled card, this gets +1{p}.\nWhen this hits a Reviled hero, put this on the bottom of its owner's deck.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP034",
+  "name": "Shining Courage",
+  "cardType": "instant",
+  "text": "Up to one target defending action card gets +3{d} this turn.\nThe crowd cheers you.",
+  "pitch": 1,
+  "cost": 0,
+  "subtypes": [
+   "revered"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP035",
+  "name": "Will of the Crowd",
+  "cardType": "block",
+  "text": "When this defends, if you've been cheered this turn, defending action cards get +3{d} this chain link.",
+  "pitch": 3,
+  "defense": 2,
+  "subtypes": [
+   "revered"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP036",
+  "name": "Dig In",
+  "cardType": "action",
+  "text": "When this defends, you may pay up to {r}{r}{r}. Create that many Toughness tokens.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP037",
+  "name": "Dig In",
+  "cardType": "action",
+  "text": "When this defends, you may pay up to {r}{r}{r}. Create that many Toughness tokens.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP038",
+  "name": "Dig In",
+  "cardType": "action",
+  "text": "When this defends, you may pay up to {r}{r}{r}. Create that many Toughness tokens.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP039",
+  "name": "Empowering Ruckus",
+  "cardType": "action",
+  "text": "If you've been cheered this turn, this gets +1{p}.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP040",
+  "name": "Fight from Behind",
+  "cardType": "action",
+  "text": "When this attacks or defends, if you have less {h} than each other hero, the crowd cheers you.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP041",
+  "name": "Fight from Behind",
+  "cardType": "action",
+  "text": "When this attacks or defends, if you have less {h} than each other hero, the crowd cheers you.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP042",
+  "name": "Fight from Behind",
+  "cardType": "action",
+  "text": "When this attacks or defends, if you have less {h} than each other hero, the crowd cheers you.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP043",
+  "name": "Rapturous Applause",
+  "cardType": "action",
+  "text": "When you win a clash revealing this, the crowd cheers you.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP044",
+  "name": "Rapturous Applause",
+  "cardType": "action",
+  "text": "When you win a clash revealing this, the crowd cheers you.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP045",
+  "name": "Rapturous Applause",
+  "cardType": "action",
+  "text": "When you win a clash revealing this, the crowd cheers you.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP046",
+  "name": "Tough Smashup",
+  "cardType": "action",
+  "text": "When this defends, clash with the attacking hero. The winner creates a Toughness token. You may put your revealed card on the bottom of its owner's deck.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP047",
+  "name": "Tough Smashup",
+  "cardType": "action",
+  "text": "When this defends, clash with the attacking hero. The winner creates a Toughness token. You may put your revealed card on the bottom of its owner's deck.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP048",
+  "name": "Tough Smashup",
+  "cardType": "action",
+  "text": "When this defends, clash with the attacking hero. The winner creates a Toughness token. You may put your revealed card on the bottom of its owner's deck.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP049",
+  "name": "Turn the Crowd Grateful",
+  "cardType": "action",
+  "text": "When this attacks a Reviled hero, this gets +1{p}.\nWhen this hits a Reviled hero, the crowd cheers you.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP050",
+  "name": "Turn the Crowd Grateful",
+  "cardType": "action",
+  "text": "When this attacks a Reviled hero, this gets +1{p}.\nWhen this hits a Reviled hero, the crowd cheers you.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP051",
+  "name": "Turn the Crowd Grateful",
+  "cardType": "action",
+  "text": "When this attacks a Reviled hero, this gets +1{p}.\nWhen this hits a Reviled hero, the crowd cheers you.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Cheers"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP052",
+  "name": "Who's the Tough Guy?",
+  "cardType": "action",
+  "text": "When the combat chain closes, if this didn't hit, the defending hero creates a Toughness token.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 7,
+  "defense": 2,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP053",
+  "name": "Who's the Tough Guy?",
+  "cardType": "action",
+  "text": "When the combat chain closes, if this didn't hit, the defending hero creates a Toughness token.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP054",
+  "name": "Who's the Tough Guy?",
+  "cardType": "action",
+  "text": "When the combat chain closes, if this didn't hit, the defending hero creates a Toughness token.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "revered",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP055",
+  "name": "Cheers!",
+  "cardType": "action",
+  "text": "Go again\nWhen this enters or leaves the arena, the crowd cheers you.\nAt the start of your turn, destroy this.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "revered",
+   "aura"
+  ],
+  "keywords": [
+   "Go again",
+   "The Crowd Cheers"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP056",
+  "name": "Heroic Grit",
+  "cardType": "action",
+  "text": "Your next attack this turn gets \"This gets +1{p} for each Toughness token you control.\"\nCreate a Toughness token.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "revered"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP057",
+  "name": "Heroic Pose",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +3{p}.\nThe crowd cheers you.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "revered"
+  ],
+  "keywords": [
+   "Go again",
+   "The Crowd Cheers"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP058",
+  "name": "Heroic Pose",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +2{p}.\nThe crowd cheers you.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "revered"
+  ],
+  "keywords": [
+   "Go again",
+   "The Crowd Cheers"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP059",
+  "name": "Heroic Pose",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +1{p}.\nThe crowd cheers you.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "revered"
+  ],
+  "keywords": [
+   "Go again",
+   "The Crowd Cheers"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP060",
+  "name": "Humble Entrance",
+  "cardType": "action",
+  "text": "Create 3 Toughness tokens.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "revered"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP061",
+  "name": "Darling of the Crowd",
+  "cardType": "block",
+  "text": "While this is defending, if you've been cheered this turn, it gets +1{d}.",
+  "pitch": 2,
+  "defense": 3,
+  "subtypes": [
+   "revered"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP062",
+  "name": "Not So Mighty",
+  "cardType": "block",
+  "text": "When this defends a Reviled hero's attack, destroy a Might token they control. If you do, create a Toughness token.",
+  "pitch": 3,
+  "defense": 2,
+  "subtypes": [
+   "revered"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP063",
+  "name": "Kayo, Underhanded Cheat",
+  "cardType": "hero",
+  "text": "You start the game with 1 weapon zone.\nInstant - {r}{r}{r}{r}, {t}: Target attack action card you control has 6 base {p}.\nWhenever the crowd boos you, create a Vigor token.",
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "reviled"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "SUP"
+ },
+ {
+  "id": "SUP064",
+  "name": "Kayo, Strong-arm",
+  "cardType": "hero",
+  "text": "You start the game with 1 weapon zone.\nInstant - {r}{r}{r}{r}, {t}: Target attack action card you control has 6 base {p}.\nWhenever the crowd boos you, create a Vigor token.",
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "reviled"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "SUP"
+ },
+ {
+  "id": "SUP065",
+  "name": "Laughing Knee-Slappers",
+  "cardType": "equipment",
+  "text": "If you control a Might and a Vigor token, this gets +2{d}.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "reviled",
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP066",
+  "name": "Outside Interference",
+  "cardType": "action",
+  "text": "Instant - Discard this: You may reveal a Reviled attack action card from your inventory and put it into your hand.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 6,
+  "defense": 0,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP067",
+  "name": "Big Bully",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you have more {h} than them, the crowd boos you.\nIf you've been booed this turn, this card's base {p} is doubled.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Boos"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP068",
+  "name": "Cheater's Charm",
+  "cardType": "instant",
+  "text": "Choose any number;\n- Steal a Confidence or Toughness token.\n- The crowd boos you.\n- If you control an attack with 6 or more {p}, deal 2 damage to target hero unless they discard a card.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "reviled"
+  ],
+  "keywords": [
+   "Steal",
+   "The Crowd Boos"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP069",
+  "name": "Steal Victory",
+  "cardType": "block",
+  "text": "When this defends, steal an aura token the attacking hero controls.",
+  "pitch": 3,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "reviled"
+  ],
+  "keywords": [
+   "Steal"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP070",
+  "name": "Offensive Behavior",
+  "cardType": "action",
+  "text": "If you control a Might or Vigor token, this gets +1{p}.\nWhen this hits a hero, create a Might and a Vigor token.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP071",
+  "name": "Lyath Goldmane, Vile Savant",
+  "cardType": "hero",
+  "text": "The base {p} and {d} of cards you control are halved, rounded up.\nInstant - {r}{r}, {t}: The crowd boos you. Defending action cards you control get +1{d} this turn.\nWhenever the crowd boos you, create a Might token.",
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "reviled"
+  ],
+  "life": 40,
+  "intellect": 5,
+  "set": "SUP"
+ },
+ {
+  "id": "SUP072",
+  "name": "Lyath Goldmane",
+  "cardType": "hero",
+  "text": "The base {p} and {d} of cards you control are halved, rounded up.\nInstant - {r}{r}, {t}: The crowd boos you. Defending action cards you control get +1{d} this turn.\nWhenever the crowd boos you, create a Might token.",
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "reviled"
+  ],
+  "life": 20,
+  "intellect": 5,
+  "set": "SUP"
+ },
+ {
+  "id": "SUP073",
+  "name": "Strong Stomach for Adversity",
+  "cardType": "equipment",
+  "text": "If you control a Confidence and a Might token, this gets +2{d}.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "reviled",
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP074",
+  "name": "Leave Them Hanging",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this enters or leaves the arena, intimidate target hero.\nWhen this leaves the arena, your next attack this turn gets +4{p}.",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "reviled",
+   "aura"
+  ],
+  "keywords": [
+   "Suspense",
+   "Intimidate"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP075",
+  "name": "Two Steps Ahead",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy this, then create a Confidence and 3 Might tokens.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "reviled",
+   "aura"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP076",
+  "name": "Liar's Charm",
+  "cardType": "instant",
+  "text": "Choose any number;\n- Steal a Toughness or Vigor token.\n- The crowd boos you.\n- Target hero loses and can't gain abilities this action phase unless they discard a card.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "reviled"
+  ],
+  "keywords": [
+   "Steal",
+   "The Crowd Boos"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP077",
+  "name": "Truth or Trickery",
+  "cardType": "block",
+  "text": "When this defends, you may look at the top card of your deck and choose a color. If you do, the attacking hero guesses if that card is the chosen color, then they look at it. If they guessed wrong, they discard a card.",
+  "pitch": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "reviled"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP078",
+  "name": "Spew Obscenities",
+  "cardType": "action",
+  "text": "If you control a Confidence or Might token, this gets +1{p}.\nWhen this hits a hero, create a Confidence and a Might token.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP079",
+  "name": "Horns of the Despised",
+  "cardType": "equipment",
+  "text": "When this defends, the crowd boos you.\nBlade Break",
+  "defense": 1,
+  "subtypes": [
+   "reviled",
+   "head"
+  ],
+  "keywords": [
+   "The Crowd Boos",
+   "Blade Break"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP080",
+  "name": "Mightybone Knuckles",
+  "cardType": "equipment",
+  "text": "Action - {r}{r}{r}, destroy this: Create 3 Might tokens. Activate this only if you have more {h} than each other hero. Go again\nBlade Break",
+  "defense": 1,
+  "subtypes": [
+   "reviled",
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP081",
+  "name": "Bully Tactics",
+  "cardType": "action",
+  "text": "When this attacks a hero, you may pay up to {r}{r}{r}. Intimidate them that many times.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP082",
+  "name": "Fix the Match",
+  "cardType": "action",
+  "text": "When this attacks, search your deck for a card, then shuffle and put that card on top.\nWhenever a card defends this, clash with the defending hero. The winner creates a Might token.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP083",
+  "name": "Battered, Beaten, and Broken",
+  "cardType": "action",
+  "text": "When this attacks a hero, intimidate them.\nIf you control 3 or more auras, this gets +3{p} and \"When this hits a hero, destroy an intimidated card they own.\"",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP084",
+  "name": "Escalate Violence",
+  "cardType": "action",
+  "text": "When this attacks, if you control a Might token, create 3 more.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP085",
+  "name": "Gang Robbery",
+  "cardType": "action",
+  "text": "When this attacks a hero, steal an aura token they control.\nIf you control 3 or more auras, this gets +3{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "Steal"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP086",
+  "name": "Tear Down the Idols",
+  "cardType": "action",
+  "text": "When this attacks a Revered hero, intimidate them.\nWhen this hits a Revered hero, they discard a card.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP087",
+  "name": "The Old Switcheroo",
+  "cardType": "action",
+  "text": "Instant - Discard this: the next time you would clash with target hero this turn, instead you reveal the top card of their deck and they reveal the top card of your deck. If you win the clash, they discard a card.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP088",
+  "name": "Rip Up Their Virtues",
+  "cardType": "instant",
+  "text": "Destroy up to 3 Toughness tokens. Create a Might token for each token destroyed this way.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "reviled"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP089",
+  "name": "Fight Dirty",
+  "cardType": "action",
+  "text": "If this is defended by a Revered card, this gets +1{p}.\nWhen this hits a Revered hero, destroy the top card of their deck.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP090",
+  "name": "Mocking Blow",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you have more {h} than them, the crowd boos you.\nIf you've been booed this turn, this gets +4{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Boos"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP091",
+  "name": "Mocking Blow",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you have more {h} than them, the crowd boos you.\nIf you've been booed this turn, this gets +3{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Boos"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP092",
+  "name": "Mocking Blow",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you have more {h} than them, the crowd boos you.\nIf you've been booed this turn, this gets +2{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Boos"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP093",
+  "name": "Overturn the Results",
+  "cardType": "action",
+  "text": "If you would fail to win a clash revealing this, instead you win the clash and the crowd boos you.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Boos"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP094",
+  "name": "Cheap Shot",
+  "cardType": "action",
+  "text": "If you've been booed this turn, you may play this as though it were an instant.\nDeal 2 damage to target hero unless they discard a card.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "reviled"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP095",
+  "name": "Sadistic Scowl",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +5{p}.\nIntimidate target hero.\nGo again",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 2,
+  "subtypes": [
+   "reviled"
+  ],
+  "keywords": [
+   "Intimidate",
+   "Go again"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP096",
+  "name": "Arrogant Showboating",
+  "cardType": "instant",
+  "text": "Create a Might token for each defending card controlled by an opponent on the combat chain.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "reviled"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP097",
+  "name": "Concealed Object",
+  "cardType": "instant",
+  "text": "When this enters the arena, the crowd boos you.\nInstant - {t}: Target attack gets +1{p}.\nAt the beginning of your end phase, destroy this.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "reviled",
+   "item"
+  ],
+  "keywords": [
+   "The Crowd Boos"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP098",
+  "name": "Bask in Your Own Greatness",
+  "cardType": "action",
+  "text": "When this attacks, you may pay up to {r}{r}{r}. Create that many Might tokens.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP099",
+  "name": "Bask in Your Own Greatness",
+  "cardType": "action",
+  "text": "When this attacks, you may pay up to {r}{r}{r}. Create that many Might tokens.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP100",
+  "name": "Bask in Your Own Greatness",
+  "cardType": "action",
+  "text": "When this attacks, you may pay up to {r}{r}{r}. Create that many Might tokens.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP101",
+  "name": "Clench the Upper Hand",
+  "cardType": "action",
+  "text": "When this attacks or defends, if you have less {h} than each other hero, the crowd boos you.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Boos"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP102",
+  "name": "Clench the Upper Hand",
+  "cardType": "action",
+  "text": "When this attacks or defends, if you have less {h} than each other hero, the crowd boos you.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Boos"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP103",
+  "name": "Clench the Upper Hand",
+  "cardType": "action",
+  "text": "When this attacks or defends, if you have less {h} than each other hero, the crowd boos you.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Boos"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP104",
+  "name": "Goon Battery",
+  "cardType": "action",
+  "text": "If you control 3 or more auras, this gets +3{p} and \"When this hits a hero, {t} them.\"",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP105",
+  "name": "Goon Beatdown",
+  "cardType": "action",
+  "text": "If you control 3 or more auras, this gets +3{p} and \"When this hits a hero, the crowd boos you.\"",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Boos"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP106",
+  "name": "Goon Tactics",
+  "cardType": "action",
+  "text": "If you control 3 or more auras, this gets +3{p} and \"When this hits a hero, destroy the top card of their deck.\"",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP107",
+  "name": "Instill Fear",
+  "cardType": "action",
+  "text": "When this attacks a hero, intimidate them.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP108",
+  "name": "Instill Fear",
+  "cardType": "action",
+  "text": "When this attacks a hero, intimidate them.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP109",
+  "name": "Instill Fear",
+  "cardType": "action",
+  "text": "When this attacks a hero, intimidate them.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP110",
+  "name": "Low Blow",
+  "cardType": "action",
+  "text": "If you've been booed this turn, this gets +3{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP111",
+  "name": "Take That!",
+  "cardType": "action",
+  "text": "When the combat chain closes, if this didn't hit, the defending hero creates a Might token.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP112",
+  "name": "Take That!",
+  "cardType": "action",
+  "text": "When the combat chain closes, if this didn't hit, the defending hero creates a Might token.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP113",
+  "name": "Take That!",
+  "cardType": "action",
+  "text": "When the combat chain closes, if this didn't hit, the defending hero creates a Might token.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP114",
+  "name": "Turn the Crowd Hateful",
+  "cardType": "action",
+  "text": "When this attacks a Revered hero, this gets +3{p}.\nWhen this hits a Revered hero, the crowd boos you.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Boos"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP115",
+  "name": "Turn the Crowd Hateful",
+  "cardType": "action",
+  "text": "When this attacks a Revered hero, this gets +3{p}.\nWhen this hits a Revered hero, the crowd boos you.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 4,
+  "defense": 2,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Boos"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP116",
+  "name": "Turn the Crowd Hateful",
+  "cardType": "action",
+  "text": "When this attacks a Revered hero, this gets +3{p}.\nWhen this hits a Revered hero, the crowd boos you.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 3,
+  "defense": 2,
+  "subtypes": [
+   "reviled",
+   "attack"
+  ],
+  "keywords": [
+   "The Crowd Boos"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP117",
+  "name": "Booze!",
+  "cardType": "action",
+  "text": "Go again\nWhen this enters or leaves the arena, the crowd boos you.\nAt the start of your turn, destroy this.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "reviled",
+   "aura"
+  ],
+  "keywords": [
+   "Go again",
+   "The Crowd Boos"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP118",
+  "name": "Cruel Ambition",
+  "cardType": "action",
+  "text": "Create 3 Might tokens.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "reviled"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP119",
+  "name": "Revolting Gesture",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +3{p}.\nCreate a Might token.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "reviled"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP120",
+  "name": "Villainous Pose",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +4{p}.\nThe crowd boos you.\nGo again",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "subtypes": [
+   "reviled"
+  ],
+  "keywords": [
+   "Go again",
+   "The Crowd Boos"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP121",
+  "name": "Villainous Pose",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +3{p}.\nThe crowd boos you.\nGo again",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 2,
+  "subtypes": [
+   "reviled"
+  ],
+  "keywords": [
+   "Go again",
+   "The Crowd Boos"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP122",
+  "name": "Villainous Pose",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +2{p}.\nThe crowd boos you.\nGo again",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 2,
+  "subtypes": [
+   "reviled"
+  ],
+  "keywords": [
+   "Go again",
+   "The Crowd Boos"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP123",
+  "name": "Disdainful Delight",
+  "cardType": "block",
+  "text": "While this is defending, if you've been booed this turn, this gets +1{d}.",
+  "pitch": 2,
+  "defense": 3,
+  "subtypes": [
+   "reviled"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP124",
+  "name": "Not So Tuff",
+  "cardType": "block",
+  "text": "When this defends a Revered hero's attack, destroy a Toughness token they control. If you do, create a Might token.",
+  "pitch": 3,
+  "defense": 2,
+  "subtypes": [
+   "reviled"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP125",
+  "name": "Gauntlets of Tyrannical Rex",
+  "cardType": "equipment",
+  "text": "Action - {r}, {t}: Your next attack this turn gets +1{p}. Activate this only if there is a card with 6 or more {p} in your pitch zone. Go again\nTemper",
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP126",
+  "name": "Overbearing Presence",
+  "cardType": "equipment",
+  "text": "Action - {r}{r}{r}, destroy this: Create 3 Vigor tokens. Activate this only if there is a card with 6 or more {p} in your pitch zone. Go again\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP127",
+  "name": "Reckless Stampede",
+  "cardType": "action",
+  "text": "Whenever a card defends this, clash with the defending hero. The winner deals 1 damage to each other hero. Each hero may put their revealed card on the bottom of its owner's deck.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 7,
+  "defense": 0,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP128",
+  "name": "Show of Strength",
+  "cardType": "action",
+  "text": "This gets -1{p} for each card with 6 or more {p} defending it.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP129",
+  "name": "Challenge the Alpha",
+  "cardType": "action",
+  "text": "When this attacks a Brute hero, this gets +2{p}.\nWhen this hits a Brute hero, they discard a card. If it has 6 or more {p}, you lose 2{h}.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP130",
+  "name": "Disturb the Peace",
+  "cardType": "action",
+  "text": "This can't be defended by Guardian auras.\nWhen this hits a Guardian hero, destroy an aura they control.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP131",
+  "name": "Energetic Impact",
+  "cardType": "action",
+  "text": "When this defends together with a card with 6 or more {p}, create a Vigor token.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP132",
+  "name": "Smashing Ground",
+  "cardType": "action",
+  "text": "If this has 6 or more {p}, it gets \"When this hits a hero, destroy a card in their arsenal.\"",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP133",
+  "name": "Smash with Big Rock",
+  "cardType": "action",
+  "text": "Cards defending this can't gain {d}.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 6,
+  "defense": 0,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP134",
+  "name": "Song of Sinew",
+  "cardType": "action",
+  "text": "Reveal the top 4 cards of your deck. Your next attack this turn gets +X{p}, where X is the number of cards with 6 or more {p} revealed this way. Put them back in any order.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP135",
+  "name": "Strongest Survive",
+  "cardType": "action",
+  "text": "When this hits a hero, they discard a card unless they reveal a card from their hand with {p} greater than the damage dealt this way.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP136",
+  "name": "Strongest Survive",
+  "cardType": "action",
+  "text": "When this hits a hero, they discard a card unless they reveal a card from their hand with {p} greater than the damage dealt this way.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP137",
+  "name": "Strongest Survive",
+  "cardType": "action",
+  "text": "When this hits a hero, they discard a card unless they reveal a card from their hand with {p} greater than the damage dealt this way.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP138",
+  "name": "Vigorous Roar",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +3{p}.\nIf there is a card with 6 or more {p} in your pitch zone, create a Vigor token.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP139",
+  "name": "Visit the Boneyard",
+  "cardType": "instant",
+  "text": "Put a card with 6 or more {p} from your graveyard on top of your deck.\nCreate a Vigor token.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "brute"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP140",
+  "name": "Asking for Trouble",
+  "cardType": "block",
+  "text": "When this defends, create a Vigor token under the attacking hero's control.",
+  "pitch": 2,
+  "defense": 4,
+  "classes": [
+   "brute"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP141",
+  "name": "Bash Guardian",
+  "cardType": "action",
+  "text": "If this is defended by a Guardian card, this gets +1{p}.\nWhen this hits a Guardian hero, destroy an aura token they control.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP142",
+  "name": "Familiar Stench",
+  "cardType": "action",
+  "text": "When 1 or more Brute cards defend this, create a Vigor token.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP143",
+  "name": "Buckwild",
+  "cardType": "action",
+  "text": "If there is a card with 6 or more {p} in your pitch zone, this gets go again.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP144",
+  "name": "Buckwild",
+  "cardType": "action",
+  "text": "If there is a card with 6 or more {p} in your pitch zone, this gets go again.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP145",
+  "name": "Buckwild",
+  "cardType": "action",
+  "text": "If there is a card with 6 or more {p} in your pitch zone, this gets go again.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP146",
+  "name": "Flex Speed",
+  "cardType": "action",
+  "text": "If this has 6 or more {p}, it gets go again.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP147",
+  "name": "Flex Speed",
+  "cardType": "action",
+  "text": "If this has 6 or more {p}, it gets go again.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP148",
+  "name": "Flex Speed",
+  "cardType": "action",
+  "text": "If this has 6 or more {p}, it gets go again.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP149",
+  "name": "Flex Strength",
+  "cardType": "action",
+  "text": "If this has 6 or more {p}, it gets +3{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP150",
+  "name": "Flex Strength",
+  "cardType": "action",
+  "text": "If this has 6 or more {p}, it gets +3{p}.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP151",
+  "name": "Flex Strength",
+  "cardType": "action",
+  "text": "If this has 6 or more {p}, it gets +3{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP152",
+  "name": "Give 'Em a Piece of Your Mind",
+  "cardType": "action",
+  "text": "When the combat chain closes, if this didn't hit, the defending hero creates a Vigor token.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP153",
+  "name": "Give 'Em a Piece of Your Mind",
+  "cardType": "action",
+  "text": "When the combat chain closes, if this didn't hit, the defending hero creates a Vigor token.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP154",
+  "name": "Give 'Em a Piece of Your Mind",
+  "cardType": "action",
+  "text": "When the combat chain closes, if this didn't hit, the defending hero creates a Vigor token.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP155",
+  "name": "High Pitched Howl",
+  "cardType": "action",
+  "text": "When this attacks, if there is a card with 6 or more {p} in your pitch zone, create a Vigor token.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP156",
+  "name": "High Pitched Howl",
+  "cardType": "action",
+  "text": "When this attacks, if there is a card with 6 or more {p} in your pitch zone, create a Vigor token.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP157",
+  "name": "High Pitched Howl",
+  "cardType": "action",
+  "text": "When this attacks, if there is a card with 6 or more {p} in your pitch zone, create a Vigor token.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP158",
+  "name": "Rough Up",
+  "cardType": "action",
+  "text": "When this attacks, if there is a card with 6 or more {p} in your pitch zone, this gets +1{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP159",
+  "name": "Rough Up",
+  "cardType": "action",
+  "text": "When this attacks, if there is a card with 6 or more {p} in your pitch zone, this gets +1{p}.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP160",
+  "name": "Rough Up",
+  "cardType": "action",
+  "text": "When this attacks, if there is a card with 6 or more {p} in your pitch zone, this gets +1{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP161",
+  "name": "Unexpected Backhand",
+  "cardType": "action",
+  "text": "When you win a clash revealing this, deal 1 damage to the other hero.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP162",
+  "name": "Unexpected Backhand",
+  "cardType": "action",
+  "text": "When you win a clash revealing this, deal 1 damage to the other hero.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP163",
+  "name": "Unexpected Backhand",
+  "cardType": "action",
+  "text": "When you win a clash revealing this, deal 1 damage to the other hero.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP164",
+  "name": "Vigorous Smashup",
+  "cardType": "action",
+  "text": "When this defends, clash with the attacking hero. The winner creates a Vigor token. You may put your revealed card on the bottom of its owner's deck.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP165",
+  "name": "Vigorous Smashup",
+  "cardType": "action",
+  "text": "When this defends, clash with the attacking hero. The winner creates a Vigor token. You may put your revealed card on the bottom of its owner's deck.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP166",
+  "name": "Vigorous Smashup",
+  "cardType": "action",
+  "text": "When this defends, clash with the attacking hero. The winner creates a Vigor token. You may put your revealed card on the bottom of its owner's deck.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP167",
+  "name": "Bark Obscenities",
+  "cardType": "action",
+  "text": "Your next attack that targets a Guardian hero this turn gets +4{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP168",
+  "name": "Ironfist Revelation",
+  "cardType": "equipment",
+  "text": "When this defends, you may turn a face-down card with crush in your arsenal face-up. If you do, put a +1{p} counter on it.\nTemper",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP169",
+  "name": "Stand Strong",
+  "cardType": "equipment",
+  "text": "Action - {r}{r}{r}, destroy this: Create a Confidence token. Activate this only if you control an aura of suspense. Go again\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP170",
+  "name": "No Tall Tales",
+  "cardType": "action",
+  "text": "If this has {p} greater than its base, it gets +1{p}.\nTower - If this has 13 or more {p}, it gets \"When this hits a hero, cards they own lose and can't get go again during their next action phase.\"",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Tower"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP171",
+  "name": "In the Palm of Your Hand",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this enters or leaves the arena, draw a card.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP172",
+  "name": "Cut a Long Story Short",
+  "cardType": "action",
+  "text": "If this has {p} greater than its base, it gets +1{p}.\nTower - If this has 13 or more {p}, it gets \"When this hits a hero, they discard their hand.\"",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Tower"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP173",
+  "name": "Cut Off at the Knees",
+  "cardType": "action",
+  "text": "If this has {p} greater than its base, it gets +1{p}.\nTower - If this has 13 or more {p}, it gets \"When this hits a hero, destroy the top 3 cards of their deck.\"",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Tower"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP174",
+  "name": "Cut the Small Talk",
+  "cardType": "action",
+  "text": "If this has {p} greater than its base, it gets +1{p}.\nTower - If this has 13 or more {p}, it gets \"When this hits a hero, destroy all auras they control.\"",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Tower"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP175",
+  "name": "Hungry for More",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this leaves the arena, gain 3{h}.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP176",
+  "name": "Turn Heads",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this leaves the arena, {t} target Brute hero. They don't {u} during their next end phase.",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP177",
+  "name": "Who Blinks First?",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this leaves the arena, you may destroy an aura permanent that a Guardian hero controls.",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP178",
+  "name": "Full of Bravado",
+  "cardType": "action",
+  "text": "When this attacks or defends, if you control an aura of suspense, create a Confidence token.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP179",
+  "name": "Full of Bravado",
+  "cardType": "action",
+  "text": "When this attacks or defends, if you control an aura of suspense, create a Confidence token.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP180",
+  "name": "Full of Bravado",
+  "cardType": "action",
+  "text": "When this attacks or defends, if you control an aura of suspense, create a Confidence token.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP181",
+  "name": "Story Beats",
+  "cardType": "action",
+  "text": "When this attacks or defends, you may put a suspense counter on, or remove one from, an aura of suspense you control.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP182",
+  "name": "Story Beats",
+  "cardType": "action",
+  "text": "When this attacks or defends, you may put a suspense counter on, or remove one from, an aura of suspense you control.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP183",
+  "name": "Story Beats",
+  "cardType": "action",
+  "text": "When this attacks or defends, you may put a suspense counter on, or remove one from, an aura of suspense you control.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP184",
+  "name": "Bash Brute",
+  "cardType": "action",
+  "text": "If this is defended by a Brute card, this gets +1{p}.\nWhen this hits a Brute hero, destroy an aura token they control.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP185",
+  "name": "Familiar Story",
+  "cardType": "action",
+  "text": "When 1 or more Guardian cards defend this, create a Confidence token.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP186",
+  "name": "Power Play",
+  "cardType": "action",
+  "text": "If this was played from arsenal, it gets +5{p}.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP187",
+  "name": "Power Play",
+  "cardType": "action",
+  "text": "If this was played from arsenal, it gets +5{p}.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP188",
+  "name": "Power Play",
+  "cardType": "action",
+  "text": "If this was played from arsenal, it gets +5{p}.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP189",
+  "name": "Shoot Your Mouth Off",
+  "cardType": "action",
+  "text": "When the combat chain closes, if this didn't hit, the defending hero creates a Confidence token.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 8,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP190",
+  "name": "Shoot Your Mouth Off",
+  "cardType": "action",
+  "text": "When the combat chain closes, if this didn't hit, the defending hero creates a Confidence token.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP191",
+  "name": "Shoot Your Mouth Off",
+  "cardType": "action",
+  "text": "When the combat chain closes, if this didn't hit, the defending hero creates a Confidence token.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP192",
+  "name": "Short Shrift",
+  "cardType": "action",
+  "text": "If this has {p} greater than its base, it gets +1{p}.\nCrush - When this deals 4 or more damage to a hero, they discard a card.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP193",
+  "name": "Small Problem",
+  "cardType": "action",
+  "text": "If this has {p} greater than its base, it gets +1{p}.\nCrush - When this deals 4 or more damage to a hero, destroy an aura they control.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP194",
+  "name": "Wee Wrecking Ball",
+  "cardType": "action",
+  "text": "If this has {p} greater than its base, it gets +1{p}.\nCrush - When this deals 4 or more damage to a hero, destroy a card in their arsenal.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP195",
+  "name": "Act of Glory",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this leaves the arena, your next attack this turn gets +6{p}.",
+  "pitch": 1,
+  "cost": 4,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP196",
+  "name": "Act of Glory",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this leaves the arena, your next attack this turn gets +5{p}.",
+  "pitch": 2,
+  "cost": 4,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP197",
+  "name": "Act of Glory",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this leaves the arena, your next attack this turn gets +4{p}.",
+  "pitch": 3,
+  "cost": 4,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP198",
+  "name": "Dramatic Pause",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this enters the arena, target defending action card gets +3{d} this chain link.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP199",
+  "name": "Dramatic Pause",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this enters the arena, target defending action card gets +2{d} this chain link.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP200",
+  "name": "Dramatic Pause",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this enters the arena, target defending action card gets +1{d} this chain link.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP201",
+  "name": "Edge of Their Seats",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this leaves the arena, your next attack this turn gets +5{p}.",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP202",
+  "name": "Edge of Their Seats",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this leaves the arena, your next attack this turn gets +4{p}.",
+  "pitch": 2,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP203",
+  "name": "Edge of Their Seats",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this leaves the arena, your next attack this turn gets +3{p}.",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP204",
+  "name": "Tension in the Air",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this leaves the arena, your next attack this turn gets +4{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP205",
+  "name": "Tension in the Air",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this leaves the arena, your next attack this turn gets +3{p}.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP206",
+  "name": "Tension in the Air",
+  "cardType": "instant",
+  "text": "Suspense\nWhen this leaves the arena, your next attack this turn gets +2{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP207",
+  "name": "The Suspense is Killing Me",
+  "cardType": "instant",
+  "text": "Suspense\nYour first attack each turn gets +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP208",
+  "name": "To Be Continued...",
+  "cardType": "instant",
+  "text": "Suspense\nThe first time you would be dealt damage each turn, prevent 1 of that damage.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP209",
+  "name": "What Happens Next?",
+  "cardType": "instant",
+  "text": "Suspense\nThe first card with cost 1 or more you play each turn costs {r} less to play.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Suspense"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP210",
+  "name": "Sit!",
+  "cardType": "block",
+  "text": "When this defends a Brute attack, this gets +3{d}.",
+  "pitch": 1,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP211",
+  "name": "Helm of Hindsight",
+  "cardType": "equipment",
+  "text": "Instant - {r}{r}{r}, destroy this: Put target attack action card from your graveyard on top of your deck.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP212",
+  "name": "Garland of Spring",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Gain {r}. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP213",
+  "name": "Punching Gloves",
+  "cardType": "equipment",
+  "text": "Action - {r}{r}, destroy this: The next attack card you play this turn gets +2{p}. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP214",
+  "name": "Toby Jugs",
+  "cardType": "equipment",
+  "text": "When this defends, you may pay {r}. If you do, it gets +2{d} this turn.\nBlade Break",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP215",
+  "name": "Cutting Retort",
+  "cardType": "action",
+  "text": "When this attacks a hero, you may pay up to {r}{r}{r}. Destroy that many aura tokens with different names they control. If you do, this gets +1{p} for each aura destroyed this way.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP216",
+  "name": "Overcrowded",
+  "cardType": "action",
+  "text": "Ambush\nWhen this attacks or defends, it gets +1{p} +1{d} for each different name among aura tokens in the arena.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Ambush"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP217",
+  "name": "Kick the Hornet's Nest",
+  "cardType": "action",
+  "text": "When an opponent's effect puts this into your graveyard from anywhere, create a Confidence, Might, Toughness, and Vigor token.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP218",
+  "name": "Unwavering Resolve",
+  "cardType": "action",
+  "text": "If you have no cards in your deck, this gets +4{p}.\nIf this is defended by 3 or more cards, it gets go again.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP219",
+  "name": "Beat the Same Drum",
+  "cardType": "action",
+  "text": "If you've controlled an Agility token this turn, create an Agility token, then repeat for Confidence, Might, Toughness, and Vigor.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP220",
+  "name": "Time Flies When You're Having Fun",
+  "cardType": "action",
+  "text": "The next time an attack action card hits a hero this turn, you may destroy an aura they control.\nIf this was played from arsenal, the next attack action card you play this turn gets +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP221",
+  "name": "Bluster Buff",
+  "cardType": "action",
+  "text": "When this attacks, it gets -1{p} unless you pay {r}.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP222",
+  "name": "Chest Puff",
+  "cardType": "action",
+  "text": "When this attacks, it gets -1{p} unless you pay {r}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP223",
+  "name": "Look Tuff",
+  "cardType": "action",
+  "text": "When this attacks, it gets -1{p} unless you pay {r}.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP224",
+  "name": "Punch Above Your Weight",
+  "cardType": "action",
+  "text": "When this attacks, you may pay {r}{r}{r}. If you do, this gets +5{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP225",
+  "name": "Punch Above Your Weight",
+  "cardType": "action",
+  "text": "When this attacks, you may pay {r}{r}{r}. If you do, this gets +4{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP226",
+  "name": "Punch Above Your Weight",
+  "cardType": "action",
+  "text": "When this attacks, you may pay {r}{r}{r}. If you do, this gets +3{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP227",
+  "name": "Brothers in Arms",
+  "cardType": "action",
+  "text": "When this defends, you may pay {r}. If you do, it gets +2{d}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP228",
+  "name": "Brothers in Arms",
+  "cardType": "action",
+  "text": "When this defends, you may pay {r}. If you do, it gets +2{d}.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP229",
+  "name": "Brothers in Arms",
+  "cardType": "action",
+  "text": "When this defends, you may pay {r}. If you do, it gets +2{d}.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP230",
+  "name": "Feisty Locals",
+  "cardType": "action",
+  "text": "If this is defended by an action card, this gets +2{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP231",
+  "name": "Feisty Locals",
+  "cardType": "action",
+  "text": "If this is defended by an action card, this gets +2{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP232",
+  "name": "Feisty Locals",
+  "cardType": "action",
+  "text": "If this is defended by an action card, this gets +2{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP233",
+  "name": "Right Behind You",
+  "cardType": "action",
+  "text": "When this defends together with another card from hand, this gets +1{d} and you may look at the top card of your deck. You may put it on the bottom.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP234",
+  "name": "Right Behind You",
+  "cardType": "action",
+  "text": "When this defends together with another card from hand, this gets +1{d} and you may look at the top card of your deck. You may put it on the bottom.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP235",
+  "name": "Right Behind You",
+  "cardType": "action",
+  "text": "When this defends together with another card from hand, this gets +1{d} and you may look at the top card of your deck. You may put it on the bottom.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP236",
+  "name": "Prime the Crowd",
+  "cardType": "action",
+  "text": "The next attack action card you play this turn gets +4{p}.\nThe crowd cheers each Revered hero.\nThe crowd boos each Reviled hero.\nGo again",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "The Crowd Cheers",
+   "The Crowd Boos",
+   "Go again"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP237",
+  "name": "Prime the Crowd",
+  "cardType": "action",
+  "text": "The next attack action card you play this turn gets +3{p}.\nThe crowd cheers each Revered hero.\nThe crowd boos each Reviled hero.\nGo again",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "The Crowd Cheers",
+   "The Crowd Boos",
+   "Go again"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP238",
+  "name": "Prime the Crowd",
+  "cardType": "action",
+  "text": "The next attack action card you play this turn gets +2{p}.\nThe crowd cheers each Revered hero.\nThe crowd boos each Reviled hero.\nGo again",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "The Crowd Cheers",
+   "The Crowd Boos",
+   "Go again"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP239",
+  "name": "Confidence",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then the next attack card you play this turn can't be defended by more than 2 non-block cards.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP240",
+  "name": "Might",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then your next attack this turn gets +1{p}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP241",
+  "name": "Toughness",
+  "cardType": "token",
+  "text": "At the start of your opponent's turn, destroy this, then the next action card you defend with this turn gets +1{d} this chain link.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP242",
+  "name": "Vigor",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then gain {r}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP243",
+  "name": "Cracked Bauble",
+  "cardType": "resource",
+  "text": "(A player may add any number of Cracked Baubles to their card-pool in sealed deck or booster draft formats.)",
+  "pitch": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP244",
+  "name": "Flick Knives",
+  "cardType": "equipment",
+  "text": "Once per Turn Attack Reaction - 0: Target dagger you control that isn't on the active chain link deals 1 damage to target hero. If damage is dealt this way, the dagger has hit. Destroy the dagger.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP245",
+  "name": "Hunter or Hunted?",
+  "cardType": "defense-reaction",
+  "text": "When this defends, name a card. The attacking hero reveals the top card of their deck. If it's the named card, banish it, search their hand, deck, and arsenal for up to 3 cards with that name and banish them, then they shuffle.\nContract - While this is defending, you are contracted to banish opponents' cards with the chosen name. Whenever you complete this contract, create a Silver token.",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 4,
+  "classes": [
+   "assassin"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP246",
+  "name": "Tempest Palm Gustwave",
+  "cardType": "action",
+  "text": "Combo - If Surging Strike was the last attack this combat chain, this gets +2{p}.\nIf this is played at chain link 3 or higher, this gets go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP247",
+  "name": "Golden Galea",
+  "cardType": "equipment",
+  "text": "Legendary Olympia Specialization\nThis counts as a Gold.\nTemper",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Legendary",
+   "Olympia Specialization",
+   "Temper"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP248",
+  "name": "Golden Heart Plate",
+  "cardType": "equipment",
+  "text": "Legendary Olympia Specialization\nThis counts as a Gold.\nTemper",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Legendary",
+   "Olympia Specialization",
+   "Temper"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP249",
+  "name": "Golden Gauntlets",
+  "cardType": "equipment",
+  "text": "Legendary Olympia Specialization\nThis counts as a Gold.\nTemper",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Legendary",
+   "Olympia Specialization",
+   "Temper"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP250",
+  "name": "Golden Gait",
+  "cardType": "equipment",
+  "text": "Legendary Olympia Specialization\nThis counts as a Gold.\nTemper",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Legendary",
+   "Olympia Specialization",
+   "Temper"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP251",
+  "name": "Beat of the Ironsong",
+  "cardType": "attack-reaction",
+  "text": "Choose X+1, where X is the number of +1{p} counters on an attacking Dawnblade;\n- Target Dawnblade attack gets +1{p}.\n- Target Dawnblade attack gets go again.\n- Cards defending target Dawnblade attack can't gain {d}.\n- Damage target Dawnblade attack would deal can't be prevented.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP252",
+  "name": "Blood Follows Blade",
+  "cardType": "attack-reaction",
+  "text": "Kassai Specialization\nTarget sword attack gets go again and \"When this hits, create a Cintari Sellsword token.\"",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Kassai Specialization"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP253",
+  "name": "Adaptive Alpha Mold",
+  "cardType": "equipment",
+  "text": "Modular\nAction - 0: Equip this to another equipment zone.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "base"
+  ],
+  "keywords": [
+   "Modular",
+   "Battleworn"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP254",
+  "name": "Backspin Thrust",
+  "cardType": "action",
+  "text": "Once per Turn Instant - {u} a cog you control: This gets +1{p} or go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP255",
+  "name": "Hit the Gas",
+  "cardType": "action",
+  "text": "Maxx Specialization\nTurn any number of Hyper Drivers in your banished zone face-down and gain that many action points. If 3 or more cards are turned face-down this way, draw a card.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "keywords": [
+   "Maxx Specialization"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP256",
+  "name": "New Horizon",
+  "cardType": "equipment",
+  "text": "If you have a face up card in your arsenal, you have an additional arsenal zone.\nWhen this is destroyed, destroy all cards in your arsenal.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP257",
+  "name": "Mage Hunter Arrow",
+  "cardType": "action",
+  "text": "Instant - Destroy this: The next time you would be dealt arcane damage this turn, prevent 3 of that damage. Activate this only while this is face-up in your arsenal.\nWhen this hits a Runeblade or Wizard hero, you may destroy an aura they control.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP258",
+  "name": "Take the Bait",
+  "cardType": "action",
+  "text": "Riptide Specialization\nSearch your deck for a card, then shuffle and put it on top.\nCreate a Bait token under an opponent's control.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Riptide Specialization",
+   "Go again"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP259",
+  "name": "Bait",
+  "cardType": "token",
+  "text": "You can't play or activate cards you own.\nAction - Destroy this when the chain link resolves: Attack\nOnce per Turn Attack Reaction - 0: This gets +1{p} and go again.",
+  "attack": 0,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP260",
+  "name": "Parched Terrain",
+  "cardType": "instant",
+  "text": "Heroes can't gain {h}.\nAt the beginning of your end phase, put a sand counter on this, then destroy it unless you banish a red card from your graveyard for each sand counter on it.",
+  "pitch": 1,
+  "cost": 1,
+  "subtypes": [
+   "draconic",
+   "aura"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP261",
+  "name": "Felling of the Crown",
+  "cardType": "action",
+  "text": "If there are 4 or more Earth cards in your banished zone, this gets +4{p}.\nDecompose - When this attacks, you may banish 2 Earth cards and an action card from your graveyard. If you do, each hero puts a card from their hand on the bottom of their deck.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 4,
+  "defense": 3,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "keywords": [
+   "Decompose"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP262",
+  "name": "Plow Under",
+  "cardType": "action",
+  "text": "If there are 4 or more Earth cards in your banished zone, this gets +4{p}.\nDecompose - When this attacks, you may banish 2 Earth cards and an action card from your graveyard. If you do, each hero puts a card from their arsenal on the bottom of their deck.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 2,
+  "defense": 3,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "keywords": [
+   "Decompose"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP263",
+  "name": "Channel the Tranquil Domain",
+  "cardType": "action",
+  "text": "Go again\nWhen this enters the arena and at the start of your action phase, put another target aura on the obttom of its owner's deck.\nChannel Earth - At the beginning of your end phase, put a flow counter on this, then destroy it unless you put an Earth card from your pitch zone on the bottom of your deck for each flow counter on it.",
+  "pitch": 2,
+  "cost": 3,
+  "defense": 3,
+  "subtypes": [
+   "earth",
+   "aura"
+  ],
+  "keywords": [
+   "Go again",
+   "Channel Earth"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP264",
+  "name": "Light Up the Leaves",
+  "cardType": "action",
+  "text": "Deal 6 arcane damage to any target.\nInstant - Discard this and an Earth card: Prevent the next 6 arcane damage target source would deal this turn.",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "earth"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP265",
+  "name": "Angelic Attendant",
+  "cardType": "action",
+  "text": "Awaken target figment you control.\nPut this into your soul.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light"
+  ],
+  "keywords": [
+   "Awaken",
+   "Go again"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP266",
+  "name": "Battlefield Beacon",
+  "cardType": "action",
+  "text": "When this attacks, choose 1 for each card you've banished from your soul this combat chain. You may choose the same mode up to 3 times;\n- Create a Courage token.\n- Create a Toughness token.\n- Create a Vigor token.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "attack"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP267",
+  "name": "Gallow, End of the Line",
+  "cardType": "action",
+  "text": "Action - {r}, {t}: Attack\nInstant - {t}, discard a card with watery grave: Until end of turn, effects controlled by opponents don't trigger when their attacks hit.\nWatery Grave",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 4,
+  "classes": [
+   "pirate"
+  ],
+  "subtypes": [
+   "necromancer",
+   "ally"
+  ],
+  "keywords": [
+   "Watery Grave"
+  ],
+  "life": 3,
+  "set": "SUP"
+ },
+ {
+  "id": "SUP268",
+  "name": "Catch of the Day",
+  "cardType": "action",
+  "text": "Your next arrow attack this turn gets +2{p}.\nIf a go fish effect would trigger this turn, instead it triggers twice.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "pirate",
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP269",
+  "name": "Painful Passage",
+  "cardType": "action",
+  "text": "You may banish an attack action card from your hand. If you do, it gets +3{p} or go again until end of turn.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "shadow"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP270",
+  "name": "Warmonger's Diplomacy",
+  "cardType": "action",
+  "text": "Starting with the hero to your left, each hero chooses war or peace.\nIf they choose war, the only actions they may play or activate during their next turn are weapon and attack actions.\nIf they choose peace, the only actions they may play or activate during their next turn are non-weapon non-attack actions.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP271",
+  "name": "Snag",
+  "cardType": "instant",
+  "text": "Attack action cards can't gain {p} from their own effects, or the effects of attack reaction cards this turn.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP272",
+  "name": "Tiara of Suspense",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Put a suspense counter on an aura of suspense you control. Activate this only if you've been cheered this turn.\nGuardwell",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "revered",
+   "head"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP273",
+  "name": "Virtuoso Bodice",
+  "cardType": "equipment",
+  "text": "When this defends, you may remove a suspense counter from an aura you control. If you do, gain {r}{r}.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP274",
+  "name": "Attention Grabbers",
+  "cardType": "equipment",
+  "text": "When this defends, you may remove a suspense counter from an aura you control. If you do, this gets +2{d} this chain link.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "SUP"
+ },
+ {
+  "id": "SUP275",
+  "name": "Boots to the Boards",
+  "cardType": "equipment",
+  "text": "When this defends, pay up to {r}{r}{r}. Create that many Toughness tokens.\nTemper",
+  "defense": 2,
+  "subtypes": [
+   "revered",
+   "legs"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "SUP"
+ }
+]

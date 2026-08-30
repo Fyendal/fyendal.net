@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["src/index.ts", "src/botPolicyWorker.ts"],
+  "exclude": ["src/**/*.test.ts", "src/**/__tests__/**"]
+}

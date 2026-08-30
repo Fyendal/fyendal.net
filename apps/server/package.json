@@ -1,0 +1,38 @@
+{
+  "name": "@fyendal/server",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "clean": "node --input-type=module -e \"import { rmSync } from 'node:fs'; rmSync('dist', { recursive: true, force: true })\"",
+    "build": "pnpm clean && tsc -p tsconfig.build.json && esbuild src/index.ts src/botPolicyWorker.ts --bundle --platform=node --target=node24 --format=esm --outdir=dist --external:pg --external:ws",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "dev": "APP_ORIGIN=${APP_ORIGIN:-http://localhost:5173} RULESET_VERSION=${RULESET_VERSION:-development-seed} WS_MAX_PER_IP=100 tsx watch src/index.ts",
+    "seed": "tsx src/seed.ts",
+    "activate-ruleset": "tsx src/activateRuleset.ts",
+    "start": "node dist/index.js",
+    "test": "vitest run src"
+  },
+  "dependencies": {
+    "pg": "^8.22.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@fyendal/bot": "workspace:*",
+    "@fyendal/cards": "workspace:*",
+    "@fyendal/engine": "workspace:*",
+    "@fyendal/protocol": "workspace:*",
+    "@fyendal/shared": "workspace:*",
+    "@types/node": "^26.1.2",
+    "@types/pg": "^8.20.4",
+    "@types/ws": "^8.5.0",
+    "esbuild": "^0.28.2",
+    "pg-mem": "^3.0.14",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^4.1.10"
+  }
+}

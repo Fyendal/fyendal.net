@@ -1,0 +1,537 @@
+[
+ {
+  "id": "ARR001",
+  "name": "Rhinar, Reckless Rampage",
+  "cardType": "hero",
+  "text": "Whenever you discard a card with 6 or more {p} during your action phase, intimidate.",
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "ARR"
+ },
+ {
+  "id": "ARR002",
+  "name": "Romping Club",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nOnce per Turn Effect - When you discard a card with 6 or more {p}, Romping Club gains +1{p} until end of turn.",
+  "attack": 4,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "club",
+   "2h"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR003",
+  "name": "Echo Casque",
+  "cardType": "equipment",
+  "text": "Whenever you beat chest, you may {r} and destroy this. If you do, draw a card.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR004",
+  "name": "Torc of Vim",
+  "cardType": "equipment",
+  "text": "Whenever you beat chest, you may destroy this. If you do, the next Brute attack action card you play this turn costs {r}{r} less to play.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR005",
+  "name": "Goliath Gauntlet",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: The next attack action card with cost 2 or more you play this turn gets +2{p}. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR006",
+  "name": "Trampling Trackers",
+  "cardType": "equipment",
+  "text": "Whenever you beat chest, you may destroy this. If you do, create an Agility token.\nTemper",
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR007",
+  "name": "Assault and Battery",
+  "cardType": "action",
+  "text": "Beat Chest\nWhen this attacks, if you've beaten chest this turn, create an Agility token.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Beat Chest"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR008",
+  "name": "Bare Destruction",
+  "cardType": "action",
+  "text": "Beat Chest\nWhen this attacks, if you've beaten chest this turn and you don't control a chest equipment, this gets go again and the next Brute attack action card you play this turn gets +2{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Beat Chest",
+   "Go again"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR009",
+  "name": "Bare Swing",
+  "cardType": "action",
+  "text": "Beat Chest\nWhen this attacks, if you've beaten chest this turn and you don't control a chest equipment, this gets +2{p}.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Beat Chest"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR010",
+  "name": "Massacre",
+  "cardType": "action",
+  "text": "When you attack with Massacre, if you have discarded a card with 6 or more {p} this turn, Massacre gains +2{p} and intimidate.\nIf Massacre is discarded to pay the cost of a Brute attack action card, intimidate.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR011",
+  "name": "Pound Town",
+  "cardType": "action",
+  "text": "Beat Chest\nWhen this attacks, if you've beaten chest this turn, create a Might token.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Beat Chest"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR012",
+  "name": "Rawhide Rumble",
+  "cardType": "action",
+  "text": "Beat Chest\nWhen this attacks a hero, if you've beaten chest this turn, intimidate them.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Beat Chest",
+   "Intimidate"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR013",
+  "name": "Show No Mercy",
+  "cardType": "action",
+  "text": "Rhinar Specialization\nWhen this attacks a hero, intimidate them.\nIf the defending hero has no cards in hand, this gets +3{p}.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Rhinar Specialization",
+   "Intimidate"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR014",
+  "name": "Strongest Survive",
+  "cardType": "action",
+  "text": "When this hits a hero, they discard a card unless they reveal a card from their hand with {p} greater than the damage dealt this way.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR015",
+  "name": "Bonebreaker Bellow",
+  "cardType": "action",
+  "text": "Beat Chest\nYour next Brute attack this turn gains +3{p}. If you've beaten chest this turn, instead it gains +5{p}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Beat Chest",
+   "Go again"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR016",
+  "name": "Assault and Battery",
+  "cardType": "action",
+  "text": "Beat Chest\nWhen this attacks, if you've beaten chest this turn, create an Agility token.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Beat Chest"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR017",
+  "name": "Bare Swing",
+  "cardType": "action",
+  "text": "Beat Chest\nWhen this attacks, if you've beaten chest this turn and you don't control a chest equipment, this gets +2{p}.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Beat Chest"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR018",
+  "name": "Beast Within",
+  "cardType": "action",
+  "text": "If Beast Within is put into a graveyard from anywhere other than the combat chain, banish the top card of your deck and lose 1{h}. If it has 6 or more {p}, put it into your hand, otherwise, repeat this process.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR019",
+  "name": "Buckwild",
+  "cardType": "action",
+  "text": "If there is a card with 6 or more {p} in your pitch zone, this gets go again.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR020",
+  "name": "Pound Town",
+  "cardType": "action",
+  "text": "Beat Chest\nWhen this attacks, if you've beaten chest this turn, create a Might token.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Beat Chest"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR021",
+  "name": "Smell Fear",
+  "cardType": "action",
+  "text": "Beat Chest\nIf you've beaten chest this turn, intimidate.\nYour next Brute attack this turn gets \"If you've intimidated 2 or more times this turn, this gets +3{p}.\"\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Beat Chest",
+   "Go again",
+   "Intimidate"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR022",
+  "name": "Alpha Instinct",
+  "cardType": "action",
+  "text": "Rhinar Specialization\nWhen this is discard to beat chest, create a Might token.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 6,
+  "defense": 0,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Rhinar Specialization"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR023",
+  "name": "Wrecker Romp",
+  "cardType": "action",
+  "text": "As an additional cost to play this, discard a random card.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR024",
+  "name": "Barraging Beatdown",
+  "cardType": "action",
+  "text": "Your next Brute attack this turn gains \"While this attack is defended by less than 2 non-equipment cards, it has +2{p}.\"\nIntimidate\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate",
+   "Go again"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR025",
+  "name": "Bonebreaker Bellow",
+  "cardType": "action",
+  "text": "Beat Chest\nYour next Brute attack this turn gains +1{p}. If you've beaten chest this turn, instead it gains +3{p}.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Beat Chest",
+   "Go again"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR026",
+  "name": "Clearing Bellow",
+  "cardType": "action",
+  "text": "Intimidate\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate",
+   "Go again"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR027",
+  "name": "Smashback Alehorn",
+  "cardType": "action",
+  "text": "Create an Agility and a Might token.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR028",
+  "name": "Smell Fear",
+  "cardType": "action",
+  "text": "Beat Chest\nIf you've beaten chest this turn, intimidate.\nYour next Brute attack this turn gets \"If you've intimidated 2 or more times this turn, this gets +2{p}.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Beat Chest",
+   "Go again",
+   "Intimidate"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR029",
+  "name": "Agility",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then your next attack this turn gets go again.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "ARR"
+ },
+ {
+  "id": "ARR030",
+  "name": "Might",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then your next attack this turn gets +1{p}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "ARR"
+ }
+]

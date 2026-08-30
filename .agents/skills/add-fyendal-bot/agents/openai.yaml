@@ -1,0 +1,4 @@
+interface:
+  display_name: "Add Fyendal Bot"
+  short_description: "Integrate a matchup-aware Fyendal practice bot"
+  default_prompt: "Use $add-fyendal-bot to add a new matchup-aware practice bot to Fyendal."

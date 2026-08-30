@@ -1,0 +1,4308 @@
+[
+ {
+  "id": "HVY000",
+  "name": "Deathmatch Arena",
+  "cardType": "action",
+  "text": "Legendary\nGo again\nHeroes can attack any opposing hero.\nWhen a hero deals lethal damage to another hero, they create Gold tokens equal to the number of heroes who started this game.",
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "landmark"
+  ],
+  "keywords": [
+   "Legendary",
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY001",
+  "name": "Kayo, Armed and Dangerous",
+  "cardType": "hero",
+  "text": "You have 1 weapon zone.\nAttack action cards you own get +1{p} while they are in any zone other than the combat chain.\nThe first time you discard a card with 6 or more {p} during each of your action phases, create a Might token.",
+  "classes": [
+   "brute"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "HVY"
+ },
+ {
+  "id": "HVY002",
+  "name": "Kayo",
+  "cardType": "hero",
+  "text": "You have 1 weapon zone.\nAttack action cards you own get +1{p} while they are in any zone other than the combat chain.\nThe first time you discard a card with 6 or more {p} during each of your action phases, create a Might token.",
+  "classes": [
+   "brute"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "HVY"
+ },
+ {
+  "id": "HVY003",
+  "name": "Rhinar, Reckless Rampage",
+  "cardType": "hero",
+  "text": "Whenever you discard a card with 6 or more {p} during your action phase, intimidate.",
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "HVY"
+ },
+ {
+  "id": "HVY004",
+  "name": "Rhinar",
+  "cardType": "hero",
+  "text": "Whenever you discard a card with 6 or more {p} during your action phase, intimidate.",
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "HVY"
+ },
+ {
+  "id": "HVY005",
+  "name": "Mandible Claw",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nIf you have discarded a card with 6 or more {p} this turn, this card's attacks go again.",
+  "attack": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "claw",
+   "1h"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY006",
+  "name": "Ball Breaker",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nIf you've discarded a card with 6 or more {p} this turn, this gets +1{p}.",
+  "attack": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "flail",
+   "1h"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY007",
+  "name": "Mini Meataxe",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nWhen this attacks, draw a card then discard a random card.",
+  "attack": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "axe",
+   "1h"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY008",
+  "name": "Apex Bonebreaker",
+  "cardType": "equipment",
+  "text": "When this defends together with a card with 6 or more {p}, create a Might token.\nTemper",
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY009",
+  "name": "Knucklehead",
+  "cardType": "equipment",
+  "text": "Kayo Specialization \nAction - Destroy this: Roll a 6-sided die. Until end of turn, your base {i} is the number rolled.\nTemper",
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Kayo Specialization",
+   "Temper"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY010",
+  "name": "Monstrous Veil",
+  "cardType": "equipment",
+  "text": "Rhinar Specialization\nAction - Destroy this: Draw a card then discard a random card. Go again\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Rhinar Specialization",
+   "Battleworn"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY011",
+  "name": "Raw Meat",
+  "cardType": "equipment",
+  "text": "If you control an Agility token, this gets +1{d}.\nIf you control a Might token, this gets +1{d}.\nTemper",
+  "defense": 0,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY012",
+  "name": "Send Packing",
+  "cardType": "action",
+  "text": "When this attacks a hero, banish a card from their arsenal. When the chain link resolves, if this didn't hit, return the banished card to its owner's hand.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY013",
+  "name": "Show No Mercy",
+  "cardType": "action",
+  "text": "Rhinar Specialization\nWhen this attacks a hero, intimidate them.\nIf the defending hero has no cards in hand, this gets +3{p}.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Rhinar Specialization",
+   "Intimidate"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY014",
+  "name": "Cast Bones",
+  "cardType": "action",
+  "text": "Reveal the top 6 cards of your deck. Create a Might token for each card with 6 or more {p} revealed this way. Put the revealed cards on top of your deck in a random order.\nIf you control 6 or more Might tokens, create an Agility token.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY015",
+  "name": "Reckless Charge",
+  "cardType": "action",
+  "text": "Kayo Specialization\nRoll a 6 sided die. Gain action points equal to half the number rolled, rounded down.\nIf you've rolled a 6 on a die this turn, draw a card.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Kayo Specialization"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY016",
+  "name": "No Fear",
+  "cardType": "instant",
+  "text": "As an additional cost to play this, banish any number of cards with 6 or more {p} from your hand. At the beginning of the end phase, return them to your hand.\nThe next time you would be dealt damage this turn, prevent X of that damage, where X is 2 plus the number of cards banished to play this.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "brute"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY017",
+  "name": "Beast Mode",
+  "cardType": "action",
+  "text": "If you've intimidated this turn, this gets +2{p}.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY018",
+  "name": "Beast Mode",
+  "cardType": "action",
+  "text": "If you've intimidated this turn, this gets +2{p}.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY019",
+  "name": "Beast Mode",
+  "cardType": "action",
+  "text": "If you've intimidated this turn, this gets +2{p}.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY020",
+  "name": "Pack Call",
+  "cardType": "action",
+  "text": "When this defends, reveal the top card of your deck. If it has 6 or more {p}, put it on top. Otherwise, put it on the bottom.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY021",
+  "name": "Pack Call",
+  "cardType": "action",
+  "text": "When this defends, reveal the top card of your deck. If it has 6 or more {p}, put it on top. Otherwise, put it on the bottom.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY022",
+  "name": "Pack Call",
+  "cardType": "action",
+  "text": "When this defends, reveal the top card of your deck. If it has 6 or more {p}, put it on top. Otherwise, put it on the bottom.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY023",
+  "name": "Rawhide Rumble",
+  "cardType": "action",
+  "text": "Beat Chest\nWhen this attacks a hero, if you've beaten chest this turn, intimidate them.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Beat Chest",
+   "Intimidate"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY024",
+  "name": "Rawhide Rumble",
+  "cardType": "action",
+  "text": "Beat Chest\nWhen this attacks a hero, if you've beaten chest this turn, intimidate them.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Beat Chest",
+   "Intimidate"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY025",
+  "name": "Rawhide Rumble",
+  "cardType": "action",
+  "text": "Beat Chest\nWhen this attacks a hero, if you've beaten chest this turn, intimidate them.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Beat Chest",
+   "Intimidate"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY026",
+  "name": "Assault and Battery",
+  "cardType": "action",
+  "text": "Beat Chest\nWhen this attacks, if you've beaten chest this turn, create an Agility token.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Beat Chest"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY027",
+  "name": "Assault and Battery",
+  "cardType": "action",
+  "text": "Beat Chest\nWhen this attacks, if you've beaten chest this turn, create an Agility token.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Beat Chest"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY028",
+  "name": "Assault and Battery",
+  "cardType": "action",
+  "text": "Beat Chest\nWhen this attacks, if you've beaten chest this turn, create an Agility token.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Beat Chest"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY029",
+  "name": "Bare Fangs",
+  "cardType": "action",
+  "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, Bare Fangs gains +2{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY030",
+  "name": "Bare Fangs",
+  "cardType": "action",
+  "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, Bare Fangs gains +2{p}.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY031",
+  "name": "Bare Fangs",
+  "cardType": "action",
+  "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, Bare Fangs gains +2{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY032",
+  "name": "Pack Hunt",
+  "cardType": "action",
+  "text": "When this attacks, intimidate.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY033",
+  "name": "Pack Hunt",
+  "cardType": "action",
+  "text": "When this attacks, intimidate.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY034",
+  "name": "Pack Hunt",
+  "cardType": "action",
+  "text": "When this attacks, intimidate.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY035",
+  "name": "Pound Town",
+  "cardType": "action",
+  "text": "Beat Chest\nWhen this attacks, if you've beaten chest this turn, create a Might token.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Beat Chest"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY036",
+  "name": "Pound Town",
+  "cardType": "action",
+  "text": "Beat Chest\nWhen this attacks, if you've beaten chest this turn, create a Might token.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Beat Chest"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY037",
+  "name": "Pound Town",
+  "cardType": "action",
+  "text": "Beat Chest\nWhen this attacks, if you've beaten chest this turn, create a Might token.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Beat Chest"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY038",
+  "name": "Wild Ride",
+  "cardType": "action",
+  "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, this gets go again.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY039",
+  "name": "Wild Ride",
+  "cardType": "action",
+  "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, this gets go again.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY040",
+  "name": "Wild Ride",
+  "cardType": "action",
+  "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, this gets go again.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY041",
+  "name": "Bonebreaker Bellow",
+  "cardType": "action",
+  "text": "Beat Chest\nYour next Brute attack this turn gains +3{p}. If you've beaten chest this turn, instead it gains +5{p}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Beat Chest",
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY042",
+  "name": "Bonebreaker Bellow",
+  "cardType": "action",
+  "text": "Beat Chest\nYour next Brute attack this turn gains +2{p}. If you've beaten chest this turn, instead it gains +4{p}.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Beat Chest",
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY043",
+  "name": "Bonebreaker Bellow",
+  "cardType": "action",
+  "text": "Beat Chest\nYour next Brute attack this turn gains +1{p}. If you've beaten chest this turn, instead it gains +3{p}.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Beat Chest",
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY044",
+  "name": "Smashback Alehorn",
+  "cardType": "action",
+  "text": "Create an Agility and a Might token.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY045",
+  "name": "Betsy, Skin in the Game",
+  "cardType": "hero",
+  "text": "Whenever an attack you control wagers, you may pay {r}{r}. If you do, the attack gets +1{p} and overpower.",
+  "classes": [
+   "guardian"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "HVY"
+ },
+ {
+  "id": "HVY046",
+  "name": "Betsy",
+  "cardType": "hero",
+  "text": "Whenever an attack you control wagers, you may pay {r}{r}. If you do, the attack gets +1{p} and overpower.",
+  "classes": [
+   "guardian"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "HVY"
+ },
+ {
+  "id": "HVY047",
+  "name": "Victor Goldmane, High and Mighty",
+  "cardType": "hero",
+  "text": "The first time each turn you create a Gold token from an effect you control, draw a card.\nThe first time each turn you would fail to win a clash, instead you may destroy a Gold you control. If you do, put 1 of the revealed cards on the bottom of its owner's deck, then clash again.",
+  "classes": [
+   "guardian"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "HVY"
+ },
+ {
+  "id": "HVY048",
+  "name": "Victor Goldmane",
+  "cardType": "hero",
+  "text": "The first time each turn you create a Gold token from an effect you control, draw a card.\nThe first time each turn you would fail to win a clash, instead you may destroy a Gold you control. If you do, put 1 of the revealed cards on the bottom of its owner's deck, then clash again.",
+  "classes": [
+   "guardian"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "HVY"
+ },
+ {
+  "id": "HVY049",
+  "name": "High Riser",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}{r}: Attack\nIf you've drawn a card this turn, this gets +1{p}.",
+  "attack": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "hammer",
+   "1h"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY050",
+  "name": "Miller's Grindstone",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}{r}: Attack\nWhen this hits a hero, clash with them. If you win, destroy the top card of their deck. If they win, put a -1{p} counter on this.",
+  "attack": 4,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "hammer",
+   "1h"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY051",
+  "name": "Aurum Aegis",
+  "cardType": "equipment",
+  "text": "Victor Specialization\nThis counts as a Gold.\nTemper",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "off-hand"
+  ],
+  "keywords": [
+   "Victor Specialization",
+   "Temper"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY052",
+  "name": "Stonewall Impasse",
+  "cardType": "equipment",
+  "text": "When this defends, clash with the attacking hero. If you win, this gets +1{d} until end of turn.\nTemper",
+  "defense": 1,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "off-hand"
+  ],
+  "keywords": [
+   "Temper",
+   "Clash"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY053",
+  "name": "Gauntlets of Iron Will",
+  "cardType": "equipment",
+  "text": "When this defends, the next time an attack would gain {p} this chain link, instead it gains that much minus 1.\nTemper",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY054",
+  "name": "Golden Glare",
+  "cardType": "equipment",
+  "text": "Victor Specialization\nWhen this defends together with 2 or more yellow cards, create a Gold token.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Victor Specialization",
+   "Blade Break"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY055",
+  "name": "Good Time Chapeau",
+  "cardType": "equipment",
+  "text": "Betsy Specialization\nAction - Destroy a Gold you control: Your next attack this turn gets \"When this attacks a hero, wager a Might and a Vigor token with them.\" Go again\nTemper",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Betsy Specialization",
+   "Temper"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY056",
+  "name": "Stand Ground",
+  "cardType": "equipment",
+  "text": "If you control a Might token, this gets +1{d}.\nIf you control a Vigor token, this gets +1{d}.\nTemper",
+  "defense": 0,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY057",
+  "name": "Bet Big",
+  "cardType": "action",
+  "text": "Betsy Specialization\nWhen this attacks a hero, you may wager a Gold, Might, and Vigor token with them.",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Betsy Specialization",
+   "Wager"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY058",
+  "name": "Primed to Fight",
+  "cardType": "action",
+  "text": "If you've controlled a Vigor token this turn, this costs {r} less to play.\nIf you've controlled a Might token this turn, this gets +1{p}.",
+  "pitch": 1,
+  "cost": 5,
+  "attack": 9,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY059",
+  "name": "The Golden Son",
+  "cardType": "action",
+  "text": "Victor Specialization\nAs an additional cost to play this, you may destroy a Gold you control. If you do, this gets +3{p} and overpower.\nWhen you win a clash revealing this, create a Gold token.",
+  "pitch": 2,
+  "cost": 4,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Victor Specialization",
+   "Overpower"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY060",
+  "name": "Boast",
+  "cardType": "block",
+  "text": "This gets +X{d} while defending, where X is twice the number of clashes you've won this turn.",
+  "pitch": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY061",
+  "name": "Trounce",
+  "cardType": "block",
+  "text": "When this defends, clash with the attacking hero. Put the revealed cards on the bottom of their owner's deck, then clash again.\nIf a hero wins both clashes, they create a Gold, Might, and Vigor token.",
+  "pitch": 1,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY062",
+  "name": "Colossal Bearing",
+  "cardType": "action",
+  "text": "Tower - If this has 13 or more {p}, it gets \"When this hits a hero, destroy an equipment they control with 1 or less {d}.\"",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Tower"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY063",
+  "name": "Lay Down the Law",
+  "cardType": "action",
+  "text": "Tower - If this has 13 or more {p}, non-equipment cards get -1{d} while defending this.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Tower"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY064",
+  "name": "Smack of Reality",
+  "cardType": "action",
+  "text": "Tower - If this has 13 or more {p}, it gets \"When this hits a hero, destroy all aura tokens they control.\"",
+  "pitch": 1,
+  "cost": 5,
+  "attack": 9,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Tower"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY065",
+  "name": "Over the Top",
+  "cardType": "action",
+  "text": "If this has {p} greater than its base, it gets overpower.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Overpower"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY066",
+  "name": "Over the Top",
+  "cardType": "action",
+  "text": "If this has {p} greater than its base, it gets overpower.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Overpower"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY067",
+  "name": "Over the Top",
+  "cardType": "action",
+  "text": "If this has {p} greater than its base, it gets overpower.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Overpower"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY068",
+  "name": "Stacked in Your Favor",
+  "cardType": "action",
+  "text": "Go again\nYour attack action cards get +3{d} while defending.\nAt the start of your turn, destroy this, draw a card, then put a card from your hand on top of your deck.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY069",
+  "name": "Stacked in Your Favor",
+  "cardType": "action",
+  "text": "Go again\nYour attack action cards get +2{d} while defending.\nAt the start of your turn, destroy this, draw a card, then put a card from your hand on top of your deck.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY070",
+  "name": "Stacked in Your Favor",
+  "cardType": "action",
+  "text": "Go again\nYour attack action cards get +1{d} while defending.\nAt the start of your turn, destroy this, draw a card, then put a card from your hand on top of your deck.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY071",
+  "name": "Command Respect",
+  "cardType": "action",
+  "text": "When this hits a hero, if this has {p} greater than its base, destroy a card in their arsenal.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY072",
+  "name": "Command Respect",
+  "cardType": "action",
+  "text": "When this hits a hero, if this has {p} greater than its base, destroy a card in their arsenal.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY073",
+  "name": "Command Respect",
+  "cardType": "action",
+  "text": "When this hits a hero, if this has {p} greater than its base, destroy a card in their arsenal.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY074",
+  "name": "Concuss",
+  "cardType": "action",
+  "text": "When this hits a hero, if this has {p} greater than its base, they discard a card.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY075",
+  "name": "Concuss",
+  "cardType": "action",
+  "text": "When this hits a hero, if this has {p} greater than its base, they discard a card.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY076",
+  "name": "Concuss",
+  "cardType": "action",
+  "text": "When this hits a hero, if this has {p} greater than its base, they discard a card.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY077",
+  "name": "Thunk",
+  "cardType": "action",
+  "text": "When you win a clash revealing this, create a Might token.",
+  "pitch": 1,
+  "cost": 5,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY078",
+  "name": "Thunk",
+  "cardType": "action",
+  "text": "When you win a clash revealing this, create a Might token.",
+  "pitch": 2,
+  "cost": 5,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY079",
+  "name": "Thunk",
+  "cardType": "action",
+  "text": "When you win a clash revealing this, create a Might token.",
+  "pitch": 3,
+  "cost": 5,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY080",
+  "name": "Wallop",
+  "cardType": "action",
+  "text": "When you win a clash revealing this, create a Vigor token.",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY081",
+  "name": "Wallop",
+  "cardType": "action",
+  "text": "When you win a clash revealing this, create a Vigor token.",
+  "pitch": 2,
+  "cost": 4,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY082",
+  "name": "Wallop",
+  "cardType": "action",
+  "text": "When you win a clash revealing this, create a Vigor token.",
+  "pitch": 3,
+  "cost": 4,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY083",
+  "name": "Big Bop",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy this, then your next Guardian attack this turn gets +5{p} and \"When this attacks a hero, you may wager a Vigor token with them.\"",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY084",
+  "name": "Big Bop",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy this, then your next Guardian attack this turn gets +4{p} and \"When this attacks a hero, you may wager a Vigor token with them.\"",
+  "pitch": 2,
+  "cost": 3,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY085",
+  "name": "Big Bop",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy this, then your next Guardian attack this turn gets +3{p} and \"When this attacks a hero, you may wager a Vigor token with them.\"",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY086",
+  "name": "Bigger Than Big",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy this, then your next Guardian attack this turn gets +5{p} and \"When this attacks a hero, you may wager a Might token with them.\"",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY087",
+  "name": "Bigger Than Big",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy this, then your next Guardian attack this turn gets +4{p} and \"When this attacks a hero, you may wager a Might token with them.\"",
+  "pitch": 2,
+  "cost": 3,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY088",
+  "name": "Bigger Than Big",
+  "cardType": "action",
+  "text": "At the start of your turn, destroy this, then your next Guardian attack this turn gets +3{p} and \"When this attacks a hero, you may wager a Might token with them.\"",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY089",
+  "name": "Pint of Strong and Stout",
+  "cardType": "action",
+  "text": "Create a Might and a Vigor token.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY090",
+  "name": "Kassai of the Golden Sand",
+  "cardType": "hero",
+  "text": "If you've drawn a card this turn, your sword attacks cost {r} less to activate.\nOnce per Turn Action - Banish 2 red and 2 yellow cards from your graveyard: The next time a weapon you control hits a hero this turn, create a Gold token. Go again",
+  "classes": [
+   "warrior"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "HVY"
+ },
+ {
+  "id": "HVY091",
+  "name": "Kassai",
+  "cardType": "hero",
+  "text": "If you've drawn a card this turn, your sword attacks cost {r} less to activate.\nOnce per Turn Action - Banish 2 red and 2 yellow cards from your graveyard: The next time a weapon you control hits a hero this turn, create a Gold token. Go again",
+  "classes": [
+   "warrior"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "HVY"
+ },
+ {
+  "id": "HVY092",
+  "name": "Olympia, Prized Fighter",
+  "cardType": "hero",
+  "text": "The first time each of your attacks wins a wager, create a Gold token.",
+  "classes": [
+   "warrior"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "HVY"
+ },
+ {
+  "id": "HVY093",
+  "name": "Olympia",
+  "cardType": "hero",
+  "text": "The first time each of your attacks wins a wager, create a Gold token.",
+  "classes": [
+   "warrior"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "HVY"
+ },
+ {
+  "id": "HVY094",
+  "name": "Cintari Saber",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nWhenever Cintari Saber is defended by 1 or more attack action cards, it gains +1{p} until end of turn.",
+  "attack": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "sword",
+   "1h"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY095",
+  "name": "Hot Streak",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nWhen this is defended by 1 or more attack action cards, Hot Streak's attacks get go again this turn.",
+  "attack": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "sword",
+   "1h"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY096",
+  "name": "Parry Blade",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nThis gets +2{d} while defending a weapon attack.\nBlade Break",
+  "attack": 2,
+  "defense": 0,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "sword",
+   "1h"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY097",
+  "name": "Grains of Bloodspill",
+  "cardType": "equipment",
+  "text": "Whenever a weapon attack you control hits, you may pay {r}. If you do, create a Vigor token. \nTemper",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY098",
+  "name": "Prized Galea",
+  "cardType": "equipment",
+  "text": "Olympia Specialization\nAttack Reaction - {r}, destroy this: Target weapon attack you control wagers a Gold token with the defending hero.\nTemper",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Olympia Specialization",
+   "Temper"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY099",
+  "name": "Hood of Red Sand",
+  "cardType": "equipment",
+  "text": "Kassai Specialization\nAttack Reaction - {r}, banish a red and yellow card from your graveyard, destroy this: Target sword attack gets \"When this hits, draw a card.\"\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Kassai Specialization",
+   "Battleworn"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY100",
+  "name": "Beckon Applause",
+  "cardType": "equipment",
+  "text": "If you control an Agility token, this gets +1{d}.\nIf you control a Vigor token, this gets +1{d}.\nTemper",
+  "defense": 0,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY101",
+  "name": "Blade Flurry",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets +2{p}.\nYour next weapon attack this turn gets +2{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY102",
+  "name": "Shift the Tide of Battle",
+  "cardType": "attack-reaction",
+  "text": "Target Warrior attack with {p} greater than its base gets go again.\nThe next time an opposing hero is dealt damage this turn, create an Agility token.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY103",
+  "name": "Up the Ante",
+  "cardType": "attack-reaction",
+  "text": "Olympia Specialization\nChoose X+1;\n- Target attack wagers an Agility token with the defending hero.\n- Target attack wagers a Gold token with the defending hero.\n- Target attack wagers a Vigor token with the defending hero.\n- Target attack gets +Y{p}, where Y is the number of times it has wagered.",
+  "pitch": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Olympia Specialization",
+   "Wager"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY104",
+  "name": "Commanding Performance",
+  "cardType": "action",
+  "text": "Your next Warrior attack this turn gets +3{p}. \nUntil end of turn, your Warrior attacks get \"When this is defended by 1 or more attack action cards, destroy a card in the defending hero's arsenal.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY105",
+  "name": "Raise an Army",
+  "cardType": "action",
+  "text": "Kassai Specialization\nAs an additional cost to play this, destroy X Gold you control.\nCreate X Cintari Sellsword tokens.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Kassai Specialization",
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY106",
+  "name": "Cut the Deck",
+  "cardType": "attack-reaction",
+  "text": "Target Warrior attack gets +3{p}. If it's defended by an attack action card, draw a card, then put a card from your hand or arsenal on the bottom of your deck.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY107",
+  "name": "Cut the Deck",
+  "cardType": "attack-reaction",
+  "text": "Target Warrior attack gets +2{p}. If it's defended by an attack action card, draw a card, then put a card from your hand or arsenal on the bottom of your deck.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY108",
+  "name": "Cut the Deck",
+  "cardType": "attack-reaction",
+  "text": "Target Warrior attack gets +1{p}. If it's defended by an attack action card, draw a card, then put a card from your hand or arsenal on the bottom of your deck.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY109",
+  "name": "Fatal Engagement",
+  "cardType": "attack-reaction",
+  "text": "Play this only if an attack action card is defending this chain link.\nTarget attack gets +5{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY110",
+  "name": "Fatal Engagement",
+  "cardType": "attack-reaction",
+  "text": "Play this only if an attack action card is defending this chain link.\nTarget attack gets +4{p}.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY111",
+  "name": "Fatal Engagement",
+  "cardType": "attack-reaction",
+  "text": "Play this only if an attack action card is defending this chain link.\nTarget attack gets +3{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY112",
+  "name": "Take the Upper Hand",
+  "cardType": "attack-reaction",
+  "text": "Play this only if you've wagered this chain link.\nTarget attack gets +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY113",
+  "name": "Take the Upper Hand",
+  "cardType": "attack-reaction",
+  "text": "Play this only if you've wagered this chain link.\nTarget attack gets +2{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY114",
+  "name": "Take the Upper Hand",
+  "cardType": "attack-reaction",
+  "text": "Play this only if you've wagered this chain link.\nTarget attack gets +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY115",
+  "name": "Agile Engagement",
+  "cardType": "attack-reaction",
+  "text": "Target Warrior attack gets +3{p}. If it's defended by an attack action card, create an Agility token.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY116",
+  "name": "Agile Engagement",
+  "cardType": "attack-reaction",
+  "text": "Target Warrior attack gets +2{p}. If it's defended by an attack action card, create an Agility token.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY117",
+  "name": "Agile Engagement",
+  "cardType": "attack-reaction",
+  "text": "Target Warrior attack gets +1{p}. If it's defended by an attack action card, create an Agility token.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY118",
+  "name": "Vigorous Engagement",
+  "cardType": "attack-reaction",
+  "text": "Target Warrior attack gets +3{p}. If it's defended by an attack action card, create a Vigor token.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY119",
+  "name": "Vigorous Engagement",
+  "cardType": "attack-reaction",
+  "text": "Target Warrior attack gets +2{p}. If it's defended by an attack action card, create a Vigor token.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY120",
+  "name": "Vigorous Engagement",
+  "cardType": "attack-reaction",
+  "text": "Target Warrior attack gets +1{p}. If it's defended by an attack action card, create a Vigor token.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY121",
+  "name": "Draw Swords",
+  "cardType": "action",
+  "text": "Your next Warrior attack this turn gets +3{p}.\nDraw a card.\nGo again",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY122",
+  "name": "Draw Swords",
+  "cardType": "action",
+  "text": "Your next Warrior attack this turn gets +2{p}.\nDraw a card.\nGo again",
+  "pitch": 2,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY123",
+  "name": "Draw Swords",
+  "cardType": "action",
+  "text": "Your next Warrior attack this turn gets +1{p}.\nDraw a card.\nGo again",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY124",
+  "name": "Edge Ahead",
+  "cardType": "action",
+  "text": "Your next Warrior attack this turn gets +3{p} and \"When this attacks a hero, you may wager an Agility token with them.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY125",
+  "name": "Edge Ahead",
+  "cardType": "action",
+  "text": "Your next Warrior attack this turn gets +2{p} and \"When this attacks a hero, you may wager an Agility token with them.\"\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY126",
+  "name": "Edge Ahead",
+  "cardType": "action",
+  "text": "Your next Warrior attack this turn gets +1{p} and \"When this attacks a hero, you may wager an Agility token with them.\"\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY127",
+  "name": "Engaged Swiftblade",
+  "cardType": "action",
+  "text": "Your next Warrior attack this turn gets +3{p} and \"If this is defended by an attack action card, this gets Go again.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY128",
+  "name": "Engaged Swiftblade",
+  "cardType": "action",
+  "text": "Your next Warrior attack this turn gets +2{p} and \"If this is defended by an attack action card, this gets Go again.\"\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY129",
+  "name": "Engaged Swiftblade",
+  "cardType": "action",
+  "text": "Your next Warrior attack this turn gets +1{p} and \"If this is defended by an attack action card, this gets Go again.\"\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY130",
+  "name": "Hold 'em",
+  "cardType": "action",
+  "text": "Your next Warrior attack this turn gets +3{p} and \"When this attacks a hero, you may wager a Vigor token with them.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY131",
+  "name": "Hold 'em",
+  "cardType": "action",
+  "text": "Your next Warrior attack this turn gets +2{p} and \"When this attacks a hero, you may wager a Vigor token with them.\"\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again",
+   "Wager"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY132",
+  "name": "Hold 'em",
+  "cardType": "action",
+  "text": "Your next Warrior attack this turn gets +1{p} and \"When this attacks a hero, you may wager a Vigor token with them.\"\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again",
+   "Wager"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY133",
+  "name": "Goblet of Bloodrun Wine",
+  "cardType": "action",
+  "text": "Create an Agility and a Vigor token.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY134",
+  "name": "Cintari Sellsword",
+  "cardType": "token",
+  "text": "Once per Turn Action - {r}: Attack. Go again\nCintari Sellsword can only attack if you've attacked with a weapon this turn.",
+  "attack": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "mercenary",
+   "ally"
+  ],
+  "life": 2,
+  "set": "HVY"
+ },
+ {
+  "id": "HVY135",
+  "name": "Gauntlet of Might",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Create a Might token. Go again\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY136",
+  "name": "Talk a Big Game",
+  "cardType": "action",
+  "text": "Choose a number. The next time you deal that much or more {p} damage to a hero this turn, create that many Might tokens.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY137",
+  "name": "Clash of Might",
+  "cardType": "action",
+  "text": "When this defends, clash with the attacking hero. The winner creates a Might token.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY138",
+  "name": "Clash of Might",
+  "cardType": "action",
+  "text": "When this defends, clash with the attacking hero. The winner creates a Might token.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY139",
+  "name": "Clash of Might",
+  "cardType": "action",
+  "text": "When this defends, clash with the attacking hero. The winner creates a Might token.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY140",
+  "name": "Battered Not Broken",
+  "cardType": "instant",
+  "text": "The next time you would be dealt damage this turn, prevent 2 of that damage. If you do, create a Might token.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY141",
+  "name": "Test of Might",
+  "cardType": "block",
+  "text": "When this defends, clash with the attacking hero. The winner creates a Might token.",
+  "pitch": 1,
+  "defense": 4,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY142",
+  "name": "Wall of Meat and Muscle",
+  "cardType": "block",
+  "text": "When this defends, if you control a Might token, you may put an attack action card from your graveyard on top of your deck.",
+  "pitch": 1,
+  "defense": 3,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY143",
+  "name": "Mighty Windup",
+  "cardType": "action",
+  "text": "Instant - Discard this: Create a Might token.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY144",
+  "name": "Mighty Windup",
+  "cardType": "action",
+  "text": "Instant - Discard this: Create a Might token.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY145",
+  "name": "Mighty Windup",
+  "cardType": "action",
+  "text": "Instant - Discard this: Create a Might token.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY146",
+  "name": "Rising Power",
+  "cardType": "action",
+  "text": "If you've drawn a card this turn, this gets +1{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY147",
+  "name": "Rising Power",
+  "cardType": "action",
+  "text": "If you've drawn a card this turn, this gets +1{p}.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY148",
+  "name": "Rising Power",
+  "cardType": "action",
+  "text": "If you've drawn a card this turn, this gets +1{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY149",
+  "name": "Wage Might",
+  "cardType": "action",
+  "text": "When this attacks a hero, you may wager a Might token with them.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Wager"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY150",
+  "name": "Wage Might",
+  "cardType": "action",
+  "text": "When this attacks a hero, you may wager a Might token with them.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Wager"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY151",
+  "name": "Wage Might",
+  "cardType": "action",
+  "text": "When this attacks a hero, you may wager a Might token with them.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Wager"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY152",
+  "name": "Lead with Power",
+  "cardType": "action",
+  "text": "Your next Brute or Guardian attack this turn gets +3{p}.\nCreate a Might token.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY153",
+  "name": "Lead with Power",
+  "cardType": "action",
+  "text": "Your next Brute or Guardian attack this turn gets +2{p}.\nCreate a Might token.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY154",
+  "name": "Lead with Power",
+  "cardType": "action",
+  "text": "Your next Brute or Guardian attack this turn gets +1{p}.\nCreate a Might token.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY155",
+  "name": "Flat Trackers",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Create an Agility token. Go again\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY156",
+  "name": "Runner Runner",
+  "cardType": "action",
+  "text": "When this attacks, if it has go again, create an Agility token.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY157",
+  "name": "Clash of Agility",
+  "cardType": "action",
+  "text": "When this defends, clash with the attacking hero. The winner creates an Agility token.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY158",
+  "name": "Clash of Agility",
+  "cardType": "action",
+  "text": "When this defends, clash with the attacking hero. The winner creates an Agility token.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY159",
+  "name": "Clash of Agility",
+  "cardType": "action",
+  "text": "When this defends, clash with the attacking hero. The winner creates an Agility token.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY160",
+  "name": "Take it on the Chin",
+  "cardType": "instant",
+  "text": "The next time you would be dealt damage this turn, prevent 2 of that damage. If you do, create an Agility token.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY161",
+  "name": "Run into Trouble",
+  "cardType": "block",
+  "text": "When this defends, if you control an Agility token, deal damage to the attacking hero.",
+  "pitch": 1,
+  "defense": 3,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY162",
+  "name": "Test of Agility",
+  "cardType": "block",
+  "text": "When this defends, clash with the attacking hero. The winner creates an Agility token.",
+  "pitch": 1,
+  "defense": 4,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY163",
+  "name": "Agile Windup",
+  "cardType": "action",
+  "text": "Instant - Discard this: Create an Agility token.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY164",
+  "name": "Agile Windup",
+  "cardType": "action",
+  "text": "Instant - Discard this: Create an Agility token.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY165",
+  "name": "Agile Windup",
+  "cardType": "action",
+  "text": "Instant - Discard this: Create an Agility token.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY166",
+  "name": "Rising Speed",
+  "cardType": "action",
+  "text": "If you've drawn a card this turn, this gets go again.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY167",
+  "name": "Rising Speed",
+  "cardType": "action",
+  "text": "If you've drawn a card this turn, this gets go again.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY168",
+  "name": "Rising Speed",
+  "cardType": "action",
+  "text": "If you've drawn a card this turn, this gets go again.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY169",
+  "name": "Wage Agility",
+  "cardType": "action",
+  "text": "When this attacks a hero, you may wager an Agility token with them.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Wager"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY170",
+  "name": "Wage Agility",
+  "cardType": "action",
+  "text": "When this attacks a hero, you may wager an Agility token with them.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Wager"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY171",
+  "name": "Wage Agility",
+  "cardType": "action",
+  "text": "When this attacks a hero, you may wager an Agility token with them.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Wager"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY172",
+  "name": "Lead with Speed",
+  "cardType": "action",
+  "text": "Your next Brute or Warrior attack this turn gets +3{p}.\nCreate an Agility token.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY173",
+  "name": "Lead with Speed",
+  "cardType": "action",
+  "text": "Your next Brute or Warrior attack this turn gets +2{p}.\nCreate an Agility token.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY174",
+  "name": "Lead with Speed",
+  "cardType": "action",
+  "text": "Your next Brute or Warrior attack this turn gets +1{p}.\nCreate an Agility token.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY175",
+  "name": "Vigor Girth",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Create a Vigor token. Go again\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY176",
+  "name": "Double Down",
+  "cardType": "action",
+  "text": "You may destroy a Gold you control rather than pay Double Down's {r} cost.\nThe next attack that wagers this turn gets +3{p} and overpower.\nIf a hero would create 1 or more tokens from a wager this turn, instead they create that many plus 1 of each of those tokens.\nGo again",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY177",
+  "name": "Clash of Vigor",
+  "cardType": "action",
+  "text": "When this defends, clash with the attacking hero. The winner creates a Vigor token.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY178",
+  "name": "Clash of Vigor",
+  "cardType": "action",
+  "text": "When this defends, clash with the attacking hero. The winner creates a Vigor token.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY179",
+  "name": "Clash of Vigor",
+  "cardType": "action",
+  "text": "When this defends, clash with the attacking hero. The winner creates a Vigor token.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY180",
+  "name": "Slap-Happy",
+  "cardType": "instant",
+  "text": "The next time you would be dealt damage this turn, prevent 2 of that damage. If you do, create a Vigor token.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY181",
+  "name": "Hearty Block",
+  "cardType": "block",
+  "text": "When this defends, if you control a Vigor token, gain 1{h}.",
+  "pitch": 1,
+  "defense": 3,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY182",
+  "name": "Test of Vigor",
+  "cardType": "block",
+  "text": "When this defends, clash with the attacking hero. The winner creates a Vigor token.",
+  "pitch": 1,
+  "defense": 4,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY183",
+  "name": "Rising Energy",
+  "cardType": "action",
+  "text": "If you've drawn a card this turn, this costs {r} less to play.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY184",
+  "name": "Rising Energy",
+  "cardType": "action",
+  "text": "If you've drawn a card this turn, this costs {r} less to play.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY185",
+  "name": "Rising Energy",
+  "cardType": "action",
+  "text": "If you've drawn a card this turn, this costs {r} less to play.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY186",
+  "name": "Vigorous Windup",
+  "cardType": "action",
+  "text": "Instant - Discard this: Create a Vigor token.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY187",
+  "name": "Vigorous Windup",
+  "cardType": "action",
+  "text": "Instant - Discard this: Create a Vigor token.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY188",
+  "name": "Vigorous Windup",
+  "cardType": "action",
+  "text": "Instant - Discard this: Create a Vigor token.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY189",
+  "name": "Wage Vigor",
+  "cardType": "action",
+  "text": "When this attacks a hero, you may wager a Vigor token with them.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Wager"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY190",
+  "name": "Wage Vigor",
+  "cardType": "action",
+  "text": "When this attacks a hero, you may wager a Vigor token with them.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Wager"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY191",
+  "name": "Wage Vigor",
+  "cardType": "action",
+  "text": "When this attacks a hero, you may wager a Vigor token with them.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Wager"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY192",
+  "name": "Lead with Heart",
+  "cardType": "action",
+  "text": "Your next Guardian or Warrior attack this turn gets +3{p}.\nCreate a Vigor token.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY193",
+  "name": "Lead with Heart",
+  "cardType": "action",
+  "text": "Your next Guardian or Warrior attack this turn gets +2{p}.\nCreate a Vigor token.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY194",
+  "name": "Lead with Heart",
+  "cardType": "action",
+  "text": "Your next Guardian or Warrior attack this turn gets +1{p}.\nCreate a Vigor token.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "guardian",
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY195",
+  "name": "Balance of Justice",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Draw a card. Activate this only if an opponent has drawn 2 or more cards this turn.\nGuardwell",
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY196",
+  "name": "Glory Seeker",
+  "cardType": "equipment",
+  "text": "Instant - {r}{r}{r}, destroy this: Draw a card.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY197",
+  "name": "Sheltered Cove",
+  "cardType": "equipment",
+  "text": "Instant - {r}{r}{r}, destroy this: The next time you would be dealt damage this turn, prevent 2 of that damage",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY198",
+  "name": "Face Adversity",
+  "cardType": "equipment",
+  "text": "This may only defend an attack if the attack's controller has drawn a card this turn.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY199",
+  "name": "Confront Adversity",
+  "cardType": "equipment",
+  "text": "This may only defend an attack if the attack's controller has destroyed a Vigor token this turn.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY200",
+  "name": "Embrace Adversity",
+  "cardType": "equipment",
+  "text": "This may only defend an attack if the attack's controller has destroyed a Might token this turn.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY201",
+  "name": "Overcome Adversity",
+  "cardType": "equipment",
+  "text": "This may only defend an attack if the attack's controller has destroyed an Agility token this turn.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY202",
+  "name": "Headliner Helm",
+  "cardType": "equipment",
+  "text": "Headliner Helm's {d} is equal to the number of opposing heroes with greater {h} than you.\nBlade Break",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY203",
+  "name": "Stadium Centerpiece",
+  "cardType": "equipment",
+  "text": "Stadium Centerpiece's {d} is equal to the number of opposing heroes with greater {h} than you.\nBlade Break",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY204",
+  "name": "Ticket Puncher",
+  "cardType": "equipment",
+  "text": "Ticket Puncher's {d} is equal to the number of opposing heroes with greater {h} than you.\nBlade Break",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY205",
+  "name": "Grandstand Legplates",
+  "cardType": "equipment",
+  "text": "Grandstand Legplates' {d} is equal to the number of opposing heroes with greater {h} than you.\nBlade Break",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY206",
+  "name": "Bloodied Oval",
+  "cardType": "equipment",
+  "text": "Bloodied Oval's {d} is equal to the number of opposing heroes with greater {h} than you.\nBlade Break",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "off-hand"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY207",
+  "name": "Nasty Surprise",
+  "cardType": "action",
+  "text": "When an opponent's effect puts this into your graveyard from anywhere, create an Agility, Might, and Vigor token.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY208",
+  "name": "Pay Up",
+  "cardType": "action",
+  "text": "If defending hero controls a Gold, this gets overpower.\nWhen this hits a hero, gain control of a Gold token they control. If you don't, deal 1 damage to them.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Overpower"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY209",
+  "name": "Ripple Away",
+  "cardType": "action",
+  "text": "Instant - Discard this: If an action card effect would create 1 or more tokens this turn, instead it creates that many minus 1 of each of those tokens.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY210",
+  "name": "Standing Order",
+  "cardType": "action",
+  "text": "When this attacks or defends, you may put a card from your arsenal on the bottom of your deck. If you do, this gets +2{p} and +2{d}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY211",
+  "name": "Tenacity",
+  "cardType": "action",
+  "text": "When this attacks, it gets +X{p}, where X is the number of defending cards on the combat chain.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY212",
+  "name": "Seduce Secrets",
+  "cardType": "instant",
+  "text": "Look at target hero's hand and the top card of their deck.\nIf this was played from arsenal, draw a card.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY213",
+  "name": "Down But Not Out",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you have less {h} and control fewer equipment and tokens than them, this gets +3{p}, overpower, and \"When this hits, create an Agility, Might, and Vigor token.\"",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Overpower"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY214",
+  "name": "Down But Not Out",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you have less {h} and control fewer equipment and tokens than them, this gets +3{p}, overpower, and \"When this hits, create an Agility, Might, and Vigor token.\"",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Overpower"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY215",
+  "name": "Down But Not Out",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you have less {h} and control fewer equipment and tokens than them, this gets +3{p}, overpower, and \"When this hits, create an Agility, Might, and Vigor token.\"",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Overpower"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY216",
+  "name": "Wage Gold",
+  "cardType": "action",
+  "text": "Universal\nWhen this attacks a hero, you may wager a Gold token with them.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Universal",
+   "Wager"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY217",
+  "name": "Wage Gold",
+  "cardType": "action",
+  "text": "Universal\nWhen this attacks a hero, you may wager a Gold token with them.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Universal",
+   "Wager"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY218",
+  "name": "Wage Gold",
+  "cardType": "action",
+  "text": "Universal\nWhen this attacks a hero, you may wager a Gold token with them.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Universal",
+   "Wager"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY219",
+  "name": "Reinforce the Line",
+  "cardType": "instant",
+  "text": "Target defending attack action card gains +4{d}.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY220",
+  "name": "Reinforce the Line",
+  "cardType": "instant",
+  "text": "Target defending attack action card gains +3{d}.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY221",
+  "name": "Reinforce the Line",
+  "cardType": "instant",
+  "text": "Target defending attack action card gets +2{d}.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY222",
+  "name": "Adrenaline Rush",
+  "cardType": "action",
+  "text": "When you play this, if you have less {h} than an opposing hero, this gets +3{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY223",
+  "name": "Adrenaline Rush",
+  "cardType": "action",
+  "text": "When you play this, if you have less {h} than an opposing hero, this gets +3{p}.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY224",
+  "name": "Adrenaline Rush",
+  "cardType": "action",
+  "text": "When you play this, if you have less {h} than an opposing hero, this gets +3{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY225",
+  "name": "Performance Bonus",
+  "cardType": "action",
+  "text": "When this hits, create a Gold token.\nIf this was played from arsenal, it gets Go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY226",
+  "name": "Performance Bonus",
+  "cardType": "action",
+  "text": "When this hits, create a Gold token.\nIf this was played from arsenal, it gets go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY227",
+  "name": "Performance Bonus",
+  "cardType": "action",
+  "text": "When this hits, create a Gold token.\nIf this was played from arsenal, it gets Go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY228",
+  "name": "Rally the Rearguard",
+  "cardType": "action",
+  "text": "Once per Turn Instant - Discard a card: This gets +3{d}. Activate this ability only while this is defending.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY229",
+  "name": "Rally the Rearguard",
+  "cardType": "action",
+  "text": "Once per Turn Instant - Discard a card: This gets +3{d}. Activate this ability only while this is defending.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY230",
+  "name": "Rally the Rearguard",
+  "cardType": "action",
+  "text": "Once per Turn Instant - Discard a card: This gets +3{d}. Activate this ability only while this is defending.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY231",
+  "name": "Trade In",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card. If you do, draw a card.\nIf this was played from arsenal, it gains go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY232",
+  "name": "Trade In",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card. If you do, draw a card.\nIf this was played from arsenal, it gains go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY233",
+  "name": "Trade In",
+  "cardType": "action",
+  "text": "When this attacks, you may discard a card. If you do, draw a card.\nIf this was played from arsenal, it gains go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY234",
+  "name": "Lunging Press",
+  "cardType": "attack-reaction",
+  "text": "Target attack action card gains +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY235",
+  "name": "Money Where Ya Mouth Is",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +3{p} and \"When this attacks a hero, you may wager with them. The winner creates a Gold token.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY236",
+  "name": "Money Where Ya Mouth Is",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +2{p} and \"When this attacks a hero, you may wager with them. The winner creates a Gold token.\"\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY237",
+  "name": "Money Where Ya Mouth Is",
+  "cardType": "action",
+  "text": "Your next attack this turn gets +1{p} and \"When this attacks a hero, you may wager with them. The winner creates a Gold token.\"\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY238",
+  "name": "Starting Stake",
+  "cardType": "action",
+  "text": "If you control no Gold tokens, create a Gold token.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY239",
+  "name": "Test of Strength",
+  "cardType": "block",
+  "text": "When this defends, clash with the attacking hero. The winner creates a Gold token.",
+  "pitch": 1,
+  "defense": 4,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Clash"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY240",
+  "name": "Agility",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then your next attack this turn gets go again.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY241",
+  "name": "Might",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then your next attack this turn gets +1{p}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY242",
+  "name": "Vigor",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then gain {r}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY243",
+  "name": "Gold",
+  "cardType": "token",
+  "text": "Action - {r}{r}, destroy this: Draw a card. Go again",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY244",
+  "name": "Cracked Bauble",
+  "cardType": "resource",
+  "text": "(A player may add any number of Cracked Baubles to their card-pool in sealed deck or booster draft formats.)",
+  "pitch": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY245",
+  "name": "Graven Call",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nPiercing 1\nInstant - Destroy 2 Silver you control: Equip this with a +1{p} counter. Activate this ability only while this is in your graveyard.",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Piercing 1"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY246",
+  "name": "Coercive Tendency",
+  "cardType": "attack-reaction",
+  "text": "Arakni Specialization\nLook at the top 3 cards of the defending hero's deck. Put them back in any order, then banish the top card of their deck.\nIf you complete a contract this way, your Assassin attacks get go again this combat chain.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "keywords": [
+   "Arakni Specialization"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY247",
+  "name": "Ancestral Harmony",
+  "cardType": "action",
+  "text": "Your attacks with combo get +1{p} this turn.\nBanish the top card of your deck. If it has combo, you may play it this turn.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY248",
+  "name": "Evo Magneto",
+  "cardType": "equipment",
+  "text": "If you have a base arms equipped, transform it into this, then equip this.\nWhen this defends, you may destroy a card under it. If you do, gain control of target item with cost 0 or 1 controlled by the attacking hero.\nTemper",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "evo",
+   "arms"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY249",
+  "name": "Judge, Jury, Executioner",
+  "cardType": "action",
+  "text": "Legendary Azalea Specialization\nIf this has an aim counter, it gets \"When this hits a hero, they discard all but 1 card from their hand.\"",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Legendary",
+   "Azalea Specialization"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY250",
+  "name": "Reel In",
+  "cardType": "instant",
+  "text": "Look at the top X+1 cards of your deck. Choose up to 4 traps, reveal them, put them into your hand, then shuffle.\nReload",
+  "pitch": 3,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Reload"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY251",
+  "name": "Sonata Galaxia",
+  "cardType": "action",
+  "text": "This costs {r} less to play for each Runechant you control.\nSearch your deck for a Runeblade aura with cost X or less, put it into the arena, then shuffle.\nIf X is 2 or more, this gets go again.",
+  "pitch": 1,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY252",
+  "name": "Aether Arc",
+  "cardType": "action",
+  "text": "Deal 1 arcane damage to each opposing hero.\nCreate a Ponder token for each hero dealt damage this way.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY253",
+  "name": "Dissolve Reality",
+  "cardType": "action",
+  "text": "Each hero puts all cards in their arsenal on the bottom of their deck and creates a Ponder token.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "illusionist"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "HVY"
+ },
+ {
+  "id": "HVY254",
+  "name": "Luminaris, Angel's Glow",
+  "cardType": "weapon",
+  "text": "If there is a yellow card in your pitch zone, the first attack action card with Herald in its name you play each turn and your first angel attack each turn get go again.",
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "scepter",
+   "2h"
+  ],
+  "set": "HVY"
+ }
+]

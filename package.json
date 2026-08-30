@@ -1,0 +1,45 @@
+{
+  "name": "fyendal",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "packageManager": "pnpm@10.28.2",
+  "scripts": {
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "check:card-images": "node scripts/check-card-images.mjs",
+    "check:rules-limitations": "node scripts/check-rules-limitations.mjs",
+    "audit:card-pool": "node scripts/audit-card-pool.mjs",
+    "sync:card-pool": "node scripts/sync-card-pool.mjs",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "dev": "pnpm --parallel --filter @fyendal/server --filter @fyendal/client dev",
+    "perf:up": "docker compose -f docker-compose.perf.yml up --build --wait -d",
+    "perf:load": "pnpm --filter @fyendal/server exec node --import tsx ../../scripts/perf/load.mts",
+    "perf:test": "pnpm --filter @fyendal/server exec node --import tsx --test ../../scripts/perf/*.test.mts",
+    "perf:typecheck": "pnpm --filter @fyendal/server exec tsc -p ../../scripts/perf/tsconfig.json",
+    "perf:load:500": "PERF_GAMES=500 PERF_SETUP_CONCURRENCY=16 PERF_MATCHMAKING_PAIRS=20 PERF_CORRECTNESS_GAMES=20 PERF_ACTION_THINK_SECONDS=10 PERF_PASS_THINK_SECONDS=1 PERF_FINISH_RATE=2 PERF_FINISH_DURATION_SECONDS=60 PERF_LONG_REPLAY_GAMES=2 PERF_LONG_REPLAY_FRAMES=550 PERF_REQUEST_TIMEOUT_MS=120000 pnpm perf:load",
+    "perf:stats": "docker compose -f docker-compose.perf.yml stats --no-stream",
+    "perf:logs": "docker compose -f docker-compose.perf.yml logs app-1 app-2 db db-proxy",
+    "perf:down": "docker compose -f docker-compose.perf.yml down",
+    "perf:reset": "docker compose -f docker-compose.perf.yml down --volumes",
+    "typecheck": "pnpm -r typecheck",
+    "release:check": "bash scripts/release-check.sh"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/ws": "^8.5.0",
+    "eslint": "^10.8.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.9.0",
+    "playwright": "^1.62.1",
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.66.0",
+    "ws": "^8.21.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "nanoid": "^3.3.18"
+    }
+  }
+}

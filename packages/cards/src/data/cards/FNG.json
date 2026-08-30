@@ -1,0 +1,446 @@
+[
+ {
+  "id": "FNG001",
+  "name": "Fang",
+  "cardType": "hero",
+  "text": "Whenever you hit a marked hero, create a Fealty token.\nIf you control 3 or more Fealty tokens, dagger attacks cost you {r} less to activate.",
+  "classes": [
+   "royal",
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "FNG"
+ },
+ {
+  "id": "FNG002",
+  "name": "Obsidian Fire Vein",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack. If you've played a Draconic card this chain link, this attack gets +1{p} and go again.",
+  "attack": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic",
+   "dagger",
+   "1h"
+  ],
+  "set": "FNG"
+ },
+ {
+  "id": "FNG003",
+  "name": "Vow of Vengeance",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy this: Mark target Arakni.\nBlade Break",
+  "defense": 1,
+  "subtypes": [
+   "draconic",
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "FNG"
+ },
+ {
+  "id": "FNG004",
+  "name": "Coat of Allegiance",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Gain {r}. Until end of turn, you may only play cards that are Draconic. Go again",
+  "defense": 0,
+  "subtypes": [
+   "draconic",
+   "chest"
+  ],
+  "set": "FNG"
+ },
+ {
+  "id": "FNG005",
+  "name": "Blade Beckoner Gauntlets",
+  "cardType": "equipment",
+  "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Guardwell"
+  ],
+  "set": "FNG"
+ },
+ {
+  "id": "FNG006",
+  "name": "Red Alert Boots",
+  "cardType": "equipment",
+  "text": "If an attack reaction has been played or activated this chain link, this gets +1{d}.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "FNG"
+ },
+ {
+  "id": "FNG007",
+  "name": "Hunt to the Ends of Rathe",
+  "cardType": "action",
+  "text": "When this attacks Arakni, mark them.\nIf this is attacking a marked hero, this gets +2{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "keywords": [
+   "Mark",
+   "Go again"
+  ],
+  "set": "FNG"
+ },
+ {
+  "id": "FNG008",
+  "name": "For the Dracai",
+  "cardType": "action",
+  "text": "When this attacks a marked hero, create a Fealty token.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "subtypes": [
+   "draconic",
+   "attack"
+  ],
+  "set": "FNG"
+ },
+ {
+  "id": "FNG009",
+  "name": "Affirm Loyalty",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +2{p}. If you control 2 or more Draconic chain links, create a Fealty token.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "FNG"
+ },
+ {
+  "id": "FNG010",
+  "name": "Blistering Blade",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +2{p}. If you control 2 or more Draconic chain links, instead it gets +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "FNG"
+ },
+ {
+  "id": "FNG011",
+  "name": "Dynastic Dedication",
+  "cardType": "attack-reaction",
+  "text": "This costs {r} less to play for each Draconic chain link you control.\nTarget dagger attack gets +3{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "FNG"
+ },
+ {
+  "id": "FNG012",
+  "name": "Endear Devotion",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +3{p}. If you control 2 or more Draconic chain links, create a Fealty token.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "FNG"
+ },
+ {
+  "id": "FNG013",
+  "name": "Fire and Brimstone",
+  "cardType": "attack-reaction",
+  "text": "Legendary\nThis costs {r} less to play for each Draconic chain link you control.\nDaggers you control get +1{p} and you may attack with each of them an additional time this turn.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "keywords": [
+   "Legendary"
+  ],
+  "set": "FNG"
+ },
+ {
+  "id": "FNG014",
+  "name": "Incision",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "set": "FNG"
+ },
+ {
+  "id": "FNG015",
+  "name": "Scar Tissue",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +3{p} and \"When this hits a hero, mark them.\"",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "set": "FNG"
+ },
+ {
+  "id": "FNG016",
+  "name": "Searing Gaze",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +2{p}. If you control 2 or more Draconic chain links, it gets \"When this hits a hero, mark them.\"",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "FNG"
+ },
+ {
+  "id": "FNG017",
+  "name": "Stabbing Pain",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +3{p}. If you control 2 or more Draconic chain links, it gets \"When this hits a hero, mark them.\"",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "FNG"
+ },
+ {
+  "id": "FNG018",
+  "name": "Smoke Out",
+  "cardType": "defense-reaction",
+  "text": "When this defends a red card, mark the attacking hero.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "draconic"
+  ],
+  "keywords": [
+   "Mark"
+  ],
+  "set": "FNG"
+ },
+ {
+  "id": "FNG019",
+  "name": "Sworn Vengeance",
+  "cardType": "action",
+  "text": "Your next dagger attack this turn gets +3{p} and \"When this hits a hero, mark them.\"\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FNG"
+ },
+ {
+  "id": "FNG020",
+  "name": "Pledge Fealty",
+  "cardType": "instant",
+  "text": "Create a Fealty token.",
+  "pitch": 1,
+  "cost": 0,
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "FNG"
+ },
+ {
+  "id": "FNG021",
+  "name": "Tooth of the Dragon",
+  "cardType": "instant",
+  "text": "Your next Draconic attack this turn gets +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "subtypes": [
+   "draconic"
+  ],
+  "set": "FNG"
+ },
+ {
+  "id": "FNG022",
+  "name": "Sworn Vengeance",
+  "cardType": "action",
+  "text": "Your next dagger attack this turn gets +2{p} and \"When this hits a hero, mark them.\"\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FNG"
+ },
+ {
+  "id": "FNG023",
+  "name": "Cut Deep",
+  "cardType": "action",
+  "text": "Your next dagger attack this turn gets +2{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FNG"
+ },
+ {
+  "id": "FNG024",
+  "name": "Hunt a Killer",
+  "cardType": "action",
+  "text": "Your next dagger attack this turn gets +2{p} and \"When this hits a hero, mark them.\"\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FNG"
+ },
+ {
+  "id": "FNG025",
+  "name": "Point of Engagement",
+  "cardType": "action",
+  "text": "Your next dagger attack this turn gets +1{p}.\nUntil end of turn, your attacks get +1{p} while attacking a marked hero.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FNG"
+ },
+ {
+  "id": "FNG026",
+  "name": "Sworn Vengeance",
+  "cardType": "action",
+  "text": "Your next dagger attack this turn gets +1{p} and \"When this hits a hero, mark them.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FNG"
+ },
+ {
+  "id": "FNG027",
+  "name": "Twist and Turn",
+  "cardType": "action",
+  "text": "Your next dagger attack this turn gets +2{p} and \"When this hits, you may attack with it an additional time this turn.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "FNG"
+ },
+ {
+  "id": "FNG028",
+  "name": "Fealty",
+  "cardType": "token",
+  "text": "Instant - Destroy this: The next card you play this turn is Draconic. At the beginning of your end phase, if you haven't created a Fealty token or played a Dragonic card this turn, destroy this.",
+  "subtypes": [
+   "draconic",
+   "aura"
+  ],
+  "set": "FNG"
+ },
+ {
+  "id": "FNG029",
+  "name": "Marked",
+  "cardType": "token",
+  "text": "You are marked until an opponent hits you",
+  "keywords": [
+   "Mark"
+  ],
+  "set": "FNG"
+ }
+]

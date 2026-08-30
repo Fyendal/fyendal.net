@@ -1,0 +1,486 @@
+[
+ {
+  "id": "KYO001",
+  "name": "Kayo",
+  "cardType": "hero",
+  "text": "You have 1 weapon zone.\nAttack action cards you own get +1{p} while they are in any zone other than the combat chain.\nThe first time you discard a card with 6 or more {p} during each of your action phases, create a Might token.",
+  "classes": [
+   "brute"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "KYO"
+ },
+ {
+  "id": "KYO002",
+  "name": "Mini Meataxe",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nWhen this attacks, draw a card then discard a random card.",
+  "attack": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "axe",
+   "1h"
+  ],
+  "set": "KYO"
+ },
+ {
+  "id": "KYO003",
+  "name": "Knucklehead",
+  "cardType": "equipment",
+  "text": "Kayo Specialization \nAction - Destroy this: Roll a 6-sided die. Until end of turn, your base {i} is the number rolled.\nTemper",
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Kayo Specialization",
+   "Temper"
+  ],
+  "set": "KYO"
+ },
+ {
+  "id": "KYO004",
+  "name": "Raw Meat",
+  "cardType": "equipment",
+  "text": "If you control an Agility token, this gets +1{d}.\nIf you control a Might token, this gets +1{d}.\nTemper",
+  "defense": 0,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "KYO"
+ },
+ {
+  "id": "KYO005",
+  "name": "Gauntlet of Might",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Create a Might token. Go again\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "KYO"
+ },
+ {
+  "id": "KYO006",
+  "name": "Flat Trackers",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Create an Agility token. Go again\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "KYO"
+ },
+ {
+  "id": "KYO007",
+  "name": "Agile Windup",
+  "cardType": "action",
+  "text": "Instant - Discard this: Create an Agility token.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "KYO"
+ },
+ {
+  "id": "KYO008",
+  "name": "Bare Fangs",
+  "cardType": "action",
+  "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, Bare Fangs gains +2{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "KYO"
+ },
+ {
+  "id": "KYO009",
+  "name": "Down But Not Out",
+  "cardType": "action",
+  "text": "When this attacks a hero, if you have less {h} and control fewer equipment and tokens than them, this gets +3{p}, overpower, and \"When this hits, create an Agility, Might, and Vigor token.\"",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Overpower"
+  ],
+  "set": "KYO"
+ },
+ {
+  "id": "KYO010",
+  "name": "Rally the Rearguard",
+  "cardType": "action",
+  "text": "Once per Turn Instant - Discard a card: This gets +3{d}. Activate this ability only while this is defending.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "KYO"
+ },
+ {
+  "id": "KYO011",
+  "name": "Rising Power",
+  "cardType": "action",
+  "text": "If you've drawn a card this turn, this gets +1{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "KYO"
+ },
+ {
+  "id": "KYO012",
+  "name": "Wild Ride",
+  "cardType": "action",
+  "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, this gets go again.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "KYO"
+ },
+ {
+  "id": "KYO013",
+  "name": "Lead with Power",
+  "cardType": "action",
+  "text": "Your next Brute or Guardian attack this turn gets +3{p}.\nCreate a Might token.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "KYO"
+ },
+ {
+  "id": "KYO014",
+  "name": "Lead with Speed",
+  "cardType": "action",
+  "text": "Your next Brute or Warrior attack this turn gets +3{p}.\nCreate an Agility token.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "KYO"
+ },
+ {
+  "id": "KYO015",
+  "name": "Run into Trouble",
+  "cardType": "block",
+  "text": "When this defends, if you control an Agility token, deal damage to the attacking hero.",
+  "pitch": 1,
+  "defense": 3,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "set": "KYO"
+ },
+ {
+  "id": "KYO016",
+  "name": "Agile Windup",
+  "cardType": "action",
+  "text": "Instant - Discard this: Create an Agility token.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "KYO"
+ },
+ {
+  "id": "KYO017",
+  "name": "Bare Fangs",
+  "cardType": "action",
+  "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, Bare Fangs gains +2{p}.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "KYO"
+ },
+ {
+  "id": "KYO018",
+  "name": "Pack Call",
+  "cardType": "action",
+  "text": "When this defends, reveal the top card of your deck. If it has 6 or more {p}, put it on top. Otherwise, put it on the bottom.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "KYO"
+ },
+ {
+  "id": "KYO019",
+  "name": "Rally the Rearguard",
+  "cardType": "action",
+  "text": "Once per Turn Instant - Discard a card: This gets +3{d}. Activate this ability only while this is defending.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "KYO"
+ },
+ {
+  "id": "KYO020",
+  "name": "Rising Power",
+  "cardType": "action",
+  "text": "If you've drawn a card this turn, this gets +1{p}.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "KYO"
+ },
+ {
+  "id": "KYO021",
+  "name": "Wild Ride",
+  "cardType": "action",
+  "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, this gets go again.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "KYO"
+ },
+ {
+  "id": "KYO022",
+  "name": "Agile Windup",
+  "cardType": "action",
+  "text": "Instant - Discard this: Create an Agility token.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "KYO"
+ },
+ {
+  "id": "KYO023",
+  "name": "Mighty Windup",
+  "cardType": "action",
+  "text": "Instant - Discard this: Create a Might token.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "KYO"
+ },
+ {
+  "id": "KYO024",
+  "name": "Pack Call",
+  "cardType": "action",
+  "text": "When this defends, reveal the top card of your deck. If it has 6 or more {p}, put it on top. Otherwise, put it on the bottom.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "KYO"
+ },
+ {
+  "id": "KYO025",
+  "name": "Lead with Power",
+  "cardType": "action",
+  "text": "Your next Brute or Guardian attack this turn gets +1{p}.\nCreate a Might token.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "guardian"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "KYO"
+ },
+ {
+  "id": "KYO026",
+  "name": "Lead with Speed",
+  "cardType": "action",
+  "text": "Your next Brute or Warrior attack this turn gets +1{p}.\nCreate an Agility token.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "brute",
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "KYO"
+ },
+ {
+  "id": "KYO027",
+  "name": "Agility",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then your next attack this turn gets go again.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "KYO"
+ },
+ {
+  "id": "KYO028",
+  "name": "Might",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then your next attack this turn gets +1{p}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "KYO"
+ },
+ {
+  "id": "KYO029",
+  "name": "Vigor",
+  "cardType": "token",
+  "text": "At the start of your turn, destroy this, then gain {r}.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "KYO"
+ }
+]

@@ -1,0 +1,555 @@
+[
+ {
+  "id": "JDG001",
+  "name": "Taipanis, Dracai of Judgement",
+  "cardType": "hero",
+  "text": "The first time each turn another hero becomes the target of a source that would deal lethal damage, you may discard a red card. If you do, choose new targets for that source.",
+  "classes": [
+   "adjudicator"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "JDG"
+ },
+ {
+  "id": "JDG002",
+  "name": "Taipanis, Dracai of Judgement",
+  "cardType": "hero",
+  "text": "The first time each turn another hero becomes the target of a source that would deal lethal damage, you may discard a red card. If you do, choose new targets for that source.",
+  "classes": [
+   "adjudicator"
+  ],
+  "subtypes": [
+   "draconic"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "JDG"
+ },
+ {
+  "id": "JDG006",
+  "name": "Theryon, Magister of Justice",
+  "cardType": "hero",
+  "text": "The first time each turn another hero destroys a card they don't control, you may pay {r}{r}. If you do, they destroy a non-hero permanent they control.",
+  "classes": [
+   "adjudicator"
+  ],
+  "subtypes": [
+   "light"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "JDG"
+ },
+ {
+  "id": "JDG008",
+  "name": "Theryon, Magister of Justice",
+  "cardType": "hero",
+  "text": "The first time each turn another hero destroys a card they don't control, you may pay {r}{r}. If you do, they destroy a non-hero permanent they control.",
+  "classes": [
+   "adjudicator"
+  ],
+  "subtypes": [
+   "light"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "JDG"
+ },
+ {
+  "id": "JDG011",
+  "name": "Arc Light Sentinel",
+  "cardType": "instant",
+  "text": "Prism Specialization\nOpponents must choose this as the target of attacks if able.\nSpectra",
+  "pitch": 2,
+  "cost": 6,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "light",
+   "aura"
+  ],
+  "keywords": [
+   "Prism Specialization",
+   "Spectra"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG012",
+  "name": "Pummel",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target club or hammer weapon attack gains +4{p}.\n- Target attack action card with cost 2 or more gets +4{p} and \"When this hits a hero, they discard a card.\"",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG013",
+  "name": "Cash In",
+  "cardType": "action",
+  "text": "You may destroy 4 Coppers, 2 Silvers, or 1 Gold you control rather than pay Cash In's {r} cost.\nDraw 2 cards.\nGo again",
+  "pitch": 2,
+  "cost": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG014",
+  "name": "Wounded Bull",
+  "cardType": "action",
+  "text": "When you play this, if you have less {h} than an opposing hero, this gains +1{p}.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG015",
+  "name": "Art of War",
+  "cardType": "instant",
+  "text": "Choose 2;\n\nAttack action cards you control gain +1{p} and +1{d} this turn.\nThe next attack action card you play this turn gains go again.\nUntil end of turn, you may defend with attack action cards from arsenal.\nYou may banish an attack action card from your hand. If you do, draw 2 cards.",
+  "pitch": 2,
+  "cost": 1,
+  "classes": [
+   "generic"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG016",
+  "name": "Fate Foreseen",
+  "cardType": "defense-reaction",
+  "text": "Opt 1",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 4,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Opt 1"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG017",
+  "name": "Last Ditch Effort",
+  "cardType": "action",
+  "text": "When you play Last Ditch Effort, if you have no cards in your deck, it gains +4{p} and go again.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG018",
+  "name": "Smashing Good Time",
+  "cardType": "action",
+  "text": "The next time an attack action card hits a hero this turn, you may destroy an item they control with cost 2 or less.\nIf Smashing Good Time is played from arsenal, the next attack action card you play this turn gains +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG020",
+  "name": "Sink Below",
+  "cardType": "defense-reaction",
+  "text": "You may put a card from your hand on the bottom of your deck. If you do, draw a card.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 4,
+  "classes": [
+   "generic"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG021",
+  "name": "Rouse the Ancients",
+  "cardType": "action",
+  "text": "As an additional cost to play Rouse the Ancients, you may reveal any number of attack action cards from your hand with 13 or more total {p}. If you do, Rouse the Ancients gains +7{p} and go again.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG022",
+  "name": "Chains of Eminence",
+  "cardType": "action",
+  "text": "Go again\nWhen Chains of Eminence enters the arena, name a card. The named card can't be pitched, played or used to defend while Chains of Eminence is in the arena.\nAt the beginning of your action phase, destroy Chains of Eminence",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG023",
+  "name": "Drone of Brutality",
+  "cardType": "action",
+  "text": "If Drone of Brutality would be put into your graveyard from anywhere, instead put it on the bottom of your deck.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG024",
+  "name": "Brutus, Summa Rudis",
+  "cardType": "hero",
+  "text": "You may have cards with clash of any class or talent in your deck.\nIf all heroes in a clash would fail to win, instead choose which hero wins the clash.",
+  "classes": [
+   "adjudicator"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "JDG"
+ },
+ {
+  "id": "JDG026",
+  "name": "Shimmers of Silver",
+  "cardType": "action",
+  "text": "Once per turn, when you attack with an Illusionist aura weapon, put a +1{p} counter on it.\nSpectra",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "illusionist"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Spectra"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG027",
+  "name": "Nourishing Emptiness",
+  "cardType": "action",
+  "text": "While there are no attack action cards in your graveyard, Nourishing Emptiness has dominate and \"If this hits, your hero gains +1{i} until end of turn.\"",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Dominate"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG028",
+  "name": "Zealous Belting",
+  "cardType": "action",
+  "text": "While there is a card in your pitch zone with {p} greater than Zealous Belting's base {p}, Zealous Belting has go again.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG029",
+  "name": "Memorial Ground",
+  "cardType": "instant",
+  "text": "Put target attack action card with cost 2 or less from your graveyard on top of your deck.",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG031",
+  "name": "Helm of Halo's Grace",
+  "cardType": "equipment",
+  "text": "When this defends, you may charge your hero's soul. If a yellow card is charged this way, draw a card.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "head"
+  ],
+  "keywords": [
+   "Charge",
+   "Blade Break"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG032",
+  "name": "Heavy Industry Power Plant",
+  "cardType": "equipment",
+  "text": "Action - {r}, destroy this: Whenever you boost this turn, gain {r}. Go again\nTemper",
+  "defense": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG033",
+  "name": "Sharp Shooters",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Put an arrow from your hand face-up into your arsenal with an aim counter. Go again\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG034",
+  "name": "Civic Steps",
+  "cardType": "equipment",
+  "text": "Whenever this defends, create a Quicken token under another hero's control.\nTemper",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG035",
+  "name": "Poison the Well",
+  "cardType": "instant",
+  "text": "The next time a hero would gain {h} this turn, instead they lose that much {h}.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG036",
+  "name": "Chivalry",
+  "cardType": "block",
+  "text": "Protect",
+  "pitch": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "keywords": [
+   "Protect"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG039",
+  "name": "Target Totalizer",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Whenever an arrow with an aim counter hits this turn, draw a card. Go again",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG040",
+  "name": "Savage Sash",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Attack action cards with 6 or more {p} cost you {r} less to play this turn. Go again\nTemper",
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG041",
+  "name": "Heavy Industry Ram Stop",
+  "cardType": "equipment",
+  "text": "When this defends, you may pay {r}. If you do, it gets +1{d} until end of turn.\nTemper",
+  "defense": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG042",
+  "name": "Warpath of Winged Grace",
+  "cardType": "equipment",
+  "text": "When this defends, you may charge your hero's soul. If a yellow card is charged this way, create a Quicken token.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "light",
+   "legs"
+  ],
+  "keywords": [
+   "Charge",
+   "Blade Break"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG043",
+  "name": "Erase Face",
+  "cardType": "action",
+  "text": "When this hits a hero, cards they own lose all class and talent types until the end of their next turn.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG044",
+  "name": "Zen State",
+  "cardType": "token",
+  "text": "This enters the arena with a balance counter. At the beginning of your action phase, destroy this unless you remove a balance counter from it.\nIf you would be dealt damage, prevent 1 of that damage.",
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "JDG"
+ },
+ {
+  "id": "JDG062",
+  "name": "The Librarian, Magister of History",
+  "cardType": "hero",
+  "text": "You may have cards with Tome in their name of any class or talent in your deck.\nAction - {t}, reveal a card with Tome in its name from your inventory: Put it into your hand. Another target hero gets +1{i} until the end of their next turn. Go again",
+  "classes": [
+   "adjudicator"
+  ],
+  "subtypes": [
+   "light"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "JDG"
+ }
+]

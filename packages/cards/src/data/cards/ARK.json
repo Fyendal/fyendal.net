@@ -1,0 +1,441 @@
+[
+ {
+  "id": "ARK001",
+  "name": "Arakni",
+  "cardType": "hero",
+  "text": "Whenever you play a card with contract, you may look at the top card of target opponent's deck. You may put it on the bottom.",
+  "classes": [
+   "assassin"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "ARK"
+ },
+ {
+  "id": "ARK002",
+  "name": "Spider's Bite",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack. Go again\nPiercing 1\nWhen this hits a hero, the next time they defend with 1 or more attack action cards this turn, those cards have -1{d} while defending.",
+  "attack": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Piercing 1"
+  ],
+  "set": "ARK"
+ },
+ {
+  "id": "ARK003",
+  "name": "Mask of Perdition",
+  "cardType": "equipment",
+  "text": "While Mask of Perdition is in your graveyard, at the start of your turn, you may destroy 2 Silvers you control. If you do, equip Mask of Perdition.\nAttack Reaction - Destroy Mask of Perdition: Target Assassin attack action card gains \"When this hits a hero, banish the top card of their deck.\"\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "ARK"
+ },
+ {
+  "id": "ARK004",
+  "name": "Leap Frog Slime Skin",
+  "cardType": "equipment",
+  "text": "When an opponent plays or activates an attack reaction, you may add this to the active chain link as a defending card.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "ARK"
+ },
+ {
+  "id": "ARK005",
+  "name": "Danger Digits",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy this: Target dagger you control that isn't on the active chain link deals 1 damage to the defending hero. If damage is dealt this way, the dagger has hit. Destroy the dagger.",
+  "defense": 0,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "ARK"
+ },
+ {
+  "id": "ARK006",
+  "name": "Starting Point",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy this: Target attack gets go again. Activate this only if you've played a card or activated an ability this reaction step.",
+  "defense": 0,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "ARK"
+ },
+ {
+  "id": "ARK007",
+  "name": "The Hand that Pulls the Strings",
+  "cardType": "mentor",
+  "text": "Once per Turn Attack Reaction - 0: Turn this face-up. Activate this only while this is face-down in your arsenal.\nWhile this is face-up in arsenal, your first attack with contract each turn gets go again. If it's attacking a Royal hero, it gets +1{p}.\nAt the beginning of your end phase, destroy a Silver you control. If you don't, put this on the bottom of your deck and draw a card.",
+  "defense": 4,
+  "subtypes": [
+   "arakni"
+  ],
+  "set": "ARK"
+ },
+ {
+  "id": "ARK008",
+  "name": "Annihilate the Armed",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' attack action cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "ARK"
+ },
+ {
+  "id": "ARK009",
+  "name": "Fleece the Frail",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' cards with 2 or less {d}. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "ARK"
+ },
+ {
+  "id": "ARK010",
+  "name": "Nix the Nimble",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' reaction cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "ARK"
+ },
+ {
+  "id": "ARK011",
+  "name": "Plunder the Poor",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' cards with cost 1 or less. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "ARK"
+ },
+ {
+  "id": "ARK012",
+  "name": "Sack the Shifty",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' cards with base go again. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "ARK"
+ },
+ {
+  "id": "ARK013",
+  "name": "Slay the Scholars",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' 'non-attack' action cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "ARK"
+ },
+ {
+  "id": "ARK014",
+  "name": "Cut to the Chase",
+  "cardType": "attack-reaction",
+  "text": "Target Assassin attack action card with contract gains +3{p}.\nLook at the top card of the defending hero's deck. You may put it on the bottom.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "ARK"
+ },
+ {
+  "id": "ARK015",
+  "name": "Incision",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "set": "ARK"
+ },
+ {
+  "id": "ARK016",
+  "name": "Razor Reflex",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target dagger or sword weapon attack gets +3{p}.\n- Target attack action card with cost 1 or less gets +3{p} and \"When this hits, it gets go again.\"",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "ARK"
+ },
+ {
+  "id": "ARK017",
+  "name": "Hunted or Hunter",
+  "cardType": "defense-reaction",
+  "text": "When this defends and the attacking hero has played or activated an attack reaction this chain link, they lose 1{h}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "trap"
+  ],
+  "set": "ARK"
+ },
+ {
+  "id": "ARK018",
+  "name": "Cut to the Chase",
+  "cardType": "attack-reaction",
+  "text": "Target Assassin attack action card with contract gains +2{p}.\nLook at the top card of the defending hero's deck. You may put it on the bottom.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "ARK"
+ },
+ {
+  "id": "ARK019",
+  "name": "Annihilate the Armed",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' attack action cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "ARK"
+ },
+ {
+  "id": "ARK020",
+  "name": "Nix the Nimble",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' reaction cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "ARK"
+ },
+ {
+  "id": "ARK021",
+  "name": "Plunder the Poor",
+  "cardType": "action",
+  "text": "Contract - You are contracted to banish opponents' cards with cost 1 or less. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Contract"
+  ],
+  "set": "ARK"
+ },
+ {
+  "id": "ARK022",
+  "name": "Cut to the Chase",
+  "cardType": "attack-reaction",
+  "text": "Target Assassin attack action card with contract gains +1{p}.\nLook at the top card of the defending hero's deck. You may put it on the bottom.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "ARK"
+ },
+ {
+  "id": "ARK023",
+  "name": "Incision",
+  "cardType": "attack-reaction",
+  "text": "Target dagger attack gets +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin",
+   "warrior"
+  ],
+  "set": "ARK"
+ },
+ {
+  "id": "ARK024",
+  "name": "Razor Reflex",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target dagger or sword weapon attack gets +1{p}.\n- Target attack action card with cost 1 or less gets +1{p} and \"When this hits, it gets go again.\"",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "ARK"
+ },
+ {
+  "id": "ARK025",
+  "name": "Shred",
+  "cardType": "attack-reaction",
+  "text": "Target card defending an Assassin attack gets -2{d} this combat chain.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "assassin"
+  ],
+  "set": "ARK"
+ },
+ {
+  "id": "ARK026",
+  "name": "Up Sticks and Run",
+  "cardType": "action",
+  "text": "You may retrieve a dagger from your graveyard.\nYour next dagger attack this turn gets +2{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "assassin",
+   "ninja"
+  ],
+  "keywords": [
+   "Go again",
+   "Retrieve"
+  ],
+  "set": "ARK"
+ },
+ {
+  "id": "ARK027",
+  "name": "Silver",
+  "cardType": "token",
+  "text": "Action - {r}{r}{r}, destroy Silver: Draw a card. Go again",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "ARK"
+ }
+]

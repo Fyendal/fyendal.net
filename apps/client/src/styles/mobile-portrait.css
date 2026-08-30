@@ -1,0 +1,391 @@
+/* Portrait mobile keeps life/AP visible at the top and all tappable controls
+   together at the bottom, within easy thumb reach. */
+@media (max-width: 700px) and (orientation: portrait) {
+  .deck-card-toast {
+    top: calc(60px + env(safe-area-inset-top));
+    max-width: calc(100vw - 20px);
+  }
+  .deck-card-toast-cards img { width: 79px; }
+
+  .rail-right {
+    top: auto;
+    bottom: 0;
+    height: calc(64px + env(safe-area-inset-bottom));
+    padding: 0 max(8px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(8px, env(safe-area-inset-left));
+    border-top: 1px solid #b8933f55;
+    border-bottom: 0;
+  }
+  .table::after {
+    content: "";
+    position: fixed;
+    z-index: 17;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: calc(max(8px, env(safe-area-inset-bottom)) + 216px);
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      transparent,
+      #0d080570 35%,
+      #0d0805bd 72%,
+      #0d0805d1
+    );
+  }
+  .table.mobile-hand-is-hidden::after { display: none; }
+  .mobile-gamebar {
+    display: flex;
+    height: 63px;
+    padding-block: 0;
+  }
+  .mobile-gamebar-actions {
+    display: flex;
+    width: 100%;
+    gap: 6px;
+  }
+  .mobile-gamebar-actions > * { flex: 1 1 0; min-width: 0; }
+  .mobile-gamebar-actions > .mobile-primary-action {
+    display: block;
+    flex-grow: 1.8;
+  }
+  .mobile-primary-action .btn-pass { height: 100%; }
+  .mobile-gamebar-actions button {
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+  }
+  .replay-bar.replay-bar-collapsed {
+    top: auto;
+    bottom: 0;
+    height: calc(63px + env(safe-area-inset-bottom));
+    padding: 7px 0 calc(7px + env(safe-area-inset-bottom));
+  }
+  .hero-emote-toolbar .hero-emote-picker {
+    top: auto;
+    bottom: calc(100% + 12px);
+  }
+  .hero-emote-toolbar .hero-emote-picker::after {
+    top: 100%;
+    bottom: auto;
+    border-top-color: #b89b4c;
+    border-bottom-color: transparent;
+  }
+
+  .zone-overlay {
+    padding-top: calc(58px + env(safe-area-inset-top));
+    padding-bottom: calc(224px + env(safe-area-inset-bottom));
+  }
+
+  /* Seven columns keep equipment, both weapons, hero, pitch, and deck on one
+     row. Lingering effects remain beside the legs, matching the desktop mat. */
+  .mat-half {
+    grid-template-columns:
+      var(--mat-outer-col)
+      var(--mat-arms-col)
+      var(--mat-weapon-0-col)
+      var(--mat-hero-col)
+      var(--mat-weapon-1-col)
+      repeat(2, minmax(0, 1fr));
+    padding-top: clamp(12px, 2dvh, 20px);
+  }
+  .mat-half.mat-opp {
+    padding-top: 0;
+    padding-bottom: clamp(12px, 2dvh, 20px);
+  }
+  .mat-half .card-zone {
+    width: min(51px, 13vw);
+    height: auto;
+    aspect-ratio: 51 / 70;
+  }
+  .board-card-stack-tapped {
+    width: min(70px, 17.843vw);
+    height: min(51px, 13vw);
+  }
+  .mat-half .zone-head { grid-area: 1 / 1 !important; }
+  .mat-half .zone-board { grid-area: 1 / 2 / 2 / 7 !important; }
+  .mat-half .zone-graveyard { grid-area: 1 / 7 !important; }
+  .mat-half .zone-chest { grid-area: 2 / 1 !important; }
+  .mat-half .zone-arms { grid-area: 2 / 2 !important; }
+  .mat-half .zone-weapon-0 { grid-area: 2 / 3 !important; }
+  .mat-half .zone-hero { grid-area: 2 / 4 !important; }
+  .mat-half .zone-weapon-1 { grid-area: 2 / 5 !important; }
+  .mat-half .zone-pitch { grid-area: 2 / 6 !important; }
+  .mat-half .zone-deck { grid-area: 2 / 7 !important; }
+  .mat-half .zone-legs { grid-area: 3 / 1 !important; }
+  .mat-half .effects-row { grid-area: 3 / 2 / 4 / 4 !important; }
+  .mat-half .zone-arsenal { grid-area: 3 / 4 !important; }
+  .mat-half .zone-banished { grid-area: 3 / 7 !important; }
+
+  .mat-half.mat-opp .zone-legs { grid-area: 1 / 1 !important; }
+  .mat-half.mat-opp .effects-row { grid-area: 1 / 2 / 2 / 4 !important; }
+  .mat-half.mat-opp .zone-arsenal { grid-area: 1 / 4 !important; }
+  .mat-half.mat-opp .zone-banished { grid-area: 1 / 7 !important; }
+  .mat-half.mat-opp .zone-head { grid-area: 3 / 1 !important; }
+  .mat-half.mat-opp .zone-board { grid-area: 3 / 2 / 4 / 7 !important; }
+  .mat-half.mat-opp .zone-graveyard { grid-area: 3 / 7 !important; }
+
+  .board {
+    padding-top: calc(54px + env(safe-area-inset-top));
+    padding-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 220px);
+  }
+  #root:has(.table) {
+    scroll-padding-top: calc(58px + env(safe-area-inset-top));
+    scroll-padding-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 224px);
+  }
+  .board:has(.opp-hand .card-back) {
+    padding-top: calc(88px + env(safe-area-inset-top));
+  }
+  #root:has(.board .opp-hand .card-back) {
+    scroll-padding-top: calc(92px + env(safe-area-inset-top));
+  }
+  .opp-hand { top: calc(54px + env(safe-area-inset-top)); }
+
+  .hand {
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 72px);
+  }
+  .end-turn-pass-toast-mobile-hand {
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 224px);
+  }
+
+  .status-float {
+    left: 0 !important;
+    right: 0 !important;
+    top: env(safe-area-inset-top) !important;
+    bottom: auto !important;
+    min-height: 52px;
+    padding: 7px max(14px, env(safe-area-inset-right)) 7px max(14px, env(safe-area-inset-left));
+    border-inline: 0;
+    border-radius: 0;
+    background:
+      linear-gradient(90deg, #74b94610, transparent 36%, transparent 64%, #df5e5810),
+      #0d0805f8;
+    box-shadow: 0 5px 18px #0008, inset 0 -1px 0 #d2ae5433;
+    z-index: 31;
+  }
+  .status-float .life-me { order: 1; }
+  .status-float .ap-pip { order: 2; }
+  .status-float .life-opp { order: 3; }
+  .status-float > .btn-pass { display: none; }
+  .status-float .life { font-size: 29px; }
+  .status-float .life-impact .ico { display: none; }
+  .status-float .life-hero {
+    display: block;
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    border: 1px solid #b8933f99;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center top;
+    box-shadow: 0 2px 7px #000a;
+  }
+  .status-float .life-me .life-hero { margin-right: 6px; }
+  .status-float .life-opp .life-hero { margin-left: 6px; }
+  .status-float .life-change-pop {
+    top: calc(100% + 5px);
+    bottom: auto;
+  }
+  .status-float .ap-pip {
+    display: flex;
+    min-width: 72px;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 10px;
+    border-block: 0;
+    border-inline: 1px solid #b8933f38;
+    border-radius: 0;
+    background: transparent;
+    line-height: 1;
+  }
+  .status-float .ap-count {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    color: #f2e8d2;
+    font-weight: 700;
+  }
+  .status-float .ap-abbr {
+    color: #cbbd9d;
+    font-family: var(--font-display);
+    font-size: 12px;
+    letter-spacing: .08em;
+  }
+  .status-float .ap-count strong {
+    color: #ffd479;
+    font-size: 19px;
+  }
+  .mobile-primary-action .btn-pass { min-height: 48px; padding-block: 8px; font-size: 14px; }
+
+  .decision-float,
+  .idle-toast {
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 224px) !important;
+  }
+  .mobile-game-alerts .toast,
+  .mobile-game-alerts .winner {
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 224px);
+  }
+  .waiting,
+  .stack-float { top: calc(58px + env(safe-area-inset-top)) !important; }
+
+  #root:has(.replay-bar:not(.replay-bar-collapsed)) .replay-bar {
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 72px);
+  }
+  #root:has(.replay-bar:not(.replay-bar-collapsed)) .hand {
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 160px);
+  }
+  #root:has(.replay-bar:not(.replay-bar-collapsed)) .board {
+    padding-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 312px);
+  }
+  #root:has(.replay-bar:not(.replay-bar-collapsed)) {
+    scroll-padding-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 316px);
+  }
+  #root:has(.replay-bar:not(.replay-bar-collapsed)) .decision-float {
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 310px) !important;
+  }
+  #root:has(.replay-bar:not(.replay-bar-collapsed)) .zone-overlay {
+    padding-bottom: calc(312px + env(safe-area-inset-bottom));
+  }
+  #root:has(.replay-bar:not(.replay-bar-collapsed)) .table::after {
+    height: calc(max(8px, env(safe-area-inset-bottom)) + 304px);
+  }
+
+  .mobile-hand-toggle {
+    top: auto;
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 216px);
+  }
+  .mobile-hand-toggle[aria-expanded="false"] {
+    top: auto;
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 72px);
+  }
+  #root:has(.replay-bar-collapsed) .mobile-hand-toggle[aria-expanded="false"] {
+    top: auto;
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 72px);
+  }
+  .mobile-hand-is-hidden .board {
+    padding-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 116px);
+  }
+  #root:has(.mobile-hand-is-hidden) {
+    scroll-padding-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 120px);
+  }
+  .mobile-hand-is-hidden .decision-float,
+  .mobile-hand-is-hidden .idle-toast {
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 116px) !important;
+  }
+  .mobile-hand-is-hidden .end-turn-pass-toast-mobile-hand,
+  .mobile-hand-is-hidden .mobile-game-alerts .toast,
+  .mobile-hand-is-hidden .mobile-game-alerts .winner {
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 116px);
+  }
+  .mobile-hand-is-hidden .zone-overlay {
+    padding-bottom: calc(116px + env(safe-area-inset-bottom));
+  }
+
+  #root:has(.replay-bar:not(.replay-bar-collapsed)) .mobile-hand-toggle[aria-expanded="true"] {
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 304px);
+  }
+  #root:has(.replay-bar:not(.replay-bar-collapsed)) .mobile-hand-toggle[aria-expanded="false"] {
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 160px);
+  }
+  #root:has(.replay-bar:not(.replay-bar-collapsed)) .mobile-hand-is-hidden .board {
+    padding-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 204px);
+  }
+  #root:has(.replay-bar:not(.replay-bar-collapsed)):has(.mobile-hand-is-hidden) {
+    scroll-padding-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 208px);
+  }
+  #root:has(.replay-bar:not(.replay-bar-collapsed)) .mobile-hand-is-hidden .decision-float {
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 202px) !important;
+  }
+  #root:has(.replay-bar:not(.replay-bar-collapsed)) .mobile-hand-is-hidden .zone-overlay {
+    padding-bottom: calc(204px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Tall portrait screens use a little extra height for the battlefield while
+   keeping card rows grouped; decisions contract it back to the compact mat. */
+@media (max-width: 700px) and (min-height: 850px) and (orientation: portrait) {
+
+  .mat-half {
+    flex: 0 0 clamp(230px, 30dvh, 300px);
+    grid-template-rows: repeat(3, minmax(72px, 1fr));
+  }
+
+  .table:has(.decision-float) .mat-half {
+    flex: 0 0 230px;
+    grid-template-rows: repeat(3, 72px);
+  }
+}
+
+@media (max-width: 420px) {
+  /* Four cards fill compact portrait widths exactly; larger hands retain the
+     same card size and scroll horizontally. The aspect ratio lets height
+     follow width instead of leaving oversized cards on narrower screens. */
+  .hand .card-hand {
+    width: calc(25vw - 11.25px);
+    height: auto;
+    align-self: flex-start;
+    aspect-ratio: 90 / 124;
+  }
+
+  /* Keep a comfortable tap target while reducing the visible hide control to
+     the icon itself. */
+  .mobile-hand-toggle[aria-expanded="true"],
+  .mobile-hand-toggle[aria-expanded="true"]:hover {
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+    transform: translateY(6px);
+  }
+  .mobile-hand-toggle-icon {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+@media (max-width: 380px) {
+  .mobile-gamebar-actions { gap: 4px; }
+  .mobile-gamebar-actions button { min-width: 0; padding-inline: 5px; }
+  .status-float .life { font-size: 24px; }
+  .status-float .life-hero { width: 28px; height: 28px; flex-basis: 28px; }
+  .status-float .life-me .life-hero { margin-right: 4px; }
+  .status-float .life-opp .life-hero { margin-left: 4px; }
+  .status-float .ap-pip { min-width: 64px; padding-inline: 7px; }
+  .mobile-primary-action .btn-pass { padding-inline: 8px; }
+}
+
+.legal-page .topbar { margin-bottom: 25px; }
+.legal-back {
+  font-family: var(--font-display);
+  font-size: 14px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  text-decoration: none;
+}
+.legal-back:hover { text-decoration: underline; }
+.legal-panel {
+  max-width: 828px;
+  margin: 0 auto 46px;
+  padding: 25px 30px;
+}
+.legal-title {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--gold);
+  margin: 0 0 16px;
+}
+.legal-section { margin-bottom: 18px; }
+.legal-section h2 {
+  font-family: var(--font-display);
+  font-size: 17px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #cbbd9d;
+  margin: 0 0 7px;
+}
+.legal-section p {
+  color: #a99e88;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0 0 9px;
+}

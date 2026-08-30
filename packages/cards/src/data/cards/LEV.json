@@ -1,0 +1,529 @@
+[
+ {
+  "id": "LEV001",
+  "name": "Levia",
+  "cardType": "hero",
+  "text": "If a card with 6 or more {p} has been put into your banished zone this turn, cards you own lose blood debt during the end phase.",
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "shadow"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "LEV"
+ },
+ {
+  "id": "LEV002",
+  "name": "Lady Barthimont",
+  "cardType": "mentor",
+  "text": "While Barthimont is face down in arsenal, at the start of your turn, you may turn her face up.\nWhile Barthimont is face up in arsenal, whenever you play an attack action card, banish the top card of your deck. If the banished card has 6 or more {p}, the attack gains dominate and put a lesson counter on Barthimont. Then if there are 2 or more lesson counters on her, banish her, search your deck for a specialization card, put it face up into arsenal, and shuffle.",
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "set": "LEV"
+ },
+ {
+  "id": "LEV003",
+  "name": "Ravenous Meataxe",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nWhenever you attack with Ravenous Meataxe, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, Ravenous Meataxe gains +2{p} until end of turn.",
+  "attack": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "axe",
+   "2h"
+  ],
+  "set": "LEV"
+ },
+ {
+  "id": "LEV004",
+  "name": "Ebon Fold",
+  "cardType": "equipment",
+  "text": "Instant - {r}, destroy Ebon Fold: Banish a card from your hand. If it's a Shadow card, draw a card.\nSpellvoid 2",
+  "defense": 0,
+  "subtypes": [
+   "shadow",
+   "head"
+  ],
+  "keywords": [
+   "Spellvoid 2"
+  ],
+  "set": "LEV"
+ },
+ {
+  "id": "LEV005",
+  "name": "Spell Fray Cloak",
+  "cardType": "equipment",
+  "text": "Spellvoid 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Spellvoid 1"
+  ],
+  "set": "LEV"
+ },
+ {
+  "id": "LEV006",
+  "name": "Goliath Gauntlet",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: The next attack action card with cost 2 or more you play this turn gets +2{p}. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "LEV"
+ },
+ {
+  "id": "LEV007",
+  "name": "Hooves of the Shadowbeast",
+  "cardType": "equipment",
+  "text": "Whenever a card with 6 or more {p} is put into your banished zone, you may destroy Hooves of the Shadowbeast. If you do, gain 1 action point.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "shadow",
+   "legs"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "LEV"
+ },
+ {
+  "id": "LEV008",
+  "name": "Soul Harvest",
+  "cardType": "action",
+  "text": "Legendary Levia Specialization\nAs an additional cost to play Soul Harvest, banish 6 cards from your graveyard. It gains +1{p} for each card with blood debt banished this way.\nIf Soul Harvest hits a hero, they banish all cards in their soul and lose {h} equal to the number of cards banished this way.",
+  "pitch": 3,
+  "cost": 6,
+  "attack": 6,
+  "defense": 3,
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Legendary",
+   "Levia Specialization"
+  ],
+  "set": "LEV"
+ },
+ {
+  "id": "LEV009",
+  "name": "Boneyard Marauder",
+  "cardType": "action",
+  "text": "As an additional cost to play Boneyard Marauder, banish 3 random cards from your graveyard.\nBlood Debt",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "LEV"
+ },
+ {
+  "id": "LEV010",
+  "name": "Deadwood Rumbler",
+  "cardType": "action",
+  "text": "Draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, banish a card from a graveyard.\nBlood Debt",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 8,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "LEV"
+ },
+ {
+  "id": "LEV011",
+  "name": "Dread Screamer",
+  "cardType": "action",
+  "text": "As an additional cost to play Dread Screamer, banish 3 random cards from your graveyard\nIf a card with 6 or more {p} is banished this way, Dread Screamer gains go again.\nBlood Debt",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Blood Debt"
+  ],
+  "set": "LEV"
+ },
+ {
+  "id": "LEV012",
+  "name": "Endless Maw",
+  "cardType": "action",
+  "text": "As an additional cost to play Endless Maw, banish 3 random cards from your graveyard.\nIf a card with 6 or more {p} is banished this way, Endless maw gains +3{p}.\nBlood Debt",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "LEV"
+ },
+ {
+  "id": "LEV013",
+  "name": "Graveling Growl",
+  "cardType": "action",
+  "text": "Play Graveling Growl only if a card with 6 or more {p} has been put into your banished zone this turn.\nBlood Debt",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "LEV"
+ },
+ {
+  "id": "LEV014",
+  "name": "Hungering Slaughterbeast",
+  "cardType": "action",
+  "text": "As an additional cost to play Hungering Slaughterbeast, banish 3 random cards from your graveyard.\nBlood Debt",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "LEV"
+ },
+ {
+  "id": "LEV015",
+  "name": "Unworldly Bellow",
+  "cardType": "action",
+  "text": "As an additional cost to play Unworldly Bellow, banish 3 random cards from your graveyard.\nThe next Brute or Shadow attack action card you play this turn gains +4{p}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "shadow"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LEV"
+ },
+ {
+  "id": "LEV016",
+  "name": "Writhing Beast Hulk",
+  "cardType": "action",
+  "text": "As an additional cost to play Writhing Beast Hulk, banish 3 random cards from your graveyard.\nIf a card with 6 or more {p} is banished this way, Writhing Beast Hulk gains dominate.\nBlood Debt",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Dominate",
+   "Blood Debt"
+  ],
+  "set": "LEV"
+ },
+ {
+  "id": "LEV017",
+  "name": "Hungering Slaughterbeast",
+  "cardType": "action",
+  "text": "As an additional cost to play Hungering Slaughterbeast, banish 3 random cards from your graveyard.\nBlood Debt",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "LEV"
+ },
+ {
+  "id": "LEV018",
+  "name": "Boneyard Marauder",
+  "cardType": "action",
+  "text": "As an additional cost to play Boneyard Marauder, banish 3 random cards from your graveyard.\nBlood Debt",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "LEV"
+ },
+ {
+  "id": "LEV019",
+  "name": "Convulsions from the Bellows of Hell",
+  "cardType": "action",
+  "text": "As an additional cost to play Convulsions from the Bellows of Hell, banish 3 random cards from your graveyard.\nIf a card with 6 or more {p} is banished this way, the next attack action card you play this turn gains +1{p} and dominate.\nGo again",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "shadow"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LEV"
+ },
+ {
+  "id": "LEV020",
+  "name": "Deadwood Rumbler",
+  "cardType": "action",
+  "text": "Draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, banish a card from a graveyard.\nBlood Debt",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 6,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Blood Debt"
+  ],
+  "set": "LEV"
+ },
+ {
+  "id": "LEV021",
+  "name": "Dread Screamer",
+  "cardType": "action",
+  "text": "As an additional cost to play Dread Screamer, banish 3 random cards from your graveyard\nIf a card with 6 or more {p} is banished this way, Dread Screamer gains go again.\nBlood Debt",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again",
+   "Blood Debt"
+  ],
+  "set": "LEV"
+ },
+ {
+  "id": "LEV022",
+  "name": "Unworldly Bellow",
+  "cardType": "action",
+  "text": "As an additional cost to play Unworldly Bellow, banish 3 random cards from your graveyard.\nThe next Brute or Shadow attack action card you play this turn gains +2{p}.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "shadow"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LEV"
+ },
+ {
+  "id": "LEV023",
+  "name": "Consuming Aftermath",
+  "cardType": "action",
+  "text": "As an additional cost to play Consuming Aftermath, you may banish a card from your hand. If a Shadow card is banished this way, Consuming Aftermath gains dominate.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "keywords": [
+   "Dominate"
+  ],
+  "set": "LEV"
+ },
+ {
+  "id": "LEV024",
+  "name": "Lunartide Plunderer",
+  "cardType": "action",
+  "text": "If Lunartide Plunderer hits a hero, banish it and a card from their soul.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "subtypes": [
+   "shadow",
+   "attack"
+  ],
+  "set": "LEV"
+ },
+ {
+  "id": "LEV025",
+  "name": "Blood Tribute",
+  "cardType": "instant",
+  "text": "Opt 1, then banish the top card of your deck.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "shadow"
+  ],
+  "keywords": [
+   "Opt 1"
+  ],
+  "set": "LEV"
+ },
+ {
+  "id": "LEV026",
+  "name": "Smash with Big Tree",
+  "cardType": "action",
+  "text": "",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 7,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "LEV"
+ },
+ {
+  "id": "LEV027",
+  "name": "Smash with Big Tree",
+  "cardType": "action",
+  "text": "",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 6,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "LEV"
+ },
+ {
+  "id": "LEV028",
+  "name": "Rally the Rearguard",
+  "cardType": "action",
+  "text": "Once per Turn Instant - Discard a card: This gets +3{d}. Activate this ability only while this is defending.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "LEV"
+ },
+ {
+  "id": "LEV029",
+  "name": "Rally the Rearguard",
+  "cardType": "action",
+  "text": "Once per Turn Instant - Discard a card: This gets +3{d}. Activate this ability only while this is defending.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "LEV"
+ }
+]

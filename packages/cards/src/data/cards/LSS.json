@@ -1,0 +1,147 @@
+[
+ {
+  "id": "LSS001",
+  "name": "Ruu'di, Gem Keeper",
+  "cardType": "hero",
+  "text": "You may only have PSA graded cards in your deck.\nOnce per Turn Action - {r}: Reveal the top card of your deck. If it's graded Gem Mint 10, put it into your hand, otherwise each opponent may draw a card. Go again",
+  "classes": [
+   "merchant"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "LSS"
+ },
+ {
+  "id": "LSS010B",
+  "name": "Blossom of Spring",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: Gain {r}. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "LSS"
+ },
+ {
+  "id": "LSS011B",
+  "name": "Fyendal's Spring Tunic",
+  "cardType": "equipment",
+  "text": "At the start of your turn, if this has fewer than 3 energy counters, you may put an energy counter on it.\nInstant - Remove 3 energy counters from this: Gain {r}\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "LSS"
+ },
+ {
+  "id": "LSS012B",
+  "name": "Hope Merchant's Hood",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Shuffle any number of cards from your hand into your deck, then draw that many cards.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "LSS"
+ },
+ {
+  "id": "LSS013B",
+  "name": "Crown of Providence",
+  "cardType": "equipment",
+  "text": "When you defend with Crown of Providence, you may put a card from your hand or arsenal on the bottom of your deck. If you do, draw a card.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "LSS"
+ },
+ {
+  "id": "LSS017B",
+  "name": "Snapdragon Scalers",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy this: Target attack action card with cost 1 or less gets go again.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "LSS"
+ },
+ {
+  "id": "LSS018B",
+  "name": "Scabskin Leathers",
+  "cardType": "equipment",
+  "text": "Once per turn Action - 0: Roll a 6 sided die. Gain action points equal to half the number rolled, rounded down.\nBattleworn",
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "LSS"
+ },
+ {
+  "id": "LSS023",
+  "name": "Drinking Buddy",
+  "cardType": "action",
+  "text": "When this attacks, each hero may search their deck for an item with Potion or Brew in its name and put it into the arena. Each hero that does, shuffles their deck. If two or more heroes put a card into the arena this way, this gets go again.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LSS"
+ },
+ {
+  "id": "LSS024",
+  "name": "Drinking Buddy",
+  "cardType": "action",
+  "text": "When this attacks, each hero may search their deck for an item with Potion or Brew in its name and put it into the arena. Each hero that does, shuffles their deck. If two or more heroes put a card into the arena this way, this gets go again.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "LSS"
+ }
+]

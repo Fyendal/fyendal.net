@@ -1,0 +1,655 @@
+/* ── decision bar ── */
+.decision {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: #1a1410ee;
+  border: 1px solid #b8933f55;
+  padding: 9px 16px;
+  border-radius: 3px;
+  max-width: 90%;
+}
+.decision-prompt { color: #e6dcc6; font-size: 15px; }
+.decision-prompt-warning { color: #ff7b72; font-weight: 700; }
+.decision-context {
+  color: #a99f8a;
+  font-size: 13px;
+  text-align: center;
+}
+/* every decision stacks the same way: prompt centered above its options */
+.decision-options { flex-direction: column; align-items: center; }
+.decision-options .decision-prompt { text-align: center; }
+.decision-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.trigger-order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(620px, 78vw);
+  max-height: 58vh;
+  overflow-y: auto;
+  padding: 4px;
+}
+.trigger-order-item {
+  display: grid;
+  grid-template-columns: 24px 54px 68px minmax(120px, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 92px;
+  padding: 7px 9px;
+  border: 1px solid #725a3299;
+  border-radius: 6px;
+  background: #0d0906cc;
+  cursor: grab;
+}
+.trigger-order-item:active { cursor: grabbing; }
+.trigger-order-item:hover { border-color: #c59b48cc; }
+.trigger-order-grip {
+  color: #a99f8a;
+  font-size: 22px;
+  line-height: 1;
+}
+.trigger-order-position {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #e7c873;
+  font: 700 20px/1 var(--font-display);
+}
+.trigger-order-position small {
+  color: #a99f8a;
+  font: 500 10px/1.15 system-ui, sans-serif;
+  text-align: center;
+}
+.trigger-order-item .card-zone {
+  width: 58px;
+  height: 80px;
+}
+.trigger-order-item .blood-debt-stack-tile {
+  width: 58px;
+  height: 80px;
+  gap: 5px;
+}
+.trigger-order-item .blood-debt-stack-title { font-size: 10px; }
+.trigger-order-item .blood-debt-stack-amount { font-size: 30px; }
+.trigger-order-label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  color: #e6dcc6;
+  font-size: 14px;
+  line-height: 1.3;
+}
+.trigger-order-label strong { color: #e7c873; font-size: 15px; }
+.trigger-order-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.trigger-order-controls button {
+  min-width: 34px;
+  padding: 5px 9px;
+}
+.shortcut-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+.shortcut-key {
+  position: relative;
+  display: block;
+  flex: 0 0 20px;
+  width: 20px;
+  height: 16px;
+  border: 1.5px solid #e1d5be88;
+  border-bottom-color: #e1d5bebb;
+  border-radius: 3px;
+  background: #fff1;
+  color: #cfc3ad99;
+  box-shadow: inset 0 -1px 0 #0004;
+}
+.shortcut-key::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 3px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  border-left: 1.5px solid currentColor;
+  transform: translate(-50%, -50%);
+}
+/* Decision card picks use the same card-hand dimensions as the player's hand.
+   Hover inspection is provided by the table's data-cardid delegation. */
+.decision-cards {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 80vw;
+  max-height: 60vh;
+  overflow-y: auto;
+  margin-top: 5px;
+}
+/* Rotation does not change a flex item's layout box. Give a tapped standalone
+   choice half of the card's width/height difference on each side so its
+   landscape silhouette cannot overlap the neighboring choice. */
+.decision-cards > .card-tapped {
+  margin-inline: calc(
+    (clamp(120px, 18vh, 220px) - clamp(87px, 13.1vh, 160px)) / 2
+  );
+}
+.decision-target-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  max-width: 82vw;
+  max-height: 58vh;
+  padding: 10px;
+  overflow-y: auto;
+}
+.decision-target-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  min-width: 124px;
+  padding: 9px;
+  clip-path: none;
+  border: 1px solid #5a4426;
+  border-radius: 7px;
+  background: #0d0906aa;
+  color: #e6dcc6;
+}
+.decision-target-card:has(.card-tapped) {
+  min-width: calc(clamp(120px, 15.1vh, 165px) + 18px);
+}
+.decision-target-card:hover { border-color: #b8933f; }
+.decision-target-card:focus-visible { outline: 2px solid #e6c96a; outline-offset: 2px; }
+.decision-target-card .card-hand {
+  width: clamp(87px, 11vh, 120px);
+  height: clamp(120px, 15.1vh, 165px);
+  pointer-events: none;
+}
+.decision-target-card > span { max-width: 150px; font-weight: 700; }
+.decision-target-card > small { color: #cbbd9d; font-size: 12px; }
+.decision-target-selected {
+  border-color: #e6c96a;
+  background: #392c16dd;
+  box-shadow: 0 0 12px #c9a62755;
+}
+.decision-additional-cost {
+  width: min(780px, calc(100vw - 40px));
+  max-width: calc(100vw - 40px);
+  gap: 14px;
+  padding: 16px 20px 18px;
+}
+.decision-additional-cost > .decision-prompt,
+.decision-additional-cost > .decision-context {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+.decision-additional-cost-groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  width: 100%;
+}
+.decision-additional-cost-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  padding: 12px 14px 14px;
+  border-radius: 6px;
+  background: #0d090655;
+  box-shadow: inset 0 1px 0 #b8933f40;
+}
+.decision-additional-cost-group:only-child {
+  grid-column: 1 / -1;
+  width: min(360px, 100%);
+  justify-self: center;
+}
+.decision-additional-cost-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  color: #e6dcc6;
+  font-size: 16px;
+  font-weight: 650;
+  text-align: center;
+}
+.decision-additional-cost-title small {
+  color: #c9a627;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.decision-additional-cost .decision-target-cards {
+  align-items: center;
+  width: 100%;
+  min-height: clamp(108px, 12.4vh, 140px);
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  overflow: visible;
+}
+.decision-additional-cost .decision-target-card {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.decision-additional-cost .decision-target-card:has(.card-tapped) {
+  min-width: clamp(108px, 12.4vh, 140px);
+}
+.decision-additional-cost .decision-target-card .card-hand {
+  width: clamp(78px, 9vh, 102px);
+  height: clamp(108px, 12.4vh, 140px);
+}
+.decision-additional-cost .decision-target-card:hover {
+  border-color: transparent;
+}
+.decision-additional-cost .decision-target-card:hover .card-hand {
+  filter: brightness(1.08);
+}
+.decision-additional-cost .decision-target-selected .card-hand {
+  box-shadow: 0 0 0 2px #e6c96a, 0 0 14px #c9a627aa;
+}
+.decision-additional-cost-actions {
+  margin-top: 2px;
+}
+@media (max-width: 760px) {
+  .decision-additional-cost {
+    width: calc(100vw - 20px);
+    max-width: calc(100vw - 20px);
+    padding-inline: 12px;
+  }
+  .decision-additional-cost-groups {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.decision-resource-progress {
+  align-self: center;
+  color: #8fc7ff;
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  text-shadow: 0 0 10px #287dccaa;
+}
+/* opt: each looked-at card with a Top button above and a Bottom button below */
+.decision-optcard { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+.decision-optcard:has(.card-tapped) { width: clamp(120px, 18vh, 220px); }
+.decision-optcard button { width: 100%; min-width: clamp(87px, 13.1vh, 160px); }
+.blood-mode-weapons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  max-width: 86vw;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+.blood-mode-weapon {
+  display: grid;
+  grid-template-columns: auto minmax(220px, 1fr);
+  grid-template-rows: auto 1fr;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 10px;
+  border: 1px solid #725a3299;
+  border-radius: 6px;
+  background: #0d0906cc;
+}
+.blood-mode-weapon > .card-hand {
+  grid-row: 1 / 3;
+  width: clamp(72px, 10vh, 104px);
+  height: clamp(99px, 13.8vh, 143px);
+}
+.blood-mode-weapon > strong { color: #e7c873; font-size: 14px; }
+.blood-mode-controls { display: flex; flex-direction: column; gap: 6px; }
+.blood-mode-control {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  color: #d8cdb8;
+  font-size: 13px;
+}
+.blood-mode-control > div {
+  display: grid;
+  grid-template-columns: 34px 30px 34px;
+  align-items: center;
+  gap: 4px;
+}
+.blood-mode-control button { min-width: 34px; padding: 5px 8px; font-size: 18px; line-height: 1; }
+.blood-mode-control output {
+  color: #f2d57c;
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* ── lingering effect chips (next attack / this turn) ── */
+/* lingering effects: blinking mini cards on the legs row of the owner's mat
+   half (left of the arsenal). Smaller than arena cards — they're not in the
+   arena; the opacity blink marks them as active. Hover pops the effect label
+   (and the card preview via data-cardid delegation). */
+.effects-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 9px;
+  padding-left: 25px;
+}
+.effect-mini {
+  position: relative;
+  flex: 0 0 auto;
+}
+.effect-mini-stacked {
+  margin-right: 5px;
+}
+.effect-mini-stacked .effect-mini-img {
+  box-shadow: 3px 2px 0 #20150d, 6px 4px 0 #80622f;
+}
+.effect-mini-img {
+  display: block;
+  width: clamp(38px, 5.2vh, 68px);
+  height: clamp(52px, 7.2vh, 93px);
+  object-fit: cover;
+  border-radius: 3px;
+  border: 1px solid var(--bronze);
+  animation: effect-blink 1.8s ease-in-out infinite;
+}
+.effect-back {
+  background: repeating-linear-gradient(45deg, #241a10, #241a10 5px, #17100a 5px, #17100a 9px);
+  border: 1px solid #b8933f33;
+}
+.effect-count {
+  position: absolute;
+  z-index: 2;
+  top: -7px;
+  right: -9px;
+  min-width: 22px;
+  box-sizing: border-box;
+  padding: 2px 5px;
+  border: 1px solid #e2c66e;
+  border-radius: 999px;
+  background: #171008;
+  box-shadow: 0 2px 5px #000b;
+  color: #f7dc86;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+}
+@keyframes effect-blink {
+  50% { opacity: 0.45; }
+}
+.effect-tip {
+  position: fixed;
+  width: max-content;
+  box-sizing: border-box;
+  background: #140d07f2;
+  border: 1px solid #b8933f66;
+  border-radius: 5px;
+  padding: 3px 9px;
+  color: #cbb894;
+  font-size: 13px;
+  line-height: 1.35;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  overflow-y: auto;
+  z-index: 47; /* above the hover card preview (z-index 46) */
+  pointer-events: none;
+}
+
+/* Public cards leaving or being revealed from a deck briefly slide over the
+   mat. This is presentation-only: identities come from the projected public
+   zones and log, never from a private deck. */
+.deck-card-toast {
+  position: fixed;
+  top: max(18px, env(safe-area-inset-top));
+  left: calc(50% - var(--rail-w) / 2);
+  z-index: 45;
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+  max-width: min(560px, calc(100vw - var(--rail-w) - 24px));
+  transform: translateX(-50%);
+  padding: 10px 14px 12px;
+  border: 1px solid #b8933f99;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #2a1b0df5, #120c07f5);
+  box-shadow: 0 12px 36px #000d, inset 0 1px 0 #ffd47922;
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+  animation: deck-card-toast-in 220ms ease-out;
+}
+.deck-card-toast-heading {
+  box-sizing: border-box;
+  padding: 0 24px;
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 14px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+/* the toast is pointer-events:none — interactive children opt back in */
+.deck-card-toast-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  clip-path: none;
+  border-radius: 3px;
+  pointer-events: auto;
+}
+/* pure-CSS cross: font glyphs never center exactly inside a small button */
+.deck-card-toast-close::before,
+.deck-card-toast-close::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 2px;
+  border-radius: 1px;
+  background: #cbb894;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.deck-card-toast-close::after { transform: translate(-50%, -50%) rotate(-45deg); }
+.deck-card-toast-close:hover::before,
+.deck-card-toast-close:hover::after { background: #ffd479; }
+.deck-card-toast-exiting {
+  pointer-events: none;
+  animation: deck-card-toast-out 220ms ease-in forwards;
+}
+@keyframes deck-card-toast-out {
+  from { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  to { opacity: 0; transform: translate(-50%, -24px) scale(0.96); }
+}
+.deck-card-toast-cards {
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  max-width: 100%;
+  overflow: hidden;
+}
+.deck-card-toast-cards img {
+  /* match the graveyard/banished zone-overlay card size; hoverable so the
+     board's delegated hover preview (data-cardid) works on revealed cards */
+  width: 116px;
+  aspect-ratio: 300 / 413;
+  flex: 0 1 auto;
+  min-width: 0;
+  object-fit: cover;
+  border: 1px solid #6f552b;
+  border-radius: 5px;
+  box-shadow: 0 5px 14px #000b;
+  pointer-events: auto;
+}
+.deck-card-toast-cards img.toast-card-mine {
+  border-color: #4da3ff;
+  box-shadow: 0 0 0 1px #4da3ffcc, 0 5px 14px #000b;
+}
+.deck-card-toast-cards img.toast-card-theirs {
+  border-color: #ff5b4d;
+  box-shadow: 0 0 0 1px #ff5b4dcc, 0 5px 14px #000b;
+}
+@keyframes deck-card-toast-in {
+  from { opacity: 0; transform: translate(-50%, -24px) scale(0.96); }
+  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+.zone-deck.deck-shuffling > .card-zone {
+  animation: deck-zone-shuffle 900ms ease-in-out;
+}
+.deck-shuffle-copy {
+  position: absolute;
+  z-index: 4;
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
+}
+.deck-shuffle-copy-left { animation: deck-zone-shuffle-left 900ms ease-in-out; }
+.deck-shuffle-copy-right { animation: deck-zone-shuffle-right 900ms ease-in-out; }
+@keyframes deck-zone-shuffle {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  40% { transform: translateY(-5px) rotate(2deg); }
+}
+@keyframes deck-zone-shuffle-left {
+  0%, 100% { opacity: 0; transform: translate(-50%, -50%) rotate(0); }
+  15%, 75% { opacity: 1; }
+  42% { opacity: 1; transform: translate(-92%, -58%) rotate(-13deg); }
+}
+@keyframes deck-zone-shuffle-right {
+  0%, 100% { opacity: 0; transform: translate(-50%, -50%) rotate(0); }
+  15%, 75% { opacity: 1; }
+  42% { opacity: 1; transform: translate(-8%, -58%) rotate(13deg); }
+}
+
+/* triggered ability layers inside the floating panel */
+.stack-layers {
+  display: flex;
+  /* The engine stores the next-resolving layer at index 0. Display the stack
+     bottom-to-top from left to right, so the rightmost layer resolves next. */
+  flex-direction: row-reverse;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 5px 2px;
+}
+.stack-layer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  position: relative;
+}
+.stack-layer-count {
+  position: absolute;
+  top: -7px;
+  right: -9px;
+  z-index: 2;
+  min-width: 25px;
+  padding: 3px 7px;
+  border: 1px solid #d2b45f;
+  border-radius: 999px;
+  background: #211507;
+  color: #f2d77d;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  box-shadow: 0 2px 8px #000a;
+}
+.blood-debt-stack-tile {
+  width: clamp(63px, 9.49vh, 124px);
+  height: clamp(86px, 13vh, 170px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  border: 2px solid #a9333d;
+  border-radius: 7px;
+  background:
+    radial-gradient(circle at 50% 38%, #52151ccc 0%, transparent 52%),
+    linear-gradient(155deg, #241014, #0d0809 72%);
+  color: #f1d9cf;
+  box-shadow: inset 0 0 22px #7e182044, 0 5px 16px #0009;
+  text-align: center;
+}
+.blood-debt-stack-title {
+  max-width: 90%;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(12px, 1.8vh, 20px);
+  font-weight: 800;
+  letter-spacing: .06em;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+.blood-debt-stack-amount {
+  color: #ff6670;
+  font-size: clamp(28px, 5vh, 54px);
+  font-weight: 900;
+  line-height: .9;
+  text-shadow: 0 2px 8px #000, 0 0 14px #c51e32aa;
+}
+.stack-label {
+  font-size: 13px;
+  color: #cbbd9d;
+  max-width: 103px;
+  text-align: center;
+}
+.stack-title { letter-spacing: .12em; }
+.stack-skip-runechants {
+  min-height: 30px;
+  padding: 5px 10px;
+  border-color: #8155a6;
+  background: #24152f;
+  color: #e8d6f5;
+  font-size: 12px;
+  clip-path: none;
+}
+.stack-skip-runechants:hover {
+  border-color: #b985df;
+  background: #3b2050;
+}
+.stack-context {
+  margin-top: -8px;
+  color: #b7a581;
+  font-family: var(--font-fantasy-meta);
+  font-variant: normal;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-align: center;
+}
+
+/* inline card names in prompts — hover shows the big preview */
+.card-ref {
+  color: #e6c96a;
+  font-weight: 600;
+  border-bottom: 1px dotted #c9a62788;
+  cursor: help;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+.card-ref:hover {
+  color: #ffe39a;
+  border-bottom-color: #e6c96a;
+}

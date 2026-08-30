@@ -1,0 +1,3859 @@
+[
+ {
+  "id": "WTR000",
+  "name": "Heart of Fyendal",
+  "cardType": "resource",
+  "text": "Legendary\nWhen you pitch Heart of Fyendal, if you have less {h} than an opposing hero, gain 1{h}.",
+  "pitch": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "gem"
+  ],
+  "keywords": [
+   "Legendary"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR001",
+  "name": "Rhinar, Reckless Rampage",
+  "cardType": "hero",
+  "text": "Whenever you discard a card with 6 or more {p} during your action phase, intimidate.",
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "WTR"
+ },
+ {
+  "id": "WTR002",
+  "name": "Rhinar",
+  "cardType": "hero",
+  "text": "Whenever you discard a card with 6 or more {p} during your action phase, intimidate.",
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "WTR"
+ },
+ {
+  "id": "WTR003",
+  "name": "Romping Club",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nOnce per Turn Effect - When you discard a card with 6 or more {p}, Romping Club gains +1{p} until end of turn.",
+  "attack": 4,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "club",
+   "2h"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR004",
+  "name": "Scabskin Leathers",
+  "cardType": "equipment",
+  "text": "Once per turn Action - 0: Roll a 6 sided die. Gain action points equal to half the number rolled, rounded down.\nBattleworn",
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR005",
+  "name": "Barkbone Strapping",
+  "cardType": "equipment",
+  "text": "Instant - Destroy Barkbone Strapping: Roll a 6 die. Gain {r} equal to half the number rolled, rounded down.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR006",
+  "name": "Alpha Rampage",
+  "cardType": "action",
+  "text": "Rhinar Specialization\nAs an additional cost to play Alpha Rampage, discard a random card.\nWhen you attack with Alpha Rampage, intimidate.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 9,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Rhinar Specialization",
+   "Intimidate"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR007",
+  "name": "Bloodrush Bellow",
+  "cardType": "action",
+  "text": "As an additional cost to play Bloodrush Bellow, discard a random card.\nYour Brute attacks gain +2{p} this turn.\nIf the discarded card has 6 or more {p}, draw 2 cards and Bloodrush Bellow gains go again.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR008",
+  "name": "Reckless Swing",
+  "cardType": "defense-reaction",
+  "text": "As an additional cost to play Reckless Swing, discard a random card.\nIf the discarded card has 6 or more {p}, deal 2 damage to the attacking hero.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 4,
+  "classes": [
+   "brute"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR009",
+  "name": "Sand Sketched Plan",
+  "cardType": "action",
+  "text": "Rhinar Specialization\nSearch your deck for a card, put it into your hand, discard a random card, then shuffle your deck.\nIf the discarded card has 6 or more {p}, gain 2 action points.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Rhinar Specialization"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR010",
+  "name": "Bone Head Barrier",
+  "cardType": "instant",
+  "text": "Roll a 6 sided die. Prevent the next X damage that would be dealt to your hero this turn, where X is the number rolled.",
+  "pitch": 2,
+  "cost": 1,
+  "classes": [
+   "brute"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR011",
+  "name": "Breakneck Battery",
+  "cardType": "action",
+  "text": "As an additional cost to play Breakneck Battery, discard a random card.\nIf the discarded card has 6 or more {p}, Breakneck Battery gains go again.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR012",
+  "name": "Breakneck Battery",
+  "cardType": "action",
+  "text": "As an additional cost to play Breakneck Battery, discard a random card.\nIf the discarded card has 6 or more {p}, Breakneck Battery gains go again.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR013",
+  "name": "Breakneck Battery",
+  "cardType": "action",
+  "text": "As an additional cost to play Breakneck Battery, discard a random card.\nIf the discarded card has 6 or more {p}, Breakneck Battery gains go again.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR014",
+  "name": "Savage Feast",
+  "cardType": "action",
+  "text": "As an additional cost to play Savage Feast discard a random card.\nWhen you attack with Savage Feast, if a card with 6 or more {p} was discarded as an additional cost to play it, draw a card.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR015",
+  "name": "Savage Feast",
+  "cardType": "action",
+  "text": "As an additional cost to play Savage Feast discard a random card.\nWhen you attack with Savage Feast, if a card with 6 or more {p} was discarded as an additional cost to play it, draw a card.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR016",
+  "name": "Savage Feast",
+  "cardType": "action",
+  "text": "As an additional cost to play Savage Feast discard a random card.\nWhen you attack with Savage Feast, if a card with 6 or more {p} was discarded as an additional cost to play it, draw a card.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR017",
+  "name": "Barraging Beatdown",
+  "cardType": "action",
+  "text": "Your next Brute attack this turn gains \"While this attack is defended by less than 2 non-equipment cards, it has +4{p}.\"\nIntimidate\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate",
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR018",
+  "name": "Barraging Beatdown",
+  "cardType": "action",
+  "text": "Your next Brute attack this turn gains \"While this attack is defended by less than 2 non-equipment cards, it has +3{p}.\"\nIntimidate\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate",
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR019",
+  "name": "Barraging Beatdown",
+  "cardType": "action",
+  "text": "Your next Brute attack this turn gains \"While this attack is defended by less than 2 non-equipment cards, it has +2{p}.\"\nIntimidate\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate",
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR020",
+  "name": "Savage Swing",
+  "cardType": "action",
+  "text": "As an additional cost to play Savage Swing, discard a random card.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR021",
+  "name": "Savage Swing",
+  "cardType": "action",
+  "text": "As an additional cost to play Savage Swing, discard a random card.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR022",
+  "name": "Savage Swing",
+  "cardType": "action",
+  "text": "As an additional cost to play Savage Swing, discard a random card.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR023",
+  "name": "Pack Hunt",
+  "cardType": "action",
+  "text": "When this attacks, intimidate.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR024",
+  "name": "Pack Hunt",
+  "cardType": "action",
+  "text": "When this attacks, intimidate.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR025",
+  "name": "Pack Hunt",
+  "cardType": "action",
+  "text": "When this attacks, intimidate.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR026",
+  "name": "Smash Instinct",
+  "cardType": "action",
+  "text": "When this attacks, intimidate.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR027",
+  "name": "Smash Instinct",
+  "cardType": "action",
+  "text": "When this attacks, intimidate.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR028",
+  "name": "Smash Instinct",
+  "cardType": "action",
+  "text": "When this attacks, intimidate.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR029",
+  "name": "Wrecker Romp",
+  "cardType": "action",
+  "text": "As an additional cost to play this, discard a random card.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR030",
+  "name": "Wrecker Romp",
+  "cardType": "action",
+  "text": "As an additional cost to play this, discard a random card.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR031",
+  "name": "Wrecker Romp",
+  "cardType": "action",
+  "text": "As an additional cost to play this, discard a random card.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR032",
+  "name": "Awakening Bellow",
+  "cardType": "action",
+  "text": "The next Brute attack action card you play this turn gains +3{p}.\nIntimidate\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate",
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR033",
+  "name": "Awakening Bellow",
+  "cardType": "action",
+  "text": "The next Brute attack action card you play this turn gains +2{p}.\nIntimidate\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate",
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR034",
+  "name": "Awakening Bellow",
+  "cardType": "action",
+  "text": "The next Brute attack action card you play this turn gains +1{p}.\nIntimidate\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate",
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR035",
+  "name": "Primeval Bellow",
+  "cardType": "action",
+  "text": "As an additional cost to play Primeval Bellow, discard a random card.\nYour next Brute attack this turn gains +5{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR036",
+  "name": "Primeval Bellow",
+  "cardType": "action",
+  "text": "As an additional cost to play Primeval Bellow, discard a random card.\nYour next Brute attack this turn gains +4{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR037",
+  "name": "Primeval Bellow",
+  "cardType": "action",
+  "text": "As an additional cost to play Primeval Bellow, discard a random card.\nYour next Brute attack this turn gains +3{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR038",
+  "name": "Bravo, Showstopper",
+  "cardType": "hero",
+  "text": "Action - {r}{r}: Until end of turn, your attack action cards with cost 3 or greater gains dominate. Go again",
+  "classes": [
+   "guardian"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "WTR"
+ },
+ {
+  "id": "WTR039",
+  "name": "Bravo",
+  "cardType": "hero",
+  "text": "Action - {r}{r}: Until end of turn, your attack action cards with cost 3 or more get dominate. Go again",
+  "classes": [
+   "guardian"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "WTR"
+ },
+ {
+  "id": "WTR040",
+  "name": "Anothos",
+  "cardType": "weapon",
+  "text": "Once per turn Action - {r}{r}{r}: Attack\nWhile there are 2 or more cards with cost 3 or greater in your pitch zone, Anothos has +2{p}.",
+  "attack": 4,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "hammer",
+   "2h"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR041",
+  "name": "Tectonic Plating",
+  "cardType": "equipment",
+  "text": "Once per turn Action - {r}: Create a Seismic Surge aura token. Go again\nBattleworn",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR042",
+  "name": "Helm of Isen's Peak",
+  "cardType": "equipment",
+  "text": "Action - {r}, destroy this: Your hero gains +1{i} this turn.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR043",
+  "name": "Crippling Crush",
+  "cardType": "action",
+  "text": "Bravo Specialization\nCrush - If Crippling Crush deals 4 or more damage to a hero, they discard 2 random cards.",
+  "pitch": 1,
+  "cost": 7,
+  "attack": 11,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Bravo Specialization",
+   "Crush"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR044",
+  "name": "Spinal Crush",
+  "cardType": "action",
+  "text": "Crush - If Spinal Crush deals 4 or more damage to a hero, action cards, activated abilities, and attacks they control lose and can't gain go again during their next action phase.",
+  "pitch": 1,
+  "cost": 5,
+  "attack": 9,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR045",
+  "name": "Cranial Crush",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, they can't draw cards during their next action phase",
+  "pitch": 3,
+  "cost": 6,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR046",
+  "name": "Forged for War",
+  "cardType": "action",
+  "text": "Go again\nEquipment you control gain +1{d}.\nAt the beginning of your action phase, destroy Forged for War.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR047",
+  "name": "Show Time!",
+  "cardType": "action",
+  "text": "Bravo Specialization\nWhen Show Time! enters the arena, search your deck for a Guardian attack action card, reveal it and put it into your hand, then shuffle your deck.\nAt the beginning of your action phase, destroy Show Time! then draw a card.",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Bravo Specialization"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR048",
+  "name": "Disable",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, put a card from their arsenal on the bottom of their deck.",
+  "pitch": 1,
+  "cost": 5,
+  "attack": 9,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR049",
+  "name": "Disable",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, put a card from their arsenal on the bottom of their deck.",
+  "pitch": 2,
+  "cost": 5,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR050",
+  "name": "Disable",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, put a card from their arsenal on the bottom of their deck.",
+  "pitch": 3,
+  "cost": 5,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR051",
+  "name": "Staunch Response",
+  "cardType": "defense-reaction",
+  "text": "As an additional cost to play Staunch Response you may pay {r}{r}{r}{r}. If you do, Staunch Response gains +3{d}.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 7,
+  "classes": [
+   "guardian"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR052",
+  "name": "Staunch Response",
+  "cardType": "defense-reaction",
+  "text": "As an additional cost to play Staunch Response you may pay {r}{r}{r}{r}. If you do, Staunch Response gains +3{d}.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 6,
+  "classes": [
+   "guardian"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR053",
+  "name": "Staunch Response",
+  "cardType": "defense-reaction",
+  "text": "As an additional cost to play Staunch Response you may pay {r}{r}{r}{r}. If you do, Staunch Response gains +3{d}.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 5,
+  "classes": [
+   "guardian"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR054",
+  "name": "Blessing of Deliverance",
+  "cardType": "action",
+  "text": "Go again\nWhen Blessing of Deliverance enters the arena, if you have a card with cost 3 or greater in your pitch zone, draw a card.\nAt the beginning of your action phase, destroy Blessing of Deliverance then reveal the top 3 cards of your deck. Gain 1{h} for each card with cost 3 or greater revealed this way.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR055",
+  "name": "Blessing of Deliverance",
+  "cardType": "action",
+  "text": "Go again\nWhen Blessing of Deliverance enters the arena, if you have a card with cost 3 or greater in your pitch zone, draw a card.\nAt the beginning of your action phase, destroy Blessing of Deliverance then reveal the top 2 cards of your deck. Gain 1{h} for each card with cost 3 or greater revealed this way.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR056",
+  "name": "Blessing of Deliverance",
+  "cardType": "action",
+  "text": "Go again\nWhen Blessing of Deliverance enters the arena, if you have a card with cost 3 or greater in your pitch zone, draw a card.\nAt the beginning of your action phase, destroy Blessing of Deliverance then reveal the top card of your deck. Gain 1{h} for each card with cost 3 or greater revealed this way.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR057",
+  "name": "Buckling Blow",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, put a -1{d} counter on an equipment they control.",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR058",
+  "name": "Buckling Blow",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, put a -1{d} counter on an equipment they control.",
+  "pitch": 2,
+  "cost": 4,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR059",
+  "name": "Buckling Blow",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, put a -1{d} counter on an equipment they control.",
+  "pitch": 3,
+  "cost": 4,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR060",
+  "name": "Cartilage Crush",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, their first action during their next turn costs an additional {r} to play or activate.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR061",
+  "name": "Cartilage Crush",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, their first action during their next turn costs an additional {r} to play or activate.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR062",
+  "name": "Cartilage Crush",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, their first action during their next turn costs an additional {r} to play or activate.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR063",
+  "name": "Crush Confidence",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, they lose all hero card abilities until the end of their next turn.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR064",
+  "name": "Crush Confidence",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, they lose all hero card abilities until the end of their next turn.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR065",
+  "name": "Crush Confidence",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, they lose all hero card abilities until the end of their next turn.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR066",
+  "name": "Debilitate",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, their first attack during their next turn gets -2{p}.",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR067",
+  "name": "Debilitate",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, their first attack during their next turn gets -2{p}.",
+  "pitch": 2,
+  "cost": 4,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR068",
+  "name": "Debilitate",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, their first attack during their next turn gets -2{p}.",
+  "pitch": 3,
+  "cost": 4,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR069",
+  "name": "Emerging Power",
+  "cardType": "action",
+  "text": "Go again\nAt the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn gets +3{p}.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR070",
+  "name": "Emerging Power",
+  "cardType": "action",
+  "text": "Go again\nAt the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn gets +2{p}.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR071",
+  "name": "Emerging Power",
+  "cardType": "action",
+  "text": "Go again\nAt the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn gets +1{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR072",
+  "name": "Stonewall Confidence",
+  "cardType": "action",
+  "text": "Go again\nCards you control with cost 3 or more get +4{d} while defending.\nAt the beginning of your action phase, destroy this.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR073",
+  "name": "Stonewall Confidence",
+  "cardType": "action",
+  "text": "Go again\nCards you control with cost 3 or more get +3{d} while defending.\nAt the beginning of your action phase, destroy this.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR074",
+  "name": "Stonewall Confidence",
+  "cardType": "action",
+  "text": "Go again\nCards you control with cost 3 or more get +2{d} while defending.\nAt the beginning of your action phase, destroy this.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR075B",
+  "name": "Seismic Surge",
+  "cardType": "token",
+  "text": "At the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn costs {r} less to play.",
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR076B",
+  "name": "Katsu, the Wanderer",
+  "cardType": "hero",
+  "text": "The first time an attack action card you control hits each turn, you may discard a card with cost 0. If you do, search your deck for a card with combo, banish it face up, then shuffle your deck. You may play it this turn.",
+  "classes": [
+   "ninja"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "WTR"
+ },
+ {
+  "id": "WTR077",
+  "name": "Katsu",
+  "cardType": "hero",
+  "text": "The first time an attack action card you control hits each turn, you may discard a card with cost 0. If you do, search your deck for a card with combo, banish it face up, then shuffle your deck. You may play it this turn.",
+  "classes": [
+   "ninja"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "WTR"
+ },
+ {
+  "id": "WTR078",
+  "name": "Harmonized Kodachi",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nIf you have a card in your pitch zone with cost 0, this card's attacks get go again.",
+  "attack": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR079",
+  "name": "Mask of Momentum",
+  "cardType": "equipment",
+  "text": "Once per Turn Effect - When an attack action card you control is the third or higher chain link in a row to hit, draw a card.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR080",
+  "name": "Breaking Scales",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy Breaking Scales: Target attack action card with combo gains +1{p}.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR081",
+  "name": "Lord of Wind",
+  "cardType": "action",
+  "text": "Katsu Specialization\nCombo - If Mugenshi: RELEASE was the last attack this combat chain, as an additional cost to play Lord of Wind, you may pay any amount of {r}. If you do, shuffle that many target cards named Surging Strike, Whelming Gustwave and/or Mugenshi: RELEASE from your graveyard into your deck, then Lord of Wind gains that much {p}.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Katsu Specialization",
+   "Combo"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR082",
+  "name": "Ancestral Empowerment",
+  "cardType": "attack-reaction",
+  "text": "Target Ninja attack action card gains +1{p}.\nDraw a card.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR083",
+  "name": "Mugenshi: RELEASE",
+  "cardType": "action",
+  "text": "Katsu Specialization\nCombo - If Whelming Gustwave was the last attack this combat chain, Mugenshi: RELEASE gains +1{p}, go again, and \"If this hits, search your deck for any number of cards named Lord of Wind, reveal them, put them into your hand, then shuffle your deck.\"",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Katsu Specialization",
+   "Combo",
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR084",
+  "name": "Hurricane Technique",
+  "cardType": "action",
+  "text": "Combo - If Rising Knee Thrust was the last attack this combat chain, Hurricane Technique gains +1{p}, go again, and \"If Hurricane Technique hits, put it into your hand.\"",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR085",
+  "name": "Pounding Gale",
+  "cardType": "action",
+  "text": "Combo - If Open the Center was the last attack this combat chain, Pounding Gale gains \"If Pounding Gale would deal damage to a hero, instead it deals double that much damage\"",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR086",
+  "name": "Fluster Fist",
+  "cardType": "action",
+  "text": "Combo - If Open the Center was the last attack this combat chain, Fluster Fist gains +1{p} for each attack that has hit this combat chain.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR087",
+  "name": "Fluster Fist",
+  "cardType": "action",
+  "text": "Combo - If Open the Center was the last attack this combat chain, Fluster Fist gains +1{p} for each attack that has hit this combat chain.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR088",
+  "name": "Fluster Fist",
+  "cardType": "action",
+  "text": "Combo - If Open the Center was the last attack this combat chain, Fluster Fist gains +1{p} for each attack that has hit this combat chain.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR089",
+  "name": "Blackout Kick",
+  "cardType": "action",
+  "text": "Combo - If Rising Knee Thrust was the last attack this combat chain, Blackout Kick gains +3{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR090",
+  "name": "Blackout Kick",
+  "cardType": "action",
+  "text": "Combo - If Rising Knee Thrust was the last attack this combat chain, Blackout Kick gains +3{p}.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR091",
+  "name": "Blackout Kick",
+  "cardType": "action",
+  "text": "Combo - If Rising Knee Thrust was the last attack this combat chain, Blackout Kick gains +3{p}.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR092",
+  "name": "Flic Flak",
+  "cardType": "defense-reaction",
+  "text": "If the next card you defend with this turn is a card with combo, it gains +2{d}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 4,
+  "classes": [
+   "ninja"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR093",
+  "name": "Flic Flak",
+  "cardType": "defense-reaction",
+  "text": "If the next card you defend with this turn is a card with combo, it gains +2{d}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR094",
+  "name": "Flic Flak",
+  "cardType": "defense-reaction",
+  "text": "If the next card you defend with this turn is a card with combo, it gains +2{d}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR095",
+  "name": "Open the Center",
+  "cardType": "action",
+  "text": "Combo - If Head Jab was the last attack this combat chain, Open the Center gains +1{p}, go again, and dominate.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again",
+   "Dominate"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR096",
+  "name": "Open the Center",
+  "cardType": "action",
+  "text": "Combo - If Head Jab was the last attack this combat chain, Open the Center gains +1{p}, go again, and dominate.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again",
+   "Dominate"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR097",
+  "name": "Open the Center",
+  "cardType": "action",
+  "text": "Combo - If Head Jab was the last attack this combat chain, Open the Center gains +1{p}, go again, and dominate.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again",
+   "Dominate"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR098",
+  "name": "Head Jab",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR099",
+  "name": "Head Jab",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR100",
+  "name": "Head Jab",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR101",
+  "name": "Leg Tap",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR102",
+  "name": "Leg Tap",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR103",
+  "name": "Leg Tap",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR104",
+  "name": "Rising Knee Thrust",
+  "cardType": "action",
+  "text": "Combo - If Leg Tap was the last attack this combat chain, Rising Knee Thrust gains +2{p} and go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR105",
+  "name": "Rising Knee Thrust",
+  "cardType": "action",
+  "text": "Combo - If Leg Tap was the last attack this combat chain, Rising Knee Thrust gains +2{p} and go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR106",
+  "name": "Rising Knee Thrust",
+  "cardType": "action",
+  "text": "Combo - If Leg Tap was the last attack this combat chain, Rising Knee Thrust gains +2{p} and go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR107",
+  "name": "Surging Strike",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR108",
+  "name": "Surging Strike",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR109",
+  "name": "Surging Strike",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR110",
+  "name": "Whelming Gustwave",
+  "cardType": "action",
+  "text": "Combo - If Surging Strike was the last attack this combat chain, Whelming Gustwave gains +1{p}, go again, and \"If this hits, draw a card.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR111",
+  "name": "Whelming Gustwave",
+  "cardType": "action",
+  "text": "Combo - If Surging Strike was the last attack this combat chain, Whelming Gustwave gains +1{p}, go again, and \"If this hits, draw a card.\"",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR112",
+  "name": "Whelming Gustwave",
+  "cardType": "action",
+  "text": "Combo - If Surging Strike was the last attack this combat chain, Whelming Gustwave gains +1{p}, go again, and \"If this hits, draw a card.\"",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR113B",
+  "name": "Dorinthea Ironsong",
+  "cardType": "hero",
+  "text": "Once per turn Effect - When a weapon you control hits, you may attack an additional time with that weapon this turn.",
+  "classes": [
+   "warrior"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "WTR"
+ },
+ {
+  "id": "WTR114B",
+  "name": "Dorinthea",
+  "cardType": "hero",
+  "text": "Once per turn Effect - When a weapon you control hits, you may attack an additional time with that weapon this turn.",
+  "classes": [
+   "warrior"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "WTR"
+ },
+ {
+  "id": "WTR115",
+  "name": "Dawnblade",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nThe second time this hits each turn, put a +1{p} counter on it.\nAt the beginning of your end phase, if this hasn't hit this turn, remove all +1{p} counters from it.",
+  "attack": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "sword",
+   "2h"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR116",
+  "name": "Braveforge Bracers",
+  "cardType": "equipment",
+  "text": "Once per turn Action - {r}: Your next weapon attack this turn gains +1{p}. Activate this ability only if a weapon you control has hit this turn. Go again\nBattleworn",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR117",
+  "name": "Refraction Bolters",
+  "cardType": "equipment",
+  "text": "When a weapon attack you control hits, you may destroy this. If you do, the attack gets go again.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR118",
+  "name": "Glint the Quicksilver",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets go again.\nReprise - If the defending hero has defended with a card from their hand this chain link, draw a card.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR119",
+  "name": "Steelblade Supremacy",
+  "cardType": "action",
+  "text": "Dorinthea Specialization\nUntil end of turn, target weapon gains +2{p} and \"Whenever this weapon hits, draw a card.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Dorinthea Specialization",
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR120",
+  "name": "Rout",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gains +3{p}.\nReprise - If the defending hero has defended with a card from their hand this chain link, you may return target non-equipment defending card to its owners hand.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR121",
+  "name": "Singing Steelblade",
+  "cardType": "attack-reaction",
+  "text": "Dorinthea Specialization\nTarget weapon attack gains +1{p}.\nReprise - If the defending hero has defended with a card from hand this chain link, search your deck for an attack reaction card, banish it face up, then shuffle your deck. You may play it this chain link.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Dorinthea Specialization",
+   "Reprise"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR122",
+  "name": "Ironsong Determination",
+  "cardType": "action",
+  "text": "Target weapon's attacks get +1{p} and dominate until end of turn.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR123",
+  "name": "Overpower",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gains +4{p}\nReprise - If the defending hero has defended with a card from their hand this chain link, instead it gains +6{p}.",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR124",
+  "name": "Overpower",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gains +3{p}\nReprise - If the defending hero has defended with a card from their hand this chain link, instead it gains +5{p}.",
+  "pitch": 2,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR125",
+  "name": "Overpower",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gains +2{p}\nReprise - If the defending hero has defended with a card from their hand this chain link, instead it gains +4{p}.",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR126",
+  "name": "Steelblade Shunt",
+  "cardType": "defense-reaction",
+  "text": "If Steelblade Shunt defends a weapon attack, deal 1 damage to the attacking hero.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 6,
+  "classes": [
+   "warrior"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR127",
+  "name": "Steelblade Shunt",
+  "cardType": "defense-reaction",
+  "text": "If Steelblade Shunt defends a weapon attack, deal 1 damage to the attacking hero.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 5,
+  "classes": [
+   "warrior"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR128",
+  "name": "Steelblade Shunt",
+  "cardType": "defense-reaction",
+  "text": "If Steelblade Shunt defends a weapon attack, deal 1 damage to the attacking hero.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 4,
+  "classes": [
+   "warrior"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR129",
+  "name": "Warrior's Valor",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gets +3{p} and \"When this hits, it gets go again.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR130",
+  "name": "Warrior's Valor",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gets +2{p} and \"When this hits, it gets go again.\"\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR131",
+  "name": "Warrior's Valor",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gets +1{p} and \"When this hits, it gets go again.\"\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR132",
+  "name": "Ironsong Response",
+  "cardType": "attack-reaction",
+  "text": "Reprise - If the defending hero has defended with a card from their hand this chain link, target weapon attack gains +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR133",
+  "name": "Ironsong Response",
+  "cardType": "attack-reaction",
+  "text": "Reprise - If the defending hero has defended with a card from their hand this chain link, target weapon attack gains +2{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR134",
+  "name": "Ironsong Response",
+  "cardType": "attack-reaction",
+  "text": "Reprise - If the defending hero has defended with a card from their hand this chain link, target weapon attack gains +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR135",
+  "name": "Biting Blade",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gains +3{p}.\nReprise - If the defending hero has defended with a card from their hand this chain link, weapons you control gain +1{p} until end of turn",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR136",
+  "name": "Biting Blade",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gains +2{p}.\nReprise - If the defending hero has defended with a card from their hand this chain link, weapons you control gain +1{p} until end of turn",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR137",
+  "name": "Biting Blade",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gains +1{p}.\nReprise - If the defending hero has defended with a card from their hand this chain link, weapons you control gain +1{p} until end of turn",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR138",
+  "name": "Stroke of Foresight",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gains +3{p}.\nReprise - If the defending hero has defended with a card from their hand this chain link, draw a card, then put a card from your hand on the top or bottom of your deck.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR139",
+  "name": "Stroke of Foresight",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gains +2{p}.\nReprise - If the defending hero has defended with a card from their hand this chain link, draw a card, then put a card from your hand on the top or bottom of your deck.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR140",
+  "name": "Stroke of Foresight",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gains +1{p}.\nReprise - If the defending hero has defended with a card from their hand this chain link, draw a card, then put a card from your hand on the top or bottom of your deck.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR141",
+  "name": "Sharpen Steel",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gets +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR142",
+  "name": "Sharpen Steel",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gets +2{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR143",
+  "name": "Sharpen Steel",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gets +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR144",
+  "name": "Driving Blade",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gains +3{p} and go again.\nGo again",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR145",
+  "name": "Driving Blade",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gains +2{p} and go again.\nGo again",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR146",
+  "name": "Driving Blade",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gains +1{p} and go again.\nGo again",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR147",
+  "name": "Nature's Path Pilgrimage",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gets +3{p} and \"When this hits and you have no cards in your arsenal, reveal the top card of your deck. If it's an action card, put it face down into your arsenal.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR148",
+  "name": "Nature's Path Pilgrimage",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gets +2{p} and \"When this hits and you have no cards in your arsenal, reveal the top card of your deck. If it's an action card, put it face down into your arsenal.\"\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR149",
+  "name": "Nature's Path Pilgrimage",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gets +1{p} and \"When this hits and you have no cards in your arsenal, reveal the top card of your deck. If it's an action card, put it face down into your arsenal.\"\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR150",
+  "name": "Fyendal's Spring Tunic",
+  "cardType": "equipment",
+  "text": "At the start of your turn, if this has fewer than 3 energy counters, you may put an energy counter on it.\nInstant - Remove 3 energy counters from this: Gain {r}\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR151",
+  "name": "Hope Merchant's Hood",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Shuffle any number of cards from your hand into your deck, then draw that many cards.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR152",
+  "name": "Heartened Cross Strap",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: The next attack action card you play this turn costs {r}{r} less to play. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR153",
+  "name": "Goliath Gauntlet",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: The next attack action card with cost 2 or more you play this turn gets +2{p}. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR154",
+  "name": "Snapdragon Scalers",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy this: Target attack action card with cost 1 or less gets go again.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR155",
+  "name": "Ironrot Helm",
+  "cardType": "equipment",
+  "text": "Blade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR156",
+  "name": "Ironrot Plate",
+  "cardType": "equipment",
+  "text": "Blade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR157",
+  "name": "Ironrot Gauntlet",
+  "cardType": "equipment",
+  "text": "Blade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR158",
+  "name": "Ironrot Legs",
+  "cardType": "equipment",
+  "text": "Blade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR159",
+  "name": "Enlightened Strike",
+  "cardType": "action",
+  "text": "As an additional cost to play Enlightened Strike, put a card from your hand on the bottom of your deck.\nChoose 1;\n- When you attack with Enlightened Strike, draw a card.\n- Enlightened Strike gains +2{p}.\n- Enlightened Strike gains go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR160",
+  "name": "Tome of Fyendal",
+  "cardType": "action",
+  "text": "Draw 2 cards.\nIf Tome of Fyendal is played from arsenal, gain 1{h} for each card in your hand.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR161",
+  "name": "Last Ditch Effort",
+  "cardType": "action",
+  "text": "When you play Last Ditch Effort, if you have no cards in your deck, it gains +4{p} and go again.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR162",
+  "name": "Crazy Brew",
+  "cardType": "action",
+  "text": "Action - Destroy this: Roll a 6 sided die. On;\n\n1 or 2 - Lose 2{h}. Go again\n3 or 4 - Gain 2{h}. Go again\n5 or 6 - Gain {r}{r}, gain 2 action points, and your next attack this turn gains +2{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR163",
+  "name": "Remembrance",
+  "cardType": "instant",
+  "text": "Shuffle up to 3 action cards from your graveyard into your deck.\nBanish Remembrance.",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR164",
+  "name": "Drone of Brutality",
+  "cardType": "action",
+  "text": "If Drone of Brutality would be put into your graveyard from anywhere, instead put it on the bottom of your deck.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR165",
+  "name": "Drone of Brutality",
+  "cardType": "action",
+  "text": "If Drone of Brutality would be put into your graveyard from anywhere, instead put it on the bottom of your deck.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR166",
+  "name": "Drone of Brutality",
+  "cardType": "action",
+  "text": "If Drone of Brutality would be put into your graveyard from anywhere, instead put it on the bottom of your deck.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR167",
+  "name": "Snatch",
+  "cardType": "action",
+  "text": "When this hits, draw a card.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR168",
+  "name": "Snatch",
+  "cardType": "action",
+  "text": "When this hits, draw a card.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR169",
+  "name": "Snatch",
+  "cardType": "action",
+  "text": "When this hits, draw a card.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR170",
+  "name": "Energy Potion",
+  "cardType": "action",
+  "text": "Instant - Destroy this: Gain {r}{r}",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR171",
+  "name": "Potion of Strength",
+  "cardType": "action",
+  "text": "Action - Destroy this: Your next attack this turn gains +2{p}. Go again",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR172",
+  "name": "Timesnap Potion",
+  "cardType": "action",
+  "text": "Action - Destroy this: Gain 2 action points.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR173",
+  "name": "Sigil of Solace",
+  "cardType": "instant",
+  "text": "Gain 3{h}",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR174",
+  "name": "Sigil of Solace",
+  "cardType": "instant",
+  "text": "Gain 2{h}",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR175",
+  "name": "Sigil of Solace",
+  "cardType": "instant",
+  "text": "Gain 1{h}",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR176",
+  "name": "Barraging Brawnhide",
+  "cardType": "action",
+  "text": "While Barraging Brawnhide is defended by less than 2 non-equipment cards, it has +1{p}.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR177",
+  "name": "Barraging Brawnhide",
+  "cardType": "action",
+  "text": "While Barraging Brawnhide is defended by less than 2 non-equipment cards, it has +1{p}.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR178",
+  "name": "Barraging Brawnhide",
+  "cardType": "action",
+  "text": "While Barraging Brawnhide is defended by less than 2 non-equipment cards, it has +1{p}.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR179",
+  "name": "Demolition Crew",
+  "cardType": "action",
+  "text": "As an additional cost to play Demolition Crew, reveal a card in your hand with cost 2 or greater.\nDominate",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Dominate"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR180",
+  "name": "Demolition Crew",
+  "cardType": "action",
+  "text": "As an additional cost to play Demolition Crew, reveal a card in your hand with cost 2 or greater.\nDominate",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Dominate"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR181",
+  "name": "Demolition Crew",
+  "cardType": "action",
+  "text": "As an additional cost to play Demolition Crew, reveal a card in your hand with cost 2 or greater.\nDominate",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Dominate"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR182",
+  "name": "Flock of the Feather Walkers",
+  "cardType": "action",
+  "text": "As an additional cost to play Flock of the Feather Walkers, reveal a card in your hand with cost 1 or less.\nWhen you attack with Flock of the Feather Walkers, create a Quicken token.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR183",
+  "name": "Flock of the Feather Walkers",
+  "cardType": "action",
+  "text": "As an additional cost to play Flock of the Feather Walkers, reveal a card in your hand with cost 1 or less.\nWhen you attack with Flock of the Feather Walkers, create a Quicken token.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR184",
+  "name": "Flock of the Feather Walkers",
+  "cardType": "action",
+  "text": "As an additional cost to play Flock of the Feather Walkers, reveal a card in your hand with cost 1 or less.\nWhen you attack with Flock of the Feather Walkers, create a Quicken token.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR185",
+  "name": "Nimble Strike",
+  "cardType": "action",
+  "text": "As an additional cost to play Nimble Strike, you may banish a card named Nimblism from your graveyard. If you do, Nimble Strike gain +1{p} and go again.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR186",
+  "name": "Nimble Strike",
+  "cardType": "action",
+  "text": "As an additional cost to play Nimble Strike, you may banish a card named Nimblism from your graveyard. If you do, Nimble Strike gain +1{p} and go again.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR187",
+  "name": "Nimble Strike",
+  "cardType": "action",
+  "text": "As an additional cost to play Nimble Strike, you may banish a card named Nimblism from your graveyard. If you do, Nimble Strike gain +1{p} and go again.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR188",
+  "name": "Raging Onslaught",
+  "cardType": "action",
+  "text": "",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR189",
+  "name": "Raging Onslaught",
+  "cardType": "action",
+  "text": "",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR190",
+  "name": "Raging Onslaught",
+  "cardType": "action",
+  "text": "",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR191",
+  "name": "Scar for a Scar",
+  "cardType": "action",
+  "text": "When this is played, if you have less {h} than an opposing hero, it gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR192",
+  "name": "Scar for a Scar",
+  "cardType": "action",
+  "text": "When this is played, if you have less {h} than an opposing hero, it gets go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR193",
+  "name": "Scar for a Scar",
+  "cardType": "action",
+  "text": "When this is played, if you have less {h} than an opposing hero, it gets go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR194",
+  "name": "Scour the Battlescape",
+  "cardType": "action",
+  "text": "You may put a card from your hand on the bottom of your deck. If you do, draw a card.\nIf Scour the Battlescape is played from arsenal, it gains go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR195",
+  "name": "Scour the Battlescape",
+  "cardType": "action",
+  "text": "You may put a card from your hand on the bottom of your deck. If you do, draw a card.\nIf Scour the Battlescape is played from arsenal, it gains go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR196",
+  "name": "Scour the Battlescape",
+  "cardType": "action",
+  "text": "You may put a card from your hand on the bottom of your deck. If you do, draw a card.\nIf Scour the Battlescape is played from arsenal, it gains go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR197",
+  "name": "Regurgitating Slog",
+  "cardType": "action",
+  "text": "As an additional cost to play Regurgitating Slog, you may banish a card named Sloggism from your graveyard. If you do, Regurgitating Slog gains dominate.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Dominate"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR198",
+  "name": "Regurgitating Slog",
+  "cardType": "action",
+  "text": "As an additional cost to play Regurgitating Slog, you may banish a card named Sloggism from your graveyard. If you do, Regurgitating Slog gains dominate.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Dominate"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR199",
+  "name": "Regurgitating Slog",
+  "cardType": "action",
+  "text": "As an additional cost to play Regurgitating Slog, you may banish a card named Sloggism from your graveyard. If you do, Regurgitating Slog gains dominate.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Dominate"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR200",
+  "name": "Wounded Bull",
+  "cardType": "action",
+  "text": "When you play this, if you have less {h} than an opposing hero, this gains +1{p}.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR201",
+  "name": "Wounded Bull",
+  "cardType": "action",
+  "text": "When you play this, if you have less {h} than an opposing hero, this gains +1{p}.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR202",
+  "name": "Wounded Bull",
+  "cardType": "action",
+  "text": "When you play this, if you have less {h} than an opposing hero, this gains +1{p}.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR203",
+  "name": "Wounding Blow",
+  "cardType": "action",
+  "text": "",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR204",
+  "name": "Wounding Blow",
+  "cardType": "action",
+  "text": "",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR205",
+  "name": "Wounding Blow",
+  "cardType": "action",
+  "text": "",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR206",
+  "name": "Pummel",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target club or hammer weapon attack gains +4{p}.\n- Target attack action card with cost 2 or more gets +4{p} and \"When this hits a hero, they discard a card.\"",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR207",
+  "name": "Pummel",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target club or hammer weapon attack gains +3{p}.\n- Target attack action card with cost 2 or more gets +3{p} and \"When this hits a hero, they discard a card.\"",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR208",
+  "name": "Pummel",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target club or hammer weapon attack gains +2{p}.\n- Target attack action card with cost 2 or more gets +2{p} and \"When this hits a hero, they discard a card.\"",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR209",
+  "name": "Razor Reflex",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target dagger or sword weapon attack gets +3{p}.\n- Target attack action card with cost 1 or less gets +3{p} and \"When this hits, it gets go again.\"",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR210",
+  "name": "Razor Reflex",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target dagger or sword weapon attack gets +2{p}.\n- Target attack action card with cost 1 or less gets +2{p} and \"When this hits, it gets go again.\"",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR211",
+  "name": "Razor Reflex",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target dagger or sword weapon attack gets +1{p}.\n- Target attack action card with cost 1 or less gets +1{p} and \"When this hits, it gets go again.\"",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR212",
+  "name": "Unmovable",
+  "cardType": "defense-reaction",
+  "text": "If this was played from arsenal, it gets +1{d}.",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 7,
+  "classes": [
+   "generic"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR213",
+  "name": "Unmovable",
+  "cardType": "defense-reaction",
+  "text": "If Unmovable is played from arsenal, it gains +1{d}.",
+  "pitch": 2,
+  "cost": 3,
+  "defense": 6,
+  "classes": [
+   "generic"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR214",
+  "name": "Unmovable",
+  "cardType": "defense-reaction",
+  "text": "If Unmovable is played from arsenal, it gains +1{d}.",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 5,
+  "classes": [
+   "generic"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR215",
+  "name": "Sink Below",
+  "cardType": "defense-reaction",
+  "text": "You may put a card from your hand on the bottom of your deck. If you do, draw a card.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 4,
+  "classes": [
+   "generic"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR216",
+  "name": "Sink Below",
+  "cardType": "defense-reaction",
+  "text": "You may put a card from your hand on the bottom of your deck. If you do, draw a card.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR217",
+  "name": "Sink Below",
+  "cardType": "defense-reaction",
+  "text": "You may put a card from your hand on the bottom of your deck. If you do, draw a card.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR218",
+  "name": "Nimblism",
+  "cardType": "action",
+  "text": "The next attack action card with cost 1 or less you play this turn gains +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR219",
+  "name": "Nimblism",
+  "cardType": "action",
+  "text": "The next attack action card with cost 1 or less you play this turn gains +2{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR220",
+  "name": "Nimblism",
+  "cardType": "action",
+  "text": "The next attack action card with cost 1 or less you play this turn gains +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR221",
+  "name": "Sloggism",
+  "cardType": "action",
+  "text": "The next attack action card with cost 2 or greater you play this turn gains +6{p}.\nGo again",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR222",
+  "name": "Sloggism",
+  "cardType": "action",
+  "text": "The next attack action card with cost 2 or greater you play this turn gains +5{p}.\nGo again",
+  "pitch": 2,
+  "cost": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR223",
+  "name": "Sloggism",
+  "cardType": "action",
+  "text": "The next attack action card with cost 2 or greater you play this turn gains +4{p}.\nGo again",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR224",
+  "name": "Cracked Bauble",
+  "cardType": "resource",
+  "text": "(A player may add any number of Cracked Baubles to their card-pool in sealed deck or booster draft formats.)",
+  "pitch": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "WTR"
+ },
+ {
+  "id": "WTR225B",
+  "name": "Quicken",
+  "cardType": "token",
+  "text": "When you play an attack action card or activate a weapon attack, destroy this and the attack gains go again.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "WTR"
+ }
+]

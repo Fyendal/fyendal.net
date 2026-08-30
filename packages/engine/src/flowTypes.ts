@@ -1,0 +1,46 @@
+export type FlowStepName =
+  | "announceCardPlayed"
+  | "attackAllowsDefender"
+  | "auraAttackGoAgain"
+  | "beginHeroDamage"
+  | "beginReactionStep"
+  | "cancelEndActionPass"
+  | "closeChain"
+  | "collectEventTriggerLayers"
+  | "consumeQueuedIntimidate"
+  | "continueEndPhase"
+  | "continueStack"
+  | "dealAllyDamage"
+  | "deferEventTriggers"
+  | "endTurn"
+  | "enterAttackWindow"
+  | "finishDamageStep"
+  | "finishLinkResolution"
+  | "finishStackCardResolution"
+  | "flushPendingTriggersAboveStack"
+  | "gainHeroLife"
+  | "holdLayerWindow"
+  | "proceedWithAttack"
+  | "queueDefendEventLayersAfterCurrent"
+  | "queueEventTriggers"
+  | "queueHitTriggers"
+  | "queueReactionEventTriggers"
+  | "queueTriggeredLayers"
+  | "reopenReactionWindow"
+  | "resolveAbilityLayer"
+  | "resolveDefendEventLayer"
+  | "resolveLink"
+  | "resolveOnHitLayer"
+  | "resolvePhantasmLayer"
+  | "resolveSpectraLayer"
+  | "resolveTopStackCard"
+  | "resolveTopStackLayer"
+  | "resolveWagerLayer"
+  | "resumeCombatDamage"
+  | "startNextQueuedPermanentAttack";
+
+/** Ephemeral orchestration request. Persisted pauses continue using StackResume. */
+export interface FlowStep {
+  readonly kind: FlowStepName;
+  readonly args: readonly unknown[];
+}

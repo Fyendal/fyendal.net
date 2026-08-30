@@ -1,0 +1,7088 @@
+[
+ {
+  "id": "1HP001",
+  "name": "Rhinar, Reckless Rampage",
+  "cardType": "hero",
+  "text": "Whenever you discard a card with 6 or more {p} during your action phase, intimidate.",
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "1HP"
+ },
+ {
+  "id": "1HP002",
+  "name": "Rhinar",
+  "cardType": "hero",
+  "text": "Whenever you discard a card with 6 or more {p} during your action phase, intimidate.",
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "1HP"
+ },
+ {
+  "id": "1HP003",
+  "name": "Kayo, Berserker Runt",
+  "cardType": "hero",
+  "text": "Whenever you play an attack action card with base power 6 or more {p}, roll a 6 sided die. On;\n\n\n1 to 4 - Halve the attack's base {p}, rounded down.\n\n\n5 to 6 - Double the attack's base {p}.",
+  "classes": [
+   "brute"
+  ],
+  "life": 19,
+  "intellect": 4,
+  "set": "1HP"
+ },
+ {
+  "id": "1HP004",
+  "name": "Mandible Claw",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nIf you have discarded a card with 6 or more {p} this turn, this card's attacks go again.",
+  "attack": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "claw",
+   "1h"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP005",
+  "name": "Mandible Claw",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nIf you have discarded a card with 6 or more {p} this turn, this card's attacks go again.",
+  "attack": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "claw",
+   "1h"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP006",
+  "name": "Romping Club",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nOnce per Turn Effect - When you discard a card with 6 or more {p}, Romping Club gains +1{p} until end of turn.",
+  "attack": 4,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "club",
+   "2h"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP007",
+  "name": "Scabskin Leathers",
+  "cardType": "equipment",
+  "text": "Once per turn Action - 0: Roll a 6 sided die. Gain action points equal to half the number rolled, rounded down.\nBattleworn",
+  "defense": 2,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP008",
+  "name": "Barkbone Strapping",
+  "cardType": "equipment",
+  "text": "Instant - Destroy Barkbone Strapping: Roll a 6 die. Gain {r} equal to half the number rolled, rounded down.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP009",
+  "name": "Skullhorn",
+  "cardType": "equipment",
+  "text": "Action - Destroy Skullhorn: Draw a card then discard a random card. Go again\nArcane Barrier 2",
+  "defense": 0,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Arcane Barrier 2"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP010",
+  "name": "Alpha Rampage",
+  "cardType": "action",
+  "text": "Rhinar Specialization\nAs an additional cost to play Alpha Rampage, discard a random card.\nWhen you attack with Alpha Rampage, intimidate.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 9,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Rhinar Specialization",
+   "Intimidate"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP011",
+  "name": "Beast Within",
+  "cardType": "action",
+  "text": "If Beast Within is put into a graveyard from anywhere other than the combat chain, banish the top card of your deck and lose 1{h}. If it has 6 or more {p}, put it into your hand, otherwise, repeat this process.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP012",
+  "name": "Massacre",
+  "cardType": "action",
+  "text": "When you attack with Massacre, if you have discarded a card with 6 or more {p} this turn, Massacre gains +2{p} and intimidate.\nIf Massacre is discarded to pay the cost of a Brute attack action card, intimidate.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP013",
+  "name": "Reckless Swing",
+  "cardType": "defense-reaction",
+  "text": "As an additional cost to play Reckless Swing, discard a random card.\nIf the discarded card has 6 or more {p}, deal 2 damage to the attacking hero.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 4,
+  "classes": [
+   "brute"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP014",
+  "name": "Bloodrush Bellow",
+  "cardType": "action",
+  "text": "As an additional cost to play Bloodrush Bellow, discard a random card.\nYour Brute attacks gain +2{p} this turn.\nIf the discarded card has 6 or more {p}, draw 2 cards and Bloodrush Bellow gains go again.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP015",
+  "name": "Sand Sketched Plan",
+  "cardType": "action",
+  "text": "Rhinar Specialization\nSearch your deck for a card, put it into your hand, discard a random card, then shuffle your deck.\nIf the discarded card has 6 or more {p}, gain 2 action points.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Rhinar Specialization"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP016",
+  "name": "Breakneck Battery",
+  "cardType": "action",
+  "text": "As an additional cost to play Breakneck Battery, discard a random card.\nIf the discarded card has 6 or more {p}, Breakneck Battery gains go again.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP017",
+  "name": "Breakneck Battery",
+  "cardType": "action",
+  "text": "As an additional cost to play Breakneck Battery, discard a random card.\nIf the discarded card has 6 or more {p}, Breakneck Battery gains go again.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP018",
+  "name": "Breakneck Battery",
+  "cardType": "action",
+  "text": "As an additional cost to play Breakneck Battery, discard a random card.\nIf the discarded card has 6 or more {p}, Breakneck Battery gains go again.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP019",
+  "name": "Savage Feast",
+  "cardType": "action",
+  "text": "As an additional cost to play Savage Feast discard a random card.\nWhen you attack with Savage Feast, if a card with 6 or more {p} was discarded as an additional cost to play it, draw a card.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP020",
+  "name": "Savage Feast",
+  "cardType": "action",
+  "text": "As an additional cost to play Savage Feast discard a random card.\nWhen you attack with Savage Feast, if a card with 6 or more {p} was discarded as an additional cost to play it, draw a card.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP021",
+  "name": "Savage Feast",
+  "cardType": "action",
+  "text": "As an additional cost to play Savage Feast discard a random card.\nWhen you attack with Savage Feast, if a card with 6 or more {p} was discarded as an additional cost to play it, draw a card.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP022",
+  "name": "Barraging Beatdown",
+  "cardType": "action",
+  "text": "Your next Brute attack this turn gains \"While this attack is defended by less than 2 non-equipment cards, it has +4{p}.\"\nIntimidate\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate",
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP023",
+  "name": "Barraging Beatdown",
+  "cardType": "action",
+  "text": "Your next Brute attack this turn gains \"While this attack is defended by less than 2 non-equipment cards, it has +3{p}.\"\nIntimidate\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate",
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP024",
+  "name": "Barraging Beatdown",
+  "cardType": "action",
+  "text": "Your next Brute attack this turn gains \"While this attack is defended by less than 2 non-equipment cards, it has +2{p}.\"\nIntimidate\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Intimidate",
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP025",
+  "name": "Pack Hunt",
+  "cardType": "action",
+  "text": "When this attacks, intimidate.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP026",
+  "name": "Pack Hunt",
+  "cardType": "action",
+  "text": "When this attacks, intimidate.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP027",
+  "name": "Pack Hunt",
+  "cardType": "action",
+  "text": "When this attacks, intimidate.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP028",
+  "name": "Riled Up",
+  "cardType": "action",
+  "text": "If you've discarded a card with 6 or more {p} this turn, this gets +1{p}.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP029",
+  "name": "Riled Up",
+  "cardType": "action",
+  "text": "If you've discarded a card with 6 or more {p} this turn, this gets +1{p}.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP030",
+  "name": "Riled Up",
+  "cardType": "action",
+  "text": "If you've discarded a card with 6 or more {p} this turn, this gets +1{p}.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP031",
+  "name": "Savage Swing",
+  "cardType": "action",
+  "text": "As an additional cost to play Savage Swing, discard a random card.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP032",
+  "name": "Savage Swing",
+  "cardType": "action",
+  "text": "As an additional cost to play Savage Swing, discard a random card.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP033",
+  "name": "Savage Swing",
+  "cardType": "action",
+  "text": "As an additional cost to play Savage Swing, discard a random card.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP034",
+  "name": "Smash Instinct",
+  "cardType": "action",
+  "text": "When this attacks, intimidate.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP035",
+  "name": "Smash Instinct",
+  "cardType": "action",
+  "text": "When this attacks, intimidate.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP036",
+  "name": "Smash Instinct",
+  "cardType": "action",
+  "text": "When this attacks, intimidate.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Intimidate"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP037",
+  "name": "Wrecker Romp",
+  "cardType": "action",
+  "text": "As an additional cost to play this, discard a random card.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP038",
+  "name": "Wrecker Romp",
+  "cardType": "action",
+  "text": "As an additional cost to play this, discard a random card.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP039",
+  "name": "Wrecker Romp",
+  "cardType": "action",
+  "text": "As an additional cost to play this, discard a random card.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP040",
+  "name": "Primeval Bellow",
+  "cardType": "action",
+  "text": "As an additional cost to play Primeval Bellow, discard a random card.\nYour next Brute attack this turn gains +5{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP041",
+  "name": "Primeval Bellow",
+  "cardType": "action",
+  "text": "As an additional cost to play Primeval Bellow, discard a random card.\nYour next Brute attack this turn gains +4{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP042",
+  "name": "Primeval Bellow",
+  "cardType": "action",
+  "text": "As an additional cost to play Primeval Bellow, discard a random card.\nYour next Brute attack this turn gains +3{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "brute"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP043",
+  "name": "Bravo, Showstopper",
+  "cardType": "hero",
+  "text": "Action - {r}{r}: Until end of turn, your attack action cards with cost 3 or greater gains dominate. Go again",
+  "classes": [
+   "guardian"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "1HP"
+ },
+ {
+  "id": "1HP044",
+  "name": "Bravo",
+  "cardType": "hero",
+  "text": "Action - {r}{r}: Until end of turn, your attack action cards with cost 3 or more get dominate. Go again",
+  "classes": [
+   "guardian"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "1HP"
+ },
+ {
+  "id": "1HP045",
+  "name": "Anothos",
+  "cardType": "weapon",
+  "text": "Once per turn Action - {r}{r}{r}: Attack\nWhile there are 2 or more cards with cost 3 or greater in your pitch zone, Anothos has +2{p}.",
+  "attack": 4,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "hammer",
+   "2h"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP046",
+  "name": "Sledge of Anvilheim",
+  "cardType": "weapon",
+  "text": "Action - {r}{r}{r}{r}: Attack",
+  "attack": 6,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "hammer",
+   "2h"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP047",
+  "name": "Tectonic Plating",
+  "cardType": "equipment",
+  "text": "Once per turn Action - {r}: Create a Seismic Surge aura token. Go again\nBattleworn",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP048",
+  "name": "Helm of Isen's Peak",
+  "cardType": "equipment",
+  "text": "Action - {r}, destroy this: Your hero gains +1{i} this turn.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP049",
+  "name": "Crater Fist",
+  "cardType": "equipment",
+  "text": "Action - {r}{r}{r}, destroy Crater Fist: Your attacks with crush gain +2{p} this turn. Go again\nTemper",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP050",
+  "name": "Crippling Crush",
+  "cardType": "action",
+  "text": "Bravo Specialization\nCrush - If Crippling Crush deals 4 or more damage to a hero, they discard 2 random cards.",
+  "pitch": 1,
+  "cost": 7,
+  "attack": 11,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Bravo Specialization",
+   "Crush"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP051",
+  "name": "Mangle",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, destroy target equipment they control with a -1{d} counter.",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP052",
+  "name": "Righteous Cleansing",
+  "cardType": "action",
+  "text": "Crush - If Righteous Cleansing deals 4 or more damage to a hero, look at the top 5 cards of their deck. Banish 1 or more cards with the same name from among them, then put the rest on top of their deck in any order.",
+  "pitch": 2,
+  "cost": 7,
+  "attack": 10,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP053",
+  "name": "Spinal Crush",
+  "cardType": "action",
+  "text": "Crush - If Spinal Crush deals 4 or more damage to a hero, action cards, activated abilities, and attacks they control lose and can't gain go again during their next action phase.",
+  "pitch": 1,
+  "cost": 5,
+  "attack": 9,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP054",
+  "name": "Show Time!",
+  "cardType": "action",
+  "text": "Bravo Specialization\nWhen Show Time! enters the arena, search your deck for a Guardian attack action card, reveal it and put it into your hand, then shuffle your deck.\nAt the beginning of your action phase, destroy Show Time! then draw a card.",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Bravo Specialization"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP055",
+  "name": "Disable",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, put a card from their arsenal on the bottom of their deck.",
+  "pitch": 1,
+  "cost": 5,
+  "attack": 9,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP056",
+  "name": "Disable",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, put a card from their arsenal on the bottom of their deck.",
+  "pitch": 2,
+  "cost": 5,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP057",
+  "name": "Disable",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, put a card from their arsenal on the bottom of their deck.",
+  "pitch": 3,
+  "cost": 5,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP058",
+  "name": "Staunch Response",
+  "cardType": "defense-reaction",
+  "text": "As an additional cost to play Staunch Response you may pay {r}{r}{r}{r}. If you do, Staunch Response gains +3{d}.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 7,
+  "classes": [
+   "guardian"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP059",
+  "name": "Staunch Response",
+  "cardType": "defense-reaction",
+  "text": "As an additional cost to play Staunch Response you may pay {r}{r}{r}{r}. If you do, Staunch Response gains +3{d}.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 6,
+  "classes": [
+   "guardian"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP060",
+  "name": "Staunch Response",
+  "cardType": "defense-reaction",
+  "text": "As an additional cost to play Staunch Response you may pay {r}{r}{r}{r}. If you do, Staunch Response gains +3{d}.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 5,
+  "classes": [
+   "guardian"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP061",
+  "name": "Blessing of Deliverance",
+  "cardType": "action",
+  "text": "Go again\nWhen Blessing of Deliverance enters the arena, if you have a card with cost 3 or greater in your pitch zone, draw a card.\nAt the beginning of your action phase, destroy Blessing of Deliverance then reveal the top 3 cards of your deck. Gain 1{h} for each card with cost 3 or greater revealed this way.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP062",
+  "name": "Blessing of Deliverance",
+  "cardType": "action",
+  "text": "Go again\nWhen Blessing of Deliverance enters the arena, if you have a card with cost 3 or greater in your pitch zone, draw a card.\nAt the beginning of your action phase, destroy Blessing of Deliverance then reveal the top 2 cards of your deck. Gain 1{h} for each card with cost 3 or greater revealed this way.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP063",
+  "name": "Blessing of Deliverance",
+  "cardType": "action",
+  "text": "Go again\nWhen Blessing of Deliverance enters the arena, if you have a card with cost 3 or greater in your pitch zone, draw a card.\nAt the beginning of your action phase, destroy Blessing of Deliverance then reveal the top card of your deck. Gain 1{h} for each card with cost 3 or greater revealed this way.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP064",
+  "name": "Towering Titan",
+  "cardType": "action",
+  "text": "At the beginning of your action phase, destroy Towering Titan then the next Guardian attack action card you play this turn gains +10{p}.",
+  "pitch": 1,
+  "cost": 9,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP065",
+  "name": "Towering Titan",
+  "cardType": "action",
+  "text": "At the beginning of your action phase, destroy Towering Titan then the next Guardian attack action card you play this turn gains +9{p}.",
+  "pitch": 2,
+  "cost": 9,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP066",
+  "name": "Towering Titan",
+  "cardType": "action",
+  "text": "At the beginning of your action phase, destroy Towering Titan then the next Guardian attack action card you play this turn gains +8{p}.",
+  "pitch": 3,
+  "cost": 9,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP067",
+  "name": "Cartilage Crush",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, their first action during their next turn costs an additional {r} to play or activate.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP068",
+  "name": "Cartilage Crush",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, their first action during their next turn costs an additional {r} to play or activate.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP069",
+  "name": "Cartilage Crush",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, their first action during their next turn costs an additional {r} to play or activate.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP070",
+  "name": "Chokeslam",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, attack action cards they control can't gain {p} during their next action phase.",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP071",
+  "name": "Chokeslam",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, attack action cards they control can't gain {p} during their next action phase.",
+  "pitch": 2,
+  "cost": 4,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP072",
+  "name": "Chokeslam",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, attack action cards they control can't gain {p} during their next action phase.",
+  "pitch": 3,
+  "cost": 4,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP073",
+  "name": "Crush Confidence",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, they lose all hero card abilities until the end of their next turn.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP074",
+  "name": "Crush Confidence",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, they lose all hero card abilities until the end of their next turn.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP075",
+  "name": "Crush Confidence",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, they lose all hero card abilities until the end of their next turn.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP076",
+  "name": "Debilitate",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, their first attack during their next turn gets -2{p}.",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP077",
+  "name": "Debilitate",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, their first attack during their next turn gets -2{p}.",
+  "pitch": 2,
+  "cost": 4,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP078",
+  "name": "Debilitate",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, their first attack during their next turn gets -2{p}.",
+  "pitch": 3,
+  "cost": 4,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP079",
+  "name": "Emerging Dominance",
+  "cardType": "action",
+  "text": "At the beginning of your action phase, destroy Emerging Dominance then the next Guardian attack action card you play this turn gains +3{p} and dominate.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP080",
+  "name": "Emerging Dominance",
+  "cardType": "action",
+  "text": "At the beginning of your action phase, destroy Emerging Dominance then the next Guardian attack action card you play this turn gains +2{p} and dominate.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP081",
+  "name": "Emerging Dominance",
+  "cardType": "action",
+  "text": "At the beginning of your action phase, destroy Emerging Dominance then the next Guardian attack action card you play this turn gains +1{p} and dominate.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP082",
+  "name": "Stonewall Confidence",
+  "cardType": "action",
+  "text": "Go again\nCards you control with cost 3 or more get +4{d} while defending.\nAt the beginning of your action phase, destroy this.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP083",
+  "name": "Stonewall Confidence",
+  "cardType": "action",
+  "text": "Go again\nCards you control with cost 3 or more get +3{d} while defending.\nAt the beginning of your action phase, destroy this.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP084",
+  "name": "Stonewall Confidence",
+  "cardType": "action",
+  "text": "Go again\nCards you control with cost 3 or more get +2{d} while defending.\nAt the beginning of your action phase, destroy this.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP085",
+  "name": "Seismic Surge",
+  "cardType": "token",
+  "text": "At the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn costs {r} less to play.",
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP086",
+  "name": "Katsu, the Wanderer",
+  "cardType": "hero",
+  "text": "The first time an attack action card you control hits each turn, you may discard a card with cost 0. If you do, search your deck for a card with combo, banish it face up, then shuffle your deck. You may play it this turn.",
+  "classes": [
+   "ninja"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "1HP"
+ },
+ {
+  "id": "1HP087",
+  "name": "Katsu",
+  "cardType": "hero",
+  "text": "The first time an attack action card you control hits each turn, you may discard a card with cost 0. If you do, search your deck for a card with combo, banish it face up, then shuffle your deck. You may play it this turn.",
+  "classes": [
+   "ninja"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "1HP"
+ },
+ {
+  "id": "1HP088",
+  "name": "Benji, the Piercing Wind",
+  "cardType": "hero",
+  "text": "Your attack action cards with 2 or less {p} can't be defended by cards from hand.\nThe first time an attack action card you control hits each turn, your next attack gains +1{p}.",
+  "classes": [
+   "ninja"
+  ],
+  "life": 17,
+  "intellect": 4,
+  "set": "1HP"
+ },
+ {
+  "id": "1HP089",
+  "name": "Ira, Crimson Haze",
+  "cardType": "hero",
+  "text": "Your second attack each turn gets +1{p}.",
+  "classes": [
+   "ninja"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "1HP"
+ },
+ {
+  "id": "1HP090",
+  "name": "Edge of Autumn",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack. Go again",
+  "attack": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "sword",
+   "2h"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP091",
+  "name": "Harmonized Kodachi",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nIf you have a card in your pitch zone with cost 0, this card's attacks get go again.",
+  "attack": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP092",
+  "name": "Harmonized Kodachi",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nIf you have a card in your pitch zone with cost 0, this card's attacks get go again.",
+  "attack": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP093",
+  "name": "Zephyr Needle",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack. Go again\nWhen this is defended by a card with {d} greater than this weapon attack's {p}, destroy this when the combat chain closes.",
+  "attack": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP094",
+  "name": "Zephyr Needle",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack. Go again\nWhen this is defended by a card with {d} greater than this weapon attack's {p}, destroy this when the combat chain closes.",
+  "attack": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "dagger",
+   "1h"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP095",
+  "name": "Mask of Momentum",
+  "cardType": "equipment",
+  "text": "Once per Turn Effect - When an attack action card you control is the third or higher chain link in a row to hit, draw a card.\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP096",
+  "name": "Breaking Scales",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy Breaking Scales: Target attack action card with combo gains +1{p}.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP097",
+  "name": "Breeze Rider Boots",
+  "cardType": "equipment",
+  "text": "When a Ninja attack action card you control hits, you may destroy Breeze Rider Boots. If you do, attack action cards with combo gain go again this turn.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP098",
+  "name": "Find Center",
+  "cardType": "action",
+  "text": "Combo - If Crane Dance was the last attack this combat chain, Find Center can't be defended by cards with {r} cost less than the number of chain links you control, and it gains \"If this hits, create a Zen State token.\"",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP099",
+  "name": "Flood of Force",
+  "cardType": "action",
+  "text": "Combo - If Rushing River or Flood of Force was the last attack this combat chain, when you attack with Flood of Force, reveal the top card of your deck. If it's a card with combo, put it into your hand then Flood of Force gains +3{p} and go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP100",
+  "name": "Heron's Flight",
+  "cardType": "action",
+  "text": "Combo - If Crane Dance was the last attack this combat chain, when you attack with Heron's Flight, it gains +2{p} and you choose 1;\n\nHeron's flight can only be defended by attack action cards.\nHeron's flight can only be defended by 'non-attack' action cards.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP101",
+  "name": "Lord of Wind",
+  "cardType": "action",
+  "text": "Katsu Specialization\nCombo - If Mugenshi: RELEASE was the last attack this combat chain, as an additional cost to play Lord of Wind, you may pay any amount of {r}. If you do, shuffle that many target cards named Surging Strike, Whelming Gustwave and/or Mugenshi: RELEASE from your graveyard into your deck, then Lord of Wind gains that much {p}.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Katsu Specialization",
+   "Combo"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP102",
+  "name": "Mugenshi: RELEASE",
+  "cardType": "action",
+  "text": "Katsu Specialization\nCombo - If Whelming Gustwave was the last attack this combat chain, Mugenshi: RELEASE gains +1{p}, go again, and \"If this hits, search your deck for any number of cards named Lord of Wind, reveal them, put them into your hand, then shuffle your deck.\"",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Katsu Specialization",
+   "Combo",
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP103",
+  "name": "Ancestral Empowerment",
+  "cardType": "attack-reaction",
+  "text": "Target Ninja attack action card gains +1{p}.\nDraw a card.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP104",
+  "name": "Blackout Kick",
+  "cardType": "action",
+  "text": "Combo - If Rising Knee Thrust was the last attack this combat chain, Blackout Kick gains +3{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP105",
+  "name": "Blackout Kick",
+  "cardType": "action",
+  "text": "Combo - If Rising Knee Thrust was the last attack this combat chain, Blackout Kick gains +3{p}.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP106",
+  "name": "Blackout Kick",
+  "cardType": "action",
+  "text": "Combo - If Rising Knee Thrust was the last attack this combat chain, Blackout Kick gains +3{p}.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP107",
+  "name": "Crane Dance",
+  "cardType": "action",
+  "text": "Combo - If Soulbead Strike was the last attack this combat chain, Crane Dance gains +1{p}, go again, and it can't be defended by attack action cards with base {p} greater than the number of chain links you control.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP108",
+  "name": "Crane Dance",
+  "cardType": "action",
+  "text": "Combo - If Soulbead Strike was the last attack this combat chain, Crane Dance gains +1{p}, go again, and it can't be defended by attack action cards with base {p} greater than the number of chain links you control.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP109",
+  "name": "Crane Dance",
+  "cardType": "action",
+  "text": "Combo - If Soulbead Strike was the last attack this combat chain, Crane Dance gains +1{p}, go again, and it can't be defended by attack action cards with base {p} greater than the number of chain links you control.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP110",
+  "name": "Rushing River",
+  "cardType": "action",
+  "text": "Combo - If Torrent of Tempo was the last attack this combat chain, Rushing River gains +1{p}, go again, and \"If Rushing River hits, draw X cards then put X cards from your hand on top of your deck in any order, where X is the number of attacks that have hit this combat chain.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP111",
+  "name": "Rushing River",
+  "cardType": "action",
+  "text": "Combo - If Torrent of Tempo was the last attack this combat chain, Rushing River gains +1{p}, go again, and \"If Rushing River hits, draw X cards then put X cards from your hand on top of your deck in any order, where X is the number of attacks that have hit this combat chain.\"",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP112",
+  "name": "Rushing River",
+  "cardType": "action",
+  "text": "Combo - If Torrent of Tempo was the last attack this combat chain, Rushing River gains +1{p}, go again, and \"If Rushing River hits, draw X cards then put X cards from your hand on top of your deck in any order, where X is the number of attacks that have hit this combat chain.\"",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP113",
+  "name": "Flic Flak",
+  "cardType": "defense-reaction",
+  "text": "If the next card you defend with this turn is a card with combo, it gains +2{d}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 4,
+  "classes": [
+   "ninja"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP114",
+  "name": "Flic Flak",
+  "cardType": "defense-reaction",
+  "text": "If the next card you defend with this turn is a card with combo, it gains +2{d}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP115",
+  "name": "Flic Flak",
+  "cardType": "defense-reaction",
+  "text": "If the next card you defend with this turn is a card with combo, it gains +2{d}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP116",
+  "name": "Leg Tap",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP117",
+  "name": "Leg Tap",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP118",
+  "name": "Leg Tap",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP119",
+  "name": "Rising Knee Thrust",
+  "cardType": "action",
+  "text": "Combo - If Leg Tap was the last attack this combat chain, Rising Knee Thrust gains +2{p} and go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP120",
+  "name": "Rising Knee Thrust",
+  "cardType": "action",
+  "text": "Combo - If Leg Tap was the last attack this combat chain, Rising Knee Thrust gains +2{p} and go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP121",
+  "name": "Rising Knee Thrust",
+  "cardType": "action",
+  "text": "Combo - If Leg Tap was the last attack this combat chain, Rising Knee Thrust gains +2{p} and go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP122",
+  "name": "Soulbead Strike",
+  "cardType": "action",
+  "text": "When this hits, it gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP123",
+  "name": "Soulbead Strike",
+  "cardType": "action",
+  "text": "When this hits, it gets go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP124",
+  "name": "Soulbead Strike",
+  "cardType": "action",
+  "text": "When this hits, it gets go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP125",
+  "name": "Surging Strike",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP126",
+  "name": "Surging Strike",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP127",
+  "name": "Surging Strike",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP128",
+  "name": "Torrent of Tempo",
+  "cardType": "action",
+  "text": "When this hits, it gets go again.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP129",
+  "name": "Torrent of Tempo",
+  "cardType": "action",
+  "text": "When this hits, it gets go again.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP130",
+  "name": "Torrent of Tempo",
+  "cardType": "action",
+  "text": "When this hits, it gets go again.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP131",
+  "name": "Whelming Gustwave",
+  "cardType": "action",
+  "text": "Combo - If Surging Strike was the last attack this combat chain, Whelming Gustwave gains +1{p}, go again, and \"If this hits, draw a card.\"",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP132",
+  "name": "Whelming Gustwave",
+  "cardType": "action",
+  "text": "Combo - If Surging Strike was the last attack this combat chain, Whelming Gustwave gains +1{p}, go again, and \"If this hits, draw a card.\"",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP133",
+  "name": "Whelming Gustwave",
+  "cardType": "action",
+  "text": "Combo - If Surging Strike was the last attack this combat chain, Whelming Gustwave gains +1{p}, go again, and \"If this hits, draw a card.\"",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 1,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Combo",
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP134",
+  "name": "Bittering Thorns",
+  "cardType": "action",
+  "text": "When this hits, your next attack this turn gets +1{p}.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP135",
+  "name": "Salt the Wound",
+  "cardType": "action",
+  "text": "This gets +1{p} for each attack that has hit this combat chain.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP136",
+  "name": "Whirling Mist Blossom",
+  "cardType": "action",
+  "text": "Ira Specialization\nWhen this hits and it's the second or higher chain link in a row to hit, draw 2 cards.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Ira Specialization",
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP137",
+  "name": "Zen State",
+  "cardType": "token",
+  "text": "This enters the arena with a balance counter. At the beginning of your action phase, destroy this unless you remove a balance counter from it.\nIf you would be dealt damage, prevent 1 of that damage.",
+  "classes": [
+   "ninja"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP138",
+  "name": "Dorinthea Ironsong",
+  "cardType": "hero",
+  "text": "Once per turn Effect - When a weapon you control hits, you may attack an additional time with that weapon this turn.",
+  "classes": [
+   "warrior"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "1HP"
+ },
+ {
+  "id": "1HP139",
+  "name": "Dorinthea",
+  "cardType": "hero",
+  "text": "Once per turn Effect - When a weapon you control hits, you may attack an additional time with that weapon this turn.",
+  "classes": [
+   "warrior"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "1HP"
+ },
+ {
+  "id": "1HP140",
+  "name": "Kassai, Cintari Sellsword",
+  "cardType": "hero",
+  "text": "Your second sword attack each turn costs {r} less.\nAt the beginning of your end phase, if you have attacked 2 or more times with weapons this turn, create a Copper token for each weapon attack that hit.",
+  "classes": [
+   "warrior"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "1HP"
+ },
+ {
+  "id": "1HP141",
+  "name": "Cintari Saber",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nWhenever Cintari Saber is defended by 1 or more attack action cards, it gains +1{p} until end of turn.",
+  "attack": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "sword",
+   "1h"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP142",
+  "name": "Cintari Saber",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nWhenever Cintari Saber is defended by 1 or more attack action cards, it gains +1{p} until end of turn.",
+  "attack": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "sword",
+   "1h"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP143",
+  "name": "Dawnblade",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nThe second time this hits each turn, put a +1{p} counter on it.\nAt the beginning of your end phase, if this hasn't hit this turn, remove all +1{p} counters from it.",
+  "attack": 3,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "sword",
+   "2h"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP144",
+  "name": "Braveforge Bracers",
+  "cardType": "equipment",
+  "text": "Once per turn Action - {r}: Your next weapon attack this turn gains +1{p}. Activate this ability only if a weapon you control has hit this turn. Go again\nBattleworn",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP145",
+  "name": "Refraction Bolters",
+  "cardType": "equipment",
+  "text": "When a weapon attack you control hits, you may destroy this. If you do, the attack gets go again.\nBattleworn",
+  "defense": 1,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP146",
+  "name": "Courage of Bladehold",
+  "cardType": "equipment",
+  "text": "Action - Destroy Courage of Bladehold: Your sword attacks cost {r} less this turn. Go again\nTemper",
+  "defense": 2,
+  "classes": [
+   "warrior"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP147",
+  "name": "Glint the Quicksilver",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gets go again.\nReprise - If the defending hero has defended with a card from their hand this chain link, draw a card.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP148",
+  "name": "Rout",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gains +3{p}.\nReprise - If the defending hero has defended with a card from their hand this chain link, you may return target non-equipment defending card to its owners hand.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP149",
+  "name": "Singing Steelblade",
+  "cardType": "attack-reaction",
+  "text": "Dorinthea Specialization\nTarget weapon attack gains +1{p}.\nReprise - If the defending hero has defended with a card from hand this chain link, search your deck for an attack reaction card, banish it face up, then shuffle your deck. You may play it this chain link.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Dorinthea Specialization",
+   "Reprise"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP150",
+  "name": "Twinning Blade",
+  "cardType": "attack-reaction",
+  "text": "You may attack an additional time with target sword this turn.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP151",
+  "name": "Spoils of War",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gains +2{p} and go again.\nWhenever a weapon you control hits this turn, create 2 Copper tokens.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP152",
+  "name": "Steelblade Supremacy",
+  "cardType": "action",
+  "text": "Dorinthea Specialization\nUntil end of turn, target weapon gains +2{p} and \"Whenever this weapon hits, draw a card.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Dorinthea Specialization",
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP153",
+  "name": "Overpower",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gains +4{p}\nReprise - If the defending hero has defended with a card from their hand this chain link, instead it gains +6{p}.",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP154",
+  "name": "Overpower",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gains +3{p}\nReprise - If the defending hero has defended with a card from their hand this chain link, instead it gains +5{p}.",
+  "pitch": 2,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP155",
+  "name": "Overpower",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gains +2{p}\nReprise - If the defending hero has defended with a card from their hand this chain link, instead it gains +4{p}.",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP156",
+  "name": "Steelblade Shunt",
+  "cardType": "defense-reaction",
+  "text": "If Steelblade Shunt defends a weapon attack, deal 1 damage to the attacking hero.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 6,
+  "classes": [
+   "warrior"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP157",
+  "name": "Steelblade Shunt",
+  "cardType": "defense-reaction",
+  "text": "If Steelblade Shunt defends a weapon attack, deal 1 damage to the attacking hero.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 5,
+  "classes": [
+   "warrior"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP158",
+  "name": "Steelblade Shunt",
+  "cardType": "defense-reaction",
+  "text": "If Steelblade Shunt defends a weapon attack, deal 1 damage to the attacking hero.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 4,
+  "classes": [
+   "warrior"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP159",
+  "name": "Warrior's Valor",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gets +3{p} and \"When this hits, it gets go again.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP160",
+  "name": "Warrior's Valor",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gets +2{p} and \"When this hits, it gets go again.\"\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP161",
+  "name": "Warrior's Valor",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gets +1{p} and \"When this hits, it gets go again.\"\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP162",
+  "name": "Ironsong Response",
+  "cardType": "attack-reaction",
+  "text": "Reprise - If the defending hero has defended with a card from their hand this chain link, target weapon attack gains +3{p}.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP163",
+  "name": "Ironsong Response",
+  "cardType": "attack-reaction",
+  "text": "Reprise - If the defending hero has defended with a card from their hand this chain link, target weapon attack gains +2{p}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP164",
+  "name": "Ironsong Response",
+  "cardType": "attack-reaction",
+  "text": "Reprise - If the defending hero has defended with a card from their hand this chain link, target weapon attack gains +1{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP165",
+  "name": "Out for Blood",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gains +3{p}.\nReprise - If the defending hero has defended with a card from their hand this chain link, your next attack this turn gains +1{p}.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP166",
+  "name": "Out for Blood",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gains +2{p}.\nReprise - If the defending hero has defended with a card from their hand this chain link, your next attack this turn gains +1{p}.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP167",
+  "name": "Out for Blood",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gains +1{p}.\nReprise - If the defending hero has defended with a card from their hand this chain link, your next attack this turn gains +1{p}.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP168",
+  "name": "Stroke of Foresight",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gains +3{p}.\nReprise - If the defending hero has defended with a card from their hand this chain link, draw a card, then put a card from your hand on the top or bottom of your deck.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP169",
+  "name": "Stroke of Foresight",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gains +2{p}.\nReprise - If the defending hero has defended with a card from their hand this chain link, draw a card, then put a card from your hand on the top or bottom of your deck.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP170",
+  "name": "Stroke of Foresight",
+  "cardType": "attack-reaction",
+  "text": "Target weapon attack gains +1{p}.\nReprise - If the defending hero has defended with a card from their hand this chain link, draw a card, then put a card from your hand on the top or bottom of your deck.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Reprise"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP171",
+  "name": "Driving Blade",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gains +3{p} and go again.\nGo again",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP172",
+  "name": "Driving Blade",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gains +2{p} and go again.\nGo again",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP173",
+  "name": "Driving Blade",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gains +1{p} and go again.\nGo again",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP174",
+  "name": "Hit and Run",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gets go again.\nIf you've attacked with a weapon this turn, your next attack this turn gets +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP175",
+  "name": "Hit and Run",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gets go again.\nIf you've attacked with a weapon this turn, your next attack this turn gets +2{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP176",
+  "name": "Hit and Run",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gets go again.\nIf you've attacked with a weapon this turn, your next attack this turn gets +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP177",
+  "name": "Nature's Path Pilgrimage",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gets +3{p} and \"When this hits and you have no cards in your arsenal, reveal the top card of your deck. If it's an action card, put it face down into your arsenal.\"\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP178",
+  "name": "Nature's Path Pilgrimage",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gets +2{p} and \"When this hits and you have no cards in your arsenal, reveal the top card of your deck. If it's an action card, put it face down into your arsenal.\"\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP179",
+  "name": "Nature's Path Pilgrimage",
+  "cardType": "action",
+  "text": "Your next weapon attack this turn gets +1{p} and \"When this hits and you have no cards in your arsenal, reveal the top card of your deck. If it's an action card, put it face down into your arsenal.\"\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "warrior"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP180",
+  "name": "Dash, Inventor Extraordinaire",
+  "cardType": "hero",
+  "text": "You may start the game with a Mechanologist item with cost 2 or less in the arena.",
+  "classes": [
+   "mechanologist"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "1HP"
+ },
+ {
+  "id": "1HP181",
+  "name": "Dash",
+  "cardType": "hero",
+  "text": "You may start the game with a Mechanologist item with cost 2 or less in the arena.",
+  "classes": [
+   "mechanologist"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "1HP"
+ },
+ {
+  "id": "1HP182",
+  "name": "Data Doll MKII",
+  "cardType": "hero",
+  "text": "Whenever a Mechanologist item with cost 2 or less is put into your banished zone from your deck, put it into the arena.",
+  "classes": [
+   "mechanologist"
+  ],
+  "life": 20,
+  "intellect": 3,
+  "set": "1HP"
+ },
+ {
+  "id": "1HP183",
+  "name": "Plasma Barrel Shot",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - Remove a steam counter from Plasma Barrel Shot: Attack\nAction - {r}{r}: If there are no steam counters on Plasma Barrel Shot, put a steam counter on it. Go again\nX is equal to 1 plus the number of times you have boosted this combat chain.",
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "gun",
+   "2h"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP184",
+  "name": "Teklo Plasma Pistol",
+  "cardType": "weapon",
+  "text": "Action - Remove a steam counter from Teklo Plasma Pistol: Attack\nAction - {r}: If there are no steam counters on Teklo Plasma Pistol, put a steam counter on it. Go again",
+  "attack": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "pistol",
+   "2h"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP185",
+  "name": "Teklo Foundry Heart",
+  "cardType": "equipment",
+  "text": "Once per Turn Action - {r}: Banish the top 2 cards of your deck. Gain {r} for each Mechanologist card banished this way. Activate this ability only if you've boosted this turn. Go again\nBattleworn",
+  "defense": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP186",
+  "name": "Achilles Accelerator",
+  "cardType": "equipment",
+  "text": "Instant - Destroy Achilles Accelerator: Gain 1 action point. Activate this ability only if you have boosted this turn.\nArcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP187",
+  "name": "Viziertronic Model i",
+  "cardType": "equipment",
+  "text": "Action - destroy Vizertronic Model i: Whenever you boost this turn, draw a card then put a card from your hand on top of your deck. Go again\nArcane Barrier 2",
+  "defense": 0,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Arcane Barrier 2"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP188",
+  "name": "High Octane",
+  "cardType": "action",
+  "text": "Whenever you boost a card this turn, gain 1 action point.\nDraw a card.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP189",
+  "name": "Induction Chamber",
+  "cardType": "action",
+  "text": "Action - {r}: If there are no steam counters on Induction Chamber, put a steam counter on it. Go again\nOnce per Turn Attack Reaction - Remove a steam counter from Induction Chamber: Target Mechanologist pistol attack gains go again.",
+  "pitch": 1,
+  "cost": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP190",
+  "name": "Plasma Purifier",
+  "cardType": "action",
+  "text": "Action - {r}: If there are no steam counters on Plasma Purifier, put a steam counter on it. Go again\nOnce per Turn Action - Remove a steam counter from Plasma Purifier: Target Mechanologist pistol you control gains +1{p} until end of turn. Go again",
+  "pitch": 1,
+  "cost": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP191",
+  "name": "Spark of Genius",
+  "cardType": "action",
+  "text": "Dash Specialization\nSearch your deck for a Mechanologist item card with cost X, put it into the arena, then shuffle your deck.\nIf you have boosted this turn, draw a card.",
+  "pitch": 2,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "keywords": [
+   "Dash Specialization"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP192",
+  "name": "Teklo Core",
+  "cardType": "action",
+  "text": "Dash Specialization\nTeklo Core enters the arena with 2 steam counters on it. When Teklo Core has no steam counters on it, destroy it.\nAt the beginning of your action phase, remove a steam counter from Teklo Core and gain {r}{r}.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "keywords": [
+   "Dash Specialization"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP193",
+  "name": "High Speed Impact",
+  "cardType": "action",
+  "text": "If High Speed Impact hits, the next attack you boost this combat chain gains dominate.\nBoost",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP194",
+  "name": "High Speed Impact",
+  "cardType": "action",
+  "text": "If High Speed Impact hits, the next attack you boost this combat chain gains dominate.\nBoost",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP195",
+  "name": "High Speed Impact",
+  "cardType": "action",
+  "text": "If High Speed Impact hits, the next attack you boost this combat chain gains dominate.\nBoost",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP196",
+  "name": "Pedal to the Metal",
+  "cardType": "action",
+  "text": "If Pedal to the Metal hits, your next attack this turn gains dominate.\nBoost",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP197",
+  "name": "Pedal to the Metal",
+  "cardType": "action",
+  "text": "If Pedal to the Metal hits, your next attack this turn gains dominate.\nBoost",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP198",
+  "name": "Pedal to the Metal",
+  "cardType": "action",
+  "text": "If Pedal to the Metal hits, your next attack this turn gains dominate.\nBoost",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP199",
+  "name": "Aether Sink",
+  "cardType": "action",
+  "text": "Aether Sink enters the arena with a steam counter on it.\nAction - {r}: If there are no steam counters on Aether Sink, put a steam counter on it. Go again\nInstant - Remove a steam counter from Aether Sink: Aether Sink gains Arcane Barrier 2 until end of turn.",
+  "pitch": 2,
+  "cost": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP200",
+  "name": "Cognition Nodes",
+  "cardType": "action",
+  "text": "Action - {r}: If there are no steam counters on Cognition Nodes, put a steam counter on it. Go again\nOnce per Turn Attack Reaction - Remove a steam counter from Cognition Nodes: Target attack action card gains \"When this hits, put it on the bottom of its owner's deck.\"",
+  "pitch": 3,
+  "cost": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP201",
+  "name": "Convection Amplifier",
+  "cardType": "action",
+  "text": "Convection Amplifier enters the arena with 2 steam counters on it. When Convection Amplifier has no steam counters on it, destroy it.\nAction - Remove a steam counter from Convection Amplifier: The next attack action card you play this turn gains dominate. Go again",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP202",
+  "name": "Combustible Courier",
+  "cardType": "action",
+  "text": "If Combustible Courier hits, the next attack you boost this combat chain gains +3{p}.\nBoost",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP203",
+  "name": "Combustible Courier",
+  "cardType": "action",
+  "text": "If Combustible Courier hits, the next attack you boost this combat chain gains +3{p}.\nBoost",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP204",
+  "name": "Combustible Courier",
+  "cardType": "action",
+  "text": "If Combustible Courier hits, the next attack you boost this combat chain gains +3{p}.\nBoost",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP205",
+  "name": "Over Loop",
+  "cardType": "action",
+  "text": "Boost\nWhen this hits, put it on the bottom of its owner's deck.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP206",
+  "name": "Over Loop",
+  "cardType": "action",
+  "text": "Boost\nWhen this hits, put it on the bottom of its owner's deck.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP207",
+  "name": "Over Loop",
+  "cardType": "action",
+  "text": "Boost\nWhen this hits, put it on the bottom of its owner's deck.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP208",
+  "name": "Throttle",
+  "cardType": "action",
+  "text": "Boost",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP209",
+  "name": "Throttle",
+  "cardType": "action",
+  "text": "Boost",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP210",
+  "name": "Throttle",
+  "cardType": "action",
+  "text": "Boost",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP211",
+  "name": "Zero to Sixty",
+  "cardType": "action",
+  "text": "Boost",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP212",
+  "name": "Zero to Sixty",
+  "cardType": "action",
+  "text": "Boost",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP213",
+  "name": "Zero to Sixty",
+  "cardType": "action",
+  "text": "Boost",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP214",
+  "name": "Zipper Hit",
+  "cardType": "action",
+  "text": "Boost",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP215",
+  "name": "Zipper Hit",
+  "cardType": "action",
+  "text": "Boost",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP216",
+  "name": "Zipper Hit",
+  "cardType": "action",
+  "text": "Boost",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Boost"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP217",
+  "name": "Dissipation Shield",
+  "cardType": "action",
+  "text": "Dissipation Shield enters the arena with 4 steam counters on it.\nAt the beginning of your action phase, destroy Dissipation Shield unless you remove a steam counter from it.\nInstant - Destroy Dissipation Shield: The next time your hero would be dealt damage this turn, prevent X damage, where X is the number of steam counters on Dissipation Shield.",
+  "pitch": 2,
+  "cost": 2,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP218",
+  "name": "Hyper Driver",
+  "cardType": "action",
+  "text": "This enters the arena with 3 steam counters. When it has none, destroy it.\nOnce per turn, when you boost a card, remove a steam counter from this and gain {r}.",
+  "pitch": 1,
+  "cost": 1,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP219",
+  "name": "Optekal Monocle",
+  "cardType": "action",
+  "text": "Optekal Monocle enters the arena with 5 steam counters on it. When Optekal Monocle has no steam counters on it, destroy it.\nAction - Remove a steam counter from Optekal Monocle: Opt 1. Go again",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "mechanologist"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP220",
+  "name": "Kavdaen, Trader of Skins",
+  "cardType": "hero",
+  "text": "Once per Turn Action - {r}{r}{r}: If a hero has more {h} than all other hero's, they lose 1{h} and create a Copper token. Then if a hero has less {h} than all other hero's, they gain 1{h}. Go again",
+  "classes": [
+   "merchant"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "1HP"
+ },
+ {
+  "id": "1HP221",
+  "name": "Azalea, Ace in the Hole",
+  "cardType": "hero",
+  "text": "Once per Turn Action - 0: Put a card from your arsenal on the bottom of your deck. If you do, put the top card of your deck face up into your arsenal. If it's an arrow card, it gains dominate until end of turn. Go again",
+  "classes": [
+   "ranger"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "1HP"
+ },
+ {
+  "id": "1HP222",
+  "name": "Azalea",
+  "cardType": "hero",
+  "text": "Once per Turn Action - 0: Put a card from your arsenal on the bottom of your deck. If you do, put the top card of your deck face up into your arsenal. If it's an arrow card, it gains dominate until end of turn. Go again",
+  "classes": [
+   "ranger"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "1HP"
+ },
+ {
+  "id": "1HP223",
+  "name": "Death Dealer",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: If you have no cards in your arsenal, you may put an arrow card from your hand face up into your arsenal. If you do, draw a card. Go again",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "bow",
+   "2h"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP224",
+  "name": "Red Liner",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - 0: If you have no cards in your arsenal, put an arrow card from your hand face up into your arsenal. Go again",
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "bow",
+   "2h"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP225",
+  "name": "Skullbone Crosswrap",
+  "cardType": "equipment",
+  "text": "Once per Turn Action - Turn a face down card in your arsenal face up: Opt 1. Go again\nArcane Barrier 1\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Arcane Barrier 1",
+   "Blade Break"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP226",
+  "name": "Bull's Eye Bracers",
+  "cardType": "equipment",
+  "text": "Action - Destroy Bull's Eye Bracers: If you have no cards in your arsenal, you may put an arrow card from your hand face up into your arsenal. It gains +1{p} until end of turn. Go again\nArcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP227",
+  "name": "Perch Grapplers",
+  "cardType": "equipment",
+  "text": "Action - {r}{r}, destroy Perch Grapplers: Until end of turn, face up arrow cards played from arsenal gain go again. Go again\nBlade Break",
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP228",
+  "name": "Endless Arrow",
+  "cardType": "action",
+  "text": "When this hits, put it into its owner's hand.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP229",
+  "name": "Red in the Ledger",
+  "cardType": "action",
+  "text": "Azalea Specialization\nIf Red in the Ledger hits a hero, they can't play or activate more than 1 action during their next turn.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Azalea Specialization"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP230",
+  "name": "Remorseless",
+  "cardType": "action",
+  "text": "If Remorseless is put into your arsenal face up, until end of turn it gains \"Defense reaction cards can't be played from arsenal to Remoreseless's chain link.\"\nIf Remorseless hits a hero, until the end of their next turn, whenever they play an action card, they lose 1{h}.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP231",
+  "name": "Nock the Deathwhistle",
+  "cardType": "action",
+  "text": "Azalea Specialization\nSearch your deck for an arrow card, reveal it, then shuffle your deck and put it on top of your deck.\nReload\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Azalea Specialization",
+   "Reload",
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP232",
+  "name": "Three of a Kind",
+  "cardType": "action",
+  "text": "Draw 3 cards. Until end of turn, you may only play cards from arsenal.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP233",
+  "name": "Feign Death",
+  "cardType": "instant",
+  "text": "Play Feign Death only if your hero has been dealt damage this turn.\nThe next time your hero would be dealt damage this turn, prevent it.",
+  "pitch": 2,
+  "cost": 1,
+  "classes": [
+   "ranger"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP234",
+  "name": "Take Cover",
+  "cardType": "defense-reaction",
+  "text": "Reload",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 4,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Reload"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP235",
+  "name": "Take Cover",
+  "cardType": "defense-reaction",
+  "text": "Reload",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Reload"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP236",
+  "name": "Take Cover",
+  "cardType": "defense-reaction",
+  "text": "Reload",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Reload"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP237",
+  "name": "Take Aim",
+  "cardType": "action",
+  "text": "The next Ranger attack action card you play this turn, gains +3{p}.\nReload\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Reload",
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP238",
+  "name": "Take Aim",
+  "cardType": "action",
+  "text": "The next Ranger attack action card you play this turn, gains +2{p}.\nReload\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Reload",
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP239",
+  "name": "Take Aim",
+  "cardType": "action",
+  "text": "The next Ranger attack action card you play this turn, gains +1{p}.\nReload\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "ranger"
+  ],
+  "keywords": [
+   "Reload",
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP240",
+  "name": "Head Shot",
+  "cardType": "action",
+  "text": "When this is put into your arsenal face up, it gains +2{p} until end of turn.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP241",
+  "name": "Head Shot",
+  "cardType": "action",
+  "text": "When this is put into your arsenal face up, it gains +2{p} until end of turn.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP242",
+  "name": "Head Shot",
+  "cardType": "action",
+  "text": "When this is put into your arsenal face up, it gains +2{p} until end of turn.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP243",
+  "name": "Ridge Rider Shot",
+  "cardType": "action",
+  "text": "If Ridge Rider Shot is put into your arsenal face up, opt 1.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Opt 1"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP244",
+  "name": "Ridge Rider Shot",
+  "cardType": "action",
+  "text": "If Ridge Rider Shot is put into your arsenal face up, opt 1.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Opt 1"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP245",
+  "name": "Ridge Rider Shot",
+  "cardType": "action",
+  "text": "If Ridge Rider Shot is put into your arsenal face up, opt 1.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Opt 1"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP246",
+  "name": "Salvage Shot",
+  "cardType": "action",
+  "text": "When this hits, put it on the bottom of its owner's deck.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP247",
+  "name": "Salvage Shot",
+  "cardType": "action",
+  "text": "When this hits, put it on the bottom of its owner's deck.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP248",
+  "name": "Salvage Shot",
+  "cardType": "action",
+  "text": "When this hits, put it on the bottom of its owner's deck.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP249",
+  "name": "Searing Shot",
+  "cardType": "action",
+  "text": "If Searing Shot hits a hero, they lose 1{h}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP250",
+  "name": "Searing Shot",
+  "cardType": "action",
+  "text": "If Searing Shot hits a hero, they lose 1{h}.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP251",
+  "name": "Searing Shot",
+  "cardType": "action",
+  "text": "If Searing Shot hits a hero, they lose 1{h}.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP252",
+  "name": "Sic 'Em Shot",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP253",
+  "name": "Sic 'Em Shot",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP254",
+  "name": "Sic 'Em Shot",
+  "cardType": "action",
+  "text": "Go again",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP255",
+  "name": "Sleep Dart",
+  "cardType": "action",
+  "text": "If Sleep Dart hits a hero, they lose all hero card effects and activated abilities until the end of their next turn.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP256",
+  "name": "Sleep Dart",
+  "cardType": "action",
+  "text": "If Sleep Dart hits a hero, they lose all hero card effects and activated abilities until the end of their next turn.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP257",
+  "name": "Sleep Dart",
+  "cardType": "action",
+  "text": "If Sleep Dart hits a hero, they lose all hero card effects and activated abilities until the end of their next turn.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "ranger"
+  ],
+  "subtypes": [
+   "arrow",
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP258",
+  "name": "Viserai, Rune Blood",
+  "cardType": "hero",
+  "text": "Whenever you play a Runeblade card, if you've played another non-attack action card this turn, create a Runechant token.",
+  "classes": [
+   "runeblade"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "1HP"
+ },
+ {
+  "id": "1HP259",
+  "name": "Viserai",
+  "cardType": "hero",
+  "text": "Whenever you play a Runeblade card, if you have played another 'non-attack' action card this turn, create a Runechant token.",
+  "classes": [
+   "runeblade"
+  ],
+  "life": 20,
+  "intellect": 4,
+  "set": "1HP"
+ },
+ {
+  "id": "1HP260",
+  "name": "Nebula Blade",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Attack\nWhen this hits, create a Runechant token.\nIf you've played a non-attack action card this turn, this gets +3{p}.",
+  "attack": 1,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "sword",
+   "2h"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP261",
+  "name": "Reaping Blade",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}: Attack\nIf a hero has more {h} than any other hero, they can't gain {h}.",
+  "attack": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "sword",
+   "2h"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP262",
+  "name": "Grasp of the Arknight",
+  "cardType": "equipment",
+  "text": "Once per Turn Action - {r}{r}: Create a Runechant token. This ability costs an additional {r} to activate for each Runechant you control. Go again\nBattleworn",
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Battleworn"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP263",
+  "name": "Crown of Dichotomy",
+  "cardType": "equipment",
+  "text": "Action - {r}, destroy Crown of Dichotomy: Put target Runeblade attack action card and target Runeblade 'non-attack' action card from your graveyard on top of your deck in any order.\nArcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP264",
+  "name": "Bloodsheath Skeleta",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: The next attack action card and non-attack action card you play this turn get \"This card costs {r} less to play for each Runechant you control.\"\nTemper",
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP265",
+  "name": "Arknight Ascendancy",
+  "cardType": "action",
+  "text": "Viserai Specialization\nThis costs {r} less to play for each Runechant you control.\nWhen this hits, create Runechant tokens equal to the damage dealt this way.\nDominate",
+  "pitch": 1,
+  "cost": 6,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Viserai Specialization",
+   "Dominate"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP266",
+  "name": "Dread Triptych",
+  "cardType": "action",
+  "text": "When you attack with Dread Triptych, if you've played a 'non-attack' action card this turn, create a Runechant token.\nWhen you attack with Dread Triptych, if you've dealt arcane damage this turn, create a Runechant token.\nIf Dread Triptych hits, create a Runechant token.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP267",
+  "name": "Become the Arknight",
+  "cardType": "action",
+  "text": "Viserai Specialization\nYou may discard an action card. If you discard an attack action card this way, search your deck for a Runeblade non-attack action card, reveal it, and put it into your hand. If you discard a non-attack action card this way, search your deck for a Runeblade attack action card, reveal it, and put it into your hand. Shuffle. Go again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Viserai Specialization",
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP268",
+  "name": "Mordred Tide",
+  "cardType": "action",
+  "text": "Until end of turn, if you would create one or more Runechant tokens, instead create that many plus 1.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP269",
+  "name": "Runeblood Barrier",
+  "cardType": "action",
+  "text": "When this enters the arena, create 4 Runechant tokens.\nIf your hero would be dealt damage, instead destroy that many Runechant tokens you control and prevent 1 damage for each Runechant token destroyed this way.\nAt the beginning of your action phase, destroy this.",
+  "pitch": 2,
+  "cost": 3,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP270",
+  "name": "Spellblade Assault",
+  "cardType": "action",
+  "text": "When you attack with Spellblade Assault, create 2 Runechant tokens.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP271",
+  "name": "Spellblade Assault",
+  "cardType": "action",
+  "text": "When you attack with Spellblade Assault, create 2 Runechant tokens.",
+  "pitch": 2,
+  "cost": 2,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP272",
+  "name": "Spellblade Assault",
+  "cardType": "action",
+  "text": "When you attack with Spellblade Assault, create 2 Runechant tokens.",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP273",
+  "name": "Reduce to Runechant",
+  "cardType": "defense-reaction",
+  "text": "Reduce to Runechant costs {r} less to play for each Runechant you control.\nCreate a Runechant token.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 4,
+  "classes": [
+   "runeblade"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP274",
+  "name": "Reduce to Runechant",
+  "cardType": "defense-reaction",
+  "text": "Reduce to Runechant costs {r} less to play for each Runechant you control.\nCreate a Runechant token.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP275",
+  "name": "Reduce to Runechant",
+  "cardType": "defense-reaction",
+  "text": "Reduce to Runechant costs {r} less to play for each Runechant you control.\nCreate a Runechant token.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP276",
+  "name": "Mauvrion Skies",
+  "cardType": "action",
+  "text": "The next runeblade attack action card you play this turn gains go again and \"If this hits, create 3 Runechant tokens.\"\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP277",
+  "name": "Mauvrion Skies",
+  "cardType": "action",
+  "text": "The next runeblade attack action card you play this turn gains go again and \"If this hits, create 2 Runechant tokens.\"\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP278",
+  "name": "Mauvrion Skies",
+  "cardType": "action",
+  "text": "The next Runeblade attack action card you play this turn gets go again and \"When this hits, create a Runechant token.\"\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP279",
+  "name": "Oath of the Arknight",
+  "cardType": "action",
+  "text": "Your next Runeblade attack this turn gains +3{p}.\nCreate a Runechant token.\nGo again",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP280",
+  "name": "Oath of the Arknight",
+  "cardType": "action",
+  "text": "Your next Runeblade attack this turn gains +2{p}.\nCreate a Runechant token.\nGo again",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP281",
+  "name": "Oath of the Arknight",
+  "cardType": "action",
+  "text": "Your next Runeblade attack this turn gains +1{p}.\nCreate a Runechant token.\nGo again",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP282",
+  "name": "Amplify the Arknight",
+  "cardType": "action",
+  "text": "This costs {r} less to play for each Runechant you control.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP283",
+  "name": "Amplify the Arknight",
+  "cardType": "action",
+  "text": "Amplify the Arknight costs {r} less to play for each Runechant you control.",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP284",
+  "name": "Amplify the Arknight",
+  "cardType": "action",
+  "text": "This costs {r} less to play for each Runechant you control.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP285",
+  "name": "Meat and Greet",
+  "cardType": "action",
+  "text": "When this hits, create a Runechant token.\nIf you've dealt arcane damage to an opposing hero this turn, this gets go again.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP286",
+  "name": "Meat and Greet",
+  "cardType": "action",
+  "text": "When this hits, create a Runechant token.\nIf you've dealt arcane damage to an opposing hero this turn, this gets go again.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP287",
+  "name": "Meat and Greet",
+  "cardType": "action",
+  "text": "When this hits, create a Runechant token.\nIf you've dealt arcane damage to an opposing hero this turn, this gets go again.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP288",
+  "name": "Rune Flash",
+  "cardType": "action",
+  "text": "This costs {r} less to play for each Runechant token you control.\nGo again",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP289",
+  "name": "Rune Flash",
+  "cardType": "action",
+  "text": "Rune Flash costs {r} less to play for each Runechant you control.\nGo again",
+  "pitch": 2,
+  "cost": 3,
+  "attack": 3,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP290",
+  "name": "Rune Flash",
+  "cardType": "action",
+  "text": "This costs {r} less to play for each Runechant token you control.\nGo again",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 2,
+  "defense": 3,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP291",
+  "name": "Bloodspill Invocation",
+  "cardType": "action",
+  "text": "Go again\nWhen an attack action card you control hits, destroy Bloodspill Invocation then create 3 Runechant tokens.\nWhen your hero is dealt damage, destroy Bloodspill Invocation.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP292",
+  "name": "Bloodspill Invocation",
+  "cardType": "action",
+  "text": "Go again\nWhen an attack action card you control hits, destroy Bloodspill Invocation then create 2 Runechant tokens.\nWhen your hero is dealt damage, destroy Bloodspill Invocation.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP293",
+  "name": "Bloodspill Invocation",
+  "cardType": "action",
+  "text": "Go again\nWhen an attack action card you control hits, destroy Bloodspill Invocation then create a Runechant token.\nWhen your hero is dealt damage, destroy Bloodspill Invocation.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP294",
+  "name": "Read the Runes",
+  "cardType": "action",
+  "text": "Create 3 Runechant tokens.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP295",
+  "name": "Read the Runes",
+  "cardType": "action",
+  "text": "Create 2 Runechant tokens.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP296",
+  "name": "Read the Runes",
+  "cardType": "action",
+  "text": "Create a Runechant token.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP297",
+  "name": "Sutcliffe's Research Notes",
+  "cardType": "action",
+  "text": "Reveal the top 3 cards of your deck. Create a Runechant token for each Runeblade attack action card revealed this way, then put the cards on top of your deck in any order.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP298",
+  "name": "Sutcliffe's Research Notes",
+  "cardType": "action",
+  "text": "Reveal the top 2 cards of your deck. Create a Runechant token for each Runeblade attack action card revealed this way, then put the cards on top of your deck in any order.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP299",
+  "name": "Sutcliffe's Research Notes",
+  "cardType": "action",
+  "text": "Reveal the top card of your deck. Create a Runechant token for each Runeblade attack action card revealed this way, then put the cards on top of your deck in any order.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "runeblade"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP300",
+  "name": "Runechant",
+  "cardType": "token",
+  "text": "When you play an attack action card or activate a weapon attack, destroy this and deal 1 arcane damage to target opposing hero.",
+  "classes": [
+   "runeblade"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP301",
+  "name": "Kano, Dracai of Aether",
+  "cardType": "hero",
+  "text": "Instant - {r}{r}{r}: Look at the top card of your deck. If it's a 'non-attack' action card, you may banish it. If you do, you may play it this turn as though it were an instant.",
+  "classes": [
+   "wizard"
+  ],
+  "life": 30,
+  "intellect": 4,
+  "set": "1HP"
+ },
+ {
+  "id": "1HP302",
+  "name": "Kano",
+  "cardType": "hero",
+  "text": "Instant - {r}{r}{r}: Look at the top card of your deck. If it's a 'non-attack' action card, you may banish it. If you do, you may play it this turn as though it were an instant.",
+  "classes": [
+   "wizard"
+  ],
+  "life": 15,
+  "intellect": 4,
+  "set": "1HP"
+ },
+ {
+  "id": "1HP303",
+  "name": "Crucible of Aetherweave",
+  "cardType": "weapon",
+  "text": "Once per Turn Instant - {r}: The next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus 1.",
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "staff",
+   "2h"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP304",
+  "name": "Aether Conduit",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}: Deal 2 arcane damage to target hero.",
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "staff",
+   "2h"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP305",
+  "name": "Storm Striders",
+  "cardType": "equipment",
+  "text": "Instant - {r}, destroy Storm Striders: You may play your next Wizard 'non-attack' action card this turn as though it were an instant.\nArcane Barrier 2",
+  "defense": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Arcane Barrier 2"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP306",
+  "name": "Robe of Rapture",
+  "cardType": "equipment",
+  "text": "Action - Destroy Robe of Rapture: Gain {r}{r}{r}.\nArcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP307",
+  "name": "Metacarpus Node",
+  "cardType": "equipment",
+  "text": "Whenever you play a card with an effect that deals arcane damage, you may pay {r}. If you do, instead it deals that much arcane damage plus 1, and destroy Metacarpus Node at the beginning of the end phase.\nArcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "wizard"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP308",
+  "name": "Blazing Aether",
+  "cardType": "action",
+  "text": "Kano Specialization\nDeal X arcane damage to target hero, where X is the amount of arcane damage you have dealt to that hero this turn.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Kano Specialization"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP309",
+  "name": "Chain Lightning",
+  "cardType": "action",
+  "text": "You may play your next Wizard 'non-attack' action card this turn as though it were an instant.\nIf you have played another Wizard 'non-attack' action card this turn, deal 3 arcane damage to each opposing hero.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP310",
+  "name": "Forked Lightning",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to two target heroes. You may target the same hero twice.",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP311",
+  "name": "Lesson in Lava",
+  "cardType": "action",
+  "text": "Kano Specialization\nDeal 3 arcane damage to target opposing hero.\nIf Lesson in Lava deals damage, you may search your deck for a Wizard card with {r} cost equal to or less than the damage dealt by Lesson in Lava, reveal it, then shuffle your deck and put it on top of your deck.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Kano Specialization"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP312",
+  "name": "Sonic Boom",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to target opposing hero.\nIf Sonic Boom deals damage, look at the top card of your deck. If it's a Wizard 'non-attack' action card, you may banish it. If you do, you may play it this turn as though it were an instant and it costs X resource points less to play, where X is the damage dealt by Sonic Boom.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP313",
+  "name": "Tome of Aetherwind",
+  "cardType": "action",
+  "text": "Choose 2. You may choose the same mode more than once;\n\nThe next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus 1.\nDraw a card.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP314",
+  "name": "Aether Spindle",
+  "cardType": "action",
+  "text": "Deal 4 arcane damage to target opposing hero.\nOpt X, where X is the damage dealt by Aether Spindle.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Opt X"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP315",
+  "name": "Aether Spindle",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to target opposing hero.\nOpt X, where X is the damage dealt by Aether Spindle.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Opt X"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP316",
+  "name": "Aether Spindle",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to target opposing hero.\nOpt X, where X is the damage dealt by Aether Spindle.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Opt X"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP317",
+  "name": "Cindering Foresight",
+  "cardType": "action",
+  "text": "If it's not your turn, you may play Cindering Foresight as though it were an instant.\nThe next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus 1.\nOpt 3",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Opt 3"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP318",
+  "name": "Cindering Foresight",
+  "cardType": "action",
+  "text": "If it's not your turn, you may play Cindering Foresight as though it were an instant.\nThe next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus 1.\nOpt 2",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Opt 2"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP319",
+  "name": "Cindering Foresight",
+  "cardType": "action",
+  "text": "If it's not your turn, you may play Cindering Foresight as though it were an instant.\nThe next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus 1.\nOpt 1",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "keywords": [
+   "Opt 1"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP320",
+  "name": "Stir the Aetherwinds",
+  "cardType": "action",
+  "text": "You may play your next Wizard 'non-attack' action card this turn as though it were an instant and if it has an effect that deals arcane damage, instead that effect deals that much arcane damage plus 3.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP321",
+  "name": "Stir the Aetherwinds",
+  "cardType": "action",
+  "text": "You may play your next Wizard 'non-attack' action card this turn as though it were an instant and if it has an effect that deals arcane damage, instead that effect deals that much arcane damage plus 2.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP322",
+  "name": "Stir the Aetherwinds",
+  "cardType": "action",
+  "text": "You may play your next Wizard 'non-attack' action card this turn as though it were an instant and if it has an effect that deals arcane damage, instead that effect deals that much arcane damage plus 1.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "wizard"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP323",
+  "name": "Aether Flare",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to target opposing hero.\nThe next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus X, where X is the damage dealt by Aether Flare.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP324",
+  "name": "Aether Flare",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to target opposing hero.\nThe next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus X, where X is the damage dealt by Aether Flare.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP325",
+  "name": "Aether Flare",
+  "cardType": "action",
+  "text": "Deal 1 arcane damage to target opposing hero.\nThe next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus X, where X is the damage dealt by Aether Flare.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP326",
+  "name": "Reverberate",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to target opposing hero.\nIf Reverberate deals damage, you may banish a Wizard 'non-attack' action card from your hand with {r} cost less than or equal to the damage dealt by Reverberate. If you do, you may play it this turn as though it were an instant.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP327",
+  "name": "Reverberate",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to target opposing hero.\nIf Reverberate deals damage, you may banish a Wizard 'non-attack' action card from your hand with {r} cost less than or equal to the damage dealt by Reverberate. If you do, you may play it this turn as though it were an instant.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP328",
+  "name": "Reverberate",
+  "cardType": "action",
+  "text": "Deal 1 arcane damage to target opposing hero.\nIf Reverberate deals damage, you may banish a Wizard 'non-attack' action card from your hand with {r} cost less than or equal to the damage dealt by Reverberate. If you do, you may play it this turn as though it were an instant.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP329",
+  "name": "Scalding Rain",
+  "cardType": "action",
+  "text": "Deal 4 arcane damage to target hero.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP330",
+  "name": "Scalding Rain",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to target hero.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP331",
+  "name": "Scalding Rain",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to target hero.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP332",
+  "name": "Snapback",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to target hero.\nIf you have played another Wizard 'non-attack' action card this turn, you may play Snapback as though it were an instant.",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP333",
+  "name": "Snapback",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to target hero.\nIf you have played another Wizard 'non-attack' action card this turn, you may play Snapback as though it were an instant.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP334",
+  "name": "Snapback",
+  "cardType": "action",
+  "text": "Deal 1 arcane damage to target hero.\nIf you have played another Wizard 'non-attack' action card this turn, you may play Snapback as though it were an instant.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP335",
+  "name": "Voltic Bolt",
+  "cardType": "action",
+  "text": "Deal 5 arcane damage to target hero.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP336",
+  "name": "Voltic Bolt",
+  "cardType": "action",
+  "text": "Deal 4 arcane damage to target hero.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP337",
+  "name": "Voltic Bolt",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to target hero.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP338",
+  "name": "Zap",
+  "cardType": "action",
+  "text": "Deal 3 arcane damage to target hero.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP339",
+  "name": "Zap",
+  "cardType": "action",
+  "text": "Deal 2 arcane damage to target hero.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP340",
+  "name": "Zap",
+  "cardType": "action",
+  "text": "Deal 1 arcane damage to target hero.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "wizard"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP341",
+  "name": "Fyendal's Spring Tunic",
+  "cardType": "equipment",
+  "text": "At the start of your turn, if this has fewer than 3 energy counters, you may put an energy counter on it.\nInstant - Remove 3 energy counters from this: Gain {r}\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP342",
+  "name": "Ironrot Helm",
+  "cardType": "equipment",
+  "text": "Blade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP343",
+  "name": "Ironrot Plate",
+  "cardType": "equipment",
+  "text": "Blade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP344",
+  "name": "Ironrot Gauntlet",
+  "cardType": "equipment",
+  "text": "Blade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP345",
+  "name": "Ironrot Legs",
+  "cardType": "equipment",
+  "text": "Blade Break",
+  "defense": 1,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP346",
+  "name": "Nullrune Hood",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP347",
+  "name": "Nullrune Robe",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP348",
+  "name": "Nullrune Gloves",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP349",
+  "name": "Nullrune Boots",
+  "cardType": "equipment",
+  "text": "Arcane Barrier 1",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "keywords": [
+   "Arcane Barrier 1"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP350",
+  "name": "Hope Merchant's Hood",
+  "cardType": "equipment",
+  "text": "Instant - Destroy this: Shuffle any number of cards from your hand into your deck, then draw that many cards.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP351",
+  "name": "Heartened Cross Strap",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: The next attack action card you play this turn costs {r}{r} less to play. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP352",
+  "name": "Goliath Gauntlet",
+  "cardType": "equipment",
+  "text": "Action - Destroy this: The next attack action card with cost 2 or more you play this turn gets +2{p}. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP353",
+  "name": "Snapdragon Scalers",
+  "cardType": "equipment",
+  "text": "Attack Reaction - Destroy this: Target attack action card with cost 1 or less gets go again.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP354",
+  "name": "Talismanic Lens",
+  "cardType": "equipment",
+  "text": "Instant - Destroy Talismanic Lens: Opt 2",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "head"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP355",
+  "name": "Bracers of Belief",
+  "cardType": "equipment",
+  "text": "Action - Destroy Bracers of Belief: Reveal the top card of your deck. If you do, the next attack action card you play this turn, gains +X{p}, where X is 3 minus the pitch value of the card revealed this way. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP356",
+  "name": "Vest of the First Fist",
+  "cardType": "equipment",
+  "text": "When an attack action card you control hits, you may destroy Vest of the First Fist. If you do, gain {r}{r}.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "chest"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP357",
+  "name": "Mage Master Boots",
+  "cardType": "equipment",
+  "text": "Action - {r}, destroy this: The next non-attack action card you play this turn gets go again. Go again",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "legs"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP358",
+  "name": "Gambler's Gloves",
+  "cardType": "equipment",
+  "text": "If a hero would roll one or more 6 sided dice, instead after the roll you may destroy Gambler's Gloves. If you do, that hero rerolls all 6 sided dice rolled this way.",
+  "defense": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "arms"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP359",
+  "name": "Coax a Commotion",
+  "cardType": "action",
+  "text": "When this hits, choose any number:\n\nEach hero creates a Quicken token.\nEach hero draws a card.\nEach hero gains 1{h}.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP360",
+  "name": "Command and Conquer",
+  "cardType": "action",
+  "text": "Defense reaction cards can't be played this chain link. When this hits a hero, destroy all cards in their arsenal.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP361",
+  "name": "Enlightened Strike",
+  "cardType": "action",
+  "text": "As an additional cost to play Enlightened Strike, put a card from your hand on the bottom of your deck.\nChoose 1;\n- When you attack with Enlightened Strike, draw a card.\n- Enlightened Strike gains +2{p}.\n- Enlightened Strike gains go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP362",
+  "name": "Last Ditch Effort",
+  "cardType": "action",
+  "text": "When you play Last Ditch Effort, if you have no cards in your deck, it gains +4{p} and go again.",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 4,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP363",
+  "name": "Crazy Brew",
+  "cardType": "action",
+  "text": "Action - Destroy this: Roll a 6 sided die. On;\n\n1 or 2 - Lose 2{h}. Go again\n3 or 4 - Gain 2{h}. Go again\n5 or 6 - Gain {r}{r}, gain 2 action points, and your next attack this turn gains +2{p}.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP364",
+  "name": "Gorganian Tome",
+  "cardType": "action",
+  "text": "Legendary\nDraw X cards, where X is 1 plus the number of Gorganian Tomes in all graveyards.\nGo again",
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Legendary",
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP365",
+  "name": "Tome of Fyendal",
+  "cardType": "action",
+  "text": "Draw 2 cards.\nIf Tome of Fyendal is played from arsenal, gain 1{h} for each card in your hand.",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP366",
+  "name": "Art of War",
+  "cardType": "instant",
+  "text": "Choose 2;\n\nAttack action cards you control gain +1{p} and +1{d} this turn.\nThe next attack action card you play this turn gains go again.\nUntil end of turn, you may defend with attack action cards from arsenal.\nYou may banish an attack action card from your hand. If you do, draw 2 cards.",
+  "pitch": 2,
+  "cost": 1,
+  "classes": [
+   "generic"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP367",
+  "name": "Talishar, the Lost Prince",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}, put a rust counter on Talishar, the Lost Prince: Attack\nAt the beginning of your end phase, if Talishar, the Lost Prince has 3 or more rust counters on it, destroy it.",
+  "attack": 4,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "sword",
+   "2h"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP368",
+  "name": "Life for a Life",
+  "cardType": "action",
+  "text": "When this is played, if you have less {h} than an opposing hero, it gets go again.\nWhen this hits, gain 1{h}.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP369",
+  "name": "Life for a Life",
+  "cardType": "action",
+  "text": "When this is played, if you have less {h} than an opposing hero, it gets go again.\nWhen this hits, gain 1{h}.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP370",
+  "name": "Life for a Life",
+  "cardType": "action",
+  "text": "When this is played, if you have less {h} than an opposing hero, it gets go again.\nWhen this hits, gain 1{h}.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP371",
+  "name": "Snatch",
+  "cardType": "action",
+  "text": "When this hits, draw a card.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP372",
+  "name": "Snatch",
+  "cardType": "action",
+  "text": "When this hits, draw a card.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP373",
+  "name": "Snatch",
+  "cardType": "action",
+  "text": "When this hits, draw a card.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP374",
+  "name": "Springboard Somersault",
+  "cardType": "defense-reaction",
+  "text": "If Springboard Somersault is played from arsenal, it gains +2{d}.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP375",
+  "name": "Enchanting Melody",
+  "cardType": "action",
+  "text": "Go again\nIf your hero would be dealt damage, instead destroy Enchanting Melody and prevent 4 damage that source would deal.\nAt the beginning of your end phase, destroy Enchanting Melody unless you have played a 'non-attack' action card this turn.",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP376",
+  "name": "Enchanting Melody",
+  "cardType": "action",
+  "text": "Go again\nIf your hero would be dealt damage, instead destroy Enchanting Melody and prevent 3 damage that source would deal.\nAt the beginning of your end phase, destroy Enchanting Melody unless you have played a 'non-attack' action card this turn.",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP377",
+  "name": "Enchanting Melody",
+  "cardType": "action",
+  "text": "Go again\nIf your hero would be dealt damage, instead destroy Enchanting Melody and prevent 2 damage that source would deal.\nAt the beginning of your end phase, destroy Enchanting Melody unless you have played a 'non-attack' action card this turn.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP378",
+  "name": "Plunder Run",
+  "cardType": "action",
+  "text": "The next time an attack action card you control hits this turn, draw a card.\nIf Plunder Run is played from arsenal, the next attack action card you play this turn gains +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP379",
+  "name": "Plunder Run",
+  "cardType": "action",
+  "text": "The next time an attack action card you control hits this turn, draw a card.\nIf Plunder Run is played from arsenal, the next attack action card you play this turn gains +2{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP380",
+  "name": "Plunder Run",
+  "cardType": "action",
+  "text": "The next time an attack action card you control hits this turn, draw a card.\nIf Plunder Run is played from arsenal, the next attack action card you play this turn gains +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP381",
+  "name": "Energy Potion",
+  "cardType": "action",
+  "text": "Instant - Destroy this: Gain {r}{r}",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP382",
+  "name": "Potion of Strength",
+  "cardType": "action",
+  "text": "Action - Destroy this: Your next attack this turn gains +2{p}. Go again",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP383",
+  "name": "Timesnap Potion",
+  "cardType": "action",
+  "text": "Action - Destroy this: Gain 2 action points.",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP384",
+  "name": "Eirina's Prayer",
+  "cardType": "instant",
+  "text": "Reveal the top card of your deck. Prevent the next X arcane damage that would be dealt to your hero this turn, where X is 6 minus the pitch value of the card revealed this way.",
+  "pitch": 1,
+  "cost": 1,
+  "classes": [
+   "generic"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP385",
+  "name": "Eirina's Prayer",
+  "cardType": "instant",
+  "text": "Reveal the top card of your deck. Prevent the next X arcane damage that would be dealt to your hero this turn, where X is 5 minus the pitch value of the card revealed this way.",
+  "pitch": 2,
+  "cost": 1,
+  "classes": [
+   "generic"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP386",
+  "name": "Eirina's Prayer",
+  "cardType": "instant",
+  "text": "Reveal the top card of your deck. Prevent the next X arcane damage that would be dealt to your hero this turn, where X is 4 minus the pitch value of the card revealed this way.",
+  "pitch": 3,
+  "cost": 1,
+  "classes": [
+   "generic"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP387",
+  "name": "Sigil of Solace",
+  "cardType": "instant",
+  "text": "Gain 3{h}",
+  "pitch": 1,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP388",
+  "name": "Sigil of Solace",
+  "cardType": "instant",
+  "text": "Gain 2{h}",
+  "pitch": 2,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP389",
+  "name": "Sigil of Solace",
+  "cardType": "instant",
+  "text": "Gain 1{h}",
+  "pitch": 3,
+  "cost": 0,
+  "classes": [
+   "generic"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP390",
+  "name": "Flock of the Feather Walkers",
+  "cardType": "action",
+  "text": "As an additional cost to play Flock of the Feather Walkers, reveal a card in your hand with cost 1 or less.\nWhen you attack with Flock of the Feather Walkers, create a Quicken token.",
+  "pitch": 1,
+  "cost": 1,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP391",
+  "name": "Flock of the Feather Walkers",
+  "cardType": "action",
+  "text": "As an additional cost to play Flock of the Feather Walkers, reveal a card in your hand with cost 1 or less.\nWhen you attack with Flock of the Feather Walkers, create a Quicken token.",
+  "pitch": 2,
+  "cost": 1,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP392",
+  "name": "Flock of the Feather Walkers",
+  "cardType": "action",
+  "text": "As an additional cost to play Flock of the Feather Walkers, reveal a card in your hand with cost 1 or less.\nWhen you attack with Flock of the Feather Walkers, create a Quicken token.",
+  "pitch": 3,
+  "cost": 1,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP393",
+  "name": "Ravenous Rabble",
+  "cardType": "action",
+  "text": "When this attacks, reveal the top card of your deck. This gets -X{p}, where X is the pitch value of the card revealed this way.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 5,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP394",
+  "name": "Ravenous Rabble",
+  "cardType": "action",
+  "text": "When this attacks, reveal the top card of your deck. This gets -X{p}, where X is the pitch value of the card revealed this way.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP395",
+  "name": "Ravenous Rabble",
+  "cardType": "action",
+  "text": "When this attacks, reveal the top card of your deck. This gets -X{p}, where X is the pitch value of the card revealed this way.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP396",
+  "name": "Scar for a Scar",
+  "cardType": "action",
+  "text": "When this is played, if you have less {h} than an opposing hero, it gets go again.",
+  "pitch": 1,
+  "cost": 0,
+  "attack": 4,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP397",
+  "name": "Scar for a Scar",
+  "cardType": "action",
+  "text": "When this is played, if you have less {h} than an opposing hero, it gets go again.",
+  "pitch": 2,
+  "cost": 0,
+  "attack": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP398",
+  "name": "Scar for a Scar",
+  "cardType": "action",
+  "text": "When this is played, if you have less {h} than an opposing hero, it gets go again.",
+  "pitch": 3,
+  "cost": 0,
+  "attack": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP399",
+  "name": "Pummel",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target club or hammer weapon attack gains +4{p}.\n- Target attack action card with cost 2 or more gets +4{p} and \"When this hits a hero, they discard a card.\"",
+  "pitch": 1,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP400",
+  "name": "Pummel",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target club or hammer weapon attack gains +3{p}.\n- Target attack action card with cost 2 or more gets +3{p} and \"When this hits a hero, they discard a card.\"",
+  "pitch": 2,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP401",
+  "name": "Pummel",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target club or hammer weapon attack gains +2{p}.\n- Target attack action card with cost 2 or more gets +2{p} and \"When this hits a hero, they discard a card.\"",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP402",
+  "name": "Razor Reflex",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target dagger or sword weapon attack gets +3{p}.\n- Target attack action card with cost 1 or less gets +3{p} and \"When this hits, it gets go again.\"",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP403",
+  "name": "Razor Reflex",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target dagger or sword weapon attack gets +2{p}.\n- Target attack action card with cost 1 or less gets +2{p} and \"When this hits, it gets go again.\"",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP404",
+  "name": "Razor Reflex",
+  "cardType": "attack-reaction",
+  "text": "Choose 1;\n- Target dagger or sword weapon attack gets +1{p}.\n- Target attack action card with cost 1 or less gets +1{p} and \"When this hits, it gets go again.\"",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP405",
+  "name": "Fate Foreseen",
+  "cardType": "defense-reaction",
+  "text": "Opt 1",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 4,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Opt 1"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP406",
+  "name": "Fate Foreseen",
+  "cardType": "defense-reaction",
+  "text": "Opt 1",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Opt 1"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP407",
+  "name": "Fate Foreseen",
+  "cardType": "defense-reaction",
+  "text": "Opt 1",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Opt 1"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP408",
+  "name": "Sink Below",
+  "cardType": "defense-reaction",
+  "text": "You may put a card from your hand on the bottom of your deck. If you do, draw a card.",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 4,
+  "classes": [
+   "generic"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP409",
+  "name": "Sink Below",
+  "cardType": "defense-reaction",
+  "text": "You may put a card from your hand on the bottom of your deck. If you do, draw a card.",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP410",
+  "name": "Sink Below",
+  "cardType": "defense-reaction",
+  "text": "You may put a card from your hand on the bottom of your deck. If you do, draw a card.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP411",
+  "name": "Unmovable",
+  "cardType": "defense-reaction",
+  "text": "If this was played from arsenal, it gets +1{d}.",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 7,
+  "classes": [
+   "generic"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP412",
+  "name": "Unmovable",
+  "cardType": "defense-reaction",
+  "text": "If Unmovable is played from arsenal, it gains +1{d}.",
+  "pitch": 2,
+  "cost": 3,
+  "defense": 6,
+  "classes": [
+   "generic"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP413",
+  "name": "Unmovable",
+  "cardType": "defense-reaction",
+  "text": "If Unmovable is played from arsenal, it gains +1{d}.",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 5,
+  "classes": [
+   "generic"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP414",
+  "name": "Come to Fight",
+  "cardType": "action",
+  "text": "The next attack action card you play this turn gains +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP415",
+  "name": "Come to Fight",
+  "cardType": "action",
+  "text": "The next attack action card you play this turn gains +2{p}.\nGo again",
+  "pitch": 2,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP416",
+  "name": "Come to Fight",
+  "cardType": "action",
+  "text": "The next attack action card you play this turn gains +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP417",
+  "name": "Nimblism",
+  "cardType": "action",
+  "text": "The next attack action card with cost 1 or less you play this turn gains +3{p}.\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP418",
+  "name": "Nimblism",
+  "cardType": "action",
+  "text": "The next attack action card with cost 1 or less you play this turn gains +2{p}.\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP419",
+  "name": "Nimblism",
+  "cardType": "action",
+  "text": "The next attack action card with cost 1 or less you play this turn gains +1{p}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP420",
+  "name": "Sloggism",
+  "cardType": "action",
+  "text": "The next attack action card with cost 2 or greater you play this turn gains +6{p}.\nGo again",
+  "pitch": 1,
+  "cost": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP421",
+  "name": "Sloggism",
+  "cardType": "action",
+  "text": "The next attack action card with cost 2 or greater you play this turn gains +5{p}.\nGo again",
+  "pitch": 2,
+  "cost": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP422",
+  "name": "Sloggism",
+  "cardType": "action",
+  "text": "The next attack action card with cost 2 or greater you play this turn gains +4{p}.\nGo again",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 2,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP423",
+  "name": "Whisper of the Oracle",
+  "cardType": "action",
+  "text": "Opt 4\nGo again",
+  "pitch": 1,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Opt 4",
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP424",
+  "name": "Whisper of the Oracle",
+  "cardType": "action",
+  "text": "Opt 3\nGo again",
+  "pitch": 2,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Opt 3",
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP425",
+  "name": "Whisper of the Oracle",
+  "cardType": "action",
+  "text": "Opt 2\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "classes": [
+   "generic"
+  ],
+  "keywords": [
+   "Opt 2",
+   "Go again"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP426",
+  "name": "Copper",
+  "cardType": "token",
+  "text": "Action - {r}{r}{r}{r}, destroy this: Draw a card. Go again",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "item"
+  ],
+  "set": "1HP"
+ },
+ {
+  "id": "1HP427",
+  "name": "Quicken",
+  "cardType": "token",
+  "text": "When you play an attack action card or activate a weapon attack, destroy this and the attack gains go again.",
+  "classes": [
+   "generic"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "1HP"
+ }
+]

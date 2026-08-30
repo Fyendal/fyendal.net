@@ -1,0 +1,517 @@
+[
+ {
+  "id": "AJV001",
+  "name": "Jarl Vetreiði",
+  "cardType": "hero",
+  "text": "Whenever you play an Ice card, create a Frostbite token in an opponent's exposed head, chest, arms, or legs zone.\nEssence of Earth and Ice",
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Essence of Earth and Ice"
+  ],
+  "life": 40,
+  "intellect": 4,
+  "set": "AJV"
+ },
+ {
+  "id": "AJV002",
+  "name": "Summit, the Unforgiving",
+  "cardType": "weapon",
+  "text": "Once per Turn Action - {r}{r}{r} {r}{r}{r}: Attack\nWhen this hits a hero, create a Frostbite token in their exposed head, chest, arms, or legs zone.\nHeavy - If this is the only card equipped to your weapon zones, it gets +2{p}.",
+  "attack": 4,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "earth",
+   "ice",
+   "polearm",
+   "1h"
+  ],
+  "keywords": [
+   "Heavy"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV003",
+  "name": "Steelbraid Buckler",
+  "cardType": "equipment",
+  "text": "Temper",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "off-hand"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV004",
+  "name": "Ollin Ice Cap",
+  "cardType": "equipment",
+  "text": "When this defends together with an Ice card, create a Frostbite token under the attacking hero's control.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "ice",
+   "head"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV005",
+  "name": "Tectonic Crust",
+  "cardType": "equipment",
+  "text": "When this defends together with an Earth card, create a Seismic Surge token.\nTemper",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "earth",
+   "chest"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV006",
+  "name": "Gauntlets of the Boreal Domain",
+  "cardType": "equipment",
+  "text": "Once per Turn Action - {r}{r}: If an Earth card is pitched this way, your attacks named Mangle get +2{p} this turn. If an Ice card is pitched this way, your attacks named Mangle get dominate this turn. Go again\nTemper",
+  "defense": 2,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "earth",
+   "ice",
+   "arms"
+  ],
+  "keywords": [
+   "Temper"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV007",
+  "name": "Root-Bound Trunks",
+  "cardType": "equipment",
+  "text": "When this defends together with an aura card, create an Embodiment of Earth token.\nBlade Break",
+  "defense": 1,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "earth",
+   "legs"
+  ],
+  "keywords": [
+   "Blade Break"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV008",
+  "name": "Buckling Blow",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, put a -1{d} counter on an equipment they control.",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV009",
+  "name": "Earth Form",
+  "cardType": "action",
+  "text": "When this hits, create an Embodiment of Earth token.",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 2,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV010",
+  "name": "Icy Encounter",
+  "cardType": "action",
+  "text": "If Icy Encounter hits a hero, create a Frostbite token under their control.",
+  "pitch": 1,
+  "cost": 2,
+  "attack": 6,
+  "defense": 2,
+  "subtypes": [
+   "ice",
+   "attack"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV011",
+  "name": "Mangle",
+  "cardType": "action",
+  "text": "Crush - When this deals 4 or more damage to a hero, destroy target equipment they control with a -1{d} counter.",
+  "pitch": 1,
+  "cost": 4,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "attack"
+  ],
+  "keywords": [
+   "Crush"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV012",
+  "name": "Snow Under",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf Snow Under was fused, it gains \"If this hits a hero, create a Frostbite token under their control.\"",
+  "pitch": 1,
+  "cost": 3,
+  "attack": 7,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV013",
+  "name": "Unforgetting Unforgiving",
+  "cardType": "block",
+  "text": "Jarl Specialization\nWhen this defends, if the attacking hero controls an equipment with a -1{d} counter, you may search your deck for a Mangle, banish it, then shuffle. You may play it during your next action phase.",
+  "pitch": 1,
+  "defense": 4,
+  "classes": [
+   "guardian"
+  ],
+  "keywords": [
+   "Jarl Specialization"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV014",
+  "name": "Autumn's Touch",
+  "cardType": "action",
+  "text": "",
+  "pitch": 3,
+  "cost": 3,
+  "attack": 5,
+  "defense": 3,
+  "subtypes": [
+   "earth",
+   "attack"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV015",
+  "name": "Glacial Footsteps",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf Glacial Footsteps was fused, it gains dominate.",
+  "pitch": 3,
+  "cost": 6,
+  "attack": 8,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "attack"
+  ],
+  "keywords": [
+   "Ice Fusion",
+   "Dominate"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV016",
+  "name": "Winter's Grasp",
+  "cardType": "action",
+  "text": "",
+  "pitch": 3,
+  "cost": 2,
+  "attack": 4,
+  "defense": 3,
+  "subtypes": [
+   "ice",
+   "attack"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV017",
+  "name": "Channel Mount Isen",
+  "cardType": "action",
+  "text": "Go again\nAt the start of each hero's turn, they lose {h} equal to the number of Frostbites in their equipment zones.\nChannel Ice - At the beginning of your end phase, put a flow counter on this, then destroy it unless you put an Ice card from your pitch zone on the bottom of your deck for each flow counter on it.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "ice",
+   "aura"
+  ],
+  "keywords": [
+   "Go again",
+   "Channel Ice"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV018",
+  "name": "Crumble to Eternity",
+  "cardType": "action",
+  "text": "Jarl Specialization\nWhen this enters the arena, you may put a -1{d} counter on an equipment.\nAt the beginning of your action phase, destroy this, then your next attack this turn gets dominate.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 3,
+  "subtypes": [
+   "ice",
+   "earth",
+   "aura"
+  ],
+  "keywords": [
+   "Jarl Specialization"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV019",
+  "name": "Emerging Avalanche",
+  "cardType": "action",
+  "text": "Ice Fusion\nGo again\nWhen Emerging Avalanche enters the arena, if it was fused, create a Frostbite token under target hero control.\nAt the beginning of your action phase, destroy Emerging Avalanche then the next attack action card you play this turn gains +1{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "aura"
+  ],
+  "keywords": [
+   "Ice Fusion",
+   "Go again"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV020",
+  "name": "Frozen to Death",
+  "cardType": "action",
+  "text": "Ice Fusion\nIf this was fused, you may destroy an equipment with a -1{d} counter.\nYou may create a Frostbite token in an exposed head, chest, arms, or legs zone.",
+  "pitch": 3,
+  "cost": 3,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "ice"
+  ],
+  "keywords": [
+   "Ice Fusion"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV021",
+  "name": "Polar Blast",
+  "cardType": "action",
+  "text": "Target opposing hero may pay {r}. If they don't your next attack this turn gains dominate.\nIf Polar Blast is played from arsenal, draw a card.\nGo again",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "ice"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV022",
+  "name": "Sigil of Earth",
+  "cardType": "action",
+  "text": "Go again\nAt the beginning of your action phase, destroy this.\nWhen this leaves the arena, create an Embodiment of Earth token.",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "earth",
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV023",
+  "name": "Strength of Sequoia",
+  "cardType": "action",
+  "text": "Earth Fusion\nGo again\nWhen Strength of Sequoia enters the arena, if it was fused, create a Seismic Surge token.\nAt the beginning of your action phase, destroy Strength of Sequoia then the next attack action card you play this turn gains +1{p}.",
+  "pitch": 3,
+  "cost": 2,
+  "defense": 3,
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "elemental",
+   "aura"
+  ],
+  "keywords": [
+   "Earth Fusion",
+   "Go again"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV024",
+  "name": "Strong Yield",
+  "cardType": "action",
+  "text": "Go again\nAt the beginning of your action phase, destroy this, then your next attack this turn gets +1{p}.",
+  "pitch": 3,
+  "cost": 1,
+  "defense": 2,
+  "subtypes": [
+   "earth",
+   "aura"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV025",
+  "name": "Winter's Bite",
+  "cardType": "action",
+  "text": "Target hero discards a card unless they pay {r}.\nGo again",
+  "pitch": 3,
+  "cost": 0,
+  "defense": 2,
+  "subtypes": [
+   "ice"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV026",
+  "name": "Amulet of Ice",
+  "cardType": "action",
+  "text": "Go again\nInstant - Destroy Amulet of Ice: Target hero discards a card unless they pay {r}{r}. Activate this ability only if you have Ice fused this turn.",
+  "pitch": 3,
+  "cost": 0,
+  "subtypes": [
+   "ice",
+   "item"
+  ],
+  "keywords": [
+   "Go again"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV027",
+  "name": "Exposed to the Elements",
+  "cardType": "instant",
+  "text": "Earth and/or Ice Fusion\nIf Exposed to the Elements was fused with an Earth card, put a -1{d} counter on target equipment.\nIf Exposed to the Elements was fused with an Ice card, destroy an equipment with 0{d} controlled by target hero unless they pay {r}{r}.",
+  "pitch": 3,
+  "cost": 2,
+  "subtypes": [
+   "elemental"
+  ],
+  "keywords": [
+   "Earth and/or Ice Fusion"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV028",
+  "name": "Embodiment of Earth",
+  "cardType": "token",
+  "text": "'Non-attack' action cards you control have +1{d} while defending.\nAt the beginning of your action phase, destroy Embodiment of Earth.",
+  "subtypes": [
+   "elemental",
+   "aura"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV029",
+  "name": "Frostbite",
+  "cardType": "token",
+  "text": "Cards and abilities cost you an additional {r} to play or activate.\nAt the beginning of your end phase or when you play a card or activate an ability, destroy Frostbite.",
+  "subtypes": [
+   "elemental",
+   "aura"
+  ],
+  "set": "AJV"
+ },
+ {
+  "id": "AJV030",
+  "name": "Seismic Surge",
+  "cardType": "token",
+  "text": "At the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn costs {r} less to play.",
+  "classes": [
+   "guardian"
+  ],
+  "subtypes": [
+   "aura"
+  ],
+  "set": "AJV"
+ }
+]
