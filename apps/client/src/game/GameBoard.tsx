@@ -5,7 +5,11 @@ import { cardData } from "@fyendal/cards/client";
 import { useStore } from "../store.js";
 import { CARD_PREVIEW_HEIGHT, CARD_PREVIEW_WIDTH, CardBack, CardFace } from "./Card.js";
 import { ChainFloat } from "./ChainFloat.js";
-import { EndTurnPassToast } from "./EndTurnPassToast.js";
+import {
+  EndTurnPassToast,
+  OpponentTurnSummaryToast,
+  previousOpponentTurnSummary,
+} from "./EndTurnPassToast.js";
 import { StatusFloat } from "./StatusFloat.js";
 import {
   ChainPriorityStatus,
@@ -285,6 +289,9 @@ export function GameBoard() {
     ? Math.max(0, resourcePayment.cost - me.resources - (me.chi ?? 0))
     : 0;
   const myTurn = view.activePlayer === seat;
+  const opponentTurnSummary = !spectating && !replaying && myTurn
+    ? previousOpponentTurnSummary(view.log, opp.heroName)
+    : null;
   const activeHeroName = view.players[view.activePlayer]?.heroName ?? "";
   const turnLabel = spectating
     ? `${activeHeroName}'s turn`
@@ -780,6 +787,9 @@ export function GameBoard() {
             {showEndTurnPassToast && !mobileFloatViewport
               ? <EndTurnPassToast placement="divider" />
               : null}
+            {opponentTurnSummary && !mobileFloatViewport
+              ? <OpponentTurnSummaryToast message={opponentTurnSummary} placement="divider" />
+              : null}
             {timingFloat}
             <div className="mat-divider-mini-dock" ref={setSplitLineMiniHost} />
           </div>
@@ -838,6 +848,9 @@ export function GameBoard() {
 
       {showEndTurnPassToast && mobileFloatViewport
         ? <EndTurnPassToast placement="mobile-hand" />
+        : null}
+      {opponentTurnSummary && mobileFloatViewport
+        ? <OpponentTurnSummaryToast message={opponentTurnSummary} placement="mobile-hand" />
         : null}
 
       {/* ── floating status window: life + remaining AP + pass.

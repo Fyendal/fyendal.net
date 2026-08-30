@@ -1182,6 +1182,37 @@ describe("cc prep room", () => {
     c.ws.close();
   });
 
+  it("matches a future-enabled player using a current-legal deck with the normal queue", async () => {
+    const { c: futureEnabled, deckId: futureEnabledDeck } = await authedClientWithCcDeck();
+    const { c: currentOnly, deckId: currentOnlyDeck } = await authedClientWithCcDeck();
+
+    futureEnabled.sendMsg({
+      type: "queue-join",
+      format: "cc",
+      deckId: futureEnabledDeck,
+      allowFutureCards: true,
+    });
+    await futureEnabled.next((message) => message.type === "queued");
+    currentOnly.sendMsg({ type: "queue-join", format: "cc", deckId: currentOnlyDeck });
+
+    const created = (await futureEnabled.next((message) => message.type === "room-created")) as Extract<
+      ServerMessage,
+      { type: "room-created" }
+    >;
+    const joined = (await currentOnly.next((message) => message.type === "joined")) as Extract<
+      ServerMessage,
+      { type: "joined" }
+    >;
+    expect(joined.code).toBe(created.code);
+    expect((await db.query(
+      "SELECT allow_future_cards FROM rooms WHERE code = $1",
+      [created.code],
+    )).rows).toEqual([{ allow_future_cards: false }]);
+
+    futureEnabled.ws.close();
+    currentOnly.ws.close();
+  });
+
   it("pairs into a prep room; die roll, first-pick and ready-up start the game", async () => {
     const { c: a, deckId: aDeck } = await authedClientWithCcDeck();
     const { c: b, deckId: bDeck } = await authedClientWithCcDeck();

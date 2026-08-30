@@ -173,6 +173,46 @@ describe("Bravo policy", () => {
     expect(intent.instanceIds).not.toContain(attack.instanceId);
   });
 
+  it("blocks Static Shock for three instead of saving that card to pitch for AB1", () => {
+    const state = createGame({
+      decklists: [bravoDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9606,
+      startPlayer: 1,
+    });
+    replaceHand(state, 0, ["SBR022", "SBR023", "SBR024", "MPG047"]);
+    const view = projectStateFor(state, 0);
+    const blocker = view.players[0].hand[1]!;
+    expect(blocker.defense ?? cardData[blocker.cardId]?.defense).toBe(3);
+    view.phase = "defend";
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "defend", prompt: "Choose defenders" };
+    view.chain = [{
+      attackingCard: { instanceId: 96_061, cardId: "SBA022", owner: 1 },
+      defendingCards: [],
+      attackValue: 4,
+      defenseValue: 0,
+      onHitEffects: [{
+        sourceCardId: "SBA022",
+        text: "When this hits, deal 1 arcane damage.",
+        impact: { damage: 1 },
+      }],
+      damage: 4,
+      resolved: false,
+      reactions: [],
+    }];
+    const legal: GameIntent[] = [
+      { kind: "defend", instanceIds: [] },
+      { kind: "stage-defenders", instanceIds: [blocker.instanceId] },
+    ];
+
+    expect(chooseBravoIntent({ seat: 0, view, legal, cards: cardData })).toEqual({
+      kind: "stage-defenders",
+      instanceIds: [blocker.instanceId],
+    });
+  });
+
   it("uses Pummel when +4 secures a crush hit", () => {
     const state = createGame({
       decklists: [bravoDeck(), decklists.dorinthea],

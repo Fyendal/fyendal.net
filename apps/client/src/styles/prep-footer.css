@@ -256,6 +256,8 @@
   box-shadow: 0 8px 20px #0008;
   clip-path: none;
   transition: transform 0.08s ease-out, filter 0.08s ease-out;
+  content-visibility: auto;
+  contain-intrinsic-inline-size: 118px;
 }
 .prep-stack-button:not([aria-disabled="true"]):hover,
 .prep-stack-button:not([aria-disabled="true"]):focus-visible {

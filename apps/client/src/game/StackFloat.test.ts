@@ -5,6 +5,7 @@ import {
   StackFloat,
   stackActivityRevision,
   stackActivityShouldReveal,
+  stackLayerLabel,
 } from "./StackFloat.js";
 
 describe("stack popup visibility", () => {
@@ -41,6 +42,12 @@ describe("stack popup visibility", () => {
 });
 
 describe("stack context", () => {
+  it("presents Heave as an unresolved opportunity", () => {
+    expect(stackLayerLabel("Heave 2")).toBe("Heave 2 opportunity");
+    expect(stackLayerLabel("Destroy Runechant: 1 arcane damage"))
+      .toBe("Destroy Runechant: 1 arcane damage");
+  });
+
   it("shows which combat step created the stack", () => {
     const html = renderToStaticMarkup(createElement(StackFloat, {
       layers: [{ card: null, seat: 0, label: "On hit", optional: false }],

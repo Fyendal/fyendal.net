@@ -29,11 +29,18 @@ export function stackActivityShouldReveal(previous: string, current: string): bo
   return current !== "" && current !== previous;
 }
 
+/** Heave layers represent an opportunity that has not been paid for yet. The
+ * shorter engine label sounded like the card had already been heaved, which
+ * made a later, ordinary face-down arsenal choice look like a rules error. */
+export function stackLayerLabel(label: string): string {
+  return /^Heave \d+$/.test(label) ? `${label} opportunity` : label;
+}
+
 /** Floating stack window: played cards and triggered/activated ability layers
  *  awaiting resolution (index 0 resolves first and appears rightmost). An
  *  attack still on the stack renders as the bottom/leftmost layer — its combat
- *  chain link only starts once the attack resolves. Defaults center-left,
- *  mirroring the life float; draggable vertically only. */
+ *  chain link only starts once the attack resolves. Defaults to the board's
+ *  central game-state axis; draggable vertically only. */
 export function StackFloat({
   layers,
   attack,
@@ -131,7 +138,7 @@ export function StackFloat({
               ) : null}
               {!bloodDebt && !lessGuidance ? (
                 <div className="stack-label">
-                  {l.label}
+                  {stackLayerLabel(l.label)}
                   {l.optional && <span className="muted"> (may)</span>}
                 </div>
               ) : null}
