@@ -316,7 +316,9 @@ describe("motion geometry", () => {
       cards: [["0:pitch:7", destination]],
     }));
 
+    expect(reduced.reducedMotion).toBe(true);
     expect(reduced.flights).toEqual([]);
+    expect(reduced.pulses.every((pulse) => pulse.delayMs === 0)).toBe(true);
     expect(reduced.pulses).toContainEqual(expect.objectContaining({ rect: destination }));
   });
 
@@ -384,7 +386,10 @@ describe("motion geometry", () => {
 
   it("measures card and zone attributes in one read phase", () => {
     const cardElement = {
-      dataset: { motionCard: "0:hand:7" },
+      dataset: {
+        motionCard: "0:board:7",
+        motionCardAliases: "0:board:8 0:board:9",
+      },
       getBoundingClientRect: () => rect(10, 20),
     } as unknown as HTMLElement;
     const zoneElement = {
@@ -399,8 +404,10 @@ describe("motion geometry", () => {
 
     const measured = measureMotionAnchors(root);
 
-    expect(measured.snapshot.cards.get("0:hand:7")).toEqual(rect(10, 20));
+    expect(measured.snapshot.cards.get("0:board:7")).toEqual(rect(10, 20));
+    expect(measured.snapshot.cards.get("0:board:8")).toEqual(rect(10, 20));
+    expect(measured.snapshot.cards.get("0:board:9")).toEqual(rect(10, 20));
     expect(measured.snapshot.zones.get("0:hand")).toEqual(rect(0, 0, 600, 220));
-    expect(measured.cardElements.get("0:hand:7")).toBe(cardElement);
+    expect(measured.cardElements.get("0:board:8")).toBe(cardElement);
   });
 });

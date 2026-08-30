@@ -240,10 +240,16 @@ export function PlayerHalf({
                 key={group.card.instanceId}
                 className={`board-card-stack${group.card.tapped ? " board-card-stack-tapped" : ""}`}
                 data-cardid={group.card.cardId}
+                data-motion-card={motionPresentationKey(
+                  { kind: "board", seat: player.seat },
+                  group.card.instanceId,
+                )}
+                data-motion-card-aliases={group.instanceIds.slice(1).map((instanceId) => (
+                  motionPresentationKey({ kind: "board", seat: player.seat }, instanceId)
+                )).join(" ") || undefined}
               >
                 <EquipmentStack
                   card={group.card}
-                  motionLocation={{ kind: "board", seat: player.seat }}
                   highlighted={group.activatable}
                   selected={mine && interaction.selection.kind === "activate" &&
                     interaction.selection.sourceInstanceId === group.card.instanceId}

@@ -69,6 +69,7 @@ export interface GameMotionBatch {
   connectors: MotionConnector[];
   pulses: MotionPulse[];
   durationMs: number;
+  reducedMotion?: true;
 }
 
 function motionRect(element: Element): MotionRect | null {
@@ -91,11 +92,18 @@ export function measureMotionAnchors(root: ParentNode): MeasuredMotionAnchors {
   const cardElements = new Map<string, HTMLElement>();
   for (const element of root.querySelectorAll<HTMLElement>("[data-motion-card]")) {
     const key = element.dataset.motionCard;
-    if (!key || cards.has(key)) continue;
+    if (!key) continue;
     const rect = motionRect(element);
     if (!rect) continue;
-    cards.set(key, rect);
-    cardElements.set(key, element);
+    const keys = [
+      key,
+      ...(element.dataset.motionCardAliases?.split(/\s+/).filter(Boolean) ?? []),
+    ];
+    for (const presentationKey of keys) {
+      if (cards.has(presentationKey)) continue;
+      cards.set(presentationKey, rect);
+      cardElements.set(presentationKey, element);
+    }
   }
   for (const element of root.querySelectorAll<HTMLElement>("[data-motion-zone]")) {
     const key = element.dataset.motionZone;
@@ -315,7 +323,7 @@ export function reducedMotionBatch(
   batch: GameMotionBatch,
   current: MotionAnchorSnapshot,
 ): GameMotionBatch {
-  const pulses = [...batch.pulses];
+  const pulses = batch.pulses.map((pulse) => ({ ...pulse, delayMs: 0 }));
   const seen = new Set(pulses.map((pulse) => (
     `${pulse.rect.left}:${pulse.rect.top}:${pulse.rect.width}:${pulse.rect.height}`
   )));
@@ -351,5 +359,6 @@ export function reducedMotionBatch(
     connectors: [],
     pulses,
     durationMs: MOTION_PULSE_MS,
+    reducedMotion: true,
   };
 }

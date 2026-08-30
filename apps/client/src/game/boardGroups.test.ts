@@ -30,7 +30,11 @@ describe("board card grouping", () => {
     ]);
 
     expect(groups).toHaveLength(1);
-    expect(groups[0]).toMatchObject({ count: 2, card: { instanceId: 1 } });
+    expect(groups[0]).toMatchObject({
+      count: 2,
+      card: { instanceId: 1 },
+      instanceIds: [1, 2],
+    });
   });
 
   it("groups functionally equivalent token printings with different art", () => {

@@ -218,14 +218,12 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .game-motion-flight { display: none; }
-  .game-motion-connector { display: none; }
-  .game-motion-pulse { animation-name: game-motion-pulse-reduced; }
+.game-motion-layer-reduced .game-motion-pulse {
+  animation-name: game-motion-pulse-reduced;
+}
 
-  @keyframes game-motion-pulse-reduced {
-    from { opacity: 0; }
-    30% { opacity: 1; }
-    to { opacity: 0; }
-  }
+@keyframes game-motion-pulse-reduced {
+  from { opacity: 0; }
+  30% { opacity: 1; }
+  to { opacity: 0; }
 }

@@ -176,6 +176,14 @@
   border-radius: 4px;
   background: #120d08;
 }
+.settings-motion-segmented {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.settings-motion-row {
+  align-items: stretch;
+  flex-direction: column;
+  gap: 7px;
+}
 .settings-segmented button {
   min-width: 100px;
   min-height: 32px;
@@ -186,6 +194,9 @@
   clip-path: none;
   color: #b9aa92;
   font-size: 13px;
+}
+.settings-segmented.settings-motion-segmented button {
+  min-width: 0;
 }
 .settings-segmented button:hover {
   border-color: #5a4426;
@@ -225,7 +236,7 @@
   content: attr(data-tooltip);
   position: absolute;
   bottom: calc(100% + 8px);
-  left: 50%;
+  left: 0;
   z-index: 20;
   width: min(230px, calc(100vw - 80px));
   padding: 8px 10px;
@@ -240,12 +251,12 @@
   white-space: normal;
   opacity: 0;
   pointer-events: none;
-  transform: translate(-50%, 2px);
+  transform: translate(0, 2px);
   transition: opacity 100ms ease, transform 100ms ease;
 }
 .settings-info-tooltip:hover::after {
   opacity: 1;
-  transform: translate(-50%, 0);
+  transform: translate(0, 0);
 }
 .settings-options { display: flex; gap: 7px; }
 .settings-options button { padding: 6px 12px; }
@@ -693,4 +704,3 @@
   height: 18px;
   fill: currentColor;
 }
-

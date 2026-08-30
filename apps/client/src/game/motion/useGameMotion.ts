@@ -8,6 +8,7 @@ import {
 } from "react";
 import type { GameView } from "@fyendal/shared";
 import type { ViewUpdate } from "../../store/types.js";
+import type { MotionPreference } from "../../storage.js";
 import { classifyViewUpdate } from "./classifyViewUpdate.js";
 import { detectGameMotionEvents } from "./detectMotionEvents.js";
 import {
@@ -23,54 +24,72 @@ import {
   type GameMotionBatch,
   type MotionAnchorSnapshot,
 } from "./motionGeometry.js";
+import { useMotionPreference } from "./useMotionPreference.js";
 
 const EMPTY_ANCHORS: MotionAnchorSnapshot = {
   cards: new Map(),
   zones: new Map(),
 };
 
-function systemPrefersReducedMotion(): boolean {
-  return typeof window !== "undefined"
-    && typeof window.matchMedia === "function"
-    && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+type MaskedElementsByBatch = Map<number, Map<string, HTMLElement>>;
+
+function elementIsMasked(
+  maskedElements: MaskedElementsByBatch,
+  target: HTMLElement,
+): boolean {
+  for (const batchMasks of maskedElements.values()) {
+    for (const element of batchMasks.values()) {
+      if (element === target) return true;
+    }
+  }
+  return false;
 }
 
 export function useGameMotion({
   rootRef,
   view,
   viewUpdate,
+  motionPreference,
 }: {
   rootRef: RefObject<HTMLElement | null>;
   view: GameView | null;
   viewUpdate: ViewUpdate;
+  motionPreference: MotionPreference;
 }): {
   batch: GameMotionBatch | null;
   arriveFlight: (batchId: number, destinationPresentationKey?: string) => void;
   completeBatch: (batchId: number) => void;
 } {
+  const reduceMotion = useMotionPreference(motionPreference);
   const [batch, setBatch] = useState<GameMotionBatch | null>(null);
   const previousViewRef = useRef<GameView | null>(null);
   const previousAnchorsRef = useRef<MotionAnchorSnapshot>(EMPTY_ANCHORS);
   const processedSequenceRef = useRef<number | null>(null);
+  const reduceMotionRef = useRef(reduceMotion);
   const batchQueueRef = useRef<MotionBatchQueue>(EMPTY_MOTION_BATCH_QUEUE);
-  const maskedElementsRef = useRef(new Map<number, Map<string, HTMLElement>>());
+  const maskedElementsRef = useRef<MaskedElementsByBatch>(new Map());
 
   const releaseBatchMasks = useCallback((batchId: number) => {
     const batchMasks = maskedElementsRef.current.get(batchId);
     if (!batchMasks) return;
     maskedElementsRef.current.delete(batchId);
     for (const element of batchMasks.values()) {
-      const stillMasked = [...maskedElementsRef.current.values()].some((masks) => (
-        [...masks.values()].includes(element)
-      ));
-      if (!stillMasked) element.classList.remove("game-motion-destination-hidden");
+      if (!elementIsMasked(maskedElementsRef.current, element)) {
+        element.classList.remove("game-motion-destination-hidden");
+      }
     }
   }, []);
 
   const clearMaskedElements = useCallback(() => {
-    for (const batchId of maskedElementsRef.current.keys()) releaseBatchMasks(batchId);
+    const elements = new Set<HTMLElement>();
+    for (const batchMasks of maskedElementsRef.current.values()) {
+      for (const element of batchMasks.values()) elements.add(element);
+    }
     maskedElementsRef.current.clear();
-  }, [releaseBatchMasks]);
+    for (const element of elements) {
+      element.classList.remove("game-motion-destination-hidden");
+    }
+  }, []);
 
   const cancelMotionQueue = useCallback(() => {
     batchQueueRef.current = EMPTY_MOTION_BATCH_QUEUE;
@@ -95,17 +114,17 @@ export function useGameMotion({
       || destinationPresentationKey === undefined
     ) return;
     const batchMasks = maskedElementsRef.current.get(batchId);
-    const element = batchMasks?.get(destinationPresentationKey);
+    if (!batchMasks) return;
+    const element = batchMasks.get(destinationPresentationKey);
     if (!element) return;
-    batchMasks?.delete(destinationPresentationKey);
-    if (batchMasks?.size === 0) maskedElementsRef.current.delete(batchId);
+    batchMasks.delete(destinationPresentationKey);
+    if (batchMasks.size === 0) maskedElementsRef.current.delete(batchId);
     // Hand off from the overlay to the real destination on this flight's own
     // arrival. Waiting for a later staggered card is what caused the visible
     // empty-frame blink in pitch and combat-chain batches.
-    const stillMasked = [...maskedElementsRef.current.values()].some((masks) => (
-      [...masks.values()].includes(element)
-    ));
-    if (!stillMasked) element.classList.remove("game-motion-destination-hidden");
+    if (!elementIsMasked(maskedElementsRef.current, element)) {
+      element.classList.remove("game-motion-destination-hidden");
+    }
   }, []);
 
   // Run after every commit: view-independent layout changes (hand collapse,
@@ -124,6 +143,10 @@ export function useGameMotion({
     // Read every current rect first. Class writes happen only after the batch
     // has been completely resolved, avoiding read/write layout interleaving.
     const measured = measureMotionAnchors(root);
+    if (reduceMotionRef.current !== reduceMotion) {
+      reduceMotionRef.current = reduceMotion;
+      cancelMotionQueue();
+    }
     if (processedSequenceRef.current === viewUpdate.sequence) {
       previousViewRef.current = view;
       previousAnchorsRef.current = measured.snapshot;
@@ -141,7 +164,7 @@ export function useGameMotion({
         measured.snapshot,
         viewUpdate.sequence,
       );
-      if (nextBatch && systemPrefersReducedMotion()) {
+      if (nextBatch && reduceMotion) {
         nextBatch = reducedMotionBatch(nextBatch, measured.snapshot);
       }
     }
@@ -162,9 +185,15 @@ export function useGameMotion({
       if (batchMasks.size > 0) maskedElementsRef.current.set(nextBatch.id, batchMasks);
     }
     if (nextBatch) {
-      const nextQueue = enqueueMotionBatch(batchQueueRef.current, nextBatch);
-      batchQueueRef.current = nextQueue;
-      setBatch(nextQueue.active);
+      const previousActive = batchQueueRef.current.active;
+      const enqueueResult = enqueueMotionBatch(batchQueueRef.current, nextBatch);
+      for (const discardedBatchId of enqueueResult.discardedBatchIds) {
+        releaseBatchMasks(discardedBatchId);
+      }
+      batchQueueRef.current = enqueueResult.queue;
+      if (enqueueResult.queue.active !== previousActive) {
+        setBatch(enqueueResult.queue.active);
+      }
     }
     previousViewRef.current = view;
     previousAnchorsRef.current = measured.snapshot;
