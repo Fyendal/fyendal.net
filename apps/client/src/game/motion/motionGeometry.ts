@@ -111,6 +111,15 @@ export function measureMotionAnchors(root: ParentNode): MeasuredMotionAnchors {
     const rect = motionRect(element);
     if (rect) zones.set(key, rect);
   }
+  // Count-only zones such as the opponent's hidden hand still render real
+  // card backs. Prefer that card-sized endpoint over the broad container so a
+  // draw does not appear to land in the neighboring mirrored arsenal zone.
+  for (const element of root.querySelectorAll<HTMLElement>("[data-motion-zone-anchor]")) {
+    const key = element.dataset.motionZoneAnchor;
+    if (!key) continue;
+    const rect = motionRect(element);
+    if (rect) zones.set(key, rect);
+  }
   return { snapshot: { cards, zones }, cardElements };
 }
 

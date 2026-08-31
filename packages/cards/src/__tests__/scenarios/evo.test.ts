@@ -60,7 +60,7 @@ describe("EVO — registration and core mechanics", () => {
     const intent = legalIntents(s.state, 0).find((candidate) =>
       candidate.kind === "play-from-zone" && candidate.zone === "deck" && candidate.instanceId === top.instanceId,
     );
-    expect(intent).toBeDefined();
+    expect(intent).toMatchObject({ asInstant: true });
     s.doRaw(intent!).settle().expectInZone(0, "fuel injector|3", "board");
   });
 

@@ -71,6 +71,10 @@ export const aio: Record<string, CardScript> = {
       return zone === "deck" && ctx.getFlag("player", "dashTopItemPlayedThisTurn") !== true &&
         isItem(ctx, card) && isMech(ctx, card) && (data(ctx, card).cost ?? 0) <= 1;
     },
+    requiresFriendlyCardPlayAsInstant(ctx, card, zone) {
+      return zone === "deck" && ctx.getFlag("player", "dashTopItemPlayedThisTurn") !== true &&
+        isItem(ctx, card) && isMech(ctx, card) && (data(ctx, card).cost ?? 0) <= 1;
+    },
     onFriendlyPlay(ctx, played, from) {
       if (from === "deck" && isItem(ctx, played) && isMech(ctx, played) && (data(ctx, played).cost ?? 0) <= 1) {
         ctx.setFlag("player", "dashTopItemPlayedThisTurn", true);

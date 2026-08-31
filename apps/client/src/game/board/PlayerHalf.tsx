@@ -8,6 +8,7 @@ import { HeroEmote } from "../HeroEmote.js";
 import { PitchStack } from "../PitchStack.js";
 import {
   motionLocationKey,
+  opaqueMotionPresentationKey,
   motionPresentationKey,
   type MotionLocation,
 } from "../motion/motionTypes.js";
@@ -400,7 +401,13 @@ export function PlayerHalf({
             )}
           />
         ) : player.arsenalCount > 0 ? (
-          <CardBack label="Arsenal" />
+          <CardBack
+            label="Arsenal"
+            motionKey={opaqueMotionPresentationKey({
+              kind: "arsenal",
+              seat: player.seat,
+            })}
+          />
         ) : undefined}
       </MatZone>
       {pileZone(

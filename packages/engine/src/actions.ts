@@ -2,7 +2,7 @@ import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { CardData, MeldSide, PlayableZone } from "@fyendal/shared";
 import type { CardInstance, PlayerState } from "./state.js";
-import { activateFromHandInstantAbility } from "./activation.js";
+import { activateFromHandAbility } from "./activation.js";
 import {
   activatedAbilitiesSuppressed,
   cardHasType,
@@ -63,7 +63,7 @@ import { abilityResourceCost, actionAbilityRestrictedByModifier, payActivatedAbi
 import { consumeNextActionGoAgain, noteActionPlayedOrActivated } from "./cardLifecycle.js";
 import { answerArcaneBarrier } from "./damageResolution.js";
 import { answerDieRollReplacement } from "./dieRoll.js";
-import { cardPlayRestrictedByModifier, cardPlayCost, cardPlayReductionForSeat, payAlternativePlayCost, preparePlayTarget, canPlayAsInstant, canRuneGate, consumeAttackCostReductions, mayPlayFromArsenal, mayPlayFromZone } from "./playRules.js";
+import { cardPlayRestrictedByModifier, cardPlayCost, cardPlayReductionForSeat, payAlternativePlayCost, preparePlayTarget, canPlayAsInstant, canRuneGate, consumeAttackCostReductions, mayPlayFromArsenal, mayPlayFromZone, playFromZoneRequiresInstant } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost, scriptedPaymentOptions } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { actionLimitReached, controlsBow, firstAttackExtraCost, consumeFirstAttackExtraCost, isFrozen } from "./ruleQueries.js";
@@ -141,6 +141,14 @@ export function playCard(
   const instantPermission = canPlayAsInstant(state, runtime, seat, card, undefined, from);
   if (asInstant === true && (selectedMeldAction || (data.cardType !== "instant" && !instantPermission))) {
     return `${nameOf(state, card.cardId)} cannot be played as an instant`;
+  }
+  if (
+    from !== "hand"
+    && from !== "arsenal"
+    && playFromZoneRequiresInstant(state, runtime, card, from, seat)
+    && asInstant !== true
+  ) {
+    return `${nameOf(state, card.cardId)} must be played as an instant`;
   }
   // The method is announced explicitly. An absent method remains compatible
   // with old recordings by choosing the instant method only when the ordinary
@@ -503,7 +511,7 @@ export function activateAbility(
     (candidate) => candidate.instanceId === permanent.instanceId,
   );
   if (!permanent || (!isPermanentSource(player, permanent.instanceId) && !isBanishSource)) {
-    const result = activateFromHandInstantAbility(state, runtime, {
+    const result = activateFromHandAbility(state, runtime, {
       mode: "action",
       seat,
       sourceInstanceId,

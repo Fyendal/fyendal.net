@@ -7,10 +7,10 @@ import { heroSoulCards } from "./zoneQueries.js";
 import { abilityResourceCost, effectiveAbilityList, payActivatedAbilityCost, prepareActivatedDiscardCost, prepareActivatedEffectCardCosts } from "./abilityRules.js";
 import { pushAbilityLayer } from "./stackCore.js";
 
-/** Validate, pay for, and stack an instant ability activated from hand.
+/** Validate, pay for, and stack an ability activated from hand.
  * Action and priority-window callers share this flow; they remain responsible
  * for restoring the appropriate priority window after the layer is added. */
-export function activateFromHandInstantAbility(
+export function activateFromHandAbility(
   state: GameStateInternal,
   runtime: EngineRuntime,
   options: {
@@ -46,8 +46,15 @@ export function activateFromHandInstantAbility(
   if (!card || !ability?.fromHand || ability.isAttack) {
     return { status: "error", error: "source not found" };
   }
-  if ((ability.timing ?? "action") !== "instant") {
-    return { status: "error", error: "only usable as an instant" };
+  const timing = ability.timing ?? "action";
+  const validTiming = timing === "instant" || (
+    mode === "window" &&
+    timing === "attack-reaction" &&
+    link?.attacker === seat &&
+    state.pendingDecision?.kind === "attack-reaction"
+  );
+  if (!validTiming) {
+    return { status: "error", error: "ability is not usable in this window" };
   }
   const flagKey = activatedFlagKey(card.instanceId, abilityIndex);
   if (ability.oncePerTurn && player.flags[flagKey]) {

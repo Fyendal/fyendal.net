@@ -485,9 +485,27 @@ export function CardFace({
   );
 }
 
-export function CardBack({ count, label, onClick }: { count?: number; label: string; onClick?: () => void }) {
+export function CardBack({
+  count,
+  label,
+  motionKey,
+  motionZoneAnchor,
+  onClick,
+}: {
+  count?: number;
+  label: string;
+  motionKey?: string;
+  /** Optional card-sized endpoint for an otherwise broad motion zone. */
+  motionZoneAnchor?: string;
+  onClick?: () => void;
+}) {
   return (
-    <div className={`card card-zone card-back ${onClick ? "card-clickable" : ""}`} onClick={onClick}>
+    <div
+      className={`card card-zone card-back ${onClick ? "card-clickable" : ""}`}
+      data-motion-card={motionKey}
+      data-motion-zone-anchor={motionZoneAnchor}
+      onClick={onClick}
+    >
       <img
         className="c-backimg"
         src={CARD_BACK_IMAGE_URL}

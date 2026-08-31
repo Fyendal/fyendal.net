@@ -1,4 +1,3 @@
-import { useState } from "react";
 import type { CardView } from "@fyendal/shared";
 import { CardFace } from "../Card.js";
 import { shouldShowDecisionPass } from "../decisionPass.js";
@@ -13,6 +12,7 @@ import { BloodModeDecision } from "./BloodModeDecision.js";
 import { RevealedChoiceCards } from "./CardChoices.js";
 import { CardRef, cardAffiliation, DecisionPrompt } from "./DecisionShared.js";
 import type { PendingDecisionModel } from "./DecisionModels.js";
+import { NameChoiceAutocomplete } from "./NameChoiceAutocomplete.js";
 import { TriggerOrderDecision } from "./TriggerOrderDecision.js";
 
 export function PendingDecisionPanel({
@@ -40,7 +40,6 @@ export function PendingDecisionPanel({
     onCancelSkipArsenal,
     onSend,
   } = model;
-  const [chosenName, setChosenName] = useState("");
   if (!pd) return null;
   if (isMine && pd.kind === "defend" && defendPitchIds.size === 0) return null;
 
@@ -212,27 +211,10 @@ export function PendingDecisionPanel({
         </div>
       ) : null}
       {pd.kind === "choose-name" ? (
-        <form
-          className="decision-buttons"
-          onSubmit={(event) => {
-            event.preventDefault();
-            const name = chosenName.trim();
-            if (!name) return;
-            onSend({ kind: "choose", optionId: name });
-            setChosenName("");
-          }}
-        >
-          <input
-            aria-label="Card name"
-            autoComplete="off"
-            placeholder="Enter an exact card name"
-            value={chosenName}
-            onChange={(event) => setChosenName(event.target.value)}
-          />
-          <button className="btn-primary" disabled={!chosenName.trim()} type="submit">
-            Choose name
-          </button>
-        </form>
+        <NameChoiceAutocomplete
+          key={`${pd.player}:${pd.prompt}`}
+          onChoose={(name) => onSend({ kind: "choose", optionId: name })}
+        />
       ) : null}
       <div className="decision-buttons">
         {(pd.kind === "optional-effect" || pd.kind === "choose-target" || pd.kind === "arsenal") &&

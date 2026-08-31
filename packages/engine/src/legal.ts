@@ -34,7 +34,7 @@ import { windowInstantPlays } from "./triggers.js";
 import { runechantSkipStep } from "./runechantSkip.js";
 import { controlledPermanents } from "./sourceQueries.js";
 import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestrictedByModifier, activatedAbilityAvailable, activatedEffectCardCostOptions, canPayActivatedEffectCardCosts, discardCostOptions, effectiveAbilityList } from "./abilityRules.js";
-import { alternativePlayCostOptions, canPlayAsInstant, canRuneGate, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, cardsPlayableFromArsenal, cardsPlayableFromZone, playTargetOptions } from "./playRules.js";
+import { alternativePlayCostOptions, canPlayAsInstant, canRuneGate, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, cardsPlayableFromArsenal, cardsPlayableFromZone, playFromZoneRequiresInstant, playTargetOptions } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost, pitchProhibitedByEffect, pitchValueOfInstance } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { actionLimitReached, controlsBow, firstAttackExtraCost, isFrozen, opposingInstantsProhibited } from "./ruleQueries.js";
@@ -259,6 +259,20 @@ function playIntentsWithPitches(
     );
 }
 
+function markInstantPlayMethod(
+  candidates: GameIntent[],
+  enabled: boolean,
+): GameIntent[] {
+  if (!enabled) return candidates;
+  return candidates.map((candidate) => (
+    candidate.kind === "play-card"
+    || candidate.kind === "play-from-arsenal"
+    || candidate.kind === "play-from-zone"
+      ? { ...candidate, asInstant: true }
+      : candidate
+  ));
+}
+
 function playIntentsForCard(
   state: GameStateInternal,
   runtime: EngineRuntime,
@@ -300,6 +314,11 @@ function playIntentsForCard(
       ) return [];
       return [{ ...intent, asInstant: true }];
     });
+    if (
+      from !== "hand"
+      && from !== "arsenal"
+      && playFromZoneRequiresInstant(state, runtime, card, from, player.seat)
+    ) return instantIntents;
     return player.actionPoints > 0 ? [...intents, ...instantIntents] : instantIntents;
   };
   const deferVariablePayment = (intents: GameIntent[]): GameIntent[] => {
@@ -631,16 +650,22 @@ function windowAbilityIntents(
       }
     }
   }
-  // From-hand instant abilities (Amp): the card itself is discarded, while
-  // static taxes such as Frostbite may still require pitches from other cards.
+  // From-hand activated abilities: the card itself is discarded, while static
+  // taxes such as Frostbite may still require pitches from other cards.
   for (const card of player.hand) {
-    if (opposingInstantsProhibited(state, player.seat)) continue;
     if (card.faceDown) continue;
     const abilities = effectiveAbilityList(state, player.seat, card);
     for (let ai = 0; ai < abilities.length; ai++) {
       const ability = abilities[ai]!;
       if (!ability.fromHand || ability.isAttack) continue;
-      if ((ability.timing ?? "action") !== "instant") continue;
+      const timing = ability.timing ?? "action";
+      const usableNow = timing === "instant"
+        ? !opposingInstantsProhibited(state, player.seat)
+        : timing === "attack-reaction" &&
+          attackReactionWindow &&
+          isAttacker &&
+          windowKind === "attack-reaction";
+      if (!usableNow) continue;
       if (!activatedAbilityAvailable(player, card.instanceId, ai, ability)) continue;
       if (ability.canActivate && !ability.canActivate(runtime.makeCtx(state, player.seat, card, link))) {
         continue;
@@ -772,9 +797,11 @@ function reactionIntents(
       const cardTargets: Array<number | undefined> = script?.playTargetOptions
         ? playTargetOptions(state, runtime, player.seat, card, link, fromArsenal)
         : [undefined];
+      const markInstantMethod = (candidates: GameIntent[]): GameIntent[] =>
+        markInstantPlayMethod(candidates, data.cardType === "action" && asInstant);
       for (const meldSide of meldSides) {
         for (const targetCardInstanceId of cardTargets) {
-          const regularIntents = playIntentsWithPitches(
+          const regularIntents = markInstantMethod(playIntentsWithPitches(
             state,
             player,
             card,
@@ -794,7 +821,7 @@ function reactionIntents(
             undefined,
             targetCardInstanceId,
             includeUnaffordable,
-          );
+          ));
           if (script?.variablePlayCost) {
             const first = regularIntents[0];
             if (first && (
@@ -806,7 +833,7 @@ function reactionIntents(
             intents.push(...regularIntents);
           }
           for (const alternativeCostCardInstanceIds of alternativeCosts) {
-            intents.push(...playIntentsWithPitches(
+            intents.push(...markInstantMethod(playIntentsWithPitches(
               state,
               player,
               card,
@@ -823,7 +850,7 @@ function reactionIntents(
               alternativeCostCardInstanceIds,
               targetCardInstanceId,
               includeUnaffordable,
-            ));
+            )));
           }
         }
       }
@@ -1133,6 +1160,11 @@ function enumerateIntents(
           includeUnaffordable,
         )) {
           const script = scriptOf(state, card.cardId, card);
+          const markInstantMethod = (candidates: GameIntent[]): GameIntent[] =>
+            markInstantPlayMethod(
+              candidates,
+              instanceDataOf(state, card).cardType === "action",
+            );
           const meldSides: Array<MeldSide | undefined> = script?.meld
             ? (["left", "right", "both"] as MeldSide[]).filter(
                 (side) => !meldSideHasType(state, card, side, "action"),
@@ -1144,7 +1176,7 @@ function enumerateIntents(
             : [undefined];
           for (const meldSide of meldSides) {
             for (const targetCardInstanceId of cardTargets) {
-              const regularIntents = playIntentsWithPitches(
+              const regularIntents = markInstantMethod(playIntentsWithPitches(
                 state,
                 player,
                 card,
@@ -1165,7 +1197,7 @@ function enumerateIntents(
                 undefined,
                 targetCardInstanceId,
                 includeUnaffordable,
-              );
+              ));
               if (script?.variablePlayCost) {
                 const first = regularIntents[0];
                 if (first && (
@@ -1177,7 +1209,7 @@ function enumerateIntents(
                 intentsOut.push(...regularIntents);
               }
               for (const alternativeCostCardInstanceIds of alternativeCosts) {
-                intentsOut.push(...playIntentsWithPitches(
+                intentsOut.push(...markInstantMethod(playIntentsWithPitches(
                   state,
                   player,
                   card,
@@ -1195,7 +1227,7 @@ function enumerateIntents(
                   alternativeCostCardInstanceIds,
                   targetCardInstanceId,
                   includeUnaffordable,
-                ));
+                )));
               }
             }
           }

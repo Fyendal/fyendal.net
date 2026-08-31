@@ -789,6 +789,13 @@ export interface CardScript {
     card: DeepReadonly<CardInstance>,
     zone: PlayableZone,
   ): boolean;
+  /** A play-from-zone permission supplied by this source permits the matching
+   * card only through the instant play method. */
+  requiresFriendlyCardPlayAsInstant?(
+    ctx: ScriptCtx,
+    card: DeepReadonly<CardInstance>,
+    zone: PlayableZone,
+  ): boolean;
   modifyFriendlyCardPlayCost?(
     ctx: ScriptCtx,
     card: DeepReadonly<CardInstance>,

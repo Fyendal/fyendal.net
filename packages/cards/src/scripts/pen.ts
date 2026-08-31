@@ -435,7 +435,14 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     onChoose(ctx, hook, option) {
       if (hook !== "pen-bottle-name") return;
       const chosen = ctx.state.chain.flatMap((link) => [link.attackingCard, ...link.defendingCards, ...link.defendingEquipment, ...link.reactions]).find((card) => card.instanceId === Number(option));
-      if (chosen) ctx.grantCardName(ctx.self.instanceId, data(ctx, chosen).name);
+      if (!chosen) return;
+      for (const name of ctx.cardNames(chosen)) {
+        const canonicalCardId = ctx.cardIdsNamed(name)[0];
+        ctx.grantCardName(
+          ctx.self.instanceId,
+          canonicalCardId ? ctx.cardData(canonicalCardId).name : name,
+        );
+      }
     },
   })),
   ...pitches("become the cup", () => ({

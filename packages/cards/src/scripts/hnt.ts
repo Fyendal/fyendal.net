@@ -714,7 +714,18 @@ Object.assign(hnt, {
   "thick hide hunter|2": { onAttackDeclared: (ctx) => ctx.discardRandom(ctx.seat, 1), onDefend: (ctx) => ctx.discardRandom(ctx.seat, 1) },
   "tremorshield sabatons|0": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true, onActivate(ctx) { ctx.preventNextArcaneDamage(ctx.seat, ctx.getPlayerFlag(ctx.seat, "createdName:seismic surge") === true ? 2 : 1); } } },
   "roiling fissure|3": { variablePlayCost: { base: 1, counterKey: "fissureX", prompt: "Choose X" }, onPlay(ctx) { const x = ctx.getCounter("fissureX"); const aura = ctx.state.players.flatMap((player) => player.board).find((card) => dataTags(ctx, card).includes("aura") && (ctx.cardData(card.cardId).cost ?? 0) <= x); if (aura) ctx.destroyPermanent(aura.instanceId); } },
-  "retrace the past|3": { onAttackDeclared(ctx) { if (previousAttackNameContains(ctx, "gustwave")) { ctx.addCardTempPower(ctx.self.instanceId, 2); ctx.grantGoAgain(); } } },
+  "retrace the past|3": {
+    onAttackDeclared(ctx) {
+      if (!previousAttackNameContains(ctx, "gustwave")) return;
+      ctx.requestNameChoice("retrace-name", `${ctx.data.name}: name a card`);
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "retrace-name") return;
+      ctx.grantCardName(ctx.self.instanceId, option);
+      ctx.addCardTempPower(ctx.self.instanceId, 2);
+      ctx.grantGoAgain();
+    },
+  },
   "misfire dampener|0": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true, onActivate(ctx) { ctx.preventNextArcaneDamage(ctx.seat, ctx.getPlayerFlag(ctx.seat, "boostedThisTurn") === true ? 2 : 1); } } },
   "null time zone|3": { prohibitsChosenName: true, onEnterArena(ctx) { ctx.setCounter("steam", 2); ctx.requestNameChoice("null-name", "Name a card"); }, onChoose(ctx, hook, option) { if (hook === "null-name") ctx.setChosenName(option); }, triggers: [{ event: "start-of-turn", label: "Remove a steam counter", effect(ctx) { if (ctx.getCounter("steam") <= 0) ctx.destroySelf(); else ctx.setCounter("steam", ctx.getCounter("steam") - 1); } }] },
   "enchanted quiver|0": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true, onActivate(ctx) { const arrow = ctx.player(ctx.seat).arsenal.some((card) => !card.faceDown && dataTags(ctx, card).includes("arrow")); ctx.preventNextArcaneDamage(ctx.seat, arrow ? 2 : 1); } } },

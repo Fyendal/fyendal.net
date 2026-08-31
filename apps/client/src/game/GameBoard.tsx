@@ -56,7 +56,11 @@ import { PlayerHalf } from "./board/PlayerHalf.js";
 import { PlayerHand } from "./board/PlayerHand.js";
 import { BoardOverlays, type BoardPreview } from "./board/BoardOverlays.js";
 import { optimisticCardPlayHiddenIds } from "./pendingCardPlay.js";
-import { motionLocationKey, motionPresentationKey } from "./motion/motionTypes.js";
+import {
+  motionLocationKey,
+  opaqueMotionPresentationKey,
+  motionPresentationKey,
+} from "./motion/motionTypes.js";
 import { GameMotionLayer } from "./motion/GameMotionLayer.js";
 import { useGameMotion } from "./motion/useGameMotion.js";
 import { useGameSounds } from "./sound/useGameSounds.js";
@@ -789,7 +793,17 @@ export function GameBoard() {
                 />
               ))
             : Array.from({ length: opp.handCount }, (_, i) => (
-                <CardBack key={i} label="" />
+                <CardBack
+                  key={i}
+                  label=""
+                  motionKey={opaqueMotionPresentationKey(
+                    { kind: "hand", seat: opp.seat },
+                    i,
+                  )}
+                  motionZoneAnchor={i === opp.handCount - 1
+                    ? motionLocationKey({ kind: "hand", seat: opp.seat })
+                    : undefined}
+                />
               ))}
           {opp.handCount === 0 && <span className="muted">opponent has no cards in hand</span>}
         </div>

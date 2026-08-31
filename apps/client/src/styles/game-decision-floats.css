@@ -20,6 +20,44 @@
 .decision-options { flex-direction: column; align-items: center; }
 .decision-options .decision-prompt { text-align: center; }
 .decision-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.decision-name-form { align-items: flex-start; flex-wrap: nowrap; }
+.decision-name-combobox {
+  position: relative;
+  width: min(360px, 62vw);
+}
+.decision-name-combobox > input { width: 100%; }
+.decision-name-suggestions {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  max-height: min(320px, 42vh);
+  overflow-y: auto;
+  border: 1px solid #806334;
+  border-radius: 3px;
+  background: #120c06;
+  box-shadow: 0 12px 24px #000b;
+}
+.decision-name-suggestions[hidden] { display: none; }
+.decision-name-suggestions button {
+  display: block;
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 12px;
+  clip-path: none;
+  border: 0;
+  border-bottom: 1px solid #4d3a2366;
+  border-radius: 0;
+  background: transparent;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: normal;
+}
+.decision-name-suggestions button:last-child { border-bottom: 0; }
+.decision-name-suggestions button:hover,
+.decision-name-suggestion-active { background: #3a2812 !important; color: #ffd479; }
 .trigger-order-list {
   display: flex;
   flex-direction: column;

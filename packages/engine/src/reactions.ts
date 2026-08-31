@@ -1,7 +1,7 @@
 import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { MeldSide, PlayableZone } from "@fyendal/shared";
-import { activateFromHandInstantAbility } from "./activation.js";
+import { activateFromHandAbility } from "./activation.js";
 import {
   activatedAbilitiesSuppressed,
   dataOf,
@@ -215,7 +215,7 @@ export function activateWindowAbility(
     (candidate) => candidate.instanceId === card.instanceId,
   );
   if (!card || (!isChainAttackCard && !isPermanentSource(player, card.instanceId) && !isGraveyardSource && !isBanishSource && !isArsenalSource)) {
-    const result = activateFromHandInstantAbility(state, runtime, {
+    const result = activateFromHandAbility(state, runtime, {
       mode: "window",
       seat,
       sourceInstanceId,

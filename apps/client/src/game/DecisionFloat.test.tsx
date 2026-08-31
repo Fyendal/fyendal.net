@@ -17,6 +17,11 @@ import {
   handCardPlayLabel,
 } from "./decision/DecisionShared.js";
 import {
+  cardNameEnterAction,
+  cardNameSuggestions,
+  NameChoiceAutocomplete,
+} from "./decision/NameChoiceAutocomplete.js";
+import {
   confirmTriggerOrderOnSpace,
   moveTriggerOrder,
   TriggerOrderDecision,
@@ -66,6 +71,38 @@ describe("announcement choice focus", () => {
 describe("hand card use labels", () => {
   it("identifies Shelter from the Storm's normal play as a defense reaction", () => {
     expect(handCardPlayLabel("HNT222")).toBe("Play as defense reaction");
+  });
+});
+
+describe("card-name autocomplete", () => {
+  it("deduplicates printings and ranks prefix matches before substring matches", () => {
+    const exact = cardNameSuggestions("Become the Bottle");
+    expect(exact.filter((name) => name === "Become the Bottle")).toEqual(["Become the Bottle"]);
+
+    const tiger = cardNameSuggestions("tiger", 20);
+    const prefixEnd = tiger.findIndex((name) => !name.toLowerCase().startsWith("tiger"));
+    expect(prefixEnd).toBeGreaterThan(0);
+    expect(tiger.slice(0, prefixEnd).every((name) => name.toLowerCase().startsWith("tiger")))
+      .toBe(true);
+    expect(tiger.slice(prefixEnd).some((name) => name === "Crouching Tiger")).toBe(true);
+    expect(cardNameSuggestions("a")).toHaveLength(8);
+  });
+
+  it("renders an accessible list-autocomplete combobox", () => {
+    const html = renderToStaticMarkup(createElement(NameChoiceAutocomplete, { onChoose() {} }));
+
+    expect(html).toContain('role="combobox"');
+    expect(html).toContain('aria-autocomplete="list"');
+    expect(html).toContain('aria-expanded="false"');
+    expect(html).toContain("Start typing a card name");
+  });
+
+  it("accepts the highlighted suggestion on Enter without submitting it", () => {
+    expect(cardNameEnterAction(true, ["Head Jab", "Hundred Winds"], 1)).toEqual({
+      kind: "accept-suggestion",
+      name: "Hundred Winds",
+    });
+    expect(cardNameEnterAction(false, ["Hundred Winds"], 0)).toEqual({ kind: "submit" });
   });
 });
 

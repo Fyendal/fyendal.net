@@ -158,6 +158,24 @@ describe("Armory Decks — AIO, AJV, and AST", () => {
       cardId: top.cardId,
     });
     expect(projectStateFor(g.state, 1).players[0]!.visibleDeckTop).toBeUndefined();
+    const topPlays = legalIntents(g.state, 0).filter((intent) =>
+      intent.kind === "play-from-zone"
+      && intent.zone === "deck"
+      && intent.instanceId === top.instanceId
+    );
+    expect(topPlays.length).toBeGreaterThan(0);
+    expect(topPlays.every((intent) =>
+      intent.kind === "play-from-zone" && intent.asInstant === true
+    )).toBe(true);
+    expect(applyIntent(g.state, 0, {
+      kind: "play-from-zone",
+      zone: "deck",
+      instanceId: top.instanceId,
+      pitchInstanceIds: [g.state.players[0]!.hand[0]!.instanceId],
+    })).toEqual({
+      ok: false,
+      error: "Cerebellum Processor must be played as an instant",
+    });
     g.play("cerebellum processor|3", {
       fromZone: "deck",
       asInstant: true,

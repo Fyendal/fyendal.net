@@ -599,6 +599,70 @@ describe("PEN — generalized rules interactions", () => {
       .expectAP(0, 1);
   });
 
+  it("Become the Bottle copies the name Retrace the Past gained", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: [
+            "surging strike|1",
+            "raging onslaught|3",
+            "whelming gustwave|1",
+            "retrace the past|3",
+            "become the bottle|1",
+          ],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.play("surging strike|1", { pitch: ["raging onslaught|3"] })
+      .blockWith()
+      .settle()
+      .play("whelming gustwave|1")
+      .blockWith()
+      .settle()
+      .play("retrace the past|3")
+      .chooseName("Head Jab")
+      .blockWith()
+      .settle()
+      .play("become the bottle|1")
+      .chooseCard("retrace the past|3");
+
+    expect(g.state.chain.at(-1)?.attackingCard.grantedNames).toEqual(expect.arrayContaining([
+      "Retrace the Past",
+      "Head Jab",
+    ]));
+  });
+
+  it("Tigrine Reflex can be discarded from hand as an attack reaction", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["head jab|1", "tigrine reflex|1"],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.play("head jab|1").blockWith();
+
+    expect(legalIntents(g.state, 0)).toContainEqual(expect.objectContaining({
+      kind: "activate-ability",
+      sourceInstanceId: g.state.players[0]!.hand.find(
+        (card) => functionalKeyOf(cardData[card.cardId]!) === "tigrine reflex|1",
+      )!.instanceId,
+    }));
+
+    g.activate("tigrine reflex|1")
+      .expectInZone(0, "tigrine reflex|1", "graveyard")
+      .expectInZone(0, "crouching tiger|0", "hand")
+      .expectFinalAttack(4);
+  });
+
   it("Shimmering Mirage may be played again during its combat chain", () => {
     const g = scenario({
       seats: [
