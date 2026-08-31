@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { gunzipSync } from "node:zlib";
 import { decklists } from "@fyendal/cards";
-import { decodeGameView, decodeReplayResponse } from "@fyendal/protocol";
+import { decodeGameView, decodeReplayResponse, replayFileViews } from "@fyendal/protocol";
 import type { Queryable } from "../db.js";
 import {
   deleteReplay,
@@ -112,7 +112,7 @@ describe("server replay retention", () => {
     let frameLoads = 0;
     const measuredDb: Queryable = {
       query: async (text, params) => {
-        if (text.includes("SELECT view FROM replay_frames")) frameLoads += 1;
+        if (text.includes("SELECT view, transition FROM replay_frames")) frameLoads += 1;
         return db.query(text, params);
       },
     };
@@ -142,11 +142,18 @@ describe("server replay retention", () => {
 
     const aliceFile = await getReplay(db, game.users[0], alice[0]!.id);
     const bobFile = await getReplay(db, game.users[1], bob[0]!.id);
-    expect(aliceFile?.views[0]!.players[0].hand.length).toBeGreaterThan(0);
-    expect(aliceFile?.views[0]!.players[1].hand.length).toBeGreaterThan(0);
-    expect(bobFile?.views[0]!.players[1].hand.length).toBeGreaterThan(0);
-    expect(bobFile?.views[0]!.players[0].hand.length).toBeGreaterThan(0);
-    expect(aliceFile?.views).toEqual(bobFile?.views);
+    expect(aliceFile?.version).toBe(2);
+    if (aliceFile?.version === 2) {
+      expect(aliceFile.frames.map((frame) => frame.transition)).toEqual([
+        null,
+        { kind: "forward", events: [] },
+      ]);
+    }
+    expect(aliceFile && replayFileViews(aliceFile)[0]!.players[0].hand.length).toBeGreaterThan(0);
+    expect(aliceFile && replayFileViews(aliceFile)[0]!.players[1].hand.length).toBeGreaterThan(0);
+    expect(bobFile && replayFileViews(bobFile)[0]!.players[1].hand.length).toBeGreaterThan(0);
+    expect(bobFile && replayFileViews(bobFile)[0]!.players[0].hand.length).toBeGreaterThan(0);
+    expect(aliceFile && replayFileViews(aliceFile)).toEqual(bobFile && replayFileViews(bobFile));
     expect(await getReplay(db, game.users[0] + 99, alice[0]!.id)).toBeNull();
     const accountExport = await exportAccount(db, game.users[0]);
     expect(accountExport?.replays).toHaveLength(1);

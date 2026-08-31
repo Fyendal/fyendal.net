@@ -8,6 +8,7 @@ import type { GameStateInternal } from "./runtimeState.js";
 import type { CardInstance, PlayerState } from "./state.js";
 import { currentLink, findCardAnywhere, findPermanent } from "./zoneQueries.js";
 import type { CardData } from "@fyendal/shared";
+import { transitionZone } from "./transitions.js";
 
 /** Count a successfully paid action play or action-ability activation. */
 export function noteActionPlayedOrActivated(player: PlayerState): void {
@@ -88,7 +89,14 @@ export function drawCards(
   }
   const before = player.hand.length;
   for (let i = 0; i < count && player.deck.length > 0; i++) {
-    player.hand.push(player.deck.shift() as CardInstance);
+    const card = player.deck.shift() as CardInstance;
+    player.hand.push(card);
+    runtime.transitions.move(
+      card,
+      transitionZone("deck", player.seat, "top"),
+      transitionZone("hand", player.seat),
+      { from: true, to: true },
+    );
   }
   const drawn = player.hand.length - before;
   if (drawn <= 0) return;

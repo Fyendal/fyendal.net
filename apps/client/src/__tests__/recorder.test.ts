@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { GameView } from "@fyendal/shared";
+import { replayFileViews } from "@fyendal/protocol";
 import {
   parseReplayFile,
   PERSIST_EVERY,
@@ -93,7 +94,7 @@ describe("ReplayRecorder", () => {
     resumed.finish();
     const reloaded = new ReplayRecorder("ABC123", storage);
     expect(reloaded.length).toBe(PERSIST_EVERY + 1);
-    expect(reloaded.toFile().views[PERSIST_EVERY]!.winner).toBe(0);
+    expect(replayFileViews(reloaded.toFile())[PERSIST_EVERY]!.winner).toBe(0);
   });
 
   it("keeps recording in memory when storage quota fails", () => {
@@ -103,7 +104,7 @@ describe("ReplayRecorder", () => {
     for (let i = 1; i <= PERSIST_EVERY + 5; i++) rec.record(frame(i), 0);
     rec.finish();
     expect(rec.length).toBe(PERSIST_EVERY + 5);
-    expect(rec.toFile().views.length).toBe(PERSIST_EVERY + 5);
+    expect(replayFileViews(rec.toFile()).length).toBe(PERSIST_EVERY + 5);
     expect(storage.data.size).toBe(0);
   });
 
@@ -143,7 +144,7 @@ describe("ReplayRecorder", () => {
     rec.replace({ version: 1, seat: 0, views: [frame(1), frame(2), frame(3)] });
     const reloaded = new ReplayRecorder("ABC123", storage);
     expect(reloaded.length).toBe(3);
-    expect(reloaded.toFile().views[2]!.turn).toBe(3);
+    expect(replayFileViews(reloaded.toFile())[2]!.turn).toBe(3);
   });
 });
 
@@ -164,8 +165,8 @@ describe("parseReplayFile", () => {
     expect(r.ok).toBe(true);
     if (r.ok) {
       expect(r.file.seat).toBe(0);
-      expect(r.file.views.length).toBe(2);
-      expect(r.file.views[1]!.winner).toBe(1);
+      expect(replayFileViews(r.file).length).toBe(2);
+      expect(replayFileViews(r.file)[1]!.winner).toBe(1);
     }
   });
 });

@@ -524,6 +524,29 @@ describe("SAZ — tokens", () => {
       .expectHandSize(0, 4); // the end-of-turn draw refills afterwards
   });
 
+  it("journals Inertia bottoming before its same-intent draw-up", () => {
+    const s = scenario({
+      seats: [
+        azaleaSeat({
+          board: ["inertia|0"],
+          hand: [RED],
+          deck: [BLUE, BLUE, BLUE, BLUE, BLUE, BLUE],
+        }),
+        { hero: "rhinar", hand: [] },
+      ],
+    });
+
+    s.doRaw({ kind: "pass" });
+    expect(s.lastEvents.map(({ from, to }) => ({ from, to }))).toEqual([
+      { from: { kind: "board", seat: 0 }, to: null },
+      { from: { kind: "hand", seat: 0 }, to: { kind: "deck", seat: 0, position: "bottom" } },
+      ...Array.from({ length: 4 }, () => ({
+        from: { kind: "deck", seat: 0, position: "top" },
+        to: { kind: "hand", seat: 0 },
+      })),
+    ]);
+  });
+
   it("Inertia's controller chooses the relative bottom order", () => {
     const s = scenario({
       seats: [

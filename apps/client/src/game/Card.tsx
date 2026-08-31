@@ -149,6 +149,7 @@ export function CardFace({
   label,
   explanation,
   motionKey,
+  motionZoneAnchor,
 }: {
   card: CardView;
   size?: "hand" | "zone" | "preview";
@@ -183,6 +184,8 @@ export function CardFace({
   explanation?: string;
   /** Stable viewer-safe presentation key used only for board motion geometry. */
   motionKey?: string;
+  /** Card-sized endpoint for a surrounding motion zone. */
+  motionZoneAnchor?: string;
 }) {
   // Try temporary Fabrary variants before falling back to the text layout.
   const [imageFailure, setImageFailure] = useState<{ cardId: string; attempts: number } | null>(null);
@@ -190,7 +193,11 @@ export function CardFace({
   // marker is public, so its standard card overlay shows on the back too
   if (card.hidden) {
     return (
-      <span className="card-hidden-wrap" data-motion-card={motionKey}>
+      <span
+        className="card-hidden-wrap"
+        data-motion-card={motionKey}
+        data-motion-zone-anchor={motionZoneAnchor}
+      >
         <CardBack label={label ?? "Face down"} />
         {showOverlays && card.intimidated ? (
           <div className="c-ovls">
@@ -273,6 +280,7 @@ export function CardFace({
       className={cls}
       data-cardid={card.cardId}
       data-motion-card={motionKey}
+      data-motion-zone-anchor={motionZoneAnchor}
       onClick={onClick}
       tabIndex={explanation ? 0 : undefined}
       aria-describedby={explanationId}

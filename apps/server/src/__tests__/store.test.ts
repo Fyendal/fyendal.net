@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { decklists, precon, preconsForFormat, silverAgePrecon } from "@fyendal/cards";
 import { legalIntents } from "@fyendal/engine";
-import { decodeServerMessage } from "@fyendal/protocol";
+import { decodeServerMessage, replayFileViews } from "@fyendal/protocol";
 import type { Queryable } from "../db.js";
 import { finalizeReplay, getReplay, listReplays } from "../replays.js";
 import {
@@ -328,7 +328,8 @@ describe("PgRoomStore storage", () => {
     expect(await listReplays(db, userId)).toEqual([
       expect.objectContaining({ yourSeat: 0, winner: null }),
     ]);
-    expect((await getReplay(db, userId, ended.replayFinalizationId))?.views.at(-1)?.winner)
+    const replay = await getReplay(db, userId, ended.replayFinalizationId);
+    expect(replay ? replayFileViews(replay).at(-1)?.winner : undefined)
       .toBeNull();
 
     const humanRoom = await store.createRoom("classic-battles", {
@@ -995,6 +996,64 @@ describe("PgRoomStore storage", () => {
     expect(raw.rows[0].state).toMatchObject({ schemaVersion: 1, rulesetVersion: "rules-a" });
     expect(raw.rows[0].state.state).not.toHaveProperty("cardsRef");
     expect(raw.rows[0].state.state).not.toHaveProperty("scriptsRef");
+  });
+
+  it("persists ordered cleanup transitions without revealing an opponent's cards", async () => {
+    const { code, tokens } = await fullRoom();
+    await startGame(code, tokens);
+    const room = await store.getRoom(code);
+    const state = room!.state!;
+    const actor = state.activePlayer as 0 | 1;
+    const opponent = (1 - actor) as 0 | 1;
+    const chosen = state.players[actor]!.hand[0]!;
+    state.phase = "end";
+    state.priorityPlayer = actor;
+    state.pendingDecision = {
+      player: actor,
+      kind: "arsenal",
+      prompt: "Choose a card for arsenal",
+      options: state.players[actor]!.hand.map((card) => String(card.instanceId)),
+      cardOptions: state.players[actor]!.hand.map((card) => card.instanceId),
+    };
+    await db.query("UPDATE rooms SET state = $2 WHERE code = $1", [
+      code,
+      JSON.stringify(dehydrateState(state, "rules-a")),
+    ]);
+
+    expect((await store.applyIntent(
+      code,
+      { token: tokens[actor] },
+      { kind: "choose", optionId: String(chosen.instanceId) },
+    )).ok).toBe(true);
+    const after = await store.getRoom(code);
+    const ownerMessage = stateMessage(after!, actor);
+    const opponentMessage = stateMessage(after!, opponent);
+    if (!ownerMessage || !opponentMessage
+      || ownerMessage.type !== "state" || opponentMessage.type !== "state") {
+      throw new Error("expected game state messages");
+    }
+    expect(ownerMessage.transition?.fromVersion).toBe(room!.version);
+    expect(ownerMessage.transition?.events.slice(0, 2)).toEqual([
+      expect.objectContaining({
+        from: { kind: "hand", seat: actor },
+        to: { kind: "arsenal", seat: actor },
+        instanceId: chosen.instanceId,
+      }),
+      expect.objectContaining({
+        from: { kind: "deck", seat: actor, position: "top" },
+        to: { kind: "hand", seat: actor },
+      }),
+    ]);
+    expect(opponentMessage.transition?.events.slice(0, 2)).toEqual([
+      { kind: "move", from: { kind: "hand", seat: actor }, to: { kind: "arsenal", seat: actor }, count: 1 },
+      { kind: "move", from: { kind: "deck", seat: actor, position: "top" }, to: { kind: "hand", seat: actor }, count: 1 },
+    ]);
+    expect((await db.query(
+      "SELECT last_transition FROM rooms WHERE code = $1",
+      [code],
+    )).rows[0]!.last_transition.events).toHaveLength(
+      after!.lastTransition!.events.length,
+    );
   });
 
   it("prunes metadata-complete history without loading every snapshot state", async () => {

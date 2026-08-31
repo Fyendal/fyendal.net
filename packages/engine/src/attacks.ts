@@ -33,6 +33,7 @@ import {
   currentLink,
   opponent,
 } from "./zoneQueries.js";
+import { transitionZone } from "./transitions.js";
 
 function replacePowerGain(
   state: GameStateInternal,
@@ -524,8 +525,21 @@ export function replaceAttackFromHand(
   ) return false;
   const previous = link.attackingCard;
   player.hand.splice(index, 1);
-  (state.players[previous.owner] as PlayerState).deck.push(previous);
+  const previousOwner = state.players[previous.owner] as PlayerState;
+  previousOwner.deck.push(previous);
   link.attackingCard = replacement;
+  runtime.transitions.move(
+    previous,
+    transitionZone("chain", previousOwner.seat),
+    transitionZone("deck", previousOwner.seat, "bottom"),
+    { to: true },
+  );
+  runtime.transitions.move(
+    replacement,
+    transitionZone("hand", player.seat),
+    transitionZone("chain", player.seat),
+    { from: true },
+  );
   if (instanceHasKeyword(state, replacement, "go again")) runtime.events.grantLinkGoAgain(state, link);
   logPublic(
     state,

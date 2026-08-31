@@ -421,6 +421,48 @@ export interface GameView {
   log: string[];
 }
 
+// ── Ordered presentation transitions ──────────────────────────────────────────
+
+/** A canonical card location used by semantic transition playback. Unlike
+ * client motion anchors, this contains no DOM/presentation indexes. */
+export interface GameTransitionZone {
+  kind:
+    | "hand"
+    | "deck"
+    | "arsenal"
+    | "pitch"
+    | "graveyard"
+    | "banish"
+    | "soul"
+    | "board"
+    | "equipment"
+    | "weapon"
+    | "stack"
+    | "chain";
+  seat: number;
+  /** Known position within a deck. Omitted for other zones and when an exact
+   * deck depth is not presentation-relevant. */
+  position?: "top" | "bottom";
+}
+
+/** One ordered, viewer-safe card movement. `instanceId` is omitted when the
+ * movement is private to another player; the client renders a card back. */
+export interface GameTransitionMove {
+  kind: "move";
+  from: GameTransitionZone | null;
+  to: GameTransitionZone | null;
+  count: number;
+  instanceId?: number;
+}
+
+export interface GameTransitionView {
+  /** The authoritative room version this edge starts at. */
+  fromVersion: number;
+  /** Undo/restoration edges settle immediately and contain no invented path. */
+  kind: "forward" | "replace";
+  events: GameTransitionMove[];
+}
+
 export interface OngoingEffectView {
   /** Seat the effect applies to */
   seat: number;
@@ -473,12 +515,27 @@ export type GameIntent =
  * reveal both players' hidden zones for post-game study; `seat` controls board
  * orientation, not replay visibility.
  */
-export interface ReplayFile {
+export interface ReplayFileV1 {
   version: 1;
   /** Board orientation seat, or null for a spectator recording. */
   seat: number | null;
   views: GameView[];
 }
+
+export interface ReplayFrameV2 {
+  view: GameView;
+  /** Null for the initial frame and discontinuous/restored frames. */
+  transition: Omit<GameTransitionView, "fromVersion"> | null;
+}
+
+export interface ReplayFileV2 {
+  version: 2;
+  /** Board orientation seat, or null for a spectator recording. */
+  seat: number | null;
+  frames: ReplayFrameV2[];
+}
+
+export type ReplayFile = ReplayFileV1 | ReplayFileV2;
 
 // ── Room / lobby wire protocol ──────────────────────────────────────────────
 
@@ -627,7 +684,7 @@ export type ServerMessage =
   | { type: "joined"; code: string; seat: number | null; token: string; spectator?: boolean; resumed?: true; version: number }
   | { type: "room-info"; room: RoomInvite }
   | { type: "game-started"; version: number }
-  | { type: "state"; version: number; view: GameView; playerProfiles: [PlayerProfileView, PlayerProfileView]; yourSeat: number | null; legal: GameIntent[]; /** Structurally available plays/activations, including unaffordable ones. */ actionCandidates?: GameIntent[]; spectators?: number; lastActionAt: [number, number]; botGame?: boolean }
+  | { type: "state"; version: number; view: GameView; transition?: GameTransitionView; playerProfiles: [PlayerProfileView, PlayerProfileView]; yourSeat: number | null; legal: GameIntent[]; /** Structurally available plays/activations, including unaffordable ones. */ actionCandidates?: GameIntent[]; spectators?: number; lastActionAt: [number, number]; botGame?: boolean }
   | { type: "spectators"; count: number; version: number }
   | { type: "opponent-disconnected"; version: number }
   | { type: "opponent-reconnected"; version: number }

@@ -196,6 +196,8 @@ input::placeholder {
   }
   .waiting,
   .end-turn-pass-toast { animation: none !important; }
+  .waiting { opacity: 1; }
+  .waiting.waiting-hidden { opacity: 0; }
 }
 
 .deck-panel-heading {

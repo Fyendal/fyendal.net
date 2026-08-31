@@ -422,6 +422,10 @@ describe("SBZ — Turn to Mindfire & Ponder", () => {
     s.doRaw({ kind: "pass" });
     s.expectNotInZone(0, "ponder|0", "board");
     expect(s.state.pendingDecision?.kind).not.toBe("priority-window");
+    expect(s.lastEvents.slice(0, 2).map(({ from, to }) => ({ from, to }))).toEqual([
+      { from: { kind: "board", seat: 0 }, to: null },
+      { from: { kind: "deck", seat: 0, position: "top" }, to: { kind: "hand", seat: 0 } },
+    ]);
   });
 
   it("creates a Ponder token when it deals damage and the hero taps; Ponder draws at end phase", () => {

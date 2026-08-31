@@ -1,7 +1,9 @@
 .game-motion-layer {
   position: fixed;
-  /* Travel, connectors, and pulses stay above game floats, below overlays. */
-  z-index: 9;
+  /* Card travel stays above the board but beneath status, waiting, stack,
+     chain, and decision floats. Those fixed HUD elements must never be
+     occluded by a hand draw or reflow flight. */
+  z-index: 5;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
@@ -11,10 +13,11 @@
    must share the board's visual depth so stack/combat floats cover it before
    and after the real destination card is unmasked. */
 .game-motion-layer-under-floats {
-  z-index: 5;
+  z-index: 4;
 }
 
 .game-motion-flight,
+.game-motion-deck-cover,
 .game-motion-connector,
 .game-motion-pulse {
   position: fixed;
@@ -34,6 +37,7 @@
 }
 
 .game-motion-flight {
+  z-index: 1;
   opacity: 0;
   transform-origin: top left;
   will-change: transform, opacity;
@@ -46,6 +50,21 @@
   animation-fill-mode: forwards;
 }
 
+.game-motion-flight-hold-source {
+  animation-fill-mode: both;
+}
+
+.game-motion-flight-reflow {
+  animation-name: game-motion-travel;
+}
+
+.game-motion-deck-cover {
+  /* Bottom-deck flights are always stacking level 1. Keep the existing deck
+     top decisively above the moving card while their rectangles overlap. */
+  z-index: 4;
+  opacity: 1;
+}
+
 .game-motion-flight-appear {
   animation-name: game-motion-appear;
 }
@@ -56,6 +75,10 @@
 
 .game-motion-flight-draw {
   animation-name: game-motion-draw;
+}
+
+.game-motion-flight-deck-bottom {
+  animation-name: game-motion-deck-bottom;
 }
 
 .game-motion-flight-settle {
@@ -89,6 +112,14 @@
 
 .game-motion-visual-back-reveal .game-motion-face {
   animation: game-motion-reveal-face var(--motion-duration) step-end var(--motion-delay) both;
+}
+
+.game-motion-visual-face-conceal .game-motion-back {
+  animation: game-motion-reveal-back-early var(--motion-duration) step-end var(--motion-delay) both;
+}
+
+.game-motion-visual-face-conceal .game-motion-face {
+  animation: game-motion-hide-face-early var(--motion-duration) step-end var(--motion-delay) both;
 }
 
 .game-motion-flight-settle .game-motion-back {
@@ -177,6 +208,33 @@
   }
 }
 
+/* Pitch cleanup has exactly two steps: flip at the pitch anchor, then travel
+   directly to the deck anchor. The persistent deck cover is above this flight,
+   so the card passes underneath the deck without an arrival handoff. */
+@keyframes game-motion-deck-bottom {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1, 1) rotateY(0);
+  }
+  21% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1, 1) rotateY(90deg);
+  }
+  22% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1, 1) rotateY(-90deg);
+  }
+  36% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1, 1) rotateY(0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(var(--motion-x), var(--motion-y), 0)
+      scale(var(--motion-scale-x), var(--motion-scale-y)) rotateY(0);
+  }
+}
+
 @keyframes game-motion-settle {
   from { opacity: 1; transform: rotateY(0); }
   49% { opacity: 1; transform: rotateY(90deg); }
@@ -192,6 +250,16 @@
 @keyframes game-motion-reveal-face {
   0%, 88% { opacity: 0; }
   89%, 100% { opacity: 1; }
+}
+
+@keyframes game-motion-hide-face-early {
+  0%, 21% { opacity: 1; }
+  22%, 100% { opacity: 0; }
+}
+
+@keyframes game-motion-reveal-back-early {
+  0%, 21% { opacity: 0; }
+  22%, 100% { opacity: 1; }
 }
 
 @keyframes game-motion-hide-back-settle {

@@ -232,9 +232,13 @@ describe("ARC — Mechanologist attacks and actions", () => {
 
     g.play("over loop|1", { pitch: ["locked and loaded|3"], boost: true })
       .blockWith()
-      .settle()
-      .play("pour the mold|3")
+      .settle();
+    g.play("pour the mold|3")
       .expectDeckBottom(0, "over loop|1");
+    expect(g.transitionEvents).toContainEqual(expect.objectContaining({
+      from: { kind: "chain", seat: 0 },
+      to: { kind: "deck", seat: 0, position: "bottom" },
+    }));
   });
 
   it("Locked and Loaded buffs the next Mechanologist attack and opts after a boost", () => {

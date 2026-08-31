@@ -24,6 +24,7 @@ export function initialStoreProjection(
     lastActionAt: null,
     replayFrames: 0,
     replayViews: null,
+    replayTransitions: null,
     replayStep: 0,
     activeSavedReplayId: null,
     savedReplays: [],
@@ -76,6 +77,7 @@ export function clearedRoomProjection(): Pick<
   | "latestEmote"
   | "replayFrames"
   | "replayViews"
+  | "replayTransitions"
   | "replayStep"
   | "activeSavedReplayId"
   | "rooms"
@@ -105,6 +107,7 @@ export function clearedRoomProjection(): Pick<
     latestEmote: null,
     replayFrames: 0,
     replayViews: null,
+    replayTransitions: null,
     replayStep: 0,
     activeSavedReplayId: null,
     rooms: [],

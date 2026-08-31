@@ -1,7 +1,7 @@
 import { engineRuntime } from "../engineRuntime.js";
 import { describe, expect, it } from "vitest";
 import type { GameIntent } from "@fyendal/shared";
-import { actionCandidates, applyIntent, legalIntents, projectStateFor, projectStateForReplay, rngNext } from "../index.js";
+import { actionCandidates, applyIntent, legalIntents, projectStateFor, projectStateForReplay, projectTransitionEvents, rngNext } from "../index.js";
 import { declareAttack } from "../attacks.js";
 import { closeChain } from "../combatChain.js";
 import { computeAttack } from "../combatValues.js";
@@ -30,6 +30,80 @@ function passTopLayer(state: ReturnType<typeof makeGame>): ReturnType<typeof mak
 }
 
 describe("game setup & turn structure", () => {
+  it("closes the combat chain and settles equipment before entering the end phase", () => {
+    const state = makeGame(944);
+    const active = player(state, 0);
+    const defending = player(state, 1);
+    const attack = active.hand.shift()!;
+    attack.cardId = "ATK4";
+    const battleworn = { instanceId: 9944, cardId: "BW", owner: 1 };
+    defending.equipment.chest = battleworn;
+    state.chain = [{
+      attacker: 0,
+      attackingCard: attack,
+      attackCardType: "action",
+      defendingCards: [],
+      defendingEquipment: [battleworn],
+      reactions: [],
+      goAgain: false,
+      damage: 0,
+      hit: false,
+      resolved: true,
+      flags: {},
+    }];
+
+    const result = applyIntent(state, 0, { kind: "pass" });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.state.phase).toBe("end");
+    expect(result.state.chain).toEqual([]);
+    expect(player(result.state, 1).equipment.chest?.defCounters).toBe(1);
+    expect(player(result.state, 0).graveyard).toContainEqual(
+      expect.objectContaining({ instanceId: attack.instanceId }),
+    );
+  });
+
+  it.each([3, 5])("journals arsenal before draw-up at intellect %i", (intellect) => {
+    const state = makeGame(940 + intellect);
+    const active = player(state, 0);
+    active.intellect = intellect;
+    active.hand = active.hand.slice(0, Math.min(active.hand.length, intellect));
+    while (active.hand.length < intellect) {
+      active.hand.push(active.deck.shift()!);
+    }
+    state.phase = "end";
+    state.activePlayer = 0;
+    state.priorityPlayer = 0;
+    state.pendingDecision = {
+      player: 0,
+      kind: "arsenal",
+      prompt: "Choose a card for arsenal",
+      options: active.hand.map((card) => String(card.instanceId)),
+      cardOptions: active.hand.map((card) => card.instanceId),
+    };
+    const chosen = active.hand[0]!;
+
+    const result = applyIntent(state, 0, { kind: "choose", optionId: String(chosen.instanceId) });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.events.slice(0, 2).map(({ from, to }) => ({ from, to }))).toEqual([
+      { from: { kind: "hand", seat: 0 }, to: { kind: "arsenal", seat: 0 } },
+      { from: { kind: "deck", seat: 0, position: "top" }, to: { kind: "hand", seat: 0 } },
+    ]);
+    expect(projectTransitionEvents(result.events, 1).slice(0, 2))
+      .toEqual(result.events.slice(0, 2).map((event) => ({
+        kind: "move",
+        from: event.from,
+        to: event.to,
+        count: 1,
+      })));
+    expect(projectTransitionEvents(result.events, 0)[0]).toHaveProperty(
+      "instanceId",
+      chosen.instanceId,
+    );
+  });
+
   it("persists and projects pitch history only with a visible card", () => {
     const state = makeGame(95);
     const attack = giveCard(state, 0, "BIG");

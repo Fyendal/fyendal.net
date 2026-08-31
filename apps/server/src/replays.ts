@@ -1,7 +1,12 @@
 import { randomBytes } from "node:crypto";
 import { promisify } from "node:util";
 import { gzip as gzipCallback, gunzip as gunzipCallback } from "node:zlib";
-import { projectStateForReplay, type GameState } from "@fyendal/engine";
+import {
+  projectStateForReplay,
+  projectTransitionEvents,
+  type EngineTransitionMove,
+  type GameState,
+} from "@fyendal/engine";
 import {
   decodeReplayFile,
   decodeReplayResponse,
@@ -97,18 +102,32 @@ export async function appendReplayView(
   roomVersion: number,
   state: GameState,
   winner: number | null,
+  transition: {
+    kind: "forward" | "replace";
+    events: readonly EngineTransitionMove[];
+  } | null,
   now = Date.now(),
 ): Promise<string | null> {
   const inserted = await db.query(
-    `INSERT INTO replay_frames (replay_id, room_version, view)
-     SELECT active.id, $2::bigint, $3::jsonb
+    `INSERT INTO replay_frames (replay_id, room_version, view, transition)
+     SELECT active.id, $2::bigint, $3::jsonb, $4::jsonb
      FROM (
        SELECT id FROM replay_games
        WHERE room_code = $1 AND status = 'recording'
        ORDER BY created_at DESC LIMIT 1
      ) active
      RETURNING replay_id`,
-    [roomCode, roomVersion, JSON.stringify(projectStateForReplay(state, roomCode))],
+    [
+      roomCode,
+      roomVersion,
+      JSON.stringify(projectStateForReplay(state, roomCode)),
+      transition
+        ? JSON.stringify({
+            kind: transition.kind,
+            events: projectTransitionEvents(transition.events, null, true),
+          })
+        : null,
+    ],
   );
   if (!inserted.rows.length) return null;
   const id = String(inserted.rows[0].replay_id);
@@ -161,16 +180,16 @@ async function replayFiles(
   const id = String(replay.id);
   const uniqueSeats = [...new Set(seats)];
   const { rows } = await db.query(
-    "SELECT view FROM replay_frames WHERE replay_id = $1 ORDER BY room_version",
+    "SELECT view, transition FROM replay_frames WHERE replay_id = $1 ORDER BY room_version",
     [id],
   );
   if (rows.length > MAX_REPLAY_VIEWS) throw new Error(`replay ${id} has too many frames`);
-  const views: GameView[] = [];
+  const frames: Array<{ view: GameView; transition: unknown }> = [];
   let yieldedAt = performance.now();
   for (let index = 0; index < rows.length; index++) {
     const view = decodeGameView(rows[index]!.view);
     if (!view) throw new Error(`replay ${id} frame ${index + 1} failed validation`);
-    views.push(view);
+    frames.push({ view, transition: rows[index]!.transition ?? null });
     if (index + 1 < rows.length && performance.now() - yieldedAt >= REPLAY_YIELD_BUDGET_MS) {
       await yieldControl();
       yieldedAt = performance.now();
@@ -178,13 +197,21 @@ async function replayFiles(
   }
   return {
     files: new Map(
-      uniqueSeats.map((seat) => [seat, { version: 1, seat, views }]),
+      uniqueSeats.map((seat) => {
+        const file = decodeReplayFile({ version: 2, seat, frames });
+        if (!file) throw new Error(`replay ${id} transition validation failed`);
+        return [seat, file];
+      }),
     ),
   };
 }
 
 interface GameViewBuild {
   files: Map<0 | 1, ReplayFile>;
+}
+
+function replayViews(file: ReplayFile): GameView[] {
+  return file.version === 1 ? file.views : file.frames.map((frame) => frame.view);
 }
 
 export async function finalizeReplay(db: Queryable, replayIdValue: string): Promise<boolean> {
@@ -214,7 +241,8 @@ export async function finalizeReplay(db: Queryable, replayIdValue: string): Prom
   });
   if (!decodedParticipants.length) throw new Error(`replay ${String(replay.id)} has no participants`);
   const built = await replayFiles(db, replay, decodedParticipants.map(({ seat }) => seat));
-  const finalView = built.files.values().next().value?.views.at(-1);
+  const firstFile = built.files.values().next().value;
+  const finalView = firstFile ? replayViews(firstFile).at(-1) : undefined;
   if (!finalView || finalView.winner !== replay.winner) {
     throw new Error(`replay ${String(replay.id)} winner mismatch`);
   }
@@ -229,7 +257,7 @@ export async function finalizeReplay(db: Queryable, replayIdValue: string): Prom
       userId: participant.userId,
       seat: participant.seat,
       payload,
-      frames: decoded.views.length,
+      frames: replayViews(decoded).length,
     };
   }));
   await withTransaction(db, async (tx) => {

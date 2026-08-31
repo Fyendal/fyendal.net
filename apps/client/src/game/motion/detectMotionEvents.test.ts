@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { CardView, GameView, PlayerView } from "@fyendal/shared";
 import { detectGameMotionEvents } from "./detectMotionEvents.js";
+import { transitionMotionEvents } from "./transitionMotionEvents.js";
 
 function player(seat: 0 | 1, overrides: Partial<PlayerView> = {}): PlayerView {
   return {
@@ -637,7 +638,7 @@ describe("game motion detection", () => {
     });
   });
 
-  it("reconstructs hidden opponent arsenaling before draw-up across a shortcut", () => {
+  it("does not invent a hidden path for a legacy end-phase shortcut", () => {
     const previous = view(
       [
         player(0),
@@ -668,29 +669,15 @@ describe("game motion detection", () => {
       { turn: 2, phase: "action", activePlayer: 0, priorityPlayer: 0 },
     );
 
-    expect(detectGameMotionEvents(previous, current)).toEqual([
-      {
-        kind: "move",
-        source: { kind: "hand", seat: 1 },
-        destination: { kind: "arsenal", seat: 1 },
-        visual: { kind: "back" },
-        destinationPresentationKey: "1:arsenal:opaque",
-        count: 1,
-        confidence: "inferred",
-      },
-      {
-        kind: "move",
-        source: { kind: "deck", seat: 1 },
-        destination: { kind: "hand", seat: 1 },
-        visual: { kind: "back" },
-        destinationPresentationKey: "1:hand:opaque:3",
-        count: 1,
-        confidence: "inferred",
-      },
-    ]);
+    const events = detectGameMotionEvents(previous, current);
+    expect(events.every((event) => event.kind === "pulse")).toBe(true);
+    expect(events).toEqual(expect.arrayContaining([
+      { kind: "pulse", location: { kind: "deck", seat: 1 } },
+      { kind: "pulse", location: { kind: "arsenal", seat: 1 } },
+    ]));
   });
 
-  it("keeps the arsenal flight but omits ambiguous gold pulses during cleanup", () => {
+  it("keeps exact arsenal motion but does not infer cleanup draws", () => {
     const chosen = face(40);
     const pitched = face(41);
     const draws = [face(42), face(43), face(44), face(45)];
@@ -741,16 +728,164 @@ describe("game motion detection", () => {
       count: 1,
       confidence: "exact",
     });
-    expect(events.slice(1)).toEqual(draws.map((card) => ({
+    expect(events.slice(1).every((event) => event.kind === "pulse")).toBe(true);
+    expect(events.some((event) => event.kind === "move" && event.confidence === "inferred"))
+      .toBe(false);
+  });
+
+  it("plays authoritative Ponder motion before arsenal motion", () => {
+    const ponder = face(90);
+    const previous = view(
+      [
+        player(0),
+        player(1, { handCount: 4, deckCount: 20, board: [ponder] }),
+      ],
+      { phase: "end" },
+    );
+    const current = view(
+      [
+        player(0),
+        player(1, { handCount: 4, deckCount: 19, arsenalCount: 1 }),
+      ],
+      { turn: 2, phase: "action", activePlayer: 0, priorityPlayer: 0 },
+    );
+
+    const events = transitionMotionEvents(previous, current, {
+      fromVersion: 7,
+      kind: "forward",
+      events: [
+        {
+          kind: "move",
+          from: { kind: "board", seat: 1 },
+          to: null,
+          count: 1,
+          instanceId: ponder.instanceId,
+        },
+        {
+          kind: "move",
+          from: { kind: "deck", seat: 1 },
+          to: { kind: "hand", seat: 1 },
+          count: 1,
+        },
+        {
+          kind: "move",
+          from: { kind: "hand", seat: 1 },
+          to: { kind: "arsenal", seat: 1 },
+          count: 1,
+        },
+      ],
+    }, "forward");
+
+    expect(events.slice(0, 3)).toEqual([
+      { kind: "pulse", location: { kind: "board", seat: 1 } },
+      expect.objectContaining({
+        kind: "move",
+        source: { kind: "deck", seat: 1 },
+        destination: { kind: "hand", seat: 1 },
+      }),
+      expect.objectContaining({
+        kind: "move",
+        source: { kind: "hand", seat: 1 },
+        destination: { kind: "arsenal", seat: 1 },
+        sourcePresentationKey: "1:hand:opaque:3",
+      }),
+    ]);
+  });
+
+  it("keeps a pitched card face visible until its deck-bottom flip", () => {
+    const pitched = face(91);
+    const deckTop = face(92);
+    const previous = view([
+      player(0, {
+        pitch: [pitched],
+        pitchCount: 1,
+        deckCount: 20,
+        visibleDeckTop: deckTop,
+      }),
+      player(1),
+    ], { phase: "end" });
+    const current = view([
+      player(0, {
+        pitch: [],
+        pitchCount: 0,
+        deckCount: 21,
+        visibleDeckTop: deckTop,
+      }),
+      player(1),
+    ], { turn: 2, phase: "action" });
+
+    expect(transitionMotionEvents(previous, current, {
+      fromVersion: 8,
+      kind: "forward",
+      events: [{
+        kind: "move",
+        from: { kind: "pitch", seat: 0 },
+        to: { kind: "deck", seat: 0, position: "bottom" },
+        count: 1,
+        instanceId: pitched.instanceId,
+      }],
+    }, "forward")).toContainEqual({
       kind: "move",
-      source: { kind: "deck", seat: 0 },
-      destination: { kind: "hand", seat: 0 },
-      visual: { kind: "back-reveal", card },
-      instanceId: card.instanceId,
-      destinationPresentationKey: `0:hand:${card.instanceId}`,
+      source: { kind: "pitch", seat: 0 },
+      destination: { kind: "deck", seat: 0, position: "bottom" },
+      visual: { kind: "face-conceal", card: pitched },
       count: 1,
-      confidence: "inferred",
-    })));
-    expect(events.some((event) => event.kind === "pulse")).toBe(false);
+      confidence: "exact",
+      instanceId: pitched.instanceId,
+      sourcePresentationKey: `0:pitch:${pitched.instanceId}`,
+      destinationCoverVisual: { kind: "face", card: deckTop },
+    });
+  });
+
+  it("adds hand reflow motion alongside end-phase draw-up", () => {
+    const kept = face(93);
+    const chosen = face(94);
+    const drawn = face(95);
+    const previous = view([
+      player(0, { hand: [kept, chosen], handCount: 2, deckCount: 10 }),
+      player(1),
+    ], { phase: "end" });
+    const current = view([
+      player(0, {
+        hand: [kept, drawn],
+        handCount: 2,
+        deckCount: 9,
+        arsenal: [{ ...chosen, faceDown: true }],
+        arsenalCount: 1,
+      }),
+      player(1),
+    ], { turn: 2, phase: "action" });
+
+    const events = transitionMotionEvents(previous, current, {
+      fromVersion: 9,
+      kind: "forward",
+      events: [
+        {
+          kind: "move",
+          from: { kind: "hand", seat: 0 },
+          to: { kind: "arsenal", seat: 0 },
+          count: 1,
+          instanceId: chosen.instanceId,
+        },
+        {
+          kind: "move",
+          from: { kind: "deck", seat: 0, position: "top" },
+          to: { kind: "hand", seat: 0 },
+          count: 1,
+          instanceId: drawn.instanceId,
+        },
+      ],
+    }, "forward");
+
+    expect(events).toContainEqual({
+      kind: "reflow",
+      source: { kind: "hand", seat: 0 },
+      destination: { kind: "hand", seat: 0 },
+      visual: { kind: "face", card: kept },
+      instanceId: kept.instanceId,
+      sourcePresentationKey: `0:hand:${kept.instanceId}`,
+      destinationPresentationKey: `0:hand:${kept.instanceId}`,
+      phase: "draw",
+    });
   });
 });

@@ -29,7 +29,9 @@ import {
   createGame,
   legalIntents,
   projectStateFor,
+  projectTransitionEvents,
   runechantSequenceActive,
+  type EngineTransitionMove,
   type GameState,
 } from "@fyendal/engine";
 import {
@@ -165,6 +167,15 @@ export interface RoomRow {
   isPrivate: boolean;
   /** Room-wide format rule, fixed when the room is created. */
   allowFutureCards: boolean;
+  /** Latest committed semantic edge. Its fromVersion fences reconnects and
+   * coalesced multi-instance refreshes from replaying a partial path. */
+  lastTransition: StoredRoomTransition | null;
+}
+
+export interface StoredRoomTransition {
+  fromVersion: number;
+  kind: "forward" | "replace";
+  events: EngineTransitionMove[];
 }
 
 export interface PresenceLease {
@@ -329,6 +340,7 @@ type RawRoomRow = {
   ruleset_version: string;
   is_private: boolean;
   allow_future_cards: boolean;
+  last_transition: unknown;
 };
 
 function dbObject(value: unknown, code: string, path: string): Record<string, unknown> {
@@ -344,6 +356,80 @@ function dbSafeInteger(value: unknown, code: string, path: string): number {
     throw new CorruptRoomError(code, path, "expected a safe integer");
   }
   return decoded;
+}
+
+const TRANSITION_ZONE_KINDS = new Set([
+  "hand", "deck", "arsenal", "pitch", "graveyard", "banish", "soul",
+  "board", "equipment", "weapon", "stack", "chain",
+]);
+
+function decodeTransitionZone(
+  value: unknown,
+  code: string,
+  path: string,
+): NonNullable<EngineTransitionMove["from"]> {
+  const zone = dbObject(value, code, path);
+  if (Object.keys(zone).some((key) => !["kind", "seat", "position"].includes(key))
+    || !TRANSITION_ZONE_KINDS.has(String(zone.kind))
+    || !(zone.seat === 0 || zone.seat === 1)
+    || !(zone.position === undefined || zone.position === "top" || zone.position === "bottom")
+    || (zone.position !== undefined && zone.kind !== "deck")) {
+    throw new CorruptRoomError(code, path, "invalid transition zone");
+  }
+  return {
+    kind: zone.kind as NonNullable<EngineTransitionMove["from"]>["kind"],
+    seat: zone.seat,
+    ...(zone.position === undefined ? {} : { position: zone.position }),
+  };
+}
+
+function decodeStoredTransition(
+  value: unknown,
+  code: string,
+  path: string,
+): StoredRoomTransition | null {
+  if (value === null || value === undefined) return null;
+  const transition = dbObject(value, code, path);
+  if (Object.keys(transition).some((key) => !["fromVersion", "kind", "events"].includes(key))) {
+    throw new CorruptRoomError(code, path, "unknown transition field");
+  }
+  const fromVersion = dbSafeInteger(transition.fromVersion, code, `${path}.fromVersion`);
+  if (fromVersion < 0 || !(transition.kind === "forward" || transition.kind === "replace")
+    || !Array.isArray(transition.events) || transition.events.length > 512) {
+    throw new CorruptRoomError(code, path, "invalid transition envelope");
+  }
+  const events = transition.events.map((value, index): EngineTransitionMove => {
+    const eventPath = `${path}.events[${index}]`;
+    const event = dbObject(value, code, eventPath);
+    if (Object.keys(event).some((key) => !["kind", "card", "from", "to", "fromPrivate", "toPrivate"].includes(key))
+      || event.kind !== "move" || typeof event.fromPrivate !== "boolean"
+      || typeof event.toPrivate !== "boolean") {
+      throw new CorruptRoomError(code, eventPath, "invalid transition event");
+    }
+    const card = dbObject(event.card, code, `${eventPath}.card`);
+    if (Object.keys(card).some((key) => !["instanceId", "cardId", "owner"].includes(key))
+      || !Number.isSafeInteger(card.instanceId) || Number(card.instanceId) <= 0
+      || typeof card.cardId !== "string" || card.cardId.length === 0
+      || !(card.owner === 0 || card.owner === 1)) {
+      throw new CorruptRoomError(code, `${eventPath}.card`, "invalid transition card");
+    }
+    return {
+      kind: "move",
+      card: {
+        instanceId: Number(card.instanceId),
+        cardId: card.cardId,
+        owner: card.owner,
+      },
+      from: event.from === null ? null : decodeTransitionZone(event.from, code, `${eventPath}.from`),
+      to: event.to === null ? null : decodeTransitionZone(event.to, code, `${eventPath}.to`),
+      fromPrivate: event.fromPrivate,
+      toPrivate: event.toPrivate,
+    };
+  });
+  if (transition.kind === "replace" && events.length > 0) {
+    throw new CorruptRoomError(code, path, "replace transition must not contain events");
+  }
+  return { fromVersion, kind: transition.kind, events };
 }
 
 function historyMetadataFromState(state: GameState): Omit<HistoryMetadata, "version"> {
@@ -464,6 +550,7 @@ function decodeRawRoomRow(value: unknown): RawRoomRow {
     ruleset_version: row.ruleset_version,
     is_private: row.is_private,
     allow_future_cards: row.allow_future_cards,
+    last_transition: row.last_transition,
   };
 }
 
@@ -556,6 +643,7 @@ function toRoom(value: unknown): RoomRow {
     rulesetVersion: r.ruleset_version,
     isPrivate: r.is_private,
     allowFutureCards: r.allow_future_cards,
+    lastTransition: decodeStoredTransition(r.last_transition, r.code, "row.last_transition"),
   };
 }
 
@@ -674,6 +762,7 @@ export class PgRoomStore {
        )
        SELECT r.code, r.format, r.spectators, r.state, r.prep, r.ruleset_version,
               r.version, r.created_at, r.gc_at, r.prep_deadline_at, r.is_private, r.allow_future_cards,
+              r.last_transition,
               COALESCE(seat_data.seat_rows, '[]'::json) AS seat_rows,
               COALESCE(presence_data.presence_rows, '[]'::json) AS presence_rows
        FROM rooms AS r
@@ -721,8 +810,8 @@ export class PgRoomStore {
     const { status, winner } = lifecycle(room);
     const { rowCount } = await db.query(
       `UPDATE rooms SET spectators=$2, state=$3, gc_at=$4, prep=$5,
-         status=$6, winner=$7, prep_deadline_at=$8, version=version+1
-       WHERE code=$1 AND version=$9`,
+         status=$6, winner=$7, prep_deadline_at=$8, last_transition=$9, version=version+1
+       WHERE code=$1 AND version=$10`,
       [
         room.code,
         JSON.stringify(dehydrateMembers(room.spectators)),
@@ -732,6 +821,7 @@ export class PgRoomStore {
         status,
         winner,
         room.prepDeadlineAt,
+        room.lastTransition ? JSON.stringify(room.lastTransition) : null,
         room.version,
       ],
     );
@@ -1128,6 +1218,9 @@ export class PgRoomStore {
             room.version + 1,
             out.room.state,
             out.room.state.winner,
+            out.room.lastTransition?.fromVersion === room.version
+              ? out.room.lastTransition
+              : null,
           )) ?? undefined;
         }
         for (const event of out.events ?? []) await appendClusterEvent(db, event);
@@ -1374,6 +1467,7 @@ export class PgRoomStore {
           rulesetVersion: this.rulesetVersion,
           isPrivate: false,
           allowFutureCards: choice.allowFutureCards,
+          lastTransition: null,
         };
         await db.query(
           `INSERT INTO rooms
@@ -1503,6 +1597,7 @@ export class PgRoomStore {
           rulesetVersion: this.rulesetVersion,
           isPrivate: false,
           allowFutureCards: choice.allowFutureCards,
+          lastTransition: null,
         };
         await db.query(
           `INSERT INTO rooms
@@ -2297,7 +2392,10 @@ export class PgRoomStore {
    *  expired before auto-pass is considered at any non-Runechant boundary.
    *  Bot seats always auto-pass empty windows. Automatic steps write no undo
    *  snapshots. */
-  private applyServerShortcuts(room: RoomRow): void {
+  private applyServerShortcuts(
+    room: RoomRow,
+    transitionEvents?: EngineTransitionMove[],
+  ): void {
     const autoPasses = (seat: number): boolean =>
       room.seats[seat]?.controller === "bot" || room.seats[seat]?.priorityMode === "auto-pass";
     const hasRunechantSkip = (): boolean => room.seats.some((seat) => seat?.runechantSkip === true);
@@ -2329,6 +2427,7 @@ export class PgRoomStore {
       if (!intent) return;
       const res = engineApplyIntent(state, seat, intent);
       if (!res.ok) return;
+      transitionEvents?.push(...res.events);
       room.state = res.state;
     }
   }
@@ -2352,7 +2451,9 @@ export class PgRoomStore {
         && room.state.winner === null
         && isEmptyPriorityWindow(room.state, seat);
       if (!shouldPass) return { room, result: { autoPassed: false }, versionNeutral: true };
-      this.applyServerShortcuts(room);
+      const events: EngineTransitionMove[] = [];
+      this.applyServerShortcuts(room, events);
+      room.lastTransition = { fromVersion: room.version, kind: "forward", events };
       return { room, result: { autoPassed: true }, replay: { kind: "frame" } };
     }, command ? {
       meta: command,
@@ -2389,7 +2490,9 @@ export class PgRoomStore {
         && legalIntents(room.state, seat).some((candidate) => candidate.kind === "skip-runechant");
       if (!choicePresented) return { room, result: { advanced: false }, versionNeutral: true };
       room.seats[seat]!.runechantSkip = true;
-      this.applyServerShortcuts(room);
+      const events: EngineTransitionMove[] = [];
+      this.applyServerShortcuts(room, events);
+      room.lastTransition = { fromVersion: room.version, kind: "forward", events };
       return { room, result: { advanced: true }, replay: { kind: "frame" } };
     }, command ? {
       meta: command,
@@ -2432,7 +2535,9 @@ export class PgRoomStore {
         ? room.state
         : undefined;
       room.state = res.state;
-      this.applyServerShortcuts(room);
+      const events = [...res.events];
+      this.applyServerShortcuts(room, events);
+      room.lastTransition = { fromVersion: room.version, kind: "forward", events };
       // any applied intent counts as activity (idle-claim timer)
       const seatRow = room.seats[seat];
       if (!seatRow) return { error: "not a player in this room" };
@@ -2473,7 +2578,9 @@ export class PgRoomStore {
       if (!res.ok) return { error: res.error };
       const snapshot = intent.kind === "stage-defenders" ? undefined : room.state;
       room.state = res.state;
-      this.applyServerShortcuts(room);
+      const events = [...res.events];
+      this.applyServerShortcuts(room, events);
+      room.lastTransition = { fromVersion: room.version, kind: "forward", events };
       const botSeat = seat as SeatIndex;
       const lastActionAt = Date.now();
       room.seats[botSeat]!.lastActionAt = lastActionAt;
@@ -2578,6 +2685,7 @@ export class PgRoomStore {
         // opted into auto-pass after the snapshot was written; pass it out
         // in this commit rather than stranding the seat until a resend.
         this.applyServerShortcuts(room);
+        room.lastTransition = { fromVersion: room.version, kind: "replace", events: [] };
         updateGc(room);
         if (!(await this.save(room, db))) throw VERSION_CONFLICT;
         await db.query(
@@ -2590,6 +2698,7 @@ export class PgRoomStore {
           room.version + 1,
           room.state,
           room.state.winner,
+          room.lastTransition,
         );
         await appendClusterEvent(db, {
           type: "room",
@@ -2974,6 +3083,15 @@ export function stateMessage(room: RoomRow, seat: number | null): ServerMessage 
     version: room.version,
     // seat null = spectator: both hands/hidden zones projected as counts only
     view: projectStateFor(room.state, seat, room.code),
+    ...(room.lastTransition?.fromVersion === room.version - 1
+      ? {
+          transition: {
+            fromVersion: room.lastTransition.fromVersion,
+            kind: room.lastTransition.kind,
+            events: projectTransitionEvents(room.lastTransition.events, seat),
+          },
+        }
+      : {}),
     playerProfiles: [profile(room.seats[0]), profile(room.seats[1])],
     yourSeat: seat,
     legal: seat === null ? [] : legalIntents(room.state, seat),

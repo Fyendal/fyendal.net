@@ -6,6 +6,8 @@ import type {
   Format,
   GameIntent,
   GameStatsView,
+  GameTransitionMove,
+  GameTransitionView,
   GameTurnStatsView,
   GameView,
   OnHitEffectView,
@@ -454,6 +456,42 @@ function cardView(value: unknown, depth = 0): value is CardView {
     && optional(card.life, finite) && optional(card.hidden, (v): v is boolean => typeof v === "boolean");
 }
 
+const TRANSITION_ZONE_KINDS = new Set([
+  "hand", "deck", "arsenal", "pitch", "graveyard", "banish", "soul",
+  "board", "equipment", "weapon", "stack", "chain",
+]);
+
+function gameTransitionZone(value: unknown): boolean {
+  const zone = object(value);
+  return !!zone && exactKeys(zone, ["kind", "seat", "position"], ["kind", "seat"])
+    && TRANSITION_ZONE_KINDS.has(String(zone.kind)) && seat(zone.seat)
+    && optional(zone.position, (position): position is "top" | "bottom" => (
+      position === "top" || position === "bottom"
+    ))
+    && (zone.position === undefined || zone.kind === "deck");
+}
+
+function gameTransitionMove(value: unknown): value is GameTransitionMove {
+  const move = object(value);
+  return !!move && exactKeys(move, ["kind", "from", "to", "count", "instanceId"], ["kind", "from", "to", "count"])
+    && move.kind === "move"
+    && (move.from === null || gameTransitionZone(move.from))
+    && (move.to === null || gameTransitionZone(move.to))
+    && (move.from !== null || move.to !== null)
+    && nonNegativeInteger(move.count) && Number(move.count) > 0 && Number(move.count) <= MAX_CARDS
+    && optional(move.instanceId, instanceId);
+}
+
+function gameTransitionView(value: unknown): value is GameTransitionView {
+  const transition = object(value);
+  return !!transition
+    && exactKeys(transition, ["fromVersion", "kind", "events"])
+    && nonNegativeInteger(transition.fromVersion)
+    && (transition.kind === "forward" || transition.kind === "replace")
+    && array(transition.events, gameTransitionMove, 512)
+    && (transition.kind === "forward" || transition.events.length === 0);
+}
+
 const cardViews = (value: unknown): value is CardView[] => array(value, cardView, MAX_CARDS);
 
 function playerView(value: unknown): value is PlayerView {
@@ -772,8 +810,9 @@ export function decodeServerMessage(value: unknown): ServerMessage | null {
         && seat(message.seat) && EMOTE_MESSAGES.has(String(message.message));
       break;
     case "state":
-      valid = exactKeys(message, ["type", "version", "view", "playerProfiles", "yourSeat", "legal", "actionCandidates", "spectators", "lastActionAt", "botGame"], ["type", "version", "view", "playerProfiles", "yourSeat", "legal", "lastActionAt"])
+      valid = exactKeys(message, ["type", "version", "view", "transition", "playerProfiles", "yourSeat", "legal", "actionCandidates", "spectators", "lastActionAt", "botGame"], ["type", "version", "view", "playerProfiles", "yourSeat", "legal", "lastActionAt"])
         && version() && decodeGameView(message.view) !== null && nullableSeat(message.yourSeat)
+        && optional(message.transition, gameTransitionView)
         && Array.isArray(message.playerProfiles) && message.playerProfiles.length === 2
         && message.playerProfiles.every(playerProfile)
         && array(message.legal, decodeGameIntentValue, MAX_CARDS)
@@ -816,13 +855,47 @@ export function decodeServerMessage(value: unknown): ServerMessage | null {
 
 export function decodeReplayFile(value: unknown): ReplayFile | null {
   const replay = object(value);
-  if (!replay || !exactKeys(replay, ["version", "seat", "views"])) return null;
-  if (replay.version !== 1 || !nullableSeat(replay.seat) || !Array.isArray(replay.views)
-    || replay.views.length > MAX_REPLAY_VIEWS) return null;
-  const views = replay.views.map(decodeGameView);
-  return views.every((view): view is GameView => view !== null)
-    ? { version: 1, seat: replay.seat, views }
+  if (!replay || !nullableSeat(replay.seat)) return null;
+  if (replay.version === 1) {
+    if (!exactKeys(replay, ["version", "seat", "views"]) || !Array.isArray(replay.views)
+      || replay.views.length > MAX_REPLAY_VIEWS) return null;
+    const views = replay.views.map(decodeGameView);
+    return views.every((view): view is GameView => view !== null)
+      ? { version: 1, seat: replay.seat, views }
+      : null;
+  }
+  if (replay.version !== 2 || !exactKeys(replay, ["version", "seat", "frames"])
+    || !Array.isArray(replay.frames) || replay.frames.length > MAX_REPLAY_VIEWS) return null;
+  const frames = replay.frames.map((value, index) => {
+    const frame = object(value);
+    if (!frame || !exactKeys(frame, ["view", "transition"]) || !("transition" in frame)) return null;
+    const view = decodeGameView(frame.view);
+    const transition = frame.transition === null
+      ? null
+      : gameTransitionView({
+          ...object(frame.transition),
+          fromVersion: index === 0 ? 0 : index - 1,
+        })
+        ? frame.transition as Omit<GameTransitionView, "fromVersion">
+        : null;
+    if (!view || (frame.transition !== null && transition === null)) return null;
+    return { view, transition };
+  });
+  return frames.every((frame): frame is NonNullable<typeof frame> => frame !== null)
+    ? { version: 2, seat: replay.seat, frames }
     : null;
+}
+
+export function replayFileViews(file: ReplayFile): GameView[] {
+  return file.version === 1 ? file.views : file.frames.map((frame) => frame.view);
+}
+
+export function replayFileTransitions(
+  file: ReplayFile,
+): Array<Omit<GameTransitionView, "fromVersion"> | null> {
+  return file.version === 1
+    ? file.views.map(() => null)
+    : file.frames.map((frame) => frame.transition);
 }
 
 export const decodeApiError: Decoder<ApiError> = (value) => {

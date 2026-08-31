@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { CARD_BACK_IMAGE_URL, cardImageUrl } from "../Card.js";
 import {
   MOTION_CONNECT_MS,
-  MOTION_TRAVEL_MS,
+  motionFlightDurationMs,
   type GameMotionBatch,
   type MotionConnector,
   type MotionFlight,
@@ -23,7 +23,8 @@ function rectStyle(rect: MotionRect): CSSProperties {
 }
 
 function visualFaceUrl(visual: MotionVisual): string | null {
-  return visual.kind === "face" || visual.kind === "back-reveal"
+  return visual.kind === "face" || visual.kind === "face-conceal"
+    || visual.kind === "back-reveal"
     ? cardImageUrl(visual.card.cardId)
     : null;
 }
@@ -53,7 +54,7 @@ function flightStyle(flight: MotionFlight): MotionStyle {
     "--motion-scale-x": String(flight.end.width / flight.start.width),
     "--motion-scale-y": String(flight.end.height / flight.start.height),
     "--motion-delay": `${flight.delayMs}ms`,
-    "--motion-duration": `${MOTION_TRAVEL_MS}ms`,
+    "--motion-duration": `${motionFlightDurationMs(flight)}ms`,
   };
 }
 
@@ -85,7 +86,9 @@ function MotionFlightOverlay({
 }) {
   return (
     <div
-      className={`game-motion-flight game-motion-flight-${flight.mode}`}
+      className={`game-motion-flight game-motion-flight-${flight.mode}${
+        flight.holdAtSource ? " game-motion-flight-hold-source" : ""
+      }`}
       style={flightStyle(flight)}
       onAnimationEnd={(event: AnimationEvent<HTMLDivElement>) => {
         // Ignore the nested back/face reveal animations. The wrapper's
@@ -99,6 +102,18 @@ function MotionFlightOverlay({
         visual={flight.visual}
         count={flight.showCount ? flight.count : 1}
       />
+    </div>
+  );
+}
+
+function MotionDeckCover({ flight }: { flight: MotionFlight }) {
+  if (!flight.destinationCoverVisual) return null;
+  return (
+    <div
+      className="game-motion-deck-cover"
+      style={rectStyle(flight.end)}
+    >
+      <MotionCardVisual visual={flight.destinationCoverVisual} count={1} />
     </div>
   );
 }
@@ -160,6 +175,9 @@ export function GameMotionLayer({
             key={flight.id}
             onFlightArrive={onFlightArrive}
           />
+        ))}
+        {foregroundFlights.map((flight) => (
+          <MotionDeckCover flight={flight} key={`${flight.id}:deck-cover`} />
         ))}
         {batch.pulses.map((pulse) => (
           <div

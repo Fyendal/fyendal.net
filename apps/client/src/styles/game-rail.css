@@ -188,7 +188,7 @@
   top: 55px;
   left: var(--mat-cx);
   transform: translateX(-50%);
-  z-index: 5;
+  z-index: 10;
   pointer-events: none;
   padding: 6px 18px;
   border-radius: 23px;
@@ -198,10 +198,19 @@
   font-size: 14px;
   font-variant: small-caps;
   letter-spacing: 2px;
-  animation: waiting-pulse 2s ease-in-out infinite;
+  opacity: 0;
+  /* End-turn snapshots may briefly have no local intent while the next
+     priority state is being projected. Do not flash a waiting pill for that
+     transient frame. */
+  animation: waiting-pulse 2s ease-in-out 250ms infinite forwards;
 }
 @keyframes waiting-pulse {
+  0%, 100% { opacity: 1; }
   50% { opacity: 0.55; }
+}
+.waiting-hidden {
+  visibility: hidden;
+  animation: none;
 }
 
 .log {

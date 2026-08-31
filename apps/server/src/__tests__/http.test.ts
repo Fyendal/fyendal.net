@@ -309,7 +309,7 @@ describe("Fabrary URL imports", () => {
       ...(pool.sideboard ?? []).map(line),
     ].join("\n");
     const replacedLine = line(pool.deck[0]!);
-    const changedText = originalText.replace(replacedLine, "1x Art of War (Red)");
+    const changedText = originalText.replace(replacedLine, "1x Art of War (Yellow)");
     expect(changedText).not.toBe(originalText);
 
     const originalUrl = "https://fabrary.net/decks/01G76G1DP5VVB050BT3YV9TQ7K";
@@ -578,10 +578,10 @@ describe("replay transport compression", () => {
     });
     expect(completed.status).toBe(200);
     const completedBody = await completed.json() as {
-      replay: { views: Array<{ players: [{ hand: unknown[] }, { hand: unknown[] }] }> };
+      replay: { frames: Array<{ view: { players: [{ hand: unknown[] }, { hand: unknown[] }] } }> };
     };
-    expect(completedBody.replay.views[0]!.players[0].hand.length).toBeGreaterThan(0);
-    expect(completedBody.replay.views[0]!.players[1].hand.length).toBeGreaterThan(0);
+    expect(completedBody.replay.frames[0]!.view.players[0].hand.length).toBeGreaterThan(0);
+    expect(completedBody.replay.frames[0]!.view.players[1].hand.length).toBeGreaterThan(0);
   });
 });
 

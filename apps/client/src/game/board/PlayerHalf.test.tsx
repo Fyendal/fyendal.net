@@ -29,7 +29,11 @@ const player: PlayerView = {
   ],
 };
 
-function renderPlayerHalf(playerView: PlayerView, mine = true): string {
+function renderPlayerHalf(
+  playerView: PlayerView,
+  mine = true,
+  visibleDeckTop?: PlayerView["visibleDeckTop"],
+): string {
   return renderToStaticMarkup(
     <PlayerHalf
       player={playerView}
@@ -38,6 +42,7 @@ function renderPlayerHalf(playerView: PlayerView, mine = true): string {
       ongoing={[]}
       gameOver={false}
       replaying={false}
+      visibleDeckTop={visibleDeckTop}
       deckShuffling={false}
       interaction={{
         legal: {
@@ -80,12 +85,25 @@ describe("PlayerHalf", () => {
     );
     expect(html).toContain('data-motion-zone="0:board"');
     expect(html).toContain('data-motion-zone="0:deck"');
+    expect(html).toContain('data-motion-zone-anchor="0:deck"');
     expect(html).toContain('data-motion-zone="0:pitch"');
     expect(html).toContain('data-motion-zone="0:arsenal"');
     expect(html).toContain('data-motion-zone="0:graveyard"');
     expect(html).toContain('data-motion-zone="0:banish"');
     expect(html).toContain('data-motion-card="0:board:2"');
     expect(html).toContain('data-motion-card="0:board:3"');
+  });
+
+  it("uses a visible deck-top card as the exact deck motion endpoint", () => {
+    const top = { instanceId: 20, cardId: "TST-TOP", owner: 0 };
+    const html = renderPlayerHalf({
+      ...player,
+      deckCount: 3,
+    }, true, top);
+
+    expect(html).toMatch(
+      /data-motion-card="0:deck:20"[^>]*data-motion-zone-anchor="0:deck"/,
+    );
   });
 
   it("anchors every grouped copy to the wrapper that also owns its count badge", () => {

@@ -332,6 +332,7 @@ export function PlayerHalf({
           <CardFace
             card={presentedDeckTop}
             size="zone"
+            motionZoneAnchor={motionLocationKey({ kind: "deck", seat: player.seat })}
             motionKey={motionPresentationKey(
               { kind: "deck", seat: player.seat },
               presentedDeckTop.instanceId,
@@ -351,7 +352,11 @@ export function PlayerHalf({
               : undefined}
           />
         ) : (
-          <CardBack label="Deck" count={player.deckCount} />
+          <CardBack
+            label="Deck"
+            count={player.deckCount}
+            motionZoneAnchor={motionLocationKey({ kind: "deck", seat: player.seat })}
+          />
         )}
         {deckShuffling ? (
           <>

@@ -37,6 +37,11 @@ import {
 } from "./zoneQueries.js";
 
 import { controlledPermanents, hookSources, observingHookSources } from "./sourceQueries.js";
+import {
+  transitionZone,
+  transitionZoneFromEngineZone,
+  transitionZoneIsPrivate,
+} from "./transitions.js";
 
 /** Reveal a group as one event. Reveals make the selected identities public
  * for the event but do not move or otherwise mutate the cards. */
@@ -1934,6 +1939,19 @@ export function makeCtx(
       const toBottom = found.owner.flags.topDeckToBottom === true;
       if (toBottom) found.owner.deck.push(found.card);
       else found.owner.deck.unshift(found.card);
+      const source = transitionZoneFromEngineZone(found.fromZone, found.owner.seat);
+      runtime.transitions.move(
+        found.card,
+        source,
+        transitionZone("deck", found.owner.seat, toBottom ? "bottom" : "top"),
+        {
+          from: source !== null && transitionZoneIsPrivate(
+            source.kind,
+            found.card.faceDown === true,
+          ),
+          to: true,
+        },
+      );
       if (found.fromZone === "graveyard") {
         runtime.events.fireCardLeavesGraveyard(state, found.owner.seat, found.card, "deck");
       }
@@ -1951,7 +1969,25 @@ export function makeCtx(
       const found = runtime.commands.removeFromOwnerZones(state, instanceId);
       if (!found) return false;
       const index = Math.min(depth - 1, found.owner.deck.length);
+      const position = index === 0
+        ? "top" as const
+        : index === found.owner.deck.length
+          ? "bottom" as const
+          : undefined;
       found.owner.deck.splice(index, 0, found.card);
+      const source = transitionZoneFromEngineZone(found.fromZone, found.owner.seat);
+      runtime.transitions.move(
+        found.card,
+        source,
+        transitionZone("deck", found.owner.seat, position),
+        {
+          from: source !== null && transitionZoneIsPrivate(
+            source.kind,
+            found.card.faceDown === true,
+          ),
+          to: true,
+        },
+      );
       if (found.fromZone === "graveyard") {
         runtime.events.fireCardLeavesGraveyard(state, found.owner.seat, found.card, "deck");
       }

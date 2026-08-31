@@ -18,6 +18,11 @@ import { controlledPermanents, hookSources } from "./sourceQueries.js";
 
 import { stampControlledName } from "./cardLifecycle.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
+import {
+  transitionZone,
+  transitionZoneFromEngineZone,
+  transitionZoneIsPrivate,
+} from "./transitions.js";
 
 /** A card entering the graveyard is a new object (CR 3.0.9). Temporary
  * permission to play its previous object from an extra zone, together with
@@ -148,22 +153,54 @@ function enterGraveyard(
 export function moveToGraveyard(state: GameStateInternal,
   runtime: EngineRuntime, card: CardInstance, from = "chain", causedBySeat?: number): void {
   const script = scriptOf(state, card.cardId, card);
+  const owner = state.players[card.owner] as PlayerState;
+  const source = transitionZoneFromEngineZone(
+    from,
+    owner.seat,
+    from === "deck" ? "top" : undefined,
+  );
+  const sourcePrivate = source !== null
+    && transitionZoneIsPrivate(source.kind, card.faceDown === true);
   const replacement = card.temporaryGraveyardReplacement ?? (typeof script?.graveyardReplacement === "function"
     ? script.graveyardReplacement(runtime.makeCtx(state, card.owner, card, currentLink(state)))
     : script?.graveyardReplacement);
   if (replacement === "bottom-of-deck") {
-    (state.players[card.owner] as PlayerState).deck.push(card);
+    owner.deck.push(card);
+    runtime.transitions.move(
+      card,
+      source,
+      transitionZone("deck", owner.seat, "bottom"),
+      { from: sourcePrivate, to: true },
+    );
     logPublic(state, `${nameOf(state, card.cardId)} is put on the bottom of the deck`);
     return;
   }
   if (replacement === "banish") {
+    runtime.transitions.move(
+      card,
+      source,
+      transitionZone("banish", owner.seat),
+      { from: sourcePrivate, to: card.faceDown === true },
+    );
     enterBanish(state, runtime, card, from);
     return;
   }
   if (replacement === "cease-to-exist") {
+    runtime.transitions.move(card, source, null, { from: sourcePrivate });
     logPublic(state, `${nameOf(state, card.cardId)} ceases to exist`);
     return;
   }
+  const ceases = dataOf(state, card.cardId).cardType === "token"
+    || (!cardAbilitiesSuppressed(state, card)
+      && (dataOf(state, card.cardId).keywords ?? []).some(
+        (keyword) => keyword.trim().toLowerCase() === "ephemeral",
+      ));
+  runtime.transitions.move(
+    card,
+    source,
+    ceases ? null : transitionZone("graveyard", owner.seat),
+    { from: sourcePrivate },
+  );
   enterGraveyard(state, runtime, card, from, causedBySeat);
 }
 
@@ -212,6 +249,11 @@ export function destroyPermanent(state: GameStateInternal,
     }
   }
   const p = state.players[controllerSeat] as PlayerState;
+  const sourceKind = Object.values(p.equipment).some((candidate) => candidate?.instanceId === card.instanceId)
+    ? "equipment" as const
+    : p.weapons.some((candidate) => candidate.instanceId === card.instanceId)
+      ? "weapon" as const
+      : "board" as const;
   for (const [slot, eq] of Object.entries(p.equipment)) {
     if (eq?.instanceId === card.instanceId) {
       delete p.equipment[slot as keyof typeof p.equipment];
@@ -235,6 +277,11 @@ export function destroyPermanent(state: GameStateInternal,
       (keyword) => keyword.trim().toLowerCase() === "incarnate",
     );
   if (incarnate) {
+    runtime.transitions.move(
+      card,
+      transitionZone(sourceKind, controllerSeat),
+      null,
+    );
     fireLeaveArena(state, runtime, controllerSeat, card, "cease-to-exist");
     logPublic(state, `${nameOf(state, card.cardId)} ceases to exist (Incarnate)`);
     return true;
@@ -536,6 +583,16 @@ export function putCardOnDeckBottom(
   const found = removeFromOwnerZones(state, instanceId);
   if (!found) return false;
   found.owner.deck.push(found.card);
+  const source = transitionZoneFromEngineZone(found.fromZone, found.owner.seat);
+  runtime.transitions.move(
+    found.card,
+    source,
+    transitionZone("deck", found.owner.seat, "bottom"),
+    {
+      from: source !== null && transitionZoneIsPrivate(source.kind, found.card.faceDown === true),
+      to: true,
+    },
+  );
   if (found.fromZone === "graveyard") {
     runtime.events.fireCardLeavesGraveyard(state, found.owner.seat, found.card, "deck");
   }

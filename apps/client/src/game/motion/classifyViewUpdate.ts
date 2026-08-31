@@ -44,6 +44,9 @@ export function classifyViewUpdate(
   if (update.transition === "replace") {
     return { kind: "settle", reason: "replacement" };
   }
+  if (update.gameTransition?.kind === "replace") {
+    return { kind: "settle", reason: "replacement" };
+  }
   if (update.transition === "jump") return { kind: "settle", reason: "jump" };
 
   const relationship = update.transition === "backward"

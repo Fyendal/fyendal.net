@@ -11,6 +11,7 @@ import type { ViewUpdate } from "../../store/types.js";
 import type { MotionPreference } from "../../storage.js";
 import { classifyViewUpdate } from "./classifyViewUpdate.js";
 import { detectGameMotionEvents } from "./detectMotionEvents.js";
+import { transitionMotionEvents } from "./transitionMotionEvents.js";
 import {
   completeMotionBatch,
   EMPTY_MOTION_BATCH_QUEUE,
@@ -151,7 +152,14 @@ export function useGameMotion({
     const classification = classifyViewUpdate(previousView, view, viewUpdate);
     let nextBatch: GameMotionBatch | null = null;
     if (previousView && classification.kind === "animate") {
-      const events = detectGameMotionEvents(previousView, view);
+      const events = viewUpdate.gameTransition
+        ? transitionMotionEvents(
+            previousView,
+            view,
+            viewUpdate.gameTransition,
+            classification.direction,
+          )
+        : detectGameMotionEvents(previousView, view);
       nextBatch = resolveMotionBatch(
         events,
         previousAnchorsRef.current,

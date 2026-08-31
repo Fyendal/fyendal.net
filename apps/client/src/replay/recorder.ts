@@ -1,5 +1,9 @@
-import type { GameView, ReplayFile } from "@fyendal/shared";
-import { decodeReplayFile } from "@fyendal/protocol";
+import type { GameTransitionView, GameView, ReplayFile } from "@fyendal/shared";
+import {
+  decodeReplayFile,
+  replayFileTransitions,
+  replayFileViews,
+} from "@fyendal/protocol";
 import { REPLAY_STORAGE_PREFIX, replayStorageKey } from "../storage.js";
 
 /** Minimal storage interface, so the recorder is testable without a DOM. */
@@ -73,6 +77,7 @@ export const PERSIST_EVERY = 25;
  */
 export class ReplayRecorder {
   private views: GameView[] = [];
+  private transitions: Array<Omit<GameTransitionView, "fromVersion"> | null> = [];
   private seat: number | null = null;
   private sincePersist = 0;
   private storageFailed = false;
@@ -86,7 +91,8 @@ export class ReplayRecorder {
       if (raw) {
         const saved = decodeLocalReplay(raw);
         if (saved) {
-          this.views = saved.views;
+          this.views = replayFileViews(saved);
+          this.transitions = replayFileTransitions(saved);
           this.seat = saved.seat;
         } else {
           storage.removeItem(replayStorageKey(code));
@@ -109,11 +115,14 @@ export class ReplayRecorder {
    * Append a frame. Reconnects re-send the current state, so a frame identical
    * to the previous one is skipped. Returns true when a frame was added.
    */
-  record(view: GameView, seat: number | null): boolean {
+  record(view: GameView, seat: number | null, transition?: GameTransitionView): boolean {
     this.seat = seat;
     const last = this.views[this.views.length - 1];
     if (last && JSON.stringify(last) === JSON.stringify(view)) return false;
     this.views.push(view);
+    this.transitions.push(transition
+      ? { kind: transition.kind, events: transition.events }
+      : null);
     if (++this.sincePersist >= PERSIST_EVERY) this.persist();
     return true;
   }
@@ -130,7 +139,8 @@ export class ReplayRecorder {
 
   /** Replace a partial local recording with the authoritative server copy. */
   replace(file: ReplayFile): void {
-    this.views = [...file.views];
+    this.views = replayFileViews(file);
+    this.transitions = replayFileTransitions(file);
     this.seat = file.seat;
     this.sincePersist = 0;
     this.storageFailed = false;
@@ -138,7 +148,14 @@ export class ReplayRecorder {
   }
 
   toFile(): ReplayFile {
-    return { version: 1, seat: this.seat, views: [...this.views] };
+    return {
+      version: 2,
+      seat: this.seat,
+      frames: this.views.map((view, index) => ({
+        view,
+        transition: this.transitions[index] ?? null,
+      })),
+    };
   }
 
   /** All recorded frames (for end-of-game stats). */
@@ -154,6 +171,7 @@ export class ReplayRecorder {
       // storage unavailable — nothing to clean up
     }
     this.views = [];
+    this.transitions = [];
   }
 
   private persist(): void {
@@ -179,7 +197,7 @@ export function parseReplayFile(
   try {
     const parsed: unknown = JSON.parse(text);
     const data = decodeReplayFile(parsed);
-    if (!data || data.views.length === 0) {
+    if (!data || replayFileViews(data).length === 0) {
       return { ok: false, error: "not a valid replay file" };
     }
     return { ok: true, file: data };

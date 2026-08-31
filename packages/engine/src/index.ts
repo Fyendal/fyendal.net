@@ -1,4 +1,4 @@
-import { engineRuntime } from "./engineRuntime.js";
+import { createEngineRuntime, engineRuntime } from "./engineRuntime.js";
 import type { GameIntent, MeldSide } from "@fyendal/shared";
 import { activateAbility, answerChoice, playCard } from "./actions.js";
 import { declareTail } from "./attacks.js";
@@ -68,9 +68,15 @@ import { mayPlayFromArsenal, mayPlayFromZone } from "./playRules.js";
 import { scriptedPaymentOptions } from "./resources.js";
 import { opposingActionsProhibited, ownedCardActionProhibited } from "./restrictions.js";
 import { checkStateBased } from "./stateBased.js";
+import type { EngineRuntime } from "./runtimePorts.js";
+import {
+  createTransitionCollector,
+  projectTransitionEvents,
+  type EngineTransitionMove,
+} from "./transitions.js";
 
 export type ApplyResult =
-  | { ok: true; state: GameStateInternal }
+  | { ok: true; state: GameStateInternal; events: EngineTransitionMove[] }
   | { ok: false; error: string };
 
 /** Run start-of-game hero effects in seat order. A setup effect may pause on
@@ -113,21 +119,22 @@ function continueGameSetup(state: GameStateInternal, fromSeat: number): void {
 /** Run the deferred continuation after a scripted choice resolves. */
 function afterChoice(
   state: GameStateInternal,
+  runtime: EngineRuntime,
   resume: PendingDecisionState["resume"],
 ): void {
-  if (resume?.kind === "after-declare") declareTail(state, engineRuntime);
+  if (resume?.kind === "after-declare") declareTail(state, runtime);
   else if (resume?.kind === "start-reaction-step") beginReactionStep(state);
-  else if (resume?.kind === "continue-stack") continueStack(state, engineRuntime, resume.seat);
-  else if (resume?.kind === "finish-wager-result") resumeWagerResult(state, engineRuntime, resume.wagerIndex);
+  else if (resume?.kind === "continue-stack") continueStack(state, runtime, resume.seat);
+  else if (resume?.kind === "finish-wager-result") resumeWagerResult(state, runtime, resume.wagerIndex);
   else if (resume?.kind === "continue-wager-loss-replacements") {
     resumeWagerLossReplacements(
-      state, engineRuntime,
+      state, runtime,
       resume.wagerIndex,
       resume.remainingSourceInstanceIds,
     );
   }
-  else if (resume?.kind === "continue-wager-prizes") resumeWagerPrizes(state, engineRuntime, resume.wagerIndex);
-  else if (resume?.kind === "reopen-reaction") holdReactionWindow(state, engineRuntime, resume.seat);
+  else if (resume?.kind === "continue-wager-prizes") resumeWagerPrizes(state, runtime, resume.wagerIndex);
+  else if (resume?.kind === "reopen-reaction") holdReactionWindow(state, runtime, resume.seat);
   else if (resume?.kind === "game-setup") continueGameSetup(state, resume.nextSeat);
 }
 
@@ -135,6 +142,7 @@ function afterChoice(
  * action/window call contract at every decision handler. */
 function resumeAbilityActivation(
   state: GameStateInternal,
+  runtime: EngineRuntime,
   resume: NonNullable<PendingDecisionState["activationCost"]>,
   selections: {
     soulInstanceIds?: number[];
@@ -149,7 +157,7 @@ function resumeAbilityActivation(
     selections.discardInstanceIds ?? resume.discardInstanceIds ?? [];
   return resume.mode === "window"
     ? activateWindowAbility(
-        state, engineRuntime,
+        state, runtime,
         resume.seat,
         resume.sourceInstanceId,
         resume.pitchInstanceIds,
@@ -162,7 +170,7 @@ function resumeAbilityActivation(
         resume.declaredVariableX,
       )
     : activateAbility(
-        state, engineRuntime,
+        state, runtime,
         resume.seat,
         resume.sourceInstanceId,
         resume.pitchInstanceIds,
@@ -180,6 +188,7 @@ function resumeAbilityActivation(
 /** Route a play intent to the handler for the current phase. */
 function dispatchPlay(
   state: GameStateInternal,
+  runtime: EngineRuntime,
   seat: number,
   card: CardInstance,
   fromArsenal: boolean,
@@ -194,7 +203,7 @@ function dispatchPlay(
 ): string | undefined {
   if (state.phase === "layer") {
     return playWindowInstant(
-      state, engineRuntime,
+      state, runtime,
       seat,
       card.instanceId,
       fromArsenal,
@@ -208,7 +217,7 @@ function dispatchPlay(
   }
   if (state.phase === "reaction") {
     return playReaction(
-      state, engineRuntime,
+      state, runtime,
       seat,
       card,
       fromArsenal,
@@ -219,7 +228,7 @@ function dispatchPlay(
     );
   }
   return playCard(
-    state, engineRuntime,
+    state, runtime,
     seat,
     card.instanceId,
     pitchInstanceIds,
@@ -241,6 +250,7 @@ function dispatchPlay(
  */
 function answerScriptedDecision(
   state: GameStateInternal,
+  runtime: EngineRuntime,
   seat: number,
   optionId: string,
 ): string | undefined | null {
@@ -286,7 +296,7 @@ function answerScriptedDecision(
     };
     const soleOption = options.length === 1 ? options[0] : undefined;
     return soleOption && payments[soleOption]?.pitchIds.length === 0
-      ? answerScriptedDecision(state, seat, soleOption)
+      ? answerScriptedDecision(state, runtime, seat, soleOption)
       : undefined;
   }
   if (pd.chooseHook === "engine-variable-play-payment" && pd.variablePlayCost?.paymentOptions) {
@@ -298,7 +308,7 @@ function answerScriptedDecision(
       const found = findCardAnywhere(state, pending.instanceId);
       if (!found) return "card not found";
       return playReaction(
-        state, engineRuntime,
+        state, runtime,
         pending.seat,
         found.card,
         pending.from === "arsenal",
@@ -312,7 +322,7 @@ function answerScriptedDecision(
     }
     if (pending.mode === "window") {
       return playWindowInstant(
-        state, engineRuntime,
+        state, runtime,
         pending.seat,
         pending.instanceId,
         pending.from === "arsenal",
@@ -325,7 +335,7 @@ function answerScriptedDecision(
       );
     }
     return playCard(
-      state, engineRuntime,
+      state, runtime,
       pending.seat,
       pending.instanceId,
       payment.pitchInstanceIds,
@@ -380,7 +390,7 @@ function answerScriptedDecision(
     };
     const soleOption = options.length === 1 ? options[0] : undefined;
     return soleOption && payments[soleOption]?.pitchIds.length === 0
-      ? answerScriptedDecision(state, seat, soleOption)
+      ? answerScriptedDecision(state, runtime, seat, soleOption)
       : undefined;
   }
   if (pd.chooseHook === "engine-variable-activation-payment" && pd.variableActivationCost?.paymentOptions) {
@@ -390,7 +400,7 @@ function answerScriptedDecision(
     state.pendingDecision = null;
     return pending.mode === "window"
       ? activateWindowAbility(
-          state, engineRuntime,
+          state, runtime,
           pending.seat,
           pending.sourceInstanceId,
           payment.pitchInstanceIds,
@@ -403,7 +413,7 @@ function answerScriptedDecision(
           pending.declaredX,
         )
       : activateAbility(
-          state, engineRuntime,
+          state, runtime,
           pending.seat,
           pending.sourceInstanceId,
           payment.pitchInstanceIds,
@@ -422,34 +432,34 @@ function answerScriptedDecision(
     const resume = pd.activationCost;
     const selected = [...(resume.discardInstanceIds ?? []), Number(optionId)];
     state.pendingDecision = null;
-    return resumeAbilityActivation(state, resume, { discardInstanceIds: selected });
+    return resumeAbilityActivation(state, runtime, resume, { discardInstanceIds: selected });
   }
   if (pd.chooseHook === "engine-activation-soul" && pd.activationCost) {
     if (!pd.options?.includes(optionId)) return "invalid option";
     const resume = pd.activationCost;
     const selected = [...(resume.soulInstanceIds ?? []), Number(optionId)];
     state.pendingDecision = null;
-    return resumeAbilityActivation(state, resume, { soulInstanceIds: selected });
+    return resumeAbilityActivation(state, runtime, resume, { soulInstanceIds: selected });
   }
   if (pd.activationCost?.effectCostInstanceIds !== undefined) {
     if (!pd.options?.includes(optionId)) return "invalid option";
     const resume = pd.activationCost;
     const selected = [...(resume.effectCostInstanceIds ?? []), Number(optionId)];
     state.pendingDecision = null;
-    return resumeAbilityActivation(state, resume, { effectCostInstanceIds: selected });
+    return resumeAbilityActivation(state, runtime, resume, { effectCostInstanceIds: selected });
   }
-  if (pd.chooseHook === "trigger-choice") return answerTriggerChoice(state, engineRuntime, seat, optionId);
-  if (pd.chooseHook === "trigger-order") return answerTriggerOrder(state, engineRuntime, seat, optionId);
+  if (pd.chooseHook === "trigger-choice") return answerTriggerChoice(state, runtime, seat, optionId);
+  if (pd.chooseHook === "trigger-order") return answerTriggerOrder(state, runtime, seat, optionId);
   if (pd.chooseHook === "engine-end-phase-pitch-order") {
-    return answerEndPhasePitchOrder(state, engineRuntime, seat, optionId);
+    return answerEndPhasePitchOrder(state, runtime, seat, optionId);
   }
-  if (pd.kind === "arsenal") return answerArsenal(state, engineRuntime, seat, optionId);
+  if (pd.kind === "arsenal") return answerArsenal(state, runtime, seat, optionId);
   if (pd.kind === "choose-target" || pd.kind === "choose-name" || pd.kind === "optional-effect") {
     const resume = pd.resume;
-    const err = answerChoice(state, engineRuntime, seat, optionId);
+    const err = answerChoice(state, runtime, seat, optionId);
     // a chained follow-up choice inherited the resume inside answerChoice;
     // the continuation runs when the follow-up is answered, not now
-    if (!err && !state.pendingDecision?.chooseHook) afterChoice(state, resume);
+    if (!err && !state.pendingDecision?.chooseHook) afterChoice(state, runtime, resume);
     return err;
   }
   return null;
@@ -502,6 +512,8 @@ export function applyIntent(
     }
   }
   const next = cloneState(state);
+  const transition = createTransitionCollector();
+  const runtime = createEngineRuntime(transition.recorder);
   let err: string | undefined;
 
   switch (intent.kind) {
@@ -519,7 +531,7 @@ export function applyIntent(
         err = "card not found";
         break;
       }
-      err = dispatchPlay(next, seat, found.card, false, intent.pitchInstanceIds, intent.meldSide, intent.targetAllyId, intent.boost, intent.boostCount, intent.asInstant, intent.alternativeCostCardInstanceIds, intent.targetCardInstanceId);
+      err = dispatchPlay(next, runtime, seat, found.card, false, intent.pitchInstanceIds, intent.meldSide, intent.targetAllyId, intent.boost, intent.boostCount, intent.asInstant, intent.alternativeCostCardInstanceIds, intent.targetCardInstanceId);
       break;
     }
     case "play-from-arsenal": {
@@ -533,16 +545,16 @@ export function applyIntent(
         err = "card may not be played from arsenal";
         break;
       }
-      err = dispatchPlay(next, seat, card, true, intent.pitchInstanceIds, intent.meldSide, intent.targetAllyId, intent.boost, intent.boostCount, intent.asInstant, intent.alternativeCostCardInstanceIds, intent.targetCardInstanceId);
+      err = dispatchPlay(next, runtime, seat, card, true, intent.pitchInstanceIds, intent.meldSide, intent.targetAllyId, intent.boost, intent.boostCount, intent.asInstant, intent.alternativeCostCardInstanceIds, intent.targetCardInstanceId);
       break;
     }
     case "play-from-zone": {
       const found = findCardAnywhere(next, intent.instanceId);
-      if (!found || !mayPlayFromZone(next, engineRuntime, found.card, intent.zone, seat)) {
+      if (!found || !mayPlayFromZone(next, runtime, found.card, intent.zone, seat)) {
         err = "card not found";
       } else if (next.phase === "layer") {
         err = playWindowInstant(
-          next, engineRuntime,
+          next, runtime,
           seat,
           intent.instanceId,
           false,
@@ -554,9 +566,9 @@ export function applyIntent(
           intent.alternativeCostCardInstanceIds,
         );
       } else if (next.phase === "reaction") {
-        err = playReaction(next, engineRuntime, seat, found.card, false, intent.pitchInstanceIds, intent.meldSide, intent.alternativeCostCardInstanceIds, intent.targetCardInstanceId, intent.zone);
+        err = playReaction(next, runtime, seat, found.card, false, intent.pitchInstanceIds, intent.meldSide, intent.alternativeCostCardInstanceIds, intent.targetCardInstanceId, intent.zone);
       } else {
-        err = playCard(next, engineRuntime, seat, intent.instanceId, intent.pitchInstanceIds, intent.zone, intent.meldSide, intent.targetAllyId, intent.boost, intent.boostCount, intent.asInstant, intent.alternativeCostCardInstanceIds, intent.targetCardInstanceId);
+        err = playCard(next, runtime, seat, intent.instanceId, intent.pitchInstanceIds, intent.zone, intent.meldSide, intent.targetAllyId, intent.boost, intent.boostCount, intent.asInstant, intent.alternativeCostCardInstanceIds, intent.targetCardInstanceId);
       }
       break;
     }
@@ -568,51 +580,51 @@ export function applyIntent(
           (c) => c.instanceId === intent.sourceInstanceId && c.owner === seat,
         );
         err = defending
-          ? activateDefenseAbility(next, engineRuntime, seat, intent.sourceInstanceId, intent.pitchInstanceIds)
-          : activateWindowAbility(next, engineRuntime, seat, intent.sourceInstanceId, intent.pitchInstanceIds, ai, [], false, [], intent.alternativeCostCardInstanceIds);
+          ? activateDefenseAbility(next, runtime, seat, intent.sourceInstanceId, intent.pitchInstanceIds)
+          : activateWindowAbility(next, runtime, seat, intent.sourceInstanceId, intent.pitchInstanceIds, ai, [], false, [], intent.alternativeCostCardInstanceIds);
       } else if (next.phase === "layer") {
-        err = activateWindowAbility(next, engineRuntime, seat, intent.sourceInstanceId, intent.pitchInstanceIds, ai, [], false, [], intent.alternativeCostCardInstanceIds);
+        err = activateWindowAbility(next, runtime, seat, intent.sourceInstanceId, intent.pitchInstanceIds, ai, [], false, [], intent.alternativeCostCardInstanceIds);
       } else {
-        err = activateAbility(next, engineRuntime, seat, intent.sourceInstanceId, intent.pitchInstanceIds, ai, intent.targetAllyId, [], false, [], intent.alternativeCostCardInstanceIds);
+        err = activateAbility(next, runtime, seat, intent.sourceInstanceId, intent.pitchInstanceIds, ai, intent.targetAllyId, [], false, [], intent.alternativeCostCardInstanceIds);
       }
       break;
     }
     case "pass": {
       const pd = next.pendingDecision;
       if (pd?.kind === "priority-window") {
-        err = passWindow(next, engineRuntime, seat);
+        err = passWindow(next, runtime, seat);
       } else if (pd?.kind === "optional-effect" || pd?.kind === "arsenal") {
         // scripted yes/no (and arsenal) decisions decline on pass — in ANY
         // phase; the phase-based reaction pass below only applies when no
         // scripted decision is open
-        const res = answerScriptedDecision(next, seat, pd.kind === "arsenal" ? "pass" : "no");
+        const res = answerScriptedDecision(next, runtime, seat, pd.kind === "arsenal" ? "pass" : "no");
         err = res === null ? "cannot pass now" : res;
       } else if (next.phase === "reaction") {
-        err = passReaction(next, engineRuntime, seat);
+        err = passReaction(next, runtime, seat);
       } else if (
         next.phase === "action" &&
         !pd &&
         !currentLink(next) &&
         seat === next.priorityPlayer
       ) {
-        if (!offerEndActionPriority(next, engineRuntime, seat)) endTurn(next, engineRuntime);
+        if (!offerEndActionPriority(next, runtime, seat)) endTurn(next, runtime);
       } else {
         // scripted decisions decline on "no"; a decision without "no" but with
         // an explicit "pass" option (look-at acknowledgments, opt, ordering
         // choices) declines on "pass" instead
         const options = next.pendingDecision?.options;
         const decline = options && !options.includes("no") && options.includes("pass") ? "pass" : "no";
-        const res = answerScriptedDecision(next, seat, decline);
+        const res = answerScriptedDecision(next, runtime, seat, decline);
         err = res === null ? "cannot pass now" : res;
       }
       break;
     }
     case "defend": {
-      err = assignDefenders(next, engineRuntime, seat, intent.instanceIds, intent.pitchInstanceIds ?? []);
+      err = assignDefenders(next, runtime, seat, intent.instanceIds, intent.pitchInstanceIds ?? []);
       break;
     }
     case "stage-defenders": {
-      err = stageDefenders(next, engineRuntime, seat, intent.instanceIds);
+      err = stageDefenders(next, runtime, seat, intent.instanceIds);
       break;
     }
     case "close-chain": {
@@ -630,15 +642,15 @@ export function applyIntent(
         err = "cannot close the combat chain now";
         break;
       }
-      closeChain(next, engineRuntime);
+      closeChain(next, runtime);
       if ((next.pendingTriggeredLayers?.length ?? 0) > 0) {
         next.stackResume ??= "begin-action";
-        continueStack(next, engineRuntime);
+        continueStack(next, runtime);
       }
       break;
     }
     case "choose": {
-      const res = answerScriptedDecision(next, seat, intent.optionId);
+      const res = answerScriptedDecision(next, runtime, seat, intent.optionId);
       err =
         res === null
           ? next.pendingDecision && next.pendingDecision.player === seat
@@ -648,20 +660,23 @@ export function applyIntent(
       break;
     }
     case "order-triggers": {
-      err = answerTriggerOrderList(next, engineRuntime, seat, intent.optionIds);
+      err = answerTriggerOrderList(next, runtime, seat, intent.optionIds);
       break;
     }
     case "skip-runechant": {
-      err = skipRunechantStep(next, engineRuntime, seat);
+      err = skipRunechantStep(next, runtime, seat);
       break;
     }
   }
 
   if (err) return { ok: false, error: err };
-  checkStateBased(next, engineRuntime);
+  checkStateBased(next, runtime);
   checkWin(next);
-  return { ok: true, state: next };
+  return { ok: true, state: next, events: transition.events };
 }
+
+export { projectTransitionEvents };
+export type { EngineTransitionMove };
 
 export function legalIntents(state: GameStateInternal, seat: number) {
   return legalIntentsImpl(state, engineRuntime, seat);
