@@ -306,6 +306,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
     code: string,
     created: boolean,
     keepQueued = false,
+    queuedFormat?: Format,
   ): Promise<void> {
     const ctx = queuedUsers.get(userId);
     if (!ctx || ctx.closed || ctx.user?.id !== userId) return;
@@ -334,6 +335,10 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
     }
     connections.attach(ctx, code, joined.seat, joined.token);
     const version = await markAttachedPresent(ctx);
+    // Do not announce a durable queue opener until its socket presence is
+    // committed. Another gateway may pair as soon as the client sees this
+    // message and starts waiting for an opponent.
+    if (queuedFormat) ctx.send({ type: "queued", format: queuedFormat });
     ctx.send(created
       ? { type: "room-created", code, seat: joined.seat, token: joined.token, version }
       : { type: "joined", code, seat: joined.seat, token: joined.token, version });
@@ -616,10 +621,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           return;
         }
         if (result.kind === "opened") {
-          // Establish the client's queued projection before room-created so it
-          // identifies this as a retained matchmaking room, not an invite room.
-          ctx.send({ type: "queued", format: msg.format });
-          await deliverMatch(ctx.user.id, result.code, true, true);
+          await deliverMatch(ctx.user.id, result.code, true, true, msg.format);
         }
         clusterConsumer?.nudge();
         return;

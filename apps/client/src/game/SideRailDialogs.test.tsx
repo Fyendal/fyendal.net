@@ -17,6 +17,10 @@ describe("game settings dialog", () => {
       onSkipPlayConfirmationChange: vi.fn(),
       motionPreference: "reduced",
       onMotionPreferenceChange: vi.fn(),
+      soundEffectsEnabled: true,
+      onSoundEffectsEnabledChange: vi.fn(),
+      soundEffectsVolume: 35,
+      onSoundEffectsVolumeChange: vi.fn(),
       onClose: vi.fn(),
     }));
 
@@ -27,5 +31,8 @@ describe("game settings dialog", () => {
     expect(html).toContain(">Reduced</button>");
     expect(html).toContain("Default follows your operating system&#x27;s reduced-motion setting");
     expect(html).toContain('class="settings-selected" aria-pressed="true"');
+    expect(html).toContain('aria-label="Sound effects"');
+    expect(html).toContain('aria-label="Sound effects volume"');
+    expect(html).toContain("35%");
   });
 });

@@ -42,6 +42,12 @@ async function startedGame() {
     userId: users[0],
     username: "Alice",
   });
+  await db.query(
+    `INSERT INTO room_presence (room_code, lease_id, token_hash, seat, last_seen_at)
+     SELECT room_code, 'replay-host', token_hash, seat, $2::bigint
+     FROM room_seats WHERE room_code = $1 AND seat = 0`,
+    [host.code, Date.now()],
+  );
   const joined = await store.joinRoom(host.code, undefined, {
     allowPlayer: true,
     hero: "dorinthea",

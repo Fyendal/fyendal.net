@@ -216,6 +216,34 @@
 .settings-control-row input:checked + .switch-track::after {
   background: #fff0c5;
 }
+.settings-volume-row:has(input:disabled) {
+  color: #8a7f6d;
+}
+.settings-volume-control {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+.settings-volume-control input[type="range"] {
+  width: 150px;
+  accent-color: #c99d45;
+  cursor: pointer;
+}
+.settings-volume-control input[type="range"]:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+.settings-volume-control input[type="range"]:focus-visible {
+  outline: 2px solid #d4a958;
+  outline-offset: 3px;
+}
+.settings-volume-control output {
+  width: 3ch;
+  color: #b9aa92;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
 .settings-info-tooltip {
   position: relative;
   display: inline-grid;

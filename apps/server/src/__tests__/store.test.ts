@@ -22,10 +22,25 @@ beforeEach(async () => {
   store = new PgRoomStore(db, "rules-a");
 });
 
+async function markStoredSeatPresent(
+  code: string,
+  seat: 0 | 1,
+  leaseId = `test-seat-${seat}`,
+): Promise<void> {
+  await db.query(
+    `INSERT INTO room_presence (room_code, lease_id, token_hash, seat, last_seen_at)
+     SELECT room_code, $3, token_hash, seat, $4::bigint
+     FROM room_seats WHERE room_code = $1 AND seat = $2`,
+    [code, seat, leaseId, Date.now()],
+  );
+}
+
 async function fullRoom(): Promise<{ code: string; tokens: [string, string] }> {
   const host = await store.createRoom("classic-battles", { hero: "rhinar" });
+  await markStoredSeatPresent(host.code, 0);
   const joined = await store.joinRoom(host.code, undefined, { allowPlayer: true, hero: "dorinthea" });
   if (!joined.ok || joined.kind !== "player") throw new Error("join failed");
+  await db.query("DELETE FROM room_presence WHERE room_code = $1", [host.code]);
   return { code: host.code, tokens: [host.token, joined.token] };
 }
 
@@ -40,9 +55,11 @@ async function matchedRoom(): Promise<{
      RETURNING id`,
   );
   const userIds = [Number(users.rows[0]!.id), Number(users.rows[1]!.id)] as [number, number];
-  await store.queueForMatch("classic-battles", {
+  const opened = await store.queueForMatch("classic-battles", {
     userId: userIds[0], username: "MatchA", hero: "rhinar", allowFutureCards: false,
   });
+  if (!opened.ok || opened.kind !== "opened") throw new Error("queue did not open a room");
+  await markStoredSeatPresent(opened.code, 0);
   const matched = await store.queueForMatch("classic-battles", {
     userId: userIds[1], username: "MatchB", hero: "dorinthea", allowFutureCards: false,
   });
@@ -128,6 +145,7 @@ describe("PgRoomStore storage", () => {
       "public",
       true,
     );
+    await markStoredSeatPresent(created.code, 0);
     expect((await store.getRoom(created.code))?.allowFutureCards).toBe(true);
     expect(await store.roomInvite(created.code)).toMatchObject({ allowFutureCards: true });
     expect(await store.listRooms()).toEqual([
@@ -137,6 +155,7 @@ describe("PgRoomStore storage", () => {
 
   it("does not seat a player whose deck is illegal for the room", async () => {
     const created = await store.createRoom("cc", { deckId: "precon-asb" });
+    await markStoredSeatPresent(created.code, 0);
     const joined = await store.joinRoom(created.code, undefined, {
       allowPlayer: true,
       deckId: "precon-aaz",
@@ -151,6 +170,39 @@ describe("PgRoomStore storage", () => {
     expect((await store.getRoom(created.code))?.seats[1]).toBeNull();
   });
 
+  it("keeps an absent opener reclaimable without advertising or refilling it", async () => {
+    const user = await db.query(
+      `INSERT INTO users (username, username_lc, pass_hash, created_at)
+       VALUES ('AbsentHost','absenthost','hash',1) RETURNING id`,
+    );
+    const userId = Number(user.rows[0]!.id);
+    const created = await store.createRoom("classic-battles", {
+      hero: "rhinar",
+      username: "AbsentHost",
+      userId,
+    });
+
+    expect(await store.listRooms()).toEqual([]);
+    expect(await store.stats()).toMatchObject({ openRooms: 0 });
+    expect(await store.listRooms(userId)).toEqual([
+      expect.objectContaining({ code: created.code, yours: true }),
+    ]);
+    await expect(store.joinRoom(created.code, undefined, {
+      allowPlayer: true,
+      hero: "dorinthea",
+    })).resolves.toEqual({ ok: false, error: "room host is disconnected" });
+
+    await markStoredSeatPresent(created.code, 0);
+    expect(await store.listRooms()).toEqual([
+      expect.objectContaining({ code: created.code }),
+    ]);
+    expect(await store.stats()).toMatchObject({ openRooms: 1 });
+    await expect(store.joinRoom(created.code, undefined, {
+      allowPlayer: true,
+      hero: "dorinthea",
+    })).resolves.toMatchObject({ ok: true, kind: "player", seat: 1 });
+  });
+
   it("keeps private rooms out of discovery while allowing capability-code joins", async () => {
     const user = await db.query(
       `INSERT INTO users (username, username_lc, pass_hash, created_at)
@@ -163,6 +215,8 @@ describe("PgRoomStore storage", () => {
       "private",
     );
     const publicRoom = await store.createRoom("classic-battles", { hero: "rhinar" });
+    await markStoredSeatPresent(privateRoom.code, 0, "private-host");
+    await markStoredSeatPresent(publicRoom.code, 0, "public-host");
 
     expect((await store.listRooms()).map((room) => room.code)).toEqual([publicRoom.code]);
     const ownerRooms = await store.listRooms(userId);
@@ -703,6 +757,7 @@ describe("PgRoomStore storage", () => {
 
   it("inserts and deletes only the affected player seat", async () => {
     const host = await store.createRoom("classic-battles", { hero: "rhinar" });
+    await markStoredSeatPresent(host.code, 0);
     const hostBefore = (await rawSeats(host.code))[0];
     const queries: string[] = [];
     const measured = tracedStore(queries);
@@ -1560,6 +1615,8 @@ describe("PgRoomStore storage", () => {
     expect(await store.listRooms(userId)).toEqual([
       expect.objectContaining({ code: created.code, yours: true }),
     ]);
+    expect(await store.listRooms(7)).toEqual([]);
+    await markStoredSeatPresent(created.code, 0);
     expect((await store.listRooms(7))[0]).not.toHaveProperty("yours");
   });
 
@@ -1581,6 +1638,7 @@ describe("PgRoomStore storage", () => {
     });
     expect(opened).toMatchObject({ ok: true, kind: "opened", version: 0 });
     if (!opened.ok || opened.kind !== "opened") throw new Error("queue did not open a room");
+    await markStoredSeatPresent(opened.code, 0);
     expect(await otherGateway.matchmakingCounts()).toEqual({
       "classic-battles": 1,
       cc: 0,
@@ -1611,6 +1669,37 @@ describe("PgRoomStore storage", () => {
     ]);
   });
 
+  it("does not match a new player into an opener whose owner is absent", async () => {
+    const users = await db.query(
+      `INSERT INTO users (username, username_lc, pass_hash, created_at)
+       VALUES ('GoneQueue','gonequeue','hash',1), ('LiveQueue','livequeue','hash',2)
+       RETURNING id`,
+    );
+    const absentId = Number(users.rows[0]!.id);
+    const liveId = Number(users.rows[1]!.id);
+    const absent = await store.queueForMatch("classic-battles", {
+      userId: absentId,
+      username: "GoneQueue",
+      hero: "rhinar",
+      allowFutureCards: false,
+    });
+    if (!absent.ok || absent.kind !== "opened") throw new Error("queue did not open a room");
+
+    const live = await store.queueForMatch("classic-battles", {
+      userId: liveId,
+      username: "LiveQueue",
+      hero: "dorinthea",
+      allowFutureCards: false,
+    });
+    expect(live).toMatchObject({ ok: true, kind: "opened" });
+    if (!live.ok || live.kind !== "opened") throw new Error("queue did not open a second room");
+    expect(live.code).not.toBe(absent.code);
+    expect((await store.getRoom(absent.code))?.seats.map((seat) => seat?.userId ?? null))
+      .toEqual([absentId, null]);
+    expect((await store.getRoom(live.code))?.seats.map((seat) => seat?.userId ?? null))
+      .toEqual([liveId, null]);
+  });
+
   it("retires a retained queue opener when its public room is filled manually", async () => {
     const users = await db.query(
       `INSERT INTO users (username, username_lc, pass_hash, created_at)
@@ -1629,6 +1718,7 @@ describe("PgRoomStore storage", () => {
       allowFutureCards: false,
     });
     if (!opened.ok || opened.kind !== "opened") throw new Error("queue did not open a room");
+    await markStoredSeatPresent(opened.code, 0);
 
     await expect(store.joinRoom(opened.code, undefined, {
       allowPlayer: true,

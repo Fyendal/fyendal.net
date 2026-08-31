@@ -25,25 +25,18 @@ import {
   type MotionAnchorSnapshot,
 } from "./motionGeometry.js";
 import { useMotionPreference } from "./useMotionPreference.js";
+import {
+  concealMotionDestination,
+  motionDestinationIsMasked,
+  refreshMotionDestinationMasks,
+  revealMotionDestination,
+  type MaskedElementsByBatch,
+} from "./motionDestinationMask.js";
 
 const EMPTY_ANCHORS: MotionAnchorSnapshot = {
   cards: new Map(),
   zones: new Map(),
 };
-
-type MaskedElementsByBatch = Map<number, Map<string, HTMLElement>>;
-
-function elementIsMasked(
-  maskedElements: MaskedElementsByBatch,
-  target: HTMLElement,
-): boolean {
-  for (const batchMasks of maskedElements.values()) {
-    for (const element of batchMasks.values()) {
-      if (element === target) return true;
-    }
-  }
-  return false;
-}
 
 export function useGameMotion({
   rootRef,
@@ -74,8 +67,8 @@ export function useGameMotion({
     if (!batchMasks) return;
     maskedElementsRef.current.delete(batchId);
     for (const element of batchMasks.values()) {
-      if (!elementIsMasked(maskedElementsRef.current, element)) {
-        element.classList.remove("game-motion-destination-hidden");
+      if (!motionDestinationIsMasked(maskedElementsRef.current, element)) {
+        revealMotionDestination(element);
       }
     }
   }, []);
@@ -87,7 +80,7 @@ export function useGameMotion({
     }
     maskedElementsRef.current.clear();
     for (const element of elements) {
-      element.classList.remove("game-motion-destination-hidden");
+      revealMotionDestination(element);
     }
   }, []);
 
@@ -122,8 +115,8 @@ export function useGameMotion({
     // Hand off from the overlay to the real destination on this flight's own
     // arrival. Waiting for a later staggered card is what caused the visible
     // empty-frame blink in pitch and combat-chain batches.
-    if (!elementIsMasked(maskedElementsRef.current, element)) {
-      element.classList.remove("game-motion-destination-hidden");
+    if (!motionDestinationIsMasked(maskedElementsRef.current, element)) {
+      revealMotionDestination(element);
     }
   }, []);
 
@@ -143,6 +136,7 @@ export function useGameMotion({
     // Read every current rect first. Class writes happen only after the batch
     // has been completely resolved, avoiding read/write layout interleaving.
     const measured = measureMotionAnchors(root);
+    refreshMotionDestinationMasks(maskedElementsRef.current, measured.cardElements);
     if (reduceMotionRef.current !== reduceMotion) {
       reduceMotionRef.current = reduceMotion;
       cancelMotionQueue();
@@ -179,7 +173,7 @@ export function useGameMotion({
         if (!key) continue;
         const element = measured.cardElements.get(key);
         if (!element) continue;
-        element.classList.add("game-motion-destination-hidden");
+        concealMotionDestination(element);
         batchMasks.set(key, element);
       }
       if (batchMasks.size > 0) maskedElementsRef.current.set(nextBatch.id, batchMasks);
