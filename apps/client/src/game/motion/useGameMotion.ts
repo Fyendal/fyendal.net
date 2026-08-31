@@ -16,12 +16,13 @@ import {
   completeMotionBatch,
   EMPTY_MOTION_BATCH_QUEUE,
   enqueueMotionBatch,
+  motionQueueBlocksTurnStartUi,
   type MotionBatchQueue,
 } from "./motionBatchQueue.js";
 import {
   measureMotionAnchors,
   reducedMotionBatch,
-  resolveMotionBatch,
+  resolveMotionBatches,
   type GameMotionBatch,
   type MotionAnchorSnapshot,
 } from "./motionGeometry.js";
@@ -51,11 +52,13 @@ export function useGameMotion({
   motionPreference: MotionPreference;
 }): {
   batch: GameMotionBatch | null;
-  arriveFlight: (batchId: number, destinationPresentationKey?: string) => void;
-  completeBatch: (batchId: number) => void;
+  turnStartUiReady: boolean;
+  arriveFlight: (batchId: string, destinationPresentationKey?: string) => void;
+  completeBatch: (batchId: string) => void;
 } {
   const reduceMotion = useMotionPreference(motionPreference);
   const [batch, setBatch] = useState<GameMotionBatch | null>(null);
+  const [turnStartUiReady, setTurnStartUiReady] = useState(true);
   const previousViewRef = useRef<GameView | null>(null);
   const previousAnchorsRef = useRef<MotionAnchorSnapshot>(EMPTY_ANCHORS);
   const processedSequenceRef = useRef<number | null>(null);
@@ -63,7 +66,7 @@ export function useGameMotion({
   const batchQueueRef = useRef<MotionBatchQueue>(EMPTY_MOTION_BATCH_QUEUE);
   const maskedElementsRef = useRef<MaskedElementsByBatch>(new Map());
 
-  const releaseBatchMasks = useCallback((batchId: number) => {
+  const releaseBatchMasks = useCallback((batchId: string) => {
     const batchMasks = maskedElementsRef.current.get(batchId);
     if (!batchMasks) return;
     maskedElementsRef.current.delete(batchId);
@@ -88,19 +91,21 @@ export function useGameMotion({
   const cancelMotionQueue = useCallback(() => {
     batchQueueRef.current = EMPTY_MOTION_BATCH_QUEUE;
     clearMaskedElements();
+    setTurnStartUiReady(true);
     setBatch(null);
   }, [clearMaskedElements]);
 
-  const completeBatch = useCallback((batchId: number) => {
+  const completeBatch = useCallback((batchId: string) => {
     if (batchQueueRef.current.active?.id !== batchId) return;
     releaseBatchMasks(batchId);
     const nextQueue = completeMotionBatch(batchQueueRef.current, batchId);
     batchQueueRef.current = nextQueue;
+    setTurnStartUiReady(!motionQueueBlocksTurnStartUi(nextQueue));
     setBatch(nextQueue.active);
   }, [releaseBatchMasks]);
 
   const arriveFlight = useCallback((
-    batchId: number,
+    batchId: string,
     destinationPresentationKey?: string,
   ) => {
     if (
@@ -150,7 +155,7 @@ export function useGameMotion({
 
     const previousView = previousViewRef.current;
     const classification = classifyViewUpdate(previousView, view, viewUpdate);
-    let nextBatch: GameMotionBatch | null = null;
+    let nextBatches: GameMotionBatch[] = [];
     if (previousView && classification.kind === "animate") {
       const events = viewUpdate.gameTransition
         ? transitionMotionEvents(
@@ -160,41 +165,50 @@ export function useGameMotion({
             classification.direction,
           )
         : detectGameMotionEvents(previousView, view);
-      nextBatch = resolveMotionBatch(
+      nextBatches = resolveMotionBatches(
         events,
         previousAnchorsRef.current,
         measured.snapshot,
         viewUpdate.sequence,
       );
-      if (nextBatch && reduceMotion) {
-        nextBatch = reducedMotionBatch(nextBatch, measured.snapshot);
+      if (reduceMotion) {
+        nextBatches = nextBatches.map((candidate) => (
+          reducedMotionBatch(candidate, measured.snapshot)
+        ));
       }
     }
 
     if (!previousView || classification.kind !== "animate") {
       cancelMotionQueue();
     }
-    if (nextBatch && nextBatch.flights.length > 0) {
-      const batchMasks = new Map<string, HTMLElement>();
-      for (const flight of nextBatch.flights) {
-        const key = flight.destinationPresentationKey;
-        if (!key) continue;
-        const element = measured.cardElements.get(key);
-        if (!element) continue;
-        concealMotionDestination(element);
-        batchMasks.set(key, element);
+    for (const nextBatch of nextBatches) {
+      if (nextBatch.flights.length > 0 || nextBatch.connectors.length > 0) {
+        const batchMasks = new Map<string, HTMLElement>();
+        for (const arrival of [...nextBatch.flights, ...nextBatch.connectors]) {
+          const key = arrival.destinationPresentationKey;
+          if (!key) continue;
+          const element = measured.cardElements.get(key);
+          if (!element) continue;
+          concealMotionDestination(element);
+          batchMasks.set(key, element);
+        }
+        if (batchMasks.size > 0) maskedElementsRef.current.set(nextBatch.id, batchMasks);
       }
-      if (batchMasks.size > 0) maskedElementsRef.current.set(nextBatch.id, batchMasks);
     }
-    if (nextBatch) {
+    if (nextBatches.length > 0) {
       const previousActive = batchQueueRef.current.active;
-      const enqueueResult = enqueueMotionBatch(batchQueueRef.current, nextBatch);
-      for (const discardedBatchId of enqueueResult.discardedBatchIds) {
-        releaseBatchMasks(discardedBatchId);
+      let nextQueue = batchQueueRef.current;
+      for (const nextBatch of nextBatches) {
+        const enqueueResult = enqueueMotionBatch(nextQueue, nextBatch);
+        nextQueue = enqueueResult.queue;
+        for (const discardedBatchId of enqueueResult.discardedBatchIds) {
+          releaseBatchMasks(discardedBatchId);
+        }
       }
-      batchQueueRef.current = enqueueResult.queue;
-      if (enqueueResult.queue.active !== previousActive) {
-        setBatch(enqueueResult.queue.active);
+      batchQueueRef.current = nextQueue;
+      setTurnStartUiReady(!motionQueueBlocksTurnStartUi(nextQueue));
+      if (nextQueue.active !== previousActive) {
+        setBatch(nextQueue.active);
       }
     }
     previousViewRef.current = view;
@@ -214,5 +228,10 @@ export function useGameMotion({
     };
   }, [cancelMotionQueue, rootRef]);
 
-  return { batch, arriveFlight, completeBatch };
+  return {
+    batch,
+    turnStartUiReady,
+    arriveFlight,
+    completeBatch,
+  };
 }

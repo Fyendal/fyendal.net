@@ -11,7 +11,8 @@ export type MotionTimelinePhase =
   | "result"
   | "arsenal"
   | "cleanup"
-  | "draw";
+  | "draw"
+  | "turn-start";
 
 const PHASE_ORDER: readonly MotionTimelinePhase[] = [
   "staging",
@@ -25,6 +26,7 @@ const PHASE_ORDER: readonly MotionTimelinePhase[] = [
   "arsenal",
   "cleanup",
   "draw",
+  "turn-start",
 ];
 
 const PHASE_RANK = new Map(PHASE_ORDER.map((phase, index) => [phase, index]));
@@ -41,6 +43,7 @@ const PHASE_STAGE: Readonly<Record<MotionTimelinePhase, number>> = {
   arsenal: 6,
   cleanup: 7,
   draw: 8,
+  "turn-start": 9,
 };
 
 function isStackLocation(location: MotionLocation): boolean {
@@ -48,6 +51,7 @@ function isStackLocation(location: MotionLocation): boolean {
 }
 
 export function motionTimelinePhase(event: GameMotionEvent): MotionTimelinePhase {
+  if ("timeline" in event && event.timeline === "turn-start") return "turn-start";
   if (event.kind === "reflow") return event.phase;
   if (event.kind === "settle") return "confirmation";
   if (event.kind === "connect") return "trigger";

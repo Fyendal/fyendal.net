@@ -1,4 +1,4 @@
-import { useEffect, type AnimationEvent, type CSSProperties } from "react";
+import { useEffect, useRef, type AnimationEvent, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { CARD_BACK_IMAGE_URL, cardImageUrl } from "../Card.js";
 import {
@@ -79,10 +79,12 @@ function MotionFlightOverlay({
   batchId,
   flight,
   onFlightArrive,
+  onCueComplete,
 }: {
-  batchId: number;
+  batchId: string;
   flight: MotionFlight;
-  onFlightArrive: (batchId: number, destinationPresentationKey?: string) => void;
+  onFlightArrive: (batchId: string, destinationPresentationKey?: string) => void;
+  onCueComplete: (cueId: string) => void;
 }) {
   return (
     <div
@@ -96,6 +98,7 @@ function MotionFlightOverlay({
         if (event.target !== event.currentTarget) return;
         onFlightArrive(batchId, flight.destinationPresentationKey);
         event.currentTarget.style.visibility = "hidden";
+        onCueComplete(flight.id);
       }}
     >
       <MotionCardVisual
@@ -124,11 +127,38 @@ export function GameMotionLayer({
   onComplete,
 }: {
   batch: GameMotionBatch | null;
-  onFlightArrive: (batchId: number, destinationPresentationKey?: string) => void;
-  onComplete: (batchId: number) => void;
+  onFlightArrive: (batchId: string, destinationPresentationKey?: string) => void;
+  onComplete: (batchId: string) => void;
 }) {
+  const completedCuesRef = useRef<{
+    batchId: string;
+    cueIds: Set<string>;
+    finished: boolean;
+  } | null>(null);
+  if (batch && completedCuesRef.current?.batchId !== batch.id) {
+    completedCuesRef.current = {
+      batchId: batch.id,
+      cueIds: new Set(),
+      finished: false,
+    };
+  }
+  const cueCount = batch
+    ? batch.flights.length + batch.connectors.length + batch.pulses.length
+    : 0;
+  const completeCue = (cueId: string) => {
+    if (!batch) return;
+    const tracker = completedCuesRef.current;
+    if (!tracker || tracker.batchId !== batch.id || tracker.finished) return;
+    tracker.cueIds.add(cueId);
+    if (tracker.cueIds.size !== cueCount) return;
+    tracker.finished = true;
+    onComplete(batch.id);
+  };
+
   useEffect(() => {
     if (!batch) return;
+    // Animation events drive normal sequencing. This remains only as a
+    // watchdog for interrupted CSS animations or browser lifecycle quirks.
     const timeout = window.setTimeout(() => onComplete(batch.id), batch.durationMs + 40);
     return () => window.clearTimeout(timeout);
   }, [batch, onComplete]);
@@ -157,6 +187,7 @@ export function GameMotionLayer({
               flight={flight}
               key={flight.id}
               onFlightArrive={onFlightArrive}
+              onCueComplete={completeCue}
             />
           ))}
         </div>
@@ -171,6 +202,12 @@ export function GameMotionLayer({
             className="game-motion-connector"
             key={connector.id}
             style={connectorStyle(connector)}
+            onAnimationEnd={(event) => {
+              if (event.target !== event.currentTarget) return;
+              onFlightArrive(batch.id, connector.destinationPresentationKey);
+              event.currentTarget.style.visibility = "hidden";
+              completeCue(connector.id);
+            }}
           />
         ))}
         {boardFlights.map((flight) => (
@@ -179,6 +216,7 @@ export function GameMotionLayer({
             flight={flight}
             key={flight.id}
             onFlightArrive={onFlightArrive}
+            onCueComplete={completeCue}
           />
         ))}
         {boardFlights.map((flight) => (
@@ -191,6 +229,10 @@ export function GameMotionLayer({
             style={{
               ...rectStyle(pulse.rect),
               animationDelay: `${pulse.delayMs}ms`,
+            }}
+            onAnimationEnd={(event) => {
+              if (event.target !== event.currentTarget) return;
+              completeCue(pulse.id);
             }}
           />
         ))}
@@ -206,6 +248,7 @@ export function GameMotionLayer({
               flight={flight}
               key={flight.id}
               onFlightArrive={onFlightArrive}
+              onCueComplete={completeCue}
             />
           ))}
           {chainFlights.map((flight) => (
@@ -224,6 +267,7 @@ export function GameMotionLayer({
               flight={flight}
               key={flight.id}
               onFlightArrive={onFlightArrive}
+              onCueComplete={completeCue}
             />
           ))}
           {stackFlights.map((flight) => (

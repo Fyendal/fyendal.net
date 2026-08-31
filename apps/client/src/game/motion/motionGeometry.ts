@@ -69,10 +69,12 @@ export interface MotionConnector {
   start: MotionRect;
   end: MotionRect;
   delayMs: number;
+  destinationPresentationKey?: string;
 }
 
 export interface GameMotionBatch {
-  id: number;
+  id: string;
+  stage?: "end-turn" | "turn-start";
   flights: MotionFlight[];
   connectors: MotionConnector[];
   pulses: MotionPulse[];
@@ -160,7 +162,7 @@ function cardRectWithinZone(zone: MotionRect, reference?: MotionRect): MotionRec
 function addPulse(
   pulses: MotionPulse[],
   pulseKeys: Set<string>,
-  id: number,
+  id: string,
   key: string,
   rect: MotionRect | undefined,
   phase: MotionTimelinePhase,
@@ -190,8 +192,9 @@ export function resolveMotionBatch(
   events: readonly GameMotionEvent[],
   previous: MotionAnchorSnapshot,
   current: MotionAnchorSnapshot,
-  id: number,
+  id: string | number,
 ): GameMotionBatch | null {
+  const batchId = String(id);
   const flights: MotionFlight[] = [];
   const connectors: MotionConnector[] = [];
   const pulses: MotionPulse[] = [];
@@ -202,7 +205,7 @@ export function resolveMotionBatch(
     const phase = motionTimelinePhase(event);
     if (event.kind === "pulse") {
       const key = motionLocationKey(event.location);
-      addPulse(pulses, pulseKeys, id, key, current.zones.get(key), phase);
+      addPulse(pulses, pulseKeys, batchId, key, current.zones.get(key), phase);
       continue;
     }
     if (event.kind === "connect") {
@@ -215,15 +218,16 @@ export function resolveMotionBatch(
       );
       if (source && destination) {
         connectors.push({
-          id: `${id}:connector:${connectors.length}`,
+          id: `${batchId}:connector:${connectors.length}`,
           phase,
           start: source.rect,
           end: destination.rect,
           delayMs: 0,
+          destinationPresentationKey: event.destinationPresentationKey,
         });
       } else {
         const key = motionLocationKey(event.destination);
-        addPulse(pulses, pulseKeys, id, key, current.zones.get(key), phase);
+        addPulse(pulses, pulseKeys, batchId, key, current.zones.get(key), phase);
       }
       continue;
     }
@@ -254,7 +258,7 @@ export function resolveMotionBatch(
       const destinationLayer = motionLayerForDestination(event.destination);
       if (flights.length < MAX_DETAILED_FLIGHTS) {
         const flight: MotionFlight = {
-          id: `${id}:flight:${flights.length}`,
+          id: `${batchId}:flight:${flights.length}`,
           phase,
           mode: event.kind,
           start: rect,
@@ -272,7 +276,7 @@ export function resolveMotionBatch(
         if (groupedAppearanceKey) boardAppearances.set(groupedAppearanceKey, flight);
       } else {
         const key = motionLocationKey(event.destination);
-        addPulse(pulses, pulseKeys, id, key, current.zones.get(key), phase);
+        addPulse(pulses, pulseKeys, batchId, key, current.zones.get(key), phase);
       }
       continue;
     }
@@ -285,7 +289,7 @@ export function resolveMotionBatch(
     );
     if (!source || !destination || flights.length >= MAX_DETAILED_FLIGHTS) {
       const key = motionLocationKey(event.destination);
-      addPulse(pulses, pulseKeys, id, key, current.zones.get(key), phase);
+      addPulse(pulses, pulseKeys, batchId, key, current.zones.get(key), phase);
       continue;
     }
     const start = source.exact
@@ -306,7 +310,7 @@ export function resolveMotionBatch(
           : "move";
     const destinationLayer = motionLayerForDestination(event.destination);
     flights.push({
-      id: `${id}:flight:${flights.length}`,
+      id: `${batchId}:flight:${flights.length}`,
       phase,
       mode,
       start,
@@ -359,12 +363,44 @@ export function resolveMotionBatch(
     ...pulses.map((pulse) => pulse.delayMs + MOTION_PULSE_MS),
   );
   return {
-    id,
+    id: batchId,
     flights,
     connectors,
     pulses,
     durationMs,
   };
+}
+
+/** A turn boundary is a presentation barrier, not another delayed phase in a
+ * single CSS timeline. The queue completes end-turn motion first, then mounts
+ * the new-turn UI and starts this second batch from delay zero. */
+export function resolveMotionBatches(
+  events: readonly GameMotionEvent[],
+  previous: MotionAnchorSnapshot,
+  current: MotionAnchorSnapshot,
+  id: string | number,
+): GameMotionBatch[] {
+  const endTurnEvents: GameMotionEvent[] = [];
+  const turnStartEvents: GameMotionEvent[] = [];
+  for (const event of events) {
+    (motionTimelinePhase(event) === "turn-start" ? turnStartEvents : endTurnEvents).push(event);
+  }
+  if (turnStartEvents.length === 0) {
+    const batch = resolveMotionBatch(endTurnEvents, previous, current, id);
+    return batch ? [batch] : [];
+  }
+
+  const batches: GameMotionBatch[] = [];
+  const endTurn = resolveMotionBatch(endTurnEvents, previous, current, `${id}:end-turn`);
+  if (endTurn) batches.push({ ...endTurn, stage: "end-turn" });
+  const turnStart = resolveMotionBatch(
+    turnStartEvents,
+    previous,
+    current,
+    `${id}:turn-start`,
+  );
+  if (turnStart) batches.push({ ...turnStart, stage: "turn-start" });
+  return batches;
 }
 
 export function reducedMotionBatch(

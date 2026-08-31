@@ -12,7 +12,16 @@ export const EMPTY_MOTION_BATCH_QUEUE: MotionBatchQueue = {
 
 interface MotionBatchEnqueueResult {
   queue: MotionBatchQueue;
-  discardedBatchIds: readonly number[];
+  discardedBatchIds: readonly string[];
+}
+
+/** The authoritative view may already contain a new-turn stack. Keep that UI
+ * gated only while an earlier batch is ahead of its queued turn-start batch. */
+export function motionQueueBlocksTurnStartUi(queue: MotionBatchQueue): boolean {
+  const turnStart = [queue.active, ...queue.pending].find((batch) => (
+    batch?.stage === "turn-start"
+  ));
+  return turnStart !== undefined && queue.active !== turnStart;
 }
 
 /** Result-only fades and pulses do not encode a physical card path. Replaying
@@ -20,7 +29,8 @@ interface MotionBatchEnqueueResult {
  * flicker, so the first one is enough. */
 function motionBatchIsCompressible(batch: GameMotionBatch): boolean {
   const cueCount = batch.flights.length + batch.connectors.length + batch.pulses.length;
-  return cueCount > 0
+  return batch.stage === undefined
+    && cueCount > 0
     && batch.connectors.length === 0
     && batch.flights.every((flight) => flight.phase === "result")
     && batch.pulses.every((pulse) => pulse.phase === "result");
@@ -65,7 +75,7 @@ export function enqueueMotionBatch(
 
 export function completeMotionBatch(
   queue: MotionBatchQueue,
-  batchId: number,
+  batchId: string,
 ): MotionBatchQueue {
   if (queue.active?.id !== batchId) return queue;
   const [active = null, ...pending] = queue.pending;

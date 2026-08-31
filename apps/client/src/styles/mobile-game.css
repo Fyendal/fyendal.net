@@ -442,7 +442,10 @@
     right: 0;
     bottom: 64px;
     height: 144px;
-    z-index: 18;
+    /* Keep the mobile tray in the same global gameplay depth scale as the
+       desktop hand. Board-destination flights sit one level above it, so a
+       draw cannot pass under the other cards and jump forward on arrival. */
+    z-index: var(--game-z-hand);
     justify-content: flex-start;
     gap: 7px;
     overflow-x: auto;

@@ -1,6 +1,6 @@
 export const MOTION_DESTINATION_HIDDEN_ATTRIBUTE = "data-game-motion-destination-hidden";
 
-export type MaskedElementsByBatch = Map<number, Map<string, HTMLElement>>;
+export type MaskedElementsByBatch = Map<string, Map<string, HTMLElement>>;
 
 export function concealMotionDestination(element: HTMLElement): void {
   // Keep this outside React's className so ordinary card rerenders cannot

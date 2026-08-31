@@ -4,11 +4,12 @@ import {
   completeMotionBatch,
   EMPTY_MOTION_BATCH_QUEUE,
   enqueueMotionBatch,
+  motionQueueBlocksTurnStartUi,
 } from "./motionBatchQueue.js";
 
 function batch(id: number): GameMotionBatch {
   return {
-    id,
+    id: String(id),
     flights: [],
     connectors: [],
     pulses: [],
@@ -61,7 +62,7 @@ describe("motion batch queue", () => {
     const stackEntry = batch(10);
     const queued = enqueueMotionBatch(EMPTY_MOTION_BATCH_QUEUE, stackEntry).queue;
 
-    expect(completeMotionBatch(queued, 9)).toBe(queued);
+    expect(completeMotionBatch(queued, "9")).toBe(queued);
   });
 
   it("compresses duplicate result footprints without crossing a causal boundary", () => {
@@ -88,7 +89,7 @@ describe("motion batch queue", () => {
 
     expect(compressed.queue).toBe(afterFirst);
     expect(compressed.discardedBatchIds).toEqual([duplicateResult.id]);
-    expect(laterResult.queue.pending.map((pending) => pending.id)).toEqual([22, 23]);
+    expect(laterResult.queue.pending.map((pending) => pending.id)).toEqual(["22", "23"]);
     expect(laterResult.discardedBatchIds).toEqual([]);
   });
 
@@ -100,5 +101,19 @@ describe("motion batch queue", () => {
 
     expect(afterSecond.queue.pending).toEqual([secondResult]);
     expect(afterSecond.discardedBatchIds).toEqual([]);
+  });
+
+  it("blocks new-turn UI until the queued turn-start batch becomes active", () => {
+    const endTurn = { ...batch(40), stage: "end-turn" as const };
+    const turnStart = { ...batch(41), stage: "turn-start" as const };
+    const queued = enqueueMotionBatch(
+      enqueueMotionBatch(EMPTY_MOTION_BATCH_QUEUE, endTurn).queue,
+      turnStart,
+    ).queue;
+
+    expect(motionQueueBlocksTurnStartUi(queued)).toBe(true);
+    const started = completeMotionBatch(queued, endTurn.id);
+    expect(started.active).toBe(turnStart);
+    expect(motionQueueBlocksTurnStartUi(started)).toBe(false);
   });
 });

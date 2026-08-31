@@ -54,6 +54,7 @@ export interface MoveMotionEvent {
   sourcePresentationKey?: string;
   destinationPresentationKey?: string;
   destinationCoverVisual?: MotionVisual;
+  timeline?: "turn-start";
 }
 
 /** A card that remains in hand while the authoritative snapshot changes the
@@ -93,6 +94,7 @@ export interface ConnectMotionEvent {
   instanceId: number;
   sourcePresentationKey: string;
   destinationPresentationKey: string;
+  timeline?: "turn-start";
 }
 
 export interface PulseMotionEvent {

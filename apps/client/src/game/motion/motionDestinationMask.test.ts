@@ -30,7 +30,7 @@ describe("motion destination masks", () => {
     const previous = fakeElement();
     const current = fakeElement();
     const masks: MaskedElementsByBatch = new Map([[
-      7,
+      "7",
       new Map([["0:hand:42", previous.element]]),
     ]]);
 
@@ -43,6 +43,6 @@ describe("motion destination masks", () => {
     expect(previous.element.removeAttribute).toHaveBeenCalledWith(
       MOTION_DESTINATION_HIDDEN_ATTRIBUTE,
     );
-    expect(masks.get(7)?.get("0:hand:42")).toBe(current.element);
+    expect(masks.get("7")?.get("0:hand:42")).toBe(current.element);
   });
 });

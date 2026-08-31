@@ -790,6 +790,13 @@ describe("game motion detection", () => {
         sourcePresentationKey: "1:hand:opaque:3",
       }),
     ]);
+    expect(events.filter((event) => event.kind === "reflow").map((event) => (
+      event.sourcePresentationKey
+    ))).toEqual([
+      "1:hand:opaque",
+      "1:hand:opaque:1",
+      "1:hand:opaque:2",
+    ]);
   });
 
   it("keeps a pitched card face visible until its deck-bottom flip", () => {
@@ -887,5 +894,60 @@ describe("game motion detection", () => {
       destinationPresentationKey: `0:hand:${kept.instanceId}`,
       phase: "draw",
     });
+  });
+
+  it("defers a new-turn stack trigger until end-phase motion completes", () => {
+    const mentor = face(96);
+    const pitched = face(97);
+    const drawn = face(98);
+    const previous = view([
+      player(0, {
+        board: [mentor],
+        pitch: [pitched],
+        pitchCount: 1,
+        deckCount: 10,
+      }),
+      player(1),
+    ], { turn: 1, phase: "end" });
+    const current = view([
+      player(0, {
+        board: [mentor],
+        hand: [drawn],
+        handCount: 1,
+        deckCount: 10,
+      }),
+      player(1),
+    ], {
+      turn: 2,
+      phase: "start",
+      stack: [{ card: mentor, seat: 0, label: "At the start of your turn", optional: false }],
+    });
+
+    const events = transitionMotionEvents(previous, current, {
+      fromVersion: 10,
+      kind: "forward",
+      events: [
+        {
+          kind: "move",
+          from: { kind: "pitch", seat: 0 },
+          to: { kind: "deck", seat: 0, position: "bottom" },
+          count: 1,
+          instanceId: pitched.instanceId,
+        },
+        {
+          kind: "move",
+          from: { kind: "deck", seat: 0, position: "top" },
+          to: { kind: "hand", seat: 0 },
+          count: 1,
+          instanceId: drawn.instanceId,
+        },
+      ],
+    }, "forward");
+
+    expect(events).toContainEqual(expect.objectContaining({
+      kind: "connect",
+      destination: { kind: "stack-layer", index: 0 },
+      timeline: "turn-start",
+    }));
   });
 });
