@@ -826,15 +826,14 @@ for (const c of cardList) {
 
 /**
  * Resolve a human-provided card name (e.g. from a Fabrary export) to a
- * printing in our data pool. Pitch (1/2/3) disambiguates color variants;
+ * printing in our data pool. An explicit pitch (1/2/3) must match that color;
  * without pitch, returns the first printing in pool order. Scripts are
  * functional-keyed, so any printing of a card plays identically.
  */
 export function findPrinting(name: string, pitch?: number): CardData | undefined {
   const n = normalizeCardName(name);
   if (pitch !== undefined) {
-    const exact = byFunctionalKey.get(functionalKey(n, pitch));
-    if (exact) return exact;
+    return byFunctionalKey.get(functionalKey(n, pitch));
   }
   return byName.get(n)?.[0];
 }

@@ -38,11 +38,9 @@ describe("findPrinting", () => {
     expect(any!.name).toBe("Raging Onslaught");
   });
 
-  it("falls back to any printing when the requested pitch is absent", () => {
-    // En Garde has no pitch variants in the pool
-    const card = findPrinting("En Garde", 2);
-    expect(card).toBeDefined();
-    expect(card!.name).toBe("En Garde");
+  it("does not substitute another color when the requested pitch is absent", () => {
+    // En Garde exists only as red; a yellow decklist entry must not resolve to it.
+    expect(findPrinting("En Garde", 2)).toBeUndefined();
   });
 
   it("returns undefined for unknown cards", () => {
