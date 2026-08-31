@@ -109,6 +109,18 @@ function sameMove(
     && motionLocationKey(inferred.destination) === motionLocationKey(semantic.destination);
 }
 
+function deferTurnStartStackEntry(event: GameMotionEvent): GameMotionEvent {
+  if (event.kind === "connect") {
+    return event.destination.kind === "stack-layer"
+      ? { ...event, timeline: "turn-start" }
+      : event;
+  }
+  if (event.kind !== "move") return event;
+  return event.destination.kind === "stack-layer" || event.destination.kind === "stack-attack"
+    ? { ...event, timeline: "turn-start" }
+    : event;
+}
+
 /** Convert an authoritative domain transition into client motion while keeping
  * snapshot detection only for presentation-only changes not covered by it. */
 export function transitionMotionEvents(
@@ -215,8 +227,22 @@ export function transitionMotionEvents(
 
   const drawSeats = new Set<number>();
   const arsenalSeats = new Set<number>();
+  const handDepartures = new Map<number, number>();
+  const handArrivals = new Map<number, number>();
   for (const event of semantic) {
     if (event.kind !== "move") continue;
+    if (event.source.kind === "hand" && event.destination.kind !== "hand") {
+      handDepartures.set(
+        event.source.seat,
+        (handDepartures.get(event.source.seat) ?? 0) + event.count,
+      );
+    }
+    if (event.destination.kind === "hand" && event.source.kind !== "hand") {
+      handArrivals.set(
+        event.destination.seat,
+        (handArrivals.get(event.destination.seat) ?? 0) + event.count,
+      );
+    }
     if (event.source.kind === "deck" && event.destination.kind === "hand") {
       drawSeats.add(event.destination.seat);
     }
@@ -249,7 +275,19 @@ export function transitionMotionEvents(
   }
   for (const seat of new Set([...drawSeats, ...arsenalSeats])) {
     const hand = { kind: "hand" as const, seat };
-    const shared = Math.min(countFor(source, hand), countFor(destination, hand));
+    // Hidden hands have stable presentation slots but no card identities. A
+    // slot that departs and is replaced in the same transition is not a card
+    // that remained in hand: reflowing it would leave a second back behind
+    // while its arsenal flight is already moving away.
+    const persistentSourceCount = Math.max(
+      0,
+      countFor(source, hand) - (handDepartures.get(seat) ?? 0),
+    );
+    const persistentDestinationCount = Math.max(
+      0,
+      countFor(destination, hand) - (handArrivals.get(seat) ?? 0),
+    );
+    const shared = Math.min(persistentSourceCount, persistentDestinationCount);
     for (let index = 0; index < shared; index++) {
       const key = opaqueMotionPresentationKey(hand, index);
       reflows.push({
@@ -263,5 +301,11 @@ export function transitionMotionEvents(
       });
     }
   }
-  return [...semantic, ...inferred, ...reflows];
+  const events = [...semantic, ...inferred, ...reflows];
+  // End-phase cleanup and startTurn are committed as one authoritative edge.
+  // A trigger already visible on the new turn's stack must nevertheless wait
+  // for arsenal, pitch-bottoming, draw-up, and hand reflow to finish playing.
+  return direction === "forward" && current.turn > previous.turn
+    ? events.map(deferTurnStartStackEntry)
+    : events;
 }

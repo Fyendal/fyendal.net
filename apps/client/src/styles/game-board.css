@@ -1,5 +1,6 @@
 /* ── table: playmat board + side panel ── */
 :root {
+  --game-z-hand: 4;
   --game-z-board-motion: 5;
   --game-z-chain-float: 6;
   --game-z-chain-motion: 7;
@@ -575,7 +576,7 @@
   overflow-y: hidden;
   padding-top: var(--hand-selected-lift);
   scrollbar-width: none;
-  z-index: 4;
+  z-index: var(--game-z-hand);
   /* Let empty space in this full-width overlay pass hover events through to
      mat cards, including lingering effects on the bottom row. */
   pointer-events: none;

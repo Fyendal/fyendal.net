@@ -3,6 +3,7 @@ import {
   measureMotionAnchors,
   reducedMotionBatch,
   resolveMotionBatch,
+  resolveMotionBatches,
   type MotionAnchorSnapshot,
   type MotionRect,
 } from "./motionGeometry.js";
@@ -637,7 +638,64 @@ describe("motion geometry", () => {
       start: source,
       end: destination,
       delayMs: 0,
+      destinationPresentationKey: "stack:layer:22",
     }]);
+  });
+
+  it("splits turn-start motion into the callback-driven batch after end-turn", () => {
+    const deck = rect(760, 480, 100, 138);
+    const hand = rect(220, 640, 100, 138);
+    const source = rect(420, 260, 100, 138);
+    const destination = rect(700, 220, 100, 138);
+    const batches = resolveMotionBatches(
+      [
+        {
+          kind: "move",
+          source: { kind: "deck", seat: 0, position: "top" },
+          destination: { kind: "hand", seat: 0 },
+          visual: { kind: "back" },
+          destinationPresentationKey: "0:hand:opaque",
+          count: 1,
+          confidence: "inferred",
+        },
+        {
+          kind: "connect",
+          source: { kind: "board", seat: 0 },
+          destination: { kind: "stack-layer", index: 0 },
+          instanceId: 23,
+          sourcePresentationKey: "0:board:23",
+          destinationPresentationKey: "stack:layer:23",
+          timeline: "turn-start",
+        },
+      ],
+      anchors({ zones: [["0:deck", deck]] }),
+      anchors({ cards: [
+        ["0:hand:opaque", hand],
+        ["0:board:23", source],
+        ["stack:layer:23", destination],
+      ] }),
+      9,
+    );
+
+    expect(batches).toHaveLength(2);
+    expect(batches[0]).toEqual(expect.objectContaining({
+      id: "9:end-turn",
+      stage: "end-turn",
+      connectors: [],
+    }));
+    expect(batches[0]?.flights[0]).toEqual(expect.objectContaining({
+      mode: "draw",
+      delayMs: 0,
+    }));
+    expect(batches[1]).toEqual(expect.objectContaining({
+      id: "9:turn-start",
+      stage: "turn-start",
+      flights: [],
+    }));
+    expect(batches[1]?.connectors[0]).toEqual(expect.objectContaining({
+      phase: "turn-start",
+      delayMs: 0,
+    }));
   });
 
   it("measures card and zone attributes in one read phase", () => {

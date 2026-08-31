@@ -914,7 +914,7 @@ export function GameBoard() {
       {/* ── floating stack window: triggered ability layers + played cards
           awaiting resolution; an attack still on the stack shows here too —
           its chain link starts only once the attack resolves ── */}
-      <StackFloat
+      {gameMotion.turnStartUiReady ? <StackFloat
         layers={view.stack}
         attack={view.chain.find((l) => l.onStack)}
         context={view.stackContext}
@@ -924,7 +924,7 @@ export function GameBoard() {
         onSkipRunechants={connected && !spectating && !replaying && canSkipCurrentRunechant
           ? () => sendRunechantSkip(true)
           : undefined}
-      />
+      /> : null}
 
       {/* ── floating combat chain panel: draggable + hidable, past links browsable.
           Staged defenders (not yet committed) show on the current link for
@@ -955,7 +955,7 @@ export function GameBoard() {
       </ChainFloat>
 
       {/* ── floating decision window: prompts, choices, pitch selection ── */}
-      <DecisionFloat
+      {gameMotion.turnStartUiReady ? <DecisionFloat
         viewerSeat={seat}
         pending={{
           decision: hidePriorityGuidance ? null : pd,
@@ -1027,7 +1027,7 @@ export function GameBoard() {
           pitchResourcesRequired: pitchProgress.required,
           onCancel: resetSel,
         }}
-      />
+      /> : null}
 
       {/* ── side panel: status + log ── */}
       <SideRail

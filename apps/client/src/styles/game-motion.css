@@ -47,7 +47,10 @@
 }
 
 .game-motion-flight {
-  z-index: 1;
+  /* Inter-zone transfers must stay above cards that only reflow within a
+     hand. Opponent cards overlap, so equal DOM stacking made arsenal/draw
+     flights briefly pass underneath the later-rendered reflow copies. */
+  z-index: 2;
   opacity: 0;
   transform-origin: top left;
   will-change: transform, opacity;
@@ -65,6 +68,7 @@
 }
 
 .game-motion-flight-reflow {
+  z-index: 1;
   animation-name: game-motion-travel;
 }
 
