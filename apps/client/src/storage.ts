@@ -294,19 +294,23 @@ export type { PriorityWindowMode };
 export type MotionPreference = "system" | "full" | "reduced";
 
 export interface GameSettings {
-  version: 3;
+  version: 4;
   priorityWindowMode: PriorityWindowMode;
   lessGuidance: boolean;
   skipPlayConfirmation: boolean;
   motionPreference: MotionPreference;
+  soundEffectsEnabled: boolean;
+  soundEffectsVolume: number;
 }
 
 export const DEFAULT_GAME_SETTINGS: GameSettings = {
-  version: 3,
+  version: 4,
   priorityWindowMode: "always-pause",
   lessGuidance: false,
   skipPlayConfirmation: true,
   motionPreference: "system",
+  soundEffectsEnabled: true,
+  soundEffectsVolume: 35,
 };
 
 export function replayStorageKey(code: string): string {
@@ -331,13 +335,13 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
       };
     }
     if (
-      (record.version !== 2 && record.version !== 3)
+      (record.version !== 2 && record.version !== 3 && record.version !== 4)
       || (
         record.priorityWindowMode !== "auto-pass"
         && record.priorityWindowMode !== "always-pause"
       )
     ) return DEFAULT_GAME_SETTINGS;
-    const motionPreference = record.version === 3
+    const motionPreference = (record.version === 3 || record.version === 4)
       && (
         record.motionPreference === "system"
         || record.motionPreference === "full"
@@ -345,14 +349,26 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
       )
       ? record.motionPreference
       : "system";
+    if (
+      record.version === 4
+      && (
+        typeof record.soundEffectsEnabled !== "boolean"
+        || typeof record.soundEffectsVolume !== "number"
+        || !Number.isSafeInteger(record.soundEffectsVolume)
+        || record.soundEffectsVolume < 0
+        || record.soundEffectsVolume > 100
+      )
+    ) return DEFAULT_GAME_SETTINGS;
     return {
-      version: 3,
+      version: 4,
       priorityWindowMode: record.priorityWindowMode,
       lessGuidance: typeof record.lessGuidance === "boolean" ? record.lessGuidance : false,
       skipPlayConfirmation: typeof record.skipPlayConfirmation === "boolean"
         ? record.skipPlayConfirmation
         : true,
       motionPreference,
+      soundEffectsEnabled: record.version === 4 ? record.soundEffectsEnabled as boolean : true,
+      soundEffectsVolume: record.version === 4 ? record.soundEffectsVolume as number : 35,
     };
   } catch {
     return DEFAULT_GAME_SETTINGS;

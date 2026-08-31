@@ -178,6 +178,8 @@ export interface LobbyRoomSnapshot {
   room: RoomSummary;
   ownerIds: number[];
   isPrivate: boolean;
+  /** At least one current player-seat credential owns a live presence lease. */
+  hasLivePlayer: boolean;
 }
 
 export type JoinResult =
@@ -1400,7 +1402,7 @@ export class PgRoomStore {
         .map((code) => code.toUpperCase())
         .filter((code) => /^[A-Z0-9]{6}$/.test(code)))]
         .slice(0, MAX_MATCHMAKING_AVOID_ROOM_CODES);
-      const avoidPlaceholders = avoidRoomCodes.map((_, index) => `$${index + 5}`).join(", ");
+      const avoidPlaceholders = avoidRoomCodes.map((_, index) => `$${index + 6}`).join(", ");
       const avoidClause = avoidRoomCodes.length > 0
         ? `AND (q.retained_room_code IS NULL OR q.retained_room_code NOT IN (${avoidPlaceholders}))`
         : "";
@@ -1410,11 +1412,30 @@ export class PgRoomStore {
                 q.allow_future_cards, q.retained_room_code
          FROM matchmaking_entries q
          JOIN users u ON u.id = q.user_id
+         JOIN (
+           SELECT DISTINCT live_seat.room_code, live_seat.user_id
+           FROM room_seats live_seat
+           JOIN room_presence p
+             ON p.room_code = live_seat.room_code
+            AND p.seat = live_seat.seat
+            AND p.token_hash = live_seat.token_hash
+           WHERE p.last_seen_at > $5
+         ) live
+           ON live.room_code = q.retained_room_code
+          AND live.user_id = q.user_id
          WHERE q.format = $1 AND q.allow_future_cards = $2 AND q.user_id <> $3
            AND (q.retained_room_code IS NULL OR $4::text IS NULL)
+           AND q.retained_room_code IS NOT NULL
            ${avoidClause}
          ORDER BY q.joined_at, q.user_id LIMIT 1`,
-        [format, choice.allowFutureCards, choice.userId, choice.retainedRoomCode ?? null, ...avoidRoomCodes],
+        [
+          format,
+          choice.allowFutureCards,
+          choice.userId,
+          choice.retainedRoomCode ?? null,
+          Date.now() - PRESENCE_TIMEOUT_MS,
+          ...avoidRoomCodes,
+        ],
       );
       if (rows.length === 0) {
         // Every unmatched new search becomes a visible one-seat opener. A
@@ -1672,6 +1693,15 @@ export class PgRoomStore {
         };
       }
       if (!opts.allowPlayer) return { error: PLAY_REQUIRES_LOGIN };
+
+      // Keep an abandoned opener available for its owner to reconnect, but do
+      // not let a new player revive it during the GC grace period. Account and
+      // token reclaims returned above; the bot bypass is only for the
+      // connectionless seat installed while createBotRoom is composing.
+      const host = room.seats[1 - freeSeat];
+      if (opts.controller !== "bot" && (!host || !isPresent(host.lastSeenAt, Date.now()))) {
+        return { error: "room host is disconnected" };
+      }
 
       // Resolve this seat's deck/hero before mutating anything.
       let seatRow: SeatRow;
@@ -2136,9 +2166,23 @@ export class PgRoomStore {
    *  are awaiting GC and stay unlisted. Selects only the small columns — the
    *  `state` and `history` blobs stay in the db. */
   async lobbySnapshot(): Promise<LobbyRoomSnapshot[]> {
+    const presenceCutoff = Date.now() - PRESENCE_TIMEOUT_MS;
     const { rows } = await this.db.query(
-      `SELECT code, format, created_at, (status = 'active') AS started, is_private, allow_future_cards
-       FROM rooms WHERE status <> 'finished'`,
+      `SELECT r.code, r.format, r.created_at, (r.status = 'active') AS started,
+              r.is_private, r.allow_future_cards,
+              (live.room_code IS NOT NULL) AS has_live_player
+       FROM rooms r
+       LEFT JOIN (
+         SELECT DISTINCT p.room_code
+         FROM room_presence p
+         JOIN room_seats live_seat
+           ON live_seat.room_code = p.room_code
+          AND live_seat.seat = p.seat
+          AND live_seat.token_hash = p.token_hash
+         WHERE p.last_seen_at > $1
+       ) live ON live.room_code = r.code
+       WHERE r.status <> 'finished'`,
+      [presenceCutoff],
     );
     const codes = rows.map((row) => String(row.code));
     const seatRows = codes.length === 0 ? [] : (await this.db.query(
@@ -2167,6 +2211,7 @@ export class PgRoomStore {
       started: boolean;
       is_private: boolean;
       allow_future_cards: boolean;
+      has_live_player: boolean;
     }[]) {
       const format = raw.format;
       const [a, b] = seatsByRoom.get(raw.code) ?? [null, null];
@@ -2185,6 +2230,7 @@ export class PgRoomStore {
           },
           ownerIds,
           isPrivate: raw.is_private,
+          hasLivePlayer: raw.has_live_player,
         });
         continue;
       }
@@ -2200,15 +2246,18 @@ export class PgRoomStore {
         },
         ownerIds,
         isPrivate: raw.is_private,
+        hasLivePlayer: raw.has_live_player,
       });
     }
     return out.sort((a, b) => a.room.createdAt - b.room.createdAt);
   }
 
   personalizeLobby(snapshot: LobbyRoomSnapshot[], userId?: number): RoomSummary[] {
-    return snapshot.flatMap(({ room, ownerIds, isPrivate }) => {
+    return snapshot.flatMap(({ room, ownerIds, isPrivate, hasLivePlayer }) => {
       const yours = userId != null && ownerIds.includes(userId);
-      if (isPrivate && !yours) return [];
+      // Disconnected rooms remain visible to their owners for reconnect, but
+      // are neither discoverable nor presented as joinable to other accounts.
+      if ((isPrivate || !hasLivePlayer) && !yours) return [];
       return [{ ...room, ...(yours ? { yours: true } : {}) }];
     });
   }
@@ -2221,9 +2270,20 @@ export class PgRoomStore {
   async stats(): Promise<{ inGame: number; openRooms: number }> {
     const { rows } = await this.db.query(
       `SELECT
-         COALESCE(SUM(CASE WHEN status = 'active' THEN 2 ELSE 0 END), 0) AS in_game,
-         COALESCE(SUM(CASE WHEN status = 'open' AND is_private = FALSE THEN 1 ELSE 0 END), 0) AS open_rooms
-       FROM rooms`,
+         COALESCE(SUM(CASE WHEN r.status = 'active' THEN 2 ELSE 0 END), 0) AS in_game,
+         COALESCE(SUM(CASE WHEN r.status = 'open' AND r.is_private = FALSE
+           AND live.room_code IS NOT NULL THEN 1 ELSE 0 END), 0) AS open_rooms
+       FROM rooms r
+       LEFT JOIN (
+         SELECT DISTINCT p.room_code
+         FROM room_presence p
+         JOIN room_seats live_seat
+           ON live_seat.room_code = p.room_code
+          AND live_seat.seat = p.seat
+          AND live_seat.token_hash = p.token_hash
+         WHERE p.last_seen_at > $1
+       ) live ON live.room_code = r.code`,
+      [Date.now() - PRESENCE_TIMEOUT_MS],
     );
     return {
       inGame: Number(rows[0]!.in_game),

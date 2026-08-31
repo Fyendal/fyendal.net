@@ -26,6 +26,10 @@ export function GameSettingsDialog({
   onSkipPlayConfirmationChange,
   motionPreference,
   onMotionPreferenceChange,
+  soundEffectsEnabled,
+  onSoundEffectsEnabledChange,
+  soundEffectsVolume,
+  onSoundEffectsVolumeChange,
   onClose,
 }: {
   turn: number;
@@ -39,6 +43,10 @@ export function GameSettingsDialog({
   onSkipPlayConfirmationChange: (enabled: boolean) => void;
   motionPreference: MotionPreference;
   onMotionPreferenceChange: (preference: MotionPreference) => void;
+  soundEffectsEnabled: boolean;
+  onSoundEffectsEnabledChange: (enabled: boolean) => void;
+  soundEffectsVolume: number;
+  onSoundEffectsVolumeChange: (volume: number) => void;
   onClose: () => void;
 }) {
   const [confirmConcede, setConfirmConcede] = useState(false);
@@ -145,6 +153,43 @@ export function GameSettingsDialog({
                 ))}
               </div>
             </div>
+            <label className="toggle-switch settings-control-row">
+              <span className="settings-control-name">
+                Sound effects
+                <span
+                  className="settings-info-tooltip"
+                  data-tooltip="Plays subtle sounds when cards are drawn, shuffled, or played."
+                  aria-hidden="true"
+                >
+                  i
+                </span>
+              </span>
+              <input
+                type="checkbox"
+                role="switch"
+                aria-label="Sound effects"
+                checked={soundEffectsEnabled}
+                onChange={(event) => onSoundEffectsEnabledChange(event.target.checked)}
+              />
+              <span className="switch-track" aria-hidden="true" />
+            </label>
+            <label className="settings-control-row settings-volume-row">
+              <span className="settings-control-name">Volume</span>
+              <span className="settings-volume-control">
+                <input
+                  id="sound-effects-volume"
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="5"
+                  value={soundEffectsVolume}
+                  disabled={!soundEffectsEnabled}
+                  aria-label="Sound effects volume"
+                  onChange={(event) => onSoundEffectsVolumeChange(Number(event.target.value))}
+                />
+                <output htmlFor="sound-effects-volume">{soundEffectsVolume}%</output>
+              </span>
+            </label>
             <label className="toggle-switch settings-control-row">
               <span className="settings-control-name">
                 Show guidance

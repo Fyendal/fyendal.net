@@ -143,6 +143,10 @@ export function SideRail({
   onSkipPlayConfirmationChange,
   motionPreference,
   onMotionPreferenceChange,
+  soundEffectsEnabled,
+  onSoundEffectsEnabledChange,
+  soundEffectsVolume,
+  onSoundEffectsVolumeChange,
   log,
   friendlyHeroName,
   opponentHeroName,
@@ -181,6 +185,10 @@ export function SideRail({
   onSkipPlayConfirmationChange: (enabled: boolean) => void;
   motionPreference: MotionPreference;
   onMotionPreferenceChange: (preference: MotionPreference) => void;
+  soundEffectsEnabled: boolean;
+  onSoundEffectsEnabledChange: (enabled: boolean) => void;
+  soundEffectsVolume: number;
+  onSoundEffectsVolumeChange: (volume: number) => void;
   log: string[];
   friendlyHeroName: string;
   opponentHeroName: string;
@@ -368,6 +376,10 @@ export function SideRail({
           onSkipPlayConfirmationChange={onSkipPlayConfirmationChange}
           motionPreference={motionPreference}
           onMotionPreferenceChange={onMotionPreferenceChange}
+          soundEffectsEnabled={soundEffectsEnabled}
+          onSoundEffectsEnabledChange={onSoundEffectsEnabledChange}
+          soundEffectsVolume={soundEffectsVolume}
+          onSoundEffectsVolumeChange={onSoundEffectsVolumeChange}
           onClose={() => setShowSettings(false)}
         />
       ) : null}

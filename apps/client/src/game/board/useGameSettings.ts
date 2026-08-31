@@ -48,6 +48,20 @@ export function useGameSettings({
       return next;
     });
   };
+  const updateSoundEffectsEnabled = (soundEffectsEnabled: boolean) => {
+    setSettings((current) => {
+      const next = { ...current, soundEffectsEnabled };
+      saveGameSettings(localStorage, next);
+      return next;
+    });
+  };
+  const updateSoundEffectsVolume = (soundEffectsVolume: number) => {
+    setSettings((current) => {
+      const next = { ...current, soundEffectsVolume };
+      saveGameSettings(localStorage, next);
+      return next;
+    });
+  };
 
   return {
     ...settings,
@@ -55,5 +69,7 @@ export function useGameSettings({
     updateLessGuidance,
     updateSkipPlayConfirmation,
     updateMotionPreference,
+    updateSoundEffectsEnabled,
+    updateSoundEffectsVolume,
   };
 }

@@ -113,8 +113,10 @@
   animation: game-motion-pulse 460ms ease-out both;
 }
 
-.game-motion-destination-hidden {
+[data-game-motion-destination-hidden] {
+  visibility: hidden !important;
   opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 @keyframes game-motion-travel {

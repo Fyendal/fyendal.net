@@ -1010,6 +1010,7 @@
   .settings-priority-row { align-items: stretch; flex-direction: column; gap: 7px; }
   .settings-segmented { width: 100%; }
   .settings-segmented button { min-width: 0; min-height: 40px; }
+  .settings-volume-control input[type="range"] { width: min(42vw, 150px); }
   .settings-options { flex-wrap: wrap; }
   .settings-info-tooltip::after { display: none; }
 

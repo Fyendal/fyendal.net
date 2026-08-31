@@ -59,6 +59,7 @@ import { optimisticCardPlayHiddenIds } from "./pendingCardPlay.js";
 import { motionLocationKey, motionPresentationKey } from "./motion/motionTypes.js";
 import { GameMotionLayer } from "./motion/GameMotionLayer.js";
 import { useGameMotion } from "./motion/useGameMotion.js";
+import { useGameSounds } from "./sound/useGameSounds.js";
 
 const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
@@ -140,10 +141,14 @@ export function GameBoard() {
     motionPreference,
     priorityWindowMode,
     skipPlayConfirmation,
+    soundEffectsEnabled,
+    soundEffectsVolume,
     updatePriorityWindowMode,
     updateLessGuidance,
     updateMotionPreference,
     updateSkipPlayConfirmation,
+    updateSoundEffectsEnabled,
+    updateSoundEffectsVolume,
   } = useGameSettings({
     syncPriorityMode: connected && screen !== "replay" && !spectating && yourSeat !== null,
     sendPriorityMode,
@@ -153,6 +158,12 @@ export function GameBoard() {
     view,
     viewUpdate,
     motionPreference,
+  });
+  useGameSounds({
+    view,
+    viewUpdate,
+    enabled: soundEffectsEnabled && screen !== "replay",
+    volume: soundEffectsVolume,
   });
   // end-of-game popup can be dismissed to inspect the final board; re-arm it
   // whenever a new winner is decided (fresh game in the same room)
@@ -1046,6 +1057,10 @@ export function GameBoard() {
         onSkipPlayConfirmationChange={updateSkipPlayConfirmation}
         motionPreference={motionPreference}
         onMotionPreferenceChange={updateMotionPreference}
+        soundEffectsEnabled={soundEffectsEnabled}
+        onSoundEffectsEnabledChange={updateSoundEffectsEnabled}
+        soundEffectsVolume={soundEffectsVolume}
+        onSoundEffectsVolumeChange={updateSoundEffectsVolume}
         log={view.log}
         friendlyHeroName={me.heroName}
         opponentHeroName={opp.heroName}

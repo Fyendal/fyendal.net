@@ -35,25 +35,31 @@ describe("client storage keys", () => {
     };
 
     expect(loadGameSettings(storage)).toEqual({
-      version: 3,
+      version: 4,
       priorityWindowMode: "always-pause",
       lessGuidance: false,
       skipPlayConfirmation: true,
       motionPreference: "system",
+      soundEffectsEnabled: true,
+      soundEffectsVolume: 35,
     });
     saveGameSettings(storage, {
-      version: 3,
+      version: 4,
       priorityWindowMode: "auto-pass",
       lessGuidance: true,
       skipPlayConfirmation: false,
       motionPreference: "reduced",
+      soundEffectsEnabled: false,
+      soundEffectsVolume: 60,
     });
     expect(loadGameSettings(storage)).toEqual({
-      version: 3,
+      version: 4,
       priorityWindowMode: "auto-pass",
       lessGuidance: true,
       skipPlayConfirmation: false,
       motionPreference: "reduced",
+      soundEffectsEnabled: false,
+      soundEffectsVolume: 60,
     });
   });
 
@@ -66,11 +72,33 @@ describe("client storage keys", () => {
         skipPlayConfirmation: false,
       }),
     })).toEqual({
-      version: 3,
+      version: 4,
       priorityWindowMode: "auto-pass",
       lessGuidance: true,
       skipPlayConfirmation: false,
       motionPreference: "system",
+      soundEffectsEnabled: true,
+      soundEffectsVolume: 35,
+    });
+  });
+
+  it("migrates version 3 settings with the default sound preferences", () => {
+    expect(loadGameSettings({
+      getItem: () => JSON.stringify({
+        version: 3,
+        priorityWindowMode: "auto-pass",
+        lessGuidance: true,
+        skipPlayConfirmation: false,
+        motionPreference: "reduced",
+      }),
+    })).toEqual({
+      version: 4,
+      priorityWindowMode: "auto-pass",
+      lessGuidance: true,
+      skipPlayConfirmation: false,
+      motionPreference: "reduced",
+      soundEffectsEnabled: true,
+      soundEffectsVolume: 35,
     });
   });
 
@@ -91,7 +119,13 @@ describe("client storage keys", () => {
   it("falls back safely for invalid or future settings", () => {
     expect(loadGameSettings({ getItem: () => "not json" })).toEqual(DEFAULT_GAME_SETTINGS);
     expect(loadGameSettings({
-      getItem: () => JSON.stringify({ version: 4, priorityWindowMode: "auto-pass" }),
+      getItem: () => JSON.stringify({ version: 5, priorityWindowMode: "auto-pass" }),
+    })).toEqual(DEFAULT_GAME_SETTINGS);
+    expect(loadGameSettings({
+      getItem: () => JSON.stringify({
+        ...DEFAULT_GAME_SETTINGS,
+        soundEffectsVolume: 101,
+      }),
     })).toEqual(DEFAULT_GAME_SETTINGS);
   });
 
