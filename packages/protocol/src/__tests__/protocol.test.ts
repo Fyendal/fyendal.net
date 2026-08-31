@@ -448,7 +448,7 @@ describe("GameView and server messages", () => {
       { type: "room-created", code: "ABC123", seat: 0, token: "token", version: 1 },
       { type: "joined", code: "ABC123", seat: null, token: "", spectator: true, version: 1 },
       { type: "game-started", version: 1 },
-      { type: "state", version: 1, view: gameView(), playerProfiles, yourSeat: 0, legal: [{ kind: "play-card", instanceId: 1, pitchInstanceIds: [], boost: true }], actionCandidates: [{ kind: "play-card", instanceId: 2, pitchInstanceIds: [], pitchRequired: 4 }], spectators: 2, lastActionAt: [0, 1], botGame: true },
+      { type: "state", version: 1, view: gameView(), transition: { fromVersion: 0, kind: "forward", events: [{ kind: "move", from: { kind: "deck", seat: 0, position: "top" }, to: { kind: "hand", seat: 0 }, count: 1 }] }, playerProfiles, yourSeat: 0, legal: [{ kind: "play-card", instanceId: 1, pitchInstanceIds: [], boost: true }], actionCandidates: [{ kind: "play-card", instanceId: 2, pitchInstanceIds: [], pitchRequired: 4 }], spectators: 2, lastActionAt: [0, 1], botGame: true },
       { type: "spectators", count: 2, version: 1 },
       { type: "opponent-disconnected", version: 1 }, { type: "opponent-reconnected", version: 1 },
       { type: "emote", seat: 1, message: "Good game!" },
@@ -475,12 +475,18 @@ describe("GameView and server messages", () => {
     expect(decodeServerMessage({ type: "state", version: 1, view: gameView(), playerProfiles, yourSeat: 0, legal: [{ kind: "play-card", instanceId: 1, pitchInstanceIds: [], boost: false }], lastActionAt: [0, 0] })).toBeNull();
     expect(decodeServerMessage({ type: "state", version: 1, view: gameView(), playerProfiles, yourSeat: 0, legal: [{ kind: "play-card", instanceId: 1, pitchInstanceIds: [], asInstant: true }], lastActionAt: [0, 0] })).not.toBeNull();
     expect(decodeServerMessage({ type: "state", version: 1, view: gameView(), playerProfiles, yourSeat: 0, legal: [{ kind: "play-card", instanceId: 1, pitchInstanceIds: [], asInstant: false }], lastActionAt: [0, 0] })).toBeNull();
+    expect(decodeServerMessage({ type: "state", version: 1, view: gameView(), transition: { fromVersion: 0, kind: "replace", events: [{ kind: "move", from: null, to: { kind: "hand", seat: 0 }, count: 1 }] }, playerProfiles, yourSeat: 0, legal: [], lastActionAt: [0, 0] })).toBeNull();
+    expect(decodeServerMessage({ type: "state", version: 1, view: gameView(), transition: { fromVersion: 0, kind: "forward", events: [{ kind: "move", from: { kind: "hand", seat: 0, position: "bottom" }, to: { kind: "deck", seat: 0, position: "bottom" }, count: 1 }] }, playerProfiles, yourSeat: 0, legal: [], lastActionAt: [0, 0] })).toBeNull();
   });
 });
 
 describe("replays and HTTP responses", () => {
   it("accepts only exact initial replay frames", () => {
     expect(decodeReplayFile({ version: 1, seat: 0, views: [gameView()] })).not.toBeNull();
+    expect(decodeReplayFile({ version: 2, seat: 0, frames: [
+      { view: gameView(), transition: null },
+      { view: { ...gameView(), turn: 2 }, transition: { kind: "forward", events: [{ kind: "move", from: { kind: "deck", seat: 0 }, to: { kind: "hand", seat: 0 }, count: 1 }] } },
+    ] })).not.toBeNull();
     expect(decodeReplayFile({ version: 2, seat: 0, views: [gameView()] })).toBeNull();
     expect(decodeReplayFile({ version: 1, seat: 0, views: [gameView()], extra: true })).toBeNull();
     expect(decodeReplayFile({ version: 1, seat: 0, views: Array(10_001).fill(gameView()) })).toBeNull();

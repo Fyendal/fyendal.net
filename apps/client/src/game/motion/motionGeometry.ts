@@ -11,12 +11,13 @@ import {
 } from "./motionTimeline.js";
 
 export const MOTION_TRAVEL_MS = 320;
+export const MOTION_DECK_BOTTOM_MS = 560;
 export const MOTION_STAGGER_MS = 45;
 export const MOTION_DRAW_STAGGER_MS = 85;
 export const MOTION_SEQUENCE_GAP_MS = 70;
 export const MOTION_PULSE_MS = 460;
 export const MOTION_CONNECT_MS = 180;
-export const MAX_DETAILED_FLIGHTS = 6;
+export const MAX_DETAILED_FLIGHTS = 24;
 
 export interface MotionRect {
   left: number;
@@ -38,7 +39,7 @@ export interface MeasuredMotionAnchors {
 export interface MotionFlight {
   id: string;
   phase: MotionTimelinePhase;
-  mode: "move" | "arsenal" | "draw" | "appear" | "settle";
+  mode: "move" | "reflow" | "arsenal" | "draw" | "deck-bottom" | "appear" | "settle";
   start: MotionRect;
   end: MotionRect;
   visual: MotionVisual;
@@ -46,6 +47,12 @@ export interface MotionFlight {
   showCount: boolean;
   delayMs: number;
   destinationPresentationKey?: string;
+  holdAtSource?: true;
+  destinationCoverVisual?: MotionVisual;
+}
+
+export function motionFlightDurationMs(flight: Pick<MotionFlight, "mode">): number {
+  return flight.mode === "deck-bottom" ? MOTION_DECK_BOTTOM_MS : MOTION_TRAVEL_MS;
 }
 
 export interface MotionPulse {
@@ -166,6 +173,11 @@ function phaseStaggerMs(phase: MotionTimelinePhase): number {
   return phase === "draw" ? MOTION_DRAW_STAGGER_MS : MOTION_STAGGER_MS;
 }
 
+function sameRect(left: MotionRect, right: MotionRect): boolean {
+  return left.left === right.left && left.top === right.top
+    && left.width === right.width && left.height === right.height;
+}
+
 export function resolveMotionBatch(
   events: readonly GameMotionEvent[],
   previous: MotionAnchorSnapshot,
@@ -270,11 +282,16 @@ export function resolveMotionBatch(
     const end = destination.exact
       ? destination.rect
       : cardRectWithinZone(destination.rect, start);
-    const mode = event.source.kind === "hand" && event.destination.kind === "arsenal"
+    if (event.kind === "reflow" && sameRect(start, end)) continue;
+    const mode = event.kind === "reflow"
+      ? "reflow"
+      : event.source.kind === "hand" && event.destination.kind === "arsenal"
       ? "arsenal"
       : event.source.kind === "deck" && event.destination.kind === "hand"
         ? "draw"
-        : "move";
+        : event.destination.kind === "deck" && event.destination.position === "bottom"
+          ? "deck-bottom"
+          : "move";
     flights.push({
       id: `${id}:flight:${flights.length}`,
       phase,
@@ -282,10 +299,16 @@ export function resolveMotionBatch(
       start,
       end,
       visual: event.visual,
-      count: event.count,
-      showCount: event.count > 1,
+      count: event.kind === "move" ? event.count : 1,
+      showCount: event.kind === "move" && event.count > 1,
       delayMs: 0,
       destinationPresentationKey: event.destinationPresentationKey,
+      ...((event.kind === "reflow" || event.sourcePresentationKey !== undefined)
+        ? { holdAtSource: true as const }
+        : {}),
+      ...(event.kind === "move" && event.destinationCoverVisual
+        ? { destinationCoverVisual: event.destinationCoverVisual }
+        : {}),
     });
   }
 
@@ -294,8 +317,8 @@ export function resolveMotionBatch(
     ...flights.map((flight) => ({
       id: flight.id,
       phase: flight.phase,
-      durationMs: MOTION_TRAVEL_MS,
-      staggerMs: phaseStaggerMs(flight.phase),
+      durationMs: motionFlightDurationMs(flight),
+      staggerMs: flight.mode === "reflow" ? 0 : phaseStaggerMs(flight.phase),
     })),
     ...connectors.map((connector) => ({
       id: connector.id,
@@ -315,7 +338,7 @@ export function resolveMotionBatch(
   for (const pulse of pulses) pulse.delayMs = delayById.get(pulse.id) ?? 0;
   const durationMs = Math.max(
     0,
-    ...flights.map((flight) => flight.delayMs + MOTION_TRAVEL_MS),
+    ...flights.map((flight) => flight.delayMs + motionFlightDurationMs(flight)),
     ...connectors.map((connector) => connector.delayMs + MOTION_CONNECT_MS),
     ...pulses.map((pulse) => pulse.delayMs + MOTION_PULSE_MS),
   );

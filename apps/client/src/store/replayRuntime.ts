@@ -1,9 +1,9 @@
-import type { GameView, ReplayFile } from "@fyendal/shared";
+import type { GameTransitionView, GameView, ReplayFile } from "@fyendal/shared";
 import { ReplayRecorder } from "../replay/recorder.js";
 import { replayStorageKey } from "../storage.js";
 
 export interface ReplayRuntime {
-  recordFrame: (code: string, view: GameView, seat: number | null) => number;
+  recordFrame: (code: string, view: GameView, seat: number | null, transition?: GameTransitionView) => number;
   discard: (code?: string | null) => void;
   detach: () => void;
   replace: (code: string, file: ReplayFile) => number;
@@ -24,9 +24,9 @@ export function createReplayRuntime(storage: Storage): ReplayRuntime {
   };
 
   return {
-    recordFrame: (code, view, seat) => {
+    recordFrame: (code, view, seat, transition) => {
       const activeRecorder = ensureRecorder(code);
-      activeRecorder.record(view, seat);
+      activeRecorder.record(view, seat, transition);
       if (view.winner !== null) activeRecorder.finish();
       return activeRecorder.length;
     },

@@ -10,6 +10,22 @@ it("registers every HNT printing as implemented", () => {
 });
 
 describe("HNT — marked heroes and daggers", () => {
+  it("journals Relentless Pursuit's self-move as a deck-bottom placement", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["relentless pursuit|3"] },
+        { hero: "dorinthea" },
+      ],
+    });
+    g.state.players[0]!.flags.attackedHeroThisTurn = true;
+
+    g.play("relentless pursuit|3").expectDeckBottom(0, "relentless pursuit|3");
+    expect(g.lastEvents).toContainEqual(expect.objectContaining({
+      from: { kind: "stack", seat: 0 },
+      to: { kind: "deck", seat: 0, position: "bottom" },
+    }));
+  });
+
   it.each([
     ["defang the dragon|1", "fang|0"],
     ["extinguish the flames|1", "cindra|0"],

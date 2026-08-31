@@ -380,6 +380,13 @@ export const MIGRATIONS: Migration[] = [
       CREATE INDEX bug_reports_room_idx ON bug_reports (room_code, created_at);`);
     },
   },
+  {
+    version: 21,
+    // Presentation transitions are durable edges between room/replay versions,
+    // not rules state, so they remain outside PersistedStateV1.
+    sql: `ALTER TABLE rooms ADD COLUMN last_transition JSONB;
+    ALTER TABLE replay_frames ADD COLUMN transition JSONB;`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

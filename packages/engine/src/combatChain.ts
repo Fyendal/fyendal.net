@@ -23,6 +23,7 @@ import {
   moveToGraveyard,
 } from "./zoneMoves.js";
 import { controlledPermanents, lingeringModifierSources } from "./sourceQueries.js";
+import { transitionZone } from "./transitions.js";
 
 import { checkWin } from "./win.js";
 
@@ -202,7 +203,14 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
       } else if (link.flags.attackToBanish === true) {
         enterBanish(state, runtime, link.attackingCard, "chain");
       } else if (link.flags.attackToBottom === true) {
-        (state.players[link.attackingCard.owner] as PlayerState).deck.push(link.attackingCard);
+        const owner = state.players[link.attackingCard.owner] as PlayerState;
+        owner.deck.push(link.attackingCard);
+        runtime.transitions.move(
+          link.attackingCard,
+          transitionZone("chain", owner.seat),
+          transitionZone("deck", owner.seat, "bottom"),
+          { to: true },
+        );
         logPublic(state, `${nameOf(state, link.attackingCard.cardId)} is put on the bottom of the deck`);
       } else {
         moveToGraveyard(state, runtime, link.attackingCard);

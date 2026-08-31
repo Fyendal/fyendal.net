@@ -132,10 +132,12 @@
     scroll-padding-top: calc(58px + env(safe-area-inset-top));
     scroll-padding-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 224px);
   }
-  .board:has(.opp-hand .card-back) {
+  /* Always reserve the opponent-hand rail. Tying this padding to the first
+     card back made draw-up resize the board underneath fixed motion flights. */
+  .board {
     padding-top: calc(88px + env(safe-area-inset-top));
   }
-  #root:has(.board .opp-hand .card-back) {
+  #root:has(.table) {
     scroll-padding-top: calc(92px + env(safe-area-inset-top));
   }
   .opp-hand { top: calc(54px + env(safe-area-inset-top)); }

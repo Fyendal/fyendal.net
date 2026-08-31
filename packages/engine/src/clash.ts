@@ -9,6 +9,7 @@ import { destroyPermanent } from "./zoneMoves.js";
 import { controlledPermanents } from "./sourceQueries.js";
 
 import { heroAbilitiesDisabled } from "./stateQueries.js";
+import { transitionZone } from "./transitions.js";
 
 // ── crowd / clash / life comparison (Super Slam mechanics) ─────────────────
 
@@ -297,6 +298,12 @@ export function answerClashDecision(
   if (owner.deck[0]?.instanceId !== revealed.instanceId) return "revealed clash card is no longer on top";
   const card = owner.deck.shift() as CardInstance;
   owner.deck.push(card);
+  runtime.transitions.move(
+    card,
+    transitionZone("deck", owner.seat, "top"),
+    transitionZone("deck", owner.seat, "bottom"),
+    { to: true },
+  );
   logPublic(state, `${nameOf(state, card.cardId)} is put on the bottom of its owner's deck`);
   resolveClashRequest(state, runtime, clashState.request, clashState.queue);
   return undefined;

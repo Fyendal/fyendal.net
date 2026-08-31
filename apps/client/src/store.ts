@@ -617,7 +617,7 @@ export const useStore = create<StoreState>((set, get) => {
         // keep recording frames even while watching a replay of this room
         const code = get().roomCode;
         const frames = code
-          ? replayRuntime.recordFrame(code, msg.view, msg.yourSeat)
+          ? replayRuntime.recordFrame(code, msg.view, msg.yourSeat, msg.transition)
           : get().replayFrames;
         const commandState = acceptRoomCommandState(msg.version, msg);
         if (get().screen === "replay") {
@@ -637,6 +637,9 @@ export const useStore = create<StoreState>((set, get) => {
             source: "live",
             transition: continuousLiveState ? "forward" : "replace",
             roomVersion: msg.version,
+            ...(continuousLiveState && msg.transition?.fromVersion === previousLiveVersion
+              ? { gameTransition: msg.transition }
+              : {}),
           }),
           legal: msg.legal,
           actionCandidates: msg.actionCandidates ?? msg.legal,
@@ -1155,9 +1158,17 @@ export const useStore = create<StoreState>((set, get) => {
     getRecordedViews: replayRuntime.getViews,
     downloadReplay: () => {
       const views = get().replayViews;
+      const transitions = get().replayTransitions;
       const file: ReplayFile | null =
         get().screen === "replay" && views
-          ? { version: 1, seat: get().yourSeat, views }
+          ? {
+              version: 2,
+              seat: get().yourSeat,
+              frames: views.map((view, index) => ({
+                view,
+                transition: transitions?.[index] ?? null,
+              })),
+            }
           : replayRuntime.getFile();
       if (!file) return;
       downloadReplayFile(file);
@@ -1170,6 +1181,7 @@ export const useStore = create<StoreState>((set, get) => {
     },
     setReplayStep: (step) => {
       const views = get().replayViews;
+      const transitions = get().replayTransitions;
       if (!views || views.length === 0) return;
       const n = Math.max(0, Math.min(step, views.length - 1));
       const currentStep = get().replayStep;
@@ -1183,14 +1195,31 @@ export const useStore = create<StoreState>((set, get) => {
       set({
         replayStep: n,
         view: views[n]!,
-        viewUpdate: nextViewUpdate({ source: "replay", transition, replayStep: n }),
+        viewUpdate: nextViewUpdate({
+          source: "replay",
+          transition,
+          replayStep: n,
+          ...((delta === 1 || delta === -1) && transitions?.[Math.max(n, currentStep)]
+            ? {
+                gameTransition: {
+                  fromVersion: Math.min(n, currentStep),
+                  ...transitions[Math.max(n, currentStep)]!,
+                },
+              }
+            : {}),
+        }),
       });
     },
     closeReplay: () => {
       const snap = preReplay;
       const savedReplayId = get().activeSavedReplayId;
       preReplay = null;
-      const base = { replayViews: null, replayStep: 0, activeSavedReplayId: null };
+      const base = {
+        replayViews: null,
+        replayTransitions: null,
+        replayStep: 0,
+        activeSavedReplayId: null,
+      };
       if (savedReplayIdFromPath(location.pathname) === savedReplayId) {
         history.replaceState(null, "", "/");
       }

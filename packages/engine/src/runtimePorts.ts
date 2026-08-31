@@ -2,6 +2,7 @@ import type { ScriptCtx, TokenCreationContext } from "./scripts.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { CardInstance, ChainLinkState } from "./state.js";
 import type { FlowStepName } from "./flowTypes.js";
+import type { TransitionRecorder } from "./transitions.js";
 
 export type ScriptCommandName =
   | "applyOneShotDefenseModifiers"
@@ -82,6 +83,7 @@ type BoundRuntimeFunction = (...args: any[]) => any;
 
 /** Stateless, process-local composition passed explicitly through engine flows. */
 export interface EngineRuntime {
+  readonly transitions: TransitionRecorder;
   readonly commands: Readonly<Record<ScriptCommandName, BoundRuntimeFunction>>;
   readonly events: Readonly<Record<ScriptEventName, BoundRuntimeFunction>>;
   dispatchFlow<T = any>(kind: FlowStepName, state: GameStateInternal, ...args: any[]): T;

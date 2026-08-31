@@ -48,6 +48,7 @@ function isStackLocation(location: MotionLocation): boolean {
 }
 
 export function motionTimelinePhase(event: GameMotionEvent): MotionTimelinePhase {
+  if (event.kind === "reflow") return event.phase;
   if (event.kind === "settle") return "confirmation";
   if (event.kind === "connect") return "trigger";
   if (event.kind === "appear") return "result";

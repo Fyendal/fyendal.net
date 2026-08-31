@@ -770,13 +770,14 @@ export function GameBoard() {
             <PlayerNameplate placement="self" profile={playerProfiles[seat]!} />
           </>
         ) : null}
-        {waitingForOpponent && !replaying && (
-          <div className="waiting">
-            {spectating
-              ? `Spectating — ${activeHeroName} to act`
-              : "Waiting for opponent…"}
-          </div>
-        )}
+        <div
+          className={`waiting${waitingForOpponent && !replaying ? "" : " waiting-hidden"}`}
+          aria-hidden={waitingForOpponent && !replaying ? undefined : true}
+        >
+          {spectating
+            ? `Spectating — ${activeHeroName} to act`
+            : "Waiting for opponent…"}
+        </div>
         <div
           className={`opp-hand${view.winner !== null || replaying ? " opp-hand-revealed" : ""}`}
           data-motion-zone={motionLocationKey({ kind: "hand", seat: opp.seat })}

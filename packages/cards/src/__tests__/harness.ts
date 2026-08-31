@@ -1,7 +1,7 @@
 import { expect } from "vitest";
 import type { Decklist, EquipmentSlot, GameIntent, MeldSide, PlayableZone } from "@fyendal/shared";
 import { applyIntent, createGame, legalIntents, projectStateFor } from "@fyendal/engine";
-import type { CardInstance, GameState } from "@fyendal/engine";
+import type { CardInstance, EngineTransitionMove, GameState } from "@fyendal/engine";
 import { functionalKeyOf } from "../functional.js";
 import { cardData, decklists, scripts } from "../index.js";
 
@@ -111,6 +111,8 @@ export function printingId(key: string): string {
 
 export class Scenario {
   state: GameState;
+  lastEvents: EngineTransitionMove[] = [];
+  transitionEvents: EngineTransitionMove[] = [];
 
   constructor(opts: ScenarioOpts) {
     const seats = opts.seats;
@@ -254,6 +256,8 @@ export class Scenario {
           `last log: ${formatLog(this.state.log.slice(-5))}`,
       );
     }
+    this.lastEvents = r.events;
+    this.transitionEvents.push(...r.events);
     this.state = r.state;
   }
 

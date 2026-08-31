@@ -2,7 +2,7 @@ import type { CardView, EquipmentSlot } from "@fyendal/shared";
 
 export type MotionLocation =
   | { kind: "hand"; seat: number }
-  | { kind: "deck"; seat: number }
+  | { kind: "deck"; seat: number; position?: "top" | "bottom" }
   | { kind: "arsenal"; seat: number }
   | { kind: "pitch"; seat: number }
   | { kind: "graveyard"; seat: number }
@@ -27,6 +27,7 @@ export type CountedMotionLocation = Extract<
 export type MotionVisual =
   | { kind: "face"; card: CardView }
   | { kind: "back" }
+  | { kind: "face-conceal"; card: CardView }
   | { kind: "back-reveal"; card: CardView };
 
 export interface CardPresentation {
@@ -52,6 +53,21 @@ export interface MoveMotionEvent {
   instanceId?: number;
   sourcePresentationKey?: string;
   destinationPresentationKey?: string;
+  destinationCoverVisual?: MotionVisual;
+}
+
+/** A card that remains in hand while the authoritative snapshot changes the
+ * hand layout. Its overlay bridges the old and new slots so the live card can
+ * stay masked until the layout motion arrives. */
+export interface HandReflowMotionEvent {
+  kind: "reflow";
+  source: Extract<MotionLocation, { kind: "hand" }>;
+  destination: Extract<MotionLocation, { kind: "hand" }>;
+  visual: MotionVisual;
+  instanceId?: number;
+  sourcePresentationKey: string;
+  destinationPresentationKey: string;
+  phase: "arsenal" | "draw";
 }
 
 export interface AppearMotionEvent {
@@ -86,6 +102,7 @@ export interface PulseMotionEvent {
 
 export type GameMotionEvent =
   | MoveMotionEvent
+  | HandReflowMotionEvent
   | AppearMotionEvent
   | SettleMotionEvent
   | ConnectMotionEvent

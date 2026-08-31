@@ -2,6 +2,7 @@ import type {
   BotOpponent,
   Format,
   GameIntent,
+  GameTransitionView,
   GameView,
   PlayerProfileView,
   HeroId,
@@ -67,6 +68,8 @@ export interface ViewUpdate {
   transition: ViewTransition;
   roomVersion?: number;
   replayStep?: number;
+  /** Authoritative semantic edge for this exact forward/backward step. */
+  gameTransition?: GameTransitionView;
 }
 
 /** The single public Zustand contract. Implementation details stay in store.ts. */
@@ -156,6 +159,7 @@ export interface StoreState {
 
   replayFrames: number;
   replayViews: GameView[] | null;
+  replayTransitions: Array<Omit<GameTransitionView, "fromVersion"> | null> | null;
   replayStep: number;
   activeSavedReplayId: string | null;
   savedReplays: ReplaySummary[];

@@ -10,6 +10,7 @@ import { findPermanent, opponent } from "./zoneQueries.js";
 import { destroyPermanent } from "./zoneMoves.js";
 import { controlledPermanents } from "./sourceQueries.js";
 import { arsenalCapacity, canUntapPermanent, drawCards, stampControlledName } from "./cardLifecycle.js";
+import { transitionZone } from "./transitions.js";
 
 /** Draw cards until the player's hand reaches their intellect. */
 export function drawUpTo(state: GameStateInternal,
@@ -104,6 +105,18 @@ export function startTurn(state: GameStateInternal, runtime: EngineRuntime): voi
 
 /** Active player passes with an empty chain → end phase: end-of-turn triggers resolve first. */
 export function endTurn(state: GameStateInternal, runtime: EngineRuntime): void {
+  // CR 4.3.4 closes a resolved combat chain before the end phase begins. This
+  // settles attacking/defending cards and applies Blade Break, Battleworn,
+  // Guardwell, and Temper while the game is still in the action phase. A
+  // chain-close trigger must finish before we resume this boundary.
+  if (state.chain.length > 0) {
+    runtime.dispatchFlow("closeChain", state);
+    if (state.stack.length > 0 || (state.pendingTriggeredLayers?.length ?? 0) > 0) {
+      state.stackResume ??= "end-action-phase";
+      runtime.dispatchFlow("continueStack", state);
+      return;
+    }
+  }
   state.phase = "end";
   // scheduled delayed destructions fire at the beginning of the end phase
   const pending = state.pendingDestructions.splice(0);
@@ -166,6 +179,12 @@ export function endTurn(state: GameStateInternal, runtime: EngineRuntime): void 
       delete c.intimidated;
       delete c.returnToHandAtTurn;
       pl.hand.push(c);
+      runtime.transitions.move(
+        c,
+        transitionZone("banish", pl.seat),
+        transitionZone("hand", pl.seat),
+        { from: true, to: true },
+      );
       logPublic(
         state,
         `${nameOf(state, pl.heroCardId)}'s ${wasIntimidated ? "intimidated" : "face-down banished"} card returns to their hand`,
@@ -212,6 +231,12 @@ export function answerArsenal(
     while (used.has(slot)) slot++;
     card.arsenalSlot = slot;
     player.arsenal.push(card);
+    runtime.transitions.move(
+      card,
+      transitionZone("hand", player.seat),
+      transitionZone("arsenal", player.seat),
+      { from: true, to: true },
+    );
     logPublic(state, `${nameOf(state, player.heroCardId)} puts a card face down into arsenal`);
   }
   finishEndPhase(state, runtime);
@@ -228,7 +253,14 @@ function continuePitchBottoming(state: GameStateInternal, runtime: EngineRuntime
     const player = state.players[seat] as PlayerState;
     if (player.pitch.length === 0) continue;
     if (player.pitch.length === 1) {
-      player.deck.push(player.pitch.shift() as CardInstance);
+      const card = player.pitch.shift() as CardInstance;
+      player.deck.push(card);
+      runtime.transitions.move(
+        card,
+        transitionZone("pitch", player.seat),
+        transitionZone("deck", player.seat, "bottom"),
+        { to: true },
+      );
       continue;
     }
 
@@ -290,7 +322,14 @@ export function answerEndPhasePitchOrder(
   }
   player.pitch = [];
   for (const instanceId of finalOrder) {
-    player.deck.push(cardsById.get(instanceId) as CardInstance);
+    const card = cardsById.get(instanceId) as CardInstance;
+    player.deck.push(card);
+    runtime.transitions.move(
+      card,
+      transitionZone("pitch", player.seat),
+      transitionZone("deck", player.seat, "bottom"),
+      { to: true },
+    );
   }
   state.pendingDecision = null;
   continuePitchBottoming(state, runtime);
@@ -303,8 +342,6 @@ export function finishEndPhase(state: GameStateInternal, runtime: EngineRuntime)
 
 function completeEndPhase(state: GameStateInternal, runtime: EngineRuntime): void {
   const player = state.players[state.activePlayer] as PlayerState;
-  // the combat chain closes at the end of the turn
-  runtime.dispatchFlow("closeChain", state);
   // Granted aura attacks leave a public presentation marker on the attacking
   // card. It is turn state, so remove it during that controller's cleanup.
   for (const card of player.board) {

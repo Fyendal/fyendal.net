@@ -231,6 +231,147 @@ describe("motion geometry", () => {
     expect(pitchFlight?.delayMs).toBe(45);
   });
 
+  it("flips a pitch card before tucking it into the deck bottom", () => {
+    const pitchSource = rect(690, 500, 100, 138);
+    const deckDestination = rect(820, 500, 100, 138);
+    const batch = resolveMotionBatch(
+      [{
+        kind: "move",
+        source: { kind: "pitch", seat: 0 },
+        destination: { kind: "deck", seat: 0, position: "bottom" },
+        visual: {
+          kind: "face-conceal",
+          card: { instanceId: 62, cardId: "TST062", owner: 0 },
+        },
+        instanceId: 62,
+        sourcePresentationKey: "0:pitch:62",
+        count: 1,
+        confidence: "exact",
+      }],
+      anchors({ cards: [["0:pitch:62", pitchSource]] }),
+      anchors({ zones: [["0:deck", deckDestination]] }),
+      14,
+    );
+
+    expect(batch?.flights).toEqual([
+      expect.objectContaining({
+        mode: "deck-bottom",
+        phase: "cleanup",
+        start: pitchSource,
+        end: deckDestination,
+        visual: {
+          kind: "face-conceal",
+          card: { instanceId: 62, cardId: "TST062", owner: 0 },
+        },
+        holdAtSource: true,
+      }),
+    ]);
+    expect(batch?.durationMs).toBe(560);
+  });
+
+  it("holds delayed sources and moves unchanged hand cards into their new slots", () => {
+    const oldHand = rect(260, 680, 140, 193);
+    const newHand = rect(160, 680, 140, 193);
+    const batch = resolveMotionBatch(
+      [{
+        kind: "reflow",
+        source: { kind: "hand", seat: 0 },
+        destination: { kind: "hand", seat: 0 },
+        visual: {
+          kind: "face",
+          card: { instanceId: 63, cardId: "TST063", owner: 0 },
+        },
+        instanceId: 63,
+        sourcePresentationKey: "0:hand:63",
+        destinationPresentationKey: "0:hand:63",
+        phase: "draw",
+      }],
+      anchors({ cards: [["0:hand:63", oldHand]] }),
+      anchors({ cards: [["0:hand:63", newHand]] }),
+      16,
+    );
+
+    expect(batch?.flights).toEqual([
+      expect.objectContaining({
+        mode: "reflow",
+        phase: "draw",
+        start: oldHand,
+        end: newHand,
+        holdAtSource: true,
+        destinationPresentationKey: "0:hand:63",
+      }),
+    ]);
+  });
+
+  it("moves multiple ordered pitch cards directly under the deck in sequence", () => {
+    const firstSource = rect(650, 500, 100, 138);
+    const secondSource = rect(670, 514, 100, 138);
+    const deckDestination = rect(820, 500, 100, 138);
+    const firstCard = { instanceId: 64, cardId: "TST064", owner: 0 };
+    const secondCard = { instanceId: 65, cardId: "TST065", owner: 0 };
+    const batch = resolveMotionBatch(
+      [firstCard, secondCard].map((card): GameMotionEvent => ({
+        kind: "move",
+        source: { kind: "pitch", seat: 0 },
+        destination: { kind: "deck", seat: 0, position: "bottom" },
+        visual: { kind: "face-conceal", card },
+        instanceId: card.instanceId,
+        sourcePresentationKey: `0:pitch:${card.instanceId}`,
+        destinationCoverVisual: { kind: "back" },
+        count: 1,
+        confidence: "exact",
+      })),
+      anchors({ cards: [
+        ["0:pitch:64", firstSource],
+        ["0:pitch:65", secondSource],
+      ] }),
+      anchors({ zones: [["0:deck", deckDestination]] }),
+      17,
+    );
+
+    expect(batch?.flights).toEqual([
+      expect.objectContaining({
+        mode: "deck-bottom",
+        phase: "cleanup",
+        start: firstSource,
+        end: deckDestination,
+        count: 1,
+        showCount: false,
+        delayMs: 0,
+      }),
+      expect.objectContaining({
+        mode: "deck-bottom",
+        phase: "cleanup",
+        start: secondSource,
+        end: deckDestination,
+        visual: { kind: "face-conceal", card: secondCard },
+        delayMs: 45,
+      }),
+    ]);
+    expect(batch?.durationMs).toBe(605);
+  });
+
+  it("does not infer a bottom tuck for an explicit deck-top placement", () => {
+    const source = rect(690, 500, 100, 138);
+    const destination = rect(820, 500, 100, 138);
+    const batch = resolveMotionBatch(
+      [{
+        kind: "move",
+        source: { kind: "graveyard", seat: 0 },
+        destination: { kind: "deck", seat: 0, position: "top" },
+        visual: { kind: "back" },
+        count: 1,
+        confidence: "exact",
+      }],
+      anchors({ zones: [["0:graveyard", source]] }),
+      anchors({ zones: [["0:deck", destination]] }),
+      15,
+    );
+
+    expect(batch?.flights[0]).toEqual(expect.objectContaining({ mode: "move" }));
+    expect(batch?.durationMs).toBe(320);
+  });
+
   it("waits for stack resolution before fading in a resulting token", () => {
     const stackSource = rect(520, 260, 100, 138);
     const graveyardDestination = rect(850, 500, 100, 138);
