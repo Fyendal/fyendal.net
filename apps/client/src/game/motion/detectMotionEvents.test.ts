@@ -176,6 +176,100 @@ describe("game motion detection", () => {
     }]);
   });
 
+  it("treats a token created with an attack as a fade-in, not a card move", () => {
+    const attack = { ...face(6), cardId: "HNT059" };
+    const token = { ...face(7), cardId: "SFA037" };
+    const previous = view([
+      player(0, { hand: [attack], handCount: 1 }),
+      player(1),
+    ]);
+    const current = view(
+      [player(0, { board: [token] }), player(1)],
+      {
+        chain: [{
+          attackingCard: attack,
+          defendingCards: [],
+          attackValue: 4,
+          defenseValue: 0,
+          damage: 0,
+          resolved: false,
+          onStack: true,
+          reactions: [],
+        }],
+      },
+    );
+
+    const events = detectGameMotionEvents(previous, current);
+    expect(events).toContainEqual(expect.objectContaining({
+      kind: "move",
+      instanceId: attack.instanceId,
+      source: { kind: "hand", seat: 0 },
+      destination: { kind: "stack-attack" },
+    }));
+    expect(events).toContainEqual({
+      kind: "appear",
+      destination: { kind: "board", seat: 0 },
+      visual: { kind: "face", card: token },
+      instanceId: token.instanceId,
+      destinationPresentationKey: `0:board:${token.instanceId}`,
+    });
+    expect(events).not.toContainEqual(expect.objectContaining({
+      kind: "move",
+      instanceId: token.instanceId,
+    }));
+    expect(events).not.toContainEqual(expect.objectContaining({
+      kind: "connect",
+      instanceId: token.instanceId,
+    }));
+  });
+
+  it("does not infer an opponent's created token as the card leaving their hand", () => {
+    const attack = { ...face(16, 1), cardId: "HNT059" };
+    const token = { ...face(17, 1), cardId: "SFA037" };
+    const previous = view([
+      player(0),
+      player(1, { handCount: 1 }),
+    ]);
+    const current = view(
+      [player(0), player(1, { board: [token], handCount: 0 })],
+      {
+        chain: [{
+          attackingCard: attack,
+          defendingCards: [],
+          attackValue: 4,
+          defenseValue: 0,
+          damage: 0,
+          resolved: false,
+          onStack: true,
+          reactions: [],
+        }],
+      },
+    );
+
+    const events = detectGameMotionEvents(previous, current);
+    expect(events).toContainEqual({
+      kind: "move",
+      source: { kind: "hand", seat: 1 },
+      destination: { kind: "stack-attack" },
+      visual: { kind: "back-reveal", card: attack },
+      instanceId: attack.instanceId,
+      destinationPresentationKey: `stack:attack:${attack.instanceId}`,
+      count: 1,
+      confidence: "inferred",
+    });
+    expect(events).toContainEqual({
+      kind: "appear",
+      destination: { kind: "board", seat: 1 },
+      visual: { kind: "face", card: token },
+      instanceId: token.instanceId,
+      destinationPresentationKey: `1:board:${token.instanceId}`,
+    });
+    expect(events).not.toContainEqual(expect.objectContaining({
+      kind: "move",
+      instanceId: token.instanceId,
+    }));
+  });
+
   it("does not carry a visible identity into a newly hidden destination", () => {
     const known = face(4);
     const hidden = { ...known, cardId: "", hidden: true };

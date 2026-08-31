@@ -1,10 +1,17 @@
 .game-motion-layer {
   position: fixed;
-  /* Above game floats, below modal/zone overlays. */
+  /* Travel, connectors, and pulses stay above game floats, below overlays. */
   z-index: 9;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
+}
+
+/* A generated card already belongs to the board. Its temporary fade-in copy
+   must share the board's visual depth so stack/combat floats cover it before
+   and after the real destination card is unmasked. */
+.game-motion-layer-under-floats {
+  z-index: 5;
 }
 
 .game-motion-flight,

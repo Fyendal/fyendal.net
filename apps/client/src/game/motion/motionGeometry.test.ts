@@ -249,6 +249,62 @@ describe("motion geometry", () => {
     expect(result?.delayMs).toBe(390);
   });
 
+  it("lands an attack on the stack before fading in its created token", () => {
+    const handSource = rect(220, 680, 140, 193);
+    const stackDestination = rect(520, 260, 100, 138);
+    const tokenDestination = rect(340, 120, 100, 138);
+    const batch = resolveMotionBatch(
+      [
+        {
+          kind: "move",
+          source: { kind: "hand", seat: 0 },
+          destination: { kind: "stack-attack" },
+          visual: {
+            kind: "face",
+            card: { instanceId: 72, cardId: "HNT059", owner: 0 },
+          },
+          instanceId: 72,
+          sourcePresentationKey: "0:hand:72",
+          destinationPresentationKey: "stack:attack:72",
+          count: 1,
+          confidence: "exact",
+        },
+        {
+          kind: "appear",
+          destination: { kind: "board", seat: 0 },
+          visual: {
+            kind: "face",
+            card: { instanceId: 73, cardId: "SFA037", owner: 0 },
+          },
+          instanceId: 73,
+          destinationPresentationKey: "0:board:73",
+        },
+      ],
+      anchors({ cards: [["0:hand:72", handSource]] }),
+      anchors({ cards: [
+        ["stack:attack:72", stackDestination],
+        ["0:board:73", tokenDestination],
+      ] }),
+      13,
+    );
+
+    const attackArrival = batch?.flights.find((flight) => flight.phase === "stack-entry");
+    const tokenAppearance = batch?.flights.find((flight) => flight.phase === "result");
+    expect(attackArrival).toEqual(expect.objectContaining({
+      mode: "move",
+      start: handSource,
+      end: stackDestination,
+      delayMs: 0,
+    }));
+    expect(tokenAppearance).toEqual(expect.objectContaining({
+      mode: "appear",
+      start: tokenDestination,
+      end: tokenDestination,
+      delayMs: 390,
+    }));
+    expect(batch?.connectors).toEqual([]);
+  });
+
   it("centers an anonymous card-sized flight inside broad zone anchors", () => {
     const event: GameMotionEvent = {
       kind: "move",
