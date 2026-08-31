@@ -74,6 +74,35 @@ function connectorStyle(connector: MotionConnector): MotionStyle {
   };
 }
 
+function MotionFlightOverlay({
+  batchId,
+  flight,
+  onFlightArrive,
+}: {
+  batchId: number;
+  flight: MotionFlight;
+  onFlightArrive: (batchId: number, destinationPresentationKey?: string) => void;
+}) {
+  return (
+    <div
+      className={`game-motion-flight game-motion-flight-${flight.mode}`}
+      style={flightStyle(flight)}
+      onAnimationEnd={(event: AnimationEvent<HTMLDivElement>) => {
+        // Ignore the nested back/face reveal animations. The wrapper's
+        // completion is the exact point at which the real card takes over.
+        if (event.target !== event.currentTarget) return;
+        onFlightArrive(batchId, flight.destinationPresentationKey);
+        event.currentTarget.style.visibility = "hidden";
+      }}
+    >
+      <MotionCardVisual
+        visual={flight.visual}
+        count={flight.showCount ? flight.count : 1}
+      />
+    </div>
+  );
+}
+
 export function GameMotionLayer({
   batch,
   onFlightArrive,
@@ -90,49 +119,60 @@ export function GameMotionLayer({
   }, [batch, onComplete]);
 
   if (!batch || typeof document === "undefined") return null;
+  const appearanceFlights: MotionFlight[] = [];
+  const foregroundFlights: MotionFlight[] = [];
+  for (const flight of batch.flights) {
+    (flight.mode === "appear" ? appearanceFlights : foregroundFlights).push(flight);
+  }
   return createPortal(
-    <div
-      className={`game-motion-layer${batch.reducedMotion ? " game-motion-layer-reduced" : ""}`}
-      data-game-motion-batch={batch.id}
-      aria-hidden="true"
-    >
-      {batch.connectors.map((connector) => (
+    <>
+      {appearanceFlights.length > 0 ? (
         <div
-          className="game-motion-connector"
-          key={connector.id}
-          style={connectorStyle(connector)}
-        />
-      ))}
-      {batch.flights.map((flight) => (
-        <div
-          className={`game-motion-flight game-motion-flight-${flight.mode}`}
-          key={flight.id}
-          style={flightStyle(flight)}
-          onAnimationEnd={(event: AnimationEvent<HTMLDivElement>) => {
-            // Ignore the nested back/face reveal animations. The wrapper's
-            // completion is the exact point at which the real card takes over.
-            if (event.target !== event.currentTarget) return;
-            onFlightArrive(batch.id, flight.destinationPresentationKey);
-            event.currentTarget.style.visibility = "hidden";
-          }}
+          className="game-motion-layer game-motion-layer-under-floats"
+          aria-hidden="true"
         >
-          <MotionCardVisual
-            visual={flight.visual}
-            count={flight.showCount ? flight.count : 1}
-          />
+          {appearanceFlights.map((flight) => (
+            <MotionFlightOverlay
+              batchId={batch.id}
+              flight={flight}
+              key={flight.id}
+              onFlightArrive={onFlightArrive}
+            />
+          ))}
         </div>
-      ))}
-      {batch.pulses.map((pulse) => (
-        <div
-          className="game-motion-pulse"
-          key={pulse.id}
-          style={{
-            ...rectStyle(pulse.rect),
-            animationDelay: `${pulse.delayMs}ms`,
-          }}
-        />
-      ))}
-    </div>,
+      ) : null}
+      <div
+        className={`game-motion-layer${batch.reducedMotion ? " game-motion-layer-reduced" : ""}`}
+        data-game-motion-batch={batch.id}
+        aria-hidden="true"
+      >
+        {batch.connectors.map((connector) => (
+          <div
+            className="game-motion-connector"
+            key={connector.id}
+            style={connectorStyle(connector)}
+          />
+        ))}
+        {foregroundFlights.map((flight) => (
+          <MotionFlightOverlay
+            batchId={batch.id}
+            flight={flight}
+            key={flight.id}
+            onFlightArrive={onFlightArrive}
+          />
+        ))}
+        {batch.pulses.map((pulse) => (
+          <div
+            className="game-motion-pulse"
+            key={pulse.id}
+            style={{
+              ...rectStyle(pulse.rect),
+              animationDelay: `${pulse.delayMs}ms`,
+            }}
+          />
+        ))}
+      </div>
+    </>,
     document.body,
   );
 }

@@ -156,6 +156,15 @@ function pulseOnce(
   events.push({ kind: "pulse", location });
 }
 
+function inferredArrivalRank(destination: CardPresentation): number {
+  // A public combat/stack object is a stronger explanation for an anonymous
+  // hidden-zone departure than a newly created arena object. Process it first
+  // so an opponent's played attack claims the hand delta before its token.
+  if (destination.role === "display") return 0;
+  if (destination.location.kind === "board") return 2;
+  return 1;
+}
+
 function detectFromPresentations(
   previous: GamePresentations,
   current: GamePresentations,
@@ -261,6 +270,7 @@ function detectFromPresentations(
     consumeBudget(arrivals, destination.location);
   }
 
+  unmatched.sort((left, right) => inferredArrivalRank(left) - inferredArrivalRank(right));
   for (const destination of unmatched) {
     const seat = motionLocationSeat(destination.location) ?? destination.card.owner;
     const possibleSources = availableForSeat(departures, seat);
