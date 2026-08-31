@@ -2,7 +2,7 @@
 /* shared chrome for all floating windows (chain, stack, status, decision) */
 .float {
   position: fixed;
-  z-index: 6;
+  z-index: var(--game-z-chain-float);
   background: #140d07f2;
   border: 1px solid #b8933f66;
   border-radius: 12px;
@@ -32,7 +32,7 @@
   left: clamp(96px, 12.2vh, 158px);
   top: 50%;
   transform: translateY(-50%);
-  z-index: 7;
+  z-index: var(--game-z-stack-float);
 }
 .chain-float:active,
 .stack-float:active,
@@ -46,7 +46,7 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  z-index: 9;
+  z-index: var(--game-z-prompt);
   display: flex;
   min-width: 250px;
   max-height: 52px;
@@ -109,7 +109,7 @@
 .decision-float {
   left: var(--mat-cx);
   bottom: clamp(132px, 19vh, 222px);
-  z-index: 8;
+  z-index: var(--game-z-prompt);
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
@@ -268,7 +268,7 @@
   left: var(--mat-cx);
   top: 42%;
   transform: translate(-50%, -50%);
-  z-index: 6;
+  z-index: var(--game-z-chain-float);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -310,7 +310,7 @@
   position: fixed;
   left: var(--mat-cx);
   top: 24%;
-  z-index: 7;
+  z-index: var(--game-z-stack-float);
   display: inline-flex;
   align-items: center;
   gap: 7px;

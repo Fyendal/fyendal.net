@@ -302,8 +302,9 @@
   }
 }
 
-/* Tall portrait screens use a little extra height for the battlefield while
-   keeping card rows grouped; decisions contract it back to the compact mat. */
+/* Tall portrait screens use a little extra height for the battlefield. Keep
+   this geometry invariant while decisions mount and unmount: end-turn arsenal
+   completion and draw-up must not move motion anchors beneath fixed flights. */
 @media (max-width: 700px) and (min-height: 850px) and (orientation: portrait) {
 
   .mat-half {
@@ -311,10 +312,6 @@
     grid-template-rows: repeat(3, minmax(72px, 1fr));
   }
 
-  .table:has(.decision-float) .mat-half {
-    flex: 0 0 230px;
-    grid-template-rows: repeat(3, 72px);
-  }
 }
 
 @media (max-width: 420px) {

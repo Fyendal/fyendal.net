@@ -3,7 +3,7 @@
   /* Card travel stays above the board but beneath status, waiting, stack,
      chain, and decision floats. Those fixed HUD elements must never be
      occluded by a hand draw or reflow flight. */
-  z-index: 5;
+  z-index: var(--game-z-board-motion);
   inset: 0;
   overflow: hidden;
   pointer-events: none;
@@ -14,6 +14,16 @@
    and after the real destination card is unmasked. */
 .game-motion-layer-under-floats {
   z-index: 4;
+}
+
+/* A flight sits immediately above its destination surface. Higher gameplay
+   floats and prompts therefore remain readable throughout the transfer. */
+.game-motion-layer-chain {
+  z-index: var(--game-z-chain-motion);
+}
+
+.game-motion-layer-stack {
+  z-index: var(--game-z-stack-motion);
 }
 
 .game-motion-flight,
@@ -95,6 +105,15 @@
   border-radius: 5px;
   background: #160e08;
   box-shadow: 0 9px 25px #000c, 0 0 14px #e5bc5a66;
+}
+
+/* Hidden-hand backs should look exactly like the hand they temporarily
+   replace. Gold motion chrome made opponent draw/reflow overlays flash yellow
+   with a heavy black shadow even though the real opponent hand has neither. */
+.game-motion-visual-back {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
 }
 
 .game-motion-image {

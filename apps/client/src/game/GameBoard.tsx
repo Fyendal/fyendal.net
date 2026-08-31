@@ -771,14 +771,6 @@ export function GameBoard() {
           </>
         ) : null}
         <div
-          className={`waiting${waitingForOpponent && !replaying ? "" : " waiting-hidden"}`}
-          aria-hidden={waitingForOpponent && !replaying ? undefined : true}
-        >
-          {spectating
-            ? `Spectating — ${activeHeroName} to act`
-            : "Waiting for opponent…"}
-        </div>
-        <div
           className={`opp-hand${view.winner !== null || replaying ? " opp-hand-revealed" : ""}`}
           data-motion-zone={motionLocationKey({ kind: "hand", seat: opp.seat })}
         >
@@ -880,6 +872,17 @@ export function GameBoard() {
             onSelect: setSel,
           }}
         />
+      </div>
+
+      {/* Fixed HUD sibling: keeping this outside .board guarantees that
+          waiting-state changes cannot affect board layout or motion anchors. */}
+      <div
+        className={`waiting${waitingForOpponent && !replaying ? "" : " waiting-hidden"}`}
+        aria-hidden={waitingForOpponent && !replaying ? undefined : true}
+      >
+        {spectating
+          ? `Spectating — ${activeHeroName} to act`
+          : "Waiting for opponent…"}
       </div>
 
       <MobileHandToggle
