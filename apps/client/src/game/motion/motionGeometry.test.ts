@@ -463,6 +463,7 @@ describe("motion geometry", () => {
       start: handSource,
       end: stackDestination,
       delayMs: 0,
+      destinationLayer: "stack",
     }));
     expect(tokenAppearance).toEqual(expect.objectContaining({
       mode: "appear",
@@ -471,6 +472,37 @@ describe("motion geometry", () => {
       delayMs: 390,
     }));
     expect(batch?.connectors).toEqual([]);
+  });
+
+  it("layers stack-to-chain travel above its chain destination but below the stack", () => {
+    const stackSource = rect(120, 280, 100, 138);
+    const chainDestination = rect(460, 330, 100, 138);
+    const batch = resolveMotionBatch(
+      [{
+        kind: "move",
+        source: { kind: "stack-attack" },
+        destination: { kind: "chain-attack", link: 0 },
+        visual: {
+          kind: "face",
+          card: { instanceId: 80, cardId: "AHA002", owner: 1 },
+        },
+        instanceId: 80,
+        sourcePresentationKey: "stack:attack:80",
+        destinationPresentationKey: "chain:0:attack:80",
+        count: 1,
+        confidence: "exact",
+      }],
+      anchors({ cards: [["stack:attack:80", stackSource]] }),
+      anchors({ cards: [["chain:0:attack:80", chainDestination]] }),
+      14,
+    );
+
+    expect(batch?.flights).toEqual([expect.objectContaining({
+      mode: "move",
+      start: stackSource,
+      end: chainDestination,
+      destinationLayer: "chain",
+    })]);
   });
 
   it("centers an anonymous card-sized flight inside broad zone anchors", () => {

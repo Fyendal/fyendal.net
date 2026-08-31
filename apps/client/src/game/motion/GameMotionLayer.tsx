@@ -135,9 +135,14 @@ export function GameMotionLayer({
 
   if (!batch || typeof document === "undefined") return null;
   const appearanceFlights: MotionFlight[] = [];
-  const foregroundFlights: MotionFlight[] = [];
+  const boardFlights: MotionFlight[] = [];
+  const chainFlights: MotionFlight[] = [];
+  const stackFlights: MotionFlight[] = [];
   for (const flight of batch.flights) {
-    (flight.mode === "appear" ? appearanceFlights : foregroundFlights).push(flight);
+    if (flight.destinationLayer === "chain") chainFlights.push(flight);
+    else if (flight.destinationLayer === "stack") stackFlights.push(flight);
+    else if (flight.mode === "appear") appearanceFlights.push(flight);
+    else boardFlights.push(flight);
   }
   return createPortal(
     <>
@@ -168,7 +173,7 @@ export function GameMotionLayer({
             style={connectorStyle(connector)}
           />
         ))}
-        {foregroundFlights.map((flight) => (
+        {boardFlights.map((flight) => (
           <MotionFlightOverlay
             batchId={batch.id}
             flight={flight}
@@ -176,7 +181,7 @@ export function GameMotionLayer({
             onFlightArrive={onFlightArrive}
           />
         ))}
-        {foregroundFlights.map((flight) => (
+        {boardFlights.map((flight) => (
           <MotionDeckCover flight={flight} key={`${flight.id}:deck-cover`} />
         ))}
         {batch.pulses.map((pulse) => (
@@ -190,6 +195,42 @@ export function GameMotionLayer({
           />
         ))}
       </div>
+      {chainFlights.length > 0 ? (
+        <div
+          className="game-motion-layer game-motion-layer-chain"
+          aria-hidden="true"
+        >
+          {chainFlights.map((flight) => (
+            <MotionFlightOverlay
+              batchId={batch.id}
+              flight={flight}
+              key={flight.id}
+              onFlightArrive={onFlightArrive}
+            />
+          ))}
+          {chainFlights.map((flight) => (
+            <MotionDeckCover flight={flight} key={`${flight.id}:deck-cover`} />
+          ))}
+        </div>
+      ) : null}
+      {stackFlights.length > 0 ? (
+        <div
+          className="game-motion-layer game-motion-layer-stack"
+          aria-hidden="true"
+        >
+          {stackFlights.map((flight) => (
+            <MotionFlightOverlay
+              batchId={batch.id}
+              flight={flight}
+              key={flight.id}
+              onFlightArrive={onFlightArrive}
+            />
+          ))}
+          {stackFlights.map((flight) => (
+            <MotionDeckCover flight={flight} key={`${flight.id}:deck-cover`} />
+          ))}
+        </div>
+      ) : null}
     </>,
     document.body,
   );

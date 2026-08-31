@@ -49,6 +49,7 @@ export interface MotionFlight {
   destinationPresentationKey?: string;
   holdAtSource?: true;
   destinationCoverVisual?: MotionVisual;
+  destinationLayer?: "chain" | "stack";
 }
 
 export function motionFlightDurationMs(flight: Pick<MotionFlight, "mode">): number {
@@ -178,6 +179,13 @@ function sameRect(left: MotionRect, right: MotionRect): boolean {
     && left.width === right.width && left.height === right.height;
 }
 
+function motionLayerForDestination(
+  location: MotionLocation,
+): MotionFlight["destinationLayer"] {
+  if (location.kind === "stack-layer" || location.kind === "stack-attack") return "stack";
+  return location.kind.startsWith("chain-") ? "chain" : undefined;
+}
+
 export function resolveMotionBatch(
   events: readonly GameMotionEvent[],
   previous: MotionAnchorSnapshot,
@@ -243,6 +251,7 @@ export function resolveMotionBatch(
       const rect = destination.exact
         ? destination.rect
         : cardRectWithinZone(destination.rect);
+      const destinationLayer = motionLayerForDestination(event.destination);
       if (flights.length < MAX_DETAILED_FLIGHTS) {
         const flight: MotionFlight = {
           id: `${id}:flight:${flights.length}`,
@@ -255,6 +264,9 @@ export function resolveMotionBatch(
           showCount: false,
           delayMs: 0,
           destinationPresentationKey: event.destinationPresentationKey,
+          ...(destinationLayer !== undefined
+            ? { destinationLayer }
+            : {}),
         };
         flights.push(flight);
         if (groupedAppearanceKey) boardAppearances.set(groupedAppearanceKey, flight);
@@ -292,6 +304,7 @@ export function resolveMotionBatch(
         : event.destination.kind === "deck" && event.destination.position === "bottom"
           ? "deck-bottom"
           : "move";
+    const destinationLayer = motionLayerForDestination(event.destination);
     flights.push({
       id: `${id}:flight:${flights.length}`,
       phase,
@@ -308,6 +321,9 @@ export function resolveMotionBatch(
         : {}),
       ...(event.kind === "move" && event.destinationCoverVisual
         ? { destinationCoverVisual: event.destinationCoverVisual }
+        : {}),
+      ...(destinationLayer !== undefined
+        ? { destinationLayer }
         : {}),
     });
   }

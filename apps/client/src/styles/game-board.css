@@ -1,4 +1,14 @@
 /* ── table: playmat board + side panel ── */
+:root {
+  --game-z-board-motion: 5;
+  --game-z-chain-float: 6;
+  --game-z-chain-motion: 7;
+  --game-z-stack-float: 8;
+  --game-z-stack-motion: 9;
+  --game-z-prompt: 10;
+  --game-z-waiting: 11;
+}
+
 .table {
   --mat-zone-col: clamp(68px, 10vh, 130px);
   --mat-column-gap: clamp(4px, .55vh, 7px);

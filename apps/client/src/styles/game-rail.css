@@ -188,7 +188,7 @@
   top: 55px;
   left: var(--mat-cx);
   transform: translateX(-50%);
-  z-index: 10;
+  z-index: var(--game-z-waiting);
   pointer-events: none;
   padding: 6px 18px;
   border-radius: 23px;
