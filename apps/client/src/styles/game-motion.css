@@ -34,13 +34,16 @@
 }
 
 .game-motion-flight {
+  opacity: 0;
   transform-origin: top left;
   will-change: transform, opacity;
   animation-name: game-motion-travel;
   animation-duration: var(--motion-duration);
   animation-delay: var(--motion-delay);
   animation-timing-function: cubic-bezier(.2, .82, .2, 1);
-  animation-fill-mode: both;
+  /* Later timeline phases must not sit visibly at their source during their
+     delay. The first keyframe takes over when the phase actually begins. */
+  animation-fill-mode: forwards;
 }
 
 .game-motion-flight-appear {

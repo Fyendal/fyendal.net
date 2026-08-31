@@ -637,6 +637,59 @@ describe("game motion detection", () => {
     });
   });
 
+  it("reconstructs hidden opponent arsenaling before draw-up across a shortcut", () => {
+    const previous = view(
+      [
+        player(0),
+        player(1, {
+          handCount: 4,
+          deckCount: 20,
+          arsenalCount: 0,
+        }),
+      ],
+      {
+        phase: "end",
+        pendingDecision: {
+          player: 1,
+          kind: "arsenal",
+          prompt: "Choose a card for arsenal",
+        },
+      },
+    );
+    const current = view(
+      [
+        player(0),
+        player(1, {
+          handCount: 4,
+          deckCount: 19,
+          arsenalCount: 1,
+        }),
+      ],
+      { turn: 2, phase: "action", activePlayer: 0, priorityPlayer: 0 },
+    );
+
+    expect(detectGameMotionEvents(previous, current)).toEqual([
+      {
+        kind: "move",
+        source: { kind: "hand", seat: 1 },
+        destination: { kind: "arsenal", seat: 1 },
+        visual: { kind: "back" },
+        destinationPresentationKey: "1:arsenal:opaque",
+        count: 1,
+        confidence: "inferred",
+      },
+      {
+        kind: "move",
+        source: { kind: "deck", seat: 1 },
+        destination: { kind: "hand", seat: 1 },
+        visual: { kind: "back" },
+        destinationPresentationKey: "1:hand:opaque:3",
+        count: 1,
+        confidence: "inferred",
+      },
+    ]);
+  });
+
   it("keeps the arsenal flight but omits ambiguous gold pulses during cleanup", () => {
     const chosen = face(40);
     const pitched = face(41);

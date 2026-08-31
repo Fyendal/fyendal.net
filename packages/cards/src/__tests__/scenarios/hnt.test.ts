@@ -576,6 +576,39 @@ describe("HNT — marked heroes and daggers", () => {
 });
 
 describe("HNT — rules regression coverage", () => {
+  it("Retrace the Past names itself after a Gustwave attack", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: [
+            "surging strike|1",
+            "raging onslaught|3",
+            "whelming gustwave|1",
+            "retrace the past|3",
+          ],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("surging strike|1", { pitch: ["raging onslaught|3"] })
+      .blockWith()
+      .settle()
+      .play("whelming gustwave|1")
+      .blockWith()
+      .settle()
+      .play("retrace the past|3");
+
+    expect(g.state.pendingDecision).toMatchObject({
+      kind: "choose-name",
+      chooseHook: "retrace-name",
+    });
+
+    g.chooseName("Head Jab").expectAttackValue(4);
+    expect(g.state.chain.at(-1)?.attackingCard.grantedNames).toContain("Head Jab");
+  });
+
   it("Sharpened Senses checks an already-buffed weapon attack when it is declared", () => {
     const g = scenario({
       seats: [

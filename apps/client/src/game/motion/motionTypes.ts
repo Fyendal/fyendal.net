@@ -133,6 +133,16 @@ export function motionPresentationKey(
   return occurrence === 0 ? base : `${base}:${occurrence}`;
 }
 
+/** Stable DOM identity for a projected private-zone card whose real instance
+ * id is deliberately unavailable to this viewer. */
+export function opaqueMotionPresentationKey(
+  location: CountedMotionLocation,
+  occurrence = 0,
+): string {
+  const base = `${motionLocationKey(location)}:opaque`;
+  return occurrence === 0 ? base : `${base}:${occurrence}`;
+}
+
 export function motionLocationSeat(location: MotionLocation): number | undefined {
   return "seat" in location ? location.seat : undefined;
 }

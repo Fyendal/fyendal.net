@@ -54,6 +54,39 @@ export function mayPlayFromZone(
   return !card.faceDown && scriptOf(state, card.cardId, card)?.staticPlayableFrom?.includes(zone) === true;
 }
 
+/** Whether the only active permission to play `card` from `zone` requires the
+ * instant play method. Ordinary per-card, modifier, Rune Gate, static, or
+ * source grants take precedence when both kinds of permission exist. */
+export function playFromZoneRequiresInstant(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  card: CardInstance,
+  zone: PlayableZone,
+  actingSeat = card.owner,
+): boolean {
+  if (actingSeat !== card.owner || card.faceDown) return false;
+  if (
+    card.playableFrom?.includes(zone) === true
+    || modifierGrantingPlayFromZone(state, card, zone, actingSeat) !== undefined
+    || (zone === "banish" && canRuneGate(state, card))
+    || scriptOf(state, card.cardId, card)?.staticPlayableFrom?.includes(zone) === true
+  ) return false;
+
+  const owner = state.players[card.owner] as PlayerState;
+  let instantOnlyGrant = false;
+  for (const source of controlledPermanents(state, owner.seat, { faceDownEquipment: false })) {
+    const sourceScript = scriptOf(state, source.cardId, source);
+    const ctx = runtime.makeCtx(state, owner.seat, source);
+    if (sourceScript?.allowsFriendlyCardPlayFrom?.(ctx, card, zone) !== true) continue;
+    if (sourceScript.requiresFriendlyCardPlayAsInstant?.(ctx, card, zone) === true) {
+      instantOnlyGrant = true;
+    } else {
+      return false;
+    }
+  }
+  return instantOnlyGrant;
+}
+
 /** Public card identity responsible for a current play-from-zone permission.
  *  Undefined covers legacy grants that predate provenance tracking. */
 export function playFromSourceCardId(

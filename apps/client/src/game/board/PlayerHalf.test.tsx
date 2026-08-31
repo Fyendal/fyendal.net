@@ -29,11 +29,11 @@ const player: PlayerView = {
   ],
 };
 
-function renderPlayerHalf(playerView: PlayerView): string {
+function renderPlayerHalf(playerView: PlayerView, mine = true): string {
   return renderToStaticMarkup(
     <PlayerHalf
       player={playerView}
-      mine
+      mine={mine}
       mirrored={false}
       ongoing={[]}
       gameOver={false}
@@ -101,5 +101,15 @@ describe("PlayerHalf", () => {
       /class="board-card-stack"[^>]*data-motion-card="0:board:2"[^>]*data-motion-card-aliases="0:board:4"[^>]*>.*board-card-count">×2</,
     );
     expect(html.match(/data-motion-card="0:board:/g)).toHaveLength(1);
+  });
+
+  it("gives a hidden opponent arsenal card a maskable motion anchor", () => {
+    const html = renderPlayerHalf({
+      ...player,
+      seat: 1,
+      arsenalCount: 1,
+    }, false);
+
+    expect(html).toContain('data-motion-card="1:arsenal:opaque"');
   });
 });

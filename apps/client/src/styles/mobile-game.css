@@ -848,6 +848,8 @@
   .stack-layers { max-width: 100%; overflow-x: auto; }
   .decision { width: 100%; max-width: none; padding: 9px; }
   .decision.decision-passive { width: auto; max-width: calc(100vw - 24px); padding-inline: 13px; }
+  .decision-name-form { width: 100%; flex-wrap: wrap; }
+  .decision-name-combobox { width: min(360px, 100%); }
   .decision-buttons button,
   .decision-optcard button { min-height: 42px; }
   .decision-cards { max-width: 100%; max-height: 30dvh; }

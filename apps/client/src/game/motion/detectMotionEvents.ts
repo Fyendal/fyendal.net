@@ -4,6 +4,7 @@ import {
   countedMotionLocation,
   motionLocationKey,
   motionLocationSeat,
+  opaqueMotionPresentationKey,
   type CardPresentation,
   type CountedMotionLocation,
   type GameMotionEvent,
@@ -31,6 +32,13 @@ function motionVisual(
 
 function countMap(counts: readonly MotionZoneCount[]): Map<string, MotionZoneCount> {
   return new Map(counts.map((count) => [motionLocationKey(count.location), count]));
+}
+
+function zoneCount(
+  counts: ReadonlyMap<string, MotionZoneCount>,
+  location: CountedMotionLocation,
+): number {
+  return counts.get(motionLocationKey(location))?.count ?? 0;
 }
 
 function budgetMap(
@@ -340,6 +348,83 @@ function detectFromPresentations(
       });
     } else {
       pulseOnce(events, pulsed, destination.location);
+    }
+  }
+
+  if (options.endPhaseCleanup) {
+    const previousCounts = countMap(previous.counts);
+    const currentCounts = countMap(current.counts);
+    for (const seat of [0, 1]) {
+      const hand = { kind: "hand", seat } as const;
+      const deck = { kind: "deck", seat } as const;
+      const arsenal = { kind: "arsenal", seat } as const;
+      const arsenalIncrease = Math.max(
+        0,
+        zoneCount(currentCounts, arsenal) - zoneCount(previousCounts, arsenal),
+      );
+      const unresolvedArsenal = arrivals.get(motionLocationKey(arsenal));
+
+      // Opponent projections expose only private-zone counts. When arsenaling
+      // and draw-up are shortcut into one view, the hand can have no net
+      // departure, which otherwise makes deck -> arsenal look like the only
+      // count-balanced path. End-phase ordering makes the real cause safe to
+      // infer: arsenal from hand, then replacement cards from deck.
+      const inferredArsenalCount = Math.min(
+        arsenalIncrease,
+        unresolvedArsenal?.remaining ?? 0,
+      );
+      if (inferredArsenalCount > 0 && unresolvedArsenal) {
+        unresolvedArsenal.remaining -= inferredArsenalCount;
+        consumeBudget(departures, hand, inferredArsenalCount);
+        events.push({
+          kind: "move",
+          source: hand,
+          destination: arsenal,
+          visual: { kind: "back" },
+          destinationPresentationKey: opaqueMotionPresentationKey(arsenal),
+          count: inferredArsenalCount,
+          confidence: "inferred",
+        });
+      }
+
+      const expectedDrawCount = Math.max(
+        0,
+        zoneCount(currentCounts, hand)
+          - zoneCount(previousCounts, hand)
+          + arsenalIncrease,
+      );
+      const representedDrawCount = events.reduce((total, event) => (
+        event.kind === "move"
+        && event.source.kind === "deck"
+        && event.source.seat === seat
+        && event.destination.kind === "hand"
+        && event.destination.seat === seat
+          ? total + event.count
+          : total
+      ), 0);
+      const inferredDrawCount = Math.max(0, expectedDrawCount - representedDrawCount);
+      if (inferredDrawCount > 0) {
+        consumeBudget(departures, deck, inferredDrawCount);
+        consumeBudget(arrivals, hand, inferredDrawCount);
+        const firstDrawnHandIndex = Math.max(
+          0,
+          zoneCount(currentCounts, hand) - inferredDrawCount,
+        );
+        for (let index = 0; index < inferredDrawCount; index += 1) {
+          events.push({
+            kind: "move",
+            source: deck,
+            destination: hand,
+            visual: { kind: "back" },
+            destinationPresentationKey: opaqueMotionPresentationKey(
+              hand,
+              firstDrawnHandIndex + index,
+            ),
+            count: 1,
+            confidence: "inferred",
+          });
+        }
+      }
     }
   }
 

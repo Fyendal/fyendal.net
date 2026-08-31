@@ -88,6 +88,33 @@ describe("motion geometry", () => {
     })]);
   });
 
+  it("lands hidden arsenaling on the maskable opaque arsenal back", () => {
+    const hand = rect(240, 30, 100, 138);
+    const arsenal = rect(620, 210, 100, 138);
+    const batch = resolveMotionBatch(
+      [{
+        kind: "move",
+        source: { kind: "hand", seat: 1 },
+        destination: { kind: "arsenal", seat: 1 },
+        visual: { kind: "back" },
+        destinationPresentationKey: "1:arsenal:opaque",
+        count: 1,
+        confidence: "inferred",
+      }],
+      anchors({ zones: [["1:hand", hand]] }),
+      anchors({ cards: [["1:arsenal:opaque", arsenal]] }),
+      14,
+    );
+
+    expect(batch?.flights).toEqual([expect.objectContaining({
+      mode: "arsenal",
+      end: arsenal,
+      destinationPresentationKey: "1:arsenal:opaque",
+    })]);
+    expect(batch?.flights[0]?.start.left).toBeGreaterThanOrEqual(hand.left);
+    expect(batch?.flights[0]?.start.left).toBeLessThan(hand.left + hand.width);
+  });
+
   it("lands the arsenal card before staggering the draw-up flights", () => {
     const chosen = { instanceId: 50, cardId: "TST050", owner: 0, faceDown: true };
     const draws = [51, 52, 53, 54].map((instanceId) => ({
@@ -465,5 +492,27 @@ describe("motion geometry", () => {
     expect(measured.snapshot.cards.get("0:board:9")).toEqual(rect(10, 20));
     expect(measured.snapshot.zones.get("0:hand")).toEqual(rect(0, 0, 600, 220));
     expect(measured.cardElements.get("0:board:8")).toBe(cardElement);
+  });
+
+  it("prefers a card-sized zone anchor over a broad hidden-hand container", () => {
+    const broadHand = {
+      dataset: { motionZone: "1:hand" },
+      getBoundingClientRect: () => rect(0, 0, 900, 120),
+    } as unknown as HTMLElement;
+    const handCard = {
+      dataset: { motionZoneAnchor: "1:hand" },
+      getBoundingClientRect: () => rect(570, 10, 100, 138),
+    } as unknown as HTMLElement;
+    const root = {
+      querySelectorAll: (selector: string) => {
+        if (selector === "[data-motion-zone]") return [broadHand];
+        if (selector === "[data-motion-zone-anchor]") return [handCard];
+        return [];
+      },
+    } as unknown as ParentNode;
+
+    const measured = measureMotionAnchors(root);
+
+    expect(measured.snapshot.zones.get("1:hand")).toEqual(rect(570, 10, 100, 138));
   });
 });
