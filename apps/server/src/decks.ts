@@ -125,7 +125,10 @@ const MAX_POOL_SIZE: Record<"cc" | "silver-age", number> = {
 /** Weapons a player may present for one game: up to 2 one-hand weapons, or a
  *  single two-hand weapon alone — except that a quiver may accompany a
  *  two-hander bow (CR 8.2.15a; at most one quiver, 8.2.15b). */
-const MAX_COPIES = 3;
+const MAX_COPIES: Record<"cc" | "silver-age", number> = {
+  cc: 3,
+  "silver-age": 2,
+};
 const EQUIPMENT_SLOTS: EquipmentSlot[] = ["head", "chest", "arms", "legs"];
 const INVENTORY_FRONT_ID_BY_BACK_ID = new Map(
   Object.values(cardData).flatMap((card) => card.backId ? [[card.backId, card.id] as const] : []),
@@ -224,8 +227,9 @@ export function validateDeck(lines: ParsedLine[], format: Format): ValidationRes
   }
 
   if (!heroId) errors.push("no hero found in the decklist");
+  const maxCopies = MAX_COPIES[format as "cc" | "silver-age"] ?? 3;
   for (const [key, n] of copies) {
-    if (n > MAX_COPIES) errors.push(`too many copies of ${key.split("|")[0]} (${n}, max ${MAX_COPIES})`);
+    if (n > maxCopies) errors.push(`too many copies of ${key.split("|")[0]} (${n}, max ${maxCopies})`);
   }
   const min = MIN_DECK_SIZE[format];
   if (min && deck.length + sideboard.length < min) {

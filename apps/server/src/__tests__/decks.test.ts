@@ -28,6 +28,11 @@ const legalCcDeckCards = deckCards.filter((candidate) =>
     "cc",
   ).length === 0,
 );
+const uniqueLegalDeckCards = legalCcDeckCards.filter((candidate, index, cards) =>
+  cards.findIndex((card) =>
+    card.name === candidate.name && card.pitch === candidate.pitch
+  ) === index
+);
 
 it("does not expose internal bot decks through player deck resolution", async () => {
   const db = await freshDb();
@@ -282,9 +287,12 @@ describe("validateDeck", () => {
   });
 
   it("counts the sideboard toward the minimum pool size", () => {
-    // silver-age min is 40: 30 main + 10 sideboard is registrable
-    const main = deckCards.slice(0, 10).map((c) => deckLine(c));
-    const side = ["Sideboard:", ...deckCards.slice(10, 14).map((c, i) => deckLine(c, i === 3 ? 1 : 3))];
+    // Silver Age min is 40: 15 identities x2 main + 5 identities x2 sideboard.
+    const main = uniqueLegalDeckCards.slice(0, 15).map((card) => deckLine(card, 2));
+    const side = [
+      "Sideboard:",
+      ...uniqueLegalDeckCards.slice(15, 20).map((card) => deckLine(card, 2)),
+    ];
     const lines = parseDecklistText([`Hero: ${hero.name}`, ...main, ...side].join("\n"));
     const r = validateDeck(lines, "silver-age");
     expect(r).toMatchObject({ ok: true });
@@ -421,6 +429,15 @@ describe("validateDeck", () => {
     expect(r.missing).toEqual(["Does Not Exist", "Flock of the Seagulls"]);
   });
 
+  it("reports an unavailable explicit color instead of substituting another pitch", () => {
+    const text = ccExportText() + "\n2x En Garde (yellow)";
+    const r = validateDeck(parseDecklistText(text), "cc");
+
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.missing).toEqual(["En Garde"]);
+  });
+
   it("rejects undersized decks per format", () => {
     const lines = parseDecklistText(
       [`Hero: ${hero.name}`, ...deckCards.slice(0, 10).map((c) => deckLine(c))].join("\n"),
@@ -439,6 +456,21 @@ describe("validateDeck", () => {
     expect(r.ok).toBe(false);
     if (r.ok) return;
     expect(r.errors.some((e) => e.includes("too many copies"))).toBe(true);
+  });
+
+  it("rejects more than 2 copies of a Silver Age card", () => {
+    const candidate = uniqueLegalDeckCards.find((card) => card.pitch !== undefined)!;
+    const otherCards = uniqueLegalDeckCards.filter((card) =>
+      card.name !== candidate.name || card.pitch !== candidate.pitch
+    ).slice(0, 20);
+    const lines = parseDecklistText(
+      [`Hero: ${hero.name}`, deckLine(candidate, 3), ...otherCards.map((card) => deckLine(card, 2))].join("\n"),
+    );
+    const r = validateDeck(lines, "silver-age");
+
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.errors).toContain(`too many copies of ${candidate.name.toLowerCase()} (3, max 2)`);
   });
 
   it("allows any number of a card with Unlimited", () => {
@@ -584,9 +616,9 @@ describe("validatePresentation", () => {
   });
 
   it("silver-age requires an exactly 40-card presentation", () => {
-    // 14 distinct cards x3 = 42 registered main-deck cards
+    // 21 distinct cards x2 = 42 registered main-deck cards.
     const lines = parseDecklistText(
-      [`Hero: ${hero.name}`, ...deckCards.slice(0, 14).map((c) => deckLine(c))].join("\n"),
+      [`Hero: ${hero.name}`, ...uniqueLegalDeckCards.slice(0, 21).map((card) => deckLine(card, 2))].join("\n"),
     );
     const v = validateDeck(lines, "silver-age");
     if (!v.ok) throw new Error("pool invalid");
@@ -607,7 +639,7 @@ describe("validatePresentation", () => {
         "Hero: Briar",
         "1x Scorpio, Comet Tail",
         "1x Star Fall",
-        ...deckCards.slice(0, 14).map((c) => deckLine(c)),
+        ...uniqueLegalDeckCards.slice(0, 21).map((card) => deckLine(card, 2)),
       ].join("\n"),
     );
     const v = validateDeck(lines, "silver-age");
