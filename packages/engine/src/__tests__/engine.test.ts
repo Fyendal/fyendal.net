@@ -1822,6 +1822,59 @@ describe("combat", () => {
     expect(player(s, 1).life).toBe(14); // 4 + 2
   });
 
+  it("keeps an attack reaction off the chain until its resolution choice is complete", () => {
+    let s = makeGame(71);
+    s.scriptsRef = {
+      ...s.scriptsRef,
+      REACT: {
+        onPlay(ctx) {
+          ctx.requestChoice("reaction-choice", "Apply the reaction?", ["yes", "no"]);
+        },
+        onChoose(ctx, hook, option) {
+          if (hook === "reaction-choice" && option === "yes") {
+            ctx.addModifier({ scope: "chain-link", attack: 2 });
+          }
+        },
+      },
+    };
+    const attack = giveCard(s, 0, "ATK4");
+    const reaction = giveCard(s, 0, "REACT");
+
+    let result = applyIntent(s, 0, {
+      kind: "play-card",
+      instanceId: attack,
+      pitchInstanceIds: [],
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    s = result.state;
+    result = applyIntent(s, 1, { kind: "defend", instanceIds: [] });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    s = result.state;
+    result = applyIntent(s, 0, {
+      kind: "play-card",
+      instanceId: reaction,
+      pitchInstanceIds: [],
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    s = passTopLayer(result.state);
+
+    expect(s.pendingDecision?.chooseHook).toBe("reaction-choice");
+    expect(s.stack[0]?.card?.instanceId).toBe(reaction);
+    expect(s.chain[0]!.reactions.some((card) => card.instanceId === reaction)).toBe(false);
+
+    result = applyIntent(s, 0, { kind: "choose", optionId: "yes" });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    s = result.state;
+
+    expect(s.stack.some((layer) => layer.card?.instanceId === reaction)).toBe(false);
+    expect(s.chain[0]!.reactions.some((card) => card.instanceId === reaction)).toBe(true);
+    expect(projectStateFor(s, 0).chain[0]!.attackValue).toBe(6);
+  });
+
   it("dominate limits defense to 1 card from hand", () => {
     let s = makeGame(8);
     const dom = giveCard(s, 0, "DOM");
@@ -2170,6 +2223,72 @@ describe("combat", () => {
     if (!r.ok) return;
     s = r.state;
     expect(player(s, 1).graveyard.some((c) => c.instanceId === dr)).toBe(true);
+  });
+
+  it("keeps a defense reaction on the stack until its resolution choice is complete", () => {
+    let s = makeGame(72);
+    s.scriptsRef = {
+      ...s.scriptsRef,
+      DREACT: {
+        onPlay(ctx) {
+          ctx.requestChoice("defense-reaction-choice", "Resolve the defense reaction?", ["yes", "no"]);
+        },
+        onChoose(ctx, hook) {
+          if (hook !== "defense-reaction-choice") return;
+          ctx.setFlag(
+            "player",
+            "wasDefendingDuringResolutionChoice",
+            ctx.link?.defendingCards.some(
+              (card) => card.instanceId === ctx.self.instanceId,
+            ) === true,
+          );
+        },
+      },
+    };
+    const attack = giveCard(s, 0, "ATK6");
+    const reaction = giveCard(s, 1, "DREACT");
+
+    let result = applyIntent(s, 0, {
+      kind: "play-card",
+      instanceId: attack,
+      pitchInstanceIds: [],
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    s = result.state;
+    result = applyIntent(s, 1, { kind: "defend", instanceIds: [] });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    s = result.state;
+    result = applyIntent(s, 0, { kind: "pass" });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    s = result.state;
+    result = applyIntent(s, 1, {
+      kind: "play-card",
+      instanceId: reaction,
+      pitchInstanceIds: [],
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    s = passTopLayer(result.state);
+
+    expect(s.pendingDecision?.chooseHook).toBe("defense-reaction-choice");
+    expect(s.stack[0]?.card?.instanceId).toBe(reaction);
+    expect(s.chain[0]!.defendingCards.some((card) => card.instanceId === reaction)).toBe(false);
+    expect(s.chain[0]!.flags.defendedFromHand).toBeUndefined();
+    expect(projectStateFor(s, 0).chain[0]!.defenseValue).toBe(0);
+
+    result = applyIntent(s, 1, { kind: "choose", optionId: "yes" });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    s = result.state;
+
+    expect(player(s, 1).flags.wasDefendingDuringResolutionChoice).toBe(false);
+    expect(s.stack.some((layer) => layer.card?.instanceId === reaction)).toBe(false);
+    expect(s.chain[0]!.defendingCards.some((card) => card.instanceId === reaction)).toBe(true);
+    expect(s.chain[0]!.flags.defendedFromHand).toBe(true);
+    expect(projectStateFor(s, 0).chain[0]!.defenseValue).toBe(3);
   });
 
   it("dominate blocks defense reactions from hand once defended from hand (8.3.4b)", () => {

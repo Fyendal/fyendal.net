@@ -1,10 +1,14 @@
 /* ── card frames ── */
 .card {
   position: relative;
+  appearance: none;
   background: linear-gradient(160deg, #2c2113, #1b1309);
   border: 1px solid #5a4426;
   border-radius: 3px;
   padding: 6px;
+  color: inherit;
+  font: inherit;
+  text-align: left;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
@@ -40,43 +44,88 @@
 .card-preview-frame .c-cost { width: 34px; height: 34px; font-size: 18px; top: -10px; right: -10px; }
 .card-preview-frame .c-atk,
 .card-preview-frame .c-def { font-size: 28px; }
-.card-clickable { cursor: pointer; }
+.card-clickable {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.card-action {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  appearance: none;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  clip-path: none;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.card-action:hover {
+  border-color: transparent;
+  background: transparent;
+}
+.card-action:focus-visible {
+  outline: none;
+}
+.card-clickable:has(> .card-action:focus-visible) {
+  outline: 3px solid #f1d98d;
+  outline-offset: 4px;
+}
 .card-highlight {
-  border-color: #62ffa0;
-  outline: 2px solid #d7ffe5;
-  outline-offset: 1px;
+  /* A crisp boundary is calmer than the old neon bloom and cannot spill into
+     neighboring equipment. #76b995 is 7.74:1 against the base playmat. */
+  border-color: #76b995;
   box-shadow:
-    0 0 0 2px #62ffa0cc,
-    0 0 18px 6px #37c871bb,
-    inset 0 0 8px #37c87166;
+    0 0 0 1px #101712,
+    0 0 0 3px #76b995,
+    inset 0 0 0 1px #76b99580;
 }
 /* Decision windows identify card ownership relative to the viewer. Keep the
-   glow softer than the selectable highlight so eligibility remains legible. */
+   ownership accent quieter than the selectable boundary. */
 .decision-float .card-friendly {
-  border-color: #62ffa0;
-  box-shadow: 0 0 0 1px #62ffa099, 0 0 10px #37c87177;
+  border-color: #76b995;
+  box-shadow: inset 0 0 0 1px #76b99580;
 }
 .decision-float .card-opponent {
-  border-color: #ff5b4d;
-  box-shadow: 0 0 0 1px #ff5b4dcc, 0 0 10px #c23a2c99;
+  border-color: #d9796f;
+  box-shadow: inset 0 0 0 1px #d9796f80;
 }
 .decision-float .card-highlight.card-friendly {
   box-shadow:
-    0 0 0 2px #62ffa0cc,
-    0 0 18px 6px #37c871bb,
-    inset 0 0 8px #37c87166;
+    0 0 0 1px #101712,
+    0 0 0 3px #76b995,
+    inset 0 0 0 1px #76b99580;
 }
 .decision-float .card-highlight.card-opponent {
   box-shadow:
-    0 0 0 2px #ff5b4dcc,
-    0 0 18px 6px #c23a2cbb,
-    inset 0 0 8px #c23a2c66;
+    0 0 0 1px #1b0e0c,
+    0 0 0 3px #d9796f,
+    inset 0 0 0 1px #d9796f80;
 }
-.card-selected { border-color: #ffd479; box-shadow: 0 0 12px #ffd47988; }
+.card-selected {
+  border-color: #e2b75f;
+  box-shadow:
+    0 0 0 1px #1b1409,
+    0 0 0 4px #e2b75f,
+    inset 0 0 0 1px #e2b75f80;
+}
+.decision-float .card-selected {
+  border-color: #e2b75f;
+  box-shadow:
+    0 0 0 1px #1b1409,
+    0 0 0 4px #e2b75f,
+    inset 0 0 0 1px #e2b75f80;
+}
 .card-hand.card-selected { transform: translateY(-12px); }
 .card-pitched {
-  border-color: #67b7ff;
-  box-shadow: 0 0 10px #3b9dff, 0 0 22px #237bd899;
+  border-color: #75b6ee;
+  box-shadow:
+    0 0 0 1px #0b151f,
+    0 0 0 3px #75b6ee,
+    inset 0 0 0 1px #75b6ee80;
 }
 .card-dim::after {
   content: "";
@@ -88,9 +137,9 @@
   pointer-events: none;
 }
 .card-explained { overflow: visible; }
-.card-explained:focus-visible {
-  outline: 2px solid #b8933f88;
-  outline-offset: 2px;
+.card-explained:not(.card-clickable):focus-visible {
+  outline: 3px solid #f1d98d;
+  outline-offset: 4px;
 }
 .card-explanation {
   position: absolute;
@@ -260,7 +309,7 @@
   justify-content: center;
   gap: 4px;
   pointer-events: none;
-  z-index: 1;
+  z-index: 4;
 }
 .c-ovl {
   --counter-box-size: 30px;

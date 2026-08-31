@@ -942,26 +942,6 @@ export function resolveTopStackCard(state: GameStateInternal, runtime: EngineRun
       finishStackCardResolution(state, runtime, seat, false);
       return;
     }
-    link.defendingCards.push(card);
-    applyOneShotDefenseModifiers(state, link, [card]);
-    const fragmentTriggered = noteAttackDefendedBy(state, runtime, link, card);
-    if (layer.fromHand) {
-      link.flags.defendedFromHand = true;
-      link.flags[`defendedFromHand:${card.instanceId}`] = true;
-      link.flags.defendedFromHandCount = Number(link.flags.defendedFromHandCount ?? 0) + 1;
-    }
-    runtime.dispatchFlow("queueDefendEventLayersAfterCurrent", state, link, [{ card, fragmentTriggered }], layer.fromHand === true);
-  } else if (layer.meldStage !== 1 && settlesInArena(state, card)) {
-    // A permanent stays on the stack while its resolution abilities run. It
-    // moves to the arena in finishStackCardResolution's leave-stack step.
-  } else if (
-    layer.meldStage !== 1 &&
-    link &&
-    dataOf(state, card.cardId).cardType === "attack-reaction"
-  ) {
-    // Attack reactions remain displayed with the chain link and move to the
-    // graveyard when it closes. Instants resolve directly to graveyard.
-    link.reactions.push(card);
   }
   runtime.events.runHook(state, seat, card, "onPlay", link, !layer.fromHand);
   const pd = state.pendingDecision;
@@ -1033,6 +1013,31 @@ export function finishStackCardResolution(
   // its own source has already cleared layer.card, so it is not moved again.
   const resolvedCard = layer?.card;
   if (resolvedCard) {
+    const link = currentLink(state);
+    const cardType = dataOf(state, resolvedCard.cardId).cardType;
+    if (resolvedSuccessfully && link && cardType === "defense-reaction") {
+      // CR 5.3.6b: only after its layer effects and go again are complete does
+      // a defense reaction leave the stack and become a defending card.
+      link.defendingCards.push(resolvedCard);
+      applyOneShotDefenseModifiers(state, link, [resolvedCard]);
+      const fragmentTriggered = noteAttackDefendedBy(state, runtime, link, resolvedCard);
+      if (layer.fromHand) {
+        link.flags.defendedFromHand = true;
+        link.flags[`defendedFromHand:${resolvedCard.instanceId}`] = true;
+        link.flags.defendedFromHandCount = Number(link.flags.defendedFromHandCount ?? 0) + 1;
+      }
+      runtime.dispatchFlow(
+        "queueDefendEventLayersAfterCurrent",
+        state,
+        link,
+        [{ card: resolvedCard, fragmentTriggered }],
+        layer.fromHand === true,
+      );
+    } else if (resolvedSuccessfully && link && cardType === "attack-reaction") {
+      // Attack reactions are retained with the chain link for presentation and
+      // chain-close settlement, but not until their stack effects are complete.
+      link.reactions.push(resolvedCard);
+    }
     const remainsOnChain = state.chain.some((link) =>
       link.attackingCard.instanceId === resolvedCard.instanceId ||
       link.defendingCards.some((card) => card.instanceId === resolvedCard.instanceId) ||

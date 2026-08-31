@@ -111,9 +111,33 @@ describe("CardBack", () => {
     expect(visible).toContain('data-motion-card="0:hand:7"');
     expect(hidden).toContain('data-motion-card="1:arsenal:8"');
   });
+
+  it("uses native button semantics when it is interactive", () => {
+    const interactive = renderToStaticMarkup(createElement(CardBack, {
+      label: "Deck",
+      onClick: () => undefined,
+    }));
+    const staticCard = renderToStaticMarkup(createElement(CardBack, { label: "Deck" }));
+
+    expect(interactive).toContain('<button type="button" class="card-action" aria-label="Deck"');
+    expect(staticCard).toContain('<div class="card card-zone card-back ');
+  });
 });
 
 describe("CardFace payment state", () => {
+  it("uses native button semantics when it is interactive", () => {
+    const interactive = renderToStaticMarkup(createElement(CardFace, {
+      card: { instanceId: 1, cardId: "TEST-CARD", owner: 0 },
+      onClick: () => undefined,
+    }));
+    const staticCard = renderToStaticMarkup(createElement(CardFace, {
+      card: { instanceId: 2, cardId: "TEST-CARD", owner: 0 },
+    }));
+
+    expect(interactive).toContain('<button type="button" class="card-action" aria-label="TEST-CARD"');
+    expect(staticCard).toContain('<div class="card card-hand');
+  });
+
   it("uses the projected name when the client catalog does not know a printing", () => {
     const html = renderToStaticMarkup(createElement(CardFace, {
       card: { instanceId: 99, cardId: "IAR999", name: "Future IAR Card", owner: 0 },

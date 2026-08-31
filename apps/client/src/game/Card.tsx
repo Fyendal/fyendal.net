@@ -281,10 +281,18 @@ export function CardFace({
       data-cardid={card.cardId}
       data-motion-card={motionKey}
       data-motion-zone-anchor={motionZoneAnchor}
-      onClick={onClick}
-      tabIndex={explanation ? 0 : undefined}
-      aria-describedby={explanationId}
+      tabIndex={!onClick && explanation ? 0 : undefined}
+      aria-describedby={!onClick ? explanationId : undefined}
     >
+      {onClick ? (
+        <button
+          type="button"
+          className="card-action"
+          aria-label={name}
+          aria-describedby={explanationId}
+          onClick={onClick}
+        />
+      ) : null}
       {showImg ? (
         <img
           className="c-img"
@@ -512,8 +520,15 @@ export function CardBack({
       className={`card card-zone card-back ${onClick ? "card-clickable" : ""}`}
       data-motion-card={motionKey}
       data-motion-zone-anchor={motionZoneAnchor}
-      onClick={onClick}
     >
+      {onClick ? (
+        <button
+          type="button"
+          className="card-action"
+          aria-label={label || "Card back"}
+          onClick={onClick}
+        />
+      ) : null}
       <img
         className="c-backimg"
         src={CARD_BACK_IMAGE_URL}

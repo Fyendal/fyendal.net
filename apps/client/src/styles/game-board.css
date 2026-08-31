@@ -256,7 +256,9 @@
   font-variant: small-caps;
   letter-spacing: 2px;
   font-size: 13px;
-  color: #c9a6274d;
+  /* Zone names are interface text, not decorative watermarking. This stays
+     muted while clearing 4.5:1 even against the mat's lightest base color. */
+  color: #c2ad78;
   text-shadow: 0 1px 2px #000;
 }
 /* board-state strip right of the helmet: tokens/auras/items/allies */
@@ -273,8 +275,8 @@
    helmet and the arms piece than the equipment grid gap; colored border to
    tell board cards apart — steel-blue for yours, blood-red for the opponent's */
 .board-cards {
-  /* Keep the expanded highlight inside the strip's vertical clip boundary.
-     Negative margins preserve the previous card position and row footprint. */
+  /* Keep keyboard focus inside the strip's vertical clip boundary. Negative
+     margins preserve the card position and row footprint. */
   padding-block: 28px;
   padding-left: 41px;
   margin-block: -10px;
