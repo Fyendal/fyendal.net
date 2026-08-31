@@ -214,6 +214,45 @@ describe("ARC — generic equipment and actions", () => {
     expect(g.state.stack[0]?.engineEffect).toEqual({ kind: "gain-action-points", amount: 1 });
     g.passPriority().passPriority().expectAP(0, 1).settle();
   });
+
+  it("Fate Foreseen becomes a defender only after its opt choice completes", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["ravenous rabble|1"] },
+        {
+          hero: "dorinthea",
+          hand: ["fate foreseen|1"],
+          deck: ["cosmic awakening|3"],
+        },
+      ],
+    });
+    const fate = g.state.players[1]!.hand.find(
+      (card) => card.cardId === printingId("fate foreseen|1"),
+    )!;
+
+    g.play("ravenous rabble|1")
+      .blockWith()
+      .passPriority()
+      .react("fate foreseen|1");
+
+    expect(g.state.pendingDecision?.chooseHook).toMatch(/^opt:/);
+    expect(g.state.stack[0]?.card?.instanceId).toBe(fate.instanceId);
+    expect(
+      g.state.chain[0]!.defendingCards.some((card) => card.instanceId === fate.instanceId),
+    ).toBe(false);
+
+    const resolved = applyIntent(g.state, 1, { kind: "choose", optionId: "pass" });
+    expect(resolved.ok).toBe(true);
+    if (!resolved.ok) return;
+    expect(
+      resolved.state.stack.some((layer) => layer.card?.instanceId === fate.instanceId),
+    ).toBe(false);
+    expect(
+      resolved.state.chain[0]!.defendingCards.some(
+        (card) => card.instanceId === fate.instanceId,
+      ),
+    ).toBe(true);
+  });
 });
 
 describe("ARC — rules regression coverage", () => {

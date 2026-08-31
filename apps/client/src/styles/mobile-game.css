@@ -464,14 +464,6 @@
   .hand > :last-child:nth-child(-n + 3) { margin-right: auto; }
   .hand::-webkit-scrollbar { display: none; }
   .hand .card-hand { width: 90px; height: 124px; transform: none; }
-  /* The hand is a clipped horizontal scroller, so keep its legality glow
-     inside the mobile gutter instead of cropping the desktop-sized bloom. */
-  .hand .card-highlight {
-    box-shadow:
-      0 0 0 2px #62ffa0cc,
-      0 0 10px 3px #37c871dd,
-      inset 0 0 8px #37c87177;
-  }
   .hand .card-hand:hover { transform: none; }
   .hand .card-hand.card-selected,
   .hand .card-hand.card-selected:hover,

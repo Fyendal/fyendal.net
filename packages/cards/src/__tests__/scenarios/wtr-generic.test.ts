@@ -570,10 +570,18 @@ describe("WTR generic — reactions", () => {
       ],
       active: 1,
     });
+    const sink = g.state.players[0]!.hand.find(
+      (card) => card.cardId === printingId("sink below|1"),
+    )!;
     g.play("snatch|1")
       .blockWith()
       .passPriority()
       .react("sink below|1");
+    expect(g.state.pendingDecision?.chooseHook).toBe("sink-bottom");
+    expect(g.state.stack[0]?.card?.instanceId).toBe(sink.instanceId);
+    expect(
+      g.state.chain[0]!.defendingCards.some((card) => card.instanceId === sink.instanceId),
+    ).toBe(false);
     chooseHandCard(g, 0, "en garde|1")
       .expectDeckBottom(0, "en garde|1")
       .expectHandSize(0, 1) // drew Raging Onslaught
