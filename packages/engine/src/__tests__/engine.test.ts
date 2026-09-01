@@ -2735,9 +2735,21 @@ describe("trigger stack & priority windows", () => {
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     s = r.state;
-    // the attack resolved: it is now attacking (defend step), no longer on the stack
-    expect(s.pendingDecision?.kind).toBe("defend");
+    // The attack-layer resolved: it is now attacking and no longer on the
+    // stack. The Attack Step has its own priority point before defense.
+    expect(s.pendingDecision?.kind).toBe("priority-window");
     expect(projectStateFor(s, 1).chain[0]!.onStack).toBeUndefined();
+    expect(projectStateFor(s, 1).stackContext).toBe("ATTACK STEP · TRIGGERS");
+
+    r = applyIntent(s, 0, { kind: "pass" });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    s = r.state;
+    r = applyIntent(s, 1, { kind: "pass" });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    s = r.state;
+    expect(s.pendingDecision?.kind).toBe("defend");
   });
 
   it("a non-attack action rides the stack: effects and go again resolve after both pass", () => {

@@ -484,7 +484,7 @@ export interface PersistedGameStateV1 {
   /** Optional for rooms written before pending triggered layers were explicit. */
   pendingTriggeredLayers?: PersistedStackLayerV1[];
   stackPasses: number;
-  stackResume: "begin-action" | "begin-action-phase" | "grant-turn-action" | "end-action-phase" | "continue-attack" | "start-reaction-step" | "finish-link-resolution" | "end-phase" | null;
+  stackResume: "begin-action" | "begin-action-phase" | "grant-turn-action" | "end-action-phase" | "start-attack-step" | "continue-attack" | "start-reaction-step" | "finish-link-resolution" | "end-phase" | null;
   modifiers: PersistedModifierV1[];
   /** Optional for rooms written before delayed triggers were explicit. */
   delayedTriggers?: PersistedDelayedTriggerV1[];
@@ -1268,7 +1268,7 @@ function validateState(value: unknown, code: string): PersistedGameStateV1 {
     code,
     `${path}.pendingTokenCreations`,
   );
-  if (state.stackResume !== null) oneOf(state.stackResume, ["begin-action", "begin-action-phase", "grant-turn-action", "end-action-phase", "continue-attack", "start-reaction-step", "finish-link-resolution", "end-phase"] as const, code, `${path}.stackResume`);
+  if (state.stackResume !== null) oneOf(state.stackResume, ["begin-action", "begin-action-phase", "grant-turn-action", "end-action-phase", "start-attack-step", "continue-attack", "start-reaction-step", "finish-link-resolution", "end-phase"] as const, code, `${path}.stackResume`);
   array(state.modifiers, code, `${path}.modifiers`).forEach((modifier, index) => validateModifier(modifier, code, `${path}.modifiers[${index}]`));
   optional(state, "delayedTriggers", (value, valuePath) => {
     array(value, code, valuePath, 128).forEach((entryValue, index) => {

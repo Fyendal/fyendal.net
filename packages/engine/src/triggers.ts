@@ -280,7 +280,9 @@ export function windowPrompt(state: GameStateInternal, forSeat: number | null): 
   }
   const link = currentLink(state);
   if (link) {
-    return `${nameOf(state, link.attackingCard.cardId)} on the stack — play an instant or pass`;
+    return link.flags.attackStepBegan === true
+      ? `${nameOf(state, link.attackingCard.cardId)} is attacking — play an instant or pass`
+      : `${nameOf(state, link.attackingCard.cardId)} on the stack — play an instant or pass`;
   }
   return "Priority — play an instant or pass";
 }
@@ -1171,8 +1173,8 @@ export function continueStack(state: GameStateInternal,
   // continuation instead of holding an empty-stack window. Combat steps are
   // different: the turn player regains priority after a layer resolves, and
   // may now have a newly legal instant-speed action before the step ends (CR
-  // 5.3.7, 7.5.3-7.5.4). The attack-declared window ("continue-attack") also
-  // remains open because the attack itself is the unresolved layer.
+  // 5.3.7, 7.5.3-7.5.4). The unresolved attack-layer also remains open until
+  // it resolves into the Attack Step.
   const priorityAllowed = phaseAllowsPriority(state);
   const hasWindowAction = priorityAllowed && anyWindowAction(state, runtime);
   const combatStepContinuation = state.stackResume === "finish-link-resolution";
@@ -1193,6 +1195,7 @@ export function continueStack(state: GameStateInternal,
   // and scripted choices return before this point, so only the redundant
   // priority round for the same layer is skipped.
   const continuingCountedLayer = top?.triggerBatchStarted === true;
+  const unresolvedAttackLayer = state.stackResume === "start-attack-step";
   if (
     priorityAllowed &&
     (
@@ -1202,7 +1205,7 @@ export function continueStack(state: GameStateInternal,
       explicitLayerPriority
     ) &&
     !continuingCountedLayer &&
-    (top || state.stackResume === "continue-attack" || combatStepContinuation)
+    (top || unresolvedAttackLayer || state.stackResume === "continue-attack" || combatStepContinuation)
   ) {
     // With no remaining layer, this is the Damage Step's empty-stack
     // priority point. Record it here so finishDamageStep does not open the
@@ -1221,6 +1224,10 @@ function finishStack(state: GameStateInternal, runtime: EngineRuntime): void {
   const resume: StackResume = state.stackResume ?? "begin-action";
   state.stackResume = null;
   state.pendingDecision = null;
+  if (resume === "start-attack-step") {
+    runtime.dispatchFlow("beginAttackStep", state);
+    return;
+  }
   if (resume === "continue-attack") {
     runtime.dispatchFlow("proceedWithAttack", state);
     return;
@@ -1270,6 +1277,14 @@ function finishStack(state: GameStateInternal, runtime: EngineRuntime): void {
   // here because responses may have modified it.
   state.phase = "action";
   state.priorityPlayer = state.activePlayer;
+}
+
+/** Hold the Layer Step over an unresolved attack-layer. Once it resolves, the
+ * Attack Step begins and attack-declared effects are generated. */
+export function enterAttackLayerWindow(state: GameStateInternal, runtime: EngineRuntime): void {
+  state.phase = "layer";
+  state.stackResume = "start-attack-step";
+  continueStack(state, runtime, currentLink(state)?.attacker ?? state.activePlayer);
 }
 
 /** Identity of a simultaneous trigger's effect — used to detect mechanically
@@ -1635,9 +1650,9 @@ export function resolveTopStackLayer(state: GameStateInternal, runtime: EngineRu
   advanceStack(state, runtime);
 }
 
-/** After an attack is declared: queue attack-declared triggers (only from
- *  permanents that existed at declaration), then a priority window over the
- *  attack layer; both passing moves to defend step. */
+/** During the Attack Step, queue attack-declared triggers (only from
+ * permanents that existed when the attack became attacking). Once they
+ * resolve, play moves to the Defend Step. */
 export function enterAttackWindow(state: GameStateInternal, runtime: EngineRuntime): void {
   const link = currentLink(state);
   queueEventTriggers(

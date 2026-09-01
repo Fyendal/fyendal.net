@@ -65,7 +65,7 @@ describe("OMN — import and set mechanics", () => {
       .expectLife(1, 18);
   });
 
-  it("Astral Strike declares its attack mode before defense or priority", () => {
+  it("Astral Strike declares its attack mode after its attack-layer resolves", () => {
     const g = scenario({
       seats: [
         hero("zyggy|0", { hand: ["astral strike|1", "cosmic duality|3"] }),
@@ -75,6 +75,10 @@ describe("OMN — import and set mechanics", () => {
     g.state.players[0]!.flags["destroyedName:lightning flow"] = true;
 
     g.play("astral strike|1", { pitch: ["cosmic duality|3"], settle: false });
+
+    expect(g.state.pendingDecision).toMatchObject({ kind: "priority-window", player: 0 });
+    expect(g.state.pendingDecision?.chooseHook).toBeUndefined();
+    g.passPriority().passPriority();
 
     expect(g.state.pendingDecision).toMatchObject({
       chooseHook: "astral-mode",
@@ -406,6 +410,25 @@ describe("OMN — import and set mechanics", () => {
       .blockWith()
       .settle()
       .expectLife(1, 14);
+  });
+
+  it("Quick Succession does not grant go again to Scar for a Scar", () => {
+    const g = scenario({
+      seats: [
+        hero("aurora, emissary of lightning|0", {
+          hand: ["quick succession|3", "scar for a scar|1"],
+        }),
+        foe(),
+      ],
+    });
+
+    g.play("quick succession|3")
+      .play("scar for a scar|1")
+      .expectAttackValue(4)
+      .blockWith()
+      .settle()
+      .expectAP(0, 0);
+    expect(g.state.chain[0]?.goAgain).toBe(false);
   });
 
   it("Crackle from Afar lets its controller choose the attack that gets +1", () => {

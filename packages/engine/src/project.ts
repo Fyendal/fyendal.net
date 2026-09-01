@@ -613,7 +613,11 @@ function projectedCombatPrevention(
 }
 
 function projectedStackContext(state: GameStateInternal): string | undefined {
-  const attackOnStack = state.stackResume === "continue-attack";
+  const link = currentLink(state);
+  const attackOnStack = state.stackResume === "start-attack-step";
+  const attackStepEffects = !!link && !link.resolved &&
+    state.phase === "layer" &&
+    (link.flags.attackStepBegan === true || state.stackResume === "continue-attack");
   if (state.stackResume === "finish-link-resolution") {
     if (currentLink(state)?.flags.resolutionStepBegan === true) {
       return "RESOLUTION STEP · EFFECTS";
@@ -627,8 +631,9 @@ function projectedStackContext(state: GameStateInternal): string | undefined {
       ? "DAMAGE STEP · ON-HIT TRIGGERS"
       : "DAMAGE STEP · EFFECTS";
   }
-  if (state.stack.length === 0 && !attackOnStack) return undefined;
+  if (state.stack.length === 0 && !attackOnStack && !attackStepEffects) return undefined;
   if (attackOnStack) return "LAYER STEP · ATTACK";
+  if (attackStepEffects) return "ATTACK STEP · TRIGGERS";
   if (state.phase === "reaction") return "REACTION STEP · REACTIONS";
   if (state.stackResume === "start-reaction-step") return "DEFEND STEP · TRIGGERS";
   if (state.stackResume === "end-phase") return "END PHASE · TRIGGERS";
@@ -896,10 +901,9 @@ function projectState(
   publicGameId: string,
   revealAll: boolean,
 ): GameView {
-  // while the attack-declared stack machine runs (triggers + priority window),
-  // the newest link is still "on the stack": the UI shows it in the stack
-  // window instead of as a combat chain link
-  const attackOnStack = state.stackResume === "continue-attack";
+  // Until the attack-layer resolves, the newest link is presented on the
+  // stack. Attack-step triggers run after it has become attacking.
+  const attackOnStack = state.stackResume === "start-attack-step";
   const lastLink = state.chain.length - 1;
   const chain = state.chain.map((link, i): ChainLinkView => {
     const attack =

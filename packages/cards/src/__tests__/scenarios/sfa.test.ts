@@ -17,7 +17,7 @@
  * defend decision. playFromZone covers the banished-and-playable cards.
  */
 import { describe, expect, it } from "vitest";
-import { applyIntent, createGame, legalIntents } from "@fyendal/engine";
+import { applyIntent, createGame, legalIntents, projectStateFor } from "@fyendal/engine";
 import type { Decklist, GameIntent } from "@fyendal/shared";
 import { cardData, decklists, scripts } from "../../index.js";
 import { printingId, scenario } from "../harness.js";
@@ -504,6 +504,28 @@ describe("SFA — defense", () => {
 });
 
 describe("SFA — Phoenix Flame support", () => {
+  it("Fire that Burns Within waits for its attack-layer to resolve before triggering", () => {
+    const s = scenario({
+      seats: [
+        faiSeat({ hand: ["fire that burns within|1", FLAME, BLUE] }),
+        { hero: "rhinar", hand: ["sigil of solace|1"] },
+      ],
+    });
+
+    s.play("fire that burns within|1", { pitch: [BLUE], settle: false });
+
+    expect(s.state.pendingDecision).toMatchObject({ kind: "priority-window", player: 0 });
+    expect(s.state.pendingDecision?.chooseHook).toBeUndefined();
+    expect(projectStateFor(s.state, 0).chain.at(-1)?.onStack).toBe(true);
+    expect(projectStateFor(s.state, 0).stackContext).toBe("LAYER STEP · ATTACK");
+
+    s.passPriority().passPriority();
+
+    expect(s.state.pendingDecision).toMatchObject({ chooseHook: "fire-that-burns", player: 0 });
+    expect(projectStateFor(s.state, 0).chain.at(-1)?.onStack).toBeUndefined();
+    expect(projectStateFor(s.state, 0).stackContext).toBe("ATTACK STEP · TRIGGERS");
+  });
+
   it("Fire that Burns Within: discard a Phoenix Flame to draw and get +2{p}", () => {
     const s = scenario({
       seats: [faiSeat({ hand: ["fire that burns within|1", FLAME, BLUE], deck: [BLUE] }), { hero: "rhinar", hand: [] }],

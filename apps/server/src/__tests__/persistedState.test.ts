@@ -23,6 +23,16 @@ function jsonCopy<T>(value: T): T {
 }
 
 describe("PersistedStateV1", () => {
+  it("round trips an unresolved attack-layer continuation", () => {
+    const source = game();
+    source.stackResume = "start-attack-step";
+
+    const encoded = encodePersistedState(source);
+    const decoded = decodePersistedState(jsonCopy(encoded), "ABC123", cardData, scripts);
+
+    expect(decoded.stackResume).toBe("start-attack-step");
+  });
+
   it("round trips registered card definitions used as visual choice options", () => {
     const source = game();
     source.pendingDecision = {
