@@ -1,5 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import { attackAbility, buffNextAttack, opponentSeat } from "./shared-helpers.js";
+import { SHARPEN_FOLLOWUP, sharpenSword } from "./aha/warrior-sharpen.js";
 
 const BLADE_DANCE = "MPW134";
 const FLURRY = "MPW135";
@@ -27,24 +28,10 @@ function controlledNamed(ctx: ScriptCtx, name: string): readonly Card[] {
   ].filter((card) => ctx.cardNames(card).includes(name.toLowerCase()));
 }
 
-function sharpen(ctx: ScriptCtx, instanceId: number, count = 1): void {
-  const sword = swords(ctx).find((card) => card.instanceId === instanceId);
-  if (!sword) return;
-  const extra = ctx.getFlag("player", "ahaExtraSharpen") === true ? 1 : 0;
-  if (extra) ctx.setFlag("player", "ahaExtraSharpen", false);
-  ctx.addCounter(instanceId, "power", count + extra);
-  ctx.setCardCounter(instanceId, "sharpenedTurn", ctx.state.turn);
-  ctx.setFlag(
-    "player",
-    "clearWeaponPowerCountersAtTurn",
-    ctx.state.activePlayer === ctx.seat ? ctx.state.turn : ctx.state.turn + 1,
-  );
-}
-
 function chooseSword(
   ctx: ScriptCtx,
   hook: string,
-  finish: (ctx: ScriptCtx, instanceId: number) => void = sharpen,
+  finish: (ctx: ScriptCtx, instanceId: number) => void = sharpenSword,
 ): void {
   const choices = swords(ctx);
   if (choices.length === 1) finish(ctx, choices[0]!.instanceId);
@@ -120,12 +107,14 @@ function sharpenAction(
   reward: "blade" | "flurry" | "discount",
 ): CardScript {
   const finish = (ctx: ScriptCtx, id: number) => {
-    sharpen(ctx, id);
-    const sword = swords(ctx).find((card) => card.instanceId === id);
-    if (Number(sword?.counters?.power ?? 0) < threshold) return;
-    if (reward === "blade") ctx.createToken(BLADE_DANCE);
-    else if (reward === "flurry") ctx.createToken(FLURRY);
-    else buffNextAttack(ctx, { attackActivationCostReduction: 1, appliesToInstanceId: id });
+    sharpenSword(ctx, id, 1, {
+      threshold,
+      kind: reward === "blade"
+        ? SHARPEN_FOLLOWUP.BLADE_DANCE
+        : reward === "flurry"
+          ? SHARPEN_FOLLOWUP.MPW_FLURRY
+          : SHARPEN_FOLLOWUP.DISCOUNT,
+    });
   };
   return {
     canPlay: (ctx) => swords(ctx).length > 0,
@@ -188,7 +177,7 @@ export const mpw: Record<string, CardScript> = {
       canActivate: (ctx) => swords(ctx).length > 0,
       onActivate: (ctx) => chooseSword(ctx, "hala-sharpen"),
     },
-    onChoose(ctx, hook, option) { if (hook === "hala-sharpen") sharpen(ctx, Number(option)); },
+    onChoose(ctx, hook, option) { if (hook === "hala-sharpen") sharpenSword(ctx, Number(option)); },
   },
   "durendal|0": {
     activated: attackAbility(1),
@@ -273,7 +262,7 @@ export const mpw: Record<string, CardScript> = {
   "sharpening sparks|1": {
     ...swordReaction(2, (ctx) => ctx.addModifier({ scope: "chain-link" })),
     canTriggerOnHit(ctx) { return !!ctx.link && ctx.state.modifiers.some((modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "chain-link" && !modifier.consumed); },
-    onHit(ctx) { consumeMarker(ctx, "chain-link"); sharpen(ctx, ctx.link!.attackingCard.instanceId); },
+    onHit(ctx) { consumeMarker(ctx, "chain-link"); sharpenSword(ctx, ctx.link!.attackingCard.instanceId); },
   },
   "all in|1": {
     onPlay: (ctx) => ctx.addModifier({ scope: "until-end-of-turn" }),
@@ -308,34 +297,33 @@ export const mpw: Record<string, CardScript> = {
   "drawn to the blade|2": {
     canPlay: (ctx) => swords(ctx).length > 0,
     onPlay: (ctx) => chooseSword(ctx, "drawn-sharpen", (inner, id) => {
-      sharpen(inner, id);
-      const sword = swords(inner).find((card) => card.instanceId === id);
-      if (Number(sword?.counters?.power ?? 0) >= 2) {
-        inner.addModifier({ scope: "until-end-of-turn", appliesToInstanceId: id, onHitDraw: 1, once: true });
-      }
+      sharpenSword(inner, id, 1, {
+        threshold: 2,
+        kind: SHARPEN_FOLLOWUP.DRAW_ON_HIT,
+      });
     }),
     onChoose(ctx, hook, option) {
       if (hook !== "drawn-sharpen") return;
-      sharpen(ctx, Number(option));
-      const sword = swords(ctx).find((card) => card.instanceId === Number(option));
-      if (Number(sword?.counters?.power ?? 0) >= 2) ctx.addModifier({ scope: "until-end-of-turn", appliesToInstanceId: sword!.instanceId, onHitDraw: 1, once: true });
+      sharpenSword(ctx, Number(option), 1, {
+        threshold: 2,
+        kind: SHARPEN_FOLLOWUP.DRAW_ON_HIT,
+      });
     },
   },
   "honed for honor|3": {
     canPlay: (ctx) => swords(ctx).length > 0,
     onPlay: (ctx) => chooseSword(ctx, "honed-sharpen", (inner, id) => {
-      sharpen(inner, id);
-      if (Number(swords(inner).find((card) => card.instanceId === id)?.counters?.power ?? 0) < 3) return;
-      const reactions = inner.player(inner.seat).graveyard.filter((card) => data(inner, card).cardType === "attack-reaction");
-      if (reactions.length) inner.requestCardChoice("honed-top", "Put an attack reaction on top?", ["no", ...reactions.map((card) => card.instanceId)]);
+      sharpenSword(inner, id, 1, {
+        threshold: 3,
+        kind: SHARPEN_FOLLOWUP.TOP_ATTACK_REACTION,
+      });
     }),
     onChoose(ctx, hook, option) {
       if (hook === "honed-sharpen") {
-        sharpen(ctx, Number(option));
-        const reactions = ctx.player(ctx.seat).graveyard.filter((card) => data(ctx, card).cardType === "attack-reaction");
-        if (Number(swords(ctx).find((card) => card.instanceId === Number(option))?.counters?.power ?? 0) >= 3 && reactions.length) {
-          ctx.requestCardChoice("honed-top", "Put an attack reaction on top?", ["no", ...reactions.map((card) => card.instanceId)]);
-        }
+        sharpenSword(ctx, Number(option), 1, {
+          threshold: 3,
+          kind: SHARPEN_FOLLOWUP.TOP_ATTACK_REACTION,
+        });
       } else if (hook === "honed-top" && option !== "no") ctx.putOnDeckTop(Number(option));
     },
   },
@@ -456,9 +444,9 @@ export const mpw: Record<string, CardScript> = {
           if (token && ctx.destroyPermanent(token.instanceId)) count++;
         }
         ctx.setCounter("offBeatCount", count);
-        if (count > 0) chooseSword(ctx, "off-beat", (inner, id) => sharpen(inner, id, count));
+        if (count > 0) chooseSword(ctx, "off-beat", (inner, id) => sharpenSword(inner, id, count));
       } else if (hook === "off-beat") {
-        sharpen(ctx, Number(option), ctx.getCounter("offBeatCount"));
+        sharpenSword(ctx, Number(option), ctx.getCounter("offBeatCount"));
       }
     },
   },

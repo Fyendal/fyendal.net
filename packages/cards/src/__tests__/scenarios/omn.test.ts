@@ -178,6 +178,36 @@ describe("OMN — import and set mechanics", () => {
       .expectLife(1, 9);
   });
 
+  it("Reverent Rerebrace replaces Beckon Steel before its counter threshold", () => {
+    const g = scenario({
+      seats: [
+        hero("hala, bladesaint of the vow|0", {
+          resources: 2,
+          weapons: ["zenith blade|0"],
+          hand: ["beckon steel|3"],
+          equipment: { arms: "reverent rerebrace|0" },
+        }),
+        foe(),
+      ],
+    });
+    const sword = g.state.players[0]!.weapons[0]!;
+    sword.counters = { power: 1 };
+
+    g.attackWithWeapon("zenith blade|0")
+      .blockWith()
+      .react("beckon steel|3")
+      .settle();
+
+    expect(g.state.pendingDecision?.prompt).toContain("Reverent Rerebrace");
+    g.chooseOption("pay 1");
+    expect(g.state.players[0]!.weapons[0]!.counters?.power).toBe(3);
+    expect(g.state.chain).toHaveLength(2);
+    expect(g.state.chain[1]).toMatchObject({
+      resolved: false,
+      attackingCard: { instanceId: sword.instanceId },
+    });
+  });
+
   it("Beckon Steel chooses a fresh target for its queued sword attack", () => {
     const g = scenario({
       seats: [

@@ -392,6 +392,39 @@ describe("Blood Debt and Rune Gate", () => {
     )).toBe(true);
   });
 
+  it.each(["cull|1", "funeral moon|1"])(
+    "%s becomes playable as an instant after combat damage on the opponent's turn",
+    (key) => {
+      const g = scenario({
+        seats: [
+          { hero: "rhinar", banish: [key] },
+          { hero: "dorinthea", hand: ["wounding blow|1"] },
+        ],
+        active: 1,
+      });
+      const card = g.state.players[0]!.banish[0]!;
+      const isInstantPlay = () => legalIntents(g.state, 0).some(
+        (intent) => intent.kind === "play-from-zone" &&
+          intent.instanceId === card.instanceId &&
+          intent.asInstant === true,
+      );
+
+      g.play("wounding blow|1").blockWith().passPriority();
+      expect(isInstantPlay()).toBe(false);
+
+      g.passPriority();
+      expect(g.state.players[0]!.flags.lostLifeThisTurn).toBe(true);
+      expect(g.state.pendingDecision).toMatchObject({
+        kind: "priority-window",
+        player: 1,
+      });
+
+      g.passPriority();
+      expect(isInstantPlay()).toBe(true);
+      g.react(key, { settle: false }).expectAP(0, 0);
+    },
+  );
+
   it("each public Blood Debt card in banish loses 1 life", () => {
     const g = scenario({
       seats: [

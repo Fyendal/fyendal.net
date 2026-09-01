@@ -1879,6 +1879,39 @@ describe("PgRoomStore storage", () => {
     });
   });
 
+  it("keeps Ready gated but lets a locked sideboard reopen while turn order is pending", async () => {
+    const match = await matchedRoom();
+    for (const seat of [0, 1] as const) {
+      await store.acceptMatch(match.code, { token: match.tokens[seat], userId: match.userIds[seat] });
+    }
+    const initial = (await store.getRoom(match.code))!;
+    const waitingSeat = (1 - initial.prep!.dieWinner) as 0 | 1;
+    const deck = decklists[initial.seats[waitingSeat]!.hero!];
+    const presented = {
+      weaponIds: deck.weaponIds,
+      equipment: deck.equipment,
+      deck: deck.deck,
+    };
+
+    expect(await store.presentDeck(match.code, {
+      token: match.tokens[waitingSeat],
+      userId: match.userIds[waitingSeat],
+    }, presented)).toEqual({ ok: false, error: "the match is not in deck preparation" });
+
+    // A retained matchmaking seat can carry its prior locked presentation into
+    // a new pairing. It must be able to unlock while the new die winner decides.
+    await db.query(
+      "UPDATE room_seats SET ready = TRUE, presented = $3 WHERE room_code = $1 AND seat = $2",
+      [match.code, waitingSeat, JSON.stringify({ ...deck, inventory: [] })],
+    );
+
+    expect(await store.unready(match.code, {
+      token: match.tokens[waitingSeat],
+      userId: match.userIds[waitingSeat],
+    })).toMatchObject({ ok: true });
+    expect((await store.getRoom(match.code))!.seats[waitingSeat]!.ready).toBe(false);
+  });
+
   it("evicts an acceptance no-show and requeues the survivor in the retained room", async () => {
     const match = await matchedRoom();
     await store.acceptMatch(match.code, { token: match.tokens[0], userId: match.userIds[0] });

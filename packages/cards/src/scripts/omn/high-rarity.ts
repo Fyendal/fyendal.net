@@ -1,5 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import { ampNextArcane, attackAbility, buffNextAttack, opponentSeat } from "../shared-helpers.js";
+import { SHARPEN_FOLLOWUP, sharpenSword } from "../aha/warrior-sharpen.js";
 
 const EMBODIMENT = "ROS026";
 const FLOW = "OMN203";
@@ -26,12 +27,6 @@ function consumeMarker(ctx: ScriptCtx, scope: "until-end-of-turn" | "chain-link"
 function swordAttack(ctx: ScriptCtx): boolean {
   return ctx.link?.attackCardType === "weapon" && !!ctx.link && has(ctx, ctx.link.attackingCard, "sword");
 }
-function sharpen(ctx: ScriptCtx, weapon: Card): void {
-  ctx.addCounter(weapon.instanceId, "power", 1);
-  ctx.setCardCounter(weapon.instanceId, "sharpenedTurn", ctx.state.turn);
-  ctx.setFlag("player", "clearWeaponPowerCountersAtTurn", ctx.state.activePlayer === ctx.seat ? ctx.state.turn : ctx.state.turn + 1);
-}
-
 function shuriken(extra: CardScript = {}): CardScript {
   return {
     onPlay(ctx) { ctx.settleCard(ctx.self.instanceId); extra.onPlay?.(ctx); },
@@ -222,7 +217,14 @@ export const omnHighRarity: Record<string, CardScript> = {
     canPlay: (ctx) => ctx.link?.attacker === ctx.seat && swordAttack(ctx),
     onPlay: (ctx) => ctx.addModifier({ scope: "chain-link" }),
     canTriggerOnHit(ctx) { return !!ctx.link && ctx.state.modifiers.some((modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "chain-link" && !modifier.consumed); },
-    onHit(ctx) { consumeMarker(ctx, "chain-link"); const attacker = ctx.link!.attackingCard; sharpen(ctx, attacker); if (Number(attacker.counters?.power ?? 0) >= 3) ctx.attackWithPermanent(attacker.instanceId); },
+    onHit(ctx) {
+      consumeMarker(ctx, "chain-link");
+      const attacker = ctx.link!.attackingCard;
+      sharpenSword(ctx, attacker.instanceId, 1, {
+        threshold: 3,
+        kind: SHARPEN_FOLLOWUP.ATTACK_WITH_SWORD,
+      });
+    },
   },
   "crash site salvage|2": {
     additionalCost(ctx) { const choices = [...ctx.player(ctx.seat).board, ...Object.values(ctx.player(ctx.seat).equipment).filter((card): card is Card => !!card)].filter((card) => has(ctx, card, "item") || has(ctx, card, "equipment") || has(ctx, card, "token")); if (choices.length) ctx.requestCardChoice("salvage-scrap", "Scrap a permanent?", ["no", ...choices.map((card) => card.instanceId)]); },

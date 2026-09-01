@@ -822,5 +822,18 @@ Object.assign(hnt, {
       });
     },
   },
-  "cull|1": bloodDebt({ staticPlayableFrom: ["banish"], onPlay(ctx) { for (const player of ctx.state.players) if (player.hand.length) ctx.banish(player.hand[ctx.randomInt(player.hand.length)]!.instanceId); }, graveyardReplacement: "banish" }),
+  "cull|1": bloodDebt({
+    staticPlayableFrom: ["banish"],
+    playAsInstant: (ctx) => ctx.state.players.some(
+      (player) => player.flags.lostLifeThisTurn === true,
+    ),
+    onPlay(ctx) {
+      for (const player of ctx.state.players) {
+        if (player.hand.length) {
+          ctx.banish(player.hand[ctx.randomInt(player.hand.length)]!.instanceId);
+        }
+      }
+    },
+    graveyardReplacement: "banish",
+  }),
 } satisfies Record<string, CardScript>);
