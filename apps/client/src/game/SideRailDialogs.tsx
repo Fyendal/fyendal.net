@@ -84,221 +84,228 @@ export function GameSettingsDialog({
             ×
           </button>
         </header>
-        <section className="settings-section">
-          <h3 className="settings-heading">Game behavior</h3>
-          <div className="settings-control-list">
-            {onPriorityWindowModeChange ? (
-              <div className="settings-control-row settings-priority-row">
-                <span className="settings-control-name">Priority</span>
-                <div className="settings-segmented" role="group" aria-label="Priority behavior">
-                  <button
-                    type="button"
-                    className={priorityWindowMode === "auto-pass" ? "settings-selected" : ""}
-                    aria-pressed={priorityWindowMode === "auto-pass"}
-                    aria-label="Auto-pass: immediately pass priority when no instant, reaction, or board ability can be played"
-                    onClick={() => onPriorityWindowModeChange("auto-pass")}
-                  >
-                    Auto-pass
-                  </button>
-                  <button
-                    type="button"
-                    className={priorityWindowMode === "always-pause" ? "settings-selected" : ""}
-                    aria-pressed={priorityWindowMode === "always-pause"}
-                    onClick={() => onPriorityWindowModeChange("always-pause")}
-                  >
-                    Always pause
-                  </button>
+        <div className="settings-grid">
+          <section className="settings-section settings-gameplay">
+            <h3 className="settings-heading">Gameplay</h3>
+            <div className="settings-control-list">
+              {onPriorityWindowModeChange ? (
+                <div className="settings-control-row settings-priority-row">
+                  <span className="settings-control-name">Priority</span>
+                  <div className="settings-segmented" role="group" aria-label="Priority behavior">
+                    <button
+                      type="button"
+                      className={priorityWindowMode === "auto-pass" ? "settings-selected" : ""}
+                      aria-pressed={priorityWindowMode === "auto-pass"}
+                      aria-label="Auto-pass: immediately pass priority when no instant, reaction, or board ability can be played"
+                      onClick={() => onPriorityWindowModeChange("auto-pass")}
+                    >
+                      Auto-pass
+                    </button>
+                    <button
+                      type="button"
+                      className={priorityWindowMode === "always-pause" ? "settings-selected" : ""}
+                      aria-pressed={priorityWindowMode === "always-pause"}
+                      onClick={() => onPriorityWindowModeChange("always-pause")}
+                    >
+                      Always pause
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ) : null}
-            <label className="toggle-switch settings-control-row">
-              <span className="settings-control-name">
-                Confirm actions
-                <span
-                  className="settings-info-tooltip"
-                  data-tooltip="Requires confirmation when playing cards or activating abilities."
-                  aria-hidden="true"
-                >
-                  i
-                </span>
-              </span>
-              <input
-                type="checkbox"
-                role="switch"
-                aria-label="Confirm actions when playing cards or activating abilities"
-                checked={!skipPlayConfirmation}
-                onChange={(event) => onSkipPlayConfirmationChange(!event.target.checked)}
-              />
-              <span className="switch-track" aria-hidden="true" />
-            </label>
-            <div className="settings-control-row settings-motion-row">
-              <span className="settings-control-name">
-                Animations
-                <span
-                  className="settings-info-tooltip"
-                  data-tooltip="Default follows your operating system's reduced-motion setting."
-                  aria-hidden="true"
-                >
-                  i
-                </span>
-              </span>
-              <div
-                className="settings-segmented settings-motion-segmented"
-                role="group"
-                aria-label="Animation preference"
-              >
-                {MOTION_PREFERENCES.map((preference) => (
-                  <button
-                    key={preference}
-                    type="button"
-                    className={motionPreference === preference ? "settings-selected" : ""}
-                    aria-pressed={motionPreference === preference}
-                    aria-label={MOTION_PREFERENCE_DESCRIPTION[preference]}
-                    onClick={() => onMotionPreferenceChange(preference)}
+              ) : null}
+              <label className="toggle-switch settings-control-row">
+                <span className="settings-control-name">
+                  Confirm actions
+                  <span
+                    className="settings-info-tooltip"
+                    data-tooltip="Requires confirmation when playing cards or activating abilities."
+                    aria-hidden="true"
                   >
-                    {MOTION_PREFERENCE_LABEL[preference]}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="settings-control-row">
-              <span className="settings-control-name">
-                Playable cards
-                <span
-                  className="settings-info-tooltip"
-                  data-tooltip="Glow adds a restrained green halo. High contrast uses a crisp outline."
-                  aria-hidden="true"
-                >
-                  i
+                    i
+                  </span>
                 </span>
-              </span>
-              <div className="settings-segmented" role="group" aria-label="Playable card cue">
-                <button
-                  type="button"
-                  className={playabilityCuePreference === "glow" ? "settings-selected" : ""}
-                  aria-pressed={playabilityCuePreference === "glow"}
-                  onClick={() => onPlayabilityCuePreferenceChange("glow")}
-                >
-                  Glow
-                </button>
-                <button
-                  type="button"
-                  className={playabilityCuePreference === "high-contrast" ? "settings-selected" : ""}
-                  aria-pressed={playabilityCuePreference === "high-contrast"}
-                  onClick={() => onPlayabilityCuePreferenceChange("high-contrast")}
-                >
-                  High contrast
-                </button>
-              </div>
-            </div>
-            <label className="toggle-switch settings-control-row">
-              <span className="settings-control-name">
-                Sound effects
-                <span
-                  className="settings-info-tooltip"
-                  data-tooltip="Plays subtle sounds when cards are drawn, shuffled, or played."
-                  aria-hidden="true"
-                >
-                  i
-                </span>
-              </span>
-              <input
-                type="checkbox"
-                role="switch"
-                aria-label="Sound effects"
-                checked={soundEffectsEnabled}
-                onChange={(event) => onSoundEffectsEnabledChange(event.target.checked)}
-              />
-              <span className="switch-track" aria-hidden="true" />
-            </label>
-            <label className="settings-control-row settings-volume-row">
-              <span className="settings-control-name">Volume</span>
-              <span className="settings-volume-control">
                 <input
-                  id="sound-effects-volume"
-                  type="range"
-                  min="0"
-                  max="100"
-                  step="5"
-                  value={soundEffectsVolume}
-                  disabled={!soundEffectsEnabled}
-                  aria-label="Sound effects volume"
-                  onChange={(event) => onSoundEffectsVolumeChange(Number(event.target.value))}
+                  type="checkbox"
+                  role="switch"
+                  aria-label="Confirm actions when playing cards or activating abilities"
+                  checked={!skipPlayConfirmation}
+                  onChange={(event) => onSkipPlayConfirmationChange(!event.target.checked)}
                 />
-                <output htmlFor="sound-effects-volume">{soundEffectsVolume}%</output>
-              </span>
-            </label>
-            <label className="toggle-switch settings-control-row">
-              <span className="settings-control-name">
-                Show guidance
-                <span
-                  className="settings-info-tooltip"
-                  data-tooltip="Shows priority-window prompts and trigger descriptions."
-                  aria-hidden="true"
-                >
-                  i
+                <span className="switch-track" aria-hidden="true" />
+              </label>
+              <label className="toggle-switch settings-control-row">
+                <span className="settings-control-name">
+                  Show guidance
+                  <span
+                    className="settings-info-tooltip"
+                    data-tooltip="Shows priority-window prompts and trigger descriptions."
+                    aria-hidden="true"
+                  >
+                    i
+                  </span>
                 </span>
-              </span>
-              <input
-                type="checkbox"
-                role="switch"
-                checked={!lessGuidance}
-                onChange={(event) => onLessGuidanceChange(!event.target.checked)}
-              />
-              <span className="switch-track" aria-hidden="true" />
-            </label>
-          </div>
-        </section>
-        {onUndo ? (
-          <section className="settings-section">
-            <h3 className="settings-heading">Game history</h3>
-            <div className="settings-action-list">
-              <button onClick={() => { onUndo("last-action"); close(); }}>
-                <span className="settings-action-title">⤺ Undo last action</span>
-              </button>
-              <button onClick={() => setConfirmUndoTarget("current-turn")}>
-                <span className="settings-action-title">⤺ Beginning of turn {turn}</span>
-              </button>
-              <button disabled={turn <= 1} onClick={() => setConfirmUndoTarget("previous-turn")}>
-                <span className="settings-action-title">
-                  ⤺ Beginning of {turn > 1 ? `turn ${turn - 1}` : "previous turn"}
-                </span>
-              </button>
+                <input
+                  type="checkbox"
+                  role="switch"
+                  checked={!lessGuidance}
+                  onChange={(event) => onLessGuidanceChange(!event.target.checked)}
+                />
+                <span className="switch-track" aria-hidden="true" />
+              </label>
             </div>
-            {confirmUndoTarget ? (
-              <div className="settings-confirm settings-confirm-block" role="alert">
-                <span>
-                  Restore the beginning of turn {confirmUndoTarget === "current-turn" ? turn : turn - 1}?
-                  Later actions will be discarded.
+          </section>
+          <section className="settings-section settings-presentation">
+            <h3 className="settings-heading">Audio &amp; Visuals</h3>
+            <div className="settings-control-list">
+              <div className="settings-control-row settings-motion-row">
+                <span className="settings-control-name">
+                  Animations
+                  <span
+                    className="settings-info-tooltip"
+                    data-tooltip="Default follows your operating system's reduced-motion setting."
+                    aria-hidden="true"
+                  >
+                    i
+                  </span>
                 </span>
-                <div className="settings-options">
-                  <button className="btn-primary" onClick={() => { onUndo(confirmUndoTarget); close(); }}>
-                    Restore turn
-                  </button>
-                  <button onClick={() => setConfirmUndoTarget(null)}>Cancel</button>
+                <div
+                  className="settings-segmented settings-motion-segmented"
+                  role="group"
+                  aria-label="Animation preference"
+                >
+                  {MOTION_PREFERENCES.map((preference) => (
+                    <button
+                      key={preference}
+                      type="button"
+                      className={motionPreference === preference ? "settings-selected" : ""}
+                      aria-pressed={motionPreference === preference}
+                      aria-label={MOTION_PREFERENCE_DESCRIPTION[preference]}
+                      onClick={() => onMotionPreferenceChange(preference)}
+                    >
+                      {MOTION_PREFERENCE_LABEL[preference]}
+                    </button>
+                  ))}
                 </div>
               </div>
-            ) : null}
-          </section>
-        ) : null}
-        {onConcede ? (
-          <section className="settings-section settings-danger">
-            <h3 className="settings-heading">Danger zone</h3>
-            {confirmConcede ? (
-              <div className="settings-confirm">
-                <span>Concede the game?</span>
-                <button className="btn-primary" onClick={() => { onConcede(); close(); }}>
-                  Yes, concede
-                </button>
-                <button onClick={() => setConfirmConcede(false)}>Cancel</button>
+              <div className="settings-control-row">
+                <span className="settings-control-name">
+                  Playable cards
+                  <span
+                    className="settings-info-tooltip"
+                    data-tooltip="Glow adds a restrained green halo. High contrast uses a crisp outline."
+                    aria-hidden="true"
+                  >
+                    i
+                  </span>
+                </span>
+                <div className="settings-segmented" role="group" aria-label="Playable card cue">
+                  <button
+                    type="button"
+                    className={playabilityCuePreference === "glow" ? "settings-selected" : ""}
+                    aria-pressed={playabilityCuePreference === "glow"}
+                    onClick={() => onPlayabilityCuePreferenceChange("glow")}
+                  >
+                    Glow
+                  </button>
+                  <button
+                    type="button"
+                    className={playabilityCuePreference === "high-contrast" ? "settings-selected" : ""}
+                    aria-pressed={playabilityCuePreference === "high-contrast"}
+                    onClick={() => onPlayabilityCuePreferenceChange("high-contrast")}
+                  >
+                    High contrast
+                  </button>
+                </div>
               </div>
-            ) : (
-              <button className="settings-danger-button" onClick={() => setConfirmConcede(true)}>
-                Concede game
-              </button>
-            )}
+              <label className="toggle-switch settings-control-row">
+                <span className="settings-control-name">
+                  Sound effects
+                  <span
+                    className="settings-info-tooltip"
+                    data-tooltip="Plays subtle sounds when cards are drawn, shuffled, or played."
+                    aria-hidden="true"
+                  >
+                    i
+                  </span>
+                </span>
+                <input
+                  type="checkbox"
+                  role="switch"
+                  aria-label="Sound effects"
+                  checked={soundEffectsEnabled}
+                  onChange={(event) => onSoundEffectsEnabledChange(event.target.checked)}
+                />
+                <span className="switch-track" aria-hidden="true" />
+              </label>
+              <label className="settings-control-row settings-volume-row">
+                <span className="settings-control-name">Volume</span>
+                <span className="settings-volume-control">
+                  <input
+                    id="sound-effects-volume"
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="5"
+                    value={soundEffectsVolume}
+                    disabled={!soundEffectsEnabled}
+                    aria-label="Sound effects volume"
+                    onChange={(event) => onSoundEffectsVolumeChange(Number(event.target.value))}
+                  />
+                  <output htmlFor="sound-effects-volume">{soundEffectsVolume}%</output>
+                </span>
+              </label>
+            </div>
           </section>
-        ) : null}
+          {onUndo ? (
+            <section className="settings-section">
+              <h3 className="settings-heading">Game History</h3>
+              <div className="settings-action-list">
+                <button onClick={() => { onUndo("last-action"); close(); }}>
+                  <span className="settings-action-title">⤺ Undo last action</span>
+                </button>
+                <button onClick={() => setConfirmUndoTarget("current-turn")}>
+                  <span className="settings-action-title">⤺ Beginning of turn {turn}</span>
+                </button>
+                <button disabled={turn <= 1} onClick={() => setConfirmUndoTarget("previous-turn")}>
+                  <span className="settings-action-title">
+                    ⤺ Beginning of {turn > 1 ? `turn ${turn - 1}` : "previous turn"}
+                  </span>
+                </button>
+              </div>
+              {confirmUndoTarget ? (
+                <div className="settings-confirm settings-confirm-block" role="alert">
+                  <span>
+                    Restore the beginning of turn {confirmUndoTarget === "current-turn" ? turn : turn - 1}?
+                    Later actions will be discarded.
+                  </span>
+                  <div className="settings-options">
+                    <button className="btn-primary" onClick={() => { onUndo(confirmUndoTarget); close(); }}>
+                      Restore turn
+                    </button>
+                    <button onClick={() => setConfirmUndoTarget(null)}>Cancel</button>
+                  </div>
+                </div>
+              ) : null}
+            </section>
+          ) : null}
+          {onConcede ? (
+            <section className="settings-section settings-danger">
+              <h3 className="settings-heading">Danger Zone</h3>
+              {confirmConcede ? (
+                <div className="settings-confirm">
+                  <span>Concede the game?</span>
+                  <button className="btn-primary" onClick={() => { onConcede(); close(); }}>
+                    Yes, concede
+                  </button>
+                  <button onClick={() => setConfirmConcede(false)}>Cancel</button>
+                </div>
+              ) : (
+                <button className="settings-danger-button" onClick={() => setConfirmConcede(true)}>
+                  Concede game
+                </button>
+              )}
+            </section>
+          ) : null}
+        </div>
       </div>
     </div>
   );

@@ -4,11 +4,11 @@ import { describe, expect, it, vi } from "vitest";
 import { GameSettingsDialog } from "./SideRailDialogs.js";
 
 describe("game settings dialog", () => {
-  it("offers default, full, and reduced animation preferences", () => {
+  it("groups game settings into clear responsive sections", () => {
     const html = renderToStaticMarkup(createElement(GameSettingsDialog, {
       turn: 1,
-      onUndo: null,
-      onConcede: null,
+      onUndo: vi.fn(),
+      onConcede: vi.fn(),
       priorityWindowMode: "always-pause",
       onPriorityWindowModeChange: null,
       lessGuidance: false,
@@ -27,6 +27,12 @@ describe("game settings dialog", () => {
     }));
 
     expect(html).toContain('aria-label="Animation preference"');
+    expect(html).toContain('class="settings-grid"');
+    expect(html.match(/class="settings-section/g)).toHaveLength(4);
+    expect(html).toContain(">Gameplay</h3>");
+    expect(html).toContain(">Audio &amp; Visuals</h3>");
+    expect(html).toContain(">Game History</h3>");
+    expect(html).toContain(">Danger Zone</h3>");
     expect(html).toContain('class="settings-control-row settings-motion-row"');
     expect(html).toContain(">Default</button>");
     expect(html).toContain(">Full</button>");
