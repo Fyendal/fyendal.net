@@ -20,7 +20,8 @@ export function initialStoreProjection(
     viewUpdate: { sequence: 0, source: "restore" as const, transition: "replace" as const },
     legal: [],
     actionCandidates: [],
-    pendingCardPlay: null,
+    pendingInteraction: null,
+    pendingDefenderStageIds: null,
     lastActionAt: null,
     replayFrames: 0,
     replayViews: null,
@@ -71,7 +72,8 @@ export function clearedRoomProjection(): Pick<
   | "viewUpdate"
   | "legal"
   | "actionCandidates"
-  | "pendingCardPlay"
+  | "pendingInteraction"
+  | "pendingDefenderStageIds"
   | "lastActionAt"
   | "opponentConnected"
   | "latestEmote"
@@ -101,7 +103,8 @@ export function clearedRoomProjection(): Pick<
     viewUpdate: { sequence: 0, source: "restore", transition: "replace" },
     legal: [],
     actionCandidates: [],
-    pendingCardPlay: null,
+    pendingInteraction: null,
+    pendingDefenderStageIds: null,
     lastActionAt: null,
     opponentConnected: true,
     latestEmote: null,

@@ -1033,7 +1033,7 @@ describe("client connection and account race fences", () => {
       instanceId: 10,
       pitchInstanceIds: [],
     })).toBe(true);
-    expect(useStore.getState().pendingCardPlay).toEqual({
+    expect(useStore.getState().pendingInteraction).toEqual({
       commandId: expect.any(String),
       expectedVersion: 2,
       intent: { kind: "play-card", instanceId: 10, pitchInstanceIds: [] },
@@ -1042,7 +1042,7 @@ describe("client connection and account race fences", () => {
     const acknowledgementProjections: { pending: boolean; handCount: number }[] = [];
     const unsubscribe = useStore.subscribe((state) => {
       acknowledgementProjections.push({
-        pending: state.pendingCardPlay !== null,
+        pending: state.pendingInteraction !== null,
         handCount: state.view?.players[0]?.handCount ?? -1,
       });
     });
@@ -1061,7 +1061,7 @@ describe("client connection and account race fences", () => {
     });
 
     unsubscribe();
-    expect(useStore.getState().pendingCardPlay).toBeNull();
+    expect(useStore.getState().pendingInteraction).toBeNull();
     expect(acknowledgementProjections).toEqual([{ pending: false, handCount: 0 }]);
     useStore.getState().leave();
   });
@@ -1084,6 +1084,52 @@ describe("client connection and account race fences", () => {
       expect.objectContaining({ type: "runechant-skip", enabled: false, expectedVersion: 2 }),
       expect.objectContaining({ type: "intent", intent: { kind: "pass" }, expectedVersion: 2 }),
     ]);
+    useStore.getState().leave();
+  });
+
+  it("tracks activation and arsenal interactions until authoritative acknowledgement", async () => {
+    const { useStore } = await import("../store.js");
+    useStore.getState().joinRoom("AAAAAA");
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    socket.message({ type: "joined", code: "AAAAAA", seat: 0, token: "seat-token", version: 1 });
+    socket.message({ ...staleState, version: 2 });
+
+    const activation = {
+      kind: "activate-ability" as const,
+      sourceInstanceId: 20,
+      pitchInstanceIds: [11],
+    };
+    expect(useStore.getState().sendIntent(activation)).toBe(true);
+    expect(useStore.getState().pendingInteraction?.intent).toEqual(activation);
+
+    socket.message({ type: "error", code: "INVALID_MESSAGE", message: "cannot activate" });
+    expect(useStore.getState().pendingInteraction).toBeNull();
+
+    const arsenalState = {
+      ...staleState,
+      version: 3,
+      view: {
+        ...staleState.view,
+        pendingDecision: {
+          player: 0,
+          kind: "arsenal" as const,
+          prompt: "Choose arsenal",
+          options: ["11"],
+        },
+      },
+    };
+    socket.message(arsenalState);
+    const choice = { kind: "choose" as const, optionId: "11" };
+    expect(useStore.getState().sendIntent(choice)).toBe(true);
+    expect(useStore.getState().pendingInteraction?.intent).toEqual(choice);
+
+    socket.message({
+      ...arsenalState,
+      version: 4,
+      view: { ...arsenalState.view, pendingDecision: null },
+    });
+    expect(useStore.getState().pendingInteraction).toBeNull();
     useStore.getState().leave();
   });
 
@@ -1121,9 +1167,9 @@ describe("client connection and account race fences", () => {
     socket.sent = [];
 
     useStore.getState().sendIntent({ kind: "stage-defenders", instanceIds: [11] });
-    // The board still renders the last authoritative [] set at this point, so
-    // its second click asks for [12]. The store must preserve the pending 11.
-    useStore.getState().sendIntent({ kind: "stage-defenders", instanceIds: [12] });
+    expect(useStore.getState().pendingDefenderStageIds).toEqual([11]);
+    useStore.getState().sendIntent({ kind: "stage-defenders", instanceIds: [11, 12] });
+    expect(useStore.getState().pendingDefenderStageIds).toEqual([11, 12]);
 
     expect(socket.sent.map((value) => JSON.parse(value))).toEqual([
       expect.objectContaining({
@@ -1152,6 +1198,60 @@ describe("client connection and account race fences", () => {
       intent: { kind: "stage-defenders", instanceIds: [11, 12] },
       expectedVersion: 3,
     }));
+    expect(useStore.getState().pendingDefenderStageIds).toEqual([11, 12]);
+
+    socket.message({
+      ...defendState,
+      version: 4,
+      view: {
+        ...defendState.view,
+        pendingDecision: {
+          ...defendState.view.pendingDecision,
+          stagedCards: [defenderA, defenderB],
+          stagedDefense: 6,
+        },
+      },
+    });
+
+    expect(useStore.getState().pendingDefenderStageIds).toBeNull();
+    useStore.getState().leave();
+  });
+
+  it("updates and rolls back the optimistic defender presentation immediately", async () => {
+    const { useStore } = await import("../store.js");
+    useStore.getState().joinRoom("AAAAAA");
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    socket.message({ type: "joined", code: "AAAAAA", seat: 0, token: "seat-token", version: 1 });
+    const defender = { instanceId: 11, cardId: "TST011", owner: 0 };
+    socket.message({
+      ...staleState,
+      version: 2,
+      view: {
+        ...staleState.view,
+        players: [
+          { ...staleState.view.players[0], hand: [defender], handCount: 1 },
+          staleState.view.players[1],
+        ],
+        pendingDecision: {
+          player: 0,
+          kind: "defend",
+          prompt: "Choose defenders",
+          stagedCards: [],
+          stagedDefense: 0,
+        },
+      },
+      legal: [{ kind: "stage-defenders", instanceIds: [11] }],
+    });
+
+    useStore.getState().sendIntent({ kind: "stage-defenders", instanceIds: [11] });
+    expect(useStore.getState().pendingDefenderStageIds).toEqual([11]);
+
+    useStore.getState().sendIntent({ kind: "stage-defenders", instanceIds: [] });
+    expect(useStore.getState().pendingDefenderStageIds).toEqual([]);
+
+    socket.message({ type: "error", code: "INVALID_MESSAGE", message: "cannot stage defender" });
+    expect(useStore.getState().pendingDefenderStageIds).toBeNull();
     useStore.getState().leave();
   });
 

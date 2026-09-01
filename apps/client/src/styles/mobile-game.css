@@ -276,6 +276,18 @@
   .board::before { inset: 0; }
   .board > .player-nameplate { display: none; }
 
+  /* Frame the playable viewport, not the fixed mobile controls. Keeping the
+     arrival flash on its own element also leaves the portrait hand scrim's
+     table pseudo-element independent. */
+  .has-own-priority .board::after,
+  .own-priority-arrival {
+    inset:
+      env(safe-area-inset-top)
+      env(safe-area-inset-right)
+      64px
+      env(safe-area-inset-left);
+  }
+
   .mat-half {
     flex: 0 0 230px;
     min-height: 230px;

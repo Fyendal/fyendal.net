@@ -56,8 +56,7 @@
   pointer-events: none;
   animation: own-priority-breathe 3.6s ease-in-out infinite;
 }
-.has-own-priority::after {
-  content: "";
+.own-priority-arrival {
   position: fixed;
   z-index: var(--game-z-prompt);
   inset: 0 var(--rail-w) 0 0;
@@ -84,13 +83,13 @@
     animation: none;
     opacity: .38;
   }
-  .has-own-priority::after { animation: none; }
+  .own-priority-arrival { animation: none; }
 }
 .table[data-motion-preference="reduced"].has-own-priority .board::after {
   animation: none;
   opacity: .38;
 }
-.table[data-motion-preference="reduced"].has-own-priority::after {
+.table[data-motion-preference="reduced"] .own-priority-arrival {
   animation: none;
 }
 

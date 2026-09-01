@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PlayerView } from "@fyendal/shared";
-import { optimisticCardPlayHiddenIds } from "./pendingCardPlay.js";
+import { optimisticInteractionHiddenIds } from "./pendingInteraction.js";
 
 const player: PlayerView = {
   seat: 0,
@@ -29,9 +29,9 @@ const player: PlayerView = {
   board: [],
 };
 
-describe("pending card play presentation", () => {
+describe("pending interaction presentation", () => {
   it("moves the source to the pending slot and hides all declared costs", () => {
-    const result = optimisticCardPlayHiddenIds({
+    const result = optimisticInteractionHiddenIds({
       kind: "play-card",
       instanceId: 10,
       pitchInstanceIds: [11],
@@ -42,13 +42,13 @@ describe("pending card play presentation", () => {
   });
 
   it("finds plays from public zones and a visible deck top", () => {
-    expect(optimisticCardPlayHiddenIds({
+    expect(optimisticInteractionHiddenIds({
       kind: "play-from-zone",
       zone: "graveyard",
       instanceId: 30,
       pitchInstanceIds: [],
     }, player)).toEqual(new Set([30]));
-    expect(optimisticCardPlayHiddenIds({
+    expect(optimisticInteractionHiddenIds({
       kind: "play-from-zone",
       zone: "deck",
       instanceId: 50,
@@ -57,10 +57,28 @@ describe("pending card play presentation", () => {
   });
 
   it("does not fabricate a pending card that is absent from the current view", () => {
-    expect(optimisticCardPlayHiddenIds({
+    expect(optimisticInteractionHiddenIds({
       kind: "play-from-arsenal",
       instanceId: 99,
       pitchInstanceIds: [],
     }, player)).toBeNull();
+  });
+
+  it("still hides declared payment when a played source belongs to another zone owner", () => {
+    expect(optimisticInteractionHiddenIds({
+      kind: "play-from-arsenal",
+      instanceId: 99,
+      pitchInstanceIds: [11],
+      alternativeCostCardInstanceIds: [12],
+    }, player)).toEqual(new Set([11, 12]));
+  });
+
+  it("hides activation payment without hiding the source permanent", () => {
+    expect(optimisticInteractionHiddenIds({
+      kind: "activate-ability",
+      sourceInstanceId: 1,
+      pitchInstanceIds: [11],
+      alternativeCostCardInstanceIds: [12],
+    }, player)).toEqual(new Set([11, 12]));
   });
 });
