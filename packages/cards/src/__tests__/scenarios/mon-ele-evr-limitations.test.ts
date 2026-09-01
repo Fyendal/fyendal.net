@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { legalIntents } from "@fyendal/engine";
+import { legalIntents, projectStateFor } from "@fyendal/engine";
 import { printingId, scenario } from "../harness.js";
 import { cardData } from "../../index.js";
 
@@ -195,6 +195,9 @@ describe("Monarch, Tales of Aria, and Everfest rules regression coverage", () =>
     const bodyId = g.state.players[0]!.weapons.find(
       (weapon) => cardData[weapon.cardId]?.name === "Hatchet of Body",
     )!.instanceId;
+    const bloodId = g.state.players[0]!.hand.find(
+      (card) => cardData[card.cardId]?.name === "Blood on Her Hands",
+    )!.instanceId;
 
     g.play("blood on her hands|2");
     expect(g.state.pendingDecision?.prompt).toBe("How many Copper do you want to destroy?");
@@ -202,12 +205,14 @@ describe("Monarch, Tales of Aria, and Everfest rules regression coverage", () =>
     expect(g.state.pendingDecision?.cardOptions).toBeUndefined();
     expect(g.state.stack).toHaveLength(0);
     expect(g.state.players[0]!.hand.some((card) => cardData[card.cardId]?.name === "Blood on Her Hands")).toBe(false);
+    expect(projectStateFor(g.state, 0).pendingDecision?.preStackSource?.card.instanceId).toBe(bloodId);
 
     g.chooseOption("2");
     expect(g.state.players[0]!.board.filter((card) => cardData[card.cardId]?.name === "Copper")).toHaveLength(0);
     expect(g.state.pendingDecision?.prompt).toBe("Assign 2 Blood on Her Hands modes");
     expect(g.state.stack).toHaveLength(0);
     expect(g.state.resolving.some((card) => cardData[card.cardId]?.name === "Blood on Her Hands")).toBe(true);
+    expect(projectStateFor(g.state, 0).pendingDecision?.preStackSource?.card.instanceId).toBe(bloodId);
     expect(legalIntents(g.state, 0).some((intent) => intent.kind === "pass")).toBe(false);
 
     g.chooseOption(`increment:power:${bodyId}`);
@@ -216,6 +221,7 @@ describe("Monarch, Tales of Aria, and Everfest rules regression coverage", () =>
     g.doRaw({ kind: "choose", optionId: incompleteConfirm! });
     expect(g.state.pendingDecision?.prompt).toBe("Assign 2 Blood on Her Hands modes");
     expect(g.state.stack).toHaveLength(0);
+    expect(projectStateFor(g.state, 0).pendingDecision?.preStackSource?.card.instanceId).toBe(bloodId);
     expect(legalIntents(g.state, 0).some((intent) => intent.kind === "pass")).toBe(false);
 
     g.chooseOption(`decrement:power:${bodyId}`)
@@ -223,6 +229,7 @@ describe("Monarch, Tales of Aria, and Everfest rules regression coverage", () =>
       .chooseOption(`increment:go-again:${bodyId}`);
     expect(g.state.stack).toHaveLength(0);
     expect(g.state.pendingDecision?.kind).toBe("choose-target");
+    expect(projectStateFor(g.state, 0).pendingDecision?.preStackSource?.card.instanceId).toBe(bloodId);
     expect(legalIntents(g.state, 0).some((intent) => intent.kind === "pass")).toBe(false);
 
     const confirm = g.state.pendingDecision?.options?.find((option) => option.includes("confirm:2:2"));

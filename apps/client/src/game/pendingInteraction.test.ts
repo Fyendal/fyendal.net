@@ -41,6 +41,15 @@ describe("pending interaction presentation", () => {
     expect([...result!]).toEqual([10, 11, 12]);
   });
 
+  it("keeps a pre-stack play and its costs visible until the choice resolves", () => {
+    expect(optimisticInteractionHiddenIds({
+      kind: "play-card",
+      instanceId: 10,
+      pitchInstanceIds: [11],
+      deferPlayPresentation: true,
+    }, player)).toBeNull();
+  });
+
   it("finds plays from public zones and a visible deck top", () => {
     expect(optimisticInteractionHiddenIds({
       kind: "play-from-zone",

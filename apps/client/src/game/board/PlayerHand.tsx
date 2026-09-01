@@ -49,6 +49,9 @@ export interface PlayerHandInteraction {
   legalState: BoardLegalState;
   legalIntents: readonly GameIntent[];
   selection: Sel;
+  /** A play paused before the stack remains visibly selected without
+   * reopening the local action-announcement state. */
+  preStackSelectedInstanceId: number | null;
   pitchSelection: readonly number[];
   selectedPaymentVariants: Parameters<typeof canAddPitch>[0];
   resourcePayment?: ResourcePayment;
@@ -160,7 +163,8 @@ export function PlayerHand({
                 interaction.selection.kind === "choose-hand-action") &&
                 interaction.selection.instanceId === card.instanceId) ||
               (interaction.selection.kind === "activate" &&
-                interaction.selection.sourceInstanceId === card.instanceId);
+                interaction.selection.sourceInstanceId === card.instanceId) ||
+              interaction.preStackSelectedInstanceId === card.instanceId;
             const resourcePitchable = interaction.resourcePayment !== undefined && (
               interaction.pitchSelection.includes(card.instanceId) ||
               canAddResourcePaymentPitch(

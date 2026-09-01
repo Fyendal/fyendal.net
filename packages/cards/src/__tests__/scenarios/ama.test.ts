@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { legalIntents } from "@fyendal/engine";
+import { legalIntents, projectStateFor } from "@fyendal/engine";
 import { scenario } from "../harness.js";
 
 const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
@@ -246,10 +246,20 @@ describe("Malice Armory Deck spoiled cards", () => {
       },
       { hero: "dorinthea", equipment: NO_EQUIPMENT },
     ] });
+    const dig = g.state.players[0]!.hand.find((card) => card.cardId === "AMA011")!;
+    expect(legalIntents(g.state, 0)).toContainEqual(expect.objectContaining({
+      kind: "play-card",
+      instanceId: dig.instanceId,
+      deferPlayPresentation: true,
+    }));
     g.play("dig for souls|1", { settle: false });
     expect(g.state.pendingDecision?.options).toContain("X = 2");
     expect(g.state.players[0]!.hand.some((card) => card.cardId === "AMA011")).toBe(true);
     expect(g.state.stack).toHaveLength(0);
+    expect(projectStateFor(g.state, 0).pendingDecision?.preStackSource).toMatchObject({
+      card: { instanceId: dig.instanceId },
+      zone: "hand",
+    });
 
     g.chooseOption("X = 2");
     expect(g.state.pendingDecision?.resourcePayment?.cost).toBe(2);

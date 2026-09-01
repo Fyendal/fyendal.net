@@ -177,6 +177,8 @@ const forsakenStrike: CardScript = {
   onAlternativeCostPaid(ctx, paidCards) {
     ctx.setCounter("forsakenModesTotal", paidCards.length);
     ctx.setCounter("forsakenModesRemaining", paidCards.length);
+  },
+  additionalCost(ctx) {
     requestForsakenStrikeMode(ctx);
   },
   onChoose(ctx, hook, option) {

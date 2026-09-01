@@ -12,6 +12,7 @@ import type {
   GameView,
   OnHitEffectView,
   OnHitImpactView,
+  PendingDecision,
   PlayerBadge,
   PlayerView,
   PrepView,
@@ -270,17 +271,18 @@ function decodeGameIntentValue(value: unknown): value is GameIntent {
   switch (intent.kind) {
     case "play-card":
     case "play-from-arsenal":
-      return exactKeys(intent, ["kind", "instanceId", "pitchInstanceIds", "pitchRequired", "meldSide", "targetAllyId", "targetCardInstanceId", "boost", "boostCount", "asInstant", "alternativeCostCardInstanceIds", "additionalCostSelection"], ["kind", "instanceId", "pitchInstanceIds"])
+      return exactKeys(intent, ["kind", "instanceId", "pitchInstanceIds", "pitchRequired", "meldSide", "targetAllyId", "targetCardInstanceId", "boost", "boostCount", "asInstant", "alternativeCostCardInstanceIds", "additionalCostSelection", "deferPlayPresentation"], ["kind", "instanceId", "pitchInstanceIds"])
         && instanceId(intent.instanceId) && instanceIds(intent.pitchInstanceIds)
         && optional(intent.pitchRequired, nonNegativeInteger)
         && meld(intent.meldSide) && target(intent.targetAllyId) && target(intent.targetCardInstanceId)
         && presenceFlag(intent.boost) && boostCount(intent.boostCount)
         && (intent.boostCount === undefined || intent.boost === true)
         && presenceFlag(intent.asInstant)
+        && presenceFlag(intent.deferPlayPresentation)
         && optional(intent.alternativeCostCardInstanceIds, instanceIds)
         && additionalCostSelection(intent.additionalCostSelection);
     case "play-from-zone":
-      return exactKeys(intent, ["kind", "zone", "instanceId", "pitchInstanceIds", "pitchRequired", "meldSide", "targetAllyId", "targetCardInstanceId", "boost", "boostCount", "asInstant", "alternativeCostCardInstanceIds", "additionalCostSelection"], ["kind", "zone", "instanceId", "pitchInstanceIds"])
+      return exactKeys(intent, ["kind", "zone", "instanceId", "pitchInstanceIds", "pitchRequired", "meldSide", "targetAllyId", "targetCardInstanceId", "boost", "boostCount", "asInstant", "alternativeCostCardInstanceIds", "additionalCostSelection", "deferPlayPresentation"], ["kind", "zone", "instanceId", "pitchInstanceIds"])
         && PLAYABLE_ZONES.has(String(intent.zone)) && instanceId(intent.instanceId)
         && instanceIds(intent.pitchInstanceIds) && optional(intent.pitchRequired, nonNegativeInteger)
         && meld(intent.meldSide)
@@ -288,6 +290,7 @@ function decodeGameIntentValue(value: unknown): value is GameIntent {
         && presenceFlag(intent.boost) && boostCount(intent.boostCount)
         && (intent.boostCount === undefined || intent.boost === true)
         && presenceFlag(intent.asInstant)
+        && presenceFlag(intent.deferPlayPresentation)
         && optional(intent.alternativeCostCardInstanceIds, instanceIds)
         && additionalCostSelection(intent.additionalCostSelection);
     case "activate-ability":
@@ -650,7 +653,7 @@ function pendingDecision(value: unknown): boolean {
   const decision = object(value);
   return !!decision && exactKeys(decision, [
     "player", "kind", "prompt", "options", "defaultOption", "optionLabels", "optionCounts", "optionCards", "revealedCards", "lookedCards", "stagedCards", "stagedDefense",
-    "resourcePayment",
+    "resourcePayment", "preStackSource",
   ], ["player", "kind", "prompt"])
     && seat(decision.player) && DECISION_KINDS.has(String(decision.kind))
     && string(decision.prompt, MAX_TEXT)
@@ -681,6 +684,12 @@ function pendingDecision(value: unknown): boolean {
             && string(option.optionId, MAX_SHORT_TEXT, false)
             && instanceIds(option.pitchInstanceIds);
         }, MAX_CARDS);
+    })
+    && optional(decision.preStackSource, (value): value is PendingDecision["preStackSource"] => {
+      const source = object(value);
+      return !!source && exactKeys(source, ["card", "zone"], ["card", "zone"])
+        && cardView(source.card)
+        && (source.zone === "hand" || source.zone === "arsenal" || PLAYABLE_ZONES.has(String(source.zone)));
     })
     && (!(Array.isArray(decision.options) && Array.isArray(decision.optionCards))
       || decision.options.length === decision.optionCards.length)

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyIntent, legalIntents } from "@fyendal/engine";
+import { applyIntent, legalIntents, projectStateFor } from "@fyendal/engine";
 import { printingId, scenario, type Scenario } from "../harness.js";
 
 /**
@@ -48,9 +48,22 @@ describe("WTR generic — attacks", () => {
       ],
     });
 
+    const enlightenedStrike = g.state.players[0]!.hand.find(
+      (card) => card.cardId === printingId("enlightened strike|1"),
+    )!;
+    expect(legalIntents(g.state, 0)).toContainEqual(expect.objectContaining({
+      kind: "play-card",
+      instanceId: enlightenedStrike.instanceId,
+      deferPlayPresentation: true,
+    }));
+
     g.play("enlightened strike|1").chooseCard("raging onslaught|2");
     const modeSnapshot = g.state;
     expect(modeSnapshot.pendingDecision?.chooseHook).toBe("estrike-mode");
+    expect(projectStateFor(modeSnapshot, 0).pendingDecision?.preStackSource).toMatchObject({
+      card: { instanceId: enlightenedStrike.instanceId },
+      zone: "hand",
+    });
     expect(modeSnapshot.chain).toHaveLength(0);
     expect(legalIntents(modeSnapshot, 0).some((intent) => intent.kind === "pass")).toBe(false);
 

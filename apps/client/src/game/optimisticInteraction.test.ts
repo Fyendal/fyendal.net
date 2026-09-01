@@ -85,6 +85,41 @@ describe("optimistic interaction projection", () => {
     ]));
   });
 
+  it("keeps a play with a pre-stack choice selected in hand", () => {
+    const announced: CardView = { instanceId: 12, cardId: "WTR170", owner: 0 };
+    const view = game(player(0, { hand: [announced], handCount: 1 }));
+
+    const projection = optimisticInteractionView(view, 0, pending({
+      kind: "play-card",
+      instanceId: 12,
+      pitchInstanceIds: [],
+      deferPlayPresentation: true,
+    }));
+
+    expect(projection.view).toBe(view);
+    expect(projection.predictsSemanticTransition).toBe(false);
+    expect(projection.view?.players[0]?.hand).toEqual([announced]);
+    expect(projection.view?.stack).toEqual([]);
+    expect(detectGameMotionEvents(view, projection.view!)).toEqual([]);
+  });
+
+  it("presents a resolving pre-stack source in hand until its choice completes", () => {
+    const announced: CardView = { instanceId: 13, cardId: "WTR170", owner: 0 };
+    const view = game(player(0), {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Choose a mode",
+      options: ["first", "second"],
+      preStackSource: { card: announced, zone: "hand" },
+    });
+
+    const projection = optimisticInteractionView(view, 0, null);
+
+    expect(projection.view?.players[0]?.hand).toEqual([announced]);
+    expect(projection.view?.players[0]?.handCount).toBe(1);
+    expect(projection.key).toBe("interaction:pre-stack:13");
+  });
+
   it("connects an activated source to a pending layer and moves its pitch", () => {
     const weapon: CardView = {
       instanceId: 20,

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { legalIntents, projectStateFor } from "@fyendal/engine";
 import { cardData, isImplemented } from "../../index.js";
 import { scenario } from "../harness.js";
 
@@ -933,6 +934,14 @@ describe("IAR spoiled cards", () => {
       },
       { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
     ] });
+    const strikeId = g.state.players[0]!.hand.find(
+      (card) => cardData[card.cardId]?.name === "Forsaken Strike",
+    )!.instanceId;
+    expect(legalIntents(g.state, 0)).toContainEqual(expect.objectContaining({
+      kind: "play-card",
+      instanceId: strikeId,
+      deferPlayPresentation: true,
+    }));
 
     g.play("forsaken strike|2", {
       settle: false,
@@ -950,10 +959,22 @@ describe("IAR spoiled cards", () => {
         "Give Forsaken Strike go again",
       ],
     });
-    g.chooseOption("Create a Gate to i'Arathael")
-      .chooseOption("Give Forsaken Strike +2 power")
-      .chooseOption("Give Forsaken Strike go again")
-      .blockWith()
+    expect(g.state.stack).toHaveLength(0);
+    expect(projectStateFor(g.state, 0).pendingDecision?.preStackSource?.card.instanceId).toBe(strikeId);
+
+    g.chooseOption("Create a Gate to i'Arathael");
+    expect(g.state.pendingDecision?.prompt).toBe("Forsaken Strike: choose effect 2 of 3");
+    expect(g.state.stack).toHaveLength(0);
+    expect(projectStateFor(g.state, 0).pendingDecision?.preStackSource?.card.instanceId).toBe(strikeId);
+
+    g.chooseOption("Give Forsaken Strike +2 power");
+    expect(g.state.pendingDecision?.prompt).toBe("Forsaken Strike: choose effect 3 of 3");
+    expect(g.state.stack).toHaveLength(0);
+    expect(projectStateFor(g.state, 0).pendingDecision?.preStackSource?.card.instanceId).toBe(strikeId);
+
+    g.chooseOption("Give Forsaken Strike go again");
+    expect(projectStateFor(g.state, 0).pendingDecision?.preStackSource).toBeUndefined();
+    g.blockWith()
       .settle()
       .expectLife(1, 15)
       .expectAP(0, 1)

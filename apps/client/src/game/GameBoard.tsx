@@ -330,6 +330,18 @@ export function GameBoard() {
   );
   const pd = presentedView.pendingDecision;
   const myDecision = !spectating && pd !== null && pd.player === seat;
+  const pendingPreStackPlayId = (() => {
+    const intent = !spectating && !replaying ? pendingInteraction?.intent : undefined;
+    return intent && (
+      intent.kind === "play-card" ||
+      intent.kind === "play-from-arsenal" ||
+      intent.kind === "play-from-zone"
+    ) && intent.deferPlayPresentation
+      ? intent.instanceId
+      : null;
+  })();
+  const preStackSelectedInstanceId = pendingPreStackPlayId
+    ?? (myDecision ? (pd.preStackSource?.card.instanceId ?? null) : null);
   const resourcePayment = myDecision ? pd.resourcePayment : undefined;
   const resourcePaymentSelected = resourcePayment
     ? pitchSel.reduce((total, instanceId) => {
@@ -775,6 +787,7 @@ export function GameBoard() {
   const playerHalfInteraction = {
     legal: derived,
     selection: sel,
+    preStackSelectedInstanceId,
     stagedIds,
     committedDefenderIds,
     optimisticallyHiddenIds,
@@ -891,6 +904,7 @@ export function GameBoard() {
             legalState: derived,
             legalIntents: legal,
             selection: sel,
+            preStackSelectedInstanceId,
             pitchSelection: pitchSel,
             selectedPaymentVariants:
               stagedAdditionalCostDefinition && !additionalCostConfirmed

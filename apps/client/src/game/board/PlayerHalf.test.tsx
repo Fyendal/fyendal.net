@@ -55,6 +55,7 @@ function renderPlayerHalf(
           canCloseChain: false,
         },
         selection: { kind: "none" },
+        preStackSelectedInstanceId: null,
         stagedIds: new Set(),
         committedDefenderIds: new Set(),
         optimisticallyHiddenIds: new Set(),
