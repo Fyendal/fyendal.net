@@ -16,6 +16,7 @@ import type {
 import type { CardInstance, CombatValueModifier, Modifier, PlayerState } from "./state.js";
 import { cardColorOf, dataOf, instanceDataOf, scriptOf } from "./cardProperties.js";
 import { pendingOnHitEffects } from "./hits.js";
+import { conditionalModifierGrantsGoAgain } from "./combatModifiers.js";
 import {
   attackHasDominate,
   attackHasOverpower,
@@ -270,6 +271,9 @@ function modifierEffectLabel(state: GameStateInternal, m: Modifier): string {
   if (m.grantKeyword) parts.push(m.grantKeyword.toLowerCase());
   if (m.goAgain) parts.push("go again");
   if (m.onHitGoAgain) parts.push("go again on hit");
+  if (m.goAgainIfPlayedOrCreatedSubtype) {
+    parts.push(`go again if a ${m.goAgainIfPlayedOrCreatedSubtype} was played or created`);
+  }
   if (m.onHitGainLife) parts.push(`gain ${m.onHitGainLife} life on next hit`);
   if (m.onHitDraw) parts.push(`draw ${m.onHitDraw} on next hit`);
   if (m.onHitDestroyTopDeckCards) {
@@ -951,7 +955,7 @@ function projectState(
       hit: link.hit,
       // Go again persists on the link; granted defense-restriction keywords
       // are snapshotted before chain-link modifiers expire.
-      goAgain: link.goAgain,
+      goAgain: link.goAgain || conditionalModifierGrantsGoAgain(state, link),
       wagered: link.flags.wagered === true,
       ...(link.wagerRewards?.length ? { wagerRewards: [...link.wagerRewards] } : {}),
       dominate: link.resolved

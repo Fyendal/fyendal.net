@@ -173,6 +173,74 @@ describe("ROS — Earth heroes and Decompose", () => {
 });
 
 describe("ROS — Lightning and Runeblade", () => {
+  it("Spellbound Creepers and Machinations stack their action points and give the next Runeblade attack go again", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 4,
+          equipment: { legs: "spellbound creepers|0" },
+          hand: [
+            "sigil of silphidae|3",
+            "head jab|1",
+            "machinations of dominion|3",
+            "deathly wail|1",
+          ],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+
+    g.play("sigil of silphidae|3")
+      .play("head jab|1")
+      .blockWith()
+      .settle()
+      .expectAP(0, 1)
+      .activate("spellbound creepers|0")
+      .play("machinations of dominion|3", { asInstant: true })
+      .expectAP(0, 2)
+      .play("deathly wail|1")
+      .expectAP(0, 1);
+
+    expect(projectStateFor(g.state, 0).chain.at(-1)).toMatchObject({
+      goAgain: true,
+      overpower: true,
+    });
+
+    g.blockWith().settle().expectAP(0, 2);
+  });
+
+  it("Machinations grants go again when an aura is created after attack declaration", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 3,
+          hand: [
+            "machinations of dominion|3",
+            "deathly wail|1",
+            "haunting rendition|1",
+          ],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+
+    g.play("machinations of dominion|3")
+      .play("deathly wail|1")
+      .expectAP(0, 0);
+    expect(projectStateFor(g.state, 0).chain.at(-1)).toMatchObject({
+      goAgain: false,
+      overpower: true,
+    });
+
+    g.blockWith()
+      .activate("haunting rendition|1");
+    expect(projectStateFor(g.state, 0).chain.at(-1)?.goAgain).toBe(true);
+
+    g.settle().expectAP(0, 1);
+  });
+
   it("Lightning Greaves grants an action point when an instant resolves", () => {
     const g = scenario({
       seats: [

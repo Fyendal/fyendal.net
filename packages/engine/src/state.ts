@@ -499,6 +499,9 @@ export interface Modifier {
   prohibitsDefenseReactionNamesInGraveyard?: boolean;
   /** The affected attack gains go again once an attack action card defends it. */
   goAgainIfDefendedByAttackAction?: boolean;
+  /** The affected attack has go again while its controller has played or
+   * created a card with this subtype during the current turn. */
+  goAgainIfPlayedOrCreatedSubtype?: string;
   /** Granted trigger: when the affected attack is defended by one or more
    * cards, deal this much damage to the defending hero. */
   onDefendedDealDamage?: number;

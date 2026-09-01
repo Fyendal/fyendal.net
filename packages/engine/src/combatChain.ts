@@ -2,7 +2,7 @@ import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
 
 import { dataOf, hasKeyword, scriptOf } from "./cardProperties.js";
-import { activeModifiers } from "./combatModifiers.js";
+import { activeModifiers, conditionalModifierGrantsGoAgain } from "./combatModifiers.js";
 import {
   attackHasDominate,
   attackHasOverpower,
@@ -53,6 +53,9 @@ function beginLinkResolutionStep(state: GameStateInternal,
   // Aura attacks with a +1{p} counter have go again (Cosmo), evaluated at the
   // same beginning-of-Resolution-Step boundary as other go again abilities.
   if (!link.goAgain && runtime.dispatchFlow("auraAttackGoAgain", state, link)) runtime.events.grantLinkGoAgain(state, link);
+  if (!link.goAgain && conditionalModifierGrantsGoAgain(state, link)) {
+    runtime.events.grantLinkGoAgain(state, link);
+  }
   if (link.goAgain) {
     (state.players[link.attacker] as PlayerState).actionPoints += 1;
     logPublic(state, `${nameOf(state, link.attackingCard.cardId)} has Go again (+1 action point)`);
