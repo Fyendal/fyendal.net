@@ -17,6 +17,8 @@ describe("game settings dialog", () => {
       onSkipPlayConfirmationChange: vi.fn(),
       motionPreference: "reduced",
       onMotionPreferenceChange: vi.fn(),
+      playabilityCuePreference: "high-contrast",
+      onPlayabilityCuePreferenceChange: vi.fn(),
       soundEffectsEnabled: true,
       onSoundEffectsEnabledChange: vi.fn(),
       soundEffectsVolume: 35,
@@ -34,5 +36,9 @@ describe("game settings dialog", () => {
     expect(html).toContain('aria-label="Sound effects"');
     expect(html).toContain('aria-label="Sound effects volume"');
     expect(html).toContain("35%");
+    expect(html).toContain('aria-label="Playable card cue"');
+    expect(html).toContain(">Glow</button>");
+    expect(html).toContain(">High contrast</button>");
+    expect(html).toContain("Glow adds a restrained green halo");
   });
 });

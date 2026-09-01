@@ -16,6 +16,7 @@ export interface BoardPreview {
   id: string | null;
   x: number;
   y: number;
+  size?: { width: number; height: number };
   effectTooltip?: { label: string; position: HoverSurfaceLayout["tooltip"] };
 }
 
@@ -76,8 +77,8 @@ export function BoardOverlays({
           style={{
             left: preview.x,
             top: preview.y,
-            width: CARD_PREVIEW_WIDTH,
-            height: CARD_PREVIEW_HEIGHT,
+            width: preview.size?.width ?? CARD_PREVIEW_WIDTH,
+            height: preview.size?.height ?? CARD_PREVIEW_HEIGHT,
           }}
         >
           <CardFace card={{ instanceId: -999, cardId: preview.id, owner: seat }} size="preview" />

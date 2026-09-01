@@ -3,7 +3,7 @@ import { useShallow } from "zustand/react/shallow";
 import type { CardView, GameIntent, MeldSide } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import { useStore } from "../store.js";
-import { CARD_PREVIEW_HEIGHT, CARD_PREVIEW_WIDTH, CardBack, CardFace } from "./Card.js";
+import { cardPreviewSize, CardBack, CardFace } from "./Card.js";
 import { ChainFloat } from "./ChainFloat.js";
 import { EndTurnPassToast } from "./EndTurnPassToast.js";
 import { StatusFloat } from "./StatusFloat.js";
@@ -143,6 +143,7 @@ export function GameBoard() {
   const {
     lessGuidance,
     motionPreference,
+    playabilityCuePreference,
     priorityWindowMode,
     skipPlayConfirmation,
     soundEffectsEnabled,
@@ -150,6 +151,7 @@ export function GameBoard() {
     updatePriorityWindowMode,
     updateLessGuidance,
     updateMotionPreference,
+    updatePlayabilityCuePreference,
     updateSkipPlayConfirmation,
     updateSoundEffectsEnabled,
     updateSoundEffectsVolume,
@@ -711,10 +713,11 @@ export function GameBoard() {
       setPreview(null);
       return;
     }
+    const previewSize = cardPreviewSize(window.innerHeight);
     const layout = hoverSurfaceLayout(
       r,
       { width: window.innerWidth, height: window.innerHeight },
-      { width: CARD_PREVIEW_WIDTH, height: CARD_PREVIEW_HEIGHT },
+      previewSize,
       240, // keep the card preview clear of the side panel when space permits
     );
     // Contextual card explanations use the preview side; effect chips also
@@ -724,6 +727,7 @@ export function GameBoard() {
       id: cardId,
       x: layout.preview.x,
       y: layout.preview.y,
+      size: previewSize,
       ...(effectLabel
         ? { effectTooltip: { label: effectLabel, position: layout.tooltip } }
         : {}),
@@ -757,6 +761,7 @@ export function GameBoard() {
     <div
       ref={tableRef}
       className={`table${railCollapsed ? " rail-is-collapsed" : ""}${view.winner !== null ? " game-is-over" : ""}${hasActiveCombatChain ? " has-active-combat-chain" : ""}${mobileHandIsHidden ? " mobile-hand-is-hidden" : ""}`}
+      data-playability-cue={playabilityCuePreference}
       onMouseOver={onHoverCard}
       onMouseLeave={() => setPreview(null)}
       {...cardLongPressHandlers}
@@ -1075,6 +1080,8 @@ export function GameBoard() {
         onSkipPlayConfirmationChange={updateSkipPlayConfirmation}
         motionPreference={motionPreference}
         onMotionPreferenceChange={updateMotionPreference}
+        playabilityCuePreference={playabilityCuePreference}
+        onPlayabilityCuePreferenceChange={updatePlayabilityCuePreference}
         soundEffectsEnabled={soundEffectsEnabled}
         onSoundEffectsEnabledChange={updateSoundEffectsEnabled}
         soundEffectsVolume={soundEffectsVolume}

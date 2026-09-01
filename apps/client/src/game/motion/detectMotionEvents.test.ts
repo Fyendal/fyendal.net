@@ -624,6 +624,12 @@ describe("game motion detection", () => {
         },
       },
     );
+    const confirmed = view(
+      [player(0), player(1, { equipment: { arms: equipment } })],
+      {
+        chain: [{ ...chain[0]!, defendingCards: [equipment], defenseValue: 3 }],
+      },
+    );
 
     expect(detectGameMotionEvents(unstaged, staged)).toContainEqual({
       kind: "move",
@@ -636,6 +642,13 @@ describe("game motion detection", () => {
       count: 1,
       confidence: "exact",
     });
+    expect(detectGameMotionEvents(staged, confirmed)).toEqual([{
+      kind: "settle",
+      destination: { kind: "chain-defender", link: 0, index: 0 },
+      visual: { kind: "face", card: equipment },
+      instanceId: equipment.instanceId,
+      destinationPresentationKey: "chain:0:defender:0:32",
+    }]);
   });
 
   it("does not invent a hidden path for a legacy end-phase shortcut", () => {

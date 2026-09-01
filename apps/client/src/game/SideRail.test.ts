@@ -33,6 +33,8 @@ function sideRailProps(
     onSkipPlayConfirmationChange: vi.fn(),
     motionPreference: "system",
     onMotionPreferenceChange: vi.fn(),
+    playabilityCuePreference: "glow",
+    onPlayabilityCuePreferenceChange: vi.fn(),
     soundEffectsEnabled: true,
     onSoundEffectsEnabledChange: vi.fn(),
     soundEffectsVolume: 35,

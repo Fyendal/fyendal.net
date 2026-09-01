@@ -50,7 +50,8 @@ export interface MotionFlight {
     | "pitch-gather"
     | "deck-bottom"
     | "appear"
-    | "settle";
+    | "settle"
+    | "settle-reveal";
   start: MotionRect;
   end: MotionRect;
   visual: MotionVisual;
@@ -275,10 +276,13 @@ export function resolveMotionBatch(
         : cardRectWithinZone(destination.rect);
       const destinationLayer = motionLayerForDestination(event.destination);
       if (flights.length < MAX_DETAILED_FLIGHTS) {
+        const mode = event.kind === "settle" && event.visual.kind === "back-reveal"
+          ? "settle-reveal"
+          : event.kind;
         const flight: MotionFlight = {
           id: `${batchId}:flight:${flights.length}`,
           phase,
-          mode: event.kind,
+          mode,
           start: rect,
           end: rect,
           visual: event.visual,

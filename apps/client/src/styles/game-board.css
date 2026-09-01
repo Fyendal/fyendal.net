@@ -639,3 +639,52 @@
   .hand-scroll-button { display: inline-flex; align-items: center; justify-content: center; }
 }
 .mobile-hand-toggle { display: none; }
+
+/* Keep card geometry viewport-relative on large and zoomed-out desktops.
+   Fixed pixel ceilings made cards physically shrink as browser zoom reduced,
+   while leaving most of a 2K/4K playmat empty. The 546:762 ratio matches the
+   Fabrary source, preserving the full image without cropping. */
+@media (min-width: 1600px) and (min-height: 900px) {
+  .table {
+    --large-zone-card-height: min(13vh, 10.88vw);
+    --large-zone-card-width: min(9.31vh, 7.8vw);
+    --mat-zone-col: var(--large-zone-card-width);
+  }
+  .mat-half {
+    --mat-outer-col: var(--large-zone-card-width);
+    --mat-arms-col: var(--large-zone-card-width);
+    --mat-weapon-0-col: var(--large-zone-card-width);
+    --mat-hero-col: var(--large-zone-card-width);
+    --mat-weapon-1-col: var(--large-zone-card-width);
+    --mat-tapped-col: var(--large-zone-card-height);
+    grid-template-rows: repeat(3, var(--large-zone-card-height));
+  }
+  .mat-half .card-zone {
+    width: var(--large-zone-card-width);
+    height: var(--large-zone-card-height);
+  }
+  .board-card-stack-tapped {
+    width: var(--large-zone-card-height);
+    height: var(--large-zone-card-width);
+  }
+  .opp-hand {
+    height: 6.9vh;
+  }
+  .opp-hand .card-back,
+  .opp-hand-revealed .card-hand {
+    width: 9.46vh;
+    height: 13.2vh;
+  }
+  .opp-hand .card-back + .card-back,
+  .opp-hand-revealed .card-hand + .card-hand {
+    margin-left: -4.73vh;
+  }
+  .hand {
+    --hand-card-height: 27vh;
+    --hand-rest-offset: 13.5vh;
+    --hand-selected-lift: 2.4vh;
+  }
+  .hand .card-hand {
+    width: 19.35vh;
+  }
+}

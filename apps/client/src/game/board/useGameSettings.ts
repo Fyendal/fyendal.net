@@ -3,6 +3,7 @@ import {
   loadGameSettings,
   saveGameSettings,
   type MotionPreference,
+  type PlayabilityCuePreference,
   type PriorityWindowMode,
 } from "../../storage.js";
 
@@ -48,6 +49,15 @@ export function useGameSettings({
       return next;
     });
   };
+  const updatePlayabilityCuePreference = (
+    playabilityCuePreference: PlayabilityCuePreference,
+  ) => {
+    setSettings((current) => {
+      const next = { ...current, playabilityCuePreference };
+      saveGameSettings(localStorage, next);
+      return next;
+    });
+  };
   const updateSoundEffectsEnabled = (soundEffectsEnabled: boolean) => {
     setSettings((current) => {
       const next = { ...current, soundEffectsEnabled };
@@ -69,6 +79,7 @@ export function useGameSettings({
     updateLessGuidance,
     updateSkipPlayConfirmation,
     updateMotionPreference,
+    updatePlayabilityCuePreference,
     updateSoundEffectsEnabled,
     updateSoundEffectsVolume,
   };

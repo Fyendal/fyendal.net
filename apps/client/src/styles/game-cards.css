@@ -75,13 +75,15 @@
   outline-offset: 4px;
 }
 .card-highlight {
-  /* A crisp boundary is calmer than the old neon bloom and cannot spill into
-     neighboring equipment. #76b995 is 7.74:1 against the base playmat. */
-  border-color: #76b995;
+  /* MTGA-style cue: keep the strongest color in a narrow rim, then use a
+     compact but visible halo. The 8.49:1 edge remains the signal; the glow
+     makes it easier to find after display scaling and against the mat texture. */
+  border-color: #51c982;
   box-shadow:
-    0 0 0 1px #101712,
-    0 0 0 3px #76b995,
-    inset 0 0 0 1px #76b99580;
+    0 0 0 2px #51c982,
+    0 0 6px 2px #34c978cc,
+    0 0 13px 2px #20864d66,
+    inset 0 0 0 1px #91e4b266;
 }
 /* Decision windows identify card ownership relative to the viewer. Keep the
    ownership accent quieter than the selectable boundary. */
@@ -94,14 +96,38 @@
   box-shadow: inset 0 0 0 1px #d9796f80;
 }
 .decision-float .card-highlight.card-friendly {
+  border-color: #51c982;
   box-shadow:
-    0 0 0 1px #101712,
-    0 0 0 3px #76b995,
-    inset 0 0 0 1px #76b99580;
+    0 0 0 2px #51c982,
+    0 0 6px 2px #34c978cc,
+    0 0 13px 2px #20864d66,
+    inset 0 0 0 1px #91e4b266;
 }
 .decision-float .card-highlight.card-opponent {
   box-shadow:
-    0 0 0 1px #1b0e0c,
+    0 0 0 2px #d9796f,
+    0 0 6px 2px #c54c43cc,
+    0 0 13px 2px #842e2a66,
+    inset 0 0 0 1px #d9796f80;
+}
+/* High contrast uses a crisp, non-blooming boundary directly against the
+   card. It is an accessibility alternative for players who find glow
+   difficult to parse or visually uncomfortable. */
+.table[data-playability-cue="high-contrast"] .card-highlight {
+  border-color: #76b995;
+  box-shadow:
+    0 0 0 3px #76b995,
+    inset 0 0 0 1px #76b99580;
+}
+.table[data-playability-cue="high-contrast"] .decision-float .card-highlight.card-friendly {
+  border-color: #76b995;
+  box-shadow:
+    0 0 0 3px #76b995,
+    inset 0 0 0 1px #76b99580;
+}
+.table[data-playability-cue="high-contrast"] .decision-float .card-highlight.card-opponent {
+  border-color: #d9796f;
+  box-shadow:
     0 0 0 3px #d9796f,
     inset 0 0 0 1px #d9796f80;
 }
@@ -231,7 +257,8 @@
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
   border-radius: 6px;
 }
 .card-hasimg .c-zonelabel {
