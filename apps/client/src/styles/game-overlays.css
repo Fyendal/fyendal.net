@@ -62,7 +62,8 @@
 
 /* ── settings overlay (cog in the side rail) ── */
 .settings-panel {
-  width: min(440px, calc(100vw - 36px));
+  width: min(900px, calc(100vw - 36px));
+  max-width: calc(100vw - 36px);
   max-height: calc(100dvh - 36px);
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -114,15 +115,23 @@
   background: #382716;
   color: #f4e9d4;
 }
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-items: stretch;
+}
 .settings-section {
   display: flex;
+  min-width: 0;
   flex-direction: column;
   gap: 8px;
   align-items: stretch;
-  padding: 16px 0;
-  border-top: 1px solid #45331f;
+  padding: 14px 16px;
+  border: 1px solid #45331f;
+  border-radius: 4px;
+  background: #151008;
 }
-.settings-section:first-of-type { border-top: 0; padding-top: 2px; }
 .settings-heading {
   margin: 0 0 4px;
   font-family: inherit;
@@ -314,6 +323,11 @@
 .settings-action-list > button:last-child { border-bottom: 0; }
 .settings-action-list > button:hover { background: #352412; }
 .settings-action-list > button:disabled { opacity: .45; cursor: not-allowed; }
+.settings-danger {
+  align-self: start;
+  border-color: #63362e;
+  background: #1b100d;
+}
 .settings-danger .settings-heading { color: #d78d78; }
 .settings-danger-button {
   border-color: #8d4b3f;
@@ -327,6 +341,10 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .settings-info-tooltip::after { transition: none; }
+}
+@media (max-width: 860px) {
+  .settings-panel { width: min(440px, calc(100vw - 36px)); }
+  .settings-grid { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* ── bug reporting (bug icon in the side rail) ── */
