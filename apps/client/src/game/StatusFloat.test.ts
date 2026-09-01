@@ -94,6 +94,25 @@ describe("status action", () => {
     expect(html).toContain("game-hud");
   });
 
+  it("disables the primary action while its room command is pending", () => {
+    const html = renderToStaticMarkup(createElement(StatusFloat, {
+      dockRect: null,
+      oppLife: 20,
+      myLife: 20,
+      oppHeroName: "Rhinar",
+      myHeroName: "Briar",
+      log: [],
+      activeHeroName: "Briar",
+      actionPoints: 1,
+      passLabel: "END TURN",
+      passDisabled: true,
+      onPass: vi.fn(),
+    }));
+
+    expect(html).toContain("disabled");
+    expect(html).toContain("End turn (Space)");
+  });
+
   it("shows action points without duplicating the board's turn status", () => {
     const html = renderToStaticMarkup(createElement(StatusFloat, {
       dockRect: null,
