@@ -368,6 +368,8 @@ describe("SGB — equipment", () => {
     g.play("snatch|1", { settle: false });
     g.passPriority();
     g.passPriority();
+    g.passPriority();
+    g.passPriority();
     g.blockWith();
     g.passPriority(); // attacker yields reaction priority to the defender
     g.activate("compass of sunken depths|0", { settle: false });
@@ -887,7 +889,7 @@ describe("SGB — allies being attacked (CR 8.2.8)", () => {
     });
     // Pass the attack-declared window and then the reaction step. The death
     // queues Watery Grave, but the card stays face up until that layer resolves.
-    g.passPriority().passPriority().passPriority().passPriority();
+    g.passPriority().passPriority().passPriority().passPriority().passPriority().passPriority();
     expect(g.state.stack[0]?.engineEffect).toEqual({ kind: "watery-grave" });
     expect(g.state.players[0]!.graveyard[0]?.faceDown).not.toBe(true);
 

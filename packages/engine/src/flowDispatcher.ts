@@ -1,14 +1,14 @@
 import type { FlowStepName } from "./flowTypes.js";
 import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
-import { auraAttackGoAgain, startNextQueuedPermanentAttack } from "./attacks.js";
+import { auraAttackGoAgain, beginAttackStep, startNextQueuedPermanentAttack } from "./attacks.js";
 import { closeChain, finishLinkResolution } from "./combatChain.js";
 import { resolveLink, resumeCombatDamage } from "./damage.js";
 import { beginHeroDamage, dealAllyDamage, gainHeroLife } from "./damageResolution.js";
 import { attackAllowsDefender, consumeQueuedIntimidate, proceedWithAttack, queueDefendEventLayersAfterCurrent, resolveDefendEventLayer, resolvePhantasmLayer, resolveSpectraLayer } from "./defense.js";
 import { queueHitTriggers, resolveOnHitLayer } from "./hits.js";
 import { beginReactionStep, reopenReactionWindow } from "./reactions.js";
-import { announceCardPlayed, cancelEndActionPass, collectEventTriggerLayers, continueStack, deferEventTriggers, enterAttackWindow, finishDamageStep, finishStackCardResolution, flushPendingTriggersAboveStack, holdLayerWindow, queueEventTriggers, queueReactionEventTriggers, queueTriggeredLayers, resolveAbilityLayer, resolveTopStackCard, resolveTopStackLayer } from "./triggers.js";
+import { announceCardPlayed, cancelEndActionPass, collectEventTriggerLayers, continueStack, deferEventTriggers, enterAttackLayerWindow, enterAttackWindow, finishDamageStep, finishStackCardResolution, flushPendingTriggersAboveStack, holdLayerWindow, queueEventTriggers, queueReactionEventTriggers, queueTriggeredLayers, resolveAbilityLayer, resolveTopStackCard, resolveTopStackLayer } from "./triggers.js";
 import { continueEndPhase, endTurn } from "./turn.js";
 import { resolveWagerLayer } from "./wagers.js";
 
@@ -18,6 +18,7 @@ const handlers: Readonly<Record<FlowStepName, { fn: FlowHandler; injectRuntime: 
   announceCardPlayed: { fn: announceCardPlayed, injectRuntime: true },
   attackAllowsDefender: { fn: attackAllowsDefender, injectRuntime: true },
   auraAttackGoAgain: { fn: auraAttackGoAgain, injectRuntime: false },
+  beginAttackStep: { fn: beginAttackStep, injectRuntime: true },
   beginHeroDamage: { fn: beginHeroDamage, injectRuntime: true },
   beginReactionStep: { fn: beginReactionStep, injectRuntime: false },
   cancelEndActionPass: { fn: cancelEndActionPass, injectRuntime: false },
@@ -29,6 +30,7 @@ const handlers: Readonly<Record<FlowStepName, { fn: FlowHandler; injectRuntime: 
   dealAllyDamage: { fn: dealAllyDamage, injectRuntime: true },
   deferEventTriggers: { fn: deferEventTriggers, injectRuntime: true },
   endTurn: { fn: endTurn, injectRuntime: true },
+  enterAttackLayerWindow: { fn: enterAttackLayerWindow, injectRuntime: true },
   enterAttackWindow: { fn: enterAttackWindow, injectRuntime: true },
   finishDamageStep: { fn: finishDamageStep, injectRuntime: true },
   finishLinkResolution: { fn: finishLinkResolution, injectRuntime: true },

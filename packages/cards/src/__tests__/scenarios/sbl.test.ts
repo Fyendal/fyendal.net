@@ -459,6 +459,8 @@ describe("SBL — equipment", () => {
     s.play("snatch|1", { settle: false }); // 4 attack — Radiant Touch keeps the attack window open
     s.passPriority(); // attacker passes
     s.passPriority(); // defender passes — the attack becomes attacking
+    s.passPriority(); // attacker passes in the Attack Step
+    s.passPriority(); // defender passes — move to defense
     s.blockWith(); // take it — attack-reaction window
     s.passPriority(); // attacker yields to the defense-reaction window
     s.activate("radiant touch|0", { settle: false });
@@ -543,6 +545,8 @@ describe("SBL — counters, prevention, redirects", () => {
     s.play("snatch|1", { settle: false }); // 4 attack — Toe the Line keeps the attack window open
     s.passPriority(); // attacker passes
     s.passPriority(); // defender passes — the attack becomes attacking
+    s.passPriority(); // attacker passes in the Attack Step
+    s.passPriority(); // defender passes — move to defense
     s.blockWith(); // take it — reaction step
     s.passPriority(); // attacker yields
     s.react("toe the line|1", { settle: false });
@@ -564,6 +568,8 @@ describe("SBL — counters, prevention, redirects", () => {
     s.play("snatch|1", { settle: false });
     s.passPriority();
     s.passPriority();
+    s.passPriority();
+    s.passPriority();
     s.blockWith();
     s.passPriority();
     s.react("toe the line|1", { settle: false });
@@ -582,6 +588,8 @@ describe("SBL — counters, prevention, redirects", () => {
       ],
     });
     s.play("snatch|1", { settle: false });
+    s.passPriority();
+    s.passPriority();
     s.passPriority();
     s.passPriority();
     s.blockWith();

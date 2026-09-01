@@ -288,12 +288,32 @@ export function declareAttack(
     flags: {
       ...(fromArsenal ? { fromArsenal: true } : {}),
       ...(boosted ? { boosted: true } : {}),
+      ...(grantedGoAgain ? { grantedGoAgainAtLayer: true } : {}),
       ...(fromBanish ? { fromBanish: true } : {}),
       ...(fromOutsideHandOrArsenal ? { fromOutsideHandOrArsenal: true } : {}),
     },
     ...(targetAllyId !== undefined ? { targetAllyId } : {}),
   };
   state.chain.push(link);
+  // The attack-layer exists now, but the object does not become attacking
+  // until that layer resolves and the Attack Step begins.
+  queueSpectraLayer(state);
+  runtime.dispatchFlow("enterAttackLayerWindow", state);
+}
+
+/** Resolve the attack-layer into the Attack Step. Only now does the object
+ * become attacking and generate its attack-declared hooks and triggers. */
+export function beginAttackStep(state: GameStateInternal, runtime: EngineRuntime): void {
+  const link = currentLink(state);
+  if (!link || link.flags.attackStepBegan === true) return;
+  link.flags.attackStepBegan = true;
+  const seat = link.attacker;
+  const card = link.attackingCard;
+  const cardType = link.attackCardType;
+  const targetAllyId = link.targetAllyId;
+  const grantedGoAgain = link.flags.grantedGoAgainAtLayer === true;
+  delete link.flags.grantedGoAgainAtLayer;
+  const player = state.players[seat] as PlayerState;
   player.flags.attacksDeclaredThisTurn =
     (Number(player.flags.attacksDeclaredThisTurn) || 0) + 1;
   const attackName = nameOf(state, card.cardId).trim().toLowerCase().replace(/\s+/g, " ");
@@ -340,8 +360,11 @@ export function declareAttack(
     state,
     `${nameOf(state, player.heroCardId)} attacks with ${logNameOf(state, card.cardId)} (${computeAttack(state, runtime, link)} attack)${target ? `, targeting ${nameOf(state, target.cardId)}` : ""}`,
   );
-  // Snapshot observers before running hooks: an object created during
-  // declaration did not exist when the attack was declared.
+  // Sources created while players responded to the unresolved attack-layer
+  // exist when the attack event occurs and are therefore valid observers.
+  link.declaredAtNextId = state.nextInstanceId;
+  // Snapshot observers before running hooks: an object created by a
+  // declaration hook did not exist when the attack became attacking.
   const observers = observingHookSources(state, seat, {
     board: true,
     arsenal: true,
@@ -562,9 +585,8 @@ export function replaceAttackFromHand(
   return true;
 }
 
-/** Tail of attack declaration: attack-declared triggers, then the layer window. */
+/** Tail of the attack event: attack-declared triggers, then Attack Step priority. */
 export function declareTail(state: GameStateInternal, runtime: EngineRuntime): void {
-  queueSpectraLayer(state);
   runtime.dispatchFlow("enterAttackWindow", state);
 }
 

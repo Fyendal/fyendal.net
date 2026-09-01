@@ -164,6 +164,10 @@ const KEYWORD_OVERRIDES: Record<string, string[]> = {
   "breakneck battery|1": [],
   "breakneck battery|2": [],
   "breakneck battery|3": [],
+  // Scar for a Scar only GAINS go again when its controller has less life.
+  "scar for a scar|1": [],
+  "scar for a scar|2": [],
+  "scar for a scar|3": [],
   // Entwine Lightning only GAINS go again if it was fused
   "entwine lightning|1": ["Lightning Fusion"],
   // Lightning Surge only GAINS go again if it was played from arsenal

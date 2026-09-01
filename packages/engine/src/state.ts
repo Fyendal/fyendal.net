@@ -262,6 +262,9 @@ export type StackResume =
   | "grant-turn-action"
   /** Both players were passing an empty stack to end the action phase. */
   | "end-action-phase"
+  /** The unresolved attack-layer is waiting to enter the Attack Step. */
+  | "start-attack-step"
+  /** Attack-step triggers are resolving before the Defend Step begins. */
   | "continue-attack"
   | "start-reaction-step"
   | "finish-link-resolution"
