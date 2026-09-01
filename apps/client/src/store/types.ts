@@ -42,18 +42,20 @@ export interface EmoteEvent {
   message: EmoteMessage;
 }
 
-export type CardPlayIntent = Extract<
+export type OptimisticInteractionIntent = Extract<
   GameIntent,
-  { kind: "play-card" | "play-from-arsenal" | "play-from-zone" }
+  | { kind: "play-card" | "play-from-arsenal" | "play-from-zone" | "activate-ability" }
+  | { kind: "choose" | "order-triggers" }
+  | { kind: "pass" }
 >;
 
-/** A card play accepted by the socket pipeline but not yet acknowledged by a
- * newer authoritative room state. This drives presentation only; GameView
+/** An interaction accepted by the socket pipeline but not yet acknowledged
+ * by newer authoritative room state. This drives presentation only; GameView
  * remains the sole rules state. */
-export interface PendingCardPlay {
+export interface PendingInteraction {
   commandId: string;
   expectedVersion: number;
-  intent: CardPlayIntent;
+  intent: OptimisticInteractionIntent;
 }
 
 export type ViewUpdateSource = "live" | "replay" | "restore";
@@ -119,7 +121,10 @@ export interface StoreState {
   viewUpdate: ViewUpdate;
   legal: GameIntent[];
   actionCandidates: GameIntent[];
-  pendingCardPlay: PendingCardPlay | null;
+  pendingInteraction: PendingInteraction | null;
+  /** Latest locally requested defender set awaiting authoritative room state.
+   * Presentation only; null means render the authoritative staged cards. */
+  pendingDefenderStageIds: number[] | null;
   lastActionAt: [number, number] | null;
   opponentConnected: boolean;
   latestEmote: EmoteEvent | null;

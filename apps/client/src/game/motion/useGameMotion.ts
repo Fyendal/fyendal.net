@@ -46,11 +46,15 @@ export function useGameMotion({
   view,
   viewUpdate,
   motionPreference,
+  presentationKey = "authoritative",
+  predictsSemanticTransition = false,
 }: {
   rootRef: RefObject<HTMLElement | null>;
   view: GameView | null;
   viewUpdate: ViewUpdate;
   motionPreference: MotionPreference;
+  presentationKey?: string;
+  predictsSemanticTransition?: boolean;
 }): {
   batch: GameMotionBatch | null;
   turnStartUiReady: boolean;
@@ -62,7 +66,9 @@ export function useGameMotion({
   const [turnStartUiReady, setTurnStartUiReady] = useState(true);
   const previousViewRef = useRef<GameView | null>(null);
   const previousAnchorsRef = useRef<MotionAnchorSnapshot>(EMPTY_ANCHORS);
-  const processedSequenceRef = useRef<number | null>(null);
+  const processedUpdateKeyRef = useRef<string | null>(null);
+  const previousViewUpdateSequenceRef = useRef<number | null>(null);
+  const previousViewPredictedSemanticTransitionRef = useRef(false);
   const reduceMotionRef = useRef(reduceMotion);
   const batchQueueRef = useRef<MotionBatchQueue>(EMPTY_MOTION_BATCH_QUEUE);
   const maskedElementsRef = useRef<MaskedElementsByBatch>(new Map());
@@ -150,11 +156,14 @@ export function useGameMotion({
   // float dragging, rail collapse) must refresh the baseline for the next
   // authoritative update without becoming motion events themselves.
   useLayoutEffect(() => {
+    const updateKey = `${viewUpdate.sequence}:${presentationKey}`;
     const root = rootRef.current;
     if (!root || !view) {
       previousViewRef.current = view;
       previousAnchorsRef.current = EMPTY_ANCHORS;
-      processedSequenceRef.current = viewUpdate.sequence;
+      processedUpdateKeyRef.current = updateKey;
+      previousViewUpdateSequenceRef.current = viewUpdate.sequence;
+      previousViewPredictedSemanticTransitionRef.current = predictsSemanticTransition;
       cancelMotionQueue();
       return;
     }
@@ -167,21 +176,28 @@ export function useGameMotion({
       reduceMotionRef.current = reduceMotion;
       cancelMotionQueue();
     }
-    if (processedSequenceRef.current === viewUpdate.sequence) {
+    if (processedUpdateKeyRef.current === updateKey) {
       previousViewRef.current = view;
       previousAnchorsRef.current = measured.snapshot;
       return;
     }
 
     const previousView = previousViewRef.current;
-    const classification = classifyViewUpdate(previousView, view, viewUpdate);
+    const isLocalPresentationUpdate =
+      previousViewUpdateSequenceRef.current === viewUpdate.sequence;
+    const motionUpdate: ViewUpdate = isLocalPresentationUpdate
+      ? { ...viewUpdate, transition: "forward", gameTransition: undefined }
+      : viewUpdate;
+    const classification = classifyViewUpdate(previousView, view, motionUpdate);
     let nextBatches: GameMotionBatch[] = [];
     if (previousView && classification.kind === "animate") {
-      const events = viewUpdate.gameTransition
+      const canUseSemanticTransition =
+        !previousViewPredictedSemanticTransitionRef.current && !predictsSemanticTransition;
+      const events = canUseSemanticTransition && motionUpdate.gameTransition
         ? transitionMotionEvents(
             previousView,
             view,
-            viewUpdate.gameTransition,
+            motionUpdate.gameTransition,
             classification.direction,
           )
         : detectGameMotionEvents(previousView, view);
@@ -189,7 +205,7 @@ export function useGameMotion({
         events,
         previousAnchorsRef.current,
         measured.snapshot,
-        viewUpdate.sequence,
+        updateKey,
       );
       if (reduceMotion) {
         nextBatches = nextBatches.flatMap((candidate) => {
@@ -232,7 +248,9 @@ export function useGameMotion({
     }
     previousViewRef.current = view;
     previousAnchorsRef.current = measured.snapshot;
-    processedSequenceRef.current = viewUpdate.sequence;
+    processedUpdateKeyRef.current = updateKey;
+    previousViewUpdateSequenceRef.current = viewUpdate.sequence;
+    previousViewPredictedSemanticTransitionRef.current = predictsSemanticTransition;
   });
 
   useEffect(() => {

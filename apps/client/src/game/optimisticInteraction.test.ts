@@ -1,0 +1,199 @@
+import { describe, expect, it } from "vitest";
+import type { CardView, GameView, PlayerView } from "@fyendal/shared";
+import type { PendingInteraction } from "../store/types.js";
+import { optimisticInteractionView } from "./optimisticInteraction.js";
+import { detectGameMotionEvents } from "./motion/detectMotionEvents.js";
+
+function player(seat: 0 | 1, overrides: Partial<PlayerView> = {}): PlayerView {
+  return {
+    seat,
+    heroCardId: `HERO-${seat}`,
+    heroInstanceId: 100 + seat,
+    heroName: `Hero ${seat}`,
+    life: 20,
+    actionPoints: 1,
+    resources: 0,
+    hand: [],
+    handCount: 0,
+    deckCount: 0,
+    arsenal: [],
+    arsenalCount: 0,
+    pitch: [],
+    pitchCount: 0,
+    graveyard: [],
+    banish: [],
+    soul: [],
+    equipment: {},
+    weapons: [],
+    board: [],
+    ...overrides,
+  };
+}
+
+function game(first: PlayerView, pendingDecision: GameView["pendingDecision"] = null): GameView {
+  return {
+    gameId: "game",
+    turn: 1,
+    phase: "action",
+    activePlayer: 0,
+    priorityPlayer: 0,
+    players: [first, player(1)],
+    chain: [],
+    stack: [],
+    ongoing: [],
+    pendingDecision,
+    winner: null,
+    log: [],
+  };
+}
+
+function pending(intent: PendingInteraction["intent"]): PendingInteraction {
+  return { commandId: "command", expectedVersion: 2, intent };
+}
+
+describe("optimistic interaction projection", () => {
+  it("moves a played card and declared pitch cards before acknowledgement", () => {
+    const played: CardView = { instanceId: 10, cardId: "WTR170", owner: 0 };
+    const pitch: CardView = { instanceId: 11, cardId: "WTR171", owner: 0 };
+    const view = game(player(0, { hand: [played, pitch], handCount: 2 }));
+
+    const projection = optimisticInteractionView(view, 0, pending({
+      kind: "play-card",
+      instanceId: 10,
+      pitchInstanceIds: [11],
+    }));
+
+    expect(projection.predictsSemanticTransition).toBe(true);
+    expect(projection.view?.players[0]?.hand).toEqual([]);
+    expect(projection.view?.players[0]?.handCount).toBe(0);
+    expect(projection.view?.players[0]?.pitch.map((card) => card.instanceId)).toEqual([11]);
+    expect(projection.view?.stack[0]?.card?.instanceId).toBe(10);
+    expect(view.players[0].hand).toHaveLength(2);
+    expect(detectGameMotionEvents(view, projection.view!)).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        kind: "move",
+        instanceId: 10,
+        source: { kind: "hand", seat: 0 },
+        destination: { kind: "stack-layer", index: 0 },
+      }),
+      expect.objectContaining({
+        kind: "move",
+        instanceId: 11,
+        source: { kind: "hand", seat: 0 },
+        destination: { kind: "pitch", seat: 0 },
+      }),
+    ]));
+  });
+
+  it("connects an activated source to a pending layer and moves its pitch", () => {
+    const weapon: CardView = {
+      instanceId: 20,
+      cardId: "WTR114",
+      owner: 0,
+      activatedAbilityLabels: ["Attack"],
+    };
+    const pitch: CardView = { instanceId: 21, cardId: "WTR171", owner: 0 };
+    const view = game(player(0, {
+      hand: [pitch],
+      handCount: 1,
+      weapons: [weapon],
+    }));
+
+    const projection = optimisticInteractionView(view, 0, pending({
+      kind: "activate-ability",
+      sourceInstanceId: 20,
+      abilityIndex: 0,
+      pitchInstanceIds: [21],
+    }));
+
+    expect(projection.predictsSemanticTransition).toBe(true);
+    expect(projection.view?.stack[0]).toMatchObject({ card: weapon, label: "Attack" });
+    expect(projection.view?.players[0]?.pitch.map((card) => card.instanceId)).toEqual([21]);
+    expect(projection.view?.players[0]?.weapons).toEqual([weapon]);
+    expect(detectGameMotionEvents(view, projection.view!)).toContainEqual(expect.objectContaining({
+      kind: "connect",
+      instanceId: 20,
+      source: { kind: "weapon", seat: 0, index: 0 },
+      destination: { kind: "stack-layer", index: 0 },
+    }));
+  });
+
+  it("presents an attack action in the attack stack slot", () => {
+    const attack: CardView = { instanceId: 25, cardId: "WTR006", owner: 0, attack: 9 };
+    const view = game(player(0, { hand: [attack], handCount: 1 }));
+
+    const projection = optimisticInteractionView(view, 0, pending({
+      kind: "play-card",
+      instanceId: 25,
+      pitchInstanceIds: [],
+    }));
+
+    expect(projection.view?.chain[0]).toMatchObject({
+      attackingCard: { instanceId: 25 },
+      attackValue: 9,
+      onStack: true,
+    });
+    expect(detectGameMotionEvents(view, projection.view!)).toContainEqual(expect.objectContaining({
+      kind: "move",
+      instanceId: 25,
+      source: { kind: "hand", seat: 0 },
+      destination: { kind: "stack-attack" },
+    }));
+  });
+
+  it("moves an arsenal choice face down and dismisses the decision", () => {
+    const card: CardView = { instanceId: 30, cardId: "WTR171", owner: 0 };
+    const view = game(player(0, { hand: [card], handCount: 1 }), {
+      player: 0,
+      kind: "arsenal",
+      prompt: "Choose arsenal",
+      options: ["30"],
+    });
+
+    const projection = optimisticInteractionView(view, 0, pending({
+      kind: "choose",
+      optionId: "30",
+    }));
+
+    expect(projection.predictsSemanticTransition).toBe(true);
+    expect(projection.view?.pendingDecision).toBeNull();
+    expect(projection.view?.players[0]?.hand).toEqual([]);
+    expect(projection.view?.players[0]?.arsenal[0]).toMatchObject({ instanceId: 30, faceDown: true });
+  });
+
+  it("dismisses an unpredictable scripted choice without predicting its movement", () => {
+    const view = game(player(0), {
+      player: 0,
+      kind: "optional-effect",
+      prompt: "Use it?",
+      options: ["yes", "no"],
+    });
+
+    const projection = optimisticInteractionView(view, 0, pending({
+      kind: "choose",
+      optionId: "yes",
+    }));
+
+    expect(projection.predictsSemanticTransition).toBe(false);
+    expect(projection.view?.pendingDecision).toBeNull();
+  });
+
+  it("does not dismiss a defend decision that owns staged-card presentation", () => {
+    const view = game(player(0), {
+      player: 0,
+      kind: "defend",
+      prompt: "Pay to defend",
+      stagedCards: [{ instanceId: 40, cardId: "WTR171", owner: 0 }],
+      stagedDefense: 3,
+      resourcePayment: { cost: 1, options: [{ optionId: "pitch", pitchInstanceIds: [41] }] },
+    });
+
+    const projection = optimisticInteractionView(view, 0, pending({
+      kind: "choose",
+      optionId: "pitch",
+    }));
+
+    expect(projection.view).toBe(view);
+    expect(projection.key).toBe("interaction:authoritative");
+  });
+});

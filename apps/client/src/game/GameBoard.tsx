@@ -55,7 +55,9 @@ import { heroCard, type BoardOverlay } from "./board/BoardPrimitives.js";
 import { PlayerHalf } from "./board/PlayerHalf.js";
 import { PlayerHand } from "./board/PlayerHand.js";
 import { BoardOverlays, type BoardPreview } from "./board/BoardOverlays.js";
-import { optimisticCardPlayHiddenIds } from "./pendingCardPlay.js";
+import { optimisticInteractionHiddenIds } from "./pendingInteraction.js";
+import { optimisticDefenderView } from "./optimisticDefenderStaging.js";
+import { optimisticInteractionView } from "./optimisticInteraction.js";
 import {
   motionLocationKey,
   opaqueMotionPresentationKey,
@@ -68,14 +70,15 @@ import { useGameSounds } from "./sound/useGameSounds.js";
 const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
-  const { view, viewUpdate, playerProfiles, legal, actionCandidates, pendingCardPlay, yourSeat, spectating, spectatorCount, botGame, sendIntent, sendPriorityMode, sendRunechantSkip, sendEmote, latestEmote, undo, error, leave, opponentConnected, connected, roomCode, screen, replayFrames, watchReplay, downloadReplay, getRecordedViews, lastActionAt, claimVictory, reportBug } = useStore(
+  const { view, viewUpdate, playerProfiles, legal, actionCandidates, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, botGame, sendIntent, sendPriorityMode, sendRunechantSkip, sendEmote, latestEmote, undo, error, leave, opponentConnected, connected, roomCode, screen, replayFrames, watchReplay, downloadReplay, getRecordedViews, lastActionAt, claimVictory, reportBug } = useStore(
     useShallow((state) => ({
       view: state.view,
       viewUpdate: state.viewUpdate,
       playerProfiles: state.playerProfiles,
       legal: state.legal,
       actionCandidates: state.actionCandidates,
-      pendingCardPlay: state.pendingCardPlay,
+      pendingInteraction: state.pendingInteraction,
+      pendingDefenderStageIds: state.pendingDefenderStageIds,
       yourSeat: state.yourSeat,
       spectating: state.spectating,
       spectatorCount: state.spectatorCount,
@@ -159,11 +162,30 @@ export function GameBoard() {
     syncPriorityMode: connected && screen !== "replay" && !spectating && yourSeat !== null,
     sendPriorityMode,
   });
+  const presentedDefenderIds = screen === "replay" || spectating
+    ? null
+    : pendingDefenderStageIds;
+  const presentedInteraction = screen === "replay" || spectating
+    ? null
+    : pendingInteraction;
+  const interactionProjection = useMemo(
+    () => optimisticInteractionView(view, yourSeat, presentedInteraction),
+    [presentedInteraction, view, yourSeat],
+  );
+  const presentedView = useMemo(
+    () => optimisticDefenderView(interactionProjection.view, yourSeat, presentedDefenderIds),
+    [interactionProjection.view, presentedDefenderIds, yourSeat],
+  );
   const gameMotion = useGameMotion({
     rootRef: tableRef,
-    view,
+    view: presentedView,
     viewUpdate,
     motionPreference,
+    presentationKey: `${interactionProjection.key}:${presentedDefenderIds === null
+      ? "defenders:authoritative"
+      : `defenders:${presentedDefenderIds.join(",")}`}`,
+    predictsSemanticTransition:
+      interactionProjection.predictsSemanticTransition || presentedDefenderIds !== null,
   });
   useGameSounds({
     view,
@@ -283,26 +305,30 @@ export function GameBoard() {
     onConfirmChainClose: confirmChainClose,
   });
 
-  if (!view || (yourSeat === null && !spectating)) return null;
+  if (!view || !presentedView || (yourSeat === null && !spectating)) return null;
   const causal = causalStatus(view, spectating ? null : yourSeat);
   const seat = yourSeat ?? 0; // spectators watch from seat 0's side of the table
   const replaying = screen === "replay";
   const canSendEmote = !spectating && !replaying && connected;
-  const me = view.players[seat]!;
-  const opp = view.players[seat === 0 ? 1 : 0]!;
+  const authoritativeMe = view.players[seat]!;
+  const me = presentedView.players[seat]!;
+  const opp = presentedView.players[seat === 0 ? 1 : 0]!;
+  const authoritativeVisibleDeckTop = !spectating
+    ? visibleDeckTop(authoritativeMe, deckCardFeedback.shuffledSeats.has(authoritativeMe.seat))
+    : undefined;
   const myVisibleDeckTop = !spectating
     ? visibleDeckTop(me, deckCardFeedback.shuffledSeats.has(me.seat))
     : undefined;
-  const optimisticallyHiddenIds = optimisticCardPlayHiddenIds(
-    !spectating && !replaying ? (pendingCardPlay?.intent ?? null) : null,
-    me,
-    myVisibleDeckTop,
+  const optimisticallyHiddenIds = optimisticInteractionHiddenIds(
+    !spectating && !replaying ? (pendingInteraction?.intent ?? null) : null,
+    authoritativeMe,
+    authoritativeVisibleDeckTop,
   ) ?? EMPTY_INSTANCE_IDS;
   const presentedHandCount = Math.max(
     0,
     me.handCount - me.hand.filter((card) => optimisticallyHiddenIds.has(card.instanceId)).length,
   );
-  const pd = view.pendingDecision;
+  const pd = presentedView.pendingDecision;
   const myDecision = !spectating && pd !== null && pd.player === seat;
   const resourcePayment = myDecision ? pd.resourcePayment : undefined;
   const resourcePaymentSelected = resourcePayment
@@ -321,7 +347,7 @@ export function GameBoard() {
     : myTurn
       ? "Your turn"
       : "Opponent's turn";
-  const combatChainLinks = view.chain.filter((link) => !link.onStack);
+  const combatChainLinks = presentedView.chain.filter((link) => !link.onStack);
   const hasActiveCombatChain = combatChainLinks.length > 0;
   const showPriorityFloat = !spectating && !replaying && gameHasPriority(view);
   const hasOwnPriority = showPriorityFloat && view.priorityPlayer === seat;
@@ -357,7 +383,7 @@ export function GameBoard() {
     />
   ) : null;
   const winnerName = view.winner !== null ? (view.players[view.winner]?.heroName ?? "") : "";
-  const committedDefenderIds = chainDefenderIds(view.chain);
+  const committedDefenderIds = chainDefenderIds(presentedView.chain);
 
   // idle opponent: offer to claim the win (server re-validates the same rule).
   // Only the seat the game is NOT waiting on may claim — the idle player must
@@ -769,6 +795,7 @@ export function GameBoard() {
       {...cardLongPressHandlers}
       onClick={onTableClick}
     >
+      {hasOwnPriority ? <div className="own-priority-arrival" aria-hidden="true" /> : null}
       {/* ── playmat board: opponent half on top, your half below ── */}
       <div className="board">
         {playerProfiles ? (
@@ -922,8 +949,8 @@ export function GameBoard() {
           awaiting resolution; an attack still on the stack shows here too —
           its chain link starts only once the attack resolves ── */}
       {gameMotion.turnStartUiReady ? <StackFloat
-        layers={view.stack}
-        attack={view.chain.find((l) => l.onStack)}
+        layers={presentedView.stack}
+        attack={presentedView.chain.find((l) => l.onStack)}
         context={view.stackContext}
         miniHost={splitLineMiniHost}
         visibility={mobileCombatFloatVisibility}

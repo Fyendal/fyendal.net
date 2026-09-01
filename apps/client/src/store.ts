@@ -32,7 +32,7 @@ import {
   saveStoredAuth,
 } from "./store/sessionStorage.js";
 import type {
-  CardPlayIntent,
+  OptimisticInteractionIntent,
   PreReplaySnapshot,
   StoreState,
   ViewTransition,
@@ -149,7 +149,10 @@ export const useStore = create<StoreState>((set, get) => {
   function resetRoomCommandPipeline(): void {
     inFlightRoomCommand = null;
     queuedDefenderStageIds = null;
-    if (get().pendingCardPlay !== null) set({ pendingCardPlay: null });
+    const state = get();
+    if (state.pendingInteraction !== null || state.pendingDefenderStageIds !== null) {
+      set({ pendingInteraction: null, pendingDefenderStageIds: null });
+    }
   }
 
   function resetRoomVersionState(): void {
@@ -348,22 +351,24 @@ export const useStore = create<StoreState>((set, get) => {
       : [];
   }
 
-  /** Board clicks are based on the last rendered (authoritative) set. Apply
-   *  that click's add/remove delta to the desired set so rapid A-then-B clicks
-   *  coalesce to [A, B], even before A's state projection arrives. */
+  /** Apply the latest rendered add/remove delta to the command pipeline's
+   * desired set. The rendered set may be optimistic while an earlier staging
+   * command is still awaiting authoritative room state. */
   function mergedDefenderStageIds(requestedIds: readonly number[]): number[] {
     const authoritative = new Set(authoritativeStagedDefenderIds());
     const requested = new Set(requestedIds);
+    const presented = new Set(get().pendingDefenderStageIds ?? authoritative);
     const desired = new Set(
-      queuedDefenderStageIds
+      get().pendingDefenderStageIds
+      ?? queuedDefenderStageIds
       ?? inFlightRoomCommand?.defenderStageIds
       ?? authoritative,
     );
-    for (const id of authoritative) {
+    for (const id of presented) {
       if (!requested.has(id)) desired.delete(id);
     }
     for (const id of requested) {
-      if (!authoritative.has(id)) desired.add(id);
+      if (!presented.has(id)) desired.add(id);
     }
     return [...desired];
   }
@@ -371,7 +376,7 @@ export const useStore = create<StoreState>((set, get) => {
   function sendVersionedRoomCommand(
     createMessage: (command: { commandId: string; expectedVersion: number }) => ClientMessage,
     defenderStageIds?: number[],
-    pendingCardPlay?: CardPlayIntent,
+    pendingInteractionIntent?: OptimisticInteractionIntent,
   ): boolean {
     if (inFlightRoomCommand) return false;
     const command = roomCommand();
@@ -379,8 +384,8 @@ export const useStore = create<StoreState>((set, get) => {
     inFlightRoomCommand = defenderStageIds === undefined
       ? { expectedVersion: command.expectedVersion }
       : { expectedVersion: command.expectedVersion, defenderStageIds };
-    if (pendingCardPlay) {
-      set({ pendingCardPlay: { ...command, intent: pendingCardPlay } });
+    if (pendingInteractionIntent) {
+      set({ pendingInteraction: { ...command, intent: pendingInteractionIntent } });
     }
     return true;
   }
@@ -392,10 +397,11 @@ export const useStore = create<StoreState>((set, get) => {
         && sameInstanceIds(desiredIds, inFlightRoomCommand.defenderStageIds)
         ? null
         : desiredIds;
+      set({ pendingDefenderStageIds: desiredIds });
       return true;
     }
     queuedDefenderStageIds = null;
-    return sendVersionedRoomCommand(
+    const accepted = sendVersionedRoomCommand(
       (command) => ({
         type: "intent",
         intent: { kind: "stage-defenders", instanceIds: desiredIds },
@@ -403,6 +409,8 @@ export const useStore = create<StoreState>((set, get) => {
       }),
       desiredIds,
     );
+    if (accepted) set({ pendingDefenderStageIds: desiredIds });
+    return accepted;
   }
 
   /** A newer state is the acknowledgement for the one outstanding mutation.
@@ -621,7 +629,9 @@ export const useStore = create<StoreState>((set, get) => {
           : get().replayFrames;
         const commandState = acceptRoomCommandState(msg.version, msg);
         if (get().screen === "replay") {
-          if (commandState.acknowledged) set({ pendingCardPlay: null });
+          if (commandState.acknowledged) {
+            set({ pendingInteraction: null, pendingDefenderStageIds: null });
+          }
           break; // replay viewer owns the screen
         }
         const current = get();
@@ -643,7 +653,10 @@ export const useStore = create<StoreState>((set, get) => {
           }),
           legal: msg.legal,
           actionCandidates: msg.actionCandidates ?? msg.legal,
-          pendingCardPlay: commandState.acknowledged ? null : get().pendingCardPlay,
+          pendingInteraction: commandState.acknowledged ? null : get().pendingInteraction,
+          pendingDefenderStageIds: commandState.acknowledged
+            ? commandState.defenderStageIds
+            : get().pendingDefenderStageIds,
           playerProfiles: msg.playerProfiles,
           yourSeat: msg.yourSeat,
           spectatorCount: msg.spectators ?? 0,
@@ -1073,16 +1086,20 @@ export const useStore = create<StoreState>((set, get) => {
       if (intent.kind === "stage-defenders") {
         return queueOrSendDefenderStage(intent.instanceIds);
       }
-      const pendingCardPlay =
+      const pendingInteractionIntent: OptimisticInteractionIntent | undefined =
         intent.kind === "play-card"
         || intent.kind === "play-from-arsenal"
         || intent.kind === "play-from-zone"
+        || intent.kind === "activate-ability"
+        || intent.kind === "choose"
+        || intent.kind === "order-triggers"
+        || (intent.kind === "pass" && get().view?.pendingDecision?.kind === "arsenal")
           ? intent
           : undefined;
       return sendVersionedRoomCommand(
         (command) => ({ type: "intent", intent, ...command }),
         undefined,
-        pendingCardPlay,
+        pendingInteractionIntent,
       );
     },
     sendPriorityMode: (mode) => {
