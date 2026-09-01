@@ -7,7 +7,6 @@ import {
   functionalKey as key,
   intentCard,
   isAttack,
-  isOpeningTurn,
   optionCard,
   ownCards,
   pitchIds,
@@ -18,6 +17,8 @@ import {
   scoreDefenseIntent,
   scoreDefenseReaction,
   scoreSpendCardChoice,
+  shouldPreserveOpeningHand,
+  spendsOpeningArsenalReserve,
   type BotPolicyInput,
 } from "./policy.js";
 import {
@@ -186,7 +187,8 @@ function scorePlay(
   const card = intentCard(intent, own);
   const data = card ? input.cards[card.cardId] : undefined;
   if (!card || !data) return -20;
-  if (isOpeningTurn(input)) return -100;
+  if (shouldPreserveOpeningHand(input)) return -100;
+  if (spendsOpeningArsenalReserve(intent, input, own)) return -100;
 
   const functional = key(data);
   let score = 0;

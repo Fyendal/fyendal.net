@@ -19,7 +19,6 @@ import {
   incomingAttackDamage,
   intentCard,
   isAttack,
-  isOpeningTurn,
   isOpeningTurnDefense,
   opponentDamageEffectOnStack,
   optionCard,
@@ -36,6 +35,8 @@ import {
   scoreDefenseIntent,
   scoreDefenseReaction,
   scoreSpendCardChoice,
+  shouldPreserveOpeningHand,
+  spendsOpeningArsenalReserve,
   targetableAttackIntent,
   visibleOpponentDamageAmount,
   type BotPolicyInput,
@@ -1806,7 +1807,8 @@ function scorePlay(
   const card = intentCard(intent, own);
   const data = card ? input.cards[card.cardId] : undefined;
   if (!card || !data) return -20;
-  if (isOpeningTurn(input)) return -100;
+  if (shouldPreserveOpeningHand(input)) return -100;
+  if (spendsOpeningArsenalReserve(intent, input, own)) return -100;
 
   const functional = key(data);
   const me = input.view.players[input.seat];
@@ -2016,7 +2018,7 @@ function chooseUnfinalizedHalaIntentWithTrace(input: BotPolicyInput): HalaIntent
   // and a resource for one nonlethal damage.
   const rerebraceDecline = forcedRerebraceDecline(input);
   if (rerebraceDecline) return { intent: rerebraceDecline };
-  if (isOpeningTurn(input)) return { intent: chooseHalaReactiveIntent(input) };
+  if (shouldPreserveOpeningHand(input)) return { intent: chooseHalaReactiveIntent(input) };
   const powerTurn = edictShinePowerTurnIntent(input);
   if (powerTurn) return { intent: powerTurn };
   const multiplierSwordTurn = sharpenMultiplierSwordTurnIntent(input);

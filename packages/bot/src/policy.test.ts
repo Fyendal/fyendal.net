@@ -13,11 +13,80 @@ import {
   responseEvaluation,
   scoreDefenseIntent,
   scoreDefenseIntentWithTrace,
+  spendsOpeningArsenalReserve,
   wagerRewardValue,
   MAX_OPTIONAL_DEFENDERS,
   type BotPolicyInput,
   type BotPolicyScorers,
 } from "./policy.js";
+
+describe("opening-turn aggression", () => {
+  function openingInput(): {
+    input: BotPolicyInput;
+    allIn: GameIntent;
+    preserving: GameIntent;
+  } {
+    const state = createGame({
+      decklists: [decklists.dorinthea, decklists.rhinar],
+      cards: cardData,
+      scripts,
+      seed: 94_150,
+      startPlayer: 0,
+    });
+    const first = state.players[0]!.hand[0]!;
+    const reserve = state.players[0]!.hand[1]!;
+    first.cardId = "ANQ031";
+    state.players[0]!.hand = [first, reserve];
+    state.players[1]!.hand = state.players[1]!.hand.slice(0, 2);
+    const allIn: GameIntent = {
+      kind: "play-card",
+      instanceId: first.instanceId,
+      pitchInstanceIds: [reserve.instanceId],
+    };
+    const preserving: GameIntent = {
+      kind: "play-card",
+      instanceId: first.instanceId,
+      pitchInstanceIds: [],
+    };
+    const input: BotPolicyInput = {
+      seat: 0,
+      view: projectStateFor(state, 0),
+      legal: [allIn, preserving, { kind: "pass" }],
+      cards: cardData,
+    };
+    return { input, allIn, preserving };
+  }
+
+  it("prefers an attack that retains an arsenal card at exactly two opposing cards", () => {
+    const { input, allIn, preserving } = openingInput();
+
+    expect(spendsOpeningArsenalReserve(allIn, input)).toBe(true);
+    expect(spendsOpeningArsenalReserve(preserving, input)).toBe(false);
+  });
+
+  it("allows an all-in first attack when no arsenal-preserving attack exists", () => {
+    const { input, allIn } = openingInput();
+    input.legal = [allIn, { kind: "pass" }];
+
+    expect(spendsOpeningArsenalReserve(allIn, input)).toBe(false);
+  });
+
+  it("reserves the last card after the bot has attacked", () => {
+    const { input } = openingInput();
+    const last = input.view.players[0].hand[1]!;
+    const followup: GameIntent = {
+      kind: "play-card",
+      instanceId: last.instanceId,
+      pitchInstanceIds: [],
+    };
+    input.view.players[0].hand = [last];
+    input.view.players[0].handCount = 1;
+    input.view.turnFacts!.players[0].attacks = 1;
+    input.legal = [followup, { kind: "pass" }];
+
+    expect(spendsOpeningArsenalReserve(followup, input)).toBe(true);
+  });
+});
 
 function defenderPruningChoice(count: number, maxNonBlockDefenders?: number): GameIntent {
   const state = createGame({

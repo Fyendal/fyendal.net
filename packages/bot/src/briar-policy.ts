@@ -9,7 +9,6 @@ import {
   incomingAttackDamage,
   intentCard,
   isAttack,
-  isOpeningTurn,
   optionCard,
   ownCards,
   pitchIds,
@@ -19,6 +18,8 @@ import {
   scoreBinaryChoice,
   scoreDefenseIntent,
   scoreDefenseReaction,
+  shouldPreserveOpeningHand,
+  spendsOpeningArsenalReserve,
   type BotPolicyInput,
 } from "./policy.js";
 
@@ -177,6 +178,32 @@ function hasSetupFollowup(
     if (functional === "sprout strength|1") return attack;
     return attack;
   });
+}
+
+function shouldLeadWithBurnUp(
+  intent: GameIntent,
+  input: BotPolicyInput,
+  own: ReadonlyMap<number, CardView>,
+): boolean {
+  const card = intentCard(intent, own);
+  if (
+    !card || key(input.cards[card.cardId]) !== "burn up // shock|1" ||
+    !("meldSide" in intent) || intent.meldSide !== "both"
+  ) return false;
+  const opponentLife = input.view.players[1 - input.seat]!.life;
+  const firstCycleFatigue = isFatiguePlan(input) && (card.pitchCount ?? 0) === 0;
+  return (!firstCycleFatigue || opponentLife <= 1) &&
+    (hasSetupFollowup("burn up // shock|1", intent, input, own) || opponentLife <= 1);
+}
+
+function prepareBriarCandidates(
+  candidates: readonly GameIntent[],
+  input: BotPolicyInput,
+): readonly GameIntent[] {
+  const proactive = omitProactiveCloudCover(candidates, input);
+  const own = ownCards(input);
+  const burnUpMelds = proactive.filter((intent) => shouldLeadWithBurnUp(intent, input, own));
+  return burnUpMelds.length > 0 ? burnUpMelds : proactive;
 }
 
 function pendingAttackSetups(input: BotPolicyInput): Set<string> {
@@ -630,7 +657,8 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
   // The opponent can spend their entire hand blocking on turn one and both
   // players refill afterward. Preserve Briar's known hand, pass, and convert
   // the best setup card into a five-card turn through arsenal.
-  if (isOpeningTurn(input)) return -100;
+  if (shouldPreserveOpeningHand(input)) return -100;
+  if (spendsOpeningArsenalReserve(intent, input, own)) return -100;
 
   if (intent.kind === "activate-ability") {
     if (data.cardType === "weapon" && !attackConsumesPendingSetup(data, input)) return -100;
@@ -700,17 +728,11 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
         : -100;
     } else if (functional === "burn up // shock|1" && "meldSide" in intent) {
       const opponentLife = input.view.players[1 - input.seat]!.life;
-      const firstCycleFatigue = isFatiguePlan(input) && (card?.pitchCount ?? 0) === 0;
-      const hasFollowup = hasSetupFollowup(functional, intent, input, own) ||
-        input.view.stack.some((layer) =>
-          layer.seat === input.seat && layer.card !== null && isAttack(input.cards[layer.card.cardId])
-        );
       // Keep the card for its full melded line. Playing another setup action
       // first opens a priority window where only Shock is legal, so the melded
       // play must outrank those actions as well. Shock alone is worth spending
       // only when its 1 damage ends the game.
-      score = intent.meldSide === "both" && (!firstCycleFatigue || opponentLife <= 1) &&
-          (hasFollowup || opponentLife <= 1)
+      score = shouldLeadWithBurnUp(intent, input, own)
         ? 100
         : intent.meldSide === "right" && opponentLife <= 1
         ? 100
@@ -767,7 +789,7 @@ export interface BriarIntentDecision {
 /** Deterministic Briar policy. Action phases use a bounded whole-turn rollout;
  * reactive windows retain the projection-only scorer. */
 export function chooseBriarIntentWithTrace(input: BotPolicyInput): BriarIntentDecision {
-  if (isOpeningTurn(input)) {
+  if (shouldPreserveOpeningHand(input)) {
     return { intent: enforceSpectraPolicy(input, chooseBriarReactiveIntent(input)) };
   }
   const plan = planBriarTurn(input, {
@@ -778,7 +800,7 @@ export function chooseBriarIntentWithTrace(input: BotPolicyInput): BriarIntentDe
     comparePitchOrder: compareBriarPitchOrder,
     scoreIntent: scoreBriarPlannedIntent,
     rankCandidate: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
-    prepareCandidates: omitProactiveCloudCover,
+    prepareCandidates: prepareBriarCandidates,
     fatiguePlan: isFatiguePlan(input),
   });
   const intent = enforceSpectraPolicy(

@@ -9,7 +9,6 @@ import {
   functionalKey as key,
   intentCard,
   isAttack,
-  isOpeningTurn,
   optionCard,
   ownCards,
   pitchIds,
@@ -19,6 +18,8 @@ import {
   scoreDefenseIntent,
   scoreDefenseReaction,
   scoreSpendCardChoice,
+  shouldPreserveOpeningHand,
+  spendsOpeningArsenalReserve,
   type BotPolicyInput,
 } from "./policy.js";
 import {
@@ -239,7 +240,8 @@ function scorePlay(
   const card = intentCard(intent, own);
   const data = card ? input.cards[card.cardId] : undefined;
   if (!card || !data) return -20;
-  if (isOpeningTurn(input)) return -100;
+  if (shouldPreserveOpeningHand(input)) return -100;
+  if (spendsOpeningArsenalReserve(intent, input, own)) return -100;
 
   const functional = key(data);
   const me = input.view.players[input.seat];
@@ -391,7 +393,7 @@ const IRA_MAX_TRANSITIONS = 8;
 const IRA_MAX_ROOT_CANDIDATES = 1;
 
 export function chooseIraIntentWithTrace(input: BotPolicyInput): IraIntentDecision {
-  if (isOpeningTurn(input)) {
+  if (shouldPreserveOpeningHand(input)) {
     return {
       intent: enforceAllyTargetPolicy(
         input,

@@ -1262,20 +1262,23 @@ describe("Briar policy", () => {
     const burn = state.players[0]!.hand[0]!;
     burn.pitchCount = 1;
 
-    const intent = chooseBriarIntent({
+    const decision = chooseBriarIntentWithTrace({
       seat: 0,
       view: projectStateFor(state, 0),
       legal: legalIntents(state, 0),
       cards: cardData,
+      state,
     });
 
-    expect(intent).toEqual({
+    expect(decision.intent).toEqual({
       kind: "play-card",
       instanceId: burn.instanceId,
       pitchInstanceIds: [],
       pitchRequired: 0,
       meldSide: "both",
     });
+    expect(decision.plan?.line[0]).toEqual(decision.intent);
+    expect(decision.plan?.candidateTrace.rootPrepared).toBe(1);
   });
 
   it("does not spend Shock alone in a priority window unless its damage is lethal", () => {
