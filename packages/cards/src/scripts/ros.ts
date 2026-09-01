@@ -767,7 +767,7 @@ Object.assign(ros, {
   "high voltage|3": { onPlay: (ctx: ScriptCtx) => ampNextArcane(ctx, 1) },
   "face purgatory|0": { canTriggerOnDefend(ctx: ScriptCtx) { const cards = ctx.link?.defendingCards ?? []; return cards.some((card) => isAttackAction(ctx, card)) && cards.some((card) => isNonAttackAction(ctx, card)); }, onDefend(ctx: ScriptCtx) { if (!requestDiscardChoice(ctx, "face-purgatory-discard", "Choose a card to discard", opponentSeat(ctx))) ctx.drawCards(ctx.seat, 1); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "face-purgatory-discard") { resolveDiscardChoice(ctx, option, opponentSeat(ctx)); ctx.drawCards(ctx.seat, 1); } } },
   "snuff out|1": { canTriggerOnHit: (ctx: ScriptCtx) => ctx.link?.targetAllyId === undefined, onHit(ctx: ScriptCtx) { chooseAuraToDestroy(ctx, "snuff-aura", "Destroy an aura you control?", true); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "snuff-aura" && option !== "no" && ctx.destroyPermanent(Number(option))) requestDiscardChoice(ctx, "snuff-discard", "Choose a card to discard", opponentSeat(ctx)); else if (hook === "snuff-discard") resolveDiscardChoice(ctx, option, opponentSeat(ctx)); } },
-  "machinations of dominion|3": { onPlay: (ctx: ScriptCtx) => buffNextAttack(ctx, { grantKeyword: "overpower", appliesToClass: "runeblade", appliesTo: "attack-action" }) },
+  "machinations of dominion|3": { onPlay: (ctx: ScriptCtx) => buffNextAttack(ctx, { grantKeyword: "overpower", goAgainIfPlayedOrCreatedSubtype: "aura", appliesToClass: "runeblade", appliesTo: "attack-action" }) },
   "succumb to temptation|2": {
     playAsInstant: (ctx: ScriptCtx) =>
       ctx.getFlag("player", "arcaneDamageDealtThisTurn") === true,

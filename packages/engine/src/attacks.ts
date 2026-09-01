@@ -9,6 +9,7 @@ import {
   wardValueOf,
 } from "./cardProperties.js";
 import {
+  conditionalModifierGrantsGoAgain,
   modifierApplies,
   modifierAppliesTo,
 } from "./combatModifiers.js";
@@ -325,7 +326,9 @@ export function declareAttack(
     (player.hero.counters ??= {}).nextAttackPowerPenalty = 0;
   }
   attachNextAttackModifiers(state, runtime, link);
-  if (innateGoAgain) runtime.events.grantLinkGoAgain(state, link);
+  if (innateGoAgain || conditionalModifierGrantsGoAgain(state, link)) {
+    runtime.events.grantLinkGoAgain(state, link);
+  }
   const target = findAttackTargetAlly(state, seat, targetAllyId);
   logPublic(
     state,

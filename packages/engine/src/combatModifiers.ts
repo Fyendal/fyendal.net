@@ -6,6 +6,7 @@ import {
   dataOf,
 } from "./cardProperties.js";
 import type { CardInstance, ChainLinkState, Modifier, PlayerState } from "./state.js";
+import { goAgainSuppressed } from "./ruleQueries.js";
 import { opponent } from "./zoneQueries.js";
 
 function isSword(data: CardData): boolean {
@@ -206,4 +207,26 @@ export function activeModifiers(
   return state.modifiers.filter(
     (modifier) => scopes.includes(modifier.scope) && modifierApplies(state, modifier, link),
   );
+}
+
+/** Whether an attached modifier's played/created-subtype condition currently
+ * gives the active attack go again. The condition remains live until the link
+ * resolves, so an aura created after declaration can still satisfy it. */
+export function conditionalModifierGrantsGoAgain(
+  state: GameStateInternal,
+  link: ChainLinkState,
+): boolean {
+  const player = state.players[link.attacker] as PlayerState;
+  if (
+    link.flags.attackAbilitiesSuppressed === true ||
+    goAgainSuppressed(state, link.attacker) ||
+    (link.attackingCard.suppressedKeywords ?? []).includes("go again")
+  ) return false;
+  return activeModifiers(state, link, ["chain-link"]).some((modifier) => {
+    const subtype = modifier.goAgainIfPlayedOrCreatedSubtype?.toLowerCase();
+    return subtype !== undefined && (
+      player.flags[`playedSubtype:${subtype}`] === true ||
+      player.flags[`createdSubtype:${subtype}`] === true
+    );
+  });
 }

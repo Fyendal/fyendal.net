@@ -619,6 +619,7 @@ describe("PersistedStateV1", () => {
       restrictActionsToNonWeaponNonAttack: true,
       prohibitsDefenseReactionNamesInGraveyard: true,
       goAgainIfDefendedByAttackAction: true,
+      goAgainIfPlayedOrCreatedSubtype: "aura",
       suppressHitEffects: true,
       defendingPitchDefenseAdjustment: { pitch: 2, amount: -1, requiresAimCounter: true },
       onDestroyedDraw: 1,
