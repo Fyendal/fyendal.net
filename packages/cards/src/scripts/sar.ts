@@ -24,8 +24,8 @@ import {
 //   lock in mayPlayFromZone) until the next end-of-turn cleanup.
 // - Stains of the Redback's conditional "costs {r} less" rides
 //   CardScript.modifyPlayCost; Hyper Inflation's "cards cost {r} more to
-//   play this turn" rides the per-turn costMoreThisTurn flag — both are
-//   applied by cardPlayCost in enumeration and validation.
+//   play this turn" rides a play-cost-only modifier — both are applied by
+//   cardPlayCost in enumeration and validation.
 // - Topsy Turvy's "would be put on top of a deck → bottom instead" rides the
 //   per-turn topDeckToBottom flag, honored by ctx.putOnDeckTop (which
 //   Memorial Ground and opt placements also use).
@@ -66,6 +66,13 @@ function markHero(ctx: ScriptCtx, seat: number): void {
   if ((hero.counters?.marked ?? 0) > 0) return;
   ctx.addCounter(hero.instanceId, "marked", 1);
   ctx.logPublic(`${ctx.cardData(hero.cardId).name} is marked`);
+}
+
+function requestHuntsmanMark(ctx: ScriptCtx): void {
+  ctx.requestChoice("huntsman-mark", "Mark of the Huntsman: destroy this and mark them?", [
+    "yes",
+    "no",
+  ]);
 }
 
 function hasStealth(ctx: ScriptCtx, cardId: string): boolean {
@@ -186,10 +193,10 @@ export const sar: Record<string, CardScript> = {
         link.attackingCard.instanceId === ctx.self.instanceId;
     },
     onHit(ctx) {
-      ctx.requestChoice("huntsman-mark", "Mark of the Huntsman: destroy this and mark them?", [
-        "yes",
-        "no",
-      ]);
+      requestHuntsmanMark(ctx);
+    },
+    onEffectHit(ctx) {
+      requestHuntsmanMark(ctx);
     },
     onChoose(ctx, hook, option) {
       if (hook !== "huntsman-mark" || option !== "yes") return;
@@ -283,8 +290,8 @@ export const sar: Record<string, CardScript> = {
       ctx.dealDamage(opponentSeat(ctx), 1, {
         sourceInstanceId: dagger.instanceId,
         countsAsHit: true,
+        destroySourceAfterDamage: true,
       });
-      ctx.destroyPermanent(dagger.instanceId);
     },
   },
 
@@ -333,7 +340,12 @@ export const sar: Record<string, CardScript> = {
     //  printed (native).
     onAttackDeclared(ctx) {
       for (const p of ctx.state.players) {
-        ctx.setPlayerFlag(p.seat, "costMoreThisTurn", Number(p.flags.costMoreThisTurn || 0) + 1);
+        ctx.addModifier({
+          scope: "until-end-of-turn",
+          seat: p.seat,
+          appliesTo: "any",
+          playCostReduction: -1,
+        });
       }
       ctx.logPublic(`${ctx.data.name}: cards cost {r} more to play this turn`);
     },
