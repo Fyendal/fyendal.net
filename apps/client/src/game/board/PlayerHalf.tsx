@@ -26,6 +26,7 @@ const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 interface PlayerHalfInteraction {
   legal: BoardLegalState;
   selection: Sel;
+  preStackSelectedInstanceId: number | null;
   stagedIds: ReadonlySet<number>;
   committedDefenderIds: ReadonlySet<number>;
   optimisticallyHiddenIds: ReadonlySet<number>;
@@ -350,8 +351,11 @@ export function PlayerHalf({
                 presentedDeckTop.instanceId,
               )}
               highlighted={deckTopPlayable}
-              selected={interaction.selection.kind === "play-zone" &&
-                interaction.selection.instanceId === presentedDeckTop.instanceId}
+              selected={
+                (interaction.selection.kind === "play-zone" &&
+                  interaction.selection.instanceId === presentedDeckTop.instanceId) ||
+                interaction.preStackSelectedInstanceId === presentedDeckTop.instanceId
+              }
               onClick={deckTopPlayable
                 ? () => {
                     if (interaction.selection.kind !== "none") return;
@@ -401,8 +405,11 @@ export function PlayerHalf({
               )}
               dimmed={arsenalCard.faceDown && !interaction.legal.playableArsenal.has(arsenalCard.instanceId)}
               highlighted={interaction.legal.playableArsenal.has(arsenalCard.instanceId)}
-              selected={interaction.selection.kind === "play-arsenal" &&
-                interaction.selection.instanceId === arsenalCard.instanceId}
+              selected={
+                (interaction.selection.kind === "play-arsenal" &&
+                  interaction.selection.instanceId === arsenalCard.instanceId) ||
+                interaction.preStackSelectedInstanceId === arsenalCard.instanceId
+              }
               onClick={interaction.legal.playableArsenal.has(arsenalCard.instanceId)
                 ? () => interaction.onSelect({ kind: "play-arsenal", instanceId: arsenalCard.instanceId })
                 : undefined}

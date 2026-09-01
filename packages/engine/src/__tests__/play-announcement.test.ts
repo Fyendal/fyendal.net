@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyIntent, legalIntents } from "../index.js";
+import { actionCandidates, applyIntent, legalIntents, projectStateFor } from "../index.js";
 import { giveCard, makeGame, player } from "./fixtures.js";
 
 describe("card-play announcement", () => {
@@ -32,7 +32,12 @@ describe("card-play announcement", () => {
     const play = legalIntents(state, 0).find(
       (intent) => intent.kind === "play-card" && intent.instanceId === attackId,
     );
-    expect(play).toBeDefined();
+    expect(play).toMatchObject({ deferPlayPresentation: true });
+    expect(actionCandidates(state, 0)).toContainEqual(expect.objectContaining({
+      kind: "play-card",
+      instanceId: attackId,
+      deferPlayPresentation: true,
+    }));
     const result = applyIntent(state, 0, play!);
     expect(result.ok).toBe(true);
     if (!result.ok) throw new Error(result.error);
@@ -74,7 +79,12 @@ describe("card-play announcement", () => {
     const play = legalIntents(state, 0).find(
       (intent) => intent.kind === "play-card" && intent.instanceId === cardId,
     );
-    expect(play).toBeDefined();
+    expect(play).toMatchObject({ deferPlayPresentation: true });
+    expect(actionCandidates(state, 0)).toContainEqual(expect.objectContaining({
+      kind: "play-card",
+      instanceId: cardId,
+      deferPlayPresentation: true,
+    }));
 
     let result = applyIntent(state, 0, play!);
     expect(result.ok).toBe(true);
@@ -83,6 +93,11 @@ describe("card-play announcement", () => {
 
     expect(state.stack).toHaveLength(0);
     expect(state.pendingDecision).toMatchObject({ chooseHook: "mode", player: 0 });
+    expect(projectStateFor(state, 0).pendingDecision?.preStackSource).toMatchObject({
+      card: { instanceId: cardId },
+      zone: "hand",
+    });
+    expect(projectStateFor(state, 1).pendingDecision?.preStackSource).toBeUndefined();
     expect(legalIntents(state, 0).some((intent) => intent.kind === "pass")).toBe(false);
 
     result = applyIntent(state, 0, { kind: "choose", optionId: "second" });

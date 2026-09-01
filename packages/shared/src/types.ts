@@ -353,6 +353,12 @@ export interface PendingDecision {
     cost: number;
     options: { optionId: string; pitchInstanceIds: number[] }[];
   };
+  /** Card whose play is paused on a declaration or additional-cost choice
+   * before it becomes a stack layer. Private to the deciding player. */
+  preStackSource?: {
+    card: CardView;
+    zone: "hand" | "arsenal" | PlayableZone;
+  };
 }
 
 /** Public, authoritative match counters recorded by the engine as events
@@ -494,9 +500,9 @@ export interface AdditionalPlayCostSelection {
 }
 
 export type GameIntent =
-  | { kind: "play-card"; instanceId: number; pitchInstanceIds: number[]; pitchRequired?: number; meldSide?: MeldSide; targetAllyId?: number; targetCardInstanceId?: number; boost?: true; boostCount?: number; asInstant?: true; alternativeCostCardInstanceIds?: number[]; additionalCostSelection?: AdditionalPlayCostSelection }
-  | { kind: "play-from-arsenal"; instanceId: number; pitchInstanceIds: number[]; pitchRequired?: number; meldSide?: MeldSide; targetAllyId?: number; targetCardInstanceId?: number; boost?: true; boostCount?: number; asInstant?: true; alternativeCostCardInstanceIds?: number[]; additionalCostSelection?: AdditionalPlayCostSelection }
-  | { kind: "play-from-zone"; zone: PlayableZone; instanceId: number; pitchInstanceIds: number[]; pitchRequired?: number; meldSide?: MeldSide; targetAllyId?: number; targetCardInstanceId?: number; boost?: true; boostCount?: number; asInstant?: true; alternativeCostCardInstanceIds?: number[]; additionalCostSelection?: AdditionalPlayCostSelection }
+  | { kind: "play-card"; instanceId: number; pitchInstanceIds: number[]; pitchRequired?: number; meldSide?: MeldSide; targetAllyId?: number; targetCardInstanceId?: number; boost?: true; boostCount?: number; asInstant?: true; alternativeCostCardInstanceIds?: number[]; additionalCostSelection?: AdditionalPlayCostSelection; /** Presentation hint: this announcement may pause on a pre-stack choice. */ deferPlayPresentation?: true }
+  | { kind: "play-from-arsenal"; instanceId: number; pitchInstanceIds: number[]; pitchRequired?: number; meldSide?: MeldSide; targetAllyId?: number; targetCardInstanceId?: number; boost?: true; boostCount?: number; asInstant?: true; alternativeCostCardInstanceIds?: number[]; additionalCostSelection?: AdditionalPlayCostSelection; deferPlayPresentation?: true }
+  | { kind: "play-from-zone"; zone: PlayableZone; instanceId: number; pitchInstanceIds: number[]; pitchRequired?: number; meldSide?: MeldSide; targetAllyId?: number; targetCardInstanceId?: number; boost?: true; boostCount?: number; asInstant?: true; alternativeCostCardInstanceIds?: number[]; additionalCostSelection?: AdditionalPlayCostSelection; deferPlayPresentation?: true }
   | { kind: "activate-ability"; sourceInstanceId: number; pitchInstanceIds: number[]; pitchRequired?: number; abilityIndex?: number; targetAllyId?: number; alternativeCostCardInstanceIds?: number[] }
   | { kind: "pass" }
   | { kind: "defend"; instanceIds: number[]; pitchInstanceIds?: number[] }

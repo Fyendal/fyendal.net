@@ -304,9 +304,15 @@ function playIntentsForCard(
   // Heartened Cross Strap, ...); Meld "both" doubles the base cost first
   const isAttackAction = data.cardType === "action" && (data.subtypes ?? []).includes("attack");
   const withPlayMethods = (intents: GameIntent[]): GameIntent[] => {
-    if (data.cardType === "instant") return intents;
-    if (!canPlayAsInstant(state, runtime, player.seat, card, undefined, from)) return intents;
-    const instantIntents = intents.flatMap((intent): GameIntent[] => {
+    // A variable declaration or scripted additional cost can pause before the
+    // card becomes a stack layer. The hint is deliberately conservative:
+    // synchronous additional costs merely skip an optimistic animation.
+    const presented = script?.variablePlayCost || script?.additionalCost
+      ? intents.map((intent) => ({ ...intent, deferPlayPresentation: true as const }))
+      : intents;
+    if (data.cardType === "instant") return presented;
+    if (!canPlayAsInstant(state, runtime, player.seat, card, undefined, from)) return presented;
+    const instantIntents = presented.flatMap((intent): GameIntent[] => {
       if (
         intent.kind !== "play-card" &&
         intent.kind !== "play-from-arsenal" &&
@@ -319,7 +325,7 @@ function playIntentsForCard(
       && from !== "arsenal"
       && playFromZoneRequiresInstant(state, runtime, card, from, player.seat)
     ) return instantIntents;
-    return player.actionPoints > 0 ? [...intents, ...instantIntents] : instantIntents;
+    return player.actionPoints > 0 ? [...presented, ...instantIntents] : instantIntents;
   };
   const deferVariablePayment = (intents: GameIntent[]): GameIntent[] => {
     if (!script?.variablePlayCost) return intents;

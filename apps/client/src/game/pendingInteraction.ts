@@ -14,6 +14,7 @@ export function optimisticInteractionHiddenIds(
     && intent.kind !== "play-from-zone"
     && intent.kind !== "activate-ability"
   )) return null;
+  if (intent.kind !== "activate-ability" && intent.deferPlayPresentation) return null;
   if (intent.kind === "activate-ability") {
     return new Set([
       ...intent.pitchInstanceIds,

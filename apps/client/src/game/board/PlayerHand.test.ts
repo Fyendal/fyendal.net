@@ -80,6 +80,7 @@ describe("hand motion anchors", () => {
         },
         legalIntents: [],
         selection: { kind: "none" },
+        preStackSelectedInstanceId: 7,
         pitchSelection: [],
         selectedPaymentVariants: [],
         stagedIds: new Set<number>(),
@@ -94,5 +95,6 @@ describe("hand motion anchors", () => {
 
     expect(html).toContain('data-motion-zone="0:hand"');
     expect(html).toContain('data-motion-card="0:hand:7"');
+    expect(html).toContain("card-selected");
   });
 });

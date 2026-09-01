@@ -1055,6 +1055,23 @@ function projectState(
             const total = mine && link ? stagedDefenseTotal(state, runtime, link, stagedInstances) : 0;
             staged = { stagedCards: cards, stagedDefense: mine ? total : 0 };
           }
+          const privateDecision = revealAll || pd.player === seat;
+          const preStackFlow = pd.variablePlayCost
+            ? {
+                instanceId: pd.variablePlayCost.instanceId,
+                zone: pd.variablePlayCost.from,
+              }
+            : pd.resume?.kind === "finish-play"
+              || pd.resume?.kind === "finish-reaction"
+              || pd.resume?.kind === "finish-window-instant"
+              ? {
+                  instanceId: pd.resume.card.instanceId,
+                  zone: pd.resume.from,
+                }
+              : undefined;
+          const preStackCard = preStackFlow
+            ? findCardAnywhere(state, preStackFlow.instanceId)?.card
+            : undefined;
           return {
             player: pd.player,
             kind: pd.kind,
@@ -1107,6 +1124,14 @@ function projectState(
               : {}),
             ...((revealAll || pd.player === seat) && pd.resourcePayment
               ? { resourcePayment: pd.resourcePayment }
+              : {}),
+            ...(privateDecision && preStackFlow && preStackCard
+              ? {
+                  preStackSource: {
+                    card: cardView(state, runtime, preStackCard),
+                    zone: preStackFlow.zone,
+                  },
+                }
               : {}),
             ...staged,
           };

@@ -113,6 +113,7 @@ function projectCardPlay(
   seat: number,
   intent: Extract<PendingInteraction["intent"], { kind: "play-card" | "play-from-arsenal" | "play-from-zone" }>,
 ): GameView | null {
+  if (intent.deferPlayPresentation) return null;
   const source = cardAnywhere(view, intent.instanceId);
   if (!source) return null;
   let players = removeCard(view.players, source.instanceId);
@@ -146,6 +147,44 @@ function projectCardPlay(
       label: data?.name ?? playedCard.name ?? "Played card",
       optional: false,
     }, ...view.stack],
+  };
+}
+
+/** A card paying pre-stack declaration/additional costs is intentionally not
+ * presented as played yet. Keep it in its announced source zone so the final
+ * authoritative stack state produces the one real movement. */
+function presentPreStackSource(view: GameView, seat: number): GameView {
+  const source = view.pendingDecision?.player === seat
+    ? view.pendingDecision.preStackSource
+    : undefined;
+  const player = view.players[seat];
+  if (!source || !player || cardInPlayer(player, source.card.instanceId)) return view;
+  const withSource: PlayerView = source.zone === "hand"
+    ? {
+        ...player,
+        hand: [...player.hand, source.card],
+        handCount: player.handCount + 1,
+      }
+    : source.zone === "arsenal"
+      ? {
+          ...player,
+          arsenal: [...player.arsenal, { ...source.card, faceDown: true }],
+          arsenalCount: player.arsenalCount + 1,
+        }
+      : source.zone === "banish"
+        ? { ...player, banish: [...player.banish, source.card] }
+        : source.zone === "graveyard"
+          ? { ...player, graveyard: [...player.graveyard, source.card] }
+          : {
+              ...player,
+              visibleDeckTop: source.card,
+              deckCount: player.deckCount + 1,
+            };
+  return {
+    ...view,
+    players: view.players.map((candidate) =>
+      candidate.seat === seat ? withSource : candidate
+    ) as GameView["players"],
   };
 }
 
@@ -274,20 +313,26 @@ export function optimisticInteractionView(
   yourSeat: number | null,
   pending: PendingInteraction | null,
 ): OptimisticInteractionProjection {
+  const presentedAuthoritative = view && yourSeat !== null
+    ? presentPreStackSource(view, yourSeat)
+    : view;
+  const preStackSourceId = presentedAuthoritative?.pendingDecision?.preStackSource?.card.instanceId;
   const authoritative = {
-    view,
-    key: "interaction:authoritative",
+    view: presentedAuthoritative,
+    key: preStackSourceId === undefined
+      ? "interaction:authoritative"
+      : `interaction:pre-stack:${preStackSourceId}`,
     predictsSemanticTransition: false,
   };
-  if (!view || yourSeat === null || !pending) return authoritative;
+  if (!presentedAuthoritative || yourSeat === null || !pending) return authoritative;
   const { intent } = pending;
   const projected = intent.kind === "play-card"
     || intent.kind === "play-from-arsenal"
     || intent.kind === "play-from-zone"
-      ? projectCardPlay(view, yourSeat, intent)
+      ? projectCardPlay(presentedAuthoritative, yourSeat, intent)
       : intent.kind === "activate-ability"
-        ? projectActivation(view, yourSeat, intent)
-        : projectDecision(view, yourSeat, intent);
+        ? projectActivation(presentedAuthoritative, yourSeat, intent)
+        : projectDecision(presentedAuthoritative, yourSeat, intent);
   if (!projected) return authoritative;
   if ("view" in projected) {
     return {

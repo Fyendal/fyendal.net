@@ -236,6 +236,15 @@ describe("client messages", () => {
       intent: { kind: "pass" },
       autoPass: true,
     })).not.toBeNull();
+    expect(decodeClientMessage({
+      type: "intent",
+      intent: {
+        kind: "play-card",
+        instanceId: 1,
+        pitchInstanceIds: [],
+        deferPlayPresentation: true,
+      },
+    })).not.toBeNull();
     for (const target of ["last-action", "current-turn", "previous-turn"]) {
       expect(decodeClientMessage({ type: "undo", target })).not.toBeNull();
     }
@@ -249,6 +258,7 @@ describe("client messages", () => {
     expect(decodeClientMessage({ type: "intent", intent: { kind: "choose", optionId: "x".repeat(257) } })).toBeNull();
     expect(decodeClientMessage({ type: "intent", intent: { kind: "play-card", instanceId: Number.MAX_SAFE_INTEGER + 1, pitchInstanceIds: [] } })).toBeNull();
     expect(decodeClientMessage({ type: "intent", intent: { kind: "play-card", instanceId: 1, pitchInstanceIds: [], pitchRequired: -1 } })).toBeNull();
+    expect(decodeClientMessage({ type: "intent", intent: { kind: "play-card", instanceId: 1, pitchInstanceIds: [], deferPlayPresentation: false } })).toBeNull();
     expect(decodeClientMessage({ type: "intent", intent: { kind: "defend", instanceIds: Array(257).fill(1) } })).toBeNull();
     expect(decodeClientMessage({ type: "present-deck", deck: { weaponIds: [], equipment: { crown: "x" }, deck: [] } })).toBeNull();
     expect(decodeClientMessage({ type: "intent", intent: { kind: "pass" }, autoPass: false })).toBeNull();
@@ -387,6 +397,26 @@ describe("GameView and server messages", () => {
       },
     };
     expect(decodeGameView(resourcePayment)).not.toBeNull();
+    expect(decodeGameView({
+      ...gameView(),
+      pendingDecision: {
+        player: 0,
+        kind: "choose-target",
+        prompt: "Choose X",
+        options: ["0", "1"],
+        preStackSource: { card, zone: "hand" },
+      },
+    })).not.toBeNull();
+    expect(decodeGameView({
+      ...gameView(),
+      pendingDecision: {
+        player: 0,
+        kind: "choose-target",
+        prompt: "Choose X",
+        options: ["0", "1"],
+        preStackSource: { card, zone: "resolving" },
+      },
+    })).toBeNull();
     const triggerOrder = {
       ...gameView(),
       pendingDecision: {
@@ -448,7 +478,7 @@ describe("GameView and server messages", () => {
       { type: "room-created", code: "ABC123", seat: 0, token: "token", version: 1 },
       { type: "joined", code: "ABC123", seat: null, token: "", spectator: true, version: 1 },
       { type: "game-started", version: 1 },
-      { type: "state", version: 1, view: gameView(), transition: { fromVersion: 0, kind: "forward", events: [{ kind: "move", from: { kind: "deck", seat: 0, position: "top" }, to: { kind: "hand", seat: 0 }, count: 1 }] }, playerProfiles, yourSeat: 0, legal: [{ kind: "play-card", instanceId: 1, pitchInstanceIds: [], boost: true }], actionCandidates: [{ kind: "play-card", instanceId: 2, pitchInstanceIds: [], pitchRequired: 4 }], spectators: 2, lastActionAt: [0, 1], botGame: true },
+      { type: "state", version: 1, view: gameView(), transition: { fromVersion: 0, kind: "forward", events: [{ kind: "move", from: { kind: "deck", seat: 0, position: "top" }, to: { kind: "hand", seat: 0 }, count: 1 }] }, playerProfiles, yourSeat: 0, legal: [{ kind: "play-card", instanceId: 1, pitchInstanceIds: [], boost: true }], actionCandidates: [{ kind: "play-card", instanceId: 2, pitchInstanceIds: [], pitchRequired: 4, deferPlayPresentation: true }], spectators: 2, lastActionAt: [0, 1], botGame: true },
       { type: "spectators", count: 2, version: 1 },
       { type: "opponent-disconnected", version: 1 }, { type: "opponent-reconnected", version: 1 },
       { type: "emote", seat: 1, message: "Good game!" },
