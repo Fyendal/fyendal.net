@@ -5,6 +5,13 @@ import type { GameStateInternal } from "./runtimeState.js";
 import type { CardInstance, PlayerState } from "./state.js";
 import { currentLink, opponent } from "./zoneQueries.js";
 
+/** Whether a turn-scoped effect prohibits this player from attacking with
+ * weapons. Callers still identify whether the proposed attack source is a
+ * weapon, including objects temporarily made into weapons. */
+export function weaponAttacksProhibited(player: PlayerState): boolean {
+  return player.flags.cannotAttackWithWeaponsThisTurn === true;
+}
+
 /** A delayed effect may prohibit attack action cards up to a base-power
  * threshold during a specific turn (Crush the Weak). The turn stamp lives on
  * the affected hero so it survives the intervening end-phase cleanup. */

@@ -782,7 +782,7 @@
   "text": "You may destroy a Gold you control rather than pay this card's {r} cost.",
   "pitch": 2,
   "cost": 2,
-  "defense": 6,
+  "defense": 5,
   "classes": [
    "warrior"
   ],
@@ -795,7 +795,7 @@
   "text": "You may destroy a Gold you control rather than pay this card's {r} cost.",
   "pitch": 3,
   "cost": 2,
-  "defense": 6,
+  "defense": 4,
   "classes": [
    "warrior"
   ],

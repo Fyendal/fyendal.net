@@ -381,11 +381,21 @@ describe("WTR generic — non-attack actions", () => {
     });
     g.play("energy potion|3")
       .expectInZone(0, "energy potion|3", "board")
-      .expectAP(0, 0)
-      .activate("energy potion|3") // instant speed: no action point needed
-      .expectResources(0, 2)
+      .expectAP(0, 0);
+
+    const potion = g.state.players[0]!.board.find(
+      (card) => card.cardId === printingId("energy potion|3"),
+    )!;
+    g.activate("energy potion|3", { settle: false }) // destroyed as a cost, before the effect resolves
       .expectNotInZone(0, "energy potion|3", "board")
-      .expectInZone(0, "energy potion|3", "graveyard");
+      .expectInZone(0, "energy potion|3", "graveyard")
+      .expectResources(0, 0);
+    expect(legalIntents(g.state, 0)).not.toContainEqual(expect.objectContaining({
+      kind: "activate-ability",
+      sourceInstanceId: potion.instanceId,
+    }));
+
+    g.settle().expectResources(0, 2);
   });
 
   it("Timesnap Potion enters the board and destroys for two action points", () => {

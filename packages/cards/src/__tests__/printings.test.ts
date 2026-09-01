@@ -2,6 +2,16 @@ import { describe, expect, it, vi } from "vitest";
 import { cardData, scripts, warnOnInconsistentPrintings } from "../index.js";
 
 describe("printing consistency", () => {
+  it("uses the correct defense for each Golden Company pitch", () => {
+    const expectedDefenseByPitch = new Map([[1, 6], [2, 5], [3, 4]]);
+    const printings = Object.values(cardData).filter((card) => card.name === "Golden Company");
+
+    expect(printings.length).toBeGreaterThan(0);
+    for (const printing of printings) {
+      expect(printing.defense, printing.id).toBe(expectedDefenseByPitch.get(printing.pitch!));
+    }
+  });
+
   it("applies the September 2026 text errata to every affected printing", () => {
     const expectedText = new Map([
       [

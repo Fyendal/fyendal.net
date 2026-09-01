@@ -69,7 +69,7 @@ import { canPayRequiredHandCardsForAdditionalCost, scriptedPaymentOptions } from
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { actionLimitReached, controlsBow, firstAttackExtraCost, consumeFirstAttackExtraCost, isFrozen } from "./ruleQueries.js";
 import { nonAttackActionCardLimitReached } from "./restrictions.js";
-import { attackActionPlayRestricted } from "./combatRestrictions.js";
+import { attackActionPlayRestricted, weaponAttacksProhibited } from "./combatRestrictions.js";
 import { pushAbilityLayer, pushCardLayer } from "./stackCore.js";
 
 function isAttackCard(data: CardData): boolean {
@@ -549,6 +549,9 @@ export function activateAbility(
   }
   if (ability.isAttack && player.flags[`cannotAttackInstance:${card.instanceId}`] === true) {
     return `${nameOf(state, card.cardId)} cannot attack again this turn`;
+  }
+  if (ability.isAttack && cardHasType(state, card, "weapon") && weaponAttacksProhibited(player)) {
+    return "cannot attack with weapons this turn";
   }
   if ((ability.fromBanish === true) !== isBanishSource || ability.fromGraveyard) {
     return "ability is not usable from this zone";

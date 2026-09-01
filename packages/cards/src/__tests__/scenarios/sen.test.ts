@@ -196,6 +196,26 @@ describe("SEN — transcend", () => {
     s.expectInZone(0, "homage to ancestors|3", "graveyard");
   });
 
+  it("a blue defense reaction played on the opponent's turn does not enable transcend next turn", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: [RED] },
+        enigmaSeat({ hand: ["big blue sky|3", "preserve tradition|3"], graveyard: [YELLOW] }),
+      ],
+    });
+    s.play(RED);
+    s.blockWith();
+    yieldToWindow(s, 1);
+    s.react("big blue sky|3").settle();
+    expect(s.state.players[1]!.flags["playedPitch:3"]).toBe(1);
+
+    s.endTurn();
+    expect(s.state.players[1]!.flags["playedPitch:3"]).toBeUndefined();
+    s.play("preserve tradition|3");
+    s.chooseCard(YELLOW);
+    s.expectInZone(1, "preserve tradition|3", "graveyard");
+  });
+
   it("A Drop in the Ocean: target attack gets -1{p}; needs an attack on the chain", () => {
     const s = scenario({
       seats: [

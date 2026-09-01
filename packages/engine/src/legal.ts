@@ -4,6 +4,7 @@ import type { AdditionalPlayCostSelection, CardData, GameIntent, MeldSide, Playa
 import type { CardInstance, PlayerState } from "./state.js";
 import {
   activatedAbilitiesSuppressed,
+  cardHasType,
   dataOf,
   hasKeyword,
   instanceDataOf,
@@ -39,7 +40,7 @@ import { canPayRequiredHandCardsForAdditionalCost, pitchProhibitedByEffect, pitc
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { actionLimitReached, controlsBow, firstAttackExtraCost, isFrozen, opposingInstantsProhibited } from "./ruleQueries.js";
 import { nonAttackActionCardLimitReached, opposingActionsProhibited, ownedCardActionProhibited } from "./restrictions.js";
-import { attackActionPlayRestricted, defendingHeroCannotRespondBelowPower } from "./combatRestrictions.js";
+import { attackActionPlayRestricted, defendingHeroCannotRespondBelowPower, weaponAttacksProhibited } from "./combatRestrictions.js";
 
 function filterOwnedCardActions(
   state: GameStateInternal,
@@ -941,6 +942,7 @@ function abilityIntents(
     for (let ai = 0; ai < abilities.length; ai++) {
       const ability = abilities[ai]!;
       if (ability.isAttack && player.flags[`cannotAttackInstance:${card.instanceId}`] === true) continue;
+      if (ability.isAttack && cardHasType(state, card, "weapon") && weaponAttacksProhibited(player)) continue;
       const fromBanish = player.banish.some((candidate) => candidate.instanceId === card.instanceId);
       if ((ability.fromBanish === true) !== fromBanish || ability.fromGraveyard) continue;
       // Cloaked: while face-down, only abilities that turn the card face up
@@ -1069,6 +1071,7 @@ function abilityIntents(
   // as weapons, once per turn each, for 1 AP + the marker's {r} cost
   if (player.actionPoints >= 1 && !actionLimitReached(state, player)) {
     for (const card of player.board) {
+      if (weaponAttacksProhibited(player)) continue;
       if (!isAuraAttacker(state, player, card)) continue;
       if (actionAbilityRestrictedByModifier(state, player.seat, card, true)) continue;
       const marker = grantsAuraAttackMarker(state, player, card)!;

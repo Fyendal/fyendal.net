@@ -29,6 +29,7 @@ import { activationCostReductionForCard, actionAbilityRestrictedByModifier } fro
 import { consumeNextActionGoAgain, noteActionPlayedOrActivated } from "./cardLifecycle.js";
 import { attackCostReductionForTarget, consumeAttackCostReductions } from "./playRules.js";
 import { actionLimitReached, consumeFirstAttackExtraCost, firstAttackExtraCost, goAgainSuppressed } from "./ruleQueries.js";
+import { weaponAttacksProhibited } from "./combatRestrictions.js";
 
 import {
   currentLink,
@@ -193,6 +194,7 @@ export function activateAuraAttack(
   if (!marker || abilityIndex !== grantedIndex || !isAuraAttacker(state, player, card)) {
     return `${nameOf(state, card.cardId)} has no such activated ability`;
   }
+  if (weaponAttacksProhibited(player)) return "cannot attack with weapons this turn";
   if (actionAbilityRestrictedByModifier(state, seat, card, true)) {
     return "action ability is prohibited by a turn restriction";
   }
@@ -443,6 +445,7 @@ export function startNextQueuedPermanentAttack(
     if (
       !card ||
       player.flags[`cannotAttackInstance:${queued.instanceId}`] === true ||
+      (weapon !== undefined && weaponAttacksProhibited(player)) ||
       !attackTargetIsLegal(state, runtime, seat, queued.targetAllyId)
     ) continue;
     declareAttack(state, runtime, seat, card, weapon ? "weapon" : "ally", false, queued.targetAllyId);
@@ -469,7 +472,11 @@ export function attackWithPermanent(
     card.instanceId === instanceId && cardTypesOf(state, card).includes("ally")
   );
   const card = weapon ?? ally;
-  if (!card || player.flags[`cannotAttackInstance:${instanceId}`] === true) return false;
+  if (
+    !card ||
+    player.flags[`cannotAttackInstance:${instanceId}`] === true ||
+    (weapon !== undefined && weaponAttacksProhibited(player))
+  ) return false;
 
   if (!targetDeclared) {
     const mandatory = mandatoryAttackTargets(state, runtime, seat);

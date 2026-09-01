@@ -331,6 +331,66 @@ describe("SEA — pirate and generic attacks", () => {
       .expectResources(0, 5);
   });
 
+  it("Gold-Baited Hook creates Gold on a Pirate hit when the defending hero controls none", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 1,
+          equipment: { arms: "gold-baited hook|0" },
+          hand: ["saltwater swell|3"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.activate("gold-baited hook|0")
+      .play("saltwater swell|3")
+      .blockWith()
+      .settle()
+      .expectInZone(0, "gold|0", "board")
+      .endTurn()
+      .expectEquipped(0, "arms", "gold-baited hook|0");
+  });
+
+  it("Gold-Baited Hook steals an opposing Gold on a Pirate hit and survives the end phase", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 1,
+          equipment: { arms: "gold-baited hook|0" },
+          hand: ["saltwater swell|3"],
+        },
+        { hero: "dorinthea", board: ["gold|0"] },
+      ],
+    });
+    const gold = g.state.players[1]!.board[0]!;
+
+    g.activate("gold-baited hook|0")
+      .play("saltwater swell|3")
+      .blockWith()
+      .settle();
+
+    expect(g.state.players[0]!.board).toContainEqual(gold);
+    expect(g.state.players[1]!.board).not.toContainEqual(gold);
+    expect(g.state.players[0]!.flags["stolenName:gold"]).toBe(true);
+    g.endTurn().expectEquipped(0, "arms", "gold-baited hook|0");
+  });
+
+  it("Gold-Baited Hook destroys itself if its controller created or stole no Gold", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", equipment: { arms: "gold-baited hook|0" } },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.endTurn()
+      .expectNoEquipment(0, "arms")
+      .expectInZone(0, "gold-baited hook|0", "graveyard");
+  });
+
   it("Scooba does not trigger when another card is the declared attacker", () => {
     const g = scenario({
       seats: [

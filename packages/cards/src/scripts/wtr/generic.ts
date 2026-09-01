@@ -122,10 +122,10 @@ const energyPotionScript = (): CardScript => ({
     isAttack: false,
     goAgain: false,
     timing: "instant",
+    destroySelfCost: true,
     onActivate(ctx) {
       ctx.changeResources(ctx.seat, 2);
       ctx.logPublic(`${ctx.data.name}: gained {r}{r}`);
-      ctx.destroySelf();
     },
   },
 });
