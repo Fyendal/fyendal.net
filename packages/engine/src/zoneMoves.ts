@@ -495,7 +495,6 @@ export function banishCard(
     ?? findAndRemoveCard(state, instanceId, { includeEquipment: true });
   if (!found) return false;
   const { owner, card, fromArena, fromZone } = found;
-  delete card.flipped;
   if (fromArena) fireLeaveArena(state, runtime, owner.seat, card, "banish");
   applyBanishVisibility(card);
   enterBanish(state, runtime, card, fromZone, causedBySeat);

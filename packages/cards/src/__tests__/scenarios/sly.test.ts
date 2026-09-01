@@ -576,7 +576,7 @@ describe("SLY — attacks and defense", () => {
     fromHand.play("power play|3", { pitch: ["mocking blow|3"] }).expectAttackValue(1);
   });
 
-  it("Oasis Respite shields 4 damage and gains 1 life while behind", () => {
+  it("Oasis Respite exposes hero targets and projects its 4 damage shield", () => {
     // the shield lasts the turn it is played, so it is played as an instant on
     // the opponent's turn, before their attack resolves
     const g = scenario({
@@ -590,8 +590,13 @@ describe("SLY — attacks and defense", () => {
     g.blockWith();
     g.passPriority(); // attacker passes → defense reaction window
     g.react("oasis respite|1", { pitch: ["mocking blow|3"] });
-    g.chooseOption("Lyath") // target hero
+    expect(projectStateFor(g.state, 0).pendingDecision?.optionCards).toEqual([
+      expect.objectContaining({ name: "Lyath Goldmane" }),
+      expect.objectContaining({ name: "Rhinar" }),
+    ]);
+    g.chooseCard("lyath goldmane|0") // target hero
       .chooseCard("raging onslaught|2") // the source: the attacking card itself
+      .expectDamageToPrevent(4, ["oasis respite|1"])
       .chooseOption("yes") // behind on life: gain 1
       .expectLog("is prevented (4)") // 6 - 4 shield = 2 damage
       .expectLife(0, 9);
@@ -609,7 +614,7 @@ describe("SLY — attacks and defense", () => {
     g.blockWith();
     g.passPriority(); // → defense reaction window
     g.react("oasis respite|1", { pitch: ["mocking blow|3"] });
-    g.chooseOption("Lyath").chooseCard("bone basher|0"); // shield against the weapon, not this attack
+    g.chooseCard("lyath goldmane|0").chooseCard("bone basher|0"); // shield against the weapon, not this attack
     g.settle().expectLife(0, 18); // Head Jab hits for 2 — the shield doesn't cover it
     g.attackWithWeapon("bone basher|0", { pitch: ["raging onslaught|3"] });
     g.blockWith().settle().expectLife(0, 18); // 4 damage, all prevented
@@ -623,7 +628,7 @@ describe("SLY — attacks and defense", () => {
       ],
     });
     g.play("oasis respite|1", { pitch: ["mocking blow|3"] });
-    g.chooseOption("Rhinar") // target the opposing hero
+    g.chooseCard("rhinar|0") // target the opposing hero
       .chooseCard("bone basher|0")
       .chooseOption("yes") // Rhinar is behind: their controller gains 1
       .expectLife(1, 16);

@@ -1371,6 +1371,36 @@ describe("Armory Decks — rules regression coverage", () => {
     )).toBe(true);
   });
 
+  it("red Sharp Incline makes the next Zenith Blade attack free", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["zenith blade|0", "dawnblade|0"],
+          hand: ["sharp incline|1"],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.play("sharp incline|1").chooseCard("zenith blade|0");
+
+    const zenith = g.state.players[0]!.weapons[0]!;
+    const dawnblade = g.state.players[0]!.weapons[1]!;
+    const freeAttacks = legalIntents(g.state, 0).filter(
+      (intent) => intent.kind === "activate-ability" && intent.pitchInstanceIds.length === 0,
+    );
+    expect(freeAttacks.some((intent) =>
+      intent.kind === "activate-ability" && intent.sourceInstanceId === zenith.instanceId
+    )).toBe(true);
+    expect(freeAttacks.some((intent) =>
+      intent.kind === "activate-ability" && intent.sourceInstanceId === dawnblade.instanceId
+    )).toBe(false);
+
+    g.attackWithWeapon("zenith blade|0").expectResources(0, 0);
+  });
+
   it("blue Edict of Steel creates Flurry after Reverent Rerebrace reaches its threshold", () => {
     const g = scenario({
       seats: [

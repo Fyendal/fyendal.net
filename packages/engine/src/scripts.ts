@@ -278,10 +278,11 @@ export interface ScriptCtx {
   notifyTrapTriggered(): void;
   /** Turn a face-down card (e.g. a mentor in arsenal) face up */
   flipFaceUp(): void;
-  /** Transcend (MST): put self into its owner's hand flipped (back face
-   *  active) and set the owner's per-turn `transcendedThisTurn` flag. The card
-   *  leaves the stack-resolution flow (returnSelfToHand precedent — it does
-   *  NOT also go to the graveyard). No-op when self is nowhere movable. */
+  /** Transcend (MST): put self into its owner's hand flipped, with its back
+   *  face active for the remainder of the game, and set the owner's per-turn
+   *  `transcendedThisTurn` flag. The card leaves the stack-resolution flow
+   *  (returnSelfToHand precedent — it does NOT also go to the graveyard).
+   *  No-op when self is nowhere movable. */
   transcend(): void;
   /** Destroy self (permanent or face-up attack); moves to graveyard and fires onDestroyed. */
   destroySelf(): void;

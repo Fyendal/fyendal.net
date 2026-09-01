@@ -10,8 +10,8 @@ export function dataOf(state: GameStateInternal, cardId: string): CardData {
   return data;
 }
 
-/** Effective static data of a card instance: a flipped card (Transcend) uses
- * its back face's data while it is in hand. */
+/** Effective static data of a card instance: a transcended card uses its back
+ * face's data for the remainder of the game (CR 9.1.5b). */
 export function instanceDataOf(state: GameStateInternal, card: CardInstance): CardData {
   const front = dataOf(state, card.cardId);
   if (card.flipped && front.backId) return dataOf(state, front.backId);

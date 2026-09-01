@@ -178,7 +178,11 @@ describe("SEN — transcend", () => {
     s.play("second tenet of chi: wind|3", { pitch: ["homage to ancestors|3"] });
     expect(s.state.players[0]!.chi).toBe(0); // 3 chi in, 3 spent (chi before resources)
     const pitched = s.state.players[0]!.pitch.find((c) => c.cardId === printingId("homage to ancestors|3"))!;
-    expect(pitched.flipped).toBeUndefined(); // leaving the hand reverts the flip
+    expect(pitched.flipped).toBe(true);
+    expect(projectStateFor(s.state, 0).players[0].pitch).toContainEqual(
+      expect.objectContaining({ instanceId: pitched.instanceId, name: "Inner Chi" }),
+    );
+    expect(s.state.log.some((entry) => entry.publicText?.includes("pitches Inner Chi (3 chi)"))).toBe(true);
     s.blockWith().settle();
     s.expectFinalAttack(5).expectAP(0, 1); // transcended this turn → go again
   });

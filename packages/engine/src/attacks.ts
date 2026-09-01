@@ -146,20 +146,24 @@ export function attackActivationCost(
     }
   }
   const data = dataOf(state, attacker.cardId);
-  const tags = [...(data.classes ?? []), ...(data.subtypes ?? [])].map((tag) => tag.toLowerCase());
+  const cardType = cardTypesOf(state, attacker).includes("ally") ? "ally" : "weapon";
   for (const modifier of state.modifiers) {
     if (
       modifier.seat !== player.seat ||
       modifier.consumed ||
-      (modifier.scope !== "combat-chain" && modifier.scope !== "until-end-of-turn") ||
-      !modifier.attackActivationCostReduction
+      !["combat-chain", "next-attack", "until-end-of-turn"].includes(modifier.scope) ||
+      !modifier.attackActivationCostReduction ||
+      (modifier.appliesToInstanceId !== undefined &&
+        modifier.appliesToInstanceId !== attacker.instanceId) ||
+      !modifierAppliesTo(
+        state,
+        modifier,
+        data,
+        cardType,
+        cardColorOf(state, attacker),
+        attacker,
+      )
     ) continue;
-    if (modifier.appliesToSubtype) {
-      const wanted = Array.isArray(modifier.appliesToSubtype)
-        ? modifier.appliesToSubtype
-        : [modifier.appliesToSubtype];
-      if (!wanted.some((tag) => tags.includes(tag.toLowerCase()))) continue;
-    }
     cost -= modifier.attackActivationCostReduction;
   }
   cost -= activationCostReductionForCard(state, player.seat, attacker);
