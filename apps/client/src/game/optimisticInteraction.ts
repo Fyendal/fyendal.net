@@ -2,6 +2,7 @@ import type { CardView, GameView, PlayerView } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import type { PendingInteraction } from "../store/types.js";
 import { heroCard } from "./board/BoardPrimitives.js";
+import { optDecisionCards } from "./decisionPresentation.js";
 
 export interface OptimisticInteractionProjection {
   view: GameView | null;
@@ -191,13 +192,64 @@ function projectDecision(
   // decision while its resource-payment choice is in flight would falsely
   // animate every staged defender back to its source.
   if (decision.kind === "defend") return null;
-  if (decision.kind !== "arsenal" || intent.kind !== "choose" || intent.optionId === "pass") {
+
+  if (intent.kind === "choose") {
+    const optChoice = /^(?:top|bottom):(\d+)$/.exec(intent.optionId);
+    const optCards = optDecisionCards(decision);
+    const selectedOptCard = optChoice && optCards
+      ? optCards.find(({ id }) => id === optChoice[1])
+      : undefined;
+    if (selectedOptCard) {
+      const keepOption = (option: string) => !option.endsWith(`:${selectedOptCard.id}`);
+      const keptIndices = (decision.options ?? []).flatMap((option, index) =>
+        keepOption(option) ? [index] : []
+      );
+      const options = keptIndices.map((index) => decision.options![index]!);
+      const remainingOptCards = options.some((option) => /^(?:top|bottom):\d+$/.test(option));
+      return {
+        view: {
+          ...view,
+          pendingDecision: remainingOptCards
+            ? {
+                ...decision,
+                options,
+                ...(decision.optionLabels
+                  ? { optionLabels: keptIndices.map((index) => decision.optionLabels![index]!) }
+                  : {}),
+                ...(decision.optionCounts
+                  ? { optionCounts: keptIndices.map((index) => decision.optionCounts![index]!) }
+                  : {}),
+                ...(decision.optionCards
+                  ? { optionCards: keptIndices.map((index) => decision.optionCards![index]!) }
+                  : {}),
+                ...(decision.lookedCards
+                  ? {
+                      lookedCards: decision.lookedCards.filter(
+                        (card) => card.instanceId !== selectedOptCard.card.instanceId,
+                      ),
+                    }
+                  : {}),
+              }
+            : null,
+        },
+        predictsSemanticTransition: false,
+      };
+    }
+  }
+
+  // Ordering is submitted only after the entire local ordering is complete.
+  // Other scripted choices can be incremental (Opt and mode-allocation
+  // decisions, for example), so keep their authoritative decision mounted
+  // unless the client can prove that this interaction completes it.
+  if (intent.kind === "order-triggers") {
+    return { view: { ...view, pendingDecision: null }, predictsSemanticTransition: false };
+  }
+  if (decision.kind !== "arsenal" || intent.kind !== "choose") return null;
+  if (intent.optionId === "pass") {
     return { view: { ...view, pendingDecision: null }, predictsSemanticTransition: false };
   }
   const instanceId = Number(intent.optionId);
-  if (!Number.isSafeInteger(instanceId)) {
-    return { view: { ...view, pendingDecision: null }, predictsSemanticTransition: false };
-  }
+  if (!Number.isSafeInteger(instanceId)) return null;
   const player = view.players[seat];
   const card = player?.hand.find((candidate) => candidate.instanceId === instanceId);
   if (!player || !card) return null;
