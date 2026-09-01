@@ -180,7 +180,17 @@ export function linkAttackHasType(
   if (attackGrantedType(link, normalized)) return true;
   return state.modifiers.some(
     (modifier) =>
-      (modifier.scope === "chain-link" || modifier.scope === "combat-chain") &&
+      (
+        modifier.scope === "combat-chain" ||
+        // A next-attack type grant becomes chain-link scoped when it attaches.
+        // It modifies only that active link, not every earlier link while the
+        // granted attack is unresolved. The attached link is also stamped
+        // above so its type survives after chain-link modifiers expire.
+        (
+          modifier.scope === "chain-link" &&
+          state.chain[state.chain.length - 1] === link
+        )
+      ) &&
       modifier.grantType?.toLowerCase() === normalized &&
       modifierApplies(state, modifier, link),
   );

@@ -181,22 +181,34 @@ describe("SFA — Fai", () => {
       .expectResources(0, 0);
   });
 
-  it("charges {r} with Crouching Tiger followed by two Draconic chain links", () => {
+  it("charges {r} after Pouncing Paws' Crouching Tiger and two Draconic chain links", () => {
     const s = scenario({
       seats: [
         faiSeat({
-          hand: ["crouching tiger|0", "brand with cinderclaw|1", "blaze headlong|1", RED],
+          equipment: { ...NO_EQUIPMENT, legs: "pouncing paws|0" },
+          hand: ["brand with cinderclaw|1", "hot on their heels|1", RED],
           graveyard: [FLAME],
         }),
         { hero: "rhinar", hand: [] },
       ],
     });
 
-    s.play("crouching tiger|0").blockWith().settle()
+    s.activate("pouncing paws|0");
+    playFromZone(s, "crouching tiger|0", "banish");
+    s.settle().blockWith().settle()
       .play("brand with cinderclaw|1").blockWith().settle()
-      .play("blaze headlong|1").blockWith().settle();
+      .play("hot on their heels|1", { settle: false });
+
+    for (
+      let guard = 0;
+      !s.state.log.at(-1)?.publicText?.includes("attacks with Hot on Their Heels") && guard < 12;
+      guard++
+    ) {
+      s.passPriority();
+    }
 
     expect(s.state.chain).toHaveLength(3);
+    expect(s.state.log.at(-1)?.publicText).toContain("attacks with Hot on Their Heels");
     const intents = abilityIntentsOn(s, 0, FAI);
     expect(intents.some((intent) => intent.pitchInstanceIds.length === 0)).toBe(false);
     expect(intents.some((intent) => intent.pitchInstanceIds.length === 1)).toBe(true);
