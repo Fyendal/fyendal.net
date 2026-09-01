@@ -50,6 +50,7 @@ export type ScriptCommandName =
   | "recordDieRoll"
   | "removeFromOwnerZones"
   | "removeFromStackResolution"
+  | "replaceAttackFromBanish"
   | "replaceAttackFromHand"
   | "replaceTemporalPowerGain"
   | "requestClash"

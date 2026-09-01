@@ -329,6 +329,44 @@ describe("HNT — marked heroes and daggers", () => {
     expect(g.state.players[0]!.equipment.chest?.counters?.stain ?? 0).toBe(0);
   });
 
+  it("Blood Splattered Vest asks before resolving a Flick Knives dagger hit", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["kunai of retribution|0"],
+          equipment: {
+            arms: "flick knives|0",
+            chest: "blood splattered vest|0",
+          },
+          hand: ["head jab|1"],
+        },
+        { hero: "dorinthea", hand: ["wounding blow|1"] },
+      ],
+    });
+
+    g.play("head jab|1")
+      .blockWith("wounding blow|1")
+      .activate("flick knives|0")
+      .chooseCard("kunai of retribution|0");
+
+    expect(g.state.pendingDecision).toMatchObject({
+      player: 0,
+      kind: "optional-effect",
+      prompt: "Blood Splattered Vest: gain 1 resource and add a stain counter?",
+      options: ["yes", "no"],
+      defaultOption: "no",
+    });
+    expect(projectStateFor(g.state, 0).pendingDecision).toMatchObject({
+      player: 0,
+      kind: "optional-effect",
+      options: ["yes", "no"],
+      defaultOption: "no",
+    });
+    g.chooseOption("no").expectResources(0, 0);
+    expect(g.state.players[0]!.equipment.chest?.counters?.stain ?? 0).toBe(0);
+  });
+
   it("Ignite discounts Cindra's Draconic hero activation and is consumed once", () => {
     const g = scenario({
       seats: [

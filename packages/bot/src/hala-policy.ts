@@ -1980,12 +1980,14 @@ export interface HalaIntentDecision {
 }
 
 // Hala's candidate preparation removes equivalent pitch payments and orders
-// the tactical roots. Most states fit the shallow budget; an unresolved
-// high-threshold Flurry conversion retains enough depth to prove both swings.
-const HALA_MAX_SEARCH_NODES = 56;
-const HALA_MAX_TRANSITIONS = 178;
-const HALA_DEEP_MAX_SEARCH_NODES = 105;
-const HALA_DEEP_MAX_TRANSITIONS = 320;
+// the tactical roots. Keep both deterministic budgets comfortably below the
+// server worker deadline: post-chain hands can make each simulated transition
+// expensive even after equivalent payments are collapsed. An unresolved
+// high-threshold Flurry conversion retains extra depth to prove both swings.
+const HALA_MAX_SEARCH_NODES = 48;
+const HALA_MAX_TRANSITIONS = 128;
+const HALA_DEEP_MAX_SEARCH_NODES = 72;
+const HALA_DEEP_MAX_TRANSITIONS = 192;
 const HALA_MAX_ROOT_CANDIDATES = 5;
 
 function needsDeepHalaSearch(input: BotPolicyInput): boolean {

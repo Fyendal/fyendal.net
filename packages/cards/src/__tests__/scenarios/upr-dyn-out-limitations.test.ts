@@ -153,12 +153,13 @@ describe("Uprising, Dynasty, and Outsiders rules regression coverage", () => {
   it("Imperial Warhorn coordinates per-hero choices", () => implementation("imperial warhorn|1", (script) => !!script.activated && !!script.onChoose));
   it("Uzuri swaps the active stealth attacking card", () => {
     const g = scenario({ seats: [
-      { hero: "rhinar", heroKey: "uzuri, switchblade|0", hand: ["infect|1", "snatch|1", "wounding blow|3"] },
+      { hero: "rhinar", heroKey: "uzuri, switchblade|0", hand: ["infiltrate|1", "shake down|1", "wounding blow|3"] },
       { hero: "dorinthea" },
     ] });
-    g.play("infect|1").blockWith().activate("uzuri, switchblade|0")
-      .chooseCard("wounding blow|3").chooseCard("snatch|1");
-    expect(g.state.chain.at(-1)!.attackingCard.cardId).toBe(printingId("snatch|1"));
+    g.play("infiltrate|1").blockWith().activate("uzuri, switchblade|0")
+      .chooseCard("shake down|1");
+    expect(g.state.chain.at(-1)!.attackingCard.cardId).toBe(printingId("shake down|1"));
+    expect(g.state.players[0]!.hand.map((card) => card.cardId)).toContain(printingId("wounding blow|3"));
   });
   it("Redback Shroud destroys two Silvers and equips from graveyard", () => {
     const g = scenario({ active: 1, seats: [

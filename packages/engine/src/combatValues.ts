@@ -192,7 +192,11 @@ export function chainLinksControlled(
   tag?: string,
 ): number {
   return state.chain.filter(
-    (link) =>
+    (link, index) =>
+      // Internally the pending attack is appended before its attack-layer
+      // resolves. It does not become a chain link until the Attack Step
+      // (CR 7.0.3a, 7.2.2), so it cannot yet contribute to this count.
+      !(state.stackResume === "start-attack-step" && index === state.chain.length - 1) &&
       link.attacker === seat &&
       (tag === undefined || linkAttackHasType(state, link, tag)),
   ).length;

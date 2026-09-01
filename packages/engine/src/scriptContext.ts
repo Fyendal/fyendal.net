@@ -2021,6 +2021,9 @@ export function makeCtx(
     replaceAttackFromHand(instanceId, maximumCost) {
       return runtime.commands.replaceAttackFromHand(state, seat, instanceId, maximumCost);
     },
+    replaceAttackFromBanish(instanceId, maximumCost) {
+      return runtime.commands.replaceAttackFromBanish(state, seat, instanceId, maximumCost);
+    },
     turnArsenalFaceUp(instanceId) {
       const owner = state.players.find((candidate) =>
         candidate.arsenal.some((card) => card.instanceId === instanceId),

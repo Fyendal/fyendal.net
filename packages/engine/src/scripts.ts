@@ -521,6 +521,9 @@ export interface ScriptCtx {
   /** Atomically bottom the current attack action and replace it with an
    * eligible attack action from hand, without play or attack-declared events. */
   replaceAttackFromHand(instanceId: number, maximumCost: number): boolean;
+  /** Atomically bottom the current attack action and replace it with an
+   * eligible face-up attack action from banish, without play or attack-declared events. */
+  replaceAttackFromBanish(instanceId: number, maximumCost: number): boolean;
   /** Turn a face-down arsenal card face up and fire its face-up arsenal hooks. */
   turnArsenalFaceUp(instanceId: number): boolean;
   /** Put a card (by instance id, from any of its owner's zones) on top of its
@@ -566,6 +569,8 @@ export interface ActivatedEffectCardCost {
   zone: "hand" | "graveyard" | "arsenal" | "arena";
   move: "banish" | "discard" | "destroy" | "put-on-deck-bottom" | "tap" | "remove-counter" | "turn-face-up";
   count: number;
+  /** Banish the selected card face down, keeping its identity private. */
+  faceDown?: boolean;
   pitch?: number;
   class?: string;
   subtype?: string;

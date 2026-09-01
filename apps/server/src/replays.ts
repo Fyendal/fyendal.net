@@ -108,6 +108,30 @@ export async function appendReplayView(
   } | null,
   now = Date.now(),
 ): Promise<string | null> {
+  let view: string;
+  let projectedTransition: string | null;
+  try {
+    view = JSON.stringify(projectStateForReplay(state, roomCode));
+    projectedTransition = transition
+      ? JSON.stringify({
+          kind: transition.kind,
+          events: projectTransitionEvents(transition.events, null, true),
+        })
+      : null;
+  } catch (error) {
+    // A traffic-less Cloud Run revision can remain alive briefly during a
+    // rollout and consume durable room work. If that older process cannot
+    // project a card introduced by the new revision, replay retention must not
+    // roll back the authoritative room mutation and strand the active player.
+    // Discard only the unfinished recording; database failures below remain
+    // transactional and continue to fail the mutation.
+    consoleError(`discarding replay recording for room ${roomCode}: frame projection failed`, error);
+    await db.query(
+      "DELETE FROM replay_games WHERE room_code = $1 AND status = 'recording'",
+      [roomCode],
+    );
+    return null;
+  }
   const inserted = await db.query(
     `INSERT INTO replay_frames (replay_id, room_version, view, transition)
      SELECT active.id, $2::bigint, $3::jsonb, $4::jsonb
@@ -120,13 +144,8 @@ export async function appendReplayView(
     [
       roomCode,
       roomVersion,
-      JSON.stringify(projectStateForReplay(state, roomCode)),
-      transition
-        ? JSON.stringify({
-            kind: transition.kind,
-            events: projectTransitionEvents(transition.events, null, true),
-          })
-        : null,
+      view,
+      projectedTransition,
     ],
   );
   if (!inserted.rows.length) return null;

@@ -62,22 +62,46 @@ function codexFrailtyChoice(ctx: ScriptCtx, seat: number): void {
   ctx.requestCardChoice(`codex-frailty:${seat}`, "Choose an attack for arsenal", attacks.map((card) => card.instanceId), seat);
 }
 
+const UZURI_BANISHED_CARD = "uzuriBanishedCard";
+
+export const uzuriAbility: CardScript = {
+  activated: {
+    cost: 0,
+    isAttack: false,
+    goAgain: false,
+    oncePerTurn: true,
+    timing: "attack-reaction",
+    label: "Swap a stealth attack",
+    effectCardCosts: [{
+      zone: "hand",
+      move: "banish",
+      count: 1,
+      faceDown: true,
+      prompt: "Banish a card from hand face down",
+    }],
+    canActivate: (ctx) => !!ctx.link &&
+      ctx.link.attacker === ctx.seat &&
+      ctx.link.attackCardType === "action" &&
+      (ctx.cardData(ctx.link.attackingCard.cardId).keywords ?? [])
+        .some((keyword) => keyword.toLowerCase() === "stealth") &&
+      ctx.player(ctx.seat).hand.length > 0,
+    onCostPaid(ctx, paidCards) {
+      ctx.setFlag("player", UZURI_BANISHED_CARD, paidCards.at(-1)?.instanceId ?? 0);
+    },
+    onActivate(ctx) {
+      const instanceId = Number(ctx.getFlag("player", UZURI_BANISHED_CARD));
+      ctx.setFlag("player", UZURI_BANISHED_CARD, false);
+      const card = ctx.player(ctx.seat).banish.find((candidate) => candidate.instanceId === instanceId);
+      if (!card || !ctx.setCardFaceDown(instanceId, false)) return;
+      ctx.logPublic(`${ctx.cardData(card.cardId).name} is turned face up`);
+      ctx.replaceAttackFromBanish(instanceId, 2);
+    },
+  },
+};
+
 export const outHighRarity: Record<string, CardScript> = {
   "plague hive|2": { triggers: [{ event: "card-pitched", sourceZone: "pitch", label: "Create a random adverse aura", condition: (ctx, pitched) => pitched?.instanceId === ctx.self.instanceId, effect(ctx) { const tokens = [BLOODROT, FRAILTY, INERTIA]; ctx.createToken(tokens[ctx.randomInt(tokens.length)]!, opponentSeat(ctx)); } }] },
-  "uzuri, switchblade|0": {
-    activated: {
-      cost: 0,
-      isAttack: false,
-      goAgain: false,
-      oncePerTurn: true,
-      timing: "attack-reaction",
-      effectCardCosts: [{ zone: "hand", move: "banish", count: 1, prompt: "Banish a card from hand face down" }],
-      canActivate: (ctx) => !!ctx.link && ctx.link.attacker === ctx.seat && ctx.link.attackCardType === "action" && (ctx.cardData(ctx.link.attackingCard.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "stealth") && ctx.player(ctx.seat).hand.some((card) => isAttack(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) <= 2),
-      onCostPaid(ctx, paidCards) { for (const card of paidCards) ctx.setCardFaceDown(card.instanceId, true); },
-      onActivate(ctx) { const cards = ctx.player(ctx.seat).hand.filter((card) => isAttack(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) <= 2); if (cards.length) ctx.requestCardChoice("adult-uzuri-swap", "Reveal an attack to swap in", cards.map((card) => card.instanceId)); },
-    },
-    onChoose(ctx, hook, option) { if (hook === "adult-uzuri-swap") ctx.replaceAttackFromHand(Number(option), 2); },
-  },
+  "uzuri, switchblade|0": uzuriAbility,
   "nerve scalpel|0": dagger({
     canTriggerOnHit(ctx) { return !!ctx.link && ctx.link.targetAllyId === undefined && ctx.link.attackingCard.instanceId === ctx.self.instanceId; },
     onHit(ctx) { ctx.addModifier({ scope: "until-end-of-turn", seat: opponentSeat(ctx), defense: -1, appliesToCardType: "reaction", once: true }); },
