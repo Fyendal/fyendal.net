@@ -309,6 +309,7 @@ export function DeckGrid(props: {
                   className="btn-bot"
                   disabled={illegal}
                   onClick={() => {
+                    props.onSelect("");
                     setBotDeckId(d.id);
                   }}
                 >

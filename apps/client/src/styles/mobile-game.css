@@ -796,6 +796,10 @@
     scrollbar-width: none;
     touch-action: pan-x pan-y;
   }
+  /* An on-hit badge makes the attack wrapper taller than its reactions.
+     Keep the cards aligned by their top edges instead of centering reactions
+     against the combined card-and-badge height. */
+  .chain > .chain-group { align-items: flex-start; }
   .chain-group::-webkit-scrollbar { display: none; }
   .chain-group .card-zone,
   .chain-group .card-hand {

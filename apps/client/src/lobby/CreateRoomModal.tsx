@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import type { DeckSummary } from "@fyendal/protocol";
 import type { BotOpponent } from "@fyendal/shared";
@@ -10,6 +10,10 @@ import { heroImageUrl } from "./heroImage.js";
 import { BotOpponentModal } from "./BotOpponentModal.js";
 
 const ROOM_FORMATS = ["cc", "silver-age"] as const satisfies readonly ConstructedFormat[];
+const DROPDOWN_GAP = 5;
+const DROPDOWN_VIEWPORT_MARGIN = 8;
+const DROPDOWN_MAX_HEIGHT = 260;
+const useClientLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 export function CreateRoomModal({ onClose }: { onClose: () => void }) {
   const {
@@ -144,10 +148,80 @@ export function DeckDropdown({
   onSelect: (id: string) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [layout, setLayout] = useState({ placement: "below" as "above" | "below", maxHeight: DROPDOWN_MAX_HEIGHT });
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const optionsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      if (event.target instanceof Node && !dropdownRef.current?.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("click", closeOnOutsideClick, true);
+    return () => document.removeEventListener("click", closeOnOutsideClick, true);
+  }, [open]);
+
+  useClientLayoutEffect(() => {
+    if (!open) return;
+    const trigger = triggerRef.current;
+    const options = optionsRef.current;
+    if (!trigger || !options) return;
+
+    let animationFrame: number | undefined;
+    const updateLayout = () => {
+      const triggerRect = trigger.getBoundingClientRect();
+      const visualViewport = window.visualViewport;
+      const viewportTop = visualViewport?.offsetTop ?? 0;
+      const viewportBottom = viewportTop + (visualViewport?.height ?? window.innerHeight);
+      const navRect = document.querySelector<HTMLElement>(".mobile-lobby-nav")?.getBoundingClientRect();
+      const bottomBoundary = navRect && navRect.height > 0
+        ? Math.min(viewportBottom, navRect.top)
+        : viewportBottom;
+      const spaceAbove = Math.max(0, triggerRect.top - viewportTop - DROPDOWN_GAP - DROPDOWN_VIEWPORT_MARGIN);
+      const spaceBelow = Math.max(0, bottomBoundary - triggerRect.bottom - DROPDOWN_GAP - DROPDOWN_VIEWPORT_MARGIN);
+      const desiredHeight = Math.min(DROPDOWN_MAX_HEIGHT, options.scrollHeight);
+      const placement = spaceBelow < desiredHeight && spaceAbove > spaceBelow ? "above" : "below";
+      const maxHeight = Math.min(desiredHeight, placement === "above" ? spaceAbove : spaceBelow);
+
+      setLayout((current) => current.placement === placement && current.maxHeight === maxHeight
+        ? current
+        : { placement, maxHeight });
+    };
+    const scheduleUpdate = () => {
+      if (animationFrame !== undefined) cancelAnimationFrame(animationFrame);
+      animationFrame = requestAnimationFrame(updateLayout);
+    };
+
+    updateLayout();
+    window.addEventListener("resize", scheduleUpdate);
+    window.visualViewport?.addEventListener("resize", scheduleUpdate);
+    document.addEventListener("scroll", scheduleUpdate, { capture: true, passive: true });
+    return () => {
+      if (animationFrame !== undefined) cancelAnimationFrame(animationFrame);
+      window.removeEventListener("resize", scheduleUpdate);
+      window.visualViewport?.removeEventListener("resize", scheduleUpdate);
+      document.removeEventListener("scroll", scheduleUpdate, true);
+    };
+  }, [decks.length, open]);
 
   return (
-    <div className="create-room-deck-select">
+    <div
+      ref={dropdownRef}
+      className="create-room-deck-select"
+      onBlur={(event) => {
+        const nextFocus = event.relatedTarget;
+        if (nextFocus instanceof Node && !event.currentTarget.contains(nextFocus)) {
+          setOpen(false);
+        }
+      }}
+    >
       <button
+        ref={triggerRef}
         type="button"
         className="create-room-deck-trigger"
         aria-haspopup="listbox"
@@ -160,7 +234,14 @@ export function DeckDropdown({
         <span className="create-room-deck-chevron" aria-hidden="true" />
       </button>
       {open ? (
-        <div className="create-room-deck-options" role="listbox" aria-label="Deck">
+        <div
+          ref={optionsRef}
+          className="create-room-deck-options"
+          role="listbox"
+          aria-label="Deck"
+          data-placement={layout.placement}
+          style={{ maxHeight: layout.maxHeight }}
+        >
           {decks.map((deck) => {
             const blocked = !deckIsLegalForRoom(deck, allowFuture);
             return (
