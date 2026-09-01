@@ -70,13 +70,14 @@ import { useGameSounds } from "./sound/useGameSounds.js";
 const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
-  const { view, viewUpdate, playerProfiles, legal, actionCandidates, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, botGame, sendIntent, sendPriorityMode, sendRunechantSkip, sendEmote, latestEmote, undo, error, leave, opponentConnected, connected, roomCode, screen, replayFrames, watchReplay, downloadReplay, getRecordedViews, lastActionAt, claimVictory, reportBug } = useStore(
+  const { view, viewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, botGame, sendIntent, sendPriorityMode, sendRunechantSkip, sendEmote, latestEmote, undo, error, leave, opponentConnected, connected, roomCode, screen, replayFrames, watchReplay, downloadReplay, getRecordedViews, lastActionAt, claimVictory, reportBug } = useStore(
     useShallow((state) => ({
       view: state.view,
       viewUpdate: state.viewUpdate,
       playerProfiles: state.playerProfiles,
       legal: state.legal,
       actionCandidates: state.actionCandidates,
+      roomCommandPending: state.roomCommandPending,
       pendingInteraction: state.pendingInteraction,
       pendingDefenderStageIds: state.pendingDefenderStageIds,
       yourSeat: state.yourSeat,
@@ -287,6 +288,7 @@ export function GameBoard() {
     : null;
   const passHotkeyEnabled =
     hotkeyIntent !== null &&
+    !roomCommandPending &&
     connected &&
     view !== null &&
     screen !== "replay" &&
@@ -431,6 +433,7 @@ export function GameBoard() {
     if (sendIntent(intent)) resetSel();
   };
   const requestPass = () => {
+    if (roomCommandPending) return;
     const intent = { kind: "pass" } as const;
     if (shouldConfirmArsenalPass(pd, intent)) {
       setConfirmSkipArsenal(true);
@@ -955,7 +958,7 @@ export function GameBoard() {
         activeHeroName={activeHeroName}
         actionPoints={view.players[view.activePlayer]!.actionPoints}
         passLabel={passLabel}
-        passDisabled={defending && defendIntent === null}
+        passDisabled={roomCommandPending || (defending && defendIntent === null)}
         onPass={triggerPrimaryAction}
       />
 

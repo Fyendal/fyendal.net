@@ -1021,6 +1021,7 @@ describe("client connection and account race fences", () => {
     socket.sent = [];
 
     expect(useStore.getState().sendIntent({ kind: "pass" })).toBe(true);
+    expect(useStore.getState().roomCommandPending).toBe(true);
     expect(useStore.getState().sendIntent({ kind: "close-chain" })).toBe(false);
 
     expect(socket.sent.map((value) => JSON.parse(value))).toEqual([
@@ -1033,7 +1034,9 @@ describe("client connection and account race fences", () => {
     ]);
 
     socket.message({ ...staleState, version: 3, legal: [{ kind: "close-chain" }] });
+    expect(useStore.getState().roomCommandPending).toBe(false);
     useStore.getState().sendIntent({ kind: "close-chain" });
+    expect(useStore.getState().roomCommandPending).toBe(true);
 
     expect(socket.sent.map((value) => JSON.parse(value))).toHaveLength(2);
     expect(JSON.parse(socket.sent[1]!)).toEqual(expect.objectContaining({
@@ -1070,6 +1073,7 @@ describe("client connection and account race fences", () => {
       instanceId: 10,
       pitchInstanceIds: [],
     })).toBe(true);
+    expect(useStore.getState().roomCommandPending).toBe(true);
     expect(useStore.getState().pendingInteraction).toEqual({
       commandId: expect.any(String),
       expectedVersion: 2,
@@ -1098,6 +1102,7 @@ describe("client connection and account race fences", () => {
     });
 
     unsubscribe();
+    expect(useStore.getState().roomCommandPending).toBe(false);
     expect(useStore.getState().pendingInteraction).toBeNull();
     expect(acknowledgementProjections).toEqual([{ pending: false, handCount: 0 }]);
     useStore.getState().leave();
@@ -1288,6 +1293,7 @@ describe("client connection and account race fences", () => {
     expect(useStore.getState().pendingDefenderStageIds).toEqual([]);
 
     socket.message({ type: "error", code: "INVALID_MESSAGE", message: "cannot stage defender" });
+    expect(useStore.getState().roomCommandPending).toBe(false);
     expect(useStore.getState().pendingDefenderStageIds).toBeNull();
     useStore.getState().leave();
   });

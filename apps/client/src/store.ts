@@ -150,8 +150,16 @@ export const useStore = create<StoreState>((set, get) => {
     inFlightRoomCommand = null;
     queuedDefenderStageIds = null;
     const state = get();
-    if (state.pendingInteraction !== null || state.pendingDefenderStageIds !== null) {
-      set({ pendingInteraction: null, pendingDefenderStageIds: null });
+    if (
+      state.roomCommandPending
+      || state.pendingInteraction !== null
+      || state.pendingDefenderStageIds !== null
+    ) {
+      set({
+        roomCommandPending: false,
+        pendingInteraction: null,
+        pendingDefenderStageIds: null,
+      });
     }
   }
 
@@ -385,9 +393,12 @@ export const useStore = create<StoreState>((set, get) => {
     inFlightRoomCommand = defenderStageIds === undefined
       ? { expectedVersion: command.expectedVersion }
       : { expectedVersion: command.expectedVersion, defenderStageIds };
-    if (pendingInteractionIntent) {
-      set({ pendingInteraction: { ...command, intent: pendingInteractionIntent } });
-    }
+    set({
+      roomCommandPending: true,
+      ...(pendingInteractionIntent
+        ? { pendingInteraction: { ...command, intent: pendingInteractionIntent } }
+        : {}),
+    });
     return true;
   }
 
@@ -631,7 +642,11 @@ export const useStore = create<StoreState>((set, get) => {
         const commandState = acceptRoomCommandState(msg.version, msg);
         if (get().screen === "replay") {
           if (commandState.acknowledged) {
-            set({ pendingInteraction: null, pendingDefenderStageIds: null });
+            set({
+              roomCommandPending: false,
+              pendingInteraction: null,
+              pendingDefenderStageIds: null,
+            });
           }
           break; // replay viewer owns the screen
         }
@@ -654,6 +669,9 @@ export const useStore = create<StoreState>((set, get) => {
           }),
           legal: msg.legal,
           actionCandidates: msg.actionCandidates ?? msg.legal,
+          roomCommandPending: commandState.acknowledged
+            ? false
+            : current.roomCommandPending,
           pendingInteraction: commandState.acknowledged ? null : get().pendingInteraction,
           pendingDefenderStageIds: commandState.acknowledged
             ? commandState.defenderStageIds

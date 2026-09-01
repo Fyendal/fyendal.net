@@ -125,6 +125,9 @@ export interface StoreState {
   viewUpdate: ViewUpdate;
   legal: GameIntent[];
   actionCandidates: GameIntent[];
+  /** A state-producing room command has been sent and is awaiting a newer
+   * authoritative projection. Used to suppress duplicate UI submissions. */
+  roomCommandPending: boolean;
   pendingInteraction: PendingInteraction | null;
   /** Latest locally requested defender set awaiting authoritative room state.
    * Presentation only; null means render the authoritative staged cards. */

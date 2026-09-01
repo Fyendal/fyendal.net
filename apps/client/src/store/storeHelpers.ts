@@ -20,6 +20,7 @@ export function initialStoreProjection(
     viewUpdate: { sequence: 0, source: "restore" as const, transition: "replace" as const },
     legal: [],
     actionCandidates: [],
+    roomCommandPending: false,
     pendingInteraction: null,
     pendingDefenderStageIds: null,
     lastActionAt: null,
@@ -73,6 +74,7 @@ export function clearedRoomProjection(): Pick<
   | "viewUpdate"
   | "legal"
   | "actionCandidates"
+  | "roomCommandPending"
   | "pendingInteraction"
   | "pendingDefenderStageIds"
   | "lastActionAt"
@@ -104,6 +106,7 @@ export function clearedRoomProjection(): Pick<
     viewUpdate: { sequence: 0, source: "restore", transition: "replace" },
     legal: [],
     actionCandidates: [],
+    roomCommandPending: false,
     pendingInteraction: null,
     pendingDefenderStageIds: null,
     lastActionAt: null,
