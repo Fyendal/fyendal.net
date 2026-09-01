@@ -526,6 +526,28 @@ describe("MON — generic commons and rares", () => {
 });
 
 describe("MON — rules regression coverage", () => {
+  it("Shadow of Blasmophet draws, discards, and searches after discarding a 6+ card", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["shadow of blasmophet|1", BLUE, SEVEN],
+          deck: [SIX, "ghostly visit|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("shadow of blasmophet|1", { pitch: [BLUE] })
+      .expectLog("draws 1 card(s)")
+      .expectLog("discards")
+      .expectHandSize(0, 1)
+      .expectZoneSize(0, "graveyard", 1)
+      .chooseCard("ghostly visit|1")
+      .expectInZone(0, "ghostly visit|1", "banish")
+      .expectNotInZone(0, "ghostly visit|1", "deck");
+  });
+
   it("Ravenous Meataxe costs 2 resources to attack", () => {
     const s = scenario({
       seats: [

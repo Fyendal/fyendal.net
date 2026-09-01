@@ -57,6 +57,23 @@ describe("PersistedStateV1", () => {
       .pendingDecision).toEqual(source.pendingDecision);
   });
 
+  it("round trips token provenance inherited by a delegated scripted choice", () => {
+    const source = game();
+    source.pendingDecision = {
+      player: 0,
+      kind: "optional-effect",
+      prompt: "Pay for the delegated effect?",
+      options: ["paid", "no"],
+      sourceInstanceId: source.players[0]!.hero.instanceId,
+      chooseHook: "delegated-payment",
+      tokenCreationCause: { kind: "effect", sourceCardId: "MPW104" },
+    };
+
+    const encoded = encodePersistedState(source);
+    expect(decodePersistedState(jsonCopy(encoded), "ABC123", cardData, scripts)
+      .pendingDecision).toEqual(source.pendingDecision);
+  });
+
   it("round trips token replacement ordering while wager prizes are suspended", () => {
     const source = game();
     const replacements = source.players.map((player) => ({

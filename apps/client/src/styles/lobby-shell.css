@@ -14,6 +14,7 @@
     #0d0703;
 }
 .topbar {
+  position: relative;
   display: flex;
   min-height: 64px;
   justify-content: space-between;
@@ -23,6 +24,61 @@
   border-bottom: 1px solid #45331f;
   background: linear-gradient(180deg, #160e06, #0d0703);
   box-shadow: 0 1px 0 #b8933f22, 0 7px 21px #00000066;
+}
+.bug-fixed-notification {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 12px);
+  right: clamp(18px, 2vw, 32px);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  width: min(390px, calc(100vw - 36px));
+  align-items: start;
+  gap: 10px;
+  padding: 13px 13px 13px 15px;
+  border: 1px solid #657d46;
+  border-radius: 4px;
+  background: linear-gradient(145deg, #1d2b18, #141c11);
+  box-shadow: 0 10px 30px #00000099, inset 0 1px #c3e39c1f;
+  color: #d6ddc9;
+  font: 14px/1.4 var(--font-lobby-ui);
+  animation: toast-in 0.18s ease-out;
+}
+.bug-fixed-notification strong {
+  display: block;
+  margin-bottom: 2px;
+  color: #badd94;
+  font-size: 15px;
+}
+.bug-fixed-notification-icon {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: #6c9748;
+  color: #10170d;
+  font-weight: 900;
+}
+.bug-fixed-notification button {
+  width: 28px;
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  clip-path: none;
+  background: transparent;
+  color: #a7ad9d;
+  font: 24px/24px var(--font-lobby-ui);
+}
+.bug-fixed-notification button:hover,
+.bug-fixed-notification button:focus-visible {
+  background: #ffffff0d;
+  color: #edf4e5;
+}
+.bug-fixed-notification button:focus-visible {
+  outline: 2px solid #badd94;
+  outline-offset: 1px;
 }
 .brand { display: flex; min-width: 0; align-items: center; gap: 11px; }
 .brand-logo {

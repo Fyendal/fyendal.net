@@ -829,8 +829,10 @@ export interface CardScript {
   prohibitsDeckSearches?: boolean;
   /** If this object would move to soul, put it into the arena instead. */
   replacesSoulMoveWithArena?: boolean;
-  /** This card may be declared as a defender directly from arsenal. */
-  canDefendFromArsenal?: boolean;
+  /** This card may be declared as a defender directly from arsenal. A
+   * predicate is authoritative for conditional permission such as Ambush
+   * gained only after controlling a named token this turn. */
+  canDefendFromArsenal?: boolean | ((ctx: ScriptCtx) => boolean);
   /** Friendly Runechant tokens have Spellvoid 1 while this source is active. */
   grantsSpellvoidToRunechants?: boolean;
   /** Non-attack action cards lose and cannot gain go again while active. */

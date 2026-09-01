@@ -87,6 +87,48 @@ describe("WTR Brute — next-attack buffs", () => {
       .expectFinalAttack(7) // no buff
       .expectLife(1, 19);
   });
+
+  it("Barraging Beatdown applies to a Brute weapon attack", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["ravenous meataxe|0"],
+          hand: ["barraging beatdown|1", "awakening bellow|2"],
+          resources: 2,
+        },
+        {
+          hero: "rhinar",
+          hand: ["raging onslaught|2", "raging onslaught|2", "raging onslaught|2"],
+        },
+      ],
+    });
+
+    g.play("barraging beatdown|1")
+      .attackWithWeapon("ravenous meataxe|0")
+      .expectAttackValue(7) // 3 + 4
+      .blockWith("raging onslaught|2")
+      .settle()
+      .expectFinalAttack(7)
+      .expectLife(1, 16);
+  });
+
+  it("Barraging Beatdown does not apply to a Generic attack", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["barraging beatdown|1", "wounded bull|2"],
+          resources: 3,
+        },
+        { hero: "rhinar", hand: [] },
+      ],
+    });
+
+    g.play("barraging beatdown|1")
+      .play("wounded bull|2")
+      .expectAttackValue(6);
+  });
 });
 
 describe("WTR Brute — random-discount attacks", () => {

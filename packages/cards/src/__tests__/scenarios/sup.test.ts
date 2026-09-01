@@ -75,6 +75,61 @@ describe("SUP — heroes and the crowd", () => {
       .expectInZone(0, "toughness|0", "board");
   });
 
+  it("Overcrowded can Ambush from arsenal against Command and Conquer", () => {
+    const g = scenario({
+      seats: [
+        foe({ hand: ["command and conquer|1"], resources: 2 }),
+        hero("tuffnut, bumbling hulkster|0", {
+          arsenalFaceDown: ["overcrowded|3"],
+        }),
+      ],
+    });
+
+    g.play("command and conquer|1", { settle: false });
+    const overcrowded = g.state.players[1]!.arsenal[0]!;
+    expect(legalIntents(g.state, 1)).toContainEqual({
+      kind: "stage-defenders",
+      instanceIds: [overcrowded.instanceId],
+    });
+
+    g.blockWith("overcrowded|3")
+      .settle()
+      .expectZoneSize(1, "arsenal", 0)
+      .expectFinalDefense(2);
+  });
+
+  it("No Hero Stands Alone gains Ambush only after controlling a Toughness this turn", () => {
+    const withoutToughness = scenario({
+      active: 1,
+      seats: [
+        hero("tuffnut|0", { arsenalFaceDown: ["no hero stands alone|2"] }),
+        foe({ hand: ["head jab|1"] }),
+      ],
+    });
+    withoutToughness.play("head jab|1", { settle: false });
+    const inactiveHero = withoutToughness.state.players[0]!.arsenal[0]!;
+    expect(legalIntents(withoutToughness.state, 0)).not.toContainEqual({
+      kind: "stage-defenders",
+      instanceIds: [inactiveHero.instanceId],
+    });
+
+    const withToughness = scenario({
+      seats: [
+        hero("tuffnut|0", {
+          arsenalFaceDown: ["no hero stands alone|2"],
+          board: ["toughness|0"],
+        }),
+        foe({ hand: ["head jab|1"] }),
+      ],
+    });
+    withToughness.endTurn().play("head jab|1", { settle: false });
+    const activeHero = withToughness.state.players[0]!.arsenal[0]!;
+    expect(legalIntents(withToughness.state, 0)).toContainEqual({
+      kind: "stage-defenders",
+      instanceIds: [activeHero.instanceId],
+    });
+  });
+
   it("Hunter or Hunted? triggers Huntsman before defending and creates a Silver per banish", () => {
     const g = scenario({
       seats: [

@@ -634,6 +634,39 @@ describe("client connection and account race fences", () => {
     );
   });
 
+  it("loads and dismisses fixed bug-report notifications", async () => {
+    localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+    const fetchMock = vi.fn((input: string | URL | Request) => {
+      const url = String(input);
+      if (url.endsWith("/api/bug-report-notifications/dismiss")) {
+        return Promise.resolve(jsonResponse({ ok: true }));
+      }
+      if (url.endsWith("/api/bug-report-notifications")) {
+        return Promise.resolve(jsonResponse({
+          ok: true,
+          notifications: [{ reportId: "report-123", fixedAt: 123 }],
+        }));
+      }
+      throw new Error(`unexpected fetch ${url}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const { useStore } = await import("../store.js");
+
+    await useStore.getState().refreshBugReportNotifications();
+    expect(useStore.getState().bugReportNotifications).toEqual([
+      { reportId: "report-123", fixedAt: 123 },
+    ]);
+    await useStore.getState().dismissBugReportNotification("report-123");
+    expect(useStore.getState().bugReportNotifications).toEqual([]);
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      "http://localhost:8080/api/bug-report-notifications/dismiss",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ reportId: "report-123" }),
+      }),
+    );
+  });
+
   it("inspects invite URLs before joining and creates hosted rooms as private", async () => {
     localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
     const { useStore } = await import("../store.js");

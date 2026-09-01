@@ -1648,6 +1648,9 @@ export function makeCtx(
         options,
         sourceInstanceId: self.instanceId,
         chooseHook: hook,
+        ...(tokenCreationCause.kind !== "effect" || tokenCreationCause.sourceCardId !== self.cardId
+          ? { tokenCreationCause }
+          : {}),
         ...(cardOptions ? { cardOptions } : {}),
         ...(defaultOption !== undefined && options.includes(defaultOption)
           ? { defaultOption }
@@ -1724,7 +1727,16 @@ export function makeCtx(
     requestPaymentFrom(sourceInstanceId, hook, prompt, cost, choiceSeat) {
       const found = findCardAnywhere(state, sourceInstanceId);
       if (!found) return false;
-      return runtime.makeCtx(state, found.seat, found.card, link)
+      return runtime.makeCtx(
+        state,
+        found.seat,
+        found.card,
+        link,
+        undefined,
+        undefined,
+        undefined,
+        tokenCreationCause,
+      )
         .requestPayment(hook, prompt, cost, choiceSeat);
     },
     requestXPayment(hook, prompt, choiceSeat, requestedMaximum, requestedResourcesPerX) {

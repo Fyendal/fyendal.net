@@ -176,14 +176,20 @@ export function legalDefenderCards(
     return allowed(c, true);
   });
   const arsenal = player.arsenal.filter((c) => {
-        const d = instanceDataOf(state, c);
-        const permitted = player.flags.attackActionsDefendFromArsenal === true ||
-          scriptOf(state, c.cardId, c)?.canDefendFromArsenal === true;
-        const ambush = d.cardType === "block" &&
-          (d.keywords ?? []).some((keyword) => keyword.toLowerCase() === "ambush");
-        return ((permitted && d.cardType === "action" && (d.subtypes ?? []).includes("attack")) || ambush) &&
-          d.defense !== undefined && allowed(c, false);
-      });
+    const d = instanceDataOf(state, c);
+    const script = scriptOf(state, c.cardId, c);
+    const registeredPermission = state.scriptsRef[c.cardId]?.canDefendFromArsenal;
+    const scriptedPermission = script?.canDefendFromArsenal;
+    const ambush = registeredPermission !== undefined
+      ? typeof scriptedPermission === "function"
+        ? scriptedPermission(runtime.makeCtx(state, seat, c, link))
+        : scriptedPermission === true
+      : instanceHasKeyword(state, c, "ambush");
+    const attackActionPermission = player.flags.attackActionsDefendFromArsenal === true &&
+      d.cardType === "action" && (d.subtypes ?? []).includes("attack");
+    return (attackActionPermission || ambush) &&
+      d.defense !== undefined && allowed(c, false);
+  });
   // equipment may defend regardless of its defense value — even 0 (Ironhide)
   // or negative after Battleworn counters (it then defends for 0); only
   // equipment with no defense stat at all (e.g. Blossom of Spring) cannot.

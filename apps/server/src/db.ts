@@ -419,6 +419,14 @@ export const MIGRATIONS: Migration[] = [
     CREATE INDEX bug_reports_fixed_created_idx
       ON bug_reports (fixed_at, created_at);`,
   },
+  {
+    version: 24,
+    // Fixed-report acknowledgements are durable per account so dismissing a
+    // notification on one browser prevents it from resurfacing elsewhere.
+    sql: `ALTER TABLE bug_reports ADD COLUMN dismissed_at BIGINT;
+    CREATE INDEX bug_reports_reporter_notification_idx
+      ON bug_reports (reporter_user_id, dismissed_at, fixed_at);`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

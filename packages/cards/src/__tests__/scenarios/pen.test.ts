@@ -112,6 +112,39 @@ describe("PEN — import and set mechanics", () => {
     g.play("head jab|1").blockWith().passPriority().react("cloud cover|2").settle().expectLife(0, 19);
   });
 
+  it("Stadium Security gains Ambush only after controlling a Toughness this turn", () => {
+    const withoutToughness = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["head jab|1"], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", arsenalFaceDown: ["stadium security|3"], equipment: NO_EQUIPMENT },
+      ],
+    });
+    withoutToughness.play("head jab|1", { settle: false });
+    const inactiveSecurity = withoutToughness.state.players[1]!.arsenal[0]!;
+    expect(legalIntents(withoutToughness.state, 1)).not.toContainEqual({
+      kind: "stage-defenders",
+      instanceIds: [inactiveSecurity.instanceId],
+    });
+
+    const withToughness = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          arsenalFaceDown: ["stadium security|3"],
+          board: ["toughness|0"],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", hand: ["head jab|1"], equipment: NO_EQUIPMENT },
+      ],
+    });
+    withToughness.endTurn().play("head jab|1", { settle: false });
+    const activeSecurity = withToughness.state.players[0]!.arsenal[0]!;
+    expect(legalIntents(withToughness.state, 0)).toContainEqual({
+      kind: "stage-defenders",
+      instanceIds: [activeSecurity.instanceId],
+    });
+  });
+
   it("Doubling Season adds one to each positive power gain", () => {
     const g = scenario({
       seats: [

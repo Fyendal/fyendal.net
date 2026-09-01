@@ -337,6 +337,7 @@ export interface PersistedPendingDecisionV1 {
   optionCounts?: (number | null)[];
   sourceInstanceId?: number;
   chooseHook?: string;
+  tokenCreationCause?: { kind: "effect" | "wager"; sourceCardId?: string };
   cardOptions?: (number | string | null)[];
   revealedCardIds?: number[];
   lookedCardIds?: number[];
@@ -996,7 +997,7 @@ function validateResume(value: unknown, code: string, path: string): void {
 }
 
 function validateDecision(value: unknown, code: string, path: string): void {
-  const decision = exact(value, code, path, ["player", "kind", "prompt"], ["options", "defaultOption", "optionLabels", "optionCounts", "sourceInstanceId", "chooseHook", "cardOptions", "revealedCardIds", "lookedCardIds", "payment", "resourcePayment", "xPayment", "variablePlayCost", "variableActivationCost", "tokenCreationReplacement", "tokenCreationReplacementOrder", "wagerLossReplacementOrder", "activationCost", "clash", "arcane", "triggerOrder", "deckBottomOrder", "dieRoll", "staged", "resume"]);
+  const decision = exact(value, code, path, ["player", "kind", "prompt"], ["options", "defaultOption", "optionLabels", "optionCounts", "sourceInstanceId", "chooseHook", "tokenCreationCause", "cardOptions", "revealedCardIds", "lookedCardIds", "payment", "resourcePayment", "xPayment", "variablePlayCost", "variableActivationCost", "tokenCreationReplacement", "tokenCreationReplacementOrder", "wagerLossReplacementOrder", "activationCost", "clash", "arcane", "triggerOrder", "deckBottomOrder", "dieRoll", "staged", "resume"]);
   integer(decision.player, code, `${path}.player`);
   oneOf(decision.kind, ["defend", "attack-reaction", "defense-reaction", "priority-window", "arsenal", "choose-target", "choose-name", "order-triggers", "optional-effect"] as const, code, `${path}.kind`);
   string(decision.prompt, code, `${path}.prompt`);
@@ -1034,6 +1035,7 @@ function validateDecision(value: unknown, code: string, path: string): void {
   }
   optional(decision, "sourceInstanceId", (v, p) => { integer(v, code, p); }, path);
   optional(decision, "chooseHook", (v, p) => { string(v, code, p, 256); }, path);
+  optional(decision, "tokenCreationCause", (v, p) => validateTokenCreationCause(v, code, p), path);
   optional(decision, "cardOptions", (v, p) => validateCardOptionArray(v, code, p), path);
   optional(decision, "revealedCardIds", (v, p) => validateIntegerArray(v, code, p), path);
   optional(decision, "lookedCardIds", (v, p) => validateIntegerArray(v, code, p), path);

@@ -10,6 +10,11 @@ export type CreateBugReportResult =
   | { ok: true; reportId: string }
   | { ok: false; error: "invalid description" | "room not found" };
 
+export interface FixedBugReportNotification {
+  reportId: string;
+  fixedAt: number;
+}
+
 function requiredString(value: unknown, field: string): string {
   if (typeof value !== "string") throw new Error(`invalid bug-report ${field}`);
   return value;
@@ -114,4 +119,44 @@ export async function createBugReport(
     );
     return { ok: true as const, reportId };
   });
+}
+
+/** Return only the status needed by the lobby notification. Report text and
+ * captured traces stay out of this player-facing response. */
+export async function listFixedBugReportNotifications(
+  db: Queryable,
+  reporterUserId: number,
+): Promise<FixedBugReportNotification[]> {
+  const { rows } = await db.query(
+    `SELECT id, fixed_at
+     FROM bug_reports
+     WHERE reporter_user_id = $1 AND fixed_at IS NOT NULL AND dismissed_at IS NULL
+     ORDER BY fixed_at, id
+     LIMIT 100`,
+    [reporterUserId],
+  );
+  return rows.map((value: unknown) => {
+    const row = asRecord(value);
+    if (!row) throw new Error("invalid fixed bug-report row");
+    return {
+      reportId: requiredString(row.id, "id"),
+      fixedAt: requiredInteger(row.fixed_at, "fixed at"),
+    };
+  });
+}
+
+/** Idempotently acknowledge a fixed report owned by this account. */
+export async function dismissFixedBugReportNotification(
+  db: Queryable,
+  reporterUserId: number,
+  reportId: string,
+): Promise<boolean> {
+  const { rows } = await db.query(
+    `UPDATE bug_reports
+     SET dismissed_at = COALESCE(dismissed_at, $3)
+     WHERE id = $1 AND reporter_user_id = $2 AND fixed_at IS NOT NULL
+     RETURNING id`,
+    [reportId, reporterUserId, Date.now()],
+  );
+  return rows.length === 1;
 }

@@ -225,6 +225,7 @@ export const useStore = create<StoreState>((set, get) => {
       authUser: null,
       decks: [],
       decksLoading: false,
+      bugReportNotifications: [],
       savedReplays: [],
       replaysLoading: false,
       queueCounts: { "classic-battles": 0, cc: 0, "silver-age": 0 },
@@ -896,6 +897,7 @@ export const useStore = create<StoreState>((set, get) => {
         authUser: res.username,
         decks: [],
         decksLoading: true,
+        bugReportNotifications: [],
         allowFutureCards: accountLobbySettings.allowFutureCards,
         lastPlayedDecks: accountLobbySettings.lastPlayedDecks,
       });
