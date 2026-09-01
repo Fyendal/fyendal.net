@@ -1,5 +1,6 @@
 import { cardData } from "@fyendal/cards/client";
 import type { CardView } from "@fyendal/shared";
+import type { ReactNode } from "react";
 
 /** Inline card name that triggers the hover preview (via data-cardid delegation). */
 export function CardRef({ id, name }: { id: string; name?: string }) {
@@ -20,15 +21,34 @@ for (const [id, data] of Object.entries(cardData)) {
 }
 
 /** Turn a leading card name in a scripted prompt into an inspectable card reference. */
-export function DecisionPrompt({ prompt }: { prompt: string }) {
+export function DecisionPrompt({
+  prompt,
+  suffix,
+  breakOnDash = false,
+}: {
+  prompt: string;
+  suffix?: ReactNode;
+  breakOnDash?: boolean;
+}) {
   const separator = prompt.indexOf(":");
   const name = separator === -1 ? prompt : prompt.slice(0, separator);
   const cardId = separator === -1 ? undefined : firstPrintingByName.get(name);
   const warning = prompt === "Warning: this damage cannot be prevented.";
+  const promptText = cardId ? prompt.slice(separator) : prompt;
+  const dashSeparator = breakOnDash ? promptText.indexOf(" — ") : -1;
+  const nextLine = dashSeparator === -1 ? "" : promptText.slice(dashSeparator + 3);
+  const capitalizedNextLine = nextLine.length > 0
+    ? `${nextLine[0]!.toUpperCase()}${nextLine.slice(1)}`
+    : nextLine;
+  const formattedPrompt = dashSeparator === -1
+    ? promptText
+    : <>{promptText.slice(0, dashSeparator)}<br />{capitalizedNextLine}</>;
 
   return (
     <span className={`decision-prompt${warning ? " decision-prompt-warning" : ""}`}>
-      {cardId ? <><CardRef id={cardId} />{prompt.slice(separator)}</> : prompt}
+      {cardId ? <CardRef id={cardId} /> : null}
+      {formattedPrompt}
+      {suffix}
     </span>
   );
 }

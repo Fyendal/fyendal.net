@@ -1112,12 +1112,12 @@ function enumerateIntents(
     if (runechantSkipStep(state, seat) !== null) intents.unshift({ kind: "skip-runechant" });
     switch (pd.kind) {
       case "defend": {
-        const { hand, equipment } = legalDefenderCards(state, runtime, seat);
+        const { hand, arsenal, equipment } = legalDefenderCards(state, runtime, seat);
         return [
           ...defendIntents(state, runtime, seat),
           // staging (uncommitted defender selection) is declarative: one
           // single-card intent per stageable card advertises the candidates
-          ...[...hand, ...equipment].map(
+          ...[...hand, ...arsenal, ...equipment].map(
             (c): GameIntent => ({ kind: "stage-defenders", instanceIds: [c.instanceId] }),
           ),
           ...intents,

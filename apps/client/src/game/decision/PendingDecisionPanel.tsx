@@ -1,6 +1,11 @@
 import type { CardView } from "@fyendal/shared";
+import { useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { CardFace } from "../Card.js";
-import { shouldShowDecisionPass } from "../decisionPass.js";
+import {
+  isPriorityGuidanceDecision,
+  shouldShowDecisionPass,
+} from "../decisionPass.js";
 import {
   bloodModeAllocation,
   handCardChoiceOptions,
@@ -14,6 +19,78 @@ import { CardRef, cardAffiliation, DecisionPrompt } from "./DecisionShared.js";
 import type { PendingDecisionModel } from "./DecisionModels.js";
 import { NameChoiceAutocomplete } from "./NameChoiceAutocomplete.js";
 import { TriggerOrderDecision } from "./TriggerOrderDecision.js";
+
+const GUIDANCE_SETTINGS_TOOLTIP =
+  "Uncheck Show guidance in Settings to disable these prompts.";
+
+function GuidanceSettingsInfo() {
+  const tooltipId = `guidance-settings-${useId()}`;
+  const anchorRef = useRef<HTMLSpanElement>(null);
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [position, setPosition] = useState<{ left: number; bottom: number } | null>(null);
+  const active = hovered || focused;
+
+  useEffect(() => {
+    if (!active) {
+      setPosition(null);
+      return;
+    }
+    const updatePosition = () => {
+      const anchor = anchorRef.current;
+      if (!anchor) return;
+      const bounds = anchor.getBoundingClientRect();
+      const tooltipHalfWidth = Math.min(120, window.innerWidth * 0.36);
+      setPosition({
+        left: Math.min(
+          window.innerWidth - tooltipHalfWidth - 8,
+          Math.max(tooltipHalfWidth + 8, bounds.left + bounds.width / 2),
+        ),
+        bottom: window.innerHeight - bounds.top + 8,
+      });
+    };
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
+  }, [active]);
+
+  return (
+    <>
+      <span
+        ref={anchorRef}
+        className="decision-guidance-info"
+        tabIndex={0}
+        aria-label="Guidance settings"
+        aria-describedby={tooltipId}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+      >
+        i
+        <span id={tooltipId} role="tooltip" className="decision-guidance-tooltip-accessible">
+          {GUIDANCE_SETTINGS_TOOLTIP}
+        </span>
+      </span>
+      {active && position && typeof document !== "undefined"
+        ? createPortal(
+            <span
+              className="decision-guidance-tooltip-floating"
+              aria-hidden="true"
+              style={position}
+            >
+              {GUIDANCE_SETTINGS_TOOLTIP}
+            </span>,
+            document.body,
+          )
+        : null}
+    </>
+  );
+}
 
 export function PendingDecisionPanel({
   model,
@@ -102,7 +179,13 @@ export function PendingDecisionPanel({
 
   return (
     <div className="decision decision-options">
-      <DecisionPrompt prompt={pd.kind === "defend" ? "Pitch to pay this defense cost" : pd.prompt} />
+      <DecisionPrompt
+        prompt={pd.kind === "defend" ? "Pitch to pay this defense cost" : pd.prompt}
+        breakOnDash={isPriorityGuidanceDecision(pd)}
+        suffix={isPriorityGuidanceDecision(pd) ? (
+          <GuidanceSettingsInfo />
+        ) : undefined}
+      />
       {lookedCards.length > 0 && !showChoiceGrid ? (
         <div className="decision-cards">
           {lookedCards.map((card) => (

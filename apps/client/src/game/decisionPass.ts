@@ -1,6 +1,6 @@
 import type { PendingDecision } from "@fyendal/shared";
 
-function isPriorityGuidanceDecision(decision: PendingDecision | null): boolean {
+export function isPriorityGuidanceDecision(decision: PendingDecision | null): boolean {
   return decision?.kind === "priority-window" ||
     decision?.kind === "attack-reaction" ||
     decision?.kind === "defense-reaction";

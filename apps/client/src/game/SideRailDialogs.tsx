@@ -70,7 +70,7 @@ export function GameSettingsDialog({
   }, [close]);
 
   return (
-    <div className="overlay" onClick={close}>
+    <div className="overlay settings-overlay" onClick={close}>
       <div
         className="overlay-panel settings-panel"
         role="dialog"
@@ -186,7 +186,7 @@ export function GameSettingsDialog({
                   ))}
                 </div>
               </div>
-              <div className="settings-control-row">
+              <div className="settings-control-row settings-choice-row">
                 <span className="settings-control-name">
                   Playable cards
                   <span

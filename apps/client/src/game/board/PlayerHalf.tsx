@@ -77,6 +77,11 @@ export function PlayerHalf({
     : undefined;
   const deckTopPlayable =
     presentedDeckTop !== undefined && interaction.legal.playableZones.get(presentedDeckTop.instanceId) === "deck";
+  const arsenalBlocking = arsenalCard !== undefined && interaction.stagedIds.has(arsenalCard.instanceId);
+  const arsenalCanBlock = mine && arsenalCard !== undefined && interaction.defending && !arsenalBlocking &&
+    interaction.legal.stageableDefenders.has(arsenalCard.instanceId);
+  const arsenalPlayable = arsenalCard !== undefined &&
+    interaction.legal.playableArsenal.has(arsenalCard.instanceId);
   const arenaBoard = boardCardsOutsideEquipmentZones(
     player.board.filter((card) => !optimisticallyHiddenIds.has(card.instanceId)),
   );
@@ -403,16 +408,18 @@ export function PlayerHalf({
                 { kind: "arsenal", seat: player.seat },
                 arsenalCard.instanceId,
               )}
-              dimmed={arsenalCard.faceDown && !interaction.legal.playableArsenal.has(arsenalCard.instanceId)}
-              highlighted={interaction.legal.playableArsenal.has(arsenalCard.instanceId)}
+              dimmed={arsenalBlocking || (arsenalCard.faceDown && !arsenalPlayable && !arsenalCanBlock)}
+              highlighted={arsenalPlayable || arsenalCanBlock}
               selected={
                 (interaction.selection.kind === "play-arsenal" &&
                   interaction.selection.instanceId === arsenalCard.instanceId) ||
                 interaction.preStackSelectedInstanceId === arsenalCard.instanceId
               }
-              onClick={interaction.legal.playableArsenal.has(arsenalCard.instanceId)
-                ? () => interaction.onSelect({ kind: "play-arsenal", instanceId: arsenalCard.instanceId })
-                : undefined}
+              onClick={arsenalCanBlock
+                ? () => interaction.onStage([...interaction.stagedIds, arsenalCard.instanceId])
+                : arsenalPlayable
+                  ? () => interaction.onSelect({ kind: "play-arsenal", instanceId: arsenalCard.instanceId })
+                  : undefined}
               showFaceUp={!arsenalCard.faceDown}
             />
           ) : undefined

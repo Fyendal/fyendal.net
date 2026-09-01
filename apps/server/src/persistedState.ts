@@ -513,7 +513,12 @@ type Assert<T extends true> = T;
 type EnginePendingDecision = NonNullable<GameState["pendingDecision"]>;
 type PersistedEngineDecision = Omit<
   EnginePendingDecision,
-  "optionCards" | "revealedCards" | "lookedCards" | "stagedCards" | "stagedDefense"
+  | "optionCards"
+  | "revealedCards"
+  | "lookedCards"
+  | "stagedCards"
+  | "stagedDefense"
+  | "preStackSource"
 >;
 type PersistedEngineState = Omit<
   GameState,

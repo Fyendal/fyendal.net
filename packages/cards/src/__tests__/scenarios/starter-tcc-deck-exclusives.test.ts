@@ -1,4 +1,5 @@
-import { describe, it } from "vitest";
+import { legalIntents } from "@fyendal/engine";
+import { describe, expect, it } from "vitest";
 import { scenario } from "../harness.js";
 
 describe("starter and demo products", () => {
@@ -74,8 +75,14 @@ describe("TCC — Round the Table", () => {
       ],
     });
 
-    g.attackWithWeapon()
-      .blockWith("tiger eye reflex|2")
+    g.attackWithWeapon();
+    const reflex = g.state.players[1]!.arsenal[0]!;
+    expect(legalIntents(g.state, 1)).toContainEqual({
+      kind: "stage-defenders",
+      instanceIds: [reflex.instanceId],
+    });
+
+    g.blockWith("tiger eye reflex|2")
       .settle()
       .expectInZone(1, "crouching tiger|0", "banish");
   });

@@ -911,6 +911,9 @@
     border-left: 0;
     background: #0d0805f8;
   }
+  .rail-right:has(> .settings-overlay) {
+    z-index: 80;
+  }
   .rail-right > :not(.mobile-gamebar):not(.mobile-game-alerts):not(.overlay):not(.modal-surface-backdrop) { display: none; }
   .mobile-gamebar {
     display: flex;
@@ -1020,7 +1023,8 @@
   }
   .settings-header { top: -14px; }
   .settings-close { width: 42px; height: 42px; }
-  .settings-priority-row { align-items: stretch; flex-direction: column; gap: 7px; }
+  .settings-priority-row,
+  .settings-choice-row { align-items: stretch; flex-direction: column; gap: 7px; }
   .settings-segmented { width: 100%; }
   .settings-segmented button { min-width: 0; min-height: 40px; }
   .settings-volume-slider { width: min(42vw, 150px); }
