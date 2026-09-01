@@ -17,6 +17,7 @@ import {
 import { playableZoneTooltip } from "../playableZoneTooltip.js";
 import {
   motionLocationKey,
+  opaqueMotionPresentationKey,
   motionPresentationKey,
 } from "../motion/motionTypes.js";
 import type { Sel } from "../useActionAnnouncement.js";
@@ -80,6 +81,7 @@ export function PlayerHand({
   interaction: PlayerHandInteraction;
 }) {
   const handMotionLocation = { kind: "hand" as const, seat: player.seat };
+  const hiddenSpectatorHand = spectating && !replaying && view.winner === null;
   const visibleCards = player.hand.filter((card) =>
     !interaction.stagedIds.has(card.instanceId)
     && !interaction.optimisticallyHiddenIds.has(card.instanceId)
@@ -148,13 +150,19 @@ export function PlayerHand({
   return (
     <>
       <div
-        className="hand"
+        className={`hand${hiddenSpectatorHand ? " hand-spectator" : ""}`}
         id="player-hand"
         ref={handRef}
         data-motion-zone={motionLocationKey(handMotionLocation)}
       >
         {spectating && view.winner === null && !(replaying && player.hand.length > 0)
-          ? Array.from({ length: player.handCount }, (_, index) => <CardBack key={index} label="" />)
+          ? Array.from({ length: player.handCount }, (_, index) => (
+              <CardBack
+                key={index}
+                label=""
+                motionKey={opaqueMotionPresentationKey(handMotionLocation, index)}
+              />
+            ))
           : visibleCards.map((card) => {
             const stageable = interaction.defending &&
               interaction.legalState.stageableDefenders.has(card.instanceId);
@@ -229,7 +237,7 @@ export function PlayerHand({
           ? <span className="muted">no cards in hand</span>
           : null}
       </div>
-      {scrollAvailability.left ? (
+      {!hiddenSpectatorHand && scrollAvailability.left ? (
         <button
           type="button"
           className="hand-scroll-button hand-scroll-button-left"
@@ -240,7 +248,7 @@ export function PlayerHand({
           <span className="hand-scroll-glyph" aria-hidden="true">{"<<"}</span>
         </button>
       ) : null}
-      {scrollAvailability.right ? (
+      {!hiddenSpectatorHand && scrollAvailability.right ? (
         <button
           type="button"
           className="hand-scroll-button hand-scroll-button-right"

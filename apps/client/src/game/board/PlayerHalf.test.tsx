@@ -145,13 +145,14 @@ describe("PlayerHalf", () => {
     expect(html.match(/data-motion-card="0:board:/g)).toHaveLength(1);
   });
 
-  it("gives a hidden opponent arsenal card a maskable motion anchor", () => {
+  it("renders a card back from the public count for any non-owned hidden arsenal", () => {
     const html = renderPlayerHalf({
       ...player,
       seat: 1,
       arsenalCount: 1,
     }, false);
 
+    expect(html).toContain('<div class="c-backlabel">Arsenal</div>');
     expect(html).toContain('data-motion-card="1:arsenal:opaque"');
   });
 

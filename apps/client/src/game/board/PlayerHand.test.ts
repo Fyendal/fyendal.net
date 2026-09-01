@@ -97,4 +97,78 @@ describe("hand motion anchors", () => {
     expect(html).toContain('data-motion-card="0:hand:7"');
     expect(html).toContain("card-selected");
   });
+
+  it("gives a spectator's compact hidden hand stable opaque anchors", () => {
+    const player: PlayerView = {
+      seat: 0,
+      heroCardId: "HERO",
+      heroInstanceId: 100,
+      heroName: "Hero",
+      life: 20,
+      actionPoints: 1,
+      resources: 0,
+      hand: [],
+      handCount: 2,
+      deckCount: 0,
+      arsenal: [],
+      arsenalCount: 0,
+      pitch: [],
+      pitchCount: 0,
+      graveyard: [],
+      banish: [],
+      soul: [],
+      equipment: {},
+      weapons: [],
+      board: [],
+    };
+    const opponent = { ...player, seat: 1 } as PlayerView;
+    const view: GameView = {
+      gameId: "spectator-game",
+      turn: 1,
+      phase: "action",
+      activePlayer: 0,
+      priorityPlayer: 0,
+      players: [player, opponent],
+      chain: [],
+      stack: [],
+      ongoing: [],
+      pendingDecision: null,
+      winner: null,
+      log: [],
+    };
+    const html = renderToStaticMarkup(createElement(PlayerHand, {
+      view,
+      player,
+      viewerSeat: 0,
+      spectating: true,
+      replaying: false,
+      interaction: {
+        legalState: {
+          playableHand: new Set<number>(),
+          playableArsenal: new Set<number>(),
+          playableZones: new Map(),
+          activatable: new Set<number>(),
+          stageableDefenders: new Set<number>(),
+          canPass: false,
+          canCloseChain: false,
+        },
+        legalIntents: [],
+        selection: { kind: "none" },
+        preStackSelectedInstanceId: null,
+        pitchSelection: [],
+        selectedPaymentVariants: [],
+        stagedIds: new Set<number>(),
+        optimisticallyHiddenIds: new Set<number>(),
+        defending: false,
+        choosingArsenal: false,
+        handPick: null,
+        onCardClick: () => undefined,
+        onSelect: () => undefined,
+      },
+    }));
+
+    expect(html).toContain('class="hand hand-spectator"');
+    expect(html).toContain('data-motion-card="0:hand:opaque"');
+    expect(html).toContain('data-motion-card="0:hand:opaque:1"');
+  });
 });

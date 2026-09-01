@@ -887,7 +887,11 @@ export function GameBoard() {
         {/* your half */}
         <PlayerHalf
           player={me}
-          mine
+          // Live spectators have a table orientation, but do not own its
+          // lower seat. Treating it as theirs hides the public arsenal count
+          // whenever that arsenal contains only face-down cards. Replays keep
+          // their recorded player perspective while exposing replay data.
+          mine={!spectating || replaying}
           mirrored={false}
           ongoing={view.ongoing.filter((effect) => effect.seat === me.seat)}
           gameOver={view.winner !== null}
