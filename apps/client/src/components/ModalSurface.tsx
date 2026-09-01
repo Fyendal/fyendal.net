@@ -108,7 +108,9 @@ export function ModalSurface({
             aria-label={`Close ${title}`}
             onClick={onClose}
           >
-            ×
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M6 6 18 18M18 6 6 18" />
+            </svg>
           </button>
         </header>
         {description ? <p id={descriptionId} className="modal-surface-description">{description}</p> : null}

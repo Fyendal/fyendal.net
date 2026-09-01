@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { preconsForFormat } from "@fyendal/cards/client";
 import type { DeckSummary } from "@fyendal/protocol";
@@ -224,6 +224,20 @@ export function DeckGrid(props: {
   const [catalog, setCatalog] = useState<DeckCatalogTab>("mine");
   const [query, setQuery] = useState("");
   const [legality, setLegality] = useState<DeckLegalityFilter>("all");
+  const deckMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!props.deckId) return;
+
+    const closeMenuOnOutsideClick = (event: MouseEvent) => {
+      if (event.target instanceof Node && !deckMenuRef.current?.contains(event.target)) {
+        props.onSelect("");
+      }
+    };
+
+    document.addEventListener("click", closeMenuOnOutsideClick, true);
+    return () => document.removeEventListener("click", closeMenuOnOutsideClick, true);
+  }, [props.deckId, props.onSelect]);
 
   const visibleDecks = filterAndSortDecks(
     catalog === "mine" ? own : precons,
@@ -259,6 +273,7 @@ export function DeckGrid(props: {
             {selected ? (
               <div className="deck-menu-backdrop" onClick={() => props.onSelect("")}>
               <div
+                ref={deckMenuRef}
                 className="deck-menu"
                 role="group"
                 aria-label={`${d.name} actions`}
@@ -269,9 +284,7 @@ export function DeckGrid(props: {
                   className="deck-menu-close"
                   aria-label={`Close ${d.name} actions`}
                   onClick={() => props.onSelect("")}
-                >
-                  ×
-                </button>
+                />
                 {queued ? (
                   <button className="btn-primary" onClick={queueLeave}>
                     Cancel Match Search
@@ -302,7 +315,10 @@ export function DeckGrid(props: {
                   Play vs Bot
                 </button>
                 {editable ? (
-                  <button onClick={() => setEditingDeck(d)}>
+                  <button onClick={() => {
+                    props.onSelect("");
+                    setEditingDeck(d);
+                  }}>
                     Edit Deck
                   </button>
                 ) : null}

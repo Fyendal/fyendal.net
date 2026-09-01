@@ -3,6 +3,7 @@ import {
   scrypt,
   timingSafeEqual,
 } from "node:crypto";
+import { recordUserRegistration } from "./analytics.js";
 import { withTransaction, type Queryable, type UserRow } from "./db.js";
 import { appendClusterEvent } from "./clusterEvents.js";
 import { hashToken } from "./tokenHash.js";
@@ -158,10 +159,14 @@ export async function register(
   if (await userByName(db, username)) return { ok: false, error: "username taken" };
   try {
     const passHash = await hashPassword(password);
-    await db.query(
-      "INSERT INTO users (username, username_lc, pass_hash, created_at) VALUES ($1, $2, $3, $4)",
-      [username, username.toLowerCase(), passHash, Date.now()],
-    );
+    const createdAt = Date.now();
+    await withTransaction(db, async (tx) => {
+      await tx.query(
+        "INSERT INTO users (username, username_lc, pass_hash, created_at) VALUES ($1, $2, $3, $4)",
+        [username, username.toLowerCase(), passHash, createdAt],
+      );
+      await recordUserRegistration(tx, createdAt);
+    });
   } catch (e) {
     // Lost a registration race (check-then-insert): a concurrent request
     // claimed the name between the check above and the INSERT.
