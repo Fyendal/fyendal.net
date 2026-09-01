@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import {
+  activateMotionDestinationMasks,
   concealMotionDestination,
   MOTION_DESTINATION_HIDDEN_ATTRIBUTE,
+  motionDestinationsRequiringEarlyMask,
   refreshMotionDestinationMasks,
   revealMotionDestination,
   type MaskedElementsByBatch,
@@ -44,5 +46,61 @@ describe("motion destination masks", () => {
       MOTION_DESTINATION_HIDDEN_ATTRIBUTE,
     );
     expect(masks.get("7")?.get("0:hand:42")).toBe(current.element);
+  });
+
+  it("masks pending arrivals but leaves persistent reflows visible until activation", () => {
+    const active = fakeElement();
+    const drawn = fakeElement();
+    const persistent = fakeElement();
+    const elements = new Map([
+      ["0:arsenal:41", active.element],
+      ["0:hand:42", drawn.element],
+      ["0:hand:43", persistent.element],
+    ]);
+    const masks: MaskedElementsByBatch = new Map();
+
+    activateMotionDestinationMasks(
+      "arsenal",
+      [{ destinationPresentationKey: "0:arsenal:41" }],
+      elements,
+      masks,
+    );
+
+    expect(active.attributes.has(MOTION_DESTINATION_HIDDEN_ATTRIBUTE)).toBe(true);
+    activateMotionDestinationMasks(
+      "draw",
+      motionDestinationsRequiringEarlyMask([
+        { mode: "draw", destinationPresentationKey: "0:hand:42" },
+        { mode: "reflow", destinationPresentationKey: "0:hand:43" },
+      ]),
+      elements,
+      masks,
+    );
+    expect(drawn.attributes.has(MOTION_DESTINATION_HIDDEN_ATTRIBUTE)).toBe(true);
+    expect(persistent.attributes.has(MOTION_DESTINATION_HIDDEN_ATTRIBUTE)).toBe(false);
+    expect([...masks.keys()]).toEqual(["arsenal", "draw"]);
+
+    activateMotionDestinationMasks(
+      "carried-draw",
+      motionDestinationsRequiringEarlyMask([{
+        mode: "reflow",
+        destinationPresentationKey: "0:hand:43",
+        maskDestinationWhilePending: true,
+      }]),
+      elements,
+      masks,
+    );
+    expect(persistent.attributes.has(MOTION_DESTINATION_HIDDEN_ATTRIBUTE)).toBe(true);
+
+    activateMotionDestinationMasks(
+      "draw",
+      [
+        { mode: "draw", destinationPresentationKey: "0:hand:42" },
+        { mode: "reflow", destinationPresentationKey: "0:hand:43" },
+      ],
+      elements,
+      masks,
+    );
+    expect(persistent.attributes.has(MOTION_DESTINATION_HIDDEN_ATTRIBUTE)).toBe(true);
   });
 });

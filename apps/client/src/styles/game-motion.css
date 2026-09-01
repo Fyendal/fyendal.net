@@ -72,6 +72,11 @@
   animation-name: game-motion-travel;
 }
 
+.game-motion-flight-hold {
+  z-index: 1;
+  animation-name: game-motion-hold;
+}
+
 .game-motion-deck-cover {
   /* Bottom-deck flights are always stacking level 1. Keep the existing deck
      top decisively above the moving card while their rectangles overlap. */
@@ -89,6 +94,10 @@
 
 .game-motion-flight-draw {
   animation-name: game-motion-draw;
+}
+
+.game-motion-flight-pitch-gather {
+  animation-name: game-motion-travel;
 }
 
 .game-motion-flight-deck-bottom {
@@ -190,6 +199,11 @@
     transform: translate3d(var(--motion-x), var(--motion-y), 0)
       scale(var(--motion-scale-x), var(--motion-scale-y));
   }
+}
+
+@keyframes game-motion-hold {
+  from { opacity: 1; transform: translate3d(0, 0, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 
 @keyframes game-motion-appear {

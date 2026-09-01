@@ -2,6 +2,12 @@ export const MOTION_DESTINATION_HIDDEN_ATTRIBUTE = "data-game-motion-destination
 
 export type MaskedElementsByBatch = Map<string, Map<string, HTMLElement>>;
 
+interface MotionDestinationArrival {
+  destinationPresentationKey?: string;
+  mode?: string;
+  maskDestinationWhilePending?: true;
+}
+
 export function concealMotionDestination(element: HTMLElement): void {
   // Keep this outside React's className so ordinary card rerenders cannot
   // accidentally expose an authoritative destination before its flight lands.
@@ -10,6 +16,37 @@ export function concealMotionDestination(element: HTMLElement): void {
 
 export function revealMotionDestination(element: HTMLElement): void {
   element.removeAttribute(MOTION_DESTINATION_HIDDEN_ATTRIBUTE);
+}
+
+/** Add destination masks for the supplied arrivals. Callers may pass only true
+ * arrivals while a batch is pending, then add its reflows when it activates. */
+export function activateMotionDestinationMasks(
+  batchId: string,
+  arrivals: readonly MotionDestinationArrival[],
+  currentElements: ReadonlyMap<string, HTMLElement>,
+  maskedElements: MaskedElementsByBatch,
+): void {
+  const batchMasks = new Map(maskedElements.get(batchId) ?? []);
+  for (const arrival of arrivals) {
+    const key = arrival.destinationPresentationKey;
+    if (!key) continue;
+    const element = currentElements.get(key);
+    if (!element) continue;
+    concealMotionDestination(element);
+    batchMasks.set(key, element);
+  }
+  if (batchMasks.size > 0) maskedElements.set(batchId, batchMasks);
+}
+
+/** True arrivals exist only in the authoritative destination DOM and must be
+ * concealed as soon as they are queued. Reflows represent cards that already
+ * exist in hand, so masking those before their overlay mounts creates a gap. */
+export function motionDestinationsRequiringEarlyMask(
+  arrivals: readonly MotionDestinationArrival[],
+): MotionDestinationArrival[] {
+  return arrivals.filter((arrival) => (
+    arrival.mode !== "reflow" || arrival.maskDestinationWhilePending === true
+  ));
 }
 
 export function motionDestinationIsMasked(

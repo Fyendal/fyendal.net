@@ -139,7 +139,7 @@ describe("motion geometry", () => {
         kind: "move",
         source: { kind: "deck", seat: 0 },
         destination: { kind: "hand", seat: 0 },
-        visual: { kind: "back-reveal", card },
+        visual: { kind: "face", card },
         instanceId: card.instanceId,
         destinationPresentationKey: `0:hand:${card.instanceId}`,
         count: 1,
@@ -304,13 +304,13 @@ describe("motion geometry", () => {
     ]);
   });
 
-  it("moves multiple ordered pitch cards directly under the deck in sequence", () => {
+  it("gathers multiple ordered pitch cards before one horizontal bottom-deck flight", () => {
     const firstSource = rect(650, 500, 100, 138);
     const secondSource = rect(670, 514, 100, 138);
     const deckDestination = rect(820, 500, 100, 138);
     const firstCard = { instanceId: 64, cardId: "TST064", owner: 0 };
     const secondCard = { instanceId: 65, cardId: "TST065", owner: 0 };
-    const batch = resolveMotionBatch(
+    const batches = resolveMotionBatches(
       [firstCard, secondCard].map((card): GameMotionEvent => ({
         kind: "move",
         source: { kind: "pitch", seat: 0 },
@@ -330,26 +330,160 @@ describe("motion geometry", () => {
       17,
     );
 
-    expect(batch?.flights).toEqual([
+    expect(batches).toHaveLength(2);
+    expect(batches[0]).toEqual(expect.objectContaining({
+      id: "17:pitch-gather:0",
+      stage: "end-turn",
+      durationMs: 180,
+    }));
+    expect(batches[0]?.flights).toEqual([
       expect.objectContaining({
-        mode: "deck-bottom",
+        mode: "pitch-gather",
         phase: "cleanup",
         start: firstSource,
-        end: deckDestination,
+        end: rect(670, 500, 100, 138),
         count: 1,
         showCount: false,
         delayMs: 0,
       }),
       expect.objectContaining({
-        mode: "deck-bottom",
+        mode: "pitch-gather",
         phase: "cleanup",
         start: secondSource,
-        end: deckDestination,
-        visual: { kind: "face-conceal", card: secondCard },
-        delayMs: 45,
+        end: rect(670, 500, 100, 138),
+        visual: { kind: "face", card: secondCard },
+        delayMs: 0,
       }),
     ]);
-    expect(batch?.durationMs).toBe(605);
+    expect(batches[1]).toEqual(expect.objectContaining({
+      id: "17:pitch-bottom:0",
+      stage: "end-turn",
+      durationMs: 560,
+    }));
+    expect(batches[1]?.flights).toEqual([
+      expect.objectContaining({
+        mode: "deck-bottom",
+        phase: "cleanup",
+        start: rect(670, 500, 100, 138),
+        end: deckDestination,
+        visual: { kind: "face-conceal", card: secondCard },
+        destinationCoverVisual: { kind: "back" },
+        delayMs: 0,
+      }),
+    ]);
+  });
+
+  it("queues arsenal, pitch packet, draw, and turn-start motion in causal order", () => {
+    const chosen = { instanceId: 66, cardId: "TST066", owner: 0 };
+    const firstPitch = { instanceId: 67, cardId: "TST067", owner: 0 };
+    const secondPitch = { instanceId: 68, cardId: "TST068", owner: 0 };
+    const drawn = { instanceId: 69, cardId: "TST069", owner: 0 };
+    const trigger = { instanceId: 70, cardId: "TST070", owner: 0 };
+    const retained = { instanceId: 71, cardId: "TST071", owner: 0 };
+    const batches = resolveMotionBatches(
+      [
+        {
+          kind: "move",
+          source: { kind: "hand", seat: 0 },
+          destination: { kind: "arsenal", seat: 0 },
+          visual: { kind: "face", card: chosen },
+          instanceId: chosen.instanceId,
+          sourcePresentationKey: "0:hand:66",
+          destinationPresentationKey: "0:arsenal:66",
+          count: 1,
+          confidence: "exact",
+        },
+        ...[firstPitch, secondPitch].map((card): GameMotionEvent => ({
+          kind: "move",
+          source: { kind: "pitch", seat: 0 },
+          destination: { kind: "deck", seat: 0, position: "bottom" },
+          visual: { kind: "face-conceal", card },
+          instanceId: card.instanceId,
+          sourcePresentationKey: `0:pitch:${card.instanceId}`,
+          destinationCoverVisual: { kind: "back" },
+          count: 1,
+          confidence: "exact",
+        })),
+        {
+          kind: "move",
+          source: { kind: "deck", seat: 0, position: "top" },
+          destination: { kind: "hand", seat: 0 },
+          visual: { kind: "face", card: drawn },
+          instanceId: drawn.instanceId,
+          destinationPresentationKey: "0:hand:69",
+          count: 1,
+          confidence: "exact",
+        },
+        {
+          kind: "reflow",
+          source: { kind: "hand", seat: 0 },
+          destination: { kind: "hand", seat: 0 },
+          visual: { kind: "face", card: retained },
+          instanceId: retained.instanceId,
+          sourcePresentationKey: "0:hand:71",
+          destinationPresentationKey: "0:hand:71",
+          phase: "draw",
+        },
+        {
+          kind: "connect",
+          source: { kind: "board", seat: 0 },
+          destination: { kind: "stack-layer", index: 0 },
+          instanceId: trigger.instanceId,
+          sourcePresentationKey: "0:board:70",
+          destinationPresentationKey: "stack:layer:70",
+          timeline: "turn-start",
+        },
+      ],
+      anchors({
+        cards: [
+          ["0:hand:66", rect(200, 650)],
+          ["0:hand:71", rect(300, 650)],
+          ["0:pitch:67", rect(640, 500)],
+          ["0:pitch:68", rect(660, 514)],
+        ],
+        zones: [["0:deck", rect(820, 500)]],
+      }),
+      anchors({
+        cards: [
+          ["0:arsenal:66", rect(520, 500)],
+          ["0:hand:69", rect(240, 650)],
+          ["0:hand:71", rect(140, 650)],
+          ["0:board:70", rect(400, 300)],
+          ["stack:layer:70", rect(700, 250)],
+        ],
+        zones: [["0:deck", rect(820, 500)]],
+      }),
+      18,
+    );
+
+    expect(batches.map((batch) => batch.id)).toEqual([
+      "18:end-turn:before-pitch",
+      "18:pitch-gather:0",
+      "18:pitch-bottom:0",
+      "18:end-turn:after-pitch",
+      "18:turn-start",
+    ]);
+    expect(batches.map((batch) => batch.flights[0]?.mode ?? "connector")).toEqual([
+      "arsenal",
+      "pitch-gather",
+      "deck-bottom",
+      "draw",
+      "connector",
+    ]);
+    for (const batch of batches.slice(0, 3)) {
+      expect(batch.flights).toContainEqual(expect.objectContaining({
+        mode: "hold",
+        start: rect(300, 650),
+        end: rect(300, 650),
+        durationMs: batch.durationMs,
+      }));
+    }
+    expect(batches[3]?.flights).toContainEqual(expect.objectContaining({
+      mode: "reflow",
+      start: rect(300, 650),
+      end: rect(140, 650),
+      maskDestinationWhilePending: true,
+    }));
   });
 
   it("does not infer a bottom tuck for an explicit deck-top placement", () => {

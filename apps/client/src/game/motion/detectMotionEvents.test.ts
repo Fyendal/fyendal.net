@@ -884,6 +884,14 @@ describe("game motion detection", () => {
       ],
     }, "forward");
 
+    expect(events).toContainEqual(expect.objectContaining({
+      kind: "move",
+      source: { kind: "deck", seat: 0, position: "top" },
+      destination: { kind: "hand", seat: 0 },
+      visual: { kind: "face", card: drawn },
+      instanceId: drawn.instanceId,
+      destinationPresentationKey: `0:hand:${drawn.instanceId}`,
+    }));
     expect(events).toContainEqual({
       kind: "reflow",
       source: { kind: "hand", seat: 0 },

@@ -23,6 +23,9 @@ function motionVisual(
   const sourceVisible = source ? cardIsVisible(source.card) : false;
   const destinationVisible = cardIsVisible(destination.card);
   if (sourceVisible && destinationVisible) return { kind: "face", card: destination.card };
+  if (destinationVisible && destination.location.kind === "hand") {
+    return { kind: "face", card: destination.card };
+  }
   if (!sourceVisible && destinationVisible) {
     return { kind: "back-reveal", card: destination.card };
   }
