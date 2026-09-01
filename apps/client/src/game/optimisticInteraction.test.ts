@@ -161,7 +161,7 @@ describe("optimistic interaction projection", () => {
     expect(projection.view?.players[0]?.arsenal[0]).toMatchObject({ instanceId: 30, faceDown: true });
   });
 
-  it("dismisses an unpredictable scripted choice without predicting its movement", () => {
+  it("keeps an unpredictable scripted choice mounted until acknowledgement", () => {
     const view = game(player(0), {
       player: 0,
       kind: "optional-effect",
@@ -175,7 +175,101 @@ describe("optimistic interaction projection", () => {
     }));
 
     expect(projection.predictsSemanticTransition).toBe(false);
+    expect(projection.view).toBe(view);
+    expect(projection.key).toBe("interaction:authoritative");
+  });
+
+  it("keeps an Opt decision mounted with only the unselected cards", () => {
+    const first: CardView = { instanceId: 50, cardId: "WTR170", owner: 0 };
+    const second: CardView = { instanceId: 51, cardId: "WTR171", owner: 0 };
+    const view = game(player(0), {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Opt 2",
+      options: ["top:50", "bottom:50", "top:51", "bottom:51", "pass"],
+      optionLabels: ["Top", "Bottom", "Top", "Bottom", "Done"],
+      optionCards: [first, first, second, second, null],
+      lookedCards: [first, second],
+    });
+
+    const projection = optimisticInteractionView(view, 0, pending({
+      kind: "choose",
+      optionId: "bottom:50",
+    }));
+
+    expect(projection.predictsSemanticTransition).toBe(false);
+    expect(projection.view?.pendingDecision).toMatchObject({
+      prompt: "Opt 2",
+      options: ["top:51", "bottom:51", "pass"],
+      optionLabels: ["Top", "Bottom", "Done"],
+      optionCards: [second, second, null],
+      lookedCards: [second],
+    });
+    expect(view.pendingDecision?.options).toHaveLength(5);
+  });
+
+  it("dismisses an Opt decision after its final card is selected", () => {
+    const card: CardView = { instanceId: 50, cardId: "WTR170", owner: 0 };
+    const view = game(player(0), {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Opt 1",
+      options: ["top:50", "bottom:50"],
+      optionCards: [card, card],
+      lookedCards: [card],
+    });
+
+    const projection = optimisticInteractionView(view, 0, pending({
+      kind: "choose",
+      optionId: "top:50",
+    }));
+
     expect(projection.view?.pendingDecision).toBeNull();
+  });
+
+  it("keeps the Blood on Her Hands allocator mounted while an adjustment is pending", () => {
+    const weapon: CardView = { instanceId: 60, cardId: "WTR114", owner: 0 };
+    const increment = "blood-mode:increment:power:60:0:0:2";
+    const decrement = "blood-mode:decrement:power:60:0:0:2";
+    const view = game(player(0, { weapons: [weapon] }), {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Assign 2 Blood on Her Hands modes",
+      options: [decrement, increment, "blood-mode:confirm:0:2"],
+      optionCards: [weapon, weapon, null],
+    });
+
+    const projection = optimisticInteractionView(view, 0, pending({
+      kind: "choose",
+      optionId: increment,
+    }));
+
+    expect(projection.view).toBe(view);
+    expect(projection.view?.pendingDecision).toBe(view.pendingDecision);
+    expect(projection.key).toBe("interaction:authoritative");
+  });
+
+  it("keeps the Forsaken Strike mode chooser mounted between repeated selections", () => {
+    const option = "Give Forsaken Strike +2 power";
+    const view = game(player(0), {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Forsaken Strike: choose effect 1 of 3",
+      options: [
+        "Create a Gate to i'Arathael",
+        option,
+        "Give Forsaken Strike go again",
+      ],
+    });
+
+    const projection = optimisticInteractionView(view, 0, pending({
+      kind: "choose",
+      optionId: option,
+    }));
+
+    expect(projection.view).toBe(view);
+    expect(projection.view?.pendingDecision).toBe(view.pendingDecision);
+    expect(projection.key).toBe("interaction:authoritative");
   });
 
   it("does not dismiss a defend decision that owns staged-card presentation", () => {
