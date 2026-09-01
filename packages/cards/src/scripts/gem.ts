@@ -30,6 +30,28 @@ function specializedRunechant(
   };
 }
 
+const ominousToll: CardScript = {
+  onAttackDeclared(ctx) {
+    const zombies = ctx.player(ctx.seat).hand.filter((card) =>
+      ctx.cardTypes(card).includes("zombie")
+    );
+    if (zombies.length > 0) {
+      ctx.requestCardChoice(
+        "gem-ominous-toll-discard",
+        "Discard a zombie to create a Gate to i'Arathael?",
+        ["no", ...zombies.map((card) => card.instanceId)],
+      );
+    }
+  },
+  onChoose(ctx, hook, option) {
+    if (hook !== "gem-ominous-toll-discard" || option === "no") return;
+    const card = ctx.player(ctx.seat).hand.find((candidate) =>
+      candidate.instanceId === Number(option) && ctx.cardTypes(candidate).includes("zombie")
+    );
+    if (card && ctx.discardCard(ctx.seat, card.instanceId)) ctx.createToken(GATE);
+  },
+};
+
 export const gem: Record<string, CardScript> = {
   "consuming appetite|2": bloodDebt({
     activated: {
@@ -45,27 +67,9 @@ export const gem: Record<string, CardScript> = {
     },
   }),
 
-  "ominous toll|1": {
-    onAttackDeclared(ctx) {
-      const zombies = ctx.player(ctx.seat).hand.filter((card) =>
-        ctx.cardTypes(card).includes("zombie")
-      );
-      if (zombies.length > 0) {
-        ctx.requestCardChoice(
-          "gem-ominous-toll-discard",
-          "Discard a zombie to create a Gate to i'Arathael?",
-          ["no", ...zombies.map((card) => card.instanceId)],
-        );
-      }
-    },
-    onChoose(ctx, hook, option) {
-      if (hook !== "gem-ominous-toll-discard" || option === "no") return;
-      const card = ctx.player(ctx.seat).hand.find((candidate) =>
-        candidate.instanceId === Number(option) && ctx.cardTypes(candidate).includes("zombie")
-      );
-      if (card && ctx.discardCard(ctx.seat, card.instanceId)) ctx.createToken(GATE);
-    },
-  },
+  "ominous toll|1": ominousToll,
+  "ominous toll|2": ominousToll,
+  "ominous toll|3": ominousToll,
 
   "embrace ursur|1": {
     onAttackDeclared(ctx) {
