@@ -12,7 +12,24 @@ const CUE_GAIN: Readonly<Record<GameSoundKind, number>> = {
   shuffle: 0.45,
 };
 
+const MAX_CUE_DURATION_SECONDS: Readonly<Partial<Record<GameSoundKind, number>>> = {
+  // Match the deck shuffle animation instead of playing the full 3-second sample.
+  shuffle: 0.9,
+};
+
+const CUE_FADE_SECONDS = 0.08;
+
 const MAX_LATE_START_MS = 500;
+
+export function gameSoundPlaybackDuration(
+  kind: GameSoundKind,
+  sourceDuration: number,
+): number {
+  const maximumDuration = MAX_CUE_DURATION_SECONDS[kind];
+  return maximumDuration === undefined
+    ? sourceDuration
+    : Math.min(sourceDuration, maximumDuration);
+}
 
 function soundUrl(filename: string): string {
   return `${import.meta.env.BASE_URL}audio/cards/${filename}`;
@@ -130,7 +147,16 @@ export class GameAudioPlayer {
       cueGain.disconnect();
     };
     this.activeSources.add(source);
-    source.start(this.context.currentTime + Math.max(0, cue.delayMs) / 1_000);
+    const startsAt = this.context.currentTime + Math.max(0, cue.delayMs) / 1_000;
+    const playbackDuration = gameSoundPlaybackDuration(cue.kind, buffer.duration);
+    let endsAt: number | undefined;
+    if (playbackDuration < buffer.duration) {
+      endsAt = startsAt + playbackDuration;
+      cueGain.gain.setValueAtTime(CUE_GAIN[cue.kind], endsAt - CUE_FADE_SECONDS);
+      cueGain.gain.linearRampToValueAtTime(0, endsAt);
+    }
+    source.start(startsAt);
+    if (endsAt !== undefined) source.stop(endsAt);
   }
 
   private stopActiveSources(): void {

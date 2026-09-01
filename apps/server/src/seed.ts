@@ -6,7 +6,9 @@
  *
  * plus the demo room DEMO00 — a GC-exempt classic-battles match already in
  * progress (Rhinar vs Dorinthea, both seats phantom) that anyone can spectate
- * from the lobby's room list or via /DEMO00. Note it also counts as 2
+ * from the lobby's room list or via /DEMO00, and HUNTED — a private CC
+ * practice room owned by alice against the standard Hala bot, with Arakni
+ * starting with two copies of Hunter or Hunted?. These fixtures count as 4
  * "players in game" in the lobby stats — dev only. Alice also receives one
  * fixed, undismissed bug-report notification for exercising the lobby UI.
  *
@@ -21,8 +23,9 @@
  * DATABASE_URL is honored; defaults to the local dev database.
  */
 import { randomBytes } from "node:crypto";
+import { botDefinition } from "@fyendal/bot";
 import { applyIntent, createGame, legalIntents, rngNext, type GameState } from "@fyendal/engine";
-import { cardData, decklists, scripts } from "@fyendal/cards";
+import { cardData, decklists, precon, scripts } from "@fyendal/cards";
 import { hashPassword } from "./auth.js";
 import { hashReconnectToken } from "./store.js";
 import { createPool } from "./db.js";
@@ -34,6 +37,7 @@ assertSafeToSeed();
 const PASSWORD = "password123";
 const DEVELOPMENT_RULESET_VERSION = "development-seed";
 const USERS = [{ username: "alice" }, { username: "bob" }];
+const HUNTER_TEST_ROOM_CODE = "HUNTED";
 
 /**
  * A lived-in mid-game board for the demo room: fixed seeds, random legal
@@ -61,6 +65,48 @@ function demoGameState(): GameState {
   return s;
 }
 
+/** Ordinary Hala practice match with a Huntsman test deck. Arakni starts with
+ * two blue Hunter or Hunted? copies so one can pay for the other. The human
+ * takes the first turn and can immediately end it; every later Hala action is
+ * driven by the normal registered bot policy and recorded in room history. */
+function hunterTestGameState(): GameState {
+  const arakniPool = precon("precon-sar")?.pool;
+  const hala = botDefinition("hala");
+  const halaPool = precon(hala?.deckId ?? "")?.pool;
+  if (!arakniPool || !hala || !halaPool) throw new Error("Hunter test fixture decks are unavailable");
+  const arakni = {
+    heroId: "DYN113",
+    weaponIds: [...arakniPool.weaponIds],
+    equipment: {},
+    deck: [
+      ...arakniPool.deck,
+      "SUP245", "SUP245", "SUP245",
+      ...arakniPool.deck.slice(0, 11),
+    ],
+  };
+  const halaPresentation = hala.presentationFor(arakni, "second");
+  const state = createGame({
+    decklists: [{ heroId: halaPool.heroId, ...halaPresentation }, arakni],
+    seed: 245,
+    cards: cardData,
+    scripts,
+    startPlayer: 1,
+  });
+  const huntsman = state.players[1]!;
+  while (huntsman.hand.filter((card) => card.cardId === "SUP245").length < 2) {
+    const hunterIndex = huntsman.deck.findIndex((card) => card.cardId === "SUP245");
+    const replaceIndex = huntsman.hand.findIndex((card) => card.cardId !== "SUP245");
+    if (hunterIndex < 0 || replaceIndex < 0) {
+      throw new Error("Hunter test fixture could not stock Arakni's hand");
+    }
+    [huntsman.hand[replaceIndex], huntsman.deck[hunterIndex]] = [
+      huntsman.deck[hunterIndex]!,
+      huntsman.hand[replaceIndex]!,
+    ];
+  }
+  return state;
+}
+
 const pool = await createPool();
 try {
   for (const u of USERS) {
@@ -80,9 +126,9 @@ try {
   const prep = { rolls: [4, 2], dieWinner: 0, startPlayer: 0 };
   await pool.query("BEGIN");
   try {
-    // The demo is disposable local fixture data. Recreate it so rerunning the
-    // seed also repairs stale ruleset envelopes and clears dependent history.
-    await pool.query("DELETE FROM rooms WHERE code = $1", [DEMO_ROOM_CODE]);
+    // These rooms are disposable local fixture data. Recreate them so rerunning
+    // the seed also repairs stale ruleset envelopes and clears dependent history.
+    await pool.query("DELETE FROM rooms WHERE code IN ($1, $2)", [DEMO_ROOM_CODE, HUNTER_TEST_ROOM_CODE]);
     await pool.query(
       `INSERT INTO rooms
         (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at, status, winner)
@@ -107,6 +153,40 @@ try {
     );
     const aliceId = Number(aliceRows[0]?.id);
     if (!Number.isSafeInteger(aliceId)) throw new Error("seeded alice account is missing");
+    const hunterPrep = { rolls: [2, 5], dieWinner: 1, startPlayer: 1 };
+    await pool.query(
+      `INSERT INTO rooms
+        (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at,
+         status, winner, is_private)
+       VALUES ($1, 'cc', '[]', $2, $3, $4, 0, $5, NULL, 'active', NULL, TRUE)`,
+      [
+        HUNTER_TEST_ROOM_CODE,
+        JSON.stringify(dehydrateState(hunterTestGameState(), DEVELOPMENT_RULESET_VERSION)),
+        JSON.stringify(hunterPrep),
+        DEVELOPMENT_RULESET_VERSION,
+        Date.now(),
+      ],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, token_hash, username, hero_id, deck_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 0, $2, 'Hala bot', 'MPW003', 'precon-hala-masterclass',
+               'Masterclass: Hala, Bladesaint of the Vow', FALSE, TRUE, 'bot')`,
+      [HUNTER_TEST_ROOM_CODE, hashReconnectToken(randomBytes(12).toString("hex"))],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, user_id, token_hash, username, hero_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 1, $2, $3, 'alice', 'DYN113', 'Hunter or Hunted? test',
+               FALSE, TRUE, 'human')`,
+      [
+        HUNTER_TEST_ROOM_CODE,
+        aliceId,
+        hashReconnectToken(randomBytes(12).toString("hex")),
+      ],
+    );
     const fixedAt = Date.now();
     await pool.query(
       `INSERT INTO bug_reports
@@ -147,6 +227,7 @@ try {
     throw error;
   }
   console.log(`seeded demo room ${DEMO_ROOM_CODE} — spectate from the room list or /${DEMO_ROOM_CODE}`);
+  console.log(`seeded Hunter or Hunted? room ${HUNTER_TEST_ROOM_CODE} — log in as alice and open /${HUNTER_TEST_ROOM_CODE}`);
   console.log("seeded fixed bug notification for alice");
 } finally {
   await pool.end();

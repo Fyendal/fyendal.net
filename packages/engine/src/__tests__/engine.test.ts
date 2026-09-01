@@ -1091,6 +1091,42 @@ describe("game setup & turn structure", () => {
   });
 });
 
+describe("scripted choices", () => {
+  it("keeps bounded card-choice metadata when the choice queues behind Crank", () => {
+    const s = makeGame(397);
+    const source = player(s, 0).hand[0]!;
+    const searched = player(s, 1).hand.slice(0, 2);
+    s.pendingDecision = {
+      player: 0,
+      kind: "optional-effect",
+      prompt: "Crank?",
+      options: ["yes", "no"],
+      sourceInstanceId: player(s, 0).hero.instanceId,
+      chooseHook: "engine-crank",
+    };
+
+    makeCtx(s, engineRuntime, 0, source).requestCardChoices(
+      "bounded-search",
+      "Choose up to 2 cards",
+      searched.map((card) => card.instanceId),
+      0,
+      2,
+      0,
+      undefined,
+      searched.map((card) => card.instanceId),
+    );
+
+    expect(s.pendingDecision.followUpDecisions?.[0]).toMatchObject({
+      chooseHook: "bounded-search",
+      options: searched.map((card) => String(card.instanceId)),
+      minimumSelections: 0,
+      maximumSelections: 2,
+      cardOptions: searched.map((card) => card.instanceId),
+      lookedCardIds: searched.map((card) => card.instanceId),
+    });
+  });
+});
+
 describe("viewer projection secrecy", () => {
   it("caps audience-aware log entries at the newest 200", () => {
     const s = makeGame(398);

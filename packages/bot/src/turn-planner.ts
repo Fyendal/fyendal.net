@@ -357,6 +357,8 @@ function opponentRolloutIntent(state: GameState): GameIntent | undefined {
   const decline = legal.find((intent) => intent.kind === "choose" &&
     (intent.optionId === "no" || intent.optionId === "decline" || intent.optionId === "pass"));
   if (decline) return decline;
+  const chooseMany = legal.find((intent) => intent.kind === "choose-many");
+  if (chooseMany) return chooseMany;
   const pass = legal.find((intent) => intent.kind === "pass");
   if (pass) return pass;
   const close = legal.find((intent) => intent.kind === "close-chain");
@@ -413,7 +415,10 @@ function genericCandidatePriority(intent: GameIntent, input: BotPolicyInput): nu
   if (intent.kind === "concede") return Number.NEGATIVE_INFINITY;
   if (intent.kind === "pass") return -1_000;
   if (intent.kind === "close-chain") return -500;
-  if (intent.kind === "choose" || intent.kind === "order-triggers" || intent.kind === "skip-runechant") {
+  if (
+    intent.kind === "choose" || intent.kind === "choose-many" ||
+    intent.kind === "order-triggers" || intent.kind === "skip-runechant"
+  ) {
     return 0;
   }
   if (intent.kind === "defend" || intent.kind === "stage-defenders") return -100;

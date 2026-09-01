@@ -1135,6 +1135,18 @@ function enumerateIntents(
           ...intents,
         ];
       case "choose-target":
+        if (
+          pd.minimumSelections !== undefined &&
+          pd.maximumSelections !== undefined
+        ) {
+          return [
+            {
+              kind: "choose-many",
+              optionIds: (pd.options ?? []).slice(0, pd.minimumSelections),
+            },
+            ...intents,
+          ];
+        }
         return [
           ...(pd.options ?? []).map((o) => ({ kind: "choose", optionId: o }) as GameIntent),
           ...intents,

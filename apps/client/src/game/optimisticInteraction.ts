@@ -223,7 +223,7 @@ function projectActivation(
 function projectDecision(
   view: GameView,
   seat: number,
-  intent: Extract<PendingInteraction["intent"], { kind: "choose" | "order-triggers" | "pass" }>,
+  intent: Extract<PendingInteraction["intent"], { kind: "choose" | "choose-many" | "order-triggers" | "pass" }>,
 ): { view: GameView; predictsSemanticTransition: boolean } | null {
   const decision = view.pendingDecision;
   if (!decision || decision.player !== seat) return null;
@@ -281,6 +281,16 @@ function projectDecision(
   // decisions, for example), so keep their authoritative decision mounted
   // unless the client can prove that this interaction completes it.
   if (intent.kind === "order-triggers") {
+    return { view: { ...view, pendingDecision: null }, predictsSemanticTransition: false };
+  }
+  if (intent.kind === "choose-many") {
+    return { view: { ...view, pendingDecision: null }, predictsSemanticTransition: false };
+  }
+  // A registered card-name submission always completes the current name
+  // decision. Its scripted effect may open a different follow-up decision,
+  // but keeping the cleared name form mounted until acknowledgement makes a
+  // successful submission look stalled.
+  if (decision.kind === "choose-name" && intent.kind === "choose") {
     return { view: { ...view, pendingDecision: null }, predictsSemanticTransition: false };
   }
   if (decision.kind !== "arsenal" || intent.kind !== "choose") return null;

@@ -10,6 +10,38 @@ it("registers every HNT printing as implemented", () => {
 });
 
 describe("HNT — marked heroes and daggers", () => {
+  it("Quickdodge Flexors has 2 base defense on each chain link without stacking", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["oath of loyalty|1", "display loyalty|1"],
+        },
+        {
+          hero: "dorinthea",
+          resources: 2,
+          equipment: { legs: "quickdodge flexors|0" },
+        },
+      ],
+    });
+
+    g.play("oath of loyalty|1")
+      .blockWith()
+      .passPriority()
+      .activate("quickdodge flexors|0")
+      .settle()
+      .expectFinalDefense(2)
+      .play("display loyalty|1")
+      .blockWith()
+      .passPriority()
+      .activate("quickdodge flexors|0")
+      .settle()
+      .expectFinalDefense(2);
+
+    expect(g.state.chain).toHaveLength(2);
+    expect(g.state.chain.every((link) => link.defendingEquipment.length === 1)).toBe(true);
+  });
+
   it("Kabuto of Imperial Authority prohibits subsequent weapon attacks this turn", () => {
     const g = scenario({
       seats: [
@@ -332,6 +364,28 @@ describe("HNT — marked heroes and daggers", () => {
       .chooseCard("kunai of retribution|0")
       .settle()
       .expectNoLegalPlay("demonstrate devotion|1");
+  });
+
+  it("Cindra cannot equip a face-down Draconic dagger from the graveyard", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "cindra|0",
+          weapons: [],
+          graveyard: ["kunai of retribution|0"],
+          resources: 3,
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    g.state.players[0]!.graveyard[0]!.faceDown = true;
+
+    const hero = g.state.players[0]!.hero;
+    expect(legalIntents(g.state, 0)).not.toContainEqual(expect.objectContaining({
+      kind: "activate-ability",
+      sourceInstanceId: hero.instanceId,
+    }));
   });
 
   it("Art of the Dragon: Blood discounts exactly the next 3 Draconic plays", () => {

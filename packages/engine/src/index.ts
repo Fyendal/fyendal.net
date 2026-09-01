@@ -1,6 +1,6 @@
 import { createEngineRuntime, engineRuntime } from "./engineRuntime.js";
 import type { GameIntent, MeldSide } from "@fyendal/shared";
-import { activateAbility, answerChoice, playCard } from "./actions.js";
+import { activateAbility, answerChoice, answerChoices, playCard } from "./actions.js";
 import { declareTail } from "./attacks.js";
 import { assignDefenders, stageDefenders } from "./defense.js";
 import { scriptOf } from "./cardProperties.js";
@@ -657,6 +657,10 @@ export function applyIntent(
             ? "not a choice decision"
             : "not your decision"
           : res;
+      break;
+    }
+    case "choose-many": {
+      err = answerChoices(next, runtime, seat, intent.optionIds);
       break;
     }
     case "order-triggers": {

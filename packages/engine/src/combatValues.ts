@@ -261,6 +261,11 @@ function defendingCardBaseDefense(
     : modified;
 }
 
+function linkBaseDefense(link: ChainLinkState, card: CardInstance, printed: number): number {
+  const override = link.flags[`baseDefense:${card.instanceId}`];
+  return typeof override === "number" ? override : printed;
+}
+
 interface AttackValueAdjustment {
   source?: CardInstance;
   amount: number;
@@ -365,6 +370,22 @@ function attackValueAdjustments(
   }
   for (const reaction of link.reactions) {
     add(reaction, conditionalAttackBonus(state, runtime, link.attacker, reaction, link));
+  }
+
+  const attackerSources = hookSources(state, link.attacker, {
+    board: true,
+    equipment: true,
+    weapons: true,
+  });
+  for (const source of attackerSources) {
+    if (source.instanceId === link.attackingCard.instanceId) continue;
+    const hook = scriptOf(state, source.cardId, source)?.modifyFriendlyAttack;
+    if (hook) {
+      add(
+        source,
+        hook(runtime.makeCtx(state, link.attacker, source, link), link.attackingCard),
+      );
+    }
   }
 
   const defenderSeat = opponent(link.attacker);
@@ -774,10 +795,11 @@ function defendingCardDefense(
     return Math.max(0, data.defense ?? 0);
   }
   const printed = data.defense ?? 0;
+  const raw = linkBaseDefense(link, card, printed);
   let defense = defendingCardBaseDefense(
     link,
     printed,
-    baseDefenseOf(state, runtime, card.owner, card, printed),
+    baseDefenseOf(state, runtime, card.owner, card, raw),
   );
   defense += defendingCardDefenseAdjustment(link, Number(card.counters?.defense ?? 0));
   for (const source of attackingDefenseModifierSources(state, link)) {
@@ -864,6 +886,7 @@ export function equipmentDefense(
   c: CardInstance,
 ): number {
   const printed = dataOf(state, c.cardId).defense ?? 0;
+  const raw = linkBaseDefense(link, c, printed);
   if (scriptOf(state, c.cardId, c)?.unmodifiableCharacteristics?.includes("defense")) {
     return Math.max(0, printed);
   }
@@ -896,7 +919,7 @@ export function equipmentDefense(
     defendingCardBaseDefense(
       link,
       printed,
-      baseDefenseOf(state, runtime, c.owner, c, printed),
+      baseDefenseOf(state, runtime, c.owner, c, raw),
     ) -
     (c.defCounters ?? 0) +
     defendingCardDefenseAdjustment(link, Number(c.counters?.defense ?? 0)) +
@@ -969,10 +992,11 @@ export function grantsAuraAttackMarker(
 
 /**
  * The attack's current bonus over its base {p}: modifier-granted plus
- * script-granted (modifyAttack) contributions from the attacking object, hero,
- * reactions and lingering effect sources. `excludeInstanceId` drops a card's
- * own conditional contribution, so "if this has {p} greater than its base"
- * does not count the bonus the check itself would grant (and cannot recurse).
+ * script-granted contributions from the attacking object, hero, reactions,
+ * friendly continuous sources, and lingering effect sources.
+ * `excludeInstanceId` drops a card's own conditional contribution, so "if
+ * this has {p} greater than its base" does not count the bonus the check
+ * itself would grant (and cannot recurse).
  */
 export function attackBonusAboveBase(
   state: GameStateInternal,
@@ -999,6 +1023,20 @@ export function attackBonusAboveBase(
   }
   for (const r of link.reactions) {
     n += conditionalAttackBonus(state, runtime, link.attacker, r, link);
+  }
+  for (const source of hookSources(state, link.attacker, {
+    board: true,
+    equipment: true,
+    weapons: true,
+  })) {
+    if (
+      source.instanceId === link.attackingCard.instanceId ||
+      source.instanceId === excludeInstanceId
+    ) continue;
+    const hook = scriptOf(state, source.cardId, source)?.modifyFriendlyAttack;
+    if (hook) {
+      n += hook(runtime.makeCtx(state, link.attacker, source, link), link.attackingCard);
+    }
   }
   for (const mod of state.modifiers) {
     if (mod.scope !== "until-end-of-turn" && mod.scope !== "static") continue;

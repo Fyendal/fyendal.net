@@ -266,6 +266,32 @@ describe("OUT — registration and core mechanics", () => {
 });
 
 describe("OUT — rules regression coverage", () => {
+  it.each(["Crazy Brew", "Crouching Tiger", "Moon Wish"])(
+    "Mask of Many Faces can name %s",
+    (chosenName) => {
+      const s = scenario({
+        seats: [
+          {
+            hero: "rhinar",
+            resources: 1,
+            hand: ["head jab|1"],
+            equipment: { head: "mask of many faces|0" },
+          },
+          { hero: "dorinthea" },
+        ],
+      });
+
+      s.activate("mask of many faces|0");
+      expect(s.state.pendingDecision).toMatchObject({
+        kind: "choose-name",
+        chooseHook: "mask-name",
+      });
+
+      s.chooseName(chosenName).play("head jab|1");
+      expect(s.state.chain.at(-1)!.attackingCard.grantedNames).toContain(chosenName);
+    },
+  );
+
   it("Riptide deals damage when a controlled trap triggers", () => {
     const s = scenario({
       active: 1,

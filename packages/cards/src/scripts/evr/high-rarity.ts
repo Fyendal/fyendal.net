@@ -263,7 +263,24 @@ export const evrHighRarity: Record<string, CardScript> = {
   },
   "stalagmite, bastion of isenloft|0": { onDefend(ctx) { if (ctx.link) ctx.createToken(FROSTBITE, ctx.link.attacker); } },
   "earthlore bounty|0": { onFriendlyDraws(ctx, count, source) { if (source && ctx.hasCardType(source, "action")) ctx.createTokens(SEISMIC_SURGE, count); } },
-  "pulverize|1": { onPlay(ctx) { buffNextAttack(ctx, { attack: 4, appliesToType: ["guardian"] }); } },
+  "pulverize|1": {
+    onPlay(ctx) { buffNextAttack(ctx, { attack: 4, appliesToType: ["guardian"] }); },
+    triggers: [{
+      event: "end-of-turn",
+      sourceZone: "hand",
+      label: "Heave 3",
+      condition: (ctx) => ctx.player(ctx.seat).arsenal.length === 0,
+      effect(ctx) {
+        ctx.requestPayment("pulverize-heave", "Pulverize: pay {r}{r}{r} to heave it?", 3);
+      },
+    }],
+    onChoose(ctx, hook, option) {
+      if (hook !== "pulverize-heave" || option !== "paid") return;
+      if (ctx.putIntoArsenal(ctx.self.instanceId, "hand")) {
+        ctx.createTokens(SEISMIC_SURGE, 3);
+      }
+    },
+  },
   "imposing visage|3": {
     variablePlayCost: { base: 3, counterKey: "visageX", prompt: "Choose X" },
     onPlay(ctx) {

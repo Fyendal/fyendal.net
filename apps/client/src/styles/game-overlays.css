@@ -53,6 +53,67 @@
   overflow-y: auto;
   overscroll-behavior: contain;
 }
+.card-search-overlay-panel {
+  width: min(1180px, 92vw);
+  max-width: 92vw;
+  max-height: 88vh;
+}
+.card-search-overlay-header > div:first-child {
+  min-width: 0;
+}
+.card-search-minimize {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  place-items: center;
+  clip-path: none;
+  font: 700 24px/1 system-ui, sans-serif;
+}
+.card-search-minimized {
+  position: fixed;
+  z-index: 10;
+  top: 12px;
+  left: 50%;
+  display: flex;
+  width: min(680px, calc(100vw - 24px));
+  padding: 10px 12px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  transform: translateX(-50%);
+  border: 1px solid #806334;
+  border-radius: 3px;
+  background: #1a120af5;
+  box-shadow: 0 10px 24px #000a;
+}
+.card-search-minimized > span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+.card-search-minimized .decision-context {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.card-search-sections {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.card-search-section + .card-search-section {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #45331f;
+}
+.card-search-section h3 {
+  margin: 0 0 10px;
+  color: #cbbd9d;
+  font: 700 14px/1.2 "Segoe UI", system-ui, sans-serif;
+  letter-spacing: .04em;
+}
 /* Pile cards stay compact enough to show several at once; hover/tap inspection
    provides the full-size view. */
 .overlay-cards .card-zone { width: 116px; height: 160px; }

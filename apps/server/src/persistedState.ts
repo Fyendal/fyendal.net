@@ -333,6 +333,8 @@ export interface PersistedPendingDecisionV1 {
   kind: "defend" | "attack-reaction" | "defense-reaction" | "priority-window" | "arsenal" | "choose-target" | "choose-name" | "order-triggers" | "optional-effect";
   prompt: string;
   options?: string[];
+  minimumSelections?: number;
+  maximumSelections?: number;
   defaultOption?: string;
   optionLabels?: string[];
   optionCounts?: (number | null)[];
@@ -1000,11 +1002,27 @@ function validateResume(value: unknown, code: string, path: string): void {
 
 function validateDecision(value: unknown, code: string, path: string, depth = 0): void {
   if (depth > 16) fail(code, path, "follow-up decision nesting is too deep");
-  const decision = exact(value, code, path, ["player", "kind", "prompt"], ["options", "defaultOption", "optionLabels", "optionCounts", "sourceInstanceId", "chooseHook", "followUpDecisions", "tokenCreationCause", "cardOptions", "revealedCardIds", "lookedCardIds", "payment", "resourcePayment", "xPayment", "variablePlayCost", "variableActivationCost", "tokenCreationReplacement", "tokenCreationReplacementOrder", "wagerLossReplacementOrder", "activationCost", "clash", "arcane", "triggerOrder", "deckBottomOrder", "dieRoll", "staged", "resume"]);
+  const decision = exact(value, code, path, ["player", "kind", "prompt"], ["options", "minimumSelections", "maximumSelections", "defaultOption", "optionLabels", "optionCounts", "sourceInstanceId", "chooseHook", "followUpDecisions", "tokenCreationCause", "cardOptions", "revealedCardIds", "lookedCardIds", "payment", "resourcePayment", "xPayment", "variablePlayCost", "variableActivationCost", "tokenCreationReplacement", "tokenCreationReplacementOrder", "wagerLossReplacementOrder", "activationCost", "clash", "arcane", "triggerOrder", "deckBottomOrder", "dieRoll", "staged", "resume"]);
   integer(decision.player, code, `${path}.player`);
   oneOf(decision.kind, ["defend", "attack-reaction", "defense-reaction", "priority-window", "arsenal", "choose-target", "choose-name", "order-triggers", "optional-effect"] as const, code, `${path}.kind`);
   string(decision.prompt, code, `${path}.prompt`);
   optional(decision, "options", (v, p) => validateStringArray(v, code, p), path);
+  optional(decision, "minimumSelections", (v, p) => { integer(v, code, p); }, path);
+  optional(decision, "maximumSelections", (v, p) => { integer(v, code, p); }, path);
+  if ((decision.minimumSelections === undefined) !== (decision.maximumSelections === undefined)) {
+    fail(code, path, "selection bounds must be present together");
+  }
+  if (decision.maximumSelections !== undefined) {
+    if (decision.kind !== "choose-target") {
+      fail(code, path, "selection bounds require a choose-target decision");
+    }
+    const minimum = integer(decision.minimumSelections, code, `${path}.minimumSelections`);
+    const maximum = integer(decision.maximumSelections, code, `${path}.maximumSelections`);
+    if (minimum < 0 || maximum < minimum) fail(code, path, "invalid selection bounds");
+    if (!Array.isArray(decision.options) || maximum > decision.options.length) {
+      fail(code, path, "selection maximum exceeds options");
+    }
+  }
   optional(decision, "defaultOption", (v, p) => { string(v, code, p, 256); }, path);
   if (
     typeof decision.defaultOption === "string" &&

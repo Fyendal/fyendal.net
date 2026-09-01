@@ -320,7 +320,7 @@ function riptide(): CardScript {
 
 const maskManyFaces: CardScript = {
   activated: { cost: 1, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true, label: "Name a card for the next attack", onActivate(ctx) {
-    ctx.requestChoice("mask-name", "Name a card", ["Head Jab", "Surging Strike", "Twin Twisters"]);
+    ctx.requestNameChoice("mask-name", "Name a card");
   } },
   onChoose(ctx, hook, option) {
     if (hook === "mask-name") {

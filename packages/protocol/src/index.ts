@@ -318,6 +318,9 @@ function decodeGameIntentValue(value: unknown): value is GameIntent {
       return exactKeys(intent, ["kind", "instanceIds"]) && instanceIds(intent.instanceIds);
     case "choose":
       return exactKeys(intent, ["kind", "optionId"]) && string(intent.optionId, MAX_SHORT_TEXT, false);
+    case "choose-many":
+      return exactKeys(intent, ["kind", "optionIds"])
+        && array(intent.optionIds, (v): v is string => string(v, MAX_SHORT_TEXT, false), MAX_CARDS);
     case "order-triggers":
       return exactKeys(intent, ["kind", "optionIds"])
         && array(intent.optionIds, (v): v is string => string(v, MAX_SHORT_TEXT, false), MAX_CARDS);
@@ -439,7 +442,7 @@ function cardView(value: unknown, depth = 0): value is CardView {
   const card = object(value);
   if (!card || !exactKeys(card, [
     "instanceId", "cardId", "name", "owner", "pitchCount", "attack", "defense", "faceDown", "tapped",
-    "defCounters", "counters", "usedAbilityIndexes", "activatedAbilityLabels", "life", "hidden", "subcards", "grantedNames",
+    "defCounters", "counters", "usedAbilityIndexes", "activatedAbilityLabels", "life", "hidden", "subcards", "grantedNames", "chosenName",
     "grantedTypes", "grantedColor", "playableFromSourceCardId", "intimidated",
   ], ["instanceId", "cardId", "owner"])) return false;
   const validInstanceId = instanceId(card.instanceId)
@@ -463,6 +466,7 @@ function cardView(value: unknown, depth = 0): value is CardView {
       array(v, (label): label is string => string(label, MAX_SHORT_TEXT, false), 33))
     && optional(card.subcards, (v): v is CardView[] => array(v, (entry) => cardView(entry, depth + 1), 16))
     && optional(card.grantedNames, (v): v is string[] => array(v, (entry): entry is string => string(entry, MAX_ID), 16))
+    && optional(card.chosenName, (v): v is string => string(v, MAX_SHORT_TEXT, false))
     && optional(card.grantedTypes, (v): v is string[] => array(v, (entry): entry is string => string(entry, MAX_ID), 16))
     && optional(card.grantedColor, (v): v is 1 | 2 | 3 => v === 1 || v === 2 || v === 3)
     && optional(card.playableFromSourceCardId, (v): v is string => string(v, MAX_ID, false))
@@ -663,12 +667,14 @@ function turnFacts(value: unknown): value is TurnFactsView {
 function pendingDecision(value: unknown): boolean {
   const decision = object(value);
   return !!decision && exactKeys(decision, [
-    "player", "kind", "prompt", "options", "defaultOption", "optionLabels", "optionCounts", "optionCards", "revealedCards", "lookedCards", "stagedCards", "stagedDefense",
+    "player", "kind", "prompt", "options", "minimumSelections", "maximumSelections", "defaultOption", "optionLabels", "optionCounts", "optionCards", "revealedCards", "lookedCards", "stagedCards", "stagedDefense",
     "resourcePayment", "preStackSource",
   ], ["player", "kind", "prompt"])
     && seat(decision.player) && DECISION_KINDS.has(String(decision.kind))
     && string(decision.prompt, MAX_TEXT)
     && optional(decision.options, (v): v is string[] => shortStrings(v))
+    && optional(decision.minimumSelections, nonNegativeInteger)
+    && optional(decision.maximumSelections, nonNegativeInteger)
     && optional(decision.defaultOption, (v): v is string => string(v, MAX_SHORT_TEXT, false))
     && optional(decision.optionLabels, (v): v is string[] => shortStrings(v))
     && optional(decision.optionCounts, (v): v is Array<number | null> =>
@@ -708,6 +714,13 @@ function pendingDecision(value: unknown): boolean {
       || decision.options.length === decision.optionLabels.length)
     && (!(Array.isArray(decision.options) && Array.isArray(decision.optionCounts))
       || decision.options.length === decision.optionCounts.length)
+    && ((decision.minimumSelections === undefined) === (decision.maximumSelections === undefined))
+    && (decision.maximumSelections === undefined || (
+      decision.kind === "choose-target"
+      && Array.isArray(decision.options)
+      && Number(decision.minimumSelections) <= Number(decision.maximumSelections)
+      && Number(decision.maximumSelections) <= decision.options.length
+    ))
     && (typeof decision.defaultOption !== "string"
       || (Array.isArray(decision.options) && decision.options.includes(decision.defaultOption)));
 }

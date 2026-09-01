@@ -143,6 +143,8 @@ export interface ScriptCtx {
    * card into its owner's graveyard without resolving it. */
   negateStackCard(instanceId: number): boolean;
   addCardTempDefense(instanceId: number, delta: number): boolean;
+  /** Set a defending card's base defense for the active chain link. */
+  setCardBaseDefenseForLink(instanceId: number, defense: number): boolean;
   addCardDefenseCounters(instanceId: number, delta: number): boolean;
   grantCardKeyword(instanceId: number, keyword: string): boolean;
   /** Suppress a keyword until end of turn. Suppression wins over later grants. */
@@ -412,6 +414,22 @@ export interface ScriptCtx {
     seat?: number,
     /** Complete public reveal group when only a subset is selectable. */
     revealedCardIds?: number[],
+    /** Additional cards shown privately to the deciding player as
+     * non-selectable context, such as every card in searched hidden zones. */
+    lookedCardIds?: number[],
+  ): void;
+  /** Ask for a bounded subset of card instances, submitted atomically. */
+  requestCardChoices(
+    hook: string,
+    prompt: string,
+    options: number[],
+    minimumSelections: number,
+    maximumSelections: number,
+    seat?: number,
+    /** Complete public reveal group when only a subset is selectable. */
+    revealedCardIds?: number[],
+    /** Additional cards shown privately as non-selectable context. */
+    lookedCardIds?: number[],
   ): void;
   /** Ask for an arbitrary registered card name without projecting the entire
    * card catalog as a giant option list. */
@@ -904,6 +922,8 @@ export interface CardScript {
    * object (including a weapon), this modifies only that object's attack;
    * observer effects belong on explicit friendly-attack/modifier hooks. */
   modifyAttack?(ctx: ScriptCtx): number;
+  /** Continuous adjustment to a friendly attack while this source is active. */
+  modifyFriendlyAttack?(ctx: ScriptCtx, attacking: DeepReadonly<CardInstance>): number;
   /** Replace one positive power gain applied to this face-up object. The
    * returned amount is the complete gain after replacement. */
   replacePowerGain?(ctx: ScriptCtx, amount: number): number | undefined;
@@ -1419,6 +1439,8 @@ export interface CardScript {
   };
   /** Answer to a requestChoice hook. */
   onChoose?(ctx: ScriptCtx, hook: string, optionId: string): void;
+  /** Atomic answer to a bounded requestCardChoices hook. */
+  onChooseMany?(ctx: ScriptCtx, hook: string, optionIds: readonly string[]): void;
   /** Triggered abilities: queued as stack layers when their event fires. */
   triggers?: TriggerDef[];
   /** Graveyard replacement applied before the card enters the graveyard. */

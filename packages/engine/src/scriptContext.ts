@@ -259,6 +259,17 @@ function publishReactionAttackPowerGain(
   }
 }
 
+interface ScriptedChoiceDetails {
+  cardOptions?: (number | string | null)[];
+  defaultOption?: string;
+  minimumSelections?: number;
+  maximumSelections?: number;
+  revealedCardIds?: number[];
+  lookedCardIds?: number[];
+}
+
+type CardChoiceDetails = Omit<ScriptedChoiceDetails, "cardOptions" | "defaultOption">;
+
 export function makeCtx(
   state: GameStateInternal,
   runtime: EngineRuntime,
@@ -275,6 +286,99 @@ export function makeCtx(
   // `ctx.cardData(id).name`. Remember those exact definitions so log-only
   // metadata can preserve pitch without making rule-facing names impure.
   const referencedLogCardIds = new Set<string>([self.cardId]);
+  const deckSearchAllowed = (): boolean => !state.players.some((candidate) =>
+    controlledPermanents(state, candidate.seat, { faceDownEquipment: false })
+      .some((source) => scriptOf(state, source.cardId, source)?.prohibitsDeckSearches === true),
+  );
+  const requestScriptedChoice = (
+    hook: string,
+    prompt: string,
+    options: string[],
+    choiceSeat?: number,
+    details: ScriptedChoiceDetails = {},
+  ): void => {
+    // An unacknowledged look-at float for the same player folds into this
+    // choice: the looked cards stay visible as context alongside it.
+    const existing = state.pendingDecision;
+    const look =
+      existing?.chooseHook === "engine-look" && existing.player === (choiceSeat ?? seat)
+        ? existing
+        : undefined;
+    // An empty option list would deadlock the game on an unanswerable
+    // decision — the effect simply finds no target and fizzles.
+    if (options.length === 0) {
+      logPublic(state, `(fizzled, no options: ${prompt})`);
+      return;
+    }
+    const decision: PendingDecisionState = {
+      player: choiceSeat ?? seat,
+      kind: options.length === 2 && options.every((option) => option === "yes" || option === "no")
+        ? "optional-effect"
+        : "choose-target",
+      prompt,
+      options,
+      sourceInstanceId: self.instanceId,
+      chooseHook: hook,
+      ...(tokenCreationCause.kind !== "effect" || tokenCreationCause.sourceCardId !== self.cardId
+        ? { tokenCreationCause }
+        : {}),
+      ...(details.cardOptions ? { cardOptions: details.cardOptions } : {}),
+      ...(details.defaultOption !== undefined && options.includes(details.defaultOption)
+        ? { defaultOption: details.defaultOption }
+        : {}),
+      ...(details.minimumSelections === undefined
+        ? {}
+        : {
+            minimumSelections: details.minimumSelections,
+            maximumSelections: details.maximumSelections,
+          }),
+      ...(details.revealedCardIds?.length
+        ? { revealedCardIds: [...new Set(details.revealedCardIds)] }
+        : {}),
+      ...(details.lookedCardIds?.length
+        ? { lookedCardIds: [...new Set(details.lookedCardIds)] }
+        : {}),
+    };
+    // Crank is an intervening enter-arena choice. Preserve later decisions
+    // from the resolving effect until that choice has been answered.
+    if (existing?.chooseHook && !look) {
+      if (!queueDecisionBehindCrank(state, decision)) {
+        logPublic(state, `(skipped duplicate choice: ${prompt})`);
+      }
+      return;
+    }
+    state.pendingDecision = decision;
+    if (look?.lookedCardIds?.length && !decision.lookedCardIds?.length) {
+      // Cards already offered as clickable options need no context copy.
+      const offered = new Set(
+        (details.cardOptions ?? []).filter((id): id is number => typeof id === "number"),
+      );
+      const carried = look.lookedCardIds.filter((id) => !offered.has(id));
+      if (carried.length) decision.lookedCardIds = carried;
+    }
+  };
+  const requestCardDecision = (
+    hook: string,
+    prompt: string,
+    options: (number | string)[],
+    choiceSeat?: number,
+    details: CardChoiceDetails = {},
+  ): void => {
+    const deckIds = new Set((state.players as PlayerState[]).flatMap((candidate) =>
+      candidate.deck.map((card) => card.instanceId),
+    ));
+    if (
+      options.some((option) => typeof option === "number" && deckIds.has(option)) &&
+      !deckSearchAllowed()
+    ) {
+      logPublic(state, "the deck search is prohibited");
+      return;
+    }
+    requestScriptedChoice(hook, prompt, options.map(String), choiceSeat, {
+      ...details,
+      cardOptions: options.map((option) => typeof option === "number" ? option : null),
+    });
+  };
   const ctx: ScriptCtx = {
     state,
     seat,
@@ -503,12 +607,7 @@ export function makeCtx(
     revealCards(instanceIds, revealingSeat = seat) {
       return revealCards(state, runtime, revealingSeat, instanceIds);
     },
-    canSearchDeck() {
-      return !state.players.some((candidate) =>
-        controlledPermanents(state, candidate.seat, { faceDownEquipment: false })
-          .some((source) => scriptOf(state, source.cardId, source)?.prohibitsDeckSearches === true),
-      );
-    },
+    canSearchDeck: deckSearchAllowed,
     shuffleDeck(targetSeat = seat) {
       const target = state.players[targetSeat] as PlayerState;
       const deck = target.deck;
@@ -875,6 +974,16 @@ export function makeCtx(
           defending.tempDefense = (defending.tempDefense ?? 0) + delta;
         }
       }
+      return true;
+    },
+    setCardBaseDefenseForLink(instanceId, defense) {
+      const current = link ?? currentLink(state);
+      if (!current || !Number.isFinite(defense)) return false;
+      const defending = [...current.defendingCards, ...current.defendingEquipment].some(
+        (card) => card.instanceId === instanceId,
+      );
+      if (!defending) return false;
+      current.flags[`baseDefense:${instanceId}`] = defense;
       return true;
     },
     addCardDefenseCounters(instanceId, delta) {
@@ -1624,71 +1733,36 @@ export function makeCtx(
       publishReactionAttackPowerGain(state, runtime, observed);
     },
     requestChoice(hook, prompt, options, choiceSeat, cardOptions, defaultOption) {
-      // an unacknowledged look-at float for the same player folds into this
-      // choice: the looked cards stay visible as context alongside it
-      const existing = state.pendingDecision;
-      const look =
-        existing?.chooseHook === "engine-look" && existing.player === (choiceSeat ?? seat)
-          ? existing
-          : undefined;
-      // an empty option list would deadlock the game on an unanswerable
-      // decision — the effect simply finds no target and fizzles
-      if (options.length === 0) {
-        logPublic(state, `(fizzled, no options: ${prompt})`);
-        return;
-      }
-      const decision: PendingDecisionState = {
-        player: choiceSeat ?? seat,
-        kind: options.length === 2 && options.every((o) => o === "yes" || o === "no")
-          ? "optional-effect"
-          : "choose-target",
-        prompt,
-        options,
-        sourceInstanceId: self.instanceId,
-        chooseHook: hook,
-        ...(tokenCreationCause.kind !== "effect" || tokenCreationCause.sourceCardId !== self.cardId
-          ? { tokenCreationCause }
-          : {}),
-        ...(cardOptions ? { cardOptions } : {}),
-        ...(defaultOption !== undefined && options.includes(defaultOption)
-          ? { defaultOption }
-          : {}),
-      };
-      // Crank is an intervening enter-arena choice. Preserve later decisions
-      // from the resolving effect until that choice has been answered.
-      if (existing?.chooseHook && !look) {
-        if (!queueDecisionBehindCrank(state, decision)) {
-          logPublic(state, `(skipped duplicate choice: ${prompt})`);
-        }
-        return;
-      }
-      state.pendingDecision = decision;
-      if (look?.lookedCardIds?.length) {
-        // cards already offered as clickable options need no context copy
-        const offered = new Set(
-          (cardOptions ?? []).filter((id): id is number => typeof id === "number"),
-        );
-        const carried = look.lookedCardIds.filter((id) => !offered.has(id));
-        if (carried.length) state.pendingDecision.lookedCardIds = carried;
-      }
+      requestScriptedChoice(hook, prompt, options, choiceSeat, { cardOptions, defaultOption });
     },
-    requestCardChoice(hook, prompt, options, choiceSeat, revealedCardIds) {
-      const deckIds = new Set((state.players as PlayerState[]).flatMap((candidate) =>
-        candidate.deck.map((card) => card.instanceId),
-      ));
-      if (options.some((option) => typeof option === "number" && deckIds.has(option)) && !ctx.canSearchDeck(choiceSeat)) {
-        logPublic(state, "the deck search is prohibited");
-        return;
-      }
-      ctx.requestChoice(hook, prompt, options.map(String), choiceSeat,
-        options.map((o) => (typeof o === "number" ? o : null)));
-      const pd = state.pendingDecision;
-      // tag only if the choice was actually queued (not skipped/fizzled)
-      if (pd?.chooseHook === hook && pd.sourceInstanceId === self.instanceId) {
-        if (revealedCardIds?.length) {
-          pd.revealedCardIds = [...new Set(revealedCardIds)];
-        }
-      }
+    requestCardChoice(hook, prompt, options, choiceSeat, revealedCardIds, lookedCardIds) {
+      requestCardDecision(hook, prompt, options, choiceSeat, {
+        revealedCardIds,
+        lookedCardIds,
+      });
+    },
+    requestCardChoices(
+      hook,
+      prompt,
+      options,
+      minimumSelections,
+      maximumSelections,
+      choiceSeat,
+      revealedCardIds,
+      lookedCardIds,
+    ) {
+      const maximum = Math.min(maximumSelections, options.length);
+      if (
+        !Number.isSafeInteger(minimumSelections) || minimumSelections < 0 ||
+        !Number.isSafeInteger(maximumSelections) || maximumSelections < minimumSelections ||
+        minimumSelections > maximum
+      ) return;
+      requestCardDecision(hook, prompt, options, choiceSeat, {
+        minimumSelections,
+        maximumSelections: maximum,
+        revealedCardIds,
+        lookedCardIds,
+      });
     },
     requestNameChoice(hook, prompt, choiceSeat) {
       const decision: PendingDecisionState = {

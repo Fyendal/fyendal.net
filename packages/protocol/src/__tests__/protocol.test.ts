@@ -218,6 +218,7 @@ describe("client messages", () => {
     { kind: "defend", instanceIds: [1], pitchInstanceIds: [2] },
     { kind: "stage-defenders", instanceIds: [1] },
     { kind: "choose", optionId: "yes" },
+    { kind: "choose-many", optionIds: ["11", "12", "13"] },
     { kind: "order-triggers", optionIds: ["41:0", "42:0"] },
     { kind: "skip-runechant" },
     { kind: "close-chain" },
@@ -370,6 +371,18 @@ describe("GameView and server messages", () => {
     const badCardName = gameView();
     (badCardName.players[0] as unknown as { hand: unknown[] }).hand = [{ ...card, name: 42 }];
     expect(decodeGameView(badCardName)).toBeNull();
+    const chosenName = gameView();
+    (chosenName.chain[0] as unknown as { defendingCards: unknown[] }).defendingCards = [{
+      ...card,
+      chosenName: "Sink Below",
+    }];
+    expect(decodeGameView(chosenName)).not.toBeNull();
+    const badChosenName = gameView();
+    (badChosenName.chain[0] as unknown as { defendingCards: unknown[] }).defendingCards = [{
+      ...card,
+      chosenName: 42,
+    }];
+    expect(decodeGameView(badChosenName)).toBeNull();
     const badSubcard = gameView();
     (badSubcard.players[0] as unknown as { hand: unknown[] }).hand = [{
       ...card,
@@ -382,6 +395,39 @@ describe("GameView and server messages", () => {
     expect(decodeGameView({
       ...gameView(),
       pendingDecision: { ...gameView().pendingDecision, defaultOption: "missing" },
+    })).toBeNull();
+    expect(decodeGameView({
+      ...gameView(),
+      pendingDecision: {
+        player: 0,
+        kind: "choose-target",
+        prompt: "Choose up to 3 cards",
+        options: ["11", "12", "13"],
+        minimumSelections: 0,
+        maximumSelections: 3,
+      },
+    })).not.toBeNull();
+    expect(decodeGameView({
+      ...gameView(),
+      pendingDecision: {
+        player: 0,
+        kind: "choose-target",
+        prompt: "Choose up to 3 cards",
+        options: ["11", "12"],
+        minimumSelections: 0,
+        maximumSelections: 3,
+      },
+    })).toBeNull();
+    expect(decodeGameView({
+      ...gameView(),
+      pendingDecision: {
+        player: 0,
+        kind: "optional-effect",
+        prompt: "Use cards?",
+        options: ["yes", "no"],
+        minimumSelections: 0,
+        maximumSelections: 2,
+      },
     })).toBeNull();
     expect(decodeGameView({ ...gameView(), log: Array(201).fill("x") })).toBeNull();
     expect(decodeGameView({ ...gameView(), chain: Array(257).fill(gameView().chain[0]) })).toBeNull();

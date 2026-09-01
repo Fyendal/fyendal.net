@@ -131,6 +131,38 @@ describe("SFA — Fai", () => {
       .expectInZone(0, FLAME, "hand")
       .expectResources(0, 0);
   });
+
+  it("charges {r} after Brand grants Display Loyalty a redundant Draconic type", () => {
+    const s = scenario({
+      seats: [
+        faiSeat({
+          hand: ["brand with cinderclaw|1", "display loyalty|1", RED],
+          graveyard: [FLAME],
+        }),
+        { hero: "rhinar", hand: [] },
+      ],
+    });
+
+    s.play("brand with cinderclaw|1").blockWith().settle()
+      .play("display loyalty|1").blockWith().settle();
+
+    expect(s.state.chain).toHaveLength(2);
+    const intents = abilityIntentsOn(s, 0, FAI);
+    expect(intents.some((intent) => intent.pitchInstanceIds.length === 0)).toBe(false);
+    expect(intents.some((intent) => intent.pitchInstanceIds.length === 1)).toBe(true);
+
+    const rejected = applyIntent(s.state, 0, {
+      kind: "activate-ability",
+      sourceInstanceId: s.state.players[0]!.hero.instanceId,
+      pitchInstanceIds: [],
+    });
+    expect(rejected.ok).toBe(false);
+
+    s.activate(FAI, { pitch: [RED] })
+      .chooseCard(FLAME)
+      .expectInZone(0, FLAME, "hand")
+      .expectResources(0, 0);
+  });
 });
 
 describe("SFA — granted Draconic types", () => {

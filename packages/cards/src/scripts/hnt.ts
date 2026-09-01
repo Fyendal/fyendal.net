@@ -707,7 +707,7 @@ Object.assign(hnt, {
       if (delayedDraw && ctx.consumeModifier(delayedDraw.id)) ctx.drawCards(ctx.seat, 1);
     },
   },
-  "quickdodge flexors|0": { activated: { cost: 1, isAttack: false, goAgain: false, timing: "defense-reaction", onActivate(ctx) { ctx.addSelfAsDefender(); ctx.addCardTempDefense(ctx.self.instanceId, 2); ctx.destroyAtEndPhase(ctx.self.instanceId); } } },
+  "quickdodge flexors|0": { activated: { cost: 1, isAttack: false, goAgain: false, timing: "defense-reaction", onActivate(ctx) { ctx.addSelfAsDefender(); ctx.setCardBaseDefenseForLink(ctx.self.instanceId, 2); ctx.destroyAtEndPhase(ctx.self.instanceId); } } },
   "rotten remains|3": { onAttackDeclared(ctx) { const byOwner = ctx.state.players.every((player) => player.graveyard.some((card) => ctx.basePower(card) === 1)); if (byOwner) { for (const player of ctx.state.players) { const card = player.graveyard.find((candidate) => ctx.basePower(candidate) === 1); if (card) ctx.banish(card.instanceId); } ctx.addCardTempPower(ctx.self.instanceId, 1); } } },
   "shelter from the storm|1": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", fromHand: true, onActivate: (ctx) => ctx.preventNextDamageEvents(ctx.seat, 1, 3) } },
   "dual threat|2": { onPlay(ctx) { if (ctx.getPlayerFlag(ctx.seat, "attackedWithWeaponThisTurn") === true) buffNextAttack(ctx, { attack: 3, appliesTo: "attack-action" }); if (ctx.getPlayerFlag(ctx.seat, "attackedWithAttackActionThisTurn") === true) buffNextAttack(ctx, { attack: 3, appliesTo: "weapon" }); } },

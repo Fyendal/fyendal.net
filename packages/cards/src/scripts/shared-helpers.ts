@@ -202,7 +202,11 @@ function weaponHands(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): number {
 }
 
 function canEquipDagger(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  if (!ctx.cardTypes(card).includes("dagger") || ctx.cardData(card.cardId).cardType !== "weapon") {
+  if (
+    card.faceDown
+    || !ctx.cardTypes(card).includes("dagger")
+    || ctx.cardData(card.cardId).cardType !== "weapon"
+  ) {
     return false;
   }
   const occupiedHands = ctx.player(ctx.seat).weapons.reduce(
