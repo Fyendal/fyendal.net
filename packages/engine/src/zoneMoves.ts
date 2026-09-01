@@ -482,8 +482,15 @@ export function banishCard(
       fromZone: "chain",
     };
   }
+  // Defending equipment remains in its arena slot while also represented on
+  // the chain. Prefer that live object after clearing every chain copy so the
+  // move does not leave a duplicate equipped object behind.
+  const fromDefendingOwnerZone = fromChain
+    ? findAndRemoveCard(state, instanceId, { includeEquipment: true })
+    : undefined;
   const found = fromResolving
     ?? fromAttackingOwnerZone
+    ?? fromDefendingOwnerZone
     ?? fromChain
     ?? findAndRemoveCard(state, instanceId, { includeEquipment: true });
   if (!found) return false;

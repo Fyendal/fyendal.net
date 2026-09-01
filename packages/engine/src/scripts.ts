@@ -311,6 +311,9 @@ export interface ScriptCtx {
    *  `faceDown` overrides the card's face state in the banished zone; omit it
    *  to keep the state the card already had. */
   banish(instanceId: number, opts?: { faceDown?: boolean }): boolean;
+  /** Mark every card currently defending on the open combat chain to be
+   *  banished by the ordinary chain-close settlement flow. */
+  banishAllDefendingCardsOnChainClose(): void;
   /** Return self from the graveyard / chain / resolving list to its owner's
    *  hand (Roaring Beam). Returns false when self is nowhere movable. */
   returnSelfToHand(): boolean;
