@@ -98,7 +98,7 @@ describe("hand motion anchors", () => {
     expect(html).toContain("card-selected");
   });
 
-  it("gives a spectator's compact hidden hand stable opaque anchors", () => {
+  it("renders a spectator's hidden cards in the player-hand layout with opaque anchors", () => {
     const player: PlayerView = {
       seat: 0,
       heroCardId: "HERO",
@@ -167,7 +167,8 @@ describe("hand motion anchors", () => {
       },
     }));
 
-    expect(html).toContain('class="hand hand-spectator"');
+    expect(html).toContain('class="hand"');
+    expect(html).toContain('class="card card-hand card-back ');
     expect(html).toContain('data-motion-card="0:hand:opaque"');
     expect(html).toContain('data-motion-card="0:hand:opaque:1"');
   });

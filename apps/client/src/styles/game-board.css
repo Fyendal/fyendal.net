@@ -713,24 +713,6 @@
 .hand .card-hand.card-pitched,
 .hand .card-hand.card-pitched:hover { transform: translateY(calc(-1 * var(--hand-selected-lift))); }
 .hand .muted { transform: translateY(calc(-1 * var(--hand-selected-lift))); }
-/* A live spectator owns neither hand. Keep the lower player's hidden hand as
-   the bottom-edge counterpart to .opp-hand instead of using the large,
-   interactive self-hand fan over the arsenal row. */
-.hand.hand-spectator {
-  height: clamp(48px, 6.9vh, 90px);
-  align-items: flex-start;
-  gap: 0;
-  overflow: hidden;
-  padding-top: 0;
-}
-.hand-spectator .card-back {
-  width: clamp(68px, 9.45vh, 123px);
-  height: clamp(95px, 13.2vh, 173px);
-  flex-shrink: 0;
-}
-.hand-spectator .card-back + .card-back {
-  margin-left: clamp(-62px, -4.73vh, -35px);
-}
 .hand-scroll-button {
   position: absolute;
   bottom: clamp(20px, 4.5vh, 52px);

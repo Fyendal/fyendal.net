@@ -81,7 +81,6 @@ export function PlayerHand({
   interaction: PlayerHandInteraction;
 }) {
   const handMotionLocation = { kind: "hand" as const, seat: player.seat };
-  const hiddenSpectatorHand = spectating && !replaying && view.winner === null;
   const visibleCards = player.hand.filter((card) =>
     !interaction.stagedIds.has(card.instanceId)
     && !interaction.optimisticallyHiddenIds.has(card.instanceId)
@@ -150,7 +149,7 @@ export function PlayerHand({
   return (
     <>
       <div
-        className={`hand${hiddenSpectatorHand ? " hand-spectator" : ""}`}
+        className="hand"
         id="player-hand"
         ref={handRef}
         data-motion-zone={motionLocationKey(handMotionLocation)}
@@ -160,6 +159,7 @@ export function PlayerHand({
               <CardBack
                 key={index}
                 label=""
+                size="hand"
                 motionKey={opaqueMotionPresentationKey(handMotionLocation, index)}
               />
             ))
@@ -237,7 +237,7 @@ export function PlayerHand({
           ? <span className="muted">no cards in hand</span>
           : null}
       </div>
-      {!hiddenSpectatorHand && scrollAvailability.left ? (
+      {scrollAvailability.left ? (
         <button
           type="button"
           className="hand-scroll-button hand-scroll-button-left"
@@ -248,7 +248,7 @@ export function PlayerHand({
           <span className="hand-scroll-glyph" aria-hidden="true">{"<<"}</span>
         </button>
       ) : null}
-      {!hiddenSpectatorHand && scrollAvailability.right ? (
+      {scrollAvailability.right ? (
         <button
           type="button"
           className="hand-scroll-button hand-scroll-button-right"
