@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type CSSProperties } from "react";
 import type { UndoTarget } from "@fyendal/shared";
 import type {
   MotionPreference,
@@ -239,17 +239,22 @@ export function GameSettingsDialog({
               <label className="settings-control-row settings-volume-row">
                 <span className="settings-control-name">Volume</span>
                 <span className="settings-volume-control">
-                  <input
-                    id="sound-effects-volume"
-                    type="range"
-                    min="0"
-                    max="100"
-                    step="5"
-                    value={soundEffectsVolume}
-                    disabled={!soundEffectsEnabled}
-                    aria-label="Sound effects volume"
-                    onChange={(event) => onSoundEffectsVolumeChange(Number(event.target.value))}
-                  />
+                  <span
+                    className="settings-volume-slider"
+                    style={{ "--volume-progress": `${soundEffectsVolume}%` } as CSSProperties}
+                  >
+                    <input
+                      id="sound-effects-volume"
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="5"
+                      value={soundEffectsVolume}
+                      disabled={!soundEffectsEnabled}
+                      aria-label="Sound effects volume"
+                      onChange={(event) => onSoundEffectsVolumeChange(Number(event.target.value))}
+                    />
+                  </span>
                   <output htmlFor="sound-effects-volume">{soundEffectsVolume}%</output>
                 </span>
               </label>

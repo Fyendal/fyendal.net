@@ -41,6 +41,7 @@ describe("game settings dialog", () => {
     expect(html).toContain('class="settings-selected" aria-pressed="true"');
     expect(html).toContain('aria-label="Sound effects"');
     expect(html).toContain('aria-label="Sound effects volume"');
+    expect(html).toContain('style="--volume-progress:35%"');
     expect(html).toContain("35%");
     expect(html).toContain('aria-label="Playable card cue"');
     expect(html).toContain(">Glow</button>");

@@ -104,6 +104,28 @@ describe("PlayerHalf", () => {
     expect(html).toMatch(
       /data-motion-card="0:deck:20"[^>]*data-motion-zone-anchor="0:deck"/,
     );
+    expect(html).toContain(
+      'class="zone-card-pile zone-card-pile-multiple" data-stack-depth="3"',
+    );
+  });
+
+  it("adds depth layers only to multi-card deck, graveyard, and banish piles", () => {
+    const html = renderPlayerHalf({
+      ...player,
+      deckCount: 2,
+      graveyard: [
+        { instanceId: 21, cardId: "TST-GRAVE-1", owner: 0 },
+        { instanceId: 22, cardId: "TST-GRAVE-2", owner: 0 },
+      ],
+      banish: [
+        { instanceId: 23, cardId: "TST-BANISH-1", owner: 0 },
+      ],
+    });
+
+    expect(html.match(/zone-card-pile-multiple/g)).toHaveLength(2);
+    expect(html.match(/data-stack-depth="2"/g)).toHaveLength(2);
+    expect(html).toMatch(/title="Graveyard".*pitch-top zone-card-pile zone-card-pile-multiple/);
+    expect(html).toMatch(/title="Banished".*pitch-top zone-card-pile"/);
   });
 
   it("anchors every grouped copy to the wrapper that also owns its count badge", () => {
@@ -116,7 +138,7 @@ describe("PlayerHalf", () => {
     });
 
     expect(html).toMatch(
-      /class="board-card-stack"[^>]*data-motion-card="0:board:2"[^>]*data-motion-card-aliases="0:board:4"[^>]*>.*board-card-count">×2</,
+      /class="board-card-stack board-card-stack-multiple" data-stack-depth="2"[^>]*data-motion-card="0:board:2"[^>]*data-motion-card-aliases="0:board:4"[^>]*>.*board-card-count" aria-label="2 stacked cards">×2</,
     );
     expect(html.match(/data-motion-card="0:board:/g)).toHaveLength(1);
   });

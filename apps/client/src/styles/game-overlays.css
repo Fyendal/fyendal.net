@@ -234,18 +234,85 @@
   align-items: center;
   gap: 10px;
 }
-.settings-volume-control input[type="range"] {
+.settings-volume-slider {
+  --volume-progress: 0%;
+  position: relative;
+  display: flex;
   width: 150px;
-  accent-color: #c99d45;
+  height: 24px;
+  align-items: center;
+}
+.settings-volume-slider::before {
+  content: "";
+  position: absolute;
+  left: 9px;
+  right: 9px;
+  height: 6px;
+  border: 1px solid #82745d;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    #c99d45 0 var(--volume-progress),
+    #303033 var(--volume-progress) 100%
+  );
+  pointer-events: none;
+}
+.settings-volume-slider:has(input:disabled)::before {
+  opacity: 0.45;
+}
+.settings-volume-control input[type="range"] {
+  position: relative;
+  width: 100%;
+  height: 24px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  background: transparent;
   cursor: pointer;
+}
+.settings-volume-control input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border: 0;
+  background: transparent;
+}
+.settings-volume-control input[type="range"]::-webkit-slider-thumb {
+  width: 18px;
+  height: 18px;
+  margin-top: -6px;
+  border: 0;
+  border-radius: 50%;
+  appearance: none;
+  -webkit-appearance: none;
+  background: #c99d45;
+}
+.settings-volume-control input[type="range"]::-moz-range-track,
+.settings-volume-control input[type="range"]::-moz-range-progress {
+  height: 6px;
+  border: 0;
+  background: transparent;
+}
+.settings-volume-control input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: 50%;
+  background: #c99d45;
 }
 .settings-volume-control input[type="range"]:disabled {
   cursor: default;
   opacity: 0.45;
 }
 .settings-volume-control input[type="range"]:focus-visible {
-  outline: 2px solid #d4a958;
-  outline-offset: 3px;
+  outline: none;
+}
+.settings-volume-control input[type="range"]:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px #1a120a, 0 0 0 5px #d4a958;
+}
+.settings-volume-control input[type="range"]:focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 0 3px #1a120a, 0 0 0 5px #d4a958;
 }
 .settings-volume-control output {
   width: 3ch;
