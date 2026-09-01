@@ -126,6 +126,7 @@ export interface AccountExport {
     rulesetVersion: string;
     description: string;
     createdAt: number;
+    fixedAt: number | null;
   }>;
   replays: Array<{
     id: string;
@@ -1088,10 +1089,11 @@ function exportRoom(value: unknown): boolean {
 function exportBugReport(value: unknown): boolean {
   const report = object(value);
   return !!report
-    && exactKeys(report, ["id", "roomCode", "roomVersion", "rulesetVersion", "description", "createdAt"])
+    && exactKeys(report, ["id", "roomCode", "roomVersion", "rulesetVersion", "description", "createdAt", "fixedAt"])
     && id(report.id) && string(report.roomCode, 6, false) && nonNegativeInteger(report.roomVersion)
     && string(report.rulesetVersion, MAX_SHORT_TEXT, false) && string(report.description, MAX_TEXT, false)
-    && nonNegativeInteger(report.createdAt);
+    && nonNegativeInteger(report.createdAt)
+    && (report.fixedAt === null || nonNegativeInteger(report.fixedAt));
 }
 
 function exportMatchmaking(value: unknown): boolean {

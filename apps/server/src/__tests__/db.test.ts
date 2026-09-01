@@ -103,6 +103,10 @@ describe("initial schema", () => {
       `SELECT column_name FROM information_schema.columns
        WHERE table_name = 'users' AND column_name = 'selected_badge'`,
     )).rows).toEqual([{ column_name: "selected_badge" }]);
+    expect((await db.query(
+      `SELECT column_name FROM information_schema.columns
+       WHERE table_name = 'bug_reports' AND column_name = 'fixed_at'`,
+    )).rows).toEqual([{ column_name: "fixed_at" }]);
     expect(await tables(db)).toEqual(expect.arrayContaining([
       "users", "sessions", "decks", "rooms", "room_seats", "room_history", "room_presence",
       "bug_reports", "replay_games", "replay_frames", "replay_participants",

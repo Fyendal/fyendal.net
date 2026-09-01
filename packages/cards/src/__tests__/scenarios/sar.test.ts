@@ -19,8 +19,10 @@ import { printingId, scenario } from "../harness.js";
 import type { Scenario } from "../harness.js";
 
 const HUNTSMAN = "mark of the huntsman|0";
+const KLAIVE = "hunter's klaive|0";
 const GRAPHENE = "graphene chelicera|0";
 const BLUE = "wrecker romp|3"; // blue pitch fodder
+const YELLOW = "wrecker romp|2"; // yellow pitch fodder
 const RED = "snatch|1"; // red pitch fodder
 
 const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
@@ -200,10 +202,56 @@ describe("SAR — daggers", () => {
     s.attackWithWeapon(HUNTSMAN, { pitch: [BLUE] })
       .blockWith()
       .activate("danger digits|0")
-      .chooseCard(HUNTSMAN); // the dagger that wasn't attacking
-    s.settle();
+      .chooseCard(HUNTSMAN) // the dagger that wasn't attacking
+      .chooseOption("no") // don't mark from the Danger Digits hit
+      .chooseOption("no"); // don't mark from the weapon attack
     expect(s.state.players[0]!.weapons.some((c) => c.instanceId === offDagger)).toBe(false);
     expect(s.state.players[1]!.life).toBe(18); // 1 (Huntsman hit) + 1 (Danger Digits)
+  });
+
+  it("Danger Digits lets a destroyed Mark of the Huntsman mark the hero it hit", () => {
+    const s = scenario({
+      seats: [
+        arakniSeat({
+          weapons: [HUNTSMAN, HUNTSMAN],
+          equipment: { ...NO_EQUIPMENT, arms: "danger digits|0" },
+          hand: [BLUE],
+        }),
+        { hero: "rhinar", hand: [BLUE] },
+      ],
+    });
+    const offDagger = s.state.players[0]!.weapons[1]!.instanceId;
+
+    s.attackWithWeapon(HUNTSMAN, { pitch: [BLUE] })
+      .blockWith(BLUE)
+      .activate("danger digits|0")
+      .chooseCard(HUNTSMAN)
+      .chooseOption("yes");
+
+    expect(s.state.players[0]!.graveyard.some((c) => c.instanceId === offDagger)).toBe(true);
+    expect(markedCount(s, 1)).toBe(1);
+  });
+
+  it("Danger Digits lets Hunter's Klaive mark the hero it hit", () => {
+    const s = scenario({
+      seats: [
+        arakniSeat({
+          weapons: [HUNTSMAN, KLAIVE],
+          equipment: { ...NO_EQUIPMENT, arms: "danger digits|0" },
+          hand: [BLUE],
+        }),
+        { hero: "rhinar", hand: [BLUE] },
+      ],
+    });
+    const klaiveId = s.state.players[0]!.weapons[1]!.instanceId;
+
+    s.attackWithWeapon(HUNTSMAN, { pitch: [BLUE] })
+      .blockWith(BLUE)
+      .activate("danger digits|0")
+      .chooseCard(KLAIVE);
+
+    expect(s.state.players[0]!.graveyard.some((c) => c.instanceId === klaiveId)).toBe(true);
+    expect(markedCount(s, 1)).toBe(1);
   });
 
   it("Danger Digits' effect hit fires Arakni, Tarantula's dagger-hit trigger", () => {
@@ -223,6 +271,7 @@ describe("SAR — daggers", () => {
       .blockWith(BLUE)
       .activate("danger digits|0")
       .chooseCard(HUNTSMAN)
+      .chooseOption("no")
       .settle();
     expect(s.state.players[1]!.life).toBe(18); // 1 damage + Tarantula's 1 life loss
     expect(markedCount(s, 1)).toBe(0);
@@ -433,20 +482,20 @@ describe("SAR — chaos actions", () => {
     expect(s.state.players[1]!.arsenal[0]?.faceDown).toBe(true);
   });
 
-  it("Hyper Inflation makes cards cost {r} more this turn", () => {
+  it("Hyper Inflation makes cards cost {r} more to play without taxing abilities", () => {
     const s = scenario({
       seats: [
-        arakniSeat({ hand: ["hyper inflation|1", "mark the prey|1"] }),
+        arakniSeat({ hand: ["hyper inflation|1", "mark the prey|1", YELLOW] }),
         { hero: "rhinar", hand: [] },
       ],
     });
     s.play("hyper inflation|1").blockWith().settle();
-    expect(s.state.players[0]!.flags.costMoreThisTurn).toBe(1);
-    expect(s.state.players[1]!.flags.costMoreThisTurn).toBe(1);
     // Mark the Prey (cost 0) now costs {r}: an empty-pitch play is rejected
     const prey = s.state.players[0]!.hand.find((c) => c.cardId === printingId("mark the prey|1"))!;
     const r = applyIntent(s.state, 0, { kind: "play-card", instanceId: prey.instanceId, pitchInstanceIds: [] });
     expect(r.ok).toBe(false);
+    // Mark of the Huntsman's {r}{r} attack ability keeps its printed cost.
+    s.attackWithWeapon(HUNTSMAN, { pitch: [YELLOW] }).expectResources(0, 0);
   });
 
   it("Infect creates a Bloodrot Pox under the hit hero's control", () => {

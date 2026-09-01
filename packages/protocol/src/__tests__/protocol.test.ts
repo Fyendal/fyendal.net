@@ -589,6 +589,7 @@ describe("replays and HTTP responses", () => {
           rulesetVersion: "rules-a",
           description: "The attack resolved incorrectly.",
           createdAt: 2,
+          fixedAt: null,
         }],
         replays: [{
           id: "replay-id",

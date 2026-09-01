@@ -670,6 +670,10 @@ describe("account rights", () => {
     expect(reported.status).toBe(200);
     const reportedBody = await reported.json() as { ok: true; reportId: string };
     expect(reportedBody).toMatchObject({ ok: true, reportId: expect.any(String) });
+    await db.query("UPDATE bug_reports SET fixed_at = $2 WHERE id = $1", [
+      reportedBody.reportId,
+      123,
+    ]);
 
     const exported = await fetch(`${url}/api/account/export`, { headers });
     expect(exported.status).toBe(200);
@@ -688,6 +692,7 @@ describe("account rights", () => {
         id: reportedBody.reportId,
         roomCode: "PRIV01",
         description: "The room stopped accepting legal actions.",
+        fixedAt: 123,
       }),
     ]);
 

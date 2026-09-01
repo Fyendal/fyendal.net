@@ -410,6 +410,15 @@ export const MIGRATIONS: Migration[] = [
     CREATE INDEX analytics_events_time_idx
       ON analytics_events (occurred_at, event_type);`,
   },
+  {
+    version: 23,
+    // Bug reports remain available for operator follow-up after resolution.
+    // A nullable timestamp records both status and when the report was closed
+    // without exposing operator workflow through the player-facing API.
+    sql: `ALTER TABLE bug_reports ADD COLUMN fixed_at BIGINT;
+    CREATE INDEX bug_reports_fixed_created_idx
+      ON bug_reports (fixed_at, created_at);`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {
