@@ -6,13 +6,17 @@
   display: grid;
   grid-template-columns: 1fr 391px;
   gap: 21px;
-  width: 100%;
-  max-width: 1127px;
+  width: min(1127px, calc(100% - 50px));
   margin: 0 auto;
-  padding: 8vh 25px 25px;
-  align-items: start;
+  padding: 8vh 0 25px;
+  align-items: stretch;
 }
-.intro-panel { padding: 32px 34px; }
+.intro-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 32px 34px;
+}
 .landing-kicker {
   margin: 0 0 8px;
   color: #b8933f;
@@ -22,22 +26,14 @@
   letter-spacing: 1.7px;
   text-transform: uppercase;
 }
-.intro-logo {
-  width: 147px;
-  height: 147px;
-  border-radius: 14px;
-  border: 1px solid #6b5326;
-  box-shadow: 0 0 32px #7cff6b38, 0 12px 32px #000;
-  object-fit: cover;
-  margin-bottom: 18px;
-}
 .intro-title {
   margin: 0 0 12px;
   font-family: var(--font-lobby-title);
   font-size: 34px;
   font-weight: 700;
   letter-spacing: -.01em;
-  text-transform: uppercase;
+  line-height: 1.12;
+  text-wrap: balance;
   color: var(--gold);
   text-shadow: 0 2px 9px #000;
 }
@@ -54,7 +50,12 @@
   color: #9c8a6d;
 }
 .intro-stats strong { color: var(--gold); font-size: 18px; margin-right: 6px; }
-.intro-auth .auth-card { margin: 0; max-width: none; }
+.intro-auth { display: flex; }
+.intro-auth .auth-card {
+  flex: 1;
+  margin: 0;
+  max-width: none;
+}
 
 .landing-details {
   display: grid;
@@ -73,6 +74,30 @@
 .landing-section-heading {
   max-width: 72ch;
   margin-bottom: 23px;
+}
+.landing-play-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, .78fr) minmax(0, 1.65fr);
+  gap: 18px;
+  align-items: start;
+}
+.landing-play-layout .landing-card-grid {
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+.landing-play-layout .landing-info-card { padding: 16px 18px; }
+.landing-demo {
+  overflow: hidden;
+  border: 1px solid #5a4426;
+  border-radius: 3px;
+  background: #090603;
+}
+.landing-demo-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
 }
 .landing-section-heading h2,
 .landing-static-account h2 {
@@ -131,6 +156,10 @@
 @media (max-width: 1035px) {
   .intro-grid { grid-template-columns: 1fr; padding-top: 25px; }
   .landing-card-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 820px) {
+  .landing-play-layout { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 1035px) {

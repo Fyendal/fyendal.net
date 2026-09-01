@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useStore } from "../store.js";
 import { apiStats, type StatsOk } from "../auth/auth.js";
@@ -75,7 +75,6 @@ export function Lobby() {
     connected,
     authUser,
     logout,
-    openReplayText,
     listRooms,
     decks,
     rooms,
@@ -92,7 +91,6 @@ export function Lobby() {
     connected: state.connected,
     authUser: state.authUser,
     logout: state.logout,
-    openReplayText: state.openReplayText,
     listRooms: state.listRooms,
     decks: state.decks,
     rooms: state.rooms,
@@ -110,8 +108,6 @@ export function Lobby() {
     cc: "",
     "silver-age": "",
   });
-  const fileInput = useRef<HTMLInputElement>(null);
-  const [replayError, setReplayError] = useState<string | null>(null);
   const [stats, setStats] = useState<StatsOk | null>(null);
   const [lastDeckFormat, setLastDeckFormat] = useState<ConstructedFormat>("cc");
   const [showMobileMore, setShowMobileMore] = useState(false);
@@ -166,27 +162,6 @@ export function Lobby() {
     if (rail === "cc" || rail === "silver-age") setLastDeckFormat(rail);
   }, [rail]);
 
-  const onReplayFile = async (file: File | undefined) => {
-    if (!file) return;
-    setReplayError(openReplayText(await file.text()));
-  };
-
-  const replayButton = (
-    <>
-      <input
-        ref={fileInput}
-        type="file"
-        accept=".json,application/json"
-        hidden
-        onChange={(e) => {
-          void onReplayFile(e.target.files?.[0]);
-          e.target.value = "";
-        }}
-      />
-      <button onClick={() => fileInput.current?.click()}>Open replay file…</button>
-    </>
-  );
-
   if (!authUser) {
     return (
       <div className="lobby-page">
@@ -195,11 +170,9 @@ export function Lobby() {
           <div className="topbar-actions">
             <div className="topbar-tools">
               <DiscordLink />
-              {replayButton}
             </div>
           </div>
         </header>
-        {replayError && <p className="error lobby-replay-error">{replayError}</p>}
 
         <main id="main-content" className="guest-landing">
           <div className="intro-grid">
