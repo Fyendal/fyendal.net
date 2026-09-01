@@ -2,6 +2,7 @@ import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { CardData, MeldSide, PlayableZone } from "@fyendal/shared";
 import type { CardInstance, PlayerState } from "./state.js";
+import type { TokenCreationContext } from "./eventTypes.js";
 import { activateFromHandAbility } from "./activation.js";
 import {
   activatedAbilitiesSuppressed,
@@ -759,11 +760,21 @@ function resolveScriptChoice(
   sourceInstanceId: number | undefined,
   hook: string | undefined,
   result: string,
+  tokenCreationCause?: TokenCreationContext,
 ): void {
   if (sourceInstanceId === undefined || !hook) return;
   const owner = findCardAnywhere(state, sourceInstanceId);
   if (!owner) return;
-  const ctx = runtime.makeCtx(state, owner.seat, owner.card, currentLink(state));
+  const ctx = runtime.makeCtx(
+    state,
+    owner.seat,
+    owner.card,
+    currentLink(state),
+    undefined,
+    undefined,
+    undefined,
+    tokenCreationCause,
+  );
   const script = scriptOf(state, owner.card.cardId, owner.card);
   script?.onChoose?.(ctx, hook, result);
   const inheritedIds = [
@@ -801,6 +812,7 @@ export function answerChoice(
   const srcId = pd.sourceInstanceId;
   const hook = pd.chooseHook;
   const resume = pd.resume;
+  const tokenCreationCause = pd.tokenCreationCause;
   if (hook === "combat-damage-equipment-replacement" || hook === "arcane-barrier" || hook === "arcane-barrier-pitch" || hook === "spellvoid" || hook === "ward" || hook === "quell" || hook === "quell-pitch" || hook === "optional-damage-prevention" || hook === "discard-damage-prevention" || hook === "soul-damage-prevention") {
     // engine-owned decision (Ward / Spellvoid / Arcane Barrier prevention):
     // the damage-prevention machine in util.ts manages the pending decision itself
@@ -873,7 +885,7 @@ export function answerChoice(
       const err = payCost(state, runtime, paying, noPitch.cost, []);
       if (err) return err;
       state.pendingDecision = null;
-      resolveScriptChoice(state, runtime, srcId, hook, noPitch.result);
+      resolveScriptChoice(state, runtime, srcId, hook, noPitch.result, tokenCreationCause);
     } else {
       state.pendingDecision = {
         player: seat,
@@ -882,6 +894,7 @@ export function answerChoice(
         options,
         sourceInstanceId: srcId,
         chooseHook: hook,
+        ...(tokenCreationCause ? { tokenCreationCause } : {}),
         payment: { pitchOptions },
         resourcePayment: {
           cost: declared.cost,
@@ -901,10 +914,17 @@ export function answerChoice(
       if (err) return err;
     }
     state.pendingDecision = null;
-    resolveScriptChoice(state, runtime, srcId, hook, picked ? picked.result : "declined");
+    resolveScriptChoice(
+      state,
+      runtime,
+      srcId,
+      hook,
+      picked ? picked.result : "declined",
+      tokenCreationCause,
+    );
   } else {
     state.pendingDecision = null;
-    resolveScriptChoice(state, runtime, srcId, hook, resolvedOption);
+    resolveScriptChoice(state, runtime, srcId, hook, resolvedOption, tokenCreationCause);
   }
   // Token commands later in the suspended effect are queued behind the first
   // replacement decision. Drain them before the original effect resumes.

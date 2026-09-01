@@ -3,6 +3,7 @@ import {
   decodeAccountBadgesResponse,
   decodeAccountExportResponse,
   decodeApiError,
+  decodeBugReportNotificationsResponse,
   decodeBugReportResponse,
   decodeDeckDetailResponse,
   decodeDeckInvalidResponse,
@@ -16,6 +17,7 @@ import {
   type AccountBadgesResponse,
   type AccountExport,
   type ApiError,
+  type BugReportNotificationsResponse,
   type BugReportResponse,
   type DeckDetailResponse,
   type DeckInvalidResponse,
@@ -145,6 +147,21 @@ export function apiReportBug(
   signal?: AbortSignal,
 ): Promise<BugReportResult> {
   return post("bug-reports", input, decodeBugReportResponse, { token, signal });
+}
+
+export function apiBugReportNotifications(
+  token: string,
+  signal?: AbortSignal,
+): Promise<BugReportNotificationsResponse | ApiError> {
+  return get("bug-report-notifications", decodeBugReportNotificationsResponse, { token, signal });
+}
+
+export function apiDismissBugReportNotification(
+  token: string,
+  reportId: string,
+  signal?: AbortSignal,
+): Promise<OkResponse | ApiError> {
+  return post("bug-report-notifications/dismiss", { reportId }, okOnly, { token, signal });
 }
 
 // ── lobby stats (public, for the logged-out landing view) ──────────────────

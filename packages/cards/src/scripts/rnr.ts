@@ -32,7 +32,7 @@ export const rnr: Record<string, CardScript> = {
   "barraging beatdown|2": {
     // Barraging Beatdown (yellow)
     onPlay(ctx) {
-      nextAttack({ attack: 3, appliesTo: "attack-action", defendedLessThanNonEquip: 2 })(ctx);
+      nextAttack({ attack: 3, appliesToClass: "brute", defendedLessThanNonEquip: 2 })(ctx);
       queueIntimidate(ctx);
     },
   },

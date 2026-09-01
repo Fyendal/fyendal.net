@@ -19,6 +19,7 @@ import type {
   AccountExport,
   AccountBadgesResponse,
   ApiError,
+  FixedBugReportNotification,
   DeckDetailResponse,
   DeckSummary,
   ReplaySummary,
@@ -86,6 +87,9 @@ export interface StoreState {
   clearError: () => void;
   setError: (message: string) => void;
   reportBug: (description: string) => Promise<BugReportResult>;
+  bugReportNotifications: FixedBugReportNotification[];
+  refreshBugReportNotifications: () => Promise<void>;
+  dismissBugReportNotification: (reportId: string) => Promise<void>;
 
   decks: DeckSummary[];
   decksLoading: boolean;

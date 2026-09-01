@@ -60,6 +60,11 @@
     grid-template-areas: "brand account";
     padding: env(safe-area-inset-top) 10px 0;
   }
+  .bug-fixed-notification {
+    top: calc(100% + 8px);
+    right: 10px;
+    width: min(390px, calc(100vw - 20px));
+  }
   .lobby-topbar .brand { grid-area: brand; overflow: hidden; }
   .lobby-topbar .topbar-actions { display: contents; }
   .lobby-topbar .topbar-tools {

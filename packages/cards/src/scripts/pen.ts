@@ -767,7 +767,9 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "comeback kicks|0": { onCheered(ctx) { if (lowerLife(ctx)) ctx.requestChoice("pen-comeback", "Destroy Comeback Kicks to gain an action point?", ["yes", "no"]); }, onChoose(ctx, hook, option) { if (hook === "pen-comeback" && option === "yes") { ctx.destroySelf(); ctx.gainActionPoint(); } } },
   "emboldened by the crowd|2": { modifyPlayCost: (ctx, base) => ctx.getFlag("player", "cheeredThisTurn") === true ? Math.max(0, base - 3) : base },
   ...pitches("hulk up", () => ({ modifyPlayCost: (ctx, base) => lowerLife(ctx) ? Math.max(0, base - 1) : base })),
-  ...pitches("stadium security", () => ({ canPlay: () => true })),
+  ...pitches("stadium security", () => ({
+    canDefendFromArsenal: (ctx) => ctx.getFlag("player", "controlledName:toughness") === true,
+  })),
   "chain of brutality|1": { onAttackDeclared(ctx) { if (ctx.currentAttackPower() >= 6) ctx.grantGoAgain(); }, canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.currentAttackPower() >= 6; }, onHit(ctx) { ctx.setFlag("player", "penNextBaseSix", true); } },
   "snarky prick|1": { onAttackDeclared(ctx) { if (ctx.link?.targetAllyId !== undefined) return; const top = ctx.player(opponentSeat(ctx)).deck[0]; if (!top) return; ctx.lookAt(top.instanceId); if (ctx.cardColor(top) === 1) ctx.requestCardChoice("pen-snarky", "Destroy the red card?", ["no", top.instanceId]); }, onChoose(ctx, hook, option) { if (hook === "pen-snarky" && option !== "no" && ctx.moveToGraveyard(Number(option), "deck")) ctx.addModifier({ scope: "chain-link", attack: 4 }); } },
   ...pitches("insult to injury", () => ({ onAttackDeclared(ctx) { if (higherLife(ctx)) ctx.grantGoAgain(); } })),

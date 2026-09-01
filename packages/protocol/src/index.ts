@@ -67,6 +67,14 @@ export interface DeckInvalidResponse {
   error?: string;
 }
 export interface BugReportResponse { ok: true; reportId: string }
+export interface FixedBugReportNotification {
+  reportId: string;
+  fixedAt: number;
+}
+export interface BugReportNotificationsResponse {
+  ok: true;
+  notifications: FixedBugReportNotification[];
+}
 export interface ReplaySummary {
   id: string;
   format: Format;
@@ -127,6 +135,7 @@ export interface AccountExport {
     description: string;
     createdAt: number;
     fixedAt: number | null;
+    dismissedAt: number | null;
   }>;
   replays: Array<{
     id: string;
@@ -927,6 +936,26 @@ export const decodeBugReportResponse: Decoder<BugReportResponse> = (value) => {
     : null;
 };
 
+export const decodeBugReportNotificationsResponse: Decoder<BugReportNotificationsResponse> = (value) => {
+  const data = object(value);
+  if (!data || !exactKeys(data, ["ok", "notifications"]) || data.ok !== true
+    || !Array.isArray(data.notifications) || data.notifications.length > MAX_ROOMS) return null;
+  const notifications = data.notifications.map((value): FixedBugReportNotification | null => {
+    const notification = object(value);
+    return notification
+      && exactKeys(notification, ["reportId", "fixedAt"])
+      && id(notification.reportId)
+      && nonNegativeInteger(notification.fixedAt)
+      ? { reportId: notification.reportId, fixedAt: notification.fixedAt }
+      : null;
+  });
+  return notifications.every(
+    (notification): notification is FixedBugReportNotification => notification !== null,
+  )
+    ? { ok: true, notifications }
+    : null;
+};
+
 function decodeReplaySummary(value: unknown): ReplaySummary | null {
   const replay = object(value);
   return replay
@@ -1089,11 +1118,12 @@ function exportRoom(value: unknown): boolean {
 function exportBugReport(value: unknown): boolean {
   const report = object(value);
   return !!report
-    && exactKeys(report, ["id", "roomCode", "roomVersion", "rulesetVersion", "description", "createdAt", "fixedAt"])
+    && exactKeys(report, ["id", "roomCode", "roomVersion", "rulesetVersion", "description", "createdAt", "fixedAt", "dismissedAt"])
     && id(report.id) && string(report.roomCode, 6, false) && nonNegativeInteger(report.roomVersion)
     && string(report.rulesetVersion, MAX_SHORT_TEXT, false) && string(report.description, MAX_TEXT, false)
     && nonNegativeInteger(report.createdAt)
-    && (report.fixedAt === null || nonNegativeInteger(report.fixedAt));
+    && (report.fixedAt === null || nonNegativeInteger(report.fixedAt))
+    && (report.dismissedAt === null || nonNegativeInteger(report.dismissedAt));
 }
 
 function exportMatchmaking(value: unknown): boolean {

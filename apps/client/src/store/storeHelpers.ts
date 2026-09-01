@@ -43,6 +43,7 @@ export function initialStoreProjection(
     matchAcceptanceRole: null,
     decks: [],
     decksLoading: auth !== null,
+    bugReportNotifications: [],
     prepDeck: null,
     prep: null,
     allowFutureCards: lobbySettings.allowFutureCards,

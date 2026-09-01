@@ -91,6 +91,9 @@ export function Lobby() {
     savedReplays,
     rail,
     setRail,
+    bugReportNotifications,
+    refreshBugReportNotifications,
+    dismissBugReportNotification,
   } = useStore(useShallow((state) => ({
     error: state.error,
     connected: state.connected,
@@ -105,6 +108,9 @@ export function Lobby() {
     savedReplays: state.savedReplays,
     rail: state.lobbyRail,
     setRail: state.setLobbyRail,
+    bugReportNotifications: state.bugReportNotifications,
+    refreshBugReportNotifications: state.refreshBugReportNotifications,
+    dismissBugReportNotification: state.dismissBugReportNotification,
   })));
   /** selected saved deck per constructed format */
   const [deckFor, setDeckFor] = useState<Record<ConstructedFormat, string>>({
@@ -116,6 +122,7 @@ export function Lobby() {
   const [stats, setStats] = useState<StatsOk | null>(null);
   const [lastDeckFormat, setLastDeckFormat] = useState<ConstructedFormat>("cc");
   const [showMobileMore, setShowMobileMore] = useState(false);
+  const bugReportNotification = bugReportNotifications[0];
   const rejoinRoomCount = rooms.reduce(
     (count, room) => count + (room.yours === true ? 1 : 0),
     0,
@@ -126,6 +133,11 @@ export function Lobby() {
   useEffect(() => {
     if (authUser) listRooms();
   }, [authUser, listRooms]);
+
+  useEffect(() => {
+    if (!authUser) return;
+    void refreshBugReportNotifications();
+  }, [authUser, refreshBugReportNotifications]);
 
   // logged-out landing: live stats over HTTP, refreshed periodically
   useEffect(() => {
@@ -242,6 +254,22 @@ export function Lobby() {
     <div className="lobby-page lobby-page-authenticated">
       <header className="topbar lobby-topbar lobby-topbar-authenticated">
         <LobbyBrand />
+        {bugReportNotification ? (
+          <div className="bug-fixed-notification" role="status" aria-live="polite">
+            <span className="bug-fixed-notification-icon" aria-hidden="true">✓</span>
+            <span>
+              <strong>Bug fixed</strong>
+              A bug you reported has been fixed. Thanks for helping us improve Fyendal!
+            </span>
+            <button
+              type="button"
+              aria-label="Dismiss bug fixed notification"
+              onClick={() => void dismissBugReportNotification(bugReportNotification.reportId)}
+            >
+              ×
+            </button>
+          </div>
+        ) : null}
         <div className="topbar-actions">
           <div className="topbar-tools">
             <DiscordLink />

@@ -34,7 +34,7 @@ function awakeningBellow(attack: number): CardScript {
 function barragingBeatdown(attack: number): CardScript {
   return {
     onPlay(ctx) {
-      nextAttack({ attack, appliesTo: "attack-action", defendedLessThanNonEquip: 2 })(ctx);
+      nextAttack({ attack, appliesToClass: "brute", defendedLessThanNonEquip: 2 })(ctx);
       queueIntimidate(ctx);
     },
   };

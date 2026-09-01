@@ -20,7 +20,11 @@ import {
   getAccountBadges,
   selectAccountBadge,
 } from "./accounts.js";
-import { createBugReport } from "./bugReports.js";
+import {
+  createBugReport,
+  dismissFixedBugReportNotification,
+  listFixedBugReportNotifications,
+} from "./bugReports.js";
 import { consoleError } from "./logging.js";
 import { asRecord } from "./validation.js";
 import {
@@ -390,6 +394,17 @@ export function createApiServer(deps: ApiDeps): http.Server {
       }
       return { status: 200, body: { ok: true, reportId: result.reportId } };
     },
+    "/api/bug-report-notifications/dismiss": async (body, user) => {
+      if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };
+      const dismissed = await dismissFixedBugReportNotification(
+        deps.db,
+        user.id,
+        field(body, "reportId"),
+      );
+      return dismissed
+        ? { status: 200, body: { ok: true } }
+        : { status: 404, body: { ok: false, error: "notification not found" } };
+    },
     "/api/decks/import": async (body, user) => {
       if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };
       const requestedName = field(body, "name").trim();
@@ -534,6 +549,16 @@ export function createApiServer(deps: ApiDeps): http.Server {
           const preferences = await getAccountBadges(deps.db, user.id);
           if (!preferences) return sendJson(res, 404, { ok: false, error: "account not found" });
           sendJson(res, 200, { ok: true, ...preferences });
+        })
+        .catch((e) => internalError(res, e));
+      return;
+    }
+    if (req.method === "GET" && url.pathname === "/api/bug-report-notifications") {
+      authUser(req)
+        .then(async (user) => {
+          if (!user) return sendJson(res, 401, { ok: false, error: "not logged in" });
+          const notifications = await listFixedBugReportNotifications(deps.db, user.id);
+          sendJson(res, 200, { ok: true, notifications });
         })
         .catch((e) => internalError(res, e));
       return;

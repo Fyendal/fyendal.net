@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   decodeAccountExportResponse,
   decodeAccountBadgesResponse,
+  decodeBugReportNotificationsResponse,
   decodeBugReportResponse,
   decodeApiError,
   decodeClientMessage,
@@ -528,6 +529,13 @@ describe("replays and HTTP responses", () => {
     expect(decodeLoginResponse({ ok: true, token: "token", username: "alice" })).not.toBeNull();
     expect(decodeStatsResponse({ ok: true, inGame: 1, openRooms: 2 })).not.toBeNull();
     expect(decodeBugReportResponse({ ok: true, reportId: "report-id" })).not.toBeNull();
+    expect(decodeBugReportNotificationsResponse({
+      ok: true,
+      notifications: [{ reportId: "report-id", fixedAt: 123 }],
+    })).toEqual({
+      ok: true,
+      notifications: [{ reportId: "report-id", fixedAt: 123 }],
+    });
     expect(decodeDecksResponse({
       ok: true,
       decks: [{ ...summary, bannedCards: ["Art of War"], futureCards: ["Tomorrow's Attack"] }],
@@ -590,6 +598,7 @@ describe("replays and HTTP responses", () => {
           description: "The attack resolved incorrectly.",
           createdAt: 2,
           fixedAt: null,
+          dismissedAt: null,
         }],
         replays: [{
           id: "replay-id",
@@ -621,6 +630,10 @@ describe("replays and HTTP responses", () => {
       [decodeLoginResponse, { ok: true, token: "token", username: "alice" }],
       [decodeStatsResponse, { ok: true, inGame: 1, openRooms: 2 }],
       [decodeBugReportResponse, { ok: true, reportId: "report-id" }],
+      [decodeBugReportNotificationsResponse, {
+        ok: true,
+        notifications: [{ reportId: "report-id", fixedAt: 123 }],
+      }],
       [decodeDecksResponse, { ok: true, decks: [summary] }],
       [decodeDeckResponse, { ok: true, deck: summary }],
       [decodeDeckDetailResponse, { ok: true, deck: { ...summary, decklist: pool } }],

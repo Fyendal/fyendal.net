@@ -448,6 +448,26 @@ describe("Armory Decks — AHA, AZS, and AOL", () => {
     g.expectFinalAttack(5).expectAP(0, 1);
   });
 
+  it("Zenith Blade only gets go again on its first attack when Flurry enables a second", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "hala, bladesaint of the vow|0",
+          weapons: ["zenith blade|0"],
+          hand: ["edict of steel|1"],
+          resources: 2,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.play("edict of steel|1");
+    g.attackWithWeapon("zenith blade|0").blockWith().settle().expectAP(0, 1);
+    g.attackWithWeapon("zenith blade|0").blockWith().settle().expectAP(0, 0);
+  });
+
   it("Blur Reality returns a Lightning aura with a holo counter", () => {
     const g = scenario({
       seats: [
@@ -1378,6 +1398,32 @@ describe("Armory Decks — rules regression coverage", () => {
     expect(g.state.players[0]!.board.some((card) =>
       functionalKeyOf(cardData[card.cardId]!) === "flurry|0"
     )).toBe(true);
+  });
+
+  it("Ripple Away replaces Edict of Steel's Flurry after Reverent Rerebrace's choice", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["zenith blade|0"],
+          hand: ["edict of steel|2", "ripple away|3"],
+          resources: 1,
+          equipment: { ...NO_EQUIPMENT, arms: "reverent rerebrace|0" },
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.state.players[0]!.weapons[0]!.counters = { power: 2 };
+
+    g.play("edict of steel|2", { settle: false })
+      .activate("ripple away|3");
+    expect(g.state.pendingDecision?.prompt).toContain("Reverent Rerebrace");
+
+    g.chooseOption("no");
+    expect(g.state.players[0]!.weapons[0]!.counters?.power).toBe(3);
+    expect(g.state.players[0]!.board.some((card) =>
+      functionalKeyOf(cardData[card.cardId]!) === "flurry|0"
+    )).toBe(false);
   });
 
   it("multiple Flurry tokens still set a weapon's total attack limit to two", () => {

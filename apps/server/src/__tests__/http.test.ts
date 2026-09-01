@@ -675,6 +675,22 @@ describe("account rights", () => {
       123,
     ]);
 
+    const notifications = await fetch(`${url}/api/bug-report-notifications`, { headers });
+    expect(notifications.status).toBe(200);
+    expect(await notifications.json()).toEqual({
+      ok: true,
+      notifications: [{ reportId: reportedBody.reportId, fixedAt: 123 }],
+    });
+    const dismissed = await fetch(`${url}/api/bug-report-notifications/dismiss`, {
+      method: "POST",
+      headers: { ...headers, "Content-Type": "application/json" },
+      body: JSON.stringify({ reportId: reportedBody.reportId }),
+    });
+    expect(dismissed.status).toBe(200);
+    expect(await dismissed.json()).toEqual({ ok: true });
+    const noNotifications = await fetch(`${url}/api/bug-report-notifications`, { headers });
+    expect(await noNotifications.json()).toEqual({ ok: true, notifications: [] });
+
     const exported = await fetch(`${url}/api/account/export`, { headers });
     expect(exported.status).toBe(200);
     const exportBody = await exported.json() as any;
@@ -693,6 +709,7 @@ describe("account rights", () => {
         roomCode: "PRIV01",
         description: "The room stopped accepting legal actions.",
         fixedAt: 123,
+        dismissedAt: expect.any(Number),
       }),
     ]);
 

@@ -7,7 +7,8 @@
  * plus the demo room DEMO00 — a GC-exempt classic-battles match already in
  * progress (Rhinar vs Dorinthea, both seats phantom) that anyone can spectate
  * from the lobby's room list or via /DEMO00. Note it also counts as 2
- * "players in game" in the lobby stats — dev only.
+ * "players in game" in the lobby stats — dev only. Alice also receives one
+ * fixed, undismissed bug-report notification for exercising the lobby UI.
  *
  * Idempotent — existing users are skipped and the disposable demo room is
  * recreated. Runs pending migrations first, so it also works against a
@@ -101,12 +102,52 @@ try {
         [DEMO_ROOM_CODE, seat, hashReconnectToken(token), seat === 0 ? "Rhinar" : "Dorinthea", seat === 0 ? "rhinar" : "dorinthea"],
       );
     }
+    const { rows: aliceRows } = await pool.query(
+      "SELECT id FROM users WHERE username_lc = 'alice'",
+    );
+    const aliceId = Number(aliceRows[0]?.id);
+    if (!Number.isSafeInteger(aliceId)) throw new Error("seeded alice account is missing");
+    const fixedAt = Date.now();
+    await pool.query(
+      `INSERT INTO bug_reports
+        (id, reporter_user_id, room_code, room_version, ruleset_version,
+         description, trace, created_at, fixed_at, dismissed_at)
+       VALUES ($1, $2, $3, 0, $4, $5, $6, $7, $7, NULL)
+       ON CONFLICT (id) DO UPDATE SET
+         reporter_user_id = EXCLUDED.reporter_user_id,
+         fixed_at = EXCLUDED.fixed_at,
+         dismissed_at = NULL`,
+      [
+        "local-fixed-bug-alice",
+        aliceId,
+        DEMO_ROOM_CODE,
+        DEVELOPMENT_RULESET_VERSION,
+        "Cards in the combat chain briefly appeared in the wrong order.",
+        JSON.stringify({
+          version: 1,
+          capturedAt: fixedAt,
+          room: {
+            code: DEMO_ROOM_CODE,
+            format: "classic-battles",
+            rulesetVersion: DEVELOPMENT_RULESET_VERSION,
+            version: 0,
+            status: "active",
+            winner: null,
+            reporterSeat: 0,
+            state: null,
+          },
+          history: [],
+        }),
+        fixedAt,
+      ],
+    );
     await pool.query("COMMIT");
   } catch (error) {
     await pool.query("ROLLBACK");
     throw error;
   }
   console.log(`seeded demo room ${DEMO_ROOM_CODE} — spectate from the room list or /${DEMO_ROOM_CODE}`);
+  console.log("seeded fixed bug notification for alice");
 } finally {
   await pool.end();
 }

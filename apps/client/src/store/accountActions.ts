@@ -1,8 +1,10 @@
 import {
   apiAccountBadges,
+  apiBugReportNotifications,
   apiDecks,
   apiDeleteAccount,
   apiDeleteDeck,
+  apiDismissBugReportNotification,
   apiExportAccount,
   apiImportDeck,
   apiReportBug,
@@ -26,7 +28,9 @@ type AccountActionKey =
   | "getAccountBadges"
   | "selectAccountBadge"
   | "deleteAccount"
-  | "reportBug";
+  | "reportBug"
+  | "refreshBugReportNotifications"
+  | "dismissBugReportNotification";
 
 export function createAccountActions({
   set,
@@ -124,6 +128,31 @@ export function createAccountActions({
       const request = authRequest(token);
       const result = await apiReportBug(token, { roomCode: code, description }, request.signal);
       return isCurrentAuth(request) ? result : superseded;
+    },
+    refreshBugReportNotifications: async () => {
+      const token = get().authToken;
+      if (!token) {
+        set({ bugReportNotifications: [] });
+        return;
+      }
+      const request = authRequest(token);
+      const result = await apiBugReportNotifications(token, request.signal);
+      if (isCurrentAuth(request) && result.ok) {
+        set({ bugReportNotifications: result.notifications });
+      }
+    },
+    dismissBugReportNotification: async (reportId) => {
+      const token = get().authToken;
+      if (!token) return;
+      const request = authRequest(token);
+      const result = await apiDismissBugReportNotification(token, reportId, request.signal);
+      if (isCurrentAuth(request) && result.ok) {
+        set({
+          bugReportNotifications: get().bugReportNotifications.filter(
+            (notification) => notification.reportId !== reportId,
+          ),
+        });
+      }
     },
   };
 }

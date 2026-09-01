@@ -712,6 +712,9 @@ export interface PendingDecisionState extends PendingDecision {
   sourceInstanceId?: number;
   /** Hook key routed back to the owning script's onChoose */
   chooseHook?: string;
+  /** Token-effect provenance inherited when one card delegates a scripted
+   * choice to another card, such as Edict of Steel using Reverent Rerebrace. */
+  tokenCreationCause?: TokenCreationContext;
   /** Parallel to options: a live card instance id or registered card id to
    *  render for that option, null for literal string options. */
   cardOptions?: (number | string | null)[];

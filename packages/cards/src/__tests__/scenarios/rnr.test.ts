@@ -99,14 +99,14 @@ describe("RNR — bellows", () => {
     const g = scenario({
       seats: [
         { hero: "dorinthea", hand: ["raging onslaught|2"] },
-        { hero: "rhinar", hand: ["barraging beatdown|2", "wounded bull|2", "wrecker romp|3"] },
+        { hero: "rhinar", hand: ["barraging beatdown|2", "pack hunt|1", "wrecker romp|3"] },
       ],
       active: 1,
     });
     g.play("barraging beatdown|2") // cost 0, go again, immediate intimidate
       .expectPendingReturn(0, 1)
       .expectAP(1, 1)
-      .play("wounded bull|2", { pitch: ["wrecker romp|3"] })
+      .play("pack hunt|1", { pitch: ["wrecker romp|3"] })
       .expectAttackValue(9) // 6 + 3, undefended so far
       .blockWith() // still less than 2 defenders
       .settle()
@@ -117,14 +117,14 @@ describe("RNR — bellows", () => {
   it("Barraging Beatdown's bonus is lost once 2 cards from hand defend", () => {
     const g = scenario({
       seats: [
-        { hero: "dorinthea", hand: ["dodge|3", "dodge|3", "dodge|3"] },
-        { hero: "rhinar", hand: ["barraging beatdown|2", "wounded bull|2", "wrecker romp|3"] },
+        { hero: "dorinthea", hand: ["dodge|3", "dodge|3", "dodge|3", "dodge|3"] },
+        { hero: "rhinar", hand: ["barraging beatdown|2", "pack hunt|1", "wrecker romp|3"] },
       ],
       active: 1,
     });
-    g.play("barraging beatdown|2") // intimidate banishes one of the three Dodges
+    g.play("barraging beatdown|2") // intimidate banishes one of the four Dodges
       .expectPendingReturn(0, 1)
-      .play("wounded bull|2", { pitch: ["wrecker romp|3"] })
+      .play("pack hunt|1", { pitch: ["wrecker romp|3"] })
       .expectAttackValue(9)
       .blockWith()
       .passPriority()
