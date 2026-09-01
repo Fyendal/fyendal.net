@@ -280,16 +280,19 @@ export const sly: Record<string, CardScript> = {
     // by a source of your choice" — two chained choices: the hero, then the
     // source (the specific object instance; a later copy is not covered).
     onPlay(ctx) {
-      const names = ctx.state.players.map((p) => ctx.cardData(p.heroCardId).name);
-      ctx.requestChoice("target-hero", "Oasis Respite: target which hero?", names);
+      ctx.requestCardChoice(
+        "target-hero",
+        "Oasis Respite: target which hero?",
+        ctx.state.players.map((player) => player.hero.instanceId),
+      );
     },
     onChoose(ctx, hook, option) {
       if (hook === "target-hero") {
-        const target = ctx.state.players.findIndex(
-          (p) => ctx.cardData(p.heroCardId).name === option,
+        const target = ctx.state.players.find(
+          (player) => player.hero.instanceId === Number(option),
         );
-        if (target < 0) return;
-        ctx.setCounter("oasisTarget", target);
+        if (!target) return;
+        ctx.setCounter("oasisTarget", target.seat);
         ctx.requestCardChoice("source", "Prevent the next 4 damage from which source?", damageSourceCandidates(ctx));
         return;
       }

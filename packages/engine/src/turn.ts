@@ -224,7 +224,6 @@ export function answerArsenal(
     const idx = player.hand.findIndex((c) => c.instanceId === id);
     if (idx < 0) return "card not in hand";
     const card = player.hand.splice(idx, 1)[0] as CardInstance;
-    delete card.flipped; // leaving the hand reverts a transcended card to its front face
     card.faceDown = true;
     const used = new Set(player.arsenal.map((candidate, index) => candidate.arsenalSlot ?? index));
     let slot = 0;

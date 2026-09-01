@@ -1058,7 +1058,6 @@ export function payAlternativePlayCost(
     }
     for (const paid of paidCards) {
       removeFromArray(player.hand, paid.instanceId);
-      delete paid.flipped;
       enterBanish(state, runtime, paid, "hand");
     }
   } else if (cost.kind === "destroy-controlled-and-or-discard-hand-subtype") {

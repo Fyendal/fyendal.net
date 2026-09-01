@@ -121,9 +121,9 @@ export interface CardInstance {
    *  deduct to a minimum of 0. A later copy of the same-named card is not
    *  covered. Cleared at end of turn. */
   damagePrevented?: { targetSeat: number; amount: number };
-  /** Transcend: the card is in its owner's hand flipped (back face active —
-   *  its data comes from CardData.backId). Cleared when the card leaves the
-   *  hand for any zone; persists across turns while it stays in hand. */
+  /** Transcend: the card's back face is active (its data comes from
+   *  CardData.backId). Once set, this persists for the remainder of the game,
+   *  including when the card moves between zones (CR 9.1.5b). */
   flipped?: boolean;
   /** Card target announced for this play. It rides the object through stack
    * resolution so scripts can resolve against the declared target. */

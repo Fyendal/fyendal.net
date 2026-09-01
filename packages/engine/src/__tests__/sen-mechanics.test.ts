@@ -384,7 +384,7 @@ describe("transcend", () => {
     expect(r.ok).toBe(false);
   });
 
-  it("a flipped card pitches for 3 chi and reverts to its front face", () => {
+  it("a transcended card pitches for 3 chi and keeps its back face active", () => {
     let s = makeGame();
     s = transcend(s);
     const t = player(s, 0).hand.find((c) => c.cardId === "TRANSC")!;
@@ -394,7 +394,11 @@ describe("transcend", () => {
     expect(player(s, 0).resources).toBe(0);
     const pitched = player(s, 0).pitch.find((c) => c.cardId === "TRANSC");
     expect(pitched).toBeDefined();
-    expect(pitched?.flipped).toBeUndefined();
+    expect(pitched?.flipped).toBe(true);
+    expect(projectStateFor(s, 0).players[0].pitch).toContainEqual(
+      expect.objectContaining({ instanceId: t.instanceId, cardId: "CHI3", name: "Test Inner Chi" }),
+    );
+    expect(s.log.some((entry) => entry.publicText?.includes("pitches Test Inner Chi (3 chi)"))).toBe(true);
   });
 });
 

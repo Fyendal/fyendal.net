@@ -92,7 +92,7 @@ function cardView(state: GameStateInternal,
     : undefined;
   return {
     instanceId: c.instanceId,
-    // a flipped (transcended) hand card shows its back face — public information
+    // A transcended card always shows its active back face (CR 9.1.5b).
     cardId: d.id,
     name: d.name,
     owner: c.owner,

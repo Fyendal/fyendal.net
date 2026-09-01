@@ -647,7 +647,6 @@ export function makeCtx(
         : undefined);
       if (!found) return false;
       delete found.card.faceDown;
-      delete found.card.flipped;
       found.owner.hand.push(found.card);
       if (found.fromZone === "graveyard") {
         runtime.events.fireCardLeavesGraveyard(state, found.owner.seat, found.card, "hand");
@@ -699,7 +698,6 @@ export function makeCtx(
       const found = runtime.commands.removeFromOwnerZones(state, instanceId);
       if (!found) return false;
       delete found.card.faceDown;
-      delete found.card.flipped;
       runtime.commands.settlePlayedCard(state, controller, found.card, opts);
       if (found.fromZone === "graveyard") {
         runtime.events.fireCardLeavesGraveyard(state, found.owner.seat, found.card, "arena");
@@ -1292,14 +1290,12 @@ export function makeCtx(
       const p = state.players[seat] as PlayerState;
       const card = removeFromArray(p.hand, instanceId);
       if (!card) return undefined;
-      delete card.flipped;
       runtime.commands.enterSoul(state, card, true);
       return card;
     },
     putIntoSoul(instanceId) {
       const found = runtime.commands.removeFromOwnerZones(state, instanceId);
       if (!found) return false;
-      delete found.card.flipped; // leaving the hand reverts a transcended card
       runtime.commands.enterSoul(state, found.card, false);
       if (found.fromZone === "graveyard") {
         runtime.events.fireCardLeavesGraveyard(state, found.owner.seat, found.card, "soul");
@@ -1807,7 +1803,6 @@ export function makeCtx(
         removeFromArray(owner.hand, instanceId) ?? removeFromArray(owner.deck, instanceId) ??
         removeFromArray(owner.graveyard, instanceId);
       if (!card) return false;
-      delete card.flipped; // leaving the hand reverts a transcended card
       card.faceDown = opts?.faceUp === false ? true : undefined;
       card.arsenalSlot = nextArsenalSlot(owner);
       owner.arsenal.push(card);
@@ -1846,7 +1841,6 @@ export function makeCtx(
       const card = removeFromArray(owner.deck, instanceId);
       if (!card) return false;
       delete card.faceDown;
-      delete card.flipped;
       current.defendingCards.push(card);
       runtime.commands.applyOneShotDefenseModifiers(state, current, [card]);
       const fragmentTriggered = runtime.commands.noteAttackDefendedBy(state, current, card);
@@ -1870,7 +1864,6 @@ export function makeCtx(
       if (!card || dataOf(state, card.cardId).cardType !== "action") return false;
       removeFromArray(owner.arsenal, instanceId);
       delete card.faceDown;
-      delete card.flipped;
       current.defendingCards.push(card);
       runtime.commands.applyOneShotDefenseModifiers(state, current, [card]);
       const fragmentTriggered = runtime.commands.noteAttackDefendedBy(state, current, card);
@@ -1893,7 +1886,6 @@ export function makeCtx(
       const card = removeFromArray(owner.hand, instanceId);
       if (!card) return false;
       delete card.faceDown;
-      delete card.flipped;
       current.defendingCards.push(card);
       runtime.commands.applyOneShotDefenseModifiers(state, current, [card]);
       current.flags.defendedFromHand = true;
@@ -2426,7 +2418,6 @@ export function discardToGraveyard(
   causedBySeat?: number,
 ): void {
   const p = state.players[seat] as PlayerState;
-  delete card.flipped; // leaving the hand reverts a transcended card to its front face
   runtime.commands.moveToGraveyard(state, card, "hand", causedBySeat);
   logPublic(
     state,

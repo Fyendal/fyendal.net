@@ -43,8 +43,8 @@ export function notePitch(state: GameStateInternal, player: PlayerState, card: C
 }
 
 /** Add a pitched card's value to the right floating pool: chi-subtype cards
- *  gain chi points INSTEAD of resource points (CR 1.13.5). Also reverts a
- *  flipped card to its front face (it left the hand). */
+ *  gain chi points INSTEAD of resource points (CR 1.13.5). Transcended cards
+ *  retain their Inner Chi back face for the remainder of the game (CR 9.1.5b). */
 export function pitchIntoPool(
   state: GameStateInternal,
   runtime: EngineRuntime,
@@ -52,11 +52,11 @@ export function pitchIntoPool(
   card: CardInstance,
   pitch: number,
 ): void {
-  const chi = isChiCard(state, card); // read the back face before reverting
-  delete card.flipped;
+  const chi = isChiCard(state, card);
+  const activeCardId = instanceDataOf(state, card).id;
   if (chi) {
     player.chi += pitch;
-    logPublic(state, `${nameOf(state, player.heroCardId)} pitches ${logNameOf(state, card.cardId)} (${pitch} chi)`);
+    logPublic(state, `${nameOf(state, player.heroCardId)} pitches ${logNameOf(state, activeCardId)} (${pitch} chi)`);
   } else {
     let gained = pitch;
     for (const source of hookSources(state, player.seat, { board: true, equipment: true, weapons: true })) {
@@ -68,7 +68,7 @@ export function pitchIntoPool(
       if (replacement !== undefined) gained = Math.max(0, Math.floor(replacement));
     }
     player.resources += gained;
-    logPublic(state, `${nameOf(state, player.heroCardId)} pitches ${logNameOf(state, card.cardId)}`);
+    logPublic(state, `${nameOf(state, player.heroCardId)} pitches ${logNameOf(state, activeCardId)}`);
   }
   runtime.events.queueTriggeredEvent(
     state,
