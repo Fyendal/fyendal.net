@@ -453,7 +453,7 @@
     left: 0;
     right: 0;
     bottom: 64px;
-    height: 144px;
+    height: calc(144px + var(--hand-outline-clearance));
     /* Keep the mobile tray in the same global gameplay depth scale as the
        desktop hand. Board-destination flights sit one level above it, so a
        draw cannot pass under the other cards and jump forward on arrival. */
@@ -462,7 +462,7 @@
     gap: 7px;
     overflow-x: auto;
     overflow-y: hidden;
-    padding: 9px 12px;
+    padding: calc(9px + var(--hand-outline-clearance)) 12px 9px;
     pointer-events: auto;
     scrollbar-width: none;
     /* The tray overlaps the player's bottom row. Keep horizontal card
