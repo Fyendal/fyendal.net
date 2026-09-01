@@ -24,8 +24,16 @@ const NAMED_COUNTER_KEYS = new Set([
   "stain",
   "storm",
 ]);
-export const CARD_PREVIEW_WIDTH = 300;
+export const CARD_IMAGE_ASPECT_RATIO = 546 / 762;
 export const CARD_PREVIEW_HEIGHT = 413;
+export const CARD_PREVIEW_WIDTH = Math.round(CARD_PREVIEW_HEIGHT * CARD_IMAGE_ASPECT_RATIO);
+
+/** Match Talishar's viewport-relative full-card preview. Small desktop windows
+ * retain the established preview size. */
+export function cardPreviewSize(viewportHeight: number): { width: number; height: number } {
+  const height = Math.max(CARD_PREVIEW_HEIGHT, Math.round(viewportHeight * 0.5));
+  return { width: Math.round(height * CARD_IMAGE_ASPECT_RATIO), height };
+}
 
 function signedCounter(value: number): string {
   return value > 0 ? `+${value}` : `−${Math.abs(value)}`;
@@ -300,6 +308,7 @@ export function CardFace({
           alt={name}
           draggable={false}
           loading="lazy"
+          decoding="async"
           onError={() => setImageFailure((current) => ({
             cardId: card.cardId,
             attempts: current?.cardId === card.cardId ? current.attempts + 1 : 1,

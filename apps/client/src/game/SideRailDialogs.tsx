@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import type { UndoTarget } from "@fyendal/shared";
-import type { MotionPreference, PriorityWindowMode } from "../storage.js";
+import type {
+  MotionPreference,
+  PlayabilityCuePreference,
+  PriorityWindowMode,
+} from "../storage.js";
 
 const MOTION_PREFERENCES: readonly MotionPreference[] = ["system", "full", "reduced"];
 const MOTION_PREFERENCE_LABEL: Readonly<Record<MotionPreference, string>> = {
@@ -26,6 +30,8 @@ export function GameSettingsDialog({
   onSkipPlayConfirmationChange,
   motionPreference,
   onMotionPreferenceChange,
+  playabilityCuePreference,
+  onPlayabilityCuePreferenceChange,
   soundEffectsEnabled,
   onSoundEffectsEnabledChange,
   soundEffectsVolume,
@@ -43,6 +49,8 @@ export function GameSettingsDialog({
   onSkipPlayConfirmationChange: (enabled: boolean) => void;
   motionPreference: MotionPreference;
   onMotionPreferenceChange: (preference: MotionPreference) => void;
+  playabilityCuePreference: PlayabilityCuePreference;
+  onPlayabilityCuePreferenceChange: (preference: PlayabilityCuePreference) => void;
   soundEffectsEnabled: boolean;
   onSoundEffectsEnabledChange: (enabled: boolean) => void;
   soundEffectsVolume: number;
@@ -151,6 +159,36 @@ export function GameSettingsDialog({
                     {MOTION_PREFERENCE_LABEL[preference]}
                   </button>
                 ))}
+              </div>
+            </div>
+            <div className="settings-control-row">
+              <span className="settings-control-name">
+                Playable cards
+                <span
+                  className="settings-info-tooltip"
+                  data-tooltip="Glow adds a restrained green halo. High contrast uses a crisp outline."
+                  aria-hidden="true"
+                >
+                  i
+                </span>
+              </span>
+              <div className="settings-segmented" role="group" aria-label="Playable card cue">
+                <button
+                  type="button"
+                  className={playabilityCuePreference === "glow" ? "settings-selected" : ""}
+                  aria-pressed={playabilityCuePreference === "glow"}
+                  onClick={() => onPlayabilityCuePreferenceChange("glow")}
+                >
+                  Glow
+                </button>
+                <button
+                  type="button"
+                  className={playabilityCuePreference === "high-contrast" ? "settings-selected" : ""}
+                  aria-pressed={playabilityCuePreference === "high-contrast"}
+                  onClick={() => onPlayabilityCuePreferenceChange("high-contrast")}
+                >
+                  High contrast
+                </button>
               </div>
             </div>
             <label className="toggle-switch settings-control-row">

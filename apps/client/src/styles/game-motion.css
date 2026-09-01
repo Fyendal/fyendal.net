@@ -106,7 +106,12 @@
 
 .game-motion-flight-settle {
   transform-origin: center;
-  animation-name: game-motion-settle;
+  animation-name: game-motion-settle-face;
+}
+
+.game-motion-flight-settle-reveal {
+  transform-origin: center;
+  animation-name: game-motion-settle-reveal;
 }
 
 .game-motion-visual {
@@ -154,11 +159,11 @@
   animation: game-motion-hide-face-early var(--motion-duration) step-end var(--motion-delay) both;
 }
 
-.game-motion-flight-settle .game-motion-back {
+.game-motion-flight-settle-reveal .game-motion-back {
   animation-name: game-motion-hide-back-settle;
 }
 
-.game-motion-flight-settle .game-motion-face {
+.game-motion-flight-settle-reveal .game-motion-face {
   animation-name: game-motion-reveal-face-settle;
 }
 
@@ -272,7 +277,12 @@
   }
 }
 
-@keyframes game-motion-settle {
+@keyframes game-motion-settle-face {
+  from { opacity: 1; transform: scale(.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes game-motion-settle-reveal {
   from { opacity: 1; transform: rotateY(0); }
   49% { opacity: 1; transform: rotateY(90deg); }
   51% { opacity: 1; transform: rotateY(-90deg); }

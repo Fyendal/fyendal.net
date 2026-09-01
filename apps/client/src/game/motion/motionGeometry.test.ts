@@ -89,6 +89,46 @@ describe("motion geometry", () => {
     })]);
   });
 
+  it("settles public defenders face-up and flips only hidden staged defenders", () => {
+    const equipment = { instanceId: 41, cardId: "TST041", owner: 0 };
+    const handDefender = { instanceId: 42, cardId: "TST042", owner: 1 };
+    const batch = resolveMotionBatch(
+      [
+        {
+          kind: "settle",
+          destination: { kind: "chain-defender", link: 0, index: 0 },
+          visual: { kind: "face", card: equipment },
+          instanceId: equipment.instanceId,
+          destinationPresentationKey: "chain:0:defender:0:41",
+        },
+        {
+          kind: "settle",
+          destination: { kind: "chain-defender", link: 0, index: 1 },
+          visual: { kind: "back-reveal", card: handDefender },
+          instanceId: handDefender.instanceId,
+          destinationPresentationKey: "chain:0:defender:1:42",
+        },
+      ],
+      anchors({}),
+      anchors({ cards: [
+        ["chain:0:defender:0:41", rect(500, 300)],
+        ["chain:0:defender:1:42", rect(610, 300)],
+      ] }),
+      19,
+    );
+
+    expect(batch?.flights).toEqual([
+      expect.objectContaining({
+        mode: "settle",
+        visual: { kind: "face", card: equipment },
+      }),
+      expect.objectContaining({
+        mode: "settle-reveal",
+        visual: { kind: "back-reveal", card: handDefender },
+      }),
+    ]);
+  });
+
   it("lands hidden arsenaling on the maskable opaque arsenal back", () => {
     const hand = rect(240, 30, 100, 138);
     const arsenal = rect(620, 210, 100, 138);

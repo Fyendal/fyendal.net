@@ -1,6 +1,10 @@
 import { useMemo, useState } from "react";
 import type { EmoteMessage, UndoTarget } from "@fyendal/shared";
-import type { MotionPreference, PriorityWindowMode } from "../storage.js";
+import type {
+  MotionPreference,
+  PlayabilityCuePreference,
+  PriorityWindowMode,
+} from "../storage.js";
 import {
   logTextSegments,
   parseTurnBoundaryLogLine,
@@ -143,6 +147,8 @@ export function SideRail({
   onSkipPlayConfirmationChange,
   motionPreference,
   onMotionPreferenceChange,
+  playabilityCuePreference,
+  onPlayabilityCuePreferenceChange,
   soundEffectsEnabled,
   onSoundEffectsEnabledChange,
   soundEffectsVolume,
@@ -185,6 +191,8 @@ export function SideRail({
   onSkipPlayConfirmationChange: (enabled: boolean) => void;
   motionPreference: MotionPreference;
   onMotionPreferenceChange: (preference: MotionPreference) => void;
+  playabilityCuePreference: PlayabilityCuePreference;
+  onPlayabilityCuePreferenceChange: (preference: PlayabilityCuePreference) => void;
   soundEffectsEnabled: boolean;
   onSoundEffectsEnabledChange: (enabled: boolean) => void;
   soundEffectsVolume: number;
@@ -376,6 +384,8 @@ export function SideRail({
           onSkipPlayConfirmationChange={onSkipPlayConfirmationChange}
           motionPreference={motionPreference}
           onMotionPreferenceChange={onMotionPreferenceChange}
+          playabilityCuePreference={playabilityCuePreference}
+          onPlayabilityCuePreferenceChange={onPlayabilityCuePreferenceChange}
           soundEffectsEnabled={soundEffectsEnabled}
           onSoundEffectsEnabledChange={onSoundEffectsEnabledChange}
           soundEffectsVolume={soundEffectsVolume}

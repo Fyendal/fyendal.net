@@ -1,7 +1,13 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { CardBack, CardFace, InactiveZoneCard, cardImageUrl } from "./Card.js";
+import {
+  CardBack,
+  CardFace,
+  InactiveZoneCard,
+  cardImageUrl,
+  cardPreviewSize,
+} from "./Card.js";
 import { resolveCardImageUrls } from "./cardImageUrl.js";
 
 describe("cardImageUrl", () => {
@@ -76,6 +82,14 @@ describe("cardImageUrl", () => {
       "https://content.fabrary.net/cards/IAR222-RF.webp",
       "https://content.fabrary.net/cards/IAR222-CF.webp",
     ]);
+  });
+});
+
+describe("cardPreviewSize", () => {
+  it("grows with the viewport while preserving the source aspect ratio", () => {
+    expect(cardPreviewSize(800)).toEqual({ width: 296, height: 413 });
+    expect(cardPreviewSize(1440)).toEqual({ width: 516, height: 720 });
+    expect(cardPreviewSize(2160)).toEqual({ width: 774, height: 1080 });
   });
 });
 
