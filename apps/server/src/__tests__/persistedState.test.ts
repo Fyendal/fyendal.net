@@ -50,6 +50,43 @@ describe("PersistedStateV1", () => {
       .pendingDecision).toEqual(source.pendingDecision);
   });
 
+  it("round trips a bounded multi-card decision", () => {
+    const source = game();
+    source.pendingDecision = {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Choose up to 3 cards",
+      options: ["11", "12", "13"],
+      minimumSelections: 0,
+      maximumSelections: 3,
+      sourceInstanceId: source.players[0]!.hero.instanceId,
+      chooseHook: "card-search",
+    };
+
+    const encoded = encodePersistedState(source);
+    expect(decodePersistedState(jsonCopy(encoded), "ABC123", cardData, scripts)
+      .pendingDecision).toEqual(source.pendingDecision);
+  });
+
+  it("rejects selection bounds on a non-card-choice decision", () => {
+    const source = game();
+    source.pendingDecision = {
+      player: 0,
+      kind: "optional-effect",
+      prompt: "Use it?",
+      options: ["yes", "no"],
+      minimumSelections: 0,
+      maximumSelections: 2,
+    };
+
+    expect(() => decodePersistedState(
+      jsonCopy(encodePersistedState(source)),
+      "ABC123",
+      cardData,
+      scripts,
+    )).toThrow(/selection bounds require a choose-target decision/);
+  });
+
   it("round trips a scripted decision's default option", () => {
     const source = game();
     source.pendingDecision = {

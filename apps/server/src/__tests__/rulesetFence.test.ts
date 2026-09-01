@@ -30,6 +30,15 @@ describe("ruleset deployment fence", () => {
     await expect(oldStore.createRoom("classic-battles", { hero: "rhinar" })).rejects.toBeInstanceOf(RulesetFenceError);
 
     const newStore = new PgRoomStore(db, "rules-b");
-    await expect(newStore.createRoom("classic-battles", { hero: "dorinthea" })).resolves.toMatchObject({ seat: 0 });
+    const newRoom = await newStore.createRoom("classic-battles", { hero: "dorinthea" });
+    expect(newRoom).toMatchObject({ seat: 0 });
+
+    // A superseded Cloud Run instance may remain alive for an existing socket.
+    // It must not hydrate or mutate rooms created after the cutover.
+    await expect(oldStore.getRoom(newRoom.code)).resolves.toBeNull();
+    await expect(newStore.getRoom(newRoom.code)).resolves.toMatchObject({
+      code: newRoom.code,
+      rulesetVersion: "rules-b",
+    });
   });
 });

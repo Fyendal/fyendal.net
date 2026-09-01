@@ -16,7 +16,7 @@ describe("PrepPresentation equipment controls", () => {
       pool,
       selection: {
         forDeck: "deck",
-        weapons: ["SEA045"],
+        weaponIndexes: [0],
         equipment: {},
         main: new Map(),
       },
@@ -50,7 +50,7 @@ describe("PrepPresentation equipment controls", () => {
       pool,
       selection: {
         forDeck: "deck",
-        weapons: [],
+        weaponIndexes: [],
         equipment: {},
         main: new Map([["HVY103", 3]]),
       },
@@ -68,5 +68,38 @@ describe("PrepPresentation equipment controls", () => {
 
     expect(html.match(/HVY103\.webp/g)).toHaveLength(3);
     expect(html).not.toContain("prep-stack-count");
+  });
+
+  it("tracks separately registered copies of the same weapon independently", () => {
+    const pool: DeckPool = {
+      heroId: "HNT054",
+      weaponIds: ["GEM003", "GEM003"],
+      equipmentPool: [],
+      deck: [],
+    };
+    const html = renderToStaticMarkup(createElement(PrepPresentation, {
+      pool,
+      selection: {
+        forDeck: "deck",
+        weaponIndexes: [0],
+        equipment: {},
+        main: new Map(),
+      },
+      selectionKey: "deck",
+      locked: false,
+      mainCount: 0,
+      minimumMainCount: 60,
+      inventoryCount: 0,
+      poolMainEntries: [],
+      fixedInventoryCounts: new Map(),
+      onToggleWeapon: vi.fn(),
+      onToggleEquipment: vi.fn(),
+      onMoveMainCopy: vi.fn(),
+    }));
+
+    expect(html.match(/aria-pressed="true"/g)).toHaveLength(1);
+    expect(html.match(/aria-pressed="false"/g)).toHaveLength(1);
+    expect(html).toContain("Remove Kunai of Retribution");
+    expect(html).toContain("Select Kunai of Retribution");
   });
 });

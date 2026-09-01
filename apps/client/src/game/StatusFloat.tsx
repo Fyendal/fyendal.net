@@ -110,7 +110,6 @@ function LifeStatus({
       alt=""
       width={32}
       height={32}
-      fetchPriority="high"
       aria-hidden="true"
       onError={(event) => {
         event.currentTarget.hidden = true;

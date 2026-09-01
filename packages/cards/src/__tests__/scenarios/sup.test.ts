@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyIntent, legalIntents } from "@fyendal/engine";
+import { applyIntent, legalIntents, projectStateFor } from "@fyendal/engine";
 import { functionalKeyOf } from "../../functional.js";
 import { cardData, isImplemented } from "../../index.js";
 import { scenario, type SeatSpec } from "../harness.js";
@@ -134,8 +134,12 @@ describe("SUP — heroes and the crowd", () => {
     const g = scenario({
       seats: [
         foe({
+          heroKey: "hala, bladesaint of the vow|0",
+          weapons: ["zenith blade|0"],
           hand: ["head jab|1"],
-          deck: ["flex claws|1", "flex claws|1", "flex claws|1", "flex claws|1"],
+          deck: ["blunten|2", "blunten|2", "blunten|2", "blunten|2", "head jab|1"],
+          arsenalFaceDown: ["raging onslaught|3"],
+          resources: 1,
         }),
         hero("arakni, huntsman|0", {
           arsenalFaceDown: ["hunter or hunted?|3"],
@@ -144,7 +148,7 @@ describe("SUP — heroes and the crowd", () => {
       ],
     });
 
-    g.play("head jab|1")
+    g.attackWithWeapon("zenith blade|0")
       .blockWith()
       .passPriority()
       .react("hunter or hunted?|3", { settle: false });
@@ -158,14 +162,37 @@ describe("SUP — heroes and the crowd", () => {
       .passPriority()
       .chooseOption("yes")
       .chooseOption("keep")
-      .chooseName("Flex Claws");
+      .doRaw({ kind: "choose", optionId: "Blunten" });
+
+    expect(g.state.pendingDecision).toMatchObject({
+      kind: "choose-target",
+      chooseHook: "hunter-search",
+      minimumSelections: 0,
+      maximumSelections: 3,
+    });
+    const searchDecision = projectStateFor(g.state, 1).pendingDecision;
+    expect(searchDecision?.optionCards?.filter(Boolean)).toHaveLength(3);
+    expect(searchDecision?.lookedCards).toHaveLength(6);
+    expect(searchDecision?.lookedCards?.map((card) => cardData[card.cardId]?.name)).toEqual(
+      expect.arrayContaining(["Head Jab", "Raging Onslaught"]),
+    );
+
+    const options = g.state.pendingDecision!.options!;
+    expect(legalIntents(g.state, 1)).toContainEqual({ kind: "choose-many", optionIds: [] });
+    expect(applyIntent(g.state, 1, {
+      kind: "choose-many",
+      optionIds: [...options, "not-an-option"],
+    })).toMatchObject({ ok: false, error: "invalid selection count" });
+
+    const selected = options.slice(0, 2);
+    g.doRaw({ kind: "choose-many", optionIds: selected });
 
     expect(g.state.players[0]!.banish.filter(
-      (card) => functionalKeyOf(cardData[card.cardId]!) === "flex claws|1",
-    )).toHaveLength(4);
+      (card) => functionalKeyOf(cardData[card.cardId]!) === "blunten|2",
+    )).toHaveLength(3);
     expect(g.state.players[1]!.board.filter(
       (card) => functionalKeyOf(cardData[card.cardId]!) === "silver|0",
-    )).toHaveLength(4);
+    )).toHaveLength(3);
   });
 
   it("Bait stops its controller playing cards they own but leaves its own abilities usable", () => {

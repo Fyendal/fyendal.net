@@ -716,7 +716,7 @@ export interface PendingArcane {
 export interface PendingDecisionState extends PendingDecision {
   /** Card instance whose script owns a "choose-target"/"optional-effect" decision */
   sourceInstanceId?: number;
-  /** Hook key routed back to the owning script's onChoose */
+  /** Hook key routed back to the owning script's choice callback. */
   chooseHook?: string;
   /** Ordered decisions deferred while an entering permanent's Crank choice
    * is being answered. Internal only; projection exposes the current choice. */

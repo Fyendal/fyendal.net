@@ -267,11 +267,8 @@ export const sly: Record<string, CardScript> = {
 
   "the suspense is killing me|3": {
     ...suspense(),
-    onFriendlyAttackDeclared(ctx) {
-      if (ctx.getFlag("player", "suspenseKillingUsed")) return;
-      ctx.setFlag("player", "suspenseKillingUsed", true);
-      ctx.addModifier({ scope: "chain-link", attack: 1 });
-      ctx.logPublic(`${ctx.data.name}: your first attack this turn gets +1{p}`);
+    modifyFriendlyAttack(ctx) {
+      return Number(ctx.getFlag("player", "attacksDeclaredThisTurn")) === 1 ? 1 : 0;
     },
   },
 

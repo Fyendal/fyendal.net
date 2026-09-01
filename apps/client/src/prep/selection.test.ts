@@ -56,6 +56,10 @@ describe("prep deck selection", () => {
       "SAR002",
       "SAR002",
     ]);
+    expect(defaultSelection({
+      ...pool,
+      weaponIds: ["SAR002", "SAR002", "WTR003"],
+    }, "duplicate-weapons").weaponIndexes).toEqual([0, 1]);
   });
 
   it("stops after the first two-hand weapon", () => {

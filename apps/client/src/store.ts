@@ -1112,6 +1112,7 @@ export const useStore = create<StoreState>((set, get) => {
         || intent.kind === "play-from-zone"
         || intent.kind === "activate-ability"
         || intent.kind === "choose"
+        || intent.kind === "choose-many"
         || intent.kind === "order-triggers"
         || (intent.kind === "pass" && get().view?.pendingDecision?.kind === "arsenal")
           ? intent

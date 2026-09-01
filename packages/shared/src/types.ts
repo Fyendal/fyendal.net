@@ -160,6 +160,8 @@ export interface CardView {
   activatedAbilityLabels?: string[];
   /** Additional names currently granted to this object. */
   grantedNames?: string[];
+  /** Public card name chosen for this object by a resolving effect. */
+  chosenName?: string;
   /** Additional classes/subtypes currently granted to this object. */
   grantedTypes?: string[];
   /** Current red/yellow/blue color override (1/2/3). */
@@ -320,6 +322,10 @@ export interface PendingDecision {
   prompt: string;
   /** For choose-target / optional-effect: engine-defined option ids */
   options?: string[];
+  /** Bounded multi-choice decisions submit a unique subset of `options` in
+   * one atomic intent. Both bounds are present together. */
+  minimumSelections?: number;
+  maximumSelections?: number;
   /** Option selected by the board's Space shortcut. Card scripts set this
    * explicitly when one choice is the expected/common path. */
   defaultOption?: string;
@@ -511,6 +517,7 @@ export type GameIntent =
   | { kind: "defend"; instanceIds: number[]; pitchInstanceIds?: number[] }
   | { kind: "stage-defenders"; instanceIds: number[] }
   | { kind: "choose"; optionId: string }
+  | { kind: "choose-many"; optionIds: string[] }
   | { kind: "order-triggers"; optionIds: string[] }
   | { kind: "skip-runechant" }
   | { kind: "close-chain" }

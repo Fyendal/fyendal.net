@@ -46,7 +46,7 @@ export interface EmoteEvent {
 export type OptimisticInteractionIntent = Extract<
   GameIntent,
   | { kind: "play-card" | "play-from-arsenal" | "play-from-zone" | "activate-ability" }
-  | { kind: "choose" | "order-triggers" }
+  | { kind: "choose" | "choose-many" | "order-triggers" }
   | { kind: "pass" }
 >;
 

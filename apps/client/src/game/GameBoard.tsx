@@ -15,6 +15,10 @@ import {
 } from "./PriorityFloat.js";
 import { StackFloat } from "./StackFloat.js";
 import { DecisionFloat } from "./DecisionFloat.js";
+import {
+  CardSearchOverlay,
+  isCardSearchOverlayDecision,
+} from "./decision/CardSearchOverlay.js";
 import { useDeckCardFeedback } from "./DeckCardToast.js";
 import { SideRail } from "./SideRail.js";
 import {
@@ -332,6 +336,7 @@ export function GameBoard() {
   );
   const pd = presentedView.pendingDecision;
   const myDecision = !spectating && pd !== null && pd.player === seat;
+  const showCardSearchOverlay = myDecision && isCardSearchOverlayDecision(pd);
   const pendingPreStackPlayId = (() => {
     const intent = !spectating && !replaying ? pendingInteraction?.intent : undefined;
     return intent && (
@@ -1009,7 +1014,7 @@ export function GameBoard() {
       {gameMotion.turnStartUiReady ? <DecisionFloat
         viewerSeat={seat}
         pending={{
-          decision: hidePriorityGuidance ? null : pd,
+          decision: hidePriorityGuidance || showCardSearchOverlay ? null : pd,
           isMine: myDecision,
           decidingName: pd ? (view.players[pd.player]?.heroName ?? "") : "",
           canPass: derived.canPass,
@@ -1143,9 +1148,22 @@ export function GameBoard() {
         onMobilePrimaryAction={triggerPrimaryAction}
       />
 
+      {showCardSearchOverlay ? (
+        <CardSearchOverlay
+          key={`${pd?.prompt ?? "search"}:${pd?.options?.join(":") ?? "choice"}`}
+          decision={pd}
+          zoneCounts={{
+            hand: opp.handCount,
+            deck: opp.deckCount,
+            arsenal: opp.arsenalCount,
+          }}
+          onSubmit={(optionIds) => send({ kind: "choose-many", optionIds: [...optionIds] })}
+        />
+      ) : null}
+
       <BoardOverlays
         preview={preview}
-        overlay={overlay}
+        overlay={showCardSearchOverlay ? null : overlay}
         inspectedCardId={inspectedCardId}
         seat={seat}
         yourSeat={yourSeat}

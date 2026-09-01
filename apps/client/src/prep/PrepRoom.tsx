@@ -222,15 +222,15 @@ export function PrepRoom() {
     setPreview({ id: el.getAttribute("data-cardid")!, x, y });
   };
 
-  const toggleWeapon = (id: string) => {
+  const toggleWeapon = (index: number) => {
     if (locked) return;
-    const has = selection.weapons.includes(id);
+    const has = selection.weaponIndexes.includes(index);
     setErrors([]);
     setSel({
       ...selection,
-      weapons: has
-        ? selection.weapons.filter((w) => w !== id)
-        : [...selection.weapons, id],
+      weaponIndexes: has
+        ? selection.weaponIndexes.filter((candidate) => candidate !== index)
+        : [...selection.weaponIndexes, index],
     });
   };
 
@@ -253,7 +253,7 @@ export function PrepRoom() {
     const deck: string[] = [];
     for (const [id, n] of selection.main) for (let i = 0; i < n; i++) deck.push(id);
     const presented: PresentedDeck = {
-      weaponIds: selection.weapons,
+      weaponIds: selection.weaponIndexes.map((index) => pool.weaponIds[index]!),
       equipment: selection.equipment,
       deck,
     };

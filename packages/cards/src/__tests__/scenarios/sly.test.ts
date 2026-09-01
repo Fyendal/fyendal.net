@@ -380,6 +380,34 @@ describe("SLY — Suspense auras", () => {
       .expectAttackValue(4); // 3 halved → 2, +1 first attack, +1 cost-3 card pitched
   });
 
+  it("The Suspense is Killing Me stacks for each copy in the arena", () => {
+    const g = scenario({
+      seats: [
+        lyath({
+          board: ["the suspense is killing me|3", "the suspense is killing me|3"],
+          hand: ["short shrift|2"],
+        }),
+        foe({}),
+      ],
+    });
+    g.play("short shrift|2").expectAttackValue(5); // 2 base +1 from each aura +1 above-base bonus
+  });
+
+  it("The Suspense is Killing Me can enter after declaration and still buff the first attack", () => {
+    const g = scenario({
+      seats: [
+        lyath({ hand: ["short shrift|2", "the suspense is killing me|3"] }),
+        foe({}),
+      ],
+    });
+    g.play("short shrift|2").expectAttackValue(2);
+    g.blockWith()
+      .react("the suspense is killing me|3", { settle: false })
+      .passPriority()
+      .passPriority()
+      .expectAttackValue(4); // 2 base +1 from the aura +1 above-base bonus
+  });
+
   it("Act of Glory buffs the next attack when it leaves the arena", () => {
     const g = scenario({
       seats: [lyath({ board: ["act of glory|1"], hand: ["short shrift|2"] }), foe({})],

@@ -214,6 +214,41 @@ describe("optimistic interaction projection", () => {
     expect(projection.key).toBe("interaction:authoritative");
   });
 
+  it("dismisses a submitted card-name decision while awaiting acknowledgement", () => {
+    const view = game(player(0), {
+      player: 0,
+      kind: "choose-name",
+      prompt: "Name a card",
+    });
+
+    const projection = optimisticInteractionView(view, 0, pending({
+      kind: "choose",
+      optionId: "Blunten",
+    }));
+
+    expect(projection.predictsSemanticTransition).toBe(false);
+    expect(projection.view?.pendingDecision).toBeNull();
+  });
+
+  it("dismisses a submitted multi-card decision while awaiting acknowledgement", () => {
+    const view = game(player(0), {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Choose up to 3 cards",
+      options: ["11", "12", "13"],
+      minimumSelections: 0,
+      maximumSelections: 3,
+    });
+
+    const projection = optimisticInteractionView(view, 0, pending({
+      kind: "choose-many",
+      optionIds: ["11", "13"],
+    }));
+
+    expect(projection.predictsSemanticTransition).toBe(false);
+    expect(projection.view?.pendingDecision).toBeNull();
+  });
+
   it("keeps an Opt decision mounted with only the unselected cards", () => {
     const first: CardView = { instanceId: 50, cardId: "WTR170", owner: 0 };
     const second: CardView = { instanceId: 51, cardId: "WTR171", owner: 0 };

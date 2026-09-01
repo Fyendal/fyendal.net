@@ -769,8 +769,8 @@ export class PgRoomStore {
        FROM rooms AS r
        LEFT JOIN seat_data ON seat_data.room_code = r.code
        LEFT JOIN presence_data ON presence_data.room_code = r.code
-       WHERE r.code = $1`,
-      [code],
+       WHERE r.code = $1 AND r.ruleset_version = $2`,
+      [code, this.rulesetVersion],
     );
     if (!rows.length) return null;
     return toRoom(rows[0]);
@@ -2610,7 +2610,9 @@ export class PgRoomStore {
       `SELECT DISTINCT rs.room_code
        FROM room_seats rs
        JOIN rooms r ON r.code = rs.room_code
-       WHERE rs.controller = 'bot' AND r.status IN ('prep', 'active')`,
+       WHERE rs.controller = 'bot' AND r.status IN ('prep', 'active')
+         AND r.ruleset_version = $1`,
+      [this.rulesetVersion],
     );
     return rows.map((row) => String(row.room_code));
   }

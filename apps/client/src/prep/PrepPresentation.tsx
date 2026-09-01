@@ -108,7 +108,7 @@ export const PrepPresentation = memo(function PrepPresentation({
   inventoryCount: number;
   poolMainEntries: [string, number][];
   fixedInventoryCounts: ReadonlyMap<string, number>;
-  onToggleWeapon: (id: string) => void;
+  onToggleWeapon: (index: number) => void;
   onToggleEquipment: (slot: EquipmentSlot, id: string) => void;
   onMoveMainCopy: (id: string, delta: -1 | 1) => void;
 }) {
@@ -131,28 +131,31 @@ export const PrepPresentation = memo(function PrepPresentation({
       <div className="prep-section">
         <WrappingPrepGroups key={selectionKey}>
           <div className="prep-group">
-            <span className="play-label">Weapons ({selection.weapons.length})</span>
+            <span className="play-label">Weapons ({selection.weaponIndexes.length})</span>
             <div className="prep-cardrow">
-              {pool.weaponIds.map((id, index) => (
-                <button
-                  key={`${id}-${index}`}
-                  type="button"
-                  className={`prep-card-choice${selection.weapons.includes(id) ? " selected" : ""}`}
-                  aria-pressed={selection.weapons.includes(id)}
-                  aria-label={`${selection.weapons.includes(id) ? "Remove" : "Select"} ${cardData[id]?.name ?? id}`}
-                  data-cardid={id}
-                  onClick={() => onToggleWeapon(id)}
-                >
-                  <img
-                    className="prep-card"
-                    src={cardImageUrl(id)}
-                    alt=""
-                    width={PREP_CARD_WIDTH}
-                    height={PREP_CARD_HEIGHT}
-                  />
-                  <span className="prep-card-check" aria-hidden="true">✓</span>
-                </button>
-              ))}
+              {pool.weaponIds.map((id, index) => {
+                const selected = selection.weaponIndexes.includes(index);
+                return (
+                  <button
+                    key={`${id}-${index}`}
+                    type="button"
+                    className={`prep-card-choice${selected ? " selected" : ""}`}
+                    aria-pressed={selected}
+                    aria-label={`${selected ? "Remove" : "Select"} ${cardData[id]?.name ?? id}`}
+                    data-cardid={id}
+                    onClick={() => onToggleWeapon(index)}
+                  >
+                    <img
+                      className="prep-card"
+                      src={cardImageUrl(id)}
+                      alt=""
+                      width={PREP_CARD_WIDTH}
+                      height={PREP_CARD_HEIGHT}
+                    />
+                    <span className="prep-card-check" aria-hidden="true">✓</span>
+                  </button>
+                );
+              })}
               {pool.weaponIds.length === 0 ? <span className="muted">none registered</span> : null}
             </div>
           </div>

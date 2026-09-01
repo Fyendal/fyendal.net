@@ -77,6 +77,41 @@ function hasSixPlusInPitch(ctx: ScriptCtx): boolean {
 }
 function createMany(ctx: ScriptCtx, id: string, count: number): void { ctx.createTokens(id, count); }
 
+function hunterSearchedCards(ctx: ScriptCtx): Card[] {
+  const target = opponentSeat(ctx);
+  return [
+    ...ctx.player(target).hand,
+    ...(ctx.canSearchDeck(target) ? ctx.player(target).deck : []),
+    ...ctx.player(target).arsenal,
+  ];
+}
+
+function hunterSearchCandidates(ctx: ScriptCtx, searchedCards = hunterSearchedCards(ctx)): Card[] {
+  const chosen = ctx.self.chosenName?.trim().toLowerCase();
+  if (!chosen) return [];
+  return searchedCards.filter((card) => ctx.cardNames(card).includes(chosen));
+}
+
+function requestHunterSearch(ctx: ScriptCtx): void {
+  const target = opponentSeat(ctx);
+  const searchedCards = hunterSearchedCards(ctx);
+  const candidates = hunterSearchCandidates(ctx, searchedCards);
+  if (candidates.length === 0) {
+    ctx.shuffleDeck(target);
+    return;
+  }
+  ctx.requestCardChoices(
+    "hunter-search",
+    "Choose up to 3 more cards with the named card's name",
+    candidates.map((card) => card.instanceId),
+    0,
+    Math.min(3, candidates.length),
+    undefined,
+    undefined,
+    searchedCards.map((card) => card.instanceId),
+  );
+}
+
 const BEAT_OF_THE_IRONSONG_MODES = [
   "+1 attack",
   "go again",
@@ -730,23 +765,29 @@ Object.assign(sup, {
       ctx.requestNameChoice("hunter-name", "Name a card");
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
-      if (hook !== "hunter-name") return;
-      ctx.setChosenName(option);
       const target = opponentSeat(ctx);
-      const top = ctx.player(target).deck[0];
-      if (!top) return;
-      ctx.revealCards([top.instanceId], target);
-      const named = (card: DeepReadonly<CardInstance>) =>
-        ctx.cardNames(card).some((name) => name.toLowerCase() === option.toLowerCase());
-      if (!named(top) || !ctx.banish(top.instanceId)) return;
-      const matches = [
-        ...ctx.player(target).hand,
-        ...ctx.player(target).deck,
-        ...ctx.player(target).arsenal,
-      ].filter(named).slice(0, 3);
-      for (const card of matches) {
-        if (card.faceDown) ctx.setCardFaceDown(card.instanceId, false);
-        ctx.banish(card.instanceId);
+      if (hook === "hunter-name") {
+        ctx.setChosenName(option);
+        const top = ctx.player(target).deck[0];
+        if (!top) return;
+        ctx.revealCards([top.instanceId], target);
+        const named = (card: DeepReadonly<CardInstance>) =>
+          ctx.cardNames(card).some((name) => name.toLowerCase() === option.toLowerCase());
+        if (!named(top) || !ctx.banish(top.instanceId)) return;
+        requestHunterSearch(ctx);
+      }
+    },
+    onChooseMany(ctx: ScriptCtx, hook: string, options: readonly string[]) {
+      if (hook !== "hunter-search") return;
+      const target = opponentSeat(ctx);
+      const candidates = new Map(
+        hunterSearchCandidates(ctx).map((card) => [card.instanceId, card]),
+      );
+      for (const option of options) {
+        const chosen = candidates.get(Number(option));
+        if (!chosen) continue;
+        if (chosen.faceDown) ctx.setCardFaceDown(chosen.instanceId, false);
+        ctx.banish(chosen.instanceId);
       }
       ctx.shuffleDeck(target);
     },

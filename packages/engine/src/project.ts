@@ -1102,6 +1102,12 @@ function projectState(
                   ? pd.prompt
                   : "",
             ...((revealAll || pd.player === seat) && pd.options ? { options: pd.options } : {}),
+            ...((revealAll || pd.player === seat) && pd.minimumSelections !== undefined
+              ? {
+                  minimumSelections: pd.minimumSelections,
+                  maximumSelections: pd.maximumSelections,
+                }
+              : {}),
             ...((revealAll || pd.player === seat) && pd.defaultOption
               ? { defaultOption: pd.defaultOption }
               : {}),

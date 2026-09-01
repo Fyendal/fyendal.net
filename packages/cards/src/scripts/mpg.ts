@@ -561,9 +561,9 @@ export const mpg: Record<string, CardScript> = {
     modifyDefense: (ctx) => (controlsSeismicSurge(ctx) ? 2 : 0),
   },
 
-  "blinding of the old ones|1": blindOwnedCards(),
-  "disenchantment of the old ones|1": oldOneDestroyAuras(),
-  "smelting of the old ones|1": oldOneSmeltEquipment(),
+  "blinding of the old ones|1": heave(2, blindOwnedCards()),
+  "disenchantment of the old ones|1": heave(2, oldOneDestroyAuras()),
+  "smelting of the old ones|1": heave(2, oldOneSmeltEquipment()),
   "annexation of all things known|2": annexFaceUpArsenal(),
   "annexation of grandeur|2": annexAura(),
   "annexation of the forge|2": annexEquipment(),

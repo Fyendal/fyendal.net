@@ -1,7 +1,7 @@
 import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { CardData, MeldSide, PlayableZone } from "@fyendal/shared";
-import type { CardInstance, PlayerState } from "./state.js";
+import type { CardInstance, PendingDecisionState, PlayerState } from "./state.js";
 import type { TokenCreationContext } from "./eventTypes.js";
 import { activateFromHandAbility } from "./activation.js";
 import {
@@ -42,7 +42,7 @@ import {
   variableResourceChoices,
   variableResourceCost,
 } from "./costs.js";
-import { abilityList } from "./scripts.js";
+import { abilityList, type CardScript, type ScriptCtx } from "./scripts.js";
 import {
   announceCardPlayed,
   continueStack,
@@ -752,21 +752,15 @@ export function activateAbility(
   return undefined;
 }
 
-/**
- * Answer a scripted choice ("choose" intent) for choose-target / optional-effect
- * decisions. Caller (index.ts) handles any resume continuation afterwards.
- * Handles the "stack-card" resume (finishing a paused stack-card resolution)
- * itself.
- */
-function resolveScriptChoice(
+/** Invoke a choice callback on the source script and any inherited scripts. */
+function dispatchScriptChoice(
   state: GameStateInternal,
   runtime: EngineRuntime,
   sourceInstanceId: number | undefined,
-  hook: string | undefined,
-  result: string,
-  tokenCreationCause?: TokenCreationContext,
+  tokenCreationCause: TokenCreationContext | undefined,
+  visit: (script: CardScript, ctx: ScriptCtx) => void,
 ): void {
-  if (sourceInstanceId === undefined || !hook) return;
+  if (sourceInstanceId === undefined) return;
   const owner = findCardAnywhere(state, sourceInstanceId);
   if (!owner) return;
   const ctx = runtime.makeCtx(
@@ -780,14 +774,155 @@ function resolveScriptChoice(
     tokenCreationCause,
   );
   const script = scriptOf(state, owner.card.cardId, owner.card);
-  script?.onChoose?.(ctx, hook, result);
+  if (script) visit(script, ctx);
   const inheritedIds = [
     ...(owner.card.grantedBaseAbilitiesCardId ? [owner.card.grantedBaseAbilitiesCardId] : []),
     ...(owner.card.grantedBaseAbilitiesCardIds ?? []),
   ];
   for (const inheritedId of inheritedIds) {
-    state.scriptsRef[inheritedId]?.onChoose?.(ctx, hook, result);
+    const inherited = state.scriptsRef[inheritedId];
+    if (inherited) visit(inherited, ctx);
   }
+}
+
+function resolveScriptChoice(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  sourceInstanceId: number | undefined,
+  hook: string | undefined,
+  result: string,
+  tokenCreationCause?: TokenCreationContext,
+): void {
+  if (!hook) return;
+  dispatchScriptChoice(
+    state, runtime, sourceInstanceId, tokenCreationCause,
+    (script, ctx) => script.onChoose?.(ctx, hook, result),
+  );
+}
+
+function resolveScriptChoices(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  sourceInstanceId: number | undefined,
+  hook: string | undefined,
+  optionIds: readonly string[],
+  tokenCreationCause?: TokenCreationContext,
+): void {
+  if (!hook) return;
+  dispatchScriptChoice(
+    state, runtime, sourceInstanceId, tokenCreationCause,
+    (script, ctx) => script.onChooseMany?.(ctx, hook, optionIds),
+  );
+}
+
+function continueAfterScriptedChoice(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  resume: PendingDecisionState["resume"],
+  hook: string | undefined,
+  followUpDecisions: PendingDecisionState[] | undefined,
+): string | undefined {
+  // Token commands later in the suspended effect are queued behind the first
+  // replacement decision. Drain them before the original effect resumes.
+  resumePendingTokenCreations(state, runtime);
+  continueFollowUpDecisions(state, followUpDecisions);
+
+  // A scripted callback may chain another choice. Keep the originating
+  // continuation suspended until that follow-up has also been answered.
+  const chained = state.pendingDecision as GameStateInternal["pendingDecision"];
+  // A choice sourced by a different card (for example, an aura's enter-arena
+  // ability or Crank) belongs to an object created or moved by this effect.
+  // The originating card must leave the stack before that new choice opens.
+  const choiceWaitsForResolvedLayer =
+    resume?.kind === "stack-card" &&
+    chained?.chooseHook !== undefined &&
+    (
+      chained.chooseHook === "engine-crank" ||
+      (
+        chained.sourceInstanceId !== undefined &&
+        chained.sourceInstanceId !== resume.card.instanceId
+      )
+  );
+  if (resume && chained?.chooseHook && !choiceWaitsForResolvedLayer) {
+    // Wager replacement ordering can create a narrower continuation for its
+    // own follow-up. Other chained choices inherit the original continuation.
+    if (hook === "engine-wager-loss-replacement-order") chained.resume ??= resume;
+    else chained.resume = resume;
+    return undefined;
+  }
+  if (resume?.kind === "stack-card") {
+    const idx = state.resolving.findIndex((c) => c.instanceId === resume.card.instanceId);
+    const card = (idx >= 0 ? state.resolving[idx] : resume.card) as CardInstance;
+    if (idx >= 0) state.resolving.splice(idx, 1);
+    const layer = state.stack.find(
+      (candidate) => candidate.card?.instanceId === card.instanceId,
+    );
+    if (layer) layer.card = card;
+    finishStackCardResolution(state, runtime, resume.seat);
+  }
+  if (resume?.kind === "finish-play") {
+    const idx = state.resolving.findIndex((c) => c.instanceId === resume.card.instanceId);
+    // The resolving copy is authoritative: the callback may have written
+    // counters onto it, and cloned resume data does not preserve identity.
+    const card = (idx >= 0 ? state.resolving[idx] : resume.card) as CardInstance;
+    if (idx >= 0) state.resolving.splice(idx, 1);
+    finishPlayCard(
+      state, runtime,
+      resume.seat,
+      card,
+      resume.from,
+      resume.targetAllyId,
+      resume.boost ?? false,
+      resume.boostCount,
+      resume.asInstant,
+    );
+  }
+  if (resume?.kind === "finish-reaction") {
+    const idx = state.resolving.findIndex((c) => c.instanceId === resume.card.instanceId);
+    const card = (idx >= 0 ? state.resolving[idx] : resume.card) as CardInstance;
+    if (idx >= 0) state.resolving.splice(idx, 1);
+    finishReactionPlay(state, runtime, resume.seat, card, resume.from);
+  }
+  if (resume?.kind === "finish-window-instant") {
+    const idx = state.resolving.findIndex((c) => c.instanceId === resume.card.instanceId);
+    const card = (idx >= 0 ? state.resolving[idx] : resume.card) as CardInstance;
+    if (idx >= 0) state.resolving.splice(idx, 1);
+    finishWindowInstantPlay(state, runtime, resume.seat, card, resume.from);
+  }
+  return undefined;
+}
+
+export function answerChoices(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  seat: number,
+  optionIds: readonly string[],
+): string | undefined {
+  const pd = state.pendingDecision;
+  if (!pd || pd.player !== seat) return "not your decision";
+  if (
+    pd.kind !== "choose-target" ||
+    pd.minimumSelections === undefined ||
+    pd.maximumSelections === undefined
+  ) return "not a multiple-choice decision";
+  if (new Set(optionIds).size !== optionIds.length) return "duplicate selections";
+  if (
+    optionIds.length < pd.minimumSelections ||
+    optionIds.length > pd.maximumSelections
+  ) return "invalid selection count";
+  const options = pd.options;
+  if (!options || optionIds.some((optionId) => !options.includes(optionId))) {
+    return "invalid option";
+  }
+
+  const srcId = pd.sourceInstanceId;
+  const hook = pd.chooseHook;
+  const resume = pd.resume;
+  const tokenCreationCause = pd.tokenCreationCause;
+  const followUpDecisions = pd.followUpDecisions;
+  state.pendingDecision = null;
+  resolveScriptChoices(state, runtime, srcId, hook, optionIds, tokenCreationCause);
+  return continueAfterScriptedChoice(state, runtime, resume, hook, followUpDecisions);
 }
 
 export function answerChoice(
@@ -803,6 +938,10 @@ export function answerChoice(
     pd.kind !== "choose-name" &&
     pd.kind !== "optional-effect"
   ) return "not a choice decision";
+  if (
+    pd.minimumSelections !== undefined ||
+    pd.maximumSelections !== undefined
+  ) return "multiple selections required";
   if (pd.options && !pd.options.includes(optionId)) return "invalid option";
   let resolvedOption = optionId;
   if (pd.kind === "choose-name") {
@@ -931,77 +1070,5 @@ export function answerChoice(
     state.pendingDecision = null;
     resolveScriptChoice(state, runtime, srcId, hook, resolvedOption, tokenCreationCause);
   }
-  // Token commands later in the suspended effect are queued behind the first
-  // replacement decision. Drain them before the original effect resumes.
-  resumePendingTokenCreations(state, runtime);
-  continueFollowUpDecisions(state, followUpDecisions);
-
-  // onChoose may chain a follow-up scripted choice (Stroke of Foresight: pick
-  // a hand card, then top/bottom; Katsu: discard, then search). The original
-  // resume continuation runs only once the follow-up has been answered.
-  const chained = state.pendingDecision as GameStateInternal["pendingDecision"];
-  // A choice sourced by a different card (for example, an aura's enter-arena
-  // ability or Crank) belongs to an object created or moved by this effect.
-  // The originating card must leave the stack before that new choice opens.
-  // Follow-up choices sourced by the resolving card itself remain part of its
-  // effect and keep the original stack-card continuation.
-  const choiceWaitsForResolvedLayer =
-    resume?.kind === "stack-card" &&
-    chained?.chooseHook !== undefined &&
-    (
-      chained.chooseHook === "engine-crank" ||
-      (
-        chained.sourceInstanceId !== undefined &&
-        chained.sourceInstanceId !== resume.card.instanceId
-      )
-    );
-  if (resume && chained?.chooseHook && !choiceWaitsForResolvedLayer) {
-    // Ordering a wager-loss replacement may open that replacement's own
-    // scripted choice with a narrower continuation over the remaining effects.
-    // Other chained choices keep inheriting the originating continuation.
-    if (hook === "engine-wager-loss-replacement-order") chained.resume ??= resume;
-    else chained.resume = resume;
-    return undefined;
-  }
-  if (resume?.kind === "stack-card") {
-    const idx = state.resolving.findIndex((c) => c.instanceId === resume.card.instanceId);
-    const card = (idx >= 0 ? state.resolving[idx] : resume.card) as CardInstance;
-    if (idx >= 0) state.resolving.splice(idx, 1);
-    const layer = state.stack.find(
-      (candidate) => candidate.card?.instanceId === card.instanceId,
-    );
-    if (layer) layer.card = card;
-    finishStackCardResolution(state, runtime, resume.seat);
-  }
-  if (resume?.kind === "finish-play") {
-    const idx = state.resolving.findIndex((c) => c.instanceId === resume.card.instanceId);
-    // the resolving copy is authoritative: onChoose may have written counters
-    // onto it (Fusion's "fused"), and cloneState's JSON round-trip does not
-    // preserve object identity between resume.card and the resolving entry
-    const card = (idx >= 0 ? state.resolving[idx] : resume.card) as CardInstance;
-    if (idx >= 0) state.resolving.splice(idx, 1);
-    finishPlayCard(
-      state, runtime,
-      resume.seat,
-      card,
-      resume.from,
-      resume.targetAllyId,
-      resume.boost ?? false,
-      resume.boostCount,
-      resume.asInstant,
-    );
-  }
-  if (resume?.kind === "finish-reaction") {
-    const idx = state.resolving.findIndex((c) => c.instanceId === resume.card.instanceId);
-    const card = (idx >= 0 ? state.resolving[idx] : resume.card) as CardInstance;
-    if (idx >= 0) state.resolving.splice(idx, 1);
-    finishReactionPlay(state, runtime, resume.seat, card, resume.from);
-  }
-  if (resume?.kind === "finish-window-instant") {
-    const idx = state.resolving.findIndex((c) => c.instanceId === resume.card.instanceId);
-    const card = (idx >= 0 ? state.resolving[idx] : resume.card) as CardInstance;
-    if (idx >= 0) state.resolving.splice(idx, 1);
-    finishWindowInstantPlay(state, runtime, resume.seat, card, resume.from);
-  }
-  return undefined;
+  return continueAfterScriptedChoice(state, runtime, resume, hook, followUpDecisions);
 }
