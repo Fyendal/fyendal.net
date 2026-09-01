@@ -9,11 +9,12 @@ import {
 import { EQUIPMENT_SLOTS } from "../domain.js";
 import type { PrepSelection } from "./selection.js";
 
-const STACK_CARD_WIDTH = 118;
-const STACK_CARD_HEIGHT = Math.round(
-  (STACK_CARD_WIDTH * CARD_PREVIEW_HEIGHT) / CARD_PREVIEW_WIDTH,
+const PREP_CARD_WIDTH = 105;
+const PREP_CARD_HEIGHT = Math.round(
+  (PREP_CARD_WIDTH * CARD_PREVIEW_HEIGHT) / CARD_PREVIEW_WIDTH,
 );
 const STACK_COPY_OFFSET = 25;
+const STACK_CARD_ASPECT_PERCENT = (CARD_PREVIEW_HEIGHT / CARD_PREVIEW_WIDTH) * 100;
 
 function WrappingPrepGroups({ children }: { children: React.ReactNode }) {
   const groupsRef = useRef<HTMLDivElement>(null);
@@ -54,13 +55,13 @@ function CardStack({
   onMove?: () => void;
 }) {
   const name = cardData[id]?.name ?? id;
-  const stackHeight = STACK_CARD_HEIGHT + (count - 1) * STACK_COPY_OFFSET;
+  const stackOffset = (count - 1) * STACK_COPY_OFFSET;
   const immovable = locked || !onMove || !destination;
   return (
     <button
       type="button"
       className="prep-stack-button"
-      style={{ height: stackHeight }}
+      style={{ paddingBottom: `calc(${STACK_CARD_ASPECT_PERCENT}% + ${stackOffset}px)` }}
       data-cardid={id}
       aria-disabled={immovable}
       aria-label={immovable ? name : `Move one copy of ${name} to ${destination}`}
@@ -78,7 +79,6 @@ function CardStack({
           loading="lazy"
         />
       ))}
-      <span className="prep-stack-count" aria-hidden="true">×{count}</span>
     </button>
   );
 }
@@ -122,8 +122,8 @@ export const PrepPresentation = memo(function PrepPresentation({
             className="prep-card selected"
             src={cardImageUrl(pool.heroId)}
             alt={cardData[pool.heroId]?.name ?? "Hero"}
-            width={97}
-            height={134}
+            width={PREP_CARD_WIDTH}
+            height={PREP_CARD_HEIGHT}
             data-cardid={pool.heroId}
           />
         </div>
@@ -143,7 +143,13 @@ export const PrepPresentation = memo(function PrepPresentation({
                   data-cardid={id}
                   onClick={() => onToggleWeapon(id)}
                 >
-                  <img className="prep-card" src={cardImageUrl(id)} alt="" width={97} height={134} />
+                  <img
+                    className="prep-card"
+                    src={cardImageUrl(id)}
+                    alt=""
+                    width={PREP_CARD_WIDTH}
+                    height={PREP_CARD_HEIGHT}
+                  />
                   <span className="prep-card-check" aria-hidden="true">✓</span>
                 </button>
               ))}
@@ -167,7 +173,13 @@ export const PrepPresentation = memo(function PrepPresentation({
                       data-cardid={id}
                       onClick={() => onToggleEquipment(slot, id)}
                     >
-                      <img className="prep-card" src={cardImageUrl(id)} alt="" width={97} height={134} />
+                      <img
+                        className="prep-card"
+                        src={cardImageUrl(id)}
+                        alt=""
+                        width={PREP_CARD_WIDTH}
+                        height={PREP_CARD_HEIGHT}
+                      />
                       <span className="prep-card-check" aria-hidden="true">✓</span>
                     </button>
                   ))}
