@@ -674,18 +674,21 @@
   --hand-card-height: clamp(180px, 27vh, 330px);
   --hand-rest-offset: clamp(90px, 13.5vh, 165px);
   --hand-selected-lift: clamp(18px, 2.4vh, 27px);
+  --hand-outline-clearance: 5px;
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
   box-sizing: border-box;
-  height: calc(var(--hand-card-height) + var(--hand-selected-lift));
+  height: calc(
+    var(--hand-card-height) + var(--hand-selected-lift) + var(--hand-outline-clearance)
+  );
   display: flex;
   gap: 10px;
   justify-content: flex-start;
   overflow-x: auto;
   overflow-y: hidden;
-  padding-top: var(--hand-selected-lift);
+  padding-top: calc(var(--hand-selected-lift) + var(--hand-outline-clearance));
   scrollbar-width: none;
   z-index: var(--game-z-hand);
   /* Let empty space in this full-width overlay pass hover events through to
