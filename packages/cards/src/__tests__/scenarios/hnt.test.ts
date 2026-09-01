@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { legalIntents, projectStateFor } from "@fyendal/engine";
+import { applyIntent, legalIntents, projectStateFor } from "@fyendal/engine";
 import { cardData, isImplemented } from "../../index.js";
 import { printingId, scenario } from "../harness.js";
 
@@ -10,6 +10,39 @@ it("registers every HNT printing as implemented", () => {
 });
 
 describe("HNT — marked heroes and daggers", () => {
+  it("Kabuto of Imperial Authority prohibits subsequent weapon attacks this turn", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "cindra|0",
+          weapons: ["kunai of retribution|0"],
+          hand: ["head jab|3"],
+          resources: 1,
+        },
+        {
+          hero: "dorinthea",
+          equipment: { head: "kabuto of imperial authority|0" },
+        },
+      ],
+    });
+
+    g.play("head jab|3")
+      .blockWith("kabuto of imperial authority|0")
+      .settle();
+
+    const kunai = g.state.players[0]!.weapons[0]!;
+    expect(legalIntents(g.state, 0)).not.toContainEqual(expect.objectContaining({
+      kind: "activate-ability",
+      sourceInstanceId: kunai.instanceId,
+    }));
+    expect(applyIntent(g.state, 0, {
+      kind: "activate-ability",
+      sourceInstanceId: kunai.instanceId,
+      pitchInstanceIds: [],
+    })).toEqual({ ok: false, error: "cannot attack with weapons this turn" });
+  });
+
   it("journals Relentless Pursuit's self-move as a deck-bottom placement", () => {
     const g = scenario({
       seats: [

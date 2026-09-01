@@ -1022,7 +1022,37 @@ Object.assign(sea, {
   "barbed barrage|1": { onPlayCostPaid(ctx: ScriptCtx, paid: readonly Card[]) { if (paid.length >= 2) ctx.setFlag("link", "additionalTarget", true); } },
   "return fire|1": { onDefend(ctx: ScriptCtx) { const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card)); if (arrows.length) ctx.requestCardChoice("return-fire", "Banish an arrow?", ["pass", ...arrows.map((card) => card.instanceId)]); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "return-fire" && option !== "pass" && ctx.banish(Number(option))) { ctx.allowPlayFrom(Number(option), "banish", { untilNextTurn: true }); ctx.addCardTempPower(Number(option), 3); } } },
   "sticky fingers|0": { ...attackAbilityForAlly(0), onAttackDeclared(ctx: ScriptCtx) { const gold = controlledGold(ctx, opponentSeat(ctx))[0]; if (ctx.link?.targetAllyId === undefined && gold) ctx.steal(gold.instanceId, { duration: "indefinite" }); } },
-  "gold-baited hook|0": { activated: { cost: 0, isAttack: false, goAgain: true, tap: true, onActivate(ctx: ScriptCtx) { buffNextAttack(ctx, { appliesToClass: "pirate", onHitCreateToken: { cardId: GOLD, count: 1 } }); } } },
+  "gold-baited hook|0": {
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: true,
+      tap: true,
+      onActivate(ctx: ScriptCtx) {
+        buffNextAttack(ctx, {
+          appliesToClass: "pirate",
+          onHitScriptHook: {
+            hook: "gold-baited-hook-hit",
+            label: "steal a Gold token they control, otherwise create a Gold token",
+            heroOnly: true,
+          },
+        });
+      },
+    },
+    onGrantedHit(ctx: ScriptCtx, hook: string) {
+      if (hook !== "gold-baited-hook-hit") return;
+      const gold = controlledGold(ctx, opponentSeat(ctx))[0];
+      if (!gold || !ctx.steal(gold.instanceId, { duration: "indefinite" })) createGold(ctx);
+    },
+    triggers: [{
+      event: "end-of-turn",
+      label: "Destroy Gold-Baited Hook",
+      condition: (ctx: ScriptCtx) =>
+        ctx.getFlag("player", "createdName:gold") !== true &&
+        ctx.getFlag("player", "stolenName:gold") !== true,
+      effect(ctx: ScriptCtx) { ctx.destroySelf(); },
+    }],
+  },
   "conqueror of the high seas|1": { modifyAttack: (ctx: ScriptCtx) => highTide(ctx) ? 1 : 0, onAttackDeclared(ctx: ScriptCtx) { if (highTide(ctx)) ctx.grantGoAgain(); }, canTriggerOnHit: (ctx: ScriptCtx) => ctx.link?.targetAllyId === undefined, onHit(ctx: ScriptCtx) { for (const card of [...ctx.player(opponentSeat(ctx)).arsenal]) if (ctx.moveToGraveyard(card.instanceId, "arsenal")) createGold(ctx); } },
   "loan shark|2": { onEnterArena(ctx: ScriptCtx) { createGold(ctx, 2); }, triggers: [{ event: "end-of-turn", label: "Pay Loan Shark", condition: (ctx: ScriptCtx) => ctx.getFlag("player", "createdName:gold") !== true, effect(ctx: ScriptCtx) { ctx.destroySelf(); const hand = ctx.player(ctx.seat).hand; if (hand.length) ctx.requestCardChoice("loan", "Discard a card or lose 2 life", ["Lose 2 life", ...hand.map((card) => card.instanceId)]); else ctx.loseLife(ctx.seat, 2); } }], onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "loan") { if (option === "Lose 2 life") ctx.loseLife(ctx.seat, 2); else ctx.discardCard(ctx.seat, Number(option)); } } },
   "tip the barkeep|3": {

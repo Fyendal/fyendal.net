@@ -178,6 +178,41 @@ describe("OMN — import and set mechanics", () => {
       .expectLife(1, 9);
   });
 
+  it("Beckon Steel does not give a second Zenith Blade attack go again", () => {
+    const g = scenario({
+      seats: [
+        hero("hala, bladesaint of the vow|0", {
+          resources: 4,
+          weapons: ["zenith blade|0"],
+          hand: ["MPW030", "AHA012", "beckon steel|3", "and again...|3"],
+          equipment: { arms: "ironsong versus|0" },
+        }),
+        foe(),
+      ],
+    });
+
+    g.play("MPW030")
+      .play("AHA012")
+      .activate("ironsong versus|0")
+      .attackWithWeapon("zenith blade|0")
+      .blockWith()
+      .settle()
+      .expectAP(0, 1)
+      .attackWithWeapon("zenith blade|0")
+      .blockWith()
+      .react("beckon steel|3")
+      .blockWith();
+
+    expect(g.state.chain).toHaveLength(3);
+    expect(g.state.chain[1]).toMatchObject({ resolved: true, goAgain: false });
+    g.settle().expectAP(0, 0);
+    const andAgain = g.state.players[0]!.hand.find((card) => card.cardId === "MPW028");
+    expect(andAgain).toBeDefined();
+    expect(legalIntents(g.state, 0).some((intent) =>
+      intent.kind === "play-card" && intent.instanceId === andAgain!.instanceId
+    )).toBe(false);
+  });
+
   it("Reverent Rerebrace replaces Beckon Steel before its counter threshold", () => {
     const g = scenario({
       seats: [

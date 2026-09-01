@@ -1199,6 +1199,12 @@ export function makeCtx(
       const card = opp.board.splice(idx, 1)[0] as CardInstance;
       player.board.push(card);
       runtime.commands.stampControlledName(state, player, card);
+      player.flags.stolenThisTurn = (Number(player.flags.stolenThisTurn) || 0) + 1;
+      for (const stolenName of cardNamesOf(state, card)) {
+        player.flags[`stolenName:${stolenName}`] = true;
+        player.flags[`stolenNameCount:${stolenName}`] =
+          (Number(player.flags[`stolenNameCount:${stolenName}`]) || 0) + 1;
+      }
       if ((opts?.duration ?? "action-phase") === "action-phase") {
         state.controlReturns.push({
           instanceId,
