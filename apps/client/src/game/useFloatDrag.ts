@@ -65,6 +65,11 @@ export function useFloatDrag(opts?: {
         ? ({ top: pos.y, transform: opts.hTransform ?? "translateX(-50%)" } as const)
         : ({ left: pos.x, top: pos.y, right: "auto", bottom: "auto", transform: "none" } as const)
       : undefined,
-    dragProps: { onPointerDown, onPointerMove, onPointerUp },
+    dragProps: {
+      onPointerDown,
+      onPointerMove,
+      onPointerUp,
+      onPointerCancel: onPointerUp,
+    },
   };
 }

@@ -15,7 +15,7 @@ const MOTION_PREFERENCE_LABEL: Readonly<Record<MotionPreference, string>> = {
 const MOTION_PREFERENCE_DESCRIPTION: Readonly<Record<MotionPreference, string>> = {
   system: "Default: follow your operating system's reduced-motion setting",
   full: "Full: show card travel and connection animations",
-  reduced: "Reduced: replace card travel with brief destination highlights",
+  reduced: "Reduced: hide card travel and connections; keep local card fades",
 };
 
 export function GameSettingsDialog({

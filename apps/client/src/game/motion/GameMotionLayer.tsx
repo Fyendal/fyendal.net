@@ -143,7 +143,7 @@ export function GameMotionLayer({
     };
   }
   const cueCount = batch
-    ? batch.flights.length + batch.connectors.length + batch.pulses.length
+    ? batch.flights.length + batch.connectors.length
     : 0;
   const completeCue = (cueId: string) => {
     if (!batch) return;
@@ -221,20 +221,6 @@ export function GameMotionLayer({
         ))}
         {boardFlights.map((flight) => (
           <MotionDeckCover flight={flight} key={`${flight.id}:deck-cover`} />
-        ))}
-        {batch.pulses.map((pulse) => (
-          <div
-            className="game-motion-pulse"
-            key={pulse.id}
-            style={{
-              ...rectStyle(pulse.rect),
-              animationDelay: `${pulse.delayMs}ms`,
-            }}
-            onAnimationEnd={(event) => {
-              if (event.target !== event.currentTarget) return;
-              completeCue(pulse.id);
-            }}
-          />
         ))}
       </div>
       {chainFlights.length > 0 ? (

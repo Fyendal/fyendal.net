@@ -20,6 +20,7 @@ describe("PriorityFloat", () => {
 
     expect(html).toContain("Turn 4 · Opponent&#x27;s turn");
     expect(html).toContain("ACTION PHASE · REACTION STEP · YOUR PRIORITY");
+    expect(html).toContain("priority-float-mine");
   });
 
   it("can identify opponent priority", () => {
@@ -31,6 +32,7 @@ describe("PriorityFloat", () => {
     }));
 
     expect(html).toContain("ACTION PHASE · OPPONENT&#x27;S PRIORITY");
+    expect(html).not.toContain("priority-float-mine");
   });
 
   it("keeps turn and timing visible without claiming a mandatory decision is priority", () => {
@@ -54,6 +56,7 @@ describe("PriorityFloat", () => {
 
     expect(html).toContain(">REACTION STEP</span>");
     expect(html).toContain(">YOUR PRIORITY</span>");
+    expect(html).toContain("chain-priority-status-mine");
     expect(html).toContain('class="chain-priority-separator"');
     expect(html).not.toContain("ACTION PHASE");
     expect(html).not.toContain("Turn");

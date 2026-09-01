@@ -98,15 +98,6 @@ function sameMove(
   inferred: GameMotionEvent,
   semantic: GameMotionEvent,
 ): boolean {
-  if (inferred.kind === "pulse") {
-    if (semantic.kind === "pulse") {
-      return motionLocationKey(inferred.location) === motionLocationKey(semantic.location);
-    }
-    return semantic.kind === "move" && (
-      motionLocationKey(inferred.location) === motionLocationKey(semantic.source)
-      || motionLocationKey(inferred.location) === motionLocationKey(semantic.destination)
-    );
-  }
   if (inferred.kind !== "move" || semantic.kind !== "move") return false;
   if (inferred.instanceId !== undefined && semantic.instanceId !== undefined) {
     return inferred.instanceId === semantic.instanceId;
@@ -221,9 +212,15 @@ export function transitionMotionEvents(
           : {}),
       });
     } else if (sourceLocation) {
-      semantic.push({ kind: "pulse", location: sourceLocation });
-    } else if (destinationLocation) {
-      semantic.push({ kind: "pulse", location: destinationLocation });
+      if (sourcePresentation && cardVisible(sourcePresentation.card)) {
+        semantic.push({
+          kind: "disappear",
+          source: sourceLocation,
+          visual: { kind: "face", card: sourcePresentation.card },
+          instanceId: sourcePresentation.instanceId,
+          sourcePresentationKey: sourcePresentation.key,
+        });
+      }
     }
   }
 

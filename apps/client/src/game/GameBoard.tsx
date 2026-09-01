@@ -324,6 +324,7 @@ export function GameBoard() {
   const combatChainLinks = view.chain.filter((link) => !link.onStack);
   const hasActiveCombatChain = combatChainLinks.length > 0;
   const showPriorityFloat = !spectating && !replaying && gameHasPriority(view);
+  const hasOwnPriority = showPriorityFloat && view.priorityPlayer === seat;
   const priorityLabel = view.priorityPlayer === seat ? "YOUR PRIORITY" : "OPPONENT'S PRIORITY";
   const priorityTimingLabel = gameTimingLabel(view);
   const showEndTurnPassToast =
@@ -760,8 +761,9 @@ export function GameBoard() {
   return (
     <div
       ref={tableRef}
-      className={`table${railCollapsed ? " rail-is-collapsed" : ""}${view.winner !== null ? " game-is-over" : ""}${hasActiveCombatChain ? " has-active-combat-chain" : ""}${mobileHandIsHidden ? " mobile-hand-is-hidden" : ""}`}
+      className={`table${railCollapsed ? " rail-is-collapsed" : ""}${view.winner !== null ? " game-is-over" : ""}${hasActiveCombatChain ? " has-active-combat-chain" : ""}${mobileHandIsHidden ? " mobile-hand-is-hidden" : ""}${hasOwnPriority ? " has-own-priority" : ""}`}
       data-playability-cue={playabilityCuePreference}
+      data-motion-preference={motionPreference}
       onMouseOver={onHoverCard}
       onMouseLeave={() => setPreview(null)}
       {...cardLongPressHandlers}

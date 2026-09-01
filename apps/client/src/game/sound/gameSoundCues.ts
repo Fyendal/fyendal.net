@@ -1,8 +1,8 @@
 import type { DeckCardEvent } from "../deckCardEvents.js";
 import {
   MOTION_CONNECT_MS,
+  MOTION_DISAPPEAR_MS,
   MOTION_DRAW_STAGGER_MS,
-  MOTION_PULSE_MS,
   MOTION_STAGGER_MS,
   MOTION_TRAVEL_MS,
   MOTION_SEQUENCE_GAP_MS,
@@ -45,7 +45,7 @@ function isPlayedCard(event: GameMotionEvent): event is MoveMotionEvent {
 
 function eventDurationMs(event: GameMotionEvent): number {
   if (event.kind === "connect") return MOTION_CONNECT_MS;
-  if (event.kind === "pulse") return MOTION_PULSE_MS;
+  if (event.kind === "disappear") return MOTION_DISAPPEAR_MS;
   return MOTION_TRAVEL_MS;
 }
 

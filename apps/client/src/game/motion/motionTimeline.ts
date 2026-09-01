@@ -56,7 +56,7 @@ export function motionTimelinePhase(event: GameMotionEvent): MotionTimelinePhase
   if (event.kind === "settle") return "confirmation";
   if (event.kind === "connect") return "trigger";
   if (event.kind === "appear") return "result";
-  if (event.kind === "pulse") return "result";
+  if (event.kind === "disappear") return "result";
   if (event.destination.kind === "chain-staged") return "staging";
   if (event.destination.kind === "pitch") return "payment";
   if (event.source.kind === "hand" && event.destination.kind === "arsenal") {

@@ -554,6 +554,66 @@ describe("SBL — counters, prevention, redirects", () => {
     s.expectInZone(1, "flurry|0", "board");
   });
 
+  it("Toe the Line: two copies that each prevent damage each create a Flurry token", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["snatch|1"] },
+        { hero: "dorinthea", life: 20, hand: ["toe the line|1", "toe the line|1"] },
+      ],
+    });
+    s.play("snatch|1", { settle: false });
+    s.passPriority();
+    s.passPriority();
+    s.blockWith();
+    s.passPriority();
+    s.react("toe the line|1", { settle: false });
+    s.react("toe the line|1", { settle: false });
+    s.settle();
+    s.expectLife(1, 20);
+    s.expectZoneSize(1, "board", 2);
+    s.expectInZone(1, "flurry|0", "board");
+  });
+
+  it("Toe the Line: resolves rewards from mixed persisted shield representations", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["snatch|1"] },
+        { hero: "dorinthea", life: 20, hand: ["toe the line|1", "toe the line|1"] },
+      ],
+    });
+    s.play("snatch|1", { settle: false });
+    s.passPriority();
+    s.passPriority();
+    s.blockWith();
+    s.passPriority();
+    s.react("toe the line|1", { settle: false });
+    s.passPriority();
+    s.passPriority();
+    s.passPriority();
+    s.react("toe the line|1", { settle: false });
+    s.passPriority();
+    s.passPriority();
+
+    const shields = s.state.modifiers.filter(
+      (modifier) => modifier.preventNextDamagePool === 2 &&
+        modifier.sourceCardId === printingId("toe the line|1"),
+    );
+    expect(shields).toHaveLength(2);
+    const combined = shields[1]!;
+    const companion = s.state.modifiers.find(
+      (modifier) => modifier.sourceInstanceId === combined.sourceInstanceId &&
+        modifier.onPreventCreateToken !== undefined,
+    );
+    expect(companion).toBeDefined();
+    combined.onPreventCreateToken = companion!.onPreventCreateToken;
+    delete companion!.onPreventCreateToken;
+    companion!.consumed = true;
+
+    s.settle();
+    s.expectLife(1, 20);
+    s.expectZoneSize(1, "board", 2);
+  });
+
   it("Roaring Beam: creates a Courage token; with an empty soul, returns to hand and charges", () => {
     const s = scenario({
       seats: [

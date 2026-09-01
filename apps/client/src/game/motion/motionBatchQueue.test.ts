@@ -12,7 +12,6 @@ function batch(id: number): GameMotionBatch {
     id: String(id),
     flights: [],
     connectors: [],
-    pulses: [],
     durationMs: 320,
   };
 }
@@ -20,10 +19,15 @@ function batch(id: number): GameMotionBatch {
 function resultBatch(id: number, left = 0): GameMotionBatch {
   return {
     ...batch(id),
-    pulses: [{
-      id: `${id}:pulse:0`,
+    flights: [{
+      id: `${id}:flight:0`,
       phase: "result",
-      rect: { left, top: 0, width: 100, height: 138 },
+      mode: "disappear",
+      start: { left, top: 0, width: 100, height: 138 },
+      end: { left, top: 0, width: 100, height: 138 },
+      visual: { kind: "back" },
+      count: 1,
+      showCount: false,
       delayMs: 0,
     }],
   };

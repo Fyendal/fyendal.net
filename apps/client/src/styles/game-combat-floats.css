@@ -26,12 +26,14 @@
   transform: translate(-50%, -50%);
   max-width: min(874px, 80vw);
 }
-/* On laptop/desktop, keep the stack beside the board's left equipment column.
-   Compact layouts override this below and center the bounded sheet. */
+/* On laptop/desktop, center the stack in the flexible lane between the
+   opponent's arms and first weapon. With the default seven equal card columns
+   this expression is the exact midpoint of that lane; compact layouts replace
+   it with their bounded sheet position. */
 .stack-float {
-  left: clamp(96px, 12.2vh, 158px);
-  top: 50%;
-  transform: translateY(-50%);
+  left: calc((100vw - var(--rail-w) + var(--mat-zone-col)) / 4 + 9px);
+  top: 28%;
+  transform: translate(-50%, -50%);
   z-index: var(--game-z-stack-float);
 }
 .chain-float:active,
@@ -76,6 +78,38 @@
   font-weight: 700;
   letter-spacing: .08em;
   line-height: 1.25;
+}
+.priority-float-mine {
+  border-color: #e8bd4acc;
+  background: #211507f7;
+  box-shadow:
+    0 12px 46px #000000aa,
+    0 0 18px #e8bd4a70,
+    inset 0 0 14px #e8bd4a24;
+  animation: priority-label-arrive 680ms cubic-bezier(.2, .8, .2, 1) both;
+}
+.priority-float-mine .priority-timing,
+.chain-priority-status-mine {
+  color: #ffe19a;
+  text-shadow: 0 0 9px #e8bd4a99;
+}
+.chain-priority-status-mine {
+  display: inline-block;
+  font-size: 12px;
+  animation: priority-label-arrive 680ms cubic-bezier(.2, .8, .2, 1) both;
+}
+@keyframes priority-label-arrive {
+  0% { opacity: .58; transform: scale(.96); }
+  45% { opacity: 1; transform: scale(1.035); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .priority-float-mine,
+  .chain-priority-status-mine { animation: none; }
+}
+.table[data-motion-preference="reduced"] .priority-float-mine,
+.table[data-motion-preference="reduced"] .chain-priority-status-mine {
+  animation: none;
 }
 @media (min-width: 701px) {
   .table:has(.chain-float) .mat-divider-center > .priority-float { display: none; }

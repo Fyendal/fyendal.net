@@ -17,8 +17,8 @@ export const MOTION_PITCH_GATHER_MS = 180;
 export const MOTION_STAGGER_MS = 45;
 export const MOTION_DRAW_STAGGER_MS = 85;
 export const MOTION_SEQUENCE_GAP_MS = 70;
-export const MOTION_PULSE_MS = 460;
 export const MOTION_CONNECT_MS = 180;
+export const MOTION_DISAPPEAR_MS = 380;
 export const MAX_DETAILED_FLIGHTS = 24;
 
 export interface MotionRect {
@@ -50,6 +50,7 @@ export interface MotionFlight {
     | "pitch-gather"
     | "deck-bottom"
     | "appear"
+    | "disappear"
     | "settle"
     | "settle-reveal";
   start: MotionRect;
@@ -72,14 +73,8 @@ export function motionFlightDurationMs(
   if (flight.durationMs !== undefined) return flight.durationMs;
   if (flight.mode === "deck-bottom") return MOTION_DECK_BOTTOM_MS;
   if (flight.mode === "pitch-gather") return MOTION_PITCH_GATHER_MS;
+  if (flight.mode === "disappear") return MOTION_DISAPPEAR_MS;
   return MOTION_TRAVEL_MS;
-}
-
-export interface MotionPulse {
-  id: string;
-  phase: MotionTimelinePhase;
-  rect: MotionRect;
-  delayMs: number;
 }
 
 export interface MotionConnector {
@@ -96,7 +91,6 @@ export interface GameMotionBatch {
   stage?: "end-turn" | "turn-start";
   flights: MotionFlight[];
   connectors: MotionConnector[];
-  pulses: MotionPulse[];
   durationMs: number;
   reducedMotion?: true;
 }
@@ -178,19 +172,6 @@ function cardRectWithinZone(zone: MotionRect, reference?: MotionRect): MotionRec
   };
 }
 
-function addPulse(
-  pulses: MotionPulse[],
-  pulseKeys: Set<string>,
-  id: string,
-  key: string,
-  rect: MotionRect | undefined,
-  phase: MotionTimelinePhase,
-): void {
-  if (!rect || pulseKeys.has(key)) return;
-  pulseKeys.add(key);
-  pulses.push({ id: `${id}:pulse:${pulses.length}`, phase, rect, delayMs: 0 });
-}
-
 function phaseStaggerMs(phase: MotionTimelinePhase): number {
   return phase === "draw" ? MOTION_DRAW_STAGGER_MS : MOTION_STAGGER_MS;
 }
@@ -216,17 +197,10 @@ export function resolveMotionBatch(
   const batchId = String(id);
   const flights: MotionFlight[] = [];
   const connectors: MotionConnector[] = [];
-  const pulses: MotionPulse[] = [];
-  const pulseKeys = new Set<string>();
   const boardAppearances = new Map<string, MotionFlight>();
 
   for (const event of events) {
     const phase = motionTimelinePhase(event);
-    if (event.kind === "pulse") {
-      const key = motionLocationKey(event.location);
-      addPulse(pulses, pulseKeys, batchId, key, current.zones.get(key), phase);
-      continue;
-    }
     if (event.kind === "connect") {
       const source = endpoint(current, event.sourcePresentationKey, event.source)
         ?? endpoint(previous, event.sourcePresentationKey, event.source);
@@ -244,10 +218,24 @@ export function resolveMotionBatch(
           delayMs: 0,
           destinationPresentationKey: event.destinationPresentationKey,
         });
-      } else {
-        const key = motionLocationKey(event.destination);
-        addPulse(pulses, pulseKeys, batchId, key, current.zones.get(key), phase);
       }
+      continue;
+    }
+    if (event.kind === "disappear") {
+      const source = endpoint(previous, event.sourcePresentationKey, event.source);
+      if (!source || flights.length >= MAX_DETAILED_FLIGHTS) continue;
+      const rect = source.exact ? source.rect : cardRectWithinZone(source.rect);
+      flights.push({
+        id: `${batchId}:flight:${flights.length}`,
+        phase,
+        mode: "disappear",
+        start: rect,
+        end: rect,
+        visual: event.visual,
+        count: 1,
+        showCount: false,
+        delayMs: 0,
+      });
       continue;
     }
     if (event.kind === "appear" || event.kind === "settle") {
@@ -296,9 +284,6 @@ export function resolveMotionBatch(
         };
         flights.push(flight);
         if (groupedAppearanceKey) boardAppearances.set(groupedAppearanceKey, flight);
-      } else {
-        const key = motionLocationKey(event.destination);
-        addPulse(pulses, pulseKeys, batchId, key, current.zones.get(key), phase);
       }
       continue;
     }
@@ -310,8 +295,6 @@ export function resolveMotionBatch(
       event.destination,
     );
     if (!source || !destination || flights.length >= MAX_DETAILED_FLIGHTS) {
-      const key = motionLocationKey(event.destination);
-      addPulse(pulses, pulseKeys, batchId, key, current.zones.get(key), phase);
       continue;
     }
     const start = source.exact
@@ -354,7 +337,7 @@ export function resolveMotionBatch(
     });
   }
 
-  if (flights.length === 0 && connectors.length === 0 && pulses.length === 0) return null;
+  if (flights.length === 0 && connectors.length === 0) return null;
   const delayById = scheduleMotionTimeline([
     ...flights.map((flight) => ({
       id: flight.id,
@@ -368,27 +351,18 @@ export function resolveMotionBatch(
       durationMs: MOTION_CONNECT_MS,
       staggerMs: phaseStaggerMs(connector.phase),
     })),
-    ...pulses.map((pulse) => ({
-      id: pulse.id,
-      phase: pulse.phase,
-      durationMs: MOTION_PULSE_MS,
-      staggerMs: phaseStaggerMs(pulse.phase),
-    })),
   ], MOTION_SEQUENCE_GAP_MS);
   for (const flight of flights) flight.delayMs = delayById.get(flight.id) ?? 0;
   for (const connector of connectors) connector.delayMs = delayById.get(connector.id) ?? 0;
-  for (const pulse of pulses) pulse.delayMs = delayById.get(pulse.id) ?? 0;
   const durationMs = Math.max(
     0,
     ...flights.map((flight) => flight.delayMs + motionFlightDurationMs(flight)),
     ...connectors.map((connector) => connector.delayMs + MOTION_CONNECT_MS),
-    ...pulses.map((pulse) => pulse.delayMs + MOTION_PULSE_MS),
   );
   return {
     id: batchId,
     flights,
     connectors,
-    pulses,
     durationMs,
   };
 }
@@ -485,7 +459,6 @@ function resolvePitchPacketBatches(
     stage: "end-turn",
     flights: gatherFlights,
     connectors: [],
-    pulses: [],
     durationMs: MOTION_PITCH_GATHER_MS,
   };
 
@@ -508,7 +481,6 @@ function resolvePitchPacketBatches(
     stage: "end-turn",
     flights: [packetFlight],
     connectors: [],
-    pulses: [],
     durationMs: MOTION_DECK_BOTTOM_MS,
   };
   return [gatherBatch, packetBatch];
@@ -629,44 +601,16 @@ export function resolveMotionBatches(
 
 export function reducedMotionBatch(
   batch: GameMotionBatch,
-  current: MotionAnchorSnapshot,
-): GameMotionBatch {
-  const pulses = batch.pulses.map((pulse) => ({ ...pulse, delayMs: 0 }));
-  const seen = new Set(pulses.map((pulse) => (
-    `${pulse.rect.left}:${pulse.rect.top}:${pulse.rect.width}:${pulse.rect.height}`
-  )));
-  for (const flight of batch.flights) {
-    const rect = flight.destinationPresentationKey
-      ? current.cards.get(flight.destinationPresentationKey)
-      : flight.end;
-    if (!rect) continue;
-    const key = `${rect.left}:${rect.top}:${rect.width}:${rect.height}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    pulses.push({
-      id: `${batch.id}:reduced:${pulses.length}`,
-      phase: "result",
-      rect,
-      delayMs: 0,
-    });
-  }
-  for (const connector of batch.connectors) {
-    const key = `${connector.end.left}:${connector.end.top}:${connector.end.width}:${connector.end.height}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    pulses.push({
-      id: `${batch.id}:reduced:${pulses.length}`,
-      phase: "result",
-      rect: connector.end,
-      delayMs: 0,
-    });
-  }
+): GameMotionBatch | null {
+  const localFlights = batch.flights
+    .filter((flight) => flight.mode === "appear" || flight.mode === "disappear")
+    .map((flight) => ({ ...flight, delayMs: 0 }));
+  if (localFlights.length === 0) return null;
   return {
     ...batch,
-    flights: [],
+    flights: localFlights,
     connectors: [],
-    pulses,
-    durationMs: MOTION_PULSE_MS,
+    durationMs: Math.max(...localFlights.map(motionFlightDurationMs)),
     reducedMotion: true,
   };
 }
