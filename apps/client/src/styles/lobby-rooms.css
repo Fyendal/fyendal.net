@@ -384,6 +384,35 @@
 .deck-import-name input { min-height: 40px; }
 @media (max-width: 620px) {
   .deck-import-name { max-width: none; }
+  .deck-edit-modal { width: 100%; }
+  .deck-edit-modal .deck-import-form {
+    gap: 10px;
+    margin-top: 0;
+  }
+  .deck-edit-modal :is(input, textarea) {
+    width: 100%;
+    min-width: 0;
+    font-size: 16px;
+  }
+  .deck-edit-modal textarea {
+    height: clamp(104px, 24dvh, 150px);
+    min-height: 104px;
+  }
+  .deck-edit-modal .deck-edit-source-note { font-size: 11px; }
+  .deck-edit-modal .deck-edit-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    margin-top: 2px;
+  }
+  .deck-edit-modal .deck-edit-actions button {
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    padding: 10px 12px;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
 }
 .deck-edit-actions { display: flex; justify-content: flex-end; gap: 10px; }
 .invite-room-modal { width: min(736px, calc(100vw - 32px)); }

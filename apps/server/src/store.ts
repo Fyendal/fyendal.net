@@ -43,6 +43,7 @@ import {
   scripts,
 } from "@fyendal/cards";
 import { MAX_MATCHMAKING_AVOID_ROOM_CODES } from "@fyendal/protocol";
+import { recordGameCompletion } from "./analytics.js";
 import { resolveDeck, validatePresentation } from "./decks.js";
 import { appendClusterEvent, type ClusterEvent } from "./clusterEvents.js";
 import { assertActiveRuleset } from "./rulesetFence.js";
@@ -1212,6 +1213,7 @@ export class PgRoomStore {
             participants,
           });
         } else if (out.replay?.kind === "frame" && out.room.state) {
+          const replayFrameAt = Date.now();
           replayFinalizationId = (await appendReplayView(
             db,
             out.room.code,
@@ -1221,7 +1223,15 @@ export class PgRoomStore {
             out.room.lastTransition?.fromVersion === room.version
               ? out.room.lastTransition
               : null,
+            replayFrameAt,
           )) ?? undefined;
+          if (replayFinalizationId) {
+            await recordGameCompletion(db, {
+              occurredAt: replayFrameAt,
+              format: out.room.format,
+              gameMode: out.room.seats.some((seat) => seat?.controller === "bot") ? "bot" : "pvp",
+            });
+          }
         }
         for (const event of out.events ?? []) await appendClusterEvent(db, event);
         await appendClusterEvent(db, {

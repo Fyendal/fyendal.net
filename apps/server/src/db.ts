@@ -387,6 +387,29 @@ export const MIGRATIONS: Migration[] = [
     sql: `ALTER TABLE rooms ADD COLUMN last_transition JSONB;
     ALTER TABLE replay_frames ADD COLUMN transition JSONB;`,
   },
+  {
+    version: 22,
+    // Product analytics are intentionally anonymous and append-only. They
+    // retain aggregate history after account deletion, room GC, and replay
+    // expiry without preserving user ids, usernames, room codes, or state.
+    sql: `CREATE TABLE analytics_events (
+      event_id TEXT PRIMARY KEY,
+      event_type TEXT NOT NULL
+        CHECK (event_type IN ('user_registered', 'game_completed')),
+      occurred_at BIGINT NOT NULL,
+      format TEXT
+        CHECK (format IS NULL OR format IN ('classic-battles', 'cc', 'silver-age')),
+      game_mode TEXT
+        CHECK (game_mode IS NULL OR game_mode IN ('pvp', 'bot')),
+      CHECK (
+        (event_type = 'user_registered' AND format IS NULL AND game_mode IS NULL)
+        OR
+        (event_type = 'game_completed' AND format IS NOT NULL AND game_mode IS NOT NULL)
+      )
+    );
+    CREATE INDEX analytics_events_time_idx
+      ON analytics_events (occurred_at, event_type);`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

@@ -40,6 +40,17 @@ describe("register", () => {
     const { rows } = await db.query("SELECT * FROM users WHERE username_lc = 'player1'");
     const user = rows[0] as UserRow;
     expect(user.username).toBe("Player1");
+    expect((await db.query(
+      "SELECT event_type, format, game_mode FROM analytics_events",
+    )).rows).toEqual([{ event_type: "user_registered", format: null, game_mode: null }]);
+  });
+
+  it("retains an anonymous registration fact after account deletion", async () => {
+    await register(db, "Player1", "password1");
+    await db.query("DELETE FROM users WHERE username_lc = 'player1'");
+    expect((await db.query(
+      "SELECT event_type FROM analytics_events",
+    )).rows).toEqual([{ event_type: "user_registered" }]);
   });
 
   it("rejects duplicate usernames case-insensitively with an explicit error", async () => {

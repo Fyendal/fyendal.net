@@ -106,7 +106,7 @@ describe("initial schema", () => {
     expect(await tables(db)).toEqual(expect.arrayContaining([
       "users", "sessions", "decks", "rooms", "room_seats", "room_history", "room_presence",
       "bug_reports", "replay_games", "replay_frames", "replay_participants",
-      "schema_metadata", "schema_migrations",
+      "analytics_events", "schema_metadata", "schema_migrations",
     ]));
     expect(await tables(db)).not.toContain("replay_events");
   });

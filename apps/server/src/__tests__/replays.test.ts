@@ -101,6 +101,18 @@ describe("server replay retention", () => {
     if (!conceded.ok) throw new Error(conceded.error);
     expect(conceded.replayFinalizationId).toMatch(/^[a-f0-9]{24}$/);
     if (!conceded.replayFinalizationId) throw new Error("missing replay finalization id");
+    const analyticsEvents = (await db.query(
+      `SELECT event_id, event_type, format, game_mode
+       FROM analytics_events WHERE event_type = 'game_completed'`,
+    )).rows;
+    expect(analyticsEvents).toHaveLength(1);
+    expect(analyticsEvents[0]).toMatchObject({
+      event_type: "game_completed",
+      format: "classic-battles",
+      game_mode: "pvp",
+    });
+    expect(analyticsEvents[0]!.event_id).toMatch(/^game:[a-f0-9]{24}$/);
+    expect(analyticsEvents[0]!.event_id).not.toContain(conceded.replayFinalizationId);
     expect(await store.undo(
       game.code,
       { token: game.tokens[0], userId: game.users[0] },
