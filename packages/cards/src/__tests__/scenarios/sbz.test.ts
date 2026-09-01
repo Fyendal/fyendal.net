@@ -151,6 +151,26 @@ describe("SBZ — Blaze, Firemind", () => {
     s.settle();
     s.expectLife(1, 20 - 6);
   });
+
+  it("can choose Nucleus Aetherbolt by removing 1 energy counter", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: BLAZE,
+          weapons: [],
+          hand: ["nucleus aetherbolt|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.state.players[0]!.hero.counters = { energy: 1 };
+
+    s.activate(BLAZE).chooseOption("1").chooseCard("nucleus aetherbolt|1");
+
+    expect(s.state.players[0]!.hero.counters.energy).toBe(0);
+    s.expectInZone(0, "nucleus aetherbolt|1", "banish");
+  });
 });
 
 describe("SBZ — the next-arcane +N pool", () => {

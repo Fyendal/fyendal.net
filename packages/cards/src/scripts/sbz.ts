@@ -70,23 +70,24 @@ function targetOnChoose(ctx: ScriptCtx, hook: string, option: string): boolean {
   return true;
 }
 
-/** Base arcane damage of each Wizard non-attack action — Blaze's ability can
- *  only banish a card "with an effect that deals arcane damage equal to X".
- *  Set-local by nature (the engine can't derive effect damage from text). */
-const ARCANE_DAMAGE: Record<string, number> = {
-  "aether quickening|3": 2,
-  "aether spindle|1": 4,
-  "aether spindle|3": 2,
-  "arcane twining|3": 1,
-  "emeritus scolding|1": 4,
-  "emeritus scolding|2": 3,
-  "emeritus scolding|3": 2,
-  "open the flood gates|3": 1,
-  "photon splicing|3": 2,
-  "snapback|1": 3,
-  "turn to mindfire|1": 5,
-  "voltic bolt|1": 5,
-  "voltic bolt|3": 3,
+/** Arcane-damage effect amounts of Wizard non-attack actions — Blaze's
+ *  ability can banish a card with any matching effect, including optional or
+ *  conditional effects. The engine can't derive these amounts from text. */
+const ARCANE_DAMAGE: Record<string, readonly number[]> = {
+  "aether quickening|3": [2],
+  "aether spindle|1": [4],
+  "aether spindle|3": [2],
+  "arcane twining|3": [1],
+  "emeritus scolding|1": [4],
+  "emeritus scolding|2": [3],
+  "emeritus scolding|3": [2],
+  "nucleus aetherbolt|1": [3, 1],
+  "open the flood gates|3": [1],
+  "photon splicing|3": [2],
+  "snapback|1": [3],
+  "turn to mindfire|1": [5],
+  "voltic bolt|1": [5],
+  "voltic bolt|3": [3],
 };
 
 // ── factories ───────────────────────────────────────────────────────────────
@@ -196,7 +197,7 @@ export const sbz: Record<string, CardScript> = {
             ctx.hasCardType(c, "action") &&
             !ctx.cardTypes(c).includes("attack") &&
             ctx.cardTypes(c).includes("wizard") &&
-            ARCANE_DAMAGE[functionalKeyOf(d)] === x
+            ARCANE_DAMAGE[functionalKeyOf(d)]?.includes(x) === true
           );
         });
         if (matches.length === 0) {
