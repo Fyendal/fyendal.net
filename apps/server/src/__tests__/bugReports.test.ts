@@ -3,7 +3,7 @@ import { cardData, decklists, scripts } from "@fyendal/cards";
 import { createGame } from "@fyendal/engine";
 import {
   createBugReport,
-  dismissFixedBugReportNotification,
+  dismissFixedBugReportNotifications,
   listFixedBugReportNotifications,
 } from "../bugReports.js";
 import type { Queryable } from "../db.js";
@@ -83,25 +83,41 @@ describe("bug reports", () => {
       .resolves.toEqual({ ok: false, error: "invalid description" });
   });
 
-  it("lists fixed reports until the reporter dismisses them", async () => {
-    const report = await createBugReport(
+  it("dismisses the current fixed batch while allowing later fixes to surface", async () => {
+    const first = await createBugReport(
       db,
       userId,
       "ABC123",
       "The combat chain resolved with the wrong damage.",
     );
-    if (!report.ok) throw new Error("report creation failed");
-    await db.query("UPDATE bug_reports SET fixed_at = $2 WHERE id = $1", [report.reportId, 123]);
+    const second = await createBugReport(
+      db,
+      userId,
+      "ABC123",
+      "The action card incorrectly remained in the arena.",
+    );
+    const later = await createBugReport(
+      db,
+      userId,
+      "ABC123",
+      "The defense reaction did not return to the graveyard.",
+    );
+    if (!first.ok || !second.ok || !later.ok) throw new Error("report creation failed");
+    await db.query("UPDATE bug_reports SET fixed_at = $2 WHERE id = $1", [first.reportId, 123]);
+    await db.query("UPDATE bug_reports SET fixed_at = $2 WHERE id = $1", [second.reportId, 124]);
 
     await expect(listFixedBugReportNotifications(db, userId)).resolves.toEqual([
-      { reportId: report.reportId, fixedAt: 123 },
+      { reportId: first.reportId, fixedAt: 123 },
+      { reportId: second.reportId, fixedAt: 124 },
     ]);
-    await expect(dismissFixedBugReportNotification(db, userId + 1, report.reportId))
-      .resolves.toBe(false);
-    await expect(dismissFixedBugReportNotification(db, userId, report.reportId))
-      .resolves.toBe(true);
-    await expect(dismissFixedBugReportNotification(db, userId, report.reportId))
-      .resolves.toBe(true);
+    await expect(dismissFixedBugReportNotifications(db, userId + 1)).resolves.toBe(0);
+    await expect(dismissFixedBugReportNotifications(db, userId)).resolves.toBe(2);
+    await expect(dismissFixedBugReportNotifications(db, userId)).resolves.toBe(0);
     await expect(listFixedBugReportNotifications(db, userId)).resolves.toEqual([]);
+
+    await db.query("UPDATE bug_reports SET fixed_at = $2 WHERE id = $1", [later.reportId, 456]);
+    await expect(listFixedBugReportNotifications(db, userId)).resolves.toEqual([
+      { reportId: later.reportId, fixedAt: 456 },
+    ]);
   });
 });

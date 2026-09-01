@@ -93,7 +93,7 @@ export function Lobby() {
     setRail,
     bugReportNotifications,
     refreshBugReportNotifications,
-    dismissBugReportNotification,
+    dismissBugReportNotifications,
   } = useStore(useShallow((state) => ({
     error: state.error,
     connected: state.connected,
@@ -110,7 +110,7 @@ export function Lobby() {
     setRail: state.setLobbyRail,
     bugReportNotifications: state.bugReportNotifications,
     refreshBugReportNotifications: state.refreshBugReportNotifications,
-    dismissBugReportNotification: state.dismissBugReportNotification,
+    dismissBugReportNotifications: state.dismissBugReportNotifications,
   })));
   /** selected saved deck per constructed format */
   const [deckFor, setDeckFor] = useState<Record<ConstructedFormat, string>>({
@@ -264,7 +264,7 @@ export function Lobby() {
             <button
               type="button"
               aria-label="Dismiss bug fixed notification"
-              onClick={() => void dismissBugReportNotification(bugReportNotification.reportId)}
+              onClick={() => void dismissBugReportNotifications()}
             >
               ×
             </button>

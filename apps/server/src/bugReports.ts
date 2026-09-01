@@ -145,18 +145,18 @@ export async function listFixedBugReportNotifications(
   });
 }
 
-/** Idempotently acknowledge a fixed report owned by this account. */
-export async function dismissFixedBugReportNotification(
+/** Acknowledge the account's current batch of fixed reports. Reports fixed
+ * after this update retain a null dismissal timestamp and surface later. */
+export async function dismissFixedBugReportNotifications(
   db: Queryable,
   reporterUserId: number,
-  reportId: string,
-): Promise<boolean> {
+): Promise<number> {
   const { rows } = await db.query(
     `UPDATE bug_reports
-     SET dismissed_at = COALESCE(dismissed_at, $3)
-     WHERE id = $1 AND reporter_user_id = $2 AND fixed_at IS NOT NULL
+     SET dismissed_at = $2
+     WHERE reporter_user_id = $1 AND fixed_at IS NOT NULL AND dismissed_at IS NULL
      RETURNING id`,
-    [reportId, reporterUserId, Date.now()],
+    [reporterUserId, Date.now()],
   );
-  return rows.length === 1;
+  return rows.length;
 }

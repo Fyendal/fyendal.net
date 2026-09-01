@@ -4,7 +4,7 @@ import {
   apiDecks,
   apiDeleteAccount,
   apiDeleteDeck,
-  apiDismissBugReportNotification,
+  apiDismissBugReportNotifications,
   apiExportAccount,
   apiImportDeck,
   apiReportBug,
@@ -30,7 +30,7 @@ type AccountActionKey =
   | "deleteAccount"
   | "reportBug"
   | "refreshBugReportNotifications"
-  | "dismissBugReportNotification";
+  | "dismissBugReportNotifications";
 
 export function createAccountActions({
   set,
@@ -141,17 +141,13 @@ export function createAccountActions({
         set({ bugReportNotifications: result.notifications });
       }
     },
-    dismissBugReportNotification: async (reportId) => {
+    dismissBugReportNotifications: async () => {
       const token = get().authToken;
       if (!token) return;
       const request = authRequest(token);
-      const result = await apiDismissBugReportNotification(token, reportId, request.signal);
+      const result = await apiDismissBugReportNotifications(token, request.signal);
       if (isCurrentAuth(request) && result.ok) {
-        set({
-          bugReportNotifications: get().bugReportNotifications.filter(
-            (notification) => notification.reportId !== reportId,
-          ),
-        });
+        set({ bugReportNotifications: [] });
       }
     },
   };

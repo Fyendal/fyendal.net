@@ -156,12 +156,11 @@ export function apiBugReportNotifications(
   return get("bug-report-notifications", decodeBugReportNotificationsResponse, { token, signal });
 }
 
-export function apiDismissBugReportNotification(
+export function apiDismissBugReportNotifications(
   token: string,
-  reportId: string,
   signal?: AbortSignal,
 ): Promise<OkResponse | ApiError> {
-  return post("bug-report-notifications/dismiss", { reportId }, okOnly, { token, signal });
+  return post("bug-report-notifications/dismiss", {}, okOnly, { token, signal });
 }
 
 // ── lobby stats (public, for the logged-out landing view) ──────────────────
