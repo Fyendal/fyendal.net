@@ -112,6 +112,7 @@ export function cardHasType(
   card: CardInstance,
   cardType: CardType,
 ): boolean {
+  if (cardType === "action" && state.scriptsRef[card.cardId]?.playableEquipment) return true;
   if (state.scriptsRef[card.cardId]?.additionalCardTypes?.includes(cardType)) return true;
   const meld = scriptOf(state, card.cardId, card)?.meld;
   if (!meld) return instanceDataOf(state, card).cardType === cardType;

@@ -1075,6 +1075,18 @@
     "set": "IAR"
   },
   {
+    "id": "IAR160",
+    "name": "Reach of the Abyss",
+    "cardType": "equipment",
+    "subtypes": [
+      "shadow",
+      "arms"
+    ],
+    "text": "When the combat chain closes, if this defended, banish all defending cards.",
+    "defense": 2,
+    "set": "IAR"
+  },
+  {
     "id": "IAR161",
     "name": "Grille of Repentance",
     "cardType": "equipment",

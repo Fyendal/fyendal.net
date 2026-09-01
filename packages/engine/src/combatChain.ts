@@ -180,6 +180,15 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
   const last = state.chain[state.chain.length - 1];
   if (!last || !last.resolved) return;
   logPublic(state, "The combat chain closes");
+  // Snapshot every defending close hook before any close effect moves cards.
+  // This keeps the event simultaneous across all links and includes equipment,
+  // which remains in its arena slot while represented on the chain.
+  const defendingCloseHooks = new Map(
+    state.chain.map((link) => [
+      link,
+      [...link.defendingCards, ...link.defendingEquipment],
+    ] as const),
+  );
   for (const link of state.chain) {
     delete link.attackingCard.grantedNames;
     const closingAttacker =
@@ -227,10 +236,12 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
         );
       if (liveAttacker) destroyPermanent(state, runtime, link.attacker, liveAttacker);
     }
-    for (const c of link.defendingCards) {
+    for (const c of defendingCloseHooks.get(link) ?? []) {
       scriptOf(state, c.cardId, c)?.onDefendingCombatChainClosed?.(
         runtime.makeCtx(state, c.owner, c, link),
       );
+    }
+    for (const c of link.defendingCards) {
       if (link.flags[`banishOnClose:${c.instanceId}`] === true) {
         enterBanish(state, runtime, c, "chain");
       } else if (scriptOf(state, c.cardId, c)?.settlesToSoulOnChainClose) {

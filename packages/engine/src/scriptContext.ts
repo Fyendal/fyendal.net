@@ -1324,6 +1324,13 @@ export function makeCtx(
       }
       return moved;
     },
+    banishAllDefendingCardsOnChainClose() {
+      for (const chainLink of state.chain) {
+        for (const card of [...chainLink.defendingCards, ...chainLink.defendingEquipment]) {
+          chainLink.flags[`banishOnClose:${card.instanceId}`] = true;
+        }
+      }
+    },
     returnSelfToHand() {
       const owner = state.players[self.owner] as PlayerState;
       const fromGraveyard = owner.graveyard.some((card) => card.instanceId === self.instanceId);

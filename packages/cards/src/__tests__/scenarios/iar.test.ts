@@ -1357,8 +1357,8 @@ describe("IAR spoiled cards", () => {
   });
 });
 
-describe("August 29 IAR and GEM Pack 6 spoilers", () => {
-  it("registers all seven spoiled printings as implemented", () => {
+describe("August 29–31 IAR and GEM Pack 6 spoilers", () => {
+  it("registers all eight spoiled printings as implemented", () => {
     const expected = {
       IAR250: "Astral Ambience",
       GEM193: "Consuming Appetite",
@@ -1366,6 +1366,7 @@ describe("August 29 IAR and GEM Pack 6 spoilers", () => {
       IAR078: "Ominous Toll",
       IAR079: "Ominous Toll",
       IAR080: "Ominous Toll",
+      IAR160: "Reach of the Abyss",
       GEM205: "Embrace Ursur",
     } as const;
 
@@ -1463,6 +1464,61 @@ describe("August 29 IAR and GEM Pack 6 spoilers", () => {
       .expectAP(0, 1);
 
     expect(boardNames(g, 0)).toContain("Gate to i'Arathael");
+  });
+
+  it("Reach of the Abyss banishes every defending card when the chain closes", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["raging onslaught|3", "sink below|1"],
+          equipment: { ...NO_EQUIPMENT, arms: "reach of the abyss|0" },
+        },
+        {
+          hero: "dorinthea",
+          hand: ["snatch|1"],
+          equipment: NO_EQUIPMENT,
+        },
+      ],
+    });
+
+    g.play("snatch|1")
+      .blockWith("reach of the abyss|0", "raging onslaught|3")
+      .passPriority()
+      .react("sink below|1")
+      .chooseOption("pass")
+      .endTurn()
+      .expectNoEquipment(0, "arms")
+      .expectInZone(0, "reach of the abyss|0", "banish")
+      .expectInZone(0, "raging onslaught|3", "banish")
+      .expectInZone(0, "sink below|1", "banish");
+  });
+
+  it("Reach of the Abyss stays equipped when it did not defend", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["raging onslaught|3"],
+          equipment: { ...NO_EQUIPMENT, arms: "reach of the abyss|0" },
+        },
+        {
+          hero: "dorinthea",
+          hand: ["snatch|1"],
+          equipment: NO_EQUIPMENT,
+        },
+      ],
+    });
+
+    g.play("snatch|1")
+      .blockWith("raging onslaught|3")
+      .settle()
+      .endTurn()
+      .expectEquipped(0, "arms", "reach of the abyss|0")
+      .expectInZone(0, "raging onslaught|3", "graveyard")
+      .expectNotInZone(0, "reach of the abyss|0", "banish");
   });
 
   it("Embrace Ursur rewards both types on a Shadow Runeblade card", () => {

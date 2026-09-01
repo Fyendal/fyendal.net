@@ -393,7 +393,10 @@ export const mst: Record<string, CardScript> = {
   "nuu|0": {
     onAttackResolved(ctx) {
       if (!ctx.link || !hasKeyword(ctx, ctx.link.attackingCard, "stealth")) return;
-      for (const defender of ctx.link.defendingCards) if (ctx.hasCardType(defender, "action")) ctx.banish(defender.instanceId);
+      const defenders = [...ctx.link.defendingCards, ...ctx.link.defendingEquipment];
+      for (const defender of defenders) {
+        if (ctx.hasCardType(defender, "action")) ctx.banish(defender.instanceId);
+      }
     },
     activated: {
       cost: 0, chiCost: 3, isAttack: false, goAgain: false, timing: "instant",

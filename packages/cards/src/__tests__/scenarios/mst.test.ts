@@ -86,6 +86,30 @@ describe("MST — Assassin", () => {
       .expectNotInZone(1, "wounding blow|3", "graveyard");
   });
 
+  it("Nuu banishes Action Equipment defending a stealth attack", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "nuu|0", hand: ["art of desire: soul|2"] },
+        {
+          hero: "dorinthea",
+          equipment: {
+            head: "ironrot helm|0",
+            arms: "evo steel soul controller|3",
+          },
+        },
+      ],
+    });
+
+    g.play("art of desire: soul|2")
+      .blockWith("ironrot helm|0", "evo steel soul controller|3")
+      .settle()
+      .expectNoEquipment(1, "arms")
+      .expectEquipped(1, "head", "ironrot helm|0")
+      .expectInZone(1, "evo steel soul controller|3", "banish")
+      .expectNotInZone(1, "evo steel soul controller|3", "graveyard")
+      .expectNotInZone(1, "ironrot helm|0", "banish");
+  });
+
   it("Double Trouble counts two attack reactions and banishes two cards on hit", () => {
     const g = scenario({
       seats: [

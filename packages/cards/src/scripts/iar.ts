@@ -808,6 +808,11 @@ export const iar: Record<string, CardScript> = {
   "runic reaving|1": runicDiscardAttack(),
   "runic disposition|1": runicDiscardAttack(),
 
+  "reach of the abyss|0": {
+    onDefendingCombatChainClosed(ctx) {
+      ctx.banishAllDefendingCardsOnChainClose();
+    },
+  },
   "grille of repentance|0": repentanceEquipment(),
   "path of repentance|0": repentanceEquipment(),
   "robe of repentance|0": repentanceEquipment(),
