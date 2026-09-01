@@ -1,6 +1,6 @@
 import type { EngineRuntime } from "./runtimePorts.js";
-import { instanceDataOf, scriptOf } from "./cardProperties.js";
-import { basePowerOf, computeAttack, currentPowerOf } from "./combatValues.js";
+import { instanceDataOf, scriptOf, wardValueOf } from "./cardProperties.js";
+import { basePowerOf, computeAttack, currentPowerOf, grantsAuraAttackMarker } from "./combatValues.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { CardInstance, PlayerState } from "./state.js";
 import { currentLink, opponent } from "./zoneQueries.js";
@@ -23,10 +23,34 @@ export function attackActionPlayRestricted(
 ): boolean {
   const data = instanceDataOf(state, card);
   if (data.cardType !== "action" || !(data.subtypes ?? []).includes("attack")) return false;
+  if (attackBasePowerRestricted(state, runtime, player.seat, card)) return true;
   const until = Number(player.hero.counters?.attackActionBasePowerLimitUntilTurn ?? 0);
   if (until !== state.turn) return false;
   const limit = Number(player.hero.counters?.attackActionBasePowerLimit ?? -1);
   return basePowerOf(state, runtime, player.seat, card, data.attack ?? 0) <= limit;
+}
+
+/** Whether a delayed effect prohibits playing or activating this attack based
+ * on its base power. The restriction applies to attack action cards, weapons,
+ * allies, and granted aura attacks, but never to non-attack actions. */
+export function attackBasePowerRestricted(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  seat: number,
+  card: CardInstance,
+): boolean {
+  const minimum = state.modifiers.reduce((required, modifier) =>
+    modifier.seat === seat &&
+    !modifier.consumed &&
+    modifier.minimumAttackBasePower !== undefined
+      ? Math.max(required, modifier.minimumAttackBasePower)
+      : required, 0);
+  if (minimum <= 0) return false;
+  const player = state.players[seat] as PlayerState;
+  const data = instanceDataOf(state, card);
+  const auraAttack = grantsAuraAttackMarker(state, player, card);
+  const rawPower = data.attack ?? auraAttack?.basePower ?? wardValueOf(data) ?? 0;
+  return basePowerOf(state, runtime, seat, card, rawPower) < minimum;
 }
 
 /** Exude-style combat restriction after defenders are committed. */

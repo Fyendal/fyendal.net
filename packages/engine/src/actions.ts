@@ -59,6 +59,7 @@ import {
 } from "./tokens.js";
 import { answerDeckBottomOrder, enterBanish } from "./zoneMoves.js";
 import { lingeringModifierSources } from "./sourceQueries.js";
+import { continueFollowUpDecisions } from "./decisionQueue.js";
 
 import { abilityResourceCost, actionAbilityRestrictedByModifier, payActivatedAbilityCost, prepareActivatedDiscardCost, prepareActivatedEffectCardCosts } from "./abilityRules.js";
 import { consumeNextActionGoAgain, noteActionPlayedOrActivated } from "./cardLifecycle.js";
@@ -565,7 +566,7 @@ export function activateAbility(
   if (timing === "attack-reaction") return "only usable as an attack reaction";
   if (timing === "defense-reaction") return "only usable as a defense reaction";
   const costsAP = timing === "action";
-  if (costsAP && actionAbilityRestrictedByModifier(state, seat, card, ability.isAttack)) {
+  if (costsAP && actionAbilityRestrictedByModifier(state, runtime, seat, card, ability.isAttack)) {
     return "action ability is prohibited by a turn restriction";
   }
   if (costsAP && actionLimitReached(state, player)) {
@@ -816,6 +817,7 @@ export function answerChoice(
   const hook = pd.chooseHook;
   const resume = pd.resume;
   const tokenCreationCause = pd.tokenCreationCause;
+  const followUpDecisions = pd.followUpDecisions;
   if (hook === "combat-damage-equipment-replacement" || hook === "arcane-barrier" || hook === "arcane-barrier-pitch" || hook === "spellvoid" || hook === "ward" || hook === "quell" || hook === "quell-pitch" || hook === "optional-damage-prevention" || hook === "discard-damage-prevention" || hook === "soul-damage-prevention") {
     // engine-owned decision (Ward / Spellvoid / Arcane Barrier prevention):
     // the damage-prevention machine in util.ts manages the pending decision itself
@@ -932,6 +934,7 @@ export function answerChoice(
   // Token commands later in the suspended effect are queued behind the first
   // replacement decision. Drain them before the original effect resumes.
   resumePendingTokenCreations(state, runtime);
+  continueFollowUpDecisions(state, followUpDecisions);
 
   // onChoose may chain a follow-up scripted choice (Stroke of Foresight: pick
   // a hand card, then top/bottom; Katsu: discard, then search). The original

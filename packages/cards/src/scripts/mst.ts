@@ -638,6 +638,25 @@ const tokenNamed = (ctx: ScriptCtx, name: string): string | undefined => ctx.car
 const createNamed = (ctx: ScriptCtx, name: string, count = 1): void => { const id = tokenNamed(ctx, name); if (id) ctx.createTokens(id, count); };
 const reactionCount = (ctx: ScriptCtx): number => Number(ctx.getFlag("link", "reactionCount"));
 
+function restlessCoalescenceSources(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
+  return ctx.player(ctx.seat).board.filter((card) =>
+    card.instanceId !== ctx.self.instanceId &&
+    isAura(ctx, card) &&
+    (card.counters?.power ?? 0) > 0,
+  );
+}
+
+function requestRestlessCoalescenceMove(ctx: ScriptCtx): void {
+  const sources = restlessCoalescenceSources(ctx);
+  if (sources.length) {
+    ctx.requestCardChoice(
+      "restless-coalescence-move",
+      "Move a +1 power counter onto Restless Coalescence, or finish",
+      ["done", ...sources.map((card) => card.instanceId)],
+    );
+  }
+}
+
 Object.assign(mst, {
   "mistcloak gully|0": { modifyOpposingAttack: (ctx) => Number(ctx.getPlayerFlag(opponentSeat(ctx), "attacksDeclaredThisTurn")) === 1 ? -1 : 0, triggers: [{ event: "end-of-turn", whose: "any", label: "Check Mistcloak Gully", effect(ctx) { const pitched = Number(ctx.getFlag("player", "pitchedPitch:3")) > 0; const played = Number(ctx.getFlag("player", "playedPitch:3")) > 0; const defended = Number(ctx.getFlag("player", "defendedPitch:3")) > 0; if (pitched && played && defended) ctx.transcend(); else if (!(pitched || played || defended)) ctx.destroySelf(); } }] },
   "mask of recurring nightmares|0": { activated: { cost: 0, chiCost: 3, isAttack: false, goAgain: false, timing: "attack-reaction", oncePerTurn: true, canActivate: (ctx) => !!ctx.link && ctx.link.attacker === ctx.seat, onActivate: (ctx) => { const target = opponentSeat(ctx); const hand = ctx.player(target).hand; if (hand.length) ctx.requestCardChoice("mask-recurring-banish", "Choose a card to banish", hand.map((card) => card.instanceId), target); } }, onChoose(ctx, hook, option) { if (hook === "mask-recurring-banish") ctx.banish(Number(option)); } },
@@ -669,7 +688,19 @@ Object.assign(mst, {
   "just a nick|1": { canPlay: (ctx) => !!ctx.link && ctx.link.attacker === ctx.seat, onPlay(ctx) { if (!ctx.link) return; if (ctx.basePower(ctx.link.attackingCard) <= 1) ctx.addModifier({ scope: "chain-link", attack: 5 }); } },
   "10,000 year reunion|1": { wardValue: () => 10 },
   "rage specter|3": { onEnterArena(ctx) { if (!ctx.player(ctx.seat).board.some((card) => card.instanceId !== ctx.self.instanceId && isIllusionistAura(ctx, card))) ctx.gainActionPoint(); }, wardValue: (ctx) => ctx.state.activePlayer === ctx.seat ? 6 : 1 },
-  "restless coalescence|2": { wardValue: () => 2, activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", oncePerTurn: true, canActivate: (ctx) => ctx.getCounter("power") > 0, onActivate(ctx) { ctx.setCounter("power", ctx.getCounter("power") - 1); ctx.createToken(SPECTRAL_SHIELD); } } },
+  "restless coalescence|2": {
+    onEnterArena(ctx) { requestRestlessCoalescenceMove(ctx); },
+    onChoose(ctx, hook, option) {
+      if (hook !== "restless-coalescence-move" || option === "done") return;
+      const source = restlessCoalescenceSources(ctx).find((card) => card.instanceId === Number(option));
+      if (!source) return;
+      ctx.addCounter(source.instanceId, "power", -1);
+      ctx.addCounter(ctx.self.instanceId, "power", 1);
+      requestRestlessCoalescenceMove(ctx);
+    },
+    wardValue: () => 2,
+    activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", oncePerTurn: true, canActivate: (ctx) => ctx.getCounter("power") > 0, onActivate(ctx) { ctx.setCounter("power", ctx.getCounter("power") - 1); ctx.createToken(SPECTRAL_SHIELD); } },
+  },
   "chase the tail|1": { onAttackDeclared(ctx) { if (previousAttackHasName(ctx, "crouching tiger")) { ctx.grantGoAgain(); buffNextAttack(ctx, { attack: 3, appliesToName: "crouching tiger" }); } } },
   "maul|2": { canPlay: (ctx) => !!ctx.link && ctx.link.attacker === ctx.seat, onPlay(ctx) { if (!ctx.link) return; if (ctx.basePower(ctx.link.attackingCard) <= 1) ctx.addModifier({ scope: "chain-link", attack: 3 }); } },
   "territorial domain|3": { modifyDefense: (ctx) => ctx.getPlayerFlag(ctx.seat, "createdName:crouching tiger") === true ? 3 : 0 },

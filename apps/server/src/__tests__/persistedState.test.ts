@@ -57,6 +57,31 @@ describe("PersistedStateV1", () => {
       .pendingDecision).toEqual(source.pendingDecision);
   });
 
+  it("round trips decisions queued behind Crank", () => {
+    const source = game();
+    source.pendingDecision = {
+      player: 0,
+      kind: "optional-effect",
+      prompt: "Golden Cog: Crank?",
+      options: ["yes", "no"],
+      defaultOption: "yes",
+      sourceInstanceId: source.players[0]!.hero.instanceId,
+      chooseHook: "engine-crank",
+      followUpDecisions: [{
+        player: 0,
+        kind: "choose-target",
+        prompt: "Tap a cog?",
+        options: ["pass", "123"],
+        sourceInstanceId: source.players[0]!.hand[0]!.instanceId,
+        chooseHook: "cog-machine",
+      }],
+    };
+
+    const encoded = encodePersistedState(source);
+    expect(decodePersistedState(jsonCopy(encoded), "ABC123", cardData, scripts)
+      .pendingDecision).toEqual(source.pendingDecision);
+  });
+
   it("round trips token provenance inherited by a delegated scripted choice", () => {
     const source = game();
     source.pendingDecision = {
@@ -649,6 +674,7 @@ describe("PersistedStateV1", () => {
       replaceCombatDamageWithDefendingEquipment: true,
       onDamageDealtCreateTokenPerPoint: "FYD-COPPER",
       minBasePower: 3,
+      minimumAttackBasePower: 5,
       appliesToInstanceId: arsenalCard.instanceId,
       appliesToTargetType: "guardian",
       appliesToMarkedHero: true,

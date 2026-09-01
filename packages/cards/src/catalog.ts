@@ -120,7 +120,7 @@ import cardsZEN from "./data/cards/ZEN.json" with { type: "json" };
 import rawDecklists from "./data/decklists.json" with { type: "json" };
 import rawPreconsJson from "./data/precons.json" with { type: "json" };
 import { validatePresentationAgainstCards } from "./presentation.js";
-export { equipmentFitsSlot } from "./equipment.js";
+export { equipmentFitsSlot, isWeaponZoneCard } from "./equipment.js";
 import { formatLegalityIssues } from "./formatLegality.js";
 export {
   CLASSIC_CONSTRUCTED_LEGALITY_CHECKED_ON,
@@ -129,7 +129,7 @@ export {
   formatLegalityIssues,
   type FormatLegalityIssue,
 } from "./formatLegality.js";
-export { EXACT_DECK_SIZE, MIN_DECK_SIZE } from "./presentation.js";
+export { EXACT_DECK_SIZE, MIN_DECK_SIZE, weaponSelectionError } from "./presentation.js";
 export type { PresentationResult } from "./presentation.js";
 
 /**

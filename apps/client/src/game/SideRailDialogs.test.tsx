@@ -50,4 +50,30 @@ describe("game settings dialog", () => {
     expect(html).toContain(">High contrast</button>");
     expect(html).toContain("Glow adds a restrained green halo");
   });
+
+  it("disables history actions while a room command is pending", () => {
+    const html = renderToStaticMarkup(createElement(GameSettingsDialog, {
+      turn: 4,
+      onUndo: vi.fn(),
+      undoDisabled: true,
+      onConcede: null,
+      priorityWindowMode: "always-pause",
+      onPriorityWindowModeChange: null,
+      lessGuidance: false,
+      onLessGuidanceChange: vi.fn(),
+      skipPlayConfirmation: false,
+      onSkipPlayConfirmationChange: vi.fn(),
+      motionPreference: "system",
+      onMotionPreferenceChange: vi.fn(),
+      playabilityCuePreference: "glow",
+      onPlayabilityCuePreferenceChange: vi.fn(),
+      soundEffectsEnabled: true,
+      onSoundEffectsEnabledChange: vi.fn(),
+      soundEffectsVolume: 35,
+      onSoundEffectsVolumeChange: vi.fn(),
+      onClose: vi.fn(),
+    }));
+
+    expect(html.match(/disabled=""/g)).toHaveLength(3);
+  });
 });

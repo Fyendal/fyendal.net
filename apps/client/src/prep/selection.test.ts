@@ -62,6 +62,17 @@ describe("prep deck selection", () => {
     expect(defaultWeapons(["WTR003", "SAR002", "SAR002"])).toEqual(["WTR003"]);
   });
 
+  it("pairs a two-hand weapon with a Perched off-hand", () => {
+    expect(defaultWeapons(["WTR003", "SEA003", "SAR002"])).toEqual([
+      "WTR003",
+      "SEA003",
+    ]);
+    expect(defaultWeapons(["SEA003", "WTR003", "SAR002"])).toEqual([
+      "SEA003",
+      "WTR003",
+    ]);
+  });
+
   it("skips a two-hand weapon that cannot fit the remaining hand", () => {
     expect(defaultWeapons(["SAR002", "WTR003", "SAR002"])).toEqual([
       "SAR002",

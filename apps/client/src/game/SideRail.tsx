@@ -125,6 +125,7 @@ export function SideRail({
   onToggleCollapsed,
   turn,
   onUndo,
+  undoDisabled = false,
   onLeave,
   leaveLabel,
   onConcede,
@@ -166,6 +167,7 @@ export function SideRail({
   onToggleCollapsed: () => void;
   turn: number;
   onUndo: ((target?: UndoTarget) => void) | null;
+  undoDisabled?: boolean;
   onLeave: () => void;
   leaveLabel: "Leave" | "End Game";
   /** seated player in a live game: concede ends it in the opponent's favor */
@@ -230,6 +232,7 @@ export function SideRail({
             <button
               aria-label="Undo last action"
               title="Undo last action"
+              disabled={undoDisabled}
               onClick={(event) => undoWithoutFocus(
                 event.currentTarget,
                 () => onUndo("last-action"),
@@ -287,6 +290,7 @@ export function SideRail({
         {onUndo && (
           <button
             title="Undo the last action (yours or your opponent's)"
+            disabled={undoDisabled}
             onClick={(event) => undoWithoutFocus(
               event.currentTarget,
               () => onUndo("last-action"),
@@ -375,6 +379,7 @@ export function SideRail({
         <GameSettingsDialog
           turn={turn}
           onUndo={onUndo}
+          undoDisabled={undoDisabled}
           onConcede={onConcede}
           priorityWindowMode={priorityWindowMode}
           onPriorityWindowModeChange={onPriorityWindowModeChange}

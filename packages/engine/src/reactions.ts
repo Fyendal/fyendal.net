@@ -266,6 +266,7 @@ export function activateWindowAbility(
   const timing = ability.timing ?? "action";
   if (timing === "action" && actionAbilityRestrictedByModifier(
     state,
+    runtime,
     seat,
     card,
     ability.isAttack,

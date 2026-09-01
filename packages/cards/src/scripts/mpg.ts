@@ -283,6 +283,30 @@ function promisingTerrain(): CardScript {
   };
 }
 
+function valdaSeismicImpact(): CardScript {
+  return {
+    onOpponentDraws(ctx, _drawingSeat, count) {
+      if (ctx.state.phase !== "start" && ctx.state.phase !== "end" && ctx.state.phase !== "game-over") {
+        ctx.createTokens(SEISMIC_SURGE, count);
+      }
+    },
+    triggers: [{
+      event: "start-of-turn",
+      label: "Valda, Seismic Impact",
+      condition(ctx) {
+        return seismicSurges(ctx).length >= 3;
+      },
+      effect(ctx) {
+        ctx.addModifier({
+          scope: "until-end-of-turn",
+          dominate: true,
+          appliesToKeyword: "crush",
+        });
+      },
+    }],
+  };
+}
+
 function advanceTectonicInstability(ctx: ScriptCtx): void {
   const step = ctx.getCounter("tectonicStep");
   if (step >= ctx.state.players.length) {
@@ -606,7 +630,7 @@ function clashAndDestroyAura(): CardScript {
 }
 
 Object.assign(mpg, {
-  "valda, seismic impact|0": mpg["valda|0"]!,
+  "valda, seismic impact|0": valdaSeismicImpact(),
   "testament of valahai|0": {
     modifyDefense(ctx: ScriptCtx) {
       const count = seismicSurges(ctx).length;

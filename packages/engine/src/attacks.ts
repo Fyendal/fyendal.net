@@ -195,7 +195,7 @@ export function activateAuraAttack(
     return `${nameOf(state, card.cardId)} has no such activated ability`;
   }
   if (weaponAttacksProhibited(player)) return "cannot attack with weapons this turn";
-  if (actionAbilityRestrictedByModifier(state, seat, card, true)) {
+  if (actionAbilityRestrictedByModifier(state, runtime, seat, card, true)) {
     return "action ability is prohibited by a turn restriction";
   }
   if (player.actionPoints < 1) return "not enough action points";

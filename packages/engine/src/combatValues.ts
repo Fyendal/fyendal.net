@@ -247,6 +247,20 @@ function valueModifier(
   });
 }
 
+function defendingCardDefenseAdjustment(link: ChainLinkState, amount: number): number {
+  return link.flags.defendingCardsCannotGainDefense === true && amount > 0 ? 0 : amount;
+}
+
+function defendingCardBaseDefense(
+  link: ChainLinkState,
+  printed: number,
+  modified: number,
+): number {
+  return link.flags.defendingCardsCannotGainDefense === true && modified > printed
+    ? printed
+    : modified;
+}
+
 interface AttackValueAdjustment {
   source?: CardInstance;
   amount: number;
@@ -485,25 +499,31 @@ export function defenseValueModifiers(
   const out: CombatValueModifier[] = [];
   for (const card of link.defendingCards) {
     for (const source of attackingDefenseModifierSources(state, link)) {
-      const amount = scriptOf(state, source.cardId, source)?.modifyDefendingDefense?.(
-        runtime.makeCtx(state, link.attacker, source, link),
-        card,
-      ) ?? 0;
+      const amount = defendingCardDefenseAdjustment(
+        link,
+        scriptOf(state, source.cardId, source)?.modifyDefendingDefense?.(
+          runtime.makeCtx(state, link.attacker, source, link),
+          card,
+        ) ?? 0,
+      );
       valueModifier(out, source, amount);
     }
     for (const modifier of defendingCardModifiers(state, link, card)) {
       valueModifier(
         out,
         findCardAnywhere(state, modifier.sourceInstanceId)?.card,
-        modifier.defense ?? 0,
+        defendingCardDefenseAdjustment(link, modifier.defense ?? 0),
       );
     }
     valueModifier(
       out,
       card,
-      scriptOf(state, card.cardId, card)?.modifyDefense?.(
-        runtime.makeCtx(state, card.owner, card, link),
-      ) ?? 0,
+      defendingCardDefenseAdjustment(
+        link,
+        scriptOf(state, card.cardId, card)?.modifyDefense?.(
+          runtime.makeCtx(state, card.owner, card, link),
+        ) ?? 0,
+      ),
     );
     for (const modifier of activeModifiers(state, link, ["chain-link", "until-end-of-turn"])) {
       const adjustment = modifier.defendingPitchDefenseAdjustment;
@@ -513,37 +533,43 @@ export function defenseValueModifiers(
         valueModifier(
           out,
           findCardAnywhere(state, modifier.sourceInstanceId)?.card,
-          adjustment.amount,
+          defendingCardDefenseAdjustment(link, adjustment.amount),
         );
       }
     }
-    valueModifier(out, card, card.tempDefense ?? 0);
+    valueModifier(out, card, defendingCardDefenseAdjustment(link, card.tempDefense ?? 0));
   }
 
   for (const card of link.defendingEquipment) {
     valueModifier(out, card, -(card.defCounters ?? 0));
-    valueModifier(out, card, card.tempDefense ?? 0);
+    valueModifier(out, card, defendingCardDefenseAdjustment(link, card.tempDefense ?? 0));
     valueModifier(
       out,
       card,
-      scriptOf(state, card.cardId, card)?.modifyDefense?.(
-        runtime.makeCtx(state, card.owner, card, link),
-      ) ?? 0,
+      defendingCardDefenseAdjustment(
+        link,
+        scriptOf(state, card.cardId, card)?.modifyDefense?.(
+          runtime.makeCtx(state, card.owner, card, link),
+        ) ?? 0,
+      ),
     );
     valueModifier(
       out,
       link.attackingCard,
-      scriptOf(state, link.attackingCard.cardId, link.attackingCard)
-        ?.modifyDefendingEquipmentDefense?.(
-          runtime.makeCtx(state, link.attacker, link.attackingCard, link),
-          card,
-        ) ?? 0,
+      defendingCardDefenseAdjustment(
+        link,
+        scriptOf(state, link.attackingCard.cardId, link.attackingCard)
+          ?.modifyDefendingEquipmentDefense?.(
+            runtime.makeCtx(state, link.attacker, link.attackingCard, link),
+            card,
+          ) ?? 0,
+      ),
     );
     for (const modifier of defendingEquipmentModifiers(state, card)) {
       valueModifier(
         out,
         findCardAnywhere(state, modifier.sourceInstanceId)?.card,
-        modifier.defense ?? 0,
+        defendingCardDefenseAdjustment(link, modifier.defense ?? 0),
       );
     }
   }
@@ -551,7 +577,7 @@ export function defenseValueModifiers(
     valueModifier(
       out,
       findCardAnywhere(state, modifier.sourceInstanceId)?.card,
-      modifier.defense ?? 0,
+      defendingCardDefenseAdjustment(link, modifier.defense ?? 0),
     );
   }
   return out;
@@ -731,7 +757,7 @@ export function computeDefense(
     total += equipmentDefense(state, runtime, link, c);
   }
   for (const modifier of linkDefenseModifiers(state, link)) {
-    total += modifier.defense ?? 0;
+    total += defendingCardDefenseAdjustment(link, modifier.defense ?? 0);
   }
   return Math.max(0, total);
 }
@@ -747,27 +773,40 @@ function defendingCardDefense(
   if (scriptOf(state, card.cardId, card)?.unmodifiableCharacteristics?.includes("defense")) {
     return Math.max(0, data.defense ?? 0);
   }
-  let defense = baseDefenseOf(state, runtime, card.owner, card, data.defense ?? 0);
-  defense += Number(card.counters?.defense ?? 0);
+  const printed = data.defense ?? 0;
+  let defense = defendingCardBaseDefense(
+    link,
+    printed,
+    baseDefenseOf(state, runtime, card.owner, card, printed),
+  );
+  defense += defendingCardDefenseAdjustment(link, Number(card.counters?.defense ?? 0));
   for (const source of attackingDefenseModifierSources(state, link)) {
-    defense += scriptOf(state, source.cardId, source)?.modifyDefendingDefense?.(
-      runtime.makeCtx(state, link.attacker, source, link),
-      card,
-    ) ?? 0;
+    defense += defendingCardDefenseAdjustment(
+      link,
+      scriptOf(state, source.cardId, source)?.modifyDefendingDefense?.(
+        runtime.makeCtx(state, link.attacker, source, link),
+        card,
+      ) ?? 0,
+    );
   }
   for (const modifier of defendingCardModifiers(state, link, card)) {
-    defense += modifier.defense ?? 0;
+    defense += defendingCardDefenseAdjustment(link, modifier.defense ?? 0);
   }
-  defense += scriptOf(state, card.cardId, card)?.modifyDefense?.(
-    runtime.makeCtx(state, card.owner, card, link),
-  ) ?? 0;
+  defense += defendingCardDefenseAdjustment(
+    link,
+    scriptOf(state, card.cardId, card)?.modifyDefense?.(
+      runtime.makeCtx(state, card.owner, card, link),
+    ) ?? 0,
+  );
   for (const modifier of activeModifiers(state, link, ["chain-link", "until-end-of-turn"])) {
     const adjustment = modifier.defendingPitchDefenseAdjustment;
     if (!adjustment) continue;
     if (adjustment.requiresAimCounter && !(link.attackingCard.counters?.aim ?? 0)) continue;
-    if (cardColorOf(state, card) === adjustment.pitch) defense += adjustment.amount;
+    if (cardColorOf(state, card) === adjustment.pitch) {
+      defense += defendingCardDefenseAdjustment(link, adjustment.amount);
+    }
   }
-  defense += card.tempDefense ?? 0;
+  defense += defendingCardDefenseAdjustment(link, card.tempDefense ?? 0);
   return Math.max(0, defense);
 }
 
@@ -840,20 +879,33 @@ export function equipmentDefense(
     weapons: true,
     heroLast: true,
   })) {
-    friendlyAdjustment += scriptOf(state, source.cardId, source)?.modifyFriendlyEquipmentDefense?.(
-      runtime.makeCtx(state, c.owner, source, link),
-      c,
-    ) ?? 0;
+    friendlyAdjustment += defendingCardDefenseAdjustment(
+      link,
+      scriptOf(state, source.cardId, source)?.modifyFriendlyEquipmentDefense?.(
+        runtime.makeCtx(state, c.owner, source, link),
+        c,
+      ) ?? 0,
+    );
   }
   const modifierAdjustment = defendingEquipmentModifiers(state, c)
-    .reduce((total, modifier) => total + (modifier.defense ?? 0), 0);
+    .reduce(
+      (total, modifier) => total + defendingCardDefenseAdjustment(link, modifier.defense ?? 0),
+      0,
+    );
   const modified =
-    baseDefenseOf(state, runtime, c.owner, c, printed) -
+    defendingCardBaseDefense(
+      link,
+      printed,
+      baseDefenseOf(state, runtime, c.owner, c, printed),
+    ) -
     (c.defCounters ?? 0) +
-    Number(c.counters?.defense ?? 0) +
-    (c.tempDefense ?? 0) +
-    (scriptOf(state, c.cardId, c)?.modifyDefense?.(runtime.makeCtx(state, c.owner, c, link)) ?? 0) +
-    attackAdjustment +
+    defendingCardDefenseAdjustment(link, Number(c.counters?.defense ?? 0)) +
+    defendingCardDefenseAdjustment(link, c.tempDefense ?? 0) +
+    defendingCardDefenseAdjustment(
+      link,
+      scriptOf(state, c.cardId, c)?.modifyDefense?.(runtime.makeCtx(state, c.owner, c, link)) ?? 0,
+    ) +
+    defendingCardDefenseAdjustment(link, attackAdjustment) +
     friendlyAdjustment +
     modifierAdjustment;
   return Math.max(0, modified);

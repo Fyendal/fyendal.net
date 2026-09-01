@@ -82,6 +82,12 @@ function bestDefenderStageIntent(
       }).length;
       if (actionDefenders > 1) return false;
     }
+    if (link?.maxNonBlockDefenders !== undefined) {
+      const nonBlockDefenders = ids.filter((id) =>
+        input.cards[own.get(id)?.cardId ?? ""]?.cardType !== "block"
+      ).length;
+      if (nonBlockDefenders > link.maxNonBlockDefenders) return false;
+    }
     return true;
   };
 

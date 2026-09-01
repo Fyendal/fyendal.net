@@ -103,13 +103,68 @@ describe("SEA — High Seas heroes and cogs", () => {
 
     g.play("copper cog|3", { settle: false })
       .passPriority()
-      .passPriority()
+      .passPriority();
+    expect(g.state.pendingDecision?.defaultOption).toBe("yes");
+    g
       .chooseOption("yes")
       .play("copper cog|3", { settle: false })
       .passPriority()
-      .passPriority()
+      .passPriority();
+    expect(g.state.pendingDecision?.defaultOption).toBe("yes");
+    g
       .chooseOption("yes")
       .expectInZone(0, "rusty harpoon|3", "hand");
+  });
+
+  it("defaults a created Golden Cog token to Crank", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "puffin|0", board: ["gold|0"] },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.activate("puffin|0", { settle: false })
+      .chooseCard("gold|0");
+
+    expect(g.state.pendingDecision?.chooseHook).toBe("engine-crank");
+    expect(g.state.pendingDecision?.defaultOption).toBe("yes");
+  });
+
+  it("Cog in the Machine offers Crank for both Golden Cogs before its tap choice", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "puffin|0",
+          hand: ["cog in the machine|1", "copper cog|3"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("cog in the machine|1", {
+      pitch: ["copper cog|3"],
+      settle: false,
+    }).passPriority().passPriority();
+
+    const firstCogId = g.state.pendingDecision?.sourceInstanceId;
+    expect(g.state.pendingDecision?.chooseHook).toBe("engine-crank");
+    g.chooseOption("yes");
+
+    expect(g.state.pendingDecision?.chooseHook).toBe("engine-crank");
+    expect(g.state.pendingDecision?.sourceInstanceId).not.toBe(firstCogId);
+    g.chooseOption("yes");
+
+    expect(g.state.pendingDecision?.chooseHook).toBe("cog-machine");
+    g.chooseCard("golden cog|0")
+      .expectInZone(0, "cog in the machine|1", "deck");
+    expect(countOnBoard(g, 0, "golden cog|0")).toBe(2);
+    expect(g.state.players[0]!.board.filter((card) => card.tapped).length).toBe(1);
+    expect(g.state.players[0]!.actionPoints).toBe(2);
+    expect(g.state.log.some(
+      (entry) => entry.publicText?.includes("skipped duplicate choice"),
+    )).toBe(false);
   });
 
   it("Marlynn may put an arrow drawn by Gold face-up into arsenal", () => {

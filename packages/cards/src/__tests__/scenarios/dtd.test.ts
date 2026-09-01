@@ -16,6 +16,52 @@ describe("DTD — registration and core mechanics", () => {
     }
   });
 
+  it("Star Struck limits attack plays and activations by damage dealt", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", resources: 7, hand: ["star struck|2"] },
+        {
+          hero: "dorinthea",
+          hand: [
+            "ravenous rabble|1",
+            "star struck|2",
+            "crippling crush|1",
+            "nimblism|1",
+            BLUE,
+            BLUE,
+            BLUE,
+          ],
+        },
+      ],
+    });
+
+    s.play("star struck|2").blockWith().settle().endTurn();
+
+    const defender = s.state.players[1]!;
+    const legal = legalIntents(s.state, 1);
+    const canPlay = (key: string): boolean => {
+      const instance = defender.hand.find((card) => card.cardId === printingId(key));
+      return !!instance && legal.some((intent) =>
+        intent.kind === "play-card" && intent.instanceId === instance.instanceId
+      );
+    };
+    expect(canPlay("ravenous rabble|1")).toBe(false);
+    expect(canPlay("star struck|2")).toBe(false);
+    expect(canPlay("crippling crush|1")).toBe(true);
+    expect(canPlay("nimblism|1")).toBe(true);
+    expect(legal.some((intent) =>
+      intent.kind === "activate-ability" &&
+      defender.weapons.some((weapon) => weapon.instanceId === intent.sourceInstanceId)
+    )).toBe(false);
+    expect(projectStateFor(s.state, 1).ongoing).toContainEqual(expect.objectContaining({
+      seat: 1,
+      label: expect.stringContaining("only attacks with base attack 11+ · this turn"),
+    }));
+
+    s.endTurn();
+    expect(s.state.modifiers.some((modifier) => modifier.minimumAttackBasePower !== undefined)).toBe(false);
+  });
+
   it("Rune Gate plays from banish without paying and Runechants still trigger", () => {
     const s = scenario({
       seats: [

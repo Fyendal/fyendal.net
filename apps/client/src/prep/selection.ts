@@ -1,4 +1,4 @@
-import { cardData, equipmentFitsSlot } from "@fyendal/cards/client";
+import { cardData, equipmentFitsSlot, weaponSelectionError } from "@fyendal/cards/client";
 import type { DeckPool, EquipmentSlot } from "@fyendal/shared";
 import { EQUIPMENT_SLOTS } from "../domain.js";
 
@@ -11,17 +11,15 @@ export interface PrepSelection {
   main: Map<string, number>;
 }
 
-/** Select the earliest registered weapon-zone cards that fit two hand slots. */
+/** Select the earliest compatible weapon-zone cards, including a quiver or
+ * Perched off-hand that can share the unoccupied side of a two-hander. */
 export function defaultWeapons(weaponIds: readonly string[]): string[] {
   const selected: string[] = [];
-  let occupiedHands = 0;
 
   for (const id of weaponIds) {
-    const hands = cardData[id]?.subtypes?.includes("2h") ? 2 : 1;
-    if (occupiedHands + hands > 2) continue;
-    selected.push(id);
-    occupiedHands += hands;
-    if (occupiedHands === 2) break;
+    const candidate = [...selected, id];
+    if (weaponSelectionError(cardData, candidate) === null) selected.push(id);
+    if (selected.length === 2) break;
   }
 
   return selected;

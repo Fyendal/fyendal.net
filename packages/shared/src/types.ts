@@ -81,7 +81,7 @@ export type EquipmentSlot = "head" | "chest" | "arms" | "legs";
  */
 export interface DeckPool {
   heroId: string;
-  /** All registered weapons (presentation picks up to 2) */
+  /** All registered weapon-zone cards: weapons, off-hands, and quivers. */
   weaponIds: string[];
   /** All registered equipment, any slot mix (presentation picks ≤1 per slot) */
   equipmentPool: string[];
@@ -95,7 +95,7 @@ export interface DeckPool {
 
 /** The cards a player brings into one game, chosen from their `DeckPool`. */
 export interface PresentedDeck {
-  /** ⊆ pool weaponIds, max 2 */
+  /** Weapon-zone cards selected from pool.weaponIds (at most two objects). */
   weaponIds: string[];
   /** slot -> cardId, each ⊆ pool equipmentPool and legal for that slot
    *  (matching subtype, or any equipment slot for Modular equipment) */
@@ -220,6 +220,9 @@ export interface ChainLinkView {
   wagerRewards?: string[];
   dominate?: boolean;
   overpower?: boolean;
+  /** Maximum number of defending cards other than block cards that may be
+   * declared for this attack. Omitted when there is no such restriction. */
+  maxNonBlockDefenders?: number;
   /** Resolved attack/defense reaction cards and activated-ability sources
    *  applied to this link. */
   reactions: CardView[];

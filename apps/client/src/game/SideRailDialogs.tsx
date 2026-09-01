@@ -21,6 +21,7 @@ const MOTION_PREFERENCE_DESCRIPTION: Readonly<Record<MotionPreference, string>> 
 export function GameSettingsDialog({
   turn,
   onUndo,
+  undoDisabled = false,
   onConcede,
   priorityWindowMode,
   onPriorityWindowModeChange,
@@ -40,6 +41,7 @@ export function GameSettingsDialog({
 }: {
   turn: number;
   onUndo: ((target?: UndoTarget) => void) | null;
+  undoDisabled?: boolean;
   onConcede: (() => void) | null;
   priorityWindowMode: PriorityWindowMode;
   onPriorityWindowModeChange: ((mode: PriorityWindowMode) => void) | null;
@@ -264,13 +266,16 @@ export function GameSettingsDialog({
             <section className="settings-section">
               <h3 className="settings-heading">Game History</h3>
               <div className="settings-action-list">
-                <button onClick={() => { onUndo("last-action"); close(); }}>
+                <button disabled={undoDisabled} onClick={() => { onUndo("last-action"); close(); }}>
                   <span className="settings-action-title">⤺ Undo last action</span>
                 </button>
-                <button onClick={() => setConfirmUndoTarget("current-turn")}>
+                <button disabled={undoDisabled} onClick={() => setConfirmUndoTarget("current-turn")}>
                   <span className="settings-action-title">⤺ Beginning of turn {turn}</span>
                 </button>
-                <button disabled={turn <= 1} onClick={() => setConfirmUndoTarget("previous-turn")}>
+                <button
+                  disabled={undoDisabled || turn <= 1}
+                  onClick={() => setConfirmUndoTarget("previous-turn")}
+                >
                   <span className="settings-action-title">
                     ⤺ Beginning of {turn > 1 ? `turn ${turn - 1}` : "previous turn"}
                   </span>
@@ -283,7 +288,11 @@ export function GameSettingsDialog({
                     Later actions will be discarded.
                   </span>
                   <div className="settings-options">
-                    <button className="btn-primary" onClick={() => { onUndo(confirmUndoTarget); close(); }}>
+                    <button
+                      className="btn-primary"
+                      disabled={undoDisabled}
+                      onClick={() => { onUndo(confirmUndoTarget); close(); }}
+                    >
                       Restore turn
                     </button>
                     <button onClick={() => setConfirmUndoTarget(null)}>Cancel</button>

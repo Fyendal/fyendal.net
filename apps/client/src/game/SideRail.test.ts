@@ -101,6 +101,15 @@ describe("game control icons", () => {
     expect(html).not.toContain("mobile-primary-action");
   });
 
+  it("disables desktop and mobile undo while a room command is pending", () => {
+    const html = renderToStaticMarkup(createElement(SideRail, sideRailProps({
+      undoDisabled: true,
+    })));
+
+    expect(html.match(/disabled=""/g)).toHaveLength(2);
+    expect(html).toContain('aria-label="Undo last action"');
+  });
+
 });
 
 describe("opponent connection status", () => {

@@ -100,6 +100,12 @@ export function fallbackBotIntent(input: BotPolicyInput): GameIntent | undefined
         ).length;
         if (actions > 1) return false;
       }
+      if (link?.maxNonBlockDefenders !== undefined) {
+        const nonBlockDefenders = ids.filter((candidate) =>
+          input.cards[visible.get(candidate)?.cardId ?? ""]?.cardType !== "block"
+        ).length;
+        if (nonBlockDefenders > link.maxNonBlockDefenders) return false;
+      }
       return true;
     };
     const next = candidates

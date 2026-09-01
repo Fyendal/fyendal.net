@@ -15,7 +15,10 @@ const cards: Record<string, CardData> = {
   KAYO: { ...card("KAYO", "hero"), name: "Kayo, Strong-arm" },
   ONE: card("ONE", "weapon", ["sword", "1h"]),
   TWO: card("TWO", "weapon", ["bow", "2h"]),
+  TWO_CLUB: card("TWO_CLUB", "weapon", ["club", "2h"]),
   QUIVER: card("QUIVER", "equipment", ["quiver"]),
+  OFF_HAND: card("OFF_HAND", "equipment", ["off-hand"]),
+  PERCHED: { ...card("PERCHED", "action", ["off-hand", "ally"]), keywords: ["Perched"] },
   HEAD: card("HEAD", "equipment", ["head"]),
   CHEST: card("CHEST", "equipment", ["chest"]),
   BOTH: card("BOTH", "equipment", ["head", "chest"]),
@@ -86,12 +89,16 @@ describe("shared presentation validation", () => {
     ["two one-hand weapons", ["ONE", "ONE"], true],
     ["a two-hand weapon alone", ["TWO"], true],
     ["a two-hand bow plus one quiver", ["TWO", "QUIVER"], true],
+    ["a two-hand bow plus one Perched off-hand", ["TWO", "PERCHED"], true],
+    ["a two-hand club plus one Perched off-hand", ["TWO_CLUB", "PERCHED"], true],
+    ["a two-hand club plus a quiver", ["TWO_CLUB", "QUIVER"], false],
     ["a two-hand weapon plus another weapon", ["TWO", "ONE"], false],
+    ["more than one off-hand", ["OFF_HAND", "PERCHED"], false],
     ["more than one quiver", ["TWO", "QUIVER", "QUIVER"], false],
     ["more than two one-hand weapons", ["ONE", "ONE", "ONE"], false],
   ])("handles %s", (_name, weaponIds, ok) => {
     const pool = basePool();
-    pool.weaponIds.push("ONE", "QUIVER");
+    pool.weaponIds.push("ONE", "QUIVER", "TWO_CLUB", "OFF_HAND", "PERCHED");
     expect(validatePresentationAgainstCards(cards, pool, { ...presentation(), weaponIds }, "cc").ok).toBe(ok);
   });
 
