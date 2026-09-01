@@ -99,7 +99,8 @@ describe("GameBoard spectator presentation", () => {
 
     const html = renderToStaticMarkup(<GameBoard />);
 
-    expect(html).toContain('class="hand hand-spectator"');
+    expect(html).toContain('class="hand"');
+    expect(html).toContain('class="card card-hand card-back ');
     expect(html).toContain('data-motion-card="0:hand:opaque"');
     expect(html).toContain('data-motion-card="1:hand:opaque"');
     expect(html).toContain('data-motion-card="0:arsenal:opaque"');

@@ -513,12 +513,14 @@ export function CardFace({
 export function CardBack({
   count,
   label,
+  size = "zone",
   motionKey,
   motionZoneAnchor,
   onClick,
 }: {
   count?: number;
   label: string;
+  size?: "zone" | "hand";
   motionKey?: string;
   /** Optional card-sized endpoint for an otherwise broad motion zone. */
   motionZoneAnchor?: string;
@@ -526,7 +528,7 @@ export function CardBack({
 }) {
   return (
     <div
-      className={`card card-zone card-back ${onClick ? "card-clickable" : ""}`}
+      className={`card ${size === "hand" ? "card-hand" : "card-zone"} card-back ${onClick ? "card-clickable" : ""}`}
       data-motion-card={motionKey}
       data-motion-zone-anchor={motionZoneAnchor}
     >
