@@ -576,6 +576,7 @@ function windowAbilityIntents(
       const timing = ability.timing ?? "action";
       if (timing === "action" && actionAbilityRestrictedByModifier(
         state,
+        runtime,
         player.seat,
         card,
         ability.isAttack,
@@ -951,6 +952,7 @@ function abilityIntents(
       const timing = ability.timing ?? "action";
       if (timing === "action" && actionAbilityRestrictedByModifier(
         state,
+        runtime,
         player.seat,
         card,
         ability.isAttack,
@@ -1073,7 +1075,7 @@ function abilityIntents(
     for (const card of player.board) {
       if (weaponAttacksProhibited(player)) continue;
       if (!isAuraAttacker(state, player, card)) continue;
-      if (actionAbilityRestrictedByModifier(state, player.seat, card, true)) continue;
+      if (actionAbilityRestrictedByModifier(state, runtime, player.seat, card, true)) continue;
       const marker = grantsAuraAttackMarker(state, player, card)!;
       const abilityIndex = abilityList(scriptOf(state, card.cardId, card)).length;
       for (const targetAllyId of attackTargets(state, runtime, player)) {

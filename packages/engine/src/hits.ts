@@ -42,7 +42,6 @@ function resolveGrantedOnHitEffect(
     logPublic(state, `${nameOf(state, attacker.heroCardId)} gains ${mod.onHitGainResources} resource`);
   }
   if (mod.onHitDraw) {
-    if (live) live.consumed = true;
     drawCards(state, runtime, attacker, Number(mod.onHitDraw));
   }
   const grant = mod.onHitCreateToken;

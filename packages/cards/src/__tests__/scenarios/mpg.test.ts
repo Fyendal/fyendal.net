@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { legalIntents } from "@fyendal/engine";
-import { cardData, isImplemented } from "../../index.js";
+import { cardData, isImplemented, scripts } from "../../index.js";
 import { functionalKeyOf } from "../../functional.js";
 import { scenario } from "../harness.js";
 
@@ -16,6 +16,27 @@ describe("MPG — import and Guardian pressure", () => {
     expect(cards).toHaveLength(130);
     expect(cards.every((card) => isImplemented(card))).toBe(true);
     expect(new Set(cards.map(functionalKeyOf))).toHaveLength(130);
+    expect(scripts.MPG001).toBeDefined();
+  });
+
+  it("Valda, Seismic Impact creates Seismic Surges when an opponent draws during the action phase", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "valda, seismic impact|0",
+          board: ["promising terrain|3"],
+        },
+        { hero: "dorinthea", hand: ["snatch|1"], deck: ["wrecker romp|3"] },
+      ],
+    });
+
+    g.play("snatch|1").blockWith().settle();
+
+    expect(g.state.players[0]!.board.filter(
+      (card) => cardData[card.cardId]?.name === "Seismic Surge",
+    )).toHaveLength(2);
   });
 
   it("Testament of Valahai gets +4 defense with six Seismic Surges", () => {

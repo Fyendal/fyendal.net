@@ -77,6 +77,20 @@ function hasSixPlusInPitch(ctx: ScriptCtx): boolean {
 }
 function createMany(ctx: ScriptCtx, id: string, count: number): void { ctx.createTokens(id, count); }
 
+const BEAT_OF_THE_IRONSONG_MODES = [
+  "+1 attack",
+  "go again",
+  "defending cards can't gain defense",
+  "damage can't be prevented",
+] as const;
+
+function beatOfTheIronsongModeBit(option: string): number {
+  const index = BEAT_OF_THE_IRONSONG_MODES.indexOf(
+    option as (typeof BEAT_OF_THE_IRONSONG_MODES)[number],
+  );
+  return index < 0 ? 0 : 1 << index;
+}
+
 function requestSongOfSinewOrder(ctx: ScriptCtx, ids: number[]): void {
   if (ids.length === 0) return;
   ctx.requestChoice(
@@ -742,7 +756,50 @@ Object.assign(sup, {
   "golden heart plate|0": goldenEquipment(),
   "golden gauntlets|0": goldenEquipment(),
   "golden gait|0": goldenEquipment(),
-  "beat of the ironsong|3": { onPlay(ctx: ScriptCtx) { if (ctx.link && hasTag(ctx, ctx.link.attackingCard, "dawnblade")) { ctx.addModifier({ scope: "chain-link", attack: 1 }); ctx.grantGoAgain(); } } },
+  "beat of the ironsong|3": {
+    canPlay: (ctx: ScriptCtx) =>
+      !!ctx.link &&
+      !ctx.link.resolved &&
+      ctx.link.attacker === ctx.seat &&
+      named(ctx, ctx.link.attackingCard, "dawnblade"),
+    additionalCost(ctx: ScriptCtx) {
+      const counters = Math.max(0, Number(ctx.link?.attackingCard.counters?.power ?? 0));
+      const count = Math.min(BEAT_OF_THE_IRONSONG_MODES.length, counters + 1);
+      ctx.setCounter("beat-modes-remaining", count);
+      ctx.setCounter("beat-modes", 0);
+      ctx.requestChoice(
+        "beat-mode",
+        `Beat of the Ironsong: choose ${count} mode${count === 1 ? "" : "s"}`,
+        [...BEAT_OF_THE_IRONSONG_MODES],
+      );
+    },
+    onChoose(ctx: ScriptCtx, hook: string, option: string) {
+      if (hook !== "beat-mode") return;
+      const bit = beatOfTheIronsongModeBit(option);
+      if (bit === 0 || (ctx.getCounter("beat-modes") & bit) !== 0) return;
+      const selected = ctx.getCounter("beat-modes") | bit;
+      const remaining = ctx.getCounter("beat-modes-remaining") - 1;
+      ctx.setCounter("beat-modes", selected);
+      ctx.setCounter("beat-modes-remaining", remaining);
+      if (remaining > 0) {
+        ctx.requestChoice(
+          "beat-mode",
+          `Beat of the Ironsong: choose ${remaining} more mode${remaining === 1 ? "" : "s"}`,
+          BEAT_OF_THE_IRONSONG_MODES.filter((mode) =>
+            (selected & beatOfTheIronsongModeBit(mode)) === 0
+          ),
+        );
+      }
+    },
+    onPlay(ctx: ScriptCtx) {
+      if (!ctx.link || !named(ctx, ctx.link.attackingCard, "dawnblade")) return;
+      const modes = ctx.getCounter("beat-modes");
+      if ((modes & 1) !== 0) ctx.addModifier({ scope: "chain-link", attack: 1 });
+      if ((modes & 2) !== 0) ctx.grantGoAgain();
+      if ((modes & 4) !== 0) ctx.setFlag("link", "defendingCardsCannotGainDefense", true);
+      if ((modes & 8) !== 0) ctx.setFlag("link", "unpreventable", true);
+    },
+  },
   "blood follows blade|2": { onPlay(ctx: ScriptCtx) { if (ctx.link && hasTag(ctx, ctx.link.attackingCard, "sword")) { ctx.grantGoAgain(); ctx.addModifier({ scope: "chain-link", onHitCreateToken: { cardId: SELLSWORD, count: 1 } }); } } },
   "adaptive alpha mold|0": { playableEquipment: true, activated: { cost: 0, isAttack: false, goAgain: true, onActivate(ctx: ScriptCtx) { ctx.setFlag("player", "adaptiveMoldMoved", true); } } },
   "backspin thrust|1": { activated: [{ cost: 0, isAttack: false, goAgain: false, timing: "instant", oncePerTurn: true, effectCardCosts: [{ zone: "arena", move: "tap", count: 1, subtype: "cog", prompt: "Untap a cog" }], onActivate(ctx: ScriptCtx) { ctx.addCardTempPower(ctx.self.instanceId, 1); } }, { cost: 0, isAttack: false, goAgain: false, timing: "instant", oncePerTurn: true, onActivate(ctx: ScriptCtx) { ctx.grantGoAgain(); } }] },

@@ -19,7 +19,7 @@ import {
   type BotPolicyScorers,
 } from "./policy.js";
 
-function defenderPruningChoice(count: number): GameIntent {
+function defenderPruningChoice(count: number, maxNonBlockDefenders?: number): GameIntent {
   const state = createGame({
     decklists: [decklists.dorinthea, decklists.rhinar],
     cards: cardData,
@@ -47,6 +47,7 @@ function defenderPruningChoice(count: number): GameIntent {
     damage: count,
     resolved: false,
     reactions: [],
+    ...(maxNonBlockDefenders !== undefined ? { maxNonBlockDefenders } : {}),
   }];
   const input: BotPolicyInput = {
     seat: 0,
@@ -84,6 +85,14 @@ describe("defender candidate bounds", () => {
     if (first.kind !== "stage-defenders") return;
     expect(first.instanceIds).toHaveLength(MAX_OPTIONAL_DEFENDERS);
     expect(first.instanceIds).not.toContain(100_000);
+  });
+
+  it("honors the attack's maximum number of non-block defenders", () => {
+    const intent = defenderPruningChoice(4, 2);
+    expect(intent).toEqual({
+      kind: "stage-defenders",
+      instanceIds: [100_002, 100_003],
+    });
   });
 });
 

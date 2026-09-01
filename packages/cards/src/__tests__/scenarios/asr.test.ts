@@ -50,6 +50,36 @@ describe("Armory Deck: Ira", () => {
   });
 });
 
+describe("ASR — Okana Scar Wraps", () => {
+  it("equips a banished Edge of Autumn when a Vengeance attack hits", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "ira, scarlet revenger|0",
+          weapons: ["edge of autumn|0"],
+          hand: ["seek vengeance|1"],
+          resources: 1,
+          equipment: { ...NO_EQUIPMENT, arms: "okana scar wraps|0" },
+        },
+        { hero: "dorinthea", hand: [], equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.attackWithWeapon("edge of autumn|0")
+      .blockWith()
+      .settle()
+      .play("seek vengeance|1")
+      .blockWith()
+      .activate("okana scar wraps|0")
+      .chooseCard("edge of autumn|0");
+
+    expect(g.state.pendingDecision?.chooseHook).toBe("okana-equip");
+    g.chooseCard("edge of autumn|0")
+      .expectInZone(0, "edge of autumn|0", "weapons");
+  });
+});
+
 describe("ASR — Give and Take", () => {
   it("triggers for action-card defenders but not equipment", () => {
     const actionDefense = scenario({

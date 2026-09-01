@@ -229,6 +229,75 @@ describe("SUP — heroes and the crowd", () => {
       .expectAttackValue(6);
   });
 
+  it("Beat of the Ironsong offers one mode with no Dawnblade counters", () => {
+    const g = scenario({
+      seats: [
+        foe({
+          weapons: ["dawnblade|0"],
+          hand: ["beat of the ironsong|3"],
+          resources: 1,
+        }),
+        hero("tuffnut|0", { hand: ["head jab|1"] }),
+      ],
+    });
+
+    g.attackWithWeapon("dawnblade|0")
+      .blockWith("head jab|1")
+      .react("beat of the ironsong|3", { settle: false });
+
+    expect(g.state.pendingDecision?.chooseHook).toBe("beat-mode");
+    expect(g.state.pendingDecision?.prompt).toContain("choose 1 mode");
+    expect(g.state.pendingDecision?.options).toEqual([
+      "+1 attack",
+      "go again",
+      "defending cards can't gain defense",
+      "damage can't be prevented",
+    ]);
+
+    g.chooseOption("+1 attack")
+      .expectFinalAttack(4)
+      .expectFinalDefense(2);
+  });
+
+  it("Beat of the Ironsong chooses distinct modes and stops defending cards gaining defense", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        foe({
+          weapons: ["dawnblade|0"],
+          hand: ["beat of the ironsong|3", "wrecker romp|3"],
+        }),
+        hero("tuffnut|0", {
+          board: ["toughness|0"],
+          hand: ["head jab|1"],
+        }),
+      ],
+    });
+    g.state.players[0]!.weapons[0]!.counters = { power: 3 };
+
+    g.endTurn()
+      .attackWithWeapon("dawnblade|0", { pitch: ["wrecker romp|3"] })
+      .blockWith("head jab|1")
+      .react("beat of the ironsong|3", { settle: false })
+      .chooseOption("+1 attack");
+    expect(g.state.pendingDecision?.options).not.toContain("+1 attack");
+
+    g.chooseOption("defending cards can't gain defense");
+    expect(g.state.pendingDecision?.options).toEqual([
+      "go again",
+      "damage can't be prevented",
+    ]);
+
+    g.chooseOption("damage can't be prevented");
+    expect(g.state.pendingDecision?.options).toEqual(["go again"]);
+
+    g.chooseOption("go again")
+      .expectFinalAttack(7)
+      .expectFinalDefense(2);
+    expect(g.state.chain.at(-1)?.flags.unpreventable).toBe(true);
+    expect(g.state.players[0]!.actionPoints).toBe(1);
+  });
+
   it("Overturn the Results replaces a failed clash with a win and boos Kayo", () => {
     const g = scenario({
       active: 1,

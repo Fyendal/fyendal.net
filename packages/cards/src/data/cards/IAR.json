@@ -795,6 +795,28 @@
     "set": "IAR"
   },
   {
+    "id": "IAR115",
+    "name": "Cullingsong Gloomblade",
+    "cardType": "action",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "You may play this from your banished zone.\nUsurp (As an additional cost to play this, destroy a Runechant if able. If you do, this gets +2{p}.)\nWhen this hits a hero, they banish a card from their hand.\nBlood Debt",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 2,
+    "defense": 3,
+    "keywords": [
+      "Usurp",
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
     "id": "IAR116",
     "name": "Plundersong Gloomblade",
     "cardType": "action",
@@ -831,6 +853,50 @@
     "pitch": 1,
     "cost": 3,
     "attack": 5,
+    "defense": 3,
+    "keywords": [
+      "Usurp",
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR118",
+    "name": "Vexing Gloomblade",
+    "cardType": "action",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "You may play this from your banished zone.\nUsurp (As an additional cost to play this, destroy a Runechant if able. If you do, this gets +2{p}.)\nWhen this hits a hero, deal 2 arcane damage to any target.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
+    "pitch": 2,
+    "cost": 3,
+    "attack": 4,
+    "defense": 3,
+    "keywords": [
+      "Usurp",
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR119",
+    "name": "Vexing Gloomblade",
+    "cardType": "action",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "You may play this from your banished zone.\nUsurp (As an additional cost to play this, destroy a Runechant if able. If you do, this gets +2{p}.)\nWhen this hits a hero, deal 2 arcane damage to any target.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
+    "pitch": 3,
+    "cost": 3,
+    "attack": 3,
     "defense": 3,
     "keywords": [
       "Usurp",

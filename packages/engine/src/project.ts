@@ -19,6 +19,7 @@ import { pendingOnHitEffects } from "./hits.js";
 import { conditionalModifierGrantsGoAgain } from "./combatModifiers.js";
 import {
   attackHasDominate,
+  attackMaxNonBlockDefenders,
   attackHasOverpower,
   attackValueModifiers,
   computeAttack,
@@ -268,6 +269,9 @@ function modifierEffectLabel(state: GameStateInternal, m: Modifier): string {
   }
   if (m.playCostReduction) parts.push(`play costs ${m.playCostReduction} less`);
   if (m.activationCostReduction) parts.push(`activation costs ${m.activationCostReduction} less`);
+  if (m.minimumAttackBasePower !== undefined) {
+    parts.push(`only attacks with base attack ${m.minimumAttackBasePower}+`);
+  }
   if (m.grantKeyword) parts.push(m.grantKeyword.toLowerCase());
   if (m.goAgain) parts.push("go again");
   if (m.onHitGoAgain) parts.push("go again on hit");
@@ -911,6 +915,9 @@ function projectState(
     const prevention = i === lastLink
       ? projectedCombatPrevention(state, runtime, link, damage)
       : undefined;
+    const maxNonBlockDefenders = link.resolved
+      ? undefined
+      : attackMaxNonBlockDefenders(state, link);
     return {
       attackingCard: {
         ...cardView(state, runtime, link.attackingCard),
@@ -964,6 +971,9 @@ function projectState(
       overpower: link.resolved
         ? link.flags.overpowerAtResolution === true
         : attackHasOverpower(state, link),
+      ...(maxNonBlockDefenders !== undefined
+        ? { maxNonBlockDefenders }
+        : {}),
       reactions: [
         ...link.reactions,
         ...(link.resolvedReactionAbilitySources ?? []),

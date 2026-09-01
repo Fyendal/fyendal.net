@@ -1086,6 +1086,7 @@ export function GameBoard() {
         onToggleCollapsed={() => setRailCollapsed((collapsed) => !collapsed)}
         turn={view.turn}
         onUndo={!spectating && !replaying && view.winner === null ? undo : null}
+        undoDisabled={roomCommandPending}
         onLeave={leave}
         leaveLabel={botGame && !spectating ? "End Game" : "Leave"}
         onConcede={

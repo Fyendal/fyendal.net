@@ -103,6 +103,7 @@ describe("ARC — Mechanologist attacks and actions", () => {
     expect(projectStateFor(g.state, 1).stack[0]).toBeUndefined();
     expect(g.state.pendingDecision?.chooseHook).toBe("engine-crank");
     expect(g.state.pendingDecision?.options).toEqual(["yes", "no"]);
+    expect(g.state.pendingDecision?.defaultOption).toBe("yes");
 
     g.chooseOption("no");
     expect(boardCard(g, 0, "prismatic lens|2").counters?.steam).toBe(1);

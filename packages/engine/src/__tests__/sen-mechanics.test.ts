@@ -706,6 +706,7 @@ describe("declarative defender selection", () => {
       scope: "chain-link",
       maxNonBlockDefenders: 2,
     });
+    expect(projectStateFor(s, 1).chain.at(-1)?.maxNonBlockDefenders).toBe(2);
     const first = giveCard(s, 1, "BLOCK3");
     const second = giveCard(s, 1, "BLOCK3");
     const third = giveCard(s, 1, "BLOCK3");

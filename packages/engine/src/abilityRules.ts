@@ -13,6 +13,7 @@ import { banishHeroSoulCard, destroyPermanent, putCardOnDeckBottom } from "./zon
 import { currentLink, findCardAnywhere, heroSoulCards } from "./zoneQueries.js";
 import { tapPermanent } from "./cardLifecycle.js";
 import { MAX_ALTERNATIVE_COST_OPTIONS, consumeMatchingActivationCostReductions, costModifierScopeApplies, exactCardCombinations, modifierMatchesPlayedCard, opposingStaticCostIncrease, payDiscardCost, validateDiscardCost } from "./playRules.js";
+import { attackBasePowerRestricted } from "./combatRestrictions.js";
 
 /** Printed abilities plus temporary abilities granted to this owned card.
  * The returned functions are process definitions only; they are never stored
@@ -595,10 +596,12 @@ export function payActivatedAbilityCost(
  * ability. Callers invoke this only for action-timing abilities. */
 export function actionAbilityRestrictedByModifier(
   state: GameStateInternal,
+  runtime: EngineRuntime,
   seat: number,
   source: CardInstance,
   isAttack: boolean,
 ): boolean {
+  if (isAttack && attackBasePowerRestricted(state, runtime, seat, source)) return true;
   const isWeapon = cardHasType(state, source, "weapon");
   return state.modifiers.some((modifier) =>
     modifier.seat === seat &&

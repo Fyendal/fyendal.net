@@ -188,6 +188,54 @@ describe("BotRunner reliability", () => {
     })).toEqual({ kind: "stage-defenders", instanceIds: [2] });
   });
 
+  it("commits staged defense instead of exceeding a non-block defender limit", () => {
+    const stagedCards = [
+      { instanceId: 1, cardId: "blocker", owner: 1 as const, defense: 3 },
+      { instanceId: 2, cardId: "blocker", owner: 1 as const, defense: 3 },
+    ];
+    const inputView = {
+      pendingDecision: {
+        player: 1,
+        kind: "defend" as const,
+        prompt: "Choose defending cards",
+        stagedCards,
+        stagedDefense: 6,
+      },
+      chain: [{
+        attackingCard: { instanceId: 99, cardId: "", owner: 0 },
+        defendingCards: [],
+        attackValue: 8,
+        defenseValue: 0,
+        damage: 8,
+        resolved: false,
+        maxNonBlockDefenders: 2,
+        reactions: [],
+      }],
+      players: [
+        {} as BotPolicyInput["view"]["players"][0],
+        {
+          hand: [...stagedCards, { instanceId: 3, cardId: "blocker", owner: 1, defense: 3 }],
+          arsenal: [],
+          equipment: {},
+        } as unknown as BotPolicyInput["view"]["players"][1],
+      ],
+    } as unknown as BotPolicyInput["view"];
+
+    expect(fallbackBotIntent({
+      seat: 1,
+      view: inputView,
+      cards: {
+        blocker: { id: "blocker", name: "Blocker", cardType: "action", defense: 3, text: "" },
+      },
+      legal: [
+        { kind: "defend", instanceIds: [1, 2] },
+        { kind: "stage-defenders", instanceIds: [1] },
+        { kind: "stage-defenders", instanceIds: [2] },
+        { kind: "stage-defenders", instanceIds: [3] },
+      ],
+    })).toEqual({ kind: "defend", instanceIds: [1, 2] });
+  });
+
   it("checks bot priority before claiming a lease", async () => {
     vi.useFakeTimers();
     const claim = vi.fn().mockResolvedValue(true);

@@ -102,6 +102,39 @@ describe("WTR — hero ability", () => {
 });
 
 describe("WTR — next-attack buff actions", () => {
+  it("Steelblade Supremacy draws for every hit with the targeted weapon this turn", () => {
+    const g = useWtrDorinthea(
+      scenario({
+        seats: [
+          {
+            hero: "dorinthea",
+            hand: ["steelblade supremacy|1", "warrior's valor|2", "titanium bauble|3"],
+            deck: ["titanium bauble|3", "titanium bauble|3"],
+            weapons: ["dawnblade|0"],
+          },
+          { hero: "rhinar", hand: [] },
+        ],
+      }),
+    );
+
+    g.play("steelblade supremacy|1", { pitch: ["titanium bauble|3"] })
+      .chooseCard("dawnblade|0")
+      .play("warrior's valor|2")
+      .attackWithWeapon()
+      .blockWith()
+      .settle()
+      .expectHandSize(0, 1)
+      .attackWithWeapon(undefined, { pitch: ["titanium bauble|3"] })
+      .blockWith()
+      .settle()
+      .expectHandSize(0, 1)
+      .expectZoneSize(0, "deck", 0);
+
+    expect(g.state.log.filter((line) =>
+      line.publicText?.includes("Steelblade Supremacy triggers: On hit")
+    )).toHaveLength(2);
+  });
+
   it("Driving Blade (red) gives +3 and go again", () => {
     const g = scenario({
       seats: [

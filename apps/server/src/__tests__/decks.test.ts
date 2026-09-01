@@ -354,6 +354,23 @@ describe("validateDeck", () => {
     expect(r.decklist.equipmentPool).toEqual([]);
   });
 
+  it("registers off-hand action cards in the weapon slots", () => {
+    const polly = cardData.SEA003!;
+    const lines = parseDecklistText(
+      [
+        `Hero: ${hero.name}`,
+        `1x ${polly.name}`,
+        ...legalCcDeckCards.slice(0, 20).map((c) => deckLine(c)),
+      ].join("\n"),
+    );
+
+    const r = validateDeck(lines, "cc");
+    expect(r).toMatchObject({ ok: true });
+    if (!r.ok) return;
+    expect(r.decklist.weaponIds).toEqual([polly.id]);
+    expect(r.decklist.deck).not.toContain(polly.id);
+  });
+
   it("registers Modular cards as equipment without a fixed slot subtype", () => {
     const adaptivePlating = printings.find((c) => c.name === "Adaptive Plating")!;
     const lines = parseDecklistText(
@@ -718,6 +735,31 @@ describe("deck storage", () => {
     if (r.ok) return;
     expect(r.missing).toContain("Does Not Exist");
     expect(await listDecks(db, userId)).toHaveLength(0);
+  });
+
+  it("repairs off-hand action cards in previously saved deck pools", async () => {
+    const { db, userId } = await freshUser();
+    await db.query(
+      `INSERT INTO decks
+       (id, user_id, name, format, fabrary_url, decklist, hero_name, created_at, updated_at)
+       VALUES ($1, $2, 'old-puffin', 'cc', NULL, $3, 'Puffin, Hightail', 1, 1)`,
+      [
+        "old-puffin",
+        userId,
+        JSON.stringify({
+          heroId: "SEA001",
+          weaponIds: [],
+          equipmentPool: [],
+          deck: ["SEA003", legalCcDeckCards[0]!.id],
+          sideboard: ["SEA124"],
+        }),
+      ],
+    );
+
+    const saved = (await listDecks(db, userId))[0]!;
+    expect(saved.decklist.weaponIds).toEqual(["SEA003", "SEA124"]);
+    expect(saved.decklist.deck).toEqual([legalCcDeckCards[0]!.id]);
+    expect(saved.decklist.sideboard).toEqual([]);
   });
 
   it("persists the latest Fabrary default but keeps matchup variants transient", async () => {

@@ -6,7 +6,8 @@ import type {
   TokenCreationContext,
 } from "./scripts.js";
 import { abilityList, oncePerTurnEffectFlagKey } from "./scripts.js";
-import type { CardInstance, ChainLinkState, PendingArcane, PlayerState } from "./state.js";
+import type { CardInstance, ChainLinkState, PendingArcane, PendingDecisionState, PlayerState } from "./state.js";
+import { queueDecisionBehindCrank } from "./decisionQueue.js";
 import { rngInt } from "./rng.js";
 import {
   cardColorOf,
@@ -1630,18 +1631,13 @@ export function makeCtx(
         existing?.chooseHook === "engine-look" && existing.player === (choiceSeat ?? seat)
           ? existing
           : undefined;
-      // one scripted choice at a time; a second simultaneous choice is skipped
-      if (existing?.chooseHook && !look) {
-        logPublic(state, `(skipped duplicate choice: ${prompt})`);
-        return;
-      }
       // an empty option list would deadlock the game on an unanswerable
       // decision — the effect simply finds no target and fizzles
       if (options.length === 0) {
         logPublic(state, `(fizzled, no options: ${prompt})`);
         return;
       }
-      state.pendingDecision = {
+      const decision: PendingDecisionState = {
         player: choiceSeat ?? seat,
         kind: options.length === 2 && options.every((o) => o === "yes" || o === "no")
           ? "optional-effect"
@@ -1658,6 +1654,15 @@ export function makeCtx(
           ? { defaultOption }
           : {}),
       };
+      // Crank is an intervening enter-arena choice. Preserve later decisions
+      // from the resolving effect until that choice has been answered.
+      if (existing?.chooseHook && !look) {
+        if (!queueDecisionBehindCrank(state, decision)) {
+          logPublic(state, `(skipped duplicate choice: ${prompt})`);
+        }
+        return;
+      }
+      state.pendingDecision = decision;
       if (look?.lookedCardIds?.length) {
         // cards already offered as clickable options need no context copy
         const offered = new Set(
@@ -1686,17 +1691,20 @@ export function makeCtx(
       }
     },
     requestNameChoice(hook, prompt, choiceSeat) {
-      if (state.pendingDecision?.chooseHook) {
-        logPublic(state, `(skipped duplicate choice: ${prompt})`);
-        return;
-      }
-      state.pendingDecision = {
+      const decision: PendingDecisionState = {
         player: choiceSeat ?? seat,
         kind: "choose-name",
         prompt,
         sourceInstanceId: self.instanceId,
         chooseHook: hook,
       };
+      if (state.pendingDecision?.chooseHook) {
+        if (!queueDecisionBehindCrank(state, decision)) {
+          logPublic(state, `(skipped duplicate choice: ${prompt})`);
+        }
+        return;
+      }
+      state.pendingDecision = decision;
     },
     requestPayment(hook, prompt, cost, choiceSeat) {
       const payingSeat = choiceSeat ?? seat;

@@ -69,6 +69,35 @@ describe("MST — Mystic heroes and cloaked equipment", () => {
       .expectLife(1, 20)
       .expectInZone(1, "essence of ancestry: body|1", "graveyard");
   });
+
+  it("Restless Coalescence moves any number of +1 power counters from controlled auras", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          board: ["spectral shield|0"],
+          hand: ["astral etchings|1", "restless coalescence|2", "wrecker romp|3"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("astral etchings|1", { pitch: ["wrecker romp|3"] })
+      .chooseCard("spectral shield|0")
+      .play("restless coalescence|2")
+      .chooseCard("spectral shield|0")
+      .chooseCard("spectral shield|0")
+      .chooseOption("done");
+
+    const shield = g.state.players[0]!.board.find(
+      (card) => card.cardId === printingId("spectral shield|0"),
+    )!;
+    const restless = g.state.players[0]!.board.find(
+      (card) => card.cardId === printingId("restless coalescence|2"),
+    )!;
+    expect(shield.counters?.power).toBe(1);
+    expect(restless.counters?.power).toBe(2);
+  });
 });
 
 describe("MST — Assassin", () => {

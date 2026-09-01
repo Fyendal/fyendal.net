@@ -5,6 +5,7 @@ import {
   equipmentFitsSlot,
   findPrinting,
   isImplemented,
+  isWeaponZoneCard,
   MIN_DECK_SIZE,
   normalizeCardName,
   precon,
@@ -189,7 +190,7 @@ export function validateDeck(lines: ParsedLine[], format: Format): ValidationRes
       heroName = card.name;
       continue;
     }
-    if (card.cardType === "weapon") {
+    if (isWeaponZoneCard(card)) {
       for (let i = 0; i < line.qty; i++) weaponIds.push(card.id);
       continue;
     }
@@ -197,14 +198,8 @@ export function validateDeck(lines: ParsedLine[], format: Format): ValidationRes
     // equipped only after being played. Arena equipment has no `evo` subtype
     // and belongs in the registered equipment pool.
     if (card.cardType === "equipment" && !card.subtypes?.includes("evo")) {
-      // off-hand / quiver equipment occupies a weapon slot (CR) — it joins the
-      // weapons
       const slot = EQUIPMENT_SLOTS.find((s) => equipmentFitsSlot(card, s));
       if (!slot) {
-        if (card.subtypes?.includes("off-hand") || card.subtypes?.includes("quiver")) {
-          for (let i = 0; i < line.qty; i++) weaponIds.push(card.id);
-          continue;
-        }
         errors.push(`${card.name}: unknown equipment slot`);
         continue;
       }
@@ -303,7 +298,7 @@ function decodeDeckPool(value: unknown): DeckPool {
   for (const key of ["heroId", "weaponIds", "equipmentPool", "deck"] as const) {
     if (!(key in pool)) return corruptDeck(`decklist.${key}`, "missing field");
   }
-  return {
+  return normalizeDeckPoolCardZones({
     heroId: dbString(pool.heroId, "decklist.heroId"),
     weaponIds: dbStringArray(pool.weaponIds, "decklist.weaponIds"),
     equipmentPool: dbStringArray(pool.equipmentPool, "decklist.equipmentPool"),
@@ -314,6 +309,27 @@ function decodeDeckPool(value: unknown): DeckPool {
     ...(pool.sideboard === undefined
       ? {}
       : { sideboard: dbStringArray(pool.sideboard, "decklist.sideboard") }),
+  });
+}
+
+/** Repair card-zone classification from older saved imports. This is derived
+ * from immutable card data at read time so existing decks gain support for new
+ * weapon-zone subtypes without a persistence migration. */
+function normalizeDeckPoolCardZones(pool: DeckPool): DeckPool {
+  const weaponIds = [...pool.weaponIds];
+  const keepMainDeckCard = (id: string): boolean => {
+    if (!isWeaponZoneCard(cardData[id])) return true;
+    weaponIds.push(id);
+    return false;
+  };
+  return {
+    ...pool,
+    weaponIds,
+    equipmentPool: pool.equipmentPool.filter(keepMainDeckCard),
+    deck: pool.deck.filter(keepMainDeckCard),
+    ...(pool.sideboard === undefined
+      ? {}
+      : { sideboard: pool.sideboard.filter(keepMainDeckCard) }),
   };
 }
 

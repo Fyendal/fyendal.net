@@ -13,7 +13,10 @@ function boardNames(game: ReturnType<typeof scenario>, seat: number): string[] {
 describe("IAR spoiled cards", () => {
   it("registers the latest spoiled collector numbers", () => {
     expect(Object.fromEntries([
+      "IAR115",
       "IAR116",
+      "IAR118",
+      "IAR119",
       "IAR146",
       "IAR167",
       "IAR179",
@@ -28,7 +31,10 @@ describe("IAR spoiled cards", () => {
       "IAR252",
       "IAR259",
     ].map((id) => [id, cardData[id]?.name]))).toEqual({
+      IAR115: "Cullingsong Gloomblade",
       IAR116: "Plundersong Gloomblade",
+      IAR118: "Vexing Gloomblade",
+      IAR119: "Vexing Gloomblade",
       IAR146: "Runic Disposition",
       IAR167: "Countdown to Extinction",
       IAR179: "Dimenxxional Ferryman",
@@ -612,22 +618,53 @@ describe("IAR spoiled cards", () => {
       .expectInZone(1, "runechant of pride|2", "banish");
   });
 
-  it("Vexing Gloomblade deals its on-hit arcane damage to the chosen target", () => {
+  it("Cullingsong Gloomblade makes the hit hero banish a card from hand", () => {
     const g = scenario({ seats: [
       {
         hero: "rhinar",
-        hand: ["vexing gloomblade|1"],
+        hand: ["cullingsong gloomblade|1"],
+        equipment: NO_EQUIPMENT,
+      },
+      {
+        hero: "dorinthea",
+        hand: ["raging onslaught|1"],
+        life: 20,
+        equipment: NO_EQUIPMENT,
+      },
+    ] });
+
+    g.play("cullingsong gloomblade|1")
+      .blockWith()
+      .settle()
+      .chooseCard("raging onslaught|1")
+      .expectLife(1, 18)
+      .expectInZone(1, "raging onslaught|1", "banish");
+  });
+
+  it.each([
+    ["red", "vexing gloomblade|1", 13],
+    ["yellow", "vexing gloomblade|2", 14],
+    ["blue", "vexing gloomblade|3", 15],
+  ])("Vexing Gloomblade (%s) deals its on-hit arcane damage to the chosen target", (
+    _color,
+    vexing,
+    expectedLife,
+  ) => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: [vexing],
         resources: 3,
         equipment: NO_EQUIPMENT,
       },
       { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
     ] });
 
-    g.play("vexing gloomblade|1")
+    g.play(vexing)
       .blockWith()
       .settle()
       .chooseOption("opposing hero")
-      .expectLife(1, 13);
+      .expectLife(1, expectedLife);
   });
 
   it("Embrace Sin grants dynamic Runechant-aura play access from banish", () => {

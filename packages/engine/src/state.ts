@@ -573,6 +573,9 @@ export interface Modifier {
   maxBasePower?: number;
   /** printed base-power floor ("your next attack with 6 or more base {p}") */
   minBasePower?: number;
+  /** While active, attacks with less than this base power cannot be played or
+   * activated. Non-attack plays and activations are unaffected. */
+  minimumAttackBasePower?: number;
   /** keyword filter for defending cards / auras (e.g. "combo") */
   appliesToKeyword?: string;
   /** subtype filter (e.g. "lightning" for "your next Lightning attack");
@@ -712,6 +715,9 @@ export interface PendingDecisionState extends PendingDecision {
   sourceInstanceId?: number;
   /** Hook key routed back to the owning script's onChoose */
   chooseHook?: string;
+  /** Ordered decisions deferred while an entering permanent's Crank choice
+   * is being answered. Internal only; projection exposes the current choice. */
+  followUpDecisions?: PendingDecisionState[];
   /** Token-effect provenance inherited when one card delegates a scripted
    * choice to another card, such as Edict of Steel using Reverent Rerebrace. */
   tokenCreationCause?: TokenCreationContext;

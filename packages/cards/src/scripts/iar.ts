@@ -392,6 +392,25 @@ function darkestHour(attack: number): CardScript {
   });
 }
 
+function vexingGloomblade(): CardScript {
+  return bloodDebt({
+    ...usurp(),
+    arcaneDamageEffect: true,
+    canTriggerOnHit: selfHitsHero,
+    onHit(ctx) {
+      requestAnyTarget(
+        ctx,
+        "iar-vexing-target",
+        `Choose a target to deal ${ctx.previewArcaneDamage(2)} arcane damage to`,
+      );
+    },
+    onChoose(ctx, hook, option) {
+      if (resolveUsurp(ctx, hook, option)) return;
+      if (hook === "iar-vexing-target") dealArcaneToTarget(ctx, option, 2);
+    },
+  }, true);
+}
+
 export const iar: Record<string, CardScript> = {
   "soul of existence|4": {
     triggers: [{
@@ -724,6 +743,25 @@ export const iar: Record<string, CardScript> = {
     },
   }, true),
 
+  "cullingsong gloomblade|1": bloodDebt({
+    ...usurp(),
+    canTriggerOnHit: (ctx) => selfHitsHero(ctx) &&
+      ctx.player(opponentSeat(ctx)).hand.length > 0,
+    onHit(ctx) {
+      const target = opponentSeat(ctx);
+      ctx.requestCardChoice(
+        "iar-cullingsong-hand",
+        "Choose a card in your hand to banish",
+        ctx.player(target).hand.map((card) => card.instanceId),
+        target,
+      );
+    },
+    onChoose(ctx, hook, option) {
+      if (resolveUsurp(ctx, hook, option)) return;
+      if (hook === "iar-cullingsong-hand") ctx.banish(Number(option));
+    },
+  }, true),
+
   "plundersong gloomblade|1": bloodDebt({
     ...usurp(),
     canTriggerOnHit: (ctx) => selfHitsHero(ctx) &&
@@ -750,22 +788,9 @@ export const iar: Record<string, CardScript> = {
     },
   }, true),
 
-  "vexing gloomblade|1": bloodDebt({
-    ...usurp(),
-    arcaneDamageEffect: true,
-    canTriggerOnHit: selfHitsHero,
-    onHit(ctx) {
-      requestAnyTarget(
-        ctx,
-        "iar-vexing-target",
-        `Choose a target to deal ${ctx.previewArcaneDamage(2)} arcane damage to`,
-      );
-    },
-    onChoose(ctx, hook, option) {
-      if (resolveUsurp(ctx, hook, option)) return;
-      if (hook === "iar-vexing-target") dealArcaneToTarget(ctx, option, 2);
-    },
-  }, true),
+  "vexing gloomblade|1": vexingGloomblade(),
+  "vexing gloomblade|2": vexingGloomblade(),
+  "vexing gloomblade|3": vexingGloomblade(),
 
   "embrace sin|2": {
     onPlay(ctx) {

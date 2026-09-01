@@ -1,11 +1,12 @@
 import type { EngineRuntime } from "./runtimePorts.js";
 import { cardAbilitiesSuppressed, dataOf, scriptOf } from "./cardProperties.js";
 import { controlledPermanents, hookSources, lingeringModifierSources } from "./sourceQueries.js";
+import { queueDecisionBehindCrank } from "./decisionQueue.js";
 
 import { logPublic, nameOf } from "./gameLog.js";
 import type { GameStateInternal } from "./runtimeState.js";
 
-import type { CardInstance, PlayerState } from "./state.js";
+import type { CardInstance, PendingDecisionState, PlayerState } from "./state.js";
 import { currentLink, findCardAnywhere, findPermanent } from "./zoneQueries.js";
 import type { CardData } from "@fyendal/shared";
 import { transitionZone } from "./transitions.js";
@@ -182,17 +183,21 @@ export function offerCrankDecision(
   if (
     !allowCrank ||
     !hasCrank(state, runtime, player, card) ||
-    (card.counters?.steam ?? 0) <= 0 ||
-    state.pendingDecision?.chooseHook
+    (card.counters?.steam ?? 0) <= 0
   ) return false;
-  state.pendingDecision = {
+  const decision = {
     player: player.seat,
     kind: "optional-effect",
     prompt: `${nameOf(state, card.cardId)}: Crank — remove a steam counter to gain 1 action point?`,
     options: ["yes", "no"],
+    defaultOption: "yes",
     sourceInstanceId: card.instanceId,
     chooseHook: "engine-crank",
-  };
+  } satisfies PendingDecisionState;
+  if (state.pendingDecision?.chooseHook) {
+    return queueDecisionBehindCrank(state, decision);
+  }
+  state.pendingDecision = decision;
   return true;
 }
 

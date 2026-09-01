@@ -322,6 +322,62 @@ describe("Jarl policy", () => {
       .toEqual(activate);
   });
 
+  it("does not stack Sink Below over Rootbound Carapace to prevent only one damage", () => {
+    const state = createGame({
+      decklists: [jarlDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 12_109_1,
+      startPlayer: 1,
+    });
+    replaceHand(state, ["ROS042", "ASR018"]);
+    const view = projectStateFor(state, 0);
+    const [rootbound, sinkBelow] = view.players[0].hand;
+    view.players[0].hand = [sinkBelow!];
+    view.phase = "reaction";
+    view.priorityPlayer = 0;
+    view.pendingDecision = {
+      player: 0,
+      kind: "defense-reaction",
+      prompt: "Play a defense reaction or pass",
+    };
+    view.chain = [{
+      attackingCard: { instanceId: 84_002, cardId: "MON293", owner: 1 },
+      defendingCards: [],
+      attackValue: 5,
+      defenseValue: 1,
+      damage: 4,
+      resolved: false,
+      reactions: [],
+    }];
+    view.stack = [{
+      card: rootbound!,
+      seat: 0,
+      label: "Rootbound Carapace",
+      optional: false,
+    }];
+    const playSink: GameIntent = {
+      kind: "play-card",
+      instanceId: sinkBelow!.instanceId,
+      pitchInstanceIds: [],
+    };
+
+    expect(chooseJarlIntent({
+      seat: 0,
+      view,
+      legal: [playSink, { kind: "pass" }],
+      cards: cardData,
+    })).toEqual({ kind: "pass" });
+
+    view.players[0].life = 1;
+    expect(chooseJarlIntent({
+      seat: 0,
+      view,
+      legal: [playSink, { kind: "pass" }],
+      cards: cardData,
+    })).toEqual(playSink);
+  });
+
   it("gives Enlightened Strike go again to convert a three-card hand into a hammer attack", () => {
     const state = createGame({
       decklists: [jarlDeck(), decklists.dorinthea],
