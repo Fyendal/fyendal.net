@@ -259,7 +259,6 @@
   .intro-panel { text-align: center; }
   .intro-logo { width: min(180px, 52vw); }
   .intro-title { font-size: 25px; }
-  .intro-features { text-align: left; }
   .intro-stats { justify-content: center; flex-wrap: wrap; gap: 14px; }
   .site-footer { padding-inline: 14px; }
 

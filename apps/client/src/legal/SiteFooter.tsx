@@ -7,8 +7,8 @@ export function SiteFooter() {
   return (
     <footer className="site-footer">
       <nav className="site-footer-links">
-        <a href="/terms">Terms of Service</a>
-        <a href="/privacy">Privacy Policy</a>
+        <a href="/terms/">Terms of Service</a>
+        <a href="/privacy/">Privacy Policy</a>
       </nav>
       <p className="site-footer-legal">
         Fyendal is in no way affiliated with Legend Story Studios. Legend Story Studios®, Flesh and
