@@ -22,7 +22,7 @@ import {
 } from "./accounts.js";
 import {
   createBugReport,
-  dismissFixedBugReportNotification,
+  dismissFixedBugReportNotifications,
   listFixedBugReportNotifications,
 } from "./bugReports.js";
 import { consoleError } from "./logging.js";
@@ -394,16 +394,10 @@ export function createApiServer(deps: ApiDeps): http.Server {
       }
       return { status: 200, body: { ok: true, reportId: result.reportId } };
     },
-    "/api/bug-report-notifications/dismiss": async (body, user) => {
+    "/api/bug-report-notifications/dismiss": async (_body, user) => {
       if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };
-      const dismissed = await dismissFixedBugReportNotification(
-        deps.db,
-        user.id,
-        field(body, "reportId"),
-      );
-      return dismissed
-        ? { status: 200, body: { ok: true } }
-        : { status: 404, body: { ok: false, error: "notification not found" } };
+      await dismissFixedBugReportNotifications(deps.db, user.id);
+      return { status: 200, body: { ok: true } };
     },
     "/api/decks/import": async (body, user) => {
       if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };

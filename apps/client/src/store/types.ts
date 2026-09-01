@@ -89,7 +89,7 @@ export interface StoreState {
   reportBug: (description: string) => Promise<BugReportResult>;
   bugReportNotifications: FixedBugReportNotification[];
   refreshBugReportNotifications: () => Promise<void>;
-  dismissBugReportNotification: (reportId: string) => Promise<void>;
+  dismissBugReportNotifications: () => Promise<void>;
 
   decks: DeckSummary[];
   decksLoading: boolean;

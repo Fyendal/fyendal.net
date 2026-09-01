@@ -644,7 +644,10 @@ describe("client connection and account race fences", () => {
       if (url.endsWith("/api/bug-report-notifications")) {
         return Promise.resolve(jsonResponse({
           ok: true,
-          notifications: [{ reportId: "report-123", fixedAt: 123 }],
+          notifications: [
+            { reportId: "report-123", fixedAt: 123 },
+            { reportId: "report-456", fixedAt: 456 },
+          ],
         }));
       }
       throw new Error(`unexpected fetch ${url}`);
@@ -655,14 +658,15 @@ describe("client connection and account race fences", () => {
     await useStore.getState().refreshBugReportNotifications();
     expect(useStore.getState().bugReportNotifications).toEqual([
       { reportId: "report-123", fixedAt: 123 },
+      { reportId: "report-456", fixedAt: 456 },
     ]);
-    await useStore.getState().dismissBugReportNotification("report-123");
+    await useStore.getState().dismissBugReportNotifications();
     expect(useStore.getState().bugReportNotifications).toEqual([]);
     expect(fetchMock).toHaveBeenLastCalledWith(
       "http://localhost:8080/api/bug-report-notifications/dismiss",
       expect.objectContaining({
         method: "POST",
-        body: JSON.stringify({ reportId: "report-123" }),
+        body: "{}",
       }),
     );
   });

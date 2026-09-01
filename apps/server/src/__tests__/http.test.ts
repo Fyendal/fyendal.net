@@ -684,7 +684,7 @@ describe("account rights", () => {
     const dismissed = await fetch(`${url}/api/bug-report-notifications/dismiss`, {
       method: "POST",
       headers: { ...headers, "Content-Type": "application/json" },
-      body: JSON.stringify({ reportId: reportedBody.reportId }),
+      body: "{}",
     });
     expect(dismissed.status).toBe(200);
     expect(await dismissed.json()).toEqual({ ok: true });
