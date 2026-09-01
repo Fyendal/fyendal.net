@@ -8,6 +8,7 @@ function defenderCardsById(
   const cards = [
     ...stagedCards,
     ...player.hand,
+    ...player.arsenal,
     ...Object.values(player.equipment).flatMap((card) => card ? [card] : []),
     ...player.weapons,
     ...player.board,

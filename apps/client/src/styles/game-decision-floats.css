@@ -16,6 +16,47 @@
   font-size: 13px;
   text-align: center;
 }
+.decision-guidance-info {
+  display: inline-grid;
+  width: 15px;
+  height: 15px;
+  margin-left: .45em;
+  place-items: center;
+  border: 1px solid #a99f8a;
+  border-radius: 50%;
+  color: #cbbd9d;
+  cursor: help;
+  font: 700 10px/1 "Segoe UI", system-ui, sans-serif;
+  vertical-align: .1em;
+}
+.decision-guidance-info:focus-visible {
+  outline: 1px solid #e6c96a;
+  outline-offset: 2px;
+}
+.decision-guidance-tooltip-accessible {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+.decision-guidance-tooltip-floating {
+  position: fixed;
+  z-index: 30;
+  width: min(240px, 72vw);
+  padding: 7px 9px;
+  border: 1px solid #806334;
+  border-radius: 4px;
+  background: #120c06f5;
+  box-shadow: 0 6px 16px #000a;
+  color: #e6dcc6;
+  font: 12px/1.35 "Segoe UI", system-ui, sans-serif;
+  pointer-events: none;
+  text-align: left;
+  transform: translateX(-50%);
+}
 /* every decision stacks the same way: prompt centered above its options */
 .decision-options { flex-direction: column; align-items: center; }
 .decision-options .decision-prompt { text-align: center; }

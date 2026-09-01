@@ -33,6 +33,7 @@ function renderPlayerHalf(
   playerView: PlayerView,
   mine = true,
   visibleDeckTop?: PlayerView["visibleDeckTop"],
+  defendFromArsenal?: number,
 ): string {
   return renderToStaticMarkup(
     <PlayerHalf
@@ -50,7 +51,7 @@ function renderPlayerHalf(
           playableArsenal: new Set(),
           playableZones: new Map(),
           activatable: new Set(),
-          stageableDefenders: new Set(),
+          stageableDefenders: new Set(defendFromArsenal === undefined ? [] : [defendFromArsenal]),
           canPass: false,
           canCloseChain: false,
         },
@@ -59,7 +60,7 @@ function renderPlayerHalf(
         stagedIds: new Set(),
         committedDefenderIds: new Set(),
         optimisticallyHiddenIds: new Set(),
-        defending: false,
+        defending: defendFromArsenal !== undefined,
         onStage: () => undefined,
         onActivate: () => undefined,
         onSelect: () => undefined,
@@ -152,5 +153,23 @@ describe("PlayerHalf", () => {
     }, false);
 
     expect(html).toContain('data-motion-card="1:arsenal:opaque"');
+  });
+
+  it("makes a stageable arsenal defender highlighted and clickable", () => {
+    const arsenalCard = {
+      instanceId: 30,
+      cardId: "TST-AMBUSH",
+      owner: 0,
+      faceDown: true,
+    };
+    const html = renderPlayerHalf({
+      ...player,
+      arsenal: [arsenalCard],
+      arsenalCount: 1,
+    }, true, undefined, arsenalCard.instanceId);
+
+    expect(html).toMatch(
+      /class="card card-zone [^"]*card-highlight[^"]*card-clickable"[^>]*data-cardid="TST-AMBUSH"/,
+    );
   });
 });

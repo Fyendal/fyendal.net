@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 import { decisionFloatDragKey } from "./DecisionFloat.js";
 import { BloodModeDecision } from "./decision/BloodModeDecision.js";
 import { ActionTargetCards, RevealedChoiceCards } from "./decision/CardChoices.js";
+import type { PendingDecisionModel } from "./decision/DecisionModels.js";
+import { PendingDecisionPanel } from "./decision/PendingDecisionPanel.js";
 import {
   ActionConfirmation,
   ArsenalSkipConfirmation,
@@ -157,7 +159,63 @@ describe("decision float drag identity", () => {
   });
 });
 
+describe("priority guidance help", () => {
+  function pendingModel(kind: "defense-reaction" | "optional-effect"): PendingDecisionModel {
+    return {
+      decision: { player: 0, kind, prompt: "Defense reaction window — play a reaction or pass" },
+      isMine: true,
+      decidingName: "Hero",
+      canPass: true,
+      defendPitchIds: new Set(),
+      hand: [],
+      defendSel: [],
+      selectedPitchIds: [],
+      onTogglePitch: () => undefined,
+      resourcePaymentSelected: 0,
+      resourcePaymentRequired: 0,
+      confirmSkipArsenal: false,
+      onRequestPass: () => undefined,
+      onConfirmSkipArsenal: () => undefined,
+      onCancelSkipArsenal: () => undefined,
+      onSend: () => undefined,
+    };
+  }
+
+  it("explains how to disable future guidance from a reaction prompt", () => {
+    const html = renderToStaticMarkup(createElement(PendingDecisionPanel, {
+      model: pendingModel("defense-reaction"),
+      viewerSeat: 0,
+    }));
+
+    expect(html).toContain('class="decision-guidance-info"');
+    expect(html).toMatch(
+      /class="decision-prompt">Defense reaction window<br\/>Play a reaction or pass<span[^>]*class="decision-guidance-info"/,
+    );
+    expect(html).toContain("Uncheck Show guidance in Settings to disable these prompts.");
+    expect(html).not.toContain("Don&#x27;t show this again");
+  });
+
+  it("does not add the guidance opt-out to required decisions", () => {
+    const html = renderToStaticMarkup(createElement(PendingDecisionPanel, {
+      model: pendingModel("optional-effect"),
+      viewerSeat: 0,
+    }));
+
+    expect(html).not.toContain("decision-guidance-info");
+  });
+});
+
 describe("scripted card-choice presentation", () => {
+  it("replaces a guidance dash with a line break", () => {
+    const html = renderToStaticMarkup(createElement(DecisionPrompt, {
+      prompt: "Command and Conquer triggers: On hit — play an instant or pass",
+      breakOnDash: true,
+    }));
+
+    expect(html).toContain("Command and Conquer triggers: On hit<br/>Play an instant or pass");
+    expect(html).not.toContain(" — ");
+  });
+
   it("makes a leading card name in the prompt hover-inspectable", () => {
     const html = renderToStaticMarkup(createElement(DecisionPrompt, {
       prompt: "Reverent Rerebrace: pay 1 and destroy this?",

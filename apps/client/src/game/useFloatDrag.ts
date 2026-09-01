@@ -33,7 +33,7 @@ export function useFloatDrag(opts?: {
     // Mobile floats are positioned as scrollable sheets. Let touch gestures
     // scroll their contents instead of capturing them as drag operations.
     if (window.matchMedia("(max-width: 700px)").matches) return;
-    if ((e.target as HTMLElement).closest("button, .card-clickable")) return;
+    if ((e.target as HTMLElement).closest("button, .card-clickable, .decision-guidance-info")) return;
     const rect = e.currentTarget.getBoundingClientRect();
     drag.current = {
       resetKey,
