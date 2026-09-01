@@ -1,5 +1,10 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import { attackAbility, buffNextAttack, isSwordAttack } from "./shared-helpers.js";
+import {
+  resolveSharpenFollowup,
+  SHARPEN_FOLLOWUP,
+  sharpenSword,
+} from "./aha/warrior-sharpen.js";
 
 const FLURRY = "SBL036";
 
@@ -13,55 +18,18 @@ function swords(ctx: ScriptCtx): readonly Card[] {
   return ctx.player(ctx.seat).weapons.filter((card) => isSword(ctx, card));
 }
 
-function sharpen(ctx: ScriptCtx, instanceId: number, count = 1): number | undefined {
-  const sword = swords(ctx).find((card) => card.instanceId === instanceId);
-  if (!sword) return;
-  const extra = ctx.getFlag("player", "ahaExtraSharpen") === true ? 1 : 0;
-  if (extra) ctx.setFlag("player", "ahaExtraSharpen", false);
-  ctx.addCounter(instanceId, "power", count + extra);
-  ctx.setCardCounter(instanceId, "sharpenedTurn", ctx.state.turn);
-  ctx.setFlag(
-    "player",
-    "clearWeaponPowerCountersAtTurn",
-    ctx.state.activePlayer === ctx.seat ? ctx.state.turn : ctx.state.turn + 1,
-  );
-  ctx.logPublic(`${ctx.cardData(sword.cardId).name} is sharpened ${count + extra} time(s)`);
-  if (ctx.cardData(sword.cardId).name !== "Zenith Blade") return;
-  const rerebrace = Object.values(ctx.player(ctx.seat).equipment).find((card) =>
-    card && ctx.cardData(card.cardId).name === "Reverent Rerebrace"
-  );
-  if (!rerebrace) return;
-  ctx.setCardCounter(rerebrace.instanceId, "sharpenTarget", sword.instanceId);
-  ctx.requestPaymentFrom(
-    rerebrace.instanceId,
-    "rerebrace-sharpen",
-    "Reverent Rerebrace: pay 1 and destroy this to sharpen an additional time?",
-    1,
-  );
-  return rerebrace.instanceId;
-}
-
 function chooseSword(ctx: ScriptCtx, hook: string, prompt: string): void {
   const choices = swords(ctx);
-  if (choices.length === 1) sharpen(ctx, choices[0]!.instanceId);
+  if (choices.length === 1) sharpenSword(ctx, choices[0]!.instanceId);
   else if (choices.length > 1) ctx.requestCardChoice(hook, prompt, choices.map((card) => card.instanceId));
 }
 
 function sharpenAction(threshold: number, payoff: "flurry" | "discount"): CardScript {
-  const applyPayoff = (ctx: ScriptCtx, id: number) => {
-    const sword = swords(ctx).find((card) => card.instanceId === id);
-    if (Number(sword?.counters?.power ?? 0) < threshold) return;
-    if (payoff === "flurry") ctx.createToken(FLURRY);
-    else buffNextAttack(ctx, { attackActivationCostReduction: 1, appliesToInstanceId: id });
-  };
   const finish = (ctx: ScriptCtx, id: number) => {
-    const rerebraceId = sharpen(ctx, id);
-    if (rerebraceId === undefined) {
-      applyPayoff(ctx, id);
-      return;
-    }
-    ctx.setCardCounter(rerebraceId, "sharpenPayoffThreshold", threshold);
-    ctx.setCardCounter(rerebraceId, "sharpenPayoffKind", payoff === "flurry" ? 1 : 2);
+    sharpenSword(ctx, id, 1, {
+      threshold,
+      kind: payoff === "flurry" ? SHARPEN_FOLLOWUP.SBL_FLURRY : SHARPEN_FOLLOWUP.DISCOUNT,
+    });
   };
   return {
     canPlay: (ctx) => swords(ctx).length > 0,
@@ -102,12 +70,15 @@ export const aha: Record<string, CardScript> = {
       canActivate: (ctx) => swords(ctx).length > 0,
       onActivate(ctx) { chooseSword(ctx, "hala-sharpen", "Hala: choose a sword to sharpen"); },
     },
-    onChoose(ctx, hook, option) { if (hook === "hala-sharpen") sharpen(ctx, Number(option)); },
+    onChoose(ctx, hook, option) { if (hook === "hala-sharpen") sharpenSword(ctx, Number(option)); },
   },
   "zenith blade|0": {
     activated: attackAbility(1),
     onAttackDeclared(ctx) {
-      if (Number(ctx.self.counters?.sharpenedTurn) === ctx.state.turn) ctx.grantGoAgain();
+      if (
+        Number(ctx.self.counters?.sharpenedTurn) === ctx.state.turn &&
+        Number(ctx.getFlag("player", `attackedInstance:${ctx.self.instanceId}`)) === 1
+      ) ctx.grantGoAgain();
     },
   },
   "anticipating gaze|0": {
@@ -137,23 +108,22 @@ export const aha: Record<string, CardScript> = {
   },
   "reverent rerebrace|0": {
     onChoose(ctx, hook, option) {
+      if (hook === "rerebrace-honed-top") {
+        if (option !== "no") ctx.putOnDeckTop(Number(option));
+        return;
+      }
       if (hook !== "rerebrace-sharpen") return;
       const target = ctx.getCounter("sharpenTarget");
-      const threshold = ctx.getCounter("sharpenPayoffThreshold");
-      const payoff = ctx.getCounter("sharpenPayoffKind");
-      if (threshold) ctx.addCounter(ctx.self.instanceId, "sharpenPayoffThreshold", -threshold);
-      if (payoff) ctx.addCounter(ctx.self.instanceId, "sharpenPayoffKind", -payoff);
+      const threshold = ctx.getCounter("sharpenFollowupThreshold");
+      const payoff = ctx.getCounter("sharpenFollowupKind");
+      ctx.setCardCounter(ctx.self.instanceId, "sharpenFollowupThreshold", 0);
+      ctx.setCardCounter(ctx.self.instanceId, "sharpenFollowupKind", 0);
       if (option === "paid") {
         ctx.addCounter(target, "power", 1);
         ctx.destroySelf();
         ctx.logPublic("Reverent Rerebrace sharpens Zenith Blade an additional time");
       }
-      const sword = swords(ctx).find((card) => card.instanceId === target);
-      if (!threshold || Number(sword?.counters?.power ?? 0) < threshold) return;
-      if (payoff === 1) ctx.createToken(FLURRY);
-      else if (payoff === 2) {
-        buffNextAttack(ctx, { attackActivationCostReduction: 1, appliesToInstanceId: target });
-      }
+      resolveSharpenFollowup(ctx, target, threshold, payoff);
     },
   },
   "silverstride dodgers|0": {
@@ -228,10 +198,10 @@ export const aha: Record<string, CardScript> = {
     canPlay: (ctx) => swords(ctx).length > 0,
     onPlay(ctx) {
       const choices = swords(ctx);
-      if (choices.length === 1) sharpen(ctx, choices[0]!.instanceId, 2);
+      if (choices.length === 1) sharpenSword(ctx, choices[0]!.instanceId, 2);
       else ctx.requestCardChoice("brimming", "Choose a sword to sharpen twice", choices.map((card) => card.instanceId));
     },
-    onChoose(ctx, hook, option) { if (hook === "brimming") sharpen(ctx, Number(option), 2); },
+    onChoose(ctx, hook, option) { if (hook === "brimming") sharpenSword(ctx, Number(option), 2); },
   },
   "edict of steel|2": sharpenAction(2, "flurry"),
   "edict of steel|3": sharpenAction(3, "flurry"),
@@ -256,14 +226,10 @@ export const aha: Record<string, CardScript> = {
     onPlay(ctx) {
       const choices = swords(ctx);
       if (choices.length === 1) {
-        sharpen(ctx, choices[0]!.instanceId);
-        if (Number(choices[0]!.counters?.power ?? 0) >= 3) {
-          ctx.addModifier({
-            scope: "next-attack",
-            appliesToInstanceId: choices[0]!.instanceId,
-            onDefendedDealDamage: 1,
-          });
-        }
+        sharpenSword(ctx, choices[0]!.instanceId, 1, {
+          threshold: 3,
+          kind: SHARPEN_FOLLOWUP.DEFENDED_DAMAGE,
+        });
       } else if (choices.length > 1) {
         ctx.requestCardChoice("indefensible-sharpen", "Choose a sword to sharpen", choices.map((card) => card.instanceId));
       }
@@ -271,22 +237,17 @@ export const aha: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook !== "indefensible-sharpen") return;
       const id = Number(option);
-      sharpen(ctx, id);
-      const sword = swords(ctx).find((card) => card.instanceId === id);
-      if (Number(sword?.counters?.power ?? 0) >= 3) {
-        ctx.addModifier({
-          scope: "next-attack",
-          appliesToInstanceId: id,
-          onDefendedDealDamage: 1,
-        });
-      }
+      sharpenSword(ctx, id, 1, {
+        threshold: 3,
+        kind: SHARPEN_FOLLOWUP.DEFENDED_DAMAGE,
+      });
     },
   },
   "shuck|3": { onPlay: (ctx) => { ctx.createToken(FLURRY); } },
   "visit the dawnsmith|3": {
     triggers: [{ event: "start-of-turn", label: "Destroy Visit the Dawnsmith and sharpen swords", effect(ctx) {
       ctx.destroySelf();
-      for (const sword of swords(ctx)) sharpen(ctx, sword.instanceId);
+      for (const sword of swords(ctx)) sharpenSword(ctx, sword.instanceId);
     } }],
   },
 };

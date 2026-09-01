@@ -1423,6 +1423,35 @@ describe("Armory Decks — rules regression coverage", () => {
     expect(g.state.players[0]!.equipment.arms).toBeUndefined();
   });
 
+  it("Reverent Rerebrace replaces Sharpening Sparks and Zenith Blade gains go again", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "hala, bladesaint of the vow|0",
+          weapons: ["zenith blade|0"],
+          hand: ["sharpening sparks|1"],
+          resources: 2,
+          equipment: { ...NO_EQUIPMENT, arms: "reverent rerebrace|0" },
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.attackWithWeapon("zenith blade|0")
+      .blockWith()
+      .react("sharpening sparks|1")
+      .settle();
+
+    expect(g.state.pendingDecision?.prompt).toContain("Reverent Rerebrace");
+    expect(g.state.chain.at(-1)?.goAgain).toBe(true);
+
+    g.chooseOption("pay 1");
+    expect(g.state.players[0]!.weapons[0]!.counters?.power).toBe(2);
+    expect(g.state.players[0]!.equipment.arms).toBeUndefined();
+    g.expectAP(0, 1);
+  });
+
   it("Polished Blade removes a chosen number of counters and modes", () => {
     const g = scenario({
       seats: [

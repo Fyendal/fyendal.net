@@ -1973,9 +1973,6 @@ export class PgRoomStore {
       const seatIdx = seatForCredentials(room, credentials);
       if (seatIdx === null) return { error: "not a player in this room" };
       const seat = room.seats[seatIdx]!;
-      if (matchPrepPhase(room) === "choose-first") {
-        return { error: "both decks are locked in" };
-      }
       seat.ready = false;
       return {
         room,
