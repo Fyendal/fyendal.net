@@ -15,13 +15,11 @@ const NAMED_COUNTER_KEYS = new Set([
   "balance",
   "bind",
   "doom",
-  "flow",
   "frost",
   "haunt",
   "lessons",
   "rust",
   "sand",
-  "stain",
   "storm",
 ]);
 export const CARD_IMAGE_ASPECT_RATIO = 546 / 762;
@@ -237,6 +235,8 @@ export function CardFace({
   const energyCounters = card.counters?.energy ?? 0;
   const suspenseCounters = card.counters?.suspense ?? 0;
   const verseCounters = card.counters?.verse ?? 0;
+  const flowCounters = card.counters?.flow ?? 0;
+  const stainCounters = card.counters?.stain ?? 0;
   const holo = (card.counters?.holo ?? 0) > 0;
   const arcaneModifier = card.counters?.arcaneBonus ?? 0;
   const attacked = (card.counters?.attacked ?? 0) > 0;
@@ -257,6 +257,8 @@ export function CardFace({
       energyCounters > 0 ||
       suspenseCounters > 0 ||
       verseCounters > 0 ||
+      flowCounters > 0 ||
+      stainCounters > 0 ||
       holo ||
       arcaneModifier !== 0 ||
       attacked ||
@@ -472,6 +474,24 @@ export function CardFace({
               icon="/icons/verse.png"
               tooltip={counterTooltip(verseCounters, "verse")}
               value={String(verseCounters)}
+            />
+          ) : null}
+          {flowCounters > 0 ? (
+            <CounterOverlay
+              cardInstanceId={card.instanceId}
+              kind="flowc"
+              icon="/icons/flow.png"
+              tooltip={counterTooltip(flowCounters, "flow")}
+              value={String(flowCounters)}
+            />
+          ) : null}
+          {stainCounters > 0 ? (
+            <CounterOverlay
+              cardInstanceId={card.instanceId}
+              kind="stainc"
+              icon="/icons/stain.png"
+              tooltip={counterTooltip(stainCounters, "stain")}
+              value={String(stainCounters)}
             />
           ) : null}
           {holo ? (

@@ -367,6 +367,26 @@ describe("CardFace counter icons", () => {
     expect(html).not.toContain("3 verse</div>");
   });
 
+  it("renders flow and stain counters over their icons instead of text chips", () => {
+    const html = renderToStaticMarkup(createElement(CardFace, {
+      card: {
+        instanceId: 53,
+        cardId: "UPR183",
+        owner: 0,
+        counters: { flow: 2, stain: 3 },
+      },
+    }));
+
+    expect(html).toContain("/icons/flow.png");
+    expect(html).toContain("2 flow counters");
+    expect(html).toContain("card-counter-53-flowc");
+    expect(html).toContain("/icons/stain.png");
+    expect(html).toContain("3 stain counters");
+    expect(html).toContain("card-counter-53-stainc");
+    expect(html).not.toContain("2 flow</div>");
+    expect(html).not.toContain("3 stain</div>");
+  });
+
   it("renders Holo as a binary icon without a number", () => {
     const html = renderToStaticMarkup(createElement(CardFace, {
       card: {

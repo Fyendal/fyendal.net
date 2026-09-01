@@ -8,7 +8,6 @@ import {
   intentCard,
   incomingAttackDamage,
   isAttack,
-  isOpeningTurn,
   opponentDamageEffectOnStack,
   optionCard,
   ownCards,
@@ -20,6 +19,8 @@ import {
   scoreDefenseIntent,
   scoreDefenseReaction,
   scoreSpendCardChoice,
+  shouldPreserveOpeningHand,
+  spendsOpeningArsenalReserve,
   visibleOpponentDamageAmount,
   type BotPolicyInput,
 } from "./policy.js";
@@ -404,8 +405,9 @@ function scorePlay(
   const card = intentCard(intent, own);
   const data = card ? input.cards[card.cardId] : undefined;
   if (!card || !data) return -50;
+  if (spendsOpeningArsenalReserve(intent, input, own)) return -100;
   const functional = key(data);
-  const opening = isOpeningTurn(input);
+  const opening = shouldPreserveOpeningHand(input);
   const aggro = opponentIsAggro(input);
   const gravy = opponentIsGravy(input);
   const enemyCompass = compass(input);

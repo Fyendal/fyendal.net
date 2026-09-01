@@ -258,6 +258,49 @@ function spentCardIds(
   return spent;
 }
 
+function isOffensivePlayIntent(
+  intent: GameIntent,
+  input: BotPolicyInput,
+  own: ReadonlyMap<number, CardView>,
+): boolean {
+  const card = intentCard(intent, own);
+  const data = card ? input.cards[card.cardId] : undefined;
+  return isAttack(data) || data?.cardType === "weapon";
+}
+
+function preservesArsenalCard(
+  intent: GameIntent,
+  input: BotPolicyInput,
+  own: ReadonlyMap<number, CardView>,
+): boolean {
+  const spent = spentCardIds(intent, input, own);
+  const me = input.view.players[input.seat];
+  return me.hand.some((card) => !spent.has(card.instanceId)) ||
+    me.arsenal.some((card) => !spent.has(card.instanceId));
+}
+
+/** During the low-hand opening exception, reserve a card after attacking when
+ * possible. An all-in first attack remains available only when no legal
+ * attack can both pressure the opponent and retain an arsenal card. */
+export function spendsOpeningArsenalReserve(
+  intent: GameIntent,
+  input: BotPolicyInput,
+  own: ReadonlyMap<number, CardView> = ownCards(input),
+): boolean {
+  if (!isOpeningTurn(input) || shouldPreserveOpeningHand(input) ||
+    preservesArsenalCard(intent, input, own)) return false;
+
+  const attacks = input.view.turnFacts?.players[input.seat].attacks ?? 0;
+  if (attacks > 0) return true;
+
+  const attacksNow = input.legal.filter((candidate) =>
+    isOffensivePlayIntent(candidate, input, own)
+  );
+  if (attacksNow.some((candidate) => preservesArsenalCard(candidate, input, own))) return true;
+
+  return !isOffensivePlayIntent(intent, input, own) && attacksNow.length > 0;
+}
+
 /**
  * Value lost from the single best card that could occupy arsenal next turn.
  * Spending an interchangeable card costs nothing here; spending the unique
@@ -373,6 +416,13 @@ export function isAttack(data: CardData | undefined): boolean {
 
 export function isOpeningTurn(input: BotPolicyInput): boolean {
   return input.view.turn === 1 && input.view.activePlayer === input.seat;
+}
+
+/** Preserve the normal first-turn hand-refill advantage unless the opponent
+ * has already spent at least half of their opening hand. At two or fewer
+ * cards, make them defend instead of giving them a free refill. */
+export function shouldPreserveOpeningHand(input: BotPolicyInput): boolean {
+  return isOpeningTurn(input) && input.view.players[1 - input.seat]!.handCount > 2;
 }
 
 export function isOpeningTurnDefense(input: BotPolicyInput): boolean {

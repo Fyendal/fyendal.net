@@ -49,6 +49,25 @@ describe("Bravo policy", () => {
     expect(chooseBravoIntent(inputFor(state))).toEqual({ kind: "pass" });
   });
 
+  it("attacks at exactly two opposing cards while retaining an arsenal card", () => {
+    const state = createGame({
+      decklists: [bravoDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9614,
+      startPlayer: 0,
+    });
+    replaceHand(state, 0, ["SBR013", "SBR023", "SBR022", "MPG047"]);
+    replaceHand(state, 1, ["WTR121", "WTR122"]);
+
+    const intent = chooseBravoIntent(inputFor(state));
+
+    expect(intent).toMatchObject({ kind: "play-card" });
+    if (intent.kind !== "play-card") return;
+    const spent = new Set([intent.instanceId, ...intent.pitchInstanceIds]);
+    expect(state.players[0]!.hand.some((card) => !spent.has(card.instanceId))).toBe(true);
+  });
+
   it.each([
     [40, "defend"],
     [20, "stage-defenders"],

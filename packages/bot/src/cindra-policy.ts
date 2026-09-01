@@ -8,7 +8,6 @@ import {
   functionalKey as key,
   intentCard,
   isAttack,
-  isOpeningTurn,
   optionCard,
   opponentAllies,
   ownCards,
@@ -22,6 +21,8 @@ import {
   scoreDefenseIntent,
   scoreDefenseReaction,
   scoreSpendCardChoice,
+  shouldPreserveOpeningHand,
+  spendsOpeningArsenalReserve,
   targetableAttackIntent,
   type BotPolicyInput,
   type TargetableAttackIntent,
@@ -1492,7 +1493,8 @@ function scorePlay(
   if (!card || !data) return -100;
   if (!isCindraTurn(input) && isProactiveInstant(intent, data)) return -10_000;
   const functional = key(data);
-  if (isOpeningTurn(input) && functional !== CARD.flickKnives) return -10_000;
+  if (shouldPreserveOpeningHand(input) && functional !== CARD.flickKnives) return -10_000;
+  if (spendsOpeningArsenalReserve(intent, input, own)) return -10_000;
   const excludedIds = new Set([card.instanceId, ...pitchIds(intent)]);
   const context: PlayScoreContext = {
     card,

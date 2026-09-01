@@ -416,7 +416,8 @@
 .c-defc .c-ovl-icon {
   filter: none;
 }
-.c-holo .c-ovl-icon {
+.c-holo .c-ovl-icon,
+.c-stainc .c-ovl-icon {
   filter: invert(1);
 }
 .c-ovl-num {
