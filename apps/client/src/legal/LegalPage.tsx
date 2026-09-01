@@ -1,4 +1,4 @@
-// Terms of Service and Privacy Policy, rendered at /terms and /privacy.
+// Terms of Service and Privacy Policy, rendered at /terms/ and /privacy/.
 // Plain-language, matching what the service actually does — keep them in
 // sync when data handling changes (accounts, decks, replays, and bug reports).
 
@@ -51,7 +51,7 @@ const TERMS: Section[] = [
   {
     title: "Changes",
     body: [
-      `These terms may change; the current version is always at /terms. Continued use after a change means acceptance. Questions: ${CONTACT}.`,
+      `These terms may change; the current version is always at /terms/. Continued use after a change means acceptance. Questions: ${CONTACT}.`,
     ],
   },
 ];
@@ -102,7 +102,7 @@ const PRIVACY: Section[] = [
   {
     title: "Changes",
     body: [
-      `This policy may change; the current version is always at /privacy. Questions: ${CONTACT}.`,
+      `This policy may change; the current version is always at /privacy/. Questions: ${CONTACT}.`,
     ],
   },
 ];

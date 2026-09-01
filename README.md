@@ -1,5 +1,7 @@
 # Fyendal
 
+[Play Flesh and Blood online at fyendal.net](https://fyendal.net/).
+
 Fyendal is an open-source, server-authoritative platform for playing and
 testing Flesh and Blood decks in the browser. It automates game rules, keeps
 hidden information on the server, and supports both player matches and

@@ -10,6 +10,52 @@ const GameBoard = lazy(() => import("./game/GameBoard.js").then((module) => ({ d
 const ReplayBar = lazy(() => import("./replay/ReplayBar.js").then((module) => ({ default: module.ReplayBar })));
 const LegalPage = lazy(() => import("./legal/LegalPage.js").then((module) => ({ default: module.LegalPage })));
 
+function setMetaContent(selector: string, content: string): void {
+  let element = document.head.querySelector<HTMLMetaElement>(selector);
+  if (!element) {
+    element = document.createElement("meta");
+    const match = /meta\[(name|property)="([^"]+)"\]/.exec(selector);
+    if (!match) return;
+    const [, attribute, value] = match;
+    if (!attribute || !value) return;
+    element.setAttribute(attribute, value);
+    document.head.append(element);
+  }
+  element.content = content;
+}
+
+function setCanonical(href: string): void {
+  let canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+  if (!canonical) {
+    canonical = document.createElement("link");
+    canonical.rel = "canonical";
+    document.head.append(canonical);
+  }
+  canonical.href = href;
+}
+
+function useRouteMetadata(path: string, privateRoute: boolean): void {
+  useEffect(() => {
+    if (privateRoute) {
+      document.title = "Fyendal — Flesh and Blood Online";
+      setMetaContent('meta[name="robots"]', "noindex, nofollow");
+      return;
+    }
+
+    setMetaContent('meta[name="robots"]', "index, follow");
+    if (path === "/terms" || path === "/terms/") {
+      document.title = "Terms of Service | Fyendal";
+      setCanonical("https://fyendal.net/terms/");
+    } else if (path === "/privacy" || path === "/privacy/") {
+      document.title = "Privacy Policy | Fyendal";
+      setCanonical("https://fyendal.net/privacy/");
+    } else {
+      document.title = "Play Flesh and Blood Online Free | Fyendal";
+      setCanonical("https://fyendal.net/");
+    }
+  }, [path, privateRoute]);
+}
+
 function ScreenFallback() {
   return <div className="screen-loading">Loading…</div>;
 }
@@ -29,6 +75,7 @@ export function App() {
   const path = location.pathname;
   const routeRoomCode = roomCodeFromUrl();
   const savedReplayId = savedReplayIdFromPath(path);
+  useRouteMetadata(path, routeRoomCode !== null || savedReplayId !== null);
   const restoringSavedRoom = screen === "lobby"
     && authUser !== null
     && routeRoomCode !== null
@@ -65,10 +112,10 @@ export function App() {
 
   // legal pages are full-page loads (plain <a href> in the footer); neither
   // path collides with the 6-char room-code pattern
-  if (path === "/terms" || path === "/privacy") {
+  if (path === "/terms" || path === "/terms/" || path === "/privacy" || path === "/privacy/") {
     return (
       <Suspense fallback={<ScreenFallback />}>
-        <LegalPage kind={path === "/terms" ? "terms" : "privacy"} />
+        <LegalPage kind={path.startsWith("/terms") ? "terms" : "privacy"} />
       </Suspense>
     );
   }

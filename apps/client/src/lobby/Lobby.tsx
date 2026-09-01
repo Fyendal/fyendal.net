@@ -9,6 +9,11 @@ import { DiscordLink } from "./DiscordLink.js";
 import { FORMAT_LABELS } from "./FormatBadge.js";
 import { ModalSurface } from "../components/ModalSurface.js";
 import { mobileDeckDestination, mobileLobbyDestinationSelected } from "./mobileNavigation.js";
+import {
+  GuestLandingDetails,
+  GuestLandingHero,
+  LobbyBrand,
+} from "./GuestLanding.js";
 
 const RoomList = lazy(() => import("./RoomList.js").then((module) => ({ default: module.RoomList })));
 const Home = lazy(() => import("./Home.js").then((module) => ({ default: module.Home })));
@@ -16,18 +21,6 @@ const RoomInviteModal = lazy(() => import("./RoomInviteModal.js").then((module) 
 const DeckGrid = lazy(() => import("./DeckGrid.js").then((module) => ({ default: module.DeckGrid })));
 const AccountPanel = lazy(() => import("../auth/AccountPanel.js").then((module) => ({ default: module.AccountPanel })));
 const ReplayLibrary = lazy(() => import("../replay/ReplayLibrary.js").then((module) => ({ default: module.ReplayLibrary })));
-
-function LobbyBrand() {
-  return (
-    <div className="brand">
-      <img className="brand-logo" src="/logo.png" alt="" />
-      <span className="brand-copy">
-        <span className="brand-name">Fyendal</span>
-        <span className="brand-sub">Flesh and Blood online</span>
-      </span>
-    </div>
-  );
-}
 
 function MobileLobbyIcon({ kind }: { kind: "home" | "decks" | "rooms" | "replays" | "more" }) {
   const content = kind === "home" ? (
@@ -208,41 +201,15 @@ export function Lobby() {
         </header>
         {replayError && <p className="error lobby-replay-error">{replayError}</p>}
 
-        <div className="intro-grid">
-          <div className="panel intro-panel">
-            <img className="intro-logo" src="/logo.png" alt="Fyendal" />
-            <h1 className="intro-title">An online platform for Flesh and Blood</h1>
-            <p className="intro-blurb">
-              Play Flesh And Blood for free in your browser with a fully automated rules engine.
-            </p>
-            <ul className="intro-features">
-              <li>
-                <strong>Matchmaking &amp; open rooms</strong> — queue up per format or host a room
-                and share the link
-              </li>
-              <li>
-                <strong>Spectate with a link</strong> — anyone can watch, no account needed
-              </li>
-              <li>
-                <strong>Replays</strong> — player replays are saved for 7 days; export anything
-                you want to keep
-              </li>
-            </ul>
-            {stats && (
-              <div className="intro-stats">
-                <span>
-                  <strong>{stats.inGame}</strong> in game
-                </span>
-                <span>
-                  <strong>{stats.openRooms}</strong> open {stats.openRooms === 1 ? "room" : "rooms"}
-                </span>
-              </div>
-            )}
+        <main id="main-content" className="guest-landing">
+          <div className="intro-grid">
+            <GuestLandingHero stats={stats} />
+            <aside id="create-account" className="intro-auth" aria-label="Account access">
+              <Auth />
+            </aside>
           </div>
-          <div className="intro-auth">
-            <Auth />
-          </div>
-        </div>
+          <GuestLandingDetails />
+        </main>
         {inviteRoom ? <Suspense fallback={null}><RoomInviteModal /></Suspense> : null}
         <SiteFooter />
       {error && <div className="toast">{error}</div>}
