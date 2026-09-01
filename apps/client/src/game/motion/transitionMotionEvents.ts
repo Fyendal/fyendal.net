@@ -65,6 +65,12 @@ function visualFor(
       ? { kind: "face-conceal", card: source.card }
       : { kind: "back" };
   }
+  // A card projected visibly in hand belongs to the viewer. Draw it face-up
+  // from the start; hidden opponent hands have no visible destination card and
+  // continue through the anonymous-back branch above.
+  if (destination.location.kind === "hand") {
+    return { kind: "face", card: destination.card };
+  }
   return sourceVisible
     ? { kind: "face", card: destination.card }
     : { kind: "back-reveal", card: destination.card };

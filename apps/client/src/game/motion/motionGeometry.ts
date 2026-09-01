@@ -1,6 +1,7 @@
 import {
   motionLocationKey,
   type GameMotionEvent,
+  type MoveMotionEvent,
   type MotionLocation,
   type MotionVisual,
 } from "./motionTypes.js";
@@ -12,6 +13,7 @@ import {
 
 export const MOTION_TRAVEL_MS = 320;
 export const MOTION_DECK_BOTTOM_MS = 560;
+export const MOTION_PITCH_GATHER_MS = 180;
 export const MOTION_STAGGER_MS = 45;
 export const MOTION_DRAW_STAGGER_MS = 85;
 export const MOTION_SEQUENCE_GAP_MS = 70;
@@ -39,21 +41,37 @@ export interface MeasuredMotionAnchors {
 export interface MotionFlight {
   id: string;
   phase: MotionTimelinePhase;
-  mode: "move" | "reflow" | "arsenal" | "draw" | "deck-bottom" | "appear" | "settle";
+  mode:
+    | "move"
+    | "reflow"
+    | "arsenal"
+    | "draw"
+    | "hold"
+    | "pitch-gather"
+    | "deck-bottom"
+    | "appear"
+    | "settle";
   start: MotionRect;
   end: MotionRect;
   visual: MotionVisual;
   count: number;
   showCount: boolean;
   delayMs: number;
+  durationMs?: number;
   destinationPresentationKey?: string;
+  maskDestinationWhilePending?: true;
   holdAtSource?: true;
   destinationCoverVisual?: MotionVisual;
   destinationLayer?: "chain" | "stack";
 }
 
-export function motionFlightDurationMs(flight: Pick<MotionFlight, "mode">): number {
-  return flight.mode === "deck-bottom" ? MOTION_DECK_BOTTOM_MS : MOTION_TRAVEL_MS;
+export function motionFlightDurationMs(
+  flight: Pick<MotionFlight, "mode" | "durationMs">,
+): number {
+  if (flight.durationMs !== undefined) return flight.durationMs;
+  if (flight.mode === "deck-bottom") return MOTION_DECK_BOTTOM_MS;
+  if (flight.mode === "pitch-gather") return MOTION_PITCH_GATHER_MS;
+  return MOTION_TRAVEL_MS;
 }
 
 export interface MotionPulse {
@@ -371,6 +389,150 @@ export function resolveMotionBatch(
   };
 }
 
+type PitchBottomEvent = MoveMotionEvent & {
+  source: Extract<MotionLocation, { kind: "pitch" }>;
+  destination: Extract<MotionLocation, { kind: "deck" }> & { position: "bottom" };
+};
+
+function isPitchBottomEvent(event: GameMotionEvent): event is PitchBottomEvent {
+  return event.kind === "move"
+    && event.source.kind === "pitch"
+    && event.destination.kind === "deck"
+    && event.destination.position === "bottom";
+}
+
+function pitchBottomGroups(events: readonly GameMotionEvent[]): PitchBottomEvent[][] {
+  const groups: PitchBottomEvent[][] = [];
+  const groupBySeat = new Map<number, PitchBottomEvent[]>();
+  for (const event of events) {
+    if (!isPitchBottomEvent(event)) continue;
+    let group = groupBySeat.get(event.destination.seat);
+    if (!group) {
+      group = [];
+      groupBySeat.set(event.destination.seat, group);
+      groups.push(group);
+    }
+    group.push(event);
+  }
+  return groups;
+}
+
+function pitchPacketVisual(visual: MotionVisual): MotionVisual {
+  if (visual.kind === "face" || visual.kind === "back-reveal") {
+    return { kind: "face-conceal", card: visual.card };
+  }
+  return visual;
+}
+
+function pitchGatherVisual(visual: MotionVisual): MotionVisual {
+  if (visual.kind === "face-conceal" || visual.kind === "back-reveal") {
+    return { kind: "face", card: visual.card };
+  }
+  return visual;
+}
+
+/** Multiple pitched cards first converge on one deck-sized packet. Reusing the
+ * destination's Y position and dimensions makes the subsequent bottom-deck
+ * flight strictly horizontal regardless of the pitch cards' fanned offsets. */
+function resolvePitchPacketBatches(
+  events: readonly PitchBottomEvent[],
+  previous: MotionAnchorSnapshot,
+  current: MotionAnchorSnapshot,
+  id: string | number,
+  groupIndex: number,
+): GameMotionBatch[] {
+  const resolved = resolveMotionBatch(
+    events,
+    previous,
+    current,
+    `${id}:pitch-source:${groupIndex}`,
+  );
+  if (!resolved || resolved.flights.length !== events.length) {
+    return resolved ? [{ ...resolved, stage: "end-turn" }] : [];
+  }
+
+  const topFlight = resolved.flights.at(-1);
+  if (!topFlight) return [];
+  const packetStart: MotionRect = {
+    left: topFlight.start.left,
+    top: topFlight.end.top,
+    width: topFlight.end.width,
+    height: topFlight.end.height,
+  };
+  const gatherFlights = resolved.flights.map((flight, flightIndex): MotionFlight => {
+    const {
+      destinationPresentationKey: _destinationPresentationKey,
+      destinationCoverVisual: _destinationCoverVisual,
+      destinationLayer: _destinationLayer,
+      ...sourceFlight
+    } = flight;
+    return {
+      ...sourceFlight,
+      id: `${id}:pitch-gather:${groupIndex}:flight:${flightIndex}`,
+      mode: "pitch-gather",
+      end: packetStart,
+      visual: pitchGatherVisual(flight.visual),
+      delayMs: 0,
+      holdAtSource: true,
+    };
+  });
+  const gatherBatch: GameMotionBatch = {
+    id: `${id}:pitch-gather:${groupIndex}`,
+    stage: "end-turn",
+    flights: gatherFlights,
+    connectors: [],
+    pulses: [],
+    durationMs: MOTION_PITCH_GATHER_MS,
+  };
+
+  const packetFlight: MotionFlight = {
+    id: `${id}:pitch-bottom:${groupIndex}:flight:0`,
+    phase: "cleanup",
+    mode: "deck-bottom",
+    start: packetStart,
+    end: topFlight.end,
+    visual: pitchPacketVisual(topFlight.visual),
+    count: 1,
+    showCount: false,
+    delayMs: 0,
+    ...(topFlight.destinationCoverVisual
+      ? { destinationCoverVisual: topFlight.destinationCoverVisual }
+      : {}),
+  };
+  const packetBatch: GameMotionBatch = {
+    id: `${id}:pitch-bottom:${groupIndex}`,
+    stage: "end-turn",
+    flights: [packetFlight],
+    connectors: [],
+    pulses: [],
+    durationMs: MOTION_DECK_BOTTOM_MS,
+  };
+  return [gatherBatch, packetBatch];
+}
+
+/** Keep identity-preserving cards at their pre-transition hand coordinates
+ * while earlier callback batches play. Their authoritative destination nodes
+ * can then remain masked until the real draw reflow takes over. */
+function carryReflowSources(
+  batch: GameMotionBatch,
+  reflows: readonly MotionFlight[],
+): GameMotionBatch {
+  if (reflows.length === 0) return batch;
+  const holds = reflows.map((reflow, index): MotionFlight => ({
+    id: `${batch.id}:hold:${index}`,
+    phase: reflow.phase,
+    mode: "hold",
+    start: reflow.start,
+    end: reflow.start,
+    visual: reflow.visual,
+    count: 1,
+    showCount: false,
+    delayMs: 0,
+    durationMs: batch.durationMs,
+  }));
+  return { ...batch, flights: [...batch.flights, ...holds] };
+}
+
 /** A turn boundary is a presentation barrier, not another delayed phase in a
  * single CSS timeline. The queue completes end-turn motion first, then mounts
  * the new-turn UI and starts this second batch from delay zero. */
@@ -385,14 +547,72 @@ export function resolveMotionBatches(
   for (const event of events) {
     (motionTimelinePhase(event) === "turn-start" ? turnStartEvents : endTurnEvents).push(event);
   }
-  if (turnStartEvents.length === 0) {
+  const pitchGroups = pitchBottomGroups(endTurnEvents);
+  const hasPitchPacket = pitchGroups.some((group) => group.length > 1);
+  if (turnStartEvents.length === 0 && !hasPitchPacket) {
     const batch = resolveMotionBatch(endTurnEvents, previous, current, id);
     return batch ? [batch] : [];
   }
 
   const batches: GameMotionBatch[] = [];
-  const endTurn = resolveMotionBatch(endTurnEvents, previous, current, `${id}:end-turn`);
-  if (endTurn) batches.push({ ...endTurn, stage: "end-turn" });
+  if (hasPitchPacket) {
+    const beforePitch = endTurnEvents.filter((event) => (
+      !isPitchBottomEvent(event) && motionTimelinePhase(event) !== "draw"
+    ));
+    const afterPitch = endTurnEvents.filter((event) => (
+      !isPitchBottomEvent(event) && motionTimelinePhase(event) === "draw"
+    ));
+    const beforePitchBatch = resolveMotionBatch(
+      beforePitch,
+      previous,
+      current,
+      `${id}:end-turn:before-pitch`,
+    );
+    if (beforePitchBatch) batches.push({ ...beforePitchBatch, stage: "end-turn" });
+    for (const [groupIndex, pitchGroup] of pitchGroups.entries()) {
+      if (pitchGroup.length > 1) {
+        batches.push(...resolvePitchPacketBatches(
+          pitchGroup,
+          previous,
+          current,
+          id,
+          groupIndex,
+        ));
+      } else {
+        const pitchBatch = resolveMotionBatch(
+          pitchGroup,
+          previous,
+          current,
+          `${id}:pitch-bottom:${groupIndex}`,
+        );
+        if (pitchBatch) batches.push({ ...pitchBatch, stage: "end-turn" });
+      }
+    }
+    const afterPitchBatch = resolveMotionBatch(
+      afterPitch,
+      previous,
+      current,
+      `${id}:end-turn:after-pitch`,
+    );
+    if (afterPitchBatch) {
+      const reflows = afterPitchBatch.flights.filter((flight) => flight.mode === "reflow");
+      for (const [index, batch] of batches.entries()) {
+        batches[index] = carryReflowSources(batch, reflows);
+      }
+      batches.push({
+        ...afterPitchBatch,
+        stage: "end-turn",
+        flights: afterPitchBatch.flights.map((flight) => (
+          flight.mode === "reflow"
+            ? { ...flight, maskDestinationWhilePending: true as const }
+            : flight
+        )),
+      });
+    }
+  } else {
+    const endTurn = resolveMotionBatch(endTurnEvents, previous, current, `${id}:end-turn`);
+    if (endTurn) batches.push({ ...endTurn, stage: "end-turn" });
+  }
   const turnStart = resolveMotionBatch(
     turnStartEvents,
     previous,

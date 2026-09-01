@@ -28,7 +28,8 @@ import {
 } from "./motionGeometry.js";
 import { useMotionPreference } from "./useMotionPreference.js";
 import {
-  concealMotionDestination,
+  activateMotionDestinationMasks,
+  motionDestinationsRequiringEarlyMask,
   motionDestinationIsMasked,
   refreshMotionDestinationMasks,
   revealMotionDestination,
@@ -66,6 +67,24 @@ export function useGameMotion({
   const batchQueueRef = useRef<MotionBatchQueue>(EMPTY_MOTION_BATCH_QUEUE);
   const maskedElementsRef = useRef<MaskedElementsByBatch>(new Map());
 
+  const activateBatchMasks = useCallback((
+    candidate: GameMotionBatch | null,
+    measuredElements?: ReadonlyMap<string, HTMLElement>,
+  ) => {
+    if (!candidate) return;
+    const arrivals = [...candidate.flights, ...candidate.connectors];
+    if (!arrivals.some((arrival) => arrival.destinationPresentationKey !== undefined)) return;
+    const elements = measuredElements
+      ?? (rootRef.current ? measureMotionAnchors(rootRef.current).cardElements : null);
+    if (!elements) return;
+    activateMotionDestinationMasks(
+      candidate.id,
+      arrivals,
+      elements,
+      maskedElementsRef.current,
+    );
+  }, [rootRef]);
+
   const releaseBatchMasks = useCallback((batchId: string) => {
     const batchMasks = maskedElementsRef.current.get(batchId);
     if (!batchMasks) return;
@@ -100,9 +119,10 @@ export function useGameMotion({
     releaseBatchMasks(batchId);
     const nextQueue = completeMotionBatch(batchQueueRef.current, batchId);
     batchQueueRef.current = nextQueue;
+    activateBatchMasks(nextQueue.active);
     setTurnStartUiReady(!motionQueueBlocksTurnStartUi(nextQueue));
     setBatch(nextQueue.active);
-  }, [releaseBatchMasks]);
+  }, [activateBatchMasks, releaseBatchMasks]);
 
   const arriveFlight = useCallback((
     batchId: string,
@@ -182,18 +202,15 @@ export function useGameMotion({
       cancelMotionQueue();
     }
     for (const nextBatch of nextBatches) {
-      if (nextBatch.flights.length > 0 || nextBatch.connectors.length > 0) {
-        const batchMasks = new Map<string, HTMLElement>();
-        for (const arrival of [...nextBatch.flights, ...nextBatch.connectors]) {
-          const key = arrival.destinationPresentationKey;
-          if (!key) continue;
-          const element = measured.cardElements.get(key);
-          if (!element) continue;
-          concealMotionDestination(element);
-          batchMasks.set(key, element);
-        }
-        if (batchMasks.size > 0) maskedElementsRef.current.set(nextBatch.id, batchMasks);
-      }
+      activateMotionDestinationMasks(
+        nextBatch.id,
+        motionDestinationsRequiringEarlyMask([
+          ...nextBatch.flights,
+          ...nextBatch.connectors,
+        ]),
+        measured.cardElements,
+        maskedElementsRef.current,
+      );
     }
     if (nextBatches.length > 0) {
       const previousActive = batchQueueRef.current.active;
@@ -208,6 +225,7 @@ export function useGameMotion({
       batchQueueRef.current = nextQueue;
       setTurnStartUiReady(!motionQueueBlocksTurnStartUi(nextQueue));
       if (nextQueue.active !== previousActive) {
+        activateBatchMasks(nextQueue.active, measured.cardElements);
         setBatch(nextQueue.active);
       }
     }
