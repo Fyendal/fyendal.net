@@ -24,7 +24,8 @@ function consumeTrackedPrevention(
   targetSeat: number,
   amount: number,
   damageSourceInstanceId?: number,
-): void {
+): Modifier[] {
+  const contributors: Modifier[] = [];
   let remaining = amount;
   for (const modifier of state.modifiers) {
     if (remaining <= 0) break;
@@ -39,7 +40,43 @@ function consumeTrackedPrevention(
     const consumed = Math.min(tracked, remaining);
     modifier.preventNextDamagePool = tracked - consumed;
     remaining -= consumed;
+    contributors.push(modifier);
     if (modifier.preventNextDamagePool <= 0) modifier.consumed = true;
+  }
+  return contributors;
+}
+
+/** Resolve rewards belonging to the individual prevention effects that
+ * contributed to this damage event. A reward may ride the shield modifier or
+ * a companion modifier created by the same source card. A shield may retain
+ * prevention after its one-shot reward has resolved. */
+function applyTrackedPreventionRewards(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  target: PlayerState,
+  contributors: Modifier[],
+): void {
+  for (const contributor of contributors) {
+    const reward = contributor.onPreventCreateToken
+      ? contributor
+      : state.modifiers.find((modifier) =>
+          !modifier.consumed &&
+          modifier.scope === "until-end-of-turn" &&
+          modifier.seat === target.seat &&
+          modifier.sourceInstanceId === contributor.sourceInstanceId &&
+          modifier.onPreventCreateToken !== undefined
+        );
+    const tokenId = reward?.onPreventCreateToken;
+    if (!tokenId) continue;
+    delete reward.onPreventCreateToken;
+    if (reward !== contributor) reward.consumed = true;
+    createTokenFor(
+      state,
+      runtime,
+      target,
+      tokenId,
+      tokenCreationCauseForModifier(state, reward),
+    );
   }
 }
 
@@ -100,7 +137,13 @@ function applyPreventionShields(
     const prevented = Math.min(sh.amount, remaining);
     remaining -= prevented;
     sh.amount -= prevented;
-    consumeTrackedPrevention(state, target.seat, prevented, source.instanceId);
+    const contributors = consumeTrackedPrevention(
+      state,
+      target.seat,
+      prevented,
+      source.instanceId,
+    );
+    applyTrackedPreventionRewards(state, runtime, target, contributors);
     if (sh.amount <= 0) delete source.damagePrevented;
     logPublic(
       state,
@@ -236,26 +279,9 @@ function applyPreventionShields(
     const prevented = Math.min(shield, remaining);
     remaining -= prevented;
     target.flags.preventNextDamage = shield - prevented;
-    consumeTrackedPrevention(state, target.seat, prevented);
+    const contributors = consumeTrackedPrevention(state, target.seat, prevented);
+    applyTrackedPreventionRewards(state, runtime, target, contributors);
     logPublic(state, `${nameOf(state, target.heroCardId)} prevents ${prevented} damage`);
-    // "if you prevent damage this way, create a <token>" (Toe the Line): a
-    // one-shot reward riding an until-end-of-turn modifier of the target
-    const reward = state.modifiers.find(
-      (m) =>
-        m.scope === "until-end-of-turn" &&
-        !m.consumed &&
-        m.onPreventCreateToken &&
-        m.seat === target.seat,
-    );
-    if (reward) {
-      reward.consumed = true;
-      createTokenFor(
-        state, runtime,
-        target,
-        reward.onPreventCreateToken as string,
-        tokenCreationCauseForModifier(state, reward),
-      );
-    }
   }
   if (
     opts?.arcane !== true && remaining < amount &&

@@ -703,7 +703,7 @@ describe("motion geometry", () => {
     expect((flight?.end.top ?? 0) + (flight?.end.height ?? 0) / 2).toBeCloseTo(110);
   });
 
-  it("falls back to a destination pulse when the source cannot be measured", () => {
+  it("settles silently when the source cannot be measured", () => {
     const event: GameMotionEvent = {
       kind: "move",
       source: { kind: "hand", seat: 0 },
@@ -720,11 +720,37 @@ describe("motion geometry", () => {
       5,
     );
 
-    expect(batch?.flights).toEqual([]);
-    expect(batch?.pulses).toEqual([expect.objectContaining({ rect: destination })]);
+    expect(batch).toBeNull();
   });
 
-  it("converts travel into destination-only feedback for reduced motion", () => {
+  it("dissolves a public card at its previous exact footprint", () => {
+    const source = rect(220, 140, 90, 126);
+    const batch = resolveMotionBatch(
+      [{
+        kind: "disappear",
+        source: { kind: "board", seat: 1 },
+        visual: {
+          kind: "face",
+          card: { instanceId: 12, cardId: "FLURRY", owner: 1 },
+        },
+        instanceId: 12,
+        sourcePresentationKey: "1:board:12",
+      }],
+      anchors({ cards: [["1:board:12", source]] }),
+      anchors({ zones: [["1:board", rect(0, 0, 800, 300)]] }),
+      51,
+    );
+
+    expect(batch?.flights).toEqual([
+      expect.objectContaining({ mode: "disappear", start: source, end: source }),
+    ]);
+    const reduced = reducedMotionBatch(batch!);
+    expect(reduced?.flights).toEqual([
+      expect.objectContaining({ mode: "disappear", start: source, end: source }),
+    ]);
+  });
+
+  it("omits travel and connections for reduced motion", () => {
     const destination = rect(720, 320, 124, 170);
     const batch = resolveMotionBatch(
       [{
@@ -743,14 +769,7 @@ describe("motion geometry", () => {
       }),
       6,
     );
-    const reduced = reducedMotionBatch(batch!, anchors({
-      cards: [["0:pitch:7", destination]],
-    }));
-
-    expect(reduced.reducedMotion).toBe(true);
-    expect(reduced.flights).toEqual([]);
-    expect(reduced.pulses.every((pulse) => pulse.delayMs === 0)).toBe(true);
-    expect(reduced.pulses).toContainEqual(expect.objectContaining({ rect: destination }));
+    expect(reducedMotionBatch(batch!)).toBeNull();
   });
 
   it("collapses simultaneous copies of one generated board token into one fade", () => {

@@ -316,7 +316,7 @@ describe("game motion detection", () => {
     }]);
   });
 
-  it("uses zone pulses instead of inventing an ambiguous private path", () => {
+  it("settles silently instead of inventing an ambiguous private path", () => {
     const previous = view([
       player(0, { handCount: 1, deckCount: 20 }),
       player(1),
@@ -326,13 +326,7 @@ describe("game motion detection", () => {
       player(1),
     ]);
 
-    expect(detectGameMotionEvents(previous, current)).toEqual(expect.arrayContaining([
-      { kind: "pulse", location: { kind: "hand", seat: 0 } },
-      { kind: "pulse", location: { kind: "deck", seat: 0 } },
-      { kind: "pulse", location: { kind: "arsenal", seat: 0 } },
-    ]));
-    expect(detectGameMotionEvents(previous, current).some((event) => event.kind === "move"))
-      .toBe(false);
+    expect(detectGameMotionEvents(previous, current)).toEqual([]);
   });
 
   it("does not animate remaining stack layers merely because their indexes compact", () => {
@@ -683,11 +677,7 @@ describe("game motion detection", () => {
     );
 
     const events = detectGameMotionEvents(previous, current);
-    expect(events.every((event) => event.kind === "pulse")).toBe(true);
-    expect(events).toEqual(expect.arrayContaining([
-      { kind: "pulse", location: { kind: "deck", seat: 1 } },
-      { kind: "pulse", location: { kind: "arsenal", seat: 1 } },
-    ]));
+    expect(events).toEqual([]);
   });
 
   it("keeps exact arsenal motion but does not infer cleanup draws", () => {
@@ -741,7 +731,7 @@ describe("game motion detection", () => {
       count: 1,
       confidence: "exact",
     });
-    expect(events.slice(1).every((event) => event.kind === "pulse")).toBe(true);
+    expect(events).toHaveLength(1);
     expect(events.some((event) => event.kind === "move" && event.confidence === "inferred"))
       .toBe(false);
   });
@@ -790,7 +780,13 @@ describe("game motion detection", () => {
     }, "forward");
 
     expect(events.slice(0, 3)).toEqual([
-      { kind: "pulse", location: { kind: "board", seat: 1 } },
+      {
+        kind: "disappear",
+        source: { kind: "board", seat: 1 },
+        visual: { kind: "face", card: ponder },
+        instanceId: ponder.instanceId,
+        sourcePresentationKey: `1:board:${ponder.instanceId}`,
+      },
       expect.objectContaining({
         kind: "move",
         source: { kind: "deck", seat: 1 },
@@ -810,6 +806,40 @@ describe("game motion detection", () => {
       "1:hand:opaque:1",
       "1:hand:opaque:2",
     ]);
+  });
+
+  it("dissolves a ceasing token without pulsing its resolved stack layer", () => {
+    const flurry = face(91);
+    const previous = view(
+      [player(0, { board: [flurry] }), player(1)],
+      {
+        stack: [{
+          card: flurry,
+          seat: 0,
+          label: "Destroy Flurry",
+          optional: false,
+        }],
+      },
+    );
+    const current = view([player(0), player(1)]);
+
+    expect(transitionMotionEvents(previous, current, {
+      fromVersion: 8,
+      kind: "forward",
+      events: [{
+        kind: "move",
+        from: { kind: "board", seat: 0 },
+        to: null,
+        count: 1,
+        instanceId: flurry.instanceId,
+      }],
+    }, "forward")).toEqual([{
+      kind: "disappear",
+      source: { kind: "board", seat: 0 },
+      visual: { kind: "face", card: flurry },
+      instanceId: flurry.instanceId,
+      sourcePresentationKey: `0:board:${flurry.instanceId}`,
+    }]);
   });
 
   it("keeps a pitched card face visible until its deck-bottom flip", () => {

@@ -85,6 +85,30 @@
     0 0 13px 2px #20864d66,
     inset 0 0 0 1px #91e4b266;
 }
+.table[data-playability-cue="glow"] .card-highlight:not(.card-selected) {
+  --playable-breathe-border: #66dc97;
+  --playable-breathe-near: #43dc8be6;
+  --playable-breathe-far: #20864d80;
+}
+.table[data-playability-cue="glow"] .card-highlight:not(.card-selected)::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: -3px;
+  border: 2px solid var(--playable-breathe-border);
+  border-radius: 5px;
+  box-shadow:
+    0 0 9px 3px var(--playable-breathe-near),
+    0 0 19px 5px var(--playable-breathe-far);
+  opacity: .28;
+  pointer-events: none;
+  transform: scale(.985);
+  animation: playable-card-breathe 3.6s ease-in-out infinite;
+}
+@keyframes playable-card-breathe {
+  0%, 100% { opacity: .28; transform: scale(.985); }
+  50% { opacity: .88; transform: scale(1.025); }
+}
 /* Decision windows identify card ownership relative to the viewer. Keep the
    ownership accent quieter than the selectable boundary. */
 .decision-float .card-friendly {
@@ -110,6 +134,11 @@
     0 0 13px 2px #842e2a66,
     inset 0 0 0 1px #d9796f80;
 }
+.table[data-playability-cue="glow"] .decision-float .card-highlight.card-opponent:not(.card-selected) {
+  --playable-breathe-border: #e6887f;
+  --playable-breathe-near: #d85d53e6;
+  --playable-breathe-far: #842e2a80;
+}
 /* High contrast uses a crisp, non-blooming boundary directly against the
    card. It is an accessibility alternative for players who find glow
    difficult to parse or visually uncomfortable. */
@@ -130,6 +159,19 @@
   box-shadow:
     0 0 0 3px #d9796f,
     inset 0 0 0 1px #d9796f80;
+}
+@media (prefers-reduced-motion: reduce) {
+  .table[data-playability-cue="glow"] .card-highlight:not(.card-selected)::before {
+    animation: none;
+    opacity: .5;
+    transform: none;
+  }
+}
+.table[data-motion-preference="reduced"][data-playability-cue="glow"]
+  .card-highlight:not(.card-selected)::before {
+  animation: none;
+  opacity: .5;
+  transform: none;
 }
 .card-selected {
   border-color: #e2b75f;

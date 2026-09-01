@@ -192,9 +192,10 @@ export function useGameMotion({
         viewUpdate.sequence,
       );
       if (reduceMotion) {
-        nextBatches = nextBatches.map((candidate) => (
-          reducedMotionBatch(candidate, measured.snapshot)
-        ));
+        nextBatches = nextBatches.flatMap((candidate) => {
+          const reduced = reducedMotionBatch(candidate);
+          return reduced ? [reduced] : [];
+        });
       }
     }
 

@@ -40,8 +40,9 @@ export function stackLayerLabel(label: string): string {
 /** Floating stack window: played cards and triggered/activated ability layers
  *  awaiting resolution (index 0 resolves first and appears rightmost). An
  *  attack still on the stack renders as the bottom/leftmost layer — its combat
- *  chain link only starts once the attack resolves. Defaults beside the left
- *  equipment column on desktop; draggable vertically only. */
+ *  chain link only starts once the attack resolves. On desktop it defaults in
+ *  the open lane between the opponent's arms and first weapon, and can be
+ *  dragged anywhere within the viewport. */
 export function StackFloat({
   layers,
   attack,
@@ -68,7 +69,7 @@ export function StackFloat({
   const [localHidden, setLocalHidden] = useState(false);
   const stackHidden = visibility?.hidden ?? localHidden;
   const setStackHidden = visibility?.setHidden ?? setLocalHidden;
-  const stackFloat = useFloatDrag({ axis: "y", hTransform: "none" });
+  const stackFloat = useFloatDrag();
   const stackSize = layers.length + (attack ? 1 : 0);
   const layerOccurrences = new Map<number, number>();
   const layerMotionKeys = layers.map((layer, index) => {

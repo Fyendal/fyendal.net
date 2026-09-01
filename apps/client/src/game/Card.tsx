@@ -291,6 +291,7 @@ export function CardFace({
       data-motion-zone-anchor={motionZoneAnchor}
       tabIndex={!onClick && explanation ? 0 : undefined}
       aria-describedby={!onClick ? explanationId : undefined}
+      onClick={onClick}
     >
       {onClick ? (
         <button
@@ -298,7 +299,6 @@ export function CardFace({
           className="card-action"
           aria-label={name}
           aria-describedby={explanationId}
-          onClick={onClick}
         />
       ) : null}
       {showImg ? (

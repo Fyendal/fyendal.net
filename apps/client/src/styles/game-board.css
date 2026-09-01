@@ -43,6 +43,56 @@
     repeating-linear-gradient(115deg, #ffffff05 0 2px, transparent 2px 7px),
     repeating-linear-gradient(25deg, #00000012 0 3px, transparent 3px 10px);
 }
+.has-own-priority .board::after {
+  content: "";
+  position: fixed;
+  z-index: var(--game-z-prompt);
+  inset: 0 var(--rail-w) 0 0;
+  box-shadow:
+    inset 0 0 12px 2px #f4ce6352,
+    inset 0 0 34px #e8bd4a42,
+    inset 0 0 78px #b56f1c1f;
+  opacity: .2;
+  pointer-events: none;
+  animation: own-priority-breathe 3.6s ease-in-out infinite;
+}
+.has-own-priority::after {
+  content: "";
+  position: fixed;
+  z-index: var(--game-z-prompt);
+  inset: 0 var(--rail-w) 0 0;
+  box-shadow:
+    inset 0 0 14px 3px #ffe18a7a,
+    inset 0 0 38px #e8bd4a66,
+    inset 0 0 82px #b56f1c26;
+  opacity: 0;
+  pointer-events: none;
+  animation: own-priority-arrive 1.15s ease-out both;
+}
+@keyframes own-priority-arrive {
+  0% { opacity: 0; }
+  16% { opacity: .62; }
+  42% { opacity: .48; }
+  100% { opacity: 0; }
+}
+@keyframes own-priority-breathe {
+  0%, 100% { opacity: .2; }
+  50% { opacity: .56; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .has-own-priority .board::after {
+    animation: none;
+    opacity: .38;
+  }
+  .has-own-priority::after { animation: none; }
+}
+.table[data-motion-preference="reduced"].has-own-priority .board::after {
+  animation: none;
+  opacity: .38;
+}
+.table[data-motion-preference="reduced"].has-own-priority::after {
+  animation: none;
+}
 
 .player-nameplate {
   position: fixed;

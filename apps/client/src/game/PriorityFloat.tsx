@@ -28,13 +28,15 @@ export function TurnTimingFloat({
   turn,
   turnLabel,
   timingLabel,
+  className,
 }: {
   turn: number;
   turnLabel: string;
   timingLabel: string;
+  className?: string;
 }) {
   return (
-    <div className="float priority-float" aria-live="polite">
+    <div className={`float priority-float${className ? ` ${className}` : ""}`} aria-live="polite">
       <span className="priority-turn">Turn {turn} · {turnLabel}</span>
       <span className="priority-timing">{timingLabel}</span>
     </div>
@@ -52,11 +54,13 @@ export function PriorityFloat({
   timingLabel: string;
   priorityLabel: PriorityLabel;
 }) {
+  const mine = priorityLabel === "YOUR PRIORITY";
   return (
     <TurnTimingFloat
       turn={turn}
       turnLabel={turnLabel}
       timingLabel={`${timingLabel} · ${priorityLabel}`}
+      className={mine ? "priority-float-mine" : undefined}
     />
   );
 }
@@ -69,7 +73,10 @@ export function ChainPriorityStatus({
   timingLabel: string;
   priorityLabel: PriorityLabel;
 }) {
+  const mine = priorityLabel === "YOUR PRIORITY";
   return (
-    <ChainTimingStatus label={`${timingLabel} · ${priorityLabel}`} />
+    <span className={mine ? "chain-priority-status-mine" : undefined}>
+      <ChainTimingStatus label={`${timingLabel} · ${priorityLabel}`} />
+    </span>
   );
 }

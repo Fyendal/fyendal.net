@@ -97,9 +97,15 @@ export interface ConnectMotionEvent {
   timeline?: "turn-start";
 }
 
-export interface PulseMotionEvent {
-  kind: "pulse";
-  location: MotionLocation;
+/** A publicly known card leaves play without entering another visible zone.
+ * Keep its last presentation alive briefly so the disappearance is shown at
+ * the card itself instead of highlighting its entire former zone. */
+export interface DisappearMotionEvent {
+  kind: "disappear";
+  source: MotionLocation;
+  visual: MotionVisual;
+  instanceId: number;
+  sourcePresentationKey: string;
 }
 
 export type GameMotionEvent =
@@ -108,7 +114,7 @@ export type GameMotionEvent =
   | AppearMotionEvent
   | SettleMotionEvent
   | ConnectMotionEvent
-  | PulseMotionEvent;
+  | DisappearMotionEvent;
 
 export function motionLocationKey(location: MotionLocation): string {
   switch (location.kind) {

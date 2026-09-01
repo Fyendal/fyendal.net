@@ -148,17 +148,6 @@ function opaqueStagedSourceForDefender(
   )) ?? null;
 }
 
-function pulseOnce(
-  events: GameMotionEvent[],
-  pulsed: Set<string>,
-  location: MotionLocation,
-): void {
-  const key = motionLocationKey(location);
-  if (pulsed.has(key)) return;
-  pulsed.add(key);
-  events.push({ kind: "pulse", location });
-}
-
 function inferredArrivalRank(destination: CardPresentation): number {
   // A public combat/stack object is a stronger explanation for an anonymous
   // hidden-zone departure than a newly created arena object. Process it first
@@ -173,7 +162,6 @@ function detectFromPresentations(
   current: GamePresentations,
 ): GameMotionEvent[] {
   const events: GameMotionEvent[] = [];
-  const pulsed = new Set<string>();
   const consumedPreviousKeys = new Set<string>();
   const previousKeys = new Set(previous.cards.map((card) => card.key));
   const currentKeys = new Set(current.cards.map((card) => card.key));
@@ -251,7 +239,7 @@ function detectFromPresentations(
       // Hand defenders remain counted in hand while staged, then leave the
       // authoritative hand on confirmation. The visual source is already the
       // staged chain card, so consume that bookkeeping delta without emitting
-      // a second hand pulse.
+      // a second hand movement.
       consumeBudget(departures, { kind: "hand", seat: source.card.owner });
       consumeBudget(arrivals, destination.location);
       continue;
@@ -319,8 +307,6 @@ function detectFromPresentations(
         instanceId: destination.instanceId,
         destinationPresentationKey: destination.key,
       });
-    } else {
-      pulseOnce(events, pulsed, destination.location);
     }
   }
 
@@ -346,32 +332,12 @@ function detectFromPresentations(
     }
   }
 
-  for (const entry of [...departures.values(), ...arrivals.values()]) {
-    if (entry.remaining > 0) pulseOnce(events, pulsed, entry.location);
-  }
-  for (const source of previous.cards) {
-    if (
-      !currentKeys.has(source.key)
-      && !consumedPreviousKeys.has(source.key)
-      && !events.some((event) => (
-        (
-          event.kind === "move"
-          || event.kind === "appear"
-          || event.kind === "settle"
-          || event.kind === "connect"
-        )
-        && event.instanceId === source.instanceId
-      ))
-    ) {
-      pulseOnce(events, pulsed, source.location);
-    }
-  }
   return events;
 }
 
 /** Derive viewer-safe presentation changes from two already-projected views.
- * The detector deliberately emits pulses instead of inventing a path when a
- * private-zone count change has more than one plausible explanation. */
+ * Ambiguous private-zone count changes deliberately settle without animation
+ * instead of implying a card path the viewer is not allowed to know. */
 export function detectGameMotionEvents(
   previous: GameView,
   current: GameView,
@@ -388,17 +354,7 @@ export function detectGameMotionEvents(
 
   // Legacy snapshots have no causal edge. During cleanup, multiple private
   // movements can cancel in the counts (Ponder/Inertia are the canonical
-  // examples), so retain exact identity moves and replace invented paths with
-  // neutral zone feedback. Versioned semantic transitions bypass this path.
-  const safe: GameMotionEvent[] = [];
-  const pulsed = new Set<string>();
-  for (const event of events) {
-    if (event.kind !== "move" || event.confidence === "exact") {
-      safe.push(event);
-      continue;
-    }
-    pulseOnce(safe, pulsed, event.source);
-    pulseOnce(safe, pulsed, event.destination);
-  }
-  return safe;
+  // examples), so retain exact identity motion and omit inferred paths.
+  // Versioned semantic transitions bypass this legacy-only safeguard.
+  return events.filter((event) => event.kind !== "move" || event.confidence === "exact");
 }
