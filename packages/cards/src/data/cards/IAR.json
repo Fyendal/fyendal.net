@@ -410,6 +410,69 @@
     "set": "IAR"
   },
   {
+    "id": "IAR078",
+    "name": "Ominous Toll",
+    "cardType": "action",
+    "classes": [
+      "necromancer"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "When this attacks, you may discard a zombie. If you do, create a Gate to i'Arathael token.\nGo again",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 3,
+    "defense": 2,
+    "keywords": [
+      "Go again"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR079",
+    "name": "Ominous Toll",
+    "cardType": "action",
+    "classes": [
+      "necromancer"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "When this attacks, you may discard a zombie. If you do, create a Gate to i'Arathael token.\nGo again",
+    "pitch": 2,
+    "cost": 0,
+    "attack": 2,
+    "defense": 2,
+    "keywords": [
+      "Go again"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR080",
+    "name": "Ominous Toll",
+    "cardType": "action",
+    "classes": [
+      "necromancer"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "When this attacks, you may discard a zombie. If you do, create a Gate to i'Arathael token.\nGo again",
+    "pitch": 3,
+    "cost": 0,
+    "attack": 1,
+    "defense": 2,
+    "keywords": [
+      "Go again"
+    ],
+    "set": "IAR"
+  },
+  {
     "id": "IAR082",
     "name": "Shadowrealm Strength",
     "cardType": "action",

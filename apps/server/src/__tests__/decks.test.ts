@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { CardData } from "@fyendal/shared";
-import { cardData, formatLegalityIssues } from "@fyendal/cards";
+import { cardData, findPrinting, formatLegalityIssues } from "@fyendal/cards";
 import {
   deleteDeck,
   importDeck,
@@ -436,6 +436,20 @@ describe("validateDeck", () => {
     expect(r.ok).toBe(false);
     if (r.ok) return;
     expect(r.missing).toEqual(["En Garde"]);
+  });
+
+  it("resolves every Ominous Toll pitch from deck exports", () => {
+    const lines = parseDecklistText([
+      "1x Ominous Toll (red)",
+      "1x Ominous Toll (yellow)",
+      "1x Ominous Toll (blue)",
+    ].join("\n"));
+
+    expect(lines.map((line) => findPrinting(line.name, line.pitch)?.id)).toEqual([
+      "IAR078",
+      "IAR079",
+      "IAR080",
+    ]);
   });
 
   it("rejects undersized decks per format", () => {

@@ -1358,11 +1358,14 @@ describe("IAR spoiled cards", () => {
 });
 
 describe("August 29 IAR and GEM Pack 6 spoilers", () => {
-  it("registers all four spoiled printings as implemented", () => {
+  it("registers all seven spoiled printings as implemented", () => {
     const expected = {
       IAR250: "Astral Ambience",
       GEM193: "Consuming Appetite",
       GEM198: "Ominous Toll",
+      IAR078: "Ominous Toll",
+      IAR079: "Ominous Toll",
+      IAR080: "Ominous Toll",
       GEM205: "Embrace Ursur",
     } as const;
 
