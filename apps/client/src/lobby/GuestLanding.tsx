@@ -20,9 +20,8 @@ export function LobbyBrand() {
 export function GuestLandingHero({ stats }: { stats?: LandingStats | null }) {
   return (
     <section className="panel intro-panel" aria-labelledby="guest-landing-title">
-      <img className="intro-logo" src="/logo.png" alt="Fyendal" width={147} height={147} />
       <h1 id="guest-landing-title" className="intro-title">
-        Play Flesh and Blood Online for Free
+        Play Flesh and Blood online for free
       </h1>
       {stats ? (
         <div className="intro-stats" aria-label="Current activity">
@@ -46,28 +45,32 @@ export function GuestLandingDetails() {
           <p className="landing-kicker">Play your way</p>
           <h2 id="ways-to-play-title">Online matches and focused practice</h2>
         </div>
-        <div className="landing-card-grid">
-          <article id="practice-bots" className="landing-info-card">
-            <h3>Practice against bots</h3>
-            <p>
-              Choose from practice opponents with their own hero, deck, and strategy. Bot games
-              are a quick way to learn Fyendal or get testing reps with a new deck.
-            </p>
-          </article>
-          <article id="player-matches" className="landing-info-card">
-            <h3>Find or host a match</h3>
-            <p>
-              Queue by format, join an open room, or create a private room and share its invite
-              link with a friend.
-            </p>
-          </article>
-          <article id="watch-replays" className="landing-info-card">
-            <h3>Spectate and review</h3>
-            <p>
-              Spectators can watch through a room link. Players can review saved replays and
-              export the games they want to keep.
-            </p>
-          </article>
+        <div className="landing-play-layout">
+          <div className="landing-card-grid">
+            <article id="practice-bots" className="landing-info-card">
+              <h3>Practice against bots</h3>
+              <p>Test decks against hero-specific bots with their own strategies.</p>
+            </article>
+            <article id="player-matches" className="landing-info-card">
+              <h3>Find or host a match</h3>
+              <p>Queue, join an open room, or invite a friend to a private game.</p>
+            </article>
+            <article id="watch-replays" className="landing-info-card">
+              <h3>Spectate and review</h3>
+              <p>Watch games through a room link, then review or export saved replays.</p>
+            </article>
+          </div>
+          <div className="landing-demo">
+            <img
+              className="landing-demo-image"
+              src="/fyendal-gameplay-demo-poster.jpg"
+              alt="A Fyendal game between Briar and a Bravo practice bot"
+              width={1280}
+              height={720}
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
         </div>
       </section>
 
