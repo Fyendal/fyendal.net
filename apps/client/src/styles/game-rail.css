@@ -154,7 +154,7 @@
   .life-change-pop { animation-duration: .01ms; }
   .deck-card-toast,
   .end-turn-pass-toast,
-  .zone-deck.deck-shuffling > .card-zone { animation: none; }
+  .zone-deck.deck-shuffling > .zone-card-pile { animation: none; }
   .deck-shuffle-copy { display: none; }
 }
 .btn-pass {

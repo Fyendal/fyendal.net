@@ -211,7 +211,10 @@ export function PlayerHalf({
       onClick={cards.length ? () => onOpenOverlay({ title, cards, inactiveZone: true }) : undefined}
     >
       {cards.length > 0 ? (
-        <div className="pitch-top">
+        <div
+          className={`pitch-top zone-card-pile${cards.length > 1 ? " zone-card-pile-multiple" : ""}`}
+          data-stack-depth={cards.length > 1 ? Math.min(cards.length, 3) : undefined}
+        >
           <InactiveZoneCard
             card={cards[cards.length - 1]!}
             showOverlays={false}
@@ -239,7 +242,8 @@ export function PlayerHalf({
             {groupBoardCards(arenaBoard, mine ? interaction.legal.activatable : undefined).map((group) => (
               <div
                 key={group.card.instanceId}
-                className={`board-card-stack${group.card.tapped ? " board-card-stack-tapped" : ""}`}
+                className={`board-card-stack${group.count > 1 ? " board-card-stack-multiple" : ""}${group.card.tapped ? " board-card-stack-tapped" : ""}`}
+                data-stack-depth={group.count > 1 ? Math.min(group.count, 3) : undefined}
                 data-cardid={group.card.cardId}
                 data-motion-card={motionPresentationKey(
                   { kind: "board", seat: player.seat },
@@ -256,7 +260,11 @@ export function PlayerHalf({
                     interaction.selection.sourceInstanceId === group.card.instanceId}
                   onClick={group.activatable ? activate(group.card.instanceId) : undefined}
                 />
-                {group.count > 1 ? <span className="board-card-count">×{group.count}</span> : null}
+                {group.count > 1 ? (
+                  <span className="board-card-count" aria-label={`${group.count} stacked cards`}>
+                    ×{group.count}
+                  </span>
+                ) : null}
               </div>
             ))}
           </div>
@@ -328,36 +336,41 @@ export function PlayerHalf({
             })
           : undefined}
       >
-        {presentedDeckTop ? (
-          <CardFace
-            card={presentedDeckTop}
-            size="zone"
-            motionZoneAnchor={motionLocationKey({ kind: "deck", seat: player.seat })}
-            motionKey={motionPresentationKey(
-              { kind: "deck", seat: player.seat },
-              presentedDeckTop.instanceId,
-            )}
-            highlighted={deckTopPlayable}
-            selected={interaction.selection.kind === "play-zone" &&
-              interaction.selection.instanceId === presentedDeckTop.instanceId}
-            onClick={deckTopPlayable
-              ? () => {
-                  if (interaction.selection.kind !== "none") return;
-                  interaction.onSelect({
-                    kind: "play-zone",
-                    instanceId: presentedDeckTop.instanceId,
-                    zone: "deck",
-                  });
-                }
-              : undefined}
-          />
-        ) : (
-          <CardBack
-            label="Deck"
-            count={player.deckCount}
-            motionZoneAnchor={motionLocationKey({ kind: "deck", seat: player.seat })}
-          />
-        )}
+        <div
+          className={`zone-card-pile${player.deckCount > 1 ? " zone-card-pile-multiple" : ""}`}
+          data-stack-depth={player.deckCount > 1 ? Math.min(player.deckCount, 3) : undefined}
+        >
+          {presentedDeckTop ? (
+            <CardFace
+              card={presentedDeckTop}
+              size="zone"
+              motionZoneAnchor={motionLocationKey({ kind: "deck", seat: player.seat })}
+              motionKey={motionPresentationKey(
+                { kind: "deck", seat: player.seat },
+                presentedDeckTop.instanceId,
+              )}
+              highlighted={deckTopPlayable}
+              selected={interaction.selection.kind === "play-zone" &&
+                interaction.selection.instanceId === presentedDeckTop.instanceId}
+              onClick={deckTopPlayable
+                ? () => {
+                    if (interaction.selection.kind !== "none") return;
+                    interaction.onSelect({
+                      kind: "play-zone",
+                      instanceId: presentedDeckTop.instanceId,
+                      zone: "deck",
+                    });
+                  }
+                : undefined}
+            />
+          ) : (
+            <CardBack
+              label="Deck"
+              count={player.deckCount}
+              motionZoneAnchor={motionLocationKey({ kind: "deck", seat: player.seat })}
+            />
+          )}
+        </div>
         {deckShuffling ? (
           <>
             <div className="deck-shuffle-copy deck-shuffle-copy-left" aria-hidden="true">

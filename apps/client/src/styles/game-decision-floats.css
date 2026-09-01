@@ -552,7 +552,7 @@
   from { opacity: 0; transform: translate(-50%, -24px) scale(0.96); }
   to { opacity: 1; transform: translate(-50%, 0) scale(1); }
 }
-.zone-deck.deck-shuffling > .card-zone {
+.zone-deck.deck-shuffling > .zone-card-pile {
   animation: deck-zone-shuffle 900ms ease-in-out;
 }
 .deck-shuffle-copy {
