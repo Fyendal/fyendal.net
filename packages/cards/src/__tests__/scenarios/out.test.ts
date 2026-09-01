@@ -4,6 +4,7 @@ import { cardData, scripts } from "../../index.js";
 import { scenario } from "../harness.js";
 
 const BLUE = "wrecker romp|3";
+const NON_ATTACK = "nimblism|3";
 
 describe("OUT — registration and core mechanics", () => {
   it("registers every printing and all heroes", () => {
@@ -346,10 +347,10 @@ describe("OUT — rules regression coverage", () => {
       .expectLife(0, 16);
   });
 
-  it("Uzuri replaces the attacking stealth card with the revealed hand card", () => {
+  it("Uzuri replaces the stealth attack with the same card banished for the cost", () => {
     const s = scenario({
       seats: [
-        { hero: "rhinar", heroKey: "uzuri|0", hand: ["infect|1", "sneak attack|1"] },
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["infect|1", "sneak attack|1", BLUE] },
         { hero: "dorinthea" },
       ],
     });
@@ -357,5 +358,24 @@ describe("OUT — rules regression coverage", () => {
       .activate("uzuri|0")
       .chooseCard("sneak attack|1");
     expect(cardData[s.state.chain.at(-1)!.attackingCard.cardId]!.name).toBe("Sneak Attack");
+    expect(s.state.players[0]!.hand.map((card) => cardData[card.cardId]?.name)).toContain("Wrecker Romp");
+    expect(s.state.players[0]!.banish).toHaveLength(0);
+    expect(s.state.log.find((entry) => entry.publicText?.includes("banished"))?.publicText)
+      .toBe("A face-down card is banished");
+  });
+
+  it("Uzuri turns an ineligible cost card face up without replacing the attack", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["infect|1", NON_ATTACK] },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.play("infect|1").blockWith()
+      .activate("uzuri|0")
+      .chooseCard(NON_ATTACK);
+    expect(cardData[s.state.chain.at(-1)!.attackingCard.cardId]!.name).toBe("Infect");
+    expect(s.state.players[0]!.banish).toHaveLength(1);
+    expect(s.state.players[0]!.banish[0]!.faceDown).not.toBe(true);
   });
 });

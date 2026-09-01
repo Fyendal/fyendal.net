@@ -12,8 +12,9 @@ import { attackAbility, buffNextAttack, isCard, opponentSeat } from "./shared-he
 //   so resolved links keep counting (last-known information while the chain
 //   is open, per the Uprising rules reprise).
 // - "Draconic chain links you control": chainLinksControlled(state, seat,
-//   "draconic") — resolved links stay on state.chain until the chain closes,
-//   and the current attack already counts (including for its own effects).
+//   "draconic") — resolved links stay on state.chain until the chain closes.
+//   The current attack counts from the Attack Step (including for its own
+//   effects), but not while it is still unresolved in the Layer Step.
 // - "Attacks that have hit this combat chain": hitsThisCombatChain.
 // - Rupture (CR 8.4.6): a label keyword — scripts check chainLinkNumber.
 // - Ephemeral (CR 8.3.21): engine-native — the card ceases to exist instead
@@ -34,7 +35,7 @@ const FEALTY = "SFA037";
 /** ctx.state is typed without the internal side tables; the runtime object has them. */
 
 
-/** "Draconic chain links you control" — incl. the current attack. */
+/** "Draconic chain links you control" — incl. the current attacking card. */
 function draconicLinks(ctx: ScriptCtx): number {
   return ctx.chainLinksControlled(ctx.seat, "draconic");
 }

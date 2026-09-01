@@ -39,6 +39,31 @@ describe("MPG — import and Guardian pressure", () => {
     )).toHaveLength(2);
   });
 
+  it("Valda creates one Seismic Surge per card redrawn by Put 'Em In Their Place", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "valda, seismic impact|0",
+          hand: ["put 'em in their place|1"],
+          resources: 7,
+        },
+        {
+          hero: "dorinthea",
+          hand: ["head jab|1", "head jab|2", "head jab|3"],
+          deck: ["wrecker romp|1", "wrecker romp|2", "wrecker romp|3"],
+        },
+      ],
+    });
+
+    g.play("put 'em in their place|1").blockWith().settle();
+
+    expect(g.state.players[0]!.board.filter(
+      (card) => cardData[card.cardId]?.name === "Seismic Surge",
+    )).toHaveLength(3);
+    expect(g.state.players[1]!.hand).toHaveLength(3);
+  });
+
   it("Testament of Valahai gets +4 defense with six Seismic Surges", () => {
     const g = scenario({
       active: 1,

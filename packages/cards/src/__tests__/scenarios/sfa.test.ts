@@ -132,6 +132,23 @@ describe("SFA — Fai", () => {
       .expectResources(0, 0);
   });
 
+  it("does not discount the hero ability for an unresolved attack layer", () => {
+    const s = scenario({
+      seats: [
+        faiSeat({ hand: [RONIN, BLUE], graveyard: [FLAME] }),
+        { hero: "rhinar", hand: [] },
+      ],
+    });
+
+    s.play(RONIN, { settle: false });
+
+    expect(s.state.phase).toBe("layer");
+    expect(s.state.stackResume).toBe("start-attack-step");
+    expect(abilityIntentsOn(s, 0, FAI)).toContainEqual(
+      expect.objectContaining({ pitchRequired: 3 }),
+    );
+  });
+
   it("charges {r} after Brand grants Display Loyalty a redundant Draconic type", () => {
     const s = scenario({
       seats: [
@@ -157,6 +174,32 @@ describe("SFA — Fai", () => {
       pitchInstanceIds: [],
     });
     expect(rejected.ok).toBe(false);
+
+    s.activate(FAI, { pitch: [RED] })
+      .chooseCard(FLAME)
+      .expectInZone(0, FLAME, "hand")
+      .expectResources(0, 0);
+  });
+
+  it("charges {r} with Crouching Tiger followed by two Draconic chain links", () => {
+    const s = scenario({
+      seats: [
+        faiSeat({
+          hand: ["crouching tiger|0", "brand with cinderclaw|1", "blaze headlong|1", RED],
+          graveyard: [FLAME],
+        }),
+        { hero: "rhinar", hand: [] },
+      ],
+    });
+
+    s.play("crouching tiger|0").blockWith().settle()
+      .play("brand with cinderclaw|1").blockWith().settle()
+      .play("blaze headlong|1").blockWith().settle();
+
+    expect(s.state.chain).toHaveLength(3);
+    const intents = abilityIntentsOn(s, 0, FAI);
+    expect(intents.some((intent) => intent.pitchInstanceIds.length === 0)).toBe(false);
+    expect(intents.some((intent) => intent.pitchInstanceIds.length === 1)).toBe(true);
 
     s.activate(FAI, { pitch: [RED] })
       .chooseCard(FLAME)

@@ -1488,9 +1488,36 @@ describe("Hala policy", () => {
     ]);
     expect(decision.plan?.evaluation.projectedSwordAttacks).toBe(2);
     expect(decision.plan?.evaluation.flurryAttackValue).toBeGreaterThanOrEqual(5);
-    expect(decision.plan?.nodes).toBeLessThanOrEqual(105);
-    expect(decision.plan?.transitions).toBeLessThanOrEqual(320);
+    expect(decision.plan?.nodes).toBeLessThanOrEqual(72);
+    expect(decision.plan?.transitions).toBeLessThanOrEqual(192);
     expect(decision.plan?.candidateTrace.rootPrepared).toBeLessThanOrEqual(5);
+  });
+
+  it("bounds planning when priority returns to Hala after the opponent closes the chain", () => {
+    const levia = { ...decklists.rhinar, heroId: "MON120" };
+    const state = createGame({
+      decklists: [levia, halaDeck(levia)],
+      cards: cardData,
+      scripts,
+      seed: 43_001,
+      startPlayer: 1,
+    });
+    state.turn = 7;
+    replaceHand(state, 1, ["HVY209", "PEN319", "OMN238", "MPW121"]);
+
+    const legal = legalIntents(state, 1);
+    const decision = chooseHalaIntentWithTrace({
+      seat: 1,
+      view: projectStateFor(state, 1),
+      legal,
+      cards: cardData,
+      state,
+    });
+
+    expect(legal).toContainEqual(decision.intent);
+    expect(decision.plan).toBeDefined();
+    expect(decision.plan?.nodes).toBeLessThanOrEqual(48);
+    expect(decision.plan?.transitions).toBeLessThanOrEqual(128);
   });
 
   it("pitches its last red payoff instead of overvaluing an empty arsenal", () => {

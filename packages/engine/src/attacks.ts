@@ -548,20 +548,45 @@ export function replaceAttackFromHand(
   instanceId: number,
   maximumCost: number,
 ): boolean {
+  return replaceAttackFromPlayerZone(state, runtime, seat, instanceId, maximumCost, "hand");
+}
+
+/** Uzuri-style active-link replacement using the face-up card paid as the
+ * ability's banish cost. */
+export function replaceAttackFromBanish(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  seat: number,
+  instanceId: number,
+  maximumCost: number,
+): boolean {
+  return replaceAttackFromPlayerZone(state, runtime, seat, instanceId, maximumCost, "banish");
+}
+
+function replaceAttackFromPlayerZone(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  seat: number,
+  instanceId: number,
+  maximumCost: number,
+  from: "hand" | "banish",
+): boolean {
   const link = currentLink(state);
   const player = state.players[seat] as PlayerState;
   if (!link || link.attacker !== seat || link.attackCardType !== "action") return false;
-  const index = player.hand.findIndex((card) => card.instanceId === instanceId);
+  const source = player[from];
+  const index = source.findIndex((card) => card.instanceId === instanceId);
   if (index < 0) return false;
-  const replacement = player.hand[index] as CardInstance;
+  const replacement = source[index] as CardInstance;
   const replacementData = dataOf(state, replacement.cardId);
   if (
+    replacement.faceDown === true ||
     replacementData.cardType !== "action" ||
     !(replacementData.subtypes ?? []).includes("attack") ||
     (replacementData.cost ?? 0) > maximumCost
   ) return false;
   const previous = link.attackingCard;
-  player.hand.splice(index, 1);
+  source.splice(index, 1);
   const previousOwner = state.players[previous.owner] as PlayerState;
   previousOwner.deck.push(previous);
   link.attackingCard = replacement;
@@ -573,7 +598,7 @@ export function replaceAttackFromHand(
   );
   runtime.transitions.move(
     replacement,
-    transitionZone("hand", player.seat),
+    transitionZone(from, player.seat),
     transitionZone("chain", player.seat),
     { from: true },
   );

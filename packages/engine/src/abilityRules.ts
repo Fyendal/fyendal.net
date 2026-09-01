@@ -535,7 +535,9 @@ export function payActivatedAbilityCost(
   let effectOffset = 0;
   for (const cost of ability.effectCardCosts ?? []) {
     for (const id of effectCostIds.slice(effectOffset, effectOffset + cost.count)) {
-      if (cost.move === "banish") runtime.makeCtx(state, seat, card).banish(id);
+      if (cost.move === "banish") {
+        runtime.makeCtx(state, seat, card).banish(id, { faceDown: cost.faceDown });
+      }
       else if (cost.move === "discard") runtime.makeCtx(state, seat, card).discardCard(seat, id);
       else if (cost.move === "destroy") runtime.makeCtx(state, seat, card).destroyPermanent(id);
       else if (cost.move === "put-on-deck-bottom") putCardOnDeckBottom(state, runtime, id, true);

@@ -1,7 +1,7 @@
 import type { CardScript, DeepReadonly, CardInstance, ScriptCtx } from "@fyendal/engine";
 import { functionalKeyOf } from "../functional.js";
 import { buffNextAttack, mergeSetScripts, opponentSeat, optN, optOnChoose, previousAttackHasName, previousAttackNameContains } from "./shared-helpers.js";
-import { outHighRarity } from "./out/high-rarity.js";
+import { outHighRarity, uzuriAbility } from "./out/high-rarity.js";
 
 // OUT — Outsiders common/rare cards and young heroes.
 const BLOODROT = "SAZ034";
@@ -329,20 +329,6 @@ const maskManyFaces: CardScript = {
   },
 };
 
-const uzuri: CardScript = {
-  activated: {
-    cost: 0, isAttack: false, goAgain: false, oncePerTurn: true, timing: "attack-reaction", label: "Swap a stealth attack",
-    canActivate: (ctx) => myAttack(ctx) && ctx.link!.attackCardType === "action" && isStealth(ctx, ctx.link!.attackingCard) && ctx.player(ctx.seat).hand.some((card) => isAttack(ctx, card) && (data(ctx, card).cost ?? 0) <= 2),
-    onActivate(ctx) {
-      const choices = ctx.player(ctx.seat).hand.filter((card) => isAttack(ctx, card) && (data(ctx, card).cost ?? 0) <= 2);
-      ctx.requestCardChoice("uzuri-reveal", "Reveal the attack action card for Uzuri", choices.map((card) => card.instanceId));
-    },
-  },
-  onChoose(ctx, hook, option) {
-    if (hook === "uzuri-reveal") ctx.replaceAttackFromHand(Number(option), 2);
-  },
-};
-
 const trapReaction = () => (ctx: ScriptCtx) => ctx.link?.flags.reactionPlayedOrActivated === true;
 const trapPower = () => (ctx: ScriptCtx) => ctx.attackBonusAboveBase() > 0;
 const trapGoAgain = () => (ctx: ScriptCtx) => ctx.link?.goAgain === true;
@@ -354,7 +340,7 @@ function offerDaggerCycle(ctx: ScriptCtx, source: DeepReadonly<CardInstance>): v
 }
 
 export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRarity, {
-  "uzuri|0": uzuri,
+  "uzuri|0": uzuriAbility,
   "arakni, solitary confinement|0": { onFriendlyAttackDeclared(ctx) { if (isStealth(ctx, ctx.link!.attackingCard) && ctx.getPlayerFlag(ctx.seat, "arakniStealth") !== true) { ctx.setPlayerFlag(ctx.seat, "arakniStealth", true); ctx.grantGoAgain(); } } },
   "back stab|1": noDefenseReactions(), "back stab|2": noDefenseReactions(), "back stab|3": noDefenseReactions(),
   "sneak attack|1": { modifyAttack: (ctx) => ctx.link?.flags.reactionPlayedOrActivated === true ? 4 : 0 }, "sneak attack|2": { modifyAttack: (ctx) => ctx.link?.flags.reactionPlayedOrActivated === true ? 4 : 0 }, "sneak attack|3": { modifyAttack: (ctx) => ctx.link?.flags.reactionPlayedOrActivated === true ? 4 : 0 },

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { gunzipSync } from "node:zlib";
 import { decklists } from "@fyendal/cards";
 import { decodeGameView, decodeReplayResponse, replayFileViews } from "@fyendal/protocol";
@@ -14,7 +14,7 @@ import {
   sweepReplays,
   waitForReplayPayloadForRoom,
 } from "../replays.js";
-import { PgRoomStore } from "../store.js";
+import { dehydrateState, PgRoomStore } from "../store.js";
 import { exportAccount } from "../accounts.js";
 import { freshDb } from "./testdb.js";
 
@@ -79,6 +79,43 @@ async function startedGame() {
 }
 
 describe("server replay retention", () => {
+  it("does not roll back a game action when an older revision cannot project a replay card", async () => {
+    const game = await startedGame();
+    const room = await store.getRoom(game.code);
+    if (!room?.state) throw new Error("game did not start");
+    const actor = room.state.pendingDecision?.player ?? room.state.priorityPlayer;
+    if (!(actor === 0 || actor === 1)) throw new Error("invalid actor");
+    const hiddenDeck = room.state.players[1 - actor]!.deck;
+    if (!hiddenDeck[0]) throw new Error("missing hidden deck card");
+    hiddenDeck[0].cardId = "NEWER_REVISION_CARD";
+    await db.query(
+      "UPDATE rooms SET state = $2 WHERE code = $1",
+      [game.code, JSON.stringify(dehydrateState(room.state, "rules-a"))],
+    );
+    const beforeVersion = room.version;
+    const logged = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    try {
+      const applied = await store.applyIntent(
+        game.code,
+        { token: game.tokens[actor], userId: game.users[actor] },
+        { kind: "pass" },
+      );
+
+      expect(applied).toMatchObject({ ok: true, version: beforeVersion + 1 });
+      expect((await store.getRoom(game.code))?.version).toBe(beforeVersion + 1);
+      expect((await db.query("SELECT 1 FROM replay_games WHERE room_code = $1", [game.code])).rows)
+        .toEqual([]);
+      expect((await db.query("SELECT 1 FROM replay_frames")).rows).toEqual([]);
+      expect(logged).toHaveBeenCalledWith(
+        `discarding replay recording for room ${game.code}: frame projection failed`,
+        expect.objectContaining({ message: "unknown card id: NEWER_REVISION_CARD" }),
+      );
+    } finally {
+      logged.mockRestore();
+    }
+  });
+
   it("stores omniscient frames and finalizes replay files without engine reconstruction", async () => {
     const game = await startedGame();
     const initialRow = (await db.query(

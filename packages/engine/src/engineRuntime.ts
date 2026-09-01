@@ -2,7 +2,7 @@ import type { EngineRuntime } from "./runtimePorts.js";
 import { dispatchFlow } from "./flowDispatcher.js";
 import { createScriptRuntime } from "./scriptRuntime.js";
 import { setAttackActivationLimitKey } from "./abilityRules.js";
-import { attackFromDeck, attackWithPermanent, replaceAttackFromHand } from "./attacks.js";
+import { attackFromDeck, attackWithPermanent, replaceAttackFromBanish, replaceAttackFromHand } from "./attacks.js";
 import { arsenalCapacity, drawCards, entersArena, settlePlayedCard, settlesInArena, stampControlledName, tapPermanent } from "./cardLifecycle.js";
 import { crowdBoo, crowdCheer, requestClash } from "./clash.js";
 import { applyOneShotDefenseModifiers, attackBonusAboveBase, attackHasDominate, attackHasOverpower, basePowerOf, chainLinkNumber, chainLinksControlled, computeAttack, computeDefense, currentPowerOf, hitsThisCombatChain, linkAttackHasType, noteAttackDefendedBy, replaceTemporalPowerGain } from "./combatValues.js";
@@ -79,6 +79,7 @@ export function createEngineRuntime(
       recordDieRoll: bind(recordDieRoll, true),
       removeFromOwnerZones: bind(removeFromOwnerZones, false),
       removeFromStackResolution: bind(removeFromStackResolution, false),
+      replaceAttackFromBanish: bind(replaceAttackFromBanish, true),
       replaceAttackFromHand: bind(replaceAttackFromHand, true),
       replaceTemporalPowerGain: bind(replaceTemporalPowerGain, false),
       requestClash: bind(requestClash, true),
