@@ -95,10 +95,15 @@
   max-height: 260px;
   padding: 5px;
   overflow-y: auto;
+  overscroll-behavior: contain;
   border: 1px solid #806334;
   border-radius: 3px;
   background: linear-gradient(180deg, #2a1c0d, #160e07);
   box-shadow: 0 14px 34px #000e;
+}
+.create-room-deck-options[data-placement="above"] {
+  top: auto;
+  bottom: calc(100% + 5px);
 }
 .create-room-deck-options > button {
   width: 100%;

@@ -705,6 +705,7 @@
 }
 .new-player-play-card:focus-within { z-index: 12; }
 .new-player-play-card:has(.create-room-deck-options) { z-index: 25; }
+.new-player-play-card:has(.create-room-deck-options) .new-player-card-content { z-index: 3; }
 .new-player-precon-card {
   background: radial-gradient(circle at 50% 30%, #41506e 0, #1d2434 38%, #100b08 76%);
 }
