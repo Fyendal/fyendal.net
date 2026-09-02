@@ -10,11 +10,11 @@ export type Format = "classic-battles" | "cc" | "silver-age";
 /** Stable identities for the supported practice opponents. */
 export type BotOpponent = "bravo" | "briar" | "cindra" | "ira" | "hala" | "jarl";
 
-/** Numeric resources produced when pitched. Most cards use their red/yellow/
- * blue color value (1/2/3); colorless resource gems may pitch for 4. */
+/** Numeric resources produced when pitched. Colored cards use their red/
+ * yellow/blue/purple color value (1/2/3/4). */
 export type Pitch = 1 | 2 | 3 | 4;
 
-export type CardColor = 1 | 2 | 3;
+export type CardColor = 1 | 2 | 3 | 4;
 
 export type CardType =
   | "hero"
@@ -167,7 +167,7 @@ export interface CardView {
   chosenName?: string;
   /** Additional classes/subtypes currently granted to this object. */
   grantedTypes?: string[];
-  /** Current red/yellow/blue color override (1/2/3). */
+  /** Current red/yellow/blue/purple color override (1/2/3/4). */
   grantedColor?: CardColor;
   /** Current life of a living permanent (allies — CR 8.2.8: dealt damage
    *  reduces it, it resets to base during the end phase, at 0 the ally dies).
@@ -325,6 +325,9 @@ export type GameMessageValue =
   | boolean
   | { kind: "card"; cardId: string }
   | { kind: "player"; seat: number }
+  /** Reference another catalog message using the enclosing message's values.
+   * This composes semantic fragments such as a localized trigger effect into
+   * a larger sentence without nesting unbounded wire data. */
   | { kind: "term"; id: string };
 
 export type GameLogZone =

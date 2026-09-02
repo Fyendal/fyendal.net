@@ -31,7 +31,7 @@ export interface PersistedCardInstanceV1 {
   playCostReductionSeat?: number;
   playTargetInstanceId?: number;
   grantedTypes?: string[];
-  grantedColor?: 1 | 2 | 3;
+  grantedColor?: 1 | 2 | 3 | 4;
   grantedNames?: string[];
   originalHeroCardId?: string;
   temporaryHeroOriginalCardId?: string;
@@ -870,7 +870,9 @@ function validateCard(value: unknown, code: string, path: string, depth = 0): vo
   ), path);
   optional(card, "playableFrom", (v, p) => array(v, code, p, 3).forEach((z, i) => oneOf(z, ["banish", "graveyard", "deck"] as const, code, `${p}[${i}]`)), path);
   optional(card, "grantedTypes", (v, p) => validateStringArray(v, code, p), path);
-  optional(card, "grantedColor", (v, p) => { if (v !== 1 && v !== 2 && v !== 3) fail(code, p, "expected 1, 2, or 3"); }, path);
+  optional(card, "grantedColor", (v, p) => {
+    if (v !== 1 && v !== 2 && v !== 3 && v !== 4) fail(code, p, "expected 1, 2, 3, or 4");
+  }, path);
   optional(card, "grantedNames", (v, p) => validateStringArray(v, code, p), path);
   optional(card, "grantedBaseAbilitiesCardIds", (v, p) => validateStringArray(v, code, p), path);
   optional(card, "originalHeroCardId", (v, p) => { string(v, code, p, 128); }, path);

@@ -1,5 +1,5 @@
 import type { GameStateInternal } from "./runtimeState.js";
-import type { CardData, CardType, MeldSide } from "@fyendal/shared";
+import type { CardColor, CardData, CardType, MeldSide } from "@fyendal/shared";
 import type { CardScript } from "./scripts.js";
 import type { CardInstance, PlayerState } from "./state.js";
 import { currentLink } from "./zoneQueries.js";
@@ -126,22 +126,22 @@ export function cardHasType(
 }
 
 /** Effective card color. Printed color tracks the color strip (represented by
- * 1/2/3 in card data) but remains independent from the numeric pitch property. */
+ * 1/2/3/4 in card data) but remains independent from the numeric pitch property. */
 export function cardColorOf(
   state: GameStateInternal,
   card: {
     readonly owner: number;
     readonly cardId: string;
     readonly flipped?: boolean;
-    readonly grantedColor?: 1 | 2 | 3;
+    readonly grantedColor?: CardColor;
   },
-): number {
+): CardColor | 0 {
   const owner = state.players[card.owner] as PlayerState;
   if (Number(owner.hero.counters?.colorsSuppressedUntilTurn ?? 0) >= state.turn) return 0;
   if (card.grantedColor !== undefined) return card.grantedColor;
   const front = dataOf(state, card.cardId);
   const pitch = (card.flipped && front.backId ? dataOf(state, front.backId) : front).pitch;
-  return pitch === 1 || pitch === 2 || pitch === 3 ? pitch : 0;
+  return pitch === 1 || pitch === 2 || pitch === 3 || pitch === 4 ? pitch : 0;
 }
 
 /** Effective names of a card object. Amnesia-style suppression is stored on

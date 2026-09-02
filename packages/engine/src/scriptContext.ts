@@ -22,6 +22,7 @@ import {
 
 import {
   gameLogMessage,
+  logCardValue,
   logForSeats,
   logPlayerValue,
   logNameOf,
@@ -955,9 +956,15 @@ export function makeCtx(
     },
     setCardColor(instanceId, color) {
       const found = findCardAnywhere(state, instanceId);
-      if (!found || ![1, 2, 3].includes(color)) return false;
+      if (!found || ![1, 2, 3, 4].includes(color)) return false;
       found.card.grantedColor = color;
-      const label = color === 1 ? "red" : color === 2 ? "yellow" : "blue";
+      const label = color === 1
+        ? "red"
+        : color === 2
+          ? "yellow"
+          : color === 3
+            ? "blue"
+            : "purple";
       logPublic(state, `${nameOf(state, found.card.cardId)} becomes ${label}`);
       return true;
     },
@@ -1991,11 +1998,29 @@ export function makeCtx(
         logPrivate(
           state,
           owner.seat,
-          `${nameOf(state, card.cardId)} is put face down into ${nameOf(state, owner.heroCardId)}'s arsenal`,
-          `${nameOf(state, owner.heroCardId)} puts a card face down into arsenal`,
+          gameLogMessage(
+            `${nameOf(state, card.cardId)} is put face down into ${nameOf(state, owner.heroCardId)}'s arsenal`,
+            "engine.log.arsenal.facedown.private",
+            {
+              card: logCardValue(card.cardId),
+              hero: logCardValue(owner.heroCardId),
+            },
+          ),
+          gameLogMessage(
+            `${nameOf(state, owner.heroCardId)} puts a card face down into arsenal`,
+            "engine.log.arsenal.facedown.public",
+            { hero: logCardValue(owner.heroCardId) },
+          ),
         );
       } else {
-        logPublic(state, `${nameOf(state, card.cardId)} is put face up into ${nameOf(state, owner.heroCardId)}'s arsenal`);
+        logPublic(state, gameLogMessage(
+          `${nameOf(state, card.cardId)} is put face up into ${nameOf(state, owner.heroCardId)}'s arsenal`,
+          "engine.log.arsenal.faceup",
+          {
+            card: logCardValue(card.cardId),
+            hero: logCardValue(owner.heroCardId),
+          },
+        ));
       }
       if (!card.faceDown) fireEnterArsenal(state, runtime, owner.seat, card, from);
       if (!card.faceDown && from === "deck") {

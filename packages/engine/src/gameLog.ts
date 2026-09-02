@@ -151,6 +151,27 @@ export function logPlayerValue(seat: number): { kind: "player"; seat: number } {
   return { kind: "player", seat };
 }
 
+export function logTermValue(id: string): { kind: "term"; id: string } {
+  return { kind: "term", id };
+}
+
+/** Compose a card source and its already-semantic trigger label without
+ * duplicating every trigger translation in the log catalog. */
+export function triggerLogMessage(
+  fallback: string,
+  sourceCardId: string,
+  effect: GameMessage,
+  occurrences = 1,
+  id = "engine.log.trigger.card",
+): GameLogPayload {
+  return gameLogMessage(fallback, id, {
+    ...effect.values,
+    triggerSource: logCardValue(sourceCardId),
+    triggerEffect: logTermValue(effect.id),
+    occurrences,
+  });
+}
+
 export function nameOf(state: GameStateInternal, cardId: string): string {
   return state.cardsRef[cardId]?.name ?? cardId;
 }

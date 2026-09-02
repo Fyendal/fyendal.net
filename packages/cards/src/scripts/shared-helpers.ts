@@ -404,6 +404,7 @@ const BLOOD_DEBT = {
   simultaneousKey: "blood-debt",
   label: "Blood Debt — lose 1 life",
   publicLog: "Blood Debt triggers",
+  publicLogMessage: { id: "card.log.common.blooddebt.triggered" },
   transformHookPrefix: "blood-debt-transform:",
   youngLeviaName: "levia",
   adultLeviaName: "levia, shadowborn abomination",
@@ -468,6 +469,7 @@ export function bloodDebtScript(extra: CardScript = {}, playableFromBanish = fal
         sourceZone: "banish",
         label: BLOOD_DEBT.label,
         publicLog: BLOOD_DEBT.publicLog,
+        publicLogMessage: BLOOD_DEBT.publicLogMessage,
         condition(ctx) {
           const heroName = activeHeroName(ctx);
           if (heroName === BLOOD_DEBT.redeemedName) return false;

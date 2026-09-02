@@ -119,6 +119,7 @@ export const cruBruteGuardian: Record<string, CardScript> = {
       event: "card-discarded",
       label: "Intimidate",
       publicLog: "Rhinar's ability triggers",
+      publicLogMessage: { id: "card.log.common.heroability.triggered" },
       condition: (ctx, discarded) =>
         ctx.state.activePlayer === ctx.seat &&
         ctx.state.phase !== "start" &&

@@ -224,6 +224,50 @@ describe("game log hero colors", () => {
     expect(html).not.toContain(fallback);
   });
 
+  it("composes localized trigger effects and keeps their source card inspectable", () => {
+    const fallback = "Fyendal's Spring Tunic triggers: Add an energy counter";
+    const html = renderSideRail(sideRailProps({
+      log: [fallback],
+      logEntries: [{
+        fallback,
+        sequence: 1,
+        message: {
+          id: "engine.log.trigger.card",
+          values: {
+            triggerSource: { kind: "card", cardId: "WTR150" },
+            triggerEffect: { kind: "term", id: "card.trigger.energycounter.add" },
+            occurrences: 1,
+          },
+        },
+      }],
+    }), "zh-Hans");
+
+    expect(html).toContain("Fyendal&#x27;s Spring Tunic");
+    expect(html).toContain("触发：增加一个能量指示物");
+    expect(html).toContain('data-cardid="WTR150"');
+    expect(html).not.toContain("Add an energy counter");
+  });
+
+  it("localizes face-down arsenal logs and keeps the hero inspectable", () => {
+    const fallback = "Cindra, Dracai of Retribution puts a card face down into arsenal";
+    const html = renderSideRail(sideRailProps({
+      log: [fallback],
+      logEntries: [{
+        fallback,
+        sequence: 1,
+        message: {
+          id: "engine.log.arsenal.facedown.public",
+          values: { hero: { kind: "card", cardId: "HNT054" } },
+        },
+      }],
+    }), "zh-Hans");
+
+    expect(html).toContain("Cindra, Dracai of Retribution");
+    expect(html).toContain("将一张牌面朝下置入 arsenal");
+    expect(html).toContain('data-cardid="HNT054"');
+    expect(html).not.toContain("puts a card face down into arsenal");
+  });
+
   it("renders structured turn boundaries in Chinese with player styling", () => {
     const fallback = "— Turn 4: Dash's turn —";
     const html = renderSideRail(sideRailProps({

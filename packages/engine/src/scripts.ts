@@ -1,4 +1,5 @@
 import type {
+  CardColor,
   CardData,
   CardType,
   EquipmentSlot,
@@ -154,8 +155,8 @@ export interface ScriptCtx {
   grantCardType(instanceId: number, type: string): boolean;
   /** Remove one previously granted class or subtype from a card object. */
   removeCardType(instanceId: number, type: string): boolean;
-  /** Set a card object's effective red/yellow/blue color. */
-  setCardColor(instanceId: number, color: 1 | 2 | 3): boolean;
+  /** Set a card object's effective red/yellow/blue/purple color. */
+  setCardColor(instanceId: number, color: CardColor): boolean;
   /** Give an attack another card's base abilities for the current chain link. */
   grantBaseAbilities(instanceId: number, sourceCardId: string): boolean;
   /** Make an active attack a copy of another card until it leaves the chain. */
@@ -409,8 +410,8 @@ export interface ScriptCtx {
   cardNames(card: DeepReadonly<CardInstance>): readonly string[];
   /** Find registered printings with the given card name. */
   cardIdsNamed(name: string): readonly string[];
-  /** Effective red/yellow/blue color of a card (1/2/3), or 0 when it has no
-   * color. Color is independent from the card's pitch value. */
+  /** Effective red/yellow/blue/purple color of a card (1/2/3/4), or 0 when it
+   * has no color. Color is independent from the card's pitch value. */
   cardColor(card: DeepReadonly<CardInstance>): number;
   /** Whether this card has an X value for its printed play cost. */
   hasVariablePlayCost(card: DeepReadonly<CardInstance>): boolean;
@@ -788,6 +789,9 @@ export interface TriggerDef {
   labelMessage?: GameMessage;
   /** Exact public trigger announcement. Defaults to "<source> triggers: <label>". */
   publicLog?: string;
+  /** Locale-independent counterpart to `publicLog`. The engine adds
+   * `triggerSource` and `occurrences` values when announcing it. */
+  publicLogMessage?: GameMessage;
   /** Runs when the trigger condition is met and its layer is created. Use for
    * consuming trigger limits; resolution effects belong in `effect`. */
   onTrigger?(

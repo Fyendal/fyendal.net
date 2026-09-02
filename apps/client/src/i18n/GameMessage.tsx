@@ -21,14 +21,27 @@ function plainValue(value: GameMessageValue, resolvers: PlainMessageResolvers): 
   return resolvers.term?.(value.id) ?? value.id;
 }
 
+function plainMessageValues(
+  intl: IntlShape,
+  message: GameMessage,
+  resolvers: PlainMessageResolvers,
+): Record<string, string | number | boolean> {
+  const values = Object.fromEntries(
+    Object.entries(message.values ?? {}).map(([key, value]) => [key, plainValue(value, resolvers)]),
+  );
+  for (const [key, value] of Object.entries(message.values ?? {})) {
+    if (typeof value !== "object" || value.kind !== "term" || resolvers.term) continue;
+    values[key] = intl.formatMessage({ id: value.id }, values);
+  }
+  return values;
+}
+
 export function formatGameMessage(
   intl: IntlShape,
   message: GameMessage,
   resolvers: PlainMessageResolvers = {},
 ): string {
-  const values = Object.fromEntries(
-    Object.entries(message.values ?? {}).map(([key, value]) => [key, plainValue(value, resolvers)]),
-  );
+  const values = plainMessageValues(intl, message, resolvers);
   return intl.formatMessage({ id: message.id }, values);
 }
 
@@ -44,7 +57,7 @@ export function GameMessageText({
   fallback?: string;
 }) {
   const intl = useIntl();
-  const values = Object.fromEntries(
+  const values: Record<string, ReactNode> = Object.fromEntries(
     Object.entries(message.values ?? {}).map(([key, value]) => {
       if (typeof value !== "object") return [key, value];
       if (value.kind === "card") return [key, resolvers.card?.(value.cardId) ?? value.cardId];
@@ -52,6 +65,10 @@ export function GameMessageText({
       return [key, resolvers.term?.(value.id) ?? value.id];
     }),
   );
+  for (const [key, value] of Object.entries(message.values ?? {})) {
+    if (typeof value !== "object" || value.kind !== "term" || resolvers.term) continue;
+    values[key] = intl.formatMessage({ id: value.id }, values);
+  }
   const formatted = intl.formatMessage(
     fallback === undefined
       ? { id: message.id }

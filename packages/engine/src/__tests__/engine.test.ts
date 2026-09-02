@@ -8,7 +8,7 @@ import { computeAttack } from "../combatValues.js";
 import { resolveWagerLayer, resumeWagerResult } from "../wagers.js";
 import { destroyPermanent } from "../zoneMoves.js";
 import { answerTokenCreationReplacement, answerTokenReplacementOrder } from "../tokens.js";
-import { cardHasType, cardTypesOf } from "../cardProperties.js";
+import { cardColorOf, cardHasType, cardTypesOf } from "../cardProperties.js";
 import { logPrivate, logPublic } from "../gameLog.js";
 import { makeCtx } from "../scriptContext.js";
 import { abilityResourceCost } from "../abilityRules.js";
@@ -30,6 +30,18 @@ function passTopLayer(state: ReturnType<typeof makeGame>): ReturnType<typeof mak
 }
 
 describe("game setup & turn structure", () => {
+  it("recognizes printed and granted purple card color", () => {
+    const state = makeGame(899);
+    const purpleId = giveCard(state, 0, "PURPLE");
+    const blueId = giveCard(state, 0, "BLUE");
+    const purple = player(state, 0).hand.find((card) => card.instanceId === purpleId)!;
+    const blue = player(state, 0).hand.find((card) => card.instanceId === blueId)!;
+
+    expect(cardColorOf(state, purple)).toBe(4);
+    expect(makeCtx(state, engineRuntime, 0, blue).setCardColor(blue.instanceId, 4)).toBe(true);
+    expect(cardColorOf(state, blue)).toBe(4);
+  });
+
   it("preserves localized card-script decisions beside their deterministic fallback", () => {
     const state = makeGame(900);
     const source = player(state, 0).hero;
@@ -1057,6 +1069,14 @@ describe("game setup & turn structure", () => {
     expect(projectStateFor(s, 1).players[0]!.arsenal).toHaveLength(0);
     expect(projectStateFor(s, 1).players[0]!.arsenalCount).toBe(1);
     expect(projectStateFor(s, 1).log).toContain("Hero A puts a card face down into arsenal");
+    expect(projectStateFor(s, 1).logEntries?.find(
+      (entry) => "message" in entry && entry.message.id === "engine.log.arsenal.facedown.public",
+    )).toMatchObject({
+      message: {
+        id: "engine.log.arsenal.facedown.public",
+        values: { hero: { kind: "card", cardId: "HERO_A" } },
+      },
+    });
   });
 
   it("omits inactive arena state from graveyard and banished card views", () => {
@@ -1305,6 +1325,35 @@ describe("scripted choices", () => {
 });
 
 describe("viewer projection secrecy", () => {
+  it("localizes scripted face-down arsenal logs without exposing the card publicly", () => {
+    const s = makeGame(400);
+    s.log = [];
+    s.nextLogSequence = undefined;
+    const card = player(s, 0).hand[0]!;
+
+    expect(makeCtx(s, engineRuntime, 0, player(s, 0).hero).putIntoArsenal(
+      card.instanceId,
+      "hand",
+      { faceUp: false },
+    )).toBe(true);
+
+    expect(projectStateFor(s, 0).logEntries?.at(-1)).toMatchObject({
+      message: {
+        id: "engine.log.arsenal.facedown.private",
+        values: {
+          card: { kind: "card", cardId: card.cardId },
+          hero: { kind: "card", cardId: "HERO_A" },
+        },
+      },
+    });
+    for (const viewer of [1, null] as const) {
+      const projected = JSON.stringify(projectStateFor(s, viewer).logEntries?.at(-1));
+      expect(projected).toContain("engine.log.arsenal.facedown.public");
+      expect(projected).toContain("HERO_A");
+      expect(projected).not.toContain(card.cardId);
+    }
+  });
+
   it("caps audience-aware log entries at the newest 200", () => {
     const s = makeGame(398);
     s.log = [];

@@ -4483,6 +4483,46 @@
       "value": "Search for an aura with Runechant in its name?"
     }
   ],
+  "card.iar.sonata.runechants.destroy": [
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Choose "
+            },
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " Runechant to destroy"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Choose "
+            },
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " Runechants to destroy"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
   "card.iar.usurp.runechant.destroy": [
     {
       "type": 0,
@@ -4841,6 +4881,34 @@
       "value": " is banished"
     }
   ],
+  "card.log.common.blooddebt.triggered": [
+    {
+      "type": 0,
+      "value": "Blood Debt triggers"
+    },
+    {
+      "type": 6,
+      "value": "occurrences",
+      "options": {
+        "one": {
+          "value": []
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": " ×"
+            },
+            {
+              "type": 7
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
   "card.log.common.card.banished.from.graveyard": [
     {
       "type": 1,
@@ -5179,6 +5247,38 @@
     {
       "type": 0,
       "value": " is marked"
+    }
+  ],
+  "card.log.common.heroability.triggered": [
+    {
+      "type": 1,
+      "value": "triggerSource"
+    },
+    {
+      "type": 0,
+      "value": "'s ability triggers"
+    },
+    {
+      "type": 6,
+      "value": "occurrences",
+      "options": {
+        "one": {
+          "value": []
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": " ×"
+            },
+            {
+              "type": 7
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "card.log.common.intimidate": [
@@ -15491,6 +15591,52 @@
       "value": "Choose X"
     }
   ],
+  "engine.log.arsenal.facedown.private": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " is put face down into "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": "'s arsenal"
+    }
+  ],
+  "engine.log.arsenal.facedown.public": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " puts a card face down into arsenal"
+    }
+  ],
+  "engine.log.arsenal.faceup": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " is put face up into "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": "'s arsenal"
+    }
+  ],
   "engine.log.card.pitched": [
     {
       "type": 1,
@@ -15779,6 +15925,78 @@
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "engine.log.trigger.card": [
+    {
+      "type": 1,
+      "value": "triggerSource"
+    },
+    {
+      "type": 0,
+      "value": " triggers: "
+    },
+    {
+      "type": 1,
+      "value": "triggerEffect"
+    },
+    {
+      "type": 6,
+      "value": "occurrences",
+      "options": {
+        "one": {
+          "value": []
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": " ×"
+            },
+            {
+              "type": 7
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "engine.log.trigger.facedown": [
+    {
+      "type": 1,
+      "value": "triggerSource"
+    },
+    {
+      "type": 0,
+      "value": "'s face-down card triggers: "
+    },
+    {
+      "type": 1,
+      "value": "triggerEffect"
+    },
+    {
+      "type": 6,
+      "value": "occurrences",
+      "options": {
+        "one": {
+          "value": []
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": " ×"
+            },
+            {
+              "type": 7
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "engine.log.turn.started": [

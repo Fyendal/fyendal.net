@@ -19,6 +19,7 @@ import {
   logPlayerValue,
   logPublic,
   nameOf,
+  triggerLogMessage,
 } from "./gameLog.js";
 import {
   isValidVariableX,
@@ -1718,7 +1719,10 @@ function collectCardPlayedTriggerLayers(
       optional: trigger.optional ?? false,
       ...(trigger.defaultOption ? { defaultOption: trigger.defaultOption } : {}),
     });
-    logPublic(state, `${nameOf(state, card.cardId)} triggers: ${trigger.label}`);
+    const fallback = `${nameOf(state, card.cardId)} triggers: ${trigger.label}`;
+    logPublic(state, trigger.labelMessage
+      ? triggerLogMessage(fallback, card.cardId, trigger.labelMessage)
+      : fallback);
   });
   return layers;
 }

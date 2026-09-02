@@ -1,4 +1,5 @@
 import type {
+  CardColor,
   EquipmentSlot,
   GameLogPayload,
   GameStatsView,
@@ -75,8 +76,8 @@ export interface CardInstance {
    *  having these tags in addition to its printed types. Persists on the card
    *  as last-known info once it leaves play. */
   grantedTypes?: string[];
-  /** Red/yellow/blue color granted to this object (1/2/3). */
-  grantedColor?: 1 | 2 | 3;
+  /** Red/yellow/blue/purple color granted to this object (1/2/3/4). */
+  grantedColor?: CardColor;
   /** Additional names granted to this object (Be Like Water / Mask of Many
    * Faces). Cleared when the combat chain closes or at end-of-turn cleanup. */
   grantedNames?: string[];
