@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { useIntl } from "react-intl";
 import type {
   CardView,
   ChainLinkView,
@@ -22,8 +23,9 @@ function ChainStat({
   value: number;
   modifiers: readonly CombatValueModifierView[];
 }) {
+  const intl = useIntl();
   const baseValue = value - modifiers.reduce((sum, modifier) => sum + modifier.amount, 0);
-  const label = kind === "attack" ? "Attack" : kind === "defense" ? "Defense" : "Prevention";
+  const label = intl.formatMessage({ id: `game.chain.stat.${kind}` });
   return (
     <span
       className={`chain-stat chain-${kind === "attack" ? "atk" : kind === "defense" ? "def" : "prevent"}`}
@@ -31,25 +33,25 @@ function ChainStat({
       aria-label={kind === "prevention" ? `${label}: ${value}` : undefined}
     >
       {kind !== "prevention" ? (
-        <img className="ico ico-lg" src={`/icons/${kind === "attack" ? "attack" : "defence"}.png`} alt={kind} />
+        <img className="ico ico-lg" src={`/icons/${kind === "attack" ? "attack" : "defence"}.png`} alt={label} />
       ) : null}
       {value}
       <span className="chain-breakdown" role="tooltip">
-        <strong>{label} modifiers</strong>
+        <strong>{intl.formatMessage({ id: "game.chain.modifiers" }, { stat: label })}</strong>
         {kind === "attack" ? (
           <span className="chain-modifier chain-base-value">
-            <span>Base</span>
+            <span>{intl.formatMessage({ id: "game.chain.base" })}</span>
             <strong>{baseValue}</strong>
           </span>
         ) : null}
-        {modifiers.length === 0 ? <span>No modifiers</span> : modifiers.map((modifier, index) => (
+        {modifiers.length === 0 ? <span>{intl.formatMessage({ id: "game.chain.noModifiers" })}</span> : modifiers.map((modifier, index) => (
           <span className="chain-modifier" key={`${modifier.sourceCardId}:${modifier.amount}:${index}`}>
             {modifier.sourceCardId ? (
               <span className="card-ref" data-cardid={modifier.sourceCardId}>
-                {cardData[modifier.sourceCardId]?.name ?? "Card"}
+                {cardData[modifier.sourceCardId]?.name ?? intl.formatMessage({ id: "game.card" })}
               </span>
             ) : (
-              <span>Hidden effect</span>
+              <span>{intl.formatMessage({ id: "game.chain.hiddenEffect" })}</span>
             )}
             <strong className={modifier.amount > 0 ? "modifier-positive" : "modifier-negative"}>
               {modifier.amount > 0 ? "+" : ""}{modifier.amount}
@@ -68,11 +70,12 @@ function ChainMinimizeButton({
   placement: "header" | "corner";
   onMinimize: () => void;
 }) {
+  const intl = useIntl();
   return (
     <button
       className={`chain-hide chain-hide-${placement}`}
-      aria-label="Minimize combat chain"
-      title="Minimize combat chain"
+      aria-label={intl.formatMessage({ id: "game.chain.minimize" })}
+      title={intl.formatMessage({ id: "game.chain.minimize" })}
       onClick={onMinimize}
     >
       <span className="chain-hide-icon" aria-hidden="true">—</span>
@@ -87,6 +90,7 @@ function OnHitBadge({
   attackInstanceId: number;
   effects: readonly OnHitEffectView[];
 }) {
+  const intl = useIntl();
   const tooltipId = `chain-on-hit-${attackInstanceId}`;
   const mobileDialogTitleId = `${tooltipId}-mobile-title`;
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -105,10 +109,10 @@ function OnHitBadge({
     >
       {effect.sourceCardId ? (
         <span className="card-ref" data-cardid={effect.sourceCardId}>
-          {cardData[effect.sourceCardId]?.name ?? "Card"}
+          {cardData[effect.sourceCardId]?.name ?? intl.formatMessage({ id: "game.card" })}
         </span>
       ) : (
-        <span>Hidden effect</span>
+        <span>{intl.formatMessage({ id: "game.chain.hiddenEffect" })}</span>
       )}
       <span>{effect.text}</span>
     </span>
@@ -126,9 +130,9 @@ function OnHitBadge({
           if (window.matchMedia("(max-width: 700px)").matches) setMobileOpen(true);
         }}
       >
-        <span className="chain-on-hit-label">On hit</span>
+        <span className="chain-on-hit-label">{intl.formatMessage({ id: "game.chain.onHit" })}</span>
         <span className="chain-on-hit-tip" id={tooltipId} role="tooltip">
-          <strong>On-hit effects</strong>
+          <strong>{intl.formatMessage({ id: "game.chain.onHitEffects" })}</strong>
           {effectList}
         </span>
       </button>
@@ -143,10 +147,10 @@ function OnHitBadge({
               onClick={(event) => event.stopPropagation()}
             >
               <header>
-                <strong id={mobileDialogTitleId}>On-hit effects</strong>
+                <strong id={mobileDialogTitleId}>{intl.formatMessage({ id: "game.chain.onHitEffects" })}</strong>
                 <button
                   type="button"
-                  aria-label="Close on-hit effects"
+                  aria-label={intl.formatMessage({ id: "game.chain.closeOnHitEffects" })}
                   onClick={() => setMobileOpen(false)}
                 >
                   ×
@@ -227,6 +231,7 @@ export function ChainFloat({
   /** Compact context composed into the expanded chain header. */
   children?: ReactNode;
 }) {
+  const intl = useIntl();
   const [localHidden, setLocalHidden] = useState(false);
   const chainHidden = visibility?.hidden ?? localHidden;
   const setChainHidden = visibility?.setHidden ?? setLocalHidden;
@@ -282,11 +287,11 @@ export function ChainFloat({
     <button
       className={`chain-mini${miniHost ? " chain-mini-anchored" : ""}`}
       onClick={() => setChainHidden(false)}
-      title="Show combat chain"
+      title={intl.formatMessage({ id: "game.chain.show" })}
     >
       <span className="chain-mini-title">
-        <span className="mini-title-long">Combat Chain</span>
-        <span className="mini-title-short">Chain</span>
+        <span className="mini-title-long">{intl.formatMessage({ id: "game.chain.title" })}</span>
+        <span className="mini-title-short">{intl.formatMessage({ id: "game.chain.short" })}</span>
       </span>
       <span className="chain-mini-score">
         <img className="ico" src="/icons/attack.png" alt="attack" />
@@ -333,7 +338,7 @@ export function ChainFloat({
           ref={chainRef}
           className="float chain-float"
           role="region"
-          aria-label="Combat chain"
+          aria-label={intl.formatMessage({ id: "game.chain.title" })}
           style={chainFloat.style}
           {...chainFloat.dragProps}
         >
@@ -342,22 +347,24 @@ export function ChainFloat({
             {onCloseChain && (
               <button
                 className="chain-close"
-                title="Close the combat chain"
+                title={intl.formatMessage({ id: "game.chain.close" })}
                 onClick={onCloseChain}
               >
-                Close chain
+                {intl.formatMessage({ id: "game.chain.closeShort" })}
               </button>
             )}
             <ChainMinimizeButton placement="header" onMinimize={() => setChainHidden(true)} />
           </div>
           <ChainMinimizeButton placement="corner" onMinimize={() => setChainHidden(true)} />
           <div className="chain-body">
-            <nav className="chain-dots" aria-label="Combat chain links">
-              <span className="chain-dots-title">Links</span>
+            <nav className="chain-dots" aria-label={intl.formatMessage({ id: "game.chain.links" })}>
+              <span className="chain-dots-title">{intl.formatMessage({ id: "game.chain.linksShort" })}</span>
               {links.map((l, i) => {
                 const linkLabel = l.resolved
-                  ? `Link ${i + 1}: ${l.hit ? `hit for ${l.damage}` : "fully defended"}`
-                  : `Link ${i + 1}: in progress`;
+                  ? l.hit
+                    ? intl.formatMessage({ id: "game.chain.link.hit" }, { link: i + 1, damage: l.damage })
+                    : intl.formatMessage({ id: "game.chain.link.defended" }, { link: i + 1 })
+                  : intl.formatMessage({ id: "game.chain.link.progress" }, { link: i + 1 });
                 return (
                   <button
                     key={l.attackingCard.instanceId}
@@ -387,8 +394,8 @@ export function ChainFloat({
                 <button
                   className={`chain-dot chain-dot-waiting${showingEmptyCurrent ? " active" : ""}`}
                   aria-current={showingEmptyCurrent ? "step" : undefined}
-                  aria-label={`Link ${chainLen + 1}: waiting for the next attack`}
-                  title={`Link ${chainLen + 1}: waiting for the next attack`}
+                  aria-label={intl.formatMessage({ id: "game.chain.link.waiting" }, { link: chainLen + 1 })}
+                  title={intl.formatMessage({ id: "game.chain.link.waiting" }, { link: chainLen + 1 })}
                   onClick={(event) => browseChainLink(
                     event.currentTarget,
                     event.detail,
@@ -403,7 +410,7 @@ export function ChainFloat({
               {showingEmptyCurrent ? (
                 <div className="chain-empty">
                   <div className="chain-empty-slot" />
-                  <span className="muted">link resolved — waiting for the next attack…</span>
+                  <span className="muted">{intl.formatMessage({ id: "game.chain.resolvedWaiting" })}</span>
                 </div>
               ) : (
                 <>
@@ -529,15 +536,15 @@ export function ChainFloat({
                       ))}
                       {showStaged &&
                         staged.map((c, stagedIndex) => {
-                          const cardName = cardData[c.cardId]?.name ?? c.name ?? "defender";
+                          const cardName = cardData[c.cardId]?.name ?? c.name ?? intl.formatMessage({ id: "game.chain.defender" });
                           return (
                             <span
                               key={c.instanceId}
                               className="chain-staged"
                               title={
                                 onUnstage
-                                  ? `Staged defender — return ${cardName}`
-                                  : "Staged defender — not yet committed"
+                                  ? intl.formatMessage({ id: "game.chain.staged.return" }, { card: cardName })
+                                  : intl.formatMessage({ id: "game.chain.staged.pending" })
                               }
                             >
                               <CardFace
@@ -582,7 +589,7 @@ export function ChainFloat({
                     </div>
                     {showStaged && onUnstageAll ? (
                       <button className="chain-unblock-all" onClick={onUnstageAll}>
-                        Unblock all
+                        {intl.formatMessage({ id: "game.chain.unblockAll" })}
                       </button>
                     ) : null}
                   </div>

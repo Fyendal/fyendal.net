@@ -1,4 +1,5 @@
 import type { CardView, EmoteMessage, PlayerView } from "@fyendal/shared";
+import { useIntl } from "react-intl";
 import type { EmoteEvent } from "../../store/types.js";
 import { BloodDebtCounter } from "../BloodDebtCounter.js";
 import { CardBack, CardFace, InactiveZoneCard } from "../Card.js";
@@ -67,8 +68,13 @@ export function PlayerHalf({
   onSendEmote: (message: EmoteMessage) => void;
   onOpenOverlay: (overlay: BoardOverlay) => void;
 }) {
+  const intl = useIntl();
   const row = (value: number) => (mirrored ? 4 - value : value);
-  const side = mine ? "Your" : "Opponent's";
+  const zoneLabel = (zone: string) => intl.formatMessage({ id: `game.zone.${zone}` });
+  const ownedZoneTitle = (zone: string) => intl.formatMessage(
+    { id: mine ? "game.zone.mine" : "game.zone.opponent" },
+    { zone: zoneLabel(zone) },
+  );
   const optimisticallyHiddenIds = mine ? interaction.optimisticallyHiddenIds : EMPTY_INSTANCE_IDS;
   const arsenalCard = player.arsenal.find((card) => !optimisticallyHiddenIds.has(card.instanceId));
   const visibleReplayDeck = replaying || gameOver ? player.deck : undefined;
@@ -100,7 +106,7 @@ export function PlayerHalf({
         <MatZone
           key={slot}
           area={area}
-          label={slot}
+          label={zoneLabel(slot)}
           className={`zone-${slot}`}
           motionZone={motionLocationKey(zoneLocation)}
         />
@@ -111,7 +117,7 @@ export function PlayerHalf({
         <MatZone
           key={slot}
           area={area}
-          label={slot}
+          label={zoneLabel(slot)}
           className={`zone-${slot}`}
           motionZone={motionLocationKey(zoneLocation)}
         >
@@ -133,7 +139,7 @@ export function PlayerHalf({
       <MatZone
         key={slot}
         area={area}
-        label={slot}
+        label={zoneLabel(slot)}
         className={`zone-${slot}`}
         motionZone={motionLocationKey(zoneLocation)}
       >
@@ -169,7 +175,7 @@ export function PlayerHalf({
       <MatZone
         key={area}
         area={area}
-        label="Weapon"
+        label={zoneLabel("weapon")}
         className={`zone-weapon-${index}`}
         motionZone={motionLocationKey(location)}
       >
@@ -201,19 +207,19 @@ export function PlayerHalf({
   const heroCanActivate = mine && !interaction.defending && interaction.legal.activatable.has(hero.instanceId);
   const pileZone = (
     area: string,
-    label: "Graveyard" | "Banished",
+    kind: "graveyard" | "banished",
     cards: CardView[],
     title: string,
   ) => {
     const location = {
-      kind: label === "Graveyard" ? "graveyard" as const : "banish" as const,
+      kind: kind === "graveyard" ? "graveyard" as const : "banish" as const,
       seat: player.seat,
     };
     return (
       <MatZone
       area={area}
-      label={label}
-      className={`zone-${label.toLowerCase().replaceAll(" ", "-")}`}
+      label={zoneLabel(kind)}
+      className={`zone-${kind}`}
       motionZone={motionLocationKey(location)}
       onClick={cards.length ? () => onOpenOverlay({ title, cards, inactiveZone: true }) : undefined}
     >
@@ -230,7 +236,7 @@ export function PlayerHalf({
           <span className="pip pile-pip">{cards.length}</span>
         </div>
       ) : null}
-      {label === "Banished" ? <BloodDebtCounter cards={cards} /> : null}
+      {kind === "banished" ? <BloodDebtCounter cards={cards} /> : null}
     </MatZone>
     );
   };
@@ -240,7 +246,7 @@ export function PlayerHalf({
       {equipmentZone("head", `${row(1)} / 1`)}
       <MatZone
         area={`${row(1)} / 2 / span 1 / span 7`}
-        label="Board"
+        label={zoneLabel("board")}
         className="zone-board"
         motionZone={motionLocationKey({ kind: "board", seat: player.seat })}
       >
@@ -268,7 +274,10 @@ export function PlayerHalf({
                   onClick={group.activatable ? activate(group.card.instanceId) : undefined}
                 />
                 {group.count > 1 ? (
-                  <span className="board-card-count" aria-label={`${group.count} stacked cards`}>
+                  <span
+                    className="board-card-count"
+                    aria-label={intl.formatMessage({ id: "game.zone.stackedCards" }, { count: group.count })}
+                  >
                     ×{group.count}
                   </span>
                 ) : null}
@@ -279,14 +288,14 @@ export function PlayerHalf({
       </MatZone>
       {pileZone(
         `${row(1)} / 9`,
-        "Graveyard",
+        "graveyard",
         player.graveyard.filter((card) => !optimisticallyHiddenIds.has(card.instanceId)),
-        `${side} Graveyard`,
+        ownedZoneTitle("graveyard"),
       )}
       {equipmentZone("chest", "2 / 1")}
       {equipmentZone("arms", "2 / 2")}
       {weaponZone(0, "2 / 4")}
-      <MatZone area="2 / 5" label="Hero" className="zone-hero">
+      <MatZone area="2 / 5" label={zoneLabel("hero")} className="zone-hero">
         <div
           className="mat-hero"
           data-motion-zone={motionLocationKey({ kind: "soul", seat: player.seat })}
@@ -317,11 +326,11 @@ export function PlayerHalf({
       {weaponZone(1, "2 / 6")}
       <MatZone
         area="2 / 8"
-        label="Pitch"
+        label={zoneLabel("pitch")}
         className="zone-pitch"
         motionZone={motionLocationKey({ kind: "pitch", seat: player.seat })}
         onClick={player.pitchCount
-          ? () => onOpenOverlay({ title: `${side} Pitch`, cards: player.pitch })
+          ? () => onOpenOverlay({ title: ownedZoneTitle("pitch"), cards: player.pitch })
           : undefined}
       >
         <PitchStack
@@ -332,13 +341,15 @@ export function PlayerHalf({
       </MatZone>
       <MatZone
         area="2 / 9"
-        label="Deck"
+        label={zoneLabel("deck")}
         className={`zone-deck${deckShuffling ? " deck-shuffling" : ""}`}
         motionZone={motionLocationKey({ kind: "deck", seat: player.seat })}
         count={presentedDeckTop ? player.deckCount : undefined}
         onClick={visibleReplayDeck?.length
           ? () => onOpenOverlay({
-              title: `${side} Deck — draw order, next card first`,
+              title: intl.formatMessage(
+                { id: mine ? "game.zone.deckMineOrder" : "game.zone.deckOpponentOrder" },
+              ),
               cards: visibleReplayDeck,
             })
           : undefined}
@@ -375,7 +386,7 @@ export function PlayerHalf({
             />
           ) : (
             <CardBack
-              label="Deck"
+              label={zoneLabel("deck")}
               count={player.deckCount}
               motionZoneAnchor={motionLocationKey({ kind: "deck", seat: player.seat })}
             />
@@ -396,7 +407,7 @@ export function PlayerHalf({
       <EffectChips effects={ongoing} area={`${row(3)} / 2 / span 1 / span 3`} />
       <MatZone
         area={`${row(3)} / 5`}
-        label="Arsenal"
+        label={zoneLabel("arsenal")}
         className="zone-arsenal"
         motionZone={motionLocationKey({ kind: "arsenal", seat: player.seat })}
       >
@@ -435,7 +446,7 @@ export function PlayerHalf({
           />
         ) : player.arsenalCount > 0 ? (
           <CardBack
-            label="Arsenal"
+            label={zoneLabel("arsenal")}
             motionKey={opaqueMotionPresentationKey({
               kind: "arsenal",
               seat: player.seat,
@@ -445,9 +456,9 @@ export function PlayerHalf({
       </MatZone>
       {pileZone(
         `${row(3)} / 9`,
-        "Banished",
+        "banished",
         player.banish.filter((card) => !optimisticallyHiddenIds.has(card.instanceId)),
-        `${side} Banish`,
+        ownedZoneTitle("banished"),
       )}
     </div>
   );

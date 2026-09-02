@@ -1,6 +1,6 @@
 import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
-import type { MeldSide, PlayableZone } from "@fyendal/shared";
+import type { GameMessage, MeldSide, PlayableZone } from "@fyendal/shared";
 import type { CardScript, TriggerEvent, TriggerEventContext } from "./scripts.js";
 import {
   activatedAbilitiesSuppressed,
@@ -287,6 +287,65 @@ export function windowPrompt(state: GameStateInternal, forSeat: number | null): 
       : `${nameOf(state, link.attackingCard.cardId)} on the stack — play an instant or pass`;
   }
   return "Priority — play an instant or pass";
+}
+
+/** Locale-independent counterpart to `windowPrompt`. Projection rebuilds this
+ * per viewer so face-down stack sources stay private. The legacy English
+ * prompt remains persisted for deterministic compatibility with older clients. */
+export function windowPromptMessage(
+  state: GameStateInternal,
+  forSeat: number | null,
+): GameMessage {
+  const layer = state.stack[0];
+  if (layer) {
+    if (layer.card) {
+      return {
+        id: "engine.decision.priority.card",
+        values: { card: { kind: "card", cardId: layer.card.cardId } },
+      };
+    }
+    const found = findCardAnywhere(state, layer.sourceInstanceId);
+    const secret = !!found && found.card.faceDown && found.card.owner !== forSeat;
+    if (layer.ability) {
+      if (secret) return { id: "engine.decision.priority.ability.hidden" };
+      if (found) {
+        return {
+          id: "engine.decision.priority.ability",
+          values: { card: { kind: "card", cardId: found.card.cardId } },
+        };
+      }
+      return { id: "engine.decision.priority.ability.triggered" };
+    }
+    if (secret) {
+      return {
+        id: "engine.decision.priority.trigger.hidden",
+        values: { trigger: layer.label },
+      };
+    }
+    if (found) {
+      return {
+        id: "engine.decision.priority.trigger",
+        values: {
+          card: { kind: "card", cardId: found.card.cardId },
+          trigger: layer.label,
+        },
+      };
+    }
+    return {
+      id: "engine.decision.priority.trigger.generic",
+      values: { trigger: layer.label },
+    };
+  }
+  const link = currentLink(state);
+  if (link) {
+    return {
+      id: link.flags.attackStepBegan === true
+        ? "engine.decision.priority.attacking"
+        : "engine.decision.priority.card",
+      values: { card: { kind: "card", cardId: link.attackingCard.cardId } },
+    };
+  }
+  return { id: "engine.decision.priority.base" };
 }
 
 function openWindow(state: GameStateInternal, seat?: number, initialPasses = 0): void {

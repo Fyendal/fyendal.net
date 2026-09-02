@@ -55,7 +55,7 @@
   box-sizing: border-box;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 5px;
   padding: 7px 16px;
   text-align: center;
   white-space: nowrap;

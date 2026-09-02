@@ -1,4 +1,5 @@
 import type { GameView } from "@fyendal/shared";
+import { useIntl } from "react-intl";
 import { cardData } from "@fyendal/cards/client";
 import {
   CARD_PREVIEW_HEIGHT,
@@ -69,6 +70,7 @@ export function BoardOverlays({
   onCloseOverlay: () => void;
   onInspectCard: (cardId: string | null) => void;
 }) {
+  const intl = useIntl();
   return (
     <>
       {preview?.id && cardData[preview.id] ? (
@@ -107,7 +109,7 @@ export function BoardOverlays({
               <button
                 type="button"
                 className="zone-overlay-close"
-                aria-label={`Close ${overlay.title}`}
+                aria-label={intl.formatMessage({ id: "common.closeNamed" }, { title: overlay.title })}
                 onClick={onCloseOverlay}
               >
                 ×
@@ -149,10 +151,17 @@ export function BoardOverlays({
       {showIdleVictory ? (
         <div className="idle-toast">
           <span>
-            {opponentHeroName} hasn't acted in {Math.floor(opponentIdleMs / 60_000)} min — claim the win?
+            {intl.formatMessage(
+              { id: "game.idle.claimPrompt" },
+              { hero: opponentHeroName, minutes: Math.floor(opponentIdleMs / 60_000) },
+            )}
           </span>
-          <button className="btn-primary" onClick={onClaimVictory}>Claim victory</button>
-          <button className="linklike" onClick={onDismissIdleVictory}>Dismiss</button>
+          <button className="btn-primary" onClick={onClaimVictory}>
+            {intl.formatMessage({ id: "game.idle.claim" })}
+          </button>
+          <button className="linklike" onClick={onDismissIdleVictory}>
+            {intl.formatMessage({ id: "common.dismiss" })}
+          </button>
         </div>
       ) : null}
       {!replaying && gameView.winner !== null && !gameOverDismissed ? (

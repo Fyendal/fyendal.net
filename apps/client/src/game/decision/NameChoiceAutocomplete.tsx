@@ -1,4 +1,5 @@
 import { useId, useMemo, useState } from "react";
+import { useIntl } from "react-intl";
 import { cardData } from "@fyendal/cards/client";
 
 const MAX_SUGGESTIONS = 8;
@@ -36,6 +37,7 @@ export function cardNameEnterAction(
 }
 
 export function NameChoiceAutocomplete({ onChoose }: { onChoose: (name: string) => void }) {
+  const intl = useIntl();
   const listboxId = useId();
   const [chosenName, setChosenName] = useState("");
   const [open, setOpen] = useState(false);
@@ -72,9 +74,9 @@ export function NameChoiceAutocomplete({ onChoose }: { onChoose: (name: string) 
           aria-autocomplete="list"
           aria-controls={listboxId}
           aria-expanded={showSuggestions}
-          aria-label="Card name"
+          aria-label={intl.formatMessage({ id: "game.cardName" })}
           autoComplete="off"
-          placeholder="Start typing a card name"
+          placeholder={intl.formatMessage({ id: "game.decision.name.placeholder" })}
           role="combobox"
           value={chosenName}
           onBlur={() => setOpen(false)}
@@ -132,7 +134,7 @@ export function NameChoiceAutocomplete({ onChoose }: { onChoose: (name: string) 
         </div>
       </div>
       <button className="btn-primary" disabled={!chosenName.trim()} type="submit">
-        Choose name
+        {intl.formatMessage({ id: "game.decision.name.choose" })}
       </button>
     </form>
   );

@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import type { PlayerView } from "@fyendal/shared";
+import { TestI18nProvider } from "../../i18n/TestI18nProvider.js";
 import { PlayerHalf } from "./PlayerHalf.js";
 
 const player: PlayerView = {
@@ -34,9 +35,11 @@ function renderPlayerHalf(
   mine = true,
   visibleDeckTop?: PlayerView["visibleDeckTop"],
   defendFromArsenal?: number,
+  locale: "en" | "zh-Hans" = "en",
 ): string {
   return renderToStaticMarkup(
-    <PlayerHalf
+    <TestI18nProvider locale={locale}>
+      <PlayerHalf
       player={playerView}
       mine={mine}
       mirrored={false}
@@ -70,11 +73,22 @@ function renderPlayerHalf(
       mobileFloatViewport={false}
       onSendEmote={() => undefined}
       onOpenOverlay={() => undefined}
-    />,
+      />
+    </TestI18nProvider>,
   );
 }
 
 describe("PlayerHalf", () => {
+  it("localizes board zone labels in Chinese", () => {
+    const html = renderPlayerHalf(player, true, undefined, undefined, "zh-Hans");
+
+    expect(html).toContain('title="牌库"');
+    expect(html).toContain('title="Arsenal"');
+    expect(html).toContain('title="墓地"');
+    expect(html).toContain('title="放逐区"');
+    expect(html).toContain('title="武器"');
+  });
+
   it("marks tapped board-card wrappers with a landscape layout footprint", () => {
     const html = renderPlayerHalf(player);
 

@@ -1,4 +1,5 @@
 import type { CardView } from "@fyendal/shared";
+import { useIntl } from "react-intl";
 import { CardFace } from "../Card.js";
 import { cardAffiliation, chooseWithoutFocus } from "./DecisionShared.js";
 
@@ -52,6 +53,7 @@ export function ActionTargetCards({
   selectionMade: boolean;
   onSelect: (id: number | null) => void;
 }) {
+  const intl = useIntl();
   return (
     <div className="decision-target-cards">
       {choices.map((choice) => {
@@ -60,7 +62,10 @@ export function ActionTargetCards({
           <button
             key={choice.id ?? "hero"}
             className={`decision-target-card ${selected ? "decision-target-selected" : ""}`}
-            aria-label={`Target ${choice.label}`}
+            aria-label={intl.formatMessage(
+              { id: "game.decision.targetNamed" },
+              { target: choice.label },
+            )}
             aria-pressed={selected}
             onClick={(event) =>
               chooseWithoutFocus(event.currentTarget, () => onSelect(choice.id))}
@@ -71,7 +76,9 @@ export function ActionTargetCards({
               affiliation={cardAffiliation(choice.card, viewerSeat)}
             />
             <span>{choice.label}</span>
-            {choice.life !== undefined && <small>{choice.life} life</small>}
+            {choice.life !== undefined && (
+              <small>{intl.formatMessage({ id: "game.life.amount" }, { life: choice.life })}</small>
+            )}
           </button>
         );
       })}

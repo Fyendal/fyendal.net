@@ -49,7 +49,9 @@ function LocalizedDecisionOptionButton({
         : {})}
     >
       {label}
-      {spaceDefault ? <kbd className="shortcut-key" aria-label="Space key" /> : null}
+      {spaceDefault ? (
+        <kbd className="shortcut-key" aria-label={intl.formatMessage({ id: "common.spaceKey" })} />
+      ) : null}
     </button>
   );
 }
@@ -183,6 +185,7 @@ export function PendingDecisionPanel({
   model: PendingDecisionModel;
   viewerSeat: number;
 }) {
+  const intl = useIntl();
   const {
     decision: pd,
     isMine,
@@ -240,7 +243,9 @@ export function PendingDecisionPanel({
   if (!isMine) {
     return (
       <div className={`decision decision-passive${revealedChoice ? " decision-options" : ""}`}>
-        <span className="decision-prompt muted">{decidingName} is deciding…</span>
+        <span className="decision-prompt muted">
+          {intl.formatMessage({ id: "game.decision.playerDeciding" }, { player: decidingName })}
+        </span>
         {revealedChoice ? (
           <RevealedChoiceCards
             cards={revealedCards}
@@ -268,8 +273,10 @@ export function PendingDecisionPanel({
       priorityGuidanceDecision ? " decision-priority-guidance" : ""
     }`}>
       <DecisionPrompt
-        prompt={pd.kind === "defend" ? "Pitch to pay this defense cost" : pd.prompt}
-        message={pd.kind === "defend" ? undefined : pd.promptMessage}
+        prompt={pd.kind === "arsenal"
+          ? intl.formatMessage({ id: "game.decision.arsenal.choosePrompt" })
+          : pd.prompt}
+        message={pd.promptMessage}
         breakOnDash={priorityGuidanceDecision}
         suffix={priorityGuidanceDecision ? (
           <GuidanceSettingsInfo onDisableGuidance={onDisableGuidance} />
@@ -310,7 +317,7 @@ export function PendingDecisionPanel({
       ) : null}
       {pd.kind === "defend" && defendPitchIds.size > 0 ? (
         <span className="decision-prompt">
-          {"Pitch to pay this defense cost: "}
+          {intl.formatMessage({ id: "game.decision.defensePitchList" })}{" "}
           {hand
             .filter((card) => !defendSel.includes(card.instanceId) && defendPitchIds.has(card.instanceId))
             .map((card) => (
@@ -326,10 +333,15 @@ export function PendingDecisionPanel({
       ) : null}
       {pd.resourcePayment ? (
         <>
-          <span className="decision-context">Choose cards from your hand to pitch.</span>
+          <span className="decision-context">
+            {intl.formatMessage({ id: "game.decision.choosePitch" })}
+          </span>
           <strong
             className="decision-resource-progress"
-            aria-label={`${resourcePaymentSelected} of ${resourcePaymentRequired} pitch resources selected`}
+            aria-label={intl.formatMessage(
+              { id: "game.decision.pitchProgress" },
+              { selected: resourcePaymentSelected, required: resourcePaymentRequired },
+            )}
           >
             {resourcePaymentSelected}/{resourcePaymentRequired}
           </strong>
@@ -352,11 +364,11 @@ export function PendingDecisionPanel({
                   className="btn-primary"
                   onClick={() => onSend({ kind: "choose", optionId: `top:${id}` })}
                 >
-                  Top
+                  {intl.formatMessage({ id: "game.decision.opt.top" })}
                 </button>
                 <CardFace card={card} size="hand" affiliation={cardAffiliation(card, viewerSeat)} />
                 <button onClick={() => onSend({ kind: "choose", optionId: `bottom:${id}` })}>
-                  Bottom
+                  {intl.formatMessage({ id: "game.decision.opt.bottom" })}
                 </button>
               </div>
             ))}
@@ -407,20 +419,49 @@ export function PendingDecisionPanel({
                 />
               );
             }
-            const shortcutLabel = option.length > 0
-              ? `${option[0]!.toUpperCase()}${option.slice(1)}`
-              : option;
+            const literalMessageId = option === "yes"
+              ? "common.option.yes"
+              : option === "no"
+                ? "common.option.no"
+                : option === "pass"
+                  ? "common.option.pass"
+                  : option === "decline"
+                    ? "common.option.decline"
+                    : option === "reroll"
+                      ? "common.option.reroll"
+                      : option === "keep"
+                        ? "common.option.keep"
+                        : undefined;
+            const payAmount = /^pay (\d+)$/.exec(option)?.[1];
+            const optionLabel = payAmount !== undefined
+              ? intl.formatMessage({ id: "game.decision.payAmount" }, { amount: payAmount })
+              : literalMessageId
+                ? intl.formatMessage({ id: literalMessageId })
+                : option;
+            const shortcutLabel = literalMessageId || payAmount !== undefined
+              ? optionLabel
+              : option.length > 0
+                ? `${option[0]!.toUpperCase()}${option.slice(1)}`
+                : option;
             return (
               <button
                 key={option}
                 className={spaceDefault ? "btn-primary shortcut-button" : undefined}
                 onClick={() => onSend({ kind: "choose", optionId: option })}
                 {...(spaceDefault
-                  ? { title: `${shortcutLabel} (Space)`, "aria-keyshortcuts": "Space" }
+                  ? {
+                      title: intl.formatMessage(
+                        { id: "common.shortcut.space" },
+                        { label: shortcutLabel },
+                      ),
+                      "aria-keyshortcuts": "Space",
+                    }
                   : {})}
               >
-                {option}
-                {spaceDefault ? <kbd className="shortcut-key" aria-label="Space key" /> : null}
+                {optionLabel}
+                {spaceDefault ? (
+                  <kbd className="shortcut-key" aria-label={intl.formatMessage({ id: "common.spaceKey" })} />
+                ) : null}
               </button>
             );
           })}
@@ -428,11 +469,14 @@ export function PendingDecisionPanel({
           <button
             className="shortcut-button"
             onClick={onRequestPass}
-            title="Pass (Space)"
+            title={intl.formatMessage(
+              { id: "common.shortcut.space" },
+              { label: intl.formatMessage({ id: "common.option.pass" }) },
+            )}
             aria-keyshortcuts="Space"
           >
-            Pass
-            <kbd className="shortcut-key" aria-label="Space key" />
+            {intl.formatMessage({ id: "common.option.pass" })}
+            <kbd className="shortcut-key" aria-label={intl.formatMessage({ id: "common.spaceKey" })} />
           </button>
         ) : null}
       </div>

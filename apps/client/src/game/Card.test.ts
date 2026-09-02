@@ -98,6 +98,7 @@ describe("CardBack", () => {
     const html = renderToStaticMarkup(createElement(CardBack, { label: "Deck", count: 40 }));
 
     expect(html).toContain("https://content.fabrary.net/cards/cardback.webp");
+    expect(html).toContain('loading="eager"');
     expect(html).toContain('aria-hidden="true"');
     expect(html).toContain(">Deck<");
     expect(html).toContain(">40<");
@@ -139,6 +140,16 @@ describe("CardBack", () => {
 });
 
 describe("CardFace payment state", () => {
+  it("loads card art eagerly so visible cards do not wait for hover", () => {
+    const html = renderToStaticMarkup(createElement(CardFace, {
+      card: { instanceId: 1, cardId: "WTR160", owner: 0 },
+    }));
+
+    expect(html).toContain('loading="eager"');
+    expect(html).not.toContain('loading="lazy"');
+    expect(html).not.toContain('decoding="async"');
+  });
+
   it("uses native button semantics when it is interactive", () => {
     const interactive = renderToStaticMarkup(createElement(CardFace, {
       card: { instanceId: 1, cardId: "TEST-CARD", owner: 0 },

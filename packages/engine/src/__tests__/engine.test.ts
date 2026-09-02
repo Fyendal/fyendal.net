@@ -355,6 +355,9 @@ describe("game setup & turn structure", () => {
       chooseHook: "engine-token-replacement-order",
       options: [`global:${sourceId}`, `optional-friendly:${sourceId}`],
     });
+    expect(projectStateFor(s, 0).pendingDecision?.promptMessage).toEqual({
+      id: "engine.decision.token.next",
+    });
     expect(answerTokenReplacementOrder(s, engineRuntime, 0, `optional-friendly:${sourceId}`)).toBeUndefined();
     expect(s.pendingDecision?.chooseHook).toBe("engine-token-creation-replacement");
     expect(answerTokenCreationReplacement(s, engineRuntime, 0, "yes")).toBeUndefined();
@@ -2279,6 +2282,9 @@ describe("combat", () => {
     if (!r.ok) return;
     s = r.state;
     expect(s.pendingDecision?.kind).toBe("defense-reaction");
+    expect(projectStateFor(s, 1).pendingDecision?.promptMessage).toEqual({
+      id: "engine.decision.reaction.defense",
+    });
     r = applyIntent(s, 1, { kind: "play-card", instanceId: dr, pitchInstanceIds: [] });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
@@ -2287,6 +2293,10 @@ describe("combat", () => {
     expect(s.stack[0]?.card?.instanceId).toBe(dr);
     expect(s.chain[0]!.defendingCards.some((c) => c.instanceId === dr)).toBe(false);
     expect(projectStateFor(s, 0).chain[0]!.defenseValue).toBe(0);
+    expect(projectStateFor(s, 1).pendingDecision?.promptMessage).toEqual({
+      id: "engine.decision.reaction.defense.card",
+      values: { card: { kind: "card", cardId: "DREACT" } },
+    });
     // both pass in succession → it resolves as a defending card (8.1.3b)
     r = applyIntent(s, 1, { kind: "pass" });
     expect(r.ok).toBe(true);
@@ -2777,6 +2787,10 @@ describe("trigger stack & priority windows", () => {
     expect(s.pendingDecision?.kind).toBe("priority-window");
     expect(s.priorityPlayer).toBe(0); // attacker holds priority first
     expect(projectStateFor(s, 1).chain[0]!.attackingCard.cardId).toBe("ATK4");
+    expect(projectStateFor(s, 0).pendingDecision?.promptMessage).toEqual({
+      id: "engine.decision.priority.card",
+      values: { card: { kind: "card", cardId: "ATK4" } },
+    });
 
     r = applyIntent(s, 0, { kind: "pass" });
     expect(r.ok).toBe(true);
@@ -2794,6 +2808,10 @@ describe("trigger stack & priority windows", () => {
     expect(s.stack).toHaveLength(1);
     expect(s.stack[0]!.card?.instanceId).toBe(sigil);
     expect(player(s, 1).life).toBe(20); // the effect waits for both players to pass
+    expect(projectStateFor(s, 1).pendingDecision?.promptMessage).toEqual({
+      id: "engine.decision.priority.card",
+      values: { card: { kind: "card", cardId: "INSTANT" } },
+    });
 
     // both pass in succession → the instant resolves; with nobody left able to
     // respond, the attack then becomes attacking and the defend decision appears
@@ -2808,6 +2826,13 @@ describe("trigger stack & priority windows", () => {
     expect(player(s, 1).life).toBe(21);
     expect(s.phase).toBe("defend");
     expect(s.pendingDecision?.kind).toBe("defend");
+    expect(projectStateFor(s, 1).pendingDecision?.promptMessage).toEqual({
+      id: "engine.decision.defend",
+      values: {
+        card: { kind: "card", cardId: "ATK4" },
+        attack: 4,
+      },
+    });
   });
 
   it("a declared attack projects as on-stack until both pass; then its chain link starts", () => {

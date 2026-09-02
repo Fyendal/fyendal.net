@@ -297,6 +297,12 @@
       "value": "Cancel"
     }
   ],
+  "common.close": [
+    {
+      "type": 0,
+      "value": "Close"
+    }
+  ],
   "common.closeNamed": [
     {
       "type": 0,
@@ -329,6 +335,18 @@
     {
       "type": 0,
       "value": "Deck"
+    }
+  ],
+  "common.dismiss": [
+    {
+      "type": 0,
+      "value": "Dismiss"
+    }
+  ],
+  "common.done": [
+    {
+      "type": 0,
+      "value": "Done"
     }
   ],
   "common.endGame": [
@@ -367,6 +385,18 @@
       "value": "Log out"
     }
   ],
+  "common.option.decline": [
+    {
+      "type": 0,
+      "value": "Decline"
+    }
+  ],
+  "common.option.keep": [
+    {
+      "type": 0,
+      "value": "Keep"
+    }
+  ],
   "common.option.no": [
     {
       "type": 0,
@@ -377,6 +407,12 @@
     {
       "type": 0,
       "value": "Pass"
+    }
+  ],
+  "common.option.reroll": [
+    {
+      "type": 0,
+      "value": "Reroll"
     }
   ],
   "common.option.yes": [
@@ -419,6 +455,32 @@
       "value": "Join the Fyendal Discord"
     }
   ],
+  "engine.decision.activation.discard": [
+    {
+      "type": 0,
+      "value": "Choose a card to discard for "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "engine.decision.arsenal": [
+    {
+      "type": 0,
+      "value": "You may put a card from your hand into your arsenal, or pass"
+    }
+  ],
+  "engine.decision.attack.target": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose an attack target"
+    }
+  ],
   "engine.decision.crank": [
     {
       "type": 1,
@@ -427,6 +489,212 @@
     {
       "type": 0,
       "value": ": Crank — remove a steam counter to gain 1 action point?"
+    }
+  ],
+  "engine.decision.deckbottom.first": [
+    {
+      "type": 0,
+      "value": "Choose the first card to put on the bottom of your deck"
+    }
+  ],
+  "engine.decision.deckbottom.next": [
+    {
+      "type": 0,
+      "value": "Choose the next card to put on the bottom of your deck"
+    }
+  ],
+  "engine.decision.defend": [
+    {
+      "type": 0,
+      "value": "Defend against "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " ("
+    },
+    {
+      "type": 1,
+      "value": "attack"
+    },
+    {
+      "type": 0,
+      "value": " attack)"
+    }
+  ],
+  "engine.decision.payment": [
+    {
+      "type": 0,
+      "value": "Pay "
+    },
+    {
+      "type": 1,
+      "value": "cost"
+    },
+    {
+      "type": 0,
+      "value": " resources"
+    }
+  ],
+  "engine.decision.priority.ability": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "'s ability on the stack — play an instant or pass"
+    }
+  ],
+  "engine.decision.priority.ability.hidden": [
+    {
+      "type": 0,
+      "value": "A face-down card's ability on the stack — play an instant or pass"
+    }
+  ],
+  "engine.decision.priority.ability.triggered": [
+    {
+      "type": 0,
+      "value": "Triggered ability on the stack — play an instant or pass"
+    }
+  ],
+  "engine.decision.priority.attacking": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " is attacking — play an instant or pass"
+    }
+  ],
+  "engine.decision.priority.base": [
+    {
+      "type": 0,
+      "value": "Priority — play an instant or pass"
+    }
+  ],
+  "engine.decision.priority.card": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " on the stack — play an instant or pass"
+    }
+  ],
+  "engine.decision.priority.trigger": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " triggers: "
+    },
+    {
+      "type": 1,
+      "value": "trigger"
+    },
+    {
+      "type": 0,
+      "value": " — play an instant or pass"
+    }
+  ],
+  "engine.decision.priority.trigger.generic": [
+    {
+      "type": 0,
+      "value": "Triggered ability: "
+    },
+    {
+      "type": 1,
+      "value": "trigger"
+    },
+    {
+      "type": 0,
+      "value": " — play an instant or pass"
+    }
+  ],
+  "engine.decision.priority.trigger.hidden": [
+    {
+      "type": 0,
+      "value": "A face-down card triggers: "
+    },
+    {
+      "type": 1,
+      "value": "trigger"
+    },
+    {
+      "type": 0,
+      "value": " — play an instant or pass"
+    }
+  ],
+  "engine.decision.reaction.attack": [
+    {
+      "type": 0,
+      "value": "Attack reaction window — play a reaction or pass"
+    }
+  ],
+  "engine.decision.reaction.attack.card": [
+    {
+      "type": 0,
+      "value": "Attack reaction window — play a reaction or pass ("
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " on the stack)"
+    }
+  ],
+  "engine.decision.reaction.defense": [
+    {
+      "type": 0,
+      "value": "Defense reaction window — play a reaction or pass"
+    }
+  ],
+  "engine.decision.reaction.defense.card": [
+    {
+      "type": 0,
+      "value": "Defense reaction window — play a reaction or pass ("
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " on the stack)"
+    }
+  ],
+  "engine.decision.token.next": [
+    {
+      "type": 0,
+      "value": "Choose the next token creation replacement to apply"
+    }
+  ],
+  "engine.decision.token.playerorder": [
+    {
+      "type": 0,
+      "value": "Choose which player's token replacements apply first"
+    }
+  ],
+  "engine.decision.triggers.order": [
+    {
+      "type": 0,
+      "value": "Order your triggered abilities"
+    }
+  ],
+  "engine.decision.wager.next": [
+    {
+      "type": 0,
+      "value": "Choose the next wager-loss replacement to apply"
     }
   ],
   "footer.legal": [
@@ -465,10 +733,2294 @@
       "value": "Silver Age"
     }
   ],
+  "game.ability": [
+    {
+      "type": 0,
+      "value": "ability"
+    }
+  ],
+  "game.action.activate": [
+    {
+      "type": 0,
+      "value": "Activate"
+    }
+  ],
+  "game.action.confirm-blocks": [
+    {
+      "type": 0,
+      "value": "Confirm blocks"
+    }
+  ],
+  "game.action.confirm-blocks.short": [
+    {
+      "type": 0,
+      "value": "CONFIRM"
+    }
+  ],
+  "game.action.confirm-no-blocks": [
+    {
+      "type": 0,
+      "value": "Confirm no blocks"
+    }
+  ],
+  "game.action.confirm-no-blocks.short": [
+    {
+      "type": 0,
+      "value": "NO BLOCK"
+    }
+  ],
+  "game.action.end-turn": [
+    {
+      "type": 0,
+      "value": "End turn"
+    }
+  ],
+  "game.action.end-turn.short": [
+    {
+      "type": 0,
+      "value": "END TURN"
+    }
+  ],
+  "game.action.pass": [
+    {
+      "type": 0,
+      "value": "Pass"
+    }
+  ],
+  "game.action.pass.short": [
+    {
+      "type": 0,
+      "value": "PASS"
+    }
+  ],
+  "game.action.play": [
+    {
+      "type": 0,
+      "value": "Play"
+    }
+  ],
+  "game.actionPoints.hero": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": "'s remaining action points"
+    }
+  ],
+  "game.actionPoints.remaining": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " action point remaining"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " action points remaining"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "game.attack.this": [
+    {
+      "type": 0,
+      "value": "this attack"
+    }
+  ],
+  "game.bloodDebt": [
+    {
+      "type": 0,
+      "value": "Blood Debt"
+    }
+  ],
+  "game.bloodDebt.loseLife": [
+    {
+      "type": 0,
+      "value": "Lose "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " life"
+    }
+  ],
+  "game.bloodDebt.summary": [
+    {
+      "type": 0,
+      "value": "Blood Debt: lose "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " life"
+    }
+  ],
+  "game.bug.currentRoom": [
+    {
+      "type": 0,
+      "value": "current"
+    }
+  ],
+  "game.bug.description": [
+    {
+      "type": 0,
+      "value": "Tell us what happened and what you expected. Room "
+    },
+    {
+      "type": 1,
+      "value": "room"
+    },
+    {
+      "type": 0,
+      "value": "'s current state and recent history will be attached securely."
+    }
+  ],
+  "game.bug.descriptionLabel": [
+    {
+      "type": 0,
+      "value": "Description"
+    }
+  ],
+  "game.bug.dialogTitle": [
+    {
+      "type": 0,
+      "value": "Report a game bug"
+    }
+  ],
+  "game.bug.placeholder": [
+    {
+      "type": 0,
+      "value": "What happened? What should have happened instead?"
+    }
+  ],
+  "game.bug.reference": [
+    {
+      "type": 0,
+      "value": "Reference "
+    },
+    {
+      "type": 1,
+      "value": "reference"
+    },
+    {
+      "type": 0,
+      "value": ". The room state and recent history were attached for diagnosis."
+    }
+  ],
+  "game.bug.report": [
+    {
+      "type": 0,
+      "value": "Report a bug"
+    }
+  ],
+  "game.bug.send": [
+    {
+      "type": 0,
+      "value": "Send report"
+    }
+  ],
+  "game.bug.sending": [
+    {
+      "type": 0,
+      "value": "Sending…"
+    }
+  ],
+  "game.bug.sent": [
+    {
+      "type": 0,
+      "value": "Report sent"
+    }
+  ],
+  "game.bug.validation": [
+    {
+      "type": 0,
+      "value": "Describe the bug in 10 to 2000 characters."
+    }
+  ],
+  "game.card": [
+    {
+      "type": 0,
+      "value": "card"
+    }
+  ],
+  "game.card.nonAttack": [
+    {
+      "type": 0,
+      "value": "this non-attack action"
+    }
+  ],
   "game.cardDetails": [
     {
       "type": 0,
       "value": "Card Details"
+    }
+  ],
+  "game.cardName": [
+    {
+      "type": 0,
+      "value": "Card name"
+    }
+  ],
+  "game.cardType.action": [
+    {
+      "type": 0,
+      "value": "Action"
+    }
+  ],
+  "game.cardType.instant": [
+    {
+      "type": 0,
+      "value": "Instant"
+    }
+  ],
+  "game.chain.base": [
+    {
+      "type": 0,
+      "value": "Base"
+    }
+  ],
+  "game.chain.close": [
+    {
+      "type": 0,
+      "value": "Close the combat chain"
+    }
+  ],
+  "game.chain.closeOnHitEffects": [
+    {
+      "type": 0,
+      "value": "Close on-hit effects"
+    }
+  ],
+  "game.chain.closeShort": [
+    {
+      "type": 0,
+      "value": "Close chain"
+    }
+  ],
+  "game.chain.defender": [
+    {
+      "type": 0,
+      "value": "defender"
+    }
+  ],
+  "game.chain.hiddenEffect": [
+    {
+      "type": 0,
+      "value": "Hidden effect"
+    }
+  ],
+  "game.chain.link.defended": [
+    {
+      "type": 0,
+      "value": "Link "
+    },
+    {
+      "type": 1,
+      "value": "link"
+    },
+    {
+      "type": 0,
+      "value": ": fully defended"
+    }
+  ],
+  "game.chain.link.hit": [
+    {
+      "type": 0,
+      "value": "Link "
+    },
+    {
+      "type": 1,
+      "value": "link"
+    },
+    {
+      "type": 0,
+      "value": ": hit for "
+    },
+    {
+      "type": 1,
+      "value": "damage"
+    }
+  ],
+  "game.chain.link.progress": [
+    {
+      "type": 0,
+      "value": "Link "
+    },
+    {
+      "type": 1,
+      "value": "link"
+    },
+    {
+      "type": 0,
+      "value": ": in progress"
+    }
+  ],
+  "game.chain.link.waiting": [
+    {
+      "type": 0,
+      "value": "Link "
+    },
+    {
+      "type": 1,
+      "value": "link"
+    },
+    {
+      "type": 0,
+      "value": ": waiting for the next attack"
+    }
+  ],
+  "game.chain.links": [
+    {
+      "type": 0,
+      "value": "Combat chain links"
+    }
+  ],
+  "game.chain.linksShort": [
+    {
+      "type": 0,
+      "value": "Links"
+    }
+  ],
+  "game.chain.minimize": [
+    {
+      "type": 0,
+      "value": "Minimize combat chain"
+    }
+  ],
+  "game.chain.modifiers": [
+    {
+      "type": 1,
+      "value": "stat"
+    },
+    {
+      "type": 0,
+      "value": " modifiers"
+    }
+  ],
+  "game.chain.noModifiers": [
+    {
+      "type": 0,
+      "value": "No modifiers"
+    }
+  ],
+  "game.chain.onHit": [
+    {
+      "type": 0,
+      "value": "On hit"
+    }
+  ],
+  "game.chain.onHitEffects": [
+    {
+      "type": 0,
+      "value": "On-hit effects"
+    }
+  ],
+  "game.chain.resolvedWaiting": [
+    {
+      "type": 0,
+      "value": "link resolved — waiting for the next attack…"
+    }
+  ],
+  "game.chain.short": [
+    {
+      "type": 0,
+      "value": "Chain"
+    }
+  ],
+  "game.chain.show": [
+    {
+      "type": 0,
+      "value": "Show combat chain"
+    }
+  ],
+  "game.chain.staged.pending": [
+    {
+      "type": 0,
+      "value": "Staged defender — not yet committed"
+    }
+  ],
+  "game.chain.staged.return": [
+    {
+      "type": 0,
+      "value": "Staged defender — return "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "game.chain.stat.attack": [
+    {
+      "type": 0,
+      "value": "Attack"
+    }
+  ],
+  "game.chain.stat.defense": [
+    {
+      "type": 0,
+      "value": "Defense"
+    }
+  ],
+  "game.chain.stat.prevention": [
+    {
+      "type": 0,
+      "value": "Prevention"
+    }
+  ],
+  "game.chain.title": [
+    {
+      "type": 0,
+      "value": "Combat Chain"
+    }
+  ],
+  "game.chain.unblockAll": [
+    {
+      "type": 0,
+      "value": "Unblock all"
+    }
+  ],
+  "game.concede": [
+    {
+      "type": 0,
+      "value": "Concede Game"
+    }
+  ],
+  "game.concede.confirmDescription": [
+    {
+      "type": 0,
+      "value": "Conceding awards the game to your opponent."
+    }
+  ],
+  "game.concede.confirmTitle": [
+    {
+      "type": 0,
+      "value": "Concede Game?"
+    }
+  ],
+  "game.concede.short": [
+    {
+      "type": 0,
+      "value": "Concede"
+    }
+  ],
+  "game.connection.lost": [
+    {
+      "type": 0,
+      "value": "connection lost — reconnecting…"
+    }
+  ],
+  "game.connection.opponentLost": [
+    {
+      "type": 0,
+      "value": "opponent disconnected — waiting…"
+    }
+  ],
+  "game.controls": [
+    {
+      "type": 0,
+      "value": "Game controls"
+    }
+  ],
+  "game.controls.more": [
+    {
+      "type": 0,
+      "value": "More game controls"
+    }
+  ],
+  "game.decision.action.confirm": [
+    {
+      "type": 1,
+      "value": "verb"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": "?"
+    }
+  ],
+  "game.decision.activateInstant": [
+    {
+      "type": 0,
+      "value": "Activate instant ability"
+    }
+  ],
+  "game.decision.additionalCost.choose": [
+    {
+      "type": 0,
+      "value": "Choose up to 3 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " from each zone"
+    }
+  ],
+  "game.decision.additionalCost.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy from arena"
+    }
+  ],
+  "game.decision.additionalCost.discard": [
+    {
+      "type": 0,
+      "value": "Discard from hand"
+    }
+  ],
+  "game.decision.arsenal.action": [
+    {
+      "type": 0,
+      "value": "Skip Arsenal"
+    }
+  ],
+  "game.decision.arsenal.choosePrompt": [
+    {
+      "type": 0,
+      "value": "You may put a card from your hand into your arsenal, or pass"
+    }
+  ],
+  "game.decision.arsenal.context": [
+    {
+      "type": 0,
+      "value": "End the turn without putting a card into your arsenal?"
+    }
+  ],
+  "game.decision.arsenal.prompt": [
+    {
+      "type": 0,
+      "value": "Skip arsenal?"
+    }
+  ],
+  "game.decision.bloodMode.confirm": [
+    {
+      "type": 0,
+      "value": "Confirm Modes"
+    }
+  ],
+  "game.decision.bloodMode.decrease": [
+    {
+      "type": 0,
+      "value": "Decrease "
+    },
+    {
+      "type": 1,
+      "value": "mode"
+    },
+    {
+      "type": 0,
+      "value": " for "
+    },
+    {
+      "type": 1,
+      "value": "weapon"
+    }
+  ],
+  "game.decision.bloodMode.extraAttack": [
+    {
+      "type": 0,
+      "value": "May attack twice"
+    }
+  ],
+  "game.decision.bloodMode.goAgain": [
+    {
+      "type": 0,
+      "value": "Attacks get go again"
+    }
+  ],
+  "game.decision.bloodMode.increase": [
+    {
+      "type": 0,
+      "value": "Increase "
+    },
+    {
+      "type": 1,
+      "value": "mode"
+    },
+    {
+      "type": 0,
+      "value": " for "
+    },
+    {
+      "type": 1,
+      "value": "weapon"
+    }
+  ],
+  "game.decision.bloodMode.instructions": [
+    {
+      "type": 0,
+      "value": "Assign exactly "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": ". Each mode may be selected up to twice across all weapons."
+    }
+  ],
+  "game.decision.bloodMode.power": [
+    {
+      "type": 0,
+      "value": "Attacks get +1 power"
+    }
+  ],
+  "game.decision.bloodMode.progress": [
+    {
+      "type": 1,
+      "value": "selected"
+    },
+    {
+      "type": 0,
+      "value": " of "
+    },
+    {
+      "type": 1,
+      "value": "required"
+    },
+    {
+      "type": 0,
+      "value": " modes assigned"
+    }
+  ],
+  "game.decision.bloodMode.selected": [
+    {
+      "type": 1,
+      "value": "weapon"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 1,
+      "value": "mode"
+    },
+    {
+      "type": 0,
+      "value": " selected "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " times"
+    }
+  ],
+  "game.decision.boost.action": [
+    {
+      "type": 0,
+      "value": "Boost"
+    }
+  ],
+  "game.decision.boost.context": [
+    {
+      "type": 0,
+      "value": "Each Boost banishes the top card of your deck."
+    }
+  ],
+  "game.decision.boost.none": [
+    {
+      "type": 0,
+      "value": "Don't Boost"
+    }
+  ],
+  "game.decision.boost.once": [
+    {
+      "type": 0,
+      "value": "Boost once"
+    }
+  ],
+  "game.decision.boost.prompt": [
+    {
+      "type": 0,
+      "value": "Boost "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "?"
+    }
+  ],
+  "game.decision.boost.times": [
+    {
+      "type": 0,
+      "value": "Boost "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " times"
+    }
+  ],
+  "game.decision.chooseCard": [
+    {
+      "type": 0,
+      "value": "Choose "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "game.decision.chooseNone": [
+    {
+      "type": 0,
+      "value": "Choose none"
+    }
+  ],
+  "game.decision.choosePitch": [
+    {
+      "type": 0,
+      "value": "Choose cards from your hand to pitch."
+    }
+  ],
+  "game.decision.chooseTarget": [
+    {
+      "type": 0,
+      "value": "Choose a target"
+    }
+  ],
+  "game.decision.chooseUse": [
+    {
+      "type": 0,
+      "value": "Choose how to use "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "game.decision.closeChain.action": [
+    {
+      "type": 0,
+      "value": "Close Chain and Play"
+    }
+  ],
+  "game.decision.closeChain.context": [
+    {
+      "type": 0,
+      "value": "Playing "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " will close the current combat chain."
+    }
+  ],
+  "game.decision.closeChain.prompt": [
+    {
+      "type": 0,
+      "value": "Close the combat chain?"
+    }
+  ],
+  "game.decision.confirmNamed": [
+    {
+      "type": 0,
+      "value": "Confirm "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    }
+  ],
+  "game.decision.defensePitch": [
+    {
+      "type": 0,
+      "value": "Pitch to pay this defense cost"
+    }
+  ],
+  "game.decision.defensePitchList": [
+    {
+      "type": 0,
+      "value": "Pitch to pay this defense cost:"
+    }
+  ],
+  "game.decision.name.choose": [
+    {
+      "type": 0,
+      "value": "Choose name"
+    }
+  ],
+  "game.decision.name.placeholder": [
+    {
+      "type": 0,
+      "value": "Start typing a card name"
+    }
+  ],
+  "game.decision.opt.bottom": [
+    {
+      "type": 0,
+      "value": "Bottom"
+    }
+  ],
+  "game.decision.opt.instructions": [
+    {
+      "type": 0,
+      "value": "Last Top is topmost; last Bottom is bottommost."
+    }
+  ],
+  "game.decision.opt.top": [
+    {
+      "type": 0,
+      "value": "Top"
+    }
+  ],
+  "game.decision.payAmount": [
+    {
+      "type": 0,
+      "value": "Pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    }
+  ],
+  "game.decision.payResources": [
+    {
+      "type": 0,
+      "value": "Pay resources"
+    }
+  ],
+  "game.decision.pitchProgress": [
+    {
+      "type": 1,
+      "value": "selected"
+    },
+    {
+      "type": 0,
+      "value": " of "
+    },
+    {
+      "type": 1,
+      "value": "required"
+    },
+    {
+      "type": 0,
+      "value": " pitch resources selected"
+    }
+  ],
+  "game.decision.playAs.action": [
+    {
+      "type": 0,
+      "value": "Play as action"
+    }
+  ],
+  "game.decision.playAs.attackReaction": [
+    {
+      "type": 0,
+      "value": "Play as attack reaction"
+    }
+  ],
+  "game.decision.playAs.defenseReaction": [
+    {
+      "type": 0,
+      "value": "Play as defense reaction"
+    }
+  ],
+  "game.decision.playAs.instant": [
+    {
+      "type": 0,
+      "value": "Play as instant"
+    }
+  ],
+  "game.decision.playAs.prompt": [
+    {
+      "type": 0,
+      "value": "Play "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " as…"
+    }
+  ],
+  "game.decision.playCard": [
+    {
+      "type": 0,
+      "value": "Play card"
+    }
+  ],
+  "game.decision.playerDeciding": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " is deciding…"
+    }
+  ],
+  "game.decision.removeCard": [
+    {
+      "type": 0,
+      "value": "Remove "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "game.decision.targetNamed": [
+    {
+      "type": 0,
+      "value": "Target "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    }
+  ],
+  "game.decision.triggerOrder.confirm": [
+    {
+      "type": 0,
+      "value": "Confirm Order"
+    }
+  ],
+  "game.decision.triggerOrder.earlier": [
+    {
+      "type": 0,
+      "value": "Move earlier"
+    }
+  ],
+  "game.decision.triggerOrder.first": [
+    {
+      "type": 0,
+      "value": "resolves first"
+    }
+  ],
+  "game.decision.triggerOrder.instructions": [
+    {
+      "type": 0,
+      "value": "Drag triggers into resolution order. The first trigger resolves first."
+    }
+  ],
+  "game.decision.triggerOrder.label": [
+    {
+      "type": 0,
+      "value": "Trigger resolution order"
+    }
+  ],
+  "game.decision.triggerOrder.last": [
+    {
+      "type": 0,
+      "value": "resolves last"
+    }
+  ],
+  "game.decision.triggerOrder.later": [
+    {
+      "type": 0,
+      "value": "Move later"
+    }
+  ],
+  "game.decision.triggerOrder.moveEarlier": [
+    {
+      "type": 0,
+      "value": "Move "
+    },
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "label"
+    },
+    {
+      "type": 0,
+      "value": " earlier"
+    }
+  ],
+  "game.decision.triggerOrder.moveLater": [
+    {
+      "type": 0,
+      "value": "Move "
+    },
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "label"
+    },
+    {
+      "type": 0,
+      "value": " later"
+    }
+  ],
+  "game.decision.triggerOrder.then": [
+    {
+      "type": 0,
+      "value": "then"
+    }
+  ],
+  "game.decision.useCard": [
+    {
+      "type": 0,
+      "value": "Use "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "game.decision.useNamed": [
+    {
+      "type": 0,
+      "value": "Use "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    }
+  ],
+  "game.effects.identical": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " identical effects"
+    }
+  ],
+  "game.effects.lingering": [
+    {
+      "type": 0,
+      "value": "Lingering effects"
+    }
+  ],
+  "game.emote.choose": [
+    {
+      "type": 0,
+      "value": "Choose a message"
+    }
+  ],
+  "game.emote.goodGame": [
+    {
+      "type": 0,
+      "value": "Good game!"
+    }
+  ],
+  "game.emote.goodLuck": [
+    {
+      "type": 0,
+      "value": "Good luck, have fun!"
+    }
+  ],
+  "game.emote.hello": [
+    {
+      "type": 0,
+      "value": "Hello!"
+    }
+  ],
+  "game.emote.nicePlay": [
+    {
+      "type": 0,
+      "value": "Nice play!"
+    }
+  ],
+  "game.emote.oops": [
+    {
+      "type": 0,
+      "value": "Oops!"
+    }
+  ],
+  "game.emote.send": [
+    {
+      "type": 0,
+      "value": "Send a message"
+    }
+  ],
+  "game.emote.sorry": [
+    {
+      "type": 0,
+      "value": "Sorry!"
+    }
+  ],
+  "game.emote.thanks": [
+    {
+      "type": 0,
+      "value": "Thanks!"
+    }
+  ],
+  "game.emote.thinking": [
+    {
+      "type": 0,
+      "value": "Thinking..."
+    }
+  ],
+  "game.end.confirmDescription": [
+    {
+      "type": 0,
+      "value": "This ends the current practice game and returns to the lobby."
+    }
+  ],
+  "game.end.confirmTitle": [
+    {
+      "type": 0,
+      "value": "End Game?"
+    }
+  ],
+  "game.hand.empty": [
+    {
+      "type": 0,
+      "value": "no cards in hand"
+    }
+  ],
+  "game.hand.hide": [
+    {
+      "type": 0,
+      "value": "Hide hand"
+    }
+  ],
+  "game.hand.scrollLeft": [
+    {
+      "type": 0,
+      "value": "Scroll hand left"
+    }
+  ],
+  "game.hand.scrollRight": [
+    {
+      "type": 0,
+      "value": "Scroll hand right"
+    }
+  ],
+  "game.hand.show": [
+    {
+      "type": 0,
+      "value": "Show hand"
+    }
+  ],
+  "game.hand.showCount": [
+    {
+      "type": 0,
+      "value": "Show hand, "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "game.hud.label": [
+    {
+      "type": 0,
+      "value": "Game status and primary action"
+    }
+  ],
+  "game.idle.claim": [
+    {
+      "type": 0,
+      "value": "Claim victory"
+    }
+  ],
+  "game.idle.claimPrompt": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " hasn't acted in "
+    },
+    {
+      "type": 1,
+      "value": "minutes"
+    },
+    {
+      "type": 0,
+      "value": " min — claim the win?"
+    }
+  ],
+  "game.keepPlaying": [
+    {
+      "type": 0,
+      "value": "Keep Playing"
+    }
+  ],
+  "game.life.amount": [
+    {
+      "type": 1,
+      "value": "life"
+    },
+    {
+      "type": 0,
+      "value": " life"
+    }
+  ],
+  "game.life.damage": [
+    {
+      "type": 1,
+      "value": "owner"
+    },
+    {
+      "type": 0,
+      "value": " hero took "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " damage. "
+    },
+    {
+      "type": 1,
+      "value": "life"
+    },
+    {
+      "type": 0,
+      "value": " life remaining."
+    }
+  ],
+  "game.life.gain": [
+    {
+      "type": 1,
+      "value": "owner"
+    },
+    {
+      "type": 0,
+      "value": " hero gained "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " life. "
+    },
+    {
+      "type": 1,
+      "value": "life"
+    },
+    {
+      "type": 0,
+      "value": " life total."
+    }
+  ],
+  "game.life.total": [
+    {
+      "type": 1,
+      "value": "owner"
+    },
+    {
+      "type": 0,
+      "value": " life: "
+    },
+    {
+      "type": 1,
+      "value": "life"
+    }
+  ],
+  "game.log.short": [
+    {
+      "type": 0,
+      "value": "Log"
+    }
+  ],
+  "game.log.title": [
+    {
+      "type": 0,
+      "value": "Game log"
+    }
+  ],
+  "game.log.turnBoundary": [
+    {
+      "type": 0,
+      "value": "Turn "
+    },
+    {
+      "type": 1,
+      "value": "turn"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "status"
+    }
+  ],
+  "game.over.backToBoard": [
+    {
+      "type": 0,
+      "value": "Back to board"
+    }
+  ],
+  "game.over.backToLobby": [
+    {
+      "type": 0,
+      "value": "Back to lobby"
+    }
+  ],
+  "game.over.retention": [
+    {
+      "type": 0,
+      "value": "This replay will be available in My Replays for 7 days. Export it to keep it longer."
+    }
+  ],
+  "game.over.showingStatsFor": [
+    {
+      "type": 0,
+      "value": "Showing stats for"
+    }
+  ],
+  "game.over.viewStatsFor": [
+    {
+      "type": 0,
+      "value": "View statistics for"
+    }
+  ],
+  "game.over.watchReplay": [
+    {
+      "type": 0,
+      "value": "Watch replay"
+    }
+  ],
+  "game.over.winner": [
+    {
+      "type": 0,
+      "value": "Winner"
+    }
+  ],
+  "game.over.winsGame": [
+    {
+      "type": 1,
+      "value": "winner"
+    },
+    {
+      "type": 0,
+      "value": " wins the game"
+    }
+  ],
+  "game.owner.opponent": [
+    {
+      "type": 0,
+      "value": "Opponent"
+    }
+  ],
+  "game.owner.your": [
+    {
+      "type": 0,
+      "value": "Your"
+    }
+  ],
+  "game.playerNumber": [
+    {
+      "type": 0,
+      "value": "Player "
+    },
+    {
+      "type": 1,
+      "value": "number"
+    }
+  ],
+  "game.rail.collapse": [
+    {
+      "type": 0,
+      "value": "Collapse side rail"
+    }
+  ],
+  "game.rail.expand": [
+    {
+      "type": 0,
+      "value": "Expand side rail"
+    }
+  ],
+  "game.result.defeat": [
+    {
+      "type": 0,
+      "value": "Defeat"
+    }
+  ],
+  "game.result.namedWinner": [
+    {
+      "type": 1,
+      "value": "winner"
+    },
+    {
+      "type": 0,
+      "value": " wins!"
+    }
+  ],
+  "game.result.victory": [
+    {
+      "type": 0,
+      "value": "Victory!"
+    }
+  ],
+  "game.room": [
+    {
+      "type": 0,
+      "value": "Room "
+    },
+    {
+      "type": 1,
+      "value": "code"
+    }
+  ],
+  "game.search.instructions": [
+    {
+      "type": 1,
+      "value": "prompt"
+    },
+    {
+      "type": 0,
+      "value": ". Click matching cards to select them, then submit."
+    }
+  ],
+  "game.search.minimize": [
+    {
+      "type": 0,
+      "value": "Minimize card search"
+    }
+  ],
+  "game.search.minimizeShort": [
+    {
+      "type": 0,
+      "value": "Minimize"
+    }
+  ],
+  "game.search.minimizedPrompt": [
+    {
+      "type": 1,
+      "value": "prompt"
+    },
+    {
+      "type": 0,
+      "value": " · "
+    },
+    {
+      "type": 1,
+      "value": "selected"
+    },
+    {
+      "type": 0,
+      "value": "/"
+    },
+    {
+      "type": 1,
+      "value": "maximum"
+    },
+    {
+      "type": 0,
+      "value": " selected"
+    }
+  ],
+  "game.search.restore": [
+    {
+      "type": 0,
+      "value": "Restore search"
+    }
+  ],
+  "game.search.short": [
+    {
+      "type": 0,
+      "value": "Card search"
+    }
+  ],
+  "game.search.submit": [
+    {
+      "type": 0,
+      "value": "Submit "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "game.search.title": [
+    {
+      "type": 0,
+      "value": "Search opponent's hand, deck, and arsenal"
+    }
+  ],
+  "game.search.zone.arsenal": [
+    {
+      "type": 0,
+      "value": "Arsenal ("
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
+  "game.search.zone.cards": [
+    {
+      "type": 0,
+      "value": "Cards ("
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
+  "game.search.zone.deck": [
+    {
+      "type": 0,
+      "value": "Deck ("
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
+  "game.search.zone.hand": [
+    {
+      "type": 0,
+      "value": "Hand ("
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
+  "game.spectating.count": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " spectating"
+    }
+  ],
+  "game.spectating.live": [
+    {
+      "type": 0,
+      "value": "You are spectating"
+    }
+  ],
+  "game.spectating.replay": [
+    {
+      "type": 0,
+      "value": "Watching replay"
+    }
+  ],
+  "game.stack.groupedTriggers": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " grouped triggers"
+    }
+  ],
+  "game.stack.minimize": [
+    {
+      "type": 0,
+      "value": "Minimize stack"
+    }
+  ],
+  "game.stack.optional": [
+    {
+      "type": 0,
+      "value": "may"
+    }
+  ],
+  "game.stack.short": [
+    {
+      "type": 0,
+      "value": "Stack"
+    }
+  ],
+  "game.stack.show": [
+    {
+      "type": 0,
+      "value": "Show stack"
+    }
+  ],
+  "game.stack.skipRunechants": [
+    {
+      "type": 0,
+      "value": "Skip all Runechants"
+    }
+  ],
+  "game.stack.skipRunechantsTitle": [
+    {
+      "type": 0,
+      "value": "Skip consecutive Runechants in this priority window"
+    }
+  ],
+  "game.stack.title": [
+    {
+      "type": 0,
+      "value": "The Stack"
+    }
+  ],
+  "game.stack.trigger": [
+    {
+      "type": 0,
+      "value": "Trigger"
+    }
+  ],
+  "game.stats.attacks": [
+    {
+      "type": 0,
+      "value": "Attacks"
+    }
+  ],
+  "game.stats.averages": [
+    {
+      "type": 0,
+      "value": "Averages"
+    }
+  ],
+  "game.stats.blocked": [
+    {
+      "type": 0,
+      "value": "Blocked"
+    }
+  ],
+  "game.stats.breakdown": [
+    {
+      "type": 0,
+      "value": "Round-by-round breakdown"
+    }
+  ],
+  "game.stats.damageBlocked": [
+    {
+      "type": 0,
+      "value": "Damage blocked"
+    }
+  ],
+  "game.stats.damageDealt": [
+    {
+      "type": 0,
+      "value": "Damage dealt"
+    }
+  ],
+  "game.stats.damagePerRound": [
+    {
+      "type": 0,
+      "value": "Damage per round"
+    }
+  ],
+  "game.stats.damagePrevented": [
+    {
+      "type": 0,
+      "value": "Damage prevented"
+    }
+  ],
+  "game.stats.damageThreatened": [
+    {
+      "type": 0,
+      "value": "Damage threatened"
+    }
+  ],
+  "game.stats.dealt": [
+    {
+      "type": 0,
+      "value": "Dealt"
+    }
+  ],
+  "game.stats.finalLife": [
+    {
+      "type": 0,
+      "value": "Final life"
+    }
+  ],
+  "game.stats.match": [
+    {
+      "type": 0,
+      "value": "Match"
+    }
+  ],
+  "game.stats.opponentFinalLife": [
+    {
+      "type": 0,
+      "value": "Opponent final life"
+    }
+  ],
+  "game.stats.prevented": [
+    {
+      "type": 0,
+      "value": "Prevented"
+    }
+  ],
+  "game.stats.round": [
+    {
+      "type": 0,
+      "value": "Round"
+    }
+  ],
+  "game.stats.roundsPlayed": [
+    {
+      "type": 0,
+      "value": "Rounds played"
+    }
+  ],
+  "game.stats.threatPerAttack": [
+    {
+      "type": 0,
+      "value": "Threat per attack"
+    }
+  ],
+  "game.stats.threatPerRound": [
+    {
+      "type": 0,
+      "value": "Threat per round"
+    }
+  ],
+  "game.stats.threatened": [
+    {
+      "type": 0,
+      "value": "Threatened"
+    }
+  ],
+  "game.stats.total": [
+    {
+      "type": 0,
+      "value": "Total"
+    }
+  ],
+  "game.stats.value": [
+    {
+      "type": 0,
+      "value": "Value"
+    }
+  ],
+  "game.stats.valuePerRound": [
+    {
+      "type": 0,
+      "value": "Value per round"
+    }
+  ],
+  "game.summary": [
+    {
+      "type": 0,
+      "value": "Game summary"
+    }
+  ],
+  "game.timing.actionPhase": [
+    {
+      "type": 0,
+      "value": "ACTION PHASE"
+    }
+  ],
+  "game.timing.attack": [
+    {
+      "type": 0,
+      "value": "ATTACK"
+    }
+  ],
+  "game.timing.attackStep": [
+    {
+      "type": 0,
+      "value": "ATTACK STEP"
+    }
+  ],
+  "game.timing.beginningTriggers": [
+    {
+      "type": 0,
+      "value": "BEGINNING TRIGGERS"
+    }
+  ],
+  "game.timing.damageStep": [
+    {
+      "type": 0,
+      "value": "DAMAGE STEP"
+    }
+  ],
+  "game.timing.defendStep": [
+    {
+      "type": 0,
+      "value": "DEFEND STEP"
+    }
+  ],
+  "game.timing.effects": [
+    {
+      "type": 0,
+      "value": "EFFECTS"
+    }
+  ],
+  "game.timing.endPhase": [
+    {
+      "type": 0,
+      "value": "END PHASE"
+    }
+  ],
+  "game.timing.gameOver": [
+    {
+      "type": 0,
+      "value": "GAME OVER"
+    }
+  ],
+  "game.timing.layerStep": [
+    {
+      "type": 0,
+      "value": "LAYER STEP"
+    }
+  ],
+  "game.timing.namedPriority": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": "'S PRIORITY"
+    }
+  ],
+  "game.timing.onHitTriggers": [
+    {
+      "type": 0,
+      "value": "ON-HIT TRIGGERS"
+    }
+  ],
+  "game.timing.opponentChoosingBlocks": [
+    {
+      "type": 0,
+      "value": "OPPONENT CHOOSING BLOCKS"
+    }
+  ],
+  "game.timing.opponentPriority": [
+    {
+      "type": 0,
+      "value": "OPPONENT'S PRIORITY"
+    }
+  ],
+  "game.timing.priority": [
+    {
+      "type": 0,
+      "value": "PRIORITY"
+    }
+  ],
+  "game.timing.reactionStep": [
+    {
+      "type": 0,
+      "value": "REACTION STEP"
+    }
+  ],
+  "game.timing.reactions": [
+    {
+      "type": 0,
+      "value": "REACTIONS"
+    }
+  ],
+  "game.timing.resolutionStep": [
+    {
+      "type": 0,
+      "value": "RESOLUTION STEP"
+    }
+  ],
+  "game.timing.startOfTurnTriggers": [
+    {
+      "type": 0,
+      "value": "START-OF-TURN TRIGGERS"
+    }
+  ],
+  "game.timing.startPhase": [
+    {
+      "type": 0,
+      "value": "START PHASE"
+    }
+  ],
+  "game.timing.toAct": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " TO ACT"
+    }
+  ],
+  "game.timing.triggers": [
+    {
+      "type": 0,
+      "value": "TRIGGERS"
+    }
+  ],
+  "game.timing.waiting": [
+    {
+      "type": 0,
+      "value": "WAITING"
+    }
+  ],
+  "game.timing.waitingOn": [
+    {
+      "type": 0,
+      "value": "WAITING ON "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    }
+  ],
+  "game.timing.youChoosingBlocks": [
+    {
+      "type": 0,
+      "value": "YOU CHOOSING BLOCKS"
+    }
+  ],
+  "game.timing.yourPriority": [
+    {
+      "type": 0,
+      "value": "YOUR PRIORITY"
+    }
+  ],
+  "game.trigger": [
+    {
+      "type": 0,
+      "value": "Trigger"
+    }
+  ],
+  "game.triggeredAbility": [
+    {
+      "type": 0,
+      "value": "Triggered ability"
+    }
+  ],
+  "game.turn.begins": [
+    {
+      "type": 0,
+      "value": "Turn begins"
+    }
+  ],
+  "game.turn.named": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": "'s turn"
+    }
+  ],
+  "game.turn.opponent": [
+    {
+      "type": 0,
+      "value": "Opponent's turn"
+    }
+  ],
+  "game.turn.status": [
+    {
+      "type": 0,
+      "value": "Turn "
+    },
+    {
+      "type": 1,
+      "value": "turn"
+    },
+    {
+      "type": 0,
+      "value": " · "
+    },
+    {
+      "type": 1,
+      "value": "owner"
+    }
+  ],
+  "game.turn.yours": [
+    {
+      "type": 0,
+      "value": "Your turn"
+    }
+  ],
+  "game.undo": [
+    {
+      "type": 0,
+      "value": "Undo"
+    }
+  ],
+  "game.undoDescription": [
+    {
+      "type": 0,
+      "value": "Undo the last action (yours or your opponent's)"
+    }
+  ],
+  "game.undoLast": [
+    {
+      "type": 0,
+      "value": "Undo last action"
+    }
+  ],
+  "game.waiting.opponent": [
+    {
+      "type": 0,
+      "value": "Waiting for opponent…"
+    }
+  ],
+  "game.waiting.spectating": [
+    {
+      "type": 0,
+      "value": "Spectating — "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " to act"
+    }
+  ],
+  "game.zone.arms": [
+    {
+      "type": 0,
+      "value": "Arms"
+    }
+  ],
+  "game.zone.arsenal": [
+    {
+      "type": 0,
+      "value": "Arsenal"
+    }
+  ],
+  "game.zone.banished": [
+    {
+      "type": 0,
+      "value": "Banished"
+    }
+  ],
+  "game.zone.board": [
+    {
+      "type": 0,
+      "value": "Board"
+    }
+  ],
+  "game.zone.chest": [
+    {
+      "type": 0,
+      "value": "Chest"
+    }
+  ],
+  "game.zone.deck": [
+    {
+      "type": 0,
+      "value": "Deck"
+    }
+  ],
+  "game.zone.deckMineOrder": [
+    {
+      "type": 0,
+      "value": "Your Deck — draw order, next card first"
+    }
+  ],
+  "game.zone.deckOpponentOrder": [
+    {
+      "type": 0,
+      "value": "Opponent's Deck — draw order, next card first"
+    }
+  ],
+  "game.zone.graveyard": [
+    {
+      "type": 0,
+      "value": "Graveyard"
+    }
+  ],
+  "game.zone.head": [
+    {
+      "type": 0,
+      "value": "Head"
+    }
+  ],
+  "game.zone.hero": [
+    {
+      "type": 0,
+      "value": "Hero"
+    }
+  ],
+  "game.zone.legs": [
+    {
+      "type": 0,
+      "value": "Legs"
+    }
+  ],
+  "game.zone.mine": [
+    {
+      "type": 0,
+      "value": "Your "
+    },
+    {
+      "type": 1,
+      "value": "zone"
+    }
+  ],
+  "game.zone.opponent": [
+    {
+      "type": 0,
+      "value": "Opponent's "
+    },
+    {
+      "type": 1,
+      "value": "zone"
+    }
+  ],
+  "game.zone.pitch": [
+    {
+      "type": 0,
+      "value": "Pitch"
+    }
+  ],
+  "game.zone.stackedCards": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " stacked card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " stacked cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "game.zone.weapon": [
+    {
+      "type": 0,
+      "value": "Weapon"
     }
   ],
   "landing.accountAccess": [

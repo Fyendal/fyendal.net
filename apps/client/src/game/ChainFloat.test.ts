@@ -1,9 +1,18 @@
-import { createElement } from "react";
+import { createElement, type ComponentProps, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { ChainLinkView } from "@fyendal/shared";
 import { describe, expect, it, vi } from "vitest";
+import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 import { browseChainLink, ChainFloat, chainAttackIsActivatable } from "./ChainFloat.js";
 import { chainTimelineRevision } from "./chainTimeline.js";
+
+function renderChain(props: ComponentProps<typeof ChainFloat>, children?: ReactNode) {
+  return renderToStaticMarkup(createElement(
+    TestI18nProvider,
+    null,
+    createElement(ChainFloat, props, children),
+  ));
+}
 
 describe("combat-chain browsing", () => {
   it("releases pointer focus after browsing so Space can pass", () => {
@@ -55,10 +64,10 @@ describe("combat-chain browsing", () => {
       hit: true,
       resolved: true,
     };
-    const html = renderToStaticMarkup(createElement(ChainFloat, {
+    const html = renderChain({
       links: [link],
       onRect: vi.fn(),
-    }));
+    });
 
     expect(html).toContain('<button class="chain-dot chain-dot-waiting active"');
     expect(html).toContain('aria-current="step"');
@@ -75,11 +84,10 @@ describe("combat-chain browsing", () => {
       damage: 3,
       resolved: false,
     };
-    const html = renderToStaticMarkup(createElement(
-      ChainFloat,
+    const html = renderChain(
       { links: [link], onRect: vi.fn() },
       createElement("span", null, "Reaction step · Your priority"),
-    ));
+    );
 
     expect(html).toContain('class="chain-priority-slot"');
     expect(html).toContain("Reaction step · Your priority");
@@ -104,13 +112,13 @@ describe("combat-chain browsing", () => {
       damage: 3,
       resolved: false,
     };
-    const html = renderToStaticMarkup(createElement(ChainFloat, {
+    const html = renderChain({
       links: [link],
       onRect: vi.fn(),
       activatableAttackIds: new Set([42]),
       selectedAbilitySourceInstanceId: 42,
       onActivateAttack: vi.fn(),
-    }));
+    });
 
     expect(html).toContain("card-highlight");
     expect(html).toContain("card-selected");
@@ -147,10 +155,10 @@ describe("combat-chain browsing", () => {
       resolved: false,
       goAgain: true,
     };
-    const html = renderToStaticMarkup(createElement(ChainFloat, {
+    const html = renderChain({
       links: [link],
       onRect: vi.fn(),
-    }));
+    });
 
     expect(html).toContain("/icons/go-again.png");
     expect(html).toContain('role="tooltip">Go again');
@@ -167,10 +175,10 @@ describe("combat-chain browsing", () => {
       damage: 3,
       resolved: false,
     };
-    const html = renderToStaticMarkup(createElement(ChainFloat, {
+    const html = renderChain({
       links: [link],
       onRect: vi.fn(),
-    }));
+    });
 
     expect(html).toContain('data-cardid="OUT139"');
     expect(html).toContain('data-motion-card="chain:0:attack:42"');
@@ -189,10 +197,10 @@ describe("combat-chain browsing", () => {
       damage: 1,
       resolved: false,
     };
-    const html = renderToStaticMarkup(createElement(ChainFloat, {
+    const html = renderChain({
       links: [link],
       onRect: vi.fn(),
-    }));
+    });
 
     expect(html).toContain('data-motion-zone="chain:0:attack"');
     expect(html).toContain('data-motion-card="chain:0:defender:0:84"');
@@ -210,10 +218,10 @@ describe("combat-chain browsing", () => {
       resolved: false,
       dominate: true,
     };
-    const html = renderToStaticMarkup(createElement(ChainFloat, {
+    const html = renderChain({
       links: [link],
       onRect: vi.fn(),
-    }));
+    });
 
     expect(html).toContain("/icons/dominate.png");
     expect(html).toContain('role="tooltip">Dominate');
@@ -231,10 +239,10 @@ describe("combat-chain browsing", () => {
       resolved: false,
       overpower: true,
     };
-    const html = renderToStaticMarkup(createElement(ChainFloat, {
+    const html = renderChain({
       links: [link],
       onRect: vi.fn(),
-    }));
+    });
 
     expect(html).toContain("/icons/overpower.svg");
     expect(html).toContain('role="tooltip">Overpower');
@@ -253,10 +261,10 @@ describe("combat-chain browsing", () => {
       wagered: true,
       wagerRewards: ["Winner creates Gold"],
     };
-    const html = renderToStaticMarkup(createElement(ChainFloat, {
+    const html = renderChain({
       links: [link],
       onRect: vi.fn(),
-    }));
+    });
 
     expect(html).toContain("/icons/wager.png");
     expect(html).toContain('role="tooltip">Wagered: Winner creates Gold');
@@ -277,10 +285,10 @@ describe("combat-chain browsing", () => {
       damage: 3,
       resolved: false,
     };
-    const html = renderToStaticMarkup(createElement(ChainFloat, {
+    const html = renderChain({
       links: [link],
       onRect: vi.fn(),
-    }));
+    });
 
     expect(html).toContain("chain-defense-controls");
     expect(html).toContain("chain-prevent-plus");
@@ -302,10 +310,10 @@ describe("combat-chain browsing", () => {
       damage: 3,
       resolved: false,
     };
-    const html = renderToStaticMarkup(createElement(ChainFloat, {
+    const html = renderChain({
       links: [link],
       onRect: vi.fn(),
-    }));
+    });
 
     expect(html).not.toContain("card-tapped");
   });
@@ -329,10 +337,10 @@ describe("combat-chain browsing", () => {
         counters: { suspense: 2 },
       },
     };
-    const html = renderToStaticMarkup(createElement(ChainFloat, {
+    const html = renderChain({
       links: [link],
       onRect: vi.fn(),
-    }));
+    });
 
     expect(html).toContain("chain-atk");
     expect(html).toContain('data-cardid="SEA262"');
@@ -356,10 +364,10 @@ describe("combat-chain browsing", () => {
       damage: 5,
       resolved: false,
     };
-    const html = renderToStaticMarkup(createElement(ChainFloat, {
+    const html = renderChain({
       links: [link],
       onRect: vi.fn(),
-    }));
+    });
 
     expect(html).toContain("tabindex=\"0\"");
     expect(html).toContain("Attack modifiers");
@@ -380,14 +388,14 @@ describe("combat-chain browsing", () => {
       damage: 5,
       resolved: false,
     };
-    const html = renderToStaticMarkup(createElement(ChainFloat, {
+    const html = renderChain({
       links: [link],
       onRect: vi.fn(),
       staged: [{ instanceId: 84, cardId: "SEA262", owner: 1 }],
       stagedDefense: 3,
       onUnstage: vi.fn(),
       onUnstageAll: vi.fn(),
-    }));
+    });
 
     expect(html).toContain("chain-defense-controls");
     expect(html).toContain("chain-unblock-all");
@@ -410,10 +418,10 @@ describe("combat-chain browsing", () => {
         text: "When this hits a hero, deal 1 arcane damage to them.",
       }],
     };
-    const html = renderToStaticMarkup(createElement(ChainFloat, {
+    const html = renderChain({
       links: [link],
       onRect: vi.fn(),
-    }));
+    });
 
     expect(html).toContain("chain-on-hit-label");
     expect(html).toContain("On hit");

@@ -4,11 +4,13 @@ import { describe, expect, it, vi } from "vitest";
 import { SideRail, undoWithoutFocus } from "./SideRail.js";
 import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 
-function renderSideRail(props: ComponentProps<typeof SideRail>): string {
+function renderSideRail(
+  props: ComponentProps<typeof SideRail>,
+  locale: "en" | "zh-Hans" = "en",
+): string {
   return renderToStaticMarkup(createElement(
     TestI18nProvider,
-    null,
-    createElement(SideRail, props),
+    { locale, children: createElement(SideRail, props) },
   ));
 }
 
@@ -21,7 +23,7 @@ function sideRailProps(
     turn: 4,
     onUndo: vi.fn(),
     onLeave: vi.fn(),
-    leaveLabel: "Leave",
+    leaveAction: "leave",
     onConcede: vi.fn(),
     spectating: false,
     spectatorCount: 0,
@@ -53,7 +55,7 @@ function sideRailProps(
     opponentHeroName: "Bravo",
     roomCode: "ROOM",
     onInspectCard: vi.fn(),
-    mobilePrimaryActionLabel: "END TURN",
+    mobilePrimaryAction: "end-turn",
     onMobilePrimaryAction: vi.fn(),
     ...overrides,
   };
@@ -104,7 +106,7 @@ describe("game control icons", () => {
 
   it("omits the mobile action slot when there is no contextual action", () => {
     const html = renderSideRail(sideRailProps({
-      mobilePrimaryActionLabel: null,
+      mobilePrimaryAction: null,
     }));
 
     expect(html).not.toContain("mobile-primary-action");
@@ -117,6 +119,20 @@ describe("game control icons", () => {
 
     expect(html.match(/disabled=""/g)).toHaveLength(2);
     expect(html).toContain('aria-label="Undo last action"');
+  });
+
+  it("renders game controls and status chrome in Simplified Chinese", () => {
+    const html = renderSideRail(sideRailProps({
+      spectating: true,
+      spectatorCount: 2,
+      opponentConnected: false,
+    }), "zh-Hans");
+
+    expect(html).toContain('aria-label="对局控制"');
+    expect(html).toContain("对局日志");
+    expect(html).toContain("你正在观战");
+    expect(html).toContain("2 人正在观战");
+    expect(html).toContain("对手已断开连接");
   });
 
 });

@@ -1,9 +1,15 @@
+import { type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { TestI18nProvider } from "../../i18n/TestI18nProvider.js";
 import { ActionAnnouncementPanel } from "./ActionAnnouncementPanel.js";
 import type { ActionAnnouncementModel } from "./DecisionModels.js";
 
 const noop = () => undefined;
+
+function renderLocalized(node: ReactNode) {
+  return renderToStaticMarkup(<TestI18nProvider>{node}</TestI18nProvider>);
+}
 
 function paymentModel(
   normalCostPayableWithoutPitch: boolean,
@@ -56,7 +62,7 @@ function paymentModel(
 
 describe("alternative-cost payment choices", () => {
   it("hides normal resource payment while the player still needs to pitch", () => {
-    const html = renderToStaticMarkup(
+    const html = renderLocalized(
       <ActionAnnouncementPanel model={paymentModel(false)} viewerSeat={0} />,
     );
 
@@ -64,7 +70,7 @@ describe("alternative-cost payment choices", () => {
   });
 
   it("offers normal resource payment when floating resources cover the cost", () => {
-    const html = renderToStaticMarkup(
+    const html = renderLocalized(
       <ActionAnnouncementPanel model={paymentModel(true)} viewerSeat={0} />,
     );
 
@@ -72,7 +78,7 @@ describe("alternative-cost payment choices", () => {
   });
 
   it("shows destroy and discard targets directly without a mode-selection prompt", () => {
-    const html = renderToStaticMarkup(
+    const html = renderLocalized(
       <ActionAnnouncementPanel
         model={{
           ...paymentModel(true),
@@ -112,7 +118,7 @@ describe("alternative-cost payment choices", () => {
 
 describe("activated ability mode choices", () => {
   it("shows the mode prompt before pitch progress", () => {
-    const html = renderToStaticMarkup(
+    const html = renderLocalized(
       <ActionAnnouncementPanel
         model={{
           ...paymentModel(false),
@@ -137,7 +143,7 @@ describe("activated ability mode choices", () => {
 
 describe("Boost choices", () => {
   it("presents Boost first and marks it as the default", () => {
-    const html = renderToStaticMarkup(
+    const html = renderLocalized(
       <ActionAnnouncementPanel
         model={{
           ...paymentModel(false),

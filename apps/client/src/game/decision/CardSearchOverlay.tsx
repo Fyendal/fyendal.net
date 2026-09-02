@@ -1,6 +1,7 @@
 import type { CardView, PendingDecision } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import { useMemo, useState } from "react";
+import { useIntl } from "react-intl";
 import { CardFace } from "../Card.js";
 
 export interface CardSearchZoneCounts {
@@ -10,7 +11,8 @@ export interface CardSearchZoneCounts {
 }
 
 interface CardSearchSection {
-  label: string;
+  zone: "hand" | "deck" | "arsenal" | "cards";
+  count: number;
   cards: CardView[];
 }
 
@@ -67,17 +69,19 @@ export function cardSearchOverlayModel(
   const expectedCount = zoneCounts.hand + zoneCounts.deck + zoneCounts.arsenal;
   const sections = expectedCount === cards.length
     ? [
-        { label: `Hand (${zoneCounts.hand})`, cards: sortedCards(cards.slice(0, zoneCounts.hand)) },
+        { zone: "hand" as const, count: zoneCounts.hand, cards: sortedCards(cards.slice(0, zoneCounts.hand)) },
         {
-          label: `Deck (${zoneCounts.deck})`,
+          zone: "deck" as const,
+          count: zoneCounts.deck,
           cards: sortedCards(cards.slice(zoneCounts.hand, zoneCounts.hand + zoneCounts.deck)),
         },
         {
-          label: `Arsenal (${zoneCounts.arsenal})`,
+          zone: "arsenal" as const,
+          count: zoneCounts.arsenal,
           cards: sortedCards(cards.slice(zoneCounts.hand + zoneCounts.deck)),
         },
       ].filter((section) => section.cards.length > 0)
-    : [{ label: `Cards (${cards.length})`, cards: sortedCards(cards) }];
+    : [{ zone: "cards" as const, count: cards.length, cards: sortedCards(cards) }];
 
   return {
     prompt: decision.prompt,
@@ -109,6 +113,7 @@ export function CardSearchOverlay({
   zoneCounts: CardSearchZoneCounts;
   onSubmit: (optionIds: readonly string[]) => void;
 }) {
+  const intl = useIntl();
   const [minimized, setMinimized] = useState(false);
   const [selectedOptionIds, setSelectedOptionIds] = useState<readonly string[]>([]);
   const model = useMemo(
@@ -121,7 +126,14 @@ export function CardSearchOverlay({
   if (minimized) {
     return (
       <MinimizedCardSearch
-        prompt={`${model.prompt} · ${selectedOptionIds.length}/${model.maximumSelections} selected`}
+        prompt={intl.formatMessage(
+          { id: "game.search.minimizedPrompt" },
+          {
+            prompt: model.prompt,
+            selected: selectedOptionIds.length,
+            maximum: model.maximumSelections,
+          },
+        )}
         onRestore={() => setMinimized(false)}
       />
     );
@@ -139,18 +151,18 @@ export function CardSearchOverlay({
         <div className="zone-overlay-header card-search-overlay-header">
           <div>
             <div className="overlay-title" id="card-search-overlay-title">
-              Search opponent&apos;s hand, deck, and arsenal
+              {intl.formatMessage({ id: "game.search.title" })}
             </div>
             <div className="decision-context" id="card-search-overlay-prompt">
-              {model.prompt}. Click matching cards to select them, then submit.
+              {intl.formatMessage({ id: "game.search.instructions" }, { prompt: model.prompt })}
             </div>
           </div>
           <div className="decision-buttons">
             <button
               className="card-search-minimize"
               type="button"
-              aria-label="Minimize card search"
-              title="Minimize"
+              aria-label={intl.formatMessage({ id: "game.search.minimize" })}
+              title={intl.formatMessage({ id: "game.search.minimizeShort" })}
               onClick={() => setMinimized(true)}
             >
               −
@@ -162,15 +174,21 @@ export function CardSearchOverlay({
               onClick={() => onSubmit(selectedOptionIds)}
             >
               {selectedOptionIds.length === 0
-                ? "Done"
-                : `Submit ${selectedOptionIds.length} card${selectedOptionIds.length === 1 ? "" : "s"}`}
+                ? intl.formatMessage({ id: "common.done" })
+                : intl.formatMessage(
+                    { id: "game.search.submit" },
+                    { count: selectedOptionIds.length },
+                  )}
             </button>
           </div>
         </div>
         <div className="card-search-sections">
           {model.sections.map((section) => (
-            <section className="card-search-section" key={section.label}>
-              <h3>{section.label}</h3>
+            <section className="card-search-section" key={section.zone}>
+              <h3>{intl.formatMessage(
+                { id: `game.search.zone.${section.zone}` },
+                { count: section.count },
+              )}</h3>
               <div className="overlay-cards">
                 {section.cards.map((card) => {
                   const option = model.optionByCardId.get(card.instanceId);
@@ -207,14 +225,15 @@ export function MinimizedCardSearch({
   prompt: string;
   onRestore: () => void;
 }) {
+  const intl = useIntl();
   return (
     <div className="card-search-minimized" role="status">
       <span>
-        <strong>Card search</strong>
+        <strong>{intl.formatMessage({ id: "game.search.short" })}</strong>
         <span className="decision-context">{prompt}</span>
       </span>
       <button className="btn-primary" type="button" onClick={onRestore}>
-        Restore search
+        {intl.formatMessage({ id: "game.search.restore" })}
       </button>
     </div>
   );

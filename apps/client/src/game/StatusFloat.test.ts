@@ -1,7 +1,15 @@
-import { createElement } from "react";
+import { createElement, type ComponentProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { damagePacketsFromLog, lifeChange, StatusFloat } from "./StatusFloat.js";
+import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
+
+function renderStatus(props: ComponentProps<typeof StatusFloat>, locale: "en" | "zh-Hans" = "en") {
+  return renderToStaticMarkup(createElement(
+    TestI18nProvider,
+    { locale, children: createElement(StatusFloat, props) },
+  ));
+}
 
 describe("life change animation", () => {
   it("describes damage when life decreases", () => {
@@ -46,7 +54,7 @@ describe("life change animation", () => {
 
 describe("status action", () => {
   it("uses the status button to confirm staged blocks", () => {
-    const html = renderToStaticMarkup(createElement(StatusFloat, {
+    const html = renderStatus({
       dockRect: null,
       oppLife: 20,
       myLife: 19,
@@ -55,9 +63,9 @@ describe("status action", () => {
       log: [],
       activeHeroName: "Briar",
       actionPoints: 0,
-      passLabel: "CONFIRM",
+      primaryAction: "confirm-blocks",
       onPass: vi.fn(),
-    }));
+    });
 
     expect(html).toContain("Confirm blocks (Space)");
     expect(html).toContain(">CONFIRM<");
@@ -73,11 +81,11 @@ describe("status action", () => {
   });
 
   it.each([
-    ["END TURN", "End turn (Space)"],
-    ["PASS", "Pass (Space)"],
-    ["NO BLOCK", "Confirm no blocks (Space)"],
-  ])("renders the derived %s primary action", (passLabel, title) => {
-    const html = renderToStaticMarkup(createElement(StatusFloat, {
+    ["end-turn", "End turn (Space)"],
+    ["pass", "Pass (Space)"],
+    ["confirm-no-blocks", "Confirm no blocks (Space)"],
+  ] as const)("renders the derived %s primary action", (primaryAction, title) => {
+    const html = renderStatus({
       dockRect: null,
       oppLife: 20,
       myLife: 20,
@@ -86,16 +94,16 @@ describe("status action", () => {
       log: [],
       activeHeroName: "Briar",
       actionPoints: 1,
-      passLabel,
+      primaryAction,
       onPass: vi.fn(),
-    }));
+    });
 
     expect(html).toContain(title);
     expect(html).toContain("game-hud");
   });
 
   it("disables the primary action while its room command is pending", () => {
-    const html = renderToStaticMarkup(createElement(StatusFloat, {
+    const html = renderStatus({
       dockRect: null,
       oppLife: 20,
       myLife: 20,
@@ -104,17 +112,17 @@ describe("status action", () => {
       log: [],
       activeHeroName: "Briar",
       actionPoints: 1,
-      passLabel: "END TURN",
+      primaryAction: "end-turn",
       passDisabled: true,
       onPass: vi.fn(),
-    }));
+    });
 
     expect(html).toContain("disabled");
     expect(html).toContain("End turn (Space)");
   });
 
   it("shows action points without duplicating the board's turn status", () => {
-    const html = renderToStaticMarkup(createElement(StatusFloat, {
+    const html = renderStatus({
       dockRect: null,
       oppLife: 20,
       myLife: 20,
@@ -123,11 +131,30 @@ describe("status action", () => {
       log: [],
       activeHeroName: "Briar",
       actionPoints: 2,
-      passLabel: null,
+      primaryAction: null,
       onPass: vi.fn(),
-    }));
+    });
 
     expect(html).toContain("2 action points remaining");
     expect(html).not.toContain("TURN");
+  });
+
+  it("renders the primary game HUD in Simplified Chinese", () => {
+    const html = renderStatus({
+      dockRect: null,
+      oppLife: 20,
+      myLife: 18,
+      oppHeroName: "Rhinar",
+      myHeroName: "Briar",
+      log: [],
+      activeHeroName: "Briar",
+      actionPoints: 1,
+      primaryAction: "end-turn",
+      onPass: vi.fn(),
+    }, "zh-Hans");
+
+    expect(html).toContain("对局状态与主要操作");
+    expect(html).toContain("结束回合");
+    expect(html).toContain("剩余 1 个行动点");
   });
 });

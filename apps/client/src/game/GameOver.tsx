@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useIntl } from "react-intl";
 import type { GameView } from "@fyendal/shared";
 import {
   averagePerRound,
@@ -33,6 +34,7 @@ export function GameOver({
   onBackToLobby: () => void;
   onClose: () => void;
 }) {
+  const intl = useIntl();
   const winner = view.winner;
   const initialSeat = (spectating ? winner ?? 0 : seat) === 1 ? 1 : 0;
   const [selectedSeat, setSelectedSeat] = useState<0 | 1>(initialSeat);
@@ -44,40 +46,50 @@ export function GameOver({
 
   const winnerName = view.players[winner]?.heroName ?? "";
   const headline = spectating
-    ? `${winnerName} wins!`
+    ? intl.formatMessage({ id: "game.result.namedWinner" }, { winner: winnerName })
     : winner === seat
-      ? "Victory!"
-      : "Defeat";
+      ? intl.formatMessage({ id: "game.result.victory" })
+      : intl.formatMessage({ id: "game.result.defeat" });
   const names: [string, string] = [
-    view.players[0]?.heroName ?? "Player 1",
-    view.players[1]?.heroName ?? "Player 2",
+    view.players[0]?.heroName ?? intl.formatMessage({ id: "game.playerNumber" }, { number: 1 }),
+    view.players[1]?.heroName ?? intl.formatMessage({ id: "game.playerNumber" }, { number: 2 }),
   ];
   const totalValue = stats.total.threatened[selectedSeat] + stats.total.blocked[selectedSeat];
-  const fmt = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
+  const fmt = (n: number) => intl.formatNumber(n, { maximumFractionDigits: 1 });
   const opponent = selectedSeat === 0 ? 1 : 0;
 
   return (
     <div className="overlay">
       <div className="overlay-panel gameover-panel">
         <div className="gameover-headline">{headline}</div>
-        {!spectating && <div className="gameover-sub">{winnerName} wins the game</div>}
+        {!spectating ? (
+          <div className="gameover-sub">
+            {intl.formatMessage({ id: "game.over.winsGame" }, { winner: winnerName })}
+          </div>
+        ) : null}
 
         <div className="rail-actions gameover-actions">
-          {onDownloadReplay ? <button onClick={onDownloadReplay}>Export replay</button> : null}
-          {onWatchReplay ? <button onClick={onWatchReplay}>▶ Watch replay</button> : null}
-          <button onClick={onClose}>Back to board</button>
-          <button className="btn-primary" onClick={onBackToLobby}>Back to lobby</button>
+          {onDownloadReplay ? (
+            <button onClick={onDownloadReplay}>{intl.formatMessage({ id: "replay.controls.export" })}</button>
+          ) : null}
+          {onWatchReplay ? (
+            <button onClick={onWatchReplay}>▶ {intl.formatMessage({ id: "game.over.watchReplay" })}</button>
+          ) : null}
+          <button onClick={onClose}>{intl.formatMessage({ id: "game.over.backToBoard" })}</button>
+          <button className="btn-primary" onClick={onBackToLobby}>
+            {intl.formatMessage({ id: "game.over.backToLobby" })}
+          </button>
         </div>
         {!spectating ? (
           <p className="gameover-replay-retention">
-            This replay will be available in My Replays for 7 days. Export it to keep it longer.
+            {intl.formatMessage({ id: "game.over.retention" })}
           </p>
         ) : null}
 
         <div className="gameover-body">
           <div className="gameover-player-picker">
             <span className="gameover-player-picker-label" id="gameover-player-picker-label">
-              View statistics for
+              {intl.formatMessage({ id: "game.over.viewStatsFor" })}
             </span>
             <div
               className="gameover-player-tabs"
@@ -93,7 +105,9 @@ export function GameOver({
                   onClick={() => setSelectedSeat(playerSeat)}
                 >
                   {names[playerSeat]}
-                  {winner === playerSeat ? <span className="gameover-winner-tag">Winner</span> : null}
+                  {winner === playerSeat ? (
+                    <span className="gameover-winner-tag">{intl.formatMessage({ id: "game.over.winner" })}</span>
+                  ) : null}
                 </button>
               ))}
             </div>
@@ -104,64 +118,66 @@ export function GameOver({
             aria-labelledby="gameover-selected-player"
           >
             <header className="gameover-selected-heading">
-              <span>Showing stats for</span>
+              <span>{intl.formatMessage({ id: "game.over.showingStatsFor" })}</span>
               <strong id="gameover-selected-player">{names[selectedSeat]}</strong>
-              {winner === selectedSeat ? <span className="gameover-winner-tag">Winner</span> : null}
+              {winner === selectedSeat ? (
+                <span className="gameover-winner-tag">{intl.formatMessage({ id: "game.over.winner" })}</span>
+              ) : null}
             </header>
 
             <div className="gameover-key-stats">
               <div className="gameover-key-stat">
                 <strong>{stats.total.threatened[selectedSeat]}</strong>
-                <span>Damage threatened</span>
+                <span>{intl.formatMessage({ id: "game.stats.damageThreatened" })}</span>
               </div>
               <div className="gameover-key-stat">
                 <strong>{stats.total.damageDealt[selectedSeat]}</strong>
-                <span>Damage dealt</span>
+                <span>{intl.formatMessage({ id: "game.stats.damageDealt" })}</span>
               </div>
               <div className="gameover-key-stat">
                 <strong>{stats.total.blocked[selectedSeat]}</strong>
-                <span>Damage blocked</span>
+                <span>{intl.formatMessage({ id: "game.stats.damageBlocked" })}</span>
               </div>
               <div className="gameover-key-stat gameover-value-stat">
                 <strong>{totalPrevented(stats, selectedSeat)}</strong>
-                <span>Damage prevented</span>
+                <span>{intl.formatMessage({ id: "game.stats.damagePrevented" })}</span>
               </div>
             </div>
 
             <div className="gameover-summary-grid">
               <section className="gameover-summary-card">
-                <h3>Averages</h3>
+                <h3>{intl.formatMessage({ id: "game.stats.averages" })}</h3>
                 <dl>
-                  <div><dt>Value per round</dt><dd>{fmt(averageValue(stats, selectedSeat))}</dd></div>
-                  <div><dt>Threat per round</dt><dd>{fmt(averagePerRound(stats, selectedSeat, "threatened"))}</dd></div>
-                  <div><dt>Damage per round</dt><dd>{fmt(averagePerRound(stats, selectedSeat, "damageDealt"))}</dd></div>
-                  <div><dt>Threat per attack</dt><dd>{fmt(averageThreatPerAttack(stats, selectedSeat))}</dd></div>
+                  <div><dt>{intl.formatMessage({ id: "game.stats.valuePerRound" })}</dt><dd>{fmt(averageValue(stats, selectedSeat))}</dd></div>
+                  <div><dt>{intl.formatMessage({ id: "game.stats.threatPerRound" })}</dt><dd>{fmt(averagePerRound(stats, selectedSeat, "threatened"))}</dd></div>
+                  <div><dt>{intl.formatMessage({ id: "game.stats.damagePerRound" })}</dt><dd>{fmt(averagePerRound(stats, selectedSeat, "damageDealt"))}</dd></div>
+                  <div><dt>{intl.formatMessage({ id: "game.stats.threatPerAttack" })}</dt><dd>{fmt(averageThreatPerAttack(stats, selectedSeat))}</dd></div>
                 </dl>
               </section>
               <section className="gameover-summary-card">
-                <h3>Match</h3>
+                <h3>{intl.formatMessage({ id: "game.stats.match" })}</h3>
                 <dl>
-                  <div><dt>Rounds played</dt><dd>{stats.cyclesPlayed[selectedSeat]}</dd></div>
-                  <div><dt>Attacks</dt><dd>{stats.total.attacks[selectedSeat]}</dd></div>
-                  <div><dt>Final life</dt><dd>{view.players[selectedSeat]?.life ?? 0}</dd></div>
-                  <div><dt>Opponent final life</dt><dd>{view.players[opponent]?.life ?? 0}</dd></div>
+                  <div><dt>{intl.formatMessage({ id: "game.stats.roundsPlayed" })}</dt><dd>{stats.cyclesPlayed[selectedSeat]}</dd></div>
+                  <div><dt>{intl.formatMessage({ id: "game.stats.attacks" })}</dt><dd>{stats.total.attacks[selectedSeat]}</dd></div>
+                  <div><dt>{intl.formatMessage({ id: "game.stats.finalLife" })}</dt><dd>{view.players[selectedSeat]?.life ?? 0}</dd></div>
+                  <div><dt>{intl.formatMessage({ id: "game.stats.opponentFinalLife" })}</dt><dd>{view.players[opponent]?.life ?? 0}</dd></div>
                 </dl>
               </section>
             </div>
 
             <section className="gameover-breakdown">
-              <h3>Round-by-round breakdown</h3>
+              <h3>{intl.formatMessage({ id: "game.stats.breakdown" })}</h3>
               <div className="gameover-table-wrap">
                 <table className="gameover-table">
                   <thead>
                     <tr>
-                      <th>Round</th>
-                      <th>Attacks</th>
-                      <th>Threatened</th>
-                      <th>Dealt</th>
-                      <th>Blocked</th>
-                      <th>Prevented</th>
-                      <th>Value</th>
+                      <th>{intl.formatMessage({ id: "game.stats.round" })}</th>
+                      <th>{intl.formatMessage({ id: "game.stats.attacks" })}</th>
+                      <th>{intl.formatMessage({ id: "game.stats.threatened" })}</th>
+                      <th>{intl.formatMessage({ id: "game.stats.dealt" })}</th>
+                      <th>{intl.formatMessage({ id: "game.stats.blocked" })}</th>
+                      <th>{intl.formatMessage({ id: "game.stats.prevented" })}</th>
+                      <th>{intl.formatMessage({ id: "game.stats.value" })}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -179,7 +195,7 @@ export function GameOver({
                   </tbody>
                   <tfoot>
                     <tr>
-                      <td>Total</td>
+                      <td>{intl.formatMessage({ id: "game.stats.total" })}</td>
                       <td>{stats.total.attacks[selectedSeat]}</td>
                       <td>{stats.total.threatened[selectedSeat]}</td>
                       <td>{stats.total.damageDealt[selectedSeat]}</td>

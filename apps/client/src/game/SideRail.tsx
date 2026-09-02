@@ -15,7 +15,7 @@ import {
 import { HeroEmote } from "./HeroEmote.js";
 import { BugReportDialog, GameSettingsDialog } from "./SideRailDialogs.js";
 import { ModalSurface } from "../components/ModalSurface.js";
-import { PrimaryActionButton } from "./StatusFloat.js";
+import { PrimaryActionButton, type PrimaryAction } from "./StatusFloat.js";
 
 interface RenderedLogLine {
   segments: readonly LogTextSegment[];
@@ -33,19 +33,26 @@ function LogLines({
   opponentHeroName: string;
   onInspectCard: (cardId: string) => void;
 }) {
+  const intl = useIntl();
   return lines.map(({ segments, turnBoundary }, lineIndex) => (
     <div
       key={lineIndex}
       className={`log-line${turnBoundary ? " log-turn-divider" : ""}`}
     >
       {turnBoundary ? (
-        `Turn ${turnBoundary.turn}: ${
-          friendlyHeroName !== opponentHeroName && turnBoundary.heroName === friendlyHeroName
-            ? "Your turn"
-            : friendlyHeroName !== opponentHeroName && turnBoundary.heroName === opponentHeroName
-              ? "Opponent's turn"
-              : "Turn begins"
-        }`
+        intl.formatMessage(
+          { id: "game.log.turnBoundary" },
+          {
+            turn: turnBoundary.turn,
+            status: intl.formatMessage({
+              id: friendlyHeroName !== opponentHeroName && turnBoundary.heroName === friendlyHeroName
+                ? "game.turn.yours"
+                : friendlyHeroName !== opponentHeroName && turnBoundary.heroName === opponentHeroName
+                  ? "game.turn.opponent"
+                  : "game.turn.begins",
+            }),
+          },
+        )
       ) : segments.map((segment, segmentIndex) =>
         segment.cardId ? (
           <button
@@ -128,7 +135,7 @@ export function SideRail({
   onUndo,
   undoDisabled = false,
   onLeave,
-  leaveLabel,
+  leaveAction,
   onConcede,
   spectating,
   spectatorCount,
@@ -160,7 +167,7 @@ export function SideRail({
   opponentHeroName,
   roomCode,
   onInspectCard,
-  mobilePrimaryActionLabel,
+  mobilePrimaryAction,
   mobilePrimaryActionDisabled = false,
   onMobilePrimaryAction,
 }: {
@@ -170,7 +177,7 @@ export function SideRail({
   onUndo: ((target?: UndoTarget) => void) | null;
   undoDisabled?: boolean;
   onLeave: () => void;
-  leaveLabel: "Leave" | "End Game";
+  leaveAction: "leave" | "end-game";
   /** seated player in a live game: concede ends it in the opponent's favor */
   onConcede: (() => void) | null;
   spectating: boolean;
@@ -205,7 +212,7 @@ export function SideRail({
   opponentHeroName: string;
   roomCode: string | null;
   onInspectCard: (cardId: string) => void;
-  mobilePrimaryActionLabel: string | null;
+  mobilePrimaryAction: PrimaryAction | null;
   mobilePrimaryActionDisabled?: boolean;
   onMobilePrimaryAction: () => void;
 }) {
@@ -215,6 +222,9 @@ export function SideRail({
   const [showMobileLog, setShowMobileLog] = useState(false);
   const [showUtilities, setShowUtilities] = useState(false);
   const [confirmingAction, setConfirmingAction] = useState<"leave" | "concede" | null>(null);
+  const leaveLabel = intl.formatMessage({
+    id: leaveAction === "end-game" ? "common.endGame" : "common.leave",
+  });
   const showOpponentDisconnected = !replaying && !opponentConnected && winnerText === null;
   const renderedLog = useMemo(
     () => log.slice().reverse().map((line) => {
@@ -228,12 +238,12 @@ export function SideRail({
   );
   return (
     <div className={`rail-right${collapsed ? " rail-collapsed" : ""}`}>
-      <nav className="mobile-gamebar" aria-label="Game controls">
+      <nav className="mobile-gamebar" aria-label={intl.formatMessage({ id: "game.controls" })}>
         <div className="mobile-gamebar-actions">
           {onUndo ? (
             <button
-              aria-label="Undo last action"
-              title="Undo last action"
+              aria-label={intl.formatMessage({ id: "game.undoLast" })}
+              title={intl.formatMessage({ id: "game.undoLast" })}
               disabled={undoDisabled}
               onClick={(event) => undoWithoutFocus(
                 event.currentTarget,
@@ -243,11 +253,16 @@ export function SideRail({
               <ControlIcon kind="undo" />
             </button>
           ) : null}
-          <button aria-label="Game log" onClick={() => setShowMobileLog(true)}>Log</button>
-          {mobilePrimaryActionLabel ? (
+          <button
+            aria-label={intl.formatMessage({ id: "game.log.title" })}
+            onClick={() => setShowMobileLog(true)}
+          >
+            {intl.formatMessage({ id: "game.log.short" })}
+          </button>
+          {mobilePrimaryAction ? (
             <div className="mobile-primary-action">
               <PrimaryActionButton
-                label={mobilePrimaryActionLabel}
+                action={mobilePrimaryAction}
                 disabled={mobilePrimaryActionDisabled}
                 onSelect={onMobilePrimaryAction}
               />
@@ -262,13 +277,22 @@ export function SideRail({
               placement="toolbar"
             />
           ) : null}
-          <button aria-label="More game controls" onClick={() => setShowUtilities(true)}>More</button>
+          <button
+            aria-label={intl.formatMessage({ id: "game.controls.more" })}
+            onClick={() => setShowUtilities(true)}
+          >
+            {intl.formatMessage({ id: "lobby.nav.more" })}
+          </button>
         </div>
       </nav>
 
       <div className="mobile-game-alerts" aria-live="polite">
-        {!replaying && !connected ? <div className="toast">connection lost — reconnecting…</div> : null}
-        {showOpponentDisconnected ? <div className="toast">opponent disconnected — waiting…</div> : null}
+        {!replaying && !connected ? (
+          <div className="toast">{intl.formatMessage({ id: "game.connection.lost" })}</div>
+        ) : null}
+        {showOpponentDisconnected ? (
+          <div className="toast">{intl.formatMessage({ id: "game.connection.opponentLost" })}</div>
+        ) : null}
         {error ? <div className="toast">{error}</div> : null}
         {winnerText ? <div className="winner">{winnerText}</div> : null}
       </div>
@@ -277,21 +301,25 @@ export function SideRail({
         <button
           type="button"
           className="rail-collapse-toggle"
-          aria-label={collapsed ? "Expand side rail" : "Collapse side rail"}
+          aria-label={intl.formatMessage({
+            id: collapsed ? "game.rail.expand" : "game.rail.collapse",
+          })}
           aria-expanded={!collapsed}
-          title={collapsed ? "Expand side rail" : "Collapse side rail"}
+          title={intl.formatMessage({
+            id: collapsed ? "game.rail.expand" : "game.rail.collapse",
+          })}
           onClick={onToggleCollapsed}
         >
           {collapsed ? "‹" : "›"}
         </button>
         <div className="rail-turn">
-          <strong>Game Log</strong>
+          <strong>{intl.formatMessage({ id: "game.log.title" })}</strong>
         </div>
       </div>
       <div className="rail-actions">
         {onUndo && (
           <button
-            title="Undo the last action (yours or your opponent's)"
+            title={intl.formatMessage({ id: "game.undoDescription" })}
             disabled={undoDisabled}
             onClick={(event) => undoWithoutFocus(
               event.currentTarget,
@@ -299,14 +327,14 @@ export function SideRail({
             )}
           >
             <ControlIcon kind="undo" />
-            Undo
+            {intl.formatMessage({ id: "game.undo" })}
           </button>
         )}
         {onReportBug ? (
           <button
             className="rail-icon"
-            aria-label="Report a bug"
-            title="Report a bug"
+            aria-label={intl.formatMessage({ id: "game.bug.report" })}
+            title={intl.formatMessage({ id: "game.bug.report" })}
             onClick={() => setShowBugReport(true)}
           >
             <ControlIcon kind="bug" />
@@ -323,9 +351,9 @@ export function SideRail({
           </button>
         )}
         <button
-          className={leaveLabel === "End Game" ? "rail-exit rail-exit-danger" : "rail-exit"}
+          className={leaveAction === "end-game" ? "rail-exit rail-exit-danger" : "rail-exit"}
           onClick={() => {
-            if (leaveLabel === "End Game") setConfirmingAction("leave");
+            if (leaveAction === "end-game") setConfirmingAction("leave");
             else onLeave();
           }}
         >
@@ -334,19 +362,27 @@ export function SideRail({
       </div>
 
       {spectating && (
-        <div className="spec-pill">{replaying ? "Watching replay" : "You are spectating"}</div>
+        <div className="spec-pill">
+          {intl.formatMessage({ id: replaying ? "game.spectating.replay" : "game.spectating.live" })}
+        </div>
       )}
       {spectatorCount > 0 && (
-        <div className="spec-count">👁 {spectatorCount} spectating</div>
+        <div className="spec-count">
+          👁 {intl.formatMessage({ id: "game.spectating.count" }, { count: spectatorCount })}
+        </div>
       )}
 
-      {!replaying && !connected && <div className="toast">connection lost — reconnecting…</div>}
-      {showOpponentDisconnected && <div className="toast">opponent disconnected — waiting…</div>}
+      {!replaying && !connected && (
+        <div className="toast">{intl.formatMessage({ id: "game.connection.lost" })}</div>
+      )}
+      {showOpponentDisconnected && (
+        <div className="toast">{intl.formatMessage({ id: "game.connection.opponentLost" })}</div>
+      )}
       {error && <div className="toast">{error}</div>}
       {winnerText && <div className="winner">{winnerText}</div>}
       {onShowGameOver && (
         <div className="rail-actions">
-          <button onClick={onShowGameOver}>Game summary</button>
+          <button onClick={onShowGameOver}>{intl.formatMessage({ id: "game.summary" })}</button>
         </div>
       )}
 
@@ -358,17 +394,19 @@ export function SideRail({
           onInspectCard={onInspectCard}
         />
       </div>
-      <div className="room-tag">Room {roomCode}</div>
+      <div className="room-tag">{intl.formatMessage({ id: "game.room" }, { code: roomCode })}</div>
 
       {showMobileLog ? (
         <div className="overlay mobile-log-overlay" onClick={() => setShowMobileLog(false)}>
           <section className="mobile-log-sheet" onClick={(e) => e.stopPropagation()}>
             <header>
               <div>
-                <strong>Game log</strong>
-                <span>Room {roomCode}</span>
+                <strong>{intl.formatMessage({ id: "game.log.title" })}</strong>
+                <span>{intl.formatMessage({ id: "game.room" }, { code: roomCode })}</span>
               </div>
-              <button onClick={() => setShowMobileLog(false)}>Close</button>
+              <button onClick={() => setShowMobileLog(false)}>
+                {intl.formatMessage({ id: "common.close" })}
+              </button>
             </header>
             <div className="log">
               <LogLines
@@ -415,7 +453,11 @@ export function SideRail({
       ) : null}
 
       {showUtilities ? (
-        <ModalSurface title="Game Controls" className="game-utilities-sheet" onClose={() => setShowUtilities(false)}>
+        <ModalSurface
+          title={intl.formatMessage({ id: "game.controls" })}
+          className="game-utilities-sheet"
+          onClose={() => setShowUtilities(false)}
+        >
           <div className="game-utilities-actions">
             {(onConcede || onUndo || onPriorityWindowModeChange) ? (
               <button
@@ -434,7 +476,7 @@ export function SideRail({
                   setShowBugReport(true);
                 }}
               >
-                Report a Bug
+                {intl.formatMessage({ id: "game.bug.report" })}
               </button>
             ) : null}
             {onConcede ? (
@@ -445,13 +487,13 @@ export function SideRail({
                   setConfirmingAction("concede");
                 }}
               >
-                Concede Game
+                {intl.formatMessage({ id: "game.concede" })}
               </button>
             ) : null}
             <button
-              className={leaveLabel === "End Game" ? "btn-danger" : ""}
+              className={leaveAction === "end-game" ? "btn-danger" : ""}
               onClick={() => {
-                if (leaveLabel === "End Game") {
+                if (leaveAction === "end-game") {
                   setShowUtilities(false);
                   setConfirmingAction("leave");
                 } else {
@@ -468,15 +510,19 @@ export function SideRail({
 
       {confirmingAction ? (
         <ModalSurface
-          title={confirmingAction === "concede" ? "Concede Game?" : "End Game?"}
+          title={intl.formatMessage({
+            id: confirmingAction === "concede" ? "game.concede.confirmTitle" : "game.end.confirmTitle",
+          })}
           description={confirmingAction === "concede"
-            ? "Conceding awards the game to your opponent."
-            : "This ends the current practice game and returns to the lobby."}
+            ? intl.formatMessage({ id: "game.concede.confirmDescription" })
+            : intl.formatMessage({ id: "game.end.confirmDescription" })}
           className="game-confirm-sheet"
           onClose={() => setConfirmingAction(null)}
         >
           <div className="game-confirm-actions">
-            <button onClick={() => setConfirmingAction(null)}>Keep Playing</button>
+            <button onClick={() => setConfirmingAction(null)}>
+              {intl.formatMessage({ id: "game.keepPlaying" })}
+            </button>
             <button
               className="btn-danger"
               onClick={() => {
@@ -487,7 +533,9 @@ export function SideRail({
                 else onLeave();
               }}
             >
-              {confirmingAction === "concede" ? "Concede" : "End Game"}
+              {intl.formatMessage({
+                id: confirmingAction === "concede" ? "game.concede.short" : "common.endGame",
+              })}
             </button>
           </div>
         </ModalSurface>

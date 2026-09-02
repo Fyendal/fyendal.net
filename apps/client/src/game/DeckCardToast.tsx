@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useIntl } from "react-intl";
 import type { GameView } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import { cardImageUrl } from "./Card.js";
@@ -112,6 +113,7 @@ export function DeckCardToast({
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
 }) {
+  const intl = useIntl();
   if (!event) return null;
   const names = event.cardIds.map((cardId) => cardData[cardId]?.name ?? cardId);
 
@@ -127,7 +129,7 @@ export function DeckCardToast({
       <button
         type="button"
         className="deck-card-toast-close"
-        aria-label="Dismiss"
+        aria-label={intl.formatMessage({ id: "common.dismiss" })}
         onClick={onDismiss}
       />
       {event.cardIds.length > 0 && (

@@ -87,7 +87,7 @@ function CardStack({
           src={cardImageUrl(id)}
           alt=""
           draggable={false}
-          loading="lazy"
+          loading="eager"
         />
       ))}
     </button>

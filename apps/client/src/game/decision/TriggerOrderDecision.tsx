@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useIntl } from "react-intl";
 import type { CardView } from "@fyendal/shared";
 import { BloodDebtTriggerTile, isBloodDebtTrigger } from "../BloodDebtTriggerTile.js";
 import { CardFace } from "../Card.js";
@@ -8,7 +9,6 @@ import { CardRef, cardAffiliation, cardDisplayName } from "./DecisionShared.js";
 interface TriggerOrderItem {
   key: string;
   optionId: string;
-  sourceName: string;
   label: string;
   card: CardView | null;
   count: number | null;
@@ -51,20 +51,16 @@ export function TriggerOrderDecision({
   viewerSeat: number;
   onConfirm: (optionIds: string[]) => void;
 }) {
+  const intl = useIntl();
   const [items, setItems] = useState<TriggerOrderItem[]>(() =>
     options.map((optionId, index) => {
-      const label = labels[index] ?? "Triggered ability";
+      const label = labels[index] ?? "";
       const count = counts[index] ?? null;
       const bloodDebt = count !== null && isBloodDebtTrigger(label);
       return {
         key: `${optionId}:${index}`,
         optionId,
-        sourceName: bloodDebt
-          ? "Blood Debt"
-          : cards[index]
-            ? cardDisplayName(cards[index]!)
-            : "Trigger",
-        label: bloodDebt ? `Lose ${count} life` : label,
+        label,
         card: bloodDebt ? null : (cards[index] ?? null),
         count,
         bloodDebt,
@@ -84,12 +80,12 @@ export function TriggerOrderDecision({
   return (
     <>
       <span className="decision-context" id="trigger-order-help">
-        Drag triggers into resolution order. The first trigger resolves first.
+        {intl.formatMessage({ id: "game.decision.triggerOrder.instructions" })}
       </span>
       <div
         className="trigger-order-list"
         role="list"
-        aria-label="Trigger resolution order"
+        aria-label={intl.formatMessage({ id: "game.decision.triggerOrder.label" })}
         aria-describedby="trigger-order-help"
       >
         {items.map((item, index) => (
@@ -117,7 +113,13 @@ export function TriggerOrderDecision({
             <span className="trigger-order-grip" aria-hidden="true">⠿</span>
             <span className="trigger-order-position">
               {index + 1}
-              <small>{index === 0 ? "resolves first" : index === items.length - 1 ? "resolves last" : "then"}</small>
+              <small>{intl.formatMessage({
+                id: index === 0
+                  ? "game.decision.triggerOrder.first"
+                  : index === items.length - 1
+                    ? "game.decision.triggerOrder.last"
+                    : "game.decision.triggerOrder.then",
+              })}</small>
             </span>
             {item.count !== null && item.bloodDebt ? (
               <BloodDebtTriggerTile count={item.count} />
@@ -130,23 +132,49 @@ export function TriggerOrderDecision({
             ) : null}
             <span className="trigger-order-label">
               {item.card ? <strong><CardRef id={item.card.cardId} name={item.card.name} /></strong> : null}
-              <span>{item.label}</span>
+              <span>{item.bloodDebt && item.count !== null
+                ? intl.formatMessage({ id: "game.bloodDebt.loseLife" }, { count: item.count })
+                : item.label || intl.formatMessage({ id: "game.triggeredAbility" })}</span>
             </span>
             <span className="trigger-order-controls">
               <button
-                aria-label={`Move ${item.sourceName}: ${item.label} earlier`}
+                aria-label={intl.formatMessage(
+                  { id: "game.decision.triggerOrder.moveEarlier" },
+                  {
+                    source: item.bloodDebt
+                      ? intl.formatMessage({ id: "game.bloodDebt" })
+                      : item.card
+                        ? cardDisplayName(item.card)
+                        : intl.formatMessage({ id: "game.trigger" }),
+                    label: item.bloodDebt && item.count !== null
+                      ? intl.formatMessage({ id: "game.bloodDebt.loseLife" }, { count: item.count })
+                      : item.label || intl.formatMessage({ id: "game.triggeredAbility" }),
+                  },
+                )}
                 disabled={index === 0}
                 onClick={() => move(index, index - 1)}
-                title="Move earlier"
+                title={intl.formatMessage({ id: "game.decision.triggerOrder.earlier" })}
                 type="button"
               >
                 ↑
               </button>
               <button
-                aria-label={`Move ${item.sourceName}: ${item.label} later`}
+                aria-label={intl.formatMessage(
+                  { id: "game.decision.triggerOrder.moveLater" },
+                  {
+                    source: item.bloodDebt
+                      ? intl.formatMessage({ id: "game.bloodDebt" })
+                      : item.card
+                        ? cardDisplayName(item.card)
+                        : intl.formatMessage({ id: "game.trigger" }),
+                    label: item.bloodDebt && item.count !== null
+                      ? intl.formatMessage({ id: "game.bloodDebt.loseLife" }, { count: item.count })
+                      : item.label || intl.formatMessage({ id: "game.triggeredAbility" }),
+                  },
+                )}
                 disabled={index === items.length - 1}
                 onClick={() => move(index, index + 1)}
-                title="Move later"
+                title={intl.formatMessage({ id: "game.decision.triggerOrder.later" })}
                 type="button"
               >
                 ↓
@@ -159,12 +187,15 @@ export function TriggerOrderDecision({
         <button
           className="btn-primary shortcut-button"
           onClick={() => onConfirm(items.map((item) => item.optionId))}
-          title="Confirm Order (Space)"
+          title={intl.formatMessage(
+            { id: "common.shortcut.space" },
+            { label: intl.formatMessage({ id: "game.decision.triggerOrder.confirm" }) },
+          )}
           aria-keyshortcuts="Space"
           type="button"
         >
-          Confirm Order
-          <kbd className="shortcut-key" aria-label="Space key" />
+          {intl.formatMessage({ id: "game.decision.triggerOrder.confirm" })}
+          <kbd className="shortcut-key" aria-label={intl.formatMessage({ id: "common.spaceKey" })} />
         </button>
       </div>
     </>

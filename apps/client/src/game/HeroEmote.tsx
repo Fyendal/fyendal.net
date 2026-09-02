@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { useIntl } from "react-intl";
 import type { EmoteMessage } from "@fyendal/shared";
 import type { EmoteEvent } from "../store/types.js";
 
@@ -12,6 +13,17 @@ export const EMOTE_OPTIONS: readonly EmoteMessage[] = [
   "Thinking...",
   "Oops!",
 ];
+
+const EMOTE_MESSAGE_IDS: Record<EmoteMessage, string> = {
+  "Hello!": "game.emote.hello",
+  "Good luck, have fun!": "game.emote.goodLuck",
+  "Good game!": "game.emote.goodGame",
+  "Thanks!": "game.emote.thanks",
+  "Sorry!": "game.emote.sorry",
+  "Nice play!": "game.emote.nicePlay",
+  "Thinking...": "game.emote.thinking",
+  "Oops!": "game.emote.oops",
+};
 
 const EMOTE_VISIBLE_MS = 4_000;
 
@@ -30,6 +42,7 @@ export function HeroEmote({
   children?: ReactNode;
   placement?: "hero" | "toolbar";
 }) {
+  const intl = useIntl();
   const [open, setOpen] = useState(false);
   const [visibleEvent, setVisibleEvent] = useState<EmoteEvent | null>(
     () => event?.seat === seat ? event : null,
@@ -63,17 +76,17 @@ export function HeroEmote({
       {children}
       {visibleEvent ? (
         <div key={visibleEvent.id} className="hero-emote-toast" role="status" aria-live="polite">
-          {visibleEvent.message}
+          {intl.formatMessage({ id: EMOTE_MESSAGE_IDS[visibleEvent.message] })}
         </div>
       ) : null}
       {canSend ? (
         <button
           type="button"
           className={placement === "toolbar" ? "emote-toolbar-button" : "hero-emote-button"}
-          aria-label="Send a message"
+          aria-label={intl.formatMessage({ id: "game.emote.send" })}
           aria-expanded={open}
           aria-controls={pickerId}
-          title="Send a message"
+          title={intl.formatMessage({ id: "game.emote.send" })}
           onClick={(event) => {
             event.stopPropagation();
             setOpen((current) => !current);
@@ -100,10 +113,12 @@ export function HeroEmote({
           id={pickerId}
           className="hero-emote-picker"
           role="dialog"
-          aria-label="Choose a message"
+          aria-label={intl.formatMessage({ id: "game.emote.choose" })}
           onClick={(event) => event.stopPropagation()}
         >
-          <div className="hero-emote-picker-title">Send a message</div>
+          <div className="hero-emote-picker-title">
+            {intl.formatMessage({ id: "game.emote.send" })}
+          </div>
           <div className="hero-emote-options">
             {EMOTE_OPTIONS.map((message) => (
               <button
@@ -114,7 +129,7 @@ export function HeroEmote({
                   setOpen(false);
                 }}
               >
-                {message}
+                {intl.formatMessage({ id: EMOTE_MESSAGE_IDS[message] })}
               </button>
             ))}
           </div>

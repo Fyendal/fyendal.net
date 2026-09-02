@@ -1,4 +1,5 @@
 import type { OngoingEffectView } from "@fyendal/shared";
+import { useIntl } from "react-intl";
 import { cardImageUrl } from "./Card.js";
 
 interface OngoingEffectStack {
@@ -34,11 +35,16 @@ export function EffectChips({
   /** grid area on the mat half */
   area: string;
 }) {
+  const intl = useIntl();
   if (effects.length === 0) return null;
   const stacks = stackOngoingEffects(effects);
 
   return (
-    <div className="effects-row" style={{ gridArea: area }} aria-label="Lingering effects">
+    <div
+      className="effects-row"
+      style={{ gridArea: area }}
+      aria-label={intl.formatMessage({ id: "game.effects.lingering" })}
+    >
       {stacks.map(({ effect, count }) => (
         <div
           key={JSON.stringify([effect.seat, effect.cardId, effect.label])}
@@ -47,11 +53,18 @@ export function EffectChips({
           {...(effect.cardId ? { "data-cardid": effect.cardId } : {})}
         >
           {effect.cardId ? (
-            <img className="effect-mini-img" src={cardImageUrl(effect.cardId)} alt="" draggable={false} loading="lazy" />
+            <img className="effect-mini-img" src={cardImageUrl(effect.cardId)} alt="" draggable={false} loading="eager" />
           ) : (
             <div className="effect-mini-img effect-back" />
           )}
-          {count > 1 ? <span className="effect-count" aria-label={`${count} identical effects`}>×{count}</span> : null}
+          {count > 1 ? (
+            <span
+              className="effect-count"
+              aria-label={intl.formatMessage({ id: "game.effects.identical" }, { count })}
+            >
+              ×{count}
+            </span>
+          ) : null}
         </div>
       ))}
     </div>

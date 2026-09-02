@@ -1,6 +1,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 import { EffectChips, stackOngoingEffects } from "./EffectChips.js";
 
 describe("stackOngoingEffects", () => {
@@ -24,15 +25,20 @@ describe("stackOngoingEffects", () => {
 
 describe("EffectChips", () => {
   it("renders identical lingering effects as one counted card stack", () => {
-    const html = renderToStaticMarkup(createElement(EffectChips, {
-      area: "3 / 2 / 4 / 4",
-      effects: [
-        { seat: 0, cardId: "WTR160", label: "+1 attack · next attack" },
-        { seat: 0, cardId: "WTR160", label: "+1 attack · next attack" },
-      ],
-    }));
+    const html = renderToStaticMarkup(createElement(
+      TestI18nProvider,
+      null,
+      createElement(EffectChips, {
+        area: "3 / 2 / 4 / 4",
+        effects: [
+          { seat: 0, cardId: "WTR160", label: "+1 attack · next attack" },
+          { seat: 0, cardId: "WTR160", label: "+1 attack · next attack" },
+        ],
+      }),
+    ));
 
     expect(html.match(/WTR160\.webp/g)).toHaveLength(1);
+    expect(html).toContain('loading="eager"');
     expect(html).toContain("effect-mini-stacked");
     expect(html).toContain("×2");
     expect(html).toContain("+1 attack · next attack ×2");

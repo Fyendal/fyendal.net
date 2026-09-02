@@ -1,3 +1,5 @@
+import { useIntl } from "react-intl";
+
 export function MobileHandToggle({
   expanded,
   cardCount,
@@ -7,7 +9,7 @@ export function MobileHandToggle({
   cardCount: number;
   onToggle: () => void;
 }) {
-  const cardLabel = cardCount === 1 ? "card" : "cards";
+  const intl = useIntl();
 
   return (
     <button
@@ -15,14 +17,17 @@ export function MobileHandToggle({
       className="mobile-hand-toggle"
       aria-controls="player-hand"
       aria-expanded={expanded}
-      aria-label={expanded ? "Hide hand" : `Show hand, ${cardCount} ${cardLabel}`}
+      aria-label={intl.formatMessage(
+        { id: expanded ? "game.hand.hide" : "game.hand.showCount" },
+        { count: cardCount },
+      )}
       onClick={onToggle}
     >
       {expanded ? (
         <img className="mobile-hand-toggle-icon" src="/icons/hide-transparent.png" alt="" />
       ) : (
         <>
-          <span>Show hand</span>
+          <span>{intl.formatMessage({ id: "game.hand.show" })}</span>
           <span className="mobile-hand-count" aria-hidden="true">{cardCount}</span>
         </>
       )}
