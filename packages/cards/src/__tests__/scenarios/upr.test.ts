@@ -78,6 +78,82 @@ describe("UPR — registration and heroes", () => {
 });
 
 describe("UPR — rules regression coverage", () => {
+  it("Phoenix Form counts Phoenix Flames controlled on the combat chain", () => {
+    const noFlames = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["phoenix form|1"], weapons: [] },
+        { hero: "dorinthea" },
+      ],
+    });
+    noFlames.play("phoenix form|1").expectAttackValue(3);
+    expect(noFlames.state.chain.at(-1)?.goAgain).toBe(false);
+
+    const oneFlame = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["phoenix flame|1", "phoenix form|1"], deck: [BLUE], weapons: [] },
+        { hero: "dorinthea" },
+      ],
+    });
+    oneFlame.play("phoenix flame|1").blockWith().settle()
+      .play("phoenix form|1").expectAttackValue(3);
+    expect(oneFlame.state.chain.at(-1)?.goAgain).toBe(true);
+    oneFlame.blockWith().settle().expectHandSize(0, 0);
+
+    const threeFlames = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["phoenix flame|1", "phoenix flame|1", "phoenix flame|1", "phoenix form|1"],
+          deck: [BLUE, RED, BLUE],
+          weapons: [],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    threeFlames.play("phoenix flame|1").blockWith().settle()
+      .play("phoenix flame|1").blockWith().settle()
+      .play("phoenix flame|1").blockWith().settle()
+      .play("phoenix form|1").expectAttackValue(5)
+      .blockWith().settle()
+      .expectHandSize(0, 3);
+  });
+
+  it("Tiger Stripe Shuko counts Ignite by base power after Rise from the Ashes", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: [
+            "rise from the ashes|1",
+            "ignite|1",
+            "spreading flames|1",
+            "phoenix flame|1",
+          ],
+          equipment: { arms: "tiger stripe shuko|0" },
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+
+    s.play("rise from the ashes|1")
+      .play("ignite|1")
+      .expectAttackValue(5)
+      .blockWith()
+      .settle();
+    expect(s.state.players[0]!.flags.smallAttackCount).toBe(1);
+    s
+      .play("spreading flames|1")
+      .expectAttackValue(3)
+      .blockWith()
+      .settle();
+    expect(s.state.players[0]!.flags.smallAttackCount).toBe(1);
+    s.play("phoenix flame|1");
+    expect(s.state.players[0]!.flags.smallAttackCount).toBe(2);
+    expect(s.state.chain.at(-1)?.attackingCard.tempPower).toBe(1);
+    expect(s.state.chain.at(-1)?.flags.unpreventable).toBe(true);
+    s.expectAttackValue(3);
+  });
+
   it("That All You Got? draws only when the combat chain closes", () => {
     const s = scenario({
       seats: [
@@ -102,6 +178,24 @@ describe("UPR — rules regression coverage", () => {
       .doRaw({ kind: "close-chain" })
       .expectHandSize(1, 1)
       .expectZoneSize(1, "deck", 0);
+  });
+
+  it("Spreading Flames buffs every eligible Draconic attack on the combat chain", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["ignite|1", "spreading flames|1", "phoenix flame|1", "phoenix flame|1"],
+          weapons: [],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+
+    s.play("ignite|1").blockWith().settle()
+      .play("spreading flames|1").blockWith().settle()
+      .play("phoenix flame|1").expectAttackValue(2).blockWith().settle()
+      .play("phoenix flame|1").expectAttackValue(2);
   });
 
   it("invocation transform retains its Ash material as a sub-card", () => {

@@ -75,6 +75,45 @@ describe("HNT — marked heroes and daggers", () => {
     })).toEqual({ ok: false, error: "cannot attack with weapons this turn" });
   });
 
+  it("Dragonscaler Flight Path can target an earlier Draconic weapon attack", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          heroKey: "fai|0",
+          weapons: ["searing emberblade|0"],
+          equipment: { legs: "dragonscaler flight path|0" },
+          hand: ["ronin renegade|1", "wounding blow|1", "wrecker romp|3"],
+        },
+        { hero: "rhinar" },
+      ],
+    });
+
+    g.play("ronin renegade|1")
+      .blockWith()
+      .settle()
+      .attackWithWeapon("searing emberblade|0", { pitch: ["wrecker romp|3"] })
+      .blockWith()
+      .settle()
+      .play("wounding blow|1", { settle: false })
+      .activate("dragonscaler flight path|0", { settle: false })
+      .settle();
+
+    const emberblade = g.state.players[0]!.weapons[0]!;
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "dragonscaler-flight-path",
+      options: ["chain:0", "chain:1"],
+      cardOptions: [
+        g.state.chain[0]!.attackingCard.instanceId,
+        emberblade.instanceId,
+      ],
+    });
+    expect(g.state.players[0]!.equipment.legs).toBeUndefined();
+
+    g.chooseOption("chain:1");
+    expect(g.state.players[0]!.flags[`additionalActivations:${emberblade.instanceId}:0`]).toBe(1);
+  });
+
   it("journals Relentless Pursuit's self-move as a deck-bottom placement", () => {
     const g = scenario({
       seats: [

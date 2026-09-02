@@ -277,12 +277,18 @@ export function queueHitTriggers(state: GameStateInternal,
   state.phase = "layer";
   runtime.dispatchFlow("queueTriggeredLayers", state, [{ seat: link.attacker, layers }], "finish-link-resolution");
   if (scriptedChoice) {
-    // Combat-damage observers may ask a direct scripted choice before the
-    // same hit's triggered layers receive priority. For example, Okana Scar
-    // Wraps may ask to equip Edge of Autumn while Legacy of Ikaru's on-hit
-    // ability is already queued. Keep that choice in front, then enter the
-    // prepared stack once it has been answered.
-    scriptedChoice.resume = { kind: "continue-stack", seat: link.attacker };
+    const queuedDecision = state.pendingDecision;
+    if (queuedDecision && queuedDecision !== scriptedChoice) {
+      // Multiple distinct on-hit abilities ask their controller to order the
+      // generated layers. Keep that decision behind the direct choice raised
+      // by the hit event instead of replacing it.
+      (scriptedChoice.followUpDecisions ??= []).push(queuedDecision);
+      state.pendingDecision = scriptedChoice;
+    } else {
+      // With no trigger-order decision, enter the prepared stack after the
+      // direct scripted choice has been answered.
+      scriptedChoice.resume = { kind: "continue-stack", seat: link.attacker };
+    }
   }
   return true;
 }

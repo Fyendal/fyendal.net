@@ -191,6 +191,8 @@ export interface ScriptCtx {
   attackBonusAboveBase(excludeSourceId?: number): number;
   chainLinksControlled(targetSeat?: number, type?: string): number;
   currentAttackHasType(type: string): boolean;
+  /** Whether the attack on an exact combat-chain link has the given type. */
+  chainLinkAttackHasType(chainLinkIndex: number, type: string): boolean;
   hitsThisCombatChain(targetSeat?: number): number;
   currentChainLinkNumber(): number;
   /** Deal effect damage to a hero. Arcane damage offers the target's active
@@ -239,6 +241,10 @@ export interface ScriptCtx {
    * chain, go again. Granting it to an already-resolved link does not resolve
    * that link again or retroactively grant an action point. */
   grantGoAgain(targetAttackInstanceId?: number): void;
+  /** Give the attack on an exact combat-chain link go again. Use this for
+   * targeted effects because a weapon or ally may attack on multiple links
+   * with the same permanent instance id. */
+  grantChainLinkGoAgain(chainLinkIndex: number): void;
   /** The crowd boos a hero: sets their `booedThisTurn` flag and fires their
    *  hero's onBooed hook. Has no other material effect on its own (SUP notes). */
   crowdBoo(targetSeat: number): void;
@@ -769,6 +775,9 @@ export interface TriggerDef {
     eventCard?: DeepReadonly<CardInstance>,
     eventContext?: TriggerEventContext,
   ): void;
+  /** Rechecked immediately before an optional trigger is offered. Returning
+   * false skips an effect that can no longer resolve successfully. */
+  canAccept?(ctx: ScriptCtx): boolean;
   /** Runs when the controller accepts an optional trigger — the trigger itself
    *  resolving (e.g. turning a mentor face up), before any priority window. */
   onAccept?(ctx: ScriptCtx): void;

@@ -955,6 +955,21 @@ function advanceStack(state: GameStateInternal, runtime: EngineRuntime): void {
     return;
   }
   if (layer.optional && !layer.accepted) {
+    const found = findCardAnywhere(state, layer.sourceInstanceId);
+    const definitionSource = layer.triggerSource ?? found?.card;
+    const contextSource = found?.card ?? definitionSource;
+    const def = definitionSource
+      ? scriptOf(state, definitionSource.cardId, definitionSource)?.triggers?.[layer.triggerIndex]
+      : undefined;
+    if (
+      contextSource &&
+      def?.canAccept &&
+      !def.canAccept(runtime.makeCtx(state, layer.seat, contextSource, currentLink(state)))
+    ) {
+      consumeTopTriggerOccurrence(state, layer);
+      continueStack(state, runtime, layer.seat);
+      return;
+    }
     askTriggerChoice(state, layer);
     return;
   }
@@ -1171,13 +1186,22 @@ export function answerTriggerChoice(
   if (optionId === "yes") {
     // Both players have already passed over this optional trigger. Resolve
     // its accepted effect now without opening a second response window.
-    layer.accepted = true;
     const found = findCardAnywhere(state, layer.sourceInstanceId);
     const definitionSource = layer.triggerSource ?? found?.card;
     const contextSource = found?.card ?? definitionSource;
     const def = definitionSource
       ? scriptOf(state, definitionSource.cardId, definitionSource)?.triggers?.[layer.triggerIndex]
       : undefined;
+    if (
+      contextSource &&
+      def?.canAccept &&
+      !def.canAccept(runtime.makeCtx(state, layer.seat, contextSource, currentLink(state)))
+    ) {
+      consumeTopTriggerOccurrence(state, layer);
+      continueStack(state, runtime, layer.seat);
+      return undefined;
+    }
+    layer.accepted = true;
     if (contextSource && def?.onAccept) {
       def.onAccept(runtime.makeCtx(state, layer.seat, contextSource, currentLink(state)));
     }

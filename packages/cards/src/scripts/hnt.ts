@@ -84,6 +84,12 @@ function currentAttackDraconic(ctx: ScriptCtx): boolean {
   return ctx.currentAttackHasType("draconic");
 }
 
+function draconicAttackLinkIndexes(ctx: ScriptCtx): number[] {
+  return ctx.state.chain.flatMap((link, index) =>
+    link.flags.attackGone !== true && ctx.chainLinkAttackHasType(index, "draconic") ? [index] : []
+  );
+}
+
 function equippedSelf(ctx: ScriptCtx): DeepReadonly<CardInstance> | undefined {
   return Object.values(ctx.player(ctx.seat).equipment).find((card) =>
     card?.instanceId === ctx.self.instanceId
@@ -654,7 +660,41 @@ Object.assign(hnt, {
     onFriendlyAttackPowerGained: grantSharpenedSensesGoAgain,
     triggers: [{ event: "end-of-turn", label: "Destroy Sharpened Senses", effect: (ctx) => ctx.destroySelf() }],
   },
-  "dragonscaler flight path|0": { activated: { cost: 3, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true, modifyCost: (ctx, base) => base - draconicLinks(ctx), canActivate: (ctx) => !!ctx.link && currentAttackDraconic(ctx), onActivate(ctx) { ctx.grantGoAgain(); if (ctx.link && (ctx.link.attackCardType === "weapon" || dataTags(ctx, ctx.link.attackingCard).includes("ally"))) ctx.grantAdditionalActivation(ctx.link.attackingCard.instanceId); } } },
+  "dragonscaler flight path|0": {
+    activated: {
+      cost: 3,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      destroySelfCost: true,
+      modifyCost: (ctx, base) => base - draconicLinks(ctx),
+      canActivate: (ctx) => draconicAttackLinkIndexes(ctx).length > 0,
+      onActivate(ctx) {
+        const indexes = draconicAttackLinkIndexes(ctx);
+        ctx.requestChoice(
+          "dragonscaler-flight-path",
+          "Dragonscaler Flight Path: choose a Draconic attack",
+          indexes.map((index) => `chain:${index}`),
+          ctx.seat,
+          indexes.map((index) => ctx.state.chain[index]!.attackingCard.instanceId),
+        );
+      },
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "dragonscaler-flight-path") return;
+      const match = /^chain:(\d+)$/.exec(option);
+      const index = match ? Number(match[1]) : -1;
+      const link = ctx.state.chain[index];
+      if (
+        !link || link.flags.attackGone === true ||
+        !ctx.chainLinkAttackHasType(index, "draconic")
+      ) return;
+      ctx.grantChainLinkGoAgain(index);
+      if (link.attackCardType === "weapon" || link.attackCardType === "ally") {
+        ctx.grantAdditionalActivation(link.attackingCard.instanceId);
+      }
+    },
+  },
   "oath of loyalty|1": { canPlay: (ctx) => Number(ctx.getPlayerFlag(ctx.seat, "actionsPlayedOrActivatedThisTurn")) === 0, triggers: [{ event: "card-played", sourceZone: "self", label: "You may only play Draconic cards this turn", effect: (ctx) => ctx.addModifier({ scope: "until-end-of-turn", restrictCardPlaysToType: "draconic" }) }] },
   "loyalty beyond the grave|1": { triggers: [{ event: "start-of-turn", sourceZone: "graveyard", optional: true, label: "Banish two Loyalty Beyond the Grave to draw", condition: (ctx) => ctx.player(ctx.seat).graveyard.filter((card) => ctx.cardData(card.cardId).name === "Loyalty Beyond the Grave").length >= 2, effect(ctx) { for (const card of ctx.player(ctx.seat).graveyard.filter((card) => ctx.cardData(card.cardId).name === "Loyalty Beyond the Grave").slice(0, 2)) ctx.banish(card.instanceId); ctx.drawCards(ctx.seat, 1); } }] },
   "blood splattered vest|0": {
