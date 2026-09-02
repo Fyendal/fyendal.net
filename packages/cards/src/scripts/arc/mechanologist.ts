@@ -1,6 +1,8 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   buffNextAttack,
+  commonOptionMessages,
+  decisionPrompt,
   optN,
   optOnChoose,
 } from "../shared-helpers.js";
@@ -27,7 +29,7 @@ function pourTheMold(maxCost: number): CardScript {
       if (candidates.length === 0) return;
       ctx.requestCardChoice(
         "pour-item",
-        `${ctx.data.name}: put a Mechanologist item with cost ${maxCost} or less into the arena`,
+        decisionPrompt(`${ctx.data.name}: put a Mechanologist item with cost ${maxCost} or less into the arena`, "card.arc.mechanologist.item.put", { values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: maxCost } }),
         candidates.map((card) => card.instanceId),
       );
     },
@@ -177,7 +179,7 @@ export const arcMechanologist: Record<string, CardScript> = {
           }
           ctx.requestChoice(
             "dissipation-maintenance",
-            "Dissipation Shield: remove a steam counter or destroy it?",
+            decisionPrompt("Dissipation Shield: remove a steam counter or destroy it?", "card.arc.dissipation.maintain", { optionMessages: commonOptionMessages("remove", "destroy") }),
             ["remove", "destroy"],
           );
         },

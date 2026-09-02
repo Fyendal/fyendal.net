@@ -1,6 +1,8 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   buffNextAttack,
+  commonOptionMessages,
+  decisionPrompt,
   opponentSeat,
   optN,
   optOnChoose,
@@ -16,7 +18,7 @@ function reload(ctx: ScriptCtx): void {
   if (player.arsenal.length > 0 || player.hand.length === 0) return;
   ctx.requestCardChoice(
     "arc-reload",
-    "Reload: put a card from your hand into your arsenal?",
+    decisionPrompt("Reload: put a card from your hand into your arsenal?", "card.common.reload", { optionMessages: commonOptionMessages("pass") }),
     ["pass", ...player.hand.map((card) => card.instanceId)],
   );
 }
@@ -51,7 +53,7 @@ function orderSilverBottoms(ctx: ScriptCtx, arrowId: number, ids: number[]): voi
   }
   ctx.requestCardChoice(
     `silver-order:${arrowId}:${ids.join(",")}`,
-    "Silver the Tip: choose the next card to put on the bottom",
+    decisionPrompt("Silver the Tip: choose the next card to put on the bottom", "card.arc.silver.bottom.next"),
     ids,
   );
 }
@@ -73,7 +75,7 @@ function silverTheTip(look: number): CardScript {
       }
       ctx.requestCardChoice(
         `silver-select:${looked.map((card) => card.instanceId).join(",")}`,
-        "Silver the Tip: put an arrow face up into your arsenal?",
+        decisionPrompt("Silver the Tip: put an arrow face up into your arsenal?", "card.arc.silver.arrow.arsenal", { optionMessages: commonOptionMessages("pass") }),
         ["pass", ...arrowIds],
       );
     },

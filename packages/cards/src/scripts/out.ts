@@ -1,6 +1,6 @@
 import type { CardScript, DeepReadonly, CardInstance, ScriptCtx } from "@fyendal/engine";
 import { functionalKeyOf } from "../functional.js";
-import { buffNextAttack, mergeSetScripts, opponentSeat, optN, optOnChoose, previousAttackHasName, previousAttackNameContains } from "./shared-helpers.js";
+import { buffNextAttack, commonOptionMessages, decisionMessage, decisionPrompt, mergeSetScripts, opponentSeat, optN, optOnChoose, previousAttackHasName, previousAttackNameContains, yesNoPrompt } from "./shared-helpers.js";
 import { outHighRarity, uzuriAbility } from "./out/high-rarity.js";
 
 // OUT — Outsiders common/rare cards and young heroes.
@@ -96,7 +96,7 @@ function scout(power: number): CardScript {
   return {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: power, appliesTo: "attack-action", appliesToFromArsenal: true });
-      ctx.requestCardChoice("scout", "Look at the top card of target hero's deck", ctx.state.players.map((p) => p.hero.instanceId));
+      ctx.requestCardChoice("scout", decisionPrompt("Look at the top card of target hero's deck", "card.out.scout.hero.choose"), ctx.state.players.map((p) => p.hero.instanceId));
     },
     onChoose(ctx, hook, option) {
       if (hook !== "scout") return;
@@ -124,7 +124,7 @@ function lookingForScrap(): CardScript {
   return {
     additionalCost(ctx) {
       const choices = ctx.player(ctx.seat).graveyard.filter((card) => ctx.basePower(card) === 1);
-      if (choices.length) ctx.requestCardChoice("scrap", "Banish a 1 power card for +1 and go again?", ["pass", ...choices.map((card) => card.instanceId)]);
+      if (choices.length) ctx.requestCardChoice("scrap", decisionPrompt("Banish a 1 power card for +1 and go again?", "card.out.scrap.card.banish", { optionMessages: commonOptionMessages("pass") }), ["pass", ...choices.map((card) => card.instanceId)]);
     },
     onChoose(ctx, hook, option) {
       if (hook !== "scrap" || option === "pass" || !ctx.banish(Number(option))) return;
@@ -140,7 +140,7 @@ function cutDown(): CardScript {
     },
     onHit(ctx) {
       const seat = opponentSeat(ctx), hand = ctx.player(seat).hand;
-      ctx.requestCardChoice("cut-down", "Discard a card", hand.map((card) => card.instanceId), seat);
+      ctx.requestCardChoice("cut-down", decisionPrompt("Discard a card", "card.common.card.discard.choose"), hand.map((card) => card.instanceId), seat);
     },
     onChoose(ctx, hook, option) { if (hook === "cut-down") ctx.discardCard(opponentSeat(ctx), Number(option)); },
   };
@@ -153,7 +153,7 @@ function wreckHavoc(): CardScript {
     },
     onHit(ctx) {
       const arsenal = ctx.player(opponentSeat(ctx)).arsenal;
-      if (arsenal.length) ctx.requestChoice("wreck", "Turn the arsenal card face up?", ["yes", "no"]);
+      if (arsenal.length) ctx.requestChoice("wreck", yesNoPrompt("Turn the arsenal card face up?", "card.out.arsenal.faceup"), ["yes", "no"]);
     },
     onChoose(ctx, hook, option) {
       if (hook !== "wreck" || option !== "yes") return;
@@ -170,7 +170,7 @@ function deathTouch(): CardScript {
   return {
     canPlay(ctx) { return !ctx.player(ctx.seat).hand.some((card) => card.instanceId === ctx.self.instanceId); },
     canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined; },
-    onHit(ctx) { ctx.requestChoice("affliction", "Choose an affliction token", [BLOODROT, FRAILTY, INERTIA]); },
+    onHit(ctx) { ctx.requestChoice("affliction", decisionPrompt("Choose an affliction token", "card.out.affliction.choose", { optionMessages: Object.fromEntries([BLOODROT, FRAILTY, INERTIA].map((cardId) => [cardId, decisionMessage("card.common.target.card", { card: { kind: "card", cardId } })])) }), [BLOODROT, FRAILTY, INERTIA]); },
     onChoose(ctx, hook, option) { if (hook === "affliction") ctx.createToken(option, opponentSeat(ctx)); },
   };
 }
@@ -210,7 +210,7 @@ function oneTwoPunch(): CardScript { return comboHit("head jab", (ctx) => ctx.de
 function recoil(): CardScript {
   return comboHit("head jab", (ctx) => {
     const seat = opponentSeat(ctx), hand = ctx.player(seat).hand;
-    if (hand.length) ctx.requestCardChoice("recoil", "Put a card from your hand on top of your deck", hand.map((card) => card.instanceId), seat);
+    if (hand.length) ctx.requestCardChoice("recoil", decisionPrompt("Put a card from your hand on top of your deck", "card.out.hand.top"), hand.map((card) => card.instanceId), seat);
   });
 }
 function recoilChoose(ctx: ScriptCtx, hook: string, option: string): void { if (hook === "recoil") ctx.putOnDeckTop(Number(option)); }
@@ -224,10 +224,10 @@ function spinningWheel(): CardScript {
 function beLikeWater(): CardScript {
   return {
     onHit(ctx) {
-      if (ctx.requestPayment("water-pay", "Pay 1 to choose a combo name?", 1)) return;
+      if (ctx.requestPayment("water-pay", decisionPrompt("Pay 1 to choose a combo name?", "card.out.water.pay", { optionMessages: commonOptionMessages("no") }), 1)) return;
     },
     onChoose(ctx, hook, option) {
-      if (hook === "water-pay" && option === "paid") ctx.requestChoice("water-name", "Choose a name", ["Head Jab", "Surging Strike", "Twin Twisters"]);
+      if (hook === "water-pay" && option === "paid") ctx.requestChoice("water-name", decisionPrompt("Choose a name", "card.out.combo.name.choose"), ["Head Jab", "Surging Strike", "Twin Twisters"]);
       if (hook === "water-name") ctx.grantCardName(ctx.self.instanceId, option);
     },
   };
@@ -239,7 +239,7 @@ function bonds(pitch: number): CardScript {
       if (!previousAttackNameContains(ctx, "gustwave")) return;
       ctx.grantGoAgain();
       const combo = ctx.player(ctx.seat).graveyard.filter((card) => has(ctx, card, "combo"));
-      if (combo.length) ctx.requestCardChoice(`bonds-grave:${pitch}`, "Banish a combo card?", ["pass", ...combo.map((card) => card.instanceId)]);
+      if (combo.length) ctx.requestCardChoice(`bonds-grave:${pitch}`, decisionPrompt("Banish a combo card?", "card.out.combo.banish", { optionMessages: commonOptionMessages("pass") }), ["pass", ...combo.map((card) => card.instanceId)]);
     },
     onChoose(ctx, hook, option) {
       if (!hook.startsWith("bonds-grave") || option === "pass") return;
@@ -247,7 +247,7 @@ function bonds(pitch: number): CardScript {
       if (!chosen || !ctx.banish(chosen.instanceId)) return;
       const key = functionalKeyOf(data(ctx, chosen));
       const matches = ctx.player(ctx.seat).deck.filter((card) => functionalKeyOf(data(ctx, card)).split("|")[0] === key.split("|")[0]);
-      if (matches.length) ctx.requestCardChoice("bonds-search", "Choose a same-name card", matches.map((card) => card.instanceId));
+      if (matches.length) ctx.requestCardChoice("bonds-search", decisionPrompt("Choose a same-name card", "card.out.same.name.choose"), matches.map((card) => card.instanceId));
       else ctx.shuffleDeck();
     },
   };
@@ -276,11 +276,11 @@ function bleedOut(): CardScript {
 }
 function hurl(): CardScript {
   return {
-    additionalCost(ctx) { ctx.requestPayment("hurl-pay", "Pay 1 to hurl a dagger?", 1); },
+    additionalCost(ctx) { ctx.requestPayment("hurl-pay", decisionPrompt("Pay 1 to hurl a dagger?", "card.out.hurl.pay", { optionMessages: commonOptionMessages("no") }), 1); },
     onAttackDeclared(ctx) {
       if (ctx.getCounter("hurlPaid") !== 1) return;
       const daggers = [...ctx.player(ctx.seat).weapons, ...ctx.player(ctx.seat).board].filter((card) => isDagger(ctx, card));
-      if (daggers.length) ctx.requestCardChoice("hurl-dagger", "Choose a dagger to deal 1 damage", daggers.map((card) => card.instanceId));
+      if (daggers.length) ctx.requestCardChoice("hurl-dagger", decisionPrompt("Choose a dagger to deal 1 damage", "card.out.hurl.dagger.choose"), daggers.map((card) => card.instanceId));
     },
     onChoose(ctx, hook, option) {
       if (hook === "hurl-pay" && option === "paid") {
@@ -306,7 +306,7 @@ function riptide(): CardScript {
         ctx.player(ctx.seat).arsenal.length === 0 &&
         ctx.player(ctx.seat).hand.length > 0,
       effect(ctx) {
-        ctx.requestCardChoice("riptide-arsenal", "Put a card from hand face down into arsenal?", ["pass", ...ctx.player(ctx.seat).hand.map((card) => card.instanceId)]);
+        ctx.requestCardChoice("riptide-arsenal", decisionPrompt("Put a card from hand face down into arsenal?", "card.out.hand.arsenal", { optionMessages: commonOptionMessages("pass") }), ["pass", ...ctx.player(ctx.seat).hand.map((card) => card.instanceId)]);
       },
     }, {
       event: "trap-triggered",
@@ -320,7 +320,7 @@ function riptide(): CardScript {
 
 const maskManyFaces: CardScript = {
   activated: { cost: 1, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true, label: "Name a card for the next attack", onActivate(ctx) {
-    ctx.requestNameChoice("mask-name", "Name a card");
+    ctx.requestNameChoice("mask-name", decisionPrompt("Name a card", "card.common.card.name"));
   } },
   onChoose(ctx, hook, option) {
     if (hook === "mask-name") {
@@ -336,7 +336,7 @@ const trapGoAgain = () => (ctx: ScriptCtx) => ctx.link?.goAgain === true;
 function offerDaggerCycle(ctx: ScriptCtx, source: DeepReadonly<CardInstance>): void {
   if (ctx.getPlayerFlag(ctx.seat, "maskDaggerCycle") !== true || !isDagger(ctx, source)) return;
   const hand = ctx.player(ctx.seat).hand;
-  if (hand.length) ctx.requestCardChoice("mask-cycle", "Put a hand card on bottom to draw?", ["pass", ...hand.map((card) => card.instanceId)]);
+  if (hand.length) ctx.requestCardChoice("mask-cycle", decisionPrompt("Put a hand card on bottom to draw?", "card.out.hand.bottom.draw", { optionMessages: commonOptionMessages("pass") }), ["pass", ...hand.map((card) => card.instanceId)]);
 }
 
 export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRarity, {
@@ -365,8 +365,8 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
   "one-two punch|1": oneTwoPunch(), "one-two punch|2": oneTwoPunch(), "one-two punch|3": oneTwoPunch(),
 
   "riptide|0": riptide(),
-  "wayfinder's crest|0": { onDefend(ctx) { ctx.requestCardChoice("wayfinder", "Look at the top card of target hero's deck", ctx.state.players.map((p) => p.hero.instanceId)); }, onChoose(ctx, h, o) { if (h === "wayfinder") { const p = ctx.state.players.find((x) => x.hero.instanceId === Number(o)); if (p?.deck[0]) ctx.lookAt(p.deck[0].instanceId); } } },
-  "boulder trap|2": { canTriggerOnDefend: trapPower(), onDefend(ctx) { ctx.notifyTrapTriggered(); const eq = Object.values(ctx.player(ctx.link!.attacker).equipment).filter((card): card is NonNullable<typeof card> => !!card); if (eq.length) ctx.requestCardChoice("boulder", "Put a -1 defense counter on equipment", eq.map((card) => card.instanceId)); }, onChoose(ctx, h, o) { if (h === "boulder") ctx.addCardDefenseCounters(Number(o), 1); } },
+  "wayfinder's crest|0": { onDefend(ctx) { ctx.requestCardChoice("wayfinder", decisionPrompt("Look at the top card of target hero's deck", "card.out.scout.hero.choose"), ctx.state.players.map((p) => p.hero.instanceId)); }, onChoose(ctx, h, o) { if (h === "wayfinder") { const p = ctx.state.players.find((x) => x.hero.instanceId === Number(o)); if (p?.deck[0]) ctx.lookAt(p.deck[0].instanceId); } } },
+  "boulder trap|2": { canTriggerOnDefend: trapPower(), onDefend(ctx) { ctx.notifyTrapTriggered(); const eq = Object.values(ctx.player(ctx.link!.attacker).equipment).filter((card): card is NonNullable<typeof card> => !!card); if (eq.length) ctx.requestCardChoice("boulder", decisionPrompt("Put a -1 defense counter on equipment", "card.out.equipment.counter"), eq.map((card) => card.instanceId)); }, onChoose(ctx, h, o) { if (h === "boulder") ctx.addCardDefenseCounters(Number(o), 1); } },
   "pendulum trap|2": trap(trapReaction(), (ctx) => { const p = ctx.player(ctx.link!.attacker); for (const card of p.deck.slice(0, 2)) ctx.moveToGraveyard(card.instanceId, "deck"); }),
   "tarpit trap|2": trap(trapGoAgain(), (ctx) => ctx.addModifier({ scope: "until-end-of-turn", seat: ctx.link!.attacker, appliesTo: "attack-action", suppressHitEffects: true })),
   "fletch a red tail|1": fletch(4, 1), "fletch a yellow tail|2": fletch(3, 2), "fletch a blue tail|3": fletch(2, 3),
@@ -375,8 +375,8 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
   "murkmire grapnel|2": aimAttack(undefined, true), "murkmire grapnel|3": aimAttack(undefined, true),
   "sedation shot|1": aimAttack(INERTIA), "sedation shot|2": aimAttack(INERTIA), "sedation shot|3": aimAttack(INERTIA),
   "skybound shot|1": aimOnly(), "skybound shot|2": aimOnly(), "skybound shot|3": aimOnly(),
-  "spire sniping|1": { onEnterArsenal(ctx) { const top = ctx.player(ctx.seat).deck.slice(0, 2); for (const card of top) ctx.lookAt(card.instanceId); if (top.length === 2) ctx.requestChoice("spire", "Swap the top two cards?", ["keep", "swap"]); }, onChoose(ctx, h, o) { if (h === "spire" && o === "swap") { const second = ctx.player(ctx.seat).deck[1]; if (second) ctx.putOnDeckTop(second.instanceId); } } },
-  "spire sniping|3": { onEnterArsenal(ctx) { const top = ctx.player(ctx.seat).deck.slice(0, 2); for (const card of top) ctx.lookAt(card.instanceId); if (top.length === 2) ctx.requestChoice("spire", "Swap the top two cards?", ["keep", "swap"]); }, onChoose(ctx, h, o) { if (h === "spire" && o === "swap") { const second = ctx.player(ctx.seat).deck[1]; if (second) ctx.putOnDeckTop(second.instanceId); } } },
+  "spire sniping|1": { onEnterArsenal(ctx) { const top = ctx.player(ctx.seat).deck.slice(0, 2); for (const card of top) ctx.lookAt(card.instanceId); if (top.length === 2) ctx.requestChoice("spire", decisionPrompt("Swap the top two cards?", "card.out.spire.swap", { optionMessages: { keep: decisionMessage("common.option.keep"), swap: decisionMessage("card.common.option.swap") } }), ["keep", "swap"]); }, onChoose(ctx, h, o) { if (h === "spire" && o === "swap") { const second = ctx.player(ctx.seat).deck[1]; if (second) ctx.putOnDeckTop(second.instanceId); } } },
+  "spire sniping|3": { onEnterArsenal(ctx) { const top = ctx.player(ctx.seat).deck.slice(0, 2); for (const card of top) ctx.lookAt(card.instanceId); if (top.length === 2) ctx.requestChoice("spire", decisionPrompt("Swap the top two cards?", "card.out.spire.swap", { optionMessages: { keep: decisionMessage("common.option.keep"), swap: decisionMessage("card.common.option.swap") } }), ["keep", "swap"]); }, onChoose(ctx, h, o) { if (h === "spire" && o === "swap") { const second = ctx.player(ctx.seat).deck[1]; if (second) ctx.putOnDeckTop(second.instanceId); } } },
   "widowmaker|1": widowmaker(), "widowmaker|3": widowmaker(),
   "withering shot|1": aimAttack(FRAILTY), "withering shot|2": aimAttack(FRAILTY), "withering shot|3": aimAttack(FRAILTY),
 
@@ -387,8 +387,8 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
   "plunge|1": { onHit(ctx) { buffNextAttack(ctx, { attack: 1, appliesToSubtype: "dagger" }); } }, "plunge|2": { onHit(ctx) { buffNextAttack(ctx, { attack: 1, appliesToSubtype: "dagger" }); } }, "plunge|3": { onHit(ctx) { buffNextAttack(ctx, { attack: 1, appliesToSubtype: "dagger" }); } },
   "short and sharp|1": shortSharp(3), "short and sharp|2": shortSharp(2), "short and sharp|3": shortSharp(1),
 
-  "mask of malicious manifestations|0": { activated: { cost: 1, isAttack: false, goAgain: true, destroySelfCost: true, label: "Bottom a card; find an attack", canActivate: (ctx) => ctx.player(ctx.seat).hand.length + ctx.player(ctx.seat).arsenal.length > 0, onActivate(ctx) { const p = ctx.player(ctx.seat); ctx.requestCardChoice("malicious-bottom", "Put a card from hand or arsenal on the bottom", [...p.hand, ...p.arsenal].map((card) => card.instanceId)); } }, onChoose(ctx, h, o) { if (h !== "malicious-bottom" || !ctx.putOnDeckBottom(Number(o))) return; const found = ctx.player(ctx.seat).deck.find((card) => isAttack(ctx, card)); if (found) ctx.moveToHand(found.instanceId); ctx.shuffleDeck(); } },
-  "toxic tips|0": { activated: { cost: 1, isAttack: false, goAgain: true, destroySelfCost: true, label: "Next attack creates an affliction", onActivate(ctx) { ctx.addModifier({ scope: "next-attack", appliesTo: "attack-action" }); ctx.addModifier({ scope: "until-end-of-turn" }); } }, canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.state.modifiers.some((m) => m.sourceInstanceId === ctx.self.instanceId && m.scope === "chain-link"); }, onHit(ctx) { const linked = ctx.state.modifiers.find((m) => m.sourceInstanceId === ctx.self.instanceId && m.scope === "chain-link")!; ctx.consumeModifier(linked.id); ctx.requestChoice("affliction", "Choose an affliction token", [BLOODROT, FRAILTY, INERTIA]); }, onChoose(ctx, h, o) { if (h === "affliction") ctx.createToken(o, opponentSeat(ctx)); } },
+  "mask of malicious manifestations|0": { activated: { cost: 1, isAttack: false, goAgain: true, destroySelfCost: true, label: "Bottom a card; find an attack", canActivate: (ctx) => ctx.player(ctx.seat).hand.length + ctx.player(ctx.seat).arsenal.length > 0, onActivate(ctx) { const p = ctx.player(ctx.seat); ctx.requestCardChoice("malicious-bottom", decisionPrompt("Put a card from hand or arsenal on the bottom", "card.out.hand.arsenal.bottom"), [...p.hand, ...p.arsenal].map((card) => card.instanceId)); } }, onChoose(ctx, h, o) { if (h !== "malicious-bottom" || !ctx.putOnDeckBottom(Number(o))) return; const found = ctx.player(ctx.seat).deck.find((card) => isAttack(ctx, card)); if (found) ctx.moveToHand(found.instanceId); ctx.shuffleDeck(); } },
+  "toxic tips|0": { activated: { cost: 1, isAttack: false, goAgain: true, destroySelfCost: true, label: "Next attack creates an affliction", onActivate(ctx) { ctx.addModifier({ scope: "next-attack", appliesTo: "attack-action" }); ctx.addModifier({ scope: "until-end-of-turn" }); } }, canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.state.modifiers.some((m) => m.sourceInstanceId === ctx.self.instanceId && m.scope === "chain-link"); }, onHit(ctx) { const linked = ctx.state.modifiers.find((m) => m.sourceInstanceId === ctx.self.instanceId && m.scope === "chain-link")!; ctx.consumeModifier(linked.id); ctx.requestChoice("affliction", decisionPrompt("Choose an affliction token", "card.out.affliction.choose", { optionMessages: Object.fromEntries([BLOODROT, FRAILTY, INERTIA].map((cardId) => [cardId, decisionMessage("card.common.target.card", { card: { kind: "card", cardId } })])) }), [BLOODROT, FRAILTY, INERTIA]); }, onChoose(ctx, h, o) { if (h === "affliction") ctx.createToken(o, opponentSeat(ctx)); } },
   "death touch|1": deathTouch(), "death touch|2": deathTouch(), "death touch|3": deathTouch(),
   "toxicity|1": toxicity(5), "toxicity|2": toxicity(4), "toxicity|3": toxicity(3),
   "virulent touch|1": virulentTouch(), "virulent touch|2": virulentTouch(), "virulent touch|3": virulentTouch(),

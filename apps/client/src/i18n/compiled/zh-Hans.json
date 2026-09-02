@@ -279,10 +279,162 @@
       "value": "赤魂战纪在线对战"
     }
   ],
+  "card.ajv.channel.ice.choose": [
+    {
+      "type": 0,
+      "value": "从资源区选择一张 Ice 牌用于 Channel Ice，或摧毁此牌"
+    }
+  ],
+  "card.ajv.channel.ice.next": [
+    {
+      "type": 0,
+      "value": "再选择一张 Ice 牌用于 Channel Ice，或摧毁此牌"
+    }
+  ],
+  "card.ajv.equipment.counter": [
+    {
+      "type": 0,
+      "value": "在一件装备上放置一个 -1 防御指示物？"
+    }
+  ],
+  "card.ajv.equipment.counter.choose": [
+    {
+      "type": 0,
+      "value": "在目标装备上放置一个 -1 防御指示物"
+    }
+  ],
+  "card.ajv.equipment.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一件具有 -1 防御指示物的装备"
+    }
+  ],
+  "card.ajv.equipment.destroy.optional": [
+    {
+      "type": 0,
+      "value": "摧毁一件具有 -1 防御指示物的装备？"
+    }
+  ],
+  "card.ajv.exposed.pay": [
+    {
+      "type": 0,
+      "value": "支付 2 点资源，否则一件防御为 0 的装备可能被摧毁"
+    }
+  ],
+  "card.ajv.frostbite.zone.choose": [
+    {
+      "type": 0,
+      "value": "选择一个未装备的装备区域来放置 Frostbite"
+    }
+  ],
+  "card.ajv.fusion.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：展示 Earth 和／或 Ice 牌以进行 fusion？"
+    }
+  ],
+  "card.ajv.fusion.option.both": [
+    {
+      "type": 0,
+      "value": "展示 "
+    },
+    {
+      "type": 1,
+      "value": "first"
+    },
+    {
+      "type": 0,
+      "value": " 和 "
+    },
+    {
+      "type": 1,
+      "value": "second"
+    },
+    {
+      "type": 0,
+      "value": " 作为 Earth 与 Ice"
+    }
+  ],
+  "card.ajv.fusion.option.both.single": [
+    {
+      "type": 0,
+      "value": "展示 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 同时作为 Earth 与 Ice"
+    }
+  ],
+  "card.ajv.fusion.option.earth": [
+    {
+      "type": 0,
+      "value": "展示 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 作为 Earth"
+    }
+  ],
+  "card.ajv.fusion.option.ice": [
+    {
+      "type": 0,
+      "value": "展示 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 作为 Ice"
+    }
+  ],
+  "card.ajv.ice.hero.choose": [
+    {
+      "type": 0,
+      "value": "选择承受 Ice fusion 效果的英雄"
+    }
+  ],
+  "card.ajv.mangle.search": [
+    {
+      "type": 0,
+      "value": "搜寻一张 Mangle，或拒绝"
+    }
+  ],
+  "card.ajv.zero.equipment.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一件防御为 0 的装备"
+    }
+  ],
   "card.ako.hide.tanner.destroy": [
     {
       "type": 0,
       "value": "摧毁 Hide Tanner 以生成 2 个 Might 衍生物？"
+    }
+  ],
+  "card.ama.crown.card.banish": [
+    {
+      "type": 0,
+      "value": "放逐一张牌，使防御 +1？"
+    }
+  ],
+  "card.ama.dig.zombie.choose": [
+    {
+      "type": 0,
+      "value": "将一个 zombie 放入你的墓地？"
     }
   ],
   "card.amo.mortimer.disease.choose": [
@@ -295,6 +447,246 @@
     {
       "type": 0,
       "value": "Halo of Lumina Light：将放逐区中的一张黄色光环放入竞技场？"
+    }
+  ],
+  "card.arc.arcane.hero.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一位英雄，造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "card.arc.art.attack.banish": [
+    {
+      "type": 0,
+      "value": "Art of War：放逐一张攻击行动牌"
+    }
+  ],
+  "card.arc.art.mode.choose": [
+    {
+      "type": 0,
+      "value": "Art of War：选择一项模式"
+    }
+  ],
+  "card.arc.art.mode.next": [
+    {
+      "type": 0,
+      "value": "Art of War：再选择一项模式"
+    }
+  ],
+  "card.arc.art.option.banish": [
+    {
+      "type": 0,
+      "value": "放逐一张攻击行动牌；抽 2 张牌"
+    }
+  ],
+  "card.arc.art.option.defend": [
+    {
+      "type": 0,
+      "value": "攻击行动牌可以从 arsenal 进行防守"
+    }
+  ],
+  "card.arc.art.option.goagain": [
+    {
+      "type": 0,
+      "value": "你的下一张攻击行动牌获得 go again"
+    }
+  ],
+  "card.arc.art.option.power": [
+    {
+      "type": 0,
+      "value": "攻击行动牌 +1 力量和防御"
+    }
+  ],
+  "card.arc.become.discard": [
+    {
+      "type": 0,
+      "value": "Become the Arknight：弃置一张行动牌？"
+    }
+  ],
+  "card.arc.become.runeblade.choose": [
+    {
+      "type": 0,
+      "value": "Become the Arknight：选择一张 Runeblade 行动牌"
+    }
+  ],
+  "card.arc.chains.card.name": [
+    {
+      "type": 0,
+      "value": "Chains of Eminence：指定一个牌名"
+    }
+  ],
+  "card.arc.dissipation.maintain": [
+    {
+      "type": 0,
+      "value": "Dissipation Shield：移除一个 steam 指示物，或摧毁此牌？"
+    }
+  ],
+  "card.arc.fork.hero.first": [
+    {
+      "type": 0,
+      "value": "Forked Lightning：选择第一位英雄，造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "card.arc.fork.hero.second": [
+    {
+      "type": 0,
+      "value": "选择第二位英雄，造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "card.arc.index.bottom.next": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择下一张要置于你的牌库底部的牌"
+    }
+  ],
+  "card.arc.index.top": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一张牌置于你的牌库顶部"
+    }
+  ],
+  "card.arc.lesson.wizard.choose": [
+    {
+      "type": 0,
+      "value": "Lesson in Lava：选择一张 Wizard 牌"
+    }
+  ],
+  "card.arc.mechanologist.item.cost": [
+    {
+      "type": 0,
+      "value": "选择一张费用为 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 的 Mechanologist 物品"
+    }
+  ],
+  "card.arc.mechanologist.item.put": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将一张费用不超过 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 的 Mechanologist 物品放入竞技场"
+    }
+  ],
+  "card.arc.nonattack.top": [
+    {
+      "type": 0,
+      "value": "将墓地中的一张非攻击行动牌置于你的牌库顶部？"
+    }
+  ],
+  "card.arc.silver.arrow.arsenal": [
+    {
+      "type": 0,
+      "value": "Silver the Tip：将一张 arrow 面朝上放入你的 arsenal？"
+    }
+  ],
+  "card.arc.silver.bottom.next": [
+    {
+      "type": 0,
+      "value": "Silver the Tip：选择下一张要置于牌库底部的牌"
+    }
+  ],
+  "card.arc.sonic.banish": [
+    {
+      "type": 0,
+      "value": "Sonic Boom：放逐牌库顶牌？"
+    }
+  ],
+  "card.arc.sunkiss.search": [
+    {
+      "type": 0,
+      "value": "从牌库搜寻一张 Sun Kiss？"
+    }
+  ],
+  "card.arc.tome.mode.first": [
+    {
+      "type": 0,
+      "value": "Tome of Aetherwind：选择第一项模式"
+    }
+  ],
+  "card.arc.tome.mode.second": [
+    {
+      "type": 0,
+      "value": "选择第二项模式"
+    }
+  ],
+  "card.arc.tome.option.arcane": [
+    {
+      "type": 0,
+      "value": "+1 奥术伤害"
+    }
+  ],
+  "card.arc.tome.option.draw": [
+    {
+      "type": 0,
+      "value": "抽一张牌"
+    }
+  ],
+  "card.arc.vest.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Vest of the First Fist 以获得 2 点资源？"
+    }
+  ],
+  "card.arc.wizard.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：放逐一张 Wizard 非攻击行动牌，使其本回合可以作为 instant 打出？"
     }
   ],
   "card.asb.charge.choose": [
@@ -353,6 +745,12 @@
       "value": "Miraging Metamorph：选择一个要复制的光环"
     }
   ],
+  "card.common.arrow.arsenal": [
+    {
+      "type": 0,
+      "value": "将一张 arrow 从手牌面朝上放入你的 arsenal？"
+    }
+  ],
   "card.common.card.discard.choose": [
     {
       "type": 0,
@@ -371,10 +769,76 @@
       "value": "将查看的牌置于牌库底部？"
     }
   ],
+  "card.common.option.arms": [
+    {
+      "type": 0,
+      "value": "手臂"
+    }
+  ],
+  "card.common.option.blue": [
+    {
+      "type": 0,
+      "value": "蓝色"
+    }
+  ],
+  "card.common.option.chest": [
+    {
+      "type": 0,
+      "value": "胸部"
+    }
+  ],
+  "card.common.option.head": [
+    {
+      "type": 0,
+      "value": "头部"
+    }
+  ],
+  "card.common.option.keeporder": [
+    {
+      "type": 0,
+      "value": "保持顺序"
+    }
+  ],
+  "card.common.option.legs": [
+    {
+      "type": 0,
+      "value": "腿部"
+    }
+  ],
+  "card.common.option.red": [
+    {
+      "type": 0,
+      "value": "红色"
+    }
+  ],
+  "card.common.option.swap": [
+    {
+      "type": 0,
+      "value": "交换"
+    }
+  ],
+  "card.common.option.yellow": [
+    {
+      "type": 0,
+      "value": "黄色"
+    }
+  ],
+  "card.common.reload": [
+    {
+      "type": 0,
+      "value": "Reload：将一张手牌放入你的 arsenal？"
+    }
+  ],
   "card.common.target.card": [
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "card.common.zombie.graveyard.choose": [
+    {
+      "type": 0,
+      "value": "选择墓地中的一个 zombie"
     }
   ],
   "card.cru.arcane.hero.choose": [
@@ -867,6 +1331,508 @@
       "value": "选择一件 Guardian 副手装备"
     }
   ],
+  "card.evr.arcane.hero.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一位英雄，造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "card.evr.attack.power.choose": [
+    {
+      "type": 0,
+      "value": "选择一张力量不超过 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 的攻击牌"
+    }
+  ],
+  "card.evr.aura.cost.choose": [
+    {
+      "type": 0,
+      "value": "选择一个费用不超过 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 的光环"
+    }
+  ],
+  "card.evr.aura.destroy": [
+    {
+      "type": 0,
+      "value": "选择一个要摧毁的光环"
+    }
+  ],
+  "card.evr.blood.modes.assign": [
+    {
+      "type": 0,
+      "value": "分配 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 项 Blood on Her Hands 模式"
+    }
+  ],
+  "card.evr.blood.option.confirm": [
+    {
+      "type": 0,
+      "value": "确认分配（"
+    },
+    {
+      "type": 1,
+      "value": "selected"
+    },
+    {
+      "type": 0,
+      "value": "/"
+    },
+    {
+      "type": 1,
+      "value": "required"
+    },
+    {
+      "type": 0,
+      "value": "）"
+    }
+  ],
+  "card.evr.blood.option.decrement.extraattack": [
+    {
+      "type": 0,
+      "value": "从 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 移除一次额外攻击分配（当前 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": "）"
+    }
+  ],
+  "card.evr.blood.option.decrement.goagain": [
+    {
+      "type": 0,
+      "value": "从 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 移除一项 go again 分配（当前 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": "）"
+    }
+  ],
+  "card.evr.blood.option.decrement.power": [
+    {
+      "type": 0,
+      "value": "从 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 移除一项 +1 力量分配（当前 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": "）"
+    }
+  ],
+  "card.evr.blood.option.increment.extraattack": [
+    {
+      "type": 0,
+      "value": "使 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 获得额外一次攻击（当前 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": "）"
+    }
+  ],
+  "card.evr.blood.option.increment.goagain": [
+    {
+      "type": 0,
+      "value": "使 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 获得 go again（当前 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": "）"
+    }
+  ],
+  "card.evr.blood.option.increment.power": [
+    {
+      "type": 0,
+      "value": "使 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " +1 力量（当前 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": "）"
+    }
+  ],
+  "card.evr.bravo.elements.reveal": [
+    {
+      "type": 0,
+      "value": "展示一张 Earth、一张 Ice 和一张 Lightning 牌"
+    }
+  ],
+  "card.evr.bravo.option.reveal": [
+    {
+      "type": 0,
+      "value": "展示 "
+    },
+    {
+      "type": 1,
+      "value": "earth"
+    },
+    {
+      "type": 0,
+      "value": "、"
+    },
+    {
+      "type": 1,
+      "value": "ice"
+    },
+    {
+      "type": 0,
+      "value": " 和 "
+    },
+    {
+      "type": 1,
+      "value": "lightning"
+    }
+  ],
+  "card.evr.card.name": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：指定一个牌名"
+    }
+  ],
+  "card.evr.card.reveal": [
+    {
+      "type": 0,
+      "value": "选择一张要展示的牌"
+    }
+  ],
+  "card.evr.copper.count": [
+    {
+      "type": 0,
+      "value": "你要摧毁多少个 Copper？"
+    }
+  ],
+  "card.evr.cremation.card.name": [
+    {
+      "type": 0,
+      "value": "Talisman of Cremation：指定一个牌名"
+    }
+  ],
+  "card.evr.damage.source.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一个伤害来源"
+    }
+  ],
+  "card.evr.deck.position": [
+    {
+      "type": 0,
+      "value": "留在牌库顶部，还是置于牌库底部？"
+    }
+  ],
+  "card.evr.dejavu.pitch.first": [
+    {
+      "type": 0,
+      "value": "Potion of Déjà Vu：选择下一张要置于牌库顶部的资源牌（最后选择的牌最终位于顶部）"
+    }
+  ],
+  "card.evr.dejavu.pitch.next": [
+    {
+      "type": 0,
+      "value": "选择下一张要置于牌库顶部的资源牌（最后选择的牌最终位于顶部）"
+    }
+  ],
+  "card.evr.discard.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一张要弃置的牌"
+    }
+  ],
+  "card.evr.discard.next": [
+    {
+      "type": 0,
+      "value": "再选择一张要弃置的牌"
+    }
+  ],
+  "card.evr.echoes.hero.choose": [
+    {
+      "type": 0,
+      "value": "Amulet of Echoes：选择一位英雄弃置 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 张牌"
+    }
+  ],
+  "card.evr.genis.hand.bottom": [
+    {
+      "type": 0,
+      "value": "Genis：将一张你的手牌置于牌库底部？"
+    }
+  ],
+  "card.evr.hand.bottom": [
+    {
+      "type": 0,
+      "value": "将一张手牌置于牌库底部"
+    }
+  ],
+  "card.evr.heave.pay": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源，将其面朝上放入 arsenal？"
+    }
+  ],
+  "card.evr.hero.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一位英雄"
+    }
+  ],
+  "card.evr.illusionist.aura.put": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将一个费用为 0 的 Illusionist 光环放入竞技场？"
+    }
+  ],
+  "card.evr.item.destroy": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：摧毁一个对方操控、费用不超过 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 的物品？"
+    }
+  ],
+  "card.evr.knick.search": [
+    {
+      "type": 0,
+      "value": "搜寻一张 Amulet、Potion 或 Talisman"
+    }
+  ],
+  "card.evr.lynx.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Mask of the Pouncing Lynx 以搜寻牌库？"
+    }
+  ],
+  "card.evr.money.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁金钱衍生物？"
+    }
+  ],
+  "card.evr.money.destroy.next": [
+    {
+      "type": 0,
+      "value": "再摧毁一个金钱衍生物？"
+    }
+  ],
+  "card.evr.nonattack.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将墓地中的一张非攻击行动牌置于牌库底部？"
+    }
+  ],
+  "card.evr.pulverize.pay": [
+    {
+      "type": 0,
+      "value": "Pulverize：支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源进行 heave？"
+    }
+  ],
+  "card.evr.reveal.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一张要展示的牌"
+    }
+  ],
+  "card.evr.revealed.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将一张展示的牌置于其拥有者的牌库底部？"
+    }
+  ],
+  "card.evr.seeing.hero.choose": [
+    {
+      "type": 0,
+      "value": "Potion of Seeing：选择一位英雄"
+    }
+  ],
+  "card.evr.twin.mode.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一项模式"
+    }
+  ],
+  "card.evr.twin.option.next": [
+    {
+      "type": 0,
+      "value": "使你的下一次攻击 +1 力量"
+    }
+  ],
+  "card.evr.twin.option.power": [
+    {
+      "type": 0,
+      "value": "本次攻击 +1 力量"
+    }
+  ],
   "card.gem.embrace.ursur.banish": [
     {
       "type": 0,
@@ -877,6 +1843,210 @@
     {
       "type": 0,
       "value": "弃置一张 Zombie 以生成一个 Gate to i'Arathael？"
+    }
+  ],
+  "card.hvy.arsenal.bottom": [
+    {
+      "type": 0,
+      "value": "将你的 arsenal 牌置于牌库底部？"
+    }
+  ],
+  "card.hvy.attack.top": [
+    {
+      "type": 0,
+      "value": "将墓地中的一张攻击行动牌置于牌库顶部？"
+    }
+  ],
+  "card.hvy.beatchest.discard": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：弃置一张力量不低于 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 的牌以 beat chest？"
+    }
+  ],
+  "card.hvy.betsy.pay": [
+    {
+      "type": 0,
+      "value": "Betsy：支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源，使进行 wager 的攻击 +1 力量并获得 overpower？"
+    }
+  ],
+  "card.hvy.betsy.pay.generic": [
+    {
+      "type": 0,
+      "value": "支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源，使攻击 +1 力量并获得 overpower？"
+    }
+  ],
+  "card.hvy.deck.second.choose": [
+    {
+      "type": 0,
+      "value": "选择第二张牌"
+    }
+  ],
+  "card.hvy.deck.top.choose": [
+    {
+      "type": 0,
+      "value": "选择牌库顶牌"
+    }
+  ],
+  "card.hvy.equipment.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一件防御不超过 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 的装备"
+    }
+  ],
+  "card.hvy.gold.count": [
+    {
+      "type": 0,
+      "value": "你要摧毁多少个 Gold？"
+    }
+  ],
+  "card.hvy.hand.arsenal.bottom": [
+    {
+      "type": 0,
+      "value": "选择一张手牌或 arsenal 牌置于牌库底部"
+    }
+  ],
+  "card.hvy.hand.keep": [
+    {
+      "type": 0,
+      "value": "选择一张牌保留"
+    }
+  ],
+  "card.hvy.hand.top": [
+    {
+      "type": 0,
+      "value": "将一张手牌置于你的牌库顶部"
+    }
+  ],
+  "card.hvy.item.control": [
+    {
+      "type": 0,
+      "value": "获得一个物品的操控权"
+    }
+  ],
+  "card.hvy.number.choose": [
+    {
+      "type": 0,
+      "value": "选择一个数字"
+    }
+  ],
+  "card.hvy.runeblade.aura.choose": [
+    {
+      "type": 0,
+      "value": "选择一个费用不超过 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 的 Runeblade 光环"
+    }
+  ],
+  "card.hvy.six.banish": [
+    {
+      "type": 0,
+      "value": "放逐一张力量为 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 的牌？"
+    }
+  ],
+  "card.hvy.six.banish.next": [
+    {
+      "type": 0,
+      "value": "再放逐一张？"
+    }
+  ],
+  "card.hvy.vigor.pay": [
+    {
+      "type": 0,
+      "value": "支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源以生成 Vigor？"
+    }
+  ],
+  "card.hvy.wager.mode.choose": [
+    {
+      "type": 0,
+      "value": "选择一项 wager 模式"
+    }
+  ],
+  "card.hvy.wager.mode.next": [
+    {
+      "type": 0,
+      "value": "再选择一项 wager 模式"
+    }
+  ],
+  "card.hvy.wager.option.agility": [
+    {
+      "type": 0,
+      "value": "以 Agility 进行 wager"
+    }
+  ],
+  "card.hvy.wager.option.gold": [
+    {
+      "type": 0,
+      "value": "以 Gold 进行 wager"
+    }
+  ],
+  "card.hvy.wager.option.power": [
+    {
+      "type": 0,
+      "value": "每项 wager 使力量增加"
+    }
+  ],
+  "card.hvy.wager.option.vigor": [
+    {
+      "type": 0,
+      "value": "以 Vigor 进行 wager"
     }
   ],
   "card.iar.apex.defender.destroy": [
@@ -1171,6 +2341,186 @@
       "value": "分别至多摧毁一个 Blade Dance 和 Flurry？"
     }
   ],
+  "card.out.affliction.choose": [
+    {
+      "type": 0,
+      "value": "选择一种 affliction 衍生物"
+    }
+  ],
+  "card.out.arsenal.attack.choose": [
+    {
+      "type": 0,
+      "value": "选择一张攻击牌放入 arsenal"
+    }
+  ],
+  "card.out.arsenal.card.choose": [
+    {
+      "type": 0,
+      "value": "选择一张牌放入 arsenal"
+    }
+  ],
+  "card.out.arsenal.facedown.choose": [
+    {
+      "type": 0,
+      "value": "选择一张面朝下的 arsenal 牌"
+    }
+  ],
+  "card.out.arsenal.faceup": [
+    {
+      "type": 0,
+      "value": "将 arsenal 中的牌翻至面朝上？"
+    }
+  ],
+  "card.out.card.name.another": [
+    {
+      "type": 0,
+      "value": "指定另一个牌名"
+    }
+  ],
+  "card.out.color.choose": [
+    {
+      "type": 0,
+      "value": "选择一种颜色"
+    }
+  ],
+  "card.out.combo.banish": [
+    {
+      "type": 0,
+      "value": "放逐一张 combo 牌？"
+    }
+  ],
+  "card.out.combo.card.choose": [
+    {
+      "type": 0,
+      "value": "选择一张 combo 牌"
+    }
+  ],
+  "card.out.combo.name.choose": [
+    {
+      "type": 0,
+      "value": "选择一个牌名"
+    }
+  ],
+  "card.out.dagger.equip": [
+    {
+      "type": 0,
+      "value": "选择一把 dagger 装备"
+    }
+  ],
+  "card.out.deck.position": [
+    {
+      "type": 0,
+      "value": "将其置于牌库顶部还是底部？"
+    }
+  ],
+  "card.out.defense.pay": [
+    {
+      "type": 0,
+      "value": "支付 1 点资源，使防御 +1 并获得 blade break？"
+    }
+  ],
+  "card.out.equipment.counter": [
+    {
+      "type": 0,
+      "value": "在装备上放置一个 -1 防御指示物"
+    }
+  ],
+  "card.out.flickknives.dagger.choose": [
+    {
+      "type": 0,
+      "value": "Flick Knives：选择一把 dagger 造成 1 点伤害，随后将其摧毁"
+    }
+  ],
+  "card.out.hand.arsenal": [
+    {
+      "type": 0,
+      "value": "将一张手牌面朝下放入 arsenal？"
+    }
+  ],
+  "card.out.hand.arsenal.bottom": [
+    {
+      "type": 0,
+      "value": "选择一张手牌或 arsenal 牌置于牌库底部"
+    }
+  ],
+  "card.out.hand.bottom.draw": [
+    {
+      "type": 0,
+      "value": "将一张手牌置于牌库底部以抽牌？"
+    }
+  ],
+  "card.out.hand.top": [
+    {
+      "type": 0,
+      "value": "将一张手牌置于你的牌库顶部"
+    }
+  ],
+  "card.out.hurl.dagger.choose": [
+    {
+      "type": 0,
+      "value": "选择一把 dagger 造成 1 点伤害"
+    }
+  ],
+  "card.out.hurl.pay": [
+    {
+      "type": 0,
+      "value": "支付 1 点资源以投掷一把 dagger？"
+    }
+  ],
+  "card.out.revealed.banish": [
+    {
+      "type": 0,
+      "value": "放逐一张展示的指定颜色牌"
+    }
+  ],
+  "card.out.revealed.none": [
+    {
+      "type": 0,
+      "value": "展示的牌中没有指定颜色牌"
+    }
+  ],
+  "card.out.same.name.choose": [
+    {
+      "type": 0,
+      "value": "选择一张同名牌"
+    }
+  ],
+  "card.out.scout.hero.choose": [
+    {
+      "type": 0,
+      "value": "选择一位英雄，查看其牌库顶牌"
+    }
+  ],
+  "card.out.scrap.card.banish": [
+    {
+      "type": 0,
+      "value": "放逐一张力量为 1 的牌，使攻击 +1 并获得 go again？"
+    }
+  ],
+  "card.out.spire.swap": [
+    {
+      "type": 0,
+      "value": "交换牌库顶的两张牌？"
+    }
+  ],
+  "card.out.surgingstrike.choose": [
+    {
+      "type": 0,
+      "value": "选择一张 Surging Strike"
+    }
+  ],
+  "card.out.water.pay": [
+    {
+      "type": 0,
+      "value": "支付 1 点资源以选择一个 combo 牌名？"
+    }
+  ],
+  "card.out.zero.discard": [
+    {
+      "type": 0,
+      "value": "弃置一张费用为 0 的牌？"
+    }
+  ],
   "card.sar.blackwidow.hand.banish": [
     {
       "type": 0,
@@ -1223,6 +2573,48 @@
     {
       "type": 0,
       "value": "Stealth 攻击 +3 力量，且命中时标记对方"
+    }
+  ],
+  "card.saz.bloodrot.pay": [
+    {
+      "type": 0,
+      "value": "Bloodrot Pox：支付 3 点资源，否则承受 2 点伤害？"
+    }
+  ],
+  "card.saz.crowsnest.pay": [
+    {
+      "type": 0,
+      "value": "Crow's Nest：支付 1 点资源，在该 arrow 上放置一个 aim 指示物？"
+    }
+  ],
+  "card.saz.drillshot.equipment.choose": [
+    {
+      "type": 0,
+      "value": "Drill Shot：在对方操控的一件装备上放置一个 -1 防御指示物"
+    }
+  ],
+  "card.saz.entangling.hero.choose": [
+    {
+      "type": 0,
+      "value": "Entangling Shot：横置目标英雄？"
+    }
+  ],
+  "card.saz.memorial.attack.top": [
+    {
+      "type": 0,
+      "value": "Memorial Ground：将墓地中一张费用不超过 1 的攻击行动牌置于牌库顶部"
+    }
+  ],
+  "card.saz.scout.hero.choose": [
+    {
+      "type": 0,
+      "value": "Scout the Periphery：选择一位英雄，查看其牌库顶牌"
+    }
+  ],
+  "card.saz.spire.order": [
+    {
+      "type": 0,
+      "value": "Spire Sniping：以任意顺序放回牌库顶的两张牌"
     }
   ],
   "card.sbz.arcane.target.choose": [
@@ -1883,6 +3275,418 @@
       "value": " 的牌，或弃置一张牌"
     }
   ],
+  "card.sup.attack.banish": [
+    {
+      "type": 0,
+      "value": "放逐一张攻击行动牌？"
+    }
+  ],
+  "card.sup.attack.pay": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源？"
+    }
+  ],
+  "card.sup.attack.top": [
+    {
+      "type": 0,
+      "value": "将一张攻击行动牌置于牌库顶部"
+    }
+  ],
+  "card.sup.aura.bottom": [
+    {
+      "type": 0,
+      "value": "将一个光环置于牌库底部"
+    }
+  ],
+  "card.sup.aura.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一个光环"
+    }
+  ],
+  "card.sup.aura.destroy.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：摧毁一个光环"
+    }
+  ],
+  "card.sup.aura.token.destroy": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：摧毁一个光环衍生物"
+    }
+  ],
+  "card.sup.aura.token.steal": [
+    {
+      "type": 0,
+      "value": "夺取一个光环衍生物的操控权"
+    }
+  ],
+  "card.sup.card.top.choose": [
+    {
+      "type": 0,
+      "value": "选择一张牌置于牌库顶部"
+    }
+  ],
+  "card.sup.color.choose": [
+    {
+      "type": 0,
+      "value": "选择一种颜色"
+    }
+  ],
+  "card.sup.combat.card.reduce": [
+    {
+      "type": 0,
+      "value": "使一张战斗中的牌 -"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量和防御"
+    }
+  ],
+  "card.sup.crush.faceup": [
+    {
+      "type": 0,
+      "value": "将一张具有 crush 的牌翻至面朝上"
+    }
+  ],
+  "card.sup.damage.prevent.discard": [
+    {
+      "type": 0,
+      "value": "弃置一张牌以防止 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害？"
+    }
+  ],
+  "card.sup.defender.defense": [
+    {
+      "type": 0,
+      "value": "使一张正在防守的行动牌 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 防御？"
+    }
+  ],
+  "card.sup.discard.or.damage": [
+    {
+      "type": 0,
+      "value": "弃置一张牌，否则承受 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
+    }
+  ],
+  "card.sup.figment.awaken": [
+    {
+      "type": 0,
+      "value": "唤醒一个 figment"
+    }
+  ],
+  "card.sup.hand.bottom": [
+    {
+      "type": 0,
+      "value": "将一张手牌置于牌库底部"
+    }
+  ],
+  "card.sup.hero.abilities.discard": [
+    {
+      "type": 0,
+      "value": "弃置一张牌以保留你的英雄能力？"
+    }
+  ],
+  "card.sup.intimidate.pay": [
+    {
+      "type": 0,
+      "value": "支付至多 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源进行 intimidate"
+    }
+  ],
+  "card.sup.ironsong.modes.choose": [
+    {
+      "type": 0,
+      "value": "Beat of the Ironsong：选择 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 项模式"
+    }
+  ],
+  "card.sup.ironsong.modes.more": [
+    {
+      "type": 0,
+      "value": "Beat of the Ironsong：再选择 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 项模式"
+    }
+  ],
+  "card.sup.looked.bottom": [
+    {
+      "type": 0,
+      "value": "将查看的牌置于牌库底部？"
+    }
+  ],
+  "card.sup.modes.choose": [
+    {
+      "type": 0,
+      "value": "选择任意数量的模式"
+    }
+  ],
+  "card.sup.named.cards.choose": [
+    {
+      "type": 0,
+      "value": "再选择至多 3 张与指定牌名相同的牌"
+    }
+  ],
+  "card.sup.option.abilities": [
+    {
+      "type": 0,
+      "value": "压制英雄能力"
+    }
+  ],
+  "card.sup.option.all": [
+    {
+      "type": 0,
+      "value": "全部"
+    }
+  ],
+  "card.sup.option.attackone": [
+    {
+      "type": 0,
+      "value": "+1 力量"
+    }
+  ],
+  "card.sup.option.boo": [
+    {
+      "type": 0,
+      "value": "喝倒彩 (boo)"
+    }
+  ],
+  "card.sup.option.booabilities": [
+    {
+      "type": 0,
+      "value": "喝倒彩 (boo) + 压制能力"
+    }
+  ],
+  "card.sup.option.goagain": [
+    {
+      "type": 0,
+      "value": "go again"
+    }
+  ],
+  "card.sup.option.loseabilities": [
+    {
+      "type": 0,
+      "value": "失去能力"
+    }
+  ],
+  "card.sup.option.nodefensegain": [
+    {
+      "type": 0,
+      "value": "防守牌不能获得防御加成"
+    }
+  ],
+  "card.sup.option.steal": [
+    {
+      "type": 0,
+      "value": "夺取"
+    }
+  ],
+  "card.sup.option.stealabilities": [
+    {
+      "type": 0,
+      "value": "夺取 + 压制能力"
+    }
+  ],
+  "card.sup.option.stealboo": [
+    {
+      "type": 0,
+      "value": "夺取 + 喝倒彩 (boo)"
+    }
+  ],
+  "card.sup.option.suspense.add": [
+    {
+      "type": 0,
+      "value": "在 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 上放置一个 suspense 指示物"
+    }
+  ],
+  "card.sup.option.suspense.remove": [
+    {
+      "type": 0,
+      "value": "从 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 上移除一个 suspense 指示物"
+    }
+  ],
+  "card.sup.option.take.damage": [
+    {
+      "type": 0,
+      "value": "承受 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
+    }
+  ],
+  "card.sup.option.unpreventable": [
+    {
+      "type": 0,
+      "value": "伤害不能被防止"
+    }
+  ],
+  "card.sup.pay.up.to": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择并支付至多 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
+  "card.sup.pay.up.to.generic": [
+    {
+      "type": 0,
+      "value": "支付至多 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
+  "card.sup.revealed.bottom": [
+    {
+      "type": 0,
+      "value": "将你展示的牌置于牌库底部？"
+    }
+  ],
+  "card.sup.sinew.order": [
+    {
+      "type": 0,
+      "value": "Song of Sinew：先选择最底部的牌；最后选择的牌将成为牌库顶牌"
+    }
+  ],
+  "card.sup.sixplus.top": [
+    {
+      "type": 0,
+      "value": "将一张力量不低于 6 的牌置于牌库顶部"
+    }
+  ],
+  "card.sup.suspense.counter.add": [
+    {
+      "type": 0,
+      "value": "在一个具有 suspense 的光环上放置 suspense 指示物？"
+    }
+  ],
+  "card.sup.suspense.counter.change": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：添加或移除一个 suspense 指示物"
+    }
+  ],
+  "card.sup.token.steal.choose": [
+    {
+      "type": 0,
+      "value": "选择一个 Toughness 或 Vigor 衍生物并夺取其操控权"
+    }
+  ],
+  "card.sup.top.color.guess": [
+    {
+      "type": 0,
+      "value": "牌库顶牌是所选颜色吗？"
+    }
+  ],
   "card.svi.beckoning.aura.return": [
     {
       "type": 1,
@@ -1957,6 +3761,52 @@
       "value": " 点奥术伤害？"
     }
   ],
+  "card.tcc.attack.bottom": [
+    {
+      "type": 0,
+      "value": "将一张攻击行动牌置于你的牌库底部"
+    }
+  ],
+  "card.tcc.boulder.hand.top": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将一张手牌置于你的牌库顶部"
+    }
+  ],
+  "card.tcc.encore.attack.return": [
+    {
+      "type": 0,
+      "value": "Encore：将一张 Bard 攻击行动牌返回你的手牌"
+    }
+  ],
+  "card.tcc.interlude.hero.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一位英雄，防止接下来对其造成的 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
+    }
+  ],
+  "card.tcc.jinglewood.token.choose": [
+    {
+      "type": 0,
+      "value": "Jinglewood：选择一种要生成的衍生物"
+    }
+  ],
   "card.ter.hard.knuckle.destroy": [
     {
       "type": 0,
@@ -1967,6 +3817,186 @@
     {
       "type": 0,
       "value": "Terra：支付 1 点资源以生成一个 Might 衍生物？"
+    }
+  ],
+  "card.wtr.bolters.destroy": [
+    {
+      "type": 0,
+      "value": "Refraction Bolters：摧毁此牌，使该次攻击获得 go again？"
+    }
+  ],
+  "card.wtr.buckling.equipment.choose": [
+    {
+      "type": 0,
+      "value": "Buckling Blow：在对方操控的一件装备上放置一个 -1 防御指示物"
+    }
+  ],
+  "card.wtr.determination.weapon.choose": [
+    {
+      "type": 0,
+      "value": "Ironsong Determination：选择一件武器"
+    }
+  ],
+  "card.wtr.estrike.hand.bottom": [
+    {
+      "type": 0,
+      "value": "Enlightened Strike：将一张手牌置于你的牌库底部"
+    }
+  ],
+  "card.wtr.estrike.mode.choose": [
+    {
+      "type": 0,
+      "value": "选择一项模式"
+    }
+  ],
+  "card.wtr.estrike.option.draw": [
+    {
+      "type": 0,
+      "value": "抽一张牌"
+    }
+  ],
+  "card.wtr.estrike.option.goagain": [
+    {
+      "type": 0,
+      "value": "go again"
+    }
+  ],
+  "card.wtr.estrike.option.power": [
+    {
+      "type": 0,
+      "value": "+2 力量"
+    }
+  ],
+  "card.wtr.hand.bottom": [
+    {
+      "type": 0,
+      "value": "将一张手牌置于你的牌库底部？"
+    }
+  ],
+  "card.wtr.hood.shuffle": [
+    {
+      "type": 0,
+      "value": "Hope Merchant's Hood：将一张手牌洗入你的牌库？"
+    }
+  ],
+  "card.wtr.hood.shuffle.next": [
+    {
+      "type": 0,
+      "value": "Hope Merchant's Hood：再将一张手牌洗入你的牌库？"
+    }
+  ],
+  "card.wtr.katsu.combo.choose": [
+    {
+      "type": 0,
+      "value": "Katsu：选择一张 combo 牌并面朝上放逐"
+    }
+  ],
+  "card.wtr.katsu.discard": [
+    {
+      "type": 0,
+      "value": "Katsu：弃置一张费用为 0 的牌以搜寻 combo 牌？"
+    }
+  ],
+  "card.wtr.lordwind.card.choose": [
+    {
+      "type": 0,
+      "value": "Lord of Wind：选择一张 combo 线路牌洗入牌库"
+    }
+  ],
+  "card.wtr.lordwind.card.next": [
+    {
+      "type": 0,
+      "value": "Lord of Wind：再选择一张牌"
+    }
+  ],
+  "card.wtr.lordwind.x": [
+    {
+      "type": 0,
+      "value": "Lord of Wind：选择 X"
+    }
+  ],
+  "card.wtr.pummel.mode.choose": [
+    {
+      "type": 0,
+      "value": "选择一项 Pummel 模式"
+    }
+  ],
+  "card.wtr.pummel.option.discard": [
+    {
+      "type": 0,
+      "value": "攻击行动牌：命中时弃牌"
+    }
+  ],
+  "card.wtr.pummel.option.weapon": [
+    {
+      "type": 0,
+      "value": "Club 或 hammer 武器"
+    }
+  ],
+  "card.wtr.razor.mode.choose": [
+    {
+      "type": 0,
+      "value": "选择一项 Razor Reflex 模式"
+    }
+  ],
+  "card.wtr.razor.option.action": [
+    {
+      "type": 0,
+      "value": "低费用攻击行动牌：命中时获得 go again"
+    }
+  ],
+  "card.wtr.razor.option.weapon": [
+    {
+      "type": 0,
+      "value": "Dagger 或 sword 武器"
+    }
+  ],
+  "card.wtr.remembrance.action.choose": [
+    {
+      "type": 0,
+      "value": "Remembrance：选择一张行动牌"
+    }
+  ],
+  "card.wtr.rout.defender.return": [
+    {
+      "type": 0,
+      "value": "Rout：将一张防守牌返回手牌？"
+    }
+  ],
+  "card.wtr.sand.card.choose": [
+    {
+      "type": 0,
+      "value": "Sand Sketched Plan：选择一张牌"
+    }
+  ],
+  "card.wtr.showtime.attack.choose": [
+    {
+      "type": 0,
+      "value": "Show Time!：选择一张 Guardian 攻击行动牌"
+    }
+  ],
+  "card.wtr.singing.reaction.choose": [
+    {
+      "type": 0,
+      "value": "Singing Steelblade：选择一张攻击反应牌"
+    }
+  ],
+  "card.wtr.stroke.card.choose": [
+    {
+      "type": 0,
+      "value": "Stroke of Foresight：选择一张你的手牌"
+    }
+  ],
+  "card.wtr.stroke.position": [
+    {
+      "type": 0,
+      "value": "Stroke of Foresight：将其置于你的牌库顶部还是底部？"
+    }
+  ],
+  "card.wtr.supremacy.weapon.choose": [
+    {
+      "type": 0,
+      "value": "Steelblade Supremacy：选择一件武器"
     }
   ],
   "common.all": [

@@ -1,6 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import { functionalKeyOf } from "../../functional.js";
-import { isSixPlus, opponentSeat, previousAttackHasName, reprise } from "../shared-helpers.js";
+import { commonOptionMessages, decisionMessage, decisionPrompt, isSixPlus, opponentSeat, previousAttackHasName, reprise } from "../shared-helpers.js";
 
 const SEISMIC_SURGE = "WTR075B";
 
@@ -28,11 +28,12 @@ function rememberRandomDiscard(ctx: ScriptCtx): void {
 function chooseDeckCard(
   ctx: ScriptCtx,
   hook: string,
-  prompt: string,
+  fallback: string,
+  messageId: string,
   predicate: (card: DeepReadonly<CardInstance>) => boolean,
 ): void {
   const cards = ctx.player(ctx.seat).deck.filter(predicate);
-  if (cards.length > 0) ctx.requestCardChoice(hook, prompt, cards.map((card) => card.instanceId));
+  if (cards.length > 0) ctx.requestCardChoice(hook, decisionPrompt(fallback, messageId), cards.map((card) => card.instanceId));
 }
 
 function finishSearchToHand(ctx: ScriptCtx, option: string): boolean {
@@ -83,7 +84,7 @@ const bloodrushBellow: CardScript = {
 
 const sandSketchedPlan: CardScript = {
   onPlay(ctx) {
-    chooseDeckCard(ctx, "sand-search", "Sand Sketched Plan: choose a card", () => true);
+    chooseDeckCard(ctx, "sand-search", "Sand Sketched Plan: choose a card", "card.wtr.sand.card.choose", () => true);
   },
   onChoose(ctx, hook, option) {
     if (hook !== "sand-search" || !finishSearchToHand(ctx, option)) return;
@@ -94,7 +95,7 @@ const sandSketchedPlan: CardScript = {
 
 const showTime: CardScript = {
   onEnterArena(ctx) {
-    chooseDeckCard(ctx, "show-time-search", "Show Time!: choose a Guardian attack action", (card) =>
+    chooseDeckCard(ctx, "show-time-search", "Show Time!: choose a Guardian attack action", "card.wtr.showtime.attack.choose", (card) =>
       isAttackAction(ctx, card) && hasType(ctx, card, "guardian"));
   },
   onChoose(ctx, hook, option) {
@@ -129,7 +130,7 @@ const maskOfMomentum: CardScript = {
 const lordOfWind: CardScript = {
   additionalCost(ctx) {
     if (previousAttackNamed(ctx, "mugenshi: release")) {
-      ctx.requestXPayment("lord-wind-x", "Lord of Wind: choose X", ctx.seat);
+      ctx.requestXPayment("lord-wind-x", decisionPrompt("Lord of Wind: choose X", "card.wtr.lordwind.x"), ctx.seat);
     }
   },
   modifyAttack: (ctx) => ctx.getCounter("lordWindX"),
@@ -141,7 +142,7 @@ const lordOfWind: CardScript = {
       const eligible = ctx.player(ctx.seat).graveyard.filter((card) =>
         ["surging strike", "whelming gustwave", "mugenshi: release"].includes(nameOf(ctx, card)));
       if (amount > 0 && eligible.length > 0) {
-        ctx.requestCardChoice("lord-wind-card", "Lord of Wind: choose a combo-line card to shuffle in", ["done", ...eligible.map((card) => card.instanceId)]);
+        ctx.requestCardChoice("lord-wind-card", decisionPrompt("Lord of Wind: choose a combo-line card to shuffle in", "card.wtr.lordwind.card.choose", { optionMessages: commonOptionMessages("done") }), ["done", ...eligible.map((card) => card.instanceId)]);
       }
       return;
     }
@@ -156,7 +157,7 @@ const lordOfWind: CardScript = {
     const eligible = ctx.player(ctx.seat).graveyard.filter((card) =>
       ["surging strike", "whelming gustwave", "mugenshi: release"].includes(nameOf(ctx, card)));
     if (remaining > 0 && eligible.length > 0) {
-      ctx.requestCardChoice("lord-wind-card", "Lord of Wind: choose another card", ["done", ...eligible.map((card) => card.instanceId)]);
+      ctx.requestCardChoice("lord-wind-card", decisionPrompt("Lord of Wind: choose another card", "card.wtr.lordwind.card.next", { optionMessages: commonOptionMessages("done") }), ["done", ...eligible.map((card) => card.instanceId)]);
     } else {
       ctx.shuffleDeck();
     }
@@ -177,7 +178,7 @@ function requestRemembrance(ctx: ScriptCtx): void {
   const remaining = ctx.getCounter("remembranceRemaining");
   const actions = ctx.player(ctx.seat).graveyard.filter((card) => ctx.hasCardType(card, "action"));
   if (remaining > 0 && actions.length > 0) {
-    ctx.requestCardChoice("remembrance-card", "Remembrance: choose an action card", ["done", ...actions.map((card) => card.instanceId)]);
+    ctx.requestCardChoice("remembrance-card", decisionPrompt("Remembrance: choose an action card", "card.wtr.remembrance.action.choose", { optionMessages: commonOptionMessages("done") }), ["done", ...actions.map((card) => card.instanceId)]);
   } else {
     ctx.shuffleDeck();
   }
@@ -226,7 +227,7 @@ export const wtrHighRarity: Record<string, CardScript> = {
   "steelblade supremacy|1": {
     onPlay(ctx) {
       const weapons = ctx.player(ctx.seat).weapons;
-      if (weapons.length > 0) ctx.requestCardChoice("supremacy-weapon", "Steelblade Supremacy: choose a weapon", weapons.map((card) => card.instanceId));
+      if (weapons.length > 0) ctx.requestCardChoice("supremacy-weapon", decisionPrompt("Steelblade Supremacy: choose a weapon", "card.wtr.supremacy.weapon.choose"), weapons.map((card) => card.instanceId));
     },
     onChoose(ctx, hook, option) { if (hook === "supremacy-weapon") ctx.addModifier({ scope: "until-end-of-turn", attack: 2, appliesTo: "weapon", appliesToInstanceId: Number(option), onHitDraw: 1 }); },
   },
@@ -235,7 +236,7 @@ export const wtrHighRarity: Record<string, CardScript> = {
       ctx.addModifier({ scope: "chain-link", attack: 3 });
       if (reprise(ctx)) {
         const defenders = ctx.link?.defendingCards ?? [];
-        if (defenders.length > 0) ctx.requestCardChoice("rout-defender", "Rout: return a defending card to hand?", ["pass", ...defenders.map((card) => card.instanceId)]);
+        if (defenders.length > 0) ctx.requestCardChoice("rout-defender", decisionPrompt("Rout: return a defending card to hand?", "card.wtr.rout.defender.return", { optionMessages: commonOptionMessages("pass") }), ["pass", ...defenders.map((card) => card.instanceId)]);
       }
     },
     onChoose(ctx, hook, option) { if (hook === "rout-defender" && option !== "pass") ctx.moveToHand(Number(option)); },
@@ -243,7 +244,7 @@ export const wtrHighRarity: Record<string, CardScript> = {
   "singing steelblade|2": {
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: 1 });
-      if (reprise(ctx)) chooseDeckCard(ctx, "singing-search", "Singing Steelblade: choose an attack reaction", (card) => ctx.cardData(card.cardId).cardType === "attack-reaction");
+      if (reprise(ctx)) chooseDeckCard(ctx, "singing-search", "Singing Steelblade: choose an attack reaction", "card.wtr.singing.reaction.choose", (card) => ctx.cardData(card.cardId).cardType === "attack-reaction");
     },
     onChoose(ctx, hook, option) {
       if (hook !== "singing-search") return;
@@ -256,7 +257,7 @@ export const wtrHighRarity: Record<string, CardScript> = {
   "ironsong determination|2": {
     onPlay(ctx) {
       const weapons = ctx.player(ctx.seat).weapons;
-      if (weapons.length > 0) ctx.requestCardChoice("determination-weapon", "Ironsong Determination: choose a weapon", weapons.map((card) => card.instanceId));
+      if (weapons.length > 0) ctx.requestCardChoice("determination-weapon", decisionPrompt("Ironsong Determination: choose a weapon", "card.wtr.determination.weapon.choose"), weapons.map((card) => card.instanceId));
     },
     onChoose(ctx, hook, option) { if (hook === "determination-weapon") ctx.addModifier({ scope: "until-end-of-turn", attack: 1, dominate: true, appliesTo: "weapon", appliesToInstanceId: Number(option) }); },
   },
@@ -266,9 +267,9 @@ export const wtrHighRarity: Record<string, CardScript> = {
     activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", removeCounterCost: { key: "energy", amount: 3 }, onActivate(ctx) { ctx.changeResources(ctx.seat, 1); } },
   },
   "enlightened strike|1": {
-    additionalCost(ctx) { ctx.requestCardChoice("estrike-bottom", "Enlightened Strike: put a card from hand on the bottom of your deck", ctx.player(ctx.seat).hand.map((card) => card.instanceId)); },
+    additionalCost(ctx) { ctx.requestCardChoice("estrike-bottom", decisionPrompt("Enlightened Strike: put a card from hand on the bottom of your deck", "card.wtr.estrike.hand.bottom"), ctx.player(ctx.seat).hand.map((card) => card.instanceId)); },
     onChoose(ctx, hook, option) {
-      if (hook === "estrike-bottom") { if (ctx.putOnDeckBottom(Number(option))) ctx.requestChoice("estrike-mode", "Choose a mode", ["draw", "+2", "go again"]); return; }
+      if (hook === "estrike-bottom") { if (ctx.putOnDeckBottom(Number(option))) ctx.requestChoice("estrike-mode", decisionPrompt("Choose a mode", "card.wtr.estrike.mode.choose", { optionMessages: { draw: decisionMessage("card.wtr.estrike.option.draw"), "+2": decisionMessage("card.wtr.estrike.option.power"), "go again": decisionMessage("card.wtr.estrike.option.goagain") } }), ["draw", "+2", "go again"]); return; }
       if (hook === "estrike-mode") ctx.setCounter("estrikeMode", option === "draw" ? 1 : option === "+2" ? 2 : 3);
     },
     onAttackDeclared(ctx) {

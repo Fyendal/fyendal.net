@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, buffNextAttack } from "./shared-helpers.js";
+import { attackAbility, buffNextAttack, commonOptionMessages, decisionPrompt } from "./shared-helpers.js";
 
 const CORRUPTED_CORPSE = "IAR090";
 
@@ -68,7 +68,7 @@ export const ama: Record<string, CardScript> = {
         const choices = zombies(ctx, ctx.player(ctx.seat).graveyard);
         ctx.requestCardChoice(
           "ama-malice-zombie",
-          "Choose a zombie in your graveyard",
+          decisionPrompt("Choose a zombie in your graveyard", "card.common.zombie.graveyard.choose"),
           choices.map((card) => card.instanceId),
         );
       },
@@ -103,7 +103,7 @@ export const ama: Record<string, CardScript> = {
       if (hand.length > 0) {
         ctx.requestCardChoice(
           "ama-crown-banish",
-          "Banish a card for +1 defense?",
+          decisionPrompt("Banish a card for +1 defense?", "card.ama.crown.card.banish", { optionMessages: commonOptionMessages("no") }),
           ["no", ...hand.map((card) => card.instanceId)],
         );
       }
@@ -144,7 +144,7 @@ export const ama: Record<string, CardScript> = {
       const choices = zombies(ctx, looked);
       ctx.requestCardChoice(
         "ama-dig-zombie",
-        "Put a zombie into your graveyard?",
+        decisionPrompt("Put a zombie into your graveyard?", "card.ama.dig.zombie.choose", { optionMessages: commonOptionMessages("no") }),
         ["no", ...choices.map((card) => card.instanceId)],
       );
     },

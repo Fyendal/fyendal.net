@@ -127,9 +127,9 @@ describe("interactions — choice option projection", () => {
     s.passPriority();
     s.passPriority(); // the ability resolves into the remove-X choice
     const pd = projectStateFor(s.state, 0).pendingDecision;
-    // "1".."4" are counter counts, not instances — instance 1 is a hero, so
+    // "0".."4" are counter counts, not instances — instance 1 is a hero, so
     // resolving them as cards rendered the opposing hero's name as an option
-    expect(pd?.options).toEqual(["1", "2", "3", "4"]);
+    expect(pd?.options).toEqual(["0", "1", "2", "3", "4"]);
     expect(pd?.optionCards).toBeUndefined();
   });
 });

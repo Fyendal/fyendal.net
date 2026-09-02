@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { previousAttackHasName } from "../shared-helpers.js";
+import { commonOptionMessages, decisionPrompt, previousAttackHasName } from "../shared-helpers.js";
 
 // ── WTR Ninja helpers ───────────────────────────────────────────────────────
 
@@ -128,7 +128,7 @@ const katsu: CardScript = {
     if (zeroCost.length === 0) return;
     ctx.requestCardChoice(
       "katsu-discard",
-      "Katsu: discard a card with cost 0 to search for a combo card?",
+      decisionPrompt("Katsu: discard a card with cost 0 to search for a combo card?", "card.wtr.katsu.discard", { optionMessages: commonOptionMessages("pass") }),
       ["pass", ...zeroCost.map((c) => c.instanceId)],
     );
   },
@@ -146,7 +146,7 @@ const katsu: CardScript = {
       }
       ctx.requestCardChoice(
         "katsu-search",
-        "Katsu: choose a combo card to banish face up",
+        decisionPrompt("Katsu: choose a combo card to banish face up", "card.wtr.katsu.combo.choose"),
         comboCards.map((c) => c.instanceId),
       );
       return;

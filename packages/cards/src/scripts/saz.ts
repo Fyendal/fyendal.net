@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, opponentSeat, optN, optOnChoose } from "./shared-helpers.js";
+import { buffNextAttack, commonOptionMessages, decisionMessage, decisionPrompt, opponentSeat, optN, optOnChoose } from "./shared-helpers.js";
 
 // ── SAZ (Silver Age: Azalea precon, Chapter 2) ──────────────────────────────
 //
@@ -62,7 +62,7 @@ function reload(ctx: ScriptCtx): void {
   if (p.arsenal.length > 0 || p.hand.length === 0) return;
   ctx.requestCardChoice(
     "reload",
-    "Reload: put a card from your hand into your arsenal?",
+    decisionPrompt("Reload: put a card from your hand into your arsenal?", "card.common.reload", { optionMessages: commonOptionMessages("pass") }),
     ["pass", ...p.hand.map((c) => c.instanceId)],
   );
 }
@@ -77,11 +77,11 @@ function reloadOnChoose(ctx: ScriptCtx, hook: string, option: string): boolean {
 }
 
 /** "You may put an arrow card from your hand face up into your arsenal." */
-function requestArrowToArsenal(ctx: ScriptCtx, hook: string, prompt: string): void {
+function requestArrowToArsenal(ctx: ScriptCtx, hook: string, fallback: string): void {
   const p = ctx.player(ctx.seat);
   const arrows = p.hand.filter((c) => isArrow(ctx, c));
   if (p.arsenal.length > 0 || arrows.length === 0) return;
-  ctx.requestCardChoice(hook, prompt, ["pass", ...arrows.map((c) => c.instanceId)]);
+  ctx.requestCardChoice(hook, decisionPrompt(fallback, "card.common.arrow.arsenal", { optionMessages: commonOptionMessages("pass") }), ["pass", ...arrows.map((c) => c.instanceId)]);
 }
 
 /** "Your next arrow attack this turn gets +3{p} and <on-hit rider>" (Lace
@@ -182,7 +182,7 @@ export const saz: Record<string, CardScript> = {
       if (from !== "deck" || !isArrow(ctx, card)) return;
       ctx.requestPayment(
         `crows-nest:${card.instanceId}`,
-        "Crow's Nest: pay {r} to put an aim counter on the arrow?",
+        decisionPrompt("Crow's Nest: pay {r} to put an aim counter on the arrow?", "card.saz.crowsnest.pay", { optionMessages: commonOptionMessages("no") }),
         1,
       );
     },
@@ -288,7 +288,7 @@ export const saz: Record<string, CardScript> = {
       if (equips.length === 0) return;
       ctx.requestCardChoice(
         "drill-shot",
-        "Drill Shot: put a -1{d} counter on an equipment they control",
+        decisionPrompt("Drill Shot: put a -1{d} counter on an equipment they control", "card.saz.drillshot.equipment.choose"),
         equips.map((c) => c.instanceId),
       );
     },
@@ -316,7 +316,7 @@ export const saz: Record<string, CardScript> = {
     onEnterArsenal(ctx) {
       ctx.requestCardChoice(
         "entangling-shot",
-        "Entangling Shot: tap target hero?",
+        decisionPrompt("Entangling Shot: tap target hero?", "card.saz.entangling.hero.choose", { optionMessages: commonOptionMessages("pass") }),
         ["pass", ...ctx.state.players.map((p) => p.hero.instanceId)],
       );
     },
@@ -395,7 +395,7 @@ export const saz: Record<string, CardScript> = {
       if (top2.length < 2) return;
       ctx.requestChoice(
         "spire-sniping",
-        "Spire Sniping: put the top 2 cards back in any order",
+        decisionPrompt("Spire Sniping: put the top 2 cards back in any order", "card.saz.spire.order", { optionMessages: { "keep order": decisionMessage("card.common.option.keeporder"), swap: decisionMessage("card.common.option.swap") } }),
         ["keep order", "swap"],
       );
     },
@@ -492,7 +492,7 @@ export const saz: Record<string, CardScript> = {
         appliesToFromArsenal: true, });
       ctx.requestCardChoice(
         "scout-the-periphery",
-        "Scout the Periphery: look at the top card of target hero's deck",
+        decisionPrompt("Scout the Periphery: look at the top card of target hero's deck", "card.saz.scout.hero.choose"),
         ctx.state.players.map((p) => p.hero.instanceId),
       );
     },
@@ -541,7 +541,7 @@ export const saz: Record<string, CardScript> = {
       });
       ctx.requestCardChoice(
         "memorial-ground",
-        "Memorial Ground: put an attack action with cost 1 or less from your graveyard on top of your deck",
+        decisionPrompt("Memorial Ground: put an attack action with cost 1 or less from your graveyard on top of your deck", "card.saz.memorial.attack.top"),
         targets.map((c) => c.instanceId),
       );
     },
@@ -565,7 +565,7 @@ export const saz: Record<string, CardScript> = {
         effect(ctx) {
           if (!ctx.requestPayment(
             "bloodrot-pox",
-            "Bloodrot Pox: pay {r}{r}{r} or take 2 damage?",
+            decisionPrompt("Bloodrot Pox: pay {r}{r}{r} or take 2 damage?", "card.saz.bloodrot.pay", { optionMessages: commonOptionMessages("no") }),
             3,
           )) {
             ctx.destroySelf();

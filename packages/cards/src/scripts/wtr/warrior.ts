@@ -1,5 +1,5 @@
 import type { CardScript } from "@fyendal/engine";
-import { isWeaponAttack, nextAttack, reprise } from "../shared-helpers.js";
+import { commonOptionMessages, decisionPrompt, isWeaponAttack, nextAttack, reprise, yesNoPrompt } from "../shared-helpers.js";
 
 // ── Welcome to Rathe (WTR) warrior-class cards ──
 //
@@ -20,7 +20,7 @@ function strokeOfForesight(bonus: number): CardScript {
       if (p.hand.length === 0) return;
       ctx.requestCardChoice(
         "stroke-card",
-        "Stroke of Foresight: choose a card from your hand",
+        decisionPrompt("Stroke of Foresight: choose a card from your hand", "card.wtr.stroke.card.choose"),
         p.hand.map((c) => c.instanceId),
       );
     },
@@ -31,7 +31,7 @@ function strokeOfForesight(bonus: number): CardScript {
         ctx.setCounter("strokeCard", Number(option));
         ctx.requestChoice(
           "stroke-position",
-          "Stroke of Foresight: put it on the top or bottom of your deck?",
+          decisionPrompt("Stroke of Foresight: put it on the top or bottom of your deck?", "card.wtr.stroke.position", { optionMessages: commonOptionMessages("top", "bottom") }),
           ["top", "bottom"],
         );
         return;
@@ -250,7 +250,7 @@ export const warrior: Record<string, CardScript> = {
     onHit(ctx) {
       ctx.requestChoice(
         "refraction-bolters",
-        "Refraction Bolters: destroy this to give the attack go again?",
+        yesNoPrompt("Refraction Bolters: destroy this to give the attack go again?", "card.wtr.bolters.destroy"),
         ["yes", "no"],
       );
     },

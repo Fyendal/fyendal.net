@@ -2,6 +2,8 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   buffNextArcaneDamageCard,
   buffNextAttack,
+  commonOptionMessages,
+  decisionPrompt,
   dealArcane,
   opponentSeat,
   optN,
@@ -118,7 +120,7 @@ function targetHeroArcaneSpell(damage: number): CardScript {
     onPlay(ctx) {
       ctx.requestChoice(
         `arc-target:${damage}`,
-        `${ctx.data.name}: deal ${ctx.previewArcaneDamage(damage)} arcane damage to which hero?`,
+        decisionPrompt(`${ctx.data.name}: deal ${ctx.previewArcaneDamage(damage)} arcane damage to which hero?`, "card.arc.arcane.hero.choose", { values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: ctx.previewArcaneDamage(damage) }, optionMessages: commonOptionMessages("opposing hero", "your hero") }),
         ["opposing hero", "your hero"],
       );
     },
@@ -167,7 +169,7 @@ function reverberate(damage: number): CardScript {
       if (eligible.length === 0) return;
       ctx.requestCardChoice(
         "reverberate-banish",
-        `${ctx.data.name}: banish a Wizard non-attack action to play as an instant this turn?`,
+        decisionPrompt(`${ctx.data.name}: banish a Wizard non-attack action to play as an instant this turn?`, "card.arc.wizard.banish", { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: commonOptionMessages("no") }),
         ["no", ...eligible.map((card) => card.instanceId)],
       );
     },
@@ -191,7 +193,7 @@ function requestIndexChoice(ctx: ScriptCtx, count: number): void {
   const ids = cards.map((card) => card.instanceId);
   ctx.requestCardChoice(
     `index-top:${ids.join(",")}`,
-    `${ctx.data.name}: choose a card to put on top of your deck`,
+    decisionPrompt(`${ctx.data.name}: choose a card to put on top of your deck`, "card.arc.index.top", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }),
     ids,
   );
 }
@@ -200,7 +202,7 @@ function requestIndexBottomOrder(ctx: ScriptCtx, ids: number[]): void {
   if (ids.length === 0) return;
   ctx.requestCardChoice(
     `index-bottom:${ids.join(",")}`,
-    `${ctx.data.name}: choose the next card to put on the bottom of your deck`,
+    decisionPrompt(`${ctx.data.name}: choose the next card to put on the bottom of your deck`, "card.arc.index.bottom.next", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }),
     ids,
   );
 }
