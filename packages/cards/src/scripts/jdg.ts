@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { opponentSeat } from "./shared-helpers.js";
+import { decisionPrompt, opponentSeat } from "./shared-helpers.js";
 
 function isTome(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.cardData(card.cardId).name.toLowerCase().includes("tome");
@@ -38,7 +38,10 @@ export const jdg: Record<string, CardScript> = {
         if (tomes.length) {
           ctx.requestCardChoice(
             "librarian-tome",
-            "The Librarian: reveal a Tome from inventory",
+            decisionPrompt(
+              "The Librarian: reveal a Tome from inventory",
+              "card.jdg.librarian.tome.choose",
+            ),
             tomes.map((card) => card.instanceId),
           );
         }
@@ -65,7 +68,10 @@ export const jdg: Record<string, CardScript> = {
       ctx.setCounter("theryonDestroyingSeat", destroyingSeat);
       ctx.requestPayment(
         "theryon-pay",
-        "Theryon: pay 2 resources to have that hero destroy a permanent they control?",
+        decisionPrompt(
+          "Theryon: pay 2 resources to have that hero destroy a permanent they control?",
+          "card.jdg.theryon.pay",
+        ),
         2,
       );
     },
@@ -76,7 +82,10 @@ export const jdg: Record<string, CardScript> = {
         if (permanents.length) {
           ctx.requestCardChoice(
             "theryon-destroy",
-            "Choose a non-hero permanent you control to destroy",
+            decisionPrompt(
+              "Choose a non-hero permanent you control to destroy",
+              "card.jdg.theryon.permanent.choose",
+            ),
             permanents.map((card) => card.instanceId),
             destroyingSeat,
           );

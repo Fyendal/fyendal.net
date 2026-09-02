@@ -19,6 +19,29 @@ export interface DecisionPromptOptions {
   optionMessages?: Readonly<Record<string, GameMessage>>;
 }
 
+const commonDecisionOptionIds = {
+  yes: "common.option.yes",
+  no: "common.option.no",
+  pass: "common.option.pass",
+  decline: "common.option.decline",
+  none: "common.option.none",
+  done: "common.option.done",
+  keep: "common.option.keep",
+  bottom: "common.option.bottom",
+  top: "common.option.top",
+  close: "common.option.close",
+  remove: "common.option.remove",
+  destroy: "common.option.destroy",
+  both: "common.option.both",
+  opponent: "common.option.opponent",
+  self: "common.option.self",
+  "opposing hero": "common.option.opposinghero",
+  "your hero": "common.option.yourhero",
+  "take damage": "common.option.takedamage",
+} as const;
+
+export type CommonDecisionOption = keyof typeof commonDecisionOptionIds;
+
 /** Construct semantic text metadata without coupling card scripts to any
  * locale catalog. The client resolves the id; the engine preserves fallback
  * text for old clients, persisted state, logs, and diagnostics. */
@@ -27,6 +50,17 @@ export function decisionMessage(
   values?: GameMessage["values"],
 ): GameMessage {
   return { id, ...(values === undefined ? {} : { values }) };
+}
+
+/** Localize recurring option values without changing the stable value sent
+ * back to card scripts. */
+export function commonOptionMessages(
+  ...options: readonly CommonDecisionOption[]
+): Readonly<Record<string, GameMessage>> {
+  return Object.fromEntries(options.map((option) => [
+    option,
+    decisionMessage(commonDecisionOptionIds[option]),
+  ]));
 }
 
 /** Describe a localizable decision prompt and any localized option labels.
@@ -54,10 +88,17 @@ export function yesNoPrompt(
 ): ScriptDecisionPrompt {
   return decisionPrompt(fallback, id, {
     values,
-    optionMessages: {
-      yes: decisionMessage("common.option.yes"),
-      no: decisionMessage("common.option.no"),
-    },
+    optionMessages: commonOptionMessages("yes", "no"),
+  });
+}
+
+/** Shared presentation for effects that inspect a deck top and either keep it
+ * there or move it to the bottom. */
+export function bottomOrKeepPrompt(
+  fallback = "Put the looked-at card on the bottom?",
+): ScriptDecisionPrompt {
+  return decisionPrompt(fallback, "card.common.lookedcard.bottom", {
+    optionMessages: commonOptionMessages("bottom", "keep"),
   });
 }
 

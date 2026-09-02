@@ -1,5 +1,13 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, buffNextAttack, opponentSeat } from "./shared-helpers.js";
+import {
+  attackAbility,
+  buffNextAttack,
+  commonOptionMessages,
+  decisionMessage,
+  decisionPrompt,
+  opponentSeat,
+  yesNoPrompt,
+} from "./shared-helpers.js";
 import { SHARPEN_FOLLOWUP, sharpenSword } from "./aha/warrior-sharpen.js";
 
 const BLADE_DANCE = "MPW134";
@@ -36,7 +44,15 @@ function chooseSword(
   const choices = swords(ctx);
   if (choices.length === 1) finish(ctx, choices[0]!.instanceId);
   else if (choices.length > 1) {
-    ctx.requestCardChoice(hook, `${ctx.data.name}: choose a sword`, choices.map((card) => card.instanceId));
+    ctx.requestCardChoice(
+      hook,
+      decisionPrompt(
+        `${ctx.data.name}: choose a sword`,
+        "card.mpw.sword.choose",
+        { values: { card: { kind: "card", cardId: ctx.self.cardId } } },
+      ),
+      choices.map((card) => card.instanceId),
+    );
   }
 }
 
@@ -191,7 +207,14 @@ export const mpw: Record<string, CardScript> = {
     canTriggerOnDefend: isWeaponAttack,
     onDefend(ctx) {
       if (Number(ctx.link?.attackingCard.counters?.power ?? 0) > 0) {
-        ctx.requestChoice("blunt-retort", "Remove a +1 power counter from the attacking weapon?", ["yes", "no"]);
+        ctx.requestChoice(
+          "blunt-retort",
+          yesNoPrompt(
+            "Remove a +1 power counter from the attacking weapon?",
+            "card.mpw.blunt.counter.remove",
+          ),
+          ["yes", "no"],
+        );
       }
     },
     onChoose(ctx, hook, option) {
@@ -219,7 +242,24 @@ export const mpw: Record<string, CardScript> = {
   },
   "longsword leggings|0": {
     activated: { cost: 0, isAttack: false, goAgain: true, destroySelfCost: true, onActivate(ctx) {
-      ctx.requestChoice("longsword-token", "Create which token?", ["Blade Dance", "Flurry"]);
+      ctx.requestChoice(
+        "longsword-token",
+        decisionPrompt(
+          "Create which token?",
+          "card.mpw.token.create.choose",
+          {
+            optionMessages: {
+              "Blade Dance": decisionMessage("card.common.target.card", {
+                card: { kind: "card", cardId: BLADE_DANCE },
+              }),
+              Flurry: decisionMessage("card.common.target.card", {
+                card: { kind: "card", cardId: FLURRY },
+              }),
+            },
+          },
+        ),
+        ["Blade Dance", "Flurry"],
+      );
     } },
     onChoose(ctx, hook, option) {
       if (hook === "longsword-token") ctx.createToken(option === "Flurry" ? FLURRY : BLADE_DANCE);
@@ -229,7 +269,15 @@ export const mpw: Record<string, CardScript> = {
     canTriggerOnDefend: isWeaponAttack,
     onDefend(ctx) {
       const reactions = ctx.player(ctx.seat).graveyard.filter((card) => data(ctx, card).cardType === "attack-reaction");
-      if (reactions.length) ctx.requestCardChoice("hot-top", "Put an attack reaction on top of your deck?", ["no", ...reactions.map((card) => card.instanceId)]);
+      if (reactions.length) ctx.requestCardChoice(
+        "hot-top",
+        decisionPrompt(
+          "Put an attack reaction on top of your deck?",
+          "card.mpw.reaction.top",
+          { optionMessages: commonOptionMessages("no") },
+        ),
+        ["no", ...reactions.map((card) => card.instanceId)],
+      );
     },
     onChoose(ctx, hook, option) { if (hook === "hot-top" && option !== "no") ctx.putOnDeckTop(Number(option)); },
   },
@@ -331,7 +379,14 @@ export const mpw: Record<string, CardScript> = {
     onPlay(ctx) {
       ctx.drawCards(ctx.seat, 1);
       const hand = ctx.player(ctx.seat).hand;
-      if (hand.length) ctx.requestCardChoice("raise-top", "Put a hand card on top of your deck", hand.map((card) => card.instanceId));
+      if (hand.length) ctx.requestCardChoice(
+        "raise-top",
+        decisionPrompt(
+          "Put a hand card on top of your deck",
+          "card.mpw.hand.top",
+        ),
+        hand.map((card) => card.instanceId),
+      );
       buffNextAttack(ctx, { attack: 3, appliesToSubtype: "sword" });
     },
     onChoose(ctx, hook, option) { if (hook === "raise-top") ctx.putOnDeckTop(Number(option)); },
@@ -353,7 +408,15 @@ export const mpw: Record<string, CardScript> = {
   "lessons learned|3": {
     onPlay(ctx) {
       const reactions = ctx.player(ctx.seat).graveyard.filter((card) => data(ctx, card).cardType === "attack-reaction");
-      if (reactions.length) ctx.requestCardChoice("lessons-learned", "Shuffle an attack reaction into your deck?", ["done", ...reactions.map((card) => card.instanceId)]);
+      if (reactions.length) ctx.requestCardChoice(
+        "lessons-learned",
+        decisionPrompt(
+          "Shuffle an attack reaction into your deck?",
+          "card.mpw.reaction.shuffle",
+          { optionMessages: commonOptionMessages("done") },
+        ),
+        ["done", ...reactions.map((card) => card.instanceId)],
+      );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "lessons-learned") return;
@@ -378,7 +441,15 @@ export const mpw: Record<string, CardScript> = {
       const remaining = ctx.player(ctx.seat).graveyard.filter((card) =>
         data(ctx, card).cardType === "attack-reaction" && !chosenNames.has(data(ctx, card).name)
       );
-      if (remaining.length) ctx.requestCardChoice("lessons-learned", "Shuffle another differently named attack reaction?", ["done", ...remaining.map((card) => card.instanceId)]);
+      if (remaining.length) ctx.requestCardChoice(
+        "lessons-learned",
+        decisionPrompt(
+          "Shuffle another differently named attack reaction?",
+          "card.mpw.reaction.shuffle.next",
+          { optionMessages: commonOptionMessages("done") },
+        ),
+        ["done", ...remaining.map((card) => card.instanceId)],
+      );
       else ctx.shuffleDeck();
     },
   },
@@ -423,7 +494,11 @@ export const mpw: Record<string, CardScript> = {
       if (!isSwordAttack(ctx) || !consumeMarker(ctx)) return;
       ctx.drawCards(ctx.seat, 1);
       const hand = ctx.player(ctx.seat).hand;
-      if (hand.length) ctx.requestCardChoice("waltz-top", "Put a hand card on top", hand.map((card) => card.instanceId));
+      if (hand.length) ctx.requestCardChoice(
+        "waltz-top",
+        decisionPrompt("Put a hand card on top", "card.mpw.hand.top"),
+        hand.map((card) => card.instanceId),
+      );
     },
     onChoose(ctx, hook, option) { if (hook === "waltz-top") ctx.putOnDeckTop(Number(option)); },
   },
@@ -432,7 +507,26 @@ export const mpw: Record<string, CardScript> = {
       const tokens = ctx.player(ctx.seat).board.filter((card) => ["Blade Dance", "Flurry"].includes(data(ctx, card).name));
       const names = [...new Set(tokens.map((token) => data(ctx, token).name))];
       const options = ["none", ...names, ...(names.length === 2 ? ["both"] : [])];
-      ctx.requestChoice("off-beat-tokens", "Destroy up to one Blade Dance and/or Flurry?", options);
+      ctx.requestChoice(
+        "off-beat-tokens",
+        decisionPrompt(
+          "Destroy up to one Blade Dance and/or Flurry?",
+          "card.mpw.tokens.destroy",
+          {
+            optionMessages: {
+              none: decisionMessage("common.option.none"),
+              "Blade Dance": decisionMessage("card.common.target.card", {
+                card: { kind: "card", cardId: BLADE_DANCE },
+              }),
+              Flurry: decisionMessage("card.common.target.card", {
+                card: { kind: "card", cardId: FLURRY },
+              }),
+              both: decisionMessage("card.mpw.option.bothtokens"),
+            },
+          },
+        ),
+        options,
+      );
     },
     onChoose(ctx, hook, option) {
       if (hook === "off-beat-tokens") {
@@ -459,7 +553,14 @@ export const mpw: Record<string, CardScript> = {
     canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && hasType(ctx, ctx.player(opponentSeat(ctx)).hero, "warrior") && ctx.state.modifiers.some((modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "chain-link"); },
     onHit(ctx) {
       const equipment = Object.values(ctx.player(opponentSeat(ctx)).equipment).filter((card): card is Card => !!card && (data(ctx, card).defense ?? 0) === 0);
-      if (equipment.length) ctx.requestCardChoice("shatter-equipment", "Destroy an equipment", equipment.map((card) => card.instanceId));
+      if (equipment.length) ctx.requestCardChoice(
+        "shatter-equipment",
+        decisionPrompt(
+          "Destroy an equipment",
+          "card.mpw.equipment.destroy",
+        ),
+        equipment.map((card) => card.instanceId),
+      );
     },
     onChoose(ctx, hook, option) { if (hook === "shatter-equipment") ctx.destroyPermanent(Number(option)); },
   },
@@ -468,7 +569,12 @@ export const mpw: Record<string, CardScript> = {
     canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && hasType(ctx, ctx.player(opponentSeat(ctx)).hero, "warrior") && ctx.state.modifiers.some((modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "chain-link"); },
     onHit(ctx) {
       const hand = ctx.player(opponentSeat(ctx)).hand;
-      if (hand.length) ctx.requestCardChoice("dome-discard", "Discard a card", hand.map((card) => card.instanceId), opponentSeat(ctx));
+      if (hand.length) ctx.requestCardChoice(
+        "dome-discard",
+        decisionPrompt("Discard a card", "card.common.card.discard.choose"),
+        hand.map((card) => card.instanceId),
+        opponentSeat(ctx),
+      );
     },
     onChoose(ctx, hook, option) { if (hook === "dome-discard") ctx.discardCard(opponentSeat(ctx), Number(option)); },
   },
@@ -493,13 +599,22 @@ export const mpw: Record<string, CardScript> = {
   }),
   "dice up|3": onHitRemoveCounter((ctx, target) => {
     const auras = ctx.player(target).board.filter((card) => hasType(ctx, card, "aura"));
-    if (auras.length) ctx.requestCardChoice("dice-aura", "Destroy an aura", auras.map((card) => card.instanceId));
+    if (auras.length) ctx.requestCardChoice(
+      "dice-aura",
+      decisionPrompt("Destroy an aura", "card.mpw.aura.destroy"),
+      auras.map((card) => card.instanceId),
+    );
   }),
   "silverdrop downpour|2": silverdrop(3),
   "silverdrop downpour|3": silverdrop(2),
   "slice up|1": onHitRemoveCounter((ctx, target) => {
     const hand = ctx.player(target).hand;
-    if (hand.length) ctx.requestCardChoice("slice-discard", "Discard a card", hand.map((card) => card.instanceId), target);
+    if (hand.length) ctx.requestCardChoice(
+      "slice-discard",
+      decisionPrompt("Discard a card", "card.common.card.discard.choose"),
+      hand.map((card) => card.instanceId),
+      target,
+    );
   }),
   "small blinder|1": smallOrBigBlinder(4, BLADE_DANCE, "Blade Dance"),
   "small blinder|2": smallOrBigBlinder(3, BLADE_DANCE, "Blade Dance"),
@@ -541,7 +656,14 @@ export const mpw: Record<string, CardScript> = {
       canActivate: (ctx) => ctx.player(ctx.seat).hand.some((card) => data(ctx, card).cardType === "attack-reaction"),
       onActivate(ctx) {
         const reactions = ctx.player(ctx.seat).hand.filter((card) => data(ctx, card).cardType === "attack-reaction");
-        if (reactions.length) ctx.requestCardChoice("clip-defender", "Add an attack reaction as a defender", reactions.map((card) => card.instanceId));
+        if (reactions.length) ctx.requestCardChoice(
+          "clip-defender",
+          decisionPrompt(
+            "Add an attack reaction as a defender",
+            "card.mpw.reaction.defender.add",
+          ),
+          reactions.map((card) => card.instanceId),
+        );
       },
     },
     onChoose(ctx, hook, option) { if (hook === "clip-defender") ctx.addDefenderFromHand(Number(option)); },
