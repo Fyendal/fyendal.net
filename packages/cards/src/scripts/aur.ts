@@ -1,5 +1,11 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, opponentSeat } from "./shared-helpers.js";
+import {
+  buffNextAttack,
+  decisionMessage,
+  decisionPrompt,
+  opponentSeat,
+  yesNoPrompt,
+} from "./shared-helpers.js";
 
 function playedLightning(ctx: ScriptCtx): boolean {
   return ctx.getPlayerFlag(ctx.seat, "playedSubtype:lightning") === true;
@@ -32,7 +38,18 @@ function photonRush(): CardScript {
 function sparkSpray(): CardScript {
   return {
     onFriendlyDefended(ctx) {
-      ctx.requestPayment("spark-spray", `${ctx.data.name}: pay {r} for +1{p}?`, 1);
+      ctx.requestPayment(
+        "spark-spray",
+        decisionPrompt(
+          `${ctx.data.name}: pay {r} for +1{p}?`,
+          "card.aur.spark.spray.pay",
+          {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            optionMessages: { no: decisionMessage("common.option.no") },
+          },
+        ),
+        1,
+      );
     },
     onChoose(ctx, hook, option) {
       if (hook === "spark-spray" && option === "paid") {
@@ -59,7 +76,11 @@ export const aur: Record<string, CardScript> = {
       if (amount > 0) {
         ctx.requestChoice(
           "aether-crackers",
-          `Aether Crackers: destroy this to deal ${ctx.previewArcaneDamage(1)} arcane damage to the hero that was hit?`,
+          yesNoPrompt(
+            `Aether Crackers: destroy this to deal ${ctx.previewArcaneDamage(1)} arcane damage to the hero that was hit?`,
+            "card.aur.aether.crackers.destroy",
+            { amount: ctx.previewArcaneDamage(1) },
+          ),
           ["yes", "no"],
         );
         ctx.setCounter("hit-target", target);

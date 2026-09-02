@@ -1,4 +1,9 @@
 import type { CardScript, DeepReadonly, CardInstance, ScriptCtx } from "@fyendal/engine";
+import {
+  decisionMessage,
+  decisionPrompt,
+  yesNoPrompt,
+} from "./shared-helpers.js";
 
 const MIGHT = "TER028";
 
@@ -69,7 +74,15 @@ export const ter: Record<string, CardScript> = {
       condition: (ctx) => ctx.player(ctx.seat).pitch.some((card) => hasType(ctx, card, "earth")),
       label: "Pay {r} to create a Might",
       effect(ctx) {
-        ctx.requestPayment("terra-might", "Terra: pay {r} to create a Might token?", 1);
+        ctx.requestPayment(
+          "terra-might",
+          decisionPrompt(
+            "Terra: pay {r} to create a Might token?",
+            "card.ter.terra.might.pay",
+            { optionMessages: { no: decisionMessage("common.option.no") } },
+          ),
+          1,
+        );
       },
     }],
     onChoose(ctx, hook, option) {
@@ -103,7 +116,10 @@ export const ter: Record<string, CardScript> = {
         ctx.setCounter("hard-knuckle-attack", played.instanceId);
         ctx.requestChoice(
           "hard-knuckle",
-          "Hard Knuckle: destroy this to give the attack +1{p}?",
+          yesNoPrompt(
+            "Hard Knuckle: destroy this to give the attack +1{p}?",
+            "card.ter.hard.knuckle.destroy",
+          ),
           ["yes", "no"],
         );
       },

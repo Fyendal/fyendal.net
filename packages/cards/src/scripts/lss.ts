@@ -1,5 +1,10 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { opponentSeat } from "./shared-helpers.js";
+import {
+  decisionMessage,
+  decisionPrompt,
+  opponentSeat,
+  yesNoPrompt,
+} from "./shared-helpers.js";
 
 function isPotionOrBrew(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   const data = ctx.cardData(card.cardId);
@@ -19,7 +24,11 @@ function continueBuddySearch(ctx: ScriptCtx): void {
     ctx.setCounter("buddySearchSeat", target);
     ctx.requestCardChoice(
       "buddy-search",
-      "Drinking Buddy: search for a Potion or Brew item?",
+      decisionPrompt(
+        "Drinking Buddy: search for a Potion or Brew item?",
+        "card.lss.drinking.buddy.search",
+        { optionMessages: { no: decisionMessage("common.option.decline") } },
+      ),
       ["no", ...choices.map((card) => card.instanceId)],
       target,
     );
@@ -60,7 +69,10 @@ export const lss: Record<string, CardScript> = {
         // cards in Fyendal are ungraded and take the printed "otherwise" path.
         ctx.requestChoice(
           "ruudi-draw",
-          "Ruu'di: draw a card?",
+          yesNoPrompt(
+            "Ruu'di: draw a card?",
+            "card.lss.ruudi.draw",
+          ),
           ["yes", "no"],
           opponentSeat(ctx),
         );

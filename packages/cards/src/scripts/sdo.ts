@@ -1,5 +1,13 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, buffNextAttack, isWeaponAttack, opponentSeat, reprise } from "./shared-helpers.js";
+import {
+  attackAbility,
+  buffNextAttack,
+  decisionMessage,
+  decisionPrompt,
+  isWeaponAttack,
+  opponentSeat,
+  reprise,
+} from "./shared-helpers.js";
 
 // ── SDO (Silver Age: Dorinthea precon, Chapter 2) ───────────────────────────
 //
@@ -111,7 +119,16 @@ export const sdo: Record<string, CardScript> = {
       // turn it up; this is only the actual optional yes/no decision.
       ctx.requestChoice(
         "wreck-havoc",
-        "Wreck Havoc: turn a card in their arsenal face up? (a defense reaction is destroyed)",
+        decisionPrompt(
+          "Wreck Havoc: turn a card in their arsenal face up? (a defense reaction is destroyed)",
+          "card.sdo.wreck.arsenal.turn",
+          {
+            optionMessages: {
+              pass: decisionMessage("common.option.pass"),
+              turn: decisionMessage("card.sdo.option.turn"),
+            },
+          },
+        ),
         ["pass", "turn"],
       );
     },

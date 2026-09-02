@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { discardSixPlusPayoff, isSixPlus, opponentSeat } from "./shared-helpers.js";
+import { discardSixPlusPayoff, isSixPlus, opponentSeat, yesNoPrompt } from "./shared-helpers.js";
 
 const MIGHT = "AKO028";
 
@@ -62,7 +62,10 @@ export const ako: Record<string, CardScript> = {
         eventContext?.atRandom === true && isSixPlus(ctx, discarded),
       effect: (ctx) => ctx.requestChoice(
         "hide-tanner",
-        "Destroy Hide Tanner to create 2 Might tokens?",
+        yesNoPrompt(
+          "Destroy Hide Tanner to create 2 Might tokens?",
+          "card.ako.hide.tanner.destroy",
+        ),
         ["yes", "no"],
       ),
     }],

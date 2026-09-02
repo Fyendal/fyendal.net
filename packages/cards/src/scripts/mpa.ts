@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { contractWithSilver, opponentSeat } from "./shared-helpers.js";
+import { contractWithSilver, decisionPrompt, opponentSeat } from "./shared-helpers.js";
 
 const BLOODROT_POX = "OUT234";
 
@@ -59,7 +59,10 @@ export const mpa: Record<string, CardScript> = {
       if (hand.length > 0) {
         ctx.requestCardChoice(
           "mpa-remember-banish",
-          "Choose a card to banish from the defending hero's hand",
+          decisionPrompt(
+            "Choose a card to banish from the defending hero's hand",
+            "card.mpa.remember.hand.banish",
+          ),
           hand.map((card) => card.instanceId),
         );
       }

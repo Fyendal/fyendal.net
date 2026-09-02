@@ -1,7 +1,9 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
-    opponentSeat,
-      } from "./shared-helpers.js";
+  decisionMessage,
+  decisionPrompt,
+  opponentSeat,
+} from "./shared-helpers.js";
 
 // SDA — Silver Age Chapter 1 Dash precon.
 // Boost is engine-native: the play intent carries the optional cost and fires
@@ -58,7 +60,15 @@ export const sda: Record<string, CardScript> = {
       if (candidates.length === 0) return;
       ctx.requestCardChoice(
         "dash-start-item",
-        "Dash: start with a Mechanologist item with cost 2 or less in the arena?",
+        decisionPrompt(
+          "Dash: start with a Mechanologist item with cost 2 or less in the arena?",
+          "card.sda.dash.item.start",
+          {
+            optionMessages: {
+              none: decisionMessage("common.option.none"),
+            },
+          },
+        ),
         ["none", ...candidates.map((card) => card.instanceId)],
       );
     },

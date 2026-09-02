@@ -1,4 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import { decisionPrompt } from "./shared-helpers.js";
 
 function isYellowAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.cardColor(card) === 2 &&
@@ -13,7 +14,10 @@ export const apr: Record<string, CardScript> = {
       if (auras.length) {
         ctx.requestCardChoice(
           "halo-lumina-aura",
-          "Halo of Lumina Light: put a yellow aura from banish into the arena?",
+          decisionPrompt(
+            "Halo of Lumina Light: put a yellow aura from banish into the arena?",
+            "card.apr.halo.aura.return",
+          ),
           ["pass", ...auras.map((card) => card.instanceId)],
         );
       }

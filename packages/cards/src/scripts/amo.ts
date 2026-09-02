@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, opponentSeat } from "./shared-helpers.js";
+import { attackAbility, decisionPrompt, opponentSeat } from "./shared-helpers.js";
 
 const BLOODROT_POX = "OUT234";
 const FRAILTY = "OUT235";
@@ -39,7 +39,10 @@ export const amo: Record<string, CardScript> = {
         onActivate(ctx) {
           ctx.requestCardChoice(
             "amo-mortimer-cure",
-            "Choose a disease to cure",
+            decisionPrompt(
+              "Choose a disease to cure",
+              "card.amo.mortimer.disease.choose",
+            ),
             opposingDiseases(ctx).map((card) => card.instanceId),
           );
         },

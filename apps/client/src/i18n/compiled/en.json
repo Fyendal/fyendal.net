@@ -279,6 +279,124 @@
       "value": "Flesh and Blood Online"
     }
   ],
+  "card.ako.hide.tanner.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy Hide Tanner to create 2 Might tokens?"
+    }
+  ],
+  "card.amo.mortimer.disease.choose": [
+    {
+      "type": 0,
+      "value": "Choose a disease to cure"
+    }
+  ],
+  "card.apr.halo.aura.return": [
+    {
+      "type": 0,
+      "value": "Halo of Lumina Light: put a yellow aura from banish into the arena?"
+    }
+  ],
+  "card.asb.charge.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose a card to charge, or decline"
+    }
+  ],
+  "card.aur.aether.crackers.destroy": [
+    {
+      "type": 0,
+      "value": "Aether Crackers: destroy this to deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage to the hero that was hit?"
+    }
+  ],
+  "card.aur.spark.spray.pay": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": pay 1 resource for +1 power?"
+    }
+  ],
+  "card.ddd.cutting.couriers.destroy": [
+    {
+      "type": 0,
+      "value": "Cutting Couriers: destroy this so the attack gets go again?"
+    }
+  ],
+  "card.ddd.squires.bracers.destroy": [
+    {
+      "type": 0,
+      "value": "Squire's Bracers: destroy this so the sword's next attack gets +2 power?"
+    }
+  ],
+  "card.gem.embrace.ursur.banish": [
+    {
+      "type": 0,
+      "value": "Banish a card from your hand?"
+    }
+  ],
+  "card.gem.ominous.toll.discard": [
+    {
+      "type": 0,
+      "value": "Discard a zombie to create a Gate to i'Arathael?"
+    }
+  ],
+  "card.lgs.batter.equipment.choose": [
+    {
+      "type": 0,
+      "value": "Batter to a Pulp: destroy an equipment with no defense value"
+    }
+  ],
+  "card.lss.drinking.buddy.search": [
+    {
+      "type": 0,
+      "value": "Drinking Buddy: search for a Potion or Brew item?"
+    }
+  ],
+  "card.lss.ruudi.draw": [
+    {
+      "type": 0,
+      "value": "Ruu'di: draw a card?"
+    }
+  ],
+  "card.mpa.remember.hand.banish": [
+    {
+      "type": 0,
+      "value": "Choose a card to banish from the defending hero's hand"
+    }
+  ],
+  "card.sda.dash.item.start": [
+    {
+      "type": 0,
+      "value": "Dash: start with a Mechanologist item with cost 2 or less in the arena?"
+    }
+  ],
+  "card.sdo.option.turn": [
+    {
+      "type": 0,
+      "value": "Turn face up"
+    }
+  ],
+  "card.sdo.wreck.arsenal.turn": [
+    {
+      "type": 0,
+      "value": "Wreck Havoc: turn a card in their arsenal face up? (A defense reaction is destroyed.)"
+    }
+  ],
   "card.sea.damage.arcane.target": [
     {
       "type": 0,
@@ -309,6 +427,42 @@
     {
       "type": 0,
       "value": "Remove a Treasure Island gold counter?"
+    }
+  ],
+  "card.ska.beaten.trackers.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy Beaten Trackers to gain 1 action point?"
+    }
+  ],
+  "card.ska.strongest.survive.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": reveal a card with power greater than "
+    },
+    {
+      "type": 1,
+      "value": "damage"
+    },
+    {
+      "type": 0,
+      "value": ", or discard a card"
+    }
+  ],
+  "card.ter.hard.knuckle.destroy": [
+    {
+      "type": 0,
+      "value": "Hard Knuckle: destroy this to give the attack +1 power?"
+    }
+  ],
+  "card.ter.terra.might.pay": [
+    {
+      "type": 0,
+      "value": "Terra: pay 1 resource to create a Might token?"
     }
   ],
   "common.all": [
@@ -433,6 +587,12 @@
     {
       "type": 0,
       "value": "No"
+    }
+  ],
+  "common.option.none": [
+    {
+      "type": 0,
+      "value": "None"
     }
   ],
   "common.option.pass": [

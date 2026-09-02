@@ -1,10 +1,12 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   attackAbility,
+  decisionPrompt,
   discardSixPlusPayoff,
-    isSixPlus,
-    opponentSeat,
-  } from "./shared-helpers.js";
+  isSixPlus,
+  opponentSeat,
+  yesNoPrompt,
+} from "./shared-helpers.js";
 
 // ── SKA (Silver Age Chapter 1: Kayo precon) ────────────────────────────────
 
@@ -74,7 +76,16 @@ function strongestSurvive(): CardScript {
       ];
       ctx.requestChoice(
         "strongest-survive",
-        `${ctx.data.name}: reveal a card with power greater than ${damage}, or discard a card`,
+        decisionPrompt(
+          `${ctx.data.name}: reveal a card with power greater than ${damage}, or discard a card`,
+          "card.ska.strongest.survive.choose",
+          {
+            values: {
+              card: { kind: "card", cardId: ctx.self.cardId },
+              damage,
+            },
+          },
+        ),
         options,
         opponent.seat,
         cardOptions,
@@ -189,7 +200,10 @@ export const ska: Record<string, CardScript> = {
         eventContext?.atRandom === true && isSixPlus(ctx, discarded),
       effect: (ctx) => ctx.requestChoice(
         "beaten-trackers",
-        "Destroy Beaten Trackers to gain 1 action point?",
+        yesNoPrompt(
+          "Destroy Beaten Trackers to gain 1 action point?",
+          "card.ska.beaten.trackers.destroy",
+        ),
         ["yes", "no"],
       ),
     }],
