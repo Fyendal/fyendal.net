@@ -30,9 +30,9 @@ describe("decision pass button", () => {
   });
 
   it.each(["priority-window", "attack-reaction", "defense-reaction"] as const)(
-    "uses the status-float Pass button for %s",
+    "also keeps Pass beside the %s guidance",
     (kind) => {
-      expect(shouldShowDecisionPass(decision(kind, []), true)).toBe(false);
+      expect(shouldShowDecisionPass(decision(kind, []), true)).toBe(true);
     },
   );
 

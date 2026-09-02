@@ -1,5 +1,5 @@
 import type { EngineRuntime } from "./runtimePorts.js";
-import { cardAbilitiesSuppressed, cardColorOf, cardHasName, cardHasType, cardNamesOf, cardTypesOf, dataOf, instanceDataOf, scriptOf } from "./cardProperties.js";
+import { cardAbilitiesSuppressed, cardColorOf, cardHasName, cardHasType, cardNamesOf, cardTypesOf, dataOf, instanceDataOf, meldSideHasType, scriptOf } from "./cardProperties.js";
 import { controlledPermanents, lingeringModifierSources } from "./sourceQueries.js";
 import { logPublic, nameOf } from "./gameLog.js";
 import type { GameStateInternal } from "./runtimeState.js";
@@ -9,7 +9,7 @@ import { destroyControlledCard, destroyPermanent, enterBanish } from "./zoneMove
 import { currentLink, findCardAnywhere, opponent, removeFromArray } from "./zoneQueries.js";
 import type { MeldSide, PlayableZone } from "@fyendal/shared";
 import { noteActionPlayedOrActivated } from "./cardLifecycle.js";
-import { actionLimitReached, goAgainSuppressed } from "./ruleQueries.js";
+import { actionLimitReached, firstActionExtraCost, goAgainSuppressed } from "./ruleQueries.js";
 import { cardProhibitedByChosenName } from "./restrictions.js";
 
 export /** Static taxes imposed by opposing arena objects. */
@@ -803,6 +803,10 @@ export function cardPlayCost(
   cost += controlledPermanents(state, seat, { faceDownEquipment: false })
     .reduce((sum, source) => sum + Number(scriptOf(state, source.cardId, source)?.additionalCostToController || 0), 0);
   cost += opposingStaticCostIncrease(state, seat);
+  const isAction = opts?.meldSide
+    ? meldSideHasType(state, card, opts.meldSide, "action")
+    : cardHasType(state, card, "action");
+  if (isAction) cost += firstActionExtraCost(state, player);
   if (data.cardType === "defense-reaction") {
     cost += Number(player.flags.nextDefenseReactionExtraCost || 0);
   }

@@ -28,7 +28,7 @@ import { controlledPermanents, observingHookSources } from "./sourceQueries.js";
 import { activationCostReductionForCard, actionAbilityRestrictedByModifier } from "./abilityRules.js";
 import { consumeNextActionGoAgain, noteActionPlayedOrActivated } from "./cardLifecycle.js";
 import { attackCostReductionForTarget, consumeAttackCostReductions } from "./playRules.js";
-import { actionLimitReached, consumeFirstAttackExtraCost, firstAttackExtraCost, goAgainSuppressed } from "./ruleQueries.js";
+import { actionLimitReached, consumeFirstActionExtraCost, consumeFirstAttackExtraCost, firstActionExtraCost, firstAttackExtraCost, goAgainSuppressed } from "./ruleQueries.js";
 import { weaponAttacksProhibited } from "./combatRestrictions.js";
 
 import {
@@ -132,7 +132,7 @@ export function attackActivationCost(
   baseCost: number,
   targetAllyId?: number,
 ): number {
-  let cost = baseCost + firstAttackExtraCost(state, player);
+  let cost = baseCost + firstActionExtraCost(state, player) + firstAttackExtraCost(state, player);
   const sources = controlledPermanents(state, player.seat, { faceDownEquipment: false });
   for (const src of sources) {
     const sourceScript = scriptOf(state, src.cardId, src);
@@ -208,6 +208,7 @@ export function activateAuraAttack(
   if (costErr) return costErr;
   const nextActionGoAgain = consumeNextActionGoAgain(player);
   consumeAttackCostReductions(state, seat, card, targetAllyId);
+  consumeFirstActionExtraCost(state, player);
   consumeFirstAttackExtraCost(state, player);
   player.actionPoints -= 1;
   noteActionPlayedOrActivated(player);

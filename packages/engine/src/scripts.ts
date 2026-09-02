@@ -351,6 +351,9 @@ export interface ScriptCtx {
   /** Make a hero's first attack during their next turn cost additional
    *  resources. Multiple delayed effects for that turn stack. */
   increaseFirstAttackCostNextTurn(targetSeat: number, amount: number): void;
+  /** Make a hero's first action during their next turn cost additional
+   *  resources. Multiple delayed effects for that turn stack. */
+  increaseFirstActionCostNextTurn(targetSeat: number, amount: number): void;
   /** Prevent the target hero from creating aura tokens during their next turn. */
   preventAuraTokenCreationNextTurn(targetSeat: number): void;
   /** Create a token/aura; returns the created instance, or undefined when a

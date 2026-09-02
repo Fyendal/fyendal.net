@@ -1,5 +1,15 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, bloodDebtScript as bloodDebt, buffNextAttack, opponentSeat, queueIntimidate } from "../shared-helpers.js";
+import {
+  attackAbility,
+  bloodDebtScript as bloodDebt,
+  buffNextAttack,
+  commonOptionMessages,
+  decisionMessage,
+  decisionPrompt,
+  opponentSeat,
+  queueIntimidate,
+  yesNoPrompt,
+} from "../shared-helpers.js";
 
 const COURAGE = "DTD232";
 const EARTH = "ELE109";
@@ -36,7 +46,7 @@ function requestWidespreadBanish(ctx: ScriptCtx, zone: "hand" | "arsenal", start
     if (player.flags.lostLifeThisTurn !== true || player[zone].length === 0) continue;
     ctx.requestCardChoice(
       `widespread-${zone}:${seat}`,
-      `Choose a card from your ${zone} to banish`,
+      decisionPrompt(`Choose a card from your ${zone} to banish`, zone === "hand" ? "card.dtd.hand.banish.choose" : "card.dtd.arsenal.banish.choose"),
       player[zone].map((card) => card.instanceId),
       seat,
     );
@@ -76,15 +86,15 @@ function createUnityToken(ctx: ScriptCtx): void {
   const match = UNITY_TOKEN_BY_HERO.find(([name]) => heroName.includes(name));
   if (match) ctx.createToken(match[1]);
 }
-function soulChoice(ctx: ScriptCtx, hook: string, prompt: string) {
+function soulChoice(ctx: ScriptCtx, hook: string) {
   const soul = ctx.player(ctx.seat).soul;
-  if (soul.length) ctx.requestCardChoice(hook, prompt, ["no", ...soul.map((card) => card.instanceId)]);
+  if (soul.length) ctx.requestCardChoice(hook, decisionPrompt("Banish a soul card for this angel's ability?", "card.dtd.angel.soul.banish", { optionMessages: commonOptionMessages("no") }), ["no", ...soul.map((card) => card.instanceId)]);
 }
 function angel(effect: (ctx: ScriptCtx) => void): CardScript {
   return {
     activated: attackAbility(2),
     onAttackDeclared(ctx) {
-      if (ctx.link?.attackingCard.instanceId === ctx.self.instanceId) soulChoice(ctx, "angel-soul", "Banish a soul card for this angel's ability?");
+      if (ctx.link?.attackingCard.instanceId === ctx.self.instanceId) soulChoice(ctx, "angel-soul");
     },
     onChoose(ctx, hook, option) {
       if (hook === "angel-soul" && option !== "no" && ctx.banish(Number(option))) effect(ctx);
@@ -94,14 +104,14 @@ function angel(effect: (ctx: ScriptCtx) => void): CardScript {
 function figment(effect: (ctx: ScriptCtx) => void): CardScript { return { onEnterArena: effect }; }
 function awakenFigment(ctx: ScriptCtx) {
   const choices = ctx.player(ctx.seat).board.filter((card) => has(ctx, card, "figment") && data(ctx, card).backId);
-  if (choices.length) ctx.requestCardChoice("prism-awaken", "Choose a Figment to awaken", choices.map((card) => card.instanceId));
+  if (choices.length) ctx.requestCardChoice("prism-awaken", decisionPrompt("Choose a Figment to awaken", "card.dtd.figment.awaken.choose"), choices.map((card) => card.instanceId));
 }
 function prismAdult(): CardScript {
   return {
     onCardPutIntoSoul(ctx, card) {
       if (ctx.state.phase !== "action" || !data(ctx, card).name.toLowerCase().includes("herald")) return;
       const figments = ctx.player(ctx.seat).deck.filter((candidate) => has(ctx, candidate, "figment"));
-      if (figments.length) ctx.requestCardChoice("prism-figment", "Search for a Figment?", ["no", ...figments.map((card) => card.instanceId)]);
+      if (figments.length) ctx.requestCardChoice("prism-figment", decisionPrompt("Search for a Figment?", "card.dtd.figment.search", { optionMessages: commonOptionMessages("no") }), ["no", ...figments.map((card) => card.instanceId)]);
     },
     activated: {
       cost: 2, banishSoulCost: 1, isAttack: false, goAgain: false, timing: "instant", oncePerTurn: true,
@@ -133,7 +143,7 @@ function topYellowToSoul(): CardScript {
       const top = ctx.player(ctx.seat).deck[0];
       if (!top) return;
       ctx.revealCards([top.instanceId]);
-      if (ctx.cardColor(top) === 2) ctx.requestChoice("light-sol", "Put the revealed yellow card into your soul?", ["yes", "no"]);
+      if (ctx.cardColor(top) === 2) ctx.requestChoice("light-sol", yesNoPrompt("Put the revealed yellow card into your soul?", "card.dtd.yellow.soul"), ["yes", "no"]);
       },
     }],
     onChoose(ctx, hook, option) {
@@ -163,7 +173,7 @@ function requestSkullChoice(ctx: ScriptCtx): void {
     ctx.hasCardType(card, "action") &&
     !ctx.cardNames(card).some((name) => chosenNames.has(name.toLowerCase())),
   );
-  if (actions.length) ctx.requestCardChoice("spoiled-skull", "Choose a differently named banished action", actions.map((card) => card.instanceId));
+  if (actions.length) ctx.requestCardChoice("spoiled-skull", decisionPrompt("Choose a differently named banished action", "card.dtd.banished.action.different"), actions.map((card) => card.instanceId));
 }
 export const dtdHighRarity: Record<string, CardScript> = {
   "light of sol|2": topYellowToSoul(),
@@ -193,21 +203,21 @@ export const dtdHighRarity: Record<string, CardScript> = {
   "suraya, archangel of erudition|0": angel((ctx) => ctx.drawCards(ctx.seat, 2)),
   "figment of judgment|2": figment((ctx) => {
     const cards = ctx.state.players.flatMap((player) => player.banish).filter((card) => !card.faceDown);
-    if (cards.length) ctx.requestCardChoice("figment-down", "Turn a banished card face down?", ["no", ...cards.map((card) => card.instanceId)]);
+    if (cards.length) ctx.requestCardChoice("figment-down", decisionPrompt("Turn a banished card face down?", "card.dtd.banished.facedown.optional", { optionMessages: commonOptionMessages("no") }), ["no", ...cards.map((card) => card.instanceId)]);
   }),
   "themis, archangel of judgment|0": angel((ctx) => {
     const cards = ctx.state.players.flatMap((player) => player.banish).filter((card) => !card.faceDown);
-    if (cards.length) ctx.requestCardChoice("angel-down", "Turn a banished card face down", cards.map((card) => card.instanceId));
+    if (cards.length) ctx.requestCardChoice("angel-down", decisionPrompt("Turn a banished card face down", "card.dtd.banished.facedown"), cards.map((card) => card.instanceId));
   }),
   "figment of ravages|2": figment((ctx) => ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true })),
   "sekem, archangel of ravages|0": angel((ctx) => ctx.dealDamage(opponentSeat(ctx), 2, { arcane: true })),
   "figment of rebirth|2": figment((ctx) => {
     const cards = ctx.player(ctx.seat).graveyard.filter((card) => ctx.hasCardType(card, "action") && ctx.cardColor(card) === 2);
-    if (cards.length) ctx.requestCardChoice("figment-top", "Put a yellow action on top", cards.map((card) => card.instanceId));
+    if (cards.length) ctx.requestCardChoice("figment-top", decisionPrompt("Put a yellow action on top", "card.dtd.yellow.action.top"), cards.map((card) => card.instanceId));
   }),
   "avalon, archangel of rebirth|0": angel((ctx) => {
     const cards = ctx.player(ctx.seat).graveyard.filter((card) => ctx.cardColor(card) === 2);
-    if (cards.length) ctx.requestCardChoice("angel-top", "Put a yellow card on top", cards.map((card) => card.instanceId));
+    if (cards.length) ctx.requestCardChoice("angel-top", decisionPrompt("Put a yellow card on top", "card.dtd.yellow.card.top"), cards.map((card) => card.instanceId));
   }),
   "figment of tenacity|2": figment((ctx) => buffNextAttack(ctx, { dominate: true })),
   "metis, archangel of tenacity|0": angel((ctx) => ctx.addModifier({ scope: "until-end-of-turn", dominate: true, appliesTo: "attack" })),
@@ -218,14 +228,14 @@ export const dtdHighRarity: Record<string, CardScript> = {
     for (const card of ctx.player(ctx.seat).board.filter((candidate) => has(ctx, candidate, "angel"))) ctx.addCounter(card.instanceId, "power", 1);
   }),
   "soulbond resolve|0": {
-    onDefend(ctx) { const hand = ctx.player(ctx.seat).hand; if (hand.length) ctx.requestCardChoice("soulbond", "Charge a card?", ["no", ...hand.map((card) => card.instanceId)]); },
+    onDefend(ctx) { const hand = ctx.player(ctx.seat).hand; if (hand.length) ctx.requestCardChoice("soulbond", decisionPrompt("Charge a card?", "card.dtd.charge.optional", { optionMessages: commonOptionMessages("no") }), ["no", ...hand.map((card) => card.instanceId)]); },
     onChoose(ctx, hook, option) { if (hook === "soulbond" && option !== "no" && ctx.charge(Number(option))) ctx.preventNextDamage(ctx.seat, 1); },
   },
   "banneret of courage|2": solflareToken(COURAGE),
   "banneret of gallantry|2": solflareToken(QUICKEN),
   "banneret of protection|2": solflareToken(SPELLBANE),
   "beckoning light|1": {
-    additionalCost(ctx) { const hand = ctx.player(ctx.seat).hand; if (hand.length) ctx.requestCardChoice("beckon-charge", "Charge a card?", ["no", ...hand.map((card) => card.instanceId)]); },
+    additionalCost(ctx) { const hand = ctx.player(ctx.seat).hand; if (hand.length) ctx.requestCardChoice("beckon-charge", decisionPrompt("Charge a card?", "card.dtd.charge.optional", { optionMessages: commonOptionMessages("no") }), ["no", ...hand.map((card) => card.instanceId)]); },
     onChoose(ctx, hook, option) {
       if (hook === "beckon-charge" && option !== "no") {
         const charged = ctx.charge(Number(option));
@@ -239,12 +249,12 @@ export const dtdHighRarity: Record<string, CardScript> = {
     },
     onHit(ctx) {
       const attacks = ctx.player(ctx.seat).graveyard.filter((card) => isAttack(ctx, card));
-      if (attacks.length) ctx.requestCardChoice("beckon-top", "Put an attack action on top of your deck?", ["no", ...attacks.map((card) => card.instanceId)]);
+      if (attacks.length) ctx.requestCardChoice("beckon-top", decisionPrompt("Put an attack action on top of your deck?", "card.dtd.attack.top.optional", { optionMessages: commonOptionMessages("no") }), ["no", ...attacks.map((card) => card.instanceId)]);
     },
   },
-  "spirit of war|1": { additionalCost(ctx) { const hand = ctx.player(ctx.seat).hand; if (hand.length) ctx.requestCardChoice("spirit-charge", "Charge a card?", ["no", ...hand.map((card) => card.instanceId)]); }, onChoose(ctx, hook, option) { if (hook === "spirit-charge" && option !== "no" && ctx.charge(Number(option))) ctx.addModifier({ scope: "combat-chain", onHitCreateToken: { cardId: COURAGE, count: 1 }, appliesTo: "attack-action" }); } },
+  "spirit of war|1": { additionalCost(ctx) { const hand = ctx.player(ctx.seat).hand; if (hand.length) ctx.requestCardChoice("spirit-charge", decisionPrompt("Charge a card?", "card.dtd.charge.optional", { optionMessages: commonOptionMessages("no") }), ["no", ...hand.map((card) => card.instanceId)]); }, onChoose(ctx, hook, option) { if (hook === "spirit-charge" && option !== "no" && ctx.charge(Number(option))) ctx.addModifier({ scope: "combat-chain", onHitCreateToken: { cardId: COURAGE, count: 1 }, appliesTo: "attack-action" }); } },
   "prayer of bellona|2": {
-    onPlay(ctx) { buffNextAttack(ctx, { attack: 2 }); const top = ctx.player(ctx.seat).deck[0]; if (top) { ctx.revealCards([top.instanceId]); if (ctx.cardColor(top) === 2 && ctx.moveToHand(top.instanceId)) { const hand = ctx.player(ctx.seat).hand; if (hand.length) ctx.requestCardChoice("prayer-charge", "Charge your hero's soul", hand.map((card) => card.instanceId)); } } },
+    onPlay(ctx) { buffNextAttack(ctx, { attack: 2 }); const top = ctx.player(ctx.seat).deck[0]; if (top) { ctx.revealCards([top.instanceId]); if (ctx.cardColor(top) === 2 && ctx.moveToHand(top.instanceId)) { const hand = ctx.player(ctx.seat).hand; if (hand.length) ctx.requestCardChoice("prayer-charge", decisionPrompt("Charge your hero's soul", "card.dtd.charge.choose"), hand.map((card) => card.instanceId)); } } },
     onChoose(ctx, hook, option) { if (hook === "prayer-charge") ctx.charge(Number(option)); },
   },
   "united we stand|2": {
@@ -252,7 +262,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
     onDefend: createUnityToken,
   },
   "lumina lance|2": {
-    additionalCost(ctx) { const soul = ctx.player(ctx.seat).soul; if (soul.length) ctx.requestCardChoice("lance-soul", "Banish up to 3 cards from soul", ["done", ...soul.map((card) => card.instanceId)]); },
+    additionalCost(ctx) { const soul = ctx.player(ctx.seat).soul; if (soul.length) ctx.requestCardChoice("lance-soul", decisionPrompt("Banish up to 3 cards from soul", "card.dtd.soul.banish.three", { optionMessages: commonOptionMessages("done") }), ["done", ...soul.map((card) => card.instanceId)]); },
     onPlay(ctx) {
       if (ctx.getCounter("lance-mode:power") > 0) ctx.addModifier({ scope: "chain-link", attack: 2, appliesToSubtype: "light" });
       if (ctx.getCounter("lance-mode:draw") > 0) ctx.addModifier({ scope: "chain-link", onHitDraw: 1, appliesToSubtype: "light" });
@@ -264,15 +274,19 @@ export const dtdHighRarity: Record<string, CardScript> = {
           const count = ctx.getCounter("lance-count") + 1; ctx.setCounter("lance-count", count);
           const soul = ctx.player(ctx.seat).soul;
           if (count < 3 && soul.length) {
-            ctx.requestCardChoice("lance-soul", "Banish another soul card?", ["done", ...soul.map((card) => card.instanceId)]);
+            ctx.requestCardChoice("lance-soul", decisionPrompt("Banish another soul card?", "card.dtd.soul.banish.next", { optionMessages: commonOptionMessages("done") }), ["done", ...soul.map((card) => card.instanceId)]);
             return;
           }
         }
-        if (ctx.getCounter("lance-count") > 0) ctx.requestChoice("lance-mode", "Choose a Lumina Lance mode", ["power", "draw", "go-again"]);
+        if (ctx.getCounter("lance-count") > 0) ctx.requestChoice("lance-mode", decisionPrompt("Choose a Lumina Lance mode", "card.dtd.lance.mode", { optionMessages: {
+          power: decisionMessage("card.dtd.lance.option.power"), draw: decisionMessage("card.dtd.lance.option.draw"), "go-again": decisionMessage("card.dtd.lance.option.goagain"),
+        } }), ["power", "draw", "go-again"]);
       } else if (hook === "lance-mode") {
         ctx.setCounter(`lance-mode:${option}`, 1);
         const used = ctx.getCounter("lance-modes") + 1; ctx.setCounter("lance-modes", used);
-        if (used < ctx.getCounter("lance-count")) ctx.requestChoice("lance-mode", "Choose another Lumina Lance mode", ["power", "draw", "go-again"].filter((mode) => ctx.getCounter(`lance-mode:${mode}`) <= 0));
+        if (used < ctx.getCounter("lance-count")) ctx.requestChoice("lance-mode", decisionPrompt("Choose another Lumina Lance mode", "card.dtd.lance.mode.next", { optionMessages: {
+          power: decisionMessage("card.dtd.lance.option.power"), draw: decisionMessage("card.dtd.lance.option.draw"), "go-again": decisionMessage("card.dtd.lance.option.goagain"),
+        } }), ["power", "draw", "go-again"].filter((mode) => ctx.getCounter(`lance-mode:${mode}`) <= 0));
       }
     },
   },
@@ -294,8 +308,8 @@ export const dtdHighRarity: Record<string, CardScript> = {
   "blood dripping frenzy|3": { additionalCost(ctx) { let sixes = 0; let bloodDebtCards = 0; for (const card of [...ctx.player(ctx.seat).hand]) { if (ctx.basePower(card) >= 6) sixes++; if (data(ctx, card).text.includes("Blood Debt")) bloodDebtCards++; ctx.banish(card.instanceId); } ctx.drawCards(ctx.seat, bloodDebtCards); ctx.addModifier({ scope: "until-end-of-turn", attack: sixes, appliesToType: ["brute", "shadow"] }); } },
   "vynnset, iron maiden|0": {
     triggers: [
-      { event: "start-of-turn", whose: "subject", label: "Banish a card and create a Runechant", condition: (ctx) => ctx.player(ctx.seat).hand.length > 0, effect(ctx) { ctx.requestCardChoice("vynnset-adult", "Banish a card", ctx.player(ctx.seat).hand.map((card) => card.instanceId)); } },
-      { event: "card-played", label: "Pay 1 life to make the next Runechant unpreventable?", condition: (ctx, card) => !!card && ctx.hasCardType(card, "action") && !has(ctx, card, "attack") && has(ctx, card, "shadow") && ctx.player(ctx.seat).life > 1, effect(ctx) { ctx.requestChoice("vynnset-life", "Pay 1 life to make the next Runechant unpreventable?", ["yes", "no"]); } },
+      { event: "start-of-turn", whose: "subject", label: "Banish a card and create a Runechant", condition: (ctx) => ctx.player(ctx.seat).hand.length > 0, effect(ctx) { ctx.requestCardChoice("vynnset-adult", decisionPrompt("Banish a card", "card.dtd.card.banish"), ctx.player(ctx.seat).hand.map((card) => card.instanceId)); } },
+      { event: "card-played", label: "Pay 1 life to make the next Runechant unpreventable?", condition: (ctx, card) => !!card && ctx.hasCardType(card, "action") && !has(ctx, card, "attack") && has(ctx, card, "shadow") && ctx.player(ctx.seat).life > 1, effect(ctx) { ctx.requestChoice("vynnset-life", yesNoPrompt("Pay 1 life to make the next Runechant unpreventable?", "card.dtd.runechant.life.pay"), ["yes", "no"]); } },
     ],
     onChoose(ctx, hook, option) { if (hook === "vynnset-adult" && ctx.banish(Number(option))) ctx.createToken(RUNECHANT); if (hook === "vynnset-life" && option === "yes") { ctx.loseLife(ctx.seat, 1); ctx.setPlayerFlag(ctx.seat, "nextRunechantUnpreventable", true); } },
   },
@@ -341,7 +355,9 @@ export const dtdHighRarity: Record<string, CardScript> = {
       const attacks = hand.filter((card) => isAttack(ctx, card));
       ctx.requestCardChoice(
         "inducement",
-        attacks.length ? "Choose a revealed attack" : "No revealed attacks can be chosen",
+        decisionPrompt(attacks.length ? "Choose a revealed attack" : "No revealed attacks can be chosen", attacks.length ? "card.dtd.revealed.attack.choose" : "card.dtd.revealed.attack.none", { optionMessages: {
+          ...commonOptionMessages("no"), Close: decisionMessage("common.option.close"),
+        } }),
         attacks.length ? ["no", ...attacks.map((card) => card.instanceId)] : ["Close"],
         undefined,
         revealedIds,
@@ -357,15 +373,15 @@ export const dtdHighRarity: Record<string, CardScript> = {
     canTriggerOnDefend: defendsTogetherWithCardFromHand,
     onDefend(ctx) { ctx.createToken(ELOQUENCE); },
   },
-  "diadem of dreamstate|0": { onFriendlyDestroyed(ctx, card) { if (ctx.getPlayerFlag(ctx.seat, "diademTriggered") === true || data(ctx, card).cardType === "token" || !data(ctx, card).text.toLowerCase().includes("ward")) return; ctx.setPlayerFlag(ctx.seat, "diademTriggered", true); if (ctx.player(ctx.seat).resources > 0) ctx.requestPayment("diadem", "Pay 1 to create Ponder?", 1); }, onChoose(ctx, hook, option) { if (hook === "diadem" && option === "paid") ctx.createToken(PONDER); } },
-  "lost in thought|1": { onPlay(ctx) { const hand = ctx.player(opponentSeat(ctx)).hand; for (const card of hand) ctx.lookAt(card.instanceId); const attacks = hand.filter((card) => isAttack(ctx, card)); if (attacks.length) ctx.requestCardChoice("lost-thought", "Choose an attack to bottom", attacks.map((card) => card.instanceId)); }, onChoose(ctx, hook, option) { if (hook === "lost-thought" && ctx.revealCards([Number(option)], opponentSeat(ctx)) && ctx.putOnDeckBottom(Number(option))) ctx.createToken(PONDER, opponentSeat(ctx)); } },
-  "censor|1": { canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined; }, onHit(ctx) { ctx.requestNameChoice("censor-name", "Name a card", ctx.seat); }, onChoose(ctx, hook, option) { if (hook === "censor-name") ctx.addModifier({ scope: "until-end-of-turn", seat: opponentSeat(ctx), prohibitsName: option.toLowerCase(), expiresAtEndOfSeatTurn: opponentSeat(ctx) }); } },
-  "mischievous meeps|1": { canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined; }, onHit(ctx) { const items = ctx.player(opponentSeat(ctx)).board.filter((card) => has(ctx, card, "item") && (data(ctx, card).cost ?? 0) <= 2); if (items.length) ctx.requestCardChoice("meeps", "Steal an item", items.map((card) => card.instanceId)); else ctx.drawCards(ctx.seat, 1); }, onChoose(ctx, hook, option) { if (hook === "meeps" && !ctx.steal(Number(option), { duration: "indefinite" })) ctx.drawCards(ctx.seat, 1); } },
+  "diadem of dreamstate|0": { onFriendlyDestroyed(ctx, card) { if (ctx.getPlayerFlag(ctx.seat, "diademTriggered") === true || data(ctx, card).cardType === "token" || !data(ctx, card).text.toLowerCase().includes("ward")) return; ctx.setPlayerFlag(ctx.seat, "diademTriggered", true); if (ctx.player(ctx.seat).resources > 0) ctx.requestPayment("diadem", decisionPrompt("Pay 1 to create Ponder?", "card.dtd.ponder.pay"), 1); }, onChoose(ctx, hook, option) { if (hook === "diadem" && option === "paid") ctx.createToken(PONDER); } },
+  "lost in thought|1": { onPlay(ctx) { const hand = ctx.player(opponentSeat(ctx)).hand; for (const card of hand) ctx.lookAt(card.instanceId); const attacks = hand.filter((card) => isAttack(ctx, card)); if (attacks.length) ctx.requestCardChoice("lost-thought", decisionPrompt("Choose an attack to bottom", "card.dtd.attack.bottom.choose"), attacks.map((card) => card.instanceId)); }, onChoose(ctx, hook, option) { if (hook === "lost-thought" && ctx.revealCards([Number(option)], opponentSeat(ctx)) && ctx.putOnDeckBottom(Number(option))) ctx.createToken(PONDER, opponentSeat(ctx)); } },
+  "censor|1": { canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined; }, onHit(ctx) { ctx.requestNameChoice("censor-name", decisionPrompt("Name a card", "card.dtd.card.name"), ctx.seat); }, onChoose(ctx, hook, option) { if (hook === "censor-name") ctx.addModifier({ scope: "until-end-of-turn", seat: opponentSeat(ctx), prohibitsName: option.toLowerCase(), expiresAtEndOfSeatTurn: opponentSeat(ctx) }); } },
+  "mischievous meeps|1": { canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined; }, onHit(ctx) { const items = ctx.player(opponentSeat(ctx)).board.filter((card) => has(ctx, card, "item") && (data(ctx, card).cost ?? 0) <= 2); if (items.length) ctx.requestCardChoice("meeps", decisionPrompt("Steal an item", "card.dtd.item.steal"), items.map((card) => card.instanceId)); else ctx.drawCards(ctx.seat, 1); }, onChoose(ctx, hook, option) { if (hook === "meeps" && !ctx.steal(Number(option), { duration: "indefinite" })) ctx.drawCards(ctx.seat, 1); } },
   "hold the line|3": { onPlay(ctx) { if (Number(ctx.getPlayerFlag(opponentSeat(ctx), "cardsDrawnThisTurn")) >= 2) ctx.preventNextDamage(ctx.seat, 3); } },
-  "hack to reality|2": { onPlay(ctx) { buffNextAttack(ctx, { attack: 2 }); ctx.addModifier({ scope: "until-end-of-turn" }); }, canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.state.modifiers.some((modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "chain-link"); }, onHit(ctx) { const auras = ctx.player(opponentSeat(ctx)).board.filter((card) => has(ctx, card, "aura") && data(ctx, card).cardType !== "token" && (data(ctx, card).cost ?? 0) <= (ctx.link?.damage ?? 0)); if (auras.length) ctx.requestCardChoice("hack-aura", "Destroy a non-token aura", auras.map((card) => card.instanceId)); }, onChoose(ctx, hook, option) { if (hook === "hack-aura") ctx.destroyPermanent(Number(option)); } },
+  "hack to reality|2": { onPlay(ctx) { buffNextAttack(ctx, { attack: 2 }); ctx.addModifier({ scope: "until-end-of-turn" }); }, canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.state.modifiers.some((modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "chain-link"); }, onHit(ctx) { const auras = ctx.player(opponentSeat(ctx)).board.filter((card) => has(ctx, card, "aura") && data(ctx, card).cardType !== "token" && (data(ctx, card).cost ?? 0) <= (ctx.link?.damage ?? 0)); if (auras.length) ctx.requestCardChoice("hack-aura", decisionPrompt("Destroy a non-token aura", "card.dtd.aura.destroy"), auras.map((card) => card.instanceId)); }, onChoose(ctx, hook, option) { if (hook === "hack-aura") ctx.destroyPermanent(Number(option)); } },
   "warmonger's diplomacy|3": {
     onPlay(ctx) {
-      ctx.requestChoice("diplomacy-opponent", "Choose war or peace", ["war", "peace"], opponentSeat(ctx));
+      ctx.requestChoice("diplomacy-opponent", decisionPrompt("Choose war or peace", "card.dtd.diplomacy.choose", { optionMessages: { war: decisionMessage("card.dtd.option.war"), peace: decisionMessage("card.dtd.option.peace") } }), ["war", "peace"], opponentSeat(ctx));
     },
     onChoose(ctx, hook, option) {
       const target = hook === "diplomacy-opponent"
@@ -384,7 +400,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
         expiresAtEndOfSeatTurn: target,
       });
       if (hook === "diplomacy-opponent") {
-        ctx.requestChoice("diplomacy-self", "Choose war or peace", ["war", "peace"]);
+        ctx.requestChoice("diplomacy-self", decisionPrompt("Choose war or peace", "card.dtd.diplomacy.choose", { optionMessages: { war: decisionMessage("card.dtd.option.war"), peace: decisionMessage("card.dtd.option.peace") } }), ["war", "peace"]);
       }
     },
   },

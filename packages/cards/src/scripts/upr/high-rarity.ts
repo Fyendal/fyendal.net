@@ -1,5 +1,14 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { dealArcane, opponentSeat, requestDiscardChoice, resolveDiscardChoice, wizardActionAsInstant } from "../shared-helpers.js";
+import {
+  commonOptionMessages,
+  dealArcane,
+  decisionPrompt,
+  opponentSeat,
+  requestDiscardChoice,
+  resolveDiscardChoice,
+  wizardActionAsInstant,
+  yesNoPrompt,
+} from "../shared-helpers.js";
 
 const ASH = "UPR043";
 const FROSTBITE = "SIY035";
@@ -21,7 +30,7 @@ function controlledPhoenixFlames(ctx: ScriptCtx): number {
 function ashes(ctx: ScriptCtx) { return ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "ash")); }
 function invoke(backId: string): CardScript {
   return {
-    onPlay(ctx) { const cards = ashes(ctx); if (cards.length) ctx.requestCardChoice("invoke-high", "Choose an Ash to transform", cards.map((card) => card.instanceId)); },
+    onPlay(ctx) { const cards = ashes(ctx); if (cards.length) ctx.requestCardChoice("invoke-high", decisionPrompt("Choose an Ash to transform", "card.upr.ash.transform.choose"), cards.map((card) => card.instanceId)); },
     onChoose(ctx, hook, option) { if (hook === "invoke-high") ctx.transformInto(backId, [Number(option)], ctx.self.instanceId); },
   };
 }
@@ -32,7 +41,7 @@ function revealRed(ctx: ScriptCtx, count: number): number {
 }
 function fusedIce(): Pick<CardScript, "additionalCost" | "onChoose"> {
   return {
-    additionalCost(ctx) { const ice = ctx.player(ctx.seat).hand.filter((card) => has(ctx, card, "ice")); if (ice.length) ctx.requestCardChoice("upr-high-fuse", "Reveal an Ice card to fuse?", ["no", ...ice.map((card) => card.instanceId)]); },
+    additionalCost(ctx) { const ice = ctx.player(ctx.seat).hand.filter((card) => has(ctx, card, "ice")); if (ice.length) ctx.requestCardChoice("upr-high-fuse", decisionPrompt("Reveal an Ice card to fuse?", "card.upr.ice.fusion.reveal", { optionMessages: commonOptionMessages("no") }), ["no", ...ice.map((card) => card.instanceId)]); },
     onChoose(ctx, hook, option) { if (hook === "upr-high-fuse" && option !== "no") { ctx.setCounter("fused", 1); ctx.setFlag("player", "fusedThisTurn", true); } },
   };
 }
@@ -43,7 +52,21 @@ const dromai: CardScript = {
   onFriendlyActivate(ctx, activated) { if (has(ctx, activated, "dragon") && Number(ctx.getFlag("player", "playedPitch:1")) > 0) ctx.grantGoAgain(); },
 };
 const fai: CardScript = {
-  onGameStart(ctx) { const flame = ctx.player(ctx.seat).deck.find((card) => named(ctx, card, "phoenix flame")); if (flame) ctx.moveToGraveyard(flame.instanceId, "deck"); },
+  onGameStart(ctx) {
+    const flame = ctx.player(ctx.seat).deck.find((card) => named(ctx, card, "phoenix flame"));
+    if (flame) {
+      ctx.requestChoice(
+        "fai-start-flame",
+        yesNoPrompt("Start the game with a Phoenix Flame in your graveyard?", "card.upr.fai.startflame"),
+        ["yes", "no"],
+      );
+    }
+  },
+  onChoose(ctx, hook, option) {
+    if (hook !== "fai-start-flame" || option !== "yes") return;
+    const flame = ctx.player(ctx.seat).deck.find((card) => named(ctx, card, "phoenix flame"));
+    if (flame) ctx.moveToGraveyard(flame.instanceId, "deck");
+  },
   activated: { cost: 3, isAttack: false, goAgain: false, timing: "instant", oncePerTurn: true, canActivate: (ctx) => ctx.player(ctx.seat).graveyard.some((card) => named(ctx, card, "phoenix flame")), modifyCost: (ctx, base) => Math.max(0, base - ctx.chainLinksControlled(ctx.seat, "draconic")), onActivate(ctx) { const flame = ctx.player(ctx.seat).graveyard.find((card) => named(ctx, card, "phoenix flame")); if (flame) ctx.moveToHand(flame.instanceId); } },
 };
 const iyslander: CardScript = {
@@ -65,7 +88,7 @@ export const uprHighRarity: Record<string, CardScript> = {
       ctx.setCounter("tomeltaiRed", red);
       const equipment = Object.values(ctx.player(opponentSeat(ctx)).equipment)
         .filter((card): card is DeepReadonly<CardInstance> => !!card);
-      if (equipment.length) ctx.requestCardChoice("tomeltai-equipment", "Choose equipment for Tomeltai", equipment.map((card) => card.instanceId));
+      if (equipment.length) ctx.requestCardChoice("tomeltai-equipment", decisionPrompt("Choose equipment for Tomeltai", "card.upr.tomeltai.equipment.choose"), equipment.map((card) => card.instanceId));
     },
     onChoose(ctx, hook, option) {
       if (hook !== "tomeltai-equipment") return;
@@ -84,7 +107,7 @@ export const uprHighRarity: Record<string, CardScript> = {
       if (revealRed(ctx, 1) <= 0) return;
       const hand = ctx.player(opponentSeat(ctx)).hand;
       for (const card of hand) ctx.lookAt(card.instanceId);
-      if (hand.length) ctx.requestCardChoice("dominia-banish", "Choose a card from the opposing hand to banish", hand.map((card) => card.instanceId));
+      if (hand.length) ctx.requestCardChoice("dominia-banish", decisionPrompt("Choose a card from the opposing hand to banish", "card.upr.opposing.hand.banish"), hand.map((card) => card.instanceId));
     },
     onChoose(ctx, hook, option) { if (hook === "dominia-banish") ctx.banish(Number(option)); },
   }),
@@ -112,7 +135,7 @@ export const uprHighRarity: Record<string, CardScript> = {
           ...player.arsenal.filter((card) => Number(card.counters?.frozenUntilTurn ?? 0) > ctx.state.turn),
           ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => !!card && Number(card.counters?.frozenUntilTurn ?? 0) > ctx.state.turn),
         ]);
-        if (targets.length) ctx.requestCardChoice("thaw-target", "Choose a frozen card or Ice permanent", targets.map((card) => card.instanceId));
+        if (targets.length) ctx.requestCardChoice("thaw-target", decisionPrompt("Choose a frozen card or Ice permanent", "card.upr.frozen.ice.choose"), targets.map((card) => card.instanceId));
       },
     }],
     onChoose(ctx, hook, option) {
@@ -131,7 +154,7 @@ export const uprHighRarity: Record<string, CardScript> = {
   "encase|1": { ...fusedIce(), arcaneDamageEffect: true, arcaneDamageEffectAmounts: [3], playAsInstant: wizardActionAsInstant, onPlay(ctx) { dealArcane(ctx, opponentSeat(ctx), 3); } },
   "freezing point|1": { ...fusedIce(), arcaneDamageEffect: true, arcaneDamageEffectAmounts: [5], playAsInstant: wizardActionAsInstant, onPlay(ctx) { const opp = ctx.player(opponentSeat(ctx)); const frozen = [...opp.arsenal, ...opp.board, ...Object.values(opp.equipment).filter((card): card is DeepReadonly<CardInstance> => !!card)].filter((card) => Number(card.counters?.frozenUntilTurn ?? 0) > ctx.state.turn).length; const ice = opp.board.filter((card) => has(ctx, card, "ice") && has(ctx, card, "affliction")).length; dealArcane(ctx, opp.seat, 5 + (ctx.getCounter("fused") ? frozen + ice + opp.board.filter((card) => named(ctx, card, "frostbite")).length : 0)); } },
   "frost hex|3": {},
-  "coronet peak|0": { activated: { cost: 3, isAttack: false, goAgain: true, oncePerTurn: true, onActivate(ctx) { const seat = opponentSeat(ctx); if (!ctx.requestPayment("coronet", "Pay 1 or discard a card", 1, seat)) { const hand = ctx.player(seat).hand; if (hand.length) ctx.requestCardChoice("coronet-discard", "Choose a card to discard", hand.map((card) => card.instanceId), seat); } } }, onChoose(ctx, hook, option) { if (hook === "coronet" && option !== "paid") { const hand = ctx.player(opponentSeat(ctx)).hand; if (hand.length) ctx.requestCardChoice("coronet-discard", "Choose a card to discard", hand.map((card) => card.instanceId), opponentSeat(ctx)); } else if (hook === "coronet-discard") ctx.discardCard(opponentSeat(ctx), Number(option)); } },
+  "coronet peak|0": { activated: { cost: 3, isAttack: false, goAgain: true, oncePerTurn: true, onActivate(ctx) { const seat = opponentSeat(ctx); if (!ctx.requestPayment("coronet", decisionPrompt("Pay 1 or discard a card", "card.upr.pay.or.discard", { values: { amount: 1 } }), 1, seat)) { const hand = ctx.player(seat).hand; if (hand.length) ctx.requestCardChoice("coronet-discard", decisionPrompt("Choose a card to discard", "card.upr.discard.choose"), hand.map((card) => card.instanceId), seat); } } }, onChoose(ctx, hook, option) { if (hook === "coronet" && option !== "paid") { const hand = ctx.player(opponentSeat(ctx)).hand; if (hand.length) ctx.requestCardChoice("coronet-discard", decisionPrompt("Choose a card to discard", "card.upr.discard.choose"), hand.map((card) => card.instanceId), opponentSeat(ctx)); } else if (hook === "coronet-discard") ctx.discardCard(opponentSeat(ctx), Number(option)); } },
   "channel the bleak expanse|3": {
     prohibitsReveals: true,
     prohibitsEffectDraws: true,
@@ -141,7 +164,7 @@ export const uprHighRarity: Record<string, CardScript> = {
       ctx.setCounter("channelRemaining", ctx.getCounter("flow"));
       const ice = ctx.player(ctx.seat).pitch.filter((card) => has(ctx, card, "ice"));
       if (ice.length < ctx.getCounter("channelRemaining")) ctx.destroySelf();
-      else ctx.requestCardChoice("bleak-channel", "Put an Ice card on the bottom of your deck", ice.map((card) => card.instanceId));
+      else ctx.requestCardChoice("bleak-channel", decisionPrompt("Put an Ice card on the bottom of your deck", "card.upr.ice.bottom"), ice.map((card) => card.instanceId));
     } }],
     onChoose(ctx, hook, option) {
       if (hook !== "bleak-channel" || !ctx.putOnDeckBottom(Number(option))) return;
@@ -149,11 +172,11 @@ export const uprHighRarity: Record<string, CardScript> = {
       if (ctx.getCounter("channelRemaining") <= 0) return;
       const ice = ctx.player(ctx.seat).pitch.filter((card) => has(ctx, card, "ice"));
       if (ice.length < ctx.getCounter("channelRemaining")) ctx.destroySelf();
-      else ctx.requestCardChoice("bleak-channel", "Put another Ice card on the bottom of your deck", ice.map((card) => card.instanceId));
+      else ctx.requestCardChoice("bleak-channel", decisionPrompt("Put another Ice card on the bottom of your deck", "card.upr.ice.bottom.next"), ice.map((card) => card.instanceId));
     },
   },
   "hypothermia|3": { onEnterArena(ctx) { ctx.setPlayerFlag(opponentSeat(ctx), "cannotGainGoAgain", true); }, onLeaveArena(ctx) { ctx.setPlayerFlag(opponentSeat(ctx), "cannotGainGoAgain", false); }, triggers: [{ event: "end-of-turn", label: "Destroy Hypothermia", effect: (ctx) => ctx.destroySelf() }] },
-  "insidious chill|3": { onEnterArena(ctx) { ctx.addCounter(ctx.self.instanceId, "frost", 3); }, triggers: [{ event: "card-played", label: "Remove a frost counter; opposing hero pays 2 or discards", condition: (ctx, card) => !!card && Number(card.counters?.fused ?? 0) > 0 && ctx.getCounter("frost") > 0 && has(ctx, card, "ice"), onTrigger(ctx) { ctx.addCounter(ctx.self.instanceId, "frost", -1); }, effect(ctx) { ctx.requestPayment("chill", "Pay 2 or discard", 2, opponentSeat(ctx)); } }], onChoose(ctx, hook, option) { if (hook === "chill" && option !== "paid") requestDiscardChoice(ctx, "chill-discard", "Choose a card to discard", opponentSeat(ctx)); else if (hook === "chill-discard") resolveDiscardChoice(ctx, option, opponentSeat(ctx)); } },
+  "insidious chill|3": { onEnterArena(ctx) { ctx.addCounter(ctx.self.instanceId, "frost", 3); }, triggers: [{ event: "card-played", label: "Remove a frost counter; opposing hero pays 2 or discards", condition: (ctx, card) => !!card && Number(card.counters?.fused ?? 0) > 0 && ctx.getCounter("frost") > 0 && has(ctx, card, "ice"), onTrigger(ctx) { ctx.addCounter(ctx.self.instanceId, "frost", -1); }, effect(ctx) { ctx.requestPayment("chill", decisionPrompt("Pay 2 or discard", "card.upr.pay.or.discard", { values: { amount: 2 } }), 2, opponentSeat(ctx)); } }], onChoose(ctx, hook, option) { if (hook === "chill" && option !== "paid") requestDiscardChoice(ctx, "chill-discard", decisionPrompt("Choose a card to discard", "card.upr.discard.choose"), opponentSeat(ctx)); else if (hook === "chill-discard") resolveDiscardChoice(ctx, option, opponentSeat(ctx)); } },
   "ghostly touch|0": {
     onFriendlyAttackLost(ctx, card, cause) {
       if (cause === "phantasm" && has(ctx, card, "illusionist")) ctx.addCounter(ctx.self.instanceId, "haunt", 1);
@@ -185,13 +208,13 @@ export const uprHighRarity: Record<string, CardScript> = {
   "double strike|1": { onChainLinkResolved(ctx) { if (ctx.getCounter("replayed") > 0) return; ctx.setCounter("replayed", 1); if (ctx.banish(ctx.self.instanceId)) ctx.allowPlayFrom(ctx.self.instanceId, "banish", { untilChainClose: true }); } },
   "take the tempo|1": { canTriggerOnHit(ctx) { return ctx.hitsThisCombatChain(ctx.seat) >= 3; }, onHit(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top && ctx.banish(top.instanceId) && isAttackCard(ctx, top)) ctx.allowPlayFrom(top.instanceId, "banish", { untilEndOfNextTurn: true }); } },
   "waning moon|0": { activated: { cost: 2, isAttack: false, goAgain: false, timing: "instant", oncePerTurn: true, canActivate: (ctx) => ctx.getFlag("player", "playedNonAttackAction") === true, onActivate(ctx) { dealArcane(ctx, opponentSeat(ctx), ctx.state.activePlayer === ctx.seat ? 2 : 3); } } },
-  "alluvion constellas|0": { preventArcaneDamage: 1, onPreventsDamage(ctx) { if (ctx.getCounter("preventionObservedTurn") === ctx.state.turn || ctx.getCounter("energy") >= 4) return; ctx.setCounter("preventionObservedTurn", ctx.state.turn); ctx.requestChoice("alluvion-energy", "Put an energy counter on Alluvion Constellas?", ["yes", "no"]); }, onChoose(ctx, hook, option) { if (hook === "alluvion-energy" && option === "yes" && ctx.getCounter("energy") < 4) ctx.addCounter(ctx.self.instanceId, "energy", 1); }, activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", oncePerTurn: false, removeCounterCost: { key: "energy", amount: 2 }, canActivate: (ctx) => ctx.getCounter("energy") >= 2, onActivate(ctx) { ctx.setPlayerFlag(ctx.seat, "nextStaffAbilityCostReduction", 3); } } },
-  "tome of duplicity|3": { onPlay(ctx) { const cards = ctx.player(ctx.seat).deck.slice(0, 2); for (const card of cards) ctx.lookAt(card.instanceId); if (cards.length) ctx.requestCardChoice("duplicity", "Choose a card to banish", cards.map((card) => card.instanceId)); }, onChoose(ctx, hook, option) { if (hook === "duplicity" && ctx.banish(Number(option))) ctx.allowPlayFrom(Number(option), "banish"); } },
+  "alluvion constellas|0": { preventArcaneDamage: 1, onPreventsDamage(ctx) { if (ctx.getCounter("preventionObservedTurn") === ctx.state.turn || ctx.getCounter("energy") >= 4) return; ctx.setCounter("preventionObservedTurn", ctx.state.turn); ctx.requestChoice("alluvion-energy", yesNoPrompt("Put an energy counter on Alluvion Constellas?", "card.upr.alluvion.counter"), ["yes", "no"]); }, onChoose(ctx, hook, option) { if (hook === "alluvion-energy" && option === "yes" && ctx.getCounter("energy") < 4) ctx.addCounter(ctx.self.instanceId, "energy", 1); }, activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", oncePerTurn: false, removeCounterCost: { key: "energy", amount: 2 }, canActivate: (ctx) => ctx.getCounter("energy") >= 2, onActivate(ctx) { ctx.setPlayerFlag(ctx.seat, "nextStaffAbilityCostReduction", 3); } } },
+  "tome of duplicity|3": { onPlay(ctx) { const cards = ctx.player(ctx.seat).deck.slice(0, 2); for (const card of cards) ctx.lookAt(card.instanceId); if (cards.length) ctx.requestCardChoice("duplicity", decisionPrompt("Choose a card to banish", "card.upr.card.banish.choose"), cards.map((card) => card.instanceId)); }, onChoose(ctx, hook, option) { if (hook === "duplicity" && ctx.banish(Number(option))) ctx.allowPlayFrom(Number(option), "banish"); } },
   "rewind|3": {
     canPlay(ctx) { return ctx.state.stack.some((layer) => layer.card && ctx.hasCardType(layer.card, "action") && !has(ctx, layer.card, "attack")); },
     onPlay(ctx) {
       const targets = ctx.state.stack.flatMap((layer) => layer.card && ctx.hasCardType(layer.card, "action") && !has(ctx, layer.card, "attack") ? [layer.card] : []);
-      if (targets.length) ctx.requestCardChoice("rewind-target", "Choose a non-attack action to negate", targets.map((card) => card.instanceId));
+      if (targets.length) ctx.requestCardChoice("rewind-target", decisionPrompt("Choose a non-attack action to negate", "card.upr.nonattack.negate"), targets.map((card) => card.instanceId));
     },
     onChoose(ctx, hook, option) {
       if (hook !== "rewind-target") return;
@@ -200,7 +223,7 @@ export const uprHighRarity: Record<string, CardScript> = {
       if (owner !== undefined && ctx.negateStackCard(id) && ctx.moveToHand(id)) ctx.changeActionPoints(owner, 1);
     },
   },
-  "crown of providence|0": { onDefend(ctx) { const cards = [...ctx.player(ctx.seat).hand, ...ctx.player(ctx.seat).arsenal]; if (cards.length) ctx.requestCardChoice("providence", "Put a card on the bottom to draw?", ["no", ...cards.map((card) => card.instanceId)]); }, onChoose(ctx, hook, option) { if (hook === "providence" && option !== "no" && ctx.putOnDeckBottom(Number(option))) ctx.drawCards(ctx.seat, 1); } },
+  "crown of providence|0": { onDefend(ctx) { const cards = [...ctx.player(ctx.seat).hand, ...ctx.player(ctx.seat).arsenal]; if (cards.length) ctx.requestCardChoice("providence", decisionPrompt("Put a card on the bottom to draw?", "card.upr.card.bottom.draw", { optionMessages: commonOptionMessages("no") }), ["no", ...cards.map((card) => card.instanceId)]); }, onChoose(ctx, hook, option) { if (hook === "providence" && option !== "no" && ctx.putOnDeckBottom(Number(option))) ctx.drawCards(ctx.seat, 1); } },
   "helio's mitre|0": { activated: { cost: 2, isAttack: false, goAgain: false, timing: "instant", oncePerTurn: false, onActivate(ctx) { ctx.preventNextDamage(ctx.seat, 1); ctx.setCounter("used", 1); } }, triggers: [{ event: "end-of-turn", condition: (ctx) => ctx.getCounter("used") > 0, label: "Destroy Helio's Mitre", effect: (ctx) => ctx.destroySelf() }] },
   "erase face|1": { canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined, onHit(ctx) { const target = opponentSeat(ctx); ctx.addModifier({ scope: "until-end-of-turn", seat: target, suppressesOwnedClassTalentTypes: true, expiresAtEndOfSeatTurn: target }); } },
   "vipox|1": { canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined, onHit(ctx) { ctx.loseLife(opponentSeat(ctx), ctx.player(opponentSeat(ctx)).hand.length); } },

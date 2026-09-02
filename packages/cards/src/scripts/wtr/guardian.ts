@@ -139,7 +139,7 @@ function cartilageCrush(): CardScript {
   return {
     canTriggerOnHit: crushTriggered,
     onHit(ctx) {
-      ctx.setPlayerFlag(opponentSeat(ctx), "nextActionExtraCost", 1);
+      ctx.increaseFirstActionCostNextTurn(opponentSeat(ctx), 1);
       ctx.logPublic("Cartilage Crush: opponent's next action costs +{r}");
     },
   };

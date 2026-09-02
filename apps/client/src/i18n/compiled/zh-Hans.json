@@ -1125,6 +1125,264 @@
       "value": "Squire's Bracers：摧毁此牌，使该剑的下一次攻击获得 +2 力量？"
     }
   ],
+  "card.dtd.angel.soul.banish": [
+    {
+      "type": 0,
+      "value": "从 soul 中放逐一张牌以使用该天使的能力？"
+    }
+  ],
+  "card.dtd.arsenal.banish.choose": [
+    {
+      "type": 0,
+      "value": "选择一张 arsenal 中的牌放逐"
+    }
+  ],
+  "card.dtd.attack.bottom.choose": [
+    {
+      "type": 0,
+      "value": "选择一张攻击牌置于牌库底部"
+    }
+  ],
+  "card.dtd.attack.top.optional": [
+    {
+      "type": 0,
+      "value": "将一张攻击行动牌置于牌库顶部？"
+    }
+  ],
+  "card.dtd.aura.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一个非衍生物灵气"
+    }
+  ],
+  "card.dtd.banished.action.choose": [
+    {
+      "type": 0,
+      "value": "选择一张已放逐的行动牌"
+    }
+  ],
+  "card.dtd.banished.action.different": [
+    {
+      "type": 0,
+      "value": "选择一张名称不同的已放逐行动牌"
+    }
+  ],
+  "card.dtd.banished.attack.choose": [
+    {
+      "type": 0,
+      "value": "选择一张已放逐的攻击行动牌"
+    }
+  ],
+  "card.dtd.banished.facedown": [
+    {
+      "type": 0,
+      "value": "将一张已放逐的牌翻至面朝下"
+    }
+  ],
+  "card.dtd.banished.facedown.optional": [
+    {
+      "type": 0,
+      "value": "将一张已放逐的牌翻至面朝下？"
+    }
+  ],
+  "card.dtd.card.banish": [
+    {
+      "type": 0,
+      "value": "放逐一张牌"
+    }
+  ],
+  "card.dtd.card.name": [
+    {
+      "type": 0,
+      "value": "说出一个牌名"
+    }
+  ],
+  "card.dtd.charge.choose": [
+    {
+      "type": 0,
+      "value": "选择一张牌进行充能"
+    }
+  ],
+  "card.dtd.charge.optional": [
+    {
+      "type": 0,
+      "value": "选择一张牌进行充能？"
+    }
+  ],
+  "card.dtd.charge.soul.optional": [
+    {
+      "type": 0,
+      "value": "为你的英雄 soul 充能？"
+    }
+  ],
+  "card.dtd.defender.defense.halve": [
+    {
+      "type": 0,
+      "value": "选择一张正在防守的牌，使其基础防御减半"
+    }
+  ],
+  "card.dtd.defending.soul.banish": [
+    {
+      "type": 0,
+      "value": "从防守英雄的 soul 中放逐一张牌"
+    }
+  ],
+  "card.dtd.diplomacy.choose": [
+    {
+      "type": 0,
+      "value": "选择战争或和平"
+    }
+  ],
+  "card.dtd.figment.awaken.choose": [
+    {
+      "type": 0,
+      "value": "选择一个 Figment 觉醒"
+    }
+  ],
+  "card.dtd.figment.search": [
+    {
+      "type": 0,
+      "value": "搜寻一个 Figment？"
+    }
+  ],
+  "card.dtd.figment.search.arena": [
+    {
+      "type": 0,
+      "value": "从你的牌库中搜寻一个 Figment 并将其放入竞技场？"
+    }
+  ],
+  "card.dtd.hand.banish.choose": [
+    {
+      "type": 0,
+      "value": "选择一张手牌放逐"
+    }
+  ],
+  "card.dtd.hand.card.banish": [
+    {
+      "type": 0,
+      "value": "放逐一张手牌"
+    }
+  ],
+  "card.dtd.item.steal": [
+    {
+      "type": 0,
+      "value": "夺取一个物品的操控权"
+    }
+  ],
+  "card.dtd.lance.mode": [
+    {
+      "type": 0,
+      "value": "选择 Lumina Lance 的一项模式"
+    }
+  ],
+  "card.dtd.lance.mode.next": [
+    {
+      "type": 0,
+      "value": "为 Lumina Lance 选择另一项模式"
+    }
+  ],
+  "card.dtd.lance.option.draw": [
+    {
+      "type": 0,
+      "value": "on hit，抽一张牌"
+    }
+  ],
+  "card.dtd.lance.option.goagain": [
+    {
+      "type": 0,
+      "value": "on hit，获得 go again"
+    }
+  ],
+  "card.dtd.lance.option.power": [
+    {
+      "type": 0,
+      "value": "+2 力量"
+    }
+  ],
+  "card.dtd.option.peace": [
+    {
+      "type": 0,
+      "value": "和平"
+    }
+  ],
+  "card.dtd.option.war": [
+    {
+      "type": 0,
+      "value": "战争"
+    }
+  ],
+  "card.dtd.ponder.pay": [
+    {
+      "type": 0,
+      "value": "支付 1 点资源以生成 Ponder？"
+    }
+  ],
+  "card.dtd.revealed.attack.choose": [
+    {
+      "type": 0,
+      "value": "选择一张已展示的攻击牌"
+    }
+  ],
+  "card.dtd.revealed.attack.none": [
+    {
+      "type": 0,
+      "value": "没有可选择的已展示攻击牌"
+    }
+  ],
+  "card.dtd.runechant.effect.life.pay": [
+    {
+      "type": 0,
+      "value": "支付 1 点生命，使下一个 Runechant 效果无法被阻止？"
+    }
+  ],
+  "card.dtd.runechant.life.pay": [
+    {
+      "type": 0,
+      "value": "支付 1 点生命，使下一个 Runechant 无法被阻止？"
+    }
+  ],
+  "card.dtd.soul.banish.next": [
+    {
+      "type": 0,
+      "value": "再从 soul 中放逐一张牌？"
+    }
+  ],
+  "card.dtd.soul.banish.shields": [
+    {
+      "type": 0,
+      "value": "从你的英雄 soul 中放逐一张牌以生成 2 个 Spectral Shield？"
+    }
+  ],
+  "card.dtd.soul.banish.three": [
+    {
+      "type": 0,
+      "value": "从 soul 中放逐至多 3 张牌"
+    }
+  ],
+  "card.dtd.soul.card.banish": [
+    {
+      "type": 0,
+      "value": "从 soul 中放逐一张牌"
+    }
+  ],
+  "card.dtd.yellow.action.top": [
+    {
+      "type": 0,
+      "value": "将一张黄色行动牌置于牌库顶部"
+    }
+  ],
+  "card.dtd.yellow.card.top": [
+    {
+      "type": 0,
+      "value": "将一张黄色牌置于牌库顶部"
+    }
+  ],
+  "card.dtd.yellow.soul": [
+    {
+      "type": 0,
+      "value": "将已展示的黄色牌放入你的 soul？"
+    }
+  ],
   "card.dyn.aetherslash.target.choose": [
     {
       "type": 0,
@@ -4715,6 +4973,412 @@
     {
       "type": 0,
       "value": "Terra：支付 1 点资源以生成一个 Might 衍生物？"
+    }
+  ],
+  "card.upr.action.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将一张行动牌置于牌库底部"
+    }
+  ],
+  "card.upr.alluvion.counter": [
+    {
+      "type": 0,
+      "value": "在 Alluvion Constellas 上放置一个能量指示物？"
+    }
+  ],
+  "card.upr.arcane.ally.choose": [
+    {
+      "type": 0,
+      "value": "对一名盟友造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害？"
+    }
+  ],
+  "card.upr.arcane.ally.next": [
+    {
+      "type": 0,
+      "value": "对另一名盟友造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害？"
+    }
+  ],
+  "card.upr.arcane.hero.choose": [
+    {
+      "type": 0,
+      "value": "选择一名英雄承受 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "card.upr.arcane.target.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：对任意目标造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "card.upr.ash.transform.choose": [
+    {
+      "type": 0,
+      "value": "选择一个 Ash 进行转化"
+    }
+  ],
+  "card.upr.ash.transform.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一个 Ash 进行转化"
+    }
+  ],
+  "card.upr.attack.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：放逐一张符合条件的攻击牌？"
+    }
+  ],
+  "card.upr.azvolai.target.next": [
+    {
+      "type": 0,
+      "value": "Azvolai：对另一个目标造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害？"
+    }
+  ],
+  "card.upr.azvolai.targets": [
+    {
+      "type": 0,
+      "value": "Azvolai：对至多 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个目标各造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "card.upr.card.banish.choose": [
+    {
+      "type": 0,
+      "value": "选择一张牌放逐"
+    }
+  ],
+  "card.upr.card.bottom.draw": [
+    {
+      "type": 0,
+      "value": "将一张牌置于牌库底部以抽牌？"
+    }
+  ],
+  "card.upr.damage.source.choose": [
+    {
+      "type": 0,
+      "value": "选择一个伤害来源"
+    }
+  ],
+  "card.upr.damage.target.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：对任意目标造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
+    }
+  ],
+  "card.upr.discard.choose": [
+    {
+      "type": 0,
+      "value": "选择一张牌弃置"
+    }
+  ],
+  "card.upr.discard.draw": [
+    {
+      "type": 0,
+      "value": "弃置一张牌以抽牌？"
+    }
+  ],
+  "card.upr.fai.startflame": [
+    {
+      "type": 0,
+      "value": "让一张凤凰烈焰在你的墓地中开始游戏？"
+    }
+  ],
+  "card.upr.freeze.ally": [
+    {
+      "type": 0,
+      "value": "冻结一名盟友？"
+    }
+  ],
+  "card.upr.freeze.arsenal": [
+    {
+      "type": 0,
+      "value": "冻结其 arsenal 中的牌？"
+    }
+  ],
+  "card.upr.freeze.avoid.pay": [
+    {
+      "type": 0,
+      "value": "支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源以避免被冻结？"
+    }
+  ],
+  "card.upr.freeze.card.choose": [
+    {
+      "type": 0,
+      "value": "选择一张牌冻结"
+    }
+  ],
+  "card.upr.frozen.ice.choose": [
+    {
+      "type": 0,
+      "value": "选择一张已冻结的牌或 Ice 永久物"
+    }
+  ],
+  "card.upr.hand.bottom.upto": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将至多 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 张手牌置于牌库底部"
+    }
+  ],
+  "card.upr.hero.choose": [
+    {
+      "type": 0,
+      "value": "选择一名英雄"
+    }
+  ],
+  "card.upr.hero.choose.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一名英雄"
+    }
+  ],
+  "card.upr.ice.bottom": [
+    {
+      "type": 0,
+      "value": "将一张 Ice 牌置于牌库底部"
+    }
+  ],
+  "card.upr.ice.bottom.next": [
+    {
+      "type": 0,
+      "value": "再将一张 Ice 牌置于牌库底部"
+    }
+  ],
+  "card.upr.ice.fusion.reveal": [
+    {
+      "type": 0,
+      "value": "展示一张 Ice 牌以进行 fusion？"
+    }
+  ],
+  "card.upr.ice.fusion.reveal.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：展示一张手牌中的 Ice 牌以进行 fusion？"
+    }
+  ],
+  "card.upr.kyloria.item.control": [
+    {
+      "type": 0,
+      "value": "Kyloria：获得一个物品的操控权"
+    }
+  ],
+  "card.upr.life.gain": [
+    {
+      "type": 0,
+      "value": "获得 1 点生命？"
+    }
+  ],
+  "card.upr.nonattack.negate": [
+    {
+      "type": 0,
+      "value": "选择一个非攻击行动使其失效"
+    }
+  ],
+  "card.upr.opposing.hand.banish": [
+    {
+      "type": 0,
+      "value": "选择对方的一张手牌放逐"
+    }
+  ],
+  "card.upr.option.you": [
+    {
+      "type": 0,
+      "value": "你"
+    }
+  ],
+  "card.upr.pay.or.discard": [
+    {
+      "type": 0,
+      "value": "支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源，否则弃置一张牌"
+    }
+  ],
+  "card.upr.phoenixflame.banish.goagain": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：放逐一张凤凰烈焰以获得 +2 力量和 go again？"
+    }
+  ],
+  "card.upr.phoenixflame.return": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将一张凤凰烈焰返回手牌？"
+    }
+  ],
+  "card.upr.phoenixflame.return.goagain": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将一张凤凰烈焰返回手牌并获得 go again？"
+    }
+  ],
+  "card.upr.power.pay": [
+    {
+      "type": 0,
+      "value": "支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源以获得 +"
+    },
+    {
+      "type": 1,
+      "value": "power"
+    },
+    {
+      "type": 0,
+      "value": " 力量？"
+    }
+  ],
+  "card.upr.revealed.action.none": [
+    {
+      "type": 0,
+      "value": "没有可置于牌库顶部的已展示行动牌"
+    }
+  ],
+  "card.upr.revealed.action.top": [
+    {
+      "type": 0,
+      "value": "将一张已展示的行动牌置于牌库顶部"
+    }
+  ],
+  "card.upr.tomeltai.equipment.choose": [
+    {
+      "type": 0,
+      "value": "为 Tomeltai 选择一件装备"
     }
   ],
   "card.wtr.bolters.destroy": [

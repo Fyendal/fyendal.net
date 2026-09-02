@@ -1555,6 +1555,18 @@ export function makeCtx(
       counters.firstAttackExtraCostTurn = turn;
       counters.firstAttackExtraCost = existing + amount;
     },
+    increaseFirstActionCostNextTurn(targetSeat, amount) {
+      if (amount <= 0) return;
+      const target = state.players[targetSeat] as PlayerState | undefined;
+      if (!target) return;
+      const turn = state.turn + (targetSeat === state.activePlayer ? 2 : 1);
+      const counters = (target.hero.counters ??= {});
+      const existing = Number(counters.firstActionExtraCostTurn ?? 0) === turn
+        ? Number(counters.firstActionExtraCost ?? 0)
+        : 0;
+      counters.firstActionExtraCostTurn = turn;
+      counters.firstActionExtraCost = existing + amount;
+    },
     preventAuraTokenCreationNextTurn(targetSeat) {
       const target = state.players[targetSeat] as PlayerState | undefined;
       if (!target) return;

@@ -21,6 +21,7 @@ const localizedSets = [
   "azs",
   "cru",
   "ddd",
+  "dtd",
   "dyn",
   "ele",
   "evr",
@@ -47,6 +48,7 @@ const localizedSets = [
   "sup",
   "tcc",
   "ter",
+  "upr",
   "wtr",
 ] as const;
 const decisionPromptArgument = new Map([

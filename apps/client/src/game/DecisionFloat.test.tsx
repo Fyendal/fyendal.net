@@ -209,6 +209,9 @@ describe("priority guidance help", () => {
     expect(html).toContain("Uncheck Show guidance in Settings, or select Disable now.");
     expect(html).toContain('aria-haspopup="dialog"');
     expect(html).toContain('aria-expanded="false"');
+    expect(html).toContain('class="shortcut-button"');
+    expect(html).toContain('aria-keyshortcuts="Space"');
+    expect(html).toContain(">Pass<");
 
     const popover = renderToStaticMarkup(createElement(
       TestI18nProvider,

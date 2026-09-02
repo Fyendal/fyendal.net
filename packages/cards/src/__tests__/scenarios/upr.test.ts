@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { legalIntents, projectStateFor } from "@fyendal/engine";
-import { cardData, scripts } from "../../index.js";
+import { applyIntent, createGame, legalIntents, projectStateFor } from "@fyendal/engine";
+import type { Decklist } from "@fyendal/shared";
+import { cardData, decklists, scripts } from "../../index.js";
 import { printingId, scenario } from "../harness.js";
 
 const BLUE = "wrecker romp|3";
@@ -62,6 +63,58 @@ describe("UPR — registration and heroes", () => {
     });
     s.activate("fai|0", { pitch: [BLUE] }).chooseCard("phoenix flame|1");
     s.expectInZone(0, "phoenix flame|1", "hand");
+  });
+
+  it.each([
+    ["yes", 1],
+    ["no", 0],
+  ] as const)("Fai may answer %s to starting with a Phoenix Flame in the graveyard", (optionId, expectedGraveyardFlames) => {
+    const faiDeck: Decklist = {
+      heroId: printingId("fai, rising rebellion|0"),
+      weaponIds: [printingId("searing emberblade|0")],
+      equipment: {},
+      deck: [
+        printingId("phoenix flame|1"),
+        ...Array.from({ length: 59 }, () => printingId(RED)),
+      ],
+    };
+    const setup = createGame({
+      decklists: [faiDeck, decklists.dorinthea],
+      seed: 7,
+      cards: cardData,
+      scripts,
+    });
+    expect(setup.pendingDecision).toMatchObject({
+      player: 0,
+      chooseHook: "fai-start-flame",
+      options: ["yes", "no"],
+    });
+
+    const answered = applyIntent(setup, 0, { kind: "choose", optionId });
+    expect(answered.ok).toBe(true);
+    if (!answered.ok) return;
+    expect(answered.state.players[0]!.graveyard.filter(
+      (card) => card.cardId === printingId("phoenix flame|1"),
+    )).toHaveLength(expectedGraveyardFlames);
+  });
+
+  it("Fai setup proceeds without a choice when the deck has no Phoenix Flame", () => {
+    const faiDeck: Decklist = {
+      heroId: printingId("fai, rising rebellion|0"),
+      weaponIds: [printingId("searing emberblade|0")],
+      equipment: {},
+      deck: Array.from({ length: 60 }, () => printingId(RED)),
+    };
+    const state = createGame({
+      decklists: [faiDeck, decklists.dorinthea],
+      seed: 7,
+      cards: cardData,
+      scripts,
+    });
+
+    expect(state.pendingDecision).toBeNull();
+    expect(state.phase).toBe("action");
+    expect(state.players[0]!.hand).toHaveLength(4);
   });
 
   it("Iyslander plays a blue Ice action from arsenal on the opponent's turn and creates Frostbite", () => {

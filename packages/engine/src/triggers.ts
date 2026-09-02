@@ -34,7 +34,7 @@ import { settlesInArena, settlePlayedCard } from "./cardLifecycle.js";
 import { alternativePlayCostOptions, canPlayAsInstant, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, cardsPlayableFromArsenal, cardsPlayableFromZone, cardLayerGoAgain, mayPlayFromArsenal, mayPlayFromZone, modifierMatchesPlayedCard, noteCardPlayed, payAlternativePlayCost, playTargetOptions, preparePlayTarget } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost, pitchValueOfInstance } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
-import { goAgainSuppressed, isFrozen, opposingInstantsProhibited, snapshotSerializable } from "./ruleQueries.js";
+import { consumeFirstActionExtraCost, firstActionExtraCost, goAgainSuppressed, isFrozen, opposingInstantsProhibited, snapshotSerializable } from "./ruleQueries.js";
 import { opposingActionsProhibited } from "./restrictions.js";
 import { defendingHeroCannotRespondBelowPower } from "./combatRestrictions.js";
 import { pushCardLayer } from "./stackCore.js";
@@ -607,6 +607,9 @@ export function playWindowInstant(
       logPublic(state, `${nameOf(state, player.heroCardId)} plays ${logNameOf(state, card.cardId)} in response`),
   });
   if (costErr) return costErr;
+  if (firstActionExtraCost(state, player) > 0 && cardHasType(state, card, "action")) {
+    consumeFirstActionExtraCost(state, player);
+  }
   if (variableCost) (card.counters ??= {})[variableCost.counterKey] = declaredVariableX!;
   if (alternativeCostCardInstanceIds !== undefined) {
     const alternativeErr = payAlternativePlayCost(
