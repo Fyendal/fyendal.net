@@ -36,10 +36,12 @@ export function GameMessageText({
   message,
   resolvers = {},
   breakOnDash = false,
+  fallback,
 }: {
   message: GameMessage;
   resolvers?: RichMessageResolvers;
   breakOnDash?: boolean;
+  fallback?: string;
 }) {
   const intl = useIntl();
   const values = Object.fromEntries(
@@ -50,7 +52,12 @@ export function GameMessageText({
       return [key, resolvers.term?.(value.id) ?? value.id];
     }),
   );
-  const formatted = intl.formatMessage({ id: message.id }, values);
+  const formatted = intl.formatMessage(
+    fallback === undefined
+      ? { id: message.id }
+      : { id: message.id, defaultMessage: fallback },
+    values,
+  );
   if (!breakOnDash) return <>{formatted}</>;
 
   const parts = Array.isArray(formatted) ? formatted : [formatted];

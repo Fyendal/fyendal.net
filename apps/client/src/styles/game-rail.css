@@ -275,6 +275,9 @@
 }
 .log-card-ref.log-card-ref-token:hover { color: #fff; }
 .log-card-ref.log-card-ref-token:focus-visible { outline-color: #fff; }
+.log-player-ref { font-weight: 700; }
+.log-player-ref-friendly { color: #78c1ff; }
+.log-player-ref-opponent { color: #ff827a; }
 .room-tag { font-size: 13px; color: #6d6353; text-align: center; }
 .game-utilities-actions,
 .game-confirm-actions {

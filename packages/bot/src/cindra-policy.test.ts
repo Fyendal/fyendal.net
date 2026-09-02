@@ -4008,6 +4008,12 @@ describe("Cindra engine-driven behavior scenarios", () => {
     sequence.push("Dragonscaler Flight Path");
     game = apply(game, 0, flightPathActivation);
     game = advanceUntil(game, (candidate) =>
+      candidate.pendingDecision?.prompt.includes("Dragonscaler Flight Path") === true
+    );
+    const flightPathTarget = cindraIntent(game);
+    expect(flightPathTarget.kind).toBe("choose");
+    game = apply(game, 0, flightPathTarget);
+    game = advanceUntil(game, (candidate) =>
       candidate.stack.length === 0 && candidate.pendingDecision?.kind === "attack-reaction" &&
       candidate.pendingDecision.player === 0 && candidate.players[0]!.equipment.legs === undefined
     );
@@ -4110,6 +4116,12 @@ describe("Cindra engine-driven behavior scenarios", () => {
       pitchInstanceIds: [],
     });
     game = apply(game, 0, flightPathActivation);
+    game = advanceUntil(game, (candidate) =>
+      candidate.pendingDecision?.prompt.includes("Dragonscaler Flight Path") === true
+    );
+    const flightPathTarget = cindraIntent(game);
+    expect(flightPathTarget.kind).toBe("choose");
+    game = apply(game, 0, flightPathTarget);
     game = advanceUntil(game, (candidate) =>
       candidate.stack.length === 0 && candidate.pendingDecision?.kind === "attack-reaction" &&
       candidate.pendingDecision.player === 0 && candidate.players[0]!.equipment.legs === undefined

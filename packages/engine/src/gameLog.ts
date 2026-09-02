@@ -1,3 +1,4 @@
+import type { GameLogPayload } from "@fyendal/shared";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { CardInstance, GameLogEntry, PlayerState } from "./state.js";
 
@@ -47,32 +48,63 @@ function appendLog(state: GameStateInternal, entry: GameLogEntry): void {
   const tagPublic = (text: string): string => moveLogCardTagsToEnd(
     tagKnownLogCardNames(state, text, publicCardIds),
   );
+  const publicText = entry.publicText === null ? null : tagPublic(entry.publicText);
+  const seatText = entry.seatText?.map((text) =>
+    text === null ? null : moveLogCardTagsToEnd(text)
+  ) as [string | null, string | null] | undefined;
+  const publicPayload = entry.publicPayload
+    ? { ...entry.publicPayload, fallback: tagPublic(entry.publicPayload.fallback) }
+    : undefined;
+  const seatPayloads = entry.seatPayloads?.map((payload) =>
+    payload === null
+      ? null
+      : { ...payload, fallback: moveLogCardTagsToEnd(payload.fallback) }
+  ) as [GameLogPayload | null, GameLogPayload | null] | undefined;
+  const structured = publicPayload !== undefined || seatPayloads !== undefined;
+  const sequence = structured
+    ? entry.sequence ?? state.nextLogSequence ?? 1
+    : undefined;
+  if (sequence !== undefined) {
+    state.nextLogSequence = Math.max(state.nextLogSequence ?? 1, sequence + 1);
+  }
   state.log.push({
-    publicText: entry.publicText === null ? null : tagPublic(entry.publicText),
-    ...(entry.seatText
-      ? {
-          seatText: entry.seatText.map((text) =>
-            text === null ? null : moveLogCardTagsToEnd(text)
-          ) as [string | null, string | null],
-        }
-      : {}),
+    publicText,
+    ...(seatText ? { seatText } : {}),
+    ...(sequence !== undefined ? { sequence } : {}),
+    ...(publicPayload !== undefined ? { publicPayload } : {}),
+    ...(seatPayloads ? { seatPayloads } : {}),
   });
   if (state.log.length > 200) state.log.splice(0, state.log.length - 200);
 }
 
-export function logPublic(state: GameStateInternal, text: string): void {
-  appendLog(state, { publicText: text });
+export function logPublic(state: GameStateInternal, entry: string | GameLogPayload): void {
+  appendLog(state, typeof entry === "string"
+    ? { publicText: entry }
+    : { publicText: entry.fallback, publicPayload: entry });
 }
 
 export function logPrivate(
   state: GameStateInternal,
   seat: number,
-  privateText: string,
-  publicText?: string,
+  privateEntry: string | GameLogPayload,
+  publicEntry?: string | GameLogPayload,
 ): void {
   const seatText: [string | null, string | null] = [null, null];
-  seatText[seat] = privateText;
-  appendLog(state, { publicText: publicText ?? null, seatText });
+  seatText[seat] = typeof privateEntry === "string" ? privateEntry : privateEntry.fallback;
+  const seatPayloads: [GameLogPayload | null, GameLogPayload | null] = [null, null];
+  if (typeof privateEntry !== "string") seatPayloads[seat] = privateEntry;
+  appendLog(state, {
+    publicText: publicEntry === undefined
+      ? null
+      : typeof publicEntry === "string"
+        ? publicEntry
+        : publicEntry.fallback,
+    seatText,
+    ...(typeof privateEntry !== "string" ? { seatPayloads } : {}),
+    ...(publicEntry !== undefined && typeof publicEntry !== "string"
+      ? { publicPayload: publicEntry }
+      : {}),
+  });
 }
 
 export function logForSeats(state: GameStateInternal, entry: GameLogEntry): void {

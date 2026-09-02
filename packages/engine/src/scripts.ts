@@ -1,4 +1,11 @@
-import type { CardData, CardType, EquipmentSlot, GameMessage, PlayableZone } from "@fyendal/shared";
+import type {
+  CardData,
+  CardType,
+  EquipmentSlot,
+  GameLogPayload,
+  GameMessage,
+  PlayableZone,
+} from "@fyendal/shared";
 import type {
   CardInstance,
   ChainLinkState,
@@ -584,10 +591,14 @@ export interface ScriptCtx {
   /** Transform until the start of this hero's next turn, preserving life. */
   becomeHeroUntilNextTurn(cardId: string): void;
   /** Log information that is public to both players and spectators. */
-  logPublic(text: string): void;
+  logPublic(entry: string | GameLogPayload): void;
   /** Log a private identity/detail for one seat, optionally with a redacted
    * public fallback. With no publicText, other audiences see nothing. */
-  logPrivate(seat: number, privateText: string, publicText?: string): void;
+  logPrivate(
+    seat: number,
+    privateEntry: string | GameLogPayload,
+    publicEntry?: string | GameLogPayload,
+  ): void;
   /** Append an explicitly classified per-audience entry. */
   logForSeats(entry: GameLogEntry): void;
 }

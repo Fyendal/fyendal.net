@@ -9,7 +9,7 @@ import { resolveWagerLayer, resumeWagerResult } from "../wagers.js";
 import { destroyPermanent } from "../zoneMoves.js";
 import { answerTokenCreationReplacement, answerTokenReplacementOrder } from "../tokens.js";
 import { cardHasType, cardTypesOf } from "../cardProperties.js";
-import { logPublic } from "../gameLog.js";
+import { logPrivate, logPublic } from "../gameLog.js";
 import { makeCtx } from "../scriptContext.js";
 import { abilityResourceCost } from "../abilityRules.js";
 import { mayPlayFromZone, playFromSourceCardId } from "../playRules.js";
@@ -1311,6 +1311,85 @@ describe("viewer projection secrecy", () => {
     expect(s.log).toHaveLength(200);
     expect(s.log[0]).toEqual({ publicText: "line-5" });
     expect(s.log.at(-1)).toEqual({ publicText: "line-204" });
+    expect(s.nextLogSequence).toBeUndefined();
+    expect(projectStateFor(s, 0).logEntries).toBeUndefined();
+  });
+
+  it("projects structured public logs beside aligned legacy fallbacks", () => {
+    const s = makeGame(397);
+    logPublic(s, {
+      fallback: "Hero A plays Attack Four",
+      message: {
+        id: "engine.log.card.played",
+        values: {
+          player: { kind: "player", seat: 0 },
+          card: { kind: "card", cardId: "ATK4" },
+        },
+      },
+      event: {
+        kind: "card-moved",
+        cardId: "ATK4",
+        ownerSeat: 0,
+        from: "hand",
+        to: "stack",
+      },
+    });
+
+    const view = projectStateFor(s, 0);
+    expect(view.log.at(-1)).toBe("Hero A plays Attack Four");
+    expect(view.logEntries?.at(-1)).toEqual({
+      fallback: "Hero A plays Attack Four",
+      sequence: 1,
+      message: {
+        id: "engine.log.card.played",
+        values: {
+          player: { kind: "player", seat: 0 },
+          card: { kind: "card", cardId: "ATK4" },
+        },
+      },
+      event: {
+        kind: "card-moved",
+        cardId: "ATK4",
+        ownerSeat: 0,
+        from: "hand",
+        to: "stack",
+      },
+    });
+    expect(s.nextLogSequence).toBe(2);
+  });
+
+  it("selects structured private or redacted public payloads before projection", () => {
+    const s = makeGame(396);
+    logPrivate(
+      s,
+      0,
+      {
+        fallback: "You look at Attack Four",
+        message: {
+          id: "engine.log.card.looked",
+          values: { card: { kind: "card", cardId: "ATK4" } },
+        },
+      },
+      {
+        fallback: "A player looks at a card",
+        message: { id: "engine.log.card.looked.hidden" },
+      },
+    );
+
+    expect(projectStateFor(s, 0).logEntries?.at(-1)).toMatchObject({
+      fallback: "You look at Attack Four",
+      message: { id: "engine.log.card.looked" },
+    });
+    for (const viewer of [1, null] as const) {
+      const view = projectStateFor(s, viewer);
+      const projected = JSON.stringify({
+        log: view.log.at(-1),
+        logEntry: view.logEntries?.at(-1),
+      });
+      expect(projected).toContain("engine.log.card.looked.hidden");
+      expect(projected).not.toContain("ATK4");
+      expect(projected).not.toContain("Attack Four");
+    }
   });
 
   it("contains poisoned private identities across complete seat, spectator, legal, and replay payloads", () => {

@@ -9585,6 +9585,20 @@
       "value": "Choose X"
     }
   ],
+  "engine.log.card.played": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " plays "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
   "footer.legal": [
     {
       "type": 0,

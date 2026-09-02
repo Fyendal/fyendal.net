@@ -1079,7 +1079,10 @@ describe("Hala policy", () => {
       if (!intent) throw new Error(`no test rollout intent for ${current.phase}`);
       if (actor === 0) {
         botIntents.push(intent);
-        if (current.pendingDecision?.prompt.toLowerCase().includes("reverent rerebrace")) {
+        if (
+          current.pendingDecision?.prompt.toLowerCase().includes("reverent rerebrace") &&
+          legal.some((candidate) => candidate.kind === "choose" && candidate.optionId === "no")
+        ) {
           rerebraceChoices.push(intent);
         }
       }
@@ -1974,7 +1977,10 @@ describe("Hala policy", () => {
           cards: cardData,
           state: current,
         });
-        if (current.pendingDecision?.prompt.toLowerCase().includes("reverent rerebrace")) {
+        if (
+          current.pendingDecision?.prompt.toLowerCase().includes("reverent rerebrace") &&
+          legal.some((candidate) => candidate.kind === "choose" && candidate.optionId === "no")
+        ) {
           rerebraceCountersAtChoice = Number(
             view.players[0].weapons.find((card) => card.instanceId === weaponId)?.counters?.power ?? 0,
           );
@@ -2144,9 +2150,14 @@ describe("Hala policy", () => {
     state.players[1]!.equipment.arms!.defCounters = 1;
 
     for (let step = 0; step < 80; step++) {
-      if (state.pendingDecision?.prompt.toLowerCase().includes("reverent rerebrace")) break;
       const actor = (state.pendingDecision?.player ?? state.priorityPlayer) as 0 | 1;
       const legal = legalIntents(state, actor);
+      if (
+        actor === 1 &&
+        state.pendingDecision?.prompt.toLowerCase().includes("reverent rerebrace") &&
+        legal.some((candidate) => candidate.kind === "choose" && candidate.optionId === "no") &&
+        Number(state.players[1]!.weapons[0]?.counters?.power ?? 0) === 3
+      ) break;
       const intent = actor === 1
         ? chooseHalaIntent({
             seat: 1,

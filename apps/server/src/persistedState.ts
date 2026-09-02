@@ -1,5 +1,5 @@
 import type { CardInstance, GameState, Modifier } from "@fyendal/engine";
-import type { GameMessage } from "@fyendal/shared";
+import type { GameLogEvent, GameLogPayload, GameMessage } from "@fyendal/shared";
 
 type JsonObject = Record<string, unknown>;
 type Seat = 0 | 1;
@@ -450,6 +450,9 @@ export interface PersistedPendingDecisionV1 {
 export interface PersistedGameLogEntryV1 {
   publicText: string | null;
   seatText?: [string | null, string | null];
+  sequence?: number;
+  publicPayload?: GameLogPayload;
+  seatPayloads?: [GameLogPayload | null, GameLogPayload | null];
 }
 
 export interface PersistedGameTurnStatsV1 {
@@ -504,6 +507,8 @@ export interface PersistedGameStateV1 {
   /** Optional only so rooms written before match counters were introduced can
    * hydrate safely; all newly encoded states include it. */
   gameStats?: PersistedGameStatsV1;
+  /** Optional until the first structured log event is emitted. */
+  nextLogSequence?: number;
   log: PersistedGameLogEntryV1[];
   winner: number | null;
 }
@@ -703,6 +708,86 @@ function validateGameMessage(value: unknown, code: string, path: string): void {
       }
     }
   }, path);
+}
+
+const GAME_LOG_ZONES = [
+  "hand", "deck", "arsenal", "pitch", "graveyard", "banish", "soul", "board",
+  "equipment", "weapon", "stack", "chain", "inventory",
+] as const;
+
+function validateGameLogEvent(value: unknown, code: string, path: string): void {
+  const event = object(value, code, path);
+  const kind = string(event.kind, code, `${path}.kind`, 32) as GameLogEvent["kind"];
+  const validateSeat = (seatValue: unknown, seatPath: string) => {
+    const seat = integer(seatValue, code, seatPath);
+    if (seat !== 0 && seat !== 1) fail(code, seatPath, "expected seat 0 or 1");
+  };
+  const positiveInteger = (integerValue: unknown, integerPath: string) => {
+    const result = integer(integerValue, code, integerPath);
+    if (result <= 0) fail(code, integerPath, "expected a positive safe integer");
+    return result;
+  };
+  if (kind === "card-moved") {
+    const moved = exact(value, code, path, ["kind", "ownerSeat", "from", "to"], ["cardId", "faceDown"]);
+    validateSeat(moved.ownerSeat, `${path}.ownerSeat`);
+    oneOf(moved.from, GAME_LOG_ZONES, code, `${path}.from`);
+    oneOf(moved.to, GAME_LOG_ZONES, code, `${path}.to`);
+    optional(moved, "cardId", (entry, entryPath) => { string(entry, code, entryPath, 128); }, path);
+    optional(moved, "faceDown", (entry, entryPath) => {
+      if (entry !== true) fail(code, entryPath, "expected true");
+    }, path);
+    return;
+  }
+  if (kind === "cards-revealed") {
+    const revealed = exact(value, code, path, ["kind", "cards", "sourceZone"]);
+    oneOf(revealed.sourceZone, ["hand", "deck", "inventory"] as const, code, `${path}.sourceZone`);
+    const cards = array(revealed.cards, code, `${path}.cards`, 256);
+    if (cards.length === 0) fail(code, `${path}.cards`, "expected at least one card");
+    cards.forEach((cardValue, index) => {
+      const cardPath = `${path}.cards[${index}]`;
+      const card = exact(cardValue, code, cardPath, ["cardId", "ownerSeat"]);
+      string(card.cardId, code, `${cardPath}.cardId`, 128);
+      validateSeat(card.ownerSeat, `${cardPath}.ownerSeat`);
+    });
+    return;
+  }
+  if (kind === "damage") {
+    const damage = exact(value, code, path, ["kind", "targetSeat", "amount", "damageType"], ["sourceCardId"]);
+    validateSeat(damage.targetSeat, `${path}.targetSeat`);
+    positiveInteger(damage.amount, `${path}.amount`);
+    oneOf(damage.damageType, ["physical", "arcane"] as const, code, `${path}.damageType`);
+    optional(damage, "sourceCardId", (entry, entryPath) => { string(entry, code, entryPath, 128); }, path);
+    return;
+  }
+  if (kind === "turn-start") {
+    const turn = exact(value, code, path, ["kind", "turn", "activeSeat"]);
+    positiveInteger(turn.turn, `${path}.turn`);
+    validateSeat(turn.activeSeat, `${path}.activeSeat`);
+    return;
+  }
+  if (kind === "shuffle") {
+    const shuffle = exact(value, code, path, ["kind", "seat"]);
+    validateSeat(shuffle.seat, `${path}.seat`);
+    return;
+  }
+  if (kind === "roll") {
+    const roll = exact(value, code, path, ["kind", "result"], ["seat", "sides"]);
+    const result = positiveInteger(roll.result, `${path}.result`);
+    optional(roll, "seat", (entry, entryPath) => { validateSeat(entry, entryPath); }, path);
+    optional(roll, "sides", (entry, entryPath) => {
+      const sides = positiveInteger(entry, entryPath);
+      if (result > sides) fail(code, `${path}.result`, "result exceeds die sides");
+    }, path);
+    return;
+  }
+  fail(code, `${path}.kind`, "unknown game log event kind");
+}
+
+function validateGameLogPayload(value: unknown, code: string, path: string): void {
+  const payload = exact(value, code, path, ["fallback", "message"], ["event"]);
+  string(payload.fallback, code, `${path}.fallback`);
+  validateGameMessage(payload.message, code, `${path}.message`);
+  optional(payload, "event", (event, eventPath) => validateGameLogEvent(event, code, eventPath), path);
 }
 
 function validateTokenCreationCause(value: unknown, code: string, path: string): void {
@@ -1319,7 +1404,7 @@ function validateDecision(value: unknown, code: string, path: string, depth = 0)
 function validateState(value: unknown, code: string): PersistedGameStateV1 {
   const path = "state";
   const required = ["seed", "rngState", "nextInstanceId", "nextModifierId", "turn", "activePlayer", "priorityPlayer", "phase", "players", "chain", "resolving", "pendingDecision", "pendingTokenCreations", "reactionPasses", "stack", "stackPasses", "stackResume", "modifiers", "pendingDestructions", "controlReturns", "log", "winner"] as const;
-  const state = exact(value, code, path, required, ["gameStats", "globalCardIds", "extraTurnSeats", "delayedTriggers", "pendingTriggeredLayers"]);
+  const state = exact(value, code, path, required, ["gameStats", "globalCardIds", "extraTurnSeats", "delayedTriggers", "pendingTriggeredLayers", "nextLogSequence"]);
   for (const key of ["seed", "rngState", "nextInstanceId", "nextModifierId", "turn", "activePlayer", "priorityPlayer", "reactionPasses", "stackPasses"] as const) integer(state[key], code, `${path}.${key}`);
   optional(state, "globalCardIds", (value, valuePath) => {
     array(value, code, valuePath, 32).forEach((entry, index) => {
@@ -1393,16 +1478,73 @@ function validateState(value: unknown, code: string): PersistedGameStateV1 {
       }
     });
   }, path);
+  optional(state, "nextLogSequence", (value, valuePath) => {
+    const sequence = integer(value, code, valuePath);
+    if (sequence <= 0) fail(code, valuePath, "expected a positive safe integer");
+  }, path);
+  let greatestLogSequence = 0;
+  let previousLogSequence = 0;
   array(state.log, code, `${path}.log`, MAX_LOG_ENTRIES).forEach((entryValue, index) => {
     const entryPath = `${path}.log[${index}]`;
-    const entry = exact(entryValue, code, entryPath, ["publicText"], ["seatText"]);
+    const entry = exact(
+      entryValue,
+      code,
+      entryPath,
+      ["publicText"],
+      ["seatText", "sequence", "publicPayload", "seatPayloads"],
+    );
     nullableString(entry.publicText, code, `${entryPath}.publicText`);
     optional(entry, "seatText", (v, p) => {
       const texts = array(v, code, p, 2);
       if (texts.length !== 2) fail(code, p, "expected two seat messages");
       nullableString(texts[0], code, `${p}[0]`); nullableString(texts[1], code, `${p}[1]`);
     }, entryPath);
+    const hasStructuredPayload = entry.publicPayload !== undefined || entry.seatPayloads !== undefined;
+    if (hasStructuredPayload && entry.sequence === undefined) {
+      fail(code, `${entryPath}.sequence`, "structured log entries require a sequence");
+    }
+    if (!hasStructuredPayload && entry.sequence !== undefined) {
+      fail(code, `${entryPath}.sequence`, "legacy log entries cannot have a sequence");
+    }
+    optional(entry, "sequence", (value, valuePath) => {
+      const sequence = integer(value, code, valuePath);
+      if (sequence <= 0) fail(code, valuePath, "expected a positive safe integer");
+      if (sequence <= previousLogSequence) {
+        fail(code, valuePath, "structured log sequences must be strictly increasing");
+      }
+      previousLogSequence = sequence;
+      greatestLogSequence = Math.max(greatestLogSequence, sequence);
+    }, entryPath);
+    optional(entry, "publicPayload", (value, valuePath) => {
+      validateGameLogPayload(value, code, valuePath);
+      const payload = value as GameLogPayload;
+      if (entry.publicText === null || payload.fallback !== entry.publicText) {
+        fail(code, `${valuePath}.fallback`, "must match publicText");
+      }
+    }, entryPath);
+    optional(entry, "seatPayloads", (value, valuePath) => {
+      const payloads = array(value, code, valuePath, 2);
+      if (payloads.length !== 2) fail(code, valuePath, "expected two seat payloads");
+      if (payloads.every((payload) => payload === null)) {
+        fail(code, valuePath, "expected at least one seat payload");
+      }
+      payloads.forEach((payload, seat) => {
+        if (payload === null) return;
+        const payloadPath = `${valuePath}[${seat}]`;
+        validateGameLogPayload(payload, code, payloadPath);
+        const seatTexts = entry.seatText as [string | null, string | null] | undefined;
+        if (!seatTexts || seatTexts[seat] === null || (payload as GameLogPayload).fallback !== seatTexts[seat]) {
+          fail(code, `${payloadPath}.fallback`, "must match seatText");
+        }
+      });
+    }, entryPath);
   });
+  if (greatestLogSequence > 0) {
+    const nextLogSequence = state.nextLogSequence;
+    if (typeof nextLogSequence !== "number" || nextLogSequence <= greatestLogSequence) {
+      fail(code, `${path}.nextLogSequence`, "must be greater than every structured log sequence");
+    }
+  }
   if (!(state.winner === null || state.winner === 0 || state.winner === 1)) fail(code, `${path}.winner`, "expected null, 0, or 1");
   return state as unknown as PersistedGameStateV1;
 }
@@ -1478,6 +1620,7 @@ export function encodePersistedState(state: GameState, rulesetVersion = "test-ru
     controlReturns: state.controlReturns,
     extraTurnSeats: state.extraTurnSeats,
     gameStats: state.gameStats,
+    ...(state.nextLogSequence === undefined ? {} : { nextLogSequence: state.nextLogSequence }),
     log: state.log,
     winner: state.winner,
   };
