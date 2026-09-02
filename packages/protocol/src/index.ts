@@ -5,6 +5,8 @@ import type {
   DeckPool,
   Format,
   GameIntent,
+  GameLogEvent,
+  GameLogViewEntry,
   GameMessage,
   GameMessageValue,
   GameStatsView,
@@ -166,6 +168,10 @@ export const MAX_MATCHMAKING_AVOID_ROOM_CODES = 20;
 const MESSAGE_ID_RE = /^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9]*)+$/;
 const MESSAGE_VALUE_KEY_RE = /^[a-zA-Z][a-zA-Z0-9_]*$/;
 const TERM_ID_RE = /^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$/;
+const GAME_LOG_ZONES = new Set([
+  "hand", "deck", "arsenal", "pitch", "graveyard", "banish", "soul", "board",
+  "equipment", "weapon", "stack", "chain", "inventory",
+]);
 
 const FORMATS = new Set(["classic-battles", "cc", "silver-age"]);
 const HEROES = new Set(["dorinthea", "rhinar"]);
@@ -278,6 +284,87 @@ export function decodeGameMessage(value: unknown): GameMessage | null {
       !gameMessageValue(entry))
   ) return null;
   return { id: message.id, values: values as Record<string, GameMessageValue> };
+}
+
+function gameLogEvent(value: unknown): value is GameLogEvent {
+  const event = object(value);
+  if (!event || typeof event.kind !== "string") return false;
+  if (event.kind === "card-moved") {
+    return exactKeys(event, ["kind", "cardId", "ownerSeat", "from", "to", "faceDown"], [
+      "kind", "ownerSeat", "from", "to",
+    ])
+      && optional(event.cardId, id)
+      && seat(event.ownerSeat)
+      && GAME_LOG_ZONES.has(String(event.from))
+      && GAME_LOG_ZONES.has(String(event.to))
+      && optional(event.faceDown, (entry): entry is true => entry === true);
+  }
+  if (event.kind === "cards-revealed") {
+    return exactKeys(event, ["kind", "cards", "sourceZone"])
+      && array(event.cards, (value): value is { cardId: string; ownerSeat: number } => {
+        const card = object(value);
+        return !!card && exactKeys(card, ["cardId", "ownerSeat"])
+          && id(card.cardId) && seat(card.ownerSeat);
+      }, MAX_CARDS)
+      && event.cards.length > 0
+      && (event.sourceZone === "hand" || event.sourceZone === "deck" || event.sourceZone === "inventory");
+  }
+  if (event.kind === "damage") {
+    return exactKeys(event, ["kind", "targetSeat", "amount", "damageType", "sourceCardId"], [
+      "kind", "targetSeat", "amount", "damageType",
+    ])
+      && seat(event.targetSeat)
+      && nonNegativeInteger(event.amount) && event.amount > 0
+      && (event.damageType === "physical" || event.damageType === "arcane")
+      && optional(event.sourceCardId, id);
+  }
+  if (event.kind === "turn-start") {
+    return exactKeys(event, ["kind", "turn", "activeSeat"])
+      && nonNegativeInteger(event.turn) && event.turn > 0 && seat(event.activeSeat);
+  }
+  if (event.kind === "shuffle") {
+    return exactKeys(event, ["kind", "seat"]) && seat(event.seat);
+  }
+  if (event.kind === "roll") {
+    return exactKeys(event, ["kind", "result", "seat", "sides"], ["kind", "result"])
+      && nonNegativeInteger(event.result) && event.result > 0
+      && optional(event.seat, seat)
+      && optional(event.sides, (entry): entry is number => nonNegativeInteger(entry) && entry > 0)
+      && (event.sides === undefined || event.result <= event.sides);
+  }
+  return false;
+}
+
+export function decodeGameLogViewEntry(value: unknown): GameLogViewEntry | null {
+  const entry = object(value);
+  if (!entry || !exactKeys(entry, ["fallback", "sequence", "message", "event"], ["fallback"])
+    || !string(entry.fallback, MAX_TEXT)) return null;
+  if (entry.message === undefined) {
+    return Object.keys(entry).length === 1 ? { fallback: entry.fallback } : null;
+  }
+  const message = decodeGameMessage(entry.message);
+  if (!message || !nonNegativeInteger(entry.sequence) || entry.sequence <= 0
+    || !optional(entry.event, gameLogEvent)) return null;
+  return {
+    fallback: entry.fallback,
+    sequence: entry.sequence,
+    message,
+    ...(entry.event === undefined ? {} : { event: entry.event }),
+  };
+}
+
+function gameLogViewEntries(value: unknown, legacyLog: unknown): value is GameLogViewEntry[] {
+  if (!Array.isArray(legacyLog)
+    || !array(value, (entry): entry is GameLogViewEntry => decodeGameLogViewEntry(entry) !== null, MAX_LOG)
+    || value.length !== legacyLog.length
+    || !value.every((entry, index) => entry.fallback === legacyLog[index])) return false;
+  let previousSequence = 0;
+  for (const entry of value) {
+    if (!("message" in entry)) continue;
+    if (entry.sequence <= previousSequence) return false;
+    previousSequence = entry.sequence;
+  }
+  return true;
 }
 
 function numberRecord(value: unknown): value is Record<string, number> {
@@ -790,7 +877,7 @@ export function decodeGameView(value: unknown): GameView | null {
   const view = object(value);
   if (!view || !exactKeys(view, [
     "gameId", "turn", "phase", "activePlayer", "priorityPlayer", "endTurnPassPending", "players", "chain", "stack",
-    "stackContext", "ongoing", "pendingDecision", "gameStats", "turnFacts", "winner", "log",
+    "stackContext", "ongoing", "pendingDecision", "gameStats", "turnFacts", "winner", "log", "logEntries",
   ], [
     "gameId", "turn", "phase", "activePlayer", "priorityPlayer", "players", "chain", "stack",
     "ongoing", "pendingDecision", "winner", "log",
@@ -807,7 +894,9 @@ export function decodeGameView(value: unknown): GameView | null {
     && optional(view.gameStats, gameStats)
     && optional(view.turnFacts, turnFacts)
     && nullableSeat(view.winner)
-    && array(view.log, (item): item is string => string(item, MAX_TEXT), MAX_LOG);
+    && array(view.log, (item): item is string => string(item, MAX_TEXT), MAX_LOG)
+    && optional(view.logEntries, (entries): entries is GameLogViewEntry[] =>
+      gameLogViewEntries(entries, view.log));
   return valid ? value as GameView : null;
 }
 

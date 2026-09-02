@@ -9315,6 +9315,20 @@
       "value": "选择 X"
     }
   ],
+  "engine.log.card.played": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": "打出"
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
   "footer.legal": [
     {
       "type": 0,

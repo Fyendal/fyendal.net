@@ -5,6 +5,7 @@ import type {
   ChainLinkView,
   CombatValueModifierView,
   EquipmentSlot,
+  GameLogViewEntry,
   GameMessage,
   GameView,
   OnHitEffectView,
@@ -43,6 +44,41 @@ import { playFromSourceCardId } from "./playRules.js";
 import { windowPrompt, windowPromptMessage } from "./triggers.js";
 import { triggerLabelMessage } from "./triggerPresentation.js";
 import { firstActionExtraCost } from "./ruleQueries.js";
+
+function projectedLog(
+  state: GameStateInternal,
+  seat: number | null,
+  revealAll: boolean,
+): { log: string[]; logEntries?: GameLogViewEntry[] } {
+  const entries = state.log.flatMap((entry) => {
+    const publicAudience = seat === null || revealAll;
+    const seatText = publicAudience ? undefined : entry.seatText?.[seat];
+    const usesSeatOverride = seatText !== undefined && seatText !== null;
+    const text = publicAudience
+      ? entry.publicText
+      : usesSeatOverride
+        ? seatText
+        : entry.publicText;
+    if (text === null) return [];
+
+    const payload = publicAudience
+      ? entry.publicPayload
+      : usesSeatOverride
+        ? entry.seatPayloads?.[seat]
+        : entry.publicPayload;
+    return [{ text, payload, sequence: entry.sequence }];
+  });
+  const log = entries.map((entry) => entry.text);
+  if (!entries.some((entry) => entry.payload && entry.sequence !== undefined)) return { log };
+  return {
+    log,
+    logEntries: entries.map((entry): GameLogViewEntry =>
+      entry.payload && entry.sequence !== undefined
+        ? { ...entry.payload, fallback: entry.text, sequence: entry.sequence }
+        : { fallback: entry.text }
+    ),
+  };
+}
 
 interface CardViewOptions {
   controller?: PlayerState;
@@ -1121,6 +1157,7 @@ function projectState(
       arcaneDamageTaken: player.flags.arcaneDamageTakenThisTurn === true,
     })) as TurnFactsView["players"],
   };
+  const projectedGameLog = projectedLog(state, seat, revealAll);
   return {
     // The RNG seed is private server state. Publishing it lets a client
     // reconstruct every future shuffle/random choice in a deterministic game.
@@ -1275,11 +1312,6 @@ function projectState(
         })()
       : null,
     winner: state.winner,
-    log: state.log.flatMap((entry) => {
-      const text = seat === null || revealAll
-        ? entry.publicText
-        : (entry.seatText?.[seat] ?? entry.publicText);
-      return text === null ? [] : [text];
-    }),
+    ...projectedGameLog,
   };
 }

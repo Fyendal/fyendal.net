@@ -23,6 +23,67 @@ function jsonCopy<T>(value: T): T {
 }
 
 describe("PersistedStateV1", () => {
+  it("round trips structured audience-aware log payloads", () => {
+    const source = game();
+    source.nextLogSequence = 2;
+    source.log.push({
+      publicText: "Rhinar plays Wrecker Romp",
+      sequence: 1,
+      publicPayload: {
+        fallback: "Rhinar plays Wrecker Romp",
+        message: {
+          id: "engine.log.card.played",
+          values: {
+            player: { kind: "player", seat: 0 },
+            card: { kind: "card", cardId: "WTR209" },
+          },
+        },
+        event: {
+          kind: "card-moved",
+          cardId: "WTR209",
+          ownerSeat: 0,
+          from: "hand",
+          to: "stack",
+        },
+      },
+    });
+
+    const encoded = encodePersistedState(source);
+    const decoded = decodePersistedState(jsonCopy(encoded), "ABC123", cardData, scripts);
+
+    expect(decoded.log).toEqual(source.log);
+    expect(decoded.nextLogSequence).toBe(2);
+    expect(decodeGameView(projectStateFor(decoded, 0))).not.toBeNull();
+  });
+
+  it("rejects malformed or mismatched structured log payloads", () => {
+    const encoded = jsonCopy(encodePersistedState(game())) as unknown as {
+      state: { nextLogSequence?: number; log: Array<Record<string, unknown>> };
+    };
+    encoded.state.nextLogSequence = 2;
+    encoded.state.log.push({
+      publicText: "fallback",
+      sequence: 1,
+      publicPayload: {
+        fallback: "different",
+        message: { id: "engine.log.card.played" },
+      },
+    });
+    expect(() => decodePersistedState(encoded, "ABC123", cardData, scripts))
+      .toThrow(/fallback.*must match publicText/);
+
+    const structuredEntry = encoded.state.log.at(-1)!;
+    (structuredEntry.publicPayload as Record<string, unknown>).fallback = "fallback";
+    (structuredEntry.publicPayload as Record<string, unknown>).event = {
+      kind: "damage",
+      targetSeat: 2,
+      amount: 1,
+      damageType: "physical",
+    };
+    expect(() => decodePersistedState(encoded, "ABC123", cardData, scripts))
+      .toThrow(/targetSeat.*expected seat 0 or 1/);
+  });
+
   it("round trips bounded semantic decision messages", () => {
     const source = game();
     source.pendingDecision = {

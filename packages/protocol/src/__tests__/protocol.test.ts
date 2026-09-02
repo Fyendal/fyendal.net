@@ -11,6 +11,7 @@ import {
   decodeDeckResponse,
   decodeDecksResponse,
   decodeGameView,
+  decodeGameLogViewEntry,
   decodeGameMessage,
   decodeLoginResponse,
   decodeOkResponse,
@@ -82,6 +83,59 @@ describe("semantic game messages", () => {
     "card.sea.treasure.counter.remove",
   ])("accepts the projected decision message id %s", (id) => {
     expect(decodeGameMessage({ id })).toEqual({ id });
+  });
+});
+
+describe("semantic game log entries", () => {
+  const structured = {
+    fallback: "Hero 0 plays Test Card",
+    sequence: 1,
+    message: {
+      id: "engine.log.card.played",
+      values: {
+        player: { kind: "player", seat: 0 },
+        card: { kind: "card", cardId: "WTR001" },
+      },
+    },
+    event: {
+      kind: "card-moved",
+      cardId: "WTR001",
+      ownerSeat: 0,
+      from: "hand",
+      to: "stack",
+    },
+  } as const;
+
+  it("accepts exact bounded messages and event metadata", () => {
+    expect(decodeGameLogViewEntry(structured)).toEqual(structured);
+    expect(decodeGameView({
+      ...gameView(),
+      log: [structured.fallback],
+      logEntries: [structured],
+    })).not.toBeNull();
+  });
+
+  it("rejects misaligned fallbacks and malformed event metadata", () => {
+    expect(decodeGameView({
+      ...gameView(),
+      log: ["different fallback"],
+      logEntries: [structured],
+    })).toBeNull();
+    expect(decodeGameLogViewEntry({
+      ...structured,
+      event: { ...structured.event, ownerSeat: 2 },
+    })).toBeNull();
+    expect(decodeGameLogViewEntry({
+      fallback: structured.fallback,
+      event: structured.event,
+    })).toBeNull();
+    expect(decodeGameLogViewEntry({ ...structured, sequence: 0 })).toBeNull();
+    expect(decodeGameLogViewEntry({ ...structured, extra: true })).toBeNull();
+    expect(decodeGameView({
+      ...gameView(),
+      log: [structured.fallback, structured.fallback],
+      logEntries: [structured, structured],
+    })).toBeNull();
   });
 });
 
@@ -664,6 +718,12 @@ describe("replays and HTTP responses", () => {
     expect(decodeReplayFile({ version: 2, seat: 0, views: [gameView()] })).toBeNull();
     expect(decodeReplayFile({ version: 1, seat: 0, views: [gameView()], extra: true })).toBeNull();
     expect(decodeReplayFile({ version: 1, seat: 0, views: Array(10_001).fill(gameView()) })).toBeNull();
+  });
+
+  it("keeps legacy string-only replay frames compatible", () => {
+    const decoded = decodeReplayFile({ version: 1, seat: 0, views: [gameView()] });
+    expect(decoded).not.toBeNull();
+    expect(decoded?.version === 1 ? decoded.views[0]?.logEntries : undefined).toBeUndefined();
   });
 
   it("decodes every HTTP response shape with exact keys and bounds", () => {

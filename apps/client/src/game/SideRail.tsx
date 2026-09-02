@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useIntl } from "react-intl";
-import type { EmoteMessage, UndoTarget } from "@fyendal/shared";
+import type { EmoteMessage, GameLogViewEntry, UndoTarget } from "@fyendal/shared";
+import { cardData } from "@fyendal/cards/client";
 import type {
   MotionPreference,
   PlayabilityCuePreference,
@@ -16,28 +17,34 @@ import { HeroEmote } from "./HeroEmote.js";
 import { BugReportDialog, GameSettingsDialog } from "./SideRailDialogs.js";
 import { ModalSurface } from "../components/ModalSurface.js";
 import { PrimaryActionButton, type PrimaryAction } from "./StatusFloat.js";
+import { GameMessageText } from "../i18n/GameMessage.js";
+
+type StructuredLogEntry = Extract<GameLogViewEntry, { message: unknown }>;
 
 interface RenderedLogLine {
   segments: readonly LogTextSegment[];
   turnBoundary: TurnBoundaryLogLine | null;
+  structured?: StructuredLogEntry;
 }
 
 function LogLines({
   lines,
   friendlyHeroName,
   opponentHeroName,
+  viewerSeat,
   onInspectCard,
 }: {
   lines: readonly RenderedLogLine[];
   friendlyHeroName: string;
   opponentHeroName: string;
+  viewerSeat: 0 | 1;
   onInspectCard: (cardId: string) => void;
 }) {
   const intl = useIntl();
-  return lines.map(({ segments, turnBoundary }, lineIndex) => (
+  return lines.map(({ segments, turnBoundary, structured }, lineIndex) => (
     <div
-      key={lineIndex}
-      className={`log-line${turnBoundary ? " log-turn-divider" : ""}`}
+      key={structured ? `structured-${structured.sequence}` : `legacy-${lineIndex}`}
+      className={`log-line${turnBoundary || structured?.event?.kind === "turn-start" ? " log-turn-divider" : ""}`}
     >
       {turnBoundary ? (
         intl.formatMessage(
@@ -53,6 +60,43 @@ function LogLines({
             }),
           },
         )
+      ) : structured ? (
+        <GameMessageText
+          message={structured.message}
+          fallback={structured.fallback}
+          resolvers={{
+            card: (cardId) => {
+              const card = cardData[cardId];
+              const name = card?.name ?? cardId;
+              return (
+                <button
+                  type="button"
+                  className={`card-ref log-card-ref${
+                    friendlyHeroName !== opponentHeroName && name === friendlyHeroName
+                      ? " log-card-ref-friendly"
+                      : friendlyHeroName !== opponentHeroName && name === opponentHeroName
+                        ? " log-card-ref-opponent"
+                        : card?.cardType === "token"
+                          ? " log-card-ref-token"
+                          : ""
+                  }`}
+                  data-cardid={cardId}
+                  onClick={() => onInspectCard(cardId)}
+                >
+                  {name}
+                </button>
+              );
+            },
+            player: (seat) => (
+              <span className={seat === viewerSeat
+                ? "log-player-ref log-player-ref-friendly"
+                : "log-player-ref log-player-ref-opponent"}
+              >
+                {seat === viewerSeat ? friendlyHeroName : opponentHeroName}
+              </span>
+            ),
+          }}
+        />
       ) : segments.map((segment, segmentIndex) =>
         segment.cardId ? (
           <button
@@ -163,8 +207,10 @@ export function SideRail({
   soundEffectsVolume,
   onSoundEffectsVolumeChange,
   log,
+  logEntries,
   friendlyHeroName,
   opponentHeroName,
+  viewerSeat,
   roomCode,
   onInspectCard,
   mobilePrimaryAction,
@@ -208,8 +254,10 @@ export function SideRail({
   soundEffectsVolume: number;
   onSoundEffectsVolumeChange: (volume: number) => void;
   log: string[];
+  logEntries?: GameLogViewEntry[];
   friendlyHeroName: string;
   opponentHeroName: string;
+  viewerSeat: 0 | 1;
   roomCode: string | null;
   onInspectCard: (cardId: string) => void;
   mobilePrimaryAction: PrimaryAction | null;
@@ -227,14 +275,19 @@ export function SideRail({
   });
   const showOpponentDisconnected = !replaying && !opponentConnected && winnerText === null;
   const renderedLog = useMemo(
-    () => log.slice().reverse().map((line) => {
-      const turnBoundary = parseTurnBoundaryLogLine(line);
-      return {
-        segments: turnBoundary ? [] : logTextSegments(line),
-        turnBoundary,
-      };
-    }),
-    [log],
+    () => (logEntries ?? log.map((fallback): GameLogViewEntry => ({ fallback })))
+      .slice()
+      .reverse()
+      .map((entry) => {
+        const structured = "message" in entry ? entry : undefined;
+        const turnBoundary = structured ? null : parseTurnBoundaryLogLine(entry.fallback);
+        return {
+          segments: turnBoundary || structured ? [] : logTextSegments(entry.fallback),
+          turnBoundary,
+          ...(structured ? { structured } : {}),
+        };
+      }),
+    [log, logEntries],
   );
   return (
     <div className={`rail-right${collapsed ? " rail-collapsed" : ""}`}>
@@ -391,6 +444,7 @@ export function SideRail({
           lines={renderedLog}
           friendlyHeroName={friendlyHeroName}
           opponentHeroName={opponentHeroName}
+          viewerSeat={viewerSeat}
           onInspectCard={onInspectCard}
         />
       </div>
@@ -413,6 +467,7 @@ export function SideRail({
                 lines={renderedLog}
                 friendlyHeroName={friendlyHeroName}
                 opponentHeroName={opponentHeroName}
+                viewerSeat={viewerSeat}
                 onInspectCard={onInspectCard}
               />
             </div>

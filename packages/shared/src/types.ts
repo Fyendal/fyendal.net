@@ -327,6 +327,64 @@ export type GameMessageValue =
   | { kind: "player"; seat: number }
   | { kind: "term"; id: string };
 
+export type GameLogZone =
+  | "hand"
+  | "deck"
+  | "arsenal"
+  | "pitch"
+  | "graveyard"
+  | "banish"
+  | "soul"
+  | "board"
+  | "equipment"
+  | "weapon"
+  | "stack"
+  | "chain"
+  | "inventory";
+
+/** Machine-readable metadata for client behavior that must not depend on
+ * localized prose. This deliberately covers only established log consumers;
+ * new variants must be added to the exact protocol and persistence decoders. */
+export type GameLogEvent =
+  | {
+      kind: "card-moved";
+      cardId?: string;
+      ownerSeat: number;
+      from: GameLogZone;
+      to: GameLogZone;
+      faceDown?: true;
+    }
+  | {
+      kind: "cards-revealed";
+      cards: { cardId: string; ownerSeat: number }[];
+      sourceZone: "hand" | "deck" | "inventory";
+    }
+  | {
+      kind: "damage";
+      targetSeat: number;
+      amount: number;
+      damageType: "physical" | "arcane";
+      sourceCardId?: string;
+    }
+  | { kind: "turn-start"; turn: number; activeSeat: number }
+  | { kind: "shuffle"; seat: number }
+  | { kind: "roll"; result: number; seat?: number; sides?: number };
+
+/** Locale-independent presentation attached to an audience-safe log entry.
+ * The English fallback keeps older clients, replays, exports, and diagnostics
+ * readable while producers migrate incrementally. */
+export interface GameLogPayload {
+  fallback: string;
+  message: GameMessage;
+  event?: GameLogEvent;
+}
+
+/** A projected log line. Legacy lines contain only `fallback`; structured
+ * lines also carry a stable sequence and semantic presentation. */
+export type GameLogViewEntry =
+  | { fallback: string }
+  | (GameLogPayload & { sequence: number });
+
 export interface PendingDecision {
   player: number;
   kind:
@@ -461,6 +519,9 @@ export interface GameView {
   winner: number | null;
   /** Recent human-readable log lines, newest last */
   log: string[];
+  /** Structured equivalents aligned one-to-one with `log`. Absent for legacy
+   * rooms and replay frames that contain no semantic log entries. */
+  logEntries?: GameLogViewEntry[];
 }
 
 // ── Ordered presentation transitions ──────────────────────────────────────────

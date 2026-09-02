@@ -324,7 +324,7 @@ export function GameBoard() {
 
   if (!view || !presentedView || (yourSeat === null && !spectating)) return null;
   const causal = causalStatus(view, spectating ? null : yourSeat);
-  const seat = yourSeat ?? 0; // spectators watch from seat 0's side of the table
+  const seat: 0 | 1 = yourSeat === 1 ? 1 : 0; // spectators watch from seat 0's side of the table
   const replaying = screen === "replay";
   const canSendEmote = !spectating && !replaying && connected;
   const authoritativeMe = view.players[seat]!;
@@ -1176,8 +1176,10 @@ export function GameBoard() {
         soundEffectsVolume={soundEffectsVolume}
         onSoundEffectsVolumeChange={updateSoundEffectsVolume}
         log={view.log}
+        logEntries={view.logEntries}
         friendlyHeroName={me.heroName}
         opponentHeroName={opp.heroName}
+        viewerSeat={seat}
         roomCode={roomCode}
         onInspectCard={setInspectedCardId}
         mobilePrimaryAction={primaryAction}

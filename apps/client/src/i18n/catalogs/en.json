@@ -1355,6 +1355,7 @@
   "game.log.title": "Game log",
   "game.log.short": "Log",
   "game.log.turnBoundary": "Turn {turn}: {status}",
+  "engine.log.card.played": "{player} plays {card}",
   "game.turn.yours": "Your turn",
   "game.turn.opponent": "Opponent's turn",
   "game.turn.named": "{player}'s turn",

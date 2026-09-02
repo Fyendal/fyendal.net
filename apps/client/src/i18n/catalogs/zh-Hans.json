@@ -1355,6 +1355,7 @@
   "game.log.title": "对局日志",
   "game.log.short": "日志",
   "game.log.turnBoundary": "第 {turn} 回合：{status}",
+  "engine.log.card.played": "{player}打出{card}",
   "game.turn.yours": "你的回合",
   "game.turn.opponent": "对手的回合",
   "game.turn.named": "{player} 的回合",

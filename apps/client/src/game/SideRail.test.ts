@@ -51,6 +51,7 @@ function sideRailProps(
     soundEffectsVolume: 35,
     onSoundEffectsVolumeChange: vi.fn(),
     log: [],
+    viewerSeat: 0,
     friendlyHeroName: "Dash",
     opponentHeroName: "Bravo",
     roomCode: "ROOM",
@@ -189,5 +190,37 @@ describe("game log hero colors", () => {
     expect(html).toMatch(/log-card-ref-friendly[^>]*>Dash<\/button>/);
     expect(html).toMatch(/log-card-ref-opponent[^>]*>Bravo<\/button>/);
     expect(html).toMatch(/log-card-ref-token[^>]*>Quicken<\/button>/);
+  });
+
+  it("renders structured log messages in the selected locale with card references", () => {
+    const fallback = "Dash plays Razor Reflex";
+    const html = renderSideRail(sideRailProps({
+      log: [fallback],
+      logEntries: [{
+        fallback,
+        sequence: 1,
+        message: {
+          id: "engine.log.card.played",
+          values: {
+            player: { kind: "player", seat: 0 },
+            card: { kind: "card", cardId: "WTR209" },
+          },
+        },
+        event: {
+          kind: "card-moved",
+          cardId: "WTR209",
+          ownerSeat: 0,
+          from: "hand",
+          to: "stack",
+        },
+      }],
+    }), "zh-Hans");
+
+    expect(html).toContain("Dash");
+    expect(html).toContain("打出");
+    expect(html).toContain("Razor Reflex");
+    expect(html).toContain('class="log-player-ref log-player-ref-friendly"');
+    expect(html).toContain('data-cardid="WTR209"');
+    expect(html).not.toContain(fallback);
   });
 });

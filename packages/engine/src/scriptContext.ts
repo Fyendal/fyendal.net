@@ -1,6 +1,6 @@
 import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
-import type { EquipmentSlot } from "@fyendal/shared";
+import type { EquipmentSlot, GameLogPayload } from "@fyendal/shared";
 import type {
   ScriptCtx,
   ScriptPrompt,
@@ -2517,17 +2517,30 @@ export function makeCtx(
         `the next ${amount} arcane damage to ${nameOf(state, target.heroCardId)} will be prevented this turn`,
       );
     },
-    logPublic(text) {
-      logPublic(state, tagKnownLogCardNames(state, text, referencedLogCardIds));
+    logPublic(entry) {
+      logPublic(
+        state,
+        typeof entry === "string"
+          ? tagKnownLogCardNames(state, entry, referencedLogCardIds)
+          : {
+              ...entry,
+              fallback: tagKnownLogCardNames(state, entry.fallback, referencedLogCardIds),
+            },
+      );
     },
-    logPrivate(targetSeat, privateText, publicText) {
+    logPrivate(targetSeat, privateEntry, publicEntry) {
+      const tagged = (entry: string | GameLogPayload) =>
+        typeof entry === "string"
+          ? tagKnownLogCardNames(state, entry, referencedLogCardIds)
+          : {
+              ...entry,
+              fallback: tagKnownLogCardNames(state, entry.fallback, referencedLogCardIds),
+            };
       logPrivate(
         state,
         targetSeat,
-        tagKnownLogCardNames(state, privateText, referencedLogCardIds),
-        publicText === undefined
-          ? undefined
-          : tagKnownLogCardNames(state, publicText, referencedLogCardIds),
+        tagged(privateEntry),
+        publicEntry === undefined ? undefined : tagged(publicEntry),
       );
     },
     logForSeats(entry) {
@@ -2542,6 +2555,34 @@ export function makeCtx(
                   ? null
                   : tagKnownLogCardNames(state, seatText, referencedLogCardIds)
               ) as [string | null, string | null],
+            }
+          : {}),
+        ...(entry.publicPayload !== undefined
+          ? {
+              publicPayload: {
+                ...entry.publicPayload,
+                fallback: tagKnownLogCardNames(
+                  state,
+                  entry.publicPayload.fallback,
+                  referencedLogCardIds,
+                ),
+              },
+            }
+          : {}),
+        ...(entry.seatPayloads
+          ? {
+              seatPayloads: entry.seatPayloads.map((payload) =>
+                payload === null
+                  ? null
+                  : {
+                      ...payload,
+                      fallback: tagKnownLogCardNames(
+                        state,
+                        payload.fallback,
+                        referencedLogCardIds,
+                      ),
+                    }
+              ) as typeof entry.seatPayloads,
             }
           : {}),
       });

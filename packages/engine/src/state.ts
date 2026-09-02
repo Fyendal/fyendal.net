@@ -1,5 +1,6 @@
 import type {
   EquipmentSlot,
+  GameLogPayload,
   GameStatsView,
   MeldSide,
   PendingDecision,
@@ -927,6 +928,9 @@ export interface GameState {
   /** Seats scheduled to take extra turns, in creation order. */
   extraTurnSeats: number[];
   gameStats: GameStatsView;
+  /** Next stable id for structured log entries. Absent until the first
+   * semantic entry is emitted so legacy rooms retain their persisted shape. */
+  nextLogSequence?: number;
   log: GameLogEntry[];
   winner: number | null;
 }
@@ -937,6 +941,9 @@ export interface GameState {
 export interface GameLogEntry {
   publicText: string | null;
   seatText?: [string | null, string | null];
+  sequence?: number;
+  publicPayload?: GameLogPayload;
+  seatPayloads?: [GameLogPayload | null, GameLogPayload | null];
 }
 
 /** A script-created trigger waiting for a future game event. The source is
