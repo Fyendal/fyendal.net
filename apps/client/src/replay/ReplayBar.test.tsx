@@ -30,6 +30,7 @@ import {
   replayStepTarget,
   shouldAdvanceReplayOnSpace,
 } from "./ReplayBar.js";
+import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 
 afterEach(() => {
   Object.assign(replayStore.state, {
@@ -50,7 +51,9 @@ describe("replay controls", () => {
       replayStep: 1,
     });
 
-    const html = renderToStaticMarkup(createElement(ReplayBar));
+    const html = renderToStaticMarkup(
+      createElement(TestI18nProvider, null, createElement(ReplayBar)),
+    );
 
     expect(html).toContain('class="replay-bar"');
     expect(html).toContain('aria-label="Minimize replay controls"');
@@ -71,13 +74,17 @@ describe("replay controls", () => {
   });
 
   it("reduces the minimized transport to back, next, and maximize", () => {
-    const html = renderToStaticMarkup(createElement(CollapsedReplayControls, {
-      replayStep: 4,
-      total: 10,
-      stepSize: 5,
-      setReplayStep: vi.fn(),
-      onExpand: vi.fn(),
-    }));
+    const html = renderToStaticMarkup(createElement(
+      TestI18nProvider,
+      null,
+      createElement(CollapsedReplayControls, {
+        replayStep: 4,
+        total: 10,
+        stepSize: 5,
+        setReplayStep: vi.fn(),
+        onExpand: vi.fn(),
+      }),
+    ));
 
     expect(html.match(/<button/g)).toHaveLength(3);
     expect(html).toContain('aria-label="Previous 5 replay frames"');
@@ -114,5 +121,23 @@ describe("replay controls", () => {
       ...event,
       target: { closest: () => ({}) } as unknown as EventTarget,
     })).toBe(false);
+  });
+
+  it("renders transport accessibility labels in Simplified Chinese", () => {
+    Object.assign(replayStore.state, {
+      replayViews: [{}, {}],
+      replayStep: 0,
+    });
+
+    const html = renderToStaticMarkup(
+      <TestI18nProvider locale="zh-Hans">
+        <ReplayBar />
+      </TestI18nProvider>,
+    );
+
+    expect(html).toContain(">回放</span>");
+    expect(html).toContain('aria-label="收起回放控制栏"');
+    expect(html).toContain('aria-label="导出回放"');
+    expect(html).toContain('aria-label="退出回放"');
   });
 });

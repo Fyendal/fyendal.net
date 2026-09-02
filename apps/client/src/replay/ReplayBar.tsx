@@ -1,4 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react";
+import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import { useStore } from "../store.js";
 
@@ -53,12 +54,15 @@ export function CollapsedReplayControls({
   setReplayStep: (step: number) => void;
   onExpand: () => void;
 }) {
+  const intl = useIntl();
+  const previousLabel = intl.formatMessage({ id: "replay.controls.previous" }, { count: stepSize });
+  const nextLabel = intl.formatMessage({ id: "replay.controls.next" }, { count: stepSize });
   return (
     <>
       <button
         type="button"
         className="replay-step-button"
-        aria-label={`Previous ${stepSize} replay ${stepSize === 1 ? "frame" : "frames"}`}
+        aria-label={previousLabel}
         disabled={replayStep <= 0}
         onClick={() => setReplayStep(replayStepTarget(replayStep, total, "previous", stepSize))}
       >
@@ -67,19 +71,22 @@ export function CollapsedReplayControls({
       <button
         type="button"
         className="replay-step-button replay-next-button shortcut-button"
-        aria-label={`Next ${stepSize} replay ${stepSize === 1 ? "frame" : "frames"}`}
+        aria-label={nextLabel}
         aria-keyshortcuts="Space"
-        title={`Next ${stepSize === 1 ? "frame" : `${stepSize} frames`} (Space)`}
+        title={intl.formatMessage({ id: "common.shortcut.space" }, { label: nextLabel })}
         disabled={replayStep >= total - 1}
         onClick={() => setReplayStep(replayStepTarget(replayStep, total, "next", stepSize))}
       >
         <span aria-hidden="true">→</span>
-        <kbd className="shortcut-key replay-next-shortcut" aria-label="Space key" />
+        <kbd
+          className="shortcut-key replay-next-shortcut"
+          aria-label={intl.formatMessage({ id: "common.spaceKey" })}
+        />
       </button>
       <button
         type="button"
         className="replay-maximize"
-        aria-label="Maximize replay controls"
+        aria-label={intl.formatMessage({ id: "replay.controls.maximize" })}
         aria-expanded="false"
         onClick={onExpand}
       >
@@ -91,6 +98,7 @@ export function CollapsedReplayControls({
 
 /** Transport controls overlaid at the bottom of the board during replay. */
 export function ReplayBar() {
+  const intl = useIntl();
   const { replayViews, replayStep, setReplayStep, closeReplay, downloadReplay } = useStore(
     useShallow((state) => ({
       replayViews: state.replayViews,
@@ -135,11 +143,11 @@ export function ReplayBar() {
         />
       ) : (
         <>
-          <span className="replay-title">Replay</span>
+          <span className="replay-title">{intl.formatMessage({ id: "replay.controls.title" })}</span>
           <button
             type="button"
             className="replay-collapse-toggle"
-            aria-label="Minimize replay controls"
+            aria-label={intl.formatMessage({ id: "replay.controls.minimize" })}
             aria-expanded="true"
             onClick={() => setCollapsed(true)}
           >
@@ -147,7 +155,10 @@ export function ReplayBar() {
           </button>
           <button
             className="replay-step-button"
-            aria-label={`Previous ${stepSize} replay ${stepSize === 1 ? "frame" : "frames"}`}
+            aria-label={intl.formatMessage(
+              { id: "replay.controls.previous" },
+              { count: stepSize },
+            )}
             onClick={() => setReplayStep(
               replayStepTarget(replayStep, total, "previous", stepSize),
             )}
@@ -157,23 +168,37 @@ export function ReplayBar() {
           </button>
           <button
             className="replay-step-button replay-next-button shortcut-button"
-            aria-label={`Next ${stepSize} replay ${stepSize === 1 ? "frame" : "frames"}`}
+            aria-label={intl.formatMessage(
+              { id: "replay.controls.next" },
+              { count: stepSize },
+            )}
             aria-keyshortcuts="Space"
-            title={`Next ${stepSize === 1 ? "frame" : `${stepSize} frames`} (Space)`}
+            title={intl.formatMessage(
+              { id: "common.shortcut.space" },
+              {
+                label: intl.formatMessage(
+                  { id: "replay.controls.next" },
+                  { count: stepSize },
+                ),
+              },
+            )}
             onClick={() => setReplayStep(
               replayStepTarget(replayStep, total, "next", stepSize),
             )}
             disabled={replayStep >= total - 1}
           >
             <span aria-hidden="true">→</span>
-            <kbd className="shortcut-key replay-next-shortcut" aria-label="Space key" />
+            <kbd
+              className="shortcut-key replay-next-shortcut"
+              aria-label={intl.formatMessage({ id: "common.spaceKey" })}
+            />
           </button>
           <div
             className="replay-scrubber"
             style={{ "--replay-progress": `${progress}%` } as CSSProperties}
           >
             <input
-              aria-label="Replay frame"
+              aria-label={intl.formatMessage({ id: "replay.controls.frame" })}
               type="range"
               min={0}
               max={total - 1}
@@ -187,7 +212,10 @@ export function ReplayBar() {
           <button
             type="button"
             className="replay-step-size"
-            aria-label={`Replay step size: ${stepSize} ${stepSize === 1 ? "frame" : "frames"}`}
+            aria-label={intl.formatMessage(
+              { id: "replay.controls.stepSize" },
+              { count: stepSize },
+            )}
             onClick={() => setStepSize((current) => current === 1 ? 5 : 1)}
           >
             {stepSize}×
@@ -195,8 +223,8 @@ export function ReplayBar() {
           <button
             type="button"
             className="replay-action-icon"
-            aria-label="Export replay"
-            title="Export replay"
+            aria-label={intl.formatMessage({ id: "replay.controls.export" })}
+            title={intl.formatMessage({ id: "replay.controls.export" })}
             onClick={downloadReplay}
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -206,8 +234,8 @@ export function ReplayBar() {
           <button
             type="button"
             className="replay-action-icon"
-            aria-label="Exit replay"
-            title="Exit replay"
+            aria-label={intl.formatMessage({ id: "replay.controls.exit" })}
+            title={intl.formatMessage({ id: "replay.controls.exit" })}
             onClick={closeReplay}
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">

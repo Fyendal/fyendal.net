@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import type { EquipmentSlot, PresentedDeck } from "@fyendal/shared";
 import {
@@ -16,7 +17,7 @@ import {
 } from "../game/Card.js";
 import { MobileCardInspect } from "../game/MobileCardInspect.js";
 import { useMobileCardLongPress } from "../game/mobileCardLongPress.js";
-import { FORMAT_LABELS } from "../lobby/FormatBadge.js";
+import { formatLabel } from "../lobby/FormatBadge.js";
 import {
   adjustMainCount,
   defaultSelection,
@@ -65,12 +66,19 @@ function FirstPlayerChoice({
   className: string;
   onChoose: (first: boolean) => void;
 }) {
+  const intl = useIntl();
   return (
-    <div className={className} role="group" aria-label="Choose who goes first">
+    <div
+      className={className}
+      role="group"
+      aria-label={intl.formatMessage({ id: "prep.firstPlayer.choose" })}
+    >
       <button type="button" className="btn-primary" onClick={() => onChoose(true)}>
-        Go first
+        {intl.formatMessage({ id: "prep.firstPlayer.goFirst" })}
       </button>
-      <button type="button" onClick={() => onChoose(false)}>Go second</button>
+      <button type="button" onClick={() => onChoose(false)}>
+        {intl.formatMessage({ id: "prep.firstPlayer.goSecond" })}
+      </button>
     </div>
   );
 }
@@ -82,6 +90,7 @@ function FirstPlayerChoice({
  * goes first. In bot games, the human always makes that choice.
  */
 export function PrepRoom() {
+  const intl = useIntl();
   const {
     prepDeck, prep, roomCode, queueCounts, matchmakingActive, matchAcceptanceRole,
     acceptMatch, declineMatch, playBotFromPrep, presentDeck, prepUnready,
@@ -157,8 +166,8 @@ export function PrepRoom() {
     return (
       <div className="lobby-page">
         <div className="panel waiting-panel">
-          <h2 className="panel-title">Loading your deck…</h2>
-          <button onClick={leave}>Cancel</button>
+          <h2 className="panel-title">{intl.formatMessage({ id: "prep.loadingDeck" })}</h2>
+          <button onClick={leave}>{intl.formatMessage({ id: "common.cancel" })}</button>
         </div>
       </div>
     );
@@ -200,7 +209,9 @@ export function PrepRoom() {
   }
   const inventoryCount = poolMainCount - mainCount + (pool.inventoryPool?.length ?? 0);
   const mainCountValid = exact === undefined ? mainCount >= min : mainCount === exact;
-  const mainCountRequirement = exact === undefined ? `${min} min` : `${exact}`;
+  const mainCountRequirement = exact === undefined
+    ? intl.formatMessage({ id: "prep.presentation.minimum" }, { count: min })
+    : intl.formatMessage({ id: "prep.presentation.exact" }, { count: exact });
 
   // hover preview next to the hovered card (event delegation via data-cardid)
   const onHoverCard = (e: React.MouseEvent) => {
@@ -282,6 +293,9 @@ export function PrepRoom() {
     startPlayer: prep?.startPlayer ?? null,
     yourSeat,
   });
+  const decisionStatusLabel = decisionStatus
+    ? intl.formatMessage({ id: `prep.firstPlayer.status.${decisionStatus}` })
+    : null;
   const readiness = derivePrepReadiness({
     accepting,
     mainCountValid,
@@ -320,55 +334,73 @@ export function PrepRoom() {
       <div className="prep-topbar">
         <div className="prep-heading">
           <h2 className="panel-title">
-            {FORMAT_LABELS[format]} — Prepare
+            {intl.formatMessage(
+              { id: "prep.title" },
+              { format: formatLabel(intl, format) },
+            )}
             {roomCode && <span className="room-code prep-code">{roomCode}</span>}
           </h2>
           {roomCode && !opp ? (
             <button
               className="prep-copy-link"
-              title="Copy room invite URL"
+              title={intl.formatMessage({ id: "prep.copyInviteTitle" })}
               onClick={() => void copyInviteUrl()}
             >
-              {inviteCopied ? "Copied!" : "Copy URL"}
+              {intl.formatMessage({ id: inviteCopied ? "prep.copied" : "prep.copyUrl" })}
             </button>
           ) : null}
         </div>
-        <button onClick={leave}>Leave</button>
+        <button onClick={leave}>{intl.formatMessage({ id: "common.leave" })}</button>
       </div>
 
       <div className="prep-columns">
         {!mobilePrepLayout ? <section className="panel prep-opponent">
-          <h3 className="panel-title">Matchup</h3>
+          <h3 className="panel-title">{intl.formatMessage({ id: "prep.matchup" })}</h3>
           {opp ? (
             <>
               <div className="prep-versus">
                 <div className="prep-vs-side">
-                  <img className="prep-hero" src={cardImageUrl(pool.heroId)} alt="your hero" width={126} height={174} data-cardid={pool.heroId} />
-                  <div className="prep-opp-name">{cardData[pool.heroId]?.name ?? "Your hero"}</div>
-                  <div className="muted">You</div>
+                  <img className="prep-hero" src={cardImageUrl(pool.heroId)} alt={intl.formatMessage({ id: "prep.yourHero" })} width={126} height={174} data-cardid={pool.heroId} />
+                  <div className="prep-opp-name">
+                    {cardData[pool.heroId]?.name ?? intl.formatMessage({ id: "prep.yourHero" })}
+                  </div>
+                  <div className="muted">{intl.formatMessage({ id: "prep.you" })}</div>
                 </div>
                 <div className="prep-vs">VS</div>
                 <div className="prep-vs-side">
                   <img className="prep-hero" src={cardImageUrl(opp.heroId)} alt={opp.heroName} width={126} height={174} data-cardid={opp.heroId} />
                   <div className="prep-opp-name">{opp.heroName}</div>
                   <div className="muted">
-                    {opp.username} — {opp.ready ? "ready" : "sideboarding…"}
-                    {!opp.connected && " (disconnected)"}
+                    {opp.username} — {intl.formatMessage({
+                      id: opp.ready ? "prep.status.readyLower" : "prep.status.sideboarding",
+                    })}
+                    {!opp.connected
+                      ? ` (${intl.formatMessage({ id: "common.connection.disconnected" })})`
+                      : null}
                   </div>
                 </div>
               </div>
               {die && !prep?.botGame && (
                 <div className="prep-die">
                   <div>
-                    Die roll: {me?.username ?? "you"} {die.rolls[yourSeat]} —{" "}
-                    {die.rolls[1 - yourSeat]} {opp.username}
+                    {intl.formatMessage(
+                      { id: "prep.dieRoll" },
+                      {
+                        you: me?.username ?? intl.formatMessage({ id: "prep.youLower" }),
+                        yourRoll: die.rolls[yourSeat],
+                        opponentRoll: die.rolls[1 - yourSeat],
+                        opponent: opp.username,
+                      },
+                    )}
                   </div>
                   <div>{iWonDie
-                    ? "You won the roll and decide who goes first."
-                    : `${opp.username} won the roll and decides who goes first.`}</div>
+                    ? intl.formatMessage({ id: "prep.rollWonYou" })
+                    : intl.formatMessage({ id: "prep.rollWonOpponent" }, { username: opp.username })}</div>
                 </div>
               )}
-              {prep?.botGame && pickPending ? <p className="prep-die">Practice match: You decide who goes first.</p> : null}
+              {prep?.botGame && pickPending ? (
+                <p className="prep-die">{intl.formatMessage({ id: "prep.practiceChooseFirst" })}</p>
+              ) : null}
               {pickPending && iChooseFirst ? (
                 <FirstPlayerChoice className="prep-pick prep-desktop-pick" onChoose={chooseFirst} />
               ) : (
@@ -376,38 +408,55 @@ export function PrepRoom() {
                   className={`prep-decision-status prep-desktop-decision${prep?.startPlayer == null ? " pending" : ""}`}
                   aria-live="polite"
                 >
-                  {decisionStatus}
+                  {decisionStatusLabel}
                 </strong>
               )}
             </>
           ) : (
             <p className="muted">
-              Waiting for an opponent…
+              {intl.formatMessage({ id: "prep.waitingOpponent" })}
               {otherPlayersInQueue > 0
-                && ` (${otherPlayersInQueue} ${otherPlayersInQueue === 1 ? "other" : "others"} in queue)`}
+                ? ` (${intl.formatMessage(
+                    { id: "prep.othersInQueue" },
+                    { count: otherPlayersInQueue },
+                  )})`
+                : null}
             </p>
           )}
           {matchups.length > 0 ? (
             <div className="prep-matchup-plan">
-              <label htmlFor="fabrary-matchup">Fabrary matchup plan</label>
+              <label htmlFor="fabrary-matchup">
+                {intl.formatMessage({ id: "prep.matchupPlan" })}
+              </label>
               <select
                 id="fabrary-matchup"
                 value={prepDeck.selectedMatchupId ?? ""}
                 disabled={locked || matchupBusy}
                 onChange={(event) => void chooseMatchup(event.target.value)}
               >
-                <option value="">Default deck</option>
+                <option value="">{intl.formatMessage({ id: "prep.defaultDeck" })}</option>
                 {matchups.map((matchup) => (
                   <option key={matchup.id} value={matchup.id}>
-                    {matchup.name}{suggestedMatchups.has(matchup.id) ? " — suggested" : ""}
+                    {matchup.name}{suggestedMatchups.has(matchup.id)
+                      ? ` — ${intl.formatMessage({ id: "prep.suggested" })}`
+                      : ""}
                   </option>
                 ))}
               </select>
-              {matchupBusy ? <span className="muted">Loading plan…</span> : null}
+              {matchupBusy ? (
+                <span className="muted">{intl.formatMessage({ id: "prep.loadingPlan" })}</span>
+              ) : null}
               {selectedMatchup ? (
                 <div className="prep-matchup-detail">
                   {selectedMatchup.preferredTurnOrder ? (
-                    <strong>Prefers going {selectedMatchup.preferredTurnOrder}</strong>
+                    <strong>{intl.formatMessage(
+                      { id: "prep.prefersTurnOrder" },
+                      {
+                        order: intl.formatMessage({
+                          id: `prep.turnOrder.${selectedMatchup.preferredTurnOrder}`,
+                        }),
+                      },
+                    )}</strong>
                   ) : null}
                   {selectedMatchup.notes ? <p>{plainMatchupNotes(selectedMatchup.notes)}</p> : null}
                 </div>
@@ -457,26 +506,32 @@ export function PrepRoom() {
             aria-labelledby="prep-match-accept-title"
             aria-live="polite"
           >
-            <span className="match-accept-eyebrow">Match found</span>
+            <span className="match-accept-eyebrow">
+              {intl.formatMessage({ id: "prep.accept.matchFound" })}
+            </span>
             <h2 className="panel-title" id="prep-match-accept-title">
-              {me?.accepted ? "Waiting for your opponent" : "Ready to play?"}
+              {intl.formatMessage({
+                id: me?.accepted ? "prep.accept.waiting" : "prep.accept.ready",
+              })}
             </h2>
             <AcceptHeroMatchup you={me} opponent={opp} />
             <p className="muted">
               {me?.accepted
-                ? "You accepted. The match will open when your opponent accepts."
-                : "Accept the match to continue preparing your deck."}
+                ? intl.formatMessage({ id: "prep.accept.acceptedDescription" })
+                : intl.formatMessage({ id: "prep.accept.description" })}
             </p>
             {me?.accepted ? (
               <div className="match-accepted-state">
-                Accepted ✓ · <DeadlineCountdown deadlineAt={prep.deadlineAt} />
+                {intl.formatMessage({ id: "prep.accept.accepted" })} ✓ ·{" "}
+                <DeadlineCountdown deadlineAt={prep.deadlineAt} />
               </div>
             ) : (
               <button className="btn-primary match-accept-primary" onClick={acceptMatch}>
-                Accept · <DeadlineCountdown deadlineAt={prep.deadlineAt} />
+                {intl.formatMessage({ id: "lobby.action.accept" })} ·{" "}
+                <DeadlineCountdown deadlineAt={prep.deadlineAt} />
               </button>
             )}
-            <button onClick={declineMatch}>Decline</button>
+            <button onClick={declineMatch}>{intl.formatMessage({ id: "lobby.action.decline" })}</button>
           </section>
         </div>
       ) : null}
@@ -485,16 +540,21 @@ export function PrepRoom() {
         <div
           className={`prep-main-count${mainCountValid ? " valid" : " invalid"}`}
           aria-live="polite"
-          aria-label={`Main deck: ${mainCount} cards; ${mainCountRequirement}`}
+          aria-label={intl.formatMessage(
+            { id: "prep.mainDeckAria" },
+            { count: mainCount, requirement: mainCountRequirement },
+          )}
         >
-          <span>Main Deck</span>
+          <span>{intl.formatMessage({ id: "prep.zone.main" })}</span>
           <strong>{mainCount} / {mainCountRequirement}</strong>
         </div>
         <div className="prep-ready-controls">
           {ready ? (
             <>
-              <span className="prep-ready-badge">Ready ✓</span>
-              <button onClick={prepUnready}>Edit deck</button>
+              <span className="prep-ready-badge">
+                {intl.formatMessage({ id: "prep.status.ready" })} ✓
+              </span>
+              <button onClick={prepUnready}>{intl.formatMessage({ id: "lobby.deck.edit" })}</button>
             </>
           ) : (
             <button
@@ -502,9 +562,9 @@ export function PrepRoom() {
               onClick={onReady}
               disabled={!canReady}
             >
-              {accepting ? "Waiting for opponent" : (
+              {accepting ? intl.formatMessage({ id: "prep.waitingOpponentNoEllipsis" }) : (
                 <>
-                  Ready
+                  {intl.formatMessage({ id: "prep.status.ready" })}
                   {prep?.deadlinePhase === "prepare" && prep.deadlineAt
                     ? <> · <DeadlineCountdown deadlineAt={prep.deadlineAt} /></>
                     : null}
@@ -519,14 +579,18 @@ export function PrepRoom() {
               <div className="prep-ready-opponent">
                 <img
                   src={cardImageUrl(opp.heroId)}
-                  alt={`Opponent hero: ${opp.heroName}`}
+                  alt={intl.formatMessage({ id: "prep.opponentHeroAria" }, { hero: opp.heroName })}
                   width={38}
                   height={52}
                   data-cardid={opp.heroId}
                 />
                 <div>
-                  <span>Opponent</span>
-                  <strong title={opp.heroName}>{opp.heroName} · {readiness.opponentStatus}</strong>
+                  <span>{intl.formatMessage({ id: "prep.opponent" })}</span>
+                  <strong title={opp.heroName}>
+                    {opp.heroName} · {intl.formatMessage({
+                      id: `prep.opponentStatus.${readiness.opponentStatus}`,
+                    })}
+                  </strong>
                 </div>
               </div>
             ) : null}
@@ -537,7 +601,7 @@ export function PrepRoom() {
                 className={`prep-decision-status${prep?.startPlayer == null ? " pending" : ""}`}
                 aria-live="polite"
               >
-                {decisionStatus}
+                {decisionStatusLabel}
               </strong>
             )}
           </div>

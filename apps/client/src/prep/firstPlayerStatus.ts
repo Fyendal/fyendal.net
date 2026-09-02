@@ -1,5 +1,14 @@
 type Seat = 0 | 1;
 
+export type FirstPlayerStatus =
+  | "waiting-opponent"
+  | "waiting-roll"
+  | "opponent-deciding"
+  | "you-decided-first"
+  | "you-decided-second"
+  | "opponent-decided-first"
+  | "opponent-decided-second";
+
 export function canReadyForGame({
   accepting,
   startPlayer,
@@ -34,16 +43,16 @@ export function firstPlayerStatus({
   dieWinner: Seat | null;
   startPlayer: Seat | null;
   yourSeat: number;
-}): string | null {
-  if (!opponentPresent) return "Waiting for an opponent";
-  if (dieWinner === null) return "Waiting for the first-player roll";
+}): FirstPlayerStatus | null {
+  if (!opponentPresent) return "waiting-opponent";
+  if (dieWinner === null) return "waiting-roll";
 
   const youDecide = canChooseFirst({ botGame: botGame === true, dieWinner, yourSeat });
   if (startPlayer === null) {
-    return youDecide ? null : "Opponent is deciding";
+    return youDecide ? null : "opponent-deciding";
   }
 
-  const decider = youDecide ? "You" : "Opponent";
+  const decider = youDecide ? "you" : "opponent";
   const yourTurnOrder = startPlayer === yourSeat ? "first" : "second";
-  return `${decider} decided: You go ${yourTurnOrder}`;
+  return `${decider}-decided-${yourTurnOrder}`;
 }

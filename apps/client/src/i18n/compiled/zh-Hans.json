@@ -395,6 +395,12 @@
       "value": "（空格键）"
     }
   ],
+  "common.spaceKey": [
+    {
+      "type": 0,
+      "value": "空格键"
+    }
+  ],
   "common.versusShort": [
     {
       "type": 0,
@@ -457,6 +463,12 @@
     {
       "type": 0,
       "value": "白银时代"
+    }
+  ],
+  "game.cardDetails": [
+    {
+      "type": 0,
+      "value": "卡牌详情"
     }
   ],
   "landing.accountAccess": [
@@ -1765,10 +1777,716 @@
       "value": "免费在线畅玩 Flesh and Blood | Fyendal"
     }
   ],
+  "prep.accept.accepted": [
+    {
+      "type": 0,
+      "value": "已接受"
+    }
+  ],
+  "prep.accept.acceptedDescription": [
+    {
+      "type": 0,
+      "value": "你已接受。对手接受后，对局将会开启。"
+    }
+  ],
+  "prep.accept.description": [
+    {
+      "type": 0,
+      "value": "接受对局以继续准备你的牌组。"
+    }
+  ],
+  "prep.accept.matchFound": [
+    {
+      "type": 0,
+      "value": "已找到对局"
+    }
+  ],
+  "prep.accept.ready": [
+    {
+      "type": 0,
+      "value": "准备好开始了吗？"
+    }
+  ],
+  "prep.accept.waiting": [
+    {
+      "type": 0,
+      "value": "正在等待你的对手"
+    }
+  ],
+  "prep.botNudge.description": [
+    {
+      "type": 0,
+      "value": "目前没有其他活跃玩家正在寻找对局。等待期间，要不要先与AI对战测试你的牌组？"
+    }
+  ],
+  "prep.botNudge.keepWaiting": [
+    {
+      "type": 0,
+      "value": "继续等待"
+    }
+  ],
+  "prep.botNudge.searching": [
+    {
+      "type": 0,
+      "value": "仍在寻找对局"
+    }
+  ],
+  "prep.botNudge.starting": [
+    {
+      "type": 0,
+      "value": "正在开始练习…"
+    }
+  ],
+  "prep.botNudge.title": [
+    {
+      "type": 0,
+      "value": "暂未找到对局"
+    }
+  ],
+  "prep.copied": [
+    {
+      "type": 0,
+      "value": "已复制！"
+    }
+  ],
+  "prep.copyInviteTitle": [
+    {
+      "type": 0,
+      "value": "复制房间邀请链接"
+    }
+  ],
+  "prep.copyUrl": [
+    {
+      "type": 0,
+      "value": "复制链接"
+    }
+  ],
+  "prep.defaultDeck": [
+    {
+      "type": 0,
+      "value": "默认牌组"
+    }
+  ],
+  "prep.dieRoll": [
+    {
+      "type": 0,
+      "value": "掷骰："
+    },
+    {
+      "type": 1,
+      "value": "you"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 1,
+      "value": "yourRoll"
+    },
+    {
+      "type": 0,
+      "value": " — "
+    },
+    {
+      "type": 1,
+      "value": "opponentRoll"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    }
+  ],
+  "prep.firstPlayer.choose": [
+    {
+      "type": 0,
+      "value": "选择谁先手"
+    }
+  ],
+  "prep.firstPlayer.goFirst": [
+    {
+      "type": 0,
+      "value": "先手"
+    }
+  ],
+  "prep.firstPlayer.goSecond": [
+    {
+      "type": 0,
+      "value": "后手"
+    }
+  ],
+  "prep.firstPlayer.status.opponent-decided-first": [
+    {
+      "type": 0,
+      "value": "对手已决定：你先手"
+    }
+  ],
+  "prep.firstPlayer.status.opponent-decided-second": [
+    {
+      "type": 0,
+      "value": "对手已决定：你后手"
+    }
+  ],
+  "prep.firstPlayer.status.opponent-deciding": [
+    {
+      "type": 0,
+      "value": "对手正在决定"
+    }
+  ],
+  "prep.firstPlayer.status.waiting-opponent": [
+    {
+      "type": 0,
+      "value": "正在等待对手"
+    }
+  ],
+  "prep.firstPlayer.status.waiting-roll": [
+    {
+      "type": 0,
+      "value": "正在等待决定先手的掷骰"
+    }
+  ],
+  "prep.firstPlayer.status.you-decided-first": [
+    {
+      "type": 0,
+      "value": "你已决定：你先手"
+    }
+  ],
+  "prep.firstPlayer.status.you-decided-second": [
+    {
+      "type": 0,
+      "value": "你已决定：你后手"
+    }
+  ],
+  "prep.loadingDeck": [
+    {
+      "type": 0,
+      "value": "正在加载你的牌组…"
+    }
+  ],
+  "prep.loadingPlan": [
+    {
+      "type": 0,
+      "value": "正在加载方案…"
+    }
+  ],
+  "prep.mainDeckAria": [
+    {
+      "type": 0,
+      "value": "主牌组："
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张牌；"
+    },
+    {
+      "type": 1,
+      "value": "requirement"
+    }
+  ],
+  "prep.matchup": [
+    {
+      "type": 0,
+      "value": "对阵"
+    }
+  ],
+  "prep.matchupAria": [
+    {
+      "type": 1,
+      "value": "yourHero"
+    },
+    {
+      "type": 0,
+      "value": " 对阵 "
+    },
+    {
+      "type": 1,
+      "value": "opponentHero"
+    }
+  ],
+  "prep.matchupPlan": [
+    {
+      "type": 0,
+      "value": "Fabrary 对阵方案"
+    }
+  ],
+  "prep.opponent": [
+    {
+      "type": 0,
+      "value": "对手"
+    }
+  ],
+  "prep.opponentHeroAria": [
+    {
+      "type": 0,
+      "value": "对手英雄："
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    }
+  ],
+  "prep.opponentStatus.disconnected": [
+    {
+      "type": 0,
+      "value": "已断开连接"
+    }
+  ],
+  "prep.opponentStatus.preparing": [
+    {
+      "type": 0,
+      "value": "准备中"
+    }
+  ],
+  "prep.opponentStatus.ready": [
+    {
+      "type": 0,
+      "value": "已准备"
+    }
+  ],
+  "prep.opponentStatus.waiting": [
+    {
+      "type": 0,
+      "value": "等待中"
+    }
+  ],
+  "prep.othersInQueue": [
+    {
+      "type": 0,
+      "value": "队列中还有 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 人"
+    }
+  ],
+  "prep.practiceChooseFirst": [
+    {
+      "type": 0,
+      "value": "练习对局：由你决定谁先手。"
+    }
+  ],
+  "prep.prefersTurnOrder": [
+    {
+      "type": 0,
+      "value": "倾向于"
+    },
+    {
+      "type": 1,
+      "value": "order"
+    }
+  ],
+  "prep.presentation.emptyInventory": [
+    {
+      "type": 0,
+      "value": "备牌区中没有卡牌。"
+    }
+  ],
+  "prep.presentation.exact": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张"
+    }
+  ],
+  "prep.presentation.hero": [
+    {
+      "type": 0,
+      "value": "英雄"
+    }
+  ],
+  "prep.presentation.inventoryCount": [
+    {
+      "type": 0,
+      "value": "备牌区（"
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": "）"
+    }
+  ],
+  "prep.presentation.mainCount": [
+    {
+      "type": 0,
+      "value": "主牌组（"
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " / "
+    },
+    {
+      "type": 1,
+      "value": "requirement"
+    },
+    {
+      "type": 0,
+      "value": "）"
+    }
+  ],
+  "prep.presentation.minimum": [
+    {
+      "type": 0,
+      "value": "至少 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张"
+    }
+  ],
+  "prep.presentation.moveCopy": [
+    {
+      "type": 0,
+      "value": "将一张"
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "移至"
+    },
+    {
+      "type": 1,
+      "value": "destination"
+    }
+  ],
+  "prep.presentation.moveToInventoryHint": [
+    {
+      "type": 0,
+      "value": "点击卡牌，将一张移至备牌区。"
+    }
+  ],
+  "prep.presentation.moveToMainHint": [
+    {
+      "type": 0,
+      "value": "点击卡牌，将一张移至主牌组。"
+    }
+  ],
+  "prep.presentation.noneRegistered": [
+    {
+      "type": 0,
+      "value": "未登记武器"
+    }
+  ],
+  "prep.presentation.removeCard": [
+    {
+      "type": 0,
+      "value": "移除"
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "prep.presentation.removeEquipment": [
+    {
+      "type": 0,
+      "value": "从"
+    },
+    {
+      "type": 1,
+      "value": "slot"
+    },
+    {
+      "type": 0,
+      "value": "移除"
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "prep.presentation.selectCard": [
+    {
+      "type": 0,
+      "value": "选择"
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "prep.presentation.selectEquipment": [
+    {
+      "type": 0,
+      "value": "为"
+    },
+    {
+      "type": 1,
+      "value": "slot"
+    },
+    {
+      "type": 0,
+      "value": "选择"
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "prep.presentation.title": [
+    {
+      "type": 0,
+      "value": "对局配置"
+    }
+  ],
+  "prep.presentation.weapons": [
+    {
+      "type": 0,
+      "value": "武器（"
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": "）"
+    }
+  ],
+  "prep.rollWonOpponent": [
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " 赢得掷骰，并决定谁先手。"
+    }
+  ],
+  "prep.rollWonYou": [
+    {
+      "type": 0,
+      "value": "你赢得掷骰，并决定谁先手。"
+    }
+  ],
+  "prep.slot.arms": [
+    {
+      "type": 0,
+      "value": "手臂"
+    }
+  ],
+  "prep.slot.chest": [
+    {
+      "type": 0,
+      "value": "胸部"
+    }
+  ],
+  "prep.slot.head": [
+    {
+      "type": 0,
+      "value": "头部"
+    }
+  ],
+  "prep.slot.legs": [
+    {
+      "type": 0,
+      "value": "腿部"
+    }
+  ],
+  "prep.status.ready": [
+    {
+      "type": 0,
+      "value": "准备完成"
+    }
+  ],
+  "prep.status.readyLower": [
+    {
+      "type": 0,
+      "value": "已准备"
+    }
+  ],
+  "prep.status.sideboarding": [
+    {
+      "type": 0,
+      "value": "正在调整备牌…"
+    }
+  ],
+  "prep.suggested": [
+    {
+      "type": 0,
+      "value": "推荐"
+    }
+  ],
+  "prep.title": [
+    {
+      "type": 1,
+      "value": "format"
+    },
+    {
+      "type": 0,
+      "value": " — 赛前准备"
+    }
+  ],
+  "prep.turnOrder.first": [
+    {
+      "type": 0,
+      "value": "先手"
+    }
+  ],
+  "prep.turnOrder.second": [
+    {
+      "type": 0,
+      "value": "后手"
+    }
+  ],
+  "prep.unknownHero": [
+    {
+      "type": 0,
+      "value": "未知英雄"
+    }
+  ],
+  "prep.waitingOpponent": [
+    {
+      "type": 0,
+      "value": "正在等待对手…"
+    }
+  ],
+  "prep.waitingOpponentNoEllipsis": [
+    {
+      "type": 0,
+      "value": "正在等待对手"
+    }
+  ],
+  "prep.you": [
+    {
+      "type": 0,
+      "value": "你"
+    }
+  ],
+  "prep.youLower": [
+    {
+      "type": 0,
+      "value": "你"
+    }
+  ],
+  "prep.yourHero": [
+    {
+      "type": 0,
+      "value": "你的英雄"
+    }
+  ],
+  "prep.zone.inventory": [
+    {
+      "type": 0,
+      "value": "备牌区"
+    }
+  ],
+  "prep.zone.main": [
+    {
+      "type": 0,
+      "value": "主牌组"
+    }
+  ],
   "replay.confirmDelete": [
     {
       "type": 0,
       "value": "要删除这份已保存的回放吗？此操作无法撤销。"
+    }
+  ],
+  "replay.controls.exit": [
+    {
+      "type": 0,
+      "value": "退出回放"
+    }
+  ],
+  "replay.controls.export": [
+    {
+      "type": 0,
+      "value": "导出回放"
+    }
+  ],
+  "replay.controls.frame": [
+    {
+      "type": 0,
+      "value": "回放帧"
+    }
+  ],
+  "replay.controls.maximize": [
+    {
+      "type": 0,
+      "value": "展开回放控制栏"
+    }
+  ],
+  "replay.controls.minimize": [
+    {
+      "type": 0,
+      "value": "收起回放控制栏"
+    }
+  ],
+  "replay.controls.next": [
+    {
+      "type": 0,
+      "value": "前进 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 帧"
+    }
+  ],
+  "replay.controls.previous": [
+    {
+      "type": 0,
+      "value": "后退 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 帧"
+    }
+  ],
+  "replay.controls.stepSize": [
+    {
+      "type": 0,
+      "value": "回放步长："
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 帧"
+    }
+  ],
+  "replay.controls.title": [
+    {
+      "type": 0,
+      "value": "回放"
     }
   ],
   "replay.daysLeft": [

@@ -23,7 +23,7 @@ describe("prep first-player status", () => {
       dieWinner: 1,
       startPlayer: null,
       yourSeat: 0,
-    })).toBe("Opponent is deciding");
+    })).toBe("opponent-deciding");
   });
 
   it("lets the human choose in a bot game even when the bot wins the roll", () => {
@@ -38,10 +38,10 @@ describe("prep first-player status", () => {
   });
 
   it.each([
-    [0, 0, "You decided: You go first"],
-    [0, 1, "You decided: You go second"],
-    [1, 0, "Opponent decided: You go first"],
-    [1, 1, "Opponent decided: You go second"],
+    [0, 0, "you-decided-first"],
+    [0, 1, "you-decided-second"],
+    [1, 0, "opponent-decided-first"],
+    [1, 1, "opponent-decided-second"],
   ] as const)("describes the result for winner %s and first player %s", (dieWinner, startPlayer, expected) => {
     expect(firstPlayerStatus({
       opponentPresent: true,
@@ -57,12 +57,12 @@ describe("prep first-player status", () => {
       dieWinner: null,
       startPlayer: null,
       yourSeat: 0,
-    })).toBe("Waiting for an opponent");
+    })).toBe("waiting-opponent");
     expect(firstPlayerStatus({
       opponentPresent: true,
       dieWinner: null,
       startPlayer: null,
       yourSeat: 0,
-    })).toBe("Waiting for the first-player roll");
+    })).toBe("waiting-roll");
   });
 });
