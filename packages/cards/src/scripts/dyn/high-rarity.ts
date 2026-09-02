@@ -29,7 +29,7 @@ function weapon(cost: number, extra: CardScript = {}): CardScript {
   };
 }
 function discardChoice(ctx: ScriptCtx, hook: string, seat = opponentSeat(ctx)): void { const hand = ctx.player(seat).hand; if (hand.length) ctx.requestCardChoice(hook, decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"), hand.map((card) => card.instanceId), seat); }
-function arcane(amount: number, extra?: (ctx: ScriptCtx, dealt: number) => void): CardScript { return { arcaneDamageEffect: true, onPlay(ctx) { const dealt = dealArcane(ctx, opponentSeat(ctx), amount); extra?.(ctx, dealt); } }; }
+function arcane(amount: number, extra?: (ctx: ScriptCtx, dealt: number) => void): CardScript { return { arcaneDamageEffect: true, arcaneDamageEffectAmounts: [amount], onPlay(ctx) { const dealt = dealArcane(ctx, opponentSeat(ctx), amount); extra?.(ctx, dealt); } }; }
 function graveyardAssassinEquipment(extra: CardScript = {}): CardScript {
   return {
     ...extra,

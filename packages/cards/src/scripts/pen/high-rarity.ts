@@ -269,7 +269,7 @@ export const penHighRarity: Record<string, CardScript> = {
     triggers: [{ event: "begin-action-phase", label: "Destroy Sigil of Gravespawning", effect: (ctx) => ctx.destroySelf() }],
   },
   "tempest dancers|0": { onLeaveArena(ctx) { ctx.setPlayerFlag(ctx.seat, "nextNonAttackAsInstant", true); } },
-  "glyph destruction nodes|2": { arcaneDamageEffect: true, onPlay(ctx) {
+  "glyph destruction nodes|2": { arcaneDamageEffect: true, arcaneDamageEffectAmounts: [3], onPlay(ctx) {
     const count = ctx.player(ctx.seat).board.filter((card) => has(ctx, card, "aura") && data(ctx, card).name.includes("Sigil")).length;
     if (count > 0) ctx.dealDamage(opponentSeat(ctx), 3, { arcane: true });
     for (const ally of ctx.player(opponentSeat(ctx)).board.filter((card) => has(ctx, card, "ally")).slice(0, Math.max(0, count - 1))) ctx.dealDamage(opponentSeat(ctx), 3, { arcane: true, targetAllyId: ally.instanceId });

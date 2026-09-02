@@ -149,6 +149,7 @@ function higherLife(ctx: ScriptCtx): boolean {
 function arcaneSpell(amount: number, createSigil = false): CardScript {
   return {
     arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [amount],
     onPlay(ctx) {
       ctx.requestChoice("pen-arcane", `${ctx.data.name}: deal ${ctx.previewArcaneDamage(amount)} arcane damage to which hero?`, ["opponent", "you"]);
     },

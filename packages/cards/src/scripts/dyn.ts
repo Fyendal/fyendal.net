@@ -280,6 +280,7 @@ const contractNonAttack: ContractTest = (ctx, card) => isNonAttackAction(ctx, ca
 function arcaneTargetSpell(amount: number, surge: "go-again" | "opt" | "energy" | null): CardScript {
   return {
     arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [amount],
     onPlay(ctx) {
       const preview = ctx.previewArcaneDamage(amount);
       chooseHero(

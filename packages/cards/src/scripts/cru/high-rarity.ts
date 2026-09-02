@@ -311,6 +311,7 @@ const metacarpusNode: CardScript = {
 
 const chainLightning: CardScript = {
   arcaneDamageEffect: true,
+  arcaneDamageEffectAmounts: [3],
   playAsInstant: wizardActionAsInstant,
   onPlay(ctx) {
     const playedAnother = Number(ctx.getFlag("player", "playedClassTypeCount:wizard:non-attack-action")) >= 2;

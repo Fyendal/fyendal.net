@@ -1171,6 +1171,7 @@ Object.assign(sea, {
   "deny redemption|1": { onAttackDeclared(ctx: ScriptCtx) { if (ctx.link?.targetAllyId === undefined && ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0) ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true, unpreventable: true }); }, activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", fromHand: true, onActivate(ctx: ScriptCtx) { ctx.setFlag("player", "heroesCannotGainLife", true); } } },
   "burn bare|0": {
     arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [6],
     onPlay(ctx: ScriptCtx) { seaTargets(ctx, "burn", 6); },
     activated: {
       cost: 0,

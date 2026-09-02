@@ -114,6 +114,7 @@ const becomeTheArknight: CardScript = {
 function targetArcane(damage: number): CardScript {
   return {
     arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [damage],
     playAsInstant: wizardActionAsInstant,
     onPlay: (ctx) => dealArcane(ctx, opponentSeat(ctx), damage),
   };
@@ -226,9 +227,9 @@ export const arcHighRarity: Record<string, CardScript> = {
   "tome of the arknight|3": { onPlay(ctx) { const top = ctx.player(ctx.seat).deck.slice(0, 2); for (const card of top) ctx.logPublic(`Tome of the Arknight reveals ${ctx.cardData(card.cardId).name}`); if (top.length === 2 && top.some((card) => isAttack(ctx, card)) && top.some((card) => isNonAttack(ctx, card))) for (const card of top) ctx.moveToHand(card.instanceId); } },
 
   "storm striders|0": { activated: { cost: 1, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true, onActivate(ctx) { ctx.setFlag("player", "nextWizardNonAttackAsInstant", true); } } },
-  "blazing aether|1": { arcaneDamageEffect: true, playAsInstant: wizardActionAsInstant, onPlay(ctx) { dealArcane(ctx, opponentSeat(ctx), Number(ctx.getFlag("player", `arcaneDamageAmountToSeat:${opponentSeat(ctx)}`)) || 0); } },
+  "blazing aether|1": { arcaneDamageEffect: true, arcaneDamageEffectAmounts: [0], playAsInstant: wizardActionAsInstant, onPlay(ctx) { dealArcane(ctx, opponentSeat(ctx), Number(ctx.getFlag("player", `arcaneDamageAmountToSeat:${opponentSeat(ctx)}`)) || 0); } },
   "sonic boom|2": sonicBoom,
-  "forked lightning|1": { arcaneDamageEffect: true, playAsInstant: wizardActionAsInstant, onPlay(ctx) { ctx.requestChoice("fork-first", `Forked Lightning: choose the first hero for ${ctx.previewArcaneDamage(2)} arcane damage`, ["opposing hero", "your hero"]); }, onChoose(ctx, hook, option) { if (hook === "fork-first") { ctx.setCounter("forkFirst", option === "your hero" ? ctx.seat : opponentSeat(ctx)); ctx.requestChoice("fork-second", "Choose the second hero for 2 arcane damage", ["opposing hero", "your hero"]); } else if (hook === "fork-second") { dealArcane(ctx, ctx.getCounter("forkFirst"), 2); dealArcane(ctx, option === "your hero" ? ctx.seat : opponentSeat(ctx), 2); } } },
+  "forked lightning|1": { arcaneDamageEffect: true, arcaneDamageEffectAmounts: [2], playAsInstant: wizardActionAsInstant, onPlay(ctx) { ctx.requestChoice("fork-first", `Forked Lightning: choose the first hero for ${ctx.previewArcaneDamage(2)} arcane damage`, ["opposing hero", "your hero"]); }, onChoose(ctx, hook, option) { if (hook === "fork-first") { ctx.setCounter("forkFirst", option === "your hero" ? ctx.seat : opponentSeat(ctx)); ctx.requestChoice("fork-second", "Choose the second hero for 2 arcane damage", ["opposing hero", "your hero"]); } else if (hook === "fork-second") { dealArcane(ctx, ctx.getCounter("forkFirst"), 2); dealArcane(ctx, option === "your hero" ? ctx.seat : opponentSeat(ctx), 2); } } },
   "lesson in lava|2": lessonInLava,
   "tome of aetherwind|1": tomeOfAetherwind,
 

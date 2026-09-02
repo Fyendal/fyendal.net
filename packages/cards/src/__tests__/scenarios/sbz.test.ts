@@ -171,6 +171,39 @@ describe("SBZ — Blaze, Firemind", () => {
     expect(s.state.players[0]!.hero.counters.energy).toBe(0);
     s.expectInZone(0, "nucleus aetherbolt|1", "banish");
   });
+
+  it.each([
+    ["voltic bolt|2", 4],
+    ["zap|1", 3],
+    ["forked lightning|1", 2],
+    ["chain lightning|2", 3],
+  ] as const)("can choose supported Wizard action %s from outside the precon", (card, amount) => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: BLAZE, weapons: [], hand: [card] },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.state.players[0]!.hero.counters = { energy: amount };
+
+    s.activate(BLAZE).chooseOption(String(amount)).chooseCard(card);
+
+    expect(s.state.players[0]!.hero.counters.energy).toBe(0);
+    s.expectInZone(0, card, "banish");
+  });
+
+  it("uses zero for an undetermined arcane-damage value such as Scour", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: BLAZE, weapons: [], hand: ["scour|3"] },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.activate(BLAZE).chooseOption("0").chooseCard("scour|3");
+
+    s.expectInZone(0, "scour|3", "banish");
+  });
 });
 
 describe("SBZ — the next-arcane +N pool", () => {
