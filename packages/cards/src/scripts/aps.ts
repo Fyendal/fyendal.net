@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, buffNextAttack, opponentSeat } from "./shared-helpers.js";
+import { attackAbility, buffNextAttack, decisionPrompt, opponentSeat } from "./shared-helpers.js";
 
 const CONFIDENCE = "APS031";
 const TOUGHNESS = "APS032";
@@ -93,7 +93,11 @@ function returnAttackToTop(ctx: ScriptCtx): void {
 }
 
 function beginThespianCheer(ctx: ScriptCtx): void {
-  ctx.requestChoice("aps-thespian-cheer", "Have the crowd cheer you?", ["yes", "no"]);
+  ctx.requestChoice(
+    "aps-thespian-cheer",
+    decisionPrompt("Have the crowd cheer you?", "card.aps.crowd.cheer"),
+    ["yes", "no"],
+  );
 }
 function beginThespianReturn(ctx: ScriptCtx): void {
   const auras = ctx.player(ctx.seat).board.filter((card) => hasTag(ctx, card, "aura"));

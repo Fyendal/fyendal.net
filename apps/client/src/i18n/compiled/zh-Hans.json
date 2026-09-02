@@ -449,6 +449,12 @@
       "value": "Halo of Lumina Light：将放逐区中的一张黄色光环放入竞技场？"
     }
   ],
+  "card.aps.crowd.cheer": [
+    {
+      "type": 0,
+      "value": "让观众为你欢呼 (cheer)？"
+    }
+  ],
   "card.arc.arcane.hero.choose": [
     {
       "type": 1,
@@ -1329,6 +1335,532 @@
     {
       "type": 0,
       "value": "选择一件 Guardian 副手装备"
+    }
+  ],
+  "card.ele.action.top": [
+    {
+      "type": 0,
+      "value": "将一张行动牌置于你的牌库顶部"
+    }
+  ],
+  "card.ele.amulet.action.choose": [
+    {
+      "type": 0,
+      "value": "Amulet of Lightning：选择一张行动牌使其获得 go again"
+    }
+  ],
+  "card.ele.arrow.load.faceup": [
+    {
+      "type": 0,
+      "value": "将一张 arrow 面朝上放入 arsenal"
+    }
+  ],
+  "card.ele.arsenal.bottom": [
+    {
+      "type": 0,
+      "value": "将你的 arsenal 牌置于牌库底部"
+    }
+  ],
+  "card.ele.arsenal.facedown.bottom": [
+    {
+      "type": 0,
+      "value": "将一张面朝下的 arsenal 牌置于牌库底部"
+    }
+  ],
+  "card.ele.arsenal.faceup": [
+    {
+      "type": 0,
+      "value": "将一张面朝下的 arsenal 牌翻至面朝上"
+    }
+  ],
+  "card.ele.attack.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将一张攻击行动牌置于牌库底部？"
+    }
+  ],
+  "card.ele.bonus.choose": [
+    {
+      "type": 0,
+      "value": "选择一项加成"
+    }
+  ],
+  "card.ele.breakground.arsenal.bottom": [
+    {
+      "type": 0,
+      "value": "Break Ground：将你的 arsenal 牌置于牌库底部并抽牌？"
+    }
+  ],
+  "card.ele.card.order": [
+    {
+      "type": 0,
+      "value": "先放置 "
+    },
+    {
+      "type": 1,
+      "value": "first"
+    },
+    {
+      "type": 0,
+      "value": "，再放置 "
+    },
+    {
+      "type": 1,
+      "value": "second"
+    }
+  ],
+  "card.ele.deepblue.hand.bottom": [
+    {
+      "type": 0,
+      "value": "Deep Blue：将一张手牌置于牌库底部"
+    }
+  ],
+  "card.ele.defense.pay": [
+    {
+      "type": 0,
+      "value": "支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源使防御 +"
+    },
+    {
+      "type": 1,
+      "value": "defense"
+    },
+    {
+      "type": 0,
+      "value": "？"
+    }
+  ],
+  "card.ele.discard.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一张牌弃置"
+    }
+  ],
+  "card.ele.dominate.pay": [
+    {
+      "type": 0,
+      "value": "支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源，否则该次攻击获得压制 (dominate)"
+    }
+  ],
+  "card.ele.frostbite.hero.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择由哪位英雄操控 Frostbite？"
+    }
+  ],
+  "card.ele.fusion.multiple": [
+    {
+      "type": 0,
+      "value": "展示 "
+    },
+    {
+      "type": 1,
+      "value": "firstType"
+    },
+    {
+      "type": 0,
+      "value": " 和／或 "
+    },
+    {
+      "type": 1,
+      "value": "secondType"
+    },
+    {
+      "type": 0,
+      "value": " 牌以进行 fusion？"
+    }
+  ],
+  "card.ele.fusion.option.both": [
+    {
+      "type": 0,
+      "value": "展示 "
+    },
+    {
+      "type": 1,
+      "value": "first"
+    },
+    {
+      "type": 0,
+      "value": " 和 "
+    },
+    {
+      "type": 1,
+      "value": "second"
+    },
+    {
+      "type": 0,
+      "value": " 作为 "
+    },
+    {
+      "type": 1,
+      "value": "firstType"
+    },
+    {
+      "type": 0,
+      "value": " 与 "
+    },
+    {
+      "type": 1,
+      "value": "secondType"
+    }
+  ],
+  "card.ele.fusion.option.both.single": [
+    {
+      "type": 0,
+      "value": "展示 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 同时作为 "
+    },
+    {
+      "type": 1,
+      "value": "firstType"
+    },
+    {
+      "type": 0,
+      "value": " 与 "
+    },
+    {
+      "type": 1,
+      "value": "secondType"
+    }
+  ],
+  "card.ele.fusion.option.single": [
+    {
+      "type": 0,
+      "value": "展示 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 作为 "
+    },
+    {
+      "type": 1,
+      "value": "type"
+    }
+  ],
+  "card.ele.fusion.reveal": [
+    {
+      "type": 0,
+      "value": "展示一张 "
+    },
+    {
+      "type": 1,
+      "value": "type"
+    },
+    {
+      "type": 0,
+      "value": " 牌以进行 fusion？"
+    }
+  ],
+  "card.ele.fusion.reveal.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：展示一张 "
+    },
+    {
+      "type": 1,
+      "value": "type"
+    },
+    {
+      "type": 0,
+      "value": " 牌以进行 fusion？"
+    }
+  ],
+  "card.ele.goagain.give.pay": [
+    {
+      "type": 0,
+      "value": "支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源使该行动获得 go again？"
+    }
+  ],
+  "card.ele.goagain.keep.pay": [
+    {
+      "type": 0,
+      "value": "支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源以避免该次攻击失去 go again？"
+    }
+  ],
+  "card.ele.graveyard.nonattack.banish": [
+    {
+      "type": 0,
+      "value": "放逐你墓地中的一张非攻击行动牌？"
+    }
+  ],
+  "card.ele.guardian.attack.choose": [
+    {
+      "type": 0,
+      "value": "选择一张 Guardian 攻击牌"
+    }
+  ],
+  "card.ele.hand.card.top": [
+    {
+      "type": 0,
+      "value": "将一张手牌置于牌库顶部"
+    }
+  ],
+  "card.ele.honing.arsenal": [
+    {
+      "type": 0,
+      "value": "Honing Hood：将一张牌面朝下放入 arsenal"
+    }
+  ],
+  "card.ele.korshem.benefit": [
+    {
+      "type": 0,
+      "value": "选择 Korshem 的一项增益"
+    }
+  ],
+  "card.ele.korshem.option.attack": [
+    {
+      "type": 0,
+      "value": "你的下一次攻击 +1 力量"
+    }
+  ],
+  "card.ele.korshem.option.defense": [
+    {
+      "type": 0,
+      "value": "你的下一张防守行动牌 +1 防御"
+    }
+  ],
+  "card.ele.korshem.option.life": [
+    {
+      "type": 0,
+      "value": "获得 1 点生命"
+    }
+  ],
+  "card.ele.korshem.option.resource": [
+    {
+      "type": 0,
+      "value": "获得 1 点资源"
+    }
+  ],
+  "card.ele.lexi.arsenal.faceup": [
+    {
+      "type": 0,
+      "value": "Lexi：将一张面朝下的 arsenal 牌翻至面朝上"
+    }
+  ],
+  "card.ele.lexi.frostbite.hero": [
+    {
+      "type": 0,
+      "value": "Lexi：选择由哪位英雄操控 Frostbite？"
+    }
+  ],
+  "card.ele.nonattack.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将一张非攻击行动牌置于牌库底部？"
+    }
+  ],
+  "card.ele.oaken.fusion.earth": [
+    {
+      "type": 0,
+      "value": "展示一张 Earth 牌以对 Oaken Old 进行 fusion？"
+    }
+  ],
+  "card.ele.oaken.fusion.ice": [
+    {
+      "type": 0,
+      "value": "展示一张 Ice 牌以对 Oaken Old 进行 fusion？"
+    }
+  ],
+  "card.ele.oaken.order": [
+    {
+      "type": 0,
+      "value": "选择两张随机牌的放置顺序"
+    }
+  ],
+  "card.ele.oldhim.hand.top": [
+    {
+      "type": 0,
+      "value": "Oldhim：将一张手牌置于你的牌库顶部"
+    }
+  ],
+  "card.ele.option.dominate": [
+    {
+      "type": 0,
+      "value": "压制 (dominate)"
+    }
+  ],
+  "card.ele.option.goagain": [
+    {
+      "type": 0,
+      "value": "go again"
+    }
+  ],
+  "card.ele.option.power.one": [
+    {
+      "type": 0,
+      "value": "+1 力量"
+    }
+  ],
+  "card.ele.pay.or.discard": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源，否则弃置一张牌？"
+    }
+  ],
+  "card.ele.pitch.card.bottom": [
+    {
+      "type": 0,
+      "value": "将资源区中的一张 "
+    },
+    {
+      "type": 1,
+      "value": "type"
+    },
+    {
+      "type": 0,
+      "value": " 牌置于牌库底部"
+    }
+  ],
+  "card.ele.plume.earth.return": [
+    {
+      "type": 0,
+      "value": "Plume of Evergrowth：将一张 Earth 牌返回你的手牌"
+    }
+  ],
+  "card.ele.polar.pay": [
+    {
+      "type": 0,
+      "value": "Polar Blast：支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源？"
+    }
+  ],
+  "card.ele.ragamuffin.option.bottom": [
+    {
+      "type": 0,
+      "value": "将 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 置于牌库底部"
+    }
+  ],
+  "card.ele.ragamuffin.option.top": [
+    {
+      "type": 0,
+      "value": "将 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 置于牌库顶部"
+    }
+  ],
+  "card.ele.ragamuffin.position": [
+    {
+      "type": 0,
+      "value": "Ragamuffin's Hat：将一张牌置于牌库顶部或底部"
+    }
+  ],
+  "card.ele.reload": [
+    {
+      "type": 0,
+      "value": "Reload：将一张手牌放入你的 arsenal？"
+    }
+  ],
+  "card.ele.shelter.defender.choose": [
+    {
+      "type": 0,
+      "value": "Summerwood Shelter：选择一张正在防守的 Earth 或 Elemental 牌"
+    }
+  ],
+  "card.ele.sow.action.bottom": [
+    {
+      "type": 0,
+      "value": "Sow Tomorrow：将一张 Earth 或 Elemental 行动牌置于牌库底部"
+    }
+  ],
+  "card.ele.thump.discard": [
+    {
+      "type": 0,
+      "value": "Thump：选择一张牌弃置"
     }
   ],
   "card.evr.arcane.hero.choose": [
@@ -2257,6 +2789,372 @@
     {
       "type": 0,
       "value": "Ruu'di：抽一张牌？"
+    }
+  ],
+  "card.mon.action.search": [
+    {
+      "type": 0,
+      "value": "搜寻一张行动牌"
+    }
+  ],
+  "card.mon.actionpoint.pay": [
+    {
+      "type": 0,
+      "value": "支付 1 点资源以获得 1 个行动点？"
+    }
+  ],
+  "card.mon.attack.reveal.three": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：展示一张基础力量不超过 3 的攻击行动牌？"
+    }
+  ],
+  "card.mon.attack.top.maxcost": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将一张费用不超过 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 的攻击行动牌置于牌库顶部"
+    }
+  ],
+  "card.mon.banished.attack.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一张已放逐的攻击行动牌"
+    }
+  ],
+  "card.mon.blooddebt.banish.goagain": [
+    {
+      "type": 0,
+      "value": "放逐一张具有 blood debt 的牌以获得 go again？"
+    }
+  ],
+  "card.mon.blooddebt.card.choose": [
+    {
+      "type": 0,
+      "value": "选择一张具有 blood debt 的牌"
+    }
+  ],
+  "card.mon.blooddebt.nonattack.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将一张具有 blood debt 的非攻击行动牌置于牌库底部？"
+    }
+  ],
+  "card.mon.captainscall.mode": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：为你的下一次符合条件的攻击选择 +2 力量或 go again"
+    }
+  ],
+  "card.mon.charge.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一张手牌进行充能，或拒绝"
+    }
+  ],
+  "card.mon.defending.hand.bottom": [
+    {
+      "type": 0,
+      "value": "选择防守英雄的一张手牌置于牌库底部"
+    }
+  ],
+  "card.mon.defending.hand.look": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：查看防守英雄的手牌？"
+    }
+  ],
+  "card.mon.defending.soul.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：放逐防守英雄 soul 中的一张牌"
+    }
+  ],
+  "card.mon.footsteps.defense.pay": [
+    {
+      "type": 0,
+      "value": "支付 1 点资源，使 Phantasmal Footsteps 获得 1 点防御？"
+    }
+  ],
+  "card.mon.glisten.distribute": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：在你的武器之间分配至多 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个 +1 力量指示物"
+    }
+  ],
+  "card.mon.glisten.option": [
+    {
+      "type": 0,
+      "value": "武器指示物："
+    },
+    {
+      "type": 1,
+      "value": "distribution"
+    }
+  ],
+  "card.mon.graveyard.action.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：放逐你墓地中的一张行动牌？"
+    }
+  ],
+  "card.mon.graveyard.card.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：放逐任一墓地中的一张牌"
+    }
+  ],
+  "card.mon.graveyard.cards.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择墓地中的 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张牌放逐"
+    }
+  ],
+  "card.mon.graveyard.cards.banish.more": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：再选择 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张牌放逐"
+    }
+  ],
+  "card.mon.hand.card.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：放逐你手牌中的一张牌"
+    }
+  ],
+  "card.mon.hand.card.banish.optional": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：放逐一张手牌？"
+    }
+  ],
+  "card.mon.hand.top.goagain": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将一张手牌置于牌库顶部以获得 go again？"
+    }
+  ],
+  "card.mon.hooves.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Hooves of the Shadowbeast 以获得 1 个行动点？"
+    }
+  ],
+  "card.mon.light.soul.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：放逐 Light 英雄 soul 中的一张牌？"
+    }
+  ],
+  "card.mon.minnowism.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：从你的牌库中选择一张 Minnowism"
+    }
+  ],
+  "card.mon.option.goagain": [
+    {
+      "type": 0,
+      "value": "go again"
+    }
+  ],
+  "card.mon.option.power.two": [
+    {
+      "type": 0,
+      "value": "+2 力量"
+    }
+  ],
+  "card.mon.phantasm.top": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将一张具有 phantasm 的牌置于牌库顶部？"
+    }
+  ],
+  "card.mon.revealed.attack.choose": [
+    {
+      "type": 0,
+      "value": "选择一张已展示的攻击行动牌"
+    }
+  ],
+  "card.mon.rouse.option.reveal": [
+    {
+      "type": 0,
+      "value": "展示 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张攻击牌"
+    }
+  ],
+  "card.mon.rouse.reveal": [
+    {
+      "type": 0,
+      "value": "展示总力量至少为 13 的攻击牌？"
+    }
+  ],
+  "card.mon.shadow.revealed.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：放逐已展示的 Shadow 牌？"
+    }
+  ],
+  "card.mon.shadowpuppetry.banish": [
+    {
+      "type": 0,
+      "value": "Shadow Puppetry：你可以放逐牌库顶牌"
+    }
+  ],
+  "card.mon.soul.banish.choose": [
+    {
+      "type": 0,
+      "value": "选择 soul 中的一张牌放逐"
+    }
+  ],
+  "card.mon.soul.banish.next": [
+    {
+      "type": 0,
+      "value": "再选择 soul 中的一张牌放逐"
+    }
+  ],
+  "card.mon.soul.card.choose": [
+    {
+      "type": 0,
+      "value": "选择一张牌放入你的 soul"
+    }
+  ],
+  "card.mon.soul.x.choose": [
+    {
+      "type": 0,
+      "value": "选择一个非零的 X，从 soul 中放逐对应数量的牌"
+    }
+  ],
+  "card.mon.soul.x.option": [
+    {
+      "type": 0,
+      "value": "放逐 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张"
     }
   ],
   "card.mpa.remember.hand.banish": [

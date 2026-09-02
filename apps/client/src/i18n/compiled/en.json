@@ -449,6 +449,12 @@
       "value": "Halo of Lumina Light: put a yellow aura from banish into the arena?"
     }
   ],
+  "card.aps.crowd.cheer": [
+    {
+      "type": 0,
+      "value": "Have the crowd cheer you?"
+    }
+  ],
   "card.arc.arcane.hero.choose": [
     {
       "type": 1,
@@ -1325,6 +1331,640 @@
     {
       "type": 0,
       "value": "Choose a Guardian off-hand"
+    }
+  ],
+  "card.ele.action.top": [
+    {
+      "type": 0,
+      "value": "Put an action on top of your deck"
+    }
+  ],
+  "card.ele.amulet.action.choose": [
+    {
+      "type": 0,
+      "value": "Amulet of Lightning: choose an action card to gain go again"
+    }
+  ],
+  "card.ele.arrow.load.faceup": [
+    {
+      "type": 0,
+      "value": "Load an arrow face up"
+    }
+  ],
+  "card.ele.arsenal.bottom": [
+    {
+      "type": 0,
+      "value": "Put your arsenal on the bottom"
+    }
+  ],
+  "card.ele.arsenal.facedown.bottom": [
+    {
+      "type": 0,
+      "value": "Put a face-down arsenal card on the bottom"
+    }
+  ],
+  "card.ele.arsenal.faceup": [
+    {
+      "type": 0,
+      "value": "Turn a face-down arsenal card face up"
+    }
+  ],
+  "card.ele.attack.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": put an attack action on the bottom?"
+    }
+  ],
+  "card.ele.bonus.choose": [
+    {
+      "type": 0,
+      "value": "Choose a bonus"
+    }
+  ],
+  "card.ele.breakground.arsenal.bottom": [
+    {
+      "type": 0,
+      "value": "Break Ground: bottom your arsenal and draw?"
+    }
+  ],
+  "card.ele.card.order": [
+    {
+      "type": 1,
+      "value": "first"
+    },
+    {
+      "type": 0,
+      "value": ", then "
+    },
+    {
+      "type": 1,
+      "value": "second"
+    }
+  ],
+  "card.ele.deepblue.hand.bottom": [
+    {
+      "type": 0,
+      "value": "Deep Blue: put a card from hand on the bottom"
+    }
+  ],
+  "card.ele.defense.pay": [
+    {
+      "type": 0,
+      "value": "Pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " for +"
+    },
+    {
+      "type": 1,
+      "value": "defense"
+    },
+    {
+      "type": 0,
+      "value": " defense?"
+    }
+  ],
+  "card.ele.discard.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose a card to discard"
+    }
+  ],
+  "card.ele.dominate.pay": [
+    {
+      "type": 0,
+      "value": "Pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "resource"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "resources"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " or the attack gains dominate"
+    }
+  ],
+  "card.ele.frostbite.hero.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": create Frostbite under which hero?"
+    }
+  ],
+  "card.ele.fusion.multiple": [
+    {
+      "type": 0,
+      "value": "Reveal "
+    },
+    {
+      "type": 1,
+      "value": "firstType"
+    },
+    {
+      "type": 0,
+      "value": " and/or "
+    },
+    {
+      "type": 1,
+      "value": "secondType"
+    },
+    {
+      "type": 0,
+      "value": " cards to fuse?"
+    }
+  ],
+  "card.ele.fusion.option.both": [
+    {
+      "type": 0,
+      "value": "Reveal "
+    },
+    {
+      "type": 1,
+      "value": "first"
+    },
+    {
+      "type": 0,
+      "value": " and "
+    },
+    {
+      "type": 1,
+      "value": "second"
+    },
+    {
+      "type": 0,
+      "value": " for "
+    },
+    {
+      "type": 1,
+      "value": "firstType"
+    },
+    {
+      "type": 0,
+      "value": " and "
+    },
+    {
+      "type": 1,
+      "value": "secondType"
+    }
+  ],
+  "card.ele.fusion.option.both.single": [
+    {
+      "type": 0,
+      "value": "Reveal "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " for both "
+    },
+    {
+      "type": 1,
+      "value": "firstType"
+    },
+    {
+      "type": 0,
+      "value": " and "
+    },
+    {
+      "type": 1,
+      "value": "secondType"
+    }
+  ],
+  "card.ele.fusion.option.single": [
+    {
+      "type": 0,
+      "value": "Reveal "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " for "
+    },
+    {
+      "type": 1,
+      "value": "type"
+    }
+  ],
+  "card.ele.fusion.reveal": [
+    {
+      "type": 0,
+      "value": "Reveal a "
+    },
+    {
+      "type": 1,
+      "value": "type"
+    },
+    {
+      "type": 0,
+      "value": " card to fuse?"
+    }
+  ],
+  "card.ele.fusion.reveal.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": reveal a "
+    },
+    {
+      "type": 1,
+      "value": "type"
+    },
+    {
+      "type": 0,
+      "value": " card to fuse?"
+    }
+  ],
+  "card.ele.goagain.give.pay": [
+    {
+      "type": 0,
+      "value": "Pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " to give this action go again?"
+    }
+  ],
+  "card.ele.goagain.keep.pay": [
+    {
+      "type": 0,
+      "value": "Pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "resource"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "resources"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " to prevent the attack losing go again?"
+    }
+  ],
+  "card.ele.graveyard.nonattack.banish": [
+    {
+      "type": 0,
+      "value": "Banish a non-attack action from your graveyard?"
+    }
+  ],
+  "card.ele.guardian.attack.choose": [
+    {
+      "type": 0,
+      "value": "Choose a Guardian attack"
+    }
+  ],
+  "card.ele.hand.card.top": [
+    {
+      "type": 0,
+      "value": "Put a card from hand on top of deck"
+    }
+  ],
+  "card.ele.honing.arsenal": [
+    {
+      "type": 0,
+      "value": "Honing Hood: put a card face down into arsenal"
+    }
+  ],
+  "card.ele.korshem.benefit": [
+    {
+      "type": 0,
+      "value": "Choose Korshem's benefit"
+    }
+  ],
+  "card.ele.korshem.option.attack": [
+    {
+      "type": 0,
+      "value": "Your next attack gets +1 power"
+    }
+  ],
+  "card.ele.korshem.option.defense": [
+    {
+      "type": 0,
+      "value": "Your next defending action gets +1 defense"
+    }
+  ],
+  "card.ele.korshem.option.life": [
+    {
+      "type": 0,
+      "value": "Gain 1 life"
+    }
+  ],
+  "card.ele.korshem.option.resource": [
+    {
+      "type": 0,
+      "value": "Gain 1 resource"
+    }
+  ],
+  "card.ele.lexi.arsenal.faceup": [
+    {
+      "type": 0,
+      "value": "Lexi: turn a face-down arsenal card face up"
+    }
+  ],
+  "card.ele.lexi.frostbite.hero": [
+    {
+      "type": 0,
+      "value": "Lexi: create Frostbite under which hero?"
+    }
+  ],
+  "card.ele.nonattack.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": put a non-attack action on the bottom?"
+    }
+  ],
+  "card.ele.oaken.fusion.earth": [
+    {
+      "type": 0,
+      "value": "Reveal an Earth card to fuse Oaken Old?"
+    }
+  ],
+  "card.ele.oaken.fusion.ice": [
+    {
+      "type": 0,
+      "value": "Reveal an Ice card to fuse Oaken Old?"
+    }
+  ],
+  "card.ele.oaken.order": [
+    {
+      "type": 0,
+      "value": "Choose the order for the two random cards"
+    }
+  ],
+  "card.ele.oldhim.hand.top": [
+    {
+      "type": 0,
+      "value": "Oldhim: put a card from your hand on top of your deck"
+    }
+  ],
+  "card.ele.option.dominate": [
+    {
+      "type": 0,
+      "value": "Dominate"
+    }
+  ],
+  "card.ele.option.goagain": [
+    {
+      "type": 0,
+      "value": "Go again"
+    }
+  ],
+  "card.ele.option.power.one": [
+    {
+      "type": 0,
+      "value": "+1 power"
+    }
+  ],
+  "card.ele.pay.or.discard": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "resource"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "resources"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " or discard a card?"
+    }
+  ],
+  "card.ele.pitch.card.bottom": [
+    {
+      "type": 0,
+      "value": "Put a "
+    },
+    {
+      "type": 1,
+      "value": "type"
+    },
+    {
+      "type": 0,
+      "value": " card from pitch on the bottom"
+    }
+  ],
+  "card.ele.plume.earth.return": [
+    {
+      "type": 0,
+      "value": "Plume of Evergrowth: return an Earth card to your hand"
+    }
+  ],
+  "card.ele.polar.pay": [
+    {
+      "type": 0,
+      "value": "Polar Blast: pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "resource"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "resources"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": "?"
+    }
+  ],
+  "card.ele.ragamuffin.option.bottom": [
+    {
+      "type": 0,
+      "value": "Put "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " on the bottom"
+    }
+  ],
+  "card.ele.ragamuffin.option.top": [
+    {
+      "type": 0,
+      "value": "Put "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " on top"
+    }
+  ],
+  "card.ele.ragamuffin.position": [
+    {
+      "type": 0,
+      "value": "Ragamuffin's Hat: put a card on the top or bottom of your deck"
+    }
+  ],
+  "card.ele.reload": [
+    {
+      "type": 0,
+      "value": "Reload: put a card from your hand into your arsenal?"
+    }
+  ],
+  "card.ele.shelter.defender.choose": [
+    {
+      "type": 0,
+      "value": "Summerwood Shelter: choose a defending Earth or Elemental card"
+    }
+  ],
+  "card.ele.sow.action.bottom": [
+    {
+      "type": 0,
+      "value": "Sow Tomorrow: put an Earth or Elemental action on the bottom"
+    }
+  ],
+  "card.ele.thump.discard": [
+    {
+      "type": 0,
+      "value": "Thump: choose a card to discard"
     }
   ],
   "card.evr.arcane.hero.choose": [
@@ -2273,6 +2913,420 @@
     {
       "type": 0,
       "value": "Ruu'di: draw a card?"
+    }
+  ],
+  "card.mon.action.search": [
+    {
+      "type": 0,
+      "value": "Search for an action card"
+    }
+  ],
+  "card.mon.actionpoint.pay": [
+    {
+      "type": 0,
+      "value": "Pay 1 to gain an action point?"
+    }
+  ],
+  "card.mon.attack.reveal.three": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": reveal an attack action with 3 or less base power?"
+    }
+  ],
+  "card.mon.attack.top.maxcost": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": put an attack action with cost "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " or less on top of your deck"
+    }
+  ],
+  "card.mon.banished.attack.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose a banished attack action"
+    }
+  ],
+  "card.mon.blooddebt.banish.goagain": [
+    {
+      "type": 0,
+      "value": "Banish a Blood Debt card for go again?"
+    }
+  ],
+  "card.mon.blooddebt.card.choose": [
+    {
+      "type": 0,
+      "value": "Choose a Blood Debt card"
+    }
+  ],
+  "card.mon.blooddebt.nonattack.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": put a Blood Debt non-attack action on the bottom?"
+    }
+  ],
+  "card.mon.captainscall.mode": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose +2 power or go again for your next qualifying attack"
+    }
+  ],
+  "card.mon.charge.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose a card from your hand to charge, or decline"
+    }
+  ],
+  "card.mon.defending.hand.bottom": [
+    {
+      "type": 0,
+      "value": "Choose a defending hero's card to bottom"
+    }
+  ],
+  "card.mon.defending.hand.look": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": look at the defending hero's hand?"
+    }
+  ],
+  "card.mon.defending.soul.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": banish a card from the defending hero's soul"
+    }
+  ],
+  "card.mon.footsteps.defense.pay": [
+    {
+      "type": 0,
+      "value": "Pay 1 to make Phantasmal Footsteps defend for 1?"
+    }
+  ],
+  "card.mon.glisten.distribute": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": distribute up to "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " +1 power counters among your weapons"
+    }
+  ],
+  "card.mon.glisten.option": [
+    {
+      "type": 0,
+      "value": "Weapon counters: "
+    },
+    {
+      "type": 1,
+      "value": "distribution"
+    }
+  ],
+  "card.mon.graveyard.action.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": banish an action from your graveyard?"
+    }
+  ],
+  "card.mon.graveyard.card.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": banish a card from a graveyard"
+    }
+  ],
+  "card.mon.graveyard.cards.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " graveyard cards to banish"
+    }
+  ],
+  "card.mon.graveyard.cards.banish.more": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " more "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " to banish"
+    }
+  ],
+  "card.mon.hand.card.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": banish a card from your hand"
+    }
+  ],
+  "card.mon.hand.card.banish.optional": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": banish a card from hand?"
+    }
+  ],
+  "card.mon.hand.top.goagain": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": put a card from your hand on top of your deck for go again?"
+    }
+  ],
+  "card.mon.hooves.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy Hooves of the Shadowbeast to gain 1 action point?"
+    }
+  ],
+  "card.mon.light.soul.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": banish a card from the Light hero's soul?"
+    }
+  ],
+  "card.mon.minnowism.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose a Minnowism from your deck"
+    }
+  ],
+  "card.mon.option.goagain": [
+    {
+      "type": 0,
+      "value": "Go again"
+    }
+  ],
+  "card.mon.option.power.two": [
+    {
+      "type": 0,
+      "value": "+2 power"
+    }
+  ],
+  "card.mon.phantasm.top": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": put a phantasm card on top?"
+    }
+  ],
+  "card.mon.revealed.attack.choose": [
+    {
+      "type": 0,
+      "value": "Choose a revealed attack action"
+    }
+  ],
+  "card.mon.rouse.option.reveal": [
+    {
+      "type": 0,
+      "value": "Reveal "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " attack "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "card.mon.rouse.reveal": [
+    {
+      "type": 0,
+      "value": "Reveal attacks with at least 13 total power?"
+    }
+  ],
+  "card.mon.shadow.revealed.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": banish the revealed Shadow card?"
+    }
+  ],
+  "card.mon.shadowpuppetry.banish": [
+    {
+      "type": 0,
+      "value": "Shadow Puppetry: you may banish the top card"
+    }
+  ],
+  "card.mon.soul.banish.choose": [
+    {
+      "type": 0,
+      "value": "Choose a soul card to banish"
+    }
+  ],
+  "card.mon.soul.banish.next": [
+    {
+      "type": 0,
+      "value": "Choose another soul card to banish"
+    }
+  ],
+  "card.mon.soul.card.choose": [
+    {
+      "type": 0,
+      "value": "Choose a card for your soul"
+    }
+  ],
+  "card.mon.soul.x.choose": [
+    {
+      "type": 0,
+      "value": "Choose a nonzero X to banish from soul"
+    }
+  ],
+  "card.mon.soul.x.option": [
+    {
+      "type": 0,
+      "value": "Banish "
+    },
+    {
+      "type": 1,
+      "value": "count"
     }
   ],
   "card.mpa.remember.hand.banish": [
