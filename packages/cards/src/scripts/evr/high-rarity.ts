@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, opponentSeat, previousAttackHasName } from "../shared-helpers.js";
+import { buffNextAttack, commonOptionMessages, decisionMessage, decisionPrompt, opponentSeat, previousAttackHasName, yesNoPrompt } from "../shared-helpers.js";
 
 const SEISMIC_SURGE = "CRU044";
 const FROSTBITE = "SIY035";
@@ -31,6 +31,21 @@ function elementalRevealOptions(ctx: ScriptCtx): string[] {
     }
   }
   return [...options];
+}
+
+function elementalRevealOptionMessages(ctx: ScriptCtx): Record<string, ReturnType<typeof decisionMessage>> {
+  const hand = ctx.player(ctx.seat).hand;
+  return Object.fromEntries(elementalRevealOptions(ctx).flatMap((option) => {
+    const [earthId, iceId, lightningId] = option.split(":").map(Number);
+    const earth = hand.find((card) => card.instanceId === earthId);
+    const ice = hand.find((card) => card.instanceId === iceId);
+    const lightning = hand.find((card) => card.instanceId === lightningId);
+    return earth && ice && lightning ? [[option, decisionMessage("card.evr.bravo.option.reveal", {
+      earth: { kind: "card", cardId: earth.cardId },
+      ice: { kind: "card", cardId: ice.cardId },
+      lightning: { kind: "card", cardId: lightning.cardId },
+    })]] : [];
+  }));
 }
 
 function illusionistAttacksOnChain(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
@@ -101,20 +116,25 @@ function requestBloodMode(ctx: ScriptCtx): void {
   const selected = bloodSelectedTotal(ctx);
   const options: string[] = [];
   const cardOptions: Array<number | null> = [];
+  const optionMessages: Record<string, ReturnType<typeof decisionMessage>> = {};
   for (const weapon of bloodWeapons(ctx)) {
     for (const mode of BLOOD_MODES) {
       const count = ctx.getCounter(bloodAllocationKey(mode, weapon.instanceId));
       for (const operation of ["decrement", "increment"] as const) {
-        options.push(`blood-mode:${operation}:${mode}:${weapon.instanceId}:${count}:${selected}:${required}`);
+        const value = `blood-mode:${operation}:${mode}:${weapon.instanceId}:${count}:${selected}:${required}`;
+        options.push(value);
         cardOptions.push(weapon.instanceId);
+        optionMessages[value] = decisionMessage(`card.evr.blood.option.${operation}.${mode.replaceAll("-", "")}`, { card: { kind: "card", cardId: weapon.cardId }, amount: count });
       }
     }
   }
-  options.push(`blood-mode:confirm:${selected}:${required}`);
+  const confirmation = `blood-mode:confirm:${selected}:${required}`;
+  options.push(confirmation);
   cardOptions.push(null);
+  optionMessages[confirmation] = decisionMessage("card.evr.blood.option.confirm", { selected, required });
   ctx.requestChoice(
     "blood-mode",
-    `Assign ${required} Blood on Her Hands ${required === 1 ? "mode" : "modes"}`,
+    decisionPrompt(`Assign ${required} Blood on Her Hands ${required === 1 ? "mode" : "modes"}`, "card.evr.blood.modes.assign", { values: { amount: required }, optionMessages }),
     options,
     undefined,
     cardOptions,
@@ -145,7 +165,7 @@ const bloodOnHerHands: CardScript = {
     const maximum = bloodWeapons(ctx).length > 0 ? Math.min(totalCopper, BLOOD_MODES.length * 2) : 0;
     ctx.requestChoice(
       "blood-count",
-      "How many Copper do you want to destroy?",
+      decisionPrompt("How many Copper do you want to destroy?", "card.evr.copper.count"),
       Array.from({ length: maximum + 1 }, (_, value) => String(value)),
     );
   },
@@ -223,12 +243,12 @@ function requestKnickSearch(ctx: ScriptCtx): void {
     ctx.shuffleDeck();
     return;
   }
-  ctx.requestCardChoice("knick-search", "Search for an Amulet, Potion, or Talisman", targets.map((card) => card.instanceId));
+  ctx.requestCardChoice("knick-search", decisionPrompt("Search for an Amulet, Potion, or Talisman", "card.evr.knick.search"), targets.map((card) => card.instanceId));
 }
 
 const knickKnack: CardScript = {
   additionalCost(ctx) {
-    ctx.requestCardChoice("knick-money", "Destroy money tokens?", ["done", ...knickMoney(ctx).map((card) => card.instanceId)]);
+    ctx.requestCardChoice("knick-money", decisionPrompt("Destroy money tokens?", "card.evr.money.destroy", { optionMessages: commonOptionMessages("done") }), ["done", ...knickMoney(ctx).map((card) => card.instanceId)]);
   },
   onPlay(ctx) {
     ctx.setCounter("knickSearches", 1 + Math.floor(ctx.getCounter("knickUnits") / 4));
@@ -241,7 +261,7 @@ const knickKnack: CardScript = {
       if (!card) return;
       ctx.setCounter("knickUnits", ctx.getCounter("knickUnits") + moneyValue(ctx, card));
       if (ctx.destroyPermanent(card.instanceId)) {
-        ctx.requestCardChoice("knick-money", "Destroy another money token?", ["done", ...knickMoney(ctx).map((candidate) => candidate.instanceId)]);
+        ctx.requestCardChoice("knick-money", decisionPrompt("Destroy another money token?", "card.evr.money.destroy.next", { optionMessages: commonOptionMessages("done") }), ["done", ...knickMoney(ctx).map((candidate) => candidate.instanceId)]);
       }
     } else if (hook === "knick-search") {
       ctx.settleCard(Number(option));
@@ -258,7 +278,7 @@ export const evrHighRarity: Record<string, CardScript> = {
   "ready to roll|3": { onPlay(ctx) { ctx.addModifier({ scope: "until-end-of-turn", extraDiceIgnoreLowest: 1 }); } },
   "rolling thunder|1": { onPlay(ctx) { ctx.requestDieRoll("rolling-thunder", 6); }, onDieRollResolved(ctx, hook, result) { if (hook === "rolling-thunder") buffNextAttack(ctx, { attack: result, appliesToType: ["brute"] }); } },
   "bravo, star of the show|0": {
-    triggers: [{ event: "start-of-turn", optional: true, label: "Reveal Earth, Ice, and Lightning cards?", condition(ctx) { return elementalRevealOptions(ctx).length > 0; }, effect(ctx) { ctx.requestChoice("bravo-elements", "Reveal an Earth, an Ice, and a Lightning card", elementalRevealOptions(ctx)); } }],
+    triggers: [{ event: "start-of-turn", optional: true, label: "Reveal Earth, Ice, and Lightning cards?", condition(ctx) { return elementalRevealOptions(ctx).length > 0; }, effect(ctx) { ctx.requestChoice("bravo-elements", decisionPrompt("Reveal an Earth, an Ice, and a Lightning card", "card.evr.bravo.elements.reveal", { optionMessages: elementalRevealOptionMessages(ctx) }), elementalRevealOptions(ctx)); } }],
     onChoose(ctx, hook, option) { if (hook !== "bravo-elements") return; const cards = option.split(":").map(Number).map((id) => ctx.player(ctx.seat).hand.find((card) => card.instanceId === id)); if (cards.length !== 3 || !cards[0] || !cards[1] || !cards[2] || !hasType(ctx, cards[0], "earth") || !hasType(ctx, cards[1], "ice") || !hasType(ctx, cards[2], "lightning")) return; ctx.revealCards([cards[0].instanceId, cards[1].instanceId, cards[2].instanceId]); buffNextAttack(ctx, { attack: 2, dominate: true, goAgain: true, appliesTo: "attack-action", minCost: 3 }); },
   },
   "stalagmite, bastion of isenloft|0": { onDefend(ctx) { if (ctx.link) ctx.createToken(FROSTBITE, ctx.link.attacker); } },
@@ -271,7 +291,7 @@ export const evrHighRarity: Record<string, CardScript> = {
       label: "Heave 3",
       condition: (ctx) => ctx.player(ctx.seat).arsenal.length === 0,
       effect(ctx) {
-        ctx.requestPayment("pulverize-heave", "Pulverize: pay {r}{r}{r} to heave it?", 3);
+        ctx.requestPayment("pulverize-heave", decisionPrompt("Pulverize: pay {r}{r}{r} to heave it?", "card.evr.pulverize.pay", { values: { amount: 3 }, optionMessages: commonOptionMessages("no") }), 3);
       },
     }],
     onChoose(ctx, hook, option) {
@@ -291,7 +311,7 @@ export const evrHighRarity: Record<string, CardScript> = {
       if (cards.length) {
         ctx.requestCardChoice(
           "visage-search",
-          `Choose an aura with cost ${x} or less`,
+          decisionPrompt(`Choose an aura with cost ${x} or less`, "card.evr.aura.cost.choose", { values: { amount: x } }),
           cards.map((card) => card.instanceId),
         );
       } else {
@@ -313,7 +333,7 @@ export const evrHighRarity: Record<string, CardScript> = {
     onHit(ctx) {
       ctx.requestChoice(
         "lynx-destroy",
-        "Destroy Mask of the Pouncing Lynx to search your deck?",
+        yesNoPrompt("Destroy Mask of the Pouncing Lynx to search your deck?", "card.evr.lynx.destroy"),
         ["yes", "no"],
         undefined,
         undefined,
@@ -329,7 +349,7 @@ export const evrHighRarity: Record<string, CardScript> = {
         if (cards.length) {
           ctx.requestCardChoice(
             "lynx-search",
-            "Choose an attack with 2 or less power",
+            decisionPrompt("Choose an attack with 2 or less power", "card.evr.attack.power.choose", { values: { amount: 2 } }),
             cards.map((card) => card.instanceId),
           );
         } else ctx.shuffleDeck();
@@ -364,8 +384,8 @@ export const evrHighRarity: Record<string, CardScript> = {
   "oath of steel|1": { onAttackDeclared(ctx) { if (ctx.link?.attackCardType === "weapon") ctx.addCounter(ctx.self.instanceId, "power", 1); }, triggers: [{ event: "end-of-turn", label: "Remove Oath counters", effect(ctx) { ctx.setCardCounter(ctx.self.instanceId, "power", 0); } }] },
   "dissolution sphere|2": { onEnterArena(ctx) { ctx.addCounter(ctx.self.instanceId, "steam", 1); }, replaceDamageToController(_ctx, amount) { return amount === 1 ? 0 : amount; }, triggers: [{ event: "begin-action-phase", label: "Remove a steam counter or destroy Dissolution Sphere", effect(ctx) { if (ctx.getCounter("steam") > 0) ctx.addCounter(ctx.self.instanceId, "steam", -1); else ctx.destroySelf(); } }] },
   "micro-processor|3": { activated: [
-    { cost: 0, isAttack: false, goAgain: true, oncePerTurn: true, label: "Opt 1", onActivate(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top) ctx.requestChoice("micro-opt", "Leave on top or put on bottom?", ["top", "bottom"]); } },
-    { cost: 0, isAttack: false, goAgain: true, oncePerTurn: true, label: "Draw then bottom", onActivate(ctx) { ctx.drawCards(ctx.seat, 1); const hand = ctx.player(ctx.seat).hand; if (hand.length) ctx.requestCardChoice("micro-bottom", "Put a card from hand on the bottom", hand.map((card) => card.instanceId)); } },
+    { cost: 0, isAttack: false, goAgain: true, oncePerTurn: true, label: "Opt 1", onActivate(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top) ctx.requestChoice("micro-opt", decisionPrompt("Leave on top or put on bottom?", "card.evr.deck.position", { optionMessages: commonOptionMessages("top", "bottom") }), ["top", "bottom"]); } },
+    { cost: 0, isAttack: false, goAgain: true, oncePerTurn: true, label: "Draw then bottom", onActivate(ctx) { ctx.drawCards(ctx.seat, 1); const hand = ctx.player(ctx.seat).hand; if (hand.length) ctx.requestCardChoice("micro-bottom", decisionPrompt("Put a card from hand on the bottom", "card.evr.hand.bottom"), hand.map((card) => card.instanceId)); } },
     { cost: 0, isAttack: false, goAgain: true, oncePerTurn: true, label: "Banish top", onActivate(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top) ctx.banish(top.instanceId); } },
   ], onChoose(ctx, hook, option) { if (hook === "micro-bottom") ctx.putOnDeckBottom(Number(option)); else if (hook === "micro-opt" && option === "bottom") { const top = ctx.player(ctx.seat).deck[0]; if (top) ctx.putOnDeckBottom(top.instanceId); } } },
   "signal jammer|3": { nonAttackActionCardLimit: 1, onEnterArena(ctx) { ctx.addCounter(ctx.self.instanceId, "steam", 1); }, triggers: [{ event: "begin-action-phase", label: "Remove a steam counter or destroy Signal Jammer", effect(ctx) { if (ctx.getCounter("steam") > 0) ctx.addCounter(ctx.self.instanceId, "steam", -1); else ctx.destroySelf(); } }] },
@@ -376,7 +396,7 @@ export const evrHighRarity: Record<string, CardScript> = {
   "tri-shot|3": { onPlay(ctx) { const bows = ctx.player(ctx.seat).weapons.filter((card) => hasType(ctx, card, "bow")); for (const bow of bows) ctx.setPlayerFlag(ctx.seat, `additionalActivations:${bow.instanceId}:0`, 2); } },
   "rain razors|2": { onPlay(ctx) { ctx.addModifier({ scope: "until-end-of-turn", attack: 2, appliesToSubtype: "arrow" }); } },
   "vexing quillhand|0": { activated: { cost: 0, isAttack: false, goAgain: true, oncePerTurn: false, destroySelfCost: true, onActivate(ctx) { ctx.createTokens(RUNECHANT, 2); } } },
-  "runic reclamation|1": { canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined, onHit(ctx) { const auras = ctx.player(opponentSeat(ctx)).board.filter((card) => hasType(ctx, card, "aura")); if (auras.length) ctx.requestCardChoice("reclamation-aura", "Choose an aura to destroy", auras.map((card) => card.instanceId)); }, onChoose(ctx, hook, option) { if (hook === "reclamation-aura" && ctx.destroyPermanent(Number(option))) ctx.createToken(RUNECHANT); } },
+  "runic reclamation|1": { canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined, onHit(ctx) { const auras = ctx.player(opponentSeat(ctx)).board.filter((card) => hasType(ctx, card, "aura")); if (auras.length) ctx.requestCardChoice("reclamation-aura", decisionPrompt("Choose an aura to destroy", "card.evr.aura.destroy"), auras.map((card) => card.instanceId)); }, onChoose(ctx, hook, option) { if (hook === "reclamation-aura" && ctx.destroyPermanent(Number(option))) ctx.createToken(RUNECHANT); } },
   "swarming gloomveil|1": { modifyAttack(ctx) { return (Number(ctx.getFlag("player", "playedSubtypeCount:aura")) + Number(ctx.getFlag("player", "createdSubtypeCount:aura"))) >= 2 ? 3 : 0; }, onAttackDeclared(ctx) { if ((Number(ctx.getFlag("player", "playedSubtypeCount:aura")) + Number(ctx.getFlag("player", "createdSubtypeCount:aura"))) >= 2) ctx.grantGoAgain(); } },
   "revel in runeblood|1": {
     onPlay(ctx) {
@@ -398,10 +418,10 @@ export const evrHighRarity: Record<string, CardScript> = {
   },
   "aether wildfire|1": { arcaneDamageEffect: true, arcaneDamageEffectAmounts: [4], onPlay(ctx) { ctx.dealDamage(opponentSeat(ctx), 4, { arcane: true, sourceInstanceId: ctx.self.instanceId }); } },
   "scour|3": { arcaneDamageEffect: true, arcaneDamageEffectAmounts: [0], variablePlayCost: { base: 0, counterKey: "scourX", prompt: "Choose X" }, onPlay(ctx) { const auras = ctx.player(opponentSeat(ctx)).board.filter((card) => hasType(ctx, card, "aura") && (ctx.cardData(card.cardId).cost ?? -1) === 0).slice(0, ctx.getCounter("scourX")); for (const aura of auras) ctx.destroyPermanent(aura.instanceId); ctx.dealDamage(opponentSeat(ctx), auras.length, { arcane: true, sourceInstanceId: ctx.self.instanceId }); } },
-  "crown of reflection|0": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", oncePerTurn: false, destroySelfCost: true, onActivate(ctx) { const auras = ctx.player(ctx.seat).board.filter((card) => hasType(ctx, card, "aura")); if (auras.length) ctx.requestCardChoice("reflection-aura", "Choose an aura to destroy", auras.map((card) => card.instanceId)); } } },
+  "crown of reflection|0": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", oncePerTurn: false, destroySelfCost: true, onActivate(ctx) { const auras = ctx.player(ctx.seat).board.filter((card) => hasType(ctx, card, "aura")); if (auras.length) ctx.requestCardChoice("reflection-aura", decisionPrompt("Choose an aura to destroy", "card.evr.aura.destroy"), auras.map((card) => card.instanceId)); } } },
   "fractal replication|1": fractalReplication,
   "shimmers of silver|3": { onFriendlyAttackDeclared(ctx) { if (ctx.link?.attackCardType !== "weapon") return; const key = `shimmers:${ctx.self.instanceId}`; if (ctx.getFlag("player", key) === true) return; ctx.setFlag("player", key, true); ctx.addCounter(ctx.link.attackingCard.instanceId, "power", 1); } },
-  "bingo|1": { canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined, onHit(ctx) { const hand = ctx.player(opponentSeat(ctx)).hand; if (hand.length) ctx.requestCardChoice("bingo-reveal", "Choose a card to reveal", hand.map((card) => card.instanceId), opponentSeat(ctx)); }, onChoose(ctx, hook, option) { if (hook !== "bingo-reveal") return; const card = ctx.player(opponentSeat(ctx)).hand.find((candidate) => candidate.instanceId === Number(option)); if (!card) return; ctx.lookAt(card.instanceId); if (isAttack(ctx, card)) ctx.grantGoAgain(); else ctx.drawCards(ctx.seat, 1); } },
+  "bingo|1": { canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined, onHit(ctx) { const hand = ctx.player(opponentSeat(ctx)).hand; if (hand.length) ctx.requestCardChoice("bingo-reveal", decisionPrompt("Choose a card to reveal", "card.evr.card.reveal"), hand.map((card) => card.instanceId), opponentSeat(ctx)); }, onChoose(ctx, hook, option) { if (hook !== "bingo-reveal") return; const card = ctx.player(opponentSeat(ctx)).hand.find((candidate) => candidate.instanceId === Number(option)); if (!card) return; ctx.lookAt(card.instanceId); if (isAttack(ctx, card)) ctx.grantGoAgain(); else ctx.drawCards(ctx.seat, 1); } },
   "firebreathing|1": { activated: { cost: 1, isAttack: false, goAgain: false, timing: "attack-reaction", oncePerTurn: false, onActivate(ctx) { ctx.addModifier({ scope: "chain-link", attack: 1 }); } } },
   "cash out|3": { onPlay(ctx) { const permanents = [...ctx.player(ctx.seat).board]; for (const card of permanents) if (ctx.destroyPermanent(card.instanceId)) ctx.createToken(SILVER); } },
   "knick knack bric-a-brac|1": knickKnack,

@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { buffNextArcaneDamageCard, dealArcane, opponentSeat, optN, optOnChoose, wizardActionAsInstant } from "../shared-helpers.js";
+import { buffNextArcaneDamageCard, commonOptionMessages, dealArcane, decisionMessage, decisionPrompt, opponentSeat, optN, optOnChoose, wizardActionAsInstant } from "../shared-helpers.js";
 
 const RUNECHANT = "ARC112";
 
@@ -22,7 +22,7 @@ function runeCount(ctx: ScriptCtx): number {
 function reload(ctx: ScriptCtx): void {
   const player = ctx.player(ctx.seat);
   if (player.arsenal.length === 0 && player.hand.length > 0) {
-    ctx.requestCardChoice("high-reload", "Reload: put a card from hand into arsenal?", ["pass", ...player.hand.map((card) => card.instanceId)]);
+    ctx.requestCardChoice("high-reload", decisionPrompt("Reload: put a card from hand into arsenal?", "card.common.reload", { optionMessages: commonOptionMessages("pass") }), ["pass", ...player.hand.map((card) => card.instanceId)]);
   }
 }
 
@@ -35,11 +35,12 @@ function reloadChoice(ctx: ScriptCtx, hook: string, option: string): boolean {
 function chooseFromDeck(
   ctx: ScriptCtx,
   hook: string,
-  prompt: string,
+  fallback: string,
+  messageId: string,
   predicate: (card: DeepReadonly<CardInstance>) => boolean,
 ): void {
   const cards = ctx.player(ctx.seat).deck.filter(predicate);
-  if (cards.length > 0) ctx.requestCardChoice(hook, prompt, cards.map((card) => card.instanceId));
+  if (cards.length > 0) ctx.requestCardChoice(hook, decisionPrompt(fallback, messageId), cards.map((card) => card.instanceId));
 }
 
 function mechanologistItem(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, exactCost?: number): boolean {
@@ -78,7 +79,7 @@ const sparkOfGenius: CardScript = {
     if (items.length > 0) {
       ctx.requestCardChoice(
         "spark-item",
-        `Choose a Mechanologist item with cost ${x}`,
+        decisionPrompt(`Choose a Mechanologist item with cost ${x}`, "card.arc.mechanologist.item.cost", { values: { amount: x } }),
         items.map((card) => card.instanceId),
       );
       return;
@@ -91,7 +92,7 @@ const sparkOfGenius: CardScript = {
 const becomeTheArknight: CardScript = {
   onPlay(ctx) {
     const actions = ctx.player(ctx.seat).hand.filter((card) => ctx.hasCardType(card, "action"));
-    if (actions.length > 0) ctx.requestCardChoice("become-discard", "Become the Arknight: discard an action card?", ["pass", ...actions.map((card) => card.instanceId)]);
+    if (actions.length > 0) ctx.requestCardChoice("become-discard", decisionPrompt("Become the Arknight: discard an action card?", "card.arc.become.discard", { optionMessages: commonOptionMessages("pass") }), ["pass", ...actions.map((card) => card.instanceId)]);
   },
   onChoose(ctx, hook, option) {
     if (hook === "become-discard") {
@@ -100,7 +101,7 @@ const becomeTheArknight: CardScript = {
       if (!card) return;
       const discardedAttack = isAttack(ctx, card);
       ctx.discardCard(ctx.seat, card.instanceId);
-      chooseFromDeck(ctx, "become-search", "Become the Arknight: choose a Runeblade action", (candidate) =>
+      chooseFromDeck(ctx, "become-search", "Become the Arknight: choose a Runeblade action", "card.arc.become.runeblade.choose", (candidate) =>
         isType(ctx, candidate, "runeblade") && (discardedAttack ? isNonAttack(ctx, candidate) : isAttack(ctx, candidate)));
       return;
     }
@@ -128,7 +129,7 @@ const sonicBoom: CardScript = {
     if (!top) return;
     ctx.lookAt(top.instanceId);
     if (isType(ctx, top, "wizard") && isNonAttack(ctx, top)) {
-      ctx.requestCardChoice(`sonic-banish:${amount}`, "Sonic Boom: banish the top card?", ["no", top.instanceId]);
+      ctx.requestCardChoice(`sonic-banish:${amount}`, decisionPrompt("Sonic Boom: banish the top card?", "card.arc.sonic.banish", { optionMessages: commonOptionMessages("no") }), ["no", top.instanceId]);
     }
   },
   onChoose(ctx, hook, option) {
@@ -145,7 +146,7 @@ const lessonInLava: CardScript = {
   ...targetArcane(3),
   onDamageDealt(ctx, _target, amount, arcane) {
     if (!arcane || amount <= 0) return;
-    chooseFromDeck(ctx, `lesson-search:${amount}`, "Lesson in Lava: choose a Wizard card", (card) =>
+    chooseFromDeck(ctx, `lesson-search:${amount}`, "Lesson in Lava: choose a Wizard card", "card.arc.lesson.wizard.choose", (card) =>
       isType(ctx, card, "wizard") && (ctx.cardData(card.cardId).cost ?? 0) <= amount);
   },
   onChoose(ctx, hook, option) {
@@ -162,13 +163,13 @@ function applyTomeMode(ctx: ScriptCtx, mode: string): void {
 }
 
 const tomeOfAetherwind: CardScript = {
-  additionalCost(ctx) { ctx.requestChoice("tome-mode", "Tome of Aetherwind: choose the first mode", ["draw", "+1 arcane damage"]); },
+  additionalCost(ctx) { ctx.requestChoice("tome-mode", decisionPrompt("Tome of Aetherwind: choose the first mode", "card.arc.tome.mode.first", { optionMessages: { draw: decisionMessage("card.arc.tome.option.draw"), "+1 arcane damage": decisionMessage("card.arc.tome.option.arcane") } }), ["draw", "+1 arcane damage"]); },
   onChoose(ctx, hook, option) {
     if (hook !== "tome-mode") return;
     ctx.setCounter(`tomeMode:${option}`, ctx.getCounter(`tomeMode:${option}`) + 1);
     const chosen = ctx.getCounter("tomeModesChosen") + 1;
     ctx.setCounter("tomeModesChosen", chosen);
-    if (chosen < 2) ctx.requestChoice("tome-mode", "Choose the second mode", ["draw", "+1 arcane damage"]);
+    if (chosen < 2) ctx.requestChoice("tome-mode", decisionPrompt("Choose the second mode", "card.arc.tome.mode.second", { optionMessages: { draw: decisionMessage("card.arc.tome.option.draw"), "+1 arcane damage": decisionMessage("card.arc.tome.option.arcane") } }), ["draw", "+1 arcane damage"]);
   },
   onPlay(ctx) {
     for (let count = 0; count < ctx.getCounter("tomeMode:draw"); count++) applyTomeMode(ctx, "draw");
@@ -181,7 +182,7 @@ function artMode(ctx: ScriptCtx, option: string): void {
   else if (option === "go again") ctx.addModifier({ scope: "next-attack", goAgain: true, appliesTo: "attack-action" });
   else if (option === "banish") {
     const attacks = ctx.player(ctx.seat).hand.filter((card) => isAttack(ctx, card));
-    if (attacks.length > 0) ctx.requestCardChoice("art-banish-card", "Art of War: banish an attack action", attacks.map((card) => card.instanceId));
+    if (attacks.length > 0) ctx.requestCardChoice("art-banish-card", decisionPrompt("Art of War: banish an attack action", "card.arc.art.attack.banish"), attacks.map((card) => card.instanceId));
   }
   else if (option === "defend from arsenal") ctx.setFlag("player", "attackActionsDefendFromArsenal", true);
 }
@@ -189,13 +190,13 @@ function artMode(ctx: ScriptCtx, option: string): void {
 const ART_OF_WAR_MODES = ["power", "go again", "defend from arsenal", "banish"] as const;
 
 const artOfWar: CardScript = {
-  additionalCost(ctx) { ctx.requestChoice("art-mode", "Art of War: choose a mode", [...ART_OF_WAR_MODES]); },
+  additionalCost(ctx) { ctx.requestChoice("art-mode", decisionPrompt("Art of War: choose a mode", "card.arc.art.mode.choose", { optionMessages: { power: decisionMessage("card.arc.art.option.power"), "go again": decisionMessage("card.arc.art.option.goagain"), "defend from arsenal": decisionMessage("card.arc.art.option.defend"), banish: decisionMessage("card.arc.art.option.banish") } }), [...ART_OF_WAR_MODES]); },
   onChoose(ctx, hook, option) {
     if (hook === "art-mode") {
       ctx.setCounter(`art:${option}`, 1);
       const chosen = ctx.getCounter("artModesChosen") + 1;
       ctx.setCounter("artModesChosen", chosen);
-      if (chosen < 2) ctx.requestChoice("art-mode", "Art of War: choose another mode", ART_OF_WAR_MODES.filter((mode) => mode !== option));
+      if (chosen < 2) ctx.requestChoice("art-mode", decisionPrompt("Art of War: choose another mode", "card.arc.art.mode.next", { optionMessages: { power: decisionMessage("card.arc.art.option.power"), "go again": decisionMessage("card.arc.art.option.goagain"), "defend from arsenal": decisionMessage("card.arc.art.option.defend"), banish: decisionMessage("card.arc.art.option.banish") } }), ART_OF_WAR_MODES.filter((mode) => mode !== option));
     } else if (hook === "art-banish-card" && ctx.banish(Number(option))) ctx.drawCards(ctx.seat, 2);
   },
   onPlay(ctx) {
@@ -229,7 +230,7 @@ export const arcHighRarity: Record<string, CardScript> = {
   "storm striders|0": { activated: { cost: 1, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true, onActivate(ctx) { ctx.setFlag("player", "nextWizardNonAttackAsInstant", true); } } },
   "blazing aether|1": { arcaneDamageEffect: true, arcaneDamageEffectAmounts: [0], playAsInstant: wizardActionAsInstant, onPlay(ctx) { dealArcane(ctx, opponentSeat(ctx), Number(ctx.getFlag("player", `arcaneDamageAmountToSeat:${opponentSeat(ctx)}`)) || 0); } },
   "sonic boom|2": sonicBoom,
-  "forked lightning|1": { arcaneDamageEffect: true, arcaneDamageEffectAmounts: [2], playAsInstant: wizardActionAsInstant, onPlay(ctx) { ctx.requestChoice("fork-first", `Forked Lightning: choose the first hero for ${ctx.previewArcaneDamage(2)} arcane damage`, ["opposing hero", "your hero"]); }, onChoose(ctx, hook, option) { if (hook === "fork-first") { ctx.setCounter("forkFirst", option === "your hero" ? ctx.seat : opponentSeat(ctx)); ctx.requestChoice("fork-second", "Choose the second hero for 2 arcane damage", ["opposing hero", "your hero"]); } else if (hook === "fork-second") { dealArcane(ctx, ctx.getCounter("forkFirst"), 2); dealArcane(ctx, option === "your hero" ? ctx.seat : opponentSeat(ctx), 2); } } },
+  "forked lightning|1": { arcaneDamageEffect: true, arcaneDamageEffectAmounts: [2], playAsInstant: wizardActionAsInstant, onPlay(ctx) { ctx.requestChoice("fork-first", decisionPrompt(`Forked Lightning: choose the first hero for ${ctx.previewArcaneDamage(2)} arcane damage`, "card.arc.fork.hero.first", { values: { amount: ctx.previewArcaneDamage(2) }, optionMessages: commonOptionMessages("opposing hero", "your hero") }), ["opposing hero", "your hero"]); }, onChoose(ctx, hook, option) { if (hook === "fork-first") { ctx.setCounter("forkFirst", option === "your hero" ? ctx.seat : opponentSeat(ctx)); ctx.requestChoice("fork-second", decisionPrompt("Choose the second hero for 2 arcane damage", "card.arc.fork.hero.second", { values: { amount: 2 }, optionMessages: commonOptionMessages("opposing hero", "your hero") }), ["opposing hero", "your hero"]); } else if (hook === "fork-second") { dealArcane(ctx, ctx.getCounter("forkFirst"), 2); dealArcane(ctx, option === "your hero" ? ctx.seat : opponentSeat(ctx), 2); } } },
   "lesson in lava|2": lessonInLava,
   "tome of aetherwind|1": tomeOfAetherwind,
 
@@ -242,7 +243,7 @@ export const arcHighRarity: Record<string, CardScript> = {
   "pursuit of knowledge|3": { canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined, onHit(ctx) { ctx.setPlayerFlag(ctx.seat, "bonusIntellect", Number(ctx.getPlayerFlag(ctx.seat, "bonusIntellect")) + 1); } },
   "chains of eminence|1": {
     prohibitsChosenName: true,
-    onEnterArena(ctx) { ctx.requestNameChoice("chains-name", "Chains of Eminence: name a card"); },
+    onEnterArena(ctx) { ctx.requestNameChoice("chains-name", decisionPrompt("Chains of Eminence: name a card", "card.arc.chains.card.name")); },
     onChoose(ctx, hook, option) {
       if (hook === "chains-name") {
         ctx.setChosenName(option);

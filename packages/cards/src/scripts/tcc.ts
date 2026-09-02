@@ -2,6 +2,8 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   attackAbility,
   buffNextAttack,
+  decisionMessage,
+  decisionPrompt,
   opponentSeat,
   payForDefenseBoost,
   previousAttackHasName,
@@ -55,7 +57,7 @@ function boulderDrop(): CardScript {
       if (hand.length) {
         ctx.requestCardChoice(
           "boulder-drop-top",
-          `${ctx.data.name}: put a card from your hand on top of your deck`,
+          decisionPrompt(`${ctx.data.name}: put a card from your hand on top of your deck`, "card.tcc.boulder.hand.top", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }),
           hand.map((card) => card.instanceId),
           target,
         );
@@ -101,7 +103,7 @@ function interlude(amount: number): CardScript {
     onPlay(ctx) {
       ctx.requestChoice(
         "interlude-target",
-        `${ctx.data.name}: choose a hero to prevent the next ${amount} damage to`,
+        decisionPrompt(`${ctx.data.name}: choose a hero to prevent the next ${amount} damage to`, "card.tcc.interlude.hero.choose", { values: { card: { kind: "card", cardId: ctx.self.cardId }, amount }, optionMessages: { you: decisionMessage("common.option.self"), opponent: decisionMessage("common.option.opponent") } }),
         ["you", "opponent"],
       );
     },
@@ -185,7 +187,7 @@ export const tcc: Record<string, CardScript> = {
         onActivate(ctx) {
           ctx.requestChoice(
             "jinglewood-token",
-            "Jinglewood: choose a token to create",
+            decisionPrompt("Jinglewood: choose a token to create", "card.tcc.jinglewood.token.choose"),
             ["Might", "Quicken", "Vigor"],
             opponentSeat(ctx),
           );
@@ -227,7 +229,7 @@ export const tcc: Record<string, CardScript> = {
           hasType(ctx, card, "bard");
       });
       if (cards.length) {
-        ctx.requestCardChoice("encore", "Encore: return a Bard attack action to your hand", cards.map((card) => card.instanceId));
+        ctx.requestCardChoice("encore", decisionPrompt("Encore: return a Bard attack action to your hand", "card.tcc.encore.attack.return"), cards.map((card) => card.instanceId));
       }
     },
     onChoose(ctx, hook, option) {
@@ -282,7 +284,7 @@ export const tcc: Record<string, CardScript> = {
       const attacks = ctx.player(target).graveyard.filter((card) => {
         return ctx.hasCardType(card, "action") && hasType(ctx, card, "attack");
       });
-      if (attacks.length) ctx.requestCardChoice("yesteryears", "Put an attack action on the bottom of your deck", attacks.map((card) => card.instanceId), target);
+      if (attacks.length) ctx.requestCardChoice("yesteryears", decisionPrompt("Put an attack action on the bottom of your deck", "card.tcc.attack.bottom"), attacks.map((card) => card.instanceId), target);
     }),
     onChoose(ctx, hook, option) {
       if (hook === "yesteryears") ctx.putOnDeckBottom(Number(option));

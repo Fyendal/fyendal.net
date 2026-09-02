@@ -1,5 +1,5 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, nextAttack, opponentSeat, requestDiscardChoice, resolveDiscardChoice } from "../shared-helpers.js";
+import { buffNextAttack, commonOptionMessages, decisionMessage, decisionPrompt, nextAttack, opponentSeat, requestDiscardChoice, resolveDiscardChoice } from "../shared-helpers.js";
 
 // ── WTR generic class cards ─────────────────────────────────────────────────
 //
@@ -201,7 +201,7 @@ const hopeMerchantsHoodScript = (): CardScript => ({
       if (p.hand.length === 0) return;
       ctx.requestCardChoice(
         "hood-shuffle",
-        "Hope Merchant's Hood: shuffle a card from your hand into your deck? (or done)",
+        decisionPrompt("Hope Merchant's Hood: shuffle a card from your hand into your deck? (or done)", "card.wtr.hood.shuffle", { optionMessages: commonOptionMessages("done") }),
         [...p.hand.map((c) => c.instanceId), "done"],
       );
     },
@@ -224,7 +224,7 @@ const hopeMerchantsHoodScript = (): CardScript => ({
       if (p.hand.length > 0) {
         ctx.requestCardChoice(
           "hood-shuffle",
-          "Hope Merchant's Hood: shuffle another card into your deck? (or done)",
+          decisionPrompt("Hope Merchant's Hood: shuffle another card into your deck? (or done)", "card.wtr.hood.shuffle.next", { optionMessages: commonOptionMessages("done") }),
           [...p.hand.map((c) => c.instanceId), "done"],
         );
         return;
@@ -295,7 +295,7 @@ const pummelScript = (buff: number): CardScript => ({
     const canClubHammer = isWeaponAttackOfSubtype(ctx, ["club", "hammer"]);
     const canBigAttack = isAttackActionWithCost(ctx, (cost) => cost >= 2);
     if (canClubHammer && canBigAttack) {
-      ctx.requestChoice("pummel-mode", "Choose a Pummel mode:", ["club/hammer weapon", "attack action discard"]);
+      ctx.requestChoice("pummel-mode", decisionPrompt("Choose a Pummel mode:", "card.wtr.pummel.mode.choose", { optionMessages: { "club/hammer weapon": decisionMessage("card.wtr.pummel.option.weapon"), "attack action discard": decisionMessage("card.wtr.pummel.option.discard") } }), ["club/hammer weapon", "attack action discard"]);
     }
   },
   onPlay(ctx) {
@@ -327,7 +327,7 @@ const pummelScript = (buff: number): CardScript => ({
   onHit(ctx) {
     // The discard mode is tracked on the combat link so it only affects the
     // attack Pummel was played on.
-    requestDiscardChoice(ctx, "pummel-discard", "Choose a card to discard", opponentSeat(ctx));
+    requestDiscardChoice(ctx, "pummel-discard", decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"), opponentSeat(ctx));
   },
 });
 
@@ -359,7 +359,7 @@ const razorReflexScript = (buff: number): CardScript => ({
     const canDaggerSword = isWeaponAttackOfSubtype(ctx, ["dagger", "sword"]);
     const canSmallAttack = isAttackActionWithCost(ctx, (cost) => cost <= 1);
     if (canDaggerSword && canSmallAttack) {
-      ctx.requestChoice("razor-mode", "Choose a Razor Reflex mode:", ["dagger/sword weapon", "cheap attack action go again"]);
+      ctx.requestChoice("razor-mode", decisionPrompt("Choose a Razor Reflex mode:", "card.wtr.razor.mode.choose", { optionMessages: { "dagger/sword weapon": decisionMessage("card.wtr.razor.option.weapon"), "cheap attack action go again": decisionMessage("card.wtr.razor.option.action") } }), ["dagger/sword weapon", "cheap attack action go again"]);
     }
   },
   onPlay(ctx) {
@@ -446,7 +446,7 @@ const scourScript = (): CardScript => ({
     }
     const p = ctx.player(ctx.seat);
     const options: (number | string)[] = ["pass", ...p.hand.map((c) => c.instanceId)];
-    ctx.requestCardChoice("scour-bottom", "Put a card from hand on the bottom of your deck?", options);
+    ctx.requestCardChoice("scour-bottom", decisionPrompt("Put a card from hand on the bottom of your deck?", "card.wtr.hand.bottom", { optionMessages: commonOptionMessages("pass") }), options);
   },
   onChoose(ctx, hook, option) {
     if (hook !== "scour-bottom" || option === "pass") return;
@@ -469,7 +469,7 @@ const sinkBelowScript = (): CardScript => ({
   onPlay(ctx) {
     const p = ctx.player(ctx.seat);
     const options: (number | string)[] = ["pass", ...p.hand.map((c) => c.instanceId)];
-    ctx.requestCardChoice("sink-bottom", "Put a card from hand on the bottom of your deck?", options);
+    ctx.requestCardChoice("sink-bottom", decisionPrompt("Put a card from hand on the bottom of your deck?", "card.wtr.hand.bottom", { optionMessages: commonOptionMessages("pass") }), options);
   },
   onChoose(ctx, hook, option) {
     if (hook !== "sink-bottom" || option === "pass") return;

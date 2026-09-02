@@ -1,5 +1,5 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, opponentSeat, payForDefenseBoost } from "../shared-helpers.js";
+import { buffNextAttack, decisionMessage, decisionPrompt, opponentSeat, payForDefenseBoost } from "../shared-helpers.js";
 
 // ── WTR Guardian cards ──────────────────────────────────────────────────────
 //
@@ -117,7 +117,10 @@ function bucklingBlow(): CardScript {
       if (options.length === 0) return;
       ctx.requestChoice(
         "buckling-blow-target",
-        "Buckling Blow: put a -1 defense counter on an equipment they control",
+        decisionPrompt("Buckling Blow: put a -1 defense counter on an equipment they control", "card.wtr.buckling.equipment.choose", { optionMessages: Object.fromEntries(options.flatMap((value) => {
+          const equipment = findOpponentEquipment(ctx, value);
+          return equipment ? [[value, decisionMessage("card.common.target.card", { card: { kind: "card", cardId: equipment.cardId } })]] : [];
+        })) }),
         options,
       );
     },

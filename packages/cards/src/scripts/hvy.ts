@@ -2,6 +2,8 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   attackAbility,
   buffNextAttack,
+  commonOptionMessages,
+  decisionPrompt,
   isSixPlus,
   mergeSetScripts,
   opponentSeat,
@@ -109,7 +111,7 @@ function beatChest(extra: CardScript = {}): CardScript {
       if (sixes.length) {
         ctx.requestCardChoice(
           "beat-chest",
-          `${ctx.data.name}: discard a card with 6 or more power to beat chest?`,
+          decisionPrompt(`${ctx.data.name}: discard a card with 6 or more power to beat chest?`, "card.hvy.beatchest.discard", { values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: 6 }, optionMessages: commonOptionMessages("no") }),
           ["no", ...sixes.map((card) => card.instanceId)],
         );
       }
@@ -216,7 +218,7 @@ function cutTheDeck(power: number): CardScript {
       const player = ctx.player(ctx.seat);
       const options = [...player.hand, ...player.arsenal].map((card) => card.instanceId);
       if (options.length) {
-        ctx.requestCardChoice("cut-bottom", "Put a card from hand or arsenal on the bottom", options);
+        ctx.requestCardChoice("cut-bottom", decisionPrompt("Put a card from hand or arsenal on the bottom", "card.hvy.hand.arsenal.bottom"), options);
       }
     },
     onChoose(ctx, hook, option) {
@@ -312,7 +314,7 @@ function stackInFavor(defense: number): CardScript {
         ctx.drawCards(ctx.seat, 1);
         const hand = ctx.player(ctx.seat).hand;
         if (hand.length) {
-          ctx.requestCardChoice("stacked-top", "Put a card from your hand on top of your deck", hand.map((card) => card.instanceId));
+          ctx.requestCardChoice("stacked-top", decisionPrompt("Put a card from your hand on top of your deck", "card.hvy.hand.top"), hand.map((card) => card.instanceId));
         }
       },
     }],
@@ -397,7 +399,7 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
       event: "wager-generated",
       label: "Pay 2 to give the wagering attack +1 and overpower?",
       effect(ctx) {
-        ctx.requestPayment("betsy-pay", "Betsy: pay 2 to give the wagering attack +1 and overpower?", 2);
+        ctx.requestPayment("betsy-pay", decisionPrompt("Betsy: pay 2 to give the wagering attack +1 and overpower?", "card.hvy.betsy.pay", { values: { amount: 2 }, optionMessages: commonOptionMessages("no") }), 2);
       },
     }],
     onChoose(ctx, hook, option) {
@@ -479,7 +481,7 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
       const targets = Object.values(ctx.player(opponentSeat(ctx)).equipment)
         .filter((card): card is DeepReadonly<CardInstance> => !!card)
         .filter((card) => Math.max(0, (data(ctx, card).defense ?? 0) - (card.defCounters ?? 0)) <= 1);
-      if (targets.length) ctx.requestCardChoice("colossal-destroy", "Destroy equipment with 1 or less defense", targets.map((card) => card.instanceId));
+      if (targets.length) ctx.requestCardChoice("colossal-destroy", decisionPrompt("Destroy equipment with 1 or less defense", "card.hvy.equipment.destroy", { values: { amount: 1 } }), targets.map((card) => card.instanceId));
     },
     onChoose(ctx, hook, option) { if (hook === "colossal-destroy") ctx.destroyPermanent(Number(option)); },
   },
@@ -514,7 +516,7 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
     onHit(ctx) {
       const opponent = ctx.player(opponentSeat(ctx));
       if (opponent.hand.length) {
-        ctx.requestCardChoice("concuss-discard", "Choose a card to discard", opponent.hand.map((card) => card.instanceId), opponent.seat);
+        ctx.requestCardChoice("concuss-discard", decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"), opponent.hand.map((card) => card.instanceId), opponent.seat);
       }
     },
     onChoose(ctx, hook, option) {
@@ -673,7 +675,7 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
     onDefend(ctx) {
       if (!controls(ctx, "Might")) return;
       const attacks = ctx.player(ctx.seat).graveyard.filter((card) => isAttackAction(ctx, card));
-      if (attacks.length) ctx.requestCardChoice("wall-top", "Put an attack action from your graveyard on top?", ["no", ...attacks.map((card) => card.instanceId)]);
+      if (attacks.length) ctx.requestCardChoice("wall-top", decisionPrompt("Put an attack action from your graveyard on top?", "card.hvy.attack.top", { optionMessages: commonOptionMessages("no") }), ["no", ...attacks.map((card) => card.instanceId)]);
     },
     onChoose(ctx, hook, option) { if (hook === "wall-top" && option !== "no") ctx.putOnDeckTop(Number(option)); },
   },

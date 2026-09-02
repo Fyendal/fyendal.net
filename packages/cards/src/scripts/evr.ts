@@ -2,6 +2,9 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import { evrHighRarity } from "./evr/high-rarity.js";
 import {
   buffNextAttack,
+  commonOptionMessages,
+  decisionMessage,
+  decisionPrompt,
   discardSixPlusPayoff,
   isCard,
   isWeaponAttack,
@@ -94,7 +97,7 @@ function heaveThree(): CardScript {
       label: "Heave 3",
       condition: (ctx) => ctx.player(ctx.seat).arsenal.length === 0,
       effect(ctx) {
-        ctx.requestPayment("heave-three", `${ctx.data.name}: pay {r}{r}{r} to put it face up into arsenal?`, 3);
+        ctx.requestPayment("heave-three", decisionPrompt(`${ctx.data.name}: pay {r}{r}{r} to put it face up into arsenal?`, "card.evr.heave.pay", { values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: 3 }, optionMessages: commonOptionMessages("no") }), 3);
       },
     }],
     onChoose(ctx, hook, option) {
@@ -126,7 +129,7 @@ function steadfast(amount: number): CardScript {
       if (options.length === 0) return;
       ctx.requestCardChoice(
         "steadfast-source",
-        `${ctx.data.name}: choose a damage source`,
+        decisionPrompt(`${ctx.data.name}: choose a damage source`, "card.evr.damage.source.choose", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }),
         options.map((card) => card.instanceId),
       );
       ctx.setCounter("steadfastAmount", amount);
@@ -171,7 +174,7 @@ function rideTailwind(): CardScript {
 function twinTwisters(): CardScript {
   return {
     onAttackDeclared(ctx) {
-      ctx.requestChoice("twin-mode", `${ctx.data.name}: choose a mode`, ["next attack", "+1"]);
+      ctx.requestChoice("twin-mode", decisionPrompt(`${ctx.data.name}: choose a mode`, "card.evr.twin.mode.choose", { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: { "next attack": decisionMessage("card.evr.twin.option.next"), "+1": decisionMessage("card.evr.twin.option.power") } }), ["next attack", "+1"]);
     },
     onChoose(ctx, hook, option) {
       if (hook !== "twin-mode") return;
@@ -290,7 +293,7 @@ function genis(): CardScript {
         const hand = ctx.player(target).hand;
         ctx.requestCardChoice(
           "genis-bottom",
-          "Genis: put a card from your hand on the bottom of your deck?",
+          decisionPrompt("Genis: put a card from your hand on the bottom of your deck?", "card.evr.genis.hand.bottom", { optionMessages: commonOptionMessages("decline") }),
           ["decline", ...hand.map((card) => card.instanceId)],
           target,
         );
@@ -391,7 +394,7 @@ function drowningDire(): CardScript {
       if (options.length === 0) return;
       ctx.requestCardChoice(
         "drowning-bottom",
-        `${ctx.data.name}: put a non-attack action from your graveyard on the bottom?`,
+        decisionPrompt(`${ctx.data.name}: put a non-attack action from your graveyard on the bottom?`, "card.evr.nonattack.bottom", { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: commonOptionMessages("pass") }),
         ["pass", ...options.map((card) => card.instanceId)],
       );
     },
@@ -412,7 +415,7 @@ function reekOfCorruption(): CardScript {
       if (hand.length > 0) {
         ctx.requestCardChoice(
           "reek-discard",
-          `${ctx.data.name}: choose a card to discard`,
+          decisionPrompt(`${ctx.data.name}: choose a card to discard`, "card.evr.discard.choose", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }),
           hand.map((card) => card.instanceId),
           target,
         );
@@ -429,7 +432,7 @@ function pry(revealCount: number): CardScript {
     if (!ctx.revealCards(ids, target)) return;
     ctx.requestCardChoice(
       "pry-bottom",
-      `${ctx.data.name}: put a revealed card on the bottom of its owner's deck?`,
+      decisionPrompt(`${ctx.data.name}: put a revealed card on the bottom of its owner's deck?`, "card.evr.revealed.bottom", { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: commonOptionMessages("pass") }),
       ["pass", ...ids],
       undefined,
       ids,
@@ -450,7 +453,7 @@ function pry(revealCount: number): CardScript {
     ctx.setCounter("pryRevealRemaining", remaining);
     ctx.requestCardChoice(
       "pry-reveal",
-      `${ctx.data.name}: choose a card to reveal`,
+      decisionPrompt(`${ctx.data.name}: choose a card to reveal`, "card.evr.reveal.choose", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }),
       hand.map((card) => card.instanceId),
       target,
     );
@@ -460,7 +463,7 @@ function pry(revealCount: number): CardScript {
     onPlay(ctx) {
       ctx.requestCardChoice(
         "pry-target",
-        `${ctx.data.name}: choose a hero`,
+        decisionPrompt(`${ctx.data.name}: choose a hero`, "card.evr.hero.choose", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }),
         ctx.state.players.map((player) => player.hero.instanceId),
       );
     },
@@ -522,7 +525,7 @@ function timekeepersWhim(amount: number): CardScript {
     onPlay(ctx) {
       ctx.requestCardChoice(
         "whim-target",
-        `${ctx.data.name}: deal ${ctx.previewArcaneDamage(amount)} arcane damage to a hero`,
+        decisionPrompt(`${ctx.data.name}: deal ${ctx.previewArcaneDamage(amount)} arcane damage to a hero`, "card.evr.arcane.hero.choose", { values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: ctx.previewArcaneDamage(amount) } }),
         ctx.state.players.map((player) => player.hero.instanceId),
       );
     },
@@ -565,7 +568,7 @@ function coalescenceMirage(): CardScript {
       if (auras.length > 0) {
         ctx.requestCardChoice(
           "coalescence-aura",
-          `${ctx.data.name}: put a cost-0 Illusionist aura into the arena?`,
+          decisionPrompt(`${ctx.data.name}: put a cost-0 Illusionist aura into the arena?`, "card.evr.illusionist.aura.put", { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: commonOptionMessages("pass") }),
           ["pass", ...auras.map((card) => card.instanceId)],
         );
       }
@@ -653,7 +656,7 @@ function pickACard(repeats: number): CardScript {
       if (hand.length === 0) return;
       hand.forEach((card) => ctx.lookAt(card.instanceId));
       const names = [...new Set(hand.map((card) => ctx.cardData(card.cardId).name))];
-      ctx.requestChoice("pick-name", `${ctx.data.name}: name a card`, names);
+      ctx.requestChoice("pick-name", decisionPrompt(`${ctx.data.name}: name a card`, "card.evr.card.name", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }), names);
       ctx.setCounter("pickRepeats", repeats);
     },
     onChoose(ctx, hook, option) {
@@ -691,7 +694,7 @@ function smashingGoodTime(amount: number): CardScript {
       if (items.length > 0) {
         ctx.requestCardChoice(
           "smashing-item",
-          `${ctx.data.name}: destroy an opposing item with cost 2 or less?`,
+          decisionPrompt(`${ctx.data.name}: destroy an opposing item with cost 2 or less?`, "card.evr.item.destroy", { values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: 2 }, optionMessages: commonOptionMessages("pass") }),
           ["pass", ...items.map((card) => card.instanceId)],
         );
       }
@@ -775,7 +778,7 @@ const amuletEchoes: CardScript = {
       ));
       ctx.requestCardChoice(
         "echoes-target",
-        "Amulet of Echoes: choose a hero to discard 2 cards",
+        decisionPrompt("Amulet of Echoes: choose a hero to discard 2 cards", "card.evr.echoes.hero.choose", { values: { amount: 2 } }),
         heroes.map((player) => player.hero.instanceId),
       );
     },
@@ -786,7 +789,7 @@ const amuletEchoes: CardScript = {
       if (!target) return;
       ctx.setCounter("echoes-target-seat", target.seat);
       ctx.setCounter("echoes-discards-left", 2);
-      requestDiscardChoice(ctx, "echoes-discard", "Choose a card to discard", target.seat);
+      requestDiscardChoice(ctx, "echoes-discard", decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"), target.seat);
       return;
     }
     if (hook !== "echoes-discard") return;
@@ -794,7 +797,7 @@ const amuletEchoes: CardScript = {
     if (!resolveDiscardChoice(ctx, option, targetSeat)) return;
     const left = ctx.getCounter("echoes-discards-left") - 1;
     ctx.setCounter("echoes-discards-left", left);
-    if (left > 0) requestDiscardChoice(ctx, "echoes-discard", "Choose another card to discard", targetSeat);
+    if (left > 0) requestDiscardChoice(ctx, "echoes-discard", decisionPrompt("Choose another card to discard", "card.evr.discard.next"), targetSeat);
   },
 };
 
@@ -902,7 +905,7 @@ const potionSeeing: CardScript = {
     onActivate(ctx) {
       ctx.requestCardChoice(
         "seeing-target",
-        "Potion of Seeing: choose a hero",
+        decisionPrompt("Potion of Seeing: choose a hero", "card.evr.seeing.hero.choose"),
         ctx.state.players.map((player) => player.hero.instanceId),
       );
     },
@@ -928,7 +931,7 @@ const potionDejaVu: CardScript = {
       if (pitch.length > 0) {
         ctx.requestCardChoice(
           "deja-top",
-          "Potion of Déjà Vu: choose the next pitch card to put on top (the last choice ends on top)",
+          decisionPrompt("Potion of Déjà Vu: choose the next pitch card to put on top (the last choice ends on top)", "card.evr.dejavu.pitch.first"),
           pitch.map((card) => card.instanceId),
         );
       }
@@ -940,7 +943,7 @@ const potionDejaVu: CardScript = {
     if (pitch.length > 0) {
       ctx.requestCardChoice(
         "deja-top",
-        "Choose the next pitch card to put on top (the last choice ends on top)",
+        decisionPrompt("Choose the next pitch card to put on top (the last choice ends on top)", "card.evr.dejavu.pitch.next"),
         pitch.map((card) => card.instanceId),
       );
     }
@@ -1003,7 +1006,7 @@ const talismanCremation: CardScript = {
     const names = [...new Set(ctx.state.players
       .filter((player) => player.seat !== ctx.seat)
       .flatMap((player) => player.graveyard.map((card) => ctx.cardData(card.cardId).name)))];
-    if (names.length > 0) ctx.requestChoice("cremation-name", "Talisman of Cremation: name a card", names);
+    if (names.length > 0) ctx.requestChoice("cremation-name", decisionPrompt("Talisman of Cremation: name a card", "card.evr.cremation.card.name"), names);
     },
   }],
   onChoose(ctx, hook, option) {

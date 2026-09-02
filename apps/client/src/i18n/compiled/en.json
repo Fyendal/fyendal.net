@@ -279,10 +279,162 @@
       "value": "Flesh and Blood Online"
     }
   ],
+  "card.ajv.channel.ice.choose": [
+    {
+      "type": 0,
+      "value": "Choose an Ice card from pitch for Channel Ice, or destroy this"
+    }
+  ],
+  "card.ajv.channel.ice.next": [
+    {
+      "type": 0,
+      "value": "Choose another Ice card for Channel Ice, or destroy this"
+    }
+  ],
+  "card.ajv.equipment.counter": [
+    {
+      "type": 0,
+      "value": "Put a -1 defense counter on an equipment?"
+    }
+  ],
+  "card.ajv.equipment.counter.choose": [
+    {
+      "type": 0,
+      "value": "Put a -1 defense counter on target equipment"
+    }
+  ],
+  "card.ajv.equipment.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy equipment with a -1 defense counter"
+    }
+  ],
+  "card.ajv.equipment.destroy.optional": [
+    {
+      "type": 0,
+      "value": "Destroy an equipment with a -1 defense counter?"
+    }
+  ],
+  "card.ajv.exposed.pay": [
+    {
+      "type": 0,
+      "value": "Pay 2 resources or an equipment with 0 defense may be destroyed"
+    }
+  ],
+  "card.ajv.frostbite.zone.choose": [
+    {
+      "type": 0,
+      "value": "Choose an exposed equipment zone for Frostbite"
+    }
+  ],
+  "card.ajv.fusion.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": reveal Earth and/or Ice cards to fuse?"
+    }
+  ],
+  "card.ajv.fusion.option.both": [
+    {
+      "type": 0,
+      "value": "Reveal "
+    },
+    {
+      "type": 1,
+      "value": "first"
+    },
+    {
+      "type": 0,
+      "value": " and "
+    },
+    {
+      "type": 1,
+      "value": "second"
+    },
+    {
+      "type": 0,
+      "value": " for Earth and Ice"
+    }
+  ],
+  "card.ajv.fusion.option.both.single": [
+    {
+      "type": 0,
+      "value": "Reveal "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " for Earth and Ice"
+    }
+  ],
+  "card.ajv.fusion.option.earth": [
+    {
+      "type": 0,
+      "value": "Reveal "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " for Earth"
+    }
+  ],
+  "card.ajv.fusion.option.ice": [
+    {
+      "type": 0,
+      "value": "Reveal "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " for Ice"
+    }
+  ],
+  "card.ajv.ice.hero.choose": [
+    {
+      "type": 0,
+      "value": "Choose the hero for the Ice fusion effect"
+    }
+  ],
+  "card.ajv.mangle.search": [
+    {
+      "type": 0,
+      "value": "Search for a Mangle, or decline"
+    }
+  ],
+  "card.ajv.zero.equipment.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy an equipment with 0 defense"
+    }
+  ],
   "card.ako.hide.tanner.destroy": [
     {
       "type": 0,
       "value": "Destroy Hide Tanner to create 2 Might tokens?"
+    }
+  ],
+  "card.ama.crown.card.banish": [
+    {
+      "type": 0,
+      "value": "Banish a card for +1 defense?"
+    }
+  ],
+  "card.ama.dig.zombie.choose": [
+    {
+      "type": 0,
+      "value": "Put a zombie into your graveyard?"
     }
   ],
   "card.amo.mortimer.disease.choose": [
@@ -295,6 +447,242 @@
     {
       "type": 0,
       "value": "Halo of Lumina Light: put a yellow aura from banish into the arena?"
+    }
+  ],
+  "card.arc.arcane.hero.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage to which hero?"
+    }
+  ],
+  "card.arc.art.attack.banish": [
+    {
+      "type": 0,
+      "value": "Art of War: banish an attack action"
+    }
+  ],
+  "card.arc.art.mode.choose": [
+    {
+      "type": 0,
+      "value": "Art of War: choose a mode"
+    }
+  ],
+  "card.arc.art.mode.next": [
+    {
+      "type": 0,
+      "value": "Art of War: choose another mode"
+    }
+  ],
+  "card.arc.art.option.banish": [
+    {
+      "type": 0,
+      "value": "Banish an attack action; draw 2"
+    }
+  ],
+  "card.arc.art.option.defend": [
+    {
+      "type": 0,
+      "value": "Attack actions may defend from arsenal"
+    }
+  ],
+  "card.arc.art.option.goagain": [
+    {
+      "type": 0,
+      "value": "Your next attack action gains go again"
+    }
+  ],
+  "card.arc.art.option.power": [
+    {
+      "type": 0,
+      "value": "Attack actions get +1 power and defense"
+    }
+  ],
+  "card.arc.become.discard": [
+    {
+      "type": 0,
+      "value": "Become the Arknight: discard an action card?"
+    }
+  ],
+  "card.arc.become.runeblade.choose": [
+    {
+      "type": 0,
+      "value": "Become the Arknight: choose a Runeblade action"
+    }
+  ],
+  "card.arc.chains.card.name": [
+    {
+      "type": 0,
+      "value": "Chains of Eminence: name a card"
+    }
+  ],
+  "card.arc.dissipation.maintain": [
+    {
+      "type": 0,
+      "value": "Dissipation Shield: remove a steam counter or destroy it?"
+    }
+  ],
+  "card.arc.fork.hero.first": [
+    {
+      "type": 0,
+      "value": "Forked Lightning: choose the first hero for "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage"
+    }
+  ],
+  "card.arc.fork.hero.second": [
+    {
+      "type": 0,
+      "value": "Choose the second hero for "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage"
+    }
+  ],
+  "card.arc.index.bottom.next": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose the next card to put on the bottom of your deck"
+    }
+  ],
+  "card.arc.index.top": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose a card to put on top of your deck"
+    }
+  ],
+  "card.arc.lesson.wizard.choose": [
+    {
+      "type": 0,
+      "value": "Lesson in Lava: choose a Wizard card"
+    }
+  ],
+  "card.arc.mechanologist.item.cost": [
+    {
+      "type": 0,
+      "value": "Choose a Mechanologist item with cost "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    }
+  ],
+  "card.arc.mechanologist.item.put": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": put a Mechanologist item with cost "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " or less into the arena"
+    }
+  ],
+  "card.arc.nonattack.top": [
+    {
+      "type": 0,
+      "value": "Put a non-attack action from your graveyard on top of your deck?"
+    }
+  ],
+  "card.arc.silver.arrow.arsenal": [
+    {
+      "type": 0,
+      "value": "Silver the Tip: put an arrow face up into your arsenal?"
+    }
+  ],
+  "card.arc.silver.bottom.next": [
+    {
+      "type": 0,
+      "value": "Silver the Tip: choose the next card to put on the bottom"
+    }
+  ],
+  "card.arc.sonic.banish": [
+    {
+      "type": 0,
+      "value": "Sonic Boom: banish the top card?"
+    }
+  ],
+  "card.arc.sunkiss.search": [
+    {
+      "type": 0,
+      "value": "Search your deck for a Sun Kiss?"
+    }
+  ],
+  "card.arc.tome.mode.first": [
+    {
+      "type": 0,
+      "value": "Tome of Aetherwind: choose the first mode"
+    }
+  ],
+  "card.arc.tome.mode.second": [
+    {
+      "type": 0,
+      "value": "Choose the second mode"
+    }
+  ],
+  "card.arc.tome.option.arcane": [
+    {
+      "type": 0,
+      "value": "+1 arcane damage"
+    }
+  ],
+  "card.arc.tome.option.draw": [
+    {
+      "type": 0,
+      "value": "Draw a card"
+    }
+  ],
+  "card.arc.vest.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy Vest of the First Fist to gain 2 resources?"
+    }
+  ],
+  "card.arc.wizard.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": banish a Wizard non-attack action to play as an instant this turn?"
     }
   ],
   "card.asb.charge.choose": [
@@ -353,6 +741,12 @@
       "value": "Miraging Metamorph: choose an aura to copy"
     }
   ],
+  "card.common.arrow.arsenal": [
+    {
+      "type": 0,
+      "value": "Put an arrow from your hand face up into your arsenal?"
+    }
+  ],
   "card.common.card.discard.choose": [
     {
       "type": 0,
@@ -371,10 +765,76 @@
       "value": "Put the looked-at card on the bottom?"
     }
   ],
+  "card.common.option.arms": [
+    {
+      "type": 0,
+      "value": "Arms"
+    }
+  ],
+  "card.common.option.blue": [
+    {
+      "type": 0,
+      "value": "Blue"
+    }
+  ],
+  "card.common.option.chest": [
+    {
+      "type": 0,
+      "value": "Chest"
+    }
+  ],
+  "card.common.option.head": [
+    {
+      "type": 0,
+      "value": "Head"
+    }
+  ],
+  "card.common.option.keeporder": [
+    {
+      "type": 0,
+      "value": "Keep order"
+    }
+  ],
+  "card.common.option.legs": [
+    {
+      "type": 0,
+      "value": "Legs"
+    }
+  ],
+  "card.common.option.red": [
+    {
+      "type": 0,
+      "value": "Red"
+    }
+  ],
+  "card.common.option.swap": [
+    {
+      "type": 0,
+      "value": "Swap"
+    }
+  ],
+  "card.common.option.yellow": [
+    {
+      "type": 0,
+      "value": "Yellow"
+    }
+  ],
+  "card.common.reload": [
+    {
+      "type": 0,
+      "value": "Reload: put a card from your hand into your arsenal?"
+    }
+  ],
   "card.common.target.card": [
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "card.common.zombie.graveyard.choose": [
+    {
+      "type": 0,
+      "value": "Choose a zombie in your graveyard"
     }
   ],
   "card.cru.arcane.hero.choose": [
@@ -867,6 +1327,532 @@
       "value": "Choose a Guardian off-hand"
     }
   ],
+  "card.evr.arcane.hero.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage to a hero"
+    }
+  ],
+  "card.evr.attack.power.choose": [
+    {
+      "type": 0,
+      "value": "Choose an attack with "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " or less power"
+    }
+  ],
+  "card.evr.aura.cost.choose": [
+    {
+      "type": 0,
+      "value": "Choose an aura with cost "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " or less"
+    }
+  ],
+  "card.evr.aura.destroy": [
+    {
+      "type": 0,
+      "value": "Choose an aura to destroy"
+    }
+  ],
+  "card.evr.blood.modes.assign": [
+    {
+      "type": 0,
+      "value": "Assign "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " Blood on Her Hands "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "mode"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "modes"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "card.evr.blood.option.confirm": [
+    {
+      "type": 0,
+      "value": "Confirm assignments ("
+    },
+    {
+      "type": 1,
+      "value": "selected"
+    },
+    {
+      "type": 0,
+      "value": "/"
+    },
+    {
+      "type": 1,
+      "value": "required"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
+  "card.evr.blood.option.decrement.extraattack": [
+    {
+      "type": 0,
+      "value": "Remove an extra-attack assignment from "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " (currently "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
+  "card.evr.blood.option.decrement.goagain": [
+    {
+      "type": 0,
+      "value": "Remove a go again assignment from "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " (currently "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
+  "card.evr.blood.option.decrement.power": [
+    {
+      "type": 0,
+      "value": "Remove a +1 power assignment from "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " (currently "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
+  "card.evr.blood.option.increment.extraattack": [
+    {
+      "type": 0,
+      "value": "Give "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " another attack (currently "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
+  "card.evr.blood.option.increment.goagain": [
+    {
+      "type": 0,
+      "value": "Give "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " go again (currently "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
+  "card.evr.blood.option.increment.power": [
+    {
+      "type": 0,
+      "value": "Give "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " +1 power (currently "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
+  "card.evr.bravo.elements.reveal": [
+    {
+      "type": 0,
+      "value": "Reveal an Earth, an Ice, and a Lightning card"
+    }
+  ],
+  "card.evr.bravo.option.reveal": [
+    {
+      "type": 0,
+      "value": "Reveal "
+    },
+    {
+      "type": 1,
+      "value": "earth"
+    },
+    {
+      "type": 0,
+      "value": ", "
+    },
+    {
+      "type": 1,
+      "value": "ice"
+    },
+    {
+      "type": 0,
+      "value": ", and "
+    },
+    {
+      "type": 1,
+      "value": "lightning"
+    }
+  ],
+  "card.evr.card.name": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": name a card"
+    }
+  ],
+  "card.evr.card.reveal": [
+    {
+      "type": 0,
+      "value": "Choose a card to reveal"
+    }
+  ],
+  "card.evr.copper.count": [
+    {
+      "type": 0,
+      "value": "How many Copper do you want to destroy?"
+    }
+  ],
+  "card.evr.cremation.card.name": [
+    {
+      "type": 0,
+      "value": "Talisman of Cremation: name a card"
+    }
+  ],
+  "card.evr.damage.source.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose a damage source"
+    }
+  ],
+  "card.evr.deck.position": [
+    {
+      "type": 0,
+      "value": "Leave on top or put on bottom?"
+    }
+  ],
+  "card.evr.dejavu.pitch.first": [
+    {
+      "type": 0,
+      "value": "Potion of Déjà Vu: choose the next pitch card to put on top (the last choice ends on top)"
+    }
+  ],
+  "card.evr.dejavu.pitch.next": [
+    {
+      "type": 0,
+      "value": "Choose the next pitch card to put on top (the last choice ends on top)"
+    }
+  ],
+  "card.evr.discard.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose a card to discard"
+    }
+  ],
+  "card.evr.discard.next": [
+    {
+      "type": 0,
+      "value": "Choose another card to discard"
+    }
+  ],
+  "card.evr.echoes.hero.choose": [
+    {
+      "type": 0,
+      "value": "Amulet of Echoes: choose a hero to discard "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " cards"
+    }
+  ],
+  "card.evr.genis.hand.bottom": [
+    {
+      "type": 0,
+      "value": "Genis: put a card from your hand on the bottom of your deck?"
+    }
+  ],
+  "card.evr.hand.bottom": [
+    {
+      "type": 0,
+      "value": "Put a card from hand on the bottom"
+    }
+  ],
+  "card.evr.heave.pay": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " resources to put it face up into arsenal?"
+    }
+  ],
+  "card.evr.hero.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose a hero"
+    }
+  ],
+  "card.evr.illusionist.aura.put": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": put a cost-0 Illusionist aura into the arena?"
+    }
+  ],
+  "card.evr.item.destroy": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": destroy an opposing item with cost "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " or less?"
+    }
+  ],
+  "card.evr.knick.search": [
+    {
+      "type": 0,
+      "value": "Search for an Amulet, Potion, or Talisman"
+    }
+  ],
+  "card.evr.lynx.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy Mask of the Pouncing Lynx to search your deck?"
+    }
+  ],
+  "card.evr.money.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy money tokens?"
+    }
+  ],
+  "card.evr.money.destroy.next": [
+    {
+      "type": 0,
+      "value": "Destroy another money token?"
+    }
+  ],
+  "card.evr.nonattack.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": put a non-attack action from your graveyard on the bottom?"
+    }
+  ],
+  "card.evr.pulverize.pay": [
+    {
+      "type": 0,
+      "value": "Pulverize: pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " resources to heave it?"
+    }
+  ],
+  "card.evr.reveal.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose a card to reveal"
+    }
+  ],
+  "card.evr.revealed.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": put a revealed card on the bottom of its owner's deck?"
+    }
+  ],
+  "card.evr.seeing.hero.choose": [
+    {
+      "type": 0,
+      "value": "Potion of Seeing: choose a hero"
+    }
+  ],
+  "card.evr.twin.mode.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose a mode"
+    }
+  ],
+  "card.evr.twin.option.next": [
+    {
+      "type": 0,
+      "value": "Give your next attack +1 power"
+    }
+  ],
+  "card.evr.twin.option.power": [
+    {
+      "type": 0,
+      "value": "This attack gets +1 power"
+    }
+  ],
   "card.gem.embrace.ursur.banish": [
     {
       "type": 0,
@@ -877,6 +1863,210 @@
     {
       "type": 0,
       "value": "Discard a zombie to create a Gate to i'Arathael?"
+    }
+  ],
+  "card.hvy.arsenal.bottom": [
+    {
+      "type": 0,
+      "value": "Put your arsenal card on the bottom?"
+    }
+  ],
+  "card.hvy.attack.top": [
+    {
+      "type": 0,
+      "value": "Put an attack action from your graveyard on top?"
+    }
+  ],
+  "card.hvy.beatchest.discard": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": discard a card with "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " or more power to beat chest?"
+    }
+  ],
+  "card.hvy.betsy.pay": [
+    {
+      "type": 0,
+      "value": "Betsy: pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " to give the wagering attack +1 and overpower?"
+    }
+  ],
+  "card.hvy.betsy.pay.generic": [
+    {
+      "type": 0,
+      "value": "Pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " for +1 and overpower?"
+    }
+  ],
+  "card.hvy.deck.second.choose": [
+    {
+      "type": 0,
+      "value": "Choose the second card"
+    }
+  ],
+  "card.hvy.deck.top.choose": [
+    {
+      "type": 0,
+      "value": "Choose the top card"
+    }
+  ],
+  "card.hvy.equipment.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy equipment with "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " or less defense"
+    }
+  ],
+  "card.hvy.gold.count": [
+    {
+      "type": 0,
+      "value": "How many Gold do you want to destroy?"
+    }
+  ],
+  "card.hvy.hand.arsenal.bottom": [
+    {
+      "type": 0,
+      "value": "Put a card from hand or arsenal on the bottom"
+    }
+  ],
+  "card.hvy.hand.keep": [
+    {
+      "type": 0,
+      "value": "Choose a card to keep"
+    }
+  ],
+  "card.hvy.hand.top": [
+    {
+      "type": 0,
+      "value": "Put a card from your hand on top of your deck"
+    }
+  ],
+  "card.hvy.item.control": [
+    {
+      "type": 0,
+      "value": "Gain control of an item"
+    }
+  ],
+  "card.hvy.number.choose": [
+    {
+      "type": 0,
+      "value": "Choose a number"
+    }
+  ],
+  "card.hvy.runeblade.aura.choose": [
+    {
+      "type": 0,
+      "value": "Choose a Runeblade aura with cost "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " or less"
+    }
+  ],
+  "card.hvy.six.banish": [
+    {
+      "type": 0,
+      "value": "Banish a "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": "-power card?"
+    }
+  ],
+  "card.hvy.six.banish.next": [
+    {
+      "type": 0,
+      "value": "Banish another?"
+    }
+  ],
+  "card.hvy.vigor.pay": [
+    {
+      "type": 0,
+      "value": "Pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " to create Vigor?"
+    }
+  ],
+  "card.hvy.wager.mode.choose": [
+    {
+      "type": 0,
+      "value": "Choose a wager mode"
+    }
+  ],
+  "card.hvy.wager.mode.next": [
+    {
+      "type": 0,
+      "value": "Choose another wager mode"
+    }
+  ],
+  "card.hvy.wager.option.agility": [
+    {
+      "type": 0,
+      "value": "Wager Agility"
+    }
+  ],
+  "card.hvy.wager.option.gold": [
+    {
+      "type": 0,
+      "value": "Wager Gold"
+    }
+  ],
+  "card.hvy.wager.option.power": [
+    {
+      "type": 0,
+      "value": "Gain power for each wager"
+    }
+  ],
+  "card.hvy.wager.option.vigor": [
+    {
+      "type": 0,
+      "value": "Wager Vigor"
     }
   ],
   "card.iar.apex.defender.destroy": [
@@ -1167,6 +2357,202 @@
       "value": "Destroy up to one Blade Dance and/or Flurry?"
     }
   ],
+  "card.out.affliction.choose": [
+    {
+      "type": 0,
+      "value": "Choose an affliction token"
+    }
+  ],
+  "card.out.arsenal.attack.choose": [
+    {
+      "type": 0,
+      "value": "Choose an attack for arsenal"
+    }
+  ],
+  "card.out.arsenal.card.choose": [
+    {
+      "type": 0,
+      "value": "Choose a card for arsenal"
+    }
+  ],
+  "card.out.arsenal.facedown.choose": [
+    {
+      "type": 0,
+      "value": "Choose a face-down arsenal card"
+    }
+  ],
+  "card.out.arsenal.faceup": [
+    {
+      "type": 0,
+      "value": "Turn the arsenal card face up?"
+    }
+  ],
+  "card.out.card.name.another": [
+    {
+      "type": 0,
+      "value": "Name another card"
+    }
+  ],
+  "card.out.color.choose": [
+    {
+      "type": 0,
+      "value": "Choose a color"
+    }
+  ],
+  "card.out.combo.banish": [
+    {
+      "type": 0,
+      "value": "Banish a combo card?"
+    }
+  ],
+  "card.out.combo.card.choose": [
+    {
+      "type": 0,
+      "value": "Choose a combo card"
+    }
+  ],
+  "card.out.combo.name.choose": [
+    {
+      "type": 0,
+      "value": "Choose a name"
+    }
+  ],
+  "card.out.dagger.equip": [
+    {
+      "type": 0,
+      "value": "Choose a dagger to equip"
+    }
+  ],
+  "card.out.deck.position": [
+    {
+      "type": 0,
+      "value": "Put it on top or bottom?"
+    }
+  ],
+  "card.out.defense.pay": [
+    {
+      "type": 0,
+      "value": "Pay 1 for +1 defense and blade break?"
+    }
+  ],
+  "card.out.equipment.counter": [
+    {
+      "type": 0,
+      "value": "Put a -1 defense counter on equipment"
+    }
+  ],
+  "card.out.flickknives.dagger.choose": [
+    {
+      "type": 0,
+      "value": "Flick Knives: choose a dagger to deal 1 damage, then destroy it"
+    }
+  ],
+  "card.out.hand.arsenal": [
+    {
+      "type": 0,
+      "value": "Put a card from hand face down into arsenal?"
+    }
+  ],
+  "card.out.hand.arsenal.bottom": [
+    {
+      "type": 0,
+      "value": "Put a card from hand or arsenal on the bottom"
+    }
+  ],
+  "card.out.hand.bottom.draw": [
+    {
+      "type": 0,
+      "value": "Put a hand card on bottom to draw?"
+    }
+  ],
+  "card.out.hand.top": [
+    {
+      "type": 0,
+      "value": "Put a card from your hand on top of your deck"
+    }
+  ],
+  "card.out.hurl.dagger.choose": [
+    {
+      "type": 0,
+      "value": "Choose a dagger to deal 1 damage"
+    }
+  ],
+  "card.out.hurl.pay": [
+    {
+      "type": 0,
+      "value": "Pay 1 to hurl a dagger?"
+    }
+  ],
+  "card.out.revealed.banish": [
+    {
+      "type": 0,
+      "value": "Banish a revealed "
+    },
+    {
+      "type": 1,
+      "value": "color"
+    },
+    {
+      "type": 0,
+      "value": " card"
+    }
+  ],
+  "card.out.revealed.none": [
+    {
+      "type": 0,
+      "value": "No revealed "
+    },
+    {
+      "type": 1,
+      "value": "color"
+    },
+    {
+      "type": 0,
+      "value": " cards"
+    }
+  ],
+  "card.out.same.name.choose": [
+    {
+      "type": 0,
+      "value": "Choose a same-name card"
+    }
+  ],
+  "card.out.scout.hero.choose": [
+    {
+      "type": 0,
+      "value": "Look at the top card of target hero's deck"
+    }
+  ],
+  "card.out.scrap.card.banish": [
+    {
+      "type": 0,
+      "value": "Banish a 1 power card for +1 and go again?"
+    }
+  ],
+  "card.out.spire.swap": [
+    {
+      "type": 0,
+      "value": "Swap the top two cards?"
+    }
+  ],
+  "card.out.surgingstrike.choose": [
+    {
+      "type": 0,
+      "value": "Choose a Surging Strike"
+    }
+  ],
+  "card.out.water.pay": [
+    {
+      "type": 0,
+      "value": "Pay 1 to choose a combo name?"
+    }
+  ],
+  "card.out.zero.discard": [
+    {
+      "type": 0,
+      "value": "Discard a zero-cost card?"
+    }
+  ],
   "card.sar.blackwidow.hand.banish": [
     {
       "type": 0,
@@ -1219,6 +2605,48 @@
     {
       "type": 0,
       "value": "Stealth attack gets +3 power and marks on hit"
+    }
+  ],
+  "card.saz.bloodrot.pay": [
+    {
+      "type": 0,
+      "value": "Bloodrot Pox: pay 3 resources or take 2 damage?"
+    }
+  ],
+  "card.saz.crowsnest.pay": [
+    {
+      "type": 0,
+      "value": "Crow's Nest: pay 1 resource to put an aim counter on the arrow?"
+    }
+  ],
+  "card.saz.drillshot.equipment.choose": [
+    {
+      "type": 0,
+      "value": "Drill Shot: put a -1 defense counter on an equipment they control"
+    }
+  ],
+  "card.saz.entangling.hero.choose": [
+    {
+      "type": 0,
+      "value": "Entangling Shot: tap target hero?"
+    }
+  ],
+  "card.saz.memorial.attack.top": [
+    {
+      "type": 0,
+      "value": "Memorial Ground: put an attack action with cost 1 or less from your graveyard on top of your deck"
+    }
+  ],
+  "card.saz.scout.hero.choose": [
+    {
+      "type": 0,
+      "value": "Scout the Periphery: look at the top card of target hero's deck"
+    }
+  ],
+  "card.saz.spire.order": [
+    {
+      "type": 0,
+      "value": "Spire Sniping: put the top 2 cards back in any order"
     }
   ],
   "card.sbz.arcane.target.choose": [
@@ -1933,6 +3361,458 @@
       "value": ", or discard a card"
     }
   ],
+  "card.sup.attack.banish": [
+    {
+      "type": 0,
+      "value": "Banish an attack action?"
+    }
+  ],
+  "card.sup.attack.pay": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": "?"
+    }
+  ],
+  "card.sup.attack.top": [
+    {
+      "type": 0,
+      "value": "Put an attack action on top"
+    }
+  ],
+  "card.sup.aura.bottom": [
+    {
+      "type": 0,
+      "value": "Put an aura on the bottom"
+    }
+  ],
+  "card.sup.aura.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy an aura"
+    }
+  ],
+  "card.sup.aura.destroy.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": destroy an aura"
+    }
+  ],
+  "card.sup.aura.token.destroy": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": destroy an aura token"
+    }
+  ],
+  "card.sup.aura.token.steal": [
+    {
+      "type": 0,
+      "value": "Steal an aura token"
+    }
+  ],
+  "card.sup.card.top.choose": [
+    {
+      "type": 0,
+      "value": "Choose a card to put on top"
+    }
+  ],
+  "card.sup.color.choose": [
+    {
+      "type": 0,
+      "value": "Choose a color"
+    }
+  ],
+  "card.sup.combat.card.reduce": [
+    {
+      "type": 0,
+      "value": "Give a combat card -"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " power and defense"
+    }
+  ],
+  "card.sup.crush.faceup": [
+    {
+      "type": 0,
+      "value": "Turn a crush card face-up"
+    }
+  ],
+  "card.sup.damage.prevent.discard": [
+    {
+      "type": 0,
+      "value": "Discard a card to prevent "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " damage?"
+    }
+  ],
+  "card.sup.defender.defense": [
+    {
+      "type": 0,
+      "value": "Give a defending action +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " defense?"
+    }
+  ],
+  "card.sup.discard.or.damage": [
+    {
+      "type": 0,
+      "value": "Discard a card or take "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " damage"
+    }
+  ],
+  "card.sup.figment.awaken": [
+    {
+      "type": 0,
+      "value": "Awaken a figment"
+    }
+  ],
+  "card.sup.hand.bottom": [
+    {
+      "type": 0,
+      "value": "Put a hand card on the bottom"
+    }
+  ],
+  "card.sup.hero.abilities.discard": [
+    {
+      "type": 0,
+      "value": "Discard a card to keep your hero abilities?"
+    }
+  ],
+  "card.sup.intimidate.pay": [
+    {
+      "type": 0,
+      "value": "Pay up to "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " to intimidate"
+    }
+  ],
+  "card.sup.ironsong.modes.choose": [
+    {
+      "type": 0,
+      "value": "Beat of the Ironsong: choose "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "mode"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "modes"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "card.sup.ironsong.modes.more": [
+    {
+      "type": 0,
+      "value": "Beat of the Ironsong: choose "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " more "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "mode"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "modes"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "card.sup.looked.bottom": [
+    {
+      "type": 0,
+      "value": "Put the looked-at card on the bottom?"
+    }
+  ],
+  "card.sup.modes.choose": [
+    {
+      "type": 0,
+      "value": "Choose any number of modes"
+    }
+  ],
+  "card.sup.named.cards.choose": [
+    {
+      "type": 0,
+      "value": "Choose up to 3 more cards with the named card's name"
+    }
+  ],
+  "card.sup.option.abilities": [
+    {
+      "type": 0,
+      "value": "Suppress hero abilities"
+    }
+  ],
+  "card.sup.option.all": [
+    {
+      "type": 0,
+      "value": "All"
+    }
+  ],
+  "card.sup.option.attackone": [
+    {
+      "type": 0,
+      "value": "+1 attack"
+    }
+  ],
+  "card.sup.option.boo": [
+    {
+      "type": 0,
+      "value": "Boo"
+    }
+  ],
+  "card.sup.option.booabilities": [
+    {
+      "type": 0,
+      "value": "Boo + suppress abilities"
+    }
+  ],
+  "card.sup.option.goagain": [
+    {
+      "type": 0,
+      "value": "go again"
+    }
+  ],
+  "card.sup.option.loseabilities": [
+    {
+      "type": 0,
+      "value": "Lose abilities"
+    }
+  ],
+  "card.sup.option.nodefensegain": [
+    {
+      "type": 0,
+      "value": "Defending cards can't gain defense"
+    }
+  ],
+  "card.sup.option.steal": [
+    {
+      "type": 0,
+      "value": "Steal"
+    }
+  ],
+  "card.sup.option.stealabilities": [
+    {
+      "type": 0,
+      "value": "Steal + suppress abilities"
+    }
+  ],
+  "card.sup.option.stealboo": [
+    {
+      "type": 0,
+      "value": "Steal + boo"
+    }
+  ],
+  "card.sup.option.suspense.add": [
+    {
+      "type": 0,
+      "value": "Add a suspense counter to "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "card.sup.option.suspense.remove": [
+    {
+      "type": 0,
+      "value": "Remove a suspense counter from "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "card.sup.option.take.damage": [
+    {
+      "type": 0,
+      "value": "Take "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " damage"
+    }
+  ],
+  "card.sup.option.unpreventable": [
+    {
+      "type": 0,
+      "value": "Damage can't be prevented"
+    }
+  ],
+  "card.sup.pay.up.to": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose and pay up to "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    }
+  ],
+  "card.sup.pay.up.to.generic": [
+    {
+      "type": 0,
+      "value": "Pay up to "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    }
+  ],
+  "card.sup.revealed.bottom": [
+    {
+      "type": 0,
+      "value": "Put your revealed card on the bottom?"
+    }
+  ],
+  "card.sup.sinew.order": [
+    {
+      "type": 0,
+      "value": "Song of Sinew: choose the bottommost card first; the last choice becomes the top card"
+    }
+  ],
+  "card.sup.sixplus.top": [
+    {
+      "type": 0,
+      "value": "Put a 6+ card on top"
+    }
+  ],
+  "card.sup.suspense.counter.add": [
+    {
+      "type": 0,
+      "value": "Put a suspense counter on an aura of suspense?"
+    }
+  ],
+  "card.sup.suspense.counter.change": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": add or remove a suspense counter"
+    }
+  ],
+  "card.sup.token.steal.choose": [
+    {
+      "type": 0,
+      "value": "Choose a Toughness or Vigor token to steal"
+    }
+  ],
+  "card.sup.top.color.guess": [
+    {
+      "type": 0,
+      "value": "Is the top card "
+    },
+    {
+      "type": 1,
+      "value": "color"
+    },
+    {
+      "type": 0,
+      "value": "?"
+    }
+  ],
   "card.svi.beckoning.aura.return": [
     {
       "type": 1,
@@ -2007,6 +3887,52 @@
       "value": " arcane damage?"
     }
   ],
+  "card.tcc.attack.bottom": [
+    {
+      "type": 0,
+      "value": "Put an attack action on the bottom of your deck"
+    }
+  ],
+  "card.tcc.boulder.hand.top": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": put a card from your hand on top of your deck"
+    }
+  ],
+  "card.tcc.encore.attack.return": [
+    {
+      "type": 0,
+      "value": "Encore: return a Bard attack action to your hand"
+    }
+  ],
+  "card.tcc.interlude.hero.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose a hero to prevent the next "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " damage to"
+    }
+  ],
+  "card.tcc.jinglewood.token.choose": [
+    {
+      "type": 0,
+      "value": "Jinglewood: choose a token to create"
+    }
+  ],
   "card.ter.hard.knuckle.destroy": [
     {
       "type": 0,
@@ -2017,6 +3943,186 @@
     {
       "type": 0,
       "value": "Terra: pay 1 resource to create a Might token?"
+    }
+  ],
+  "card.wtr.bolters.destroy": [
+    {
+      "type": 0,
+      "value": "Refraction Bolters: destroy this to give the attack go again?"
+    }
+  ],
+  "card.wtr.buckling.equipment.choose": [
+    {
+      "type": 0,
+      "value": "Buckling Blow: put a -1 defense counter on an equipment they control"
+    }
+  ],
+  "card.wtr.determination.weapon.choose": [
+    {
+      "type": 0,
+      "value": "Ironsong Determination: choose a weapon"
+    }
+  ],
+  "card.wtr.estrike.hand.bottom": [
+    {
+      "type": 0,
+      "value": "Enlightened Strike: put a card from hand on the bottom of your deck"
+    }
+  ],
+  "card.wtr.estrike.mode.choose": [
+    {
+      "type": 0,
+      "value": "Choose a mode"
+    }
+  ],
+  "card.wtr.estrike.option.draw": [
+    {
+      "type": 0,
+      "value": "Draw a card"
+    }
+  ],
+  "card.wtr.estrike.option.goagain": [
+    {
+      "type": 0,
+      "value": "go again"
+    }
+  ],
+  "card.wtr.estrike.option.power": [
+    {
+      "type": 0,
+      "value": "+2 power"
+    }
+  ],
+  "card.wtr.hand.bottom": [
+    {
+      "type": 0,
+      "value": "Put a card from hand on the bottom of your deck?"
+    }
+  ],
+  "card.wtr.hood.shuffle": [
+    {
+      "type": 0,
+      "value": "Hope Merchant's Hood: shuffle a card from your hand into your deck?"
+    }
+  ],
+  "card.wtr.hood.shuffle.next": [
+    {
+      "type": 0,
+      "value": "Hope Merchant's Hood: shuffle another card into your deck?"
+    }
+  ],
+  "card.wtr.katsu.combo.choose": [
+    {
+      "type": 0,
+      "value": "Katsu: choose a combo card to banish face up"
+    }
+  ],
+  "card.wtr.katsu.discard": [
+    {
+      "type": 0,
+      "value": "Katsu: discard a card with cost 0 to search for a combo card?"
+    }
+  ],
+  "card.wtr.lordwind.card.choose": [
+    {
+      "type": 0,
+      "value": "Lord of Wind: choose a combo-line card to shuffle in"
+    }
+  ],
+  "card.wtr.lordwind.card.next": [
+    {
+      "type": 0,
+      "value": "Lord of Wind: choose another card"
+    }
+  ],
+  "card.wtr.lordwind.x": [
+    {
+      "type": 0,
+      "value": "Lord of Wind: choose X"
+    }
+  ],
+  "card.wtr.pummel.mode.choose": [
+    {
+      "type": 0,
+      "value": "Choose a Pummel mode"
+    }
+  ],
+  "card.wtr.pummel.option.discard": [
+    {
+      "type": 0,
+      "value": "Attack action: discard on hit"
+    }
+  ],
+  "card.wtr.pummel.option.weapon": [
+    {
+      "type": 0,
+      "value": "Club or hammer weapon"
+    }
+  ],
+  "card.wtr.razor.mode.choose": [
+    {
+      "type": 0,
+      "value": "Choose a Razor Reflex mode"
+    }
+  ],
+  "card.wtr.razor.option.action": [
+    {
+      "type": 0,
+      "value": "Low-cost attack action: go again on hit"
+    }
+  ],
+  "card.wtr.razor.option.weapon": [
+    {
+      "type": 0,
+      "value": "Dagger or sword weapon"
+    }
+  ],
+  "card.wtr.remembrance.action.choose": [
+    {
+      "type": 0,
+      "value": "Remembrance: choose an action card"
+    }
+  ],
+  "card.wtr.rout.defender.return": [
+    {
+      "type": 0,
+      "value": "Rout: return a defending card to hand?"
+    }
+  ],
+  "card.wtr.sand.card.choose": [
+    {
+      "type": 0,
+      "value": "Sand Sketched Plan: choose a card"
+    }
+  ],
+  "card.wtr.showtime.attack.choose": [
+    {
+      "type": 0,
+      "value": "Show Time!: choose a Guardian attack action"
+    }
+  ],
+  "card.wtr.singing.reaction.choose": [
+    {
+      "type": 0,
+      "value": "Singing Steelblade: choose an attack reaction"
+    }
+  ],
+  "card.wtr.stroke.card.choose": [
+    {
+      "type": 0,
+      "value": "Stroke of Foresight: choose a card from your hand"
+    }
+  ],
+  "card.wtr.stroke.position": [
+    {
+      "type": 0,
+      "value": "Stroke of Foresight: put it on the top or bottom of your deck?"
+    }
+  ],
+  "card.wtr.supremacy.weapon.choose": [
+    {
+      "type": 0,
+      "value": "Steelblade Supremacy: choose a weapon"
     }
   ],
   "common.all": [

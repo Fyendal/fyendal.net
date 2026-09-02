@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, buffNextAttack, opponentSeat } from "./shared-helpers.js";
+import { attackAbility, buffNextAttack, commonOptionMessages, decisionMessage, decisionPrompt, opponentSeat } from "./shared-helpers.js";
 
 const FROSTBITE = "AJV029";
 const EARTH = "AJV028";
@@ -21,7 +21,13 @@ function exposed(ctx: ScriptCtx, seat: number): string[] {
 
 function offerExposedFrostbite(ctx: ScriptCtx, hook: string, seat: number, optional = false): void {
   const slots = exposed(ctx, seat);
-  if (slots.length) ctx.requestChoice(hook, "Choose an exposed equipment zone for Frostbite", [...(optional ? ["none"] : []), ...slots], seat === ctx.seat ? ctx.seat : undefined);
+  if (slots.length) ctx.requestChoice(hook, decisionPrompt("Choose an exposed equipment zone for Frostbite", "card.ajv.frostbite.zone.choose", { optionMessages: {
+    ...commonOptionMessages("none"),
+    head: decisionMessage("card.common.option.head"),
+    chest: decisionMessage("card.common.option.chest"),
+    arms: decisionMessage("card.common.option.arms"),
+    legs: decisionMessage("card.common.option.legs"),
+  } }), [...(optional ? ["none"] : []), ...slots], seat === ctx.seat ? ctx.seat : undefined);
 }
 
 function createExposedFrostbite(ctx: ScriptCtx, seat: number, slot: string): void {
@@ -53,7 +59,20 @@ function elementalFusion(): Pick<CardScript, "additionalCost" | "onChoose"> {
       for (const card of ice) options.add(`ice:${card.instanceId}`);
       for (const card of hand) if (hasType(ctx, card, "earth") && hasType(ctx, card, "ice")) options.add(`both:${card.instanceId}:${card.instanceId}`);
       for (const e of earth) for (const i of ice) if (e.instanceId !== i.instanceId) options.add(`both:${e.instanceId}:${i.instanceId}`);
-      if (options.size > 1) ctx.requestChoice("ajv-fusion", `${ctx.data.name}: reveal Earth and/or Ice cards to fuse?`, [...options]);
+      const optionMessages: Record<string, ReturnType<typeof decisionMessage>> = { ...commonOptionMessages("no") };
+      for (const option of options) {
+        if (option === "no") continue;
+        const [kind, firstText, secondText] = option.split(":");
+        const first = hand.find((card) => card.instanceId === Number(firstText));
+        const second = hand.find((card) => card.instanceId === Number(secondText));
+        if (!first) continue;
+        optionMessages[option] = kind === "both" && second
+          ? first.instanceId === second.instanceId
+            ? decisionMessage("card.ajv.fusion.option.both.single", { card: { kind: "card", cardId: first.cardId } })
+            : decisionMessage("card.ajv.fusion.option.both", { first: { kind: "card", cardId: first.cardId }, second: { kind: "card", cardId: second.cardId } })
+          : decisionMessage(kind === "earth" ? "card.ajv.fusion.option.earth" : "card.ajv.fusion.option.ice", { card: { kind: "card", cardId: first.cardId } });
+      }
+      if (options.size > 1) ctx.requestChoice("ajv-fusion", decisionPrompt(`${ctx.data.name}: reveal Earth and/or Ice cards to fuse?`, "card.ajv.fusion.choose", { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages }), [...options]);
     },
     onChoose(ctx, hook, option) {
       if (hook !== "ajv-fusion" || option === "no") return;
@@ -139,7 +158,7 @@ export const ajv: Record<string, CardScript> = {
     onHit(ctx) {
       const equipment = Object.values(ctx.player(opponentSeat(ctx)).equipment)
         .filter((card): card is DeepReadonly<CardInstance> => !!card && (card.defCounters ?? 0) > 0);
-      if (equipment.length) ctx.requestCardChoice("mangle-equipment", "Destroy equipment with a -1 defense counter", equipment.map((card) => card.instanceId));
+      if (equipment.length) ctx.requestCardChoice("mangle-equipment", decisionPrompt("Destroy equipment with a -1 defense counter", "card.ajv.equipment.destroy"), equipment.map((card) => card.instanceId));
     },
     onChoose(ctx, hook, option) { if (hook === "mangle-equipment") ctx.destroyPermanent(Number(option)); },
   },
@@ -166,7 +185,7 @@ export const ajv: Record<string, CardScript> = {
           if (ice.length < flow) ctx.destroySelf();
           else {
             ctx.setCounter("channelRemaining", flow);
-            ctx.requestCardChoice("channel-ice", "Choose an Ice card from pitch for Channel Ice, or destroy this", ["destroy", ...ice.map((card) => card.instanceId)]);
+            ctx.requestCardChoice("channel-ice", decisionPrompt("Choose an Ice card from pitch for Channel Ice, or destroy this", "card.ajv.channel.ice.choose", { optionMessages: commonOptionMessages("destroy") }), ["destroy", ...ice.map((card) => card.instanceId)]);
           }
         },
       },
@@ -180,13 +199,13 @@ export const ajv: Record<string, CardScript> = {
       if (remaining <= 0) return;
       const ice = ctx.player(ctx.seat).pitch.filter((card) => hasType(ctx, card, "ice"));
       if (ice.length < remaining) ctx.destroySelf();
-      else ctx.requestCardChoice("channel-ice", "Choose another Ice card for Channel Ice, or destroy this", ["destroy", ...ice.map((card) => card.instanceId)]);
+      else ctx.requestCardChoice("channel-ice", decisionPrompt("Choose another Ice card for Channel Ice, or destroy this", "card.ajv.channel.ice.next", { optionMessages: commonOptionMessages("destroy") }), ["destroy", ...ice.map((card) => card.instanceId)]);
     },
   },
   "crumble to eternity|3": {
     onEnterArena(ctx) {
       const equipment = allEquipment(ctx);
-      if (equipment.length) ctx.requestCardChoice("crumble-counter", "Put a -1 defense counter on an equipment?", ["none", ...equipment.map((card) => card.instanceId)]);
+      if (equipment.length) ctx.requestCardChoice("crumble-counter", decisionPrompt("Put a -1 defense counter on an equipment?", "card.ajv.equipment.counter", { optionMessages: commonOptionMessages("none") }), ["none", ...equipment.map((card) => card.instanceId)]);
     },
     triggers: [{
       event: "begin-action-phase",
@@ -204,7 +223,7 @@ export const ajv: Record<string, CardScript> = {
       if (fused(ctx)) {
         const equipment = allEquipment(ctx).filter((card) => (card.defCounters ?? 0) > 0);
         if (equipment.length) {
-          ctx.requestCardChoice("frozen-destroy", "Destroy an equipment with a -1 defense counter?", ["none", ...equipment.map((card) => card.instanceId)]);
+          ctx.requestCardChoice("frozen-destroy", decisionPrompt("Destroy an equipment with a -1 defense counter?", "card.ajv.equipment.destroy.optional", { optionMessages: commonOptionMessages("none") }), ["none", ...equipment.map((card) => card.instanceId)]);
           return;
         }
       }
@@ -223,26 +242,26 @@ export const ajv: Record<string, CardScript> = {
     onPlay(ctx) {
       if (fused(ctx, "earth")) {
         const equipment = allEquipment(ctx);
-        if (equipment.length) { ctx.requestCardChoice("exposed-counter", "Put a -1 defense counter on target equipment", equipment.map((card) => card.instanceId)); return; }
+        if (equipment.length) { ctx.requestCardChoice("exposed-counter", decisionPrompt("Put a -1 defense counter on target equipment", "card.ajv.equipment.counter.choose"), equipment.map((card) => card.instanceId)); return; }
       }
-      if (fused(ctx, "ice")) ctx.requestChoice("exposed-hero", "Choose the hero for the Ice fusion effect", ctx.state.players.map((player) => String(player.seat)));
+      if (fused(ctx, "ice")) ctx.requestChoice("exposed-hero", decisionPrompt("Choose the hero for the Ice fusion effect", "card.ajv.ice.hero.choose", { optionMessages: Object.fromEntries(ctx.state.players.map((player) => [String(player.seat), decisionMessage("card.common.target.card", { card: { kind: "card", cardId: player.heroCardId } })])) }), ctx.state.players.map((player) => String(player.seat)));
     },
     onChoose(ctx, hook, option) {
       if (hook === "ajv-fusion") { elementalFusion().onChoose!(ctx, hook, option); return; }
       if (hook === "exposed-counter") {
         ctx.addCardDefenseCounters(Number(option), 1);
-        if (fused(ctx, "ice")) ctx.requestChoice("exposed-hero", "Choose the hero for the Ice fusion effect", ctx.state.players.map((player) => String(player.seat)));
+        if (fused(ctx, "ice")) ctx.requestChoice("exposed-hero", decisionPrompt("Choose the hero for the Ice fusion effect", "card.ajv.ice.hero.choose", { optionMessages: Object.fromEntries(ctx.state.players.map((player) => [String(player.seat), decisionMessage("card.common.target.card", { card: { kind: "card", cardId: player.heroCardId } })])) }), ctx.state.players.map((player) => String(player.seat)));
       } else if (hook === "exposed-hero") {
         const target = Number(option);
         ctx.setCounter("exposedTarget", target);
-        if (!ctx.requestPayment("exposed-pay", "Pay 2 resources or an equipment with 0 defense may be destroyed", 2, target)) {
+        if (!ctx.requestPayment("exposed-pay", decisionPrompt("Pay 2 resources or an equipment with 0 defense may be destroyed", "card.ajv.exposed.pay", { optionMessages: commonOptionMessages("no") }), 2, target)) {
           const equipment = Object.values(ctx.player(target).equipment).filter((card): card is DeepReadonly<CardInstance> => !!card && Math.max(0, (data(ctx, card).defense ?? 0) - (card.defCounters ?? 0)) === 0);
-          if (equipment.length) ctx.requestCardChoice("exposed-destroy", "Destroy an equipment with 0 defense", equipment.map((card) => card.instanceId));
+          if (equipment.length) ctx.requestCardChoice("exposed-destroy", decisionPrompt("Destroy an equipment with 0 defense", "card.ajv.zero.equipment.destroy"), equipment.map((card) => card.instanceId));
         }
       } else if (hook === "exposed-pay" && option === "declined") {
         const target = ctx.getCounter("exposedTarget");
         const equipment = Object.values(ctx.player(target).equipment).filter((card): card is DeepReadonly<CardInstance> => !!card && Math.max(0, (data(ctx, card).defense ?? 0) - (card.defCounters ?? 0)) === 0);
-        if (equipment.length) ctx.requestCardChoice("exposed-destroy", "Destroy an equipment with 0 defense", equipment.map((card) => card.instanceId));
+        if (equipment.length) ctx.requestCardChoice("exposed-destroy", decisionPrompt("Destroy an equipment with 0 defense", "card.ajv.zero.equipment.destroy"), equipment.map((card) => card.instanceId));
       } else if (hook === "exposed-destroy") ctx.destroyPermanent(Number(option));
     },
   },
@@ -256,7 +275,7 @@ export const ajv: Record<string, CardScript> = {
       const attacker = ctx.link?.attacker;
       if (attacker === undefined || !Object.values(ctx.player(attacker).equipment).some((card) => (card?.defCounters ?? 0) > 0)) return;
       const mangles = ctx.player(ctx.seat).deck.filter((card) => data(ctx, card).name.toLowerCase() === "mangle");
-      if (mangles.length) ctx.requestCardChoice("unforgetting-mangle", "Search for a Mangle, or decline", ["none", ...mangles.map((card) => card.instanceId)]);
+      if (mangles.length) ctx.requestCardChoice("unforgetting-mangle", decisionPrompt("Search for a Mangle, or decline", "card.ajv.mangle.search", { optionMessages: commonOptionMessages("none") }), ["none", ...mangles.map((card) => card.instanceId)]);
     },
     onChoose(ctx, hook, option) {
       if (hook !== "unforgetting-mangle" || option === "none") return;

@@ -1,9 +1,12 @@
 import type { CardScript } from "@fyendal/engine";
 import {
   buffNextAttack,
+  commonOptionMessages,
+  decisionPrompt,
   optN,
   optOnChoose,
   opponentSeat,
+  yesNoPrompt,
 } from "../shared-helpers.js";
 
 function vestOfTheFirstFist(): CardScript {
@@ -14,7 +17,7 @@ function vestOfTheFirstFist(): CardScript {
     onHit(ctx) {
       ctx.requestChoice(
         "vest-first-fist",
-        "Destroy Vest of the First Fist to gain {r}{r}?",
+        yesNoPrompt("Destroy Vest of the First Fist to gain {r}{r}?", "card.arc.vest.destroy"),
         ["yes", "no"],
       );
     },
@@ -103,7 +106,7 @@ function cadaverousContraband(): CardScript {
       if (cards.length === 0) return;
       ctx.requestCardChoice(
         "cadaverous-top",
-        "Put a non-attack action from your graveyard on top of your deck?",
+        decisionPrompt("Put a non-attack action from your graveyard on top of your deck?", "card.arc.nonattack.top", { optionMessages: commonOptionMessages("none") }),
         ["none", ...cards.map((card) => card.instanceId)],
       );
     },
@@ -138,7 +141,7 @@ function moonWish(): CardScript {
       if (kisses.length === 0) return;
       ctx.requestCardChoice(
         "moon-wish-search",
-        "Search your deck for a Sun Kiss?",
+        decisionPrompt("Search your deck for a Sun Kiss?", "card.arc.sunkiss.search", { optionMessages: commonOptionMessages("none") }),
         ["none", ...kisses.map((card) => card.instanceId)],
       );
     },
