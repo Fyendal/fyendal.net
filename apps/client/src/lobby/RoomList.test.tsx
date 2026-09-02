@@ -1,4 +1,5 @@
 import { renderToStaticMarkup } from "react-dom/server";
+import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { StoreState } from "../store/types.js";
 
@@ -18,6 +19,11 @@ vi.mock("../store.js", () => ({
 
 import { RoomList } from "./RoomList.js";
 import { Home } from "./Home.js";
+import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
+
+function renderLocalized(node: ReactNode, locale: "en" | "zh-Hans" = "en") {
+  return renderToStaticMarkup(<TestI18nProvider locale={locale}>{node}</TestI18nProvider>);
+}
 
 describe("RoomList", () => {
   beforeEach(() => {
@@ -82,7 +88,7 @@ describe("RoomList", () => {
         },
       ],
     };
-    const html = renderToStaticMarkup(<RoomList onGoToFormat={() => {}} />);
+    const html = renderLocalized(<RoomList onGoToFormat={() => {}} />);
 
     const yourHeading = html.indexOf("Your Rooms");
     const yourRoom = html.indexOf("Owned Hero");
@@ -146,7 +152,7 @@ describe("RoomList", () => {
       lastPlayedDecks: { cc: "remembered-deck", "silver-age": null },
     };
 
-    const html = renderToStaticMarkup(<Home onGoToFormat={() => {}} />);
+    const html = renderLocalized(<Home onGoToFormat={() => {}} />);
 
     expect(html).toContain("Rejoin Rooms");
     expect(html).toContain("Victor");
@@ -174,7 +180,7 @@ describe("RoomList", () => {
   });
 
   it("offers a Silver Age precon and hides an empty rejoin section on first run", () => {
-    const html = renderToStaticMarkup(<Home onGoToFormat={() => {}} />);
+    const html = renderLocalized(<Home onGoToFormat={() => {}} />);
 
     expect(html).toContain("Welcome to Fyendal, NewPlayer.");
     expect(html).toContain("Choose one of these three ways to start playing.");
@@ -201,7 +207,7 @@ describe("RoomList", () => {
       allowFutureCards: { cc: true, "silver-age": true },
     };
 
-    const enabledHtml = renderToStaticMarkup(<Home onGoToFormat={() => {}} />);
+    const enabledHtml = renderLocalized(<Home onGoToFormat={() => {}} />);
     expect(enabledHtml.match(/role="switch" checked=""/g)).toHaveLength(2);
 
     roomListStore.state = {
@@ -209,7 +215,7 @@ describe("RoomList", () => {
       allowFutureCards: { cc: true, "silver-age": false },
     };
 
-    const mixedHtml = renderToStaticMarkup(<Home onGoToFormat={() => {}} />);
+    const mixedHtml = renderLocalized(<Home onGoToFormat={() => {}} />);
     expect(mixedHtml.match(/role="switch" checked=""/g)).toHaveLength(1);
     expect(mixedHtml).toContain("Classic Constructed");
     expect(mixedHtml).toContain("Silver Age");
@@ -218,12 +224,27 @@ describe("RoomList", () => {
   it("waits for deck loading before showing the new-player choices", () => {
     roomListStore.state = { ...roomListStore.state, decksLoading: true };
 
-    const html = renderToStaticMarkup(<Home onGoToFormat={() => {}} />);
+    const html = renderLocalized(<Home onGoToFormat={() => {}} />);
 
     expect(html).toContain("Loading your decks…");
     expect(html).not.toContain("Welcome to Fyendal");
     expect(html).not.toContain("Try with a precon");
     expect(html).not.toContain("Rejoin Rooms");
+  });
+
+  it("renders the authenticated home actions in Simplified Chinese", () => {
+    const html = renderLocalized(<Home onGoToFormat={() => {}} />, "zh-Hans");
+
+    expect(html).toContain("欢迎来到 Fyendal，NewPlayer。");
+    expect(html).toContain("卡牌范围");
+    expect(html).toContain("允许未来卡牌");
+    expect(html).toContain("白银时代");
+    expect(html).toContain("Silver Age");
+    expect(html).toContain("经典构筑");
+    expect(html).toContain(">CC</span>");
+    expect(html).toContain("试用预构筑牌组");
+    expect(html).toContain("寻找对局");
+    expect(html).toContain("对战AI");
   });
 
   it("turns imported format cards into playable deck pickers", () => {
@@ -270,7 +291,7 @@ describe("RoomList", () => {
       lastPlayedDecks: { cc: "cc-deck", "silver-age": "silver-deck" },
     };
 
-    const html = renderToStaticMarkup(<Home onGoToFormat={() => {}} />);
+    const html = renderLocalized(<Home onGoToFormat={() => {}} />);
 
     expect(html).not.toContain("Choose how you’d like to start playing.");
     expect(html).not.toContain("Try with a precon");

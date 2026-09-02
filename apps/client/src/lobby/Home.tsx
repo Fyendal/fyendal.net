@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import type { BotOpponent } from "@fyendal/shared";
 import type { DeckSummary } from "@fyendal/protocol";
@@ -15,9 +16,11 @@ import {
 import { DeckDropdown } from "./CreateRoomModal.js";
 import { RoomCard } from "./RoomCard.js";
 import { BotOpponentModal } from "./BotOpponentModal.js";
+import { FormatName } from "./FormatBadge.js";
 
 /** The focused starting point: play choices and rooms the account can reclaim. */
 export function Home(props: { onGoToFormat: (format: ConstructedFormat) => void }) {
+  const intl = useIntl();
   const { rooms, joinRoom } = useStore(useShallow((state) => ({
     rooms: state.rooms,
     joinRoom: state.joinRoom,
@@ -29,7 +32,9 @@ export function Home(props: { onGoToFormat: (format: ConstructedFormat) => void 
       <HomePlayOptions onGoToFormat={props.onGoToFormat}>
         {rejoinRooms.length > 0 ? (
           <section className="room-section home-rejoin-section" aria-labelledby="rejoin-rooms-title">
-            <h3 id="rejoin-rooms-title" className="panel-title">Rejoin Rooms</h3>
+            <h3 id="rejoin-rooms-title" className="panel-title">
+              {intl.formatMessage({ id: "lobby.home.rejoinRooms" })}
+            </h3>
             <div className="room-grid">
               {rejoinRooms.map((room) => (
                 <RoomCard
@@ -50,6 +55,7 @@ function HomePlayOptions(props: {
   children: ReactNode;
   onGoToFormat: (format: ConstructedFormat) => void;
 }) {
+  const intl = useIntl();
   const {
     authUser,
     allowFutureCards,
@@ -74,7 +80,7 @@ function HomePlayOptions(props: {
   const [importingFormat, setImportingFormat] = useState<ConstructedFormat | null>(null);
 
   if (decksLoading) {
-    return <p className="muted" role="status">Loading your decks…</p>;
+    return <p className="muted" role="status">{intl.formatMessage({ id: "lobby.loadingDecks" })}</p>;
   }
 
   const hasSavedDecks = decks.length > 0;
@@ -90,13 +96,13 @@ function HomePlayOptions(props: {
     <>
       <section className="new-player-welcome" aria-labelledby="new-player-welcome-title">
         <details className="card-pool-menu home-future-toggle">
-          <summary>Card Pool</summary>
+          <summary>{intl.formatMessage({ id: "lobby.cardPool.title" })}</summary>
           <div className="card-pool-menu-panel">
-            <strong>Allow Future Cards</strong>
-            <p>Set card eligibility separately for each format.</p>
+            <strong>{intl.formatMessage({ id: "lobby.cardPool.allowFuture" })}</strong>
+            <p>{intl.formatMessage({ id: "lobby.cardPool.description" })}</p>
             {(["cc", "silver-age"] as const).map((format) => (
               <label className="toggle-switch" key={format}>
-                <span>{format === "cc" ? "Classic Constructed" : "Silver Age"}</span>
+                <FormatName format={format} className="home-card-pool-format" />
                 <input
                   type="checkbox"
                   role="switch"
@@ -111,13 +117,12 @@ function HomePlayOptions(props: {
         </details>
         <div className={`new-player-welcome-copy${hasSavedDecks ? " returning" : ""}`}>
           <h3 id="new-player-welcome-title">
-            {hasSavedDecks
-              ? `Welcome back${authUser ? `, ${authUser}` : ""}.`
-              : authUser
-                ? `Welcome to Fyendal, ${authUser}.`
-                : "Welcome to Fyendal."}
+            {intl.formatMessage(
+              { id: hasSavedDecks ? "lobby.home.welcomeBack" : "lobby.home.welcome" },
+              { username: authUser ?? "" },
+            )}
           </h3>
-          {!hasSavedDecks ? <p>Choose one of these three ways to start playing.</p> : null}
+          {!hasSavedDecks ? <p>{intl.formatMessage({ id: "lobby.home.chooseStart" })}</p> : null}
         </div>
 
         {props.children}
@@ -125,7 +130,7 @@ function HomePlayOptions(props: {
         <div className={`new-player-options${hasSavedDecks ? " two-options" : ""}`}>
           {!hasSavedDecks ? (
             <PlayableDeckCard
-              title="Try with a precon"
+              title={intl.formatMessage({ id: "lobby.home.tryPrecon" })}
               art={silverAgePreconArt}
               artStyle="precon"
               format="silver-age"
@@ -139,7 +144,7 @@ function HomePlayOptions(props: {
 
           {silverAgeDecks.length > 0 ? (
             <PlayableDeckCard
-              title="Play Silver Age"
+              title={intl.formatMessage({ id: "lobby.home.playSilverAge" })}
               art={silverAgeDeckArt}
               format="silver-age"
               decks={silverAgeDecks}
@@ -150,7 +155,7 @@ function HomePlayOptions(props: {
             />
           ) : (
             <ImportDeckCard
-              title="Import your Silver Age deck"
+              title={intl.formatMessage({ id: "lobby.home.importSilverAge" })}
               art={silverAgeDeckArt}
               onClick={() => setImportingFormat("silver-age")}
             />
@@ -158,7 +163,7 @@ function HomePlayOptions(props: {
 
           {classicConstructedDecks.length > 0 ? (
             <PlayableDeckCard
-              title="Play CC"
+              title={intl.formatMessage({ id: "lobby.home.playCc" })}
               art={classicConstructedDeckArt}
               format="cc"
               decks={classicConstructedDecks}
@@ -169,7 +174,7 @@ function HomePlayOptions(props: {
             />
           ) : (
             <ImportDeckCard
-              title="Import your CC deck"
+              title={intl.formatMessage({ id: "lobby.home.importCc" })}
               art={classicConstructedDeckArt}
               onClick={() => setImportingFormat("cc")}
             />
@@ -199,6 +204,7 @@ function PlayableDeckCard(props: {
   onFindMatch: (format: ConstructedFormat, choice: { deckId: string }) => void;
   onPlayBot: (format: ConstructedFormat, deckId: string, bot?: BotOpponent) => void;
 }) {
+  const intl = useIntl();
   const [selectedDeckId, setSelectedDeckId] = useState("");
   const [choosingBot, setChoosingBot] = useState(false);
   const selectedDeck = props.decks.find((deck) =>
@@ -237,7 +243,7 @@ function PlayableDeckCard(props: {
               if (selectedDeck) props.onFindMatch(props.format, { deckId: selectedDeck.id });
             }}
           >
-            Find Match
+            {intl.formatMessage({ id: "lobby.action.findMatch" })}
           </button>
           <button
             className="btn-bot"
@@ -247,7 +253,7 @@ function PlayableDeckCard(props: {
               setChoosingBot(true);
             }}
           >
-            Play vs Bot
+            {intl.formatMessage({ id: "lobby.action.playBot" })}
           </button>
         </div>
       </div>
@@ -266,6 +272,7 @@ function PlayableDeckCard(props: {
 }
 
 function ImportDeckCard(props: { title: string; art: string; onClick: () => void }) {
+  const intl = useIntl();
   return (
     <button
       className="new-player-card new-player-import-card"
@@ -274,7 +281,9 @@ function ImportDeckCard(props: { title: string; art: string; onClick: () => void
     >
       <img className="new-player-card-art" src={props.art} alt="" width={960} height={540} />
       <span className="new-player-card-content">
-        <span className="new-player-card-eyebrow">Bring your own deck</span>
+        <span className="new-player-card-eyebrow">
+          {intl.formatMessage({ id: "lobby.home.bringDeck" })}
+        </span>
         <strong>{props.title}</strong>
       </span>
     </button>

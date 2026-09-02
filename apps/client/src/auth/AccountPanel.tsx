@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { useIntl } from "react-intl";
 import type { PlayerBadge } from "@fyendal/shared";
 import type { AccountBadgesResponse } from "@fyendal/protocol";
 import { useStore } from "../store.js";
 import { BadgePicker } from "./BadgePicker.js";
 
 export function AccountPanel() {
+  const intl = useIntl();
   const authToken = useStore((state) => state.authToken);
   const authUser = useStore((state) => state.authUser);
   const getAccountBadges = useStore((state) => state.getAccountBadges);
@@ -35,7 +37,7 @@ export function AccountPanel() {
     const result = await selectAccountBadge(badge);
     if (result.ok) {
       setBadges(result);
-      setNote("Displayed badge updated.");
+      setNote(intl.formatMessage({ id: "account.badge.updated" }));
     } else {
       setError(result.error);
     }
@@ -64,7 +66,7 @@ export function AccountPanel() {
 
   const removeAccount = async () => {
     if (!authToken || !password) return;
-    if (!window.confirm("Delete your Fyendal account, saved decks, retained replays, bug reports, sessions, and active rooms from the active service? This cannot be undone.")) return;
+    if (!window.confirm(intl.formatMessage({ id: "account.delete.confirm" }))) return;
     setBusy("delete");
     setError(null);
     const result = await deleteAccount(password);
@@ -77,11 +79,16 @@ export function AccountPanel() {
 
   return (
     <div className="panel account-panel">
-      <h2 className="panel-title">Account</h2>
-      <p>Signed in as <strong>{authUser}</strong>.</p>
+      <h2 className="panel-title">{intl.formatMessage({ id: "account.title" })}</h2>
+      <p>
+        {intl.formatMessage(
+          { id: "account.signedInAs" },
+          { username: authUser, strong: (chunks) => <strong>{chunks}</strong> },
+        )}
+      </p>
       <section>
-        <h3>Player badge</h3>
-        <p>Choose one earned badge to display before your username, or hide badges.</p>
+        <h3>{intl.formatMessage({ id: "account.badge.title" })}</h3>
+        <p>{intl.formatMessage({ id: "account.badge.description" })}</p>
         {badges ? (
           <BadgePicker
             availableBadges={badges.availableBadges}
@@ -90,19 +97,21 @@ export function AccountPanel() {
             onSelect={(badge) => void chooseBadge(badge)}
           />
         ) : (
-          <p className="muted">Loading badges…</p>
+          <p className="muted">{intl.formatMessage({ id: "account.badge.loading" })}</p>
         )}
       </section>
       <section>
-        <h3>Export your data</h3>
-        <p>Download your account details, saved decklists, room membership records, retained replays, and bug-report references as JSON.</p>
+        <h3>{intl.formatMessage({ id: "account.export.title" })}</h3>
+        <p>{intl.formatMessage({ id: "account.export.description" })}</p>
         <button disabled={busy !== null} onClick={() => void downloadExport()}>
-          {busy === "export" ? "Preparing…" : "Download account data"}
+          {intl.formatMessage({
+            id: busy === "export" ? "account.export.preparing" : "account.export.download",
+          })}
         </button>
       </section>
       <section className="account-danger">
-        <h3>Delete account</h3>
-        <p>This permanently removes your account, sessions, saved decks, retained replays, bug reports, and active rooms. Backup copies expire according to the retention policy.</p>
+        <h3>{intl.formatMessage({ id: "account.delete.title" })}</h3>
+        <p>{intl.formatMessage({ id: "account.delete.description" })}</p>
         <form
           onSubmit={(event) => {
             event.preventDefault();
@@ -111,15 +120,17 @@ export function AccountPanel() {
         >
           <input
             name="password"
-            aria-label="Current password"
+            aria-label={intl.formatMessage({ id: "account.currentPassword" })}
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            placeholder="current password"
+            placeholder={intl.formatMessage({ id: "account.currentPasswordPlaceholder" })}
             autoComplete="current-password"
           />
           <button type="submit" className="btn-danger" disabled={busy !== null || !password}>
-            {busy === "delete" ? "Deleting…" : "Delete account"}
+            {intl.formatMessage({
+              id: busy === "delete" ? "account.delete.deleting" : "account.delete.action",
+            })}
           </button>
         </form>
       </section>

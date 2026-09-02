@@ -1,11 +1,23 @@
-import { createElement } from "react";
+import type { ComponentProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { GameSettingsDialog } from "./SideRailDialogs.js";
+import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
+
+function settingsDialog(
+  props: ComponentProps<typeof GameSettingsDialog>,
+  locale: "en" | "zh-Hans" = "en",
+) {
+  return renderToStaticMarkup(
+    <TestI18nProvider locale={locale}>
+      <GameSettingsDialog {...props} />
+    </TestI18nProvider>,
+  );
+}
 
 describe("game settings dialog", () => {
   it("groups game settings into clear responsive sections", () => {
-    const html = renderToStaticMarkup(createElement(GameSettingsDialog, {
+    const html = settingsDialog({
       turn: 1,
       onUndo: vi.fn(),
       onConcede: vi.fn(),
@@ -24,7 +36,7 @@ describe("game settings dialog", () => {
       soundEffectsVolume: 35,
       onSoundEffectsVolumeChange: vi.fn(),
       onClose: vi.fn(),
-    }));
+    });
 
     expect(html).toContain('aria-label="Animation preference"');
     expect(html).toContain('class="settings-grid"');
@@ -52,7 +64,7 @@ describe("game settings dialog", () => {
   });
 
   it("disables history actions while a room command is pending", () => {
-    const html = renderToStaticMarkup(createElement(GameSettingsDialog, {
+    const html = settingsDialog({
       turn: 4,
       onUndo: vi.fn(),
       undoDisabled: true,
@@ -72,8 +84,38 @@ describe("game settings dialog", () => {
       soundEffectsVolume: 35,
       onSoundEffectsVolumeChange: vi.fn(),
       onClose: vi.fn(),
-    }));
+    });
 
     expect(html.match(/disabled=""/g)).toHaveLength(3);
+  });
+
+  it("renders settings labels and accessible controls in Simplified Chinese", () => {
+    const html = settingsDialog({
+      turn: 3,
+      onUndo: vi.fn(),
+      onConcede: vi.fn(),
+      priorityWindowMode: "auto-pass",
+      onPriorityWindowModeChange: vi.fn(),
+      lessGuidance: false,
+      onLessGuidanceChange: vi.fn(),
+      skipPlayConfirmation: false,
+      onSkipPlayConfirmationChange: vi.fn(),
+      motionPreference: "system",
+      onMotionPreferenceChange: vi.fn(),
+      playabilityCuePreference: "glow",
+      onPlayabilityCuePreferenceChange: vi.fn(),
+      soundEffectsEnabled: true,
+      onSoundEffectsEnabledChange: vi.fn(),
+      soundEffectsVolume: 35,
+      onSoundEffectsVolumeChange: vi.fn(),
+      onClose: vi.fn(),
+    }, "zh-Hans");
+
+    expect(html).toContain(">设置</h2>");
+    expect(html).toContain(">游戏操作</h3>");
+    expect(html).toContain(">自动跳过</button>");
+    expect(html).toContain('aria-label="动画偏好"');
+    expect(html).toContain(">对局历史</h3>");
+    expect(html).toContain(">危险操作</h3>");
   });
 });

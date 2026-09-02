@@ -1,20 +1,23 @@
 import { useId } from "react";
 import type { PlayerBadge } from "@fyendal/shared";
+import { useIntl } from "react-intl";
 
 export const PLAYER_BADGE_DETAILS: Record<PlayerBadge, {
-  name: string;
-  description: string;
+  nameMessageId: string;
+  descriptionMessageId: string;
   image: string;
 }> = {
   "early-tester": {
-    name: "Early Tester",
-    description: "Awarded to players who joined Fyendal during early testing.",
+    nameMessageId: "account.badge.earlyTester.name",
+    descriptionMessageId: "account.badge.earlyTester.description",
     image: "/logo.png",
   },
 };
 
 export function PlayerBadgeMark({ badge }: { badge: PlayerBadge }) {
+  const intl = useIntl();
   const details = PLAYER_BADGE_DETAILS[badge];
+  const name = intl.formatMessage({ id: details.nameMessageId });
   const tooltipId = useId();
   return (
     <span className="player-badge-mark" tabIndex={0} aria-describedby={tooltipId}>
@@ -23,11 +26,11 @@ export function PlayerBadgeMark({ badge }: { badge: PlayerBadge }) {
         src={details.image}
         width={20}
         height={20}
-        alt={`${details.name} badge`}
+        alt={intl.formatMessage({ id: "account.badge.imageAlt" }, { name })}
       />
       <span className="player-badge-tooltip" id={tooltipId} role="tooltip">
-        <strong>{details.name}</strong>
-        <span>{details.description}</span>
+        <strong>{name}</strong>
+        <span>{intl.formatMessage({ id: details.descriptionMessageId })}</span>
       </span>
     </span>
   );

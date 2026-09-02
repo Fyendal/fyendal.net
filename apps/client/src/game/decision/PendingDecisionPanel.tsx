@@ -22,9 +22,6 @@ import type { PendingDecisionModel } from "./DecisionModels.js";
 import { NameChoiceAutocomplete } from "./NameChoiceAutocomplete.js";
 import { TriggerOrderDecision } from "./TriggerOrderDecision.js";
 
-const GUIDANCE_SETTINGS_TOOLTIP =
-  "Uncheck Show guidance in Settings, or select Disable now.";
-
 function LocalizedDecisionOptionButton({
   message,
   option,
@@ -62,15 +59,16 @@ export function GuidanceSettingsPopover({
 }: {
   onDisableGuidance: () => void;
 }) {
+  const intl = useIntl();
   return (
     <>
-      Uncheck Show guidance in Settings, or{" "}
+      {intl.formatMessage({ id: "settings.guidance.disableHint" })}{" "}
       <button
         type="button"
         className="decision-guidance-disable"
         onClick={onDisableGuidance}
       >
-        disable now
+        {intl.formatMessage({ id: "settings.guidance.disableNow" })}
       </button>
       .
     </>
@@ -82,6 +80,7 @@ function GuidanceSettingsInfo({
 }: {
   onDisableGuidance: () => void;
 }) {
+  const intl = useIntl();
   const guidanceId = useId();
   const descriptionId = `guidance-settings-description-${guidanceId}`;
   const popoverId = `guidance-settings-popover-${guidanceId}`;
@@ -139,7 +138,7 @@ function GuidanceSettingsInfo({
         type="button"
         ref={anchorRef}
         className="decision-guidance-info"
-        aria-label="Guidance settings"
+        aria-label={intl.formatMessage({ id: "settings.guidance.title" })}
         aria-describedby={descriptionId}
         aria-haspopup="dialog"
         aria-expanded={open}
@@ -152,7 +151,7 @@ function GuidanceSettingsInfo({
       >
         i
         <span id={descriptionId} className="decision-guidance-tooltip-accessible">
-          {GUIDANCE_SETTINGS_TOOLTIP}
+          {intl.formatMessage({ id: "settings.guidance.tooltip" })}
         </span>
       </button>
       {open && position && typeof document !== "undefined"
@@ -160,7 +159,7 @@ function GuidanceSettingsInfo({
             <span
               id={popoverId}
               role="dialog"
-              aria-label="Guidance settings"
+              aria-label={intl.formatMessage({ id: "settings.guidance.title" })}
               className="decision-guidance-tooltip-floating"
               style={position}
               onMouseEnter={showPopover}

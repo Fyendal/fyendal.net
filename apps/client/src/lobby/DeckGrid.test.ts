@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { DeckSummary } from "@fyendal/protocol";
+import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 
 describe("deckChoicesFor", () => {
   it("lists the user's decks before shared precons", async () => {
@@ -45,10 +46,11 @@ describe("deckChoicesFor", () => {
       bannedCards: ["Art of War"],
     };
 
-    const html = renderToStaticMarkup(createElement(DeckTile, {
-      deck,
-      onSelect: () => {},
-    }));
+    const html = renderToStaticMarkup(createElement(
+      TestI18nProvider,
+      null,
+      createElement(DeckTile, { deck, onSelect: () => {} }),
+    ));
 
     expect(html).toContain("Includes banned card");
     expect(html).toContain("Banned cards:\nArt of War");

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useIntl } from "react-intl";
 import type { BotOpponent } from "@fyendal/shared";
 import type { ConstructedFormat } from "../domain.js";
 import { heroImageUrl } from "./heroImage.js";
@@ -9,8 +10,7 @@ interface BotOption {
   title: string;
   heroName: string;
   deckType: DeckType;
-  deckTypeLabel: string;
-  description: string;
+  descriptionId: string;
 }
 
 type DeckType = "beginner" | "midrange" | "aggro" | "elemental" | "guardian";
@@ -23,8 +23,7 @@ const BOTS: Readonly<Record<ConstructedFormat, readonly BotOption[]>> = {
       title: "Scarlet Revenger",
       heroName: "Ira, Scarlet Revenger",
       deckType: "beginner",
-      deckTypeLabel: "Beginner",
-      description: "A straightforward Armory Deck that's great for beginners.",
+      descriptionId: "lobby.bot.ira.description",
     },
     {
       id: "hala",
@@ -32,8 +31,7 @@ const BOTS: Readonly<Record<ConstructedFormat, readonly BotOption[]>> = {
       title: "Bladesaint of the Vow",
       heroName: "Hala, Bladesaint of the Vow",
       deckType: "midrange",
-      deckTypeLabel: "Midrange",
-      description: "A flexible value deck that balances offense and defense.",
+      descriptionId: "lobby.bot.hala.description",
     },
     {
       id: "cindra",
@@ -41,8 +39,7 @@ const BOTS: Readonly<Record<ConstructedFormat, readonly BotOption[]>> = {
       title: "Dracai of Retribution",
       heroName: "Cindra, Dracai of Retribution",
       deckType: "aggro",
-      deckTypeLabel: "Aggro",
-      description: "A fast redline deck built to keep the pressure on.",
+      descriptionId: "lobby.bot.cindra.description",
     },
     {
       id: "jarl",
@@ -50,8 +47,7 @@ const BOTS: Readonly<Record<ConstructedFormat, readonly BotOption[]>> = {
       title: "Vetreiði",
       heroName: "Jarl Vetreiði",
       deckType: "guardian",
-      deckTypeLabel: "Defensive",
-      description: "A patient Earth and Ice Guardian that blocks efficiently and attacks with disruptive two-card hands.",
+      descriptionId: "lobby.bot.jarl.description",
     },
   ],
   "silver-age": [
@@ -61,8 +57,7 @@ const BOTS: Readonly<Record<ConstructedFormat, readonly BotOption[]>> = {
       title: "Elemental Runeblade",
       heroName: "Briar",
       deckType: "elemental",
-      deckTypeLabel: "Aggro",
-      description: "An aggressive deck that chains elemental attacks together.",
+      descriptionId: "lobby.bot.briar.description",
     },
     {
       id: "bravo",
@@ -70,8 +65,7 @@ const BOTS: Readonly<Record<ConstructedFormat, readonly BotOption[]>> = {
       title: "Flattering Showman",
       heroName: "Bravo, Flattering Showman",
       deckType: "guardian",
-      deckTypeLabel: "Defensive",
-      description: "A defensive deck that sets up powerful, disruptive attacks.",
+      descriptionId: "lobby.bot.bravo.description",
     },
   ],
 };
@@ -81,6 +75,7 @@ export function BotOpponentModal(props: {
   onSelect: (bot: BotOpponent) => void;
   onClose: () => void;
 }) {
+  const intl = useIntl();
   const bots = BOTS[props.format];
   return (
     <div
@@ -98,8 +93,10 @@ export function BotOpponentModal(props: {
           if (event.key === "Escape") props.onClose();
         }}
       >
-        <h2 className="panel-title" id="bot-opponent-title">Choose your opponent</h2>
-        <p className="muted">Who would you like to practice against?</p>
+        <h2 className="panel-title" id="bot-opponent-title">
+          {intl.formatMessage({ id: "lobby.bot.chooseOpponent" })}
+        </h2>
+        <p className="muted">{intl.formatMessage({ id: "lobby.bot.prompt" })}</p>
         <div className="bot-opponent-options">
           {bots.map((bot, index) => (
             <button
@@ -114,16 +111,20 @@ export function BotOpponentModal(props: {
                   <strong>{bot.name}</strong>
                   <span className={`bot-deck-type bot-deck-type-${bot.deckType}`}>
                     <DeckTypeIcon type={bot.deckType} />
-                    {bot.deckTypeLabel}
+                    {intl.formatMessage({ id: `lobby.bot.type.${bot.deckType}` })}
                   </span>
                 </span>
                 <small className="bot-opponent-title">{bot.title}</small>
-                <span className="bot-opponent-description">{bot.description}</span>
+                <span className="bot-opponent-description">
+                  {intl.formatMessage({ id: bot.descriptionId })}
+                </span>
               </span>
             </button>
           ))}
         </div>
-        <button className="bot-opponent-cancel" onClick={props.onClose}>Cancel</button>
+        <button className="bot-opponent-cancel" onClick={props.onClose}>
+          {intl.formatMessage({ id: "common.cancel" })}
+        </button>
       </section>
     </div>
   );

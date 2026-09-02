@@ -564,6 +564,9 @@
   box-shadow: inset 3px 0 0 var(--blood-hi), inset 0 0 0 1px #b8933f33;
 }
 .format-card-name {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
   font-family: var(--font-lobby-ui);
   font-size: 16px;
   font-weight: 650;
@@ -571,10 +574,21 @@
   text-transform: uppercase;
   color: #d6c9b1;
 }
+.format-name-primary { display: block; }
+.format-name-subtitle {
+  display: block;
+  color: #9f927c;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .7px;
+  line-height: 1.1;
+  text-transform: none;
+}
 .format-card.selected .format-card-name {
   color: var(--gold);
   font-weight: 700;
 }
+.format-card.selected .format-name-subtitle { color: #c7a96d; }
 .format-card-queue { font-size: 13px; color: #a0927c; margin-top: 2px; }
 .format-card.selected .format-card-queue { color: #d4a958; }
 

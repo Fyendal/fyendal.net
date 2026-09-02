@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import { preconsForFormat } from "@fyendal/cards/client";
 import type { DeckSummary } from "@fyendal/protocol";
 import type { ConstructedFormat } from "../domain.js";
 import { useStore } from "../store.js";
 import { preconPrepDeck } from "../prep/prepDeck.js";
-import { FORMAT_LABELS } from "./FormatBadge.js";
+import { formatLabel, formatSelectLabel } from "./FormatBadge.js";
 import { heroImageUrl } from "./heroImage.js";
 import { deckErrorMessages } from "./deckErrors.js";
 import { BotOpponentModal } from "./BotOpponentModal.js";
@@ -73,9 +74,10 @@ function FutureCardsToggle(props: {
   disabled: boolean;
   onChange: (checked: boolean) => void;
 }) {
+  const intl = useIntl();
   return (
     <label className="toggle-switch deck-future-toggle">
-      <span>Allow Future Cards</span>
+      <span>{intl.formatMessage({ id: "lobby.cardPool.allowFuture" })}</span>
       <input
         type="checkbox"
         role="switch"
@@ -95,28 +97,29 @@ function DeckLibraryFilters(props: {
   onQueryChange: (query: string) => void;
   onLegalityChange: (legality: DeckLegalityFilter) => void;
 }) {
+  const intl = useIntl();
   return (
     <div className={props.className}>
       <label>
-        <span>Search decks</span>
+        <span>{intl.formatMessage({ id: "lobby.deck.search" })}</span>
         <input
           type="search"
           name="deck-search"
           value={props.query}
           autoComplete="off"
-          placeholder="Deck or hero name…"
+          placeholder={intl.formatMessage({ id: "lobby.deck.searchPlaceholder" })}
           onChange={(event) => props.onQueryChange(event.target.value)}
         />
       </label>
       <label>
-        <span>Legality</span>
+        <span>{intl.formatMessage({ id: "lobby.deck.legality" })}</span>
         <select
           value={props.legality}
           onChange={(event) => props.onLegalityChange(event.target.value as DeckLegalityFilter)}
         >
-          <option value="all">All</option>
-          <option value="playable">Playable</option>
-          <option value="attention">Needs Attention</option>
+          <option value="all">{intl.formatMessage({ id: "common.all" })}</option>
+          <option value="playable">{intl.formatMessage({ id: "lobby.deck.playable" })}</option>
+          <option value="attention">{intl.formatMessage({ id: "lobby.deck.needsAttention" })}</option>
         </select>
       </label>
     </div>
@@ -132,9 +135,10 @@ export function DeckTile(props: {
   deck: DeckSummary;
   selected?: boolean;
   blocked?: boolean;
-  source?: "Saved" | "Preconstructed";
+  source?: "saved" | "preconstructed";
   onSelect: () => void;
 }) {
+  const intl = useIntl();
   const [imgOk, setImgOk] = useState(true);
   const d = props.deck;
   const bannedCards = d.bannedCards ?? [];
@@ -162,22 +166,34 @@ export function DeckTile(props: {
       <span className="deck-card-name">{d.name}</span>
       <span className="deck-card-details">
         <span>{d.heroName}</span>
-        <span>{d.deckSize} cards · {props.source ?? "Saved"}</span>
+        <span>
+          {intl.formatMessage(
+            { id: "lobby.deck.countAndSource" },
+            {
+              count: d.deckSize,
+              source: intl.formatMessage({
+                id: props.source === "preconstructed"
+                  ? "lobby.deck.source.preconstructed"
+                  : "lobby.deck.source.saved",
+              }),
+            },
+          )}
+        </span>
       </span>
       {bannedCards.length > 0 ? (
         <span
           className="deck-legality-hint banned"
-          title={`Banned cards:\n${bannedCards.join("\n")}`}
+          title={intl.formatMessage({ id: "lobby.deck.bannedList" }, { cards: bannedCards.join("\n") })}
         >
-          Includes banned {bannedCards.length === 1 ? "card" : "cards"}
+          {intl.formatMessage({ id: "lobby.deck.includesBanned" }, { count: bannedCards.length })}
         </span>
       ) : null}
       {futureCards.length > 0 ? (
         <span
           className="deck-legality-hint future"
-          title={`Future cards:\n${futureCards.join("\n")}`}
+          title={intl.formatMessage({ id: "lobby.deck.futureList" }, { cards: futureCards.join("\n") })}
         >
-          Includes future {futureCards.length === 1 ? "card" : "cards"}
+          {intl.formatMessage({ id: "lobby.deck.includesFuture" }, { count: futureCards.length })}
         </span>
       ) : null}
     </button>
@@ -194,6 +210,9 @@ export function DeckGrid(props: {
   onSelect: (id: string) => void;
   onFormatChange?: (format: ConstructedFormat) => void;
 }) {
+  const intl = useIntl();
+  const selectedDeckId = props.deckId;
+  const closeDeckMenu = props.onSelect;
   const {
     decks,
     queuedFormat,
@@ -227,17 +246,17 @@ export function DeckGrid(props: {
   const deckMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!props.deckId) return;
+    if (!selectedDeckId) return;
 
     const closeMenuOnOutsideClick = (event: MouseEvent) => {
       if (event.target instanceof Node && !deckMenuRef.current?.contains(event.target)) {
-        props.onSelect("");
+        closeDeckMenu("");
       }
     };
 
     document.addEventListener("click", closeMenuOnOutsideClick, true);
     return () => document.removeEventListener("click", closeMenuOnOutsideClick, true);
-  }, [props.deckId, props.onSelect]);
+  }, [closeDeckMenu, selectedDeckId]);
 
   const visibleDecks = filterAndSortDecks(
     catalog === "mine" ? own : precons,
@@ -255,7 +274,13 @@ export function DeckGrid(props: {
         const selected = d.id === props.deckId;
         const allowFuture = allowFutureCards[props.format];
         const illegal = !deckIsLegalForRoom(d, allowFuture);
-        const legalityReason = deckLegalityReason(d, allowFuture);
+        const blockedCards = [
+          ...(d.bannedCards ?? []),
+          ...(allowFuture ? [] : (d.futureCards ?? [])),
+        ];
+        const legalityReason = blockedCards.length > 0
+          ? intl.formatMessage({ id: "lobby.deck.illegalCards" }, { cards: blockedCards.join(", ") })
+          : undefined;
         return (
           <div
             className={`deck-choice${selected ? " selected" : ""}`}
@@ -267,7 +292,7 @@ export function DeckGrid(props: {
             <DeckTile
               deck={d}
               selected={selected}
-              source={editable ? "Saved" : "Preconstructed"}
+              source={editable ? "saved" : "preconstructed"}
               onSelect={() => props.onSelect(selected ? "" : d.id)}
             />
             {selected ? (
@@ -276,18 +301,18 @@ export function DeckGrid(props: {
                 ref={deckMenuRef}
                 className="deck-menu"
                 role="group"
-                aria-label={`${d.name} actions`}
+                aria-label={intl.formatMessage({ id: "lobby.deck.actions" }, { name: d.name })}
                 onClick={(event) => event.stopPropagation()}
               >
                 <button
                   type="button"
                   className="deck-menu-close"
-                  aria-label={`Close ${d.name} actions`}
+                  aria-label={intl.formatMessage({ id: "lobby.deck.closeActions" }, { name: d.name })}
                   onClick={() => props.onSelect("")}
                 />
                 {queued ? (
                   <button className="btn-primary" onClick={queueLeave}>
-                    Cancel Match Search
+                    {intl.formatMessage({ id: "lobby.action.cancelSearch" })}
                   </button>
                 ) : (
                   <button
@@ -295,7 +320,7 @@ export function DeckGrid(props: {
                     disabled={illegal}
                     onClick={() => queueJoin(props.format, { deckId: d.id })}
                   >
-                    Find Match
+                    {intl.formatMessage({ id: "lobby.action.findMatch" })}
                   </button>
                 )}
                 <button
@@ -303,7 +328,7 @@ export function DeckGrid(props: {
                   disabled={illegal}
                   onClick={() => createRoom(props.format, { deckId: d.id })}
                 >
-                  Invite Friend
+                  {intl.formatMessage({ id: "lobby.action.inviteFriend" })}
                 </button>
                 <button
                   className="btn-bot"
@@ -313,19 +338,22 @@ export function DeckGrid(props: {
                     setBotDeckId(d.id);
                   }}
                 >
-                  Play vs Bot
+                  {intl.formatMessage({ id: "lobby.action.playBot" })}
                 </button>
                 {editable ? (
                   <button onClick={() => {
                     props.onSelect("");
                     setEditingDeck(d);
                   }}>
-                    Edit Deck
+                    {intl.formatMessage({ id: "lobby.deck.edit" })}
                   </button>
                 ) : null}
                 {illegal ? (
                   <p className="deck-menu-blocked" role="status">
-                    {legalityReason}. Update the deck or card-pool setting to play it.
+                    {intl.formatMessage(
+                      { id: "lobby.deck.blocked" },
+                      { reason: legalityReason },
+                    )}
                   </p>
                 ) : null}
               </div>
@@ -341,20 +369,23 @@ export function DeckGrid(props: {
     <div className="panel deck-library-panel">
       {props.onFormatChange ? (
         <label className="mobile-deck-format-picker">
-          <span>Format</span>
+          <span>{intl.formatMessage({ id: "common.format" })}</span>
           <select
-            aria-label="Deck format"
+            aria-label={intl.formatMessage({ id: "lobby.deck.format" })}
             value={props.format}
             onChange={(event) => props.onFormatChange?.(event.target.value as ConstructedFormat)}
           >
-            <option value="cc">Classic Constructed</option>
-            <option value="silver-age">Silver Age</option>
+            <option value="cc">{formatSelectLabel(intl, "cc")}</option>
+            <option value="silver-age">{formatSelectLabel(intl, "silver-age")}</option>
           </select>
         </label>
       ) : null}
       <div className="deck-panel-heading">
         <h2 className="panel-title">
-          {props.format === "silver-age" ? "Silver Age Decks" : `${FORMAT_LABELS[props.format]} Decks`}
+          {intl.formatMessage(
+            { id: "lobby.deck.formatDecks" },
+            { format: formatLabel(intl, props.format) },
+          )}
         </h2>
         <div className="deck-panel-actions">
           <FutureCardsToggle
@@ -363,12 +394,16 @@ export function DeckGrid(props: {
             onChange={(checked) => setAllowFutureCards(props.format, checked)}
           />
           <button className="btn-primary deck-import-action" onClick={() => setImporting(true)}>
-            Import Deck
+            {intl.formatMessage({ id: "lobby.deck.import" })}
           </button>
         </div>
       </div>
 
-      <div className="deck-catalog-tabs" role="tablist" aria-label="Deck catalog">
+      <div
+        className="deck-catalog-tabs"
+        role="tablist"
+        aria-label={intl.formatMessage({ id: "lobby.deck.catalog" })}
+      >
         <button
           type="button"
           role="tab"
@@ -379,7 +414,7 @@ export function DeckGrid(props: {
             props.onSelect("");
           }}
         >
-          My Decks <span>{own.length}</span>
+          {intl.formatMessage({ id: "lobby.deck.mine" })} <span>{own.length}</span>
         </button>
         <button
           type="button"
@@ -391,14 +426,16 @@ export function DeckGrid(props: {
             props.onSelect("");
           }}
         >
-          Preconstructed <span>{precons.length}</span>
+          {intl.formatMessage({ id: "lobby.deck.preconstructed" })} <span>{precons.length}</span>
         </button>
       </div>
 
       <div className="mobile-deck-toolbar">
-        <button className="btn-primary" onClick={() => setImporting(true)}>Import</button>
+        <button className="btn-primary" onClick={() => setImporting(true)}>
+          {intl.formatMessage({ id: "common.import" })}
+        </button>
         <details className="mobile-deck-options">
-          <summary>Search &amp; Options</summary>
+          <summary>{intl.formatMessage({ id: "lobby.deck.searchOptions" })}</summary>
           <div className="mobile-deck-options-panel">
             <FutureCardsToggle
               checked={allowFutureCards[props.format]}
@@ -426,12 +463,20 @@ export function DeckGrid(props: {
 
       {visibleDecks.length > 0 ? tiles(visibleDecks, catalog === "mine") : (
         <div className="deck-library-empty">
-          <h3>{catalog === "mine" && own.length === 0 ? "No saved decks yet" : "No decks match these filters"}</h3>
-          <p>{catalog === "mine" && own.length === 0
-            ? "Import a Fabrary link or full deck list to start playing."
-            : "Clear the search or choose a different legality filter."}</p>
+          <h3>{intl.formatMessage({
+            id: catalog === "mine" && own.length === 0
+              ? "lobby.deck.emptySaved"
+              : "lobby.deck.emptyFiltered",
+          })}</h3>
+          <p>{intl.formatMessage({
+            id: catalog === "mine" && own.length === 0
+              ? "lobby.deck.emptySavedBody"
+              : "lobby.deck.emptyFilteredBody",
+          })}</p>
           {catalog === "mine" && own.length === 0 ? (
-            <button className="btn-primary" onClick={() => setImporting(true)}>Import Your First Deck</button>
+            <button className="btn-primary" onClick={() => setImporting(true)}>
+              {intl.formatMessage({ id: "lobby.deck.importFirst" })}
+            </button>
           ) : null}
         </div>
       )}
@@ -461,6 +506,7 @@ export function ImportDeckModal(props: {
   onClose: () => void;
   onImported?: () => void;
 }) {
+  const intl = useIntl();
   const importDeck = useStore((state) => state.importDeck);
   const [source, setSource] = useState<"url" | "text">("url");
   const [name, setName] = useState("");
@@ -485,25 +531,43 @@ export function ImportDeckModal(props: {
       props.onImported?.();
       return;
     }
-    setErrors(deckErrorMessages(result, "import failed"));
+    setErrors(deckErrorMessages(
+      result,
+      intl.formatMessage({ id: "lobby.deck.error.importFailed" }),
+      {
+        unknownCards: (cards) => intl.formatMessage({ id: "lobby.deck.error.unknownCards" }, { cards }),
+        unimplementedCards: (cards) => intl.formatMessage(
+          { id: "lobby.deck.error.unimplementedCards" },
+          { cards },
+        ),
+      },
+    ));
   };
 
   return (
-    <ModalSurface title="Import Deck" className="deck-import-modal" onClose={props.onClose}>
-        <div className="deck-import-source" role="group" aria-label="Deck source">
+    <ModalSurface
+      title={intl.formatMessage({ id: "lobby.deck.import" })}
+      className="deck-import-modal"
+      onClose={props.onClose}
+    >
+        <div
+          className="deck-import-source"
+          role="group"
+          aria-label={intl.formatMessage({ id: "lobby.deck.source" })}
+        >
           <button
             className={source === "url" ? "selected" : ""}
             aria-pressed={source === "url"}
             onClick={() => setSource("url")}
           >
-            Fabrary link
+            {intl.formatMessage({ id: "lobby.deck.fabraryLink" })}
           </button>
           <button
             className={source === "text" ? "selected" : ""}
             aria-pressed={source === "text"}
             onClick={() => setSource("text")}
           >
-            Paste deck list
+            {intl.formatMessage({ id: "lobby.deck.pasteList" })}
           </button>
         </div>
         <form
@@ -515,7 +579,7 @@ export function ImportDeckModal(props: {
         >
           {source === "url" ? (
             <label className="deck-import-primary">
-              <span>Fabrary link</span>
+              <span>{intl.formatMessage({ id: "lobby.deck.fabraryLink" })}</span>
               <input
                 name="fabrary-url"
                 type="url"
@@ -529,12 +593,12 @@ export function ImportDeckModal(props: {
             </label>
           ) : (
             <label className="deck-import-primary">
-              <span>Deck list</span>
+              <span>{intl.formatMessage({ id: "lobby.deck.deckList" })}</span>
               <textarea
                 name="deck-list"
                 value={decklist}
                 onChange={(event) => setDecklist(event.target.value)}
-                placeholder={"Hero: …\nWeapons: …\nDeck cards\n3x Card Name (red)\nSideboard cards\n…"}
+                placeholder={intl.formatMessage({ id: "lobby.deck.deckListPlaceholder" })}
                 rows={12}
                 spellCheck={false}
                 data-modal-initial-focus
@@ -542,7 +606,7 @@ export function ImportDeckModal(props: {
             </label>
           )}
           <label className="deck-import-name">
-            <span>Name (optional)</span>
+            <span>{intl.formatMessage({ id: "lobby.deck.optionalName" })}</span>
             <input
               name="deck-name"
               autoComplete="off"
@@ -556,9 +620,11 @@ export function ImportDeckModal(props: {
             </div>
           ) : null}
           <div className="deck-edit-actions">
-            <button type="button" onClick={props.onClose}>Cancel</button>
+            <button type="button" onClick={props.onClose}>
+              {intl.formatMessage({ id: "common.cancel" })}
+            </button>
             <button type="submit" className="btn-primary" disabled={busy || !value}>
-              {busy ? "Importing…" : "Import"}
+              {intl.formatMessage({ id: busy ? "lobby.deck.importing" : "common.import" })}
             </button>
           </div>
         </form>
@@ -567,6 +633,7 @@ export function ImportDeckModal(props: {
 }
 
 function EditDeckModal(props: { deck: DeckSummary; onClose: () => void }) {
+  const intl = useIntl();
   const { updateDeck, deleteDeck } = useStore(useShallow((state) => ({
     updateDeck: state.updateDeck,
     deleteDeck: state.deleteDeck,
@@ -592,7 +659,17 @@ function EditDeckModal(props: { deck: DeckSummary; onClose: () => void }) {
       props.onClose();
       return;
     }
-    setErrors(deckErrorMessages(result, "update failed"));
+    setErrors(deckErrorMessages(
+      result,
+      intl.formatMessage({ id: "lobby.deck.error.updateFailed" }),
+      {
+        unknownCards: (cards) => intl.formatMessage({ id: "lobby.deck.error.unknownCards" }, { cards }),
+        unimplementedCards: (cards) => intl.formatMessage(
+          { id: "lobby.deck.error.unimplementedCards" },
+          { cards },
+        ),
+      },
+    ));
   };
 
   const remove = async () => {
@@ -608,10 +685,14 @@ function EditDeckModal(props: { deck: DeckSummary; onClose: () => void }) {
   };
 
   return (
-    <ModalSurface title="Edit Deck" className="deck-edit-modal" onClose={props.onClose}>
+    <ModalSurface
+      title={intl.formatMessage({ id: "lobby.deck.edit" })}
+      className="deck-edit-modal"
+      onClose={props.onClose}
+    >
         <div className="deck-import-form">
           <label>
-            <span>Deck name</span>
+            <span>{intl.formatMessage({ id: "lobby.deck.name" })}</span>
             <input
               name="deck-name"
               value={name}
@@ -621,7 +702,7 @@ function EditDeckModal(props: { deck: DeckSummary; onClose: () => void }) {
             />
           </label>
           <label>
-            <span>Fabrary deck URL</span>
+            <span>{intl.formatMessage({ id: "lobby.deck.fabraryUrl" })}</span>
             <input
               name="fabrary-url"
               type="url"
@@ -632,16 +713,16 @@ function EditDeckModal(props: { deck: DeckSummary; onClose: () => void }) {
               spellCheck={false}
             />
             <small className="deck-edit-source-note">
-              Changing this URL reimports and revalidates the Fabrary deck.
+              {intl.formatMessage({ id: "lobby.deck.fabraryUrlHint" })}
             </small>
           </label>
           <label>
-            <span>Replacement decklist</span>
+            <span>{intl.formatMessage({ id: "lobby.deck.replacementList" })}</span>
             <textarea
               name="replacement-deck-list"
               value={text}
               onChange={(event) => setText(event.target.value)}
-              placeholder="Leave blank to keep the current card list"
+              placeholder={intl.formatMessage({ id: "lobby.deck.replacementPlaceholder" })}
               rows={7}
               spellCheck={false}
             />
@@ -654,23 +735,25 @@ function EditDeckModal(props: { deck: DeckSummary; onClose: () => void }) {
           <div className="deck-edit-actions">
             {confirmingDelete ? (
               <>
-                <button disabled={busy} onClick={() => setConfirmingDelete(false)}>Keep Deck</button>
+                <button disabled={busy} onClick={() => setConfirmingDelete(false)}>
+                  {intl.formatMessage({ id: "lobby.deck.keep" })}
+                </button>
                 <button className="btn-danger" disabled={busy} onClick={() => void remove()}>
-                  {busy ? "Deleting…" : "Confirm Delete"}
+                  {intl.formatMessage({ id: busy ? "lobby.deck.deleting" : "lobby.deck.confirmDelete" })}
                 </button>
               </>
             ) : (
               <>
                 <button className="btn-danger" disabled={busy} onClick={() => setConfirmingDelete(true)}>
-                  Delete Deck
+                  {intl.formatMessage({ id: "lobby.deck.delete" })}
                 </button>
-                <button onClick={props.onClose}>Cancel</button>
+                <button onClick={props.onClose}>{intl.formatMessage({ id: "common.cancel" })}</button>
                 <button
                   className="btn-primary"
                   disabled={busy || !name.trim()}
                   onClick={() => void submit()}
                 >
-                  {busy ? "Saving…" : "Save Changes"}
+                  {intl.formatMessage({ id: busy ? "lobby.deck.saving" : "lobby.deck.saveChanges" })}
                 </button>
               </>
             )}

@@ -1,11 +1,13 @@
 import { useStore } from "../store.js";
 import { useShallow } from "zustand/react/shallow";
+import { useIntl } from "react-intl";
 import { DeadlineCountdown } from "../prep/DeadlineCountdown.js";
 import { AcceptHeroMatchup } from "../prep/AcceptHeroMatchup.js";
 
 /** Holding screen before a game starts: the host waits for an opponent,
  *  a spectator for the match to begin (the board appears on game start). */
 export function WaitingRoom() {
+  const intl = useIntl();
   const { roomCode, leave, declineMatch, spectating, botGame, prep, matchAcceptanceRole, acceptMatch } = useStore(
     useShallow((state) => ({
       roomCode: state.roomCode,
@@ -36,16 +38,20 @@ export function WaitingRoom() {
           aria-labelledby="joining-match-accept-title"
           aria-live="polite"
         >
-          <span className="match-accept-eyebrow">Match found</span>
-          <h2 className="panel-title" id="joining-match-accept-title">Ready to play?</h2>
+          <span className="match-accept-eyebrow">{intl.formatMessage({ id: "lobby.waiting.matchFound" })}</span>
+          <h2 className="panel-title" id="joining-match-accept-title">
+            {intl.formatMessage({ id: "lobby.waiting.ready" })}
+          </h2>
           <AcceptHeroMatchup you={me} opponent={opponent} />
           <p className="muted">
-            {opponent ? `${opponent.username} is waiting for you.` : "Your opponent is waiting for you."}
+            {opponent
+              ? intl.formatMessage({ id: "lobby.waiting.namedOpponent" }, { username: opponent.username })
+              : intl.formatMessage({ id: "lobby.waiting.opponent" })}
           </p>
           <button className="btn-primary match-accept-primary" onClick={acceptMatch}>
-            Accept · <DeadlineCountdown deadlineAt={prep.deadlineAt} />
+            {intl.formatMessage({ id: "lobby.action.accept" })} · <DeadlineCountdown deadlineAt={prep.deadlineAt} />
           </button>
-          <button onClick={declineMatch}>Decline</button>
+          <button onClick={declineMatch}>{intl.formatMessage({ id: "lobby.action.decline" })}</button>
         </div>
       </div>
     );
@@ -54,12 +60,12 @@ export function WaitingRoom() {
     return (
       <div className="lobby-page">
         <div className="panel waiting-panel">
-          <h2 className="panel-title">Spectating — waiting for the game to start</h2>
+          <h2 className="panel-title">{intl.formatMessage({ id: "lobby.waiting.spectating" })}</h2>
           <div className="room-code">{roomCode}</div>
           <p className="muted">
-            The players are still getting ready; the game board appears here once the match begins.
+            {intl.formatMessage({ id: "lobby.waiting.playersPreparing" })}
           </p>
-          <button onClick={leave}>Leave</button>
+          <button onClick={leave}>{intl.formatMessage({ id: "common.leave" })}</button>
         </div>
       </div>
     );
@@ -67,16 +73,18 @@ export function WaitingRoom() {
   return (
     <div className="lobby-page">
       <div className="panel waiting-panel">
-        <h2 className="panel-title">Waiting for opponent…</h2>
+        <h2 className="panel-title">{intl.formatMessage({ id: "lobby.waiting.forOpponent" })}</h2>
         <div className="room-code">{roomCode}</div>
         <p>
-          Share this link:{" "}
+          {intl.formatMessage({ id: "lobby.waiting.shareLink" })}{" "}
           <a className="room-link" href={`/${roomCode}`}>
             {url}
           </a>
         </p>
-        <p className="muted">Friends who open the link can choose a deck or hero and join.</p>
-        <button onClick={leave}>{botGame ? "End Game" : "Cancel"}</button>
+        <p className="muted">{intl.formatMessage({ id: "lobby.waiting.shareHint" })}</p>
+        <button onClick={leave}>
+          {intl.formatMessage({ id: botGame ? "common.endGame" : "common.cancel" })}
+        </button>
       </div>
     </div>
   );

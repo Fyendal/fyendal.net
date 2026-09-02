@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { RoomSummary } from "@fyendal/shared";
+import { useIntl } from "react-intl";
 import { FormatBadge } from "./FormatBadge.js";
 import { heroImageUrl } from "./heroImage.js";
 
@@ -14,9 +15,18 @@ export function RoomCard({
   onRejoin: (code: string) => void;
   onSpectate?: (code: string) => void;
 }) {
+  const intl = useIntl();
   const owned = room.yours === true;
   const full = room.spectateOnly === true;
-  const status = owned ? "Your room" : room.started ? "Started" : full ? "Full" : "Open";
+  const status = intl.formatMessage({
+    id: owned
+      ? "lobby.room.status.yours"
+      : room.started
+        ? "lobby.room.status.started"
+        : full
+          ? "lobby.room.status.full"
+          : "lobby.room.status.open",
+  });
 
   return (
     <article className={`room-card${owned ? " owned" : ""}`}>
@@ -30,19 +40,21 @@ export function RoomCard({
       <div className="room-card-actions">
         {owned ? (
           <button className="btn-primary" onClick={() => onRejoin(room.code)}>
-            Rejoin
+            {intl.formatMessage({ id: "lobby.action.rejoin" })}
           </button>
         ) : (
           <>
             <button
               className="btn-primary"
               disabled={full}
-              title={full ? "room is full — spectate to watch" : undefined}
+              title={full ? intl.formatMessage({ id: "lobby.room.fullHint" }) : undefined}
               onClick={() => onJoin?.(room)}
             >
-              Join
+              {intl.formatMessage({ id: "lobby.action.join" })}
             </button>
-            <button onClick={() => onSpectate?.(room.code)}>Spectate</button>
+            <button onClick={() => onSpectate?.(room.code)}>
+              {intl.formatMessage({ id: "lobby.action.spectate" })}
+            </button>
           </>
         )}
       </div>
@@ -61,10 +73,11 @@ function RoomStatus({ label }: { label: string }) {
 
 /** The two seats as vs headshots; an open seat is a "?" placeholder. */
 function HeroVs({ heroes }: { heroes: [string | null, string | null] }) {
+  const intl = useIntl();
   return (
     <span className="hero-vs">
       <HeroFace name={heroes[0]} />
-      <span className="hero-vs-sep">vs</span>
+      <span className="hero-vs-sep">{intl.formatMessage({ id: "common.versusShort" })}</span>
       <HeroFace name={heroes[1]} />
     </span>
   );

@@ -1,4 +1,5 @@
 import type { PlayerBadge } from "@fyendal/shared";
+import { useIntl } from "react-intl";
 import { PLAYER_BADGE_DETAILS, PlayerBadgeMark } from "../game/PlayerBadge.js";
 
 export function BadgePicker({
@@ -12,9 +13,10 @@ export function BadgePicker({
   disabled?: boolean;
   onSelect: (badge: PlayerBadge | null) => void;
 }) {
+  const intl = useIntl();
   return (
     <fieldset className="account-badge-picker" disabled={disabled}>
-      <legend>Displayed badge</legend>
+      <legend>{intl.formatMessage({ id: "account.badge.displayed" })}</legend>
       <label className={`account-badge-option${selectedBadge === null ? " selected" : ""}`}>
         <input
           type="radio"
@@ -23,7 +25,7 @@ export function BadgePicker({
           onChange={() => onSelect(null)}
         />
         <span className="account-badge-none" aria-hidden="true">—</span>
-        <span>No badge</span>
+        <span>{intl.formatMessage({ id: "account.badge.none" })}</span>
       </label>
       {availableBadges.map((badge) => (
         <label
@@ -37,7 +39,7 @@ export function BadgePicker({
             onChange={() => onSelect(badge)}
           />
           <PlayerBadgeMark badge={badge} />
-          <span>{PLAYER_BADGE_DETAILS[badge].name}</span>
+          <span>{intl.formatMessage({ id: PLAYER_BADGE_DETAILS[badge].nameMessageId })}</span>
         </label>
       ))}
     </fieldset>

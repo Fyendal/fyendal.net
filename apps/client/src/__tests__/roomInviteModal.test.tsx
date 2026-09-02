@@ -13,6 +13,13 @@ vi.mock("../store.js", () => ({
 }));
 
 import { RoomInviteModal } from "../lobby/RoomInviteModal.js";
+import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
+
+function renderInvite(locale: "en" | "zh-Hans" = "en") {
+  return renderToStaticMarkup(
+    <TestI18nProvider locale={locale}><RoomInviteModal /></TestI18nProvider>,
+  );
+}
 
 describe("room invite onboarding", () => {
   beforeEach(() => {
@@ -28,7 +35,7 @@ describe("room invite onboarding", () => {
   });
 
   it("offers account creation as the primary path for a new invitee", () => {
-    const html = renderToStaticMarkup(<RoomInviteModal />);
+    const html = renderInvite();
 
     expect(html).toContain("You’ve been invited to play Silver Age");
     expect(html).toContain("Create Player Account");
@@ -46,7 +53,7 @@ describe("room invite onboarding", () => {
       },
     };
 
-    const html = renderToStaticMarkup(<RoomInviteModal />);
+    const html = renderInvite();
 
     expect(html).toContain("already has two players");
     expect(html).toContain("Spectate");

@@ -10,6 +10,7 @@ vi.mock("../store.js", () => ({
 }));
 
 import { GameBoard } from "./GameBoard.js";
+import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -97,7 +98,9 @@ describe("GameBoard spectator presentation", () => {
       removeItem: () => undefined,
     });
 
-    const html = renderToStaticMarkup(<GameBoard />);
+    const html = renderToStaticMarkup(
+      <TestI18nProvider><GameBoard /></TestI18nProvider>,
+    );
 
     expect(html).toContain('class="hand"');
     expect(html).toContain('class="card card-hand card-back ');

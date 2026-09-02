@@ -1,4 +1,154 @@
 {
+  "account.badge.description": [
+    {
+      "type": 0,
+      "value": "选择一个已获得的徽章显示在用户名之前，或隐藏徽章。"
+    }
+  ],
+  "account.badge.displayed": [
+    {
+      "type": 0,
+      "value": "显示的徽章"
+    }
+  ],
+  "account.badge.earlyTester.description": [
+    {
+      "type": 0,
+      "value": "授予在早期测试阶段加入 Fyendal 的玩家。"
+    }
+  ],
+  "account.badge.earlyTester.name": [
+    {
+      "type": 0,
+      "value": "早期测试者"
+    }
+  ],
+  "account.badge.imageAlt": [
+    {
+      "type": 1,
+      "value": "name"
+    },
+    {
+      "type": 0,
+      "value": "徽章"
+    }
+  ],
+  "account.badge.loading": [
+    {
+      "type": 0,
+      "value": "正在加载徽章…"
+    }
+  ],
+  "account.badge.none": [
+    {
+      "type": 0,
+      "value": "不显示徽章"
+    }
+  ],
+  "account.badge.title": [
+    {
+      "type": 0,
+      "value": "玩家徽章"
+    }
+  ],
+  "account.badge.updated": [
+    {
+      "type": 0,
+      "value": "显示的徽章已更新。"
+    }
+  ],
+  "account.currentPassword": [
+    {
+      "type": 0,
+      "value": "当前密码"
+    }
+  ],
+  "account.currentPasswordPlaceholder": [
+    {
+      "type": 0,
+      "value": "当前密码"
+    }
+  ],
+  "account.delete.action": [
+    {
+      "type": 0,
+      "value": "删除账户"
+    }
+  ],
+  "account.delete.confirm": [
+    {
+      "type": 0,
+      "value": "要从当前服务中删除你的 Fyendal 账户、已保存牌组、保留的回放、问题报告、会话及当前房间吗？此操作无法撤销。"
+    }
+  ],
+  "account.delete.deleting": [
+    {
+      "type": 0,
+      "value": "正在删除…"
+    }
+  ],
+  "account.delete.description": [
+    {
+      "type": 0,
+      "value": "这将永久删除你的账户、会话、已保存牌组、保留的回放、问题报告及当前房间。备份副本会按照保留政策到期。"
+    }
+  ],
+  "account.delete.title": [
+    {
+      "type": 0,
+      "value": "删除账户"
+    }
+  ],
+  "account.export.description": [
+    {
+      "type": 0,
+      "value": "将账户详情、已保存牌表、房间成员记录、保留的回放及问题报告引用下载为 JSON。"
+    }
+  ],
+  "account.export.download": [
+    {
+      "type": 0,
+      "value": "下载账户数据"
+    }
+  ],
+  "account.export.preparing": [
+    {
+      "type": 0,
+      "value": "正在准备…"
+    }
+  ],
+  "account.export.title": [
+    {
+      "type": 0,
+      "value": "导出你的数据"
+    }
+  ],
+  "account.signedInAs": [
+    {
+      "type": 0,
+      "value": "当前登录账户："
+    },
+    {
+      "type": 8,
+      "value": "strong",
+      "children": [
+        {
+          "type": 1,
+          "value": "username"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": "。"
+    }
+  ],
+  "account.title": [
+    {
+      "type": 0,
+      "value": "账户"
+    }
+  ],
   "auth.consent": [
     {
       "type": 0,
@@ -129,6 +279,94 @@
       "value": "赤魂战纪在线对战"
     }
   ],
+  "common.all": [
+    {
+      "type": 0,
+      "value": "全部"
+    }
+  ],
+  "common.back": [
+    {
+      "type": 0,
+      "value": "返回"
+    }
+  ],
+  "common.cancel": [
+    {
+      "type": 0,
+      "value": "取消"
+    }
+  ],
+  "common.closeNamed": [
+    {
+      "type": 0,
+      "value": "关闭"
+    },
+    {
+      "type": 1,
+      "value": "title"
+    }
+  ],
+  "common.connection.connected": [
+    {
+      "type": 0,
+      "value": "已连接"
+    }
+  ],
+  "common.connection.disconnected": [
+    {
+      "type": 0,
+      "value": "未连接"
+    }
+  ],
+  "common.connection.reconnecting": [
+    {
+      "type": 0,
+      "value": "正在重新连接…"
+    }
+  ],
+  "common.deck": [
+    {
+      "type": 0,
+      "value": "牌组"
+    }
+  ],
+  "common.endGame": [
+    {
+      "type": 0,
+      "value": "结束对局"
+    }
+  ],
+  "common.format": [
+    {
+      "type": 0,
+      "value": "赛制"
+    }
+  ],
+  "common.import": [
+    {
+      "type": 0,
+      "value": "导入"
+    }
+  ],
+  "common.leave": [
+    {
+      "type": 0,
+      "value": "离开"
+    }
+  ],
+  "common.loading": [
+    {
+      "type": 0,
+      "value": "正在加载…"
+    }
+  ],
+  "common.logOut": [
+    {
+      "type": 0,
+      "value": "退出登录"
+    }
+  ],
   "common.option.no": [
     {
       "type": 0,
@@ -155,6 +393,12 @@
     {
       "type": 0,
       "value": "（空格键）"
+    }
+  ],
+  "common.versusShort": [
+    {
+      "type": 0,
+      "value": "对阵"
     }
   ],
   "discord.label": [
@@ -197,6 +441,24 @@
       "value": "服务条款"
     }
   ],
+  "format.classicBattles": [
+    {
+      "type": 0,
+      "value": "经典对战"
+    }
+  ],
+  "format.classicConstructed": [
+    {
+      "type": 0,
+      "value": "经典构筑"
+    }
+  ],
+  "format.silverAge": [
+    {
+      "type": 0,
+      "value": "白银时代"
+    }
+  ],
   "landing.accountAccess": [
     {
       "type": 0,
@@ -218,7 +480,7 @@
   "landing.bots.title": [
     {
       "type": 0,
-      "value": "与机器人练习"
+      "value": "与AI练习"
     }
   ],
   "landing.demoAlt": [
@@ -346,7 +608,7 @@
   "landing.startPlayingBody": [
     {
       "type": 0,
-      "value": "创建免费账户，即可参与对局并与机器人练习。"
+      "value": "创建免费账户，即可参与对局并与AI练习。"
     }
   ],
   "landing.startPlayingLabel": [
@@ -391,10 +653,1110 @@
       "value": "语言"
     }
   ],
+  "lobby.action.accept": [
+    {
+      "type": 0,
+      "value": "接受"
+    }
+  ],
+  "lobby.action.cancelSearch": [
+    {
+      "type": 0,
+      "value": "取消寻找对局"
+    }
+  ],
+  "lobby.action.decline": [
+    {
+      "type": 0,
+      "value": "拒绝"
+    }
+  ],
+  "lobby.action.findMatch": [
+    {
+      "type": 0,
+      "value": "寻找对局"
+    }
+  ],
+  "lobby.action.inviteFriend": [
+    {
+      "type": 0,
+      "value": "邀请好友"
+    }
+  ],
+  "lobby.action.join": [
+    {
+      "type": 0,
+      "value": "加入"
+    }
+  ],
+  "lobby.action.playBot": [
+    {
+      "type": 0,
+      "value": "对战AI"
+    }
+  ],
+  "lobby.action.rejoin": [
+    {
+      "type": 0,
+      "value": "重新加入"
+    }
+  ],
+  "lobby.action.rejoinRoom": [
+    {
+      "type": 0,
+      "value": "重新加入房间"
+    }
+  ],
+  "lobby.action.spectate": [
+    {
+      "type": 0,
+      "value": "观战"
+    }
+  ],
+  "lobby.bot.bravo.description": [
+    {
+      "type": 0,
+      "value": "通过防御积蓄力量，再发动强力干扰攻击的牌组。"
+    }
+  ],
+  "lobby.bot.briar.description": [
+    {
+      "type": 0,
+      "value": "将元素攻击连续衔接起来的进攻型牌组。"
+    }
+  ],
+  "lobby.bot.chooseOpponent": [
+    {
+      "type": 0,
+      "value": "选择对手"
+    }
+  ],
+  "lobby.bot.cindra.description": [
+    {
+      "type": 0,
+      "value": "以持续施压为目标的高速红线牌组。"
+    }
+  ],
+  "lobby.bot.hala.description": [
+    {
+      "type": 0,
+      "value": "攻守兼备、灵活获取价值的中速牌组。"
+    }
+  ],
+  "lobby.bot.ira.description": [
+    {
+      "type": 0,
+      "value": "直观易懂的 Armory 牌组，非常适合新手。"
+    }
+  ],
+  "lobby.bot.jarl.description": [
+    {
+      "type": 0,
+      "value": "耐心的土冰守护者，擅长高效防御并用两卡手牌发动干扰性攻击。"
+    }
+  ],
+  "lobby.bot.prompt": [
+    {
+      "type": 0,
+      "value": "你想与谁练习？"
+    }
+  ],
+  "lobby.bot.type.aggro": [
+    {
+      "type": 0,
+      "value": "快攻"
+    }
+  ],
+  "lobby.bot.type.beginner": [
+    {
+      "type": 0,
+      "value": "新手友好"
+    }
+  ],
+  "lobby.bot.type.elemental": [
+    {
+      "type": 0,
+      "value": "快攻"
+    }
+  ],
+  "lobby.bot.type.guardian": [
+    {
+      "type": 0,
+      "value": "防御型"
+    }
+  ],
+  "lobby.bot.type.midrange": [
+    {
+      "type": 0,
+      "value": "中速"
+    }
+  ],
+  "lobby.bugFixed.body": [
+    {
+      "type": 0,
+      "value": "你报告的问题已经修复。感谢你帮助我们改进 Fyendal！"
+    }
+  ],
+  "lobby.bugFixed.dismiss": [
+    {
+      "type": 0,
+      "value": "关闭问题已修复通知"
+    }
+  ],
+  "lobby.bugFixed.title": [
+    {
+      "type": 0,
+      "value": "问题已修复"
+    }
+  ],
+  "lobby.cardPool.allowFuture": [
+    {
+      "type": 0,
+      "value": "允许未来卡牌"
+    }
+  ],
+  "lobby.cardPool.description": [
+    {
+      "type": 0,
+      "value": "为每种赛制分别设置可用卡牌。"
+    }
+  ],
+  "lobby.cardPool.title": [
+    {
+      "type": 0,
+      "value": "卡牌范围"
+    }
+  ],
+  "lobby.count.live": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个进行中"
+    }
+  ],
+  "lobby.count.rejoin": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个可重连"
+    }
+  ],
+  "lobby.count.saved": [
+    {
+      "type": 0,
+      "value": "已保存 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个"
+    }
+  ],
+  "lobby.count.waiting": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 人等待中"
+    }
+  ],
+  "lobby.createRoom.open": [
+    {
+      "type": 0,
+      "value": "公开房间"
+    }
+  ],
+  "lobby.createRoom.private": [
+    {
+      "type": 0,
+      "value": "私人房间"
+    }
+  ],
+  "lobby.createRoom.title": [
+    {
+      "type": 0,
+      "value": "创建房间"
+    }
+  ],
+  "lobby.deck.actions": [
+    {
+      "type": 1,
+      "value": "name"
+    },
+    {
+      "type": 0,
+      "value": "操作"
+    }
+  ],
+  "lobby.deck.bannedList": [
+    {
+      "type": 0,
+      "value": "禁用卡牌：\n"
+    },
+    {
+      "type": 1,
+      "value": "cards"
+    }
+  ],
+  "lobby.deck.blocked": [
+    {
+      "type": 1,
+      "value": "reason"
+    },
+    {
+      "type": 0,
+      "value": "。请更新牌组或卡牌范围设置后再游玩。"
+    }
+  ],
+  "lobby.deck.catalog": [
+    {
+      "type": 0,
+      "value": "牌组目录"
+    }
+  ],
+  "lobby.deck.choose": [
+    {
+      "type": 0,
+      "value": "选择牌组"
+    }
+  ],
+  "lobby.deck.closeActions": [
+    {
+      "type": 0,
+      "value": "关闭"
+    },
+    {
+      "type": 1,
+      "value": "name"
+    },
+    {
+      "type": 0,
+      "value": "操作"
+    }
+  ],
+  "lobby.deck.confirmDelete": [
+    {
+      "type": 0,
+      "value": "确认删除"
+    }
+  ],
+  "lobby.deck.countAndSource": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张牌 · "
+    },
+    {
+      "type": 1,
+      "value": "source"
+    }
+  ],
+  "lobby.deck.deckList": [
+    {
+      "type": 0,
+      "value": "牌表"
+    }
+  ],
+  "lobby.deck.deckListPlaceholder": [
+    {
+      "type": 0,
+      "value": "Hero: …\nWeapons: …\nDeck cards\n3x Card Name (red)\nSideboard cards\n…"
+    }
+  ],
+  "lobby.deck.delete": [
+    {
+      "type": 0,
+      "value": "删除牌组"
+    }
+  ],
+  "lobby.deck.deleting": [
+    {
+      "type": 0,
+      "value": "正在删除…"
+    }
+  ],
+  "lobby.deck.edit": [
+    {
+      "type": 0,
+      "value": "编辑牌组"
+    }
+  ],
+  "lobby.deck.emptyFiltered": [
+    {
+      "type": 0,
+      "value": "没有符合筛选条件的牌组"
+    }
+  ],
+  "lobby.deck.emptyFilteredBody": [
+    {
+      "type": 0,
+      "value": "清除搜索内容或选择其他合法性筛选条件。"
+    }
+  ],
+  "lobby.deck.emptySaved": [
+    {
+      "type": 0,
+      "value": "尚无已保存牌组"
+    }
+  ],
+  "lobby.deck.emptySavedBody": [
+    {
+      "type": 0,
+      "value": "导入 Fabrary 链接或完整牌表即可开始游戏。"
+    }
+  ],
+  "lobby.deck.error.importFailed": [
+    {
+      "type": 0,
+      "value": "导入失败"
+    }
+  ],
+  "lobby.deck.error.unimplementedCards": [
+    {
+      "type": 0,
+      "value": "尚未实现："
+    },
+    {
+      "type": 1,
+      "value": "cards"
+    }
+  ],
+  "lobby.deck.error.unknownCards": [
+    {
+      "type": 0,
+      "value": "未知卡牌："
+    },
+    {
+      "type": 1,
+      "value": "cards"
+    }
+  ],
+  "lobby.deck.error.updateFailed": [
+    {
+      "type": 0,
+      "value": "更新失败"
+    }
+  ],
+  "lobby.deck.fabraryLink": [
+    {
+      "type": 0,
+      "value": "Fabrary 链接"
+    }
+  ],
+  "lobby.deck.fabraryUrl": [
+    {
+      "type": 0,
+      "value": "Fabrary 牌组链接"
+    }
+  ],
+  "lobby.deck.fabraryUrlHint": [
+    {
+      "type": 0,
+      "value": "更改此链接会重新导入并验证 Fabrary 牌组。"
+    }
+  ],
+  "lobby.deck.format": [
+    {
+      "type": 0,
+      "value": "牌组赛制"
+    }
+  ],
+  "lobby.deck.formatDecks": [
+    {
+      "type": 1,
+      "value": "format"
+    },
+    {
+      "type": 0,
+      "value": "牌组"
+    }
+  ],
+  "lobby.deck.futureList": [
+    {
+      "type": 0,
+      "value": "未来卡牌：\n"
+    },
+    {
+      "type": 1,
+      "value": "cards"
+    }
+  ],
+  "lobby.deck.heroAndCount": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " · "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张牌"
+    }
+  ],
+  "lobby.deck.illegalCards": [
+    {
+      "type": 0,
+      "value": "非法卡牌："
+    },
+    {
+      "type": 1,
+      "value": "cards"
+    }
+  ],
+  "lobby.deck.import": [
+    {
+      "type": 0,
+      "value": "导入牌组"
+    }
+  ],
+  "lobby.deck.importFirst": [
+    {
+      "type": 0,
+      "value": "导入第一副牌组"
+    }
+  ],
+  "lobby.deck.importing": [
+    {
+      "type": 0,
+      "value": "正在导入…"
+    }
+  ],
+  "lobby.deck.includesBanned": [
+    {
+      "type": 0,
+      "value": "包含 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张禁用卡牌"
+    }
+  ],
+  "lobby.deck.includesFuture": [
+    {
+      "type": 0,
+      "value": "包含 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张未来卡牌"
+    }
+  ],
+  "lobby.deck.keep": [
+    {
+      "type": 0,
+      "value": "保留牌组"
+    }
+  ],
+  "lobby.deck.legality": [
+    {
+      "type": 0,
+      "value": "合法性"
+    }
+  ],
+  "lobby.deck.mine": [
+    {
+      "type": 0,
+      "value": "我的牌组"
+    }
+  ],
+  "lobby.deck.name": [
+    {
+      "type": 0,
+      "value": "牌组名称"
+    }
+  ],
+  "lobby.deck.needsAttention": [
+    {
+      "type": 0,
+      "value": "需要处理"
+    }
+  ],
+  "lobby.deck.optionalName": [
+    {
+      "type": 0,
+      "value": "名称（可选）"
+    }
+  ],
+  "lobby.deck.pasteList": [
+    {
+      "type": 0,
+      "value": "粘贴牌表"
+    }
+  ],
+  "lobby.deck.playable": [
+    {
+      "type": 0,
+      "value": "可游玩"
+    }
+  ],
+  "lobby.deck.preconstructed": [
+    {
+      "type": 0,
+      "value": "预构筑"
+    }
+  ],
+  "lobby.deck.replacementList": [
+    {
+      "type": 0,
+      "value": "替换牌表"
+    }
+  ],
+  "lobby.deck.replacementPlaceholder": [
+    {
+      "type": 0,
+      "value": "留空以保留当前牌表"
+    }
+  ],
+  "lobby.deck.saveChanges": [
+    {
+      "type": 0,
+      "value": "保存更改"
+    }
+  ],
+  "lobby.deck.saving": [
+    {
+      "type": 0,
+      "value": "正在保存…"
+    }
+  ],
+  "lobby.deck.search": [
+    {
+      "type": 0,
+      "value": "搜索牌组"
+    }
+  ],
+  "lobby.deck.searchOptions": [
+    {
+      "type": 0,
+      "value": "搜索与选项"
+    }
+  ],
+  "lobby.deck.searchPlaceholder": [
+    {
+      "type": 0,
+      "value": "牌组或英雄名称…"
+    }
+  ],
+  "lobby.deck.source": [
+    {
+      "type": 0,
+      "value": "牌组来源"
+    }
+  ],
+  "lobby.deck.source.preconstructed": [
+    {
+      "type": 0,
+      "value": "预构筑"
+    }
+  ],
+  "lobby.deck.source.saved": [
+    {
+      "type": 0,
+      "value": "已保存"
+    }
+  ],
+  "lobby.discordCommunity": [
+    {
+      "type": 0,
+      "value": "Discord 社区"
+    }
+  ],
+  "lobby.futureCardsNote": [
+    {
+      "type": 0,
+      "value": "此房间允许使用已实现的未来卡牌。"
+    }
+  ],
+  "lobby.home.bringDeck": [
+    {
+      "type": 0,
+      "value": "使用自己的牌组"
+    }
+  ],
+  "lobby.home.chooseStart": [
+    {
+      "type": 0,
+      "value": "选择以下三种方式之一开始游戏。"
+    }
+  ],
+  "lobby.home.importCc": [
+    {
+      "type": 0,
+      "value": "导入你的经典构筑牌组"
+    }
+  ],
+  "lobby.home.importSilverAge": [
+    {
+      "type": 0,
+      "value": "导入你的白银时代牌组"
+    }
+  ],
+  "lobby.home.playCc": [
+    {
+      "type": 0,
+      "value": "经典构筑 (CC)"
+    }
+  ],
+  "lobby.home.playSilverAge": [
+    {
+      "type": 0,
+      "value": "白银时代 (Silver Age)"
+    }
+  ],
+  "lobby.home.rejoinRooms": [
+    {
+      "type": 0,
+      "value": "重新加入房间"
+    }
+  ],
+  "lobby.home.tryPrecon": [
+    {
+      "type": 0,
+      "value": "试用预构筑牌组"
+    }
+  ],
+  "lobby.home.welcome": [
+    {
+      "type": 0,
+      "value": "欢迎来到 Fyendal，"
+    },
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": "。"
+    }
+  ],
+  "lobby.home.welcomeBack": [
+    {
+      "type": 0,
+      "value": "欢迎回来，"
+    },
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": "。"
+    }
+  ],
+  "lobby.invite.afterCreate": [
+    {
+      "type": 0,
+      "value": "账户创建完成后，你将可以"
+    },
+    {
+      "type": 1,
+      "value": "choice"
+    },
+    {
+      "type": 0,
+      "value": "。"
+    }
+  ],
+  "lobby.invite.afterSignIn": [
+    {
+      "type": 0,
+      "value": "登录后，此邀请仍会保留。"
+    }
+  ],
+  "lobby.invite.alreadySeated": [
+    {
+      "type": 0,
+      "value": "你已经在此房间中拥有席位。"
+    }
+  ],
+  "lobby.invite.choiceDeck": [
+    {
+      "type": 0,
+      "value": "选择一副可直接游玩的牌组"
+    }
+  ],
+  "lobby.invite.choiceHero": [
+    {
+      "type": 0,
+      "value": "选择 Rhinar 或 Dorinthea"
+    }
+  ],
+  "lobby.invite.chooseDeck": [
+    {
+      "type": 0,
+      "value": "选择牌组以加入此私人房间。"
+    }
+  ],
+  "lobby.invite.chooseHero": [
+    {
+      "type": 0,
+      "value": "选择英雄以加入此私人房间。"
+    }
+  ],
+  "lobby.invite.createAccount": [
+    {
+      "type": 0,
+      "value": "创建玩家账户"
+    }
+  ],
+  "lobby.invite.createAccountTitle": [
+    {
+      "type": 0,
+      "value": "创建玩家账户"
+    }
+  ],
+  "lobby.invite.createThenJoin": [
+    {
+      "type": 0,
+      "value": "创建免费玩家账户，"
+    },
+    {
+      "type": 1,
+      "value": "choice"
+    },
+    {
+      "type": 0,
+      "value": "，然后加入好友。"
+    }
+  ],
+  "lobby.invite.full": [
+    {
+      "type": 0,
+      "value": "此房间已有两名玩家，但你可以观看对局。"
+    }
+  ],
+  "lobby.invite.fullGuest": [
+    {
+      "type": 0,
+      "value": "此房间已有两名玩家，但你无需账户即可观看对局。"
+    }
+  ],
+  "lobby.invite.haveAccount": [
+    {
+      "type": 0,
+      "value": "我已有账户"
+    }
+  ],
+  "lobby.invite.invited": [
+    {
+      "type": 0,
+      "value": "你受邀参加"
+    },
+    {
+      "type": 1,
+      "value": "format"
+    },
+    {
+      "type": 0,
+      "value": "对局。"
+    }
+  ],
+  "lobby.invite.needDeck": [
+    {
+      "type": 0,
+      "value": "打开此邀请前，你需要一副"
+    },
+    {
+      "type": 1,
+      "value": "format"
+    },
+    {
+      "type": 0,
+      "value": "牌组。"
+    }
+  ],
+  "lobby.invite.signInTitle": [
+    {
+      "type": 0,
+      "value": "登录并加入好友"
+    }
+  ],
+  "lobby.invite.spectateGuest": [
+    {
+      "type": 0,
+      "value": "不登录，直接观战"
+    }
+  ],
+  "lobby.invite.title": [
+    {
+      "type": 0,
+      "value": "房间邀请 · "
+    },
+    {
+      "type": 1,
+      "value": "code"
+    }
+  ],
+  "lobby.loadingDecks": [
+    {
+      "type": 0,
+      "value": "正在加载你的牌组…"
+    }
+  ],
+  "lobby.nav.account": [
+    {
+      "type": 0,
+      "value": "账户"
+    }
+  ],
+  "lobby.nav.allRooms": [
+    {
+      "type": 0,
+      "value": "所有房间"
+    }
+  ],
+  "lobby.nav.decks": [
+    {
+      "type": 0,
+      "value": "牌组"
+    }
+  ],
+  "lobby.nav.home": [
+    {
+      "type": 0,
+      "value": "首页"
+    }
+  ],
+  "lobby.nav.more": [
+    {
+      "type": 0,
+      "value": "更多"
+    }
+  ],
+  "lobby.nav.primary": [
+    {
+      "type": 0,
+      "value": "主导航"
+    }
+  ],
+  "lobby.nav.replays": [
+    {
+      "type": 0,
+      "value": "回放"
+    }
+  ],
+  "lobby.nav.rooms": [
+    {
+      "type": 0,
+      "value": "房间"
+    }
+  ],
+  "lobby.room.fullHint": [
+    {
+      "type": 0,
+      "value": "房间已满——可进入观战"
+    }
+  ],
+  "lobby.room.loadingState": [
+    {
+      "type": 0,
+      "value": "正在加载最新房间状态。"
+    }
+  ],
+  "lobby.room.restoring": [
+    {
+      "type": 0,
+      "value": "正在恢复对局…"
+    }
+  ],
+  "lobby.room.status.full": [
+    {
+      "type": 0,
+      "value": "已满"
+    }
+  ],
+  "lobby.room.status.open": [
+    {
+      "type": 0,
+      "value": "开放中"
+    }
+  ],
+  "lobby.room.status.started": [
+    {
+      "type": 0,
+      "value": "已开始"
+    }
+  ],
+  "lobby.room.status.yours": [
+    {
+      "type": 0,
+      "value": "你的房间"
+    }
+  ],
+  "lobby.rooms.all": [
+    {
+      "type": 0,
+      "value": "所有房间"
+    }
+  ],
+  "lobby.rooms.create": [
+    {
+      "type": 0,
+      "value": "创建房间"
+    }
+  ],
+  "lobby.rooms.empty": [
+    {
+      "type": 0,
+      "value": "目前没有可观战的公开对局。"
+    }
+  ],
+  "lobby.rooms.importOne": [
+    {
+      "type": 0,
+      "value": "导入一个"
+    }
+  ],
+  "lobby.rooms.noFormatDecks": [
+    {
+      "type": 0,
+      "value": "尚无"
+    },
+    {
+      "type": 1,
+      "value": "format"
+    },
+    {
+      "type": 0,
+      "value": "牌组——"
+    }
+  ],
+  "lobby.rooms.open": [
+    {
+      "type": 0,
+      "value": "开放房间"
+    }
+  ],
+  "lobby.rooms.pickDeck": [
+    {
+      "type": 0,
+      "value": "加入 "
+    },
+    {
+      "type": 1,
+      "value": "code"
+    },
+    {
+      "type": 0,
+      "value": "——选择牌组"
+    }
+  ],
+  "lobby.rooms.pickHero": [
+    {
+      "type": 0,
+      "value": "加入 "
+    },
+    {
+      "type": 1,
+      "value": "code"
+    },
+    {
+      "type": 0,
+      "value": "——选择英雄"
+    }
+  ],
+  "lobby.rooms.started": [
+    {
+      "type": 0,
+      "value": "已开始的对局"
+    }
+  ],
+  "lobby.rooms.yours": [
+    {
+      "type": 0,
+      "value": "你的房间"
+    }
+  ],
+  "lobby.waiting.forOpponent": [
+    {
+      "type": 0,
+      "value": "正在等待对手…"
+    }
+  ],
+  "lobby.waiting.matchFound": [
+    {
+      "type": 0,
+      "value": "已找到对局"
+    }
+  ],
+  "lobby.waiting.namedOpponent": [
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " 正在等你。"
+    }
+  ],
+  "lobby.waiting.opponent": [
+    {
+      "type": 0,
+      "value": "你的对手正在等你。"
+    }
+  ],
+  "lobby.waiting.playersPreparing": [
+    {
+      "type": 0,
+      "value": "玩家仍在准备；对局开始后，游戏界面会显示在这里。"
+    }
+  ],
+  "lobby.waiting.ready": [
+    {
+      "type": 0,
+      "value": "准备好了吗？"
+    }
+  ],
+  "lobby.waiting.shareHint": [
+    {
+      "type": 0,
+      "value": "好友打开链接后，可以选择牌组或英雄并加入。"
+    }
+  ],
+  "lobby.waiting.shareLink": [
+    {
+      "type": 0,
+      "value": "分享此链接："
+    }
+  ],
+  "lobby.waiting.spectating": [
+    {
+      "type": 0,
+      "value": "观战中——等待对局开始"
+    }
+  ],
   "meta.home.description": [
     {
       "type": 0,
-      "value": "免费在线畅玩 Flesh and Blood。寻找对手、与针对不同英雄设计的机器人练习、导入 Fabrary 牌组、观看对局并查看回放。"
+      "value": "免费在线畅玩 Flesh and Blood。寻找对手、与针对不同英雄设计的AI练习、导入 Fabrary 牌组、观看对局并查看回放。"
     }
   ],
   "meta.home.title": [
@@ -557,6 +1919,298 @@
     {
       "type": 0,
       "value": "正在加载…"
+    }
+  ],
+  "settings.animations": [
+    {
+      "type": 0,
+      "value": "动画"
+    }
+  ],
+  "settings.animations.preference": [
+    {
+      "type": 0,
+      "value": "动画偏好"
+    }
+  ],
+  "settings.animations.tooltip": [
+    {
+      "type": 0,
+      "value": "默认跟随操作系统的减少动态效果设置。"
+    }
+  ],
+  "settings.audioVisuals": [
+    {
+      "type": 0,
+      "value": "音频与视觉"
+    }
+  ],
+  "settings.close": [
+    {
+      "type": 0,
+      "value": "关闭设置"
+    }
+  ],
+  "settings.concede.action": [
+    {
+      "type": 0,
+      "value": "认输"
+    }
+  ],
+  "settings.concede.confirm": [
+    {
+      "type": 0,
+      "value": "要认输吗？"
+    }
+  ],
+  "settings.concede.yes": [
+    {
+      "type": 0,
+      "value": "确认认输"
+    }
+  ],
+  "settings.confirmActions": [
+    {
+      "type": 0,
+      "value": "确认操作"
+    }
+  ],
+  "settings.confirmActions.aria": [
+    {
+      "type": 0,
+      "value": "打出卡牌或启动能力时确认操作"
+    }
+  ],
+  "settings.confirmActions.tooltip": [
+    {
+      "type": 0,
+      "value": "打出卡牌或启动能力时要求确认。"
+    }
+  ],
+  "settings.danger": [
+    {
+      "type": 0,
+      "value": "危险操作"
+    }
+  ],
+  "settings.gameplay": [
+    {
+      "type": 0,
+      "value": "游戏操作"
+    }
+  ],
+  "settings.guidance.disableHint": [
+    {
+      "type": 0,
+      "value": "在设置中关闭“显示引导”，或"
+    }
+  ],
+  "settings.guidance.disableNow": [
+    {
+      "type": 0,
+      "value": "立即关闭"
+    }
+  ],
+  "settings.guidance.title": [
+    {
+      "type": 0,
+      "value": "引导设置"
+    }
+  ],
+  "settings.guidance.tooltip": [
+    {
+      "type": 0,
+      "value": "在设置中关闭“显示引导”，或选择“立即关闭”。"
+    }
+  ],
+  "settings.history": [
+    {
+      "type": 0,
+      "value": "对局历史"
+    }
+  ],
+  "settings.history.previousTurnStart": [
+    {
+      "type": 0,
+      "value": "上一回合开始"
+    }
+  ],
+  "settings.history.restore": [
+    {
+      "type": 0,
+      "value": "恢复回合"
+    }
+  ],
+  "settings.history.restoreConfirm": [
+    {
+      "type": 0,
+      "value": "恢复到第 "
+    },
+    {
+      "type": 1,
+      "value": "turn"
+    },
+    {
+      "type": 0,
+      "value": " 回合开始吗？之后的操作将被丢弃。"
+    }
+  ],
+  "settings.history.turnStart": [
+    {
+      "type": 0,
+      "value": "第 "
+    },
+    {
+      "type": 1,
+      "value": "turn"
+    },
+    {
+      "type": 0,
+      "value": " 回合开始"
+    }
+  ],
+  "settings.history.undoLast": [
+    {
+      "type": 0,
+      "value": "撤销上一步操作"
+    }
+  ],
+  "settings.motion.default": [
+    {
+      "type": 0,
+      "value": "默认"
+    }
+  ],
+  "settings.motion.defaultDescription": [
+    {
+      "type": 0,
+      "value": "默认：跟随操作系统的减少动态效果设置"
+    }
+  ],
+  "settings.motion.full": [
+    {
+      "type": 0,
+      "value": "完整"
+    }
+  ],
+  "settings.motion.fullDescription": [
+    {
+      "type": 0,
+      "value": "完整：显示卡牌移动和连线动画"
+    }
+  ],
+  "settings.motion.reduced": [
+    {
+      "type": 0,
+      "value": "减少"
+    }
+  ],
+  "settings.motion.reducedDescription": [
+    {
+      "type": 0,
+      "value": "减少：隐藏卡牌移动和连线，仅保留局部淡入淡出"
+    }
+  ],
+  "settings.playableCards": [
+    {
+      "type": 0,
+      "value": "可打出的卡牌"
+    }
+  ],
+  "settings.playableCards.cue": [
+    {
+      "type": 0,
+      "value": "可打出卡牌提示"
+    }
+  ],
+  "settings.playableCards.glow": [
+    {
+      "type": 0,
+      "value": "发光"
+    }
+  ],
+  "settings.playableCards.highContrast": [
+    {
+      "type": 0,
+      "value": "高对比度"
+    }
+  ],
+  "settings.playableCards.tooltip": [
+    {
+      "type": 0,
+      "value": "发光会添加柔和的绿色光晕；高对比度会使用清晰轮廓。"
+    }
+  ],
+  "settings.priority": [
+    {
+      "type": 0,
+      "value": "优先权"
+    }
+  ],
+  "settings.priority.alwaysPause": [
+    {
+      "type": 0,
+      "value": "始终暂停"
+    }
+  ],
+  "settings.priority.autoPass": [
+    {
+      "type": 0,
+      "value": "自动跳过"
+    }
+  ],
+  "settings.priority.autoPassDescription": [
+    {
+      "type": 0,
+      "value": "自动跳过：没有可使用的瞬间牌、反应牌或场上能力时立即让过优先权"
+    }
+  ],
+  "settings.priority.behavior": [
+    {
+      "type": 0,
+      "value": "优先权行为"
+    }
+  ],
+  "settings.showGuidance": [
+    {
+      "type": 0,
+      "value": "显示引导"
+    }
+  ],
+  "settings.showGuidance.tooltip": [
+    {
+      "type": 0,
+      "value": "显示优先权窗口提示和触发效果说明。"
+    }
+  ],
+  "settings.soundEffects": [
+    {
+      "type": 0,
+      "value": "音效"
+    }
+  ],
+  "settings.soundEffects.tooltip": [
+    {
+      "type": 0,
+      "value": "抽牌、洗牌或打出卡牌时播放轻微音效。"
+    }
+  ],
+  "settings.title": [
+    {
+      "type": 0,
+      "value": "设置"
+    }
+  ],
+  "settings.volume": [
+    {
+      "type": 0,
+      "value": "音量"
+    }
+  ],
+  "settings.volume.aria": [
+    {
+      "type": 0,
+      "value": "音效音量"
     }
   ]
 }
