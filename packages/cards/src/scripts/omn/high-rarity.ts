@@ -196,9 +196,9 @@ export const omnHighRarity: Record<string, CardScript> = {
     const item = ctx.player(ctx.seat).graveyard.find((card) => has(ctx, card, "shuriken") && has(ctx, card, "item"));
     if (item && ctx.putOnDeckBottom(item.instanceId)) ctx.addModifier({ scope: "chain-link", attack: 1 });
   } },
-  "evasive nageboshi|3": shuriken({ cannotBeDefendedByEquipment: true, canBeDefendedBy(_ctx, defending) { return data(_ctx, defending).cardType !== "attack-reaction" && data(_ctx, defending).cardType !== "defense-reaction"; } }),
-  "razor ring|3": shuriken({ canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined; }, onHit(ctx) { ctx.addModifier({ scope: "until-end-of-turn", seat: opponentSeat(ctx), defense: -1, appliesToCardType: "action", once: true, expiresOnChainClose: true }); } }),
-  "stun star|3": shuriken({ canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined; }, onHit(ctx) { ctx.tap(ctx.player(opponentSeat(ctx)).hero.instanceId); } }),
+  "evasive nageboshi|3": shuriken({ cannotBeDefendedByEquipment: true, canBeDefendedBy(ctx, defending) { return ctx.link?.attackingCard.instanceId !== ctx.self.instanceId || (data(ctx, defending).cardType !== "attack-reaction" && data(ctx, defending).cardType !== "defense-reaction"); } }),
+  "razor ring|3": shuriken({ canTriggerOnHit(ctx) { return ctx.link?.attackingCard.instanceId === ctx.self.instanceId && ctx.link.targetAllyId === undefined; }, onHit(ctx) { ctx.addModifier({ scope: "until-end-of-turn", seat: opponentSeat(ctx), defense: -1, appliesToCardType: "action", once: true, expiresOnChainClose: true }); } }),
+  "stun star|3": shuriken({ canTriggerOnHit(ctx) { return ctx.link?.attackingCard.instanceId === ctx.self.instanceId && ctx.link.targetAllyId === undefined; }, onHit(ctx) { ctx.tap(ctx.player(opponentSeat(ctx)).hero.instanceId); } }),
   "gear turner|1": { onHit(ctx) {
     const cog = ctx.player(ctx.seat).deck.find((card) => has(ctx, card, "cog")); if (cog) ctx.settleCard(cog.instanceId); ctx.shuffleDeck();
   } },

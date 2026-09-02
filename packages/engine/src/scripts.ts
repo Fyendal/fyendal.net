@@ -1413,6 +1413,12 @@ export interface CardScript {
    *  itself for characteristic-defining abilities, then on its controller's
    *  hero for effects that apply to cards the hero controls. */
   modifyBasePower?(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, base: number): number;
+  /** Stage-3 multiplication of a card's base power, after effects that set
+   *  its base value and before effects that divide it. */
+  multiplyBasePower?(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, base: number): number;
+  /** Stage-4 division of a card's base power, after all multiplication
+   *  effects. The hook owns any required rounding rule. */
+  divideBasePower?(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, base: number): number;
   /** Continuous modification of a card's base defense. Called first on the
    *  card itself, then on its controller's hero. */
   modifyBaseDefense?(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, base: number): number;

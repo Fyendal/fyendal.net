@@ -428,6 +428,10 @@ export function noteCardPlayed(
   for (const mod of state.modifiers) {
     if (mod.scope !== "next-play" || mod.seat !== player.seat || !modifierMatchesPlayedCard(state, mod, card)) continue;
     consumedNextPlay.add(mod.id);
+    if (mod.basePower !== undefined) {
+      (card.counters ??= {}).setBasePower = mod.basePower;
+      card.counters.setBasePowerUntilTurn = state.turn;
+    }
     if (mod.grantType) {
       const tag = mod.grantType.toLowerCase();
       (card.grantedTypes ??= []).push(tag);

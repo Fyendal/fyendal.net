@@ -770,7 +770,19 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   ...pitches("stadium security", () => ({
     canDefendFromArsenal: (ctx) => ctx.getFlag("player", "controlledName:toughness") === true,
   })),
-  "chain of brutality|1": { onAttackDeclared(ctx) { if (ctx.currentAttackPower() >= 6) ctx.grantGoAgain(); }, canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.currentAttackPower() >= 6; }, onHit(ctx) { ctx.setFlag("player", "penNextBaseSix", true); } },
+  "chain of brutality|1": {
+    onAttackDeclared(ctx) { if (ctx.currentAttackPower() >= 6) ctx.grantGoAgain(); },
+    canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.currentAttackPower() >= 6; },
+    onHit(ctx) {
+      ctx.addModifier({
+        scope: "next-play",
+        appliesToCardType: "action",
+        appliesToSubtype: "attack",
+        basePower: 6,
+        ongoingLabel: "next attack action card has 6 base attack",
+      });
+    },
+  },
   "snarky prick|1": { onAttackDeclared(ctx) { if (ctx.link?.targetAllyId !== undefined) return; const top = ctx.player(opponentSeat(ctx)).deck[0]; if (!top) return; ctx.lookAt(top.instanceId); if (ctx.cardColor(top) === 1) ctx.requestCardChoice("pen-snarky", "Destroy the red card?", ["no", top.instanceId]); }, onChoose(ctx, hook, option) { if (hook === "pen-snarky" && option !== "no" && ctx.moveToGraveyard(Number(option), "deck")) ctx.addModifier({ scope: "chain-link", attack: 4 }); } },
   ...pitches("insult to injury", () => ({ onAttackDeclared(ctx) { if (higherLife(ctx)) ctx.grantGoAgain(); } })),
   ...pitches("bad breath", (pitch) => ({ onPlay(ctx) { queueIntimidate(ctx); ctx.addModifier({ scope: "until-end-of-turn", onHitCreateToken: { cardId: MIGHT, count: 4 - pitch } }); } })),

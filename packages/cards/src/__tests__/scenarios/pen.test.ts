@@ -155,6 +155,29 @@ describe("PEN — import and set mechanics", () => {
     g.play("sprout strength|3").play("doubling season|1").expectAttackValue(2);
   });
 
+  it("Chain of Brutality sets Big Bully to base 6 before its base power doubles", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "kayo, underhanded cheat|0",
+          life: 25,
+          hand: ["chain of brutality|1", "big bully|1"],
+          resources: 6,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.play("chain of brutality|1", { settle: false })
+      .activate("kayo, underhanded cheat|0")
+      .blockWith()
+      .settle()
+      .play("big bully|1")
+      .expectAttackValue(12);
+  });
+
   it("Decompose chooses two Earth cards before the distinct action card", () => {
     const g = scenario({
       seats: [

@@ -387,6 +387,9 @@ export interface Modifier {
   expiresAtStartOfSeatTurn?: number;
   expiresAtEndOfSeatTurn?: number;
   createdTurn?: number;
+  /** Base power stamped onto the next matching card when it is played.
+   * Multiplication, division, and ordinary power adjustments apply later. */
+  basePower?: number;
   attack?: number;
   /** Add this much to each matching positive power-gain event after other
    * replacements. With `once`, consume this modifier after the first event. */

@@ -39,12 +39,70 @@ describe("OMN — wager targeting", () => {
   });
 });
 
+describe("OMN — shuriken hit triggers", () => {
+  const hitTriggerShuriken = ["razor ring|3", "stun star|3"] as const;
+
+  it.each(hitTriggerShuriken)(
+    "%s does not trigger when another attack hits while it is in the arena",
+    (shuriken) => {
+      const g = scenario({
+        seats: [
+          hero("ira, scarlet revenger|0", { board: [shuriken], hand: ["browbeat|3"] }),
+          foe(),
+        ],
+      });
+
+      g.play("browbeat|3").blockWith().settle();
+
+      expect(g.state.log.some((entry) =>
+        entry.publicText?.toLowerCase().includes(`${shuriken.split("|")[0]} triggers: on hit`)
+      )).toBe(false);
+    },
+  );
+
+  it.each(hitTriggerShuriken)("%s triggers when its own attack hits", (shuriken) => {
+    const g = scenario({
+      seats: [
+        hero("ira, scarlet revenger|0", { board: [shuriken], resources: 1 }),
+        foe(),
+      ],
+    });
+
+    g.activate(shuriken).blockWith().settle();
+
+    expect(g.state.log.some((entry) =>
+      entry.publicText?.toLowerCase().includes(`${shuriken.split("|")[0]} triggers: on hit`)
+    )).toBe(true);
+  });
+});
+
 describe("OMN — import and set mechanics", () => {
   it("registers every eligible OMN printing as implemented", () => {
     const cards = Object.values(cardData).filter((card) => card.set === "OMN");
     expect(cards).toHaveLength(251);
     expect(cards.every((card) => isImplemented(card))).toBe(true);
     expect(new Set(cards.map(functionalKeyOf))).toHaveLength(251);
+  });
+
+  it("Evasive Nageboshi does not restrict defenders on a later chain link", () => {
+    const g = scenario({
+      seats: [
+        hero("ira, scarlet revenger|0", {
+          weapons: ["evasive nageboshi|3"],
+          hand: ["command and conquer|1"],
+          resources: 3,
+        }),
+        foe({ hand: ["razor reflex|1"] }),
+      ],
+    });
+
+    g.attackWithWeapon("evasive nageboshi|3")
+      .blockWith()
+      .settle()
+      .play("command and conquer|1")
+      .blockWith("razor reflex|1");
+
+    expect(g.state.chain.at(-1)?.defendingCards).toHaveLength(1);
   });
 
   it("Fragment reduces an attack when a 3-defense card defends it", () => {
@@ -429,6 +487,36 @@ describe("OMN — import and set mechanics", () => {
       .settle()
       .expectAP(0, 0);
     expect(g.state.chain[0]?.goAgain).toBe(false);
+  });
+
+  it("Quick Succession gives +1 when Path of Same Ends gains go again later", () => {
+    const g = scenario({
+      seats: [
+        hero("aurora, emissary of lightning|0", {
+          hand: ["quick succession|1", "stinging sprite|1", "path of same ends|1", "wrecker romp|3"],
+        }),
+        foe({
+          equipment: { head: "crown of dichotomy|0" },
+          hand: ["wrecker romp|3"],
+        }),
+      ],
+    });
+
+    g.play("quick succession|1")
+      .play("stinging sprite|1")
+      .chooseOption("opposing hero")
+      .chooseOption("0")
+      .blockWith()
+      .settle()
+      .play("path of same ends|1")
+      .chooseOption("1")
+      .chooseCard("wrecker romp|3")
+      .blockWith()
+      .expectAttackValue(3)
+      .activate("path of same ends|1", { pitch: ["wrecker romp|3"], settle: false })
+      .passPriority()
+      .passPriority()
+      .expectAttackValue(4);
   });
 
   it("Crackle from Afar lets its controller choose the attack that gets +1", () => {

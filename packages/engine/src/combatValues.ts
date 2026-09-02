@@ -738,12 +738,45 @@ function applyBaseModifier(
     const hook = scriptOf(state, player.hero.cardId, player.hero)?.[key];
     if (hook) base = hook(runtime.makeCtx(state, seat, player.hero), card, base);
   }
-  // Per-card base-value effects use the CR stage order: multiplication before
-  // division. Kayo's low roll is the round-down division; other halving
-  // effects below explicitly round up.
+
+  // Numeric-property stage 2: layer effects stamped onto a card when it was
+  // played set its base power before any multiplication.
   if (kind === "power") {
+    if (Number(card.counters?.setBasePowerUntilTurn ?? 0) === state.turn) {
+      base = Number(card.counters?.setBasePower ?? base);
+    }
+
+    // Numeric-property stage 3: multiplication. Card and hero hooks model
+    // live static effects; counters model effects stamped onto this object.
+    const ownMultiply = card.instanceId === player.hero.instanceId
+      ? undefined
+      : scriptOf(state, card.cardId, card)?.multiplyBasePower;
+    if (ownMultiply) {
+      base = ownMultiply(runtime.makeCtx(state, seat, card), card, base);
+    }
+    if (!heroAbilitiesDisabled(state, seat)) {
+      const heroMultiply = scriptOf(state, player.hero.cardId, player.hero)?.multiplyBasePower;
+      if (heroMultiply) {
+        base = heroMultiply(runtime.makeCtx(state, seat, player.hero), card, base);
+      }
+    }
     const doublings = Math.max(0, Number(card.counters?.doubleBasePower ?? 0));
     for (let i = 0; i < doublings; i++) base *= 2;
+
+    // Numeric-property stage 4: division. Kayo's low roll is the round-down
+    // division; other halving effects below explicitly round up.
+    const ownDivide = card.instanceId === player.hero.instanceId
+      ? undefined
+      : scriptOf(state, card.cardId, card)?.divideBasePower;
+    if (ownDivide) {
+      base = ownDivide(runtime.makeCtx(state, seat, card), card, base);
+    }
+    if (!heroAbilitiesDisabled(state, seat)) {
+      const heroDivide = scriptOf(state, player.hero.cardId, player.hero)?.divideBasePower;
+      if (heroDivide) {
+        base = heroDivide(runtime.makeCtx(state, seat, player.hero), card, base);
+      }
+    }
     const roundDownHalvings = Math.max(
       0,
       Number(card.counters?.halveBasePowerRoundDown ?? 0),
