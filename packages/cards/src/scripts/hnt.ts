@@ -3,6 +3,9 @@ import {
   attackAbility,
   bloodDebtScript as bloodDebt,
   buffNextAttack,
+  commonOptionMessages,
+  decisionMessage,
+  decisionPrompt,
   markedStealthHeroScript,
   markContractCompleted,
   offerRetrieveDagger,
@@ -10,6 +13,7 @@ import {
   previousAttackNameContains,
   resolveRetrieveDagger,
   retrievableDaggerIds,
+  yesNoPrompt,
 } from "./shared-helpers.js";
 
 // HNT — The Hunted. Mark/Contract (CR 8.4.7, 8.5.39, 8.5.50, 9.3),
@@ -100,7 +104,7 @@ function offerBloodSplatteredVest(ctx: ScriptCtx): void {
   if (!equippedSelf(ctx)) return;
   ctx.requestChoice(
     "blood-splattered-vest",
-    "Blood Splattered Vest: gain 1 resource and add a stain counter?",
+    yesNoPrompt("Blood Splattered Vest: gain 1 resource and add a stain counter?", "card.hnt.vest.resource.stain"),
     ["yes", "no"],
     ctx.seat,
     undefined,
@@ -149,7 +153,10 @@ function offerDaggerDamage(ctx: ScriptCtx, hook: string): void {
   if (options.length === 0) return;
   ctx.requestCardChoice(
     hook,
-    `${ctx.data.name}: choose a dagger to deal 1 damage, then destroy it`,
+    decisionPrompt(`${ctx.data.name}: choose a dagger to deal 1 damage, then destroy it`, "card.hnt.dagger.damage.destroy", {
+      values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: 1 },
+      optionMessages: commonOptionMessages("pass"),
+    }),
     ["pass", ...options],
   );
 }
@@ -263,7 +270,7 @@ export const hnt: Record<string, CardScript> = {
     canTriggerOnHit: hitMarkedHero,
     onHit(ctx) {
       const hand = ctx.player(opponentSeat(ctx)).hand;
-      if (hand.length) ctx.requestCardChoice("hnt-black-widow", "Banish a card from your hand", hand.map((card) => card.instanceId), opponentSeat(ctx));
+      if (hand.length) ctx.requestCardChoice("hnt-black-widow", decisionPrompt("Banish a card from your hand", "card.hnt.hand.card.banish"), hand.map((card) => card.instanceId), opponentSeat(ctx));
     },
     onChoose(ctx, hook, option) { if (hook === "hnt-black-widow") ctx.banish(Number(option)); },
   },
@@ -291,7 +298,7 @@ export const hnt: Record<string, CardScript> = {
       canActivate: (ctx) => availableDraconicDaggers(ctx).length > 0,
       onActivate(ctx) {
         const ids = availableDraconicDaggers(ctx);
-        ctx.requestCardChoice("cindra-equip:0", "Equip up to 2 Draconic daggers from your graveyard", ["pass", ...ids]);
+        ctx.requestCardChoice("cindra-equip:0", decisionPrompt("Equip up to 2 Draconic daggers from your graveyard", "card.hnt.draconicdagger.equip.upto", { values: { count: 2 }, optionMessages: commonOptionMessages("pass") }), ["pass", ...ids]);
       },
     },
     onChoose(ctx, hook, option) {
@@ -302,7 +309,7 @@ export const hnt: Record<string, CardScript> = {
       if (!card || !isDagger(ctx, card) || !isDraconic(ctx, card)) return;
       if (!ctx.equipFromGraveyard(id) || count >= 1) return;
       const ids = availableDraconicDaggers(ctx);
-      if (ids.length) ctx.requestCardChoice("cindra-equip:1", "Equip one more Draconic dagger?", ["pass", ...ids]);
+      if (ids.length) ctx.requestCardChoice("cindra-equip:1", decisionPrompt("Equip one more Draconic dagger?", "card.hnt.draconicdagger.equip.next", { optionMessages: commonOptionMessages("pass") }), ["pass", ...ids]);
     },
   },
   "kunai of retribution|0": {
@@ -332,7 +339,7 @@ export const hnt: Record<string, CardScript> = {
     canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "hntArtScale") === true; },
     onHit(ctx) {
       const equipment = Object.values(ctx.player(opponentSeat(ctx)).equipment).filter((card) => card !== undefined);
-      if (equipment.length) ctx.requestCardChoice("art-scale", "Put a -1 defense counter on equipment", equipment.map((card) => card.instanceId));
+      if (equipment.length) ctx.requestCardChoice("art-scale", decisionPrompt("Put a -1 defense counter on equipment", "card.hnt.equipment.defensecounter"), equipment.map((card) => card.instanceId));
     },
     onChoose(ctx, hook, option) {
       if (hook !== "art-scale") return;
@@ -513,7 +520,7 @@ export const hnt: Record<string, CardScript> = {
       ctx.logPublic(`${ctx.cardData(ctx.player(opponentSeat(ctx)).heroCardId).name} reveals their hand`);
       if (!hand.some((card) => ctx.cardData(card.cardId).cardType === "attack-reaction")) return;
       const reactions = ctx.player(ctx.seat).deck.filter((card) => ctx.cardData(card.cardId).cardType === "defense-reaction");
-      if (reactions.length) ctx.requestCardChoice("sound-alarm", "Search for a defense reaction?", ["pass", ...reactions.map((card) => card.instanceId)]);
+      if (reactions.length) ctx.requestCardChoice("sound-alarm", decisionPrompt("Search for a defense reaction?", "card.hnt.defensereaction.search", { optionMessages: commonOptionMessages("pass") }), ["pass", ...reactions.map((card) => card.instanceId)]);
     },
     onChoose(ctx, hook, option) { if (hook !== "sound-alarm") return; if (option !== "pass") { const card = ctx.player(ctx.seat).deck.find((candidate) => candidate.instanceId === Number(option)); if (card) { ctx.logPublic(`${ctx.cardData(card.cardId).name} is revealed`); ctx.shuffleDeck(); ctx.putOnDeckTop(card.instanceId); return; } } ctx.shuffleDeck(); },
   },
@@ -534,7 +541,7 @@ const AGENTS = ["HNT003", "HNT004", "HNT005", "HNT006", "HNT007", "HNT008"] as c
 const randomAgent = (ctx: ScriptCtx) => ctx.becomeHero(AGENTS[ctx.randomInt(AGENTS.length)]!);
 const dealWithDagger = (ctx: ScriptCtx, draw = false) => {
   const daggers = draw ? offLinkDaggerOptions(ctx) : daggerOptions(ctx);
-  if (daggers.length) ctx.requestCardChoice(draw ? "deal-dagger-draw" : "deal-dagger", "Choose a dagger", daggers);
+  if (daggers.length) ctx.requestCardChoice(draw ? "deal-dagger-draw" : "deal-dagger", decisionPrompt("Choose a dagger", "card.hnt.dagger.choose"), daggers);
 };
 
 Object.assign(hnt, {
@@ -549,7 +556,7 @@ Object.assign(hnt, {
       }
       ctx.requestChoice(
         "mask-agent",
-        "Mask of Deceit: choose an Agent of Chaos",
+        decisionPrompt("Mask of Deceit: choose an Agent of Chaos", "card.hnt.agentofchaos.choose"),
         AGENTS.map((cardId) => ctx.cardData(cardId).name),
         undefined,
         [...AGENTS],
@@ -572,7 +579,7 @@ Object.assign(hnt, {
       ctx.loseLife(targetSeat, 1);
     },
   },
-  "under the trap-door|3": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", fromHand: true, onActivate(ctx) { const traps = ctx.player(ctx.seat).graveyard.filter((card) => dataTags(ctx, card).includes("trap")); if (traps.length) ctx.requestCardChoice("trap-door", "Banish a trap", traps.map((card) => card.instanceId)); } }, onChoose(ctx, hook, option) { if (hook === "trap-door" && ctx.banish(Number(option))) ctx.allowPlayFrom(Number(option), "banish", { graveyardReplacement: "banish" }); } },
+  "under the trap-door|3": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", fromHand: true, onActivate(ctx) { const traps = ctx.player(ctx.seat).graveyard.filter((card) => dataTags(ctx, card).includes("trap")); if (traps.length) ctx.requestCardChoice("trap-door", decisionPrompt("Banish a trap", "card.hnt.trap.banish"), traps.map((card) => card.instanceId)); } }, onChoose(ctx, hook, option) { if (hook === "trap-door" && ctx.banish(Number(option))) ctx.allowPlayFrom(Number(option), "banish", { graveyardReplacement: "banish" }); } },
   "tarantula toxin|1": {
     canPlay(ctx) {
       if (!ctx.link || ctx.link.attacker !== ctx.seat) return false;
@@ -589,7 +596,11 @@ Object.assign(hnt, {
       if (daggerMode && defenseMode) {
         ctx.requestChoice(
           "tarantula-mode",
-          "Tarantula Toxin: choose 1 or both",
+          decisionPrompt("Tarantula Toxin: choose 1 or both", "card.hnt.tarantula.mode", { optionMessages: {
+            "+3 attack": decisionMessage("card.hnt.tarantula.option.attack"),
+            "-3 defense": decisionMessage("card.hnt.tarantula.option.defense"),
+            both: decisionMessage("common.option.both"),
+          } }),
           ["+3 attack", "-3 defense", "both"],
         );
       }
@@ -607,7 +618,7 @@ Object.assign(hnt, {
         const defenders = [...ctx.link.defendingCards, ...ctx.link.defendingEquipment];
         ctx.requestCardChoice(
           "toxin-defender",
-          "Give a defender -3 defense",
+          decisionPrompt("Give a defender -3 defense", "card.hnt.defender.defense.reduce", { values: { amount: 3 } }),
           defenders.map((card) => card.instanceId),
         );
       }
@@ -638,7 +649,7 @@ Object.assign(hnt, {
       if (hand.length) {
         ctx.requestCardChoice(
           "provoke-reveal",
-          "Provoke: choose a card to reveal",
+          decisionPrompt("Provoke: choose a card to reveal", "card.hnt.provoke.card.reveal"),
           hand.map((card) => card.instanceId),
           target,
         );
@@ -673,7 +684,7 @@ Object.assign(hnt, {
         const indexes = draconicAttackLinkIndexes(ctx);
         ctx.requestChoice(
           "dragonscaler-flight-path",
-          "Dragonscaler Flight Path: choose a Draconic attack",
+          decisionPrompt("Dragonscaler Flight Path: choose a Draconic attack", "card.hnt.draconic.attack.choose"),
           indexes.map((index) => `chain:${index}`),
           ctx.seat,
           indexes.map((index) => ctx.state.chain[index]!.attackingCard.instanceId),
@@ -757,7 +768,7 @@ Object.assign(hnt, {
   "retrace the past|3": {
     onAttackDeclared(ctx) {
       if (!previousAttackNameContains(ctx, "gustwave")) return;
-      ctx.requestNameChoice("retrace-name", `${ctx.data.name}: name a card`);
+      ctx.requestNameChoice("retrace-name", decisionPrompt(`${ctx.data.name}: name a card`, "card.hnt.card.name.named", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }));
     },
     onChoose(ctx, hook, option) {
       if (hook !== "retrace-name") return;
@@ -767,11 +778,11 @@ Object.assign(hnt, {
     },
   },
   "misfire dampener|0": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true, onActivate(ctx) { ctx.preventNextArcaneDamage(ctx.seat, ctx.getPlayerFlag(ctx.seat, "boostedThisTurn") === true ? 2 : 1); } } },
-  "null time zone|3": { prohibitsChosenName: true, onEnterArena(ctx) { ctx.setCounter("steam", 2); ctx.requestNameChoice("null-name", "Name a card"); }, onChoose(ctx, hook, option) { if (hook === "null-name") ctx.setChosenName(option); }, triggers: [{ event: "start-of-turn", label: "Remove a steam counter", effect(ctx) { if (ctx.getCounter("steam") <= 0) ctx.destroySelf(); else ctx.setCounter("steam", ctx.getCounter("steam") - 1); } }] },
+  "null time zone|3": { prohibitsChosenName: true, onEnterArena(ctx) { ctx.setCounter("steam", 2); ctx.requestNameChoice("null-name", decisionPrompt("Name a card", "card.hnt.card.name")); }, onChoose(ctx, hook, option) { if (hook === "null-name") ctx.setChosenName(option); }, triggers: [{ event: "start-of-turn", label: "Remove a steam counter", effect(ctx) { if (ctx.getCounter("steam") <= 0) ctx.destroySelf(); else ctx.setCounter("steam", ctx.getCounter("steam") - 1); } }] },
   "enchanted quiver|0": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true, onActivate(ctx) { const arrow = ctx.player(ctx.seat).arsenal.some((card) => !card.faceDown && dataTags(ctx, card).includes("arrow")); ctx.preventNextArcaneDamage(ctx.seat, arrow ? 2 : 1); } } },
-  "chain reaction|2": { canTriggerOnDefend: (ctx) => ctx.link?.goAgain === true, onDefend(ctx) { const cards = ctx.player(ctx.seat).arsenal.filter((card) => ctx.hasCardType(card, "action") && !dataTags(ctx, card).includes("attack")); if (cards.length) ctx.requestCardChoice("chain-arsenal", "Turn a non-attack action face-up", cards.map((card) => card.instanceId)); }, onChoose(ctx, hook, option) { if (hook === "chain-arsenal") ctx.setCardFaceDown(Number(option), false); } },
+  "chain reaction|2": { canTriggerOnDefend: (ctx) => ctx.link?.goAgain === true, onDefend(ctx) { const cards = ctx.player(ctx.seat).arsenal.filter((card) => ctx.hasCardType(card, "action") && !dataTags(ctx, card).includes("attack")); if (cards.length) ctx.requestCardChoice("chain-arsenal", decisionPrompt("Turn a non-attack action face-up", "card.hnt.arsenal.nonattack.faceup"), cards.map((card) => card.instanceId)); }, onChoose(ctx, hook, option) { if (hook === "chain-arsenal") ctx.setCardFaceDown(Number(option), false); } },
   "douse in runeblood|1": { onAttackDeclared(ctx) { const count = Number(ctx.getPlayerFlag(ctx.seat, "nonAttackActionsPlayedThisTurn")); ctx.createTokens("ARC112", count); if (count >= 3) ctx.grantGoAgain(); } },
-  "spur locked|3": { onPlay(ctx) { const mine = ctx.randomInt(6) + 1; const theirs = ctx.randomInt(6) + 1; if (mine === theirs) return; const loser = mine > theirs ? ctx.seat : opponentSeat(ctx); const amount = Math.max(mine, theirs); ctx.loseLife(loser, amount); const cards = ctx.player(loser).deck.filter((card) => (ctx.cardData(card.cardId).cost ?? 0) <= amount); if (cards.length) ctx.requestCardChoice("spur-search", "Choose a card", cards.map((card) => card.instanceId), loser); }, onChoose(ctx, hook, option) { if (hook === "spur-search") { ctx.revealCards([Number(option)]); ctx.moveToHand(Number(option)); ctx.shuffleDeck(); } } },
+  "spur locked|3": { onPlay(ctx) { const mine = ctx.randomInt(6) + 1; const theirs = ctx.randomInt(6) + 1; if (mine === theirs) return; const loser = mine > theirs ? ctx.seat : opponentSeat(ctx); const amount = Math.max(mine, theirs); ctx.loseLife(loser, amount); const cards = ctx.player(loser).deck.filter((card) => (ctx.cardData(card.cardId).cost ?? 0) <= amount); if (cards.length) ctx.requestCardChoice("spur-search", decisionPrompt("Choose a card", "card.hnt.card.choose"), cards.map((card) => card.instanceId), loser); }, onChoose(ctx, hook, option) { if (hook === "spur-search") { ctx.revealCards([Number(option)]); ctx.moveToHand(Number(option)); ctx.shuffleDeck(); } } },
   "ring of roses|2": { onFriendlyDamageDealt(ctx, _source, target, amount, arcane) { const key = `ring:${ctx.state.turn}`; if (arcane && amount > 0 && target !== ctx.seat && !ctx.getCounter(key)) { ctx.setCounter(key, 1); ctx.gainLife(ctx.seat, 1); } } },
   "war cry of themis|2": {
     onPlay: (ctx) => buffNextAttack(ctx, { attack: 4, appliesToSubtype: "angel" }),
@@ -795,7 +806,7 @@ Object.assign(hnt, {
         if (targets.length) {
           ctx.requestCardChoice(
             "war-cry-themis-target",
-            `Choose banished card 1 of ${remaining} to turn face-down`,
+            decisionPrompt(`Choose banished card 1 of ${remaining} to turn face-down`, "card.hnt.banished.facedown.first", { values: { total: remaining } }),
             targets.map((card) => card.instanceId),
           );
         }
@@ -815,7 +826,7 @@ Object.assign(hnt, {
       if (targets.length) {
         ctx.requestCardChoice(
           "war-cry-themis-target",
-          `Choose another banished card (${remaining} remaining)`,
+          decisionPrompt(`Choose another banished card (${remaining} remaining)`, "card.hnt.banished.facedown.next", { values: { remaining } }),
           targets.map((card) => card.instanceId),
         );
       }
@@ -839,7 +850,7 @@ Object.assign(hnt, {
         const weapons = ctx.state.players.flatMap((player) => player.weapons);
         if (weapons.length) ctx.requestCardChoice(
           "war-cry-bellona-weapon",
-          "Choose a weapon",
+          decisionPrompt("Choose a weapon", "card.hnt.weapon.choose"),
           weapons.map((card) => card.instanceId),
         );
       },
