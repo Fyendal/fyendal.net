@@ -771,7 +771,9 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     canDefendFromArsenal: (ctx) => ctx.getFlag("player", "controlledName:toughness") === true,
   })),
   "chain of brutality|1": {
-    onAttackDeclared(ctx) { if (ctx.currentAttackPower() >= 6) ctx.grantGoAgain(); },
+    onAttackDeclared(ctx) {
+      ctx.addModifier({ scope: "chain-link", goAgainIfAttackPowerAtLeast: 6 });
+    },
     canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.currentAttackPower() >= 6; },
     onHit(ctx) {
       ctx.addModifier({

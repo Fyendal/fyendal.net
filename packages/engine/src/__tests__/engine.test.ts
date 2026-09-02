@@ -271,6 +271,49 @@ describe("game setup & turn structure", () => {
     expect(abilityResourceCost(s, engineRuntime, 0, p.hero, { cost: 3 })).toBe(3);
   });
 
+  it("offers a named-card replacement only when the final damage is lethal", () => {
+    const s = makeGame(1002);
+    const target = player(s, 1);
+    target.life = 3;
+    target.flags.preventNextDamage = 1;
+    const candidate = target.hand.shift()!;
+    candidate.cardId = "INSTANT";
+    candidate.faceDown = true;
+    target.arsenal.push(candidate);
+    makeCtx(s, engineRuntime, 1, target.hero).addModifier({
+      scope: "until-end-of-turn",
+      preventLethalDamageByBanishingNamedCard: "Test Sigil",
+    });
+
+    engineRuntime.commands.dealEffectDamage(s, {
+      sourceInstanceId: player(s, 0).hero.instanceId,
+      sourceSeat: 0,
+      targetSeat: 1,
+      amount: 4,
+      arcane: false,
+    });
+
+    expect(s.pendingDecision).toMatchObject({
+      player: 1,
+      chooseHook: "lethal-damage-prevention",
+      options: [String(candidate.instanceId), "decline"],
+    });
+    expect(s.pendingDecision?.arcane?.amount).toBe(3);
+
+    const result = applyIntent(s, 1, {
+      kind: "choose",
+      optionId: String(candidate.instanceId),
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(player(result.state, 1).life).toBe(3);
+    expect(player(result.state, 1).banish).toContainEqual(expect.objectContaining({
+      instanceId: candidate.instanceId,
+      cardId: "INSTANT",
+    }));
+    expect(player(result.state, 1).banish[0]).not.toHaveProperty("faceDown");
+  });
+
   it("clears stale private-zone placement metadata when drawing a card", () => {
     const s = makeGame(1001);
     const p = player(s, 0);

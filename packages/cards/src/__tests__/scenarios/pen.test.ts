@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { legalIntents } from "@fyendal/engine";
+import { legalIntents, projectStateFor } from "@fyendal/engine";
 import { cardData, isImplemented } from "../../index.js";
 import { functionalKeyOf } from "../../functional.js";
 import { printingId, scenario } from "../harness.js";
@@ -155,7 +155,7 @@ describe("PEN — import and set mechanics", () => {
     g.play("sprout strength|3").play("doubling season|1").expectAttackValue(2);
   });
 
-  it("Chain of Brutality sets Big Bully to base 6 before its base power doubles", () => {
+  it("Chain of Brutality gains go again and sets the next attack's base power to 6", () => {
     const g = scenario({
       seats: [
         {
@@ -171,11 +171,51 @@ describe("PEN — import and set mechanics", () => {
     });
 
     g.play("chain of brutality|1", { settle: false })
-      .activate("kayo, underhanded cheat|0")
-      .blockWith()
+      .activate("kayo, underhanded cheat|0");
+
+    expect(projectStateFor(g.state, 0).chain.at(-1)?.goAgain).toBe(true);
+
+    g.blockWith()
       .settle()
-      .play("big bully|1")
-      .expectAttackValue(12);
+      .expectAP(0, 1);
+
+    expect(g.state.modifiers).toContainEqual(expect.objectContaining({
+      scope: "next-play",
+      basePower: 6,
+    }));
+
+    g.play("big bully|1").expectAttackValue(12);
+    expect(g.state.modifiers).not.toContainEqual(expect.objectContaining({
+      scope: "next-play",
+      basePower: 6,
+    }));
+  });
+
+  it("Chain of Brutality gains go again from a reaction buff when fully defended", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "kayo, strong-arm|0",
+          life: 40,
+          hand: ["chain of brutality|1"],
+          resources: 4,
+          equipment: NO_EQUIPMENT,
+        },
+        {
+          hero: "dorinthea",
+          hand: ["wounding blow|1", "wounding blow|1"],
+          equipment: NO_EQUIPMENT,
+        },
+      ],
+    });
+
+    g.play("chain of brutality|1", { settle: false })
+      .activate("kayo, strong-arm|0")
+      .blockWith("wounding blow|1", "wounding blow|1")
+      .settle()
+      .expectLog("Chain of Brutality is fully defended")
+      .expectAP(0, 1);
   });
 
   it("Decompose chooses two Earth cards before the distinct action card", () => {

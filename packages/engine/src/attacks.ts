@@ -352,7 +352,10 @@ export function beginAttackStep(state: GameStateInternal, runtime: EngineRuntime
     (player.hero.counters ??= {}).nextAttackPowerPenalty = 0;
   }
   attachNextAttackModifiers(state, runtime, link);
-  if (innateGoAgain || conditionalModifierGrantsGoAgain(state, link)) {
+  if (
+    innateGoAgain ||
+    conditionalModifierGrantsGoAgain(state, link, computeAttack(state, runtime, link))
+  ) {
     runtime.events.grantLinkGoAgain(state, link);
   }
   const target = findAttackTargetAlly(state, seat, targetAllyId);

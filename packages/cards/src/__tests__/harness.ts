@@ -97,7 +97,8 @@ export type ZoneName =
   | "pitch"
   | "banish"
   | "soul"
-  | "board";
+  | "board"
+  | "weapons";
 
 const FILLER = "RNR020"; // Raging Onslaught — vanilla, inert for setup purposes
 

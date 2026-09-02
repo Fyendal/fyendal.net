@@ -254,6 +254,15 @@ export function abilitiesAsInstantForCard(
   );
 }
 
+/** Whether a player has enough life points to pay an activated ability's
+ * life asset-cost. Paying the hero's final life point is legal. */
+export function canPayAbilityLifeCost(
+  player: PlayerState,
+  ability: Pick<ActivatedAbility, "lifeCost">,
+): boolean {
+  return player.life >= Math.max(0, Math.floor(ability.lifeCost ?? 0));
+}
+
 function effectCardCostCandidates(
   state: GameStateInternal,
   player: PlayerState,
@@ -471,6 +480,7 @@ export function payActivatedAbilityCost(
   if (ability.tapHeroCost && player.hero.tapped) {
     return `${nameOf(state, player.hero.cardId)} is already tapped`;
   }
+  if (!canPayAbilityLifeCost(player, ability)) return "not enough life";
   if (ability.destroySubcardCost && (card.subcards?.length ?? 0) === 0) {
     return `${nameOf(state, card.cardId)} has no card under it`;
   }
@@ -522,6 +532,8 @@ export function payActivatedAbilityCost(
     chiCost: opts?.chiCost,
   });
   if (costErr) return costErr;
+  const lifeCost = Math.max(0, Math.floor(ability.lifeCost ?? 0));
+  if (lifeCost > 0) runtime.makeCtx(state, seat, card).loseLife(seat, lifeCost);
   consumeMatchingActivationCostReductions(state, seat, card);
   if (Number(player.flags.nextAbilityCostReduction || 0) > 0) {
     player.flags.nextAbilityCostReduction = 0;

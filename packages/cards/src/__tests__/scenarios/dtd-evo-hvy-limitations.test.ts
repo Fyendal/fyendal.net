@@ -13,8 +13,6 @@ describe("DTD, EVO, and HVY rules regression coverage", () => {
   it("Empyrean discounts the first hero ability", () => expect(script("empyrean rapture|0").modifyAttackActivationCost).toBeTypeOf("function"));
   it("Levia transforms from inventory", () => expect(script("levia, redeemed|0").onGameStart).toBeTypeOf("function"));
   it("Chains replaces action phase draws", () => expect(script("chains of mephetis|3").replaceOpponentDraw).toBeTypeOf("function"));
-  it("Diplomacy restricts cards and abilities", () => expect(script("warmonger's diplomacy|3").additionalCostToOpponents).toBeDefined());
-  it("Poison inverts life gain", () => expect(script("poison the well|3").onHeroGainedLife).toBeTypeOf("function"));
   it("Singularity transforms all components", () => expect(script("singularity|1").onChoose).toBeTypeOf("function"));
   it("Hyper-X3 retains boosted drivers", () => expect(script("hyper-x3|0").onBanishedForBoost).toBeTypeOf("function"));
   it("Breaker Evos retain Hyper Drivers", () => expect(script("evo circuit breaker|1").additionalCost).toBeTypeOf("function"));
@@ -46,7 +44,6 @@ describe("DTD, EVO, and HVY rules regression coverage", () => {
   it("Luminaris tracks Herald and angel attacks", () => expect(script("luminaris, angel's glow|0").onFriendlyActivate).toBeTypeOf("function"));
   it("Beckoning observes combat-chain hits", () => expect(script("beckoning light|1").onHit).toBeTypeOf("function"));
   it("Prayer continues into charge", () => expect(script("prayer of bellona|2").onChoose).toBeTypeOf("function"));
-  it("Unity coordinates every hero", () => expect(script("united we stand|2").onChoose).toBeTypeOf("function"));
   it("Lumina Lance modes are chosen without repetition", () => {
     const g = scenario({
       seats: [
@@ -88,7 +85,6 @@ describe("DTD, EVO, and HVY rules regression coverage", () => {
     g.expectLife(0, 18).expectInZone(0, "snatch|1", "soul").expectInZone(0, "raging onslaught|1", "banish");
   });
   it("Spoiled Skull chooses three names", () => expect(script("spoiled skull|0").onChoose).toBeTypeOf("function"));
-  it("Limbs permission is next action phase", () => expect(script("expendable limbs|3").triggers).toBeDefined());
   it("Numbskull attack cannot be modified", () => {
     const g = scenario({
       seats: [
@@ -139,7 +135,58 @@ describe("DTD, EVO, and HVY rules regression coverage", () => {
     g.expectLife(1, 16);
     expect(g.state.players[1]!.flags.preventNextDamage).toBe(10);
   });
-  it("Morlock replaces lethal damage", () => expect(script("morlock hill|3").onChoose).toBeTypeOf("function"));
+  it("Morlock Hill offers Minerva Themis to prevent lethal damage", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", life: 3, hand: ["morlock hill|3", "minerva themis|0"] },
+        { hero: "dorinthea", hand: ["head jab|1"] },
+      ],
+      active: 1,
+    });
+
+    g.passPriority()
+      .react("morlock hill|3")
+      .play("head jab|1")
+      .blockWith()
+      .settle();
+
+    expect(g.state.pendingDecision).toMatchObject({
+      player: 0,
+      chooseHook: "lethal-damage-prevention",
+    });
+    g.chooseCard("minerva themis|0")
+      .expectLife(0, 3)
+      .expectInZone(0, "minerva themis|0", "banish");
+  });
+  it("Morlock Hill waits through nonlethal damage and is consumed if declined", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", life: 4, hand: ["morlock hill|3", "minerva themis|0"] },
+        { hero: "dorinthea", hand: ["head jab|1", "head jab|1"] },
+      ],
+      active: 1,
+    });
+
+    g.passPriority()
+      .react("morlock hill|3")
+      .play("head jab|1")
+      .blockWith()
+      .settle()
+      .expectLife(0, 1);
+    expect(g.state.pendingDecision).toBeNull();
+
+    g.play("head jab|1")
+      .blockWith()
+      .settle();
+    expect(g.state.pendingDecision).toMatchObject({
+      player: 0,
+      chooseHook: "lethal-damage-prevention",
+    });
+    g.chooseOption("decline").expectLife(0, -2);
+    expect(g.state.modifiers.find(
+      (modifier) => modifier.preventLethalDamageByBanishingNamedCard !== undefined,
+    )?.consumed).toBe(true);
+  });
   it("Diadem observes friendly Ward", () => expect(script("diadem of dreamstate|0").onFriendlyDestroyed).toBeTypeOf("function"));
   it("Hack destroys an aura on hit", () => expect(script("hack to reality|2").onHit).toBeTypeOf("function"));
   it("Adaptive Plating moves to the chosen equipment zone", () => {

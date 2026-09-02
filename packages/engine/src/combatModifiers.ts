@@ -219,12 +219,12 @@ export function activeModifiers(
   );
 }
 
-/** Whether an attached modifier's played/created-subtype condition currently
- * gives the active attack go again. The condition remains live until the link
- * resolves, so an aura created after declaration can still satisfy it. */
+/** Whether an attached modifier's live condition currently gives the active
+ * attack go again. Conditions remain live until the link resolves. */
 export function conditionalModifierGrantsGoAgain(
   state: GameStateInternal,
   link: ChainLinkState,
+  currentAttack: number,
 ): boolean {
   const player = state.players[link.attacker] as PlayerState;
   if (
@@ -234,9 +234,14 @@ export function conditionalModifierGrantsGoAgain(
   ) return false;
   return activeModifiers(state, link, ["chain-link"]).some((modifier) => {
     const subtype = modifier.goAgainIfPlayedOrCreatedSubtype?.toLowerCase();
-    return subtype !== undefined && (
-      player.flags[`playedSubtype:${subtype}`] === true ||
-      player.flags[`createdSubtype:${subtype}`] === true
+    return (
+      subtype !== undefined && (
+        player.flags[`playedSubtype:${subtype}`] === true ||
+        player.flags[`createdSubtype:${subtype}`] === true
+      )
+    ) || (
+      modifier.goAgainIfAttackPowerAtLeast !== undefined &&
+      currentAttack >= modifier.goAgainIfAttackPowerAtLeast
     );
   });
 }

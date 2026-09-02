@@ -717,6 +717,44 @@ describe("HNT — marked heroes and daggers", () => {
 });
 
 describe("HNT — rules regression coverage", () => {
+  it("Cull can be played as an instant after life loss and resolves to graveyard", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        { hero: "rhinar", hand: ["cull|1"] },
+        { hero: "dorinthea", hand: ["wounding blow|1", "raging onslaught|3"] },
+      ],
+    });
+
+    g.play("wounding blow|1")
+      .blockWith()
+      .passPriority()
+      .passPriority();
+    expect(g.state.players[0]!.flags.lostLifeThisTurn).toBe(true);
+
+    g.passPriority()
+      .react("cull|1")
+      .expectInZone(0, "cull|1", "graveyard")
+      .expectNotInZone(0, "cull|1", "banish")
+      .expectInZone(1, "raging onslaught|3", "banish");
+  });
+
+  it("Cull goes to graveyard after defending", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["bittering thorns|2"], resources: 1 },
+        { hero: "dorinthea", hand: ["cull|1"] },
+      ],
+    });
+
+    g.play("bittering thorns|2")
+      .blockWith("cull|1")
+      .settle()
+      .endTurn()
+      .expectInZone(1, "cull|1", "graveyard")
+      .expectNotInZone(1, "cull|1", "banish");
+  });
+
   it("Retrace the Past names itself after a Gustwave attack", () => {
     const g = scenario({
       seats: [

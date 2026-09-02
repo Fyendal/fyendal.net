@@ -75,6 +75,109 @@ describe("DTD — registration and core mechanics", () => {
       .expectLife(1, 17);
   });
 
+  it("Flail of Agony pays 1 life and makes a banished Cull playable on the open chain", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "vynnset|0",
+          life: 10,
+          weapons: ["flail of agony|0"],
+          hand: ["ravenous rabble|1"],
+          deck: ["wounding blow|3"],
+          banish: ["cull|1"],
+        },
+        { hero: "dorinthea", hand: ["wounding blow|3"] },
+      ],
+    });
+    const cull = s.state.players[0]!.banish[0]!;
+    const canPlayCullAsInstant = () => legalIntents(s.state, 0).some((intent) =>
+      intent.kind === "play-from-zone" &&
+      intent.instanceId === cull.instanceId &&
+      intent.asInstant === true
+    );
+
+    s.play("ravenous rabble|1")
+      .blockWith("wounding blow|3")
+      .settle();
+    expect(s.state.chain).toHaveLength(1);
+    expect(s.state.players[0]!.actionPoints).toBe(1);
+    expect(s.state.players[0]!.flags.lostLifeThisTurn).not.toBe(true);
+    expect(canPlayCullAsInstant()).toBe(false);
+
+    s.attackWithWeapon("flail of agony|0").expectLife(0, 9);
+    expect(s.state.players[0]!.flags.lostLifeThisTurn).toBe(true);
+
+    s.blockWith();
+    expect(canPlayCullAsInstant()).toBe(true);
+  });
+
+  it("Poison the Well replaces the next life gain with equal life loss", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", life: 10, hand: ["poison the well|3", "sigil of solace|1"] },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("poison the well|3")
+      .play("sigil of solace|1")
+      .expectLife(0, 7);
+  });
+
+  it("United We Stand creates Courage when Dorinthea defends with it and another hand card", () => {
+    const s = scenario({
+      seats: [
+        { hero: "dorinthea", hand: ["united we stand|2", "wounding blow|3"] },
+        { hero: "rhinar", hand: ["head jab|1"] },
+      ],
+      active: 1,
+    });
+
+    s.play("head jab|1")
+      .blockWith("united we stand|2", "wounding blow|3")
+      .settle()
+      .expectInZone(0, "courage|0", "board");
+
+    const rhinar = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["united we stand|2", "wounding blow|3"] },
+        { hero: "dorinthea", hand: ["head jab|1"] },
+      ],
+      active: 1,
+    });
+    rhinar.play("head jab|1")
+      .blockWith("united we stand|2", "wounding blow|3")
+      .settle();
+    expect(rhinar.state.players[0]!.board).toHaveLength(0);
+  });
+
+  it("Expendable Limbs grants its banished 6-power card for the next action phase", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["expendable limbs|3", "gore belching|1"] },
+        { hero: "dorinthea", hand: ["head jab|1"] },
+      ],
+      active: 1,
+    });
+
+    s.play("head jab|1")
+      .blockWith()
+      .passPriority()
+      .react("expendable limbs|3")
+      .endTurn();
+
+    const banished = s.state.players[0]!.banish.find(
+      (card) => card.cardId === printingId("gore belching|1"),
+    );
+    expect(banished).toBeDefined();
+    expect(legalIntents(s.state, 0)).toContainEqual(expect.objectContaining({
+      kind: "play-from-zone",
+      zone: "banish",
+      instanceId: banished!.instanceId,
+    }));
+  });
+
   it("Envelop in Darkness buffs only the next rune-gated attack", () => {
     const s = scenario({
       seats: [

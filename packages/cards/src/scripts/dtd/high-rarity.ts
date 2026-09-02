@@ -10,6 +10,18 @@ const QUICKEN = "DTD234";
 const RUNECHANT = "DTD214";
 const SEISMIC = "DTD204";
 const SPELLBANE = "DTD235";
+const SPECTRAL_SHIELD = "DTD220";
+
+const UNITY_TOKEN_BY_HERO = [
+  ["boltyn", COURAGE],
+  ["bravo", SEISMIC],
+  ["briar", EARTH],
+  ["dorinthea", COURAGE],
+  ["lexi", LIGHTNING],
+  ["oldhim", SPELLBANE],
+  ["prism", SPECTRAL_SHIELD],
+  ["shiyana", ELOQUENCE],
+] as const;
 
 function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) { return ctx.cardData(card.cardId); }
 function has(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string) {
@@ -58,6 +70,11 @@ function defendsTogetherWithCardFromHand(ctx: ScriptCtx): boolean {
   const handDefenders = Number(ctx.link.flags.defendedFromHandCount ?? 0);
   const selfWasFromHand = ctx.link.flags[`defendedFromHand:${ctx.self.instanceId}`] === true ? 1 : 0;
   return handDefenders > selfWasFromHand;
+}
+function createUnityToken(ctx: ScriptCtx): void {
+  const heroName = data(ctx, ctx.player(ctx.seat).hero).name.toLowerCase();
+  const match = UNITY_TOKEN_BY_HERO.find(([name]) => heroName.includes(name));
+  if (match) ctx.createToken(match[1]);
 }
 function soulChoice(ctx: ScriptCtx, hook: string, prompt: string) {
   const soul = ctx.player(ctx.seat).soul;
@@ -230,7 +247,10 @@ export const dtdHighRarity: Record<string, CardScript> = {
     onPlay(ctx) { buffNextAttack(ctx, { attack: 2 }); const top = ctx.player(ctx.seat).deck[0]; if (top) { ctx.revealCards([top.instanceId]); if (ctx.cardColor(top) === 2 && ctx.moveToHand(top.instanceId)) { const hand = ctx.player(ctx.seat).hand; if (hand.length) ctx.requestCardChoice("prayer-charge", "Charge your hero's soul", hand.map((card) => card.instanceId)); } } },
     onChoose(ctx, hook, option) { if (hook === "prayer-charge") ctx.charge(Number(option)); },
   },
-  "united we stand|2": { canTriggerOnDefend: defendsTogetherWithCardFromHand, onDefend(ctx) { ctx.createToken(COURAGE); }, onChoose() {} },
+  "united we stand|2": {
+    canTriggerOnDefend: defendsTogetherWithCardFromHand,
+    onDefend: createUnityToken,
+  },
   "lumina lance|2": {
     additionalCost(ctx) { const soul = ctx.player(ctx.seat).soul; if (soul.length) ctx.requestCardChoice("lance-soul", "Banish up to 3 cards from soul", ["done", ...soul.map((card) => card.instanceId)]); },
     onPlay(ctx) {
@@ -270,7 +290,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
   "diabolic offering|3": bloodDebt({ modifyAttack: (ctx) => ctx.getFlag("player", "banishedSixPlusThisTurn") === true ? 6 - (data(ctx, ctx.self).attack ?? 0) : 0, modifyDefense: (ctx) => ctx.getFlag("player", "banishedSixPlusThisTurn") === true ? 6 - (data(ctx, ctx.self).defense ?? 0) : -(data(ctx, ctx.self).defense ?? 0) }),
   "shaden death hydra|2": bloodDebt({ onAttackDeclared(ctx) { const count = ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && data(ctx, card).text.includes("Blood Debt")).length; ctx.dealDamage(ctx.seat, Math.max(0, 13 - count)); } }),
   "slithering shadowpede|1": bloodDebt({ onCardBanished(ctx, card, from) { if (card.instanceId === ctx.self.instanceId && from === "hand") ctx.allowPlayFrom(card.instanceId, "banish"); } }),
-  "expendable limbs|3": { additionalCost(ctx) { const hand = ctx.player(ctx.seat).hand; const card = hand[ctx.randomInt(hand.length)]; if (card && ctx.banish(card.instanceId) && ctx.basePower(card) >= 6) ctx.allowPlayFrom(card.instanceId, "banish", { untilEndOfNextTurn: true }); }, triggers: [] },
+  "expendable limbs|3": { additionalCost(ctx) { const hand = ctx.player(ctx.seat).hand; const card = hand[ctx.randomInt(hand.length)]; if (card && ctx.banish(card.instanceId) && ctx.basePower(card) >= 6) ctx.allowPlayFrom(card.instanceId, "banish", { untilEndOfNextTurn: true }); } },
   "blood dripping frenzy|3": { additionalCost(ctx) { let sixes = 0; let bloodDebtCards = 0; for (const card of [...ctx.player(ctx.seat).hand]) { if (ctx.basePower(card) >= 6) sixes++; if (data(ctx, card).text.includes("Blood Debt")) bloodDebtCards++; ctx.banish(card.instanceId); } ctx.drawCards(ctx.seat, bloodDebtCards); ctx.addModifier({ scope: "until-end-of-turn", attack: sixes, appliesToType: ["brute", "shadow"] }); } },
   "vynnset, iron maiden|0": {
     triggers: [
@@ -302,7 +322,15 @@ export const dtdHighRarity: Record<string, CardScript> = {
   "bastion of unity|0": { canTriggerOnDefend: defendsTogetherWithCardFromHand, onDefend(ctx) { ctx.addCardTempDefense(ctx.self.instanceId, 1); } },
   "ironsong versus|0": { activated: { cost: 1, isAttack: false, goAgain: true, oncePerTurn: true, label: "Next sword hit creates Courage", onActivate(ctx) { buffNextAttack(ctx, { appliesTo: "sword", onHitCreateToken: { cardId: COURAGE, count: 1 } }); } } },
   "chorus of ironsong|2": { onPlay(ctx) { const dawnblade = ctx.link?.attackingCard; if (dawnblade && named(ctx, dawnblade, "dawnblade")) ctx.addModifier({ scope: "until-end-of-turn", attack: 1, damageUnpreventable: true, appliesToInstanceId: dawnblade.instanceId }); }, canTriggerOnDefend: defendsTogetherWithCardFromHand, onDefend(ctx) { ctx.createToken(COURAGE); } },
-  "morlock hill|3": { onPlay(ctx) { ctx.setPlayerFlag(ctx.seat, "morlockLethalReplacement", true); }, onChoose(ctx, hook, option) { if (hook === "morlock-minerva" && option !== "no") ctx.banish(Number(option)); } },
+  "morlock hill|3": {
+    onPlay(ctx) {
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        preventLethalDamageByBanishingNamedCard: "Minerva Themis",
+        ongoingLabel: "The next lethal damage may be prevented by banishing Minerva Themis",
+      });
+    },
+  },
   "bequest the vast beyond|1": { onPlay(ctx) { buffNextAttack(ctx, { attackCostReduction: ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "runechant")).length, appliesToType: ["runeblade"] }); } },
   "runic reckoning|1": { modifyPlayCost(ctx, base) { return Math.max(0, base - ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "runechant")).length); }, onPlay(ctx) { buffNextAttack(ctx, { attack: 3, appliesToType: ["runeblade"] }); } },
   "alluring inducement|2": {
@@ -336,7 +364,6 @@ export const dtdHighRarity: Record<string, CardScript> = {
   "hold the line|3": { onPlay(ctx) { if (Number(ctx.getPlayerFlag(opponentSeat(ctx), "cardsDrawnThisTurn")) >= 2) ctx.preventNextDamage(ctx.seat, 3); } },
   "hack to reality|2": { onPlay(ctx) { buffNextAttack(ctx, { attack: 2 }); ctx.addModifier({ scope: "until-end-of-turn" }); }, canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.state.modifiers.some((modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "chain-link"); }, onHit(ctx) { const auras = ctx.player(opponentSeat(ctx)).board.filter((card) => has(ctx, card, "aura") && data(ctx, card).cardType !== "token" && (data(ctx, card).cost ?? 0) <= (ctx.link?.damage ?? 0)); if (auras.length) ctx.requestCardChoice("hack-aura", "Destroy a non-token aura", auras.map((card) => card.instanceId)); }, onChoose(ctx, hook, option) { if (hook === "hack-aura") ctx.destroyPermanent(Number(option)); } },
   "warmonger's diplomacy|3": {
-    additionalCostToOpponents: 0,
     onPlay(ctx) {
       ctx.requestChoice("diplomacy-opponent", "Choose war or peace", ["war", "peace"], opponentSeat(ctx));
     },
@@ -361,7 +388,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
       }
     },
   },
-  "poison the well|3": { onPlay(ctx) { ctx.addModifier({ scope: "until-end-of-turn" }); }, replaceHeroLifeGain(ctx, gainingSeat, amount) { if (amount <= 0 || ctx.getCounter("used") > 0) return amount; ctx.setCounter("used", 1); ctx.loseLife(gainingSeat, amount); return 0; }, onHeroGainedLife() {} },
+  "poison the well|3": { onPlay(ctx) { ctx.addModifier({ scope: "until-end-of-turn" }); }, replaceHeroLifeGain(ctx, gainingSeat, amount) { if (amount <= 0 || ctx.getCounter("used") > 0) return amount; ctx.setCounter("used", 1); ctx.loseLife(gainingSeat, amount); return 0; } },
 };
 
 for (const script of [dtdHighRarity["figment of judgment|2"], dtdHighRarity["themis, archangel of judgment|0"]]) {

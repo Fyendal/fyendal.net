@@ -278,6 +278,9 @@ function modifierEffectLabel(state: GameStateInternal, m: Modifier): string {
   if (m.goAgainIfPlayedOrCreatedSubtype) {
     parts.push(`go again if a ${m.goAgainIfPlayedOrCreatedSubtype} was played or created`);
   }
+  if (m.goAgainIfAttackPowerAtLeast !== undefined) {
+    parts.push(`go again with ${m.goAgainIfAttackPowerAtLeast} or more attack`);
+  }
   if (m.onHitGainLife) parts.push(`gain ${m.onHitGainLife} life on next hit`);
   if (m.onHitDraw) parts.push(`draw ${m.onHitDraw} on next hit`);
   if (m.onHitDestroyTopDeckCards) {
@@ -966,7 +969,7 @@ function projectState(
       hit: link.hit,
       // Go again persists on the link; granted defense-restriction keywords
       // are snapshotted before chain-link modifiers expire.
-      goAgain: link.goAgain || conditionalModifierGrantsGoAgain(state, link),
+      goAgain: link.goAgain || conditionalModifierGrantsGoAgain(state, link, attack),
       wagered: link.flags.wagered === true,
       ...(link.wagerRewards?.length ? { wagerRewards: [...link.wagerRewards] } : {}),
       dominate: link.resolved

@@ -53,7 +53,11 @@ function beginLinkResolutionStep(state: GameStateInternal,
   // Aura attacks with a +1{p} counter have go again (Cosmo), evaluated at the
   // same beginning-of-Resolution-Step boundary as other go again abilities.
   if (!link.goAgain && runtime.dispatchFlow("auraAttackGoAgain", state, link)) runtime.events.grantLinkGoAgain(state, link);
-  if (!link.goAgain && conditionalModifierGrantsGoAgain(state, link)) {
+  if (!link.goAgain && conditionalModifierGrantsGoAgain(
+    state,
+    link,
+    computeAttack(state, runtime, link),
+  )) {
     runtime.events.grantLinkGoAgain(state, link);
   }
   if (link.goAgain) {
