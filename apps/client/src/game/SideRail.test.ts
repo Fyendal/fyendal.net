@@ -2,6 +2,15 @@ import { createElement, type ComponentProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { SideRail, undoWithoutFocus } from "./SideRail.js";
+import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
+
+function renderSideRail(props: ComponentProps<typeof SideRail>): string {
+  return renderToStaticMarkup(createElement(
+    TestI18nProvider,
+    null,
+    createElement(SideRail, props),
+  ));
+}
 
 function sideRailProps(
   overrides: Partial<ComponentProps<typeof SideRail>> = {},
@@ -65,7 +74,7 @@ describe("undo focus", () => {
 
 describe("game control icons", () => {
   it("uses the same SVG sizing hook for mobile emotes and the other icon controls", () => {
-    const html = renderToStaticMarkup(createElement(SideRail, sideRailProps()));
+    const html = renderSideRail(sideRailProps());
 
     expect(html.match(/class="game-control-icon"/g)).toHaveLength(5);
     expect(html.match(/data-control-icon="undo"/g)).toHaveLength(2);
@@ -94,17 +103,17 @@ describe("game control icons", () => {
   });
 
   it("omits the mobile action slot when there is no contextual action", () => {
-    const html = renderToStaticMarkup(createElement(SideRail, sideRailProps({
+    const html = renderSideRail(sideRailProps({
       mobilePrimaryActionLabel: null,
-    })));
+    }));
 
     expect(html).not.toContain("mobile-primary-action");
   });
 
   it("disables desktop and mobile undo while a room command is pending", () => {
-    const html = renderToStaticMarkup(createElement(SideRail, sideRailProps({
+    const html = renderSideRail(sideRailProps({
       undoDisabled: true,
-    })));
+    }));
 
     expect(html.match(/disabled=""/g)).toHaveLength(2);
     expect(html).toContain('aria-label="Undo last action"');
@@ -114,29 +123,29 @@ describe("game control icons", () => {
 
 describe("opponent connection status", () => {
   it("shows a disconnected opponent while the game is active", () => {
-    const html = renderToStaticMarkup(createElement(SideRail, sideRailProps({
+    const html = renderSideRail(sideRailProps({
       opponentConnected: false,
-    })));
+    }));
 
     expect(html.match(/opponent disconnected — waiting…/g)).toHaveLength(2);
   });
 
   it("hides a disconnected opponent after a winner is determined", () => {
-    const html = renderToStaticMarkup(createElement(SideRail, sideRailProps({
+    const html = renderSideRail(sideRailProps({
       opponentConnected: false,
       winnerText: "Victory!",
-    })));
+    }));
 
     expect(html).not.toContain("opponent disconnected");
     expect(html.match(/Victory!/g)).toHaveLength(2);
   });
 
   it("hides stale opponent connection state while viewing an earlier replay frame", () => {
-    const html = renderToStaticMarkup(createElement(SideRail, sideRailProps({
+    const html = renderSideRail(sideRailProps({
       opponentConnected: false,
       winnerText: null,
       replaying: true,
-    })));
+    }));
 
     expect(html).not.toContain("opponent disconnected");
   });
@@ -144,7 +153,7 @@ describe("opponent connection status", () => {
 
 describe("game log hero colors", () => {
   it("marks the player's hero as friendly and the opponent's hero as opponent", () => {
-    const html = renderToStaticMarkup(createElement(SideRail, sideRailProps({
+    const html = renderSideRail(sideRailProps({
       log: [
         "— Turn 4: Dash's turn —",
         "Dash plays Zero to Sixty",
@@ -152,7 +161,7 @@ describe("game log hero colors", () => {
         "Bravo blocks",
         "Dash creates a Quicken",
       ],
-    })));
+    }));
 
     expect(html).toContain("log-turn-divider");
     expect(html).toContain("Turn 4: Your turn");

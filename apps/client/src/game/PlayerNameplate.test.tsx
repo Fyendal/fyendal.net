@@ -2,13 +2,18 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { PlayerNameplate } from "./PlayerNameplate.js";
+import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 
 describe("PlayerNameplate", () => {
   it("puts the early-tester logo before the username", () => {
-    const html = renderToStaticMarkup(createElement(PlayerNameplate, {
-      placement: "opponent",
-      profile: { username: "ArakniFan", badge: "early-tester" },
-    }));
+    const html = renderToStaticMarkup(createElement(
+      TestI18nProvider,
+      null,
+      createElement(PlayerNameplate, {
+        placement: "opponent",
+        profile: { username: "ArakniFan", badge: "early-tester" },
+      }),
+    ));
 
     expect(html).toContain('class="player-nameplate player-nameplate-opponent"');
     expect(html.indexOf('src="/logo.png"')).toBeLessThan(html.indexOf("ArakniFan"));

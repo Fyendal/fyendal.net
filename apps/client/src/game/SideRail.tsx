@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useIntl } from "react-intl";
 import type { EmoteMessage, UndoTarget } from "@fyendal/shared";
 import type {
   MotionPreference,
@@ -208,6 +209,7 @@ export function SideRail({
   mobilePrimaryActionDisabled?: boolean;
   onMobilePrimaryAction: () => void;
 }) {
+  const intl = useIntl();
   const [showSettings, setShowSettings] = useState(false);
   const [showBugReport, setShowBugReport] = useState(false);
   const [showMobileLog, setShowMobileLog] = useState(false);
@@ -311,7 +313,12 @@ export function SideRail({
           </button>
         ) : null}
         {(onConcede || onUndo || onPriorityWindowModeChange) && (
-          <button className="rail-icon" aria-label="Settings" title="Settings" onClick={() => setShowSettings(true)}>
+          <button
+            className="rail-icon"
+            aria-label={intl.formatMessage({ id: "settings.title" })}
+            title={intl.formatMessage({ id: "settings.title" })}
+            onClick={() => setShowSettings(true)}
+          >
             <ControlIcon kind="settings" />
           </button>
         )}
@@ -417,7 +424,7 @@ export function SideRail({
                   setShowSettings(true);
                 }}
               >
-                Settings
+                {intl.formatMessage({ id: "settings.title" })}
               </button>
             ) : null}
             {onReportBug ? (

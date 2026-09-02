@@ -1,4 +1,154 @@
 {
+  "account.badge.description": [
+    {
+      "type": 0,
+      "value": "Choose one earned badge to display before your username, or hide badges."
+    }
+  ],
+  "account.badge.displayed": [
+    {
+      "type": 0,
+      "value": "Displayed badge"
+    }
+  ],
+  "account.badge.earlyTester.description": [
+    {
+      "type": 0,
+      "value": "Awarded to players who joined Fyendal during early testing."
+    }
+  ],
+  "account.badge.earlyTester.name": [
+    {
+      "type": 0,
+      "value": "Early Tester"
+    }
+  ],
+  "account.badge.imageAlt": [
+    {
+      "type": 1,
+      "value": "name"
+    },
+    {
+      "type": 0,
+      "value": " badge"
+    }
+  ],
+  "account.badge.loading": [
+    {
+      "type": 0,
+      "value": "Loading badges…"
+    }
+  ],
+  "account.badge.none": [
+    {
+      "type": 0,
+      "value": "No badge"
+    }
+  ],
+  "account.badge.title": [
+    {
+      "type": 0,
+      "value": "Player badge"
+    }
+  ],
+  "account.badge.updated": [
+    {
+      "type": 0,
+      "value": "Displayed badge updated."
+    }
+  ],
+  "account.currentPassword": [
+    {
+      "type": 0,
+      "value": "Current password"
+    }
+  ],
+  "account.currentPasswordPlaceholder": [
+    {
+      "type": 0,
+      "value": "current password"
+    }
+  ],
+  "account.delete.action": [
+    {
+      "type": 0,
+      "value": "Delete account"
+    }
+  ],
+  "account.delete.confirm": [
+    {
+      "type": 0,
+      "value": "Delete your Fyendal account, saved decks, retained replays, bug reports, sessions, and active rooms from the active service? This cannot be undone."
+    }
+  ],
+  "account.delete.deleting": [
+    {
+      "type": 0,
+      "value": "Deleting…"
+    }
+  ],
+  "account.delete.description": [
+    {
+      "type": 0,
+      "value": "This permanently removes your account, sessions, saved decks, retained replays, bug reports, and active rooms. Backup copies expire according to the retention policy."
+    }
+  ],
+  "account.delete.title": [
+    {
+      "type": 0,
+      "value": "Delete account"
+    }
+  ],
+  "account.export.description": [
+    {
+      "type": 0,
+      "value": "Download your account details, saved decklists, room membership records, retained replays, and bug-report references as JSON."
+    }
+  ],
+  "account.export.download": [
+    {
+      "type": 0,
+      "value": "Download account data"
+    }
+  ],
+  "account.export.preparing": [
+    {
+      "type": 0,
+      "value": "Preparing…"
+    }
+  ],
+  "account.export.title": [
+    {
+      "type": 0,
+      "value": "Export your data"
+    }
+  ],
+  "account.signedInAs": [
+    {
+      "type": 0,
+      "value": "Signed in as "
+    },
+    {
+      "type": 8,
+      "value": "strong",
+      "children": [
+        {
+          "type": 1,
+          "value": "username"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": "."
+    }
+  ],
+  "account.title": [
+    {
+      "type": 0,
+      "value": "Account"
+    }
+  ],
   "auth.consent": [
     {
       "type": 0,
@@ -129,6 +279,94 @@
       "value": "Flesh and Blood Online"
     }
   ],
+  "common.all": [
+    {
+      "type": 0,
+      "value": "All"
+    }
+  ],
+  "common.back": [
+    {
+      "type": 0,
+      "value": "Back"
+    }
+  ],
+  "common.cancel": [
+    {
+      "type": 0,
+      "value": "Cancel"
+    }
+  ],
+  "common.closeNamed": [
+    {
+      "type": 0,
+      "value": "Close "
+    },
+    {
+      "type": 1,
+      "value": "title"
+    }
+  ],
+  "common.connection.connected": [
+    {
+      "type": 0,
+      "value": "Connected"
+    }
+  ],
+  "common.connection.disconnected": [
+    {
+      "type": 0,
+      "value": "Not connected"
+    }
+  ],
+  "common.connection.reconnecting": [
+    {
+      "type": 0,
+      "value": "Reconnecting…"
+    }
+  ],
+  "common.deck": [
+    {
+      "type": 0,
+      "value": "Deck"
+    }
+  ],
+  "common.endGame": [
+    {
+      "type": 0,
+      "value": "End Game"
+    }
+  ],
+  "common.format": [
+    {
+      "type": 0,
+      "value": "Format"
+    }
+  ],
+  "common.import": [
+    {
+      "type": 0,
+      "value": "Import"
+    }
+  ],
+  "common.leave": [
+    {
+      "type": 0,
+      "value": "Leave"
+    }
+  ],
+  "common.loading": [
+    {
+      "type": 0,
+      "value": "Loading…"
+    }
+  ],
+  "common.logOut": [
+    {
+      "type": 0,
+      "value": "Log out"
+    }
+  ],
   "common.option.no": [
     {
       "type": 0,
@@ -155,6 +393,12 @@
     {
       "type": 0,
       "value": " (Space)"
+    }
+  ],
+  "common.versusShort": [
+    {
+      "type": 0,
+      "value": "vs"
     }
   ],
   "discord.label": [
@@ -195,6 +439,24 @@
     {
       "type": 0,
       "value": "Terms of Service"
+    }
+  ],
+  "format.classicBattles": [
+    {
+      "type": 0,
+      "value": "Classic Battles"
+    }
+  ],
+  "format.classicConstructed": [
+    {
+      "type": 0,
+      "value": "Classic Constructed"
+    }
+  ],
+  "format.silverAge": [
+    {
+      "type": 0,
+      "value": "Silver Age"
     }
   ],
   "landing.accountAccess": [
@@ -415,6 +677,1270 @@
       "value": "Language"
     }
   ],
+  "lobby.action.accept": [
+    {
+      "type": 0,
+      "value": "Accept"
+    }
+  ],
+  "lobby.action.cancelSearch": [
+    {
+      "type": 0,
+      "value": "Cancel Match Search"
+    }
+  ],
+  "lobby.action.decline": [
+    {
+      "type": 0,
+      "value": "Decline"
+    }
+  ],
+  "lobby.action.findMatch": [
+    {
+      "type": 0,
+      "value": "Find Match"
+    }
+  ],
+  "lobby.action.inviteFriend": [
+    {
+      "type": 0,
+      "value": "Invite Friend"
+    }
+  ],
+  "lobby.action.join": [
+    {
+      "type": 0,
+      "value": "Join"
+    }
+  ],
+  "lobby.action.playBot": [
+    {
+      "type": 0,
+      "value": "Play vs Bot"
+    }
+  ],
+  "lobby.action.rejoin": [
+    {
+      "type": 0,
+      "value": "Rejoin"
+    }
+  ],
+  "lobby.action.rejoinRoom": [
+    {
+      "type": 0,
+      "value": "Rejoin Room"
+    }
+  ],
+  "lobby.action.spectate": [
+    {
+      "type": 0,
+      "value": "Spectate"
+    }
+  ],
+  "lobby.bot.bravo.description": [
+    {
+      "type": 0,
+      "value": "A defensive deck that sets up powerful, disruptive attacks."
+    }
+  ],
+  "lobby.bot.briar.description": [
+    {
+      "type": 0,
+      "value": "An aggressive deck that chains elemental attacks together."
+    }
+  ],
+  "lobby.bot.chooseOpponent": [
+    {
+      "type": 0,
+      "value": "Choose your opponent"
+    }
+  ],
+  "lobby.bot.cindra.description": [
+    {
+      "type": 0,
+      "value": "A fast redline deck built to keep the pressure on."
+    }
+  ],
+  "lobby.bot.hala.description": [
+    {
+      "type": 0,
+      "value": "A flexible value deck that balances offense and defense."
+    }
+  ],
+  "lobby.bot.ira.description": [
+    {
+      "type": 0,
+      "value": "A straightforward Armory Deck that's great for beginners."
+    }
+  ],
+  "lobby.bot.jarl.description": [
+    {
+      "type": 0,
+      "value": "A patient Earth and Ice Guardian that blocks efficiently and attacks with disruptive two-card hands."
+    }
+  ],
+  "lobby.bot.prompt": [
+    {
+      "type": 0,
+      "value": "Who would you like to practice against?"
+    }
+  ],
+  "lobby.bot.type.aggro": [
+    {
+      "type": 0,
+      "value": "Aggro"
+    }
+  ],
+  "lobby.bot.type.beginner": [
+    {
+      "type": 0,
+      "value": "Beginner"
+    }
+  ],
+  "lobby.bot.type.elemental": [
+    {
+      "type": 0,
+      "value": "Aggro"
+    }
+  ],
+  "lobby.bot.type.guardian": [
+    {
+      "type": 0,
+      "value": "Defensive"
+    }
+  ],
+  "lobby.bot.type.midrange": [
+    {
+      "type": 0,
+      "value": "Midrange"
+    }
+  ],
+  "lobby.bugFixed.body": [
+    {
+      "type": 0,
+      "value": "A bug you reported has been fixed. Thanks for helping us improve Fyendal!"
+    }
+  ],
+  "lobby.bugFixed.dismiss": [
+    {
+      "type": 0,
+      "value": "Dismiss bug fixed notification"
+    }
+  ],
+  "lobby.bugFixed.title": [
+    {
+      "type": 0,
+      "value": "Bug fixed"
+    }
+  ],
+  "lobby.cardPool.allowFuture": [
+    {
+      "type": 0,
+      "value": "Allow Future Cards"
+    }
+  ],
+  "lobby.cardPool.description": [
+    {
+      "type": 0,
+      "value": "Set card eligibility separately for each format."
+    }
+  ],
+  "lobby.cardPool.title": [
+    {
+      "type": 0,
+      "value": "Card Pool"
+    }
+  ],
+  "lobby.count.live": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " live"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " live"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "lobby.count.rejoin": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " to rejoin"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " to rejoin"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "lobby.count.saved": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " saved"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " saved"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "lobby.count.waiting": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " waiting"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " waiting"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "lobby.createRoom.open": [
+    {
+      "type": 0,
+      "value": "Open Room"
+    }
+  ],
+  "lobby.createRoom.private": [
+    {
+      "type": 0,
+      "value": "Private Room"
+    }
+  ],
+  "lobby.createRoom.title": [
+    {
+      "type": 0,
+      "value": "Create a room"
+    }
+  ],
+  "lobby.deck.actions": [
+    {
+      "type": 1,
+      "value": "name"
+    },
+    {
+      "type": 0,
+      "value": " actions"
+    }
+  ],
+  "lobby.deck.bannedList": [
+    {
+      "type": 0,
+      "value": "Banned cards:\n"
+    },
+    {
+      "type": 1,
+      "value": "cards"
+    }
+  ],
+  "lobby.deck.blocked": [
+    {
+      "type": 1,
+      "value": "reason"
+    },
+    {
+      "type": 0,
+      "value": ". Update the deck or card-pool setting to play it."
+    }
+  ],
+  "lobby.deck.catalog": [
+    {
+      "type": 0,
+      "value": "Deck catalog"
+    }
+  ],
+  "lobby.deck.choose": [
+    {
+      "type": 0,
+      "value": "Choose a deck"
+    }
+  ],
+  "lobby.deck.closeActions": [
+    {
+      "type": 0,
+      "value": "Close "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    },
+    {
+      "type": 0,
+      "value": " actions"
+    }
+  ],
+  "lobby.deck.confirmDelete": [
+    {
+      "type": 0,
+      "value": "Confirm Delete"
+    }
+  ],
+  "lobby.deck.countAndSource": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " · "
+    },
+    {
+      "type": 1,
+      "value": "source"
+    }
+  ],
+  "lobby.deck.deckList": [
+    {
+      "type": 0,
+      "value": "Deck list"
+    }
+  ],
+  "lobby.deck.deckListPlaceholder": [
+    {
+      "type": 0,
+      "value": "Hero: …\nWeapons: …\nDeck cards\n3x Card Name (red)\nSideboard cards\n…"
+    }
+  ],
+  "lobby.deck.delete": [
+    {
+      "type": 0,
+      "value": "Delete Deck"
+    }
+  ],
+  "lobby.deck.deleting": [
+    {
+      "type": 0,
+      "value": "Deleting…"
+    }
+  ],
+  "lobby.deck.edit": [
+    {
+      "type": 0,
+      "value": "Edit Deck"
+    }
+  ],
+  "lobby.deck.emptyFiltered": [
+    {
+      "type": 0,
+      "value": "No decks match these filters"
+    }
+  ],
+  "lobby.deck.emptyFilteredBody": [
+    {
+      "type": 0,
+      "value": "Clear the search or choose a different legality filter."
+    }
+  ],
+  "lobby.deck.emptySaved": [
+    {
+      "type": 0,
+      "value": "No saved decks yet"
+    }
+  ],
+  "lobby.deck.emptySavedBody": [
+    {
+      "type": 0,
+      "value": "Import a Fabrary link or full deck list to start playing."
+    }
+  ],
+  "lobby.deck.error.importFailed": [
+    {
+      "type": 0,
+      "value": "Import failed"
+    }
+  ],
+  "lobby.deck.error.unimplementedCards": [
+    {
+      "type": 0,
+      "value": "Not implemented yet: "
+    },
+    {
+      "type": 1,
+      "value": "cards"
+    }
+  ],
+  "lobby.deck.error.unknownCards": [
+    {
+      "type": 0,
+      "value": "Unknown cards: "
+    },
+    {
+      "type": 1,
+      "value": "cards"
+    }
+  ],
+  "lobby.deck.error.updateFailed": [
+    {
+      "type": 0,
+      "value": "Update failed"
+    }
+  ],
+  "lobby.deck.fabraryLink": [
+    {
+      "type": 0,
+      "value": "Fabrary link"
+    }
+  ],
+  "lobby.deck.fabraryUrl": [
+    {
+      "type": 0,
+      "value": "Fabrary deck URL"
+    }
+  ],
+  "lobby.deck.fabraryUrlHint": [
+    {
+      "type": 0,
+      "value": "Changing this URL reimports and revalidates the Fabrary deck."
+    }
+  ],
+  "lobby.deck.format": [
+    {
+      "type": 0,
+      "value": "Deck format"
+    }
+  ],
+  "lobby.deck.formatDecks": [
+    {
+      "type": 1,
+      "value": "format"
+    },
+    {
+      "type": 0,
+      "value": " Decks"
+    }
+  ],
+  "lobby.deck.futureList": [
+    {
+      "type": 0,
+      "value": "Future cards:\n"
+    },
+    {
+      "type": 1,
+      "value": "cards"
+    }
+  ],
+  "lobby.deck.heroAndCount": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " · "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "lobby.deck.illegalCards": [
+    {
+      "type": 0,
+      "value": "Illegal cards: "
+    },
+    {
+      "type": 1,
+      "value": "cards"
+    }
+  ],
+  "lobby.deck.import": [
+    {
+      "type": 0,
+      "value": "Import Deck"
+    }
+  ],
+  "lobby.deck.importFirst": [
+    {
+      "type": 0,
+      "value": "Import Your First Deck"
+    }
+  ],
+  "lobby.deck.importing": [
+    {
+      "type": 0,
+      "value": "Importing…"
+    }
+  ],
+  "lobby.deck.includesBanned": [
+    {
+      "type": 0,
+      "value": "Includes banned "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "lobby.deck.includesFuture": [
+    {
+      "type": 0,
+      "value": "Includes future "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "lobby.deck.keep": [
+    {
+      "type": 0,
+      "value": "Keep Deck"
+    }
+  ],
+  "lobby.deck.legality": [
+    {
+      "type": 0,
+      "value": "Legality"
+    }
+  ],
+  "lobby.deck.mine": [
+    {
+      "type": 0,
+      "value": "My Decks"
+    }
+  ],
+  "lobby.deck.name": [
+    {
+      "type": 0,
+      "value": "Deck name"
+    }
+  ],
+  "lobby.deck.needsAttention": [
+    {
+      "type": 0,
+      "value": "Needs Attention"
+    }
+  ],
+  "lobby.deck.optionalName": [
+    {
+      "type": 0,
+      "value": "Name (optional)"
+    }
+  ],
+  "lobby.deck.pasteList": [
+    {
+      "type": 0,
+      "value": "Paste deck list"
+    }
+  ],
+  "lobby.deck.playable": [
+    {
+      "type": 0,
+      "value": "Playable"
+    }
+  ],
+  "lobby.deck.preconstructed": [
+    {
+      "type": 0,
+      "value": "Preconstructed"
+    }
+  ],
+  "lobby.deck.replacementList": [
+    {
+      "type": 0,
+      "value": "Replacement decklist"
+    }
+  ],
+  "lobby.deck.replacementPlaceholder": [
+    {
+      "type": 0,
+      "value": "Leave blank to keep the current card list"
+    }
+  ],
+  "lobby.deck.saveChanges": [
+    {
+      "type": 0,
+      "value": "Save Changes"
+    }
+  ],
+  "lobby.deck.saving": [
+    {
+      "type": 0,
+      "value": "Saving…"
+    }
+  ],
+  "lobby.deck.search": [
+    {
+      "type": 0,
+      "value": "Search decks"
+    }
+  ],
+  "lobby.deck.searchOptions": [
+    {
+      "type": 0,
+      "value": "Search & Options"
+    }
+  ],
+  "lobby.deck.searchPlaceholder": [
+    {
+      "type": 0,
+      "value": "Deck or hero name…"
+    }
+  ],
+  "lobby.deck.source": [
+    {
+      "type": 0,
+      "value": "Deck source"
+    }
+  ],
+  "lobby.deck.source.preconstructed": [
+    {
+      "type": 0,
+      "value": "Preconstructed"
+    }
+  ],
+  "lobby.deck.source.saved": [
+    {
+      "type": 0,
+      "value": "Saved"
+    }
+  ],
+  "lobby.discordCommunity": [
+    {
+      "type": 0,
+      "value": "Discord Community"
+    }
+  ],
+  "lobby.futureCardsNote": [
+    {
+      "type": 0,
+      "value": "This room allows implemented future cards."
+    }
+  ],
+  "lobby.home.bringDeck": [
+    {
+      "type": 0,
+      "value": "Bring your own deck"
+    }
+  ],
+  "lobby.home.chooseStart": [
+    {
+      "type": 0,
+      "value": "Choose one of these three ways to start playing."
+    }
+  ],
+  "lobby.home.importCc": [
+    {
+      "type": 0,
+      "value": "Import your CC deck"
+    }
+  ],
+  "lobby.home.importSilverAge": [
+    {
+      "type": 0,
+      "value": "Import your Silver Age deck"
+    }
+  ],
+  "lobby.home.playCc": [
+    {
+      "type": 0,
+      "value": "Play CC"
+    }
+  ],
+  "lobby.home.playSilverAge": [
+    {
+      "type": 0,
+      "value": "Play Silver Age"
+    }
+  ],
+  "lobby.home.rejoinRooms": [
+    {
+      "type": 0,
+      "value": "Rejoin Rooms"
+    }
+  ],
+  "lobby.home.tryPrecon": [
+    {
+      "type": 0,
+      "value": "Try with a precon"
+    }
+  ],
+  "lobby.home.welcome": [
+    {
+      "type": 0,
+      "value": "Welcome to Fyendal, "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": "."
+    }
+  ],
+  "lobby.home.welcomeBack": [
+    {
+      "type": 0,
+      "value": "Welcome back, "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": "."
+    }
+  ],
+  "lobby.invite.afterCreate": [
+    {
+      "type": 0,
+      "value": "You’ll "
+    },
+    {
+      "type": 1,
+      "value": "choice"
+    },
+    {
+      "type": 0,
+      "value": " as soon as your account is ready."
+    }
+  ],
+  "lobby.invite.afterSignIn": [
+    {
+      "type": 0,
+      "value": "This invitation will still be here after you sign in."
+    }
+  ],
+  "lobby.invite.alreadySeated": [
+    {
+      "type": 0,
+      "value": "You already have a seat in this room."
+    }
+  ],
+  "lobby.invite.choiceDeck": [
+    {
+      "type": 0,
+      "value": "choose a ready-to-play deck"
+    }
+  ],
+  "lobby.invite.choiceHero": [
+    {
+      "type": 0,
+      "value": "choose Rhinar or Dorinthea"
+    }
+  ],
+  "lobby.invite.chooseDeck": [
+    {
+      "type": 0,
+      "value": "Choose a deck to join this private room."
+    }
+  ],
+  "lobby.invite.chooseHero": [
+    {
+      "type": 0,
+      "value": "Choose your hero to join this private room."
+    }
+  ],
+  "lobby.invite.createAccount": [
+    {
+      "type": 0,
+      "value": "Create Player Account"
+    }
+  ],
+  "lobby.invite.createAccountTitle": [
+    {
+      "type": 0,
+      "value": "Create your player account"
+    }
+  ],
+  "lobby.invite.createThenJoin": [
+    {
+      "type": 0,
+      "value": "Create a free player account, "
+    },
+    {
+      "type": 1,
+      "value": "choice"
+    },
+    {
+      "type": 0,
+      "value": ", and join your friend."
+    }
+  ],
+  "lobby.invite.full": [
+    {
+      "type": 0,
+      "value": "This room already has two players, but you can watch the match."
+    }
+  ],
+  "lobby.invite.fullGuest": [
+    {
+      "type": 0,
+      "value": "This room already has two players, but you can watch the match without an account."
+    }
+  ],
+  "lobby.invite.haveAccount": [
+    {
+      "type": 0,
+      "value": "I Have an Account"
+    }
+  ],
+  "lobby.invite.invited": [
+    {
+      "type": 0,
+      "value": "You’ve been invited to play "
+    },
+    {
+      "type": 1,
+      "value": "format"
+    },
+    {
+      "type": 0,
+      "value": "."
+    }
+  ],
+  "lobby.invite.needDeck": [
+    {
+      "type": 0,
+      "value": "You need a "
+    },
+    {
+      "type": 1,
+      "value": "format"
+    },
+    {
+      "type": 0,
+      "value": " deck before opening this invite."
+    }
+  ],
+  "lobby.invite.signInTitle": [
+    {
+      "type": 0,
+      "value": "Sign in to join your friend"
+    }
+  ],
+  "lobby.invite.spectateGuest": [
+    {
+      "type": 0,
+      "value": "Just spectate without an account"
+    }
+  ],
+  "lobby.invite.title": [
+    {
+      "type": 0,
+      "value": "Room invitation · "
+    },
+    {
+      "type": 1,
+      "value": "code"
+    }
+  ],
+  "lobby.loadingDecks": [
+    {
+      "type": 0,
+      "value": "Loading your decks…"
+    }
+  ],
+  "lobby.nav.account": [
+    {
+      "type": 0,
+      "value": "Account"
+    }
+  ],
+  "lobby.nav.allRooms": [
+    {
+      "type": 0,
+      "value": "All Rooms"
+    }
+  ],
+  "lobby.nav.decks": [
+    {
+      "type": 0,
+      "value": "Decks"
+    }
+  ],
+  "lobby.nav.home": [
+    {
+      "type": 0,
+      "value": "Home"
+    }
+  ],
+  "lobby.nav.more": [
+    {
+      "type": 0,
+      "value": "More"
+    }
+  ],
+  "lobby.nav.primary": [
+    {
+      "type": 0,
+      "value": "Primary navigation"
+    }
+  ],
+  "lobby.nav.replays": [
+    {
+      "type": 0,
+      "value": "Replays"
+    }
+  ],
+  "lobby.nav.rooms": [
+    {
+      "type": 0,
+      "value": "Rooms"
+    }
+  ],
+  "lobby.room.fullHint": [
+    {
+      "type": 0,
+      "value": "Room is full — spectate to watch"
+    }
+  ],
+  "lobby.room.loadingState": [
+    {
+      "type": 0,
+      "value": "Loading the latest room state."
+    }
+  ],
+  "lobby.room.restoring": [
+    {
+      "type": 0,
+      "value": "Restoring Game…"
+    }
+  ],
+  "lobby.room.status.full": [
+    {
+      "type": 0,
+      "value": "Full"
+    }
+  ],
+  "lobby.room.status.open": [
+    {
+      "type": 0,
+      "value": "Open"
+    }
+  ],
+  "lobby.room.status.started": [
+    {
+      "type": 0,
+      "value": "Started"
+    }
+  ],
+  "lobby.room.status.yours": [
+    {
+      "type": 0,
+      "value": "Your room"
+    }
+  ],
+  "lobby.rooms.all": [
+    {
+      "type": 0,
+      "value": "All Rooms"
+    }
+  ],
+  "lobby.rooms.create": [
+    {
+      "type": 0,
+      "value": "Create Room"
+    }
+  ],
+  "lobby.rooms.empty": [
+    {
+      "type": 0,
+      "value": "No public games to spectate right now."
+    }
+  ],
+  "lobby.rooms.importOne": [
+    {
+      "type": 0,
+      "value": "import one"
+    }
+  ],
+  "lobby.rooms.noFormatDecks": [
+    {
+      "type": 0,
+      "value": "No "
+    },
+    {
+      "type": 1,
+      "value": "format"
+    },
+    {
+      "type": 0,
+      "value": " decks yet —"
+    }
+  ],
+  "lobby.rooms.open": [
+    {
+      "type": 0,
+      "value": "Open Rooms"
+    }
+  ],
+  "lobby.rooms.pickDeck": [
+    {
+      "type": 0,
+      "value": "Join "
+    },
+    {
+      "type": 1,
+      "value": "code"
+    },
+    {
+      "type": 0,
+      "value": " — pick a deck"
+    }
+  ],
+  "lobby.rooms.pickHero": [
+    {
+      "type": 0,
+      "value": "Join "
+    },
+    {
+      "type": 1,
+      "value": "code"
+    },
+    {
+      "type": 0,
+      "value": " — pick a hero"
+    }
+  ],
+  "lobby.rooms.started": [
+    {
+      "type": 0,
+      "value": "Started Games"
+    }
+  ],
+  "lobby.rooms.yours": [
+    {
+      "type": 0,
+      "value": "Your Rooms"
+    }
+  ],
+  "lobby.waiting.forOpponent": [
+    {
+      "type": 0,
+      "value": "Waiting for opponent…"
+    }
+  ],
+  "lobby.waiting.matchFound": [
+    {
+      "type": 0,
+      "value": "Match found"
+    }
+  ],
+  "lobby.waiting.namedOpponent": [
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " is waiting for you."
+    }
+  ],
+  "lobby.waiting.opponent": [
+    {
+      "type": 0,
+      "value": "Your opponent is waiting for you."
+    }
+  ],
+  "lobby.waiting.playersPreparing": [
+    {
+      "type": 0,
+      "value": "The players are still getting ready; the game board appears here once the match begins."
+    }
+  ],
+  "lobby.waiting.ready": [
+    {
+      "type": 0,
+      "value": "Ready to play?"
+    }
+  ],
+  "lobby.waiting.shareHint": [
+    {
+      "type": 0,
+      "value": "Friends who open the link can choose a deck or hero and join."
+    }
+  ],
+  "lobby.waiting.shareLink": [
+    {
+      "type": 0,
+      "value": "Share this link:"
+    }
+  ],
+  "lobby.waiting.spectating": [
+    {
+      "type": 0,
+      "value": "Spectating — waiting for the game to start"
+    }
+  ],
   "meta.home.description": [
     {
       "type": 0,
@@ -621,6 +2147,294 @@
     {
       "type": 0,
       "value": "Loading…"
+    }
+  ],
+  "settings.animations": [
+    {
+      "type": 0,
+      "value": "Animations"
+    }
+  ],
+  "settings.animations.preference": [
+    {
+      "type": 0,
+      "value": "Animation preference"
+    }
+  ],
+  "settings.animations.tooltip": [
+    {
+      "type": 0,
+      "value": "Default follows your operating system's reduced-motion setting."
+    }
+  ],
+  "settings.audioVisuals": [
+    {
+      "type": 0,
+      "value": "Audio & Visuals"
+    }
+  ],
+  "settings.close": [
+    {
+      "type": 0,
+      "value": "Close settings"
+    }
+  ],
+  "settings.concede.action": [
+    {
+      "type": 0,
+      "value": "Concede game"
+    }
+  ],
+  "settings.concede.confirm": [
+    {
+      "type": 0,
+      "value": "Concede the game?"
+    }
+  ],
+  "settings.concede.yes": [
+    {
+      "type": 0,
+      "value": "Yes, concede"
+    }
+  ],
+  "settings.confirmActions": [
+    {
+      "type": 0,
+      "value": "Confirm actions"
+    }
+  ],
+  "settings.confirmActions.aria": [
+    {
+      "type": 0,
+      "value": "Confirm actions when playing cards or activating abilities"
+    }
+  ],
+  "settings.confirmActions.tooltip": [
+    {
+      "type": 0,
+      "value": "Requires confirmation when playing cards or activating abilities."
+    }
+  ],
+  "settings.danger": [
+    {
+      "type": 0,
+      "value": "Danger Zone"
+    }
+  ],
+  "settings.gameplay": [
+    {
+      "type": 0,
+      "value": "Gameplay"
+    }
+  ],
+  "settings.guidance.disableHint": [
+    {
+      "type": 0,
+      "value": "Uncheck Show guidance in Settings, or"
+    }
+  ],
+  "settings.guidance.disableNow": [
+    {
+      "type": 0,
+      "value": "disable now"
+    }
+  ],
+  "settings.guidance.title": [
+    {
+      "type": 0,
+      "value": "Guidance settings"
+    }
+  ],
+  "settings.guidance.tooltip": [
+    {
+      "type": 0,
+      "value": "Uncheck Show guidance in Settings, or select Disable now."
+    }
+  ],
+  "settings.history": [
+    {
+      "type": 0,
+      "value": "Game History"
+    }
+  ],
+  "settings.history.previousTurnStart": [
+    {
+      "type": 0,
+      "value": "Beginning of previous turn"
+    }
+  ],
+  "settings.history.restore": [
+    {
+      "type": 0,
+      "value": "Restore turn"
+    }
+  ],
+  "settings.history.restoreConfirm": [
+    {
+      "type": 0,
+      "value": "Restore the beginning of turn "
+    },
+    {
+      "type": 1,
+      "value": "turn"
+    },
+    {
+      "type": 0,
+      "value": "? Later actions will be discarded."
+    }
+  ],
+  "settings.history.turnStart": [
+    {
+      "type": 0,
+      "value": "Beginning of turn "
+    },
+    {
+      "type": 1,
+      "value": "turn"
+    }
+  ],
+  "settings.history.undoLast": [
+    {
+      "type": 0,
+      "value": "Undo last action"
+    }
+  ],
+  "settings.motion.default": [
+    {
+      "type": 0,
+      "value": "Default"
+    }
+  ],
+  "settings.motion.defaultDescription": [
+    {
+      "type": 0,
+      "value": "Default: follow your operating system's reduced-motion setting"
+    }
+  ],
+  "settings.motion.full": [
+    {
+      "type": 0,
+      "value": "Full"
+    }
+  ],
+  "settings.motion.fullDescription": [
+    {
+      "type": 0,
+      "value": "Full: show card travel and connection animations"
+    }
+  ],
+  "settings.motion.reduced": [
+    {
+      "type": 0,
+      "value": "Reduced"
+    }
+  ],
+  "settings.motion.reducedDescription": [
+    {
+      "type": 0,
+      "value": "Reduced: hide card travel and connections; keep local card fades"
+    }
+  ],
+  "settings.playableCards": [
+    {
+      "type": 0,
+      "value": "Playable cards"
+    }
+  ],
+  "settings.playableCards.cue": [
+    {
+      "type": 0,
+      "value": "Playable card cue"
+    }
+  ],
+  "settings.playableCards.glow": [
+    {
+      "type": 0,
+      "value": "Glow"
+    }
+  ],
+  "settings.playableCards.highContrast": [
+    {
+      "type": 0,
+      "value": "High contrast"
+    }
+  ],
+  "settings.playableCards.tooltip": [
+    {
+      "type": 0,
+      "value": "Glow adds a restrained green halo. High contrast uses a crisp outline."
+    }
+  ],
+  "settings.priority": [
+    {
+      "type": 0,
+      "value": "Priority"
+    }
+  ],
+  "settings.priority.alwaysPause": [
+    {
+      "type": 0,
+      "value": "Always pause"
+    }
+  ],
+  "settings.priority.autoPass": [
+    {
+      "type": 0,
+      "value": "Auto-pass"
+    }
+  ],
+  "settings.priority.autoPassDescription": [
+    {
+      "type": 0,
+      "value": "Auto-pass: immediately pass priority when no instant, reaction, or board ability can be played"
+    }
+  ],
+  "settings.priority.behavior": [
+    {
+      "type": 0,
+      "value": "Priority behavior"
+    }
+  ],
+  "settings.showGuidance": [
+    {
+      "type": 0,
+      "value": "Show guidance"
+    }
+  ],
+  "settings.showGuidance.tooltip": [
+    {
+      "type": 0,
+      "value": "Shows priority-window prompts and trigger descriptions."
+    }
+  ],
+  "settings.soundEffects": [
+    {
+      "type": 0,
+      "value": "Sound effects"
+    }
+  ],
+  "settings.soundEffects.tooltip": [
+    {
+      "type": 0,
+      "value": "Plays subtle sounds when cards are drawn, shuffled, or played."
+    }
+  ],
+  "settings.title": [
+    {
+      "type": 0,
+      "value": "Settings"
+    }
+  ],
+  "settings.volume": [
+    {
+      "type": 0,
+      "value": "Volume"
+    }
+  ],
+  "settings.volume.aria": [
+    {
+      "type": 0,
+      "value": "Sound effects volume"
     }
   ]
 }

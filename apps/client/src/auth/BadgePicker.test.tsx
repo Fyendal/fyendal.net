@@ -2,14 +2,19 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { BadgePicker } from "./BadgePicker.js";
+import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 
 describe("BadgePicker", () => {
   it("renders one radio group with exactly one selected badge", () => {
-    const html = renderToStaticMarkup(createElement(BadgePicker, {
-      availableBadges: ["early-tester"],
-      selectedBadge: "early-tester",
-      onSelect: vi.fn(),
-    }));
+    const html = renderToStaticMarkup(createElement(
+      TestI18nProvider,
+      null,
+      createElement(BadgePicker, {
+        availableBadges: ["early-tester"],
+        selectedBadge: "early-tester",
+        onSelect: vi.fn(),
+      }),
+    ));
 
     expect(html.match(/name="account-badge"/g)).toHaveLength(2);
     expect(html.match(/checked=""/g)).toHaveLength(1);

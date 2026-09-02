@@ -7,7 +7,7 @@ import { Auth } from "../auth/AuthCard.js";
 import { CONSTRUCTED_FORMATS, type ConstructedFormat } from "../domain.js";
 import { SiteFooter } from "../legal/SiteFooter.js";
 import { DiscordLink } from "./DiscordLink.js";
-import { FORMAT_LABELS } from "./FormatBadge.js";
+import { FormatName } from "./FormatBadge.js";
 import { ModalSurface } from "../components/ModalSurface.js";
 import { LanguagePicker } from "../i18n/LanguagePicker.js";
 import { mobileDeckDestination, mobileLobbyDestinationSelected } from "./mobileNavigation.js";
@@ -206,12 +206,12 @@ export function Lobby() {
           <div className="bug-fixed-notification" role="status" aria-live="polite">
             <span className="bug-fixed-notification-icon" aria-hidden="true">✓</span>
             <span>
-              <strong>Bug fixed</strong>
-              A bug you reported has been fixed. Thanks for helping us improve Fyendal!
+              <strong>{intl.formatMessage({ id: "lobby.bugFixed.title" })}</strong>
+              {intl.formatMessage({ id: "lobby.bugFixed.body" })}
             </span>
             <button
               type="button"
-              aria-label="Dismiss bug fixed notification"
+              aria-label={intl.formatMessage({ id: "lobby.bugFixed.dismiss" })}
               onClick={() => void dismissBugReportNotifications()}
             >
               ×
@@ -227,11 +227,16 @@ export function Lobby() {
             <span className="user-chip">
               <span className="user-name">{authUser}</span>
               <button className="linklike" onClick={() => void logout()}>
-                Log out
+                {intl.formatMessage({ id: "common.logOut" })}
               </button>
             </span>
             <span className="mobile-user-name" title={authUser ?? undefined}>{authUser}</span>
-            <span className={`conn-dot${connected ? " on" : ""}`} title={connected ? "connected" : "not connected"} />
+            <span
+              className={`conn-dot${connected ? " on" : ""}`}
+              title={intl.formatMessage({
+                id: connected ? "common.connection.connected" : "common.connection.disconnected",
+              })}
+            />
           </div>
         </div>
       </header>
@@ -244,9 +249,11 @@ export function Lobby() {
                 className={`format-card${rail === "home" ? " selected" : ""}`}
                 onClick={() => setRail("home")}
               >
-                <span className="format-card-name">Home</span>
+                <span className="format-card-name">{intl.formatMessage({ id: "lobby.nav.home" })}</span>
                 {rejoinRoomCount > 0 ? (
-                  <span className="format-card-queue">{rejoinRoomCount} to rejoin</span>
+                  <span className="format-card-queue">
+                    {intl.formatMessage({ id: "lobby.count.rejoin" }, { count: rejoinRoomCount })}
+                  </span>
                 ) : null}
               </button>
               {CONSTRUCTED_FORMATS.map((f) => {
@@ -256,9 +263,11 @@ export function Lobby() {
                     className={`format-card${f === rail ? " selected" : ""}`}
                     onClick={() => setRail(f)}
                   >
-                    <span className="format-card-name">{FORMAT_LABELS[f]}</span>
+                    <FormatName format={f} className="format-card-name" />
                     {queueCounts[f] > 0 ? (
-                      <span className="format-card-queue">{queueCounts[f]} waiting</span>
+                      <span className="format-card-queue">
+                        {intl.formatMessage({ id: "lobby.count.waiting" }, { count: queueCounts[f] })}
+                      </span>
                     ) : null}
                   </button>
                 );
@@ -267,25 +276,29 @@ export function Lobby() {
                 className={`format-card${rail === "all" ? " selected" : ""}`}
                 onClick={() => setRail("all")}
               >
-                <span className="format-card-name">All Rooms</span>
+                <span className="format-card-name">{intl.formatMessage({ id: "lobby.nav.allRooms" })}</span>
                 {rooms.length > 0 ? (
-                  <span className="format-card-queue">{rooms.length} live</span>
+                  <span className="format-card-queue">
+                    {intl.formatMessage({ id: "lobby.count.live" }, { count: rooms.length })}
+                  </span>
                 ) : null}
               </button>
               <button
                 className={`format-card${rail === "replays" ? " selected" : ""}`}
                 onClick={() => setRail("replays")}
               >
-                <span className="format-card-name">Replays</span>
+                <span className="format-card-name">{intl.formatMessage({ id: "lobby.nav.replays" })}</span>
                 {savedReplays.length > 0 ? (
-                  <span className="format-card-queue">{savedReplays.length} saved</span>
+                  <span className="format-card-queue">
+                    {intl.formatMessage({ id: "lobby.count.saved" }, { count: savedReplays.length })}
+                  </span>
                 ) : null}
               </button>
               <button
                 className={`format-card${rail === "account" ? " selected" : ""}`}
                 onClick={() => setRail("account")}
               >
-                <span className="format-card-name">Account</span>
+                <span className="format-card-name">{intl.formatMessage({ id: "lobby.nav.account" })}</span>
               </button>
             </div>
           </div>
@@ -295,10 +308,10 @@ export function Lobby() {
           <Suspense fallback={rail === "home"
             ? (
                 <div className="panel home-panel">
-                  <p className="muted" role="status">Loading your decks…</p>
+                  <p className="muted" role="status">{intl.formatMessage({ id: "lobby.loadingDecks" })}</p>
                 </div>
               )
-            : <p className="muted" role="status">Loading…</p>}>
+            : <p className="muted" role="status">{intl.formatMessage({ id: "common.loading" })}</p>}>
             {rail === "home" && <Home onGoToFormat={setRail} />}
             {rail === "all" && <RoomList onGoToFormat={setRail} />}
             {(rail === "cc" || rail === "silver-age") && (
@@ -315,7 +328,7 @@ export function Lobby() {
           </Suspense>
         </div>
       </div>
-      <nav className="mobile-lobby-nav" aria-label="Primary navigation">
+      <nav className="mobile-lobby-nav" aria-label={intl.formatMessage({ id: "lobby.nav.primary" })}>
         <button
           type="button"
           className={mobileLobbyDestinationSelected("home", rail) ? "selected" : ""}
@@ -323,7 +336,7 @@ export function Lobby() {
           onClick={() => setRail("home")}
         >
           <MobileLobbyIcon kind="home" />
-          <span className="mobile-lobby-nav-label">Home</span>
+          <span className="mobile-lobby-nav-label">{intl.formatMessage({ id: "lobby.nav.home" })}</span>
         </button>
         <button
           type="button"
@@ -332,7 +345,7 @@ export function Lobby() {
           onClick={() => setRail(mobileDeckDestination(lastDeckFormat))}
         >
           <MobileLobbyIcon kind="decks" />
-          <span className="mobile-lobby-nav-label">Decks</span>
+          <span className="mobile-lobby-nav-label">{intl.formatMessage({ id: "lobby.nav.decks" })}</span>
         </button>
         <button
           type="button"
@@ -341,7 +354,7 @@ export function Lobby() {
           onClick={() => setRail("all")}
         >
           <MobileLobbyIcon kind="rooms" />
-          <span className="mobile-lobby-nav-label">Rooms</span>
+          <span className="mobile-lobby-nav-label">{intl.formatMessage({ id: "lobby.nav.rooms" })}</span>
         </button>
         <button
           type="button"
@@ -350,7 +363,7 @@ export function Lobby() {
           onClick={() => setRail("replays")}
         >
           <MobileLobbyIcon kind="replays" />
-          <span className="mobile-lobby-nav-label">Replays</span>
+          <span className="mobile-lobby-nav-label">{intl.formatMessage({ id: "lobby.nav.replays" })}</span>
         </button>
         <button
           type="button"
@@ -360,19 +373,21 @@ export function Lobby() {
           onClick={() => setShowMobileMore(true)}
         >
           <MobileLobbyIcon kind="more" />
-          <span className="mobile-lobby-nav-label">More</span>
+          <span className="mobile-lobby-nav-label">{intl.formatMessage({ id: "lobby.nav.more" })}</span>
         </button>
       </nav>
       {showMobileMore ? (
         <ModalSurface
-          title="More"
+          title={intl.formatMessage({ id: "lobby.nav.more" })}
           className="mobile-lobby-more"
           onClose={() => setShowMobileMore(false)}
         >
           <div className="mobile-more-user">
             <span>{authUser}</span>
             <strong className={connected ? "connected" : "disconnected"}>
-              {connected ? "Connected" : "Reconnecting…"}
+              {intl.formatMessage({
+                id: connected ? "common.connection.connected" : "common.connection.reconnecting",
+              })}
             </strong>
           </div>
           <div className="mobile-more-actions">
@@ -383,14 +398,16 @@ export function Lobby() {
                 setShowMobileMore(false);
               }}
             >
-              Account
+              {intl.formatMessage({ id: "lobby.nav.account" })}
             </button>
             <a href="https://discord.gg/DpTjVbfPVv" target="_blank" rel="noopener noreferrer">
-              Discord Community
+              {intl.formatMessage({ id: "lobby.discordCommunity" })}
             </a>
-            <a href="/terms">Terms of Service</a>
-            <a href="/privacy">Privacy Policy</a>
-            <button className="mobile-more-logout" onClick={() => void logout()}>Log Out</button>
+            <a href="/terms">{intl.formatMessage({ id: "footer.terms" })}</a>
+            <a href="/privacy">{intl.formatMessage({ id: "footer.privacy" })}</a>
+            <button className="mobile-more-logout" onClick={() => void logout()}>
+              {intl.formatMessage({ id: "common.logOut" })}
+            </button>
           </div>
         </ModalSurface>
       ) : null}

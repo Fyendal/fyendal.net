@@ -1,11 +1,14 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { BotOpponentModal } from "./BotOpponentModal.js";
+import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 
 describe("BotOpponentModal", () => {
   it("offers Ira, Hala, Cindra, and Jarl in a focused opponent dialog", () => {
     const html = renderToStaticMarkup(
-      <BotOpponentModal format="cc" onSelect={vi.fn()} onClose={vi.fn()} />,
+      <TestI18nProvider>
+        <BotOpponentModal format="cc" onSelect={vi.fn()} onClose={vi.fn()} />
+      </TestI18nProvider>,
     );
 
     expect(html).toContain('role="dialog"');
@@ -31,7 +34,9 @@ describe("BotOpponentModal", () => {
 
   it("offers Briar and Bravo for Silver Age", () => {
     const html = renderToStaticMarkup(
-      <BotOpponentModal format="silver-age" onSelect={vi.fn()} onClose={vi.fn()} />,
+      <TestI18nProvider>
+        <BotOpponentModal format="silver-age" onSelect={vi.fn()} onClose={vi.fn()} />
+      </TestI18nProvider>,
     );
 
     expect(html).toContain("Briar");

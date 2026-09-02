@@ -187,10 +187,14 @@ describe("priority guidance help", () => {
   }
 
   it("explains how to disable future guidance from a reaction prompt", () => {
-    const html = renderToStaticMarkup(createElement(PendingDecisionPanel, {
-      model: pendingModel("defense-reaction"),
-      viewerSeat: 0,
-    }));
+    const html = renderToStaticMarkup(createElement(
+      TestI18nProvider,
+      null,
+      createElement(PendingDecisionPanel, {
+        model: pendingModel("defense-reaction"),
+        viewerSeat: 0,
+      }),
+    ));
 
     expect(html).toContain('class="decision-guidance-info"');
     expect(html).toContain('class="decision decision-options decision-priority-guidance"');
@@ -201,9 +205,11 @@ describe("priority guidance help", () => {
     expect(html).toContain('aria-haspopup="dialog"');
     expect(html).toContain('aria-expanded="false"');
 
-    const popover = renderToStaticMarkup(createElement(GuidanceSettingsPopover, {
-      onDisableGuidance: () => undefined,
-    }));
+    const popover = renderToStaticMarkup(createElement(
+      TestI18nProvider,
+      null,
+      createElement(GuidanceSettingsPopover, { onDisableGuidance: () => undefined }),
+    ));
     expect(popover).toContain('class="decision-guidance-disable"');
     expect(popover).toContain("disable now");
   });

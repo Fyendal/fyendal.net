@@ -2,13 +2,18 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { ModalSurface } from "./ModalSurface.js";
+import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 
 describe("ModalSurface", () => {
   it("labels the dialog and always provides an explicit close control", () => {
     const html = renderToStaticMarkup(createElement(
-      ModalSurface,
-      { title: "Deck Actions", onClose: vi.fn(), description: "Choose an action." },
-      createElement("button", null, "Play"),
+      TestI18nProvider,
+      null,
+      createElement(
+        ModalSurface,
+        { title: "Deck Actions", onClose: vi.fn(), description: "Choose an action." },
+        createElement("button", null, "Play"),
+      ),
     ));
 
     expect(html).toContain('role="dialog"');

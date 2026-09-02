@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import type { RoomSummary } from "@fyendal/shared";
 import type { ConstructedFormat } from "../domain.js";
 import { useStore } from "../store.js";
-import { FORMAT_LABELS } from "./FormatBadge.js";
+import { formatLabel } from "./FormatBadge.js";
 import {
   DeckTile,
   deckChoicesFor,
@@ -22,6 +23,7 @@ import { RoomCard } from "./RoomCard.js";
  * the seat by token or account).
  */
 export function RoomList(props: { onGoToFormat: (format: ConstructedFormat) => void }) {
+  const intl = useIntl();
   const { rooms, joinRoom, decks } = useStore(useShallow((state) => ({
     rooms: state.rooms,
     joinRoom: state.joinRoom,
@@ -55,15 +57,17 @@ export function RoomList(props: { onGoToFormat: (format: ConstructedFormat) => v
   return (
     <div className="panel all-rooms-panel">
       <div className="rooms-header">
-        <h2 className="panel-title">All Rooms</h2>
-        <button className="btn-primary" onClick={() => setCreating(true)}>Create Room</button>
+        <h2 className="panel-title">{intl.formatMessage({ id: "lobby.rooms.all" })}</h2>
+        <button className="btn-primary" onClick={() => setCreating(true)}>
+          {intl.formatMessage({ id: "lobby.rooms.create" })}
+        </button>
       </div>
       {rooms.length === 0 ? (
-        <p className="muted">no public games to spectate right now</p>
+        <p className="muted">{intl.formatMessage({ id: "lobby.rooms.empty" })}</p>
       ) : null}
       {yourRooms.length > 0 ? (
         <section className="room-section">
-          <h3 className="panel-title">Your Rooms</h3>
+          <h3 className="panel-title">{intl.formatMessage({ id: "lobby.rooms.yours" })}</h3>
           <div className="room-grid">
             {yourRooms.map((room) => (
               <RoomCard
@@ -79,7 +83,7 @@ export function RoomList(props: { onGoToFormat: (format: ConstructedFormat) => v
       ) : null}
       {openRooms.length > 0 ? (
         <section className="room-section">
-          <h3 className="panel-title">Open Rooms</h3>
+          <h3 className="panel-title">{intl.formatMessage({ id: "lobby.rooms.open" })}</h3>
           <div className="room-grid">
             {openRooms.map((room) => (
               <RoomCard
@@ -95,7 +99,7 @@ export function RoomList(props: { onGoToFormat: (format: ConstructedFormat) => v
       ) : null}
       {startedGames.length > 0 ? (
         <section className="room-section">
-          <h3 className="panel-title">Started Games</h3>
+          <h3 className="panel-title">{intl.formatMessage({ id: "lobby.rooms.started" })}</h3>
           <div className="room-grid">
             {startedGames.map((room) => (
               <RoomCard
@@ -113,10 +117,15 @@ export function RoomList(props: { onGoToFormat: (format: ConstructedFormat) => v
       {picker && (
         <div className="modal-backdrop" onClick={() => setPicker(null)}>
           <div className="deck-pick-modal" onClick={(e) => e.stopPropagation()}>
-            <h2 className="panel-title">Join {picker.code} — pick a deck</h2>
+            <h2 className="panel-title">
+              {intl.formatMessage({ id: "lobby.rooms.pickDeck" }, { code: picker.code })}
+            </h2>
             {pickerDecks.length === 0 ? (
               <p className="muted">
-                no {FORMAT_LABELS[picker.format]} decks yet —{" "}
+                {intl.formatMessage(
+                  { id: "lobby.rooms.noFormatDecks" },
+                  { format: formatLabel(intl, picker.format) },
+                )}{" "}
                 <button
                   className="linklike"
                   onClick={() => {
@@ -124,7 +133,7 @@ export function RoomList(props: { onGoToFormat: (format: ConstructedFormat) => v
                     props.onGoToFormat(picker.format as ConstructedFormat);
                   }}
                 >
-                  import one
+                  {intl.formatMessage({ id: "lobby.rooms.importOne" })}
                 </button>
               </p>
             ) : (
@@ -143,7 +152,7 @@ export function RoomList(props: { onGoToFormat: (format: ConstructedFormat) => v
               </div>
             )}
             <div className="deck-actions">
-              <button onClick={() => setPicker(null)}>Cancel</button>
+              <button onClick={() => setPicker(null)}>{intl.formatMessage({ id: "common.cancel" })}</button>
             </div>
           </div>
         </div>
@@ -152,7 +161,9 @@ export function RoomList(props: { onGoToFormat: (format: ConstructedFormat) => v
       {heroPick && (
         <div className="modal-backdrop" onClick={() => setHeroPick(null)}>
           <div className="deck-pick-modal" onClick={(e) => e.stopPropagation()}>
-            <h2 className="panel-title">Join {heroPick.code} — pick a hero</h2>
+            <h2 className="panel-title">
+              {intl.formatMessage({ id: "lobby.rooms.pickHero" }, { code: heroPick.code })}
+            </h2>
             <div className="lobby-row">
               <button
                 onClick={() => {
@@ -172,7 +183,7 @@ export function RoomList(props: { onGoToFormat: (format: ConstructedFormat) => v
               </button>
             </div>
             <div className="deck-actions">
-              <button onClick={() => setHeroPick(null)}>Cancel</button>
+              <button onClick={() => setHeroPick(null)}>{intl.formatMessage({ id: "common.cancel" })}</button>
             </div>
           </div>
         </div>

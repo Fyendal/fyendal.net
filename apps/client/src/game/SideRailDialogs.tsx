@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, type CSSProperties } from "react";
+import { useIntl } from "react-intl";
 import type { UndoTarget } from "@fyendal/shared";
 import type {
   MotionPreference,
@@ -7,15 +8,15 @@ import type {
 } from "../storage.js";
 
 const MOTION_PREFERENCES: readonly MotionPreference[] = ["system", "full", "reduced"];
-const MOTION_PREFERENCE_LABEL: Readonly<Record<MotionPreference, string>> = {
-  system: "Default",
-  full: "Full",
-  reduced: "Reduced",
+const MOTION_PREFERENCE_LABEL_ID: Readonly<Record<MotionPreference, string>> = {
+  system: "settings.motion.default",
+  full: "settings.motion.full",
+  reduced: "settings.motion.reduced",
 };
-const MOTION_PREFERENCE_DESCRIPTION: Readonly<Record<MotionPreference, string>> = {
-  system: "Default: follow your operating system's reduced-motion setting",
-  full: "Full: show card travel and connection animations",
-  reduced: "Reduced: hide card travel and connections; keep local card fades",
+const MOTION_PREFERENCE_DESCRIPTION_ID: Readonly<Record<MotionPreference, string>> = {
+  system: "settings.motion.defaultDescription",
+  full: "settings.motion.fullDescription",
+  reduced: "settings.motion.reducedDescription",
 };
 
 export function GameSettingsDialog({
@@ -59,6 +60,7 @@ export function GameSettingsDialog({
   onSoundEffectsVolumeChange: (volume: number) => void;
   onClose: () => void;
 }) {
+  const intl = useIntl();
   const [confirmConcede, setConfirmConcede] = useState(false);
   const [confirmUndoTarget, setConfirmUndoTarget] = useState<UndoTarget | null>(null);
   const close = useCallback(onClose, [onClose]);
@@ -81,27 +83,38 @@ export function GameSettingsDialog({
         onClick={(event) => event.stopPropagation()}
       >
         <header className="settings-header">
-          <h2 className="overlay-title" id="settings-title">Settings</h2>
-          <button type="button" className="settings-close" aria-label="Close settings" onClick={close}>
+          <h2 className="overlay-title" id="settings-title">
+            {intl.formatMessage({ id: "settings.title" })}
+          </h2>
+          <button
+            type="button"
+            className="settings-close"
+            aria-label={intl.formatMessage({ id: "settings.close" })}
+            onClick={close}
+          >
             ×
           </button>
         </header>
         <div className="settings-grid">
           <section className="settings-section settings-gameplay">
-            <h3 className="settings-heading">Gameplay</h3>
+            <h3 className="settings-heading">{intl.formatMessage({ id: "settings.gameplay" })}</h3>
             <div className="settings-control-list">
               {onPriorityWindowModeChange ? (
                 <div className="settings-control-row settings-priority-row">
-                  <span className="settings-control-name">Priority</span>
-                  <div className="settings-segmented" role="group" aria-label="Priority behavior">
+                  <span className="settings-control-name">{intl.formatMessage({ id: "settings.priority" })}</span>
+                  <div
+                    className="settings-segmented"
+                    role="group"
+                    aria-label={intl.formatMessage({ id: "settings.priority.behavior" })}
+                  >
                     <button
                       type="button"
                       className={priorityWindowMode === "auto-pass" ? "settings-selected" : ""}
                       aria-pressed={priorityWindowMode === "auto-pass"}
-                      aria-label="Auto-pass: immediately pass priority when no instant, reaction, or board ability can be played"
+                      aria-label={intl.formatMessage({ id: "settings.priority.autoPassDescription" })}
                       onClick={() => onPriorityWindowModeChange("auto-pass")}
                     >
-                      Auto-pass
+                      {intl.formatMessage({ id: "settings.priority.autoPass" })}
                     </button>
                     <button
                       type="button"
@@ -109,17 +122,17 @@ export function GameSettingsDialog({
                       aria-pressed={priorityWindowMode === "always-pause"}
                       onClick={() => onPriorityWindowModeChange("always-pause")}
                     >
-                      Always pause
+                      {intl.formatMessage({ id: "settings.priority.alwaysPause" })}
                     </button>
                   </div>
                 </div>
               ) : null}
               <label className="toggle-switch settings-control-row">
                 <span className="settings-control-name">
-                  Confirm actions
+                  {intl.formatMessage({ id: "settings.confirmActions" })}
                   <span
                     className="settings-info-tooltip"
-                    data-tooltip="Requires confirmation when playing cards or activating abilities."
+                    data-tooltip={intl.formatMessage({ id: "settings.confirmActions.tooltip" })}
                     aria-hidden="true"
                   >
                     i
@@ -128,7 +141,7 @@ export function GameSettingsDialog({
                 <input
                   type="checkbox"
                   role="switch"
-                  aria-label="Confirm actions when playing cards or activating abilities"
+                  aria-label={intl.formatMessage({ id: "settings.confirmActions.aria" })}
                   checked={!skipPlayConfirmation}
                   onChange={(event) => onSkipPlayConfirmationChange(!event.target.checked)}
                 />
@@ -136,10 +149,10 @@ export function GameSettingsDialog({
               </label>
               <label className="toggle-switch settings-control-row">
                 <span className="settings-control-name">
-                  Show guidance
+                  {intl.formatMessage({ id: "settings.showGuidance" })}
                   <span
                     className="settings-info-tooltip"
-                    data-tooltip="Shows priority-window prompts and trigger descriptions."
+                    data-tooltip={intl.formatMessage({ id: "settings.showGuidance.tooltip" })}
                     aria-hidden="true"
                   >
                     i
@@ -156,14 +169,14 @@ export function GameSettingsDialog({
             </div>
           </section>
           <section className="settings-section settings-presentation">
-            <h3 className="settings-heading">Audio &amp; Visuals</h3>
+            <h3 className="settings-heading">{intl.formatMessage({ id: "settings.audioVisuals" })}</h3>
             <div className="settings-control-list">
               <div className="settings-control-row settings-motion-row">
                 <span className="settings-control-name">
-                  Animations
+                  {intl.formatMessage({ id: "settings.animations" })}
                   <span
                     className="settings-info-tooltip"
-                    data-tooltip="Default follows your operating system's reduced-motion setting."
+                    data-tooltip={intl.formatMessage({ id: "settings.animations.tooltip" })}
                     aria-hidden="true"
                   >
                     i
@@ -172,7 +185,7 @@ export function GameSettingsDialog({
                 <div
                   className="settings-segmented settings-motion-segmented"
                   role="group"
-                  aria-label="Animation preference"
+                  aria-label={intl.formatMessage({ id: "settings.animations.preference" })}
                 >
                   {MOTION_PREFERENCES.map((preference) => (
                     <button
@@ -180,33 +193,37 @@ export function GameSettingsDialog({
                       type="button"
                       className={motionPreference === preference ? "settings-selected" : ""}
                       aria-pressed={motionPreference === preference}
-                      aria-label={MOTION_PREFERENCE_DESCRIPTION[preference]}
+                      aria-label={intl.formatMessage({ id: MOTION_PREFERENCE_DESCRIPTION_ID[preference] })}
                       onClick={() => onMotionPreferenceChange(preference)}
                     >
-                      {MOTION_PREFERENCE_LABEL[preference]}
+                      {intl.formatMessage({ id: MOTION_PREFERENCE_LABEL_ID[preference] })}
                     </button>
                   ))}
                 </div>
               </div>
               <div className="settings-control-row settings-choice-row">
                 <span className="settings-control-name">
-                  Playable cards
+                  {intl.formatMessage({ id: "settings.playableCards" })}
                   <span
                     className="settings-info-tooltip"
-                    data-tooltip="Glow adds a restrained green halo. High contrast uses a crisp outline."
+                    data-tooltip={intl.formatMessage({ id: "settings.playableCards.tooltip" })}
                     aria-hidden="true"
                   >
                     i
                   </span>
                 </span>
-                <div className="settings-segmented" role="group" aria-label="Playable card cue">
+                <div
+                  className="settings-segmented"
+                  role="group"
+                  aria-label={intl.formatMessage({ id: "settings.playableCards.cue" })}
+                >
                   <button
                     type="button"
                     className={playabilityCuePreference === "glow" ? "settings-selected" : ""}
                     aria-pressed={playabilityCuePreference === "glow"}
                     onClick={() => onPlayabilityCuePreferenceChange("glow")}
                   >
-                    Glow
+                    {intl.formatMessage({ id: "settings.playableCards.glow" })}
                   </button>
                   <button
                     type="button"
@@ -214,16 +231,16 @@ export function GameSettingsDialog({
                     aria-pressed={playabilityCuePreference === "high-contrast"}
                     onClick={() => onPlayabilityCuePreferenceChange("high-contrast")}
                   >
-                    High contrast
+                    {intl.formatMessage({ id: "settings.playableCards.highContrast" })}
                   </button>
                 </div>
               </div>
               <label className="toggle-switch settings-control-row">
                 <span className="settings-control-name">
-                  Sound effects
+                  {intl.formatMessage({ id: "settings.soundEffects" })}
                   <span
                     className="settings-info-tooltip"
-                    data-tooltip="Plays subtle sounds when cards are drawn, shuffled, or played."
+                    data-tooltip={intl.formatMessage({ id: "settings.soundEffects.tooltip" })}
                     aria-hidden="true"
                   >
                     i
@@ -232,14 +249,14 @@ export function GameSettingsDialog({
                 <input
                   type="checkbox"
                   role="switch"
-                  aria-label="Sound effects"
+                  aria-label={intl.formatMessage({ id: "settings.soundEffects" })}
                   checked={soundEffectsEnabled}
                   onChange={(event) => onSoundEffectsEnabledChange(event.target.checked)}
                 />
                 <span className="switch-track" aria-hidden="true" />
               </label>
               <label className="settings-control-row settings-volume-row">
-                <span className="settings-control-name">Volume</span>
+                <span className="settings-control-name">{intl.formatMessage({ id: "settings.volume" })}</span>
                 <span className="settings-volume-control">
                   <span
                     className="settings-volume-slider"
@@ -253,7 +270,7 @@ export function GameSettingsDialog({
                       step="5"
                       value={soundEffectsVolume}
                       disabled={!soundEffectsEnabled}
-                      aria-label="Sound effects volume"
+                      aria-label={intl.formatMessage({ id: "settings.volume.aria" })}
                       onChange={(event) => onSoundEffectsVolumeChange(Number(event.target.value))}
                     />
                   </span>
@@ -264,28 +281,36 @@ export function GameSettingsDialog({
           </section>
           {onUndo ? (
             <section className="settings-section">
-              <h3 className="settings-heading">Game History</h3>
+              <h3 className="settings-heading">{intl.formatMessage({ id: "settings.history" })}</h3>
               <div className="settings-action-list">
                 <button disabled={undoDisabled} onClick={() => { onUndo("last-action"); close(); }}>
-                  <span className="settings-action-title">⤺ Undo last action</span>
+                  <span className="settings-action-title">
+                    ⤺ {intl.formatMessage({ id: "settings.history.undoLast" })}
+                  </span>
                 </button>
                 <button disabled={undoDisabled} onClick={() => setConfirmUndoTarget("current-turn")}>
-                  <span className="settings-action-title">⤺ Beginning of turn {turn}</span>
+                  <span className="settings-action-title">
+                    ⤺ {intl.formatMessage({ id: "settings.history.turnStart" }, { turn })}
+                  </span>
                 </button>
                 <button
                   disabled={undoDisabled || turn <= 1}
                   onClick={() => setConfirmUndoTarget("previous-turn")}
                 >
                   <span className="settings-action-title">
-                    ⤺ Beginning of {turn > 1 ? `turn ${turn - 1}` : "previous turn"}
+                    ⤺ {turn > 1
+                      ? intl.formatMessage({ id: "settings.history.turnStart" }, { turn: turn - 1 })
+                      : intl.formatMessage({ id: "settings.history.previousTurnStart" })}
                   </span>
                 </button>
               </div>
               {confirmUndoTarget ? (
                 <div className="settings-confirm settings-confirm-block" role="alert">
                   <span>
-                    Restore the beginning of turn {confirmUndoTarget === "current-turn" ? turn : turn - 1}?
-                    Later actions will be discarded.
+                    {intl.formatMessage(
+                      { id: "settings.history.restoreConfirm" },
+                      { turn: confirmUndoTarget === "current-turn" ? turn : turn - 1 },
+                    )}
                   </span>
                   <div className="settings-options">
                     <button
@@ -293,9 +318,11 @@ export function GameSettingsDialog({
                       disabled={undoDisabled}
                       onClick={() => { onUndo(confirmUndoTarget); close(); }}
                     >
-                      Restore turn
+                      {intl.formatMessage({ id: "settings.history.restore" })}
                     </button>
-                    <button onClick={() => setConfirmUndoTarget(null)}>Cancel</button>
+                    <button onClick={() => setConfirmUndoTarget(null)}>
+                      {intl.formatMessage({ id: "common.cancel" })}
+                    </button>
                   </div>
                 </div>
               ) : null}
@@ -303,18 +330,20 @@ export function GameSettingsDialog({
           ) : null}
           {onConcede ? (
             <section className="settings-section settings-danger">
-              <h3 className="settings-heading">Danger Zone</h3>
+              <h3 className="settings-heading">{intl.formatMessage({ id: "settings.danger" })}</h3>
               {confirmConcede ? (
                 <div className="settings-confirm">
-                  <span>Concede the game?</span>
+                  <span>{intl.formatMessage({ id: "settings.concede.confirm" })}</span>
                   <button className="btn-primary" onClick={() => { onConcede(); close(); }}>
-                    Yes, concede
+                    {intl.formatMessage({ id: "settings.concede.yes" })}
                   </button>
-                  <button onClick={() => setConfirmConcede(false)}>Cancel</button>
+                  <button onClick={() => setConfirmConcede(false)}>
+                    {intl.formatMessage({ id: "common.cancel" })}
+                  </button>
                 </div>
               ) : (
                 <button className="settings-danger-button" onClick={() => setConfirmConcede(true)}>
-                  Concede game
+                  {intl.formatMessage({ id: "settings.concede.action" })}
                 </button>
               )}
             </section>

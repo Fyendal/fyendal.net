@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, type ReactNode } from "react";
+import { useIntl } from "react-intl";
 
 const FOCUSABLE = [
   "button:not([disabled])",
@@ -23,6 +24,7 @@ export function ModalSurface({
   className?: string;
   description?: string;
 }) {
+  const intl = useIntl();
   const titleId = useId();
   const descriptionId = useId();
   const backdropRef = useRef<HTMLDivElement>(null);
@@ -105,7 +107,7 @@ export function ModalSurface({
           <button
             type="button"
             className="modal-surface-close"
-            aria-label={`Close ${title}`}
+            aria-label={intl.formatMessage({ id: "common.closeNamed" }, { title })}
             onClick={onClose}
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">

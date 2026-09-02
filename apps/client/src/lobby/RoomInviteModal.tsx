@@ -1,14 +1,16 @@
 import { useState } from "react";
+import { useIntl } from "react-intl";
 import { useStore } from "../store.js";
 import { useShallow } from "zustand/react/shallow";
 import { Auth } from "../auth/AuthCard.js";
 import type { ConstructedFormat } from "../domain.js";
 import { DeckTile, deckChoicesFor } from "./DeckGrid.js";
-import { FORMAT_LABELS } from "./FormatBadge.js";
+import { formatLabel } from "./FormatBadge.js";
 
 /** URL-only room entry. Resolve the room first, then collect the deck or hero
  *  required to take its open player seat. */
 export function RoomInviteModal() {
+  const intl = useIntl();
   const [entryMode, setEntryMode] = useState<"choice" | "login" | "register">("choice");
   const { inviteRoom, authUser, decks, joinRoom, dismissInvite } = useStore(
     useShallow((state) => ({
@@ -25,20 +27,20 @@ export function RoomInviteModal() {
     joinRoom(inviteRoom.code, undefined, undefined, hero);
   };
   const newPlayerChoice = inviteRoom.format === "classic-battles"
-    ? "choose Rhinar or Dorinthea"
-    : "choose a ready-to-play deck";
+    ? intl.formatMessage({ id: "lobby.invite.choiceHero" })
+    : intl.formatMessage({ id: "lobby.invite.choiceDeck" });
 
   let content;
   if (!authUser && inviteRoom.spectateOnly) {
     content = (
       <>
-        <p>This room already has two players, but you can watch the match without an account.</p>
+        <p>{intl.formatMessage({ id: "lobby.invite.fullGuest" })}</p>
         <div className="invite-entry-actions">
           <button
             className="btn-primary"
             onClick={() => joinRoom(inviteRoom.code, undefined, true)}
           >
-            Spectate
+            {intl.formatMessage({ id: "lobby.action.spectate" })}
           </button>
         </div>
       </>
@@ -47,22 +49,27 @@ export function RoomInviteModal() {
     content = (
       <div className="invite-onboarding">
         <p className="invite-lede">
-          You’ve been invited to play {FORMAT_LABELS[inviteRoom.format]}.
+          {intl.formatMessage(
+            { id: "lobby.invite.invited" },
+            { format: formatLabel(intl, inviteRoom.format) },
+          )}
         </p>
         <p className="muted">
-          Create a free player account, {newPlayerChoice}, and join your friend.
+          {intl.formatMessage({ id: "lobby.invite.createThenJoin" }, { choice: newPlayerChoice })}
         </p>
         <div className="invite-entry-actions">
           <button className="btn-primary" onClick={() => setEntryMode("register")}>
-            Create Player Account
+            {intl.formatMessage({ id: "lobby.invite.createAccount" })}
           </button>
-          <button onClick={() => setEntryMode("login")}>I Have an Account</button>
+          <button onClick={() => setEntryMode("login")}>
+            {intl.formatMessage({ id: "lobby.invite.haveAccount" })}
+          </button>
         </div>
         <button
           className="linklike invite-spectate-link"
           onClick={() => joinRoom(inviteRoom.code, undefined, true)}
         >
-          Just spectate without an account
+          {intl.formatMessage({ id: "lobby.invite.spectateGuest" })}
         </button>
       </div>
     );
@@ -71,39 +78,43 @@ export function RoomInviteModal() {
     content = (
       <div className="invite-auth-step">
         <p className="invite-lede">
-          {creatingAccount ? "Create your player account" : "Sign in to join your friend"}
+          {intl.formatMessage({
+            id: creatingAccount ? "lobby.invite.createAccountTitle" : "lobby.invite.signInTitle",
+          })}
         </p>
         <p className="muted">
           {creatingAccount
-            ? `You’ll ${newPlayerChoice} as soon as your account is ready.`
-            : "This invitation will still be here after you sign in."}
+            ? intl.formatMessage({ id: "lobby.invite.afterCreate" }, { choice: newPlayerChoice })
+            : intl.formatMessage({ id: "lobby.invite.afterSignIn" })}
         </p>
         <Auth initialMode={creatingAccount ? "register" : "login"} />
-        <button className="linklike" onClick={() => setEntryMode("choice")}>Back</button>
+        <button className="linklike" onClick={() => setEntryMode("choice")}>
+          {intl.formatMessage({ id: "common.back" })}
+        </button>
       </div>
     );
   } else if (inviteRoom.yours) {
     content = (
       <>
-        <p>You already have a seat in this room.</p>
+        <p>{intl.formatMessage({ id: "lobby.invite.alreadySeated" })}</p>
         <button className="btn-primary" onClick={() => joinRoom(inviteRoom.code)}>
-          Rejoin Room
+          {intl.formatMessage({ id: "lobby.action.rejoinRoom" })}
         </button>
       </>
     );
   } else if (inviteRoom.spectateOnly) {
     content = (
       <>
-        <p>This room already has two players, but you can watch the match.</p>
+        <p>{intl.formatMessage({ id: "lobby.invite.full" })}</p>
         <button className="btn-primary" onClick={() => joinRoom(inviteRoom.code, undefined, true)}>
-          Spectate
+          {intl.formatMessage({ id: "lobby.action.spectate" })}
         </button>
       </>
     );
   } else if (inviteRoom.format === "classic-battles") {
     content = (
       <>
-        <p className="muted">Choose your hero to join this private room.</p>
+        <p className="muted">{intl.formatMessage({ id: "lobby.invite.chooseHero" })}</p>
         <div className="lobby-row invite-hero-actions">
           <button onClick={() => joinAsHero("rhinar")}>Rhinar</button>
           <button onClick={() => joinAsHero("dorinthea")}>Dorinthea</button>
@@ -118,11 +129,14 @@ export function RoomInviteModal() {
     );
     content = choices.length === 0 ? (
       <p className="muted">
-        You need a {FORMAT_LABELS[inviteRoom.format]} deck before opening this invite.
+        {intl.formatMessage(
+          { id: "lobby.invite.needDeck" },
+          { format: formatLabel(intl, inviteRoom.format) },
+        )}
       </p>
     ) : (
       <>
-        <p className="muted">Choose a deck to join this private room.</p>
+        <p className="muted">{intl.formatMessage({ id: "lobby.invite.chooseDeck" })}</p>
         <div className="deck-grid">
           {choices.map((deck) => (
             <DeckTile
@@ -149,14 +163,14 @@ export function RoomInviteModal() {
         }}
       >
         <h2 className="panel-title" id="invite-room-title">
-          Room invitation · {inviteRoom.code}
+          {intl.formatMessage({ id: "lobby.invite.title" }, { code: inviteRoom.code })}
         </h2>
         {inviteRoom.allowFutureCards ? (
-          <p className="future-cards-note">This room allows implemented future cards.</p>
+          <p className="future-cards-note">{intl.formatMessage({ id: "lobby.futureCardsNote" })}</p>
         ) : null}
         {content}
         <div className="deck-actions">
-          <button onClick={() => dismissInvite()}>Cancel</button>
+          <button onClick={() => dismissInvite()}>{intl.formatMessage({ id: "common.cancel" })}</button>
         </div>
       </div>
     </div>

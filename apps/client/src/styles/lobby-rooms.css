@@ -44,6 +44,16 @@
   min-height: 42px;
   padding: 9px 11px;
 }
+.create-room-format-name {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.create-room-format-name .format-name-subtitle {
+  color: #a99a80;
+  font-size: 10px;
+}
 .create-room-formats button.selected {
   border-color: var(--bronze);
   background: linear-gradient(180deg, #33220f, #241608);

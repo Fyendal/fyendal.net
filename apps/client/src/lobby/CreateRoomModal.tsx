@@ -1,11 +1,12 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import type { DeckSummary } from "@fyendal/protocol";
 import type { BotOpponent } from "@fyendal/shared";
 import type { ConstructedFormat } from "../domain.js";
 import { useStore } from "../store.js";
 import { deckChoicesFor, deckIsLegalForRoom } from "./DeckGrid.js";
-import { FORMAT_LABELS } from "./FormatBadge.js";
+import { FormatName } from "./FormatBadge.js";
 import { heroImageUrl } from "./heroImage.js";
 import { BotOpponentModal } from "./BotOpponentModal.js";
 
@@ -16,6 +17,7 @@ const DROPDOWN_MAX_HEIGHT = 260;
 const useClientLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 export function CreateRoomModal({ onClose }: { onClose: () => void }) {
+  const intl = useIntl();
   const {
     decks,
     createRoom,
@@ -66,10 +68,12 @@ export function CreateRoomModal({ onClose }: { onClose: () => void }) {
           if (event.key === "Escape") onClose();
         }}
       >
-        <h2 className="panel-title" id="create-room-title">Create a room</h2>
+        <h2 className="panel-title" id="create-room-title">
+          {intl.formatMessage({ id: "lobby.createRoom.title" })}
+        </h2>
 
         <fieldset className="create-room-fieldset">
-          <legend>Format</legend>
+          <legend>{intl.formatMessage({ id: "common.format" })}</legend>
           <div className="create-room-formats">
             {ROOM_FORMATS.map((roomFormat) => (
               <button
@@ -79,16 +83,16 @@ export function CreateRoomModal({ onClose }: { onClose: () => void }) {
                 aria-pressed={format === roomFormat}
                 onClick={() => setFormat(roomFormat)}
               >
-                {FORMAT_LABELS[roomFormat]}
+                <FormatName format={roomFormat} className="create-room-format-name" />
               </button>
             ))}
           </div>
         </fieldset>
 
         <fieldset className="create-room-fieldset">
-          <legend>Deck</legend>
+          <legend>{intl.formatMessage({ id: "common.deck" })}</legend>
           <label className="toggle-switch create-room-future-toggle">
-            <span>Allow Future Cards</span>
+            <span>{intl.formatMessage({ id: "lobby.cardPool.allowFuture" })}</span>
             <input
               type="checkbox"
               role="switch"
@@ -108,10 +112,10 @@ export function CreateRoomModal({ onClose }: { onClose: () => void }) {
 
         <div className="create-room-actions">
           <button className="btn-primary" disabled={!selectionValid} onClick={() => createHostedRoom("public")}>
-            Open Room
+            {intl.formatMessage({ id: "lobby.createRoom.open" })}
           </button>
           <button className="btn-private-room" disabled={!selectionValid} onClick={() => createHostedRoom("private")}>
-            Private Room
+            {intl.formatMessage({ id: "lobby.createRoom.private" })}
           </button>
           <button
             className="btn-bot"
@@ -120,9 +124,9 @@ export function CreateRoomModal({ onClose }: { onClose: () => void }) {
               setChoosingBot(true);
             }}
           >
-            Play vs Bot
+            {intl.formatMessage({ id: "lobby.action.playBot" })}
           </button>
-          <button onClick={onClose}>Cancel</button>
+          <button onClick={onClose}>{intl.formatMessage({ id: "common.cancel" })}</button>
         </div>
         {choosingBot ? (
           <BotOpponentModal
@@ -147,6 +151,7 @@ export function DeckDropdown({
   allowFuture: boolean;
   onSelect: (id: string) => void;
 }) {
+  const intl = useIntl();
   const [open, setOpen] = useState(false);
   const [layout, setLayout] = useState({ placement: "below" as "above" | "below", maxHeight: DROPDOWN_MAX_HEIGHT });
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -230,7 +235,7 @@ export function DeckDropdown({
       >
         {selected
           ? <DeckOptionContent key={selected.id} deck={selected} />
-          : <span className="muted">Choose a deck</span>}
+          : <span className="muted">{intl.formatMessage({ id: "lobby.deck.choose" })}</span>}
         <span className="create-room-deck-chevron" aria-hidden="true" />
       </button>
       {open ? (
@@ -238,7 +243,7 @@ export function DeckDropdown({
           ref={optionsRef}
           className="create-room-deck-options"
           role="listbox"
-          aria-label="Deck"
+          aria-label={intl.formatMessage({ id: "common.deck" })}
           data-placement={layout.placement}
           style={{ maxHeight: layout.maxHeight }}
         >
@@ -267,6 +272,7 @@ export function DeckDropdown({
 }
 
 function DeckOptionContent({ deck }: { deck: DeckSummary }) {
+  const intl = useIntl();
   const [imageAvailable, setImageAvailable] = useState(true);
 
   return (
@@ -284,7 +290,12 @@ function DeckOptionContent({ deck }: { deck: DeckSummary }) {
       )}
       <span className="create-room-deck-option-copy">
         <span title={deck.name}>{deck.name}</span>
-        <small>{deck.heroName} · {deck.deckSize} cards</small>
+        <small>
+          {intl.formatMessage(
+            { id: "lobby.deck.heroAndCount" },
+            { hero: deck.heroName, count: deck.deckSize },
+          )}
+        </small>
       </span>
     </span>
   );
