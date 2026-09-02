@@ -31,7 +31,7 @@ import {
 
 import { abilityResourceCost, activatedAbilityAvailable, canPayAbilityLifeCost, canPayActivatedEffectCardCosts, discardCostOptions, effectiveAbilityList } from "./abilityRules.js";
 import { settlesInArena, settlePlayedCard } from "./cardLifecycle.js";
-import { alternativePlayCostOptions, canPlayAsInstant, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, cardsPlayableFromArsenal, cardsPlayableFromZone, cardLayerGoAgain, mayPlayFromArsenal, mayPlayFromZone, noteCardPlayed, payAlternativePlayCost, playTargetOptions, preparePlayTarget } from "./playRules.js";
+import { alternativePlayCostOptions, canPlayAsInstant, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, cardsPlayableFromArsenal, cardsPlayableFromZone, cardLayerGoAgain, mayPlayFromArsenal, mayPlayFromZone, modifierMatchesPlayedCard, noteCardPlayed, payAlternativePlayCost, playTargetOptions, preparePlayTarget } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost, pitchValueOfInstance } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { goAgainSuppressed, isFrozen, opposingInstantsProhibited, snapshotSerializable } from "./ruleQueries.js";
@@ -616,6 +616,15 @@ export function announceCardPlayed(
   );
   if (!alreadyResolving) state.resolving.push(card);
   try {
+    for (const modifier of state.modifiers) {
+      if (
+        modifier.seat === seat &&
+        modifier.consumed !== true &&
+        modifier.once === true &&
+        modifier.grantsPlayFromZone === origin &&
+        modifierMatchesPlayedCard(state, modifier, card)
+      ) modifier.consumed = true;
+    }
     const playEventNextId = state.nextInstanceId;
     const layers = [
       ...noteCardPlayed(state, player, card),
