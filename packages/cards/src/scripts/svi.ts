@@ -2,10 +2,12 @@ import type { ActivatedAbility, CardInstance, CardScript, DeepReadonly, ScriptCt
 import {
   attackAbility,
   buffNextAttack,
+  commonOptionMessages,
   dealArcane,
-      isCard,
-    opponentSeat,
-  } from "./shared-helpers.js";
+  decisionPrompt,
+  isCard,
+  opponentSeat,
+} from "./shared-helpers.js";
 
 // ── SVI (Silver Age Chapter 1: Viserai precon) ──────────────────────────────
 //
@@ -85,7 +87,14 @@ function condemnToSlaughter(amount: number): CardScript {
       if (auras.length > 0) {
         ctx.requestCardChoice(
           "condemn-own-aura",
-          `${ctx.data.name}: destroy an aura you control?`,
+          decisionPrompt(
+            `${ctx.data.name}: destroy an aura you control?`,
+            "card.svi.condemn.own.aura.destroy",
+            {
+              values: { card: { kind: "card", cardId: ctx.self.cardId } },
+              optionMessages: commonOptionMessages("no"),
+            },
+          ),
           ["no", ...auras.map((card) => card.instanceId)],
         );
       }
@@ -100,7 +109,11 @@ function condemnToSlaughter(amount: number): CardScript {
         if (opposingAuras.length > 0) {
           ctx.requestCardChoice(
             "condemn-opposing-aura",
-            `${ctx.data.name}: destroy an aura you control`,
+            decisionPrompt(
+              `${ctx.data.name}: destroy an aura you control`,
+              "card.svi.condemn.opposing.aura.destroy",
+              { values: { card: { kind: "card", cardId: ctx.self.cardId } } },
+            ),
             opposingAuras.map((card) => card.instanceId),
             opponentSeat(ctx),
           );
@@ -136,7 +149,17 @@ function sigilOfSilphidaeTrigger(ctx: ScriptCtx): void {
   if (auras.length === 0) return;
   ctx.requestCardChoice(
     "silphidae-banish",
-    `${ctx.data.name}: banish another aura from your graveyard for ${ctx.previewArcaneDamage(1)} arcane damage?`,
+    decisionPrompt(
+      `${ctx.data.name}: banish another aura from your graveyard for ${ctx.previewArcaneDamage(1)} arcane damage?`,
+      "card.svi.silphidae.aura.banish",
+      {
+        values: {
+          card: { kind: "card", cardId: ctx.self.cardId },
+          amount: ctx.previewArcaneDamage(1),
+        },
+        optionMessages: commonOptionMessages("no"),
+      },
+    ),
     ["no", ...auras.map((card) => card.instanceId)],
   );
 }
@@ -159,7 +182,16 @@ function beckoningAbilities(): ActivatedAbility[] {
       );
       ctx.requestCardChoice(
         "beckoning-return",
-        `${ctx.data.name}: return a cost ${x} aura from your graveyard to your hand`,
+        decisionPrompt(
+          `${ctx.data.name}: return a cost ${x} aura from your graveyard to your hand`,
+          "card.svi.beckoning.aura.return",
+          {
+            values: {
+              card: { kind: "card", cardId: ctx.self.cardId },
+              amount: x,
+            },
+          },
+        ),
         auras.map((card) => card.instanceId),
       );
     },
@@ -243,7 +275,17 @@ export const svi: Record<string, CardScript> = {
       if (auras.length > 0) {
         ctx.requestCardChoice(
           "fellingsong-banish",
-          `${ctx.data.name}: banish an aura from your graveyard for ${ctx.previewArcaneDamage(1)} arcane damage?`,
+          decisionPrompt(
+            `${ctx.data.name}: banish an aura from your graveyard for ${ctx.previewArcaneDamage(1)} arcane damage?`,
+            "card.svi.fellingsong.aura.banish",
+            {
+              values: {
+                card: { kind: "card", cardId: ctx.self.cardId },
+                amount: ctx.previewArcaneDamage(1),
+              },
+              optionMessages: commonOptionMessages("no"),
+            },
+          ),
           ["no", ...auras.map((card) => card.instanceId)],
         );
       }

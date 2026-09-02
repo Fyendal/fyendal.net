@@ -331,6 +331,28 @@
       "value": "：支付 1 点资源使攻击获得 +1 力量？"
     }
   ],
+  "card.azs.blur.aura.choose": [
+    {
+      "type": 0,
+      "value": "Blur Reality：选择一个 Lightning 光环"
+    }
+  ],
+  "card.azs.holo.aura.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：为一个 Lightning 光环放置 holo 指示物？"
+    }
+  ],
+  "card.azs.miraging.aura.copy": [
+    {
+      "type": 0,
+      "value": "Miraging Metamorph：选择一个要复制的光环"
+    }
+  ],
   "card.common.card.discard.choose": [
     {
       "type": 0,
@@ -857,6 +879,180 @@
       "value": "弃置一张 Zombie 以生成一个 Gate to i'Arathael？"
     }
   ],
+  "card.iar.apex.defender.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一张正在防守你基础力量不低于 6 的攻击的牌"
+    }
+  ],
+  "card.iar.arsenal.banish.choose": [
+    {
+      "type": 0,
+      "value": "选择一张 arsenal 中的牌并放逐"
+    }
+  ],
+  "card.iar.banished.graveyard.put": [
+    {
+      "type": 0,
+      "value": "将一张已放逐的牌放入你的墓地"
+    }
+  ],
+  "card.iar.blooddebt.action.choose": [
+    {
+      "type": 0,
+      "value": "选择一张具有 blood debt 的行动牌"
+    }
+  ],
+  "card.iar.blooddebt.facedown": [
+    {
+      "type": 0,
+      "value": "将一张具有 blood debt 的牌翻至面朝下"
+    }
+  ],
+  "card.iar.bloodsong.aura.banish": [
+    {
+      "type": 0,
+      "value": "放逐一个由对方操控的光环永久物？"
+    }
+  ],
+  "card.iar.bonebarrier.ally.choose": [
+    {
+      "type": 0,
+      "value": "摧毁或弃置一个 ally，使防御 +2？"
+    }
+  ],
+  "card.iar.bridge.zombie.choose": [
+    {
+      "type": 0,
+      "value": "将一个 zombie 放入墓地以保留 Bridge of Damnation？"
+    }
+  ],
+  "card.iar.circlet.banished.facedown": [
+    {
+      "type": 0,
+      "value": "将进攻英雄的一张已放逐牌翻至面朝下"
+    }
+  ],
+  "card.iar.countdown.darkesthour.search": [
+    {
+      "type": 0,
+      "value": "搜寻 Darkest Hour 并放逐？"
+    }
+  ],
+  "card.iar.danse.pay": [
+    {
+      "type": 0,
+      "value": "Danse Macabre：支付 2 点资源并横置此牌？"
+    }
+  ],
+  "card.iar.forsaken.mode.choose": [
+    {
+      "type": 0,
+      "value": "Forsaken Strike：选择第 "
+    },
+    {
+      "type": 1,
+      "value": "index"
+    },
+    {
+      "type": 0,
+      "value": "/"
+    },
+    {
+      "type": 1,
+      "value": "total"
+    },
+    {
+      "type": 0,
+      "value": " 个效果"
+    }
+  ],
+  "card.iar.forsaken.option.gate": [
+    {
+      "type": 0,
+      "value": "生成一个 Gate to i'Arathael"
+    }
+  ],
+  "card.iar.forsaken.option.goagain": [
+    {
+      "type": 0,
+      "value": "使 Forsaken Strike 获得 go again"
+    }
+  ],
+  "card.iar.forsaken.option.power": [
+    {
+      "type": 0,
+      "value": "使 Forsaken Strike +2 力量"
+    }
+  ],
+  "card.iar.hand.banish": [
+    {
+      "type": 0,
+      "value": "放逐一张你的手牌"
+    }
+  ],
+  "card.iar.hand.banish.choose": [
+    {
+      "type": 0,
+      "value": "选择一张要放逐的牌"
+    }
+  ],
+  "card.iar.hand.banish.optional": [
+    {
+      "type": 0,
+      "value": "放逐一张手牌？"
+    }
+  ],
+  "card.iar.malice.zombie.choose": [
+    {
+      "type": 0,
+      "value": "选择墓地中的一个 zombie"
+    }
+  ],
+  "card.iar.opponent.arsenal.banish": [
+    {
+      "type": 0,
+      "value": "选择一张你的 arsenal 中的牌并放逐"
+    }
+  ],
+  "card.iar.opponent.hand.banish": [
+    {
+      "type": 0,
+      "value": "选择一张你的手牌并放逐"
+    }
+  ],
+  "card.iar.rush.ponder.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一个 Ponder，以抽一张牌并获得 1 个行动点？"
+    }
+  ],
+  "card.iar.sinspeaker.aura.search": [
+    {
+      "type": 0,
+      "value": "搜寻一张牌名中含有 Runechant 的光环？"
+    }
+  ],
+  "card.iar.usurp.runechant.destroy": [
+    {
+      "type": 0,
+      "value": "Usurp：摧毁一个 Runechant"
+    }
+  ],
+  "card.iar.vexing.target.choose": [
+    {
+      "type": 0,
+      "value": "选择一个目标，造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
   "card.jdg.librarian.tome.choose": [
     {
       "type": 0,
@@ -975,6 +1171,60 @@
       "value": "分别至多摧毁一个 Blade Dance 和 Flurry？"
     }
   ],
+  "card.sar.blackwidow.hand.banish": [
+    {
+      "type": 0,
+      "value": "Mark of the Black Widow：放逐一张你的手牌"
+    }
+  ],
+  "card.sar.brood.blackwidow.hand.banish": [
+    {
+      "type": 0,
+      "value": "Arakni, Black Widow：放逐一张你的手牌"
+    }
+  ],
+  "card.sar.danger.dagger.choose": [
+    {
+      "type": 0,
+      "value": "Danger Digits：选择一把 dagger 造成 1 点伤害；随后将其摧毁"
+    }
+  ],
+  "card.sar.huntsman.destroy": [
+    {
+      "type": 0,
+      "value": "Mark of the Huntsman：摧毁此牌并标记对方？"
+    }
+  ],
+  "card.sar.shred.defender.choose": [
+    {
+      "type": 0,
+      "value": "Shred：选择一张防守牌，使其在本次 combat chain 中 -2 防御"
+    }
+  ],
+  "card.sar.trapdoor.card.search": [
+    {
+      "type": 0,
+      "value": "Arakni, Trap-Door：从牌库搜寻一张牌并面朝下放逐？"
+    }
+  ],
+  "card.sar.twosides.mode.choose": [
+    {
+      "type": 0,
+      "value": "Two Sides to the Blade：选择一项"
+    }
+  ],
+  "card.sar.twosides.option.dagger": [
+    {
+      "type": 0,
+      "value": "Dagger 攻击 +3 力量"
+    }
+  ],
+  "card.sar.twosides.option.stealth": [
+    {
+      "type": 0,
+      "value": "Stealth 攻击 +3 力量，且命中时标记对方"
+    }
+  ],
   "card.sbz.arcane.target.choose": [
     {
       "type": 1,
@@ -1043,6 +1293,120 @@
       "value": "Wreck Havoc：将对方 arsenal 中的一张牌翻开？（若为防御反应牌，则将其摧毁。）"
     }
   ],
+  "card.sea.action.bottom": [
+    {
+      "type": 0,
+      "value": "将一张行动牌置于其牌库底部"
+    }
+  ],
+  "card.sea.ally.counter.add": [
+    {
+      "type": 0,
+      "value": "为一个 ally 放置一个 +1 力量指示物"
+    }
+  ],
+  "card.sea.ally.tap": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：横置一个由你操控的 ally？"
+    }
+  ],
+  "card.sea.ally.tap.optional": [
+    {
+      "type": 0,
+      "value": "横置目标 ally？"
+    }
+  ],
+  "card.sea.arrow.banish": [
+    {
+      "type": 0,
+      "value": "放逐一张 arrow？"
+    }
+  ],
+  "card.sea.arrow.hand.arsenal": [
+    {
+      "type": 0,
+      "value": "将一张手牌中的 arrow 正面朝上放入 arsenal？"
+    }
+  ],
+  "card.sea.arrow.hand.arsenal.required": [
+    {
+      "type": 0,
+      "value": "将一张 arrow 正面朝上放入 arsenal"
+    }
+  ],
+  "card.sea.arrow.top.arsenal": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将该 arrow 正面朝上放入 arsenal？"
+    }
+  ],
+  "card.sea.bandana.blue.bottom": [
+    {
+      "type": 0,
+      "value": "将墓地中的一张蓝色牌置于你的牌库底部"
+    }
+  ],
+  "card.sea.bloodwater.choose": [
+    {
+      "type": 0,
+      "value": "弃置一张牌，或摧毁你的牌库顶牌？"
+    }
+  ],
+  "card.sea.bludger.cog.tap": [
+    {
+      "type": 0,
+      "value": "横置一个 cog 以获得 overpower？"
+    }
+  ],
+  "card.sea.bow.untap": [
+    {
+      "type": 0,
+      "value": "重置一把由你操控的弓？"
+    }
+  ],
+  "card.sea.cog.steam.add": [
+    {
+      "type": 0,
+      "value": "为一个由你操控的 cog 放置 steam 指示物"
+    }
+  ],
+  "card.sea.cog.tap": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：横置一个由你操控的 cog？"
+    }
+  ],
+  "card.sea.cog.untap": [
+    {
+      "type": 0,
+      "value": "重置一个由你操控的 cog"
+    }
+  ],
+  "card.sea.cog.untap.optional": [
+    {
+      "type": 0,
+      "value": "重置一个由你操控的 cog？"
+    }
+  ],
+  "card.sea.cogmachine.cog.tap": [
+    {
+      "type": 0,
+      "value": "横置一个 cog，将此牌置于你的牌库底部？"
+    }
+  ],
   "card.sea.damage.arcane.target": [
     {
       "type": 0,
@@ -1057,10 +1421,236 @@
       "value": " 点奥术伤害"
     }
   ],
+  "card.sea.damage.target.choose": [
+    {
+      "type": 0,
+      "value": "选择任意目标，造成 1 点伤害"
+    }
+  ],
+  "card.sea.defender.buff": [
+    {
+      "type": 0,
+      "value": "使一张防守牌 +1 防御"
+    }
+  ],
+  "card.sea.defender.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一张防守牌"
+    }
+  ],
+  "card.sea.discardormill.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：弃置一张牌，或摧毁你的牌库顶牌？"
+    }
+  ],
+  "card.sea.gofish.card.choose": [
+    {
+      "type": 0,
+      "value": "Go Fish：选择并展示一张牌"
+    }
+  ],
+  "card.sea.graveyard.facedown": [
+    {
+      "type": 0,
+      "value": "将墓地中的一张牌翻至面朝下"
+    }
+  ],
+  "card.sea.graveyard.facedown.optional": [
+    {
+      "type": 0,
+      "value": "将墓地中的一张牌翻至面朝下？"
+    }
+  ],
+  "card.sea.gun.untap": [
+    {
+      "type": 0,
+      "value": "重置一把由你操控的枪？"
+    }
+  ],
+  "card.sea.hero.tap": [
+    {
+      "type": 0,
+      "value": "横置目标英雄"
+    }
+  ],
+  "card.sea.hero.untap": [
+    {
+      "type": 0,
+      "value": "重置另一名目标英雄"
+    }
+  ],
+  "card.sea.heroally.tap": [
+    {
+      "type": 0,
+      "value": "横置目标英雄或 ally"
+    }
+  ],
+  "card.sea.hoist.ally.tap": [
+    {
+      "type": 0,
+      "value": "横置一个 ally，使防御 +1？"
+    }
+  ],
+  "card.sea.item.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一个物品"
+    }
+  ],
+  "card.sea.item.destroy.cog": [
+    {
+      "type": 0,
+      "value": "摧毁一个物品以生成一个 Golden Cog？"
+    }
+  ],
+  "card.sea.item.steal": [
+    {
+      "type": 0,
+      "value": "获得一个物品的操控权，直到行动阶段结束"
+    }
+  ],
+  "card.sea.jacknimble.nimblism.banish": [
+    {
+      "type": 0,
+      "value": "放逐一张 Nimblism，使力量 +1 并获得 go again？"
+    }
+  ],
+  "card.sea.loan.discardorlife": [
+    {
+      "type": 0,
+      "value": "弃置一张牌，或失去 2 点生命"
+    }
+  ],
+  "card.sea.lubricate.cog.choose": [
+    {
+      "type": 0,
+      "value": "依次重置至多 3 个 cog"
+    }
+  ],
+  "card.sea.lubricate.cog.next": [
+    {
+      "type": 0,
+      "value": "再重置一个 cog？"
+    }
+  ],
+  "card.sea.marlynn.arrow.arsenal": [
+    {
+      "type": 0,
+      "value": "Marlynn：将一张 arrow 正面朝上放入 arsenal？"
+    }
+  ],
+  "card.sea.money.goldordamage": [
+    {
+      "type": 0,
+      "value": "交出一个 Gold，或承受 2 点伤害"
+    }
+  ],
+  "card.sea.nimblism.search": [
+    {
+      "type": 0,
+      "value": "搜寻一张 Nimblism？"
+    }
+  ],
+  "card.sea.opponent.ally.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一个由对方操控的 ally"
+    }
+  ],
+  "card.sea.opponent.graveyard.facedown": [
+    {
+      "type": 0,
+      "value": "将对方墓地中的一张牌翻至面朝下？"
+    }
+  ],
+  "card.sea.opponent.item.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一个由对方操控的物品"
+    }
+  ],
+  "card.sea.opponent.pirate.tap": [
+    {
+      "type": 0,
+      "value": "横置该 Pirate 英雄或一个由其操控的 ally"
+    }
+  ],
+  "card.sea.option.damage": [
+    {
+      "type": 0,
+      "value": "承受 2 点伤害"
+    }
+  ],
+  "card.sea.option.decktop": [
+    {
+      "type": 0,
+      "value": "摧毁你的牌库顶牌"
+    }
+  ],
+  "card.sea.option.loselife": [
+    {
+      "type": 0,
+      "value": "失去 2 点生命"
+    }
+  ],
+  "card.sea.permanent.untap": [
+    {
+      "type": 0,
+      "value": "重置一个永久物"
+    }
+  ],
+  "card.sea.pinion.cog.tap": [
+    {
+      "type": 0,
+      "value": "横置一个 cog 以生成一个 Golden Cog？"
+    }
+  ],
+  "card.sea.pirate.tap": [
+    {
+      "type": 0,
+      "value": "横置目标 Pirate 英雄或 ally"
+    }
+  ],
+  "card.sea.scooba.yellow.bottom": [
+    {
+      "type": 0,
+      "value": "将墓地中的一张黄色牌置于牌库底部以生成 Gold？"
+    }
+  ],
+  "card.sea.scrub.hero.choose": [
+    {
+      "type": 0,
+      "value": "选择一名英雄，摧毁其牌库顶牌"
+    }
+  ],
+  "card.sea.skywarden.item.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一个物品，使防御 +1？"
+    }
+  ],
+  "card.sea.spitfire.cog.tap": [
+    {
+      "type": 0,
+      "value": "横置一个 cog，使攻击 +1？"
+    }
+  ],
   "card.sea.target.card": [
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "card.sea.tip.gold.give": [
+    {
+      "type": 0,
+      "value": "将一个由你操控的 Gold 衍生物交给另一名英雄？"
     }
   ],
   "card.sea.treasure.counter.add": [
@@ -1073,6 +1663,22 @@
     {
       "type": 0,
       "value": "从 Treasure Island 上移除一个金指示物？"
+    }
+  ],
+  "card.sea.yellow.discard": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：弃置一张黄色牌？"
+    }
+  ],
+  "card.sea.yellow.soul": [
+    {
+      "type": 0,
+      "value": "将一张黄色牌放入你的 soul？"
     }
   ],
   "card.sgb.carrion.ally.discard": [
@@ -1133,6 +1739,126 @@
       "value": "Golden Tipple：弃置一张黄色牌，以抽一张牌并生成一个 Gold？"
     }
   ],
+  "card.siy.arcane.target.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一个目标，造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "card.siy.brainfreeze.action.choose": [
+    {
+      "type": 0,
+      "value": "Brain Freeze：将一张已展示、费用为 0 的行动牌置于对方牌库顶"
+    }
+  ],
+  "card.siy.brainfreeze.action.none": [
+    {
+      "type": 0,
+      "value": "Brain Freeze：没有可置于牌库顶的已展示费用为 0 的行动牌"
+    }
+  ],
+  "card.siy.cold.freeze.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一张 arsenal 中的牌或一个 ally 并冻结"
+    }
+  ],
+  "card.siy.cold.freeze.pay": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：支付 1 点资源以避免冻结一张牌？"
+    }
+  ],
+  "card.siy.coldsnap.hero.choose": [
+    {
+      "type": 0,
+      "value": "Cold Snap：选择一名英雄"
+    }
+  ],
+  "card.siy.discard.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一张要弃置的牌"
+    }
+  ],
+  "card.siy.discard.pay": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源，否则弃置一张牌？"
+    }
+  ],
+  "card.siy.frostspike.zone.choose": [
+    {
+      "type": 0,
+      "value": "Frost Spike：选择一个未装备的装备区域"
+    }
+  ],
+  "card.siy.fusion.reveal": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：展示一张手牌中的 Ice 牌以进行 fusion？"
+    }
+  ],
+  "card.siy.iceeternal.hero.choose": [
+    {
+      "type": 0,
+      "value": "Ice Eternal：选择一名英雄，在其操控下生成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 个 Frostbite 衍生物"
+    }
+  ],
+  "card.siy.wintersbite.hero.choose": [
+    {
+      "type": 0,
+      "value": "Winter's Bite：选择一名英雄"
+    }
+  ],
   "card.ska.beaten.trackers.destroy": [
     {
       "type": 0,
@@ -1155,6 +1881,80 @@
     {
       "type": 0,
       "value": " 的牌，或弃置一张牌"
+    }
+  ],
+  "card.svi.beckoning.aura.return": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将墓地中一张费用为 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 的光环返回手牌"
+    }
+  ],
+  "card.svi.condemn.opposing.aura.destroy": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：摧毁一个由你操控的光环"
+    }
+  ],
+  "card.svi.condemn.own.aura.destroy": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：摧毁一个由你操控的光环？"
+    }
+  ],
+  "card.svi.fellingsong.aura.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：放逐墓地中的一个光环，造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害？"
+    }
+  ],
+  "card.svi.silphidae.aura.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：放逐墓地中的另一个光环，造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害？"
     }
   ],
   "card.ter.hard.knuckle.destroy": [

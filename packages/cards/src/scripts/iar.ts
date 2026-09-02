@@ -3,7 +3,10 @@ import {
   attackAbility,
   bloodDebtScript as bloodDebt,
   buffNextAttack,
+  commonOptionMessages,
   dealArcane,
+  decisionMessage,
+  decisionPrompt,
   optN,
   optOnChoose,
   opponentSeat,
@@ -46,7 +49,13 @@ function selfHitsHero(ctx: ScriptCtx): boolean {
     ctx.link.attackingCard.instanceId === ctx.self.instanceId;
 }
 
-function requestAnyTarget(ctx: ScriptCtx, hook: string, prompt: string): void {
+function requestAnyTarget(
+  ctx: ScriptCtx,
+  hook: string,
+  fallback: string,
+  id: string,
+  amount: number,
+): void {
   const options = ["opposing hero", "your hero"];
   const cardOptions: (number | null)[] = [null, null];
   for (const player of ctx.state.players) {
@@ -56,7 +65,16 @@ function requestAnyTarget(ctx: ScriptCtx, hook: string, prompt: string): void {
       cardOptions.push(card.instanceId);
     }
   }
-  ctx.requestChoice(hook, prompt, options, ctx.seat, cardOptions);
+  ctx.requestChoice(
+    hook,
+    decisionPrompt(fallback, id, {
+      values: { amount },
+      optionMessages: commonOptionMessages("opposing hero", "your hero"),
+    }),
+    options,
+    ctx.seat,
+    cardOptions,
+  );
 }
 
 function dealArcaneToTarget(ctx: ScriptCtx, option: string, amount: number): void {
@@ -148,7 +166,18 @@ function requestForsakenStrikeMode(ctx: ScriptCtx): void {
   const choiceNumber = total - remaining + 1;
   ctx.requestChoice(
     "iar-forsaken-strike-mode",
-    `Forsaken Strike: choose effect ${choiceNumber} of ${total}`,
+    decisionPrompt(
+      `Forsaken Strike: choose effect ${choiceNumber} of ${total}`,
+      "card.iar.forsaken.mode.choose",
+      {
+        values: { index: choiceNumber, total },
+        optionMessages: {
+          "Create a Gate to i'Arathael": decisionMessage("card.iar.forsaken.option.gate"),
+          "Give Forsaken Strike +2 power": decisionMessage("card.iar.forsaken.option.power"),
+          "Give Forsaken Strike go again": decisionMessage("card.iar.forsaken.option.goagain"),
+        },
+      },
+    ),
     [
       "Create a Gate to i'Arathael",
       "Give Forsaken Strike +2 power",
@@ -213,7 +242,10 @@ function repentanceEquipment(moveSource: "destroy" | "banish" = "destroy"): Card
       onActivate(ctx) {
         ctx.requestCardChoice(
           "iar-repentance-target",
-          "Turn a card with blood debt face down",
+          decisionPrompt(
+            "Turn a card with blood debt face down",
+            "card.iar.blooddebt.facedown",
+          ),
           faceUpBloodDebtCards(ctx).map((card) => card.instanceId),
         );
       },
@@ -233,7 +265,10 @@ function usurp(): Pick<CardScript, "additionalCost" | "onChoose"> {
       if (runechants.length > 0) {
         ctx.requestCardChoice(
           "iar-usurp-runechant",
-          "Usurp: destroy a Runechant",
+          decisionPrompt(
+            "Usurp: destroy a Runechant",
+            "card.iar.usurp.runechant.destroy",
+          ),
           runechants.map((card) => card.instanceId),
         );
       }
@@ -282,7 +317,11 @@ function shadowrealmStrength(attack: number): CardScript {
       if (banished.length > 0) {
         ctx.requestCardChoice(
           "iar-shadowrealm-strength",
-          "Put a banished card into your graveyard?",
+          decisionPrompt(
+            "Put a banished card into your graveyard?",
+            "card.iar.banished.graveyard.put",
+            { optionMessages: commonOptionMessages("no") },
+          ),
           ["no", ...banished.map((card) => card.instanceId)],
         );
       }
@@ -402,6 +441,8 @@ function vexingGloomblade(): CardScript {
         ctx,
         "iar-vexing-target",
         `Choose a target to deal ${ctx.previewArcaneDamage(2)} arcane damage to`,
+        "card.iar.vexing.target.choose",
+        ctx.previewArcaneDamage(2),
       );
     },
     onChoose(ctx, hook, option) {
@@ -454,7 +495,10 @@ export const iar: Record<string, CardScript> = {
         if (!link) return;
         ctx.requestCardChoice(
           "iar-apex-burster-target",
-          "Destroy a card defending your 6 or more base power attack",
+          decisionPrompt(
+            "Destroy a card defending your 6 or more base power attack",
+            "card.iar.apex.defender.destroy",
+          ),
           [...link.defendingCards, ...link.defendingEquipment].map(
             (card) => card.instanceId,
           ),
@@ -538,7 +582,10 @@ export const iar: Record<string, CardScript> = {
         );
         ctx.requestCardChoice(
           "iar-malice-zombie",
-          "Choose a zombie in your graveyard",
+          decisionPrompt(
+            "Choose a zombie in your graveyard",
+            "card.iar.malice.zombie.choose",
+          ),
           zombies.map((card) => card.instanceId),
         );
       },
@@ -586,7 +633,11 @@ export const iar: Record<string, CardScript> = {
         }
         ctx.requestCardChoice(
           "iar-bridge-zombie",
-          "Put a zombie into your graveyard to keep Bridge of Damnation?",
+          decisionPrompt(
+            "Put a zombie into your graveyard to keep Bridge of Damnation?",
+            "card.iar.bridge.zombie.choose",
+            { optionMessages: commonOptionMessages("destroy") },
+          ),
           ["destroy", ...zombies.map((card) => card.instanceId)],
         );
       },
@@ -608,7 +659,11 @@ export const iar: Record<string, CardScript> = {
       if (allies.length > 0) {
         ctx.requestCardChoice(
           "iar-bone-barrier-ally",
-          "Destroy or discard an ally for +2 defense?",
+          decisionPrompt(
+            "Destroy or discard an ally for +2 defense?",
+            "card.iar.bonebarrier.ally.choose",
+            { optionMessages: commonOptionMessages("no") },
+          ),
           ["no", ...allies.map((card) => card.instanceId)],
         );
       }
@@ -647,7 +702,10 @@ export const iar: Record<string, CardScript> = {
       const target = opponentSeat(ctx);
       ctx.requestCardChoice(
         "iar-magister-hand",
-        "Choose a card to banish",
+        decisionPrompt(
+          "Choose a card to banish",
+          "card.iar.hand.banish.choose",
+        ),
         ctx.player(target).hand.map((card) => card.instanceId),
         target,
       );
@@ -666,7 +724,10 @@ export const iar: Record<string, CardScript> = {
       const target = opponentSeat(ctx);
       ctx.requestCardChoice(
         "iar-quartermaster-arsenal",
-        "Choose an arsenal card to banish",
+        decisionPrompt(
+          "Choose an arsenal card to banish",
+          "card.iar.arsenal.banish.choose",
+        ),
         ctx.player(target).arsenal.map((card) => card.instanceId),
         target,
       );
@@ -694,7 +755,10 @@ export const iar: Record<string, CardScript> = {
       if (hand.length > 0) {
         ctx.requestCardChoice(
           "iar-shadow-lord-banish",
-          "Banish a card from your hand",
+          decisionPrompt(
+            "Banish a card from your hand",
+            "card.iar.hand.banish",
+          ),
           hand.map((card) => card.instanceId),
         );
       }
@@ -727,7 +791,11 @@ export const iar: Record<string, CardScript> = {
       if (auras.length > 0) {
         ctx.requestCardChoice(
           "iar-bloodsong-aura",
-          "Banish an aura permanent they control?",
+          decisionPrompt(
+            "Banish an aura permanent they control?",
+            "card.iar.bloodsong.aura.banish",
+            { optionMessages: commonOptionMessages("no") },
+          ),
           ["no", ...auras.map((card) => card.instanceId)],
         );
       }
@@ -751,7 +819,10 @@ export const iar: Record<string, CardScript> = {
       const target = opponentSeat(ctx);
       ctx.requestCardChoice(
         "iar-cullingsong-hand",
-        "Choose a card in your hand to banish",
+        decisionPrompt(
+          "Choose a card in your hand to banish",
+          "card.iar.opponent.hand.banish",
+        ),
         ctx.player(target).hand.map((card) => card.instanceId),
         target,
       );
@@ -772,7 +843,10 @@ export const iar: Record<string, CardScript> = {
       if (arsenal.length > 0) {
         ctx.requestCardChoice(
           "iar-plundersong-arsenal",
-          "Choose a card in your arsenal to banish",
+          decisionPrompt(
+            "Choose a card in your arsenal to banish",
+            "card.iar.opponent.arsenal.banish",
+          ),
           arsenal.map((card) => card.instanceId),
           target,
         );
@@ -820,7 +894,11 @@ export const iar: Record<string, CardScript> = {
       }
       ctx.requestCardChoice(
         "iar-sinspeaker-aura",
-        "Search for an aura with Runechant in its name?",
+        decisionPrompt(
+          "Search for an aura with Runechant in its name?",
+          "card.iar.sinspeaker.aura.search",
+          { optionMessages: commonOptionMessages("no") },
+        ),
         ["no", ...auras.map((card) => card.instanceId)],
       );
     },
@@ -881,7 +959,11 @@ export const iar: Record<string, CardScript> = {
       }
       ctx.requestCardChoice(
         "iar-countdown-darkest-hour",
-        "Search for Darkest Hour to banish?",
+        decisionPrompt(
+          "Search for Darkest Hour to banish?",
+          "card.iar.countdown.darkesthour.search",
+          { optionMessages: commonOptionMessages("no") },
+        ),
         ["no", ...darkestHours.map((card) => card.instanceId)],
       );
     },
@@ -901,7 +983,10 @@ export const iar: Record<string, CardScript> = {
       if (choices.length > 0) {
         ctx.requestCardChoice(
           "iar-ferryman-target",
-          "Choose an action card with blood debt",
+          decisionPrompt(
+            "Choose an action card with blood debt",
+            "card.iar.blooddebt.action.choose",
+          ),
           choices.map((card) => card.instanceId),
         );
       }
@@ -959,7 +1044,10 @@ export const iar: Record<string, CardScript> = {
       requestDiscardChoice(
         ctx,
         "iar-echoing-trap-discard",
-        "Choose a card to discard",
+        decisionPrompt(
+          "Choose a card to discard",
+          "card.common.card.discard.choose",
+        ),
         attacker,
       );
     },
@@ -1037,7 +1125,11 @@ export const iar: Record<string, CardScript> = {
       if (ponders.length > 0) {
         ctx.requestCardChoice(
           "iar-rush-ponder",
-          "Destroy a Ponder to draw a card and gain 1 action point?",
+          decisionPrompt(
+            "Destroy a Ponder to draw a card and gain 1 action point?",
+            "card.iar.rush.ponder.destroy",
+            { optionMessages: commonOptionMessages("no") },
+          ),
           ["no", ...ponders.map((card) => card.instanceId)],
         );
       }
@@ -1130,7 +1222,10 @@ export const iar: Record<string, CardScript> = {
       if (cards.length > 0) {
         ctx.requestCardChoice(
           "iar-circlet-banish",
-          "Turn an attacking hero's banished card face down",
+          decisionPrompt(
+            "Turn an attacking hero's banished card face down",
+            "card.iar.circlet.banished.facedown",
+          ),
           cards.map((card) => card.instanceId),
         );
       }
@@ -1168,7 +1263,10 @@ export const iar: Record<string, CardScript> = {
       if (hand.length > 0) {
         ctx.requestCardChoice(
           "iar-harbinger-banish",
-          "Banish a card from your hand",
+          decisionPrompt(
+            "Banish a card from your hand",
+            "card.iar.hand.banish",
+          ),
           hand.map((card) => card.instanceId),
         );
       }
@@ -1230,7 +1328,11 @@ export const iar: Record<string, CardScript> = {
         }
         ctx.requestCardChoice(
           "iar-blasmophet-banish",
-          "Banish a card from hand?",
+          decisionPrompt(
+            "Banish a card from hand?",
+            "card.iar.hand.banish.optional",
+            { optionMessages: commonOptionMessages("no") },
+          ),
           ["no", ...hand.map((card) => card.instanceId)],
         );
       },
@@ -1273,7 +1375,10 @@ export const iar: Record<string, CardScript> = {
         onActivate(ctx) {
           ctx.requestCardChoice(
             "iar-restless-corporal",
-            "Put a banished card into your graveyard",
+            decisionPrompt(
+              "Put a banished card into your graveyard",
+              "card.iar.banished.graveyard.put",
+            ),
             ctx.player(ctx.seat).banish
               .filter((card) => !card.faceDown)
               .map((card) => card.instanceId),
@@ -1314,7 +1419,11 @@ export const iar: Record<string, CardScript> = {
         ctx.setCounter("iarDanseAlly", entered.instanceId);
         ctx.requestPayment(
           "iar-danse-macabre-pay",
-          "Danse Macabre: pay 2 and tap this?",
+          decisionPrompt(
+            "Danse Macabre: pay 2 and tap this?",
+            "card.iar.danse.pay",
+            { optionMessages: commonOptionMessages("no") },
+          ),
           2,
         );
       },
@@ -1501,7 +1610,10 @@ export const iar: Record<string, CardScript> = {
         if (choices.length > 0) {
           ctx.requestCardChoice(
             "iar-gate-target",
-            "Choose an action card with blood debt",
+            decisionPrompt(
+              "Choose an action card with blood debt",
+              "card.iar.blooddebt.action.choose",
+            ),
             choices.map((card) => card.instanceId),
           );
         }

@@ -6,6 +6,7 @@ import type {
   Modifier,
   ScriptCtx,
   ScriptDecisionPrompt,
+  ScriptPrompt,
   TriggerDef,
 } from "@fyendal/engine";
 import type { GameMessage } from "@fyendal/shared";
@@ -196,7 +197,7 @@ export function contractWithSilver(
 export function requestDiscardChoice(
   ctx: ScriptCtx,
   hook: string,
-  prompt: string,
+  prompt: ScriptPrompt,
   targetSeat: number,
 ): boolean {
   const hand = ctx.player(targetSeat).hand;

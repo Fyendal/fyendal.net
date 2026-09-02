@@ -331,6 +331,28 @@
       "value": ": pay 1 resource for +1 power?"
     }
   ],
+  "card.azs.blur.aura.choose": [
+    {
+      "type": 0,
+      "value": "Blur Reality: choose a Lightning aura"
+    }
+  ],
+  "card.azs.holo.aura.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": give a Lightning aura a holo counter?"
+    }
+  ],
+  "card.azs.miraging.aura.copy": [
+    {
+      "type": 0,
+      "value": "Miraging Metamorph: choose an aura to copy"
+    }
+  ],
   "card.common.card.discard.choose": [
     {
       "type": 0,
@@ -857,6 +879,176 @@
       "value": "Discard a zombie to create a Gate to i'Arathael?"
     }
   ],
+  "card.iar.apex.defender.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy a card defending your attack with 6 or more base power"
+    }
+  ],
+  "card.iar.arsenal.banish.choose": [
+    {
+      "type": 0,
+      "value": "Choose an arsenal card to banish"
+    }
+  ],
+  "card.iar.banished.graveyard.put": [
+    {
+      "type": 0,
+      "value": "Put a banished card into your graveyard"
+    }
+  ],
+  "card.iar.blooddebt.action.choose": [
+    {
+      "type": 0,
+      "value": "Choose an action card with blood debt"
+    }
+  ],
+  "card.iar.blooddebt.facedown": [
+    {
+      "type": 0,
+      "value": "Turn a card with blood debt face down"
+    }
+  ],
+  "card.iar.bloodsong.aura.banish": [
+    {
+      "type": 0,
+      "value": "Banish an aura permanent they control?"
+    }
+  ],
+  "card.iar.bonebarrier.ally.choose": [
+    {
+      "type": 0,
+      "value": "Destroy or discard an ally for +2 defense?"
+    }
+  ],
+  "card.iar.bridge.zombie.choose": [
+    {
+      "type": 0,
+      "value": "Put a zombie into your graveyard to keep Bridge of Damnation?"
+    }
+  ],
+  "card.iar.circlet.banished.facedown": [
+    {
+      "type": 0,
+      "value": "Turn an attacking hero's banished card face down"
+    }
+  ],
+  "card.iar.countdown.darkesthour.search": [
+    {
+      "type": 0,
+      "value": "Search for Darkest Hour to banish?"
+    }
+  ],
+  "card.iar.danse.pay": [
+    {
+      "type": 0,
+      "value": "Danse Macabre: pay 2 resources and tap this?"
+    }
+  ],
+  "card.iar.forsaken.mode.choose": [
+    {
+      "type": 0,
+      "value": "Forsaken Strike: choose effect "
+    },
+    {
+      "type": 1,
+      "value": "index"
+    },
+    {
+      "type": 0,
+      "value": " of "
+    },
+    {
+      "type": 1,
+      "value": "total"
+    }
+  ],
+  "card.iar.forsaken.option.gate": [
+    {
+      "type": 0,
+      "value": "Create a Gate to i'Arathael"
+    }
+  ],
+  "card.iar.forsaken.option.goagain": [
+    {
+      "type": 0,
+      "value": "Give Forsaken Strike go again"
+    }
+  ],
+  "card.iar.forsaken.option.power": [
+    {
+      "type": 0,
+      "value": "Give Forsaken Strike +2 power"
+    }
+  ],
+  "card.iar.hand.banish": [
+    {
+      "type": 0,
+      "value": "Banish a card from your hand"
+    }
+  ],
+  "card.iar.hand.banish.choose": [
+    {
+      "type": 0,
+      "value": "Choose a card to banish"
+    }
+  ],
+  "card.iar.hand.banish.optional": [
+    {
+      "type": 0,
+      "value": "Banish a card from hand?"
+    }
+  ],
+  "card.iar.malice.zombie.choose": [
+    {
+      "type": 0,
+      "value": "Choose a zombie in your graveyard"
+    }
+  ],
+  "card.iar.opponent.arsenal.banish": [
+    {
+      "type": 0,
+      "value": "Choose a card in your arsenal to banish"
+    }
+  ],
+  "card.iar.opponent.hand.banish": [
+    {
+      "type": 0,
+      "value": "Choose a card in your hand to banish"
+    }
+  ],
+  "card.iar.rush.ponder.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy a Ponder to draw a card and gain 1 action point?"
+    }
+  ],
+  "card.iar.sinspeaker.aura.search": [
+    {
+      "type": 0,
+      "value": "Search for an aura with Runechant in its name?"
+    }
+  ],
+  "card.iar.usurp.runechant.destroy": [
+    {
+      "type": 0,
+      "value": "Usurp: destroy a Runechant"
+    }
+  ],
+  "card.iar.vexing.target.choose": [
+    {
+      "type": 0,
+      "value": "Choose a target to deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage to"
+    }
+  ],
   "card.jdg.librarian.tome.choose": [
     {
       "type": 0,
@@ -975,6 +1167,60 @@
       "value": "Destroy up to one Blade Dance and/or Flurry?"
     }
   ],
+  "card.sar.blackwidow.hand.banish": [
+    {
+      "type": 0,
+      "value": "Mark of the Black Widow: banish a card from your hand"
+    }
+  ],
+  "card.sar.brood.blackwidow.hand.banish": [
+    {
+      "type": 0,
+      "value": "Arakni, Black Widow: banish a card from your hand"
+    }
+  ],
+  "card.sar.danger.dagger.choose": [
+    {
+      "type": 0,
+      "value": "Danger Digits: choose a dagger to deal 1 damage; it is destroyed"
+    }
+  ],
+  "card.sar.huntsman.destroy": [
+    {
+      "type": 0,
+      "value": "Mark of the Huntsman: destroy this and mark them?"
+    }
+  ],
+  "card.sar.shred.defender.choose": [
+    {
+      "type": 0,
+      "value": "Shred: choose a defending card to get -2 defense this combat chain"
+    }
+  ],
+  "card.sar.trapdoor.card.search": [
+    {
+      "type": 0,
+      "value": "Arakni, Trap-Door: search your deck for a card to banish face down?"
+    }
+  ],
+  "card.sar.twosides.mode.choose": [
+    {
+      "type": 0,
+      "value": "Two Sides to the Blade: choose 1"
+    }
+  ],
+  "card.sar.twosides.option.dagger": [
+    {
+      "type": 0,
+      "value": "Dagger attack gets +3 power"
+    }
+  ],
+  "card.sar.twosides.option.stealth": [
+    {
+      "type": 0,
+      "value": "Stealth attack gets +3 power and marks on hit"
+    }
+  ],
   "card.sbz.arcane.target.choose": [
     {
       "type": 1,
@@ -1043,6 +1289,120 @@
       "value": "Wreck Havoc: turn a card in their arsenal face up? (A defense reaction is destroyed.)"
     }
   ],
+  "card.sea.action.bottom": [
+    {
+      "type": 0,
+      "value": "Put an action on the bottom of its deck"
+    }
+  ],
+  "card.sea.ally.counter.add": [
+    {
+      "type": 0,
+      "value": "Put a +1 power counter on an ally"
+    }
+  ],
+  "card.sea.ally.tap": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": tap an ally you control?"
+    }
+  ],
+  "card.sea.ally.tap.optional": [
+    {
+      "type": 0,
+      "value": "Tap target ally?"
+    }
+  ],
+  "card.sea.arrow.banish": [
+    {
+      "type": 0,
+      "value": "Banish an arrow?"
+    }
+  ],
+  "card.sea.arrow.hand.arsenal": [
+    {
+      "type": 0,
+      "value": "Put an arrow from your hand face up into your arsenal?"
+    }
+  ],
+  "card.sea.arrow.hand.arsenal.required": [
+    {
+      "type": 0,
+      "value": "Put an arrow face up into your arsenal"
+    }
+  ],
+  "card.sea.arrow.top.arsenal": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": put the arrow face up into your arsenal?"
+    }
+  ],
+  "card.sea.bandana.blue.bottom": [
+    {
+      "type": 0,
+      "value": "Put a blue graveyard card on the bottom of your deck"
+    }
+  ],
+  "card.sea.bloodwater.choose": [
+    {
+      "type": 0,
+      "value": "Discard a card or destroy the top card of your deck?"
+    }
+  ],
+  "card.sea.bludger.cog.tap": [
+    {
+      "type": 0,
+      "value": "Tap a cog for overpower?"
+    }
+  ],
+  "card.sea.bow.untap": [
+    {
+      "type": 0,
+      "value": "Untap a bow you control?"
+    }
+  ],
+  "card.sea.cog.steam.add": [
+    {
+      "type": 0,
+      "value": "Put a steam counter on a cog you control"
+    }
+  ],
+  "card.sea.cog.tap": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": tap a cog you control?"
+    }
+  ],
+  "card.sea.cog.untap": [
+    {
+      "type": 0,
+      "value": "Untap a cog you control"
+    }
+  ],
+  "card.sea.cog.untap.optional": [
+    {
+      "type": 0,
+      "value": "Untap a cog you control?"
+    }
+  ],
+  "card.sea.cogmachine.cog.tap": [
+    {
+      "type": 0,
+      "value": "Tap a cog to put this on the bottom of your deck?"
+    }
+  ],
   "card.sea.damage.arcane.target": [
     {
       "type": 0,
@@ -1057,10 +1417,236 @@
       "value": " arcane damage"
     }
   ],
+  "card.sea.damage.target.choose": [
+    {
+      "type": 0,
+      "value": "Choose any target to deal 1 damage to"
+    }
+  ],
+  "card.sea.defender.buff": [
+    {
+      "type": 0,
+      "value": "Give a defender +1 defense"
+    }
+  ],
+  "card.sea.defender.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy a defending card"
+    }
+  ],
+  "card.sea.discardormill.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": discard a card or destroy the top card of your deck?"
+    }
+  ],
+  "card.sea.gofish.card.choose": [
+    {
+      "type": 0,
+      "value": "Go Fish: choose and reveal a card"
+    }
+  ],
+  "card.sea.graveyard.facedown": [
+    {
+      "type": 0,
+      "value": "Turn a card in a graveyard face down"
+    }
+  ],
+  "card.sea.graveyard.facedown.optional": [
+    {
+      "type": 0,
+      "value": "Turn a graveyard card face down?"
+    }
+  ],
+  "card.sea.gun.untap": [
+    {
+      "type": 0,
+      "value": "Untap a gun you control?"
+    }
+  ],
+  "card.sea.hero.tap": [
+    {
+      "type": 0,
+      "value": "Tap target hero"
+    }
+  ],
+  "card.sea.hero.untap": [
+    {
+      "type": 0,
+      "value": "Untap another target hero"
+    }
+  ],
+  "card.sea.heroally.tap": [
+    {
+      "type": 0,
+      "value": "Tap target hero or ally"
+    }
+  ],
+  "card.sea.hoist.ally.tap": [
+    {
+      "type": 0,
+      "value": "Tap an ally for +1 defense?"
+    }
+  ],
+  "card.sea.item.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy an item"
+    }
+  ],
+  "card.sea.item.destroy.cog": [
+    {
+      "type": 0,
+      "value": "Destroy an item to create a Golden Cog?"
+    }
+  ],
+  "card.sea.item.steal": [
+    {
+      "type": 0,
+      "value": "Steal an item until the end of the action phase"
+    }
+  ],
+  "card.sea.jacknimble.nimblism.banish": [
+    {
+      "type": 0,
+      "value": "Banish a Nimblism for +1 power and go again?"
+    }
+  ],
+  "card.sea.loan.discardorlife": [
+    {
+      "type": 0,
+      "value": "Discard a card or lose 2 life"
+    }
+  ],
+  "card.sea.lubricate.cog.choose": [
+    {
+      "type": 0,
+      "value": "Untap up to 3 cogs, one at a time"
+    }
+  ],
+  "card.sea.lubricate.cog.next": [
+    {
+      "type": 0,
+      "value": "Untap another cog?"
+    }
+  ],
+  "card.sea.marlynn.arrow.arsenal": [
+    {
+      "type": 0,
+      "value": "Marlynn: put an arrow face up into your arsenal?"
+    }
+  ],
+  "card.sea.money.goldordamage": [
+    {
+      "type": 0,
+      "value": "Give a Gold or take 2 damage"
+    }
+  ],
+  "card.sea.nimblism.search": [
+    {
+      "type": 0,
+      "value": "Search for a Nimblism?"
+    }
+  ],
+  "card.sea.opponent.ally.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy an ally they control"
+    }
+  ],
+  "card.sea.opponent.graveyard.facedown": [
+    {
+      "type": 0,
+      "value": "Turn a card in their graveyard face down?"
+    }
+  ],
+  "card.sea.opponent.item.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy an item they control"
+    }
+  ],
+  "card.sea.opponent.pirate.tap": [
+    {
+      "type": 0,
+      "value": "Tap that Pirate hero or an ally they control"
+    }
+  ],
+  "card.sea.option.damage": [
+    {
+      "type": 0,
+      "value": "Take 2 damage"
+    }
+  ],
+  "card.sea.option.decktop": [
+    {
+      "type": 0,
+      "value": "Destroy the top card of your deck"
+    }
+  ],
+  "card.sea.option.loselife": [
+    {
+      "type": 0,
+      "value": "Lose 2 life"
+    }
+  ],
+  "card.sea.permanent.untap": [
+    {
+      "type": 0,
+      "value": "Untap a permanent"
+    }
+  ],
+  "card.sea.pinion.cog.tap": [
+    {
+      "type": 0,
+      "value": "Tap a cog to create a Golden Cog?"
+    }
+  ],
+  "card.sea.pirate.tap": [
+    {
+      "type": 0,
+      "value": "Tap target Pirate hero or ally"
+    }
+  ],
+  "card.sea.scooba.yellow.bottom": [
+    {
+      "type": 0,
+      "value": "Put a yellow graveyard card on the bottom to create Gold?"
+    }
+  ],
+  "card.sea.scrub.hero.choose": [
+    {
+      "type": 0,
+      "value": "Choose a hero whose deck top to destroy"
+    }
+  ],
+  "card.sea.skywarden.item.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy an item for +1 defense?"
+    }
+  ],
+  "card.sea.spitfire.cog.tap": [
+    {
+      "type": 0,
+      "value": "Tap a cog for +1 attack?"
+    }
+  ],
   "card.sea.target.card": [
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "card.sea.tip.gold.give": [
+    {
+      "type": 0,
+      "value": "Give a Gold token you control to another hero?"
     }
   ],
   "card.sea.treasure.counter.add": [
@@ -1073,6 +1659,22 @@
     {
       "type": 0,
       "value": "Remove a Treasure Island gold counter?"
+    }
+  ],
+  "card.sea.yellow.discard": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": discard a yellow card?"
+    }
+  ],
+  "card.sea.yellow.soul": [
+    {
+      "type": 0,
+      "value": "Put a yellow card into your soul?"
     }
   ],
   "card.sgb.carrion.ally.discard": [
@@ -1133,6 +1735,180 @@
       "value": "Golden Tipple: discard a yellow card to draw a card and create a Gold?"
     }
   ],
+  "card.siy.arcane.target.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose a target for "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage"
+    }
+  ],
+  "card.siy.brainfreeze.action.choose": [
+    {
+      "type": 0,
+      "value": "Brain Freeze: put a revealed cost 0 action on top of their deck"
+    }
+  ],
+  "card.siy.brainfreeze.action.none": [
+    {
+      "type": 0,
+      "value": "Brain Freeze: no revealed cost 0 action can be put on top"
+    }
+  ],
+  "card.siy.cold.freeze.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose an arsenal card or ally to freeze"
+    }
+  ],
+  "card.siy.cold.freeze.pay": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": pay 1 resource to avoid freezing a card?"
+    }
+  ],
+  "card.siy.coldsnap.hero.choose": [
+    {
+      "type": 0,
+      "value": "Cold Snap: choose a hero"
+    }
+  ],
+  "card.siy.discard.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose a card to discard"
+    }
+  ],
+  "card.siy.discard.pay": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "resource"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "resources"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " or discard a card?"
+    }
+  ],
+  "card.siy.frostspike.zone.choose": [
+    {
+      "type": 0,
+      "value": "Frost Spike: choose an exposed equipment zone"
+    }
+  ],
+  "card.siy.fusion.reveal": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": reveal an Ice card from your hand to fuse?"
+    }
+  ],
+  "card.siy.iceeternal.hero.choose": [
+    {
+      "type": 0,
+      "value": "Ice Eternal: choose a hero to create "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " Frostbite token"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " Frostbite tokens"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " under"
+    }
+  ],
+  "card.siy.wintersbite.hero.choose": [
+    {
+      "type": 0,
+      "value": "Winter's Bite: choose a hero"
+    }
+  ],
   "card.ska.beaten.trackers.destroy": [
     {
       "type": 0,
@@ -1155,6 +1931,80 @@
     {
       "type": 0,
       "value": ", or discard a card"
+    }
+  ],
+  "card.svi.beckoning.aura.return": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": return a cost "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " aura from your graveyard to your hand"
+    }
+  ],
+  "card.svi.condemn.opposing.aura.destroy": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": destroy an aura you control"
+    }
+  ],
+  "card.svi.condemn.own.aura.destroy": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": destroy an aura you control?"
+    }
+  ],
+  "card.svi.fellingsong.aura.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": banish an aura from your graveyard for "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage?"
+    }
+  ],
+  "card.svi.silphidae.aura.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": banish another aura from your graveyard for "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage?"
     }
   ],
   "card.ter.hard.knuckle.destroy": [
