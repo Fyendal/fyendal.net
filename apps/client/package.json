@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -p tsconfig.json && vite build",
+    "dev": "pnpm i18n:compile && vite",
+    "build": "pnpm i18n:compile && tsc -p tsconfig.json && vite build",
+    "i18n:compile": "formatjs compile-folder src/i18n/catalogs src/i18n/compiled --format simple --ast",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "preview": "vite preview",
     "test": "vitest run src --passWithNoTests"
@@ -15,9 +16,11 @@
     "@fyendal/shared": "workspace:*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-intl": "^10.1.25",
     "zustand": "^4.5.0"
   },
   "devDependencies": {
+    "@formatjs/cli": "^6.16.22",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^6.0.5",

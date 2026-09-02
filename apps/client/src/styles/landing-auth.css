@@ -37,6 +37,13 @@
   color: var(--gold);
   text-shadow: 0 2px 9px #000;
 }
+.intro-subtitle {
+  max-width: 58ch;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 17px;
+  line-height: 1.55;
+}
 .intro-stats {
   display: flex;
   gap: 30px;
@@ -184,8 +191,8 @@
   border-color: transparent;
   color: #9c8a6d;
   font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: 2px;
+  text-transform: none;
+  letter-spacing: .8px;
   font-size: 15px;
 }
 .auth-tab.active {
@@ -194,7 +201,42 @@
   color: #e8dcc4;
 }
 .auth-form { display: flex; flex-direction: column; gap: 12px; }
-.auth-form input { letter-spacing: normal; }
+.auth-field {
+  display: grid;
+  gap: 6px;
+  color: #c9b99c;
+  font-size: 13px;
+  font-weight: 700;
+}
+.auth-field input { letter-spacing: normal; }
+.auth-field input::placeholder {
+  color: #8a7f6d;
+  font-family: inherit;
+  font-size: 15px;
+  text-transform: none;
+}
+.auth-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: #d2c3a8;
+  font-size: 13px;
+  line-height: 1.35;
+}
+.auth-consent input[type="checkbox"] {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  min-height: 16px;
+  margin: 1px 0 0;
+  padding: 0;
+  accent-color: var(--gold);
+}
+.auth-consent a { color: #e3c77f; }
+.auth-form .btn-primary {
+  text-transform: none;
+  letter-spacing: .8px;
+}
 
 @media (max-width: 700px) {
   .landing-details { width: calc(100% - 24px); gap: 12px; margin-bottom: 24px; }

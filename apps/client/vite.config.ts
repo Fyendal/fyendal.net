@@ -1,11 +1,71 @@
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
+import { execFile } from "node:child_process";
+import { readFileSync } from "node:fs";
+import { basename, dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { createIntl, createIntlCache, type IntlConfig } from "react-intl";
 import { SeoPrerenderedLanding } from "./src/lobby/GuestLanding.tsx";
 import { LegalPage } from "./src/legal/LegalPage.tsx";
 
-const prerenderedLanding = renderToStaticMarkup(createElement(SeoPrerenderedLanding));
+const clientRoot = dirname(fileURLToPath(import.meta.url));
+const sourceCatalogDirectory = resolve(clientRoot, "src/i18n/catalogs");
+const compiledCatalogDirectory = resolve(clientRoot, "src/i18n/compiled");
+const formatjsBin = resolve(clientRoot, "node_modules/@formatjs/cli/bin/formatjs");
+const seoIntlCache = createIntlCache();
+
+function compileCatalog(sourceFile: string): Promise<void> {
+  const outputFile = resolve(compiledCatalogDirectory, basename(sourceFile));
+  return new Promise((resolvePromise, reject) => {
+    execFile(
+      process.execPath,
+      [formatjsBin, "compile", sourceFile, "--out-file", outputFile, "--format", "simple", "--ast"],
+      { cwd: clientRoot },
+      (error, _stdout, stderr) => {
+        if (error) {
+          reject(new Error(stderr.trim() || error.message));
+          return;
+        }
+        resolvePromise();
+      },
+    );
+  });
+}
+
+function i18nCompileWatch(): Plugin {
+  return {
+    name: "fyendal-i18n-compile-watch",
+    apply: "serve" as const,
+    configureServer(server) {
+      let compileQueue = Promise.resolve();
+      const enqueueCompile = (file: string) => {
+        if (resolve(dirname(file)) !== sourceCatalogDirectory || !file.endsWith(".json")) return;
+        compileQueue = compileQueue
+          .then(() => compileCatalog(file))
+          .then(() => {
+            server.config.logger.info(`[i18n] compiled ${basename(file)}`);
+            server.ws.send({ type: "full-reload", path: "*" });
+          })
+          .catch((error: unknown) => {
+            const message = error instanceof Error ? error.message : String(error);
+            server.config.logger.error(`[i18n] failed to compile ${basename(file)}: ${message}`);
+          });
+      };
+      server.watcher.on("add", enqueueCompile);
+      server.watcher.on("change", enqueueCompile);
+    },
+  };
+}
+
+function renderPrerenderedLanding(): string {
+  const messages = JSON.parse(
+    readFileSync(resolve(compiledCatalogDirectory, "en.json"), "utf8"),
+  ) as IntlConfig["messages"];
+  const intl = createIntl({ locale: "en", defaultLocale: "en", messages }, seoIntlCache);
+  return renderToStaticMarkup(createElement(SeoPrerenderedLanding, { intl }));
+}
 
 const LEGAL_ROUTES = [
   {
@@ -64,7 +124,7 @@ function seoPrerender() {
     transformIndexHtml(html: string) {
       return html.replace(
         '<div id="root"></div>',
-        `<div id="root">${prerenderedLanding}</div>`,
+        `<div id="root">${renderPrerenderedLanding()}</div>`,
       );
     },
     generateBundle(_options: unknown, bundle: Record<string, { type: string; source?: string | Uint8Array }>) {
@@ -84,7 +144,14 @@ function seoPrerender() {
 }
 
 export default defineConfig({
-  plugins: [react(), seoPrerender()],
+  plugins: [react(), i18nCompileWatch(), seoPrerender()],
+  resolve: {
+    // Every runtime catalog is compiled to ICU AST by `pnpm i18n:compile`.
+    // Excluding the parser keeps the client i18n runtime substantially smaller.
+    alias: {
+      "@formatjs/icu-messageformat-parser": "@formatjs/icu-messageformat-parser/no-parser.js",
+    },
+  },
   build: {
     // The card catalog is intentionally isolated and highly compressible
     // static game data (~2.7 MB raw, ~330 KB gzip), not application code.

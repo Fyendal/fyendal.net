@@ -58,38 +58,45 @@ const TERMS: Section[] = [
 
 const PRIVACY: Section[] = [
   {
-    title: "What we store",
+    title: "Information Fyendal stores",
     body: [
-      "Account data: your username, early-tester cosmetic entitlement, and a salted scrypt hash of your password (never the password itself). Session tokens are stored only as SHA-256 hashes. Fyendal does not collect an email address during registration.",
+      "Account information includes your username, password hash, and any cosmetic entitlement attached to your account. Fyendal does not collect an email address during registration.",
       "Game data: your saved decklists, room membership, and the state and history of games you play (needed to run, reconnect, and resume games). Completed replays contain full-information frames, including both players' hidden zones; they are available only to the two signed-in participants and expire after 7 days.",
       "Bug reports: when you choose to submit one, we store your description, a report reference, and a server-side copy of the room's current state and recent history. The trace can contain both players' hidden game zones and is available only to service operators for diagnosis; it is not returned through the player-facing API.",
     ],
   },
   {
-    title: "What stays in your browser",
+    title: "How Fyendal uses information",
+    body: [
+      "Fyendal uses this information to create and secure accounts, run and resume games, save decks and replays, provide account controls, prevent abuse, and diagnose problems reported by players.",
+    ],
+  },
+  {
+    title: "Information kept in your browser",
     body: [
       "Your session token, browser preferences, short-lived matchmaking avoidance list, and an in-progress fallback replay are kept in your browser's localStorage. Clearing site data removes those browser copies. Imported and exported replay files remain on your device.",
     ],
   },
   {
-    title: "What we don't do",
+    title: "Service providers and sharing",
     body: [
-      "No advertising, no analytics or tracking scripts, no sale or sharing of your data with third parties for their own purposes.",
-    ],
-  },
-  {
-    title: "Third parties we rely on",
-    body: [
-      "Hosting: Google Cloud (Cloud Run, Cloud SQL, Cloud Storage), currently in the us-west1 region. Google processes network and stored service data on our behalf to provide hosting.",
+      "Fyendal has no advertising or analytics, does not track you across other websites, and does not sell or share your information with third parties for their own purposes. Because there is no cross-site tracking, browser Do Not Track signals do not change how Fyendal operates.",
+      "Fyendal uses Google Cloud to host and operate the service in the United States. Google processes network and stored service data on our behalf to provide hosting.",
       "Card and hero images are loaded directly from Fabrary's content servers. When your browser requests those images, Fabrary receives ordinary request metadata such as your IP address and browser user agent. Fyendal sends no account token or username with those requests.",
     ],
   },
   {
-    title: "Retention and deletion",
+    title: "Retention",
     body: [
       "Rooms are normally deleted 15 minutes after a finished game or after all live presence is gone. Completed player replays expire 7 days after the game ends. Sessions expire after 30 days without renewal. Accounts, saved decks, and submitted bug reports persist until deletion.",
+      "Encrypted disaster-recovery backups are retained for up to 7 days. They are used only for disaster recovery and expire automatically.",
+    ],
+  },
+  {
+    title: "Your choices",
+    body: [
       "Signed-in users can download their account data or delete their account from the Account panel. Exports include retained player replays, bug-report descriptions, and trace references, but not hidden bug-report room-state attachments. Deletion removes the account, sessions, saved decks, replay copies, bug reports, and account-bound active rooms from Fyendal's active systems.",
-      "Encrypted disaster-recovery backups are retained for up to 7 days and are not edited to remove individual records. They are used only for disaster recovery and expire automatically.",
+      "Backups are not edited to remove individual records, but deleted information disappears as those backups expire.",
       `For a request you cannot complete while signed in, contact ${CONTACT}.`,
     ],
   },
@@ -100,9 +107,9 @@ const PRIVACY: Section[] = [
     ],
   },
   {
-    title: "Changes",
+    title: "Changes and contact",
     body: [
-      `This policy may change; the current version is always at /privacy/. Questions: ${CONTACT}.`,
+      `Effective September 1, 2026. This policy may change; the current version is always at /privacy/. Questions: ${CONTACT}.`,
     ],
   },
 ];

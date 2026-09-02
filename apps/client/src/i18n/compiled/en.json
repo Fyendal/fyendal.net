@@ -1,0 +1,588 @@
+{
+  "auth.consent": [
+    {
+      "type": 0,
+      "value": "I agree to the "
+    },
+    {
+      "type": 8,
+      "value": "terms",
+      "children": [
+        {
+          "type": 0,
+          "value": "Terms"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": " and acknowledge the "
+    },
+    {
+      "type": 8,
+      "value": "privacy",
+      "children": [
+        {
+          "type": 0,
+          "value": "Privacy Policy"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": "."
+    }
+  ],
+  "auth.createAccount": [
+    {
+      "type": 0,
+      "value": "Create account"
+    }
+  ],
+  "auth.creatingAccount": [
+    {
+      "type": 0,
+      "value": "Creating account…"
+    }
+  ],
+  "auth.error.invalidUsername": [
+    {
+      "type": 0,
+      "value": "Username must be 3–20 characters using letters, numbers, or _"
+    }
+  ],
+  "auth.error.missingPassword": [
+    {
+      "type": 0,
+      "value": "Enter your password"
+    }
+  ],
+  "auth.error.missingUsername": [
+    {
+      "type": 0,
+      "value": "Enter your username"
+    }
+  ],
+  "auth.error.shortPassword": [
+    {
+      "type": 0,
+      "value": "Password must be at least 8 characters"
+    }
+  ],
+  "auth.error.termsRequired": [
+    {
+      "type": 0,
+      "value": "Agree to the Terms of Service to create an account."
+    }
+  ],
+  "auth.loggingIn": [
+    {
+      "type": 0,
+      "value": "Logging in…"
+    }
+  ],
+  "auth.login": [
+    {
+      "type": 0,
+      "value": "Log in"
+    }
+  ],
+  "auth.password": [
+    {
+      "type": 0,
+      "value": "Password"
+    }
+  ],
+  "auth.passwordLoginPlaceholder": [
+    {
+      "type": 0,
+      "value": "Your password"
+    }
+  ],
+  "auth.passwordRegisterPlaceholder": [
+    {
+      "type": 0,
+      "value": "8 or more characters"
+    }
+  ],
+  "auth.register": [
+    {
+      "type": 0,
+      "value": "Register"
+    }
+  ],
+  "auth.username": [
+    {
+      "type": 0,
+      "value": "Username"
+    }
+  ],
+  "auth.usernameHint": [
+    {
+      "type": 0,
+      "value": "3–20 letters, numbers, or underscores"
+    }
+  ],
+  "brand.subtitle": [
+    {
+      "type": 0,
+      "value": "Flesh and Blood Online"
+    }
+  ],
+  "discord.label": [
+    {
+      "type": 0,
+      "value": "Join the Fyendal Discord community (opens in a new tab)"
+    }
+  ],
+  "discord.title": [
+    {
+      "type": 0,
+      "value": "Join the Fyendal Discord"
+    }
+  ],
+  "footer.legal": [
+    {
+      "type": 0,
+      "value": "Fyendal is in no way affiliated with Legend Story Studios. Legend Story Studios®, Flesh and Blood™, and set names are trademarks of Legend Story Studios. Flesh and Blood characters, cards, logos, and art are property of Legend Story Studios. © Legend Story Studios."
+    }
+  ],
+  "footer.privacy": [
+    {
+      "type": 0,
+      "value": "Privacy Policy"
+    }
+  ],
+  "footer.terms": [
+    {
+      "type": 0,
+      "value": "Terms of Service"
+    }
+  ],
+  "landing.accountAccess": [
+    {
+      "type": 0,
+      "value": "Account access"
+    }
+  ],
+  "landing.activityLabel": [
+    {
+      "type": 0,
+      "value": "Current activity"
+    }
+  ],
+  "landing.bots.body": [
+    {
+      "type": 0,
+      "value": "Test decks against hero-specific bots with their own strategies."
+    }
+  ],
+  "landing.bots.title": [
+    {
+      "type": 0,
+      "value": "Practice against bots"
+    }
+  ],
+  "landing.demoAlt": [
+    {
+      "type": 0,
+      "value": "A Fyendal game between Briar and a Bravo practice bot"
+    }
+  ],
+  "landing.faq.bot.answer": [
+    {
+      "type": 0,
+      "value": "Yes. Fyendal offers hero-specific practice bots in both supported formats."
+    }
+  ],
+  "landing.faq.bot.question": [
+    {
+      "type": 0,
+      "value": "Can I play Flesh and Blood against a bot?"
+    }
+  ],
+  "landing.faq.free.answer": [
+    {
+      "type": 0,
+      "value": "Yes. Fyendal is a free, non-commercial community project."
+    }
+  ],
+  "landing.faq.free.question": [
+    {
+      "type": 0,
+      "value": "Is Fyendal free?"
+    }
+  ],
+  "landing.faq.import.answer": [
+    {
+      "type": 0,
+      "value": "Yes. Import a public Fabrary URL or Fabrary export text. Every card must be supported by Fyendal."
+    }
+  ],
+  "landing.faq.import.question": [
+    {
+      "type": 0,
+      "value": "Can I import a Fabrary deck?"
+    }
+  ],
+  "landing.faq.kicker": [
+    {
+      "type": 0,
+      "value": "Common questions"
+    }
+  ],
+  "landing.faq.official.answer": [
+    {
+      "type": 0,
+      "value": "No. Fyendal is an unofficial fan project and its game results are not official rules rulings."
+    }
+  ],
+  "landing.faq.official.question": [
+    {
+      "type": 0,
+      "value": "Is Fyendal official?"
+    }
+  ],
+  "landing.faq.title": [
+    {
+      "type": 0,
+      "value": "About Playing On Fyendal"
+    }
+  ],
+  "landing.inGame": [
+    {
+      "type": 8,
+      "value": "strong",
+      "children": [
+        {
+          "type": 1,
+          "value": "count"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": " in game"
+    }
+  ],
+  "landing.matches.body": [
+    {
+      "type": 0,
+      "value": "Queue, join an open room, or invite a friend to a private game."
+    }
+  ],
+  "landing.matches.title": [
+    {
+      "type": 0,
+      "value": "Find or host a match"
+    }
+  ],
+  "landing.openRooms": [
+    {
+      "type": 8,
+      "value": "strong",
+      "children": [
+        {
+          "type": 1,
+          "value": "count"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "open room"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "open rooms"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "landing.replays.body": [
+    {
+      "type": 0,
+      "value": "Watch games through a room link, then review or export saved replays."
+    }
+  ],
+  "landing.replays.title": [
+    {
+      "type": 0,
+      "value": "Spectate and review"
+    }
+  ],
+  "landing.startPlayingBody": [
+    {
+      "type": 0,
+      "value": "Create a free account to play matches and practice against bots."
+    }
+  ],
+  "landing.startPlayingLabel": [
+    {
+      "type": 0,
+      "value": "Start playing"
+    }
+  ],
+  "landing.startPlayingTitle": [
+    {
+      "type": 0,
+      "value": "Start playing"
+    }
+  ],
+  "landing.subtitle": [
+    {
+      "type": 0,
+      "value": "Play for free in your browser. Find opponents, practice against hero-specific bots, and bring your Fabrary decks."
+    }
+  ],
+  "landing.title": [
+    {
+      "type": 0,
+      "value": "Play Flesh and Blood Online"
+    }
+  ],
+  "landing.ways.kicker": [
+    {
+      "type": 0,
+      "value": "Play your way"
+    }
+  ],
+  "landing.ways.title": [
+    {
+      "type": 0,
+      "value": "Online Matches and Focused Practice"
+    }
+  ],
+  "language.label": [
+    {
+      "type": 0,
+      "value": "Language"
+    }
+  ],
+  "meta.home.description": [
+    {
+      "type": 0,
+      "value": "Play Flesh and Blood online for free. Find opponents, practice against hero-specific bots, import Fabrary decks, spectate games, and review replays."
+    }
+  ],
+  "meta.home.title": [
+    {
+      "type": 0,
+      "value": "Play Flesh and Blood Online Free | Fyendal"
+    }
+  ],
+  "replay.confirmDelete": [
+    {
+      "type": 0,
+      "value": "Delete this saved replay? This cannot be undone."
+    }
+  ],
+  "replay.daysLeft": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " day left"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " days left"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "replay.defeat": [
+    {
+      "type": 0,
+      "value": "Defeat"
+    }
+  ],
+  "replay.delete": [
+    {
+      "type": 0,
+      "value": "Delete replay"
+    }
+  ],
+  "replay.deleting": [
+    {
+      "type": 0,
+      "value": "Deleting replay"
+    }
+  ],
+  "replay.emptyBody": [
+    {
+      "type": 0,
+      "value": "Completed games and manually ended bot games will appear here automatically."
+    }
+  ],
+  "replay.emptyTitle": [
+    {
+      "type": 0,
+      "value": "No saved replays yet"
+    }
+  ],
+  "replay.ended": [
+    {
+      "type": 0,
+      "value": "Ended"
+    }
+  ],
+  "replay.expiresAt": [
+    {
+      "type": 0,
+      "value": "Expires "
+    },
+    {
+      "type": 1,
+      "value": "date"
+    }
+  ],
+  "replay.expiresToday": [
+    {
+      "type": 0,
+      "value": "Expires today"
+    }
+  ],
+  "replay.exportJson": [
+    {
+      "type": 0,
+      "value": "Export replay JSON"
+    }
+  ],
+  "replay.frameCount": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " frame"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " frames"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "replay.loading": [
+    {
+      "type": 0,
+      "value": "Loading replays…"
+    }
+  ],
+  "replay.matchup": [
+    {
+      "type": 1,
+      "value": "firstHero"
+    },
+    {
+      "type": 0,
+      "value": " versus "
+    },
+    {
+      "type": 1,
+      "value": "secondHero"
+    }
+  ],
+  "replay.openFile": [
+    {
+      "type": 0,
+      "value": "Open Replay File…"
+    }
+  ],
+  "replay.openFileShort": [
+    {
+      "type": 0,
+      "value": "Open File"
+    }
+  ],
+  "replay.prepareExport": [
+    {
+      "type": 0,
+      "value": "Preparing replay export"
+    }
+  ],
+  "replay.retention": [
+    {
+      "type": 0,
+      "value": "Replays are saved for 7 days. Export anything you want to keep."
+    }
+  ],
+  "replay.title": [
+    {
+      "type": 0,
+      "value": "My Replays"
+    }
+  ],
+  "replay.victory": [
+    {
+      "type": 0,
+      "value": "Victory"
+    }
+  ],
+  "replay.watch": [
+    {
+      "type": 0,
+      "value": "▶ Watch"
+    }
+  ],
+  "replay.watchLoading": [
+    {
+      "type": 0,
+      "value": "Loading…"
+    }
+  ]
+}

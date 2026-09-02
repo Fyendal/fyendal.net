@@ -1,18 +1,24 @@
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
 
+export type AuthValidationError =
+  | "invalidUsername"
+  | "missingUsername"
+  | "shortPassword"
+  | "missingPassword";
+
 export function validateAuthInput(
   username: string,
   password: string,
   mode: "login" | "register",
-): string | null {
+): AuthValidationError | null {
   if (mode === "register") {
     if (!USERNAME_RE.test(username)) {
-      return "username must be 3–20 characters using letters, numbers, or _";
+      return "invalidUsername";
     }
   } else if (!username) {
-    return "enter your username";
+    return "missingUsername";
   }
-  if (mode === "register" && password.length < 8) return "password must be at least 8 characters";
-  if (!password) return "enter your password";
+  if (mode === "register" && password.length < 8) return "shortPassword";
+  if (!password) return "missingPassword";
   return null;
 }
