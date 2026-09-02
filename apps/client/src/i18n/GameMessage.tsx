@@ -1,5 +1,5 @@
 import type { GameMessage, GameMessageValue } from "@fyendal/shared";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import { useIntl, type IntlShape } from "react-intl";
 
 interface PlainMessageResolvers {
@@ -35,9 +35,11 @@ export function formatGameMessage(
 export function GameMessageText({
   message,
   resolvers = {},
+  breakOnDash = false,
 }: {
   message: GameMessage;
   resolvers?: RichMessageResolvers;
+  breakOnDash?: boolean;
 }) {
   const intl = useIntl();
   const values = Object.fromEntries(
@@ -48,5 +50,29 @@ export function GameMessageText({
       return [key, resolvers.term?.(value.id) ?? value.id];
     }),
   );
-  return <>{intl.formatMessage({ id: message.id }, values)}</>;
+  const formatted = intl.formatMessage({ id: message.id }, values);
+  if (!breakOnDash) return <>{formatted}</>;
+
+  const parts = Array.isArray(formatted) ? formatted : [formatted];
+  let insertedBreak = false;
+  const broken = parts.flatMap((part, index): ReactNode[] => {
+    if (insertedBreak || typeof part !== "string") return [part];
+    const spacedDash = part.indexOf(" — ");
+    const compactDash = part.indexOf("——");
+    const separator = spacedDash >= 0 ? spacedDash : compactDash;
+    if (separator < 0) return [part];
+
+    insertedBreak = true;
+    const separatorLength = spacedDash >= 0 ? 3 : 2;
+    const nextLine = part.slice(separator + separatorLength);
+    const capitalizedNextLine = nextLine.length > 0
+      ? `${nextLine[0]!.toUpperCase()}${nextLine.slice(1)}`
+      : nextLine;
+    return [
+      part.slice(0, separator),
+      <br key={`message-break-${index}`} />,
+      capitalizedNextLine,
+    ];
+  });
+  return <Fragment>{broken}</Fragment>;
 }

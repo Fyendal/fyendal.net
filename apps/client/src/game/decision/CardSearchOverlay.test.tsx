@@ -1,7 +1,7 @@
-import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { CardView, PendingDecision } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
+import { TestI18nProvider } from "../../i18n/TestI18nProvider.js";
 import {
   CardSearchOverlay,
   MinimizedCardSearch,
@@ -33,10 +33,10 @@ describe("private card search overlay", () => {
     const model = cardSearchOverlayModel(decision, { hand: 1, deck: 1, arsenal: 1 });
 
     expect(isCardSearchOverlayDecision(decision)).toBe(true);
-    expect(model?.sections.map((section) => section.label)).toEqual([
-      "Hand (1)",
-      "Deck (1)",
-      "Arsenal (1)",
+    expect(model?.sections.map((section) => [section.zone, section.count])).toEqual([
+      ["hand", 1],
+      ["deck", 1],
+      ["arsenal", 1],
     ]);
     expect(model?.optionByCardId.get(deckCard.instanceId)).toBe("12");
     expect(model?.optionByCardId.has(handCard.instanceId)).toBe(false);
@@ -45,11 +45,15 @@ describe("private card search overlay", () => {
   });
 
   it("renders all searched cards in a required zone-style dialog", () => {
-    const html = renderToStaticMarkup(createElement(CardSearchOverlay, {
-      decision: searchDecision(),
-      zoneCounts: { hand: 1, deck: 1, arsenal: 1 },
-      onSubmit() {},
-    }));
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <CardSearchOverlay
+          decision={searchDecision()}
+          zoneCounts={{ hand: 1, deck: 1, arsenal: 1 }}
+          onSubmit={() => undefined}
+        />
+      </TestI18nProvider>,
+    );
 
     expect(html).toContain('role="dialog"');
     expect(html).toContain("Search opponent&#x27;s hand, deck, and arsenal");
@@ -76,13 +80,35 @@ describe("private card search overlay", () => {
   });
 
   it("renders a compact restore control while minimized", () => {
-    const html = renderToStaticMarkup(createElement(MinimizedCardSearch, {
-      prompt: "Choose up to 3 more cards",
-      onRestore() {},
-    }));
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <MinimizedCardSearch
+          prompt="Choose up to 3 more cards"
+          onRestore={() => undefined}
+        />
+      </TestI18nProvider>,
+    );
 
     expect(html).toContain('class="card-search-minimized"');
     expect(html).toContain("Choose up to 3 more cards");
     expect(html).toContain("Restore search");
+  });
+
+  it("localizes the search chrome without changing the authored card prompt", () => {
+    const html = renderToStaticMarkup(
+      <TestI18nProvider locale="zh-Hans">
+        <CardSearchOverlay
+          decision={searchDecision()}
+          zoneCounts={{ hand: 1, deck: 1, arsenal: 1 }}
+          onSubmit={() => undefined}
+        />
+      </TestI18nProvider>,
+    );
+
+    expect(html).toContain("手牌（1）");
+    expect(html).toContain("牌库（1）");
+    expect(html).toContain("Arsenal（1）");
+    expect(html).toContain("完成");
+    expect(html).toContain("Choose up to 1 more card with the named card&#x27;s name");
   });
 });

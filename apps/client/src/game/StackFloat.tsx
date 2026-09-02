@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import { useIntl } from "react-intl";
 import { createPortal } from "react-dom";
 import type { ChainLinkView, StackLayerView } from "@fyendal/shared";
 import { CardBack, CardFace } from "./Card.js";
 import { BloodDebtTriggerTile, isBloodDebtTrigger } from "./BloodDebtTriggerTile.js";
 import type { FloatVisibilityController } from "./floatVisibility.js";
 import { motionLocationKey, motionPresentationKey } from "./motion/motionTypes.js";
+import { localizeTimingLabel } from "./timingLocalization.js";
 import { useFloatDrag } from "./useFloatDrag.js";
 
 export function stackActivityRevision(
@@ -66,6 +68,7 @@ export function StackFloat({
   /** One-shot shortcut offered only during the viewer's Runechant choice. */
   onSkipRunechants?: () => void;
 }) {
+  const intl = useIntl();
   const [localHidden, setLocalHidden] = useState(false);
   const stackHidden = visibility?.hidden ?? localHidden;
   const setStackHidden = visibility?.setHidden ?? setLocalHidden;
@@ -96,11 +99,11 @@ export function StackFloat({
         className={`stack-mini${miniHost ? " stack-mini-anchored" : ""}`}
         style={miniHost ? undefined : stackFloat.style}
         onClick={() => setStackHidden(false)}
-        title="Show stack"
+        title={intl.formatMessage({ id: "game.stack.show" })}
       >
         <span className="stack-mini-title">
-          <span className="mini-title-long">The Stack</span>
-          <span className="mini-title-short">Stack</span>
+          <span className="mini-title-long">{intl.formatMessage({ id: "game.stack.title" })}</span>
+          <span className="mini-title-short">{intl.formatMessage({ id: "game.stack.short" })}</span>
         </span>
         <span className="stack-mini-count">{stackSize}</span>
       </button>
@@ -110,27 +113,31 @@ export function StackFloat({
   return (
     <div className="float stack-float" style={stackFloat.style} {...stackFloat.dragProps}>
       <div className="chain-float-bar">
-        <span className="chain-float-title stack-title">The Stack</span>
+        <span className="chain-float-title stack-title">
+          {intl.formatMessage({ id: "game.stack.title" })}
+        </span>
         {onSkipRunechants ? (
           <button
             className="stack-skip-runechants"
             onClick={onSkipRunechants}
-            title="Skip consecutive Runechants in this priority window"
+            title={intl.formatMessage({ id: "game.stack.skipRunechantsTitle" })}
             type="button"
           >
-            Skip all Runechants
+            {intl.formatMessage({ id: "game.stack.skipRunechants" })}
           </button>
         ) : null}
         <button
           className="chain-hide stack-hide"
-          title="Minimize stack"
-          aria-label="Minimize stack"
+          title={intl.formatMessage({ id: "game.stack.minimize" })}
+          aria-label={intl.formatMessage({ id: "game.stack.minimize" })}
           onClick={() => setStackHidden(true)}
         >
           —
         </button>
       </div>
-      {context ? <div className="stack-context">{context}</div> : null}
+      {context ? (
+        <div className="stack-context">{localizeTimingLabel(intl, context)}</div>
+      ) : null}
       <div className="stack-layers">
         {layers.map((l, i) => {
           const bloodDebt = isBloodDebtTrigger(l.label);
@@ -151,17 +158,22 @@ export function StackFloat({
                   motionKey={layerMotionKeys[i]}
                 />
               ) : (
-                <CardBack label="Trigger" />
+                <CardBack label={intl.formatMessage({ id: "game.stack.trigger" })} />
               )}
               {!bloodDebt && count > 1 ? (
-                <span className="stack-layer-count" aria-label={`${count} grouped triggers`}>
+                <span
+                  className="stack-layer-count"
+                  aria-label={intl.formatMessage({ id: "game.stack.groupedTriggers" }, { count })}
+                >
                   ×{count}
                 </span>
               ) : null}
               {!bloodDebt && !lessGuidance ? (
                 <div className="stack-label">
                   {stackLayerLabel(l.label)}
-                  {l.optional && <span className="muted"> (may)</span>}
+                  {l.optional ? (
+                    <span className="muted"> ({intl.formatMessage({ id: "game.stack.optional" })})</span>
+                  ) : null}
                 </div>
               ) : null}
             </div>

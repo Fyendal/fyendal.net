@@ -371,6 +371,7 @@ export function BugReportDialog({
   >;
   onClose: () => void;
 }) {
+  const intl = useIntl();
   const [description, setDescription] = useState("");
   const [result, setResult] = useState<BugReportResult>(null);
   const close = () => {
@@ -379,7 +380,10 @@ export function BugReportDialog({
   const submit = async () => {
     const trimmed = description.trim();
     if (trimmed.length < 10 || trimmed.length > 2_000) {
-      setResult({ kind: "error", message: "Describe the bug in 10 to 2000 characters." });
+      setResult({
+        kind: "error",
+        message: intl.formatMessage({ id: "game.bug.validation" }),
+      });
       return;
     }
     setResult({ kind: "submitting" });
@@ -402,24 +406,32 @@ export function BugReportDialog({
           if (result?.kind !== "submitting" && result?.kind !== "sent") void submit();
         }}
       >
-        <div className="overlay-title" id="bug-report-title">Report a game bug</div>
+        <div className="overlay-title" id="bug-report-title">
+          {intl.formatMessage({ id: "game.bug.dialogTitle" })}
+        </div>
         {result?.kind === "sent" ? (
           <div className="bug-report-success" role="status">
-            <strong>Report sent</strong>
+            <strong>{intl.formatMessage({ id: "game.bug.sent" })}</strong>
             <p>
-              Reference <code>{result.reportId}</code>. The room state and recent history were
-              attached for diagnosis.
+              {intl.formatMessage(
+                { id: "game.bug.reference" },
+                { reference: <code>{result.reportId}</code> },
+              )}
             </p>
-            <button type="button" className="btn-primary" onClick={close}>Done</button>
+            <button type="button" className="btn-primary" onClick={close}>
+              {intl.formatMessage({ id: "common.done" })}
+            </button>
           </div>
         ) : (
           <>
             <p className="muted">
-              Tell us what happened and what you expected. Room {roomCode}'s current state and
-              recent history will be attached securely.
+              {intl.formatMessage(
+                { id: "game.bug.description" },
+                { room: roomCode ?? intl.formatMessage({ id: "game.bug.currentRoom" }) },
+              )}
             </p>
             <label className="bug-report-description">
-              <span>Description</span>
+              <span>{intl.formatMessage({ id: "game.bug.descriptionLabel" })}</span>
               <textarea
                 autoFocus
                 rows={7}
@@ -429,7 +441,7 @@ export function BugReportDialog({
                   setDescription(event.target.value);
                   if (result?.kind === "error") setResult(null);
                 }}
-                placeholder="What happened? What should have happened instead?"
+                placeholder={intl.formatMessage({ id: "game.bug.placeholder" })}
               />
             </label>
             <div className="bug-report-meta">
@@ -439,13 +451,15 @@ export function BugReportDialog({
               ) : null}
             </div>
             <div className="bug-report-actions">
-              <button type="button" onClick={close}>Cancel</button>
+              <button type="button" onClick={close}>{intl.formatMessage({ id: "common.cancel" })}</button>
               <button
                 type="submit"
                 className="btn-primary"
                 disabled={result?.kind === "submitting" || description.trim().length < 10}
               >
-                {result?.kind === "submitting" ? "Sending…" : "Send report"}
+                {intl.formatMessage({
+                  id: result?.kind === "submitting" ? "game.bug.sending" : "game.bug.send",
+                })}
               </button>
             </div>
           </>

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useIntl } from "react-intl";
 import type {
   CardView,
   GameIntent,
@@ -111,6 +112,7 @@ export function PlayerHand({
   replaying: boolean;
   interaction: PlayerHandInteraction;
 }) {
+  const intl = useIntl();
   const handMotionLocation = { kind: "hand" as const, seat: player.seat };
   const previousHandOrderRef = useRef<readonly number[]>([]);
   const currentVisibleCards = player.hand.filter((card) =>
@@ -275,14 +277,14 @@ export function PlayerHand({
             />
         ))}
         {!spectating && visibleCards.length === 0 && playableZoneCards.length === 0
-          ? <span className="muted">no cards in hand</span>
+          ? <span className="muted">{intl.formatMessage({ id: "game.hand.empty" })}</span>
           : null}
       </div>
       {scrollAvailability.left ? (
         <button
           type="button"
           className="hand-scroll-button hand-scroll-button-left"
-          aria-label="Scroll hand left"
+          aria-label={intl.formatMessage({ id: "game.hand.scrollLeft" })}
           aria-controls="player-hand"
           onClick={() => scrollHand(-1)}
         >
@@ -293,7 +295,7 @@ export function PlayerHand({
         <button
           type="button"
           className="hand-scroll-button hand-scroll-button-right"
-          aria-label="Scroll hand right"
+          aria-label={intl.formatMessage({ id: "game.hand.scrollRight" })}
           aria-controls="player-hand"
           onClick={() => scrollHand(1)}
         >

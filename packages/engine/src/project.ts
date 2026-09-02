@@ -5,6 +5,7 @@ import type {
   ChainLinkView,
   CombatValueModifierView,
   EquipmentSlot,
+  GameMessage,
   GameView,
   OnHitEffectView,
   OngoingEffectView,
@@ -13,7 +14,7 @@ import type {
   StackLayerView,
   TurnFactsView,
 } from "@fyendal/shared";
-import type { CardInstance, CombatValueModifier, Modifier, PlayerState } from "./state.js";
+import type { CardInstance, CombatValueModifier, Modifier, PendingDecisionState, PlayerState } from "./state.js";
 import { cardColorOf, dataOf, instanceDataOf, scriptOf } from "./cardProperties.js";
 import { pendingOnHitEffects } from "./hits.js";
 import { conditionalModifierGrantsGoAgain } from "./combatModifiers.js";
@@ -39,7 +40,7 @@ import { controlledPermanents } from "./sourceQueries.js";
 import { activatedAbilityUsage } from "./abilityRules.js";
 import { wardPieces } from "./damageResolution.js";
 import { playFromSourceCardId } from "./playRules.js";
-import { windowPrompt } from "./triggers.js";
+import { windowPrompt, windowPromptMessage } from "./triggers.js";
 
 interface CardViewOptions {
   controller?: PlayerState;
@@ -901,6 +902,97 @@ function projectedStackLayers(
   });
 }
 
+function projectedDecisionPromptMessage(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  decision: PendingDecisionState,
+  viewerSeat: number | null,
+): GameMessage | undefined {
+  if (decision.promptMessage) return decision.promptMessage;
+  if (decision.resourcePayment) {
+    return {
+      id: "engine.decision.payment",
+      values: { cost: decision.resourcePayment.cost },
+    };
+  }
+  if (decision.chooseHook === "engine-end-phase-pitch-order") {
+    return {
+      id: decision.deckBottomOrder?.ordered.length
+        ? "engine.decision.deckbottom.next"
+        : "engine.decision.deckbottom.first",
+    };
+  }
+  if (
+    decision.chooseHook === "engine-activation-discard" &&
+    decision.sourceInstanceId !== undefined
+  ) {
+    const source = findCardAnywhere(state, decision.sourceInstanceId)?.card;
+    if (source) {
+      return {
+        id: "engine.decision.activation.discard",
+        values: { card: { kind: "card", cardId: source.cardId } },
+      };
+    }
+  }
+  if (
+    decision.chooseHook === "engine-effect-attack-target" &&
+    decision.sourceInstanceId !== undefined
+  ) {
+    const source = findCardAnywhere(state, decision.sourceInstanceId)?.card;
+    if (source) {
+      return {
+        id: "engine.decision.attack.target",
+        values: { card: { kind: "card", cardId: source.cardId } },
+      };
+    }
+  }
+  if (decision.chooseHook === "engine-token-replacement-player-order") {
+    return { id: "engine.decision.token.playerorder" };
+  }
+  if (decision.chooseHook === "engine-token-replacement-order") {
+    return { id: "engine.decision.token.next" };
+  }
+  if (decision.chooseHook === "engine-wager-loss-replacement-order") {
+    return { id: "engine.decision.wager.next" };
+  }
+  if (decision.kind === "priority-window") {
+    return windowPromptMessage(state, viewerSeat);
+  }
+  if (decision.kind === "attack-reaction" || decision.kind === "defense-reaction") {
+    const card = state.stack[0]?.card;
+    return {
+      id: decision.kind === "attack-reaction"
+        ? card
+          ? "engine.decision.reaction.attack.card"
+          : "engine.decision.reaction.attack"
+        : card
+          ? "engine.decision.reaction.defense.card"
+          : "engine.decision.reaction.defense",
+      ...(card
+        ? { values: { card: { kind: "card" as const, cardId: card.cardId } } }
+        : {}),
+    };
+  }
+  if (decision.kind === "defend") {
+    const link = currentLink(state);
+    if (!link) return undefined;
+    return {
+      id: "engine.decision.defend",
+      values: {
+        card: { kind: "card", cardId: link.attackingCard.cardId },
+        attack: computeAttack(state, runtime, link),
+      },
+    };
+  }
+  if (decision.kind === "arsenal") {
+    return { id: "engine.decision.arsenal" };
+  }
+  if (decision.kind === "order-triggers") {
+    return { id: "engine.decision.triggers.order" };
+  }
+  return undefined;
+}
+
 function projectState(
   state: GameStateInternal,
   runtime: EngineRuntime,
@@ -1081,6 +1173,12 @@ function projectState(
             staged = { stagedCards: cards, stagedDefense: mine ? total : 0 };
           }
           const privateDecision = revealAll || pd.player === seat;
+          const promptMessage = projectedDecisionPromptMessage(
+            state,
+            runtime,
+            pd,
+            revealAll ? pd.player : seat,
+          );
           const preStackFlow = pd.variablePlayCost
             ? {
                 instanceId: pd.variablePlayCost.instanceId,
@@ -1108,8 +1206,8 @@ function projectState(
                 : revealAll || pd.player === seat
                   ? pd.prompt
                   : "",
-            ...(privateDecision && pd.promptMessage
-              ? { promptMessage: pd.promptMessage }
+            ...(privateDecision && promptMessage
+              ? { promptMessage }
               : {}),
             ...((revealAll || pd.player === seat) && pd.options ? { options: pd.options } : {}),
             ...((revealAll || pd.player === seat) && pd.minimumSelections !== undefined

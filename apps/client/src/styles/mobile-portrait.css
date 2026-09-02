@@ -52,7 +52,14 @@
     display: block;
     flex-grow: 1.8;
   }
-  .mobile-primary-action .btn-pass { height: 100%; }
+  .mobile-primary-action .btn-pass {
+    height: 100%;
+    gap: 0;
+    padding-inline: 6px;
+    line-height: 1.15;
+    white-space: nowrap;
+  }
+  .mobile-primary-action .shortcut-key { display: none; }
   .mobile-gamebar-actions button {
     width: 100%;
     min-width: 0;
@@ -352,7 +359,7 @@
   .status-float .life-me .life-hero { margin-right: 4px; }
   .status-float .life-opp .life-hero { margin-left: 4px; }
   .status-float .ap-pip { min-width: 64px; padding-inline: 7px; }
-  .mobile-primary-action .btn-pass { padding-inline: 8px; }
+  .mobile-primary-action .btn-pass { padding-inline: 4px; }
 }
 
 .legal-page .topbar { margin-bottom: 25px; }

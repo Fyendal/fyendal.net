@@ -309,8 +309,7 @@ export function CardFace({
           src={imageUrls[failedAttempts]}
           alt={name}
           draggable={false}
-          loading="lazy"
-          decoding="async"
+          loading="eager"
           onError={() => setImageFailure((current) => ({
             cardId: card.cardId,
             attempts: current?.cardId === card.cardId ? current.attempts + 1 : 1,
@@ -340,7 +339,7 @@ export function CardFace({
             src={cardImageUrl(MARKED_TOKEN_ID)}
             alt="Marked"
             draggable={false}
-            loading="lazy"
+            loading="eager"
           />
         </div>
       ) : null}
@@ -566,7 +565,7 @@ export function CardBack({
         alt=""
         aria-hidden="true"
         draggable={false}
-        loading="lazy"
+        loading="eager"
       />
       {label ? <div className="c-backlabel">{label}</div> : null}
       {count !== undefined && <div className="c-count">{count}</div>}

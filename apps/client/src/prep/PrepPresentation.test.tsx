@@ -68,6 +68,7 @@ describe("PrepPresentation equipment controls", () => {
     })));
 
     expect(html.match(/HVY103\.webp/g)).toHaveLength(3);
+    expect(html.match(/loading="eager"/g)).toHaveLength(3);
     expect(html).not.toContain("prep-stack-count");
   });
 

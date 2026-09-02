@@ -1,9 +1,18 @@
+import { useIntl, type IntlShape } from "react-intl";
 import { CardRef } from "./DecisionShared.js";
 
-export function boostOptionLabel(count: number, offersMultipleBoosts: boolean): string {
-  if (count === 0) return "Don't Boost";
-  if (count === 1) return offersMultipleBoosts ? "Boost once" : "Boost";
-  return `Boost ${count} times`;
+export function boostOptionLabel(
+  intl: IntlShape,
+  count: number,
+  offersMultipleBoosts: boolean,
+): string {
+  if (count === 0) return intl.formatMessage({ id: "game.decision.boost.none" });
+  if (count === 1) {
+    return intl.formatMessage({
+      id: offersMultipleBoosts ? "game.decision.boost.once" : "game.decision.boost.action",
+    });
+  }
+  return intl.formatMessage({ id: "game.decision.boost.times" }, { count });
 }
 
 /** Present affirmative Boost choices first while retaining the engine's
@@ -25,23 +34,30 @@ export function ChainCloseConfirmation({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
+  const intl = useIntl();
   return (
     <>
-      <span className="decision-prompt">Close the combat chain?</span>
+      <span className="decision-prompt">{intl.formatMessage({ id: "game.decision.closeChain.prompt" })}</span>
       <span className="decision-context">
-        Playing {cardId ? <CardRef id={cardId} /> : "this non-attack action"} will close the current combat chain.
+        {intl.formatMessage(
+          { id: "game.decision.closeChain.context" },
+          { card: cardId ? <CardRef id={cardId} /> : intl.formatMessage({ id: "game.card.nonAttack" }) },
+        )}
       </span>
       <div className="decision-buttons">
         <button
           className="btn-primary shortcut-button"
           onClick={onConfirm}
-          title="Close Chain and Play (Space)"
+          title={intl.formatMessage(
+            { id: "common.shortcut.space" },
+            { label: intl.formatMessage({ id: "game.decision.closeChain.action" }) },
+          )}
           aria-keyshortcuts="Space"
         >
-          Close Chain and Play
-          <kbd className="shortcut-key" aria-label="Space key" />
+          {intl.formatMessage({ id: "game.decision.closeChain.action" })}
+          <kbd className="shortcut-key" aria-label={intl.formatMessage({ id: "common.spaceKey" })} />
         </button>
-        <button onClick={onCancel}>Cancel</button>
+        <button onClick={onCancel}>{intl.formatMessage({ id: "common.cancel" })}</button>
       </div>
     </>
   );
@@ -58,23 +74,32 @@ export function ActionConfirmation({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
-  const verb = activation ? "Activate" : "Play";
+  const intl = useIntl();
+  const verb = intl.formatMessage({ id: activation ? "game.action.activate" : "game.action.play" });
   return (
     <>
       <span className="decision-prompt">
-        {verb} {cardId ? <CardRef id={cardId} /> : activation ? "ability" : "card"}?
+        {intl.formatMessage(
+          { id: "game.decision.action.confirm" },
+          {
+            verb,
+            target: cardId
+              ? <CardRef id={cardId} />
+              : intl.formatMessage({ id: activation ? "game.ability" : "game.card" }),
+          },
+        )}
       </span>
       <div className="decision-buttons">
         <button
           className="btn-primary shortcut-button"
           onClick={onConfirm}
-          title={`${verb} (Space)`}
+          title={intl.formatMessage({ id: "common.shortcut.space" }, { label: verb })}
           aria-keyshortcuts="Space"
         >
           {verb}
-          <kbd className="shortcut-key" aria-label="Space key" />
+          <kbd className="shortcut-key" aria-label={intl.formatMessage({ id: "common.spaceKey" })} />
         </button>
-        <button onClick={onCancel}>Cancel</button>
+        <button onClick={onCancel}>{intl.formatMessage({ id: "common.cancel" })}</button>
       </div>
     </>
   );
@@ -87,25 +112,29 @@ export function ArsenalSkipConfirmation({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
+  const intl = useIntl();
   return (
     <>
-      <span className="decision-prompt">Skip arsenal?</span>
+      <span className="decision-prompt">{intl.formatMessage({ id: "game.decision.arsenal.prompt" })}</span>
       <span className="decision-context">
-        End the turn without putting a card into your arsenal?
+        {intl.formatMessage({ id: "game.decision.arsenal.context" })}
       </span>
       <div className="decision-buttons">
-        <button className="btn-primary" onClick={onConfirm}>Skip Arsenal</button>
-        <button onClick={onCancel}>Cancel</button>
+        <button className="btn-primary" onClick={onConfirm}>
+          {intl.formatMessage({ id: "game.decision.arsenal.action" })}
+        </button>
+        <button onClick={onCancel}>{intl.formatMessage({ id: "common.cancel" })}</button>
       </div>
     </>
   );
 }
 
 export function OptDecisionInstructions({ cardCount }: { cardCount: number }) {
+  const intl = useIntl();
   if (cardCount < 2) return null;
   return (
     <span className="decision-context">
-      Last Top is topmost; last Bottom is bottommost.
+      {intl.formatMessage({ id: "game.decision.opt.instructions" })}
     </span>
   );
 }

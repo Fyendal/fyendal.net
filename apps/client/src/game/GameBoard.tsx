@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import type { CardView, GameIntent, MeldSide } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
@@ -6,7 +7,7 @@ import { useStore } from "../store.js";
 import { cardPreviewSize, CardBack, CardFace } from "./Card.js";
 import { ChainFloat } from "./ChainFloat.js";
 import { EndTurnPassToast } from "./EndTurnPassToast.js";
-import { StatusFloat } from "./StatusFloat.js";
+import { StatusFloat, type PrimaryAction } from "./StatusFloat.js";
 import {
   ChainPriorityStatus,
   ChainTimingStatus,
@@ -75,6 +76,7 @@ import { handChoiceDismissal } from "./handChoiceDismissal.js";
 const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
+  const intl = useIntl();
   const { view, viewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, botGame, sendIntent, sendPriorityMode, sendRunechantSkip, sendEmote, latestEmote, undo, error, leave, opponentConnected, connected, roomCode, screen, replayFrames, watchReplay, downloadReplay, getRecordedViews, lastActionAt, claimVictory, reportBug } = useStore(
     useShallow((state) => ({
       view: state.view,
@@ -371,10 +373,10 @@ export function GameBoard() {
   const myTurn = view.activePlayer === seat;
   const activeHeroName = view.players[view.activePlayer]?.heroName ?? "";
   const turnLabel = spectating
-    ? `${activeHeroName}'s turn`
+    ? intl.formatMessage({ id: "game.turn.named" }, { player: activeHeroName })
     : myTurn
-      ? "Your turn"
-      : "Opponent's turn";
+      ? intl.formatMessage({ id: "game.turn.yours" })
+      : intl.formatMessage({ id: "game.turn.opponent" });
   const combatChainLinks = presentedView.chain.filter((link) => !link.onStack);
   const hasActiveCombatChain = combatChainLinks.length > 0;
   const showPriorityFloat = !spectating && !replaying && gameHasPriority(view);
@@ -705,19 +707,19 @@ export function GameBoard() {
     lessGuidance,
     mobileHandIsHidden,
   });
-  const passLabel = sel.kind !== "none"
+  const primaryAction: PrimaryAction | null = sel.kind !== "none"
     ? null
     : defending
-      ? stagedIds.size > 0 ? "CONFIRM" : "NO BLOCK"
+      ? stagedIds.size > 0 ? "confirm-blocks" : "confirm-no-blocks"
       : !derived.canPass
       ? null
       : myDecision
         ? statusPassDecision
-          ? "PASS"
+          ? "pass"
           : null // button-choice decisions carry their own pass/decline button
         : view.phase === "action" && myTurn
-          ? "END TURN"
-          : "PASS";
+          ? "end-turn"
+          : "pass";
   const triggerPrimaryAction = defending
     ? () => {
         if (defendIntent) send(defendIntent);
@@ -971,8 +973,8 @@ export function GameBoard() {
         aria-hidden={waitingForOpponent && !replaying ? undefined : true}
       >
         {spectating
-          ? `Spectating — ${activeHeroName} to act`
-          : "Waiting for opponent…"}
+          ? intl.formatMessage({ id: "game.waiting.spectating" }, { hero: activeHeroName })
+          : intl.formatMessage({ id: "game.waiting.opponent" })}
       </div>
 
       <MobileHandToggle
@@ -996,7 +998,7 @@ export function GameBoard() {
         log={view.log}
         activeHeroName={activeHeroName}
         actionPoints={view.players[view.activePlayer]!.actionPoints}
-        passLabel={passLabel}
+        primaryAction={primaryAction}
         passDisabled={roomCommandPending || (defending && defendIntent === null)}
         onPass={triggerPrimaryAction}
       />
@@ -1128,7 +1130,7 @@ export function GameBoard() {
         onUndo={!spectating && !replaying && view.winner === null ? undo : null}
         undoDisabled={roomCommandPending}
         onLeave={leave}
-        leaveLabel={botGame && !spectating ? "End Game" : "Leave"}
+        leaveAction={botGame && !spectating ? "end-game" : "leave"}
         onConcede={
           !spectating && !replaying && view.winner === null
             ? () => send({ kind: "concede" })
@@ -1142,10 +1144,10 @@ export function GameBoard() {
         winnerText={
           view.winner !== null
             ? spectating
-              ? `${winnerName} wins!`
+              ? intl.formatMessage({ id: "game.result.namedWinner" }, { winner: winnerName })
               : view.winner === seat
-                ? "Victory!"
-                : "Defeat"
+                ? intl.formatMessage({ id: "game.result.victory" })
+                : intl.formatMessage({ id: "game.result.defeat" })
             : null
         }
         replaying={replaying}
@@ -1178,7 +1180,7 @@ export function GameBoard() {
         opponentHeroName={opp.heroName}
         roomCode={roomCode}
         onInspectCard={setInspectedCardId}
-        mobilePrimaryActionLabel={passLabel}
+        mobilePrimaryAction={primaryAction}
         mobilePrimaryActionDisabled={defending && defendIntent === null}
         onMobilePrimaryAction={triggerPrimaryAction}
       />

@@ -1,4 +1,5 @@
 import { cardData } from "@fyendal/cards/client";
+import { useIntl } from "react-intl";
 import { CardFace } from "../Card.js";
 import {
   ActionConfirmation,
@@ -17,6 +18,7 @@ export function ActionAnnouncementPanel({
   model: ActionAnnouncementModel;
   viewerSeat: number;
 }) {
+  const intl = useIntl();
   const {
     sel,
     selCardId,
@@ -70,14 +72,17 @@ export function ActionAnnouncementPanel({
       {sel.kind === "choose-hand-action" ? (
         <>
           <span className="decision-prompt">
-            Use {selCardId ? <CardRef id={selCardId} /> : "card"}
+            {intl.formatMessage(
+              { id: "game.decision.useCard" },
+              { card: selCardId ? <CardRef id={selCardId} /> : intl.formatMessage({ id: "game.card" }) },
+            )}
           </span>
           <div className="decision-buttons">
             <button onClick={() => onChooseHandPlay(sel.instanceId)}>
-              {handCardPlayLabel(selCardId)}
+              {handCardPlayLabel(intl, selCardId)}
             </button>
             <button onClick={() => onChooseHandAbility(sel.instanceId)}>
-              Activate instant ability
+              {intl.formatMessage({ id: "game.decision.activateInstant" })}
             </button>
           </div>
         </>
@@ -85,8 +90,8 @@ export function ActionAnnouncementPanel({
       {sel.kind !== "choose-hand-action" && step === "payment" ? (
         <>
           <span className="decision-prompt">
-            {sel.kind === "activate" ? "Activate " : "Play "}
-            {selCardId ? <CardRef id={selCardId} /> : "card"}
+            {intl.formatMessage({ id: sel.kind === "activate" ? "game.action.activate" : "game.action.play" })}{" "}
+            {selCardId ? <CardRef id={selCardId} /> : intl.formatMessage({ id: "game.card" })}
           </span>
           {meldChoices.length > 0 ? (
             <div className="decision-buttons">
@@ -105,7 +110,10 @@ export function ActionAnnouncementPanel({
           {stagedAdditionalCost && !additionalCostConfirmed ? (
             <>
               <span className="decision-context">
-                Choose up to 3 {stagedAdditionalCost.cardLabel} from each zone
+                {intl.formatMessage(
+                  { id: "game.decision.additionalCost.choose" },
+                  { card: stagedAdditionalCost.cardLabel },
+                )}
               </span>
               <div className="decision-additional-cost-groups">
                 {stagedAdditionalCost.modes.map((mode) => {
@@ -115,19 +123,26 @@ export function ActionAnnouncementPanel({
                   return (
                     <section key={mode.mode} className="decision-additional-cost-group">
                       <div className="decision-additional-cost-title">
-                        <span>{mode.mode === "destroy" ? "Destroy from arena" : "Discard from hand"}</span>
+                        <span>{intl.formatMessage({
+                          id: mode.mode === "destroy"
+                            ? "game.decision.additionalCost.destroy"
+                            : "game.decision.additionalCost.discard",
+                        })}</span>
                         <small>{selectedInMode}/{mode.maximum}</small>
                       </div>
                       <div className="decision-target-cards">
                         {mode.cards.map((card) => {
                           const selected = selectedAlternativeCostIds.includes(card.instanceId);
                           const atMaximum = selectedInMode >= mode.maximum;
-                          const label = cardData[card.cardId]?.name ?? "card";
+                          const label = cardData[card.cardId]?.name ?? intl.formatMessage({ id: "game.card" });
                           return (
                             <button
                               key={card.instanceId}
                               className={`decision-target-card ${selected ? "decision-target-selected" : ""}`}
-                              aria-label={`${selected ? "Remove" : "Choose"} ${label}`}
+                              aria-label={intl.formatMessage(
+                                { id: selected ? "game.decision.removeCard" : "game.decision.chooseCard" },
+                                { card: label },
+                              )}
                               aria-pressed={selected}
                               disabled={!selected && atMaximum}
                               onClick={(event) => chooseWithoutFocus(
@@ -155,16 +170,19 @@ export function ActionAnnouncementPanel({
                     () => onSelectAlternativeCost(null),
                   )}
                 >
-                  Choose none
+                  {intl.formatMessage({ id: "game.decision.chooseNone" })}
                 </button>
                 <button
                   className="btn-primary"
                   disabled={!canConfirmAdditionalCost}
                   onClick={onConfirmAdditionalCost}
                 >
-                  Confirm {stagedAdditionalCost.cardLabel}
+                  {intl.formatMessage(
+                    { id: "game.decision.confirmNamed" },
+                    { name: stagedAdditionalCost.cardLabel },
+                  )}
                 </button>
-                <button onClick={onCancel}>Cancel</button>
+                <button onClick={onCancel}>{intl.formatMessage({ id: "common.cancel" })}</button>
               </div>
             </>
           ) : !stagedAdditionalCost && alternativeCostChoices.length > 0 ? (
@@ -176,7 +194,7 @@ export function ActionAnnouncementPanel({
                     onClick={(event) =>
                       chooseWithoutFocus(event.currentTarget, () => onSelectAlternativeCost(null))}
                   >
-                    Pay resources
+                    {intl.formatMessage({ id: "game.decision.payResources" })}
                   </button>
                 ) : null}
               </div>
@@ -187,13 +205,15 @@ export function ActionAnnouncementPanel({
                     choice.instanceIds.length === alternativeCostCardInstanceIds.length &&
                     choice.instanceIds.every((id) => alternativeCostCardInstanceIds.includes(id));
                   const label = choice.cards
-                    .map((card) => card ? (cardData[card.cardId]?.name ?? "card") : "card")
+                    .map((card) => card
+                      ? (cardData[card.cardId]?.name ?? intl.formatMessage({ id: "game.card" }))
+                      : intl.formatMessage({ id: "game.card" }))
                     .join(", ");
                   return (
                     <button
                       key={choice.key}
                       className={`decision-target-card ${selected ? "decision-target-selected" : ""}`}
-                      aria-label={`Use ${label}`}
+                      aria-label={intl.formatMessage({ id: "game.decision.useNamed" }, { name: label })}
                       aria-pressed={selected}
                       onClick={(event) =>
                         chooseWithoutFocus(event.currentTarget, () =>
@@ -207,7 +227,7 @@ export function ActionAnnouncementPanel({
                           affiliation={cardAffiliation(card, viewerSeat)}
                         />
                       ) : null)}
-                      <span>Use {label}</span>
+                      <span>{intl.formatMessage({ id: "game.decision.useNamed" }, { name: label })}</span>
                     </button>
                   );
                 })}
@@ -217,14 +237,17 @@ export function ActionAnnouncementPanel({
           {(!stagedAdditionalCost || additionalCostConfirmed) && pitchResourcesRequired > 0 ? (
             <strong
               className="decision-resource-progress"
-              aria-label={`${pitchResourcesSelected} of ${pitchResourcesRequired} pitch resources selected`}
+              aria-label={intl.formatMessage(
+                { id: "game.decision.pitchProgress" },
+                { selected: pitchResourcesSelected, required: pitchResourcesRequired },
+              )}
             >
               {pitchResourcesSelected}/{pitchResourcesRequired}
             </strong>
           ) : null}
           {stagedAdditionalCost && !additionalCostConfirmed ? null : (
             <div className="decision-buttons">
-              <button onClick={onCancel}>Cancel</button>
+              <button onClick={onCancel}>{intl.formatMessage({ id: "common.cancel" })}</button>
             </div>
           )}
         </>
@@ -232,7 +255,10 @@ export function ActionAnnouncementPanel({
       {sel.kind === "activate" && step === "ability" ? (
         <>
           <span className="decision-prompt">
-            Choose how to use {selCardId ? <CardRef id={selCardId} /> : "card"}
+            {intl.formatMessage(
+              { id: "game.decision.chooseUse" },
+              { card: selCardId ? <CardRef id={selCardId} /> : intl.formatMessage({ id: "game.card" }) },
+            )}
           </span>
           <div className="decision-buttons">
             {abilityChoices.map((choice) => (
@@ -244,14 +270,17 @@ export function ActionAnnouncementPanel({
                 {choice.label}
               </button>
             ))}
-            <button onClick={onCancel}>Cancel</button>
+            <button onClick={onCancel}>{intl.formatMessage({ id: "common.cancel" })}</button>
           </div>
         </>
       ) : null}
       {sel.kind !== "choose-hand-action" && step === "method" && playMethodChoiceRequired ? (
         <>
           <span className="decision-prompt">
-            Play {selCardId ? <CardRef id={selCardId} /> : "card"} as…
+            {intl.formatMessage(
+              { id: "game.decision.playAs.prompt" },
+              { card: selCardId ? <CardRef id={selCardId} /> : intl.formatMessage({ id: "game.card" }) },
+            )}
           </span>
           <div className="decision-buttons">
             <button
@@ -259,28 +288,37 @@ export function ActionAnnouncementPanel({
               onClick={(event) =>
                 chooseWithoutFocus(event.currentTarget, () => onSelectPlayMethod("action"))}
             >
-              Action
+              {intl.formatMessage({ id: "game.cardType.action" })}
             </button>
             <button
               className={playMethod === "instant" ? "btn-primary" : ""}
               onClick={(event) =>
                 chooseWithoutFocus(event.currentTarget, () => onSelectPlayMethod("instant"))}
             >
-              Instant
+              {intl.formatMessage({ id: "game.cardType.instant" })}
             </button>
-            <button onClick={onCancel}>Cancel</button>
+            <button onClick={onCancel}>{intl.formatMessage({ id: "common.cancel" })}</button>
           </div>
         </>
       ) : null}
       {step === "boost" ? (
         <>
           <span className="decision-prompt">
-            Boost {selCardId ? <CardRef id={selCardId} /> : "this attack"}?
+            {intl.formatMessage(
+              { id: "game.decision.boost.prompt" },
+              {
+                card: selCardId
+                  ? <CardRef id={selCardId} />
+                  : intl.formatMessage({ id: "game.attack.this" }),
+              },
+            )}
           </span>
-          <span className="decision-context">Each Boost banishes the top card of your deck.</span>
+          <span className="decision-context">
+            {intl.formatMessage({ id: "game.decision.boost.context" })}
+          </span>
           <div className="decision-buttons">
             {presentedBoostOptions.map((count) => {
-              const label = boostOptionLabel(count, offersMultipleBoosts);
+              const label = boostOptionLabel(intl, count, offersMultipleBoosts);
               const spaceDefault = boostCount === null && presentedBoostCount === count;
               return (
                 <button
@@ -291,16 +329,23 @@ export function ActionAnnouncementPanel({
                   onClick={(event) =>
                     chooseWithoutFocus(event.currentTarget, () => onSelectBoost(count))}
                   {...(spaceDefault
-                    ? { title: `${label} (Space)`, "aria-keyshortcuts": "Space" }
+                    ? {
+                        title: intl.formatMessage({ id: "common.shortcut.space" }, { label }),
+                        "aria-keyshortcuts": "Space",
+                      }
                     : {})}
                 >
                   {label}
-                  {spaceDefault ? <kbd className="shortcut-key" aria-label="Space key" /> : null}
+                  {spaceDefault ? (
+                    <kbd className="shortcut-key" aria-label={intl.formatMessage({ id: "common.spaceKey" })} />
+                  ) : null}
                 </button>
               );
             })}
           </div>
-          <div className="decision-buttons"><button onClick={onCancel}>Cancel</button></div>
+          <div className="decision-buttons">
+            <button onClick={onCancel}>{intl.formatMessage({ id: "common.cancel" })}</button>
+          </div>
         </>
       ) : null}
       {step === "close-chain" ? (
@@ -320,7 +365,7 @@ export function ActionAnnouncementPanel({
       ) : null}
       {step === "target" ? (
         <>
-          <span className="decision-prompt">Choose a target</span>
+          <span className="decision-prompt">{intl.formatMessage({ id: "game.decision.chooseTarget" })}</span>
           {targetChoices.length > 0 ? (
             <ActionTargetCards
               choices={targetChoices}
@@ -341,7 +386,9 @@ export function ActionAnnouncementPanel({
               }}
             />
           ) : null}
-          <div className="decision-buttons"><button onClick={onCancel}>Cancel</button></div>
+          <div className="decision-buttons">
+            <button onClick={onCancel}>{intl.formatMessage({ id: "common.cancel" })}</button>
+          </div>
         </>
       ) : null}
     </div>

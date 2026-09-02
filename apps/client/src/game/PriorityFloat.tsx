@@ -1,3 +1,6 @@
+import { useIntl } from "react-intl";
+import { localizeTimingLabel } from "./timingLocalization.js";
+
 type PriorityLabel = "YOUR PRIORITY" | "OPPONENT'S PRIORITY";
 
 export function combatPriorityTimingLabel(timingLabel: string): string {
@@ -8,7 +11,8 @@ export function combatPriorityTimingLabel(timingLabel: string): string {
 
 /** Compact combat context shared by priority windows and required decisions. */
 export function ChainTimingStatus({ label }: { label: string }) {
-  const combatLabel = combatPriorityTimingLabel(label);
+  const intl = useIntl();
+  const combatLabel = localizeTimingLabel(intl, combatPriorityTimingLabel(label));
   const separatorIndex = combatLabel.lastIndexOf(" · ");
   if (separatorIndex === -1) {
     return <span className="chain-priority-status">{combatLabel}</span>;
@@ -35,10 +39,13 @@ export function TurnTimingFloat({
   timingLabel: string;
   className?: string;
 }) {
+  const intl = useIntl();
   return (
     <div className={`float priority-float${className ? ` ${className}` : ""}`} aria-live="polite">
-      <span className="priority-turn">Turn {turn} · {turnLabel}</span>
-      <span className="priority-timing">{timingLabel}</span>
+      <span className="priority-turn">
+        {intl.formatMessage({ id: "game.turn.status" }, { turn, owner: turnLabel })}
+      </span>
+      <span className="priority-timing">{localizeTimingLabel(intl, timingLabel)}</span>
     </div>
   );
 }

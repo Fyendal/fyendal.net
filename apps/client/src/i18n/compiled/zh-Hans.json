@@ -297,6 +297,12 @@
       "value": "取消"
     }
   ],
+  "common.close": [
+    {
+      "type": 0,
+      "value": "关闭"
+    }
+  ],
   "common.closeNamed": [
     {
       "type": 0,
@@ -329,6 +335,18 @@
     {
       "type": 0,
       "value": "牌组"
+    }
+  ],
+  "common.dismiss": [
+    {
+      "type": 0,
+      "value": "关闭"
+    }
+  ],
+  "common.done": [
+    {
+      "type": 0,
+      "value": "完成"
     }
   ],
   "common.endGame": [
@@ -367,6 +385,18 @@
       "value": "退出登录"
     }
   ],
+  "common.option.decline": [
+    {
+      "type": 0,
+      "value": "拒绝"
+    }
+  ],
+  "common.option.keep": [
+    {
+      "type": 0,
+      "value": "保留结果"
+    }
+  ],
   "common.option.no": [
     {
       "type": 0,
@@ -376,7 +406,13 @@
   "common.option.pass": [
     {
       "type": 0,
-      "value": "跳过"
+      "value": "让过"
+    }
+  ],
+  "common.option.reroll": [
+    {
+      "type": 0,
+      "value": "重新掷骰"
     }
   ],
   "common.option.yes": [
@@ -419,6 +455,36 @@
       "value": "加入 Fyendal Discord"
     }
   ],
+  "engine.decision.activation.discard": [
+    {
+      "type": 0,
+      "value": "选择一张要为 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 弃置的卡牌"
+    }
+  ],
+  "engine.decision.arsenal": [
+    {
+      "type": 0,
+      "value": "你可以将一张手牌放入 arsenal，或选择让过"
+    }
+  ],
+  "engine.decision.attack.target": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择攻击目标"
+    }
+  ],
   "engine.decision.crank": [
     {
       "type": 1,
@@ -427,6 +493,212 @@
     {
       "type": 0,
       "value": "：Crank——移除一个蒸汽指示物以获得 1 个行动点？"
+    }
+  ],
+  "engine.decision.deckbottom.first": [
+    {
+      "type": 0,
+      "value": "选择第一张要放到牌库底部的卡牌"
+    }
+  ],
+  "engine.decision.deckbottom.next": [
+    {
+      "type": 0,
+      "value": "选择下一张要放到牌库底部的卡牌"
+    }
+  ],
+  "engine.decision.defend": [
+    {
+      "type": 0,
+      "value": "防御 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "（攻击力 "
+    },
+    {
+      "type": 1,
+      "value": "attack"
+    },
+    {
+      "type": 0,
+      "value": "）"
+    }
+  ],
+  "engine.decision.payment": [
+    {
+      "type": 0,
+      "value": "支付 "
+    },
+    {
+      "type": 1,
+      "value": "cost"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
+  "engine.decision.priority.ability": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 的能力位于堆叠上——你可以打出瞬间牌或让过"
+    }
+  ],
+  "engine.decision.priority.ability.hidden": [
+    {
+      "type": 0,
+      "value": "一张牌面朝下卡牌的能力位于堆叠上——你可以打出瞬间牌或让过"
+    }
+  ],
+  "engine.decision.priority.ability.triggered": [
+    {
+      "type": 0,
+      "value": "触发能力位于堆叠上——你可以打出瞬间牌或让过"
+    }
+  ],
+  "engine.decision.priority.attacking": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 正在攻击——你可以打出瞬间牌或让过"
+    }
+  ],
+  "engine.decision.priority.base": [
+    {
+      "type": 0,
+      "value": "优先权——你可以打出瞬间牌或让过"
+    }
+  ],
+  "engine.decision.priority.card": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 位于堆叠上——你可以打出瞬间牌或让过"
+    }
+  ],
+  "engine.decision.priority.trigger": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 触发："
+    },
+    {
+      "type": 1,
+      "value": "trigger"
+    },
+    {
+      "type": 0,
+      "value": "——你可以打出瞬间牌或让过"
+    }
+  ],
+  "engine.decision.priority.trigger.generic": [
+    {
+      "type": 0,
+      "value": "触发能力："
+    },
+    {
+      "type": 1,
+      "value": "trigger"
+    },
+    {
+      "type": 0,
+      "value": "——你可以打出瞬间牌或让过"
+    }
+  ],
+  "engine.decision.priority.trigger.hidden": [
+    {
+      "type": 0,
+      "value": "一张牌面朝下卡牌触发："
+    },
+    {
+      "type": 1,
+      "value": "trigger"
+    },
+    {
+      "type": 0,
+      "value": "——你可以打出瞬间牌或让过"
+    }
+  ],
+  "engine.decision.reaction.attack": [
+    {
+      "type": 0,
+      "value": "攻击反应窗口——你可以打出反应牌或让过"
+    }
+  ],
+  "engine.decision.reaction.attack.card": [
+    {
+      "type": 0,
+      "value": "攻击反应窗口——你可以打出反应牌或让过（"
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 位于堆叠上）"
+    }
+  ],
+  "engine.decision.reaction.defense": [
+    {
+      "type": 0,
+      "value": "防御反应窗口——你可以打出反应牌或让过"
+    }
+  ],
+  "engine.decision.reaction.defense.card": [
+    {
+      "type": 0,
+      "value": "防御反应窗口——你可以打出反应牌或让过（"
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 位于堆叠上）"
+    }
+  ],
+  "engine.decision.token.next": [
+    {
+      "type": 0,
+      "value": "选择下一个要应用的衍生物生成替代效果"
+    }
+  ],
+  "engine.decision.token.playerorder": [
+    {
+      "type": 0,
+      "value": "选择哪位玩家的衍生物替代效果先应用"
+    }
+  ],
+  "engine.decision.triggers.order": [
+    {
+      "type": 0,
+      "value": "排列你的触发能力"
+    }
+  ],
+  "engine.decision.wager.next": [
+    {
+      "type": 0,
+      "value": "选择下一个要应用的赌注失败替代效果"
     }
   ],
   "footer.legal": [
@@ -465,10 +737,2234 @@
       "value": "白银时代"
     }
   ],
+  "game.ability": [
+    {
+      "type": 0,
+      "value": "能力"
+    }
+  ],
+  "game.action.activate": [
+    {
+      "type": 0,
+      "value": "启动"
+    }
+  ],
+  "game.action.confirm-blocks": [
+    {
+      "type": 0,
+      "value": "确认防御"
+    }
+  ],
+  "game.action.confirm-blocks.short": [
+    {
+      "type": 0,
+      "value": "确认防御"
+    }
+  ],
+  "game.action.confirm-no-blocks": [
+    {
+      "type": 0,
+      "value": "确认不防御"
+    }
+  ],
+  "game.action.confirm-no-blocks.short": [
+    {
+      "type": 0,
+      "value": "不防御"
+    }
+  ],
+  "game.action.end-turn": [
+    {
+      "type": 0,
+      "value": "结束回合"
+    }
+  ],
+  "game.action.end-turn.short": [
+    {
+      "type": 0,
+      "value": "结束回合"
+    }
+  ],
+  "game.action.pass": [
+    {
+      "type": 0,
+      "value": "让过"
+    }
+  ],
+  "game.action.pass.short": [
+    {
+      "type": 0,
+      "value": "让过"
+    }
+  ],
+  "game.action.play": [
+    {
+      "type": 0,
+      "value": "打出"
+    }
+  ],
+  "game.actionPoints.hero": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 剩余的行动点"
+    }
+  ],
+  "game.actionPoints.remaining": [
+    {
+      "type": 0,
+      "value": "剩余 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个行动点"
+    }
+  ],
+  "game.attack.this": [
+    {
+      "type": 0,
+      "value": "此次攻击"
+    }
+  ],
+  "game.bloodDebt": [
+    {
+      "type": 0,
+      "value": "血债"
+    }
+  ],
+  "game.bloodDebt.loseLife": [
+    {
+      "type": 0,
+      "value": "失去 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 点生命"
+    }
+  ],
+  "game.bloodDebt.summary": [
+    {
+      "type": 0,
+      "value": "血债：失去 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 点生命"
+    }
+  ],
+  "game.bug.currentRoom": [
+    {
+      "type": 0,
+      "value": "当前房间"
+    }
+  ],
+  "game.bug.description": [
+    {
+      "type": 0,
+      "value": "请说明发生了什么，以及你预期的结果。房间 "
+    },
+    {
+      "type": 1,
+      "value": "room"
+    },
+    {
+      "type": 0,
+      "value": " 的当前状态和近期历史记录将被安全地随报告附上。"
+    }
+  ],
+  "game.bug.descriptionLabel": [
+    {
+      "type": 0,
+      "value": "问题描述"
+    }
+  ],
+  "game.bug.dialogTitle": [
+    {
+      "type": 0,
+      "value": "报告对局问题"
+    }
+  ],
+  "game.bug.placeholder": [
+    {
+      "type": 0,
+      "value": "发生了什么？你预期应该发生什么？"
+    }
+  ],
+  "game.bug.reference": [
+    {
+      "type": 0,
+      "value": "参考编号 "
+    },
+    {
+      "type": 1,
+      "value": "reference"
+    },
+    {
+      "type": 0,
+      "value": "。房间状态和近期历史记录已随报告附上，以便诊断。"
+    }
+  ],
+  "game.bug.report": [
+    {
+      "type": 0,
+      "value": "报告问题"
+    }
+  ],
+  "game.bug.send": [
+    {
+      "type": 0,
+      "value": "发送报告"
+    }
+  ],
+  "game.bug.sending": [
+    {
+      "type": 0,
+      "value": "正在发送…"
+    }
+  ],
+  "game.bug.sent": [
+    {
+      "type": 0,
+      "value": "报告已发送"
+    }
+  ],
+  "game.bug.validation": [
+    {
+      "type": 0,
+      "value": "请用 10 至 2000 个字符描述问题。"
+    }
+  ],
+  "game.card": [
+    {
+      "type": 0,
+      "value": "卡牌"
+    }
+  ],
+  "game.card.nonAttack": [
+    {
+      "type": 0,
+      "value": "此非攻击行动"
+    }
+  ],
   "game.cardDetails": [
     {
       "type": 0,
       "value": "卡牌详情"
+    }
+  ],
+  "game.cardName": [
+    {
+      "type": 0,
+      "value": "卡牌名称"
+    }
+  ],
+  "game.cardType.action": [
+    {
+      "type": 0,
+      "value": "行动"
+    }
+  ],
+  "game.cardType.instant": [
+    {
+      "type": 0,
+      "value": "瞬间"
+    }
+  ],
+  "game.chain.base": [
+    {
+      "type": 0,
+      "value": "基础值"
+    }
+  ],
+  "game.chain.close": [
+    {
+      "type": 0,
+      "value": "关闭战斗链"
+    }
+  ],
+  "game.chain.closeOnHitEffects": [
+    {
+      "type": 0,
+      "value": "关闭 On-hit effects"
+    }
+  ],
+  "game.chain.closeShort": [
+    {
+      "type": 0,
+      "value": "关闭战斗链"
+    }
+  ],
+  "game.chain.defender": [
+    {
+      "type": 0,
+      "value": "防御牌"
+    }
+  ],
+  "game.chain.hiddenEffect": [
+    {
+      "type": 0,
+      "value": "隐藏效果"
+    }
+  ],
+  "game.chain.link.defended": [
+    {
+      "type": 0,
+      "value": "Link "
+    },
+    {
+      "type": 1,
+      "value": "link"
+    },
+    {
+      "type": 0,
+      "value": "：完全防御"
+    }
+  ],
+  "game.chain.link.hit": [
+    {
+      "type": 0,
+      "value": "Link "
+    },
+    {
+      "type": 1,
+      "value": "link"
+    },
+    {
+      "type": 0,
+      "value": "：命中并造成 "
+    },
+    {
+      "type": 1,
+      "value": "damage"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
+    }
+  ],
+  "game.chain.link.progress": [
+    {
+      "type": 0,
+      "value": "Link "
+    },
+    {
+      "type": 1,
+      "value": "link"
+    },
+    {
+      "type": 0,
+      "value": "：进行中"
+    }
+  ],
+  "game.chain.link.waiting": [
+    {
+      "type": 0,
+      "value": "Link "
+    },
+    {
+      "type": 1,
+      "value": "link"
+    },
+    {
+      "type": 0,
+      "value": "：等待下一次攻击"
+    }
+  ],
+  "game.chain.links": [
+    {
+      "type": 0,
+      "value": "Chain Links"
+    }
+  ],
+  "game.chain.linksShort": [
+    {
+      "type": 0,
+      "value": "Links"
+    }
+  ],
+  "game.chain.minimize": [
+    {
+      "type": 0,
+      "value": "收起战斗链"
+    }
+  ],
+  "game.chain.modifiers": [
+    {
+      "type": 1,
+      "value": "stat"
+    },
+    {
+      "type": 0,
+      "value": "修正"
+    }
+  ],
+  "game.chain.noModifiers": [
+    {
+      "type": 0,
+      "value": "无修正"
+    }
+  ],
+  "game.chain.onHit": [
+    {
+      "type": 0,
+      "value": "On hit"
+    }
+  ],
+  "game.chain.onHitEffects": [
+    {
+      "type": 0,
+      "value": "On-hit effects"
+    }
+  ],
+  "game.chain.resolvedWaiting": [
+    {
+      "type": 0,
+      "value": "本环已结算 — 正在等待下一次攻击…"
+    }
+  ],
+  "game.chain.short": [
+    {
+      "type": 0,
+      "value": "战斗链"
+    }
+  ],
+  "game.chain.show": [
+    {
+      "type": 0,
+      "value": "显示战斗链"
+    }
+  ],
+  "game.chain.staged.pending": [
+    {
+      "type": 0,
+      "value": "已暂选防御牌 — 尚未确认"
+    }
+  ],
+  "game.chain.staged.return": [
+    {
+      "type": 0,
+      "value": "已暂选防御牌 — 退回 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "game.chain.stat.attack": [
+    {
+      "type": 0,
+      "value": "攻击"
+    }
+  ],
+  "game.chain.stat.defense": [
+    {
+      "type": 0,
+      "value": "防御"
+    }
+  ],
+  "game.chain.stat.prevention": [
+    {
+      "type": 0,
+      "value": "防止"
+    }
+  ],
+  "game.chain.title": [
+    {
+      "type": 0,
+      "value": "战斗链"
+    }
+  ],
+  "game.chain.unblockAll": [
+    {
+      "type": 0,
+      "value": "取消全部防御"
+    }
+  ],
+  "game.concede": [
+    {
+      "type": 0,
+      "value": "认输"
+    }
+  ],
+  "game.concede.confirmDescription": [
+    {
+      "type": 0,
+      "value": "认输后，对手将赢得本局对战。"
+    }
+  ],
+  "game.concede.confirmTitle": [
+    {
+      "type": 0,
+      "value": "确认认输？"
+    }
+  ],
+  "game.concede.short": [
+    {
+      "type": 0,
+      "value": "认输"
+    }
+  ],
+  "game.connection.lost": [
+    {
+      "type": 0,
+      "value": "连接已断开 — 正在重新连接…"
+    }
+  ],
+  "game.connection.opponentLost": [
+    {
+      "type": 0,
+      "value": "对手已断开连接 — 正在等待…"
+    }
+  ],
+  "game.controls": [
+    {
+      "type": 0,
+      "value": "对局控制"
+    }
+  ],
+  "game.controls.more": [
+    {
+      "type": 0,
+      "value": "更多对局控制"
+    }
+  ],
+  "game.decision.action.confirm": [
+    {
+      "type": 1,
+      "value": "verb"
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": "？"
+    }
+  ],
+  "game.decision.activateInstant": [
+    {
+      "type": 0,
+      "value": "启动瞬间能力"
+    }
+  ],
+  "game.decision.additionalCost.choose": [
+    {
+      "type": 0,
+      "value": "从每个区域选择最多 3 张"
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "game.decision.additionalCost.destroy": [
+    {
+      "type": 0,
+      "value": "从竞技场摧毁"
+    }
+  ],
+  "game.decision.additionalCost.discard": [
+    {
+      "type": 0,
+      "value": "从手牌弃置"
+    }
+  ],
+  "game.decision.arsenal.action": [
+    {
+      "type": 0,
+      "value": "跳过Arsenal"
+    }
+  ],
+  "game.decision.arsenal.choosePrompt": [
+    {
+      "type": 0,
+      "value": "你可以将一张手牌放入 arsenal，或选择让过"
+    }
+  ],
+  "game.decision.arsenal.context": [
+    {
+      "type": 0,
+      "value": "结束回合且不将卡牌放入Arsenal？"
+    }
+  ],
+  "game.decision.arsenal.prompt": [
+    {
+      "type": 0,
+      "value": "跳过Arsenal？"
+    }
+  ],
+  "game.decision.bloodMode.confirm": [
+    {
+      "type": 0,
+      "value": "确认模式"
+    }
+  ],
+  "game.decision.bloodMode.decrease": [
+    {
+      "type": 0,
+      "value": "减少"
+    },
+    {
+      "type": 1,
+      "value": "weapon"
+    },
+    {
+      "type": 0,
+      "value": "的“"
+    },
+    {
+      "type": 1,
+      "value": "mode"
+    },
+    {
+      "type": 0,
+      "value": "”"
+    }
+  ],
+  "game.decision.bloodMode.extraAttack": [
+    {
+      "type": 0,
+      "value": "可以攻击两次"
+    }
+  ],
+  "game.decision.bloodMode.goAgain": [
+    {
+      "type": 0,
+      "value": "攻击获得 go again"
+    }
+  ],
+  "game.decision.bloodMode.increase": [
+    {
+      "type": 0,
+      "value": "增加"
+    },
+    {
+      "type": 1,
+      "value": "weapon"
+    },
+    {
+      "type": 0,
+      "value": "的“"
+    },
+    {
+      "type": 1,
+      "value": "mode"
+    },
+    {
+      "type": 0,
+      "value": "”"
+    }
+  ],
+  "game.decision.bloodMode.instructions": [
+    {
+      "type": 0,
+      "value": "必须分配 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个模式。每种模式在所有武器上最多选择两次。"
+    }
+  ],
+  "game.decision.bloodMode.power": [
+    {
+      "type": 0,
+      "value": "攻击获得 +1 力量"
+    }
+  ],
+  "game.decision.bloodMode.progress": [
+    {
+      "type": 0,
+      "value": "已分配 "
+    },
+    {
+      "type": 1,
+      "value": "selected"
+    },
+    {
+      "type": 0,
+      "value": "/"
+    },
+    {
+      "type": 1,
+      "value": "required"
+    },
+    {
+      "type": 0,
+      "value": " 个模式"
+    }
+  ],
+  "game.decision.bloodMode.selected": [
+    {
+      "type": 1,
+      "value": "weapon"
+    },
+    {
+      "type": 0,
+      "value": "的“"
+    },
+    {
+      "type": 1,
+      "value": "mode"
+    },
+    {
+      "type": 0,
+      "value": "”已选择 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 次"
+    }
+  ],
+  "game.decision.boost.action": [
+    {
+      "type": 0,
+      "value": "推进"
+    }
+  ],
+  "game.decision.boost.context": [
+    {
+      "type": 0,
+      "value": "每次推进都会放逐你牌组顶的一张卡牌。"
+    }
+  ],
+  "game.decision.boost.none": [
+    {
+      "type": 0,
+      "value": "不推进"
+    }
+  ],
+  "game.decision.boost.once": [
+    {
+      "type": 0,
+      "value": "推进一次"
+    }
+  ],
+  "game.decision.boost.prompt": [
+    {
+      "type": 0,
+      "value": "推进"
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "？"
+    }
+  ],
+  "game.decision.boost.times": [
+    {
+      "type": 0,
+      "value": "推进 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 次"
+    }
+  ],
+  "game.decision.chooseCard": [
+    {
+      "type": 0,
+      "value": "选择"
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "game.decision.chooseNone": [
+    {
+      "type": 0,
+      "value": "不选择"
+    }
+  ],
+  "game.decision.choosePitch": [
+    {
+      "type": 0,
+      "value": "选择要扣置以支付资源的手牌。"
+    }
+  ],
+  "game.decision.chooseTarget": [
+    {
+      "type": 0,
+      "value": "选择目标"
+    }
+  ],
+  "game.decision.chooseUse": [
+    {
+      "type": 0,
+      "value": "选择如何使用"
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "game.decision.closeChain.action": [
+    {
+      "type": 0,
+      "value": "关闭战斗链并打出"
+    }
+  ],
+  "game.decision.closeChain.context": [
+    {
+      "type": 0,
+      "value": "打出"
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "将关闭当前战斗链。"
+    }
+  ],
+  "game.decision.closeChain.prompt": [
+    {
+      "type": 0,
+      "value": "关闭战斗链？"
+    }
+  ],
+  "game.decision.confirmNamed": [
+    {
+      "type": 0,
+      "value": "确认"
+    },
+    {
+      "type": 1,
+      "value": "name"
+    }
+  ],
+  "game.decision.defensePitch": [
+    {
+      "type": 0,
+      "value": "扣置卡牌以支付此次防御费用"
+    }
+  ],
+  "game.decision.defensePitchList": [
+    {
+      "type": 0,
+      "value": "扣置卡牌以支付此次防御费用："
+    }
+  ],
+  "game.decision.name.choose": [
+    {
+      "type": 0,
+      "value": "选择名称"
+    }
+  ],
+  "game.decision.name.placeholder": [
+    {
+      "type": 0,
+      "value": "输入卡牌名称"
+    }
+  ],
+  "game.decision.opt.bottom": [
+    {
+      "type": 0,
+      "value": "底部"
+    }
+  ],
+  "game.decision.opt.instructions": [
+    {
+      "type": 0,
+      "value": "最后放到顶部的牌位于最上方；最后放到底部的牌位于最下方。"
+    }
+  ],
+  "game.decision.opt.top": [
+    {
+      "type": 0,
+      "value": "顶部"
+    }
+  ],
+  "game.decision.payAmount": [
+    {
+      "type": 0,
+      "value": "支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
+  "game.decision.payResources": [
+    {
+      "type": 0,
+      "value": "支付资源"
+    }
+  ],
+  "game.decision.pitchProgress": [
+    {
+      "type": 0,
+      "value": "已选择 "
+    },
+    {
+      "type": 1,
+      "value": "selected"
+    },
+    {
+      "type": 0,
+      "value": "/"
+    },
+    {
+      "type": 1,
+      "value": "required"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
+  "game.decision.playAs.action": [
+    {
+      "type": 0,
+      "value": "作为行动打出"
+    }
+  ],
+  "game.decision.playAs.attackReaction": [
+    {
+      "type": 0,
+      "value": "作为攻击反应打出"
+    }
+  ],
+  "game.decision.playAs.defenseReaction": [
+    {
+      "type": 0,
+      "value": "作为防御反应打出"
+    }
+  ],
+  "game.decision.playAs.instant": [
+    {
+      "type": 0,
+      "value": "作为瞬间打出"
+    }
+  ],
+  "game.decision.playAs.prompt": [
+    {
+      "type": 0,
+      "value": "将"
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "作为…打出"
+    }
+  ],
+  "game.decision.playCard": [
+    {
+      "type": 0,
+      "value": "打出卡牌"
+    }
+  ],
+  "game.decision.playerDeciding": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 正在决定…"
+    }
+  ],
+  "game.decision.removeCard": [
+    {
+      "type": 0,
+      "value": "移除"
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "game.decision.targetNamed": [
+    {
+      "type": 0,
+      "value": "以"
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": "为目标"
+    }
+  ],
+  "game.decision.triggerOrder.confirm": [
+    {
+      "type": 0,
+      "value": "确认顺序"
+    }
+  ],
+  "game.decision.triggerOrder.earlier": [
+    {
+      "type": 0,
+      "value": "提前"
+    }
+  ],
+  "game.decision.triggerOrder.first": [
+    {
+      "type": 0,
+      "value": "最先结算"
+    }
+  ],
+  "game.decision.triggerOrder.instructions": [
+    {
+      "type": 0,
+      "value": "拖动触发效果以调整结算顺序。第一个触发效果最先结算。"
+    }
+  ],
+  "game.decision.triggerOrder.label": [
+    {
+      "type": 0,
+      "value": "触发效果结算顺序"
+    }
+  ],
+  "game.decision.triggerOrder.last": [
+    {
+      "type": 0,
+      "value": "最后结算"
+    }
+  ],
+  "game.decision.triggerOrder.later": [
+    {
+      "type": 0,
+      "value": "延后"
+    }
+  ],
+  "game.decision.triggerOrder.moveEarlier": [
+    {
+      "type": 0,
+      "value": "将"
+    },
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": "："
+    },
+    {
+      "type": 1,
+      "value": "label"
+    },
+    {
+      "type": 0,
+      "value": "提前"
+    }
+  ],
+  "game.decision.triggerOrder.moveLater": [
+    {
+      "type": 0,
+      "value": "将"
+    },
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": "："
+    },
+    {
+      "type": 1,
+      "value": "label"
+    },
+    {
+      "type": 0,
+      "value": "延后"
+    }
+  ],
+  "game.decision.triggerOrder.then": [
+    {
+      "type": 0,
+      "value": "然后"
+    }
+  ],
+  "game.decision.useCard": [
+    {
+      "type": 0,
+      "value": "使用"
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "game.decision.useNamed": [
+    {
+      "type": 0,
+      "value": "使用"
+    },
+    {
+      "type": 1,
+      "value": "name"
+    }
+  ],
+  "game.effects.identical": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个相同效果"
+    }
+  ],
+  "game.effects.lingering": [
+    {
+      "type": 0,
+      "value": "持续效果"
+    }
+  ],
+  "game.emote.choose": [
+    {
+      "type": 0,
+      "value": "选择消息"
+    }
+  ],
+  "game.emote.goodGame": [
+    {
+      "type": 0,
+      "value": "精彩对局！"
+    }
+  ],
+  "game.emote.goodLuck": [
+    {
+      "type": 0,
+      "value": "祝你好运，玩得开心！"
+    }
+  ],
+  "game.emote.hello": [
+    {
+      "type": 0,
+      "value": "你好！"
+    }
+  ],
+  "game.emote.nicePlay": [
+    {
+      "type": 0,
+      "value": "打得漂亮！"
+    }
+  ],
+  "game.emote.oops": [
+    {
+      "type": 0,
+      "value": "糟糕！"
+    }
+  ],
+  "game.emote.send": [
+    {
+      "type": 0,
+      "value": "发送消息"
+    }
+  ],
+  "game.emote.sorry": [
+    {
+      "type": 0,
+      "value": "抱歉！"
+    }
+  ],
+  "game.emote.thanks": [
+    {
+      "type": 0,
+      "value": "谢谢！"
+    }
+  ],
+  "game.emote.thinking": [
+    {
+      "type": 0,
+      "value": "思考中…"
+    }
+  ],
+  "game.end.confirmDescription": [
+    {
+      "type": 0,
+      "value": "这会结束当前练习对局并返回大厅。"
+    }
+  ],
+  "game.end.confirmTitle": [
+    {
+      "type": 0,
+      "value": "结束对局？"
+    }
+  ],
+  "game.hand.empty": [
+    {
+      "type": 0,
+      "value": "手牌为空"
+    }
+  ],
+  "game.hand.hide": [
+    {
+      "type": 0,
+      "value": "收起手牌"
+    }
+  ],
+  "game.hand.scrollLeft": [
+    {
+      "type": 0,
+      "value": "向左滚动手牌"
+    }
+  ],
+  "game.hand.scrollRight": [
+    {
+      "type": 0,
+      "value": "向右滚动手牌"
+    }
+  ],
+  "game.hand.show": [
+    {
+      "type": 0,
+      "value": "显示手牌"
+    }
+  ],
+  "game.hand.showCount": [
+    {
+      "type": 0,
+      "value": "显示手牌，共 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张"
+    }
+  ],
+  "game.hud.label": [
+    {
+      "type": 0,
+      "value": "对局状态与主要操作"
+    }
+  ],
+  "game.idle.claim": [
+    {
+      "type": 0,
+      "value": "宣告胜利"
+    }
+  ],
+  "game.idle.claimPrompt": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 已有 "
+    },
+    {
+      "type": 1,
+      "value": "minutes"
+    },
+    {
+      "type": 0,
+      "value": " 分钟未行动 — 是否宣告胜利？"
+    }
+  ],
+  "game.keepPlaying": [
+    {
+      "type": 0,
+      "value": "继续游戏"
+    }
+  ],
+  "game.life.amount": [
+    {
+      "type": 1,
+      "value": "life"
+    },
+    {
+      "type": 0,
+      "value": " 点生命"
+    }
+  ],
+  "game.life.damage": [
+    {
+      "type": 1,
+      "value": "owner"
+    },
+    {
+      "type": 0,
+      "value": "英雄受到 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害，剩余 "
+    },
+    {
+      "type": 1,
+      "value": "life"
+    },
+    {
+      "type": 0,
+      "value": " 点生命。"
+    }
+  ],
+  "game.life.gain": [
+    {
+      "type": 1,
+      "value": "owner"
+    },
+    {
+      "type": 0,
+      "value": "英雄恢复 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点生命，当前共有 "
+    },
+    {
+      "type": 1,
+      "value": "life"
+    },
+    {
+      "type": 0,
+      "value": " 点生命。"
+    }
+  ],
+  "game.life.total": [
+    {
+      "type": 1,
+      "value": "owner"
+    },
+    {
+      "type": 0,
+      "value": "英雄生命："
+    },
+    {
+      "type": 1,
+      "value": "life"
+    }
+  ],
+  "game.log.short": [
+    {
+      "type": 0,
+      "value": "日志"
+    }
+  ],
+  "game.log.title": [
+    {
+      "type": 0,
+      "value": "对局日志"
+    }
+  ],
+  "game.log.turnBoundary": [
+    {
+      "type": 0,
+      "value": "第 "
+    },
+    {
+      "type": 1,
+      "value": "turn"
+    },
+    {
+      "type": 0,
+      "value": " 回合："
+    },
+    {
+      "type": 1,
+      "value": "status"
+    }
+  ],
+  "game.over.backToBoard": [
+    {
+      "type": 0,
+      "value": "返回对局界面"
+    }
+  ],
+  "game.over.backToLobby": [
+    {
+      "type": 0,
+      "value": "返回大厅"
+    }
+  ],
+  "game.over.retention": [
+    {
+      "type": 0,
+      "value": "此回放将在“我的回放”中保留 7 天。如需长期保存，请将其导出。"
+    }
+  ],
+  "game.over.showingStatsFor": [
+    {
+      "type": 0,
+      "value": "当前显示"
+    }
+  ],
+  "game.over.viewStatsFor": [
+    {
+      "type": 0,
+      "value": "查看统计数据"
+    }
+  ],
+  "game.over.watchReplay": [
+    {
+      "type": 0,
+      "value": "观看回放"
+    }
+  ],
+  "game.over.winner": [
+    {
+      "type": 0,
+      "value": "胜者"
+    }
+  ],
+  "game.over.winsGame": [
+    {
+      "type": 1,
+      "value": "winner"
+    },
+    {
+      "type": 0,
+      "value": " 赢得本局对战"
+    }
+  ],
+  "game.owner.opponent": [
+    {
+      "type": 0,
+      "value": "对手的"
+    }
+  ],
+  "game.owner.your": [
+    {
+      "type": 0,
+      "value": "你的"
+    }
+  ],
+  "game.playerNumber": [
+    {
+      "type": 0,
+      "value": "玩家 "
+    },
+    {
+      "type": 1,
+      "value": "number"
+    }
+  ],
+  "game.rail.collapse": [
+    {
+      "type": 0,
+      "value": "收起侧栏"
+    }
+  ],
+  "game.rail.expand": [
+    {
+      "type": 0,
+      "value": "展开侧栏"
+    }
+  ],
+  "game.result.defeat": [
+    {
+      "type": 0,
+      "value": "失败"
+    }
+  ],
+  "game.result.namedWinner": [
+    {
+      "type": 1,
+      "value": "winner"
+    },
+    {
+      "type": 0,
+      "value": " 获胜！"
+    }
+  ],
+  "game.result.victory": [
+    {
+      "type": 0,
+      "value": "胜利！"
+    }
+  ],
+  "game.room": [
+    {
+      "type": 0,
+      "value": "房间 "
+    },
+    {
+      "type": 1,
+      "value": "code"
+    }
+  ],
+  "game.search.instructions": [
+    {
+      "type": 1,
+      "value": "prompt"
+    },
+    {
+      "type": 0,
+      "value": "。点击符合条件的卡牌进行选择，然后提交。"
+    }
+  ],
+  "game.search.minimize": [
+    {
+      "type": 0,
+      "value": "收起卡牌搜索"
+    }
+  ],
+  "game.search.minimizeShort": [
+    {
+      "type": 0,
+      "value": "收起"
+    }
+  ],
+  "game.search.minimizedPrompt": [
+    {
+      "type": 1,
+      "value": "prompt"
+    },
+    {
+      "type": 0,
+      "value": " · 已选择 "
+    },
+    {
+      "type": 1,
+      "value": "selected"
+    },
+    {
+      "type": 0,
+      "value": "/"
+    },
+    {
+      "type": 1,
+      "value": "maximum"
+    }
+  ],
+  "game.search.restore": [
+    {
+      "type": 0,
+      "value": "恢复搜索"
+    }
+  ],
+  "game.search.short": [
+    {
+      "type": 0,
+      "value": "卡牌搜索"
+    }
+  ],
+  "game.search.submit": [
+    {
+      "type": 0,
+      "value": "提交 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张卡牌"
+    }
+  ],
+  "game.search.title": [
+    {
+      "type": 0,
+      "value": "搜索对手的手牌、牌组与Arsenal"
+    }
+  ],
+  "game.search.zone.arsenal": [
+    {
+      "type": 0,
+      "value": "Arsenal（"
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": "）"
+    }
+  ],
+  "game.search.zone.cards": [
+    {
+      "type": 0,
+      "value": "卡牌（"
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": "）"
+    }
+  ],
+  "game.search.zone.deck": [
+    {
+      "type": 0,
+      "value": "牌库（"
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": "）"
+    }
+  ],
+  "game.search.zone.hand": [
+    {
+      "type": 0,
+      "value": "手牌（"
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": "）"
+    }
+  ],
+  "game.spectating.count": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 人正在观战"
+    }
+  ],
+  "game.spectating.live": [
+    {
+      "type": 0,
+      "value": "你正在观战"
+    }
+  ],
+  "game.spectating.replay": [
+    {
+      "type": 0,
+      "value": "正在观看回放"
+    }
+  ],
+  "game.stack.groupedTriggers": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个合并显示的触发效果"
+    }
+  ],
+  "game.stack.minimize": [
+    {
+      "type": 0,
+      "value": "收起堆叠"
+    }
+  ],
+  "game.stack.optional": [
+    {
+      "type": 0,
+      "value": "可选"
+    }
+  ],
+  "game.stack.short": [
+    {
+      "type": 0,
+      "value": "堆叠"
+    }
+  ],
+  "game.stack.show": [
+    {
+      "type": 0,
+      "value": "显示堆叠"
+    }
+  ],
+  "game.stack.skipRunechants": [
+    {
+      "type": 0,
+      "value": "跳过所有符文吟唱"
+    }
+  ],
+  "game.stack.skipRunechantsTitle": [
+    {
+      "type": 0,
+      "value": "跳过此优先权窗口中连续的符文吟唱"
+    }
+  ],
+  "game.stack.title": [
+    {
+      "type": 0,
+      "value": "堆叠"
+    }
+  ],
+  "game.stack.trigger": [
+    {
+      "type": 0,
+      "value": "触发效果"
+    }
+  ],
+  "game.stats.attacks": [
+    {
+      "type": 0,
+      "value": "攻击次数"
+    }
+  ],
+  "game.stats.averages": [
+    {
+      "type": 0,
+      "value": "平均数据"
+    }
+  ],
+  "game.stats.blocked": [
+    {
+      "type": 0,
+      "value": "防御"
+    }
+  ],
+  "game.stats.breakdown": [
+    {
+      "type": 0,
+      "value": "逐回合明细"
+    }
+  ],
+  "game.stats.damageBlocked": [
+    {
+      "type": 0,
+      "value": "防御伤害"
+    }
+  ],
+  "game.stats.damageDealt": [
+    {
+      "type": 0,
+      "value": "造成伤害"
+    }
+  ],
+  "game.stats.damagePerRound": [
+    {
+      "type": 0,
+      "value": "每回合伤害"
+    }
+  ],
+  "game.stats.damagePrevented": [
+    {
+      "type": 0,
+      "value": "预防伤害"
+    }
+  ],
+  "game.stats.damageThreatened": [
+    {
+      "type": 0,
+      "value": "威胁伤害"
+    }
+  ],
+  "game.stats.dealt": [
+    {
+      "type": 0,
+      "value": "造成"
+    }
+  ],
+  "game.stats.finalLife": [
+    {
+      "type": 0,
+      "value": "最终生命"
+    }
+  ],
+  "game.stats.match": [
+    {
+      "type": 0,
+      "value": "对局"
+    }
+  ],
+  "game.stats.opponentFinalLife": [
+    {
+      "type": 0,
+      "value": "对手最终生命"
+    }
+  ],
+  "game.stats.prevented": [
+    {
+      "type": 0,
+      "value": "预防"
+    }
+  ],
+  "game.stats.round": [
+    {
+      "type": 0,
+      "value": "回合"
+    }
+  ],
+  "game.stats.roundsPlayed": [
+    {
+      "type": 0,
+      "value": "进行回合数"
+    }
+  ],
+  "game.stats.threatPerAttack": [
+    {
+      "type": 0,
+      "value": "每次攻击威胁"
+    }
+  ],
+  "game.stats.threatPerRound": [
+    {
+      "type": 0,
+      "value": "每回合威胁"
+    }
+  ],
+  "game.stats.threatened": [
+    {
+      "type": 0,
+      "value": "威胁"
+    }
+  ],
+  "game.stats.total": [
+    {
+      "type": 0,
+      "value": "总计"
+    }
+  ],
+  "game.stats.value": [
+    {
+      "type": 0,
+      "value": "价值"
+    }
+  ],
+  "game.stats.valuePerRound": [
+    {
+      "type": 0,
+      "value": "每回合价值"
+    }
+  ],
+  "game.summary": [
+    {
+      "type": 0,
+      "value": "对局总结"
+    }
+  ],
+  "game.timing.actionPhase": [
+    {
+      "type": 0,
+      "value": "ACTION PHASE"
+    }
+  ],
+  "game.timing.attack": [
+    {
+      "type": 0,
+      "value": "攻击"
+    }
+  ],
+  "game.timing.attackStep": [
+    {
+      "type": 0,
+      "value": "ATTACK STEP"
+    }
+  ],
+  "game.timing.beginningTriggers": [
+    {
+      "type": 0,
+      "value": "阶段开始时触发"
+    }
+  ],
+  "game.timing.damageStep": [
+    {
+      "type": 0,
+      "value": "DAMAGE STEP"
+    }
+  ],
+  "game.timing.defendStep": [
+    {
+      "type": 0,
+      "value": "DEFEND STEP"
+    }
+  ],
+  "game.timing.effects": [
+    {
+      "type": 0,
+      "value": "效果"
+    }
+  ],
+  "game.timing.endPhase": [
+    {
+      "type": 0,
+      "value": "END PHASE"
+    }
+  ],
+  "game.timing.gameOver": [
+    {
+      "type": 0,
+      "value": "对局结束"
+    }
+  ],
+  "game.timing.layerStep": [
+    {
+      "type": 0,
+      "value": "LAYER STEP"
+    }
+  ],
+  "game.timing.namedPriority": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 的优先权"
+    }
+  ],
+  "game.timing.onHitTriggers": [
+    {
+      "type": 0,
+      "value": "On hit"
+    }
+  ],
+  "game.timing.opponentChoosingBlocks": [
+    {
+      "type": 0,
+      "value": "对手正在选择防御牌"
+    }
+  ],
+  "game.timing.opponentPriority": [
+    {
+      "type": 0,
+      "value": "对手的优先权"
+    }
+  ],
+  "game.timing.priority": [
+    {
+      "type": 0,
+      "value": "优先权"
+    }
+  ],
+  "game.timing.reactionStep": [
+    {
+      "type": 0,
+      "value": "REACTION STEP"
+    }
+  ],
+  "game.timing.reactions": [
+    {
+      "type": 0,
+      "value": "反应"
+    }
+  ],
+  "game.timing.resolutionStep": [
+    {
+      "type": 0,
+      "value": "RESOLUTION STEP"
+    }
+  ],
+  "game.timing.startOfTurnTriggers": [
+    {
+      "type": 0,
+      "value": "回合开始时触发"
+    }
+  ],
+  "game.timing.startPhase": [
+    {
+      "type": 0,
+      "value": "START PHASE"
+    }
+  ],
+  "game.timing.toAct": [
+    {
+      "type": 0,
+      "value": "等待 "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 行动"
+    }
+  ],
+  "game.timing.triggers": [
+    {
+      "type": 0,
+      "value": "触发"
+    }
+  ],
+  "game.timing.waiting": [
+    {
+      "type": 0,
+      "value": "等待中"
+    }
+  ],
+  "game.timing.waitingOn": [
+    {
+      "type": 0,
+      "value": "正在等待 "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    }
+  ],
+  "game.timing.youChoosingBlocks": [
+    {
+      "type": 0,
+      "value": "你正在选择防御牌"
+    }
+  ],
+  "game.timing.yourPriority": [
+    {
+      "type": 0,
+      "value": "你的优先权"
+    }
+  ],
+  "game.trigger": [
+    {
+      "type": 0,
+      "value": "触发效果"
+    }
+  ],
+  "game.triggeredAbility": [
+    {
+      "type": 0,
+      "value": "触发能力"
+    }
+  ],
+  "game.turn.begins": [
+    {
+      "type": 0,
+      "value": "回合开始"
+    }
+  ],
+  "game.turn.named": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 的回合"
+    }
+  ],
+  "game.turn.opponent": [
+    {
+      "type": 0,
+      "value": "对手的回合"
+    }
+  ],
+  "game.turn.status": [
+    {
+      "type": 0,
+      "value": "第 "
+    },
+    {
+      "type": 1,
+      "value": "turn"
+    },
+    {
+      "type": 0,
+      "value": " 回合 · "
+    },
+    {
+      "type": 1,
+      "value": "owner"
+    }
+  ],
+  "game.turn.yours": [
+    {
+      "type": 0,
+      "value": "你的回合"
+    }
+  ],
+  "game.undo": [
+    {
+      "type": 0,
+      "value": "撤销"
+    }
+  ],
+  "game.undoDescription": [
+    {
+      "type": 0,
+      "value": "撤销上一项操作（你或对手的操作）"
+    }
+  ],
+  "game.undoLast": [
+    {
+      "type": 0,
+      "value": "撤销上一步操作"
+    }
+  ],
+  "game.waiting.opponent": [
+    {
+      "type": 0,
+      "value": "正在等待对手…"
+    }
+  ],
+  "game.waiting.spectating": [
+    {
+      "type": 0,
+      "value": "观战中 — 等待 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 行动"
+    }
+  ],
+  "game.zone.arms": [
+    {
+      "type": 0,
+      "value": "手臂"
+    }
+  ],
+  "game.zone.arsenal": [
+    {
+      "type": 0,
+      "value": "Arsenal"
+    }
+  ],
+  "game.zone.banished": [
+    {
+      "type": 0,
+      "value": "放逐区"
+    }
+  ],
+  "game.zone.board": [
+    {
+      "type": 0,
+      "value": "场上"
+    }
+  ],
+  "game.zone.chest": [
+    {
+      "type": 0,
+      "value": "胸部"
+    }
+  ],
+  "game.zone.deck": [
+    {
+      "type": 0,
+      "value": "牌库"
+    }
+  ],
+  "game.zone.deckMineOrder": [
+    {
+      "type": 0,
+      "value": "你的牌库 — 按抽牌顺序，下一张牌在最前"
+    }
+  ],
+  "game.zone.deckOpponentOrder": [
+    {
+      "type": 0,
+      "value": "对手的牌库 — 按抽牌顺序，下一张牌在最前"
+    }
+  ],
+  "game.zone.graveyard": [
+    {
+      "type": 0,
+      "value": "墓地"
+    }
+  ],
+  "game.zone.head": [
+    {
+      "type": 0,
+      "value": "头部"
+    }
+  ],
+  "game.zone.hero": [
+    {
+      "type": 0,
+      "value": "英雄"
+    }
+  ],
+  "game.zone.legs": [
+    {
+      "type": 0,
+      "value": "腿部"
+    }
+  ],
+  "game.zone.mine": [
+    {
+      "type": 0,
+      "value": "你的"
+    },
+    {
+      "type": 1,
+      "value": "zone"
+    }
+  ],
+  "game.zone.opponent": [
+    {
+      "type": 0,
+      "value": "对手的"
+    },
+    {
+      "type": 1,
+      "value": "zone"
+    }
+  ],
+  "game.zone.pitch": [
+    {
+      "type": 0,
+      "value": "扣置区"
+    }
+  ],
+  "game.zone.stackedCards": [
+    {
+      "type": 0,
+      "value": "堆叠的 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张牌"
+    }
+  ],
+  "game.zone.weapon": [
+    {
+      "type": 0,
+      "value": "武器"
     }
   ],
   "landing.accountAccess": [

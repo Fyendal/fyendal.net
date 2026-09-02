@@ -1,6 +1,7 @@
 import { cardData } from "@fyendal/cards/client";
 import type { CardView, GameMessage } from "@fyendal/shared";
 import type { ReactNode } from "react";
+import type { IntlShape } from "react-intl";
 import { GameMessageText } from "../../i18n/GameMessage.js";
 
 /** Inline card name that triggers the hover preview (via data-cardid delegation). */
@@ -39,6 +40,7 @@ export function DecisionPrompt({
         <GameMessageText
           message={message}
           resolvers={{ card: (cardId) => <CardRef id={cardId} /> }}
+          breakOnDash={breakOnDash}
         />
         {suffix}
       </span>
@@ -77,18 +79,18 @@ export function chooseWithoutFocus(
 }
 
 /** Describe a card's normal play mode when it also exposes an activated ability. */
-export function handCardPlayLabel(cardId: string | undefined): string {
+export function handCardPlayLabel(intl: IntlShape, cardId: string | undefined): string {
   switch (cardId ? cardData[cardId]?.cardType : undefined) {
     case "action":
-      return "Play as action";
+      return intl.formatMessage({ id: "game.decision.playAs.action" });
     case "attack-reaction":
-      return "Play as attack reaction";
+      return intl.formatMessage({ id: "game.decision.playAs.attackReaction" });
     case "defense-reaction":
-      return "Play as defense reaction";
+      return intl.formatMessage({ id: "game.decision.playAs.defenseReaction" });
     case "instant":
-      return "Play as instant";
+      return intl.formatMessage({ id: "game.decision.playAs.instant" });
     default:
-      return "Play card";
+      return intl.formatMessage({ id: "game.decision.playCard" });
   }
 }
 

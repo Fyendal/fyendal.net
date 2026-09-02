@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useIntl } from "react-intl";
 import { heroImageUrl } from "../lobby/heroImage.js";
+
+export type PrimaryAction = "end-turn" | "confirm-blocks" | "confirm-no-blocks" | "pass";
 
 export type LifeChange = {
   amount: number;
@@ -75,6 +78,7 @@ function LifeStatus({
   heroName: string;
   log: readonly string[];
 }) {
+  const intl = useIntl();
   const previousLife = useRef(life);
   const previousLog = useRef(log);
   const [change, setChange] = useState<LifeChange & {
@@ -99,7 +103,7 @@ function LifeStatus({
     }));
   }, [heroName, life, log]);
 
-  const owner = side === "me" ? "Your" : "Opponent";
+  const owner = intl.formatMessage({ id: side === "me" ? "game.owner.your" : "game.owner.opponent" });
   const activeChange = change?.lifeAfter === life ? change : null;
   const displayedAmounts = activeChange?.damagePackets ??
     (activeChange ? [activeChange.amount] : []);
@@ -117,7 +121,10 @@ function LifeStatus({
     />
   );
   return (
-    <div className={`life life-${side}`} aria-label={`${owner} life: ${life}`}>
+    <div
+      className={`life life-${side}`}
+      aria-label={intl.formatMessage({ id: "game.life.total" }, { owner, life })}
+    >
       {side === "me" ? heroPortrait : null}
       <span
         className={`life-impact ${activeChange ? `life-impact-${activeChange.kind}` : ""}`}
@@ -143,9 +150,15 @@ function LifeStatus({
       )) : null}
       <span className="life-change-live" aria-live="polite">
         {activeChange?.kind === "damage"
-          ? `${owner} hero took ${activeChange.amount} damage. ${life} life remaining.`
+          ? intl.formatMessage(
+              { id: "game.life.damage" },
+              { owner, amount: activeChange.amount, life },
+            )
           : activeChange
-            ? `${owner} hero gained ${activeChange.amount} life. ${life} life total.`
+            ? intl.formatMessage(
+                { id: "game.life.gain" },
+                { owner, amount: activeChange.amount, life },
+              )
             : ""}
       </span>
     </div>
@@ -153,32 +166,28 @@ function LifeStatus({
 }
 
 export function PrimaryActionButton({
-  label,
+  action,
   disabled = false,
   onSelect,
 }: {
-  label: string;
+  action: PrimaryAction;
   disabled?: boolean;
   onSelect: () => void;
 }) {
-  const actionName = label === "END TURN"
-    ? "End turn"
-    : label === "CONFIRM"
-      ? "Confirm blocks"
-      : label === "NO BLOCK"
-        ? "Confirm no blocks"
-        : "Pass";
+  const intl = useIntl();
+  const actionName = intl.formatMessage({ id: `game.action.${action}` });
+  const shortLabel = intl.formatMessage({ id: `game.action.${action}.short` });
 
   return (
     <button
       className="btn-primary btn-pass shortcut-button"
       onClick={onSelect}
       disabled={disabled}
-      title={`${actionName} (Space)`}
+      title={intl.formatMessage({ id: "common.shortcut.space" }, { label: actionName })}
       aria-keyshortcuts="Space"
     >
-      <span>{label}</span>
-      <kbd className="shortcut-key" aria-label="Space key" />
+      <span>{shortLabel}</span>
+      <kbd className="shortcut-key" aria-label={intl.formatMessage({ id: "common.spaceKey" })} />
     </button>
   );
 }
@@ -195,7 +204,7 @@ export function StatusFloat({
   log,
   activeHeroName,
   actionPoints,
-  passLabel,
+  primaryAction,
   passDisabled = false,
   onPass,
 }: {
@@ -207,26 +216,30 @@ export function StatusFloat({
   log: readonly string[];
   activeHeroName: string;
   actionPoints: number;
-  passLabel: string | null;
+  primaryAction: PrimaryAction | null;
   passDisabled?: boolean;
   onPass: () => void;
 }) {
+  const intl = useIntl();
   return (
-    <div className="float status-float game-hud" aria-label="Game status and primary action">
+    <div
+      className="float status-float game-hud"
+      aria-label={intl.formatMessage({ id: "game.hud.label" })}
+    >
       <LifeStatus life={oppLife} side="opp" heroName={oppHeroName} log={log} />
       <div
         className="ap-pip"
-        title={`${activeHeroName}'s remaining action points`}
-        aria-label={`${actionPoints} action ${actionPoints === 1 ? "point" : "points"} remaining`}
+        title={intl.formatMessage({ id: "game.actionPoints.hero" }, { hero: activeHeroName })}
+        aria-label={intl.formatMessage({ id: "game.actionPoints.remaining" }, { count: actionPoints })}
       >
         <span className="ap-count" aria-hidden="true">
           <span className="ap-abbr">AP</span>
           <strong>{actionPoints}</strong>
         </span>
       </div>
-      {passLabel ? (
+      {primaryAction ? (
         <PrimaryActionButton
-          label={passLabel}
+          action={primaryAction}
           disabled={passDisabled}
           onSelect={onPass}
         />

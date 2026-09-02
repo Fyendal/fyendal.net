@@ -2,6 +2,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { GameView, PlayerView } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
+import { TestI18nProvider } from "../../i18n/TestI18nProvider.js";
 import {
   handScrollAvailability,
   PlayerHand,
@@ -87,7 +88,7 @@ describe("hand motion anchors", () => {
       winner: null,
       log: [],
     };
-    const html = renderToStaticMarkup(createElement(PlayerHand, {
+    const html = renderToStaticMarkup(createElement(TestI18nProvider, null, createElement(PlayerHand, {
       view,
       player,
       viewerSeat: 0,
@@ -116,7 +117,7 @@ describe("hand motion anchors", () => {
         onCardClick: () => undefined,
         onSelect: () => undefined,
       },
-    }));
+    })));
 
     expect(html).toContain('data-motion-zone="0:hand"');
     expect(html).toContain('data-motion-card="0:hand:7"');
@@ -161,7 +162,7 @@ describe("hand motion anchors", () => {
       winner: null,
       log: [],
     };
-    const html = renderToStaticMarkup(createElement(PlayerHand, {
+    const html = renderToStaticMarkup(createElement(TestI18nProvider, null, createElement(PlayerHand, {
       view,
       player,
       viewerSeat: 0,
@@ -190,7 +191,7 @@ describe("hand motion anchors", () => {
         onCardClick: () => undefined,
         onSelect: () => undefined,
       },
-    }));
+    })));
 
     expect(html).toContain('class="hand"');
     expect(html).toContain('class="card card-hand card-back ');

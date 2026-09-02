@@ -50,6 +50,35 @@ describe("semantic game messages", () => {
       values: { card: { kind: "card", cardId: "SEA123", name: "hidden" } },
     })).toBeNull();
   });
+
+  it.each([
+    "engine.decision.priority.base",
+    "engine.decision.priority.card",
+    "engine.decision.priority.ability",
+    "engine.decision.priority.ability.hidden",
+    "engine.decision.priority.ability.triggered",
+    "engine.decision.priority.trigger",
+    "engine.decision.priority.trigger.hidden",
+    "engine.decision.priority.trigger.generic",
+    "engine.decision.priority.attacking",
+    "engine.decision.reaction.attack",
+    "engine.decision.reaction.attack.card",
+    "engine.decision.reaction.defense",
+    "engine.decision.reaction.defense.card",
+    "engine.decision.defend",
+    "engine.decision.arsenal",
+    "engine.decision.triggers.order",
+    "engine.decision.payment",
+    "engine.decision.deckbottom.first",
+    "engine.decision.deckbottom.next",
+    "engine.decision.activation.discard",
+    "engine.decision.attack.target",
+    "engine.decision.token.playerorder",
+    "engine.decision.token.next",
+    "engine.decision.wager.next",
+  ])("accepts the projected decision message id %s", (id) => {
+    expect(decodeGameMessage({ id })).toEqual({ id });
+  });
 });
 
 const player = (seat: 0 | 1) => ({
