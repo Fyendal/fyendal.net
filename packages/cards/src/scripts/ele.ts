@@ -1,5 +1,13 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, dealArcane, mergeSetScripts, opponentSeat } from "./shared-helpers.js";
+import {
+  buffNextAttack,
+  commonOptionMessages,
+  dealArcane,
+  decisionMessage,
+  decisionPrompt,
+  mergeSetScripts,
+  opponentSeat,
+} from "./shared-helpers.js";
 import { eleHighRarity } from "./ele/high-rarity.js";
 
 // Tales of Aria commons, rares, and young heroes. Fusion is paid by revealing
@@ -30,7 +38,10 @@ function fusionAdditionalCost(type: "earth" | "ice" | "lightning") {
     if (matches.length === 0) return;
     ctx.requestCardChoice(
       `${type}-fusion`,
-      `${ctx.data.name}: reveal a ${type[0]!.toUpperCase()}${type.slice(1)} card to fuse?`,
+      decisionPrompt(`${ctx.data.name}: reveal a ${type[0]!.toUpperCase()}${type.slice(1)} card to fuse?`, "card.ele.fusion.reveal.named", {
+        values: { card: { kind: "card", cardId: ctx.self.cardId }, type: type[0]!.toUpperCase() + type.slice(1) },
+        optionMessages: commonOptionMessages("no"),
+      }),
       [...matches.map((card) => card.instanceId), "no"],
     );
   };
@@ -77,14 +88,18 @@ function discardUnlessPay(
   if (
     ctx.requestPayment(
       `${key}:pay:${target}`,
-      `${ctx.data.name}: pay ${cost} resource${cost === 1 ? "" : "s"} or discard a card?`,
+      decisionPrompt(`${ctx.data.name}: pay ${cost} resource${cost === 1 ? "" : "s"} or discard a card?`, "card.ele.pay.or.discard", {
+        values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: cost },
+      }),
       cost,
       target,
     )
   ) return;
   ctx.requestCardChoice(
     `${key}:discard:${target}`,
-    `${ctx.data.name}: choose a card to discard`,
+    decisionPrompt(`${ctx.data.name}: choose a card to discard`, "card.ele.discard.choose", {
+      values: { card: { kind: "card", cardId: ctx.self.cardId } },
+    }),
     hand.map((card) => card.instanceId),
     target,
   );
@@ -102,7 +117,9 @@ function discardUnlessPayOnChoose(
     if (option !== "paid" && ctx.player(target).hand.length > 0) {
       ctx.requestCardChoice(
         `${key}:discard:${target}`,
-        `${ctx.data.name}: choose a card to discard`,
+        decisionPrompt(`${ctx.data.name}: choose a card to discard`, "card.ele.discard.choose", {
+          values: { card: { kind: "card", cardId: ctx.self.cardId } },
+        }),
         ctx.player(target).hand.map((card) => card.instanceId),
         target,
       );
@@ -192,7 +209,10 @@ function delayedGuardianAura(
       if (creates === "frostbite") {
         ctx.requestChoice(
           "avalanche-target",
-          `${ctx.data.name}: create Frostbite under which hero?`,
+          decisionPrompt(`${ctx.data.name}: create Frostbite under which hero?`, "card.ele.frostbite.hero.choose", {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            optionMessages: commonOptionMessages("opponent", "self"),
+          }),
           ["opponent", "self"],
         );
       }
@@ -275,7 +295,10 @@ function requestRitesAttack(ctx: ScriptCtx): void {
   if (!ctx.getCounter("ritesAttack")) return;
   const attacks = ctx.player(ctx.seat).graveyard.filter((card) => isAttack(ctx, card));
   if (attacks.length > 0) {
-    ctx.requestCardChoice("rites-attack", `${ctx.data.name}: put an attack action on the bottom?`, [
+    ctx.requestCardChoice("rites-attack", decisionPrompt(`${ctx.data.name}: put an attack action on the bottom?`, "card.ele.attack.bottom", {
+      values: { card: { kind: "card", cardId: ctx.self.cardId } },
+      optionMessages: commonOptionMessages("none"),
+    }), [
       "none",
       ...attacks.map((card) => card.instanceId),
     ]);
@@ -294,7 +317,10 @@ function ritesOfReplenishment(): CardScript {
       ) {
         ctx.requestCardChoice(
           "rites-non-attack",
-          `${ctx.data.name}: put a non-attack action on the bottom?`,
+          decisionPrompt(`${ctx.data.name}: put a non-attack action on the bottom?`, "card.ele.nonattack.bottom", {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            optionMessages: commonOptionMessages("none"),
+          }),
           ["none", ...nonAttacks.map((card) => card.instanceId)],
         );
       } else {
@@ -419,7 +445,7 @@ function lightningPress(attack: number): CardScript {
 function reload(ctx: ScriptCtx, hook = "ele-reload"): void {
   const player = ctx.player(ctx.seat);
   if (player.arsenal.length > 0 || player.hand.length === 0) return;
-  ctx.requestCardChoice(hook, "Reload: put a card from your hand into your arsenal?", [
+  ctx.requestCardChoice(hook, decisionPrompt("Reload: put a card from your hand into your arsenal?", "card.ele.reload", { optionMessages: commonOptionMessages("pass") }), [
     "pass",
     ...player.hand.map((card) => card.instanceId),
   ]);
@@ -474,7 +500,7 @@ function sowTomorrow(minCost: number): CardScript {
       if (cards.length > 0) {
         ctx.requestCardChoice(
           "sow-bottom",
-          "Sow Tomorrow: put an Earth or Elemental action on the bottom",
+          decisionPrompt("Sow Tomorrow: put an Earth or Elemental action on the bottom", "card.ele.sow.action.bottom"),
           cards.map((card) => card.instanceId),
         );
       }
@@ -520,7 +546,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
         if (hand.length > 0) {
           ctx.requestCardChoice(
             "oldhim-top",
-            "Oldhim: put a card from your hand on top of your deck",
+            decisionPrompt("Oldhim: put a card from your hand on top of your deck", "card.ele.oldhim.hand.top"),
             hand.map((card) => card.instanceId),
             attacker,
           );
@@ -599,7 +625,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       canActivate(ctx) { return ctx.player(ctx.seat).arsenal.some((card) => card.faceDown); },
       onActivate(ctx) {
         const cards = ctx.player(ctx.seat).arsenal.filter((card) => card.faceDown);
-        ctx.requestCardChoice("lexi-flip", "Lexi: turn a face-down arsenal card face up", cards.map((card) => card.instanceId));
+        ctx.requestCardChoice("lexi-flip", decisionPrompt("Lexi: turn a face-down arsenal card face up", "card.ele.lexi.arsenal.faceup"), cards.map((card) => card.instanceId));
       },
     },
     onChoose(ctx, hook, option) {
@@ -610,7 +636,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
         const ice = hasType(ctx, card, "ice");
         ctx.turnArsenalFaceUp(card.instanceId);
         if (lightning) buffNextAttack(ctx, { goAgain: true });
-        if (ice) ctx.requestChoice("lexi-ice-target", "Lexi: create Frostbite under which hero?", ["opponent", "self"]);
+        if (ice) ctx.requestChoice("lexi-ice-target", decisionPrompt("Lexi: create Frostbite under which hero?", "card.ele.lexi.frostbite.hero", { optionMessages: commonOptionMessages("opponent", "self") }), ["opponent", "self"]);
       } else if (hook === "lexi-ice-target") {
         createFrostbites(ctx, option === "self" ? ctx.seat : opponentSeat(ctx));
       }
@@ -789,7 +815,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
           return hasType(ctx, card, "earth") &&
             (ctx.hasCardType(card, "action") || ctx.hasCardType(card, "instant"));
         });
-        ctx.requestCardChoice("plume-return", "Plume of Evergrowth: return an Earth card to your hand", cards.map((card) => card.instanceId));
+        ctx.requestCardChoice("plume-return", decisionPrompt("Plume of Evergrowth: return an Earth card to your hand", "card.ele.plume.earth.return"), cards.map((card) => card.instanceId));
       },
     },
     onChoose(ctx, hook, option) { if (hook === "plume-return") ctx.moveToHand(Number(option)); },
@@ -814,7 +840,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       const cards = ctx.link?.defendingCards.filter((card) =>
         ctx.hasCardType(card, "action") &&
         (hasType(ctx, card, "earth") || hasType(ctx, card, "elemental"))) ?? [];
-      if (cards.length > 0) ctx.requestCardChoice("shelter", "Summerwood Shelter: choose a defending Earth or Elemental card", cards.map((card) => card.instanceId));
+      if (cards.length > 0) ctx.requestCardChoice("shelter", decisionPrompt("Summerwood Shelter: choose a defending Earth or Elemental card", "card.ele.shelter.defender.choose"), cards.map((card) => card.instanceId));
     },
     onChoose(ctx, hook, option) { if (hook === "shelter") ctx.addCardTempDefense(Number(option), 4); },
   },
@@ -823,7 +849,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       const cards = ctx.link?.defendingCards.filter((card) =>
         ctx.hasCardType(card, "action") &&
         (hasType(ctx, card, "earth") || hasType(ctx, card, "elemental"))) ?? [];
-      if (cards.length > 0) ctx.requestCardChoice("shelter", "Summerwood Shelter: choose a defending Earth or Elemental card", cards.map((card) => card.instanceId));
+      if (cards.length > 0) ctx.requestCardChoice("shelter", decisionPrompt("Summerwood Shelter: choose a defending Earth or Elemental card", "card.ele.shelter.defender.choose"), cards.map((card) => card.instanceId));
     },
     onChoose(ctx, hook, option) { if (hook === "shelter") ctx.addCardTempDefense(Number(option), 3); },
   },
@@ -832,20 +858,20 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       const cards = ctx.link?.defendingCards.filter((card) =>
         ctx.hasCardType(card, "action") &&
         (hasType(ctx, card, "earth") || hasType(ctx, card, "elemental"))) ?? [];
-      if (cards.length > 0) ctx.requestCardChoice("shelter", "Summerwood Shelter: choose a defending Earth or Elemental card", cards.map((card) => card.instanceId));
+      if (cards.length > 0) ctx.requestCardChoice("shelter", decisionPrompt("Summerwood Shelter: choose a defending Earth or Elemental card", "card.ele.shelter.defender.choose"), cards.map((card) => card.instanceId));
     },
     onChoose(ctx, hook, option) { if (hook === "shelter") ctx.addCardTempDefense(Number(option), 2); },
   },
   "break ground|1": {
-    onAttackDeclared(ctx) { const card = ctx.player(ctx.seat).arsenal[0]; if (card) ctx.requestCardChoice("break-ground", "Break Ground: bottom your arsenal and draw?", ["no", card.instanceId]); },
+    onAttackDeclared(ctx) { const card = ctx.player(ctx.seat).arsenal[0]; if (card) ctx.requestCardChoice("break-ground", decisionPrompt("Break Ground: bottom your arsenal and draw?", "card.ele.breakground.arsenal.bottom", { optionMessages: commonOptionMessages("no") }), ["no", card.instanceId]); },
     onChoose(ctx, hook, option) { if (hook === "break-ground" && option !== "no" && ctx.putOnDeckBottom(Number(option))) ctx.drawCards(ctx.seat, 1); },
   },
   "break ground|2": {
-    onAttackDeclared(ctx) { const card = ctx.player(ctx.seat).arsenal[0]; if (card) ctx.requestCardChoice("break-ground", "Break Ground: bottom your arsenal and draw?", ["no", card.instanceId]); },
+    onAttackDeclared(ctx) { const card = ctx.player(ctx.seat).arsenal[0]; if (card) ctx.requestCardChoice("break-ground", decisionPrompt("Break Ground: bottom your arsenal and draw?", "card.ele.breakground.arsenal.bottom", { optionMessages: commonOptionMessages("no") }), ["no", card.instanceId]); },
     onChoose(ctx, hook, option) { if (hook === "break-ground" && option !== "no" && ctx.putOnDeckBottom(Number(option))) ctx.drawCards(ctx.seat, 1); },
   },
   "break ground|3": {
-    onAttackDeclared(ctx) { const card = ctx.player(ctx.seat).arsenal[0]; if (card) ctx.requestCardChoice("break-ground", "Break Ground: bottom your arsenal and draw?", ["no", card.instanceId]); },
+    onAttackDeclared(ctx) { const card = ctx.player(ctx.seat).arsenal[0]; if (card) ctx.requestCardChoice("break-ground", decisionPrompt("Break Ground: bottom your arsenal and draw?", "card.ele.breakground.arsenal.bottom", { optionMessages: commonOptionMessages("no") }), ["no", card.instanceId]); },
     onChoose(ctx, hook, option) { if (hook === "break-ground" && option !== "no" && ctx.putOnDeckBottom(Number(option))) ctx.drawCards(ctx.seat, 1); },
   },
   "burgeoning|1": { modifyAttack: (ctx) => ctx.getFlag("link", "fromArsenal") === true ? 1 : 0 },
@@ -925,15 +951,15 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
     onHit(ctx) { ctx.setCounter("chill", 0); createFrostbites(ctx, opponentSeat(ctx), 1); },
   },
   "polar blast|1": {
-    onPlay(ctx) { if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1); if (!ctx.requestPayment("polar-pay", "Polar Blast: pay 3 resources?", 3, opponentSeat(ctx))) buffNextAttack(ctx, { dominate: true }); },
+    onPlay(ctx) { if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1); if (!ctx.requestPayment("polar-pay", decisionPrompt("Polar Blast: pay 3 resources?", "card.ele.polar.pay", { values: { amount: 3 } }), 3, opponentSeat(ctx))) buffNextAttack(ctx, { dominate: true }); },
     onChoose(ctx, hook, option) { if (hook === "polar-pay" && option !== "paid") buffNextAttack(ctx, { dominate: true }); },
   },
   "polar blast|2": {
-    onPlay(ctx) { if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1); if (!ctx.requestPayment("polar-pay", "Polar Blast: pay 2 resources?", 2, opponentSeat(ctx))) buffNextAttack(ctx, { dominate: true }); },
+    onPlay(ctx) { if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1); if (!ctx.requestPayment("polar-pay", decisionPrompt("Polar Blast: pay 2 resources?", "card.ele.polar.pay", { values: { amount: 2 } }), 2, opponentSeat(ctx))) buffNextAttack(ctx, { dominate: true }); },
     onChoose(ctx, hook, option) { if (hook === "polar-pay" && option !== "paid") buffNextAttack(ctx, { dominate: true }); },
   },
   "polar blast|3": {
-    onPlay(ctx) { if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1); if (!ctx.requestPayment("polar-pay", "Polar Blast: pay 1 resource?", 1, opponentSeat(ctx))) buffNextAttack(ctx, { dominate: true }); },
+    onPlay(ctx) { if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1); if (!ctx.requestPayment("polar-pay", decisionPrompt("Polar Blast: pay 1 resource?", "card.ele.polar.pay", { values: { amount: 1 } }), 1, opponentSeat(ctx))) buffNextAttack(ctx, { dominate: true }); },
     onChoose(ctx, hook, option) { if (hook === "polar-pay" && option !== "paid") buffNextAttack(ctx, { dominate: true }); },
   },
   "winter's bite|1": {
@@ -1045,7 +1071,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
         for (const layer of ctx.state.stack) {
           if (layer.card && ctx.hasCardType(layer.card, "action")) ids.add(layer.card.instanceId);
         }
-        ctx.requestCardChoice("amulet-lightning", "Amulet of Lightning: choose an action card to gain go again", [...ids]);
+        ctx.requestCardChoice("amulet-lightning", decisionPrompt("Amulet of Lightning: choose an action card to gain go again", "card.ele.amulet.action.choose"), [...ids]);
       },
     },
     onChoose(ctx, hook, option) { if (hook === "amulet-lightning") ctx.grantCardKeyword(Number(option), "go again"); },
@@ -1073,19 +1099,19 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   "thump|1": {
     onAttackDeclared(ctx) { if (ctx.attackBonusAboveBase(ctx.self.instanceId) > 0) { ctx.addModifier({ scope: "chain-link", dominate: true }); ctx.setFlag("link", "thumpDiscard", true); } },
     canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "thumpDiscard") === true; },
-    onHit(ctx) { const hand = ctx.player(opponentSeat(ctx)).hand; if (hand.length > 0) ctx.requestCardChoice("thump-discard", "Thump: choose a card to discard", hand.map((card) => card.instanceId), opponentSeat(ctx)); },
+    onHit(ctx) { const hand = ctx.player(opponentSeat(ctx)).hand; if (hand.length > 0) ctx.requestCardChoice("thump-discard", decisionPrompt("Thump: choose a card to discard", "card.ele.thump.discard"), hand.map((card) => card.instanceId), opponentSeat(ctx)); },
     onChoose(ctx, hook, option) { if (hook === "thump-discard") ctx.discardCard(opponentSeat(ctx), Number(option)); },
   },
   "thump|2": {
     onAttackDeclared(ctx) { if (ctx.attackBonusAboveBase(ctx.self.instanceId) > 0) { ctx.addModifier({ scope: "chain-link", dominate: true }); ctx.setFlag("link", "thumpDiscard", true); } },
     canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "thumpDiscard") === true; },
-    onHit(ctx) { const hand = ctx.player(opponentSeat(ctx)).hand; if (hand.length > 0) ctx.requestCardChoice("thump-discard", "Thump: choose a card to discard", hand.map((card) => card.instanceId), opponentSeat(ctx)); },
+    onHit(ctx) { const hand = ctx.player(opponentSeat(ctx)).hand; if (hand.length > 0) ctx.requestCardChoice("thump-discard", decisionPrompt("Thump: choose a card to discard", "card.ele.thump.discard"), hand.map((card) => card.instanceId), opponentSeat(ctx)); },
     onChoose(ctx, hook, option) { if (hook === "thump-discard") ctx.discardCard(opponentSeat(ctx), Number(option)); },
   },
   "thump|3": {
     onAttackDeclared(ctx) { if (ctx.attackBonusAboveBase(ctx.self.instanceId) > 0) { ctx.addModifier({ scope: "chain-link", dominate: true }); ctx.setFlag("link", "thumpDiscard", true); } },
     canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "thumpDiscard") === true; },
-    onHit(ctx) { const hand = ctx.player(opponentSeat(ctx)).hand; if (hand.length > 0) ctx.requestCardChoice("thump-discard", "Thump: choose a card to discard", hand.map((card) => card.instanceId), opponentSeat(ctx)); },
+    onHit(ctx) { const hand = ctx.player(opponentSeat(ctx)).hand; if (hand.length > 0) ctx.requestCardChoice("thump-discard", decisionPrompt("Thump: choose a card to discard", "card.ele.thump.discard"), hand.map((card) => card.instanceId), opponentSeat(ctx)); },
     onChoose(ctx, hook, option) { if (hook === "thump-discard") ctx.discardCard(opponentSeat(ctx), Number(option)); },
   },
   "honing hood|0": {
@@ -1099,7 +1125,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       onActivate(ctx) {
         for (const card of [...ctx.player(ctx.seat).arsenal]) ctx.moveToHand(card.instanceId);
         const hand = ctx.player(ctx.seat).hand;
-        if (hand.length > 0) ctx.requestCardChoice("honing-arsenal", "Honing Hood: put a card face down into arsenal", hand.map((card) => card.instanceId));
+        if (hand.length > 0) ctx.requestCardChoice("honing-arsenal", decisionPrompt("Honing Hood: put a card face down into arsenal", "card.ele.honing.arsenal"), hand.map((card) => card.instanceId));
       },
     },
     onChoose(ctx, hook, option) { if (hook === "honing-arsenal") ctx.putIntoArsenal(Number(option), "hand", { faceUp: false }); },
@@ -1139,7 +1165,12 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
         const hand = ctx.player(ctx.seat).hand;
         ctx.requestChoice(
           "ragamuffin-place",
-          "Ragamuffin's Hat: put a card on the top or bottom of your deck",
+          decisionPrompt("Ragamuffin's Hat: put a card on the top or bottom of your deck", "card.ele.ragamuffin.position", {
+            optionMessages: Object.fromEntries(hand.flatMap((card) => [
+              [`top:${card.instanceId}`, decisionMessage("card.ele.ragamuffin.option.top", { card: { kind: "card", cardId: card.cardId } })],
+              [`bottom:${card.instanceId}`, decisionMessage("card.ele.ragamuffin.option.bottom", { card: { kind: "card", cardId: card.cardId } })],
+            ])),
+          }),
           hand.flatMap((card) => [`top:${card.instanceId}`, `bottom:${card.instanceId}`]),
           undefined,
           hand.flatMap((card) => [card.instanceId, card.instanceId]),
@@ -1160,7 +1191,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       goAgain: true,
       destroySelfCost: true,
       canActivate: (ctx) => ctx.player(ctx.seat).hand.length > 0,
-      onActivate(ctx) { ctx.requestCardChoice("deep-blue-bottom", "Deep Blue: put a card from hand on the bottom", ctx.player(ctx.seat).hand.map((card) => card.instanceId)); },
+      onActivate(ctx) { ctx.requestCardChoice("deep-blue-bottom", decisionPrompt("Deep Blue: put a card from hand on the bottom", "card.ele.deepblue.hand.bottom"), ctx.player(ctx.seat).hand.map((card) => card.instanceId)); },
     },
     onChoose(ctx, hook, option) { if (hook === "deep-blue-bottom" && ctx.putOnDeckBottom(Number(option))) ctx.changeResources(ctx.seat, 3); },
   },
