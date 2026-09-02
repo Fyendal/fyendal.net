@@ -1,5 +1,4 @@
-import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import { functionalKeyOf } from "../functional.js";
+import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   ampNextArcane,
   buffNextArcaneDamageCard,
@@ -42,6 +41,19 @@ function opt(ctx: ScriptCtx, n: number): void {
  *  ability (per-turn flag set when the counters are removed). */
 function viaBlaze(ctx: ScriptCtx): boolean {
   return wizardActionAsInstant(ctx);
+}
+
+function blazeMatches(
+  ctx: ScriptCtx,
+  card: DeepReadonly<CardInstance>,
+  amount: number,
+): boolean {
+  return (
+    ctx.hasCardType(card, "action") &&
+    !ctx.cardTypes(card).includes("attack") &&
+    ctx.cardTypes(card).includes("wizard") &&
+    ctx.arcaneDamageEffectAmounts(card.cardId).includes(amount)
+  );
 }
 
 // ── "target hero" / "any target" choices ────────────────────────────────────
@@ -93,32 +105,13 @@ function targetOnChoose(ctx: ScriptCtx, hook: string, option: string): boolean {
   return true;
 }
 
-/** Arcane-damage effect amounts of Wizard non-attack actions — Blaze's
- *  ability can banish a card with any matching effect, including optional or
- *  conditional effects. The engine can't derive these amounts from text. */
-const ARCANE_DAMAGE: Record<string, readonly number[]> = {
-  "aether quickening|3": [2],
-  "aether spindle|1": [4],
-  "aether spindle|3": [2],
-  "arcane twining|3": [1],
-  "emeritus scolding|1": [4],
-  "emeritus scolding|2": [3],
-  "emeritus scolding|3": [2],
-  "nucleus aetherbolt|1": [3, 1],
-  "open the flood gates|3": [1],
-  "photon splicing|3": [2],
-  "snapback|1": [3],
-  "turn to mindfire|1": [5],
-  "voltic bolt|1": [5],
-  "voltic bolt|3": [3],
-};
-
 // ── factories ───────────────────────────────────────────────────────────────
 
 /** "Deal N arcane damage to target hero" + optional extra hooks. */
 function arcaneBolt(damage: number, extra: CardScript = {}): CardScript {
   return {
     arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [damage],
     playAsInstant: viaBlaze,
     onPlay: (ctx) => requestHeroTarget(ctx, damage),
     ...extra,
@@ -159,6 +152,7 @@ function cinderingScript(n: number): CardScript {
 function emeritusScript(base: number): CardScript {
   return {
     arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [base],
     playAsInstant: viaBlaze,
     onPlay(ctx) {
       const boosted = ctx.state.activePlayer !== ctx.seat;
@@ -175,6 +169,7 @@ function emeritusScript(base: number): CardScript {
 function spindleScript(damage: number): CardScript {
   return {
     arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [damage],
     playAsInstant: viaBlaze,
     onPlay: (ctx) => dealArcane(ctx, opponentSeat(ctx), damage),
     onDamageDealt(ctx, _target, amount, arcane) {
@@ -200,7 +195,9 @@ export const sbz: Record<string, CardScript> = {
       timing: "instant",
       oncePerTurn: true,
       label: "Remove X energy counters: play a Wizard non-attack action as an instant",
-      canActivate: (ctx) => ctx.getCounter("energy") > 0,
+      canActivate: (ctx) =>
+        ctx.getCounter("energy") > 0 ||
+        ctx.player(ctx.seat).hand.some((card) => blazeMatches(ctx, card, 0)),
       onActivate(ctx) {
         const max = ctx.getCounter("energy");
         ctx.requestChoice(
@@ -209,7 +206,7 @@ export const sbz: Record<string, CardScript> = {
             "Blaze, Firemind: remove how many energy counters?",
             "card.sbz.blaze.energy.choose",
           ),
-          Array.from({ length: max }, (_, i) => String(i + 1)),
+          Array.from({ length: max + 1 }, (_, i) => String(i)),
         );
       },
     },
@@ -217,15 +214,9 @@ export const sbz: Record<string, CardScript> = {
       if (hook === "blaze-x") {
         const x = Number(option);
         ctx.setCounter("energy", ctx.getCounter("energy") - x);
-        const matches = ctx.player(ctx.seat).hand.filter((c) => {
-          const d = ctx.cardData(c.cardId);
-          return (
-            ctx.hasCardType(c, "action") &&
-            !ctx.cardTypes(c).includes("attack") &&
-            ctx.cardTypes(c).includes("wizard") &&
-            ARCANE_DAMAGE[functionalKeyOf(d)]?.includes(x) === true
-          );
-        });
+        const matches = ctx.player(ctx.seat).hand.filter((card) =>
+          blazeMatches(ctx, card, x)
+        );
         if (matches.length === 0) {
           ctx.logPublic(`Blaze, Firemind: no Wizard non-attack action dealing ${x} arcane damage in hand`);
           return;
@@ -388,6 +379,7 @@ export const sbz: Record<string, CardScript> = {
   // this turn, you may play Snapback as though it were an instant."
   "snapback|1": {
     arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [3],
     playAsInstant: (ctx) =>
       viaBlaze(ctx) ||
       ctx.getFlag("player", "playedClassType:wizard:non-attack-action") === true,
@@ -401,6 +393,7 @@ export const sbz: Record<string, CardScript> = {
   // tap your hero to create a Ponder token.
   "turn to mindfire|1": {
     arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [5],
     playAsInstant: viaBlaze,
     onPlay: (ctx) => requestHeroTarget(ctx, 5),
     onDamageDealt(ctx, _target, amount, arcane) {
@@ -435,6 +428,7 @@ export const sbz: Record<string, CardScript> = {
   // Surge-granted one and is stripped from data/cards/SBZ.json).
   "aether quickening|3": {
     arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [2],
     playAsInstant: viaBlaze,
     onPlay: (ctx) => requestHeroTarget(ctx, 2),
     onDamageDealt(ctx, _target, amount, arcane) {
@@ -450,6 +444,7 @@ export const sbz: Record<string, CardScript> = {
   // Open the Flood Gates — Surge: draw 2 if it deals more than 1
   "open the flood gates|3": {
     arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [1],
     playAsInstant: viaBlaze,
     onPlay: (ctx) => requestHeroTarget(ctx, 1),
     onDamageDealt(ctx, _target, amount, arcane) {

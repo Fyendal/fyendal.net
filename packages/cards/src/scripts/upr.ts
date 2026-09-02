@@ -184,6 +184,7 @@ function fused(ctx: ScriptCtx): boolean {
 function arcaneSpell(amount: number): CardScript {
   return {
     arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [amount],
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
       chooseDamageTarget(ctx, "arcane", `${ctx.data.name}: deal ${ctx.previewArcaneDamage(amount)} arcane damage to any target`);
@@ -200,6 +201,7 @@ function fusedArcane(
 ): CardScript {
   return {
     arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [amount],
     playAsInstant: wizardActionAsInstant,
     additionalCost: fusionAdditionalCost,
     onPlay(ctx) {

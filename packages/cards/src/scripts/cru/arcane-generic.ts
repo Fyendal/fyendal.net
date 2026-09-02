@@ -165,6 +165,7 @@ function forebodingBolt(damage: number): CardScript {
 function rousingAether(damage: number): CardScript {
   return {
     arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [damage],
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
       const amount = ctx.previewArcaneDamage(damage);
@@ -188,6 +189,7 @@ function rousingAether(damage: number): CardScript {
 function snapback(damage: number): CardScript {
   return {
     arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [damage],
     playAsInstant: (ctx) =>
       wizardActionAsInstant(ctx) ||
       ctx.getFlag("player", "playedClassType:wizard:non-attack-action") === true,

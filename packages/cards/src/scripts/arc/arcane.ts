@@ -96,6 +96,7 @@ function stirTheAetherwinds(amount: number): CardScript {
 function opposingArcaneSpell(damage: number, extra: CardScript = {}): CardScript {
   return {
     arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [damage],
     playAsInstant: wizardActionAsInstant,
     prospectiveHeroDamage: (ctx) => [{
       targetSeat: opponentSeat(ctx),
@@ -112,6 +113,7 @@ function opposingArcaneSpell(damage: number, extra: CardScript = {}): CardScript
 function targetHeroArcaneSpell(damage: number): CardScript {
   return {
     arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [damage],
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
       ctx.requestChoice(

@@ -90,6 +90,7 @@ function dealToChosenTarget(ctx: ScriptCtx, option: string, damage: number): voi
 function arcaneSpell(damage: number): CardScript {
   return {
     arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [damage],
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
       requestAnyTarget(ctx, "arcane-target", `${ctx.data.name}: deal ${ctx.previewArcaneDamage(damage)} arcane damage to which target?`);
@@ -143,6 +144,7 @@ function handleDiscardUnlessPay(ctx: ScriptCtx, hook: string, option: string, ke
 function aetherIcevein(damage: number): CardScript {
   return {
     arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [damage],
     playAsInstant: wizardActionAsInstant,
     additionalCost: fusionAdditionalCost,
     onPlay(ctx) {
@@ -167,6 +169,7 @@ function aetherIcevein(damage: number): CardScript {
 function polarCap(damage: number): CardScript {
   return {
     arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [damage],
     playAsInstant: wizardActionAsInstant,
     additionalCost: fusionAdditionalCost,
     onPlay(ctx) {
@@ -377,6 +380,7 @@ export const siy: Record<string, CardScript> = {
 
   "ice eternal|3": {
     arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [0],
     playAsInstant: wizardActionAsInstant,
     variablePlayCost: { base: 0, resourcesPerX: 2, counterKey: "x", prompt: "Choose X" },
     additionalCost: iceEternalAdditionalCost,

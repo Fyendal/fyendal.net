@@ -36,6 +36,14 @@ function hasStandaloneKeywordLine(card: CardData, keyword: string): boolean {
   );
 }
 
+function hasPrintedDirectArcaneDamageEffect(card: CardData): boolean {
+  // Granted abilities are not direct effects of the granting card. Removing
+  // quoted text keeps cards such as Frost Hex out of this contract.
+  const text = card.text.replace(/"[^"]*"/g, "");
+  return /\bdeal(?:s)?\s+(?:\d+|x(?:\s*\+\s*\d+)?)\s+arcane damage\b/i.test(text) ||
+    /\bdeal arcane damage to\b/i.test(text);
+}
+
 describe("script completeness", () => {
   it("every functional key has a script or is curated as vanilla", () => {
     const uncovered = [...dataKeys].filter(
@@ -105,6 +113,50 @@ describe("script completeness", () => {
     const missing = keysWithKeyword("Rune Gate").filter(
       (key) => registry[key]?.runeGate !== true,
     );
+    expect(missing).toEqual([]);
+  });
+
+  it("every scripted Wizard non-attack arcane action declares its printed effect amounts", () => {
+    const missing = [...functionalCards]
+      .filter(([, card]) =>
+        card.cardType === "action" &&
+        card.attack === undefined &&
+        (card.classes ?? []).includes("wizard")
+      )
+      .filter(([key]) => registry[key]?.arcaneDamageEffect === true)
+      .filter(([key]) => registry[key]?.arcaneDamageEffectAmounts === undefined)
+      .map(([key]) => key)
+      .sort();
+    const invalid = Object.entries(registry)
+      .filter(([, script]) => script.arcaneDamageEffectAmounts !== undefined)
+      .filter(([, script]) =>
+        script.arcaneDamageEffect !== true ||
+        script.arcaneDamageEffectAmounts!.length === 0 ||
+        script.arcaneDamageEffectAmounts!.some(
+          (amount) => !Number.isSafeInteger(amount) || amount < 0,
+        )
+      )
+      .map(([key]) => key)
+      .sort();
+
+    expect({ missing, invalid }).toEqual({ missing: [], invalid: [] });
+  });
+
+  it("marks every printed direct Wizard action arcane-damage effect", () => {
+    const missing = [...functionalCards]
+      .filter(([, card]) =>
+        card.cardType === "action" &&
+        card.attack === undefined &&
+        (card.classes ?? []).includes("wizard") &&
+        hasPrintedDirectArcaneDamageEffect(card)
+      )
+      .filter(([key]) =>
+        registry[key]?.arcaneDamageEffect !== true ||
+        registry[key]?.arcaneDamageEffectAmounts === undefined
+      )
+      .map(([key]) => key)
+      .sort();
+
     expect(missing).toEqual([]);
   });
 

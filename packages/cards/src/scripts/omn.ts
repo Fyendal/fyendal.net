@@ -79,9 +79,13 @@ function dealToChoice(
   });
 }
 
-function arcaneAny(amount: number | ((ctx: ScriptCtx) => number)): CardScript {
+function arcaneAny(
+  amount: number | ((ctx: ScriptCtx) => number),
+  printedAmount = typeof amount === "number" ? amount : 0,
+): CardScript {
   return {
     arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [printedAmount],
     onPlay(ctx) {
       const base = typeof amount === "function" ? amount(ctx) : amount;
       requestAnyTarget(ctx, "arcane-target", `${ctx.data.name}: deal ${ctx.previewArcaneDamage(base)} arcane damage to a target`);
@@ -95,13 +99,14 @@ function arcaneAny(amount: number | ((ctx: ScriptCtx) => number)): CardScript {
 function arcaneHero(amount: number): CardScript {
   return {
     arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [amount],
     onPlay: (ctx) => requestAnyTarget(ctx, "arcane-hero", `${ctx.data.name}: deal ${ctx.previewArcaneDamage(amount)} arcane damage to a hero`, true),
     onChoose(ctx, hook, option) { if (hook === "arcane-hero") dealToChoice(ctx, option, amount); },
   };
 }
 
 function starfallAny(base: number, bonus: number): CardScript {
-  return arcaneAny((ctx) => base + (starfall(ctx) ? bonus : 0));
+  return arcaneAny((ctx) => base + (starfall(ctx) ? bonus : 0), base);
 }
 
 function createOnStarfall(base: number): CardScript {
@@ -821,6 +826,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
       const sourceInstanceId = ctx.player(ctx.seat).hero.instanceId;
       requestAnyTarget(ctx, "nucleus-target", `Your hero deals ${ctx.previewArcaneDamage(1, { sourceInstanceId })} arcane damage to a target`);
     }),
+    arcaneDamageEffectAmounts: [3, 1],
     onChoose(ctx, hook, option) {
       if (hook === "nucleus-target") dealToChoice(ctx, option, 1, { arcane: true, sourceInstanceId: ctx.player(ctx.seat).hero.instanceId });
       else if (hook === "tap-payoff" && option === "yes" && ctx.tap(ctx.player(ctx.seat).hero.instanceId)) {

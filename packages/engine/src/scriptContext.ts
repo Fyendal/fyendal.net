@@ -1699,6 +1699,9 @@ export function makeCtx(
       referencedLogCardIds.add(cardId);
       return dataOf(state, cardId);
     },
+    arcaneDamageEffectAmounts(cardId) {
+      return scriptOf(state, cardId)?.arcaneDamageEffectAmounts ?? [];
+    },
     hasCardType(card, cardType) {
       const found = findCardAnywhere(state, card.instanceId)?.card;
       return cardHasType(state, found ?? card as CardInstance, cardType);

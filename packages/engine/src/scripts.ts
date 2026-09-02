@@ -377,6 +377,10 @@ export interface ScriptCtx {
   becomeAllyUntilEndOfTurn(instanceId: number, power: number, life: number): boolean;
   /** Look up static data for any card id */
   cardData(cardId: string): CardData;
+  /** Printed amounts of the registered card's direct arcane-damage effects.
+   * Values are read in non-layer zones before conditional replacements or
+   * damage modifiers; an undetermined X is 0. */
+  arcaneDamageEffectAmounts(cardId: string): readonly number[];
   /** Whether this object currently has a card-type keyword. Melded split cards
    *  have the card types of both declared sides. */
   hasCardType(card: DeepReadonly<CardInstance>, cardType: CardType): boolean;
@@ -881,6 +885,11 @@ export interface CardScript {
    *  "the next card you play with an arcane-damage effect gets +N" when the
    *  card is played, rather than when a later damage packet happens. */
   arcaneDamageEffect?: boolean;
+  /** Printed amounts of this card's direct arcane-damage effects while it is
+   * in a non-layer zone. This is card-owned rules metadata for effects such as
+   * Blaze, Firemind; list each distinct direct effect, use its unmodified base
+   * amount, and represent an undetermined X as 0. */
+  arcaneDamageEffectAmounts?: readonly number[];
   /** Damage this source's unresolved stack layer would deal to heroes if it
    * resolved now, before prevention. Used by effects that inspect a targeted
    * source prospectively (Amulet of Intervention). Must be pure. */

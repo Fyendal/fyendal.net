@@ -337,6 +337,7 @@ function ampFromHand(): CardScript {
 function arcaneAnyTarget(amount: number, extra?: Pick<CardScript, "onDamageDealt" | "graveyardReplacement">): CardScript {
   return {
     arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [amount],
     onPlay: (ctx) => requestAnyTarget(ctx, "arcane-target", `${ctx.data.name}: deal ${ctx.previewArcaneDamage(amount)} arcane damage to a target`),
     onChoose(ctx, hook, option) { if (hook === "arcane-target") dealToChoice(ctx, option, amount); },
     ...extra,
@@ -346,6 +347,7 @@ function arcaneAnyTarget(amount: number, extra?: Pick<CardScript, "onDamageDealt
 function arcaneHero(amount: number, surge?: (ctx: ScriptCtx, target: number, dealt: number) => void): CardScript {
   return {
     arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [amount],
     onPlay(ctx) { ctx.requestChoice("arcane-hero", `${ctx.data.name}: deal ${ctx.previewArcaneDamage(amount)} arcane damage to a hero`, ["opposing hero", "your hero"]); },
     onChoose(ctx, hook, option) { if (hook === "arcane-hero") dealArcane(ctx, option === "your hero" ? ctx.seat : opponentSeat(ctx), amount); },
     onDamageDealt(ctx, target, dealt, arcane) { if (arcane && dealt > amount) surge?.(ctx, target, dealt); },
@@ -368,6 +370,7 @@ function chorus(amount: number): CardScript {
 function glyphOverlay(base: number): CardScript {
   return {
     arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [base],
     onPlay(ctx) {
       const amount = base + sigils(ctx).length;
       ctx.requestChoice("glyph-hero", `${ctx.data.name}: deal ${ctx.previewArcaneDamage(amount)} arcane damage to a hero`, ["opposing hero", "your hero"]);

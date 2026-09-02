@@ -514,6 +514,7 @@ function pyroglyphic(amount: number): CardScript {
 function timekeepersWhim(amount: number): CardScript {
   return {
     arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [amount],
     playAsInstant: wizardActionAsInstant,
     additionalCost(ctx) {
       if (ctx.state.activePlayer !== ctx.seat) ctx.setCounter("whimOpponentTurn", 1);
