@@ -2,16 +2,15 @@ import type { CardScript } from "@fyendal/engine";
 import type { GameMessage } from "@fyendal/shared";
 
 /**
- * Semantic presentation for trigger labels shared verbatim by multiple card
- * scripts. Card-specific and dynamic labels stay beside their script as an
- * explicit `labelMessage`; this registry prevents common mechanics from being
- * translated independently in dozens of sets.
+ * Semantic presentation for legacy card-trigger labels. Registry composition
+ * converts their deterministic English fallback into locale-neutral metadata;
+ * parameterized message IDs keep repeated mechanics consistent across sets.
  *
- * The English key is only the deterministic legacy fallback. A coverage test
- * caps labels without semantic metadata, so changing or adding a fallback
- * cannot silently make new English text player-facing.
+ * New scripts should define `labelMessage` beside the trigger. The coverage
+ * test requires every registered trigger to have semantic presentation, so a
+ * new raw fallback cannot silently become player-facing English.
  */
-const commonTriggerMessages: Readonly<Record<string, GameMessage>> = {
+const triggerMessagesByLabel: Readonly<Record<string, GameMessage>> = {
   "Wager with the defending hero?": { id: "card.trigger.common.wager.defender.optional" },
   "Wager with the defending hero": { id: "card.trigger.common.wager.defender" },
   "Destroy aura": { id: "card.trigger.common.aura.destroy" },
@@ -161,10 +160,128 @@ const commonTriggerMessages: Readonly<Record<string, GameMessage>> = {
   "Destroy Havoc Wrap": { id: "card.trigger.common.named.destroy", values: { target: "Havoc Wrap" } },
   "Destroy Heavy Swing and empower a sword": { id: "card.trigger.common.heavyswing.destroy" },
   "Destroy Helio's Mitre": { id: "card.trigger.common.named.destroy", values: { target: "Helio's Mitre" } },
+  "Destroy Hypothermia": { id: "card.trigger.common.named.destroy", values: { target: "Hypothermia" } },
+  "Destroy Inertia — hand and arsenal go on the bottom of the deck": { id: "card.trigger.common.inertia.destroy" },
+  "Destroy Kimono of Layered Lessons": { id: "card.trigger.common.named.destroy", values: { target: "Kimono of Layered Lessons" } },
+  "Destroy Leave 'Em Speechless": { id: "card.trigger.common.named.destroy", values: { target: "Leave 'Em Speechless" } },
+  "Destroy Ley Line if you control no Seismic Surges": { id: "card.trigger.common.leyline.destroy" },
+  "Destroy Might (next attack +1{p})": { id: "card.trigger.common.might.destroy", values: { amount: 1 } },
+  "Destroy Never Yield": { id: "card.trigger.common.named.destroy", values: { target: "Never Yield" } },
+  "Destroy Peaceful Sanctuary": { id: "card.trigger.common.named.destroy", values: { target: "Peaceful Sanctuary" } },
+  "Destroy Ponder and draw a card": { id: "card.trigger.common.ponder.destroy.draw" },
+  "Destroy Promising Terrain": { id: "card.trigger.common.named.destroy", values: { target: "Promising Terrain" } },
+  "Destroy Prowess of Agility": { id: "card.trigger.common.named.destroy", values: { target: "Prowess of Agility" } },
+  "Destroy Rest Before Battle and draw": { id: "card.trigger.common.restbeforebattle.destroy.draw" },
+  "Destroy Runeblood Barrier": { id: "card.trigger.common.named.destroy", values: { target: "Runeblood Barrier" } },
+  "Destroy Seismic Shelter": { id: "card.trigger.common.named.destroy", values: { target: "Seismic Shelter" } },
+  "Destroy Seismic Surge — next Guardian attack costs {r} less": { id: "card.trigger.common.seismicsurge.destroy.discount", values: { amount: 1 } },
+  "Destroy Sharpened Senses": { id: "card.trigger.common.named.destroy", values: { target: "Sharpened Senses" } },
+  "Destroy Show Time! and draw a card": { id: "card.trigger.common.showtime.destroy.draw" },
+  "Destroy Sigil of Fate": { id: "card.trigger.common.named.destroy", values: { target: "Sigil of Fate" } },
+  "Destroy Sigil of Gravespawning": { id: "card.trigger.common.named.destroy", values: { target: "Sigil of Gravespawning" } },
+  "Destroy Sigil of Silphidae": { id: "card.trigger.common.named.destroy", values: { target: "Sigil of Silphidae" } },
+  "Destroy Sigil of the Muse and create a Ponder": { id: "card.trigger.common.sigilmuse.destroy.ponder" },
+  "Destroy Sigil of Voltaris": { id: "card.trigger.common.named.destroy", values: { target: "Sigil of Voltaris" } },
+  "Destroy Stamp Authority": { id: "card.trigger.common.named.destroy", values: { target: "Stamp Authority" } },
+  "Destroy Sting of Sorcery": { id: "card.trigger.common.named.destroy", values: { target: "Sting of Sorcery" } },
+  "Destroy Talishar with 3 rust counters": { id: "card.trigger.common.talishar.destroy.rust", values: { count: 3 } },
+  "Destroy this": { id: "card.trigger.common.self.destroy" },
+  "Destroy this — next Guardian attack gets +4{p}": { id: "card.trigger.common.guardian.attack.destroy", values: { amount: 4 } },
+  "Destroy this and name a card": { id: "card.trigger.common.cardname.choose.destroy" },
+  "Destroy this to create 2 Might tokens?": { id: "card.trigger.common.might.create.destroy.optional", values: { count: 2 } },
+  "Destroy this to gain 1 action point?": { id: "card.trigger.common.actionpoint.gain.destroy.optional", values: { amount: 1 } },
+  "Destroy this to give the attack +1?": { id: "card.trigger.common.attack.gain.destroy.optional", values: { amount: 1 } },
+  "Destroy this to have the attack deal 1 damage to the defending hero?": { id: "card.trigger.common.attack.damage.defender.destroy.optional", values: { amount: 1 } },
+  "Destroy this; next attack gains dominate": { id: "card.trigger.common.dominate.nextattack.destroy" },
+  "Destroy Tome of Aeo": { id: "card.trigger.common.named.destroy", values: { target: "Tome of Aeo" } },
+  "Destroy Toughness": { id: "card.trigger.common.named.destroy", values: { target: "Toughness" } },
+  "Destroy Two Steps Ahead": { id: "card.trigger.common.named.destroy", values: { target: "Two Steps Ahead" } },
+  "Destroy Vigor — gain {r}": { id: "card.trigger.common.vigor.destroy.resource", values: { amount: 1 } },
+  "Destroy Visit the Dawnsmith and sharpen swords": { id: "card.trigger.common.visitdawnsmith.destroy" },
+  "Discount the next 3 Draconic cards": { id: "card.trigger.common.draconic.discount", values: { count: 3 } },
+  Doomsaying: { id: "card.trigger.common.doomsaying.resolve" },
+  "Each hero shuffles and arsenals their top card": { id: "card.trigger.common.heroes.shuffle.arsenal" },
+  "Echo Casque — pay and destroy to draw": { id: "card.trigger.common.echocasque.draw" },
+  "Frost Hex deals 1 arcane damage": { id: "card.trigger.common.frosthex.damage", values: { amount: 1 } },
+  "Gain {r}": { id: "card.trigger.common.resource.gain", values: { amount: 1 } },
+  "Gain +2 defense": { id: "card.trigger.common.defense.gain", values: { amount: 2 } },
+  "Gain +4 attack and go again": { id: "card.trigger.common.attack.goagain.gain", values: { amount: 4 } },
+  "Gain 1 life if behind": { id: "card.trigger.common.life.gain.behind", values: { amount: 1 } },
+  "Gain the base abilities of Illusionist attacks on the combat chain": { id: "card.trigger.common.illusionist.chain.abilities" },
+  "Get +1 power this turn": { id: "card.trigger.common.power.turn.gain", values: { amount: 1 } },
+  "Great Library intellect": { id: "card.trigger.common.greatlibrary.intellect" },
+  "Haboob storm upkeep": { id: "card.trigger.common.haboob.maintain" },
+  "If it wagered, it gets dominate": { id: "card.trigger.common.wager.dominate" },
+  "Infect each hero and banish the top card of each deck": { id: "card.trigger.common.heroes.infect.decktop.banish" },
+  "Lose 1 life": { id: "card.trigger.common.life.lose", values: { amount: 1 } },
+  "Lose life for auras": { id: "card.trigger.common.life.lose.auras" },
+  "Lose life for Frostbites in equipment zones": { id: "card.trigger.common.life.lose.frostbites" },
+  "Maintain Spellbound Creepers": { id: "card.trigger.common.spellboundcreepers.maintain" },
+  "Name the Crouching Tiger": { id: "card.trigger.common.crouchingtiger.name" },
+  "Next attack is Draconic and +3": { id: "card.trigger.common.nextattack.draconic", values: { amount: 3 } },
+  "Opt 2": { id: "card.trigger.common.opt", values: { amount: 2 } },
+  "Pay {r} to create a Might": { id: "card.trigger.common.might.create.pay", values: { amount: 1 } },
+  "Pay 1 and tap this to create a Seismic Surge?": { id: "card.trigger.common.seismicsurge.create.pay.tap.optional", values: { amount: 1 } },
+  "Pay 1 resource for +1 arcane damage?": { id: "card.trigger.common.arcane.gain.pay.optional", values: { cost: 1, amount: 1 } },
+  "Pay 1 to give this action go again?": { id: "card.trigger.common.goagain.gain.pay.optional", values: { amount: 1 } },
+  "Pay 1 to remove a -1 defense counter?": { id: "card.trigger.common.defensecounter.remove.pay.optional", values: { cost: 1, amount: 1 } },
+  "Pay 2 and tap this for the ally's first attack?": { id: "card.trigger.common.ally.firstattack.pay.tap.optional", values: { amount: 2 } },
+  "Pay 2 for +1 and overpower?": { id: "card.trigger.common.wager.attack.overpower.pay.optional", values: { cost: 2, amount: 1 } },
+  "Pay 2 to give the wagering attack +1 and overpower?": { id: "card.trigger.common.wager.attack.overpower.pay.optional", values: { cost: 2, amount: 1 } },
+  "Pay Loan Shark": { id: "card.trigger.common.loanshark.pay" },
+  "Pitch the top card": { id: "card.trigger.common.decktop.pitch" },
+  "Put a card from hand into soul?": { id: "card.trigger.common.hand.soul.optional" },
+  "Put a steam counter on an item with crank?": { id: "card.trigger.common.item.crank.steam.optional" },
+  "Put a steam counter on Hanabi Blaster": { id: "card.trigger.common.hanabiblaster.steam" },
+  "Put a zombie from banish into graveyard or destroy this": { id: "card.trigger.common.bridgeofdamnation.maintain" },
+  "Put Blessing of Aegis into soul": { id: "card.trigger.common.soul.put", values: { target: "Blessing of Aegis" } },
+  "Put Blessing of Bellona into soul": { id: "card.trigger.common.soul.put", values: { target: "Blessing of Bellona" } },
+  "Put Blessing of Themis into your soul": { id: "card.trigger.common.soul.put", values: { target: "Blessing of Themis" } },
+  "Put the top card face up into arsenal": { id: "card.trigger.common.decktop.arsenal.faceup" },
+  "Recover Valiant Dynamo": { id: "card.trigger.common.valiantdynamo.recover" },
+  "Remove a balance counter or destroy Zen State": { id: "card.trigger.common.zenstate.maintain" },
+  "Remove a frost counter; opposing hero pays 2 or discards": { id: "card.trigger.common.frostcounter.remove.paydiscard", values: { amount: 2 } },
+  "Remove a steam counter": { id: "card.trigger.common.steam.remove" },
+  "Remove a steam counter and gain 2 resources": { id: "card.trigger.common.steam.remove.resource", values: { amount: 2 } },
+  "Remove a steam counter or destroy Boom Grenade": { id: "card.trigger.common.steam.remove.named.destroy", values: { target: "Boom Grenade" } },
+  "Remove a steam counter or destroy Clamp Press": { id: "card.trigger.common.steam.remove.named.destroy", values: { target: "Clamp Press" } },
+  "Remove a steam counter or destroy Dissipation Shield": { id: "card.trigger.common.steam.remove.named.destroy", values: { target: "Dissipation Shield" } },
+  "Remove a steam counter or destroy Dissolution Sphere": { id: "card.trigger.common.steam.remove.named.destroy", values: { target: "Dissolution Sphere" } },
+  "Remove a steam counter or destroy Signal Jammer": { id: "card.trigger.common.steam.remove.named.destroy", values: { target: "Signal Jammer" } },
+  "Remove balance or destroy": { id: "card.trigger.common.balance.remove.destroy" },
+  "Remove doom or destroy": { id: "card.trigger.common.doom.remove.destroy" },
+  "Remove Duskblade counters": { id: "card.trigger.common.duskblade.counters.remove" },
+  "Remove Oath counters": { id: "card.trigger.common.oath.counters.remove" },
+  "Resolve Looming Doom": { id: "card.trigger.common.loomingdoom.resolve" },
+  "Resolve Surface Shaking": { id: "card.trigger.common.surfaceshaking.resolve" },
+  "Return cards banished by No Fear": { id: "card.trigger.common.nofear.return" },
+  "Return this to its owner's hand?": { id: "card.trigger.common.ownerhand.return.optional" },
+  "Reveal Earth, Ice, and Lightning cards?": { id: "card.trigger.common.elements.reveal.optional" },
+  "Reveal the top card": { id: "card.trigger.common.decktop.reveal" },
+  "Roll a die for the attack's base power": { id: "card.trigger.common.attack.basepower.roll" },
+  "Talisman of Balance": { id: "card.trigger.common.talismanbalance.resolve" },
+  "Tap your hero and destroy this to create Courage?": { id: "card.trigger.common.token.create.herotap.destroy.optional", values: { target: "Courage" } },
+  "Tap your hero and destroy this to create Vigor?": { id: "card.trigger.common.token.create.herotap.destroy.optional", values: { target: "Vigor" } },
+  "The wagering attack gets +2": { id: "card.trigger.common.wager.attack.gain", values: { amount: 2 } },
+  "The wagering attack gets +3": { id: "card.trigger.common.wager.attack.gain", values: { amount: 3 } },
+  "The wagering attack gets +3 and overpower": { id: "card.trigger.common.wager.attack.overpower.gain", values: { amount: 3 } },
+  "The wagering attack gets +4": { id: "card.trigger.common.wager.attack.gain", values: { amount: 4 } },
+  "Torc of Vim — destroy for a discount": { id: "card.trigger.common.torcvim.discount" },
+  "Trampling Trackers — destroy to create Agility": { id: "card.trigger.common.tramplingtrackers.agility" },
+  "Transform up to one Ash": { id: "card.trigger.common.ash.transform", values: { amount: 1 } },
+  Traverse: { id: "card.trigger.common.traverse" },
+  "Treasure Island gets a gold counter": { id: "card.trigger.common.treasureisland.counter" },
+  "Turn Koi Blessed Kimono face-up?": { id: "card.trigger.common.koikimono.faceup.optional" },
+  "Valda Brightaxe": { id: "card.trigger.common.valdabrightaxe.resolve" },
+  "Valda, Seismic Impact": { id: "card.trigger.common.valdaseismic.resolve" },
+  "Wager a Gold?": { id: "card.trigger.common.gold.wager.optional" },
+  "Wager Might and Vigor with the defending hero": { id: "card.trigger.common.wager.mightvigor" },
+  "You may only play Draconic cards this turn": { id: "card.trigger.common.draconic.only" },
+  "Your hero deals 1 arcane damage": { id: "card.trigger.common.arcane.hero.deal", values: { amount: 1 } },
 };
 
-export function withCommonTriggerMessages(script: CardScript): CardScript {
-  if (!script.triggers?.some((trigger) => !trigger.labelMessage && commonTriggerMessages[trigger.label])) {
+export function withTriggerMessages(script: CardScript): CardScript {
+  if (!script.triggers?.some((trigger) => !trigger.labelMessage && triggerMessagesByLabel[trigger.label])) {
     return script;
   }
   return {
@@ -173,8 +290,8 @@ export function withCommonTriggerMessages(script: CardScript): CardScript {
       ? trigger
       : {
           ...trigger,
-          ...(commonTriggerMessages[trigger.label]
-            ? { labelMessage: commonTriggerMessages[trigger.label] }
+          ...(triggerMessagesByLabel[trigger.label]
+            ? { labelMessage: triggerMessagesByLabel[trigger.label] }
             : {}),
         }),
   };

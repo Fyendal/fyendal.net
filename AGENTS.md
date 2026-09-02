@@ -50,6 +50,59 @@ the boundaries below; they are release invariants, not suggestions.
 - `apps/client` — React/Vite UI and one public Zustand store covering
   connection/session, account/decks, lobby/room, and replay state.
 
+## Internationalization
+
+- React copy uses `react-intl`. Source catalogs live in
+  `apps/client/src/i18n/catalogs/{en,zh-Hans}.json`; compiled ICU AST catalogs
+  live in `apps/client/src/i18n/compiled/`. Edit both source catalogs and never
+  hand-edit compiled output. English is the canonical fallback, and every
+  supported locale must have exactly the same keys.
+- Message ids are stable, lowercase, dot-separated semantic identifiers. Do
+  not encode rendered copy, a printing id, or runtime data in an id. Put
+  dynamic content in ICU values; use typed `GameMessage` card, player, and term
+  references when the client must resolve visible names safely.
+- Client-only copy uses `useIntl`, `FormattedMessage`, `GameMessageText`, or
+  `formatGameMessage`. Do not branch on the current locale or construct
+  translated sentences by concatenating fragments.
+- The engine, server, and card scripts never import locale catalogs or render a
+  locale. Wire-visible game copy retains a deterministic English fallback and
+  carries locale-neutral `GameMessage` metadata. This keeps old clients,
+  persisted decisions, replay diagnostics, and newer catalogs compatible.
+- Card-script decisions use the helpers in
+  `packages/cards/src/scripts/shared-helpers.ts`: `decisionPrompt` for every
+  player-facing prompt, `decisionMessage` for semantic option labels, and
+  `commonOptionMessages` for shared fixed choices. Option values delivered to
+  `onChoose` are stable engine values and must never be translated. Card choices
+  may remain ids because the client renders their visible card names.
+- Player-facing card logs use `localizedLog` or `localizedCardLog`. Choose
+  `logPublic`, `logPrivate`, or `logForSeats` independently of localization;
+  neither fallback text nor semantic values may reveal hidden information.
+- Every new `TriggerDef` supplies `labelMessage` beside its English `label`.
+  `packages/cards/src/trigger-messages.ts` enriches migrated legacy labels at
+  registry composition and consolidates repeated effects through parameterized
+  messages. Do not add a new raw trigger fallback without semantic metadata;
+  `trigger-messages.test.ts` enforces a zero untranslated backlog.
+- To add a language, extend `SUPPORTED_LOCALES`, its autonym and browser-locale
+  matching in `apps/client/src/i18n/locale.ts`; add its source catalog and lazy
+  import in `I18nProvider.tsx`; then update locale, picker, and catalog tests.
+  Language-picker labels are autonyms, not translations in the active locale.
+- Preserve established Simplified Chinese terminology. Keep `go again`,
+  `On hit`, `Links`/`Chain`, and `arsenal` as established UI terms; render
+  dominate as `压制 (dominate)` and Aura as `灵气 (Aura)` with a space before
+  the parenthesis. Extend the terminology assertions in `catalogs.test.ts` when
+  standardizing another term.
+- `pnpm dev` compiles all catalogs before Vite starts, then the Vite plugin
+  recompiles a changed source catalog and reloads the page. Builds also compile
+  first. Outside a running dev server, run
+  `pnpm --filter @fyendal/client i18n:compile` after catalog edits and include
+  the generated compiled catalogs in the change.
+- `apps/client/src/i18n/catalogs.test.ts` enforces locale key parity, safe ids,
+  referenced card/engine message coverage, and terminology. For i18n changes,
+  run the compiler, that focused client test, the relevant UI/card tests, and
+  affected workspace typechecks. Pure catalog or presentation-metadata changes
+  do not require a `rulesetVersion` bump; rules behavior or incompatible
+  persisted/wire changes still do.
+
 ## Server and persistence
 
 - Persisted game state uses the explicit `PersistedStateV1` envelope.

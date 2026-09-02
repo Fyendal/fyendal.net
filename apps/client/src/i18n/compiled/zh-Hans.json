@@ -11709,6 +11709,20 @@
       "value": " 个行动点"
     }
   ],
+  "card.trigger.common.actionpoint.gain.destroy.optional": [
+    {
+      "type": 0,
+      "value": "摧毁此牌以获得 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 个行动点？"
+    }
+  ],
   "card.trigger.common.adverseaura.random": [
     {
       "type": 0,
@@ -11725,6 +11739,20 @@
     {
       "type": 0,
       "value": "摧毁 Agility；下一次攻击获得 go again"
+    }
+  ],
+  "card.trigger.common.ally.firstattack.pay.tap.optional": [
+    {
+      "type": 0,
+      "value": "支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源并横置此牌，以进行该 ally 的第一次攻击？"
     }
   ],
   "card.trigger.common.amp": [
@@ -11765,6 +11793,42 @@
       "value": " 点奥术伤害"
     }
   ],
+  "card.trigger.common.arcane.gain.pay.optional": [
+    {
+      "type": 0,
+      "value": "支付 "
+    },
+    {
+      "type": 1,
+      "value": "cost"
+    },
+    {
+      "type": 0,
+      "value": " 点资源以获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 奥术伤害？"
+    }
+  ],
+  "card.trigger.common.arcane.hero.deal": [
+    {
+      "type": 0,
+      "value": "你的英雄造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
   "card.trigger.common.arcane.target": [
     {
       "type": 0,
@@ -11779,6 +11843,40 @@
       "value": " 点奥术伤害"
     }
   ],
+  "card.trigger.common.ash.transform": [
+    {
+      "type": 0,
+      "value": "转化至多 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 个 Ash"
+    }
+  ],
+  "card.trigger.common.attack.basepower.roll": [
+    {
+      "type": 0,
+      "value": "掷骰决定该攻击的基础力量"
+    }
+  ],
+  "card.trigger.common.attack.damage.defender.destroy.optional": [
+    {
+      "type": 0,
+      "value": "摧毁此牌，使该攻击对防守英雄造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害？"
+    }
+  ],
   "card.trigger.common.attack.gain": [
     {
       "type": 0,
@@ -11791,6 +11889,34 @@
     {
       "type": 0,
       "value": " 力量"
+    }
+  ],
+  "card.trigger.common.attack.gain.destroy.optional": [
+    {
+      "type": 0,
+      "value": "摧毁此牌，使该攻击获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量？"
+    }
+  ],
+  "card.trigger.common.attack.goagain.gain": [
+    {
+      "type": 0,
+      "value": "获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量和 go again"
     }
   ],
   "card.trigger.common.aura.bottom.another": [
@@ -11809,6 +11935,12 @@
     {
       "type": 0,
       "value": "将一个符合条件的灵气 (Aura) 返回其拥有者手牌？"
+    }
+  ],
+  "card.trigger.common.balance.remove.destroy": [
+    {
+      "type": 0,
+      "value": "移除一个 balance 指示物，或摧毁此牌"
     }
   ],
   "card.trigger.common.biosupdate.arena": [
@@ -11863,6 +11995,12 @@
       "value": "结算 Bone Puppetry 的弃牌效果"
     }
   ],
+  "card.trigger.common.bridgeofdamnation.maintain": [
+    {
+      "type": 0,
+      "value": "将放逐区中的一个 Zombie 置入你的墓地，或摧毁此牌"
+    }
+  ],
   "card.trigger.common.brood.return": [
     {
       "type": 0,
@@ -11879,6 +12017,12 @@
     {
       "type": 0,
       "value": "抽一张牌"
+    }
+  ],
+  "card.trigger.common.cardname.choose.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁此牌并指定一个牌名"
     }
   ],
   "card.trigger.common.carrionhusk.banish": [
@@ -11955,6 +12099,12 @@
     {
       "type": 0,
       "value": "生成 Crouching Tiger"
+    }
+  ],
+  "card.trigger.common.crouchingtiger.name": [
+    {
+      "type": 0,
+      "value": "为 Crouching Tiger 指定牌名"
     }
   ],
   "card.trigger.common.dagger.attack": [
@@ -12043,6 +12193,12 @@
       "value": "将此牌置于其拥有者的牌库底部"
     }
   ],
+  "card.trigger.common.decktop.arsenal.faceup": [
+    {
+      "type": 0,
+      "value": "将你的牌库顶牌面朝上置入 arsenal"
+    }
+  ],
   "card.trigger.common.decktop.banish": [
     {
       "type": 0,
@@ -12063,10 +12219,36 @@
       "value": " 个 Runechant，则进行 traverse"
     }
   ],
+  "card.trigger.common.decktop.pitch": [
+    {
+      "type": 0,
+      "value": "将你的牌库顶牌置入扣置区"
+    }
+  ],
+  "card.trigger.common.decktop.reveal": [
+    {
+      "type": 0,
+      "value": "展示你的牌库顶牌"
+    }
+  ],
   "card.trigger.common.defend.add": [
     {
       "type": 0,
       "value": "将此牌作为防守牌加入当前 chain link"
+    }
+  ],
+  "card.trigger.common.defense.gain": [
+    {
+      "type": 0,
+      "value": "获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 防御"
     }
   ],
   "card.trigger.common.defensecounter.minus": [
@@ -12081,6 +12263,28 @@
     {
       "type": 0,
       "value": " 防御指示物"
+    }
+  ],
+  "card.trigger.common.defensecounter.remove.pay.optional": [
+    {
+      "type": 0,
+      "value": "支付 "
+    },
+    {
+      "type": 1,
+      "value": "cost"
+    },
+    {
+      "type": 0,
+      "value": " 点资源以移除一个 -"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 防御指示物？"
     }
   ],
   "card.trigger.common.defensereaction.cost": [
@@ -12109,6 +12313,24 @@
       "value": "获得压制 (dominate)"
     }
   ],
+  "card.trigger.common.dominate.nextattack.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁此牌；下一次攻击获得压制 (dominate)"
+    }
+  ],
+  "card.trigger.common.doom.remove.destroy": [
+    {
+      "type": 0,
+      "value": "移除一个 doom 指示物，或摧毁此牌"
+    }
+  ],
+  "card.trigger.common.doomsaying.resolve": [
+    {
+      "type": 0,
+      "value": "增加一个 doom 指示物，然后摧毁等同于 doom 指示物数量的灵气 (Aura)"
+    }
+  ],
   "card.trigger.common.dracofire.banish.resource": [
     {
       "type": 0,
@@ -12131,10 +12353,48 @@
       "value": " 点资源"
     }
   ],
+  "card.trigger.common.draconic.discount": [
+    {
+      "type": 0,
+      "value": "接下来 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张龙族 (Draconic) 牌获得费用减免"
+    }
+  ],
+  "card.trigger.common.draconic.only": [
+    {
+      "type": 0,
+      "value": "本回合你只能打出龙族 (Draconic) 牌"
+    }
+  ],
   "card.trigger.common.draw.handtop.destroy": [
     {
       "type": 0,
       "value": "摧毁此牌，抽一张牌，然后将一张手牌置于你的牌库顶部"
+    }
+  ],
+  "card.trigger.common.duskblade.counters.remove": [
+    {
+      "type": 0,
+      "value": "移除 Duskblade 上的指示物"
+    }
+  ],
+  "card.trigger.common.echocasque.draw": [
+    {
+      "type": 0,
+      "value": "支付费用并摧毁 Echo Casque，以抽一张牌"
+    }
+  ],
+  "card.trigger.common.elements.reveal.optional": [
+    {
+      "type": 0,
+      "value": "展示 Earth、Ice 和 Lightning 牌？"
     }
   ],
   "card.trigger.common.eloquence.destroy": [
@@ -12227,10 +12487,52 @@
       "value": "在一个暴露的装备区域生成 Frostbite"
     }
   ],
+  "card.trigger.common.frostcounter.remove.paydiscard": [
+    {
+      "type": 0,
+      "value": "移除一个 frost 指示物；对方英雄支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源或弃一张牌"
+    }
+  ],
+  "card.trigger.common.frosthex.damage": [
+    {
+      "type": 0,
+      "value": "Frost Hex 造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
   "card.trigger.common.goagain.gain": [
     {
       "type": 0,
       "value": "获得 go again"
+    }
+  ],
+  "card.trigger.common.goagain.gain.pay.optional": [
+    {
+      "type": 0,
+      "value": "支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源，使此行动获得 go again？"
     }
   ],
   "card.trigger.common.gold.create": [
@@ -12239,10 +12541,22 @@
       "value": "生成一个 Gold 衍生物"
     }
   ],
+  "card.trigger.common.gold.wager.optional": [
+    {
+      "type": 0,
+      "value": "以一个 Gold 进行 wager？"
+    }
+  ],
   "card.trigger.common.goldkissrum.create": [
     {
       "type": 0,
       "value": "生成一个 Goldkiss Rum 衍生物"
+    }
+  ],
+  "card.trigger.common.greatlibrary.intellect": [
+    {
+      "type": 0,
+      "value": "获得 +1 智力"
     }
   ],
   "card.trigger.common.guardian.attack.destroy": [
@@ -12301,6 +12615,18 @@
       "value": "摧毁此牌并强化下一次 Guardian 攻击"
     }
   ],
+  "card.trigger.common.haboob.maintain": [
+    {
+      "type": 0,
+      "value": "增加一个 storm 指示物；摧毁等量的 Ash，否则摧毁 Haboob"
+    }
+  ],
+  "card.trigger.common.hanabiblaster.steam": [
+    {
+      "type": 0,
+      "value": "在 Hanabi Blaster 上放置一个 steam 指示物"
+    }
+  ],
   "card.trigger.common.hand.arsenal.optional": [
     {
       "type": 0,
@@ -12319,6 +12645,12 @@
       "value": "放逐一张手牌，然后检查 hunger"
     }
   ],
+  "card.trigger.common.hand.soul.optional": [
+    {
+      "type": 0,
+      "value": "将一张手牌置入你的 soul？"
+    }
+  ],
   "card.trigger.common.heave": [
     {
       "type": 0,
@@ -12335,6 +12667,12 @@
       "value": "摧毁 Heavy Swing 并强化一把剑"
     }
   ],
+  "card.trigger.common.heroes.infect.decktop.banish": [
+    {
+      "type": 0,
+      "value": "感染双方英雄并放逐双方的牌库顶牌"
+    }
+  ],
   "card.trigger.common.heroes.life.gain": [
     {
       "type": 0,
@@ -12349,10 +12687,40 @@
       "value": " 点生命"
     }
   ],
+  "card.trigger.common.heroes.shuffle.arsenal": [
+    {
+      "type": 0,
+      "value": "双方英雄各自洗牌，并将牌库顶牌置入 arsenal"
+    }
+  ],
+  "card.trigger.common.illusionist.chain.abilities": [
+    {
+      "type": 0,
+      "value": "获得 combat chain 上 Illusionist 攻击牌的基础能力"
+    }
+  ],
+  "card.trigger.common.inertia.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Inertia；将你的手牌和 arsenal 置于牌库底部"
+    }
+  ],
   "card.trigger.common.intimidate": [
     {
       "type": 0,
       "value": "intimidate"
+    }
+  ],
+  "card.trigger.common.item.crank.steam.optional": [
+    {
+      "type": 0,
+      "value": "在一个具有 crank 的 item 上放置一个 steam 指示物？"
+    }
+  ],
+  "card.trigger.common.koikimono.faceup.optional": [
+    {
+      "type": 0,
+      "value": "将 Koi Blessed Kimono 翻至正面朝上？"
     }
   ],
   "card.trigger.common.korshem.check": [
@@ -12365,6 +12733,12 @@
     {
       "type": 0,
       "value": "结算离场效果"
+    }
+  ],
+  "card.trigger.common.leyline.destroy": [
+    {
+      "type": 0,
+      "value": "若你未操控 Seismic Surge，则摧毁 Ley Line"
     }
   ],
   "card.trigger.common.life.gain": [
@@ -12381,6 +12755,46 @@
       "value": " 点生命"
     }
   ],
+  "card.trigger.common.life.gain.behind": [
+    {
+      "type": 0,
+      "value": "若你的生命较低，则获得 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点生命"
+    }
+  ],
+  "card.trigger.common.life.lose": [
+    {
+      "type": 0,
+      "value": "失去 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点生命"
+    }
+  ],
+  "card.trigger.common.life.lose.auras": [
+    {
+      "type": 0,
+      "value": "因灵气 (Aura) 失去生命"
+    }
+  ],
+  "card.trigger.common.life.lose.frostbites": [
+    {
+      "type": 0,
+      "value": "因装备区域中的 Frostbite 失去生命"
+    }
+  ],
   "card.trigger.common.lightningembodiment.or.flow": [
     {
       "type": 0,
@@ -12391,6 +12805,18 @@
     {
       "type": 0,
       "value": "生成一个 Lightning Flow 衍生物"
+    }
+  ],
+  "card.trigger.common.loanshark.pay": [
+    {
+      "type": 0,
+      "value": "支付 Loan Shark 的费用"
+    }
+  ],
+  "card.trigger.common.loomingdoom.resolve": [
+    {
+      "type": 0,
+      "value": "移除一个 doom 指示物并造成 2 点奥术伤害，或摧毁 Looming Doom"
     }
   ],
   "card.trigger.common.loyalty.banish.draw": [
@@ -12427,6 +12853,48 @@
       "value": " 个 Might 衍生物"
     }
   ],
+  "card.trigger.common.might.create.destroy.optional": [
+    {
+      "type": 0,
+      "value": "摧毁此牌以生成 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个 Might 衍生物？"
+    }
+  ],
+  "card.trigger.common.might.create.pay": [
+    {
+      "type": 0,
+      "value": "支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源以生成一个 Might 衍生物"
+    }
+  ],
+  "card.trigger.common.might.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Might；下一次攻击获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
   "card.trigger.common.mistcloakgully.check": [
     {
       "type": 0,
@@ -12443,6 +12911,20 @@
       "value": "target"
     }
   ],
+  "card.trigger.common.nextattack.draconic": [
+    {
+      "type": 0,
+      "value": "下一次攻击成为龙族 (Draconic) 并获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
   "card.trigger.common.nextattack.power.destroy": [
     {
       "type": 0,
@@ -12457,6 +12939,28 @@
       "value": " 力量"
     }
   ],
+  "card.trigger.common.nofear.return": [
+    {
+      "type": 0,
+      "value": "归还被 No Fear 放逐的牌"
+    }
+  ],
+  "card.trigger.common.oath.counters.remove": [
+    {
+      "type": 0,
+      "value": "移除 Oath of Steel 上的指示物"
+    }
+  ],
+  "card.trigger.common.opt": [
+    {
+      "type": 0,
+      "value": "opt "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    }
+  ],
   "card.trigger.common.opt.draw.destroy": [
     {
       "type": 0,
@@ -12467,6 +12971,32 @@
     {
       "type": 0,
       "value": "获得 overpower"
+    }
+  ],
+  "card.trigger.common.ownerhand.return.optional": [
+    {
+      "type": 0,
+      "value": "将此牌返回其拥有者的手牌？"
+    }
+  ],
+  "card.trigger.common.ponder.destroy.draw": [
+    {
+      "type": 0,
+      "value": "摧毁 Ponder 并抽一张牌"
+    }
+  ],
+  "card.trigger.common.power.turn.gain": [
+    {
+      "type": 0,
+      "value": "本回合获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
     }
   ],
   "card.trigger.common.pyroglyphic.destroy": [
@@ -12493,6 +13023,12 @@
     {
       "type": 0,
       "value": " 点资源"
+    }
+  ],
+  "card.trigger.common.restbeforebattle.destroy.draw": [
+    {
+      "type": 0,
+      "value": "摧毁 Rest Before Battle 并抽一张牌"
     }
   ],
   "card.trigger.common.runebloodincantation": [
@@ -12559,10 +13095,56 @@
       "value": "摧毁此牌并生成 Seismic Surge"
     }
   ],
+  "card.trigger.common.seismicsurge.create.pay.tap.optional": [
+    {
+      "type": 0,
+      "value": "支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源并横置此牌，以生成一个 Seismic Surge？"
+    }
+  ],
+  "card.trigger.common.seismicsurge.destroy.discount": [
+    {
+      "type": 0,
+      "value": "摧毁 Seismic Surge；你的下一次 Guardian 攻击费用减少 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
+  "card.trigger.common.self.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁此牌"
+    }
+  ],
   "card.trigger.common.shiyana.copy": [
     {
       "type": 0,
       "value": "用 Shiyana 复制一个英雄"
+    }
+  ],
+  "card.trigger.common.showtime.destroy.draw": [
+    {
+      "type": 0,
+      "value": "摧毁 Show Time! 并抽一张牌"
+    }
+  ],
+  "card.trigger.common.sigilmuse.destroy.ponder": [
+    {
+      "type": 0,
+      "value": "摧毁 Sigil of the Muse 并生成一个 Ponder"
     }
   ],
   "card.trigger.common.sigilprotection.destroy": [
@@ -12631,10 +13213,60 @@
       "value": "combat chain 关闭时，将此牌置入你英雄的 soul"
     }
   ],
+  "card.trigger.common.soul.put": [
+    {
+      "type": 0,
+      "value": "将 "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 置入你的 soul"
+    }
+  ],
+  "card.trigger.common.spellboundcreepers.maintain": [
+    {
+      "type": 0,
+      "value": "维持 Spellbound Creepers"
+    }
+  ],
+  "card.trigger.common.steam.remove": [
+    {
+      "type": 0,
+      "value": "移除一个 steam 指示物"
+    }
+  ],
   "card.trigger.common.steam.remove.destroy": [
     {
       "type": 0,
       "value": "移除一个 steam 指示物，或摧毁此牌"
+    }
+  ],
+  "card.trigger.common.steam.remove.named.destroy": [
+    {
+      "type": 0,
+      "value": "移除一个 steam 指示物，或摧毁 "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    }
+  ],
+  "card.trigger.common.steam.remove.resource": [
+    {
+      "type": 0,
+      "value": "移除一个 steam 指示物并获得 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
     }
   ],
   "card.trigger.common.stonewall.destroy": [
@@ -12643,10 +13275,36 @@
       "value": "摧毁 Stonewall Confidence"
     }
   ],
+  "card.trigger.common.surfaceshaking.resolve": [
+    {
+      "type": 0,
+      "value": "摧毁 Surface Shaking"
+    }
+  ],
   "card.trigger.common.suspense.remove": [
     {
       "type": 0,
       "value": "移除一个 suspense 指示物"
+    }
+  ],
+  "card.trigger.common.talishar.destroy.rust": [
+    {
+      "type": 0,
+      "value": "Talishar 有 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个 rust 指示物时将其摧毁"
+    }
+  ],
+  "card.trigger.common.talismanbalance.resolve": [
+    {
+      "type": 0,
+      "value": "摧毁 Talisman of Balance，并将你的牌库顶牌置入 arsenal"
     }
   ],
   "card.trigger.common.thaw.banish.optional": [
@@ -12655,10 +13313,136 @@
       "value": "放逐 Thaw，以摧毁一张牌或将其解除冻结？"
     }
   ],
+  "card.trigger.common.token.create.herotap.destroy.optional": [
+    {
+      "type": 0,
+      "value": "横置你的英雄并摧毁此牌，以生成 "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": "？"
+    }
+  ],
+  "card.trigger.common.torcvim.discount": [
+    {
+      "type": 0,
+      "value": "摧毁 Torc of Vim 以获得费用减免"
+    }
+  ],
+  "card.trigger.common.tramplingtrackers.agility": [
+    {
+      "type": 0,
+      "value": "摧毁 Trampling Trackers 以生成 Agility"
+    }
+  ],
+  "card.trigger.common.traverse": [
+    {
+      "type": 0,
+      "value": "进行 traverse"
+    }
+  ],
+  "card.trigger.common.treasureisland.counter": [
+    {
+      "type": 0,
+      "value": "在 Treasure Island 上放置一个 gold 指示物"
+    }
+  ],
+  "card.trigger.common.valdabrightaxe.resolve": [
+    {
+      "type": 0,
+      "value": "本回合你的 crush 攻击获得压制 (dominate)"
+    }
+  ],
+  "card.trigger.common.valdaseismic.resolve": [
+    {
+      "type": 0,
+      "value": "本回合你的 crush 攻击获得压制 (dominate)"
+    }
+  ],
+  "card.trigger.common.valiantdynamo.recover": [
+    {
+      "type": 0,
+      "value": "复原 Valiant Dynamo"
+    }
+  ],
   "card.trigger.common.verse.runechant": [
     {
       "type": 0,
       "value": "移除一个 verse 指示物并生成一个 Runechant"
+    }
+  ],
+  "card.trigger.common.vigor.destroy.resource": [
+    {
+      "type": 0,
+      "value": "摧毁 Vigor 并获得 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
+  "card.trigger.common.visitdawnsmith.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Visit the Dawnsmith 并强化你的剑"
+    }
+  ],
+  "card.trigger.common.wager.attack.gain": [
+    {
+      "type": 0,
+      "value": "进行 wager 的攻击获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
+  "card.trigger.common.wager.attack.overpower.gain": [
+    {
+      "type": 0,
+      "value": "进行 wager 的攻击获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量和 overpower"
+    }
+  ],
+  "card.trigger.common.wager.attack.overpower.pay.optional": [
+    {
+      "type": 0,
+      "value": "支付 "
+    },
+    {
+      "type": 1,
+      "value": "cost"
+    },
+    {
+      "type": 0,
+      "value": " 点资源，使进行 wager 的攻击获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量和 overpower？"
     }
   ],
   "card.trigger.common.wager.defender": [
@@ -12673,6 +13457,18 @@
       "value": "与防守英雄进行 wager？"
     }
   ],
+  "card.trigger.common.wager.dominate": [
+    {
+      "type": 0,
+      "value": "若该攻击进行过 wager，则获得压制 (dominate)"
+    }
+  ],
+  "card.trigger.common.wager.mightvigor": [
+    {
+      "type": 0,
+      "value": "与防守英雄以 Might 和 Vigor 进行 wager"
+    }
+  ],
   "card.trigger.common.wagertokens.create.four": [
     {
       "type": 0,
@@ -12683,6 +13479,12 @@
     {
       "type": 0,
       "value": "生成 Agility、Might 和 Vigor 衍生物"
+    }
+  ],
+  "card.trigger.common.zenstate.maintain": [
+    {
+      "type": 0,
+      "value": "移除一个 balance 指示物，或摧毁 Zen State"
     }
   ],
   "card.trigger.energycounter.add": [
