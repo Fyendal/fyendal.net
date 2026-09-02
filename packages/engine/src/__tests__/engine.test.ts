@@ -1016,10 +1016,22 @@ describe("game setup & turn structure", () => {
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     s = r.state;
+    expect(s.log.find((entry) =>
+      entry.publicPayload?.message.id === "engine.log.combat.attacks"
+    )?.publicPayload?.message).toMatchObject({
+      values: {
+        hero: { kind: "card", cardId: "HERO_A" },
+        card: { kind: "card", cardId: "ATK4" },
+      },
+    });
     r = applyIntent(s, 1, { kind: "defend", instanceIds: [] });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     s = r.state;
+    expect(s.log.at(-1)?.publicPayload?.message).toMatchObject({
+      id: "engine.log.combat.no.defense",
+      values: { hero: { kind: "card", cardId: "HERO_B" } },
+    });
     r = applyIntent(s, 0, { kind: "pass" }); // attacker reaction pass
     expect(r.ok).toBe(true);
     if (!r.ok) return;
@@ -1230,6 +1242,14 @@ describe("game setup & turn structure", () => {
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     s = r.state;
+    expect(s.log.at(-1)?.publicPayload?.message).toMatchObject({
+      id: "engine.log.combat.defends",
+      values: {
+        hero: { kind: "card", cardId: "HERO_B" },
+        count: 1,
+        defense: 3,
+      },
+    });
     for (const seat of [0, 1] as const) {
       r = applyIntent(s, seat, { kind: "pass" });
       expect(r.ok).toBe(true);
@@ -2049,7 +2069,10 @@ describe("pitch & costs", () => {
     const source = player(s, 0).hand[0]!;
     source.cardId = "BLOCK3";
 
-    makeCtx(s, engineRuntime, 0, source).logPublic(`${cards.BLOCK3!.name} resolves`);
+    makeCtx(s, engineRuntime, 0, source).logPublic({
+      fallback: `${cards.BLOCK3!.name} resolves`,
+      message: { id: "card.test.resolves" },
+    });
 
     expect(s.log.at(-1)?.publicText).toBe("Blocker resolves⟦BLOCK3⟧");
   });

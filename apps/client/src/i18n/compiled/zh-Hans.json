@@ -13151,6 +13151,12 @@
       "value": " 点生命，使下一个 Runechant 的伤害无法被防止？"
     }
   ],
+  "card.trigger.common.runechants.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Runechant"
+    }
+  ],
   "card.trigger.common.sandcounter.add": [
     {
       "type": 0,
@@ -15019,6 +15025,44 @@
       "value": "选择 X"
     }
   ],
+  "engine.log.ability.fizzles.source.gone": [
+    {
+      "type": 0,
+      "value": "因来源已离场，启动能力结算时不产生效果"
+    }
+  ],
+  "engine.log.ally.life.restored": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 的生命恢复至 "
+    },
+    {
+      "type": 1,
+      "value": "life"
+    }
+  ],
+  "engine.log.arsenal.card.turned.face.up": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 在 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 的 arsenal 中翻至面朝上"
+    }
+  ],
   "engine.log.arsenal.facedown.private": [
     {
       "type": 1,
@@ -15063,6 +15107,787 @@
     {
       "type": 0,
       "value": " 的 arsenal"
+    }
+  ],
+  "engine.log.arsenal.faceup.annexed": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 接管 "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 面朝上的 arsenal，持续至其下回合结束"
+    }
+  ],
+  "engine.log.card.activated": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 激活 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "engine.log.card.added.as.defender": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 作为防守牌加入战斗链环"
+    }
+  ],
+  "engine.log.card.added.as.defender.from.arsenal": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 从 arsenal 加入防守"
+    }
+  ],
+  "engine.log.card.added.as.defender.from.hand": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 从手牌加入防守"
+    }
+  ],
+  "engine.log.card.banished": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 5,
+      "value": "origin",
+      "options": {
+        "deck": {
+          "value": [
+            {
+              "type": 0,
+              "value": "从牌库"
+            }
+          ]
+        },
+        "graveyard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "从墓地"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": "被放逐"
+    }
+  ],
+  "engine.log.card.banished.facedown.private": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 5,
+      "value": "origin",
+      "options": {
+        "deck": {
+          "value": [
+            {
+              "type": 0,
+              "value": "从牌库"
+            }
+          ]
+        },
+        "graveyard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "从墓地"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": "被面朝下放逐"
+    }
+  ],
+  "engine.log.card.banished.facedown.public": [
+    {
+      "type": 0,
+      "value": "一张牌"
+    },
+    {
+      "type": 5,
+      "value": "origin",
+      "options": {
+        "deck": {
+          "value": [
+            {
+              "type": 0,
+              "value": "从牌库"
+            }
+          ]
+        },
+        "graveyard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "从墓地"
+            }
+          ]
+        },
+        "other": {
+          "value": []
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": "被面朝下放逐"
+    }
+  ],
+  "engine.log.card.banished.from.under": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 从 "
+    },
+    {
+      "type": 1,
+      "value": "parent"
+    },
+    {
+      "type": 0,
+      "value": " 下方被放逐"
+    }
+  ],
+  "engine.log.card.becomes.color": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 变为"
+    },
+    {
+      "type": 1,
+      "value": "color"
+    }
+  ],
+  "engine.log.card.boosts": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " boost"
+    }
+  ],
+  "engine.log.card.ceases.to.exist": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 不复存在"
+    }
+  ],
+  "engine.log.card.ceases.to.exist.ephemeral": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 因 Ephemeral 不复存在"
+    }
+  ],
+  "engine.log.card.ceases.to.exist.incarnate": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 因 Incarnate 不复存在"
+    }
+  ],
+  "engine.log.card.charged": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 被 charge"
+    }
+  ],
+  "engine.log.card.control.gained": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 获得 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 的控制权"
+    }
+  ],
+  "engine.log.card.control.given": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 将 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 的控制权交给 "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    }
+  ],
+  "engine.log.card.control.stolen.action.phase": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 夺取 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 的控制权，持续至行动阶段结束"
+    }
+  ],
+  "engine.log.card.cranked": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 触发 crank：移除 1 个 steam 指示物"
+    }
+  ],
+  "engine.log.card.created.in.banish": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 在放逐区生成 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "engine.log.card.created.in.hand": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 在手牌中生成 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "engine.log.card.destroy.prevented.opposing.effect": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 不会被对手的效果摧毁"
+    }
+  ],
+  "engine.log.card.destroy.scheduled.end.phase": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 将在结束阶段开始时被摧毁"
+    }
+  ],
+  "engine.log.card.destroyed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 被摧毁"
+    }
+  ],
+  "engine.log.card.destroyed.from.under": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 从 "
+    },
+    {
+      "type": 1,
+      "value": "parent"
+    },
+    {
+      "type": 0,
+      "value": " 下方被摧毁"
+    }
+  ],
+  "engine.log.card.destroyed.phantasm": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 因 phantasm 被摧毁"
+    }
+  ],
+  "engine.log.card.discarded": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 弃掉 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "engine.log.card.discarded.random": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 随机弃掉 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "engine.log.card.enters.arena": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 进入 arena"
+    }
+  ],
+  "engine.log.card.enters.arena.instead.of.soul": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 进入 arena，而非其英雄的 soul"
+    }
+  ],
+  "engine.log.card.equip.failed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 无法装备"
+    }
+  ],
+  "engine.log.card.equip.failed.no.equipment.zone": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 无法装备（没有空闲装备区域）"
+    }
+  ],
+  "engine.log.card.equip.failed.no.weapon.zone": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 无法装备（没有空闲武器区域）"
+    }
+  ],
+  "engine.log.card.equipment.zone.changed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 从 "
+    },
+    {
+      "type": 1,
+      "value": "from"
+    },
+    {
+      "type": 0,
+      "value": " 区域移至 "
+    },
+    {
+      "type": 1,
+      "value": "to"
+    },
+    {
+      "type": 0,
+      "value": " 区域"
+    }
+  ],
+  "engine.log.card.equipped.from.banish": [
+    {
+      "type": 0,
+      "value": "从放逐区装备 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "engine.log.card.equipped.from.graveyard": [
+    {
+      "type": 0,
+      "value": "从墓地装备 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "engine.log.card.equipped.from.inventory": [
+    {
+      "type": 0,
+      "value": "从 inventory 装备 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "engine.log.card.equipped.from.opponent": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 从 "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " 处装备 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "engine.log.card.equipped.to.slot": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 被装备至 "
+    },
+    {
+      "type": 1,
+      "value": "slot"
+    },
+    {
+      "type": 0,
+      "value": " 区域"
+    }
+  ],
+  "engine.log.card.equipped.to.weapon.zone": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 被装备至武器区域"
+    }
+  ],
+  "engine.log.card.facedown.banished.returns.to.hand": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 面朝下放逐的牌返回其手牌"
+    }
+  ],
+  "engine.log.card.fragments": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " fragment（-"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 攻击力）"
+    }
+  ],
+  "engine.log.card.gains.additional.type": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 除其他类型外也具有 "
+    },
+    {
+      "type": 1,
+      "value": "type"
+    },
+    {
+      "type": 0,
+      "value": " 类型"
+    }
+  ],
+  "engine.log.card.gains.keyword": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 获得 "
+    },
+    {
+      "type": 1,
+      "value": "keyword"
+    }
+  ],
+  "engine.log.card.gains.minus.defense.counters": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 获得 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个 -1 防御指示物（"
+    },
+    {
+      "type": 1,
+      "value": "keyword"
+    },
+    {
+      "type": 0,
+      "value": "）"
+    }
+  ],
+  "engine.log.card.gains.name": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 获得名称 "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    }
+  ],
+  "engine.log.card.gains.power.counters": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 获得 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个 +1 攻击力指示物"
+    }
+  ],
+  "engine.log.card.gains.type": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 获得 "
+    },
+    {
+      "type": 1,
+      "value": "type"
+    },
+    {
+      "type": 0,
+      "value": " 类型"
+    }
+  ],
+  "engine.log.card.intimidated.returns.to.hand": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 被 intimidate 的牌返回其手牌"
+    }
+  ],
+  "engine.log.card.inventory.revealed.to.hand": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 从 inventory 展示并置入手牌"
+    }
+  ],
+  "engine.log.card.looked.at.private": [
+    {
+      "type": 0,
+      "value": "你查看 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "engine.log.card.may.attack.additional.time": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 本回合可额外攻击一次"
+    }
+  ],
+  "engine.log.card.negated": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 被无效化"
     }
   ],
   "engine.log.card.pitched": [
@@ -15133,6 +15958,200 @@
       "value": "card"
     }
   ],
+  "engine.log.card.power.counters.removed": [
+    {
+      "type": 0,
+      "value": "移除 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 上的 +1 攻击力指示物"
+    }
+  ],
+  "engine.log.card.put.at.deck.depth": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 被置于牌库顶向下第 "
+    },
+    {
+      "type": 1,
+      "value": "depth"
+    },
+    {
+      "type": 0,
+      "value": " 张"
+    }
+  ],
+  "engine.log.card.put.at.deck.depth.hidden": [
+    {
+      "type": 0,
+      "value": "一张牌被置于牌库顶向下第 "
+    },
+    {
+      "type": 1,
+      "value": "depth"
+    },
+    {
+      "type": 0,
+      "value": " 张"
+    }
+  ],
+  "engine.log.card.put.into.graveyard.from.deck": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 从牌库被置入墓地"
+    }
+  ],
+  "engine.log.card.put.into.soul": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 被置入 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 的 soul"
+    }
+  ],
+  "engine.log.card.put.on.deck.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 被置于牌库底部"
+    }
+  ],
+  "engine.log.card.put.on.deck.bottom.hidden": [
+    {
+      "type": 0,
+      "value": "一张牌被置于牌库底部"
+    }
+  ],
+  "engine.log.card.put.on.deck.position": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 被置于牌库"
+    },
+    {
+      "type": 5,
+      "value": "position",
+      "options": {
+        "top": {
+          "value": [
+            {
+              "type": 0,
+              "value": "顶部"
+            }
+          ]
+        },
+        "bottom": {
+          "value": [
+            {
+              "type": 0,
+              "value": "底部"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "指定位置"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "engine.log.card.put.on.deck.position.hidden": [
+    {
+      "type": 0,
+      "value": "一张牌被置于牌库"
+    },
+    {
+      "type": 5,
+      "value": "position",
+      "options": {
+        "top": {
+          "value": [
+            {
+              "type": 0,
+              "value": "顶部"
+            }
+          ]
+        },
+        "bottom": {
+          "value": [
+            {
+              "type": 0,
+              "value": "底部"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "指定位置"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "engine.log.card.put.on.owner.deck.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 被置于其拥有者牌库底部"
+    }
+  ],
+  "engine.log.card.put.under": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 被置于 "
+    },
+    {
+      "type": 1,
+      "value": "parent"
+    },
+    {
+      "type": 0,
+      "value": " 下方"
+    }
+  ],
   "engine.log.card.random.banished.face.down": [
     {
       "type": 1,
@@ -15143,10 +16162,788 @@
       "value": " 随机面朝下放逐一张牌"
     }
   ],
+  "engine.log.card.resolve.failed.cannot.defend": [
+    {
+      "type": 0,
+      "value": "因无法防守此次攻击，"
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 结算时不产生效果"
+    }
+  ],
+  "engine.log.card.resolve.failed.dominate": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 因压制 (dominate) 结算时不产生效果"
+    }
+  ],
+  "engine.log.card.returns.to.hero.control": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 返回 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 的控制"
+    }
+  ],
+  "engine.log.card.returns.to.hero.hand": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 返回 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 的手牌"
+    }
+  ],
+  "engine.log.card.returns.to.owner.hand": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 返回其拥有者手牌"
+    }
+  ],
+  "engine.log.card.tapped": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 横置"
+    }
+  ],
+  "engine.log.card.transcends.to.hand": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " transcend 后进入 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 的手牌"
+    }
+  ],
+  "engine.log.card.turned.face.up": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 将 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 翻至面朝上"
+    }
+  ],
+  "engine.log.card.turned.facedown.graveyard.watery.grave": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 在墓地中翻至面朝下（Watery Grave）"
+    }
+  ],
+  "engine.log.card.untapped": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 重置"
+    }
+  ],
+  "engine.log.cards.drawn": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 抽 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张牌"
+    }
+  ],
+  "engine.log.cards.revealed": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 展示 "
+    },
+    {
+      "type": 1,
+      "value": "cards"
+    }
+  ],
+  "engine.log.cards.transform.into": [
+    {
+      "type": 1,
+      "value": "cards"
+    },
+    {
+      "type": 0,
+      "value": " 转化为 "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    }
+  ],
+  "engine.log.clash.reveals": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 展示 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "（"
+    },
+    {
+      "type": 1,
+      "value": "power"
+    },
+    {
+      "type": 0,
+      "value": " 攻击力）"
+    }
+  ],
+  "engine.log.clash.tie": [
+    {
+      "type": 0,
+      "value": "clash 平局，无人获胜"
+    }
+  ],
+  "engine.log.clash.winner": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 赢得 clash"
+    }
+  ],
+  "engine.log.combat.attacker.replaced": [
+    {
+      "type": 1,
+      "value": "previous"
+    },
+    {
+      "type": 0,
+      "value": " 被置于其拥有者牌库底部，并由 "
+    },
+    {
+      "type": 1,
+      "value": "replacement"
+    },
+    {
+      "type": 0,
+      "value": " 替代为攻击牌"
+    }
+  ],
+  "engine.log.combat.attacks": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 使用 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 发起攻击（"
+    },
+    {
+      "type": 1,
+      "value": "attack"
+    },
+    {
+      "type": 0,
+      "value": " 攻击力）"
+    }
+  ],
+  "engine.log.combat.attacks.targeting": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 使用 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 发起攻击（"
+    },
+    {
+      "type": 1,
+      "value": "attack"
+    },
+    {
+      "type": 0,
+      "value": " 攻击力），目标为 "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    }
+  ],
   "engine.log.combat.chain.closed": [
     {
       "type": 0,
       "value": "战斗链关闭"
+    }
+  ],
+  "engine.log.combat.defends": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 使用 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张牌防守（"
+    },
+    {
+      "type": 1,
+      "value": "defense"
+    },
+    {
+      "type": 0,
+      "value": " 防御值）"
+    }
+  ],
+  "engine.log.combat.fully.defended": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 被完全防守"
+    }
+  ],
+  "engine.log.combat.go.again": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 具有 Go again（+1 行动点）"
+    }
+  ],
+  "engine.log.combat.hit.effects.suppressed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 的命中效果被阻止"
+    }
+  ],
+  "engine.log.combat.no.defense": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 不进行防守"
+    }
+  ],
+  "engine.log.combat.no.target.ally.gone": [
+    {
+      "type": 0,
+      "value": "因该 ally 已离场，"
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 未找到目标"
+    }
+  ],
+  "engine.log.combat.resolve.failed.left.chain": [
+    {
+      "type": 0,
+      "value": "因该攻击已离开战斗链，"
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 结算时不产生效果"
+    }
+  ],
+  "engine.log.combat.resolve.failed.source.left.arena": [
+    {
+      "type": 0,
+      "value": "因来源已离开 arena，"
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 结算时不产生效果"
+    }
+  ],
+  "engine.log.crowd.boos": [
+    {
+      "type": 0,
+      "value": "观众向 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 喝倒彩 (boo)"
+    }
+  ],
+  "engine.log.crowd.cheers": [
+    {
+      "type": 0,
+      "value": "观众为 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 欢呼 (cheer)"
+    }
+  ],
+  "engine.log.damage.ally.hit": [
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " 命中 "
+    },
+    {
+      "type": 1,
+      "value": "ally"
+    },
+    {
+      "type": 0,
+      "value": " 并造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害（剩余 "
+    },
+    {
+      "type": 1,
+      "value": "life"
+    },
+    {
+      "type": 0,
+      "value": " 点生命）"
+    }
+  ],
+  "engine.log.damage.ally.prevented": [
+    {
+      "type": 1,
+      "value": "ally"
+    },
+    {
+      "type": 0,
+      "value": " 防止 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
+    }
+  ],
+  "engine.log.damage.ally.takes": [
+    {
+      "type": 1,
+      "value": "ally"
+    },
+    {
+      "type": 0,
+      "value": " 受到 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害（剩余 "
+    },
+    {
+      "type": 1,
+      "value": "life"
+    },
+    {
+      "type": 0,
+      "value": " 点生命）"
+    }
+  ],
+  "engine.log.damage.ally.takes.arcane": [
+    {
+      "type": 1,
+      "value": "ally"
+    },
+    {
+      "type": 0,
+      "value": " 受到 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害（剩余 "
+    },
+    {
+      "type": 1,
+      "value": "life"
+    },
+    {
+      "type": 0,
+      "value": " 点生命）"
+    }
+  ],
+  "engine.log.damage.arcane.barrier.paid": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": "（Arcane Barrier）"
+    }
+  ],
+  "engine.log.damage.arcane.barrier.unpreventable": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 的 Arcane Barrier 无法防止此次伤害"
+    }
+  ],
+  "engine.log.damage.arcane.bonus": [
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " 造成 "
+    },
+    {
+      "type": 1,
+      "value": "base"
+    },
+    {
+      "type": 0,
+      "value": " + "
+    },
+    {
+      "type": 1,
+      "value": "bonus"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "engine.log.damage.arcane.would.deal": [
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " 将对 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "engine.log.damage.hero.prevented": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 防止 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
+    }
+  ],
+  "engine.log.damage.hero.prevented.arcane": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 防止 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "engine.log.damage.hero.prevented.arcane.barrier": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 防止 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害（Arcane Barrier）"
+    }
+  ],
+  "engine.log.damage.hero.prevented.lethal": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 防止 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点致命伤害"
+    }
+  ],
+  "engine.log.damage.hero.prevented.physical": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 防止 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点物理伤害"
+    }
+  ],
+  "engine.log.damage.hero.redirected": [
+    {
+      "type": 0,
+      "value": "原本对 "
+    },
+    {
+      "type": 1,
+      "value": "originalHero"
+    },
+    {
+      "type": 0,
+      "value": " 的伤害被转移至 "
+    },
+    {
+      "type": 1,
+      "value": "targetHero"
+    }
+  ],
+  "engine.log.damage.hero.takes": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 受到 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害（剩余 "
+    },
+    {
+      "type": 1,
+      "value": "life"
+    },
+    {
+      "type": 0,
+      "value": " 点生命）"
+    }
+  ],
+  "engine.log.damage.hero.takes.arcane": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 受到 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害（剩余 "
+    },
+    {
+      "type": 1,
+      "value": "life"
+    },
+    {
+      "type": 0,
+      "value": " 点生命）"
     }
   ],
   "engine.log.damage.hit": [
@@ -15183,6 +16980,88 @@
       "value": " 点生命）"
     }
   ],
+  "engine.log.damage.next.redirected": [
+    {
+      "type": 0,
+      "value": "下一次对 "
+    },
+    {
+      "type": 1,
+      "value": "from"
+    },
+    {
+      "type": 0,
+      "value": " 的伤害将被转移至 "
+    },
+    {
+      "type": 1,
+      "value": "to"
+    }
+  ],
+  "engine.log.damage.no.ally.target": [
+    {
+      "type": 0,
+      "value": "因该 ally 已离场，伤害未找到目标"
+    }
+  ],
+  "engine.log.damage.none.to.ally": [
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " 未对 "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 造成伤害"
+    }
+  ],
+  "engine.log.damage.prevention.reduced.physical": [
+    {
+      "type": 0,
+      "value": "该防止效果少防止 1 点物理伤害"
+    }
+  ],
+  "engine.log.damage.quell.paid": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 支付 "
+    },
+    {
+      "type": 1,
+      "value": "cost"
+    },
+    {
+      "type": 0,
+      "value": "，通过 Quell "
+    },
+    {
+      "type": 1,
+      "value": "quell"
+    },
+    {
+      "type": 0,
+      "value": " 防止 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
+    }
+  ],
   "engine.log.damage.redirected": [
     {
       "type": 1,
@@ -15217,6 +17096,230 @@
       "value": " 点生命）"
     }
   ],
+  "engine.log.damage.redirected.prevented": [
+    {
+      "type": 0,
+      "value": "原本对 "
+    },
+    {
+      "type": 1,
+      "value": "originalHero"
+    },
+    {
+      "type": 0,
+      "value": " 的伤害被转移至 "
+    },
+    {
+      "type": 1,
+      "value": "targetHero"
+    },
+    {
+      "type": 0,
+      "value": "，并防止其中 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点"
+    }
+  ],
+  "engine.log.damage.replaced.destroy.equipment": [
+    {
+      "type": 0,
+      "value": "摧毁 "
+    },
+    {
+      "type": 1,
+      "value": "equipment"
+    },
+    {
+      "type": 0,
+      "value": "，替代 "
+    },
+    {
+      "type": 1,
+      "value": "attack"
+    },
+    {
+      "type": 0,
+      "value": " 造成的伤害"
+    }
+  ],
+  "engine.log.damage.source.no.ally.target": [
+    {
+      "type": 0,
+      "value": "因该 ally 已离场，"
+    },
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " 未找到目标"
+    }
+  ],
+  "engine.log.damage.source.prevented": [
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " 造成的 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害被防止"
+    }
+  ],
+  "engine.log.damage.source.to.hero.prevented": [
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " 对 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 的伤害被防止（"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": "）"
+    }
+  ],
+  "engine.log.damage.spellvoid.prevented": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 通过 Spellvoid "
+    },
+    {
+      "type": 1,
+      "value": "spellvoid"
+    },
+    {
+      "type": 0,
+      "value": " 防止 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "engine.log.damage.spellvoid.unpreventable": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 摧毁 Spellvoid "
+    },
+    {
+      "type": 1,
+      "value": "spellvoid"
+    },
+    {
+      "type": 0,
+      "value": "，但无法防止此次伤害"
+    }
+  ],
+  "engine.log.damage.ward.prevented": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 通过 Ward "
+    },
+    {
+      "type": 1,
+      "value": "ward"
+    },
+    {
+      "type": 0,
+      "value": " 防止 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
+    }
+  ],
+  "engine.log.damage.ward.unpreventable": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 摧毁 Ward "
+    },
+    {
+      "type": 1,
+      "value": "ward"
+    },
+    {
+      "type": 0,
+      "value": "，但无法防止此次伤害"
+    }
+  ],
+  "engine.log.decision.duplicate.skipped": [
+    {
+      "type": 0,
+      "value": "跳过重复选择："
+    },
+    {
+      "type": 1,
+      "value": "prompt"
+    }
+  ],
+  "engine.log.decision.fizzles.no.options": [
+    {
+      "type": 0,
+      "value": "因没有可选项，该选择结算时不产生效果："
+    },
+    {
+      "type": 1,
+      "value": "prompt"
+    }
+  ],
+  "engine.log.deck.search.prohibited": [
+    {
+      "type": 0,
+      "value": "禁止搜索牌库"
+    }
+  ],
   "engine.log.die.rerolled": [
     {
       "type": 0,
@@ -15241,6 +17344,32 @@
       "value": "result"
     }
   ],
+  "engine.log.fragment.fizzles.attack.gone": [
+    {
+      "type": 0,
+      "value": "因攻击已离场，Fragment 结算时不产生效果"
+    }
+  ],
+  "engine.log.game.concedes": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 认输"
+    }
+  ],
+  "engine.log.game.player.loses": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 输掉对局"
+    }
+  ],
   "engine.log.game.winner": [
     {
       "type": 1,
@@ -15249,6 +17378,132 @@
     {
       "type": 0,
       "value": " 赢得对局！"
+    }
+  ],
+  "engine.log.hero.becomes": [
+    {
+      "type": 1,
+      "value": "previous"
+    },
+    {
+      "type": 0,
+      "value": " 变为 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    }
+  ],
+  "engine.log.hero.becomes.until.next.turn": [
+    {
+      "type": 1,
+      "value": "previous"
+    },
+    {
+      "type": 0,
+      "value": " 变为 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": "，持续至其下回合开始"
+    }
+  ],
+  "engine.log.hero.cards.lose.abilities.next.turn": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 的卡牌在其下回合失去所有能力"
+    }
+  ],
+  "engine.log.hero.loses.all.abilities": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 失去所有能力"
+    }
+  ],
+  "engine.log.hero.marked": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 被标记"
+    }
+  ],
+  "engine.log.hero.returns.to.original": [
+    {
+      "type": 1,
+      "value": "transformed"
+    },
+    {
+      "type": 0,
+      "value": " 恢复为 "
+    },
+    {
+      "type": 1,
+      "value": "original"
+    }
+  ],
+  "engine.log.hero.transforms.into": [
+    {
+      "type": 1,
+      "value": "previous"
+    },
+    {
+      "type": 0,
+      "value": " 转化为 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    }
+  ],
+  "engine.log.hero.unmarked": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 不再被标记"
+    }
+  ],
+  "engine.log.intimidate.random.card.banished": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 因 Intimidate 随机面朝下放逐一张牌"
+    }
+  ],
+  "engine.log.life.gain.prevented.ahead": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 的生命领先时无法恢复生命"
+    }
+  ],
+  "engine.log.phantasm.fizzles.condition.failed": [
+    {
+      "type": 0,
+      "value": "因条件不再满足，Phantasm 结算时不产生效果"
     }
   ],
   "engine.log.player.draws": [
@@ -15279,6 +17534,24 @@
       "value": " 获得 1 个行动点"
     }
   ],
+  "engine.log.player.gains.action.points": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 获得 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 个行动点"
+    }
+  ],
   "engine.log.player.gains.life": [
     {
       "type": 1,
@@ -15305,6 +17578,42 @@
       "value": " 点生命）"
     }
   ],
+  "engine.log.player.gains.resources": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 获得 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
+  "engine.log.player.loses.life": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 失去 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点生命"
+    }
+  ],
   "engine.log.player.shuffles.deck": [
     {
       "type": 1,
@@ -15313,6 +17622,248 @@
     {
       "type": 0,
       "value": " 洗切牌库"
+    }
+  ],
+  "engine.log.player.untaps.permanents": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 重置 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个永久物"
+    }
+  ],
+  "engine.log.prevention.next.arcane.damage": [
+    {
+      "type": 0,
+      "value": "本回合将防止 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 下一次受到的 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "engine.log.prevention.next.damage": [
+    {
+      "type": 0,
+      "value": "本回合将防止 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 下一次受到的 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
+    }
+  ],
+  "engine.log.prevention.next.damage.from.type": [
+    {
+      "type": 0,
+      "value": "本回合将防止 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 下一次受到来自 "
+    },
+    {
+      "type": 1,
+      "value": "type"
+    },
+    {
+      "type": 0,
+      "value": " 来源的 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
+    }
+  ],
+  "engine.log.prevention.next.event": [
+    {
+      "type": 0,
+      "value": "本回合 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 下一次将受到伤害时，防止其中至多 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点"
+    }
+  ],
+  "engine.log.prevention.next.event.at.most": [
+    {
+      "type": 0,
+      "value": "本回合 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 下一次受到总值不超过 "
+    },
+    {
+      "type": 1,
+      "value": "maximum"
+    },
+    {
+      "type": 0,
+      "value": " 的伤害时，防止其中至多 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点"
+    }
+  ],
+  "engine.log.prevention.next.events": [
+    {
+      "type": 0,
+      "value": "本回合 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 接下来 "
+    },
+    {
+      "type": 1,
+      "value": "events"
+    },
+    {
+      "type": 0,
+      "value": " 次受到伤害时，每次防止 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点"
+    }
+  ],
+  "engine.log.prevention.next.physical.event": [
+    {
+      "type": 0,
+      "value": "本回合 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 下一次受到物理伤害时，防止其中至多 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点"
+    }
+  ],
+  "engine.log.prevention.source.next.damage": [
+    {
+      "type": 0,
+      "value": "本回合将防止 "
+    },
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " 下一次对 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 造成的 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
+    }
+  ],
+  "engine.log.spectra.fizzles.source.gone": [
+    {
+      "type": 0,
+      "value": "因来源已离场，Spectra 结算时不产生效果"
+    }
+  ],
+  "engine.log.token.aura.creation.prohibited": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 本回合无法生成灵气 (Aura) token"
     }
   ],
   "engine.log.token.created": [
@@ -15327,6 +17878,16 @@
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "engine.log.trigger.attack.defended": [
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " 触发：受影响的攻击被至少 1 张牌防守时"
     }
   ],
   "engine.log.trigger.card": [
@@ -15365,6 +17926,68 @@
       "pluralType": "cardinal"
     }
   ],
+  "engine.log.trigger.declined.card": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 让过 "
+    },
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " 的触发"
+    }
+  ],
+  "engine.log.trigger.declined.facedown": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 让过一个面朝下卡牌的触发"
+    }
+  ],
+  "engine.log.trigger.declined.generic": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 让过该触发"
+    }
+  ],
+  "engine.log.trigger.defend.fizzles.chain.gone": [
+    {
+      "type": 0,
+      "value": "因战斗链环已离场，防守触发结算时不产生效果"
+    }
+  ],
+  "engine.log.trigger.delayed.lose.life": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 的延迟效果触发：失去 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点生命"
+    }
+  ],
   "engine.log.trigger.facedown": [
     {
       "type": 1,
@@ -15401,6 +18024,134 @@
       "pluralType": "cardinal"
     }
   ],
+  "engine.log.trigger.fizzles.source.gone": [
+    {
+      "type": 0,
+      "value": "因来源已离场，触发能力结算时不产生效果"
+    }
+  ],
+  "engine.log.trigger.fragment": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 触发 Fragment"
+    }
+  ],
+  "engine.log.trigger.gains.action.points": [
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " 触发：获得 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 个行动点"
+    }
+  ],
+  "engine.log.trigger.generic": [
+    {
+      "type": 0,
+      "value": "触发能力触发"
+    },
+    {
+      "type": 6,
+      "value": "occurrences",
+      "options": {
+        "one": {
+          "value": []
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": " ×"
+            },
+            {
+              "type": 7
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "engine.log.trigger.on.friendly.hit": [
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " 触发：On friendly hit"
+    }
+  ],
+  "engine.log.trigger.on.hit": [
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " 触发：On hit"
+    }
+  ],
+  "engine.log.trigger.on.hit.fizzles.chain.gone": [
+    {
+      "type": 0,
+      "value": "因战斗链环已离场，On hit 触发结算时不产生效果"
+    }
+  ],
+  "engine.log.trigger.phantasm": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 触发 Phantasm"
+    }
+  ],
+  "engine.log.trigger.spectra": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 触发 Spectra"
+    }
+  ],
+  "engine.log.trigger.watery.grave": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 触发 Watery Grave"
+    }
+  ],
+  "engine.log.turn.extra.granted": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 将获得一个额外回合"
+    }
+  ],
   "engine.log.turn.started": [
     {
       "type": 0,
@@ -15421,6 +18172,52 @@
     {
       "type": 0,
       "value": " 的回合 —"
+    }
+  ],
+  "engine.log.wager.created": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 与 "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " 进行 wager"
+    }
+  ],
+  "engine.log.wager.fizzles.chain.gone": [
+    {
+      "type": 0,
+      "value": "因战斗链环已离场，wager 结算时不产生效果"
+    }
+  ],
+  "engine.log.wager.fizzles.wager.gone": [
+    {
+      "type": 0,
+      "value": "因 wager 已不存在，wager 结算时不产生效果"
+    }
+  ],
+  "engine.log.wager.winner": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 赢得 wager"
+    }
+  ],
+  "engine.log.watery.grave.fizzles.source.left.graveyard": [
+    {
+      "type": 0,
+      "value": "因来源已离开墓地，Watery Grave 结算时不产生效果"
     }
   ],
   "footer.legal": [
@@ -19885,6 +22682,40 @@
     {
       "type": 0,
       "value": "正在加载…"
+    }
+  ],
+  "server.log.undo.last.action": [
+    {
+      "type": 0,
+      "value": "⤺ 已撤销上一个操作"
+    }
+  ],
+  "server.log.undo.turn.start": [
+    {
+      "type": 0,
+      "value": "⤺ 已返回第 "
+    },
+    {
+      "type": 1,
+      "value": "turn"
+    },
+    {
+      "type": 0,
+      "value": " 回合开始"
+    }
+  ],
+  "server.log.victory.claimed.idle": [
+    {
+      "type": 0,
+      "value": "🏳 "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 宣告胜利——对手处于闲置状态"
     }
   ],
   "settings.animations": [

@@ -248,6 +248,129 @@ describe("game log hero colors", () => {
     expect(html).not.toContain("Add an energy counter");
   });
 
+  it("localizes core combat, activation, crank, entry, and destruction logs", () => {
+    const fallbacks = [
+      "Puffin, Hightail attacks with Palantir Aeronought (6 attack)",
+      "Puffin, Hightail activates Puffin, Hightail",
+      "Copper Cog enters the arena",
+      "Copper Cog is cranked: remove a steam counter",
+      "Gold is destroyed",
+    ];
+    const html = renderSideRail(sideRailProps({
+      log: fallbacks,
+      logEntries: [
+        {
+          fallback: fallbacks[0]!,
+          sequence: 1,
+          message: {
+            id: "engine.log.combat.attacks",
+            values: {
+              hero: { kind: "card", cardId: "SEA001" },
+              card: { kind: "card", cardId: "SEA012" },
+              attack: 6,
+            },
+          },
+        },
+        {
+          fallback: fallbacks[1]!,
+          sequence: 2,
+          message: {
+            id: "engine.log.card.activated",
+            values: {
+              hero: { kind: "card", cardId: "SEA001" },
+              card: { kind: "card", cardId: "SEA001" },
+            },
+          },
+        },
+        {
+          fallback: fallbacks[2]!,
+          sequence: 3,
+          message: {
+            id: "engine.log.card.enters.arena",
+            values: { card: { kind: "card", cardId: "SEA021" } },
+          },
+        },
+        {
+          fallback: fallbacks[3]!,
+          sequence: 4,
+          message: {
+            id: "engine.log.card.cranked",
+            values: { card: { kind: "card", cardId: "SEA021" } },
+          },
+        },
+        {
+          fallback: fallbacks[4]!,
+          sequence: 5,
+          message: {
+            id: "engine.log.card.destroyed",
+            values: { card: { kind: "card", cardId: "SEA244" } },
+          },
+        },
+      ],
+    }), "zh-Hans");
+
+    expect(html).toContain("使用");
+    expect(html).toContain("发起攻击（6 攻击力）");
+    expect(html).toContain("激活");
+    expect(html).toContain("进入 arena");
+    expect(html).toContain("触发 crank：移除 1 个 steam 指示物");
+    expect(html).toContain("被摧毁");
+    expect(html).toContain('data-cardid="SEA001"');
+    expect(html).toContain('data-cardid="SEA012"');
+    expect(html).toContain('data-cardid="SEA021"');
+    expect(html).toContain('data-cardid="SEA244"');
+    for (const fallback of fallbacks) expect(html).not.toContain(fallback);
+  });
+
+  it("localizes deck-bottom and tap lifecycle logs", () => {
+    const fallbacks = [
+      "Cog in the Machine is put on the bottom of the deck",
+      "Golden Cog taps",
+    ];
+    const html = renderSideRail(sideRailProps({
+      log: fallbacks,
+      logEntries: [
+        {
+          fallback: fallbacks[0]!,
+          sequence: 1,
+          message: {
+            id: "engine.log.card.put.on.deck.bottom",
+            values: { card: { kind: "card", cardId: "SEA013" } },
+          },
+        },
+        {
+          fallback: fallbacks[1]!,
+          sequence: 2,
+          message: {
+            id: "engine.log.card.tapped",
+            values: { card: { kind: "card", cardId: "SEA042" } },
+          },
+        },
+      ],
+    }), "zh-Hans");
+
+    expect(html).toContain("被置于牌库底部");
+    expect(html).toContain("横置");
+    expect(html).toContain('data-cardid="SEA013"');
+    expect(html).toContain('data-cardid="SEA042"');
+    for (const fallback of fallbacks) expect(html).not.toContain(fallback);
+  });
+
+  it("localizes the server-generated undo marker", () => {
+    const fallback = "⤺ the last action was undone";
+    const html = renderSideRail(sideRailProps({
+      log: [fallback],
+      logEntries: [{
+        fallback,
+        sequence: 1,
+        message: { id: "server.log.undo.last.action" },
+      }],
+    }), "zh-Hans");
+
+    expect(html).toContain("⤺ 已撤销上一个操作");
+    expect(html).not.toContain(fallback);
+  });
+
   it("localizes face-down arsenal logs and keeps the hero inspectable", () => {
     const fallback = "Cindra, Dracai of Retribution puts a card face down into arsenal";
     const html = renderSideRail(sideRailProps({

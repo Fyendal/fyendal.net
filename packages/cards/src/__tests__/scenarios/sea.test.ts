@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { projectStateFor } from "@fyendal/engine";
+import { legalIntents, projectStateFor } from "@fyendal/engine";
 import { functionalKeyOf } from "../../functional.js";
 import { cardData, isImplemented } from "../../index.js";
 import { printingId, scenario } from "../harness.js";
@@ -162,9 +162,20 @@ describe("SEA — High Seas heroes and cogs", () => {
     g.play("copper cog|3", { settle: false })
       .passPriority()
       .passPriority();
+    const copperCogId = printingId("copper cog|3");
+    expect(g.state.log.find((entry) =>
+      entry.publicPayload?.message.id === "engine.log.card.enters.arena"
+    )?.publicPayload?.message).toMatchObject({
+      values: { card: { kind: "card", cardId: copperCogId } },
+    });
     expect(g.state.pendingDecision?.defaultOption).toBe("yes");
+    g.chooseOption("yes");
+    expect(g.state.log.find((entry) =>
+      entry.publicPayload?.message.id === "engine.log.card.cranked"
+    )?.publicPayload?.message).toMatchObject({
+      values: { card: { kind: "card", cardId: copperCogId } },
+    });
     g
-      .chooseOption("yes")
       .play("copper cog|3", { settle: false })
       .passPriority()
       .passPriority();
@@ -229,6 +240,20 @@ describe("SEA — High Seas heroes and cogs", () => {
     expect(countOnBoard(g, 0, "golden cog|0")).toBe(2);
     expect(g.state.players[0]!.board.filter((card) => card.tapped).length).toBe(1);
     expect(g.state.players[0]!.actionPoints).toBe(2);
+    expect(g.state.log.some((entry) =>
+      entry.publicPayload?.message.id === "engine.log.card.tapped" &&
+      entry.publicPayload.message.values?.card &&
+      typeof entry.publicPayload.message.values.card === "object" &&
+      "cardId" in entry.publicPayload.message.values.card &&
+      entry.publicPayload.message.values.card.cardId === printingId("golden cog|0")
+    )).toBe(true);
+    expect(g.state.log.some((entry) =>
+      entry.publicPayload?.message.id === "engine.log.card.put.on.deck.bottom" &&
+      entry.publicPayload.message.values?.card &&
+      typeof entry.publicPayload.message.values.card === "object" &&
+      "cardId" in entry.publicPayload.message.values.card &&
+      entry.publicPayload.message.values.card.cardId === printingId("cog in the machine|1")
+    )).toBe(true);
     expect(g.state.log.some(
       (entry) => entry.publicText?.includes("skipped duplicate choice"),
     )).toBe(false);
@@ -257,6 +282,41 @@ describe("SEA — High Seas heroes and cogs", () => {
       .settle()
       .expectFinalDefense(4)
       .expectLife(1, 17);
+  });
+
+  it("Palantir Aeronought requires an equipment defender when one is able", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["palantir aeronought|1", "raging onslaught|3"],
+        },
+        {
+          hero: "dorinthea",
+          hand: ["raging onslaught|1"],
+          equipment: {
+            head: "ironrot helm|0",
+            chest: null,
+            arms: null,
+            legs: null,
+          },
+        },
+      ],
+    });
+
+    g.play("palantir aeronought|1", { pitch: ["raging onslaught|3"] });
+    const defender = g.state.pendingDecision!.player;
+    const equipmentId = g.state.players[defender]!.equipment.head!.instanceId;
+    const beforeStaging = legalIntents(g.state, defender);
+    expect(beforeStaging.some((intent) => intent.kind === "defend")).toBe(false);
+    expect(beforeStaging).toContainEqual({
+      kind: "stage-defenders",
+      instanceIds: [equipmentId],
+    });
+
+    g.blockWith("ironrot helm|0");
+    expect(g.state.chain.at(-1)?.defendingEquipment.map((card) => card.instanceId))
+      .toEqual([equipmentId]);
   });
 
   it("Marlynn may put an arrow drawn by Gold face-up into arsenal", () => {

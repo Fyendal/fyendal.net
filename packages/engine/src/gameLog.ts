@@ -155,6 +155,53 @@ export function logTermValue(id: string): { kind: "term"; id: string } {
   return { kind: "term", id };
 }
 
+/** Shared lifecycle messages keep core engine flows semantic without making
+ * every caller repeat catalog ids and typed card references. */
+export function cardDestroyedLogMessage(
+  state: GameStateInternal,
+  cardId: string,
+): GameLogPayload {
+  return gameLogMessage(
+    `${nameOf(state, cardId)} is destroyed`,
+    "engine.log.card.destroyed",
+    { card: logCardValue(cardId) },
+  );
+}
+
+export function cardEntersArenaLogMessage(
+  state: GameStateInternal,
+  cardId: string,
+): GameLogPayload {
+  return gameLogMessage(
+    `${nameOf(state, cardId)} enters the arena`,
+    "engine.log.card.enters.arena",
+    { card: logCardValue(cardId) },
+  );
+}
+
+export function cardPutOnDeckBottomLogMessage(
+  state: GameStateInternal,
+  cardId: string,
+): GameLogPayload {
+  return gameLogMessage(
+    `${nameOf(state, cardId)} is put on the bottom of the deck`,
+    "engine.log.card.put.on.deck.bottom",
+    { card: logCardValue(cardId) },
+  );
+}
+
+export function cardTappedLogMessage(
+  state: GameStateInternal,
+  cardId: string,
+  tapped: boolean,
+): GameLogPayload {
+  return gameLogMessage(
+    `${nameOf(state, cardId)} ${tapped ? "taps" : "untaps"}`,
+    tapped ? "engine.log.card.tapped" : "engine.log.card.untapped",
+    { card: logCardValue(cardId) },
+  );
+}
+
 /** Compose a card source and its already-semantic trigger label without
  * duplicating every trigger translation in the log catalog. */
 export function triggerLogMessage(

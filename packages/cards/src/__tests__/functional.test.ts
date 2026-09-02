@@ -74,7 +74,14 @@ describe("localized card logs", () => {
 
 describe("script expansion", () => {
   it("maps two printings with the same functional identity to the same script object", () => {
-    const script: CardScript = { onPlay(ctx) { ctx.logPublic("romp"); } };
+    const script: CardScript = {
+      onPlay(ctx) {
+        ctx.logPublic({
+          fallback: "romp",
+          message: { id: "card.test.romp" },
+        });
+      },
+    };
     const fakeRegistry: Record<string, CardScript> = { "wrecker romp|3": script };
     const printings = [
       fakeCard("RNR023", "Wrecker Romp", 3),

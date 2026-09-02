@@ -5,7 +5,13 @@ import {
   scriptOf,
 } from "./cardProperties.js";
 import { activeModifiers } from "./combatModifiers.js";
-import { logPublic, nameOf } from "./gameLog.js";
+import {
+  gameLogMessage,
+  logCardValue,
+  logPublic,
+  logTermValue,
+  nameOf,
+} from "./gameLog.js";
 import type { CardInstance, ChainLinkState, Modifier, PlayerState, StackLayer } from "./state.js";
 import { tokenCreationCauseForModifier } from "./tokenQueries.js";
 import { createTokensFor } from "./tokens.js";
@@ -39,7 +45,11 @@ function resolveGrantedOnHitEffect(
   if (mod.onHitGainResources) {
     if (live) live.consumed = true;
     attacker.resources += Number(mod.onHitGainResources);
-    logPublic(state, `${nameOf(state, attacker.heroCardId)} gains ${mod.onHitGainResources} resource`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, attacker.heroCardId)} gains ${mod.onHitGainResources} resource`,
+      "engine.log.player.gains.resources",
+      { hero: logCardValue(attacker.heroCardId), amount: mod.onHitGainResources },
+    ));
   }
   if (mod.onHitDraw) {
     drawCards(state, runtime, attacker, Number(mod.onHitDraw));
@@ -86,7 +96,11 @@ function resolveGrantedOnHitEffect(
     const hero = (state.players[opponent(link.attacker)] as PlayerState).hero;
     if ((hero.counters?.marked ?? 0) <= 0) {
       (hero.counters ??= {}).marked = 1;
-      logPublic(state, `${nameOf(state, hero.cardId)} is marked`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, hero.cardId)} is marked`,
+        "engine.log.hero.marked",
+        { hero: logCardValue(hero.cardId) },
+      ));
     }
   }
   if (mod.onHitClearHandAndArsenalAtEndPhase && link.targetAllyId === undefined) {
@@ -110,10 +124,11 @@ function resolveGrantedOnHitEffect(
   ) {
     runtime.makeCtx(state, link.attacker, link.attackingCard, link)
       .grantAdditionalActivation(link.attackingCard.instanceId);
-    logPublic(
-      state,
+    logPublic(state, gameLogMessage(
       `${nameOf(state, link.attackingCard.cardId)} may attack an additional time this turn`,
-    );
+      "engine.log.card.may.attack.additional.time",
+      { card: logCardValue(link.attackingCard.cardId) },
+    ));
   }
 }
 
@@ -253,7 +268,11 @@ export function queueHitTriggers(state: GameStateInternal,
         optional: false,
         engineEffect: { kind: "on-hit-hook", source: snapshotSerializable(source) },
       });
-      logPublic(state, `${nameOf(state, source.cardId)} triggers: On hit`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, source.cardId)} triggers: On hit`,
+        "engine.log.trigger.on.hit",
+        { source: logCardValue(source.cardId) },
+      ));
       continue;
     }
     const { modifier } = effect;
@@ -268,7 +287,15 @@ export function queueHitTriggers(state: GameStateInternal,
       optional: false,
       engineEffect: { kind: "on-hit-modifier", modifier: snapshotSerializable(modifier) },
     });
-    logPublic(state, `${source ? nameOf(state, source.cardId) : "A delayed effect"} triggers: On hit`);
+    logPublic(state, gameLogMessage(
+      `${source ? nameOf(state, source.cardId) : "A delayed effect"} triggers: On hit`,
+      "engine.log.trigger.on.hit",
+      {
+        source: source
+          ? logCardValue(source.cardId)
+          : logTermValue("engine.term.delayed.effect"),
+      },
+    ));
   }
 
   if (layers.length === 0) return false;
@@ -298,7 +325,10 @@ export function resolveOnHitLayer(state: GameStateInternal,
   runtime: EngineRuntime, layer: StackLayer): void {
   const link = currentLink(state);
   if (!link) {
-    logPublic(state, "An on-hit trigger resolves without effect (the chain link is gone)");
+    logPublic(state, gameLogMessage(
+      "An on-hit trigger resolves without effect (the chain link is gone)",
+      "engine.log.trigger.on.hit.fizzles.chain.gone",
+    ));
     return;
   }
   const effect = layer.engineEffect;

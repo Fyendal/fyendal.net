@@ -18,6 +18,7 @@ import {
   logNameOf,
   logPlayerValue,
   logPublic,
+  logTermValue,
   nameOf,
   triggerLogMessage,
 } from "./gameLog.js";
@@ -737,7 +738,11 @@ export function announceCardPlayed(
         optional: false,
         engineEffect: { kind: "lose-life", amount: 1 },
       });
-      logPublic(state, `${nameOf(state, player.heroCardId)}'s delayed effect triggers: lose 1 life`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, player.heroCardId)}'s delayed effect triggers: lose 1 life`,
+        "engine.log.trigger.delayed.lose.life",
+        { hero: logCardValue(player.heroCardId), amount: 1 },
+      ));
     }
     runtime.events.fireOnFriendlyPlay(state, seat, card, origin);
     return {
@@ -755,7 +760,10 @@ function runTriggerEffect(state: GameStateInternal,
   const definitionSource = layer.triggerSource ?? found?.card;
   const contextSource = found?.card ?? definitionSource;
   if (!definitionSource || !contextSource) {
-    logPublic(state, "A triggered ability fizzles (its source is gone)");
+    logPublic(state, gameLogMessage(
+      "A triggered ability fizzles (its source is gone)",
+      "engine.log.trigger.fizzles.source.gone",
+    ));
     return;
   }
   const script: CardScript | undefined = scriptOf(
@@ -795,7 +803,10 @@ export function resolveAbilityLayer(state: GameStateInternal,
   runtime: EngineRuntime, layer: StackLayer): boolean {
   const found = findCardAnywhere(state, layer.sourceInstanceId);
   if (!found) {
-    logPublic(state, "An activated ability fizzles (its source is gone)");
+    logPublic(state, gameLogMessage(
+      "An activated ability fizzles (its source is gone)",
+      "engine.log.ability.fizzles.source.gone",
+    ));
     return false;
   }
   const ability = effectiveAbilityList(state, layer.seat, found.card)[layer.abilityIndex ?? 0];
@@ -862,10 +873,15 @@ function advanceStack(state: GameStateInternal, runtime: EngineRuntime): void {
   if (layer.engineEffect?.kind === "gain-action-points") {
     if (layer.seat === state.activePlayer) {
       (state.players[layer.seat] as PlayerState).actionPoints += layer.engineEffect.amount;
-      logPublic(
-        state,
-        `${nameOf(state, (state.players[layer.seat] as PlayerState).heroCardId)} gains ${layer.engineEffect.amount} action point(s)`,
-      );
+      const player = state.players[layer.seat] as PlayerState;
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, player.heroCardId)} gains ${layer.engineEffect.amount} action point(s)`,
+        "engine.log.player.gains.action.points",
+        {
+          hero: logCardValue(player.heroCardId),
+          amount: layer.engineEffect.amount,
+        },
+      ));
     }
     state.stack.shift();
     continueStack(state, runtime, layer.seat);
@@ -875,7 +891,11 @@ function advanceStack(state: GameStateInternal, runtime: EngineRuntime): void {
     const player = state.players[layer.seat] as PlayerState;
     player.life = Math.max(0, player.life - layer.engineEffect.amount);
     player.flags.lostLifeThisTurn = true;
-    logPublic(state, `${nameOf(state, player.heroCardId)} loses ${layer.engineEffect.amount} life`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, player.heroCardId)} loses ${layer.engineEffect.amount} life`,
+      "engine.log.player.loses.life",
+      { hero: logCardValue(player.heroCardId), amount: layer.engineEffect.amount },
+    ));
     state.stack.shift();
     continueStack(state, runtime, layer.seat);
     return;
@@ -937,9 +957,16 @@ function advanceStack(state: GameStateInternal, runtime: EngineRuntime): void {
     if (card && !card.faceDown) {
       const name = nameOf(state, card.cardId);
       card.faceDown = true;
-      logPublic(state, `${name} is turned face down in its graveyard (Watery Grave)`);
+      logPublic(state, gameLogMessage(
+        `${name} is turned face down in its graveyard (Watery Grave)`,
+        "engine.log.card.turned.facedown.graveyard.watery.grave",
+        { card: logCardValue(card.cardId) },
+      ));
     } else {
-      logPublic(state, "Watery Grave resolves without effect (its source left the graveyard)");
+      logPublic(state, gameLogMessage(
+        "Watery Grave resolves without effect (its source left the graveyard)",
+        "engine.log.watery.grave.fizzles.source.left.graveyard",
+      ));
     }
     continueStack(state, runtime, layer.seat);
     return;
@@ -1059,7 +1086,11 @@ export function resolveTopStackCard(state: GameStateInternal, runtime: EngineRun
   const isDefReact = dataOf(state, card.cardId).cardType === "defense-reaction";
   if (layer.meldStage !== 1 && link && isDefReact) {
     if (layer.fromHand && attackHasDominate(state, link) && link.flags.defendedFromHand === true) {
-      logPublic(state, `${nameOf(state, card.cardId)} fails to resolve (Dominate)`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, card.cardId)} fails to resolve (Dominate)`,
+        "engine.log.card.resolve.failed.dominate",
+        { card: logCardValue(card.cardId) },
+      ));
       finishStackCardResolution(state, runtime, seat, false);
       return;
     }
@@ -1067,12 +1098,20 @@ export function resolveTopStackCard(state: GameStateInternal, runtime: EngineRun
     // less base {p}") also gates a defense reaction resolving into a defender
     const canDefend = scriptOf(state, card.cardId, card)?.canDefend;
     if (canDefend && !canDefend(runtime.makeCtx(state, seat, card, link))) {
-      logPublic(state, `${nameOf(state, card.cardId)} fails to resolve (it cannot defend this attack)`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, card.cardId)} fails to resolve (it cannot defend this attack)`,
+        "engine.log.card.resolve.failed.cannot.defend",
+        { card: logCardValue(card.cardId) },
+      ));
       finishStackCardResolution(state, runtime, seat, false);
       return;
     }
     if (!runtime.dispatchFlow("attackAllowsDefender", state, link, card, layer.fromHand === true)) {
-      logPublic(state, `${nameOf(state, card.cardId)} fails to resolve (it cannot defend this attack)`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, card.cardId)} fails to resolve (it cannot defend this attack)`,
+        "engine.log.card.resolve.failed.cannot.defend",
+        { card: logCardValue(card.cardId) },
+      ));
       finishStackCardResolution(state, runtime, seat, false);
       return;
     }
@@ -1273,7 +1312,18 @@ export function answerTriggerChoice(
       : source
         ? nameOf(state, source.cardId)
         : "the trigger";
-    logPublic(state, `${nameOf(state, hero.heroCardId)} declines ${secretName}`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, hero.heroCardId)} declines ${secretName}`,
+      source?.faceDown
+        ? "engine.log.trigger.declined.facedown"
+        : source
+          ? "engine.log.trigger.declined.card"
+          : "engine.log.trigger.declined.generic",
+      {
+        hero: logCardValue(hero.heroCardId),
+        ...(source && !source.faceDown ? { source: logCardValue(source.cardId) } : {}),
+      },
+    ));
     consumeTopTriggerOccurrence(state, layer);
   }
   continueStack(state, runtime, layer.seat);
@@ -1675,7 +1725,11 @@ export function collectEventTriggerLayers(
           hook: delayed.hook,
         },
       });
-      logPublic(state, `${nameOf(state, delayed.source.cardId)} triggers: ${delayed.label}`);
+      logPublic(state, triggerLogMessage(
+        `${nameOf(state, delayed.source.cardId)} triggers: ${delayed.label}`,
+        delayed.source.cardId,
+        delayed.labelMessage ?? { id: "engine.term.delayed.effect" },
+      ));
     }
     const seatOrder = [subject, opponent(subject)];
     groups.sort((a, b) => seatOrder.indexOf(a.seat) - seatOrder.indexOf(b.seat));
@@ -1720,9 +1774,11 @@ function collectCardPlayedTriggerLayers(
       ...(trigger.defaultOption ? { defaultOption: trigger.defaultOption } : {}),
     });
     const fallback = `${nameOf(state, card.cardId)} triggers: ${trigger.label}`;
-    logPublic(state, trigger.labelMessage
-      ? triggerLogMessage(fallback, card.cardId, trigger.labelMessage)
-      : fallback);
+    logPublic(state, triggerLogMessage(
+      fallback,
+      card.cardId,
+      trigger.labelMessage ?? { id: "engine.term.triggered.ability" },
+    ));
   });
   return layers;
 }

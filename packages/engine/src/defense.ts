@@ -20,7 +20,14 @@ import {
   currentPowerOf,
   noteAttackDefendedBy,
 } from "./combatValues.js";
-import { logPublic, nameOf } from "./gameLog.js";
+import {
+  gameLogMessage,
+  logCardValue,
+  logPublic,
+  logTermValue,
+  nameOf,
+  triggerLogMessage,
+} from "./gameLog.js";
 
 import { rngInt } from "./rng.js";
 import type { CardInstance, ChainLinkState, PlayerState, StackLayer } from "./state.js";
@@ -110,7 +117,11 @@ export function resolveIntimidate(
     card.faceDown = true;
     card.intimidated = true;
     defender.banish.push(card);
-    logPublic(state, `${nameOf(state, defender.heroCardId)} banishes a random card face down (Intimidate)`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, defender.heroCardId)} banishes a random card face down (Intimidate)`,
+      "engine.log.intimidate.random.card.banished",
+      { hero: logCardValue(defender.heroCardId) },
+    ));
   }
 }
 
@@ -301,7 +312,10 @@ export function resolveSpectraLayer(
   if (target) {
     destroyPermanent(state, runtime, defender.seat, target);
   } else {
-    logPublic(state, "Spectra resolves without effect (its source is gone)");
+    logPublic(state, gameLogMessage(
+      "Spectra resolves without effect (its source is gone)",
+      "engine.log.spectra.fizzles.source.gone",
+    ));
   }
   link.resolved = true;
   link.damage = 0;
@@ -326,7 +340,10 @@ export function resolvePhantasmLayer(
 ): boolean {
   const link = currentLink(state);
   if (!link || link.attackingCard.instanceId !== sourceInstanceId || !phantasmDefender(state, runtime, link)) {
-    logPublic(state, "Phantasm resolves without effect (its condition is no longer met)");
+    logPublic(state, gameLogMessage(
+      "Phantasm resolves without effect (its condition is no longer met)",
+      "engine.log.phantasm.fizzles.condition.failed",
+    ));
     return false;
   }
   phantasmDestroy(state, runtime, link);
@@ -335,7 +352,11 @@ export function resolvePhantasmLayer(
 
 /** Build Phantasm's mandatory state-triggered layer. */
 function phantasmLayer(state: GameStateInternal, link: ChainLinkState): StackLayer {
-  logPublic(state, `${nameOf(state, link.attackingCard.cardId)} triggers Phantasm`);
+  logPublic(state, gameLogMessage(
+    `${nameOf(state, link.attackingCard.cardId)} triggers Phantasm`,
+    "engine.log.trigger.phantasm",
+    { card: logCardValue(link.attackingCard.cardId) },
+  ));
   return {
     sourceInstanceId: link.attackingCard.instanceId,
     seat: link.attacker,
@@ -385,7 +406,11 @@ function collectDefendEventLayers(
       optional: false,
       engineEffect: { kind: "on-defend-hook", source: snapshotSerializable(card) },
     });
-    logPublic(state, `${nameOf(state, card.cardId)} triggers: When this defends`);
+    logPublic(state, triggerLogMessage(
+      `${nameOf(state, card.cardId)} triggers: When this defends`,
+      card.cardId,
+      { id: "engine.term.when.this.defends" },
+    ));
   }
 
   if (defenders.length > 0) {
@@ -404,11 +429,16 @@ function collectDefendEventLayers(
         },
       });
       const source = findCardAnywhere(state, modifier.sourceInstanceId)?.card;
-      logPublic(
-        state,
+      logPublic(state, gameLogMessage(
         `${source ? nameOf(state, source.cardId) : "A delayed effect"} triggers: ` +
           "When the affected attack is defended by 1 or more cards",
-      );
+        "engine.log.trigger.attack.defended",
+        {
+          source: source
+            ? logCardValue(source.cardId)
+            : logTermValue("engine.term.delayed.effect"),
+        },
+      ));
     }
   }
 
@@ -445,7 +475,11 @@ function collectDefendEventLayers(
         defendedFromHand,
       },
     });
-    logPublic(state, `${nameOf(state, source.cardId)} triggers: ${label}`);
+    logPublic(state, triggerLogMessage(
+      `${nameOf(state, source.cardId)} triggers: ${label}`,
+      source.cardId,
+      trigger?.labelMessage ?? { id: "engine.term.attack.defended" },
+    ));
   }
 
   for (const { fragmentTriggered } of defenders) {
@@ -458,7 +492,11 @@ function collectDefendEventLayers(
       optional: false,
       engineEffect: { kind: "fragment", source: snapshotSerializable(link.attackingCard) },
     });
-    logPublic(state, `${nameOf(state, link.attackingCard.cardId)} triggers Fragment`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, link.attackingCard.cardId)} triggers Fragment`,
+      "engine.log.trigger.fragment",
+      { card: logCardValue(link.attackingCard.cardId) },
+    ));
   }
 
   if (
@@ -494,7 +532,11 @@ export function queueDefendEventLayersAfterCurrent(
  *  close-of-chain keywords exactly as at normal link resolution. */
 function phantasmDestroy(state: GameStateInternal,
   runtime: EngineRuntime, link: ChainLinkState): void {
-  logPublic(state, `${nameOf(state, link.attackingCard.cardId)} is destroyed (Phantasm)`);
+  logPublic(state, gameLogMessage(
+    `${nameOf(state, link.attackingCard.cardId)} is destroyed (Phantasm)`,
+    "engine.log.card.destroyed.phantasm",
+    { card: logCardValue(link.attackingCard.cardId) },
+  ));
   runtime.events.fireFriendlyAttackLost(state, link.attacker, link.attackingCard, "phantasm");
   link.resolved = true; // let closeChain run
   link.damage = 0;
@@ -612,12 +654,22 @@ export function assignDefenders(
     return "defend-trigger costs are paid when their stack layers resolve";
   }
   if (instanceIds.length > 0) {
-    logPublic(
-      state,
-      `${nameOf(state, player.heroCardId)} defends with ${instanceIds.length} card(s) (${computeDefense(state, runtime, link)} defense)`,
-    );
+    const defense = computeDefense(state, runtime, link);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, player.heroCardId)} defends with ${instanceIds.length} card(s) (${defense} defense)`,
+      "engine.log.combat.defends",
+      {
+        hero: logCardValue(player.heroCardId),
+        count: instanceIds.length,
+        defense,
+      },
+    ));
   } else {
-    logPublic(state, `${nameOf(state, player.heroCardId)} takes the attack (no defense)`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, player.heroCardId)} takes the attack (no defense)`,
+      "engine.log.combat.no.defense",
+      { hero: logCardValue(player.heroCardId) },
+    ));
   }
   if (
     link.defendingCards.some((card) => {
@@ -642,7 +694,10 @@ export function resolveDefendEventLayer(state: GameStateInternal,
   runtime: EngineRuntime, layer: StackLayer): void {
   const link = currentLink(state);
   if (!link) {
-    logPublic(state, "A defend trigger resolves without effect (the chain link is gone)");
+    logPublic(state, gameLogMessage(
+      "A defend trigger resolves without effect (the chain link is gone)",
+      "engine.log.trigger.defend.fizzles.chain.gone",
+    ));
     return;
   }
   const effect = layer.engineEffect;
@@ -679,13 +734,20 @@ export function resolveDefendEventLayer(state: GameStateInternal,
   }
   if (effect?.kind === "fragment") {
     if (link.attackingCard.instanceId !== layer.sourceInstanceId) {
-      logPublic(state, "Fragment resolves without effect (the attack is gone)");
+      logPublic(state, gameLogMessage(
+        "Fragment resolves without effect (the attack is gone)",
+        "engine.log.fragment.fizzles.attack.gone",
+      ));
       return;
     }
     link.attackingCard.tempPower = (link.attackingCard.tempPower ?? 0) - 2;
     link.flags.fragmentCount = Number(link.flags.fragmentCount ?? 0) + 1;
     (state.players[link.attacker] as PlayerState).flags.fragmentedThisTurn = true;
-    logPublic(state, `${nameOf(state, link.attackingCard.cardId)} fragments (-2 power)`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, link.attackingCard.cardId)} fragments (-2 power)`,
+      "engine.log.card.fragments",
+      { card: logCardValue(link.attackingCard.cardId), amount: 2 },
+    ));
     const source = findCardAnywhere(state, layer.sourceInstanceId)?.card ?? effect.source;
     if (scriptOf(state, source.cardId, source)?.onFragment) {
       state.stack.splice(state.stack[0] === layer ? 1 : 0, 0, {
@@ -696,7 +758,11 @@ export function resolveDefendEventLayer(state: GameStateInternal,
         optional: false,
         engineEffect: { kind: "on-fragment-hook", source: snapshotSerializable(source) },
       });
-      logPublic(state, `${nameOf(state, source.cardId)} triggers: Whenever this fragments`);
+      logPublic(state, triggerLogMessage(
+        `${nameOf(state, source.cardId)} triggers: Whenever this fragments`,
+        source.cardId,
+        { id: "engine.term.whenever.this.fragments" },
+      ));
     }
   }
 }

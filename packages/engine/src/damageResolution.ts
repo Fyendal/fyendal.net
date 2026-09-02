@@ -3,7 +3,14 @@ import { cardAbilitiesSuppressed, cardColorOf, cardTypesOf, dataOf, instanceData
 
 import { controlledPermanents, hookSources, lingeringModifierSources } from "./sourceQueries.js";
 
-import { gameLogMessage, logPlayerValue, logPublic, nameOf } from "./gameLog.js";
+import {
+  cardDestroyedLogMessage,
+  gameLogMessage,
+  logCardValue,
+  logPlayerValue,
+  logPublic,
+  nameOf,
+} from "./gameLog.js";
 import type { GameStateInternal } from "./runtimeState.js";
 
 import type { CardInstance, Modifier, PendingArcane, PlayerState, StackLayer } from "./state.js";
@@ -128,7 +135,11 @@ function applyPreventionShields(
   const sourceWide = sourceWidePrevention(state, source, opts?.preventable !== false);
   let remaining = sourceWide ? 0 : amount;
   if (sourceWide && source) {
-    logPublic(state, `${nameOf(state, source.cardId)}'s ${amount} damage is prevented`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, source.cardId)}'s ${amount} damage is prevented`,
+      "engine.log.damage.source.prevented",
+      { source: logCardValue(source.cardId), amount },
+    ));
   }
   const eventAmount = amount;
   const preventable = opts?.preventable !== false;
@@ -145,10 +156,15 @@ function applyPreventionShields(
     );
     applyTrackedPreventionRewards(state, runtime, target, contributors);
     if (sh.amount <= 0) delete source.damagePrevented;
-    logPublic(
-      state,
+    logPublic(state, gameLogMessage(
       `${nameOf(state, source.cardId)}'s damage to ${nameOf(state, target.heroCardId)} is prevented (${prevented})`,
-    );
+      "engine.log.damage.source.to.hero.prevented",
+      {
+        source: logCardValue(source.cardId),
+        hero: logCardValue(target.heroCardId),
+        amount: prevented,
+      },
+    ));
   }
   for (const preventionSource of controlledPermanents(state, target.seat, {
     faceDownEquipment: false,
@@ -177,10 +193,11 @@ function applyPreventionShields(
         (preventionSource.counters ??= {}).fixedPreventionUsedTurn = state.turn;
       }
       remaining -= prevented;
-      logPublic(
-        state,
+      logPublic(state, gameLogMessage(
         `${nameOf(state, target.heroCardId)} prevents ${prevented} damage`,
-      );
+        "engine.log.damage.hero.prevented",
+        { hero: logCardValue(target.heroCardId), amount: prevented },
+      ));
     }
   }
   if (preventable && remaining > 0) remaining = applyPitchSourcePrevention(state, target, remaining, source);
@@ -199,7 +216,11 @@ function applyPreventionShields(
       repeating.preventDamageEventsRemaining =
         Number(repeating.preventDamageEventsRemaining) - 1;
       if (Number(repeating.preventDamageEventsRemaining) <= 0) repeating.consumed = true;
-      logPublic(state, `${nameOf(state, target.heroCardId)} prevents ${prevented} damage`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, target.heroCardId)} prevents ${prevented} damage`,
+        "engine.log.damage.hero.prevented",
+        { hero: logCardValue(target.heroCardId), amount: prevented },
+      ));
     }
   }
   if (preventable && remaining > 0) {
@@ -227,10 +248,11 @@ function applyPreventionShields(
       modifier.consumed = true;
       if (prevented > 0) {
         applyTrackedPreventionRewards(state, runtime, target, [modifier]);
-        logPublic(
-          state,
+        logPublic(state, gameLogMessage(
           `${nameOf(state, target.heroCardId)} prevents ${prevented} damage`,
-        );
+          "engine.log.damage.hero.prevented",
+          { hero: logCardValue(target.heroCardId), amount: prevented },
+        ));
         if (modifier.reflectPreventedDamageToSeat !== undefined) {
           const reflectionSource = modifier.sourceInstanceId === undefined
             ? undefined
@@ -254,10 +276,11 @@ function applyPreventionShields(
     const prevented = Math.min(arcaneShield, remaining);
     remaining -= prevented;
     target.flags.preventNextArcaneDamage = arcaneShield - prevented;
-    logPublic(
-      state,
+    logPublic(state, gameLogMessage(
       `${nameOf(state, target.heroCardId)} prevents ${prevented} arcane damage`,
-    );
+      "engine.log.damage.hero.prevented.arcane",
+      { hero: logCardValue(target.heroCardId), amount: prevented },
+    ));
   }
   const physicalShield = preventable && opts?.arcane !== true
     ? Number(target.flags.preventNextPhysicalDamage) || 0
@@ -268,10 +291,11 @@ function applyPreventionShields(
     // Fixed prevention modifies one matching event; unlike shielding
     // prevention, an unused remainder does not carry to another source.
     target.flags.preventNextPhysicalDamage = 0;
-    logPublic(
-      state,
+    logPublic(state, gameLogMessage(
       `${nameOf(state, target.heroCardId)} prevents ${prevented} physical damage`,
-    );
+      "engine.log.damage.hero.prevented.physical",
+      { hero: logCardValue(target.heroCardId), amount: prevented },
+    ));
   }
   const shield = preventable
     ? Number(target.flags.preventNextDamage) || 0
@@ -282,7 +306,11 @@ function applyPreventionShields(
     target.flags.preventNextDamage = shield - prevented;
     const contributors = consumeTrackedPrevention(state, target.seat, prevented);
     applyTrackedPreventionRewards(state, runtime, target, contributors);
-    logPublic(state, `${nameOf(state, target.heroCardId)} prevents ${prevented} damage`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, target.heroCardId)} prevents ${prevented} damage`,
+      "engine.log.damage.hero.prevented",
+      { hero: logCardValue(target.heroCardId), amount: prevented },
+    ));
   }
   if (
     opts?.arcane !== true && remaining < amount &&
@@ -290,7 +318,10 @@ function applyPreventionShields(
   ) {
     remaining = Math.min(amount, remaining + 1);
     target.flags.nextPhysicalPreventionReduction = 0;
-    logPublic(state, "the prevention effect prevents 1 less physical damage");
+    logPublic(state, gameLogMessage(
+      "the prevention effect prevents 1 less physical damage",
+      "engine.log.damage.prevention.reduced.physical",
+    ));
   }
   finishSourceWidePrevention(state, runtime, source, sourceWide, amount - remaining);
   return remaining;
@@ -315,7 +346,11 @@ function applyPitchSourcePrevention(
   );
   if (!modifier) return amount;
   modifier.consumed = true;
-  logPublic(state, `${nameOf(state, target.heroCardId)} prevents ${amount} damage`);
+  logPublic(state, gameLogMessage(
+    `${nameOf(state, target.heroCardId)} prevents ${amount} damage`,
+    "engine.log.damage.hero.prevented",
+    { hero: logCardValue(target.heroCardId), amount },
+  ));
   return 0;
 }
 
@@ -444,7 +479,7 @@ function destroySourceAfterEffectDamage(
   if (!link) return;
   link.flags.attackGone = true;
   moveToGraveyard(state, runtime, link.attackingCard, "chain", packet.sourceSeat);
-  logPublic(state, `${nameOf(state, link.attackingCard.cardId)} is destroyed`);
+  logPublic(state, cardDestroyedLogMessage(state, link.attackingCard.cardId));
   runtime.events.runHook(state, link.attacker, link.attackingCard, "onDestroyed", link);
   runtime.events.fireFriendlyDestroyed(state, link.attacker, link.attackingCard, packet.sourceSeat);
 }
@@ -473,7 +508,11 @@ function queueEffectHitTriggers(
         targetSeat: packet.targetSeat,
       },
     });
-    logPublic(state, `${nameOf(state, hitSource.cardId)} triggers: On hit`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, hitSource.cardId)} triggers: On hit`,
+      "engine.log.trigger.on.hit",
+      { source: logCardValue(hitSource.cardId) },
+    ));
   }
   const active = hookSources(state, packet.sourceSeat, {
     board: true,
@@ -510,7 +549,11 @@ function queueEffectHitTriggers(
         targetWasMarked,
       },
     });
-    logPublic(state, `${nameOf(state, source.cardId)} triggers: On friendly hit`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, source.cardId)} triggers: On friendly hit`,
+      "engine.log.trigger.on.friendly.hit",
+      { source: logCardValue(source.cardId) },
+    ));
   }
   if (layers.length === 0) return;
   const top = state.stack[0];
@@ -538,10 +581,15 @@ function applyEffectDamage(state: GameStateInternal,
       target.flags.physicalDamageTakenThisTurn = true;
     }
   }
-  logPublic(
-    state,
+  logPublic(state, gameLogMessage(
     `${nameOf(state, target.heroCardId)} takes ${packet.amount} ${packet.arcane ? "arcane " : ""}damage (${target.life} life left)`,
-  );
+    packet.arcane ? "engine.log.damage.hero.takes.arcane" : "engine.log.damage.hero.takes",
+    {
+      hero: logCardValue(target.heroCardId),
+      amount: packet.amount,
+      life: target.life,
+    },
+  ));
   if (packet.amount > 0 && packet.countsAsHit) {
     // A hit by any object during a chain link makes the active chain link
     // count as having hit. It does not make the active attack itself hit, so
@@ -1130,7 +1178,11 @@ export function dealAllyDamage(state: GameStateInternal,
     !(dataOf(state, ally.cardId).subtypes ?? []).includes("ally") ||
     ally.life === undefined
   ) {
-    logPublic(state, `${src ? nameOf(state, src.card.cardId) : "The source"} finds no target (the ally is gone)`);
+    logPublic(state, gameLogMessage(
+      `${src ? nameOf(state, src.card.cardId) : "The source"} finds no target (the ally is gone)`,
+      src ? "engine.log.damage.source.no.ally.target" : "engine.log.damage.no.ally.target",
+      src ? { source: logCardValue(src.card.cardId) } : undefined,
+    ));
     return 0;
   }
   applyBoundArcaneCardBonus(state, packet);
@@ -1140,7 +1192,11 @@ export function dealAllyDamage(state: GameStateInternal,
   if (sourceWide && src) {
     const prevented = packet.amount;
     packet.amount = 0;
-    logPublic(state, `${nameOf(state, src.card.cardId)}'s ${prevented} damage is prevented`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, src.card.cardId)}'s ${prevented} damage is prevented`,
+      "engine.log.damage.source.prevented",
+      { source: logCardValue(src.card.cardId), amount: prevented },
+    ));
     finishSourceWidePrevention(state, runtime, src.card, sourceWide, prevented);
   }
   if (packet.amount <= 0) return 0;
@@ -1162,7 +1218,11 @@ export function dealAllyDamage(state: GameStateInternal,
       const prevented = Math.min(Number(shield.preventNextDamageAmount), packet.amount);
       packet.amount -= prevented;
       shield.consumed = true;
-      logPublic(state, `${nameOf(state, ally.cardId)} prevents ${prevented} damage`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, ally.cardId)} prevents ${prevented} damage`,
+        "engine.log.damage.ally.prevented",
+        { ally: logCardValue(ally.cardId), amount: prevented },
+      ));
     }
   }
   const replacement = scriptOf(state, ally.cardId, ally)?.replaceDamageToSelf?.(
@@ -1174,12 +1234,26 @@ export function dealAllyDamage(state: GameStateInternal,
   packet.amount = dealt;
   ally.life -= dealt;
   if (!packet.combat) noteEffectDamageDealer(state, packet, src, false);
-  logPublic(
-    state,
-    packet.combat && src
-      ? `${nameOf(state, src.card.cardId)} hits ${nameOf(state, ally.cardId)} for ${dealt} (${Math.max(0, ally.life)} life left)`
-      : `${nameOf(state, ally.cardId)} takes ${dealt} ${packet.arcane ? "arcane " : ""}damage (${Math.max(0, ally.life)} life left)`,
-  );
+  logPublic(state, packet.combat && src
+    ? gameLogMessage(
+        `${nameOf(state, src.card.cardId)} hits ${nameOf(state, ally.cardId)} for ${dealt} (${Math.max(0, ally.life)} life left)`,
+        "engine.log.damage.ally.hit",
+        {
+          source: logCardValue(src.card.cardId),
+          ally: logCardValue(ally.cardId),
+          amount: dealt,
+          life: Math.max(0, ally.life),
+        },
+      )
+    : gameLogMessage(
+        `${nameOf(state, ally.cardId)} takes ${dealt} ${packet.arcane ? "arcane " : ""}damage (${Math.max(0, ally.life)} life left)`,
+        packet.arcane ? "engine.log.damage.ally.takes.arcane" : "engine.log.damage.ally.takes",
+        {
+          ally: logCardValue(ally.cardId),
+          amount: dealt,
+          life: Math.max(0, ally.life),
+        },
+      ));
   if (dealt > 0) {
     scriptOf(state, ally.cardId, ally)?.onDealtDamage?.(
       runtime.makeCtx(state, found.seat, ally, currentLink(state)),
@@ -1272,7 +1346,11 @@ function applyBoundArcaneCardBonus(state: GameStateInternal, packet: PendingArca
   const base = packet.amount;
   packet.amount += bonus;
   (source.counters ??= {}).arcaneBonus = 0;
-  logPublic(state, `${nameOf(state, source.cardId)} deals ${base} + ${bonus} arcane damage`);
+  logPublic(state, gameLogMessage(
+    `${nameOf(state, source.cardId)} deals ${base} + ${bonus} arcane damage`,
+    "engine.log.damage.arcane.bonus",
+    { source: logCardValue(source.cardId), base, bonus },
+  ));
 }
 
 /** Amp replaces the next positive arcane-damage event its controller would
@@ -1311,10 +1389,17 @@ function applyHeroDamageRedirect(
   const prevented = Math.min(Math.max(0, replacement.redirectDamagePrevent ?? 0), packet.amount);
   packet.amount -= prevented;
   replacement.consumed = true;
-  logPublic(
-    state,
-    `${nameOf(state, (state.players[original] as PlayerState).heroCardId)}'s damage is redirected to ${nameOf(state, (state.players[packet.targetSeat] as PlayerState).heroCardId)}${prevented > 0 ? ` and ${prevented} is prevented` : ""}`,
-  );
+  const originalHero = (state.players[original] as PlayerState).heroCardId;
+  const targetHero = (state.players[packet.targetSeat] as PlayerState).heroCardId;
+  logPublic(state, gameLogMessage(
+    `${nameOf(state, originalHero)}'s damage is redirected to ${nameOf(state, targetHero)}${prevented > 0 ? ` and ${prevented} is prevented` : ""}`,
+    prevented > 0 ? "engine.log.damage.redirected.prevented" : "engine.log.damage.hero.redirected",
+    {
+      originalHero: logCardValue(originalHero),
+      targetHero: logCardValue(targetHero),
+      ...(prevented > 0 ? { amount: prevented } : {}),
+    },
+  ));
 }
 
 /**
@@ -1427,10 +1512,15 @@ export function beginHeroDamage(state: GameStateInternal,
   if (!packet.combat && packet.arcane && packet.amount > 0) {
     const source = findCardAnywhere(state, packet.sourceInstanceId);
     if (source) {
-      logPublic(
-        state,
+      logPublic(state, gameLogMessage(
         `${nameOf(state, source.card.cardId)} would deal ${packet.amount} arcane damage to ${nameOf(state, target.heroCardId)}`,
-      );
+        "engine.log.damage.arcane.would.deal",
+        {
+          source: logCardValue(source.card.cardId),
+          amount: packet.amount,
+          hero: logCardValue(target.heroCardId),
+        },
+      ));
     }
   }
   if (packet.arcane && packet.amount > 0) {
@@ -1456,7 +1546,11 @@ export function beginHeroDamage(state: GameStateInternal,
       const prevented = packet.unpreventable ? 0 : Math.min(fixed, packet.amount);
       packet.amount -= prevented;
       if (prevented > 0) {
-        logPublic(state, `${nameOf(state, target.heroCardId)} prevents ${prevented} arcane damage`);
+        logPublic(state, gameLogMessage(
+          `${nameOf(state, target.heroCardId)} prevents ${prevented} arcane damage`,
+          "engine.log.damage.hero.prevented.arcane",
+          { hero: logCardValue(target.heroCardId), amount: prevented },
+        ));
       }
       let observed = prevented;
       for (const source of permanentSources) {
@@ -1499,16 +1593,20 @@ function finishArcanePacket(state: GameStateInternal,
   const prevented = arc.unpreventable ? 0 : Math.min(paid, arc.amount);
   if (prevented > 0) {
     arc.amount -= prevented;
-    logPublic(
-      state,
-      `${nameOf(state, (state.players[arc.targetSeat] as PlayerState).heroCardId)} prevents ${prevented} arcane damage (Arcane Barrier)`,
-    );
+    const heroCardId = (state.players[arc.targetSeat] as PlayerState).heroCardId;
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, heroCardId)} prevents ${prevented} arcane damage (Arcane Barrier)`,
+      "engine.log.damage.hero.prevented.arcane.barrier",
+      { hero: logCardValue(heroCardId), amount: prevented },
+    ));
   }
   if (paid > 0 && arc.unpreventable) {
-    logPublic(
-      state,
-      `${nameOf(state, (state.players[arc.targetSeat] as PlayerState).heroCardId)}'s Arcane Barrier can't prevent this damage`,
-    );
+    const heroCardId = (state.players[arc.targetSeat] as PlayerState).heroCardId;
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, heroCardId)}'s Arcane Barrier can't prevent this damage`,
+      "engine.log.damage.arcane.barrier.unpreventable",
+      { hero: logCardValue(heroCardId) },
+    ));
   }
   if (arc.amount > 0 && openWardDecision(state, runtime, arc)) return;
   continueArcaneDamage(state, runtime, arc, true);
@@ -1550,10 +1648,14 @@ export function answerArcaneBarrier(
       delete arc.combatDamageEquipmentReplacementIds;
       destroyPermanent(state, runtime, live.owner, live);
       link.flags[`equipmentGone:${equipmentId}`] = true;
-      logPublic(
-        state,
+      logPublic(state, gameLogMessage(
         `${nameOf(state, link.attackingCard.cardId)}'s damage is replaced by destroying ${nameOf(state, defending.cardId)}`,
-      );
+        "engine.log.damage.replaced.destroy.equipment",
+        {
+          attack: logCardValue(link.attackingCard.cardId),
+          equipment: logCardValue(defending.cardId),
+        },
+      ));
       arc.amount = 0;
       runtime.dispatchFlow("resumeCombatDamage", state, arc);
       return undefined;
@@ -1586,7 +1688,11 @@ export function answerArcaneBarrier(
       }
       const prevented = arc.unpreventable ? 0 : arc.amount;
       arc.amount -= prevented;
-      logPublic(state, `${nameOf(state, player.heroCardId)} prevents ${prevented} lethal damage`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, player.heroCardId)} prevents ${prevented} lethal damage`,
+        "engine.log.damage.hero.prevented.lethal",
+        { hero: logCardValue(player.heroCardId), amount: prevented },
+      ));
     }
     finishHeroDamage(state, runtime, arc);
     return undefined;
@@ -1608,10 +1714,18 @@ export function answerArcaneBarrier(
     const prevented = Math.min(piece.amount, arc.amount);
     arc.amount -= prevented;
     (arc.usedDiscardDamagePreventionModifierIds ??= []).push(piece.modifierId);
-    logPublic(state, `${nameOf(state, player.heroCardId)} prevents ${prevented} damage`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, player.heroCardId)} prevents ${prevented} damage`,
+      "engine.log.damage.hero.prevented",
+      { hero: logCardValue(player.heroCardId), amount: prevented },
+    ));
     if (piece.draw > 0) {
       drawCards(state, runtime, player, piece.draw);
-      logPublic(state, `${nameOf(state, player.heroCardId)} draws ${piece.draw} card(s)`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, player.heroCardId)} draws ${piece.draw} card(s)`,
+        "engine.log.cards.drawn",
+        { player: logPlayerValue(player.seat), count: piece.draw },
+      ));
     }
     state.pendingDecision = null;
     continueAfterDiscardDamagePrevention(state, runtime, arc, true);
@@ -1636,7 +1750,11 @@ export function answerArcaneBarrier(
     arc.amount -= prevented;
     (arc.usedSoulDamagePreventionSourceIds ??= []).push(source.instanceId);
     delete arc.soulDamagePreventionSourceInstanceId;
-    logPublic(state, `${nameOf(state, player.heroCardId)} prevents ${prevented} damage`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, player.heroCardId)} prevents ${prevented} damage`,
+      "engine.log.damage.hero.prevented",
+      { hero: logCardValue(player.heroCardId), amount: prevented },
+    ));
     if (player.soul.length === 0) {
       const live = findPermanent(state, source.instanceId)?.card;
       if (live) destroyPermanent(state, runtime, seat, live);
@@ -1663,10 +1781,11 @@ export function answerArcaneBarrier(
     else runtime.makeCtx(state, seat, source).banish(source.instanceId);
     const prevented = Math.min(piece.amount, arc.amount);
     arc.amount -= prevented;
-    logPublic(
-      state,
+    logPublic(state, gameLogMessage(
       `${nameOf(state, player.heroCardId)} prevents ${prevented} damage`,
-    );
+      "engine.log.damage.hero.prevented",
+      { hero: logCardValue(player.heroCardId), amount: prevented },
+    ));
     continueAfterOptionalDamagePrevention(state, runtime, arc, true);
     return undefined;
   }
@@ -1709,7 +1828,16 @@ export function answerArcaneBarrier(
     }
     delete arc.payTotal;
     delete arc.quellSourceInstanceId;
-    logPublic(state, `${nameOf(state, player.heroCardId)} pays ${piece.cost} to prevent ${prevented} damage (Quell ${piece.amount})`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, player.heroCardId)} pays ${piece.cost} to prevent ${prevented} damage (Quell ${piece.amount})`,
+      "engine.log.damage.quell.paid",
+      {
+        hero: logCardValue(player.heroCardId),
+        cost: piece.cost,
+        amount: prevented,
+        quell: piece.amount,
+      },
+    ));
     continueAfterPaidQuell(state, runtime, arc);
     return undefined;
   }
@@ -1751,7 +1879,16 @@ export function answerArcaneBarrier(
     }
     delete arc.payTotal;
     delete arc.quellSourceInstanceId;
-    logPublic(state, `${nameOf(state, player.heroCardId)} pays ${total} to prevent ${prevented} damage (Quell ${piece.amount})`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, player.heroCardId)} pays ${total} to prevent ${prevented} damage (Quell ${piece.amount})`,
+      "engine.log.damage.quell.paid",
+      {
+        hero: logCardValue(player.heroCardId),
+        cost: total,
+        amount: prevented,
+        quell: piece.amount,
+      },
+    ));
     continueAfterPaidQuell(state, runtime, arc);
     return undefined;
   }
@@ -1770,9 +1907,17 @@ export function answerArcaneBarrier(
     destroyPermanent(state, runtime, seat, source);
     const prevented = arc.unpreventable ? 0 : Math.min(piece.n, arc.amount);
     arc.amount -= prevented;
-    logPublic(state, arc.unpreventable
-      ? `${nameOf(state, player.heroCardId)} destroys Ward ${piece.n}, but the damage can't be prevented`
-      : `${nameOf(state, player.heroCardId)} prevents ${prevented} damage (Ward ${piece.n})`);
+    logPublic(state, gameLogMessage(
+      arc.unpreventable
+        ? `${nameOf(state, player.heroCardId)} destroys Ward ${piece.n}, but the damage can't be prevented`
+        : `${nameOf(state, player.heroCardId)} prevents ${prevented} damage (Ward ${piece.n})`,
+      arc.unpreventable ? "engine.log.damage.ward.unpreventable" : "engine.log.damage.ward.prevented",
+      {
+        hero: logCardValue(player.heroCardId),
+        ward: piece.n,
+        ...(arc.unpreventable ? {} : { amount: prevented }),
+      },
+    ));
     // further ward sources must still apply to the rest of the packet
     continueAfterWard(state, runtime, arc);
     return undefined;
@@ -1792,9 +1937,17 @@ export function answerArcaneBarrier(
       destroyPermanent(state, runtime, seat, eq);
       const prevented = arc.unpreventable ? 0 : Math.min(piece.n, arc.amount);
       arc.amount -= prevented;
-      logPublic(state, arc.unpreventable
-        ? `${nameOf(state, player.heroCardId)} destroys Spellvoid ${piece.n}, but the damage can't be prevented`
-        : `${nameOf(state, player.heroCardId)} prevents ${prevented} arcane damage (Spellvoid ${piece.n})`);
+      logPublic(state, gameLogMessage(
+        arc.unpreventable
+          ? `${nameOf(state, player.heroCardId)} destroys Spellvoid ${piece.n}, but the damage can't be prevented`
+          : `${nameOf(state, player.heroCardId)} prevents ${prevented} arcane damage (Spellvoid ${piece.n})`,
+        arc.unpreventable ? "engine.log.damage.spellvoid.unpreventable" : "engine.log.damage.spellvoid.prevented",
+        {
+          hero: logCardValue(player.heroCardId),
+          spellvoid: piece.n,
+          ...(arc.unpreventable ? {} : { amount: prevented }),
+        },
+      ));
       // further Spellvoid pieces may still apply to the rest of the packet
       continueArcaneDamage(state, runtime, arc, true);
       return undefined;
@@ -1833,7 +1986,11 @@ export function answerArcaneBarrier(
       return undefined;
     }
     payFromPools(player, total);
-    if (total > 0) logPublic(state, `${nameOf(state, player.heroCardId)} pays ${total} (Arcane Barrier)`);
+    if (total > 0) logPublic(state, gameLogMessage(
+      `${nameOf(state, player.heroCardId)} pays ${total} (Arcane Barrier)`,
+      "engine.log.damage.arcane.barrier.paid",
+      { hero: logCardValue(player.heroCardId), amount: total },
+    ));
     state.pendingDecision = null;
     finishArcanePacket(state, runtime, arc, total);
     return undefined;
@@ -1872,7 +2029,11 @@ export function answerArcaneBarrier(
     return undefined;
   }
   payFromPools(player, total);
-  logPublic(state, `${nameOf(state, player.heroCardId)} pays ${total} (Arcane Barrier)`);
+  logPublic(state, gameLogMessage(
+    `${nameOf(state, player.heroCardId)} pays ${total} (Arcane Barrier)`,
+    "engine.log.damage.arcane.barrier.paid",
+    { hero: logCardValue(player.heroCardId), amount: total },
+  ));
   state.pendingDecision = null;
   finishArcanePacket(state, runtime, arc, total);
   return undefined;
@@ -1891,7 +2052,11 @@ export function gainHeroLife(state: GameStateInternal,
     ),
   );
   if (isAhead && lifeGainLocked) {
-    logPublic(state, `${nameOf(state, player.heroCardId)} can't gain life while ahead on life`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, player.heroCardId)} can't gain life while ahead on life`,
+      "engine.log.life.gain.prevented.ahead",
+      { hero: logCardValue(player.heroCardId) },
+    ));
     return;
   }
   let amount = Math.max(0, n);

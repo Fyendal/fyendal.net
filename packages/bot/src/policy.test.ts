@@ -139,6 +139,46 @@ function defenderPruningChoice(count: number, maxNonBlockDefenders?: number): Ga
 }
 
 describe("defender candidate bounds", () => {
+  it("stages equipment when Palantir Aeronought withholds the defend intent", () => {
+    const state = createGame({
+      decklists: [decklists.dorinthea, decklists.rhinar],
+      cards: cardData,
+      scripts,
+      seed: 94_139,
+      startPlayer: 1,
+    });
+    const view = projectStateFor(state, 0);
+    const equipment = Object.values(view.players[0].equipment).find((card) => card !== undefined)!;
+    const handCard = view.players[0].hand[0]!;
+    view.phase = "defend";
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "defend", prompt: "Choose defenders" };
+    view.chain = [{
+      attackingCard: { instanceId: 200_001, cardId: "SEA012", owner: 1 },
+      defendingCards: [],
+      attackValue: 6,
+      defenseValue: 0,
+      damage: 6,
+      resolved: false,
+      reactions: [],
+    }];
+    const legal: GameIntent[] = [
+      { kind: "stage-defenders", instanceIds: [handCard.instanceId] },
+      { kind: "stage-defenders", instanceIds: [equipment.instanceId] },
+      { kind: "concede" },
+    ];
+
+    expect(chooseScoredIntent({ seat: 0, view, legal, cards: cardData }, {
+      defend: (intent) => intent.instanceIds.includes(handCard.instanceId) ? 100 : 0,
+      choose: () => 0,
+      play: () => 0,
+      nextTurnArsenal: () => 0,
+    })).toEqual({
+      kind: "stage-defenders",
+      instanceIds: [equipment.instanceId],
+    });
+  });
+
   it("enumerates every optional defender through the exact limit", () => {
     const intent = defenderPruningChoice(MAX_OPTIONAL_DEFENDERS);
     expect(intent).toMatchObject({ kind: "stage-defenders" });

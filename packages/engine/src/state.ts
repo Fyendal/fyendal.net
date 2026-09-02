@@ -2,6 +2,7 @@ import type {
   CardColor,
   EquipmentSlot,
   GameLogPayload,
+  GameMessage,
   GameStatsView,
   MeldSide,
   PendingDecision,
@@ -957,4 +958,5 @@ interface DelayedTrigger {
   turn: number;
   hook: string;
   label: string;
+  labelMessage?: GameMessage;
 }

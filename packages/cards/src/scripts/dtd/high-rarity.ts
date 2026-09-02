@@ -15,6 +15,7 @@ const COURAGE = "DTD232";
 const EARTH = "ELE109";
 const ELOQUENCE = "DTD233";
 const LIGHTNING = "ELE110";
+const NASRETH = "DTD193";
 const PONDER = "DYN244";
 const QUICKEN = "DTD234";
 const RUNECHANT = "DTD214";
@@ -319,7 +320,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
   "widespread ruin|1": { runeGate: true, ...bloodDebt({ onCombatChainClosed(ctx) { for (const player of ctx.state.players) if (player.flags.lostLifeThisTurn && player.deck[0]) ctx.banish(player.deck[0].instanceId); } }) },
   "funeral moon|1": bloodDebt({ staticPlayableFrom: ["banish"], playAsInstant: (ctx) => ctx.state.players.some((player) => player.flags.lostLifeThisTurn === true), onPlay(ctx) { ctx.createToken(RUNECHANT); } }),
   "requiem for the damned|1": bloodDebt({ staticPlayableFrom: ["banish"], playAsInstant: (ctx) => ctx.state.players.some((player) => player.flags.lostLifeThisTurn === true), onPlay(ctx) { ctx.createToken(ELOQUENCE); } }),
-  "oblivion|3": { canPlay: (ctx) => ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "runechant")).length === 6, onPlay(ctx) { ctx.createToken("DTD216"); } },
+  "oblivion|3": { canPlay: (ctx) => ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "runechant")).length === 6, onPlay(ctx) { ctx.createToken(NASRETH); } },
 
   "blasmophet, levia consumed|0": { allowsFriendlyCardPlayFrom: (_ctx, card, zone) => zone === "banish" && !card.faceDown && data(_ctx, card).text.includes("Blood Debt"), onCardBanished(ctx, card) { ctx.setCardFaceDown(card.instanceId, true); } },
   "levia, redeemed|0": { onGameStart(ctx) { ctx.setPlayerFlag(ctx.seat, "leviaRedeemedInInventory", true); }, activated: { cost: 0, isAttack: false, goAgain: false, timing: "action", label: "Transform into Levia, Redeemed", canActivate: (ctx) => ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && data(ctx, card).text.includes("Blood Debt")).length >= 13, onActivate(ctx) { for (const card of ctx.player(ctx.seat).banish) ctx.setCardFaceDown(card.instanceId, true); ctx.becomeHero("DTD164B"); } } },

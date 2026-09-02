@@ -85,12 +85,20 @@ export function startTurn(state: GameStateInternal, runtime: EngineRuntime): voi
     originalHeroId !== undefined &&
     Number(player.hero.temporaryHeroUntilTurn ?? 0) <= state.turn
   ) {
+    const transformedHeroId = player.heroCardId;
     const transformedName = nameOf(state, player.heroCardId);
     player.hero.cardId = originalHeroId;
     player.heroCardId = originalHeroId;
     delete player.hero.temporaryHeroOriginalCardId;
     delete player.hero.temporaryHeroUntilTurn;
-    logPublic(state, `${transformedName} returns to being ${nameOf(state, originalHeroId)}`);
+    logPublic(state, gameLogMessage(
+      `${transformedName} returns to being ${nameOf(state, originalHeroId)}`,
+      "engine.log.hero.returns.to.original",
+      {
+        transformed: logCardValue(transformedHeroId),
+        original: logCardValue(originalHeroId),
+      },
+    ));
     scriptOf(state, originalHeroId, player.hero)?.onBecomeHero?.(
       runtime.makeCtx(state, player.seat, player.hero),
     );
@@ -156,7 +164,11 @@ export function endTurn(state: GameStateInternal, runtime: EngineRuntime): void 
     for (const w of turnPlayer.weapons) {
       if (w.counters?.power) {
         delete w.counters.power;
-        logPublic(state, `${nameOf(state, w.cardId)}'s +1{p} counters are removed`);
+        logPublic(state, gameLogMessage(
+          `${nameOf(state, w.cardId)}'s +1{p} counters are removed`,
+          "engine.log.card.power.counters.removed",
+          { card: logCardValue(w.cardId) },
+        ));
       }
     }
     turnPlayer.flags.clearWeaponPowerCountersAtTurn = 0;
@@ -172,7 +184,14 @@ export function endTurn(state: GameStateInternal, runtime: EngineRuntime): void 
     const home = state.players[homeSeat] as PlayerState;
     home.board.push(card);
     stampControlledName(state, home, card);
-    logPublic(state, `${nameOf(state, card.cardId)} returns to ${nameOf(state, home.heroCardId)}'s control`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, card.cardId)} returns to ${nameOf(state, home.heroCardId)}'s control`,
+      "engine.log.card.returns.to.hero.control",
+      {
+        card: logCardValue(card.cardId),
+        hero: logCardValue(home.heroCardId),
+      },
+    ));
   }
   // Face-down banished cards pending return go back to hand at their scheduled
   // beginning of end phase. Intimidated cards return at the upcoming one.
@@ -194,10 +213,13 @@ export function endTurn(state: GameStateInternal, runtime: EngineRuntime): void 
         transitionZone("hand", pl.seat),
         { from: true, to: true },
       );
-      logPublic(
-        state,
+      logPublic(state, gameLogMessage(
         `${nameOf(state, pl.heroCardId)}'s ${wasIntimidated ? "intimidated" : "face-down banished"} card returns to their hand`,
-      );
+        wasIntimidated
+          ? "engine.log.card.intimidated.returns.to.hand"
+          : "engine.log.card.facedown.banished.returns.to.hand",
+        { hero: logCardValue(pl.heroCardId) },
+      ));
     }
   }
   runtime.dispatchFlow("queueEventTriggers", state, "end-of-turn", state.activePlayer, "end-phase");
@@ -375,7 +397,14 @@ function completeEndPhase(state: GameStateInternal, runtime: EngineRuntime): voi
     }
   }
   if (untapped > 0) {
-    logPublic(state, `${nameOf(state, player.heroCardId)} untaps ${untapped} permanent(s)`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, player.heroCardId)} untaps ${untapped} permanent(s)`,
+      "engine.log.player.untaps.permanents",
+      {
+        hero: logCardValue(player.heroCardId),
+        count: untapped,
+      },
+    ));
   }
   // CR 8.2.8b: during the end phase (either player's), every ally's life
   // total resets to its base life
@@ -387,7 +416,11 @@ function completeEndPhase(state: GameStateInternal, runtime: EngineRuntime): voi
         : Math.max(0, printed - (Number(c.counters?.lifePenalty) || 0));
       if (base !== undefined && c.life !== undefined && c.life !== base) {
         c.life = base;
-        logPublic(state, `${nameOf(state, c.cardId)} is restored to ${base} life`);
+        logPublic(state, gameLogMessage(
+          `${nameOf(state, c.cardId)} is restored to ${base} life`,
+          "engine.log.ally.life.restored",
+          { card: logCardValue(c.cardId), life: base },
+        ));
       }
     }
   }

@@ -75,6 +75,23 @@ describe("DTD — registration and core mechanics", () => {
       .expectLife(1, 17);
   });
 
+  it("Oblivion creates Nasreth rather than Reality Refractor", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["oblivion|3"],
+          board: Array(6).fill("runechant|0") as string[],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("oblivion|3")
+      .expectInZone(0, "nasreth, the soul harrower|0", "board")
+      .expectNotInZone(0, "reality refractor|0", "board");
+  });
+
   it("Flail of Agony pays 1 life and makes a banished Cull playable on the open chain", () => {
     const s = scenario({
       seats: [

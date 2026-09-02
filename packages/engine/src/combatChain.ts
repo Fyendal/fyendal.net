@@ -12,7 +12,13 @@ import {
   defenseValueModifiers,
   equipmentDefense,
 } from "./combatValues.js";
-import { gameLogMessage, logPublic, nameOf } from "./gameLog.js";
+import {
+  cardPutOnDeckBottomLogMessage,
+  gameLogMessage,
+  logCardValue,
+  logPublic,
+  nameOf,
+} from "./gameLog.js";
 import type { ChainLinkState, PlayerState, StackLayer } from "./state.js";
 
 import { findCardAnywhere, removeFromArray } from "./zoneQueries.js";
@@ -62,7 +68,11 @@ function beginLinkResolutionStep(state: GameStateInternal,
   }
   if (link.goAgain) {
     (state.players[link.attacker] as PlayerState).actionPoints += 1;
-    logPublic(state, `${nameOf(state, link.attackingCard.cardId)} has Go again (+1 action point)`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, link.attackingCard.cardId)} has Go again (+1 action point)`,
+      "engine.log.combat.go.again",
+      { card: logCardValue(link.attackingCard.cardId) },
+    ));
   }
 }
 
@@ -99,7 +109,11 @@ export function finishLinkResolution(state: GameStateInternal,
       const live = findCardAnywhere(state, link.attackingCard.instanceId)?.card;
       if (live) {
         (live.counters ??= {}).power = Number(live.counters?.power ?? 0) + counters;
-        logPublic(state, `${nameOf(state, live.cardId)} gets ${counters} +1{p} counter(s)`);
+        logPublic(state, gameLogMessage(
+          `${nameOf(state, live.cardId)} gets ${counters} +1{p} counter(s)`,
+          "engine.log.card.gains.power.counters",
+          { card: logCardValue(live.cardId), count: counters },
+        ));
       }
     }
   }
@@ -133,7 +147,11 @@ export function finishLinkResolution(state: GameStateInternal,
     (state.players[link.attackingCard.owner] as PlayerState).hand.push(link.attackingCard);
     link.flags.attackGone = true;
     delete link.attackingCard.counters.returnToHandAtLinkResolution;
-    logPublic(state, `${nameOf(state, link.attackingCard.cardId)} returns to its owner's hand`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, link.attackingCard.cardId)} returns to its owner's hand`,
+      "engine.log.card.returns.to.owner.hand",
+      { card: logCardValue(link.attackingCard.cardId) },
+    ));
   }
   const returningDefenders = link.defendingCards.filter(
     (card) => card.counters?.returnToHandAtLinkResolution,
@@ -141,7 +159,11 @@ export function finishLinkResolution(state: GameStateInternal,
   for (const card of returningDefenders) {
     delete card.counters?.returnToHandAtLinkResolution;
     (state.players[card.owner] as PlayerState).hand.push(card);
-    logPublic(state, `${nameOf(state, card.cardId)} returns to its owner's hand`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, card.cardId)} returns to its owner's hand`,
+      "engine.log.card.returns.to.owner.hand",
+      { card: logCardValue(card.cardId) },
+    ));
   }
   if (returningDefenders.length > 0) {
     const ids = new Set(returningDefenders.map((card) => card.instanceId));
@@ -230,7 +252,10 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
           transitionZone("deck", owner.seat, "bottom"),
           { to: true },
         );
-        logPublic(state, `${nameOf(state, link.attackingCard.cardId)} is put on the bottom of the deck`);
+        logPublic(
+          state,
+          cardPutOnDeckBottomLogMessage(state, link.attackingCard.cardId),
+        );
       } else {
         moveToGraveyard(state, runtime, link.attackingCard);
       }
@@ -285,20 +310,22 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
         // live equipment object — the link may hold a stale clone of it.
         const live = findCardAnywhere(state, c.instanceId)?.card ?? c;
         live.defCounters = (live.defCounters ?? 0) + 1;
-        logPublic(
-          state,
+        logPublic(state, gameLogMessage(
           `${nameOf(state, c.cardId)} gets a -1 defense counter (Battleworn)`,
-        );
+          "engine.log.card.gains.minus.defense.counters",
+          { card: logCardValue(c.cardId), count: 1, keyword: "Battleworn" },
+        ));
       } else if (hasKeyword(state, c, "guardwell")) {
         // Guardwell (8.3.34): -1 defense counters equal to its defense
         const live = findCardAnywhere(state, c.instanceId)?.card ?? c;
         const n = equipmentDefense(state, runtime, link, live);
         if (n > 0) {
           live.defCounters = (live.defCounters ?? 0) + n;
-          logPublic(
-            state,
+          logPublic(state, gameLogMessage(
             `${nameOf(state, c.cardId)} gets ${n} -1 defense counter(s) (Guardwell)`,
-          );
+            "engine.log.card.gains.minus.defense.counters",
+            { card: logCardValue(c.cardId), count: n, keyword: "Guardwell" },
+          ));
         }
       } else if (hasKeyword(state, c, "temper")) {
         // Temper: add a -1 defense counter, then destroy the equipment only
@@ -306,7 +333,11 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
         // during the close step (such as Unity) are part of that value.
         const live = findCardAnywhere(state, c.instanceId)?.card ?? c;
         live.defCounters = (live.defCounters ?? 0) + 1;
-        logPublic(state, `${nameOf(state, c.cardId)} gets a -1 defense counter (Temper)`);
+        logPublic(state, gameLogMessage(
+          `${nameOf(state, c.cardId)} gets a -1 defense counter (Temper)`,
+          "engine.log.card.gains.minus.defense.counters",
+          { card: logCardValue(c.cardId), count: 1, keyword: "Temper" },
+        ));
         if (equipmentDefense(state, runtime, link, live) <= 0) {
           destroyPermanent(state, runtime, live.owner, live);
         }

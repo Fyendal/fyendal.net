@@ -1,7 +1,7 @@
 import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import { scriptOf } from "./cardProperties.js";
-import { logPublic, nameOf } from "./gameLog.js";
+import { gameLogMessage, logCardValue, logPublic, nameOf } from "./gameLog.js";
 import type { CardInstance, ChainLinkState, PlayerState, StackLayer } from "./state.js";
 
 import { createTokenFor } from "./tokens.js";
@@ -31,10 +31,12 @@ function completeWagerResult(
   if (replacementSource?.counters) delete replacementSource.counters.wagerWinnerOverride;
   if (source.counters) delete source.counters.wagerWinnerOverride;
 
-  logPublic(
-    state,
-    `${nameOf(state, (state.players[winner] as PlayerState).heroCardId)} wins the wager`,
-  );
+  const winningPlayer = state.players[winner] as PlayerState;
+  logPublic(state, gameLogMessage(
+    `${nameOf(state, winningPlayer.heroCardId)} wins the wager`,
+    "engine.log.wager.winner",
+    { hero: logCardValue(winningPlayer.heroCardId) },
+  ));
   // Winning a wager is its own event. Abilities such as Prizeworn
   // Pathfinders trigger now and resolve as separate layers after this wager
   // layer finishes; the winner may be either the attacker or defender.
@@ -273,12 +275,18 @@ export function resolveWagerLayer(state: GameStateInternal,
   const link = currentLink(state);
   const effect = layer.engineEffect;
   if (!link || effect?.kind !== "wager-result") {
-    logPublic(state, "A wager resolves without effect (the chain link is gone)");
+    logPublic(state, gameLogMessage(
+      "A wager resolves without effect (the chain link is gone)",
+      "engine.log.wager.fizzles.chain.gone",
+    ));
     return;
   }
   const wager = link.wagers?.[effect.wagerIndex];
   if (!wager) {
-    logPublic(state, "A wager resolves without effect (its wager is gone)");
+    logPublic(state, gameLogMessage(
+      "A wager resolves without effect (its wager is gone)",
+      "engine.log.wager.fizzles.wager.gone",
+    ));
     return;
   }
   const winner = link.hit ? wager.controllerSeat : wager.opposingSeat;
