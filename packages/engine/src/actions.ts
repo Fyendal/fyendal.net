@@ -961,7 +961,7 @@ export function answerChoice(
   const resume = pd.resume;
   const tokenCreationCause = pd.tokenCreationCause;
   const followUpDecisions = pd.followUpDecisions;
-  if (hook === "combat-damage-equipment-replacement" || hook === "arcane-barrier" || hook === "arcane-barrier-pitch" || hook === "spellvoid" || hook === "ward" || hook === "quell" || hook === "quell-pitch" || hook === "optional-damage-prevention" || hook === "discard-damage-prevention" || hook === "soul-damage-prevention") {
+  if (hook === "combat-damage-equipment-replacement" || hook === "lethal-damage-prevention" || hook === "arcane-barrier" || hook === "arcane-barrier-pitch" || hook === "spellvoid" || hook === "ward" || hook === "quell" || hook === "quell-pitch" || hook === "optional-damage-prevention" || hook === "discard-damage-prevention" || hook === "soul-damage-prevention") {
     // engine-owned decision (Ward / Spellvoid / Arcane Barrier prevention):
     // the damage-prevention machine in util.ts manages the pending decision itself
     const err = answerArcaneBarrier(state, runtime, seat, optionId);

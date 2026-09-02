@@ -34,7 +34,7 @@ import type { ActivatedAbility } from "./scripts.js";
 import { windowInstantPlays } from "./triggers.js";
 import { runechantSkipStep } from "./runechantSkip.js";
 import { controlledPermanents } from "./sourceQueries.js";
-import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestrictedByModifier, activatedAbilityAvailable, activatedEffectCardCostOptions, canPayActivatedEffectCardCosts, discardCostOptions, effectiveAbilityList } from "./abilityRules.js";
+import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestrictedByModifier, activatedAbilityAvailable, activatedEffectCardCostOptions, canPayAbilityLifeCost, canPayActivatedEffectCardCosts, discardCostOptions, effectiveAbilityList } from "./abilityRules.js";
 import { alternativePlayCostOptions, canPlayAsInstant, canRuneGate, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, cardsPlayableFromArsenal, cardsPlayableFromZone, playFromZoneRequiresInstant, playTargetOptions } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost, pitchProhibitedByEffect, pitchValueOfInstance } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
@@ -599,6 +599,7 @@ function windowAbilityIntents(
         (card.counters?.[ability.removeCounterCost.key] ?? 0) < ability.removeCounterCost.amount
       ) continue;
       if (ability.banishSoulCost && heroSoulCards(player).length < ability.banishSoulCost) continue;
+      if (!includeUnaffordable && !canPayAbilityLifeCost(player, ability)) continue;
       if (!canPayActivatedEffectCardCosts(state, player, ability)) continue;
       if (ability.canActivate && !ability.canActivate(runtime.makeCtx(state, player.seat, card, link))) {
         continue;
@@ -678,6 +679,7 @@ function windowAbilityIntents(
       if (ability.canActivate && !ability.canActivate(runtime.makeCtx(state, player.seat, card, link))) {
         continue;
       }
+      if (!includeUnaffordable && !canPayAbilityLifeCost(player, ability)) continue;
       if (
         ability.discardCost &&
         discardCostOptions(state, player, ability)
@@ -971,6 +973,7 @@ function abilityIntents(
       ) continue;
       if (timing === "action" && !grantedInstantTiming && player.actionPoints < 1) continue;
       if (ability.banishSoulCost && heroSoulCards(player).length < ability.banishSoulCost) continue;
+      if (!includeUnaffordable && !canPayAbilityLifeCost(player, ability)) continue;
       if (!canPayActivatedEffectCardCosts(state, player, ability)) continue;
       if (ability.canActivate && !ability.canActivate(runtime.makeCtx(state, player.seat, card))) continue;
       // mirror activateAbility's effective cost so the offered pitches match
@@ -1046,6 +1049,7 @@ function abilityIntents(
       }
       if (!activatedAbilityAvailable(player, card.instanceId, ai, ability)) continue;
       if (ability.canActivate && !ability.canActivate(runtime.makeCtx(state, player.seat, card))) continue;
+      if (!includeUnaffordable && !canPayAbilityLifeCost(player, ability)) continue;
       if (
         ability.discardCost &&
         discardCostOptions(state, player, ability)

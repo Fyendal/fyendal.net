@@ -834,6 +834,5 @@ Object.assign(hnt, {
         }
       }
     },
-    graveyardReplacement: "banish",
   }),
 } satisfies Record<string, CardScript>);

@@ -827,6 +827,30 @@ describe("SBA — instants and buffs", () => {
       .settle()
       .expectFinalAttack(7);
   });
+
+  it("Scar for a Scar does not gain go again when its controller has more life", () => {
+    const g = scenario({
+      seats: [
+        { ...briar, life: 2, hand: ["sprout strength|1", "scar for a scar|1"] },
+        {
+          hero: "rhinar",
+          life: 1,
+          hand: ["wrecker romp|3", "wrecker romp|3", "arcane polarity|1"],
+        },
+      ],
+    });
+
+    g.play("sprout strength|1")
+      .play("scar for a scar|1")
+      .expectAttackValue(7)
+      .blockWith("wrecker romp|3", "wrecker romp|3")
+      .passPriority()
+      .react("arcane polarity|1")
+      .settle()
+      .expectLife(1, 1)
+      .expectAP(0, 0);
+    expect(g.state.chain[0]?.goAgain).toBe(false);
+  });
 });
 
 describe("SBA — Jack Be Quick (Steal)", () => {

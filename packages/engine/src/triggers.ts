@@ -29,7 +29,7 @@ import {
   noteAttackDefendedBy,
 } from "./combatValues.js";
 
-import { abilityResourceCost, activatedAbilityAvailable, canPayActivatedEffectCardCosts, discardCostOptions, effectiveAbilityList } from "./abilityRules.js";
+import { abilityResourceCost, activatedAbilityAvailable, canPayAbilityLifeCost, canPayActivatedEffectCardCosts, discardCostOptions, effectiveAbilityList } from "./abilityRules.js";
 import { settlesInArena, settlePlayedCard } from "./cardLifecycle.js";
 import { alternativePlayCostOptions, canPlayAsInstant, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, cardsPlayableFromArsenal, cardsPlayableFromZone, cardLayerGoAgain, mayPlayFromArsenal, mayPlayFromZone, noteCardPlayed, payAlternativePlayCost, playTargetOptions, preparePlayTarget } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost, pitchValueOfInstance } from "./resources.js";
@@ -198,6 +198,7 @@ function anyWindowAbility(
       if (!activatedAbilityAvailable(player, card.instanceId, ai, ability)) continue;
       if (ability.tap && card.tapped) continue;
       if (ability.canActivate && !ability.canActivate(runtime.makeCtx(state, seat, card, link))) continue;
+      if (!includeUnaffordable && !canPayAbilityLifeCost(player, ability)) continue;
       if (
         ability.discardCost &&
         discardCostOptions(state, player, ability).length < ability.discardCost.count
@@ -227,6 +228,7 @@ function anyWindowAbility(
       if ((ability.timing ?? "action") !== "instant") continue;
       if (!activatedAbilityAvailable(player, card.instanceId, ai, ability)) continue;
       if (ability.canActivate && !ability.canActivate(runtime.makeCtx(state, seat, card, link))) continue;
+      if (!includeUnaffordable && !canPayAbilityLifeCost(player, ability)) continue;
       if (
         ability.discardCost &&
         discardCostOptions(state, player, ability)

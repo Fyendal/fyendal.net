@@ -84,6 +84,23 @@ describe("OMN — import and set mechanics", () => {
     expect(new Set(cards.map(functionalKeyOf))).toHaveLength(251);
   });
 
+  it("Draco Fire makes the next Draconic weapon attack cost 1 less to activate", () => {
+    const g = scenario({
+      seats: [
+        hero("fang, dracai of blades|0", {
+          weapons: ["obsidian fire vein|0"],
+          hand: ["draco fire|1"],
+        }),
+        foe(),
+      ],
+    });
+
+    g.play("draco fire|1")
+      .expectResources(0, 0)
+      .attackWithWeapon("obsidian fire vein|0")
+      .expectAttackValue(3);
+  });
+
   it("Evasive Nageboshi does not restrict defenders on a later chain link", () => {
     const g = scenario({
       seats: [

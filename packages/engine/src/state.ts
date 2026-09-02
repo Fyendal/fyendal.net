@@ -444,6 +444,10 @@ export interface Modifier {
   discardDamagePreventionCardType?: string;
   discardDamagePreventionAmount?: number;
   discardDamagePreventionDraw?: number;
+  /** One-shot optional prevention for a lethal damage event. Applying it
+   * banishes a card with this exact printed name from hand or arsenal and
+   * prevents the entire event. */
+  preventLethalDamageByBanishingNamedCard?: string;
   /** Prevent the next damage event from a source with this printed pitch
    * value. The whole event is prevented and the modifier is consumed. */
   preventNextDamageFromPitch?: number;
@@ -508,6 +512,8 @@ export interface Modifier {
   /** The affected attack has go again while its controller has played or
    * created a card with this subtype during the current turn. */
   goAgainIfPlayedOrCreatedSubtype?: string;
+  /** The affected attack has go again while its current power meets this threshold. */
+  goAgainIfAttackPowerAtLeast?: number;
   /** Granted trigger: when the affected attack is defended by one or more
    * cards, deal this much damage to the defending hero. */
   onDefendedDealDamage?: number;
@@ -709,6 +715,9 @@ export interface PendingArcane {
   usedSoulDamagePreventionSourceIds?: number[];
   /** Source currently awaiting its controller's soul-card selection. */
   soulDamagePreventionSourceInstanceId?: number;
+  /** Turn-scoped modifier currently awaiting its controller's named-card
+   * selection for a lethal-damage prevention replacement. */
+  lethalDamagePreventionModifierId?: number;
   /** Quell source selected while its resource payment is being completed. */
   quellSourceInstanceId?: number;
   /** further packets queued behind this one (several sources can deal arcane

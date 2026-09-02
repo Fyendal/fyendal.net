@@ -955,6 +955,73 @@ function drainDamageQueue(state: GameStateInternal,
   }
 }
 
+function lethalDamagePreventionCards(
+  state: GameStateInternal,
+  player: PlayerState,
+  cardName: string,
+): CardInstance[] {
+  const normalized = cardName.trim().toLowerCase();
+  return [...player.hand, ...player.arsenal].filter(
+    (card) => dataOf(state, card.cardId).name.trim().toLowerCase() === normalized,
+  );
+}
+
+/** Offer a one-shot optional replacement for the final damage event. Effects
+ * which made the event nonlethal stay ready for a later event; the first
+ * lethal event consumes the replacement whether its controller applies it or
+ * declines it. */
+function openLethalDamagePrevention(
+  state: GameStateInternal,
+  packet: PendingArcane,
+): boolean {
+  const target = state.players[packet.targetSeat] as PlayerState;
+  if (packet.amount <= 0 || packet.amount < target.life) return false;
+  for (const modifier of state.modifiers) {
+    const cardName = modifier.preventLethalDamageByBanishingNamedCard;
+    if (
+      modifier.seat !== target.seat ||
+      modifier.scope !== "until-end-of-turn" ||
+      modifier.consumed ||
+      !cardName
+    ) continue;
+    const cards = lethalDamagePreventionCards(state, target, cardName);
+    if (cards.length === 0) {
+      modifier.consumed = true;
+      continue;
+    }
+    packet.lethalDamagePreventionModifierId = modifier.id;
+    state.pendingDecision = {
+      player: target.seat,
+      kind: "optional-effect",
+      prompt: `You would be dealt ${packet.amount} lethal damage — banish ${cardName} from hand or arsenal to prevent it?`,
+      options: [...cards.map((card) => String(card.instanceId)), "decline"],
+      cardOptions: [...cards.map((card) => card.instanceId as number | null), null],
+      sourceInstanceId: packet.sourceInstanceId,
+      chooseHook: "lethal-damage-prevention",
+      arcane: packet,
+    };
+    return true;
+  }
+  return false;
+}
+
+/** Apply a damage packet only after every earlier replacement and prevention
+ * has established whether its remaining amount is lethal. */
+function finishHeroDamage(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  packet: PendingArcane,
+): number {
+  if (openLethalDamagePrevention(state, packet)) return 0;
+  if (packet.combat) {
+    runtime.dispatchFlow("resumeCombatDamage", state, packet);
+    return packet.amount;
+  }
+  applyEffectDamage(state, runtime, packet);
+  drainDamageQueue(state, runtime, packet.queue ?? []);
+  return packet.amount;
+}
+
 /** After a Spellvoid answer: continue the packet through any remaining
  *  prevention decisions (Spellvoid again after a destroy, Arcane Barrier
  *  unless declined into it), then apply and drain the queue. */
@@ -970,8 +1037,7 @@ function continueArcaneDamage(
       : tryOpenBarrierDecision(state, runtime, packet);
     if (opened) return;
   }
-  applyEffectDamage(state, runtime, packet);
-  drainDamageQueue(state, runtime, packet.queue ?? []);
+  finishHeroDamage(state, runtime, packet);
 }
 
 /** After a Ward answer: Ward is mandatory — re-offer it while damage and
@@ -987,15 +1053,10 @@ function continueAfterWard(state: GameStateInternal,
     packet.amount = applyPitchSourcePrevention(state, target, packet.amount, source);
   }
   if (packet.amount > 0 && openWardDecision(state, runtime, packet)) return;
-  if (packet.combat) {
-    runtime.dispatchFlow("resumeCombatDamage", state, packet);
-    return;
-  }
   if (packet.amount > 0 && packet.arcane) {
     if (openArcaneDecision(state, runtime, packet)) return;
   }
-  applyEffectDamage(state, runtime, packet);
-  drainDamageQueue(state, runtime, packet.queue ?? []);
+  finishHeroDamage(state, runtime, packet);
 }
 
 /**
@@ -1231,14 +1292,8 @@ function continueHeroDamageAfterQuell(
   });
   if (packet.amount > 0 && packet.arcane && tryOpenBarrierDecision(state, runtime, packet)) return 0;
   if (packet.amount > 0 && openWardDecision(state, runtime, packet)) return 0;
-  if (packet.combat) {
-    runtime.dispatchFlow("resumeCombatDamage", state, packet);
-    return packet.amount;
-  }
   if (packet.amount > 0 && packet.arcane && openArcaneDecision(state, runtime, packet)) return 0;
-  applyEffectDamage(state, runtime, packet);
-  drainDamageQueue(state, runtime, packet.queue ?? []);
-  return packet.amount;
+  return finishHeroDamage(state, runtime, packet);
 }
 
 function continueAfterPaidQuell(state: GameStateInternal,
@@ -1287,7 +1342,7 @@ function continueAfterDiscardDamagePrevention(
 export function beginHeroDamage(state: GameStateInternal,
   runtime: EngineRuntime, packet: PendingArcane): number {
   const open = state.pendingDecision;
-  if (open?.arcane && ["combat-damage-equipment-replacement", "soul-damage-prevention", "discard-damage-prevention", "optional-damage-prevention", "quell", "quell-pitch", "ward", "spellvoid", "arcane-barrier", "arcane-barrier-pitch"].includes(open.chooseHook ?? "")) {
+  if (open?.arcane && ["combat-damage-equipment-replacement", "lethal-damage-prevention", "soul-damage-prevention", "discard-damage-prevention", "optional-damage-prevention", "quell", "quell-pitch", "ward", "spellvoid", "arcane-barrier", "arcane-barrier-pitch"].includes(open.chooseHook ?? "")) {
     (open.arcane.queue ??= []).push(packet);
     return 0;
   }
@@ -1454,6 +1509,34 @@ export function answerArcaneBarrier(
     state.pendingDecision = null;
     delete arc.combatDamageEquipmentReplacementIds;
     beginHeroDamage(state, runtime, arc);
+    return undefined;
+  }
+  if (pd.chooseHook === "lethal-damage-prevention") {
+    if (!pd.options?.includes(optionId)) return "invalid option";
+    const modifierId = arc.lethalDamagePreventionModifierId;
+    const modifier = state.modifiers.find((candidate) =>
+      candidate.id === modifierId &&
+      candidate.seat === seat &&
+      candidate.consumed !== true &&
+      candidate.preventLethalDamageByBanishingNamedCard !== undefined
+    );
+    if (!modifier) return "lethal prevention effect not found";
+    const cardName = modifier.preventLethalDamageByBanishingNamedCard as string;
+    modifier.consumed = true;
+    delete arc.lethalDamagePreventionModifierId;
+    state.pendingDecision = null;
+    if (optionId !== "decline") {
+      const card = lethalDamagePreventionCards(state, player, cardName)
+        .find((candidate) => candidate.instanceId === Number(optionId));
+      if (!card) return "lethal prevention card not found";
+      if (!runtime.commands.banishCard(state, card.instanceId, seat, false)) {
+        return "lethal prevention card could not be banished";
+      }
+      const prevented = arc.unpreventable ? 0 : arc.amount;
+      arc.amount -= prevented;
+      logPublic(state, `${nameOf(state, player.heroCardId)} prevents ${prevented} lethal damage`);
+    }
+    finishHeroDamage(state, runtime, arc);
     return undefined;
   }
   if (pd.chooseHook === "discard-damage-prevention") {

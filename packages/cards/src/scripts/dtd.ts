@@ -330,7 +330,11 @@ export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRar
       }
     },
   },
-  "flail of agony|0": { activated: attackAbility(0), ...banishTargetSoul(), canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined, onHit(ctx) { ctx.createToken(RUNECHANT); } },
+  "flail of agony|0": {
+    activated: [{ ...attackAbility(0)[0]!, lifeCost: 1 }],
+    canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
+    onHit(ctx) { ctx.createToken(RUNECHANT); },
+  },
   "shroud of darkness|0": shadowEquipment(), "cloak of darkness|0": shadowEquipment(),
   "grasp of darkness|0": shadowEquipment(), "dance of darkness|0": shadowEquipment(),
   "nasreth, the soul harrower|0": {

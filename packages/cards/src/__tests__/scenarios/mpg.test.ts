@@ -64,6 +64,33 @@ describe("MPG — import and Guardian pressure", () => {
     expect(g.state.players[1]!.hand).toHaveLength(3);
   });
 
+  it("Valda gives crush attacks dominate after starting the turn with five Seismic Surges", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "valda, seismic impact|0",
+          board: Array.from({ length: 5 }, () => "seismic surge|0"),
+          hand: ["spinal crush|1"],
+        },
+        {
+          hero: "dorinthea",
+          hand: ["raging onslaught|1", "raging onslaught|2"],
+        },
+      ],
+    });
+
+    g.endTurn().play("spinal crush|1");
+
+    const handIds = new Set(g.state.players[1]!.hand.map((card) => card.instanceId));
+    const defendIntents = legalIntents(g.state, 1).filter((intent) => intent.kind === "defend");
+    expect(defendIntents.length).toBeGreaterThan(0);
+    expect(defendIntents.every(
+      (intent) => intent.instanceIds.filter((instanceId) => handIds.has(instanceId)).length <= 1,
+    )).toBe(true);
+  });
+
   it("Testament of Valahai gets +4 defense with six Seismic Surges", () => {
     const g = scenario({
       active: 1,

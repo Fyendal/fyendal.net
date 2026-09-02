@@ -58,6 +58,44 @@ function grantActionIdolInstantTiming(s: GameStateInternal, seat: number): numbe
   return idolId;
 }
 
+describe("activated ability life costs", () => {
+  it("requires and pays life before an attack ability is activated", () => {
+    const s = makeGame(19);
+    const weapon = player(s, 0).weapons[0]!;
+    s.scriptsRef = {
+      ...s.scriptsRef,
+      SWORD: {
+        activated: {
+          cost: 0,
+          lifeCost: 2,
+          isAttack: true,
+          goAgain: true,
+          oncePerTurn: true,
+        },
+      },
+    };
+    player(s, 0).life = 1;
+
+    expect(abilityIntents(s, 0, weapon.instanceId)).toHaveLength(0);
+    const rejected = applyIntent(s, 0, {
+      kind: "activate-ability",
+      sourceInstanceId: weapon.instanceId,
+      pitchInstanceIds: [],
+    });
+    expect(rejected).toMatchObject({ ok: false, error: "not enough life" });
+
+    player(s, 0).life = 2;
+    const activation = abilityIntents(s, 0, weapon.instanceId)[0];
+    expect(activation).toBeDefined();
+    const accepted = applyIntent(s, 0, activation!);
+    expect(accepted.ok).toBe(true);
+    if (!accepted.ok) throw new Error(accepted.error);
+    expect(player(accepted.state, 0).life).toBe(0);
+    expect(player(accepted.state, 0).flags.lostLifeThisTurn).toBe(true);
+    expect(accepted.state.winner).toBe(1);
+  });
+});
+
 describe("multiple activated abilities per card", () => {
   it("projects spent once-per-turn weapon abilities to both players", () => {
     const s = makeGame(20);

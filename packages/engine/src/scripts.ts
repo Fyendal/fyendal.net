@@ -586,6 +586,8 @@ export interface ActivatedEffectCardCost {
 
 export interface ActivatedAbility {
   cost: number;
+  /** Life point cost ({h}) paid in addition to resource and chi costs. */
+  lifeCost?: number;
   /** Printed variable resource component of this activation cost. The engine
    * declares X before pitching and stores it on the source before resolution. */
   variableCost?: {
