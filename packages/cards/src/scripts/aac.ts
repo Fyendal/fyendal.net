@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, buffNextAttack, commonOptionMessages, decisionPrompt, opponentSeat } from "./shared-helpers.js";
+import { attackAbility, buffNextAttack, commonOptionMessages, decisionPrompt, localizedCardLog, opponentSeat } from "./shared-helpers.js";
 
 type Card = DeepReadonly<CardInstance>;
 
@@ -16,7 +16,7 @@ function markHero(ctx: ScriptCtx, seat: number): void {
   const hero = ctx.player(seat).hero;
   if ((hero.counters?.marked ?? 0) > 0) return;
   ctx.addCounter(hero.instanceId, "marked", 1);
-  ctx.logPublic(`${ctx.cardData(hero.cardId).name} is marked`);
+  ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(hero.cardId).name} is marked`, "card.log.common.hero.marked", { target: { kind: "card", cardId: hero.cardId } }));
 }
 function myStealthAttack(ctx: ScriptCtx): boolean {
   return !!ctx.link && !ctx.link.resolved && ctx.link.attacker === ctx.seat && hasStealth(ctx, ctx.link.attackingCard);

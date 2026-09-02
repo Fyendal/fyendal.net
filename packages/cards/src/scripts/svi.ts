@@ -6,6 +6,7 @@ import {
   dealArcane,
   decisionPrompt,
   isCard,
+  localizedCardLog,
   opponentSeat,
 } from "./shared-helpers.js";
 
@@ -244,7 +245,7 @@ export const svi: Record<string, CardScript> = {
       const aura = ctx.player(ctx.seat).graveyard.find((card) => card.instanceId === Number(option));
       if (!aura || !isAura(ctx, aura)) return;
       ctx.moveToHand(aura.instanceId);
-      ctx.logPublic(`${ctx.data.name}: return ${ctx.cardData(aura.cardId).name} to hand`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: return ${ctx.cardData(aura.cardId).name} to hand`, "card.log.svi.aura.returned", { result: { kind: "card", cardId: aura.cardId } }, { kind: "card-moved", cardId: aura.cardId, ownerSeat: ctx.seat, from: "graveyard", to: "hand" }));
     },
   },
 

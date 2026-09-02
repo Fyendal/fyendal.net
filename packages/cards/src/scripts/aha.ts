@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, buffNextAttack, commonOptionMessages, decisionMessage, decisionPrompt, isSwordAttack, yesNoPrompt } from "./shared-helpers.js";
+import { attackAbility, buffNextAttack, commonOptionMessages, decisionMessage, decisionPrompt, isSwordAttack, localizedCardLog, yesNoPrompt } from "./shared-helpers.js";
 import {
   resolveSharpenFollowup,
   SHARPEN_FOLLOWUP,
@@ -121,7 +121,7 @@ export const aha: Record<string, CardScript> = {
       if (option === "paid") {
         ctx.addCounter(target, "power", 1);
         ctx.destroySelf();
-        ctx.logPublic("Reverent Rerebrace sharpens Zenith Blade an additional time");
+        ctx.logPublic(localizedCardLog(ctx, "Reverent Rerebrace sharpens Zenith Blade an additional time", "card.log.aha.rerebrace.sharpen"));
       }
       resolveSharpenFollowup(ctx, target, threshold, payoff);
     },

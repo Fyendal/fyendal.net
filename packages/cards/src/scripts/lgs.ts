@@ -4,6 +4,7 @@ import {
   decisionPrompt,
   isSixPlus,
   lessonCounter,
+  localizedCardLog,
   mentorFlipTrigger,
   mentorPayoff,
   opponentSeat,
@@ -27,7 +28,7 @@ export const lgs: Record<string, CardScript> = {
   // Wrecking Ball (red)
   "wrecking ball|1": discardSixPlusPayoff((ctx) => {
     ctx.addModifier({ scope: "chain-link", intimidate: 1 });
-    ctx.logPublic("Wrecking Ball: intimidate");
+    ctx.logPublic(localizedCardLog(ctx, "Wrecking Ball: intimidate", "card.log.common.intimidate"));
   }),
   "chief ruk'utan|0": {
     activeWhileFaceUpInArsenal: true,

@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { buffNextArcaneDamageCard, commonOptionMessages, dealArcane, decisionMessage, decisionPrompt, opponentSeat, optN, optOnChoose, wizardActionAsInstant } from "../shared-helpers.js";
+import { buffNextArcaneDamageCard, commonOptionMessages, dealArcane, decisionMessage, decisionPrompt, localizedCardLog, opponentSeat, optN, optOnChoose, wizardActionAsInstant } from "../shared-helpers.js";
 
 const RUNECHANT = "ARC112";
 
@@ -225,7 +225,7 @@ export const arcHighRarity: Record<string, CardScript> = {
   "mordred tide|1": { onPlay(ctx) { ctx.addModifier({ scope: "until-end-of-turn" }); }, replaceFriendlyTokenCreation: (ctx, cardId, count) => ctx.cardData(cardId).name === "Runechant" ? count + 1 : undefined },
   "ninth blade of the blood oath|2": { modifyPlayCost: (ctx, base) => Math.max(0, base - runeCount(ctx)) },
   "become the arknight|3": becomeTheArknight,
-  "tome of the arknight|3": { onPlay(ctx) { const top = ctx.player(ctx.seat).deck.slice(0, 2); for (const card of top) ctx.logPublic(`Tome of the Arknight reveals ${ctx.cardData(card.cardId).name}`); if (top.length === 2 && top.some((card) => isAttack(ctx, card)) && top.some((card) => isNonAttack(ctx, card))) for (const card of top) ctx.moveToHand(card.instanceId); } },
+  "tome of the arknight|3": { onPlay(ctx) { const top = ctx.player(ctx.seat).deck.slice(0, 2); for (const card of top) ctx.logPublic(localizedCardLog(ctx, `Tome of the Arknight reveals ${ctx.cardData(card.cardId).name}`, "card.log.common.decktop.revealed", { revealed: { kind: "card", cardId: card.cardId } }, { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" })); if (top.length === 2 && top.some((card) => isAttack(ctx, card)) && top.some((card) => isNonAttack(ctx, card))) for (const card of top) ctx.moveToHand(card.instanceId); } },
 
   "storm striders|0": { activated: { cost: 1, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true, onActivate(ctx) { ctx.setFlag("player", "nextWizardNonAttackAsInstant", true); } } },
   "blazing aether|1": { arcaneDamageEffect: true, arcaneDamageEffectAmounts: [0], playAsInstant: wizardActionAsInstant, onPlay(ctx) { dealArcane(ctx, opponentSeat(ctx), Number(ctx.getFlag("player", `arcaneDamageAmountToSeat:${opponentSeat(ctx)}`)) || 0); } },

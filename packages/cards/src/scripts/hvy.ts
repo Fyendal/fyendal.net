@@ -5,6 +5,7 @@ import {
   commonOptionMessages,
   decisionPrompt,
   isSixPlus,
+  localizedCardLog,
   mergeSetScripts,
   opponentSeat,
   queueIntimidate,
@@ -333,7 +334,7 @@ function rally(): CardScript {
     defenseAbility: { discard: 1, oncePerTurn: true },
     onDefendAbility(ctx) {
       ctx.addModifier({ scope: "chain-link", defense: 3 });
-      ctx.logPublic("Rally the Rearguard gains +3 defense");
+      ctx.logPublic(localizedCardLog(ctx, "Rally the Rearguard gains +3 defense", "card.log.common.defense.gained", { defense: 3 }));
     },
   };
 }

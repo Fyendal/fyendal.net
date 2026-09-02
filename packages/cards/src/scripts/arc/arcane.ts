@@ -5,6 +5,7 @@ import {
   commonOptionMessages,
   decisionPrompt,
   dealArcane,
+  localizedCardLog,
   opponentSeat,
   optN,
   optOnChoose,
@@ -264,7 +265,7 @@ export const arcArcane: Record<string, CardScript> = {
       label: "Destroy: gain 3 resources",
       onActivate(ctx) {
         ctx.changeResources(ctx.seat, 3);
-        ctx.logPublic(`${ctx.data.name}: gained {r}{r}{r}`);
+        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: gained {r}{r}{r}`, "card.log.common.resources.gained", { amount: 3 }));
       },
     },
   },

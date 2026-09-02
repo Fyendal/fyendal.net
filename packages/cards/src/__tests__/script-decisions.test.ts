@@ -148,9 +148,51 @@ function rawDecisionPrompts(set: string): string[] {
   return raw;
 }
 
+function rawLogMessages(set: string): string[] {
+  const raw: string[] = [];
+  const partitionDirectory = `${scriptsDirectory}/${set}`;
+  const paths = [
+    `${scriptsDirectory}/${set}.ts`,
+    ...(existsSync(partitionDirectory)
+      ? readdirSync(partitionDirectory)
+        .filter((name) => name.endsWith(".ts"))
+        .map((name) => `${partitionDirectory}/${name}`)
+      : []),
+  ];
+
+  for (const path of paths) {
+    const source = readFileSync(path, "utf8");
+    const sourceFile = ts.createSourceFile(path, source, ts.ScriptTarget.Latest, true);
+    const visit = (node: ts.Node): void => {
+      if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)) {
+        const method = node.expression.name.text;
+        const payload = method === "logPublic"
+          ? node.arguments[0]
+          : method === "logPrivate"
+            ? node.arguments[1]
+            : undefined;
+        const isLocalized = payload && ts.isCallExpression(payload) &&
+          ts.isIdentifier(payload.expression) &&
+          (payload.expression.text === "localizedLog" || payload.expression.text === "localizedCardLog");
+        if (payload && !isLocalized) {
+          const position = sourceFile.getLineAndCharacterOfPosition(payload.getStart(sourceFile));
+          raw.push(`${path.slice(scriptsDirectory.length + 1)}:${position.line + 1}`);
+        }
+      }
+      ts.forEachChild(node, visit);
+    };
+    visit(sourceFile);
+  }
+  return raw;
+}
+
 describe("card-script decision presentation", () => {
   it("keeps completed sets free of raw direct and declarative player-facing prompts", () => {
     expect(localizedSets.flatMap(rawDecisionPrompts)).toEqual([]);
+  });
+
+  it("keeps completed sets free of raw public and private log messages", () => {
+    expect(localizedSets.flatMap(rawLogMessages)).toEqual([]);
   });
 
   it("constructs prompt-only metadata with optional interpolation values", () => {

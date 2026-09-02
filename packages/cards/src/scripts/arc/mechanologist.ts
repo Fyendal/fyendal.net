@@ -3,6 +3,7 @@ import {
   buffNextAttack,
   commonOptionMessages,
   decisionPrompt,
+  localizedCardLog,
   optN,
   optOnChoose,
 } from "../shared-helpers.js";
@@ -38,7 +39,13 @@ function pourTheMold(maxCost: number): CardScript {
       const item = ctx.player(ctx.seat).hand.find((card) => card.instanceId === Number(option));
       if (!item || !mechanicItemAtMost(ctx, item, maxCost) || !ctx.settleCard(item.instanceId)) return;
       if (boostedThisTurn(ctx)) ctx.addCounter(item.instanceId, "steam", 1);
-      ctx.logPublic(`${ctx.data.name}: ${ctx.cardData(item.cardId).name} is put into the arena`);
+      ctx.logPublic(localizedCardLog(
+        ctx,
+        `${ctx.data.name}: ${ctx.cardData(item.cardId).name} is put into the arena`,
+        "card.log.arc.item.arena",
+        { result: { kind: "card", cardId: item.cardId } },
+        { kind: "card-moved", cardId: item.cardId, ownerSeat: ctx.seat, from: "hand", to: "board" },
+      ));
     },
   };
 }
@@ -103,7 +110,7 @@ export const arcMechanologist: Record<string, CardScript> = {
         removeCounterCost: { key: "steam", amount: 1 },
         onActivate(ctx) {
           ctx.grantCardKeyword(ctx.self.instanceId, "arcane barrier 2");
-          ctx.logPublic("Aether Sink gains Arcane Barrier 2 until end of turn");
+          ctx.logPublic(localizedCardLog(ctx, "Aether Sink gains Arcane Barrier 2 until end of turn", "card.log.arc.aethersink.barrier", { amount: 2 }));
         },
       },
     ],

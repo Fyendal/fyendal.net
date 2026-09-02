@@ -4,6 +4,7 @@ import {
   dealArcane,
   decisionMessage,
   decisionPrompt,
+  localizedCardLog,
   opponentSeat,
   optN,
   optOnChoose,
@@ -129,7 +130,7 @@ const floodOfForce: CardScript = {
     if (!previousNamed(ctx, "rushing river") && !previousNamed(ctx, "flood of force")) return;
     const top = ctx.player(ctx.seat).deck[0];
     if (!top) return;
-    ctx.logPublic(`Flood of Force reveals ${ctx.cardData(top.cardId).name}`);
+    ctx.logPublic(localizedCardLog(ctx, `Flood of Force reveals ${ctx.cardData(top.cardId).name}`, "card.log.common.decktop.revealed", { revealed: { kind: "card", cardId: top.cardId } }, { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" }));
     if ((ctx.cardData(top.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "combo")) {
       ctx.moveToHand(top.instanceId);
       ctx.addModifier({ scope: "chain-link", attack: 3 });
@@ -431,7 +432,7 @@ export const cruHighRarity: Record<string, CardScript> = {
       const remaining = ctx.getCounter("steam") - prevented;
       ctx.setCounter("steam", remaining);
       ctx.setCounter("damageReplacement", remaining);
-      ctx.logPublic(`Absorption Dome prevents ${prevented} damage`);
+      ctx.logPublic(localizedCardLog(ctx, `Absorption Dome prevents ${prevented} damage`, "card.log.cru.damage.prevented", { amount: prevented }));
       if (remaining === 0) ctx.destroySelf();
       return amount - prevented;
     },
@@ -457,7 +458,7 @@ export const cruHighRarity: Record<string, CardScript> = {
       const prevented = Math.min(amount, runechants.length);
       for (const token of runechants.slice(0, prevented)) ctx.destroyPermanent(token.instanceId);
       ctx.setCounter("runechantDamageReplacement", runechants.length - prevented);
-      if (prevented > 0) ctx.logPublic(`Runeblood Barrier prevents ${prevented} damage`);
+      if (prevented > 0) ctx.logPublic(localizedCardLog(ctx, `Runeblood Barrier prevents ${prevented} damage`, "card.log.cru.damage.prevented", { amount: prevented }));
       return amount - prevented;
     },
     triggers: [{ event: "begin-action-phase", label: "Destroy Runeblood Barrier", effect: (ctx) => ctx.destroySelf() }],

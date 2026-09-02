@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { ampNextArcane, attackAbility, bloodDebtScript as bloodDebt, buffNextAttack, commonOptionMessages, decisionMessage, decisionPrompt, isCard, opponentSeat, previousAttackHasName, requestDiscardChoice, resolveDiscardChoice, yesNoPrompt } from "./shared-helpers.js";
+import { ampNextArcane, attackAbility, bloodDebtScript as bloodDebt, buffNextAttack, commonOptionMessages, decisionMessage, decisionPrompt, isCard, localizedCardLog, opponentSeat, previousAttackHasName, requestDiscardChoice, resolveDiscardChoice, yesNoPrompt } from "./shared-helpers.js";
 
 // Part the Mistveil. Reprints reuse their existing functional-key scripts;
 // this module contains only identities first introduced by MST.
@@ -545,7 +545,7 @@ function koiKimono(): CardScript {
   return {
     triggersWhileFaceDown: true,
     triggers: [{ event: "start-of-turn", condition: (ctx) => ctx.self.faceDown === true && ctx.player(ctx.seat).life === 1, optional: true, label: "Turn Koi Blessed Kimono face-up?", onAccept(ctx) { ctx.setCardFaceDown(ctx.self.instanceId, false); }, effect(ctx) { ctx.destroySelf(); const chi = ctx.player(ctx.seat).deck.filter((card) => data(ctx, card).name === "Inner Chi"); if (chi.length) ctx.requestCardChoice("koi-chi", decisionPrompt("Search for Inner Chi", "card.mst.innerchi.search"), chi.map((card) => card.instanceId)); else ctx.shuffleDeck(); } }],
-    onChoose(ctx, hook, option) { if (hook !== "koi-chi") return; const card = ctx.player(ctx.seat).deck.find((candidate) => candidate.instanceId === Number(option)); if (!card) return; ctx.logPublic(`${ctx.data.name} reveals ${data(ctx, card).name}`); ctx.moveToHand(card.instanceId); ctx.shuffleDeck(); },
+    onChoose(ctx, hook, option) { if (hook !== "koi-chi") return; const card = ctx.player(ctx.seat).deck.find((candidate) => candidate.instanceId === Number(option)); if (!card) return; ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} reveals ${data(ctx, card).name} and puts it into hand`, "card.log.mst.innerchi.found", { result: { kind: "card", cardId: card.cardId } }, { kind: "card-moved", cardId: card.cardId, ownerSeat: ctx.seat, from: "deck", to: "hand" })); ctx.moveToHand(card.instanceId); ctx.shuffleDeck(); },
   };
 }
 

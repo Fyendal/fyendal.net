@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, commonOptionMessages, dealArcane, decisionMessage, decisionPrompt, opponentSeat } from "./shared-helpers.js";
+import { buffNextAttack, commonOptionMessages, dealArcane, decisionMessage, decisionPrompt, localizedCardLog, opponentSeat } from "./shared-helpers.js";
 
 const LIGHTNING = "AST028";
 
@@ -25,7 +25,13 @@ function revealInstantEquipment(effect: (ctx: ScriptCtx) => void): CardScript {
       if (hook !== "ast-reveal-instant" || option === "none") return;
       const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
       if (!card || !ctx.hasCardType(card, "instant")) return;
-      ctx.logPublic(`${ctx.data.name} reveals ${data(ctx, card).name}`);
+      ctx.logPublic(localizedCardLog(
+        ctx,
+        `${ctx.data.name} reveals ${data(ctx, card).name}`,
+        "card.log.common.card.revealed",
+        { revealed: { kind: "card", cardId: card.cardId } },
+        { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" },
+      ));
       effect(ctx);
     },
   };
@@ -146,7 +152,13 @@ export const ast: Record<string, CardScript> = {
         const id = Number(option);
         const card = ctx.player(ctx.seat).deck.find((candidate) => candidate.instanceId === id);
         if (!card || !ctx.banish(id)) return;
-        ctx.logPublic(`${ctx.data.name} reveals ${data(ctx, card).name}`);
+        ctx.logPublic(localizedCardLog(
+          ctx,
+          `${ctx.data.name} reveals ${data(ctx, card).name} and banishes it`,
+          "card.log.ast.search.banished",
+          { result: { kind: "card", cardId: card.cardId } },
+          { kind: "card-moved", cardId: card.cardId, ownerSeat: ctx.seat, from: "deck", to: "banish" },
+        ));
         ctx.shuffleDeck();
         ctx.allowPlayFrom(id, "banish");
       }

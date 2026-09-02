@@ -3,6 +3,7 @@ import {
   buffNextAttack,
   commonOptionMessages,
   decisionPrompt,
+  localizedCardLog,
   optN,
   optOnChoose,
   opponentSeat,
@@ -25,7 +26,13 @@ function vestOfTheFirstFist(): CardScript {
       if (hook !== "vest-first-fist" || option !== "yes") return;
       ctx.destroySelf();
       ctx.changeResources(ctx.seat, 2);
-      ctx.logPublic("Vest of the First Fist is destroyed — gain {r}{r}");
+      ctx.logPublic(localizedCardLog(
+        ctx,
+        "Vest of the First Fist is destroyed — gain {r}{r}",
+        "card.log.common.destroyed.resources",
+        { amount: 2 },
+        { kind: "card-moved", cardId: ctx.self.cardId, ownerSeat: ctx.seat, from: "equipment", to: "graveyard" },
+      ));
     },
   };
 }
@@ -79,7 +86,7 @@ function eirinasPrayer(base: number): CardScript {
       if (!top) return;
       const pitch = ctx.cardData(top.cardId).pitch ?? 0;
       const amount = Math.max(0, base - pitch);
-      ctx.logPublic(`${ctx.data.name} reveals ${ctx.cardData(top.cardId).name}`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} reveals ${ctx.cardData(top.cardId).name}`, "card.log.common.decktop.revealed", { revealed: { kind: "card", cardId: top.cardId } }, { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" }));
       if (amount > 0) ctx.preventNextArcaneDamage(ctx.seat, amount);
     },
   };
@@ -151,7 +158,13 @@ function moonWish(): CardScript {
       const card = ctx.player(ctx.seat).deck.find((candidate) => candidate.instanceId === instanceId);
       if (!card || !ctx.moveToHand(instanceId)) return;
       ctx.shuffleDeck(ctx.seat);
-      ctx.logPublic(`${ctx.data.name} finds ${ctx.cardData(card.cardId).name}`);
+      ctx.logPublic(localizedCardLog(
+        ctx,
+        `${ctx.data.name} finds ${ctx.cardData(card.cardId).name}`,
+        "card.log.arc.search.hand",
+        { result: { kind: "card", cardId: card.cardId } },
+        { kind: "card-moved", cardId: card.cardId, ownerSeat: ctx.seat, from: "deck", to: "hand" },
+      ));
     },
   };
 }
@@ -173,7 +186,7 @@ function ravenousRabble(): CardScript {
       const top = ctx.player(ctx.seat).deck[0];
       const pitch = top ? (ctx.cardData(top.cardId).pitch ?? 0) : 0;
       ctx.setFlag("link", "ravenousRabblePenalty", pitch);
-      if (top) ctx.logPublic(`${ctx.data.name} reveals ${ctx.cardData(top.cardId).name}`);
+      if (top) ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} reveals ${ctx.cardData(top.cardId).name}`, "card.log.common.decktop.revealed", { revealed: { kind: "card", cardId: top.cardId } }, { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" }));
     },
     modifyAttack(ctx) {
       return -Number(ctx.getFlag("link", "ravenousRabblePenalty") || 0);
@@ -185,7 +198,7 @@ function rifting(): CardScript {
   return {
     onHit(ctx) {
       ctx.setFlag("player", "nextNonAttackAsInstant", true);
-      ctx.logPublic("Your next non-attack action card this turn may be played as though it were an instant");
+      ctx.logPublic(localizedCardLog(ctx, "Your next non-attack action card this turn may be played as though it were an instant", "card.log.arc.nextnonattack.instant"));
     },
   };
 }
@@ -254,7 +267,7 @@ export const arcGeneric: Record<string, CardScript> = {
         const top = ctx.player(ctx.seat).deck[0];
         if (!top) return;
         const attack = 3 - (ctx.cardData(top.cardId).pitch ?? 0);
-        ctx.logPublic(`${ctx.data.name} reveals ${ctx.cardData(top.cardId).name}`);
+        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} reveals ${ctx.cardData(top.cardId).name}`, "card.log.common.decktop.revealed", { revealed: { kind: "card", cardId: top.cardId } }, { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" }));
         buffNextAttack(ctx, { attack, appliesTo: "attack-action" });
       },
     },

@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { commonOptionMessages, decisionPrompt, yesNoPrompt } from "./shared-helpers.js";
+import { commonOptionMessages, decisionPrompt, localizedCardLog, yesNoPrompt } from "./shared-helpers.js";
 
 function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
   return ctx.cardData(card.cardId);
@@ -127,7 +127,7 @@ export const aio: Record<string, CardScript> = {
       );
       if (!activated) return;
       ctx.changeResources(ctx.seat, 1);
-      ctx.logPublic("Heavy Industry Power Plant: gain {r}");
+      ctx.logPublic(localizedCardLog(ctx, "Heavy Industry Power Plant: gain {r}", "card.log.common.resources.gained", { amount: 1 }));
     },
   },
   "heavy industry ram stop|0": {

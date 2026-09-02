@@ -1,5 +1,5 @@
 import type { CardScript, DeepReadonly, CardInstance, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, commonOptionMessages, decisionPrompt, opponentSeat } from "./shared-helpers.js";
+import { buffNextAttack, commonOptionMessages, decisionPrompt, localizedCardLog, opponentSeat } from "./shared-helpers.js";
 
 const SEISMIC_SURGE = "SBR035";
 
@@ -207,7 +207,13 @@ function renounceGrandeur(): CardScript {
     canTriggerOnHit: crushTriggered,
     onHit(ctx) {
       ctx.preventAuraTokenCreationNextTurn(opponentSeat(ctx));
-      ctx.logPublic("Renounce Grandeur: the defending hero can't create aura tokens next turn");
+      const target = opponentSeat(ctx);
+      ctx.logPublic(localizedCardLog(
+        ctx,
+        "Renounce Grandeur: the defending hero can't create aura tokens next turn",
+        "card.log.mpg.auras.suppressed",
+        { target: { kind: "player", seat: target } },
+      ));
     },
   };
 }
@@ -510,7 +516,13 @@ function crashAndBash(): CardScript {
       if (hook !== "crash-reveal" || option === "no") return;
       const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
       if (!card) return;
-      ctx.logPublic(`Crash and Bash reveals ${data(ctx, card).name} from hand`);
+      ctx.logPublic(localizedCardLog(
+        ctx,
+        `Crash and Bash reveals ${data(ctx, card).name} from hand`,
+        "card.log.sbr.crash.revealed",
+        { revealed: { kind: "card", cardId: card.cardId } },
+        { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" },
+      ));
       ctx.createToken(SEISMIC_SURGE);
     },
   };

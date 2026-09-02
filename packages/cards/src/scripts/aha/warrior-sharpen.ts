@@ -1,5 +1,5 @@
 import type { CardInstance, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, commonOptionMessages, decisionPrompt } from "../shared-helpers.js";
+import { buffNextAttack, commonOptionMessages, decisionPrompt, localizedLog } from "../shared-helpers.js";
 
 type Card = DeepReadonly<CardInstance>;
 
@@ -112,7 +112,7 @@ export function sharpenSword(
     "clearWeaponPowerCountersAtTurn",
     ctx.state.activePlayer === ctx.seat ? ctx.state.turn : ctx.state.turn + 1,
   );
-  ctx.logPublic(`${ctx.cardData(sword.cardId).name} is sharpened ${total} time(s)`);
+  ctx.logPublic(localizedLog(`${ctx.cardData(sword.cardId).name} is sharpened ${total} time(s)`, "card.log.aha.sword.sharpened", { target: { kind: "card", cardId: sword.cardId }, count: total }));
 
   const isZenithBlade = ctx.cardData(sword.cardId).name === "Zenith Blade";
   if (

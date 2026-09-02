@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, commonOptionMessages, decisionMessage, decisionPrompt, opponentSeat, yesNoPrompt } from "./shared-helpers.js";
+import { buffNextAttack, commonOptionMessages, decisionMessage, decisionPrompt, localizedCardLog, opponentSeat, yesNoPrompt } from "./shared-helpers.js";
 
 function isArrow(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.cardTypes(card).includes("arrow");
@@ -169,7 +169,7 @@ export const aaz: Record<string, CardScript> = {
         const id = Number(option);
         const card = ctx.player(ctx.seat).deck.find((candidate) => candidate.instanceId === id);
         if (!card) return;
-        ctx.logPublic(`${ctx.data.name} reveals ${ctx.cardData(card.cardId).name}`);
+        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} reveals ${ctx.cardData(card.cardId).name}`, "card.log.common.card.revealed", { revealed: { kind: "card", cardId: card.cardId } }, { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" }));
         ctx.shuffleDeck();
         ctx.putOnDeckTop(id);
         reload(ctx);
