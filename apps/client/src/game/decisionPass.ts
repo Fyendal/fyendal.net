@@ -20,14 +20,14 @@ export function shouldHidePriorityGuidance(
   return isPriorityGuidanceDecision(decision);
 }
 
-/** Hide the pass alias when it already lives in the status float or an
- * optional decision has an explicit No. */
+/** Keep Pass beside priority guidance as well as in the persistent status
+ * float. A playable instant prevents auto-pass, and separating the only
+ * escape from the explanatory prompt can make the game look stalled. */
 export function shouldShowDecisionPass(
   decision: PendingDecision | null,
   canPass: boolean,
 ): boolean {
   if (!canPass) return false;
-  if (isPriorityGuidanceDecision(decision)) return false;
   if (decision?.kind === "arsenal") return false;
   if (decision?.kind !== "optional-effect") return true;
   return !(decision.options ?? []).some((option) => option.trim().toLowerCase() === "no");

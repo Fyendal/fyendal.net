@@ -1678,6 +1678,80 @@ describe("pitch & costs", () => {
     expect(player(s, 0).hero.counters?.firstAttackExtraCost).toBe(1);
   });
 
+  it("a delayed first-action tax is paid and consumed by an action card", () => {
+    let s = makeGame(413);
+    const action = giveCard(s, 0, "PUMP");
+    const pitch = giveCard(s, 0, "BLUE");
+    player(s, 0).hero.counters = {
+      firstActionExtraCostTurn: s.turn,
+      firstActionExtraCost: 1,
+    };
+
+    const intents = legalIntents(s, 0).filter(
+      (intent) => intent.kind === "play-card" && intent.instanceId === action,
+    );
+    expect(intents.some((intent) => intent.kind === "play-card" && intent.pitchInstanceIds.length === 0)).toBe(false);
+    expect(intents.some(
+      (intent) => intent.kind === "play-card" && intent.pitchInstanceIds.length === 1 && intent.pitchInstanceIds[0] === pitch,
+    )).toBe(true);
+    const result = applyIntent(s, 0, {
+      kind: "play-card",
+      instanceId: action,
+      pitchInstanceIds: [pitch],
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    s = result.state;
+    expect(player(s, 0).resources).toBe(2);
+    expect(player(s, 0).hero.counters?.firstActionExtraCost).toBeUndefined();
+  });
+
+  it("a delayed first-action tax ignores instant cards", () => {
+    const s = makeGame(414);
+    const instant = giveCard(s, 0, "INSTANT");
+    player(s, 0).hero.counters = {
+      firstActionExtraCostTurn: s.turn,
+      firstActionExtraCost: 1,
+    };
+
+    const result = applyIntent(s, 0, {
+      kind: "play-card",
+      instanceId: instant,
+      pitchInstanceIds: [],
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(player(result.state, 0).hero.counters?.firstActionExtraCost).toBe(1);
+  });
+
+  it("a delayed first-action tax applies to action abilities", () => {
+    const s = makeGame(415);
+    const weapon = player(s, 0).weapons[0]!;
+    const pitch = giveCard(s, 0, "YEL");
+    player(s, 0).hand = player(s, 0).hand.filter((card) => card.instanceId === pitch);
+    player(s, 0).hero.counters = {
+      firstActionExtraCostTurn: s.turn,
+      firstActionExtraCost: 1,
+    };
+
+    const intents = legalIntents(s, 0).filter(
+      (intent) => intent.kind === "activate-ability" && intent.sourceInstanceId === weapon.instanceId,
+    );
+    expect(intents.some((intent) => intent.kind === "activate-ability" && intent.pitchInstanceIds.length === 0)).toBe(false);
+    expect(intents.some(
+      (intent) => intent.kind === "activate-ability" && intent.pitchInstanceIds.length === 1 && intent.pitchInstanceIds[0] === pitch,
+    )).toBe(true);
+    const result = applyIntent(s, 0, {
+      kind: "activate-ability",
+      sourceInstanceId: weapon.instanceId,
+      pitchInstanceIds: [pitch],
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(player(result.state, 0).resources).toBe(0);
+    expect(player(result.state, 0).hero.counters?.firstActionExtraCost).toBeUndefined();
+  });
+
   it("a delayed first-attack tax is paid and consumed by an attack action card", () => {
     let s = makeGame(404);
     const attack = giveCard(s, 0, "ATK6");
@@ -3644,8 +3718,9 @@ describe("ongoing effects", () => {
   it("projects delayed Crush restrictions on the affected opponent", () => {
     const s = makeGame(51);
     const opponent = player(s, 1);
-    opponent.flags.nextActionExtraCost = 1;
     opponent.hero.counters = {
+      firstActionExtraCostTurn: s.turn,
+      firstActionExtraCost: 1,
       halveBaseAttackActionUntil: s.turn + 1,
       attackActionBasePowerLimitUntilTurn: s.turn + 1,
       attackActionBasePowerLimit: 3,

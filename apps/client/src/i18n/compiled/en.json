@@ -1121,6 +1121,264 @@
       "value": "Squire's Bracers: destroy this so the sword's next attack gets +2 power?"
     }
   ],
+  "card.dtd.angel.soul.banish": [
+    {
+      "type": 0,
+      "value": "Banish a soul card for this angel's ability?"
+    }
+  ],
+  "card.dtd.arsenal.banish.choose": [
+    {
+      "type": 0,
+      "value": "Choose a card from your arsenal to banish"
+    }
+  ],
+  "card.dtd.attack.bottom.choose": [
+    {
+      "type": 0,
+      "value": "Choose an attack to put on the bottom"
+    }
+  ],
+  "card.dtd.attack.top.optional": [
+    {
+      "type": 0,
+      "value": "Put an attack action on top of your deck?"
+    }
+  ],
+  "card.dtd.aura.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy a non-token aura"
+    }
+  ],
+  "card.dtd.banished.action.choose": [
+    {
+      "type": 0,
+      "value": "Choose a banished action card"
+    }
+  ],
+  "card.dtd.banished.action.different": [
+    {
+      "type": 0,
+      "value": "Choose a differently named banished action"
+    }
+  ],
+  "card.dtd.banished.attack.choose": [
+    {
+      "type": 0,
+      "value": "Choose a banished attack action"
+    }
+  ],
+  "card.dtd.banished.facedown": [
+    {
+      "type": 0,
+      "value": "Turn a banished card face down"
+    }
+  ],
+  "card.dtd.banished.facedown.optional": [
+    {
+      "type": 0,
+      "value": "Turn a banished card face down?"
+    }
+  ],
+  "card.dtd.card.banish": [
+    {
+      "type": 0,
+      "value": "Banish a card"
+    }
+  ],
+  "card.dtd.card.name": [
+    {
+      "type": 0,
+      "value": "Name a card"
+    }
+  ],
+  "card.dtd.charge.choose": [
+    {
+      "type": 0,
+      "value": "Charge a card"
+    }
+  ],
+  "card.dtd.charge.optional": [
+    {
+      "type": 0,
+      "value": "Charge a card?"
+    }
+  ],
+  "card.dtd.charge.soul.optional": [
+    {
+      "type": 0,
+      "value": "Charge your hero's soul?"
+    }
+  ],
+  "card.dtd.defender.defense.halve": [
+    {
+      "type": 0,
+      "value": "Choose a defending card to halve its base defense"
+    }
+  ],
+  "card.dtd.defending.soul.banish": [
+    {
+      "type": 0,
+      "value": "Banish a card from the defending hero's soul"
+    }
+  ],
+  "card.dtd.diplomacy.choose": [
+    {
+      "type": 0,
+      "value": "Choose war or peace"
+    }
+  ],
+  "card.dtd.figment.awaken.choose": [
+    {
+      "type": 0,
+      "value": "Choose a Figment to awaken"
+    }
+  ],
+  "card.dtd.figment.search": [
+    {
+      "type": 0,
+      "value": "Search for a Figment?"
+    }
+  ],
+  "card.dtd.figment.search.arena": [
+    {
+      "type": 0,
+      "value": "Search your deck for a Figment and put it into the arena?"
+    }
+  ],
+  "card.dtd.hand.banish.choose": [
+    {
+      "type": 0,
+      "value": "Choose a card from your hand to banish"
+    }
+  ],
+  "card.dtd.hand.card.banish": [
+    {
+      "type": 0,
+      "value": "Banish a card from your hand"
+    }
+  ],
+  "card.dtd.item.steal": [
+    {
+      "type": 0,
+      "value": "Steal an item"
+    }
+  ],
+  "card.dtd.lance.mode": [
+    {
+      "type": 0,
+      "value": "Choose a Lumina Lance mode"
+    }
+  ],
+  "card.dtd.lance.mode.next": [
+    {
+      "type": 0,
+      "value": "Choose another Lumina Lance mode"
+    }
+  ],
+  "card.dtd.lance.option.draw": [
+    {
+      "type": 0,
+      "value": "On hit, draw a card"
+    }
+  ],
+  "card.dtd.lance.option.goagain": [
+    {
+      "type": 0,
+      "value": "On hit, gain go again"
+    }
+  ],
+  "card.dtd.lance.option.power": [
+    {
+      "type": 0,
+      "value": "+2 power"
+    }
+  ],
+  "card.dtd.option.peace": [
+    {
+      "type": 0,
+      "value": "Peace"
+    }
+  ],
+  "card.dtd.option.war": [
+    {
+      "type": 0,
+      "value": "War"
+    }
+  ],
+  "card.dtd.ponder.pay": [
+    {
+      "type": 0,
+      "value": "Pay 1 to create Ponder?"
+    }
+  ],
+  "card.dtd.revealed.attack.choose": [
+    {
+      "type": 0,
+      "value": "Choose a revealed attack"
+    }
+  ],
+  "card.dtd.revealed.attack.none": [
+    {
+      "type": 0,
+      "value": "No revealed attacks can be chosen"
+    }
+  ],
+  "card.dtd.runechant.effect.life.pay": [
+    {
+      "type": 0,
+      "value": "Pay 1 life to make the next Runechant effect unpreventable?"
+    }
+  ],
+  "card.dtd.runechant.life.pay": [
+    {
+      "type": 0,
+      "value": "Pay 1 life to make the next Runechant unpreventable?"
+    }
+  ],
+  "card.dtd.soul.banish.next": [
+    {
+      "type": 0,
+      "value": "Banish another soul card?"
+    }
+  ],
+  "card.dtd.soul.banish.shields": [
+    {
+      "type": 0,
+      "value": "Banish a card from your hero's soul to create 2 Spectral Shields?"
+    }
+  ],
+  "card.dtd.soul.banish.three": [
+    {
+      "type": 0,
+      "value": "Banish up to 3 cards from soul"
+    }
+  ],
+  "card.dtd.soul.card.banish": [
+    {
+      "type": 0,
+      "value": "Banish a soul card"
+    }
+  ],
+  "card.dtd.yellow.action.top": [
+    {
+      "type": 0,
+      "value": "Put a yellow action on top"
+    }
+  ],
+  "card.dtd.yellow.card.top": [
+    {
+      "type": 0,
+      "value": "Put a yellow card on top"
+    }
+  ],
+  "card.dtd.yellow.soul": [
+    {
+      "type": 0,
+      "value": "Put the revealed yellow card into your soul?"
+    }
+  ],
   "card.dyn.aetherslash.target.choose": [
     {
       "type": 0,
@@ -4997,6 +5255,412 @@
     {
       "type": 0,
       "value": "Terra: pay 1 resource to create a Might token?"
+    }
+  ],
+  "card.upr.action.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": put an action on the bottom"
+    }
+  ],
+  "card.upr.alluvion.counter": [
+    {
+      "type": 0,
+      "value": "Put an energy counter on Alluvion Constellas?"
+    }
+  ],
+  "card.upr.arcane.ally.choose": [
+    {
+      "type": 0,
+      "value": "Deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage to an ally?"
+    }
+  ],
+  "card.upr.arcane.ally.next": [
+    {
+      "type": 0,
+      "value": "Deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage to another ally?"
+    }
+  ],
+  "card.upr.arcane.hero.choose": [
+    {
+      "type": 0,
+      "value": "Choose a hero for "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage"
+    }
+  ],
+  "card.upr.arcane.target.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage to any target"
+    }
+  ],
+  "card.upr.ash.transform.choose": [
+    {
+      "type": 0,
+      "value": "Choose an Ash to transform"
+    }
+  ],
+  "card.upr.ash.transform.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose an Ash to transform"
+    }
+  ],
+  "card.upr.attack.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": banish an eligible attack?"
+    }
+  ],
+  "card.upr.azvolai.target.next": [
+    {
+      "type": 0,
+      "value": "Azvolai: deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage to another target?"
+    }
+  ],
+  "card.upr.azvolai.targets": [
+    {
+      "type": 0,
+      "value": "Azvolai: deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage to up to "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " targets"
+    }
+  ],
+  "card.upr.card.banish.choose": [
+    {
+      "type": 0,
+      "value": "Choose a card to banish"
+    }
+  ],
+  "card.upr.card.bottom.draw": [
+    {
+      "type": 0,
+      "value": "Put a card on the bottom to draw?"
+    }
+  ],
+  "card.upr.damage.source.choose": [
+    {
+      "type": 0,
+      "value": "Choose a damage source"
+    }
+  ],
+  "card.upr.damage.target.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " damage to any target"
+    }
+  ],
+  "card.upr.discard.choose": [
+    {
+      "type": 0,
+      "value": "Choose a card to discard"
+    }
+  ],
+  "card.upr.discard.draw": [
+    {
+      "type": 0,
+      "value": "Discard a card to draw?"
+    }
+  ],
+  "card.upr.fai.startflame": [
+    {
+      "type": 0,
+      "value": "Start the game with a Phoenix Flame in your graveyard?"
+    }
+  ],
+  "card.upr.freeze.ally": [
+    {
+      "type": 0,
+      "value": "Freeze an ally?"
+    }
+  ],
+  "card.upr.freeze.arsenal": [
+    {
+      "type": 0,
+      "value": "Freeze their arsenal card?"
+    }
+  ],
+  "card.upr.freeze.avoid.pay": [
+    {
+      "type": 0,
+      "value": "Pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " to avoid freezing?"
+    }
+  ],
+  "card.upr.freeze.card.choose": [
+    {
+      "type": 0,
+      "value": "Choose a card to freeze"
+    }
+  ],
+  "card.upr.frozen.ice.choose": [
+    {
+      "type": 0,
+      "value": "Choose a frozen card or Ice permanent"
+    }
+  ],
+  "card.upr.hand.bottom.upto": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": put up to "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " cards on the bottom"
+    }
+  ],
+  "card.upr.hero.choose": [
+    {
+      "type": 0,
+      "value": "Choose a hero"
+    }
+  ],
+  "card.upr.hero.choose.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose a hero"
+    }
+  ],
+  "card.upr.ice.bottom": [
+    {
+      "type": 0,
+      "value": "Put an Ice card on the bottom of your deck"
+    }
+  ],
+  "card.upr.ice.bottom.next": [
+    {
+      "type": 0,
+      "value": "Put another Ice card on the bottom of your deck"
+    }
+  ],
+  "card.upr.ice.fusion.reveal": [
+    {
+      "type": 0,
+      "value": "Reveal an Ice card to fuse?"
+    }
+  ],
+  "card.upr.ice.fusion.reveal.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": reveal an Ice card from your hand to fuse?"
+    }
+  ],
+  "card.upr.kyloria.item.control": [
+    {
+      "type": 0,
+      "value": "Kyloria: gain control of an item"
+    }
+  ],
+  "card.upr.life.gain": [
+    {
+      "type": 0,
+      "value": "Gain 1 life?"
+    }
+  ],
+  "card.upr.nonattack.negate": [
+    {
+      "type": 0,
+      "value": "Choose a non-attack action to negate"
+    }
+  ],
+  "card.upr.opposing.hand.banish": [
+    {
+      "type": 0,
+      "value": "Choose a card from the opposing hand to banish"
+    }
+  ],
+  "card.upr.option.you": [
+    {
+      "type": 0,
+      "value": "You"
+    }
+  ],
+  "card.upr.pay.or.discard": [
+    {
+      "type": 0,
+      "value": "Pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " or discard a card"
+    }
+  ],
+  "card.upr.phoenixflame.banish.goagain": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": banish a Phoenix Flame for +2 and go again?"
+    }
+  ],
+  "card.upr.phoenixflame.return": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": return a Phoenix Flame?"
+    }
+  ],
+  "card.upr.phoenixflame.return.goagain": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": return a Phoenix Flame and gain go again?"
+    }
+  ],
+  "card.upr.power.pay": [
+    {
+      "type": 0,
+      "value": "Pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " for +"
+    },
+    {
+      "type": 1,
+      "value": "power"
+    },
+    {
+      "type": 0,
+      "value": " power?"
+    }
+  ],
+  "card.upr.revealed.action.none": [
+    {
+      "type": 0,
+      "value": "No revealed action can be put on top"
+    }
+  ],
+  "card.upr.revealed.action.top": [
+    {
+      "type": 0,
+      "value": "Put a revealed action on top"
+    }
+  ],
+  "card.upr.tomeltai.equipment.choose": [
+    {
+      "type": 0,
+      "value": "Choose equipment for Tomeltai"
     }
   ],
   "card.wtr.bolters.destroy": [

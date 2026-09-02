@@ -62,6 +62,26 @@ export function consumeFirstAttackExtraCost(
   delete player.hero.counters?.firstAttackExtraCostTurn;
 }
 
+/** Resource increase on this hero's first action during the stamped turn.
+ * The effect lives on the hero so it survives the intervening cleanup. */
+export function firstActionExtraCost(
+  state: GameStateInternal,
+  player: PlayerState,
+): number {
+  if (Number(player.hero.counters?.firstActionExtraCostTurn ?? 0) !== state.turn) return 0;
+  return Math.max(0, Number(player.hero.counters?.firstActionExtraCost ?? 0));
+}
+
+/** Consume the delayed first-action increase after its cost is paid. */
+export function consumeFirstActionExtraCost(
+  state: GameStateInternal,
+  player: PlayerState,
+): void {
+  if (firstActionExtraCost(state, player) <= 0) return;
+  delete player.hero.counters?.firstActionExtraCost;
+  delete player.hero.counters?.firstActionExtraCostTurn;
+}
+
 /** Whether a delayed cap prevents another action play or activation. */
 export function actionLimitReached(state: GameStateInternal, player: PlayerState): boolean {
   const turn = Number(player.hero.counters?.actionLimitTurn ?? 0);

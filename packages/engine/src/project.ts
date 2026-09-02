@@ -41,6 +41,7 @@ import { activatedAbilityUsage } from "./abilityRules.js";
 import { wardPieces } from "./damageResolution.js";
 import { playFromSourceCardId } from "./playRules.js";
 import { windowPrompt, windowPromptMessage } from "./triggers.js";
+import { firstActionExtraCost } from "./ruleQueries.js";
 
 interface CardViewOptions {
   controller?: PlayerState;
@@ -763,7 +764,7 @@ function ongoingEffects(state: GameStateInternal, viewer: number | null | undefi
     if (Number(counters?.cannotDrawActionTurn ?? 0) >= state.turn) {
       addHeroEffect("cannot-draw", "can't draw cards · next action phase");
     }
-    const nextActionExtraCost = Number(player.flags.nextActionExtraCost ?? 0);
+    const nextActionExtraCost = firstActionExtraCost(state, player);
     if (nextActionExtraCost > 0) {
       addHeroEffect("next-action-cost", `next action costs +${nextActionExtraCost} resource`);
     }

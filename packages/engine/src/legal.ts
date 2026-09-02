@@ -338,9 +338,7 @@ function playIntentsForCard(
     )) return [];
     return [{ ...first, pitchInstanceIds: [], pitchRequired: undefined }];
   };
-  const extraCost =
-    Number(player.flags.nextActionExtraCost || 0) +
-    (isAttackAction ? firstAttackExtraCost(state, player) : 0);
+  const extraCost = isAttackAction ? firstAttackExtraCost(state, player) : 0;
   const reduction =
     (isAttackAction ? Number(player.flags.nextActionCostReduction || 0) : 0) +
     (isAttackAction && (data.classes ?? []).some((c) => c.toLowerCase() === "guardian")

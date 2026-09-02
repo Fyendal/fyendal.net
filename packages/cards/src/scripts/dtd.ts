@@ -1,5 +1,14 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, bloodDebtScript as bloodDebt, buffNextAttack, mergeSetScripts, opponentSeat } from "./shared-helpers.js";
+import {
+  attackAbility,
+  bloodDebtScript as bloodDebt,
+  buffNextAttack,
+  commonOptionMessages,
+  decisionPrompt,
+  mergeSetScripts,
+  opponentSeat,
+  yesNoPrompt,
+} from "./shared-helpers.js";
 import { dtdHighRarity } from "./dtd/high-rarity.js";
 
 // Dusk till Dawn — commons, rares, young heroes, and required tokens.
@@ -34,7 +43,7 @@ function chargeAttack(extra: CardScript = {}): CardScript {
     ...extra,
     additionalCost(ctx) {
       const hand = ctx.player(ctx.seat).hand;
-      if (hand.length) ctx.requestCardChoice("dtd-charge", "Charge your hero's soul?", ["no", ...hand.map((card) => card.instanceId)]);
+      if (hand.length) ctx.requestCardChoice("dtd-charge", decisionPrompt("Charge your hero's soul?", "card.dtd.charge.soul.optional", { optionMessages: commonOptionMessages("no") }), ["no", ...hand.map((card) => card.instanceId)]);
       extra.additionalCost?.(ctx);
     },
     onChoose(ctx, hook, option) {
@@ -98,7 +107,7 @@ function vForValor(power: number): CardScript {
       cost: 1, isAttack: false, goAgain: false, timing: "attack-reaction", destroySelfCost: true,
       canActivate: (ctx) => ownAttack(ctx) && ctx.player(ctx.seat).hand.length > 0,
       label: `Destroy and charge: attack +${power}`,
-      onActivate(ctx) { ctx.requestCardChoice("valor-charge", "Charge a card", ctx.player(ctx.seat).hand.map((card) => card.instanceId)); },
+      onActivate(ctx) { ctx.requestCardChoice("valor-charge", decisionPrompt("Charge a card", "card.dtd.charge.choose"), ctx.player(ctx.seat).hand.map((card) => card.instanceId)); },
     },
     onChoose(ctx, hook, option) {
       if (hook === "valor-charge" && ctx.charge(Number(option))) ctx.addModifier({ scope: "chain-link", attack: power });
@@ -173,7 +182,7 @@ function banishTargetSoul(): CardScript {
     },
     onHit(ctx) {
       const soul = ctx.player(opponentSeat(ctx)).soul;
-      if (soul.length) ctx.requestCardChoice("banish-soul", "Banish a card from the defending hero's soul", soul.map((card) => card.instanceId));
+      if (soul.length) ctx.requestCardChoice("banish-soul", decisionPrompt("Banish a card from the defending hero's soul", "card.dtd.defending.soul.banish"), soul.map((card) => card.instanceId));
     },
     onChoose(ctx, hook, option) { if (hook === "banish-soul") ctx.banish(Number(option)); },
   };
@@ -182,7 +191,7 @@ function banishBuff(power: number): CardScript {
   return {
     onPlay(ctx) {
       const cards = ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && isAttack(ctx, card));
-      if (cards.length) ctx.requestCardChoice("banish-buff", "Choose a banished attack action", cards.map((card) => card.instanceId));
+      if (cards.length) ctx.requestCardChoice("banish-buff", decisionPrompt("Choose a banished attack action", "card.dtd.banished.attack.choose"), cards.map((card) => card.instanceId));
     },
     onChoose(ctx, hook, option) { if (hook === "banish-buff") ctx.addCardTempPower(Number(option), power); },
   };
@@ -191,7 +200,7 @@ function banishGoAgain(pitch: number): CardScript {
   return {
     onPlay(ctx) {
       const cards = ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && ctx.hasCardType(card, "action") && ctx.cardColor(card) === pitch);
-      if (cards.length) ctx.requestCardChoice("banish-go", "Choose a banished action card", cards.map((card) => card.instanceId));
+      if (cards.length) ctx.requestCardChoice("banish-go", decisionPrompt("Choose a banished action card", "card.dtd.banished.action.choose"), cards.map((card) => card.instanceId));
     },
     onChoose(ctx, hook, option) { if (hook === "banish-go") ctx.grantCardKeyword(Number(option), "go again"); },
   };
@@ -211,7 +220,7 @@ export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRar
       if (figments.length > 0) {
         ctx.requestCardChoice(
           "prism-figment-search",
-          "Search your deck for a Figment and put it into the arena?",
+          decisionPrompt("Search your deck for a Figment and put it into the arena?", "card.dtd.figment.search.arena", { optionMessages: commonOptionMessages("no") }),
           ["no", ...figments.map((candidate) => candidate.instanceId)],
         );
       }
@@ -236,7 +245,7 @@ export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRar
         if (figments.length > 0) {
           ctx.requestCardChoice(
             "prism-awaken",
-            "Choose a Figment to awaken",
+            decisionPrompt("Choose a Figment to awaken", "card.dtd.figment.awaken.choose"),
             figments.map((card) => card.instanceId),
           );
         }
@@ -272,7 +281,7 @@ export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRar
       if (soul.length > 0) {
         ctx.requestCardChoice(
           "aegis-soul",
-          "Banish a card from your hero's soul to create 2 Spectral Shields?",
+          decisionPrompt("Banish a card from your hero's soul to create 2 Spectral Shields?", "card.dtd.soul.banish.shields", { optionMessages: commonOptionMessages("no") }),
           ["no", ...soul.map((card) => card.instanceId)],
         );
       }
@@ -309,7 +318,7 @@ export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRar
       {
         event: "start-of-turn", whose: "subject", label: "Banish a card from hand",
         condition: (ctx) => ctx.player(ctx.seat).hand.length > 0,
-        effect(ctx) { ctx.requestCardChoice("vynnset-banish", "Banish a card from your hand", ctx.player(ctx.seat).hand.map((card) => card.instanceId)); },
+        effect(ctx) { ctx.requestCardChoice("vynnset-banish", decisionPrompt("Banish a card from your hand", "card.dtd.hand.card.banish"), ctx.player(ctx.seat).hand.map((card) => card.instanceId)); },
       },
       {
         event: "card-played",
@@ -318,7 +327,7 @@ export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRar
           has(ctx, played, "shadow") &&
           ctx.player(ctx.seat).life > 1,
         effect(ctx) {
-          ctx.requestChoice("vynnset-life", "Pay 1 life to make the next Runechant effect unpreventable?", ["yes", "no"]);
+          ctx.requestChoice("vynnset-life", yesNoPrompt("Pay 1 life to make the next Runechant effect unpreventable?", "card.dtd.runechant.effect.life.pay"), ["yes", "no"]);
         },
       },
     ],
@@ -344,7 +353,7 @@ export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRar
     },
     onHit(ctx) {
       const soul = ctx.player(opponentSeat(ctx)).soul;
-      if (soul.length) ctx.requestCardChoice("nasreth", "Banish a soul card", soul.map((card) => card.instanceId));
+      if (soul.length) ctx.requestCardChoice("nasreth", decisionPrompt("Banish a soul card", "card.dtd.soul.card.banish"), soul.map((card) => card.instanceId));
     },
     onChoose(ctx, hook, option) {
       if (hook !== "nasreth") return;
@@ -370,7 +379,7 @@ export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRar
       ];
       if (!cards.length) return;
       ctx.setCounter("usedTurn", ctx.state.turn);
-      ctx.requestCardChoice("decimator", "Choose a defending card to halve its base defense", cards.map((card) => card.instanceId));
+      ctx.requestCardChoice("decimator", decisionPrompt("Choose a defending card to halve its base defense", "card.dtd.defender.defense.halve"), cards.map((card) => card.instanceId));
     },
     onChoose(ctx, hook, option) {
       if (hook !== "decimator") return;
@@ -431,7 +440,7 @@ for (const [pitch, power] of [[1, 3], [2, 2], [3, 1]] as const) {
     canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined; },
     onHit(ctx) {
       const banish = ctx.player(opponentSeat(ctx)).banish.filter((card) => !card.faceDown);
-      if (banish.length) ctx.requestCardChoice("lay-rest", "Turn a banished card face down?", ["no", ...banish.map((card) => card.instanceId)]);
+      if (banish.length) ctx.requestCardChoice("lay-rest", decisionPrompt("Turn a banished card face down?", "card.dtd.banished.facedown.optional", { optionMessages: commonOptionMessages("no") }), ["no", ...banish.map((card) => card.instanceId)]);
     },
     onChoose(ctx, hook, option) { if (hook === "lay-rest" && option !== "no") ctx.setCardFaceDown(Number(option), true); },
   };

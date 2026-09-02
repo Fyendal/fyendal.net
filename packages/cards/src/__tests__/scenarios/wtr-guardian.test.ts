@@ -135,7 +135,10 @@ describe("WTR Guardian — crush attacks", () => {
     const g = scenario({
       seats: [
         { hero: "rhinar", hand: ["cartilage crush|3", "titanium bauble|3"] },
-        { hero: "rhinar", hand: [] },
+        {
+          hero: "rhinar",
+          hand: ["what happens next?|3", "revolting gesture|1", "titanium bauble|3"],
+        },
       ],
     });
     g.play("cartilage crush|3")
@@ -143,7 +146,11 @@ describe("WTR Guardian — crush attacks", () => {
       .blockWith()
       .settle()
       .expectLog("Cartilage Crush: opponent's next action costs +{r}")
-      .expectLife(1, 15);
+      .expectLife(1, 15)
+      .endTurn()
+      .play("what happens next?|3")
+      .play("revolting gesture|1", { pitch: ["titanium bauble|3"] })
+      .expectResources(1, 2);
   });
 
   it("Crush Confidence crush disables opponent hero abilities", () => {
@@ -240,4 +247,3 @@ describe("WTR Guardian — defense reactions and equipment", () => {
       .expectLog("Helm of Isen's Peak: +1 intellect this turn");
   });
 });
-

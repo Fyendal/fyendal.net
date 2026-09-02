@@ -68,7 +68,7 @@ import { answerDieRollReplacement } from "./dieRoll.js";
 import { cardPlayRestrictedByModifier, cardPlayCost, cardPlayReductionForSeat, payAlternativePlayCost, preparePlayTarget, canPlayAsInstant, canRuneGate, consumeAttackCostReductions, mayPlayFromArsenal, mayPlayFromZone, playFromZoneRequiresInstant } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost, scriptedPaymentOptions } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
-import { actionLimitReached, controlsBow, firstAttackExtraCost, consumeFirstAttackExtraCost, isFrozen, opposingInstantsProhibited } from "./ruleQueries.js";
+import { actionLimitReached, consumeFirstActionExtraCost, controlsBow, firstActionExtraCost, firstAttackExtraCost, consumeFirstAttackExtraCost, isFrozen, opposingInstantsProhibited } from "./ruleQueries.js";
 import { nonAttackActionCardLimitReached } from "./restrictions.js";
 import { attackActionPlayRestricted, weaponAttacksProhibited } from "./combatRestrictions.js";
 import { pushAbilityLayer, pushCardLayer } from "./stackCore.js";
@@ -212,9 +212,8 @@ export function playCard(
     from === "arsenal",
   );
   if (targetErr) return targetErr;
-  const nextActionExtraCost = Number(player.flags.nextActionExtraCost || 0);
   const attackExtraCost = isAttackAction ? firstAttackExtraCost(state, player) : 0;
-  const extraCost = nextActionExtraCost + attackExtraCost;
+  const extraCost = attackExtraCost;
   const genericAttackReduction = isAttackAction
     ? Number(player.flags.nextActionCostReduction || 0)
     : 0;
@@ -319,7 +318,9 @@ export function playCard(
       .filter((candidate): candidate is CardInstance => candidate !== undefined);
     script.onPlayCostPaid(runtime.makeCtx(state, seat, card), paidCards);
   }
-  if (nextActionExtraCost > 0) player.flags.nextActionExtraCost = 0;
+  if (firstActionExtraCost(state, player) > 0 && cardHasType(state, card, "action")) {
+    consumeFirstActionExtraCost(state, player);
+  }
   if (attackExtraCost > 0) consumeFirstAttackExtraCost(state, player);
   if (genericAttackReduction > 0) player.flags.nextActionCostReduction = 0;
   if (guardianAttackReduction > 0) player.flags.nextGuardianAttackCostReduction = 0;
@@ -594,10 +595,9 @@ export function activateAbility(
         maximum: Math.max(0, Math.floor(variableCost.maximum ?? 127)),
       }
     : undefined;
-  const extraCost = Number(player.flags.nextActionExtraCost || 0);
   const resourceCostForBase = (base: number): number => ability.isAttack
-    ? attackActivationCost(state, runtime, player, card, base + extraCost, targetAllyId)
-    : abilityResourceCost(state, runtime, seat, card, { ...ability, cost: base }) + extraCost;
+    ? attackActivationCost(state, runtime, player, card, base, targetAllyId)
+    : abilityResourceCost(state, runtime, seat, card, { ...ability, cost: base });
   if (resolvedVariableCost && declaredVariableX === undefined) {
     if (pitchInstanceIds.length > 0) return "declare X before pitching for this ability";
     const choices = variableResourceChoices(
@@ -700,12 +700,11 @@ export function activateAbility(
     return undefined;
   }
   const resourceCost = ability.isAttack
-    ? attackActivationCost(state, runtime, player, card, costAbility.cost + extraCost, targetAllyId)
-    : abilityResourceCost(state, runtime, seat, card, costAbility) + extraCost;
+    ? attackActivationCost(state, runtime, player, card, costAbility.cost, targetAllyId)
+    : abilityResourceCost(state, runtime, seat, card, costAbility);
   const nextActionGoAgain = timing === "action" && consumeNextActionGoAgain(player);
   const prepErr = payActivatedAbilityCost(state, runtime, seat, card, costAbility, abilityIndex, pitchInstanceIds, resourceCost, {
     chiCost: ability.chiCost,
-    extraCost,
     soulInstanceIds: selectedSoulIds,
     effectCostInstanceIds: selectedEffectCostIds,
     discardInstanceIds,

@@ -14,6 +14,7 @@ import { currentLink, findCardAnywhere, heroSoulCards } from "./zoneQueries.js";
 import { tapPermanent } from "./cardLifecycle.js";
 import { MAX_ALTERNATIVE_COST_OPTIONS, consumeMatchingActivationCostReductions, costModifierScopeApplies, exactCardCombinations, modifierMatchesPlayedCard, opposingStaticCostIncrease, payDiscardCost, validateDiscardCost } from "./playRules.js";
 import { attackBasePowerRestricted } from "./combatRestrictions.js";
+import { consumeFirstActionExtraCost, firstActionExtraCost } from "./ruleQueries.js";
 
 /** Printed abilities plus temporary abilities granted to this owned card.
  * The returned functions are process definitions only; they are never stored
@@ -160,7 +161,7 @@ export function abilityResourceCost(
   runtime: EngineRuntime,
   seat: number,
   card: CardInstance,
-  ability: { cost: number; modifyCost?: (ctx: ScriptCtx, baseCost: number) => number },
+  ability: { cost: number; timing?: ActivatedAbility["timing"]; modifyCost?: (ctx: ScriptCtx, baseCost: number) => number },
   link?: ChainLinkState,
 ): number {
   let cost = ability.modifyCost
@@ -182,8 +183,11 @@ export function abilityResourceCost(
   const staffReduction = cardTypesOf(state, card).includes("staff")
     ? Number((state.players[seat] as PlayerState).flags.nextStaffAbilityCostReduction || 0)
     : 0;
+  const delayedActionIncrease = (ability.timing ?? "action") === "action"
+    ? firstActionExtraCost(state, state.players[seat] as PlayerState)
+    : 0;
   return Math.max(0, cost - nextReduction - staffReduction) + staticIncrease +
-    opposingStaticCostIncrease(state, seat) + turnIncrease;
+    opposingStaticCostIncrease(state, seat) + turnIncrease + delayedActionIncrease;
 }
 
 function activationCountKey(instanceId: number, abilityIndex: number): string {
@@ -476,7 +480,6 @@ export function payActivatedAbilityCost(
   resourceCost: number,
   opts?: {
     chiCost?: number;
-    extraCost?: number;
     soulInstanceIds?: number[];
     effectCostInstanceIds?: number[];
     discardInstanceIds?: number[];
@@ -586,8 +589,9 @@ export function payActivatedAbilityCost(
     if (remaining > 0) counters[counterCost.key] = remaining;
     else delete counters[counterCost.key];
   }
-  const extraCost = opts?.extraCost ?? 0;
-  if (extraCost > 0) player.flags.nextActionExtraCost = 0;
+  if ((ability.timing ?? "action") === "action") {
+    consumeFirstActionExtraCost(state, player);
+  }
   const usedAgainstLimit = activationsAgainstLimit(player, card.instanceId, abilityIndex, ability);
   const usedActivations = activationCount(player, card.instanceId, abilityIndex);
   player.flags[activationCountKey(card.instanceId, abilityIndex)] = usedActivations + 1;
