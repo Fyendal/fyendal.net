@@ -26,6 +26,26 @@ export function consumeNextActionGoAgain(player: PlayerState): boolean {
   return true;
 }
 
+/** Clear per-turn activated-ability usage when a card enters the arena as a
+ * new game object while retaining its stable physical-card instance id. */
+export function resetActivatedAbilityUsage(player: PlayerState, instanceId: number): void {
+  const exactKeys = new Set([
+    `activated:${instanceId}`,
+    `attackActivationCount:${instanceId}`,
+    `setAttackActivationLimit:${instanceId}`,
+  ]);
+  const prefixes = [
+    `activated:${instanceId}:`,
+    `activationCount:${instanceId}:`,
+    `additionalActivations:${instanceId}:`,
+  ];
+  for (const key of Object.keys(player.flags)) {
+    if (exactKeys.has(key) || prefixes.some((prefix) => key.startsWith(prefix))) {
+      delete player.flags[key];
+    }
+  }
+}
+
 /** Clear metadata whose meaning is limited to a face-down private-zone
  * placement. Deck cards are inherently hidden without `faceDown`, and cards
  * in hand must expose their rules identity to their owner. */

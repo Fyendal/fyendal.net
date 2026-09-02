@@ -12249,6 +12249,996 @@
       "value": "Terra: pay 1 resource to create a Might token?"
     }
   ],
+  "card.trigger.common.actionpoint.gain": [
+    {
+      "type": 0,
+      "value": "Gain "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " action point"
+    }
+  ],
+  "card.trigger.common.adverseaura.random": [
+    {
+      "type": 0,
+      "value": "Create a random adverse Aura"
+    }
+  ],
+  "card.trigger.common.agentofchaos.random": [
+    {
+      "type": 0,
+      "value": "Become a random Agent of Chaos"
+    }
+  ],
+  "card.trigger.common.agility.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy Agility; the next attack gains go again"
+    }
+  ],
+  "card.trigger.common.amp": [
+    {
+      "type": 0,
+      "value": "Amp "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    }
+  ],
+  "card.trigger.common.arcane.deal": [
+    {
+      "type": 0,
+      "value": "Deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage"
+    }
+  ],
+  "card.trigger.common.arcane.eachhero": [
+    {
+      "type": 0,
+      "value": "Deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage to each hero"
+    }
+  ],
+  "card.trigger.common.arcane.target": [
+    {
+      "type": 0,
+      "value": "Deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage to target hero"
+    }
+  ],
+  "card.trigger.common.attack.gain": [
+    {
+      "type": 0,
+      "value": "Gain +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " attack"
+    }
+  ],
+  "card.trigger.common.aura.bottom.another": [
+    {
+      "type": 0,
+      "value": "Put another Aura on the bottom of its owner's deck"
+    }
+  ],
+  "card.trigger.common.aura.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy an Aura"
+    }
+  ],
+  "card.trigger.common.aura.return.optional": [
+    {
+      "type": 0,
+      "value": "Return an eligible Aura to its owner's hand?"
+    }
+  ],
+  "card.trigger.common.biosupdate.arena": [
+    {
+      "type": 0,
+      "value": "Bios Update: put the banished item into the arena"
+    }
+  ],
+  "card.trigger.common.bladedance.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy Blade Dance to gain go again"
+    }
+  ],
+  "card.trigger.common.blessing.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy this Blessing"
+    }
+  ],
+  "card.trigger.common.blessingdeliverance.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy Blessing of Deliverance and reveal the top cards"
+    }
+  ],
+  "card.trigger.common.bloodrotpox.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy Bloodrot Pox: take "
+    },
+    {
+      "type": 1,
+      "value": "damage"
+    },
+    {
+      "type": 0,
+      "value": " damage unless you pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " resources"
+    }
+  ],
+  "card.trigger.common.bonepuppetry.discard": [
+    {
+      "type": 0,
+      "value": "Resolve Bone Puppetry's discard"
+    }
+  ],
+  "card.trigger.common.brood.return": [
+    {
+      "type": 0,
+      "value": "Return to the brood"
+    }
+  ],
+  "card.trigger.common.card.banish.runechant": [
+    {
+      "type": 0,
+      "value": "Banish a card and create a Runechant"
+    }
+  ],
+  "card.trigger.common.card.draw": [
+    {
+      "type": 0,
+      "value": "Draw a card"
+    }
+  ],
+  "card.trigger.common.carrionhusk.banish": [
+    {
+      "type": 0,
+      "value": "Banish Carrion Husk"
+    }
+  ],
+  "card.trigger.common.channel.earth": [
+    {
+      "type": 0,
+      "value": "Channel Earth"
+    }
+  ],
+  "card.trigger.common.channel.ice": [
+    {
+      "type": 0,
+      "value": "Channel Ice"
+    }
+  ],
+  "card.trigger.common.channel.lightning": [
+    {
+      "type": 0,
+      "value": "Channel Lightning"
+    }
+  ],
+  "card.trigger.common.confidence.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy Confidence; the next attack can have at most "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " non-block defenders"
+    }
+  ],
+  "card.trigger.common.copper.create": [
+    {
+      "type": 0,
+      "value": "Create Copper tokens"
+    }
+  ],
+  "card.trigger.common.copper.weaponhit": [
+    {
+      "type": 0,
+      "value": "Create Copper for weapon attacks that hit"
+    }
+  ],
+  "card.trigger.common.core.reaction": [
+    {
+      "type": 0,
+      "value": "Core Reaction"
+    }
+  ],
+  "card.trigger.common.courage.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy Courage; the attack gets +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " attack"
+    }
+  ],
+  "card.trigger.common.crouchingtiger.create": [
+    {
+      "type": 0,
+      "value": "Create Crouching Tiger"
+    }
+  ],
+  "card.trigger.common.dagger.attack": [
+    {
+      "type": 0,
+      "value": "Dagger attacks get +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " attack"
+    }
+  ],
+  "card.trigger.common.dagger.attacks.additional": [
+    {
+      "type": 0,
+      "value": "Gain additional dagger attacks"
+    }
+  ],
+  "card.trigger.common.dagger.goagain": [
+    {
+      "type": 0,
+      "value": "Dagger attacks gain go again"
+    }
+  ],
+  "card.trigger.common.damage.attackinghero": [
+    {
+      "type": 0,
+      "value": "Deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " damage to the attacking hero"
+    }
+  ],
+  "card.trigger.common.damage.deal": [
+    {
+      "type": 0,
+      "value": "Deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " damage"
+    }
+  ],
+  "card.trigger.common.dawnblade.counters.remove": [
+    {
+      "type": 0,
+      "value": "Dawnblade hasn't hit this turn; remove all +1 attack counters"
+    }
+  ],
+  "card.trigger.common.decay": [
+    {
+      "type": 0,
+      "value": "Decay"
+    }
+  ],
+  "card.trigger.common.deck.banish.power": [
+    {
+      "type": 0,
+      "value": "Banish cards until a card with "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " power is found"
+    }
+  ],
+  "card.trigger.common.deckbottom.owner": [
+    {
+      "type": 0,
+      "value": "Put this on the bottom of its owner's deck"
+    }
+  ],
+  "card.trigger.common.decktop.banish": [
+    {
+      "type": 0,
+      "value": "Banish the top card of your deck"
+    }
+  ],
+  "card.trigger.common.decktop.banish.traverse": [
+    {
+      "type": 0,
+      "value": "Banish the top card of your deck, then traverse if you've created "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " Runechants"
+    }
+  ],
+  "card.trigger.common.defend.add": [
+    {
+      "type": 0,
+      "value": "Add this to the active chain link as a defending card"
+    }
+  ],
+  "card.trigger.common.defensecounter.minus": [
+    {
+      "type": 0,
+      "value": "Put a -"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " defense counter on this"
+    }
+  ],
+  "card.trigger.common.defensereaction.cost": [
+    {
+      "type": 0,
+      "value": "Opponents' defense reactions cost "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " more resource"
+    }
+  ],
+  "card.trigger.common.discarded.banish": [
+    {
+      "type": 0,
+      "value": "Banish the discarded card"
+    }
+  ],
+  "card.trigger.common.dominate.gain": [
+    {
+      "type": 0,
+      "value": "Gain dominate"
+    }
+  ],
+  "card.trigger.common.dracofire.banish.resource": [
+    {
+      "type": 0,
+      "value": "Banish "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " Draco Fire to gain "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " resource"
+    }
+  ],
+  "card.trigger.common.draw.handtop.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy this, draw a card, then put a hand card on top of your deck"
+    }
+  ],
+  "card.trigger.common.eloquence.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy Eloquence; the card gains go again"
+    }
+  ],
+  "card.trigger.common.embodimentearth.create": [
+    {
+      "type": 0,
+      "value": "Create Embodiment of Earth"
+    }
+  ],
+  "card.trigger.common.embodimentlightning.create": [
+    {
+      "type": 0,
+      "value": "Create Embodiment of Lightning"
+    }
+  ],
+  "card.trigger.common.embodimentlightning.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy Embodiment of Lightning; the attack gains go again"
+    }
+  ],
+  "card.trigger.common.emergingpower.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy Emerging Power and empower the next Guardian attack"
+    }
+  ],
+  "card.trigger.common.enchantingmelody.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy Enchanting Melody unless you played a non-attack action card"
+    }
+  ],
+  "card.trigger.common.energy.seismicsurge": [
+    {
+      "type": 0,
+      "value": "Remove an energy counter and create a Seismic Surge"
+    }
+  ],
+  "card.trigger.common.ephemeral.name": [
+    {
+      "type": 0,
+      "value": "Choose a name for the ephemeral attack"
+    }
+  ],
+  "card.trigger.common.equipment.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy this equipment"
+    }
+  ],
+  "card.trigger.common.equipment.faceup.optional": [
+    {
+      "type": 0,
+      "value": "Turn this equipment face up?"
+    }
+  ],
+  "card.trigger.common.faceup.optional": [
+    {
+      "type": 0,
+      "value": "Turn this face up?"
+    }
+  ],
+  "card.trigger.common.flurry.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy Flurry; you may attack with the weapon twice this turn"
+    }
+  ],
+  "card.trigger.common.frostbite.create": [
+    {
+      "type": 0,
+      "value": "Create a Frostbite"
+    }
+  ],
+  "card.trigger.common.frostbite.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy Frostbite"
+    }
+  ],
+  "card.trigger.common.frostbite.exposed.create": [
+    {
+      "type": 0,
+      "value": "Create a Frostbite in an exposed equipment zone"
+    }
+  ],
+  "card.trigger.common.goagain.gain": [
+    {
+      "type": 0,
+      "value": "Gain go again"
+    }
+  ],
+  "card.trigger.common.gold.create": [
+    {
+      "type": 0,
+      "value": "Create a Gold token"
+    }
+  ],
+  "card.trigger.common.goldkissrum.create": [
+    {
+      "type": 0,
+      "value": "Create a Goldkiss Rum token"
+    }
+  ],
+  "card.trigger.common.guardian.attack.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy this; your next Guardian attack gets +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " attack"
+    }
+  ],
+  "card.trigger.common.guardian.attack.named.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": "; your next Guardian attack gets +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " attack"
+    }
+  ],
+  "card.trigger.common.guardian.attack.wager.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy this; your next Guardian attack gets +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " attack and may wager"
+    }
+  ],
+  "card.trigger.common.guardian.empower.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy this and empower the next Guardian attack"
+    }
+  ],
+  "card.trigger.common.hand.arsenal.optional": [
+    {
+      "type": 0,
+      "value": "Put a card from your hand face down into your arsenal?"
+    }
+  ],
+  "card.trigger.common.hand.card.banish": [
+    {
+      "type": 0,
+      "value": "Banish a card from your hand"
+    }
+  ],
+  "card.trigger.common.hand.card.banish.hunger": [
+    {
+      "type": 0,
+      "value": "Banish a card from your hand, then check the hunger"
+    }
+  ],
+  "card.trigger.common.heave": [
+    {
+      "type": 0,
+      "value": "Heave "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    }
+  ],
+  "card.trigger.common.heavyswing.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy Heavy Swing and empower a sword"
+    }
+  ],
+  "card.trigger.common.heroes.life.gain": [
+    {
+      "type": 0,
+      "value": "Both heroes gain "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " life"
+    }
+  ],
+  "card.trigger.common.intimidate": [
+    {
+      "type": 0,
+      "value": "Intimidate"
+    }
+  ],
+  "card.trigger.common.korshem.check": [
+    {
+      "type": 0,
+      "value": "Check Korshem"
+    }
+  ],
+  "card.trigger.common.leavearena.resolve": [
+    {
+      "type": 0,
+      "value": "Resolve the leave-arena effect"
+    }
+  ],
+  "card.trigger.common.life.gain": [
+    {
+      "type": 0,
+      "value": "Gain "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " life"
+    }
+  ],
+  "card.trigger.common.lightningembodiment.or.flow": [
+    {
+      "type": 0,
+      "value": "Create Embodiment of Lightning or Lightning Flow"
+    }
+  ],
+  "card.trigger.common.lightningflow.create": [
+    {
+      "type": 0,
+      "value": "Create a Lightning Flow token"
+    }
+  ],
+  "card.trigger.common.loyalty.banish.draw": [
+    {
+      "type": 0,
+      "value": "Banish "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " Loyalty Beyond the Grave to draw"
+    }
+  ],
+  "card.trigger.common.might.create": [
+    {
+      "type": 0,
+      "value": "Create a Might token"
+    }
+  ],
+  "card.trigger.common.might.create.count": [
+    {
+      "type": 0,
+      "value": "Create "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " Might tokens"
+    }
+  ],
+  "card.trigger.common.mistcloakgully.check": [
+    {
+      "type": 0,
+      "value": "Check Mistcloak Gully"
+    }
+  ],
+  "card.trigger.common.named.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    }
+  ],
+  "card.trigger.common.nextattack.power.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy this; the next attack action gets +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " power"
+    }
+  ],
+  "card.trigger.common.opt.draw.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy this, opt, then draw"
+    }
+  ],
+  "card.trigger.common.overpower.gain": [
+    {
+      "type": 0,
+      "value": "Gain overpower"
+    }
+  ],
+  "card.trigger.common.pyroglyphic.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy Pyroglyphic Protection"
+    }
+  ],
+  "card.trigger.common.quicken.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy Quicken; the attack gains go again"
+    }
+  ],
+  "card.trigger.common.resource.gain": [
+    {
+      "type": 0,
+      "value": "Gain "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " resource"
+    }
+  ],
+  "card.trigger.common.runebloodincantation": [
+    {
+      "type": 0,
+      "value": "Runeblood Incantation"
+    }
+  ],
+  "card.trigger.common.runechant.create": [
+    {
+      "type": 0,
+      "value": "Create a Runechant"
+    }
+  ],
+  "card.trigger.common.runechant.create.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy this and create a Runechant"
+    }
+  ],
+  "card.trigger.common.runechant.destroy.damage": [
+    {
+      "type": 0,
+      "value": "Destroy Runechant; deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage to the opposing hero"
+    }
+  ],
+  "card.trigger.common.runechant.unpreventable.optional": [
+    {
+      "type": 0,
+      "value": "Pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " life to make the next Runechant unpreventable?"
+    }
+  ],
+  "card.trigger.common.sandcounter.add": [
+    {
+      "type": 0,
+      "value": "Add a sand counter"
+    }
+  ],
+  "card.trigger.common.seismicsurge.create": [
+    {
+      "type": 0,
+      "value": "Create a Seismic Surge token"
+    }
+  ],
+  "card.trigger.common.seismicsurge.create.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy this and create Seismic Surges"
+    }
+  ],
+  "card.trigger.common.shiyana.copy": [
+    {
+      "type": 0,
+      "value": "Copy a hero with Shiyana"
+    }
+  ],
+  "card.trigger.common.sigilprotection.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy Sigil of Protection"
+    }
+  ],
+  "card.trigger.common.sigilsolitude.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy Sigil of Solitude"
+    }
+  ],
+  "card.trigger.common.silver.arena.optional": [
+    {
+      "type": 0,
+      "value": "Destroy "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " Silver to return this to the arena?"
+    }
+  ],
+  "card.trigger.common.silver.destroy.or.bottomdraw": [
+    {
+      "type": 0,
+      "value": "Destroy a Silver, or put this on the bottom of its owner's deck and draw"
+    }
+  ],
+  "card.trigger.common.silver.equip": [
+    {
+      "type": 0,
+      "value": "Destroy "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " Silver to equip this"
+    }
+  ],
+  "card.trigger.common.silver.equip.optional": [
+    {
+      "type": 0,
+      "value": "Destroy "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " Silver to equip this?"
+    }
+  ],
+  "card.trigger.common.soul.chainclose": [
+    {
+      "type": 0,
+      "value": "Put this into your hero's soul when the combat chain closes"
+    }
+  ],
+  "card.trigger.common.steam.remove.destroy": [
+    {
+      "type": 0,
+      "value": "Remove a steam counter or destroy this"
+    }
+  ],
+  "card.trigger.common.stonewall.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy Stonewall Confidence"
+    }
+  ],
+  "card.trigger.common.suspense.remove": [
+    {
+      "type": 0,
+      "value": "Remove a suspense counter"
+    }
+  ],
+  "card.trigger.common.thaw.banish.optional": [
+    {
+      "type": 0,
+      "value": "Banish Thaw to destroy or unfreeze a card?"
+    }
+  ],
+  "card.trigger.common.verse.runechant": [
+    {
+      "type": 0,
+      "value": "Remove a verse counter and create a Runechant"
+    }
+  ],
+  "card.trigger.common.wager.defender": [
+    {
+      "type": 0,
+      "value": "Wager with the defending hero"
+    }
+  ],
+  "card.trigger.common.wager.defender.optional": [
+    {
+      "type": 0,
+      "value": "Wager with the defending hero?"
+    }
+  ],
+  "card.trigger.common.wagertokens.create.four": [
+    {
+      "type": 0,
+      "value": "Create Confidence, Might, Toughness, and Vigor tokens"
+    }
+  ],
+  "card.trigger.common.wagertokens.create.three": [
+    {
+      "type": 0,
+      "value": "Create Agility, Might, and Vigor tokens"
+    }
+  ],
   "card.trigger.energycounter.add": [
     {
       "type": 0,

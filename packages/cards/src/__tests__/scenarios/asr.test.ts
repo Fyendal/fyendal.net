@@ -51,6 +51,34 @@ describe("Armory Deck: Ira", () => {
 });
 
 describe("ASR — Okana Scar Wraps", () => {
+  it("banishes a Become the Bottle that gained Edge of Autumn's name", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "ira, scarlet revenger|0",
+          weapons: ["edge of autumn|0"],
+          hand: ["become the bottle|1"],
+          resources: 1,
+          equipment: { ...NO_EQUIPMENT, arms: "okana scar wraps|0" },
+        },
+        { hero: "dorinthea", hand: [], equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.attackWithWeapon("edge of autumn|0")
+      .blockWith()
+      .settle()
+      .play("become the bottle|1")
+      .chooseCard("edge of autumn|0")
+      .blockWith()
+      .activate("okana scar wraps|0")
+      .chooseCard("become the bottle|1");
+
+    expect(g.state.players[0]!.equipment.arms?.tapped).toBe(true);
+    g.expectInZone(0, "become the bottle|1", "banish");
+  });
+
   it("equips a banished Edge of Autumn when a Vengeance attack hits", () => {
     const g = scenario({
       seats: [
@@ -59,7 +87,7 @@ describe("ASR — Okana Scar Wraps", () => {
           heroKey: "ira, scarlet revenger|0",
           weapons: ["edge of autumn|0"],
           hand: ["seek vengeance|1"],
-          resources: 1,
+          resources: 2,
           equipment: { ...NO_EQUIPMENT, arms: "okana scar wraps|0" },
         },
         { hero: "dorinthea", hand: [], equipment: NO_EQUIPMENT },
@@ -76,7 +104,14 @@ describe("ASR — Okana Scar Wraps", () => {
 
     expect(g.state.pendingDecision?.chooseHook).toBe("okana-equip");
     g.chooseCard("edge of autumn|0")
-      .expectInZone(0, "edge of autumn|0", "weapons");
+      .expectInZone(0, "edge of autumn|0", "weapons")
+      .doRaw({ kind: "close-chain" });
+
+    const reequippedEdge = g.state.players[0]!.weapons[0]!;
+    expect(legalIntents(g.state, 0)).toContainEqual(expect.objectContaining({
+      kind: "activate-ability",
+      sourceInstanceId: reequippedEdge.instanceId,
+    }));
   });
 
   it("puts Okana and Enact Vengeance hit triggers on the stack in the chosen order", () => {

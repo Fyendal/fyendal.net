@@ -745,6 +745,25 @@ describe("PEN — generalized rules interactions", () => {
       .expectAP(0, 1);
   });
 
+  it("Tigrine Reflex does not get go again without its combo condition", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["tigrine reflex|1"],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.play("tigrine reflex|1")
+      .expectAttackValue(3)
+      .blockWith()
+      .settle()
+      .expectAP(0, 0);
+  });
+
   it("Become the Bottle copies the name Retrace the Past gained", () => {
     const g = scenario({
       seats: [

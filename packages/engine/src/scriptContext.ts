@@ -42,7 +42,7 @@ import {
 } from "./zoneQueries.js";
 
 import { controlledPermanents, hookSources, observingHookSources } from "./sourceQueries.js";
-import { clearPrivateZonePlacement } from "./cardLifecycle.js";
+import { clearPrivateZonePlacement, resetActivatedAbilityUsage } from "./cardLifecycle.js";
 import {
   transitionZone,
   transitionZoneFromEngineZone,
@@ -2319,6 +2319,7 @@ export function makeCtx(
         removeFromArray(player.banish, instanceId);
         player.equipment[slot] = card;
       } else return false;
+      resetActivatedAbilityUsage(player, card.instanceId);
       logPublic(state, `${d.name} is equipped from banish`);
       runtime.events.runHook(state, player.seat, card, "onEnterArena");
       runtime.events.fireFriendlyEnterArena(state, player.seat, card);

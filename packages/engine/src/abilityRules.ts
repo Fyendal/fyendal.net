@@ -13,7 +13,7 @@ import type { CardInstance, ChainLinkState, PlayerState } from "./state.js";
 import { banishHeroSoulCard, destroyPermanent, putCardOnDeckBottom } from "./zoneMoves.js";
 import { currentLink, findCardAnywhere, heroSoulCards } from "./zoneQueries.js";
 import { tapPermanent } from "./cardLifecycle.js";
-import { MAX_ALTERNATIVE_COST_OPTIONS, consumeMatchingActivationCostReductions, costModifierScopeApplies, exactCardCombinations, modifierMatchesPlayedCard, opposingStaticCostIncrease, payDiscardCost, validateDiscardCost } from "./playRules.js";
+import { MAX_ALTERNATIVE_COST_OPTIONS, consumeMatchingActivationCostReductions, controlledCostCards, costModifierScopeApplies, exactCardCombinations, modifierMatchesPlayedCard, opposingStaticCostIncrease, payDiscardCost, validateDiscardCost } from "./playRules.js";
 import { attackBasePowerRestricted } from "./combatRestrictions.js";
 import { consumeFirstActionExtraCost, firstActionExtraCost } from "./ruleQueries.js";
 
@@ -295,8 +295,7 @@ function effectCardCostCandidates(
     ? player.hand
     : cost.zone === "graveyard" ? player.graveyard
     : cost.zone === "arsenal" ? player.arsenal
-    : controlledPermanents(state, player.seat, { faceDownEquipment: false })
-        .filter((card) => card.instanceId !== player.hero.instanceId && !card.faceDown);
+    : controlledCostCards(state, player).filter((card) => !card.faceDown);
   return cards.filter((card) => {
     const data = dataOf(state, card.cardId);
     return (cost.move !== "tap" || !card.tapped) &&
