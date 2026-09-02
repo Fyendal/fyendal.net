@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, buffNextAttack, decisionPrompt, opponentSeat } from "./shared-helpers.js";
+import { attackAbility, buffNextAttack, commonOptionMessages, decisionPrompt, opponentSeat, yesNoPrompt } from "./shared-helpers.js";
 
 const CONFIDENCE = "APS031";
 const TOUGHNESS = "APS032";
@@ -20,7 +20,11 @@ function suspenseTargets(ctx: ScriptCtx): Card[] {
 }
 function removeSuspenseChoice(ctx: ScriptCtx, hook: string, prompt: string): void {
   const targets = suspenseTargets(ctx).filter((card) => (card.counters?.suspense ?? 0) > 0);
-  if (targets.length) ctx.requestCardChoice(hook, prompt, ["pass", ...targets.map((card) => card.instanceId)]);
+  if (targets.length) ctx.requestCardChoice(hook, decisionPrompt(
+    prompt,
+    hook === "aps-bodice" ? "card.aps.suspense.remove.resources" : "card.aps.suspense.remove.defense",
+    { optionMessages: commonOptionMessages("pass") },
+  ), ["pass", ...targets.map((card) => card.instanceId)]);
 }
 function resolveRemoveSuspense(ctx: ScriptCtx, option: string): boolean {
   if (option === "pass") return false;
@@ -71,7 +75,7 @@ function pleiades(): CardScript {
       }],
       onActivate(ctx) {
         const targets = suspenseTargets(ctx);
-        if (targets.length) ctx.requestCardChoice("aps-pleiades-add", "Put a suspense counter on an aura of suspense?", ["pass", ...targets.map((card) => card.instanceId)]);
+        if (targets.length) ctx.requestCardChoice("aps-pleiades-add", decisionPrompt("Put a suspense counter on an aura of suspense?", "card.aps.suspense.counter.add.optional", { optionMessages: commonOptionMessages("pass") }), ["pass", ...targets.map((card) => card.instanceId)]);
       },
     },
     onChoose(ctx, hook, option) {
@@ -89,19 +93,19 @@ function returnAttackToTop(ctx: ScriptCtx): void {
     ctx.cardTypes(card).includes("attack") &&
     (hasTag(ctx, card, "revered") || hasTag(ctx, card, "guardian"))
   );
-  if (attacks.length) ctx.requestCardChoice("aps-pedestal", "Put a Revered or Guardian attack on top of your deck?", ["pass", ...attacks.map((card) => card.instanceId)]);
+  if (attacks.length) ctx.requestCardChoice("aps-pedestal", decisionPrompt("Put a Revered or Guardian attack on top of your deck?", "card.aps.attack.top", { optionMessages: commonOptionMessages("pass") }), ["pass", ...attacks.map((card) => card.instanceId)]);
 }
 
 function beginThespianCheer(ctx: ScriptCtx): void {
   ctx.requestChoice(
     "aps-thespian-cheer",
-    decisionPrompt("Have the crowd cheer you?", "card.aps.crowd.cheer"),
+    yesNoPrompt("Have the crowd cheer you?", "card.aps.crowd.cheer"),
     ["yes", "no"],
   );
 }
 function beginThespianReturn(ctx: ScriptCtx): void {
   const auras = ctx.player(ctx.seat).board.filter((card) => hasTag(ctx, card, "aura"));
-  if (auras.length) ctx.requestCardChoice("aps-thespian-return", "Return an aura you control to its owner's hand?", ["pass", ...auras.map((card) => card.instanceId)]);
+  if (auras.length) ctx.requestCardChoice("aps-thespian-return", decisionPrompt("Return an aura you control to its owner's hand?", "card.aps.aura.return", { optionMessages: commonOptionMessages("pass") }), ["pass", ...auras.map((card) => card.instanceId)]);
 }
 
 export const aps: Record<string, CardScript> = {
@@ -130,7 +134,7 @@ export const aps: Record<string, CardScript> = {
       canActivate: (ctx) => ctx.getFlag("player", "cheeredThisTurn") === true && suspenseTargets(ctx).length > 0,
       onActivate(ctx) {
         const targets = suspenseTargets(ctx);
-        ctx.requestCardChoice("aps-tiara", "Put a suspense counter on an aura", targets.map((card) => card.instanceId));
+        ctx.requestCardChoice("aps-tiara", decisionPrompt("Put a suspense counter on an aura", "card.aps.suspense.counter.add"), targets.map((card) => card.instanceId));
       },
     },
     onChoose(ctx, hook, option) {
@@ -152,7 +156,7 @@ export const aps: Record<string, CardScript> = {
     },
   },
   "boots to the boards|0": {
-    onDefend(ctx) { ctx.requestXPayment("aps-boots", "Pay up to {r}{r}{r} to create that many Toughness tokens", undefined, 3); },
+    onDefend(ctx) { ctx.requestXPayment("aps-boots", decisionPrompt("Pay up to {r}{r}{r} to create that many Toughness tokens", "card.aps.toughness.pay", { values: { maximum: 3 } }), undefined, 3); },
     onChoose(ctx, hook, option) {
       if (hook === "aps-boots" && option.startsWith("x:")) ctx.createTokens(TOUGHNESS, Number(option.slice(2)));
     },
@@ -176,7 +180,7 @@ export const aps: Record<string, CardScript> = {
         if (defenders.length) {
           ctx.requestCardChoice(
             "aps-never-give-up",
-            "Give a defending action card +3 defense",
+            decisionPrompt("Give a defending action card +3 defense", "card.aps.defender.defense", { values: { amount: 3 } }),
             defenders.map((card) => card.instanceId),
           );
         }
@@ -218,13 +222,13 @@ export const aps: Record<string, CardScript> = {
     },
     onHit(ctx) {
       const hand = ctx.player(opponentSeat(ctx)).hand;
-      if (hand.length) ctx.requestCardChoice("aps-tear-first", "Discard a card", hand.map((card) => card.instanceId), opponentSeat(ctx));
+      if (hand.length) ctx.requestCardChoice("aps-tear-first", decisionPrompt("Discard a card", "card.aps.card.discard.first"), hand.map((card) => card.instanceId), opponentSeat(ctx));
     },
     onChoose(ctx, hook, option) {
       if (hook === "aps-tear-first") {
         ctx.discardCard(opponentSeat(ctx), Number(option));
         const hand = ctx.player(opponentSeat(ctx)).hand;
-        if (hand.length) ctx.requestCardChoice("aps-tear-second", "Discard another card", hand.map((card) => card.instanceId), opponentSeat(ctx));
+        if (hand.length) ctx.requestCardChoice("aps-tear-second", decisionPrompt("Discard another card", "card.aps.card.discard.next"), hand.map((card) => card.instanceId), opponentSeat(ctx));
       } else if (hook === "aps-tear-second") {
         ctx.discardCard(opponentSeat(ctx), Number(option));
       }
@@ -233,7 +237,7 @@ export const aps: Record<string, CardScript> = {
   "thespian charm|2": {
     onPlay(ctx) {
       const tokens = ctx.state.players.flatMap((player) => player.board).filter((card) => named(ctx, card, "Might") || named(ctx, card, "Vigor"));
-      if (tokens.length) ctx.requestCardChoice("aps-thespian-token", "Destroy a Might or Vigor token?", ["pass", ...tokens.map((card) => card.instanceId)]);
+      if (tokens.length) ctx.requestCardChoice("aps-thespian-token", decisionPrompt("Destroy a Might or Vigor token?", "card.aps.token.destroy", { optionMessages: commonOptionMessages("pass") }), ["pass", ...tokens.map((card) => card.instanceId)]);
       else beginThespianCheer(ctx);
     },
     onChoose(ctx, hook, option) {

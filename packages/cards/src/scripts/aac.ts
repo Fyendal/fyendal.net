@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, buffNextAttack, opponentSeat } from "./shared-helpers.js";
+import { attackAbility, buffNextAttack, commonOptionMessages, decisionPrompt, opponentSeat } from "./shared-helpers.js";
 
 type Card = DeepReadonly<CardInstance>;
 
@@ -108,9 +108,9 @@ export const aac: Record<string, CardScript> = {
       const opponent = ctx.player(target);
       const result = ctx.randomInt(3);
       if (result === 0 && opponent.hand.length) {
-        ctx.requestCardChoice("aac-madness-hand", "Choose a card from your hand to banish", opponent.hand.map((card) => card.instanceId), target);
+        ctx.requestCardChoice("aac-madness-hand", decisionPrompt("Choose a card from your hand to banish", "card.aac.hand.card.banish"), opponent.hand.map((card) => card.instanceId), target);
       } else if (result === 1 && opponent.arsenal.length) {
-        ctx.requestCardChoice("aac-madness-arsenal", "Choose a card from your arsenal to banish", opponent.arsenal.map((card) => card.instanceId), target);
+        ctx.requestCardChoice("aac-madness-arsenal", decisionPrompt("Choose a card from your arsenal to banish", "card.aac.arsenal.card.banish"), opponent.arsenal.map((card) => card.instanceId), target);
       } else if (result === 2 && opponent.deck[0]) {
         ctx.banish(opponent.deck[0].instanceId);
       }
@@ -144,7 +144,7 @@ export const aac: Record<string, CardScript> = {
       const options = ctx.player(ctx.seat).graveyard.filter((card) =>
         ctx.hasCardType(card, "action") && hasStealth(ctx, card),
       );
-      if (options.length) ctx.requestCardChoice("aac-mantle", "Banish a stealth attack for the target to become its copy?", ["pass", ...options.map((card) => card.instanceId)]);
+      if (options.length) ctx.requestCardChoice("aac-mantle", decisionPrompt("Banish a stealth attack for the target to become its copy?", "card.aac.stealthattack.copy", { optionMessages: commonOptionMessages("pass") }), ["pass", ...options.map((card) => card.instanceId)]);
     },
     onChoose(ctx, hook, option) {
       if (hook !== "aac-mantle" || option === "pass") return;
@@ -159,7 +159,7 @@ export const aac: Record<string, CardScript> = {
     },
     onHit(ctx) {
       const items = ctx.player(opponentSeat(ctx)).board.filter((card) => hasTag(ctx, card, "item"));
-      if (items.length) ctx.requestCardChoice("aac-steal-item", "Steal an item", items.map((card) => card.instanceId));
+      if (items.length) ctx.requestCardChoice("aac-steal-item", decisionPrompt("Steal an item", "card.aac.item.steal"), items.map((card) => card.instanceId));
     },
     onChoose(ctx, hook, option) {
       if (hook === "aac-steal-item") ctx.steal(Number(option), { duration: "indefinite" });

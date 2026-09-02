@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, buffNextAttack } from "./shared-helpers.js";
+import { attackAbility, buffNextAttack, commonOptionMessages, decisionPrompt } from "./shared-helpers.js";
 
 // ── SBL (Silver Age: Boltyn precon) ─────────────────────────────────────────
 //
@@ -57,7 +57,10 @@ function chargeAdditionalCost(ctx: ScriptCtx): void {
   if (hand.length === 0) return;
   ctx.requestCardChoice(
     CHARGE_HOOK,
-    `${ctx.data.name}: choose a card from your hand to charge, or decline`,
+    decisionPrompt(`${ctx.data.name}: choose a card from your hand to charge, or decline`, "card.sbl.charge.choose", {
+      values: { card: { kind: "card", cardId: ctx.self.cardId } },
+      optionMessages: commonOptionMessages("no"),
+    }),
     ["no", ...hand.map((card) => card.instanceId)],
   );
 }
@@ -163,7 +166,7 @@ export const sbl: Record<string, CardScript> = {
         }
         ctx.requestCardChoice(
           "halo-soul",
-          "Halo of Illumination: put a card from your hand into your hero's soul",
+          decisionPrompt("Halo of Illumination: put a card from your hand into your hero's soul", "card.sbl.halo.soul"),
           hand.map((c) => c.instanceId),
         );
       },
@@ -307,7 +310,7 @@ export const sbl: Record<string, CardScript> = {
       if (hand.length > 0) {
         ctx.requestCardChoice(
           "v-charge",
-          "V of the Vanguard: choose a card from your hand to charge, or stop",
+          decisionPrompt("V of the Vanguard: choose a card from your hand to charge, or stop", "card.sbl.v.charge.first", { optionMessages: commonOptionMessages("no") }),
           ["no", ...hand.map((card) => card.instanceId)],
         );
       }
@@ -324,7 +327,7 @@ export const sbl: Record<string, CardScript> = {
           if (hand.length > 0) {
             ctx.requestCardChoice(
               "v-charge",
-              "V of the Vanguard: choose another card to charge, or stop",
+              decisionPrompt("V of the Vanguard: choose another card to charge, or stop", "card.sbl.v.charge.next", { optionMessages: commonOptionMessages("no") }),
               ["no", ...hand.map((card) => card.instanceId)],
             );
             return;
@@ -373,7 +376,7 @@ export const sbl: Record<string, CardScript> = {
       }
       ctx.requestCardChoice(
         "edict-sword",
-        "Edict of Steel: Sharpen target sword you control",
+        decisionPrompt("Edict of Steel: Sharpen target sword you control", "card.sbl.sword.sharpen"),
         swords.map((c) => c.instanceId),
       );
     },
@@ -396,7 +399,7 @@ export const sbl: Record<string, CardScript> = {
       }
       ctx.requestChoice(
         "glisten-dist",
-        "Glisten: distribute up to four +1{p} counters among your weapons",
+        decisionPrompt("Glisten: distribute up to four +1{p} counters among your weapons", "card.sbl.weapon.counters.distribute", { values: { count: 4 } }),
         options,
       );
     },

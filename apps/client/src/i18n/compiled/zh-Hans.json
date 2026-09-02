@@ -279,6 +279,220 @@
       "value": "赤魂战纪在线对战"
     }
   ],
+  "card.aac.arsenal.card.banish": [
+    {
+      "type": 0,
+      "value": "选择 arsenal 中的一张牌放逐"
+    }
+  ],
+  "card.aac.hand.card.banish": [
+    {
+      "type": 0,
+      "value": "选择一张手牌放逐"
+    }
+  ],
+  "card.aac.item.steal": [
+    {
+      "type": 0,
+      "value": "夺取一个物品"
+    }
+  ],
+  "card.aac.stealthattack.copy": [
+    {
+      "type": 0,
+      "value": "放逐一张 Stealth 攻击，使目标成为其复制？"
+    }
+  ],
+  "card.aaz.arrow.arsenal.faceup": [
+    {
+      "type": 0,
+      "value": "将一张箭正面朝上放入 arsenal"
+    }
+  ],
+  "card.aaz.arrow.search": [
+    {
+      "type": 0,
+      "value": "从牌库中搜寻一张箭"
+    }
+  ],
+  "card.aaz.arsenal.arrow.aim": [
+    {
+      "type": 0,
+      "value": "将 arsenal 中的箭翻至正面并放置一个 aim 指示物？"
+    }
+  ],
+  "card.aaz.option.blue": [
+    {
+      "type": 0,
+      "value": "蓝色"
+    }
+  ],
+  "card.aaz.option.red": [
+    {
+      "type": 0,
+      "value": "红色"
+    }
+  ],
+  "card.aaz.option.yellow": [
+    {
+      "type": 0,
+      "value": "黄色"
+    }
+  ],
+  "card.aaz.pitch.color.prohibit": [
+    {
+      "type": 0,
+      "value": "选择一种防守英雄不能扣置的颜色"
+    }
+  ],
+  "card.aaz.reload.arsenal": [
+    {
+      "type": 0,
+      "value": "装填 (reload)：将一张手牌放入 arsenal？"
+    }
+  ],
+  "card.agb.anka.card.discard": [
+    {
+      "type": 0,
+      "value": "Anka：弃置一张牌"
+    }
+  ],
+  "card.agb.deck.card.graveyard": [
+    {
+      "type": 0,
+      "value": "选择一张牌置入你的墓地"
+    }
+  ],
+  "card.agb.waterygrave.discard.draw": [
+    {
+      "type": 0,
+      "value": "弃置一张具有水葬 (watery grave) 的牌以抽牌？"
+    }
+  ],
+  "card.aha.attackreaction.top": [
+    {
+      "type": 0,
+      "value": "将一张攻击反应牌置于牌库顶？"
+    }
+  ],
+  "card.aha.gaze.counter.draw": [
+    {
+      "type": 0,
+      "value": "Anticipating Gaze：移除一个指示物，摧毁此牌并抽牌？"
+    }
+  ],
+  "card.aha.option.additionalattack": [
+    {
+      "type": 0,
+      "value": "额外攻击一次"
+    }
+  ],
+  "card.aha.option.discount": [
+    {
+      "type": 0,
+      "value": "启动费用减少 1"
+    }
+  ],
+  "card.aha.option.goagain": [
+    {
+      "type": 0,
+      "value": "go again"
+    }
+  ],
+  "card.aha.polished.counters.remove": [
+    {
+      "type": 0,
+      "value": "Polished Blade：选择要移除的指示物数量"
+    }
+  ],
+  "card.aha.polished.mode.choose": [
+    {
+      "type": 0,
+      "value": "Polished Blade：再选择 "
+    },
+    {
+      "type": 1,
+      "value": "remaining"
+    },
+    {
+      "type": 0,
+      "value": " 个模式"
+    }
+  ],
+  "card.aha.rerebrace.pay.sharpen": [
+    {
+      "type": 0,
+      "value": "Reverent Rerebrace：支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源并摧毁此牌，以额外强化一次？"
+    }
+  ],
+  "card.aha.sword.sharpen": [
+    {
+      "type": 0,
+      "value": "选择一把剑进行强化"
+    }
+  ],
+  "card.aha.sword.sharpen.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一把剑进行强化"
+    }
+  ],
+  "card.aha.sword.sharpen.twice": [
+    {
+      "type": 0,
+      "value": "选择一把剑强化两次"
+    }
+  ],
+  "card.aio.crankitem.steam": [
+    {
+      "type": 0,
+      "value": "在一个具有 crank 的物品上放置一个蒸汽指示物"
+    }
+  ],
+  "card.aio.deck.top.banish": [
+    {
+      "type": 0,
+      "value": "放逐你的牌库顶牌？"
+    }
+  ],
+  "card.aio.defense.pay": [
+    {
+      "type": 0,
+      "value": "支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源使防御力 +1？"
+    }
+  ],
+  "card.aio.maintenance.choose": [
+    {
+      "type": 0,
+      "value": "移除一个蒸汽指示物，或摧毁此牌？"
+    }
+  ],
+  "card.aio.symbiosisshot.steam": [
+    {
+      "type": 0,
+      "value": "在 Symbiosis Shot 上放置一个蒸汽指示物？"
+    }
+  ],
   "card.ajv.channel.ice.choose": [
     {
       "type": 0,
@@ -443,16 +657,230 @@
       "value": "选择一个要治愈的疾病"
     }
   ],
+  "card.amx.banisheditem.arena": [
+    {
+      "type": 0,
+      "value": "将一张费用为 0 或 1 的放逐区物品放入竞技场？"
+    }
+  ],
+  "card.amx.bankbreaker.card.banish": [
+    {
+      "type": 0,
+      "value": "放逐 Bank Breaker 下方的一张牌？"
+    }
+  ],
+  "card.amx.clamppress.maintenance": [
+    {
+      "type": 0,
+      "value": "移除一个蒸汽指示物，或摧毁 Clamp Press？"
+    }
+  ],
+  "card.amx.crankitem.steam": [
+    {
+      "type": 0,
+      "value": "在一个具有 crank 的物品上放置一个蒸汽指示物"
+    }
+  ],
+  "card.amx.hyperdriver.choose": [
+    {
+      "type": 0,
+      "value": "构装 Bank Breaker：选择第 "
+    },
+    {
+      "type": 1,
+      "value": "current"
+    },
+    {
+      "type": 0,
+      "value": " 个 Hyper Driver（共 "
+    },
+    {
+      "type": 1,
+      "value": "total"
+    },
+    {
+      "type": 0,
+      "value": " 个）"
+    }
+  ],
+  "card.amx.hyperdriver.discard.draw": [
+    {
+      "type": 0,
+      "value": "弃置一个 Hyper Driver 以抽牌并使防御力 +1？"
+    }
+  ],
+  "card.amx.hyperdriver.shuffle.resource": [
+    {
+      "type": 0,
+      "value": "将一个 Hyper Driver 洗入牌库并获得 1 点资源？"
+    }
+  ],
+  "card.amx.wrench.power": [
+    {
+      "type": 0,
+      "value": "选择一把扳手，使其本回合力量 +1"
+    }
+  ],
+  "card.amx.wrench.transform": [
+    {
+      "type": 0,
+      "value": "选择一把要转化的扳手"
+    }
+  ],
+  "card.aol.arsenal.card.destroy": [
+    {
+      "type": 0,
+      "value": "选择 arsenal 中的一张牌摧毁"
+    }
+  ],
+  "card.aol.card.discard": [
+    {
+      "type": 0,
+      "value": "弃置一张牌"
+    }
+  ],
+  "card.aol.deck.card.top": [
+    {
+      "type": 0,
+      "value": "选择一张牌置于牌库顶"
+    }
+  ],
+  "card.aol.defender.nonequipment.banish": [
+    {
+      "type": 0,
+      "value": "放逐一张非装备防守牌"
+    }
+  ],
+  "card.aol.defender.return": [
+    {
+      "type": 0,
+      "value": "将一张防守牌返回手牌"
+    }
+  ],
+  "card.aol.defensecounter.pay": [
+    {
+      "type": 0,
+      "value": "支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源以移除一个 -1 防御指示物？"
+    }
+  ],
+  "card.aol.gold.destroy.galea": [
+    {
+      "type": 0,
+      "value": "Visit the Prize Room：摧毁一个 Gold 以装备 Prized Galea？"
+    }
+  ],
+  "card.aol.graveyard.equipment.equip": [
+    {
+      "type": 0,
+      "value": "从你的墓地装备一件装备？"
+    }
+  ],
+  "card.aol.hero.tap.destroy": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：横置你的英雄并摧毁此牌？"
+    }
+  ],
   "card.apr.halo.aura.return": [
     {
       "type": 0,
       "value": "Halo of Lumina Light：将放逐区中的一张黄色光环放入竞技场？"
     }
   ],
+  "card.aps.attack.top": [
+    {
+      "type": 0,
+      "value": "将一张 Revered 或 Guardian 攻击牌置于牌库顶？"
+    }
+  ],
+  "card.aps.aura.return": [
+    {
+      "type": 0,
+      "value": "将一个你操控的光环返回其拥有者手牌？"
+    }
+  ],
+  "card.aps.card.discard.first": [
+    {
+      "type": 0,
+      "value": "弃置一张牌"
+    }
+  ],
+  "card.aps.card.discard.next": [
+    {
+      "type": 0,
+      "value": "再弃置一张牌"
+    }
+  ],
   "card.aps.crowd.cheer": [
     {
       "type": 0,
       "value": "让观众为你欢呼 (cheer)？"
+    }
+  ],
+  "card.aps.defender.defense": [
+    {
+      "type": 0,
+      "value": "使一张行动防守牌的防御力 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    }
+  ],
+  "card.aps.suspense.counter.add": [
+    {
+      "type": 0,
+      "value": "在一个光环上放置 suspense 指示物"
+    }
+  ],
+  "card.aps.suspense.counter.add.optional": [
+    {
+      "type": 0,
+      "value": "在一个具有 suspense 的光环上放置 suspense 指示物？"
+    }
+  ],
+  "card.aps.suspense.remove.defense": [
+    {
+      "type": 0,
+      "value": "移除一个 suspense 指示物，使防御力 +2？"
+    }
+  ],
+  "card.aps.suspense.remove.resources": [
+    {
+      "type": 0,
+      "value": "移除一个 suspense 指示物以获得 2 点资源？"
+    }
+  ],
+  "card.aps.token.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一个 Might 或 Vigor 衍生物？"
+    }
+  ],
+  "card.aps.toughness.pay": [
+    {
+      "type": 0,
+      "value": "支付至多 "
+    },
+    {
+      "type": 1,
+      "value": "maximum"
+    },
+    {
+      "type": 0,
+      "value": " 点资源，并创造等量的 Toughness 衍生物"
     }
   ],
   "card.arc.arcane.hero.choose": [
@@ -695,6 +1123,34 @@
       "value": "：放逐一张 Wizard 非攻击行动牌，使其本回合可以作为 instant 打出？"
     }
   ],
+  "card.arr.beatchest.discard": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：弃置一张力量不低于 6 的牌以 beat chest？"
+    }
+  ],
+  "card.arr.echocasque.pay.draw": [
+    {
+      "type": 0,
+      "value": "Echo Casque：支付 1 点资源并摧毁此牌以抽一张牌？"
+    }
+  ],
+  "card.arr.torcofvim.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Torc of Vim，使费用减少 2 点资源？"
+    }
+  ],
+  "card.arr.trackers.destroy.agility": [
+    {
+      "type": 0,
+      "value": "摧毁 Trampling Trackers 以创造 Agility？"
+    }
+  ],
   "card.asb.charge.choose": [
     {
       "type": 1,
@@ -703,6 +1159,104 @@
     {
       "type": 0,
       "value": "：选择一张牌进行充能，或拒绝"
+    }
+  ],
+  "card.asr.edgeofautumn.equip": [
+    {
+      "type": 0,
+      "value": "从放逐区装备一把 Edge of Autumn？"
+    }
+  ],
+  "card.asr.graveyard.action.top": [
+    {
+      "type": 0,
+      "value": "将墓地中一张符合条件的行动牌置于牌库顶？"
+    }
+  ],
+  "card.asr.robe.destroy.resource": [
+    {
+      "type": 0,
+      "value": "摧毁 Robe of Autumn's Fall 以获得 1 点资源？"
+    }
+  ],
+  "card.asr.whirlingmistblossom.banish": [
+    {
+      "type": 0,
+      "value": "搜寻 Whirling Mist Blossom 并将其放逐"
+    }
+  ],
+  "card.ast.arcane.target.choose": [
+    {
+      "type": 0,
+      "value": "对任意目标造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "card.ast.instant.reveal": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：展示一张瞬间牌？"
+    }
+  ],
+  "card.ast.option.attack": [
+    {
+      "type": 0,
+      "value": "下一次攻击的力量 +1"
+    }
+  ],
+  "card.ast.option.embodiment": [
+    {
+      "type": 0,
+      "value": "创造 Embodiment of Lightning"
+    }
+  ],
+  "card.ast.option.skyzyk": [
+    {
+      "type": 0,
+      "value": "搜寻 Skyzyk"
+    }
+  ],
+  "card.ast.power.pay": [
+    {
+      "type": 0,
+      "value": "支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源使力量 +1？"
+    }
+  ],
+  "card.ast.serenade.mode.first": [
+    {
+      "type": 0,
+      "value": "Skyward Serenade：选择第一个模式"
+    }
+  ],
+  "card.ast.serenade.mode.second": [
+    {
+      "type": 0,
+      "value": "Skyward Serenade：选择另一个不同的模式"
+    }
+  ],
+  "card.ast.skyzyk.search": [
+    {
+      "type": 0,
+      "value": "从牌库中搜寻 Skyzyk"
     }
   ],
   "card.aur.aether.crackers.destroy": [
@@ -769,10 +1323,56 @@
       "value": "指定一个牌名"
     }
   ],
+  "card.common.levia.transform": [
+    {
+      "type": 0,
+      "value": "转化为 Blasmophet, Levia Consumed？"
+    }
+  ],
   "card.common.lookedcard.bottom": [
     {
       "type": 0,
       "value": "将查看的牌置于牌库底部？"
+    }
+  ],
+  "card.common.opt": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：Opt "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    }
+  ],
+  "card.common.opt.remaining": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：Opt "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " · 还剩 "
+    },
+    {
+      "type": 1,
+      "value": "remaining"
+    },
+    {
+      "type": 0,
+      "value": " 张"
     }
   ],
   "card.common.option.arms": [
@@ -833,6 +1433,36 @@
     {
       "type": 0,
       "value": "Reload：将一张手牌放入你的 arsenal？"
+    }
+  ],
+  "card.common.retrieve.dagger": [
+    {
+      "type": 0,
+      "value": "从你的墓地取回 (retrieve) 一把匕首？"
+    }
+  ],
+  "card.common.retrieve.dagger.pay": [
+    {
+      "type": 0,
+      "value": "取回 (retrieve)：支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源以装备这把匕首？"
+    }
+  ],
+  "card.common.specialization.arsenal": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一张 specialization 牌正面朝上放入 arsenal"
     }
   ],
   "card.common.target.card": [
@@ -3895,6 +4525,142 @@
       "value": "选择一张防守方英雄的手牌并放逐"
     }
   ],
+  "card.mpg.arsenal.card.bottom": [
+    {
+      "type": 0,
+      "value": "Tectonic Instability：将 arsenal 中的一张牌置于你的牌库底"
+    }
+  ],
+  "card.mpg.arsenal.faceup.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将 arsenal 中一张正面朝上的牌置于牌库底"
+    }
+  ],
+  "card.mpg.attack.choose": [
+    {
+      "type": 0,
+      "value": "Fearless Confrontation：选择一次攻击"
+    }
+  ],
+  "card.mpg.attack.top": [
+    {
+      "type": 0,
+      "value": "Call for Backup：将一张攻击牌置于牌库顶"
+    }
+  ],
+  "card.mpg.aura.destroy": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：摧毁一个光环"
+    }
+  ],
+  "card.mpg.aura.steal": [
+    {
+      "type": 0,
+      "value": "Annexation of Grandeur：夺取一个光环的操控权"
+    }
+  ],
+  "card.mpg.auratoken.destroy": [
+    {
+      "type": 0,
+      "value": "Break Stature：摧毁一个光环衍生物"
+    }
+  ],
+  "card.mpg.card.discard": [
+    {
+      "type": 0,
+      "value": "Hostile Encroachment：弃置一张牌"
+    }
+  ],
+  "card.mpg.crush.reveal": [
+    {
+      "type": 0,
+      "value": "Crash and Bash：展示一张具有 crush 的牌？"
+    }
+  ],
+  "card.mpg.defensecounter.remove": [
+    {
+      "type": 0,
+      "value": "移除 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个 -1 防御指示物"
+    }
+  ],
+  "card.mpg.equipment.defensecounter.arms": [
+    {
+      "type": 0,
+      "value": "Clash：在已装备的手臂装备上放置一个 -1 防御指示物"
+    }
+  ],
+  "card.mpg.equipment.defensecounter.chest": [
+    {
+      "type": 0,
+      "value": "Clash：在已装备的胸部装备上放置一个 -1 防御指示物"
+    }
+  ],
+  "card.mpg.equipment.defensecounter.head": [
+    {
+      "type": 0,
+      "value": "Clash：在已装备的头部装备上放置一个 -1 防御指示物"
+    }
+  ],
+  "card.mpg.equipment.defensecounter.legs": [
+    {
+      "type": 0,
+      "value": "Clash：在已装备的腿部装备上放置一个 -1 防御指示物"
+    }
+  ],
+  "card.mpg.equipment.defensecounter.offhand": [
+    {
+      "type": 0,
+      "value": "Clash：在已装备的副手装备上放置一个 -1 防御指示物"
+    }
+  ],
+  "card.mpg.heave.pay": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源进行 heave？"
+    }
+  ],
+  "card.mpg.iron.card.discard": [
+    {
+      "type": 0,
+      "value": "Test of Iron Grip：弃置一张牌"
+    }
+  ],
+  "card.mpg.opposing.equipment.equip": [
+    {
+      "type": 0,
+      "value": "Annexation of the Forge：装备对方的装备"
+    }
+  ],
   "card.mpw.aura.destroy": [
     {
       "type": 0,
@@ -5479,6 +6245,88 @@
       "value": "Jack Be Quick：从墓地放逐一张 Nimblism，使攻击力 +1 并获得 go again？"
     }
   ],
+  "card.sbl.charge.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一张手牌进行充能，或拒绝"
+    }
+  ],
+  "card.sbl.halo.soul": [
+    {
+      "type": 0,
+      "value": "Halo of Illumination：将一张手牌置入你的英雄 soul"
+    }
+  ],
+  "card.sbl.sword.sharpen": [
+    {
+      "type": 0,
+      "value": "Edict of Steel：强化一把你操控的目标剑"
+    }
+  ],
+  "card.sbl.v.charge.first": [
+    {
+      "type": 0,
+      "value": "V of the Vanguard：选择一张手牌进行充能，或停止"
+    }
+  ],
+  "card.sbl.v.charge.next": [
+    {
+      "type": 0,
+      "value": "V of the Vanguard：再选择一张牌进行充能，或停止"
+    }
+  ],
+  "card.sbl.weapon.counters.distribute": [
+    {
+      "type": 0,
+      "value": "Glisten：在你的武器之间分配至多 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个 +1 力量指示物"
+    }
+  ],
+  "card.sbr.bravo.crush.faceup": [
+    {
+      "type": 0,
+      "value": "Bravo：将 arsenal 中一张具有 crush 的牌翻至正面"
+    }
+  ],
+  "card.sbr.carapace.pay.surge": [
+    {
+      "type": 0,
+      "value": "Magmatic Carapace：支付 1 点资源并横置此牌，以创造 Seismic Surge？"
+    }
+  ],
+  "card.sbr.crush.reveal.surge": [
+    {
+      "type": 0,
+      "value": "Crash and Bash：展示一张具有 crush 的牌以创造 Seismic Surge？"
+    }
+  ],
+  "card.sbr.hand.card.top": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将一张手牌置于你的牌库顶"
+    }
+  ],
+  "card.sbr.thunderquake.heave": [
+    {
+      "type": 0,
+      "value": "Thunder Quake：支付 3 点资源，将其正面朝上 heave 进 arsenal？"
+    }
+  ],
   "card.sbz.arcane.target.choose": [
     {
       "type": 1,
@@ -5935,6 +6783,138 @@
       "value": "将一张黄色牌放入你的 soul？"
     }
   ],
+  "card.sen.graveyard.action.bottom": [
+    {
+      "type": 0,
+      "value": "Preserve Tradition：将墓地中的一张行动牌置于你的牌库底"
+    }
+  ],
+  "card.sen.hand.card.bottom": [
+    {
+      "type": 0,
+      "value": "Rising Sun, Setting Moon：将一张手牌置于你的牌库底"
+    }
+  ],
+  "card.sen.opponent.graveyard.banish": [
+    {
+      "type": 0,
+      "value": "Pass Over：从对手墓地放逐一张牌"
+    }
+  ],
+  "card.sen.stilettos.pay.actionpoint": [
+    {
+      "type": 0,
+      "value": "Silent Stilettos：支付 3 点资源并摧毁此牌，以获得 1 个行动点？"
+    }
+  ],
+  "card.sen.wardaura.powercounter": [
+    {
+      "type": 0,
+      "value": "Uphold Tradition：在一个你操控的守护 (ward) 光环上放置 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个 +1 力量指示物"
+    }
+  ],
+  "card.sen.wardaura.powercounters": [
+    {
+      "type": 0,
+      "value": "Astral Etchings：在一个你操控的守护 (ward) 光环上放置 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个 +1 力量指示物"
+    }
+  ],
+  "card.sfa.attack.banish.discount": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：放逐一张费用低于 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 的攻击行动牌；其打出费用减少 1，且本回合可以打出"
+    }
+  ],
+  "card.sfa.attack.banish.power": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：放逐一张费用低于 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 的攻击行动牌；其力量 +1，且本回合可以打出"
+    }
+  ],
+  "card.sfa.dragonfire.target": [
+    {
+      "type": 0,
+      "value": "Art of the Dragon: Fire：对任意目标造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
+    }
+  ],
+  "card.sfa.fai.flame.return": [
+    {
+      "type": 0,
+      "value": "Fai：将墓地中的一张凤凰烈焰返回手牌"
+    }
+  ],
+  "card.sfa.fai.flame.start": [
+    {
+      "type": 0,
+      "value": "Fai：以一张凤凰烈焰在你的墓地中开始游戏？"
+    }
+  ],
+  "card.sfa.flame.discard.draw": [
+    {
+      "type": 0,
+      "value": "Fire that Burns Within：弃置一张凤凰烈焰以抽一张牌，并使力量 +2？"
+    }
+  ],
+  "card.sfa.flame.return": [
+    {
+      "type": 0,
+      "value": "Rise from the Ashes：将墓地中的一张凤凰烈焰返回手牌？"
+    }
+  ],
+  "card.sfa.flame.search": [
+    {
+      "type": 0,
+      "value": "Flamecall Awakening：从牌库中搜寻一张凤凰烈焰？"
+    }
+  ],
   "card.sgb.carrion.ally.discard": [
     {
       "type": 0,
@@ -6135,6 +7115,46 @@
     {
       "type": 0,
       "value": " 的牌，或弃置一张牌"
+    }
+  ],
+  "card.sly.damage.source.choose": [
+    {
+      "type": 0,
+      "value": "选择防止接下来由哪个来源造成的 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
+    }
+  ],
+  "card.sly.oasis.hero.choose": [
+    {
+      "type": 0,
+      "value": "Oasis Respite：选择目标英雄"
+    }
+  ],
+  "card.sly.oasis.life.gain": [
+    {
+      "type": 0,
+      "value": "Oasis Respite：获得 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点生命？"
+    }
+  ],
+  "card.sly.shortshrift.card.discard": [
+    {
+      "type": 0,
+      "value": "Short Shrift 的 crush：选择一张牌弃置"
     }
   ],
   "card.sup.attack.banish": [

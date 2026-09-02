@@ -279,6 +279,220 @@
       "value": "Flesh and Blood Online"
     }
   ],
+  "card.aac.arsenal.card.banish": [
+    {
+      "type": 0,
+      "value": "Choose a card from your arsenal to banish"
+    }
+  ],
+  "card.aac.hand.card.banish": [
+    {
+      "type": 0,
+      "value": "Choose a card from your hand to banish"
+    }
+  ],
+  "card.aac.item.steal": [
+    {
+      "type": 0,
+      "value": "Steal an item"
+    }
+  ],
+  "card.aac.stealthattack.copy": [
+    {
+      "type": 0,
+      "value": "Banish a stealth attack for the target to become its copy?"
+    }
+  ],
+  "card.aaz.arrow.arsenal.faceup": [
+    {
+      "type": 0,
+      "value": "Put an arrow face up into your arsenal"
+    }
+  ],
+  "card.aaz.arrow.search": [
+    {
+      "type": 0,
+      "value": "Search your deck for an arrow"
+    }
+  ],
+  "card.aaz.arsenal.arrow.aim": [
+    {
+      "type": 0,
+      "value": "Turn the arrow in your arsenal face up and give it an aim counter?"
+    }
+  ],
+  "card.aaz.option.blue": [
+    {
+      "type": 0,
+      "value": "Blue"
+    }
+  ],
+  "card.aaz.option.red": [
+    {
+      "type": 0,
+      "value": "Red"
+    }
+  ],
+  "card.aaz.option.yellow": [
+    {
+      "type": 0,
+      "value": "Yellow"
+    }
+  ],
+  "card.aaz.pitch.color.prohibit": [
+    {
+      "type": 0,
+      "value": "Choose a color the defending hero can't pitch"
+    }
+  ],
+  "card.aaz.reload.arsenal": [
+    {
+      "type": 0,
+      "value": "Reload: put a card from your hand into your arsenal?"
+    }
+  ],
+  "card.agb.anka.card.discard": [
+    {
+      "type": 0,
+      "value": "Anka: discard a card"
+    }
+  ],
+  "card.agb.deck.card.graveyard": [
+    {
+      "type": 0,
+      "value": "Choose a card to put into your graveyard"
+    }
+  ],
+  "card.agb.waterygrave.discard.draw": [
+    {
+      "type": 0,
+      "value": "Discard a card with watery grave to draw?"
+    }
+  ],
+  "card.aha.attackreaction.top": [
+    {
+      "type": 0,
+      "value": "Put an attack reaction on top?"
+    }
+  ],
+  "card.aha.gaze.counter.draw": [
+    {
+      "type": 0,
+      "value": "Anticipating Gaze: remove a counter, destroy this, and draw?"
+    }
+  ],
+  "card.aha.option.additionalattack": [
+    {
+      "type": 0,
+      "value": "Additional attack"
+    }
+  ],
+  "card.aha.option.discount": [
+    {
+      "type": 0,
+      "value": "Activation costs 1 less"
+    }
+  ],
+  "card.aha.option.goagain": [
+    {
+      "type": 0,
+      "value": "go again"
+    }
+  ],
+  "card.aha.polished.counters.remove": [
+    {
+      "type": 0,
+      "value": "Polished Blade: choose counters to remove"
+    }
+  ],
+  "card.aha.polished.mode.choose": [
+    {
+      "type": 0,
+      "value": "Polished Blade: choose "
+    },
+    {
+      "type": 1,
+      "value": "remaining"
+    },
+    {
+      "type": 0,
+      "value": " more mode(s)"
+    }
+  ],
+  "card.aha.rerebrace.pay.sharpen": [
+    {
+      "type": 0,
+      "value": "Reverent Rerebrace: pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " and destroy this to sharpen an additional time?"
+    }
+  ],
+  "card.aha.sword.sharpen": [
+    {
+      "type": 0,
+      "value": "Choose a sword to sharpen"
+    }
+  ],
+  "card.aha.sword.sharpen.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose a sword to sharpen"
+    }
+  ],
+  "card.aha.sword.sharpen.twice": [
+    {
+      "type": 0,
+      "value": "Choose a sword to sharpen twice"
+    }
+  ],
+  "card.aio.crankitem.steam": [
+    {
+      "type": 0,
+      "value": "Put a steam counter on an item with crank"
+    }
+  ],
+  "card.aio.deck.top.banish": [
+    {
+      "type": 0,
+      "value": "Banish the top card of your deck?"
+    }
+  ],
+  "card.aio.defense.pay": [
+    {
+      "type": 0,
+      "value": "Pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " resource for +1 defense?"
+    }
+  ],
+  "card.aio.maintenance.choose": [
+    {
+      "type": 0,
+      "value": "Remove a steam counter or destroy this?"
+    }
+  ],
+  "card.aio.symbiosisshot.steam": [
+    {
+      "type": 0,
+      "value": "Put a steam counter on Symbiosis Shot?"
+    }
+  ],
   "card.ajv.channel.ice.choose": [
     {
       "type": 0,
@@ -443,16 +657,230 @@
       "value": "Choose a disease to cure"
     }
   ],
+  "card.amx.banisheditem.arena": [
+    {
+      "type": 0,
+      "value": "Put a cost 0 or 1 banished item into the arena?"
+    }
+  ],
+  "card.amx.bankbreaker.card.banish": [
+    {
+      "type": 0,
+      "value": "Banish a card from under Bank Breaker?"
+    }
+  ],
+  "card.amx.clamppress.maintenance": [
+    {
+      "type": 0,
+      "value": "Remove a steam counter or destroy Clamp Press?"
+    }
+  ],
+  "card.amx.crankitem.steam": [
+    {
+      "type": 0,
+      "value": "Put a steam counter on an item with crank"
+    }
+  ],
+  "card.amx.hyperdriver.choose": [
+    {
+      "type": 0,
+      "value": "Construct Bank Breaker: choose Hyper Driver "
+    },
+    {
+      "type": 1,
+      "value": "current"
+    },
+    {
+      "type": 0,
+      "value": " of "
+    },
+    {
+      "type": 1,
+      "value": "total"
+    }
+  ],
+  "card.amx.hyperdriver.discard.draw": [
+    {
+      "type": 0,
+      "value": "Discard a Hyper Driver to draw and get +1 defense?"
+    }
+  ],
+  "card.amx.hyperdriver.shuffle.resource": [
+    {
+      "type": 0,
+      "value": "Shuffle a Hyper Driver into your deck and gain a resource?"
+    }
+  ],
+  "card.amx.wrench.power": [
+    {
+      "type": 0,
+      "value": "Target a wrench to get +1 power this turn"
+    }
+  ],
+  "card.amx.wrench.transform": [
+    {
+      "type": 0,
+      "value": "Choose a wrench to transform"
+    }
+  ],
+  "card.aol.arsenal.card.destroy": [
+    {
+      "type": 0,
+      "value": "Choose an arsenal card to destroy"
+    }
+  ],
+  "card.aol.card.discard": [
+    {
+      "type": 0,
+      "value": "Discard a card"
+    }
+  ],
+  "card.aol.deck.card.top": [
+    {
+      "type": 0,
+      "value": "Choose a card to put on top"
+    }
+  ],
+  "card.aol.defender.nonequipment.banish": [
+    {
+      "type": 0,
+      "value": "Banish a non-equipment defending card"
+    }
+  ],
+  "card.aol.defender.return": [
+    {
+      "type": 0,
+      "value": "Return a defending card to hand"
+    }
+  ],
+  "card.aol.defensecounter.pay": [
+    {
+      "type": 0,
+      "value": "Pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " to remove a -1 defense counter?"
+    }
+  ],
+  "card.aol.gold.destroy.galea": [
+    {
+      "type": 0,
+      "value": "Visit the Prize Room: destroy a Gold to equip Prized Galea?"
+    }
+  ],
+  "card.aol.graveyard.equipment.equip": [
+    {
+      "type": 0,
+      "value": "Equip an equipment from your graveyard?"
+    }
+  ],
+  "card.aol.hero.tap.destroy": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": tap your hero and destroy this?"
+    }
+  ],
   "card.apr.halo.aura.return": [
     {
       "type": 0,
       "value": "Halo of Lumina Light: put a yellow aura from banish into the arena?"
     }
   ],
+  "card.aps.attack.top": [
+    {
+      "type": 0,
+      "value": "Put a Revered or Guardian attack on top of your deck?"
+    }
+  ],
+  "card.aps.aura.return": [
+    {
+      "type": 0,
+      "value": "Return an aura you control to its owner's hand?"
+    }
+  ],
+  "card.aps.card.discard.first": [
+    {
+      "type": 0,
+      "value": "Discard a card"
+    }
+  ],
+  "card.aps.card.discard.next": [
+    {
+      "type": 0,
+      "value": "Discard another card"
+    }
+  ],
   "card.aps.crowd.cheer": [
     {
       "type": 0,
       "value": "Have the crowd cheer you?"
+    }
+  ],
+  "card.aps.defender.defense": [
+    {
+      "type": 0,
+      "value": "Give a defending action card +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " defense"
+    }
+  ],
+  "card.aps.suspense.counter.add": [
+    {
+      "type": 0,
+      "value": "Put a suspense counter on an aura"
+    }
+  ],
+  "card.aps.suspense.counter.add.optional": [
+    {
+      "type": 0,
+      "value": "Put a suspense counter on an aura of suspense?"
+    }
+  ],
+  "card.aps.suspense.remove.defense": [
+    {
+      "type": 0,
+      "value": "Remove a suspense counter for +2 defense?"
+    }
+  ],
+  "card.aps.suspense.remove.resources": [
+    {
+      "type": 0,
+      "value": "Remove a suspense counter to gain 2 resources?"
+    }
+  ],
+  "card.aps.token.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy a Might or Vigor token?"
+    }
+  ],
+  "card.aps.toughness.pay": [
+    {
+      "type": 0,
+      "value": "Pay up to "
+    },
+    {
+      "type": 1,
+      "value": "maximum"
+    },
+    {
+      "type": 0,
+      "value": " resources to create that many Toughness tokens"
     }
   ],
   "card.arc.arcane.hero.choose": [
@@ -691,6 +1119,34 @@
       "value": ": banish a Wizard non-attack action to play as an instant this turn?"
     }
   ],
+  "card.arr.beatchest.discard": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": discard a card with 6 or more power to beat chest?"
+    }
+  ],
+  "card.arr.echocasque.pay.draw": [
+    {
+      "type": 0,
+      "value": "Echo Casque: pay 1 and destroy this to draw a card?"
+    }
+  ],
+  "card.arr.torcofvim.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy Torc of Vim for a 2-resource discount?"
+    }
+  ],
+  "card.arr.trackers.destroy.agility": [
+    {
+      "type": 0,
+      "value": "Destroy Trampling Trackers to create Agility?"
+    }
+  ],
   "card.asb.charge.choose": [
     {
       "type": 1,
@@ -699,6 +1155,104 @@
     {
       "type": 0,
       "value": ": choose a card to charge, or decline"
+    }
+  ],
+  "card.asr.edgeofautumn.equip": [
+    {
+      "type": 0,
+      "value": "Equip an Edge of Autumn from banish?"
+    }
+  ],
+  "card.asr.graveyard.action.top": [
+    {
+      "type": 0,
+      "value": "Put an eligible action card from your graveyard on top of your deck?"
+    }
+  ],
+  "card.asr.robe.destroy.resource": [
+    {
+      "type": 0,
+      "value": "Destroy Robe of Autumn's Fall to gain a resource?"
+    }
+  ],
+  "card.asr.whirlingmistblossom.banish": [
+    {
+      "type": 0,
+      "value": "Search for Whirling Mist Blossom to banish"
+    }
+  ],
+  "card.ast.arcane.target.choose": [
+    {
+      "type": 0,
+      "value": "Deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage to any target"
+    }
+  ],
+  "card.ast.instant.reveal": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": reveal an instant card?"
+    }
+  ],
+  "card.ast.option.attack": [
+    {
+      "type": 0,
+      "value": "Next attack gets +1 power"
+    }
+  ],
+  "card.ast.option.embodiment": [
+    {
+      "type": 0,
+      "value": "Create Embodiment of Lightning"
+    }
+  ],
+  "card.ast.option.skyzyk": [
+    {
+      "type": 0,
+      "value": "Search for Skyzyk"
+    }
+  ],
+  "card.ast.power.pay": [
+    {
+      "type": 0,
+      "value": "Pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " resource for +1 power?"
+    }
+  ],
+  "card.ast.serenade.mode.first": [
+    {
+      "type": 0,
+      "value": "Skyward Serenade: choose the first mode"
+    }
+  ],
+  "card.ast.serenade.mode.second": [
+    {
+      "type": 0,
+      "value": "Skyward Serenade: choose a different second mode"
+    }
+  ],
+  "card.ast.skyzyk.search": [
+    {
+      "type": 0,
+      "value": "Search your deck for a Skyzyk"
     }
   ],
   "card.aur.aether.crackers.destroy": [
@@ -765,10 +1319,56 @@
       "value": "Name a card"
     }
   ],
+  "card.common.levia.transform": [
+    {
+      "type": 0,
+      "value": "Transform into Blasmophet, Levia Consumed?"
+    }
+  ],
   "card.common.lookedcard.bottom": [
     {
       "type": 0,
       "value": "Put the looked-at card on the bottom?"
+    }
+  ],
+  "card.common.opt": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": Opt "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    }
+  ],
+  "card.common.opt.remaining": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": Opt "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " · "
+    },
+    {
+      "type": 1,
+      "value": "remaining"
+    },
+    {
+      "type": 0,
+      "value": " left"
     }
   ],
   "card.common.option.arms": [
@@ -829,6 +1429,36 @@
     {
       "type": 0,
       "value": "Reload: put a card from your hand into your arsenal?"
+    }
+  ],
+  "card.common.retrieve.dagger": [
+    {
+      "type": 0,
+      "value": "Retrieve a dagger from your graveyard?"
+    }
+  ],
+  "card.common.retrieve.dagger.pay": [
+    {
+      "type": 0,
+      "value": "Retrieve: pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " to equip this dagger?"
+    }
+  ],
+  "card.common.specialization.arsenal": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose a specialization card to put face up into arsenal"
     }
   ],
   "card.common.target.card": [
@@ -4071,6 +4701,142 @@
       "value": "Choose a card to banish from the defending hero's hand"
     }
   ],
+  "card.mpg.arsenal.card.bottom": [
+    {
+      "type": 0,
+      "value": "Tectonic Instability: put an arsenal card on the bottom of your deck"
+    }
+  ],
+  "card.mpg.arsenal.faceup.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": put a face-up arsenal card on the bottom"
+    }
+  ],
+  "card.mpg.attack.choose": [
+    {
+      "type": 0,
+      "value": "Fearless Confrontation: choose an attack"
+    }
+  ],
+  "card.mpg.attack.top": [
+    {
+      "type": 0,
+      "value": "Call for Backup: put an attack on top"
+    }
+  ],
+  "card.mpg.aura.destroy": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": destroy an aura"
+    }
+  ],
+  "card.mpg.aura.steal": [
+    {
+      "type": 0,
+      "value": "Annexation of Grandeur: gain control of an aura"
+    }
+  ],
+  "card.mpg.auratoken.destroy": [
+    {
+      "type": 0,
+      "value": "Break Stature: destroy an aura token"
+    }
+  ],
+  "card.mpg.card.discard": [
+    {
+      "type": 0,
+      "value": "Hostile Encroachment: discard a card"
+    }
+  ],
+  "card.mpg.crush.reveal": [
+    {
+      "type": 0,
+      "value": "Crash and Bash: reveal a card with crush?"
+    }
+  ],
+  "card.mpg.defensecounter.remove": [
+    {
+      "type": 0,
+      "value": "Remove "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " -1 defense counter(s)"
+    }
+  ],
+  "card.mpg.equipment.defensecounter.arms": [
+    {
+      "type": 0,
+      "value": "Clash: put a -1 defense counter on equipped arms"
+    }
+  ],
+  "card.mpg.equipment.defensecounter.chest": [
+    {
+      "type": 0,
+      "value": "Clash: put a -1 defense counter on an equipped chest"
+    }
+  ],
+  "card.mpg.equipment.defensecounter.head": [
+    {
+      "type": 0,
+      "value": "Clash: put a -1 defense counter on an equipped head"
+    }
+  ],
+  "card.mpg.equipment.defensecounter.legs": [
+    {
+      "type": 0,
+      "value": "Clash: put a -1 defense counter on equipped legs"
+    }
+  ],
+  "card.mpg.equipment.defensecounter.offhand": [
+    {
+      "type": 0,
+      "value": "Clash: put a -1 defense counter on an equipped off-hand"
+    }
+  ],
+  "card.mpg.heave.pay": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " resource(s) to heave it?"
+    }
+  ],
+  "card.mpg.iron.card.discard": [
+    {
+      "type": 0,
+      "value": "Test of Iron Grip: discard a card"
+    }
+  ],
+  "card.mpg.opposing.equipment.equip": [
+    {
+      "type": 0,
+      "value": "Annexation of the Forge: equip opposing equipment"
+    }
+  ],
   "card.mpw.aura.destroy": [
     {
       "type": 0,
@@ -5663,6 +6429,88 @@
       "value": "Jack Be Quick: banish a Nimblism from your graveyard for +1 power and go again?"
     }
   ],
+  "card.sbl.charge.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose a card from your hand to charge, or decline"
+    }
+  ],
+  "card.sbl.halo.soul": [
+    {
+      "type": 0,
+      "value": "Halo of Illumination: put a card from your hand into your hero's soul"
+    }
+  ],
+  "card.sbl.sword.sharpen": [
+    {
+      "type": 0,
+      "value": "Edict of Steel: sharpen target sword you control"
+    }
+  ],
+  "card.sbl.v.charge.first": [
+    {
+      "type": 0,
+      "value": "V of the Vanguard: choose a card from your hand to charge, or stop"
+    }
+  ],
+  "card.sbl.v.charge.next": [
+    {
+      "type": 0,
+      "value": "V of the Vanguard: choose another card to charge, or stop"
+    }
+  ],
+  "card.sbl.weapon.counters.distribute": [
+    {
+      "type": 0,
+      "value": "Glisten: distribute up to "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " +1 power counters among your weapons"
+    }
+  ],
+  "card.sbr.bravo.crush.faceup": [
+    {
+      "type": 0,
+      "value": "Bravo: turn a crush card in your arsenal face up"
+    }
+  ],
+  "card.sbr.carapace.pay.surge": [
+    {
+      "type": 0,
+      "value": "Magmatic Carapace: pay 1 and tap it to create a Seismic Surge?"
+    }
+  ],
+  "card.sbr.crush.reveal.surge": [
+    {
+      "type": 0,
+      "value": "Crash and Bash: reveal a card with crush to create a Seismic Surge?"
+    }
+  ],
+  "card.sbr.hand.card.top": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": put a card from your hand on top of your deck"
+    }
+  ],
+  "card.sbr.thunderquake.heave": [
+    {
+      "type": 0,
+      "value": "Thunder Quake: pay 3 resources to heave it face up into your arsenal?"
+    }
+  ],
   "card.sbz.arcane.target.choose": [
     {
       "type": 1,
@@ -6119,6 +6967,138 @@
       "value": "Put a yellow card into your soul?"
     }
   ],
+  "card.sen.graveyard.action.bottom": [
+    {
+      "type": 0,
+      "value": "Preserve Tradition: put an action card from your graveyard on the bottom of your deck"
+    }
+  ],
+  "card.sen.hand.card.bottom": [
+    {
+      "type": 0,
+      "value": "Rising Sun, Setting Moon: put a card from your hand on the bottom of your deck"
+    }
+  ],
+  "card.sen.opponent.graveyard.banish": [
+    {
+      "type": 0,
+      "value": "Pass Over: banish a card from the opponent's graveyard"
+    }
+  ],
+  "card.sen.stilettos.pay.actionpoint": [
+    {
+      "type": 0,
+      "value": "Silent Stilettos: pay 3 resources to destroy it and gain 1 action point?"
+    }
+  ],
+  "card.sen.wardaura.powercounter": [
+    {
+      "type": 0,
+      "value": "Uphold Tradition: put "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " +1 power counter on an aura with ward you control"
+    }
+  ],
+  "card.sen.wardaura.powercounters": [
+    {
+      "type": 0,
+      "value": "Astral Etchings: put "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " +1 power counters on an aura with ward you control"
+    }
+  ],
+  "card.sfa.attack.banish.discount": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": banish an attack action with cost less than "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": "; it costs 1 less to play and you may play it this turn"
+    }
+  ],
+  "card.sfa.attack.banish.power": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": banish an attack action with cost less than "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": "; it gains +1 power and you may play it this turn"
+    }
+  ],
+  "card.sfa.dragonfire.target": [
+    {
+      "type": 0,
+      "value": "Art of the Dragon: Fire — deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " damage to any target"
+    }
+  ],
+  "card.sfa.fai.flame.return": [
+    {
+      "type": 0,
+      "value": "Fai: return a Phoenix Flame from your graveyard to your hand"
+    }
+  ],
+  "card.sfa.fai.flame.start": [
+    {
+      "type": 0,
+      "value": "Fai: start the game with a Phoenix Flame in your graveyard?"
+    }
+  ],
+  "card.sfa.flame.discard.draw": [
+    {
+      "type": 0,
+      "value": "Fire that Burns Within: discard a Phoenix Flame to draw a card and get +2 power?"
+    }
+  ],
+  "card.sfa.flame.return": [
+    {
+      "type": 0,
+      "value": "Rise from the Ashes: return a Phoenix Flame from your graveyard to your hand?"
+    }
+  ],
+  "card.sfa.flame.search": [
+    {
+      "type": 0,
+      "value": "Flamecall Awakening: search your deck for a Phoenix Flame?"
+    }
+  ],
   "card.sgb.carrion.ally.discard": [
     {
       "type": 0,
@@ -6373,6 +7353,46 @@
     {
       "type": 0,
       "value": ", or discard a card"
+    }
+  ],
+  "card.sly.damage.source.choose": [
+    {
+      "type": 0,
+      "value": "Prevent the next "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " damage from which source?"
+    }
+  ],
+  "card.sly.oasis.hero.choose": [
+    {
+      "type": 0,
+      "value": "Oasis Respite: target which hero?"
+    }
+  ],
+  "card.sly.oasis.life.gain": [
+    {
+      "type": 0,
+      "value": "Oasis Respite: gain "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " life?"
+    }
+  ],
+  "card.sly.shortshrift.card.discard": [
+    {
+      "type": 0,
+      "value": "Short Shrift crush: choose a card to discard"
     }
   ],
   "card.sup.attack.banish": [

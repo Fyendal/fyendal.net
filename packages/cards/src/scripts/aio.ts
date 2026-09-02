@@ -1,4 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import { commonOptionMessages, decisionPrompt, yesNoPrompt } from "./shared-helpers.js";
 
 function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
   return ctx.cardData(card.cardId);
@@ -22,7 +23,7 @@ function crankItem(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
 
 function addSteamChoice(ctx: ScriptCtx, hook: string): void {
   const items = ctx.player(ctx.seat).board.filter((card) => crankItem(ctx, card));
-  if (items.length) ctx.requestCardChoice(hook, "Put a steam counter on an item with crank", items.map((card) => card.instanceId));
+  if (items.length) ctx.requestCardChoice(hook, decisionPrompt("Put a steam counter on an item with crank", "card.aio.crankitem.steam"), items.map((card) => card.instanceId));
 }
 
 function maintenanceItem(steam: number, extra: CardScript = {}): CardScript {
@@ -39,7 +40,7 @@ function maintenanceItem(steam: number, extra: CardScript = {}): CardScript {
         label: "Remove a steam counter or destroy this",
         effect(ctx) {
           if (ctx.getCounter("steam") <= 0) ctx.destroySelf();
-          else ctx.requestChoice("aio-maintenance", "Remove a steam counter or destroy this?", ["remove", "destroy"]);
+          else ctx.requestChoice("aio-maintenance", decisionPrompt("Remove a steam counter or destroy this?", "card.aio.maintenance.choose", { optionMessages: commonOptionMessages("remove", "destroy") }), ["remove", "destroy"]);
         },
       },
       ...(extra.triggers ?? []),
@@ -91,7 +92,7 @@ export const aio: Record<string, CardScript> = {
     },
     onFriendlyEnterArena(ctx, entered) {
       if (!isItem(ctx, entered) || !isMech(ctx, entered) || ctx.getCounter("steam") >= 6) return;
-      ctx.requestChoice("symbiosis-steam", "Put a steam counter on Symbiosis Shot?", ["yes", "no"], undefined, undefined, "yes");
+      ctx.requestChoice("symbiosis-steam", yesNoPrompt("Put a steam counter on Symbiosis Shot?", "card.aio.symbiosisshot.steam"), ["yes", "no"], undefined, undefined, "yes");
     },
     onChoose(ctx, hook, option) {
       if (hook === "symbiosis-steam" && option === "yes" && ctx.getCounter("steam") < 6) {
@@ -101,7 +102,7 @@ export const aio: Record<string, CardScript> = {
   },
   "heavy industry surveillance|0": {
     onDefend(ctx) {
-      if (ctx.player(ctx.seat).deck.length) ctx.requestChoice("surveillance", "Banish the top card of your deck?", ["yes", "no"]);
+      if (ctx.player(ctx.seat).deck.length) ctx.requestChoice("surveillance", yesNoPrompt("Banish the top card of your deck?", "card.aio.deck.top.banish"), ["yes", "no"]);
     },
     onChoose(ctx, hook, option) {
       if (hook !== "surveillance" || option !== "yes") return;
@@ -131,7 +132,7 @@ export const aio: Record<string, CardScript> = {
   },
   "heavy industry ram stop|0": {
     defendCost: 1,
-    onDefend(ctx) { ctx.requestPayment("ram-stop", "Pay 1 resource for +1 defense?", 1); },
+    onDefend(ctx) { ctx.requestPayment("ram-stop", decisionPrompt("Pay 1 resource for +1 defense?", "card.aio.defense.pay", { values: { amount: 1 } }), 1); },
     onChoose(ctx, hook, option) {
       if (hook === "ram-stop" && option === "paid") ctx.addCardTempDefense(ctx.self.instanceId, 1);
     },

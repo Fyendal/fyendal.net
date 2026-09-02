@@ -321,7 +321,11 @@ export function retrievableDaggerIds(ctx: ScriptCtx): number[] {
 export function offerRetrieveDagger(ctx: ScriptCtx, hook: string): void {
   const ids = retrievableDaggerIds(ctx);
   if (ids.length === 0) return;
-  ctx.requestCardChoice(hook, "Retrieve a dagger from your graveyard?", ["pass", ...ids]);
+  ctx.requestCardChoice(hook, decisionPrompt(
+    "Retrieve a dagger from your graveyard?",
+    "card.common.retrieve.dagger",
+    { optionMessages: commonOptionMessages("pass") },
+  ), ["pass", ...ids]);
 }
 
 export function resolveRetrieveDagger(
@@ -334,7 +338,11 @@ export function resolveRetrieveDagger(
     if (option === "pass") return true;
     const id = Number(option);
     if (!retrievableDaggerIds(ctx).includes(id)) return true;
-    ctx.requestPayment(`retrieve-pay:${expected}:${id}`, "Retrieve: pay {r} to equip this dagger?", 1);
+    ctx.requestPayment(`retrieve-pay:${expected}:${id}`, decisionPrompt(
+      "Retrieve: pay {r} to equip this dagger?",
+      "card.common.retrieve.dagger.pay",
+      { values: { amount: 1 } },
+    ), 1);
     return true;
   }
   const prefix = `retrieve-pay:${expected}:`;
@@ -431,7 +439,7 @@ export function bloodDebtScript(extra: CardScript = {}, playableFromBanish = fal
           if (!transform || !isOriginalLevia(heroName)) return;
           ctx.requestChoice(
             `${BLOOD_DEBT.transformHookPrefix}${transform.instanceId}`,
-            "Transform into Blasmophet, Levia Consumed?",
+            yesNoPrompt("Transform into Blasmophet, Levia Consumed?", "card.common.levia.transform"),
             ["yes", "no"],
             undefined,
             undefined,
@@ -532,7 +540,11 @@ export function mentorSpecializationPayoff(ctx: ScriptCtx, hook: string): void {
   }
   ctx.requestCardChoice(
     hook,
-    `${ctx.data.name}: choose a specialization card to put face up into arsenal`,
+    decisionPrompt(
+      `${ctx.data.name}: choose a specialization card to put face up into arsenal`,
+      "card.common.specialization.arsenal",
+      { values: { card: { kind: "card", cardId: ctx.self.cardId } } },
+    ),
     choices.map((card) => card.instanceId),
   );
 }
@@ -782,6 +794,16 @@ function optOptions(ids: number[]): { options: string[]; cardOptions: (number | 
   };
 }
 
+function optOptionMessages(ids: number[]): Readonly<Record<string, GameMessage>> {
+  return {
+    ...Object.fromEntries(ids.flatMap((id) => [
+      [`top:${id}`, decisionMessage("common.option.top")],
+      [`bottom:${id}`, decisionMessage("common.option.bottom")],
+    ])),
+    pass: decisionMessage("common.option.pass"),
+  };
+}
+
 export function optN(ctx: ScriptCtx, n: number, chargeHero = false): void {
   const p = ctx.player(ctx.seat);
   const looked = p.deck.slice(0, n).map((c) => c.instanceId);
@@ -791,7 +813,10 @@ export function optN(ctx: ScriptCtx, n: number, chargeHero = false): void {
     chargeHero || ctx.cardData(p.heroCardId).name === "Blaze, Firemind";
   ctx.requestChoice(
     `${chargesBlaze ? "optc" : "opt"}:${looked.length}:${looked.join(",")}`,
-    `${ctx.data.name}: Opt ${looked.length}`,
+    decisionPrompt(`${ctx.data.name}: Opt ${looked.length}`, "card.common.opt", {
+      values: { card: { kind: "card", cardId: ctx.self.cardId }, count: looked.length },
+      optionMessages: optOptionMessages(looked),
+    }),
     options,
     undefined,
     cardOptions,
@@ -842,7 +867,14 @@ export function optOnChoose(
     const { options, cardOptions } = optOptions(rest);
     ctx.requestChoice(
       `${m[1]}:${total}:${rest.join(",")}`,
-      `${ctx.data.name}: Opt ${total} · ${rest.length} left`,
+      decisionPrompt(`${ctx.data.name}: Opt ${total} · ${rest.length} left`, "card.common.opt.remaining", {
+        values: {
+          card: { kind: "card", cardId: ctx.self.cardId },
+          count: total,
+          remaining: rest.length,
+        },
+        optionMessages: optOptionMessages(rest),
+      }),
       options,
       undefined,
       cardOptions,

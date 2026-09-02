@@ -699,8 +699,8 @@ export function GameBoard() {
       pd.kind === "attack-reaction" ||
       pd.kind === "defense-reaction" ||
       pd.kind === "arsenal");
-  // Priority/reaction cards remain highlighted and Pass remains in the status
-  // float, so this duplicate prompt can follow the guidance preference. On a
+  // Priority/reaction cards remain highlighted and Pass stays exclusively in
+  // the status float, so this guidance prompt can follow the preference. On a
   // mobile viewport, collapsing the hand also clears it off the battlefield.
   const hidePriorityGuidance = shouldHidePriorityGuidance(pd, {
     isMine: myDecision,

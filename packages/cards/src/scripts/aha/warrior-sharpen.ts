@@ -1,5 +1,5 @@
 import type { CardInstance, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack } from "../shared-helpers.js";
+import { buffNextAttack, commonOptionMessages, decisionPrompt } from "../shared-helpers.js";
 
 type Card = DeepReadonly<CardInstance>;
 
@@ -72,7 +72,7 @@ export function resolveSharpenFollowup(
       if (reactions.length) {
         ctx.requestCardChoice(
           "rerebrace-honed-top",
-          "Put an attack reaction on top?",
+          decisionPrompt("Put an attack reaction on top?", "card.aha.attackreaction.top", { optionMessages: commonOptionMessages("no") }),
           ["no", ...reactions.map((card) => card.instanceId)],
         );
       }
@@ -135,7 +135,7 @@ export function sharpenSword(
     const requested = ctx.requestPaymentFrom(
       rerebrace.instanceId,
       "rerebrace-sharpen",
-      "Reverent Rerebrace: pay 1 and destroy this to sharpen an additional time?",
+      decisionPrompt("Reverent Rerebrace: pay 1 and destroy this to sharpen an additional time?", "card.aha.rerebrace.pay.sharpen", { values: { amount: 1 } }),
       1,
     );
     if (requested) return;

@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, opponentSeat, previousAttackHasName, previousAttackNameContains } from "./shared-helpers.js";
+import { buffNextAttack, commonOptionMessages, decisionPrompt, opponentSeat, previousAttackHasName, previousAttackNameContains, yesNoPrompt } from "./shared-helpers.js";
 import { cruNinjaWarrior } from "./cru/ninja-warrior.js";
 
 function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
@@ -28,7 +28,7 @@ function offerGiveAndTake(ctx: ScriptCtx): void {
   const choices = ctx.player(ctx.seat).graveyard.filter((card) =>
     ctx.hasCardType(card, "action") && (data(ctx, card).cost ?? 0) < ctx.currentAttackPower()
   );
-  if (choices.length) ctx.requestCardChoice("give-take-top", "Put an eligible action card from your graveyard on top of your deck?", ["pass", ...choices.map((card) => card.instanceId)]);
+  if (choices.length) ctx.requestCardChoice("give-take-top", decisionPrompt("Put an eligible action card from your graveyard on top of your deck?", "card.asr.graveyard.action.top", { optionMessages: commonOptionMessages("pass") }), ["pass", ...choices.map((card) => card.instanceId)]);
 }
 
 function seekVengeance(): CardScript {
@@ -57,7 +57,7 @@ export const asr: Record<string, CardScript> = {
       canActivate: (ctx) => ctx.getPlayerFlag(ctx.seat, "dealtDamageThisTurn") === true,
       onActivate(ctx) {
         const choices = ctx.player(ctx.seat).deck.filter((card) => normalizedName(ctx, card) === "whirling mist blossom");
-        if (choices.length) ctx.requestCardChoice("iris-blossom", "Search for Whirling Mist Blossom to banish", choices.map((card) => card.instanceId));
+        if (choices.length) ctx.requestCardChoice("iris-blossom", decisionPrompt("Search for Whirling Mist Blossom to banish", "card.asr.whirlingmistblossom.banish"), choices.map((card) => card.instanceId));
         else ctx.shuffleDeck();
       },
     },
@@ -72,7 +72,7 @@ export const asr: Record<string, CardScript> = {
   "robe of autumn's fall|0": {
     onFriendlyCombatDamageDealt(ctx, source) {
       if (normalizedName(ctx, source) === "edge of autumn") {
-        ctx.requestChoice("robe-autumn", "Destroy Robe of Autumn's Fall to gain a resource?", ["yes", "no"]);
+        ctx.requestChoice("robe-autumn", yesNoPrompt("Destroy Robe of Autumn's Fall to gain a resource?", "card.asr.robe.destroy.resource"), ["yes", "no"]);
       }
     },
     onChoose(ctx, hook, option) {
@@ -93,10 +93,12 @@ export const asr: Record<string, CardScript> = {
       canActivate: (ctx) => !!ctx.link && ctx.link.attacker === ctx.seat && ninjaAttack(ctx, ctx.link.attackingCard),
       onActivate(ctx) { ctx.addModifier({ scope: "chain-link", attack: 1 }); },
     },
-    onFriendlyCombatDamageDealt(ctx, source) {
-      if (!normalizedName(ctx, source).includes("vengeance")) return;
+    canTriggerOnHit(ctx) {
+      return !!ctx.link && normalizedName(ctx, ctx.link.attackingCard).includes("vengeance");
+    },
+    onHit(ctx) {
       const choices = ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && normalizedName(ctx, card) === "edge of autumn");
-      if (choices.length) ctx.requestCardChoice("okana-equip", "Equip an Edge of Autumn from banish?", ["pass", ...choices.map((card) => card.instanceId)]);
+      if (choices.length) ctx.requestCardChoice("okana-equip", decisionPrompt("Equip an Edge of Autumn from banish?", "card.asr.edgeofautumn.equip", { optionMessages: commonOptionMessages("pass") }), ["pass", ...choices.map((card) => card.instanceId)]);
     },
     onChoose(ctx, hook, option) {
       if (hook === "okana-equip" && option !== "pass") ctx.equipFromBanish(Number(option));

@@ -10,47 +10,77 @@ import {
 
 const scriptsDirectory = fileURLToPath(new URL("../scripts/", import.meta.url));
 const localizedSets = [
+  "1hp",
+  "aac",
+  "aaz",
+  "agb",
+  "aha",
+  "aio",
   "ako",
   "ajv",
   "ama",
   "amo",
+  "amx",
+  "aol",
   "apr",
+  "aps",
   "arc",
+  "ark",
+  "arr",
+  "asr",
   "asb",
+  "ast",
   "aur",
   "azs",
+  "bdd",
+  "bol",
+  "chn",
   "cru",
   "ddd",
   "dtd",
+  "dro",
   "dyn",
+  "dvr",
   "ele",
   "evr",
   "evo",
+  "fab",
   "gem",
   "hnt",
   "hvy",
   "iar",
   "jdg",
   "lgs",
+  "lev",
   "lss",
   "mon",
+  "mpg",
   "mpa",
   "mpw",
   "mst",
   "omn",
   "out",
   "pen",
+  "psm",
+  "rnr",
   "ros",
+  "rvd",
   "sar",
   "sba",
   "saz",
   "sbz",
+  "sbl",
+  "sbr",
   "sda",
   "sdo",
   "sea",
+  "sen",
+  "sfa",
   "sgb",
+  "shared-helpers",
   "siy",
   "ska",
+  "sly",
   "svi",
   "sup",
   "tcc",
@@ -87,7 +117,16 @@ function rawDecisionPrompts(set: string): string[] {
       if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)) {
         const argumentIndex = decisionPromptArgument.get(node.expression.name.text);
         const prompt = argumentIndex === undefined ? undefined : node.arguments[argumentIndex];
-        if (prompt && !ts.isCallExpression(prompt) && !ts.isObjectLiteralExpression(prompt)) {
+        const isTypedPromptParameter = prompt && ts.isIdentifier(prompt) && (() => {
+          let current: ts.Node | undefined = node;
+          while (current && !ts.isFunctionLike(current)) current = current.parent;
+          return current?.parameters.some((parameter) =>
+            ts.isIdentifier(parameter.name) &&
+            parameter.name.text === prompt.text &&
+            parameter.type?.getText(sourceFile) === "ScriptPrompt"
+          ) === true;
+        })();
+        if (prompt && !ts.isCallExpression(prompt) && !ts.isObjectLiteralExpression(prompt) && !isTypedPromptParameter) {
           const position = sourceFile.getLineAndCharacterOfPosition(prompt.getStart(sourceFile));
           raw.push(`${path.slice(scriptsDirectory.length + 1)}:${position.line + 1}`);
         }

@@ -1,5 +1,5 @@
 import type { CardScript, DeepReadonly, CardInstance, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, opponentSeat } from "./shared-helpers.js";
+import { buffNextAttack, commonOptionMessages, decisionPrompt, opponentSeat } from "./shared-helpers.js";
 
 const SEISMIC_SURGE = "SBR035";
 
@@ -135,7 +135,7 @@ function annexAura(): CardScript {
       if (auras.length) {
         ctx.requestCardChoice(
           "annex-aura",
-          "Annexation of Grandeur: gain control of an aura",
+          decisionPrompt("Annexation of Grandeur: gain control of an aura", "card.mpg.aura.steal"),
           auras.map((card) => card.instanceId),
         );
       }
@@ -163,7 +163,7 @@ function annexEquipment(): CardScript {
       if (equipment.length) {
         ctx.requestCardChoice(
           "annex-equipment",
-          "Annexation of the Forge: equip opposing equipment",
+          decisionPrompt("Annexation of the Forge: equip opposing equipment", "card.mpg.opposing.equipment.equip"),
           equipment.map((card) => card.instanceId),
         );
       }
@@ -186,7 +186,7 @@ function hostileEncroachment(): CardScript {
       if (hand.length) {
         ctx.requestCardChoice(
           "hostile-discard",
-          "Hostile Encroachment: discard a card",
+          decisionPrompt("Hostile Encroachment: discard a card", "card.mpg.card.discard"),
           hand.map((card) => card.instanceId),
           target,
         );
@@ -322,7 +322,7 @@ function advanceTectonicInstability(ctx: ScriptCtx): void {
   }
   ctx.requestCardChoice(
     `tectonic-bottom:${seat}`,
-    "Tectonic Instability: put an arsenal card on the bottom of your deck",
+    decisionPrompt("Tectonic Instability: put an arsenal card on the bottom of your deck", "card.mpg.arsenal.card.bottom"),
     arsenal.map((card) => card.instanceId),
     seat,
   );
@@ -350,6 +350,14 @@ function tectonicInstability(): CardScript {
 
 type ClashSlot = "head" | "chest" | "arms" | "legs" | "off-hand";
 
+const clashSlotMessageIds: Record<ClashSlot, string> = {
+  head: "card.mpg.equipment.defensecounter.head",
+  chest: "card.mpg.equipment.defensecounter.chest",
+  arms: "card.mpg.equipment.defensecounter.arms",
+  legs: "card.mpg.equipment.defensecounter.legs",
+  "off-hand": "card.mpg.equipment.defensecounter.offhand",
+};
+
 function clashEquipment(slot: ClashSlot): CardScript {
   const equippedInSlot = (ctx: ScriptCtx, seat: number): readonly DeepReadonly<CardInstance>[] => {
     if (slot === "off-hand") {
@@ -376,7 +384,7 @@ function clashEquipment(slot: ClashSlot): CardScript {
         ctx.setCounter("clashEquipmentLoser", loser);
         ctx.requestCardChoice(
           `clash-equipment:${slot}`,
-          `Clash: put a -1{d} counter on an equipped ${slot}`,
+          decisionPrompt(`Clash: put a -1{d} counter on an equipped ${slot}`, clashSlotMessageIds[slot]),
           equipment.map((card) => card.instanceId),
           loser,
         );
@@ -433,7 +441,9 @@ function heave(amount: number, extra: CardScript = {}): CardScript {
         effect(ctx) {
           ctx.requestPayment(
             `heave-${amount}`,
-            `${ctx.data.name}: pay ${Array(amount).fill("{r}").join("")} to heave it?`,
+            decisionPrompt(`${ctx.data.name}: pay ${Array(amount).fill("{r}").join("")} to heave it?`, "card.mpg.heave.pay", {
+              values: { card: { kind: "card", cardId: ctx.self.cardId }, amount },
+            }),
             amount,
           );
         },
@@ -491,7 +501,7 @@ function crashAndBash(): CardScript {
       if (crush.length) {
         ctx.requestCardChoice(
           "crash-reveal",
-          "Crash and Bash: reveal a card with crush?",
+          decisionPrompt("Crash and Bash: reveal a card with crush?", "card.mpg.crush.reveal", { optionMessages: commonOptionMessages("no") }),
           ["no", ...crush.map((card) => card.instanceId)],
         );
       }
@@ -513,7 +523,7 @@ function sunkwater(): CardScript {
       if (faceUp.length) {
         ctx.requestCardChoice(
           "sunkwater-bottom",
-          `${ctx.data.name}: put a face-up arsenal card on the bottom`,
+          decisionPrompt(`${ctx.data.name}: put a face-up arsenal card on the bottom`, "card.mpg.arsenal.faceup.bottom", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }),
           faceUp.map((card) => card.instanceId),
         );
       }
@@ -612,7 +622,7 @@ export const mpg: Record<string, CardScript> = {
 
 function destroyAuraChoice(ctx: ScriptCtx, seat: number, hook: string): void {
   const auras = ctx.player(seat).board.filter((card) => isAura(ctx, card));
-  if (auras.length) ctx.requestCardChoice(hook, `${ctx.data.name}: destroy an aura`, auras.map((card) => card.instanceId), seat);
+  if (auras.length) ctx.requestCardChoice(hook, decisionPrompt(`${ctx.data.name}: destroy an aura`, "card.mpg.aura.destroy", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }), auras.map((card) => card.instanceId), seat);
 }
 
 function clashAndDestroyAura(): CardScript {
@@ -654,7 +664,7 @@ Object.assign(mpg, {
     onHit(ctx: ScriptCtx) {
       const target = opponentSeat(ctx);
       const tokens = ctx.player(target).board.filter((card) => isAuraToken(ctx, card));
-      if (tokens.length) ctx.requestCardChoice("break-aura", "Break Stature: destroy an aura token", tokens.map((card) => card.instanceId));
+      if (tokens.length) ctx.requestCardChoice("break-aura", decisionPrompt("Break Stature: destroy an aura token", "card.mpg.auratoken.destroy"), tokens.map((card) => card.instanceId));
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
       if (hook !== "break-aura") return;
@@ -714,7 +724,7 @@ Object.assign(mpg, {
     onPlay(ctx: ScriptCtx) {
       const x = ctx.getCounter("anvilheimX");
       const offHands = ctx.player(ctx.seat).weapons.filter((card) => hasType(ctx, card, "off-hand") && -(card.defCounters ?? 0) >= x);
-      if (x > 0 && offHands.length) ctx.requestCardChoice("anvilheim", `Remove ${x} -1 defense counter${x === 1 ? "" : "s"}`, offHands.map((card) => card.instanceId));
+      if (x > 0 && offHands.length) ctx.requestCardChoice("anvilheim", decisionPrompt(`Remove ${x} -1 defense counter${x === 1 ? "" : "s"}`, "card.mpg.defensecounter.remove", { values: { count: x } }), offHands.map((card) => card.instanceId));
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
       if (hook === "anvilheim") ctx.addCardDefenseCounters(Number(option), ctx.getCounter("anvilheimX"));
@@ -741,7 +751,7 @@ Object.assign(mpg, {
       if (hook !== "iron-grip" || winner < 0) return;
       const loser = winner === ctx.seat ? opponentSeat(ctx) : ctx.seat;
       const hand = ctx.player(loser).hand;
-      if (hand.length) ctx.requestCardChoice("iron-discard", "Test of Iron Grip: discard a card", hand.map((card) => card.instanceId), loser);
+      if (hand.length) ctx.requestCardChoice("iron-discard", decisionPrompt("Test of Iron Grip: discard a card", "card.mpg.iron.card.discard"), hand.map((card) => card.instanceId), loser);
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "iron-discard") ctx.discardCard(opponentSeat(ctx), Number(option)); },
   },
@@ -751,7 +761,7 @@ Object.assign(mpg, {
   "call for backup|1": {
     onDefend(ctx: ScriptCtx) {
       const attacks = ctx.player(ctx.seat).graveyard.filter((card) => ctx.hasCardType(card, "action") && hasType(ctx, card, "attack"));
-      if (attacks.length) ctx.requestCardChoice("backup-top", "Call for Backup: put an attack on top", attacks.map((card) => card.instanceId));
+      if (attacks.length) ctx.requestCardChoice("backup-top", decisionPrompt("Call for Backup: put an attack on top", "card.mpg.attack.top"), attacks.map((card) => card.instanceId));
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "backup-top") ctx.putOnDeckTop(Number(option)); },
   },
@@ -767,7 +777,7 @@ Object.assign(mpg, {
         if (attacks.length === 1) applyFearlessConfrontation(ctx, attacks[0]!.instanceId);
         else ctx.requestCardChoice(
           "fearless-attack",
-          "Fearless Confrontation: choose an attack",
+          decisionPrompt("Fearless Confrontation: choose an attack", "card.mpg.attack.choose"),
           attacks.map((attack) => attack.instanceId),
         );
       },
