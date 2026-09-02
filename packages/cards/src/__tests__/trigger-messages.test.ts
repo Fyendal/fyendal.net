@@ -1,7 +1,7 @@
 import type { CardScript } from "@fyendal/engine";
 import { describe, expect, it } from "vitest";
 import { registry } from "../scripts/index.js";
-import { withCommonTriggerMessages } from "../trigger-messages.js";
+import { withTriggerMessages } from "../trigger-messages.js";
 
 const specializedTriggerLabels = new Set([
   // Rendered by BloodDebtTriggerTile with its own semantic life-loss message.
@@ -9,7 +9,7 @@ const specializedTriggerLabels = new Set([
 ]);
 
 describe("card trigger presentation", () => {
-  it("enriches shared labels without mutating card behavior or explicit metadata", () => {
+  it("enriches legacy labels without mutating card behavior or explicit metadata", () => {
     const effect = () => undefined;
     const script: CardScript = {
       triggers: [
@@ -23,7 +23,7 @@ describe("card trigger presentation", () => {
       ],
     };
 
-    const enriched = withCommonTriggerMessages(script);
+    const enriched = withTriggerMessages(script);
 
     expect(enriched).not.toBe(script);
     expect(script.triggers?.[0]?.labelMessage).toBeUndefined();
@@ -42,7 +42,7 @@ describe("card trigger presentation", () => {
         !trigger.labelMessage && !specializedTriggerLabels.has(trigger.label)
       );
 
-    expect(untranslated).toHaveLength(118);
-    expect(new Set(untranslated.map((trigger) => trigger.label))).toHaveLength(118);
+    expect(untranslated).toHaveLength(0);
+    expect(new Set(untranslated.map((trigger) => trigger.label))).toHaveLength(0);
   });
 });
