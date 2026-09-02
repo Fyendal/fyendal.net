@@ -1232,6 +1232,8 @@
   "card.log.siy.hero.paid": "{target} pays the resource cost for {card}",
   "card.log.siy.hero.paid.amount": "{target} pays {amount} resource for {card}",
   "card.log.svi.aura.returned": "{card}: return {result} from the graveyard to your hand",
+  "card.trigger.energycounter.add": "Add an energy counter",
+  "card.trigger.steam.maintain": "Remove a steam counter or destroy this",
   "card.log.dvr.dawnblade.counter": "{card} gets a +{amount} attack counter",
   "card.log.dvr.dawnblade.turn.attack": "{card} gains +{amount} attack until end of turn",
   "card.log.dvr.dorinthea.additionalattack": "{card}: Dawnblade may attack an additional time this turn",

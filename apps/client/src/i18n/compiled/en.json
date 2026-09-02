@@ -12249,6 +12249,18 @@
       "value": "Terra: pay 1 resource to create a Might token?"
     }
   ],
+  "card.trigger.energycounter.add": [
+    {
+      "type": 0,
+      "value": "Add an energy counter"
+    }
+  ],
+  "card.trigger.steam.maintain": [
+    {
+      "type": 0,
+      "value": "Remove a steam counter or destroy this"
+    }
+  ],
   "card.upr.action.bottom": [
     {
       "type": 1,
