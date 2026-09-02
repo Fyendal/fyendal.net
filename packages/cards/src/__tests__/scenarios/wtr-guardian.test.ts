@@ -1,5 +1,6 @@
-import { describe, it } from "vitest";
-import { scenario } from "../harness.js";
+import { projectStateFor } from "@fyendal/engine";
+import { describe, expect, it } from "vitest";
+import { printingId, scenario } from "../harness.js";
 
 /**
  * Scenarios for the WTR Guardian pool: auras, crush attacks, defense reactions,
@@ -202,6 +203,14 @@ describe("WTR Guardian — crush attacks", () => {
       .expectZoneSize(1, "arsenal", 0)
       .expectDeckBottom(1, "raging onslaught|2")
       .expectLife(1, 13);
+
+    const publicMove = projectStateFor(g.state, 0).logEntries?.find(
+      (entry) => "message" in entry && entry.message.id === "card.log.wtr.disable.arsenal.bottom",
+    );
+    expect(publicMove).toMatchObject({
+      event: { kind: "card-moved", ownerSeat: 1, from: "arsenal", to: "deck" },
+    });
+    expect(JSON.stringify(publicMove)).not.toContain(printingId("raging onslaught|2"));
   });
 });
 

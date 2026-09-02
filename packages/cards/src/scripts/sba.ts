@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, commonOptionMessages, dealArcane, decisionPrompt, isWeaponAttack, nextAttack, opponentSeat } from "./shared-helpers.js";
+import { attackAbility, commonOptionMessages, dealArcane, decisionPrompt, isWeaponAttack, localizedCardLog, nextAttack, opponentSeat } from "./shared-helpers.js";
 
 // ── SBA (Silver Age: Briar precon) ──────────────────────────────────────────
 //
@@ -67,7 +67,13 @@ function fusionOnChoose(ctx: ScriptCtx, hook: string, option: string): void {
       ctx.setFlag("player", `${type}FusedThisTurn`, true);
     }
   }
-  ctx.logPublic(`${ctx.data.name} is fused (reveals ${ctx.cardData(card.cardId).name})`);
+  ctx.logPublic(localizedCardLog(
+    ctx,
+    `${ctx.data.name} is fused (reveals ${ctx.cardData(card.cardId).name})`,
+    "card.log.common.fusion.revealed",
+    { revealed: { kind: "card", cardId: card.cardId } },
+    { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" },
+  ));
 }
 
 // ── Meld split cards ────────────────────────────────────────────────────────
@@ -177,7 +183,7 @@ export const sba: Record<string, CardScript> = {
       if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId) return;
       if (!playedLightning(ctx)) return;
       ctx.grantGoAgain();
-      ctx.logPublic(`${ctx.data.name}: +1{p} and go again (played a Lightning card this turn)`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: +1{p} and go again (played a Lightning card this turn)`, "card.log.sba.starfall.lightning", { amount: 1 }));
     },
   },
 
@@ -250,7 +256,7 @@ export const sba: Record<string, CardScript> = {
             : ctx.getCounter("crownAttack");
         crownPutOnTop(ctx, other);
         crownPutOnTop(ctx, chosen);
-        ctx.logPublic(`${ctx.data.name}: put two cards from the graveyard on top of the deck`);
+        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: put two cards from the graveyard on top of the deck`, "card.log.sba.crown.graveyard.top", { amount: 2 }));
       }
     },
   },
@@ -299,7 +305,7 @@ export const sba: Record<string, CardScript> = {
     onAttackDeclared(ctx) {
       if (!isFused(ctx)) return;
       ctx.grantGoAgain();
-      ctx.logPublic(`${ctx.data.name}: gains go again (fused)`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: gains go again (fused)`, "card.log.sba.fused.goagain"));
     },
   },
 
@@ -328,7 +334,13 @@ export const sba: Record<string, CardScript> = {
       ctx.banish(card.instanceId);
       ctx.setCounter("jackBuff", 1);
       ctx.grantGoAgain();
-      ctx.logPublic(`${ctx.data.name}: banishes Nimblism — +1{p} and go again`);
+      ctx.logPublic(localizedCardLog(
+        ctx,
+        `${ctx.data.name}: banishes Nimblism — +1{p} and go again`,
+        "card.log.sba.jack.nimblism",
+        { result: { kind: "card", cardId: card.cardId }, amount: 1 },
+        { kind: "card-moved", cardId: card.cardId, ownerSeat: ctx.seat, from: "graveyard", to: "banish" },
+      ));
     },
     modifyAttack(ctx) {
       return ctx.getCounter("jackBuff") ? 1 : 0;
@@ -367,7 +379,7 @@ export const sba: Record<string, CardScript> = {
     onAttackDeclared(ctx) {
       if (!ctx.getCounter("fromArsenal")) return;
       ctx.grantGoAgain();
-      ctx.logPublic(`${ctx.data.name}: gains go again (played from arsenal)`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: gains go again (played from arsenal)`, "card.log.common.goagain.from.arsenal"));
     },
   },
 
@@ -380,7 +392,7 @@ export const sba: Record<string, CardScript> = {
     onDamageDealt(ctx, _target, amount, arcane) {
       if (!arcane || amount <= 0) return;
       ctx.grantGoAgain();
-      ctx.logPublic(`${ctx.data.name}: gains go again (arcane damage dealt)`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: gains go again (arcane damage dealt)`, "card.log.sba.arcane.goagain"));
     },
     activated: {
       cost: 1,
@@ -402,7 +414,13 @@ export const sba: Record<string, CardScript> = {
     onAttackDeclared(ctx) {
       const top = ctx.player(ctx.seat).deck[0];
       const x = top ? (ctx.cardData(top.cardId).pitch ?? 0) : 0;
-      if (top) ctx.logPublic(`${ctx.data.name} reveals ${ctx.cardData(top.cardId).name} (-${x}{p})`);
+      if (top) ctx.logPublic(localizedCardLog(
+        ctx,
+        `${ctx.data.name} reveals ${ctx.cardData(top.cardId).name} (-${x}{p})`,
+        "card.log.sba.rabble.revealed",
+        { revealed: { kind: "card", cardId: top.cardId }, amount: x },
+        { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
+      ));
       ctx.setFlag("link", "rabbleX", x);
     },
     modifyAttack(ctx) {
@@ -428,7 +446,7 @@ export const sba: Record<string, CardScript> = {
       if (ctx.getFlag("player", "dealtDamageThisTurn") !== true) return;
       ctx.addModifier({ scope: "chain-link", attack: 1 });
       ctx.grantGoAgain();
-      ctx.logPublic(`${ctx.data.name}: +1{p} and go again (dealt damage this turn)`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: +1{p} and go again (dealt damage this turn)`, "card.log.sba.secondstrike.damage", { amount: 1 }));
     },
   },
 
@@ -535,7 +553,7 @@ export const sba: Record<string, CardScript> = {
       if (marker) ctx.consumeModifier(marker.id);
       if ((link.attackingCard.counters?.fused ?? 0) > 0) {
         ctx.grantGoAgain();
-        ctx.logPublic(`${ctx.data.name}: the fused attack gains go again`);
+        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: the fused attack gains go again`, "card.log.sba.fused.attack.goagain"));
       }
     },
   },
@@ -553,7 +571,7 @@ export const sba: Record<string, CardScript> = {
     onPlay(ctx) {
       const cur = Number(ctx.getFlag("player", "preventNextDamage")) || 0;
       ctx.setFlag("player", "preventNextDamage", cur + 3);
-      ctx.logPublic(`${ctx.data.name}: the next 3 damage dealt to you this turn is prevented`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: the next 3 damage dealt to you this turn is prevented`, "card.log.common.damage.next.prevented", { amount: 3 }));
     },
   },
 
@@ -577,7 +595,7 @@ export const sba: Record<string, CardScript> = {
         appliesToInstanceId: ctx.playTargetInstanceId,
         maxCost: 1,
       });
-      ctx.logPublic(`${ctx.data.name}: the attack gains +3{p}`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: the attack gains +3{p}`, "card.log.common.attack.gained", { amount: 3 }));
     },
   },
 
@@ -618,7 +636,13 @@ export const sba: Record<string, CardScript> = {
         effect(ctx) {
           ctx.destroySelf();
           ctx.grantGoAgain();
-          ctx.logPublic(`${ctx.data.name} is destroyed — the attack gains go again`);
+          ctx.logPublic(localizedCardLog(
+            ctx,
+            `${ctx.data.name} is destroyed — the attack gains go again`,
+            "card.log.common.destroyed.attack.goagain",
+            undefined,
+            { kind: "card-moved", cardId: ctx.self.cardId, ownerSeat: ctx.seat, from: "board", to: "graveyard" },
+          ));
         },
       },
     ],

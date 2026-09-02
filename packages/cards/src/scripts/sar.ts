@@ -5,6 +5,7 @@ import {
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  localizedCardLog,
   markedStealthHeroScript,
   opponentSeat,
   yesNoPrompt,
@@ -69,7 +70,12 @@ function markHero(ctx: ScriptCtx, seat: number): void {
   const hero = ctx.state.players[seat]!.hero;
   if ((hero.counters?.marked ?? 0) > 0) return;
   ctx.addCounter(hero.instanceId, "marked", 1);
-  ctx.logPublic(`${ctx.cardData(hero.cardId).name} is marked`);
+  ctx.logPublic(localizedCardLog(
+    ctx,
+    `${ctx.cardData(hero.cardId).name} is marked`,
+    "card.log.common.hero.marked",
+    { target: { kind: "card", cardId: hero.cardId } },
+  ));
 }
 
 function requestHuntsmanMark(ctx: ScriptCtx): void {
@@ -133,7 +139,7 @@ function broodReaction(target: (ctx: ScriptCtx) => boolean, label: string): Acti
     canActivate: (ctx) => myAttack(ctx) && target(ctx),
     onActivate(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: 3 });
-      ctx.logPublic(`${ctx.data.name}: the attack gets +3{p}`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: the attack gets +3{p}`, "card.log.common.attack.gained", { amount: 3 }));
     },
   };
 }
@@ -256,7 +262,7 @@ export const sar: Record<string, CardScript> = {
       onActivate(ctx) {
         ctx.destroySelf();
         for (const p of ctx.state.players) ctx.setPlayerFlag(p.seat, "topDeckToBottom", true);
-        ctx.logPublic("Topsy Turvy: cards put on top of a deck go on the bottom this turn");
+        ctx.logPublic(localizedCardLog(ctx, "Topsy Turvy: cards put on top of a deck go on the bottom this turn", "card.log.sar.topsyturvy.replacement"));
       },
     },
   },
@@ -340,7 +346,13 @@ export const sar: Record<string, CardScript> = {
         if (!top || p.arsenal.length > 0) continue;
         ctx.putIntoArsenal(top.instanceId, "deck", { faceUp: false });
         puts++;
-        ctx.logPublic(`${ctx.cardData(p.heroCardId).name} puts the top card of their deck face-down into their arsenal`);
+        ctx.logPublic(localizedCardLog(
+          ctx,
+          `${ctx.cardData(p.heroCardId).name} puts the top card of their deck face-down into their arsenal`,
+          "card.log.sar.hero.arsenal",
+          { target: { kind: "player", seat: p.seat } },
+          { kind: "card-moved", ownerSeat: p.seat, from: "deck", to: "arsenal", faceDown: true },
+        ));
       }
       if (puts >= 2) ctx.grantGoAgain();
     },
@@ -358,7 +370,7 @@ export const sar: Record<string, CardScript> = {
           playCostReduction: -1,
         });
       }
-      ctx.logPublic(`${ctx.data.name}: cards cost {r} more to play this turn`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: cards cost {r} more to play this turn`, "card.log.sar.hyperinflation.cost", { amount: 1 }));
     },
   },
 
@@ -561,7 +573,12 @@ export const sar: Record<string, CardScript> = {
       );
       if (!card) return;
       ctx.addCardTempDefense(card.instanceId, -2);
-      ctx.logPublic(`Shred: ${ctx.cardData(card.cardId).name} gets -2{d} this combat chain`);
+      ctx.logPublic(localizedCardLog(
+        ctx,
+        `Shred: ${ctx.cardData(card.cardId).name} gets -2{d} this combat chain`,
+        "card.log.sar.shred.defense",
+        { target: { kind: "card", cardId: card.cardId }, amount: 2 },
+      ));
     },
   },
 
@@ -741,7 +758,7 @@ export const sar: Record<string, CardScript> = {
       const targetSeat = opponentSeat(ctx);
       ctx.loseLife(targetSeat, 1);
       const opp = ctx.player(targetSeat);
-      ctx.logPublic(`${ctx.cardData(opp.heroCardId).name} loses 1 life (${opp.life} life)`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(opp.heroCardId).name} loses 1 life (${opp.life} life)`, "card.log.common.hero.life.lost", { target: { kind: "player", seat: targetSeat }, amount: 1, life: opp.life }));
     },
     onFriendlyEffectHitCondition(ctx, source) {
       return isDagger(ctx, source) && source.owner === ctx.seat;
@@ -749,7 +766,7 @@ export const sar: Record<string, CardScript> = {
     onFriendlyEffectHit(ctx, _source, targetSeat) {
       ctx.loseLife(targetSeat, 1);
       const target = ctx.player(targetSeat);
-      ctx.logPublic(`${ctx.cardData(target.heroCardId).name} loses 1 life (${target.life} life)`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(target.heroCardId).name} loses 1 life (${target.life} life)`, "card.log.common.hero.life.lost", { target: { kind: "player", seat: targetSeat }, amount: 1, life: target.life }));
     },
     activated: broodReaction(
       (ctx) => isDagger(ctx, ctx.link!.attackingCard),
@@ -780,11 +797,17 @@ export const sar: Record<string, CardScript> = {
       const card = ctx.player(ctx.seat).deck.find((c) => c.instanceId === Number(option));
       if (!card) return;
       ctx.banish(card.instanceId, { faceDown: true });
-      ctx.logPublic("Arakni, Trap-Door: a card is banished face-down");
+      ctx.logPublic(localizedCardLog(
+        ctx,
+        "Arakni, Trap-Door: a card is banished face-down",
+        "card.log.sar.trapdoor.banished",
+        undefined,
+        { kind: "card-moved", ownerSeat: ctx.seat, from: "deck", to: "banish", faceDown: true },
+      ));
       ctx.shuffleDeck();
       if (ctx.cardTypes(card).includes("trap")) {
         ctx.allowPlayFrom(card.instanceId, "banish", { untilNextTurn: true });
-        ctx.logPublic("Arakni, Trap-Door: the trap may be played until the start of your next turn");
+        ctx.logPublic(localizedCardLog(ctx, "Arakni, Trap-Door: the trap may be played until the start of your next turn", "card.log.sar.trapdoor.playable"));
       }
     },
     triggers: [returnToBrood()],

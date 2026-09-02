@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { legalIntents, projectStateFor } from "@fyendal/engine";
-import { scenario } from "../harness.js";
+import { printingId, scenario } from "../harness.js";
 
 /**
  * Scenarios for the SBA pool (Silver Age: Briar precon): Briar's Embodiments,
@@ -302,6 +302,16 @@ describe("SBA — Fusion", () => {
       .blockWith()
       .settle()
       .expectLife(1, 15); // 4 combat + 1 arcane
+    expect(projectStateFor(g.state, 1).logEntries).toContainEqual(expect.objectContaining({
+      message: {
+        id: "card.log.common.fusion.revealed",
+        values: {
+          revealed: { kind: "card", cardId: printingId("fry|1") },
+          card: { kind: "card", cardId: printingId("arcanic shockwave|1") },
+        },
+      },
+      event: expect.objectContaining({ kind: "cards-revealed", sourceZone: "hand" }),
+    }));
   });
 
   it("Entwine Lightning gains go again only when fused", () => {

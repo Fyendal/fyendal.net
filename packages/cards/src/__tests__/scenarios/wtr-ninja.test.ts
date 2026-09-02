@@ -293,6 +293,21 @@ describe("WTR Ninja — Katsu hero", () => {
       .expectInZone(0, "blackout kick|1", "banish")
       .expectInZone(0, "head jab|3", "graveyard")
       .expectLog("Katsu: banished Blackout Kick face up");
+    expect(projectStateFor(g.state, 1).logEntries).toContainEqual(expect.objectContaining({
+      message: {
+        id: "card.log.wtr.katsu.search.banished",
+        values: {
+          card: { kind: "card", cardId: "WTR077" },
+          result: { kind: "card", cardId: printingId("blackout kick|1") },
+        },
+      },
+      event: expect.objectContaining({
+        kind: "card-moved",
+        cardId: printingId("blackout kick|1"),
+        from: "deck",
+        to: "banish",
+      }),
+    }));
     // "you may play it this turn": straight from the banish zone
     playFromZone(g, "blackout kick|1", "banish", ["raging onslaught|3"])
       .blockWith()

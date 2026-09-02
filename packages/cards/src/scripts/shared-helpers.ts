@@ -74,6 +74,27 @@ export function localizedLog(
   };
 }
 
+/** Construct a semantic log whose conventional `card` value is the script
+ * source. Additional values remain generic, and callers can attach the same
+ * audience-safe machine event supported by `localizedLog`. */
+export function localizedCardLog(
+  ctx: Pick<ScriptCtx, "self">,
+  fallback: string,
+  id: string,
+  values?: GameMessage["values"],
+  event?: GameLogEvent,
+): GameLogPayload {
+  return localizedLog(
+    fallback,
+    id,
+    {
+      ...values,
+      card: { kind: "card", cardId: ctx.self.cardId },
+    },
+    event,
+  );
+}
+
 /** Localize recurring option values without changing the stable value sent
  * back to card scripts. */
 export function commonOptionMessages(

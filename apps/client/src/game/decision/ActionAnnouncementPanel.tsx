@@ -64,6 +64,7 @@ export function ActionAnnouncementPanel({
   const selectedAlternativeCostIds = Array.isArray(alternativeCostCardInstanceIds)
     ? alternativeCostCardInstanceIds
     : [];
+  const attackLabel = intl.formatMessage({ id: "game.chain.stat.attack" });
 
   return (
     <div className={`decision decision-options${
@@ -264,10 +265,21 @@ export function ActionAnnouncementPanel({
             {abilityChoices.map((choice) => (
               <button
                 key={choice.index}
+                aria-label={choice.label.replaceAll("{p}", ` ${attackLabel}`).trim()}
                 onClick={(event) =>
                   chooseWithoutFocus(event.currentTarget, () => onSelectAbility(choice.index))}
               >
-                {choice.label}
+                {choice.label.split(/(\{p\})/g).map((part, index) =>
+                  part === "{p}" ? (
+                    <img
+                      key={index}
+                      className="ico"
+                      src="/icons/attack.png"
+                      alt=""
+                      aria-hidden="true"
+                    />
+                  ) : part
+                )}
               </button>
             ))}
             <button onClick={onCancel}>{intl.formatMessage({ id: "common.cancel" })}</button>

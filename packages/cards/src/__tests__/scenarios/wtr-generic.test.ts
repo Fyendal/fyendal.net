@@ -492,6 +492,31 @@ describe("WTR generic — equipment", () => {
       .chooseOption("done") // …and stop
       .expectHandSize(0, 2) // Wrecker Romp swapped for a fresh draw
       .expectLog("Hope Merchant's Hood: shuffled 1 card(s) in and drew 1");
+
+    const ownerLog = projectStateFor(g.state, 0).logEntries ?? [];
+    const opponentLog = projectStateFor(g.state, 1).logEntries ?? [];
+    expect(ownerLog).toContainEqual(expect.objectContaining({
+      message: {
+        id: "card.log.wtr.hood.card.private",
+        values: {
+          card: { kind: "card", cardId: printingId("hope merchant's hood|0") },
+          result: { kind: "card", cardId: printingId("wrecker romp|3") },
+        },
+      },
+      event: expect.objectContaining({
+        kind: "card-moved",
+        cardId: printingId("wrecker romp|3"),
+        from: "hand",
+        to: "deck",
+      }),
+    }));
+    const publicMove = opponentLog.find(
+      (entry) => "message" in entry && entry.message.id === "card.log.wtr.hood.card.public",
+    );
+    expect(publicMove).toMatchObject({
+      event: { kind: "card-moved", ownerSeat: 0, from: "hand", to: "deck" },
+    });
+    expect(JSON.stringify(publicMove)).not.toContain(printingId("wrecker romp|3"));
   });
 
   it("Snapdragon Scalers gives a cheap attack action go again in the reaction window", () => {

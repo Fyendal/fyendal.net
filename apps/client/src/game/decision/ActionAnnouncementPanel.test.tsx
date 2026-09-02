@@ -126,8 +126,8 @@ describe("activated ability mode choices", () => {
           selCardId: "AGB014",
           step: "ability",
           abilityChoices: [
-            { index: 0, label: "Attack" },
-            { index: 1, label: "Instant — discard watery grave: punish next draw" },
+            { index: 0, label: "+1{p}" },
+            { index: 1, label: "Go again" },
           ],
         }}
         viewerSeat={0}
@@ -135,8 +135,10 @@ describe("activated ability mode choices", () => {
     );
 
     expect(html).toContain("Choose how to use");
-    expect(html).toContain("Attack");
-    expect(html).toContain("Instant — discard watery grave: punish next draw");
+    expect(html).toContain('aria-label="+1 Attack"');
+    expect(html).toContain('src="/icons/attack.png"');
+    expect(html).not.toContain("{p}");
+    expect(html).toContain("Go again");
     expect(html).not.toContain("pitch resources selected");
   });
 });

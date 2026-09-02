@@ -5,6 +5,7 @@ import {
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  localizedCardLog,
   nextAttack,
   opponentSeat,
 } from "./shared-helpers.js";
@@ -53,7 +54,13 @@ function destroyDeckTop(ctx: ScriptCtx): { readonly instanceId: number; readonly
   const p = ctx.player(ctx.seat);
   const top = p.deck[0];
   if (!top) return undefined;
-  ctx.logPublic(`${ctx.data.name} destroys the top card of the deck (${ctx.cardData(top.cardId).name})`);
+  ctx.logPublic(localizedCardLog(
+    ctx,
+    `${ctx.data.name} destroys the top card of the deck (${ctx.cardData(top.cardId).name})`,
+    "card.log.sgb.decktop.destroyed",
+    { result: { kind: "card", cardId: top.cardId } },
+    { kind: "card-moved", cardId: top.cardId, ownerSeat: ctx.seat, from: "deck", to: "graveyard" },
+  ));
   ctx.moveToGraveyard(top.instanceId, "deck");
   return top;
 }
@@ -213,7 +220,13 @@ export const sgb: Record<string, CardScript> = {
           .find((card) => card.instanceId === Number(option));
         if (gold) {
           ctx.destroyPermanent(gold.instanceId);
-          ctx.logPublic(`${ctx.data.name} destroys a Gold`);
+          ctx.logPublic(localizedCardLog(
+            ctx,
+            `${ctx.data.name} destroys a Gold`,
+            "card.log.sgb.gold.destroyed",
+            { result: { kind: "card", cardId: gold.cardId } },
+            { kind: "card-moved", cardId: gold.cardId, ownerSeat: ctx.seat, from: "board", to: "graveyard" },
+          ));
         }
         ctx.drawCards(ctx.seat, 1);
         const hand = ctx.player(ctx.seat).hand;
@@ -245,12 +258,12 @@ export const sgb: Record<string, CardScript> = {
       onActivate(ctx) {
         const top = ctx.player(ctx.seat).deck[0];
         if (!top) {
-          ctx.logPublic(`${ctx.data.name}: the deck is empty`);
+          ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: the deck is empty`, "card.log.common.deck.empty"));
           return;
         }
         // the identity is private: logged only to the controller (lookAt)
         ctx.lookAt(top.instanceId);
-        ctx.logPublic(`${ctx.data.name}: its controller looks at the top card of their deck`);
+        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: its controller looks at the top card of their deck`, "card.log.sgb.compass.look"));
       },
     },
     // "The first card with watery grave you play from your graveyard each
@@ -261,7 +274,7 @@ export const sgb: Record<string, CardScript> = {
       if (ctx.getFlag("player", "compassGoAgain")) return;
       ctx.setFlag("player", "compassGoAgain", true);
       ctx.gainActionPoint();
-      ctx.logPublic(`${ctx.data.name}: ${ctx.cardData(card.cardId).name} gets go again`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: ${ctx.cardData(card.cardId).name} gets go again`, "card.log.sgb.compass.goagain", { target: { kind: "card", cardId: card.cardId } }));
     },
   },
 
@@ -309,7 +322,7 @@ export const sgb: Record<string, CardScript> = {
         const card = choice.resolve(ctx, option);
         if (card && hasWateryGrave(ctx, card.cardId)) {
           ctx.addModifier({ scope: "chain-link", defense: 2 });
-          ctx.logPublic(`${ctx.data.name} gets +2{d} (${ctx.cardData(card.cardId).name} has watery grave)`);
+          ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} gets +2{d} (${ctx.cardData(card.cardId).name} has watery grave)`, "card.log.sgb.waterygrave.defense", { result: { kind: "card", cardId: card.cardId }, amount: 2 }));
         }
       },
     };
@@ -324,7 +337,7 @@ export const sgb: Record<string, CardScript> = {
       onActivate(ctx) {
         ctx.destroySelf();
         ctx.setFlag("player", "nextNonAttackActionCardGoAgain", true);
-        ctx.logPublic(`${ctx.data.name}: the next non-attack action card played this turn gets go again`);
+        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: the next non-attack action card played this turn gets go again`, "card.log.sgb.magemaster.goagain"));
       },
     },
   },
@@ -370,7 +383,7 @@ export const sgb: Record<string, CardScript> = {
     onAttackDeclared(ctx) {
       if (highTide(ctx)) {
         ctx.grantGoAgain();
-        ctx.logPublic(`${ctx.data.name} gains go again (High Tide)`);
+        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} gains go again (High Tide)`, "card.log.sgb.hightide.goagain"));
       }
     },
   },
@@ -378,7 +391,7 @@ export const sgb: Record<string, CardScript> = {
     onAttackDeclared(ctx) {
       if (highTide(ctx)) {
         ctx.grantGoAgain();
-        ctx.logPublic(`${ctx.data.name} gains go again (High Tide)`);
+        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} gains go again (High Tide)`, "card.log.sgb.hightide.goagain"));
       }
     },
   },
@@ -422,11 +435,23 @@ export const sgb: Record<string, CardScript> = {
           const p = ctx.player(ctx.seat);
           const top = p.deck[0];
           if (!top) return;
-          ctx.logPublic(`${ctx.data.name} reveals ${ctx.cardData(top.cardId).name}`);
+          ctx.logPublic(localizedCardLog(
+            ctx,
+            `${ctx.data.name} reveals ${ctx.cardData(top.cardId).name}`,
+            "card.log.common.decktop.revealed",
+            { revealed: { kind: "card", cardId: top.cardId } },
+            { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
+          ));
           const value = ctx.cardData(top.cardId).pitch ?? 0;
           if (ctx.cardColor(top) === 3) {
             ctx.pitchCard(top.instanceId);
-            ctx.logPublic(`${ctx.data.name} pitches ${ctx.cardData(top.cardId).name} (+${value} resources)`);
+            ctx.logPublic(localizedCardLog(
+              ctx,
+              `${ctx.data.name} pitches ${ctx.cardData(top.cardId).name} (+${value} resources)`,
+              "card.log.sgb.decktop.pitched",
+              { result: { kind: "card", cardId: top.cardId }, amount: value },
+              { kind: "card-moved", cardId: top.cardId, ownerSeat: ctx.seat, from: "deck", to: "pitch" },
+            ));
           }
         },
       } satisfies CardScript,
@@ -446,7 +471,7 @@ export const sgb: Record<string, CardScript> = {
         label: "Next ally +1{p}",
         onActivate(ctx) {
           buffNextAttack(ctx, { attack: 1, appliesToSubtype: "ally" });
-          ctx.logPublic(`${ctx.data.name}: your next ally attack this turn gets +1{p}`);
+          ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: your next ally attack this turn gets +1{p}`, "card.log.sgb.nextally.attack", { amount: 1 }));
         },
       },
     ],
@@ -456,7 +481,7 @@ export const sgb: Record<string, CardScript> = {
     ...allyAttack(0),
     onDestroyed(ctx) {
       createGold(ctx);
-      ctx.logPublic(`${ctx.data.name}: created a Gold token when it died`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: created a Gold token when it died`, "card.log.sgb.gold.created.death", { result: { kind: "card", cardId: GOLD } }));
     },
   },
   "riggermortis|2": allyAttack(1),
@@ -484,7 +509,7 @@ export const sgb: Record<string, CardScript> = {
         const card = choice.resolve(ctx, option);
         if (card && hasWateryGrave(ctx, card.cardId)) {
           ctx.grantGoAgain();
-          ctx.logPublic(`${ctx.data.name} gains go again (${ctx.cardData(card.cardId).name} has watery grave)`);
+          ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} gains go again (${ctx.cardData(card.cardId).name} has watery grave)`, "card.log.sgb.waterygrave.goagain", { result: { kind: "card", cardId: card.cardId } }));
         }
       },
     };
@@ -495,7 +520,13 @@ export const sgb: Record<string, CardScript> = {
     onAttackDeclared(ctx) {
       const top = ctx.player(ctx.seat).deck[0];
       const x = top ? (ctx.cardData(top.cardId).pitch ?? 0) : 0;
-      if (top) ctx.logPublic(`${ctx.data.name} reveals ${ctx.cardData(top.cardId).name} (+${x}{p})`);
+      if (top) ctx.logPublic(localizedCardLog(
+        ctx,
+        `${ctx.data.name} reveals ${ctx.cardData(top.cardId).name} (+${x}{p})`,
+        "card.log.sgb.rabble.revealed",
+        { revealed: { kind: "card", cardId: top.cardId }, amount: x },
+        { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
+      ));
       ctx.setFlag("link", "rabbleX", x);
     },
     modifyAttack(ctx) {
@@ -506,13 +537,13 @@ export const sgb: Record<string, CardScript> = {
   // Avast Ye! — next ally attack: go again and "on hit: create a Gold"
   "avast ye!|3": nextAllyAttack("avastYe", { goAgain: true }, (ctx) => {
     createGold(ctx);
-    ctx.logPublic(`${ctx.data.name}: created a Gold token on hit`);
+    ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: created a Gold token on hit`, "card.log.sgb.gold.created.hit", { result: { kind: "card", cardId: GOLD } }));
   }),
 
   // Yo Ho Ho! — next ally attack: +1{p} and "on hit: create a Gold"
   "yo ho ho!|3": nextAllyAttack("yoHoHo", { attack: 1 }, (ctx) => {
     createGold(ctx);
-    ctx.logPublic(`${ctx.data.name}: created a Gold token on hit`);
+    ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: created a Gold token on hit`, "card.log.sgb.gold.created.hit", { result: { kind: "card", cardId: GOLD } }));
   }),
 
   // Loot the Arsenal — next ally attack: "on hit: destroy a card in their
@@ -521,8 +552,14 @@ export const sgb: Record<string, CardScript> = {
     const opp = ctx.player(opponentSeat(ctx));
     const card = opp.arsenal[0];
     if (!card) return;
-    ctx.logPublic(`${ctx.data.name} destroys ${ctx.cardData(card.cardId).name} in the opposing arsenal`);
     ctx.moveToGraveyard(card.instanceId, "arsenal");
+    ctx.logPublic(localizedCardLog(
+      ctx,
+      `${ctx.data.name} destroys a card in the opposing arsenal`,
+      "card.log.sgb.arsenal.destroyed",
+      { target: { kind: "player", seat: opponentSeat(ctx) } },
+      { kind: "card-moved", ownerSeat: opponentSeat(ctx), from: "arsenal", to: "graveyard" },
+    ));
     createGold(ctx);
   }),
 
@@ -563,7 +600,7 @@ export const sgb: Record<string, CardScript> = {
       ctx.setFlag("player", "flyingHigh", false);
       if (ctx.cardColor(link.attackingCard) === 3) {
         ctx.addModifier({ scope: "chain-link", attack: 1 });
-        ctx.logPublic(`${ctx.data.name}: the blue attack gets +1{p}`);
+        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: the blue attack gets +1{p}`, "card.log.sgb.blue.attack", { amount: 1 }));
       }
     },
   },
@@ -598,7 +635,13 @@ export const sgb: Record<string, CardScript> = {
     onPlay(ctx) {
       const top = ctx.player(ctx.seat).deck[0];
       const x = top ? (ctx.cardData(top.cardId).pitch ?? 0) : 0;
-      if (top) ctx.logPublic(`${ctx.data.name} reveals ${ctx.cardData(top.cardId).name} (prevent ${x})`);
+      if (top) ctx.logPublic(localizedCardLog(
+        ctx,
+        `${ctx.data.name} reveals ${ctx.cardData(top.cardId).name} (prevent ${x})`,
+        "card.log.sgb.revealed.prevent",
+        { revealed: { kind: "card", cardId: top.cardId }, amount: x },
+        { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
+      ));
       if (x > 0) {
         const cur = Number(ctx.getFlag("player", "preventNextDamage")) || 0;
         ctx.setFlag("player", "preventNextDamage", cur + x);

@@ -78,5 +78,13 @@ describe("locale catalogs", () => {
     )).toBe("Link 2：进行中");
     expect(intl.formatMessage({ id: "game.decision.bloodMode.goAgain" }))
       .toBe("攻击获得 go again");
+    expect(intl.formatMessage(
+      { id: "card.log.common.goagain.gained" },
+      { card: "Nimble Strike" },
+    )).toBe("Nimble Strike 获得 go again");
+    expect(intl.formatMessage(
+      { id: "card.log.common.dominate.gained" },
+      { card: "Regurgitating Slog" },
+    )).toBe("Regurgitating Slog 获得压制 (dominate)");
   });
 });
