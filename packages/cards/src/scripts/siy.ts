@@ -10,6 +10,7 @@ import {
   type DecisionPromptOptions,
   decisionMessage,
   decisionPrompt,
+  localizedCardLog,
   opponentSeat,
   wizardActionAsInstant,
 } from "./shared-helpers.js";
@@ -60,7 +61,7 @@ function handleFusion(ctx: ScriptCtx, hook: string, option: string): boolean {
     ctx.createTokens(FROSTBITE, count, target);
     ctx.setPlayerFlag(ctx.seat, key, 0);
   }
-  ctx.logPublic(`${ctx.data.name} is fused (reveals ${ctx.cardData(revealed.cardId).name})`);
+  ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} is fused (reveals ${ctx.cardData(revealed.cardId).name})`, "card.log.common.fusion.revealed", { revealed: { kind: "card", cardId: revealed.cardId } }, { kind: "cards-revealed", cards: [{ cardId: revealed.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" }));
   return true;
 }
 
@@ -189,7 +190,7 @@ function handleDiscardUnlessPay(ctx: ScriptCtx, hook: string, option: string, ke
     const target = Number(pay[1]);
     const player = ctx.state.players[target]!;
     if (option === "paid") {
-      ctx.logPublic(`${ctx.cardData(player.heroCardId).name} pays the resource cost`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(player.heroCardId).name} pays the resource cost`, "card.log.siy.hero.paid", { target: { kind: "player", seat: target } }));
     } else if (player.hand.length > 0) {
       ctx.requestCardChoice(
         `${key}:discard:${target}`,
@@ -323,7 +324,7 @@ function freezeChoice(ctx: ScriptCtx, target: number, option: string): void {
   const expiry = ctx.state.turn + (ctx.state.activePlayer === ctx.seat ? 2 : 1);
   const current = Number(card.counters?.frozenUntilTurn || 0);
   ctx.addCounter(card.instanceId, "frozenUntilTurn", Math.max(0, expiry - current));
-  ctx.logPublic(`${ctx.cardData(card.cardId).name} is frozen until the start of ${ctx.cardData(ctx.player(ctx.seat).heroCardId).name}'s next turn`);
+  ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(card.cardId).name} is frozen until the start of ${ctx.cardData(ctx.player(ctx.seat).heroCardId).name}'s next turn`, "card.log.siy.card.frozen", { target: { kind: "card", cardId: card.cardId }, player: { kind: "player", seat: ctx.seat } }));
 }
 
 export const siy: Record<string, CardScript> = {
@@ -413,7 +414,7 @@ export const siy: Record<string, CardScript> = {
           offerFreezeTarget(ctx, target);
         } else {
           const player = ctx.state.players[target]!;
-          ctx.logPublic(`${ctx.cardData(player.heroCardId).name} pays 1 resource`);
+          ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(player.heroCardId).name} pays 1 resource`, "card.log.siy.hero.paid.amount", { target: { kind: "player", seat: target }, amount: 1 }));
         }
         return;
       }
@@ -433,7 +434,7 @@ export const siy: Record<string, CardScript> = {
         }
       }
       if (options.length === 0) {
-        ctx.logPublic("Frost Spike finds no exposed equipment zone");
+        ctx.logPublic(localizedCardLog(ctx, "Frost Spike finds no exposed equipment zone", "card.log.siy.frostspike.none"));
         return;
       }
       ctx.requestChoice(

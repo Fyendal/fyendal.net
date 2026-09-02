@@ -4527,6 +4527,182 @@
       "value": "Batter to a Pulp: destroy an equipment with no defense value"
     }
   ],
+  "card.log.aha.rerebrace.sharpen": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " sharpens Zenith Blade an additional time"
+    }
+  ],
+  "card.log.aha.sword.sharpened": [
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " is sharpened "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " time"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " times"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "card.log.ajv.search.banished": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " reveals and banishes "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": "; it may be played until your next turn"
+    }
+  ],
+  "card.log.arc.aethersink.barrier": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " gains Arcane Barrier "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " until end of turn"
+    }
+  ],
+  "card.log.arc.firstattack.cost": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": "'s first attack next turn costs "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " more resource"
+    }
+  ],
+  "card.log.arc.item.arena": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " is put into the arena"
+    }
+  ],
+  "card.log.arc.nextnonattack.instant": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": your next non-attack action card this turn may be played as though it were an instant"
+    }
+  ],
+  "card.log.arc.search.hand": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " finds "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " and puts it into your hand"
+    }
+  ],
+  "card.log.ast.search.banished": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " reveals and banishes "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": "; it may be played this turn"
+    }
+  ],
   "card.log.common.actionpoints.gained": [
     {
       "type": 1,
@@ -5289,6 +5465,176 @@
       "value": " left)"
     }
   ],
+  "card.log.cru.cranedance.combo": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": combo — attack action defenders with too much base power are restricted"
+    }
+  ],
+  "card.log.cru.damage.prevented": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " prevents "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " damage"
+    }
+  ],
+  "card.log.cru.dauntless.cost": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": "'s next defense reaction costs "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " more resource"
+    }
+  ],
+  "card.log.cru.hero.suppressed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " loses hero abilities until the end of their next turn"
+    }
+  ],
+  "card.log.cru.katsu.banished": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": the searched combo card is banished and may be played this turn"
+    }
+  ],
+  "card.log.cru.knucklehead.doubled": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": rolled "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": "; "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": "'s base attack is doubled"
+    }
+  ],
+  "card.log.cru.knucklehead.halved": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": rolled "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": "; "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": "'s base attack is halved"
+    }
+  ],
+  "card.log.cru.riled.attack": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": your next Guardian attack action gets +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " attack"
+    }
+  ],
+  "card.log.cru.riled.attack.dominate": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": your next Guardian attack action gets +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " attack and dominate"
+    }
+  ],
   "card.log.dvr.dawnblade.counter": [
     {
       "type": 1,
@@ -5469,6 +5815,94 @@
     {
       "type": 1,
       "value": "to"
+    }
+  ],
+  "card.log.hnt.hand.revealed": [
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " reveals "
+    },
+    {
+      "type": 1,
+      "value": "cards"
+    }
+  ],
+  "card.log.hnt.hand.revealed.generic": [
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " reveals their hand"
+    }
+  ],
+  "card.log.mon.minnowism.found": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " finds "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " and puts it into your hand"
+    }
+  ],
+  "card.log.mpg.auras.suppressed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " can't create Aura tokens next turn"
+    }
+  ],
+  "card.log.mst.innerchi.found": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " reveals "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " and puts it into your hand"
+    }
+  ],
+  "card.log.out.banish.faceup": [
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " is turned face up in banish"
     }
   ],
   "card.log.sar.hero.arsenal": [
@@ -6201,6 +6635,160 @@
       "value": ": Surge — gains go again"
     }
   ],
+  "card.log.sda.dash.item.start": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " starts the game with "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " in the arena"
+    }
+  ],
+  "card.log.sda.hyperdriver.counter": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": Hyper Driver gains a steam counter ("
+    },
+    {
+      "type": 1,
+      "value": "from"
+    },
+    {
+      "type": 0,
+      "value": " → "
+    },
+    {
+      "type": 1,
+      "value": "to"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
+  "card.log.sda.hyperdriver.spent": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": remove a steam counter from Hyper Driver ("
+    },
+    {
+      "type": 1,
+      "value": "from"
+    },
+    {
+      "type": 0,
+      "value": " → "
+    },
+    {
+      "type": 1,
+      "value": "to"
+    },
+    {
+      "type": 0,
+      "value": ") and gain "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " resource"
+    }
+  ],
+  "card.log.sda.recharge.attack": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": your next boosted attack this turn gets +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " attack"
+    }
+  ],
+  "card.log.sda.steam.counter": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " gets "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " steam counter"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " steam counters"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "card.log.sda.trebuchet.attack": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": your next boosted attack this combat chain gets +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " attack"
+    }
+  ],
   "card.log.sdo.dawnblade.counter.gained": [
     {
       "type": 1,
@@ -6355,6 +6943,68 @@
     {
       "type": 0,
       "value": "'s arsenal is turned face up"
+    }
+  ],
+  "card.log.sea.decktop.destroyed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " destroys "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " from the top of the deck"
+    }
+  ],
+  "card.log.sea.defender.decktop.revealed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " reveals "
+    },
+    {
+      "type": 1,
+      "value": "revealed"
+    },
+    {
+      "type": 0,
+      "value": " from the top of "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": "'s deck"
+    }
+  ],
+  "card.log.sea.search.revealed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " reveals "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " and puts it into your hand"
     }
   ],
   "card.log.sen.enigma.discount": [
@@ -6917,6 +7567,78 @@
       "value": " has watery grave)"
     }
   ],
+  "card.log.siy.card.frozen": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " is frozen until the start of "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": "'s next turn"
+    }
+  ],
+  "card.log.siy.frostspike.none": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": no exposed equipment zone was found"
+    }
+  ],
+  "card.log.siy.hero.paid": [
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " pays the resource cost for "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "card.log.siy.hero.paid.amount": [
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " pays "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " resource for "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
   "card.log.ska.barefangs.attack": [
     {
       "type": 1,
@@ -7031,6 +7753,24 @@
     {
       "type": 0,
       "value": ": the opponent's attack action cards' base attack and defense are halved until end of their next turn"
+    }
+  ],
+  "card.log.svi.aura.returned": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": return "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " from the graveyard to your hand"
     }
   ],
   "card.log.upr.frozen.arsenal": [

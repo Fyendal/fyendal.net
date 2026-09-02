@@ -3,6 +3,7 @@ import {
   buffNextAttack,
   commonOptionMessages,
   decisionPrompt,
+  localizedCardLog,
   opponentSeat,
   optN,
   optOnChoose,
@@ -124,7 +125,13 @@ function finishWorkshop(ctx: ScriptCtx, maxCost: number): void {
   const top = ctx.state.players[ctx.seat]!.deck[0];
   if (!top) return;
   ctx.lookAt(top.instanceId);
-  ctx.logPublic(`${ctx.data.name} reveals ${ctx.cardData(top.cardId).name}`);
+  ctx.logPublic(localizedCardLog(
+    ctx,
+    `${ctx.data.name} reveals ${ctx.cardData(top.cardId).name}`,
+    "card.log.common.decktop.revealed",
+    { revealed: { kind: "card", cardId: top.cardId } },
+    { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
+  ));
   if (isMechanologistItem(ctx, top, maxCost)) ctx.settleCard(top.instanceId);
 }
 
@@ -341,9 +348,13 @@ function sleepDart(): CardScript {
     },
     onHit(ctx) {
       ctx.suppressHeroAbilitiesThroughNextTurn(opponentSeat(ctx));
-      ctx.logPublic(
-        `${ctx.data.name}: ${ctx.cardData(ctx.state.players[opponentSeat(ctx)]!.heroCardId).name} loses hero abilities until the end of their next turn`,
-      );
+      const target = opponentSeat(ctx);
+      ctx.logPublic(localizedCardLog(
+        ctx,
+        `${ctx.data.name}: ${ctx.cardData(ctx.state.players[target]!.heroCardId).name} loses hero abilities until the end of their next turn`,
+        "card.log.cru.hero.suppressed",
+        { target: { kind: "player", seat: target } },
+      ));
     },
   };
 }

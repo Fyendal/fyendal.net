@@ -11,6 +11,7 @@ import {
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  localizedCardLog,
   nextAttack,
   opponentSeat,
   requestDiscardChoice,
@@ -196,7 +197,13 @@ function discardOrMill(
       if (!chosen) return;
       const watery = (data(ctx, chosen).keywords ?? []).some((keyword) => keyword.toLowerCase() === "watery grave");
       if (option === "deck-top") {
-        ctx.logPublic(`${ctx.data.name} destroys ${data(ctx, chosen).name} from the top of the deck`);
+        ctx.logPublic(localizedCardLog(
+          ctx,
+          `${ctx.data.name} destroys ${data(ctx, chosen).name} from the top of the deck`,
+          "card.log.sea.decktop.destroyed",
+          { result: { kind: "card", cardId: chosen.cardId } },
+          { kind: "card-moved", cardId: chosen.cardId, ownerSeat: ctx.seat, from: "deck", to: "graveyard" },
+        ));
         ctx.moveToGraveyard(chosen.instanceId, "deck");
       } else {
         ctx.discardCard(ctx.seat, chosen.instanceId);
@@ -407,7 +414,13 @@ function goFish(color: 1 | 2 | 3): CardScript {
       const target = opponentSeat(ctx);
       const card = ctx.player(target).hand.find((candidate) => candidate.instanceId === Number(option));
       if (!card) return;
-      ctx.logPublic(`Go Fish reveals ${data(ctx, card).name}`);
+      ctx.logPublic(localizedCardLog(
+        ctx,
+        `Go Fish reveals ${data(ctx, card).name}`,
+        "card.log.common.card.revealed",
+        { revealed: { kind: "card", cardId: card.cardId } },
+        { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: target }], sourceZone: "hand" },
+      ));
       if (ctx.cardColor(card) === color && ctx.discardCard(target, card.instanceId)) createGold(ctx);
     },
   };
@@ -511,7 +524,13 @@ function crashDownTheGates(): CardScript {
       if (ctx.link?.targetAllyId !== undefined) return;
       const top = ctx.player(opponentSeat(ctx)).deck[0];
       if (!top) return;
-      ctx.logPublic(`${data(ctx, top).name} is revealed from the top of the defending hero's deck`);
+      ctx.logPublic(localizedCardLog(
+        ctx,
+        `${data(ctx, top).name} is revealed from the top of the defending hero's deck`,
+        "card.log.sea.defender.decktop.revealed",
+        { revealed: { kind: "card", cardId: top.cardId }, target: { kind: "player", seat: opponentSeat(ctx) } },
+        { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: opponentSeat(ctx) }], sourceZone: "deck" },
+      ));
       if (ctx.currentAttackPower() > ctx.basePower(top)) ctx.addModifier({ scope: "chain-link", attack: 2 });
     },
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
@@ -944,7 +963,13 @@ export const sea: Record<string, CardScript> = {
     onAttackDeclared(ctx) {
       const top = ctx.player(ctx.seat).deck[0];
       if (!top) return;
-      ctx.logPublic(`${ctx.data.name} reveals ${data(ctx, top).name}`);
+      ctx.logPublic(localizedCardLog(
+        ctx,
+        `${ctx.data.name} reveals ${data(ctx, top).name}`,
+        "card.log.common.decktop.revealed",
+        { revealed: { kind: "card", cardId: top.cardId } },
+        { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
+      ));
       if (ctx.cardColor(top) === 3) ctx.pitchCard(top.instanceId);
     },
   },
@@ -1320,7 +1345,13 @@ Object.assign(sea,
       if (hook !== "nimby-search" || option === "pass") return;
       const card = ctx.player(ctx.seat).deck.find((candidate) => candidate.instanceId === Number(option));
       if (!card) return;
-      ctx.logPublic(`${ctx.data.name} reveals ${data(ctx, card).name}`);
+      ctx.logPublic(localizedCardLog(
+        ctx,
+        `${ctx.data.name} reveals ${data(ctx, card).name}`,
+        "card.log.sea.search.revealed",
+        { result: { kind: "card", cardId: card.cardId } },
+        { kind: "card-moved", cardId: card.cardId, ownerSeat: ctx.seat, from: "deck", to: "hand" },
+      ));
       ctx.moveToHand(card.instanceId);
       ctx.shuffleDeck();
     },

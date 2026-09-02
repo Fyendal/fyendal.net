@@ -4,6 +4,7 @@ import {
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  localizedCardLog,
   mergeSetScripts,
   opponentSeat,
   optN,
@@ -530,7 +531,7 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
     onDefend(ctx) {
       const top = ctx.player(ctx.seat).deck[0];
       if (!top) return;
-      ctx.logPublic(`${ctx.data.name} reveals ${data(ctx, top).name}`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} reveals ${data(ctx, top).name}`, "card.log.common.decktop.revealed", { revealed: { kind: "card", cardId: top.cardId } }, { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" }));
       if (!isEvo(ctx, top)) ctx.putOnDeckBottom(top.instanceId);
     },
   })),

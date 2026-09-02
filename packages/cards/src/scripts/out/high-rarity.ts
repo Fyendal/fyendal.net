@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, commonOptionMessages, decisionMessage, decisionPrompt, opponentSeat, previousAttackHasName, yesNoPrompt } from "../shared-helpers.js";
+import { buffNextAttack, commonOptionMessages, decisionMessage, decisionPrompt, localizedLog, opponentSeat, previousAttackHasName, yesNoPrompt } from "../shared-helpers.js";
 
 const BLOODROT = "SAZ034";
 const FRAILTY = "SAZ035";
@@ -93,7 +93,7 @@ export const uzuriAbility: CardScript = {
       ctx.setFlag("player", UZURI_BANISHED_CARD, false);
       const card = ctx.player(ctx.seat).banish.find((candidate) => candidate.instanceId === instanceId);
       if (!card || !ctx.setCardFaceDown(instanceId, false)) return;
-      ctx.logPublic(`${ctx.cardData(card.cardId).name} is turned face up`);
+      ctx.logPublic(localizedLog(`${ctx.cardData(card.cardId).name} is turned face up`, "card.log.out.banish.faceup", { target: { kind: "card", cardId: card.cardId } }));
       ctx.replaceAttackFromBanish(instanceId, 2);
     },
   },

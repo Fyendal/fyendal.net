@@ -10,6 +10,7 @@ import {
   ironhideScript,
   isCard,
   isSixPlus,
+  localizedCardLog,
   mergeSetScripts,
   optN,
   optOnChoose,
@@ -321,7 +322,7 @@ function dimenxxionalGateway(opt: number): CardScript {
     const top = ctx.player(ctx.seat).deck[0];
     if (!top) return;
     const data = ctx.cardData(top.cardId);
-    ctx.logPublic(`${ctx.data.name} reveals ${data.name}`);
+    ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} reveals ${data.name}`, "card.log.common.decktop.revealed", { revealed: { kind: "card", cardId: top.cardId } }, { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" }));
     const runeblade = hasType(ctx, top, "runeblade");
     const shadow = hasType(ctx, top, "shadow");
     if (runeblade && shadow) ctx.setCounter("gatewayShadowCard", top.instanceId);
@@ -586,7 +587,7 @@ function rallyTheRearguard(): CardScript {
     defenseAbility: { discard: 1, oncePerTurn: true },
     onDefendAbility(ctx) {
       ctx.addModifier({ scope: "chain-link", defense: 3 });
-      ctx.logPublic(`${ctx.data.name} gets +3{d}`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} gets +3{d}`, "card.log.common.defense.gained", { defense: 3 }));
     },
   };
 }
@@ -613,7 +614,7 @@ function belittle(): CardScript {
         if (option === "no") return;
         const revealed = revealable(ctx).find((card) => card.instanceId === Number(option));
         if (!revealed) return;
-        ctx.logPublic(`${ctx.data.name} reveals ${ctx.cardData(revealed.cardId).name}`);
+        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} reveals ${ctx.cardData(revealed.cardId).name}`, "card.log.common.card.revealed", { revealed: { kind: "card", cardId: revealed.cardId } }, { kind: "cards-revealed", cards: [{ cardId: revealed.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" }));
         const minnows = ctx.player(ctx.seat).deck.filter((card) => isCard(ctx, card.cardId, "Minnowism"));
         if (minnows.length === 0) {
           ctx.shuffleDeck();
@@ -631,7 +632,7 @@ function belittle(): CardScript {
       if (hook !== "belittle-search") return;
       const found = ctx.player(ctx.seat).deck.find((card) => card.instanceId === Number(option));
       if (found && ctx.moveToHand(found.instanceId)) {
-        ctx.logPublic(`${ctx.data.name} finds Minnowism`);
+        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} finds Minnowism`, "card.log.mon.minnowism.found", { result: { kind: "card", cardId: found.cardId } }, { kind: "card-moved", cardId: found.cardId, ownerSeat: ctx.seat, from: "deck", to: "hand" }));
       }
       ctx.shuffleDeck();
     },

@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { decisionMessage, decisionPrompt } from "./shared-helpers.js";
+import { decisionMessage, decisionPrompt, localizedCardLog } from "./shared-helpers.js";
 
 const COURAGE = "ASB027";
 const QUICKEN = "ASB028";
@@ -104,7 +104,7 @@ export const asb: Record<string, CardScript> = {
     onHit(ctx) {
       const top = ctx.player(ctx.seat).deck[0];
       if (!top) return;
-      ctx.logPublic(`${ctx.data.name} reveals ${ctx.cardData(top.cardId).name}`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} reveals ${ctx.cardData(top.cardId).name}`, "card.log.common.decktop.revealed", { revealed: { kind: "card", cardId: top.cardId } }, { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" }));
       if (isLight(ctx, top)) {
         ctx.putIntoSoul(top.instanceId);
         ctx.gainLife(ctx.seat, 1);

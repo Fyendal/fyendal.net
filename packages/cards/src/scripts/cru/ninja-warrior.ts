@@ -2,6 +2,7 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   commonOptionMessages,
   decisionPrompt,
+  localizedCardLog,
   opponentSeat,
   previousAttackHasName,
 } from "../shared-helpers.js";
@@ -61,9 +62,7 @@ function craneDance(): CardScript {
       if (!comboWith(ctx, "soulbead strike")) return;
       ctx.setFlag("link", "craneCombo", true);
       ctx.grantGoAgain();
-      ctx.logPublic(
-        "Crane Dance: combo — attack action defenders with too much base power are restricted",
-      );
+      ctx.logPublic(localizedCardLog(ctx, "Crane Dance: combo — attack action defenders with too much base power are restricted", "card.log.cru.cranedance.combo"));
     },
     modifyAttack(ctx) {
       return ctx.getFlag("link", "craneCombo") === true ? 1 : 0;
@@ -134,7 +133,7 @@ function dauntless(attack: number): CardScript {
       const defender = opponentSeat(ctx);
       const current = Number(ctx.getPlayerFlag(defender, "nextDefenseReactionExtraCost"));
       ctx.setPlayerFlag(defender, "nextDefenseReactionExtraCost", current + 1);
-      ctx.logPublic("Dauntless: the defending hero's next defense reaction costs {r} more");
+      ctx.logPublic(localizedCardLog(ctx, "Dauntless: the defending hero's next defense reaction costs {r} more", "card.log.cru.dauntless.cost", { amount: 1, target: { kind: "player", seat: defender } }));
     },
   };
 }
@@ -206,10 +205,12 @@ export const cruNinjaWarrior: Record<string, CardScript> = {
       }
       if (hook !== "katsu-search") return;
       const id = Number(option);
+      const card = ctx.player(ctx.seat).deck.find((candidate) => candidate.instanceId === id);
+      if (!card) return;
       if (!ctx.banish(id)) return;
       ctx.allowPlayFrom(id, "banish");
       ctx.shuffleDeck(ctx.seat);
-      ctx.logPublic("Katsu: the searched combo card is banished and may be played this turn");
+      ctx.logPublic(localizedCardLog(ctx, "Katsu: the searched combo card is banished and may be played this turn", "card.log.cru.katsu.banished"));
     },
   },
 

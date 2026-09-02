@@ -4355,6 +4355,160 @@
       "value": "Batter to a Pulp：选择摧毁一件防御值为 0 的装备"
     }
   ],
+  "card.log.aha.rerebrace.sharpen": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 使 Zenith Blade 额外磨砺一次"
+    }
+  ],
+  "card.log.aha.sword.sharpened": [
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 被磨砺 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 次"
+    }
+  ],
+  "card.log.ajv.search.banished": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 展示并放逐 "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": "；直到你的下回合都可以打出该牌"
+    }
+  ],
+  "card.log.arc.aethersink.barrier": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 获得奥术屏障 (Arcane Barrier) "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 直到回合结束"
+    }
+  ],
+  "card.log.arc.firstattack.cost": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "："
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 下回合第一次攻击的费用增加 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
+  "card.log.arc.item.arena": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将 "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " 置入 arena"
+    }
+  ],
+  "card.log.arc.nextnonattack.instant": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：本回合你的下一张非攻击行动牌可以当作瞬间牌打出"
+    }
+  ],
+  "card.log.arc.search.hand": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 找到 "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " 并将其置入你的手牌"
+    }
+  ],
+  "card.log.ast.search.banished": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 展示并放逐 "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": "；本回合可以打出该牌"
+    }
+  ],
   "card.log.common.actionpoints.gained": [
     {
       "type": 1,
@@ -5003,6 +5157,176 @@
       "value": " 个）"
     }
   ],
+  "card.log.cru.cranedance.combo": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：combo——限制基础力量过高的攻击行动防守牌"
+    }
+  ],
+  "card.log.cru.damage.prevented": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 防止 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
+    }
+  ],
+  "card.log.cru.dauntless.cost": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "："
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 的下一张防御反应牌费用增加 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
+  "card.log.cru.hero.suppressed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "："
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 的英雄能力失效，直到其下回合结束"
+    }
+  ],
+  "card.log.cru.katsu.banished": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将搜寻到的 combo 牌放逐；本回合可以打出该牌"
+    }
+  ],
+  "card.log.cru.knucklehead.doubled": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：掷骰结果为 "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": "；"
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 的基础力量翻倍"
+    }
+  ],
+  "card.log.cru.knucklehead.halved": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：掷骰结果为 "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": "；"
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 的基础力量减半"
+    }
+  ],
+  "card.log.cru.riled.attack": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：你的下一张 Guardian 攻击行动牌获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
+  "card.log.cru.riled.attack.dominate": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：你的下一张 Guardian 攻击行动牌获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量和压制 (dominate)"
+    }
+  ],
   "card.log.dvr.dawnblade.counter": [
     {
       "type": 1,
@@ -5187,6 +5511,98 @@
     {
       "type": 1,
       "value": "to"
+    }
+  ],
+  "card.log.hnt.hand.revealed": [
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 展示 "
+    },
+    {
+      "type": 1,
+      "value": "cards"
+    }
+  ],
+  "card.log.hnt.hand.revealed.generic": [
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 展示其手牌"
+    }
+  ],
+  "card.log.mon.minnowism.found": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 找到 "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " 并将其置入你的手牌"
+    }
+  ],
+  "card.log.mpg.auras.suppressed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "："
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 下回合不能生成灵气 (Aura) 衍生物"
+    }
+  ],
+  "card.log.mst.innerchi.found": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 展示 "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " 并将其置入你的手牌"
+    }
+  ],
+  "card.log.out.banish.faceup": [
+    {
+      "type": 0,
+      "value": "将放逐区中的 "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 翻至正面朝上"
     }
   ],
   "card.log.sar.hero.arsenal": [
@@ -5915,6 +6331,138 @@
       "value": "：涌动 (Surge)——获得 go again"
     }
   ],
+  "card.log.sda.dash.item.start": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 以 "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " 在 arena 中开始游戏"
+    }
+  ],
+  "card.log.sda.hyperdriver.counter": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：Hyper Driver 获得一个 steam 指示物（"
+    },
+    {
+      "type": 1,
+      "value": "from"
+    },
+    {
+      "type": 0,
+      "value": " → "
+    },
+    {
+      "type": 1,
+      "value": "to"
+    },
+    {
+      "type": 0,
+      "value": "）"
+    }
+  ],
+  "card.log.sda.hyperdriver.spent": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：移除 Hyper Driver 的一个 steam 指示物（"
+    },
+    {
+      "type": 1,
+      "value": "from"
+    },
+    {
+      "type": 0,
+      "value": " → "
+    },
+    {
+      "type": 1,
+      "value": "to"
+    },
+    {
+      "type": 0,
+      "value": "）并获得 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
+  "card.log.sda.recharge.attack": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：本回合你的下一次完成 boost 的攻击获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
+  "card.log.sda.steam.counter": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 获得 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 个 steam 指示物"
+    }
+  ],
+  "card.log.sda.trebuchet.attack": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：本次 combat chain 中你的下一次完成 boost 的攻击获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
   "card.log.sdo.dawnblade.counter.gained": [
     {
       "type": 1,
@@ -6047,6 +6595,60 @@
     {
       "type": 0,
       "value": " 翻至正面朝上"
+    }
+  ],
+  "card.log.sea.decktop.destroyed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 摧毁牌库顶的 "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    }
+  ],
+  "card.log.sea.defender.decktop.revealed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 展示 "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 的牌库顶牌 "
+    },
+    {
+      "type": 1,
+      "value": "revealed"
+    }
+  ],
+  "card.log.sea.search.revealed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 展示 "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " 并将其置入你的手牌"
     }
   ],
   "card.log.sen.enigma.discount": [
@@ -6601,6 +7203,86 @@
       "value": " 具有水墓 (watery grave)）"
     }
   ],
+  "card.log.siy.card.frozen": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "："
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 被冻结 (frozen)，直到 "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 的下回合开始"
+    }
+  ],
+  "card.log.siy.frostspike.none": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：没有找到暴露的装备区域"
+    }
+  ],
+  "card.log.siy.hero.paid": [
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 为 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 支付资源费用"
+    }
+  ],
+  "card.log.siy.hero.paid.amount": [
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 为 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
   "card.log.ska.barefangs.attack": [
     {
       "type": 1,
@@ -6711,6 +7393,24 @@
     {
       "type": 0,
       "value": "：对手攻击行动牌的基础力量和防御减半，直到其下回合结束"
+    }
+  ],
+  "card.log.svi.aura.returned": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将墓地中的灵气 (Aura) "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " 返回你的手牌"
     }
   ],
   "card.log.upr.frozen.arsenal": [

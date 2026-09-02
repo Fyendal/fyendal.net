@@ -2,6 +2,7 @@ import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   decisionMessage,
   decisionPrompt,
+  localizedCardLog,
   opponentSeat,
 } from "./shared-helpers.js";
 
@@ -24,7 +25,7 @@ function addHyperSteam(ctx: ScriptCtx): void {
   if (!driver) return;
   const steam = driver.counters?.steam ?? 0;
   ctx.addCounter(driver.instanceId, "steam", 1);
-  ctx.logPublic(`${ctx.data.name}: Hyper Driver gains a steam counter (${steam} → ${steam + 1})`);
+  ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: Hyper Driver gains a steam counter (${steam} → ${steam + 1})`, "card.log.sda.hyperdriver.counter", { from: steam, to: steam + 1 }));
 }
 
 function controlsHyperDriver(ctx: ScriptCtx): boolean {
@@ -78,7 +79,13 @@ export const sda: Record<string, CardScript> = {
       if (!item) return;
       ctx.settleCard(item.instanceId, { allowCrank: false });
       ctx.shuffleDeck();
-      ctx.logPublic(`Dash starts the game with ${ctx.cardData(item.cardId).name} in the arena`);
+      ctx.logPublic(localizedCardLog(
+        ctx,
+        `Dash starts the game with ${ctx.cardData(item.cardId).name} in the arena`,
+        "card.log.sda.dash.item.start",
+        { result: { kind: "card", cardId: item.cardId } },
+        { kind: "card-moved", cardId: item.cardId, ownerSeat: ctx.seat, from: "deck", to: "board" },
+      ));
     },
   },
 
@@ -100,7 +107,7 @@ export const sda: Record<string, CardScript> = {
         canActivate: (ctx) => ctx.getCounter("steam") === 0,
         onActivate(ctx) {
           ctx.setCounter("steam", 1);
-          ctx.logPublic("Plasma Barrel Shot gets a steam counter");
+          ctx.logPublic(localizedCardLog(ctx, "Plasma Barrel Shot gets a steam counter", "card.log.sda.steam.counter", { amount: 1 }));
         },
       },
     ],
@@ -171,7 +178,7 @@ export const sda: Record<string, CardScript> = {
     onPlay(ctx) {
       addHyperSteam(ctx);
       ctx.addModifier({ scope: "until-end-of-turn", onBoostAttack: 4 });
-      ctx.logPublic("Re-Charge!: your next boosted attack this turn gets +4{p}");
+      ctx.logPublic(localizedCardLog(ctx, "Re-Charge!: your next boosted attack this turn gets +4{p}", "card.log.sda.recharge.attack", { amount: 4 }));
     },
   },
 
@@ -213,7 +220,7 @@ export const sda: Record<string, CardScript> = {
       ctx.setFlag("player", used, true);
       ctx.setCounter("steam", steam - 1);
       ctx.changeResources(ctx.seat, 1);
-      ctx.logPublic(`Hyper Driver: remove a steam counter (${steam} → ${steam - 1}) and gain {r}`);
+      ctx.logPublic(localizedCardLog(ctx, `Hyper Driver: remove a steam counter (${steam} → ${steam - 1}) and gain {r}`, "card.log.sda.hyperdriver.spent", { from: steam, to: steam - 1, amount: 1 }));
     },
   },
 
@@ -221,7 +228,7 @@ export const sda: Record<string, CardScript> = {
     onAttackDeclared(ctx) {
       if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId) return;
       ctx.addModifier({ scope: "combat-chain", onBoostAttack: 2 });
-      ctx.logPublic("Teklo Trebuchet 2000: your next boosted attack this combat chain gets +2{p}");
+      ctx.logPublic(localizedCardLog(ctx, "Teklo Trebuchet 2000: your next boosted attack this combat chain gets +2{p}", "card.log.sda.trebuchet.attack", { amount: 2 }));
     },
   },
 };

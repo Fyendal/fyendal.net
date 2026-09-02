@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { ampNextArcane, attackAbility, buffNextAttack, commonOptionMessages, dealArcane, decisionMessage, decisionPrompt, opponentSeat, previousAttackHasName, requestDiscardChoice, resolveDiscardChoice } from "./shared-helpers.js";
+import { ampNextArcane, attackAbility, buffNextAttack, commonOptionMessages, dealArcane, decisionMessage, decisionPrompt, localizedCardLog, opponentSeat, previousAttackHasName, requestDiscardChoice, resolveDiscardChoice } from "./shared-helpers.js";
 
 // Rosetta (ROS) — commons, rares, young heroes, and their required tokens.
 
@@ -544,7 +544,7 @@ export const ros: Record<string, CardScript> = {
   "sigil of the arknight|3": beginningAura(undefined, (ctx) => {
     const top = ctx.player(ctx.seat).deck[0];
     if (!top) return;
-    ctx.logPublic(`${ctx.data.name} reveals ${data(ctx, top).name}`);
+    ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} reveals ${data(ctx, top).name}`, "card.log.common.decktop.revealed", { revealed: { kind: "card", cardId: top.cardId } }, { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" }));
     if (isAttackAction(ctx, top)) ctx.moveToHand(top.instanceId);
   }),
   "sigil of deadwood|3": beginningAura(undefined, (ctx) => ctx.createToken(RUNECHANT)),

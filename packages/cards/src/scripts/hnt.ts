@@ -8,6 +8,7 @@ import {
   decisionPrompt,
   markedStealthHeroScript,
   markContractCompleted,
+  localizedCardLog,
   offerRetrieveDagger,
   opponentSeat,
   previousAttackNameContains,
@@ -50,7 +51,7 @@ function markHero(ctx: ScriptCtx, seat: number): void {
   const hero = ctx.player(seat).hero;
   if ((hero.counters?.marked ?? 0) > 0) return;
   ctx.addCounter(hero.instanceId, "marked", 1);
-  ctx.logPublic(`${ctx.cardData(hero.cardId).name} is marked`);
+  ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(hero.cardId).name} is marked`, "card.log.common.hero.marked", { target: { kind: "card", cardId: hero.cardId } }));
 }
 
 function hitMarkedHero(ctx: ScriptCtx): boolean {
@@ -461,7 +462,13 @@ export const hnt: Record<string, CardScript> = {
       const revealed = [];
       for (const card of ctx.player(ctx.seat).deck) {
         revealed.push(card);
-        ctx.logPublic(`${ctx.data.name} reveals ${ctx.cardData(card.cardId).name}`);
+        ctx.logPublic(localizedCardLog(
+          ctx,
+          `${ctx.data.name} reveals ${ctx.cardData(card.cardId).name}`,
+          "card.log.common.decktop.revealed",
+          { revealed: { kind: "card", cardId: card.cardId } },
+          { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
+        ));
         if ((ctx.cardData(card.cardId).pitch ?? 0) === 1) break;
       }
       const red = revealed.find((card) => (ctx.cardData(card.cardId).pitch ?? 0) === 1);
@@ -520,7 +527,7 @@ export const hnt: Record<string, CardScript> = {
   "red alert boots|0": { modifyDefense: (ctx) => ctx.getFlag("link", "reactionPlayedOrActivated") ? 1 : 0 },
   "starting point|0": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "attack-reaction", destroySelfCost: true, canActivate: (ctx) => ctx.getFlag("link", `reactionBySeat:${ctx.seat}`) === true, onActivate: (ctx) => ctx.grantGoAgain() } },
   ...pitchSeries("to the point", (pitch) => ({ canPlay: currentDaggerAttack, onPlay(ctx) { ctx.addModifier({ scope: "chain-link", attack: 4 - pitch + (isMarked(ctx, opponentSeat(ctx)) ? 1 : 0) }); } })),
-  ...pitchSeries("cut from the same cloth", (pitch) => ({ onPlay(ctx) { const target = opponentSeat(ctx); const hand = ctx.player(target).hand; ctx.logPublic(`${ctx.cardData(ctx.player(target).heroCardId).name} reveals ${hand.map((card) => ctx.cardData(card.cardId).name).join(", ") || "an empty hand"}`); if (hand.some((card) => ctx.cardData(card.cardId).cardType === "attack-reaction")) markHero(ctx, target); buffNextAttack(ctx, { attack: 5 - pitch, appliesToSubtype: "dagger" }); } })),
+  ...pitchSeries("cut from the same cloth", (pitch) => ({ onPlay(ctx) { const target = opponentSeat(ctx); const hand = ctx.player(target).hand; ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(ctx.player(target).heroCardId).name} reveals ${hand.map((card) => ctx.cardData(card.cardId).name).join(", ") || "an empty hand"}`, "card.log.hnt.hand.revealed", { target: { kind: "player", seat: target }, cards: hand.map((card) => ctx.cardData(card.cardId).name).join(", ") || "an empty hand" }, { kind: "cards-revealed", cards: hand.map((card) => ({ cardId: card.cardId, ownerSeat: target })), sourceZone: "hand" })); if (hand.some((card) => ctx.cardData(card.cardId).cardType === "attack-reaction")) markHero(ctx, target); buffNextAttack(ctx, { attack: 5 - pitch, appliesToSubtype: "dagger" }); } })),
   ...pitchSeries("incision", (pitch) => daggerReaction(4 - pitch)),
   "scar tissue|2": daggerReaction(2, { mark: true }),
   "scar tissue|3": daggerReaction(1, { mark: true }),
@@ -534,12 +541,18 @@ export const hnt: Record<string, CardScript> = {
     onAttackDeclared(ctx) {
       if (ctx.link?.targetAllyId !== undefined) return;
       const hand = ctx.player(opponentSeat(ctx)).hand;
-      ctx.logPublic(`${ctx.cardData(ctx.player(opponentSeat(ctx)).heroCardId).name} reveals their hand`);
+      ctx.logPublic(localizedCardLog(
+        ctx,
+        `${ctx.cardData(ctx.player(opponentSeat(ctx)).heroCardId).name} reveals their hand`,
+        "card.log.hnt.hand.revealed.generic",
+        { target: { kind: "player", seat: opponentSeat(ctx) } },
+        { kind: "cards-revealed", cards: hand.map((card) => ({ cardId: card.cardId, ownerSeat: opponentSeat(ctx) })), sourceZone: "hand" },
+      ));
       if (!hand.some((card) => ctx.cardData(card.cardId).cardType === "attack-reaction")) return;
       const reactions = ctx.player(ctx.seat).deck.filter((card) => ctx.cardData(card.cardId).cardType === "defense-reaction");
       if (reactions.length) ctx.requestCardChoice("sound-alarm", decisionPrompt("Search for a defense reaction?", "card.hnt.defensereaction.search", { optionMessages: commonOptionMessages("pass") }), ["pass", ...reactions.map((card) => card.instanceId)]);
     },
-    onChoose(ctx, hook, option) { if (hook !== "sound-alarm") return; if (option !== "pass") { const card = ctx.player(ctx.seat).deck.find((candidate) => candidate.instanceId === Number(option)); if (card) { ctx.logPublic(`${ctx.cardData(card.cardId).name} is revealed`); ctx.shuffleDeck(); ctx.putOnDeckTop(card.instanceId); return; } } ctx.shuffleDeck(); },
+    onChoose(ctx, hook, option) { if (hook !== "sound-alarm") return; if (option !== "pass") { const card = ctx.player(ctx.seat).deck.find((candidate) => candidate.instanceId === Number(option)); if (card) { ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(card.cardId).name} is revealed`, "card.log.common.card.revealed", { revealed: { kind: "card", cardId: card.cardId } }, { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" })); ctx.shuffleDeck(); ctx.putOnDeckTop(card.instanceId); return; } } ctx.shuffleDeck(); },
   },
   "imperial seal of command|1": { activated: { cost: 0, isAttack: false, goAgain: true, destroySelfCost: true, onActivate(ctx) { ctx.setPlayerFlag(ctx.seat, "noDefenseReactionsThisTurn", true); if (dataTags(ctx, ctx.player(ctx.seat).hero).includes("royal")) ctx.addModifier({ scope: "until-end-of-turn" }); } }, canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.state.modifiers.some((modifier) => modifier.scope === "until-end-of-turn" && modifier.sourceInstanceId === ctx.self.instanceId && !modifier.consumed); }, onHit(ctx) { for (const card of [...ctx.player(opponentSeat(ctx)).arsenal]) ctx.banish(card.instanceId); const mod = ctx.state.modifiers.find((modifier) => modifier.scope === "until-end-of-turn" && modifier.sourceInstanceId === ctx.self.instanceId && !modifier.consumed)!; ctx.consumeModifier(mod.id); } },
   "relentless pursuit|3": { onPlay(ctx) { markHero(ctx, opponentSeat(ctx)); if (ctx.getFlag("player", "attackedHeroThisTurn")) ctx.putOnDeckBottom(ctx.self.instanceId); } },

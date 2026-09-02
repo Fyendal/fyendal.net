@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { discardSixPlusPayoff, isSixPlus, opponentSeat, yesNoPrompt } from "./shared-helpers.js";
+import { discardSixPlusPayoff, isSixPlus, localizedCardLog, opponentSeat, yesNoPrompt } from "./shared-helpers.js";
 
 const MIGHT = "AKO028";
 
@@ -100,11 +100,11 @@ export const ako: Record<string, CardScript> = {
   // Bare Fangs (red)
   "bare fangs|1": discardSixPlusPayoff((ctx) => {
     ctx.addModifier({ scope: "chain-link", attack: 2 });
-    ctx.logPublic("Bare Fangs gains +2 attack");
+    ctx.logPublic(localizedCardLog(ctx, "Bare Fangs gains +2 attack", "card.log.ska.barefangs.attack", { amount: 2 }));
   }),
   // Wild Ride (red)
   "wild ride|1": discardSixPlusPayoff((ctx) => {
     ctx.grantGoAgain();
-    ctx.logPublic("Wild Ride gains go again");
+    ctx.logPublic(localizedCardLog(ctx, "Wild Ride gains go again", "card.log.common.goagain.gained"));
   }),
 };

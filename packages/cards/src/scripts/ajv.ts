@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, buffNextAttack, commonOptionMessages, decisionMessage, decisionPrompt, opponentSeat } from "./shared-helpers.js";
+import { attackAbility, buffNextAttack, commonOptionMessages, decisionMessage, decisionPrompt, localizedCardLog, opponentSeat } from "./shared-helpers.js";
 
 const FROSTBITE = "AJV029";
 const EARTH = "AJV028";
@@ -88,7 +88,17 @@ function elementalFusion(): Pick<CardScript, "additionalCost" | "onChoose"> {
         ctx.setFlag("player", "fusedThisTurn", true);
         if (earthCard) ctx.setFlag("player", "earthFusedThisTurn", true);
         if (iceCard) ctx.setFlag("player", "iceFusedThisTurn", true);
-        ctx.logPublic(`${ctx.data.name} is fused (reveals ${revealed.map((card) => data(ctx, card).name).join(" and ")})`);
+        ctx.logPublic(localizedCardLog(
+          ctx,
+          `${ctx.data.name} is fused (reveals ${revealed.map((card) => data(ctx, card).name).join(" and ")})`,
+          "card.log.common.fusion.revealed",
+          { revealed: revealed.map((card) => data(ctx, card).name).join(", ") },
+          {
+            kind: "cards-revealed",
+            cards: revealed.map((card) => ({ cardId: card.cardId, ownerSeat: ctx.seat })),
+            sourceZone: "hand",
+          },
+        ));
       }
     },
   };
@@ -281,7 +291,13 @@ export const ajv: Record<string, CardScript> = {
       if (hook !== "unforgetting-mangle" || option === "none") return;
       const card = ctx.player(ctx.seat).deck.find((candidate) => candidate.instanceId === Number(option));
       if (!card || !ctx.banish(card.instanceId)) return;
-      ctx.logPublic(`${ctx.data.name} reveals ${data(ctx, card).name}`);
+      ctx.logPublic(localizedCardLog(
+        ctx,
+        `${ctx.data.name} reveals ${data(ctx, card).name} and banishes it`,
+        "card.log.ajv.search.banished",
+        { result: { kind: "card", cardId: card.cardId } },
+        { kind: "card-moved", cardId: card.cardId, ownerSeat: ctx.seat, from: "deck", to: "banish" },
+      ));
       ctx.shuffleDeck();
       ctx.allowPlayFrom(card.instanceId, "banish", { untilNextTurn: true });
     },

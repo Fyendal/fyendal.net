@@ -5,6 +5,7 @@ import {
   dealArcane,
   decisionMessage,
   decisionPrompt,
+  localizedCardLog,
   mergeSetScripts,
   opponentSeat,
 } from "./shared-helpers.js";
@@ -60,7 +61,7 @@ function fusionOnChoose(
   ctx.setCounter("fused", 1);
   ctx.setFlag("player", "fusedThisTurn", true);
   ctx.setFlag("player", `${type}FusedThisTurn`, true);
-  ctx.logPublic(`${ctx.data.name} is fused (reveals ${ctx.cardData(card.cardId).name})`);
+  ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} is fused (reveals ${ctx.cardData(card.cardId).name})`, "card.log.common.fusion.revealed", { revealed: { kind: "card", cardId: card.cardId } }, { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" }));
   return true;
 }
 

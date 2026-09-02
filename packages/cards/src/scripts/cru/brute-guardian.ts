@@ -1,4 +1,5 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
+import { localizedCardLog } from "../shared-helpers.js";
 
 function opponentSeat(ctx: ScriptCtx): number {
   return ctx.seat === 0 ? 1 : 0;
@@ -52,9 +53,12 @@ function delayedGuardianAura(attack: number, dominate = false): CardScript {
             appliesTo: "attack-action",
             appliesToClass: "guardian",
           });
-          ctx.logPublic(
+          ctx.logPublic(localizedCardLog(
+            ctx,
             `${ctx.data.name}: next Guardian attack action gets +${attack}{p}${dominate ? " and dominate" : ""}`,
-          );
+            dominate ? "card.log.cru.riled.attack.dominate" : "card.log.cru.riled.attack",
+            { amount: attack },
+          ));
         },
       },
     ],
@@ -81,9 +85,7 @@ function crushTheWeak(): CardScript {
         ctx.state.turn + 1,
       );
       ctx.setCardCounter(opponent.hero.instanceId, "attackActionBasePowerLimit", 3);
-      ctx.logPublic(
-        "Crush the Weak: the opponent can't play attack actions with 3 or less base {p} next action phase",
-      );
+      ctx.logPublic(localizedCardLog(ctx, "Crush the Weak: the opponent can't play attack actions with 3 or less base {p} next action phase", "card.log.sbr.crushtheweak.restricted", { amount: 3 }));
     },
   };
 }
@@ -98,9 +100,7 @@ function chokeslam(): CardScript {
         "attackActionNoPowerGainUntilTurn",
         ctx.state.turn + 1,
       );
-      ctx.logPublic(
-        "Chokeslam: opposing attack action cards can't gain {p} during their next action phase",
-      );
+      ctx.logPublic(localizedCardLog(ctx, "Chokeslam: opposing attack action cards can't gain {p} during their next action phase", "card.log.sbr.chokeslam.suppressed"));
     },
   };
 }
@@ -161,9 +161,13 @@ export const cruBruteGuardian: Record<string, CardScript> = {
       } else {
         ctx.setCardCounter(played.instanceId, "doubleBasePower", 1);
       }
-      ctx.logPublic(
+      ctx.logPublic(localizedCardLog(
+        ctx,
         `${ctx.data.name}: rolled ${roll}; ${data.name}'s base {p} is ${roll <= 4 ? "halved" : "doubled"}`,
-      );
+        roll <= 4 ? "card.log.cru.knucklehead.halved" : "card.log.cru.knucklehead.doubled",
+        { result: roll, target: { kind: "card", cardId: played.cardId } },
+        { kind: "roll", result: roll, seat: ctx.seat, sides: 6 },
+      ));
     },
   },
 
@@ -227,7 +231,7 @@ export const cruBruteGuardian: Record<string, CardScript> = {
           appliesTo: "attack-action",
           minCost: 3,
         });
-        ctx.logPublic("Bravo: attack action cards with cost 3 or more gain dominate this turn");
+        ctx.logPublic(localizedCardLog(ctx, "Bravo: attack action cards with cost 3 or more gain dominate this turn", "card.log.wtr.bravo.dominate"));
       },
     },
   },

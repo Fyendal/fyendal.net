@@ -3,6 +3,7 @@ import {
   buffNextAttack,
   commonOptionMessages,
   decisionPrompt,
+  localizedCardLog,
   opponentSeat,
   optN,
   optOnChoose,
@@ -126,7 +127,7 @@ function takeAim(attack: number): CardScript {
 const headShot: CardScript = {
   onEnterArsenal(ctx) {
     ctx.addCardTempPower(ctx.self.instanceId, 2);
-    ctx.logPublic(`${ctx.data.name} gets +2{p} this turn`);
+    ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} gets +2{p} this turn`, "card.log.saz.card.attack.turn", { amount: 2 }));
   },
 };
 
@@ -137,9 +138,7 @@ const hamstringShot: CardScript = {
   onHit(ctx) {
     const target = opponentSeat(ctx);
     ctx.increaseFirstAttackCostNextTurn(target, 1);
-    ctx.logPublic(
-      `${ctx.data.name}: ${ctx.cardData(ctx.state.players[target]!.heroCardId).name}'s first attack next turn costs an additional {r}`,
-    );
+    ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: ${ctx.cardData(ctx.state.players[target]!.heroCardId).name}'s first attack next turn costs an additional {r}`, "card.log.arc.firstattack.cost", { target: { kind: "player", seat: target }, amount: 1 }));
   },
 };
 
@@ -166,7 +165,7 @@ const searingShot: CardScript = {
     const seat = opponentSeat(ctx);
     ctx.loseLife(seat, 1);
     const hero = ctx.player(seat);
-    ctx.logPublic(`${ctx.cardData(hero.heroCardId).name} loses 1 life (${hero.life} life)`);
+    ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(hero.heroCardId).name} loses 1 life (${hero.life} life)`, "card.log.common.hero.life.lost", { target: { kind: "player", seat }, amount: 1, life: hero.life }));
   },
 };
 
