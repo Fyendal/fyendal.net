@@ -8,6 +8,7 @@ import {
   discardSixPlusPayoff,
   isCard,
   isWeaponAttack,
+  localizedCardLog,
   mergeSetScripts,
   opponentSeat,
   optN,
@@ -69,7 +70,7 @@ function badBeats(threshold: number): CardScript {
     },
     onDieRollResolved(ctx, hook, roll) {
       if (hook !== "bad-beats") return;
-      ctx.logPublic(`${ctx.data.name}: rolled ${roll}`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: rolled ${roll}`, "card.log.common.die.rolled", { result: roll }, { kind: "roll", result: roll, seat: ctx.seat, sides: 6 }));
       if (roll >= threshold) {
         buffNextAttack(ctx, { attack: 5, appliesTo: "attack-action", appliesToClass: "brute" });
       }
@@ -611,15 +612,15 @@ function lifeOfParty(): CardScript {
       const mode = allModes ? -1 : ctx.randomInt(3);
       if (allModes || mode === 0) {
         ctx.setCounter("lifeOnHit", 1);
-        ctx.logPublic(`${ctx.data.name}: gains "When this hits, gain 2 life"`);
+        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: gains "When this hits, gain 2 life"`, "card.log.evr.phantasmaclasm.life", { amount: 2 }));
       }
       if (allModes || mode === 1) {
         ctx.addModifier({ scope: "chain-link", attack: 2 });
-        ctx.logPublic(`${ctx.data.name}: gains +2{p}`);
+        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: gains +2{p}`, "card.log.common.attack.gained", { amount: 2 }));
       }
       if (allModes || mode === 2) {
         ctx.grantGoAgain();
-        ctx.logPublic(`${ctx.data.name}: gains go again`);
+        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: gains go again`, "card.log.common.goagain.gained"));
       }
     },
     canTriggerOnHit(ctx) {
@@ -665,7 +666,13 @@ function pickACard(repeats: number): CardScript {
       for (let i = 0; i < ctx.getCounter("pickRepeats") && hand.length > 0; i++) {
         const card = hand[ctx.randomInt(hand.length)]!;
         const name = ctx.cardData(card.cardId).name;
-        ctx.logPublic(`${ctx.data.name} reveals ${name}`);
+        ctx.logPublic(localizedCardLog(
+          ctx,
+          `${ctx.data.name} reveals ${name}`,
+          "card.log.common.card.revealed",
+          { revealed: { kind: "card", cardId: card.cardId } },
+          { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" },
+        ));
         if (name === option) ctx.createToken(SILVER);
       }
     },
@@ -710,7 +717,13 @@ function evenBigger(opt: number): CardScript {
     const top = ctx.player(ctx.seat).deck[0];
     if (!top) return;
     const power = ctx.basePower(top);
-    ctx.logPublic(`${ctx.data.name} reveals ${ctx.cardData(top.cardId).name}`);
+    ctx.logPublic(localizedCardLog(
+      ctx,
+      `${ctx.data.name} reveals ${ctx.cardData(top.cardId).name}`,
+      "card.log.common.decktop.revealed",
+      { revealed: { kind: "card", cardId: top.cardId } },
+      { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
+    ));
     const dealt = Number(ctx.getFlag("player", "physicalDamageAmountDealtThisTurn")) || 0;
     if (power > dealt) {
       ctx.createToken(QUICKEN);
@@ -915,7 +928,13 @@ const potionSeeing: CardScript = {
     const target = ctx.state.players.find((player) => player.hero.instanceId === Number(option));
     if (!target) return;
     target.hand.forEach((card) => ctx.lookAt(card.instanceId));
-    ctx.logPrivate(ctx.seat, `Potion of Seeing: ${target.hand.map((card) => ctx.cardData(card.cardId).name).join(", ")}`);
+    ctx.logPrivate(ctx.seat, localizedCardLog(
+      ctx,
+      `Potion of Seeing: ${target.hand.map((card) => ctx.cardData(card.cardId).name).join(", ")}`,
+      "card.log.evr.potionseeing.private",
+      { cards: target.hand.map((card) => ctx.cardData(card.cardId).name).join(", ") },
+      { kind: "cards-revealed", cards: target.hand.map((card) => ({ cardId: card.cardId, ownerSeat: target.seat })), sourceZone: "hand" },
+    ));
   },
 };
 
@@ -1032,7 +1051,7 @@ const talismanRecompense: CardScript = {
   replacePitchResources(ctx, _pitched, amount) {
     if (amount !== 1) return undefined;
     ctx.destroySelf();
-    ctx.logPublic("Talisman of Recompense replaces 1 resource with 3 resources");
+    ctx.logPublic(localizedCardLog(ctx, "Talisman of Recompense replaces 1 resource with 3 resources", "card.log.evr.recompense.resources", { from: 1, to: 3 }));
     return 3;
   },
 };
@@ -1045,7 +1064,7 @@ const talismanTithes: CardScript = {
       ctx.state.phase !== "game-over";
     if (count <= 0 || ctx.state.activePlayer !== ctx.seat || !duringActionPhase) return undefined;
     ctx.destroySelf();
-    ctx.logPublic(`Talisman of Tithes reduces the draw from ${count} to ${Math.max(0, count - 1)}`);
+    ctx.logPublic(localizedCardLog(ctx, `Talisman of Tithes reduces the draw from ${count} to ${Math.max(0, count - 1)}`, "card.log.evr.tithes.draw", { from: count, to: Math.max(0, count - 1) }));
     return count - 1;
   },
 };

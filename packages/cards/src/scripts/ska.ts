@@ -4,6 +4,7 @@ import {
   decisionPrompt,
   discardSixPlusPayoff,
   isSixPlus,
+  localizedCardLog,
   opponentSeat,
   yesNoPrompt,
 } from "./shared-helpers.js";
@@ -99,7 +100,13 @@ function strongestSurvive(): CardScript {
         ctx.discardCard(opponentSeat(ctx), id);
       } else if (choice === "reveal") {
         const card = ctx.player(opponentSeat(ctx)).hand.find((candidate) => candidate.instanceId === id);
-        if (card) ctx.logPublic(`${ctx.cardData(card.cardId).name} is revealed`);
+        if (card) ctx.logPublic(localizedCardLog(
+          ctx,
+          `${ctx.cardData(card.cardId).name} is revealed`,
+          "card.log.common.card.revealed",
+          { revealed: { kind: "card", cardId: card.cardId } },
+          { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: opponentSeat(ctx) }], sourceZone: "hand" },
+        ));
       }
     },
   };
@@ -107,12 +114,12 @@ function strongestSurvive(): CardScript {
 
 const bareFangs = discardSixPlusPayoff((ctx) => {
   ctx.addModifier({ scope: "chain-link", attack: 2 });
-  ctx.logPublic("Bare Fangs gains +2 attack");
+  ctx.logPublic(localizedCardLog(ctx, "Bare Fangs gains +2 attack", "card.log.ska.barefangs.attack", { amount: 2 }));
 });
 
 const wildRide = discardSixPlusPayoff((ctx) => {
   ctx.grantGoAgain();
-  ctx.logPublic("Wild Ride gains go again");
+  ctx.logPublic(localizedCardLog(ctx, "Wild Ride gains go again", "card.log.common.goagain.gained"));
 });
 
 export const ska: Record<string, CardScript> = {
@@ -160,7 +167,7 @@ export const ska: Record<string, CardScript> = {
     onDieRollResolved(ctx, hook, roll) {
       if (hook !== "knucklehead") return;
         ctx.setPlayerFlag(ctx.seat, "baseIntellectThisTurn", roll);
-        ctx.logPublic(`Knucklehead rolls ${roll}; base intellect is ${roll} this turn`);
+        ctx.logPublic(localizedCardLog(ctx, `Knucklehead rolls ${roll}; base intellect is ${roll} this turn`, "card.log.ska.knucklehead.roll", { result: roll }, { kind: "roll", result: roll, seat: ctx.seat, sides: 6 }));
         ctx.destroySelf();
     },
   },
@@ -187,7 +194,7 @@ export const ska: Record<string, CardScript> = {
       onActivate(ctx) {
         ctx.destroySelf();
         ctx.changeResources(ctx.seat, 1);
-        ctx.logPublic("Predatory Plating gains {r}");
+        ctx.logPublic(localizedCardLog(ctx, "Predatory Plating gains {r}", "card.log.common.resources.gained", { amount: 1 }));
       },
     },
   },
@@ -276,7 +283,7 @@ export const ska: Record<string, CardScript> = {
     defenseAbility: { discard: 1, oncePerTurn: true },
     onDefendAbility(ctx) {
       ctx.addModifier({ scope: "chain-link", defense: 3 });
-      ctx.logPublic("Rally the Coast Guard gains +3 defense");
+      ctx.logPublic(localizedCardLog(ctx, "Rally the Coast Guard gains +3 defense", "card.log.common.defense.gained", { defense: 3 }));
     },
   },
 

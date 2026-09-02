@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, commonOptionMessages, decisionMessage, decisionPrompt, opponentSeat, optN, optOnChoose } from "./shared-helpers.js";
+import { buffNextAttack, commonOptionMessages, decisionMessage, decisionPrompt, localizedCardLog, opponentSeat, optN, optOnChoose } from "./shared-helpers.js";
 
 // ── SAZ (Silver Age: Azalea precon, Chapter 2) ──────────────────────────────
 //
@@ -124,15 +124,33 @@ export const saz: Record<string, CardScript> = {
         ctx.putOnDeckBottom(card.instanceId);
         ctx.logPrivate(
           ctx.seat,
-          `Azalea: ${ctx.cardData(card.cardId).name} goes on the bottom of the deck`,
-          "Azalea: the arsenal card goes on the bottom of the deck",
+          localizedCardLog(
+            ctx,
+            `Azalea: ${ctx.cardData(card.cardId).name} goes on the bottom of the deck`,
+            "card.log.saz.azalea.bottom.private",
+            { result: { kind: "card", cardId: card.cardId } },
+            { kind: "card-moved", cardId: card.cardId, ownerSeat: ctx.seat, from: "arsenal", to: "deck" },
+          ),
+          localizedCardLog(
+            ctx,
+            "Azalea: the arsenal card goes on the bottom of the deck",
+            "card.log.saz.azalea.bottom.public",
+            undefined,
+            { kind: "card-moved", ownerSeat: ctx.seat, from: "arsenal", to: "deck" },
+          ),
         );
         const top = p.deck[0];
         if (!top) return;
         ctx.putIntoArsenal(top.instanceId, "deck");
         if (isArrow(ctx, top)) {
           ctx.grantCardKeyword(top.instanceId, "dominate");
-          ctx.logPublic(`Azalea: ${ctx.cardData(top.cardId).name} gains dominate until end of turn`);
+          ctx.logPublic(localizedCardLog(
+            ctx,
+            `Azalea: ${ctx.cardData(top.cardId).name} gains dominate until end of turn`,
+            "card.log.saz.azalea.dominate",
+            { target: { kind: "card", cardId: top.cardId } },
+            { kind: "card-moved", cardId: top.cardId, ownerSeat: ctx.seat, from: "deck", to: "arsenal" },
+          ));
         }
       },
     },
@@ -190,7 +208,7 @@ export const saz: Record<string, CardScript> = {
       const m = /^crows-nest:(\d+)$/.exec(hook);
       if (!m || option !== "paid") return;
       ctx.addCounter(Number(m[1]), "aim", 1);
-      ctx.logPublic("Crow's Nest: the arrow gets an aim counter");
+      ctx.logPublic(localizedCardLog(ctx, "Crow's Nest: the arrow gets an aim counter", "card.log.saz.crowsnest.aim"));
     },
   },
 
@@ -220,7 +238,7 @@ export const saz: Record<string, CardScript> = {
       if (!card || !ctx.putIntoArsenal(card.instanceId, "hand")) return;
       ctx.destroySelf();
       ctx.addCardTempPower(card.instanceId, 1);
-      ctx.logPublic(`Bull's Eye Bracers: ${ctx.cardData(card.cardId).name} gets +1{p} this turn`);
+      ctx.logPublic(localizedCardLog(ctx, `Bull's Eye Bracers: ${ctx.cardData(card.cardId).name} gets +1{p} this turn`, "card.log.saz.bracers.attack", { target: { kind: "card", cardId: card.cardId }, amount: 1 }));
     },
   },
 
@@ -299,7 +317,7 @@ export const saz: Record<string, CardScript> = {
       );
       if (!eq) return;
       ctx.addCardDefenseCounters(eq.instanceId, 1);
-      ctx.logPublic(`Drill Shot: ${ctx.cardData(eq.cardId).name} gets a -1{d} counter`);
+      ctx.logPublic(localizedCardLog(ctx, `Drill Shot: ${ctx.cardData(eq.cardId).name} gets a -1{d} counter`, "card.log.saz.drillshot.counter", { target: { kind: "card", cardId: eq.cardId }, amount: 1 }));
     },
   },
 
@@ -307,7 +325,7 @@ export const saz: Record<string, CardScript> = {
     // "When this is put face-up into your arsenal, it gets +2{p} this turn."
     onEnterArsenal(ctx) {
       ctx.addCardTempPower(ctx.self.instanceId, 2);
-      ctx.logPublic(`${ctx.data.name} gets +2{p} this turn`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} gets +2{p} this turn`, "card.log.saz.card.attack.turn", { amount: 2 }));
     },
   },
 
@@ -371,7 +389,7 @@ export const saz: Record<string, CardScript> = {
       const seat = opponentSeat(ctx);
       ctx.loseLife(seat, 1);
       const opp = ctx.player(seat);
-      ctx.logPublic(`${ctx.cardData(opp.heroCardId).name} loses 1 life (${opp.life} life)`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(opp.heroCardId).name} loses 1 life (${opp.life} life)`, "card.log.common.hero.life.lost", { target: { kind: "player", seat }, amount: 1, life: opp.life }));
     },
   },
 
@@ -380,7 +398,7 @@ export const saz: Record<string, CardScript> = {
     //  turn." (Go again is conditional — KEYWORD_OVERRIDES strips it.)
     onEnterArsenal(ctx) {
       ctx.grantCardKeyword(ctx.self.instanceId, "go again");
-      ctx.logPublic(`${ctx.data.name} gets go again this turn`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} gets go again this turn`, "card.log.saz.card.goagain.turn"));
     },
   },
 
@@ -404,7 +422,7 @@ export const saz: Record<string, CardScript> = {
       const p = ctx.player(ctx.seat);
       if (p.deck.length < 2) return;
       ctx.putOnDeckTop(p.deck[1]!.instanceId);
-      ctx.logPublic("Spire Sniping: the top two cards swap places");
+      ctx.logPublic(localizedCardLog(ctx, "Spire Sniping: the top two cards swap places", "card.log.saz.spire.swap"));
     },
   },
 
@@ -502,9 +520,12 @@ export const saz: Record<string, CardScript> = {
       const top = target?.deck[0];
       if (!target || !top) return;
       ctx.lookAt(top.instanceId);
-      ctx.logPublic(
+      ctx.logPublic(localizedCardLog(
+        ctx,
         `${ctx.data.name}: look at the top card of ${ctx.cardData(target.heroCardId).name}'s deck`,
-      );
+        "card.log.saz.scout.look",
+        { target: { kind: "player", seat: target.seat } },
+      ));
     },
   },
 
@@ -578,7 +599,7 @@ export const saz: Record<string, CardScript> = {
       if (hook !== "bloodrot-pox") return;
       ctx.destroySelf();
       if (option === "paid") {
-        ctx.logPublic("Bloodrot Pox: {r}{r}{r} paid");
+        ctx.logPublic(localizedCardLog(ctx, "Bloodrot Pox: {r}{r}{r} paid", "card.log.common.resources.paid", { amount: 3 }));
       } else {
         ctx.dealDamage(ctx.seat, 2);
       }

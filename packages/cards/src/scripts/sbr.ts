@@ -3,6 +3,7 @@ import {
   attackAbility,
   commonOptionMessages,
   decisionPrompt,
+  localizedCardLog,
   opponentSeat,
 } from "./shared-helpers.js";
 
@@ -62,7 +63,7 @@ function chokeslam(): CardScript {
     onHit(ctx) {
       const hero = ctx.player(opponentSeat(ctx)).hero;
       ctx.setCardCounter(hero.instanceId, "attackActionNoPowerGainUntilTurn", ctx.state.turn + 1);
-      ctx.logPublic("Chokeslam: opposing attack action cards can't gain {p} during their next action phase");
+      ctx.logPublic(localizedCardLog(ctx, "Chokeslam: opposing attack action cards can't gain {p} during their next action phase", "card.log.sbr.chokeslam.suppressed"));
     },
   };
 }
@@ -98,7 +99,7 @@ export const sbr: Record<string, CardScript> = {
       if (!ctx.turnArsenalFaceUp(card.instanceId)) return;
       ctx.addCardTempPower(card.instanceId, 2);
       ctx.grantCardKeyword(card.instanceId, "dominate");
-      ctx.logPublic(`${ctx.cardData(card.cardId).name} is turned face up and gets +2{p} and dominate`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(card.cardId).name} is turned face up and gets +2{p} and dominate`, "card.log.sbr.bravo.crush", { target: { kind: "card", cardId: card.cardId }, amount: 2 }));
     },
   },
 
@@ -123,7 +124,7 @@ export const sbr: Record<string, CardScript> = {
       if (hook !== "magmatic-carapace" || option !== "paid" || ctx.self.tapped) return;
       ctx.tap(ctx.self.instanceId);
       ctx.createToken(SEISMIC_SURGE);
-      ctx.logPublic("Magmatic Carapace: paid {r}, tapped, and created a Seismic Surge");
+      ctx.logPublic(localizedCardLog(ctx, "Magmatic Carapace: paid {r}, tapped, and created a Seismic Surge", "card.log.sbr.carapace.surge", { amount: 1, result: { kind: "card", cardId: SEISMIC_SURGE } }));
     },
   },
 
@@ -150,8 +151,20 @@ export const sbr: Record<string, CardScript> = {
           ctx.putOnDeckBottom(card.instanceId);
           ctx.logPrivate(
             player.seat,
-            `${ctx.cardData(card.cardId).name} is put on the bottom of its owner's deck`,
-            "a face-down arsenal card is put on the bottom of its owner's deck",
+            localizedCardLog(
+              ctx,
+              `${ctx.cardData(card.cardId).name} is put on the bottom of its owner's deck`,
+              "card.log.sbr.faultline.bottom.private",
+              { result: { kind: "card", cardId: card.cardId }, target: { kind: "player", seat: player.seat } },
+              { kind: "card-moved", cardId: card.cardId, ownerSeat: player.seat, from: "arsenal", to: "deck" },
+            ),
+            localizedCardLog(
+              ctx,
+              "a face-down arsenal card is put on the bottom of its owner's deck",
+              "card.log.sbr.faultline.bottom.public",
+              { target: { kind: "player", seat: player.seat } },
+              { kind: "card-moved", ownerSeat: player.seat, from: "arsenal", to: "deck" },
+            ),
           );
         }
       }
@@ -182,7 +195,13 @@ export const sbr: Record<string, CardScript> = {
       const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
       if (!card || !hasCrush(ctx, card)) return;
       ctx.createToken(SEISMIC_SURGE);
-      ctx.logPublic(`Crash and Bash reveals ${ctx.cardData(card.cardId).name} from hand`);
+      ctx.logPublic(localizedCardLog(
+        ctx,
+        `Crash and Bash reveals ${ctx.cardData(card.cardId).name} from hand`,
+        "card.log.sbr.crash.revealed",
+        { revealed: { kind: "card", cardId: card.cardId } },
+        { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" },
+      ));
     },
   },
 
@@ -201,7 +220,7 @@ export const sbr: Record<string, CardScript> = {
       const hero = ctx.player(opponentSeat(ctx)).hero;
       ctx.setCardCounter(hero.instanceId, "attackActionBasePowerLimitUntilTurn", ctx.state.turn + 1);
       ctx.setCardCounter(hero.instanceId, "attackActionBasePowerLimit", 3);
-      ctx.logPublic("Crush the Weak: the opponent can't play attack actions with 3 or less base {p} next action phase");
+      ctx.logPublic(localizedCardLog(ctx, "Crush the Weak: the opponent can't play attack actions with 3 or less base {p} next action phase", "card.log.sbr.crushtheweak.restricted", { amount: 3 }));
     },
   },
 
@@ -236,7 +255,13 @@ export const sbr: Record<string, CardScript> = {
       if (hook !== "thunder-quake-heave" || option !== "paid") return;
       if (!ctx.putIntoArsenal(ctx.self.instanceId, "hand")) return;
       ctx.createTokens(SEISMIC_SURGE, 3);
-      ctx.logPublic("Thunder Quake is heaved: create 3 Seismic Surge tokens");
+      ctx.logPublic(localizedCardLog(
+        ctx,
+        "Thunder Quake is heaved: create 3 Seismic Surge tokens",
+        "card.log.sbr.thunderquake.heaved",
+        { amount: 3, result: { kind: "card", cardId: SEISMIC_SURGE } },
+        { kind: "card-moved", cardId: ctx.self.cardId, ownerSeat: ctx.seat, from: "hand", to: "arsenal" },
+      ));
     },
   },
 
@@ -259,7 +284,13 @@ export const sbr: Record<string, CardScript> = {
             appliesTo: "attack-action",
             appliesToClass: "guardian",
           });
-          ctx.logPublic("Seismic Surge is destroyed: the next Guardian attack costs {r} less");
+          ctx.logPublic(localizedCardLog(
+            ctx,
+            "Seismic Surge is destroyed: the next Guardian attack costs {r} less",
+            "card.log.sbr.seismicsurge.discount",
+            { amount: 1 },
+            { kind: "card-moved", cardId: ctx.self.cardId, ownerSeat: ctx.seat, from: "board", to: "graveyard" },
+          ));
         },
       },
     ],

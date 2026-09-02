@@ -11,6 +11,7 @@ import {
   decisionMessage,
   decisionPrompt,
   discardRandomCost,
+  localizedCardLog,
   mergeSetScripts,
   opponentSeat,
   optN,
@@ -29,6 +30,16 @@ function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
 
 function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
   return ctx.cardTypes(card).includes(type.toLowerCase());
+}
+
+function logDeckTopReveal(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): void {
+  ctx.logPublic(localizedCardLog(
+    ctx,
+    `${ctx.data.name} reveals ${data(ctx, card).name}`,
+    "card.log.common.decktop.revealed",
+    { revealed: { kind: "card", cardId: card.cardId } },
+    { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
+  ));
 }
 
 function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
@@ -122,7 +133,7 @@ function blessingFocus(amount: number): CardScript {
   const reveal = (ctx: ScriptCtx) => {
     const top = ctx.player(ctx.seat).deck[0];
     if (!top) return;
-    ctx.logPublic(`${ctx.data.name} reveals ${data(ctx, top).name}`);
+    logDeckTopReveal(ctx, top);
     if (hasType(ctx, top, "arrow")) {
       ctx.putIntoArsenal(top.instanceId, "deck", { faceUp: true });
       ctx.addCounter(top.instanceId, "aim", 1);
@@ -438,7 +449,23 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
       onActivate(ctx) {
         const card = ctx.player(ctx.seat).deck.find((candidate) => data(ctx, candidate).name === "Command and Conquer");
         if (card) {
-          ctx.logPrivate(ctx.seat, "Emperor finds Command and Conquer", "Emperor searches for a card");
+          ctx.logPrivate(
+            ctx.seat,
+            localizedCardLog(
+              ctx,
+              "Emperor finds Command and Conquer",
+              "card.log.dyn.emperor.search.private",
+              { result: { kind: "card", cardId: card.cardId } },
+              { kind: "card-moved", cardId: card.cardId, ownerSeat: ctx.seat, from: "deck", to: "chain" },
+            ),
+            localizedCardLog(
+              ctx,
+              "Emperor searches for a card",
+              "card.log.dyn.emperor.search.public",
+              undefined,
+              { kind: "card-moved", ownerSeat: ctx.seat, from: "deck", to: "chain" },
+            ),
+          );
           ctx.attackFromDeck(card.instanceId);
         }
         ctx.shuffleDeck();
@@ -596,7 +623,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "point the tip|1": { onPlay(ctx) { const arrows = ctx.player(ctx.seat).arsenal.filter((card) => !card.faceDown && hasType(ctx, card, "arrow")); if (arrows.length) ctx.requestCardChoice("point", decisionPrompt("Choose a face-up arrow", "card.dyn.point.arrow.choose"), arrows.map((card) => card.instanceId)); }, onChoose(ctx, h, o) { if (h === "point") { ctx.addCardTempPower(Number(o), 3); ctx.addCounter(Number(o), "aim", 1); } } },
   "point the tip|2": { onPlay(ctx) { const arrows = ctx.player(ctx.seat).arsenal.filter((card) => !card.faceDown && hasType(ctx, card, "arrow")); if (arrows.length) ctx.requestCardChoice("point", decisionPrompt("Choose a face-up arrow", "card.dyn.point.arrow.choose"), arrows.map((card) => card.instanceId)); }, onChoose(ctx, h, o) { if (h === "point") { ctx.addCardTempPower(Number(o), 2); ctx.addCounter(Number(o), "aim", 1); } } },
   "point the tip|3": { onPlay(ctx) { const arrows = ctx.player(ctx.seat).arsenal.filter((card) => !card.faceDown && hasType(ctx, card, "arrow")); if (arrows.length) ctx.requestCardChoice("point", decisionPrompt("Choose a face-up arrow", "card.dyn.point.arrow.choose"), arrows.map((card) => card.instanceId)); }, onChoose(ctx, h, o) { if (h === "point") { ctx.addCardTempPower(Number(o), 1); ctx.addCounter(Number(o), "aim", 1); } } },
-  "hornet's sting|0": { onDefend(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (!top) return; ctx.logPublic(`${ctx.data.name} reveals ${data(ctx, top).name}`); if (hasType(ctx, top, "arrow")) { const targets = [ctx.player(opponentSeat(ctx)).hero.instanceId]; if (ctx.link?.attackCardType === "ally") targets.push(ctx.link.attackingCard.instanceId); ctx.requestCardChoice("hornet", decisionPrompt("Deal 1 damage to the attacking hero or ally", "card.dyn.hornet.target.choose"), targets); } else ctx.putOnDeckBottom(top.instanceId); }, onChoose(ctx, h, o) { if (h === "hornet") dealToAnyTarget(ctx, o, 1); } },
+  "hornet's sting|0": { onDefend(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (!top) return; logDeckTopReveal(ctx, top); if (hasType(ctx, top, "arrow")) { const targets = [ctx.player(opponentSeat(ctx)).hero.instanceId]; if (ctx.link?.attackCardType === "ally") targets.push(ctx.link.attackingCard.instanceId); ctx.requestCardChoice("hornet", decisionPrompt("Deal 1 damage to the attacking hero or ally", "card.dyn.hornet.target.choose"), targets); } else ctx.putOnDeckBottom(top.instanceId); }, onChoose(ctx, h, o) { if (h === "hornet") dealToAnyTarget(ctx, o, 1); } },
 
   // Runeblade
   "annals of sutcliffe|0": { activated: { cost: 3, isAttack: false, goAgain: true, oncePerTurn: true, label: "Draw a card", onCostPaid(ctx, paid) { ctx.setCounter("annalsAttack", paid.some((card) => isAttackAction(ctx, card)) ? 1 : 0); ctx.setCounter("annalsNonAttack", paid.some((card) => isNonAttackAction(ctx, card)) ? 1 : 0); }, onActivate(ctx) { ctx.drawCards(ctx.seat, 1); if (ctx.getCounter("annalsAttack") && ctx.getCounter("annalsNonAttack")) ctx.createToken(RUNECHANT); } } },
@@ -612,9 +639,9 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "blessing of occult|1": blessing((ctx) => createTokens(ctx, RUNECHANT, 3)),
   "blessing of occult|2": blessing((ctx) => createTokens(ctx, RUNECHANT, 2)),
   "blessing of occult|3": blessing((ctx) => createTokens(ctx, RUNECHANT, 1)),
-  "sky fire lanterns|1": { onPlay(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top) { ctx.logPublic(`${ctx.data.name} reveals ${data(ctx, top).name}`); if (ctx.cardColor(top) === 1) ctx.createToken(RUNECHANT); } } },
-  "sky fire lanterns|2": { onPlay(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top) { ctx.logPublic(`${ctx.data.name} reveals ${data(ctx, top).name}`); if (ctx.cardColor(top) === 2) ctx.createToken(RUNECHANT); } } },
-  "sky fire lanterns|3": { onPlay(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top) { ctx.logPublic(`${ctx.data.name} reveals ${data(ctx, top).name}`); if (ctx.cardColor(top) === 3) ctx.createToken(RUNECHANT); } } },
+  "sky fire lanterns|1": { onPlay(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top) { logDeckTopReveal(ctx, top); if (ctx.cardColor(top) === 1) ctx.createToken(RUNECHANT); } } },
+  "sky fire lanterns|2": { onPlay(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top) { logDeckTopReveal(ctx, top); if (ctx.cardColor(top) === 2) ctx.createToken(RUNECHANT); } } },
+  "sky fire lanterns|3": { onPlay(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top) { logDeckTopReveal(ctx, top); if (ctx.cardColor(top) === 3) ctx.createToken(RUNECHANT); } } },
 
   // Wizard
   "aether quickening|1": arcaneTargetSpell(4, "go-again"),
@@ -645,9 +672,9 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "tranquil passing|1": tranquilPassing(3),
   "tranquil passing|2": tranquilPassing(2),
   "tranquil passing|3": tranquilPassing(1),
-  "water glow lanterns|1": { onPlay(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top) { ctx.logPublic(`${ctx.data.name} reveals ${data(ctx, top).name}`); if (ctx.cardColor(top) === 1) ctx.createToken(SPECTRAL_SHIELD); } } },
-  "water glow lanterns|2": { onPlay(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top) { ctx.logPublic(`${ctx.data.name} reveals ${data(ctx, top).name}`); if (ctx.cardColor(top) === 2) ctx.createToken(SPECTRAL_SHIELD); } } },
-  "water glow lanterns|3": { onPlay(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top) { ctx.logPublic(`${ctx.data.name} reveals ${data(ctx, top).name}`); if (ctx.cardColor(top) === 3) ctx.createToken(SPECTRAL_SHIELD); } } },
+  "water glow lanterns|1": { onPlay(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top) { logDeckTopReveal(ctx, top); if (ctx.cardColor(top) === 1) ctx.createToken(SPECTRAL_SHIELD); } } },
+  "water glow lanterns|2": { onPlay(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top) { logDeckTopReveal(ctx, top); if (ctx.cardColor(top) === 2) ctx.createToken(SPECTRAL_SHIELD); } } },
+  "water glow lanterns|3": { onPlay(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top) { logDeckTopReveal(ctx, top); if (ctx.cardColor(top) === 3) ctx.createToken(SPECTRAL_SHIELD); } } },
   "wave of reality|0": { onDestroyed(ctx) { ctx.createToken(SPECTRAL_SHIELD); } },
 
   // Generic

@@ -390,6 +390,23 @@ describe("DYN — rules regression coverage", () => {
       });
       s.activate("emperor, dracai of aesir|0", { pitch: [BLUE] });
       expect(s.state.chain.at(-1)?.attackingCard.cardId).toBe("ARC159");
+      expect(projectStateFor(s.state, 0).logEntries).toContainEqual(expect.objectContaining({
+        message: {
+          id: "card.log.dyn.emperor.search.private",
+          values: {
+            result: { kind: "card", cardId: "ARC159" },
+            card: { kind: "card", cardId: "DYN001" },
+          },
+        },
+        event: expect.objectContaining({ cardId: "ARC159", from: "deck", to: "chain" }),
+      }));
+      const publicSearch = projectStateFor(s.state, 1).logEntries?.find(
+        (entry) => "message" in entry && entry.message.id === "card.log.dyn.emperor.search.public",
+      );
+      expect(publicSearch).toMatchObject({
+        event: { kind: "card-moved", ownerSeat: 0, from: "deck", to: "chain" },
+      });
+      expect(JSON.stringify(publicSearch)).not.toContain("ARC159");
     } finally {
       if (originalCard) cardData.ARC159 = originalCard;
       else delete cardData.ARC159;

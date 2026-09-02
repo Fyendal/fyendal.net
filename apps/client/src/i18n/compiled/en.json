@@ -4623,6 +4623,24 @@
       "value": ": the attack gains go again"
     }
   ],
+  "card.log.common.attack.lost": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": the attack gets -"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " attack"
+    }
+  ],
   "card.log.common.attack.piercing.gained": [
     {
       "type": 1,
@@ -4693,6 +4711,20 @@
       "value": " returns to your hand"
     }
   ],
+  "card.log.common.card.revealed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " reveals "
+    },
+    {
+      "type": 1,
+      "value": "revealed"
+    }
+  ],
   "card.log.common.damage.next.prevented": [
     {
       "type": 1,
@@ -4719,6 +4751,16 @@
     {
       "type": 0,
       "value": ": the deck is empty"
+    }
+  ],
+  "card.log.common.decktop.look": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": look at the top card of your deck"
     }
   ],
   "card.log.common.decktop.revealed": [
@@ -4991,6 +5033,24 @@
       "value": ")"
     }
   ],
+  "card.log.common.life.gained": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": gained "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " life"
+    }
+  ],
   "card.log.common.mentor.search.private": [
     {
       "type": 0,
@@ -5051,6 +5111,46 @@
     {
       "type": 0,
       "value": " gains "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " resource"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " resources"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "card.log.common.resources.paid": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": paid "
     },
     {
       "type": 6,
@@ -5267,6 +5367,110 @@
       "value": "amount"
     }
   ],
+  "card.log.dyn.emperor.search.private": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " finds "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    }
+  ],
+  "card.log.dyn.emperor.search.public": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " searches for a card"
+    }
+  ],
+  "card.log.evr.phantasmaclasm.life": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": gains ‘When this hits, gain "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " life’"
+    }
+  ],
+  "card.log.evr.potionseeing.private": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "cards"
+    }
+  ],
+  "card.log.evr.recompense.resources": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " replaces "
+    },
+    {
+      "type": 1,
+      "value": "from"
+    },
+    {
+      "type": 0,
+      "value": " resource with "
+    },
+    {
+      "type": 1,
+      "value": "to"
+    },
+    {
+      "type": 0,
+      "value": " resources"
+    }
+  ],
+  "card.log.evr.tithes.draw": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " reduces the draw from "
+    },
+    {
+      "type": 1,
+      "value": "from"
+    },
+    {
+      "type": 0,
+      "value": " to "
+    },
+    {
+      "type": 1,
+      "value": "to"
+    }
+  ],
   "card.log.sar.hero.arsenal": [
     {
       "type": 1,
@@ -5357,6 +5561,170 @@
     {
       "type": 0,
       "value": ": the trap may be played until the start of your next turn"
+    }
+  ],
+  "card.log.saz.azalea.bottom.private": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " goes on the bottom of the deck"
+    }
+  ],
+  "card.log.saz.azalea.bottom.public": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": the arsenal card goes on the bottom of the deck"
+    }
+  ],
+  "card.log.saz.azalea.dominate": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " gains dominate until end of turn"
+    }
+  ],
+  "card.log.saz.bracers.attack": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " gets +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " attack this turn"
+    }
+  ],
+  "card.log.saz.card.attack.turn": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " gets +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " attack this turn"
+    }
+  ],
+  "card.log.saz.card.goagain.turn": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " gets go again this turn"
+    }
+  ],
+  "card.log.saz.crowsnest.aim": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": the arrow gets an aim counter"
+    }
+  ],
+  "card.log.saz.drillshot.counter": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " gets a -"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " defense counter"
+    }
+  ],
+  "card.log.saz.scout.look": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": look at the top card of "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": "'s deck"
+    }
+  ],
+  "card.log.saz.spire.swap": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": the top two cards swap places"
     }
   ],
   "card.log.sba.arcane.goagain": [
@@ -5493,6 +5861,344 @@
     {
       "type": 0,
       "value": " attack and go again (played a Lightning card this turn)"
+    }
+  ],
+  "card.log.sbl.banneret.life": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": the next time you hit this turn, gain "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " life"
+    }
+  ],
+  "card.log.sbl.edict.counters": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " gets "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " +1 attack counters"
+    }
+  ],
+  "card.log.sbl.flurry.additionalattack": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": you may attack with the weapon again this turn"
+    }
+  ],
+  "card.log.sbl.glisten.remove": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": remove all +1 attack counters from your weapons at the beginning of your end phase"
+    }
+  ],
+  "card.log.sbl.halo.none": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": no card in hand to put into the soul"
+    }
+  ],
+  "card.log.sbl.vanguard.attack": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": attacks on this combat chain get +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " attack"
+    }
+  ],
+  "card.log.sbr.bravo.crush": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " is turned face up and gets +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " attack and dominate"
+    }
+  ],
+  "card.log.sbr.carapace.surge": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": paid "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " resource, tapped, and created "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    }
+  ],
+  "card.log.sbr.chokeslam.suppressed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": opposing attack action cards can't gain attack during their next action phase"
+    }
+  ],
+  "card.log.sbr.crash.revealed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " reveals "
+    },
+    {
+      "type": 1,
+      "value": "revealed"
+    },
+    {
+      "type": 0,
+      "value": " from hand"
+    }
+  ],
+  "card.log.sbr.crushtheweak.restricted": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": the opponent can't play attack actions with "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " or less base attack next action phase"
+    }
+  ],
+  "card.log.sbr.faultline.bottom.private": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " is put on the bottom of "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": "'s deck"
+    }
+  ],
+  "card.log.sbr.faultline.bottom.public": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": a face-down arsenal card is put on the bottom of "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": "'s deck"
+    }
+  ],
+  "card.log.sbr.seismicsurge.discount": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " is destroyed: the next Guardian attack costs "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " less"
+    }
+  ],
+  "card.log.sbr.thunderquake.heaved": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " is heaved: create "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " tokens"
+    }
+  ],
+  "card.log.sbz.blaze.none": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": no Wizard non-attack action dealing "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage in hand"
+    }
+  ],
+  "card.log.sbz.blaze.playable": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " may be played as an instant this turn"
+    }
+  ],
+  "card.log.sbz.surge.draw": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": Surge — draw "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " cards"
+    }
+  ],
+  "card.log.sbz.surge.goagain": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": Surge — gains go again"
     }
   ],
   "card.log.sdo.dawnblade.counter.gained": [
@@ -5649,6 +6355,84 @@
     {
       "type": 0,
       "value": "'s arsenal is turned face up"
+    }
+  ],
+  "card.log.sen.enigma.discount": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": your first Spectral Shield attack this turn is discounted"
+    }
+  ],
+  "card.log.sen.graveyard.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " goes on the bottom of the deck"
+    }
+  ],
+  "card.log.sen.hand.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": a card goes on the bottom of the deck"
+    }
+  ],
+  "card.log.sen.stilettos.actionpoint": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " is destroyed: gain "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " action point"
+    }
+  ],
+  "card.log.sen.ward.counters": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": put "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " +1 attack counters on "
+    },
+    {
+      "type": 1,
+      "value": "target"
     }
   ],
   "card.log.sfa.attacks.draconic": [
@@ -6131,6 +6915,172 @@
     {
       "type": 0,
       "value": " has watery grave)"
+    }
+  ],
+  "card.log.ska.barefangs.attack": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " gains +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " attack"
+    }
+  ],
+  "card.log.ska.knucklehead.roll": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " rolls "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": "; base intellect is "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " this turn"
+    }
+  ],
+  "card.log.sly.arsenal.destroyed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " destroys a card in "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": "'s arsenal"
+    }
+  ],
+  "card.log.sly.decktop.destroyed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " destroys the top card of "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": "'s deck ("
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
+  "card.log.sly.defenders.defense": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": defending action cards you control get +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " defense this turn"
+    }
+  ],
+  "card.log.sly.hero.stats.halved": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": the opponent's attack action cards' base attack and defense are halved until end of their next turn"
+    }
+  ],
+  "card.log.upr.frozen.arsenal": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": a card in "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": "'s arsenal is frozen"
+    }
+  ],
+  "card.log.upr.frozen.card": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " is frozen"
+    }
+  ],
+  "card.log.upr.redhot.revealed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " reveals "
+    },
+    {
+      "type": 1,
+      "value": "revealed"
     }
   ],
   "card.log.wtr.barkbone.roll.resources": [

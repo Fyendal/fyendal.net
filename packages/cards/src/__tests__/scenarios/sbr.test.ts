@@ -148,6 +148,19 @@ describe("SBR — crush attacks", () => {
       .expectZoneSize(1, "arsenal", 0)
       .expectDeckBottom(0, "head jab|1")
       .expectDeckBottom(1, "raging onslaught|1");
+
+    const opponentMove = projectStateFor(g.state, 1).logEntries?.find(
+      (entry) => "message" in entry &&
+        entry.message.id === "card.log.sbr.faultline.bottom.public" &&
+        entry.message.values?.target &&
+        typeof entry.message.values.target === "object" &&
+        "seat" in entry.message.values.target &&
+        entry.message.values.target.seat === 0,
+    );
+    expect(opponentMove).toMatchObject({
+      event: { kind: "card-moved", ownerSeat: 0, from: "arsenal", to: "deck" },
+    });
+    expect(JSON.stringify(opponentMove)).not.toContain(printingId("head jab|1"));
   });
 
   it("Crush the Weak blocks low-base-power attack actions next action phase", () => {

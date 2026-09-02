@@ -54,6 +54,25 @@ describe("SAZ — Azalea", () => {
     const swift = s.state.players[0]!.arsenal[0]!;
     // dominate from Azalea, go again from Swift Shot's own arsenal trigger
     expect(swift.grantedKeywords ?? []).toEqual(expect.arrayContaining(["dominate", "go again"]));
+    const ownerLog = projectStateFor(s.state, 0).logEntries ?? [];
+    const opponentLog = projectStateFor(s.state, 1).logEntries ?? [];
+    expect(ownerLog).toContainEqual(expect.objectContaining({
+      message: {
+        id: "card.log.saz.azalea.bottom.private",
+        values: {
+          result: { kind: "card", cardId: printingId(RONIN_FREE) },
+          card: { kind: "card", cardId: printingId(AZALEA) },
+        },
+      },
+      event: expect.objectContaining({ cardId: printingId(RONIN_FREE), from: "arsenal", to: "deck" }),
+    }));
+    const publicBottom = opponentLog.find(
+      (entry) => "message" in entry && entry.message.id === "card.log.saz.azalea.bottom.public",
+    );
+    expect(publicBottom).toMatchObject({
+      event: { kind: "card-moved", ownerSeat: 0, from: "arsenal", to: "deck" },
+    });
+    expect(JSON.stringify(publicBottom)).not.toContain(printingId(RONIN_FREE));
   });
 
   it("hero ability grants no dominate to a non-arrow", () => {

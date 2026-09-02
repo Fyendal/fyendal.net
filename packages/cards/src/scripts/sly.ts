@@ -1,5 +1,5 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, buffNextAttack, decisionPrompt, isWeaponAttack, opponentSeat, payForDefenseBoost, queueIntimidate, suspenseAura, yesNoPrompt } from "./shared-helpers.js";
+import { attackAbility, buffNextAttack, decisionPrompt, isWeaponAttack, localizedCardLog, opponentSeat, payForDefenseBoost, queueIntimidate, suspenseAura, yesNoPrompt } from "./shared-helpers.js";
 
 // ── SLY (Silver Age: Lyath Goldmane precon) ─────────────────────────────────
 //
@@ -163,7 +163,7 @@ export const sly: Record<string, CardScript> = {
       onActivate(ctx) {
         ctx.crowdBoo(ctx.seat);
         ctx.addModifier({ scope: "until-end-of-turn", defense: 1, appliesToCardType: "action" });
-        ctx.logPublic(`${ctx.data.name}: defending action cards you control get +1{d} this turn`);
+        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: defending action cards you control get +1{d} this turn`, "card.log.sly.defenders.defense", { amount: 1 }));
       },
     },
     onBooed(ctx) {
@@ -231,7 +231,7 @@ export const sly: Record<string, CardScript> = {
   "drag down|1": {
     onDefend(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: -3, seat: opponentSeat(ctx) });
-      ctx.logPublic(`${ctx.data.name}: the attack gets -3{p}`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: the attack gets -3{p}`, "card.log.common.attack.lost", { amount: 3 }));
     },
   },
 
@@ -316,15 +316,21 @@ export const sly: Record<string, CardScript> = {
     // flag cleanup and covers the rest of this turn plus their next turn
     const hero = ctx.player(opponentSeat(ctx)).hero;
     ctx.setCardCounter(hero.instanceId, "halveBaseAttackActionUntil", ctx.state.turn + 1);
-    ctx.logPublic(`${ctx.data.name}: opponent's attack action cards' base {p}/{d} are halved until end of their next turn`);
+    ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: opponent's attack action cards' base {p}/{d} are halved until end of their next turn`, "card.log.sly.hero.stats.halved"));
   }),
 
   "wee wrecking ball|2": slyCrush((ctx) => {
     const opp = ctx.player(opponentSeat(ctx));
     const c = opp.arsenal[0];
     if (!c) return;
-    ctx.logPublic(`${ctx.data.name} destroys ${ctx.cardData(c.cardId).name} in their arsenal`);
     ctx.moveToGraveyard(c.instanceId, "arsenal");
+    ctx.logPublic(localizedCardLog(
+      ctx,
+      `${ctx.data.name} destroys a card in their arsenal`,
+      "card.log.sly.arsenal.destroyed",
+      { target: { kind: "player", seat: opponentSeat(ctx) } },
+      { kind: "card-moved", ownerSeat: opponentSeat(ctx), from: "arsenal", to: "graveyard" },
+    ));
   }),
 
   "brothers in arms|3": {
@@ -350,7 +356,13 @@ export const sly: Record<string, CardScript> = {
     const opp = ctx.player(opponentSeat(ctx));
     const top = opp.deck[0];
     if (!top) return;
-    ctx.logPublic(`${ctx.data.name} destroys the top card of their deck (${ctx.cardData(top.cardId).name})`);
+    ctx.logPublic(localizedCardLog(
+      ctx,
+      `${ctx.data.name} destroys the top card of their deck (${ctx.cardData(top.cardId).name})`,
+      "card.log.sly.decktop.destroyed",
+      { result: { kind: "card", cardId: top.cardId }, target: { kind: "player", seat: opponentSeat(ctx) } },
+      { kind: "card-moved", cardId: top.cardId, ownerSeat: opponentSeat(ctx), from: "deck", to: "graveyard" },
+    ));
     ctx.moveToGraveyard(top.instanceId, "deck");
   }),
 
@@ -398,7 +410,7 @@ export const sly: Record<string, CardScript> = {
         const link = ctx.link;
         if (!link) return;
         ctx.addModifier({ scope: "chain-link", attack: 1, seat: link.attacker });
-        ctx.logPublic(`${ctx.data.name}: target attack gets +1{p}`);
+        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: target attack gets +1{p}`, "card.log.common.attack.gained", { amount: 1 }));
       },
     },
     triggers: [

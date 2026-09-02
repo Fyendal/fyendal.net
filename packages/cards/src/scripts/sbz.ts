@@ -5,6 +5,7 @@ import {
   commonOptionMessages,
   dealArcane,
   decisionPrompt,
+  localizedCardLog,
   opponentSeat,
   optN,
   optOnChoose,
@@ -218,7 +219,7 @@ export const sbz: Record<string, CardScript> = {
           blazeMatches(ctx, card, x)
         );
         if (matches.length === 0) {
-          ctx.logPublic(`Blaze, Firemind: no Wizard non-attack action dealing ${x} arcane damage in hand`);
+          ctx.logPublic(localizedCardLog(ctx, `Blaze, Firemind: no Wizard non-attack action dealing ${x} arcane damage in hand`, "card.log.sbz.blaze.none", { amount: x }));
           return;
         }
         ctx.requestCardChoice(
@@ -238,9 +239,13 @@ export const sbz: Record<string, CardScript> = {
         if (!found || !ctx.banish(id)) return;
         ctx.allowPlayFrom(id, "banish");
         ctx.setFlag("player", `asInstant:${id}`, true);
-        ctx.logPublic(
+        ctx.logPublic(localizedCardLog(
+          ctx,
           `Blaze, Firemind: ${found ? ctx.cardData(found.cardId).name : "the chosen card"} may be played as an instant this turn`,
-        );
+          "card.log.sbz.blaze.playable",
+          found ? { result: { kind: "card", cardId: found.cardId } } : undefined,
+          found ? { kind: "card-moved", cardId: found.cardId, ownerSeat: ctx.seat, from: "hand", to: "banish" } : undefined,
+        ));
         return;
       }
     },
@@ -290,7 +295,7 @@ export const sbz: Record<string, CardScript> = {
       onActivate(ctx) {
         ctx.destroySelf();
         ctx.changeResources(ctx.seat, 1);
-        ctx.logPublic(`${ctx.data.name}: gained {r}`);
+        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: gained {r}`, "card.log.common.resources.gained", { amount: 1 }));
       },
     },
   },
@@ -321,14 +326,14 @@ export const sbz: Record<string, CardScript> = {
     onAttackDeclared(ctx) {
       if (ctx.compareLife(ctx.seat, opponentSeat(ctx)) === -1) {
         ctx.gainLife(ctx.seat, 1);
-        ctx.logPublic(`${ctx.data.name}: gained 1{h}`);
+        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: gained 1{h}`, "card.log.common.life.gained", { amount: 1 }));
       }
     },
     canTriggerOnDefend: (ctx) => ctx.compareLife(ctx.seat, opponentSeat(ctx)) === -1,
     onDefend(ctx) {
       if (ctx.compareLife(ctx.seat, opponentSeat(ctx)) === -1) {
         ctx.gainLife(ctx.seat, 1);
-        ctx.logPublic(`${ctx.data.name}: gained 1{h}`);
+        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: gained 1{h}`, "card.log.common.life.gained", { amount: 1 }));
       }
     },
   },
@@ -345,16 +350,16 @@ export const sbz: Record<string, CardScript> = {
         1,
       )) {
         ctx.addModifier({ scope: "chain-link", attack: -1 });
-        ctx.logPublic(`${ctx.data.name} gets -1{p}`);
+        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} gets -1{p}`, "card.log.common.attack.lost", { amount: 1 }));
       }
     },
     onChoose(ctx, hook, option) {
       if (hook !== "look-tuff") return;
       if (option === "paid") {
-        ctx.logPublic(`${ctx.data.name}: paid {r}`);
+        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: paid {r}`, "card.log.common.resources.paid", { amount: 1 }));
       } else {
         ctx.addModifier({ scope: "chain-link", attack: -1 });
-        ctx.logPublic(`${ctx.data.name} gets -1{p}`);
+        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} gets -1{p}`, "card.log.common.attack.lost", { amount: 1 }));
       }
     },
   },
@@ -434,7 +439,7 @@ export const sbz: Record<string, CardScript> = {
     onDamageDealt(ctx, _target, amount, arcane) {
       if (!arcane || amount <= 2) return;
       ctx.gainActionPoint();
-      ctx.logPublic(`${ctx.data.name}: Surge — gains go again`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: Surge — gains go again`, "card.log.sbz.surge.goagain"));
     },
     onChoose(ctx, hook, option) {
       targetOnChoose(ctx, hook, option);
@@ -450,7 +455,7 @@ export const sbz: Record<string, CardScript> = {
     onDamageDealt(ctx, _target, amount, arcane) {
       if (!arcane || amount <= 1) return;
       ctx.drawCards(ctx.seat, 2);
-      ctx.logPublic(`${ctx.data.name}: Surge — draw 2 cards`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: Surge — draw 2 cards`, "card.log.sbz.surge.draw", { amount: 2 }));
     },
     onChoose(ctx, hook, option) {
       targetOnChoose(ctx, hook, option);
