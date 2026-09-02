@@ -395,6 +395,12 @@
       "value": " (Space)"
     }
   ],
+  "common.spaceKey": [
+    {
+      "type": 0,
+      "value": "Space key"
+    }
+  ],
   "common.versusShort": [
     {
       "type": 0,
@@ -457,6 +463,12 @@
     {
       "type": 0,
       "value": "Silver Age"
+    }
+  ],
+  "game.cardDetails": [
+    {
+      "type": 0,
+      "value": "Card Details"
     }
   ],
   "landing.accountAccess": [
@@ -1953,10 +1965,822 @@
       "value": "Play Flesh and Blood Online Free | Fyendal"
     }
   ],
+  "prep.accept.accepted": [
+    {
+      "type": 0,
+      "value": "Accepted"
+    }
+  ],
+  "prep.accept.acceptedDescription": [
+    {
+      "type": 0,
+      "value": "You accepted. The match will open when your opponent accepts."
+    }
+  ],
+  "prep.accept.description": [
+    {
+      "type": 0,
+      "value": "Accept the match to continue preparing your deck."
+    }
+  ],
+  "prep.accept.matchFound": [
+    {
+      "type": 0,
+      "value": "Match found"
+    }
+  ],
+  "prep.accept.ready": [
+    {
+      "type": 0,
+      "value": "Ready to play?"
+    }
+  ],
+  "prep.accept.waiting": [
+    {
+      "type": 0,
+      "value": "Waiting for your opponent"
+    }
+  ],
+  "prep.botNudge.description": [
+    {
+      "type": 0,
+      "value": "No other active player is looking for a game right now. Would you like to test your deck against a bot while you wait?"
+    }
+  ],
+  "prep.botNudge.keepWaiting": [
+    {
+      "type": 0,
+      "value": "Keep waiting"
+    }
+  ],
+  "prep.botNudge.searching": [
+    {
+      "type": 0,
+      "value": "Still searching"
+    }
+  ],
+  "prep.botNudge.starting": [
+    {
+      "type": 0,
+      "value": "Starting practice…"
+    }
+  ],
+  "prep.botNudge.title": [
+    {
+      "type": 0,
+      "value": "No match yet"
+    }
+  ],
+  "prep.copied": [
+    {
+      "type": 0,
+      "value": "Copied!"
+    }
+  ],
+  "prep.copyInviteTitle": [
+    {
+      "type": 0,
+      "value": "Copy room invite URL"
+    }
+  ],
+  "prep.copyUrl": [
+    {
+      "type": 0,
+      "value": "Copy URL"
+    }
+  ],
+  "prep.defaultDeck": [
+    {
+      "type": 0,
+      "value": "Default deck"
+    }
+  ],
+  "prep.dieRoll": [
+    {
+      "type": 0,
+      "value": "Die roll: "
+    },
+    {
+      "type": 1,
+      "value": "you"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 1,
+      "value": "yourRoll"
+    },
+    {
+      "type": 0,
+      "value": " — "
+    },
+    {
+      "type": 1,
+      "value": "opponentRoll"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 1,
+      "value": "opponent"
+    }
+  ],
+  "prep.firstPlayer.choose": [
+    {
+      "type": 0,
+      "value": "Choose who goes first"
+    }
+  ],
+  "prep.firstPlayer.goFirst": [
+    {
+      "type": 0,
+      "value": "Go first"
+    }
+  ],
+  "prep.firstPlayer.goSecond": [
+    {
+      "type": 0,
+      "value": "Go second"
+    }
+  ],
+  "prep.firstPlayer.status.opponent-decided-first": [
+    {
+      "type": 0,
+      "value": "Opponent decided: You go first"
+    }
+  ],
+  "prep.firstPlayer.status.opponent-decided-second": [
+    {
+      "type": 0,
+      "value": "Opponent decided: You go second"
+    }
+  ],
+  "prep.firstPlayer.status.opponent-deciding": [
+    {
+      "type": 0,
+      "value": "Opponent is deciding"
+    }
+  ],
+  "prep.firstPlayer.status.waiting-opponent": [
+    {
+      "type": 0,
+      "value": "Waiting for an opponent"
+    }
+  ],
+  "prep.firstPlayer.status.waiting-roll": [
+    {
+      "type": 0,
+      "value": "Waiting for the first-player roll"
+    }
+  ],
+  "prep.firstPlayer.status.you-decided-first": [
+    {
+      "type": 0,
+      "value": "You decided: You go first"
+    }
+  ],
+  "prep.firstPlayer.status.you-decided-second": [
+    {
+      "type": 0,
+      "value": "You decided: You go second"
+    }
+  ],
+  "prep.loadingDeck": [
+    {
+      "type": 0,
+      "value": "Loading your deck…"
+    }
+  ],
+  "prep.loadingPlan": [
+    {
+      "type": 0,
+      "value": "Loading plan…"
+    }
+  ],
+  "prep.mainDeckAria": [
+    {
+      "type": 0,
+      "value": "Main deck: "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": "; "
+    },
+    {
+      "type": 1,
+      "value": "requirement"
+    }
+  ],
+  "prep.matchup": [
+    {
+      "type": 0,
+      "value": "Matchup"
+    }
+  ],
+  "prep.matchupAria": [
+    {
+      "type": 1,
+      "value": "yourHero"
+    },
+    {
+      "type": 0,
+      "value": " versus "
+    },
+    {
+      "type": 1,
+      "value": "opponentHero"
+    }
+  ],
+  "prep.matchupPlan": [
+    {
+      "type": 0,
+      "value": "Fabrary matchup plan"
+    }
+  ],
+  "prep.opponent": [
+    {
+      "type": 0,
+      "value": "Opponent"
+    }
+  ],
+  "prep.opponentHeroAria": [
+    {
+      "type": 0,
+      "value": "Opponent hero: "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    }
+  ],
+  "prep.opponentStatus.disconnected": [
+    {
+      "type": 0,
+      "value": "disconnected"
+    }
+  ],
+  "prep.opponentStatus.preparing": [
+    {
+      "type": 0,
+      "value": "preparing"
+    }
+  ],
+  "prep.opponentStatus.ready": [
+    {
+      "type": 0,
+      "value": "ready"
+    }
+  ],
+  "prep.opponentStatus.waiting": [
+    {
+      "type": 0,
+      "value": "waiting"
+    }
+  ],
+  "prep.othersInQueue": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " other in queue"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " others in queue"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "prep.practiceChooseFirst": [
+    {
+      "type": 0,
+      "value": "Practice match: You decide who goes first."
+    }
+  ],
+  "prep.prefersTurnOrder": [
+    {
+      "type": 0,
+      "value": "Prefers going "
+    },
+    {
+      "type": 1,
+      "value": "order"
+    }
+  ],
+  "prep.presentation.emptyInventory": [
+    {
+      "type": 0,
+      "value": "No cards in inventory."
+    }
+  ],
+  "prep.presentation.exact": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " exact"
+    }
+  ],
+  "prep.presentation.hero": [
+    {
+      "type": 0,
+      "value": "Hero"
+    }
+  ],
+  "prep.presentation.inventoryCount": [
+    {
+      "type": 0,
+      "value": "Inventory ("
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
+  "prep.presentation.mainCount": [
+    {
+      "type": 0,
+      "value": "Main Deck ("
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " / "
+    },
+    {
+      "type": 1,
+      "value": "requirement"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
+  "prep.presentation.minimum": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " min"
+    }
+  ],
+  "prep.presentation.moveCopy": [
+    {
+      "type": 0,
+      "value": "Move one copy of "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " to "
+    },
+    {
+      "type": 1,
+      "value": "destination"
+    }
+  ],
+  "prep.presentation.moveToInventoryHint": [
+    {
+      "type": 0,
+      "value": "Click a card to move one copy to Inventory."
+    }
+  ],
+  "prep.presentation.moveToMainHint": [
+    {
+      "type": 0,
+      "value": "Click a card to move one copy to Main Deck."
+    }
+  ],
+  "prep.presentation.noneRegistered": [
+    {
+      "type": 0,
+      "value": "none registered"
+    }
+  ],
+  "prep.presentation.removeCard": [
+    {
+      "type": 0,
+      "value": "Remove "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "prep.presentation.removeEquipment": [
+    {
+      "type": 0,
+      "value": "Remove "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " from "
+    },
+    {
+      "type": 1,
+      "value": "slot"
+    }
+  ],
+  "prep.presentation.selectCard": [
+    {
+      "type": 0,
+      "value": "Select "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "prep.presentation.selectEquipment": [
+    {
+      "type": 0,
+      "value": "Select "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " for "
+    },
+    {
+      "type": 1,
+      "value": "slot"
+    }
+  ],
+  "prep.presentation.title": [
+    {
+      "type": 0,
+      "value": "Your presentation"
+    }
+  ],
+  "prep.presentation.weapons": [
+    {
+      "type": 0,
+      "value": "Weapons ("
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
+  "prep.rollWonOpponent": [
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " won the roll and decides who goes first."
+    }
+  ],
+  "prep.rollWonYou": [
+    {
+      "type": 0,
+      "value": "You won the roll and decide who goes first."
+    }
+  ],
+  "prep.slot.arms": [
+    {
+      "type": 0,
+      "value": "arms"
+    }
+  ],
+  "prep.slot.chest": [
+    {
+      "type": 0,
+      "value": "chest"
+    }
+  ],
+  "prep.slot.head": [
+    {
+      "type": 0,
+      "value": "head"
+    }
+  ],
+  "prep.slot.legs": [
+    {
+      "type": 0,
+      "value": "legs"
+    }
+  ],
+  "prep.status.ready": [
+    {
+      "type": 0,
+      "value": "Ready"
+    }
+  ],
+  "prep.status.readyLower": [
+    {
+      "type": 0,
+      "value": "ready"
+    }
+  ],
+  "prep.status.sideboarding": [
+    {
+      "type": 0,
+      "value": "sideboarding…"
+    }
+  ],
+  "prep.suggested": [
+    {
+      "type": 0,
+      "value": "suggested"
+    }
+  ],
+  "prep.title": [
+    {
+      "type": 1,
+      "value": "format"
+    },
+    {
+      "type": 0,
+      "value": " — Prepare"
+    }
+  ],
+  "prep.turnOrder.first": [
+    {
+      "type": 0,
+      "value": "first"
+    }
+  ],
+  "prep.turnOrder.second": [
+    {
+      "type": 0,
+      "value": "second"
+    }
+  ],
+  "prep.unknownHero": [
+    {
+      "type": 0,
+      "value": "Unknown hero"
+    }
+  ],
+  "prep.waitingOpponent": [
+    {
+      "type": 0,
+      "value": "Waiting for an opponent…"
+    }
+  ],
+  "prep.waitingOpponentNoEllipsis": [
+    {
+      "type": 0,
+      "value": "Waiting for opponent"
+    }
+  ],
+  "prep.you": [
+    {
+      "type": 0,
+      "value": "You"
+    }
+  ],
+  "prep.youLower": [
+    {
+      "type": 0,
+      "value": "you"
+    }
+  ],
+  "prep.yourHero": [
+    {
+      "type": 0,
+      "value": "Your hero"
+    }
+  ],
+  "prep.zone.inventory": [
+    {
+      "type": 0,
+      "value": "Inventory"
+    }
+  ],
+  "prep.zone.main": [
+    {
+      "type": 0,
+      "value": "Main Deck"
+    }
+  ],
   "replay.confirmDelete": [
     {
       "type": 0,
       "value": "Delete this saved replay? This cannot be undone."
+    }
+  ],
+  "replay.controls.exit": [
+    {
+      "type": 0,
+      "value": "Exit replay"
+    }
+  ],
+  "replay.controls.export": [
+    {
+      "type": 0,
+      "value": "Export replay"
+    }
+  ],
+  "replay.controls.frame": [
+    {
+      "type": 0,
+      "value": "Replay frame"
+    }
+  ],
+  "replay.controls.maximize": [
+    {
+      "type": 0,
+      "value": "Maximize replay controls"
+    }
+  ],
+  "replay.controls.minimize": [
+    {
+      "type": 0,
+      "value": "Minimize replay controls"
+    }
+  ],
+  "replay.controls.next": [
+    {
+      "type": 0,
+      "value": "Next "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " replay frame"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " replay frames"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "replay.controls.previous": [
+    {
+      "type": 0,
+      "value": "Previous "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " replay frame"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " replay frames"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "replay.controls.stepSize": [
+    {
+      "type": 0,
+      "value": "Replay step size: "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " frame"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " frames"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "replay.controls.title": [
+    {
+      "type": 0,
+      "value": "Replay"
     }
   ],
   "replay.daysLeft": [

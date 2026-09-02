@@ -6,6 +6,7 @@ import {
   botPracticeFormat,
   shouldOfferBotPractice,
 } from "./BotPracticeNudge.js";
+import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 
 describe("bot practice nudge", () => {
   it("waits 30 seconds before appearing", () => {
@@ -48,12 +49,14 @@ describe("bot practice nudge", () => {
 
   it("names the available opponent and lets the player keep waiting", () => {
     const html = renderToStaticMarkup(
-      <BotPracticeNudge
-        format="cc"
-        busy={false}
-        onPlay={vi.fn()}
-        onDismiss={vi.fn()}
-      />,
+      <TestI18nProvider>
+        <BotPracticeNudge
+          format="cc"
+          busy={false}
+          onPlay={vi.fn()}
+          onDismiss={vi.fn()}
+        />
+      </TestI18nProvider>,
     );
 
     expect(html).toContain("No other active player is looking for a game right now.");
@@ -62,5 +65,22 @@ describe("bot practice nudge", () => {
     expect(html).toContain("Play vs Bot");
     expect(html).not.toContain("Hala");
     expect(html).toContain("Keep waiting");
+  });
+
+  it("renders the offer in Simplified Chinese", () => {
+    const html = renderToStaticMarkup(
+      <TestI18nProvider locale="zh-Hans">
+        <BotPracticeNudge
+          format="silver-age"
+          busy={false}
+          onPlay={vi.fn()}
+          onDismiss={vi.fn()}
+        />
+      </TestI18nProvider>,
+    );
+
+    expect(html).toContain("暂未找到对局");
+    expect(html).toContain("与AI对战测试你的牌组");
+    expect(html).toContain("继续等待");
   });
 });

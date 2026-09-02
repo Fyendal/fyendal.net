@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useIntl } from "react-intl";
 import type { BotOpponent, Format } from "@fyendal/shared";
 import type { ConstructedFormat } from "../domain.js";
 import { BotOpponentModal } from "../lobby/BotOpponentModal.js";
@@ -28,6 +29,7 @@ export function BotPracticeNudge(props: {
   onPlay: (bot: BotOpponent) => void;
   onDismiss: () => void;
 }) {
+  const intl = useIntl();
   const [choosingBot, setChoosingBot] = useState(false);
 
   return (
@@ -47,11 +49,14 @@ export function BotPracticeNudge(props: {
           if (event.key === "Escape" && !props.busy) props.onDismiss();
         }}
       >
-        <span className="match-accept-eyebrow">Still searching</span>
-        <h2 className="panel-title" id="prep-bot-nudge-title">No match yet</h2>
+        <span className="match-accept-eyebrow">
+          {intl.formatMessage({ id: "prep.botNudge.searching" })}
+        </span>
+        <h2 className="panel-title" id="prep-bot-nudge-title">
+          {intl.formatMessage({ id: "prep.botNudge.title" })}
+        </h2>
         <p id="prep-bot-nudge-description">
-          No other active player is looking for a game right now. Would you like to test your
-          deck against a bot while you wait?
+          {intl.formatMessage({ id: "prep.botNudge.description" })}
         </p>
         <div className="prep-bot-nudge-actions">
           <button
@@ -62,9 +67,13 @@ export function BotPracticeNudge(props: {
               setChoosingBot(true);
             }}
           >
-            {props.busy ? "Starting practice…" : "Play vs Bot"}
+            {intl.formatMessage({
+              id: props.busy ? "prep.botNudge.starting" : "lobby.action.playBot",
+            })}
           </button>
-          <button disabled={props.busy} onClick={props.onDismiss}>Keep waiting</button>
+          <button disabled={props.busy} onClick={props.onDismiss}>
+            {intl.formatMessage({ id: "prep.botNudge.keepWaiting" })}
+          </button>
         </div>
         {choosingBot ? (
           <BotOpponentModal
