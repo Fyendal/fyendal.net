@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { attackAbility } from "./shared-helpers.js";
+import { attackAbility, commonOptionMessages, decisionPrompt } from "./shared-helpers.js";
 import { sgb } from "./sgb.js";
 
 function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
@@ -23,7 +23,7 @@ export const agb: Record<string, CardScript> = {
   "tricorn of saltwater death|0": {
     onDefend(ctx) {
       const choices = ctx.player(ctx.seat).hand.filter((card) => wateryGrave(ctx, card));
-      if (choices.length) ctx.requestCardChoice("tricorn-discard", "Discard a card with watery grave to draw?", ["pass", ...choices.map((card) => card.instanceId)]);
+      if (choices.length) ctx.requestCardChoice("tricorn-discard", decisionPrompt("Discard a card with watery grave to draw?", "card.agb.waterygrave.discard.draw", { optionMessages: commonOptionMessages("pass") }), ["pass", ...choices.map((card) => card.instanceId)]);
     },
     onChoose(ctx, hook, option) {
       if (hook !== "tricorn-discard" || option === "pass") return;
@@ -81,7 +81,7 @@ export const agb: Record<string, CardScript> = {
       const hand = ctx.player(drawingSeat).hand;
       if (!hand.length) return;
       ctx.setCounter("ankaDrawingSeat", drawingSeat + 1);
-      ctx.requestCardChoice("anka-discard", "Anka: discard a card", hand.map((card) => card.instanceId), drawingSeat);
+      ctx.requestCardChoice("anka-discard", decisionPrompt("Anka: discard a card", "card.agb.anka.card.discard"), hand.map((card) => card.instanceId), drawingSeat);
     },
     onChoose(ctx, hook, option) {
       if (hook !== "anka-discard") return;
@@ -114,7 +114,7 @@ export const agb: Record<string, CardScript> = {
   "call to the grave|3": {
     onPlay(ctx) {
       const deck = ctx.player(ctx.seat).deck;
-      if (deck.length) ctx.requestCardChoice("call-grave", "Choose a card to put into your graveyard", deck.map((card) => card.instanceId));
+      if (deck.length) ctx.requestCardChoice("call-grave", decisionPrompt("Choose a card to put into your graveyard", "card.agb.deck.card.graveyard"), deck.map((card) => card.instanceId));
       else ctx.shuffleDeck();
     },
     onChoose(ctx, hook, option) {

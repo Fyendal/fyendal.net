@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, buffNextAttack, isSwordAttack } from "./shared-helpers.js";
+import { attackAbility, buffNextAttack, commonOptionMessages, decisionMessage, decisionPrompt, isSwordAttack, yesNoPrompt } from "./shared-helpers.js";
 import {
   resolveSharpenFollowup,
   SHARPEN_FOLLOWUP,
@@ -21,7 +21,7 @@ function swords(ctx: ScriptCtx): readonly Card[] {
 function chooseSword(ctx: ScriptCtx, hook: string, prompt: string): void {
   const choices = swords(ctx);
   if (choices.length === 1) sharpenSword(ctx, choices[0]!.instanceId);
-  else if (choices.length > 1) ctx.requestCardChoice(hook, prompt, choices.map((card) => card.instanceId));
+  else if (choices.length > 1) ctx.requestCardChoice(hook, decisionPrompt(prompt, "card.aha.sword.sharpen"), choices.map((card) => card.instanceId));
 }
 
 function sharpenAction(threshold: number, payoff: "flurry" | "discount"): CardScript {
@@ -36,7 +36,7 @@ function sharpenAction(threshold: number, payoff: "flurry" | "discount"): CardSc
     onPlay(ctx) {
       const choices = swords(ctx);
       if (choices.length === 1) finish(ctx, choices[0]!.instanceId);
-      else ctx.requestCardChoice("aha-sharpen", `${ctx.data.name}: choose a sword to sharpen`, choices.map((card) => card.instanceId));
+      else ctx.requestCardChoice("aha-sharpen", decisionPrompt(`${ctx.data.name}: choose a sword to sharpen`, "card.aha.sword.sharpen.named", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }), choices.map((card) => card.instanceId));
     },
     onChoose(ctx, hook, option) { if (hook === "aha-sharpen") finish(ctx, Number(option)); },
   };
@@ -85,7 +85,7 @@ export const aha: Record<string, CardScript> = {
     onFriendlyCombatDamageDealt(ctx, source, target, amount) {
       if (amount <= 0 || target === ctx.seat || !isSword(ctx, source) || Number(source.counters?.power) < 1) return;
       ctx.setCounter("gazeSword", source.instanceId);
-      ctx.requestChoice("gaze-draw", "Anticipating Gaze: remove a counter, destroy this, and draw?", ["yes", "no"]);
+      ctx.requestChoice("gaze-draw", yesNoPrompt("Anticipating Gaze: remove a counter, destroy this, and draw?", "card.aha.gaze.counter.draw"), ["yes", "no"]);
     },
     onChoose(ctx, hook, option) {
       if (hook !== "gaze-draw" || option !== "yes") return;
@@ -155,7 +155,7 @@ export const aha: Record<string, CardScript> = {
       const maximum = Math.min(2, Number(weapon.counters?.power ?? 0));
       ctx.requestChoice(
         "polished-counters",
-        "Polished Blade: choose counters to remove",
+        decisionPrompt("Polished Blade: choose counters to remove", "card.aha.polished.counters.remove"),
         Array.from({ length: maximum }, (_, index) => `remove ${index + 1}`),
       );
     },
@@ -185,7 +185,14 @@ export const aha: Record<string, CardScript> = {
         ...(mask & 2 ? [] : ["additional attack"]),
         ...(mask & 4 ? [] : ["activation discount"]),
       ];
-      ctx.requestChoice("polished-mode", `Polished Blade: choose ${remaining} more mode(s)`, modes);
+      ctx.requestChoice("polished-mode", decisionPrompt(`Polished Blade: choose ${remaining} more mode(s)`, "card.aha.polished.mode.choose", {
+        values: { remaining },
+        optionMessages: {
+          "go again": decisionMessage("card.aha.option.goagain"),
+          "additional attack": decisionMessage("card.aha.option.additionalattack"),
+          "activation discount": decisionMessage("card.aha.option.discount"),
+        },
+      }), modes);
     },
   },
   "silverdrop downpour|1": {
@@ -199,7 +206,7 @@ export const aha: Record<string, CardScript> = {
     onPlay(ctx) {
       const choices = swords(ctx);
       if (choices.length === 1) sharpenSword(ctx, choices[0]!.instanceId, 2);
-      else ctx.requestCardChoice("brimming", "Choose a sword to sharpen twice", choices.map((card) => card.instanceId));
+      else ctx.requestCardChoice("brimming", decisionPrompt("Choose a sword to sharpen twice", "card.aha.sword.sharpen.twice"), choices.map((card) => card.instanceId));
     },
     onChoose(ctx, hook, option) { if (hook === "brimming") sharpenSword(ctx, Number(option), 2); },
   },
@@ -231,7 +238,7 @@ export const aha: Record<string, CardScript> = {
           kind: SHARPEN_FOLLOWUP.DEFENDED_DAMAGE,
         });
       } else if (choices.length > 1) {
-        ctx.requestCardChoice("indefensible-sharpen", "Choose a sword to sharpen", choices.map((card) => card.instanceId));
+        ctx.requestCardChoice("indefensible-sharpen", decisionPrompt("Choose a sword to sharpen", "card.aha.sword.sharpen"), choices.map((card) => card.instanceId));
       }
     },
     onChoose(ctx, hook, option) {

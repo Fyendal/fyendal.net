@@ -1,5 +1,5 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, buffNextAttack, isCard, opponentSeat } from "./shared-helpers.js";
+import { attackAbility, buffNextAttack, commonOptionMessages, decisionPrompt, isCard, opponentSeat, yesNoPrompt } from "./shared-helpers.js";
 
 // ── SFA (Silver Age: Fai precon, Chapter 2) ─────────────────────────────────
 //
@@ -108,7 +108,14 @@ function banishAttackOnHit(hook: string, reward: string): CardScript {
       if (targets.length === 0) return;
       ctx.requestCardChoice(
         hook,
-        `${ctx.data.name}: banish an attack action with cost less than ${n} — it ${reward} and you may play it this turn`,
+        decisionPrompt(
+          `${ctx.data.name}: banish an attack action with cost less than ${n} — it ${reward} and you may play it this turn`,
+          reward === "gains +1{p}" ? "card.sfa.attack.banish.power" : "card.sfa.attack.banish.discount",
+          {
+            values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: n },
+            optionMessages: commonOptionMessages("pass"),
+          },
+        ),
         ["pass", ...targets.map((c) => c.instanceId)],
       );
     },
@@ -147,7 +154,7 @@ export const sfa: Record<string, CardScript> = {
       if (i < 0) return;
       ctx.requestChoice(
         "fai-start-flame",
-        "Fai: start the game with a Phoenix Flame in your graveyard?",
+        yesNoPrompt("Fai: start the game with a Phoenix Flame in your graveyard?", "card.sfa.fai.flame.start"),
         ["yes", "no"],
       );
     },
@@ -167,7 +174,7 @@ export const sfa: Record<string, CardScript> = {
         const flames = ctx.player(ctx.seat).graveyard.filter((c) => isPhoenixFlame(ctx, c.cardId));
         ctx.requestCardChoice(
           "fai-return",
-          "Fai: return a Phoenix Flame from your graveyard to your hand",
+          decisionPrompt("Fai: return a Phoenix Flame from your graveyard to your hand", "card.sfa.fai.flame.return"),
           flames.map((c) => c.instanceId),
         );
       },
@@ -270,7 +277,7 @@ export const sfa: Record<string, CardScript> = {
       if (!currentAttackIsDraconic(ctx)) return;
       ctx.requestCardChoice(
         "art-of-the-dragon",
-        "Art of the Dragon: Fire — deal 2 damage to any target",
+        decisionPrompt("Art of the Dragon: Fire — deal 2 damage to any target", "card.sfa.dragonfire.target", { values: { amount: 2 } }),
         [...ctx.state.players.map((p) => p.hero.instanceId), ...livingAllyIds(ctx)],
       );
     },
@@ -346,7 +353,7 @@ export const sfa: Record<string, CardScript> = {
       if (flames.length === 0) return;
       ctx.requestCardChoice(
         "fire-that-burns",
-        "Fire that Burns Within: discard a Phoenix Flame to draw a card and get +2{p}?",
+        decisionPrompt("Fire that Burns Within: discard a Phoenix Flame to draw a card and get +2{p}?", "card.sfa.flame.discard.draw", { optionMessages: commonOptionMessages("pass") }),
         ["pass", ...flames.map((c) => c.instanceId)],
       );
     },
@@ -369,7 +376,7 @@ export const sfa: Record<string, CardScript> = {
       if (!p.deck.some((c) => isPhoenixFlame(ctx, c.cardId))) return;
       ctx.requestCardChoice(
         "flamecall-search",
-        "Flamecall Awakening: search your deck for a Phoenix Flame?",
+        decisionPrompt("Flamecall Awakening: search your deck for a Phoenix Flame?", "card.sfa.flame.search", { optionMessages: commonOptionMessages("pass") }),
         [
           "pass",
           ...p.deck.filter((c) => isPhoenixFlame(ctx, c.cardId)).map((c) => c.instanceId),
@@ -457,7 +464,7 @@ export const sfa: Record<string, CardScript> = {
       if (flames.length > 0) {
         ctx.requestCardChoice(
           "rise-from-the-ashes",
-          "Rise from the Ashes: return a Phoenix Flame from your graveyard to your hand?",
+          decisionPrompt("Rise from the Ashes: return a Phoenix Flame from your graveyard to your hand?", "card.sfa.flame.return", { optionMessages: commonOptionMessages("pass") }),
           ["pass", ...flames.map((c) => c.instanceId)],
         );
       }

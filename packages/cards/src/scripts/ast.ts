@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, dealArcane, opponentSeat } from "./shared-helpers.js";
+import { buffNextAttack, commonOptionMessages, dealArcane, decisionMessage, decisionPrompt, opponentSeat } from "./shared-helpers.js";
 
 const LIGHTNING = "AST028";
 
@@ -19,7 +19,7 @@ function revealInstantEquipment(effect: (ctx: ScriptCtx) => void): CardScript {
   return {
     onDefend(ctx) {
       const instants = instantCards(ctx);
-      if (instants.length) ctx.requestCardChoice("ast-reveal-instant", `${ctx.data.name}: reveal an instant card?`, ["none", ...instants.map((card) => card.instanceId)]);
+      if (instants.length) ctx.requestCardChoice("ast-reveal-instant", decisionPrompt(`${ctx.data.name}: reveal an instant card?`, "card.ast.instant.reveal", { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: commonOptionMessages("none") }), ["none", ...instants.map((card) => card.instanceId)]);
     },
     onChoose(ctx, hook, option) {
       if (hook !== "ast-reveal-instant" || option === "none") return;
@@ -41,7 +41,10 @@ function requestAnyTarget(ctx: ScriptCtx, hook: string, prompt: string): void {
       cardOptions.push(card.instanceId);
     }
   }
-  ctx.requestChoice(hook, prompt, options, ctx.seat, cardOptions);
+  ctx.requestChoice(hook, decisionPrompt(prompt, "card.ast.arcane.target.choose", {
+    values: { amount: ctx.previewArcaneDamage(1) },
+    optionMessages: commonOptionMessages("opposing hero", "your hero"),
+  }), options, ctx.seat, cardOptions);
 }
 
 function dealToChoice(ctx: ScriptCtx, option: string): void {
@@ -55,7 +58,7 @@ function applySerenadeChoices(ctx: ScriptCtx, choices: number[]): void {
   if (choices.includes(3)) buffNextAttack(ctx, { attack: 1 });
   if (!choices.includes(2)) return;
   const skyzyks = ctx.player(ctx.seat).deck.filter((card) => data(ctx, card).name.toLowerCase() === "skyzyk");
-  if (skyzyks.length) ctx.requestCardChoice("serenade-skyzyk", "Search your deck for a Skyzyk", skyzyks.map((card) => card.instanceId));
+  if (skyzyks.length) ctx.requestCardChoice("serenade-skyzyk", decisionPrompt("Search your deck for a Skyzyk", "card.ast.skyzyk.search"), skyzyks.map((card) => card.instanceId));
   else ctx.shuffleDeck();
 }
 
@@ -122,13 +125,21 @@ export const ast: Record<string, CardScript> = {
     onChoose(ctx, hook, option) { if (hook === "arc-lightning-target") dealToChoice(ctx, option); },
   },
   "skyward serenade|2": {
-    additionalCost(ctx) { ctx.requestChoice("serenade-first", "Skyward Serenade: choose the first mode", ["1: Embodiment", "2: Search Skyzyk", "3: Next attack +1"]); },
+    additionalCost(ctx) { ctx.requestChoice("serenade-first", decisionPrompt("Skyward Serenade: choose the first mode", "card.ast.serenade.mode.first", { optionMessages: {
+      "1: Embodiment": decisionMessage("card.ast.option.embodiment"),
+      "2: Search Skyzyk": decisionMessage("card.ast.option.skyzyk"),
+      "3: Next attack +1": decisionMessage("card.ast.option.attack"),
+    } }), ["1: Embodiment", "2: Search Skyzyk", "3: Next attack +1"]); },
     onPlay(ctx) { applySerenadeChoices(ctx, [ctx.getCounter("serenadeFirst"), ctx.getCounter("serenadeSecond")]); },
     onChoose(ctx, hook, option) {
       if (hook === "serenade-first") {
         const first = Number(option[0]);
         ctx.setCounter("serenadeFirst", first);
-        ctx.requestChoice("serenade-second", "Skyward Serenade: choose a different second mode", [1, 2, 3].filter((mode) => mode !== first).map((mode) => `${mode}: ${mode === 1 ? "Embodiment" : mode === 2 ? "Search Skyzyk" : "Next attack +1"}`));
+        ctx.requestChoice("serenade-second", decisionPrompt("Skyward Serenade: choose a different second mode", "card.ast.serenade.mode.second", { optionMessages: {
+          "1: Embodiment": decisionMessage("card.ast.option.embodiment"),
+          "2: Search Skyzyk": decisionMessage("card.ast.option.skyzyk"),
+          "3: Next attack +1": decisionMessage("card.ast.option.attack"),
+        } }), [1, 2, 3].filter((mode) => mode !== first).map((mode) => `${mode}: ${mode === 1 ? "Embodiment" : mode === 2 ? "Search Skyzyk" : "Next attack +1"}`));
       } else if (hook === "serenade-second") {
         ctx.setCounter("serenadeSecond", Number(option[0]));
       } else if (hook === "serenade-skyzyk") {
@@ -145,7 +156,7 @@ export const ast: Record<string, CardScript> = {
     modifyAttack: (ctx) => ctx.link?.goAgain === true ? 1 : 0,
   },
   "spark spray|1": {
-    onFriendlyDefended(ctx) { ctx.requestPayment("spark-spray", "Pay 1 resource for +1 power?", 1); },
+    onFriendlyDefended(ctx) { ctx.requestPayment("spark-spray", decisionPrompt("Pay 1 resource for +1 power?", "card.ast.power.pay", { values: { amount: 1 } }), 1); },
     onChoose(ctx, hook, option) { if (hook === "spark-spray" && option === "paid") ctx.addModifier({ scope: "chain-link", attack: 1 }); },
   },
   "written in the stars|3": {

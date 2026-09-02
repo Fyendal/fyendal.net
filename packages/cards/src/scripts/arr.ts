@@ -1,5 +1,5 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, isSixPlus, opponentSeat, queueIntimidate } from "./shared-helpers.js";
+import { buffNextAttack, commonOptionMessages, decisionPrompt, isSixPlus, opponentSeat, queueIntimidate, yesNoPrompt } from "./shared-helpers.js";
 
 const AGILITY = "ARR029";
 const MIGHT = "ARR030";
@@ -12,7 +12,10 @@ function beatChest(extra: CardScript = {}): CardScript {
       if (sixes.length) {
         ctx.requestCardChoice(
           "arr-beat-chest",
-          `${ctx.data.name}: discard a card with 6 or more power to beat chest?`,
+          decisionPrompt(`${ctx.data.name}: discard a card with 6 or more power to beat chest?`, "card.arr.beatchest.discard", {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            optionMessages: commonOptionMessages("no"),
+          }),
           ["no", ...sixes.map((card) => card.instanceId)],
         );
       }
@@ -136,7 +139,7 @@ export const arr: Record<string, CardScript> = {
   },
   "echo casque|0": {
     ...beatChestEquipment("Echo Casque — pay and destroy to draw", (ctx) => {
-      ctx.requestPayment("echo-casque", "Echo Casque: pay {r} and destroy this to draw a card?", 1);
+      ctx.requestPayment("echo-casque", decisionPrompt("Echo Casque: pay {r} and destroy this to draw a card?", "card.arr.echocasque.pay.draw"), 1);
     }),
     onChoose(ctx, hook, option) {
       if (hook === "echo-casque" && option === "paid") {
@@ -172,7 +175,7 @@ export const arr: Record<string, CardScript> = {
   "smell fear|2": smellFear(3),
   "smell fear|3": smellFear(2),
   "torc of vim|0": {
-    ...beatChestEquipment("Torc of Vim — destroy for a discount", (ctx) => ctx.requestChoice("torc-vim", "Destroy Torc of Vim for a {r}{r} discount?", ["yes", "no"])),
+    ...beatChestEquipment("Torc of Vim — destroy for a discount", (ctx) => ctx.requestChoice("torc-vim", yesNoPrompt("Destroy Torc of Vim for a {r}{r} discount?", "card.arr.torcofvim.destroy"), ["yes", "no"])),
     onChoose(ctx, hook, option) {
       if (hook !== "torc-vim" || option !== "yes") return;
       destroyBeatChestEquipment(ctx);
@@ -185,7 +188,7 @@ export const arr: Record<string, CardScript> = {
     },
   },
   "trampling trackers|0": {
-    ...beatChestEquipment("Trampling Trackers — destroy to create Agility", (ctx) => ctx.requestChoice("trampling-trackers", "Destroy Trampling Trackers to create Agility?", ["yes", "no"])),
+    ...beatChestEquipment("Trampling Trackers — destroy to create Agility", (ctx) => ctx.requestChoice("trampling-trackers", yesNoPrompt("Destroy Trampling Trackers to create Agility?", "card.arr.trackers.destroy.agility"), ["yes", "no"])),
     onChoose(ctx, hook, option) {
       if (hook === "trampling-trackers" && option === "yes") {
         destroyBeatChestEquipment(ctx);

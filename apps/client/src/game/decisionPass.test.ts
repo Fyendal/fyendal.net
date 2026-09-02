@@ -30,9 +30,9 @@ describe("decision pass button", () => {
   });
 
   it.each(["priority-window", "attack-reaction", "defense-reaction"] as const)(
-    "also keeps Pass beside the %s guidance",
+    "hides the redundant Pass beside the %s guidance",
     (kind) => {
-      expect(shouldShowDecisionPass(decision(kind, []), true)).toBe(true);
+      expect(shouldShowDecisionPass(decision(kind, []), true)).toBe(false);
     },
   );
 

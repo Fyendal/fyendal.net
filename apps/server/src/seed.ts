@@ -10,7 +10,9 @@
  * room owned by alice against the standard Hala bot, with Arakni starting with
  * two copies of Hunter or Hunted?; and SNAPBT — a private Silver Age practice
  * room against the Briar bot with Snap Shot already face up in arsenal and
- * Death Dealer unused. These fixtures count as 6 "players in game" in the
+ * Death Dealer unused; and OKANAS — a private CC practice room against the
+ * Hala bot with Ira ready to test Okana Scar Wraps after a Vengeance attack.
+ * These fixtures count as 8 "players in game" in the
  * lobby stats — dev only.
  * Alice also receives one fixed, undismissed bug-report notification for
  * exercising the lobby UI.
@@ -38,10 +40,11 @@ import { assertSafeToSeed } from "./seedGuard.js";
 assertSafeToSeed();
 
 const PASSWORD = "password123";
-const DEVELOPMENT_RULESET_VERSION = "development-seed";
+const DEFAULT_DEVELOPMENT_RULESET_VERSION = "development-seed";
 const USERS = [{ username: "alice" }, { username: "bob" }];
 const HUNTER_TEST_ROOM_CODE = "HUNTED";
 const SNAP_ARC_TEST_ROOM_CODE = "SNAPBT";
+const OKANA_TEST_ROOM_CODE = "OKANAS";
 
 /**
  * A lived-in mid-game board for the demo room: fixed seeds, random legal
@@ -160,8 +163,64 @@ function snapArcTestGameState(): GameState {
   return state;
 }
 
+/** Ira can attack with Edge of Autumn, then play Enact Vengeance and activate
+ * Okana Scar Wraps. Hala has no cards or equipment available to defend, so
+ * Enact reaches the hit trigger deterministically and offers the banished Edge
+ * for re-equipping. */
+function okanaTestGameState(): GameState {
+  const ira = botDefinition("ira");
+  const iraPool = precon(ira?.deckId ?? "")?.pool;
+  const hala = botDefinition("hala");
+  const halaPool = precon(hala?.deckId ?? "")?.pool;
+  if (!ira || !iraPool || !hala || !halaPool) {
+    throw new Error("Okana test fixture decks are unavailable");
+  }
+  const iraPresentation = ira.presentationFor({
+    heroId: halaPool.heroId,
+    weaponIds: [...halaPool.weaponIds],
+    equipment: {},
+    deck: [...halaPool.deck],
+  }, "first");
+  const iraDeck = { heroId: iraPool.heroId, ...iraPresentation };
+  const halaPresentation = hala.presentationFor(iraDeck, "second");
+  const state = createGame({
+    decklists: [iraDeck, { heroId: halaPool.heroId, ...halaPresentation }],
+    seed: 905202,
+    cards: cardData,
+    scripts,
+    startPlayer: 0,
+  });
+
+  const player = state.players[0]!;
+  const cards = [...player.hand, ...player.deck];
+  const take = (cardId: string) => {
+    const index = cards.findIndex((card) => card.cardId === cardId);
+    if (index < 0) throw new Error(`Okana test fixture is missing ${cardId}`);
+    return cards.splice(index, 1)[0]!;
+  };
+  player.hand = [take("ASR008")];
+  player.deck = cards;
+  player.resources = 3;
+
+  const defender = state.players[1]!;
+  defender.deck.push(...defender.hand);
+  defender.hand = [];
+  defender.equipment = { head: undefined, chest: undefined, arms: undefined, legs: undefined };
+  return state;
+}
+
 const pool = await createPool();
 try {
+  const { rows: runtimeConfigRows } = await pool.query(
+    "SELECT active_ruleset_version FROM runtime_config WHERE singleton = TRUE",
+  );
+  const activeRulesetVersion = runtimeConfigRows[0]?.active_ruleset_version;
+  if (activeRulesetVersion !== null && typeof activeRulesetVersion !== "string") {
+    throw new Error("local active ruleset configuration is invalid");
+  }
+  const seedRulesetVersion = activeRulesetVersion ??
+    process.env.RULESET_VERSION ?? DEFAULT_DEVELOPMENT_RULESET_VERSION;
+  console.log(`local seed ruleset: ${seedRulesetVersion}`);
   for (const u of USERS) {
     const { rows } = await pool.query(
       `INSERT INTO users (username, username_lc, pass_hash, created_at)
@@ -181,10 +240,11 @@ try {
   try {
     // These rooms are disposable local fixture data. Recreate them so rerunning
     // the seed also repairs stale ruleset envelopes and clears dependent history.
-    await pool.query("DELETE FROM rooms WHERE code IN ($1, $2, $3)", [
+    await pool.query("DELETE FROM rooms WHERE code IN ($1, $2, $3, $4)", [
       DEMO_ROOM_CODE,
       HUNTER_TEST_ROOM_CODE,
       SNAP_ARC_TEST_ROOM_CODE,
+      OKANA_TEST_ROOM_CODE,
     ]);
     await pool.query(
       `INSERT INTO rooms
@@ -192,9 +252,9 @@ try {
        VALUES ($1, 'classic-battles', '[]', $2, $3, $4, 0, $5, NULL, 'active', NULL)`,
       [
         DEMO_ROOM_CODE,
-        JSON.stringify(dehydrateState(demoGameState(), DEVELOPMENT_RULESET_VERSION)),
+        JSON.stringify(dehydrateState(demoGameState(), seedRulesetVersion)),
         JSON.stringify(prep),
-        DEVELOPMENT_RULESET_VERSION,
+        seedRulesetVersion,
         Date.now(),
       ],
     );
@@ -218,9 +278,9 @@ try {
        VALUES ($1, 'cc', '[]', $2, $3, $4, 0, $5, NULL, 'active', NULL, TRUE)`,
       [
         HUNTER_TEST_ROOM_CODE,
-        JSON.stringify(dehydrateState(hunterTestGameState(), DEVELOPMENT_RULESET_VERSION)),
+        JSON.stringify(dehydrateState(hunterTestGameState(), seedRulesetVersion)),
         JSON.stringify(hunterPrep),
-        DEVELOPMENT_RULESET_VERSION,
+        seedRulesetVersion,
         Date.now(),
       ],
     );
@@ -244,6 +304,54 @@ try {
         hashReconnectToken(randomBytes(12).toString("hex")),
       ],
     );
+    const okanaPrep = { rolls: [6, 1], dieWinner: 0, startPlayer: 0 };
+    const ira = botDefinition("ira");
+    const halaForOkana = botDefinition("hala");
+    if (!ira || !halaForOkana) throw new Error("Okana test fixture bots are unavailable");
+    const iraPool = precon(ira.deckId)?.pool;
+    const halaPoolForOkana = precon(halaForOkana.deckId)?.pool;
+    if (!iraPool || !halaPoolForOkana) throw new Error("Okana test fixture bot decks are unavailable");
+    await pool.query(
+      `INSERT INTO rooms
+        (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at,
+         status, winner, is_private)
+       VALUES ($1, 'cc', '[]', $2, $3, $4, 0, $5, NULL, 'active', NULL, TRUE)`,
+      [
+        OKANA_TEST_ROOM_CODE,
+        JSON.stringify(dehydrateState(okanaTestGameState(), seedRulesetVersion)),
+        JSON.stringify(okanaPrep),
+        seedRulesetVersion,
+        Date.now(),
+      ],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, user_id, token_hash, username, hero_id, deck_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 0, $2, $3, 'alice', $4, $5, $6, FALSE, TRUE, 'human')`,
+      [
+        OKANA_TEST_ROOM_CODE,
+        aliceId,
+        hashReconnectToken(randomBytes(12).toString("hex")),
+        iraPool.heroId,
+        ira.deckId,
+        "Okana Scar Wraps / Enact Vengeance test",
+      ],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, token_hash, username, hero_id, deck_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 1, $2, $3, $4, $5, $6, FALSE, TRUE, 'bot')`,
+      [
+        OKANA_TEST_ROOM_CODE,
+        hashReconnectToken(randomBytes(12).toString("hex")),
+        halaForOkana.username,
+        halaPoolForOkana.heroId,
+        halaForOkana.deckId,
+        halaForOkana.deckName,
+      ],
+    );
     const snapArcPrep = { rolls: [6, 2], dieWinner: 0, startPlayer: 0 };
     const briar = botDefinition("briar");
     if (!briar) throw new Error("Snap/Arc test fixture bot is unavailable");
@@ -256,9 +364,9 @@ try {
        VALUES ($1, 'silver-age', '[]', $2, $3, $4, 0, $5, NULL, 'active', NULL, TRUE)`,
       [
         SNAP_ARC_TEST_ROOM_CODE,
-        JSON.stringify(dehydrateState(snapArcTestGameState(), DEVELOPMENT_RULESET_VERSION)),
+        JSON.stringify(dehydrateState(snapArcTestGameState(), seedRulesetVersion)),
         JSON.stringify(snapArcPrep),
-        DEVELOPMENT_RULESET_VERSION,
+        seedRulesetVersion,
         Date.now(),
       ],
     );
@@ -302,7 +410,7 @@ try {
         "local-fixed-bug-alice",
         aliceId,
         DEMO_ROOM_CODE,
-        DEVELOPMENT_RULESET_VERSION,
+        seedRulesetVersion,
         "Cards in the combat chain briefly appeared in the wrong order.",
         JSON.stringify({
           version: 1,
@@ -310,7 +418,7 @@ try {
           room: {
             code: DEMO_ROOM_CODE,
             format: "classic-battles",
-            rulesetVersion: DEVELOPMENT_RULESET_VERSION,
+            rulesetVersion: seedRulesetVersion,
             version: 0,
             status: "active",
             winner: null,
@@ -330,6 +438,7 @@ try {
   console.log(`seeded demo room ${DEMO_ROOM_CODE} — spectate from the room list or /${DEMO_ROOM_CODE}`);
   console.log(`seeded Hunter or Hunted? room ${HUNTER_TEST_ROOM_CODE} — log in as alice and open /${HUNTER_TEST_ROOM_CODE}`);
   console.log(`seeded Snap Shot / Arc Bending room ${SNAP_ARC_TEST_ROOM_CODE} — log in as alice and open /${SNAP_ARC_TEST_ROOM_CODE}`);
+  console.log(`seeded Okana Scar Wraps / Enact Vengeance room ${OKANA_TEST_ROOM_CODE} — log in as alice and open /${OKANA_TEST_ROOM_CODE}`);
   console.log("seeded fixed bug notification for alice");
 } finally {
   await pool.end();

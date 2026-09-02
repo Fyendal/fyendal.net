@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, opponentSeat } from "./shared-helpers.js";
+import { buffNextAttack, commonOptionMessages, decisionPrompt, opponentSeat, yesNoPrompt } from "./shared-helpers.js";
 
 const COURAGE = "SBL035";
 const VIGOR = "SDO036";
@@ -85,7 +85,7 @@ function prizeworn(token: string): CardScript {
       label: `Tap your hero and destroy this to create ${token === VIGOR ? "Vigor" : "Courage"}?`,
       effect(ctx) {
         if (!ctx.player(ctx.seat).hero.tapped) {
-          ctx.requestChoice("prizeworn", `${ctx.data.name}: tap your hero and destroy this?`, ["yes", "no"]);
+          ctx.requestChoice("prizeworn", yesNoPrompt(`${ctx.data.name}: tap your hero and destroy this?`, "card.aol.hero.tap.destroy", { card: { kind: "card", cardId: ctx.self.cardId } }), ["yes", "no"]);
         }
       },
     }],
@@ -137,7 +137,7 @@ export const aol: Record<string, CardScript> = {
       label: "Pay 1 to remove a -1 defense counter?",
       effect(ctx) {
         if ((ctx.self.defCounters ?? 0) > 0) {
-          ctx.requestPayment("pathfinders", "Pay 1 to remove a -1 defense counter?", 1);
+          ctx.requestPayment("pathfinders", decisionPrompt("Pay 1 to remove a -1 defense counter?", "card.aol.defensecounter.pay", { values: { amount: 1 } }), 1);
         }
       },
     }],
@@ -154,7 +154,7 @@ export const aol: Record<string, CardScript> = {
         (card) => ctx.cardData(card.cardId).cardType !== "equipment",
       );
       if (defenders.length === 1) ctx.banish(defenders[0]!.instanceId);
-      else if (defenders.length > 1) ctx.requestCardChoice("muck", "Banish a non-equipment defending card", defenders.map((card) => card.instanceId));
+      else if (defenders.length > 1) ctx.requestCardChoice("muck", decisionPrompt("Banish a non-equipment defending card", "card.aol.defender.nonequipment.banish"), defenders.map((card) => card.instanceId));
     },
     onChoose(ctx, hook, option) { if (hook === "muck") ctx.banish(Number(option)); },
   },
@@ -186,7 +186,7 @@ export const aol: Record<string, CardScript> = {
     const hand = winner >= 0 ? ctx.player(winner).hand : [];
     if (hand.length) {
       ctx.setCounter("decisionSeat", winner);
-      ctx.requestCardChoice("drawing-discard", "Discard a card", hand.map((card) => card.instanceId), winner);
+      ctx.requestCardChoice("drawing-discard", decisionPrompt("Discard a card", "card.aol.card.discard"), hand.map((card) => card.instanceId), winner);
     }
   }),
   "bluff catcher|2": {
@@ -203,7 +203,7 @@ export const aol: Record<string, CardScript> = {
     if (arsenal.length === 1) ctx.moveToGraveyard(arsenal[0]!.instanceId, "arsenal");
     else if (arsenal.length > 1) {
       ctx.setCounter("decisionSeat", winner);
-      ctx.requestCardChoice("donkey-arsenal", "Choose an arsenal card to destroy", arsenal.map((card) => card.instanceId), winner);
+      ctx.requestCardChoice("donkey-arsenal", decisionPrompt("Choose an arsenal card to destroy", "card.aol.arsenal.card.destroy"), arsenal.map((card) => card.instanceId), winner);
     }
   }),
   "shove off|3": {
@@ -211,7 +211,7 @@ export const aol: Record<string, CardScript> = {
     onPlay(ctx) {
       const defenders = ctx.link?.defendingCards ?? [];
       if (defenders.length === 1) ctx.moveToHand(defenders[0]!.instanceId);
-      else ctx.requestCardChoice("shove", "Return a defending card to hand", defenders.map((card) => card.instanceId));
+      else ctx.requestCardChoice("shove", decisionPrompt("Return a defending card to hand", "card.aol.defender.return"), defenders.map((card) => card.instanceId));
     },
     onChoose(ctx, hook, option) { if (hook === "shove") ctx.moveToHand(Number(option)); },
   },
@@ -221,7 +221,7 @@ export const aol: Record<string, CardScript> = {
     const deck = ctx.player(winner).deck;
     if (!deck.length) return;
     ctx.setCounter("decisionSeat", winner);
-    ctx.requestCardChoice("odds-top", "Choose a card to put on top", deck.map((card) => card.instanceId), winner);
+    ctx.requestCardChoice("odds-top", decisionPrompt("Choose a card to put on top", "card.aol.deck.card.top"), deck.map((card) => card.instanceId), winner);
   }),
   "rake back|3": {
     alternativePlayCost: alternativeGold(),
@@ -229,7 +229,7 @@ export const aol: Record<string, CardScript> = {
       const equipment = winner >= 0 ? ctx.player(winner).graveyard.filter((card) => ctx.cardData(card.cardId).cardType === "equipment") : [];
       if (equipment.length) {
         ctx.setCounter("decisionSeat", winner);
-        ctx.requestCardChoice("rake-equip", "Equip an equipment from your graveyard?", ["no", ...equipment.map((card) => card.instanceId)], winner);
+        ctx.requestCardChoice("rake-equip", decisionPrompt("Equip an equipment from your graveyard?", "card.aol.graveyard.equipment.equip", { optionMessages: commonOptionMessages("no") }), ["no", ...equipment.map((card) => card.instanceId)], winner);
       }
     }),
   },
@@ -241,7 +241,7 @@ export const aol: Record<string, CardScript> = {
       );
       if (gold.length > 0 && galea) {
         ctx.setCounter("prizedGalea", galea.instanceId);
-        ctx.requestCardChoice("visit-gold", "Visit the Prize Room: destroy a Gold to equip Prized Galea?", ["no", ...gold.map((card) => card.instanceId)]);
+        ctx.requestCardChoice("visit-gold", decisionPrompt("Visit the Prize Room: destroy a Gold to equip Prized Galea?", "card.aol.gold.destroy.galea", { optionMessages: commonOptionMessages("no") }), ["no", ...gold.map((card) => card.instanceId)]);
       }
       ctx.createToken(VIGOR);
       ctx.createToken(COURAGE);

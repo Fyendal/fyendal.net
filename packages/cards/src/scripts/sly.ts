@@ -1,5 +1,5 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, buffNextAttack, isWeaponAttack, opponentSeat, payForDefenseBoost, queueIntimidate, suspenseAura } from "./shared-helpers.js";
+import { attackAbility, buffNextAttack, decisionPrompt, isWeaponAttack, opponentSeat, payForDefenseBoost, queueIntimidate, suspenseAura, yesNoPrompt } from "./shared-helpers.js";
 
 // ── SLY (Silver Age: Lyath Goldmane precon) ─────────────────────────────────
 //
@@ -135,7 +135,7 @@ function shortShrift(): CardScript {
       if (opp.hand.length === 0) return;
       ctx.requestCardChoice(
         "crush-discard",
-        "Short Shrift crush: choose a card to discard",
+        decisionPrompt("Short Shrift crush: choose a card to discard", "card.sly.shortshrift.card.discard"),
         opp.hand.map((c) => c.instanceId),
         opponentSeat(ctx),
       );
@@ -279,7 +279,7 @@ export const sly: Record<string, CardScript> = {
     onPlay(ctx) {
       ctx.requestCardChoice(
         "target-hero",
-        "Oasis Respite: target which hero?",
+        decisionPrompt("Oasis Respite: target which hero?", "card.sly.oasis.hero.choose"),
         ctx.state.players.map((player) => player.hero.instanceId),
       );
     },
@@ -290,7 +290,7 @@ export const sly: Record<string, CardScript> = {
         );
         if (!target) return;
         ctx.setCounter("oasisTarget", target.seat);
-        ctx.requestCardChoice("source", "Prevent the next 4 damage from which source?", damageSourceCandidates(ctx));
+        ctx.requestCardChoice("source", decisionPrompt("Prevent the next 4 damage from which source?", "card.sly.damage.source.choose", { values: { amount: 4 } }), damageSourceCandidates(ctx));
         return;
       }
       if (hook === "source") {
@@ -299,7 +299,7 @@ export const sly: Record<string, CardScript> = {
         // "If they have less life than each other hero, they may gain 1{h}" —
         // the targeted hero's controller decides
         if (ctx.compareLife(target, target === 0 ? 1 : 0) < 0) {
-          ctx.requestChoice("gain-life", "Oasis Respite: gain 1 life?", ["yes", "no"], target);
+          ctx.requestChoice("gain-life", yesNoPrompt("Oasis Respite: gain 1 life?", "card.sly.oasis.life.gain", { amount: 1 }), ["yes", "no"], target);
         }
         return;
       }

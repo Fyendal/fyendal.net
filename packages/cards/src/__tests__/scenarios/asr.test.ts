@@ -79,37 +79,73 @@ describe("ASR — Okana Scar Wraps", () => {
       .expectInZone(0, "edge of autumn|0", "weapons");
   });
 
-  it("equips Edge of Autumn before other Vengeance on-hit triggers resolve", () => {
+  it("puts Okana and Enact Vengeance hit triggers on the stack in the chosen order", () => {
     const g = scenario({
       seats: [
         {
           hero: "rhinar",
           heroKey: "ira, scarlet revenger|0",
           weapons: ["edge of autumn|0"],
-          hand: ["vengeance never rests|3", "legacy of ikaru|3"],
-          deck: ["nimblism|1"],
-          resources: 2,
+          hand: ["enact vengeance|1"],
+          resources: 3,
           equipment: { ...NO_EQUIPMENT, arms: "okana scar wraps|0" },
         },
-        { hero: "dorinthea", hand: [], equipment: NO_EQUIPMENT },
+        {
+          hero: "dorinthea",
+          hand: [],
+          arsenal: ["nimblism|1"],
+          equipment: NO_EQUIPMENT,
+        },
       ],
     });
 
     g.attackWithWeapon("edge of autumn|0")
       .blockWith()
       .settle()
-      .play("vengeance never rests|3")
+      .play("enact vengeance|1")
       .blockWith()
-      .react("legacy of ikaru|3", { settle: false })
+      .activate("okana scar wraps|0", { settle: false });
+
+    const edge = g.state.players[0]!.weapons[0]!;
+    expect(g.state.pendingDecision?.options).toContain(String(edge.instanceId));
+    g.doRaw({ kind: "choose", optionId: String(edge.instanceId) })
       .passPriority()
+      .passPriority() // resolve Okana's activated attack reaction
       .passPriority()
-      .activate("okana scar wraps|0")
-      .chooseCard("edge of autumn|0");
+      .passPriority(); // end reactions; Enact hits
+
+    expect(g.state.pendingDecision?.chooseHook).toBe("trigger-order");
+    const layers = g.state.pendingDecision?.triggerOrder?.remaining ?? [];
+    const okanaLayer = layers.find((layer) =>
+      layer.engineEffect?.kind === "on-hit-hook" &&
+      layer.engineEffect.source.cardId === printingId("okana scar wraps|0")
+    );
+    const enactLayer = layers.find((layer) =>
+      layer.engineEffect?.kind === "on-hit-hook" &&
+      layer.engineEffect.source.cardId === printingId("enact vengeance|1")
+    );
+    expect(okanaLayer).toBeDefined();
+    expect(enactLayer).toBeDefined();
+    g.doRaw({
+      kind: "order-triggers",
+      optionIds: [
+        `${okanaLayer!.sourceInstanceId}:${okanaLayer!.triggerIndex}`,
+        `${enactLayer!.sourceInstanceId}:${enactLayer!.triggerIndex}`,
+      ],
+    });
+
+    expect(g.state.stack).toHaveLength(2);
+    expect(g.state.stack[0]?.sourceInstanceId).toBe(okanaLayer!.sourceInstanceId);
+    expect(g.state.pendingDecision?.kind).toBe("priority-window");
+    g.expectInZone(0, "edge of autumn|0", "banish")
+      .expectInZone(1, "nimblism|1", "arsenal")
+      .passPriority()
+      .passPriority();
 
     expect(g.state.pendingDecision?.chooseHook).toBe("okana-equip");
     g.chooseCard("edge of autumn|0")
       .expectInZone(0, "edge of autumn|0", "weapons")
-      .expectInZone(0, "nimblism|1", "hand");
+      .expectInZone(1, "nimblism|1", "graveyard");
   });
 });
 

@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, opponentSeat } from "./shared-helpers.js";
+import { buffNextAttack, commonOptionMessages, decisionMessage, decisionPrompt, opponentSeat, yesNoPrompt } from "./shared-helpers.js";
 
 function isArrow(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.cardTypes(card).includes("arrow");
@@ -12,7 +12,7 @@ function hasAim(card: { readonly counters?: Readonly<Record<string, number>> }):
 function reload(ctx: ScriptCtx): void {
   const player = ctx.player(ctx.seat);
   if (player.arsenal.length === 0 && player.hand.length > 0) {
-    ctx.requestCardChoice("aaz-reload", "Reload: put a card from your hand into your arsenal?", [
+    ctx.requestCardChoice("aaz-reload", decisionPrompt("Reload: put a card from your hand into your arsenal?", "card.aaz.reload.arsenal", { optionMessages: commonOptionMessages("pass") }), [
       "pass",
       ...player.hand.map((card) => card.instanceId),
     ]);
@@ -72,7 +72,7 @@ export const aaz: Record<string, CardScript> = {
       },
       onActivate(ctx) {
         const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card));
-        ctx.requestCardChoice("sharp-shooters", "Put an arrow face up into your arsenal", arrows.map((card) => card.instanceId));
+        ctx.requestCardChoice("sharp-shooters", decisionPrompt("Put an arrow face up into your arsenal", "card.aaz.arrow.arsenal.faceup"), arrows.map((card) => card.instanceId));
       },
     },
     onChoose(ctx, hook, option) {
@@ -101,7 +101,11 @@ export const aaz: Record<string, CardScript> = {
       return hasAim(ctx.self) && ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
-            ctx.requestChoice("barbed-undertow-color", "Choose a color the defending hero can't pitch", ["red", "yellow", "blue"]);
+      ctx.requestChoice("barbed-undertow-color", decisionPrompt("Choose a color the defending hero can't pitch", "card.aaz.pitch.color.prohibit", { optionMessages: {
+        red: decisionMessage("card.aaz.option.red"),
+        yellow: decisionMessage("card.aaz.option.yellow"),
+        blue: decisionMessage("card.aaz.option.blue"),
+      } }), ["red", "yellow", "blue"]);
     },
     onChoose(ctx, hook, option) {
       if (hook !== "barbed-undertow-color") return;
@@ -142,7 +146,7 @@ export const aaz: Record<string, CardScript> = {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 3, appliesToSubtype: "arrow" });
       const arrow = ctx.player(ctx.seat).arsenal.find((card) => card.faceDown && isArrow(ctx, card));
-      if (arrow) ctx.requestChoice("line-it-up", "Turn the arrow in your arsenal face up and give it an aim counter?", ["yes", "no"]);
+      if (arrow) ctx.requestChoice("line-it-up", yesNoPrompt("Turn the arrow in your arsenal face up and give it an aim counter?", "card.aaz.arsenal.arrow.aim"), ["yes", "no"]);
     },
     onChoose(ctx, hook, option) {
       if (hook !== "line-it-up" || option !== "yes") return;
@@ -154,7 +158,7 @@ export const aaz: Record<string, CardScript> = {
     onPlay(ctx) {
       const arrows = ctx.player(ctx.seat).deck.filter((card) => isArrow(ctx, card));
       if (arrows.length) {
-        ctx.requestCardChoice("nock-arrow", "Search your deck for an arrow", arrows.map((card) => card.instanceId));
+        ctx.requestCardChoice("nock-arrow", decisionPrompt("Search your deck for an arrow", "card.aaz.arrow.search"), arrows.map((card) => card.instanceId));
       } else {
         ctx.shuffleDeck();
         reload(ctx);

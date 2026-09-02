@@ -1,8 +1,10 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   attackAbility,
-        opponentSeat,
-  } from "./shared-helpers.js";
+  commonOptionMessages,
+  decisionPrompt,
+  opponentSeat,
+} from "./shared-helpers.js";
 
 // ── SBR (Silver Age Chapter 1: Bravo, Flattering Showman precon) ───────────
 
@@ -43,7 +45,7 @@ function boulderDrop(): CardScript {
       if (hand.length === 0) return;
       ctx.requestCardChoice(
         "boulder-drop-top",
-        `${ctx.data.name}: put a card from your hand on top of your deck`,
+        decisionPrompt(`${ctx.data.name}: put a card from your hand on top of your deck`, "card.sbr.hand.card.top", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }),
         hand.map((card) => card.instanceId),
         opponentSeat(ctx),
       );
@@ -82,7 +84,7 @@ export const sbr: Record<string, CardScript> = {
         );
         ctx.requestCardChoice(
           "bravo-reveal-crush",
-          "Bravo: turn a crush card in your arsenal face up",
+          decisionPrompt("Bravo: turn a crush card in your arsenal face up", "card.sbr.bravo.crush.faceup"),
           cards.map((card) => card.instanceId),
         );
       },
@@ -112,7 +114,7 @@ export const sbr: Record<string, CardScript> = {
       effect(ctx) {
         ctx.requestPayment(
           "magmatic-carapace",
-          "Magmatic Carapace: pay {r} and tap it to create a Seismic Surge?",
+          decisionPrompt("Magmatic Carapace: pay {r} and tap it to create a Seismic Surge?", "card.sbr.carapace.pay.surge"),
           1,
         );
       },
@@ -171,7 +173,7 @@ export const sbr: Record<string, CardScript> = {
       if (crushCards.length === 0) return;
       ctx.requestCardChoice(
         "crash-reveal-crush",
-        "Crash and Bash: reveal a card with crush to create a Seismic Surge?",
+        decisionPrompt("Crash and Bash: reveal a card with crush to create a Seismic Surge?", "card.sbr.crush.reveal.surge", { optionMessages: commonOptionMessages("no") }),
         ["no", ...crushCards.map((card) => card.instanceId)],
       );
     },
@@ -224,7 +226,7 @@ export const sbr: Record<string, CardScript> = {
         effect(ctx) {
           ctx.requestPayment(
             "thunder-quake-heave",
-            "Thunder Quake: pay {r}{r}{r} to heave it face up into your arsenal?",
+            decisionPrompt("Thunder Quake: pay {r}{r}{r} to heave it face up into your arsenal?", "card.sbr.thunderquake.heave"),
             3,
           );
         },

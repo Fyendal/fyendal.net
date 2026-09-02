@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { isCard, opponentSeat } from "./shared-helpers.js";
+import { decisionPrompt, isCard, opponentSeat } from "./shared-helpers.js";
 
 // ── SEN (Silver Age: Enigma precon) ─────────────────────────────────────────
 //
@@ -147,7 +147,7 @@ export const sen: Record<string, CardScript> = {
       onActivate(ctx) {
         ctx.requestCardChoice(
           "uphold-target",
-          "Uphold Tradition: put a +1{p} counter on an aura with ward you control",
+          decisionPrompt("Uphold Tradition: put a +1{p} counter on an aura with ward you control", "card.sen.wardaura.powercounter", { values: { count: 1 } }),
           wardAuras(ctx).map((c) => c.instanceId),
         );
       },
@@ -163,7 +163,7 @@ export const sen: Record<string, CardScript> = {
     onFriendlyAttackLost(ctx) {
       ctx.requestPayment(
         "stilettos-pay",
-        "Silent Stilettos: pay {r}{r}{r} to destroy it and gain 1 action point?",
+        decisionPrompt("Silent Stilettos: pay {r}{r}{r} to destroy it and gain 1 action point?", "card.sen.stilettos.pay.actionpoint"),
         3,
       );
     },
@@ -184,7 +184,7 @@ export const sen: Record<string, CardScript> = {
     onPlay(ctx) {
       ctx.requestCardChoice(
         "etchings-target",
-        "Astral Etchings: put three +1{p} counters on an aura with ward you control",
+        decisionPrompt("Astral Etchings: put three +1{p} counters on an aura with ward you control", "card.sen.wardaura.powercounters", { values: { count: 3 } }),
         wardAuras(ctx).map((c) => c.instanceId),
       );
     },
@@ -315,7 +315,7 @@ export const sen: Record<string, CardScript> = {
     (ctx) => {
       ctx.requestCardChoice(
         "pass-over",
-        "Pass Over: banish a card from the opponent's graveyard",
+        decisionPrompt("Pass Over: banish a card from the opponent's graveyard", "card.sen.opponent.graveyard.banish"),
         ctx.player(opponentSeat(ctx)).graveyard.map((c) => c.instanceId),
       );
     },
@@ -336,7 +336,7 @@ export const sen: Record<string, CardScript> = {
       );
       ctx.requestCardChoice(
         "preserve-tradition",
-        "Preserve Tradition: put an action card from your graveyard on the bottom of your deck",
+        decisionPrompt("Preserve Tradition: put an action card from your graveyard on the bottom of your deck", "card.sen.graveyard.action.bottom"),
         actions.map((c) => c.instanceId),
       );
     },
@@ -361,7 +361,7 @@ export const sen: Record<string, CardScript> = {
       // an empty hand fizzle-logs (requestCardChoice with no options)
       ctx.requestCardChoice(
         "rising-sun",
-        "Rising Sun, Setting Moon: put a card from your hand on the bottom of your deck",
+        decisionPrompt("Rising Sun, Setting Moon: put a card from your hand on the bottom of your deck", "card.sen.hand.card.bottom"),
         hand.map((c) => c.instanceId),
       );
       // Transcend is the final instruction. When there is no card to put back,
