@@ -1,5 +1,11 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { ampNextArcane, dealArcane, opponentSeat } from "./shared-helpers.js";
+import {
+  ampNextArcane,
+  commonOptionMessages,
+  dealArcane,
+  decisionPrompt,
+  opponentSeat,
+} from "./shared-helpers.js";
 
 const FLOW = "OMN203";
 const EMBODIMENT = "ROS026";
@@ -21,7 +27,18 @@ function holoChoices(ctx: ScriptCtx): readonly Card[] {
 
 function requestHoloBlink(ctx: ScriptCtx, hook: string): void {
   const choices = holoChoices(ctx);
-  if (choices.length) ctx.requestCardChoice(hook, `${ctx.data.name}: give a Lightning aura a holo counter?`, ["no", ...choices.map((card) => card.instanceId)]);
+  if (choices.length) ctx.requestCardChoice(
+    hook,
+    decisionPrompt(
+      `${ctx.data.name}: give a Lightning aura a holo counter?`,
+      "card.azs.holo.aura.choose",
+      {
+        values: { card: { kind: "card", cardId: ctx.self.cardId } },
+        optionMessages: commonOptionMessages("no"),
+      },
+    ),
+    ["no", ...choices.map((card) => card.instanceId)],
+  );
 }
 
 function finishHoloBlink(ctx: ScriptCtx, hook: string, expected: string, option: string): boolean {
@@ -106,7 +123,14 @@ export const azs: Record<string, CardScript> = {
         ctx.cardTypes(card).includes("aura")
       );
       if (auras.length > 0) {
-        ctx.requestCardChoice("miraging-copy", "Miraging Metamorph: choose an aura to copy", auras.map((card) => card.instanceId));
+        ctx.requestCardChoice(
+          "miraging-copy",
+          decisionPrompt(
+            "Miraging Metamorph: choose an aura to copy",
+            "card.azs.miraging.aura.copy",
+          ),
+          auras.map((card) => card.instanceId),
+        );
       }
     },
     onChoose(ctx, hook, option) {
@@ -131,7 +155,14 @@ export const azs: Record<string, CardScript> = {
         const id = choices[0]!.instanceId;
         if (ctx.banish(id)) { ctx.setCardCounter(id, "holo", 1); ctx.settleCard(id); }
       } else if (choices.length > 1) {
-        ctx.requestCardChoice("blur-holo", "Blur Reality: choose a Lightning aura", choices.map((card) => card.instanceId));
+        ctx.requestCardChoice(
+          "blur-holo",
+          decisionPrompt(
+            "Blur Reality: choose a Lightning aura",
+            "card.azs.blur.aura.choose",
+          ),
+          choices.map((card) => card.instanceId),
+        );
       }
     },
     onChoose(ctx, hook, option) { finishHoloBlink(ctx, hook, "blur-holo", option); },

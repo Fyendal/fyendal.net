@@ -2,8 +2,12 @@ import type { ActivatedAbility, CardInstance, CardScript, DeepReadonly, ScriptCt
 import {
   attackAbility,
   buffNextAttack,
+  commonOptionMessages,
+  decisionMessage,
+  decisionPrompt,
   markedStealthHeroScript,
   opponentSeat,
+  yesNoPrompt,
 } from "./shared-helpers.js";
 
 // ── SAR (Silver Age: Arakni, Web of Deceit precon, Chapter 2) ───────────────
@@ -69,10 +73,14 @@ function markHero(ctx: ScriptCtx, seat: number): void {
 }
 
 function requestHuntsmanMark(ctx: ScriptCtx): void {
-  ctx.requestChoice("huntsman-mark", "Mark of the Huntsman: destroy this and mark them?", [
-    "yes",
-    "no",
-  ]);
+  ctx.requestChoice(
+    "huntsman-mark",
+    yesNoPrompt(
+      "Mark of the Huntsman: destroy this and mark them?",
+      "card.sar.huntsman.destroy",
+    ),
+    ["yes", "no"],
+  );
 }
 
 function hasStealth(ctx: ScriptCtx, cardId: string): boolean {
@@ -278,7 +286,10 @@ export const sar: Record<string, CardScript> = {
         );
         ctx.requestCardChoice(
           "danger-digits",
-          "Danger Digits: choose a dagger to deal 1 damage (it is destroyed)",
+          decisionPrompt(
+            "Danger Digits: choose a dagger to deal 1 damage (it is destroyed)",
+            "card.sar.danger.dagger.choose",
+          ),
           daggers.map((c) => c.instanceId),
         );
       },
@@ -367,7 +378,10 @@ export const sar: Record<string, CardScript> = {
       if (opp.hand.length === 0) return;
       ctx.requestCardChoice(
         "black-widow",
-        "Mark of the Black Widow: banish a card from your hand",
+        decisionPrompt(
+          "Mark of the Black Widow: banish a card from your hand",
+          "card.sar.blackwidow.hand.banish",
+        ),
         opp.hand.map((c) => c.instanceId),
         opponentSeat(ctx),
       );
@@ -385,7 +399,10 @@ export const sar: Record<string, CardScript> = {
       if (opp.hand.length === 0) return;
       ctx.requestCardChoice(
         "black-widow",
-        "Mark of the Black Widow: banish a card from your hand",
+        decisionPrompt(
+          "Mark of the Black Widow: banish a card from your hand",
+          "card.sar.blackwidow.hand.banish",
+        ),
         opp.hand.map((c) => c.instanceId),
         opponentSeat(ctx),
       );
@@ -469,10 +486,23 @@ export const sar: Record<string, CardScript> = {
       const stealthAction =
         link.attackCardType === "action" && hasStealth(ctx, link.attackingCard.cardId);
       if (dagger && stealthAction) {
-        ctx.requestChoice("two-sides", "Two Sides to the Blade: choose 1", [
-          "Dagger attack gets +3{p}",
-          "Stealth attack gets +3{p} and mark on hit",
-        ]);
+        ctx.requestChoice(
+          "two-sides",
+          decisionPrompt(
+            "Two Sides to the Blade: choose 1",
+            "card.sar.twosides.mode.choose",
+            {
+              optionMessages: {
+                "Dagger attack gets +3{p}": decisionMessage("card.sar.twosides.option.dagger"),
+                "Stealth attack gets +3{p} and mark on hit": decisionMessage("card.sar.twosides.option.stealth"),
+              },
+            },
+          ),
+          [
+            "Dagger attack gets +3{p}",
+            "Stealth attack gets +3{p} and mark on hit",
+          ],
+        );
       }
     },
     onPlay(ctx) {
@@ -516,7 +546,10 @@ export const sar: Record<string, CardScript> = {
       const link = ctx.link!;
       ctx.requestCardChoice(
         "shred",
-        "Shred: target defending card gets -2{d} this combat chain",
+        decisionPrompt(
+          "Shred: target defending card gets -2{d} this combat chain",
+          "card.sar.shred.defender.choose",
+        ),
         [...link.defendingCards, ...link.defendingEquipment].map((c) => c.instanceId),
       );
     },
@@ -618,7 +651,10 @@ export const sar: Record<string, CardScript> = {
       if (opp.hand.length === 0) return;
       ctx.requestCardChoice(
         "brood-black-widow",
-        "Arakni, Black Widow: banish a card from your hand",
+        decisionPrompt(
+          "Arakni, Black Widow: banish a card from your hand",
+          "card.sar.brood.blackwidow.hand.banish",
+        ),
         opp.hand.map((c) => c.instanceId),
         opponentSeat(ctx),
       );
@@ -731,7 +767,11 @@ export const sar: Record<string, CardScript> = {
       if (p.deck.length === 0) return;
       ctx.requestCardChoice(
         "trap-door-search",
-        "Arakni, Trap-Door: search your deck for a card to banish face-down?",
+        decisionPrompt(
+          "Arakni, Trap-Door: search your deck for a card to banish face-down?",
+          "card.sar.trapdoor.card.search",
+          { optionMessages: commonOptionMessages("pass") },
+        ),
         ["pass", ...p.deck.map((c) => c.instanceId)],
       );
     },

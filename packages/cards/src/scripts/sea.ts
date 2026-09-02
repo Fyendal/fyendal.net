@@ -8,6 +8,7 @@ import type {
 import {
   attackAbility,
   buffNextAttack,
+  commonOptionMessages,
   decisionMessage,
   decisionPrompt,
   nextAttack,
@@ -96,8 +97,21 @@ function maintenanceCog(steam: number): CardScript {
   };
 }
 
-function tapChoice(ctx: ScriptCtx, hook: string, prompt: string, cards: readonly Card[]): void {
-  if (cards.length) ctx.requestCardChoice(hook, prompt, ["pass", ...cards.map((card) => card.instanceId)]);
+function tapChoice(
+  ctx: ScriptCtx,
+  hook: string,
+  fallback: string,
+  id: string,
+  cards: readonly Card[],
+): void {
+  if (cards.length) ctx.requestCardChoice(
+    hook,
+    decisionPrompt(fallback, id, {
+      values: { card: { kind: "card", cardId: ctx.self.cardId } },
+      optionMessages: commonOptionMessages("pass"),
+    }),
+    ["pass", ...cards.map((card) => card.instanceId)],
+  );
 }
 
 function nextAllyAttack(
@@ -145,7 +159,21 @@ function discardOrMill(
         ...player.hand.map((card) => card.instanceId),
         ...(player.deck.length ? ["deck-top"] : []),
       ];
-      if (options.length > 1) ctx.requestCardChoice(hook, `${ctx.data.name}: discard a card or destroy the top card of your deck?`, options);
+      if (options.length > 1) ctx.requestCardChoice(
+        hook,
+        decisionPrompt(
+          `${ctx.data.name}: discard a card or destroy the top card of your deck?`,
+          "card.sea.discardormill.choose",
+          {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            optionMessages: {
+              ...commonOptionMessages("pass"),
+              "deck-top": decisionMessage("card.sea.option.decktop"),
+            },
+          },
+        ),
+        options,
+      );
     },
     onChoose(ctx, choiceHook, option) {
       if (choiceHook !== hook || option === "pass") return;
@@ -184,7 +212,13 @@ function highTideOverpower(onHit?: (ctx: ScriptCtx) => void): CardScript {
 function tapAllyAttack(kind: "overpower" | "go-again"): CardScript {
   return {
     onAttackDeclared(ctx) {
-      tapChoice(ctx, "tap-ally-attack", `${ctx.data.name}: tap an ally you control?`, ctx.player(ctx.seat).board.filter((card) => isAlly(ctx, card) && !card.tapped));
+      tapChoice(
+        ctx,
+        "tap-ally-attack",
+        `${ctx.data.name}: tap an ally you control?`,
+        "card.sea.ally.tap",
+        ctx.player(ctx.seat).board.filter((card) => isAlly(ctx, card) && !card.tapped),
+      );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "tap-ally-attack" || option === "pass" || !ctx.tap(Number(option))) return;
@@ -212,14 +246,27 @@ function cogPoweredAttack(createOnHit: boolean): CardScript {
     },
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
     onHit(ctx) {
-      tapChoice(ctx, "cog-hit", `${ctx.data.name}: tap a cog you control?`, controlledCogs(ctx, false));
+      tapChoice(
+        ctx,
+        "cog-hit",
+        `${ctx.data.name}: tap a cog you control?`,
+        "card.sea.cog.tap",
+        controlledCogs(ctx, false),
+      );
     },
     onChoose(ctx, hook, option) {
       if (hook === "cog-hit" && option !== "pass" && ctx.tap(Number(option))) {
         if (createOnHit) createGoldenCog(ctx);
         else {
           const cogs = controlledCogs(ctx);
-          if (cogs.length) ctx.requestCardChoice("cog-steam", "Put a steam counter on a cog you control", cogs.map((card) => card.instanceId));
+          if (cogs.length) ctx.requestCardChoice(
+            "cog-steam",
+            decisionPrompt(
+              "Put a steam counter on a cog you control",
+              "card.sea.cog.steam.add",
+            ),
+            cogs.map((card) => card.instanceId),
+          );
         }
       } else if (hook === "cog-steam") {
         ctx.addCounter(Number(option), "steam", 1);
@@ -300,7 +347,18 @@ function yellowDiscardAttack(hook: string): CardScript {
   return {
     onAttackDeclared(ctx) {
       const yellow = ctx.player(ctx.seat).hand.filter((card) => ctx.cardColor(card) === 2);
-      if (yellow.length) ctx.requestCardChoice(hook, `${ctx.data.name}: discard a yellow card?`, ["pass", ...yellow.map((card) => card.instanceId)]);
+      if (yellow.length) ctx.requestCardChoice(
+        hook,
+        decisionPrompt(
+          `${ctx.data.name}: discard a yellow card?`,
+          "card.sea.yellow.discard",
+          {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            optionMessages: commonOptionMessages("pass"),
+          },
+        ),
+        ["pass", ...yellow.map((card) => card.instanceId)],
+      );
     },
     onChoose(ctx, choiceHook, option) {
       if (choiceHook !== hook || option === "pass") return;
@@ -321,7 +379,15 @@ function goFish(color: 1 | 2 | 3): CardScript {
       const chooser = ctx.getFlag("player", "activatedCannonThisTurn") ? ctx.seat : target;
       // cannon branch: "instead look at their hand and you choose the card"
       if (chooser === ctx.seat) for (const card of hand) ctx.lookAt(card.instanceId);
-      ctx.requestCardChoice(`go-fish:${color}`, "Go Fish: choose and reveal a card", hand.map((card) => card.instanceId), chooser);
+      ctx.requestCardChoice(
+        `go-fish:${color}`,
+        decisionPrompt(
+          "Go Fish: choose and reveal a card",
+          "card.sea.gofish.card.choose",
+        ),
+        hand.map((card) => card.instanceId),
+        chooser,
+      );
     },
     onChoose(ctx, hook, option) {
       if (hook !== `go-fish:${color}`) return;
@@ -341,7 +407,18 @@ function topArrowSetup(grant: "power" | "go-again" | "overpower"): CardScript {
       if (!top) return;
       ctx.lookAt(top.instanceId);
       if (!isArrow(ctx, top) || ctx.player(ctx.seat).arsenal.length) return;
-      ctx.requestCardChoice(`top-arrow:${grant}`, `${ctx.data.name}: put the arrow face-up into your arsenal?`, ["pass", top.instanceId]);
+      ctx.requestCardChoice(
+        `top-arrow:${grant}`,
+        decisionPrompt(
+          `${ctx.data.name}: put the arrow face-up into your arsenal?`,
+          "card.sea.arrow.top.arsenal",
+          {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            optionMessages: commonOptionMessages("pass"),
+          },
+        ),
+        ["pass", top.instanceId],
+      );
     },
     onChoose(ctx, hook, option) {
       if (hook !== `top-arrow:${grant}` || option === "pass") return;
@@ -359,7 +436,15 @@ function callBigGuns(power: number): CardScript {
       buffNextAttack(ctx, { attack: power, appliesToSubtype: "arrow" });
       const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card));
       if (!ctx.player(ctx.seat).arsenal.length && arrows.length) {
-        ctx.requestCardChoice("call-big-guns", "Put an arrow from your hand face-up into your arsenal?", ["pass", ...arrows.map((card) => card.instanceId)]);
+        ctx.requestCardChoice(
+          "call-big-guns",
+          decisionPrompt(
+            "Put an arrow from your hand face-up into your arsenal?",
+            "card.sea.arrow.hand.arsenal",
+            { optionMessages: commonOptionMessages("pass") },
+          ),
+          ["pass", ...arrows.map((card) => card.instanceId)],
+        );
       }
     },
     onChoose(ctx, hook, option) {
@@ -466,7 +551,13 @@ export const sea: Record<string, CardScript> = {
     activated: {
       cost: 0, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true,
       canActivate: (ctx) => controlledCogs(ctx, true).length > 0,
-      onActivate(ctx) { ctx.requestCardChoice("unicycle", "Untap a cog you control", controlledCogs(ctx, true).map((card) => card.instanceId)); },
+      onActivate(ctx) {
+        ctx.requestCardChoice(
+          "unicycle",
+          decisionPrompt("Untap a cog you control", "card.sea.cog.untap"),
+          controlledCogs(ctx, true).map((card) => card.instanceId),
+        );
+      },
     },
     onChoose(ctx, hook, option) { if (hook === "unicycle") ctx.untap(Number(option)); },
   },
@@ -474,7 +565,15 @@ export const sea: Record<string, CardScript> = {
   "lubricate|3": {
     onPlay(ctx) {
       const cogs = controlledCogs(ctx, true);
-      if (cogs.length) ctx.requestCardChoice("lubricate", "Untap up to 3 cogs (choose one at a time)", ["done", ...cogs.map((card) => card.instanceId)]);
+      if (cogs.length) ctx.requestCardChoice(
+        "lubricate",
+        decisionPrompt(
+          "Untap up to 3 cogs (choose one at a time)",
+          "card.sea.lubricate.cog.choose",
+          { optionMessages: commonOptionMessages("done") },
+        ),
+        ["done", ...cogs.map((card) => card.instanceId)],
+      );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "lubricate" || option === "done") return;
@@ -482,11 +581,27 @@ export const sea: Record<string, CardScript> = {
       const cogs = controlledCogs(ctx, true);
       const count = ctx.getCounter("lubricated") + 1;
       ctx.setCounter("lubricated", count);
-      if (count < 3 && cogs.length) ctx.requestCardChoice("lubricate", "Untap another cog?", ["done", ...cogs.map((card) => card.instanceId)]);
+      if (count < 3 && cogs.length) ctx.requestCardChoice(
+        "lubricate",
+        decisionPrompt(
+          "Untap another cog?",
+          "card.sea.lubricate.cog.next",
+          { optionMessages: commonOptionMessages("done") },
+        ),
+        ["done", ...cogs.map((card) => card.instanceId)],
+      );
     },
   },
   "pinion sentry|3": {
-    onDefend(ctx) { tapChoice(ctx, "pinion", "Tap a cog to create a Golden Cog?", controlledCogs(ctx, false)); },
+    onDefend(ctx) {
+      tapChoice(
+        ctx,
+        "pinion",
+        "Tap a cog to create a Golden Cog?",
+        "card.sea.pinion.cog.tap",
+        controlledCogs(ctx, false),
+      );
+    },
     onChoose(ctx, hook, option) { if (hook === "pinion" && option !== "pass" && ctx.tap(Number(option))) createGoldenCog(ctx); },
   },
   "goldwing turbine|1": { onPlay(ctx) { buffNextAttack(ctx, { attack: 3, appliesToClass: "mechanologist" }); createGoldenCog(ctx); } },
@@ -496,7 +611,15 @@ export const sea: Record<string, CardScript> = {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 4, appliesToClass: "mechanologist" });
       const guns = ctx.player(ctx.seat).weapons.filter((card) => hasTag(ctx, card, "gun") && card.tapped);
-      if (guns.length) ctx.requestCardChoice("draw-hammer", "Untap a gun you control?", ["pass", ...guns.map((card) => card.instanceId)]);
+      if (guns.length) ctx.requestCardChoice(
+        "draw-hammer",
+        decisionPrompt(
+          "Untap a gun you control?",
+          "card.sea.gun.untap",
+          { optionMessages: commonOptionMessages("pass") },
+        ),
+        ["pass", ...guns.map((card) => card.instanceId)],
+      );
     },
     onChoose(ctx, hook, option) { if (hook === "draw-hammer" && option !== "pass") ctx.untap(Number(option)); },
   },
@@ -505,7 +628,15 @@ export const sea: Record<string, CardScript> = {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 4, appliesToClass: "mechanologist" });
       const cogs = controlledCogs(ctx, true);
-      if (cogs.length) ctx.requestCardChoice("tighten", "Untap a cog you control?", ["pass", ...cogs.map((card) => card.instanceId)]);
+      if (cogs.length) ctx.requestCardChoice(
+        "tighten",
+        decisionPrompt(
+          "Untap a cog you control?",
+          "card.sea.cog.untap.optional",
+          { optionMessages: commonOptionMessages("pass") },
+        ),
+        ["pass", ...cogs.map((card) => card.instanceId)],
+      );
     },
     onChoose(ctx, hook, option) { if (hook === "tighten" && option !== "pass") ctx.untap(Number(option)); },
   },
@@ -513,7 +644,15 @@ export const sea: Record<string, CardScript> = {
   "board the ship|1": tapAllyAttack("overpower"),
   "paddle faster|1": tapAllyAttack("go-again"),
   "hoist 'em up|1": {
-    onDefend(ctx) { tapChoice(ctx, "hoist", "Tap an ally for +1 defense?", ctx.player(ctx.seat).board.filter((card) => isAlly(ctx, card) && !card.tapped)); },
+    onDefend(ctx) {
+      tapChoice(
+        ctx,
+        "hoist",
+        "Tap an ally for +1 defense?",
+        "card.sea.hoist.ally.tap",
+        ctx.player(ctx.seat).board.filter((card) => isAlly(ctx, card) && !card.tapped),
+      );
+    },
     onChoose(ctx, hook, option) { if (hook === "hoist" && option !== "pass" && ctx.tap(Number(option))) ctx.addModifier({ scope: "chain-link", defense: 1 }); },
   },
   "heave ho!|3": nextAllyAttack("heaveHo", { overpower: true }, createGold),
@@ -525,7 +664,14 @@ export const sea: Record<string, CardScript> = {
         canActivate: (ctx) => !ctx.self.tapped,
         onActivate(ctx) {
           const targets = ctx.state.players.flatMap((player) => [player.hero, ...player.board.filter((card) => isAlly(ctx, card))]).filter((card) => !card.tapped);
-          if (targets.length) ctx.requestCardChoice("kelpie-tap", "Tap target hero or ally", targets.map((card) => card.instanceId));
+          if (targets.length) ctx.requestCardChoice(
+            "kelpie-tap",
+            decisionPrompt(
+              "Tap target hero or ally",
+              "card.sea.heroally.tap",
+            ),
+            targets.map((card) => card.instanceId),
+          );
         },
       },
     ],
@@ -535,7 +681,15 @@ export const sea: Record<string, CardScript> = {
     ...attackAbilityForAlly(3),
     onAttackDeclared(ctx) {
       const yellow = ctx.state.players.flatMap((player) => player.graveyard).filter((card) => ctx.cardColor(card) === 2 && !card.faceDown);
-      if (yellow.length) ctx.requestCardChoice("scooba-yellow", "Put a yellow graveyard card on the bottom to create Gold?", ["pass", ...yellow.map((card) => card.instanceId)]);
+      if (yellow.length) ctx.requestCardChoice(
+        "scooba-yellow",
+        decisionPrompt(
+          "Put a yellow graveyard card on the bottom to create Gold?",
+          "card.sea.scooba.yellow.bottom",
+          { optionMessages: commonOptionMessages("pass") },
+        ),
+        ["pass", ...yellow.map((card) => card.instanceId)],
+      );
     },
     onChoose(ctx, hook, option) { if (hook === "scooba-yellow" && option !== "pass" && ctx.putOnDeckBottom(Number(option))) createGold(ctx); },
   },
@@ -569,7 +723,15 @@ export const sea: Record<string, CardScript> = {
     onFriendlyDraws(ctx) {
       if (ctx.state.activePlayer !== ctx.seat || ctx.state.phase === "start" || ctx.state.phase === "end" || ctx.state.phase === "game-over") return;
       const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card));
-      if (!ctx.player(ctx.seat).arsenal.length && arrows.length) ctx.requestCardChoice("marlynn-arrow", "Marlynn: put an arrow face-up into your arsenal?", ["pass", ...arrows.map((card) => card.instanceId)]);
+      if (!ctx.player(ctx.seat).arsenal.length && arrows.length) ctx.requestCardChoice(
+        "marlynn-arrow",
+        decisionPrompt(
+          "Marlynn: put an arrow face-up into your arsenal?",
+          "card.sea.marlynn.arrow.arsenal",
+          { optionMessages: commonOptionMessages("pass") },
+        ),
+        ["pass", ...arrows.map((card) => card.instanceId)],
+      );
     },
     onChoose(ctx, hook, option) { if (hook === "marlynn-arrow" && option !== "pass") ctx.putIntoArsenal(Number(option), "hand"); },
   },
@@ -580,14 +742,22 @@ export const sea: Record<string, CardScript> = {
     activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true, canActivate: (ctx) => ctx.player(ctx.seat).arsenal.length > 0, onActivate(ctx) { const card = ctx.player(ctx.seat).arsenal[0]; if (card) ctx.moveToHand(card.instanceId); } },
   },
   "glidewell fins|0": {
-    activated: { cost: 1, isAttack: false, goAgain: true, destroySelfCost: true, canActivate: (ctx) => !ctx.player(ctx.seat).arsenal.length && ctx.player(ctx.seat).hand.some((card) => isArrow(ctx, card)), onActivate(ctx) { const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card)); ctx.requestCardChoice("glidewell", "Put an arrow face-up into your arsenal", arrows.map((card) => card.instanceId)); } },
+    activated: { cost: 1, isAttack: false, goAgain: true, destroySelfCost: true, canActivate: (ctx) => !ctx.player(ctx.seat).arsenal.length && ctx.player(ctx.seat).hand.some((card) => isArrow(ctx, card)), onActivate(ctx) { const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card)); ctx.requestCardChoice("glidewell", decisionPrompt("Put an arrow face-up into your arsenal", "card.sea.arrow.hand.arsenal.required"), arrows.map((card) => card.instanceId)); } },
     onChoose(ctx, hook, option) { if (hook === "glidewell" && ctx.putIntoArsenal(Number(option), "hand")) ctx.addCardTempPower(Number(option), 1); },
   },
   "fire in the hole|1": {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 3, appliesToSubtype: "arrow" });
       const bows = ctx.player(ctx.seat).weapons.filter((card) => hasTag(ctx, card, "bow") && card.tapped);
-      if (bows.length) ctx.requestCardChoice("fire-hole", "Untap a bow you control?", ["pass", ...bows.map((card) => card.instanceId)]);
+      if (bows.length) ctx.requestCardChoice(
+        "fire-hole",
+        decisionPrompt(
+          "Untap a bow you control?",
+          "card.sea.bow.untap",
+          { optionMessages: commonOptionMessages("pass") },
+        ),
+        ["pass", ...bows.map((card) => card.instanceId)],
+      );
     },
     onChoose(ctx, hook, option) { if (hook === "fire-hole" && option !== "pass") ctx.untap(Number(option)); },
   },
@@ -598,7 +768,15 @@ export const sea: Record<string, CardScript> = {
   "nettling shot|1": {
     onEnterArsenal(ctx) {
       const allies = ctx.state.players.flatMap((player) => player.board.filter((card) => isAlly(ctx, card) && !card.tapped));
-      if (allies.length) ctx.requestCardChoice("nettling", "Tap target ally?", ["pass", ...allies.map((card) => card.instanceId)]);
+      if (allies.length) ctx.requestCardChoice(
+        "nettling",
+        decisionPrompt(
+          "Tap target ally?",
+          "card.sea.ally.tap.optional",
+          { optionMessages: commonOptionMessages("pass") },
+        ),
+        ["pass", ...allies.map((card) => card.instanceId)],
+      );
     },
     onChoose(ctx, hook, option) { if (hook === "nettling" && option !== "pass") ctx.tap(Number(option)); },
   },
@@ -625,7 +803,14 @@ export const sea: Record<string, CardScript> = {
     ...highTideOverpower((ctx) => {
       if (ctx.link?.targetAllyId !== undefined) return;
       const allies = ctx.player(opponentSeat(ctx)).board.filter((card) => isAlly(ctx, card));
-      if (allies.length) ctx.requestCardChoice("barracuda", "Destroy an ally they control", allies.map((card) => card.instanceId));
+      if (allies.length) ctx.requestCardChoice(
+        "barracuda",
+        decisionPrompt(
+          "Destroy an ally they control",
+          "card.sea.opponent.ally.destroy",
+        ),
+        allies.map((card) => card.instanceId),
+      );
     }),
     onChoose(ctx, hook, option) { if (hook === "barracuda") ctx.destroyPermanent(Number(option)); },
   },
@@ -633,7 +818,14 @@ export const sea: Record<string, CardScript> = {
     ...highTideOverpower((ctx) => {
       if (ctx.link?.targetAllyId !== undefined) return;
       const items = ctx.player(opponentSeat(ctx)).board.filter((card) => isItem(ctx, card));
-      if (items.length) ctx.requestCardChoice("kraken", "Destroy an item they control", items.map((card) => card.instanceId));
+      if (items.length) ctx.requestCardChoice(
+        "kraken",
+        decisionPrompt(
+          "Destroy an item they control",
+          "card.sea.opponent.item.destroy",
+        ),
+        items.map((card) => card.instanceId),
+      );
     }),
     onChoose(ctx, hook, option) { if (hook === "kraken") ctx.destroyPermanent(Number(option)); },
   },
@@ -649,7 +841,14 @@ export const sea: Record<string, CardScript> = {
   "sea floor salvage|3": {
     onPlay(ctx) {
       const cards = ctx.state.players.flatMap((player) => player.graveyard.filter((card) => !card.faceDown));
-      if (cards.length) ctx.requestCardChoice("salvage-face-down", "Turn a card in a graveyard face-down", cards.map((card) => card.instanceId));
+      if (cards.length) ctx.requestCardChoice(
+        "salvage-face-down",
+        decisionPrompt(
+          "Turn a card in a graveyard face-down",
+          "card.sea.graveyard.facedown",
+        ),
+        cards.map((card) => card.instanceId),
+      );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "salvage-face-down") return;
@@ -661,7 +860,22 @@ export const sea: Record<string, CardScript> = {
   },
   "scrub the deck|3": {
     onPlay(ctx) {
-      ctx.requestChoice("scrub-target", "Choose a hero whose deck top to destroy", ctx.state.players.map((player) => `hero:${player.seat}`));
+      ctx.requestChoice(
+        "scrub-target",
+        decisionPrompt(
+          "Choose a hero whose deck top to destroy",
+          "card.sea.scrub.hero.choose",
+          {
+            optionMessages: Object.fromEntries(ctx.state.players.map((player) => [
+              `hero:${player.seat}`,
+              decisionMessage("card.common.target.card", {
+                card: { kind: "card", cardId: player.heroCardId },
+              }),
+            ])),
+          },
+        ),
+        ctx.state.players.map((player) => `hero:${player.seat}`),
+      );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "scrub-target") return;
@@ -727,7 +941,15 @@ export const sea: Record<string, CardScript> = {
   "jack be nimble|1": {
     onAttackDeclared(ctx) {
       const nimblisms = ctx.player(ctx.seat).graveyard.filter((card) => named(ctx, card, "Nimblism"));
-      if (nimblisms.length) ctx.requestCardChoice("jack-nimble-banish", "Banish a Nimblism for +1 power and go again?", ["pass", ...nimblisms.map((card) => card.instanceId)]);
+      if (nimblisms.length) ctx.requestCardChoice(
+        "jack-nimble-banish",
+        decisionPrompt(
+          "Banish a Nimblism for +1 power and go again?",
+          "card.sea.jacknimble.nimblism.banish",
+          { optionMessages: commonOptionMessages("pass") },
+        ),
+        ["pass", ...nimblisms.map((card) => card.instanceId)],
+      );
     },
     onChoose(ctx, hook, option) {
       if (hook === "jack-nimble-steal") {
@@ -745,7 +967,14 @@ export const sea: Record<string, CardScript> = {
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
     onHit(ctx) {
       const items = ctx.player(opponentSeat(ctx)).board.filter((card) => isItem(ctx, card));
-      if (items.length) ctx.requestCardChoice("jack-nimble-steal", "Steal an item until the end of the action phase", items.map((card) => card.instanceId));
+      if (items.length) ctx.requestCardChoice(
+        "jack-nimble-steal",
+        decisionPrompt(
+          "Steal an item until the end of the action phase",
+          "card.sea.item.steal",
+        ),
+        items.map((card) => card.instanceId),
+      );
     },
   },
   "thiev'n varmints|1": {
@@ -768,7 +997,14 @@ export const sea: Record<string, CardScript> = {
       canActivate: (ctx) => ctx.player(ctx.seat).hand.length > 0,
       onActivate(ctx) {
         const blue = ctx.player(ctx.seat).graveyard.filter((card) => ctx.cardColor(card) === 3);
-        if (blue.length) ctx.requestCardChoice("bandana-blue", "Put a blue graveyard card on the bottom of your deck", blue.map((card) => card.instanceId));
+        if (blue.length) ctx.requestCardChoice(
+          "bandana-blue",
+          decisionPrompt(
+            "Put a blue graveyard card on the bottom of your deck",
+            "card.sea.bandana.blue.bottom",
+          ),
+          blue.map((card) => card.instanceId),
+        );
       },
     },
     onChoose(ctx, hook, option) { if (hook === "bandana-blue") ctx.putOnDeckBottom(Number(option)); },
@@ -789,7 +1025,14 @@ export const sea: Record<string, CardScript> = {
   "clap 'em in irons|3": {
     onEnterArena(ctx) {
       const targets = ctx.state.players.flatMap((player) => [player.hero, ...player.board.filter((card) => isAlly(ctx, card))]).filter((card) => isPirate(ctx, card) && !card.tapped);
-      if (targets.length) ctx.requestCardChoice("clap-tap", "Tap target Pirate hero or ally", targets.map((card) => card.instanceId));
+      if (targets.length) ctx.requestCardChoice(
+        "clap-tap",
+        decisionPrompt(
+          "Tap target Pirate hero or ally",
+          "card.sea.pirate.tap",
+        ),
+        targets.map((card) => card.instanceId),
+      );
     },
     onChoose(ctx, hook, option) { if (hook === "clap-tap" && ctx.tap(Number(option))) ctx.setCounter("clapTarget", Number(option)); },
     preventsUntapOf(ctx, target) { return ctx.getCounter("clapTarget") === target.instanceId; },
@@ -810,14 +1053,46 @@ export const sea: Record<string, CardScript> = {
     onHit(ctx) { ctx.untap(ctx.player(ctx.seat).hero.instanceId); },
   },
   "tit for tat|3": {
-    onPlay(ctx) { ctx.requestChoice("tit-tap", "Tap target hero", ctx.state.players.map((player) => `hero:${player.seat}`)); },
+    onPlay(ctx) {
+      ctx.requestChoice(
+        "tit-tap",
+        decisionPrompt(
+          "Tap target hero",
+          "card.sea.hero.tap",
+          {
+            optionMessages: Object.fromEntries(ctx.state.players.map((player) => [
+              `hero:${player.seat}`,
+              decisionMessage("card.common.target.card", {
+                card: { kind: "card", cardId: player.heroCardId },
+              }),
+            ])),
+          },
+        ),
+        ctx.state.players.map((player) => `hero:${player.seat}`),
+      );
+    },
     onChoose(ctx, hook, option) {
       if (hook === "tit-tap") {
         const seat = Number(option.split(":")[1]);
         ctx.tap(ctx.player(seat).hero.instanceId);
         ctx.setCounter("titTappedSeat", seat + 1);
         const others = ctx.state.players.filter((player) => player.seat !== seat);
-        ctx.requestChoice("tit-untap", "Untap another target hero", others.map((player) => `hero:${player.seat}`));
+        ctx.requestChoice(
+          "tit-untap",
+          decisionPrompt(
+            "Untap another target hero",
+            "card.sea.hero.untap",
+            {
+              optionMessages: Object.fromEntries(others.map((player) => [
+                `hero:${player.seat}`,
+                decisionMessage("card.common.target.card", {
+                  card: { kind: "card", cardId: player.heroCardId },
+                }),
+              ])),
+            },
+          ),
+          others.map((player) => `hero:${player.seat}`),
+        );
       } else if (hook === "tit-untap") {
         ctx.untap(ctx.player(Number(option.split(":")[1])).hero.instanceId);
       }
@@ -836,7 +1111,27 @@ export const sea: Record<string, CardScript> = {
     triggers: [{ event: "card-played", sourceZone: "self", label: "Gain go again", condition: (ctx) => ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0, effect(ctx, played) { if (played) ctx.grantGoAgain(played.instanceId); } }],
     onHit(ctx) {
       const options = ctx.state.players.flatMap((player) => [`hero:${player.seat}`, ...player.board.filter((card) => isAlly(ctx, card)).map((card) => `ally:${card.instanceId}`)]);
-      ctx.requestChoice("blow-target", "Deal 1 damage to any target", options);
+      ctx.requestChoice(
+        "blow-target",
+        decisionPrompt(
+          "Deal 1 damage to any target",
+          "card.sea.damage.target.choose",
+          {
+            optionMessages: Object.fromEntries(ctx.state.players.flatMap((player) => [
+              [`hero:${player.seat}`, decisionMessage("card.common.target.card", {
+                card: { kind: "card", cardId: player.heroCardId },
+              })],
+              ...player.board.filter((card) => isAlly(ctx, card)).map((card) => [
+                `ally:${card.instanceId}`,
+                decisionMessage("card.common.target.card", {
+                  card: { kind: "card", cardId: card.cardId },
+                }),
+              ]),
+            ])),
+          },
+        ),
+        options,
+      );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "blow-target") return;
@@ -864,7 +1159,15 @@ Object.assign(sea,
     {
       onDefend(ctx: ScriptCtx) {
         const items = ctx.player(ctx.seat).board.filter((card) => isItem(ctx, card));
-        if (items.length) ctx.requestCardChoice("sea-galvanize", "Destroy an item to create a Golden Cog?", ["pass", ...items.map((card) => card.instanceId)]);
+        if (items.length) ctx.requestCardChoice(
+          "sea-galvanize",
+          decisionPrompt(
+            "Destroy an item to create a Golden Cog?",
+            "card.sea.item.destroy.cog",
+            { optionMessages: commonOptionMessages("pass") },
+          ),
+          ["pass", ...items.map((card) => card.instanceId)],
+        );
       },
       onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "sea-galvanize" && option !== "pass" && ctx.destroyPermanent(Number(option))) createGoldenCog(ctx); },
     } satisfies CardScript,
@@ -880,7 +1183,15 @@ Object.assign(sea,
     canTriggerOnHit: (ctx: ScriptCtx) => ctx.link?.targetAllyId === undefined,
     onHit(ctx: ScriptCtx) {
       const cards = ctx.player(opponentSeat(ctx)).graveyard.filter((card) => !card.faceDown);
-      if (cards.length) ctx.requestCardChoice("pilfer-wreck", "Turn a card in their graveyard face-down?", ["pass", ...cards.map((card) => card.instanceId)]);
+      if (cards.length) ctx.requestCardChoice(
+        "pilfer-wreck",
+        decisionPrompt(
+          "Turn a card in their graveyard face-down?",
+          "card.sea.opponent.graveyard.facedown",
+          { optionMessages: commonOptionMessages("pass") },
+        ),
+        ["pass", ...cards.map((card) => card.instanceId)],
+      );
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
       if (hook !== "pilfer-wreck" || option === "pass") return;
@@ -943,7 +1254,16 @@ Object.assign(sea,
     onHit(ctx: ScriptCtx) {
       ctx.setCounter("moneyRepeats", isThief(ctx) ? 2 : 1);
       const gold = controlledGold(ctx, opponentSeat(ctx));
-      ctx.requestCardChoice("money-choice", "Give a Gold or take 2 damage", [...gold.map((card) => card.instanceId), "damage"], opponentSeat(ctx));
+      ctx.requestCardChoice(
+        "money-choice",
+        decisionPrompt(
+          "Give a Gold or take 2 damage",
+          "card.sea.money.goldordamage",
+          { optionMessages: { damage: decisionMessage("card.sea.option.damage") } },
+        ),
+        [...gold.map((card) => card.instanceId), "damage"],
+        opponentSeat(ctx),
+      );
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
       if (hook !== "money-choice") return;
@@ -953,7 +1273,16 @@ Object.assign(sea,
       ctx.setCounter("moneyRepeats", remaining);
       if (remaining > 0) {
         const gold = controlledGold(ctx, opponentSeat(ctx));
-        ctx.requestCardChoice("money-choice", "Give a Gold or take 2 damage", [...gold.map((card) => card.instanceId), "damage"], opponentSeat(ctx));
+        ctx.requestCardChoice(
+          "money-choice",
+          decisionPrompt(
+            "Give a Gold or take 2 damage",
+            "card.sea.money.goldordamage",
+            { optionMessages: { damage: decisionMessage("card.sea.option.damage") } },
+          ),
+          [...gold.map((card) => card.instanceId), "damage"],
+          opponentSeat(ctx),
+        );
       }
     },
   } satisfies CardScript])),
@@ -961,7 +1290,15 @@ Object.assign(sea,
   Object.fromEntries([1, 2, 3].map((pitch) => [`nimby|${pitch}`, {
     onAttackDeclared(ctx: ScriptCtx) {
       const cards = ctx.player(ctx.seat).deck.filter((card) => named(ctx, card, "Nimblism"));
-      if (cards.length) ctx.requestCardChoice("nimby-search", "Search for a Nimblism?", ["pass", ...cards.map((card) => card.instanceId)]);
+      if (cards.length) ctx.requestCardChoice(
+        "nimby-search",
+        decisionPrompt(
+          "Search for a Nimblism?",
+          "card.sea.nimblism.search",
+          { optionMessages: commonOptionMessages("pass") },
+        ),
+        ["pass", ...cards.map((card) => card.instanceId)],
+      );
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
       if (hook !== "nimby-search" || option === "pass") return;
@@ -977,7 +1314,14 @@ Object.assign(sea,
     onHit(ctx: ScriptCtx) {
       const target = opponentSeat(ctx);
       const options = [ctx.player(target).hero, ...ctx.player(target).board.filter((card) => isAlly(ctx, card))].filter((card) => !card.tapped);
-      if (options.length) ctx.requestCardChoice("walk-tap", "Tap that Pirate hero or an ally they control", options.map((card) => card.instanceId));
+      if (options.length) ctx.requestCardChoice(
+        "walk-tap",
+        decisionPrompt(
+          "Tap that Pirate hero or an ally they control",
+          "card.sea.opponent.pirate.tap",
+        ),
+        options.map((card) => card.instanceId),
+      );
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "walk-tap") ctx.tap(Number(option)); },
   } satisfies CardScript])),
@@ -1023,7 +1367,15 @@ function kingHarpoon(kind: "attack" | "non-attack"): CardScript {
     onHit(ctx) {
       const target = opponentSeat(ctx); const hand = ctx.player(target).hand;
       if (!hand.length) return;
-      ctx.requestCardChoice(`king-${kind}`, "Go Fish: choose and reveal a card", hand.map((card) => card.instanceId), ctx.getFlag("player", "activatedCannonThisTurn") ? ctx.seat : target);
+      ctx.requestCardChoice(
+        `king-${kind}`,
+        decisionPrompt(
+          "Go Fish: choose and reveal a card",
+          "card.sea.gofish.card.choose",
+        ),
+        hand.map((card) => card.instanceId),
+        ctx.getFlag("player", "activatedCannonThisTurn") ? ctx.seat : target,
+      );
     },
     onChoose(ctx, hook, option) {
       if (hook !== `king-${kind}`) return;
@@ -1043,7 +1395,7 @@ function seaAmulet(effect: (ctx: ScriptCtx) => void, timing: "action" | "instant
 function destroyItemOnHit(): CardScript {
   return {
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
-    onHit(ctx) { const items = ctx.player(opponentSeat(ctx)).board.filter((card) => isItem(ctx, card)); if (items.length) ctx.requestCardChoice("sea-destroy-item", "Destroy an item", items.map((card) => card.instanceId)); },
+    onHit(ctx) { const items = ctx.player(opponentSeat(ctx)).board.filter((card) => isItem(ctx, card)); if (items.length) ctx.requestCardChoice("sea-destroy-item", decisionPrompt("Destroy an item", "card.sea.item.destroy"), items.map((card) => card.instanceId)); },
     onChoose(ctx, hook, option) { if (hook === "sea-destroy-item") ctx.destroyPermanent(Number(option)); },
   };
 }
@@ -1053,42 +1405,42 @@ Object.assign(sea, {
   "puffin, hightail|0": sea["puffin|0"]!,
   "polly cranka|0": { activated: { cost: 0, isAttack: false, goAgain: true, tap: true, banishSelfCost: true, onActivate(ctx: ScriptCtx) { ctx.createToken("SEA003"); } } },
   "golden skywarden|2": {
-    onDefend(ctx: ScriptCtx) { const items = ctx.player(ctx.seat).board.filter((card) => isItem(ctx, card)); if (items.length) ctx.requestCardChoice("skywarden", "Destroy an item for +1 defense?", ["pass", ...items.map((card) => card.instanceId)]); },
+    onDefend(ctx: ScriptCtx) { const items = ctx.player(ctx.seat).board.filter((card) => isItem(ctx, card)); if (items.length) ctx.requestCardChoice("skywarden", decisionPrompt("Destroy an item for +1 defense?", "card.sea.skywarden.item.destroy", { optionMessages: commonOptionMessages("pass") }), ["pass", ...items.map((card) => card.instanceId)]); },
     onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook !== "skywarden" || option === "pass") return; const item = ctx.player(ctx.seat).board.find((card) => card.instanceId === Number(option)); if (!item || !ctx.destroyPermanent(item.instanceId)) return; ctx.addCardTempDefense(ctx.self.instanceId, 1); if (named(ctx, item, "Golden Cog")) createGold(ctx); },
   },
   "jolly bludger|2": {
-    onAttackDeclared(ctx: ScriptCtx) { tapChoice(ctx, "bludger", "Tap a cog for overpower?", controlledCogs(ctx, false)); },
+    onAttackDeclared(ctx: ScriptCtx) { tapChoice(ctx, "bludger", "Tap a cog for overpower?", "card.sea.bludger.cog.tap", controlledCogs(ctx, false)); },
     onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "bludger" && option !== "pass" && ctx.tap(Number(option))) ctx.setFlag("link", "overpower", true); },
     onHit(ctx: ScriptCtx) { for (const item of ctx.player(opponentSeat(ctx)).board.filter((card) => isItem(ctx, card)).slice(0, ctx.link?.damage ?? 0)) ctx.steal(item.instanceId, { duration: "indefinite" }); },
     activated: [1, 2, 3].map(() => ({ cost: 0, isAttack: false, goAgain: false, timing: "instant" as const, effectCardCosts: [{ zone: "arena" as const, move: "tap" as const, count: 1, subtype: "cog", prompt: "Tap a cog" }], onActivate(ctx: ScriptCtx) { ctx.addCardTempPower(ctx.self.instanceId, 1); } })),
   },
   "cogwerx blunderbuss|0": { activated: [...attackAbility(2, { tap: true, oncePerTurn: false }), { cost: 0, isAttack: false, goAgain: false, timing: "instant", effectCardCosts: [{ zone: "arena", move: "tap", count: 1, subtype: "cog", prompt: "Tap a cog" }], onActivate(ctx: ScriptCtx) { buffNextAttack(ctx, { goAgain: true, appliesToInstanceId: ctx.self.instanceId }); } }] },
-  "spitfire|0": { activated: { cost: 0, isAttack: true, goAgain: false, tap: true, oncePerTurn: false, effectCardCosts: [{ zone: "arena", move: "tap", count: 1, subtype: "cog", prompt: "Tap a cog" }] }, onAttackDeclared(ctx: ScriptCtx) { tapChoice(ctx, "spitfire", "Tap a cog for +1 attack?", controlledCogs(ctx, false)); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "spitfire" && option !== "pass" && ctx.tap(Number(option))) ctx.addModifier({ scope: "chain-link", attack: 1 }); } },
+  "spitfire|0": { activated: { cost: 0, isAttack: true, goAgain: false, tap: true, oncePerTurn: false, effectCardCosts: [{ zone: "arena", move: "tap", count: 1, subtype: "cog", prompt: "Tap a cog" }] }, onAttackDeclared(ctx: ScriptCtx) { tapChoice(ctx, "spitfire", "Tap a cog for +1 attack?", "card.sea.spitfire.cog.tap", controlledCogs(ctx, false)); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "spitfire" && option !== "pass" && ctx.tap(Number(option))) ctx.addModifier({ scope: "chain-link", attack: 1 }); } },
   "cogwerx tinker rings|0": { onDefend(ctx: ScriptCtx) { createGoldenCog(ctx); } },
   "cogwerx dovetail|1": { canTriggerOnHit: (ctx: ScriptCtx) => ctx.link?.targetAllyId === undefined, onHit(ctx: ScriptCtx) { for (const cog of controlledCogs(ctx, true)) ctx.untap(cog.instanceId); }, activated: ["power", "go-again", "power"].map((mode) => ({ cost: 0, isAttack: false, goAgain: false, timing: "instant" as const, effectCardCosts: [{ zone: "arena" as const, move: "tap" as const, count: 1, subtype: "cog", prompt: "Tap a cog" }], onActivate(ctx: ScriptCtx) { if (mode === "power") ctx.addCardTempPower(ctx.self.instanceId, 1); else ctx.grantGoAgain(); } })) },
-  "palantir aeronought|1": { activated: [1, 2, 3].map((n) => ({ cost: 0, isAttack: false, goAgain: false, timing: "instant" as const, effectCardCosts: [{ zone: "arena" as const, move: "tap" as const, count: 1, subtype: "cog", prompt: "Tap a cog" }], onActivate(ctx: ScriptCtx) { ctx.addCardTempPower(ctx.self.instanceId, 1); if (n === 3 && ctx.link) { const cards = [...ctx.link.defendingCards, ...ctx.link.defendingEquipment]; if (cards.length) ctx.requestCardChoice("palantir", "Destroy a defending card", cards.map((card) => card.instanceId)); } } })), onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "palantir") ctx.moveToGraveyard(Number(option), "chain"); } },
-  "cog in the machine|1": { onPlay(ctx: ScriptCtx) { ctx.createTokens(GOLDEN_COG, 2); tapChoice(ctx, "cog-machine", "Tap a cog to bottom this?", controlledCogs(ctx, false)); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "cog-machine" && option !== "pass" && ctx.tap(Number(option))) ctx.putOnDeckBottom(ctx.self.instanceId); } },
+  "palantir aeronought|1": { activated: [1, 2, 3].map((n) => ({ cost: 0, isAttack: false, goAgain: false, timing: "instant" as const, effectCardCosts: [{ zone: "arena" as const, move: "tap" as const, count: 1, subtype: "cog", prompt: "Tap a cog" }], onActivate(ctx: ScriptCtx) { ctx.addCardTempPower(ctx.self.instanceId, 1); if (n === 3 && ctx.link) { const cards = [...ctx.link.defendingCards, ...ctx.link.defendingEquipment]; if (cards.length) ctx.requestCardChoice("palantir", decisionPrompt("Destroy a defending card", "card.sea.defender.destroy"), cards.map((card) => card.instanceId)); } } })), onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "palantir") ctx.moveToGraveyard(Number(option), "chain"); } },
+  "cog in the machine|1": { onPlay(ctx: ScriptCtx) { ctx.createTokens(GOLDEN_COG, 2); tapChoice(ctx, "cog-machine", "Tap a cog to bottom this?", "card.sea.cogmachine.cog.tap", controlledCogs(ctx, false)); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "cog-machine" && option !== "pass" && ctx.tap(Number(option))) ctx.putOnDeckBottom(ctx.self.instanceId); } },
   "cogwerx workshop|3": { onPlay(ctx: ScriptCtx) { createGoldenCog(ctx); for (const cog of controlledCogs(ctx).slice(0, 2)) ctx.addCounter(cog.instanceId, "steam", 1); } },
   "blood in the water|1": {
-    onDefend(ctx: ScriptCtx) { const p = ctx.player(ctx.seat); ctx.requestCardChoice("blood-water", "Discard or destroy the top card?", ["pass", ...p.hand.map((card) => card.instanceId), ...(p.deck.length ? ["deck-top"] : [])]); },
+    onDefend(ctx: ScriptCtx) { const p = ctx.player(ctx.seat); ctx.requestCardChoice("blood-water", decisionPrompt("Discard or destroy the top card?", "card.sea.bloodwater.choose", { optionMessages: { ...commonOptionMessages("pass"), "deck-top": decisionMessage("card.sea.option.decktop") } }), ["pass", ...p.hand.map((card) => card.instanceId), ...(p.deck.length ? ["deck-top"] : [])]); },
     onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook !== "blood-water" || option === "pass") return; const card = option === "deck-top" ? ctx.player(ctx.seat).deck[0] : ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option)); if (!card) return; const watery = (data(ctx, card).keywords ?? []).some((keyword) => keyword.toLowerCase() === "watery grave"); if (option === "deck-top") ctx.moveToGraveyard(card.instanceId, "deck"); else ctx.discardCard(ctx.seat, card.instanceId); if (watery) ctx.addCardTempDefense(ctx.self.instanceId, 2); },
   },
   "chart the high seas|3": { onPlay(ctx: ScriptCtx) { const top = ctx.player(ctx.seat).deck.slice(0, 2); for (const card of top) ctx.lookAt(card.instanceId); const blue = top.find((card) => ctx.cardColor(card) === 3); if (blue) ctx.pitchCard(blue.instanceId); for (const card of top.filter((candidate) => candidate.instanceId !== blue?.instanceId)) { const yellow = ctx.cardColor(card) === 2; if (ctx.moveToGraveyard(card.instanceId, "deck") && yellow) createGold(ctx); } } },
   "give no quarter|3": { onPlay(ctx: ScriptCtx) { for (let i = 0; i < 2; i++) ctx.addModifier({ scope: "until-end-of-turn", playCostReduction: 3, appliesToSubtype: "ally", appliesToKeyword: "watery grave" }); } },
   "chum, friendly first mate|2": { activated: [...attackAbility(0, { tap: true, oncePerTurn: false }), { cost: 0, isAttack: false, goAgain: false, timing: "instant", tap: true, oncePerTurn: false, effectCardCosts: [{ zone: "hand", move: "discard", count: 1, keyword: "watery grave", prompt: "Discard a card with watery grave" }], onActivate(ctx) { ctx.setCounter("must-target-turn", ctx.state.turn); } }], mandatoryAttackTarget: (ctx) => ctx.getCounter("must-target-turn") === ctx.state.turn },
-  "moray le fay|2": { activated: [...attackAbility(0, { tap: true, oncePerTurn: false }), { cost: 1, isAttack: false, goAgain: false, timing: "instant", tap: true, oncePerTurn: false, onActivate(ctx: ScriptCtx) { const allies = ctx.player(ctx.seat).board.filter((card) => isAlly(ctx, card)); if (allies.length) ctx.requestCardChoice("moray", "Put a +1 counter on an ally", allies.map((card) => card.instanceId)); } }], onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "moray") ctx.addCounter(Number(option), "power", 1); } },
+  "moray le fay|2": { activated: [...attackAbility(0, { tap: true, oncePerTurn: false }), { cost: 1, isAttack: false, goAgain: false, timing: "instant", tap: true, oncePerTurn: false, onActivate(ctx: ScriptCtx) { const allies = ctx.player(ctx.seat).board.filter((card) => isAlly(ctx, card)); if (allies.length) ctx.requestCardChoice("moray", decisionPrompt("Put a +1 counter on an ally", "card.sea.ally.counter.add"), allies.map((card) => card.instanceId)); } }], onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "moray") ctx.addCounter(Number(option), "power", 1); } },
   "wailer humperdinck|2": attackAbilityForAlly(6),
   "dead threads|0": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", tap: true, canActivate: (ctx: ScriptCtx) => ctx.getFlag("player", "graveSubtype:ally") === true, onActivate(ctx: ScriptCtx) { ctx.changeResources(ctx.seat, 1); } } },
   "marlynn, treasure hunter|0": sea["marlynn|0"]!,
   "hammerhead, harpoon cannon|0": { activated: { cost: 4, isAttack: false, goAgain: true, tap: true, onActivate(ctx: ScriptCtx) { buffNextAttack(ctx, { attack: 4, appliesToSubtype: "arrow", overpower: true }); ctx.setFlag("player", "activatedCannonThisTurn", true); } } },
   "king kraken harpoon|1": kingHarpoon("non-attack"),
   "king shark harpoon|1": kingHarpoon("attack"),
-  "big game trophy shot|2": { onPlay(ctx: ScriptCtx) { buffNextAttack(ctx, { attack: 4, appliesToSubtype: "arrow" }); ctx.drawCards(ctx.seat, 1); requestDiscardChoice(ctx, "big-game-discard", "Choose a card to discard", ctx.seat); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "big-game-discard") resolveDiscardChoice(ctx, option, ctx.seat); } },
+  "big game trophy shot|2": { onPlay(ctx: ScriptCtx) { buffNextAttack(ctx, { attack: 4, appliesToSubtype: "arrow" }); ctx.drawCards(ctx.seat, 1); requestDiscardChoice(ctx, "big-game-discard", decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"), ctx.seat); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "big-game-discard") resolveDiscardChoice(ctx, option, ctx.seat); } },
   "gold the tip|2": { onPlay(ctx: ScriptCtx) { buffNextAttack(ctx, { attack: 3, appliesToSubtype: "arrow" }); if (ctx.player(ctx.seat).arsenal.some((card) => !card.faceDown && isArrow(ctx, card) && ctx.cardColor(card) === 2)) createGold(ctx); } },
-  "redspine manta|0": { activated: { cost: 0, isAttack: false, goAgain: true, tap: true, canActivate: (ctx: ScriptCtx) => !ctx.player(ctx.seat).arsenal.length && ctx.player(ctx.seat).hand.some((card) => isArrow(ctx, card)), onActivate(ctx: ScriptCtx) { const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card)); ctx.requestCardChoice("manta", "Put an arrow face-up into arsenal", arrows.map((card) => card.instanceId)); } }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "manta") ctx.putIntoArsenal(Number(option), "hand"); } },
+  "redspine manta|0": { activated: { cost: 0, isAttack: false, goAgain: true, tap: true, canActivate: (ctx: ScriptCtx) => !ctx.player(ctx.seat).arsenal.length && ctx.player(ctx.seat).hand.some((card) => isArrow(ctx, card)), onActivate(ctx: ScriptCtx) { const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card)); ctx.requestCardChoice("manta", decisionPrompt("Put an arrow face-up into arsenal", "card.sea.arrow.hand.arsenal.required"), arrows.map((card) => card.instanceId)); } }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "manta") ctx.putIntoArsenal(Number(option), "hand"); } },
   "sealace sarong|0": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", tap: true, effectCardCosts: [{ zone: "arsenal", move: "turn-face-up", count: 1, pitch: 3, subtype: "arrow", prompt: "Turn a blue arrow face-up" }], onActivate(ctx: ScriptCtx) { const arrow = ctx.player(ctx.seat).arsenal.find((card) => !card.faceDown && isArrow(ctx, card) && ctx.cardColor(card) === 3); if (arrow) ctx.grantCardKeyword(arrow.instanceId, "go again"); } } },
   "barbed barrage|1": { onPlayCostPaid(ctx: ScriptCtx, paid: readonly Card[]) { if (paid.length >= 2) ctx.setFlag("link", "additionalTarget", true); } },
-  "return fire|1": { onDefend(ctx: ScriptCtx) { const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card)); if (arrows.length) ctx.requestCardChoice("return-fire", "Banish an arrow?", ["pass", ...arrows.map((card) => card.instanceId)]); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "return-fire" && option !== "pass" && ctx.banish(Number(option))) { ctx.allowPlayFrom(Number(option), "banish", { untilNextTurn: true }); ctx.addCardTempPower(Number(option), 3); } } },
+  "return fire|1": { onDefend(ctx: ScriptCtx) { const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card)); if (arrows.length) ctx.requestCardChoice("return-fire", decisionPrompt("Banish an arrow?", "card.sea.arrow.banish", { optionMessages: commonOptionMessages("pass") }), ["pass", ...arrows.map((card) => card.instanceId)]); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "return-fire" && option !== "pass" && ctx.banish(Number(option))) { ctx.allowPlayFrom(Number(option), "banish", { untilNextTurn: true }); ctx.addCardTempPower(Number(option), 3); } } },
   "sticky fingers|0": { ...attackAbilityForAlly(0), onAttackDeclared(ctx: ScriptCtx) { const gold = controlledGold(ctx, opponentSeat(ctx))[0]; if (ctx.link?.targetAllyId === undefined && gold) ctx.steal(gold.instanceId, { duration: "indefinite" }); } },
   "gold-baited hook|0": {
     activated: {
@@ -1124,7 +1476,7 @@ Object.assign(sea, {
     }],
   },
   "conqueror of the high seas|1": { modifyAttack: (ctx: ScriptCtx) => highTide(ctx) ? 1 : 0, onAttackDeclared(ctx: ScriptCtx) { if (highTide(ctx)) ctx.grantGoAgain(); }, canTriggerOnHit: (ctx: ScriptCtx) => ctx.link?.targetAllyId === undefined, onHit(ctx: ScriptCtx) { for (const card of [...ctx.player(opponentSeat(ctx)).arsenal]) if (ctx.moveToGraveyard(card.instanceId, "arsenal")) createGold(ctx); } },
-  "loan shark|2": { onEnterArena(ctx: ScriptCtx) { createGold(ctx, 2); }, triggers: [{ event: "end-of-turn", label: "Pay Loan Shark", condition: (ctx: ScriptCtx) => ctx.getFlag("player", "createdName:gold") !== true, effect(ctx: ScriptCtx) { ctx.destroySelf(); const hand = ctx.player(ctx.seat).hand; if (hand.length) ctx.requestCardChoice("loan", "Discard a card or lose 2 life", ["Lose 2 life", ...hand.map((card) => card.instanceId)]); else ctx.loseLife(ctx.seat, 2); } }], onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "loan") { if (option === "Lose 2 life") ctx.loseLife(ctx.seat, 2); else ctx.discardCard(ctx.seat, Number(option)); } } },
+  "loan shark|2": { onEnterArena(ctx: ScriptCtx) { createGold(ctx, 2); }, triggers: [{ event: "end-of-turn", label: "Pay Loan Shark", condition: (ctx: ScriptCtx) => ctx.getFlag("player", "createdName:gold") !== true, effect(ctx: ScriptCtx) { ctx.destroySelf(); const hand = ctx.player(ctx.seat).hand; if (hand.length) ctx.requestCardChoice("loan", decisionPrompt("Discard a card or lose 2 life", "card.sea.loan.discardorlife", { optionMessages: { "Lose 2 life": decisionMessage("card.sea.option.loselife") } }), ["Lose 2 life", ...hand.map((card) => card.instanceId)]); else ctx.loseLife(ctx.seat, 2); } }], onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "loan") { if (option === "Lose 2 life") ctx.loseLife(ctx.seat, 2); else ctx.discardCard(ctx.seat, Number(option)); } } },
   "tip the barkeep|3": {
     onPlay(ctx: ScriptCtx) {
       ctx.createToken(GOLDKISS_RUM);
@@ -1132,7 +1484,11 @@ Object.assign(sea, {
       if (gold.length) {
         ctx.requestCardChoice(
           "tip-gold",
-          "Give a Gold token you control to another hero?",
+          decisionPrompt(
+            "Give a Gold token you control to another hero?",
+            "card.sea.tip.gold.give",
+            { optionMessages: commonOptionMessages("pass") },
+          ),
           ["pass", ...gold.map((card) => card.instanceId)],
         );
       }
@@ -1144,7 +1500,7 @@ Object.assign(sea, {
       }
     },
   },
-  "sunken treasure|3": { onDefend(ctx: ScriptCtx) { const cards = ctx.state.players.flatMap((player) => player.graveyard.filter((card) => !card.faceDown)); if (cards.length) ctx.requestCardChoice("sunken", "Turn a graveyard card face-down?", ["pass", ...cards.map((card) => card.instanceId)]); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook !== "sunken" || option === "pass") return; const card = ctx.state.players.flatMap((player) => player.graveyard).find((candidate) => candidate.instanceId === Number(option)); if (card && ctx.setCardFaceDown(card.instanceId, true) && ctx.cardColor(card) === 2) createGold(ctx); } },
+  "sunken treasure|3": { onDefend(ctx: ScriptCtx) { const cards = ctx.state.players.flatMap((player) => player.graveyard.filter((card) => !card.faceDown)); if (cards.length) ctx.requestCardChoice("sunken", decisionPrompt("Turn a graveyard card face-down?", "card.sea.graveyard.facedown.optional", { optionMessages: commonOptionMessages("pass") }), ["pass", ...cards.map((card) => card.instanceId)]); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook !== "sunken" || option === "pass") return; const card = ctx.state.players.flatMap((player) => player.graveyard).find((candidate) => candidate.instanceId === Number(option)); if (card && ctx.setCardFaceDown(card.instanceId, true) && ctx.cardColor(card) === 2) createGold(ctx); } },
   "sea legs|2": {
     triggers: [{
       event: "card-discarded",
@@ -1159,8 +1515,8 @@ Object.assign(sea, {
   "diamond amulet|3": seaAmulet((ctx) => ctx.changeActionPoints(ctx.seat, 1), "instant"),
   "onyx amulet|3": seaAmulet((ctx) => { for (const p of ctx.state.players) { ctx.tap(p.hero.instanceId); for (const ally of p.board.filter((card) => isAlly(ctx, card))) ctx.tap(ally.instanceId); } }),
   "opal amulet|3": seaAmulet((ctx) => { for (const card of ctx.player(ctx.seat).deck.slice(0, 2)) ctx.lookAt(card.instanceId); }),
-  "pearl amulet|3": seaAmulet((ctx) => { const cards = ctx.state.players.flatMap((p) => [p.hero, ...p.board, ...p.weapons]); if (cards.length) ctx.requestCardChoice("pearl", "Untap a permanent", cards.map((card) => card.instanceId)); }),
-  "platinum amulet|3": seaAmulet((ctx) => { const cards = ctx.link ? [...ctx.link.defendingCards, ...ctx.link.defendingEquipment] : []; if (cards.length) ctx.requestCardChoice("platinum", "Give a defender +1 defense", cards.map((card) => card.instanceId)); }, "instant"),
+  "pearl amulet|3": seaAmulet((ctx) => { const cards = ctx.state.players.flatMap((p) => [p.hero, ...p.board, ...p.weapons]); if (cards.length) ctx.requestCardChoice("pearl", decisionPrompt("Untap a permanent", "card.sea.permanent.untap"), cards.map((card) => card.instanceId)); }),
+  "platinum amulet|3": seaAmulet((ctx) => { const cards = ctx.link ? [...ctx.link.defendingCards, ...ctx.link.defendingEquipment] : []; if (cards.length) ctx.requestCardChoice("platinum", decisionPrompt("Give a defender +1 defense", "card.sea.defender.buff"), cards.map((card) => card.instanceId)); }, "instant"),
   "pounamu amulet|3": seaAmulet((ctx) => ctx.gainLife(ctx.seat, 2)),
   "ruby amulet|3": seaAmulet((ctx) => ctx.changeResources(ctx.seat, 2), "instant"),
   "sapphire amulet|3": seaAmulet((ctx) => ctx.setFlag("player", "sapphireIntellect", true)),
@@ -1198,9 +1554,9 @@ Object.assign(sea, {
   },
   "riddle with regret|1": { triggers: [{ event: "end-of-turn", whose: "any", label: "Lose life for auras", effect(ctx: ScriptCtx) { const seat = ctx.state.activePlayer; const count = ctx.player(seat).board.filter((card) => hasTag(ctx, card, "aura")).length; ctx.loseLife(seat, count); if (count >= 3) ctx.destroySelf(); } }] },
   "claw of vynserakai|0": { ...attackAbility(1, { oncePerTurn: true }), preventArcaneDamageWhileActive: 1 },
-  "everbloom // life|3": { meld: { leftName: "Everbloom", rightName: "Life", leftCardType: "action", rightCardType: "instant" }, onPlay(ctx: ScriptCtx) { if (ctx.self.meldSide !== "left") ctx.gainLife(ctx.seat, 1); if (ctx.self.meldSide !== "right") { const gained = Number(ctx.getPlayerFlag(ctx.seat, "lifeGainedThisTurn")); const cards = ctx.state.players.flatMap((player) => player.graveyard).filter((card) => ctx.hasCardType(card, "action") && (data(ctx, card).cost ?? 0) < gained); if (cards.length) ctx.requestCardChoice("everbloom", "Put an action on the bottom", cards.map((card) => card.instanceId)); } }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "everbloom") ctx.putOnDeckBottom(Number(option)); } },
+  "everbloom // life|3": { meld: { leftName: "Everbloom", rightName: "Life", leftCardType: "action", rightCardType: "instant" }, onPlay(ctx: ScriptCtx) { if (ctx.self.meldSide !== "left") ctx.gainLife(ctx.seat, 1); if (ctx.self.meldSide !== "right") { const gained = Number(ctx.getPlayerFlag(ctx.seat, "lifeGainedThisTurn")); const cards = ctx.state.players.flatMap((player) => player.graveyard).filter((card) => ctx.hasCardType(card, "action") && (data(ctx, card).cost ?? 0) < gained); if (cards.length) ctx.requestCardChoice("everbloom", decisionPrompt("Put an action on the bottom", "card.sea.action.bottom"), cards.map((card) => card.instanceId)); } }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "everbloom") ctx.putOnDeckBottom(Number(option)); } },
   "consign to cosmos // shock|2": { meld: { leftName: "Consign to Cosmos", rightName: "Shock", leftCardType: "action", rightCardType: "instant" }, arcaneDamageEffect: true, onPlay(ctx: ScriptCtx) { if (ctx.self.meldSide !== "left") seaTargets(ctx, "consign", 1); if (ctx.self.meldSide !== "right") { const amount = Number(ctx.getPlayerFlag(ctx.seat, `arcaneDamageAmountToSeat:${opponentSeat(ctx)}`)); const cards = ctx.state.players.flatMap((player) => player.graveyard).filter((card) => ctx.hasCardType(card, "instant") || hasTag(ctx, card, "aura")); for (const card of cards.slice(0, amount)) ctx.banish(card.instanceId); } }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "consign") dealSeaTarget(ctx, option, 1, true); } },
-  "herald of sekem|1": { onAttackDeclared(ctx: ScriptCtx) { const yellow = ctx.player(ctx.seat).hand.filter((card) => ctx.cardColor(card) === 2); if (yellow.length) ctx.requestCardChoice("sekem", "Put a yellow card into your soul?", ["pass", ...yellow.map((card) => card.instanceId)]); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "sekem" && option !== "pass" && ctx.putIntoSoul(Number(option))) seaTargets(ctx, "sekem-target", 2); else if (hook === "sekem-target") dealSeaTarget(ctx, option, 2, true); } },
+  "herald of sekem|1": { onAttackDeclared(ctx: ScriptCtx) { const yellow = ctx.player(ctx.seat).hand.filter((card) => ctx.cardColor(card) === 2); if (yellow.length) ctx.requestCardChoice("sekem", decisionPrompt("Put a yellow card into your soul?", "card.sea.yellow.soul", { optionMessages: commonOptionMessages("pass") }), ["pass", ...yellow.map((card) => card.instanceId)]); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "sekem" && option !== "pass" && ctx.putIntoSoul(Number(option))) seaTargets(ctx, "sekem-target", 2); else if (hook === "sekem-target") dealSeaTarget(ctx, option, 2, true); } },
   "arcane compliance|3": { onPlay(ctx: ScriptCtx) { ctx.setFlag("player", "arcaneCompliance", true); } },
 } satisfies Record<string, CardScript>);
 
