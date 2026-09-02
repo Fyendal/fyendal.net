@@ -2,7 +2,14 @@ import type { EngineRuntime } from "./runtimePorts.js";
 import { cardColorOf, instanceDataOf, isChiCard, scriptOf } from "./cardProperties.js";
 import { hookSources } from "./sourceQueries.js";
 
-import { logNameOf, logPublic, nameOf } from "./gameLog.js";
+import {
+  gameLogMessage,
+  logCardValue,
+  logNameOf,
+  logPlayerValue,
+  logPublic,
+  nameOf,
+} from "./gameLog.js";
 import { enumeratePitchSequences } from "./pitchSequences.js";
 import type { GameStateInternal } from "./runtimeState.js";
 
@@ -56,7 +63,22 @@ export function pitchIntoPool(
   const activeCardId = instanceDataOf(state, card).id;
   if (chi) {
     player.chi += pitch;
-    logPublic(state, `${nameOf(state, player.heroCardId)} pitches ${logNameOf(state, activeCardId)} (${pitch} chi)`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, player.heroCardId)} pitches ${logNameOf(state, activeCardId)} (${pitch} chi)`,
+      "engine.log.card.pitched.chi",
+      {
+        player: logPlayerValue(player.seat),
+        card: logCardValue(activeCardId),
+        amount: pitch,
+      },
+      {
+        kind: "card-moved",
+        cardId: activeCardId,
+        ownerSeat: player.seat,
+        from: "hand",
+        to: "pitch",
+      },
+    ));
   } else {
     let gained = pitch;
     for (const source of hookSources(state, player.seat, { board: true, equipment: true, weapons: true })) {
@@ -68,7 +90,21 @@ export function pitchIntoPool(
       if (replacement !== undefined) gained = Math.max(0, Math.floor(replacement));
     }
     player.resources += gained;
-    logPublic(state, `${nameOf(state, player.heroCardId)} pitches ${logNameOf(state, activeCardId)}`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, player.heroCardId)} pitches ${logNameOf(state, activeCardId)}`,
+      "engine.log.card.pitched",
+      {
+        player: logPlayerValue(player.seat),
+        card: logCardValue(activeCardId),
+      },
+      {
+        kind: "card-moved",
+        cardId: activeCardId,
+        ownerSeat: player.seat,
+        from: "hand",
+        to: "pitch",
+      },
+    ));
   }
   runtime.events.queueTriggeredEvent(
     state,

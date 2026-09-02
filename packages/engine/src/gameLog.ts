@@ -1,4 +1,8 @@
-import type { GameLogPayload } from "@fyendal/shared";
+import type {
+  GameLogEvent,
+  GameLogPayload,
+  GameMessage,
+} from "@fyendal/shared";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { CardInstance, GameLogEntry, PlayerState } from "./state.js";
 
@@ -113,7 +117,38 @@ export function logForSeats(state: GameStateInternal, entry: GameLogEntry): void
     ...(entry.seatText
       ? { seatText: [...entry.seatText] as [string | null, string | null] }
       : {}),
+    ...(entry.publicPayload !== undefined ? { publicPayload: entry.publicPayload } : {}),
+    ...(entry.seatPayloads
+      ? { seatPayloads: [...entry.seatPayloads] as [GameLogPayload | null, GameLogPayload | null] }
+      : {}),
   });
+}
+
+/** Build the locale-independent payload shape used by engine log producers.
+ * Call sites supply the English fallback so diagnostics, older clients, and
+ * replay exports remain useful without a locale catalog. */
+export function gameLogMessage(
+  fallback: string,
+  id: string,
+  values?: GameMessage["values"],
+  event?: GameLogEvent,
+): GameLogPayload {
+  return {
+    fallback,
+    message: {
+      id,
+      ...(values === undefined ? {} : { values }),
+    },
+    ...(event === undefined ? {} : { event }),
+  };
+}
+
+export function logCardValue(cardId: string): { kind: "card"; cardId: string } {
+  return { kind: "card", cardId };
+}
+
+export function logPlayerValue(seat: number): { kind: "player"; seat: number } {
+  return { kind: "player", seat };
 }
 
 export function nameOf(state: GameStateInternal, cardId: string): string {

@@ -3,7 +3,7 @@ import type { GameStateInternal } from "./runtimeState.js";
 import type { CardInstance, PlayerState } from "./state.js";
 import { dataOf, scriptOf } from "./cardProperties.js";
 
-import { logPublic, nameOf } from "./gameLog.js";
+import { gameLogMessage, logPlayerValue, logPublic, nameOf } from "./gameLog.js";
 
 import { beginStatsTurn } from "./stats.js";
 import { findPermanent, opponent } from "./zoneQueries.js";
@@ -24,7 +24,11 @@ export function drawUpTo(state: GameStateInternal,
   if (need > 0 && player.deck.length > 0) {
     const drawn = Math.min(need, player.deck.length);
     drawCards(state, runtime, player, need);
-    logPublic(state, `${nameOf(state, player.heroCardId)} draws ${drawn} card(s)`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, player.heroCardId)} draws ${drawn} card(s)`,
+      "engine.log.player.draws",
+      { player: logPlayerValue(player.seat), count: drawn },
+    ));
   }
 }
 
@@ -99,7 +103,12 @@ export function startTurn(state: GameStateInternal, runtime: EngineRuntime): voi
   player.actionPoints = 0;
   player.resources = 0;
   player.chi = 0; // floating chi resets wherever floating resources reset
-  logPublic(state, `— Turn ${state.turn}: ${nameOf(state, player.heroCardId)}'s turn —`);
+  logPublic(state, gameLogMessage(
+    `— Turn ${state.turn}: ${nameOf(state, player.heroCardId)}'s turn —`,
+    "engine.log.turn.started",
+    { turn: state.turn, player: logPlayerValue(player.seat) },
+    { kind: "turn-start", turn: state.turn, activeSeat: player.seat },
+  ));
   runtime.dispatchFlow("queueEventTriggers", state, "start-of-turn", state.activePlayer, "begin-action-phase");
 }
 

@@ -21,7 +21,9 @@ import {
 } from "./cardProperties.js";
 
 import {
+  gameLogMessage,
   logForSeats,
+  logPlayerValue,
   logNameOf,
   logPrivate,
   logPublic,
@@ -586,12 +588,22 @@ export function makeCtx(
         )
       )[0];
       if (!replacement) {
-        logPublic(state, `${nameOf(state, player.heroCardId)} rolls ${result}`);
+        logPublic(state, gameLogMessage(
+          `${nameOf(state, player.heroCardId)} rolls ${result}`,
+          "engine.log.die.rolled",
+          { player: logPlayerValue(player.seat), result },
+          { kind: "roll", result, seat: player.seat, sides },
+        ));
         runtime.commands.recordDieResult(state, player, result);
         scriptOf(state, self.cardId, self)?.onDieRollResolved?.(ctx, hook, result);
         return;
       }
-      logPublic(state, `${nameOf(state, player.heroCardId)} rolls ${result}`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, player.heroCardId)} rolls ${result}`,
+        "engine.log.die.rolled",
+        { player: logPlayerValue(player.seat), result },
+        { kind: "roll", result, seat: player.seat, sides },
+      ));
       state.pendingDecision = {
         player: replacement.seat,
         kind: "optional-effect",
@@ -634,7 +646,12 @@ export function makeCtx(
         const j = rngInt(state, i + 1);
         [deck[i], deck[j]] = [deck[j]!, deck[i]!];
       }
-      logPublic(state, `${nameOf(state, target.heroCardId)} shuffles their deck`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, target.heroCardId)} shuffles their deck`,
+        "engine.log.player.shuffles.deck",
+        { player: logPlayerValue(target.seat) },
+        { kind: "shuffle", seat: target.seat },
+      ));
     },
     destroyPermanent(instanceId, destroyingSeat = seat) {
       if (!state.players[destroyingSeat]) return false;
@@ -1161,12 +1178,20 @@ export function makeCtx(
       // CR 8.5.7b: a non-turn-player cannot gain action points
       if (seat !== state.activePlayer) return;
       player.actionPoints += 1;
-      logPublic(state, `${nameOf(state, player.heroCardId)} gains an action point`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, player.heroCardId)} gains an action point`,
+        "engine.log.player.gains.action.point",
+        { player: logPlayerValue(player.seat) },
+      ));
     },
     drawCards(targetSeat, n) {
       const p = state.players[targetSeat] as PlayerState;
       runtime.commands.drawCards(state, p, n, self);
-      logPublic(state, `${nameOf(state, p.heroCardId)} draws ${n} card(s)`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, p.heroCardId)} draws ${n} card(s)`,
+        "engine.log.player.draws",
+        { player: logPlayerValue(p.seat), count: n },
+      ));
     },
     discardRandom(targetSeat, n) {
       const p = state.players[targetSeat] as PlayerState;
@@ -1188,7 +1213,18 @@ export function makeCtx(
       card.faceDown = true;
       card.returnToHandAtTurn = returnTurn;
       target.banish.push(card);
-      logPublic(state, `${nameOf(state, target.heroCardId)} banishes a random card face down`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, target.heroCardId)} banishes a random card face down`,
+        "engine.log.card.random.banished.face.down",
+        { player: logPlayerValue(target.seat) },
+        {
+          kind: "card-moved",
+          ownerSeat: target.seat,
+          from: "hand",
+          to: "banish",
+          faceDown: true,
+        },
+      ));
       return card;
     },
     discardCard(targetSeat, instanceId) {

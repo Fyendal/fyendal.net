@@ -12,7 +12,14 @@ import {
   meldSideHasType,
   scriptOf,
 } from "./cardProperties.js";
-import { logNameOf, logPublic, nameOf } from "./gameLog.js";
+import {
+  gameLogMessage,
+  logCardValue,
+  logNameOf,
+  logPlayerValue,
+  logPublic,
+  nameOf,
+} from "./gameLog.js";
 import {
   isValidVariableX,
   payCost,
@@ -622,7 +629,14 @@ export function playWindowInstant(
   )) return "cannot pay the card's additional hand-card cost";
   const costErr = payCost(state, runtime, player, cost, pitchInstanceIds, card.instanceId, {
     beforePitch: () =>
-      logPublic(state, `${nameOf(state, player.heroCardId)} plays ${logNameOf(state, card.cardId)} in response`),
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, player.heroCardId)} plays ${logNameOf(state, card.cardId)} in response`,
+        "engine.log.card.played.in.response",
+        {
+          player: logPlayerValue(player.seat),
+          card: logCardValue(card.cardId),
+        },
+      )),
   });
   if (costErr) return costErr;
   if (firstActionExtraCost(state, player) > 0 && cardHasType(state, card, "action")) {

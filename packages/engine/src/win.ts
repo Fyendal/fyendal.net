@@ -1,5 +1,5 @@
 import type { GameStateInternal } from "./runtimeState.js";
-import { logPublic, nameOf } from "./gameLog.js";
+import { gameLogMessage, logPlayerValue, logPublic, nameOf } from "./gameLog.js";
 
 import { opponent } from "./zoneQueries.js";
 
@@ -12,7 +12,11 @@ export function checkWin(state: GameStateInternal): boolean {
     state.pendingDecision = null;
     logPublic(
       state,
-      `${nameOf(state, state.players[state.winner]?.heroCardId ?? "")} wins the game!`,
+      gameLogMessage(
+        `${nameOf(state, state.players[state.winner]?.heroCardId ?? "")} wins the game!`,
+        "engine.log.game.winner",
+        { player: logPlayerValue(state.winner) },
+      ),
     );
     return true;
   }

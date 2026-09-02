@@ -16,7 +16,14 @@ import {
   scriptOf,
 } from "./cardProperties.js";
 import { answerClashDecision } from "./clash.js";
-import { logNameOf, logPublic, nameOf } from "./gameLog.js";
+import {
+  gameLogMessage,
+  logCardValue,
+  logNameOf,
+  logPlayerValue,
+  logPublic,
+  nameOf,
+} from "./gameLog.js";
 import {
   activateAuraAttack,
   attackActivationCost,
@@ -307,7 +314,14 @@ export function playCard(
   )) return "cannot pay the card's additional hand-card cost";
   const costErr = payCost(state, runtime, player, effectiveCost, pitchInstanceIds, instanceId, {
     beforePitch: () =>
-      logPublic(state, `${nameOf(state, player.heroCardId)} plays ${logNameOf(state, card.cardId)}`),
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, player.heroCardId)} plays ${logNameOf(state, card.cardId)}`,
+        "engine.log.card.played",
+        {
+          player: logPlayerValue(player.seat),
+          card: logCardValue(card.cardId),
+        },
+      )),
   });
   if (costErr) return costErr;
   if (variableCost) {

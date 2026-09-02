@@ -8,9 +8,13 @@ import { createTestIntl } from "./TestI18nProvider.js";
 const cardScriptsDirectory = fileURLToPath(
   new URL("../../../../packages/cards/src/scripts/", import.meta.url),
 );
+const engineSourceDirectory = fileURLToPath(
+  new URL("../../../../packages/engine/src/", import.meta.url),
+);
 
 function scriptFiles(path: string): string[] {
   return readdirSync(path, { withFileTypes: true }).flatMap((entry) => {
+    if (entry.name === "__tests__") return [];
     const entryPath = `${path}/${entry.name}`;
     if (entry.isDirectory()) return scriptFiles(entryPath);
     return entry.name.endsWith(".ts") ? [entryPath] : [];
@@ -36,6 +40,20 @@ describe("locale catalogs", () => {
     const referencedIds = new Set(scriptFiles(cardScriptsDirectory).flatMap((path) =>
       Array.from(
         readFileSync(path, "utf8").matchAll(/["']((?:card|common\.option)\.[a-z0-9.]+)["']/g),
+        (match) => match[1]!,
+      )
+    ));
+    const catalogIds = new Set(Object.keys(englishMessages));
+
+    expect(
+      [...referencedIds].filter((id) => !catalogIds.has(id)).sort(),
+    ).toEqual([]);
+  });
+
+  it("contains every semantic log message referenced by engine producers", () => {
+    const referencedIds = new Set(scriptFiles(engineSourceDirectory).flatMap((path) =>
+      Array.from(
+        readFileSync(path, "utf8").matchAll(/["'](engine\.log\.[a-zA-Z0-9.]+)["']/g),
         (match) => match[1]!,
       )
     ));

@@ -8,7 +8,13 @@ import {
   computeDefense,
   equipmentDefense,
 } from "./combatValues.js";
-import { logPublic, nameOf } from "./gameLog.js";
+import {
+  gameLogMessage,
+  logCardValue,
+  logPlayerValue,
+  logPublic,
+  nameOf,
+} from "./gameLog.js";
 
 import { recordAttackStats, recordHeroDamage } from "./stats.js";
 import type { ChainLinkState, PendingArcane, PlayerState } from "./state.js";
@@ -48,7 +54,23 @@ function applyHit(
   recordHeroDamage(state, link.attacker, link.damage);
   logPublic(
     state,
-    `${nameOf(state, link.attackingCard.cardId)} ${hitOriginalTarget ? "hits" : "deals redirected damage"} for ${link.damage} (${nameOf(state, defender.heroCardId)} at ${defender.life} life)`,
+    gameLogMessage(
+      `${nameOf(state, link.attackingCard.cardId)} ${hitOriginalTarget ? "hits" : "deals redirected damage"} for ${link.damage} (${nameOf(state, defender.heroCardId)} at ${defender.life} life)`,
+      hitOriginalTarget ? "engine.log.damage.hit" : "engine.log.damage.redirected",
+      {
+        source: logCardValue(link.attackingCard.cardId),
+        amount: link.damage,
+        target: logPlayerValue(defender.seat),
+        life: defender.life,
+      },
+      {
+        kind: "damage",
+        targetSeat: defender.seat,
+        amount: link.damage,
+        damageType: "physical",
+        sourceCardId: link.attackingCard.cardId,
+      },
+    ),
   );
   if (hitOriginalTarget && removeMarkOnOpponentHit(state, link.attacker, defender.seat)) {
     // Hit-triggered effects still observe that their target was marked at the

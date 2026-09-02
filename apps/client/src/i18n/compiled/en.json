@@ -9585,6 +9585,46 @@
       "value": "Choose X"
     }
   ],
+  "engine.log.card.pitched": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " pitches "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "engine.log.card.pitched.chi": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " pitches "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " ("
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " chi)"
+    }
+  ],
   "engine.log.card.played": [
     {
       "type": 1,
@@ -9597,6 +9637,264 @@
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "engine.log.card.played.in.response": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " plays "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " in response"
+    }
+  ],
+  "engine.log.card.random.banished.face.down": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " banishes a random card face down"
+    }
+  ],
+  "engine.log.combat.chain.closed": [
+    {
+      "type": 0,
+      "value": "The combat chain closes"
+    }
+  ],
+  "engine.log.damage.hit": [
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " hits for "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " ("
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " at "
+    },
+    {
+      "type": 1,
+      "value": "life"
+    },
+    {
+      "type": 0,
+      "value": " life)"
+    }
+  ],
+  "engine.log.damage.redirected": [
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " deals "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " redirected damage ("
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " at "
+    },
+    {
+      "type": 1,
+      "value": "life"
+    },
+    {
+      "type": 0,
+      "value": " life)"
+    }
+  ],
+  "engine.log.die.rerolled": [
+    {
+      "type": 0,
+      "value": "The die is rerolled: "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    }
+  ],
+  "engine.log.die.rolled": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " rolls "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    }
+  ],
+  "engine.log.game.winner": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " wins the game!"
+    }
+  ],
+  "engine.log.player.draws": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " draws "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "engine.log.player.gains.action.point": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " gains an action point"
+    }
+  ],
+  "engine.log.player.gains.life": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " gains "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " life ("
+    },
+    {
+      "type": 1,
+      "value": "life"
+    },
+    {
+      "type": 0,
+      "value": " life)"
+    }
+  ],
+  "engine.log.player.shuffles.deck": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " shuffles their deck"
+    }
+  ],
+  "engine.log.token.created": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " creates "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "engine.log.turn.started": [
+    {
+      "type": 0,
+      "value": "— Turn "
+    },
+    {
+      "type": 1,
+      "value": "turn"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": "'s turn —"
     }
   ],
   "footer.legal": [
