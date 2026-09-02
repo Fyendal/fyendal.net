@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { projectStateFor } from "@fyendal/engine";
 import { functionalKeyOf } from "../../functional.js";
 import { cardData, isImplemented } from "../../index.js";
 import { printingId, scenario } from "../harness.js";
@@ -129,6 +130,15 @@ describe("SEA — High Seas heroes and cogs", () => {
 
     expect(g.state.pendingDecision?.chooseHook).toBe("engine-crank");
     expect(g.state.pendingDecision?.defaultOption).toBe("yes");
+    expect(g.state.pendingDecision?.promptMessage).toMatchObject({
+      id: "engine.decision.crank",
+    });
+    expect(g.state.pendingDecision?.optionMessages).toEqual([
+      { id: "common.option.yes" },
+      { id: "common.option.no" },
+    ]);
+    expect(projectStateFor(g.state, 0).pendingDecision?.promptMessage).toBeDefined();
+    expect(projectStateFor(g.state, 1).pendingDecision?.promptMessage).toBeUndefined();
   });
 
   it("Cog in the Machine offers Crank for both Golden Cogs before its tap choice", () => {

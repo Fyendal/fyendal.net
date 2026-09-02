@@ -1108,6 +1108,9 @@ function projectState(
                 : revealAll || pd.player === seat
                   ? pd.prompt
                   : "",
+            ...(privateDecision && pd.promptMessage
+              ? { promptMessage: pd.promptMessage }
+              : {}),
             ...((revealAll || pd.player === seat) && pd.options ? { options: pd.options } : {}),
             ...((revealAll || pd.player === seat) && pd.minimumSelections !== undefined
               ? {
@@ -1119,6 +1122,7 @@ function projectState(
               ? { defaultOption: pd.defaultOption }
               : {}),
             ...((revealAll || pd.player === seat) && pd.optionLabels ? { optionLabels: pd.optionLabels } : {}),
+            ...(privateDecision && pd.optionMessages ? { optionMessages: pd.optionMessages } : {}),
             ...((revealAll || pd.player === seat) && pd.optionCounts ? { optionCounts: pd.optionCounts } : {}),
             ...((revealAll || pd.player === seat) && pd.cardOptions
               ? {

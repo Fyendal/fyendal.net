@@ -15,7 +15,7 @@ describe("guest search landing", () => {
       </TestI18nProvider>,
     );
 
-    expect(html).toContain("Play Flesh and Blood online");
+    expect(html).toContain("Play Flesh and Blood Online");
     expect(html).toContain("Play for free in your browser");
     expect(html).toContain("Find opponents, practice against hero-specific bots");
     expect(html).not.toContain('class="intro-logo"');
@@ -44,7 +44,7 @@ describe("guest search landing", () => {
     const html = renderToStaticMarkup(<SeoPrerenderedLanding intl={createTestIntl()} />);
 
     expect(html).toContain('<main id="main-content"');
-    expect(html).toContain("Play Flesh and Blood online");
+    expect(html).toContain("Play Flesh and Blood Online");
     expect(html).toContain("Terms of Service");
     expect(html).toContain("Privacy Policy");
   });
@@ -59,7 +59,7 @@ describe("guest search landing", () => {
       </TestI18nProvider>,
     );
 
-    expect(html).toContain("在线畅玩 Flesh and Blood");
+    expect(html).toContain("在线畅玩赤魂战纪 (Flesh &amp; Blood)");
     expect(html).toContain("<strong>2</strong> 人正在对局");
     expect(html).toContain("常见问题");
     expect(html).toContain("我可以导入 Fabrary 牌组吗？");

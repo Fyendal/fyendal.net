@@ -1,6 +1,7 @@
 import { cardData } from "@fyendal/cards/client";
-import type { CardView } from "@fyendal/shared";
+import type { CardView, GameMessage } from "@fyendal/shared";
 import type { ReactNode } from "react";
+import { GameMessageText } from "../../i18n/GameMessage.js";
 
 /** Inline card name that triggers the hover preview (via data-cardid delegation). */
 export function CardRef({ id, name }: { id: string; name?: string }) {
@@ -23,13 +24,26 @@ for (const [id, data] of Object.entries(cardData)) {
 /** Turn a leading card name in a scripted prompt into an inspectable card reference. */
 export function DecisionPrompt({
   prompt,
+  message,
   suffix,
   breakOnDash = false,
 }: {
   prompt: string;
+  message?: GameMessage;
   suffix?: ReactNode;
   breakOnDash?: boolean;
 }) {
+  if (message) {
+    return (
+      <span className="decision-prompt">
+        <GameMessageText
+          message={message}
+          resolvers={{ card: (cardId) => <CardRef id={cardId} /> }}
+        />
+        {suffix}
+      </span>
+    );
+  }
   const separator = prompt.indexOf(":");
   const name = separator === -1 ? prompt : prompt.slice(0, separator);
   const cardId = separator === -1 ? undefined : firstPrintingByName.get(name);

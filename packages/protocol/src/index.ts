@@ -5,6 +5,8 @@ import type {
   DeckPool,
   Format,
   GameIntent,
+  GameMessage,
+  GameMessageValue,
   GameStatsView,
   GameTransitionMove,
   GameTransitionView,
@@ -156,7 +158,14 @@ const MAX_ROOMS = 10_000;
 const MAX_DECKS = 1_000;
 const MAX_REPLAY_VIEWS = 10_000;
 const MAX_COUNTERS = 128;
+const MAX_MESSAGE_VALUES = 16;
+const MAX_MESSAGE_VALUE_TEXT = 256;
+const MAX_MESSAGE_VALUE_KEY = 64;
 export const MAX_MATCHMAKING_AVOID_ROOM_CODES = 20;
+
+const MESSAGE_ID_RE = /^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9]*)+$/;
+const MESSAGE_VALUE_KEY_RE = /^[a-zA-Z][a-zA-Z0-9_]*$/;
+const TERM_ID_RE = /^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$/;
 
 const FORMATS = new Set(["classic-battles", "cc", "silver-age"]);
 const HEROES = new Set(["dorinthea", "rhinar"]);
@@ -226,6 +235,50 @@ const shortStrings = (value: unknown, max = MAX_CARDS): value is string[] =>
   array(value, (item): item is string => string(item, MAX_SHORT_TEXT), max);
 const instanceId = (value: unknown): value is number => nonNegativeInteger(value);
 const instanceIds = (value: unknown): value is number[] => array(value, instanceId, MAX_INPUT_CARDS);
+
+function gameMessageValue(value: unknown): value is GameMessageValue {
+  if (
+    typeof value === "boolean" ||
+    (typeof value === "string" && string(value, MAX_MESSAGE_VALUE_TEXT)) ||
+    Number.isSafeInteger(value)
+  ) return true;
+  const reference = object(value);
+  if (!reference || typeof reference.kind !== "string") return false;
+  if (reference.kind === "card") {
+    return exactKeys(reference, ["kind", "cardId"]) && id(reference.cardId);
+  }
+  if (reference.kind === "player") {
+    return exactKeys(reference, ["kind", "seat"]) && seat(reference.seat);
+  }
+  if (reference.kind === "term") {
+    return exactKeys(reference, ["kind", "id"])
+      && string(reference.id, MAX_ID, false) && TERM_ID_RE.test(reference.id);
+  }
+  return false;
+}
+
+/** Decode a locale-independent message received from a wire or replay boundary. */
+export function decodeGameMessage(value: unknown): GameMessage | null {
+  const message = object(value);
+  if (
+    !message ||
+    !exactKeys(message, ["id", "values"], ["id"]) ||
+    !string(message.id, MAX_ID, false) ||
+    !MESSAGE_ID_RE.test(message.id)
+  ) return null;
+  if (message.values === undefined) return { id: message.id };
+  const values = object(message.values);
+  if (!values) return null;
+  const entries = Object.entries(values);
+  if (
+    entries.length > MAX_MESSAGE_VALUES ||
+    entries.some(([key, entry]) =>
+      key.length > MAX_MESSAGE_VALUE_KEY ||
+      !MESSAGE_VALUE_KEY_RE.test(key) ||
+      !gameMessageValue(entry))
+  ) return null;
+  return { id: message.id, values: values as Record<string, GameMessageValue> };
+}
 
 function numberRecord(value: unknown): value is Record<string, number> {
   const record = object(value);
@@ -669,16 +722,19 @@ function turnFacts(value: unknown): value is TurnFactsView {
 function pendingDecision(value: unknown): boolean {
   const decision = object(value);
   return !!decision && exactKeys(decision, [
-    "player", "kind", "prompt", "options", "minimumSelections", "maximumSelections", "defaultOption", "optionLabels", "optionCounts", "optionCards", "revealedCards", "lookedCards", "stagedCards", "stagedDefense",
+    "player", "kind", "prompt", "promptMessage", "options", "minimumSelections", "maximumSelections", "defaultOption", "optionLabels", "optionMessages", "optionCounts", "optionCards", "revealedCards", "lookedCards", "stagedCards", "stagedDefense",
     "resourcePayment", "preStackSource",
   ], ["player", "kind", "prompt"])
     && seat(decision.player) && DECISION_KINDS.has(String(decision.kind))
     && string(decision.prompt, MAX_TEXT)
+    && optional(decision.promptMessage, (value): value is GameMessage => decodeGameMessage(value) !== null)
     && optional(decision.options, (v): v is string[] => shortStrings(v))
     && optional(decision.minimumSelections, nonNegativeInteger)
     && optional(decision.maximumSelections, nonNegativeInteger)
     && optional(decision.defaultOption, (v): v is string => string(v, MAX_SHORT_TEXT, false))
     && optional(decision.optionLabels, (v): v is string[] => shortStrings(v))
+    && optional(decision.optionMessages, (v): v is Array<GameMessage | null> =>
+      array(v, (item): item is GameMessage | null => item === null || decodeGameMessage(item) !== null, MAX_CARDS))
     && optional(decision.optionCounts, (v): v is Array<number | null> =>
       array(v, (count): count is number | null =>
         count === null || (integer(count) && count >= 2 && count <= MAX_CARDS), MAX_CARDS))
@@ -714,6 +770,8 @@ function pendingDecision(value: unknown): boolean {
       || decision.options.length === decision.optionCards.length)
     && (!(Array.isArray(decision.options) && Array.isArray(decision.optionLabels))
       || decision.options.length === decision.optionLabels.length)
+    && (!(Array.isArray(decision.options) && Array.isArray(decision.optionMessages))
+      || decision.options.length === decision.optionMessages.length)
     && (!(Array.isArray(decision.options) && Array.isArray(decision.optionCounts))
       || decision.options.length === decision.optionCounts.length)
     && ((decision.minimumSelections === undefined) === (decision.maximumSelections === undefined))

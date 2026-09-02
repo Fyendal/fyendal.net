@@ -1,6 +1,8 @@
 import type { CardView } from "@fyendal/shared";
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useIntl } from "react-intl";
+import { formatGameMessage } from "../../i18n/GameMessage.js";
 import { CardFace } from "../Card.js";
 import {
   isPriorityGuidanceDecision,
@@ -22,6 +24,38 @@ import { TriggerOrderDecision } from "./TriggerOrderDecision.js";
 
 const GUIDANCE_SETTINGS_TOOLTIP =
   "Uncheck Show guidance in Settings, or select Disable now.";
+
+function LocalizedDecisionOptionButton({
+  message,
+  option,
+  spaceDefault,
+  onChoose,
+}: {
+  message: NonNullable<NonNullable<PendingDecisionModel["decision"]>["optionMessages"]>[number];
+  option: string;
+  spaceDefault: boolean;
+  onChoose: () => void;
+}) {
+  const intl = useIntl();
+  if (!message) return null;
+  const label = formatGameMessage(intl, message);
+  return (
+    <button
+      key={option}
+      className={spaceDefault ? "btn-primary shortcut-button" : undefined}
+      onClick={onChoose}
+      {...(spaceDefault
+        ? {
+            title: intl.formatMessage({ id: "common.shortcut.space" }, { label }),
+            "aria-keyshortcuts": "Space",
+          }
+        : {})}
+    >
+      {label}
+      {spaceDefault ? <kbd className="shortcut-key" aria-label="Space key" /> : null}
+    </button>
+  );
+}
 
 export function GuidanceSettingsPopover({
   onDisableGuidance,
@@ -236,6 +270,7 @@ export function PendingDecisionPanel({
     }`}>
       <DecisionPrompt
         prompt={pd.kind === "defend" ? "Pitch to pay this defense cost" : pd.prompt}
+        message={pd.kind === "defend" ? undefined : pd.promptMessage}
         breakOnDash={priorityGuidanceDecision}
         suffix={priorityGuidanceDecision ? (
           <GuidanceSettingsInfo onDisableGuidance={onDisableGuidance} />
@@ -361,6 +396,18 @@ export function PendingDecisionPanel({
             if (pd.optionCards?.[index]) return null;
             if (pd.resourcePayment?.options.some((candidate) => candidate.optionId === option)) return null;
             const spaceDefault = option === defaultSpaceOption;
+            const optionMessage = pd.optionMessages?.[index];
+            if (optionMessage) {
+              return (
+                <LocalizedDecisionOptionButton
+                  key={option}
+                  message={optionMessage}
+                  option={option}
+                  spaceDefault={spaceDefault}
+                  onChoose={() => onSend({ kind: "choose", optionId: option })}
+                />
+              );
+            }
             const shortcutLabel = option.length > 0
               ? `${option[0]!.toUpperCase()}${option.slice(1)}`
               : option;

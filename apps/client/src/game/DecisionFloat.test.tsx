@@ -1,6 +1,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 import { decisionFloatDragKey } from "./DecisionFloat.js";
 import { BloodModeDecision } from "./decision/BloodModeDecision.js";
 import { ActionTargetCards, RevealedChoiceCards } from "./decision/CardChoices.js";
@@ -214,6 +215,34 @@ describe("priority guidance help", () => {
     }));
 
     expect(html).not.toContain("decision-guidance-info");
+  });
+
+  it("renders semantic prompts and unchanged yes/no option ids in Chinese", () => {
+    const model = pendingModel("optional-effect");
+    model.decision = {
+      player: 0,
+      kind: "optional-effect",
+      prompt: "Reverent Rerebrace: Crank?",
+      promptMessage: {
+        id: "engine.decision.crank",
+        values: { card: { kind: "card", cardId: "AHA005" } },
+      },
+      options: ["yes", "no"],
+      optionMessages: [{ id: "common.option.yes" }, { id: "common.option.no" }],
+      defaultOption: "yes",
+    };
+    const html = renderToStaticMarkup(
+      <TestI18nProvider locale="zh-Hans">
+        <PendingDecisionPanel model={model} viewerSeat={0} />
+      </TestI18nProvider>,
+    );
+
+    expect(html).toContain('data-cardid="AHA005"');
+    expect(html).toContain("Crank——移除一个蒸汽指示物");
+    expect(html).toContain(">是");
+    expect(html).toContain(">否<");
+    expect(html).toContain('title="是（空格键）"');
+    expect(model.decision.options).toEqual(["yes", "no"]);
   });
 });
 

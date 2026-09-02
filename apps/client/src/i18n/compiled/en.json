@@ -129,6 +129,34 @@
       "value": "Flesh and Blood Online"
     }
   ],
+  "common.option.no": [
+    {
+      "type": 0,
+      "value": "No"
+    }
+  ],
+  "common.option.pass": [
+    {
+      "type": 0,
+      "value": "Pass"
+    }
+  ],
+  "common.option.yes": [
+    {
+      "type": 0,
+      "value": "Yes"
+    }
+  ],
+  "common.shortcut.space": [
+    {
+      "type": 1,
+      "value": "label"
+    },
+    {
+      "type": 0,
+      "value": " (Space)"
+    }
+  ],
   "discord.label": [
     {
       "type": 0,
@@ -139,6 +167,16 @@
     {
       "type": 0,
       "value": "Join the Fyendal Discord"
+    }
+  ],
+  "engine.decision.crank": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": Crank — remove a steam counter to gain 1 action point?"
     }
   ],
   "footer.legal": [

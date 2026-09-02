@@ -35,8 +35,9 @@ export function decisionFloatDragKey(
   return `pending:${JSON.stringify([
     decision.player,
     decision.kind,
-    decision.prompt,
+    decision.promptMessage ?? decision.prompt,
     decision.options ?? [],
+    decision.optionMessages ?? [],
   ])}`;
 }
 
