@@ -209,6 +209,7 @@ const KEYWORD_OVERRIDES: Record<string, string[]> = {
   "lighten the load|1": [],
   "lighten the load|2": [],
   "lighten the load|3": [],
+  "tigrine reflex|1": ["Combo"],
   "knife through|1": ["Stealth"],
   "knife through|2": ["Stealth"],
   "knife through|3": ["Stealth"],

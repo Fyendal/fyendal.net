@@ -11695,6 +11695,996 @@
       "value": "Terra：支付 1 点资源以生成一个 Might 衍生物？"
     }
   ],
+  "card.trigger.common.actionpoint.gain": [
+    {
+      "type": 0,
+      "value": "获得 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 个行动点"
+    }
+  ],
+  "card.trigger.common.adverseaura.random": [
+    {
+      "type": 0,
+      "value": "随机生成一个负面灵气 (Aura)"
+    }
+  ],
+  "card.trigger.common.agentofchaos.random": [
+    {
+      "type": 0,
+      "value": "变为一个随机的 Agent of Chaos"
+    }
+  ],
+  "card.trigger.common.agility.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Agility；下一次攻击获得 go again"
+    }
+  ],
+  "card.trigger.common.amp": [
+    {
+      "type": 0,
+      "value": "增幅 (amp) "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    }
+  ],
+  "card.trigger.common.arcane.deal": [
+    {
+      "type": 0,
+      "value": "造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "card.trigger.common.arcane.eachhero": [
+    {
+      "type": 0,
+      "value": "对每位英雄造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "card.trigger.common.arcane.target": [
+    {
+      "type": 0,
+      "value": "对目标英雄造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "card.trigger.common.attack.gain": [
+    {
+      "type": 0,
+      "value": "获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
+  "card.trigger.common.aura.bottom.another": [
+    {
+      "type": 0,
+      "value": "将另一个灵气 (Aura) 置于其拥有者的牌库底部"
+    }
+  ],
+  "card.trigger.common.aura.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一个灵气 (Aura)"
+    }
+  ],
+  "card.trigger.common.aura.return.optional": [
+    {
+      "type": 0,
+      "value": "将一个符合条件的灵气 (Aura) 返回其拥有者手牌？"
+    }
+  ],
+  "card.trigger.common.biosupdate.arena": [
+    {
+      "type": 0,
+      "value": "Bios Update：将被放逐的 item 置入 arena"
+    }
+  ],
+  "card.trigger.common.bladedance.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Blade Dance 以获得 go again"
+    }
+  ],
+  "card.trigger.common.blessing.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁此 Blessing"
+    }
+  ],
+  "card.trigger.common.blessingdeliverance.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Blessing of Deliverance 并展示牌库顶牌"
+    }
+  ],
+  "card.trigger.common.bloodrotpox.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Bloodrot Pox：受到 "
+    },
+    {
+      "type": 1,
+      "value": "damage"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害，除非你支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
+  "card.trigger.common.bonepuppetry.discard": [
+    {
+      "type": 0,
+      "value": "结算 Bone Puppetry 的弃牌效果"
+    }
+  ],
+  "card.trigger.common.brood.return": [
+    {
+      "type": 0,
+      "value": "返回巢群"
+    }
+  ],
+  "card.trigger.common.card.banish.runechant": [
+    {
+      "type": 0,
+      "value": "放逐一张牌并生成一个 Runechant"
+    }
+  ],
+  "card.trigger.common.card.draw": [
+    {
+      "type": 0,
+      "value": "抽一张牌"
+    }
+  ],
+  "card.trigger.common.carrionhusk.banish": [
+    {
+      "type": 0,
+      "value": "放逐 Carrion Husk"
+    }
+  ],
+  "card.trigger.common.channel.earth": [
+    {
+      "type": 0,
+      "value": "维持 Earth 的 Channel"
+    }
+  ],
+  "card.trigger.common.channel.ice": [
+    {
+      "type": 0,
+      "value": "维持 Ice 的 Channel"
+    }
+  ],
+  "card.trigger.common.channel.lightning": [
+    {
+      "type": 0,
+      "value": "维持 Lightning 的 Channel"
+    }
+  ],
+  "card.trigger.common.confidence.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Confidence；下一次攻击最多可有 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 张非阻挡防守牌"
+    }
+  ],
+  "card.trigger.common.copper.create": [
+    {
+      "type": 0,
+      "value": "生成 Copper 衍生物"
+    }
+  ],
+  "card.trigger.common.copper.weaponhit": [
+    {
+      "type": 0,
+      "value": "武器攻击 on hit 时生成 Copper"
+    }
+  ],
+  "card.trigger.common.core.reaction": [
+    {
+      "type": 0,
+      "value": "核心反应 (Core Reaction)"
+    }
+  ],
+  "card.trigger.common.courage.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Courage；该攻击获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
+  "card.trigger.common.crouchingtiger.create": [
+    {
+      "type": 0,
+      "value": "生成 Crouching Tiger"
+    }
+  ],
+  "card.trigger.common.dagger.attack": [
+    {
+      "type": 0,
+      "value": "匕首攻击获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
+  "card.trigger.common.dagger.attacks.additional": [
+    {
+      "type": 0,
+      "value": "获得额外的匕首攻击次数"
+    }
+  ],
+  "card.trigger.common.dagger.goagain": [
+    {
+      "type": 0,
+      "value": "匕首攻击获得 go again"
+    }
+  ],
+  "card.trigger.common.damage.attackinghero": [
+    {
+      "type": 0,
+      "value": "对攻击英雄造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
+    }
+  ],
+  "card.trigger.common.damage.deal": [
+    {
+      "type": 0,
+      "value": "造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
+    }
+  ],
+  "card.trigger.common.dawnblade.counters.remove": [
+    {
+      "type": 0,
+      "value": "Dawnblade 本回合未 on hit；移除所有 +1 力量指示物"
+    }
+  ],
+  "card.trigger.common.decay": [
+    {
+      "type": 0,
+      "value": "衰败 (Decay)"
+    }
+  ],
+  "card.trigger.common.deck.banish.power": [
+    {
+      "type": 0,
+      "value": "放逐牌，直到找到一张力量为 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 的牌"
+    }
+  ],
+  "card.trigger.common.deckbottom.owner": [
+    {
+      "type": 0,
+      "value": "将此牌置于其拥有者的牌库底部"
+    }
+  ],
+  "card.trigger.common.decktop.banish": [
+    {
+      "type": 0,
+      "value": "放逐你的牌库顶牌"
+    }
+  ],
+  "card.trigger.common.decktop.banish.traverse": [
+    {
+      "type": 0,
+      "value": "放逐你的牌库顶牌；若你已生成 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个 Runechant，则进行 traverse"
+    }
+  ],
+  "card.trigger.common.defend.add": [
+    {
+      "type": 0,
+      "value": "将此牌作为防守牌加入当前 chain link"
+    }
+  ],
+  "card.trigger.common.defensecounter.minus": [
+    {
+      "type": 0,
+      "value": "在此牌上放置一个 -"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 防御指示物"
+    }
+  ],
+  "card.trigger.common.defensereaction.cost": [
+    {
+      "type": 0,
+      "value": "对手的防御反应牌费用增加 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
+  "card.trigger.common.discarded.banish": [
+    {
+      "type": 0,
+      "value": "放逐被弃掉的牌"
+    }
+  ],
+  "card.trigger.common.dominate.gain": [
+    {
+      "type": 0,
+      "value": "获得压制 (dominate)"
+    }
+  ],
+  "card.trigger.common.dracofire.banish.resource": [
+    {
+      "type": 0,
+      "value": "放逐 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张 Draco Fire，以获得 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
+  "card.trigger.common.draw.handtop.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁此牌，抽一张牌，然后将一张手牌置于你的牌库顶部"
+    }
+  ],
+  "card.trigger.common.eloquence.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Eloquence；该牌获得 go again"
+    }
+  ],
+  "card.trigger.common.embodimentearth.create": [
+    {
+      "type": 0,
+      "value": "生成一个 Embodiment of Earth"
+    }
+  ],
+  "card.trigger.common.embodimentlightning.create": [
+    {
+      "type": 0,
+      "value": "生成一个 Embodiment of Lightning"
+    }
+  ],
+  "card.trigger.common.embodimentlightning.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Embodiment of Lightning；该攻击获得 go again"
+    }
+  ],
+  "card.trigger.common.emergingpower.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Emerging Power 并强化下一次 Guardian 攻击"
+    }
+  ],
+  "card.trigger.common.enchantingmelody.destroy": [
+    {
+      "type": 0,
+      "value": "若你未打出非攻击行动牌，则摧毁 Enchanting Melody"
+    }
+  ],
+  "card.trigger.common.energy.seismicsurge": [
+    {
+      "type": 0,
+      "value": "移除一个能量指示物并生成一个 Seismic Surge"
+    }
+  ],
+  "card.trigger.common.ephemeral.name": [
+    {
+      "type": 0,
+      "value": "为该临时攻击指定一个牌名"
+    }
+  ],
+  "card.trigger.common.equipment.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁此装备"
+    }
+  ],
+  "card.trigger.common.equipment.faceup.optional": [
+    {
+      "type": 0,
+      "value": "将此装备翻至正面朝上？"
+    }
+  ],
+  "card.trigger.common.faceup.optional": [
+    {
+      "type": 0,
+      "value": "将此牌翻至正面朝上？"
+    }
+  ],
+  "card.trigger.common.flurry.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Flurry；本回合你可以用该武器攻击两次"
+    }
+  ],
+  "card.trigger.common.frostbite.create": [
+    {
+      "type": 0,
+      "value": "生成一个 Frostbite"
+    }
+  ],
+  "card.trigger.common.frostbite.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Frostbite"
+    }
+  ],
+  "card.trigger.common.frostbite.exposed.create": [
+    {
+      "type": 0,
+      "value": "在一个暴露的装备区域生成 Frostbite"
+    }
+  ],
+  "card.trigger.common.goagain.gain": [
+    {
+      "type": 0,
+      "value": "获得 go again"
+    }
+  ],
+  "card.trigger.common.gold.create": [
+    {
+      "type": 0,
+      "value": "生成一个 Gold 衍生物"
+    }
+  ],
+  "card.trigger.common.goldkissrum.create": [
+    {
+      "type": 0,
+      "value": "生成一个 Goldkiss Rum 衍生物"
+    }
+  ],
+  "card.trigger.common.guardian.attack.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁此牌；你的下一次 Guardian 攻击获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
+  "card.trigger.common.guardian.attack.named.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": "；你的下一次 Guardian 攻击获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
+  "card.trigger.common.guardian.attack.wager.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁此牌；你的下一次 Guardian 攻击获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量，且可以进行 wager"
+    }
+  ],
+  "card.trigger.common.guardian.empower.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁此牌并强化下一次 Guardian 攻击"
+    }
+  ],
+  "card.trigger.common.hand.arsenal.optional": [
+    {
+      "type": 0,
+      "value": "将一张手牌面朝下置入 arsenal？"
+    }
+  ],
+  "card.trigger.common.hand.card.banish": [
+    {
+      "type": 0,
+      "value": "放逐一张手牌"
+    }
+  ],
+  "card.trigger.common.hand.card.banish.hunger": [
+    {
+      "type": 0,
+      "value": "放逐一张手牌，然后检查 hunger"
+    }
+  ],
+  "card.trigger.common.heave": [
+    {
+      "type": 0,
+      "value": "heave "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    }
+  ],
+  "card.trigger.common.heavyswing.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Heavy Swing 并强化一把剑"
+    }
+  ],
+  "card.trigger.common.heroes.life.gain": [
+    {
+      "type": 0,
+      "value": "双方英雄各获得 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点生命"
+    }
+  ],
+  "card.trigger.common.intimidate": [
+    {
+      "type": 0,
+      "value": "intimidate"
+    }
+  ],
+  "card.trigger.common.korshem.check": [
+    {
+      "type": 0,
+      "value": "检查 Korshem"
+    }
+  ],
+  "card.trigger.common.leavearena.resolve": [
+    {
+      "type": 0,
+      "value": "结算离场效果"
+    }
+  ],
+  "card.trigger.common.life.gain": [
+    {
+      "type": 0,
+      "value": "获得 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点生命"
+    }
+  ],
+  "card.trigger.common.lightningembodiment.or.flow": [
+    {
+      "type": 0,
+      "value": "生成 Embodiment of Lightning 或 Lightning Flow"
+    }
+  ],
+  "card.trigger.common.lightningflow.create": [
+    {
+      "type": 0,
+      "value": "生成一个 Lightning Flow 衍生物"
+    }
+  ],
+  "card.trigger.common.loyalty.banish.draw": [
+    {
+      "type": 0,
+      "value": "放逐 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张 Loyalty Beyond the Grave 以抽牌"
+    }
+  ],
+  "card.trigger.common.might.create": [
+    {
+      "type": 0,
+      "value": "生成一个 Might 衍生物"
+    }
+  ],
+  "card.trigger.common.might.create.count": [
+    {
+      "type": 0,
+      "value": "生成 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个 Might 衍生物"
+    }
+  ],
+  "card.trigger.common.mistcloakgully.check": [
+    {
+      "type": 0,
+      "value": "检查 Mistcloak Gully"
+    }
+  ],
+  "card.trigger.common.named.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    }
+  ],
+  "card.trigger.common.nextattack.power.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁此牌；下一张攻击行动牌获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
+  "card.trigger.common.opt.draw.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁此牌，进行 opt，然后抽牌"
+    }
+  ],
+  "card.trigger.common.overpower.gain": [
+    {
+      "type": 0,
+      "value": "获得 overpower"
+    }
+  ],
+  "card.trigger.common.pyroglyphic.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Pyroglyphic Protection"
+    }
+  ],
+  "card.trigger.common.quicken.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Quicken；该攻击获得 go again"
+    }
+  ],
+  "card.trigger.common.resource.gain": [
+    {
+      "type": 0,
+      "value": "获得 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
+  "card.trigger.common.runebloodincantation": [
+    {
+      "type": 0,
+      "value": "结算 Runeblood Incantation"
+    }
+  ],
+  "card.trigger.common.runechant.create": [
+    {
+      "type": 0,
+      "value": "生成一个 Runechant"
+    }
+  ],
+  "card.trigger.common.runechant.create.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁此牌并生成一个 Runechant"
+    }
+  ],
+  "card.trigger.common.runechant.destroy.damage": [
+    {
+      "type": 0,
+      "value": "摧毁 Runechant；对对方英雄造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "card.trigger.common.runechant.unpreventable.optional": [
+    {
+      "type": 0,
+      "value": "支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点生命，使下一个 Runechant 的伤害无法被防止？"
+    }
+  ],
+  "card.trigger.common.sandcounter.add": [
+    {
+      "type": 0,
+      "value": "增加一个 sand 指示物"
+    }
+  ],
+  "card.trigger.common.seismicsurge.create": [
+    {
+      "type": 0,
+      "value": "生成一个 Seismic Surge 衍生物"
+    }
+  ],
+  "card.trigger.common.seismicsurge.create.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁此牌并生成 Seismic Surge"
+    }
+  ],
+  "card.trigger.common.shiyana.copy": [
+    {
+      "type": 0,
+      "value": "用 Shiyana 复制一个英雄"
+    }
+  ],
+  "card.trigger.common.sigilprotection.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Sigil of Protection"
+    }
+  ],
+  "card.trigger.common.sigilsolitude.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Sigil of Solitude"
+    }
+  ],
+  "card.trigger.common.silver.arena.optional": [
+    {
+      "type": 0,
+      "value": "摧毁 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 个 Silver，将此牌返回 arena？"
+    }
+  ],
+  "card.trigger.common.silver.destroy.or.bottomdraw": [
+    {
+      "type": 0,
+      "value": "摧毁一个 Silver，或将此牌置于其拥有者的牌库底部并抽牌"
+    }
+  ],
+  "card.trigger.common.silver.equip": [
+    {
+      "type": 0,
+      "value": "摧毁 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 个 Silver 以装备此牌"
+    }
+  ],
+  "card.trigger.common.silver.equip.optional": [
+    {
+      "type": 0,
+      "value": "摧毁 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 个 Silver 以装备此牌？"
+    }
+  ],
+  "card.trigger.common.soul.chainclose": [
+    {
+      "type": 0,
+      "value": "combat chain 关闭时，将此牌置入你英雄的 soul"
+    }
+  ],
+  "card.trigger.common.steam.remove.destroy": [
+    {
+      "type": 0,
+      "value": "移除一个 steam 指示物，或摧毁此牌"
+    }
+  ],
+  "card.trigger.common.stonewall.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Stonewall Confidence"
+    }
+  ],
+  "card.trigger.common.suspense.remove": [
+    {
+      "type": 0,
+      "value": "移除一个 suspense 指示物"
+    }
+  ],
+  "card.trigger.common.thaw.banish.optional": [
+    {
+      "type": 0,
+      "value": "放逐 Thaw，以摧毁一张牌或将其解除冻结？"
+    }
+  ],
+  "card.trigger.common.verse.runechant": [
+    {
+      "type": 0,
+      "value": "移除一个 verse 指示物并生成一个 Runechant"
+    }
+  ],
+  "card.trigger.common.wager.defender": [
+    {
+      "type": 0,
+      "value": "与防守英雄进行 wager"
+    }
+  ],
+  "card.trigger.common.wager.defender.optional": [
+    {
+      "type": 0,
+      "value": "与防守英雄进行 wager？"
+    }
+  ],
+  "card.trigger.common.wagertokens.create.four": [
+    {
+      "type": 0,
+      "value": "生成 Confidence、Might、Toughness 和 Vigor 衍生物"
+    }
+  ],
+  "card.trigger.common.wagertokens.create.three": [
+    {
+      "type": 0,
+      "value": "生成 Agility、Might 和 Vigor 衍生物"
+    }
+  ],
   "card.trigger.energycounter.add": [
     {
       "type": 0,

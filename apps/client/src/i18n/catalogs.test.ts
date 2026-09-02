@@ -8,6 +8,9 @@ import { createTestIntl } from "./TestI18nProvider.js";
 const cardScriptsDirectory = fileURLToPath(
   new URL("../../../../packages/cards/src/scripts/", import.meta.url),
 );
+const cardTriggerMessagesFile = fileURLToPath(
+  new URL("../../../../packages/cards/src/trigger-messages.ts", import.meta.url),
+);
 const engineSourceDirectory = fileURLToPath(
   new URL("../../../../packages/engine/src/", import.meta.url),
 );
@@ -37,7 +40,7 @@ describe("locale catalogs", () => {
   });
 
   it("contains every semantic message referenced by card scripts", () => {
-    const referencedIds = new Set(scriptFiles(cardScriptsDirectory).flatMap((path) =>
+    const referencedIds = new Set([...scriptFiles(cardScriptsDirectory), cardTriggerMessagesFile].flatMap((path) =>
       Array.from(
         readFileSync(path, "utf8").matchAll(/["']((?:card|common\.option)\.[a-z0-9.]+)["']/g),
         (match) => match[1]!,

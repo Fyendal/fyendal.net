@@ -901,7 +901,7 @@ export function preparePlayTarget(
 
 export const MAX_ALTERNATIVE_COST_OPTIONS = 64;
 
-function controlledCostCards(state: GameStateInternal, player: PlayerState): CardInstance[] {
+export function controlledCostCards(state: GameStateInternal, player: PlayerState): CardInstance[] {
   const cards = [
     ...player.board,
     ...player.weapons,
