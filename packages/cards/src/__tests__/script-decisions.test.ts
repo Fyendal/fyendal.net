@@ -35,6 +35,7 @@ const localizedSets = [
   "mpa",
   "mpw",
   "out",
+  "pen",
   "sar",
   "saz",
   "sbz",
