@@ -16,7 +16,7 @@ import {
 } from "./zoneQueries.js";
 import { controlledPermanents, hookSources } from "./sourceQueries.js";
 
-import { stampControlledName } from "./cardLifecycle.js";
+import { clearPrivateZonePlacement, stampControlledName } from "./cardLifecycle.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import {
   transitionZone,
@@ -298,6 +298,63 @@ export function destroyPermanent(state: GameStateInternal,
   );
   if (attacking) runtime.events.fireFriendlyAttackLost(state, controllerSeat, card, "ally-died");
   return true;
+}
+
+/** Destroy a card controlled by `seat` from the arena or combat chain. Chain
+ * cards are removed from combat immediately; attacking cards retain their
+ * last-known chain snapshot while the physical card moves to the graveyard. */
+export function destroyControlledCard(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  seat: number,
+  card: CardInstance,
+): boolean {
+  const permanent = findPermanent(state, card.instanceId);
+  if (permanent) {
+    return permanent.seat === seat && destroyPermanent(state, runtime, seat, permanent.card);
+  }
+
+  for (let index = state.chain.length - 1; index >= 0; index--) {
+    const link = state.chain[index]!;
+    if (
+      link.attacker === seat &&
+      link.attackCardType === "action" &&
+      link.flags.attackGone !== true &&
+      link.attackingCard.instanceId === card.instanceId
+    ) {
+      link.flags.attackGone = true;
+      moveToGraveyard(state, runtime, link.attackingCard, "chain", seat);
+      logPublic(state, `${nameOf(state, link.attackingCard.cardId)} is destroyed`);
+      runtime.events.runHook(state, seat, link.attackingCard, "onDestroyed", link);
+      runtime.events.fireFriendlyDestroyed(state, seat, link.attackingCard, seat);
+      return true;
+    }
+
+    const defending = link.defendingCards.find(
+      (candidate) => candidate.owner === seat && candidate.instanceId === card.instanceId,
+    );
+    if (defending) {
+      removeFromArray(link.defendingCards, defending.instanceId);
+      moveToGraveyard(state, runtime, defending, "chain", seat);
+      logPublic(state, `${nameOf(state, defending.cardId)} is destroyed`);
+      runtime.events.runHook(state, seat, defending, "onDestroyed", link);
+      runtime.events.fireFriendlyDestroyed(state, seat, defending, seat);
+      return true;
+    }
+
+    const reaction = link.reactions.find(
+      (candidate) => candidate.owner === seat && candidate.instanceId === card.instanceId,
+    );
+    if (reaction) {
+      removeFromArray(link.reactions, reaction.instanceId);
+      moveToGraveyard(state, runtime, reaction, "chain", seat);
+      logPublic(state, `${nameOf(state, reaction.cardId)} is destroyed`);
+      runtime.events.runHook(state, seat, reaction, "onDestroyed", link);
+      runtime.events.fireFriendlyDestroyed(state, seat, reaction, seat);
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
@@ -588,6 +645,11 @@ export function putCardOnDeckBottom(
 ): boolean {
   const found = removeFromOwnerZones(state, instanceId);
   if (!found) return false;
+  const privateSource = found.fromZone === "hand" || found.fromZone === "deck"
+    || (found.fromZone === "arsenal" && found.card.faceDown)
+    || (found.fromZone === "banish" && found.card.faceDown);
+  const sourceWasFaceDown = found.card.faceDown === true;
+  clearPrivateZonePlacement(found.card);
   found.owner.deck.push(found.card);
   const source = transitionZoneFromEngineZone(found.fromZone, found.owner.seat);
   runtime.transitions.move(
@@ -595,7 +657,7 @@ export function putCardOnDeckBottom(
     source,
     transitionZone("deck", found.owner.seat, "bottom"),
     {
-      from: source !== null && transitionZoneIsPrivate(source.kind, found.card.faceDown === true),
+      from: source !== null && transitionZoneIsPrivate(source.kind, sourceWasFaceDown),
       to: true,
     },
   );
@@ -603,9 +665,6 @@ export function putCardOnDeckBottom(
     runtime.events.fireCardLeavesGraveyard(state, found.owner.seat, found.card, "deck");
   }
   if (found.fromArena) fireLeaveArena(state, runtime, found.owner.seat, found.card, "deck", asActivationCost);
-  const privateSource = found.fromZone === "hand" || found.fromZone === "deck"
-    || (found.fromZone === "arsenal" && found.card.faceDown)
-    || (found.fromZone === "banish" && found.card.faceDown);
   const detail = `${nameOf(state, found.card.cardId)} is put on the bottom of the deck`;
   if (privateSource) logPrivate(state, found.owner.seat, detail, "a card is put on the bottom of the deck");
   else logPublic(state, detail);

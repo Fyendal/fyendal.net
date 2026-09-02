@@ -28,6 +28,7 @@ function modifierMatches(
   granted: (tag: string) => boolean = () => false,
   grantedNames: readonly string[] = [],
   keywordAbilitiesActive = true,
+  effectiveCardTypes: readonly string[] = [data.cardType],
 ): boolean {
   const appliesTo = modifier.appliesTo ?? "any";
   if (appliesTo === "weapon") {
@@ -72,12 +73,15 @@ function modifierMatches(
     (data.subtypes ?? []).includes(modifier.excludesSubtype)
   ) return false;
   if (modifier.appliesToCardType === "reaction") {
-    if (data.cardType !== "attack-reaction" && data.cardType !== "defense-reaction") {
+    if (
+      !effectiveCardTypes.includes("attack-reaction") &&
+      !effectiveCardTypes.includes("defense-reaction")
+    ) {
       return false;
     }
   } else if (
     modifier.appliesToCardType &&
-    data.cardType !== modifier.appliesToCardType
+    !effectiveCardTypes.includes(modifier.appliesToCardType)
   ) return false;
   if (modifier.appliesToPitch !== undefined && color !== modifier.appliesToPitch) return false;
   const hasTag = (tag: string): boolean =>
@@ -138,6 +142,11 @@ export function modifierAppliesToDefense(
     modifier.appliesToInstanceId !== card.instanceId
   ) return false;
   if (modifier.appliesTo === "weapon" || modifier.appliesTo === "sword") return false;
+  // Outside the stack, a split-card has the card types of both sides (CR 9.2.2).
+  const meld = state.scriptsRef[card.cardId]?.meld;
+  const effectiveCardTypes = meld
+    ? [meld.leftCardType, meld.rightCardType]
+    : [data.cardType];
   return modifierMatches(
     modifier,
     data,
@@ -146,6 +155,7 @@ export function modifierAppliesToDefense(
     undefined,
     undefined,
     !cardAbilitiesSuppressed(state, card),
+    effectiveCardTypes,
   );
 }
 

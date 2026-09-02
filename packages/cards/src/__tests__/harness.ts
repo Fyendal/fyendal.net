@@ -321,6 +321,15 @@ export class Scenario {
       ...Object.values(player.equipment).filter(
         (card): card is NonNullable<typeof card> => card !== undefined,
       ),
+      ...this.state.chain.flatMap((link) => [
+        ...(link.attacker === seat &&
+          link.attackCardType === "action" &&
+          link.flags.attackGone !== true
+          ? [link.attackingCard]
+          : []),
+        ...link.defendingCards.filter((card) => card.owner === seat),
+        ...link.reactions.filter((card) => card.owner === seat),
+      ]),
     ];
     const used = new Set<number>();
     return keys.map((key) => {

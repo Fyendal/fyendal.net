@@ -597,6 +597,26 @@ describe("PEN — generalized rules interactions", () => {
     expect(g.state.players[0]!.board.filter((card) => functionalKeyOf(cardData[card.cardId]!) === "might|0")).toHaveLength(4);
   });
 
+  it("Arc Bending gets go again when a Lightning card is pitched to play it", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["death dealer|0"],
+          arsenal: ["arc bending|1"],
+          hand: ["heaven's claws|3"],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.play("arc bending|1", { fromArsenal: true, pitch: ["heaven's claws|3"] })
+      .blockWith()
+      .settle()
+      .expectAP(0, 1);
+  });
+
   it("Distant Rumbling inserts the chosen card fifth from the top", () => {
     const g = scenario({
       seats: [

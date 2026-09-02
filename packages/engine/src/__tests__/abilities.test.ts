@@ -36,6 +36,28 @@ function boardCard(s: GameStateInternal, seat: number, cardId: string): { s: Gam
   return { s: after, id: found.instanceId };
 }
 
+function grantActionIdolInstantTiming(s: GameStateInternal, seat: number): number {
+  const idolId = giveCard(s, seat, "IDOL");
+  const idolIndex = player(s, seat).hand.findIndex((card) => card.instanceId === idolId);
+  player(s, seat).board.push(player(s, seat).hand.splice(idolIndex, 1)[0]!);
+  s.scriptsRef = {
+    ...s.scriptsRef,
+    IDOL: {
+      activated: {
+        cost: 0,
+        isAttack: false,
+        goAgain: true,
+        timing: "action",
+        onActivate(ctx) {
+          ctx.gainLife(ctx.seat, 1);
+        },
+      },
+    },
+  };
+  player(s, seat).flags["abilitiesAsInstant:item"] = true;
+  return idolId;
+}
+
 describe("multiple activated abilities per card", () => {
   it("projects spent once-per-turn weapon abilities to both players", () => {
     const s = makeGame(20);
@@ -142,6 +164,57 @@ describe("multiple activated abilities per card", () => {
 });
 
 describe("empty-stack action-phase priority", () => {
+  it("activates an action ability with granted instant timing at zero action points", () => {
+    let s = makeGame(23);
+    const idolId = grantActionIdolInstantTiming(s, 0);
+    player(s, 0).actionPoints = 0;
+
+    const activation = abilityIntents(s, 0, idolId)[0];
+    expect(activation).toBeDefined();
+    let result = applyIntent(s, 0, activation!);
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(result.error);
+    s = result.state;
+    for (let i = 0; i < 2; i++) {
+      result = applyIntent(s, s.priorityPlayer, { kind: "pass" });
+      expect(result.ok).toBe(true);
+      if (!result.ok) throw new Error(result.error);
+      s = result.state;
+    }
+    expect(player(s, 0).actionPoints).toBe(1);
+    expect(player(s, 0).life).toBe(21);
+  });
+
+  it("retains go again when a granted-instant action ability is activated in a priority window", () => {
+    let s = makeGame(230);
+    const idolId = grantActionIdolInstantTiming(s, 0);
+    player(s, 0).actionPoints = 0;
+    const opener = giveCard(s, 0, "INSTANT");
+
+    let result = applyIntent(s, 0, {
+      kind: "play-card",
+      instanceId: opener,
+      pitchInstanceIds: [],
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(result.error);
+    s = result.state;
+    const activation = abilityIntents(s, 0, idolId)[0];
+    expect(activation).toBeDefined();
+    result = applyIntent(s, 0, activation!);
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(result.error);
+    s = result.state;
+    for (let i = 0; i < 6 && s.pendingDecision; i++) {
+      result = applyIntent(s, s.pendingDecision.player, { kind: "pass" });
+      expect(result.ok).toBe(true);
+      if (!result.ok) throw new Error(result.error);
+      s = result.state;
+    }
+    expect(player(s, 0).actionPoints).toBe(1);
+    expect(player(s, 0).life).toBe(22);
+  });
+
   it("lets the opponent activate an instant ability before the action phase ends", () => {
     let s = makeGame(24);
     const idolId = giveCard(s, 1, "IDOL");

@@ -191,6 +191,41 @@ describe("OUT — registration and core mechanics", () => {
     expect(s.state.players[1]!.hero.counters?.marked).toBe(1);
   });
 
+  it.each([
+    ["spider's bite|0", "wounding blow|1", 2],
+    ["nerve scalpel|0", "ancestral empowerment|1", 2],
+    ["orbitoclast|0", "bloodrush bellow|2", 2],
+    ["scale peeler|0", "ironrot helm|0", 0],
+  ] as const)("Flick Knives applies %s's on-hit defense penalty", (dagger, defender, expectedDefense) => {
+    const defenderEquipment = defender === "ironrot helm|0"
+      ? { head: defender }
+      : undefined;
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "arakni, solitary confinement|0",
+          hand: ["infect|1", "infect|1"],
+          weapons: [dagger],
+          equipment: { arms: "flick knives|0" },
+        },
+        {
+          hero: "dorinthea",
+          hand: [BLUE, ...(defenderEquipment ? [] : [defender])],
+          ...(defenderEquipment ? { equipment: defenderEquipment } : {}),
+        },
+      ],
+    });
+
+    s.play("infect|1").blockWith(BLUE)
+      .activate("flick knives|0")
+      .chooseCard(dagger)
+      .play("infect|1")
+      .blockWith(defender)
+      .settle()
+      .expectFinalDefense(expectedDefense);
+  });
+
   it("Flick Knives keeps a fully defended link in Mask of Momentum's hit streak", () => {
     const s = scenario({
       seats: [

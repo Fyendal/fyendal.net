@@ -5,7 +5,7 @@ import { logPublic, nameOf } from "./gameLog.js";
 import type { GameStateInternal } from "./runtimeState.js";
 
 import type { CardInstance, ChainLinkState, Modifier, PlayerState, StackLayer } from "./state.js";
-import { destroyPermanent, enterBanish } from "./zoneMoves.js";
+import { destroyControlledCard, destroyPermanent, enterBanish } from "./zoneMoves.js";
 import { currentLink, findCardAnywhere, opponent, removeFromArray } from "./zoneQueries.js";
 import type { MeldSide, PlayableZone } from "@fyendal/shared";
 import { noteActionPlayedOrActivated } from "./cardLifecycle.js";
@@ -889,14 +889,24 @@ export function preparePlayTarget(
 
 export const MAX_ALTERNATIVE_COST_OPTIONS = 64;
 
-function controlledCostCards(player: PlayerState): CardInstance[] {
-  return [
+function controlledCostCards(state: GameStateInternal, player: PlayerState): CardInstance[] {
+  const cards = [
     ...player.board,
     ...player.weapons,
     ...Object.values(player.equipment).filter(
       (card): card is CardInstance => card !== undefined,
     ),
+    ...state.chain.flatMap((link) => [
+      ...(link.attacker === player.seat &&
+        link.attackCardType === "action" &&
+        link.flags.attackGone !== true
+        ? [link.attackingCard]
+        : []),
+      ...link.defendingCards.filter((card) => card.owner === player.seat),
+      ...link.reactions.filter((card) => card.owner === player.seat),
+    ]),
   ];
+  return [...new Map(cards.map((card) => [card.instanceId, card])).values()];
 }
 
 export function exactCardCombinations(cards: CardInstance[], count: number): number[][] {
@@ -958,7 +968,7 @@ export function alternativePlayCostOptions(
       .map((candidate) => [candidate.instanceId]);
   }
   if (cost.kind === "destroy-controlled-named") {
-    const controlled = controlledCostCards(player);
+    const controlled = controlledCostCards(state, player);
     return cost.options.flatMap(({ name, count }) =>
       exactCardCombinations(
         controlled.filter(
@@ -975,7 +985,7 @@ export function alternativePlayCostOptions(
     return nonEmptyCardSubsets(candidates).filter((ids) => ids.length >= cost.min);
   }
   if (cost.kind === "destroy-controlled-and-or-discard-hand-subtype") {
-    const controlled = controlledCostCards(player).filter((candidate) =>
+    const controlled = controlledCostCards(state, player).filter((candidate) =>
       cardTypesOf(state, candidate).includes(cost.subtype.toLowerCase())
     );
     const hand = player.hand.filter((candidate) =>
@@ -1006,7 +1016,7 @@ export function alternativePlayCostOptions(
         candidate.instanceId !== card.instanceId &&
         cardHasName(state, candidate, wanted),
     ),
-    ...controlledCostCards(player).filter(
+    ...controlledCostCards(state, player).filter(
       (candidate) => cardHasName(state, candidate, wanted),
     ),
   ].map((candidate) => [candidate.instanceId]);
@@ -1045,11 +1055,15 @@ export function payAlternativePlayCost(
     paidCards.push(paid);
   } else if (cost.kind === "destroy-controlled-named") {
     for (const id of option) {
-      const paid = controlledCostCards(player).find((candidate) => candidate.instanceId === id);
-      if (!paid) return "alternative-cost permanent is no longer controlled";
+      const paid = controlledCostCards(state, player).find((candidate) => candidate.instanceId === id);
+      if (!paid) return "alternative-cost card is no longer controlled";
       paidCards.push(paid);
     }
-    for (const paid of paidCards) destroyPermanent(state, runtime, player.seat, paid);
+    for (const paid of paidCards) {
+      if (!destroyControlledCard(state, runtime, player.seat, paid)) {
+        return "could not destroy alternative-cost card";
+      }
+    }
   } else if (cost.kind === "banish-hand") {
     for (const id of option) {
       const paid = player.hand.find((candidate) => candidate.instanceId === id);
@@ -1061,7 +1075,7 @@ export function payAlternativePlayCost(
       enterBanish(state, runtime, paid, "hand");
     }
   } else if (cost.kind === "destroy-controlled-and-or-discard-hand-subtype") {
-    const controlled = controlledCostCards(player);
+    const controlled = controlledCostCards(state, player);
     for (const id of option) {
       const paid = controlled.find((candidate) => candidate.instanceId === id)
         ?? player.hand.find((candidate) => candidate.instanceId === id);
@@ -1092,12 +1106,14 @@ export function payAlternativePlayCost(
       runtime.commands.fireOnDiscard(state, player.seat, fromHand, false);
       paidCards.push(fromHand);
     } else {
-      const permanent = controlledCostCards(player).find(
+      const permanent = controlledCostCards(state, player).find(
         (candidate) => candidate.instanceId === id,
       );
       if (!permanent) return "alternative-cost card is no longer controlled";
       paidCards.push(permanent);
-      destroyPermanent(state, runtime, player.seat, permanent);
+      if (!destroyControlledCard(state, runtime, player.seat, permanent)) {
+        return "could not destroy alternative-cost card";
+      }
     }
   }
   script?.onAlternativeCostPaid?.(

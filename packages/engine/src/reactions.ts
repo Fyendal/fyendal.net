@@ -445,7 +445,7 @@ export function activateWindowAbility(
   // resolves only once both players pass in succession (CR 5.3.2)
   pushAbilityLayer(state, seat, card, nameOf(state, card.cardId), {
     abilityIndex,
-    goAgain: nextActionGoAgain,
+    goAgain: ability.goAgain || nextActionGoAgain,
   });
   if (timing === "attack-reaction") runtime.dispatchFlow("queueReactionEventTriggers", state, seat);
   // A leave-arena trigger opened while paying this activation cost must be

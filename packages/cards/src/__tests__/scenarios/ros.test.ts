@@ -96,6 +96,40 @@ describe("ROS — Earth heroes and Decompose", () => {
     expect(g.state.players[1]!.deck.at(-1)?.cardId).toBe(printingId("snatch|1"));
   });
 
+  it("Plow Under clears arsenal-only state before the card is drawn", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["plow under|2", BLUE],
+          graveyard: ["wounding blow|1", "autumn's touch|1", "autumn's touch|2"],
+        },
+        {
+          hero: "dorinthea",
+          hand: [BLUE],
+          arsenal: ["swordmaster's path|3"],
+        },
+      ],
+    });
+
+    g.play("plow under|2", { pitch: [BLUE] })
+      .chooseCard("autumn's touch|1")
+      .chooseCard("autumn's touch|2")
+      .chooseCard("wounding blow|1");
+
+    expect(g.state.players[1]!.deck.at(-1)).toMatchObject({
+      cardId: printingId("swordmaster's path|3"),
+    });
+    expect(g.state.players[1]!.deck.at(-1)).not.toHaveProperty("faceDown");
+    expect(g.state.players[1]!.deck.at(-1)).not.toHaveProperty("arsenalSlot");
+
+    g.blockWith()
+      .settle()
+      .endTurn()
+      .play("swordmaster's path|3", { pitch: [BLUE] })
+      .expectAP(1, 1);
+  });
+
   it("Rootbound Carapace counts face-up Colors of Aria as Earth for Decompose", () => {
     const g = scenario({
       active: 1,

@@ -61,14 +61,14 @@ import { answerDeckBottomOrder, enterBanish } from "./zoneMoves.js";
 import { lingeringModifierSources } from "./sourceQueries.js";
 import { continueFollowUpDecisions } from "./decisionQueue.js";
 
-import { abilityResourceCost, actionAbilityRestrictedByModifier, payActivatedAbilityCost, prepareActivatedDiscardCost, prepareActivatedEffectCardCosts } from "./abilityRules.js";
+import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestrictedByModifier, payActivatedAbilityCost, prepareActivatedDiscardCost, prepareActivatedEffectCardCosts } from "./abilityRules.js";
 import { consumeNextActionGoAgain, noteActionPlayedOrActivated } from "./cardLifecycle.js";
 import { answerArcaneBarrier } from "./damageResolution.js";
 import { answerDieRollReplacement } from "./dieRoll.js";
 import { cardPlayRestrictedByModifier, cardPlayCost, cardPlayReductionForSeat, payAlternativePlayCost, preparePlayTarget, canPlayAsInstant, canRuneGate, consumeAttackCostReductions, mayPlayFromArsenal, mayPlayFromZone, playFromZoneRequiresInstant } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost, scriptedPaymentOptions } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
-import { actionLimitReached, controlsBow, firstAttackExtraCost, consumeFirstAttackExtraCost, isFrozen } from "./ruleQueries.js";
+import { actionLimitReached, controlsBow, firstAttackExtraCost, consumeFirstAttackExtraCost, isFrozen, opposingInstantsProhibited } from "./ruleQueries.js";
 import { nonAttackActionCardLimitReached } from "./restrictions.js";
 import { attackActionPlayRestricted, weaponAttacksProhibited } from "./combatRestrictions.js";
 import { pushAbilityLayer, pushCardLayer } from "./stackCore.js";
@@ -565,11 +565,15 @@ export function activateAbility(
   const timing = ability.timing ?? "action";
   if (timing === "attack-reaction") return "only usable as an attack reaction";
   if (timing === "defense-reaction") return "only usable as a defense reaction";
-  const costsAP = timing === "action";
-  if (costsAP && actionAbilityRestrictedByModifier(state, runtime, seat, card, ability.isAttack)) {
+  const grantedInstantTiming = abilitiesAsInstantForCard(state, player, card);
+  const costsAP = timing === "action" && !grantedInstantTiming;
+  if (timing === "action" && actionAbilityRestrictedByModifier(state, runtime, seat, card, ability.isAttack)) {
     return "action ability is prohibited by a turn restriction";
   }
-  if (costsAP && actionLimitReached(state, player)) {
+  if ((timing === "instant" || grantedInstantTiming) && opposingInstantsProhibited(state, seat)) {
+    return "opposing effect prohibits instants";
+  }
+  if (timing === "action" && actionLimitReached(state, player)) {
     return "cannot play or activate another action this turn";
   }
   if (costsAP && player.actionPoints < 1) return "not enough action points";
@@ -698,7 +702,7 @@ export function activateAbility(
   const resourceCost = ability.isAttack
     ? attackActivationCost(state, runtime, player, card, costAbility.cost + extraCost, targetAllyId)
     : abilityResourceCost(state, runtime, seat, card, costAbility) + extraCost;
-  const nextActionGoAgain = costsAP && consumeNextActionGoAgain(player);
+  const nextActionGoAgain = timing === "action" && consumeNextActionGoAgain(player);
   const prepErr = payActivatedAbilityCost(state, runtime, seat, card, costAbility, abilityIndex, pitchInstanceIds, resourceCost, {
     chiCost: ability.chiCost,
     extraCost,
@@ -710,7 +714,7 @@ export function activateAbility(
   if (variableCost) (card.counters ??= {})[variableCost.counterKey] = declaredVariableX!;
   if (ability.isAttack) consumeAttackCostReductions(state, seat, card, targetAllyId);
   if (costsAP) player.actionPoints -= 1;
-  if (costsAP) noteActionPlayedOrActivated(player);
+  if (timing === "action") noteActionPlayedOrActivated(player);
   if (ability.isAttack) {
     if (!attackTargetIsLegal(state, runtime, seat, targetAllyId)) {
       return "not a legal attack target";
