@@ -439,6 +439,22 @@ describe("SFA — banish-and-play on hit", () => {
       .blockWith().settle() // hits for 4 — the banish choice opens
       .chooseCard(RONIN) // cost 0 < 1 Draconic link
       .expectInZone(0, RONIN, "banish");
+    expect(projectStateFor(s.state, 1).logEntries).toContainEqual(expect.objectContaining({
+      message: {
+        id: "card.log.sfa.banished.power",
+        values: {
+          amount: 1,
+          result: { kind: "card", cardId: printingId(RONIN) },
+          card: { kind: "card", cardId: printingId("mounting anger|1") },
+        },
+      },
+      event: expect.objectContaining({
+        kind: "card-moved",
+        cardId: printingId(RONIN),
+        from: "hand",
+        to: "banish",
+      }),
+    }));
     playFromZone(s, RONIN, "banish");
     s.expectAttackValue(4); // 3 base + the +1{p} counter
   });

@@ -1,9 +1,10 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
-    isSixPlus,
+  isSixPlus,
+  localizedLog,
   nextAttack,
   queueIntimidate,
-  } from "../shared-helpers.js";
+} from "../shared-helpers.js";
 
 /** Store whether the random discard paid for this card had 6+ {p}. */
 function rememberDiscardedSixPlus(ctx: ScriptCtx): void {
@@ -46,7 +47,11 @@ const breakneckBattery: CardScript = {
   onAttackDeclared(ctx) {
     if (discardedSixPlus(ctx)) {
       ctx.grantGoAgain();
-      ctx.logPublic("Breakneck Battery gains go again");
+      ctx.logPublic(localizedLog(
+        "Breakneck Battery gains go again",
+        "card.log.common.goagain.gained",
+        { card: { kind: "card", cardId: ctx.self.cardId } },
+      ));
     }
   },
 };
@@ -65,7 +70,11 @@ const savageFeast: CardScript = {
   onAttackDeclared(ctx) {
     if (discardedSixPlus(ctx)) {
       ctx.drawCards(ctx.seat, 1);
-      ctx.logPublic("Savage Feast: draw a card");
+      ctx.logPublic(localizedLog(
+        "Savage Feast: draw a card",
+        "card.log.common.card.drawn",
+        { card: { kind: "card", cardId: ctx.self.cardId } },
+      ));
     }
   },
 };
@@ -133,7 +142,16 @@ export const brute: Record<string, CardScript> = {
       if (hook !== "barkbone") return;
         const gained = Math.floor(roll / 2);
         ctx.changeResources(ctx.seat, gained);
-        ctx.logPublic(`Barkbone Strapping: rolled ${roll}, gained {r}${gained}`);
+        ctx.logPublic(localizedLog(
+          `Barkbone Strapping: rolled ${roll}, gained {r}${gained}`,
+          "card.log.wtr.barkbone.roll.resources",
+          {
+            card: { kind: "card", cardId: ctx.self.cardId },
+            result: roll,
+            amount: gained,
+          },
+          { kind: "roll", result: roll, seat: ctx.seat, sides: 6 },
+        ));
         ctx.destroySelf();
     },
   },

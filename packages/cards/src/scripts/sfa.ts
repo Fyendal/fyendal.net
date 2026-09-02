@@ -1,5 +1,5 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, buffNextAttack, commonOptionMessages, decisionPrompt, isCard, opponentSeat, yesNoPrompt } from "./shared-helpers.js";
+import { attackAbility, buffNextAttack, commonOptionMessages, decisionPrompt, isCard, localizedCardLog, opponentSeat, yesNoPrompt } from "./shared-helpers.js";
 
 // ── SFA (Silver Age: Fai precon, Chapter 2) ─────────────────────────────────
 //
@@ -83,7 +83,13 @@ function destroyGainResource(canActivate: (ctx: ScriptCtx) => boolean, label: st
       onActivate(ctx) {
         ctx.destroySelf();
         ctx.changeResources(ctx.seat, 1);
-        ctx.logPublic(`${ctx.data.name} is destroyed: gain {r}`);
+        ctx.logPublic(localizedCardLog(
+          ctx,
+          `${ctx.data.name} is destroyed: gain {r}`,
+          "card.log.common.destroyed.resources",
+          { amount: 1 },
+          { kind: "card-moved", cardId: ctx.self.cardId, ownerSeat: ctx.seat, from: "equipment", to: "graveyard" },
+        ));
       },
     },
   };
@@ -122,6 +128,8 @@ function banishAttackOnHit(hook: string, reward: string): CardScript {
     onChoose(ctx, h, option) {
       if (h !== hook || option === "pass") return;
       const id = Number(option);
+      const selected = ctx.player(ctx.seat).hand.find((card) => card.instanceId === id);
+      if (!selected) return;
       if (!ctx.banish(id)) return;
       if (reward === "gains +1{p}") {
         ctx.addCounter(id, "power", 1);
@@ -129,7 +137,13 @@ function banishAttackOnHit(hook: string, reward: string): CardScript {
       } else {
         ctx.allowPlayFrom(id, "banish", { costReduction: 1 });
       }
-      ctx.logPublic(`${ctx.data.name}: the banished card ${reward} — you may play it this turn`);
+      ctx.logPublic(localizedCardLog(
+        ctx,
+        `${ctx.data.name}: the banished card ${reward} — you may play it this turn`,
+        reward === "gains +1{p}" ? "card.log.sfa.banished.power" : "card.log.sfa.banished.discount",
+        { result: { kind: "card", cardId: selected.cardId }, amount: 1 },
+        { kind: "card-moved", cardId: selected.cardId, ownerSeat: ctx.seat, from: "hand", to: "banish" },
+      ));
     },
   };
 }
@@ -139,7 +153,7 @@ function banishAttackOnHit(hook: string, reward: string): CardScript {
 const brandWithCinderclaw: CardScript = {
   onAttackDeclared(ctx) {
     buffNextAttack(ctx, { grantType: "draconic", expiresOnChainClose: true });
-    ctx.logPublic(`${ctx.data.name}: your next attack this combat chain is Draconic`);
+    ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: your next attack this combat chain is Draconic`, "card.log.sfa.nextattack.draconic"));
   },
 };
 
@@ -186,14 +200,26 @@ export const sfa: Record<string, CardScript> = {
         if (!flame) return;
         ctx.moveToGraveyard(flame.instanceId, "deck");
         ctx.shuffleDeck();
-        ctx.logPublic("Fai: a Phoenix Flame starts the game in your graveyard");
+        ctx.logPublic(localizedCardLog(
+          ctx,
+          "Fai: a Phoenix Flame starts the game in your graveyard",
+          "card.log.sfa.fai.flame.start",
+          { result: { kind: "card", cardId: flame.cardId } },
+          { kind: "card-moved", cardId: flame.cardId, ownerSeat: ctx.seat, from: "deck", to: "graveyard" },
+        ));
         return;
       }
       if (hook !== "fai-return") return;
       const flame = ctx.player(ctx.seat).graveyard.find((c) => c.instanceId === Number(option));
       if (!flame) return;
       ctx.moveToHand(flame.instanceId);
-      ctx.logPublic(`Fai: ${ctx.cardData(flame.cardId).name} returns to your hand`);
+      ctx.logPublic(localizedCardLog(
+        ctx,
+        `Fai: ${ctx.cardData(flame.cardId).name} returns to your hand`,
+        "card.log.common.card.returned.hand",
+        { result: { kind: "card", cardId: flame.cardId } },
+        { kind: "card-moved", cardId: flame.cardId, ownerSeat: ctx.seat, from: "graveyard", to: "hand" },
+      ));
     },
   },
 
@@ -243,7 +269,7 @@ export const sfa: Record<string, CardScript> = {
       onActivate(ctx) {
         ctx.destroySelf();
         buffNextAttack(ctx, { attack: 2, appliesToName: "crouching tiger" });
-        ctx.logPublic("Tearing Shuko: the next Crouching Tiger you play this turn gets +2{p}");
+        ctx.logPublic(localizedCardLog(ctx, "Tearing Shuko: the next Crouching Tiger you play this turn gets +2{p}", "card.log.sfa.shuko.attack", { amount: 2 }));
       },
     },
   },
@@ -263,7 +289,13 @@ export const sfa: Record<string, CardScript> = {
         if (!tiger) return;
         ctx.banish(tiger.instanceId);
         ctx.allowPlayFrom(tiger.instanceId, "banish");
-        ctx.logPublic("Pouncing Paws: the Crouching Tiger may be played this turn");
+        ctx.logPublic(localizedCardLog(
+          ctx,
+          "Pouncing Paws: the Crouching Tiger may be played this turn",
+          "card.log.sfa.paws.tiger.playable",
+          { result: { kind: "card", cardId: tiger.cardId } },
+          { kind: "card-moved", cardId: tiger.cardId, ownerSeat: ctx.seat, from: "board", to: "banish" },
+        ));
       },
     },
   },
@@ -326,7 +358,7 @@ export const sfa: Record<string, CardScript> = {
       if (n >= 2) ctx.grantGoAgain();
       if (n >= 3) {
         ctx.addModifier({ scope: "combat-chain", grantType: "draconic" });
-        ctx.logPublic(`${ctx.data.name}: your attacks are Draconic this combat chain`);
+        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: your attacks are Draconic this combat chain`, "card.log.sfa.attacks.draconic"));
       }
       if (n >= 4) ctx.addModifier({ scope: "chain-link", attack: 2 });
     },
@@ -341,7 +373,7 @@ export const sfa: Record<string, CardScript> = {
         appliesToSubtype: "draconic",
         expiresOnChainClose: true,
       });
-      ctx.logPublic(`${ctx.data.name}: your next Draconic attack this combat chain gets +1{p}`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: your next Draconic attack this combat chain gets +1{p}`, "card.log.sfa.nextdraconic.attack", { amount: 1 }));
     },
   },
 
@@ -362,7 +394,7 @@ export const sfa: Record<string, CardScript> = {
       if (!ctx.discardCard(ctx.seat, Number(option))) return;
       ctx.drawCards(ctx.seat, 1);
       ctx.addModifier({ scope: "chain-link", attack: 2 });
-      ctx.logPublic(`${ctx.data.name}: draw a card and get +2{p}`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: draw a card and get +2{p}`, "card.log.sfa.draw.attack", { amount: 2 }));
     },
   },
 
@@ -389,7 +421,13 @@ export const sfa: Record<string, CardScript> = {
         const flame = ctx.player(ctx.seat).deck.find((c) => c.instanceId === Number(option));
         if (flame) {
           ctx.moveToHand(flame.instanceId);
-          ctx.logPublic(`${ctx.data.name}: ${ctx.cardData(flame.cardId).name} is revealed and put into your hand`);
+          ctx.logPublic(localizedCardLog(
+            ctx,
+            `${ctx.data.name}: ${ctx.cardData(flame.cardId).name} is revealed and put into your hand`,
+            "card.log.sfa.flame.revealed.hand",
+            { result: { kind: "card", cardId: flame.cardId } },
+            { kind: "card-moved", cardId: flame.cardId, ownerSeat: ctx.seat, from: "deck", to: "hand" },
+          ));
         }
       }
       ctx.shuffleDeck();
@@ -411,7 +449,7 @@ export const sfa: Record<string, CardScript> = {
       const hero = ctx.player(opponentSeat(ctx)).hero;
       if ((hero.counters?.marked ?? 0) > 0) return;
       ctx.addCounter(hero.instanceId, "marked", 1);
-      ctx.logPublic(`${ctx.cardData(hero.cardId).name} is marked`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(hero.cardId).name} is marked`, "card.log.common.hero.marked", { target: { kind: "card", cardId: hero.cardId } }));
     },
   },
 
@@ -474,7 +512,13 @@ export const sfa: Record<string, CardScript> = {
       const flame = ctx.player(ctx.seat).graveyard.find((c) => c.instanceId === Number(option));
       if (!flame) return;
       ctx.moveToHand(flame.instanceId);
-      ctx.logPublic(`${ctx.data.name}: ${ctx.cardData(flame.cardId).name} returns to your hand`);
+      ctx.logPublic(localizedCardLog(
+        ctx,
+        `${ctx.data.name}: ${ctx.cardData(flame.cardId).name} returns to your hand`,
+        "card.log.common.card.returned.hand",
+        { result: { kind: "card", cardId: flame.cardId } },
+        { kind: "card-moved", cardId: flame.cardId, ownerSeat: ctx.seat, from: "graveyard", to: "hand" },
+      ));
     },
   },
 
@@ -499,7 +543,7 @@ export const sfa: Record<string, CardScript> = {
     },
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: 1 });
-      ctx.logPublic(`${ctx.data.name}: the attack gets +1{p}`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: the attack gets +1{p}`, "card.log.common.attack.gained", { amount: 1 }));
     },
   },
 
@@ -516,7 +560,7 @@ export const sfa: Record<string, CardScript> = {
       label: "Destroy: the next card you play this turn is Draconic",
       onActivate(ctx) {
         ctx.addModifier({ scope: "next-play", grantType: "draconic" });
-        ctx.logPublic("Fealty: the next card you play this turn is Draconic");
+        ctx.logPublic(localizedCardLog(ctx, "Fealty: the next card you play this turn is Draconic", "card.log.sfa.fealty.draconic"));
       },
     },
     // "At the beginning of your end phase, if you haven't created a Fealty

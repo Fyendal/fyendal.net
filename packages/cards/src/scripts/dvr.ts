@@ -1,5 +1,5 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, attackedWithWeapon, isCard, isSwordAttack, isWeaponAttack, lessonCounter, mentorFlipTrigger, mentorPayoff, nextAttack, reprise, weaponAttackCount } from "./shared-helpers.js";
+import { attackAbility, attackedWithWeapon, isCard, isSwordAttack, isWeaponAttack, lessonCounter, localizedCardLog, mentorFlipTrigger, mentorPayoff, nextAttack, reprise, weaponAttackCount } from "./shared-helpers.js";
 
 // ── Dorinthea (hero / weapon / equipment / mentor / token / deck cards) ──
 export const dvr: Record<string, CardScript> = {
@@ -16,7 +16,7 @@ export const dvr: Record<string, CardScript> = {
       const dawnblade = p.weapons.find((w) => isCard(ctx, w.cardId, "Dawnblade, Resplendent"));
       if (dawnblade) {
         ctx.grantAdditionalActivation(dawnblade.instanceId);
-        ctx.logPublic("Dorinthea's ability: Dawnblade may attack an additional time this turn");
+        ctx.logPublic(localizedCardLog(ctx, "Dorinthea's ability: Dawnblade may attack an additional time this turn", "card.log.dvr.dorinthea.additionalattack"));
       }
     },
   },
@@ -28,7 +28,7 @@ export const dvr: Record<string, CardScript> = {
       if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId) return;
       if (weaponAttackCount(ctx) === 2) {
         ctx.addModifier({ scope: "until-end-of-turn", attack: 1, appliesTo: "sword" });
-        ctx.logPublic("Dawnblade, Resplendent gains +1 attack until end of turn");
+        ctx.logPublic(localizedCardLog(ctx, "Dawnblade, Resplendent gains +1 attack until end of turn", "card.log.dvr.dawnblade.turn.attack", { amount: 1 }));
       }
     },
   },
@@ -40,7 +40,7 @@ export const dvr: Record<string, CardScript> = {
       goAgain: true,
       onActivate(ctx) {
         ctx.changeResources(ctx.seat, 1);
-        ctx.logPublic("Blossom of Spring: gained {r}");
+        ctx.logPublic(localizedCardLog(ctx, "Blossom of Spring: gained {r}", "card.log.common.resources.gained", { amount: 1 }));
         ctx.destroySelf();
       },
     },
@@ -53,7 +53,7 @@ export const dvr: Record<string, CardScript> = {
       goAgain: true,
       onActivate(ctx) {
         ctx.addModifier({ scope: "until-end-of-turn", attack: 1, appliesTo: "weapon" });
-        ctx.logPublic("Gallantry Gold: weapon attacks gain +1 attack this turn");
+        ctx.logPublic(localizedCardLog(ctx, "Gallantry Gold: weapon attacks gain +1 attack this turn", "card.log.dvr.gallantry.weapon.attack", { amount: 1 }));
         ctx.destroySelf();
       },
     },
@@ -66,7 +66,7 @@ export const dvr: Record<string, CardScript> = {
     canTriggerOnHit: isSwordAttack,
     onHit(ctx) {
       ctx.grantGoAgain();
-      ctx.logPublic("Hala Goldenhelm: the attack gains go again");
+      ctx.logPublic(localizedCardLog(ctx, "Hala Goldenhelm: the attack gains go again", "card.log.common.attack.goagain.gained"));
       if (lessonCounter(ctx) >= 2) mentorPayoff(ctx, "Glistening Steelblade", 2);
     },
   },
@@ -82,7 +82,7 @@ export const dvr: Record<string, CardScript> = {
           ctx.cardTypes(played).includes("attack"),
         effect(ctx) {
           ctx.grantGoAgain();
-          ctx.logPublic("Quicken: the attack gains go again");
+          ctx.logPublic(localizedCardLog(ctx, "Quicken: the attack gains go again", "card.log.common.attack.goagain.gained"));
           ctx.destroySelf();
         },
       },
@@ -91,7 +91,7 @@ export const dvr: Record<string, CardScript> = {
         label: "Destroy Quicken (attack gains go again)",
         effect(ctx) {
           ctx.grantGoAgain();
-          ctx.logPublic("Quicken: the attack gains go again");
+          ctx.logPublic(localizedCardLog(ctx, "Quicken: the attack gains go again", "card.log.common.attack.goagain.gained"));
           ctx.destroySelf();
         },
       },
@@ -113,7 +113,13 @@ export const dvr: Record<string, CardScript> = {
       },
       additionalCost(ctx) {
         const reveal = ctx.state.players[ctx.seat]!.hand.find(revealable(ctx));
-        if (reveal) ctx.logPublic(`reveals ${ctx.cardData(reveal.cardId).name} (cost 1 or less)`);
+        if (reveal) ctx.logPublic(localizedCardLog(
+          ctx,
+          `reveals ${ctx.cardData(reveal.cardId).name} (cost 1 or less)`,
+          "card.log.common.reveal.cost.maximum",
+          { revealed: { kind: "card", cardId: reveal.cardId }, cost: 1 },
+          { kind: "cards-revealed", cards: [{ cardId: reveal.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" },
+        ));
       },
       onAttackDeclared(ctx) {
         ctx.createToken("DVR028");
@@ -133,7 +139,7 @@ export const dvr: Record<string, CardScript> = {
     onPlay(ctx) {
       if (reprise(ctx)) {
         ctx.addModifier({ scope: "chain-link", attack: 3 });
-        ctx.logPublic("Ironsong Response (Reprise): +3 attack");
+        ctx.logPublic(localizedCardLog(ctx, "Ironsong Response (Reprise): +3 attack", "card.log.common.reprise.attack", { amount: 3 }));
       }
     },
   },
@@ -181,7 +187,7 @@ export const dvr: Record<string, CardScript> = {
     },
     onHit(ctx) {
       ctx.addModifier({ scope: "static", attack: 1, appliesTo: "sword" });
-      ctx.logPublic("Dawnblade, Resplendent gets a +1 attack counter");
+      ctx.logPublic(localizedCardLog(ctx, "Dawnblade, Resplendent gets a +1 attack counter", "card.log.dvr.dawnblade.counter", { amount: 1 }));
     },
   },
   "on a knife edge|2": {
@@ -197,7 +203,7 @@ export const dvr: Record<string, CardScript> = {
       ctx.addModifier({ scope: "chain-link", attack: 2 });
       if (reprise(ctx)) {
         nextAttack({ attack: 1, appliesTo: "any" })(ctx);
-        ctx.logPublic("Out for Blood (Reprise): your next attack gains +1");
+        ctx.logPublic(localizedCardLog(ctx, "Out for Blood (Reprise): your next attack gains +1", "card.log.dvr.outforblood.reprise", { amount: 1 }));
       }
     },
   },

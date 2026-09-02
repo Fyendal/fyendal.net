@@ -575,6 +575,14 @@ describe("SGB — allies", () => {
       .expectZoneSize(1, "arsenal", 0)
       .expectInZone(1, "dodge|3", "graveyard")
       .expectZoneSize(0, "board", 2); // Gold created
+
+    const publicDestruction = projectStateFor(g.state, 1).logEntries?.find(
+      (entry) => "message" in entry && entry.message.id === "card.log.sgb.arsenal.destroyed",
+    );
+    expect(publicDestruction).toMatchObject({
+      event: { kind: "card-moved", ownerSeat: 1, from: "arsenal", to: "graveyard" },
+    });
+    expect(JSON.stringify(publicDestruction)).not.toContain(printingId("dodge|3"));
   });
 
   it("Loot the Hold: on hit the opponent discards a card", () => {

@@ -1,5 +1,5 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, commonOptionMessages, decisionMessage, decisionPrompt, nextAttack, opponentSeat, requestDiscardChoice, resolveDiscardChoice } from "../shared-helpers.js";
+import { buffNextAttack, commonOptionMessages, decisionMessage, decisionPrompt, localizedLog, nextAttack, opponentSeat, requestDiscardChoice, resolveDiscardChoice } from "../shared-helpers.js";
 
 // ── WTR generic class cards ─────────────────────────────────────────────────
 //
@@ -70,7 +70,16 @@ const demolitionCrewScript = (): CardScript => ({
       p.hand.find((c) => c.instanceId === targetId) ??
       p.pitch.find((c) => c.instanceId === targetId);
     if (reveal) {
-      ctx.logPublic(`${ctx.data.name}: reveals ${ctx.cardData(reveal.cardId).name} (cost 2 or greater)`);
+      ctx.logPublic(localizedLog(
+        `${ctx.data.name}: reveals ${ctx.cardData(reveal.cardId).name} (cost 2 or greater)`,
+        "card.log.common.reveal.cost.minimum",
+        {
+          card: { kind: "card", cardId: ctx.self.cardId },
+          revealed: { kind: "card", cardId: reveal.cardId },
+          cost: 2,
+        },
+        { kind: "cards-revealed", cards: [{ cardId: reveal.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" },
+      ));
     }
     // Grant dominate to the next attack action — which is this attack.
     buffNextAttack(ctx, { dominate: true, appliesTo: "attack-action" });
@@ -98,7 +107,12 @@ const crazyBrewScript = (): CardScript => ({
   },
   onDieRollResolved(ctx, hook, roll) {
     if (hook !== "crazy-brew") return;
-      ctx.logPublic(`${ctx.data.name}: rolled ${roll}`);
+      ctx.logPublic(localizedLog(
+        `${ctx.data.name}: rolled ${roll}`,
+        "card.log.common.die.rolled",
+        { card: { kind: "card", cardId: ctx.self.cardId }, result: roll },
+        { kind: "roll", result: roll, seat: ctx.seat, sides: 6 },
+      ));
       if (roll <= 2) {
         ctx.loseLife(ctx.seat, 2);
         ctx.gainActionPoint();
@@ -125,7 +139,11 @@ const energyPotionScript = (): CardScript => ({
     destroySelfCost: true,
     onActivate(ctx) {
       ctx.changeResources(ctx.seat, 2);
-      ctx.logPublic(`${ctx.data.name}: gained {r}{r}`);
+      ctx.logPublic(localizedLog(
+        `${ctx.data.name}: gained {r}{r}`,
+        "card.log.common.resources.gained",
+        { card: { kind: "card", cardId: ctx.self.cardId }, amount: 2 },
+      ));
     },
   },
 });
@@ -149,7 +167,16 @@ const flockScript = (): CardScript => {
       const reveal =
         p.hand.find((c) => c.instanceId === targetId) ??
         p.pitch.find((c) => c.instanceId === targetId);
-      if (reveal) ctx.logPublic(`${ctx.data.name}: reveals ${ctx.cardData(reveal.cardId).name} (cost 1 or less)`);
+      if (reveal) ctx.logPublic(localizedLog(
+        `${ctx.data.name}: reveals ${ctx.cardData(reveal.cardId).name} (cost 1 or less)`,
+        "card.log.common.reveal.cost.maximum",
+        {
+          card: { kind: "card", cardId: ctx.self.cardId },
+          revealed: { kind: "card", cardId: reveal.cardId },
+          cost: 1,
+        },
+        { kind: "cards-revealed", cards: [{ cardId: reveal.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" },
+      ));
     },
     onAttackDeclared(ctx) {
       ctx.createToken(QUICKEN_TOKEN_ID);
@@ -166,7 +193,11 @@ const goliathGauntletScript = (): CardScript => ({
     goAgain: true,
     onActivate(ctx) {
       buffNextAttack(ctx, { attack: 2, appliesTo: "attack-action", minCost: 2 });
-      ctx.logPublic(`${ctx.data.name}: next attack action with cost 2 or greater gains +2 attack`);
+      ctx.logPublic(localizedLog(
+        `${ctx.data.name}: next attack action with cost 2 or greater gains +2 attack`,
+        "card.log.wtr.goliathgauntlet.attack",
+        { card: { kind: "card", cardId: ctx.self.cardId }, cost: 2, amount: 2 },
+      ));
       ctx.destroySelf();
     },
   },
@@ -181,7 +212,11 @@ const heartenedCrossStrapScript = (): CardScript => ({
     goAgain: true,
     onActivate(ctx) {
       ctx.setFlag("player", "nextActionCostReduction", 2);
-      ctx.logPublic(`${ctx.data.name}: the next attack action card you play this turn costs {r}{r} less`);
+      ctx.logPublic(localizedLog(
+        `${ctx.data.name}: the next attack action card you play this turn costs {r}{r} less`,
+        "card.log.wtr.crossstrap.cost",
+        { card: { kind: "card", cardId: ctx.self.cardId }, amount: 2 },
+      ));
       ctx.destroySelf();
     },
   },
@@ -217,8 +252,21 @@ const hopeMerchantsHoodScript = (): CardScript => ({
         ctx.setCounter("hoodCount", ctx.getCounter("hoodCount") + 1);
         ctx.logPrivate(
           ctx.seat,
-          `${ctx.data.name}: put ${ctx.cardData(card!.cardId).name} into the deck`,
-          `${ctx.data.name}: put a card into the deck`,
+          localizedLog(
+            `${ctx.data.name}: put ${ctx.cardData(card.cardId).name} into the deck`,
+            "card.log.wtr.hood.card.private",
+            {
+              card: { kind: "card", cardId: ctx.self.cardId },
+              result: { kind: "card", cardId: card.cardId },
+            },
+            { kind: "card-moved", cardId: card.cardId, ownerSeat: ctx.seat, from: "hand", to: "deck" },
+          ),
+          localizedLog(
+            `${ctx.data.name}: put a card into the deck`,
+            "card.log.wtr.hood.card.public",
+            { card: { kind: "card", cardId: ctx.self.cardId } },
+            { kind: "card-moved", ownerSeat: ctx.seat, from: "hand", to: "deck" },
+          ),
         );
       }
       if (p.hand.length > 0) {
@@ -234,7 +282,12 @@ const hopeMerchantsHoodScript = (): CardScript => ({
     if (n > 0) {
       ctx.shuffleDeck();
       ctx.drawCards(ctx.seat, n);
-      ctx.logPublic(`${ctx.data.name}: shuffled ${n} card(s) in and drew ${n}`);
+      ctx.logPublic(localizedLog(
+        `${ctx.data.name}: shuffled ${n} card(s) in and drew ${n}`,
+        "card.log.wtr.hood.shuffle.draw",
+        { card: { kind: "card", cardId: ctx.self.cardId }, amount: n },
+        { kind: "shuffle", seat: ctx.seat },
+      ));
     }
   },
 });
@@ -247,7 +300,15 @@ const nimbleStrikeScript = (): CardScript => ({
     if (!nimblism) return;
       if (ctx.banish(nimblism.instanceId)) {
       ctx.setCounter("nimblismBanished", 1);
-      ctx.logPublic(`${ctx.data.name}: banishes Nimblism from graveyard`);
+      ctx.logPublic(localizedLog(
+        `${ctx.data.name}: banishes Nimblism from graveyard`,
+        "card.log.common.card.banished.from.graveyard",
+        {
+          card: { kind: "card", cardId: ctx.self.cardId },
+          result: { kind: "card", cardId: nimblism.cardId },
+        },
+        { kind: "card-moved", cardId: nimblism.cardId, ownerSeat: ctx.seat, from: "graveyard", to: "banish" },
+      ));
     }
   },
   modifyAttack(ctx) {
@@ -256,7 +317,11 @@ const nimbleStrikeScript = (): CardScript => ({
   onAttackDeclared(ctx) {
     if (ctx.getCounter("nimblismBanished")) {
       ctx.grantGoAgain();
-      ctx.logPublic(`${ctx.data.name}: gains go again`);
+      ctx.logPublic(localizedLog(
+        `${ctx.data.name}: gains go again`,
+        "card.log.common.goagain.gained",
+        { card: { kind: "card", cardId: ctx.self.cardId } },
+      ));
     }
   },
 });
@@ -333,7 +398,11 @@ const pummelScript = (buff: number): CardScript => ({
 
 function applyPummelClubHammer(ctx: ScriptCtx, buff: number): void {
   ctx.addModifier({ scope: "chain-link", attack: buff });
-  ctx.logPublic(`${ctx.data.name}: club/hammer weapon gains +${buff} attack`);
+  ctx.logPublic(localizedLog(
+    `${ctx.data.name}: club/hammer weapon gains +${buff} attack`,
+    "card.log.wtr.pummel.weapon.attack",
+    { card: { kind: "card", cardId: ctx.self.cardId }, amount: buff },
+  ));
 }
 
 function applyPummelDiscard(ctx: ScriptCtx, buff: number): void {
@@ -343,7 +412,11 @@ function applyPummelDiscard(ctx: ScriptCtx, buff: number): void {
   // tied to the attack Pummel was actually played on.
   ctx.addModifier({ scope: "until-end-of-turn", appliesTo: "attack-action" });
   ctx.setFlag("link", "pummelDiscardMode", true);
-  ctx.logPublic(`${ctx.data.name}: attack action gains +${buff} attack and "when this hits, discard"`);
+  ctx.logPublic(localizedLog(
+    `${ctx.data.name}: attack action gains +${buff} attack and "when this hits, discard"`,
+    "card.log.wtr.pummel.action.attack",
+    { card: { kind: "card", cardId: ctx.self.cardId }, amount: buff },
+  ));
 }
 
 // ── Razor Reflex ────────────────────────────────────────────────────────────
@@ -385,12 +458,20 @@ const razorReflexScript = (buff: number): CardScript => ({
 
 function applyRazorWeapon(ctx: ScriptCtx, buff: number): void {
   ctx.addModifier({ scope: "chain-link", attack: buff });
-  ctx.logPublic(`${ctx.data.name}: dagger/sword weapon gains +${buff} attack`);
+  ctx.logPublic(localizedLog(
+    `${ctx.data.name}: dagger/sword weapon gains +${buff} attack`,
+    "card.log.wtr.razor.weapon.attack",
+    { card: { kind: "card", cardId: ctx.self.cardId }, amount: buff },
+  ));
 }
 
 function applyRazorGoAgain(ctx: ScriptCtx, buff: number): void {
   ctx.addModifier({ scope: "chain-link", attack: buff, onHitGoAgain: true, appliesTo: "attack-action" });
-  ctx.logPublic(`${ctx.data.name}: cheap attack action gains +${buff} attack and on-hit go again`);
+  ctx.logPublic(localizedLog(
+    `${ctx.data.name}: cheap attack action gains +${buff} attack and on-hit go again`,
+    "card.log.wtr.razor.action.attack",
+    { card: { kind: "card", cardId: ctx.self.cardId }, amount: buff },
+  ));
 }
 
 // ── Regurgitating Slog ──────────────────────────────────────────────────────
@@ -401,13 +482,25 @@ const regurgitatingSlogScript = (): CardScript => ({
     if (!sloggism) return;
       if (ctx.banish(sloggism.instanceId)) {
       ctx.setCounter("sloggismBanished", 1);
-      ctx.logPublic(`${ctx.data.name}: banishes Sloggism from graveyard`);
+      ctx.logPublic(localizedLog(
+        `${ctx.data.name}: banishes Sloggism from graveyard`,
+        "card.log.common.card.banished.from.graveyard",
+        {
+          card: { kind: "card", cardId: ctx.self.cardId },
+          result: { kind: "card", cardId: sloggism.cardId },
+        },
+        { kind: "card-moved", cardId: sloggism.cardId, ownerSeat: ctx.seat, from: "graveyard", to: "banish" },
+      ));
     }
   },
   onAttackDeclared(ctx) {
     if (ctx.getCounter("sloggismBanished")) {
       buffNextAttack(ctx, { dominate: true, appliesTo: "attack-action" });
-      ctx.logPublic(`${ctx.data.name}: gains dominate`);
+      ctx.logPublic(localizedLog(
+        `${ctx.data.name}: gains dominate`,
+        "card.log.common.dominate.gained",
+        { card: { kind: "card", cardId: ctx.self.cardId } },
+      ));
     }
   },
 });
@@ -423,7 +516,11 @@ const scarForAScarScript = (): CardScript => ({
     effect(ctx, played) {
       if (!played) return;
       ctx.grantGoAgain(played.instanceId);
-      ctx.logPublic(`${ctx.data.name}: gains go again (less life than opponent)`);
+      ctx.logPublic(localizedLog(
+        `${ctx.data.name}: gains go again (less life than opponent)`,
+        "card.log.wtr.scar.goagain",
+        { card: { kind: "card", cardId: ctx.self.cardId } },
+      ));
     },
   }],
 });
@@ -442,7 +539,11 @@ const scourScript = (): CardScript => ({
   onAttackDeclared(ctx) {
     if (ctx.getCounter("fromArsenal")) {
       ctx.grantGoAgain();
-      ctx.logPublic(`${ctx.data.name}: gains go again (played from arsenal)`);
+      ctx.logPublic(localizedLog(
+        `${ctx.data.name}: gains go again (played from arsenal)`,
+        "card.log.wtr.scour.goagain",
+        { card: { kind: "card", cardId: ctx.self.cardId } },
+      ));
     }
     const p = ctx.player(ctx.seat);
     const options: (number | string)[] = ["pass", ...p.hand.map((c) => c.instanceId)];
@@ -451,7 +552,12 @@ const scourScript = (): CardScript => ({
   onChoose(ctx, hook, option) {
     if (hook !== "scour-bottom" || option === "pass") return;
     bottomHandCardAndDraw(ctx, Number(option));
-    ctx.logPublic(`${ctx.data.name}: put a card on the bottom and drew a card`);
+    ctx.logPublic(localizedLog(
+      `${ctx.data.name}: put a card on the bottom and drew a card`,
+      "card.log.common.hand.bottom.drawn",
+      { card: { kind: "card", cardId: ctx.self.cardId } },
+      { kind: "card-moved", ownerSeat: ctx.seat, from: "hand", to: "deck" },
+    ));
   },
 });
 
@@ -474,7 +580,12 @@ const sinkBelowScript = (): CardScript => ({
   onChoose(ctx, hook, option) {
     if (hook !== "sink-bottom" || option === "pass") return;
     bottomHandCardAndDraw(ctx, Number(option));
-    ctx.logPublic(`${ctx.data.name}: put a card on the bottom and drew a card`);
+    ctx.logPublic(localizedLog(
+      `${ctx.data.name}: put a card on the bottom and drew a card`,
+      "card.log.common.hand.bottom.drawn",
+      { card: { kind: "card", cardId: ctx.self.cardId } },
+      { kind: "card-moved", ownerSeat: ctx.seat, from: "hand", to: "deck" },
+    ));
   },
 });
 
@@ -501,7 +612,11 @@ const snapdragonScalersScript = (): CardScript => ({
     },
     onActivate(ctx) {
       ctx.grantGoAgain();
-      ctx.logPublic(`${ctx.data.name}: target attack action gains go again`);
+      ctx.logPublic(localizedLog(
+        `${ctx.data.name}: target attack action gains go again`,
+        "card.log.wtr.snapdragon.goagain",
+        { card: { kind: "card", cardId: ctx.self.cardId } },
+      ));
     },
   },
 });
@@ -524,7 +639,11 @@ const timesnapPotionScript = (): CardScript => ({
     goAgain: false,
     onActivate(ctx) {
       ctx.changeActionPoints(ctx.seat, 2);
-      ctx.logPublic(`${ctx.data.name}: gained 2 action points`);
+      ctx.logPublic(localizedLog(
+        `${ctx.data.name}: gained 2 action points`,
+        "card.log.common.actionpoints.gained",
+        { card: { kind: "card", cardId: ctx.self.cardId }, amount: 2 },
+      ));
       ctx.destroySelf();
     },
   },
@@ -536,7 +655,11 @@ const unmovableScript = (): CardScript => ({
   onPlay(ctx) {
     if (ctx.fromArsenal) {
       ctx.addModifier({ scope: "chain-link", defense: 1 });
-      ctx.logPublic(`${ctx.data.name}: +1 defense (played from arsenal)`);
+      ctx.logPublic(localizedLog(
+        `${ctx.data.name}: +1 defense (played from arsenal)`,
+        "card.log.wtr.unmovable.defense",
+        { card: { kind: "card", cardId: ctx.self.cardId }, amount: 1 },
+      ));
     }
   },
 });

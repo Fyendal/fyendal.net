@@ -102,6 +102,21 @@ describe("SDO — attacks", () => {
     s.chooseOption("turn") // turn their arsenal card face up — it is destroyed
       .expectInZone(1, "wax on|1", "graveyard")
       .expectZoneSize(1, "arsenal", 0);
+    expect(projectStateFor(s.state, 0).logEntries).toContainEqual(expect.objectContaining({
+      message: {
+        id: "card.log.sdo.wreckhavoc.destroyed",
+        values: {
+          result: { kind: "card", cardId: printingId("wax on|1") },
+          card: { kind: "card", cardId: printingId("wreck havoc|1") },
+        },
+      },
+      event: expect.objectContaining({
+        kind: "card-moved",
+        cardId: printingId("wax on|1"),
+        from: "arsenal",
+        to: "graveyard",
+      }),
+    }));
   });
 });
 

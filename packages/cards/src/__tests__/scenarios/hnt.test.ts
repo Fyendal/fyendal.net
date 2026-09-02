@@ -146,7 +146,7 @@ describe("HNT — marked heroes and daggers", () => {
       options: ["additional attack", "mark on hit"],
     });
 
-    g.chooseOption("mark on hit").settle().expectFinalAttack(3);
+    g.chooseOption("mark on hit").settle().expectFinalAttack(4);
 
     const dagger = g.state.players[0]!.weapons[0]!;
     expect(g.state.players[0]!.flags[`additionalActivations:${dagger.instanceId}:0`]).toBeUndefined();
