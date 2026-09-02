@@ -27,7 +27,7 @@ describe("ROS — Earth heroes and Decompose", () => {
       .expectInZone(1, "fruits of the forest|1", "graveyard");
   });
 
-  it("Florian adds one Runechant to a grouped token-creation effect", () => {
+  it("Florian adds one Runechant to each Arcane Seeds creation event", () => {
     const g = scenario({
       seats: [
         {
@@ -40,7 +40,7 @@ describe("ROS — Earth heroes and Decompose", () => {
         { hero: "dorinthea" },
       ],
     });
-    g.play("arcane seeds // life|1", { meldSide: "left" }).expectZoneSize(0, "board", 3);
+    g.play("arcane seeds // life|1", { meldSide: "left" }).expectZoneSize(0, "board", 4);
   });
 
   it("Cadaverous Tilling pays three distinct Decompose cards for +2 power", () => {

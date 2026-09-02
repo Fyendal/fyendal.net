@@ -4,6 +4,7 @@ import type { CardScript } from "@fyendal/engine";
 import { functionalKey, functionalKeyOf } from "../functional.js";
 import { expandScripts, cardData, scripts } from "../index.js";
 import { registry } from "../scripts/index.js";
+import { localizedLog } from "../scripts/shared-helpers.js";
 
 function fakeCard(id: string, name: string, pitch?: number): CardData {
   return { id, name, cardType: "action", text: "", ...(pitch !== undefined ? { pitch: pitch as 1 | 2 | 3 } : {}) };
@@ -18,6 +19,38 @@ describe("functional keys", () => {
 
   it("distinguishes pitch variants", () => {
     expect(functionalKey("Wrecker Romp", 1)).not.toBe(functionalKey("Wrecker Romp", 3));
+  });
+});
+
+describe("localized card logs", () => {
+  it("keeps fallback, typed values, and machine events in one reusable payload", () => {
+    expect(localizedLog(
+      "Test Card reveals Attack",
+      "card.log.test.reveal",
+      {
+        card: { kind: "card", cardId: "SOURCE" },
+        revealed: { kind: "card", cardId: "TARGET" },
+      },
+      {
+        kind: "cards-revealed",
+        cards: [{ cardId: "TARGET", ownerSeat: 0 }],
+        sourceZone: "deck",
+      },
+    )).toEqual({
+      fallback: "Test Card reveals Attack",
+      message: {
+        id: "card.log.test.reveal",
+        values: {
+          card: { kind: "card", cardId: "SOURCE" },
+          revealed: { kind: "card", cardId: "TARGET" },
+        },
+      },
+      event: {
+        kind: "cards-revealed",
+        cards: [{ cardId: "TARGET", ownerSeat: 0 }],
+        sourceZone: "deck",
+      },
+    });
   });
 });
 

@@ -267,6 +267,36 @@ describe("PEN — import and set mechanics", () => {
     )).toBe(false);
   });
 
+  it("Smoldering Steel may banish itself from graveyard instead of creating Frostbite", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["head jab|1"],
+          graveyard: ["smoldering steel|1"],
+          equipment: NO_EQUIPMENT,
+        },
+        {
+          hero: "dorinthea",
+          equipment: { ...NO_EQUIPMENT, head: "stalagmite, bastion of isenloft|0" },
+        },
+      ],
+    });
+
+    g.play("head jab|1").blockWith("stalagmite, bastion of isenloft|0");
+
+    expect(g.state.stack[0]?.engineEffect?.kind).toBe("on-defend-hook");
+    g.settle();
+    expect(g.state.pendingDecision).toMatchObject({
+      kind: "optional-effect",
+      chooseHook: "engine-token-creation-replacement",
+    });
+
+    g.chooseOption("yes")
+      .expectInZone(0, "smoldering steel|1", "banish")
+      .expectNotInZone(0, "frostbite|0", "board");
+  });
+
   it("Savage Claw gets +1 when a six-power card pays for its attack", () => {
     const g = scenario({
       seats: [

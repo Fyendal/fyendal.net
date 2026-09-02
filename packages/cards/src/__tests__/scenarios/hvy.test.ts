@@ -106,6 +106,19 @@ describe("HVY — Rally the Rearguard", () => {
 });
 
 describe("HVY — Heavy Hitters mechanics", () => {
+  it("Bloodied Oval can defend using its dynamically defined defense", () => {
+    const g = scenario({ seats: [
+      { hero: "rhinar", life: 19, weapons: ["bloodied oval|0"] },
+      { hero: "dorinthea", life: 20, hand: ["head jab|1"] },
+    ], active: 1 });
+
+    g.play("head jab|1")
+      .blockWith("bloodied oval|0")
+      .settle()
+      .expectFinalDefense(1)
+      .expectLife(0, 17);
+  });
+
   it("Performance Bonus gains go again only when played from arsenal", () => {
     const fromArsenal = scenario({ seats: [
       { hero: "rhinar", arsenal: ["performance bonus|1"] },

@@ -456,12 +456,13 @@ export const sba: Record<string, CardScript> = {
     },
   },
 
-  // Arcane Seeds // Life — split: 2 Runechants + go again // gain 1{h}
+  // Arcane Seeds // Life — split: two separate Runechant creation events + go again // gain 1{h}
   "arcane seeds // life|1": splitScript({
     leftName: "Arcane Seeds",
     rightName: "Life",
     left(ctx) {
-      ctx.createTokens(RUNECHANT, 2);
+      ctx.createToken(RUNECHANT);
+      ctx.createToken(RUNECHANT);
     },
     right(ctx) {
       ctx.gainLife(ctx.seat, 1);

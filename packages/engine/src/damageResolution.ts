@@ -204,6 +204,7 @@ function applyPreventionShields(
   }
   if (preventable && remaining > 0) {
     for (const modifier of state.modifiers) {
+      if (remaining <= 0) break;
       const requiredSourceType = modifier.appliesToDamageSourceType?.toLowerCase();
       const sourceTypes = source
         ? [
@@ -225,6 +226,7 @@ function applyPreventionShields(
       remaining -= prevented;
       modifier.consumed = true;
       if (prevented > 0) {
+        applyTrackedPreventionRewards(state, runtime, target, [modifier]);
         logPublic(
           state,
           `${nameOf(state, target.heroCardId)} prevents ${prevented} damage`,
@@ -243,7 +245,6 @@ function applyPreventionShields(
           });
         }
       }
-      break;
     }
   }
   const arcaneShield = preventable && opts?.arcane === true

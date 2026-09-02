@@ -197,9 +197,12 @@ export function legalDefenderCards(
     return (attackActionPermission || ambush) &&
       d.defense !== undefined && allowed(c, false);
   });
-  // equipment may defend regardless of its defense value — even 0 (Ironhide)
-  // or negative after Battleworn counters (it then defends for 0); only
-  // equipment with no defense stat at all (e.g. Blossom of Spring) cannot.
+  // Equipment may defend regardless of its defense value — even 0 (Ironhide)
+  // or negative after Battleworn counters (it then defends for 0). A defining
+  // ability also gives a card the defense property (CR 2.3.2a), even when the
+  // card data has no literal defense value (for example, Bloodied Oval). Only
+  // equipment with neither a base defense nor such an ability (e.g. Blossom
+  // of Spring) cannot defend.
   // Face-down (Cloaked) equipment has no defense property and cannot defend.
   const equippedCards = [
     ...Object.values(player.equipment),
@@ -221,7 +224,8 @@ export function legalDefenderCards(
         !modifier.consumed && modifier.cannotDefendWithInstanceId === c.instanceId
       ) &&
       scriptOf(state, link?.attackingCard.cardId ?? "", link?.attackingCard)?.cannotBeDefendedByEquipment !== true &&
-      dataOf(state, c.cardId).defense !== undefined &&
+      (dataOf(state, c.cardId).defense !== undefined ||
+        scriptOf(state, c.cardId, c)?.modifyDefense !== undefined) &&
       allowed(c, false),
   );
   return { hand, arsenal, equipment };

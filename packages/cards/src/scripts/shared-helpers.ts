@@ -9,7 +9,11 @@ import type {
   ScriptPrompt,
   TriggerDef,
 } from "@fyendal/engine";
-import type { GameMessage } from "@fyendal/shared";
+import type {
+  GameLogEvent,
+  GameLogPayload,
+  GameMessage,
+} from "@fyendal/shared";
 import { functionalKey, functionalKeyOf } from "../functional.js";
 
 export interface DecisionPromptOptions {
@@ -51,6 +55,23 @@ export function decisionMessage(
   values?: GameMessage["values"],
 ): GameMessage {
   return { id, ...(values === undefined ? {} : { values }) };
+}
+
+/** Construct one audience-safe semantic log payload for any card script.
+ * Keeping this beside the decision helpers gives every set the same fallback,
+ * message-value, and optional machine-event contract without importing engine
+ * internals or a locale catalog. */
+export function localizedLog(
+  fallback: string,
+  id: string,
+  values?: GameMessage["values"],
+  event?: GameLogEvent,
+): GameLogPayload {
+  return {
+    fallback,
+    message: decisionMessage(id, values),
+    ...(event === undefined ? {} : { event }),
+  };
 }
 
 /** Localize recurring option values without changing the stable value sent
@@ -155,7 +176,14 @@ export function suspenseAura(options: {
         const next = Math.max(0, ctx.getCounter("suspense") - 1);
         ctx.setCounter("suspense", next);
         if (options.logCounterRemoval) {
-          ctx.logPublic(`${ctx.data.name}: a suspense counter is removed (${next} left)`);
+          ctx.logPublic(localizedLog(
+            `${ctx.data.name}: a suspense counter is removed (${next} left)`,
+            "card.log.common.suspense.counter.removed",
+            {
+              card: { kind: "card", cardId: ctx.self.cardId },
+              remaining: next,
+            },
+          ));
         }
         if (next === 0) ctx.destroySelf();
       },
@@ -460,7 +488,11 @@ export function isCard(ctx: ScriptCtx, cardId: string, name: string, pitch?: num
 export function queueIntimidate(ctx: ScriptCtx): void {
   const n = Number(ctx.getFlag("player", "pendingIntimidate")) || 0;
   ctx.setFlag("player", "pendingIntimidate", n + 1);
-  ctx.logPublic(`${ctx.data.name}: intimidate`);
+  ctx.logPublic(localizedLog(
+    `${ctx.data.name}: intimidate`,
+    "card.log.common.intimidate",
+    { card: { kind: "card", cardId: ctx.self.cardId } },
+  ));
 }
 
 export function isSixPlus(
@@ -493,10 +525,34 @@ export function revealTopSixPlusStays(ctx: ScriptCtx): void {
   if (!top) return;
   const d = ctx.cardData(top.cardId);
   if ((d.attack ?? 0) >= 6) {
-    ctx.logPublic(`${ctx.data.name} reveals ${d.name} — it stays on top`);
+    ctx.logPublic(localizedLog(
+      `${ctx.data.name} reveals ${d.name} — it stays on top`,
+      "card.log.common.reveal.top.stays",
+      {
+        card: { kind: "card", cardId: ctx.self.cardId },
+        revealed: { kind: "card", cardId: top.cardId },
+      },
+      {
+        kind: "cards-revealed",
+        cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }],
+        sourceZone: "deck",
+      },
+    ));
   } else {
     ctx.putOnDeckBottom(top.instanceId);
-    ctx.logPublic(`${ctx.data.name} reveals ${d.name} — put on the bottom of the deck`);
+    ctx.logPublic(localizedLog(
+      `${ctx.data.name} reveals ${d.name} — put on the bottom of the deck`,
+      "card.log.common.reveal.top.bottom",
+      {
+        card: { kind: "card", cardId: ctx.self.cardId },
+        revealed: { kind: "card", cardId: top.cardId },
+      },
+      {
+        kind: "cards-revealed",
+        cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }],
+        sourceZone: "deck",
+      },
+    ));
   }
 }
 
@@ -505,15 +561,47 @@ export function mentorPayoff(ctx: ScriptCtx, searchName: string, searchPitch?: n
   const p = ctx.player(ctx.seat);
   if (p.arsenal.some((c) => c.instanceId === ctx.self.instanceId)) {
     ctx.banish(ctx.self.instanceId);
-    ctx.logPublic(`${ctx.data.name} is banished`);
+    ctx.logPublic(localizedLog(
+      `${ctx.data.name} is banished`,
+      "card.log.common.banished",
+      { card: { kind: "card", cardId: ctx.self.cardId } },
+      {
+        kind: "card-moved",
+        cardId: ctx.self.cardId,
+        ownerSeat: ctx.seat,
+        from: "arsenal",
+        to: "banish",
+      },
+    ));
   }
   const key = functionalKey(searchName, searchPitch);
   const found = p.deck.find((c) => functionalKeyOf(ctx.cardData(c.cardId)) === key);
   if (found && ctx.putIntoArsenal(found.instanceId, "deck")) {
     ctx.logPrivate(
       ctx.seat,
-      `searched ${ctx.cardData(found.cardId).name} into arsenal`,
-      "searched a card into arsenal",
+      localizedLog(
+        `searched ${ctx.cardData(found.cardId).name} into arsenal`,
+        "card.log.common.mentor.search.private",
+        { result: { kind: "card", cardId: found.cardId } },
+        {
+          kind: "card-moved",
+          cardId: found.cardId,
+          ownerSeat: ctx.seat,
+          from: "deck",
+          to: "arsenal",
+        },
+      ),
+      localizedLog(
+        "searched a card into arsenal",
+        "card.log.common.mentor.search.public",
+        undefined,
+        {
+          kind: "card-moved",
+          ownerSeat: ctx.seat,
+          from: "deck",
+          to: "arsenal",
+        },
+      ),
     );
   }
   ctx.shuffleDeck();
@@ -531,7 +619,18 @@ function isSpecialization(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boo
 export function mentorSpecializationPayoff(ctx: ScriptCtx, hook: string): void {
   if (ctx.player(ctx.seat).arsenal.some((card) => card.instanceId === ctx.self.instanceId)) {
     ctx.banish(ctx.self.instanceId);
-    ctx.logPublic(`${ctx.data.name} is banished`);
+    ctx.logPublic(localizedLog(
+      `${ctx.data.name} is banished`,
+      "card.log.common.banished",
+      { card: { kind: "card", cardId: ctx.self.cardId } },
+      {
+        kind: "card-moved",
+        cardId: ctx.self.cardId,
+        ownerSeat: ctx.seat,
+        from: "arsenal",
+        to: "banish",
+      },
+    ));
   }
   const choices = ctx.player(ctx.seat).deck.filter((card) => isSpecialization(ctx, card));
   if (choices.length === 0) {
@@ -563,8 +662,29 @@ export function resolveMentorSpecializationChoice(
   if (card && ctx.putIntoArsenal(card.instanceId, "deck")) {
     ctx.logPrivate(
       ctx.seat,
-      `searched ${ctx.cardData(card.cardId).name} into arsenal`,
-      "searched a card into arsenal",
+      localizedLog(
+        `searched ${ctx.cardData(card.cardId).name} into arsenal`,
+        "card.log.common.mentor.search.private",
+        { result: { kind: "card", cardId: card.cardId } },
+        {
+          kind: "card-moved",
+          cardId: card.cardId,
+          ownerSeat: ctx.seat,
+          from: "deck",
+          to: "arsenal",
+        },
+      ),
+      localizedLog(
+        "searched a card into arsenal",
+        "card.log.common.mentor.search.public",
+        undefined,
+        {
+          kind: "card-moved",
+          ownerSeat: ctx.seat,
+          from: "deck",
+          to: "arsenal",
+        },
+      ),
     );
   }
   ctx.shuffleDeck();
@@ -593,7 +713,14 @@ export function discardRandomCost(ctx: ScriptCtx): void {
 export function lessonCounter(ctx: ScriptCtx): number {
   const n = ctx.getCounter("lessons") + 1;
   ctx.setCounter("lessons", n);
-  ctx.logPublic(`${ctx.data.name} gets a lesson counter (${n})`);
+  ctx.logPublic(localizedLog(
+    `${ctx.data.name} gets a lesson counter (${n})`,
+    "card.log.common.lesson.counter.gained",
+    {
+      card: { kind: "card", cardId: ctx.self.cardId },
+      count: n,
+    },
+  ));
   return n;
 }
 
@@ -680,7 +807,14 @@ export function payForDefenseBoost(
     if (opts?.destroyOnClose) {
       ctx.setFlag("link", `destroyOnClose:${ctx.self.instanceId}`, true);
     }
-    ctx.logPublic(resolve(opts?.logMessage, ctx, `${ctx.data.name} gains +${defense} defense`));
+    ctx.logPublic(localizedLog(
+      resolve(opts?.logMessage, ctx, `${ctx.data.name} gains +${defense} defense`),
+      "card.log.common.defense.gained",
+      {
+        card: { kind: "card", cardId: ctx.self.cardId },
+        defense,
+      },
+    ));
   };
   return opts?.onPlay
     ? { onPlay: request, onChoose }
@@ -720,7 +854,14 @@ export function buffNextArcaneDamageCard(ctx: ScriptCtx, n: number): void {
   const sourceKey = `nextArcaneCardBonusSource:${ctx.self.instanceId}`;
   const sourceBonus = Number(ctx.getPlayerFlag(ctx.seat, sourceKey)) + n;
   ctx.setPlayerFlag(ctx.seat, sourceKey, sourceBonus);
-  ctx.logPublic(`${ctx.data.name}: your next arcane damage card this turn gets +${n}`);
+  ctx.logPublic(localizedLog(
+    `${ctx.data.name}: your next arcane damage card this turn gets +${n}`,
+    "card.log.common.arcane.card.bonus",
+    {
+      card: { kind: "card", cardId: ctx.self.cardId },
+      amount: n,
+    },
+  ));
 }
 
 /** Add to the controller's Amp pool: the next positive arcane-damage event
@@ -731,7 +872,14 @@ export function ampNextArcane(ctx: ScriptCtx, n: number): void {
   const sourceKey = `nextArcaneBonusSource:${ctx.self.instanceId}`;
   const sourceBonus = Number(ctx.getPlayerFlag(ctx.seat, sourceKey)) + n;
   ctx.setPlayerFlag(ctx.seat, sourceKey, sourceBonus);
-  ctx.logPublic(`${ctx.data.name}: your next arcane damage event this turn gets +${n}`);
+  ctx.logPublic(localizedLog(
+    `${ctx.data.name}: your next arcane damage event this turn gets +${n}`,
+    "card.log.common.arcane.event.bonus",
+    {
+      card: { kind: "card", cardId: ctx.self.cardId },
+      amount: n,
+    },
+  ));
 }
 
 /** Shared Wizard instant permission used by the Blaze and Iyslander pools.
@@ -838,14 +986,29 @@ export function optOnChoose(
   const total = Number(m[2]);
   const ids = m[3]!.split(",").map(Number);
   const finish = (): void => {
-    ctx.logPublic(`${ctx.data.name}: opt ${total}`);
+    ctx.logPublic(localizedLog(
+      `${ctx.data.name}: opt ${total}`,
+      "card.log.common.opt.completed",
+      {
+        card: { kind: "card", cardId: ctx.self.cardId },
+        count: total,
+      },
+    ));
     if (charge && total > 0) {
       // Blaze, Firemind: "Whenever you opt, put energy counters on Blaze equal
       // to the number of cards looked at this way."
       const hero = ctx.player(ctx.seat).hero;
       const n = (hero.counters?.energy ?? 0) + total;
       ctx.setCardCounter(hero.instanceId, "energy", n);
-      ctx.logPublic(`${ctx.cardData(hero.cardId).name} gets ${total} energy counter(s) (${n})`);
+      ctx.logPublic(localizedLog(
+        `${ctx.cardData(hero.cardId).name} gets ${total} energy counter(s) (${n})`,
+        "card.log.common.energy.counters.gained",
+        {
+          card: { kind: "card", cardId: hero.cardId },
+          amount: total,
+          count: n,
+        },
+      ));
     }
     onComplete?.();
   };

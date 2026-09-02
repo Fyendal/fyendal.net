@@ -3865,6 +3865,52 @@
       "value": "从你的手牌中放逐一张牌"
     }
   ],
+  "card.hnt.longwhisker.modes.choose": [
+    {
+      "type": 0,
+      "value": "Long Whisker Loyalty：选择 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 个模式"
+    }
+  ],
+  "card.hnt.longwhisker.modes.more": [
+    {
+      "type": 0,
+      "value": "Long Whisker Loyalty：再选择 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 个模式"
+    }
+  ],
+  "card.hnt.longwhisker.option.additionalattack": [
+    {
+      "type": 0,
+      "value": "本回合可用目标匕首额外攻击一次"
+    }
+  ],
+  "card.hnt.longwhisker.option.attack": [
+    {
+      "type": 0,
+      "value": "目标匕首攻击的攻击力 +2"
+    }
+  ],
+  "card.hnt.longwhisker.option.mark": [
+    {
+      "type": 0,
+      "value": "目标匕首下次命中英雄时标记该英雄"
+    }
+  ],
   "card.hnt.provoke.card.reveal": [
     {
       "type": 0,
@@ -4307,6 +4353,204 @@
     {
       "type": 0,
       "value": "Batter to a Pulp：选择摧毁一件防御值为 0 的装备"
+    }
+  ],
+  "card.log.common.arcane.card.bonus": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：本回合你的下一张奥术伤害牌获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    }
+  ],
+  "card.log.common.arcane.event.bonus": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：本回合你的下一次奥术伤害获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    }
+  ],
+  "card.log.common.banished": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 被放逐"
+    }
+  ],
+  "card.log.common.defense.gained": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 获得 +"
+    },
+    {
+      "type": 1,
+      "value": "defense"
+    },
+    {
+      "type": 0,
+      "value": " 防御"
+    }
+  ],
+  "card.log.common.energy.counters.gained": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 获得 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 个能量指示物（当前 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个）"
+    }
+  ],
+  "card.log.common.intimidate": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：intimidate"
+    }
+  ],
+  "card.log.common.lesson.counter.gained": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 获得一个 lesson 指示物（当前 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个）"
+    }
+  ],
+  "card.log.common.mentor.search.private": [
+    {
+      "type": 0,
+      "value": "将 "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " 从牌库搜寻并置入 arsenal"
+    }
+  ],
+  "card.log.common.mentor.search.public": [
+    {
+      "type": 0,
+      "value": "从牌库搜寻一张牌并置入 arsenal"
+    }
+  ],
+  "card.log.common.opt.completed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：Opt "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    }
+  ],
+  "card.log.common.reveal.top.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 展示 "
+    },
+    {
+      "type": 1,
+      "value": "revealed"
+    },
+    {
+      "type": 0,
+      "value": " —— 将其置于牌库底部"
+    }
+  ],
+  "card.log.common.reveal.top.stays": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 展示 "
+    },
+    {
+      "type": 1,
+      "value": "revealed"
+    },
+    {
+      "type": 0,
+      "value": " —— 将其留在牌库顶部"
+    }
+  ],
+  "card.log.common.suspense.counter.removed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：移除一个 suspense 指示物（剩余 "
+    },
+    {
+      "type": 1,
+      "value": "remaining"
+    },
+    {
+      "type": 0,
+      "value": " 个）"
     }
   ],
   "card.lss.drinking.buddy.search": [

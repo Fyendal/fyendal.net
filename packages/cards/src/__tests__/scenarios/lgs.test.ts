@@ -1,5 +1,6 @@
-import { describe, it } from "vitest";
-import { scenario } from "../harness.js";
+import { projectStateFor } from "@fyendal/engine";
+import { describe, expect, it } from "vitest";
+import { printingId, scenario } from "../harness.js";
 
 /** Scenarios for the LGS set: Wrecking Ball and the Chief Ruk'utan mentor. */
 
@@ -88,6 +89,45 @@ describe("LGS — Chief Ruk'utan (mentor)", () => {
       .blockWith()
       .settle()
       .expectLife(0, 8); // 6 (Wild Ride) + 6 (Pack Hunt)
+
+    const ownerLog = projectStateFor(g.state, 1).logEntries ?? [];
+    const opponentLog = projectStateFor(g.state, 0).logEntries ?? [];
+    expect(ownerLog).toContainEqual(expect.objectContaining({
+      message: {
+        id: "card.log.common.lesson.counter.gained",
+        values: {
+          card: { kind: "card", cardId: printingId("chief ruk'utan|0") },
+          count: 2,
+        },
+      },
+    }));
+    expect(ownerLog).toContainEqual(expect.objectContaining({
+      message: {
+        id: "card.log.common.mentor.search.private",
+        values: {
+          result: { kind: "card", cardId: printingId("alpha rampage|1") },
+        },
+      },
+      event: expect.objectContaining({
+        kind: "card-moved",
+        cardId: printingId("alpha rampage|1"),
+        from: "deck",
+        to: "arsenal",
+      }),
+    }));
+    const publicSearch = opponentLog.find(
+      (entry) => "message" in entry &&
+        entry.message.id === "card.log.common.mentor.search.public",
+    );
+    expect(publicSearch).toMatchObject({
+      event: {
+        kind: "card-moved",
+        ownerSeat: 1,
+        from: "deck",
+        to: "arsenal",
+      },
+    });
+    expect(JSON.stringify(publicSearch)).not.toContain(printingId("alpha rampage|1"));
   });
 
   // lesson counters live on the mentor card itself (persistent counters), so
