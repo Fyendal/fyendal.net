@@ -279,6 +279,124 @@
       "value": "赤魂战纪在线对战"
     }
   ],
+  "card.ako.hide.tanner.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Hide Tanner 以生成 2 个 Might 衍生物？"
+    }
+  ],
+  "card.amo.mortimer.disease.choose": [
+    {
+      "type": 0,
+      "value": "选择一个要治愈的疾病"
+    }
+  ],
+  "card.apr.halo.aura.return": [
+    {
+      "type": 0,
+      "value": "Halo of Lumina Light：将放逐区中的一张黄色光环放入竞技场？"
+    }
+  ],
+  "card.asb.charge.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一张牌进行充能，或拒绝"
+    }
+  ],
+  "card.aur.aether.crackers.destroy": [
+    {
+      "type": 0,
+      "value": "Aether Crackers：摧毁此牌，对被击中的英雄造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害？"
+    }
+  ],
+  "card.aur.spark.spray.pay": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：支付 1 点资源使攻击获得 +1 力量？"
+    }
+  ],
+  "card.ddd.cutting.couriers.destroy": [
+    {
+      "type": 0,
+      "value": "Cutting Couriers：摧毁此牌，使该次攻击获得 go again？"
+    }
+  ],
+  "card.ddd.squires.bracers.destroy": [
+    {
+      "type": 0,
+      "value": "Squire's Bracers：摧毁此牌，使该剑的下一次攻击获得 +2 力量？"
+    }
+  ],
+  "card.gem.embrace.ursur.banish": [
+    {
+      "type": 0,
+      "value": "放逐一张你的手牌？"
+    }
+  ],
+  "card.gem.ominous.toll.discard": [
+    {
+      "type": 0,
+      "value": "弃置一张 Zombie 以生成一个 Gate to i'Arathael？"
+    }
+  ],
+  "card.lgs.batter.equipment.choose": [
+    {
+      "type": 0,
+      "value": "Batter to a Pulp：选择摧毁一件防御值为 0 的装备"
+    }
+  ],
+  "card.lss.drinking.buddy.search": [
+    {
+      "type": 0,
+      "value": "Drinking Buddy：搜索一张名称中含 Potion 或 Brew 的物品牌？"
+    }
+  ],
+  "card.lss.ruudi.draw": [
+    {
+      "type": 0,
+      "value": "Ruu'di：抽一张牌？"
+    }
+  ],
+  "card.mpa.remember.hand.banish": [
+    {
+      "type": 0,
+      "value": "选择一张防守方英雄的手牌并放逐"
+    }
+  ],
+  "card.sda.dash.item.start": [
+    {
+      "type": 0,
+      "value": "Dash：以一张费用不超过 2 的 Mechanologist 物品在竞技场中开始游戏？"
+    }
+  ],
+  "card.sdo.option.turn": [
+    {
+      "type": 0,
+      "value": "翻开"
+    }
+  ],
+  "card.sdo.wreck.arsenal.turn": [
+    {
+      "type": 0,
+      "value": "Wreck Havoc：将对方 arsenal 中的一张牌翻开？（若为防御反应牌，则将其摧毁。）"
+    }
+  ],
   "card.sea.damage.arcane.target": [
     {
       "type": 0,
@@ -309,6 +427,42 @@
     {
       "type": 0,
       "value": "从 Treasure Island 上移除一个金指示物？"
+    }
+  ],
+  "card.ska.beaten.trackers.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Beaten Trackers 以获得 1 个行动点？"
+    }
+  ],
+  "card.ska.strongest.survive.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：展示一张力量大于 "
+    },
+    {
+      "type": 1,
+      "value": "damage"
+    },
+    {
+      "type": 0,
+      "value": " 的牌，或弃置一张牌"
+    }
+  ],
+  "card.ter.hard.knuckle.destroy": [
+    {
+      "type": 0,
+      "value": "Hard Knuckle：摧毁此牌，使该次攻击获得 +1 力量？"
+    }
+  ],
+  "card.ter.terra.might.pay": [
+    {
+      "type": 0,
+      "value": "Terra：支付 1 点资源以生成一个 Might 衍生物？"
     }
   ],
   "common.all": [
@@ -433,6 +587,12 @@
     {
       "type": 0,
       "value": "否"
+    }
+  ],
+  "common.option.none": [
+    {
+      "type": 0,
+      "value": "不选择"
     }
   ],
   "common.option.pass": [

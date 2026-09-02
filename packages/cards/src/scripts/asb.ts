@@ -1,4 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import { decisionMessage, decisionPrompt } from "./shared-helpers.js";
 
 const COURAGE = "ASB027";
 const QUICKEN = "ASB028";
@@ -11,10 +12,18 @@ function isLight(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
 function chargeAdditionalCost(ctx: ScriptCtx): void {
   const hand = ctx.player(ctx.seat).hand;
   if (hand.length) {
-    ctx.requestCardChoice(CHARGE_HOOK, `${ctx.data.name}: choose a card to charge, or decline`, [
-      "no",
-      ...hand.map((card) => card.instanceId),
-    ]);
+    ctx.requestCardChoice(
+      CHARGE_HOOK,
+      decisionPrompt(
+        `${ctx.data.name}: choose a card to charge, or decline`,
+        "card.asb.charge.choose",
+        {
+          values: { card: { kind: "card", cardId: ctx.self.cardId } },
+          optionMessages: { no: decisionMessage("common.option.decline") },
+        },
+      ),
+      ["no", ...hand.map((card) => card.instanceId)],
+    );
   }
 }
 
@@ -32,10 +41,18 @@ function graceEquipment(effect: (ctx: ScriptCtx) => void): CardScript {
     onDefend(ctx) {
       const hand = ctx.player(ctx.seat).hand;
       if (hand.length) {
-        ctx.requestCardChoice("grace-charge", `${ctx.data.name}: charge a card, or decline`, [
-          "no",
-          ...hand.map((card) => card.instanceId),
-        ]);
+        ctx.requestCardChoice(
+          "grace-charge",
+          decisionPrompt(
+            `${ctx.data.name}: charge a card, or decline`,
+            "card.asb.charge.choose",
+            {
+              values: { card: { kind: "card", cardId: ctx.self.cardId } },
+              optionMessages: { no: decisionMessage("common.option.decline") },
+            },
+          ),
+          ["no", ...hand.map((card) => card.instanceId)],
+        );
       }
     },
     onChoose(ctx, hook, option) {

@@ -1,5 +1,9 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import { bloodDebtScript as bloodDebt } from "./shared-helpers.js";
+import {
+  bloodDebtScript as bloodDebt,
+  decisionMessage,
+  decisionPrompt,
+} from "./shared-helpers.js";
 
 const RUNECHANT = "SBA036";
 const GATE = "IAR222";
@@ -38,7 +42,11 @@ const ominousToll: CardScript = {
     if (zombies.length > 0) {
       ctx.requestCardChoice(
         "gem-ominous-toll-discard",
-        "Discard a zombie to create a Gate to i'Arathael?",
+        decisionPrompt(
+          "Discard a zombie to create a Gate to i'Arathael?",
+          "card.gem.ominous.toll.discard",
+          { optionMessages: { no: decisionMessage("common.option.decline") } },
+        ),
         ["no", ...zombies.map((card) => card.instanceId)],
       );
     }
@@ -77,7 +85,11 @@ export const gem: Record<string, CardScript> = {
       if (hand.length > 0) {
         ctx.requestCardChoice(
           "gem-embrace-ursur-banish",
-          "Banish a card from your hand?",
+          decisionPrompt(
+            "Banish a card from your hand?",
+            "card.gem.embrace.ursur.banish",
+            { optionMessages: { no: decisionMessage("common.option.decline") } },
+          ),
           ["no", ...hand.map((card) => card.instanceId)],
         );
       }

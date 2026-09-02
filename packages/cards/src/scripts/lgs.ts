@@ -1,6 +1,7 @@
 import type { CardScript } from "@fyendal/engine";
 import {
   discardSixPlusPayoff,
+  decisionPrompt,
   isSixPlus,
   lessonCounter,
   mentorFlipTrigger,
@@ -53,7 +54,10 @@ export const lgs: Record<string, CardScript> = {
       if (equipment.length) {
         ctx.requestCardChoice(
           "batter-equipment",
-          "Batter to a Pulp: destroy an equipment with no defense value",
+          decisionPrompt(
+            "Batter to a Pulp: destroy an equipment with no defense value",
+            "card.lgs.batter.equipment.choose",
+          ),
           equipment.map((card) => card.instanceId),
         );
       }

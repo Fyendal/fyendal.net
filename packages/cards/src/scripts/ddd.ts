@@ -1,5 +1,5 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, isSwordAttack } from "./shared-helpers.js";
+import { buffNextAttack, isSwordAttack, yesNoPrompt } from "./shared-helpers.js";
 
 function swordHit(ctx: ScriptCtx, sourceCardId: string, amount: number): boolean {
   if (amount <= 0 || !ctx.link || ctx.link.attackingCard.cardId !== sourceCardId) return false;
@@ -12,7 +12,10 @@ export const ddd: Record<string, CardScript> = {
       if (!swordHit(ctx, source.cardId, amount)) return;
       ctx.requestChoice(
         "squires-bracers",
-        "Squire's Bracers: destroy this so the sword's next attack gets +2{p}?",
+        yesNoPrompt(
+          "Squire's Bracers: destroy this so the sword's next attack gets +2{p}?",
+          "card.ddd.squires.bracers.destroy",
+        ),
         ["yes", "no"],
       );
     },
@@ -27,7 +30,10 @@ export const ddd: Record<string, CardScript> = {
       if (!swordHit(ctx, source.cardId, amount)) return;
       ctx.requestChoice(
         "cutting-couriers",
-        "Cutting Couriers: destroy this so the attack gets go again?",
+        yesNoPrompt(
+          "Cutting Couriers: destroy this so the attack gets go again?",
+          "card.ddd.cutting.couriers.destroy",
+        ),
         ["yes", "no"],
       );
     },

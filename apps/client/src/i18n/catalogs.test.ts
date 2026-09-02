@@ -1,7 +1,21 @@
+import { readdirSync, readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import englishMessages from "./compiled/en.json";
 import chineseMessages from "./compiled/zh-Hans.json";
 import { createTestIntl } from "./TestI18nProvider.js";
+
+const cardScriptsDirectory = fileURLToPath(
+  new URL("../../../../packages/cards/src/scripts/", import.meta.url),
+);
+
+function scriptFiles(path: string): string[] {
+  return readdirSync(path, { withFileTypes: true }).flatMap((entry) => {
+    const entryPath = `${path}/${entry.name}`;
+    if (entry.isDirectory()) return scriptFiles(entryPath);
+    return entry.name.endsWith(".ts") ? [entryPath] : [];
+  });
+}
 
 describe("locale catalogs", () => {
   it("keeps Simplified Chinese complete with the English source catalog", () => {
@@ -16,6 +30,20 @@ describe("locale catalogs", () => {
 
     expect(wireMessageIds).not.toHaveLength(0);
     expect(wireMessageIds.filter((id) => !semanticMessageId.test(id))).toEqual([]);
+  });
+
+  it("contains every semantic message referenced by card scripts", () => {
+    const referencedIds = new Set(scriptFiles(cardScriptsDirectory).flatMap((path) =>
+      Array.from(
+        readFileSync(path, "utf8").matchAll(/["']((?:card|common\.option)\.[a-z0-9.]+)["']/g),
+        (match) => match[1]!,
+      )
+    ));
+    const catalogIds = new Set(Object.keys(englishMessages));
+
+    expect(
+      [...referencedIds].filter((id) => !catalogIds.has(id)).sort(),
+    ).toEqual([]);
   });
 
   it("preserves canonical English game keywords in Chinese", () => {
