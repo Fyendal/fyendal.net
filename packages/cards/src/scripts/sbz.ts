@@ -1,6 +1,17 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import { functionalKeyOf } from "../functional.js";
-import { ampNextArcane, buffNextArcaneDamageCard, dealArcane, opponentSeat, optN, optOnChoose, wizardActionAsInstant } from "./shared-helpers.js";
+import {
+  ampNextArcane,
+  buffNextArcaneDamageCard,
+  commonOptionMessages,
+  dealArcane,
+  decisionPrompt,
+  opponentSeat,
+  optN,
+  optOnChoose,
+  wizardActionAsInstant,
+  yesNoPrompt,
+} from "./shared-helpers.js";
 
 // ── SBZ (Silver Age: Blaze, Firemind precon) ────────────────────────────────
 //
@@ -50,7 +61,19 @@ function requestHeroTarget(ctx: ScriptCtx, damage: number): void {
   }
   ctx.requestChoice(
     `target:${damage}`,
-    `${ctx.data.name}: deal ${ctx.previewArcaneDamage(damage)} arcane damage to which target?`,
+    decisionPrompt(
+      `${ctx.data.name}: deal ${ctx.previewArcaneDamage(damage)} arcane damage to which target?`,
+      "card.sbz.arcane.target.choose",
+      {
+        values: {
+          card: { kind: "card", cardId: ctx.self.cardId },
+          amount: ctx.previewArcaneDamage(damage),
+        },
+        optionMessages: {
+          ...commonOptionMessages("opposing hero", "your hero"),
+        },
+      },
+    ),
     options,
     ctx.seat,
     cardOptions,
@@ -182,7 +205,10 @@ export const sbz: Record<string, CardScript> = {
         const max = ctx.getCounter("energy");
         ctx.requestChoice(
           "blaze-x",
-          "Blaze, Firemind: remove how many energy counters?",
+          decisionPrompt(
+            "Blaze, Firemind: remove how many energy counters?",
+            "card.sbz.blaze.energy.choose",
+          ),
           Array.from({ length: max }, (_, i) => String(i + 1)),
         );
       },
@@ -206,7 +232,11 @@ export const sbz: Record<string, CardScript> = {
         }
         ctx.requestCardChoice(
           "blaze-banish",
-          `Blaze, Firemind: banish a Wizard non-attack action dealing ${x} arcane damage (playable as an instant this turn)`,
+          decisionPrompt(
+            `Blaze, Firemind: banish a Wizard non-attack action dealing ${x} arcane damage (playable as an instant this turn)`,
+            "card.sbz.blaze.action.banish",
+            { values: { amount: x } },
+          ),
           matches.map((c) => c.instanceId),
         );
         return;
@@ -317,7 +347,10 @@ export const sbz: Record<string, CardScript> = {
     onAttackDeclared(ctx) {
       if (!ctx.requestPayment(
         "look-tuff",
-        "Look Tuff: pay {r} or it gets -1{p}?",
+        decisionPrompt(
+          "Look Tuff: pay {r} or it gets -1{p}?",
+          "card.sbz.looktuff.pay",
+        ),
         1,
       )) {
         ctx.addModifier({ scope: "chain-link", attack: -1 });
@@ -372,10 +405,14 @@ export const sbz: Record<string, CardScript> = {
     onPlay: (ctx) => requestHeroTarget(ctx, 5),
     onDamageDealt(ctx, _target, amount, arcane) {
       if (!arcane || amount <= 0) return;
-      ctx.requestChoice("mindfire-tap", "Turn to Mindfire: tap your hero to create a Ponder token?", [
-        "yes",
-        "no",
-      ]);
+      ctx.requestChoice(
+        "mindfire-tap",
+        yesNoPrompt(
+          "Turn to Mindfire: tap your hero to create a Ponder token?",
+          "card.sbz.mindfire.hero.tap",
+        ),
+        ["yes", "no"],
+      );
     },
     onChoose(ctx, hook, option) {
       if (targetOnChoose(ctx, hook, option)) return;

@@ -1,5 +1,15 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, contractWithSilver, dealArcane, opponentSeat, previousAttackHasName } from "../shared-helpers.js";
+import {
+  bottomOrKeepPrompt,
+  buffNextAttack,
+  commonOptionMessages,
+  contractWithSilver,
+  dealArcane,
+  decisionMessage,
+  decisionPrompt,
+  opponentSeat,
+  previousAttackHasName,
+} from "../shared-helpers.js";
 
 const CROUCHING_TIGER = "DYN065";
 const SILVER = "DYN245";
@@ -18,7 +28,7 @@ function weapon(cost: number, extra: CardScript = {}): CardScript {
       : { ...base, ...activated },
   };
 }
-function discardChoice(ctx: ScriptCtx, hook: string, seat = opponentSeat(ctx)): void { const hand = ctx.player(seat).hand; if (hand.length) ctx.requestCardChoice(hook, "Choose a card to discard", hand.map((card) => card.instanceId), seat); }
+function discardChoice(ctx: ScriptCtx, hook: string, seat = opponentSeat(ctx)): void { const hand = ctx.player(seat).hand; if (hand.length) ctx.requestCardChoice(hook, decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"), hand.map((card) => card.instanceId), seat); }
 function arcane(amount: number, extra?: (ctx: ScriptCtx, dealt: number) => void): CardScript { return { arcaneDamageEffect: true, onPlay(ctx) { const dealt = dealArcane(ctx, opponentSeat(ctx), amount); extra?.(ctx, dealt); } }; }
 function graveyardAssassinEquipment(extra: CardScript = {}): CardScript {
   return {
@@ -48,7 +58,17 @@ function advanceDiabolic(ctx: ScriptCtx, stage: "ally" | "aura", seat: number): 
   }
   const cards = typedPermanents(ctx, seat, stage);
   if (!cards.length) return advanceDiabolic(ctx, stage, seat + 1);
-  ctx.requestCardChoice(`diabolic:${stage}:${seat}`, `Choose a ${stage} to destroy`, cards.map((card) => card.instanceId), seat);
+  ctx.requestCardChoice(
+    `diabolic:${stage}:${seat}`,
+    decisionPrompt(
+      `Choose a ${stage} to destroy`,
+      stage === "ally"
+        ? "card.dyn.diabolic.ally.choose"
+        : "card.dyn.diabolic.aura.choose",
+    ),
+    cards.map((card) => card.instanceId),
+    seat,
+  );
 }
 function warhornPermanents(ctx: ScriptCtx, seat: number): readonly DeepReadonly<CardInstance>[] {
   return ctx.player(seat).board.filter((card) => ["ally", "aura", "item", "landmark"].some((type) => has(ctx, card, type)));
@@ -62,7 +82,15 @@ function finishHarpoonReveal(ctx: ScriptCtx): void {
   if (ids.length) {
     ctx.requestCardChoice(
       "harpoon-defender",
-      actions.length ? "Choose a revealed action card to defend" : "No revealed cards can defend",
+      decisionPrompt(
+        actions.length ? "Choose a revealed action card to defend" : "No revealed cards can defend",
+        actions.length
+          ? "card.dyn.harpoon.defender.choose"
+          : "card.dyn.harpoon.defender.none",
+        actions.length
+          ? {}
+          : { optionMessages: { Close: decisionMessage("common.option.close") } },
+      ),
       actions.length ? actions.map((card) => card.instanceId) : ["Close"],
       undefined,
       ids,
@@ -70,13 +98,43 @@ function finishHarpoonReveal(ctx: ScriptCtx): void {
   }
 }
 function requestBrainstormTarget(ctx: ScriptCtx): void {
-  const allies = ctx.state.players.flatMap((player) => player.board.filter((card) => has(ctx, card, "ally")));
-  ctx.requestChoice("brainstorm-target", `Choose a target for ${ctx.previewArcaneDamage(1)} arcane damage`, ["hero:0", "hero:1", ...allies.map((card) => `ally:${card.instanceId}`)]);
+  const targets = ctx.state.players.flatMap((player) => [
+    { option: `hero:${player.seat}`, cardId: player.hero.cardId },
+    ...player.board
+      .filter((card) => has(ctx, card, "ally"))
+      .map((card) => ({ option: `ally:${card.instanceId}`, cardId: card.cardId })),
+  ]);
+  const amount = ctx.previewArcaneDamage(1);
+  ctx.requestChoice(
+    "brainstorm-target",
+    decisionPrompt(
+      `Choose a target for ${amount} arcane damage`,
+      "card.dyn.brainstorm.target.choose",
+      {
+        values: { amount },
+        optionMessages: Object.fromEntries(targets.map(({ option, cardId }) => [
+          option,
+          decisionMessage("card.common.target.card", {
+            card: { kind: "card", cardId },
+          }),
+        ])),
+      },
+    ),
+    targets.map(({ option }) => option),
+  );
 }
 function advanceWarhorn(ctx: ScriptCtx, afterSeat: number): void {
   const next = [0, 1].find((target) => target > afterSeat && (ctx.getCounter("warhornMask") & (1 << target)) !== 0 && warhornPermanents(ctx, target).length > 0);
   if (next !== undefined) {
-    ctx.requestCardChoice(`warhorn:${next}`, "Choose a permanent to destroy", warhornPermanents(ctx, next).map((card) => card.instanceId), has(ctx, ctx.player(ctx.seat).hero, "royal") ? ctx.seat : next);
+    ctx.requestCardChoice(
+      `warhorn:${next}`,
+      decisionPrompt(
+        "Choose a permanent to destroy",
+        "card.dyn.warhorn.permanent.choose",
+      ),
+      warhornPermanents(ctx, next).map((card) => card.instanceId),
+      has(ctx, ctx.player(ctx.seat).hero, "royal") ? ctx.seat : next,
+    );
     return;
   }
   for (const target of [0, 1]) { const id = ctx.getCounter(`warhornChoice:${target}`); if (id) ctx.destroyPermanent(id); }
@@ -133,14 +191,14 @@ export const dynHighRarity: Record<string, CardScript> = {
   "cleave|1": {
     onPlay(ctx) { buffNextAttack(ctx, { attack: 4, appliesToSubtype: "axe" }); },
     canTriggerOnHit(ctx) { return ctx.state.modifiers.some((modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "chain-link"); },
-    onHit(ctx) { const allies = typedPermanents(ctx, opponentSeat(ctx), "ally").filter((card) => card.instanceId !== ctx.link?.targetAllyId); if (allies.length && (ctx.link?.damage ?? 0) > 0) { ctx.setCounter("cleaveDamage", ctx.link!.damage); ctx.requestCardChoice("cleave-ally", "Deal the hit damage to another ally?", ["no", ...allies.map((card) => card.instanceId)]); } },
+    onHit(ctx) { const allies = typedPermanents(ctx, opponentSeat(ctx), "ally").filter((card) => card.instanceId !== ctx.link?.targetAllyId); if (allies.length && (ctx.link?.damage ?? 0) > 0) { ctx.setCounter("cleaveDamage", ctx.link!.damage); ctx.requestCardChoice("cleave-ally", decisionPrompt("Deal the hit damage to another ally?", "card.dyn.cleave.ally.choose", { optionMessages: commonOptionMessages("no") }), ["no", ...allies.map((card) => card.instanceId)]); } },
     onChoose(ctx, hook, option) { if (hook === "cleave-ally" && option !== "no") ctx.dealDamage(opponentSeat(ctx), ctx.getCounter("cleaveDamage"), { targetAllyId: Number(option) }); },
   },
   "ironsong pride|1": { onEnterArena(ctx) { const swords = ctx.player(ctx.seat).weapons.filter((card) => has(ctx, card, "sword")); if (swords.length) ctx.addCounter(swords[0]!.instanceId, "power", 1); }, onLeaveArena(ctx) { for (const sword of ctx.player(ctx.seat).weapons.filter((card) => has(ctx, card, "sword"))) ctx.setCardCounter(sword.instanceId, "power", 0); } },
   "hanabi blaster|0": { activated: { cost: 0, isAttack: true, goAgain: false, oncePerTurn: true, removeCounterCost: { key: "steam", amount: 2 } }, triggers: [{ event: "card-played", label: "Put a steam counter on Hanabi Blaster", condition: (ctx, played) => !!played && (ctx.cardData(played.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "boost") && Number(ctx.getFlag("player", "playedKeywordCount:boost")) === 3, effect(ctx) { ctx.addCounter(ctx.self.instanceId, "steam", 1); } }], onAttackDeclared(ctx) { ctx.setFlag("link", "overpower", true); } },
   "pulsewave harpoon|1": {
-    onAttackDeclared(ctx) { const x = Math.min(Number(ctx.getFlag("player", "boostCountThisTurn")), ctx.player(opponentSeat(ctx)).hand.length); ctx.setCounter("harpoonX", x); if (x <= 0) return; const hand = ctx.player(opponentSeat(ctx)).hand; if (hand.length === x) { hand.forEach((card, index) => ctx.setCardCounter(ctx.self.instanceId, `harpoonReveal:${index}`, card.instanceId)); finishHarpoonReveal(ctx); } else ctx.requestCardChoice("harpoon-reveal:0", "Choose a card to reveal", hand.map((card) => card.instanceId), opponentSeat(ctx)); },
-    onChoose(ctx, hook, option) { if (hook === "harpoon-defender") { if (option !== "Close") ctx.addDefenderFromHand(Number(option)); return; } if (!hook.startsWith("harpoon-reveal:")) return; const index = Number(hook.split(":")[1]); ctx.setCardCounter(ctx.self.instanceId, `harpoonReveal:${index}`, Number(option)); if (index + 1 >= ctx.getCounter("harpoonX")) { finishHarpoonReveal(ctx); return; } const selected = new Set(Array.from({ length: index + 1 }, (_, i) => ctx.getCounter(`harpoonReveal:${i}`))); const hand = ctx.player(opponentSeat(ctx)).hand.filter((card) => !selected.has(card.instanceId)); ctx.requestCardChoice(`harpoon-reveal:${index + 1}`, "Choose another card to reveal", hand.map((card) => card.instanceId), opponentSeat(ctx)); },
+    onAttackDeclared(ctx) { const x = Math.min(Number(ctx.getFlag("player", "boostCountThisTurn")), ctx.player(opponentSeat(ctx)).hand.length); ctx.setCounter("harpoonX", x); if (x <= 0) return; const hand = ctx.player(opponentSeat(ctx)).hand; if (hand.length === x) { hand.forEach((card, index) => ctx.setCardCounter(ctx.self.instanceId, `harpoonReveal:${index}`, card.instanceId)); finishHarpoonReveal(ctx); } else ctx.requestCardChoice("harpoon-reveal:0", decisionPrompt("Choose a card to reveal", "card.dyn.harpoon.reveal.choose"), hand.map((card) => card.instanceId), opponentSeat(ctx)); },
+    onChoose(ctx, hook, option) { if (hook === "harpoon-defender") { if (option !== "Close") ctx.addDefenderFromHand(Number(option)); return; } if (!hook.startsWith("harpoon-reveal:")) return; const index = Number(hook.split(":")[1]); ctx.setCardCounter(ctx.self.instanceId, `harpoonReveal:${index}`, Number(option)); if (index + 1 >= ctx.getCounter("harpoonX")) { finishHarpoonReveal(ctx); return; } const selected = new Set(Array.from({ length: index + 1 }, (_, i) => ctx.getCounter(`harpoonReveal:${i}`))); const hand = ctx.player(opponentSeat(ctx)).hand.filter((card) => !selected.has(card.instanceId)); ctx.requestCardChoice(`harpoon-reveal:${index + 1}`, decisionPrompt("Choose another card to reveal", "card.dyn.harpoon.reveal.next"), hand.map((card) => card.instanceId), opponentSeat(ctx)); },
   },
   "bios update|1": {
     onPlay(ctx) { buffNextAttack(ctx, { attack: 3, appliesToType: ["mechanologist"] }); ctx.addModifier({ scope: "until-end-of-turn" }); },
@@ -194,7 +252,14 @@ export const dynHighRarity: Record<string, CardScript> = {
       );
       if (target === ctx.seat || amount <= 0 || !isGun) return;
       const equipment = ctx.link?.defendingEquipment ?? [];
-      if (equipment.length) ctx.requestCardChoice("powder-keg-equipment", "Choose defending equipment to destroy", equipment.map((card) => card.instanceId));
+      if (equipment.length) ctx.requestCardChoice(
+        "powder-keg-equipment",
+        decisionPrompt(
+          "Choose defending equipment to destroy",
+          "card.dyn.powderkeg.equipment.choose",
+        ),
+        equipment.map((card) => card.instanceId),
+      );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "powder-keg-equipment") return;
@@ -220,11 +285,7 @@ export const dynHighRarity: Record<string, CardScript> = {
         if (!top) return;
         ctx.lookAt(top.instanceId);
         ctx.setCounter("arakniTop", top.instanceId);
-        ctx.requestChoice(
-          "arakni-top",
-          "Put the looked-at card on the bottom?",
-          ["bottom", "keep"],
-        );
+        ctx.requestChoice("arakni-top", bottomOrKeepPrompt(), ["bottom", "keep"]);
       },
     }],
     onChoose(ctx, hook, option) {
@@ -246,12 +307,19 @@ export const dynHighRarity: Record<string, CardScript> = {
       const top = opponent.deck[0];
       if (top) ctx.banish(top.instanceId);
       for (const card of opponent.hand) ctx.lookAt(card.instanceId);
-      if (opponent.hand.length) ctx.requestCardChoice("surgical-hand", "Choose an opposing hand card to banish", opponent.hand.map((card) => card.instanceId));
+      if (opponent.hand.length) ctx.requestCardChoice(
+        "surgical-hand",
+        decisionPrompt(
+          "Choose an opposing hand card to banish",
+          "card.dyn.surgical.hand.banish",
+        ),
+        opponent.hand.map((card) => card.instanceId),
+      );
     },
     onChoose(ctx, hook, option) { if (hook === "surgical-hand") ctx.banish(Number(option)); },
   },
   "pay day|3": { canPlay: (ctx) => ctx.getFlag("player", "completedContractThisTurn") === true, onPlay(ctx) { ctx.createTokens(SILVER, 4); } },
-  "sandscour greatbow|0": { activated: { cost: 1, isAttack: false, goAgain: true, oncePerTurn: true, onActivate(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top) ctx.lookAt(top.instanceId); const cards = [...ctx.player(ctx.seat).hand, ...ctx.player(ctx.seat).deck.slice(0, 1)].filter((card) => has(ctx, card, "arrow")); if (cards.length) ctx.requestCardChoice("sandscour-load", "Put an arrow face up in arsenal", ["no", ...cards.map((card) => card.instanceId)]); } }, onChoose(ctx, hook, option) { if (hook !== "sandscour-load" || option === "no") return; const from = ctx.player(ctx.seat).hand.some((card) => card.instanceId === Number(option)) ? "hand" : "deck"; if (ctx.putIntoArsenal(Number(option), from, { faceUp: true }) && from === "deck") ctx.addCounter(Number(option), "aim", 1); } },
+  "sandscour greatbow|0": { activated: { cost: 1, isAttack: false, goAgain: true, oncePerTurn: true, onActivate(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top) ctx.lookAt(top.instanceId); const cards = [...ctx.player(ctx.seat).hand, ...ctx.player(ctx.seat).deck.slice(0, 1)].filter((card) => has(ctx, card, "arrow")); if (cards.length) ctx.requestCardChoice("sandscour-load", decisionPrompt("Put an arrow face up in arsenal", "card.dyn.sandscour.arrow.load", { optionMessages: commonOptionMessages("no") }), ["no", ...cards.map((card) => card.instanceId)]); } }, onChoose(ctx, hook, option) { if (hook !== "sandscour-load" || option === "no") return; const from = ctx.player(ctx.seat).hand.some((card) => card.instanceId === Number(option)) ? "hand" : "deck"; if (ctx.putIntoArsenal(Number(option), from, { faceUp: true }) && from === "deck") ctx.addCounter(Number(option), "aim", 1); } },
   "heat seeker|1": { onHit(ctx) { ctx.setCounter("heatSeekerEndTurn", ctx.state.turn); }, triggers: [{ event: "end-of-turn", whose: "subject", sourceZone: "graveyard", condition: (ctx) => ctx.getCounter("heatSeekerEndTurn") === ctx.state.turn, label: "Put the top card face up into arsenal", effect(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top) ctx.putIntoArsenal(top.instanceId, "deck", { faceUp: true }); ctx.setCounter("heatSeekerEndTurn", 0); } }] },
   "immobilizing shot|1": { canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.getCounter("aim") > 0; }, onHit(ctx) { const target = opponentSeat(ctx); ctx.addModifier({ scope: "until-end-of-turn", seat: target, attackActionCardCap: 1, nonAttackActionCardCap: 1, expiresAtEndOfSeatTurn: target }); } },
   "dead eye|2": {
@@ -268,7 +336,14 @@ export const dynHighRarity: Record<string, CardScript> = {
       if (hook !== "dead-eye-hit") return;
       const hand = ctx.player(opponentSeat(ctx)).hand;
       for (const card of hand) ctx.lookAt(card.instanceId);
-      if (hand.length) ctx.requestCardChoice("dead-eye-discard", "Dead Eye: choose a card — they discard it", hand.map((card) => card.instanceId));
+      if (hand.length) ctx.requestCardChoice(
+        "dead-eye-discard",
+        decisionPrompt(
+          "Dead Eye: choose a card — they discard it",
+          "card.dyn.deadeye.discard.choose",
+        ),
+        hand.map((card) => card.instanceId),
+      );
     },
     onChoose(ctx, hook, option) {
       if (hook === "dead-eye-discard") ctx.discardCard(opponentSeat(ctx), Number(option));
@@ -282,14 +357,14 @@ export const dynHighRarity: Record<string, CardScript> = {
   "mind warp|2": arcane(2),
   "swell tidings|1": arcane(5, (ctx, dealt) => { if (dealt > 5) ctx.createToken(PONDER); }),
   "brainstorm|3": { onPlay(ctx) { ctx.addModifier({ scope: "until-end-of-turn" }); }, onFriendlyDraws(ctx, count) { if (ctx.state.phase !== "action" && ctx.state.phase !== "layer" && ctx.state.phase !== "reaction") return; ctx.setCounter("brainstormPackets", ctx.getCounter("brainstormPackets") + count); requestBrainstormTarget(ctx); }, onChoose(ctx, hook, option) { if (hook !== "brainstorm-target") return; if (option.startsWith("ally:")) ctx.dealDamage(ctx.seat, 1, { arcane: true, targetAllyId: Number(option.split(":")[1]) }); else ctx.dealDamage(Number(option.split(":")[1]), 1, { arcane: true }); ctx.setCounter("brainstormPackets", ctx.getCounter("brainstormPackets") - 1); if (ctx.getCounter("brainstormPackets") > 0) requestBrainstormTarget(ctx); } },
-  "invoke suraya|2": { onPlay(ctx) { const shields = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "spectral shield")); if (shields.length) ctx.requestCardChoice("suraya-transform", "Choose a Spectral Shield", shields.map((card) => card.instanceId)); }, onChoose(ctx, hook, option) { if (hook === "suraya-transform") ctx.transformInto("DYN212B", [Number(option)], ctx.self.instanceId); } },
+  "invoke suraya|2": { onPlay(ctx) { const shields = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "spectral shield")); if (shields.length) ctx.requestCardChoice("suraya-transform", decisionPrompt("Choose a Spectral Shield", "card.dyn.suraya.shield.choose"), shields.map((card) => card.instanceId)); }, onChoose(ctx, hook, option) { if (hook === "suraya-transform") ctx.transformInto("DYN212B", [Number(option)], ctx.self.instanceId); } },
   "suraya, archangel of knowledge|0": { activated: { cost: 0, isAttack: true, goAgain: false, oncePerTurn: true }, onDealsDamage(ctx, _target, amount) { if (amount > 0) ctx.gainLife(ctx.seat, amount); } },
   "celestial kimono|0": { onFriendlyDestroyed(ctx, card) { if (card.instanceId === ctx.self.instanceId || has(ctx, card, "ward")) ctx.changeResources(ctx.seat, 1); } },
-  "phantasmal symbiosis|2": { onAttackDeclared(ctx) { ctx.requestNameChoice("symbiosis-name", "Name a card"); }, onChoose(ctx, hook, option) { if (hook === "symbiosis-name") ctx.addModifier({ scope: "until-end-of-turn", grantsTypeToName: option.toLowerCase(), grantsType: "illusionist" }); } },
+  "phantasmal symbiosis|2": { onAttackDeclared(ctx) { ctx.requestNameChoice("symbiosis-name", decisionPrompt("Name a card", "card.common.card.name")); }, onChoose(ctx, hook, option) { if (hook === "symbiosis-name") ctx.addModifier({ scope: "until-end-of-turn", grantsTypeToName: option.toLowerCase(), grantsType: "illusionist" }); } },
   "spectral procession|1": { modifyAttack(ctx) { return ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "spectral shield")).length - (ctx.data.attack ?? 0); } },
   "tome of aeo|3": { triggers: [{ event: "begin-action-phase", whose: "subject", label: "Destroy Tome of Aeo", effect(ctx) { ctx.destroySelf(); ctx.drawCards(ctx.seat, 1); } }] },
   "crown of dominion|0": { allZoneTypes: ["royal"], onGameStart(ctx) { ctx.createToken("DYN243"); } },
-  "imperial edict|1": { activated: { cost: 0, isAttack: false, goAgain: true, oncePerTurn: false, destroySelfCost: true, onActivate(ctx) { if (has(ctx, ctx.player(ctx.seat).hero, "royal")) ctx.revealCards(ctx.player(opponentSeat(ctx)).hand.map((card) => card.instanceId), opponentSeat(ctx)); ctx.requestNameChoice("edict-name", "Name a card"); } }, onChoose(ctx, hook, option) { if (hook === "edict-name") ctx.addModifier({ scope: "until-end-of-turn", prohibitsName: option.toLowerCase(), expiresAtStartOfSeatTurn: ctx.seat }); } },
+  "imperial edict|1": { activated: { cost: 0, isAttack: false, goAgain: true, oncePerTurn: false, destroySelfCost: true, onActivate(ctx) { if (has(ctx, ctx.player(ctx.seat).hero, "royal")) ctx.revealCards(ctx.player(opponentSeat(ctx)).hand.map((card) => card.instanceId), opponentSeat(ctx)); ctx.requestNameChoice("edict-name", decisionPrompt("Name a card", "card.common.card.name")); } }, onChoose(ctx, hook, option) { if (hook === "edict-name") ctx.addModifier({ scope: "until-end-of-turn", prohibitsName: option.toLowerCase(), expiresAtStartOfSeatTurn: ctx.seat }); } },
   "imperial ledger|1": { activated: { cost: 0, isAttack: false, goAgain: true, oncePerTurn: false, onActivate(ctx) { ctx.putOnDeckBottom(ctx.self.instanceId); ctx.createToken(has(ctx, ctx.player(ctx.seat).hero, "royal") ? "DYN243" : "DYN247"); } } },
-  "imperial warhorn|1": { activated: { cost: 1, isAttack: false, goAgain: false, oncePerTurn: false, destroySelfCost: true, onActivate(ctx) { ctx.requestChoice("warhorn-heroes", "Choose heroes", ["both", "opponent", "self", "none"]); } }, onChoose(ctx, hook, option) { if (hook === "warhorn-heroes") { const seats = option === "both" ? [0, 1] : option === "none" ? [] : [option === "self" ? ctx.seat : opponentSeat(ctx)]; ctx.setCounter("warhornMask", seats.reduce((mask, target) => mask | (1 << target), 0)); advanceWarhorn(ctx, -1); } else if (hook.startsWith("warhorn:")) { const seat = Number(hook.split(":")[1]); ctx.setCardCounter(ctx.self.instanceId, `warhornChoice:${seat}`, Number(option)); advanceWarhorn(ctx, seat); } } },
+  "imperial warhorn|1": { activated: { cost: 1, isAttack: false, goAgain: false, oncePerTurn: false, destroySelfCost: true, onActivate(ctx) { ctx.requestChoice("warhorn-heroes", decisionPrompt("Choose heroes", "card.dyn.warhorn.heroes.choose", { optionMessages: commonOptionMessages("both", "opponent", "self", "none") }), ["both", "opponent", "self", "none"]); } }, onChoose(ctx, hook, option) { if (hook === "warhorn-heroes") { const seats = option === "both" ? [0, 1] : option === "none" ? [] : [option === "self" ? ctx.seat : opponentSeat(ctx)]; ctx.setCounter("warhornMask", seats.reduce((mask, target) => mask | (1 << target), 0)); advanceWarhorn(ctx, -1); } else if (hook.startsWith("warhorn:")) { const seat = Number(hook.split(":")[1]); ctx.setCardCounter(ctx.self.instanceId, `warhornChoice:${seat}`, Number(option)); advanceWarhorn(ctx, seat); } } },
 };

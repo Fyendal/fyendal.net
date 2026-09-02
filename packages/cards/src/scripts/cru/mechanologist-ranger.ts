@@ -1,6 +1,8 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   buffNextAttack,
+  commonOptionMessages,
+  decisionPrompt,
   opponentSeat,
   optN,
   optOnChoose,
@@ -28,7 +30,14 @@ function dashSetup(): CardScript {
       if (candidates.length === 0) return;
       ctx.requestCardChoice(
         "dash-start-item",
-        `${ctx.data.name}: start with a Mechanologist item with cost 2 or less in the arena?`,
+        decisionPrompt(
+          `${ctx.data.name}: start with a Mechanologist item with cost 2 or less in the arena?`,
+          "card.cru.dash.item.start",
+          {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            optionMessages: commonOptionMessages("none"),
+          },
+        ),
         ["none", ...candidates.map((card) => card.instanceId)],
       );
     },
@@ -140,12 +149,21 @@ function isArrow(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.cardTypes(card).includes("arrow");
 }
 
-function requestArrow(ctx: ScriptCtx, hook: string, prompt: string): void {
+function requestArrow(
+  ctx: ScriptCtx,
+  hook: string,
+  fallback: string,
+  id: string,
+): void {
   const player = ctx.state.players[ctx.seat]!;
   if (player.arsenal.length > 0) return;
   const arrows = player.hand.filter((card) => isArrow(ctx, card));
   if (arrows.length === 0) return;
-  ctx.requestCardChoice(hook, prompt, arrows.map((card) => card.instanceId));
+  ctx.requestCardChoice(
+    hook,
+    decisionPrompt(fallback, id),
+    arrows.map((card) => card.instanceId),
+  );
 }
 
 function redLiner(): CardScript {
@@ -161,7 +179,12 @@ function redLiner(): CardScript {
         return player.arsenal.length === 0 && player.hand.some((card) => isArrow(ctx, card));
       },
       onActivate(ctx) {
-        requestArrow(ctx, "red-liner-arrow", "Red Liner: put an arrow face up into your arsenal");
+        requestArrow(
+          ctx,
+          "red-liner-arrow",
+          "Red Liner: put an arrow face up into your arsenal",
+          "card.cru.redliner.arrow.load",
+        );
       },
     },
     onChoose(ctx, hook, option) {
@@ -211,7 +234,16 @@ function pitfallTrap(): CardScript {
       const attacker = ctx.link?.attacker;
       if (attacker === undefined) return;
       ctx.notifyTrapTriggered();
-      if (!ctx.requestPayment("pitfall-pay", "Pitfall Trap: pay {r} or take 2 damage?", 1, attacker)) {
+      if (!ctx.requestPayment(
+        "pitfall-pay",
+        decisionPrompt(
+          "Pitfall Trap: pay {r} or take 2 damage?",
+          "card.cru.pitfall.pay",
+          { optionMessages: commonOptionMessages("no") },
+        ),
+        1,
+        attacker,
+      )) {
         ctx.dealDamage(attacker, 2);
       }
     },
@@ -229,7 +261,16 @@ function rockslideTrap(): CardScript {
       const attacker = ctx.link?.attacker;
       if (attacker === undefined) return;
       ctx.notifyTrapTriggered();
-      if (!ctx.requestPayment("rockslide-pay", "Rockslide Trap: pay {r} or the attack gets -2{p}?", 1, attacker)) {
+      if (!ctx.requestPayment(
+        "rockslide-pay",
+        decisionPrompt(
+          "Rockslide Trap: pay {r} or the attack gets -2{p}?",
+          "card.cru.rockslide.pay",
+          { optionMessages: commonOptionMessages("no") },
+        ),
+        1,
+        attacker,
+      )) {
         ctx.addModifier({ scope: "chain-link", attack: -2, seat: attacker });
       }
     },
@@ -247,7 +288,16 @@ function tripwireTrap(): CardScript {
       const attacker = ctx.link?.attacker;
       if (attacker === undefined) return;
       ctx.notifyTrapTriggered();
-      if (!ctx.requestPayment("tripwire-pay", "Tripwire Trap: pay {r} to keep hit effects?", 1, attacker)) {
+      if (!ctx.requestPayment(
+        "tripwire-pay",
+        decisionPrompt(
+          "Tripwire Trap: pay {r} to keep hit effects?",
+          "card.cru.tripwire.pay",
+          { optionMessages: commonOptionMessages("no") },
+        ),
+        1,
+        attacker,
+      )) {
         ctx.setFlag("link", "suppressHitEffects", true);
       }
     },
@@ -266,7 +316,14 @@ function pathingHelix(): CardScript {
       if (player.arsenal.length > 0 || player.hand.length === 0) return;
       ctx.requestCardChoice(
         "pathing-reload",
-        `${ctx.data.name}: put a card from hand face down into arsenal?`,
+        decisionPrompt(
+          `${ctx.data.name}: put a card from hand face down into arsenal?`,
+          "card.cru.pathing.arsenal.put",
+          {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            optionMessages: commonOptionMessages("pass"),
+          },
+        ),
         ["pass", ...player.hand.map((card) => card.instanceId)],
       );
     },

@@ -1,5 +1,13 @@
 import type { CardInstance, CardScript, DeepReadonly, Modifier, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, buffNextAttack, nextAttack, opponentSeat } from "./shared-helpers.js";
+import {
+  attackAbility,
+  buffNextAttack,
+  commonOptionMessages,
+  decisionMessage,
+  decisionPrompt,
+  nextAttack,
+  opponentSeat,
+} from "./shared-helpers.js";
 
 // ── SGB (Silver Age: Gravy Bones precon) ────────────────────────────────────
 //
@@ -131,7 +139,21 @@ function discardOrMillChoice(hook: string, name: string) {
         "pass",
       ];
       if (options.length === 1) return;
-      ctx.requestCardChoice(hook, `${name}: discard a card or destroy the top card of your deck?`, options);
+      ctx.requestCardChoice(
+        hook,
+        decisionPrompt(
+          `${name}: discard a card or destroy the top card of your deck?`,
+          "card.sgb.discardormill.choose",
+          {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            optionMessages: {
+              "deck-top": decisionMessage("card.sgb.option.decktop"),
+              ...commonOptionMessages("pass"),
+            },
+          },
+        ),
+        options,
+      );
     },
     resolve(ctx: ScriptCtx, option: string): { readonly instanceId: number; readonly cardId: string } | undefined {
       if (option === "deck-top") return destroyDeckTop(ctx);
@@ -163,7 +185,10 @@ export const sgb: Record<string, CardScript> = {
         if (golds.length > 0) {
           ctx.requestCardChoice(
             "gravy-gold",
-            "Gravy Bones: choose a Gold to destroy",
+            decisionPrompt(
+              "Gravy Bones: choose a Gold to destroy",
+              "card.sgb.gravy.gold.choose",
+            ),
             golds.map((c) => c.instanceId),
           );
         }
@@ -195,7 +220,10 @@ export const sgb: Record<string, CardScript> = {
         if (hand.length > 0) {
           ctx.requestCardChoice(
             "gravy-discard",
-            "Gravy Bones: discard a card",
+            decisionPrompt(
+              "Gravy Bones: discard a card",
+              "card.sgb.gravy.discard.choose",
+            ),
             hand.map((c) => c.instanceId),
           );
         }
@@ -248,7 +276,10 @@ export const sgb: Record<string, CardScript> = {
         const allies = ctx.player(ctx.seat).hand.filter((c) => isAlly(ctx, c));
         ctx.requestCardChoice(
           "carrion-discard",
-          "Carrion Crown: discard an ally",
+          decisionPrompt(
+            "Carrion Crown: discard an ally",
+            "card.sgb.carrion.ally.discard",
+          ),
           allies.map((c) => c.instanceId),
         );
       },
@@ -313,7 +344,10 @@ export const sgb: Record<string, CardScript> = {
         if (allies.length > 0) {
           ctx.requestCardChoice(
             "scuttle-untap",
-            "Scuttle Toes: untap target ally",
+            decisionPrompt(
+              "Scuttle Toes: untap target ally",
+              "card.sgb.scuttle.ally.choose",
+            ),
             allies.map((c) => c.instanceId),
           );
         }
@@ -361,7 +395,11 @@ export const sgb: Record<string, CardScript> = {
           if (yellow.length === 0) return;
           ctx.requestCardChoice(
             "tipple-discard",
-            "Golden Tipple: discard a yellow card to draw a card and create a Gold?",
+            decisionPrompt(
+              "Golden Tipple: discard a yellow card to draw a card and create a Gold?",
+              "card.sgb.tipple.discard",
+              { optionMessages: commonOptionMessages("pass") },
+            ),
             ["pass", ...yellow.map((c) => c.instanceId)],
           );
         },
@@ -496,7 +534,10 @@ export const sgb: Record<string, CardScript> = {
       if (opp.hand.length === 0) return;
       ctx.requestCardChoice(
         "loot-hold-discard",
-        "Loot the Hold: discard a card",
+        decisionPrompt(
+          "Loot the Hold: discard a card",
+          "card.sgb.loot.discard.choose",
+        ),
         opp.hand.map((c) => c.instanceId),
         opponentSeat(ctx),
       );
@@ -537,7 +578,10 @@ export const sgb: Record<string, CardScript> = {
       }
       ctx.requestCardChoice(
         "portside-discard",
-        "Portside Exchange: discard a card",
+        decisionPrompt(
+          "Portside Exchange: discard a card",
+          "card.sgb.portside.discard.choose",
+        ),
         hand.map((c) => c.instanceId),
       );
     },

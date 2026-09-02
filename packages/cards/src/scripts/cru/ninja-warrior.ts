@@ -1,5 +1,10 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { opponentSeat, previousAttackHasName } from "../shared-helpers.js";
+import {
+  commonOptionMessages,
+  decisionPrompt,
+  opponentSeat,
+  previousAttackHasName,
+} from "../shared-helpers.js";
 
 const COPPER = "CRU197";
 type CardRef = DeepReadonly<CardInstance>;
@@ -78,7 +83,10 @@ function rushingRiver(): CardScript {
     if (hand.length === 0) return;
     ctx.requestCardChoice(
       "rushing-top",
-      "Rushing River: put a card from your hand on top of your deck",
+      decisionPrompt(
+        "Rushing River: put a card from your hand on top of your deck",
+        "card.cru.rushing.card.top",
+      ),
       hand.map((card) => card.instanceId),
     );
   };
@@ -170,7 +178,11 @@ export const cruNinjaWarrior: Record<string, CardScript> = {
       if (zeroes.length === 0) return;
       ctx.requestCardChoice(
         "katsu-discard",
-        "Katsu: discard a cost 0 card to search for a combo card?",
+        decisionPrompt(
+          "Katsu: discard a cost 0 card to search for a combo card?",
+          "card.cru.katsu.discard",
+          { optionMessages: commonOptionMessages("pass") },
+        ),
         ["pass", ...zeroes.map((card) => card.instanceId)],
       );
     },
@@ -184,7 +196,10 @@ export const cruNinjaWarrior: Record<string, CardScript> = {
         }
         ctx.requestCardChoice(
           "katsu-search",
-          "Katsu: choose a combo card to banish face up",
+          decisionPrompt(
+            "Katsu: choose a combo card to banish face up",
+            "card.cru.katsu.combo.choose",
+          ),
           combo.map((card) => card.instanceId),
         );
         return;
@@ -290,7 +305,11 @@ export const cruNinjaWarrior: Record<string, CardScript> = {
           }
           ctx.requestChoice(
             "zen-maintenance",
-            "Zen State: remove a balance counter or destroy it?",
+            decisionPrompt(
+              "Zen State: remove a balance counter or destroy it?",
+              "card.cru.zen.maintenance",
+              { optionMessages: commonOptionMessages("remove", "destroy") },
+            ),
             ["remove", "destroy"],
           );
         },

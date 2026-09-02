@@ -331,6 +331,296 @@
       "value": ": pay 1 resource for +1 power?"
     }
   ],
+  "card.common.card.discard.choose": [
+    {
+      "type": 0,
+      "value": "Choose a card to discard"
+    }
+  ],
+  "card.common.card.name": [
+    {
+      "type": 0,
+      "value": "Name a card"
+    }
+  ],
+  "card.common.lookedcard.bottom": [
+    {
+      "type": 0,
+      "value": "Put the looked-at card on the bottom?"
+    }
+  ],
+  "card.common.target.card": [
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "card.cru.arcane.hero.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose a hero to deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage to"
+    }
+  ],
+  "card.cru.breeze.boots.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy Breeze Rider Boots?"
+    }
+  ],
+  "card.cru.cleansing.name.choose": [
+    {
+      "type": 0,
+      "value": "Righteous Cleansing: choose a card name to banish"
+    }
+  ],
+  "card.cru.cleansing.order.choose": [
+    {
+      "type": 0,
+      "value": "Righteous Cleansing: choose the next card for the top"
+    }
+  ],
+  "card.cru.coax.modes.choose": [
+    {
+      "type": 0,
+      "value": "Coax a Commotion: choose any number"
+    }
+  ],
+  "card.cru.coax.option.all": [
+    {
+      "type": 0,
+      "value": "All three"
+    }
+  ],
+  "card.cru.coax.option.draw": [
+    {
+      "type": 0,
+      "value": "Draw a card"
+    }
+  ],
+  "card.cru.coax.option.drawlife": [
+    {
+      "type": 0,
+      "value": "Draw a card and gain 1 life"
+    }
+  ],
+  "card.cru.coax.option.life": [
+    {
+      "type": 0,
+      "value": "Gain 1 life"
+    }
+  ],
+  "card.cru.coax.option.quicken": [
+    {
+      "type": 0,
+      "value": "Create a Quicken"
+    }
+  ],
+  "card.cru.coax.option.quickendraw": [
+    {
+      "type": 0,
+      "value": "Create a Quicken and draw a card"
+    }
+  ],
+  "card.cru.coax.option.quickenlife": [
+    {
+      "type": 0,
+      "value": "Create a Quicken and gain 1 life"
+    }
+  ],
+  "card.cru.consuming.discard.choose": [
+    {
+      "type": 0,
+      "value": "Consuming Volition: choose a card to discard"
+    }
+  ],
+  "card.cru.dash.item.start": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": start with a Mechanologist item with cost 2 or less in the arena?"
+    }
+  ],
+  "card.cru.decree.banish": [
+    {
+      "type": 0,
+      "value": "Unified Decree: banish the top card?"
+    }
+  ],
+  "card.cru.foreboding.hero.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose a hero"
+    }
+  ],
+  "card.cru.heron.defense.choose": [
+    {
+      "type": 0,
+      "value": "Heron's Flight: choose what may defend"
+    }
+  ],
+  "card.cru.heron.option.attacks": [
+    {
+      "type": 0,
+      "value": "Attack action cards"
+    }
+  ],
+  "card.cru.heron.option.nonattacks": [
+    {
+      "type": 0,
+      "value": "Non-attack action cards"
+    }
+  ],
+  "card.cru.kano.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": banish the top card and allow it to be played as an instant?"
+    }
+  ],
+  "card.cru.katsu.combo.choose": [
+    {
+      "type": 0,
+      "value": "Katsu: choose a combo card to banish face up"
+    }
+  ],
+  "card.cru.katsu.discard": [
+    {
+      "type": 0,
+      "value": "Katsu: discard a cost 0 card to search for a combo card?"
+    }
+  ],
+  "card.cru.metacarpus.pay": [
+    {
+      "type": 0,
+      "value": "Metacarpus Node: pay 1 resource for +1 arcane damage?"
+    }
+  ],
+  "card.cru.pathing.arsenal.put": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": put a card from hand face down into arsenal?"
+    }
+  ],
+  "card.cru.pitfall.pay": [
+    {
+      "type": 0,
+      "value": "Pitfall Trap: pay 1 resource or take 2 damage?"
+    }
+  ],
+  "card.cru.poison.discard.choose": [
+    {
+      "type": 0,
+      "value": "Poison the Tips: choose a card to discard"
+    }
+  ],
+  "card.cru.purifier.pistol.choose": [
+    {
+      "type": 0,
+      "value": "Plasma Purifier: choose a pistol"
+    }
+  ],
+  "card.cru.rattlebones.attack.choose": [
+    {
+      "type": 0,
+      "value": "Rattle Bones: choose a Runeblade attack"
+    }
+  ],
+  "card.cru.redliner.arrow.load": [
+    {
+      "type": 0,
+      "value": "Red Liner: put an arrow face up into your arsenal"
+    }
+  ],
+  "card.cru.reinforce.defender.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose a defending attack action card"
+    }
+  ],
+  "card.cru.reload.card.choose": [
+    {
+      "type": 0,
+      "value": "Reload: put a card into arsenal?"
+    }
+  ],
+  "card.cru.research.order.choose": [
+    {
+      "type": 0,
+      "value": "Sutcliffe's Research Notes: choose the bottommost card first"
+    }
+  ],
+  "card.cru.rockslide.pay": [
+    {
+      "type": 0,
+      "value": "Rockslide Trap: pay 1 resource or the attack gets -2 power?"
+    }
+  ],
+  "card.cru.rushing.card.top": [
+    {
+      "type": 0,
+      "value": "Rushing River: put a card from your hand on top of your deck"
+    }
+  ],
+  "card.cru.shiyana.hero.choose": [
+    {
+      "type": 0,
+      "value": "Shiyana: choose a hero to copy"
+    }
+  ],
+  "card.cru.smash.item.destroy": [
+    {
+      "type": 0,
+      "value": "Argh... Smash!: destroy an item?"
+    }
+  ],
+  "card.cru.tripwire.pay": [
+    {
+      "type": 0,
+      "value": "Tripwire Trap: pay 1 resource to keep hit effects?"
+    }
+  ],
+  "card.cru.viziertronic.card.top": [
+    {
+      "type": 0,
+      "value": "Viziertronic Model i: put a card on top"
+    }
+  ],
+  "card.cru.zen.maintenance": [
+    {
+      "type": 0,
+      "value": "Zen State: remove a balance counter or destroy it?"
+    }
+  ],
   "card.ddd.cutting.couriers.destroy": [
     {
       "type": 0,
@@ -343,6 +633,218 @@
       "value": "Squire's Bracers: destroy this so the sword's next attack gets +2 power?"
     }
   ],
+  "card.dyn.aetherslash.target.choose": [
+    {
+      "type": 0,
+      "value": "Deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage to any target"
+    }
+  ],
+  "card.dyn.arcane.hero.choose": [
+    {
+      "type": 0,
+      "value": "Choose a hero to deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage to"
+    }
+  ],
+  "card.dyn.brainstorm.target.choose": [
+    {
+      "type": 0,
+      "value": "Choose a target for "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage"
+    }
+  ],
+  "card.dyn.cleave.ally.choose": [
+    {
+      "type": 0,
+      "value": "Deal the hit damage to another ally?"
+    }
+  ],
+  "card.dyn.deadeye.discard.choose": [
+    {
+      "type": 0,
+      "value": "Dead Eye: choose a card — they discard it"
+    }
+  ],
+  "card.dyn.delivery.item.put": [
+    {
+      "type": 0,
+      "value": "Put a Mechanologist item into the arena"
+    }
+  ],
+  "card.dyn.diabolic.ally.choose": [
+    {
+      "type": 0,
+      "value": "Choose an ally to destroy"
+    }
+  ],
+  "card.dyn.diabolic.aura.choose": [
+    {
+      "type": 0,
+      "value": "Choose an aura to destroy"
+    }
+  ],
+  "card.dyn.drill.equipment.counter": [
+    {
+      "type": 0,
+      "value": "Put a -1 defense counter on equipment"
+    }
+  ],
+  "card.dyn.harpoon.defender.choose": [
+    {
+      "type": 0,
+      "value": "Choose a revealed action card to defend"
+    }
+  ],
+  "card.dyn.harpoon.defender.none": [
+    {
+      "type": 0,
+      "value": "No revealed cards can defend"
+    }
+  ],
+  "card.dyn.harpoon.reveal.choose": [
+    {
+      "type": 0,
+      "value": "Choose a card to reveal"
+    }
+  ],
+  "card.dyn.harpoon.reveal.next": [
+    {
+      "type": 0,
+      "value": "Choose another card to reveal"
+    }
+  ],
+  "card.dyn.hornet.target.choose": [
+    {
+      "type": 0,
+      "value": "Deal 1 damage to the attacking hero or ally"
+    }
+  ],
+  "card.dyn.ingenuity.hyperdriver.return": [
+    {
+      "type": 0,
+      "value": "Return a Hyper Driver to the arena?"
+    }
+  ],
+  "card.dyn.patience.hero.choose": [
+    {
+      "type": 0,
+      "value": "Choose a hero to gain "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " life"
+    }
+  ],
+  "card.dyn.point.arrow.choose": [
+    {
+      "type": 0,
+      "value": "Choose a face-up arrow"
+    }
+  ],
+  "card.dyn.powderkeg.equipment.choose": [
+    {
+      "type": 0,
+      "value": "Choose defending equipment to destroy"
+    }
+  ],
+  "card.dyn.reinforce.counter.remove": [
+    {
+      "type": 0,
+      "value": "Remove a -1 defense counter"
+    }
+  ],
+  "card.dyn.sandscour.arrow.load": [
+    {
+      "type": 0,
+      "value": "Put an arrow face up in arsenal"
+    }
+  ],
+  "card.dyn.sap.energy.remove": [
+    {
+      "type": 0,
+      "value": "Remove an energy counter"
+    }
+  ],
+  "card.dyn.shieldbash.discard": [
+    {
+      "type": 0,
+      "value": "Discard a card or take 1 damage"
+    }
+  ],
+  "card.dyn.shred.defender.choose": [
+    {
+      "type": 0,
+      "value": "Choose a defending card"
+    }
+  ],
+  "card.dyn.suraya.shield.choose": [
+    {
+      "type": 0,
+      "value": "Choose a Spectral Shield"
+    }
+  ],
+  "card.dyn.surgical.hand.banish": [
+    {
+      "type": 0,
+      "value": "Choose an opposing hand card to banish"
+    }
+  ],
+  "card.dyn.tessen.hand.bottom": [
+    {
+      "type": 0,
+      "value": "Put a hand card on the bottom"
+    }
+  ],
+  "card.dyn.tranquil.aura.banish": [
+    {
+      "type": 0,
+      "value": "Banish an opposing aura until this leaves"
+    }
+  ],
+  "card.dyn.warhorn.heroes.choose": [
+    {
+      "type": 0,
+      "value": "Choose heroes"
+    }
+  ],
+  "card.dyn.warhorn.permanent.choose": [
+    {
+      "type": 0,
+      "value": "Choose a permanent to destroy"
+    }
+  ],
+  "card.dyn.withstand.offhand.choose": [
+    {
+      "type": 0,
+      "value": "Choose a Guardian off-hand"
+    }
+  ],
   "card.gem.embrace.ursur.banish": [
     {
       "type": 0,
@@ -353,6 +855,24 @@
     {
       "type": 0,
       "value": "Discard a zombie to create a Gate to i'Arathael?"
+    }
+  ],
+  "card.jdg.librarian.tome.choose": [
+    {
+      "type": 0,
+      "value": "The Librarian: reveal a Tome from inventory"
+    }
+  ],
+  "card.jdg.theryon.pay": [
+    {
+      "type": 0,
+      "value": "Theryon: pay 2 resources to have that hero destroy a permanent they control?"
+    }
+  ],
+  "card.jdg.theryon.permanent.choose": [
+    {
+      "type": 0,
+      "value": "Choose a non-hero permanent you control to destroy"
     }
   ],
   "card.lgs.batter.equipment.choose": [
@@ -377,6 +897,132 @@
     {
       "type": 0,
       "value": "Choose a card to banish from the defending hero's hand"
+    }
+  ],
+  "card.mpw.aura.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy an aura"
+    }
+  ],
+  "card.mpw.blunt.counter.remove": [
+    {
+      "type": 0,
+      "value": "Remove a +1 power counter from the attacking weapon?"
+    }
+  ],
+  "card.mpw.equipment.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy an equipment"
+    }
+  ],
+  "card.mpw.hand.top": [
+    {
+      "type": 0,
+      "value": "Put a hand card on top of your deck"
+    }
+  ],
+  "card.mpw.option.bothtokens": [
+    {
+      "type": 0,
+      "value": "Blade Dance and Flurry"
+    }
+  ],
+  "card.mpw.reaction.defender.add": [
+    {
+      "type": 0,
+      "value": "Add an attack reaction as a defender"
+    }
+  ],
+  "card.mpw.reaction.shuffle": [
+    {
+      "type": 0,
+      "value": "Shuffle an attack reaction into your deck?"
+    }
+  ],
+  "card.mpw.reaction.shuffle.next": [
+    {
+      "type": 0,
+      "value": "Shuffle another differently named attack reaction?"
+    }
+  ],
+  "card.mpw.reaction.top": [
+    {
+      "type": 0,
+      "value": "Put an attack reaction on top of your deck?"
+    }
+  ],
+  "card.mpw.sword.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose a sword"
+    }
+  ],
+  "card.mpw.token.create.choose": [
+    {
+      "type": 0,
+      "value": "Create which token?"
+    }
+  ],
+  "card.mpw.tokens.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy up to one Blade Dance and/or Flurry?"
+    }
+  ],
+  "card.sbz.arcane.target.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose a target for "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage"
+    }
+  ],
+  "card.sbz.blaze.action.banish": [
+    {
+      "type": 0,
+      "value": "Blaze, Firemind: banish a Wizard non-attack action dealing "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage (playable as an instant this turn)"
+    }
+  ],
+  "card.sbz.blaze.energy.choose": [
+    {
+      "type": 0,
+      "value": "Blaze, Firemind: remove how many energy counters?"
+    }
+  ],
+  "card.sbz.looktuff.pay": [
+    {
+      "type": 0,
+      "value": "Look Tuff: pay 1 resource or it gets -1 power?"
+    }
+  ],
+  "card.sbz.mindfire.hero.tap": [
+    {
+      "type": 0,
+      "value": "Turn to Mindfire: tap your hero to create a Ponder token?"
     }
   ],
   "card.sda.dash.item.start": [
@@ -427,6 +1073,64 @@
     {
       "type": 0,
       "value": "Remove a Treasure Island gold counter?"
+    }
+  ],
+  "card.sgb.carrion.ally.discard": [
+    {
+      "type": 0,
+      "value": "Carrion Crown: discard an ally"
+    }
+  ],
+  "card.sgb.discardormill.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": discard a card or destroy the top card of your deck?"
+    }
+  ],
+  "card.sgb.gravy.discard.choose": [
+    {
+      "type": 0,
+      "value": "Gravy Bones: discard a card"
+    }
+  ],
+  "card.sgb.gravy.gold.choose": [
+    {
+      "type": 0,
+      "value": "Gravy Bones: choose a Gold to destroy"
+    }
+  ],
+  "card.sgb.loot.discard.choose": [
+    {
+      "type": 0,
+      "value": "Loot the Hold: discard a card"
+    }
+  ],
+  "card.sgb.option.decktop": [
+    {
+      "type": 0,
+      "value": "Destroy the top card of your deck"
+    }
+  ],
+  "card.sgb.portside.discard.choose": [
+    {
+      "type": 0,
+      "value": "Portside Exchange: discard a card"
+    }
+  ],
+  "card.sgb.scuttle.ally.choose": [
+    {
+      "type": 0,
+      "value": "Scuttle Toes: untap target ally"
+    }
+  ],
+  "card.sgb.tipple.discard": [
+    {
+      "type": 0,
+      "value": "Golden Tipple: discard a yellow card to draw a card and create a Gold?"
     }
   ],
   "card.ska.beaten.trackers.destroy": [
@@ -571,10 +1275,40 @@
       "value": "Log out"
     }
   ],
+  "common.option.both": [
+    {
+      "type": 0,
+      "value": "Both"
+    }
+  ],
+  "common.option.bottom": [
+    {
+      "type": 0,
+      "value": "Put on bottom"
+    }
+  ],
+  "common.option.close": [
+    {
+      "type": 0,
+      "value": "Close"
+    }
+  ],
   "common.option.decline": [
     {
       "type": 0,
       "value": "Decline"
+    }
+  ],
+  "common.option.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy"
+    }
+  ],
+  "common.option.done": [
+    {
+      "type": 0,
+      "value": "Done"
     }
   ],
   "common.option.keep": [
@@ -595,10 +1329,28 @@
       "value": "None"
     }
   ],
+  "common.option.opponent": [
+    {
+      "type": 0,
+      "value": "Opponent"
+    }
+  ],
+  "common.option.opposinghero": [
+    {
+      "type": 0,
+      "value": "Opposing hero"
+    }
+  ],
   "common.option.pass": [
     {
       "type": 0,
       "value": "Pass"
+    }
+  ],
+  "common.option.remove": [
+    {
+      "type": 0,
+      "value": "Remove"
     }
   ],
   "common.option.reroll": [
@@ -607,10 +1359,34 @@
       "value": "Reroll"
     }
   ],
+  "common.option.self": [
+    {
+      "type": 0,
+      "value": "Yourself"
+    }
+  ],
+  "common.option.takedamage": [
+    {
+      "type": 0,
+      "value": "Take damage"
+    }
+  ],
+  "common.option.top": [
+    {
+      "type": 0,
+      "value": "Put on top"
+    }
+  ],
   "common.option.yes": [
     {
       "type": 0,
       "value": "Yes"
+    }
+  ],
+  "common.option.yourhero": [
+    {
+      "type": 0,
+      "value": "Your hero"
     }
   ],
   "common.shortcut.space": [

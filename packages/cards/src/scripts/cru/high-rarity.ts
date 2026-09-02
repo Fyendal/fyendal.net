@@ -1,5 +1,16 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { dealArcane, opponentSeat, optN, optOnChoose, previousAttackHasName, wizardActionAsInstant } from "../shared-helpers.js";
+import {
+  commonOptionMessages,
+  dealArcane,
+  decisionMessage,
+  decisionPrompt,
+  opponentSeat,
+  optN,
+  optOnChoose,
+  previousAttackHasName,
+  wizardActionAsInstant,
+  yesNoPrompt,
+} from "../shared-helpers.js";
 
 const COPPER = "CRU197";
 const QUICKEN = "CRU196";
@@ -51,14 +62,29 @@ function requestItemDestruction(ctx: ScriptCtx): void {
   const remaining = ctx.getCounter("smashRemaining");
   const items = ctx.player(opponentSeat(ctx)).board.filter((card) => hasType(ctx, card, "item"));
   if (remaining > 0 && items.length > 0) {
-    ctx.requestCardChoice("smash-item", "Argh... Smash!: destroy an item?", ["done", ...items.map((card) => card.instanceId)]);
+    ctx.requestCardChoice(
+      "smash-item",
+      decisionPrompt(
+        "Argh... Smash!: destroy an item?",
+        "card.cru.smash.item.destroy",
+        { optionMessages: commonOptionMessages("done") },
+      ),
+      ["done", ...items.map((card) => card.instanceId)],
+    );
   }
 }
 
 function orderOnTop(ctx: ScriptCtx, ids: number[]): void {
   if (ids.length === 0) return;
   if (ids.length === 1) { ctx.putOnDeckTop(ids[0]!); return; }
-  ctx.requestCardChoice(`cleanse-order:${ids.join(",")}`, "Righteous Cleansing: choose the next card for the top", ids);
+  ctx.requestCardChoice(
+    `cleanse-order:${ids.join(",")}`,
+    decisionPrompt(
+      "Righteous Cleansing: choose the next card for the top",
+      "card.cru.cleansing.order.choose",
+    ),
+    ids,
+  );
 }
 
 const righteousCleansing: CardScript = {
@@ -68,7 +94,14 @@ const righteousCleansing: CardScript = {
   onHit(ctx) {
     const top = ctx.player(opponentSeat(ctx)).deck.slice(0, 5);
     for (const card of top) ctx.lookAt(card.instanceId);
-    if (top.length > 0) ctx.requestCardChoice(`cleanse-name:${top.map((card) => card.instanceId).join(",")}`, "Righteous Cleansing: choose a card name to banish", top.map((card) => card.instanceId));
+    if (top.length > 0) ctx.requestCardChoice(
+      `cleanse-name:${top.map((card) => card.instanceId).join(",")}`,
+      decisionPrompt(
+        "Righteous Cleansing: choose a card name to banish",
+        "card.cru.cleansing.name.choose",
+      ),
+      top.map((card) => card.instanceId),
+    );
   },
   onChoose(ctx, hook, option) {
     const choose = /^cleanse-name:([\d,]+)$/.exec(hook);
@@ -108,7 +141,20 @@ const floodOfForce: CardScript = {
 const heronsFlight: CardScript = {
   modifyAttack: (ctx) => previousNamed(ctx, "crane dance") ? 2 : 0,
   onAttackDeclared(ctx) {
-    if (previousNamed(ctx, "crane dance")) ctx.requestChoice("heron-mode", "Heron's Flight: choose what may defend", ["attack actions", "non-attack actions"]);
+    if (previousNamed(ctx, "crane dance")) ctx.requestChoice(
+      "heron-mode",
+      decisionPrompt(
+        "Heron's Flight: choose what may defend",
+        "card.cru.heron.defense.choose",
+        {
+          optionMessages: {
+            "attack actions": decisionMessage("card.cru.heron.option.attacks"),
+            "non-attack actions": decisionMessage("card.cru.heron.option.nonattacks"),
+          },
+        },
+      ),
+      ["attack actions", "non-attack actions"],
+    );
   },
   canBeDefendedBy(ctx, defending) {
     const mode = ctx.getCounter("heronMode");
@@ -126,7 +172,15 @@ const unifiedDecree: CardScript = {
     const top = ctx.player(ctx.seat).deck[0];
     if (!top) return;
     ctx.lookAt(top.instanceId);
-    if (ctx.cardData(top.cardId).cardType === "attack-reaction") ctx.requestCardChoice("decree-banish", "Unified Decree: banish the top card?", ["no", top.instanceId]);
+    if (ctx.cardData(top.cardId).cardType === "attack-reaction") ctx.requestCardChoice(
+      "decree-banish",
+      decisionPrompt(
+        "Unified Decree: banish the top card?",
+        "card.cru.decree.banish",
+        { optionMessages: commonOptionMessages("no") },
+      ),
+      ["no", top.instanceId],
+    );
   },
   onChoose(ctx, hook, option) {
     if (hook !== "decree-banish" || option === "no") return;
@@ -140,7 +194,14 @@ const viziertronic: CardScript = {
   onBoosted(ctx) {
     ctx.drawCards(ctx.seat, 1);
     const hand = ctx.player(ctx.seat).hand;
-    if (hand.length > 0) ctx.requestCardChoice("viz-top", "Viziertronic Model i: put a card on top", hand.map((card) => card.instanceId));
+    if (hand.length > 0) ctx.requestCardChoice(
+      "viz-top",
+      decisionPrompt(
+        "Viziertronic Model i: put a card on top",
+        "card.cru.viziertronic.card.top",
+      ),
+      hand.map((card) => card.instanceId),
+    );
   },
   onChoose(ctx, hook, option) { if (hook === "viz-top") ctx.putOnDeckTop(Number(option)); },
 };
@@ -148,7 +209,7 @@ const viziertronic: CardScript = {
 const plasmaPurifier: CardScript = {
   activated: [
     { cost: 1, isAttack: false, goAgain: true, canActivate: (ctx) => ctx.getCounter("steam") === 0, onActivate(ctx) { ctx.setCounter("steam", 1); } },
-    { cost: 0, isAttack: false, goAgain: true, oncePerTurn: true, removeCounterCost: { key: "steam", amount: 1 }, canActivate: (ctx) => ctx.player(ctx.seat).weapons.some((card) => hasType(ctx, card, "mechanologist") && hasType(ctx, card, "pistol")), onActivate(ctx) { const pistols = ctx.player(ctx.seat).weapons.filter((card) => hasType(ctx, card, "mechanologist") && hasType(ctx, card, "pistol")); ctx.requestCardChoice("purifier-pistol", "Plasma Purifier: choose a pistol", pistols.map((card) => card.instanceId)); } },
+    { cost: 0, isAttack: false, goAgain: true, oncePerTurn: true, removeCounterCost: { key: "steam", amount: 1 }, canActivate: (ctx) => ctx.player(ctx.seat).weapons.some((card) => hasType(ctx, card, "mechanologist") && hasType(ctx, card, "pistol")), onActivate(ctx) { const pistols = ctx.player(ctx.seat).weapons.filter((card) => hasType(ctx, card, "mechanologist") && hasType(ctx, card, "pistol")); ctx.requestCardChoice("purifier-pistol", decisionPrompt("Plasma Purifier: choose a pistol", "card.cru.purifier.pistol.choose"), pistols.map((card) => card.instanceId)); } },
   ],
   onChoose(ctx, hook, option) { if (hook === "purifier-pistol") ctx.addCardTempPower(Number(option), 1); },
 };
@@ -173,14 +234,30 @@ const poisonTheTips: CardScript = {
   onHit(ctx) {
     const target = opponentSeat(ctx);
     const hand = ctx.player(target).hand;
-    if (hand.length > 0) ctx.requestCardChoice("poison-discard", "Poison the Tips: choose a card to discard", hand.map((card) => card.instanceId), target);
+    if (hand.length > 0) ctx.requestCardChoice(
+      "poison-discard",
+      decisionPrompt(
+        "Poison the Tips: choose a card to discard",
+        "card.cru.poison.discard.choose",
+      ),
+      hand.map((card) => card.instanceId),
+      target,
+    );
   },
   onChoose(ctx, hook, option) { if (hook === "poison-discard") ctx.discardCard(opponentSeat(ctx), Number(option)); else reloadChoice(ctx, hook, option); },
 };
 
 function reload(ctx: ScriptCtx): void {
   const player = ctx.player(ctx.seat);
-  if (player.arsenal.length === 0 && player.hand.length > 0) ctx.requestCardChoice("cru-high-reload", "Reload: put a card into arsenal?", ["pass", ...player.hand.map((card) => card.instanceId)]);
+  if (player.arsenal.length === 0 && player.hand.length > 0) ctx.requestCardChoice(
+    "cru-high-reload",
+    decisionPrompt(
+      "Reload: put a card into arsenal?",
+      "card.cru.reload.card.choose",
+      { optionMessages: commonOptionMessages("pass") },
+    ),
+    ["pass", ...player.hand.map((card) => card.instanceId)],
+  );
 }
 
 function reloadChoice(ctx: ScriptCtx, hook: string, option: string): boolean {
@@ -193,7 +270,14 @@ const rattleBones: CardScript = {
   playAsInstant: (ctx) => ctx.getFlag("player", "arcaneDamageDealtToOpposingHeroThisTurn") === true,
   onPlay(ctx) {
     const cards = ctx.player(ctx.seat).graveyard.filter((card) => isAttack(ctx, card) && hasType(ctx, card, "runeblade"));
-    if (cards.length > 0) ctx.requestCardChoice("rattle-banish", "Rattle Bones: choose a Runeblade attack", cards.map((card) => card.instanceId));
+    if (cards.length > 0) ctx.requestCardChoice(
+      "rattle-banish",
+      decisionPrompt(
+        "Rattle Bones: choose a Runeblade attack",
+        "card.cru.rattlebones.attack.choose",
+      ),
+      cards.map((card) => card.instanceId),
+    );
   },
   onChoose(ctx, hook, option) { if (hook === "rattle-banish" && ctx.banish(Number(option))) ctx.allowPlayFrom(Number(option), "banish"); },
 };
@@ -207,7 +291,15 @@ const metacarpusNode: CardScript = {
     effect(ctx, played) {
       if (!played) return;
       ctx.setCounter("metacarpusTarget", played.instanceId);
-      ctx.requestPayment("metacarpus-pay", "Metacarpus Node: pay 1 resource for +1 arcane damage?", 1);
+      ctx.requestPayment(
+        "metacarpus-pay",
+        decisionPrompt(
+          "Metacarpus Node: pay 1 resource for +1 arcane damage?",
+          "card.cru.metacarpus.pay",
+          { optionMessages: commonOptionMessages("no") },
+        ),
+        1,
+      );
     },
   }],
   onChoose(ctx, hook, option) {
@@ -229,7 +321,26 @@ const chainLightning: CardScript = {
 
 const coaxACommotion: CardScript = {
   onHit(ctx) {
-    ctx.requestChoice("coax-modes", "Coax a Commotion: choose any number", ["none", "quicken", "draw", "life", "quicken+draw", "quicken+life", "draw+life", "all"]);
+    ctx.requestChoice(
+      "coax-modes",
+      decisionPrompt(
+        "Coax a Commotion: choose any number",
+        "card.cru.coax.modes.choose",
+        {
+          optionMessages: {
+            none: decisionMessage("common.option.none"),
+            quicken: decisionMessage("card.cru.coax.option.quicken"),
+            draw: decisionMessage("card.cru.coax.option.draw"),
+            life: decisionMessage("card.cru.coax.option.life"),
+            "quicken+draw": decisionMessage("card.cru.coax.option.quickendraw"),
+            "quicken+life": decisionMessage("card.cru.coax.option.quickenlife"),
+            "draw+life": decisionMessage("card.cru.coax.option.drawlife"),
+            all: decisionMessage("card.cru.coax.option.all"),
+          },
+        },
+      ),
+      ["none", "quicken", "draw", "life", "quicken+draw", "quicken+life", "draw+life", "all"],
+    );
   },
   onChoose(ctx, hook, option) {
     if (hook !== "coax-modes" || option === "none") return;
@@ -256,7 +367,7 @@ export const cruHighRarity: Record<string, CardScript> = {
   "righteous cleansing|2": righteousCleansing,
   "stamp authority|3": { suppressesAttackActionHitEffects: true, onEnterArena(ctx) { ctx.setPlayerFlag(ctx.seat, "suppressAttackActionHitEffects", true); if (ctx.player(ctx.seat).pitch.filter((card) => (ctx.cardData(card.cardId).cost ?? 0) >= 3).length >= 2) ctx.setPlayerFlag(ctx.seat, "bonusIntellect", Number(ctx.getPlayerFlag(ctx.seat, "bonusIntellect")) + 1); }, onLeaveArena(ctx) { ctx.setPlayerFlag(ctx.seat, "suppressAttackActionHitEffects", false); }, triggers: [{ event: "begin-action-phase", label: "Destroy Stamp Authority", effect: (ctx) => ctx.destroySelf() }] },
 
-  "breeze rider boots|0": { canTriggerOnHit(ctx) { return ctx.link?.attackCardType === "action" && hasType(ctx, ctx.link.attackingCard, "ninja"); }, onHit(ctx) { ctx.requestChoice("breeze-destroy", "Destroy Breeze Rider Boots?", ["yes", "no"]); }, onChoose(ctx, hook, option) { if (hook === "breeze-destroy" && option === "yes") { ctx.destroySelf(); ctx.addModifier({ scope: "until-end-of-turn", goAgain: true, appliesToKeyword: "combo" }); } } },
+  "breeze rider boots|0": { canTriggerOnHit(ctx) { return ctx.link?.attackCardType === "action" && hasType(ctx, ctx.link.attackingCard, "ninja"); }, onHit(ctx) { ctx.requestChoice("breeze-destroy", yesNoPrompt("Destroy Breeze Rider Boots?", "card.cru.breeze.boots.destroy"), ["yes", "no"]); }, onChoose(ctx, hook, option) { if (hook === "breeze-destroy" && option === "yes") { ctx.destroySelf(); ctx.addModifier({ scope: "until-end-of-turn", goAgain: true, appliesToKeyword: "combo" }); } } },
   "find center|3": { canBeDefendedBy(ctx, defending) { return !previousNamed(ctx, "crane dance") || (ctx.cardData(defending.cardId).cost ?? 0) >= ctx.currentChainLinkNumber(); }, canTriggerOnHit(ctx) { return previousNamed(ctx, "crane dance"); }, onHit(ctx) { ctx.createToken(ZEN_STATE); } },
   "flood of force|2": floodOfForce,
   "heron's flight|1": heronsFlight,
@@ -277,7 +388,14 @@ export const cruHighRarity: Record<string, CardScript> = {
         const heroes = ctx.state.players
           .filter((player) => player.seat !== ctx.seat)
           .map((player) => player.hero.instanceId);
-        ctx.requestCardChoice("shiyana-hero", "Shiyana: choose a hero to copy", heroes);
+        ctx.requestCardChoice(
+          "shiyana-hero",
+          decisionPrompt(
+            "Shiyana: choose a hero to copy",
+            "card.cru.shiyana.hero.choose",
+          ),
+          heroes,
+        );
       },
     }],
     onChoose(ctx, hook, option) {
