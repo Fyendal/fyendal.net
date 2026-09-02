@@ -655,7 +655,7 @@ export interface Modifier {
   /** If defended by an attack action, put this many +1{p} counters on the
    *  attacking permanent when the link resolves. */
   onDefendedByAttackActionPowerCounters?: number;
-  /** remove after it is first applied to a defending card */
+  /** Remove after the first matching application or play. */
   once?: boolean;
   /** A pending next-attack modifier with this marker expires unused when the
    *  current combat chain closes. */

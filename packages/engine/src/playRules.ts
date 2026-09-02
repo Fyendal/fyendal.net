@@ -229,6 +229,10 @@ function modifierMatchesPlayedCard(
   if (mod.minCost !== undefined && cost < mod.minCost) return false;
   if (mod.maxCost !== undefined && cost > mod.maxCost) return false;
   if (mod.appliesToName && data.name.trim().toLowerCase() !== mod.appliesToName.toLowerCase()) return false;
+  if (
+    mod.appliesToKeyword &&
+    !(data.keywords ?? []).some((keyword) => keyword.toLowerCase() === mod.appliesToKeyword!.toLowerCase())
+  ) return false;
   const tags = [...(data.classes ?? []), ...(data.subtypes ?? []), ...(card.grantedTypes ?? [])]
     .map((tag) => tag.toLowerCase());
   if (mod.appliesToClass && !tags.includes(mod.appliesToClass.toLowerCase())) return false;

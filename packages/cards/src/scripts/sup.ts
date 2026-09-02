@@ -677,7 +677,24 @@ Object.assign(sup, {
   "jaws of victory|1": { onAttackDeclared(ctx: ScriptCtx) { if (ctx.link?.targetAllyId === undefined && ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0) ctx.crowdCheer(ctx.seat); if (ctx.getFlag("player", "cheeredThisTurn")) ctx.grantGoAgain(); } },
   "wind up the crowd|3": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", fromHand: true, onActivate(ctx: ScriptCtx) { ctx.createToken(TOUGHNESS); ctx.createToken(VIGOR); } } },
   "numbskull charm|2": { onPlay(ctx: ScriptCtx) { for (const name of ["Confidence", "Might"]) { const token = tokenNamed(ctx, opponentSeat(ctx), name) ?? tokenNamed(ctx, ctx.seat, name); if (token) ctx.destroyPermanent(token.instanceId); } ctx.crowdCheer(ctx.seat); const top = ctx.player(ctx.seat).deck[0]; if (top) { const six = isSixPlus(ctx, top); ctx.pitchCard(top.instanceId); if (six) ctx.createToken(VIGOR); } } },
-  "cries of encore|1": { onAttackDeclared(ctx: ScriptCtx) { if (ctx.link?.targetAllyId === undefined && ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0) ctx.crowdCheer(ctx.seat); }, canTriggerOnHit(ctx: ScriptCtx) { return ctx.link?.targetAllyId === undefined && ctx.getFlag("player", "cheeredThisTurn") === true; }, onHit(ctx: ScriptCtx) { ctx.setFlag("player", "planSuspenseFromGraveyard", true); } },
+  "cries of encore|1": {
+    onAttackDeclared(ctx: ScriptCtx) {
+      if (ctx.link?.targetAllyId === undefined && ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0) ctx.crowdCheer(ctx.seat);
+    },
+    canTriggerOnHit(ctx: ScriptCtx) {
+      return ctx.link?.targetAllyId === undefined && ctx.getFlag("player", "cheeredThisTurn") === true;
+    },
+    onHit(ctx: ScriptCtx) {
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        grantsPlayFromZone: "graveyard",
+        appliesToSubtype: "aura",
+        appliesToKeyword: "suspense",
+        once: true,
+        ongoingLabel: "You may play an aura of suspense from your graveyard",
+      });
+    },
+  },
   "crowd goes wild|2": { modifyPlayCost: (ctx: ScriptCtx, base: number) => ctx.getFlag("player", "cheeredThisTurn") ? base - 3 : base },
   "no hero stands alone|2": { canDefendFromArsenal: (ctx: ScriptCtx) => ctx.getFlag("player", "controlledName:toughness") === true, modifyDefense: (ctx: ScriptCtx) => ctx.getFlag("player", "controlledName:toughness") ? 3 : 0, onDefend(ctx: ScriptCtx) { ctx.requestClash(opponentSeat(ctx), "hero-alone"); }, onClashResult(ctx: ScriptCtx, hook: string, winner: number) { if (hook === "hero-alone" && winner >= 0 && ctx.link) { const cards = [ctx.link.attackingCard, ...ctx.link.defendingCards]; if (cards.length) ctx.requestCardChoice("hero-alone-card", "Give a combat card -3 power and defense", cards.map((card) => card.instanceId), winner); } }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "hero-alone-card") { ctx.addCardTempPower(Number(option), -3); ctx.addCardTempDefense(Number(option), -3); } } },
   "a good clean fight|1": { suppressesAttackActionHitEffects: true },

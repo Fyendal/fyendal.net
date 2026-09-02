@@ -224,7 +224,7 @@ describe("HVY — Heavy Hitters mechanics", () => {
 
   it("declares and pays Up the Ante's X cost before the reaction is played", () => {
     const g = scenario({ seats: [
-      { hero: "dorinthea", resources: 2, hand: ["wage gold|1", "up the ante|3", "raging onslaught|3", "raging onslaught|3"] },
+      { hero: "dorinthea", resources: 1, hand: ["wage gold|1", "up the ante|3", "raging onslaught|3", "raging onslaught|3"] },
       { hero: "rhinar" },
     ] });
     g.play("wage gold|1").chooseOption("yes").blockWith()
@@ -232,7 +232,9 @@ describe("HVY — Heavy Hitters mechanics", () => {
     expect(g.state.pendingDecision?.options).toEqual(["X = 0", "X = 1", "X = 2", "X = 3"]);
     expect(g.state.players[0]!.hand.some((card) => card.cardId === "HVY103")).toBe(true);
     g.chooseOption("X = 1");
+    expect(g.state.players[0]!.resources).toBe(0);
     expect(g.state.pendingDecision?.chooseHook).toBe("ante-mode");
+    expect(g.state.pendingDecision?.resourcePayment).toBeUndefined();
     expect(g.state.stack.some((layer) => layer.card?.cardId === "HVY103")).toBe(false);
     expect(legalIntents(g.state, 0).some((intent) => intent.kind === "pass")).toBe(false);
     g.doRaw({ kind: "choose", optionId: "agility" });

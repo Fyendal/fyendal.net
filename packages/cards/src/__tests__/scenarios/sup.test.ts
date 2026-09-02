@@ -75,6 +75,45 @@ describe("SUP — heroes and the crowd", () => {
       .expectInZone(0, "toughness|0", "board");
   });
 
+  it("Cries of Encore lets its controller pay to play one suspense aura from graveyard", () => {
+    const g = scenario({
+      seats: [
+        hero("pleiades, superstar|0", {
+          life: 10,
+          hand: ["cries of encore|1"],
+          graveyard: ["tension in the air|3", "up on a pedestal|3", "sigil of solace|1"],
+          resources: 5,
+        }),
+        foe({ life: 20 }),
+      ],
+    });
+
+    g.play("cries of encore|1")
+      .blockWith()
+      .settle();
+
+    const graveyard = g.state.players[0]!.graveyard;
+    const tension = graveyard.find((card) => functionalKeyOf(cardData[card.cardId]!) === "tension in the air|3")!;
+    const pedestal = graveyard.find((card) => functionalKeyOf(cardData[card.cardId]!) === "up on a pedestal|3")!;
+    const solace = graveyard.find((card) => functionalKeyOf(cardData[card.cardId]!) === "sigil of solace|1")!;
+    const canPlayFromGraveyard = (instanceId: number): boolean => legalIntents(g.state, 0).some(
+      (intent) => intent.kind === "play-from-zone" && intent.zone === "graveyard" && intent.instanceId === instanceId,
+    );
+    expect(canPlayFromGraveyard(tension.instanceId)).toBe(true);
+    expect(canPlayFromGraveyard(pedestal.instanceId)).toBe(true);
+    expect(canPlayFromGraveyard(solace.instanceId)).toBe(false);
+
+    g.play("tension in the air|3", { fromZone: "graveyard" })
+      .expectResources(0, 0)
+      .expectInZone(0, "tension in the air|3", "board");
+
+    expect(legalIntents(g.state, 0)).not.toContainEqual(expect.objectContaining({
+      kind: "play-from-zone",
+      instanceId: pedestal.instanceId,
+      zone: "graveyard",
+    }));
+  });
+
   it("Overcrowded can Ambush from arsenal against Command and Conquer", () => {
     const g = scenario({
       seats: [

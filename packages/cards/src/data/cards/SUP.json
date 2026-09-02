@@ -213,7 +213,7 @@
   "id": "SUP012",
   "name": "Cries of Encore",
   "cardType": "action",
-  "text": "When this attacks a hero, if you have less {h} than them, the crowd cheers you.\nIf you've been cheered this turn, this gets \"When this hits a hero, you may plan an aura of suspense from your graveyard this turn.\"",
+  "text": "When this attacks a hero, if you have less {h} than them, the crowd cheers you.\nIf you've been cheered this turn, this gets \"When this hits a hero, you may play an aura of suspense from your graveyard this turn.\"",
   "pitch": 1,
   "cost": 3,
   "attack": 7,
