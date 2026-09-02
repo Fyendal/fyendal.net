@@ -80,6 +80,19 @@ describe("Bravo Fabrary matchup presentation", () => {
     expect(presented.deck).not.toContain("SBR017");
   });
 
+  it("uses the anti-arcane package against Iyslander", () => {
+    const presented = bravoPresentationFor(opponent({ heroId: "SIY001" }));
+    expect(presented.equipment).toEqual({
+      head: "SBR006",
+      chest: "SBR007",
+      arms: "SGB006",
+      legs: "SBL010",
+    });
+    expect(presented.deck.filter((id) => id === "SBA030")).toHaveLength(2);
+    expect(presented.deck.filter((id) => id === "SLY019")).toHaveLength(2);
+    expect(presented.deck).not.toContain("SBR017");
+  });
+
   it("follows the Briar guide's second-player plan", () => {
     const presented = bravoPresentationFor(opponent({ heroId: "SBA001" }));
     expect(presented.equipment.head).toBe("SBR006");
