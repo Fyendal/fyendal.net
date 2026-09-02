@@ -25,6 +25,7 @@ function jsonCopy<T>(value: T): T {
 describe("PersistedStateV1", () => {
   it("round trips structured audience-aware log payloads", () => {
     const source = game();
+    source.log = [];
     source.nextLogSequence = 2;
     source.log.push({
       publicText: "Rhinar plays Wrecker Romp",
@@ -60,6 +61,7 @@ describe("PersistedStateV1", () => {
     const encoded = jsonCopy(encodePersistedState(game())) as unknown as {
       state: { nextLogSequence?: number; log: Array<Record<string, unknown>> };
     };
+    encoded.state.log = [];
     encoded.state.nextLogSequence = 2;
     encoded.state.log.push({
       publicText: "fallback",

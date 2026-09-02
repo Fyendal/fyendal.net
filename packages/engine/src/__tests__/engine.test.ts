@@ -1307,6 +1307,8 @@ describe("scripted choices", () => {
 describe("viewer projection secrecy", () => {
   it("caps audience-aware log entries at the newest 200", () => {
     const s = makeGame(398);
+    s.log = [];
+    s.nextLogSequence = undefined;
     for (let index = 0; index < 205; index++) logPublic(s, `line-${index}`);
     expect(s.log).toHaveLength(200);
     expect(s.log[0]).toEqual({ publicText: "line-5" });
@@ -1317,6 +1319,8 @@ describe("viewer projection secrecy", () => {
 
   it("projects structured public logs beside aligned legacy fallbacks", () => {
     const s = makeGame(397);
+    s.log = [];
+    s.nextLogSequence = undefined;
     logPublic(s, {
       fallback: "Hero A plays Attack Four",
       message: {
@@ -1390,6 +1394,62 @@ describe("viewer projection secrecy", () => {
       expect(projected).not.toContain("ATK4");
       expect(projected).not.toContain("Attack Four");
     }
+  });
+
+  it("preserves structured per-seat payloads through the script log adapter", () => {
+    const s = makeGame(395);
+    s.log = [];
+    s.nextLogSequence = undefined;
+    makeCtx(s, engineRuntime, 0, player(s, 0).hero).logForSeats({
+      publicText: null,
+      seatText: ["Seat zero detail", "Seat one detail"],
+      seatPayloads: [
+        {
+          fallback: "Seat zero detail",
+          message: { id: "engine.log.test.seat.zero" },
+        },
+        {
+          fallback: "Seat one detail",
+          message: { id: "engine.log.test.seat.one" },
+        },
+      ],
+    });
+
+    expect(projectStateFor(s, 0).logEntries?.at(-1)).toMatchObject({
+      fallback: "Seat zero detail",
+      sequence: 1,
+      message: { id: "engine.log.test.seat.zero" },
+    });
+    expect(projectStateFor(s, 1).logEntries?.at(-1)).toMatchObject({
+      fallback: "Seat one detail",
+      sequence: 1,
+      message: { id: "engine.log.test.seat.one" },
+    });
+    expect(projectStateFor(s, null).log).toEqual([]);
+  });
+
+  it("projects real turn-start producers as localized semantic entries", () => {
+    const s = makeGame(394);
+    s.log = [];
+    s.nextLogSequence = undefined;
+    s.turn = 4;
+    s.activePlayer = 0;
+
+    startTurn(s, engineRuntime);
+
+    expect(projectStateFor(s, 0).logEntries?.find(
+      (entry) => "message" in entry && entry.message.id === "engine.log.turn.started",
+    )).toMatchObject({
+      fallback: "— Turn 4: Hero A's turn —",
+      message: {
+        id: "engine.log.turn.started",
+        values: {
+          turn: 4,
+          player: { kind: "player", seat: 0 },
+        },
+      },
+      event: { kind: "turn-start", turn: 4, activeSeat: 0 },
+    });
   });
 
   it("contains poisoned private identities across complete seat, spectator, legal, and replay payloads", () => {
@@ -1621,6 +1681,34 @@ describe("pitch & costs", () => {
     expect(newLog.slice(0, 2)).toEqual([
       expect.stringContaining("Hero A plays Big Swing"),
       expect.stringContaining("Hero A pitches Blue Resource"),
+    ]);
+    const newPayloads = result.state.log.slice(s.log.length).map((entry) => entry.publicPayload);
+    expect(newPayloads.slice(0, 2)).toMatchObject([
+      {
+        message: {
+          id: "engine.log.card.played",
+          values: {
+            player: { kind: "player", seat: 0 },
+            card: { kind: "card", cardId: "BIG" },
+          },
+        },
+      },
+      {
+        message: {
+          id: "engine.log.card.pitched",
+          values: {
+            player: { kind: "player", seat: 0 },
+            card: { kind: "card", cardId: "BLUE" },
+          },
+        },
+        event: {
+          kind: "card-moved",
+          cardId: "BLUE",
+          ownerSeat: 0,
+          from: "hand",
+          to: "pitch",
+        },
+      },
     ]);
   });
 

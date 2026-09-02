@@ -12,7 +12,7 @@ import {
   defenseValueModifiers,
   equipmentDefense,
 } from "./combatValues.js";
-import { logPublic, nameOf } from "./gameLog.js";
+import { gameLogMessage, logPublic, nameOf } from "./gameLog.js";
 import type { ChainLinkState, PlayerState, StackLayer } from "./state.js";
 
 import { findCardAnywhere, removeFromArray } from "./zoneQueries.js";
@@ -186,7 +186,10 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
   // attack is a new unresolved link — mid-combat the chain is not closable)
   const last = state.chain[state.chain.length - 1];
   if (!last || !last.resolved) return;
-  logPublic(state, "The combat chain closes");
+  logPublic(state, gameLogMessage(
+    "The combat chain closes",
+    "engine.log.combat.chain.closed",
+  ));
   // Snapshot every defending close hook before any close effect moves cards.
   // This keeps the event simultaneous across all links and includes equipment,
   // which remains in its arena slot while represented on the chain.

@@ -1,7 +1,7 @@
 import type { EngineRuntime } from "./runtimePorts.js";
 import { scriptOf } from "./cardProperties.js";
 import { hookSources, lingeringModifierSources } from "./sourceQueries.js";
-import { logPublic } from "./gameLog.js";
+import { gameLogMessage, logPublic } from "./gameLog.js";
 import { rngInt } from "./rng.js";
 import type { GameStateInternal } from "./runtimeState.js";
 
@@ -65,8 +65,14 @@ export function answerDieRollReplacement(
     if (!replacement) return "die-roll replacement is no longer active";
     destroyPermanent(state, runtime, replacement.seat, replacement.card);
     result = rollIgnoringLowest(state, roll.sides, roll.extraDiceIgnoreLowest ?? 0);
-    recordDieResult(state, runtime, state.players[roll.rollingSeat] as PlayerState, result);
-    logPublic(state, `the die is rerolled: ${result}`);
+    const rollingPlayer = state.players[roll.rollingSeat] as PlayerState;
+    recordDieResult(state, runtime, rollingPlayer, result);
+    logPublic(state, gameLogMessage(
+      `the die is rerolled: ${result}`,
+      "engine.log.die.rerolled",
+      { result },
+      { kind: "roll", result, seat: rollingPlayer.seat, sides: roll.sides },
+    ));
   } else {
     recordDieResult(state, runtime, state.players[roll.rollingSeat] as PlayerState, result);
   }

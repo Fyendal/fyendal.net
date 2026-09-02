@@ -9315,6 +9315,46 @@
       "value": "选择 X"
     }
   ],
+  "engine.log.card.pitched": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " Pitch "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "engine.log.card.pitched.chi": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " Pitch "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "（获得 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点 chi）"
+    }
+  ],
   "engine.log.card.played": [
     {
       "type": 1,
@@ -9322,11 +9362,243 @@
     },
     {
       "type": 0,
-      "value": "打出"
+      "value": " 打出 "
     },
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "engine.log.card.played.in.response": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 响应打出 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "engine.log.card.random.banished.face.down": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 随机面朝下放逐一张牌"
+    }
+  ],
+  "engine.log.combat.chain.closed": [
+    {
+      "type": 0,
+      "value": "战斗链关闭"
+    }
+  ],
+  "engine.log.damage.hit": [
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " 命中并造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害（"
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 剩余 "
+    },
+    {
+      "type": 1,
+      "value": "life"
+    },
+    {
+      "type": 0,
+      "value": " 点生命）"
+    }
+  ],
+  "engine.log.damage.redirected": [
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " 造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点转移伤害（"
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 剩余 "
+    },
+    {
+      "type": 1,
+      "value": "life"
+    },
+    {
+      "type": 0,
+      "value": " 点生命）"
+    }
+  ],
+  "engine.log.die.rerolled": [
+    {
+      "type": 0,
+      "value": "重新掷骰："
+    },
+    {
+      "type": 1,
+      "value": "result"
+    }
+  ],
+  "engine.log.die.rolled": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 掷出 "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    }
+  ],
+  "engine.log.game.winner": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 赢得对局！"
+    }
+  ],
+  "engine.log.player.draws": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 抽 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张牌"
+    }
+  ],
+  "engine.log.player.gains.action.point": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 获得 1 个行动点"
+    }
+  ],
+  "engine.log.player.gains.life": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 恢复 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点生命（当前 "
+    },
+    {
+      "type": 1,
+      "value": "life"
+    },
+    {
+      "type": 0,
+      "value": " 点生命）"
+    }
+  ],
+  "engine.log.player.shuffles.deck": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 洗切牌库"
+    }
+  ],
+  "engine.log.token.created": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 生成 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "engine.log.turn.started": [
+    {
+      "type": 0,
+      "value": "— 第 "
+    },
+    {
+      "type": 1,
+      "value": "turn"
+    },
+    {
+      "type": 0,
+      "value": " 回合："
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 的回合 —"
     }
   ],
   "footer.legal": [

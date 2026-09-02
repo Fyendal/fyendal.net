@@ -3,7 +3,7 @@ import { cardAbilitiesSuppressed, cardColorOf, cardTypesOf, dataOf, instanceData
 
 import { controlledPermanents, hookSources, lingeringModifierSources } from "./sourceQueries.js";
 
-import { logPublic, nameOf } from "./gameLog.js";
+import { gameLogMessage, logPlayerValue, logPublic, nameOf } from "./gameLog.js";
 import type { GameStateInternal } from "./runtimeState.js";
 
 import type { CardInstance, Modifier, PendingArcane, PlayerState, StackLayer } from "./state.js";
@@ -1916,7 +1916,15 @@ export function gainHeroLife(state: GameStateInternal,
   if (amount <= 0) return;
   player.life += amount;
   player.flags.lifeGainedThisTurn = (Number(player.flags.lifeGainedThisTurn) || 0) + amount;
-  logPublic(state, `${nameOf(state, player.heroCardId)} gains ${amount} life (${player.life} life)`);
+  logPublic(state, gameLogMessage(
+    `${nameOf(state, player.heroCardId)} gains ${amount} life (${player.life} life)`,
+    "engine.log.player.gains.life",
+    {
+      player: logPlayerValue(player.seat),
+      amount,
+      life: player.life,
+    },
+  ));
   for (const source of controlledPermanents(state, targetSeat, { faceDownEquipment: false })) {
     scriptOf(state, source.cardId, source)?.onHeroGainedLife?.(
       runtime.makeCtx(state, targetSeat, source, currentLink(state)),

@@ -20,7 +20,14 @@ import {
   variableResourceChoices,
   variableResourceCost,
 } from "./costs.js";
-import { logNameOf, logPublic, nameOf } from "./gameLog.js";
+import {
+  gameLogMessage,
+  logCardValue,
+  logNameOf,
+  logPlayerValue,
+  logPublic,
+  nameOf,
+} from "./gameLog.js";
 import { abilityList } from "./scripts.js";
 import {
   DEFAULT_CHOOSE_X_PROMPT,
@@ -703,7 +710,14 @@ export function playReaction(
     card.instanceId,
     {
       beforePitch: () =>
-        logPublic(state, `${nameOf(state, player.heroCardId)} plays ${logNameOf(state, card.cardId)}`),
+        logPublic(state, gameLogMessage(
+          `${nameOf(state, player.heroCardId)} plays ${logNameOf(state, card.cardId)}`,
+          "engine.log.card.played",
+          {
+            player: logPlayerValue(player.seat),
+            card: logCardValue(card.cardId),
+          },
+        )),
     },
   );
   if (costErr) return costErr;

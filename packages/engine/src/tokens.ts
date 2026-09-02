@@ -1,7 +1,13 @@
 import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import { dataOf, scriptOf } from "./cardProperties.js";
-import { logPublic, nameOf } from "./gameLog.js";
+import {
+  gameLogMessage,
+  logCardValue,
+  logPlayerValue,
+  logPublic,
+  nameOf,
+} from "./gameLog.js";
 import type { TokenCreationContext } from "./scripts.js";
 import type { CardInstance, PlayerState, TokenCreationRequest, TokenCreationReplacementRef } from "./state.js";
 import { currentLink, findCardAnywhere } from "./zoneQueries.js";
@@ -35,7 +41,14 @@ function createTokenRaw(
     player.flags[`createdSubtypeCount:${subtype.toLowerCase()}`] =
       (Number(player.flags[`createdSubtypeCount:${subtype.toLowerCase()}`]) || 0) + 1;
   }
-  logPublic(state, `${nameOf(state, player.heroCardId)} creates ${nameOf(state, cardId)}`);
+  logPublic(state, gameLogMessage(
+    `${nameOf(state, player.heroCardId)} creates ${nameOf(state, cardId)}`,
+    "engine.log.token.created",
+    {
+      player: logPlayerValue(player.seat),
+      card: logCardValue(cardId),
+    },
+  ));
   runtime.events.runHook(state, player.seat, token, "onEnterArena");
   for (const source of hookSources(state, player.seat, {
     board: true,

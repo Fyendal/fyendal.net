@@ -223,4 +223,28 @@ describe("game log hero colors", () => {
     expect(html).toContain('data-cardid="WTR209"');
     expect(html).not.toContain(fallback);
   });
+
+  it("renders structured turn boundaries in Chinese with player styling", () => {
+    const fallback = "— Turn 4: Dash's turn —";
+    const html = renderSideRail(sideRailProps({
+      log: [fallback],
+      logEntries: [{
+        fallback,
+        sequence: 1,
+        message: {
+          id: "engine.log.turn.started",
+          values: {
+            turn: 4,
+            player: { kind: "player", seat: 0 },
+          },
+        },
+        event: { kind: "turn-start", turn: 4, activeSeat: 0 },
+      }],
+    }), "zh-Hans");
+
+    expect(html).toContain("log-turn-divider");
+    expect(html).toContain("第 4 回合");
+    expect(html).toContain('class="log-player-ref log-player-ref-friendly"');
+    expect(html).not.toContain(fallback);
+  });
 });
