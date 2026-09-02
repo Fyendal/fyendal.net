@@ -36,6 +36,45 @@ describe("EquipmentStack", () => {
     expect(html).not.toContain("equipment-stack-pip");
   });
 
+  it("renders only remaining dots for a multi-activation weapon", () => {
+    const html = renderToStaticMarkup(createElement(EquipmentStack, {
+      card: {
+        instanceId: 5,
+        cardId: "ARC040",
+        owner: 0,
+        remainingAbilityActivations: [2],
+      },
+      showActivationDots: true,
+    }));
+
+    expect(html).toContain('aria-label="2 activations remaining"');
+    expect(html.match(/<span class="weapon-activation-dot(?: |")/g)).toHaveLength(2);
+    expect(html).not.toContain("weapon-activation-dot-spent");
+  });
+
+  it("removes the indicator when only one activation remains", () => {
+    const html = renderToStaticMarkup(createElement(EquipmentStack, {
+      card: {
+        instanceId: 7,
+        cardId: "ARC040",
+        owner: 0,
+        remainingAbilityActivations: [1],
+      },
+      showActivationDots: true,
+    }));
+
+    expect(html).not.toContain("weapon-activation-dots");
+  });
+
+  it("does not render activation dots for an ordinary once-per-turn weapon", () => {
+    const html = renderToStaticMarkup(createElement(EquipmentStack, {
+      card: { instanceId: 6, cardId: "ARC040", owner: 0 },
+      showActivationDots: true,
+    }));
+
+    expect(html).not.toContain("weapon-activation-dots");
+  });
+
   it("renders soul cards underneath the hero while keeping interaction on the hero", () => {
     const hero: CardView = { instanceId: 10, cardId: "MON031", owner: 0 };
     const soul: CardView[] = [

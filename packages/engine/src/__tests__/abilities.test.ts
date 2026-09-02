@@ -106,6 +106,31 @@ describe("multiple activated abilities per card", () => {
     expect(projectStateFor(s, 1).players[0]!.weapons[0]?.usedAbilityIndexes).toEqual([0]);
   });
 
+  it("projects only remaining additional weapon activations", () => {
+    const s = makeGame(201);
+    const weapon = player(s, 0).weapons[0]!;
+    player(s, 0).flags[`additionalActivations:${weapon.instanceId}:0`] = 1;
+
+    for (const viewer of [0, 1]) {
+      const projected = projectStateFor(s, viewer).players[0]!.weapons[0];
+      expect(projected?.remainingAbilityActivations).toEqual([2]);
+      expect(projected?.usedAbilityIndexes).toBeUndefined();
+    }
+
+    player(s, 0).flags[`activated:${weapon.instanceId}`] = true;
+    for (const viewer of [0, 1]) {
+      const projected = projectStateFor(s, viewer).players[0]!.weapons[0];
+      expect(projected?.remainingAbilityActivations).toEqual([1]);
+      expect(projected?.usedAbilityIndexes).toBeUndefined();
+    }
+
+    player(s, 0).flags[`activationCount:${weapon.instanceId}:0`] = 2;
+    player(s, 0).flags[`additionalActivations:${weapon.instanceId}:0`] = 0;
+    const spent = projectStateFor(s, 0).players[0]!.weapons[0];
+    expect(spent?.remainingAbilityActivations).toBeUndefined();
+    expect(spent?.usedAbilityIndexes).toEqual([0]);
+  });
+
   it("enumerates each ability with its own index and tracks once-per-turn separately", () => {
     const settled = boardCard(makeGame(21), 0, "GADGET");
     let s = settled.s;
@@ -220,6 +245,30 @@ describe("empty-stack action-phase priority", () => {
       s = result.state;
     }
     expect(player(s, 0).actionPoints).toBe(1);
+    expect(player(s, 0).life).toBe(21);
+  });
+
+  it("defaults a granted-instant action ability to instant timing when an action point is available", () => {
+    let s = makeGame(231);
+    const idolId = grantActionIdolInstantTiming(s, 0);
+    player(s, 0).actionPoints = 1;
+
+    const activation = abilityIntents(s, 0, idolId)[0];
+    expect(activation).toBeDefined();
+    let result = applyIntent(s, 0, activation!);
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(result.error);
+    s = result.state;
+    expect(player(s, 0).actionPoints).toBe(1);
+    expect(s.pendingDecision?.kind).toBe("priority-window");
+
+    for (let i = 0; i < 2; i++) {
+      result = applyIntent(s, s.priorityPlayer, { kind: "pass" });
+      expect(result.ok).toBe(true);
+      if (!result.ok) throw new Error(result.error);
+      s = result.state;
+    }
+    expect(player(s, 0).actionPoints).toBe(2);
     expect(player(s, 0).life).toBe(21);
   });
 

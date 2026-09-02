@@ -236,11 +236,25 @@ export function activatedAbilityAvailable(
   abilityIndex: number,
   ability: ActivatedAbility,
 ): boolean {
+  const usage = activatedAbilityUsage(player, instanceId, abilityIndex, ability);
+  return usage === undefined || usage.remaining > 0;
+}
+
+/** Turn usage for a finitely limited activated ability. The derived total
+ * remains stable as additional activations are consumed. */
+export function activatedAbilityUsage(
+  player: PlayerState,
+  instanceId: number,
+  abilityIndex: number,
+  ability: ActivatedAbility,
+): { used: number; remaining: number; total: number } | undefined {
   const limit = activatedAbilityLimit(player, instanceId, ability);
-  if (limit === undefined) return true;
+  if (limit === undefined) return undefined;
   const used = activationsAgainstLimit(player, instanceId, abilityIndex, ability);
-  const extra = Number(player.flags[`additionalActivations:${instanceId}:${abilityIndex}`] || 0);
-  return used < limit || extra > 0;
+  const rawExtra = Number(player.flags[`additionalActivations:${instanceId}:${abilityIndex}`] || 0);
+  const extra = Number.isSafeInteger(rawExtra) && rawExtra > 0 ? rawExtra : 0;
+  const remaining = Math.max(0, limit - used) + extra;
+  return { used, remaining, total: used + remaining };
 }
 
 export function abilitiesAsInstantForCard(

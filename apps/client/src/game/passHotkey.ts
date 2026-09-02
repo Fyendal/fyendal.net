@@ -53,7 +53,11 @@ export function shouldConfirmArsenalPass(
   return decision?.kind === "arsenal" && intent.kind === "pass";
 }
 
-/** Space passes only when it is an unmodified, non-repeating board shortcut. */
+/** Space passes only when it is an unmodified, non-repeating game shortcut.
+ * Buttons and links deliberately do not opt out: preventDefault in the global
+ * handler must suppress their native Space-to-click behavior so a previously
+ * clicked card cannot activate again when the player means to pass. Editable
+ * controls retain Space for text entry and native selection behavior. */
 export function shouldPassOnSpace(
   event: Pick<KeyboardEvent, "code" | "repeat" | "altKey" | "ctrlKey" | "metaKey" | "shiftKey" | "target">,
 ): boolean {
@@ -68,7 +72,7 @@ export function shouldPassOnSpace(
 
   const target = event.target as KeyboardTarget | null;
   return !target?.closest?.(
-    "input, textarea, select, button, a, [contenteditable='true'], [role='button']",
+    "input, textarea, select, [contenteditable='true']",
   );
 }
 

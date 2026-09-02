@@ -21,18 +21,59 @@ import { NameChoiceAutocomplete } from "./NameChoiceAutocomplete.js";
 import { TriggerOrderDecision } from "./TriggerOrderDecision.js";
 
 const GUIDANCE_SETTINGS_TOOLTIP =
-  "Uncheck Show guidance in Settings to disable these prompts.";
+  "Uncheck Show guidance in Settings, or select Disable now.";
 
-function GuidanceSettingsInfo() {
-  const tooltipId = `guidance-settings-${useId()}`;
-  const anchorRef = useRef<HTMLSpanElement>(null);
-  const [hovered, setHovered] = useState(false);
-  const [focused, setFocused] = useState(false);
+export function GuidanceSettingsPopover({
+  onDisableGuidance,
+}: {
+  onDisableGuidance: () => void;
+}) {
+  return (
+    <>
+      Uncheck Show guidance in Settings, or{" "}
+      <button
+        type="button"
+        className="decision-guidance-disable"
+        onClick={onDisableGuidance}
+      >
+        disable now
+      </button>
+      .
+    </>
+  );
+}
+
+function GuidanceSettingsInfo({
+  onDisableGuidance,
+}: {
+  onDisableGuidance: () => void;
+}) {
+  const guidanceId = useId();
+  const descriptionId = `guidance-settings-description-${guidanceId}`;
+  const popoverId = `guidance-settings-popover-${guidanceId}`;
+  const anchorRef = useRef<HTMLButtonElement>(null);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [open, setOpen] = useState(false);
   const [position, setPosition] = useState<{ left: number; bottom: number } | null>(null);
-  const active = hovered || focused;
+
+  const cancelClose = () => {
+    if (closeTimerRef.current === null) return;
+    clearTimeout(closeTimerRef.current);
+    closeTimerRef.current = null;
+  };
+  const showPopover = () => {
+    cancelClose();
+    setOpen(true);
+  };
+  const scheduleClose = () => {
+    cancelClose();
+    closeTimerRef.current = setTimeout(() => setOpen(false), 150);
+  };
+
+  useEffect(() => () => cancelClose(), []);
 
   useEffect(() => {
-    if (!active) {
+    if (!open) {
       setPosition(null);
       return;
     }
@@ -56,34 +97,44 @@ function GuidanceSettingsInfo() {
       window.removeEventListener("resize", updatePosition);
       window.removeEventListener("scroll", updatePosition, true);
     };
-  }, [active]);
+  }, [open]);
 
   return (
     <>
-      <span
+      <button
+        type="button"
         ref={anchorRef}
         className="decision-guidance-info"
-        tabIndex={0}
         aria-label="Guidance settings"
-        aria-describedby={tooltipId}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
+        aria-describedby={descriptionId}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        aria-controls={open ? popoverId : undefined}
+        onMouseEnter={showPopover}
+        onMouseLeave={scheduleClose}
+        onFocus={showPopover}
+        onBlur={scheduleClose}
+        onClick={showPopover}
       >
         i
-        <span id={tooltipId} role="tooltip" className="decision-guidance-tooltip-accessible">
+        <span id={descriptionId} className="decision-guidance-tooltip-accessible">
           {GUIDANCE_SETTINGS_TOOLTIP}
         </span>
-      </span>
-      {active && position && typeof document !== "undefined"
+      </button>
+      {open && position && typeof document !== "undefined"
         ? createPortal(
             <span
+              id={popoverId}
+              role="dialog"
+              aria-label="Guidance settings"
               className="decision-guidance-tooltip-floating"
-              aria-hidden="true"
               style={position}
+              onMouseEnter={showPopover}
+              onMouseLeave={scheduleClose}
+              onFocus={showPopover}
+              onBlur={scheduleClose}
             >
-              {GUIDANCE_SETTINGS_TOOLTIP}
+              <GuidanceSettingsPopover onDisableGuidance={onDisableGuidance} />
             </span>,
             document.body,
           )
@@ -113,6 +164,7 @@ export function PendingDecisionPanel({
     resourcePaymentRequired,
     confirmSkipArsenal,
     onRequestPass,
+    onDisableGuidance,
     onConfirmSkipArsenal,
     onCancelSkipArsenal,
     onSend,
@@ -150,6 +202,7 @@ export function PendingDecisionPanel({
     }),
   );
   const defaultSpaceOption = decisionSpaceOption(pd);
+  const priorityGuidanceDecision = isPriorityGuidanceDecision(pd);
 
   if (!isMine) {
     return (
@@ -178,12 +231,14 @@ export function PendingDecisionPanel({
   }
 
   return (
-    <div className="decision decision-options">
+    <div className={`decision decision-options${
+      priorityGuidanceDecision ? " decision-priority-guidance" : ""
+    }`}>
       <DecisionPrompt
         prompt={pd.kind === "defend" ? "Pitch to pay this defense cost" : pd.prompt}
-        breakOnDash={isPriorityGuidanceDecision(pd)}
-        suffix={isPriorityGuidanceDecision(pd) ? (
-          <GuidanceSettingsInfo />
+        breakOnDash={priorityGuidanceDecision}
+        suffix={priorityGuidanceDecision ? (
+          <GuidanceSettingsInfo onDisableGuidance={onDisableGuidance} />
         ) : undefined}
       />
       {lookedCards.length > 0 && !showChoiceGrid ? (

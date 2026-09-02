@@ -155,6 +155,9 @@ export interface CardView {
   /** Zero-based indexes of once-per-turn activated abilities already used this
    *  turn. Public arena status used to distinguish otherwise identical cards. */
   usedAbilityIndexes?: number[];
+  /** Uses remaining this turn for each activated ability. Projected only while
+   * a multi-use ability has at least one activation remaining. */
+  remainingAbilityActivations?: number[];
   /** Labels for sources with multiple activated abilities. Derived by the
    * authoritative engine so clients do not load executable card scripts. */
   activatedAbilityLabels?: string[];

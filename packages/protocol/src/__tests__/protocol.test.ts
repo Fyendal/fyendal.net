@@ -59,6 +59,7 @@ const card = {
   counters: { lesson: 2 },
   playableFromSourceCardId: "HERO0",
   usedAbilityIndexes: [0, 2],
+  remainingAbilityActivations: [1, 0],
   activatedAbilityLabels: ["Attack", "Reload"],
   life: 1,
   hidden: false,
