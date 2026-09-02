@@ -10,6 +10,25 @@ const EXIT_MS = 220;
 const SHUFFLE_DISPLAY_MS = 900;
 const useClientLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
+function localizedDeckCardEventLabel(event: DeckCardEvent): string | null {
+  if (event.kind === "banish" && event.sourceZone === "deck") {
+    return "game.deckToast.banishedFromDeck";
+  }
+  if (event.kind === "banish" && event.sourceZone === "graveyard") {
+    return "game.deckToast.banishedFromGraveyard";
+  }
+  if (event.kind === "graveyard" && event.sourceZone === "deck") {
+    return "game.deckToast.sentFromDeckToGraveyard";
+  }
+  if (event.kind === "reveal" && event.sourceZone === "hand") {
+    return "game.deckToast.revealedFromHand";
+  }
+  if (event.kind === "reveal" && event.sourceZone === "deck") {
+    return "game.deckToast.revealedFromDeck";
+  }
+  return null;
+}
+
 export function useDeckCardFeedback(view: GameView | null, enabled: boolean): {
   activeEvent: DeckCardEvent | null;
   exiting: boolean;
@@ -116,6 +135,10 @@ export function DeckCardToast({
   const intl = useIntl();
   if (!event) return null;
   const names = event.cardIds.map((cardId) => cardData[cardId]?.name ?? cardId);
+  const localizedLabelId = localizedDeckCardEventLabel(event);
+  const label = localizedLabelId
+    ? intl.formatMessage({ id: localizedLabelId })
+    : event.label;
 
   return (
     <div
@@ -125,7 +148,7 @@ export function DeckCardToast({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      <div className="deck-card-toast-heading">{event.label}</div>
+      <div className="deck-card-toast-heading">{label}</div>
       <button
         type="button"
         className="deck-card-toast-close"

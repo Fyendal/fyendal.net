@@ -8,6 +8,7 @@ import type { FloatVisibilityController } from "./floatVisibility.js";
 import { motionLocationKey, motionPresentationKey } from "./motion/motionTypes.js";
 import { localizeTimingLabel } from "./timingLocalization.js";
 import { useFloatDrag } from "./useFloatDrag.js";
+import { formatGameMessage } from "../i18n/GameMessage.js";
 
 export function stackActivityRevision(
   layers: readonly StackLayerView[],
@@ -19,6 +20,7 @@ export function stackActivityRevision(
     layer.card?.instanceId ?? "hidden",
     layer.card?.cardId ?? "",
     layer.seat,
+    layer.labelMessage?.id ?? "",
     layer.label,
     layer.optional ? 1 : 0,
     layer.count ?? 1,
@@ -170,7 +172,13 @@ export function StackFloat({
               ) : null}
               {!bloodDebt && !lessGuidance ? (
                 <div className="stack-label">
-                  {stackLayerLabel(l.label)}
+                  {stackLayerLabel(l.labelMessage
+                    ? formatGameMessage(intl, l.labelMessage, {
+                        card: (cardId) => l.card?.cardId === cardId
+                          ? (l.card.name ?? cardId)
+                          : cardId,
+                      })
+                    : l.label)}
                   {l.optional ? (
                     <span className="muted"> ({intl.formatMessage({ id: "game.stack.optional" })})</span>
                   ) : null}

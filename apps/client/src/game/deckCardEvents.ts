@@ -7,6 +7,7 @@ export interface DeckCardEvent {
   kind: DeckCardEventKind;
   cardIds: string[];
   label: string;
+  sourceZone?: "deck" | "graveyard" | "hand";
   seat?: number;
   /** Per-card owner seats aligned with `cardIds`; used when one event mixes
    * owners (a clash reveals both heroes' cards in a single toast). */
@@ -223,7 +224,13 @@ export function detectDeckCardEvents(previous: GameView, current: GameView): Dec
         existing.cardIds.push(...cardIds);
         delete existing.seat;
       } else {
-        events.push({ kind: "banish", cardIds, label: "Banished from graveyard", seat });
+        events.push({
+          kind: "banish",
+          cardIds,
+          label: "Banished from graveyard",
+          sourceZone: "graveyard",
+          seat,
+        });
       }
     }
   }
@@ -259,7 +266,7 @@ export function detectDeckCardEvents(previous: GameView, current: GameView): Dec
         existingBanish.cardIds.push(...cardIds);
         delete existingBanish.seat;
       } else {
-        events.push({ kind: zone, cardIds, label, seat });
+        events.push({ kind: zone, cardIds, label, sourceZone: "deck", seat });
       }
     }
   }
@@ -290,6 +297,7 @@ export function detectDeckCardEvents(previous: GameView, current: GameView): Dec
       kind: "reveal",
       cardIds: reveal.cardIds,
       label,
+      sourceZone: label === "Revealed from hand" ? "hand" : "deck",
       cardSeats: reveal.cardSeats,
     });
   }

@@ -452,7 +452,7 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
       canActivate: (ctx) => controls(ctx, "Gold"),
       effectCardCosts: [{
         zone: "arena", move: "destroy", count: 1, name: "Gold",
-        prompt: "Good Time Chapeau: choose a Gold to destroy as a cost",
+        prompt: decisionPrompt("Good Time Chapeau: choose a Gold to destroy as a cost", "card.common.cost.gold.destroy"),
       }],
       effectCardCostChoiceHook: "chapeau-cost",
       label: "Destroy a Gold: next attack wagers Might and Vigor",
@@ -543,8 +543,8 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
       cost: 0, isAttack: false, goAgain: true, oncePerTurn: true,
       canActivate(ctx) { return findPitchedGraveCards(ctx, 1, 2).length === 2 && findPitchedGraveCards(ctx, 2, 2).length === 2; },
       effectCardCosts: [
-        { zone: "graveyard", move: "banish", count: 2, pitch: 1, prompt: "Kassai: choose a red card to banish as a cost" },
-        { zone: "graveyard", move: "banish", count: 2, pitch: 2, prompt: "Kassai: choose a yellow card to banish as a cost" },
+        { zone: "graveyard", move: "banish", count: 2, pitch: 1, prompt: decisionPrompt("Kassai: choose a red card to banish as a cost", "card.common.cost.red.banish") },
+        { zone: "graveyard", move: "banish", count: 2, pitch: 2, prompt: decisionPrompt("Kassai: choose a yellow card to banish as a cost", "card.common.cost.yellow.banish") },
       ],
       effectCardCostChoiceHook: "kassai-cost",
       label: "Banish 2 red and 2 yellow: next weapon hit creates Gold",
@@ -604,8 +604,8 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
           findPitchedGraveCards(ctx, 1, 1).length === 1 && findPitchedGraveCards(ctx, 2, 1).length === 1;
       },
       effectCardCosts: [
-        { zone: "graveyard", move: "banish", count: 1, pitch: 1, prompt: "Hood of Red Sand: choose a red card to banish as a cost" },
-        { zone: "graveyard", move: "banish", count: 1, pitch: 2, prompt: "Hood of Red Sand: choose a yellow card to banish as a cost" },
+        { zone: "graveyard", move: "banish", count: 1, pitch: 1, prompt: decisionPrompt("Hood of Red Sand: choose a red card to banish as a cost", "card.common.cost.red.banish") },
+        { zone: "graveyard", move: "banish", count: 1, pitch: 2, prompt: decisionPrompt("Hood of Red Sand: choose a yellow card to banish as a cost", "card.common.cost.yellow.banish") },
       ],
       effectCardCostChoiceHook: "hood-cost",
       onActivate(ctx) {

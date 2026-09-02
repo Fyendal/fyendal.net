@@ -71,7 +71,7 @@ function pleiades(): CardScript {
         count: 1,
         subtype: "aura",
         counter: { key: "suspense", amount: 1 },
-        prompt: "Pleiades: choose an aura to remove a suspense counter from",
+        prompt: decisionPrompt("Pleiades: choose an aura to remove a suspense counter from", "card.common.cost.aura.suspense.remove"),
       }],
       onActivate(ctx) {
         const targets = suspenseTargets(ctx);

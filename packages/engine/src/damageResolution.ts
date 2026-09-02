@@ -706,7 +706,12 @@ function openQuellDecision(state: GameStateInternal, packet: PendingArcane): boo
     player: target.seat,
     kind: "optional-effect",
     prompt: `Quell: you would be dealt ${packet.amount} damage — pay to prevent some of it?`,
+    promptMessage: {
+      id: "engine.decision.damage.quell",
+      values: { amount: packet.amount },
+    },
     options: [...pieces.map((piece) => `use ${piece.id}`), "decline"],
+    optionMessages: [...pieces.map(() => null), { id: "common.option.decline" }],
     cardOptions: [...pieces.map((piece) => piece.id as number | null), null],
     sourceInstanceId: packet.sourceInstanceId,
     chooseHook: "quell",
@@ -774,7 +779,16 @@ function openDiscardDamagePrevention(
     player: target.seat,
     kind: "optional-effect",
     prompt: `You would be dealt ${packet.amount} damage — discard a ${piece.cardType} card to prevent ${piece.amount} and draw ${piece.draw}?`,
+    promptMessage: {
+      id: "engine.decision.damage.discardprevent",
+      values: {
+        damage: packet.amount,
+        prevent: piece.amount,
+        draw: piece.draw,
+      },
+    },
     options: [...piece.cards.map((card) => String(card.instanceId)), "decline"],
+    optionMessages: [...piece.cards.map(() => null), { id: "common.option.decline" }],
     cardOptions: [...piece.cards.map((card) => card.instanceId as number | null), null],
     sourceInstanceId: packet.sourceInstanceId,
     chooseHook: "discard-damage-prevention",
@@ -798,7 +812,12 @@ function openOptionalDamagePrevention(
     player: target.seat,
     kind: "optional-effect",
     prompt: `You would be dealt ${packet.amount} damage — use a prevention effect?`,
+    promptMessage: {
+      id: "engine.decision.damage.prevent",
+      values: { amount: packet.amount },
+    },
     options: [...pieces.map((piece) => `use ${piece.id}`), "decline"],
+    optionMessages: [...pieces.map(() => null), { id: "common.option.decline" }],
     cardOptions: [...pieces.map((piece) => piece.id as number | null), null],
     sourceInstanceId: packet.sourceInstanceId,
     chooseHook: "optional-damage-prevention",
@@ -831,6 +850,10 @@ function openSoulDamagePrevention(
       player: target.seat,
       kind: "choose-target",
       prompt: `You would be dealt ${packet.amount} damage — choose a soul card to banish and prevent ${amount}`,
+      promptMessage: {
+        id: "engine.decision.damage.soulprevent",
+        values: { damage: packet.amount, prevent: amount },
+      },
       options: target.soul.map((card) => String(card.instanceId)),
       cardOptions: target.soul.map((card) => card.instanceId),
       sourceInstanceId: packet.sourceInstanceId,
@@ -882,6 +905,12 @@ function openWardDecision(state: GameStateInternal,
     prompt: packet.unpreventable
       ? `Ward: you would be dealt ${packet.amount} damage that can't be prevented — Ward is still destroyed`
       : `Ward: you would be dealt ${packet.amount} damage — destroy a card with Ward to prevent some of it`,
+    promptMessage: {
+      id: packet.unpreventable
+        ? "engine.decision.damage.ward.unpreventable"
+        : "engine.decision.damage.ward",
+      values: { amount: packet.amount },
+    },
     options: pieces.map((p) => `destroy ${p.id}`),
     cardOptions: pieces.map((p) => p.id),
     sourceInstanceId: packet.sourceInstanceId,
@@ -908,9 +937,19 @@ function tryOpenBarrierDecision(state: GameStateInternal,
     prompt: packet.unpreventable
       ? "Warning: this damage cannot be prevented."
       : `Arcane Barrier: you would be dealt ${packet.amount} arcane damage — pay {r} to prevent that much?`,
+    promptMessage: packet.unpreventable
+      ? { id: "engine.decision.damage.unpreventable" }
+      : {
+          id: "engine.decision.damage.arcane.barrier",
+          values: { amount: packet.amount },
+        },
     // "pay N" (not bare numbers) so option ids can never collide with card
     // instance ids in other choice prompts
     options: ["pay 0", ...options.map((n) => `pay ${n}`)],
+    optionMessages: [0, ...options].map((amount) => ({
+      id: "common.option.pay",
+      values: { amount },
+    })),
     sourceInstanceId: packet.sourceInstanceId,
     chooseHook: "arcane-barrier",
     arcane: packet,
@@ -931,7 +970,12 @@ function openArcaneDecision(state: GameStateInternal,
       player: packet.targetSeat,
       kind: "choose-target",
       prompt: `Spellvoid: you would be dealt ${packet.amount} arcane damage — destroy an equipment with Spellvoid to prevent some of it?`,
+      promptMessage: {
+        id: "engine.decision.damage.spellvoid",
+        values: { amount: packet.amount },
+      },
       options: [...pieces.map((p) => `destroy ${p.id}`), "decline"],
+      optionMessages: [...pieces.map(() => null), { id: "common.option.decline" }],
       cardOptions: [...pieces.map((p) => p.id as number | null), null],
       sourceInstanceId: packet.sourceInstanceId,
       chooseHook: "spellvoid",
@@ -994,7 +1038,12 @@ function openLethalDamagePrevention(
       player: target.seat,
       kind: "optional-effect",
       prompt: `You would be dealt ${packet.amount} lethal damage — banish ${cardName} from hand or arsenal to prevent it?`,
+      promptMessage: {
+        id: "engine.decision.damage.lethalprevent",
+        values: { amount: packet.amount, card: cardName },
+      },
       options: [...cards.map((card) => String(card.instanceId)), "decline"],
+      optionMessages: [...cards.map(() => null), { id: "common.option.decline" }],
       cardOptions: [...cards.map((card) => card.instanceId as number | null), null],
       sourceInstanceId: packet.sourceInstanceId,
       chooseHook: "lethal-damage-prevention",
@@ -1352,7 +1401,9 @@ export function beginHeroDamage(state: GameStateInternal,
       player: packet.sourceSeat,
       kind: "optional-effect",
       prompt: "Replace combat damage by destroying defending equipment?",
+      promptMessage: { id: "engine.decision.damage.combatequipment" },
       options: ["no", ...replacementIds.map(String)],
+      optionMessages: [{ id: "common.option.no" }, ...replacementIds.map(() => null)],
       cardOptions: [null, ...replacementIds],
       sourceInstanceId: packet.sourceInstanceId,
       chooseHook: "combat-damage-equipment-replacement",
@@ -1636,6 +1687,10 @@ export function answerArcaneBarrier(
       state.pendingDecision = {
         ...pd,
         prompt: `Pitch cards to pay ${piece.cost} for Quell`,
+        promptMessage: {
+          id: "engine.decision.damage.quellpay",
+          values: { cost: piece.cost },
+        },
         options,
         cardOptions: options.map(Number),
         chooseHook: "quell-pitch",
@@ -1763,6 +1818,12 @@ export function answerArcaneBarrier(
         prompt: arc.unpreventable
           ? "Warning: this damage cannot be prevented."
           : `Pitch cards to pay ${total} for Arcane Barrier (${need} more needed)`,
+        promptMessage: arc.unpreventable
+          ? { id: "engine.decision.damage.unpreventable" }
+          : {
+              id: "engine.decision.damage.arcane.barrier.pay",
+              values: { total, need },
+            },
         options,
         cardOptions: options.map(Number), // hand instance ids — own hand, visible
         chooseHook: "arcane-barrier-pitch",
@@ -1797,6 +1858,12 @@ export function answerArcaneBarrier(
       prompt: arc.unpreventable
         ? "Warning: this damage cannot be prevented."
         : `Pitch cards to pay ${total} for Arcane Barrier (${need} more needed)`,
+      promptMessage: arc.unpreventable
+        ? { id: "engine.decision.damage.unpreventable" }
+        : {
+            id: "engine.decision.damage.arcane.barrier.pay",
+            values: { total, need },
+          },
       options,
       cardOptions: options.map(Number),
       resume: undefined,

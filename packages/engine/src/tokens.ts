@@ -224,6 +224,7 @@ function continueTokenCreation(
         player: state.activePlayer,
         kind: "choose-target",
         prompt: "Choose which player's token replacements apply first",
+        promptMessage: { id: "engine.decision.token.playerorder" },
         options: applicableControllers.map(String),
         optionLabels: applicableControllers.map((controllerSeat) =>
           nameOf(state, (state.players[controllerSeat] as PlayerState).heroCardId)
@@ -254,6 +255,7 @@ function continueTokenCreation(
       player: currentController,
       kind: "choose-target",
       prompt: "Choose the next token creation replacement to apply",
+      promptMessage: { id: "engine.decision.token.next" },
       options: controlledApplicable.map(({ ref }) => replacementRefId(ref)),
       optionLabels: controlledApplicable.map(({ label }) => label),
       cardOptions: controlledApplicable.map(({ ref }) => ref.instanceId),
@@ -274,11 +276,19 @@ function continueTokenCreation(
     (ref) => replacementRefId(ref) !== replacementRefId(chosen.ref),
   );
   if (chosen.ref.kind === "optional-friendly") {
+    const source = findCardAnywhere(state, chosen.ref.instanceId);
     state.pendingDecision = {
       player: player.seat,
       kind: "optional-effect",
       prompt: chosen.label,
+      promptMessage: source
+        ? {
+            id: "engine.decision.token.optional.card",
+            values: { card: { kind: "card", cardId: source.card.cardId } },
+          }
+        : { id: "engine.decision.token.optional" },
       options: ["yes", "no"],
+      optionMessages: [{ id: "common.option.yes" }, { id: "common.option.no" }],
       sourceInstanceId: chosen.ref.instanceId,
       chooseHook: "engine-token-creation-replacement",
       tokenCreationReplacement: {
@@ -438,11 +448,19 @@ export function answerTokenReplacementOrder(
     (candidate) => replacementRefId(candidate) !== optionId,
   );
   if (chosen.ref.kind === "optional-friendly") {
+    const source = findCardAnywhere(state, chosen.ref.instanceId);
     state.pendingDecision = {
       player: batch.seat,
       kind: "optional-effect",
       prompt: chosen.label,
+      promptMessage: source
+        ? {
+            id: "engine.decision.token.optional.card",
+            values: { card: { kind: "card", cardId: source.card.cardId } },
+          }
+        : { id: "engine.decision.token.optional" },
       options: ["yes", "no"],
+      optionMessages: [{ id: "common.option.yes" }, { id: "common.option.no" }],
       sourceInstanceId: chosen.ref.instanceId,
       chooseHook: "engine-token-creation-replacement",
       tokenCreationReplacement: {

@@ -75,6 +75,13 @@ function setupDefendDecision(state: GameStateInternal, runtime: EngineRuntime): 
     player: defender,
     kind: "defend",
     prompt: `Defend against ${nameOf(state, link.attackingCard.cardId)} (${computeAttack(state, runtime, link)} attack)`,
+    promptMessage: {
+      id: "engine.decision.defend",
+      values: {
+        card: { kind: "card", cardId: link.attackingCard.cardId },
+        attack: computeAttack(state, runtime, link),
+      },
+    },
   };
 }
 

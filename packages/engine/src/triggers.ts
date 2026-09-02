@@ -2,6 +2,7 @@ import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { GameMessage, MeldSide, PlayableZone } from "@fyendal/shared";
 import type { CardScript, TriggerEvent, TriggerEventContext } from "./scripts.js";
+import { DEFAULT_CHOOSE_X_PROMPT, scriptPromptParts } from "./scriptPresentation.js";
 import {
   activatedAbilitiesSuppressed,
   cardHasType,
@@ -38,6 +39,7 @@ import { consumeFirstActionExtraCost, firstActionExtraCost, goAgainSuppressed, i
 import { opposingActionsProhibited } from "./restrictions.js";
 import { defendingHeroCannotRespondBelowPower } from "./combatRestrictions.js";
 import { pushCardLayer } from "./stackCore.js";
+import { triggerLabelMessage } from "./triggerPresentation.js";
 
 import {
   holdPriorityWindow,
@@ -316,6 +318,16 @@ export function windowPromptMessage(
       }
       return { id: "engine.decision.priority.ability.triggered" };
     }
+    if (triggerLabelMessage(state, layer)) {
+      if (secret) return { id: "engine.decision.priority.ability.hidden" };
+      if (found) {
+        return {
+          id: "engine.decision.priority.trigger.cardgeneric",
+          values: { card: { kind: "card", cardId: found.card.cardId } },
+        };
+      }
+      return { id: "engine.decision.priority.ability.triggered" };
+    }
     if (secret) {
       return {
         id: "engine.decision.priority.trigger.hidden",
@@ -564,13 +576,19 @@ export function playWindowInstant(
       );
       const options = Object.keys(choices);
       if (options.length === 0) return "not enough resources";
+      const presentation = scriptPromptParts(
+        resolvedVariableCost.prompt ?? DEFAULT_CHOOSE_X_PROMPT,
+        options,
+      );
       const origin = fromZone ?? (fromArsenal
         ? "arsenal"
         : source === player.banish ? "banish" : "hand");
       state.pendingDecision = {
         player: seat,
         kind: "choose-target",
-        prompt: resolvedVariableCost.prompt ?? "Choose X",
+        prompt: presentation.fallback,
+        ...(presentation.promptMessage ? { promptMessage: presentation.promptMessage } : {}),
+        ...(presentation.optionMessages ? { optionMessages: presentation.optionMessages } : {}),
         options,
         sourceInstanceId: card.instanceId,
         chooseHook: "engine-variable-play-x",
@@ -789,11 +807,22 @@ export function resolveAbilityLayer(state: GameStateInternal,
 function askTriggerChoice(state: GameStateInternal, layer: StackLayer): void {
   const found = findCardAnywhere(state, layer.sourceInstanceId);
   const name = found ? nameOf(state, found.card.cardId) : "Triggered ability";
+  const labelMessage = triggerLabelMessage(state, layer);
   state.pendingDecision = {
     player: layer.seat,
     kind: "optional-effect",
     prompt: `${name}: ${layer.label}`,
+    promptMessage: labelMessage ?? (found
+      ? {
+          id: "engine.decision.trigger.optional.card",
+          values: { card: { kind: "card", cardId: found.card.cardId } },
+        }
+      : { id: "engine.decision.trigger.optional" }),
     options: ["yes", "no"],
+    optionMessages: [
+      { id: "common.option.yes" },
+      { id: "common.option.no" },
+    ],
     sourceInstanceId: layer.sourceInstanceId,
     chooseHook: "trigger-choice",
     ...(layer.defaultOption ? { defaultOption: layer.defaultOption } : {}),
@@ -1463,12 +1492,15 @@ function placeTriggers(
     return;
   }
   const optionCounts = layers.map((layer) => layer.triggerCount ?? null);
+  const optionMessages = layers.map((layer) => triggerLabelMessage(state, layer) ?? null);
   state.pendingDecision = {
     player: head.seat,
     kind: "order-triggers",
     prompt: "Order your triggered abilities",
+    promptMessage: { id: "engine.decision.triggers.order" },
     options: layers.map((layer) => `${layer.sourceInstanceId}:${layer.triggerIndex}`),
     optionLabels: layers.map((layer) => layer.label),
+    ...(optionMessages.some((message) => message !== null) ? { optionMessages } : {}),
     ...(optionCounts.some((count) => count !== null) ? { optionCounts } : {}),
     cardOptions: layers.map((layer) => layer.sourceInstanceId),
     chooseHook: "trigger-order",

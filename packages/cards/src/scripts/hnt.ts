@@ -764,7 +764,7 @@ Object.assign(hnt, {
   "dual threat|2": { onPlay(ctx) { if (ctx.getPlayerFlag(ctx.seat, "attackedWithWeaponThisTurn") === true) buffNextAttack(ctx, { attack: 3, appliesTo: "attack-action" }); if (ctx.getPlayerFlag(ctx.seat, "attackedWithAttackActionThisTurn") === true) buffNextAttack(ctx, { attack: 3, appliesTo: "weapon" }); } },
   "thick hide hunter|2": { onAttackDeclared: (ctx) => ctx.discardRandom(ctx.seat, 1), onDefend: (ctx) => ctx.discardRandom(ctx.seat, 1) },
   "tremorshield sabatons|0": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true, onActivate(ctx) { ctx.preventNextArcaneDamage(ctx.seat, ctx.getPlayerFlag(ctx.seat, "createdName:seismic surge") === true ? 2 : 1); } } },
-  "roiling fissure|3": { variablePlayCost: { base: 1, counterKey: "fissureX", prompt: "Choose X" }, onPlay(ctx) { const x = ctx.getCounter("fissureX"); const aura = ctx.state.players.flatMap((player) => player.board).find((card) => dataTags(ctx, card).includes("aura") && (ctx.cardData(card.cardId).cost ?? 0) <= x); if (aura) ctx.destroyPermanent(aura.instanceId); } },
+  "roiling fissure|3": { variablePlayCost: { base: 1, counterKey: "fissureX", prompt: decisionPrompt("Choose X", "engine.decision.x.choose") }, onPlay(ctx) { const x = ctx.getCounter("fissureX"); const aura = ctx.state.players.flatMap((player) => player.board).find((card) => dataTags(ctx, card).includes("aura") && (ctx.cardData(card.cardId).cost ?? 0) <= x); if (aura) ctx.destroyPermanent(aura.instanceId); } },
   "retrace the past|3": {
     onAttackDeclared(ctx) {
       if (!previousAttackNameContains(ctx, "gustwave")) return;
@@ -794,7 +794,7 @@ Object.assign(hnt, {
       fromHand: true,
       variableBanishSoulCost: {
         counterKey: "warCryThemisX",
-        prompt: "Choose X cards to banish from your soul",
+        prompt: decisionPrompt("Choose X cards to banish from your soul", "card.common.cost.soul.banishx"),
       },
       label: "Discard: turn X banished cards face-down",
       onActivate(ctx) {
@@ -843,7 +843,7 @@ Object.assign(hnt, {
       fromHand: true,
       variableBanishSoulCost: {
         counterKey: "warCryBellonaX",
-        prompt: "Choose X cards to banish from your soul",
+        prompt: decisionPrompt("Choose X cards to banish from your soul", "card.common.cost.soul.banishx"),
       },
       label: "Discard: reflect a weapon's next X or less damage",
       onActivate(ctx) {

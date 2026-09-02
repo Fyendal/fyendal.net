@@ -57,8 +57,8 @@ export const azs: Record<string, CardScript> = {
     activated: {
       cost: 2, isAttack: false, goAgain: false, timing: "instant", tap: true,
       effectCardCosts: [
-        { zone: "arena", move: "destroy", count: 1, name: "Lightning Flow", prompt: "Choose a Lightning Flow to destroy" },
-        { zone: "arena", move: "banish", count: 1, types: ["lightning", "aura"], withoutCounter: "holo", prompt: "Choose another Lightning aura to banish" },
+        { zone: "arena", move: "destroy", count: 1, name: "Lightning Flow", prompt: decisionPrompt("Choose a Lightning Flow to destroy", "card.common.cost.lightningflow.destroy") },
+        { zone: "arena", move: "banish", count: 1, types: ["lightning", "aura"], withoutCounter: "holo", prompt: decisionPrompt("Choose another Lightning aura to banish", "card.common.cost.lightningaura.banish") },
       ],
       onCostPaid(ctx, paid) {
         const aura = paid.find((card) => ctx.player(ctx.seat).banish.some((candidate) => candidate.instanceId === card.instanceId));

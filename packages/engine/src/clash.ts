@@ -129,6 +129,13 @@ function offerNextClashReplacement(state: GameStateInternal, clashState: ClashSt
       player: seat,
       kind: "optional-effect",
       prompt: `${nameOf(state, player.heroCardId)}: destroy a ${replacement.costPermanentName} to put a revealed card on the bottom of its owner's deck and clash again?`,
+      promptMessage: {
+        id: "engine.decision.clash.again",
+        values: {
+          card: { kind: "card", cardId: player.heroCardId },
+          permanent: replacement.costPermanentName,
+        },
+      },
       options: ["no", ...costs.map((card) => String(card.instanceId))],
       cardOptions: [null, ...costs.map((card) => card.instanceId)],
       sourceInstanceId: clashState.request.sourceInstanceId,
@@ -172,6 +179,15 @@ function finishClashOrOfferWinnerChoice(
     player: chooser,
     kind: "choose-target",
     prompt: `${nameOf(state, (state.players[chooser] as PlayerState).heroCardId)}: choose which hero wins the clash`,
+    promptMessage: {
+      id: "engine.decision.clash.winner",
+      values: {
+        card: {
+          kind: "card",
+          cardId: (state.players[chooser] as PlayerState).heroCardId,
+        },
+      },
+    },
     options: heroes.map((hero) => String(hero.instanceId)),
     cardOptions: heroes.map((hero) => hero.instanceId),
     sourceInstanceId: clashState.request.sourceInstanceId,
@@ -282,6 +298,10 @@ export function answerClashDecision(
       player: player.seat,
       kind: "choose-target",
       prompt: `${nameOf(state, player.heroCardId)}: choose a revealed card to put on the bottom of its owner's deck`,
+      promptMessage: {
+        id: "engine.decision.clash.revealed.bottom",
+        values: { card: { kind: "card", cardId: player.heroCardId } },
+      },
       options: revealed.map(({ instanceId }) => String(instanceId)),
       cardOptions: revealed.map(({ instanceId }) => instanceId),
       sourceInstanceId: clashState.request.sourceInstanceId,

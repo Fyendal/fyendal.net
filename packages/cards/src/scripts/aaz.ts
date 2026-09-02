@@ -49,7 +49,7 @@ export const aaz: Record<string, CardScript> = {
         move: "turn-face-up",
         count: 1,
         subtype: "arrow",
-        prompt: "Turn a face-down arrow in your arsenal face up as a cost",
+        prompt: decisionPrompt("Turn a face-down arrow in your arsenal face up as a cost", "card.common.cost.arsenalarrow.faceup"),
       }],
       canActivate(ctx) {
         return ctx.player(ctx.seat).arsenal.some((card) => card.faceDown && isArrow(ctx, card));

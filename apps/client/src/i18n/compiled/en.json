@@ -1319,6 +1319,162 @@
       "value": "Name a card"
     }
   ],
+  "card.common.cost.arsenalarrow.faceup": [
+    {
+      "type": 0,
+      "value": "Turn a face-down arrow in your arsenal face up as a cost"
+    }
+  ],
+  "card.common.cost.aura.destroy": [
+    {
+      "type": 0,
+      "value": "Choose an aura to destroy as a cost"
+    }
+  ],
+  "card.common.cost.aura.suspense.remove": [
+    {
+      "type": 0,
+      "value": "Choose an aura to remove a suspense counter from"
+    }
+  ],
+  "card.common.cost.bluearrow.faceup": [
+    {
+      "type": 0,
+      "value": "Turn a blue arrow face up"
+    }
+  ],
+  "card.common.cost.cog.tap": [
+    {
+      "type": 0,
+      "value": "Choose a cog to tap as a cost"
+    }
+  ],
+  "card.common.cost.cog.untap": [
+    {
+      "type": 0,
+      "value": "Untap a cog"
+    }
+  ],
+  "card.common.cost.edgeofautumn.banish": [
+    {
+      "type": 0,
+      "value": "Banish an Edge of Autumn"
+    }
+  ],
+  "card.common.cost.evo.banish": [
+    {
+      "type": 0,
+      "value": "Banish an Evo"
+    }
+  ],
+  "card.common.cost.gold.destroy": [
+    {
+      "type": 0,
+      "value": "Choose a Gold to destroy as a cost"
+    }
+  ],
+  "card.common.cost.hand.banishfacedown": [
+    {
+      "type": 0,
+      "value": "Banish a card from hand face down"
+    }
+  ],
+  "card.common.cost.hand.deckbottom": [
+    {
+      "type": 0,
+      "value": "Put a card from your hand on the bottom of your deck"
+    }
+  ],
+  "card.common.cost.lightningaura.banish": [
+    {
+      "type": 0,
+      "value": "Choose another Lightning aura to banish"
+    }
+  ],
+  "card.common.cost.lightningflow.destroy": [
+    {
+      "type": 0,
+      "value": "Choose a Lightning Flow to destroy"
+    }
+  ],
+  "card.common.cost.offchaindagger.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy an off-chain dagger"
+    }
+  ],
+  "card.common.cost.ponder.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy a Ponder"
+    }
+  ],
+  "card.common.cost.powercounter.remove": [
+    {
+      "type": 0,
+      "value": "Remove a power counter"
+    }
+  ],
+  "card.common.cost.red.banish": [
+    {
+      "type": 0,
+      "value": "Choose a red card to banish as a cost"
+    }
+  ],
+  "card.common.cost.red.banish.two": [
+    {
+      "type": 0,
+      "value": "Banish 2 red cards"
+    }
+  ],
+  "card.common.cost.silver.destroy.two": [
+    {
+      "type": 0,
+      "value": "Destroy 2 Silver"
+    }
+  ],
+  "card.common.cost.soul.banishx": [
+    {
+      "type": 0,
+      "value": "Choose X cards to banish from your soul"
+    }
+  ],
+  "card.common.cost.spectralshield.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy a Spectral Shield"
+    }
+  ],
+  "card.common.cost.waterygrave.discard": [
+    {
+      "type": 0,
+      "value": "Discard a card with watery grave"
+    }
+  ],
+  "card.common.cost.yellow.banish": [
+    {
+      "type": 0,
+      "value": "Choose a yellow card to banish as a cost"
+    }
+  ],
+  "card.common.cost.yellow.banish.two": [
+    {
+      "type": 0,
+      "value": "Banish 2 yellow cards"
+    }
+  ],
+  "card.common.cost.yellow.discard.two": [
+    {
+      "type": 0,
+      "value": "Discard two yellow cards"
+    }
+  ],
+  "card.common.cost.zombie.discard": [
+    {
+      "type": 0,
+      "value": "Discard a zombie"
+    }
+  ],
   "card.common.levia.transform": [
     {
       "type": 0,
@@ -1465,6 +1621,12 @@
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "card.common.ward.x.choose": [
+    {
+      "type": 0,
+      "value": "Choose ward X"
     }
   ],
   "card.common.zombie.graveyard.choose": [
@@ -2021,6 +2183,12 @@
     {
       "type": 0,
       "value": " arcane damage to any target"
+    }
+  ],
+  "card.dyn.arakni.opponenttop.look": [
+    {
+      "type": 0,
+      "value": "Look at the opponent's top card?"
     }
   ],
   "card.dyn.arcane.hero.choose": [
@@ -8743,6 +8911,16 @@
       "value": "Pass"
     }
   ],
+  "common.option.pay": [
+    {
+      "type": 0,
+      "value": "Pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    }
+  ],
   "common.option.remove": [
     {
       "type": 0,
@@ -8845,6 +9023,44 @@
       "value": ": choose an attack target"
     }
   ],
+  "engine.decision.clash.again": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": destroy a "
+    },
+    {
+      "type": 1,
+      "value": "permanent"
+    },
+    {
+      "type": 0,
+      "value": " to put a revealed card on the bottom of its owner's deck and clash again?"
+    }
+  ],
+  "engine.decision.clash.revealed.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose a revealed card to put on the bottom of its owner's deck"
+    }
+  ],
+  "engine.decision.clash.winner": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose which hero wins the clash"
+    }
+  ],
   "engine.decision.crank": [
     {
       "type": 1,
@@ -8853,6 +9069,208 @@
     {
       "type": 0,
       "value": ": Crank — remove a steam counter to gain 1 action point?"
+    }
+  ],
+  "engine.decision.damage.arcane.barrier": [
+    {
+      "type": 0,
+      "value": "Arcane Barrier: you would be dealt "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage — pay resources to prevent that much?"
+    }
+  ],
+  "engine.decision.damage.arcane.barrier.pay": [
+    {
+      "type": 0,
+      "value": "Pitch cards to pay "
+    },
+    {
+      "type": 1,
+      "value": "total"
+    },
+    {
+      "type": 0,
+      "value": " for Arcane Barrier ("
+    },
+    {
+      "type": 1,
+      "value": "need"
+    },
+    {
+      "type": 0,
+      "value": " more needed)"
+    }
+  ],
+  "engine.decision.damage.combatequipment": [
+    {
+      "type": 0,
+      "value": "Replace combat damage by destroying defending equipment?"
+    }
+  ],
+  "engine.decision.damage.discardprevent": [
+    {
+      "type": 0,
+      "value": "You would be dealt "
+    },
+    {
+      "type": 1,
+      "value": "damage"
+    },
+    {
+      "type": 0,
+      "value": " damage — discard an eligible card to prevent "
+    },
+    {
+      "type": 1,
+      "value": "prevent"
+    },
+    {
+      "type": 0,
+      "value": " and draw "
+    },
+    {
+      "type": 1,
+      "value": "draw"
+    },
+    {
+      "type": 0,
+      "value": "?"
+    }
+  ],
+  "engine.decision.damage.lethalprevent": [
+    {
+      "type": 0,
+      "value": "You would be dealt "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " lethal damage — banish "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " from hand or arsenal to prevent it?"
+    }
+  ],
+  "engine.decision.damage.prevent": [
+    {
+      "type": 0,
+      "value": "You would be dealt "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " damage — use a prevention effect?"
+    }
+  ],
+  "engine.decision.damage.quell": [
+    {
+      "type": 0,
+      "value": "Quell: you would be dealt "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " damage — pay to prevent some of it?"
+    }
+  ],
+  "engine.decision.damage.quellpay": [
+    {
+      "type": 0,
+      "value": "Pitch cards to pay "
+    },
+    {
+      "type": 1,
+      "value": "cost"
+    },
+    {
+      "type": 0,
+      "value": " for Quell"
+    }
+  ],
+  "engine.decision.damage.soulprevent": [
+    {
+      "type": 0,
+      "value": "You would be dealt "
+    },
+    {
+      "type": 1,
+      "value": "damage"
+    },
+    {
+      "type": 0,
+      "value": " damage — choose a soul card to banish and prevent "
+    },
+    {
+      "type": 1,
+      "value": "prevent"
+    }
+  ],
+  "engine.decision.damage.spellvoid": [
+    {
+      "type": 0,
+      "value": "Spellvoid: you would be dealt "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage — destroy an equipment with Spellvoid to prevent some of it?"
+    }
+  ],
+  "engine.decision.damage.unpreventable": [
+    {
+      "type": 0,
+      "value": "Warning: this damage cannot be prevented."
+    }
+  ],
+  "engine.decision.damage.ward": [
+    {
+      "type": 0,
+      "value": "Ward: you would be dealt "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " damage — destroy a card with Ward to prevent some of it"
+    }
+  ],
+  "engine.decision.damage.ward.unpreventable": [
+    {
+      "type": 0,
+      "value": "Ward: you would be dealt "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " damage that can't be prevented — Ward is still destroyed"
     }
   ],
   "engine.decision.deckbottom.first": [
@@ -8887,6 +9305,38 @@
     {
       "type": 0,
       "value": " attack)"
+    }
+  ],
+  "engine.decision.die.reroll": [
+    {
+      "type": 0,
+      "value": "Destroy "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " to reroll the "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": "?"
+    }
+  ],
+  "engine.decision.look": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": look at"
     }
   ],
   "engine.decision.payment": [
@@ -8969,6 +9419,16 @@
       "value": " — play an instant or pass"
     }
   ],
+  "engine.decision.priority.trigger.cardgeneric": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "'s triggered ability is on the stack — play an instant or pass"
+    }
+  ],
   "engine.decision.priority.trigger.generic": [
     {
       "type": 0,
@@ -9037,16 +9497,74 @@
       "value": " on the stack)"
     }
   ],
+  "engine.decision.soul.banishcost": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose soul card "
+    },
+    {
+      "type": 1,
+      "value": "current"
+    },
+    {
+      "type": 0,
+      "value": " of "
+    },
+    {
+      "type": 1,
+      "value": "total"
+    },
+    {
+      "type": 0,
+      "value": " to banish as a cost"
+    }
+  ],
   "engine.decision.token.next": [
     {
       "type": 0,
       "value": "Choose the next token creation replacement to apply"
     }
   ],
+  "engine.decision.token.optional": [
+    {
+      "type": 0,
+      "value": "Use this token replacement effect?"
+    }
+  ],
+  "engine.decision.token.optional.card": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": use this token replacement effect?"
+    }
+  ],
   "engine.decision.token.playerorder": [
     {
       "type": 0,
       "value": "Choose which player's token replacements apply first"
+    }
+  ],
+  "engine.decision.trigger.optional": [
+    {
+      "type": 0,
+      "value": "Use this triggered ability?"
+    }
+  ],
+  "engine.decision.trigger.optional.card": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": use this triggered ability?"
     }
   ],
   "engine.decision.triggers.order": [
@@ -9059,6 +9577,12 @@
     {
       "type": 0,
       "value": "Choose the next wager-loss replacement to apply"
+    }
+  ],
+  "engine.decision.x.choose": [
+    {
+      "type": 0,
+      "value": "Choose X"
     }
   ],
   "footer.legal": [
@@ -10195,6 +10719,36 @@
     {
       "type": 1,
       "value": "name"
+    }
+  ],
+  "game.deckToast.banishedFromDeck": [
+    {
+      "type": 0,
+      "value": "Banished from deck"
+    }
+  ],
+  "game.deckToast.banishedFromGraveyard": [
+    {
+      "type": 0,
+      "value": "Banished from graveyard"
+    }
+  ],
+  "game.deckToast.revealedFromDeck": [
+    {
+      "type": 0,
+      "value": "Revealed from deck"
+    }
+  ],
+  "game.deckToast.revealedFromHand": [
+    {
+      "type": 0,
+      "value": "Revealed from hand"
+    }
+  ],
+  "game.deckToast.sentFromDeckToGraveyard": [
+    {
+      "type": 0,
+      "value": "Sent from deck to graveyard"
     }
   ],
   "game.effects.identical": [

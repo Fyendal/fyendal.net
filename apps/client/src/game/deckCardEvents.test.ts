@@ -77,8 +77,20 @@ describe("public deck-card events", () => {
     });
 
     expect(detectDeckCardEvents(previous, current)).toEqual([
-      { kind: "banish", cardIds: [sinkBelow.id], label: "Banished from deck", seat: 0 },
-      { kind: "graveyard", cardIds: [snatch.id], label: "Sent from deck to graveyard", seat: 0 },
+      {
+        kind: "banish",
+        cardIds: [sinkBelow.id],
+        label: "Banished from deck",
+        sourceZone: "deck",
+        seat: 0,
+      },
+      {
+        kind: "graveyard",
+        cardIds: [snatch.id],
+        label: "Sent from deck to graveyard",
+        sourceZone: "deck",
+        seat: 0,
+      },
     ]);
   });
 
@@ -100,6 +112,7 @@ describe("public deck-card events", () => {
       kind: "banish",
       cardIds: [sinkBelow.id, snatch.id],
       label: "Banished from graveyard",
+      sourceZone: "graveyard",
       seat: 0,
     }]);
   });
@@ -113,6 +126,7 @@ describe("public deck-card events", () => {
       kind: "reveal",
       cardIds: [sinkBelow.id],
       label: "Revealed from deck",
+      sourceZone: "deck",
       cardSeats: [1],
     }]);
   });
@@ -126,6 +140,7 @@ describe("public deck-card events", () => {
       kind: "reveal",
       cardIds: [faultLine.id],
       label: "Revealed from hand",
+      sourceZone: "hand",
       cardSeats: [undefined],
     }]);
   });
@@ -141,6 +156,7 @@ describe("public deck-card events", () => {
       kind: "reveal",
       cardIds: [lightningPress.id],
       label: "Revealed from hand",
+      sourceZone: "hand",
       cardSeats: [undefined],
     }]);
   });
@@ -164,6 +180,7 @@ describe("public deck-card events", () => {
       kind: "banish",
       cardIds: [sinkBelow.id, snatch.id],
       label: "Banished from deck",
+      sourceZone: "deck",
       cardSeats: [0, 1],
     }]);
   });
@@ -183,6 +200,7 @@ describe("public deck-card events", () => {
       kind: "reveal",
       cardIds: [sinkBelow.id, snatch.id],
       label: "Revealed from deck",
+      sourceZone: "deck",
       cardSeats: [0, 1],
     }]);
   });
@@ -209,6 +227,7 @@ describe("public deck-card events", () => {
       kind: "reveal",
       cardIds: expect.arrayContaining([sinkBelow.id]),
       label: "Revealed from deck",
+      sourceZone: "deck",
       cardSeats: [undefined],
     });
   });

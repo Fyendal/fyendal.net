@@ -3,10 +3,10 @@ import type { GameStateInternal } from "./runtimeState.js";
 import type { EquipmentSlot } from "@fyendal/shared";
 import type {
   ScriptCtx,
-  ScriptDecisionPrompt,
   ScriptPrompt,
   TokenCreationContext,
 } from "./scripts.js";
+import { scriptPromptParts } from "./scriptPresentation.js";
 import { abilityList, oncePerTurnEffectFlagKey } from "./scripts.js";
 import type { CardInstance, ChainLinkState, PendingArcane, PendingDecisionState, PlayerState } from "./state.js";
 import { queueDecisionBehindCrank } from "./decisionQueue.js";
@@ -272,32 +272,6 @@ interface ScriptedChoiceDetails {
 }
 
 type CardChoiceDetails = Omit<ScriptedChoiceDetails, "cardOptions" | "defaultOption">;
-
-function scriptPromptParts(
-  prompt: ScriptPrompt,
-  options?: readonly string[],
-): {
-  fallback: string;
-  promptMessage?: ScriptDecisionPrompt["message"];
-  optionMessages?: (ScriptDecisionPrompt["message"] | null)[];
-} {
-  if (typeof prompt === "string") return { fallback: prompt };
-  const messagesByValue = prompt.optionMessagesByValue;
-  const optionMessages = options && messagesByValue
-    ? options.map((option) =>
-        Object.hasOwn(messagesByValue, option)
-          ? messagesByValue[option] ?? null
-          : null
-      )
-    : undefined;
-  return {
-    fallback: prompt.fallback,
-    promptMessage: prompt.message,
-    ...(optionMessages?.some((message) => message !== null)
-      ? { optionMessages }
-      : {}),
-  };
-}
 
 export function makeCtx(
   state: GameStateInternal,
@@ -622,7 +596,18 @@ export function makeCtx(
         player: replacement.seat,
         kind: "optional-effect",
         prompt: `Destroy ${nameOf(state, replacement.card.cardId)} to reroll the ${result}?`,
+        promptMessage: {
+          id: "engine.decision.die.reroll",
+          values: {
+            card: { kind: "card", cardId: replacement.card.cardId },
+            result,
+          },
+        },
         options: ["reroll", "keep"],
+        optionMessages: [
+          { id: "common.option.reroll" },
+          { id: "common.option.keep" },
+        ],
         sourceInstanceId: replacement.card.instanceId,
         chooseHook: "engine-die-roll-replacement",
         dieRoll: {
@@ -1312,7 +1297,12 @@ export function makeCtx(
         player: seat,
         kind: "choose-target",
         prompt: `${nameOf(state, self.cardId)}: look at`,
+        promptMessage: {
+          id: "engine.decision.look",
+          values: { card: { kind: "card", cardId: self.cardId } },
+        },
         options: ["pass"],
+        optionMessages: [{ id: "common.option.pass" }],
         sourceInstanceId: self.instanceId,
         chooseHook: "engine-look",
         lookedCardIds: [instanceId],
@@ -1336,7 +1326,12 @@ export function makeCtx(
         player: lookingSeat,
         kind: "choose-target",
         prompt: `${nameOf(state, self.cardId)}: look at`,
+        promptMessage: {
+          id: "engine.decision.look",
+          values: { card: { kind: "card", cardId: self.cardId } },
+        },
         options: ["pass"],
+        optionMessages: [{ id: "common.option.pass" }],
         sourceInstanceId: self.instanceId,
         chooseHook: "engine-look",
         lookedCardIds: [instanceId],
@@ -2180,10 +2175,16 @@ export function makeCtx(
         if (ids[0] !== undefined) runtime.commands.putCardOnDeckBottom(state, ids[0]);
         return;
       }
+      const presentation = scriptPromptParts(prompt ?? {
+        fallback: "Choose the next card to put on the bottom of your deck",
+        message: { id: "engine.decision.deckbottom.next" },
+      }, ids.map(String));
       state.pendingDecision = {
         player: seat,
         kind: "choose-target",
-        prompt: prompt ?? "Choose the next card to put on the bottom of your deck",
+        prompt: presentation.fallback,
+        ...(presentation.promptMessage ? { promptMessage: presentation.promptMessage } : {}),
+        ...(presentation.optionMessages ? { optionMessages: presentation.optionMessages } : {}),
         options: ids.map(String),
         cardOptions: [...ids],
         sourceInstanceId: self.instanceId,

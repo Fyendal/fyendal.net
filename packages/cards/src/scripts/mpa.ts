@@ -23,7 +23,7 @@ export const mpa: Record<string, CardScript> = {
         zone: "hand",
         move: "put-on-deck-bottom",
         count: 1,
-        prompt: "Put a card from your hand on the bottom of your deck",
+        prompt: decisionPrompt("Put a card from your hand on the bottom of your deck", "card.common.cost.hand.deckbottom"),
       }],
       canActivate(ctx) {
         const attack = ctx.link?.attackingCard;

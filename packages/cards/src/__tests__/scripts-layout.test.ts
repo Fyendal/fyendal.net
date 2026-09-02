@@ -95,7 +95,7 @@ describe("card script layout", () => {
 
     expect(rawTypeReads).toEqual([
       "cru/high-rarity.ts:408:const heroClass = heroData.classes?.[0];",
-      "pen.ts:74:return [...(d.classes ?? []), ...(d.subtypes ?? [])].some(",
+      "pen.ts:78:return [...(d.classes ?? []), ...(d.subtypes ?? [])].some(",
       "sea.ts:37:return [...(d.classes ?? []), ...(d.subtypes ?? [])].some((value) => value.toLowerCase() === wanted);",
     ]);
   });

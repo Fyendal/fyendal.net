@@ -31,6 +31,36 @@ describe("DYN — registration and heroes", () => {
     }
   });
 
+  it("provides a semantic label for Arakni, Huntsman's trigger", () => {
+    expect(scripts.DYN113?.triggers?.[0]?.labelMessage).toEqual({
+      id: "card.dyn.arakni.opponenttop.look",
+    });
+  });
+
+  it("uses that semantic label for Arakni, Huntsman's optional decision", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "arakni, huntsman|0",
+          hand: ["DYN133"],
+          resources: 3,
+        },
+        { hero: "dorinthea", deck: ["head jab|1"] },
+      ],
+    });
+
+    g.play("DYN133", { settle: false });
+    expect(projectStateFor(g.state, 0).stack[0]?.labelMessage).toEqual({
+      id: "card.dyn.arakni.opponenttop.look",
+    });
+    g.settle();
+    expect(g.state.pendingDecision).toMatchObject({
+      kind: "optional-effect",
+      promptMessage: { id: "card.dyn.arakni.opponenttop.look" },
+    });
+  });
+
   it.each(CONTRACT_PRINTINGS)("$id triggers Arakni, Huntsman when played", (contract) => {
     if (contract.cardType === "action") {
       const g = scenario({

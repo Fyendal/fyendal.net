@@ -1,8 +1,9 @@
-import type { CardView, PendingDecision } from "@fyendal/shared";
+import type { CardView, GameMessage, PendingDecision } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import { useMemo, useState } from "react";
 import { useIntl } from "react-intl";
 import { CardFace } from "../Card.js";
+import { formatGameMessage } from "../../i18n/GameMessage.js";
 
 export interface CardSearchZoneCounts {
   hand: number;
@@ -26,6 +27,7 @@ type CardSearchDecision = PendingDecision & {
 
 export interface CardSearchOverlayModel {
   prompt: string;
+  promptMessage?: GameMessage;
   sections: CardSearchSection[];
   optionByCardId: ReadonlyMap<number, string>;
   minimumSelections: number;
@@ -85,6 +87,7 @@ export function cardSearchOverlayModel(
 
   return {
     prompt: decision.prompt,
+    ...(decision.promptMessage ? { promptMessage: decision.promptMessage } : {}),
     sections,
     optionByCardId,
     minimumSelections: decision.minimumSelections,
@@ -123,13 +126,18 @@ export function CardSearchOverlay({
   if (!model) return null;
   const canSubmit = selectedOptionIds.length >= model.minimumSelections
     && selectedOptionIds.length <= model.maximumSelections;
+  const localizedPrompt = model.promptMessage
+    ? formatGameMessage(intl, model.promptMessage, {
+        card: (cardId) => cardData[cardId]?.name ?? cardId,
+      })
+    : model.prompt;
   if (minimized) {
     return (
       <MinimizedCardSearch
         prompt={intl.formatMessage(
           { id: "game.search.minimizedPrompt" },
           {
-            prompt: model.prompt,
+            prompt: localizedPrompt,
             selected: selectedOptionIds.length,
             maximum: model.maximumSelections,
           },
@@ -154,7 +162,7 @@ export function CardSearchOverlay({
               {intl.formatMessage({ id: "game.search.title" })}
             </div>
             <div className="decision-context" id="card-search-overlay-prompt">
-              {intl.formatMessage({ id: "game.search.instructions" }, { prompt: model.prompt })}
+              {intl.formatMessage({ id: "game.search.instructions" }, { prompt: localizedPrompt })}
             </div>
           </div>
           <div className="decision-buttons">

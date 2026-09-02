@@ -531,7 +531,7 @@ export const ros: Record<string, CardScript> = {
       canActivate: (ctx) => ctx.player(ctx.seat).board.some((card) => isAura(ctx, card)),
       effectCardCosts: [{
         zone: "arena", move: "destroy", count: 1, subtype: "aura",
-        prompt: "Bloodtorn Bodice: choose an aura to destroy as a cost",
+        prompt: decisionPrompt("Bloodtorn Bodice: choose an aura to destroy as a cost", "card.common.cost.aura.destroy"),
       }],
       effectCardCostChoiceHook: "bloodtorn-cost",
       onActivate(ctx) { ctx.changeResources(ctx.seat, 1); },
@@ -680,7 +680,7 @@ ros["oscilio, constella intelligence|0"] = ros["oscilio|0"]!;
 Object.assign(ros, {
   "will of arcana|3": { triggers: [{ event: "card-pitched", sourceZone: "pitch", label: "Amp 1", condition: (ctx, pitched) => pitched?.instanceId === ctx.self.instanceId, effect: (ctx: ScriptCtx) => ampNextArcane(ctx, 1) }] },
   "germinate|3": {
-    variablePlayCost: { base: 0, resourcesPerX: 2, counterKey: "germinateX", prompt: "Choose X" },
+    variablePlayCost: { base: 0, resourcesPerX: 2, counterKey: "germinateX", prompt: decisionPrompt("Choose X", "engine.decision.x.choose") },
     onPlay(ctx: ScriptCtx) {
       const count = ctx.getCounter("germinateX") + 1;
       ctx.setCounter("germinateRemaining", count);

@@ -469,7 +469,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     activated: {
       cost: 1, isAttack: false, goAgain: false, timing: "attack-reaction", tap: true,
       canActivate: (ctx) => !!ctx.link && hasTag(ctx, ctx.link.attackingCard, "ninja") && ctx.player(ctx.seat).weapons.some((card) => hasTag(ctx, card, "dagger") && card.instanceId !== ctx.link?.attackingCard.instanceId),
-      effectCardCosts: [{ zone: "arena", move: "destroy", count: 1, subtype: "dagger", prompt: "Destroy an off-chain dagger" }],
+      effectCardCosts: [{ zone: "arena", move: "destroy", count: 1, subtype: "dagger", prompt: decisionPrompt("Destroy an off-chain dagger", "card.common.cost.offchaindagger.destroy") }],
       onActivate(ctx) { ctx.addModifier({ scope: "chain-link", attack: 1 }); ctx.setCounter("armed", 1); },
     },
     onMiss(ctx) { if (ctx.getCounter("armed")) ctx.destroySelf(); },
@@ -536,7 +536,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
 
   "mbrio base vizier|0": { preventArcaneDamage: 1 },
   "mbrio base cortex|0": { modifyDefense: (ctx) => controls(ctx, "Hyper Driver") ? 2 : 0 },
-  "mbrio base digits|0": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", tap: true, effectCardCosts: [{ zone: "arena", move: "tap", count: 1, subtype: "cog", prompt: "Tap a cog" }], onActivate(ctx) { ctx.addCardTempDefense(ctx.self.instanceId, 1); } } },
+  "mbrio base digits|0": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", tap: true, effectCardCosts: [{ zone: "arena", move: "tap", count: 1, subtype: "cog", prompt: decisionPrompt("Tap a cog", "card.common.cost.cog.tap") }], onActivate(ctx) { ctx.addCardTempDefense(ctx.self.instanceId, 1); } } },
   "blast rig|1": { modifyAttack: (ctx) => controlledType(ctx, "evo").length },
   "speed demon|1": {
     additionalCost(ctx) {
@@ -804,7 +804,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     },
   },
   "kimono of layered lessons|0": { activated: { cost: 0, chiCost: 3, isAttack: false, goAgain: false, timing: "instant", turnsFaceUp: true, onActivate(ctx) { ctx.addCardDefenseCounters(ctx.self.instanceId, -1); } }, triggers: [{ event: "start-of-turn", label: "Destroy Kimono of Layered Lessons", effect(ctx) { ctx.destroySelf(); } }] },
-  "recede to mistform|3": { variablePlayCost: { base: 0, counterKey: "recedeX", prompt: "Choose X", maximum(ctx) { return Object.values(ctx.player(ctx.seat).equipment).filter((card) => card && !card.faceDown && (data(ctx, card).keywords ?? []).some((keyword) => keyword.toLowerCase() === "cloaked")).length; } }, onPlay(ctx) { if (ctx.getCounter("recedeX") <= 0) return; const equipment = Object.values(ctx.player(ctx.seat).equipment).filter((card): card is DeepReadonly<CardInstance> => !!card && !card.faceDown && (data(ctx, card).keywords ?? []).some((keyword) => keyword.toLowerCase() === "cloaked")); if (equipment.length) ctx.requestCardChoice("recede-equipment", decisionPrompt("Choose equipment with cloaked to turn face-down", "card.pen.cloaked.equipment.facedown"), equipment.map((card) => card.instanceId)); }, onChoose(ctx, hook, option) { if (hook !== "recede-equipment") return; if (ctx.setCardFaceDown(Number(option), true)) ctx.addCounter(ctx.self.instanceId, "recedeChosen", 1); if (ctx.getCounter("recedeChosen") >= ctx.getCounter("recedeX")) return; const equipment = Object.values(ctx.player(ctx.seat).equipment).filter((card): card is DeepReadonly<CardInstance> => !!card && !card.faceDown && (data(ctx, card).keywords ?? []).some((keyword) => keyword.toLowerCase() === "cloaked")); if (equipment.length) ctx.requestCardChoice("recede-equipment", decisionPrompt("Choose another equipment with cloaked", "card.pen.cloaked.equipment.facedown.next"), equipment.map((card) => card.instanceId)); } },
+  "recede to mistform|3": { variablePlayCost: { base: 0, counterKey: "recedeX", prompt: decisionPrompt("Choose X", "engine.decision.x.choose"), maximum(ctx) { return Object.values(ctx.player(ctx.seat).equipment).filter((card) => card && !card.faceDown && (data(ctx, card).keywords ?? []).some((keyword) => keyword.toLowerCase() === "cloaked")).length; } }, onPlay(ctx) { if (ctx.getCounter("recedeX") <= 0) return; const equipment = Object.values(ctx.player(ctx.seat).equipment).filter((card): card is DeepReadonly<CardInstance> => !!card && !card.faceDown && (data(ctx, card).keywords ?? []).some((keyword) => keyword.toLowerCase() === "cloaked")); if (equipment.length) ctx.requestCardChoice("recede-equipment", decisionPrompt("Choose equipment with cloaked to turn face-down", "card.pen.cloaked.equipment.facedown"), equipment.map((card) => card.instanceId)); }, onChoose(ctx, hook, option) { if (hook !== "recede-equipment") return; if (ctx.setCardFaceDown(Number(option), true)) ctx.addCounter(ctx.self.instanceId, "recedeChosen", 1); if (ctx.getCounter("recedeChosen") >= ctx.getCounter("recedeX")) return; const equipment = Object.values(ctx.player(ctx.seat).equipment).filter((card): card is DeepReadonly<CardInstance> => !!card && !card.faceDown && (data(ctx, card).keywords ?? []).some((keyword) => keyword.toLowerCase() === "cloaked")); if (equipment.length) ctx.requestCardChoice("recede-equipment", decisionPrompt("Choose another equipment with cloaked", "card.pen.cloaked.equipment.facedown.next"), equipment.map((card) => card.instanceId)); } },
   "mistborn protector|3": { modifyDefense: (ctx) => createdThisTurn(ctx) ? 1 : 0 },
   "billowing mist|3": { onPlay(ctx) { buffNextAttack(ctx, { attack: 1 }); ctx.setFlag("player", "penExtraEphemeral", true); } },
   "look within|3": { onPlay(ctx) { const chi = ctx.player(ctx.seat).deck.find((card) => hasTag(ctx, card, "chi")); if (chi) ctx.putOnDeckTop(chi.instanceId); ctx.shuffleDeck(); } },
@@ -850,7 +850,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "restvine elixir|1": elixir("Inertia"),
   "sapwood elixir|1": elixir("Frailty"),
   "ransack and raze|3": {
-    variablePlayCost: { base: 0, counterKey: "ransackX", prompt: "Choose X", maximum(ctx) { const target = ctx.globalCards().find((card) => card.instanceId === ctx.playTargetInstanceId); return target ? (data(ctx, target).cost ?? 0) : 0; }, canDeclareX(ctx, x) { const target = ctx.globalCards().find((card) => card.instanceId === ctx.playTargetInstanceId); return !!target && (data(ctx, target).cost ?? 0) === x; } },
+    variablePlayCost: { base: 0, counterKey: "ransackX", prompt: decisionPrompt("Choose X", "engine.decision.x.choose"), maximum(ctx) { const target = ctx.globalCards().find((card) => card.instanceId === ctx.playTargetInstanceId); return target ? (data(ctx, target).cost ?? 0) : 0; }, canDeclareX(ctx, x) { const target = ctx.globalCards().find((card) => card.instanceId === ctx.playTargetInstanceId); return !!target && (data(ctx, target).cost ?? 0) === x; } },
     playTargetOptions(ctx) {
       return ctx.globalCards()
         .filter((card) => hasTag(ctx, card, "landmark"))

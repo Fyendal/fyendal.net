@@ -38,7 +38,7 @@ export const agb: Record<string, CardScript> = {
       goAgain: false,
       timing: "instant",
       destroySelfCost: true,
-      effectCardCosts: [{ zone: "hand", move: "discard", count: 1, prompt: "Choose a card to discard" }],
+      effectCardCosts: [{ zone: "hand", move: "discard", count: 1, prompt: decisionPrompt("Choose a card to discard", "card.common.card.discard.choose") }],
       onCostPaid(ctx, paidCards) {
         const discarded = paidCards[0];
         if (discarded) ctx.changeResources(ctx.seat, ctx.cardData(discarded.cardId).pitch ?? 0);
@@ -71,7 +71,7 @@ export const agb: Record<string, CardScript> = {
         timing: "instant",
         tap: true,
         label: "Instant — discard watery grave: punish next draw",
-        effectCardCosts: [{ zone: "hand", move: "discard", count: 1, keyword: "Watery Grave", prompt: "Discard a card with watery grave" }],
+        effectCardCosts: [{ zone: "hand", move: "discard", count: 1, keyword: "Watery Grave", prompt: decisionPrompt("Discard a card with watery grave", "card.common.cost.waterygrave.discard") }],
         onCostPaid(ctx) { ctx.setCounter("ankaDrawTrap", ctx.state.turn); },
       },
     ],

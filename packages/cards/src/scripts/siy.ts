@@ -496,7 +496,7 @@ export const siy: Record<string, CardScript> = {
     arcaneDamageEffect: true,
     arcaneDamageEffectAmounts: [0],
     playAsInstant: wizardActionAsInstant,
-    variablePlayCost: { base: 0, resourcesPerX: 2, counterKey: "x", prompt: "Choose X" },
+    variablePlayCost: { base: 0, resourcesPerX: 2, counterKey: "x", prompt: decisionPrompt("Choose X", "engine.decision.x.choose") },
     additionalCost: iceEternalAdditionalCost,
     onPlay(ctx) {
       const x = ctx.getCounter("x");
