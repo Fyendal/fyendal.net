@@ -209,8 +209,8 @@ const viziertronic: CardScript = {
 
 const plasmaPurifier: CardScript = {
   activated: [
-    { cost: 1, isAttack: false, goAgain: true, canActivate: (ctx) => ctx.getCounter("steam") === 0, onActivate(ctx) { ctx.setCounter("steam", 1); } },
-    { cost: 0, isAttack: false, goAgain: true, oncePerTurn: true, removeCounterCost: { key: "steam", amount: 1 }, canActivate: (ctx) => ctx.player(ctx.seat).weapons.some((card) => hasType(ctx, card, "mechanologist") && hasType(ctx, card, "pistol")), onActivate(ctx) { const pistols = ctx.player(ctx.seat).weapons.filter((card) => hasType(ctx, card, "mechanologist") && hasType(ctx, card, "pistol")); ctx.requestCardChoice("purifier-pistol", decisionPrompt("Plasma Purifier: choose a pistol", "card.cru.purifier.pistol.choose"), pistols.map((card) => card.instanceId)); } },
+    { cost: 1, isAttack: false, goAgain: true, label: "Load a steam counter", canActivate: (ctx) => ctx.getCounter("steam") === 0, onActivate(ctx) { ctx.setCounter("steam", 1); } },
+    { cost: 0, isAttack: false, goAgain: true, oncePerTurn: true, label: "Give a pistol +1 power", removeCounterCost: { key: "steam", amount: 1 }, canActivate: (ctx) => ctx.player(ctx.seat).weapons.some((card) => hasType(ctx, card, "mechanologist") && hasType(ctx, card, "pistol")), onActivate(ctx) { const pistols = ctx.player(ctx.seat).weapons.filter((card) => hasType(ctx, card, "mechanologist") && hasType(ctx, card, "pistol")); ctx.requestCardChoice("purifier-pistol", decisionPrompt("Plasma Purifier: choose a pistol", "card.cru.purifier.pistol.choose"), pistols.map((card) => card.instanceId)); } },
   ],
   onChoose(ctx, hook, option) { if (hook === "purifier-pistol") ctx.addCardTempPower(Number(option), 1); },
 };

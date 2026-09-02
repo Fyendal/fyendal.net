@@ -1,6 +1,6 @@
 import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
-import type { CardScript, ScriptCtx } from "./scripts.js";
+import type { ActivatedAbility, CardScript, ScriptCtx } from "./scripts.js";
 import type { CardInstance, PlayerState } from "./state.js";
 import { isChiCard } from "./cardProperties.js";
 import { nameOf } from "./gameLog.js";
@@ -17,6 +17,9 @@ interface VariableResourceCost {
 
 type VariablePlayCost = NonNullable<CardScript["variablePlayCost"]>;
 type ResolvedVariablePlayCost = Omit<VariablePlayCost, "maximum" | "canDeclareX"> &
+  VariableResourceCost;
+type VariableAbilityCost = NonNullable<ActivatedAbility["variableCost"]>;
+type ResolvedVariableAbilityCost = Omit<VariableAbilityCost, "maximum" | "canDeclareX"> &
   VariableResourceCost;
 
 type VariableResourceChoice = { x: number; cost: number };
@@ -39,6 +42,21 @@ export function resolveVariablePlayCost(
   variableCost: VariablePlayCost,
   ctx: ScriptCtx,
 ): ResolvedVariablePlayCost {
+  return {
+    ...variableCost,
+    maximum: typeof variableCost.maximum === "function"
+      ? variableCost.maximum(ctx)
+      : variableCost.maximum,
+    canDeclareX: variableCost.canDeclareX
+      ? (x: number) => variableCost.canDeclareX!(ctx, x)
+      : undefined,
+  };
+}
+
+export function resolveVariableAbilityCost(
+  variableCost: VariableAbilityCost,
+  ctx: ScriptCtx,
+): ResolvedVariableAbilityCost {
   return {
     ...variableCost,
     maximum: typeof variableCost.maximum === "function"

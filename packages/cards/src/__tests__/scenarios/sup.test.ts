@@ -59,6 +59,45 @@ describe("SUP — heroes and the crowd", () => {
       .expectInZone(0, "autumn's touch|3", "graveyard");
   });
 
+  it("Backspin Thrust untaps a cog, then chooses one bonus once per turn", () => {
+    const g = scenario({
+      seats: [
+        hero("tuffnut, bumbling hulkster|0", {
+          hand: ["backspin thrust|1"],
+          board: ["golden cog|0"],
+          equipment: { chest: "rust belt|0" },
+        }),
+        foe(),
+      ],
+    });
+
+    g.play("backspin thrust|1")
+      .blockWith()
+      .activate("rust belt|0", { settle: false });
+    let cogOption = g.state.pendingDecision?.options?.[0];
+    expect(cogOption).toBeDefined();
+    g.doRaw({ kind: "choose", optionId: cogOption! })
+      .passPriority()
+      .passPriority();
+    expect(g.state.players[0]!.board[0]!.tapped).toBe(true);
+
+    g.activate("backspin thrust|1", { settle: false });
+    cogOption = g.state.pendingDecision?.options?.[0];
+    expect(cogOption).toBeDefined();
+    g.doRaw({ kind: "choose", optionId: cogOption! })
+      .passPriority()
+      .passPriority();
+    expect(g.state.pendingDecision?.chooseHook).toBe("backspin-mode");
+    g.doRaw({ kind: "choose", optionId: "power" })
+      .expectAttackValue(5);
+    expect(g.state.players[0]!.board[0]!.tapped).not.toBe(true);
+
+    const attackId = g.state.chain.at(-1)!.attackingCard.instanceId;
+    expect(legalIntents(g.state, 0).some((intent) =>
+      intent.kind === "activate-ability" && intent.sourceInstanceId === attackId
+    )).toBe(false);
+  });
+
   it("Good Natured Brutality defends for 6 and cheers from an empty hand", () => {
     const g = scenario({
       active: 1,

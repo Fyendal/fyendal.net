@@ -200,7 +200,9 @@ describe("DTD, EVO, and HVY rules regression coverage", () => {
       ],
     });
 
-    g.activate("adaptive plating|0", { ability: 1 }).expectEquipped(0, "chest", "adaptive plating|0");
+    g.activate("adaptive plating|0")
+      .chooseOption("chest")
+      .expectEquipped(0, "chest", "adaptive plating|0");
     g.expectNoEquipment(0, "arms");
   });
   it("Steel Soul observes transforms", () => expect(script("evo steel soul memory|3").onTransform).toBeTypeOf("function"));

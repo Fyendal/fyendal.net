@@ -665,7 +665,11 @@ describe("PEN — generalized rules interactions", () => {
         { hero: "dorinthea", equipment: NO_EQUIPMENT },
       ],
     });
-    g.activate("beckoning haunt|0", { ability: 1 }).chooseCard("sigil of gravespawning|3").expectLife(1, 19);
+    g.activate("beckoning haunt|0", { settle: false });
+    expect(g.state.pendingDecision?.options).toEqual(["X = 1"]);
+    g.chooseOption("X = 1")
+      .chooseCard("sigil of gravespawning|3")
+      .expectLife(1, 19);
   });
 
   it("Dynastic Diadem protects Fealty from opposing effects", () => {

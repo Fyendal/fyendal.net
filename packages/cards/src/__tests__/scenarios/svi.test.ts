@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { projectStateFor } from "@fyendal/engine";
+import { legalIntents, projectStateFor } from "@fyendal/engine";
 import { cardData } from "../../index.js";
 import { printingId, scenario } from "../harness.js";
 import type { Scenario } from "../harness.js";
@@ -400,10 +400,39 @@ describe("SVI — auras and equipment", () => {
       ],
     });
 
-    g.activate("beckoning haunt|0", { ability: 0, pitch: ["en garde|1"] })
+    g.activate("beckoning haunt|0", { settle: false });
+    expect(g.state.pendingDecision?.options).toEqual(["X = 0"]);
+    g.chooseOption("X = 0")
+      .chooseOption("pay 1 — pitch En Garde")
       .chooseCard("malefic incantation|1")
       .expectInZone(0, "malefic incantation|1", "hand")
       .expectNoEquipment(0, "arms");
+  });
+
+  it("does not offer Beckoning Haunt without a payable aura cost", () => {
+    const withoutAura = scenario({
+      seats: [
+        { hero: "rhinar", resources: 10, equipment: { arms: "beckoning haunt|0" } },
+        { hero: "dorinthea" },
+      ],
+    });
+    const withoutResources = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          graveyard: ["sigil of gravespawning|3"],
+          equipment: { arms: "beckoning haunt|0" },
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    for (const g of [withoutAura, withoutResources]) {
+      const sourceId = g.state.players[0]!.equipment.arms!.instanceId;
+      expect(legalIntents(g.state, 0).some((intent) =>
+        intent.kind === "activate-ability" && intent.sourceInstanceId === sourceId
+      )).toBe(false);
+    }
   });
 
   it("Runebleed Robe and a Runechant prevent the next arcane damage", () => {

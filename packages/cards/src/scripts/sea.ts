@@ -297,22 +297,53 @@ function cogPoweredAttack(createOnHit: boolean): CardScript {
 }
 
 function skimmerAbility(): CardScript {
-  const mode = (label: string, effect: (ctx: ScriptCtx) => void) => ({
-    cost: 0, isAttack: false as const, goAgain: false, timing: "instant" as const,
-    label,
-    canActivate: (ctx: ScriptCtx) =>
-      ctx.getCounter("cogModeTurn") !== ctx.state.turn && controlledCogs(ctx, false).length > 0,
-    effectCardCosts: [{ zone: "arena" as const, move: "tap" as const, count: 1, subtype: "cog", prompt: decisionPrompt(`: choose a cog to tap as a cost`, "card.common.cost.cog.tap") }],
-    effectCardCostChoiceHook: "skimmer-cog-cost",
-    onCostPaid(ctx: ScriptCtx) { ctx.setCounter("cogModeTurn", ctx.state.turn); },
-    onActivate: effect,
-  });
   return {
-    activated: [
-      mode("Get +1 attack", (ctx) => ctx.addModifier({ scope: "chain-link", attack: 1 })),
-      mode("Gain go again", (ctx) => ctx.grantGoAgain()),
-    ],
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      oncePerTurn: true,
+      canActivate: (ctx) => controlledCogs(ctx, false).length > 0,
+      effectCardCosts: [{
+        zone: "arena",
+        move: "tap",
+        count: 1,
+        subtype: "cog",
+        prompt: decisionPrompt("Choose a cog to tap as a cost", "card.common.cost.cog.tap"),
+      }],
+      onActivate(ctx) {
+        requestPowerOrGoAgain(ctx, "skimmer-mode");
+      },
+    },
+    onChoose(ctx, hook, option) {
+      resolvePowerOrGoAgain(ctx, hook, option, "skimmer-mode");
+    },
   };
+}
+
+function requestPowerOrGoAgain(ctx: ScriptCtx, hook: string): void {
+  ctx.requestChoice(
+    hook,
+    decisionPrompt("Choose a bonus", "card.common.bonus.choose", {
+      optionMessages: {
+        power: decisionMessage("card.common.option.power.one"),
+        "go-again": decisionMessage("card.common.option.goagain"),
+      },
+    }),
+    ["power", "go-again"],
+  );
+}
+
+function resolvePowerOrGoAgain(
+  ctx: ScriptCtx,
+  hook: string,
+  option: string,
+  expectedHook: string,
+): void {
+  if (hook !== expectedHook) return;
+  if (option === "power") ctx.addCardTempPower(ctx.self.instanceId, 1);
+  else if (option === "go-again") ctx.grantGoAgain();
 }
 
 function treasureCounters(ctx: ScriptCtx): number {
@@ -694,6 +725,7 @@ export const sea: Record<string, CardScript> = {
       ...attackAbility(0, { tap: true, oncePerTurn: false }),
       {
         cost: 1, isAttack: false, goAgain: true, tap: true, oncePerTurn: false,
+        label: "Tap a hero or ally",
         canActivate: (ctx) => !ctx.self.tapped,
         onActivate(ctx) {
           const targets = ctx.state.players.flatMap((player) => [player.hero, ...player.board.filter((card) => isAlly(ctx, card))]).filter((card) => !card.tapped);
@@ -729,13 +761,13 @@ export const sea: Record<string, CardScript> = {
   "chowder, hearty cook|2": {
     activated: [
       ...attackAbility(0, { tap: true, oncePerTurn: false }),
-      { cost: 0, isAttack: false, goAgain: false, timing: "instant", tap: true, oncePerTurn: false, onActivate(ctx) { ctx.gainLife(ctx.seat, 1); } },
+      { cost: 0, isAttack: false, goAgain: false, timing: "instant", tap: true, oncePerTurn: false, label: "Gain 1 life", onActivate(ctx) { ctx.gainLife(ctx.seat, 1); } },
     ],
   },
   "shelly, hardened traveler|2": {
     activated: [
       ...attackAbility(3, { tap: true, oncePerTurn: false }),
-      { cost: 0, isAttack: false, goAgain: false, timing: "instant", tap: true, oncePerTurn: false, onActivate(ctx) { ctx.addModifier({ scope: "until-end-of-turn", defense: 1, appliesTo: "attack-action", once: true }); } },
+      { cost: 0, isAttack: false, goAgain: false, timing: "instant", tap: true, oncePerTurn: false, label: "Next defended attack +1 defense", onActivate(ctx) { ctx.addModifier({ scope: "until-end-of-turn", defense: 1, appliesTo: "attack-action", once: true }); } },
     ],
   },
   "head stone|0": {
@@ -1460,13 +1492,71 @@ Object.assign(sea, {
     onAttackDeclared(ctx: ScriptCtx) { tapChoice(ctx, "bludger", "Tap a cog for overpower?", "card.sea.bludger.cog.tap", controlledCogs(ctx, false)); },
     onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "bludger" && option !== "pass" && ctx.tap(Number(option))) ctx.setFlag("link", "overpower", true); },
     onHit(ctx: ScriptCtx) { for (const item of ctx.player(opponentSeat(ctx)).board.filter((card) => isItem(ctx, card)).slice(0, ctx.link?.damage ?? 0)) ctx.steal(item.instanceId, { duration: "indefinite" }); },
-    activated: [1, 2, 3].map(() => ({ cost: 0, isAttack: false, goAgain: false, timing: "instant" as const, effectCardCosts: [{ zone: "arena" as const, move: "tap" as const, count: 1, subtype: "cog", prompt: decisionPrompt("Tap a cog", "card.common.cost.cog.tap") }], onActivate(ctx: ScriptCtx) { ctx.addCardTempPower(ctx.self.instanceId, 1); } })),
+    activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", activationsPerTurn: 3, effectCardCosts: [{ zone: "arena", move: "tap", count: 1, subtype: "cog", prompt: decisionPrompt("Tap a cog", "card.common.cost.cog.tap") }], onActivate(ctx: ScriptCtx) { ctx.addCardTempPower(ctx.self.instanceId, 1); } },
   },
-  "cogwerx blunderbuss|0": { activated: [...attackAbility(2, { tap: true, oncePerTurn: false }), { cost: 0, isAttack: false, goAgain: false, timing: "instant", effectCardCosts: [{ zone: "arena", move: "tap", count: 1, subtype: "cog", prompt: decisionPrompt("Tap a cog", "card.common.cost.cog.tap") }], onActivate(ctx: ScriptCtx) { buffNextAttack(ctx, { goAgain: true, appliesToInstanceId: ctx.self.instanceId }); } }] },
+  "cogwerx blunderbuss|0": { activated: [...attackAbility(2, { tap: true, oncePerTurn: false }), { cost: 0, isAttack: false, goAgain: false, timing: "instant", label: "Next attack gains go again", effectCardCosts: [{ zone: "arena", move: "tap", count: 1, subtype: "cog", prompt: decisionPrompt("Tap a cog", "card.common.cost.cog.tap") }], onActivate(ctx: ScriptCtx) { buffNextAttack(ctx, { goAgain: true, appliesToInstanceId: ctx.self.instanceId }); } }] },
   "spitfire|0": { activated: { cost: 0, isAttack: true, goAgain: false, tap: true, oncePerTurn: false, effectCardCosts: [{ zone: "arena", move: "tap", count: 1, subtype: "cog", prompt: decisionPrompt("Tap a cog", "card.common.cost.cog.tap") }] }, onAttackDeclared(ctx: ScriptCtx) { tapChoice(ctx, "spitfire", "Tap a cog for +1 attack?", "card.sea.spitfire.cog.tap", controlledCogs(ctx, false)); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "spitfire" && option !== "pass" && ctx.tap(Number(option))) ctx.addModifier({ scope: "chain-link", attack: 1 }); } },
   "cogwerx tinker rings|0": { onDefend(ctx: ScriptCtx) { createGoldenCog(ctx); } },
-  "cogwerx dovetail|1": { canTriggerOnHit: (ctx: ScriptCtx) => ctx.link?.targetAllyId === undefined, onHit(ctx: ScriptCtx) { for (const cog of controlledCogs(ctx, true)) ctx.untap(cog.instanceId); }, activated: ["power", "go-again", "power"].map((mode) => ({ cost: 0, isAttack: false, goAgain: false, timing: "instant" as const, effectCardCosts: [{ zone: "arena" as const, move: "tap" as const, count: 1, subtype: "cog", prompt: decisionPrompt("Tap a cog", "card.common.cost.cog.tap") }], onActivate(ctx: ScriptCtx) { if (mode === "power") ctx.addCardTempPower(ctx.self.instanceId, 1); else ctx.grantGoAgain(); } })) },
-  "palantir aeronought|1": { onAttackDeclared(ctx: ScriptCtx) { ctx.setFlag("link", "mustDefendWithEquipment", true); }, activated: [1, 2, 3].map((n) => ({ cost: 0, isAttack: false, goAgain: false, timing: "instant" as const, effectCardCosts: [{ zone: "arena" as const, move: "tap" as const, count: 1, subtype: "cog", prompt: decisionPrompt("Tap a cog", "card.common.cost.cog.tap") }], onActivate(ctx: ScriptCtx) { ctx.addCardTempPower(ctx.self.instanceId, 1); if (n === 3 && ctx.link) { const cards = [...ctx.link.defendingCards, ...ctx.link.defendingEquipment]; if (cards.length) ctx.requestCardChoice("palantir", decisionPrompt("Destroy a defending card", "card.sea.defender.destroy"), cards.map((card) => card.instanceId)); } } })), onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "palantir") ctx.moveToGraveyard(Number(option), "chain"); } },
+  "cogwerx dovetail|1": {
+    canTriggerOnHit: (ctx: ScriptCtx) => ctx.link?.targetAllyId === undefined,
+    onHit(ctx: ScriptCtx) { for (const cog of controlledCogs(ctx, true)) ctx.untap(cog.instanceId); },
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      activationsPerTurn: 3,
+      effectCardCosts: [{ zone: "arena", move: "tap", count: 1, subtype: "cog", prompt: decisionPrompt("Tap a cog", "card.common.cost.cog.tap") }],
+      onActivate(ctx: ScriptCtx) { requestPowerOrGoAgain(ctx, "dovetail-mode"); },
+    },
+    onChoose(ctx: ScriptCtx, hook: string, option: string) {
+      resolvePowerOrGoAgain(ctx, hook, option, "dovetail-mode");
+    },
+  },
+  "palantir aeronought|1": {
+    onAttackDeclared(ctx: ScriptCtx) { ctx.setFlag("link", "mustDefendWithEquipment", true); },
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      activationsPerTurn: 3,
+      effectCardCosts: [{
+        zone: "arena",
+        move: "tap",
+        count: 1,
+        subtype: "cog",
+        prompt: decisionPrompt("Tap a cog", "card.common.cost.cog.tap"),
+      }],
+      onCostPaid(ctx: ScriptCtx) {
+        const key = `palantirActivations:${ctx.self.instanceId}`;
+        ctx.setFlag("player", key, Number(ctx.getFlag("player", key)) + 1);
+      },
+      onActivate(ctx: ScriptCtx) {
+        ctx.addCardTempPower(ctx.self.instanceId, 1);
+        const activatedKey = `palantirActivations:${ctx.self.instanceId}`;
+        const destroyedKey = `palantirThirdActivationResolved:${ctx.self.instanceId}`;
+        if (
+          Number(ctx.getFlag("player", activatedKey)) === 3 &&
+          ctx.getFlag("player", destroyedKey) !== true &&
+          ctx.link
+        ) {
+          ctx.setFlag("player", destroyedKey, true);
+          const cards = [...ctx.link.defendingCards, ...ctx.link.defendingEquipment];
+          if (cards.length) {
+            ctx.requestCardChoice(
+              "palantir",
+              decisionPrompt("Destroy a defending card", "card.sea.defender.destroy"),
+              cards.map((card) => card.instanceId),
+            );
+          }
+        }
+      },
+    },
+    onChoose(ctx: ScriptCtx, hook: string, option: string) {
+      if (hook === "palantir") ctx.destroyDefendingCard(Number(option));
+    },
+  },
   "cog in the machine|1": { onPlay(ctx: ScriptCtx) { ctx.createTokens(GOLDEN_COG, 2); tapChoice(ctx, "cog-machine", "Tap a cog to bottom this?", "card.sea.cogmachine.cog.tap", controlledCogs(ctx, false)); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "cog-machine" && option !== "pass" && ctx.tap(Number(option))) ctx.putOnDeckBottom(ctx.self.instanceId); } },
   "cogwerx workshop|3": { onPlay(ctx: ScriptCtx) { createGoldenCog(ctx); for (const cog of controlledCogs(ctx).slice(0, 2)) ctx.addCounter(cog.instanceId, "steam", 1); } },
   "blood in the water|1": {
@@ -1475,8 +1565,8 @@ Object.assign(sea, {
   },
   "chart the high seas|3": { onPlay(ctx: ScriptCtx) { const top = ctx.player(ctx.seat).deck.slice(0, 2); for (const card of top) ctx.lookAt(card.instanceId); const blue = top.find((card) => ctx.cardColor(card) === 3); if (blue) ctx.pitchCard(blue.instanceId); for (const card of top.filter((candidate) => candidate.instanceId !== blue?.instanceId)) { const yellow = ctx.cardColor(card) === 2; if (ctx.moveToGraveyard(card.instanceId, "deck") && yellow) createGold(ctx); } } },
   "give no quarter|3": { onPlay(ctx: ScriptCtx) { for (let i = 0; i < 2; i++) ctx.addModifier({ scope: "until-end-of-turn", playCostReduction: 3, appliesToSubtype: "ally", appliesToKeyword: "watery grave" }); } },
-  "chum, friendly first mate|2": { activated: [...attackAbility(0, { tap: true, oncePerTurn: false }), { cost: 0, isAttack: false, goAgain: false, timing: "instant", tap: true, oncePerTurn: false, effectCardCosts: [{ zone: "hand", move: "discard", count: 1, keyword: "watery grave", prompt: decisionPrompt("Discard a card with watery grave", "card.common.cost.waterygrave.discard") }], onActivate(ctx) { ctx.setCounter("must-target-turn", ctx.state.turn); } }], mandatoryAttackTarget: (ctx) => ctx.getCounter("must-target-turn") === ctx.state.turn },
-  "moray le fay|2": { activated: [...attackAbility(0, { tap: true, oncePerTurn: false }), { cost: 1, isAttack: false, goAgain: false, timing: "instant", tap: true, oncePerTurn: false, onActivate(ctx: ScriptCtx) { const allies = ctx.player(ctx.seat).board.filter((card) => isAlly(ctx, card)); if (allies.length) ctx.requestCardChoice("moray", decisionPrompt("Put a +1 counter on an ally", "card.sea.ally.counter.add"), allies.map((card) => card.instanceId)); } }], onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "moray") ctx.addCounter(Number(option), "power", 1); } },
+  "chum, friendly first mate|2": { activated: [...attackAbility(0, { tap: true, oncePerTurn: false }), { cost: 0, isAttack: false, goAgain: false, timing: "instant", tap: true, oncePerTurn: false, label: "Must be attacked if able", effectCardCosts: [{ zone: "hand", move: "discard", count: 1, keyword: "watery grave", prompt: decisionPrompt("Discard a card with watery grave", "card.common.cost.waterygrave.discard") }], onActivate(ctx) { ctx.setCounter("must-target-turn", ctx.state.turn); } }], mandatoryAttackTarget: (ctx) => ctx.getCounter("must-target-turn") === ctx.state.turn },
+  "moray le fay|2": { activated: [...attackAbility(0, { tap: true, oncePerTurn: false }), { cost: 1, isAttack: false, goAgain: false, timing: "instant", tap: true, oncePerTurn: false, label: "Put a +1 counter on an ally", onActivate(ctx: ScriptCtx) { const allies = ctx.player(ctx.seat).board.filter((card) => isAlly(ctx, card)); if (allies.length) ctx.requestCardChoice("moray", decisionPrompt("Put a +1 counter on an ally", "card.sea.ally.counter.add"), allies.map((card) => card.instanceId)); } }], onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "moray") ctx.addCounter(Number(option), "power", 1); } },
   "wailer humperdinck|2": attackAbilityForAlly(6),
   "dead threads|0": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", tap: true, canActivate: (ctx: ScriptCtx) => ctx.getFlag("player", "graveSubtype:ally") === true, onActivate(ctx: ScriptCtx) { ctx.changeResources(ctx.seat, 1); } } },
   "marlynn, treasure hunter|0": sea["marlynn|0"]!,

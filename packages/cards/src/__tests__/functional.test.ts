@@ -101,4 +101,50 @@ describe("script expansion", () => {
       expect(script).toBe(registry[key]);
     }
   });
+
+  it("gives every distinct ability on a multi-ability card an explicit label", () => {
+    for (const [key, script] of Object.entries(registry)) {
+      if (!Array.isArray(script.activated) || script.activated.length < 2) continue;
+      for (const [index, ability] of script.activated.entries()) {
+        expect(ability.label, `${key} ability ${index + 1}`).toBeTruthy();
+      }
+    }
+  });
+
+  it.each([
+    ["jolly bludger|2", 3],
+    ["cogwerx dovetail|1", 3],
+    ["palantir aeronought|1", 3],
+  ])("models %s as one printed ability usable %i times per turn", (key, limit) => {
+    const activated = registry[key]!.activated;
+    expect(Array.isArray(activated)).toBe(false);
+    expect(activated && !Array.isArray(activated) ? activated.activationsPerTurn : undefined)
+      .toBe(limit);
+  });
+
+  it.each([
+    "cloud skiff|1",
+    "cloud skiff|2",
+    "cloud skiff|3",
+    "sky skimmer|1",
+    "sky skimmer|2",
+    "sky skimmer|3",
+    "backspin thrust|1",
+  ])("models %s's modal text as one once-per-turn ability", (key) => {
+    const activated = registry[key]!.activated;
+    expect(Array.isArray(activated)).toBe(false);
+    expect(activated && !Array.isArray(activated) ? activated.oncePerTurn : undefined)
+      .toBe(true);
+  });
+
+  it("models Adaptive Plating and Beckoning Haunt as single abilities", () => {
+    const adaptive = registry["adaptive plating|0"]!.activated;
+    const beckoning = registry["beckoning haunt|0"]!.activated;
+    expect(Array.isArray(adaptive)).toBe(false);
+    expect(adaptive && !Array.isArray(adaptive) ? adaptive.oncePerTurn : undefined)
+      .toBeUndefined();
+    expect(Array.isArray(beckoning)).toBe(false);
+    expect(beckoning && !Array.isArray(beckoning) ? beckoning.variableCost : undefined)
+      .toMatchObject({ base: 1, resourcesPerX: 2, counterKey: "beckoningX" });
+  });
 });

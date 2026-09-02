@@ -45,6 +45,7 @@ import { answerWagerLossReplacementOrder } from "./wagers.js";
 import {
   isValidVariableX,
   payCost,
+  resolveVariableAbilityCost,
   resolveVariablePlayCost,
   variableResourceChoices,
   variableResourceCost,
@@ -619,10 +620,7 @@ export function activateAbility(
   const selectedEffectCostIds = alternativeCostCardInstanceIds ?? effectCostInstanceIds;
   const variableCost = payingAlternative ? undefined : ability.variableCost;
   const resolvedVariableCost = variableCost
-    ? {
-        ...variableCost,
-        maximum: Math.max(0, Math.floor(variableCost.maximum ?? 127)),
-      }
+    ? resolveVariableAbilityCost(variableCost, ctx)
     : undefined;
   const resourceCostForBase = (base: number): number => ability.isAttack
     ? attackActivationCost(state, runtime, player, card, base, targetAllyId)

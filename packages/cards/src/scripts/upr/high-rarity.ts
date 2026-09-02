@@ -182,9 +182,9 @@ export const uprHighRarity: Record<string, CardScript> = {
       if (cause === "phantasm" && has(ctx, card, "illusionist")) ctx.addCounter(ctx.self.instanceId, "haunt", 1);
     },
     activated: [
-      { cost: 0, isAttack: false, goAgain: true, oncePerTurn: true, canActivate: (ctx) => ctx.getCounter("haunt") > 0,
+      { cost: 0, isAttack: false, goAgain: true, oncePerTurn: true, label: "Become an ally", canActivate: (ctx) => ctx.getCounter("haunt") > 0,
         onActivate(ctx) { ctx.addCounter(ctx.self.instanceId, "haunt", -1); const n = ctx.getCounter("haunt"); if (ctx.becomeAllyUntilEndOfTurn(ctx.self.instanceId, n, n)) ctx.grantCardKeyword(ctx.self.instanceId, "phantasm"); } },
-      { cost: 3, isAttack: true, goAgain: false, oncePerTurn: true, canActivate: (ctx) => has(ctx, ctx.self, "ally") },
+      { cost: 3, isAttack: true, goAgain: false, oncePerTurn: true, label: "Attack", canActivate: (ctx) => has(ctx, ctx.self, "ally") },
     ],
   },
   "frightmare|1": { canPlay: (ctx) => ctx.getFlag("player", "phantasmDestroyedThisTurn") === true },

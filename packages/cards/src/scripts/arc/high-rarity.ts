@@ -211,8 +211,8 @@ export const arcHighRarity: Record<string, CardScript> = {
   "teklo core|3": tekloCore,
   "spark of genius|2": sparkOfGenius,
   "induction chamber|1": { activated: [
-    { cost: 1, isAttack: false, goAgain: true, canActivate: (ctx) => ctx.getCounter("steam") === 0, onActivate(ctx) { ctx.setCounter("steam", 1); } },
-    { cost: 0, isAttack: false, goAgain: false, timing: "attack-reaction", oncePerTurn: true, removeCounterCost: { key: "steam", amount: 1 }, canActivate: (ctx) => ctx.link?.attackCardType === "weapon" && isType(ctx, ctx.link.attackingCard, "mechanologist"), onActivate(ctx) { ctx.grantGoAgain(); } },
+    { cost: 1, isAttack: false, goAgain: true, label: "Load a steam counter", canActivate: (ctx) => ctx.getCounter("steam") === 0, onActivate(ctx) { ctx.setCounter("steam", 1); } },
+    { cost: 0, isAttack: false, goAgain: false, timing: "attack-reaction", oncePerTurn: true, label: "Give pistol attack go again", removeCounterCost: { key: "steam", amount: 1 }, canActivate: (ctx) => ctx.link?.attackCardType === "weapon" && isType(ctx, ctx.link.attackingCard, "mechanologist"), onActivate(ctx) { ctx.grantGoAgain(); } },
   ] },
 
   "skullbone crosswrap|0": { activated: { cost: 0, isAttack: false, goAgain: true, oncePerTurn: true, canActivate: (ctx) => ctx.player(ctx.seat).arsenal.some((card) => card.faceDown), onActivate(ctx) { const card = ctx.player(ctx.seat).arsenal.find((candidate) => candidate.faceDown); if (card) ctx.turnArsenalFaceUp(card.instanceId); optN(ctx, 1); } }, onChoose: optOnChoose },
