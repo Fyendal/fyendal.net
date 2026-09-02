@@ -70,6 +70,7 @@ import {
 import { GameMotionLayer } from "./motion/GameMotionLayer.js";
 import { useGameMotion } from "./motion/useGameMotion.js";
 import { useGameSounds } from "./sound/useGameSounds.js";
+import { handChoiceDismissal } from "./handChoiceDismissal.js";
 
 const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
@@ -280,10 +281,15 @@ export function GameBoard() {
     toggleAdditionalCostCard,
     confirmAdditionalCost,
   } = announcement;
-  const actionConfirmationReady =
+  const defaultBoostCount = boostOptions.find((count) => count > 0) ?? null;
+  const actionShortcutReady =
     sel.kind !== "none" &&
     !autoCommitPending &&
-    (actionStep === "confirm" || actionStep === "close-chain");
+    (
+      actionStep === "confirm" ||
+      actionStep === "close-chain" ||
+      (actionStep === "boost" && defaultBoostCount !== null)
+    );
 
   const canSkipCurrentRunechant = canSkipRunechant(legal);
 
@@ -305,8 +311,11 @@ export function GameBoard() {
     setConfirmArsenalSkip: setConfirmSkipArsenal,
     onSend: sendIntent,
     onReset: resetSel,
-    confirmationEnabled: actionConfirmationReady,
+    actionShortcutEnabled: actionShortcutReady,
     actionStep,
+    onSelectDefaultBoost: () => {
+      if (defaultBoostCount !== null) selectBoost(defaultBoostCount);
+    },
     onConfirmAction: confirmAction,
     onConfirmChainClose: confirmChainClose,
   });
@@ -792,6 +801,26 @@ export function GameBoard() {
     if (cardId) setInspectedCardId(cardId);
   };
 
+  const onTableClickCapture = (event: React.MouseEvent) => {
+    const target = event.target as HTMLElement;
+    const insideChoiceSurface = target.closest(
+      "#player-hand, .decision-float, .card-search-overlay",
+    ) !== null;
+    const dismissal = handChoiceDismissal(
+      sel.kind === "play-hand" || sel.kind === "choose-hand-action",
+      !roomCommandPending && myDecision && pd?.preStackSource?.zone === "hand",
+      insideChoiceSurface,
+    );
+    if (dismissal === null) return;
+
+    // Treat the first outside click as dismissal, like a blurred popover,
+    // instead of also activating the control underneath it.
+    event.preventDefault();
+    event.stopPropagation();
+    if (dismissal === "reset-local") resetSel();
+    else undo("last-action");
+  };
+
   const playerHalfInteraction = {
     legal: derived,
     selection: sel,
@@ -814,6 +843,7 @@ export function GameBoard() {
       onMouseOver={onHoverCard}
       onMouseLeave={() => setPreview(null)}
       {...cardLongPressHandlers}
+      onClickCapture={onTableClickCapture}
       onClick={onTableClick}
     >
       {hasOwnPriority ? <div className="own-priority-arrival" aria-hidden="true" /> : null}

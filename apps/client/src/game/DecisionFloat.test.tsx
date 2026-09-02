@@ -15,6 +15,7 @@ import {
   ArsenalSkipConfirmation,
   boostOptionLabel,
   ChainCloseConfirmation,
+  orderedBoostOptions,
   OptDecisionInstructions,
 } from "./decision/ActionConfirmations.js";
 import {
@@ -381,6 +382,11 @@ describe("boost announcement labels", () => {
       "Boost once",
       "Boost 2 times",
     ]);
+  });
+
+  it("orders affirmative Boost choices before Don't Boost", () => {
+    expect(orderedBoostOptions([0, 1])).toEqual([1, 0]);
+    expect(orderedBoostOptions([0, 1, 2])).toEqual([1, 2, 0]);
   });
 });
 

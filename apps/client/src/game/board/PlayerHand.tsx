@@ -30,6 +30,37 @@ interface HandScrollAvailability {
   right: boolean;
 }
 
+/** A pre-stack play temporarily leaves the authoritative hand, then the
+ * client projects it back while its declaration is open. Keep the surviving
+ * cards in their last presented order so that projected source does not jump
+ * to the right edge of the hand. */
+export function preservePreStackHandOrder(
+  cards: readonly CardView[],
+  previousInstanceIds: readonly number[],
+  preStackInstanceId: number | null,
+): CardView[] {
+  if (
+    preStackInstanceId === null ||
+    !previousInstanceIds.includes(preStackInstanceId) ||
+    !cards.some((card) => card.instanceId === preStackInstanceId)
+  ) return [...cards];
+
+  const previousIndex = new Map(
+    previousInstanceIds.map((instanceId, index) => [instanceId, index]),
+  );
+  return cards
+    .map((card, currentIndex) => ({ card, currentIndex }))
+    .sort((left, right) => {
+      const leftIndex = previousIndex.get(left.card.instanceId);
+      const rightIndex = previousIndex.get(right.card.instanceId);
+      if (leftIndex !== undefined && rightIndex !== undefined) return leftIndex - rightIndex;
+      if (leftIndex !== undefined) return -1;
+      if (rightIndex !== undefined) return 1;
+      return left.currentIndex - right.currentIndex;
+    })
+    .map(({ card }) => card);
+}
+
 export function handScrollAvailability({
   scrollLeft,
   clientWidth,
@@ -81,10 +112,20 @@ export function PlayerHand({
   interaction: PlayerHandInteraction;
 }) {
   const handMotionLocation = { kind: "hand" as const, seat: player.seat };
-  const visibleCards = player.hand.filter((card) =>
+  const previousHandOrderRef = useRef<readonly number[]>([]);
+  const currentVisibleCards = player.hand.filter((card) =>
     !interaction.stagedIds.has(card.instanceId)
     && !interaction.optimisticallyHiddenIds.has(card.instanceId)
   );
+  const visibleCards = preservePreStackHandOrder(
+    currentVisibleCards,
+    previousHandOrderRef.current,
+    interaction.preStackSelectedInstanceId,
+  );
+  const visibleCardOrderKey = visibleCards.map((card) => card.instanceId).join(":");
+  useEffect(() => {
+    previousHandOrderRef.current = visibleCards.map((card) => card.instanceId);
+  }, [visibleCardOrderKey]);
   const playableZoneCards = spectating
     ? []
     : [...interaction.legalState.playableZones]

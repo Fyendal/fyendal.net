@@ -134,3 +134,26 @@ describe("activated ability mode choices", () => {
     expect(html).not.toContain("pitch resources selected");
   });
 });
+
+describe("Boost choices", () => {
+  it("presents Boost first and marks it as the default", () => {
+    const html = renderToStaticMarkup(
+      <ActionAnnouncementPanel
+        model={{
+          ...paymentModel(false),
+          step: "boost",
+          boostCount: null,
+          boostOptions: [0, 1],
+        }}
+        viewerSeat={0}
+      />,
+    );
+
+    expect(html.indexOf(">Boost</button>")).toBeLessThan(
+      html.indexOf(">Don&#x27;t Boost</button>"),
+    );
+    expect(html).toContain('class="btn-primary shortcut-button"');
+    expect(html).toContain('title="Boost (Space)"');
+    expect(html).toContain('aria-keyshortcuts="Space"');
+  });
+});

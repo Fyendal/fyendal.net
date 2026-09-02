@@ -14,8 +14,9 @@ export function useGameShortcuts({
   setConfirmArsenalSkip,
   onSend,
   onReset,
-  confirmationEnabled,
+  actionShortcutEnabled,
   actionStep,
+  onSelectDefaultBoost,
   onConfirmAction,
   onConfirmChainClose,
 }: {
@@ -25,8 +26,9 @@ export function useGameShortcuts({
   setConfirmArsenalSkip: (confirmed: boolean) => void;
   onSend: (intent: GameIntent) => boolean;
   onReset: () => void;
-  confirmationEnabled: boolean;
+  actionShortcutEnabled: boolean;
   actionStep: ActionStep;
+  onSelectDefaultBoost: () => void;
   onConfirmAction: () => void;
   onConfirmChainClose: () => void;
 }): void {
@@ -46,15 +48,22 @@ export function useGameShortcuts({
   }, [hotkeyIntent, onReset, onSend, passEnabled, pendingDecision, setConfirmArsenalSkip]);
 
   useEffect(() => {
-    if (!confirmationEnabled || actionStep === "method") return;
+    if (!actionShortcutEnabled) return;
     const onKeyDown = (event: KeyboardEvent) => {
       const result = actionConfirmationHotkey(event, actionStep, true);
       if (!result) return;
       event.preventDefault();
-      if (result === "confirm-chain-close") onConfirmChainClose();
+      if (result === "select-default-boost") onSelectDefaultBoost();
+      else if (result === "confirm-chain-close") onConfirmChainClose();
       else onConfirmAction();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [actionStep, confirmationEnabled, onConfirmAction, onConfirmChainClose]);
+  }, [
+    actionShortcutEnabled,
+    actionStep,
+    onConfirmAction,
+    onConfirmChainClose,
+    onSelectDefaultBoost,
+  ]);
 }
