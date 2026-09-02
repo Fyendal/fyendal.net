@@ -168,6 +168,7 @@ function maintenanceItem(steam: number, extra: CardScript = {}): CardScript {
         event: "start-of-turn",
         whose: "subject",
         label: "Remove a steam counter or destroy this",
+        labelMessage: decisionMessage("card.trigger.steam.maintain"),
         effect(ctx) {
           if (ctx.getCounter("steam") <= 0) ctx.destroySelf();
           else ctx.requestChoice("evo-maintenance", decisionPrompt(

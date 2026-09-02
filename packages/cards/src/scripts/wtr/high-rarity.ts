@@ -263,7 +263,7 @@ export const wtrHighRarity: Record<string, CardScript> = {
   },
 
   "fyendal's spring tunic|0": {
-    triggers: [{ event: "start-of-turn", optional: true, defaultOption: "yes", label: "Add an energy counter", condition: (ctx) => ctx.getCounter("energy") < 3, effect(ctx) { ctx.setCounter("energy", ctx.getCounter("energy") + 1); } }],
+    triggers: [{ event: "start-of-turn", optional: true, defaultOption: "yes", label: "Add an energy counter", labelMessage: decisionMessage("card.trigger.energycounter.add"), condition: (ctx) => ctx.getCounter("energy") < 3, effect(ctx) { ctx.setCounter("energy", ctx.getCounter("energy") + 1); } }],
     activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", removeCounterCost: { key: "energy", amount: 3 }, onActivate(ctx) { ctx.changeResources(ctx.seat, 1); } },
   },
   "enlightened strike|1": {

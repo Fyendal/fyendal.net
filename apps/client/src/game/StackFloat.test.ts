@@ -35,6 +35,21 @@ describe("stack popup visibility", () => {
     expect(html).not.toContain("Look at the opponent&#x27;s top card?");
   });
 
+  it("localizes common maintenance effects from the same trigger metadata", () => {
+    const html = renderStack({
+      layers: [{
+        card: { instanceId: 8, cardId: "SEA042", owner: 0 },
+        seat: 0,
+        label: "Remove a steam counter or destroy this",
+        labelMessage: { id: "card.trigger.steam.maintain" },
+        optional: false,
+      }],
+    }, "zh-Hans");
+
+    expect(html).toContain("移除一个 steam 指示物，或摧毁此牌");
+    expect(html).not.toContain("Remove a steam counter or destroy this");
+  });
+
   it("reveals popups for new stack activity but not an unchanged or emptied stack", () => {
     const emptyRevision = stackActivityRevision([]);
     const triggerRevision = stackActivityRevision([

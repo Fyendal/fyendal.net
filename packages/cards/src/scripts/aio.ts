@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { commonOptionMessages, decisionPrompt, localizedCardLog, yesNoPrompt } from "./shared-helpers.js";
+import { commonOptionMessages, decisionMessage, decisionPrompt, localizedCardLog, yesNoPrompt } from "./shared-helpers.js";
 
 function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
   return ctx.cardData(card.cardId);
@@ -38,6 +38,7 @@ function maintenanceItem(steam: number, extra: CardScript = {}): CardScript {
         event: "start-of-turn",
         whose: "subject",
         label: "Remove a steam counter or destroy this",
+        labelMessage: decisionMessage("card.trigger.steam.maintain"),
         effect(ctx) {
           if (ctx.getCounter("steam") <= 0) ctx.destroySelf();
           else ctx.requestChoice("aio-maintenance", decisionPrompt("Remove a steam counter or destroy this?", "card.aio.maintenance.choose", { optionMessages: commonOptionMessages("remove", "destroy") }), ["remove", "destroy"]);

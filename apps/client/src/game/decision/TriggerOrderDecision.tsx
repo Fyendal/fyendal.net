@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
 import { useIntl } from "react-intl";
-import type { CardView } from "@fyendal/shared";
+import { cardData } from "@fyendal/cards/client";
+import type { CardView, GameMessage } from "@fyendal/shared";
 import { BloodDebtTriggerTile, isBloodDebtTrigger } from "../BloodDebtTriggerTile.js";
 import { CardFace } from "../Card.js";
 import { shouldPassOnSpace } from "../passHotkey.js";
 import { CardRef, cardAffiliation, cardDisplayName } from "./DecisionShared.js";
+import { formatGameMessage } from "../../i18n/GameMessage.js";
 
 interface TriggerOrderItem {
   key: string;
   optionId: string;
   label: string;
+  message: GameMessage | null;
   card: CardView | null;
   count: number | null;
   bloodDebt: boolean;
@@ -39,6 +42,7 @@ export function confirmTriggerOrderOnSpace(
 export function TriggerOrderDecision({
   options,
   labels,
+  messages = [],
   counts,
   cards,
   viewerSeat,
@@ -46,6 +50,7 @@ export function TriggerOrderDecision({
 }: {
   options: string[];
   labels: string[];
+  messages?: Array<GameMessage | null>;
   counts: Array<number | null>;
   cards: Array<CardView | null>;
   viewerSeat: number;
@@ -61,6 +66,7 @@ export function TriggerOrderDecision({
         key: `${optionId}:${index}`,
         optionId,
         label,
+        message: messages[index] ?? null,
         card: bloodDebt ? null : (cards[index] ?? null),
         count,
         bloodDebt,
@@ -69,6 +75,13 @@ export function TriggerOrderDecision({
   );
   const move = (from: number, to: number) =>
     setItems((current) => moveTriggerOrder(current, from, to));
+  const localizedLabel = (item: TriggerOrderItem) => item.message
+    ? formatGameMessage(intl, item.message, {
+        card: (cardId) => item.card?.cardId === cardId
+          ? (item.card.name ?? cardId)
+          : (cardData[cardId]?.name ?? cardId),
+      })
+    : item.label;
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       confirmTriggerOrderOnSpace(event, items.map((item) => item.optionId), onConfirm);
@@ -88,8 +101,9 @@ export function TriggerOrderDecision({
         aria-label={intl.formatMessage({ id: "game.decision.triggerOrder.label" })}
         aria-describedby="trigger-order-help"
       >
-        {items.map((item, index) => (
-          <div
+        {items.map((item, index) => {
+          const label = localizedLabel(item);
+          return <div
             className="trigger-order-item"
             draggable
             key={item.key}
@@ -134,7 +148,7 @@ export function TriggerOrderDecision({
               {item.card ? <strong><CardRef id={item.card.cardId} name={item.card.name} /></strong> : null}
               <span>{item.bloodDebt && item.count !== null
                 ? intl.formatMessage({ id: "game.bloodDebt.loseLife" }, { count: item.count })
-                : item.label || intl.formatMessage({ id: "game.triggeredAbility" })}</span>
+                : label || intl.formatMessage({ id: "game.triggeredAbility" })}</span>
             </span>
             <span className="trigger-order-controls">
               <button
@@ -148,7 +162,7 @@ export function TriggerOrderDecision({
                         : intl.formatMessage({ id: "game.trigger" }),
                     label: item.bloodDebt && item.count !== null
                       ? intl.formatMessage({ id: "game.bloodDebt.loseLife" }, { count: item.count })
-                      : item.label || intl.formatMessage({ id: "game.triggeredAbility" }),
+                      : label || intl.formatMessage({ id: "game.triggeredAbility" }),
                   },
                 )}
                 disabled={index === 0}
@@ -169,7 +183,7 @@ export function TriggerOrderDecision({
                         : intl.formatMessage({ id: "game.trigger" }),
                     label: item.bloodDebt && item.count !== null
                       ? intl.formatMessage({ id: "game.bloodDebt.loseLife" }, { count: item.count })
-                      : item.label || intl.formatMessage({ id: "game.triggeredAbility" }),
+                      : label || intl.formatMessage({ id: "game.triggeredAbility" }),
                   },
                 )}
                 disabled={index === items.length - 1}
@@ -180,8 +194,8 @@ export function TriggerOrderDecision({
                 ↓
               </button>
             </span>
-          </div>
-        ))}
+          </div>;
+        })}
       </div>
       <div className="decision-buttons">
         <button

@@ -555,7 +555,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   },
   "assembly module|3": {
     onEnterArena(ctx) { ctx.setCounter("steam", 1); },
-    triggers: [{ event: "start-of-turn", label: "Remove a steam counter or destroy this", effect(ctx) { if (ctx.getCounter("steam") <= 0) ctx.destroySelf(); else ctx.setCounter("steam", ctx.getCounter("steam") - 1); } }],
+    triggers: [{ event: "start-of-turn", label: "Remove a steam counter or destroy this", labelMessage: decisionMessage("card.trigger.steam.maintain"), effect(ctx) { if (ctx.getCounter("steam") <= 0) ctx.destroySelf(); else ctx.setCounter("steam", ctx.getCounter("steam") - 1); } }],
     activated: { cost: 0, isAttack: false, goAgain: true, tap: true, onActivate(ctx) { const driver = ctx.player(ctx.seat).deck.find((card) => named(ctx, card, "Hyper Driver")); if (driver) ctx.settleCard(driver.instanceId); ctx.shuffleDeck(); } },
   },
   "evo beta base head|3": evoBeta("head"),

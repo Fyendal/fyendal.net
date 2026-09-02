@@ -11695,6 +11695,18 @@
       "value": "Terra：支付 1 点资源以生成一个 Might 衍生物？"
     }
   ],
+  "card.trigger.energycounter.add": [
+    {
+      "type": 0,
+      "value": "增加一个能量指示物"
+    }
+  ],
+  "card.trigger.steam.maintain": [
+    {
+      "type": 0,
+      "value": "移除一个 steam 指示物，或摧毁此牌"
+    }
+  ],
   "card.upr.action.bottom": [
     {
       "type": 1,

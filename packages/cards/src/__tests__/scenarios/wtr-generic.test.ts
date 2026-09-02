@@ -437,6 +437,7 @@ describe("WTR generic — equipment", () => {
     expect(g.state.pendingDecision).toMatchObject({
       kind: "optional-effect",
       defaultOption: "yes",
+      promptMessage: { id: "card.trigger.energycounter.add" },
     });
     g.chooseOption("yes");
     expect(g.state.players[0]!.equipment.chest?.counters?.energy).toBe(1);

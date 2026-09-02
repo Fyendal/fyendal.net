@@ -372,7 +372,14 @@ describe("priority guidance help", () => {
       kind: "order-triggers",
       prompt: "Order your triggered abilities",
       promptMessage: { id: "engine.decision.triggers.order" },
-      options: [],
+      options: ["41:0", "42:0"],
+      optionLabels: ["Add an energy counter", "Remove a steam counter or destroy this"],
+      optionMessages: [
+        { id: "card.trigger.energycounter.add" },
+        { id: "card.trigger.steam.maintain" },
+      ],
+      optionCounts: [null, null],
+      optionCards: [null, null],
     };
     const orderHtml = renderToStaticMarkup(
       <TestI18nProvider locale="zh-Hans">
@@ -380,7 +387,11 @@ describe("priority guidance help", () => {
       </TestI18nProvider>,
     );
     expect(orderHtml).toContain("排列你的触发能力");
+    expect(orderHtml).toContain("增加一个能量指示物");
+    expect(orderHtml).toContain("移除一个 steam 指示物，或摧毁此牌");
     expect(orderHtml).not.toContain("Order your triggered abilities");
+    expect(orderHtml).not.toContain("Add an energy counter");
+    expect(orderHtml).not.toContain("Remove a steam counter or destroy this");
   });
 
   it("localizes common literal option ids without changing their submitted values", () => {

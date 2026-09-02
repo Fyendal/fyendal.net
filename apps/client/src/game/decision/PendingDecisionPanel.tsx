@@ -300,10 +300,11 @@ export function PendingDecisionPanel({
       {pd.kind === "order-triggers" ? (
         <TriggerOrderDecision
           key={(pd.options ?? []).map((option, index) =>
-            `${option}:${pd.optionCounts?.[index] ?? 1}:${index}`
+            `${option}:${pd.optionCounts?.[index] ?? 1}:${pd.optionMessages?.[index]?.id ?? ""}:${JSON.stringify(pd.optionMessages?.[index]?.values ?? {})}:${index}`
           ).join("|")}
           options={pd.options ?? []}
           labels={pd.optionLabels ?? []}
+          messages={pd.optionMessages ?? []}
           counts={pd.optionCounts ?? []}
           cards={pd.optionCards ?? []}
           viewerSeat={viewerSeat}
