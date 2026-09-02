@@ -23,6 +23,7 @@ export const cards: Record<string, CardData> = {
   BW: { id: "BW", name: "Test Battleworn", cardType: "equipment", subtypes: ["chest"], defense: 2, keywords: ["Battleworn"], text: "Battleworn" },
   BUCKLER: { id: "BUCKLER", name: "Test Buckler", cardType: "equipment", subtypes: ["off-hand"], defense: 2, keywords: ["Temper"], text: "Temper" },
   BLUE: { id: "BLUE", name: "Blue Resource", cardType: "action", subtypes: [], classes: ["generic"], pitch: 3, cost: 0, attack: 0, defense: 3, text: "" },
+  PURPLE: { id: "PURPLE", name: "Purple Resource", cardType: "resource", subtypes: ["gem"], pitch: 4, text: "" },
   YEL: { id: "YEL", name: "Yellow Resource", cardType: "action", subtypes: [], classes: ["generic"], pitch: 2, cost: 0, attack: 0, defense: 3, text: "" },
   INSTANT: { id: "INSTANT", name: "Test Sigil", cardType: "instant", classes: ["generic"], pitch: 3, cost: 0, text: "Gain 1 life" },
   IDOL: { id: "IDOL", name: "Test Idol", cardType: "instant", subtypes: ["item"], classes: ["generic"], pitch: 3, cost: 0, text: "Instant — {t}: Gain 1 life" },

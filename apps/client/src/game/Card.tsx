@@ -4,7 +4,12 @@ import type { CardView } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import { resolveCardImageUrl, resolveCardImageUrls } from "./cardImageUrl.js";
 
-const PITCH_CLASS: Record<number, string> = { 1: "pitch-red", 2: "pitch-yellow", 3: "pitch-blue" };
+const PITCH_CLASS: Record<number, string> = {
+  1: "pitch-red",
+  2: "pitch-yellow",
+  3: "pitch-blue",
+  4: "pitch-purple",
+};
 const MARKED_TOKEN_ID = "HNT244";
 const INTIMIDATED_TOOLTIP = "Intimidated — returns to hand at the beginning of the end phase";
 /** Rules counters that use the generic text-chip presentation. Card scripts

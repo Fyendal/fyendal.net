@@ -610,7 +610,8 @@ function cardView(value: unknown, depth = 0): value is CardView {
     && optional(card.grantedNames, (v): v is string[] => array(v, (entry): entry is string => string(entry, MAX_ID), 16))
     && optional(card.chosenName, (v): v is string => string(v, MAX_SHORT_TEXT, false))
     && optional(card.grantedTypes, (v): v is string[] => array(v, (entry): entry is string => string(entry, MAX_ID), 16))
-    && optional(card.grantedColor, (v): v is 1 | 2 | 3 => v === 1 || v === 2 || v === 3)
+    && optional(card.grantedColor, (v): v is 1 | 2 | 3 | 4 =>
+      v === 1 || v === 2 || v === 3 || v === 4)
     && optional(card.playableFromSourceCardId, (v): v is string => string(v, MAX_ID, false))
     && optional(card.life, finite) && optional(card.hidden, (v): v is boolean => typeof v === "boolean");
 }

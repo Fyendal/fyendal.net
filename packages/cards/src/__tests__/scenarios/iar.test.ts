@@ -395,7 +395,7 @@ describe("IAR spoiled cards", () => {
     g.activate("runic reaving|1");
 
     expect(g.state.players[0]!.graveyard).toContainEqual(
-      expect.objectContaining({ cardId: "FAB477" }),
+      expect.objectContaining({ cardId: "IAR149" }),
     );
     expect(g.state.players[0]!.board).toContainEqual(
       expect.objectContaining({ cardId: RUNECHANT_ID }),
@@ -1599,5 +1599,146 @@ describe("August 29–31 IAR and GEM Pack 6 spoilers", () => {
       .expectAP(0, 1);
 
     expect(boardNames(g, 0)).toContain("Runechant");
+  });
+});
+
+describe("August 31–September 1 IAR spoilers", () => {
+  it("registers all newly published and corrected printings as implemented", () => {
+    const expected = {
+      IAR007: "Ingest the Unknown",
+      IAR008: "Consuming Appetite",
+      IAR011: "Hellbound Assault",
+      IAR012: "Hellbound Assault",
+      IAR013: "Hellbound Assault",
+      IAR086: "Restless Outlaw",
+      IAR127: "Demonbound Gloomblade",
+      IAR128: "Demonbound Gloomblade",
+      IAR129: "Embrace Ursur",
+      IAR130: "Embrace Ursur",
+      IAR131: "Embrace Ursur",
+      IAR144: "Sonata Dystopia",
+      IAR147: "Runic Disposition",
+      IAR148: "Runic Disposition",
+      IAR149: "Runic Reaving",
+      IAR150: "Runic Reaving",
+      IAR151: "Runic Reaving",
+      IAR168: "Countdown to Extinction",
+      IAR169: "Countdown to Extinction",
+      IAR210: "Darkest Hour",
+      IAR233: "Battle Prep",
+      IAR234: "Battle Prep",
+      IAR235: "Battle Prep",
+      IAR666: "Soul of Existence",
+    } as const;
+
+    expect(Object.fromEntries(
+      Object.keys(expected).map((id) => [id, cardData[id]?.name]),
+    )).toEqual(expected);
+    expect(Object.keys(expected).every((id) => isImplemented(cardData[id]!))).toBe(true);
+    expect(cardData.IAR066).toBeUndefined();
+  });
+
+  it("Ingest the Unknown banishes the top card and gains its base power", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["ingest the unknown|1"],
+        deck: ["raging onslaught|1"],
+        resources: 1,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("ingest the unknown|1")
+      .blockWith()
+      .settle()
+      .expectLife(1, 13)
+      .expectInZone(0, "raging onslaught|1", "banish");
+  });
+
+  it("Hellbound Assault banishes itself after it hits", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["hellbound assault|1"],
+        resources: 2,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("hellbound assault|1")
+      .blockWith()
+      .settle()
+      .doRaw({ kind: "close-chain" })
+      .expectLife(1, 13)
+      .expectInZone(0, "hellbound assault|1", "banish");
+  });
+
+  it("Sonata Dystopia destroys X Runechants and empowers the next attack", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["sonata dystopia|3", "raging onslaught|1"],
+        board: ["runechant|0", "runechant|0"],
+        resources: 3,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("sonata dystopia|3", { settle: false })
+      .chooseOption("X = 2");
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "iar-sonata-dystopia-runechants",
+      minimumSelections: 2,
+      maximumSelections: 2,
+    });
+    g.doRaw({
+      kind: "choose-many",
+      optionIds: g.state.pendingDecision!.options!,
+    }).settle();
+
+    expect(boardNames(g, 0)).not.toContain("Runechant");
+    expect(g.state.modifiers).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        seat: 0,
+        scope: "next-attack",
+        appliesTo: "attack-action",
+        attack: 2,
+        overpower: true,
+        onHitCreateToken: { cardId: "SBA036", count: 2 },
+      }),
+    ]));
+    g.play("raging onslaught|1");
+    expect(g.state.modifiers).toEqual(expect.arrayContaining([
+      expect.objectContaining({ scope: "chain-link", attack: 2 }),
+    ]));
+    expect(projectStateFor(g.state, 0).chain.at(-1)?.attackValue).toBe(9);
+    g.blockWith()
+      .settle()
+      .expectLife(1, 11)
+      .expectResources(0, 0);
+    expect(boardNames(g, 0).filter((name) => name === "Runechant")).toHaveLength(2);
+  });
+
+  it("Battle Prep buffs the next attack only when played from arsenal", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["raging onslaught|1"],
+        arsenal: ["battle prep|1"],
+        resources: 3,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("battle prep|1", { fromArsenal: true })
+      .play("raging onslaught|1")
+      .blockWith()
+      .settle()
+      .expectLife(1, 10);
   });
 });

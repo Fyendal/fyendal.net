@@ -91,7 +91,11 @@
 }
 .decision-guidance-disable:hover { background: transparent; color: #ffd479; }
 /* every decision stacks the same way: prompt centered above its options */
-.decision-options { flex-direction: column; align-items: center; }
+.decision-options {
+  min-width: min(320px, calc(100vw - var(--rail-w) - 32px));
+  flex-direction: column;
+  align-items: center;
+}
 .decision-options .decision-prompt { text-align: center; }
 .decision-priority-guidance {
   width: min(420px, calc(100vw - var(--rail-w) - 32px));

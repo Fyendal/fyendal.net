@@ -301,6 +301,121 @@ function runicDiscardAttack(): CardScript {
   };
 }
 
+function ingestTheUnknown(): CardScript {
+  return bloodDebt({
+    onAttackDeclared(ctx) {
+      const top = ctx.player(ctx.seat).deck[0];
+      if (!top) return;
+      const power = ctx.basePower(top);
+      if (ctx.banish(top.instanceId)) ctx.addCardTempPower(ctx.self.instanceId, power);
+    },
+  });
+}
+
+function hellboundAssault(): CardScript {
+  return bloodDebt({
+    canTriggerOnHit: (ctx) => ctx.link?.attackingCard.instanceId === ctx.self.instanceId,
+    onHit(ctx) { ctx.setFlag("link", "attackToBanish", true); },
+  });
+}
+
+function embraceUrsur(): CardScript {
+  return {
+    onAttackDeclared(ctx) {
+      const hand = ctx.player(ctx.seat).hand;
+      if (hand.length > 0) {
+        ctx.requestCardChoice(
+          "iar-embrace-ursur-banish",
+          decisionPrompt(
+            "Banish a card from your hand?",
+            "card.gem.embrace.ursur.banish",
+            { optionMessages: { no: decisionMessage("common.option.decline") } },
+          ),
+          ["no", ...hand.map((card) => card.instanceId)],
+        );
+      }
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "iar-embrace-ursur-banish" || option === "no") return;
+      const card = ctx.player(ctx.seat).hand.find((candidate) =>
+        candidate.instanceId === Number(option)
+      );
+      if (!card) return;
+      const types = ctx.cardTypes(card);
+      if (!ctx.banish(card.instanceId)) return;
+      if (types.includes("runeblade")) ctx.createToken(RUNECHANT);
+      if (types.includes("shadow")) ctx.grantGoAgain();
+    },
+  };
+}
+
+function sonataDystopia(): CardScript {
+  return {
+    variablePlayCost: {
+      base: 0,
+      counterKey: "iarSonataDystopiaX",
+      prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
+      maximum(ctx) {
+        return ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "Runechant")).length;
+      },
+    },
+    additionalCost(ctx) {
+      const x = ctx.getCounter("iarSonataDystopiaX");
+      if (x <= 0) return;
+      const runechants = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "Runechant"));
+      ctx.requestCardChoices(
+        "iar-sonata-dystopia-runechants",
+        decisionPrompt(
+          `Choose ${x} Runechant${x === 1 ? "" : "s"} to destroy`,
+          "card.iar.sonata.runechants.destroy",
+          { values: { amount: x } },
+        ),
+        runechants.map((card) => card.instanceId),
+        x,
+        x,
+      );
+    },
+    onChooseMany(ctx, hook, options) {
+      if (hook !== "iar-sonata-dystopia-runechants") return;
+      const runechantIds = new Set(
+        ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "Runechant"))
+          .map((card) => card.instanceId),
+      );
+      for (const option of options) {
+        const instanceId = Number(option);
+        if (runechantIds.has(instanceId)) ctx.destroyPermanent(instanceId);
+      }
+    },
+    onPlay(ctx) {
+      const x = ctx.getCounter("iarSonataDystopiaX");
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        appliesTo: "attack-action",
+        playCostReduction: x,
+        once: true,
+      });
+      buffNextAttack(ctx, {
+        appliesTo: "attack-action",
+        attack: x,
+        overpower: true,
+        onHitCreateToken: { cardId: RUNECHANT, count: x },
+      });
+    },
+  };
+}
+
+function battlePrep(attack: number): CardScript {
+  return {
+    onPlay(ctx) {
+      if (ctx.fromArsenal) buffNextAttack(ctx, { attack });
+      optN(ctx, 2);
+    },
+    onChoose(ctx, hook, option) {
+      optOnChoose(ctx, hook, option);
+    },
+  };
+}
+
 function fromBanishBonus(extra?: (ctx: ScriptCtx) => void): CardScript {
   return bloodDebt({
     modifyAttack: (ctx) => ctx.getFlag("link", "fromBanish") === true ? 1 : 0,
@@ -431,6 +546,38 @@ function darkestHour(attack: number): CardScript {
   });
 }
 
+function countdownToExtinction(): CardScript {
+  return bloodDebt({
+    onAttackDeclared(ctx) {
+      ctx.createToken(GATE);
+    },
+    canTriggerOnHit: (ctx) => selfHitsHero(ctx) && ctx.canSearchDeck(),
+    onHit(ctx) {
+      const darkestHours = ctx.player(ctx.seat).deck.filter((card) =>
+        named(ctx, card, "Darkest Hour")
+      );
+      if (darkestHours.length === 0) {
+        ctx.shuffleDeck();
+        return;
+      }
+      ctx.requestCardChoice(
+        "iar-countdown-darkest-hour",
+        decisionPrompt(
+          "Search for Darkest Hour to banish?",
+          "card.iar.countdown.darkesthour.search",
+          { optionMessages: commonOptionMessages("no") },
+        ),
+        ["no", ...darkestHours.map((card) => card.instanceId)],
+      );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "iar-countdown-darkest-hour") return;
+      if (option !== "no") ctx.banish(Number(option));
+      ctx.shuffleDeck();
+    },
+  });
+}
+
 function vexingGloomblade(): CardScript {
   return bloodDebt({
     ...usurp(),
@@ -537,6 +684,11 @@ export const iar: Record<string, CardScript> = {
       onActivate(ctx) { buffNextAttack(ctx, { attack: 2 }); },
     },
   }),
+
+  "ingest the unknown|1": ingestTheUnknown(),
+  "hellbound assault|1": hellboundAssault(),
+  "hellbound assault|2": hellboundAssault(),
+  "hellbound assault|3": hellboundAssault(),
 
   "beckoning hunger|1": bloodDebt({
     onAttackDeclared(ctx) {
@@ -780,6 +932,15 @@ export const iar: Record<string, CardScript> = {
   "demonbound gloomblade|1": bloodDebt({
     ...usurp(),
   }, true),
+  "demonbound gloomblade|2": bloodDebt({
+    ...usurp(),
+  }, true),
+  "demonbound gloomblade|3": bloodDebt({
+    ...usurp(),
+  }, true),
+
+  "embrace ursur|2": embraceUrsur(),
+  "embrace ursur|3": embraceUrsur(),
 
   "bloodsong gloomblade|1": bloodDebt({
     ...usurp(),
@@ -910,8 +1071,14 @@ export const iar: Record<string, CardScript> = {
     },
   }, true),
 
+  "sonata dystopia|3": sonataDystopia(),
+
   "runic reaving|1": runicDiscardAttack(),
+  "runic reaving|2": runicDiscardAttack(),
+  "runic reaving|3": runicDiscardAttack(),
   "runic disposition|1": runicDiscardAttack(),
+  "runic disposition|2": runicDiscardAttack(),
+  "runic disposition|3": runicDiscardAttack(),
 
   "reach of the abyss|0": {
     onDefendingCombatChainClosed(ctx) {
@@ -944,35 +1111,9 @@ export const iar: Record<string, CardScript> = {
     },
   }),
 
-  "countdown to extinction|1": bloodDebt({
-    onAttackDeclared(ctx) {
-      ctx.createToken(GATE);
-    },
-    canTriggerOnHit: (ctx) => selfHitsHero(ctx) && ctx.canSearchDeck(),
-    onHit(ctx) {
-      const darkestHours = ctx.player(ctx.seat).deck.filter((card) =>
-        named(ctx, card, "Darkest Hour")
-      );
-      if (darkestHours.length === 0) {
-        ctx.shuffleDeck();
-        return;
-      }
-      ctx.requestCardChoice(
-        "iar-countdown-darkest-hour",
-        decisionPrompt(
-          "Search for Darkest Hour to banish?",
-          "card.iar.countdown.darkesthour.search",
-          { optionMessages: commonOptionMessages("no") },
-        ),
-        ["no", ...darkestHours.map((card) => card.instanceId)],
-      );
-    },
-    onChoose(ctx, hook, option) {
-      if (hook !== "iar-countdown-darkest-hour") return;
-      if (option !== "no") ctx.banish(Number(option));
-      ctx.shuffleDeck();
-    },
-  }),
+  "countdown to extinction|1": countdownToExtinction(),
+  "countdown to extinction|2": countdownToExtinction(),
+  "countdown to extinction|3": countdownToExtinction(),
 
   "dimenxxional ferryman|3": {
     graveyardReplacement: "bottom-of-deck",
@@ -1013,7 +1154,12 @@ export const iar: Record<string, CardScript> = {
   },
 
   "darkest hour|1": darkestHour(4),
+  "darkest hour|2": darkestHour(3),
   "darkest hour|3": darkestHour(2),
+
+  "battle prep|1": battlePrep(3),
+  "battle prep|2": battlePrep(2),
+  "battle prep|3": battlePrep(1),
 
   "stoke vengeance|1": {
     onAttackDeclared(ctx) {

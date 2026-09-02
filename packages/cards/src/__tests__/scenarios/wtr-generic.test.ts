@@ -439,6 +439,18 @@ describe("WTR generic — equipment", () => {
       defaultOption: "yes",
       promptMessage: { id: "card.trigger.energycounter.add" },
     });
+    expect(projectStateFor(g.state, 0).logEntries?.find(
+      (entry) => "message" in entry && entry.message.id === "engine.log.trigger.card",
+    )).toMatchObject({
+      message: {
+        id: "engine.log.trigger.card",
+        values: {
+          triggerSource: { kind: "card", cardId: printingId("fyendal's spring tunic|0") },
+          triggerEffect: { kind: "term", id: "card.trigger.energycounter.add" },
+          occurrences: 1,
+        },
+      },
+    });
     g.chooseOption("yes");
     expect(g.state.players[0]!.equipment.chest?.counters?.energy).toBe(1);
   });

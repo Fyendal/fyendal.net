@@ -3,7 +3,7 @@ import type { GameStateInternal } from "./runtimeState.js";
 import type { CardInstance, PlayerState } from "./state.js";
 import { dataOf, scriptOf } from "./cardProperties.js";
 
-import { gameLogMessage, logPlayerValue, logPublic, nameOf } from "./gameLog.js";
+import { gameLogMessage, logCardValue, logPlayerValue, logPublic, nameOf } from "./gameLog.js";
 
 import { beginStatsTurn } from "./stats.js";
 import { findPermanent, opponent } from "./zoneQueries.js";
@@ -246,7 +246,11 @@ export function answerArsenal(
       transitionZone("arsenal", player.seat),
       { from: true, to: true },
     );
-    logPublic(state, `${nameOf(state, player.heroCardId)} puts a card face down into arsenal`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, player.heroCardId)} puts a card face down into arsenal`,
+      "engine.log.arsenal.facedown.public",
+      { hero: logCardValue(player.heroCardId) },
+    ));
   }
   finishEndPhase(state, runtime);
   return undefined;

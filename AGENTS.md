@@ -60,7 +60,10 @@ the boundaries below; they are release invariants, not suggestions.
 - Message ids are stable, lowercase, dot-separated semantic identifiers. Do
   not encode rendered copy, a printing id, or runtime data in an id. Put
   dynamic content in ICU values; use typed `GameMessage` card, player, and term
-  references when the client must resolve visible names safely.
+  references when the client must resolve visible names safely. A term
+  reference composes another catalog message using the enclosing values; use
+  it for reusable fragments such as trigger effects instead of duplicating
+  every effect as a second log translation.
 - Client-only copy uses `useIntl`, `FormattedMessage`, `GameMessageText`, or
   `formatGameMessage`. Do not branch on the current locale or construct
   translated sentences by concatenating fragments.
@@ -78,6 +81,7 @@ the boundaries below; they are release invariants, not suggestions.
   `logPublic`, `logPrivate`, or `logForSeats` independently of localization;
   neither fallback text nor semantic values may reveal hidden information.
 - Every new `TriggerDef` supplies `labelMessage` beside its English `label`.
+  A custom `publicLog` also requires `publicLogMessage`.
   `packages/cards/src/trigger-messages.ts` enriches migrated legacy labels at
   registry composition and consolidates repeated effects through parameterized
   messages. Do not add a new raw trigger fallback without semantic metadata;

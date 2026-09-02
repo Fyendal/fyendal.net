@@ -36,13 +36,15 @@ describe("card trigger presentation", () => {
   });
 
   it("does not allow the untranslated trigger backlog to grow", () => {
-    const untranslated = Object.values(registry)
-      .flatMap((script) => script.triggers ?? [])
+    const triggers = Object.values(registry).flatMap((script) => script.triggers ?? []);
+    const untranslated = triggers
       .filter((trigger) =>
         !trigger.labelMessage && !specializedTriggerLabels.has(trigger.label)
       );
 
     expect(untranslated).toHaveLength(0);
     expect(new Set(untranslated.map((trigger) => trigger.label))).toHaveLength(0);
+    expect(triggers.filter((trigger) => trigger.publicLog && !trigger.publicLogMessage))
+      .toEqual([]);
   });
 });

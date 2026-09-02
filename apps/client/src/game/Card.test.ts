@@ -44,6 +44,7 @@ describe("cardImageUrl", () => {
     ["IAR083", "AMA026"],
     ["IAR091", "IAR091-RF"],
     ["IAR222", "IAR222-MV"],
+    ["IAR666", "IAR666-MV"],
     ["JDG062", "JDG062-CF"],
     ["OMN000", "OMN000-RF"],
     ["OMN141", "OMN141-RF"],

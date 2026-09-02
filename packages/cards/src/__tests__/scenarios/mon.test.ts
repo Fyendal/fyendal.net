@@ -265,7 +265,15 @@ describe("MON — Shadow Brute and Blood Debt", () => {
     expect(s.state.pendingDecision).toBeNull();
     expect(s.state.pendingDecision?.kind).not.toBe("order-triggers");
     expect(s.state.log.filter((entry) => entry.publicText?.includes("Blood Debt triggers")))
-      .toEqual([{ publicText: "Blood Debt triggers ×2" }]);
+      .toEqual([expect.objectContaining({
+        publicText: "Blood Debt triggers ×2",
+        publicPayload: expect.objectContaining({
+          message: {
+            id: "card.log.common.blooddebt.triggered",
+            values: expect.objectContaining({ occurrences: 2 }),
+          },
+        }),
+      })]);
   });
 
   it("stores Blood Debt as one counted server layer beside distinct triggers", () => {

@@ -1,7 +1,13 @@
 import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
+import type { GameMessage } from "@fyendal/shared";
 import { dataOf, scriptOf } from "./cardProperties.js";
-import { logPublic, nameOf } from "./gameLog.js";
+import {
+  logCardValue,
+  logPublic,
+  nameOf,
+  triggerLogMessage,
+} from "./gameLog.js";
 import type { ScriptCtx, TriggerEvent, TriggerEventContext } from "./scripts.js";
 import type { CardInstance, ChainLinkState, PlayerState, StackLayer } from "./state.js";
 import { tokenCreationCauseForModifier } from "./tokenQueries.js";
@@ -31,7 +37,7 @@ export function collectCardEventTriggerLayers(
   for (const seat of [subject, opponent(subject)]) {
     const player = state.players[seat] as PlayerState;
     const layers: StackLayer[] = [];
-    const announcements: { group?: string; text: string }[] = [];
+    const announcements: { group?: string; text: string; message?: GameMessage }[] = [];
     const sources = eventTriggerSources(state, player);
     if (
       event !== "card-played" && eventCard?.owner === seat &&
@@ -61,11 +67,32 @@ export function collectCardEventTriggerLayers(
         const publicText = card.faceDown
           ? `${nameOf(state, player.heroCardId)}'s face-down card triggers: ${trigger.label}`
           : trigger.publicLog ?? `${nameOf(state, card.cardId)} triggers: ${trigger.label}`;
+        const message = card.faceDown && trigger.labelMessage
+          ? triggerLogMessage(
+              publicText,
+              player.heroCardId,
+              trigger.labelMessage,
+              1,
+              "engine.log.trigger.facedown",
+            ).message
+          : trigger.publicLogMessage
+            ? {
+                ...trigger.publicLogMessage,
+                values: {
+                  ...trigger.publicLogMessage.values,
+                  triggerSource: logCardValue(card.cardId),
+                  occurrences: 1,
+                },
+              }
+            : !trigger.publicLog && trigger.labelMessage
+              ? triggerLogMessage(publicText, card.cardId, trigger.labelMessage).message
+              : undefined;
         announcements.push({
           ...(trigger.simultaneousKey
             ? { group: `${trigger.simultaneousKey}\u0000${publicText}` }
             : {}),
           text: publicText,
+          ...(message ? { message } : {}),
         });
       });
     }
@@ -79,15 +106,32 @@ export function collectCardEventTriggerLayers(
       }
     }
     const announcedGroups = new Set<string>();
+    const announce = (announcement: (typeof announcements)[number], occurrences: number): void => {
+      const fallback = `${announcement.text}${occurrences > 1 ? ` ×${occurrences}` : ""}`;
+      if (!announcement.message) {
+        logPublic(state, fallback);
+        return;
+      }
+      logPublic(state, {
+        fallback,
+        message: {
+          ...announcement.message,
+          values: {
+            ...announcement.message.values,
+            occurrences,
+          },
+        },
+      });
+    };
     for (const announcement of announcements) {
       if (!announcement.group) {
-        logPublic(state, announcement.text);
+        announce(announcement, 1);
         continue;
       }
       if (announcedGroups.has(announcement.group)) continue;
       announcedGroups.add(announcement.group);
       const count = groupedCounts.get(announcement.group) ?? 1;
-      logPublic(state, `${announcement.text}${count > 1 ? ` ×${count}` : ""}`);
+      announce(announcement, count);
     }
     if (layers.length > 0) groups.push({ seat, layers });
   }

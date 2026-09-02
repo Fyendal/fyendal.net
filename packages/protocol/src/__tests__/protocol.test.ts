@@ -176,6 +176,7 @@ const card = {
   tapped: true,
   defCounters: 1,
   counters: { lesson: 2 },
+  grantedColor: 4,
   playableFromSourceCardId: "HERO0",
   usedAbilityIndexes: [0, 2],
   remainingAbilityActivations: [1, 0],

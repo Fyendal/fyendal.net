@@ -105,6 +105,48 @@
     "set": "IAR"
   },
   {
+    "id": "IAR007",
+    "name": "Ingest the Unknown",
+    "cardType": "action",
+    "classes": [
+      "brute"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "When this attacks, banish the top card of your deck. This gets +X{p}, where X is the banished card's base {p}.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
+    "pitch": 1,
+    "cost": 1,
+    "attack": 0,
+    "defense": 3,
+    "keywords": [
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR008",
+    "name": "Consuming Appetite",
+    "cardType": "action",
+    "classes": [
+      "brute"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "Instant - {r}, banish this from your hand: Until end of turn, Blasmophet, the Insatiable Hunger tokens you control get \"Action - {r}: Attack. Go again.\"\nBlood Debt",
+    "pitch": 2,
+    "cost": 3,
+    "attack": 6,
+    "defense": 3,
+    "keywords": [
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
     "id": "IAR009",
     "name": "Consuming Lash",
     "cardType": "action",
@@ -140,6 +182,69 @@
     "pitch": 2,
     "cost": 2,
     "attack": 6,
+    "defense": 3,
+    "keywords": [
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR011",
+    "name": "Hellbound Assault",
+    "cardType": "action",
+    "classes": [
+      "brute"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "When this hits, banish it.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
+    "pitch": 1,
+    "cost": 2,
+    "attack": 7,
+    "defense": 3,
+    "keywords": [
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR012",
+    "name": "Hellbound Assault",
+    "cardType": "action",
+    "classes": [
+      "brute"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "When this hits, banish it.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
+    "pitch": 2,
+    "cost": 2,
+    "attack": 6,
+    "defense": 3,
+    "keywords": [
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR013",
+    "name": "Hellbound Assault",
+    "cardType": "action",
+    "classes": [
+      "brute"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "When this hits, banish it.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
+    "pitch": 3,
+    "cost": 2,
+    "attack": 5,
     "defense": 3,
     "keywords": [
       "Blood Debt"
@@ -388,7 +493,7 @@
     "set": "IAR"
   },
   {
-    "id": "IAR066",
+    "id": "IAR086",
     "name": "Restless Outlaw",
     "cardType": "action",
     "classes": [
@@ -946,6 +1051,104 @@
     "set": "IAR"
   },
   {
+    "id": "IAR127",
+    "name": "Demonbound Gloomblade",
+    "cardType": "action",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "You may play this from your banished zone.\nUsurp (As an additional cost to play this, destroy a Runechant if able. If you do, this gets +2{p}.)\nBlood Debt",
+    "pitch": 2,
+    "cost": 0,
+    "attack": 2,
+    "defense": 3,
+    "keywords": [
+      "Usurp",
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR128",
+    "name": "Demonbound Gloomblade",
+    "cardType": "action",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "You may play this from your banished zone.\nUsurp (As an additional cost to play this, destroy a Runechant if able. If you do, this gets +2{p}.)\nBlood Debt",
+    "pitch": 3,
+    "cost": 0,
+    "attack": 1,
+    "defense": 3,
+    "keywords": [
+      "Usurp",
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR129",
+    "name": "Embrace Ursur",
+    "cardType": "action",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "When this attacks, you may banish a card from your hand. If it's Runeblade, create a Runechant token. If it's Shadow, this gets go again.",
+    "pitch": 1,
+    "cost": 1,
+    "attack": 3,
+    "defense": 3,
+    "set": "IAR"
+  },
+  {
+    "id": "IAR130",
+    "name": "Embrace Ursur",
+    "cardType": "action",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "When this attacks, you may banish a card from your hand. If it's Runeblade, create a Runechant token. If it's Shadow, this gets go again.",
+    "pitch": 2,
+    "cost": 1,
+    "attack": 2,
+    "defense": 3,
+    "set": "IAR"
+  },
+  {
+    "id": "IAR131",
+    "name": "Embrace Ursur",
+    "cardType": "action",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "When this attacks, you may banish a card from your hand. If it's Runeblade, create a Runechant token. If it's Shadow, this gets go again.",
+    "pitch": 3,
+    "cost": 1,
+    "attack": 1,
+    "defense": 3,
+    "set": "IAR"
+  },
+  {
     "id": "IAR141",
     "name": "Otherworldly Sins",
     "cardType": "action",
@@ -1003,6 +1206,21 @@
     "set": "IAR"
   },
   {
+    "id": "IAR144",
+    "name": "Sonata Dystopia",
+    "cardType": "action",
+    "classes": [
+      "runeblade"
+    ],
+    "text": "As an additional cost to play this, destroy X Runechants you control.\nThe next attack action card you play this turn costs X{r} less to play and gets +X{p}, overpower, and \"When this hits, create X Runechant tokens.\" Go again",
+    "pitch": 3,
+    "defense": 3,
+    "keywords": [
+      "Go again"
+    ],
+    "set": "IAR"
+  },
+  {
     "id": "IAR145",
     "name": "Runechant of Greed",
     "cardType": "instant",
@@ -1031,6 +1249,106 @@
     "pitch": 1,
     "cost": 2,
     "attack": 6,
+    "defense": 2,
+    "keywords": [
+      "Usurp"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR147",
+    "name": "Runic Disposition",
+    "cardType": "action",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "attack"
+    ],
+    "text": "Usurp (As an additional cost to play this, destroy a Runechant if able. If you do, this gets +2{p}.)\nInstant - Discard this: Create a Runechant token.",
+    "pitch": 2,
+    "cost": 2,
+    "attack": 5,
+    "defense": 2,
+    "keywords": [
+      "Usurp"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR148",
+    "name": "Runic Disposition",
+    "cardType": "action",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "attack"
+    ],
+    "text": "Usurp (As an additional cost to play this, destroy a Runechant if able. If you do, this gets +2{p}.)\nInstant - Discard this: Create a Runechant token.",
+    "pitch": 3,
+    "cost": 2,
+    "attack": 4,
+    "defense": 2,
+    "keywords": [
+      "Usurp"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR149",
+    "name": "Runic Reaving",
+    "cardType": "action",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "attack"
+    ],
+    "text": "Usurp (As an additional cost to play this, destroy a Runechant if able. If you do, this gets +2{p}.)\nInstant - Discard this: Create a Runechant token.",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 4,
+    "defense": 2,
+    "keywords": [
+      "Usurp"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR150",
+    "name": "Runic Reaving",
+    "cardType": "action",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "attack"
+    ],
+    "text": "Usurp (As an additional cost to play this, destroy a Runechant if able. If you do, this gets +2{p}.)\nInstant - Discard this: Create a Runechant token.",
+    "pitch": 2,
+    "cost": 0,
+    "attack": 3,
+    "defense": 2,
+    "keywords": [
+      "Usurp"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR151",
+    "name": "Runic Reaving",
+    "cardType": "action",
+    "classes": [
+      "runeblade"
+    ],
+    "subtypes": [
+      "attack"
+    ],
+    "text": "Usurp (As an additional cost to play this, destroy a Runechant if able. If you do, this gets +2{p}.)\nInstant - Discard this: Create a Runechant token.",
+    "pitch": 3,
+    "cost": 0,
+    "attack": 2,
     "defense": 2,
     "keywords": [
       "Usurp"
@@ -1243,6 +1561,42 @@
     "set": "IAR"
   },
   {
+    "id": "IAR168",
+    "name": "Countdown to Extinction",
+    "cardType": "action",
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "When this attacks, create a Gate to i'Arathael token.\nWhen this hits, you may search your deck for a Darkest Hour, banish it, then shuffle.\nBlood Debt",
+    "pitch": 2,
+    "cost": 3,
+    "attack": 5,
+    "defense": 3,
+    "keywords": [
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR169",
+    "name": "Countdown to Extinction",
+    "cardType": "action",
+    "subtypes": [
+      "shadow",
+      "attack"
+    ],
+    "text": "When this attacks, create a Gate to i'Arathael token.\nWhen this hits, you may search your deck for a Darkest Hour, banish it, then shuffle.\nBlood Debt",
+    "pitch": 3,
+    "cost": 3,
+    "attack": 4,
+    "defense": 3,
+    "keywords": [
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
     "id": "IAR170",
     "name": "Harbinger of Destruction",
     "cardType": "action",
@@ -1401,6 +1755,23 @@
     "set": "IAR"
   },
   {
+    "id": "IAR210",
+    "name": "Darkest Hour",
+    "cardType": "action",
+    "subtypes": [
+      "shadow"
+    ],
+    "text": "You may put a card from your hand on top of your deck rather than pay this card's {r} cost.\nYour next Shadow attack this turn gets +3{p}. Go again\nBlood Debt",
+    "pitch": 2,
+    "cost": 2,
+    "defense": 3,
+    "keywords": [
+      "Go again",
+      "Blood Debt"
+    ],
+    "set": "IAR"
+  },
+  {
     "id": "IAR211",
     "name": "Darkest Hour",
     "cardType": "action",
@@ -1510,6 +1881,57 @@
     "defense": 2,
     "keywords": [
       "Blade Break"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR233",
+    "name": "Battle Prep",
+    "cardType": "action",
+    "classes": [
+      "generic"
+    ],
+    "text": "Opt 2 (Look at the top 2 cards of your deck. Put them on the top and/or bottom in any order.)\nIf this was played from arsenal, your next attack this turn gets +3{p}.\nGo again",
+    "pitch": 1,
+    "cost": 0,
+    "defense": 3,
+    "keywords": [
+      "Opt 2",
+      "Go again"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR234",
+    "name": "Battle Prep",
+    "cardType": "action",
+    "classes": [
+      "generic"
+    ],
+    "text": "Opt 2 (Look at the top 2 cards of your deck. Put them on the top and/or bottom in any order.)\nIf this was played from arsenal, your next attack this turn gets +2{p}.\nGo again",
+    "pitch": 2,
+    "cost": 0,
+    "defense": 3,
+    "keywords": [
+      "Opt 2",
+      "Go again"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR235",
+    "name": "Battle Prep",
+    "cardType": "action",
+    "classes": [
+      "generic"
+    ],
+    "text": "Opt 2 (Look at the top 2 cards of your deck. Put them on the top and/or bottom in any order.)\nIf this was played from arsenal, your next attack this turn gets +1{p}.\nGo again",
+    "pitch": 3,
+    "cost": 0,
+    "defense": 3,
+    "keywords": [
+      "Opt 2",
+      "Go again"
     ],
     "set": "IAR"
   },
@@ -1714,6 +2136,21 @@
     "defense": 3,
     "keywords": [
       "Earth Bond"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR666",
+    "name": "Soul of Existence",
+    "cardType": "resource",
+    "subtypes": [
+      "shadow",
+      "gem"
+    ],
+    "text": "Legendary (You may only have 1 Soul of Existence in your deck.)\nWhen this is pitched, lose 1{h}.",
+    "pitch": 4,
+    "keywords": [
+      "Legendary"
     ],
     "set": "IAR"
   }

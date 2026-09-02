@@ -4311,6 +4311,20 @@
       "value": "搜寻一张牌名中含有 Runechant 的灵气 (Aura)？"
     }
   ],
+  "card.iar.sonata.runechants.destroy": [
+    {
+      "type": 0,
+      "value": "选择 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 个要摧毁的 Runechant"
+    }
+  ],
   "card.iar.usurp.runechant.destroy": [
     {
       "type": 0,
@@ -4625,6 +4639,34 @@
       "value": " 被放逐"
     }
   ],
+  "card.log.common.blooddebt.triggered": [
+    {
+      "type": 0,
+      "value": "Blood Debt 触发"
+    },
+    {
+      "type": 6,
+      "value": "occurrences",
+      "options": {
+        "one": {
+          "value": []
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": " ×"
+            },
+            {
+              "type": 7
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
   "card.log.common.card.banished.from.graveyard": [
     {
       "type": 1,
@@ -4915,6 +4957,38 @@
     {
       "type": 0,
       "value": " 被标记 (marked)"
+    }
+  ],
+  "card.log.common.heroability.triggered": [
+    {
+      "type": 1,
+      "value": "triggerSource"
+    },
+    {
+      "type": 0,
+      "value": " 的英雄能力触发"
+    },
+    {
+      "type": 6,
+      "value": "occurrences",
+      "options": {
+        "one": {
+          "value": []
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": " ×"
+            },
+            {
+              "type": 7
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "card.log.common.intimidate": [
@@ -14945,6 +15019,52 @@
       "value": "选择 X"
     }
   ],
+  "engine.log.arsenal.facedown.private": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 被面朝下置入 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 的 arsenal"
+    }
+  ],
+  "engine.log.arsenal.facedown.public": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 将一张牌面朝下置入 arsenal"
+    }
+  ],
+  "engine.log.arsenal.faceup": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 被面朝上置入 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 的 arsenal"
+    }
+  ],
   "engine.log.card.pitched": [
     {
       "type": 1,
@@ -15207,6 +15327,78 @@
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "engine.log.trigger.card": [
+    {
+      "type": 1,
+      "value": "triggerSource"
+    },
+    {
+      "type": 0,
+      "value": " 触发："
+    },
+    {
+      "type": 1,
+      "value": "triggerEffect"
+    },
+    {
+      "type": 6,
+      "value": "occurrences",
+      "options": {
+        "one": {
+          "value": []
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": " ×"
+            },
+            {
+              "type": 7
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "engine.log.trigger.facedown": [
+    {
+      "type": 1,
+      "value": "triggerSource"
+    },
+    {
+      "type": 0,
+      "value": " 的面朝下卡牌触发："
+    },
+    {
+      "type": 1,
+      "value": "triggerEffect"
+    },
+    {
+      "type": 6,
+      "value": "occurrences",
+      "options": {
+        "one": {
+          "value": []
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": " ×"
+            },
+            {
+              "type": 7
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "engine.log.turn.started": [
