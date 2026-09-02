@@ -1,5 +1,13 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { ampNextArcane, attackAbility, buffNextAttack, opponentSeat } from "../shared-helpers.js";
+import {
+  ampNextArcane,
+  attackAbility,
+  buffNextAttack,
+  commonOptionMessages,
+  decisionMessage,
+  decisionPrompt,
+  opponentSeat,
+} from "../shared-helpers.js";
 import { SHARPEN_FOLLOWUP, sharpenSword } from "../aha/warrior-sharpen.js";
 
 const EMBODIMENT = "ROS026";
@@ -42,7 +50,11 @@ export const omnHighRarity: Record<string, CardScript> = {
     onHit: (ctx) => { ctx.drawCards(ctx.seat, 1); },
     onFragment(ctx) {
       const cards = ctx.player(ctx.seat).graveyard.filter((card) => isInstant(ctx, card) && has(ctx, card, "lightning"));
-      if (cards.length) ctx.requestCardChoice("unwinding-top", "Put a Lightning instant on top?", ["no", ...cards.map((card) => card.instanceId)]);
+      if (cards.length) ctx.requestCardChoice("unwinding-top", decisionPrompt(
+        "Put a Lightning instant on top?",
+        "card.omn.lightning.instant.top",
+        { optionMessages: commonOptionMessages("no") },
+      ), ["no", ...cards.map((card) => card.instanceId)]);
     },
     onChoose(ctx, hook, option) { if (hook === "unwinding-top" && option !== "no") ctx.putOnDeckTop(Number(option)); },
   },
@@ -50,12 +62,16 @@ export const omnHighRarity: Record<string, CardScript> = {
     wardValue: () => 1,
     onLeaveArena(ctx) {
       const auras = ctx.player(ctx.seat).board.filter((card) => card.instanceId !== ctx.self.instanceId && has(ctx, card, "lightning") && isAura(ctx, card) && Number(card.counters?.holo ?? 0) === 0);
-      if (auras.length) ctx.requestCardChoice("flicker-holo", "Blink a Lightning aura with a holo counter?", ["no", ...auras.map((card) => card.instanceId)]);
+      if (auras.length) ctx.requestCardChoice("flicker-holo", decisionPrompt(
+        "Blink a Lightning aura with a holo counter?",
+        "card.omn.lightning.aura.holo.blink",
+        { optionMessages: commonOptionMessages("no") },
+      ), ["no", ...auras.map((card) => card.instanceId)]);
     },
     onChoose(ctx, hook, option) { if (hook === "flicker-holo" && option !== "no" && ctx.banish(Number(option))) { ctx.setCardCounter(Number(option), "holo", 1); ctx.settleCard(Number(option)); } },
   },
   "fractal creation|3": {
-    onHit(ctx) { const auras = ctx.player(ctx.seat).board.filter((card) => isAura(ctx, card)); if (auras.length) ctx.requestCardChoice("fractal-copy", "Create a token copy of an aura?", ["no", ...auras.map((card) => card.instanceId)]); },
+    onHit(ctx) { const auras = ctx.player(ctx.seat).board.filter((card) => isAura(ctx, card)); if (auras.length) ctx.requestCardChoice("fractal-copy", decisionPrompt("Create a token copy of an aura?", "card.omn.aura.token.copy", { optionMessages: commonOptionMessages("no") }), ["no", ...auras.map((card) => card.instanceId)]); },
     onChoose(ctx, hook, option) { if (hook === "fractal-copy" && option !== "no") ctx.createTokenCopy(Number(option)); },
   },
   "aurora, legacy of tempest|0": {
@@ -71,7 +87,10 @@ export const omnHighRarity: Record<string, CardScript> = {
     onDealsDamage(ctx, target, amount) {
       if (amount <= 0 || target === ctx.seat || ctx.getFlag("link", "tempestDiscard") === true) return;
       ctx.setFlag("link", "tempestDiscard", true); const hand = ctx.player(target).hand;
-      if (hand.length) ctx.requestCardChoice("tempest-discard", "Discard a card", hand.map((card) => card.instanceId), target);
+      if (hand.length) ctx.requestCardChoice("tempest-discard", decisionPrompt(
+        "Discard a card",
+        "card.omn.card.discard",
+      ), hand.map((card) => card.instanceId), target);
     },
     onChoose(ctx, hook, option) { if (hook === "tempest-discard") ctx.discardCard(opponentSeat(ctx), Number(option)); },
   },
@@ -79,7 +98,11 @@ export const omnHighRarity: Record<string, CardScript> = {
     onHeroDealtDamage(ctx) {
       if (ctx.getFlag("player", "arcanicReproachUsed") === true) return;
       const cards = ctx.player(ctx.seat).hand.filter((card) => has(ctx, card, "lightning"));
-      if (cards.length) ctx.requestCardChoice("reproach-reveal", "Reveal a Lightning card?", ["no", ...cards.map((card) => card.instanceId)]);
+      if (cards.length) ctx.requestCardChoice("reproach-reveal", decisionPrompt(
+        "Reveal a Lightning card?",
+        "card.omn.lightning.card.reveal",
+        { optionMessages: commonOptionMessages("no") },
+      ), ["no", ...cards.map((card) => card.instanceId)]);
     },
     onChoose(ctx, hook, option) { if (hook === "reproach-reveal" && option !== "no") { ctx.revealCards([Number(option)], ctx.seat); ctx.setFlag("player", "arcanicReproachUsed", true); ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true }); } },
     triggers: [{ event: "begin-action-phase", label: "Destroy an aura", effect(ctx) { const aura = ctx.player(ctx.seat).board.find((card) => isAura(ctx, card)); if (aura) ctx.destroyPermanent(aura.instanceId); } }],
@@ -103,7 +126,10 @@ export const omnHighRarity: Record<string, CardScript> = {
       onActivate(ctx) {
         const hand = ctx.player(ctx.seat).hand;
         if (hand.length) {
-          ctx.requestCardChoice("oscilio-discard", "Discard a card", hand.map((card) => card.instanceId));
+          ctx.requestCardChoice("oscilio-discard", decisionPrompt(
+            "Discard a card",
+            "card.omn.card.discard",
+          ), hand.map((card) => card.instanceId));
           return;
         }
         ctx.createToken(PONDER);
@@ -160,15 +186,15 @@ export const omnHighRarity: Record<string, CardScript> = {
     }],
   },
   "astral strike|1": {
-    onAttackDeclared(ctx) { if (ctx.getFlag("player", "destroyedName:lightning flow") === true) ctx.requestChoice("astral-mode", "Choose a mode", ["draw", "+2", "go again"]); },
+    onAttackDeclared(ctx) { if (ctx.getFlag("player", "destroyedName:lightning flow") === true) ctx.requestChoice("astral-mode", decisionPrompt("Choose a mode", "card.omn.mode.choose", { optionMessages: { draw: decisionMessage("card.omn.option.draw"), "+2": decisionMessage("card.omn.option.plus2power"), "go again": decisionMessage("card.omn.option.goagain") } }), ["draw", "+2", "go again"]); },
     onChoose(ctx, hook, option) { if (hook !== "astral-mode") return; if (option === "draw") ctx.drawCards(ctx.seat, 1); else if (option === "+2") ctx.addModifier({ scope: "chain-link", attack: 2 }); else ctx.grantGoAgain(); },
   },
   "flowstate embodiment|1": {
     onAttackDeclared: (ctx) => ctx.addModifier({ scope: "combat-chain" }),
-    triggers: [{ event: "card-played", label: "Create an Embodiment of Lightning or Lightning Flow", condition: (ctx, played) => ctx.link?.attackingCard.instanceId === ctx.self.instanceId && !!played && isInstant(ctx, played), effect(ctx) { ctx.requestChoice("flowstate-token", "Create which token?", [EMBODIMENT, FLOW]); } }],
+    triggers: [{ event: "card-played", label: "Create an Embodiment of Lightning or Lightning Flow", condition: (ctx, played) => ctx.link?.attackingCard.instanceId === ctx.self.instanceId && !!played && isInstant(ctx, played), effect(ctx) { ctx.requestChoice("flowstate-token", decisionPrompt("Create which token?", "card.omn.token.choose", { optionMessages: { [EMBODIMENT]: decisionMessage("card.omn.option.embodimentoflightning"), [FLOW]: decisionMessage("card.omn.option.lightningflow") } }), [EMBODIMENT, FLOW]); } }],
     onChoose(ctx, hook, option) { if (hook === "flowstate-token") ctx.createToken(option); },
   },
-  "static shelter|2": { defendCost: 1, onDefend(ctx) { if (ctx.requestPayment("static-flow", "Pay 1 to create Lightning Flow?", 1)) return; }, onChoose(ctx, hook, option) { if (hook === "static-flow" && option === "paid") ctx.createToken(FLOW); } },
+  "static shelter|2": { defendCost: 1, onDefend(ctx) { if (ctx.requestPayment("static-flow", decisionPrompt("Pay 1 to create Lightning Flow?", "card.omn.resource.pay.flow", { values: { amount: 1 } }), 1)) return; }, onChoose(ctx, hook, option) { if (hook === "static-flow" && option === "paid") ctx.createToken(FLOW); } },
   "boots of omnis ward|0": {
     modifyDefense: (ctx) => ctx.getFlag("player", "arcaneDamageTakenThisTurn") === true ? 1 : 0,
     activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true, tapHeroCost: true, onActivate: (ctx) => ctx.preventNextDamage(ctx.seat, 1) },
@@ -180,7 +206,10 @@ export const omnHighRarity: Record<string, CardScript> = {
   },
   "tempt over|2": { onAttackDeclared(ctx) {
     if (ctx.link?.targetAllyId !== undefined) return; const auras = ctx.player(opponentSeat(ctx)).board.filter((card) => isAura(ctx, card) && has(ctx, card, "token"));
-    if (auras.length) ctx.requestCardChoice("tempt-steal", "Steal an aura token", auras.map((card) => card.instanceId));
+    if (auras.length) ctx.requestCardChoice("tempt-steal", decisionPrompt(
+      "Steal an aura token",
+      "card.omn.aura.token.steal",
+    ), auras.map((card) => card.instanceId));
   }, onChoose(ctx, hook, option) { if (hook === "tempt-steal") ctx.steal(Number(option)); } },
   "unmake the underlings|3": {
     onAttackDeclared(ctx) { if (ctx.link?.targetAllyId !== undefined) return; const ally = ctx.player(opponentSeat(ctx)).graveyard.find((card) => has(ctx, card, "ally")); if (ally) ctx.setCardFaceDown(ally.instanceId, true); },
@@ -208,7 +237,7 @@ export const omnHighRarity: Record<string, CardScript> = {
     onEnterArena(ctx) { ctx.createToken(SPELLBANE); },
   },
   "settle the bill|1": {
-    onPlay(ctx) { const arrows = ctx.player(ctx.seat).hand.filter((card) => has(ctx, card, "arrow")); if (arrows.length && ctx.player(ctx.seat).arsenal.length === 0) ctx.requestCardChoice("settle-arrow", "Put an arrow into arsenal?", ["no", ...arrows.map((card) => card.instanceId)]); },
+    onPlay(ctx) { const arrows = ctx.player(ctx.seat).hand.filter((card) => has(ctx, card, "arrow")); if (arrows.length && ctx.player(ctx.seat).arsenal.length === 0) ctx.requestCardChoice("settle-arrow", decisionPrompt("Put an arrow into arsenal?", "card.omn.arrow.arsenal", { optionMessages: commonOptionMessages("no") }), ["no", ...arrows.map((card) => card.instanceId)]); },
     onChoose(ctx, hook, option) { if (hook === "settle-arrow" && option !== "no" && ctx.putIntoArsenal(Number(option), "hand", { faceUp: true })) { ctx.addCardTempPower(Number(option), 3); ctx.addModifier({ scope: "until-end-of-turn", appliesToInstanceId: Number(option) }); } },
     canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.state.modifiers.some((modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "chain-link"); },
     onHit(ctx) { for (const card of [...ctx.player(opponentSeat(ctx)).arsenal]) ctx.moveToGraveyard(card.instanceId, "arsenal"); },
@@ -227,24 +256,27 @@ export const omnHighRarity: Record<string, CardScript> = {
     },
   },
   "crash site salvage|2": {
-    additionalCost(ctx) { const choices = [...ctx.player(ctx.seat).board, ...Object.values(ctx.player(ctx.seat).equipment).filter((card): card is Card => !!card)].filter((card) => has(ctx, card, "item") || has(ctx, card, "equipment") || has(ctx, card, "token")); if (choices.length) ctx.requestCardChoice("salvage-scrap", "Scrap a permanent?", ["no", ...choices.map((card) => card.instanceId)]); },
+    additionalCost(ctx) { const choices = [...ctx.player(ctx.seat).board, ...Object.values(ctx.player(ctx.seat).equipment).filter((card): card is Card => !!card)].filter((card) => has(ctx, card, "item") || has(ctx, card, "equipment") || has(ctx, card, "token")); if (choices.length) ctx.requestCardChoice("salvage-scrap", decisionPrompt("Scrap a permanent?", "card.omn.permanent.scrap", { optionMessages: commonOptionMessages("no") }), ["no", ...choices.map((card) => card.instanceId)]); },
     onChoose(ctx, hook, option) { if (hook !== "salvage-scrap" || option === "no") return; const card = [...ctx.player(ctx.seat).board, ...Object.values(ctx.player(ctx.seat).equipment).filter((candidate): candidate is Card => !!candidate)].find((candidate) => candidate.instanceId === Number(option)); if (card && ctx.destroyPermanent(card.instanceId)) { ctx.setCounter("scrapped", 1); if (has(ctx, card, "cog")) ctx.setCounter("scrappedCog", 1); } },
     onAttackDeclared(ctx) { if (ctx.getCounter("scrapped")) ctx.grantGoAgain(); if (ctx.getCounter("scrappedCog")) ctx.createToken(GOLD); },
   },
   "golden skull|2": { allZoneNames: ["Gold"] },
   "red lure harpoon|3": { canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.getFlag("player", "activatedCannonThisTurn") === true; }, onHit(ctx) {
     const cards = ctx.player(opponentSeat(ctx)).graveyard.filter((card) => ctx.cardColor(card) === 1 && ctx.hasCardType(card, "action"));
-    if (cards.length) ctx.requestCardChoice("harpoon-banish", "Banish a red action", cards.map((card) => card.instanceId));
+    if (cards.length) ctx.requestCardChoice("harpoon-banish", decisionPrompt(
+      "Banish a red action",
+      "card.omn.red.action.banish",
+    ), cards.map((card) => card.instanceId));
   }, onChoose(ctx, hook, option) { if (hook === "harpoon-banish" && ctx.banish(Number(option))) ctx.allowPlayFrom(Number(option), "banish", { forSeat: ctx.seat, untilEndOfNextTurn: true }); } },
   "fortitude of anvilheim|0": { activated: {
     cost: 2, isAttack: false, goAgain: false, timing: "attack-reaction", destroySelfCost: true, tapHeroCost: true,
     canActivate: (ctx) => ctx.link?.attackCardType === "weapon" && ctx.link.defendingCards.some((card) => ctx.hasCardType(card, "action")),
-    onActivate(ctx) { const cards = ctx.link?.defendingCards.filter((card) => ctx.hasCardType(card, "action")) ?? []; if (cards.length) ctx.requestCardChoice("fortitude-return", "Return an action defender", cards.map((card) => card.instanceId)); },
+    onActivate(ctx) { const cards = ctx.link?.defendingCards.filter((card) => ctx.hasCardType(card, "action")) ?? []; if (cards.length) ctx.requestCardChoice("fortitude-return", decisionPrompt("Return an action defender", "card.omn.action.defender.return"), cards.map((card) => card.instanceId)); },
   }, onChoose(ctx, hook, option) { if (hook === "fortitude-return") ctx.moveToHand(Number(option)); } },
   "a bit off the side|1": {
     onPlay: (ctx) => ctx.addModifier({ scope: "until-end-of-turn", appliesToSubtype: "axe" }),
     canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.state.modifiers.some((modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "chain-link"); },
-    onHit(ctx) { const hand = ctx.player(opponentSeat(ctx)).hand; if (hand.length) ctx.requestCardChoice("axe-discard", "Discard a card", hand.map((card) => card.instanceId), opponentSeat(ctx)); },
+    onHit(ctx) { const hand = ctx.player(opponentSeat(ctx)).hand; if (hand.length) ctx.requestCardChoice("axe-discard", decisionPrompt("Discard a card", "card.omn.card.discard"), hand.map((card) => card.instanceId), opponentSeat(ctx)); },
     onChoose(ctx, hook, option) { if (hook === "axe-discard") ctx.discardCard(opponentSeat(ctx), Number(option)); },
   },
   "blessing of aegis|2": {
@@ -256,7 +288,7 @@ export const omnHighRarity: Record<string, CardScript> = {
     triggers: [{ event: "start-of-turn", sourceZone: "graveyard", optional: true, label: "Banish 2 Draco Fire to gain 1 resource", condition(ctx) { return ctx.player(ctx.seat).graveyard.filter((card) => named(ctx, card, "Draco Fire")).length >= 2; }, canAccept(ctx) { return ctx.player(ctx.seat).graveyard.filter((card) => named(ctx, card, "Draco Fire")).length >= 2; }, onAccept(ctx) { const cards = ctx.player(ctx.seat).graveyard.filter((card) => named(ctx, card, "Draco Fire")).slice(0, 2); if (cards.length < 2) return; for (const card of cards) ctx.banish(card.instanceId); ctx.changeResources(ctx.seat, 1); } }],
   },
   "induce panic|2": {
-    onDefend: (ctx) => ctx.requestChoice("panic-color", "Choose a color", ["red", "yellow", "blue"]),
+    onDefend: (ctx) => ctx.requestChoice("panic-color", decisionPrompt("Choose a color", "card.omn.color.choose", { optionMessages: { red: decisionMessage("card.omn.option.red"), yellow: decisionMessage("card.omn.option.yellow"), blue: decisionMessage("card.omn.option.blue") } }), ["red", "yellow", "blue"]),
     onChoose(ctx, hook, option) {
       if (hook !== "panic-color") return; const wanted = option === "red" ? 1 : option === "yellow" ? 2 : 3;
       for (const player of ctx.state.players) { if (!player.hand.length) continue; const card = player.hand[ctx.randomInt(player.hand.length)]!; ctx.revealCards([card.instanceId], player.seat); if (ctx.cardColor(card) === wanted) ctx.discardCard(player.seat, card.instanceId); }

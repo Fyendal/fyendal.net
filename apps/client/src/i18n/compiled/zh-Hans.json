@@ -2927,6 +2927,188 @@
       "value": "弃置一张 Zombie 以生成一个 Gate to i'Arathael？"
     }
   ],
+  "card.hnt.agentofchaos.choose": [
+    {
+      "type": 0,
+      "value": "Mask of Deceit：选择一个 Agent of Chaos"
+    }
+  ],
+  "card.hnt.arsenal.nonattack.faceup": [
+    {
+      "type": 0,
+      "value": "将 arsenal 中的一张非攻击行动牌翻至正面"
+    }
+  ],
+  "card.hnt.banished.facedown.first": [
+    {
+      "type": 0,
+      "value": "选择第 1 张要翻至背面的放逐牌（共 "
+    },
+    {
+      "type": 1,
+      "value": "total"
+    },
+    {
+      "type": 0,
+      "value": " 张）"
+    }
+  ],
+  "card.hnt.banished.facedown.next": [
+    {
+      "type": 0,
+      "value": "再选择一张放逐牌（还需 "
+    },
+    {
+      "type": 1,
+      "value": "remaining"
+    },
+    {
+      "type": 0,
+      "value": " 张）"
+    }
+  ],
+  "card.hnt.card.choose": [
+    {
+      "type": 0,
+      "value": "选择一张牌"
+    }
+  ],
+  "card.hnt.card.name": [
+    {
+      "type": 0,
+      "value": "说出一个牌名"
+    }
+  ],
+  "card.hnt.card.name.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：说出一个牌名"
+    }
+  ],
+  "card.hnt.dagger.choose": [
+    {
+      "type": 0,
+      "value": "选择一把匕首"
+    }
+  ],
+  "card.hnt.dagger.damage.destroy": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一把匕首造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害，然后将其摧毁"
+    }
+  ],
+  "card.hnt.defender.defense.reduce": [
+    {
+      "type": 0,
+      "value": "使一张防守牌的防御力 -"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    }
+  ],
+  "card.hnt.defensereaction.search": [
+    {
+      "type": 0,
+      "value": "搜寻一张防御反应牌？"
+    }
+  ],
+  "card.hnt.draconic.attack.choose": [
+    {
+      "type": 0,
+      "value": "Dragonscaler Flight Path：选择一次 Draconic 攻击"
+    }
+  ],
+  "card.hnt.draconicdagger.equip.next": [
+    {
+      "type": 0,
+      "value": "再装备一把 Draconic 匕首？"
+    }
+  ],
+  "card.hnt.draconicdagger.equip.upto": [
+    {
+      "type": 0,
+      "value": "从墓地装备至多 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 把 Draconic 匕首"
+    }
+  ],
+  "card.hnt.equipment.defensecounter": [
+    {
+      "type": 0,
+      "value": "在一件装备上放置一个 -1 防御指示物"
+    }
+  ],
+  "card.hnt.hand.card.banish": [
+    {
+      "type": 0,
+      "value": "从你的手牌中放逐一张牌"
+    }
+  ],
+  "card.hnt.provoke.card.reveal": [
+    {
+      "type": 0,
+      "value": "Provoke：选择一张牌展示"
+    }
+  ],
+  "card.hnt.tarantula.mode": [
+    {
+      "type": 0,
+      "value": "Tarantula Toxin：选择一项或两项"
+    }
+  ],
+  "card.hnt.tarantula.option.attack": [
+    {
+      "type": 0,
+      "value": "攻击力 +3"
+    }
+  ],
+  "card.hnt.tarantula.option.defense": [
+    {
+      "type": 0,
+      "value": "防御力 -3"
+    }
+  ],
+  "card.hnt.trap.banish": [
+    {
+      "type": 0,
+      "value": "放逐一张 trap 牌"
+    }
+  ],
+  "card.hnt.vest.resource.stain": [
+    {
+      "type": 0,
+      "value": "Blood Splattered Vest：获得 1 点资源并放置一个 stain 指示物？"
+    }
+  ],
+  "card.hnt.weapon.choose": [
+    {
+      "type": 0,
+      "value": "选择一件武器"
+    }
+  ],
   "card.hvy.arsenal.bottom": [
     {
       "type": 0,
@@ -3789,6 +3971,450 @@
       "value": "分别至多摧毁一个 Blade Dance 和 Flurry？"
     }
   ],
+  "card.mst.aura.bottom": [
+    {
+      "type": 0,
+      "value": "将一个光环置于其拥有者牌库底"
+    }
+  ],
+  "card.mst.blue.card.banish": [
+    {
+      "type": 0,
+      "value": "放逐一张蓝色牌"
+    }
+  ],
+  "card.mst.blue.card.defend": [
+    {
+      "type": 0,
+      "value": "选择一张蓝色牌进行防守"
+    }
+  ],
+  "card.mst.card.banish": [
+    {
+      "type": 0,
+      "value": "放逐一张牌"
+    }
+  ],
+  "card.mst.card.choose": [
+    {
+      "type": 0,
+      "value": "选择一张牌"
+    }
+  ],
+  "card.mst.card.discard": [
+    {
+      "type": 0,
+      "value": "选择一张牌弃置"
+    }
+  ],
+  "card.mst.card.nodefense.choose": [
+    {
+      "type": 0,
+      "value": "选择一张没有防御值的牌"
+    }
+  ],
+  "card.mst.combo.bottom": [
+    {
+      "type": 0,
+      "value": "将一张 combo 牌置于你的牌库底"
+    }
+  ],
+  "card.mst.combo.search": [
+    {
+      "type": 0,
+      "value": "搜寻一张 combo 牌"
+    }
+  ],
+  "card.mst.crouchingtiger.name": [
+    {
+      "type": 0,
+      "value": "说出一张 Crouching Tiger 的牌名"
+    }
+  ],
+  "card.mst.defending.card.choose": [
+    {
+      "type": 0,
+      "value": "选择一张防守牌"
+    }
+  ],
+  "card.mst.defendinghero.graveyard.banish": [
+    {
+      "type": 0,
+      "value": "从防守英雄的墓地放逐一张牌"
+    }
+  ],
+  "card.mst.defendinghero.graveyard.banish.optional": [
+    {
+      "type": 0,
+      "value": "从防守英雄的墓地放逐一张牌？"
+    }
+  ],
+  "card.mst.equipment.faceup": [
+    {
+      "type": 0,
+      "value": "将一件装备翻至正面"
+    }
+  ],
+  "card.mst.facedown.card.look": [
+    {
+      "type": 0,
+      "value": "选择一张背面朝上的牌查看"
+    }
+  ],
+  "card.mst.hand.card.bottom": [
+    {
+      "type": 0,
+      "value": "将一张手牌置于牌库底"
+    }
+  ],
+  "card.mst.hero.damage.choose": [
+    {
+      "type": 0,
+      "value": "对哪位英雄造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害？"
+    }
+  ],
+  "card.mst.innerchi.search": [
+    {
+      "type": 0,
+      "value": "搜寻一张 Inner Chi"
+    }
+  ],
+  "card.mst.matchingcolor.card.banish": [
+    {
+      "type": 0,
+      "value": "放逐一张颜色相同的牌"
+    }
+  ],
+  "card.mst.mechanologist.action.top": [
+    {
+      "type": 0,
+      "value": "将一张 Mechanologist 行动牌置于牌库顶"
+    }
+  ],
+  "card.mst.option.yourhero": [
+    {
+      "type": 0,
+      "value": "你的英雄"
+    }
+  ],
+  "card.mst.remaining.bottommost.choose": [
+    {
+      "type": 0,
+      "value": "选择哪张牌位于最下方"
+    }
+  ],
+  "card.mst.restless.power.move": [
+    {
+      "type": 0,
+      "value": "移动 Restless Coalescence 的力量指示物？"
+    }
+  ],
+  "card.mst.wardaura.choose": [
+    {
+      "type": 0,
+      "value": "选择一个守护 (ward) 光环"
+    }
+  ],
+  "card.omn.action.defender.return": [
+    {
+      "type": 0,
+      "value": "将一张行动防守牌返回手牌"
+    }
+  ],
+  "card.omn.arcane.target.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：对一个目标造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "card.omn.arrow.arsenal": [
+    {
+      "type": 0,
+      "value": "将一张箭放入 arsenal？"
+    }
+  ],
+  "card.omn.attack.target.upto": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择至多一个目标攻击"
+    }
+  ],
+  "card.omn.aura.holo.counter": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：为一个光环放置 holo 指示物？"
+    }
+  ],
+  "card.omn.aura.token.copy": [
+    {
+      "type": 0,
+      "value": "创造一个光环的衍生物复制？"
+    }
+  ],
+  "card.omn.aura.token.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一个光环衍生物"
+    }
+  ],
+  "card.omn.aura.token.destroy.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：摧毁一个光环衍生物"
+    }
+  ],
+  "card.omn.aura.token.steal": [
+    {
+      "type": 0,
+      "value": "夺取一个光环衍生物"
+    }
+  ],
+  "card.omn.card.discard": [
+    {
+      "type": 0,
+      "value": "弃置一张牌"
+    }
+  ],
+  "card.omn.color.choose": [
+    {
+      "type": 0,
+      "value": "选择一种颜色"
+    }
+  ],
+  "card.omn.flow.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一个 Lightning Flow"
+    }
+  ],
+  "card.omn.flow.destroy.damage": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：摧毁一个 Lightning Flow 以造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害？"
+    }
+  ],
+  "card.omn.flow.destroy.goagain": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：摧毁一个 Lightning Flow 以获得 go again？"
+    }
+  ],
+  "card.omn.flow.destroy.power": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：摧毁一个 Lightning Flow 使攻击力 +2？"
+    }
+  ],
+  "card.omn.graveyard.attack.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将墓地中的一张攻击行动牌置于牌库底"
+    }
+  ],
+  "card.omn.graveyard.instant.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将墓地中的一张瞬间牌置于牌库底"
+    }
+  ],
+  "card.omn.graveyard.instant.shuffle": [
+    {
+      "type": 0,
+      "value": "将墓地中的一张瞬间牌洗入你的牌库？"
+    }
+  ],
+  "card.omn.hand.card.bottom": [
+    {
+      "type": 0,
+      "value": "将一张手牌置于牌库底"
+    }
+  ],
+  "card.omn.hero.tap.bonus": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：横置你的英雄以获得额外效果？"
+    }
+  ],
+  "card.omn.instant.discard.flow.goagain": [
+    {
+      "type": 0,
+      "value": "弃置一张瞬间牌以创造 Lightning Flow 并获得 go again？"
+    }
+  ],
+  "card.omn.lightning.aura.holo.blink": [
+    {
+      "type": 0,
+      "value": "放逐一个没有 holo 指示物的 Lightning 光环并将其移回竞技场？"
+    }
+  ],
+  "card.omn.lightning.card.reveal": [
+    {
+      "type": 0,
+      "value": "展示一张 Lightning 牌？"
+    }
+  ],
+  "card.omn.lightning.hero.weapon.tap": [
+    {
+      "type": 0,
+      "value": "横置 Lightning 英雄或一件武器"
+    }
+  ],
+  "card.omn.lightning.instant.top": [
+    {
+      "type": 0,
+      "value": "将一张 Lightning 瞬间牌置于牌库顶？"
+    }
+  ],
+  "card.omn.mode.choose": [
+    {
+      "type": 0,
+      "value": "选择一个模式"
+    }
+  ],
+  "card.omn.option.blue": [
+    {
+      "type": 0,
+      "value": "蓝色"
+    }
+  ],
+  "card.omn.option.draw": [
+    {
+      "type": 0,
+      "value": "抽一张牌"
+    }
+  ],
+  "card.omn.option.embodimentoflightning": [
+    {
+      "type": 0,
+      "value": "Embodiment of Lightning"
+    }
+  ],
+  "card.omn.option.goagain": [
+    {
+      "type": 0,
+      "value": "go again"
+    }
+  ],
+  "card.omn.option.lightningflow": [
+    {
+      "type": 0,
+      "value": "Lightning Flow"
+    }
+  ],
+  "card.omn.option.plus2power": [
+    {
+      "type": 0,
+      "value": "攻击力 +2"
+    }
+  ],
+  "card.omn.option.red": [
+    {
+      "type": 0,
+      "value": "红色"
+    }
+  ],
+  "card.omn.option.yellow": [
+    {
+      "type": 0,
+      "value": "黄色"
+    }
+  ],
+  "card.omn.permanent.scrap": [
+    {
+      "type": 0,
+      "value": "拆解 (scrap) 一个永久物？"
+    }
+  ],
+  "card.omn.red.action.banish": [
+    {
+      "type": 0,
+      "value": "放逐一张红色行动牌"
+    }
+  ],
+  "card.omn.resource.pay.flow": [
+    {
+      "type": 0,
+      "value": "支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源以创造 Lightning Flow？"
+    }
+  ],
+  "card.omn.token.choose": [
+    {
+      "type": 0,
+      "value": "选择一个衍生物"
+    }
+  ],
   "card.out.affliction.choose": [
     {
       "type": 0,
@@ -4475,6 +5101,240 @@
       "value": "弃置一张牌以改为赢得赌注 (wager)？"
     }
   ],
+  "card.ros.arcane.hero.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：对一位英雄造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "card.ros.arcane.target.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：对一个目标造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "card.ros.arsenal.card.bottom": [
+    {
+      "type": 0,
+      "value": "将 arsenal 中的一张牌置于牌库底"
+    }
+  ],
+  "card.ros.arsenal.matching.banish": [
+    {
+      "type": 0,
+      "value": "从 arsenal 放逐相符的牌"
+    }
+  ],
+  "card.ros.attack.return": [
+    {
+      "type": 0,
+      "value": "将一张攻击行动牌返回其拥有者手牌"
+    }
+  ],
+  "card.ros.attack.return.next": [
+    {
+      "type": 0,
+      "value": "再选择一张攻击行动牌，或完成选择"
+    }
+  ],
+  "card.ros.attack.return.upto": [
+    {
+      "type": 0,
+      "value": "选择至多 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张攻击行动牌，在此 link 结算时返回手牌"
+    }
+  ],
+  "card.ros.aura.bottom.optional": [
+    {
+      "type": 0,
+      "value": "将至多 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个光环置于其拥有者牌库底"
+    }
+  ],
+  "card.ros.aura.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一个光环"
+    }
+  ],
+  "card.ros.aura.destroy.eligible": [
+    {
+      "type": 0,
+      "value": "摧毁一个符合条件的光环"
+    }
+  ],
+  "card.ros.aura.destroy.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：摧毁一个你操控的光环"
+    }
+  ],
+  "card.ros.aura.destroy.own": [
+    {
+      "type": 0,
+      "value": "摧毁一个你操控的光环？"
+    }
+  ],
+  "card.ros.aura.destroy.runechant": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：摧毁一个光环以创造 Runechant？"
+    }
+  ],
+  "card.ros.aura.return": [
+    {
+      "type": 0,
+      "value": "将一个你操控的光环返回手牌"
+    }
+  ],
+  "card.ros.aura.return.eligible": [
+    {
+      "type": 0,
+      "value": "将一个符合条件的光环返回其拥有者手牌？"
+    }
+  ],
+  "card.ros.card.discard": [
+    {
+      "type": 0,
+      "value": "选择一张牌弃置"
+    }
+  ],
+  "card.ros.decompose.action": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择要放逐的行动牌"
+    }
+  ],
+  "card.ros.decompose.earth.first": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：进行分解 (decompose)？选择第一张要放逐的 Earth 牌"
+    }
+  ],
+  "card.ros.decompose.earth.second": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择第二张要放逐的 Earth 牌"
+    }
+  ],
+  "card.ros.hand.card.bottom": [
+    {
+      "type": 0,
+      "value": "将一张手牌置于你的牌库底"
+    }
+  ],
+  "card.ros.intimidated.card.graveyard": [
+    {
+      "type": 0,
+      "value": "将一张被 intimidate 的牌置入墓地"
+    }
+  ],
+  "card.ros.lightning.discard": [
+    {
+      "type": 0,
+      "value": "弃置一张 Lightning 牌？"
+    }
+  ],
+  "card.ros.nonattack.shuffle": [
+    {
+      "type": 0,
+      "value": "选择一张非攻击行动牌洗入牌库，或完成选择"
+    }
+  ],
+  "card.ros.opponent.hand.discard": [
+    {
+      "type": 0,
+      "value": "查看对手手牌并选择一张；对手将其弃置"
+    }
+  ],
+  "card.ros.option.earth": [
+    {
+      "type": 0,
+      "value": "Embodiment of Earth"
+    }
+  ],
+  "card.ros.option.runechant": [
+    {
+      "type": 0,
+      "value": "Runechant"
+    }
+  ],
+  "card.ros.option.yourhero": [
+    {
+      "type": 0,
+      "value": "你的英雄"
+    }
+  ],
+  "card.ros.sigil.return": [
+    {
+      "type": 0,
+      "value": "将墓地中的一个 Sigil 光环返回手牌？"
+    }
+  ],
+  "card.ros.token.create": [
+    {
+      "type": 0,
+      "value": "要创造哪个衍生物？"
+    }
+  ],
   "card.sar.blackwidow.hand.banish": [
     {
       "type": 0,
@@ -4569,6 +5429,54 @@
     {
       "type": 0,
       "value": "Spire Sniping：以任意顺序放回牌库顶的两张牌"
+    }
+  ],
+  "card.sba.crown.attack.top": [
+    {
+      "type": 0,
+      "value": "Crown of Providence：将一张手牌中的攻击行动牌置于牌库顶？"
+    }
+  ],
+  "card.sba.crown.nonattack.top": [
+    {
+      "type": 0,
+      "value": "Crown of Providence：将一张手牌中的非攻击行动牌置于牌库顶？"
+    }
+  ],
+  "card.sba.crown.order": [
+    {
+      "type": 0,
+      "value": "Crown of Providence：选择哪张牌置于牌库顶"
+    }
+  ],
+  "card.sba.fusion.reveal": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：展示一张手牌中的 "
+    },
+    {
+      "type": 1,
+      "value": "type"
+    },
+    {
+      "type": 0,
+      "value": " 牌以进行 fusion？"
+    }
+  ],
+  "card.sba.jack.ally.steal": [
+    {
+      "type": 0,
+      "value": "Jack Be Quick：夺取哪个对方 ally？"
+    }
+  ],
+  "card.sba.jack.nimblism.banish": [
+    {
+      "type": 0,
+      "value": "Jack Be Quick：从墓地放逐一张 Nimblism，使攻击力 +1 并获得 go again？"
     }
   ],
   "card.sbz.arcane.target.choose": [

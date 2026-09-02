@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, dealArcane, isWeaponAttack, nextAttack, opponentSeat } from "./shared-helpers.js";
+import { attackAbility, commonOptionMessages, dealArcane, decisionPrompt, isWeaponAttack, nextAttack, opponentSeat } from "./shared-helpers.js";
 
 // ── SBA (Silver Age: Briar precon) ──────────────────────────────────────────
 //
@@ -47,7 +47,10 @@ function fusionAdditionalCost(supertype: string) {
     if (matches.length === 0) return;
     ctx.requestCardChoice(
       "fusion",
-      `${ctx.data.name}: reveal a ${supertype} card from your hand to fuse?`,
+      decisionPrompt(`${ctx.data.name}: reveal a ${supertype} card from your hand to fuse?`, "card.sba.fusion.reveal", {
+        values: { card: { kind: "card", cardId: ctx.self.cardId }, type: supertype },
+        optionMessages: commonOptionMessages("no"),
+      }),
       [...matches.map((c) => c.instanceId), "no"],
     );
   };
@@ -222,7 +225,7 @@ export const sba: Record<string, CardScript> = {
         }
         ctx.requestCardChoice(
           "crown-attack",
-          "Crown of Dichotomy: put a Runeblade attack action from your graveyard on top of your deck",
+          decisionPrompt("Crown of Dichotomy: put a Runeblade attack action from your graveyard on top of your deck", "card.sba.crown.attack.top"),
           attacks.map((c) => c.instanceId),
         );
       },
@@ -309,7 +312,7 @@ export const sba: Record<string, CardScript> = {
       if (nimblisms.length === 0) return;
       ctx.requestCardChoice(
         "jack-banish",
-        "Jack Be Quick: banish a Nimblism from your graveyard for +1{p} and go again?",
+        decisionPrompt("Jack Be Quick: banish a Nimblism from your graveyard for +1{p} and go again?", "card.sba.jack.nimblism.banish", { optionMessages: commonOptionMessages("no") }),
         [...nimblisms.map((c) => c.instanceId), "no"],
       );
     },
@@ -347,7 +350,7 @@ export const sba: Record<string, CardScript> = {
       }
       ctx.requestCardChoice(
         "jack-steal",
-        "Jack Be Quick: untap and steal an ally until the end of this action phase",
+        decisionPrompt("Jack Be Quick: untap and steal an ally until the end of this action phase", "card.sba.jack.ally.steal"),
         allies.map((c) => c.instanceId),
       );
     },
@@ -667,7 +670,7 @@ function crownPickNonAttack(ctx: ScriptCtx): void {
   }
   ctx.requestCardChoice(
     "crown-non-attack",
-    "Crown of Dichotomy: put a Runeblade 'non-attack' action from your graveyard on top of your deck",
+    decisionPrompt("Crown of Dichotomy: put a Runeblade 'non-attack' action from your graveyard on top of your deck", "card.sba.crown.nonattack.top"),
     nonAttacks.map((c) => c.instanceId),
   );
 }
@@ -681,7 +684,7 @@ function crownOrder(ctx: ScriptCtx): void {
   }
   ctx.requestChoice(
     "crown-order",
-    "Crown of Dichotomy: which card goes on top? (the other goes beneath it)",
+    decisionPrompt("Crown of Dichotomy: which card goes on top? (the other goes beneath it)", "card.sba.crown.order"),
     [String(attack), String(nonAttack)],
   );
 }

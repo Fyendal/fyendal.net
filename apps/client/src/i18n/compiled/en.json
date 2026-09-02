@@ -3055,6 +3055,192 @@
       "value": "Discard a zombie to create a Gate to i'Arathael?"
     }
   ],
+  "card.hnt.agentofchaos.choose": [
+    {
+      "type": 0,
+      "value": "Mask of Deceit: choose an Agent of Chaos"
+    }
+  ],
+  "card.hnt.arsenal.nonattack.faceup": [
+    {
+      "type": 0,
+      "value": "Turn a non-attack action in arsenal face-up"
+    }
+  ],
+  "card.hnt.banished.facedown.first": [
+    {
+      "type": 0,
+      "value": "Choose banished card 1 of "
+    },
+    {
+      "type": 1,
+      "value": "total"
+    },
+    {
+      "type": 0,
+      "value": " to turn face-down"
+    }
+  ],
+  "card.hnt.banished.facedown.next": [
+    {
+      "type": 0,
+      "value": "Choose another banished card ("
+    },
+    {
+      "type": 1,
+      "value": "remaining"
+    },
+    {
+      "type": 0,
+      "value": " remaining)"
+    }
+  ],
+  "card.hnt.card.choose": [
+    {
+      "type": 0,
+      "value": "Choose a card"
+    }
+  ],
+  "card.hnt.card.name": [
+    {
+      "type": 0,
+      "value": "Name a card"
+    }
+  ],
+  "card.hnt.card.name.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": name a card"
+    }
+  ],
+  "card.hnt.dagger.choose": [
+    {
+      "type": 0,
+      "value": "Choose a dagger"
+    }
+  ],
+  "card.hnt.dagger.damage.destroy": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose a dagger to deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " damage, then destroy it"
+    }
+  ],
+  "card.hnt.defender.defense.reduce": [
+    {
+      "type": 0,
+      "value": "Give a defender -"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " defense"
+    }
+  ],
+  "card.hnt.defensereaction.search": [
+    {
+      "type": 0,
+      "value": "Search for a defense reaction?"
+    }
+  ],
+  "card.hnt.draconic.attack.choose": [
+    {
+      "type": 0,
+      "value": "Dragonscaler Flight Path: choose a Draconic attack"
+    }
+  ],
+  "card.hnt.draconicdagger.equip.next": [
+    {
+      "type": 0,
+      "value": "Equip one more Draconic dagger?"
+    }
+  ],
+  "card.hnt.draconicdagger.equip.upto": [
+    {
+      "type": 0,
+      "value": "Equip up to "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " Draconic daggers from your graveyard"
+    }
+  ],
+  "card.hnt.equipment.defensecounter": [
+    {
+      "type": 0,
+      "value": "Put a -1 defense counter on equipment"
+    }
+  ],
+  "card.hnt.hand.card.banish": [
+    {
+      "type": 0,
+      "value": "Banish a card from your hand"
+    }
+  ],
+  "card.hnt.provoke.card.reveal": [
+    {
+      "type": 0,
+      "value": "Provoke: choose a card to reveal"
+    }
+  ],
+  "card.hnt.tarantula.mode": [
+    {
+      "type": 0,
+      "value": "Tarantula Toxin: choose 1 or both"
+    }
+  ],
+  "card.hnt.tarantula.option.attack": [
+    {
+      "type": 0,
+      "value": "+3 attack"
+    }
+  ],
+  "card.hnt.tarantula.option.defense": [
+    {
+      "type": 0,
+      "value": "-3 defense"
+    }
+  ],
+  "card.hnt.trap.banish": [
+    {
+      "type": 0,
+      "value": "Banish a trap"
+    }
+  ],
+  "card.hnt.vest.resource.stain": [
+    {
+      "type": 0,
+      "value": "Blood Splattered Vest: gain 1 resource and add a stain counter?"
+    }
+  ],
+  "card.hnt.weapon.choose": [
+    {
+      "type": 0,
+      "value": "Choose a weapon"
+    }
+  ],
   "card.hvy.arsenal.bottom": [
     {
       "type": 0,
@@ -3961,6 +4147,450 @@
       "value": "Destroy up to one Blade Dance and/or Flurry?"
     }
   ],
+  "card.mst.aura.bottom": [
+    {
+      "type": 0,
+      "value": "Put an aura on the bottom of its owner's deck"
+    }
+  ],
+  "card.mst.blue.card.banish": [
+    {
+      "type": 0,
+      "value": "Banish a blue card"
+    }
+  ],
+  "card.mst.blue.card.defend": [
+    {
+      "type": 0,
+      "value": "Choose a blue card to defend"
+    }
+  ],
+  "card.mst.card.banish": [
+    {
+      "type": 0,
+      "value": "Banish a card"
+    }
+  ],
+  "card.mst.card.choose": [
+    {
+      "type": 0,
+      "value": "Choose a card"
+    }
+  ],
+  "card.mst.card.discard": [
+    {
+      "type": 0,
+      "value": "Choose a card to discard"
+    }
+  ],
+  "card.mst.card.nodefense.choose": [
+    {
+      "type": 0,
+      "value": "Choose a card without defense"
+    }
+  ],
+  "card.mst.combo.bottom": [
+    {
+      "type": 0,
+      "value": "Put a combo card on the bottom of your deck"
+    }
+  ],
+  "card.mst.combo.search": [
+    {
+      "type": 0,
+      "value": "Search for a combo card"
+    }
+  ],
+  "card.mst.crouchingtiger.name": [
+    {
+      "type": 0,
+      "value": "Name a Crouching Tiger"
+    }
+  ],
+  "card.mst.defending.card.choose": [
+    {
+      "type": 0,
+      "value": "Choose a defending card"
+    }
+  ],
+  "card.mst.defendinghero.graveyard.banish": [
+    {
+      "type": 0,
+      "value": "Banish a card from the defending hero's graveyard"
+    }
+  ],
+  "card.mst.defendinghero.graveyard.banish.optional": [
+    {
+      "type": 0,
+      "value": "Banish a card from the defending hero's graveyard?"
+    }
+  ],
+  "card.mst.equipment.faceup": [
+    {
+      "type": 0,
+      "value": "Turn an equipment face-up"
+    }
+  ],
+  "card.mst.facedown.card.look": [
+    {
+      "type": 0,
+      "value": "Choose a face-down card to look at"
+    }
+  ],
+  "card.mst.hand.card.bottom": [
+    {
+      "type": 0,
+      "value": "Put a card from your hand on the bottom"
+    }
+  ],
+  "card.mst.hero.damage.choose": [
+    {
+      "type": 0,
+      "value": "Deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " damage to which hero?"
+    }
+  ],
+  "card.mst.innerchi.search": [
+    {
+      "type": 0,
+      "value": "Search for an Inner Chi"
+    }
+  ],
+  "card.mst.matchingcolor.card.banish": [
+    {
+      "type": 0,
+      "value": "Banish a matching-color card"
+    }
+  ],
+  "card.mst.mechanologist.action.top": [
+    {
+      "type": 0,
+      "value": "Put a Mechanologist action on top"
+    }
+  ],
+  "card.mst.option.yourhero": [
+    {
+      "type": 0,
+      "value": "Your hero"
+    }
+  ],
+  "card.mst.remaining.bottommost.choose": [
+    {
+      "type": 0,
+      "value": "Choose which card is bottommost"
+    }
+  ],
+  "card.mst.restless.power.move": [
+    {
+      "type": 0,
+      "value": "Move Restless Coalescence's power counters?"
+    }
+  ],
+  "card.mst.wardaura.choose": [
+    {
+      "type": 0,
+      "value": "Choose a ward aura"
+    }
+  ],
+  "card.omn.action.defender.return": [
+    {
+      "type": 0,
+      "value": "Return an action defender"
+    }
+  ],
+  "card.omn.arcane.target.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage to a target"
+    }
+  ],
+  "card.omn.arrow.arsenal": [
+    {
+      "type": 0,
+      "value": "Put an arrow into arsenal?"
+    }
+  ],
+  "card.omn.attack.target.upto": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose up to 1 target attack"
+    }
+  ],
+  "card.omn.aura.holo.counter": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": give an aura a holo counter?"
+    }
+  ],
+  "card.omn.aura.token.copy": [
+    {
+      "type": 0,
+      "value": "Create a token copy of an aura?"
+    }
+  ],
+  "card.omn.aura.token.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy an aura token"
+    }
+  ],
+  "card.omn.aura.token.destroy.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": destroy an aura token"
+    }
+  ],
+  "card.omn.aura.token.steal": [
+    {
+      "type": 0,
+      "value": "Steal an aura token"
+    }
+  ],
+  "card.omn.card.discard": [
+    {
+      "type": 0,
+      "value": "Discard a card"
+    }
+  ],
+  "card.omn.color.choose": [
+    {
+      "type": 0,
+      "value": "Choose a color"
+    }
+  ],
+  "card.omn.flow.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy a Lightning Flow"
+    }
+  ],
+  "card.omn.flow.destroy.damage": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": destroy a Lightning Flow to deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage?"
+    }
+  ],
+  "card.omn.flow.destroy.goagain": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": destroy a Lightning Flow for go again?"
+    }
+  ],
+  "card.omn.flow.destroy.power": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": destroy a Lightning Flow for +2 power?"
+    }
+  ],
+  "card.omn.graveyard.attack.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": put an attack action on the bottom"
+    }
+  ],
+  "card.omn.graveyard.instant.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": put an instant on the bottom"
+    }
+  ],
+  "card.omn.graveyard.instant.shuffle": [
+    {
+      "type": 0,
+      "value": "Shuffle an instant into your deck?"
+    }
+  ],
+  "card.omn.hand.card.bottom": [
+    {
+      "type": 0,
+      "value": "Put a card from your hand on the bottom"
+    }
+  ],
+  "card.omn.hero.tap.bonus": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": tap your hero for its bonus?"
+    }
+  ],
+  "card.omn.instant.discard.flow.goagain": [
+    {
+      "type": 0,
+      "value": "Discard an instant for Lightning Flow and go again?"
+    }
+  ],
+  "card.omn.lightning.aura.holo.blink": [
+    {
+      "type": 0,
+      "value": "Blink a Lightning aura with a holo counter?"
+    }
+  ],
+  "card.omn.lightning.card.reveal": [
+    {
+      "type": 0,
+      "value": "Reveal a Lightning card?"
+    }
+  ],
+  "card.omn.lightning.hero.weapon.tap": [
+    {
+      "type": 0,
+      "value": "Tap the Lightning hero or a weapon"
+    }
+  ],
+  "card.omn.lightning.instant.top": [
+    {
+      "type": 0,
+      "value": "Put a Lightning instant on top?"
+    }
+  ],
+  "card.omn.mode.choose": [
+    {
+      "type": 0,
+      "value": "Choose a mode"
+    }
+  ],
+  "card.omn.option.blue": [
+    {
+      "type": 0,
+      "value": "Blue"
+    }
+  ],
+  "card.omn.option.draw": [
+    {
+      "type": 0,
+      "value": "Draw a card"
+    }
+  ],
+  "card.omn.option.embodimentoflightning": [
+    {
+      "type": 0,
+      "value": "Embodiment of Lightning"
+    }
+  ],
+  "card.omn.option.goagain": [
+    {
+      "type": 0,
+      "value": "go again"
+    }
+  ],
+  "card.omn.option.lightningflow": [
+    {
+      "type": 0,
+      "value": "Lightning Flow"
+    }
+  ],
+  "card.omn.option.plus2power": [
+    {
+      "type": 0,
+      "value": "+2 power"
+    }
+  ],
+  "card.omn.option.red": [
+    {
+      "type": 0,
+      "value": "Red"
+    }
+  ],
+  "card.omn.option.yellow": [
+    {
+      "type": 0,
+      "value": "Yellow"
+    }
+  ],
+  "card.omn.permanent.scrap": [
+    {
+      "type": 0,
+      "value": "Scrap a permanent?"
+    }
+  ],
+  "card.omn.red.action.banish": [
+    {
+      "type": 0,
+      "value": "Banish a red action"
+    }
+  ],
+  "card.omn.resource.pay.flow": [
+    {
+      "type": 0,
+      "value": "Pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " to create Lightning Flow?"
+    }
+  ],
+  "card.omn.token.choose": [
+    {
+      "type": 0,
+      "value": "Choose a token"
+    }
+  ],
   "card.out.affliction.choose": [
     {
       "type": 0,
@@ -4655,6 +5285,240 @@
       "value": "Discard a card to win the wager instead?"
     }
   ],
+  "card.ros.arcane.hero.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage to a hero"
+    }
+  ],
+  "card.ros.arcane.target.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage to a target"
+    }
+  ],
+  "card.ros.arsenal.card.bottom": [
+    {
+      "type": 0,
+      "value": "Put an arsenal card on the bottom"
+    }
+  ],
+  "card.ros.arsenal.matching.banish": [
+    {
+      "type": 0,
+      "value": "Banish the matching card from arsenal"
+    }
+  ],
+  "card.ros.attack.return": [
+    {
+      "type": 0,
+      "value": "Return an attack action to its owner's hand"
+    }
+  ],
+  "card.ros.attack.return.next": [
+    {
+      "type": 0,
+      "value": "Choose another attack action, or finish"
+    }
+  ],
+  "card.ros.attack.return.upto": [
+    {
+      "type": 0,
+      "value": "Choose up to "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " attack actions to return when the link resolves"
+    }
+  ],
+  "card.ros.aura.bottom.optional": [
+    {
+      "type": 0,
+      "value": "Put up to "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " aura on the bottom of its owner's deck"
+    }
+  ],
+  "card.ros.aura.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy an aura"
+    }
+  ],
+  "card.ros.aura.destroy.eligible": [
+    {
+      "type": 0,
+      "value": "Destroy an eligible aura"
+    }
+  ],
+  "card.ros.aura.destroy.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": destroy an aura you control"
+    }
+  ],
+  "card.ros.aura.destroy.own": [
+    {
+      "type": 0,
+      "value": "Destroy an aura you control?"
+    }
+  ],
+  "card.ros.aura.destroy.runechant": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": destroy an aura to create a Runechant?"
+    }
+  ],
+  "card.ros.aura.return": [
+    {
+      "type": 0,
+      "value": "Return an aura you control to hand"
+    }
+  ],
+  "card.ros.aura.return.eligible": [
+    {
+      "type": 0,
+      "value": "Return an eligible aura to its owner's hand?"
+    }
+  ],
+  "card.ros.card.discard": [
+    {
+      "type": 0,
+      "value": "Choose a card to discard"
+    }
+  ],
+  "card.ros.decompose.action": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose the action card to banish"
+    }
+  ],
+  "card.ros.decompose.earth.first": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": decompose? Choose the first Earth card to banish"
+    }
+  ],
+  "card.ros.decompose.earth.second": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose the second Earth card to banish"
+    }
+  ],
+  "card.ros.hand.card.bottom": [
+    {
+      "type": 0,
+      "value": "Put a card from your hand on the bottom of your deck"
+    }
+  ],
+  "card.ros.intimidated.card.graveyard": [
+    {
+      "type": 0,
+      "value": "Put an intimidated card into the graveyard"
+    }
+  ],
+  "card.ros.lightning.discard": [
+    {
+      "type": 0,
+      "value": "Discard a Lightning card?"
+    }
+  ],
+  "card.ros.nonattack.shuffle": [
+    {
+      "type": 0,
+      "value": "Choose a non-attack action to shuffle, or finish"
+    }
+  ],
+  "card.ros.opponent.hand.discard": [
+    {
+      "type": 0,
+      "value": "Look at their hand and choose a card — they discard it"
+    }
+  ],
+  "card.ros.option.earth": [
+    {
+      "type": 0,
+      "value": "Embodiment of Earth"
+    }
+  ],
+  "card.ros.option.runechant": [
+    {
+      "type": 0,
+      "value": "Runechant"
+    }
+  ],
+  "card.ros.option.yourhero": [
+    {
+      "type": 0,
+      "value": "Your hero"
+    }
+  ],
+  "card.ros.sigil.return": [
+    {
+      "type": 0,
+      "value": "Return a Sigil aura from your graveyard?"
+    }
+  ],
+  "card.ros.token.create": [
+    {
+      "type": 0,
+      "value": "Create which token?"
+    }
+  ],
   "card.sar.blackwidow.hand.banish": [
     {
       "type": 0,
@@ -4749,6 +5613,54 @@
     {
       "type": 0,
       "value": "Spire Sniping: put the top 2 cards back in any order"
+    }
+  ],
+  "card.sba.crown.attack.top": [
+    {
+      "type": 0,
+      "value": "Crown of Providence: put an attack action from your hand on top?"
+    }
+  ],
+  "card.sba.crown.nonattack.top": [
+    {
+      "type": 0,
+      "value": "Crown of Providence: put a non-attack action from your hand on top?"
+    }
+  ],
+  "card.sba.crown.order": [
+    {
+      "type": 0,
+      "value": "Crown of Providence: choose which card goes on top"
+    }
+  ],
+  "card.sba.fusion.reveal": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": reveal a "
+    },
+    {
+      "type": 1,
+      "value": "type"
+    },
+    {
+      "type": 0,
+      "value": " card from your hand to fuse?"
+    }
+  ],
+  "card.sba.jack.ally.steal": [
+    {
+      "type": 0,
+      "value": "Jack Be Quick: steal which opposing ally?"
+    }
+  ],
+  "card.sba.jack.nimblism.banish": [
+    {
+      "type": 0,
+      "value": "Jack Be Quick: banish a Nimblism from your graveyard for +1 power and go again?"
     }
   ],
   "card.sbz.arcane.target.choose": [
