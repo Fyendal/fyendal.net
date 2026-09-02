@@ -20,6 +20,21 @@ function renderStack(
 }
 
 describe("stack popup visibility", () => {
+  it("renders semantic trigger labels in the selected locale", () => {
+    const html = renderStack({
+      layers: [{
+        card: { instanceId: 7, cardId: "DYN113", owner: 0 },
+        seat: 0,
+        label: "Look at the opponent's top card?",
+        labelMessage: { id: "card.dyn.arakni.opponenttop.look" },
+        optional: true,
+      }],
+    }, "zh-Hans");
+
+    expect(html).toContain("查看对手牌库顶牌？");
+    expect(html).not.toContain("Look at the opponent&#x27;s top card?");
+  });
+
   it("reveals popups for new stack activity but not an unchanged or emptied stack", () => {
     const emptyRevision = stackActivityRevision([]);
     const triggerRevision = stackActivityRevision([

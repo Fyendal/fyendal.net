@@ -61,6 +61,7 @@
 .card-search-overlay-header > div:first-child {
   min-width: 0;
 }
+.card-search-overlay-header .decision-buttons { flex: 0 0 auto; }
 .card-search-minimize {
   display: grid;
   width: 36px;

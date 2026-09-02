@@ -22,6 +22,11 @@ import {
 } from "./costs.js";
 import { logNameOf, logPublic, nameOf } from "./gameLog.js";
 import { abilityList } from "./scripts.js";
+import {
+  DEFAULT_CHOOSE_X_PROMPT,
+  scriptPromptParts,
+  soulBanishCostPrompt,
+} from "./scriptPresentation.js";
 import type { CardInstance, ChainLinkState, PlayerState } from "./state.js";
 
 import {
@@ -78,6 +83,7 @@ export function beginReactionStep(state: GameStateInternal): void {
     player: link.attacker,
     kind: "attack-reaction",
     prompt: "Attack reaction window — play a reaction or pass",
+    promptMessage: { id: "engine.decision.reaction.attack" },
   };
 }
 
@@ -97,6 +103,18 @@ function reactionWindow(runtime: EngineRuntime): PriorityWindow {
       prompt: defenderIsNext
         ? `Defense reaction window — play a reaction or pass${suffix}`
         : `Attack reaction window — play a reaction or pass${suffix}`,
+      promptMessage: top
+        ? {
+            id: defenderIsNext
+              ? "engine.decision.reaction.defense.card"
+              : "engine.decision.reaction.attack.card",
+            values: { card: { kind: "card", cardId: top.cardId } },
+          }
+        : {
+            id: defenderIsNext
+              ? "engine.decision.reaction.defense"
+              : "engine.decision.reaction.attack",
+          },
     };
   },
   onBothPass(state) {
@@ -328,10 +346,16 @@ export function activateWindowAbility(
     );
     const options = Object.keys(choices);
     if (options.length === 0) return "not enough resources";
+    const presentation = scriptPromptParts(
+      resolvedVariableCost.prompt ?? DEFAULT_CHOOSE_X_PROMPT,
+      options,
+    );
     state.pendingDecision = {
       player: seat,
       kind: "choose-target",
-      prompt: resolvedVariableCost.prompt ?? "Choose X",
+      prompt: presentation.fallback,
+      ...(presentation.promptMessage ? { promptMessage: presentation.promptMessage } : {}),
+      ...(presentation.optionMessages ? { optionMessages: presentation.optionMessages } : {}),
       options,
       sourceInstanceId: card.instanceId,
       chooseHook: "engine-variable-activation-x",
@@ -394,10 +418,17 @@ export function activateWindowAbility(
     }
     const remaining = soul.filter((candidate) => !selectedSoulIds.includes(candidate.instanceId));
     if (remaining.length < ability.banishSoulCost - selectedSoulIds.length) return "not enough cards in soul";
+    const presentation = scriptPromptParts(soulBanishCostPrompt(
+      nameOf(state, card.cardId),
+      card.cardId,
+      selectedSoulIds.length + 1,
+      ability.banishSoulCost,
+    ));
     state.pendingDecision = {
       player: seat,
       kind: "choose-target",
-      prompt: `${nameOf(state, card.cardId)}: choose soul card ${selectedSoulIds.length + 1} of ${ability.banishSoulCost} to banish as a cost`,
+      prompt: presentation.fallback,
+      promptMessage: presentation.promptMessage,
       options: remaining.map((candidate) => String(candidate.instanceId)),
       cardOptions: remaining.map((candidate) => candidate.instanceId),
       chooseHook: "engine-activation-soul",
@@ -620,13 +651,19 @@ export function playReaction(
       );
       const options = Object.keys(choices);
       if (options.length === 0) return "not enough resources";
+      const presentation = scriptPromptParts(
+        resolvedVariableCost.prompt ?? DEFAULT_CHOOSE_X_PROMPT,
+        options,
+      );
       const origin = fromZone ?? (fromArsenal
         ? "arsenal"
         : source === player.banish ? "banish" : "hand");
       state.pendingDecision = {
         player: seat,
         kind: "choose-target",
-        prompt: resolvedVariableCost.prompt ?? "Choose X",
+        prompt: presentation.fallback,
+        ...(presentation.promptMessage ? { promptMessage: presentation.promptMessage } : {}),
+        ...(presentation.optionMessages ? { optionMessages: presentation.optionMessages } : {}),
         options,
         sourceInstanceId: card.instanceId,
         chooseHook: "engine-variable-play-x",

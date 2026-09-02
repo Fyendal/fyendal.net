@@ -59,7 +59,7 @@ export const amo: Record<string, CardScript> = {
           move: "destroy",
           count: 2,
           name: "Silver",
-          prompt: "Destroy 2 Silver",
+          prompt: decisionPrompt("Destroy 2 Silver", "card.common.cost.silver.destroy.two"),
         }],
         canActivate(ctx) {
           return !!ctx.link &&

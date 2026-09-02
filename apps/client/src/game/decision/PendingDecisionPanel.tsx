@@ -274,7 +274,7 @@ export function PendingDecisionPanel({
   return (
     <div className={`decision decision-options${
       priorityGuidanceDecision ? " decision-priority-guidance" : ""
-    }`}>
+    }${pd.kind === "choose-name" ? " decision-name-choice" : ""}`}>
       <DecisionPrompt
         prompt={pd.kind === "arsenal"
           ? intl.formatMessage({ id: "game.decision.arsenal.choosePrompt" })

@@ -126,7 +126,7 @@ export const ama: Record<string, CardScript> = {
         move: "discard",
         count: 1,
         subtype: "zombie",
-        prompt: "Discard a zombie",
+        prompt: decisionPrompt("Discard a zombie", "card.common.cost.zombie.discard"),
       }],
       onActivate(ctx) {
         grantDestroyingZombieAttack(ctx, 3, "amaUndeadGrasp");
@@ -136,7 +136,7 @@ export const ama: Record<string, CardScript> = {
   },
 
   "dig for souls|1": {
-    variablePlayCost: { base: 0, counterKey: "digX", prompt: "Choose X" },
+    variablePlayCost: { base: 0, counterKey: "digX", prompt: decisionPrompt("Choose X", "engine.decision.x.choose") },
     onPlay(ctx) {
       const x = ctx.getCounter("digX");
       const looked = ctx.player(ctx.seat).deck.slice(0, x);

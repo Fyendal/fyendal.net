@@ -202,6 +202,7 @@ export function continueEndPhase(state: GameStateInternal, runtime: EngineRuntim
       player: player.seat,
       kind: "arsenal",
       prompt: "You may put a card from your hand into your arsenal, or pass",
+      promptMessage: { id: "engine.decision.arsenal" },
       options: player.hand.map((c) => String(c.instanceId)),
       cardOptions: player.hand.map((c) => c.instanceId), // own hand — visible
     };
@@ -268,6 +269,7 @@ function continuePitchBottoming(state: GameStateInternal, runtime: EngineRuntime
       player: seat,
       kind: "choose-target",
       prompt: "Choose the first card to put on the bottom of your deck",
+      promptMessage: { id: "engine.decision.deckbottom.first" },
       options: ids.map(String),
       cardOptions: [...ids],
       chooseHook: "engine-end-phase-pitch-order",

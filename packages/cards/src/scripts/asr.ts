@@ -89,7 +89,7 @@ export const asr: Record<string, CardScript> = {
       goAgain: false,
       timing: "attack-reaction",
       tap: true,
-      effectCardCosts: [{ zone: "arena", move: "banish", count: 1, name: "Edge of Autumn", prompt: "Banish an Edge of Autumn" }],
+      effectCardCosts: [{ zone: "arena", move: "banish", count: 1, name: "Edge of Autumn", prompt: decisionPrompt("Banish an Edge of Autumn", "card.common.cost.edgeofautumn.banish") }],
       canActivate: (ctx) => !!ctx.link && ctx.link.attacker === ctx.seat && ninjaAttack(ctx, ctx.link.attackingCard),
       onActivate(ctx) { ctx.addModifier({ scope: "chain-link", attack: 1 }); },
     },

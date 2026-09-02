@@ -41,6 +41,7 @@ import { activatedAbilityUsage } from "./abilityRules.js";
 import { wardPieces } from "./damageResolution.js";
 import { playFromSourceCardId } from "./playRules.js";
 import { windowPrompt, windowPromptMessage } from "./triggers.js";
+import { triggerLabelMessage } from "./triggerPresentation.js";
 import { firstActionExtraCost } from "./ruleQueries.js";
 
 interface CardViewOptions {
@@ -891,10 +892,12 @@ function projectedStackLayers(
       layer.triggerSource ??
       null;
     const secret = !revealAll && !layer.card && !!card?.faceDown && card.owner !== seat;
+    const labelMessage = secret ? undefined : triggerLabelMessage(state, layer);
     return {
       card: card && !secret ? cardView(state, runtime, card) : null,
       seat: layer.seat,
       label: layer.label,
+      ...(labelMessage ? { labelMessage } : {}),
       optional: layer.optional,
       ...(layer.triggerCount !== undefined && layer.triggerCount > 1
         ? { count: layer.triggerCount }

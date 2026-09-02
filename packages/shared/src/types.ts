@@ -186,6 +186,9 @@ export interface StackLayerView {
   seat: number;
   /** Short description, e.g. "Turn face up?" */
   label: string;
+  /** Semantic label used by localized clients; `label` remains the stable
+   * English fallback for older clients and replays. */
+  labelMessage?: GameMessage;
   /** Controller may decline when the layer resolves */
   optional: boolean;
   /** Number of mechanically interchangeable trigger occurrences represented

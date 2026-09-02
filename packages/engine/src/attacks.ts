@@ -520,6 +520,10 @@ export function attackWithPermanent(
         player: seat,
         kind: "choose-target",
         prompt: `${nameOf(state, card.cardId)}: choose an attack target`,
+        promptMessage: {
+          id: "engine.decision.attack.target",
+          values: { card: { kind: "card", cardId: card.cardId } },
+        },
         options,
         cardOptions: [
           ...(mandatory.length === 0 ? [opposingHero.instanceId] : []),

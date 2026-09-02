@@ -114,6 +114,16 @@ function rawDecisionPrompts(set: string): string[] {
     const source = readFileSync(path, "utf8");
     const sourceFile = ts.createSourceFile(path, source, ts.ScriptTarget.Latest, true);
     const visit = (node: ts.Node): void => {
+      if (
+        ts.isPropertyAssignment(node) &&
+        ((ts.isIdentifier(node.name) || ts.isStringLiteral(node.name)) && node.name.text === "prompt") &&
+        (ts.isStringLiteral(node.initializer) ||
+          ts.isNoSubstitutionTemplateLiteral(node.initializer) ||
+          ts.isTemplateExpression(node.initializer))
+      ) {
+        const position = sourceFile.getLineAndCharacterOfPosition(node.initializer.getStart(sourceFile));
+        raw.push(`${path.slice(scriptsDirectory.length + 1)}:${position.line + 1}`);
+      }
       if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)) {
         const argumentIndex = decisionPromptArgument.get(node.expression.name.text);
         const prompt = argumentIndex === undefined ? undefined : node.arguments[argumentIndex];
@@ -139,7 +149,7 @@ function rawDecisionPrompts(set: string): string[] {
 }
 
 describe("card-script decision presentation", () => {
-  it("keeps completed sets free of raw player-facing decision prompts", () => {
+  it("keeps completed sets free of raw direct and declarative player-facing prompts", () => {
     expect(localizedSets.flatMap(rawDecisionPrompts)).toEqual([]);
   });
 

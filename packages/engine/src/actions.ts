@@ -44,6 +44,11 @@ import {
 } from "./costs.js";
 import { abilityList, type CardScript, type ScriptCtx } from "./scripts.js";
 import {
+  DEFAULT_CHOOSE_X_PROMPT,
+  scriptPromptParts,
+  soulBanishCostPrompt,
+} from "./scriptPresentation.js";
+import {
   announceCardPlayed,
   continueStack,
   deferEventTriggers,
@@ -255,10 +260,16 @@ export function playCard(
       );
       const options = Object.keys(choices);
       if (options.length === 0) return "not enough resources";
+      const presentation = scriptPromptParts(
+        resolvedVariableCost.prompt ?? DEFAULT_CHOOSE_X_PROMPT,
+        options,
+      );
       state.pendingDecision = {
         player: seat,
         kind: "choose-target",
-        prompt: resolvedVariableCost.prompt ?? "Choose X",
+        prompt: presentation.fallback,
+        ...(presentation.promptMessage ? { promptMessage: presentation.promptMessage } : {}),
+        ...(presentation.optionMessages ? { optionMessages: presentation.optionMessages } : {}),
         options,
         sourceInstanceId: card.instanceId,
         chooseHook: "engine-variable-play-x",
@@ -609,10 +620,16 @@ export function activateAbility(
     );
     const options = Object.keys(choices);
     if (options.length === 0) return "not enough resources";
+    const presentation = scriptPromptParts(
+      resolvedVariableCost.prompt ?? DEFAULT_CHOOSE_X_PROMPT,
+      options,
+    );
     state.pendingDecision = {
       player: seat,
       kind: "choose-target",
-      prompt: resolvedVariableCost.prompt ?? "Choose X",
+      prompt: presentation.fallback,
+      ...(presentation.promptMessage ? { promptMessage: presentation.promptMessage } : {}),
+      ...(presentation.optionMessages ? { optionMessages: presentation.optionMessages } : {}),
       options,
       sourceInstanceId: card.instanceId,
       chooseHook: "engine-variable-activation-x",
@@ -675,10 +692,17 @@ export function activateAbility(
     }
     const remaining = soul.filter((candidate) => !selectedSoulIds.includes(candidate.instanceId));
     if (remaining.length < ability.banishSoulCost - selectedSoulIds.length) return "not enough cards in soul";
+    const presentation = scriptPromptParts(soulBanishCostPrompt(
+      nameOf(state, card.cardId),
+      card.cardId,
+      selectedSoulIds.length + 1,
+      ability.banishSoulCost,
+    ));
     state.pendingDecision = {
       player: seat,
       kind: "choose-target",
-      prompt: `${nameOf(state, card.cardId)}: choose soul card ${selectedSoulIds.length + 1} of ${ability.banishSoulCost} to banish as a cost`,
+      prompt: presentation.fallback,
+      promptMessage: presentation.promptMessage,
       options: remaining.map((candidate) => String(candidate.instanceId)),
       cardOptions: remaining.map((candidate) => candidate.instanceId),
       chooseHook: "engine-activation-soul",
@@ -1038,6 +1062,7 @@ export function answerChoice(
         player: seat,
         kind: "choose-target",
         prompt: `Pay ${declared.cost} resources`,
+        promptMessage: { id: "engine.decision.payment", values: { cost: declared.cost } },
         options,
         sourceInstanceId: srcId,
         chooseHook: hook,

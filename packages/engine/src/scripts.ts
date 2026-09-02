@@ -568,7 +568,7 @@ export interface ScriptCtx {
    *  player's chosen order. When more than one card is supplied, this opens a
    *  private card-order decision and moves the cards only after the complete
    *  order has been determined (CR 8.5.15c). */
-  putOnDeckBottomInChosenOrder(instanceIds: number[], prompt?: string): void;
+  putOnDeckBottomInChosenOrder(instanceIds: number[], prompt?: ScriptPrompt): void;
   /** Create a weapon/equipment token and equip it to its zone (CR 8.5.41):
    *  weapon-subtype cards to a weapon slot (max 2), equipment to its named
    *  free slot. Returns the instance, or undefined when there is no room —
@@ -608,7 +608,7 @@ export interface ActivatedEffectCardCost {
   /** Only cards without this named counter are eligible. */
   withoutCounter?: string;
   counter?: { key: string; amount: number };
-  prompt: string;
+  prompt: ScriptPrompt;
 }
 
 export interface ActivatedAbility {
@@ -622,7 +622,7 @@ export interface ActivatedAbility {
     counterKey: string;
     resourcesPerX?: number;
     maximum?: number;
-    prompt?: string;
+    prompt?: ScriptPrompt;
   };
   /** Chi point cost ({c}) in addition to `cost` (CR 1.14.2c/d): only chi
    *  points may pay it — while paying, only chi-subtype cards may be pitched,
@@ -664,7 +664,7 @@ export interface ActivatedAbility {
   variableBanishSoulCost?: {
     counterKey: string;
     maximum?: number;
-    prompt?: string;
+    prompt?: ScriptPrompt;
   };
   /** Select public cards and move them as effect-costs before the activated
    * layer is created. Groups are paid in order and may constrain the source
@@ -769,6 +769,9 @@ export interface TriggerDef {
   defaultOption?: "yes" | "no";
   /** Short description shown in the stack window, e.g. "Turn face up?" */
   label: string;
+  /** Locale-independent counterpart to `label`. It is derived from the script
+   * during decision/view projection and never persisted in room state. */
+  labelMessage?: GameMessage;
   /** Exact public trigger announcement. Defaults to "<source> triggers: <label>". */
   publicLog?: string;
   /** Runs when the trigger condition is met and its layer is created. Use for
@@ -1112,7 +1115,7 @@ export interface CardScript {
     maximum?: number | ((ctx: ScriptCtx) => number);
     /** Extra declaration legality for target-defined X values. */
     canDeclareX?(ctx: ScriptCtx, x: number): boolean;
-    prompt?: string;
+    prompt?: ScriptPrompt;
   };
   /** Observe the exact cards pitched to pay this card's play cost. Called
    *  after payment and before additional costs, while the cards are in pitch. */

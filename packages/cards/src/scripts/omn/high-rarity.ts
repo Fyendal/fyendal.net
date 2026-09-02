@@ -77,7 +77,7 @@ export const omnHighRarity: Record<string, CardScript> = {
   "aurora, legacy of tempest|0": {
     activated: {
       cost: 2, isAttack: false, goAgain: false, timing: "instant", tap: true,
-      effectCardCosts: [{ zone: "arena", move: "destroy", count: 1, name: "Lightning Flow", prompt: "Destroy a Lightning Flow" }],
+      effectCardCosts: [{ zone: "arena", move: "destroy", count: 1, name: "Lightning Flow", prompt: decisionPrompt("Destroy a Lightning Flow", "card.common.cost.lightningflow.destroy") }],
       onActivate: (ctx) => { ctx.createToken(EMBODIMENT); },
     },
   },
@@ -121,7 +121,7 @@ export const omnHighRarity: Record<string, CardScript> = {
     activated: {
       cost: 1, isAttack: false, goAgain: false, timing: "instant", tap: true,
       effectCardCosts: [
-        { zone: "arena", move: "destroy", count: 1, name: "Lightning Flow", prompt: "Destroy a Lightning Flow" },
+        { zone: "arena", move: "destroy", count: 1, name: "Lightning Flow", prompt: decisionPrompt("Destroy a Lightning Flow", "card.common.cost.lightningflow.destroy") },
       ],
       onActivate(ctx) {
         const hand = ctx.player(ctx.seat).hand;
@@ -163,7 +163,7 @@ export const omnHighRarity: Record<string, CardScript> = {
   },
   "tome of quandaries|3": { onPlay: (ctx) => { ctx.createTokens(PONDER, 2); } },
   "third eye of the sphinx|0": {
-    activated: { cost: 1, isAttack: false, goAgain: false, timing: "instant", tap: true, effectCardCosts: [{ zone: "arena", move: "destroy", count: 1, name: "Ponder", prompt: "Destroy a Ponder" }], onActivate: (ctx) => ctx.drawCards(ctx.seat, 1) },
+    activated: { cost: 1, isAttack: false, goAgain: false, timing: "instant", tap: true, effectCardCosts: [{ zone: "arena", move: "destroy", count: 1, name: "Ponder", prompt: decisionPrompt("Destroy a Ponder", "card.common.cost.ponder.destroy") }], onActivate: (ctx) => ctx.drawCards(ctx.seat, 1) },
   },
   "plutonic starplate|0": {
     triggers: [{

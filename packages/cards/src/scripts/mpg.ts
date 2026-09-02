@@ -720,7 +720,7 @@ Object.assign(mpg, {
     },
   },
   "visit anvilheim|3": {
-    variablePlayCost: { base: 0, counterKey: "anvilheimX", prompt: "Choose X", maximum(ctx: ScriptCtx) { return ctx.player(ctx.seat).weapons.filter((card) => hasType(ctx, card, "off-hand")).reduce((maximum, card) => Math.max(maximum, -(card.defCounters ?? 0)), 0); } },
+    variablePlayCost: { base: 0, counterKey: "anvilheimX", prompt: decisionPrompt("Choose X", "engine.decision.x.choose"), maximum(ctx: ScriptCtx) { return ctx.player(ctx.seat).weapons.filter((card) => hasType(ctx, card, "off-hand")).reduce((maximum, card) => Math.max(maximum, -(card.defCounters ?? 0)), 0); } },
     onPlay(ctx: ScriptCtx) {
       const x = ctx.getCounter("anvilheimX");
       const offHands = ctx.player(ctx.seat).weapons.filter((card) => hasType(ctx, card, "off-hand") && -(card.defCounters ?? 0) >= x);

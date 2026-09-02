@@ -124,7 +124,7 @@ export const aol: Record<string, CardScript> = {
       goAgain: false,
       oncePerTurn: true,
       alternativeEffectCardCosts: [
-        { zone: "arena", move: "destroy", count: 1, name: "Gold", prompt: "Destroy a Gold" },
+        { zone: "arena", move: "destroy", count: 1, name: "Gold", prompt: decisionPrompt("Destroy a Gold", "card.common.cost.gold.destroy") },
       ],
     },
     modifyAttack: (ctx) => ctx.getFlag("link", "wagered") === true ? 1 : 0,

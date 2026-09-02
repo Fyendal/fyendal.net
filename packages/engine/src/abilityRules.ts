@@ -8,6 +8,7 @@ import type { GameStateInternal } from "./runtimeState.js";
 
 import { abilityList, activatedFlagKey } from "./scripts.js";
 import type { ActivatedAbility, ActivatedEffectCardCost, ScriptCtx } from "./scripts.js";
+import { scriptPromptParts } from "./scriptPresentation.js";
 import type { CardInstance, ChainLinkState, PlayerState } from "./state.js";
 import { banishHeroSoulCard, destroyPermanent, putCardOnDeckBottom } from "./zoneMoves.js";
 import { currentLink, findCardAnywhere, heroSoulCards } from "./zoneQueries.js";
@@ -131,6 +132,10 @@ export function prepareActivatedDiscardCost(
     player: seat,
     kind: "choose-target",
     prompt: `Choose a card to discard for ${nameOf(state, card.cardId)}`,
+    promptMessage: {
+      id: "engine.decision.activation.discard",
+      values: { card: { kind: "card", cardId: card.cardId } },
+    },
     options: options.map((candidate) => String(candidate.instanceId)),
     cardOptions: options.map((candidate) => candidate.instanceId),
     sourceInstanceId: card.instanceId,
@@ -436,11 +441,15 @@ export function prepareActivatedEffectCardCosts(
         .filter((candidate) => !selected.has(candidate.instanceId));
       const remaining = cost.count - selectedInGroup;
       if (options.length < remaining) return "cannot pay effect card cost";
+      const optionIds = options.map((candidate) => String(candidate.instanceId));
+      const presentation = scriptPromptParts(cost.prompt, optionIds);
       state.pendingDecision = {
         player: seat,
         kind: "choose-target",
-        prompt: cost.prompt,
-        options: options.map((candidate) => String(candidate.instanceId)),
+        prompt: presentation.fallback,
+        ...(presentation.promptMessage ? { promptMessage: presentation.promptMessage } : {}),
+        ...(presentation.optionMessages ? { optionMessages: presentation.optionMessages } : {}),
+        options: optionIds,
         cardOptions: options.map((candidate) => candidate.instanceId),
         sourceInstanceId: card.instanceId,
         chooseHook: ability.effectCardCostChoiceHook ?? "engine-activation-effect-cost",

@@ -6,6 +6,11 @@ import { nameOf } from "./gameLog.js";
 import { heroSoulCards } from "./zoneQueries.js";
 import { abilityResourceCost, effectiveAbilityList, payActivatedAbilityCost, prepareActivatedDiscardCost, prepareActivatedEffectCardCosts } from "./abilityRules.js";
 import { pushAbilityLayer } from "./stackCore.js";
+import {
+  DEFAULT_CHOOSE_X_PROMPT,
+  scriptPromptParts,
+  soulBanishCostPrompt,
+} from "./scriptPresentation.js";
 
 /** Validate, pay for, and stack an ability activated from hand.
  * Action and priority-window callers share this flow; they remain responsible
@@ -76,11 +81,18 @@ export function activateFromHandAbility(
     const choices = Object.fromEntries(
       Array.from({ length: maximumSoulCost + 1 }, (_, x) => [`X = ${x}`, { x, cost: 0 }]),
     );
+    const options = Object.keys(choices);
+    const presentation = scriptPromptParts(
+      variableSoul.prompt ?? DEFAULT_CHOOSE_X_PROMPT,
+      options,
+    );
     state.pendingDecision = {
       player: seat,
       kind: "choose-target",
-      prompt: variableSoul.prompt ?? "Choose X",
-      options: Object.keys(choices),
+      prompt: presentation.fallback,
+      ...(presentation.promptMessage ? { promptMessage: presentation.promptMessage } : {}),
+      ...(presentation.optionMessages ? { optionMessages: presentation.optionMessages } : {}),
+      options,
       sourceInstanceId: card.instanceId,
       chooseHook: "engine-variable-activation-x",
       variableActivationCost: {
@@ -144,10 +156,17 @@ export function activateFromHandAbility(
   if (selectedSoulIds.length < soulCost) {
     const remaining = heroSoulCards(player)
       .filter((candidate) => !selectedSoulIds.includes(candidate.instanceId));
+    const presentation = scriptPromptParts(soulBanishCostPrompt(
+      nameOf(state, card.cardId),
+      card.cardId,
+      selectedSoulIds.length + 1,
+      soulCost,
+    ));
     state.pendingDecision = {
       player: seat,
       kind: "choose-target",
-      prompt: `${nameOf(state, card.cardId)}: choose soul card ${selectedSoulIds.length + 1} of ${soulCost} to banish as a cost`,
+      prompt: presentation.fallback,
+      promptMessage: presentation.promptMessage,
       options: remaining.map((candidate) => String(candidate.instanceId)),
       cardOptions: remaining.map((candidate) => candidate.instanceId),
       sourceInstanceId: card.instanceId,

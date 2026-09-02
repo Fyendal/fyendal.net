@@ -796,7 +796,7 @@
   "card.apr.halo.aura.return": [
     {
       "type": 0,
-      "value": "Halo of Lumina Light：将放逐区中的一张黄色光环放入竞技场？"
+      "value": "Halo of Lumina Light：将放逐区中的一张黄色灵气 (Aura)放入竞技场？"
     }
   ],
   "card.aps.attack.top": [
@@ -808,7 +808,7 @@
   "card.aps.aura.return": [
     {
       "type": 0,
-      "value": "将一个你操控的光环返回其拥有者手牌？"
+      "value": "将一个你操控的灵气 (Aura)返回其拥有者手牌？"
     }
   ],
   "card.aps.card.discard.first": [
@@ -842,13 +842,13 @@
   "card.aps.suspense.counter.add": [
     {
       "type": 0,
-      "value": "在一个光环上放置 suspense 指示物"
+      "value": "在一个灵气 (Aura)上放置 suspense 指示物"
     }
   ],
   "card.aps.suspense.counter.add.optional": [
     {
       "type": 0,
-      "value": "在一个具有 suspense 的光环上放置 suspense 指示物？"
+      "value": "在一个具有 suspense 的灵气 (Aura)上放置 suspense 指示物？"
     }
   ],
   "card.aps.suspense.remove.defense": [
@@ -1286,7 +1286,7 @@
   "card.azs.blur.aura.choose": [
     {
       "type": 0,
-      "value": "Blur Reality：选择一个 Lightning 光环"
+      "value": "Blur Reality：选择一个 Lightning 灵气 (Aura)"
     }
   ],
   "card.azs.holo.aura.choose": [
@@ -1296,13 +1296,13 @@
     },
     {
       "type": 0,
-      "value": "：为一个 Lightning 光环放置 holo 指示物？"
+      "value": "：为一个 Lightning 灵气 (Aura)放置 holo 指示物？"
     }
   ],
   "card.azs.miraging.aura.copy": [
     {
       "type": 0,
-      "value": "Miraging Metamorph：选择一个要复制的光环"
+      "value": "Miraging Metamorph：选择一个要复制的灵气 (Aura)"
     }
   ],
   "card.common.arrow.arsenal": [
@@ -1321,6 +1321,162 @@
     {
       "type": 0,
       "value": "指定一个牌名"
+    }
+  ],
+  "card.common.cost.arsenalarrow.faceup": [
+    {
+      "type": 0,
+      "value": "将 arsenal 中一张牌面朝下的箭翻至正面作为费用"
+    }
+  ],
+  "card.common.cost.aura.destroy": [
+    {
+      "type": 0,
+      "value": "选择一个灵气 (Aura)摧毁作为费用"
+    }
+  ],
+  "card.common.cost.aura.suspense.remove": [
+    {
+      "type": 0,
+      "value": "选择一个灵气 (Aura)，移除其一个 suspense 指示物"
+    }
+  ],
+  "card.common.cost.bluearrow.faceup": [
+    {
+      "type": 0,
+      "value": "将一张蓝色箭翻至正面"
+    }
+  ],
+  "card.common.cost.cog.tap": [
+    {
+      "type": 0,
+      "value": "选择一个 cog 横置作为费用"
+    }
+  ],
+  "card.common.cost.cog.untap": [
+    {
+      "type": 0,
+      "value": "重置一个 cog"
+    }
+  ],
+  "card.common.cost.edgeofautumn.banish": [
+    {
+      "type": 0,
+      "value": "放逐一张 Edge of Autumn"
+    }
+  ],
+  "card.common.cost.evo.banish": [
+    {
+      "type": 0,
+      "value": "放逐一张 Evo"
+    }
+  ],
+  "card.common.cost.gold.destroy": [
+    {
+      "type": 0,
+      "value": "选择一个 Gold 摧毁作为费用"
+    }
+  ],
+  "card.common.cost.hand.banishfacedown": [
+    {
+      "type": 0,
+      "value": "将一张手牌面朝下放逐"
+    }
+  ],
+  "card.common.cost.hand.deckbottom": [
+    {
+      "type": 0,
+      "value": "将一张手牌置于牌库底部"
+    }
+  ],
+  "card.common.cost.lightningaura.banish": [
+    {
+      "type": 0,
+      "value": "选择另一个 Lightning 灵气 (Aura)放逐"
+    }
+  ],
+  "card.common.cost.lightningflow.destroy": [
+    {
+      "type": 0,
+      "value": "选择一个 Lightning Flow 摧毁"
+    }
+  ],
+  "card.common.cost.offchaindagger.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一把不在战斗链上的 dagger"
+    }
+  ],
+  "card.common.cost.ponder.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一个 Ponder"
+    }
+  ],
+  "card.common.cost.powercounter.remove": [
+    {
+      "type": 0,
+      "value": "移除一个力量指示物"
+    }
+  ],
+  "card.common.cost.red.banish": [
+    {
+      "type": 0,
+      "value": "选择一张红色牌放逐作为费用"
+    }
+  ],
+  "card.common.cost.red.banish.two": [
+    {
+      "type": 0,
+      "value": "放逐 2 张红色牌"
+    }
+  ],
+  "card.common.cost.silver.destroy.two": [
+    {
+      "type": 0,
+      "value": "摧毁 2 个 Silver"
+    }
+  ],
+  "card.common.cost.soul.banishx": [
+    {
+      "type": 0,
+      "value": "选择 X 张 soul 中的牌放逐"
+    }
+  ],
+  "card.common.cost.spectralshield.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一个 Spectral Shield"
+    }
+  ],
+  "card.common.cost.waterygrave.discard": [
+    {
+      "type": 0,
+      "value": "弃置一张具有 watery grave 的牌"
+    }
+  ],
+  "card.common.cost.yellow.banish": [
+    {
+      "type": 0,
+      "value": "选择一张黄色牌放逐作为费用"
+    }
+  ],
+  "card.common.cost.yellow.banish.two": [
+    {
+      "type": 0,
+      "value": "放逐 2 张黄色牌"
+    }
+  ],
+  "card.common.cost.yellow.discard.two": [
+    {
+      "type": 0,
+      "value": "弃置 2 张黄色牌"
+    }
+  ],
+  "card.common.cost.zombie.discard": [
+    {
+      "type": 0,
+      "value": "弃置一个 zombie"
     }
   ],
   "card.common.levia.transform": [
@@ -1469,6 +1625,12 @@
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "card.common.ward.x.choose": [
+    {
+      "type": 0,
+      "value": "选择 ward X"
     }
   ],
   "card.common.zombie.graveyard.choose": [
@@ -2027,6 +2189,12 @@
       "value": " 点奥术伤害"
     }
   ],
+  "card.dyn.arakni.opponenttop.look": [
+    {
+      "type": 0,
+      "value": "查看对手牌库顶牌？"
+    }
+  ],
   "card.dyn.arcane.hero.choose": [
     {
       "type": 0,
@@ -2082,7 +2250,7 @@
   "card.dyn.diabolic.aura.choose": [
     {
       "type": 0,
-      "value": "选择一个要摧毁的光环"
+      "value": "选择一个要摧毁的灵气 (Aura)"
     }
   ],
   "card.dyn.drill.equipment.counter": [
@@ -2204,7 +2372,7 @@
   "card.dyn.tranquil.aura.banish": [
     {
       "type": 0,
-      "value": "放逐一个对方光环，直到此牌离场"
+      "value": "放逐一个对方灵气 (Aura)，直到此牌离场"
     }
   ],
   "card.dyn.warhorn.heroes.choose": [
@@ -3086,13 +3254,13 @@
     },
     {
       "type": 0,
-      "value": " 的光环"
+      "value": " 的灵气 (Aura)"
     }
   ],
   "card.evr.aura.destroy": [
     {
       "type": 0,
-      "value": "选择一个要摧毁的光环"
+      "value": "选择一个要摧毁的灵气 (Aura)"
     }
   ],
   "card.evr.blood.modes.assign": [
@@ -3428,7 +3596,7 @@
     },
     {
       "type": 0,
-      "value": "：将一个费用为 0 的 Illusionist 光环放入竞技场？"
+      "value": "：将一个费用为 0 的 Illusionist 灵气 (Aura)放入竞技场？"
     }
   ],
   "card.evr.item.destroy": [
@@ -3870,7 +4038,7 @@
     },
     {
       "type": 0,
-      "value": " 的 Runeblade 光环"
+      "value": " 的 Runeblade 灵气 (Aura)"
     }
   ],
   "card.hvy.six.banish": [
@@ -3976,7 +4144,7 @@
   "card.iar.bloodsong.aura.banish": [
     {
       "type": 0,
-      "value": "放逐一个由对方操控的光环永久物？"
+      "value": "放逐一个由对方操控的灵气 (Aura)永久物？"
     }
   ],
   "card.iar.bonebarrier.ally.choose": [
@@ -4094,7 +4262,7 @@
   "card.iar.sinspeaker.aura.search": [
     {
       "type": 0,
-      "value": "搜寻一张牌名中含有 Runechant 的光环？"
+      "value": "搜寻一张牌名中含有 Runechant 的灵气 (Aura)？"
     }
   ],
   "card.iar.usurp.runechant.destroy": [
@@ -4560,19 +4728,19 @@
     },
     {
       "type": 0,
-      "value": "：摧毁一个光环"
+      "value": "：摧毁一个灵气 (Aura)"
     }
   ],
   "card.mpg.aura.steal": [
     {
       "type": 0,
-      "value": "Annexation of Grandeur：夺取一个光环的操控权"
+      "value": "Annexation of Grandeur：夺取一个灵气 (Aura)的操控权"
     }
   ],
   "card.mpg.auratoken.destroy": [
     {
       "type": 0,
-      "value": "Break Stature：摧毁一个光环衍生物"
+      "value": "Break Stature：摧毁一个灵气 (Aura)衍生物"
     }
   ],
   "card.mpg.card.discard": [
@@ -4664,7 +4832,7 @@
   "card.mpw.aura.destroy": [
     {
       "type": 0,
-      "value": "摧毁一个光环"
+      "value": "摧毁一个灵气 (Aura)"
     }
   ],
   "card.mpw.blunt.counter.remove": [
@@ -4740,7 +4908,7 @@
   "card.mst.aura.bottom": [
     {
       "type": 0,
-      "value": "将一个光环置于其拥有者牌库底"
+      "value": "将一个灵气 (Aura)置于其拥有者牌库底"
     }
   ],
   "card.mst.blue.card.banish": [
@@ -4886,7 +5054,7 @@
   "card.mst.wardaura.choose": [
     {
       "type": 0,
-      "value": "选择一个守护 (ward) 光环"
+      "value": "选择一个守护 (ward) 灵气 (Aura)"
     }
   ],
   "card.omn.action.defender.return": [
@@ -4936,19 +5104,19 @@
     },
     {
       "type": 0,
-      "value": "：为一个光环放置 holo 指示物？"
+      "value": "：为一个灵气 (Aura)放置 holo 指示物？"
     }
   ],
   "card.omn.aura.token.copy": [
     {
       "type": 0,
-      "value": "创造一个光环的衍生物复制？"
+      "value": "创造一个灵气 (Aura)的衍生物复制？"
     }
   ],
   "card.omn.aura.token.destroy": [
     {
       "type": 0,
-      "value": "摧毁一个光环衍生物"
+      "value": "摧毁一个灵气 (Aura)衍生物"
     }
   ],
   "card.omn.aura.token.destroy.named": [
@@ -4958,13 +5126,13 @@
     },
     {
       "type": 0,
-      "value": "：摧毁一个光环衍生物"
+      "value": "：摧毁一个灵气 (Aura)衍生物"
     }
   ],
   "card.omn.aura.token.steal": [
     {
       "type": 0,
-      "value": "夺取一个光环衍生物"
+      "value": "夺取一个灵气 (Aura)衍生物"
     }
   ],
   "card.omn.card.discard": [
@@ -5074,7 +5242,7 @@
   "card.omn.lightning.aura.holo.blink": [
     {
       "type": 0,
-      "value": "放逐一个没有 holo 指示物的 Lightning 光环并将其移回竞技场？"
+      "value": "放逐一个没有 holo 指示物的 Lightning 灵气 (Aura)并将其移回竞技场？"
     }
   ],
   "card.omn.lightning.card.reveal": [
@@ -5952,19 +6120,19 @@
     },
     {
       "type": 0,
-      "value": " 个光环置于其拥有者牌库底"
+      "value": " 个灵气 (Aura)置于其拥有者牌库底"
     }
   ],
   "card.ros.aura.destroy": [
     {
       "type": 0,
-      "value": "摧毁一个光环"
+      "value": "摧毁一个灵气 (Aura)"
     }
   ],
   "card.ros.aura.destroy.eligible": [
     {
       "type": 0,
-      "value": "摧毁一个符合条件的光环"
+      "value": "摧毁一个符合条件的灵气 (Aura)"
     }
   ],
   "card.ros.aura.destroy.named": [
@@ -5974,13 +6142,13 @@
     },
     {
       "type": 0,
-      "value": "：摧毁一个你操控的光环"
+      "value": "：摧毁一个你操控的灵气 (Aura)"
     }
   ],
   "card.ros.aura.destroy.own": [
     {
       "type": 0,
-      "value": "摧毁一个你操控的光环？"
+      "value": "摧毁一个你操控的灵气 (Aura)？"
     }
   ],
   "card.ros.aura.destroy.runechant": [
@@ -5990,19 +6158,19 @@
     },
     {
       "type": 0,
-      "value": "：摧毁一个光环以创造 Runechant？"
+      "value": "：摧毁一个灵气 (Aura)以创造 Runechant？"
     }
   ],
   "card.ros.aura.return": [
     {
       "type": 0,
-      "value": "将一个你操控的光环返回手牌"
+      "value": "将一个你操控的灵气 (Aura)返回手牌"
     }
   ],
   "card.ros.aura.return.eligible": [
     {
       "type": 0,
-      "value": "将一个符合条件的光环返回其拥有者手牌？"
+      "value": "将一个符合条件的灵气 (Aura)返回其拥有者手牌？"
     }
   ],
   "card.ros.card.discard": [
@@ -6092,7 +6260,7 @@
   "card.ros.sigil.return": [
     {
       "type": 0,
-      "value": "将墓地中的一个 Sigil 光环返回手牌？"
+      "value": "将墓地中的一个 Sigil 灵气 (Aura)返回手牌？"
     }
   ],
   "card.ros.token.create": [
@@ -6810,7 +6978,7 @@
   "card.sen.wardaura.powercounter": [
     {
       "type": 0,
-      "value": "Uphold Tradition：在一个你操控的守护 (ward) 光环上放置 "
+      "value": "Uphold Tradition：在一个你操控的守护 (ward) 灵气 (Aura)上放置 "
     },
     {
       "type": 1,
@@ -6824,7 +6992,7 @@
   "card.sen.wardaura.powercounters": [
     {
       "type": 0,
-      "value": "Astral Etchings：在一个你操控的守护 (ward) 光环上放置 "
+      "value": "Astral Etchings：在一个你操控的守护 (ward) 灵气 (Aura)上放置 "
     },
     {
       "type": 1,
@@ -7190,13 +7358,13 @@
   "card.sup.aura.bottom": [
     {
       "type": 0,
-      "value": "将一个光环置于牌库底部"
+      "value": "将一个灵气 (Aura)置于牌库底部"
     }
   ],
   "card.sup.aura.destroy": [
     {
       "type": 0,
-      "value": "摧毁一个光环"
+      "value": "摧毁一个灵气 (Aura)"
     }
   ],
   "card.sup.aura.destroy.named": [
@@ -7206,7 +7374,7 @@
     },
     {
       "type": 0,
-      "value": "：摧毁一个光环"
+      "value": "：摧毁一个灵气 (Aura)"
     }
   ],
   "card.sup.aura.token.destroy": [
@@ -7216,13 +7384,13 @@
     },
     {
       "type": 0,
-      "value": "：摧毁一个光环衍生物"
+      "value": "：摧毁一个灵气 (Aura)衍生物"
     }
   ],
   "card.sup.aura.token.steal": [
     {
       "type": 0,
-      "value": "夺取一个光环衍生物的操控权"
+      "value": "夺取一个灵气 (Aura)衍生物的操控权"
     }
   ],
   "card.sup.card.top.choose": [
@@ -7544,7 +7712,7 @@
   "card.sup.suspense.counter.add": [
     {
       "type": 0,
-      "value": "在一个具有 suspense 的光环上放置 suspense 指示物？"
+      "value": "在一个具有 suspense 的灵气 (Aura)上放置 suspense 指示物？"
     }
   ],
   "card.sup.suspense.counter.change": [
@@ -7584,7 +7752,7 @@
     },
     {
       "type": 0,
-      "value": " 的光环返回手牌"
+      "value": " 的灵气 (Aura)返回手牌"
     }
   ],
   "card.svi.condemn.opposing.aura.destroy": [
@@ -7594,7 +7762,7 @@
     },
     {
       "type": 0,
-      "value": "：摧毁一个由你操控的光环"
+      "value": "：摧毁一个由你操控的灵气 (Aura)"
     }
   ],
   "card.svi.condemn.own.aura.destroy": [
@@ -7604,7 +7772,7 @@
     },
     {
       "type": 0,
-      "value": "：摧毁一个由你操控的光环？"
+      "value": "：摧毁一个由你操控的灵气 (Aura)？"
     }
   ],
   "card.svi.fellingsong.aura.banish": [
@@ -7614,7 +7782,7 @@
     },
     {
       "type": 0,
-      "value": "：放逐墓地中的一个光环，造成 "
+      "value": "：放逐墓地中的一个灵气 (Aura)，造成 "
     },
     {
       "type": 1,
@@ -7632,7 +7800,7 @@
     },
     {
       "type": 0,
-      "value": "：放逐墓地中的另一个光环，造成 "
+      "value": "：放逐墓地中的另一个灵气 (Aura)，造成 "
     },
     {
       "type": 1,
@@ -8465,6 +8633,16 @@
       "value": "让过"
     }
   ],
+  "common.option.pay": [
+    {
+      "type": 0,
+      "value": "支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    }
+  ],
   "common.option.remove": [
     {
       "type": 0,
@@ -8571,6 +8749,44 @@
       "value": "：选择攻击目标"
     }
   ],
+  "engine.decision.clash.again": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：摧毁一个 "
+    },
+    {
+      "type": 1,
+      "value": "permanent"
+    },
+    {
+      "type": 0,
+      "value": "，将一张展示的牌置于其拥有者牌库底部，然后再次 clash？"
+    }
+  ],
+  "engine.decision.clash.revealed.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一张展示的牌置于其拥有者牌库底部"
+    }
+  ],
+  "engine.decision.clash.winner": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择哪位英雄赢得 clash"
+    }
+  ],
   "engine.decision.crank": [
     {
       "type": 1,
@@ -8579,6 +8795,212 @@
     {
       "type": 0,
       "value": "：Crank——移除一个蒸汽指示物以获得 1 个行动点？"
+    }
+  ],
+  "engine.decision.damage.arcane.barrier": [
+    {
+      "type": 0,
+      "value": "Arcane Barrier：你将受到 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害——支付资源以防止等量伤害？"
+    }
+  ],
+  "engine.decision.damage.arcane.barrier.pay": [
+    {
+      "type": 0,
+      "value": "Pitch 卡牌以为 Arcane Barrier 支付 "
+    },
+    {
+      "type": 1,
+      "value": "total"
+    },
+    {
+      "type": 0,
+      "value": " 点资源（还需 "
+    },
+    {
+      "type": 1,
+      "value": "need"
+    },
+    {
+      "type": 0,
+      "value": " 点）"
+    }
+  ],
+  "engine.decision.damage.combatequipment": [
+    {
+      "type": 0,
+      "value": "摧毁一件正在防守的装备以替代战斗伤害？"
+    }
+  ],
+  "engine.decision.damage.discardprevent": [
+    {
+      "type": 0,
+      "value": "你将受到 "
+    },
+    {
+      "type": 1,
+      "value": "damage"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害——弃置一张符合条件的牌以防止 "
+    },
+    {
+      "type": 1,
+      "value": "prevent"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害并抽 "
+    },
+    {
+      "type": 1,
+      "value": "draw"
+    },
+    {
+      "type": 0,
+      "value": " 张牌？"
+    }
+  ],
+  "engine.decision.damage.lethalprevent": [
+    {
+      "type": 0,
+      "value": "你将受到 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点致命伤害——从手牌或 arsenal 放逐 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 以防止该伤害？"
+    }
+  ],
+  "engine.decision.damage.prevent": [
+    {
+      "type": 0,
+      "value": "你将受到 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害——使用一个伤害防止效果？"
+    }
+  ],
+  "engine.decision.damage.quell": [
+    {
+      "type": 0,
+      "value": "Quell：你将受到 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害——支付资源以防止部分伤害？"
+    }
+  ],
+  "engine.decision.damage.quellpay": [
+    {
+      "type": 0,
+      "value": "Pitch 卡牌以为 Quell 支付 "
+    },
+    {
+      "type": 1,
+      "value": "cost"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
+  "engine.decision.damage.soulprevent": [
+    {
+      "type": 0,
+      "value": "你将受到 "
+    },
+    {
+      "type": 1,
+      "value": "damage"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害——选择一张 soul 中的牌放逐并防止 "
+    },
+    {
+      "type": 1,
+      "value": "prevent"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害"
+    }
+  ],
+  "engine.decision.damage.spellvoid": [
+    {
+      "type": 0,
+      "value": "Spellvoid：你将受到 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害——摧毁一件具有 Spellvoid 的装备以防止部分伤害？"
+    }
+  ],
+  "engine.decision.damage.unpreventable": [
+    {
+      "type": 0,
+      "value": "警告：此伤害无法被防止。"
+    }
+  ],
+  "engine.decision.damage.ward": [
+    {
+      "type": 0,
+      "value": "Ward：你将受到 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点伤害——摧毁一张具有 Ward 的牌以防止部分伤害"
+    }
+  ],
+  "engine.decision.damage.ward.unpreventable": [
+    {
+      "type": 0,
+      "value": "Ward：你将受到 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点无法防止的伤害——Ward 仍会被摧毁"
     }
   ],
   "engine.decision.deckbottom.first": [
@@ -8613,6 +9035,38 @@
     {
       "type": 0,
       "value": "）"
+    }
+  ],
+  "engine.decision.die.reroll": [
+    {
+      "type": 0,
+      "value": "摧毁 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 以重掷结果 "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": "？"
+    }
+  ],
+  "engine.decision.look": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：查看"
     }
   ],
   "engine.decision.payment": [
@@ -8695,6 +9149,16 @@
       "value": "——你可以打出瞬间牌或让过"
     }
   ],
+  "engine.decision.priority.trigger.cardgeneric": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 的触发能力位于堆叠上——你可以打出瞬间牌或让过"
+    }
+  ],
   "engine.decision.priority.trigger.generic": [
     {
       "type": 0,
@@ -8763,16 +9227,74 @@
       "value": " 位于堆叠上）"
     }
   ],
+  "engine.decision.soul.banishcost": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择要作为费用放逐的第 "
+    },
+    {
+      "type": 1,
+      "value": "current"
+    },
+    {
+      "type": 0,
+      "value": "/"
+    },
+    {
+      "type": 1,
+      "value": "total"
+    },
+    {
+      "type": 0,
+      "value": " 张 soul 中的牌"
+    }
+  ],
   "engine.decision.token.next": [
     {
       "type": 0,
       "value": "选择下一个要应用的衍生物生成替代效果"
     }
   ],
+  "engine.decision.token.optional": [
+    {
+      "type": 0,
+      "value": "使用此衍生物替代效果？"
+    }
+  ],
+  "engine.decision.token.optional.card": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：使用此衍生物替代效果？"
+    }
+  ],
   "engine.decision.token.playerorder": [
     {
       "type": 0,
       "value": "选择哪位玩家的衍生物替代效果先应用"
+    }
+  ],
+  "engine.decision.trigger.optional": [
+    {
+      "type": 0,
+      "value": "是否使用此触发能力？"
+    }
+  ],
+  "engine.decision.trigger.optional.card": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：是否使用此触发能力？"
     }
   ],
   "engine.decision.triggers.order": [
@@ -8785,6 +9307,12 @@
     {
       "type": 0,
       "value": "选择下一个要应用的赌注失败替代效果"
+    }
+  ],
+  "engine.decision.x.choose": [
+    {
+      "type": 0,
+      "value": "选择 X"
     }
   ],
   "footer.legal": [
@@ -9925,6 +10453,36 @@
       "value": "name"
     }
   ],
+  "game.deckToast.banishedFromDeck": [
+    {
+      "type": 0,
+      "value": "从牌库放逐"
+    }
+  ],
+  "game.deckToast.banishedFromGraveyard": [
+    {
+      "type": 0,
+      "value": "从墓地放逐"
+    }
+  ],
+  "game.deckToast.revealedFromDeck": [
+    {
+      "type": 0,
+      "value": "从牌库展示"
+    }
+  ],
+  "game.deckToast.revealedFromHand": [
+    {
+      "type": 0,
+      "value": "从手牌展示"
+    }
+  ],
+  "game.deckToast.sentFromDeckToGraveyard": [
+    {
+      "type": 0,
+      "value": "从牌库置入墓地"
+    }
+  ],
   "game.effects.identical": [
     {
       "type": 1,
@@ -10390,7 +10948,7 @@
   "game.search.title": [
     {
       "type": 0,
-      "value": "搜索对手的手牌、牌组与Arsenal"
+      "value": "搜索对手的手牌、牌组与 Arsenal"
     }
   ],
   "game.search.zone.arsenal": [

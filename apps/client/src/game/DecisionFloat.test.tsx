@@ -108,6 +108,36 @@ describe("card-name autocomplete", () => {
     expect(html).toContain("Start typing a card name");
   });
 
+  it("gives choose-name decisions a wider responsive panel", () => {
+    const model: PendingDecisionModel = {
+      decision: { player: 0, kind: "choose-name", prompt: "Name a card" },
+      isMine: true,
+      decidingName: "Hero",
+      canPass: false,
+      defendPitchIds: new Set(),
+      hand: [],
+      defendSel: [],
+      selectedPitchIds: [],
+      onTogglePitch: () => undefined,
+      resourcePaymentSelected: 0,
+      resourcePaymentRequired: 0,
+      confirmSkipArsenal: false,
+      onRequestPass: () => undefined,
+      onDisableGuidance: () => undefined,
+      onConfirmSkipArsenal: () => undefined,
+      onCancelSkipArsenal: () => undefined,
+      onSend: () => undefined,
+    };
+
+    const html = renderLocalized(
+      <PendingDecisionPanel model={model} viewerSeat={0} />,
+    );
+
+    expect(html).toContain(
+      'class="decision decision-options decision-name-choice"',
+    );
+  });
+
   it("accepts the highlighted suggestion on Enter without submitting it", () => {
     expect(cardNameEnterAction(true, ["Head Jab", "Hundred Winds"], 1)).toEqual({
       kind: "accept-suggestion",

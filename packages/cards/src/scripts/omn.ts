@@ -723,8 +723,8 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
       timing: "instant",
       tap: true,
       effectCardCosts: [
-        { zone: "arena", move: "destroy", count: 1, name: "Lightning Flow", prompt: "Choose a Lightning Flow to destroy" },
-        { zone: "arena", move: "banish", count: 1, types: ["lightning", "aura"], withoutCounter: "holo", prompt: "Choose another Lightning aura to banish" },
+        { zone: "arena", move: "destroy", count: 1, name: "Lightning Flow", prompt: decisionPrompt("Choose a Lightning Flow to destroy", "card.common.cost.lightningflow.destroy") },
+        { zone: "arena", move: "banish", count: 1, types: ["lightning", "aura"], withoutCounter: "holo", prompt: decisionPrompt("Choose another Lightning aura to banish", "card.common.cost.lightningaura.banish") },
       ],
       onCostPaid(ctx, paid) {
         const banished = paid.find((card) => ctx.player(ctx.seat).banish.some((candidate) => candidate.instanceId === card.instanceId));
@@ -777,7 +777,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
       goAgain: false,
       timing: "instant",
       tap: true,
-      effectCardCosts: [{ zone: "arena", move: "destroy", count: 1, name: "Lightning Flow", prompt: "Choose a Lightning Flow to destroy" }],
+      effectCardCosts: [{ zone: "arena", move: "destroy", count: 1, name: "Lightning Flow", prompt: decisionPrompt("Choose a Lightning Flow to destroy", "card.common.cost.lightningflow.destroy") }],
       onActivate: (ctx) => ctx.createToken(EMBODIMENT),
     },
   },
@@ -842,7 +842,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
       timing: "instant",
       tap: true,
       effectCardCosts: [
-        { zone: "arena", move: "destroy", count: 1, name: "Lightning Flow", prompt: "Choose a Lightning Flow to destroy" },
+        { zone: "arena", move: "destroy", count: 1, name: "Lightning Flow", prompt: decisionPrompt("Choose a Lightning Flow to destroy", "card.common.cost.lightningflow.destroy") },
       ],
       onActivate(ctx) {
         const hand = ctx.player(ctx.seat).hand;

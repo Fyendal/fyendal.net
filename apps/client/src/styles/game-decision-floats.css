@@ -97,11 +97,23 @@
   width: min(420px, calc(100vw - var(--rail-w) - 32px));
 }
 .decision-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.decision-buttons > button { white-space: nowrap; }
 .decision-buttons:empty { display: none; }
-.decision-name-form { align-items: flex-start; flex-wrap: nowrap; }
+.decision-name-choice {
+  width: min(400px, calc(100vw - var(--rail-w) - 48px));
+  max-width: calc(100vw - var(--rail-w) - 48px);
+  box-sizing: border-box;
+}
+.decision-name-form {
+  width: min(720px, 100%);
+  flex-direction: column;
+  align-items: stretch;
+  flex-wrap: nowrap;
+}
+.decision-name-form > .btn-primary { align-self: center; flex: 0 0 auto; }
 .decision-name-combobox {
   position: relative;
-  width: min(360px, 62vw);
+  width: 100%;
 }
 .decision-name-combobox > input { width: 100%; }
 .decision-name-suggestions {

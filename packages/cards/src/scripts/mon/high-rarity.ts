@@ -142,7 +142,7 @@ function requestSonataAttack(ctx: ScriptCtx): void {
 }
 
 const sonataArcanix: CardScript = {
-  variablePlayCost: { base: 0, resourcesPerX: 2, counterKey: "sonataX", prompt: "Choose X" },
+  variablePlayCost: { base: 0, resourcesPerX: 2, counterKey: "sonataX", prompt: decisionPrompt("Choose X", "engine.decision.x.choose") },
   onPlay(ctx) {
     const revealed = ctx.player(ctx.seat).deck.slice(0, ctx.getCounter("sonataX") + 3);
     ctx.revealCards(revealed.map((card) => card.instanceId));
@@ -207,7 +207,7 @@ const rouseTheAncients: CardScript = {
 };
 
 export const monHighRarity: Record<string, CardScript> = {
-  "great library of solana|0": { global: true, activated: { cost: 0, isAttack: false, goAgain: true, oncePerTurn: false, effectCardCosts: [{ zone: "hand", move: "discard", count: 2, pitch: 2, prompt: "Discard two yellow cards" }], onActivate(ctx) { ctx.destroyGlobal(ctx.self.instanceId); } }, triggers: [{ event: "end-of-turn", whose: "any", label: "Great Library intellect", condition(ctx) { return ctx.player(ctx.seat).pitch.filter((card) => ctx.cardColor(card) === 2).length >= 2; }, effect(ctx) { ctx.setPlayerFlag(ctx.seat, "bonusIntellect", Number(ctx.getPlayerFlag(ctx.seat, "bonusIntellect")) + 1); } }] },
+  "great library of solana|0": { global: true, activated: { cost: 0, isAttack: false, goAgain: true, oncePerTurn: false, effectCardCosts: [{ zone: "hand", move: "discard", count: 2, pitch: 2, prompt: decisionPrompt("Discard two yellow cards", "card.common.cost.yellow.discard.two") }], onActivate(ctx) { ctx.destroyGlobal(ctx.self.instanceId); } }, triggers: [{ event: "end-of-turn", whose: "any", label: "Great Library intellect", condition(ctx) { return ctx.player(ctx.seat).pitch.filter((card) => ctx.cardColor(card) === 2).length >= 2; }, effect(ctx) { ctx.setPlayerFlag(ctx.seat, "bonusIntellect", Number(ctx.getPlayerFlag(ctx.seat, "bonusIntellect")) + 1); } }] },
   "prism, sculptor of arc light|0": { activated: { cost: 2, isAttack: false, goAgain: false, timing: "instant", oncePerTurn: false, banishSoulCost: 1, onActivate(ctx) { ctx.createToken(SPECTRAL_SHIELD); } } },
   "luminaris|0": { grantsAuraAttack: { cost: 0, basePower: 1, requiresClass: "illusionist" }, onFriendlyAttackDeclared(ctx) { if (ctx.currentAttackHasType("illusionist") && ctx.player(ctx.seat).pitch.some((card) => ctx.cardColor(card) === 2)) ctx.grantGoAgain(); } },
   "herald of erudition|2": { onHit(ctx) { ctx.setFlag("link", "attackToSoul", true); ctx.drawCards(ctx.seat, 2); } },

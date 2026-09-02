@@ -612,7 +612,7 @@ export const iar: Record<string, CardScript> = {
         move: "discard",
         count: 1,
         subtype: "zombie",
-        prompt: "Discard a zombie",
+        prompt: decisionPrompt("Discard a zombie", "card.common.cost.zombie.discard"),
       }],
       onActivate(ctx) { ctx.preventNextDamage(ctx.seat, 2); },
     },
@@ -1103,7 +1103,7 @@ export const iar: Record<string, CardScript> = {
         move: "destroy",
         count: 1,
         name: "Spectral Shield",
-        prompt: "Destroy a Spectral Shield",
+        prompt: decisionPrompt("Destroy a Spectral Shield", "card.common.cost.spectralshield.destroy"),
       }],
       canActivate(ctx) {
         return ctx.link?.attackingCard.instanceId === ctx.self.instanceId;

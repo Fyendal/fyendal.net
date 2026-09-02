@@ -659,11 +659,12 @@ function stackLayer(value: unknown): boolean {
   const layer = object(value);
   return !!layer && exactKeys(
     layer,
-    ["card", "seat", "label", "optional", "count"],
+    ["card", "seat", "label", "labelMessage", "optional", "count"],
     ["card", "seat", "label", "optional"],
   )
     && (layer.card === null || cardView(layer.card)) && seat(layer.seat)
     && string(layer.label, MAX_SHORT_TEXT) && typeof layer.optional === "boolean"
+    && (layer.labelMessage === undefined || decodeGameMessage(layer.labelMessage) !== null)
     && (layer.count === undefined
       || (integer(layer.count) && layer.count >= 2 && layer.count <= MAX_CARDS));
 }

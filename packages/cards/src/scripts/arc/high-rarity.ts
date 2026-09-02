@@ -64,7 +64,7 @@ const tekloCore: CardScript = {
 };
 
 const sparkOfGenius: CardScript = {
-  variablePlayCost: { base: 0, resourcesPerX: 2, counterKey: "sparkX", prompt: "Choose X" },
+  variablePlayCost: { base: 0, resourcesPerX: 2, counterKey: "sparkX", prompt: decisionPrompt("Choose X", "engine.decision.x.choose") },
   onChoose(ctx, hook, option) {
     if (hook !== "spark-item") return;
     const item = ctx.player(ctx.seat).deck.find((card) => card.instanceId === Number(option));

@@ -181,6 +181,7 @@ function continueWagerLossReplacements(
       player: wager.controllerSeat,
       kind: "choose-target",
       prompt: "Choose the next wager-loss replacement to apply",
+      promptMessage: { id: "engine.decision.wager.next" },
       options: sourceIds.map(String),
       optionLabels: sources.map((source) => nameOf(state, source.cardId)),
       cardOptions: sourceIds,

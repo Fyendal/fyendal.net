@@ -188,7 +188,13 @@ const gameView = () => ({
     targetAllyName: "Ally",
     targetAlly: card,
   }],
-  stack: [{ card, seat: 0, label: "Trigger", optional: true }],
+  stack: [{
+    card,
+    seat: 0,
+    label: "Trigger",
+    labelMessage: { id: "card.test.trigger" },
+    optional: true,
+  }],
   stackContext: "DAMAGE STEP · ON-HIT TRIGGERS",
   ongoing: [{ seat: 0, cardId: "WTR001", label: "+1" }],
   pendingDecision: {

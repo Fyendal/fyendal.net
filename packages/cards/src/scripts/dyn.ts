@@ -8,6 +8,7 @@ import {
   contractWithSilver,
   dealArcane,
   type DecisionPromptOptions,
+  decisionMessage,
   decisionPrompt,
   discardRandomCost,
   mergeSetScripts,
@@ -414,6 +415,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
     triggers: [{
       event: "card-played",
       label: "Look at the opponent's top card?",
+      labelMessage: decisionMessage("card.dyn.arakni.opponenttop.look"),
       optional: true,
       defaultOption: "yes",
       condition: (ctx, played) => !!played &&

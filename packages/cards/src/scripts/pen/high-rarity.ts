@@ -211,7 +211,7 @@ export const penHighRarity: Record<string, CardScript> = {
   "synapse sparkcap|0": {
     activated: {
       cost: 0, isAttack: false, goAgain: true, tap: true,
-      effectCardCosts: [{ zone: "hand", move: "banish", count: 1, subtype: "evo", prompt: "Banish an Evo" }],
+      effectCardCosts: [{ zone: "hand", move: "banish", count: 1, subtype: "evo", prompt: decisionPrompt("Banish an Evo", "card.common.cost.evo.banish") }],
       onActivate: (ctx) => { ctx.createToken(PONDER); },
     },
   },
@@ -295,7 +295,7 @@ export const penHighRarity: Record<string, CardScript> = {
     onPlay(ctx) { if (ctx.playTargetInstanceId !== undefined && ctx.negateStackCard(ctx.playTargetInstanceId)) ctx.changeActionPoints(opponentSeat(ctx), 1); },
   },
   "touch of reality|0": {
-    activated: { cost: 0, variableCost: { base: 0, counterKey: "wardX", prompt: "Choose ward X" }, isAttack: false, goAgain: false, timing: "instant", tap: true, onActivate: (ctx) => ctx.destroyAtEndPhase(ctx.self.instanceId) },
+    activated: { cost: 0, variableCost: { base: 0, counterKey: "wardX", prompt: decisionPrompt("Choose ward X", "card.common.ward.x.choose") }, isAttack: false, goAgain: false, timing: "instant", tap: true, onActivate: (ctx) => ctx.destroyAtEndPhase(ctx.self.instanceId) },
     wardValue: (ctx) => ctx.getCounter("wardX"),
   },
   "lunar mirage|1": {
@@ -314,7 +314,7 @@ export const penHighRarity: Record<string, CardScript> = {
     for (const card of cards) ctx.discardCard(target, card.instanceId); ctx.drawCards(target, cards.length);
   } },
   "graven gaslight|0": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", fromGraveyard: true,
-    effectCardCosts: [{ zone: "arena", move: "destroy", count: 2, name: "Silver", prompt: "Destroy 2 Silver" }], onActivate(ctx) { ctx.equipFromGraveyard(ctx.self.instanceId); }
+    effectCardCosts: [{ zone: "arena", move: "destroy", count: 2, name: "Silver", prompt: decisionPrompt("Destroy 2 Silver", "card.common.cost.silver.destroy.two") }], onActivate(ctx) { ctx.equipFromGraveyard(ctx.self.instanceId); }
   } },
   "lobotomy|1": {
     onAttackDeclared(ctx) { const orbit = (ctx.player(ctx.seat).inventory ?? []).find((card) => data(ctx, card).name.includes("Orbitoclast")); if (orbit) ctx.requestCardChoice("lobotomy-equip", decisionPrompt("Equip an Orbitoclast?", "card.pen.orbitoclast.equip", { optionMessages: commonOptionMessages("no") }), ["no", orbit.instanceId]); },
@@ -364,7 +364,7 @@ export const penHighRarity: Record<string, CardScript> = {
     onEnterArena: (ctx) => ctx.addCounter(ctx.self.instanceId, "power", 1),
     activated: [
       { ...attackAbility(1, { tap: true })[0]! },
-      { cost: 0, isAttack: false, goAgain: true, effectCardCosts: [{ zone: "arena", move: "remove-counter", count: 1, subtype: "ally", counter: { key: "power", amount: 1 }, prompt: "Remove a power counter" }], onActivate(ctx) { const aura = ctx.state.players.flatMap((p) => p.board).find((card) => has(ctx, card, "aura") && has(ctx, card, "token")); if (aura) ctx.destroyPermanent(aura.instanceId); } },
+      { cost: 0, isAttack: false, goAgain: true, effectCardCosts: [{ zone: "arena", move: "remove-counter", count: 1, subtype: "ally", counter: { key: "power", amount: 1 }, prompt: decisionPrompt("Remove a power counter", "card.common.cost.powercounter.remove") }], onActivate(ctx) { const aura = ctx.state.players.flatMap((p) => p.board).find((card) => has(ctx, card, "aura") && has(ctx, card, "token")); if (aura) ctx.destroyPermanent(aura.instanceId); } },
     ],
   },
   "gloves of azure waves|0": { modifyDefense: (ctx) => ctx.player(ctx.seat).pitch.filter((card) => ctx.cardColor(card) === 3).length >= 2 ? 3 : 0 },

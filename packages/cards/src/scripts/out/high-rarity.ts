@@ -77,7 +77,7 @@ export const uzuriAbility: CardScript = {
       move: "banish",
       count: 1,
       faceDown: true,
-      prompt: "Banish a card from hand face down",
+      prompt: decisionPrompt("Banish a card from hand face down", "card.common.cost.hand.banishfacedown"),
     }],
     canActivate: (ctx) => !!ctx.link &&
       ctx.link.attacker === ctx.seat &&

@@ -19,6 +19,7 @@ function searchDecision(): PendingDecision {
     player: 0,
     kind: "choose-target",
     prompt: "Choose up to 1 more card with the named card's name",
+    promptMessage: { id: "card.sup.named.cards.choose" },
     options: ["12"],
     optionCards: [deckCard],
     lookedCards: [handCard, deckCard, arsenalCard],
@@ -42,6 +43,7 @@ describe("private card search overlay", () => {
     expect(model?.optionByCardId.has(handCard.instanceId)).toBe(false);
     expect(model?.minimumSelections).toBe(0);
     expect(model?.maximumSelections).toBe(1);
+    expect(model?.promptMessage).toEqual({ id: "card.sup.named.cards.choose" });
   });
 
   it("renders all searched cards in a required zone-style dialog", () => {
@@ -94,7 +96,7 @@ describe("private card search overlay", () => {
     expect(html).toContain("Restore search");
   });
 
-  it("localizes the search chrome without changing the authored card prompt", () => {
+  it("localizes both the search chrome and the semantic card prompt", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider locale="zh-Hans">
         <CardSearchOverlay
@@ -109,6 +111,7 @@ describe("private card search overlay", () => {
     expect(html).toContain("牌库（1）");
     expect(html).toContain("Arsenal（1）");
     expect(html).toContain("完成");
-    expect(html).toContain("Choose up to 1 more card with the named card&#x27;s name");
+    expect(html).toContain("再选择至多 3 张与指定牌名相同的牌");
+    expect(html).not.toContain("Choose up to 1 more card with the named card&#x27;s name");
   });
 });
