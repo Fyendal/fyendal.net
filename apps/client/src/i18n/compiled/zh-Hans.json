@@ -2121,6 +2121,298 @@
       "value": "Thump：选择一张牌弃置"
     }
   ],
+  "card.evo.attack.fifthfromtop": [
+    {
+      "type": 0,
+      "value": "将一张攻击牌置于牌库顶向下第五张？"
+    }
+  ],
+  "card.evo.card.discard": [
+    {
+      "type": 0,
+      "value": "选择一张牌弃置"
+    }
+  ],
+  "card.evo.crankitem.steam.add": [
+    {
+      "type": 0,
+      "value": "在一个具有 crank 的物品上放置一个蒸汽指示物"
+    }
+  ],
+  "card.evo.crankitem.steam.add.optional": [
+    {
+      "type": 0,
+      "value": "在一个具有 crank 的物品上放置一个蒸汽指示物？"
+    }
+  ],
+  "card.evo.defendinghero.item.control": [
+    {
+      "type": 0,
+      "value": "获得防守英雄所操控的一个物品的操控权"
+    }
+  ],
+  "card.evo.equipment.abilities.disable": [
+    {
+      "type": 0,
+      "value": "选择一件无法发动能力的装备"
+    }
+  ],
+  "card.evo.equipment.defense.disable": [
+    {
+      "type": 0,
+      "value": "选择一件无法防守的装备"
+    }
+  ],
+  "card.evo.equipment.mustdefend": [
+    {
+      "type": 0,
+      "value": "选择一件必须防守的装备"
+    }
+  ],
+  "card.evo.equipment.offer": [
+    {
+      "type": 0,
+      "value": "选择一件装备交出"
+    }
+  ],
+  "card.evo.equipment.offer.next": [
+    {
+      "type": 0,
+      "value": "再选择一件装备交出"
+    }
+  ],
+  "card.evo.fabricate.mode.first": [
+    {
+      "type": 0,
+      "value": "选择 Fabricate 的第一项模式"
+    }
+  ],
+  "card.evo.fabricate.mode.next": [
+    {
+      "type": 0,
+      "value": "选择 Fabricate 的第二项模式"
+    }
+  ],
+  "card.evo.fabricate.option.defense": [
+    {
+      "type": 0,
+      "value": "你的装备 +1 防御"
+    }
+  ],
+  "card.evo.fabricate.option.equip": [
+    {
+      "type": 0,
+      "value": "装备一个 Proto Base"
+    }
+  ],
+  "card.evo.fabricate.option.hand": [
+    {
+      "type": 0,
+      "value": "从手牌放逐一张 Evo 并抽牌"
+    }
+  ],
+  "card.evo.fabricate.option.under": [
+    {
+      "type": 0,
+      "value": "将 Fabricate 置于一个 Evo 之下"
+    }
+  ],
+  "card.evo.fabricate.under.choose": [
+    {
+      "type": 0,
+      "value": "选择一件 Evo 装备，将 Fabricate 置于其下"
+    }
+  ],
+  "card.evo.galvanize.item": [
+    {
+      "type": 0,
+      "value": "摧毁一个物品以获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 防御？"
+    }
+  ],
+  "card.evo.graveyard.item.banish": [
+    {
+      "type": 0,
+      "value": "放逐你墓地中的一个物品"
+    }
+  ],
+  "card.evo.graveyard.item.banish.next": [
+    {
+      "type": 0,
+      "value": "再放逐你墓地中的一个物品"
+    }
+  ],
+  "card.evo.hand.card.banish.draw": [
+    {
+      "type": 0,
+      "value": "放逐一张手牌以抽一张牌？"
+    }
+  ],
+  "card.evo.hand.card.top": [
+    {
+      "type": 0,
+      "value": "将一张手牌置于牌库顶部"
+    }
+  ],
+  "card.evo.hyperdriver.arena.optional": [
+    {
+      "type": 0,
+      "value": "将一个 Hyper Driver 放入竞技场？"
+    }
+  ],
+  "card.evo.hyperdriver.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一个 Hyper Driver"
+    }
+  ],
+  "card.evo.hyperdriver.destroy.next": [
+    {
+      "type": 0,
+      "value": "再摧毁一个 Hyper Driver"
+    }
+  ],
+  "card.evo.hyperdriver.transform.next": [
+    {
+      "type": 0,
+      "value": "再选择一个 Hyper Driver？"
+    }
+  ],
+  "card.evo.hyperdrivers.transform": [
+    {
+      "type": 0,
+      "value": "选择要进行转化的 Hyper Driver"
+    }
+  ],
+  "card.evo.item.arena": [
+    {
+      "type": 0,
+      "value": "将一个物品放入竞技场"
+    }
+  ],
+  "card.evo.item.reset": [
+    {
+      "type": 0,
+      "value": "选择一个要重置的物品"
+    }
+  ],
+  "card.evo.item.reset.next": [
+    {
+      "type": 0,
+      "value": "再选择一个要重置的物品"
+    }
+  ],
+  "card.evo.item.small.arena": [
+    {
+      "type": 0,
+      "value": "将一个费用为 0 或 1 的物品放入竞技场"
+    }
+  ],
+  "card.evo.item.small.arena.optional": [
+    {
+      "type": 0,
+      "value": "将一个费用为 0 或 1 的物品放入竞技场？"
+    }
+  ],
+  "card.evo.maintenance.choose": [
+    {
+      "type": 0,
+      "value": "移除一个蒸汽指示物，或摧毁此牌？"
+    }
+  ],
+  "card.evo.matching.item.top": [
+    {
+      "type": 0,
+      "value": "将一个颜色相符的物品置于牌库顶部"
+    }
+  ],
+  "card.evo.mechanologist.attack.return": [
+    {
+      "type": 0,
+      "value": "将一张 Mechanologist 攻击行动牌返回手牌"
+    }
+  ],
+  "card.evo.mechanologist.attack.shuffle": [
+    {
+      "type": 0,
+      "value": "将一张 Mechanologist 攻击牌洗回你的牌库"
+    }
+  ],
+  "card.evo.permanent.steam.remove": [
+    {
+      "type": 0,
+      "value": "移除一个永久物上的所有蒸汽指示物"
+    }
+  ],
+  "card.evo.permanent.steam.remove.next": [
+    {
+      "type": 0,
+      "value": "移除另一个永久物上的蒸汽指示物？"
+    }
+  ],
+  "card.evo.permanent.steam.remove.uptox": [
+    {
+      "type": 0,
+      "value": "移除至多 X 个永久物上的蒸汽指示物"
+    }
+  ],
+  "card.evo.red.pitch.first": [
+    {
+      "type": 0,
+      "value": "将 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张红色牌中的第一张置入扣置区？"
+    }
+  ],
+  "card.evo.red.pitch.second": [
+    {
+      "type": 0,
+      "value": "将第二张红色牌置入扣置区？"
+    }
+  ],
+  "card.evo.revealed.card.defend": [
+    {
+      "type": 0,
+      "value": "选择一张已展示的牌进行防守"
+    }
+  ],
+  "card.evo.revealed.card.none": [
+    {
+      "type": 0,
+      "value": "没有可用于防守的已展示牌"
+    }
+  ],
+  "card.evo.scrap.choose": [
+    {
+      "type": 0,
+      "value": "拆解 (scrap) 一个物品、装备或衍生物？"
+    }
+  ],
+  "card.evo.soul.charge": [
+    {
+      "type": 0,
+      "value": "为你的英雄 soul 充能？"
+    }
+  ],
+  "card.evo.weapon.attackagain.choose": [
+    {
+      "type": 0,
+      "value": "选择一件本回合可以额外攻击一次的武器"
+    }
+  ],
   "card.evr.arcane.hero.choose": [
     {
       "type": 1,

@@ -25,6 +25,7 @@ const localizedSets = [
   "dyn",
   "ele",
   "evr",
+  "evo",
   "gem",
   "hvy",
   "iar",
