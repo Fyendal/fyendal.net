@@ -51,6 +51,16 @@ describe("SEA — High Seas heroes and cogs", () => {
     g.activate("crucible of aetherweave|0", { pitch: [] })
       .play("burn bare|0");
     expect(g.state.pendingDecision?.prompt).toBe("Choose a target for 7 arcane damage");
+    expect(g.state.pendingDecision?.promptMessage).toEqual({
+      id: "card.sea.damage.arcane.target",
+      values: { amount: 7 },
+    });
+    expect(g.state.pendingDecision?.optionMessages).toHaveLength(
+      g.state.pendingDecision?.options?.length ?? 0,
+    );
+    expect(g.state.pendingDecision?.optionMessages?.every(
+      (message) => message?.id === "card.sea.target.card",
+    )).toBe(true);
     g.chooseOption("hero:1")
       .expectLog("Burn Bare would deal 7 arcane damage to Dorinthea")
       .expectLife(1, 13);

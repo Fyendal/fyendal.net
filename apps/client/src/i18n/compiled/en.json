@@ -279,6 +279,38 @@
       "value": "Flesh and Blood Online"
     }
   ],
+  "card.sea.damage.arcane.target": [
+    {
+      "type": 0,
+      "value": "Choose a target for "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage"
+    }
+  ],
+  "card.sea.target.card": [
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "card.sea.treasure.counter.add": [
+    {
+      "type": 0,
+      "value": "Put a gold counter on Treasure Island?"
+    }
+  ],
+  "card.sea.treasure.counter.remove": [
+    {
+      "type": 0,
+      "value": "Remove a Treasure Island gold counter?"
+    }
+  ],
   "common.all": [
     {
       "type": 0,

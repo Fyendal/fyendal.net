@@ -376,6 +376,34 @@ describe("priority guidance help", () => {
       "yes", "no", "pass", "decline", "reroll", "keep", "pay 2", "custom-option",
     ]);
   });
+
+  it("renders a card-authored semantic prompt and option in Chinese", () => {
+    const model = pendingModel("optional-effect");
+    model.decision = {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Choose a target for 7 arcane damage",
+      promptMessage: {
+        id: "card.sea.damage.arcane.target",
+        values: { amount: 7 },
+      },
+      options: ["hero:1"],
+      optionMessages: [{
+        id: "card.sea.target.card",
+        values: { card: { kind: "card", cardId: "AHA005" } },
+      }],
+    };
+    const html = renderToStaticMarkup(
+      <TestI18nProvider locale="zh-Hans">
+        <PendingDecisionPanel model={model} viewerSeat={0} />
+      </TestI18nProvider>,
+    );
+
+    expect(html).toContain("选择一个目标，造成 7 点奥术伤害");
+    expect(html).toContain("Reverent Rerebrace");
+    expect(html).not.toContain("Choose a target for");
+    expect(model.decision.options).toEqual(["hero:1"]);
+  });
 });
 
 describe("scripted card-choice presentation", () => {

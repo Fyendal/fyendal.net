@@ -1,5 +1,21 @@
-import type { CardInstance, CardScript, DeepReadonly, Modifier, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, buffNextAttack, nextAttack, opponentSeat, requestDiscardChoice, resolveDiscardChoice } from "./shared-helpers.js";
+import type {
+  CardInstance,
+  CardScript,
+  DeepReadonly,
+  Modifier,
+  ScriptCtx,
+} from "@fyendal/engine";
+import {
+  attackAbility,
+  buffNextAttack,
+  decisionMessage,
+  decisionPrompt,
+  nextAttack,
+  opponentSeat,
+  requestDiscardChoice,
+  resolveDiscardChoice,
+  yesNoPrompt,
+} from "./shared-helpers.js";
 
 const GOLD = "SGB035";
 const GOLDEN_COG = "SEA042";
@@ -677,7 +693,14 @@ export const sea: Record<string, CardScript> = {
   },
   "lost in transit|2": {
     onDefend(ctx) {
-      if (treasureCounters(ctx) > 0) ctx.requestChoice("lost-transit", "Remove a Treasure Island gold counter?", ["yes", "no"]);
+      if (treasureCounters(ctx) > 0) ctx.requestChoice(
+        "lost-transit",
+        yesNoPrompt(
+          "Remove a Treasure Island gold counter?",
+          "card.sea.treasure.counter.remove",
+        ),
+        ["yes", "no"],
+      );
     },
     onChoose(ctx, hook, option) {
       if (hook === "lost-transit" && option === "yes") { setTreasureCounters(ctx, treasureCounters(ctx) - 1); if (isThief(ctx)) createGold(ctx); }
@@ -726,7 +749,16 @@ export const sea: Record<string, CardScript> = {
     },
   },
   "thiev'n varmints|1": {
-    onAttackDeclared(ctx) { if (treasureCounters(ctx) > 0) ctx.requestChoice("varmints", "Remove a Treasure Island gold counter?", ["yes", "no"]); },
+    onAttackDeclared(ctx) {
+      if (treasureCounters(ctx) > 0) ctx.requestChoice(
+        "varmints",
+        yesNoPrompt(
+          "Remove a Treasure Island gold counter?",
+          "card.sea.treasure.counter.remove",
+        ),
+        ["yes", "no"],
+      );
+    },
     onChoose(ctx, hook, option) { if (hook === "varmints" && option === "yes") { setTreasureCounters(ctx, treasureCounters(ctx) - 1); if (isThief(ctx)) createGold(ctx); } },
   },
 
@@ -859,7 +891,16 @@ Object.assign(sea,
     },
   } satisfies CardScript])),
   Object.fromEntries(["expedition to azuro keys", "expedition to blackwater strait", "expedition to dreadfall reach", "expedition to horizon's mantle"].map((name) => [`${name}|1`, {
-    onAttackDeclared(ctx: ScriptCtx) { ctx.requestChoice("expedition-counter", "Put a gold counter on Treasure Island?", ["yes", "no"]); },
+    onAttackDeclared(ctx: ScriptCtx) {
+      ctx.requestChoice(
+        "expedition-counter",
+        yesNoPrompt(
+          "Put a gold counter on Treasure Island?",
+          "card.sea.treasure.counter.add",
+        ),
+        ["yes", "no"],
+      );
+    },
     onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "expedition-counter" && option === "yes") addTreasureCounter(ctx); },
   } satisfies CardScript])),
   Object.fromEntries([1, 2, 3].map((pitch) => [`swindler's grift|${pitch}`, yellowDiscardAttack(`swindler-${pitch}`)])),
@@ -867,7 +908,14 @@ Object.assign(sea,
     onPlay(ctx: ScriptCtx) {
       ctx.setCounter("chartOrdinal", pitch);
       ctx.addModifier({ scope: "until-end-of-turn" });
-      ctx.requestChoice("chart-treasure", "Put a gold counter on Treasure Island?", ["yes", "no"]);
+      ctx.requestChoice(
+        "chart-treasure",
+        yesNoPrompt(
+          "Put a gold counter on Treasure Island?",
+          "card.sea.treasure.counter.add",
+        ),
+        ["yes", "no"],
+      );
     },
     onFriendlyAttackDeclared(ctx: ScriptCtx) {
       if (Number(ctx.getFlag("player", "attacksDeclaredThisTurn")) !== ctx.getCounter("chartOrdinal")) return;
@@ -936,11 +984,31 @@ Object.assign(sea,
   Object.fromEntries([2, 3].map((pitch) => [`on the horizon|${pitch}`, { onDefend(ctx: ScriptCtx) { const top = ctx.player(ctx.seat).deck[0]; if (top) ctx.lookAt(top.instanceId); } } satisfies CardScript])),
 );
 
-function seaTargets(ctx: ScriptCtx, hook: string, prompt: string): void {
-  ctx.requestChoice(hook, prompt, [
-    ...ctx.state.players.map((player) => `hero:${player.seat}`),
-    ...ctx.state.players.flatMap((player) => player.board.filter((card) => isAlly(ctx, card)).map((card) => `ally:${card.instanceId}`)),
+function seaTargets(ctx: ScriptCtx, hook: string, baseAmount: number): void {
+  const amount = ctx.previewArcaneDamage(baseAmount);
+  const targets = ctx.state.players.flatMap((player) => [
+    { option: `hero:${player.seat}`, cardId: player.hero.cardId },
+    ...player.board
+      .filter((card) => isAlly(ctx, card))
+      .map((card) => ({ option: `ally:${card.instanceId}`, cardId: card.cardId })),
   ]);
+  ctx.requestChoice(
+    hook,
+    decisionPrompt(
+      `Choose a target for ${amount} arcane damage`,
+      "card.sea.damage.arcane.target",
+      {
+        values: { amount },
+        optionMessages: Object.fromEntries(targets.map(({ option, cardId }) => [
+          option,
+          decisionMessage("card.sea.target.card", {
+            card: { kind: "card", cardId },
+          }),
+        ])),
+      },
+    ),
+    targets.map(({ option }) => option),
+  );
 }
 
 function dealSeaTarget(ctx: ScriptCtx, option: string, amount: number, arcane = false): void {
@@ -1103,7 +1171,7 @@ Object.assign(sea, {
   "deny redemption|1": { onAttackDeclared(ctx: ScriptCtx) { if (ctx.link?.targetAllyId === undefined && ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0) ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true, unpreventable: true }); }, activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", fromHand: true, onActivate(ctx: ScriptCtx) { ctx.setFlag("player", "heroesCannotGainLife", true); } } },
   "burn bare|0": {
     arcaneDamageEffect: true,
-    onPlay(ctx: ScriptCtx) { seaTargets(ctx, "burn", `Choose a target for ${ctx.previewArcaneDamage(6)} arcane damage`); },
+    onPlay(ctx: ScriptCtx) { seaTargets(ctx, "burn", 6); },
     activated: {
       cost: 0,
       isAttack: false,
@@ -1130,8 +1198,8 @@ Object.assign(sea, {
   "riddle with regret|1": { triggers: [{ event: "end-of-turn", whose: "any", label: "Lose life for auras", effect(ctx: ScriptCtx) { const seat = ctx.state.activePlayer; const count = ctx.player(seat).board.filter((card) => hasTag(ctx, card, "aura")).length; ctx.loseLife(seat, count); if (count >= 3) ctx.destroySelf(); } }] },
   "claw of vynserakai|0": { ...attackAbility(1, { oncePerTurn: true }), preventArcaneDamageWhileActive: 1 },
   "everbloom // life|3": { meld: { leftName: "Everbloom", rightName: "Life", leftCardType: "action", rightCardType: "instant" }, onPlay(ctx: ScriptCtx) { if (ctx.self.meldSide !== "left") ctx.gainLife(ctx.seat, 1); if (ctx.self.meldSide !== "right") { const gained = Number(ctx.getPlayerFlag(ctx.seat, "lifeGainedThisTurn")); const cards = ctx.state.players.flatMap((player) => player.graveyard).filter((card) => ctx.hasCardType(card, "action") && (data(ctx, card).cost ?? 0) < gained); if (cards.length) ctx.requestCardChoice("everbloom", "Put an action on the bottom", cards.map((card) => card.instanceId)); } }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "everbloom") ctx.putOnDeckBottom(Number(option)); } },
-  "consign to cosmos // shock|2": { meld: { leftName: "Consign to Cosmos", rightName: "Shock", leftCardType: "action", rightCardType: "instant" }, arcaneDamageEffect: true, onPlay(ctx: ScriptCtx) { if (ctx.self.meldSide !== "left") seaTargets(ctx, "consign", `Choose a target for ${ctx.previewArcaneDamage(1)} arcane damage`); if (ctx.self.meldSide !== "right") { const amount = Number(ctx.getPlayerFlag(ctx.seat, `arcaneDamageAmountToSeat:${opponentSeat(ctx)}`)); const cards = ctx.state.players.flatMap((player) => player.graveyard).filter((card) => ctx.hasCardType(card, "instant") || hasTag(ctx, card, "aura")); for (const card of cards.slice(0, amount)) ctx.banish(card.instanceId); } }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "consign") dealSeaTarget(ctx, option, 1, true); } },
-  "herald of sekem|1": { onAttackDeclared(ctx: ScriptCtx) { const yellow = ctx.player(ctx.seat).hand.filter((card) => ctx.cardColor(card) === 2); if (yellow.length) ctx.requestCardChoice("sekem", "Put a yellow card into your soul?", ["pass", ...yellow.map((card) => card.instanceId)]); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "sekem" && option !== "pass" && ctx.putIntoSoul(Number(option))) seaTargets(ctx, "sekem-target", `Choose a target for ${ctx.previewArcaneDamage(2)} arcane damage`); else if (hook === "sekem-target") dealSeaTarget(ctx, option, 2, true); } },
+  "consign to cosmos // shock|2": { meld: { leftName: "Consign to Cosmos", rightName: "Shock", leftCardType: "action", rightCardType: "instant" }, arcaneDamageEffect: true, onPlay(ctx: ScriptCtx) { if (ctx.self.meldSide !== "left") seaTargets(ctx, "consign", 1); if (ctx.self.meldSide !== "right") { const amount = Number(ctx.getPlayerFlag(ctx.seat, `arcaneDamageAmountToSeat:${opponentSeat(ctx)}`)); const cards = ctx.state.players.flatMap((player) => player.graveyard).filter((card) => ctx.hasCardType(card, "instant") || hasTag(ctx, card, "aura")); for (const card of cards.slice(0, amount)) ctx.banish(card.instanceId); } }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "consign") dealSeaTarget(ctx, option, 1, true); } },
+  "herald of sekem|1": { onAttackDeclared(ctx: ScriptCtx) { const yellow = ctx.player(ctx.seat).hand.filter((card) => ctx.cardColor(card) === 2); if (yellow.length) ctx.requestCardChoice("sekem", "Put a yellow card into your soul?", ["pass", ...yellow.map((card) => card.instanceId)]); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "sekem" && option !== "pass" && ctx.putIntoSoul(Number(option))) seaTargets(ctx, "sekem-target", 2); else if (hook === "sekem-target") dealSeaTarget(ctx, option, 2, true); } },
   "arcane compliance|3": { onPlay(ctx: ScriptCtx) { ctx.setFlag("player", "arcaneCompliance", true); } },
 } satisfies Record<string, CardScript>);
 

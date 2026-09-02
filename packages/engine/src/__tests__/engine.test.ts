@@ -30,6 +30,122 @@ function passTopLayer(state: ReturnType<typeof makeGame>): ReturnType<typeof mak
 }
 
 describe("game setup & turn structure", () => {
+  it("preserves localized card-script decisions beside their deterministic fallback", () => {
+    const state = makeGame(900);
+    const source = player(state, 0).hero;
+
+    makeCtx(state, engineRuntime, 0, source).requestChoice(
+      "localized-choice",
+      {
+        fallback: "Choose a mode",
+        message: { id: "card.test.mode.choose" },
+        optionMessagesByValue: {
+          first: { id: "card.test.mode.first" },
+          second: { id: "card.test.mode.second" },
+        },
+      },
+      ["first", "second"],
+    );
+
+    expect(state.pendingDecision).toMatchObject({
+      prompt: "Choose a mode",
+      promptMessage: { id: "card.test.mode.choose" },
+      options: ["first", "second"],
+      optionMessages: [
+        { id: "card.test.mode.first" },
+        { id: "card.test.mode.second" },
+      ],
+    });
+    expect(projectStateFor(state, 0).pendingDecision?.promptMessage).toEqual({
+      id: "card.test.mode.choose",
+    });
+    expect(projectStateFor(state, 1).pendingDecision?.promptMessage).toBeUndefined();
+  });
+
+  it("aligns partial card-script option messages by stable option value", () => {
+    const state = makeGame(901);
+    const source = player(state, 0).hero;
+
+    makeCtx(state, engineRuntime, 0, source).requestChoice(
+      "localized-choice",
+      {
+        fallback: "Choose a mode",
+        message: { id: "card.test.mode.choose" },
+        optionMessagesByValue: {
+          first: { id: "card.test.mode.first" },
+          second: { id: "card.test.mode.second" },
+          unused: { id: "card.test.mode.unused" },
+        },
+      },
+      ["second", "untranslated", "first"],
+    );
+
+    expect(state.pendingDecision?.promptMessage).toEqual({
+      id: "card.test.mode.choose",
+    });
+    expect(state.pendingDecision?.optionMessages).toEqual([
+      { id: "card.test.mode.second" },
+      null,
+      { id: "card.test.mode.first" },
+    ]);
+  });
+
+  it("supports semantic prompts across card, name, and payment decisions", () => {
+    const cardState = makeGame(902);
+    const cardSource = player(cardState, 0).hero;
+    makeCtx(cardState, engineRuntime, 0, cardSource).requestCardChoice(
+      "localized-card",
+      {
+        fallback: "Choose a card",
+        message: { id: "card.test.card.choose" },
+        optionMessagesByValue: {
+          [String(cardSource.instanceId)]: { id: "card.test.card.option" },
+        },
+      },
+      [cardSource.instanceId],
+    );
+    expect(cardState.pendingDecision).toMatchObject({
+      promptMessage: { id: "card.test.card.choose" },
+      options: [String(cardSource.instanceId)],
+      optionMessages: [{ id: "card.test.card.option" }],
+      cardOptions: [cardSource.instanceId],
+    });
+
+    const nameState = makeGame(903);
+    const nameSource = player(nameState, 0).hero;
+    makeCtx(nameState, engineRuntime, 0, nameSource).requestNameChoice(
+      "localized-name",
+      {
+        fallback: "Choose a name",
+        message: { id: "card.test.name.choose" },
+      },
+    );
+    expect(nameState.pendingDecision?.promptMessage).toEqual({
+      id: "card.test.name.choose",
+    });
+
+    const paymentState = makeGame(904);
+    const paymentSource = player(paymentState, 0).hero;
+    player(paymentState, 0).resources = 1;
+    expect(makeCtx(paymentState, engineRuntime, 0, paymentSource).requestPayment(
+      "localized-payment",
+      {
+        fallback: "Pay 1?",
+        message: { id: "card.test.payment.choose" },
+        optionMessagesByValue: {
+          no: { id: "common.option.no" },
+        },
+      },
+      1,
+    )).toBe(true);
+    expect(paymentState.pendingDecision?.promptMessage).toEqual({
+      id: "card.test.payment.choose",
+    });
+    expect(paymentState.pendingDecision?.optionMessages?.at(-1)).toEqual({
+      id: "common.option.no",
+    });
+  });
+
   it("closes the combat chain and settles equipment before entering the end phase", () => {
     const state = makeGame(944);
     const active = player(state, 0);

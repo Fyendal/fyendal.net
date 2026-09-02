@@ -732,4 +732,11 @@ export type {
   Modifier,
 } from "./state.js";
 export type { GameStateInternal as GameState } from "./runtimeState.js";
-export type { CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "./scripts.js";
+export type {
+  CardScript,
+  DeepReadonly,
+  ScriptCtx,
+  ScriptDecisionPrompt,
+  ScriptPrompt,
+  TriggerDef,
+} from "./scripts.js";

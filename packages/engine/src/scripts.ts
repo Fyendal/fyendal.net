@@ -1,4 +1,4 @@
-import type { CardData, CardType, EquipmentSlot, PlayableZone } from "@fyendal/shared";
+import type { CardData, CardType, EquipmentSlot, GameMessage, PlayableZone } from "@fyendal/shared";
 import type {
   CardInstance,
   ChainLinkState,
@@ -18,6 +18,20 @@ export type DeepReadonly<T> = T extends (...args: never[]) => unknown
     : T extends object
       ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
       : T;
+
+/** Backward-compatible card-script presentation. `fallback` remains the
+ * deterministic English prompt for older clients and persisted games, while
+ * semantic prompt and option messages drive localized clients. */
+export interface ScriptDecisionPrompt {
+  fallback: string;
+  message: GameMessage;
+  /** Localized labels keyed by the stable option value passed to onChoose.
+   * The engine derives the projected parallel array after the final option
+   * order is known, so dynamic and partially localized choices stay aligned. */
+  optionMessagesByValue?: Readonly<Record<string, GameMessage>>;
+}
+
+export type ScriptPrompt = string | ScriptDecisionPrompt;
 
 /** Helpers handed to card scripts. `state` is the engine's working copy — scripts mutate via these helpers. */
 export interface ScriptCtx {
@@ -397,7 +411,7 @@ export interface ScriptCtx {
    *  card images; projected only to the deciding player. */
   requestChoice(
     hook: string,
-    prompt: string,
+    prompt: ScriptPrompt,
     options: string[],
     seat?: number,
     cardOptions?: (number | string | null)[],
@@ -409,7 +423,7 @@ export interface ScriptCtx {
    *  onChoose still receives the option as a string (String(instanceId)). */
   requestCardChoice(
     hook: string,
-    prompt: string,
+    prompt: ScriptPrompt,
     options: (number | string)[],
     seat?: number,
     /** Complete public reveal group when only a subset is selectable. */
@@ -421,7 +435,7 @@ export interface ScriptCtx {
   /** Ask for a bounded subset of card instances, submitted atomically. */
   requestCardChoices(
     hook: string,
-    prompt: string,
+    prompt: ScriptPrompt,
     options: number[],
     minimumSelections: number,
     maximumSelections: number,
@@ -433,20 +447,20 @@ export interface ScriptCtx {
   ): void;
   /** Ask for an arbitrary registered card name without projecting the entire
    * card catalog as a giant option list. */
-  requestNameChoice(hook: string, prompt: string, seat?: number): void;
+  requestNameChoice(hook: string, prompt: ScriptPrompt, seat?: number): void;
   /** Offer a resource payment during a resolving effect or trigger. Legal
    *  options include floating pools and pitchable cards from the paying
    *  player's hand. Returns false when the player cannot pay, otherwise queues
    *  a decision whose onChoose result is normalized to "paid" or "declined". */
-  requestPayment(hook: string, prompt: string, cost: number, seat?: number): boolean;
+  requestPayment(hook: string, prompt: ScriptPrompt, cost: number, seat?: number): boolean;
   /** Offer a payment whose follow-up hook belongs to another active source. */
-  requestPaymentFrom(sourceInstanceId: number, hook: string, prompt: string, cost: number, seat?: number): boolean;
+  requestPaymentFrom(sourceInstanceId: number, hook: string, prompt: ScriptPrompt, cost: number, seat?: number): boolean;
   /** Declare X, then pay the resulting resource cost while playing a card.
    *  `resourcesPerX` supports printed costs such as XX. The resulting
    *  onChoose option is `x:<number>`. */
   requestXPayment(
     hook: string,
-    prompt: string,
+    prompt: ScriptPrompt,
     seat?: number,
     maximum?: number,
     resourcesPerX?: number,

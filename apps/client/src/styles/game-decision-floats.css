@@ -10,6 +10,16 @@
   max-width: 90%;
 }
 .decision-prompt { color: #e6dcc6; font-size: 15px; }
+.decision-passive:not(.decision-options) {
+  width: max-content;
+  max-width: calc(100vw - var(--rail-w) - 24px);
+}
+.decision-passive .decision-prompt {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .decision-prompt-warning { color: #ff7b72; font-weight: 700; }
 .decision-context {
   color: #a99f8a;
