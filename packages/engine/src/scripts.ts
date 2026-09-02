@@ -1272,6 +1272,8 @@ export interface CardScript {
    * effect and prevents the entire batch; declining continues through later
    * replacement effects. */
   optionalFriendlyTokenCreationReplacement?: {
+    /** Zone where this static replacement is functional. Defaults to the arena. */
+    sourceZone?: "arena" | "graveyard";
     condition(ctx: ScriptCtx, cardId: string, count: number): boolean;
     label: string;
     effect(ctx: ScriptCtx): void;

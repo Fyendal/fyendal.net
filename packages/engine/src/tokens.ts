@@ -149,6 +149,12 @@ function tokenCreationReplacementRefs(
       push({ instanceId: source.instanceId, kind: "optional-friendly" });
     }
   }
+  for (const source of player.graveyard.filter((card) => !card.faceDown)) {
+    const replacement = scriptOf(state, source.cardId, source)?.optionalFriendlyTokenCreationReplacement;
+    if (replacement?.sourceZone === "graveyard") {
+      push({ instanceId: source.instanceId, kind: "optional-friendly" });
+    }
+  }
   return refs;
 }
 
@@ -195,6 +201,10 @@ function applicableTokenCreationReplacements(
           }];
     }
     const optional = script?.optionalFriendlyTokenCreationReplacement;
+    if (
+      optional?.sourceZone === "graveyard" &&
+      !state.players[found.seat]?.graveyard.some((card) => card.instanceId === found.card.instanceId)
+    ) return [];
     return normalizedCount > 0 && optional?.condition(ctx, cardId, normalizedCount)
       ? [{ ref, controllerSeat: found.seat, label: optional.label }]
       : [];
@@ -570,7 +580,11 @@ export function answerTokenCreationReplacement(
     const replacement = found
       ? scriptOf(state, found.card.cardId, found.card)?.optionalFriendlyTokenCreationReplacement
       : undefined;
-    if (found && replacement) {
+    const sourceIsFunctional = found && replacement && (
+      replacement.sourceZone !== "graveyard" ||
+      state.players[found.seat]?.graveyard.some((card) => card.instanceId === found.card.instanceId)
+    );
+    if (sourceIsFunctional) {
       replacement.effect(runtime.makeCtx(state, found.seat, found.card, currentLink(state)));
     }
     return undefined;
