@@ -430,6 +430,35 @@ describe("ELE — Fusion and Elemental heroes", () => {
       .expectAP(0, 1);
   });
 
+  it("preserves Snap Shot's extra Death Dealer use when the bow was unused", () => {
+    const g = scenario({
+      seats: [
+        {
+          ...lexi,
+          weapons: ["death dealer|0"],
+          resources: 1,
+          arsenal: ["snap shot|1"],
+          hand: ["arc bending|1", "arc bending|1", LIGHTNING, LIGHTNING],
+          deck: [BLUE, BLUE],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+
+    g.play("snap shot|1", { fromArsenal: true })
+      .chooseCard(LIGHTNING)
+      .blockWith()
+      .settle()
+      .expectAP(0, 0)
+      .activate("death dealer|0")
+      .chooseCard("arc bending|1")
+      .play("arc bending|1", { fromArsenal: true, pitch: [LIGHTNING] })
+      .blockWith()
+      .activate("death dealer|0")
+      .chooseCard("arc bending|1")
+      .expectInZone(0, "arc bending|1", "arsenal");
+  });
+
   it("fused Snap Shot lets Voltaire activate an additional time as an instant", () => {
     const g = scenario({
       seats: [

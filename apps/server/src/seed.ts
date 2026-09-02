@@ -6,11 +6,14 @@
  *
  * plus the demo room DEMO00 — a GC-exempt classic-battles match already in
  * progress (Rhinar vs Dorinthea, both seats phantom) that anyone can spectate
- * from the lobby's room list or via /DEMO00, and HUNTED — a private CC
- * practice room owned by alice against the standard Hala bot, with Arakni
- * starting with two copies of Hunter or Hunted?. These fixtures count as 4
- * "players in game" in the lobby stats — dev only. Alice also receives one
- * fixed, undismissed bug-report notification for exercising the lobby UI.
+ * from the lobby's room list or via /DEMO00; HUNTED — a private CC practice
+ * room owned by alice against the standard Hala bot, with Arakni starting with
+ * two copies of Hunter or Hunted?; and SNAPBT — a private Silver Age practice
+ * room against the Briar bot with Snap Shot already face up in arsenal and
+ * Death Dealer unused. These fixtures count as 6 "players in game" in the
+ * lobby stats — dev only.
+ * Alice also receives one fixed, undismissed bug-report notification for
+ * exercising the lobby UI.
  *
  * Idempotent — existing users are skipped and the disposable demo room is
  * recreated. Runs pending migrations first, so it also works against a
@@ -38,6 +41,7 @@ const PASSWORD = "password123";
 const DEVELOPMENT_RULESET_VERSION = "development-seed";
 const USERS = [{ username: "alice" }, { username: "bob" }];
 const HUNTER_TEST_ROOM_CODE = "HUNTED";
+const SNAP_ARC_TEST_ROOM_CODE = "SNAPBT";
 
 /**
  * A lived-in mid-game board for the demo room: fixed seeds, random legal
@@ -107,6 +111,55 @@ function hunterTestGameState(): GameState {
   return state;
 }
 
+/** Snap Shot starts face up in arsenal while Death Dealer is unused. Fuse it,
+ * then use Death Dealer to load and play Arc Bending before using the granted
+ * second activation to load the follow-up arrow. Pitching Heaven's Claws to
+ * Arc Bending also exercises Lightning Bond against the ordinary Briar bot. */
+function snapArcTestGameState(): GameState {
+  const briar = botDefinition("briar");
+  const briarPool = precon(briar?.deckId ?? "")?.pool;
+  if (!briar || !briarPool) throw new Error("Snap/Arc test fixture bot deck is unavailable");
+  const lexi = {
+    heroId: "ELE032",
+    weaponIds: ["ARC040"],
+    equipment: {},
+    deck: [
+      "ELE041", "ELE041", "ELE041",
+      "PEN202", "PEN202", "PEN202",
+      "ELE194", "ELE194", "ELE194",
+      ...Array<string>(31).fill("RNR020"),
+    ],
+  };
+  const briarPresentation = briar.presentationFor(lexi, "second");
+  const state = createGame({
+    decklists: [lexi, { heroId: briarPool.heroId, ...briarPresentation }],
+    seed: 410202,
+    cards: cardData,
+    scripts,
+    startPlayer: 0,
+  });
+  const player = state.players[0]!;
+  const cards = [...player.hand, ...player.deck];
+  const take = (cardId: string) => {
+    const index = cards.findIndex((card) => card.cardId === cardId);
+    if (index < 0) throw new Error(`Snap/Arc test fixture is missing ${cardId}`);
+    return cards.splice(index, 1)[0]!;
+  };
+  const snapShot = take("ELE041");
+  const arcBending = take("PEN202");
+  const followupArrow = take("PEN202");
+  const fusionLightning = take("ELE194");
+  const bondLightning = take("ELE194");
+  player.hand = [arcBending, followupArrow, fusionLightning, bondLightning];
+  player.arsenal = [snapShot];
+  player.deck = cards;
+  // Death Dealer spends the only floating resource, forcing Heaven's Claws
+  // to be pitched when Arc Bending is played and exercising Lightning Bond.
+  player.resources = 1;
+  player.actionPoints = 1;
+  return state;
+}
+
 const pool = await createPool();
 try {
   for (const u of USERS) {
@@ -128,7 +181,11 @@ try {
   try {
     // These rooms are disposable local fixture data. Recreate them so rerunning
     // the seed also repairs stale ruleset envelopes and clears dependent history.
-    await pool.query("DELETE FROM rooms WHERE code IN ($1, $2)", [DEMO_ROOM_CODE, HUNTER_TEST_ROOM_CODE]);
+    await pool.query("DELETE FROM rooms WHERE code IN ($1, $2, $3)", [
+      DEMO_ROOM_CODE,
+      HUNTER_TEST_ROOM_CODE,
+      SNAP_ARC_TEST_ROOM_CODE,
+    ]);
     await pool.query(
       `INSERT INTO rooms
         (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at, status, winner)
@@ -187,6 +244,50 @@ try {
         hashReconnectToken(randomBytes(12).toString("hex")),
       ],
     );
+    const snapArcPrep = { rolls: [6, 2], dieWinner: 0, startPlayer: 0 };
+    const briar = botDefinition("briar");
+    if (!briar) throw new Error("Snap/Arc test fixture bot is unavailable");
+    const briarPool = precon(briar.deckId)?.pool;
+    if (!briarPool) throw new Error("Snap/Arc test fixture bot deck is unavailable");
+    await pool.query(
+      `INSERT INTO rooms
+        (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at,
+         status, winner, is_private)
+       VALUES ($1, 'silver-age', '[]', $2, $3, $4, 0, $5, NULL, 'active', NULL, TRUE)`,
+      [
+        SNAP_ARC_TEST_ROOM_CODE,
+        JSON.stringify(dehydrateState(snapArcTestGameState(), DEVELOPMENT_RULESET_VERSION)),
+        JSON.stringify(snapArcPrep),
+        DEVELOPMENT_RULESET_VERSION,
+        Date.now(),
+      ],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, user_id, token_hash, username, hero_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 0, $2, $3, 'alice', 'ELE032', 'Snap Shot starts in arsenal test',
+               FALSE, TRUE, 'human')`,
+      [
+        SNAP_ARC_TEST_ROOM_CODE,
+        aliceId,
+        hashReconnectToken(randomBytes(12).toString("hex")),
+      ],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, token_hash, username, hero_id, deck_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 1, $2, $3, $4, $5, $6, FALSE, TRUE, 'bot')`,
+      [
+        SNAP_ARC_TEST_ROOM_CODE,
+        hashReconnectToken(randomBytes(12).toString("hex")),
+        briar.username,
+        briarPool.heroId,
+        briar.deckId,
+        briar.deckName,
+      ],
+    );
     const fixedAt = Date.now();
     await pool.query(
       `INSERT INTO bug_reports
@@ -228,6 +329,7 @@ try {
   }
   console.log(`seeded demo room ${DEMO_ROOM_CODE} — spectate from the room list or /${DEMO_ROOM_CODE}`);
   console.log(`seeded Hunter or Hunted? room ${HUNTER_TEST_ROOM_CODE} — log in as alice and open /${HUNTER_TEST_ROOM_CODE}`);
+  console.log(`seeded Snap Shot / Arc Bending room ${SNAP_ARC_TEST_ROOM_CODE} — log in as alice and open /${SNAP_ARC_TEST_ROOM_CODE}`);
   console.log("seeded fixed bug notification for alice");
 } finally {
   await pool.end();

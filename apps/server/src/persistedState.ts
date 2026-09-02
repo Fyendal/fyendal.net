@@ -197,6 +197,7 @@ export interface PersistedModifierV1 {
   discardDamagePreventionCardType?: string;
   discardDamagePreventionAmount?: number;
   discardDamagePreventionDraw?: number;
+  preventLethalDamageByBanishingNamedCard?: string;
   preventNextDamageFromPitch?: number;
   preventAllDamageFromSource?: boolean;
   banishPreventedDamageSourceFaceDownIfType?: string;
@@ -311,6 +312,7 @@ export interface PersistedPendingArcaneV1 {
   usedDiscardDamagePreventionModifierIds?: number[];
   usedSoulDamagePreventionSourceIds?: number[];
   soulDamagePreventionSourceInstanceId?: number;
+  lethalDamagePreventionModifierId?: number;
   quellSourceInstanceId?: number;
   queue?: PersistedPendingArcaneV1[];
 }
@@ -894,7 +896,7 @@ function validateChainLink(value: unknown, code: string, path: string): void {
 const MODIFIER_REQUIRED = ["id", "sourceInstanceId", "seat", "scope"] as const;
 const MODIFIER_NUMBERS = ["expiresAtStartOfTurn", "expiresAtEndOfTurn", "expiresAtStartOfSeatTurn", "expiresAtEndOfSeatTurn", "createdTurn", "basePower", "attack", "powerGainBonus", "attackActivationCostReduction", "activationCostReduction", "attackCostReduction", "piercing", "defense", "damage", "intimidate", "preventNextDamageAmount", "preventNextDamagePool", "preventDamagePerEvent", "preventDamageEventsRemaining", "discardDamagePreventionAmount", "discardDamagePreventionDraw", "preventNextDamageFromPitch", "maxDamageEventAmount", "reflectPreventedDamageToSeat", "redirectDamageFromSeat", "redirectDamageToSeat", "redirectDamagePrevent", "onHitGainLife", "onHitGainResources", "onHitDraw", "attackActionCardCap", "nonAttackActionCardCap", "goAgainIfAttackPowerAtLeast", "onDefendedDealDamage", "onHitLoseLife", "onDestroyedDraw", "onBoostAttack", "onActionPlayedGainActionPoints", "extraDiceIgnoreLowest", "onHitDealDamage", "defendedLessThanNonEquip", "minCost", "maxCost", "maxBasePower", "minBasePower", "minimumAttackBasePower", "appliesToInstanceId", "suppressesActivatedAbilitiesOfInstanceId", "cannotDefendWithInstanceId", "appliesToPitch", "playCostReduction", "remainingCostUses", "maxNonBlockDefenders", "onDefendedByAttackActionPowerCounters"] as const satisfies readonly (keyof Modifier)[];
 const MODIFIER_BOOLEANS = ["appliesToEquipment", "appliesToFirstDefenderOnly", "damageUnpreventable", "goAgain", "dominate", "overpower", "preventAllDamageFromSource", "reflectPreventedDamageUnpreventable", "onHitGoAgain", "suppressesHeroAbilities", "suppressesOwnedNames", "suppressesOwnedClassTalentTypes", "restrictActionsToWeaponOrAttack", "restrictActionsToNonWeaponNonAttack", "prohibitsDefenseReactionNamesInGraveyard", "goAgainIfDefendedByAttackAction", "suppressHitEffects", "onHitToSoul", "onHitBottomDeck", "onHitReenableAttacker", "onHitReenableAttackerIfMarked", "onHitMark", "onBoostDominate", "onHitClearHandAndArsenalAtEndPhase", "replaceCombatDamageWithDefendingEquipment", "appliesToMarkedHero", "appliesToFromArsenal", "appliesToRuneGated", "appliesToCharged", "noDefenseReactionsFromArsenal", "noDefenseReactionsFromHand", "once", "expiresOnChainClose", "consumed"] as const satisfies readonly (keyof Modifier)[];
-const MODIFIER_STRINGS = ["sourceCardId", "grantType", "grantName", "discardDamagePreventionCardType", "banishPreventedDamageSourceFaceDownIfType", "appliesToDamageSourceType", "appliesToDamageRecipientType", "grantKeyword", "suppressKeyword", "prohibitsName", "grantsTypeToName", "grantsType", "onFriendlyActivateCreateToken", "onDamageDealtCreateTokenPerPoint", "onPreventCreateToken", "appliesToClass", "appliesToKeyword", "appliesToName", "appliesToTargetType", "appliesToTargetNamePrefix", "excludesSubtype", "appliesToCardType", "restrictCardPlaysToType", "ongoingLabel", "grantsPlayFromNameContains", "goAgainIfPlayedOrCreatedSubtype"] as const satisfies readonly (keyof Modifier)[];
+const MODIFIER_STRINGS = ["sourceCardId", "grantType", "grantName", "discardDamagePreventionCardType", "preventLethalDamageByBanishingNamedCard", "banishPreventedDamageSourceFaceDownIfType", "appliesToDamageSourceType", "appliesToDamageRecipientType", "grantKeyword", "suppressKeyword", "prohibitsName", "grantsTypeToName", "grantsType", "onFriendlyActivateCreateToken", "onDamageDealtCreateTokenPerPoint", "onPreventCreateToken", "appliesToClass", "appliesToKeyword", "appliesToName", "appliesToTargetType", "appliesToTargetNamePrefix", "excludesSubtype", "appliesToCardType", "restrictCardPlaysToType", "ongoingLabel", "grantsPlayFromNameContains", "goAgainIfPlayedOrCreatedSubtype"] as const satisfies readonly (keyof Modifier)[];
 const MODIFIER_OBJECTS = ["onHitCreateToken", "onHitDestroyTopDeckCards", "onHitScriptHook", "defendingPitchDefenseAdjustment", "appliesTo", "appliesToSubtype", "appliesToType", "grantsPlayFromZone"] as const satisfies readonly (keyof Modifier)[];
 type _ModifierValidatorIsExhaustive = Assert<
   SameKeys<
@@ -948,11 +950,11 @@ function validateModifier(value: unknown, code: string, path: string): void {
 
 function validateArcane(value: unknown, code: string, path: string, depth: number): void {
   if (depth > MAX_ARCANE_DEPTH) fail(code, path, "arcane queue nesting is too deep");
-  const arcane = exact(value, code, path, ["sourceInstanceId", "sourceSeat", "targetSeat", "amount", "arcane"], ["sourceIsAlly", "sourceIsRunechant", "countsAsHit", "destroySourceAfterDamage", "targetWasMarked", "targetAllyId", "combat", "combatDamageEquipmentReplacementIds", "unpreventable", "payTotal", "arcaneBarrierResolved", "usedQuellSourceIds", "usedDiscardDamagePreventionModifierIds", "usedSoulDamagePreventionSourceIds", "soulDamagePreventionSourceInstanceId", "quellSourceInstanceId", "queue"]);
+  const arcane = exact(value, code, path, ["sourceInstanceId", "sourceSeat", "targetSeat", "amount", "arcane"], ["sourceIsAlly", "sourceIsRunechant", "countsAsHit", "destroySourceAfterDamage", "targetWasMarked", "targetAllyId", "combat", "combatDamageEquipmentReplacementIds", "unpreventable", "payTotal", "arcaneBarrierResolved", "usedQuellSourceIds", "usedDiscardDamagePreventionModifierIds", "usedSoulDamagePreventionSourceIds", "soulDamagePreventionSourceInstanceId", "lethalDamagePreventionModifierId", "quellSourceInstanceId", "queue"]);
   for (const key of ["sourceInstanceId", "sourceSeat", "targetSeat", "amount"] as const) integer(arcane[key], code, `${path}.${key}`);
   bool(arcane.arcane, code, `${path}.arcane`);
   for (const key of ["sourceIsAlly", "sourceIsRunechant", "countsAsHit", "destroySourceAfterDamage", "targetWasMarked", "combat", "unpreventable", "arcaneBarrierResolved"] as const) optional(arcane, key, (v, p) => { bool(v, code, p); }, path);
-  for (const key of ["targetAllyId", "payTotal", "soulDamagePreventionSourceInstanceId", "quellSourceInstanceId"] as const) optional(arcane, key, (v, p) => { integer(v, code, p); }, path);
+  for (const key of ["targetAllyId", "payTotal", "soulDamagePreventionSourceInstanceId", "lethalDamagePreventionModifierId", "quellSourceInstanceId"] as const) optional(arcane, key, (v, p) => { integer(v, code, p); }, path);
   optional(arcane, "usedQuellSourceIds", (v, p) => array(v, code, p, 64).forEach((entry, index) => integer(entry, code, `${p}[${index}]`)), path);
   optional(arcane, "usedDiscardDamagePreventionModifierIds", (v, p) => array(v, code, p, 64).forEach((entry, index) => integer(entry, code, `${p}[${index}]`)), path);
   optional(arcane, "usedSoulDamagePreventionSourceIds", (v, p) => array(v, code, p, 64).forEach((entry, index) => integer(entry, code, `${p}[${index}]`)), path);

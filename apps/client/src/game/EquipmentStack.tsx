@@ -15,6 +15,7 @@ export function EquipmentStack({
   onClick,
   motionLocation,
   underCardMotionLocation,
+  showActivationDots = false,
 }: {
   card: CardView;
   /** Additional public cards rendered behind the permanent, oldest first. */
@@ -25,11 +26,17 @@ export function EquipmentStack({
   onClick?: () => void;
   motionLocation?: MotionLocation;
   underCardMotionLocation?: MotionLocation;
+  /** Show turn activation capacity for weapon abilities. */
+  showActivationDots?: boolean;
 }) {
   const cards = [...underCards, ...equipmentStackCards(card)];
   const step = cardStackStep(cards.length);
   const underCardCount = cards.length - 1;
   const explicitUnderCardIds = new Set(underCards.map((underCard) => underCard.instanceId));
+  const activationGroups = showActivationDots
+    ? (card.remainingAbilityActivations ?? []).flatMap((remaining, abilityIndex) =>
+        remaining >= 2 ? [{ abilityIndex, remaining }] : [])
+    : [];
 
   return (
     <div className="equipment-stack" data-card-stack-id={card.instanceId}>
@@ -65,6 +72,26 @@ export function EquipmentStack({
       })}
       {underCardCount > 0 ? (
         <span className="pip pile-pip equipment-stack-pip">{underCardCount}</span>
+      ) : null}
+      {activationGroups.length > 0 ? (
+        <span className="weapon-activation-indicators">
+          {activationGroups.map(({ abilityIndex, remaining }) => {
+            const label = `${remaining} activation${remaining === 1 ? "" : "s"} remaining`;
+            return (
+              <span
+                className="weapon-activation-dots"
+                key={abilityIndex}
+                role="img"
+                aria-label={label}
+                title={label}
+              >
+                {Array.from({ length: remaining }, (_, index) => (
+                  <span className="weapon-activation-dot" key={index} />
+                ))}
+              </span>
+            );
+          })}
+        </span>
       ) : null}
     </div>
   );

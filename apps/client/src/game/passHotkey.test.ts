@@ -32,8 +32,17 @@ describe("pass hotkey", () => {
     expect(shouldPassOnSpace(keyEvent({ code: "Enter" }))).toBe(false);
   });
 
-  it("does not override focused interactive controls", () => {
-    const target = { closest: () => ({}) } as unknown as EventTarget;
+  it("bypasses a focused button so Space remains the pass shortcut", () => {
+    const target = {
+      closest: (selector: string) => selector.includes("button") ? {} : null,
+    } as unknown as EventTarget;
+    expect(shouldPassOnSpace(keyEvent({ target }))).toBe(true);
+  });
+
+  it("does not override Space in editable controls", () => {
+    const target = {
+      closest: (selector: string) => selector.includes("input") ? {} : null,
+    } as unknown as EventTarget;
     expect(shouldPassOnSpace(keyEvent({ target }))).toBe(false);
   });
 

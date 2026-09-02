@@ -607,6 +607,31 @@
   pointer-events: none;
 }
 
+/* A weapon with at least two remaining turn activations shows one green dot
+   per use. The indicator disappears once only the ordinary final use remains. */
+.weapon-activation-indicators {
+  position: absolute;
+  z-index: 21;
+  left: 50%;
+  bottom: -14px;
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.weapon-activation-dots {
+  display: flex;
+  gap: 4px;
+}
+.weapon-activation-dot {
+  width: 9px;
+  height: 9px;
+  border: 1px solid #dff7e8;
+  border-radius: 50%;
+  background: #51c982;
+  box-shadow: 0 1px 4px #000, 0 0 5px #34c978aa;
+}
 /* Number of cards with Blood Debt in this banished zone. */
 .blood-debt-counter {
   position: absolute;

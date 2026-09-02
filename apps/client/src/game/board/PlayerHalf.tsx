@@ -177,6 +177,7 @@ export function PlayerHalf({
           <EquipmentStack
             card={card}
             motionLocation={location}
+            showActivationDots
             highlighted={canActivate || canBlock}
             selected={mine && interaction.selection.kind === "activate" &&
               interaction.selection.sourceInstanceId === card.instanceId}

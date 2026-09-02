@@ -18,17 +18,25 @@
 }
 .decision-guidance-info {
   display: inline-grid;
+  min-width: 15px;
   width: 15px;
+  min-height: 15px;
   height: 15px;
   margin-left: .45em;
+  padding: 0;
   place-items: center;
   border: 1px solid #a99f8a;
   border-radius: 50%;
+  background: transparent;
+  clip-path: none;
   color: #cbbd9d;
   cursor: help;
   font: 700 10px/1 "Segoe UI", system-ui, sans-serif;
+  letter-spacing: normal;
+  text-transform: none;
   vertical-align: .1em;
 }
+.decision-guidance-info:hover { background: #3a2812; }
 .decision-guidance-info:focus-visible {
   outline: 1px solid #e6c96a;
   outline-offset: 2px;
@@ -53,14 +61,33 @@
   box-shadow: 0 6px 16px #000a;
   color: #e6dcc6;
   font: 12px/1.35 "Segoe UI", system-ui, sans-serif;
-  pointer-events: none;
+  pointer-events: auto;
   text-align: left;
   transform: translateX(-50%);
 }
+.decision-guidance-disable {
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  clip-path: none;
+  color: #e6c96a;
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: normal;
+  text-decoration: underline;
+  text-transform: none;
+}
+.decision-guidance-disable:hover { background: transparent; color: #ffd479; }
 /* every decision stacks the same way: prompt centered above its options */
 .decision-options { flex-direction: column; align-items: center; }
 .decision-options .decision-prompt { text-align: center; }
+.decision-priority-guidance {
+  width: min(420px, calc(100vw - var(--rail-w) - 32px));
+}
 .decision-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.decision-buttons:empty { display: none; }
 .decision-name-form { align-items: flex-start; flex-wrap: nowrap; }
 .decision-name-combobox {
   position: relative;

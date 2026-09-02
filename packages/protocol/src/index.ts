@@ -442,7 +442,7 @@ function cardView(value: unknown, depth = 0): value is CardView {
   const card = object(value);
   if (!card || !exactKeys(card, [
     "instanceId", "cardId", "name", "owner", "pitchCount", "attack", "defense", "faceDown", "tapped",
-    "defCounters", "counters", "usedAbilityIndexes", "activatedAbilityLabels", "life", "hidden", "subcards", "grantedNames", "chosenName",
+    "defCounters", "counters", "usedAbilityIndexes", "remainingAbilityActivations", "activatedAbilityLabels", "life", "hidden", "subcards", "grantedNames", "chosenName",
     "grantedTypes", "grantedColor", "playableFromSourceCardId", "intimidated",
   ], ["instanceId", "cardId", "owner"])) return false;
   const validInstanceId = instanceId(card.instanceId)
@@ -462,6 +462,8 @@ function cardView(value: unknown, depth = 0): value is CardView {
     && optional(card.defCounters, nonNegativeInteger) && optional(card.counters, numberRecord)
     && optional(card.usedAbilityIndexes, (v): v is number[] =>
       array(v, (index): index is number => nonNegativeInteger(index) && index <= 32, 33))
+    && optional(card.remainingAbilityActivations, (v): v is number[] =>
+      array(v, (count): count is number => nonNegativeInteger(count) && count <= 32, 33))
     && optional(card.activatedAbilityLabels, (v): v is string[] =>
       array(v, (label): label is string => string(label, MAX_SHORT_TEXT, false), 33))
     && optional(card.subcards, (v): v is CardView[] => array(v, (entry) => cardView(entry, depth + 1), 16))

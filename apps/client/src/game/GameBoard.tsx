@@ -1031,6 +1031,7 @@ export function GameBoard() {
           resourcePaymentRequired,
           confirmSkipArsenal,
           onRequestPass: requestPass,
+          onDisableGuidance: () => updateLessGuidance(true),
           onConfirmSkipArsenal: () => send({ kind: "pass" }),
           onCancelSkipArsenal: () => setConfirmSkipArsenal(false),
           onSend: send,

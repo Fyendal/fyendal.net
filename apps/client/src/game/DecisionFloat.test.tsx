@@ -5,7 +5,10 @@ import { decisionFloatDragKey } from "./DecisionFloat.js";
 import { BloodModeDecision } from "./decision/BloodModeDecision.js";
 import { ActionTargetCards, RevealedChoiceCards } from "./decision/CardChoices.js";
 import type { PendingDecisionModel } from "./decision/DecisionModels.js";
-import { PendingDecisionPanel } from "./decision/PendingDecisionPanel.js";
+import {
+  GuidanceSettingsPopover,
+  PendingDecisionPanel,
+} from "./decision/PendingDecisionPanel.js";
 import {
   ActionConfirmation,
   ArsenalSkipConfirmation,
@@ -175,6 +178,7 @@ describe("priority guidance help", () => {
       resourcePaymentRequired: 0,
       confirmSkipArsenal: false,
       onRequestPass: () => undefined,
+      onDisableGuidance: () => undefined,
       onConfirmSkipArsenal: () => undefined,
       onCancelSkipArsenal: () => undefined,
       onSend: () => undefined,
@@ -188,11 +192,19 @@ describe("priority guidance help", () => {
     }));
 
     expect(html).toContain('class="decision-guidance-info"');
+    expect(html).toContain('class="decision decision-options decision-priority-guidance"');
     expect(html).toMatch(
-      /class="decision-prompt">Defense reaction window<br\/>Play a reaction or pass<span[^>]*class="decision-guidance-info"/,
+      /class="decision-prompt">Defense reaction window<br\/>Play a reaction or pass<button[^>]*class="decision-guidance-info"/,
     );
-    expect(html).toContain("Uncheck Show guidance in Settings to disable these prompts.");
-    expect(html).not.toContain("Don&#x27;t show this again");
+    expect(html).toContain("Uncheck Show guidance in Settings, or select Disable now.");
+    expect(html).toContain('aria-haspopup="dialog"');
+    expect(html).toContain('aria-expanded="false"');
+
+    const popover = renderToStaticMarkup(createElement(GuidanceSettingsPopover, {
+      onDisableGuidance: () => undefined,
+    }));
+    expect(popover).toContain('class="decision-guidance-disable"');
+    expect(popover).toContain("disable now");
   });
 
   it("does not add the guidance opt-out to required decisions", () => {

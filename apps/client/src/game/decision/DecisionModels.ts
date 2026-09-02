@@ -16,6 +16,7 @@ export interface PendingDecisionModel {
   resourcePaymentRequired: number;
   confirmSkipArsenal: boolean;
   onRequestPass: () => void;
+  onDisableGuidance: () => void;
   onConfirmSkipArsenal: () => void;
   onCancelSkipArsenal: () => void;
   onSend: (intent: GameIntent) => void;

@@ -486,6 +486,19 @@ function sowTomorrow(minCost: number): CardScript {
   };
 }
 
+function snapShot(): CardScript {
+  return {
+    ...fusionOnly("lightning"),
+    onAttackDeclared(ctx) {
+      if (!isFused(ctx)) return;
+      for (const weapon of ctx.player(ctx.seat).weapons) {
+        if (hasType(ctx, weapon, "bow")) ctx.grantAdditionalActivation(weapon.instanceId);
+      }
+      ctx.allowAbilitiesAsInstant("bow");
+    },
+  };
+}
+
 export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRarity, {
   // Heroes and Elemental Guardian
   "oldhim|0": {
@@ -615,36 +628,9 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
     ...fusionOnly("ice"),
     onAttackDeclared(ctx) { if (isFused(ctx)) ctx.setPlayerFlag(opponentSeat(ctx), "costMoreThisTurn", Number(ctx.getPlayerFlag(opponentSeat(ctx), "costMoreThisTurn")) + 1); },
   },
-  "snap shot|1": {
-    ...fusionOnly("lightning"),
-    onAttackDeclared(ctx) {
-      if (!isFused(ctx)) return;
-      for (const weapon of ctx.player(ctx.seat).weapons) {
-        if (hasType(ctx, weapon, "bow")) ctx.grantAdditionalActivation(weapon.instanceId);
-      }
-      ctx.allowAbilitiesAsInstant("bow");
-    },
-  },
-  "snap shot|2": {
-    ...fusionOnly("lightning"),
-    onAttackDeclared(ctx) {
-      if (!isFused(ctx)) return;
-      for (const weapon of ctx.player(ctx.seat).weapons) {
-        if (hasType(ctx, weapon, "bow")) ctx.grantAdditionalActivation(weapon.instanceId);
-      }
-      ctx.allowAbilitiesAsInstant("bow");
-    },
-  },
-  "snap shot|3": {
-    ...fusionOnly("lightning"),
-    onAttackDeclared(ctx) {
-      if (!isFused(ctx)) return;
-      for (const weapon of ctx.player(ctx.seat).weapons) {
-        if (hasType(ctx, weapon, "bow")) ctx.grantAdditionalActivation(weapon.instanceId);
-      }
-      ctx.allowAbilitiesAsInstant("bow");
-    },
-  },
+  "snap shot|1": snapShot(),
+  "snap shot|2": snapShot(),
+  "snap shot|3": snapShot(),
   "blizzard bolt|1": fusedAttackWatcher("ice", "blizzard", (ctx) => createFrostbites(ctx, opponentSeat(ctx))),
   "blizzard bolt|2": fusedAttackWatcher("ice", "blizzard", (ctx) => createFrostbites(ctx, opponentSeat(ctx))),
   "blizzard bolt|3": fusedAttackWatcher("ice", "blizzard", (ctx) => createFrostbites(ctx, opponentSeat(ctx))),

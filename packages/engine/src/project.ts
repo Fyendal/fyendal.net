@@ -36,7 +36,7 @@ import {
 } from "./scripts.js";
 import { currentLink, findCardAnywhere } from "./zoneQueries.js";
 import { controlledPermanents } from "./sourceQueries.js";
-import { activatedAbilityAvailable } from "./abilityRules.js";
+import { activatedAbilityUsage } from "./abilityRules.js";
 import { wardPieces } from "./damageResolution.js";
 import { playFromSourceCardId } from "./playRules.js";
 import { windowPrompt } from "./triggers.js";
@@ -68,12 +68,15 @@ function cardView(state: GameStateInternal,
   const power = includeCounters ? (c.counters?.power ?? 0) : 0;
   const controller = opts.controller;
   const abilities = abilityList(scriptOf(state, c.cardId, c));
+  const abilityUsage = controller
+    ? abilities.map((ability, index) =>
+        activatedAbilityUsage(controller, c.instanceId, index, ability))
+    : [];
+  const remainingAbilityActivations = abilityUsage.map((usage) =>
+    usage !== undefined && usage.total > 1 ? usage.remaining : 0);
+  const hasRemainingMultipleActivation = remainingAbilityActivations.some((remaining) => remaining > 0);
   const nativeUsedAbilityIndexes = controller
-    ? abilities.flatMap((ability, index) =>
-        !activatedAbilityAvailable(controller, c.instanceId, index, ability)
-          ? [index]
-          : [],
-      )
+    ? abilityUsage.flatMap((usage, index) => usage?.remaining === 0 ? [index] : [])
     : [];
   // Aura attacks granted by another permanent (Reality Refractor, Cosmo)
   // are synthetic once-per-turn abilities whose index follows the card's
@@ -118,6 +121,7 @@ function cardView(state: GameStateInternal,
       : {}),
     ...(playableFromSource ? { playableFromSourceCardId: playableFromSource } : {}),
     ...(usedAbilityIndexes.length > 0 ? { usedAbilityIndexes } : {}),
+    ...(hasRemainingMultipleActivation ? { remainingAbilityActivations } : {}),
     ...(abilities.length > 1 ? { activatedAbilityLabels: projectedAbilityLabels(abilities) } : {}),
     ...(c.grantedNames && c.grantedNames.length > 0 ? { grantedNames: c.grantedNames } : {}),
     ...(c.chosenName ? { chosenName: c.chosenName } : {}),
