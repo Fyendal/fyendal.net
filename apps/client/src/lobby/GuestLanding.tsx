@@ -1,35 +1,52 @@
-import { SiteFooter } from "../legal/SiteFooter.js";
+import { useIntl, type IntlShape } from "react-intl";
+import { SiteFooterView } from "../legal/SiteFooter.js";
 
 interface LandingStats {
   inGame: number;
   openRooms: number;
 }
 
-export function LobbyBrand() {
+function LobbyBrandView({ intl }: { intl: IntlShape }) {
   return (
     <div className="brand">
       <img className="brand-logo" src="/logo.png" alt="" width={46} height={46} />
       <span className="brand-copy">
         <span className="brand-name">Fyendal</span>
-        <span className="brand-sub">Flesh and Blood online</span>
+        <span className="brand-sub">{intl.formatMessage({ id: "brand.subtitle" })}</span>
       </span>
     </div>
   );
 }
 
-export function GuestLandingHero({ stats }: { stats?: LandingStats | null }) {
+export function LobbyBrand() {
+  return <LobbyBrandView intl={useIntl()} />;
+}
+
+function GuestLandingHeroView({ intl, stats }: { intl: IntlShape; stats?: LandingStats | null }) {
   return (
     <section className="panel intro-panel" aria-labelledby="guest-landing-title">
       <h1 id="guest-landing-title" className="intro-title">
-        Play Flesh and Blood online for free
+        {intl.formatMessage({ id: "landing.title" })}
       </h1>
+      <p className="intro-subtitle">
+        {intl.formatMessage({ id: "landing.subtitle" })}
+      </p>
       {stats ? (
-        <div className="intro-stats" aria-label="Current activity">
+        <div
+          className="intro-stats"
+          aria-label={intl.formatMessage({ id: "landing.activityLabel" })}
+        >
           <span>
-            <strong>{stats.inGame}</strong> in game
+            {intl.formatMessage(
+              { id: "landing.inGame" },
+              { count: stats.inGame, strong: (chunks) => <strong>{chunks}</strong> },
+            )}
           </span>
           <span>
-            <strong>{stats.openRooms}</strong> open {stats.openRooms === 1 ? "room" : "rooms"}
+            {intl.formatMessage(
+              { id: "landing.openRooms" },
+              { count: stats.openRooms, strong: (chunks) => <strong>{chunks}</strong> },
+            )}
           </span>
         </div>
       ) : null}
@@ -37,34 +54,38 @@ export function GuestLandingHero({ stats }: { stats?: LandingStats | null }) {
   );
 }
 
-export function GuestLandingDetails() {
+export function GuestLandingHero({ stats }: { stats?: LandingStats | null }) {
+  return <GuestLandingHeroView intl={useIntl()} stats={stats} />;
+}
+
+function GuestLandingDetailsView({ intl }: { intl: IntlShape }) {
   return (
     <div className="landing-details">
       <section className="landing-section" aria-labelledby="ways-to-play-title">
         <div className="landing-section-heading">
-          <p className="landing-kicker">Play your way</p>
-          <h2 id="ways-to-play-title">Online matches and focused practice</h2>
+          <p className="landing-kicker">{intl.formatMessage({ id: "landing.ways.kicker" })}</p>
+          <h2 id="ways-to-play-title">{intl.formatMessage({ id: "landing.ways.title" })}</h2>
         </div>
         <div className="landing-play-layout">
           <div className="landing-card-grid">
             <article id="practice-bots" className="landing-info-card">
-              <h3>Practice against bots</h3>
-              <p>Test decks against hero-specific bots with their own strategies.</p>
+              <h3>{intl.formatMessage({ id: "landing.bots.title" })}</h3>
+              <p>{intl.formatMessage({ id: "landing.bots.body" })}</p>
             </article>
             <article id="player-matches" className="landing-info-card">
-              <h3>Find or host a match</h3>
-              <p>Queue, join an open room, or invite a friend to a private game.</p>
+              <h3>{intl.formatMessage({ id: "landing.matches.title" })}</h3>
+              <p>{intl.formatMessage({ id: "landing.matches.body" })}</p>
             </article>
             <article id="watch-replays" className="landing-info-card">
-              <h3>Spectate and review</h3>
-              <p>Watch games through a room link, then review or export saved replays.</p>
+              <h3>{intl.formatMessage({ id: "landing.replays.title" })}</h3>
+              <p>{intl.formatMessage({ id: "landing.replays.body" })}</p>
             </article>
           </div>
           <div className="landing-demo">
             <img
               className="landing-demo-image"
               src="/fyendal-gameplay-demo-poster.jpg"
-              alt="A Fyendal game between Briar and a Bravo practice bot"
+              alt={intl.formatMessage({ id: "landing.demoAlt" })}
               width={1280}
               height={720}
               loading="lazy"
@@ -76,25 +97,25 @@ export function GuestLandingDetails() {
 
       <section className="landing-section landing-faq" aria-labelledby="faq-title">
         <div className="landing-section-heading">
-          <p className="landing-kicker">Common questions</p>
-          <h2 id="faq-title">About playing on Fyendal</h2>
+          <p className="landing-kicker">{intl.formatMessage({ id: "landing.faq.kicker" })}</p>
+          <h2 id="faq-title">{intl.formatMessage({ id: "landing.faq.title" })}</h2>
         </div>
         <div className="landing-faq-grid">
           <details>
-            <summary>Is Fyendal free?</summary>
-            <p>Yes. Fyendal is a free, non-commercial community project.</p>
+            <summary>{intl.formatMessage({ id: "landing.faq.free.question" })}</summary>
+            <p>{intl.formatMessage({ id: "landing.faq.free.answer" })}</p>
           </details>
           <details>
-            <summary>Can I play Flesh and Blood against a bot?</summary>
-            <p>Yes. Fyendal offers hero-specific practice bots in both supported formats.</p>
+            <summary>{intl.formatMessage({ id: "landing.faq.bot.question" })}</summary>
+            <p>{intl.formatMessage({ id: "landing.faq.bot.answer" })}</p>
           </details>
           <details>
-            <summary>Can I import a Fabrary deck?</summary>
-            <p>Yes. Import a public Fabrary URL or Fabrary export text. Every card must be supported by Fyendal.</p>
+            <summary>{intl.formatMessage({ id: "landing.faq.import.question" })}</summary>
+            <p>{intl.formatMessage({ id: "landing.faq.import.answer" })}</p>
           </details>
           <details>
-            <summary>Is Fyendal official?</summary>
-            <p>No. Fyendal is an unofficial fan project and its game results are not official rules rulings.</p>
+            <summary>{intl.formatMessage({ id: "landing.faq.official.question" })}</summary>
+            <p>{intl.formatMessage({ id: "landing.faq.official.answer" })}</p>
           </details>
         </div>
       </section>
@@ -102,26 +123,34 @@ export function GuestLandingDetails() {
   );
 }
 
+export function GuestLandingDetails() {
+  return <GuestLandingDetailsView intl={useIntl()} />;
+}
+
 /** Static guest content inserted into the built HTML before the client starts. */
-export function SeoPrerenderedLanding() {
+export function SeoPrerenderedLanding({ intl }: { intl: IntlShape }) {
   return (
     <div className="lobby-page">
       <header className="topbar lobby-topbar lobby-topbar-guest">
-        <LobbyBrand />
+        <LobbyBrandView intl={intl} />
       </header>
       <main id="main-content" className="guest-landing">
         <div className="intro-grid">
-          <GuestLandingHero />
-          <aside id="create-account" className="intro-auth landing-static-account" aria-label="Start playing">
+          <GuestLandingHeroView intl={intl} />
+          <aside
+            id="create-account"
+            className="intro-auth landing-static-account"
+            aria-label={intl.formatMessage({ id: "landing.startPlayingLabel" })}
+          >
             <div className="auth-card">
-              <h2>Start playing</h2>
-              <p>Create a free account to play matches and practice against bots.</p>
+              <h2>{intl.formatMessage({ id: "landing.startPlayingTitle" })}</h2>
+              <p>{intl.formatMessage({ id: "landing.startPlayingBody" })}</p>
             </div>
           </aside>
         </div>
-        <GuestLandingDetails />
+        <GuestLandingDetailsView intl={intl} />
       </main>
-      <SiteFooter />
+      <SiteFooterView intl={intl} />
     </div>
   );
 }

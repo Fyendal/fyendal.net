@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from "react";
+import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import { useStore } from "../store.js";
 import { apiStats, type StatsOk } from "../auth/auth.js";
@@ -8,6 +9,7 @@ import { SiteFooter } from "../legal/SiteFooter.js";
 import { DiscordLink } from "./DiscordLink.js";
 import { FORMAT_LABELS } from "./FormatBadge.js";
 import { ModalSurface } from "../components/ModalSurface.js";
+import { LanguagePicker } from "../i18n/LanguagePicker.js";
 import { mobileDeckDestination, mobileLobbyDestinationSelected } from "./mobileNavigation.js";
 import {
   GuestLandingDetails,
@@ -70,6 +72,7 @@ function MobileLobbyIcon({ kind }: { kind: "home" | "decks" | "rooms" | "replays
 }
 
 export function Lobby() {
+  const intl = useIntl();
   const {
     error,
     connected,
@@ -169,6 +172,7 @@ export function Lobby() {
           <LobbyBrand />
           <div className="topbar-actions">
             <div className="topbar-tools">
+              <LanguagePicker />
               <DiscordLink />
             </div>
           </div>
@@ -177,7 +181,11 @@ export function Lobby() {
         <main id="main-content" className="guest-landing">
           <div className="intro-grid">
             <GuestLandingHero stats={stats} />
-            <aside id="create-account" className="intro-auth" aria-label="Account access">
+            <aside
+              id="create-account"
+              className="intro-auth"
+              aria-label={intl.formatMessage({ id: "landing.accountAccess" })}
+            >
               <Auth />
             </aside>
           </div>
@@ -212,6 +220,7 @@ export function Lobby() {
         ) : null}
         <div className="topbar-actions">
           <div className="topbar-tools">
+            <LanguagePicker />
             <DiscordLink />
           </div>
           <div className="topbar-account">
@@ -367,6 +376,7 @@ export function Lobby() {
             </strong>
           </div>
           <div className="mobile-more-actions">
+            <LanguagePicker />
             <button
               onClick={() => {
                 setRail("account");

@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { useIntl } from "react-intl";
 import { roomCodeFromUrl, savedRoomCode, useStore } from "./store.js";
 import { Lobby } from "./lobby/Lobby.js";
 import { RoomLoading } from "./lobby/RoomLoading.js";
@@ -34,7 +35,12 @@ function setCanonical(href: string): void {
   canonical.href = href;
 }
 
-function useRouteMetadata(path: string, privateRoute: boolean): void {
+function useRouteMetadata(
+  path: string,
+  privateRoute: boolean,
+  homeTitle: string,
+  homeDescription: string,
+): void {
   useEffect(() => {
     if (privateRoute) {
       document.title = "Fyendal — Flesh and Blood Online";
@@ -50,10 +56,15 @@ function useRouteMetadata(path: string, privateRoute: boolean): void {
       document.title = "Privacy Policy | Fyendal";
       setCanonical("https://fyendal.net/privacy/");
     } else {
-      document.title = "Play Flesh and Blood Online Free | Fyendal";
+      document.title = homeTitle;
       setCanonical("https://fyendal.net/");
+      setMetaContent('meta[name="description"]', homeDescription);
+      setMetaContent('meta[property="og:title"]', homeTitle);
+      setMetaContent('meta[property="og:description"]', homeDescription);
+      setMetaContent('meta[name="twitter:title"]', homeTitle);
+      setMetaContent('meta[name="twitter:description"]', homeDescription);
     }
-  }, [path, privateRoute]);
+  }, [homeDescription, homeTitle, path, privateRoute]);
 }
 
 function ScreenFallback() {
@@ -61,6 +72,7 @@ function ScreenFallback() {
 }
 
 export function App() {
+  const intl = useIntl();
   const authUser = useStore((state) => state.authUser);
   const authToken = useStore((state) => state.authToken);
   const screen = useStore((state) => state.screen);
@@ -75,7 +87,12 @@ export function App() {
   const path = location.pathname;
   const routeRoomCode = roomCodeFromUrl();
   const savedReplayId = savedReplayIdFromPath(path);
-  useRouteMetadata(path, routeRoomCode !== null || savedReplayId !== null);
+  useRouteMetadata(
+    path,
+    routeRoomCode !== null || savedReplayId !== null,
+    intl.formatMessage({ id: "meta.home.title" }),
+    intl.formatMessage({ id: "meta.home.description" }),
+  );
   const restoringSavedRoom = screen === "lobby"
     && authUser !== null
     && routeRoomCode !== null

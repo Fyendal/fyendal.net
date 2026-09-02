@@ -52,6 +52,16 @@
   color-scheme: dark;
 }
 
+html:lang(zh-Hans) {
+  --font-display: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
+  --font-lobby-title: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
+  --font-lobby-ui: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
+}
+
+html:lang(zh-Hans) button {
+  letter-spacing: .05em;
+}
+
 html, body, #root { height: 100%; }
 
 body {

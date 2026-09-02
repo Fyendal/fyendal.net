@@ -1,0 +1,524 @@
+{
+  "auth.consent": [
+    {
+      "type": 0,
+      "value": "我同意"
+    },
+    {
+      "type": 8,
+      "value": "terms",
+      "children": [
+        {
+          "type": 0,
+          "value": "服务条款"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": "并确认已阅读"
+    },
+    {
+      "type": 8,
+      "value": "privacy",
+      "children": [
+        {
+          "type": 0,
+          "value": "隐私政策"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": "。"
+    }
+  ],
+  "auth.createAccount": [
+    {
+      "type": 0,
+      "value": "创建账户"
+    }
+  ],
+  "auth.creatingAccount": [
+    {
+      "type": 0,
+      "value": "正在创建账户…"
+    }
+  ],
+  "auth.error.invalidUsername": [
+    {
+      "type": 0,
+      "value": "用户名必须为 3–20 个字母、数字或下划线"
+    }
+  ],
+  "auth.error.missingPassword": [
+    {
+      "type": 0,
+      "value": "请输入密码"
+    }
+  ],
+  "auth.error.missingUsername": [
+    {
+      "type": 0,
+      "value": "请输入用户名"
+    }
+  ],
+  "auth.error.shortPassword": [
+    {
+      "type": 0,
+      "value": "密码必须至少包含 8 个字符"
+    }
+  ],
+  "auth.error.termsRequired": [
+    {
+      "type": 0,
+      "value": "请同意服务条款后再创建账户。"
+    }
+  ],
+  "auth.loggingIn": [
+    {
+      "type": 0,
+      "value": "正在登录…"
+    }
+  ],
+  "auth.login": [
+    {
+      "type": 0,
+      "value": "登录"
+    }
+  ],
+  "auth.password": [
+    {
+      "type": 0,
+      "value": "密码"
+    }
+  ],
+  "auth.passwordLoginPlaceholder": [
+    {
+      "type": 0,
+      "value": "你的密码"
+    }
+  ],
+  "auth.passwordRegisterPlaceholder": [
+    {
+      "type": 0,
+      "value": "至少 8 个字符"
+    }
+  ],
+  "auth.register": [
+    {
+      "type": 0,
+      "value": "注册"
+    }
+  ],
+  "auth.username": [
+    {
+      "type": 0,
+      "value": "用户名"
+    }
+  ],
+  "auth.usernameHint": [
+    {
+      "type": 0,
+      "value": "3–20 个字母、数字或下划线"
+    }
+  ],
+  "brand.subtitle": [
+    {
+      "type": 0,
+      "value": "赤魂战纪在线对战"
+    }
+  ],
+  "discord.label": [
+    {
+      "type": 0,
+      "value": "加入 Fyendal Discord 社区（在新标签页中打开）"
+    }
+  ],
+  "discord.title": [
+    {
+      "type": 0,
+      "value": "加入 Fyendal Discord"
+    }
+  ],
+  "footer.legal": [
+    {
+      "type": 0,
+      "value": "Fyendal 与 Legend Story Studios 无任何关联。Legend Story Studios®、Flesh and Blood™ 及各系列名称均为 Legend Story Studios 的商标。Flesh and Blood 的角色、卡牌、标志和美术素材均为 Legend Story Studios 的财产。© Legend Story Studios。"
+    }
+  ],
+  "footer.privacy": [
+    {
+      "type": 0,
+      "value": "隐私政策"
+    }
+  ],
+  "footer.terms": [
+    {
+      "type": 0,
+      "value": "服务条款"
+    }
+  ],
+  "landing.accountAccess": [
+    {
+      "type": 0,
+      "value": "账户访问"
+    }
+  ],
+  "landing.activityLabel": [
+    {
+      "type": 0,
+      "value": "当前活动"
+    }
+  ],
+  "landing.bots.body": [
+    {
+      "type": 0,
+      "value": "使用拥有独立策略、针对不同英雄设计的AI测试牌组。"
+    }
+  ],
+  "landing.bots.title": [
+    {
+      "type": 0,
+      "value": "与机器人练习"
+    }
+  ],
+  "landing.demoAlt": [
+    {
+      "type": 0,
+      "value": "Fyendal 中 Briar 与 Bravo 练习AI的一场对局"
+    }
+  ],
+  "landing.faq.bot.answer": [
+    {
+      "type": 0,
+      "value": "可以，Fyendal 在两种受支持的赛制中都提供针对不同英雄设计的练习AI。"
+    }
+  ],
+  "landing.faq.bot.question": [
+    {
+      "type": 0,
+      "value": "我可以与 Flesh and Blood AI 对战吗？"
+    }
+  ],
+  "landing.faq.free.answer": [
+    {
+      "type": 0,
+      "value": "是的!Fyendal 是一个免费、非商业性质的社区项目。"
+    }
+  ],
+  "landing.faq.free.question": [
+    {
+      "type": 0,
+      "value": "Fyendal 免费吗？"
+    }
+  ],
+  "landing.faq.import.answer": [
+    {
+      "type": 0,
+      "value": "可以。你可以导入公开的 Fabrary 链接或 Fabrary 导出文本。牌组中的每张卡都必须受 Fyendal 支持。"
+    }
+  ],
+  "landing.faq.import.question": [
+    {
+      "type": 0,
+      "value": "我可以导入 Fabrary 牌组吗？"
+    }
+  ],
+  "landing.faq.kicker": [
+    {
+      "type": 0,
+      "value": "常见问题"
+    }
+  ],
+  "landing.faq.official.answer": [
+    {
+      "type": 0,
+      "value": "不是。Fyendal 是非官方的粉丝项目，其对局结果不能作为官方规则裁定。"
+    }
+  ],
+  "landing.faq.official.question": [
+    {
+      "type": 0,
+      "value": "Fyendal 是官方产品吗？"
+    }
+  ],
+  "landing.faq.title": [
+    {
+      "type": 0,
+      "value": "关于在 Fyendal 上游玩"
+    }
+  ],
+  "landing.inGame": [
+    {
+      "type": 8,
+      "value": "strong",
+      "children": [
+        {
+          "type": 1,
+          "value": "count"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": " 人正在对局"
+    }
+  ],
+  "landing.matches.body": [
+    {
+      "type": 0,
+      "value": "进入匹配队列、加入开放房间，或邀请好友进行私人对局。"
+    }
+  ],
+  "landing.matches.title": [
+    {
+      "type": 0,
+      "value": "寻找或创建对局"
+    }
+  ],
+  "landing.openRooms": [
+    {
+      "type": 8,
+      "value": "strong",
+      "children": [
+        {
+          "type": 1,
+          "value": "count"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": " 个开放房间"
+    }
+  ],
+  "landing.replays.body": [
+    {
+      "type": 0,
+      "value": "通过房间链接观看对局，然后查看或导出已保存的回放。"
+    }
+  ],
+  "landing.replays.title": [
+    {
+      "type": 0,
+      "value": "观战与复盘"
+    }
+  ],
+  "landing.startPlayingBody": [
+    {
+      "type": 0,
+      "value": "创建免费账户，即可参与对局并与机器人练习。"
+    }
+  ],
+  "landing.startPlayingLabel": [
+    {
+      "type": 0,
+      "value": "开始游戏"
+    }
+  ],
+  "landing.startPlayingTitle": [
+    {
+      "type": 0,
+      "value": "开始游戏"
+    }
+  ],
+  "landing.subtitle": [
+    {
+      "type": 0,
+      "value": "免费在浏览器中畅玩。寻找对手、与针对不同英雄设计的AI练习，一键导入你的 Fabrary 牌组。"
+    }
+  ],
+  "landing.title": [
+    {
+      "type": 0,
+      "value": "在线畅玩赤魂战纪 (Flesh & Blood)"
+    }
+  ],
+  "landing.ways.kicker": [
+    {
+      "type": 0,
+      "value": "按你的方式游玩"
+    }
+  ],
+  "landing.ways.title": [
+    {
+      "type": 0,
+      "value": "在线对战与专项练习"
+    }
+  ],
+  "language.label": [
+    {
+      "type": 0,
+      "value": "语言"
+    }
+  ],
+  "meta.home.description": [
+    {
+      "type": 0,
+      "value": "免费在线畅玩 Flesh and Blood。寻找对手、与针对不同英雄设计的机器人练习、导入 Fabrary 牌组、观看对局并查看回放。"
+    }
+  ],
+  "meta.home.title": [
+    {
+      "type": 0,
+      "value": "免费在线畅玩 Flesh and Blood | Fyendal"
+    }
+  ],
+  "replay.confirmDelete": [
+    {
+      "type": 0,
+      "value": "要删除这份已保存的回放吗？此操作无法撤销。"
+    }
+  ],
+  "replay.daysLeft": [
+    {
+      "type": 0,
+      "value": "剩余 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 天"
+    }
+  ],
+  "replay.defeat": [
+    {
+      "type": 0,
+      "value": "失败"
+    }
+  ],
+  "replay.delete": [
+    {
+      "type": 0,
+      "value": "删除回放"
+    }
+  ],
+  "replay.deleting": [
+    {
+      "type": 0,
+      "value": "正在删除回放"
+    }
+  ],
+  "replay.emptyBody": [
+    {
+      "type": 0,
+      "value": "已完成的对局和手动结束的人机对局会自动显示在这里。"
+    }
+  ],
+  "replay.emptyTitle": [
+    {
+      "type": 0,
+      "value": "暂无已保存的回放"
+    }
+  ],
+  "replay.ended": [
+    {
+      "type": 0,
+      "value": "已结束"
+    }
+  ],
+  "replay.expiresAt": [
+    {
+      "type": 0,
+      "value": "到期时间："
+    },
+    {
+      "type": 1,
+      "value": "date"
+    }
+  ],
+  "replay.expiresToday": [
+    {
+      "type": 0,
+      "value": "今天到期"
+    }
+  ],
+  "replay.exportJson": [
+    {
+      "type": 0,
+      "value": "导出回放 JSON"
+    }
+  ],
+  "replay.frameCount": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 帧"
+    }
+  ],
+  "replay.loading": [
+    {
+      "type": 0,
+      "value": "正在加载回放…"
+    }
+  ],
+  "replay.matchup": [
+    {
+      "type": 1,
+      "value": "firstHero"
+    },
+    {
+      "type": 0,
+      "value": " 对阵 "
+    },
+    {
+      "type": 1,
+      "value": "secondHero"
+    }
+  ],
+  "replay.openFile": [
+    {
+      "type": 0,
+      "value": "打开回放文件…"
+    }
+  ],
+  "replay.openFileShort": [
+    {
+      "type": 0,
+      "value": "打开文件"
+    }
+  ],
+  "replay.prepareExport": [
+    {
+      "type": 0,
+      "value": "正在准备导出回放"
+    }
+  ],
+  "replay.retention": [
+    {
+      "type": 0,
+      "value": "回放将保存 7 天。请导出你想长期保留的回放。"
+    }
+  ],
+  "replay.title": [
+    {
+      "type": 0,
+      "value": "我的回放"
+    }
+  ],
+  "replay.victory": [
+    {
+      "type": 0,
+      "value": "胜利"
+    }
+  ],
+  "replay.watch": [
+    {
+      "type": 0,
+      "value": "▶ 观看"
+    }
+  ],
+  "replay.watchLoading": [
+    {
+      "type": 0,
+      "value": "正在加载…"
+    }
+  ]
+}
