@@ -953,7 +953,10 @@ export const sea: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook === "jack-nimble-steal") {
-        ctx.steal(Number(option));
+        const item = ctx.player(opponentSeat(ctx)).board.find(
+          (card) => card.instanceId === Number(option) && isItem(ctx, card),
+        );
+        if (item) ctx.steal(item.instanceId);
         return;
       }
       if (hook !== "jack-nimble-banish" || option === "pass") return;

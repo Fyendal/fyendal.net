@@ -13,6 +13,11 @@ function has(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): bo
 function isAttackCard(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.hasCardType(card, "action") && has(ctx, card, "attack");
 }
+function controlledPhoenixFlames(ctx: ScriptCtx): number {
+  return ctx.state.chain.filter(
+    (link) => link.attacker === ctx.seat && named(ctx, link.attackingCard, "phoenix flame"),
+  ).length;
+}
 function ashes(ctx: ScriptCtx) { return ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "ash")); }
 function invoke(backId: string): CardScript {
   return {
@@ -84,8 +89,17 @@ export const uprHighRarity: Record<string, CardScript> = {
     onChoose(ctx, hook, option) { if (hook === "dominia-banish") ctx.banish(Number(option)); },
   }),
   "fai, rising rebellion|0": fai,
-  "phoenix form|1": { modifyAttack(ctx) { return ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "phoenix flame")).length >= 2 ? 2 : 0; }, onAttackDeclared(ctx) { if (ctx.player(ctx.seat).board.some((card) => named(ctx, card, "phoenix flame"))) ctx.grantGoAgain(); }, canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "phoenix flame")).length >= 3; }, onHit(ctx) { ctx.drawCards(ctx.seat, 3); } },
-  "spreading flames|1": { modifyAttack(ctx) { return ctx.chainLinksControlled(ctx.seat, "draconic") > (ctx.data.attack ?? 0) ? 1 : 0; } },
+  "phoenix form|1": { modifyAttack(ctx) { return controlledPhoenixFlames(ctx) >= 2 ? 2 : 0; }, onAttackDeclared(ctx) { if (controlledPhoenixFlames(ctx) >= 1) ctx.grantGoAgain(); }, canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && controlledPhoenixFlames(ctx) >= 3; }, onHit(ctx) { ctx.drawCards(ctx.seat, 3); } },
+  "spreading flames|1": {
+    onAttackDeclared(ctx) {
+      ctx.addModifier({ scope: "until-end-of-turn", expiresOnChainClose: true });
+    },
+    modifyAttack(ctx) {
+      const attacking = ctx.link?.attackingCard;
+      if (!attacking || !ctx.currentAttackHasType("draconic")) return 0;
+      return ctx.basePower(attacking) < ctx.chainLinksControlled(ctx.seat, "draconic") ? 1 : 0;
+    },
+  },
   "combustion point|1": { canPlay(ctx) { return !!ctx.link && (ctx.cardTypes(ctx.link.attackingCard).includes("draconic") || ctx.cardTypes(ctx.link.attackingCard).includes("ninja")); }, onPlay(ctx) { ctx.addModifier({ scope: "chain-link", attack: 1 }); } },
   "flamescale furnace|0": { activated: { cost: 1, isAttack: false, goAgain: false, timing: "instant", oncePerTurn: true, canActivate: (ctx) => Number(ctx.getFlag("player", "playedPitch:1")) > 0, onActivate(ctx) { ctx.changeResources(ctx.seat, ctx.player(ctx.seat).pitch.filter((card) => ctx.cardData(card.cardId).pitch === 1).length); } } },
   "thaw|1": {
@@ -152,7 +166,22 @@ export const uprHighRarity: Record<string, CardScript> = {
   },
   "frightmare|1": { canPlay: (ctx) => ctx.getFlag("player", "phantasmDestroyedThisTurn") === true },
   "semblance|3": { onPlay(ctx) { ctx.setFlag("link", "suppressPhantasm", true); } },
-  "tiger stripe shuko|0": { onFriendlyPlay(ctx, card) { if (!ctx.hasCardType(card, "action") || !has(ctx, card, "attack") || (ctx.cardData(card.cardId).attack ?? 99) > 2) return; const count = Number(ctx.getFlag("player", "smallAttackCount")) + 1; ctx.setFlag("player", "smallAttackCount", count); if (count === 2) { ctx.addCardTempPower(card.instanceId, 1); ctx.setFlag("link", "unpreventable", true); } } },
+  "tiger stripe shuko|0": {
+    onFriendlyPlay(ctx, card) {
+      if (!isAttackCard(ctx, card) || ctx.basePower(card) > 2) return;
+      const count = Number(ctx.getFlag("player", "smallAttackCount")) + 1;
+      ctx.setFlag("player", "smallAttackCount", count);
+      if (count !== 2) return;
+      ctx.addCardTempPower(card.instanceId, 1);
+      ctx.setFlag("player", `tigerStripeShuko:${card.instanceId}`, true);
+    },
+    onFriendlyAttackDeclared(ctx) {
+      const attacking = ctx.link?.attackingCard;
+      if (!attacking || ctx.getFlag("player", `tigerStripeShuko:${attacking.instanceId}`) !== true) return;
+      ctx.setFlag("link", "unpreventable", true);
+      ctx.setFlag("player", `tigerStripeShuko:${attacking.instanceId}`, false);
+    },
+  },
   "double strike|1": { onChainLinkResolved(ctx) { if (ctx.getCounter("replayed") > 0) return; ctx.setCounter("replayed", 1); if (ctx.banish(ctx.self.instanceId)) ctx.allowPlayFrom(ctx.self.instanceId, "banish", { untilChainClose: true }); } },
   "take the tempo|1": { canTriggerOnHit(ctx) { return ctx.hitsThisCombatChain(ctx.seat) >= 3; }, onHit(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top && ctx.banish(top.instanceId) && isAttackCard(ctx, top)) ctx.allowPlayFrom(top.instanceId, "banish", { untilEndOfNextTurn: true }); } },
   "waning moon|0": { activated: { cost: 2, isAttack: false, goAgain: false, timing: "instant", oncePerTurn: true, canActivate: (ctx) => ctx.getFlag("player", "playedNonAttackAction") === true, onActivate(ctx) { dealArcane(ctx, opponentSeat(ctx), ctx.state.activePlayer === ctx.seat ? 2 : 3); } } },

@@ -78,6 +78,39 @@ describe("ASR — Okana Scar Wraps", () => {
     g.chooseCard("edge of autumn|0")
       .expectInZone(0, "edge of autumn|0", "weapons");
   });
+
+  it("equips Edge of Autumn before other Vengeance on-hit triggers resolve", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "ira, scarlet revenger|0",
+          weapons: ["edge of autumn|0"],
+          hand: ["vengeance never rests|3", "legacy of ikaru|3"],
+          deck: ["nimblism|1"],
+          resources: 2,
+          equipment: { ...NO_EQUIPMENT, arms: "okana scar wraps|0" },
+        },
+        { hero: "dorinthea", hand: [], equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.attackWithWeapon("edge of autumn|0")
+      .blockWith()
+      .settle()
+      .play("vengeance never rests|3")
+      .blockWith()
+      .react("legacy of ikaru|3", { settle: false })
+      .passPriority()
+      .passPriority()
+      .activate("okana scar wraps|0")
+      .chooseCard("edge of autumn|0");
+
+    expect(g.state.pendingDecision?.chooseHook).toBe("okana-equip");
+    g.chooseCard("edge of autumn|0")
+      .expectInZone(0, "edge of autumn|0", "weapons")
+      .expectInZone(0, "nimblism|1", "hand");
+  });
 });
 
 describe("ASR — Give and Take", () => {

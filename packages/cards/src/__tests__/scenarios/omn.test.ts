@@ -101,6 +101,31 @@ describe("OMN — import and set mechanics", () => {
       .expectAttackValue(3);
   });
 
+  it("Draco Fire skips a second trigger after the first banishes both copies", () => {
+    const g = scenario({
+      seats: [
+        hero("fang, dracai of blades|0", {
+          graveyard: ["draco fire|1", "draco fire|1"],
+        }),
+        foe(),
+      ],
+    });
+
+    g.endTurn()
+      .endTurn();
+    expect(g.state.pendingDecision).toMatchObject({
+      kind: "optional-effect",
+      prompt: "Draco Fire: Banish 2 Draco Fire to gain 1 resource",
+      options: ["yes", "no"],
+    });
+
+    g.chooseOption("yes")
+      .expectResources(0, 1)
+      .expectZoneSize(0, "graveyard", 0)
+      .expectZoneSize(0, "banish", 2);
+    expect(g.state.pendingDecision).toBeNull();
+  });
+
   it("Evasive Nageboshi does not restrict defenders on a later chain link", () => {
     const g = scenario({
       seats: [

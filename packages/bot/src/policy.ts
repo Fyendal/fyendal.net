@@ -778,12 +778,20 @@ function isBladeBeckoner(card: CardView, input: BotPolicyInput): boolean {
   return input.cards[card.cardId]?.name.trim().toLowerCase().startsWith("blade beckoner ") === true;
 }
 
-function bladeBeckonerDefenseBonus(card: CardView, input: BotPolicyInput): number {
+function defenderDefense(card: CardView, input: BotPolicyInput): number {
   const link = currentLink(input);
-  return isBladeBeckoner(card, input) &&
-      input.cards[link?.attackingCard.cardId ?? ""]?.cardType === "weapon"
-    ? 1
-    : 0;
+  const data = input.cards[card.cardId];
+  if (
+    isBladeBeckoner(card, input) &&
+    input.cards[link?.attackingCard.cardId ?? ""]?.cardType === "weapon"
+  ) {
+    // CardView.defense has already clamped printed defense minus counters to
+    // zero. Blade Beckoner's continuous bonus is applied before that clamp,
+    // so reconstruct the raw value or a second Guardwell use incorrectly
+    // looks like it still blocks for one.
+    return Math.max(0, (data?.defense ?? card.defense ?? 0) - (card.defCounters ?? 0) + 1);
+  }
+  return Math.max(0, card.defense ?? data?.defense ?? 0);
 }
 
 function isMidgameDurableArmor(card: CardView, input: BotPolicyInput): boolean {
@@ -1135,7 +1143,7 @@ export function scoreDefenseIntentWithTrace(
 
   const incomingAfterPlannedPrevention = Math.max(0, incoming - plannedPrevention.amount);
   const defense = chosen.reduce(
-    (sum, card) => sum + (card.defense ?? 0) + bladeBeckonerDefenseBonus(card, input),
+    (sum, card) => sum + defenderDefense(card, input),
     0,
   );
   // Future reaction/prevention cards are reserved here so the staged block is

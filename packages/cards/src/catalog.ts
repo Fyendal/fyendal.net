@@ -333,6 +333,7 @@ const KEYWORD_OVERRIDES: Record<string, string[]> = {
   "lava vein loyalty|2": [],
   "lava vein loyalty|3": [],
   "burn away|1": [],
+  "phoenix form|1": [],
   "rise up|1": ["Dromai or Fai Specialization", "Rupture"],
   "stoke the flames|1": [],
   "trade in|1": [],

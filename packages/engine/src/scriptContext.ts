@@ -1120,6 +1120,11 @@ export function makeCtx(
     currentAttackHasType(type) {
       return !!link && runtime.commands.linkAttackHasType(state, link, type);
     },
+    chainLinkAttackHasType(chainLinkIndex, type) {
+      if (!Number.isSafeInteger(chainLinkIndex) || chainLinkIndex < 0) return false;
+      const target = state.chain[chainLinkIndex];
+      return !!target && runtime.commands.linkAttackHasType(state, target, type);
+    },
     hitsThisCombatChain(targetSeat) {
       return runtime.commands.hitsThisCombatChain(state, targetSeat);
     },
@@ -1219,6 +1224,11 @@ export function makeCtx(
         : state.chain.find((candidate) =>
             candidate.attackingCard.instanceId === targetAttackInstanceId
           );
+      if (target && target.flags.attackGone !== true) runtime.events.grantLinkGoAgain(state, target);
+    },
+    grantChainLinkGoAgain(chainLinkIndex) {
+      if (!Number.isSafeInteger(chainLinkIndex) || chainLinkIndex < 0) return;
+      const target = state.chain[chainLinkIndex];
       if (target && target.flags.attackGone !== true) runtime.events.grantLinkGoAgain(state, target);
     },
     crowdBoo(targetSeat) {

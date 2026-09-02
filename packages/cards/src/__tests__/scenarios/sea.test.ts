@@ -19,6 +19,53 @@ describe("SEA — High Seas heroes and cogs", () => {
     expect(new Set(cards.map(functionalKeyOf))).toHaveLength(265);
   });
 
+  it("Briar creates its own Embodiment when Jack hits without stealing the opposing aura", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "briar|0",
+          weapons: [],
+          hand: ["jack be nimble|1"],
+        },
+        {
+          hero: "rhinar",
+          board: ["embodiment of earth|0"],
+          hand: [],
+        },
+      ],
+    });
+
+    g.play("jack be nimble|1")
+      .blockWith()
+      .settle()
+      .expectInZone(0, "embodiment of earth|0", "board")
+      .expectInZone(1, "embodiment of earth|0", "board")
+      .expectLog("Briar creates Embodiment of Earth");
+    expect(g.state.pendingDecision).toBeNull();
+  });
+
+  it("Jack Be Nimble returns a stolen item at the end of the action phase", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["jack be nimble|1"] },
+        { hero: "dorinthea", board: ["gold|0"], hand: [] },
+      ],
+    });
+
+    g.play("jack be nimble|1")
+      .blockWith()
+      .settle()
+      .chooseCard("gold|0")
+      .expectInZone(0, "gold|0", "board")
+      .expectNotInZone(1, "gold|0", "board")
+      .endTurn()
+      .expectNotInZone(0, "gold|0", "board")
+      .expectInZone(1, "gold|0", "board")
+      .expectLog("Gold returns to Dorinthea");
+    expect(g.state.controlReturns).toEqual([]);
+  });
+
   it("Burn Bare can discard itself to destroy a phantasm attacking its hero", () => {
     const g = scenario({
       seats: [

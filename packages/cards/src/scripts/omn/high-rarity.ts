@@ -253,7 +253,7 @@ export const omnHighRarity: Record<string, CardScript> = {
   },
   "draco fire|1": {
     onPlay(ctx) { buffNextAttack(ctx, { attack: 2, attackCostReduction: 1, appliesToType: ["draconic"] }); },
-    triggers: [{ event: "start-of-turn", sourceZone: "graveyard", optional: true, label: "Banish 2 Draco Fire to gain 1 resource", condition(ctx) { return ctx.player(ctx.seat).graveyard.filter((card) => named(ctx, card, "Draco Fire")).length >= 2; }, onAccept(ctx) { const cards = ctx.player(ctx.seat).graveyard.filter((card) => named(ctx, card, "Draco Fire")).slice(0, 2); for (const card of cards) ctx.banish(card.instanceId); ctx.changeResources(ctx.seat, 1); } }],
+    triggers: [{ event: "start-of-turn", sourceZone: "graveyard", optional: true, label: "Banish 2 Draco Fire to gain 1 resource", condition(ctx) { return ctx.player(ctx.seat).graveyard.filter((card) => named(ctx, card, "Draco Fire")).length >= 2; }, canAccept(ctx) { return ctx.player(ctx.seat).graveyard.filter((card) => named(ctx, card, "Draco Fire")).length >= 2; }, onAccept(ctx) { const cards = ctx.player(ctx.seat).graveyard.filter((card) => named(ctx, card, "Draco Fire")).slice(0, 2); if (cards.length < 2) return; for (const card of cards) ctx.banish(card.instanceId); ctx.changeResources(ctx.seat, 1); } }],
   },
   "induce panic|2": {
     onDefend: (ctx) => ctx.requestChoice("panic-color", "Choose a color", ["red", "yellow", "blue"]),

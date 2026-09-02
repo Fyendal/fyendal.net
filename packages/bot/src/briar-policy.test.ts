@@ -956,6 +956,52 @@ describe("Briar policy", () => {
       .toEqual({ kind: "defend", instanceIds: [blockThree!.instanceId] });
   });
 
+  it("uses a hand card instead of spent Blade Beckoner armor to survive a weapon attack", () => {
+    const state = createGame({
+      decklists: [briarDeck(decklists.dorinthea), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 70513,
+      startPlayer: 1,
+    });
+    replaceHand(state, 0, ["SBA020"]);
+    const view = projectStateFor(state, 0);
+    const handCard = view.players[0].hand[0]!;
+    const gauntlets = {
+      instanceId: 99_909,
+      cardId: "SBA007",
+      owner: 0 as const,
+      defense: 0,
+      defCounters: 2,
+    };
+    view.players[0].equipment.arms = gauntlets;
+    view.players[0].life = 1;
+    view.priorityPlayer = 0;
+    view.phase = "defend";
+    view.pendingDecision = { player: 0, kind: "defend", prompt: "Choose defending cards" };
+    view.chain = [{
+      attackingCard: { instanceId: 99_908, cardId: "WTR115", owner: 1 },
+      defendingCards: [],
+      attackValue: 1,
+      defenseValue: 0,
+      damage: 1,
+      resolved: false,
+      reactions: [],
+    }];
+
+    expect(cardData.WTR115?.cardType).toBe("weapon");
+    expect(chooseBriarIntent({
+      seat: 0,
+      view,
+      legal: [
+        { kind: "defend", instanceIds: [] },
+        { kind: "stage-defenders", instanceIds: [gauntlets.instanceId] },
+        { kind: "stage-defenders", instanceIds: [handCard.instanceId] },
+      ],
+      cards: cardData,
+    })).toEqual({ kind: "stage-defenders", instanceIds: [handCard.instanceId] });
+  });
+
   it("holds Arcane Seeds // Life on the opponent's nonlethal priority window", () => {
     const state = createGame({
       decklists: [briarDeck(decklists.dorinthea), decklists.dorinthea],
