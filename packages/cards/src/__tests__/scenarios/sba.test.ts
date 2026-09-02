@@ -140,12 +140,18 @@ describe("SBA — Briar hero", () => {
     expect(g.state.players[0]!.flags.nonAttackActionsPlayedThisTurn).toBe(2);
   });
 
-  it("Embodiment of Earth gives 'non-attack' actions +1{d} and is destroyed at the start of Briar's turn", () => {
+  it("Embodiment of Earth gives a split 'non-attack' action +1{d} and is destroyed at the start of Briar's turn", () => {
     const g = scenario({
       seats: [
         {
           ...briar,
-          hand: ["arcanic shockwave|1", "sizzle|1", "wrecker romp|1", "wrecker romp|3"],
+          hand: [
+            "arcanic shockwave|1",
+            "sizzle|1",
+            "arcane seeds // life|1",
+            "wrecker romp|1",
+            "wrecker romp|3",
+          ],
         },
         { hero: "rhinar", hand: ["raging onslaught|1", "wrecker romp|3"] },
       ],
@@ -157,9 +163,9 @@ describe("SBA — Briar hero", () => {
       .expectInZone(0, "embodiment of earth|0", "board")
       .endTurn();
     g.play("raging onslaught|1", { pitch: ["wrecker romp|3"] })
-      .blockWith("sizzle|1") // 2 defense + 1 from the Embodiment
+      .blockWith("arcane seeds // life|1") // 3 defense + 1 from the Embodiment
       .settle()
-      .expectFinalDefense(3);
+      .expectFinalDefense(4);
     g.endTurn().expectZoneSize(0, "board", 0); // destroyed at the start of Briar's turn
   });
 });

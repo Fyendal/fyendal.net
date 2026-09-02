@@ -105,14 +105,17 @@ export const outHighRarity: Record<string, CardScript> = {
   "nerve scalpel|0": dagger({
     canTriggerOnHit(ctx) { return !!ctx.link && ctx.link.targetAllyId === undefined && ctx.link.attackingCard.instanceId === ctx.self.instanceId; },
     onHit(ctx) { ctx.addModifier({ scope: "until-end-of-turn", seat: opponentSeat(ctx), defense: -1, appliesToCardType: "reaction", once: true }); },
+    onEffectHit(ctx, targetSeat) { ctx.addModifier({ scope: "until-end-of-turn", seat: targetSeat, defense: -1, appliesToCardType: "reaction", once: true }); },
   }),
   "orbitoclast|0": dagger({
     canTriggerOnHit(ctx) { return !!ctx.link && ctx.link.targetAllyId === undefined && ctx.link.attackingCard.instanceId === ctx.self.instanceId; },
     onHit(ctx) { ctx.addModifier({ scope: "until-end-of-turn", seat: opponentSeat(ctx), defense: -1, appliesToCardType: "action", excludesSubtype: "attack", once: true }); },
+    onEffectHit(ctx, targetSeat) { ctx.addModifier({ scope: "until-end-of-turn", seat: targetSeat, defense: -1, appliesToCardType: "action", excludesSubtype: "attack", once: true }); },
   }),
   "scale peeler|0": dagger({
     canTriggerOnHit(ctx) { return !!ctx.link && ctx.link.targetAllyId === undefined && ctx.link.attackingCard.instanceId === ctx.self.instanceId; },
     onHit(ctx) { ctx.addModifier({ scope: "until-end-of-turn", seat: opponentSeat(ctx), defense: -1, appliesToEquipment: true, once: true }); },
+    onEffectHit(ctx, targetSeat) { ctx.addModifier({ scope: "until-end-of-turn", seat: targetSeat, defense: -1, appliesToEquipment: true, once: true }); },
   }),
   "redback shroud|0": graveyardChest({ activated: { cost: 0, isAttack: false, goAgain: false, timing: "attack-reaction", destroySelfCost: true, onActivate(ctx) { ctx.addModifier({ scope: "next-play", playCostReduction: 1, appliesToCardType: "attack-reaction" }); } } }),
   "shake down|1": {

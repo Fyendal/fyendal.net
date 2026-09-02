@@ -271,6 +271,21 @@ describe("game setup & turn structure", () => {
     expect(abilityResourceCost(s, engineRuntime, 0, p.hero, { cost: 3 })).toBe(3);
   });
 
+  it("clears stale private-zone placement metadata when drawing a card", () => {
+    const s = makeGame(1001);
+    const p = player(s, 0);
+    const top = p.deck[0]!;
+    top.faceDown = true;
+    top.arsenalSlot = 0;
+
+    makeCtx(s, engineRuntime, 0, p.hero).drawCards(0, 1);
+
+    const drawn = p.hand.find((card) => card.instanceId === top.instanceId);
+    expect(drawn).toBeDefined();
+    expect(drawn).not.toHaveProperty("faceDown");
+    expect(drawn).not.toHaveProperty("arsenalSlot");
+  });
+
   it("orders global and optional-friendly token replacements together", () => {
     const s = makeGame(102);
     const p = player(s, 0);

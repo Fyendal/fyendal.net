@@ -407,7 +407,7 @@ describe("ELE — Fusion and Elemental heroes", () => {
           ...lexi,
           weapons: ["death dealer|0"],
           resources: 2,
-          hand: ["snap shot|1", LIGHTNING, "dazzling crescendo|3"],
+          hand: ["snap shot|1", LIGHTNING, "arc bending|1"],
           deck: [BLUE],
         },
         { hero: "dorinthea", hand: [] },
@@ -419,9 +419,47 @@ describe("ELE — Fusion and Elemental heroes", () => {
       .play("snap shot|1", { fromArsenal: true })
       .chooseCard(LIGHTNING)
       .blockWith()
+      .settle()
+      .expectAP(0, 0)
       .activate("death dealer|0")
+      .chooseCard("arc bending|1")
+      .expectInZone(0, "arc bending|1", "arsenal")
+      .play("arc bending|1", { fromArsenal: true, pitch: [LIGHTNING] })
+      .blockWith()
+      .settle()
+      .expectAP(0, 1);
+  });
+
+  it("fused Snap Shot lets Voltaire activate an additional time as an instant", () => {
+    const g = scenario({
+      seats: [
+        {
+          ...lexi,
+          weapons: ["voltaire, strike twice|0"],
+          resources: 3,
+          hand: ["snap shot|1", LIGHTNING, "dazzling crescendo|3", "arc bending|1"],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+
+    g.activate("voltaire, strike twice|0")
       .chooseCard("dazzling crescendo|3")
-      .expectInZone(0, "dazzling crescendo|3", "arsenal");
+      .chooseOption("go again")
+      .play("dazzling crescendo|3", { fromArsenal: true })
+      .chooseOption("no")
+      .blockWith()
+      .settle()
+      .activate("voltaire, strike twice|0")
+      .chooseCard("snap shot|1")
+      .chooseOption("go again")
+      .play("snap shot|1", { fromArsenal: true })
+      .chooseCard(LIGHTNING)
+      .blockWith()
+      .activate("voltaire, strike twice|0")
+      .chooseCard("arc bending|1")
+      .chooseOption("power")
+      .expectInZone(0, "arc bending|1", "arsenal");
   });
 
   it("Turn Timber gets +2 defense when Earth fused", () => {

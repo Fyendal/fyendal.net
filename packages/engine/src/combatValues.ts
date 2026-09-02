@@ -23,6 +23,31 @@ import { findCardAnywhere, opponent } from "./zoneQueries.js";
 import { controlledPermanents, hookSources, lingeringModifierSources } from "./sourceQueries.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 
+function matchingOneShotDefenseCards(
+  state: GameStateInternal,
+  link: ChainLinkState,
+  modifier: Modifier,
+  defenders: readonly CardInstance[],
+): CardInstance[] {
+  let matching = defenders.filter((card) => {
+    if (modifier.seat !== card.owner) return false;
+    const equipment = link.defendingEquipment.some(
+      (candidate) => candidate.instanceId === card.instanceId,
+    );
+    if (equipment) return modifier.appliesToEquipment === true;
+    if (modifier.appliesToEquipment === true) return false;
+    return modifierAppliesToDefense(
+      state,
+      modifier,
+      dataOf(state, card.cardId),
+      cardColorOf(state, card),
+      card,
+    );
+  });
+  if (modifier.appliesToFirstDefenderOnly) matching = matching.slice(0, 1);
+  return matching;
+}
+
 /** Consume delayed "the next time they defend" effects at the defend event
  * boundary and attach their adjustment to exactly the matching cards. */
 export function applyOneShotDefenseModifiers(
@@ -38,22 +63,7 @@ export function applyOneShotDefenseModifiers(
       !modifier.defense ||
       (modifier.scope !== "until-end-of-turn" && modifier.scope !== "static")
     ) continue;
-    let matching = defenders.filter((card) => {
-      if (modifier.seat !== card.owner) return false;
-      const equipment = link.defendingEquipment.some(
-        (candidate) => candidate.instanceId === card.instanceId,
-      );
-      if (equipment) return modifier.appliesToEquipment === true;
-      if (modifier.appliesToEquipment === true) return false;
-      return modifierAppliesToDefense(
-        state,
-        modifier,
-        dataOf(state, card.cardId),
-        cardColorOf(state, card),
-        card,
-      );
-    });
-    if (modifier.appliesToFirstDefenderOnly) matching = matching.slice(0, 1);
+    const matching = matchingOneShotDefenseCards(state, link, modifier, defenders);
     if (matching.length === 0) continue;
     modifier.consumed = true;
     for (const card of matching) {
@@ -469,6 +479,11 @@ function defendingCardModifiers(
   const color = cardColorOf(state, card);
   return state.modifiers.filter((modifier) => {
     if (!modifier.defense || modifier.consumed || modifier.appliesToEquipment) return false;
+    // "The next time they defend" modifiers are observed and attached by
+    // applyOneShotDefenseModifiers at the defend-event boundary. If one was
+    // created later in the reaction step (for example by Flick Knives), it
+    // must not retroactively modify cards already defending this link.
+    if (modifier.once && modifier.scope !== "chain-link") return false;
     if (
       modifier.scope !== "until-end-of-turn" &&
       modifier.scope !== "static" &&
@@ -499,6 +514,7 @@ function defendingEquipmentModifiers(
   return state.modifiers.filter((modifier) =>
     !!modifier.defense &&
     !modifier.consumed &&
+    (!modifier.once || modifier.scope === "chain-link") &&
     modifier.appliesToEquipment === true &&
     modifier.seat === card.owner &&
     (modifier.appliesToInstanceId === undefined ||
@@ -965,11 +981,39 @@ export function stagedDefenseTotal(
     defendingCards: [...link.defendingCards, ...cards],
     defendingEquipment: [...link.defendingEquipment, ...equipment],
   };
+  // Preview the attachments that applyOneShotDefenseModifiers would create
+  // if this staged set became the next defend event, without consuming the
+  // live delayed modifiers or advancing the state's modifier id.
+  const previewModifiers: Modifier[] = [];
+  let previewId = -1;
+  for (const modifier of state.modifiers) {
+    if (
+      !modifier.once ||
+      modifier.consumed ||
+      !modifier.defense ||
+      (modifier.scope !== "until-end-of-turn" && modifier.scope !== "static")
+    ) continue;
+    for (const card of matchingOneShotDefenseCards(state, stagedLink, modifier, staged)) {
+      previewModifiers.push({
+        id: previewId--,
+        sourceInstanceId: modifier.sourceInstanceId,
+        ...(modifier.sourceCardId ? { sourceCardId: modifier.sourceCardId } : {}),
+        seat: card.owner,
+        scope: "chain-link",
+        defense: modifier.defense,
+        appliesToInstanceId: card.instanceId,
+        ...(modifier.appliesToEquipment ? { appliesToEquipment: true } : {}),
+      });
+    }
+  }
+  const previewState: GameStateInternal = previewModifiers.length > 0
+    ? { ...state, modifiers: [...state.modifiers, ...previewModifiers] }
+    : state;
   return cards.reduce(
-    (total, card) => total + defendingCardDefense(state, runtime, stagedLink, card),
+    (total, card) => total + defendingCardDefense(previewState, runtime, stagedLink, card),
     0,
   ) + equipment.reduce(
-    (total, card) => total + equipmentDefense(state, runtime, stagedLink, card),
+    (total, card) => total + equipmentDefense(previewState, runtime, stagedLink, card),
     0,
   );
 }

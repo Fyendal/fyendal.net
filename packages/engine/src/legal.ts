@@ -957,6 +957,8 @@ function abilityIntents(
         card,
         ability.isAttack,
       )) continue;
+      const grantedInstantTiming = abilitiesAsInstantForCard(state, player, card);
+      if ((timing === "instant" || grantedInstantTiming) && opposingInstantsProhibited(state, player.seat)) continue;
       if (timing === "action" && actionLimitReached(state, player)) continue;
       if (timing === "attack-reaction" || timing === "defense-reaction") continue;
       if (!activatedAbilityAvailable(player, card.instanceId, ai, ability)) continue;
@@ -967,7 +969,7 @@ function abilityIntents(
         ability.removeCounterCost &&
         (card.counters?.[ability.removeCounterCost.key] ?? 0) < ability.removeCounterCost.amount
       ) continue;
-      if (timing === "action" && player.actionPoints < 1) continue; // instants are free of AP
+      if (timing === "action" && !grantedInstantTiming && player.actionPoints < 1) continue;
       if (ability.banishSoulCost && heroSoulCards(player).length < ability.banishSoulCost) continue;
       if (!canPayActivatedEffectCardCosts(state, player, ability)) continue;
       if (ability.canActivate && !ability.canActivate(runtime.makeCtx(state, player.seat, card))) continue;

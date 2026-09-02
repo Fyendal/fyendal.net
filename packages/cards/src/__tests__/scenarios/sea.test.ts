@@ -433,7 +433,7 @@ describe("SEA — pirate and generic attacks", () => {
     g.endTurn().expectEquipped(0, "arms", "gold-baited hook|0");
   });
 
-  it("Gold-Baited Hook destroys itself if its controller created or stole no Gold", () => {
+  it("Gold-Baited Hook does not destroy itself on a turn when it was not activated", () => {
     const g = scenario({
       seats: [
         { hero: "rhinar", equipment: { arms: "gold-baited hook|0" } },
@@ -442,6 +442,20 @@ describe("SEA — pirate and generic attacks", () => {
     });
 
     g.endTurn()
+      .expectEquipped(0, "arms", "gold-baited hook|0")
+      .expectNotInZone(0, "gold-baited hook|0", "graveyard");
+  });
+
+  it("Gold-Baited Hook destroys itself after activation if its controller creates or steals no Gold", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", equipment: { arms: "gold-baited hook|0" } },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.activate("gold-baited hook|0")
+      .endTurn()
       .expectNoEquipment(0, "arms")
       .expectInZone(0, "gold-baited hook|0", "graveyard");
   });

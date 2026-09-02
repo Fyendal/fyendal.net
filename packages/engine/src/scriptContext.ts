@@ -38,6 +38,7 @@ import {
 } from "./zoneQueries.js";
 
 import { controlledPermanents, hookSources, observingHookSources } from "./sourceQueries.js";
+import { clearPrivateZonePlacement } from "./cardLifecycle.js";
 import {
   transitionZone,
   transitionZoneFromEngineZone,
@@ -746,7 +747,7 @@ export function makeCtx(
           }
         : undefined);
       if (!found) return false;
-      delete found.card.faceDown;
+      clearPrivateZonePlacement(found.card);
       found.owner.hand.push(found.card);
       if (found.fromZone === "graveyard") {
         runtime.events.fireCardLeavesGraveyard(state, found.owner.seat, found.card, "hand");
@@ -2038,6 +2039,11 @@ export function makeCtx(
     putOnDeckTop(instanceId) {
       const found = runtime.commands.removeFromOwnerZones(state, instanceId);
       if (!found) return false;
+      const privateSource = found.fromZone === "hand" || found.fromZone === "deck"
+        || (found.fromZone === "arsenal" && found.card.faceDown)
+        || (found.fromZone === "banish" && found.card.faceDown);
+      const sourceWasFaceDown = found.card.faceDown === true;
+      clearPrivateZonePlacement(found.card);
       const toBottom = found.owner.flags.topDeckToBottom === true;
       if (toBottom) found.owner.deck.push(found.card);
       else found.owner.deck.unshift(found.card);
@@ -2049,7 +2055,7 @@ export function makeCtx(
         {
           from: source !== null && transitionZoneIsPrivate(
             source.kind,
-            found.card.faceDown === true,
+            sourceWasFaceDown,
           ),
           to: true,
         },
@@ -2058,9 +2064,6 @@ export function makeCtx(
         runtime.events.fireCardLeavesGraveyard(state, found.owner.seat, found.card, "deck");
       }
       if (found.fromArena) runtime.commands.fireLeaveArena(state, found.owner.seat, found.card, "deck");
-      const privateSource = found.fromZone === "hand" || found.fromZone === "deck"
-        || (found.fromZone === "arsenal" && found.card.faceDown)
-        || (found.fromZone === "banish" && found.card.faceDown);
       const detail = `${nameOf(state, found.card.cardId)} is put on the ${toBottom ? "bottom" : "top"} of the deck`;
       if (privateSource) logPrivate(state, found.owner.seat, detail, `a card is put on the ${toBottom ? "bottom" : "top"} of the deck`);
       else logPublic(state, detail);
@@ -2070,6 +2073,11 @@ export function makeCtx(
       if (!Number.isSafeInteger(depth) || depth < 1) return false;
       const found = runtime.commands.removeFromOwnerZones(state, instanceId);
       if (!found) return false;
+      const privateSource = found.fromZone === "hand" || found.fromZone === "deck"
+        || (found.fromZone === "arsenal" && found.card.faceDown)
+        || (found.fromZone === "banish" && found.card.faceDown);
+      const sourceWasFaceDown = found.card.faceDown === true;
+      clearPrivateZonePlacement(found.card);
       const index = Math.min(depth - 1, found.owner.deck.length);
       const position = index === 0
         ? "top" as const
@@ -2085,7 +2093,7 @@ export function makeCtx(
         {
           from: source !== null && transitionZoneIsPrivate(
             source.kind,
-            found.card.faceDown === true,
+            sourceWasFaceDown,
           ),
           to: true,
         },
@@ -2094,9 +2102,6 @@ export function makeCtx(
         runtime.events.fireCardLeavesGraveyard(state, found.owner.seat, found.card, "deck");
       }
       if (found.fromArena) runtime.commands.fireLeaveArena(state, found.owner.seat, found.card, "deck");
-      const privateSource = found.fromZone === "hand" || found.fromZone === "deck"
-        || (found.fromZone === "arsenal" && found.card.faceDown)
-        || (found.fromZone === "banish" && found.card.faceDown);
       const suffix = depth === 1 ? "st" : depth === 2 ? "nd" : depth === 3 ? "rd" : "th";
       const detail = `${nameOf(state, found.card.cardId)} is put ${depth}${suffix} from the top of the deck`;
       if (privateSource) {

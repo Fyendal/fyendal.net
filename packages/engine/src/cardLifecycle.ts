@@ -26,6 +26,14 @@ export function consumeNextActionGoAgain(player: PlayerState): boolean {
   return true;
 }
 
+/** Clear metadata whose meaning is limited to a face-down private-zone
+ * placement. Deck cards are inherently hidden without `faceDown`, and cards
+ * in hand must expose their rules identity to their owner. */
+export function clearPrivateZonePlacement(card: CardInstance): void {
+  delete card.faceDown;
+  delete card.arsenalSlot;
+}
+
 /** Move up to `n` cards from the top of the player's deck to their hand. */
 export function drawCards(
   state: GameStateInternal,
@@ -91,6 +99,7 @@ export function drawCards(
   const before = player.hand.length;
   for (let i = 0; i < count && player.deck.length > 0; i++) {
     const card = player.deck.shift() as CardInstance;
+    clearPrivateZonePlacement(card);
     player.hand.push(card);
     runtime.transitions.move(
       card,

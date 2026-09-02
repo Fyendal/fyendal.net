@@ -382,6 +382,36 @@ describe("EVR — rules regression coverage", () => {
       .expectAP(0, 1);
   });
 
+  it("Life of the Party can destroy an attack named Crazy Brew by Mask of Many Faces", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          life: 18,
+          resources: 1,
+          hand: ["head jab|1", "life of the party|1"],
+          equipment: { head: "mask of many faces|0" },
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.activate("mask of many faces|0")
+      .chooseName("Crazy Brew")
+      .play("head jab|1")
+      .blockWith()
+      .settle()
+      .play("life of the party|1", { alternativeCost: "head jab|1" });
+
+    expect(s.state.chain[0]!.flags.attackGone).toBe(true);
+    s.expectInZone(0, "head jab|1", "graveyard")
+      .expectAttackValue(6)
+      .blockWith()
+      .settle()
+      .expectLife(0, 20)
+      .expectAP(0, 1);
+  });
+
   it("Amulet of Intervention can answer lethal non-combat damage", () => {
     const s = scenario({
       active: 1,

@@ -1029,6 +1029,7 @@ Object.assign(sea, {
       goAgain: true,
       tap: true,
       onActivate(ctx: ScriptCtx) {
+        ctx.setCounter("goldBaitedHookActivatedTurn", ctx.state.turn);
         buffNextAttack(ctx, {
           appliesToClass: "pirate",
           onHitScriptHook: {
@@ -1048,6 +1049,7 @@ Object.assign(sea, {
       event: "end-of-turn",
       label: "Destroy Gold-Baited Hook",
       condition: (ctx: ScriptCtx) =>
+        ctx.getCounter("goldBaitedHookActivatedTurn") === ctx.state.turn &&
         ctx.getFlag("player", "createdName:gold") !== true &&
         ctx.getFlag("player", "stolenName:gold") !== true,
       effect(ctx: ScriptCtx) { ctx.destroySelf(); },
