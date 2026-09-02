@@ -1307,6 +1307,12 @@
       "value": "Put an arrow from your hand face up into your arsenal?"
     }
   ],
+  "card.common.bonus.choose": [
+    {
+      "type": 0,
+      "value": "Choose a bonus"
+    }
+  ],
   "card.common.card.discard.choose": [
     {
       "type": 0,
@@ -1545,6 +1551,12 @@
       "value": "Chest"
     }
   ],
+  "card.common.option.goagain": [
+    {
+      "type": 0,
+      "value": "Go again"
+    }
+  ],
   "card.common.option.head": [
     {
       "type": 0,
@@ -1561,6 +1573,16 @@
     {
       "type": 0,
       "value": "Legs"
+    }
+  ],
+  "card.common.option.power.one": [
+    {
+      "type": 0,
+      "value": "+1"
+    },
+    {
+      "type": 1,
+      "value": "p"
     }
   ],
   "card.common.option.red": [
@@ -2854,7 +2876,11 @@
   "card.ele.option.power.one": [
     {
       "type": 0,
-      "value": "+1 power"
+      "value": "+1"
+    },
+    {
+      "type": 1,
+      "value": "p"
     }
   ],
   "card.ele.pay.or.discard": [
@@ -3081,6 +3107,12 @@
     {
       "type": 0,
       "value": "Choose another equipment to offer"
+    }
+  ],
+  "card.evo.equipment.zone.choose": [
+    {
+      "type": 0,
+      "value": "Choose an equipment zone"
     }
   ],
   "card.evo.fabricate.mode.first": [

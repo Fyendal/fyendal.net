@@ -613,7 +613,7 @@ export interface ScriptCtx {
 
 export interface ActivatedEffectCardCost {
   zone: "hand" | "graveyard" | "arsenal" | "arena";
-  move: "banish" | "discard" | "destroy" | "put-on-deck-bottom" | "tap" | "remove-counter" | "turn-face-up";
+  move: "banish" | "discard" | "destroy" | "put-on-deck-bottom" | "tap" | "untap" | "remove-counter" | "turn-face-up";
   count: number;
   /** Banish the selected card face down, keeping its identity private. */
   faceDown?: boolean;
@@ -640,7 +640,9 @@ export interface ActivatedAbility {
     base: number;
     counterKey: string;
     resourcesPerX?: number;
-    maximum?: number;
+    maximum?: number | ((ctx: ScriptCtx) => number);
+    /** Restrict declarations to values that can produce the printed effect. */
+    canDeclareX?(ctx: ScriptCtx, x: number): boolean;
     prompt?: ScriptPrompt;
   };
   /** Chi point cost ({c}) in addition to `cost` (CR 1.14.2c/d): only chi

@@ -364,7 +364,7 @@ export const penHighRarity: Record<string, CardScript> = {
     onEnterArena: (ctx) => ctx.addCounter(ctx.self.instanceId, "power", 1),
     activated: [
       { ...attackAbility(1, { tap: true })[0]! },
-      { cost: 0, isAttack: false, goAgain: true, effectCardCosts: [{ zone: "arena", move: "remove-counter", count: 1, subtype: "ally", counter: { key: "power", amount: 1 }, prompt: decisionPrompt("Remove a power counter", "card.common.cost.powercounter.remove") }], onActivate(ctx) { const aura = ctx.state.players.flatMap((p) => p.board).find((card) => has(ctx, card, "aura") && has(ctx, card, "token")); if (aura) ctx.destroyPermanent(aura.instanceId); } },
+      { cost: 0, isAttack: false, goAgain: true, label: "Destroy an aura token", effectCardCosts: [{ zone: "arena", move: "remove-counter", count: 1, subtype: "ally", counter: { key: "power", amount: 1 }, prompt: decisionPrompt("Remove a power counter", "card.common.cost.powercounter.remove") }], onActivate(ctx) { const aura = ctx.state.players.flatMap((p) => p.board).find((card) => has(ctx, card, "aura") && has(ctx, card, "token")); if (aura) ctx.destroyPermanent(aura.instanceId); } },
     ],
   },
   "gloves of azure waves|0": { modifyDefense: (ctx) => ctx.player(ctx.seat).pitch.filter((card) => ctx.cardColor(card) === 3).length >= 2 ? 3 : 0 },

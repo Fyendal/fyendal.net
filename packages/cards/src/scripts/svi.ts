@@ -1,4 +1,4 @@
-import type { ActivatedAbility, CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   attackAbility,
   buffNextAttack,
@@ -165,40 +165,6 @@ function sigilOfSilphidaeTrigger(ctx: ScriptCtx): void {
   );
 }
 
-function beckoningAbilities(): ActivatedAbility[] {
-  return Array.from({ length: 11 }, (_, x) => ({
-    cost: 2 * x + 1,
-    isAttack: false,
-    goAgain: false,
-    label: `Return a cost ${x} aura`,
-    canActivate(ctx: ScriptCtx) {
-      return ctx.player(ctx.seat).graveyard.some(
-        (card) => isAura(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) === x,
-      );
-    },
-    onActivate(ctx: ScriptCtx) {
-      ctx.destroySelf();
-      const auras = ctx.player(ctx.seat).graveyard.filter(
-        (card) => isAura(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) === x,
-      );
-      ctx.requestCardChoice(
-        "beckoning-return",
-        decisionPrompt(
-          `${ctx.data.name}: return a cost ${x} aura from your graveyard to your hand`,
-          "card.svi.beckoning.aura.return",
-          {
-            values: {
-              card: { kind: "card", cardId: ctx.self.cardId },
-              amount: x,
-            },
-          },
-        ),
-        auras.map((card) => card.instanceId),
-      );
-    },
-  }));
-}
-
 export const svi: Record<string, CardScript> = {
   "viserai|0": {
     triggers: [{
@@ -239,7 +205,44 @@ export const svi: Record<string, CardScript> = {
   },
 
   "beckoning haunt|0": {
-    activated: beckoningAbilities(),
+    activated: {
+      cost: 0,
+      variableCost: {
+        base: 1,
+        resourcesPerX: 2,
+        counterKey: "beckoningX",
+        maximum: 10,
+        prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
+        canDeclareX(ctx, x) {
+          return ctx.player(ctx.seat).graveyard.some(
+            (card) => isAura(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) === x,
+          );
+        },
+      },
+      isAttack: false,
+      goAgain: false,
+      destroySelfCost: true,
+      onActivate(ctx) {
+        const x = ctx.getCounter("beckoningX");
+        const auras = ctx.player(ctx.seat).graveyard.filter(
+          (card) => isAura(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) === x,
+        );
+        ctx.requestCardChoice(
+          "beckoning-return",
+          decisionPrompt(
+            `${ctx.data.name}: return a cost ${x} aura from your graveyard to your hand`,
+            "card.svi.beckoning.aura.return",
+            {
+              values: {
+                card: { kind: "card", cardId: ctx.self.cardId },
+                amount: x,
+              },
+            },
+          ),
+          auras.map((card) => card.instanceId),
+        );
+      },
+    },
     onChoose(ctx, hook, option) {
       if (hook !== "beckoning-return") return;
       const aura = ctx.player(ctx.seat).graveyard.find((card) => card.instanceId === Number(option));

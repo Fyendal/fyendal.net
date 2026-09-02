@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { legalIntents, projectStateFor } from "@fyendal/engine";
 import { functionalKeyOf } from "../../functional.js";
-import { cardData, isImplemented } from "../../index.js";
+import { cardData, isImplemented, scripts } from "../../index.js";
 import { printingId, scenario } from "../harness.js";
 
 function countOnBoard(g: ReturnType<typeof scenario>, seat: number, key: string): number {
@@ -317,6 +317,103 @@ describe("SEA — High Seas heroes and cogs", () => {
     g.blockWith("ironrot helm|0");
     expect(g.state.chain.at(-1)?.defendingEquipment.map((card) => card.instanceId))
       .toEqual([equipmentId]);
+  });
+
+  it.each([
+    "raging onslaught|1",
+    "ironrot helm|0",
+  ])("Palantir Aeronought destroys defending %s on its third activation", (destroyed) => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["palantir aeronought|1", "raging onslaught|3"],
+          board: ["golden cog|0", "golden cog|0", "golden cog|0"],
+        },
+        {
+          hero: "dorinthea",
+          hand: ["raging onslaught|1"],
+          equipment: {
+            head: "ironrot helm|0",
+            chest: null,
+            arms: null,
+            legs: null,
+          },
+        },
+      ],
+    });
+
+    g.play("palantir aeronought|1", { pitch: ["raging onslaught|3"] })
+      .blockWith("ironrot helm|0", "raging onslaught|1");
+    const activated = scripts[printingId("palantir aeronought|1")]?.activated;
+    expect(Array.isArray(activated)).toBe(false);
+    expect(activated && !Array.isArray(activated) ? activated.activationsPerTurn : undefined)
+      .toBe(3);
+
+    const activatePalantir = () => {
+      g.activate("palantir aeronought|1", { settle: false });
+      const cogOption = g.state.pendingDecision?.options?.[0];
+      expect(cogOption).toBeDefined();
+      g.doRaw({ kind: "choose", optionId: cogOption! })
+        .passPriority()
+        .passPriority();
+    };
+
+    activatePalantir();
+    expect(g.state.pendingDecision?.chooseHook).not.toBe("palantir");
+    g.expectAttackValue(7);
+
+    activatePalantir();
+    expect(g.state.pendingDecision?.chooseHook).not.toBe("palantir");
+    g.expectAttackValue(8);
+
+    activatePalantir();
+    expect(g.state.pendingDecision?.chooseHook).toBe("palantir");
+    g.expectAttackValue(9);
+
+    g.chooseCard(destroyed)
+      .expectInZone(1, destroyed, "graveyard");
+    if (destroyed === "ironrot helm|0") g.expectNoEquipment(1, "head");
+    const attackId = g.state.chain.at(-1)!.attackingCard.instanceId;
+    expect(legalIntents(g.state, 0).some((intent) =>
+      intent.kind === "activate-ability" && intent.sourceInstanceId === attackId
+    )).toBe(false);
+  });
+
+  it("Cogwerx Dovetail uses one modal ability up to three times", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["cogwerx dovetail|1", "en garde|1"],
+          board: ["golden cog|0", "golden cog|0", "golden cog|0"],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+
+    g.play("cogwerx dovetail|1", { pitch: ["en garde|1"] })
+      .blockWith();
+    const attackId = g.state.chain.at(-1)!.attackingCard.instanceId;
+
+    const activateDovetail = (mode: "power" | "go-again") => {
+      g.activate("cogwerx dovetail|1", { settle: false });
+      const cogOption = g.state.pendingDecision?.options?.[0];
+      expect(cogOption).toBeDefined();
+      g.doRaw({ kind: "choose", optionId: cogOption! })
+        .passPriority()
+        .passPriority();
+      expect(g.state.pendingDecision?.chooseHook).toBe("dovetail-mode");
+      g.doRaw({ kind: "choose", optionId: mode });
+    };
+
+    activateDovetail("power");
+    activateDovetail("go-again");
+    activateDovetail("power");
+    g.expectAttackValue(7);
+    expect(legalIntents(g.state, 0).some((intent) =>
+      intent.kind === "activate-ability" && intent.sourceInstanceId === attackId
+    )).toBe(false);
   });
 
   it("Marlynn may put an arrow drawn by Gold face-up into arsenal", () => {

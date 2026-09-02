@@ -29,6 +29,7 @@ function plainMessageValues(
   const values = Object.fromEntries(
     Object.entries(message.values ?? {}).map(([key, value]) => [key, plainValue(value, resolvers)]),
   );
+  values.p = ` ${intl.formatMessage({ id: "game.chain.stat.attack" })}`;
   for (const [key, value] of Object.entries(message.values ?? {})) {
     if (typeof value !== "object" || value.kind !== "term" || resolvers.term) continue;
     values[key] = intl.formatMessage({ id: value.id }, values);
@@ -64,6 +65,13 @@ export function GameMessageText({
       if (value.kind === "player") return [key, resolvers.player?.(value.seat) ?? String(value.seat + 1)];
       return [key, resolvers.term?.(value.id) ?? value.id];
     }),
+  );
+  values.p = (
+    <img
+      className="ico game-message-power-icon"
+      src="/icons/attack.png"
+      alt={intl.formatMessage({ id: "game.chain.stat.attack" })}
+    />
   );
   for (const [key, value] of Object.entries(message.values ?? {})) {
     if (typeof value !== "object" || value.kind !== "term" || resolvers.term) continue;

@@ -16,6 +16,7 @@ import { attackHasDominate } from "./combatValues.js";
 import {
   isValidVariableX,
   payCost,
+  resolveVariableAbilityCost,
   resolveVariablePlayCost,
   variableResourceChoices,
   variableResourceCost,
@@ -335,10 +336,7 @@ export function activateWindowAbility(
   const selectedEffectCostIds = alternativeCostCardInstanceIds ?? effectCostInstanceIds;
   const variableCost = payingAlternative ? undefined : ability.variableCost;
   const resolvedVariableCost = variableCost
-    ? {
-        ...variableCost,
-        maximum: Math.max(0, Math.floor(variableCost.maximum ?? 127)),
-      }
+    ? resolveVariableAbilityCost(variableCost, runtime.makeCtx(state, seat, card, link))
     : undefined;
   const resourceCostForBase = (base: number): number =>
     abilityResourceCost(state, runtime, seat, card, { ...ability, cost: base }, link);

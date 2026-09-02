@@ -901,7 +901,27 @@ Object.assign(sup, {
   },
   "blood follows blade|2": { onPlay(ctx: ScriptCtx) { if (ctx.link && hasTag(ctx, ctx.link.attackingCard, "sword")) { ctx.grantGoAgain(); ctx.addModifier({ scope: "chain-link", onHitCreateToken: { cardId: SELLSWORD, count: 1 } }); } } },
   "adaptive alpha mold|0": { playableEquipment: true, activated: { cost: 0, isAttack: false, goAgain: true, onActivate(ctx: ScriptCtx) { ctx.setFlag("player", "adaptiveMoldMoved", true); } } },
-  "backspin thrust|1": { activated: [{ cost: 0, isAttack: false, goAgain: false, timing: "instant", oncePerTurn: true, effectCardCosts: [{ zone: "arena", move: "tap", count: 1, subtype: "cog", prompt: decisionPrompt("Untap a cog", "card.common.cost.cog.untap") }], label: "+1{p}", onActivate(ctx: ScriptCtx) { ctx.addCardTempPower(ctx.self.instanceId, 1); } }, { cost: 0, isAttack: false, goAgain: false, timing: "instant", oncePerTurn: true, label: "Go again", onActivate(ctx: ScriptCtx) { ctx.grantGoAgain(); } }] },
+  "backspin thrust|1": {
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      oncePerTurn: true,
+      effectCardCosts: [{ zone: "arena", move: "untap", count: 1, subtype: "cog", prompt: decisionPrompt("Untap a cog", "card.common.cost.cog.untap") }],
+      onActivate(ctx: ScriptCtx) {
+        ctx.requestChoice("backspin-mode", decisionPrompt("Choose a bonus", "card.common.bonus.choose", { optionMessages: {
+          power: decisionMessage("card.common.option.power.one"),
+          "go-again": decisionMessage("card.common.option.goagain"),
+        } }), ["power", "go-again"]);
+      },
+    },
+    onChoose(ctx: ScriptCtx, hook: string, option: string) {
+      if (hook !== "backspin-mode") return;
+      if (option === "power") ctx.addCardTempPower(ctx.self.instanceId, 1);
+      else if (option === "go-again") ctx.grantGoAgain();
+    },
+  },
   "hit the gas|3": { onPlay(ctx: ScriptCtx) { const drivers = ctx.player(ctx.seat).banish.filter((card) => named(ctx, card, "Hyper Driver") && !card.faceDown); for (const card of drivers) ctx.setCardFaceDown(card.instanceId, true); ctx.changeActionPoints(ctx.seat, drivers.length); if (drivers.length >= 3) ctx.drawCards(ctx.seat, 1); } },
   "mage hunter arrow|1": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true, canActivate: (ctx: ScriptCtx) => ctx.player(ctx.seat).arsenal.some((card) => card.instanceId === ctx.self.instanceId && !card.faceDown), onActivate(ctx: ScriptCtx) { ctx.preventNextArcaneDamage(ctx.seat, 3); } }, canTriggerOnHit(ctx: ScriptCtx) { return ctx.link?.targetAllyId === undefined && (heroHas(ctx, opponentSeat(ctx), "runeblade") || heroHas(ctx, opponentSeat(ctx), "wizard")); }, onHit(ctx: ScriptCtx) { destroyAuraAtTarget(ctx, opponentSeat(ctx), "mage-aura"); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "mage-aura") ctx.destroyPermanent(Number(option)); } },
   "take the bait|1": {
@@ -920,14 +940,14 @@ Object.assign(sup, {
   "bait|0": {
     mandatoryAttackTarget: true,
     controllerCannotPlayOrActivateOwnedCards: true,
-    activated: [{ cost: 0, isAttack: true, goAgain: false, oncePerTurn: false, destroySelfCost: true }, { cost: 0, isAttack: false, goAgain: false, timing: "attack-reaction", oncePerTurn: true, onActivate(ctx: ScriptCtx) { ctx.addModifier({ scope: "chain-link", attack: 1 }); ctx.grantGoAgain(); } }],
+    activated: [{ cost: 0, isAttack: true, goAgain: false, oncePerTurn: false, destroySelfCost: true, label: "Attack" }, { cost: 0, isAttack: false, goAgain: false, timing: "attack-reaction", oncePerTurn: true, label: "+1 power and go again", onActivate(ctx: ScriptCtx) { ctx.addModifier({ scope: "chain-link", attack: 1 }); ctx.grantGoAgain(); } }],
   },
   "parched terrain|1": { replaceHeroLifeGain: () => 0, triggers: [{ event: "end-of-turn", label: "Add a sand counter", effect(ctx: ScriptCtx) { ctx.setCounter("sand", ctx.getCounter("sand") + 1); const reds = ctx.player(ctx.seat).graveyard.filter((card) => ctx.cardColor(card) === 1); if (reds.length < ctx.getCounter("sand")) ctx.destroySelf(); else for (const card of reds.slice(0, ctx.getCounter("sand"))) ctx.banish(card.instanceId); } }] },
   "channel the tranquil domain|2": { onEnterArena(ctx: ScriptCtx) { const auras = ctx.state.players.flatMap((p) => p.board.filter((card) => aura(ctx, card) && card.instanceId !== ctx.self.instanceId)); if (auras[0]) ctx.putOnDeckBottom(auras[0].instanceId); }, triggers: [{ event: "begin-action-phase", label: "Bottom another aura", effect(ctx: ScriptCtx) { const auraCard = ctx.state.players.flatMap((p) => p.board.filter((card) => aura(ctx, card) && card.instanceId !== ctx.self.instanceId))[0]; if (auraCard) ctx.putOnDeckBottom(auraCard.instanceId); } }] },
   "light up the leaves|1": { arcaneDamageEffect: true, arcaneDamageEffectAmounts: [6], onPlay(ctx: ScriptCtx) { ctx.dealDamage(opponentSeat(ctx), 6, { arcane: true }); }, activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", fromHand: true, discardCost: { count: 1, types: ["earth"] }, onActivate(ctx: ScriptCtx) { ctx.preventNextArcaneDamage(ctx.seat, 6); } } },
   "angelic attendant|2": { onPlay(ctx: ScriptCtx) { const figments = ctx.player(ctx.seat).board.filter((card) => hasTag(ctx, card, "figment")); if (figments.length) ctx.requestCardChoice("awaken-figment", decisionPrompt("Awaken a figment", "card.sup.figment.awaken"), figments.map((card) => card.instanceId)); ctx.putIntoSoul(ctx.self.instanceId); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "awaken-figment") ctx.setFlag("player", `awakened:${option}`, true); } },
   "battlefield beacon|2": { onAttackDeclared(ctx: ScriptCtx) { const n = Math.min(3, Number(ctx.getFlag("player", "soulBanishedThisChain")) || 0); for (let i = 0; i < n; i++) ctx.createToken([COURAGE, TOUGHNESS, VIGOR][i % 3]!); } },
-  "gallow, end of the line|2": { ...attackAbility(1, { tap: true, oncePerTurn: false }), activated: [...attackAbility(1, { tap: true, oncePerTurn: false }), { cost: 0, isAttack: false, goAgain: false, timing: "instant", tap: true, oncePerTurn: false, effectCardCosts: [{ zone: "hand", move: "discard", count: 1, keyword: "watery grave", prompt: decisionPrompt("Discard a card with watery grave", "card.common.cost.waterygrave.discard") }], onActivate(ctx: ScriptCtx) { ctx.setFlag("player", "suppressOpponentHitTriggers", true); } }] },
+  "gallow, end of the line|2": { ...attackAbility(1, { tap: true, oncePerTurn: false }), activated: [...attackAbility(1, { tap: true, oncePerTurn: false }), { cost: 0, isAttack: false, goAgain: false, timing: "instant", tap: true, oncePerTurn: false, label: "Suppress opposing on-hit triggers", effectCardCosts: [{ zone: "hand", move: "discard", count: 1, keyword: "watery grave", prompt: decisionPrompt("Discard a card with watery grave", "card.common.cost.waterygrave.discard") }], onActivate(ctx: ScriptCtx) { ctx.setFlag("player", "suppressOpponentHitTriggers", true); } }] },
   "catch of the day|3": { onPlay(ctx: ScriptCtx) { buffNextAttack(ctx, { attack: 2, appliesToSubtype: "arrow" }); ctx.setFlag("player", "doubleGoFish", true); } },
   "painful passage|1": { onPlay(ctx: ScriptCtx) { const attacks = ctx.player(ctx.seat).hand.filter((card) => ctx.hasCardType(card, "action") && hasTag(ctx, card, "attack")); if (attacks.length) ctx.requestCardChoice("painful", decisionPrompt("Banish an attack action?", "card.sup.attack.banish", { optionMessages: commonOptionMessages("pass") }), ["pass", ...attacks.map((card) => card.instanceId)]); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "painful" && option !== "pass" && ctx.banish(Number(option))) { ctx.addCardTempPower(Number(option), 3); ctx.allowPlayFrom(Number(option), "banish"); } } },
 } satisfies Record<string, CardScript>);

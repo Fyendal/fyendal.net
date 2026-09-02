@@ -1311,6 +1311,12 @@
       "value": "将一张 arrow 从手牌面朝上放入你的 arsenal？"
     }
   ],
+  "card.common.bonus.choose": [
+    {
+      "type": 0,
+      "value": "选择一项加成"
+    }
+  ],
   "card.common.card.discard.choose": [
     {
       "type": 0,
@@ -1549,6 +1555,12 @@
       "value": "胸部"
     }
   ],
+  "card.common.option.goagain": [
+    {
+      "type": 0,
+      "value": "go again"
+    }
+  ],
   "card.common.option.head": [
     {
       "type": 0,
@@ -1565,6 +1577,16 @@
     {
       "type": 0,
       "value": "腿部"
+    }
+  ],
+  "card.common.option.power.one": [
+    {
+      "type": 0,
+      "value": "+1"
+    },
+    {
+      "type": 1,
+      "value": "p"
     }
   ],
   "card.common.option.red": [
@@ -2806,7 +2828,11 @@
   "card.ele.option.power.one": [
     {
       "type": 0,
-      "value": "+1 力量"
+      "value": "+1"
+    },
+    {
+      "type": 1,
+      "value": "p"
     }
   ],
   "card.ele.pay.or.discard": [
@@ -2977,6 +3003,12 @@
     {
       "type": 0,
       "value": "再选择一件装备交出"
+    }
+  ],
+  "card.evo.equipment.zone.choose": [
+    {
+      "type": 0,
+      "value": "选择一个装备区域"
     }
   ],
   "card.evo.fabricate.mode.first": [

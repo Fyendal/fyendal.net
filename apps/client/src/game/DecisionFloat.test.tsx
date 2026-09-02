@@ -448,6 +448,25 @@ describe("priority guidance help", () => {
     expect(html).not.toContain("Choose a target for");
     expect(model.decision.options).toEqual(["hero:1"]);
   });
+
+  it("renders localized power symbols as icons in decision options", () => {
+    const model = pendingModel("optional-effect");
+    model.decision = {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Choose a bonus",
+      options: ["power"],
+      optionMessages: [{ id: "card.common.option.power.one" }],
+    };
+
+    const html = renderLocalized(
+      <PendingDecisionPanel model={model} viewerSeat={0} />,
+    );
+
+    expect(html).toContain('aria-label="+1 Attack"');
+    expect(html).toContain('src="/icons/attack.png"');
+    expect(html).not.toContain("{p}");
+  });
 });
 
 describe("scripted card-choice presentation", () => {

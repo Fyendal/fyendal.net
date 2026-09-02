@@ -169,7 +169,33 @@ export const evoHighRarity: Record<string, CardScript> = {
   "singularity|1": { canPlay: (ctx) => equippedEvos(ctx) >= 4 && ctx.player(ctx.seat).weapons.length > 0, onPlay(ctx) { const player = ctx.player(ctx.seat); const evos = Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => !!card && has(ctx, card, "evo")).slice(0, 4); const weapon = player.weapons[0]; if (weapon && evos.length === 4) ctx.transformInto("EVO010B", [player.hero.instanceId, weapon.instanceId, ...evos.map((card) => card.instanceId)], player.hero.instanceId); }, onChoose() {} },
   "teklovossen, the mechropotent|0": { additionalCardTypes: ["equipment"], countsAsEquipped: { evo: 4 }, activated: { cost: 3, banishSoulCost: 2, isAttack: true, goAgain: false, label: "Attack" }, onAttackDeclared(ctx) { if (ctx.link?.attackingCard.instanceId === ctx.self.instanceId) requestDiscardChoice(ctx, "mechropotent-discard", decisionPrompt("Choose a card to discard", "card.evo.card.discard"), opponentSeat(ctx)); }, onFriendlyPlay(ctx, card) { if (isMechAttack(ctx, card)) ctx.grantCardKeyword(card.instanceId, "go again"); }, onChoose(ctx, hook, option) { if (hook === "mechropotent-discard") resolveDiscardChoice(ctx, option, opponentSeat(ctx)); } },
   "hyper-x3|0": { onBanishedForBoost(ctx) { ctx.addCounter(ctx.self.instanceId, "drivers", 1); if (ctx.getCounter("drivers") >= 3 && ctx.getPlayerFlag(ctx.seat, "hyperX3Drawn") !== true) { ctx.setPlayerFlag(ctx.seat, "hyperX3Drawn", true); ctx.drawCards(ctx.seat, 1); } } },
-  "adaptive plating|0": galvanize({ activated: (["head", "chest", "arms", "legs"] as const).map((slot) => ({ cost: 0, isAttack: false, goAgain: true, oncePerTurn: true, label: `Equip to ${slot}`, canActivate: (ctx: ScriptCtx) => !ctx.player(ctx.seat).equipment[slot], onActivate(ctx: ScriptCtx) { ctx.moveEquipmentToZone(ctx.self.instanceId, slot); } })) }),
+  "adaptive plating|0": galvanize({
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: true,
+      canActivate: (ctx: ScriptCtx) => (["head", "chest", "arms", "legs"] as const)
+        .some((slot) => !ctx.player(ctx.seat).equipment[slot]),
+      onActivate(ctx: ScriptCtx) {
+        const slots = (["head", "chest", "arms", "legs"] as const)
+          .filter((slot) => !ctx.player(ctx.seat).equipment[slot]);
+        ctx.requestChoice("adaptive-plating-zone", decisionPrompt(
+          "Choose an equipment zone",
+          "card.evo.equipment.zone.choose",
+          { optionMessages: Object.fromEntries(slots.map((slot) => [
+            slot,
+            decisionMessage(`card.common.option.${slot}`),
+          ])) },
+        ), slots);
+      },
+    },
+    onChoose(ctx: ScriptCtx, hook: string, option: string) {
+      if (hook !== "adaptive-plating-zone") return;
+      if (option === "head" || option === "chest" || option === "arms" || option === "legs") {
+        ctx.moveEquipmentToZone(ctx.self.instanceId, option);
+      }
+    },
+  }),
   "evo steel soul memory|3": evoEquipment({ onTransform(ctx, _direction, other) { const count = steelSoulTriggerCount(ctx, other); if (count > 0) ctx.setPlayerFlag(ctx.seat, "bonusIntellect", Number(ctx.getPlayerFlag(ctx.seat, "bonusIntellect")) + count); } }),
   "evo steel soul processor|3": evoEquipment({ onTransform(ctx, _direction, other) { const count = steelSoulTriggerCount(ctx, other); if (count > 0) ctx.changeResources(ctx.seat, count * 3); } }),
   "evo steel soul controller|3": evoEquipment({ onTransform(ctx, _direction, other) { const count = steelSoulTriggerCount(ctx, other); if (count <= 0) return; ctx.setCounter("steel-controller-triggers", count); requestSteelControllerChoice(ctx); }, onChoose(ctx, hook, option) { if (hook !== "steel-controller") return; if (option !== "no") ctx.putOnDeckAtDepth(Number(option), 5); const remaining = Math.max(0, ctx.getCounter("steel-controller-triggers") - 1); ctx.setCounter("steel-controller-triggers", remaining); if (remaining > 0) requestSteelControllerChoice(ctx); } }),

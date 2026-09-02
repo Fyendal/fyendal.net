@@ -3,7 +3,7 @@ import type { CardView } from "@fyendal/shared";
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useIntl } from "react-intl";
-import { formatGameMessage } from "../../i18n/GameMessage.js";
+import { formatGameMessage, GameMessageText } from "../../i18n/GameMessage.js";
 import { CardFace } from "../Card.js";
 import {
   isPriorityGuidanceDecision,
@@ -23,6 +23,10 @@ import type { PendingDecisionModel } from "./DecisionModels.js";
 import { NameChoiceAutocomplete } from "./NameChoiceAutocomplete.js";
 import { TriggerOrderDecision } from "./TriggerOrderDecision.js";
 
+const localizedOptionResolvers = {
+  card: (cardId: string) => cardData[cardId]?.name ?? cardId,
+};
+
 function LocalizedDecisionOptionButton({
   message,
   option,
@@ -36,13 +40,12 @@ function LocalizedDecisionOptionButton({
 }) {
   const intl = useIntl();
   if (!message) return null;
-  const label = formatGameMessage(intl, message, {
-    card: (cardId) => cardData[cardId]?.name ?? cardId,
-  });
+  const label = formatGameMessage(intl, message, localizedOptionResolvers);
   return (
     <button
       key={option}
       className={spaceDefault ? "btn-primary shortcut-button" : undefined}
+      aria-label={label}
       onClick={onChoose}
       {...(spaceDefault
         ? {
@@ -51,7 +54,10 @@ function LocalizedDecisionOptionButton({
           }
         : {})}
     >
-      {label}
+      <GameMessageText
+        message={message}
+        resolvers={localizedOptionResolvers}
+      />
       {spaceDefault ? (
         <kbd className="shortcut-key" aria-label={intl.formatMessage({ id: "common.spaceKey" })} />
       ) : null}

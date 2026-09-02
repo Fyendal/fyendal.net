@@ -304,6 +304,7 @@ function effectCardCostCandidates(
   return cards.filter((card) => {
     const data = dataOf(state, card.cardId);
     return (cost.move !== "tap" || !card.tapped) &&
+      (cost.move !== "untap" || card.tapped) &&
       (cost.move !== "turn-face-up" || card.faceDown === true) &&
       (cost.move !== "remove-counter" || (
         !!cost.counter && (card.counters?.[cost.counter.key] ?? 0) >= cost.counter.amount
@@ -584,6 +585,7 @@ export function payActivatedAbilityCost(
       else if (cost.move === "destroy") runtime.makeCtx(state, seat, card).destroyPermanent(id);
       else if (cost.move === "put-on-deck-bottom") putCardOnDeckBottom(state, runtime, id, true);
       else if (cost.move === "tap") runtime.makeCtx(state, seat, card).tap(id);
+      else if (cost.move === "untap") runtime.makeCtx(state, seat, card).untap(id);
       else if (cost.move === "turn-face-up") runtime.makeCtx(state, seat, card).turnArsenalFaceUp(id);
       else {
         const target = findCardAnywhere(state, id)?.card;

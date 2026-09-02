@@ -37,6 +37,7 @@ import { controlledPermanents } from "./sourceQueries.js";
 import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestrictedByModifier, activatedAbilityAvailable, activatedEffectCardCostOptions, canPayAbilityLifeCost, canPayActivatedEffectCardCosts, discardCostOptions, effectiveAbilityList } from "./abilityRules.js";
 import { alternativePlayCostOptions, canPlayAsInstant, canRuneGate, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, cardsPlayableFromArsenal, cardsPlayableFromZone, playFromZoneRequiresInstant, playTargetOptions } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost, pitchProhibitedByEffect, pitchValueOfInstance } from "./resources.js";
+import { resolveVariableAbilityCost, variableResourceChoices } from "./costs.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { actionLimitReached, controlsBow, firstAttackExtraCost, isFrozen, opposingInstantsProhibited } from "./ruleQueries.js";
 import { nonAttackActionCardLimitReached, opposingActionsProhibited, ownedCardActionProhibited } from "./restrictions.js";
@@ -76,6 +77,40 @@ function announceAttackTarget(intents: GameIntent[], targetAllyId?: number): Gam
   return targetAllyId === undefined
     ? intents
     : intents.map((intent) => ({ ...intent, targetAllyId }) as GameIntent);
+}
+
+function variableAbilityHasChoice(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  player: PlayerState,
+  card: CardInstance,
+  ability: ActivatedAbility,
+  includeUnaffordable: boolean,
+  link = currentLink(state),
+  targetAllyId?: number,
+): boolean {
+  if (!ability.variableCost) return true;
+  const resolved = resolveVariableAbilityCost(
+    ability.variableCost,
+    runtime.makeCtx(state, player.seat, card, link),
+  );
+  if (includeUnaffordable) {
+    const maximum = Math.min(127, Math.max(0, Math.floor(resolved.maximum ?? 127)));
+    for (let x = 0; x <= maximum; x++) {
+      if (!resolved.canDeclareX || resolved.canDeclareX(x)) return true;
+    }
+    return false;
+  }
+  const costForBase = (base: number): number => ability.isAttack
+    ? attackActivationCost(state, runtime, player, card, base, targetAllyId)
+    : abilityResourceCost(state, runtime, player.seat, card, { ...ability, cost: base }, link);
+  return Object.keys(variableResourceChoices(
+    state,
+    player,
+    card.instanceId,
+    resolved,
+    costForBase,
+  )).length > 0;
 }
 
 function pitchRequirement(player: PlayerState, cost: number, chiCost = 0): number {
@@ -602,6 +637,9 @@ function windowAbilityIntents(
       if (ability.canActivate && !ability.canActivate(runtime.makeCtx(state, player.seat, card, link))) {
         continue;
       }
+      if (!variableAbilityHasChoice(
+        state, runtime, player, card, ability, includeUnaffordable, link,
+      )) continue;
       const resourceCost = abilityResourceCost(state, runtime, player.seat, card, ability, link);
       const pitchRequired = pitchRequirement(player, resourceCost, ability.chiCost);
       const variableBaseCost = ability.variableCost
@@ -979,6 +1017,9 @@ function abilityIntents(
       // discounts)
       const targets = ability.isAttack ? attackTargets(state, runtime, player) : [undefined];
       for (const targetAllyId of targets) {
+        if (!variableAbilityHasChoice(
+          state, runtime, player, card, ability, includeUnaffordable, undefined, targetAllyId,
+        )) continue;
         const resourceCost = ability.isAttack
           ? attackActivationCost(state, runtime, player, card, ability.variableCost?.base ?? ability.cost, targetAllyId)
           : abilityResourceCost(state, runtime, player.seat, card, ability.variableCost
