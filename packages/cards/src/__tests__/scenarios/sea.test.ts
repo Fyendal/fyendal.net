@@ -234,6 +234,31 @@ describe("SEA — High Seas heroes and cogs", () => {
     )).toBe(false);
   });
 
+  it("Golden Skywarden repeats Galvanize after destroying a Golden Cog", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", resources: 3, hand: ["raging onslaught|1"] },
+        {
+          hero: "dorinthea",
+          hand: ["golden skywarden|2"],
+          board: ["golden cog|0"],
+        },
+      ],
+    });
+
+    g.play("raging onslaught|1")
+      .blockWith("golden skywarden|2")
+      .passPriority()
+      .passPriority()
+      .chooseCard("golden cog|0");
+
+    expect(g.state.pendingDecision?.chooseHook).toBe("skywarden");
+    g.chooseCard("gold|0")
+      .settle()
+      .expectFinalDefense(4)
+      .expectLife(1, 17);
+  });
+
   it("Marlynn may put an arrow drawn by Gold face-up into arsenal", () => {
     const g = scenario({
       seats: [

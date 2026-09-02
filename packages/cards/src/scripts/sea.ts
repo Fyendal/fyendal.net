@@ -79,6 +79,19 @@ function createGoldenCog(ctx: ScriptCtx): void {
   ctx.createToken(GOLDEN_COG);
 }
 
+function requestSkywardenGalvanize(ctx: ScriptCtx): void {
+  const items = ctx.player(ctx.seat).board.filter((card) => isItem(ctx, card));
+  if (items.length) ctx.requestCardChoice(
+    "skywarden",
+    decisionPrompt(
+      "Destroy an item for +1 defense?",
+      "card.sea.skywarden.item.destroy",
+      { optionMessages: commonOptionMessages("pass") },
+    ),
+    ["pass", ...items.map((card) => card.instanceId)],
+  );
+}
+
 function attackAbilityForAlly(cost: number, goAgain = false): CardScript {
   return { activated: attackAbility(cost, { tap: true, goAgain, oncePerTurn: false }) };
 }
@@ -1408,8 +1421,8 @@ Object.assign(sea, {
   "puffin, hightail|0": sea["puffin|0"]!,
   "polly cranka|0": { activated: { cost: 0, isAttack: false, goAgain: true, tap: true, banishSelfCost: true, onActivate(ctx: ScriptCtx) { ctx.createToken("SEA003"); } } },
   "golden skywarden|2": {
-    onDefend(ctx: ScriptCtx) { const items = ctx.player(ctx.seat).board.filter((card) => isItem(ctx, card)); if (items.length) ctx.requestCardChoice("skywarden", decisionPrompt("Destroy an item for +1 defense?", "card.sea.skywarden.item.destroy", { optionMessages: commonOptionMessages("pass") }), ["pass", ...items.map((card) => card.instanceId)]); },
-    onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook !== "skywarden" || option === "pass") return; const item = ctx.player(ctx.seat).board.find((card) => card.instanceId === Number(option)); if (!item || !ctx.destroyPermanent(item.instanceId)) return; ctx.addCardTempDefense(ctx.self.instanceId, 1); if (named(ctx, item, "Golden Cog")) createGold(ctx); },
+    onDefend: requestSkywardenGalvanize,
+    onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook !== "skywarden" || option === "pass") return; const item = ctx.player(ctx.seat).board.find((card) => card.instanceId === Number(option)); if (!item || !ctx.destroyPermanent(item.instanceId)) return; ctx.addCardTempDefense(ctx.self.instanceId, 1); if (named(ctx, item, "Golden Cog")) { createGold(ctx); requestSkywardenGalvanize(ctx); } },
   },
   "jolly bludger|2": {
     onAttackDeclared(ctx: ScriptCtx) { tapChoice(ctx, "bludger", "Tap a cog for overpower?", "card.sea.bludger.cog.tap", controlledCogs(ctx, false)); },

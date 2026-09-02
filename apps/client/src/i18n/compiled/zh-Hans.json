@@ -4429,6 +4429,24 @@
       "value": "：该攻击获得 go again"
     }
   ],
+  "card.log.common.attack.lost": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：该攻击获得 -"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
   "card.log.common.attack.piercing.gained": [
     {
       "type": 1,
@@ -4499,6 +4517,20 @@
       "value": " 返回你的手牌"
     }
   ],
+  "card.log.common.card.revealed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 展示 "
+    },
+    {
+      "type": 1,
+      "value": "revealed"
+    }
+  ],
   "card.log.common.damage.next.prevented": [
     {
       "type": 1,
@@ -4525,6 +4557,16 @@
     {
       "type": 0,
       "value": "：牌库为空"
+    }
+  ],
+  "card.log.common.decktop.look": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：查看你的牌库顶牌"
     }
   ],
   "card.log.common.decktop.revealed": [
@@ -4749,6 +4791,24 @@
       "value": " 个）"
     }
   ],
+  "card.log.common.life.gained": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：获得 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点生命"
+    }
+  ],
   "card.log.common.mentor.search.private": [
     {
       "type": 0,
@@ -4809,6 +4869,24 @@
     {
       "type": 0,
       "value": " 获得 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
+  "card.log.common.resources.paid": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：支付 "
     },
     {
       "type": 1,
@@ -5007,6 +5085,110 @@
       "value": " 力量"
     }
   ],
+  "card.log.dyn.emperor.search.private": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 找到 "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    }
+  ],
+  "card.log.dyn.emperor.search.public": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 搜寻一张牌"
+    }
+  ],
+  "card.log.evr.phantasmaclasm.life": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：获得‘命中时，获得 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点生命’"
+    }
+  ],
+  "card.log.evr.potionseeing.private": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "："
+    },
+    {
+      "type": 1,
+      "value": "cards"
+    }
+  ],
+  "card.log.evr.recompense.resources": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 将 "
+    },
+    {
+      "type": 1,
+      "value": "from"
+    },
+    {
+      "type": 0,
+      "value": " 点资源替换为 "
+    },
+    {
+      "type": 1,
+      "value": "to"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
+  "card.log.evr.tithes.draw": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 将抽牌数量从 "
+    },
+    {
+      "type": 1,
+      "value": "from"
+    },
+    {
+      "type": 0,
+      "value": " 减少至 "
+    },
+    {
+      "type": 1,
+      "value": "to"
+    }
+  ],
   "card.log.sar.hero.arsenal": [
     {
       "type": 1,
@@ -5097,6 +5279,170 @@
     {
       "type": 0,
       "value": "：该 trap 可以打出，直到你下回合开始"
+    }
+  ],
+  "card.log.saz.azalea.bottom.private": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将 "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " 置于牌库底部"
+    }
+  ],
+  "card.log.saz.azalea.bottom.public": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将 arsenal 牌置于牌库底部"
+    }
+  ],
+  "card.log.saz.azalea.dominate": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "："
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 获得压制 (dominate) 直到回合结束"
+    }
+  ],
+  "card.log.saz.bracers.attack": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "："
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 本回合获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
+  "card.log.saz.card.attack.turn": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 本回合获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
+  "card.log.saz.card.goagain.turn": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 本回合获得 go again"
+    }
+  ],
+  "card.log.saz.crowsnest.aim": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：该 arrow 获得一个瞄准 (aim) 指示物"
+    }
+  ],
+  "card.log.saz.drillshot.counter": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：在 "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 上放置一个 -"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 防御指示物"
+    }
+  ],
+  "card.log.saz.scout.look": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：查看 "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 的牌库顶牌"
+    }
+  ],
+  "card.log.saz.spire.swap": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：交换牌库顶部两张牌的位置"
     }
   ],
   "card.log.sba.arcane.goagain": [
@@ -5235,6 +5581,340 @@
       "value": " 力量并获得 go again（本回合已打出 Lightning 牌）"
     }
   ],
+  "card.log.sbl.banneret.life": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：本回合下一次命中时，获得 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点生命"
+    }
+  ],
+  "card.log.sbl.edict.counters": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：在 "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 上放置 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 个 +1 力量指示物"
+    }
+  ],
+  "card.log.sbl.flurry.additionalattack": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：本回合你可以再次用该武器攻击"
+    }
+  ],
+  "card.log.sbl.glisten.remove": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：在你的结束阶段开始时，移除你武器上的所有 +1 力量指示物"
+    }
+  ],
+  "card.log.sbl.halo.none": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：手牌中没有牌可置入 soul"
+    }
+  ],
+  "card.log.sbl.vanguard.attack": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：本次 combat chain 中的攻击获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
+  "card.log.sbr.bravo.crush": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将 "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 翻至正面朝上；其获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量和压制 (dominate)"
+    }
+  ],
+  "card.log.sbr.carapace.surge": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源并横置，生成 "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    }
+  ],
+  "card.log.sbr.chokeslam.suppressed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：对方攻击行动牌在其下一个行动阶段不能获得力量加成"
+    }
+  ],
+  "card.log.sbr.crash.revealed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 从手牌展示 "
+    },
+    {
+      "type": 1,
+      "value": "revealed"
+    }
+  ],
+  "card.log.sbr.crushtheweak.restricted": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：对手在下一个行动阶段不能打出基础力量不超过 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 的攻击行动牌"
+    }
+  ],
+  "card.log.sbr.faultline.bottom.private": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将 "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " 置于 "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 的牌库底部"
+    }
+  ],
+  "card.log.sbr.faultline.bottom.public": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将 "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 的一张面朝下 arsenal 牌置于其牌库底部"
+    }
+  ],
+  "card.log.sbr.seismicsurge.discount": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 被摧毁：下一次 Guardian 攻击费用减少 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
+  "card.log.sbr.thunderquake.heaved": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 完成 heave：生成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 个 "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " 衍生物"
+    }
+  ],
+  "card.log.sbz.blaze.none": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：手牌中没有造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害的 Wizard 非攻击行动牌"
+    }
+  ],
+  "card.log.sbz.blaze.playable": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：本回合可以将 "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " 当作瞬间牌打出"
+    }
+  ],
+  "card.log.sbz.surge.draw": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：涌动 (Surge)——抽 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 张牌"
+    }
+  ],
+  "card.log.sbz.surge.goagain": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：涌动 (Surge)——获得 go again"
+    }
+  ],
   "card.log.sdo.dawnblade.counter.gained": [
     {
       "type": 1,
@@ -5367,6 +6047,80 @@
     {
       "type": 0,
       "value": " 翻至正面朝上"
+    }
+  ],
+  "card.log.sen.enigma.discount": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：本回合你的第一次 Spectral Shield 攻击费用减少"
+    }
+  ],
+  "card.log.sen.graveyard.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将 "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " 置于牌库底部"
+    }
+  ],
+  "card.log.sen.hand.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将一张牌置于牌库底部"
+    }
+  ],
+  "card.log.sen.stilettos.actionpoint": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 被摧毁：获得 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 个行动点"
+    }
+  ],
+  "card.log.sen.ward.counters": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：在具有结界 (ward) 的灵气 (Aura) 上放置 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 个 +1 力量指示物"
     }
   ],
   "card.log.sfa.attacks.draconic": [
@@ -5845,6 +6599,168 @@
     {
       "type": 0,
       "value": " 具有水墓 (watery grave)）"
+    }
+  ],
+  "card.log.ska.barefangs.attack": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
+  "card.log.ska.knucklehead.roll": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 掷出 "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": "；本回合基础智力为 "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    }
+  ],
+  "card.log.sly.arsenal.destroyed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 摧毁 "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " arsenal 中的一张牌"
+    }
+  ],
+  "card.log.sly.decktop.destroyed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 摧毁 "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 的牌库顶牌（"
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": "）"
+    }
+  ],
+  "card.log.sly.defenders.defense": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：本回合你操控的防守行动牌获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 防御"
+    }
+  ],
+  "card.log.sly.hero.stats.halved": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：对手攻击行动牌的基础力量和防御减半，直到其下回合结束"
+    }
+  ],
+  "card.log.upr.frozen.arsenal": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：冻结 (frozen) "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " arsenal 中的一张牌"
+    }
+  ],
+  "card.log.upr.frozen.card": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "："
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 被冻结 (frozen)"
+    }
+  ],
+  "card.log.upr.redhot.revealed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 展示 "
+    },
+    {
+      "type": 1,
+      "value": "revealed"
     }
   ],
   "card.log.wtr.barkbone.roll.resources": [

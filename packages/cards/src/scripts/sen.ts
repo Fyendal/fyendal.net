@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { decisionPrompt, isCard, opponentSeat } from "./shared-helpers.js";
+import { decisionPrompt, isCard, localizedCardLog, opponentSeat } from "./shared-helpers.js";
 
 // ── SEN (Silver Age: Enigma precon) ─────────────────────────────────────────
 //
@@ -105,7 +105,7 @@ export const sen: Record<string, CardScript> = {
       if (!isCard(ctx, link.attackingCard.cardId, "Spectral Shield")) return;
       if (ctx.getFlag("player", "ssDiscountUsed")) return;
       ctx.setFlag("player", "ssDiscountUsed", true);
-      ctx.logPublic("Enigma: your first Spectral Shield attack this turn is discounted");
+      ctx.logPublic(localizedCardLog(ctx, "Enigma: your first Spectral Shield attack this turn is discounted", "card.log.sen.enigma.discount"));
     },
     // "Once per Turn Instant — {c}{c}{c}: Create a Spectral Shield token with
     //  a +1{p} counter."
@@ -154,8 +154,10 @@ export const sen: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "uphold-target") return;
+      const target = wardAuras(ctx).find((card) => card.instanceId === Number(option));
+      if (!target) return;
       ctx.addCounter(Number(option), "power", 1);
-      ctx.logPublic(`${ctx.data.name}: a +1{p} counter goes on an aura with ward`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: a +1{p} counter goes on an aura with ward`, "card.log.sen.ward.counters", { amount: 1, target: { kind: "card", cardId: target.cardId } }));
     },
   },
 
@@ -171,7 +173,13 @@ export const sen: Record<string, CardScript> = {
       if (hook !== "stilettos-pay" || option !== "paid") return;
       ctx.destroySelf();
       ctx.gainActionPoint();
-      ctx.logPublic("Silent Stilettos is destroyed: gain 1 action point");
+      ctx.logPublic(localizedCardLog(
+        ctx,
+        "Silent Stilettos is destroyed: gain 1 action point",
+        "card.log.sen.stilettos.actionpoint",
+        { amount: 1 },
+        { kind: "card-moved", cardId: ctx.self.cardId, ownerSeat: ctx.seat, from: "equipment", to: "graveyard" },
+      ));
     },
   },
 
@@ -190,8 +198,10 @@ export const sen: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "etchings-target") return;
+      const target = wardAuras(ctx).find((card) => card.instanceId === Number(option));
+      if (!target) return;
       ctx.addCounter(Number(option), "power", 3);
-      ctx.logPublic(`${ctx.data.name}: three +1{p} counters go on an aura with ward`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: three +1{p} counters go on an aura with ward`, "card.log.sen.ward.counters", { amount: 3, target: { kind: "card", cardId: target.cardId } }));
     },
   },
 
@@ -248,7 +258,7 @@ export const sen: Record<string, CardScript> = {
       const top = ctx.player(ctx.seat).deck[0];
       if (!top) return;
       ctx.lookAt(top.instanceId);
-      ctx.logPublic(`${ctx.data.name}: look at the top card of your deck`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: look at the top card of your deck`, "card.log.common.decktop.look"));
     },
   },
 
@@ -300,7 +310,7 @@ export const sen: Record<string, CardScript> = {
       const link = ctx.link;
       if (!link) return;
       ctx.addModifier({ scope: "chain-link", attack: -1, seat: link.attacker });
-      ctx.logPublic(`${ctx.data.name}: target attack gets -1{p}`);
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: target attack gets -1{p}`, "card.log.common.attack.lost", { amount: 1 }));
     },
     {
       canPlay: (ctx) => !!ctx.link && !ctx.link.resolved,
@@ -348,7 +358,13 @@ export const sen: Record<string, CardScript> = {
         const card = ctx.player(ctx.seat).graveyard.find((candidate) => candidate.instanceId === Number(option));
         if (!card) return;
         ctx.putOnDeckBottom(Number(option));
-        ctx.logPublic(`${ctx.data.name}: ${ctx.cardData(card.cardId).name} goes on the bottom of the deck`);
+        ctx.logPublic(localizedCardLog(
+          ctx,
+          `${ctx.data.name}: ${ctx.cardData(card.cardId).name} goes on the bottom of the deck`,
+          "card.log.sen.graveyard.bottom",
+          { result: { kind: "card", cardId: card.cardId } },
+          { kind: "card-moved", cardId: card.cardId, ownerSeat: ctx.seat, from: "graveyard", to: "deck" },
+        ));
       },
     },
     "preserve-tradition",
@@ -371,7 +387,13 @@ export const sen: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook !== "rising-sun") return;
       ctx.putOnDeckBottom(Number(option));
-      ctx.logPublic(`${ctx.data.name}: a card goes on the bottom of the deck`);
+      ctx.logPublic(localizedCardLog(
+        ctx,
+        `${ctx.data.name}: a card goes on the bottom of the deck`,
+        "card.log.sen.hand.bottom",
+        undefined,
+        { kind: "card-moved", ownerSeat: ctx.seat, from: "hand", to: "deck" },
+      ));
       transcendIfBlue(ctx);
     },
   },

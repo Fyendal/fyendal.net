@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, buffNextAttack, commonOptionMessages, decisionPrompt } from "./shared-helpers.js";
+import { attackAbility, buffNextAttack, commonOptionMessages, decisionPrompt, localizedCardLog } from "./shared-helpers.js";
 
 // ── SBL (Silver Age: Boltyn precon) ─────────────────────────────────────────
 //
@@ -130,7 +130,7 @@ export const sbl: Record<string, CardScript> = {
       },
       onActivate(ctx) {
         ctx.grantGoAgain();
-        ctx.logPublic("Boltyn: target attack gains go again");
+        ctx.logPublic(localizedCardLog(ctx, "Boltyn: target attack gains go again", "card.log.common.attack.goagain.gained"));
       },
     },
   },
@@ -161,7 +161,7 @@ export const sbl: Record<string, CardScript> = {
       onActivate(ctx) {
         const hand = ctx.player(ctx.seat).hand;
         if (hand.length === 0) {
-          ctx.logPublic("Halo of Illumination: no card in hand to put into the soul");
+          ctx.logPublic(localizedCardLog(ctx, "Halo of Illumination: no card in hand to put into the soul", "card.log.sbl.halo.none"));
           return;
         }
         ctx.requestCardChoice(
@@ -194,7 +194,7 @@ export const sbl: Record<string, CardScript> = {
       label: "Destroy: gain {r}",
       onActivate(ctx) {
         ctx.changeResources(ctx.seat, 1);
-        ctx.logPublic("Garland of Spring: gain 1 resource");
+        ctx.logPublic(localizedCardLog(ctx, "Garland of Spring: gain 1 resource", "card.log.common.resources.gained", { amount: 1 }));
       },
     },
   },
@@ -337,7 +337,7 @@ export const sbl: Record<string, CardScript> = {
       const n = ctx.getCounter("vLight");
       if (n > 0) {
         ctx.addModifier({ scope: "combat-chain", attack: n });
-        ctx.logPublic(`V of the Vanguard: attacks on this combat chain get +${n}{p}`);
+        ctx.logPublic(localizedCardLog(ctx, `V of the Vanguard: attacks on this combat chain get +${n}{p}`, "card.log.sbl.vanguard.attack", { amount: n }));
       }
     },
   },
@@ -351,7 +351,7 @@ export const sbl: Record<string, CardScript> = {
   "banneret of salvation|2": {
     onCharged(ctx) {
       ctx.addModifier({ scope: "until-end-of-turn", onHitGainLife: 1 });
-      ctx.logPublic("Banneret of Salvation: the next time you hit this turn, gain 1 life");
+      ctx.logPublic(localizedCardLog(ctx, "Banneret of Salvation: the next time you hit this turn, gain 1 life", "card.log.sbl.banneret.life", { amount: 1 }));
     },
   },
 
@@ -361,7 +361,7 @@ export const sbl: Record<string, CardScript> = {
     onPlay(ctx) {
       if (!chargedThisTurn(ctx)) return;
       ctx.addModifier({ scope: "chain-link", attack: 3 });
-      ctx.logPublic("Courageous Steelhand: target attack gains +3{p}");
+      ctx.logPublic(localizedCardLog(ctx, "Courageous Steelhand: target attack gains +3{p}", "card.log.common.attack.gained", { amount: 3 }));
     },
   },
 
@@ -415,7 +415,7 @@ export const sbl: Record<string, CardScript> = {
         "clearWeaponPowerCountersAtTurn",
         ctx.state.activePlayer === ctx.seat ? ctx.state.turn : ctx.state.turn + 1,
       );
-      ctx.logPublic("Glisten: remove all +1{p} counters from your weapons at the beginning of your end phase");
+      ctx.logPublic(localizedCardLog(ctx, "Glisten: remove all +1{p} counters from your weapons at the beginning of your end phase", "card.log.sbl.glisten.remove"));
     },
   },
 
@@ -496,7 +496,7 @@ export const sbl: Record<string, CardScript> = {
             // Another Flurry sets that same limit; it does not add a third.
             ctx.setAttackActivationLimit(weaponId, 2);
           }
-          ctx.logPublic("Flurry: you may attack with the weapon again this turn");
+          ctx.logPublic(localizedCardLog(ctx, "Flurry: you may attack with the weapon again this turn", "card.log.sbl.flurry.additionalattack"));
         },
       },
     ],
@@ -516,6 +516,11 @@ function sharpenSword(ctx: ScriptCtx, instanceId: number): void {
     ctx.state.activePlayer === ctx.seat ? ctx.state.turn : ctx.state.turn + 1,
   );
   const sword = ctx.player(ctx.seat).weapons.find((w) => w.instanceId === instanceId);
-  ctx.logPublic(`Edict of Steel: ${sword ? ctx.cardData(sword.cardId).name : "the sword"} gets ${1 + extra} +1{p} counter(s)`);
+  ctx.logPublic(localizedCardLog(
+    ctx,
+    `Edict of Steel: ${sword ? ctx.cardData(sword.cardId).name : "the sword"} gets ${1 + extra} +1{p} counter(s)`,
+    "card.log.sbl.edict.counters",
+    { amount: 1 + extra, target: sword ? { kind: "card", cardId: sword.cardId } : "the sword" },
+  ));
   if ((sword?.counters?.power ?? 0) + 1 + extra >= 1) ctx.createToken(FLURRY);
 }

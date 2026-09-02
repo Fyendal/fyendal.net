@@ -6,6 +6,7 @@ import {
   dealArcane,
   decisionMessage,
   decisionPrompt,
+  localizedCardLog,
   mergeSetScripts,
   opponentSeat,
   optN,
@@ -105,9 +106,9 @@ function freeze(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): void {
   const current = Number(card.counters?.frozenUntilTurn ?? 0);
   ctx.addCounter(card.instanceId, "frozenUntilTurn", Math.max(0, expiry - current));
   if (ctx.player(card.owner).arsenal.some((candidate) => candidate.instanceId === card.instanceId)) {
-    ctx.logPublic(`${ctx.data.name}: a card in the target hero's arsenal is frozen`);
+    ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: a card in the target hero's arsenal is frozen`, "card.log.upr.frozen.arsenal", { target: { kind: "player", seat: card.owner } }));
   } else {
-    ctx.logPublic(`${ctx.cardData(card.cardId).name} is frozen`);
+    ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(card.cardId).name} is frozen`, "card.log.upr.frozen.card", { target: { kind: "card", cardId: card.cardId } }));
   }
 }
 
@@ -202,7 +203,13 @@ function handleFusion(ctx: ScriptCtx, hook: string, option: string): boolean {
   ctx.setFlag("player", "fusedThisTurn", true);
   ctx.setFlag("player", "iceFusedThisTurn", true);
   consumeIsenhowl(ctx);
-  ctx.logPublic(`${ctx.data.name} is fused (reveals ${ctx.cardData(card.cardId).name})`);
+  ctx.logPublic(localizedCardLog(
+    ctx,
+    `${ctx.data.name} is fused (reveals ${ctx.cardData(card.cardId).name})`,
+    "card.log.common.fusion.revealed",
+    { revealed: { kind: "card", cardId: card.cardId } },
+    { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" },
+  ));
   return true;
 }
 
@@ -751,7 +758,13 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
       if (ctx.currentChainLinkNumber() < 4) return;
       const shown = ctx.player(ctx.seat).deck.slice(0, draconicLinks(ctx));
       const red = shown.filter((card) => ctx.cardColor(card) === 1).length;
-      ctx.logPublic(`${ctx.data.name} reveals ${shown.map((card) => data(ctx, card).name).join(", ") || "no cards"}`);
+      ctx.logPublic(localizedCardLog(
+        ctx,
+        `${ctx.data.name} reveals ${shown.map((card) => data(ctx, card).name).join(", ") || "no cards"}`,
+        "card.log.upr.redhot.revealed",
+        { count: shown.length, revealed: shown.map((card) => data(ctx, card).name).join(", ") || "no cards" },
+        { kind: "cards-revealed", cards: shown.map((card) => ({ cardId: card.cardId, ownerSeat: ctx.seat })), sourceZone: "deck" },
+      ));
       ctx.setCounter("redHotDamage", red);
       if (red > 0) chooseDamageTarget(ctx, "red-hot", `Deal ${red} damage to any target`, red, false);
       else ctx.shuffleDeck();
