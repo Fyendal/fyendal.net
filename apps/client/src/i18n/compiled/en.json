@@ -2225,6 +2225,298 @@
       "value": "Thump: choose a card to discard"
     }
   ],
+  "card.evo.attack.fifthfromtop": [
+    {
+      "type": 0,
+      "value": "Put an attack fifth from the top?"
+    }
+  ],
+  "card.evo.card.discard": [
+    {
+      "type": 0,
+      "value": "Choose a card to discard"
+    }
+  ],
+  "card.evo.crankitem.steam.add": [
+    {
+      "type": 0,
+      "value": "Put a steam counter on an item with crank"
+    }
+  ],
+  "card.evo.crankitem.steam.add.optional": [
+    {
+      "type": 0,
+      "value": "Put a steam counter on an item with crank?"
+    }
+  ],
+  "card.evo.defendinghero.item.control": [
+    {
+      "type": 0,
+      "value": "Gain control of an item controlled by the defending hero"
+    }
+  ],
+  "card.evo.equipment.abilities.disable": [
+    {
+      "type": 0,
+      "value": "Choose equipment whose abilities can't be activated"
+    }
+  ],
+  "card.evo.equipment.defense.disable": [
+    {
+      "type": 0,
+      "value": "Choose equipment that can't defend"
+    }
+  ],
+  "card.evo.equipment.mustdefend": [
+    {
+      "type": 0,
+      "value": "Choose equipment that must defend"
+    }
+  ],
+  "card.evo.equipment.offer": [
+    {
+      "type": 0,
+      "value": "Choose equipment to offer"
+    }
+  ],
+  "card.evo.equipment.offer.next": [
+    {
+      "type": 0,
+      "value": "Choose another equipment to offer"
+    }
+  ],
+  "card.evo.fabricate.mode.first": [
+    {
+      "type": 0,
+      "value": "Choose the first Fabricate mode"
+    }
+  ],
+  "card.evo.fabricate.mode.next": [
+    {
+      "type": 0,
+      "value": "Choose the second Fabricate mode"
+    }
+  ],
+  "card.evo.fabricate.option.defense": [
+    {
+      "type": 0,
+      "value": "Your equipment gets +1 defense"
+    }
+  ],
+  "card.evo.fabricate.option.equip": [
+    {
+      "type": 0,
+      "value": "Equip a Proto Base"
+    }
+  ],
+  "card.evo.fabricate.option.hand": [
+    {
+      "type": 0,
+      "value": "Banish an Evo from hand to draw"
+    }
+  ],
+  "card.evo.fabricate.option.under": [
+    {
+      "type": 0,
+      "value": "Put Fabricate under an Evo"
+    }
+  ],
+  "card.evo.fabricate.under.choose": [
+    {
+      "type": 0,
+      "value": "Choose an Evo equipment to put Fabricate under"
+    }
+  ],
+  "card.evo.galvanize.item": [
+    {
+      "type": 0,
+      "value": "Destroy an item for +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " defense?"
+    }
+  ],
+  "card.evo.graveyard.item.banish": [
+    {
+      "type": 0,
+      "value": "Banish an item from your graveyard"
+    }
+  ],
+  "card.evo.graveyard.item.banish.next": [
+    {
+      "type": 0,
+      "value": "Banish another item from your graveyard"
+    }
+  ],
+  "card.evo.hand.card.banish.draw": [
+    {
+      "type": 0,
+      "value": "Banish a card from hand to draw a card?"
+    }
+  ],
+  "card.evo.hand.card.top": [
+    {
+      "type": 0,
+      "value": "Put a card from your hand on top of your deck"
+    }
+  ],
+  "card.evo.hyperdriver.arena.optional": [
+    {
+      "type": 0,
+      "value": "Put a Hyper Driver into the arena?"
+    }
+  ],
+  "card.evo.hyperdriver.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy a Hyper Driver"
+    }
+  ],
+  "card.evo.hyperdriver.destroy.next": [
+    {
+      "type": 0,
+      "value": "Destroy another Hyper Driver"
+    }
+  ],
+  "card.evo.hyperdriver.transform.next": [
+    {
+      "type": 0,
+      "value": "Choose another Hyper Driver?"
+    }
+  ],
+  "card.evo.hyperdrivers.transform": [
+    {
+      "type": 0,
+      "value": "Choose Hyper Drivers to transform"
+    }
+  ],
+  "card.evo.item.arena": [
+    {
+      "type": 0,
+      "value": "Put an item into the arena"
+    }
+  ],
+  "card.evo.item.reset": [
+    {
+      "type": 0,
+      "value": "Choose an item to reset"
+    }
+  ],
+  "card.evo.item.reset.next": [
+    {
+      "type": 0,
+      "value": "Choose another item to reset"
+    }
+  ],
+  "card.evo.item.small.arena": [
+    {
+      "type": 0,
+      "value": "Put an item with cost 0 or 1 into the arena"
+    }
+  ],
+  "card.evo.item.small.arena.optional": [
+    {
+      "type": 0,
+      "value": "Put an item with cost 0 or 1 into the arena?"
+    }
+  ],
+  "card.evo.maintenance.choose": [
+    {
+      "type": 0,
+      "value": "Remove a steam counter or destroy this?"
+    }
+  ],
+  "card.evo.matching.item.top": [
+    {
+      "type": 0,
+      "value": "Put a matching item on top"
+    }
+  ],
+  "card.evo.mechanologist.attack.return": [
+    {
+      "type": 0,
+      "value": "Return a Mechanologist attack action card"
+    }
+  ],
+  "card.evo.mechanologist.attack.shuffle": [
+    {
+      "type": 0,
+      "value": "Shuffle a Mechanologist attack into your deck"
+    }
+  ],
+  "card.evo.permanent.steam.remove": [
+    {
+      "type": 0,
+      "value": "Remove all steam counters from a permanent"
+    }
+  ],
+  "card.evo.permanent.steam.remove.next": [
+    {
+      "type": 0,
+      "value": "Remove steam from another permanent?"
+    }
+  ],
+  "card.evo.permanent.steam.remove.uptox": [
+    {
+      "type": 0,
+      "value": "Remove steam counters from up to X permanents"
+    }
+  ],
+  "card.evo.red.pitch.first": [
+    {
+      "type": 0,
+      "value": "Pitch the first of "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " red cards?"
+    }
+  ],
+  "card.evo.red.pitch.second": [
+    {
+      "type": 0,
+      "value": "Pitch the second red card?"
+    }
+  ],
+  "card.evo.revealed.card.defend": [
+    {
+      "type": 0,
+      "value": "Choose a revealed card to defend"
+    }
+  ],
+  "card.evo.revealed.card.none": [
+    {
+      "type": 0,
+      "value": "No revealed cards can defend"
+    }
+  ],
+  "card.evo.scrap.choose": [
+    {
+      "type": 0,
+      "value": "Scrap an item, equipment, or token?"
+    }
+  ],
+  "card.evo.soul.charge": [
+    {
+      "type": 0,
+      "value": "Charge your hero's soul?"
+    }
+  ],
+  "card.evo.weapon.attackagain.choose": [
+    {
+      "type": 0,
+      "value": "Choose a weapon that may attack an additional time"
+    }
+  ],
   "card.evr.arcane.hero.choose": [
     {
       "type": 1,
