@@ -6,6 +6,16 @@ export function boostOptionLabel(count: number, offersMultipleBoosts: boolean): 
   return `Boost ${count} times`;
 }
 
+/** Present affirmative Boost choices first while retaining the engine's
+ * ascending order when an attack can Boost more than once. */
+export function orderedBoostOptions(options: readonly number[]): number[] {
+  return [...options].sort((left, right) => {
+    if (left === 0) return right === 0 ? 0 : 1;
+    if (right === 0) return -1;
+    return left - right;
+  });
+}
+
 export function ChainCloseConfirmation({
   cardId,
   onConfirm,

@@ -76,14 +76,14 @@ export function shouldPassOnSpace(
   );
 }
 
-/** Resolve Space while the decision float is showing a final play or
- * activation confirmation. */
+/** Resolve Space to the primary action in a local card announcement. */
 export function actionConfirmationHotkey(
   event: Parameters<typeof shouldPassOnSpace>[0],
   step: "method" | "ability" | "payment" | "boost" | "target" | "close-chain" | "confirm",
   selectionActive: boolean,
-): "confirm-chain-close" | "confirm-action" | null {
+): "select-default-boost" | "confirm-chain-close" | "confirm-action" | null {
   if (!selectionActive || !shouldPassOnSpace(event)) return null;
+  if (step === "boost") return "select-default-boost";
   if (step === "close-chain") return "confirm-chain-close";
   if (step === "confirm") return "confirm-action";
   return null;

@@ -4,6 +4,7 @@ import {
   ActionConfirmation,
   boostOptionLabel,
   ChainCloseConfirmation,
+  orderedBoostOptions,
 } from "./ActionConfirmations.js";
 import { ActionTargetCards } from "./CardChoices.js";
 import { CardRef, cardAffiliation, chooseWithoutFocus, handCardPlayLabel } from "./DecisionShared.js";
@@ -56,6 +57,8 @@ export function ActionAnnouncementPanel({
   } = model;
   if (sel.kind === "none") return null;
   const offersMultipleBoosts = boostOptions.some((count) => count > 1);
+  const presentedBoostOptions = orderedBoostOptions(boostOptions);
+  const presentedBoostCount = boostCount ?? presentedBoostOptions.find((count) => count > 0);
   const selectedAlternativeCostIds = Array.isArray(alternativeCostCardInstanceIds)
     ? alternativeCostCardInstanceIds
     : [];
@@ -276,16 +279,26 @@ export function ActionAnnouncementPanel({
           </span>
           <span className="decision-context">Each Boost banishes the top card of your deck.</span>
           <div className="decision-buttons">
-            {boostOptions.map((count) => (
-              <button
-                key={count}
-                className={boostCount === count ? "btn-primary" : ""}
-                onClick={(event) =>
-                  chooseWithoutFocus(event.currentTarget, () => onSelectBoost(count))}
-              >
-                {boostOptionLabel(count, offersMultipleBoosts)}
-              </button>
-            ))}
+            {presentedBoostOptions.map((count) => {
+              const label = boostOptionLabel(count, offersMultipleBoosts);
+              const spaceDefault = boostCount === null && presentedBoostCount === count;
+              return (
+                <button
+                  key={count}
+                  className={`${presentedBoostCount === count ? "btn-primary" : ""}${
+                    spaceDefault ? " shortcut-button" : ""
+                  }`}
+                  onClick={(event) =>
+                    chooseWithoutFocus(event.currentTarget, () => onSelectBoost(count))}
+                  {...(spaceDefault
+                    ? { title: `${label} (Space)`, "aria-keyshortcuts": "Space" }
+                    : {})}
+                >
+                  {label}
+                  {spaceDefault ? <kbd className="shortcut-key" aria-label="Space key" /> : null}
+                </button>
+              );
+            })}
           </div>
           <div className="decision-buttons"><button onClick={onCancel}>Cancel</button></div>
         </>

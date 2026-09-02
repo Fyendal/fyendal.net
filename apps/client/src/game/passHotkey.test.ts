@@ -46,7 +46,8 @@ describe("pass hotkey", () => {
     expect(shouldPassOnSpace(keyEvent({ target }))).toBe(false);
   });
 
-  it("confirms the decision float's final action with Space", () => {
+  it("chooses the decision float's primary action with Space", () => {
+    expect(actionConfirmationHotkey(keyEvent(), "boost", true)).toBe("select-default-boost");
     expect(actionConfirmationHotkey(keyEvent(), "confirm", true)).toBe("confirm-action");
     expect(actionConfirmationHotkey(keyEvent(), "close-chain", true)).toBe("confirm-chain-close");
     expect(actionConfirmationHotkey(keyEvent(), "ability", true)).toBeNull();

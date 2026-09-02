@@ -2,7 +2,32 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { GameView, PlayerView } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
-import { handScrollAvailability, PlayerHand } from "./PlayerHand.js";
+import {
+  handScrollAvailability,
+  PlayerHand,
+  preservePreStackHandOrder,
+} from "./PlayerHand.js";
+
+describe("pre-stack hand order", () => {
+  it("keeps a projected source in its prior position instead of appending it", () => {
+    const cards = [
+      { instanceId: 3, cardId: "THIRD", owner: 0 },
+      { instanceId: 2, cardId: "SECOND", owner: 0 },
+    ];
+
+    expect(preservePreStackHandOrder(cards, [1, 2, 3], 2).map((card) => card.instanceId))
+      .toEqual([2, 3]);
+  });
+
+  it("does not reorder an ordinary hand update", () => {
+    const cards = [
+      { instanceId: 3, cardId: "THIRD", owner: 0 },
+      { instanceId: 2, cardId: "SECOND", owner: 0 },
+    ];
+
+    expect(preservePreStackHandOrder(cards, [1, 2, 3], null)).toEqual(cards);
+  });
+});
 
 describe("hand scroll controls", () => {
   it("hides both controls while all cards fit", () => {
