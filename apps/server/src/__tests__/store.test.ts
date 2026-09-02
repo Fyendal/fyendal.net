@@ -677,6 +677,9 @@ describe("PgRoomStore storage", () => {
       "before the human action",
       "⤺ the last action was undone",
     ]);
+    expect(restored!.state!.log.at(-1)?.publicPayload?.message).toEqual({
+      id: "server.log.undo.last.action",
+    });
     expect(await store.getHistory(created.code)).toEqual([]);
   });
 
@@ -1521,6 +1524,10 @@ describe("PgRoomStore storage", () => {
       expectedLog,
       `⤺ returned to the beginning of turn ${expectedTurn}`,
     ]);
+    expect(restored!.state!.log.at(-1)?.publicPayload?.message).toEqual({
+      id: "server.log.undo.turn.start",
+      values: { turn: expectedTurn },
+    });
   });
 
   it("retains turn-start anchors beyond the rolling undo cap", async () => {

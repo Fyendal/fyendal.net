@@ -285,7 +285,11 @@ export interface ScriptCtx {
   destroyAtEndPhase(instanceId: number): boolean;
   /** Schedule one of this script's delayed hooks for the current turn's end
    * phase. The source is snapshotted, so moving it later does not cancel it. */
-  scheduleEndOfTurnTrigger(hook: string, label: string, subjectSeat?: number): void;
+  scheduleEndOfTurnTrigger(
+    hook: string,
+    label: string | ScriptPrompt,
+    subjectSeat?: number,
+  ): void;
   /** Let the controller privately look at a card (e.g. the top of their deck)
    *  — its identity is logged to the controller only. */
   lookAt(instanceId: number): void;
@@ -595,7 +599,7 @@ export interface ScriptCtx {
   /** Transform until the start of this hero's next turn, preserving life. */
   becomeHeroUntilNextTurn(cardId: string): void;
   /** Log information that is public to both players and spectators. */
-  logPublic(entry: string | GameLogPayload): void;
+  logPublic(entry: GameLogPayload): void;
   /** Log a private identity/detail for one seat, optionally with a redacted
    * public fallback. With no publicText, other audiences see nothing. */
   logPrivate(
@@ -1343,6 +1347,8 @@ export interface CardScript {
     ): boolean;
     /** Card-specific text shown in the stack and public trigger log. */
     label?: string;
+    /** Locale-independent counterpart to `label`. */
+    labelMessage?: GameMessage;
   };
   onFriendlyDefended?(ctx: ScriptCtx, defendedFromHand: boolean): void;
   /** This attack's Fragment ability triggered after a 2+ defense card defended it. */

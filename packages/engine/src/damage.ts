@@ -144,7 +144,11 @@ function applyHit(
     ))
   ) {
     dispatchSuppressedHitObservers(state, runtime, link);
-    logPublic(state, `${nameOf(state, link.attackingCard.cardId)}'s hit effects are suppressed`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, link.attackingCard.cardId)}'s hit effects are suppressed`,
+      "engine.log.combat.hit.effects.suppressed",
+      { card: logCardValue(link.attackingCard.cardId) },
+    ));
   } else {
     return runtime.dispatchFlow("queueHitTriggers", state, link);
   }
@@ -168,7 +172,11 @@ function applyCombatDamage(
   if (damage > 0) {
     return applyHit(state, runtime, link, targetSeat);
   } else {
-    logPublic(state, `${nameOf(state, link.attackingCard.cardId)} is fully defended`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, link.attackingCard.cardId)} is fully defended`,
+      "engine.log.combat.fully.defended",
+      { card: logCardValue(link.attackingCard.cardId) },
+    ));
     runtime.events.runHook(state, link.attacker, link.attackingCard, "onMiss", link);
   }
   return false;
@@ -201,7 +209,11 @@ export function resolveLink(state: GameStateInternal, runtime: EngineRuntime): v
   const link = currentLink(state);
   if (!link) return;
   if (link.flags.attackGone === true) {
-    logPublic(state, `${nameOf(state, link.attackingCard.cardId)} fails to resolve (the attack left the combat chain)`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, link.attackingCard.cardId)} fails to resolve (the attack left the combat chain)`,
+      "engine.log.combat.resolve.failed.left.chain",
+      { card: logCardValue(link.attackingCard.cardId) },
+    ));
     link.damage = 0;
     link.hit = false;
     link.goAgain = false;
@@ -215,7 +227,11 @@ export function resolveLink(state: GameStateInternal, runtime: EngineRuntime): v
     return;
   }
   if (!attackSourceInArena(state, link)) {
-    logPublic(state, `${nameOf(state, link.attackingCard.cardId)} fails to resolve (its source left the arena)`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, link.attackingCard.cardId)} fails to resolve (its source left the arena)`,
+      "engine.log.combat.resolve.failed.source.left.arena",
+      { card: logCardValue(link.attackingCard.cardId) },
+    ));
     link.damage = 0;
     link.hit = false;
     link.goAgain = false; // no refund — the attack never resolved
@@ -244,7 +260,11 @@ export function resolveLink(state: GameStateInternal, runtime: EngineRuntime): v
     // out links with targetAllyId.
     const targetAlly = defenderPlayer.board.find((c) => c.instanceId === link.targetAllyId);
     if (!targetAlly) {
-      logPublic(state, `${nameOf(state, link.attackingCard.cardId)} finds no target (the ally is gone)`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, link.attackingCard.cardId)} finds no target (the ally is gone)`,
+        "engine.log.combat.no.target.ally.gone",
+        { card: logCardValue(link.attackingCard.cardId) },
+      ));
       link.damage = 0;
       link.hit = false;
     } else {
@@ -263,7 +283,14 @@ export function resolveLink(state: GameStateInternal, runtime: EngineRuntime): v
       if (dealt > 0) {
         if (runtime.dispatchFlow("queueHitTriggers", state, link)) return;
       } else {
-        logPublic(state, `${nameOf(state, link.attackingCard.cardId)} deals no damage to ${nameOf(state, targetAlly.cardId)}`);
+        logPublic(state, gameLogMessage(
+          `${nameOf(state, link.attackingCard.cardId)} deals no damage to ${nameOf(state, targetAlly.cardId)}`,
+          "engine.log.damage.none.to.ally",
+          {
+            source: logCardValue(link.attackingCard.cardId),
+            target: logCardValue(targetAlly.cardId),
+          },
+        ));
         runtime.events.runHook(state, link.attacker, link.attackingCard, "onMiss", link);
       }
     }

@@ -48,7 +48,10 @@ const scripts: Record<string, CardScript> = {
   },
   HERO_V2: {
     onBecomeHero(ctx) {
-      ctx.logPublic("the agent takes over");
+      ctx.logPublic({
+        fallback: "the agent takes over",
+        message: { id: "card.test.agent.takes.over" },
+      });
     },
     activated: {
       cost: 0,

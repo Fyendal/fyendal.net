@@ -4,7 +4,7 @@ import { activateAbility, answerChoice, answerChoices, playCard } from "./action
 import { declareTail } from "./attacks.js";
 import { assignDefenders, stageDefenders } from "./defense.js";
 import { scriptOf } from "./cardProperties.js";
-import { logPublic, nameOf } from "./gameLog.js";
+import { gameLogMessage, logCardValue, logPublic, nameOf } from "./gameLog.js";
 import { checkWin } from "./win.js";
 import { currentLink, findCardAnywhere, opponent } from "./zoneQueries.js";
 import { closeChain } from "./combatChain.js";
@@ -524,7 +524,11 @@ export function applyIntent(
       next.phase = "game-over";
       next.pendingDecision = null;
       const conceding = next.players[seat];
-      if (conceding) logPublic(next, `${nameOf(next, conceding.heroCardId)} concedes`);
+      if (conceding) logPublic(next, gameLogMessage(
+        `${nameOf(next, conceding.heroCardId)} concedes`,
+        "engine.log.game.concedes",
+        { hero: logCardValue(conceding.heroCardId) },
+      ));
       break;
     }
     case "play-card": {

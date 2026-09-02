@@ -1,7 +1,7 @@
 import { dataOf, scriptOf } from "./cardProperties.js";
 
 import { controlledPermanents } from "./sourceQueries.js";
-import { logPublic, nameOf } from "./gameLog.js";
+import { gameLogMessage, logCardValue, logPublic, nameOf } from "./gameLog.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { CardInstance, PlayerState } from "./state.js";
 import { currentLink } from "./zoneQueries.js";
@@ -102,7 +102,11 @@ export function removeMarkOnOpponentHit(
   const hero = (state.players[targetSeat] as PlayerState).hero;
   if ((hero.counters?.marked ?? 0) <= 0) return false;
   delete hero.counters!.marked;
-  logPublic(state, `${nameOf(state, hero.cardId)} is no longer marked`);
+  logPublic(state, gameLogMessage(
+    `${nameOf(state, hero.cardId)} is no longer marked`,
+    "engine.log.hero.unmarked",
+    { hero: logCardValue(hero.cardId) },
+  ));
   return true;
 }
 

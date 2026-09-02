@@ -400,7 +400,10 @@ export const evrHighRarity: Record<string, CardScript> = {
   "swarming gloomveil|1": { modifyAttack(ctx) { return (Number(ctx.getFlag("player", "playedSubtypeCount:aura")) + Number(ctx.getFlag("player", "createdSubtypeCount:aura"))) >= 2 ? 3 : 0; }, onAttackDeclared(ctx) { if ((Number(ctx.getFlag("player", "playedSubtypeCount:aura")) + Number(ctx.getFlag("player", "createdSubtypeCount:aura"))) >= 2) ctx.grantGoAgain(); } },
   "revel in runeblood|1": {
     onPlay(ctx) {
-      ctx.scheduleEndOfTurnTrigger("revel-cleanup", "Destroy Runechants");
+      ctx.scheduleEndOfTurnTrigger(
+        "revel-cleanup",
+        decisionPrompt("Destroy Runechants", "card.trigger.common.runechants.destroy"),
+      );
       if (Number(ctx.getFlag("player", "attackActionsPlayedThisTurn")) >= 1 && Number(ctx.getFlag("player", "nonAttackActionsPlayedThisTurn")) >= 2) ctx.createTokens(RUNECHANT, 4);
     },
     onDelayedTrigger(ctx, hook) {

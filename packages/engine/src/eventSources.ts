@@ -3,6 +3,7 @@ import type { GameStateInternal } from "./runtimeState.js";
 import type { GameMessage } from "@fyendal/shared";
 import { dataOf, scriptOf } from "./cardProperties.js";
 import {
+  gameLogMessage,
   logCardValue,
   logPublic,
   nameOf,
@@ -109,7 +110,14 @@ export function collectCardEventTriggerLayers(
     const announce = (announcement: (typeof announcements)[number], occurrences: number): void => {
       const fallback = `${announcement.text}${occurrences > 1 ? ` ×${occurrences}` : ""}`;
       if (!announcement.message) {
-        logPublic(state, fallback);
+        logPublic(
+          state,
+          gameLogMessage(
+            fallback,
+            "engine.log.trigger.generic",
+            { occurrences },
+          ),
+        );
         return;
       }
       logPublic(state, {

@@ -475,7 +475,11 @@ export function finishPlayCard(
         for (const src of boostSources) {
           scriptOf(state, src.cardId, src)?.onBoosted?.(runtime.makeCtx(state, seat, src), card, banished);
         }
-        logPublic(state, `${logNameOf(state, card.cardId)} boosts`);
+        logPublic(state, gameLogMessage(
+          `${logNameOf(state, card.cardId)} boosts`,
+          "engine.log.card.boosts",
+          { card: logCardValue(card.cardId) },
+        ));
       }
     }
     deferTriggerLayers(state, playedTriggers);
@@ -1046,7 +1050,11 @@ export function answerChoice(
       if (found && steam > 0) {
         if (steam === 1) delete found.card.counters?.steam;
         else (found.card.counters ??= {}).steam = steam - 1;
-        logPublic(state, `${nameOf(state, found.card.cardId)} is cranked: remove a steam counter`);
+        logPublic(state, gameLogMessage(
+          `${nameOf(state, found.card.cardId)} is cranked: remove a steam counter`,
+          "engine.log.card.cranked",
+          { card: logCardValue(found.card.cardId) },
+        ));
         (state.players[found.seat] as PlayerState).flags.crankedThisTurn = true;
         runtime.makeCtx(state, found.seat, found.card).gainActionPoint();
         runtime.events.fireOnFriendlyCrank(state, found.seat, found.card);

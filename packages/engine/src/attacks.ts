@@ -19,7 +19,13 @@ import {
   replaceTemporalPowerGain,
 } from "./combatValues.js";
 import { payCost } from "./costs.js";
-import { logNameOf, logPublic, nameOf } from "./gameLog.js";
+import {
+  gameLogMessage,
+  logCardValue,
+  logNameOf,
+  logPublic,
+  nameOf,
+} from "./gameLog.js";
 import { abilityList, activatedFlagKey } from "./scripts.js";
 import type { CardInstance, ChainLinkState, Modifier, PlayerState } from "./state.js";
 
@@ -360,10 +366,18 @@ export function beginAttackStep(state: GameStateInternal, runtime: EngineRuntime
     runtime.events.grantLinkGoAgain(state, link);
   }
   const target = findAttackTargetAlly(state, seat, targetAllyId);
-  logPublic(
-    state,
-    `${nameOf(state, player.heroCardId)} attacks with ${logNameOf(state, card.cardId)} (${computeAttack(state, runtime, link)} attack)${target ? `, targeting ${nameOf(state, target.cardId)}` : ""}`,
-  );
+  const attack = computeAttack(state, runtime, link);
+  const attackFallback = `${nameOf(state, player.heroCardId)} attacks with ${logNameOf(state, card.cardId)} (${attack} attack)${target ? `, targeting ${nameOf(state, target.cardId)}` : ""}`;
+  logPublic(state, gameLogMessage(
+    attackFallback,
+    target ? "engine.log.combat.attacks.targeting" : "engine.log.combat.attacks",
+    {
+      hero: logCardValue(player.heroCardId),
+      card: logCardValue(card.cardId),
+      attack,
+      ...(target ? { target: logCardValue(target.cardId) } : {}),
+    },
+  ));
   // Sources created while players responded to the unresolved attack-layer
   // exist when the attack event occurs and are therefore valid observers.
   link.declaredAtNextId = state.nextInstanceId;
@@ -613,7 +627,14 @@ function replaceAttackFromPlayerZone(
   if (instanceHasKeyword(state, replacement, "go again")) runtime.events.grantLinkGoAgain(state, link);
   logPublic(
     state,
-    `${nameOf(state, previous.cardId)} is put on the bottom of its owner's deck and replaced by ${nameOf(state, replacement.cardId)} as the attacking card`,
+    gameLogMessage(
+      `${nameOf(state, previous.cardId)} is put on the bottom of its owner's deck and replaced by ${nameOf(state, replacement.cardId)} as the attacking card`,
+      "engine.log.combat.attacker.replaced",
+      {
+        previous: logCardValue(previous.cardId),
+        replacement: logCardValue(replacement.cardId),
+      },
+    ),
   );
   return true;
 }
@@ -690,5 +711,9 @@ function queueSpectraLayer(state: GameStateInternal): void {
     optional: false,
     engineEffect: { kind: "spectra-destroy" },
   });
-  logPublic(state, `${nameOf(state, target.cardId)} triggers Spectra`);
+  logPublic(state, gameLogMessage(
+    `${nameOf(state, target.cardId)} triggers Spectra`,
+    "engine.log.trigger.spectra",
+    { card: logCardValue(target.cardId) },
+  ));
 }

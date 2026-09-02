@@ -1,7 +1,13 @@
 import type { EngineRuntime } from "./runtimePorts.js";
 import { cardAbilitiesSuppressed, cardColorOf, cardHasName, cardHasType, cardNamesOf, cardTypesOf, dataOf, instanceDataOf, meldSideHasType, scriptOf } from "./cardProperties.js";
 import { controlledPermanents, lingeringModifierSources } from "./sourceQueries.js";
-import { logPublic, nameOf } from "./gameLog.js";
+import {
+  gameLogMessage,
+  logCardValue,
+  logPublic,
+  logTermValue,
+  nameOf,
+} from "./gameLog.js";
 import type { GameStateInternal } from "./runtimeState.js";
 
 import type { CardInstance, ChainLinkState, Modifier, PlayerState, StackLayer } from "./state.js";
@@ -392,7 +398,16 @@ export function noteCardPlayed(
         optional: false,
         engineEffect: { kind: "gain-action-points", amount },
       });
-      logPublic(state, `${sourceName} triggers: gain ${amount} action point${amount === 1 ? "" : "s"}`);
+      logPublic(state, gameLogMessage(
+        `${sourceName} triggers: gain ${amount} action point${amount === 1 ? "" : "s"}`,
+        "engine.log.trigger.gains.action.points",
+        {
+          source: source
+            ? logCardValue(source.cardId)
+            : logTermValue("engine.term.delayed.effect"),
+          amount,
+        },
+      ));
     }
   }
   if (nonAttackAction) {
@@ -441,11 +456,19 @@ export function noteCardPlayed(
       (card.grantedTypes ??= []).push(tag);
       player.flags[`playedSubtype:${tag}`] = true;
       player.flags[`playedClass:${tag}`] = true;
-      logPublic(state, `${nameOf(state, cardId)} is ${mod.grantType} in addition to its other types`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, cardId)} is ${mod.grantType} in addition to its other types`,
+        "engine.log.card.gains.additional.type",
+        { card: logCardValue(cardId), type: mod.grantType },
+      ));
     }
     if (mod.grantKeyword) {
       (card.grantedKeywords ??= []).push(mod.grantKeyword.toLowerCase());
-      logPublic(state, `${nameOf(state, cardId)} gains ${mod.grantKeyword}`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, cardId)} gains ${mod.grantKeyword}`,
+        "engine.log.card.gains.keyword",
+        { card: logCardValue(cardId), keyword: mod.grantKeyword },
+      ));
     }
   }
   state.modifiers = state.modifiers.filter((m) => !consumedNextPlay.has(m.id));

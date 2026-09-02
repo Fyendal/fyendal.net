@@ -238,6 +238,14 @@ describe("empty-stack action-phase priority", () => {
     expect(result.ok).toBe(true);
     if (!result.ok) throw new Error(result.error);
     s = result.state;
+    expect(s.log.find((entry) =>
+      entry.publicPayload?.message.id === "engine.log.card.activated"
+    )?.publicPayload?.message).toMatchObject({
+      values: {
+        hero: { kind: "card", cardId: "HERO_A" },
+        card: { kind: "card", cardId: "IDOL" },
+      },
+    });
     for (let i = 0; i < 2; i++) {
       result = applyIntent(s, s.priorityPlayer, { kind: "pass" });
       expect(result.ok).toBe(true);
@@ -417,5 +425,10 @@ describe("destroy at the beginning of the end phase", () => {
     expect(player(s, 0).board).toHaveLength(0);
     expect(player(s, 0).graveyard.some((c) => c.cardId === "IDOL")).toBe(true);
     expect(s.pendingDestructions).toHaveLength(0); // consumed
+    expect(s.log.find((entry) =>
+      entry.publicPayload?.message.id === "engine.log.card.destroyed"
+    )?.publicPayload?.message).toMatchObject({
+      values: { card: { kind: "card", cardId: "IDOL" } },
+    });
   });
 });

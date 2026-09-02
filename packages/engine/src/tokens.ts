@@ -357,7 +357,11 @@ function beginTokenCreation(
     (tokenData.subtypes ?? []).includes("aura") &&
     (auraTokensProhibited || Number(player.hero.counters?.auraTokenCreationLockedUntilTurn ?? 0) === state.turn)
   ) {
-    logPublic(state, `${nameOf(state, player.heroCardId)} can't create aura tokens this turn`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, player.heroCardId)} can't create aura tokens this turn`,
+      "engine.log.token.aura.creation.prohibited",
+      { hero: logCardValue(player.heroCardId) },
+    ));
     return [];
   }
   return continueTokenCreation(

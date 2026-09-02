@@ -21,6 +21,7 @@ import {
 } from "./cardProperties.js";
 
 import {
+  cardDestroyedLogMessage,
   gameLogMessage,
   logCardValue,
   logForSeats,
@@ -71,7 +72,14 @@ function revealCards(
   logPublic(
     state,
     // the ⟦id⟧ tags let clients preview the exact printing of each reveal
-    `${nameOf(state, hero.heroCardId)} reveals ${cards.map((card) => `${nameOf(state, card.cardId)}⟦${card.cardId}⟧`).join(", ")}`,
+    gameLogMessage(
+      `${nameOf(state, hero.heroCardId)} reveals ${cards.map((card) => `${nameOf(state, card.cardId)}⟦${card.cardId}⟧`).join(", ")}`,
+      "engine.log.cards.revealed",
+      {
+        hero: logCardValue(hero.heroCardId),
+        cards: cards.map((card) => nameOf(state, card.cardId)).join(", "),
+      },
+    ),
   );
   for (const controller of state.players as PlayerState[]) {
     for (const observer of hookSources(state, controller.seat, {
@@ -162,7 +170,14 @@ function createCardInHandFor(
   player.flags[`createdName:${createdName}`] = true;
   player.flags[`createdNameCount:${createdName}`] =
     (Number(player.flags[`createdNameCount:${createdName}`]) || 0) + 1;
-  logPublic(state, `${nameOf(state, player.heroCardId)} creates ${nameOf(state, cardId)} in their hand`);
+  logPublic(state, gameLogMessage(
+    `${nameOf(state, player.heroCardId)} creates ${nameOf(state, cardId)} in their hand`,
+    "engine.log.card.created.in.hand",
+    {
+      hero: logCardValue(player.heroCardId),
+      card: logCardValue(cardId),
+    },
+  ));
   return card;
 }
 
@@ -190,7 +205,14 @@ function createCardInBanishFor(
   }
   logPublic(
     state,
-    `${nameOf(state, player.heroCardId)} creates ${nameOf(state, cardId)} in their banished zone`,
+    gameLogMessage(
+      `${nameOf(state, player.heroCardId)} creates ${nameOf(state, cardId)} in their banished zone`,
+      "engine.log.card.created.in.banish",
+      {
+        hero: logCardValue(player.heroCardId),
+        card: logCardValue(cardId),
+      },
+    ),
   );
   return card;
 }
@@ -314,7 +336,11 @@ export function makeCtx(
     // An empty option list would deadlock the game on an unanswerable
     // decision — the effect simply finds no target and fizzles.
     if (options.length === 0) {
-      logPublic(state, `(fizzled, no options: ${presentation.fallback})`);
+      logPublic(state, gameLogMessage(
+        `(fizzled, no options: ${presentation.fallback})`,
+        "engine.log.decision.fizzles.no.options",
+        { prompt: presentation.fallback },
+      ));
       return;
     }
     const decision: PendingDecisionState = {
@@ -352,7 +378,11 @@ export function makeCtx(
     // from the resolving effect until that choice has been answered.
     if (existing?.chooseHook && !look) {
       if (!queueDecisionBehindCrank(state, decision)) {
-        logPublic(state, `(skipped duplicate choice: ${presentation.fallback})`);
+        logPublic(state, gameLogMessage(
+          `(skipped duplicate choice: ${presentation.fallback})`,
+          "engine.log.decision.duplicate.skipped",
+          { prompt: presentation.fallback },
+        ));
       }
       return;
     }
@@ -380,7 +410,10 @@ export function makeCtx(
       options.some((option) => typeof option === "number" && deckIds.has(option)) &&
       !deckSearchAllowed()
     ) {
-      logPublic(state, "the deck search is prohibited");
+      logPublic(state, gameLogMessage(
+        "the deck search is prohibited",
+        "engine.log.deck.search.prohibited",
+      ));
       return;
     }
     requestScriptedChoice(hook, prompt, options.map(String), choiceSeat, {
@@ -535,7 +568,11 @@ export function makeCtx(
       const target = state.players[targetSeat] as PlayerState | undefined;
       if (!target) return;
       (target.hero.counters ??= {}).abilitiesDisabledPermanently = 1;
-      logPublic(state, `${nameOf(state, target.heroCardId)} loses all abilities`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, target.heroCardId)} loses all abilities`,
+        "engine.log.hero.loses.all.abilities",
+        { hero: logCardValue(target.heroCardId) },
+      ));
     },
     loseGame(targetSeat) {
       if (!state.players[targetSeat] || state.winner !== null) return;
@@ -543,12 +580,22 @@ export function makeCtx(
       state.phase = "game-over";
       state.pendingDecision = null;
       state.stack = [];
-      logPublic(state, `${nameOf(state, (state.players[targetSeat] as PlayerState).heroCardId)} loses the game`);
+      const target = state.players[targetSeat] as PlayerState;
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, target.heroCardId)} loses the game`,
+        "engine.log.game.player.loses",
+        { hero: logCardValue(target.heroCardId) },
+      ));
     },
     takeExtraTurn(targetSeat) {
       if (targetSeat !== 0 && targetSeat !== 1) return;
       (state.extraTurnSeats ??= []).push(targetSeat);
-      logPublic(state, `${nameOf(state, (state.players[targetSeat] as PlayerState).heroCardId)} will take an extra turn`);
+      const target = state.players[targetSeat] as PlayerState;
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, target.heroCardId)} will take an extra turn`,
+        "engine.log.turn.extra.granted",
+        { hero: logCardValue(target.heroCardId) },
+      ));
     },
     suppressOwnedCardAbilitiesNextTurn(targetSeat) {
       const target = state.players[targetSeat] as PlayerState | undefined;
@@ -559,10 +606,11 @@ export function makeCtx(
         Number(counters.ownedCardAbilitiesDisabledTurn ?? 0),
         disabledTurn,
       );
-      logPublic(
-        state,
+      logPublic(state, gameLogMessage(
         `${nameOf(state, target.heroCardId)}'s cards lose all abilities during their next turn`,
-      );
+        "engine.log.hero.cards.lose.abilities.next.turn",
+        { hero: logCardValue(target.heroCardId) },
+      ));
     },
     randomInt(maxExclusive) {
       if (!Number.isSafeInteger(maxExclusive) || maxExclusive <= 0) return 0;
@@ -682,7 +730,7 @@ export function makeCtx(
       }
       link.flags.attackGone = true;
       runtime.commands.moveToGraveyard(state, link.attackingCard, "chain", seat);
-      logPublic(state, `${nameOf(state, link.attackingCard.cardId)} is destroyed`);
+      logPublic(state, cardDestroyedLogMessage(state, link.attackingCard.cardId));
       runtime.events.runHook(state, link.attacker, link.attackingCard, "onDestroyed", link);
       runtime.events.fireFriendlyDestroyed(state, link.attacker, link.attackingCard, seat);
       return true;
@@ -699,7 +747,7 @@ export function makeCtx(
         const card = removeFromArray(chainLink.defendingCards, instanceId);
         if (!card) continue;
         runtime.commands.moveToGraveyard(state, card, "chain", seat);
-        logPublic(state, `${nameOf(state, card.cardId)} is destroyed`);
+        logPublic(state, cardDestroyedLogMessage(state, card.cardId));
         runtime.events.runHook(state, card.owner, card, "onDestroyed", chainLink);
         runtime.events.fireFriendlyDestroyed(state, card.owner, card, seat);
         return true;
@@ -711,7 +759,14 @@ export function makeCtx(
       const card = found?.card.subcards?.pop();
       if (!found || !card) return false;
       runtime.commands.moveToGraveyard(state, card, "under", seat);
-      logPublic(state, `${nameOf(state, card.cardId)} is destroyed from under ${nameOf(state, found.card.cardId)}`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, card.cardId)} is destroyed from under ${nameOf(state, found.card.cardId)}`,
+        "engine.log.card.destroyed.from.under",
+        {
+          card: logCardValue(card.cardId),
+          parent: logCardValue(found.card.cardId),
+        },
+      ));
       runtime.events.runHook(state, found.seat, card, "onDestroyed");
       runtime.events.fireFriendlyDestroyed(state, found.seat, card);
       return true;
@@ -726,7 +781,14 @@ export function makeCtx(
       const [card] = found.card.subcards.splice(index, 1);
       if (!card) return false;
       (state.players[card.owner] as PlayerState).banish.push(card);
-      logPublic(state, `${nameOf(state, card.cardId)} is banished from under ${nameOf(state, found.card.cardId)}`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, card.cardId)} is banished from under ${nameOf(state, found.card.cardId)}`,
+        "engine.log.card.banished.from.under",
+        {
+          card: logCardValue(card.cardId),
+          parent: logCardValue(found.card.cardId),
+        },
+      ));
       return true;
     },
     putSelfUnder(instanceId) {
@@ -735,7 +797,14 @@ export function makeCtx(
       const found = runtime.commands.removeFromStackResolution(state, self.instanceId);
       if (!found) return false;
       (target.card.subcards ??= []).push(found.card);
-      logPublic(state, `${nameOf(state, found.card.cardId)} is put under ${nameOf(state, target.card.cardId)}`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, found.card.cardId)} is put under ${nameOf(state, target.card.cardId)}`,
+        "engine.log.card.put.under",
+        {
+          card: logCardValue(found.card.cardId),
+          parent: logCardValue(target.card.cardId),
+        },
+      ));
       return true;
     },
     globalCards() {
@@ -749,7 +818,7 @@ export function makeCtx(
       const index = state.globalCardIds.indexOf(target.cardId);
       if (index < 0) return false;
       state.globalCardIds.splice(index, 1);
-      logPublic(state, `${nameOf(state, target.cardId)} is destroyed`);
+      logPublic(state, cardDestroyedLogMessage(state, target.cardId));
       return true;
     },
     moveToGraveyard(instanceId, from = "effect") {
@@ -804,7 +873,11 @@ export function makeCtx(
       const card = removeFromArray(inventory, instanceId);
       if (!card) return false;
       player.hand.push(card);
-      logPublic(state, `${nameOf(state, card.cardId)} is revealed from inventory and put into hand`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, card.cardId)} is revealed from inventory and put into hand`,
+        "engine.log.card.inventory.revealed.to.hand",
+        { card: logCardValue(card.cardId) },
+      ));
       return true;
     },
     pitchCard(instanceId) {
@@ -915,7 +988,11 @@ export function makeCtx(
       if (!names.some((candidate) => candidate.toLowerCase() === normalized.toLowerCase())) {
         names.push(normalized);
       }
-      logPublic(state, `${nameOf(state, found.card.cardId)} gains the name ${normalized}`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, found.card.cardId)} gains the name ${normalized}`,
+        "engine.log.card.gains.name",
+        { card: logCardValue(found.card.cardId), name: normalized },
+      ));
       return true;
     },
     setChosenName(name) {
@@ -943,7 +1020,11 @@ export function makeCtx(
       if (!found || !normalized) return false;
       const types = (found.card.grantedTypes ??= []);
       if (!types.includes(normalized)) types.push(normalized);
-      logPublic(state, `${nameOf(state, found.card.cardId)} gains the type ${normalized}`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, found.card.cardId)} gains the type ${normalized}`,
+        "engine.log.card.gains.type",
+        { card: logCardValue(found.card.cardId), type: normalized },
+      ));
       return true;
     },
     removeCardType(instanceId, type) {
@@ -965,7 +1046,11 @@ export function makeCtx(
           : color === 3
             ? "blue"
             : "purple";
-      logPublic(state, `${nameOf(state, found.card.cardId)} becomes ${label}`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, found.card.cardId)} becomes ${label}`,
+        "engine.log.card.becomes.color",
+        { card: logCardValue(found.card.cardId), color: label },
+      ));
       return true;
     },
     grantBaseAbilities(instanceId, sourceCardId) {
@@ -999,7 +1084,11 @@ export function makeCtx(
       const owner = state.players[card.owner] as PlayerState;
       delete card.playTargetInstanceId;
       owner.graveyard.push(card);
-      logPublic(state, `${nameOf(state, card.cardId)} is negated`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, card.cardId)} is negated`,
+        "engine.log.card.negated",
+        { card: logCardValue(card.cardId) },
+      ));
       return true;
     },
     addCardTempDefense(instanceId, delta) {
@@ -1287,7 +1376,15 @@ export function makeCtx(
       });
       logPublic(
         state,
-        `${nameOf(state, (state.players[seat] as PlayerState).heroCardId)} wagers with ${nameOf(state, (state.players[withSeat] as PlayerState).heroCardId)}: ${publicReward}`,
+        gameLogMessage(
+          `${nameOf(state, (state.players[seat] as PlayerState).heroCardId)} wagers with ${nameOf(state, (state.players[withSeat] as PlayerState).heroCardId)}: ${publicReward}`,
+          "engine.log.wager.created",
+          {
+            hero: logCardValue((state.players[seat] as PlayerState).heroCardId),
+            opponent: logCardValue((state.players[withSeat] as PlayerState).heroCardId),
+            reward: publicReward,
+          },
+        ),
       );
       runtime.events.queueTriggeredEvent(state, "wager-generated", seat, activeLink.attackingCard);
     },
@@ -1304,10 +1401,15 @@ export function makeCtx(
       const found = findPermanent(state, instanceId);
       if (!found) return false;
       state.pendingDestructions.push({ seat: found.seat, instanceId });
-      logPublic(state, `${nameOf(state, found.card.cardId)} will be destroyed at the beginning of the end phase`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, found.card.cardId)} will be destroyed at the beginning of the end phase`,
+        "engine.log.card.destroy.scheduled.end.phase",
+        { card: logCardValue(found.card.cardId) },
+      ));
       return true;
     },
     scheduleEndOfTurnTrigger(hook, label, subjectSeat = seat) {
+      const presentation = scriptPromptParts(label);
       state.delayedTriggers.push({
         source: runtime.commands.snapshotSerializable(self),
         seat,
@@ -1315,7 +1417,8 @@ export function makeCtx(
         event: "end-of-turn",
         turn: state.turn,
         hook,
-        label,
+        label: presentation.fallback,
+        ...(presentation.promptMessage ? { labelMessage: presentation.promptMessage } : {}),
       });
     },
     lookAt(instanceId) {
@@ -1323,7 +1426,11 @@ export function makeCtx(
       if (!found) return;
       // the identity is private: logged to the looking player only (the ⟦id⟧
       // tag lets the client preview the exact printing/pitch) …
-      logPrivate(state, seat, `You look at ${nameOf(state, found.card.cardId)}⟦${found.card.cardId}⟧`);
+      logPrivate(state, seat, gameLogMessage(
+        `You look at ${nameOf(state, found.card.cardId)}⟦${found.card.cardId}⟧`,
+        "engine.log.card.looked.at.private",
+        { card: logCardValue(found.card.cardId) },
+      ));
       // … and floated as card images with a pass button until acknowledged.
       // Successive looks coalesce into one float; if the effect follows up
       // with its own choice, requestChoice folds the float into that choice.
@@ -1356,7 +1463,11 @@ export function makeCtx(
       const found = findCardAnywhere(state, instanceId);
       const lookingPlayer = state.players[lookingSeat];
       if (!found || !lookingPlayer) return;
-      logPrivate(state, lookingSeat, `You look at ${nameOf(state, found.card.cardId)}⟦${found.card.cardId}⟧`);
+      logPrivate(state, lookingSeat, gameLogMessage(
+        `You look at ${nameOf(state, found.card.cardId)}⟦${found.card.cardId}⟧`,
+        "engine.log.card.looked.at.private",
+        { card: logCardValue(found.card.cardId) },
+      ));
       const pd = state.pendingDecision;
       if (pd?.chooseHook === "engine-look" && pd.player === lookingSeat) {
         if (!(pd.lookedCardIds ?? []).includes(instanceId)) {
@@ -1401,9 +1512,23 @@ export function makeCtx(
           thiefSeat: seat,
           homeSeat: opp.seat,
         });
-        logPublic(state, `${nameOf(state, player.heroCardId)} steals ${nameOf(state, card.cardId)} until the end of the action phase`);
+        logPublic(state, gameLogMessage(
+          `${nameOf(state, player.heroCardId)} steals ${nameOf(state, card.cardId)} until the end of the action phase`,
+          "engine.log.card.control.stolen.action.phase",
+          {
+            hero: logCardValue(player.heroCardId),
+            card: logCardValue(card.cardId),
+          },
+        ));
       } else {
-        logPublic(state, `${nameOf(state, player.heroCardId)} gains control of ${nameOf(state, card.cardId)}`);
+        logPublic(state, gameLogMessage(
+          `${nameOf(state, player.heroCardId)} gains control of ${nameOf(state, card.cardId)}`,
+          "engine.log.card.control.gained",
+          {
+            hero: logCardValue(player.heroCardId),
+            card: logCardValue(card.cardId),
+          },
+        ));
       }
       return true;
     },
@@ -1422,7 +1547,15 @@ export function makeCtx(
       );
       logPublic(
         state,
-        `${nameOf(state, player.heroCardId)} gives control of ${nameOf(state, card.cardId)} to ${nameOf(state, target.heroCardId)}`,
+        gameLogMessage(
+          `${nameOf(state, player.heroCardId)} gives control of ${nameOf(state, card.cardId)} to ${nameOf(state, target.heroCardId)}`,
+          "engine.log.card.control.given",
+          {
+            hero: logCardValue(player.heroCardId),
+            card: logCardValue(card.cardId),
+            target: logCardValue(target.heroCardId),
+          },
+        ),
       );
       return true;
     },
@@ -1434,7 +1567,14 @@ export function makeCtx(
       counters.faceUpArsenalAnnexedThroughTurn = state.turn + 2;
       logPublic(
         state,
-        `${nameOf(state, player.heroCardId)} annexes ${nameOf(state, target.heroCardId)}'s face-up arsenal through their next turn`,
+        gameLogMessage(
+          `${nameOf(state, player.heroCardId)} annexes ${nameOf(state, target.heroCardId)}'s face-up arsenal through their next turn`,
+          "engine.log.arsenal.faceup.annexed",
+          {
+            hero: logCardValue(player.heroCardId),
+            target: logCardValue(target.heroCardId),
+          },
+        ),
       );
     },
     notifyTrapTriggered() {
@@ -1443,7 +1583,14 @@ export function makeCtx(
     flipFaceUp() {
       if (!self.faceDown) return;
       self.faceDown = false;
-      logPublic(state, `${nameOf(state, player.heroCardId)} turns ${nameOf(state, self.cardId)} face up`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, player.heroCardId)} turns ${nameOf(state, self.cardId)} face up`,
+        "engine.log.card.turned.face.up",
+        {
+          hero: logCardValue(player.heroCardId),
+          card: logCardValue(self.cardId),
+        },
+      ));
     },
     transcend() {
       // the resolving card leaves the stack-resolution flow into its owner's
@@ -1460,7 +1607,14 @@ export function makeCtx(
       card.flipped = true;
       owner.hand.push(card);
       owner.flags.transcendedThisTurn = true;
-      logPublic(state, `${nameOf(state, card.cardId)} transcends into ${nameOf(state, owner.heroCardId)}'s hand`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, card.cardId)} transcends into ${nameOf(state, owner.heroCardId)}'s hand`,
+        "engine.log.card.transcends.to.hand",
+        {
+          card: logCardValue(card.cardId),
+          hero: logCardValue(owner.heroCardId),
+        },
+      ));
       if (fromGraveyard) runtime.events.fireCardLeavesGraveyard(state, owner.seat, card, "hand");
     },
     destroySelf() {
@@ -1478,7 +1632,7 @@ export function makeCtx(
       if (!attack) return;
       attack.flags.attackGone = true;
       runtime.commands.moveToGraveyard(state, attack.attackingCard, "chain", seat);
-      logPublic(state, `${nameOf(state, attack.attackingCard.cardId)} is destroyed`);
+      logPublic(state, cardDestroyedLogMessage(state, attack.attackingCard.cardId));
       runtime.events.runHook(state, attack.attacker, attack.attackingCard, "onDestroyed", attack);
       runtime.events.fireFriendlyDestroyed(state, attack.attacker, attack.attackingCard, seat);
     },
@@ -1546,7 +1700,14 @@ export function makeCtx(
       const card = removed?.card ?? attackingCard ?? chainCard;
       if (!card) return false;
       owner.hand.push(card);
-      logPublic(state, `${nameOf(state, card.cardId)} returns to ${nameOf(state, owner.heroCardId)}'s hand`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, card.cardId)} returns to ${nameOf(state, owner.heroCardId)}'s hand`,
+        "engine.log.card.returns.to.hero.hand",
+        {
+          card: logCardValue(card.cardId),
+          hero: logCardValue(owner.heroCardId),
+        },
+      ));
       if (fromGraveyard) runtime.events.fireCardLeavesGraveyard(state, owner.seat, card, "hand");
       return true;
     },
@@ -1740,7 +1901,14 @@ export function makeCtx(
       if (!permanent) return undefined;
       (permanent.subcards ??= []).push(...subcards);
       if (subcards.length > 0) {
-        logPublic(state, `${subcards.map((card) => nameOf(state, card.cardId)).join(" and ")} transforms into ${nameOf(state, cardId)}`);
+        logPublic(state, gameLogMessage(
+          `${subcards.map((card) => nameOf(state, card.cardId)).join(" and ")} transforms into ${nameOf(state, cardId)}`,
+          "engine.log.cards.transform.into",
+          {
+            cards: subcards.map((card) => nameOf(state, card.cardId)).join(" and "),
+            result: logCardValue(cardId),
+          },
+        ));
       }
       for (const event of transformEvents) {
         runtime.commands.fireTransformHook(state, event.seat, event.from, "into", permanent);
@@ -1871,7 +2039,11 @@ export function makeCtx(
       };
       if (state.pendingDecision?.chooseHook) {
         if (!queueDecisionBehindCrank(state, decision)) {
-          logPublic(state, `(skipped duplicate choice: ${presentation.fallback})`);
+          logPublic(state, gameLogMessage(
+            `(skipped duplicate choice: ${presentation.fallback})`,
+            "engine.log.decision.duplicate.skipped",
+            { prompt: presentation.fallback },
+          ));
         }
         return;
       }
@@ -2047,7 +2219,11 @@ export function makeCtx(
       current.defendingCards.push(card);
       runtime.commands.applyOneShotDefenseModifiers(state, current, [card]);
       const fragmentTriggered = runtime.commands.noteAttackDefendedBy(state, current, card);
-      logPublic(state, `${nameOf(state, card.cardId)} is added to the chain link as a defending card`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, card.cardId)} is added to the chain link as a defending card`,
+        "engine.log.card.added.as.defender",
+        { card: logCardValue(card.cardId) },
+      ));
       runtime.commands.queueDefendEventLayersAfterCurrent(
         state,
         current,
@@ -2070,7 +2246,11 @@ export function makeCtx(
       current.defendingCards.push(card);
       runtime.commands.applyOneShotDefenseModifiers(state, current, [card]);
       const fragmentTriggered = runtime.commands.noteAttackDefendedBy(state, current, card);
-      logPublic(state, `${nameOf(state, card.cardId)} is added from arsenal as a defending card`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, card.cardId)} is added from arsenal as a defending card`,
+        "engine.log.card.added.as.defender.from.arsenal",
+        { card: logCardValue(card.cardId) },
+      ));
       runtime.commands.queueDefendEventLayersAfterCurrent(
         state,
         current,
@@ -2095,7 +2275,11 @@ export function makeCtx(
       current.flags[`defendedFromHand:${card.instanceId}`] = true;
       current.flags.defendedFromHandCount = Number(current.flags.defendedFromHandCount ?? 0) + 1;
       const fragmentTriggered = runtime.commands.noteAttackDefendedBy(state, current, card);
-      logPublic(state, `${nameOf(state, card.cardId)} is added from hand as a defending card`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, card.cardId)} is added from hand as a defending card`,
+        "engine.log.card.added.as.defender.from.hand",
+        { card: logCardValue(card.cardId) },
+      ));
       runtime.commands.queueDefendEventLayersAfterCurrent(
         state,
         current,
@@ -2118,7 +2302,11 @@ export function makeCtx(
       current.defendingEquipment.push(live);
       runtime.commands.applyOneShotDefenseModifiers(state, current, [live]);
       const fragmentTriggered = runtime.commands.noteAttackDefendedBy(state, current, live);
-      logPublic(state, `${nameOf(state, live.cardId)} is added to the chain link as a defending card`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, live.cardId)} is added to the chain link as a defending card`,
+        "engine.log.card.added.as.defender",
+        { card: logCardValue(live.cardId) },
+      ));
       runtime.commands.queueDefendEventLayersAfterCurrent(
         state,
         current,
@@ -2146,7 +2334,14 @@ export function makeCtx(
       const card = owner?.arsenal.find((candidate) => candidate.instanceId === instanceId);
       if (!card?.faceDown) return false;
       delete card.faceDown;
-      logPublic(state, `${nameOf(state, card.cardId)} is turned face up in ${nameOf(state, owner!.heroCardId)}'s arsenal`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, card.cardId)} is turned face up in ${nameOf(state, owner!.heroCardId)}'s arsenal`,
+        "engine.log.arsenal.card.turned.face.up",
+        {
+          card: logCardValue(card.cardId),
+          hero: logCardValue(owner!.heroCardId),
+        },
+      ));
       fireEnterArsenal(state, runtime, owner!.seat, card, "arsenal");
       return true;
     },
@@ -2178,9 +2373,23 @@ export function makeCtx(
         runtime.events.fireCardLeavesGraveyard(state, found.owner.seat, found.card, "deck");
       }
       if (found.fromArena) runtime.commands.fireLeaveArena(state, found.owner.seat, found.card, "deck");
-      const detail = `${nameOf(state, found.card.cardId)} is put on the ${toBottom ? "bottom" : "top"} of the deck`;
-      if (privateSource) logPrivate(state, found.owner.seat, detail, `a card is put on the ${toBottom ? "bottom" : "top"} of the deck`);
-      else logPublic(state, detail);
+      const detail = gameLogMessage(
+        `${nameOf(state, found.card.cardId)} is put on the ${toBottom ? "bottom" : "top"} of the deck`,
+        "engine.log.card.put.on.deck.position",
+        { card: logCardValue(found.card.cardId), position: toBottom ? "bottom" : "top" },
+      );
+      if (privateSource) {
+        logPrivate(
+          state,
+          found.owner.seat,
+          detail,
+          gameLogMessage(
+            `a card is put on the ${toBottom ? "bottom" : "top"} of the deck`,
+            "engine.log.card.put.on.deck.position.hidden",
+            { position: toBottom ? "bottom" : "top" },
+          ),
+        );
+      } else logPublic(state, detail);
       return true;
     },
     putOnDeckAtDepth(instanceId, depth) {
@@ -2217,9 +2426,22 @@ export function makeCtx(
       }
       if (found.fromArena) runtime.commands.fireLeaveArena(state, found.owner.seat, found.card, "deck");
       const suffix = depth === 1 ? "st" : depth === 2 ? "nd" : depth === 3 ? "rd" : "th";
-      const detail = `${nameOf(state, found.card.cardId)} is put ${depth}${suffix} from the top of the deck`;
+      const detail = gameLogMessage(
+        `${nameOf(state, found.card.cardId)} is put ${depth}${suffix} from the top of the deck`,
+        "engine.log.card.put.at.deck.depth",
+        { card: logCardValue(found.card.cardId), depth },
+      );
       if (privateSource) {
-        logPrivate(state, found.owner.seat, detail, `a card is put ${depth}${suffix} from the top of the deck`);
+        logPrivate(
+          state,
+          found.owner.seat,
+          detail,
+          gameLogMessage(
+            `a card is put ${depth}${suffix} from the top of the deck`,
+            "engine.log.card.put.at.deck.depth.hidden",
+            { depth },
+          ),
+        );
       } else {
         logPublic(state, detail);
       }
@@ -2264,14 +2486,22 @@ export function makeCtx(
         );
         const requiredZones = (d.subtypes ?? []).includes("2h") ? 2 : 1;
         if (occupiedZones + requiredZones > 2) {
-          logPublic(state, `${d.name} can't be equipped (no empty weapon zone)`);
+          logPublic(state, gameLogMessage(
+            `${d.name} can't be equipped (no empty weapon zone)`,
+            "engine.log.card.equip.failed.no.weapon.zone",
+            { card: logCardValue(cardId) },
+          ));
           return undefined;
         }
         const token = runtime.commands.createTokenFor(state, target, cardId, tokenCreationCause);
         if (!token) return undefined;
         removeFromArray(target.board, token.instanceId);
         target.weapons.push(token);
-        logPublic(state, `${d.name} is equipped to a weapon zone`);
+        logPublic(state, gameLogMessage(
+          `${d.name} is equipped to a weapon zone`,
+          "engine.log.card.equipped.to.weapon.zone",
+          { card: logCardValue(cardId) },
+        ));
         return token;
       }
       if (d.cardType === "equipment") {
@@ -2279,17 +2509,29 @@ export function makeCtx(
           (d.subtypes ?? []).includes(s),
         );
         if (!slot || target.equipment[slot]) {
-          logPublic(state, `${d.name} can't be equipped (no free equipment zone)`);
+          logPublic(state, gameLogMessage(
+            `${d.name} can't be equipped (no free equipment zone)`,
+            "engine.log.card.equip.failed.no.equipment.zone",
+            { card: logCardValue(cardId) },
+          ));
           return undefined;
         }
         const token = runtime.commands.createTokenFor(state, target, cardId, tokenCreationCause);
         if (!token) return undefined;
         removeFromArray(target.board, token.instanceId);
         target.equipment[slot] = token;
-        logPublic(state, `${d.name} is equipped to the ${slot} zone`);
+        logPublic(state, gameLogMessage(
+          `${d.name} is equipped to the ${slot} zone`,
+          "engine.log.card.equipped.to.slot",
+          { card: logCardValue(cardId), slot },
+        ));
         return token;
       }
-      logPublic(state, `${d.name} can't be equipped`);
+      logPublic(state, gameLogMessage(
+        `${d.name} can't be equipped`,
+        "engine.log.card.equip.failed",
+        { card: logCardValue(cardId) },
+      ));
       return undefined;
     },
     equipFromGraveyard(instanceId) {
@@ -2305,7 +2547,11 @@ export function makeCtx(
         removeFromArray(owner.graveyard, instanceId);
         owner.weapons.push(card);
         runtime.events.fireCardLeavesGraveyard(state, owner.seat, card, "arena");
-        logPublic(state, `${d.name} is equipped from the graveyard`);
+        logPublic(state, gameLogMessage(
+          `${d.name} is equipped from the graveyard`,
+          "engine.log.card.equipped.from.graveyard",
+          { card: logCardValue(card.cardId) },
+        ));
         runtime.events.runHook(state, owner.seat, card, "onEnterArena");
         runtime.events.fireFriendlyEnterArena(state, owner.seat, card);
         return true;
@@ -2318,7 +2564,11 @@ export function makeCtx(
         removeFromArray(owner.graveyard, instanceId);
         owner.equipment[slot] = card;
         runtime.events.fireCardLeavesGraveyard(state, owner.seat, card, "arena");
-        logPublic(state, `${d.name} is equipped from the graveyard`);
+        logPublic(state, gameLogMessage(
+          `${d.name} is equipped from the graveyard`,
+          "engine.log.card.equipped.from.graveyard",
+          { card: logCardValue(card.cardId) },
+        ));
         runtime.events.runHook(state, owner.seat, card, "onEnterArena");
         runtime.events.fireFriendlyEnterArena(state, owner.seat, card);
         return true;
@@ -2345,7 +2595,11 @@ export function makeCtx(
         player.equipment[slot] = card;
       } else return false;
       resetActivatedAbilityUsage(player, card.instanceId);
-      logPublic(state, `${d.name} is equipped from banish`);
+      logPublic(state, gameLogMessage(
+        `${d.name} is equipped from banish`,
+        "engine.log.card.equipped.from.banish",
+        { card: logCardValue(card.cardId) },
+      ));
       runtime.events.runHook(state, player.seat, card, "onEnterArena");
       runtime.events.fireFriendlyEnterArena(state, player.seat, card);
       return true;
@@ -2371,7 +2625,11 @@ export function makeCtx(
         removeFromArray(inventory, instanceId);
         player.equipment[slot] = card;
       } else return false;
-      logPublic(state, `${d.name} is equipped from inventory`);
+      logPublic(state, gameLogMessage(
+        `${d.name} is equipped from inventory`,
+        "engine.log.card.equipped.from.inventory",
+        { card: logCardValue(card.cardId) },
+      ));
       runtime.events.runHook(state, player.seat, card, "onEnterArena");
       runtime.events.fireFriendlyEnterArena(state, player.seat, card);
       return true;
@@ -2389,7 +2647,15 @@ export function makeCtx(
         player.equipment[ordinarySlot] = card;
         logPublic(
           state,
-          `${nameOf(state, player.heroCardId)} equips ${nameOf(state, card.cardId)} from ${nameOf(state, opposing.heroCardId)}`,
+          gameLogMessage(
+            `${nameOf(state, player.heroCardId)} equips ${nameOf(state, card.cardId)} from ${nameOf(state, opposing.heroCardId)}`,
+            "engine.log.card.equipped.from.opponent",
+            {
+              hero: logCardValue(player.heroCardId),
+              card: logCardValue(card.cardId),
+              opponent: logCardValue(opposing.heroCardId),
+            },
+          ),
         );
         return true;
       }
@@ -2408,7 +2674,15 @@ export function makeCtx(
       player.weapons.push(card);
       logPublic(
         state,
-        `${nameOf(state, player.heroCardId)} equips ${nameOf(state, card.cardId)} from ${nameOf(state, opposing.heroCardId)}`,
+        gameLogMessage(
+          `${nameOf(state, player.heroCardId)} equips ${nameOf(state, card.cardId)} from ${nameOf(state, opposing.heroCardId)}`,
+          "engine.log.card.equipped.from.opponent",
+          {
+            hero: logCardValue(player.heroCardId),
+            card: logCardValue(card.cardId),
+            opponent: logCardValue(opposing.heroCardId),
+          },
+        ),
       );
       return true;
     },
@@ -2425,15 +2699,27 @@ export function makeCtx(
       if (!card) return false;
       delete owner.equipment[current];
       owner.equipment[slot] = card;
-      logPublic(state, `${nameOf(state, card.cardId)} moves from the ${current} zone to the ${slot} zone`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, card.cardId)} moves from the ${current} zone to the ${slot} zone`,
+        "engine.log.card.equipment.zone.changed",
+        { card: logCardValue(card.cardId), from: current, to: slot },
+      ));
       return true;
     },
     becomeHero(cardId) {
       player.hero.originalHeroCardId ??= player.heroCardId;
+      const oldHeroCardId = player.heroCardId;
       const oldName = nameOf(state, player.heroCardId);
       player.hero.cardId = cardId;
       player.heroCardId = cardId;
-      logPublic(state, `${oldName} becomes ${nameOf(state, cardId)}`);
+      logPublic(state, gameLogMessage(
+        `${oldName} becomes ${nameOf(state, cardId)}`,
+        "engine.log.hero.becomes",
+        {
+          previous: logCardValue(oldHeroCardId),
+          hero: logCardValue(cardId),
+        },
+      ));
       scriptOf(state, cardId, player.hero)?.onBecomeHero?.(runtime.makeCtx(state, seat, player.hero));
     },
     becomeHeroFromInventory(instanceId) {
@@ -2445,6 +2731,7 @@ export function makeCtx(
       if (!next || next.cardType !== "hero") return false;
       removeFromArray(inventory, instanceId);
       const oldHero = player.hero;
+      const oldHeroCardId = player.heroCardId;
       const oldName = nameOf(state, player.heroCardId);
       player.soul.push(oldHero);
       inventoryCard.originalHeroCardId ??= inventoryCard.cardId;
@@ -2452,7 +2739,14 @@ export function makeCtx(
       player.heroCardId = inventoryCard.cardId;
       player.life = next.life ?? player.life;
       player.intellect = next.intellect ?? player.intellect;
-      logPublic(state, `${oldName} transforms into ${nameOf(state, inventoryCard.cardId)}`);
+      logPublic(state, gameLogMessage(
+        `${oldName} transforms into ${nameOf(state, inventoryCard.cardId)}`,
+        "engine.log.hero.transforms.into",
+        {
+          previous: logCardValue(oldHeroCardId),
+          hero: logCardValue(inventoryCard.cardId),
+        },
+      ));
       scriptOf(state, inventoryCard.cardId, inventoryCard)?.onBecomeHero?.(
         runtime.makeCtx(state, seat, inventoryCard),
       );
@@ -2465,10 +2759,18 @@ export function makeCtx(
       player.hero.temporaryHeroOriginalCardId ??= player.hero.cardId;
       player.hero.temporaryHeroUntilTurn = state.turn +
         (state.activePlayer === seat ? 2 : 1);
+      const oldHeroCardId = player.heroCardId;
       const oldName = nameOf(state, player.heroCardId);
       player.hero.cardId = cardId;
       player.heroCardId = cardId;
-      logPublic(state, `${oldName} becomes ${nameOf(state, cardId)} until the start of their next turn`);
+      logPublic(state, gameLogMessage(
+        `${oldName} becomes ${nameOf(state, cardId)} until the start of their next turn`,
+        "engine.log.hero.becomes.until.next.turn",
+        {
+          previous: logCardValue(oldHeroCardId),
+          hero: logCardValue(cardId),
+        },
+      ));
       scriptOf(state, cardId, player.hero)?.onBecomeHero?.(runtime.makeCtx(state, seat, player.hero));
     },
     preventNextDamage(targetSeat, amount, sourceInstanceId) {
@@ -2477,10 +2779,11 @@ export function makeCtx(
         // generic shield on the target hero (Seeker's Mitts, ...)
         target.flags.preventNextDamage =
           (Number(target.flags.preventNextDamage) || 0) + amount;
-        logPublic(
-          state,
+        logPublic(state, gameLogMessage(
           `the next ${amount} damage to ${nameOf(state, target.heroCardId)} will be prevented this turn`,
-        );
+          "engine.log.prevention.next.damage",
+          { hero: logCardValue(target.heroCardId), amount },
+        ));
         ctx.addModifier({
           scope: "until-end-of-turn",
           seat: targetSeat,
@@ -2499,10 +2802,15 @@ export function makeCtx(
         preventNextDamagePool: amount,
         appliesToInstanceId: sourceInstanceId,
       });
-      logPublic(
-        state,
+      logPublic(state, gameLogMessage(
         `${nameOf(state, src.card.cardId)}'s next ${amount} damage to ${nameOf(state, (state.players[targetSeat] as PlayerState).heroCardId)} will be prevented this turn`,
-      );
+        "engine.log.prevention.source.next.damage",
+        {
+          source: logCardValue(src.card.cardId),
+          hero: logCardValue((state.players[targetSeat] as PlayerState).heroCardId),
+          amount,
+        },
+      ));
     },
     preventNextDamageEvent(targetSeat, amount) {
       if (amount <= 0 || !state.players[targetSeat]) return;
@@ -2511,10 +2819,14 @@ export function makeCtx(
         seat: targetSeat,
         preventNextDamageAmount: amount,
       });
-      logPublic(
-        state,
+      logPublic(state, gameLogMessage(
         `the next time ${nameOf(state, (state.players[targetSeat] as PlayerState).heroCardId)} would be dealt damage this turn, up to ${amount} of that damage will be prevented`,
-      );
+        "engine.log.prevention.next.event",
+        {
+          hero: logCardValue((state.players[targetSeat] as PlayerState).heroCardId),
+          amount,
+        },
+      ));
     },
     preventNextDamageAtMost(targetSeat, amount, maximumEventAmount) {
       if (amount <= 0 || maximumEventAmount <= 0 || !state.players[targetSeat]) return;
@@ -2524,10 +2836,15 @@ export function makeCtx(
         preventNextDamageAmount: amount,
         maxDamageEventAmount: maximumEventAmount,
       });
-      logPublic(
-        state,
+      logPublic(state, gameLogMessage(
         `the next damage event of ${maximumEventAmount} or less to ${nameOf(state, (state.players[targetSeat] as PlayerState).heroCardId)} will have up to ${amount} damage prevented this turn`,
-      );
+        "engine.log.prevention.next.event.at.most",
+        {
+          hero: logCardValue((state.players[targetSeat] as PlayerState).heroCardId),
+          maximum: maximumEventAmount,
+          amount,
+        },
+      ));
     },
     preventNextDamageFromType(targetSeat, amount, sourceType) {
       if (amount <= 0 || !sourceType || !state.players[targetSeat]) return;
@@ -2537,10 +2854,15 @@ export function makeCtx(
         preventNextDamageAmount: amount,
         appliesToDamageSourceType: sourceType,
       });
-      logPublic(
-        state,
+      logPublic(state, gameLogMessage(
         `the next ${amount} damage from a ${sourceType} source to ${nameOf(state, (state.players[targetSeat] as PlayerState).heroCardId)} will be prevented this turn`,
-      );
+        "engine.log.prevention.next.damage.from.type",
+        {
+          hero: logCardValue((state.players[targetSeat] as PlayerState).heroCardId),
+          amount,
+          type: sourceType,
+        },
+      ));
     },
     preventNextDamageEvents(targetSeat, amount, events) {
       if (amount <= 0 || events <= 0 || !state.players[targetSeat]) return;
@@ -2550,10 +2872,15 @@ export function makeCtx(
         preventDamagePerEvent: amount,
         preventDamageEventsRemaining: events,
       });
-      logPublic(
-        state,
+      logPublic(state, gameLogMessage(
         `the next ${events} damage events to ${nameOf(state, (state.players[targetSeat] as PlayerState).heroCardId)} will each have ${amount} damage prevented this turn`,
-      );
+        "engine.log.prevention.next.events",
+        {
+          hero: logCardValue((state.players[targetSeat] as PlayerState).heroCardId),
+          events,
+          amount,
+        },
+      ));
     },
     redirectNextHeroDamage(fromSeat, toSeat, prevent) {
       if (!state.players[fromSeat] || !state.players[toSeat] || fromSeat === toSeat) return;
@@ -2564,10 +2891,14 @@ export function makeCtx(
         redirectDamageToSeat: toSeat,
         redirectDamagePrevent: Math.max(0, prevent),
       });
-      logPublic(
-        state,
+      logPublic(state, gameLogMessage(
         `the next damage to ${nameOf(state, (state.players[fromSeat] as PlayerState).heroCardId)} will be redirected to ${nameOf(state, (state.players[toSeat] as PlayerState).heroCardId)} this turn`,
-      );
+        "engine.log.damage.next.redirected",
+        {
+          from: logCardValue((state.players[fromSeat] as PlayerState).heroCardId),
+          to: logCardValue((state.players[toSeat] as PlayerState).heroCardId),
+        },
+      ));
     },
     preventNextPhysicalDamage(targetSeat, amount) {
       if (amount <= 0) return;
@@ -2575,10 +2906,11 @@ export function makeCtx(
       if (!target) return;
       target.flags.preventNextPhysicalDamage =
         (Number(target.flags.preventNextPhysicalDamage) || 0) + amount;
-      logPublic(
-        state,
+      logPublic(state, gameLogMessage(
         `the next physical damage event to ${nameOf(state, target.heroCardId)} will have up to ${amount} damage prevented this turn`,
-      );
+        "engine.log.prevention.next.physical.event",
+        { hero: logCardValue(target.heroCardId), amount },
+      ));
     },
     preventNextArcaneDamage(targetSeat, amount) {
       if (amount <= 0) return;
@@ -2586,21 +2918,17 @@ export function makeCtx(
       if (!target) return;
       target.flags.preventNextArcaneDamage =
         (Number(target.flags.preventNextArcaneDamage) || 0) + amount;
-      logPublic(
-        state,
+      logPublic(state, gameLogMessage(
         `the next ${amount} arcane damage to ${nameOf(state, target.heroCardId)} will be prevented this turn`,
-      );
+        "engine.log.prevention.next.arcane.damage",
+        { hero: logCardValue(target.heroCardId), amount },
+      ));
     },
     logPublic(entry) {
-      logPublic(
-        state,
-        typeof entry === "string"
-          ? tagKnownLogCardNames(state, entry, referencedLogCardIds)
-          : {
-              ...entry,
-              fallback: tagKnownLogCardNames(state, entry.fallback, referencedLogCardIds),
-            },
-      );
+      logPublic(state, {
+        ...entry,
+        fallback: tagKnownLogCardNames(state, entry.fallback, referencedLogCardIds),
+      });
     },
     logPrivate(targetSeat, privateEntry, publicEntry) {
       const tagged = (entry: string | GameLogPayload) =>
@@ -2691,9 +3019,16 @@ export function discardToGraveyard(
   runtime.commands.moveToGraveyard(state, card, "hand", causedBySeat);
   logPublic(
     state,
-    atRandom
-      ? `${nameOf(state, p.heroCardId)} discards ${logNameOf(state, card.cardId)} at random`
-      : `${nameOf(state, p.heroCardId)} discards ${logNameOf(state, card.cardId)}`,
+    gameLogMessage(
+      atRandom
+        ? `${nameOf(state, p.heroCardId)} discards ${logNameOf(state, card.cardId)} at random`
+        : `${nameOf(state, p.heroCardId)} discards ${logNameOf(state, card.cardId)}`,
+      atRandom ? "engine.log.card.discarded.random" : "engine.log.card.discarded",
+      {
+        hero: logCardValue(p.heroCardId),
+        card: logCardValue(card.cardId),
+      },
+    ),
   );
 }
 

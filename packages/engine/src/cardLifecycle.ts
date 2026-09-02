@@ -3,7 +3,14 @@ import { cardAbilitiesSuppressed, dataOf, scriptOf } from "./cardProperties.js";
 import { controlledPermanents, hookSources, lingeringModifierSources } from "./sourceQueries.js";
 import { queueDecisionBehindCrank } from "./decisionQueue.js";
 
-import { logPublic, nameOf } from "./gameLog.js";
+import {
+  cardEntersArenaLogMessage,
+  cardTappedLogMessage,
+  gameLogMessage,
+  logCardValue,
+  logPublic,
+  nameOf,
+} from "./gameLog.js";
 import type { GameStateInternal } from "./runtimeState.js";
 
 import type { CardInstance, PendingDecisionState, PlayerState } from "./state.js";
@@ -253,7 +260,7 @@ export function tapPermanent(
   if (!tapped && !canUntapPermanent(state, runtime, found.card)) return false;
   if (tapped) found.card.tapped = true;
   else delete found.card.tapped;
-  logPublic(state, `${nameOf(state, found.card.cardId)} ${tapped ? "taps" : "untaps"}`);
+  logPublic(state, cardTappedLogMessage(state, found.card.cardId, tapped));
   return true;
 }
 
@@ -321,7 +328,11 @@ export function settlePlayedCard(
       card.subcards = [base];
     }
     player.equipment[slot] = card;
-    logPublic(state, `${nameOf(state, card.cardId)} is equipped to the ${slot} zone`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, card.cardId)} is equipped to the ${slot} zone`,
+      "engine.log.card.equipped.to.slot",
+      { card: logCardValue(card.cardId), slot },
+    ));
     runtime.events.runHook(state, player.seat, card, "onEnterArena", currentLink(state));
     if (base) {
       runtime.commands.fireTransformHook(state, player.seat, base, "into", card);
@@ -334,7 +345,7 @@ export function settlePlayedCard(
     stampEnteringLife(state, card);
     player.board.push(card);
     stampControlledName(state, player, card);
-    logPublic(state, `${nameOf(state, card.cardId)} enters the arena`);
+    logPublic(state, cardEntersArenaLogMessage(state, card.cardId));
     runtime.events.runHook(state, player.seat, card, "onEnterArena", currentLink(state));
     if (!offerCrankDecision(state, runtime, player, card, opts?.allowCrank !== false)) {
       runtime.events.fireFriendlyEnterArena(state, player.seat, card);

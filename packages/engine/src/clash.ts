@@ -2,7 +2,12 @@ import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import { cardHasName, dataOf, scriptOf } from "./cardProperties.js";
 import { basePowerOf } from "./combatValues.js";
-import { logPublic, nameOf } from "./gameLog.js";
+import {
+  gameLogMessage,
+  logCardValue,
+  logPublic,
+  nameOf,
+} from "./gameLog.js";
 import type { CardInstance, PendingDecisionState, PlayerState } from "./state.js";
 import { currentLink, findCardAnywhere, opponent } from "./zoneQueries.js";
 import { destroyPermanent } from "./zoneMoves.js";
@@ -19,7 +24,11 @@ export function crowdBoo(state: GameStateInternal,
   runtime: EngineRuntime, seat: number): void {
   const p = state.players[seat] as PlayerState;
   p.flags.booedThisTurn = true;
-  logPublic(state, `The crowd boos ${nameOf(state, p.heroCardId)}`);
+  logPublic(state, gameLogMessage(
+    `The crowd boos ${nameOf(state, p.heroCardId)}`,
+    "engine.log.crowd.boos",
+    { hero: logCardValue(p.heroCardId) },
+  ));
   runtime.events.runHook(state, seat, p.hero, "onBooed");
 }
 
@@ -29,7 +38,11 @@ export function crowdCheer(state: GameStateInternal,
   runtime: EngineRuntime, seat: number): void {
   const p = state.players[seat] as PlayerState;
   p.flags.cheeredThisTurn = true;
-  logPublic(state, `The crowd cheers ${nameOf(state, p.heroCardId)}`);
+  logPublic(state, gameLogMessage(
+    `The crowd cheers ${nameOf(state, p.heroCardId)}`,
+    "engine.log.crowd.cheers",
+    { hero: logCardValue(p.heroCardId) },
+  ));
   runtime.events.runHook(state, seat, p.hero, "onCheered");
 }
 
@@ -48,8 +61,24 @@ function revealClash(state: GameStateInternal,
   const topB = b.deck[0];
   const powA = topA ? basePowerOf(state, runtime, aSeat, topA, dataOf(state, topA.cardId).attack ?? 0) : -1;
   const powB = topB ? basePowerOf(state, runtime, bSeat, topB, dataOf(state, topB.cardId).attack ?? 0) : -1;
-  if (topA) logPublic(state, `${nameOf(state, a.heroCardId)} reveals ${nameOf(state, topA.cardId)} (${powA} power)`);
-  if (topB) logPublic(state, `${nameOf(state, b.heroCardId)} reveals ${nameOf(state, topB.cardId)} (${powB} power)`);
+  if (topA) logPublic(state, gameLogMessage(
+    `${nameOf(state, a.heroCardId)} reveals ${nameOf(state, topA.cardId)} (${powA} power)`,
+    "engine.log.clash.reveals",
+    {
+      hero: logCardValue(a.heroCardId),
+      card: logCardValue(topA.cardId),
+      power: powA,
+    },
+  ));
+  if (topB) logPublic(state, gameLogMessage(
+    `${nameOf(state, b.heroCardId)} reveals ${nameOf(state, topB.cardId)} (${powB} power)`,
+    "engine.log.clash.reveals",
+    {
+      hero: logCardValue(b.heroCardId),
+      card: logCardValue(topB.cardId),
+      power: powB,
+    },
+  ));
   let winner = powA === powB ? -1 : powA > powB ? aSeat : bSeat;
   for (const [seat, card] of [[aSeat, topA], [bSeat, topB]] as const) {
     if (!card || winner === seat) continue;
@@ -75,9 +104,17 @@ function finishClashAttempt(
   attempt: ClashAttempt,
 ): void {
   if (attempt.winner < 0) {
-    logPublic(state, "The clash is a tie — no winner");
+    logPublic(state, gameLogMessage(
+      "The clash is a tie — no winner",
+      "engine.log.clash.tie",
+    ));
   } else {
-    logPublic(state, `${nameOf(state, (state.players[attempt.winner] as PlayerState).heroCardId)} wins the clash`);
+    const winner = state.players[attempt.winner] as PlayerState;
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, winner.heroCardId)} wins the clash`,
+      "engine.log.clash.winner",
+      { hero: logCardValue(winner.heroCardId) },
+    ));
   }
   for (const revealed of attempt.revealed) {
     const found = findCardAnywhere(state, revealed.instanceId);
@@ -324,7 +361,11 @@ export function answerClashDecision(
     transitionZone("deck", owner.seat, "bottom"),
     { to: true },
   );
-  logPublic(state, `${nameOf(state, card.cardId)} is put on the bottom of its owner's deck`);
+  logPublic(state, gameLogMessage(
+    `${nameOf(state, card.cardId)} is put on the bottom of its owner's deck`,
+    "engine.log.card.put.on.owner.deck.bottom",
+    { card: logCardValue(card.cardId) },
+  ));
   resolveClashRequest(state, runtime, clashState.request, clashState.queue);
   return undefined;
 }

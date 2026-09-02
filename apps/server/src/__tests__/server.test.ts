@@ -751,6 +751,10 @@ describe("server rooms over websocket", () => {
     expect(undone.view.turn).toBe(before.view.turn);
     expect(undone.view.priorityPlayer).toBe(before.view.priorityPlayer);
     expect(undone.view.log).toEqual([...before.view.log, "⤺ the last action was undone"]);
+    expect(undone.view.logEntries?.at(-1)).toMatchObject({
+      fallback: "⤺ the last action was undone",
+      message: { id: "server.log.undo.last.action" },
+    });
 
     a.ws.close();
     b.ws.close();

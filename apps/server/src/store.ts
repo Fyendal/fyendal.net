@@ -5,6 +5,7 @@ import {
   type Decklist,
   type EquipmentSlot,
   type Format,
+  type GameLogPayload,
   type GameIntent,
   type HeroId,
   type MatchPrepPhase,
@@ -296,6 +297,21 @@ function appendGameLog(
   entry: GameState["log"][number],
 ): GameState["log"] {
   return [...log, entry].slice(-GAME_LOG_CAP);
+}
+
+function appendSemanticGameLog(
+  state: GameState,
+  payload: GameLogPayload,
+): Pick<GameState, "log" | "nextLogSequence"> {
+  const sequence = state.nextLogSequence ?? 1;
+  return {
+    log: appendGameLog(state.log, {
+      publicText: payload.fallback,
+      publicPayload: payload,
+      sequence,
+    }),
+    nextLogSequence: sequence + 1,
+  };
 }
 
 function newCode(): string {
@@ -2686,9 +2702,18 @@ export class PgRoomStore {
         const undoText = target === "last-action"
           ? "⤺ the last action was undone"
           : `⤺ returned to the beginning of turn ${prev.turn}`;
+        const undoPayload: GameLogPayload = {
+          fallback: undoText,
+          message: target === "last-action"
+            ? { id: "server.log.undo.last.action" }
+            : {
+                id: "server.log.undo.turn.start",
+                values: { turn: prev.turn },
+              },
+        };
         room.state = {
           ...prev,
-          log: appendGameLog(prev.log, { publicText: undoText }),
+          ...appendSemanticGameLog(prev, undoPayload),
         };
         // The restored snapshot can hold an empty window for a seat that
         // opted into auto-pass after the snapshot was written; pass it out
@@ -2759,8 +2784,12 @@ export class PgRoomStore {
       room.state = {
         ...room.state,
         winner: seatIdx as 0 | 1,
-        log: appendGameLog(room.state.log, {
-          publicText: `🏳 ${name} claims victory — the opponent was idle`,
+        ...appendSemanticGameLog(room.state, {
+          fallback: `🏳 ${name} claims victory — the opponent was idle`,
+          message: {
+            id: "server.log.victory.claimed.idle",
+            values: { player: name },
+          },
         }),
       };
       return { room, result: undefined, snapshot, replay: { kind: "frame" } };

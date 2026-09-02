@@ -7,7 +7,15 @@ import {
   scriptOf,
 } from "./cardProperties.js";
 import { basePowerOf } from "./combatValues.js";
-import { logPrivate, logPublic, nameOf } from "./gameLog.js";
+import {
+  cardDestroyedLogMessage,
+  cardPutOnDeckBottomLogMessage,
+  gameLogMessage,
+  logCardValue,
+  logPrivate,
+  logPublic,
+  nameOf,
+} from "./gameLog.js";
 import type { CardInstance, PlayerState } from "./state.js";
 import {
   currentLink,
@@ -66,7 +74,11 @@ function enterGraveyard(
   //  anywhere, instead it ceases to exist" — no graveyard, no graveyard flags
   //  or triggers
   if (!cardAbilitiesSuppressed(state, card) && (dataOf(state, card.cardId).keywords ?? []).some((k) => k.toLowerCase() === "ephemeral")) {
-    logPublic(state, `${nameOf(state, card.cardId)} ceases to exist (Ephemeral)`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, card.cardId)} ceases to exist (Ephemeral)`,
+      "engine.log.card.ceases.to.exist.ephemeral",
+      { card: logCardValue(card.cardId) },
+    ));
     return;
   }
   clearPlayFromZoneGrant(card);
@@ -83,7 +95,11 @@ function enterGraveyard(
   delete card.defCounters;
   owner.graveyard.push(card);
   if (from === "deck") {
-    logPublic(state, `${nameOf(state, card.cardId)} is put into the graveyard from deck`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, card.cardId)} is put into the graveyard from deck`,
+      "engine.log.card.put.into.graveyard.from.deck",
+      { card: logCardValue(card.cardId) },
+    ));
   }
   const wateryGrave =
     (from === "arena" || from === "chain") &&
@@ -101,7 +117,11 @@ function enterGraveyard(
       optional: false,
       engineEffect: { kind: "watery-grave" },
     });
-    logPublic(state, `${nameOf(state, card.cardId)} triggers Watery Grave`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, card.cardId)} triggers Watery Grave`,
+      "engine.log.trigger.watery.grave",
+      { card: logCardValue(card.cardId) },
+    ));
   }
   // The graveyard is public and cards enter it face up. Determine leave-arena
   // abilities above using the source's prior orientation, then normalize it.
@@ -172,7 +192,7 @@ export function moveToGraveyard(state: GameStateInternal,
       transitionZone("deck", owner.seat, "bottom"),
       { from: sourcePrivate, to: true },
     );
-    logPublic(state, `${nameOf(state, card.cardId)} is put on the bottom of the deck`);
+    logPublic(state, cardPutOnDeckBottomLogMessage(state, card.cardId));
     return;
   }
   if (replacement === "banish") {
@@ -187,7 +207,11 @@ export function moveToGraveyard(state: GameStateInternal,
   }
   if (replacement === "cease-to-exist") {
     runtime.transitions.move(card, source, null, { from: sourcePrivate });
-    logPublic(state, `${nameOf(state, card.cardId)} ceases to exist`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, card.cardId)} ceases to exist`,
+      "engine.log.card.ceases.to.exist",
+      { card: logCardValue(card.cardId) },
+    ));
     return;
   }
   const ceases = dataOf(state, card.cardId).cardType === "token"
@@ -244,7 +268,11 @@ export function destroyPermanent(state: GameStateInternal,
       card,
     ) === true);
     if (protectedBy) {
-      logPublic(state, `${nameOf(state, card.cardId)} can't be destroyed by the opposing effect`);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, card.cardId)} can't be destroyed by the opposing effect`,
+        "engine.log.card.destroy.prevented.opposing.effect",
+        { card: logCardValue(card.cardId) },
+      ));
       return false;
     }
   }
@@ -283,12 +311,16 @@ export function destroyPermanent(state: GameStateInternal,
       null,
     );
     fireLeaveArena(state, runtime, controllerSeat, card, "cease-to-exist");
-    logPublic(state, `${nameOf(state, card.cardId)} ceases to exist (Incarnate)`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, card.cardId)} ceases to exist (Incarnate)`,
+      "engine.log.card.ceases.to.exist.incarnate",
+      { card: logCardValue(card.cardId) },
+    ));
     return true;
   }
   moveToGraveyard(state, runtime, card, "arena", seat);
   fireLeaveArena(state, runtime, controllerSeat, card, "graveyard");
-  logPublic(state, `${nameOf(state, card.cardId)} is destroyed`);
+  logPublic(state, cardDestroyedLogMessage(state, card.cardId));
   runtime.events.runHook(state, controllerSeat, card, "onDestroyed");
   runtime.events.fireFriendlyDestroyed(state, controllerSeat, card, seat);
   // an ally that dies while it is the attacking card of a chain link notifies
@@ -324,7 +356,7 @@ export function destroyControlledCard(
     ) {
       link.flags.attackGone = true;
       moveToGraveyard(state, runtime, link.attackingCard, "chain", seat);
-      logPublic(state, `${nameOf(state, link.attackingCard.cardId)} is destroyed`);
+      logPublic(state, cardDestroyedLogMessage(state, link.attackingCard.cardId));
       runtime.events.runHook(state, seat, link.attackingCard, "onDestroyed", link);
       runtime.events.fireFriendlyDestroyed(state, seat, link.attackingCard, seat);
       return true;
@@ -336,7 +368,7 @@ export function destroyControlledCard(
     if (defending) {
       removeFromArray(link.defendingCards, defending.instanceId);
       moveToGraveyard(state, runtime, defending, "chain", seat);
-      logPublic(state, `${nameOf(state, defending.cardId)} is destroyed`);
+      logPublic(state, cardDestroyedLogMessage(state, defending.cardId));
       runtime.events.runHook(state, seat, defending, "onDestroyed", link);
       runtime.events.fireFriendlyDestroyed(state, seat, defending, seat);
       return true;
@@ -348,7 +380,7 @@ export function destroyControlledCard(
     if (reaction) {
       removeFromArray(link.reactions, reaction.instanceId);
       moveToGraveyard(state, runtime, reaction, "chain", seat);
-      logPublic(state, `${nameOf(state, reaction.cardId)} is destroyed`);
+      logPublic(state, cardDestroyedLogMessage(state, reaction.cardId));
       runtime.events.runHook(state, seat, reaction, "onDestroyed", link);
       runtime.events.fireFriendlyDestroyed(state, seat, reaction, seat);
       return true;
@@ -373,7 +405,11 @@ export function enterSoul(
   if (scriptOf(state, card.cardId, card)?.replacesSoulMoveWithArena === true) {
     owner.board.push(card);
     stampControlledName(state, owner, card);
-    logPublic(state, `${nameOf(state, card.cardId)} enters the arena instead of its hero's soul`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, card.cardId)} enters the arena instead of its hero's soul`,
+      "engine.log.card.enters.arena.instead.of.soul",
+      { card: logCardValue(card.cardId) },
+    ));
     runtime.events.runHook(state, owner.seat, card, "onEnterArena");
     runtime.events.fireFriendlyEnterArena(state, owner.seat, card);
     return;
@@ -382,10 +418,14 @@ export function enterSoul(
   owner.flags.soulThisTurn = true;
   const color = cardColorOf(state, card);
   owner.flags[`soulPitch:${color}`] = (Number(owner.flags[`soulPitch:${color}`]) || 0) + 1;
-  logPublic(
-    state,
+  logPublic(state, gameLogMessage(
     `${nameOf(state, owner.heroCardId)} ${charged ? "charges" : "puts"} ${nameOf(state, card.cardId)} into their hero's soul`,
-  );
+    charged ? "engine.log.card.charged" : "engine.log.card.put.into.soul",
+    {
+      hero: logCardValue(owner.heroCardId),
+      card: logCardValue(card.cardId),
+    },
+  ));
   for (const source of controlledPermanents(state, owner.seat, {
     faceDownEquipment: false,
   })) {
@@ -469,11 +509,23 @@ export function enterBanish(
     logPrivate(
       state,
       owner.seat,
-      `${nameOf(state, card.cardId)} is banished face down${origin}`,
-      `A face-down card is banished${origin}`,
+      gameLogMessage(
+        `${nameOf(state, card.cardId)} is banished face down${origin}`,
+        "engine.log.card.banished.facedown.private",
+        { card: logCardValue(card.cardId), origin: from },
+      ),
+      gameLogMessage(
+        `A face-down card is banished${origin}`,
+        "engine.log.card.banished.facedown.public",
+        { origin: from },
+      ),
     );
   } else {
-    logPublic(state, `${nameOf(state, card.cardId)} is banished${origin}`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, card.cardId)} is banished${origin}`,
+      "engine.log.card.banished",
+      { card: logCardValue(card.cardId), origin: from },
+    ));
   }
   if (!card.faceDown) {
     scriptOf(state, card.cardId, card)?.onSelfBanished?.(
@@ -665,9 +717,20 @@ export function putCardOnDeckBottom(
     runtime.events.fireCardLeavesGraveyard(state, found.owner.seat, found.card, "deck");
   }
   if (found.fromArena) fireLeaveArena(state, runtime, found.owner.seat, found.card, "deck", asActivationCost);
-  const detail = `${nameOf(state, found.card.cardId)} is put on the bottom of the deck`;
-  if (privateSource) logPrivate(state, found.owner.seat, detail, "a card is put on the bottom of the deck");
-  else logPublic(state, detail);
+  const detail = cardPutOnDeckBottomLogMessage(state, found.card.cardId);
+  if (privateSource) {
+    logPrivate(
+      state,
+      found.owner.seat,
+      detail,
+      gameLogMessage(
+        "a card is put on the bottom of the deck",
+        "engine.log.card.put.on.deck.bottom.hidden",
+      ),
+    );
+  } else {
+    logPublic(state, detail);
+  }
   return true;
 }
 

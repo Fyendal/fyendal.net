@@ -80,6 +80,11 @@ the boundaries below; they are release invariants, not suggestions.
 - Player-facing card logs use `localizedLog` or `localizedCardLog`. Choose
   `logPublic`, `logPrivate`, or `logForSeats` independently of localization;
   neither fallback text nor semantic values may reveal hidden information.
+- Engine `logPublic` producers must pass a semantic `GameLogPayload`, never a
+  raw player-facing string. Server-generated game-log entries (such as undo or
+  idle-victory markers) require the same payload. `catalogs.test.ts` scans every
+  engine call site and referenced server log id; add matching English and
+  localized catalog keys with the producer change.
 - Every new `TriggerDef` supplies `labelMessage` beside its English `label`.
   A custom `publicLog` also requires `publicLogMessage`.
   `packages/cards/src/trigger-messages.ts` enriches migrated legacy labels at

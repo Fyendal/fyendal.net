@@ -3,7 +3,12 @@ import { cardColorOf, cardHasName, cardHasType, cardTypesOf, dataOf, scriptOf } 
 import { payCost } from "./costs.js";
 import { controlledPermanents } from "./sourceQueries.js";
 
-import { logPublic, nameOf } from "./gameLog.js";
+import {
+  gameLogMessage,
+  logCardValue,
+  logPublic,
+  nameOf,
+} from "./gameLog.js";
 import type { GameStateInternal } from "./runtimeState.js";
 
 import { abilityList, activatedFlagKey } from "./scripts.js";
@@ -623,9 +628,23 @@ export function payActivatedAbilityCost(
   if (ability.destroySubcardCost) runtime.makeCtx(state, seat, card).destroySubcard(card.instanceId);
   if (card.faceDown && ability.turnsFaceUp) {
     card.faceDown = false;
-    logPublic(state, `${nameOf(state, player.heroCardId)} turns ${nameOf(state, card.cardId)} face up`);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, player.heroCardId)} turns ${nameOf(state, card.cardId)} face up`,
+      "engine.log.card.turned.face.up",
+      {
+        hero: logCardValue(player.heroCardId),
+        card: logCardValue(card.cardId),
+      },
+    ));
   }
-  logPublic(state, `${nameOf(state, player.heroCardId)} activates ${nameOf(state, card.cardId)}`);
+  logPublic(state, gameLogMessage(
+    `${nameOf(state, player.heroCardId)} activates ${nameOf(state, card.cardId)}`,
+    "engine.log.card.activated",
+    {
+      hero: logCardValue(player.heroCardId),
+      card: logCardValue(card.cardId),
+    },
+  ));
   runtime.events.fireOnFriendlyActivate(state, seat, card, ability.timing ?? "action");
   ability.onCostPaid?.(runtime.makeCtx(state, seat, card, currentLink(state)), paidCards);
   return undefined;
