@@ -762,7 +762,18 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "cloud cover|3": { onPlay(ctx) { ctx.preventNextDamage(ctx.seat, 1); } },
 
   "haboob|1": { modifyOpposingAttack: () => -1, modifyOpposingPower: () => -1, triggers: [{ event: "start-of-turn", whose: "any", label: "Haboob storm upkeep", effect(ctx) { const n = ctx.getCounter("storm") + 1; ctx.setCounter("storm", n); const ash = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "Ash")).slice(0, n); if (ash.length < n) ctx.destroySelf(); else for (const card of ash) ctx.destroyPermanent(card.instanceId); } }] },
-  "smoldering steel|1": { canPlay: (ctx) => !!ctx.link && hasTag(ctx, ctx.link.attackingCard, "dagger"), onPlay(ctx) { ctx.addModifier({ scope: "chain-link", attack: 1 }); ctx.setFlag("link", "penSmolderingSteel", true); } },
+  "smoldering steel|1": {
+    canPlay: (ctx) => !!ctx.link && hasTag(ctx, ctx.link.attackingCard, "dagger"),
+    onPlay(ctx) { ctx.addModifier({ scope: "chain-link", attack: 1 }); ctx.setFlag("link", "penSmolderingSteel", true); },
+    optionalFriendlyTokenCreationReplacement: {
+      sourceZone: "graveyard",
+      label: "Banish Smoldering Steel instead of creating Frostbite?",
+      condition(ctx, cardId, count) {
+        return count > 0 && named(ctx, cardId, "Frostbite");
+      },
+      effect(ctx) { ctx.banish(ctx.self.instanceId); },
+    },
+  },
   "smoldering scales|0": {
     optionalFriendlyTokenCreationReplacement: {
       label: "Destroy Smoldering Scales instead of creating Frostbite?",
