@@ -21,15 +21,22 @@ import {
   type SupportedLocale,
 } from "./locale.js";
 
-export type LocaleMessages = IntlConfig["messages"];
+export type LocaleMessages = NonNullable<IntlConfig["messages"]>;
 
 const intlCache = createIntlCache();
 
 export async function loadLocaleMessages(locale: SupportedLocale): Promise<LocaleMessages> {
-  const catalog = locale === "zh-Hans"
-    ? await import("./compiled/zh-Hans.json")
-    : await import("./compiled/en.json");
-  return catalog.default as LocaleMessages;
+  const englishCatalog = import("./compiled/en.json");
+  if (locale === "en") return (await englishCatalog).default as LocaleMessages;
+  const [english, selected] = await Promise.all([
+    englishCatalog,
+    import("./compiled/zh-Hans.json"),
+  ]);
+  return Object.assign(
+    {},
+    english.default as LocaleMessages,
+    selected.default as LocaleMessages,
+  ) as LocaleMessages;
 }
 
 interface LocaleContextValue {

@@ -11,6 +11,7 @@ import {
   decodeDeckResponse,
   decodeDecksResponse,
   decodeGameView,
+  decodeGameMessage,
   decodeLoginResponse,
   decodeOkResponse,
   decodeReplayFile,
@@ -19,6 +20,37 @@ import {
   decodeServerMessage,
   decodeStatsResponse,
 } from "../index.js";
+
+describe("semantic game messages", () => {
+  it("accepts bounded primitive and typed reference values", () => {
+    expect(decodeGameMessage({
+      id: "engine.decision.crank",
+      values: {
+        card: { kind: "card", cardId: "SEA123" },
+        player: { kind: "player", seat: 1 },
+        term: { kind: "term", id: "action-point" },
+        count: 1,
+        optional: true,
+        detail: "steam",
+      },
+    })).not.toBeNull();
+  });
+
+  it("rejects malformed, nested, oversized, and non-exact messages", () => {
+    expect(decodeGameMessage({ id: "Crank" })).toBeNull();
+    expect(decodeGameMessage({ id: "engine.crank", extra: true })).toBeNull();
+    expect(decodeGameMessage({ id: "engine.crank", values: { nested: { value: 1 } } })).toBeNull();
+    expect(decodeGameMessage({ id: "engine.crank", values: { count: 1.5 } })).toBeNull();
+    expect(decodeGameMessage({
+      id: "engine.crank",
+      values: Object.fromEntries(Array.from({ length: 17 }, (_, index) => [`value${index}`, index])),
+    })).toBeNull();
+    expect(decodeGameMessage({
+      id: "engine.crank",
+      values: { card: { kind: "card", cardId: "SEA123", name: "hidden" } },
+    })).toBeNull();
+  });
+});
 
 const player = (seat: 0 | 1) => ({
   seat,
@@ -408,6 +440,30 @@ describe("GameView and server messages", () => {
         maximumSelections: 3,
       },
     })).not.toBeNull();
+    expect(decodeGameView({
+      ...gameView(),
+      pendingDecision: {
+        player: 0,
+        kind: "optional-effect",
+        prompt: "Golden Cog: Crank?",
+        promptMessage: {
+          id: "engine.decision.crank",
+          values: { card: { kind: "card", cardId: "SEA123" } },
+        },
+        options: ["yes", "no"],
+        optionMessages: [{ id: "common.option.yes" }, { id: "common.option.no" }],
+      },
+    })).not.toBeNull();
+    expect(decodeGameView({
+      ...gameView(),
+      pendingDecision: {
+        player: 0,
+        kind: "optional-effect",
+        prompt: "Golden Cog: Crank?",
+        options: ["yes", "no"],
+        optionMessages: [{ id: "common.option.yes" }],
+      },
+    })).toBeNull();
     expect(decodeGameView({
       ...gameView(),
       pendingDecision: {

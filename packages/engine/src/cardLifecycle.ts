@@ -198,7 +198,15 @@ export function offerCrankDecision(
     player: player.seat,
     kind: "optional-effect",
     prompt: `${nameOf(state, card.cardId)}: Crank — remove a steam counter to gain 1 action point?`,
+    promptMessage: {
+      id: "engine.decision.crank",
+      values: { card: { kind: "card", cardId: card.cardId } },
+    },
     options: ["yes", "no"],
+    optionMessages: [
+      { id: "common.option.yes" },
+      { id: "common.option.no" },
+    ],
     defaultOption: "yes",
     sourceInstanceId: card.instanceId,
     chooseHook: "engine-crank",

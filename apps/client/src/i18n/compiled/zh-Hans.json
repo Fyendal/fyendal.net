@@ -129,6 +129,34 @@
       "value": "赤魂战纪在线对战"
     }
   ],
+  "common.option.no": [
+    {
+      "type": 0,
+      "value": "否"
+    }
+  ],
+  "common.option.pass": [
+    {
+      "type": 0,
+      "value": "跳过"
+    }
+  ],
+  "common.option.yes": [
+    {
+      "type": 0,
+      "value": "是"
+    }
+  ],
+  "common.shortcut.space": [
+    {
+      "type": 1,
+      "value": "label"
+    },
+    {
+      "type": 0,
+      "value": "（空格键）"
+    }
+  ],
   "discord.label": [
     {
       "type": 0,
@@ -139,6 +167,16 @@
     {
       "type": 0,
       "value": "加入 Fyendal Discord"
+    }
+  ],
+  "engine.decision.crank": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：Crank——移除一个蒸汽指示物以获得 1 个行动点？"
     }
   ],
   "footer.legal": [

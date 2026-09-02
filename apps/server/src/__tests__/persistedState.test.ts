@@ -23,6 +23,41 @@ function jsonCopy<T>(value: T): T {
 }
 
 describe("PersistedStateV1", () => {
+  it("round trips bounded semantic decision messages", () => {
+    const source = game();
+    source.pendingDecision = {
+      player: 0,
+      kind: "optional-effect",
+      prompt: "Golden Cog: Crank?",
+      promptMessage: {
+        id: "engine.decision.crank",
+        values: { card: { kind: "card", cardId: "SEA123" } },
+      },
+      options: ["yes", "no"],
+      optionMessages: [{ id: "common.option.yes" }, { id: "common.option.no" }],
+    };
+
+    const encoded = encodePersistedState(source);
+    expect(decodePersistedState(jsonCopy(encoded), "ABC123", cardData, scripts)
+      .pendingDecision).toEqual(source.pendingDecision);
+  });
+
+  it("rejects malformed semantic decision messages", () => {
+    const encoded = jsonCopy(encodePersistedState(game())) as unknown as {
+      state: { pendingDecision: Record<string, unknown> | null };
+    };
+    encoded.state.pendingDecision = {
+      player: 0,
+      kind: "optional-effect",
+      prompt: "Crank?",
+      promptMessage: { id: "not dotted", values: { nested: { value: 1 } } },
+      options: ["yes", "no"],
+    };
+
+    expect(() => decodePersistedState(encoded, "ABC123", cardData, scripts))
+      .toThrowError(CorruptRoomError);
+  });
+
   it("round trips an unresolved attack-layer continuation", () => {
     const source = game();
     source.stackResume = "start-attack-step";

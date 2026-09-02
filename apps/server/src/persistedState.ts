@@ -1,4 +1,5 @@
 import type { CardInstance, GameState, Modifier } from "@fyendal/engine";
+import type { GameMessage } from "@fyendal/shared";
 
 type JsonObject = Record<string, unknown>;
 type Seat = 0 | 1;
@@ -336,11 +337,13 @@ export interface PersistedPendingDecisionV1 {
   player: number;
   kind: "defend" | "attack-reaction" | "defense-reaction" | "priority-window" | "arsenal" | "choose-target" | "choose-name" | "order-triggers" | "optional-effect";
   prompt: string;
+  promptMessage?: GameMessage;
   options?: string[];
   minimumSelections?: number;
   maximumSelections?: number;
   defaultOption?: string;
   optionLabels?: string[];
+  optionMessages?: (GameMessage | null)[];
   optionCounts?: (number | null)[];
   sourceInstanceId?: number;
   chooseHook?: string;
@@ -581,6 +584,12 @@ const MAX_LOG_ENTRIES = 200;
 const MAX_TEXT = 2_048;
 const MAX_ARCANE_DEPTH = 8;
 const MAX_TRIGGER_COUNT = 256;
+const MAX_MESSAGE_VALUES = 16;
+const MAX_MESSAGE_VALUE_TEXT = 256;
+const MAX_MESSAGE_VALUE_KEY = 64;
+const MESSAGE_ID_RE = /^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9]*)+$/;
+const MESSAGE_VALUE_KEY_RE = /^[a-zA-Z][a-zA-Z0-9_]*$/;
+const TERM_ID_RE = /^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$/;
 
 export interface PersistedStateV1 {
   schemaVersion: 1;
@@ -656,6 +665,44 @@ function validateIntegerArray(value: unknown, code: string, path: string, nullab
     if (nullable && entry === null) return;
     integer(entry, code, `${path}[${index}]`);
   });
+}
+
+function validateGameMessage(value: unknown, code: string, path: string): void {
+  const message = exact(value, code, path, ["id"], ["values"]);
+  const messageId = string(message.id, code, `${path}.id`, 128);
+  if (!MESSAGE_ID_RE.test(messageId)) fail(code, `${path}.id`, "expected a dotted message id");
+  optional(message, "values", (rawValues, valuesPath) => {
+    const values = object(rawValues, code, valuesPath);
+    const entries = Object.entries(values);
+    if (entries.length > MAX_MESSAGE_VALUES) fail(code, valuesPath, "too many message values");
+    for (const [key, entry] of entries) {
+      const entryPath = `${valuesPath}.${key}`;
+      if (key.length > MAX_MESSAGE_VALUE_KEY || !MESSAGE_VALUE_KEY_RE.test(key)) {
+        fail(code, entryPath, "invalid message value key");
+      }
+      if (typeof entry === "string") {
+        if (entry.length > MAX_MESSAGE_VALUE_TEXT) fail(code, entryPath, "message value is too long");
+        continue;
+      }
+      if (typeof entry === "boolean" || Number.isSafeInteger(entry)) continue;
+      const reference = object(entry, code, entryPath);
+      const kind = string(reference.kind, code, `${entryPath}.kind`, 16);
+      if (kind === "card") {
+        const card = exact(reference, code, entryPath, ["kind", "cardId"]);
+        string(card.cardId, code, `${entryPath}.cardId`, 128);
+      } else if (kind === "player") {
+        const player = exact(reference, code, entryPath, ["kind", "seat"]);
+        const seat = integer(player.seat, code, `${entryPath}.seat`);
+        if (seat !== 0 && seat !== 1) fail(code, `${entryPath}.seat`, "expected seat 0 or 1");
+      } else if (kind === "term") {
+        const term = exact(reference, code, entryPath, ["kind", "id"]);
+        const termId = string(term.id, code, `${entryPath}.id`, 128);
+        if (!TERM_ID_RE.test(termId)) fail(code, `${entryPath}.id`, "invalid term id");
+      } else {
+        fail(code, `${entryPath}.kind`, "unknown message value kind");
+      }
+    }
+  }, path);
 }
 
 function validateTokenCreationCause(value: unknown, code: string, path: string): void {
@@ -1006,10 +1053,11 @@ function validateResume(value: unknown, code: string, path: string): void {
 
 function validateDecision(value: unknown, code: string, path: string, depth = 0): void {
   if (depth > 16) fail(code, path, "follow-up decision nesting is too deep");
-  const decision = exact(value, code, path, ["player", "kind", "prompt"], ["options", "minimumSelections", "maximumSelections", "defaultOption", "optionLabels", "optionCounts", "sourceInstanceId", "chooseHook", "followUpDecisions", "tokenCreationCause", "cardOptions", "revealedCardIds", "lookedCardIds", "payment", "resourcePayment", "xPayment", "variablePlayCost", "variableActivationCost", "tokenCreationReplacement", "tokenCreationReplacementOrder", "wagerLossReplacementOrder", "activationCost", "clash", "arcane", "triggerOrder", "deckBottomOrder", "dieRoll", "staged", "resume"]);
+  const decision = exact(value, code, path, ["player", "kind", "prompt"], ["promptMessage", "options", "minimumSelections", "maximumSelections", "defaultOption", "optionLabels", "optionMessages", "optionCounts", "sourceInstanceId", "chooseHook", "followUpDecisions", "tokenCreationCause", "cardOptions", "revealedCardIds", "lookedCardIds", "payment", "resourcePayment", "xPayment", "variablePlayCost", "variableActivationCost", "tokenCreationReplacement", "tokenCreationReplacementOrder", "wagerLossReplacementOrder", "activationCost", "clash", "arcane", "triggerOrder", "deckBottomOrder", "dieRoll", "staged", "resume"]);
   integer(decision.player, code, `${path}.player`);
   oneOf(decision.kind, ["defend", "attack-reaction", "defense-reaction", "priority-window", "arsenal", "choose-target", "choose-name", "order-triggers", "optional-effect"] as const, code, `${path}.kind`);
   string(decision.prompt, code, `${path}.prompt`);
+  optional(decision, "promptMessage", (v, p) => validateGameMessage(v, code, p), path);
   optional(decision, "options", (v, p) => validateStringArray(v, code, p), path);
   optional(decision, "minimumSelections", (v, p) => { integer(v, code, p); }, path);
   optional(decision, "maximumSelections", (v, p) => { integer(v, code, p); }, path);
@@ -1041,6 +1089,18 @@ function validateDecision(value: unknown, code: string, path: string, depth = 0)
     decision.options.length !== decision.optionLabels.length
   ) {
     fail(code, `${path}.optionLabels`, "must be parallel to options");
+  }
+  optional(decision, "optionMessages", (v, p) => {
+    array(v, code, p).forEach((message, index) => {
+      if (message !== null) validateGameMessage(message, code, `${p}[${index}]`);
+    });
+  }, path);
+  if (
+    Array.isArray(decision.options) &&
+    Array.isArray(decision.optionMessages) &&
+    decision.options.length !== decision.optionMessages.length
+  ) {
+    fail(code, `${path}.optionMessages`, "must be parallel to options");
   }
   optional(decision, "optionCounts", (v, p) => {
     array(v, code, p, MAX_COLLECTION).forEach((count, index) => {

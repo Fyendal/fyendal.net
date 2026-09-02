@@ -309,6 +309,21 @@ export interface PlayerView {
   board: CardView[];
 }
 
+/** A locale-independent player-facing message. Values stay deliberately
+ * shallow so protocol and persisted-state decoders can validate them exactly. */
+export interface GameMessage {
+  id: string;
+  values?: Record<string, GameMessageValue>;
+}
+
+export type GameMessageValue =
+  | string
+  | number
+  | boolean
+  | { kind: "card"; cardId: string }
+  | { kind: "player"; seat: number }
+  | { kind: "term"; id: string };
+
 export interface PendingDecision {
   player: number;
   kind:
@@ -323,6 +338,9 @@ export interface PendingDecision {
     | "optional-effect"; // yes/no scripted choice
   /** Human-readable prompt for the UI */
   prompt: string;
+  /** Semantic prompt used by localized clients. `prompt` remains during the
+   * card-script migration and is the deterministic legacy fallback. */
+  promptMessage?: GameMessage;
   /** For choose-target / optional-effect: engine-defined option ids */
   options?: string[];
   /** Bounded multi-choice decisions submit a unique subset of `options` in
@@ -335,6 +353,9 @@ export interface PendingDecision {
   /** Parallel display text for ordering/choice options whose ids are
    *  engine-owned and not suitable as player-facing labels. */
   optionLabels?: string[];
+  /** Parallel localized presentation for literal options. Null entries use a
+   * card view or the legacy option/optionLabels presentation. */
+  optionMessages?: (GameMessage | null)[];
   /** Parallel count for consolidated trigger-order options. Null entries are
    * ordinary single-source options. */
   optionCounts?: (number | null)[];
