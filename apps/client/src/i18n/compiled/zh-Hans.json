@@ -3677,6 +3677,512 @@
       "value": "弃置一张费用为 0 的牌？"
     }
   ],
+  "card.pen.ally.discard": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：弃置一名盟友？"
+    }
+  ],
+  "card.pen.ally.freeze.next": [
+    {
+      "type": 0,
+      "value": "再冻结一名盟友？"
+    }
+  ],
+  "card.pen.ally.freeze.upto": [
+    {
+      "type": 0,
+      "value": "冻结至多 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 名盟友"
+    }
+  ],
+  "card.pen.ally.return": [
+    {
+      "type": 0,
+      "value": "将一名盟友返回手牌"
+    }
+  ],
+  "card.pen.arcane.hero.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一名英雄承受 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "card.pen.arrow.arsenal": [
+    {
+      "type": 0,
+      "value": "将一张箭放入 arsenal"
+    }
+  ],
+  "card.pen.arsenal.action.defend": [
+    {
+      "type": 0,
+      "value": "将 arsenal 中的一张行动牌加入防守"
+    }
+  ],
+  "card.pen.attackinghero.card.discard": [
+    {
+      "type": 0,
+      "value": "选择一张牌让进攻英雄弃置"
+    }
+  ],
+  "card.pen.aura.banish.arcane": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：放逐一个灵气以造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害？"
+    }
+  ],
+  "card.pen.aura.banish.arcane.unnamed": [
+    {
+      "type": 0,
+      "value": "放逐一个灵气以造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害？"
+    }
+  ],
+  "card.pen.aura.powercounter.add": [
+    {
+      "type": 0,
+      "value": "在一个灵气上放置一个 +1 力量指示物"
+    }
+  ],
+  "card.pen.auratoken.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一个灵气衍生物"
+    }
+  ],
+  "card.pen.auratoken.target.choose": [
+    {
+      "type": 0,
+      "value": "选择第 "
+    },
+    {
+      "type": 1,
+      "value": "current"
+    },
+    {
+      "type": 0,
+      "value": "／"
+    },
+    {
+      "type": 1,
+      "value": "total"
+    },
+    {
+      "type": 0,
+      "value": " 个灵气衍生物目标"
+    }
+  ],
+  "card.pen.card.banish": [
+    {
+      "type": 0,
+      "value": "放逐一张牌"
+    }
+  ],
+  "card.pen.card.discard": [
+    {
+      "type": 0,
+      "value": "选择一张牌弃置"
+    }
+  ],
+  "card.pen.card.fifthfromtop": [
+    {
+      "type": 0,
+      "value": "将一张牌置于牌库顶向下第五张"
+    }
+  ],
+  "card.pen.card.name": [
+    {
+      "type": 0,
+      "value": "说出一个牌名"
+    }
+  ],
+  "card.pen.cloaked.equipment.facedown": [
+    {
+      "type": 0,
+      "value": "选择一件具有隐匿 (cloaked) 的装备并将其翻至面朝下"
+    }
+  ],
+  "card.pen.cloaked.equipment.facedown.next": [
+    {
+      "type": 0,
+      "value": "再选择一件具有隐匿 (cloaked) 的装备"
+    }
+  ],
+  "card.pen.color.choose": [
+    {
+      "type": 0,
+      "value": "选择一种颜色"
+    }
+  ],
+  "card.pen.combatchain.card.choose": [
+    {
+      "type": 0,
+      "value": "选择 combat chain 上的一张牌"
+    }
+  ],
+  "card.pen.comeback.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Comeback Kicks 以获得 1 个行动点？"
+    }
+  ],
+  "card.pen.deck.top.banish": [
+    {
+      "type": 0,
+      "value": "放逐牌库顶 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张牌中的一张"
+    }
+  ],
+  "card.pen.deck.top.instant": [
+    {
+      "type": 0,
+      "value": "放逐牌库顶牌并将其作为 instant 打出？"
+    }
+  ],
+  "card.pen.decompose.action": [
+    {
+      "type": 0,
+      "value": "选择那张行动牌"
+    }
+  ],
+  "card.pen.decompose.earth.first": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：进行分解 (decompose)？选择第一张 Earth 牌"
+    }
+  ],
+  "card.pen.decompose.earth.second": [
+    {
+      "type": 0,
+      "value": "选择第二张 Earth 牌"
+    }
+  ],
+  "card.pen.deeprecesses.banish": [
+    {
+      "type": 0,
+      "value": "将 Deep Recesses of Existence 面朝下放逐？"
+    }
+  ],
+  "card.pen.destruction.prevent.pay": [
+    {
+      "type": 0,
+      "value": "支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源以阻止摧毁？"
+    }
+  ],
+  "card.pen.discardoritem.goagain": [
+    {
+      "type": 0,
+      "value": "弃置一张牌或摧毁一个物品以获得 go again？"
+    }
+  ],
+  "card.pen.ephemeral.name": [
+    {
+      "type": 0,
+      "value": "为具有瞬逝 (ephemeral) 的攻击选择一个牌名"
+    }
+  ],
+  "card.pen.evo.maxcost.choose": [
+    {
+      "type": 0,
+      "value": "选择一张费用不超过 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 的 Evo"
+    }
+  ],
+  "card.pen.frozen.ally.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一名已冻结的盟友"
+    }
+  ],
+  "card.pen.frozen.card.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一张已冻结的牌"
+    }
+  ],
+  "card.pen.frozen.permanent.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一个已冻结的永久物"
+    }
+  ],
+  "card.pen.graveyard.blue.pitch": [
+    {
+      "type": 0,
+      "value": "将墓地中的一张蓝色牌置入扣置区？"
+    }
+  ],
+  "card.pen.graveyard.card.banish": [
+    {
+      "type": 0,
+      "value": "选择英雄 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 墓地中的一张牌放逐"
+    }
+  ],
+  "card.pen.hand.fifthfromtop": [
+    {
+      "type": 0,
+      "value": "将一张手牌置于牌库顶向下第五张"
+    }
+  ],
+  "card.pen.heroally.tap": [
+    {
+      "type": 0,
+      "value": "横置目标英雄或盟友"
+    }
+  ],
+  "card.pen.instant.discard": [
+    {
+      "type": 0,
+      "value": "弃置一张 instant？"
+    }
+  ],
+  "card.pen.instantyellow.banish": [
+    {
+      "type": 0,
+      "value": "放逐一张 instant 或黄色牌"
+    }
+  ],
+  "card.pen.item.destroy.defense": [
+    {
+      "type": 0,
+      "value": "摧毁一个物品以获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 防御？"
+    }
+  ],
+  "card.pen.livinglegend.hero.name": [
+    {
+      "type": 0,
+      "value": "说出一名 living legend 英雄的名称"
+    }
+  ],
+  "card.pen.option.blue": [
+    {
+      "type": 0,
+      "value": "蓝色"
+    }
+  ],
+  "card.pen.option.red": [
+    {
+      "type": 0,
+      "value": "红色"
+    }
+  ],
+  "card.pen.option.yellow": [
+    {
+      "type": 0,
+      "value": "黄色"
+    }
+  ],
+  "card.pen.option.you": [
+    {
+      "type": 0,
+      "value": "你"
+    }
+  ],
+  "card.pen.orbitoclast.equip": [
+    {
+      "type": 0,
+      "value": "装备一个 Orbitoclast？"
+    }
+  ],
+  "card.pen.permanent.freeze": [
+    {
+      "type": 0,
+      "value": "冻结一个永久物"
+    }
+  ],
+  "card.pen.powercounter.remove": [
+    {
+      "type": 0,
+      "value": "移除一个 +1 力量指示物"
+    }
+  ],
+  "card.pen.red.card.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁这张红色牌？"
+    }
+  ],
+  "card.pen.scrap.choose": [
+    {
+      "type": 0,
+      "value": "拆解 (scrap) 一个物品、装备或衍生物？"
+    }
+  ],
+  "card.pen.seismic.resources.pay": [
+    {
+      "type": 0,
+      "value": "支付至多 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 点资源以生成 Seismic Surge 衍生物"
+    }
+  ],
+  "card.pen.seismicshift.x.choose": [
+    {
+      "type": 0,
+      "value": "为 Seismic Shift 选择 X"
+    }
+  ],
+  "card.pen.seismicsurge.tap": [
+    {
+      "type": 0,
+      "value": "横置第 "
+    },
+    {
+      "type": 1,
+      "value": "current"
+    },
+    {
+      "type": 0,
+      "value": "／"
+    },
+    {
+      "type": 1,
+      "value": "total"
+    },
+    {
+      "type": 0,
+      "value": " 个 Seismic Surge"
+    }
+  ],
+  "card.pen.serpent.token.create": [
+    {
+      "type": 0,
+      "value": "生成 Fang Strike 或 Slither"
+    }
+  ],
+  "card.pen.sigil.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一个 Sigil 灵气？"
+    }
+  ],
+  "card.pen.sword.sharpen": [
+    {
+      "type": 0,
+      "value": "选择一把剑进行强化"
+    }
+  ],
+  "card.pen.token.counters.remove": [
+    {
+      "type": 0,
+      "value": "移除一个物品或灵气衍生物上的所有指示物"
+    }
+  ],
+  "card.pen.token.destroy.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：摧毁一个 "
+    },
+    {
+      "type": 1,
+      "value": "token"
+    },
+    {
+      "type": 0,
+      "value": "？"
+    }
+  ],
+  "card.pen.wager.discard.win": [
+    {
+      "type": 0,
+      "value": "弃置一张牌以改为赢得赌注 (wager)？"
+    }
+  ],
   "card.sar.blackwidow.hand.banish": [
     {
       "type": 0,

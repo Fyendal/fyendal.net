@@ -1,5 +1,14 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, bloodDebtScript as bloodDebt, buffNextAttack, opponentSeat, previousAttackHasName, queueIntimidate } from "../shared-helpers.js";
+import {
+  attackAbility,
+  bloodDebtScript as bloodDebt,
+  buffNextAttack,
+  commonOptionMessages,
+  decisionPrompt,
+  opponentSeat,
+  previousAttackHasName,
+  queueIntimidate,
+} from "../shared-helpers.js";
 
 const COURAGE = "DTD232";
 const EMBODIMENT_LIGHTNING = "DTD195";
@@ -43,7 +52,7 @@ function nextWager(power: number): CardScript {
     onFriendlyWagerLossReplacement(ctx) {
       if (ctx.getCounter("cheat-loss-ready") <= 0 || ctx.player(ctx.seat).hand.length === 0) return false;
       ctx.setCounter("cheat-loss-ready", 0);
-      ctx.requestCardChoice("cheat-wager", "Discard a card to win the wager instead?", ["no", ...ctx.player(ctx.seat).hand.map((card) => card.instanceId)]);
+      ctx.requestCardChoice("cheat-wager", decisionPrompt("Discard a card to win the wager instead?", "card.pen.wager.discard.win", { optionMessages: commonOptionMessages("no") }), ["no", ...ctx.player(ctx.seat).hand.map((card) => card.instanceId)]);
       return true;
     },
     onChoose(ctx, hook, option) {
@@ -77,7 +86,9 @@ function continueSeismicChoices(ctx: ScriptCtx): void {
   if (surgesChosen < x) {
     ctx.requestCardChoice(
       "seismic-surge",
-      `Tap Seismic Surge ${surgesChosen + 1} of ${x}`,
+      decisionPrompt(`Tap Seismic Surge ${surgesChosen + 1} of ${x}`, "card.pen.seismicsurge.tap", {
+        values: { current: surgesChosen + 1, total: x },
+      }),
       seismicSurges(ctx).map((card) => card.instanceId),
     );
     return;
@@ -86,7 +97,9 @@ function continueSeismicChoices(ctx: ScriptCtx): void {
   if (targetsChosen < x) {
     ctx.requestCardChoice(
       "seismic-target",
-      `Choose aura token target ${targetsChosen + 1} of ${x}`,
+      decisionPrompt(`Choose aura token target ${targetsChosen + 1} of ${x}`, "card.pen.auratoken.target.choose", {
+        values: { current: targetsChosen + 1, total: x },
+      }),
       seismicAuraTokens(ctx).map((card) => card.instanceId),
     );
   }
@@ -112,7 +125,7 @@ export const penHighRarity: Record<string, CardScript> = {
       const max = Math.min(seismicSurges(ctx).length, seismicAuraTokens(ctx).length);
       ctx.requestChoice(
         "seismic-x",
-        "Choose X for Seismic Shift",
+        decisionPrompt("Choose X for Seismic Shift", "card.pen.seismicshift.x.choose"),
         Array.from({ length: max + 1 }, (_, x) => String(x)),
       );
     },
@@ -191,7 +204,7 @@ export const penHighRarity: Record<string, CardScript> = {
       const attacker = ctx.link?.attacker;
       if (attacker === undefined) return;
       const hand = ctx.player(attacker).hand;
-      if (hand.length) ctx.requestCardChoice("blunten-discard", "Discard a card", hand.map((card) => card.instanceId), attacker);
+      if (hand.length) ctx.requestCardChoice("blunten-discard", decisionPrompt("Discard a card", "card.pen.card.discard"), hand.map((card) => card.instanceId), attacker);
     },
     onChoose(ctx, hook, option) { if (hook === "blunten-discard") ctx.discardCard(opponentSeat(ctx), Number(option)); },
   },
@@ -210,7 +223,7 @@ export const penHighRarity: Record<string, CardScript> = {
       if (evos.length) {
         ctx.requestCardChoice(
           "ghost-architect-evo",
-          `Choose an Evo with cost ${equipped} or less`,
+          decisionPrompt(`Choose an Evo with cost ${equipped} or less`, "card.pen.evo.maxcost.choose", { values: { amount: equipped } }),
           evos.map((card) => card.instanceId),
         );
         return;
@@ -235,7 +248,7 @@ export const penHighRarity: Record<string, CardScript> = {
     activated: {
       cost: 1, isAttack: false, goAgain: false, timing: "instant", tap: true,
       canActivate: (ctx) => ctx.player(ctx.seat).hand.some((card) => has(ctx, card, "arrow")) && ctx.player(ctx.seat).arsenal.length === 0,
-      onActivate(ctx) { const arrows = ctx.player(ctx.seat).hand.filter((card) => has(ctx, card, "arrow")); ctx.requestCardChoice("farflight", "Put an arrow into arsenal", arrows.map((card) => card.instanceId)); },
+      onActivate(ctx) { const arrows = ctx.player(ctx.seat).hand.filter((card) => has(ctx, card, "arrow")); ctx.requestCardChoice("farflight", decisionPrompt("Put an arrow into arsenal", "card.pen.arrow.arsenal"), arrows.map((card) => card.instanceId)); },
     },
     onChoose(ctx, hook, option) { if (hook === "farflight") ctx.putIntoArsenal(Number(option), "hand", { faceUp: true }); },
   },
@@ -304,7 +317,7 @@ export const penHighRarity: Record<string, CardScript> = {
     effectCardCosts: [{ zone: "arena", move: "destroy", count: 2, name: "Silver", prompt: "Destroy 2 Silver" }], onActivate(ctx) { ctx.equipFromGraveyard(ctx.self.instanceId); }
   } },
   "lobotomy|1": {
-    onAttackDeclared(ctx) { const orbit = (ctx.player(ctx.seat).inventory ?? []).find((card) => data(ctx, card).name.includes("Orbitoclast")); if (orbit) ctx.requestCardChoice("lobotomy-equip", "Equip an Orbitoclast?", ["no", orbit.instanceId]); },
+    onAttackDeclared(ctx) { const orbit = (ctx.player(ctx.seat).inventory ?? []).find((card) => data(ctx, card).name.includes("Orbitoclast")); if (orbit) ctx.requestCardChoice("lobotomy-equip", decisionPrompt("Equip an Orbitoclast?", "card.pen.orbitoclast.equip", { optionMessages: commonOptionMessages("no") }), ["no", orbit.instanceId]); },
     canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && Object.values(ctx.player(ctx.seat).equipment).some((card) => card && data(ctx, card).name.includes("Orbitoclast")); },
     onHit(ctx) { ctx.suppressHeroAbilitiesThroughNextTurn(opponentSeat(ctx)); },
     onChoose(ctx, hook, option) { if (hook === "lobotomy-equip" && option !== "no") ctx.equipFromInventory(Number(option)); },
@@ -369,7 +382,7 @@ export const penHighRarity: Record<string, CardScript> = {
     if (attack) ctx.putOnDeckBottom(attack.instanceId);
   }, onAttackDeclared(ctx) { if (ctx.getFlag("link", "fromBanish") === true) ctx.grantGoAgain(); } }),
   "elemental strike|1": {
-    additionalCost(ctx) { const hand = ctx.player(ctx.seat).hand; if (hand.length) ctx.requestCardChoice("elemental-banish", "Banish a card", hand.map((card) => card.instanceId)); },
+    additionalCost(ctx) { const hand = ctx.player(ctx.seat).hand; if (hand.length) ctx.requestCardChoice("elemental-banish", decisionPrompt("Banish a card", "card.pen.card.banish"), hand.map((card) => card.instanceId)); },
     onChoose(ctx, hook, option) { if (hook !== "elemental-banish") return; const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option)); if (!card || !ctx.banish(card.instanceId)) return; if (has(ctx, card, "earth")) ctx.addModifier({ scope: "chain-link", attack: 2 }); if (has(ctx, card, "lightning")) ctx.grantGoAgain(); if (has(ctx, card, "ice")) ctx.setFlag("link", "dominate", true); },
   },
   "crown of everbloom|0": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true, canActivate: (ctx) => ctx.player(ctx.seat).arsenal.length > 0, onActivate(ctx) {
@@ -386,7 +399,7 @@ export const penHighRarity: Record<string, CardScript> = {
   "channel iceloch glaze|3": { freezesOpposingArsenalConditionally: true, triggers: [{ event: "end-of-turn", label: "Channel Ice", effect(ctx) { const n = ctx.getCounter("flow") + 1; ctx.setCounter("flow", n); const ice = ctx.player(ctx.seat).pitch.filter((card) => has(ctx, card, "ice")).slice(0, n); if (ice.length < n) ctx.destroySelf(); else for (const card of ice) ctx.putOnDeckBottom(card.instanceId); } }] },
   "stormweaver's aegis|0": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true, onActivate(ctx) { ctx.grantOwnedInstantDiscardPrevention(2); } } },
   "astravolt elemental|1": { onAttackDeclared(ctx) {
-    const cards = ctx.player(ctx.seat).hand.filter((card) => ctx.hasCardType(card, "instant")); if (cards.length) ctx.requestCardChoice("astravolt", "Discard an instant?", ["no", ...cards.map((card) => card.instanceId)]);
+    const cards = ctx.player(ctx.seat).hand.filter((card) => ctx.hasCardType(card, "instant")); if (cards.length) ctx.requestCardChoice("astravolt", decisionPrompt("Discard an instant?", "card.pen.instant.discard", { optionMessages: commonOptionMessages("no") }), ["no", ...cards.map((card) => card.instanceId)]);
   }, onChoose(ctx, hook, option) { if (hook === "astravolt" && option !== "no" && ctx.discardCard(ctx.seat, Number(option))) { ctx.drawCards(ctx.seat, 1); ctx.createToken(EMBODIMENT_LIGHTNING); } } },
   "dynastic diadem|0": {
     preventsOpponentDestroyingFriendly: (ctx, target) => named(ctx, target, "Fealty"),
@@ -409,17 +422,17 @@ export const penHighRarity: Record<string, CardScript> = {
   "glory plate|0": { modifyDefense: (ctx) => Number(ctx.getFlag("player", "destroyedNameCount:toughness")) },
   "by the book|3": { playAsInstant: (ctx) => ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0, prohibitsEffectDrawsDuringActionPhase: true, triggers: [{ event: "begin-action-phase", label: "Destroy By the Book", effect: (ctx) => ctx.destroySelf() }] },
   "two-faced|0": { onDefend(ctx) {
-    const attacker = ctx.link?.attacker; if (attacker === undefined) return; ctx.drawCards(attacker, 1); const hand = ctx.player(attacker).hand; for (const card of hand) ctx.lookAt(card.instanceId); if (hand.length) ctx.requestCardChoice("two-faced", "Choose a card for the attacking hero to discard", hand.map((card) => card.instanceId), ctx.seat);
+    const attacker = ctx.link?.attacker; if (attacker === undefined) return; ctx.drawCards(attacker, 1); const hand = ctx.player(attacker).hand; for (const card of hand) ctx.lookAt(card.instanceId); if (hand.length) ctx.requestCardChoice("two-faced", decisionPrompt("Choose a card for the attacking hero to discard", "card.pen.attackinghero.card.discard"), hand.map((card) => card.instanceId), ctx.seat);
   }, onChoose(ctx, hook, option) { if (hook === "two-faced") ctx.discardCard(opponentSeat(ctx), Number(option)); } },
   "leave 'em speechless|3": {
     playAsInstant: (ctx) => ctx.compareLife(ctx.seat, opponentSeat(ctx)) > 0,
-    onEnterArena: (ctx) => ctx.requestNameChoice("speechless-name", "Name a card"),
+    onEnterArena: (ctx) => ctx.requestNameChoice("speechless-name", decisionPrompt("Name a card", "card.pen.card.name")),
     onChoose(ctx, hook, option) { if (hook === "speechless-name") ctx.setChosenName(option); },
     prohibitsChosenName: true,
     triggers: [{ event: "begin-action-phase", label: "Destroy Leave 'Em Speechless", effect: (ctx) => ctx.destroySelf() }],
   },
   "helm of safe haven|0": { onDefend(ctx) {
-    const top = ctx.player(ctx.seat).deck[0]; if (!top) return; ctx.revealCards([top.instanceId], ctx.seat); if (isAttack(ctx, top) && ctx.addDefenderFromDeck(top.instanceId)) { const hand = ctx.player(ctx.seat).hand; if (hand.length) ctx.requestCardChoice("safe-discard", "Discard a card", hand.map((card) => card.instanceId)); }
+    const top = ctx.player(ctx.seat).deck[0]; if (!top) return; ctx.revealCards([top.instanceId], ctx.seat); if (isAttack(ctx, top) && ctx.addDefenderFromDeck(top.instanceId)) { const hand = ctx.player(ctx.seat).hand; if (hand.length) ctx.requestCardChoice("safe-discard", decisionPrompt("Discard a card", "card.pen.card.discard"), hand.map((card) => card.instanceId)); }
   }, onChoose(ctx, hook, option) { if (hook === "safe-discard") ctx.discardCard(ctx.seat, Number(option)); } },
   "rockyard rodeo|3": { modifyBasePower(ctx, card, base) { return card.instanceId === ctx.self.instanceId ? Math.max(0, ...ctx.player(ctx.seat).weapons.map((weaponCard) => ctx.basePower(weaponCard))) : base; } },
   "high current currency|3": {

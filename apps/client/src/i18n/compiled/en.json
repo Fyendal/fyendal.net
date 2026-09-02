@@ -3865,6 +3865,504 @@
       "value": "Discard a zero-cost card?"
     }
   ],
+  "card.pen.ally.discard": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": discard an ally?"
+    }
+  ],
+  "card.pen.ally.freeze.next": [
+    {
+      "type": 0,
+      "value": "Freeze another ally?"
+    }
+  ],
+  "card.pen.ally.freeze.upto": [
+    {
+      "type": 0,
+      "value": "Freeze up to "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " allies"
+    }
+  ],
+  "card.pen.ally.return": [
+    {
+      "type": 0,
+      "value": "Return an ally"
+    }
+  ],
+  "card.pen.arcane.hero.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": deal "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage to which hero?"
+    }
+  ],
+  "card.pen.arrow.arsenal": [
+    {
+      "type": 0,
+      "value": "Put an arrow into arsenal"
+    }
+  ],
+  "card.pen.arsenal.action.defend": [
+    {
+      "type": 0,
+      "value": "Add an action from arsenal as a defender"
+    }
+  ],
+  "card.pen.attackinghero.card.discard": [
+    {
+      "type": 0,
+      "value": "Choose a card for the attacking hero to discard"
+    }
+  ],
+  "card.pen.aura.banish.arcane": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": banish an aura for "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage?"
+    }
+  ],
+  "card.pen.aura.banish.arcane.unnamed": [
+    {
+      "type": 0,
+      "value": "Banish an aura for "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " arcane damage?"
+    }
+  ],
+  "card.pen.aura.powercounter.add": [
+    {
+      "type": 0,
+      "value": "Put a +1 power counter on an aura"
+    }
+  ],
+  "card.pen.auratoken.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy an aura token"
+    }
+  ],
+  "card.pen.auratoken.target.choose": [
+    {
+      "type": 0,
+      "value": "Choose aura token target "
+    },
+    {
+      "type": 1,
+      "value": "current"
+    },
+    {
+      "type": 0,
+      "value": " of "
+    },
+    {
+      "type": 1,
+      "value": "total"
+    }
+  ],
+  "card.pen.card.banish": [
+    {
+      "type": 0,
+      "value": "Banish a card"
+    }
+  ],
+  "card.pen.card.discard": [
+    {
+      "type": 0,
+      "value": "Choose a card to discard"
+    }
+  ],
+  "card.pen.card.fifthfromtop": [
+    {
+      "type": 0,
+      "value": "Put a card fifth from the top"
+    }
+  ],
+  "card.pen.card.name": [
+    {
+      "type": 0,
+      "value": "Name a card"
+    }
+  ],
+  "card.pen.cloaked.equipment.facedown": [
+    {
+      "type": 0,
+      "value": "Choose equipment with cloaked to turn face-down"
+    }
+  ],
+  "card.pen.cloaked.equipment.facedown.next": [
+    {
+      "type": 0,
+      "value": "Choose another equipment with cloaked"
+    }
+  ],
+  "card.pen.color.choose": [
+    {
+      "type": 0,
+      "value": "Choose a color"
+    }
+  ],
+  "card.pen.combatchain.card.choose": [
+    {
+      "type": 0,
+      "value": "Choose a card on the combat chain"
+    }
+  ],
+  "card.pen.comeback.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy Comeback Kicks to gain an action point?"
+    }
+  ],
+  "card.pen.deck.top.banish": [
+    {
+      "type": 0,
+      "value": "Banish one of the top "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " cards"
+    }
+  ],
+  "card.pen.deck.top.instant": [
+    {
+      "type": 0,
+      "value": "Banish the top card and play it as an instant?"
+    }
+  ],
+  "card.pen.decompose.action": [
+    {
+      "type": 0,
+      "value": "Choose the action card"
+    }
+  ],
+  "card.pen.decompose.earth.first": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": decompose? Choose the first Earth card"
+    }
+  ],
+  "card.pen.decompose.earth.second": [
+    {
+      "type": 0,
+      "value": "Choose the second Earth card"
+    }
+  ],
+  "card.pen.deeprecesses.banish": [
+    {
+      "type": 0,
+      "value": "Banish Deep Recesses of Existence face-down?"
+    }
+  ],
+  "card.pen.destruction.prevent.pay": [
+    {
+      "type": 0,
+      "value": "Pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " resources to prevent destruction?"
+    }
+  ],
+  "card.pen.discardoritem.goagain": [
+    {
+      "type": 0,
+      "value": "Discard a card or destroy an item for go again?"
+    }
+  ],
+  "card.pen.ephemeral.name": [
+    {
+      "type": 0,
+      "value": "Choose a name for the ephemeral attack"
+    }
+  ],
+  "card.pen.evo.maxcost.choose": [
+    {
+      "type": 0,
+      "value": "Choose an Evo with cost "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " or less"
+    }
+  ],
+  "card.pen.frozen.ally.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy a frozen ally"
+    }
+  ],
+  "card.pen.frozen.card.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy a frozen card"
+    }
+  ],
+  "card.pen.frozen.permanent.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy a frozen permanent"
+    }
+  ],
+  "card.pen.graveyard.blue.pitch": [
+    {
+      "type": 0,
+      "value": "Pitch a blue from graveyard?"
+    }
+  ],
+  "card.pen.graveyard.card.banish": [
+    {
+      "type": 0,
+      "value": "Choose a card from hero "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": "'s graveyard to banish"
+    }
+  ],
+  "card.pen.hand.fifthfromtop": [
+    {
+      "type": 0,
+      "value": "Put a card from hand fifth from the top"
+    }
+  ],
+  "card.pen.heroally.tap": [
+    {
+      "type": 0,
+      "value": "Tap target hero or ally"
+    }
+  ],
+  "card.pen.instant.discard": [
+    {
+      "type": 0,
+      "value": "Discard an instant?"
+    }
+  ],
+  "card.pen.instantyellow.banish": [
+    {
+      "type": 0,
+      "value": "Banish an instant or yellow card"
+    }
+  ],
+  "card.pen.item.destroy.defense": [
+    {
+      "type": 0,
+      "value": "Destroy an item for +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " defense?"
+    }
+  ],
+  "card.pen.livinglegend.hero.name": [
+    {
+      "type": 0,
+      "value": "Name a living legend hero"
+    }
+  ],
+  "card.pen.option.blue": [
+    {
+      "type": 0,
+      "value": "Blue"
+    }
+  ],
+  "card.pen.option.red": [
+    {
+      "type": 0,
+      "value": "Red"
+    }
+  ],
+  "card.pen.option.yellow": [
+    {
+      "type": 0,
+      "value": "Yellow"
+    }
+  ],
+  "card.pen.option.you": [
+    {
+      "type": 0,
+      "value": "You"
+    }
+  ],
+  "card.pen.orbitoclast.equip": [
+    {
+      "type": 0,
+      "value": "Equip an Orbitoclast?"
+    }
+  ],
+  "card.pen.permanent.freeze": [
+    {
+      "type": 0,
+      "value": "Freeze a permanent"
+    }
+  ],
+  "card.pen.powercounter.remove": [
+    {
+      "type": 0,
+      "value": "Remove a +1 power counter"
+    }
+  ],
+  "card.pen.red.card.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy the red card?"
+    }
+  ],
+  "card.pen.scrap.choose": [
+    {
+      "type": 0,
+      "value": "Scrap an item, equipment, or token?"
+    }
+  ],
+  "card.pen.seismic.resources.pay": [
+    {
+      "type": 0,
+      "value": "Pay up to "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " resources for Seismic Surge tokens"
+    }
+  ],
+  "card.pen.seismicshift.x.choose": [
+    {
+      "type": 0,
+      "value": "Choose X for Seismic Shift"
+    }
+  ],
+  "card.pen.seismicsurge.tap": [
+    {
+      "type": 0,
+      "value": "Tap Seismic Surge "
+    },
+    {
+      "type": 1,
+      "value": "current"
+    },
+    {
+      "type": 0,
+      "value": " of "
+    },
+    {
+      "type": 1,
+      "value": "total"
+    }
+  ],
+  "card.pen.serpent.token.create": [
+    {
+      "type": 0,
+      "value": "Create Fang Strike or Slither"
+    }
+  ],
+  "card.pen.sigil.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy a Sigil aura?"
+    }
+  ],
+  "card.pen.sword.sharpen": [
+    {
+      "type": 0,
+      "value": "Choose a sword to sharpen"
+    }
+  ],
+  "card.pen.token.counters.remove": [
+    {
+      "type": 0,
+      "value": "Remove all counters from an item or aura token"
+    }
+  ],
+  "card.pen.token.destroy.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": destroy a "
+    },
+    {
+      "type": 1,
+      "value": "token"
+    },
+    {
+      "type": 0,
+      "value": "?"
+    }
+  ],
+  "card.pen.wager.discard.win": [
+    {
+      "type": 0,
+      "value": "Discard a card to win the wager instead?"
+    }
+  ],
   "card.sar.blackwidow.hand.banish": [
     {
       "type": 0,
