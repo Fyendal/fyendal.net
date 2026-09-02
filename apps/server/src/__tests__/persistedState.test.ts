@@ -688,6 +688,7 @@ describe("PersistedStateV1", () => {
       expiresAtStartOfSeatTurn: 1,
       expiresAtEndOfSeatTurn: 1,
       createdTurn: source.turn,
+      basePower: 6,
       attackActivationCostReduction: 1,
       activationCostReduction: 1,
       appliesToFirstDefenderOnly: true,

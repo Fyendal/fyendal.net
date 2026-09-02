@@ -409,10 +409,14 @@ function quickSuccession(count: number): CardScript {
     },
     onFriendlyAttackDeclared(ctx) {
       const remaining = ctx.getCounter("quickRemaining");
-      if (remaining <= 0 || !ctx.link?.goAgain) return;
-      ctx.addModifier({ scope: "chain-link", attack: 1, appliesToInstanceId: ctx.link.attackingCard.instanceId });
+      if (remaining <= 0 || !ctx.link) return;
+      ctx.setFlag("link", `quickSuccession:${ctx.self.instanceId}`, true);
       ctx.setCounter("quickRemaining", remaining - 1);
-      if (remaining === 1) consumeSourceModifier(ctx);
+    },
+    modifyAttack(ctx) {
+      return ctx.link?.goAgain && ctx.getFlag("link", `quickSuccession:${ctx.self.instanceId}`) === true
+        ? 1
+        : 0;
     },
   };
 }
