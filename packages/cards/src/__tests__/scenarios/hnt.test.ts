@@ -114,6 +114,45 @@ describe("HNT — marked heroes and daggers", () => {
     expect(g.state.players[0]!.flags[`additionalActivations:${emberblade.instanceId}:0`]).toBe(1);
   });
 
+  it("Long Whisker Loyalty chooses distinct modes for its Draconic chain links", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          heroKey: "fang|0",
+          weapons: ["obsidian fire vein|0"],
+          resources: 1,
+          hand: ["oath of loyalty|1", "long whisker loyalty|1"],
+        },
+        { hero: "rhinar" },
+      ],
+    });
+
+    g.play("oath of loyalty|1")
+      .blockWith()
+      .settle()
+      .attackWithWeapon("obsidian fire vein|0", { settle: false })
+      .blockWith()
+      .react("long whisker loyalty|1", { settle: false });
+
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "long-whisker-mode",
+      options: ["+2 attack", "additional attack", "mark on hit"],
+    });
+
+    g.chooseOption("+2 attack");
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "long-whisker-mode",
+      options: ["additional attack", "mark on hit"],
+    });
+
+    g.chooseOption("mark on hit").settle().expectFinalAttack(3);
+
+    const dagger = g.state.players[0]!.weapons[0]!;
+    expect(g.state.players[0]!.flags[`additionalActivations:${dagger.instanceId}:0`]).toBeUndefined();
+    expect(g.state.players[1]!.hero.counters?.marked).toBe(1);
+  });
+
   it("journals Relentless Pursuit's self-move as a deck-bottom placement", () => {
     const g = scenario({
       seats: [

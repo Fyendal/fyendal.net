@@ -535,7 +535,7 @@ describe("SBL — counters, prevention, redirects", () => {
     s.expectLog("+1{p} counters are removed");
   });
 
-  it("Toe the Line: prevents 2 of the next damage and creates a Flurry token when it does", () => {
+  it("Toe the Line: prevents 2 from the next damage event and creates a Flurry token", () => {
     const s = scenario({
       seats: [
         { hero: "rhinar", hand: ["snatch|1"] },
@@ -556,6 +556,28 @@ describe("SBL — counters, prevention, redirects", () => {
     s.settle(); // the attack lands
     s.expectLife(1, 18);
     s.expectInZone(1, "flurry|0", "board");
+  });
+
+  it("Toe the Line: expires its unused prevention after the first damage event", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["head jab|3", "wounding blow|1"] },
+        { hero: "dorinthea", life: 20, hand: ["toe the line|1"] },
+      ],
+    });
+    s.play("head jab|3", { settle: false });
+    s.passPriority();
+    s.passPriority();
+    s.passPriority();
+    s.passPriority();
+    s.blockWith();
+    s.passPriority();
+    s.react("toe the line|1", { settle: false });
+    s.settle();
+    s.expectLife(1, 20).expectInZone(1, "flurry|0", "board");
+
+    s.play("wounding blow|1").blockWith().settle();
+    s.expectLife(1, 16);
   });
 
   it("Toe the Line: two copies that each prevent damage each create a Flurry token", () => {
@@ -603,7 +625,7 @@ describe("SBL — counters, prevention, redirects", () => {
     s.passPriority();
 
     const shields = s.state.modifiers.filter(
-      (modifier) => modifier.preventNextDamagePool === 2 &&
+      (modifier) => modifier.preventNextDamageAmount === 2 &&
         modifier.sourceCardId === printingId("toe the line|1"),
     );
     expect(shields).toHaveLength(2);

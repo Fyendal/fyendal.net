@@ -490,6 +490,9 @@ export interface ScriptCtx {
    *  source of your choice" — Oasis Respite); a later copy of the same-named
    *  card is not covered. */
   preventNextDamage(targetSeat: number, amount: number, sourceInstanceId?: number): void;
+  /** Prevent up to `amount` damage from the next damage event dealt to a hero
+   * this turn. Any unused amount expires after that event. */
+  preventNextDamageEvent(targetSeat: number, amount: number): void;
   /** Prevent the next event no larger than `maximumEventAmount`; an oversized
    * event is ignored and does not consume this turn-long replacement. */
   preventNextDamageAtMost(targetSeat: number, amount: number, maximumEventAmount: number): void;

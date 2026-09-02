@@ -429,8 +429,8 @@ export interface Modifier {
   grantType?: string;
   /** Name granted to the matching attack object when this modifier attaches. */
   grantName?: string;
-  /** One-shot prevention which only applies when the original damage event is
-   * no larger than the threshold (Brush Off). Oversized events leave it ready. */
+  /** Fixed prevention for the next matching damage event. When a threshold is
+   * present (Brush Off), oversized events leave it ready. */
   preventNextDamageAmount?: number;
   /** Remaining contribution from this source to a generic or source-filtered
    * prevention shield. Damage resolution remains authoritative on the hero

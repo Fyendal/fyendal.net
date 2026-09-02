@@ -3997,6 +3997,96 @@
       "value": "Banish a card from your hand"
     }
   ],
+  "card.hnt.longwhisker.modes.choose": [
+    {
+      "type": 0,
+      "value": "Long Whisker Loyalty: choose "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " mode"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " modes"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "card.hnt.longwhisker.modes.more": [
+    {
+      "type": 0,
+      "value": "Long Whisker Loyalty: choose "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " more mode"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " more modes"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "card.hnt.longwhisker.option.additionalattack": [
+    {
+      "type": 0,
+      "value": "Attack with the target dagger an additional time"
+    }
+  ],
+  "card.hnt.longwhisker.option.attack": [
+    {
+      "type": 0,
+      "value": "Target dagger attack gets +2 attack"
+    }
+  ],
+  "card.hnt.longwhisker.option.mark": [
+    {
+      "type": 0,
+      "value": "Mark the hero the next time the target dagger hits"
+    }
+  ],
   "card.hnt.provoke.card.reveal": [
     {
       "type": 0,
@@ -4435,6 +4525,230 @@
     {
       "type": 0,
       "value": "Batter to a Pulp: destroy an equipment with no defense value"
+    }
+  ],
+  "card.log.common.arcane.card.bonus": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": your next arcane damage card this turn gets +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    }
+  ],
+  "card.log.common.arcane.event.bonus": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": your next arcane damage event this turn gets +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    }
+  ],
+  "card.log.common.banished": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " is banished"
+    }
+  ],
+  "card.log.common.defense.gained": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " gains +"
+    },
+    {
+      "type": 1,
+      "value": "defense"
+    },
+    {
+      "type": 0,
+      "value": " defense"
+    }
+  ],
+  "card.log.common.energy.counters.gained": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " gets "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " energy counter"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " energy counters"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " ("
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
+  "card.log.common.intimidate": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": intimidate"
+    }
+  ],
+  "card.log.common.lesson.counter.gained": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " gets a lesson counter ("
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
+  "card.log.common.mentor.search.private": [
+    {
+      "type": 0,
+      "value": "searched "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " into arsenal"
+    }
+  ],
+  "card.log.common.mentor.search.public": [
+    {
+      "type": 0,
+      "value": "searched a card into arsenal"
+    }
+  ],
+  "card.log.common.opt.completed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": opt "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    }
+  ],
+  "card.log.common.reveal.top.bottom": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " reveals "
+    },
+    {
+      "type": 1,
+      "value": "revealed"
+    },
+    {
+      "type": 0,
+      "value": " — put on the bottom of the deck"
+    }
+  ],
+  "card.log.common.reveal.top.stays": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " reveals "
+    },
+    {
+      "type": 1,
+      "value": "revealed"
+    },
+    {
+      "type": 0,
+      "value": " — it stays on top"
+    }
+  ],
+  "card.log.common.suspense.counter.removed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": a suspense counter is removed ("
+    },
+    {
+      "type": 1,
+      "value": "remaining"
+    },
+    {
+      "type": 0,
+      "value": " left)"
     }
   ],
   "card.lss.drinking.buddy.search": [

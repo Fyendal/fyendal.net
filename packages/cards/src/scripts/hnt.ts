@@ -84,6 +84,23 @@ function draconicLinks(ctx: ScriptCtx): number {
   return ctx.chainLinksControlled(ctx.seat, "draconic");
 }
 
+const LONG_WHISKER_MODES = ["+2 attack", "additional attack", "mark on hit"] as const;
+
+function longWhiskerModeBit(mode: string): number {
+  if (mode === "+2 attack") return 1;
+  if (mode === "additional attack") return 2;
+  if (mode === "mark on hit") return 4;
+  return 0;
+}
+
+function longWhiskerOptionMessages(): Record<(typeof LONG_WHISKER_MODES)[number], ReturnType<typeof decisionMessage>> {
+  return {
+    "+2 attack": decisionMessage("card.hnt.longwhisker.option.attack"),
+    "additional attack": decisionMessage("card.hnt.longwhisker.option.additionalattack"),
+    "mark on hit": decisionMessage("card.hnt.longwhisker.option.mark"),
+  };
+}
+
 function currentAttackDraconic(ctx: ScriptCtx): boolean {
   return ctx.currentAttackHasType("draconic");
 }
@@ -638,7 +655,60 @@ Object.assign(hnt, {
   "devotion never dies|1": { canTriggerOnHit: lastAttackWasDraconic, onHit(ctx) { if (ctx.banish(ctx.self.instanceId)) ctx.allowPlayFrom(ctx.self.instanceId, "banish"); } },
   "prowess of agility|3": { onFriendlyAttackDeclared(ctx) { if (Number(ctx.getPlayerFlag(ctx.seat, "attacksDeclaredThisTurn")) === 4) { ctx.destroySelf(); ctx.drawCards(ctx.seat, 1); } }, triggers: [{ event: "end-of-turn", condition: (ctx) => Number(ctx.getPlayerFlag(ctx.seat, "attacksDeclaredThisTurn")) < 3, label: "Destroy Prowess of Agility", effect: (ctx) => ctx.destroySelf() }] },
   "hunt's end|1": { canPlay: (ctx) => ctx.player(ctx.seat).board.filter((card) => ctx.cardData(card.cardId).name === "Fealty").length >= 3 && currentDaggerAttack(ctx), onPlay: (ctx) => ctx.addModifier({ scope: "chain-link", attack: 4 }) },
-  "long whisker loyalty|1": { canPlay: currentDaggerAttack, onPlay(ctx) { const count = draconicLinks(ctx); if (count > 0) ctx.addModifier({ scope: "chain-link", attack: 2 }); if (count > 1 && ctx.link) ctx.grantAdditionalActivation(ctx.link.attackingCard.instanceId); if (count > 2 && ctx.link) ctx.addModifier({ scope: "until-end-of-turn", appliesToSubtype: "dagger", onHitMark: true, once: true }); } },
+  "long whisker loyalty|1": {
+    canPlay: currentDaggerAttack,
+    additionalCost(ctx) {
+      const count = Math.min(LONG_WHISKER_MODES.length, draconicLinks(ctx));
+      ctx.setCounter("longWhiskerModes", 0);
+      ctx.setCounter("longWhiskerModesRemaining", count);
+      if (count > 0) {
+        ctx.requestChoice(
+          "long-whisker-mode",
+          decisionPrompt(
+            `Long Whisker Loyalty: choose ${count} mode${count === 1 ? "" : "s"}`,
+            "card.hnt.longwhisker.modes.choose",
+            { values: { amount: count }, optionMessages: longWhiskerOptionMessages() },
+          ),
+          [...LONG_WHISKER_MODES],
+        );
+      }
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "long-whisker-mode") return;
+      const bit = longWhiskerModeBit(option);
+      const selected = ctx.getCounter("longWhiskerModes");
+      if (bit === 0 || (selected & bit) !== 0) return;
+      const updated = selected | bit;
+      const remaining = ctx.getCounter("longWhiskerModesRemaining") - 1;
+      ctx.setCounter("longWhiskerModes", updated);
+      ctx.setCounter("longWhiskerModesRemaining", remaining);
+      if (remaining > 0) {
+        ctx.requestChoice(
+          "long-whisker-mode",
+          decisionPrompt(
+            `Long Whisker Loyalty: choose ${remaining} more mode${remaining === 1 ? "" : "s"}`,
+            "card.hnt.longwhisker.modes.more",
+            { values: { amount: remaining }, optionMessages: longWhiskerOptionMessages() },
+          ),
+          LONG_WHISKER_MODES.filter((mode) => (updated & longWhiskerModeBit(mode)) === 0),
+        );
+      }
+    },
+    onPlay(ctx) {
+      if (!ctx.link) return;
+      const modes = ctx.getCounter("longWhiskerModes");
+      if (modes & 1) ctx.addModifier({ scope: "chain-link", attack: 2 });
+      if (modes & 2) ctx.grantAdditionalActivation(ctx.link.attackingCard.instanceId);
+      if (modes & 4) {
+        ctx.addModifier({
+          scope: "until-end-of-turn",
+          appliesToInstanceId: ctx.link.attackingCard.instanceId,
+          onHitMark: true,
+          once: true,
+        });
+      }
+    },
+  },
   "kabuto of imperial authority|0": { onDefend(ctx) { ctx.setPlayerFlag(opponentSeat(ctx), "cannotAttackWithWeaponsThisTurn", true); } },
   "jagged edge|1": { canPlay: (ctx) => !!ctx.link && ctx.link.attackCardType === "weapon", onPlay(ctx) { ctx.addModifier({ scope: "chain-link", attack: 3 }); ctx.setFlag("link", "unpreventable", true); } },
   "provoke|3": {

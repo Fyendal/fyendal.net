@@ -2478,6 +2478,18 @@ export function makeCtx(
         `${nameOf(state, src.card.cardId)}'s next ${amount} damage to ${nameOf(state, (state.players[targetSeat] as PlayerState).heroCardId)} will be prevented this turn`,
       );
     },
+    preventNextDamageEvent(targetSeat, amount) {
+      if (amount <= 0 || !state.players[targetSeat]) return;
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        seat: targetSeat,
+        preventNextDamageAmount: amount,
+      });
+      logPublic(
+        state,
+        `the next time ${nameOf(state, (state.players[targetSeat] as PlayerState).heroCardId)} would be dealt damage this turn, up to ${amount} of that damage will be prevented`,
+      );
+    },
     preventNextDamageAtMost(targetSeat, amount, maximumEventAmount) {
       if (amount <= 0 || maximumEventAmount <= 0 || !state.players[targetSeat]) return;
       ctx.addModifier({

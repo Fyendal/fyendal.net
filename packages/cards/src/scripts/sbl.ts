@@ -421,7 +421,7 @@ export const sbl: Record<string, CardScript> = {
 
   "toe the line|1": {
     onPlay(ctx) {
-      ctx.preventNextDamage(ctx.seat, 2);
+      ctx.preventNextDamageEvent(ctx.seat, 2);
       ctx.addModifier({ scope: "until-end-of-turn", onPreventCreateToken: FLURRY });
     },
   },
