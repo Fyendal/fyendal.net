@@ -1,3 +1,4 @@
+import { cardData } from "@fyendal/cards/client";
 import type { CardView } from "@fyendal/shared";
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -35,7 +36,9 @@ function LocalizedDecisionOptionButton({
 }) {
   const intl = useIntl();
   if (!message) return null;
-  const label = formatGameMessage(intl, message);
+  const label = formatGameMessage(intl, message, {
+    card: (cardId) => cardData[cardId]?.name ?? cardId,
+  });
   return (
     <button
       key={option}

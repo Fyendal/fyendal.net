@@ -5,9 +5,61 @@ import type {
   DeepReadonly,
   Modifier,
   ScriptCtx,
+  ScriptDecisionPrompt,
   TriggerDef,
 } from "@fyendal/engine";
+import type { GameMessage } from "@fyendal/shared";
 import { functionalKey, functionalKeyOf } from "../functional.js";
+
+export interface DecisionPromptOptions {
+  values?: GameMessage["values"];
+  /** Labels keyed by the exact option value delivered to `onChoose`. Missing
+   * entries intentionally fall back to the raw option without affecting the
+   * ordering of localized entries. */
+  optionMessages?: Readonly<Record<string, GameMessage>>;
+}
+
+/** Construct semantic text metadata without coupling card scripts to any
+ * locale catalog. The client resolves the id; the engine preserves fallback
+ * text for old clients, persisted state, logs, and diagnostics. */
+export function decisionMessage(
+  id: string,
+  values?: GameMessage["values"],
+): GameMessage {
+  return { id, ...(values === undefined ? {} : { values }) };
+}
+
+/** Describe a localizable decision prompt and any localized option labels.
+ * This presentation object works with every ScriptCtx decision API. */
+export function decisionPrompt(
+  fallback: string,
+  id: string,
+  options: DecisionPromptOptions = {},
+): ScriptDecisionPrompt {
+  return {
+    fallback,
+    message: decisionMessage(id, options.values),
+    ...(options.optionMessages
+      ? { optionMessagesByValue: options.optionMessages }
+      : {}),
+  };
+}
+
+/** Common optional-effect presentation. Stable yes/no option values remain
+ * engine-facing while their labels use the shared catalog messages. */
+export function yesNoPrompt(
+  fallback: string,
+  id: string,
+  values?: GameMessage["values"],
+): ScriptDecisionPrompt {
+  return decisionPrompt(fallback, id, {
+    values,
+    optionMessages: {
+      yes: decisionMessage("common.option.yes"),
+      no: decisionMessage("common.option.no"),
+    },
+  });
+}
 
 /** Compose one set's implementation partitions without allowing a later
  * partition to silently replace an earlier functional script. */

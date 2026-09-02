@@ -8,6 +8,16 @@ describe("locale catalogs", () => {
     expect(Object.keys(chineseMessages).sort()).toEqual(Object.keys(englishMessages).sort());
   });
 
+  it("keeps wire-projected engine and card message IDs protocol-safe", () => {
+    const semanticMessageId = /^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9]*)+$/;
+    const wireMessageIds = Object.keys(englishMessages).filter(
+      (id) => id.startsWith("engine.") || id.startsWith("card."),
+    );
+
+    expect(wireMessageIds).not.toHaveLength(0);
+    expect(wireMessageIds.filter((id) => !semanticMessageId.test(id))).toEqual([]);
+  });
+
   it("preserves canonical English game keywords in Chinese", () => {
     const intl = createTestIntl("zh-Hans");
 

@@ -279,6 +279,38 @@
       "value": "赤魂战纪在线对战"
     }
   ],
+  "card.sea.damage.arcane.target": [
+    {
+      "type": 0,
+      "value": "选择一个目标，造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "card.sea.target.card": [
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "card.sea.treasure.counter.add": [
+    {
+      "type": 0,
+      "value": "在 Treasure Island 上放置一个金指示物？"
+    }
+  ],
+  "card.sea.treasure.counter.remove": [
+    {
+      "type": 0,
+      "value": "从 Treasure Island 上移除一个金指示物？"
+    }
+  ],
   "common.all": [
     {
       "type": 0,

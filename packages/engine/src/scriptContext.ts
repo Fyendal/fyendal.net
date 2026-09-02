@@ -3,6 +3,8 @@ import type { GameStateInternal } from "./runtimeState.js";
 import type { EquipmentSlot } from "@fyendal/shared";
 import type {
   ScriptCtx,
+  ScriptDecisionPrompt,
+  ScriptPrompt,
   TokenCreationContext,
 } from "./scripts.js";
 import { abilityList, oncePerTurnEffectFlagKey } from "./scripts.js";
@@ -271,6 +273,32 @@ interface ScriptedChoiceDetails {
 
 type CardChoiceDetails = Omit<ScriptedChoiceDetails, "cardOptions" | "defaultOption">;
 
+function scriptPromptParts(
+  prompt: ScriptPrompt,
+  options?: readonly string[],
+): {
+  fallback: string;
+  promptMessage?: ScriptDecisionPrompt["message"];
+  optionMessages?: (ScriptDecisionPrompt["message"] | null)[];
+} {
+  if (typeof prompt === "string") return { fallback: prompt };
+  const messagesByValue = prompt.optionMessagesByValue;
+  const optionMessages = options && messagesByValue
+    ? options.map((option) =>
+        Object.hasOwn(messagesByValue, option)
+          ? messagesByValue[option] ?? null
+          : null
+      )
+    : undefined;
+  return {
+    fallback: prompt.fallback,
+    promptMessage: prompt.message,
+    ...(optionMessages?.some((message) => message !== null)
+      ? { optionMessages }
+      : {}),
+  };
+}
+
 export function makeCtx(
   state: GameStateInternal,
   runtime: EngineRuntime,
@@ -293,11 +321,12 @@ export function makeCtx(
   );
   const requestScriptedChoice = (
     hook: string,
-    prompt: string,
+    prompt: ScriptPrompt,
     options: string[],
     choiceSeat?: number,
     details: ScriptedChoiceDetails = {},
   ): void => {
+    const presentation = scriptPromptParts(prompt, options);
     // An unacknowledged look-at float for the same player folds into this
     // choice: the looked cards stay visible as context alongside it.
     const existing = state.pendingDecision;
@@ -308,7 +337,7 @@ export function makeCtx(
     // An empty option list would deadlock the game on an unanswerable
     // decision — the effect simply finds no target and fizzles.
     if (options.length === 0) {
-      logPublic(state, `(fizzled, no options: ${prompt})`);
+      logPublic(state, `(fizzled, no options: ${presentation.fallback})`);
       return;
     }
     const decision: PendingDecisionState = {
@@ -316,7 +345,9 @@ export function makeCtx(
       kind: options.length === 2 && options.every((option) => option === "yes" || option === "no")
         ? "optional-effect"
         : "choose-target",
-      prompt,
+      prompt: presentation.fallback,
+      ...(presentation.promptMessage ? { promptMessage: presentation.promptMessage } : {}),
+      ...(presentation.optionMessages ? { optionMessages: presentation.optionMessages } : {}),
       options,
       sourceInstanceId: self.instanceId,
       chooseHook: hook,
@@ -344,7 +375,7 @@ export function makeCtx(
     // from the resolving effect until that choice has been answered.
     if (existing?.chooseHook && !look) {
       if (!queueDecisionBehindCrank(state, decision)) {
-        logPublic(state, `(skipped duplicate choice: ${prompt})`);
+        logPublic(state, `(skipped duplicate choice: ${presentation.fallback})`);
       }
       return;
     }
@@ -360,7 +391,7 @@ export function makeCtx(
   };
   const requestCardDecision = (
     hook: string,
-    prompt: string,
+    prompt: ScriptPrompt,
     options: (number | string)[],
     choiceSeat?: number,
     details: CardChoiceDetails = {},
@@ -1766,16 +1797,18 @@ export function makeCtx(
       });
     },
     requestNameChoice(hook, prompt, choiceSeat) {
+      const presentation = scriptPromptParts(prompt);
       const decision: PendingDecisionState = {
         player: choiceSeat ?? seat,
         kind: "choose-name",
-        prompt,
+        prompt: presentation.fallback,
+        ...(presentation.promptMessage ? { promptMessage: presentation.promptMessage } : {}),
         sourceInstanceId: self.instanceId,
         chooseHook: hook,
       };
       if (state.pendingDecision?.chooseHook) {
         if (!queueDecisionBehindCrank(state, decision)) {
-          logPublic(state, `(skipped duplicate choice: ${prompt})`);
+          logPublic(state, `(skipped duplicate choice: ${presentation.fallback})`);
         }
         return;
       }
