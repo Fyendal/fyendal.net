@@ -682,6 +682,29 @@ describe("SEA — pirate and generic attacks", () => {
     g.endTurn().expectEquipped(0, "arms", "gold-baited hook|0");
   });
 
+  it("Loan Shark survives when its controller steals Gold with Gold-Baited Hook", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 1,
+          equipment: { arms: "gold-baited hook|0" },
+          board: ["loan shark|2"],
+          hand: ["saltwater swell|3"],
+        },
+        { hero: "dorinthea", board: ["gold|0"] },
+      ],
+    });
+
+    g.activate("gold-baited hook|0")
+      .play("saltwater swell|3")
+      .blockWith()
+      .settle()
+      .endTurn()
+      .expectInZone(0, "loan shark|2", "board")
+      .expectLife(0, 20);
+  });
+
   it("Gold-Baited Hook does not destroy itself on a turn when it was not activated", () => {
     const g = scenario({
       seats: [
