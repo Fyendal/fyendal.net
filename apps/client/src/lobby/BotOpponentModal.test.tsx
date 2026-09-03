@@ -13,6 +13,8 @@ describe("BotOpponentModal", () => {
 
     expect(html).toContain('role="dialog"');
     expect(html).toContain("Choose your opponent");
+    expect(html).toContain("Keep searching for a real player");
+    expect(html).toContain('type="checkbox" checked=""');
     expect(html).toContain("Ira");
     expect(html).toContain("Scarlet Revenger");
     expect(html).toContain("Beginner");

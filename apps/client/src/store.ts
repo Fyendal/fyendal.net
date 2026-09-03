@@ -118,7 +118,7 @@ export const useStore = create<StoreState>((set, get) => {
   let joiningRoomCode: string | null = null;
   /** A bot-room request waiting for the retained matchmaking room to release
    *  this socket. WebSocket commands stay ordered by waiting for `left`. */
-  let pendingBotRoom: { format: ConstructedFormat; deckId: string; bot?: BotOpponent } | null = null;
+  let pendingBotRoom: { format: ConstructedFormat; deckId: string; bot?: BotOpponent; searchForPlayer?: boolean } | null = null;
   /** Choice associated with the current/most recent matchmaking request. */
   let activeMatchmakingChoiceKey: string | null = null;
   /** In-memory monotonic race fences for callbacks that outlive the
@@ -531,7 +531,7 @@ export const useStore = create<StoreState>((set, get) => {
     replayRuntime.discard(get().roomCode);
     resetRoomVersionState();
     set(clearedRoomProjection());
-    get().createBotRoom(pending.format, pending.deckId, pending.bot);
+    get().createBotRoom(pending.format, pending.deckId, pending.bot, pending.searchForPlayer);
   }
 
   function syncCompletedReplay(code: string): Promise<ReplayFile | null> {
@@ -706,7 +706,9 @@ export const useStore = create<StoreState>((set, get) => {
           lastActionAt: msg.lastActionAt,
           screen: "game",
           replayFrames: frames,
+          ...(msg.botGame === true ? { pendingBotStart: false } : {}),
         });
+        if (msg.botGame === true) send({ type: "background-matchmaking-status" });
         if (commandState.defenderStageIds) {
           queueOrSendDefenderStage(commandState.defenderStageIds);
         }
@@ -740,6 +742,11 @@ export const useStore = create<StoreState>((set, get) => {
       case "queue-left":
         set({ queuedFormat: null, matchmakingActive: false });
         launchPendingBotRoom();
+        break;
+      case "background-matchmaking":
+        set(msg.status.state === "pending"
+          ? { backgroundMatchmaking: { state: "inactive" }, pendingBotStart: true }
+          : { backgroundMatchmaking: msg.status, pendingBotStart: false });
         break;
       case "match-timeout":
         localStorage.removeItem(ROOM_SESSION_STORAGE_KEY);
@@ -989,33 +996,47 @@ export const useStore = create<StoreState>((set, get) => {
         });
       });
     },
-    createBotRoom: (format, deckId, bot) => {
+    createBotRoom: (format, deckId, bot, searchForPlayer = false) => {
       roomEntryPending = false;
       rememberPlayedDeck(format, deckId);
       prepDeckId = deckId;
       prepHero = null;
-      set({ prep: null, prepDeck: null, botGame: true, matchmakingActive: false });
+      const cardPoolMode = get().cardPoolModes[format];
+      const choiceKey = matchmakingChoiceKey(format, { deckId }, cardPoolMode);
+      activeMatchmakingChoiceKey = choiceKey;
+      const username = get().authUser;
+      const avoidRoomCodes = searchForPlayer && username
+        ? loadRejectedMatchRoomsForChoice(localStorage, username, choiceKey)
+        : [];
+      set({
+        prep: null,
+        prepDeck: null,
+        botGame: true,
+        matchmakingActive: searchForPlayer,
+        backgroundMatchmaking: { state: "inactive" },
+        pendingBotStart: searchForPlayer,
+      });
       connect(() => {
         send({
           type: "create-bot-room",
           format,
           deckId,
           ...(bot ? { bot } : {}),
+          ...(searchForPlayer ? { searchForPlayer: true } : {}),
+          ...(avoidRoomCodes.length > 0 ? { avoidRoomCodes } : {}),
           ...(get().cardPoolModes[format] !== "legal"
             ? { cardPoolMode: get().cardPoolModes[format] }
             : {}),
         });
       });
     },
-    playBotFromPrep: (format, deckId, bot) => {
-      if (pendingBotRoom || !get().matchmakingActive) return;
-      pendingBotRoom = { format, deckId, ...(bot ? { bot } : {}) };
-      if (get().roomCode) {
-        send({ type: "leave-room" });
-      } else if (get().queuedFormat) {
-        send({ type: "queue-leave" });
+    playBotFromPrep: (format, deckId, bot, searchForPlayer = true) => {
+      if (pendingBotRoom || !get().matchmakingActive || !get().roomCode) return;
+      if (searchForPlayer) {
+        get().createBotRoom(format, deckId, bot, true);
       } else {
-        pendingBotRoom = null;
+        pendingBotRoom = { format, deckId, ...(bot ? { bot } : {}), searchForPlayer: false };
+        send({ type: "leave-room" });
       }
     },
     joinRoom: (code, deckId, spectate, hero) => {
@@ -1107,6 +1128,32 @@ export const useStore = create<StoreState>((set, get) => {
       });
     },
     queueLeave: () => send({ type: "queue-leave" }),
+    stopBackgroundMatchmaking: () => {
+      send({ type: "background-matchmaking-leave" });
+      set({ backgroundMatchmaking: { state: "inactive" } });
+    },
+    acceptBackgroundMatch: () => {
+      const status = get().backgroundMatchmaking;
+      if (status.state === "offer") {
+        send({ type: "background-match-accept", roomCode: status.roomCode });
+      }
+    },
+    declineBackgroundMatch: () => {
+      const status = get().backgroundMatchmaking;
+      if (status.state !== "offer") return;
+      const username = get().authUser;
+      if (username && activeMatchmakingChoiceKey) {
+        rememberRejectedMatchRoom(
+          localStorage,
+          username,
+          status.roomCode,
+          Date.now(),
+          activeMatchmakingChoiceKey,
+        );
+      }
+      send({ type: "background-match-decline", roomCode: status.roomCode });
+      set({ backgroundMatchmaking: { state: "searching", format: status.format } });
+    },
     presentDeck: (deck) => {
       get().clearError();
       send({ type: "present-deck", deck });
@@ -1126,7 +1173,11 @@ export const useStore = create<StoreState>((set, get) => {
           : "legacy");
         rememberRejectedMatchRoom(localStorage, username, code, Date.now(), choiceKey);
       }
-      get().leave();
+      if (get().pendingBotStart && code) {
+        send({ type: "decline-pending-bot-match", roomCode: code });
+      } else {
+        get().leave();
+      }
     },
     prepUnready: () => send({ type: "prep-unready" }),
     chooseFirst: (first) => send({ type: "choose-first", first }),

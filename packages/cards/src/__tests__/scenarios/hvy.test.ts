@@ -54,6 +54,28 @@ describe("HVY — Beast Mode", () => {
   });
 });
 
+describe("HVY — Luminaris, Angel's Glow", () => {
+  it("gives the first Angel attack go again when a yellow card is in pitch", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "prism, awakener of sol|0",
+          weapons: ["luminaris, angel's glow|0"],
+          board: ["bellona, archangel of war|0"],
+          hand: ["figment of erudition|2"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.activate("bellona, archangel of war|0", { pitch: ["figment of erudition|2"] })
+      .blockWith()
+      .settle()
+      .expectAP(0, 1);
+  });
+});
+
 describe("HVY — Pack Call (on defend, reveal top: 6+ stays, else bottom)", () => {
   it("a 6+ top card stays on top", () => {
     const g = scenario({

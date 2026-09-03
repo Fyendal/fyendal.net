@@ -139,6 +139,31 @@ describe("initial schema", () => {
       .toEqual(migrations.map((migration) => ({ version: migration.version })));
   });
 
+  it("upgrades a version 25 database with durable bot matchmaking state", async () => {
+    const db = rawDb();
+    await applyMigrations(db, MIGRATIONS.filter((migration) => migration.version <= 25));
+    await applyMigrations(db, MIGRATIONS);
+
+    expect((await db.query(
+      `SELECT column_name FROM information_schema.columns
+       WHERE table_name = 'matchmaking_entries'
+         AND column_name IN ('mode', 'source_room_code', 'pending_offer_room_code', 'avoided_room_codes')
+       ORDER BY column_name`,
+    )).rows).toEqual([
+      { column_name: "avoided_room_codes" },
+      { column_name: "mode" },
+      { column_name: "pending_offer_room_code" },
+      { column_name: "source_room_code" },
+    ]);
+    expect(await tables(db)).toEqual(expect.arrayContaining([
+      "pending_bot_starts",
+      "pending_bot_start_candidates",
+      "matchmaking_offers",
+    ]));
+    expect((await db.query("SELECT version FROM schema_migrations ORDER BY version DESC LIMIT 1")).rows)
+      .toEqual([{ version: 26 }]);
+  });
+
   it("repairs a legacy database whose bug reports table is missing", async () => {
     const db = rawDb();
     const repairVersion = MIGRATIONS.at(-1)!.version;

@@ -585,6 +585,42 @@ describe("DTD — registration and core mechanics", () => {
 });
 
 describe("DTD — Prism and Figments", () => {
+  it("Prism, Awakener of Sol presents every Figment after Wartune Herald hits", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "prism, awakener of sol|0",
+          hand: ["wartune herald|2", BLUE],
+          deck: ["figment of protection|2", "figment of war|2", BLUE],
+        },
+        {
+          hero: "dorinthea",
+          heroKey: "cindra, dracai of retribution|0",
+          hand: ["dragonscaler flight path|0"],
+        },
+      ],
+    });
+
+    s.play("wartune herald|2", { pitch: [BLUE] })
+      .blockWith("dragonscaler flight path|0")
+      .settle()
+      .expectInZone(0, "wartune herald|2", "soul");
+
+    const options = s.state.pendingDecision?.options ?? [];
+    const deck = s.state.players[0]!.deck;
+    expect(options).toContain("no");
+    expect(deck.filter((card) => options.includes(String(card.instanceId))).map((card) => card.cardId))
+      .toEqual(expect.arrayContaining([printingId("figment of protection|2"), printingId("figment of war|2")]));
+    expect(options).toHaveLength(3);
+
+    s.chooseCard("figment of protection|2")
+      .doRaw({ kind: "close-chain" })
+      .expectInZone(0, "wartune herald|2", "soul")
+      .expectInZone(0, "figment of protection|2", "board")
+      .expectNotInZone(0, "wartune herald|2", "graveyard");
+  });
+
   it("Prism searches for a Figment when a Herald enters her soul, then awakens it", () => {
     const s = scenario({
       seats: [

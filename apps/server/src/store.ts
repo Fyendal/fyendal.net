@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import {
   IDLE_VICTORY_MS,
+  type BackgroundMatchmakingStatus,
   type BotOpponent,
   type CardPoolMode,
   type Decklist,
@@ -134,8 +135,17 @@ export interface MatchmakingChoice {
   retainedRoomCode?: string;
   /** Browser-local rooms this player explicitly declined. Never persisted. */
   avoidRoomCodes?: string[];
+  mode?: "foreground" | "background";
+  sourceRoomCode?: string;
   /** Preserve a survivor's original place when an opponent times out. */
   joinedAt?: number;
+  pendingBotStart?: {
+    format: "cc" | "silver-age";
+    deckId: string;
+    bot: BotOpponent;
+    requestedAt: number;
+  };
+  continuePendingBotStart?: boolean;
 }
 
 export type MatchmakingResult =
@@ -1421,7 +1431,7 @@ export class PgRoomStore {
          ORDER BY r.created_at DESC LIMIT 1`,
         [choice.userId],
       );
-      if (assigned.rows.length > 0) {
+      if (!choice.continuePendingBotStart && assigned.rows.length > 0) {
         const code = String(assigned.rows[0]!.room_code);
         const version = Number(assigned.rows[0]!.version);
         await appendClusterEvent(db, { type: "match-ready", userId: choice.userId, code, created: false });
@@ -1444,7 +1454,7 @@ export class PgRoomStore {
          LIMIT 1`,
         [choice.userId, format, choice.cardPoolMode],
       );
-      if (existingOpening.rows.length > 0) {
+      if (!choice.continuePendingBotStart && !choice.pendingBotStart && existingOpening.rows.length > 0) {
         return {
           ok: true as const,
           kind: "opened" as const,
@@ -1453,11 +1463,48 @@ export class PgRoomStore {
         };
       }
 
-      await db.query("DELETE FROM matchmaking_entries WHERE user_id = $1", [choice.userId]);
+      const previousEntry = await db.query(
+        `SELECT mode, source_room_code, avoided_room_codes, joined_at
+         FROM matchmaking_entries WHERE user_id = $1`,
+        [choice.userId],
+      );
+      const previousRaw = previousEntry.rows[0] as Record<string, unknown> | undefined;
+      const persistedAvoided = previousRaw
+        ? dbStringArray(previousRaw.avoided_room_codes, "<matchmaking>", "avoided_room_codes", MAX_MATCHMAKING_AVOID_ROOM_CODES)
+        : [];
+      const avoidRoomCodes = [...new Set([
+        ...persistedAvoided,
+        ...(choice.avoidRoomCodes ?? []).map((code) => code.toUpperCase()),
+      ].filter((code) => /^[A-Z0-9]{6}$/.test(code)))]
+        .slice(-MAX_MATCHMAKING_AVOID_ROOM_CODES);
+      const mode = choice.mode
+        ?? (previousRaw?.mode === "background" ? "background" : "foreground");
+      const sourceRoomCode = choice.sourceRoomCode?.toUpperCase()
+        ?? (typeof previousRaw?.source_room_code === "string" ? previousRaw.source_room_code : null);
+      if (mode === "background" && !sourceRoomCode) {
+        return { ok: false as const, error: "background matchmaking requires a bot room" };
+      }
+      const joinedAt = choice.joinedAt
+        ?? (previousRaw && Number.isSafeInteger(Number(previousRaw.joined_at))
+          ? Number(previousRaw.joined_at)
+          : Date.now());
       await db.query(
         `INSERT INTO matchmaking_entries
-          (user_id, format, hero, deck_id, deck_name, card_pool_mode, retained_room_code, joined_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+          (user_id, format, hero, deck_id, deck_name, card_pool_mode, retained_room_code, joined_at,
+           mode, source_room_code, avoided_room_codes)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+         ON CONFLICT (user_id) DO UPDATE SET
+           format = EXCLUDED.format,
+           hero = EXCLUDED.hero,
+           deck_id = EXCLUDED.deck_id,
+           deck_name = EXCLUDED.deck_name,
+           card_pool_mode = EXCLUDED.card_pool_mode,
+           retained_room_code = EXCLUDED.retained_room_code,
+           joined_at = EXCLUDED.joined_at,
+           mode = EXCLUDED.mode,
+           source_room_code = EXCLUDED.source_room_code,
+           pending_offer_room_code = NULL,
+           avoided_room_codes = EXCLUDED.avoided_room_codes`,
         [
           choice.userId,
           format,
@@ -1466,9 +1513,76 @@ export class PgRoomStore {
           choice.deckName ?? null,
           choice.cardPoolMode,
           choice.retainedRoomCode?.toUpperCase() ?? null,
-          choice.joinedAt ?? Date.now(),
+          joinedAt,
+          mode,
+          mode === "background" ? sourceRoomCode : null,
+          JSON.stringify(avoidRoomCodes),
         ],
       );
+
+      if (choice.pendingBotStart) {
+        await db.query(
+          `INSERT INTO pending_bot_starts
+            (user_id, format, deck_id, bot, card_pool_mode, requested_at)
+           VALUES ($1,$2,$3,$4,$5,$6)
+           ON CONFLICT (user_id) DO NOTHING`,
+          [
+            choice.userId,
+            choice.pendingBotStart.format,
+            choice.pendingBotStart.deckId,
+            choice.pendingBotStart.bot,
+            choice.cardPoolMode,
+            choice.pendingBotStart.requestedAt,
+          ],
+        );
+        const candidates = await db.query(
+          `SELECT q.user_id, q.retained_room_code, q.avoided_room_codes
+           FROM matchmaking_entries q
+           JOIN rooms live_room ON live_room.code = COALESCE(q.source_room_code, q.retained_room_code)
+           LEFT JOIN room_seats bot_source
+             ON bot_source.room_code = q.source_room_code AND bot_source.controller = 'bot'
+           JOIN (
+             SELECT DISTINCT live_seat.room_code, live_seat.user_id
+             FROM room_seats live_seat
+             JOIN room_presence p
+               ON p.room_code = live_seat.room_code
+              AND p.seat = live_seat.seat
+              AND p.token_hash = live_seat.token_hash
+             WHERE p.last_seen_at > $4
+           ) live
+             ON live.room_code = COALESCE(q.source_room_code, q.retained_room_code)
+            AND live.user_id = q.user_id
+           WHERE q.user_id <> $1 AND q.format = $2 AND q.card_pool_mode = $3
+             AND q.retained_room_code IS NOT NULL
+             AND q.pending_offer_room_code IS NULL
+             AND (q.mode = 'foreground' OR (
+               live_room.status IN ('prep', 'playing') AND bot_source.room_code IS NOT NULL
+             ))
+           ORDER BY q.joined_at, q.user_id`,
+          [choice.userId, format, choice.cardPoolMode, Date.now() - PRESENCE_TIMEOUT_MS],
+        );
+        const compatibleCandidates = candidates.rows.filter((candidate) => {
+          const candidateRaw = dbObject(candidate, "<matchmaking>", "bot-start snapshot candidate");
+          if (typeof candidateRaw.retained_room_code !== "string"
+            || avoidRoomCodes.includes(candidateRaw.retained_room_code)) return false;
+          if (!choice.retainedRoomCode) return true;
+          return !dbStringArray(
+            candidateRaw.avoided_room_codes,
+            "<matchmaking>",
+            "avoided_room_codes",
+            MAX_MATCHMAKING_AVOID_ROOM_CODES,
+          ).includes(choice.retainedRoomCode.toUpperCase());
+        });
+        for (const [ordinal, candidate] of compatibleCandidates.entries()) {
+          await db.query(
+            `INSERT INTO pending_bot_start_candidates
+              (starter_user_id, candidate_user_id, ordinal)
+             VALUES ($1,$2,$3)
+             ON CONFLICT (starter_user_id, candidate_user_id) DO NOTHING`,
+            [choice.userId, candidate.user_id, ordinal],
+          );
+        }
+      }
 
       const currentSeat = await this.matchmakingSeat(db, format, choice);
       if (!currentSeat) {
@@ -1519,10 +1633,6 @@ export class PgRoomStore {
         return { ok: true, kind: "queued" };
       };
 
-      const avoidRoomCodes = [...new Set((choice.avoidRoomCodes ?? [])
-        .map((code) => code.toUpperCase())
-        .filter((code) => /^[A-Z0-9]{6}$/.test(code)))]
-        .slice(0, MAX_MATCHMAKING_AVOID_ROOM_CODES);
       const avoidPlaceholders = avoidRoomCodes.map((_, index) => `$${index + 6}`).join(", ");
       const avoidClause = avoidRoomCodes.length > 0
         ? `AND (q.retained_room_code IS NULL OR q.retained_room_code NOT IN (${avoidPlaceholders}))`
@@ -1530,9 +1640,16 @@ export class PgRoomStore {
 
       const { rows } = await db.query(
         `SELECT q.user_id, u.username, q.hero, q.deck_id, q.deck_name,
-                q.card_pool_mode, q.retained_room_code
+                q.card_pool_mode, q.retained_room_code, q.mode, q.source_room_code,
+                q.avoided_room_codes,
+                (opponent_pending.user_id IS NOT NULL) AS pending_bot_start
          FROM matchmaking_entries q
          JOIN users u ON u.id = q.user_id
+         LEFT JOIN pending_bot_starts opponent_pending ON opponent_pending.user_id = q.user_id
+         LEFT JOIN pending_bot_starts current_pending ON current_pending.user_id = $3
+         LEFT JOIN pending_bot_start_candidates current_candidate
+           ON current_candidate.starter_user_id = $3
+          AND current_candidate.candidate_user_id = q.user_id
          JOIN (
            SELECT DISTINCT live_seat.room_code, live_seat.user_id
            FROM room_seats live_seat
@@ -1542,13 +1659,24 @@ export class PgRoomStore {
             AND p.token_hash = live_seat.token_hash
            WHERE p.last_seen_at > $5
          ) live
-           ON live.room_code = q.retained_room_code
+           ON live.room_code = COALESCE(q.source_room_code, q.retained_room_code)
           AND live.user_id = q.user_id
+         JOIN rooms live_room ON live_room.code = COALESCE(q.source_room_code, q.retained_room_code)
+         LEFT JOIN room_seats bot_source
+           ON bot_source.room_code = q.source_room_code AND bot_source.controller = 'bot'
          WHERE q.format = $1 AND q.card_pool_mode = $2 AND q.user_id <> $3
-           AND (q.retained_room_code IS NULL OR $4::text IS NULL)
+           AND ($4::text IS NULL OR q.retained_room_code IS NULL OR $${6 + avoidRoomCodes.length}::boolean)
            AND q.retained_room_code IS NOT NULL
+           AND q.pending_offer_room_code IS NULL
+           AND (q.mode = 'foreground' OR (
+             live_room.status IN ('prep', 'playing') AND bot_source.room_code IS NOT NULL
+           ))
+           AND (
+             current_pending.user_id IS NULL
+             OR (current_candidate.attempted = FALSE AND current_candidate.skipped = FALSE)
+           )
            ${avoidClause}
-         ORDER BY q.joined_at, q.user_id LIMIT 1`,
+         ORDER BY q.joined_at, q.user_id`,
         [
           format,
           choice.cardPoolMode,
@@ -1556,16 +1684,27 @@ export class PgRoomStore {
           choice.retainedRoomCode ?? null,
           Date.now() - PRESENCE_TIMEOUT_MS,
           ...avoidRoomCodes,
+          choice.continuePendingBotStart === true,
         ],
       );
-      if (rows.length === 0) {
+      const candidateRow = rows.find((candidate) => {
+        if (!choice.retainedRoomCode) return true;
+        const candidateRaw = dbObject(candidate, "<matchmaking>", "opponent candidate");
+        return !dbStringArray(
+          candidateRaw.avoided_room_codes,
+          "<matchmaking>",
+          "avoided_room_codes",
+          MAX_MATCHMAKING_AVOID_ROOM_CODES,
+        ).includes(choice.retainedRoomCode.toUpperCase());
+      });
+      if (!candidateRow) {
         // Every unmatched new search becomes a visible one-seat opener. A
         // survivor already owns a retained room and simply keeps waiting in it.
         if (!choice.retainedRoomCode) return openMatchmakingRoom();
         return waitForOpponent();
       }
 
-      const raw = dbObject(rows[0], "<matchmaking>", "opponent");
+      const raw = dbObject(candidateRow, "<matchmaking>", "opponent");
       const opponent: MatchmakingChoice = {
         userId: Number(raw.user_id),
         username: String(raw.username),
@@ -1576,6 +1715,8 @@ export class PgRoomStore {
           ? raw.card_pool_mode
           : "legal",
         ...(typeof raw.retained_room_code === "string" ? { retainedRoomCode: raw.retained_room_code } : {}),
+        ...(raw.mode === "background" ? { mode: "background" as const } : {}),
+        ...(typeof raw.source_room_code === "string" ? { sourceRoomCode: raw.source_room_code } : {}),
       };
       const opponentSeat = await this.matchmakingSeat(db, format, opponent);
       if (!opponentSeat) {
@@ -1586,9 +1727,17 @@ export class PgRoomStore {
 
       let room: RoomRow | null = null;
       let createdFreshRoom = false;
-      const retainedCode = opponent.retainedRoomCode ?? choice.retainedRoomCode;
-      const retainedOwner = opponent.retainedRoomCode ? opponent : choice;
-      const incomingSeat = opponent.retainedRoomCode ? currentSeat : opponentSeat;
+      const retainedCode = choice.continuePendingBotStart && choice.retainedRoomCode
+        ? choice.retainedRoomCode
+        : opponent.retainedRoomCode ?? choice.retainedRoomCode;
+      const retainedOwner = retainedCode === choice.retainedRoomCode ? choice : opponent;
+      const incomingSeat = retainedOwner === choice ? opponentSeat : currentSeat;
+      const unusedRetainedCode = choice.continuePendingBotStart
+        && opponent.retainedRoomCode
+        && choice.retainedRoomCode
+        && opponent.retainedRoomCode !== choice.retainedRoomCode
+          ? opponent.retainedRoomCode
+          : null;
       if (retainedCode) {
         const retained = await this.loadRoom(db, retainedCode.toUpperCase());
         const ownerSeat = retained?.seats.findIndex((seat) => seat?.userId === retainedOwner.userId) ?? -1;
@@ -1641,7 +1790,33 @@ export class PgRoomStore {
         ]);
       }
 
-      await db.query("DELETE FROM matchmaking_entries WHERE user_id IN ($1, $2)", [choice.userId, opponent.userId]);
+      if (mode === "background" || opponent.mode === "background" || choice.pendingBotStart
+        || choice.continuePendingBotStart || raw.pending_bot_start === true) {
+        await db.query(
+          `UPDATE matchmaking_entries
+           SET pending_offer_room_code = $3, retained_room_code = $3
+           WHERE user_id IN ($1, $2)`,
+          [choice.userId, opponent.userId, room.code],
+        );
+        await db.query(
+          `INSERT INTO matchmaking_offers(room_code, first_user_id, second_user_id, created_at)
+           VALUES ($1,$2,$3,$4)
+           ON CONFLICT (room_code) DO NOTHING`,
+          [room.code, opponent.userId, choice.userId, Date.now()],
+        );
+      } else {
+        await db.query(
+          "DELETE FROM matchmaking_entries WHERE user_id IN ($1, $2)",
+          [choice.userId, opponent.userId],
+        );
+      }
+      if (unusedRetainedCode) {
+        await db.query("DELETE FROM rooms WHERE code = $1", [unusedRetainedCode]);
+        await appendClusterEvent(db, {
+          type: "room",
+          event: { code: unusedRetainedCode, kind: "deleted", version: 1 },
+        });
+      }
       await appendClusterEvent(db, { type: "room", event: { code: room.code, kind: "sync", version: room.version } });
       await appendClusterEvent(db, { type: "match-ready", userId: choice.userId, code: room.code, created: false });
       await appendClusterEvent(db, { type: "match-ready", userId: opponent.userId, code: room.code, created: createdFreshRoom });
@@ -1662,6 +1837,23 @@ export class PgRoomStore {
     });
   }
 
+  async isRetainedMatchmakingRoom(userId: number, code: string): Promise<boolean> {
+    const { rows } = await this.db.query(
+      `SELECT 1
+       FROM matchmaking_entries q
+       JOIN rooms r ON r.code = q.retained_room_code
+       JOIN room_seats rs ON rs.room_code = r.code AND rs.user_id = q.user_id
+       JOIN (
+         SELECT room_code, COUNT(*) AS occupied FROM room_seats GROUP BY room_code
+       ) occupancy ON occupancy.room_code = r.code
+       WHERE q.user_id = $1 AND q.retained_room_code = $2
+         AND q.mode = 'foreground' AND q.pending_offer_room_code IS NULL
+         AND r.status = 'open' AND occupancy.occupied = 1`,
+      [userId, code.toUpperCase()],
+    );
+    return rows.length > 0;
+  }
+
   async matchmakingCounts(): Promise<Record<Format, number>> {
     const { rows } = await this.db.query(
       "SELECT format, COUNT(*) AS count FROM matchmaking_entries GROUP BY format",
@@ -1676,11 +1868,424 @@ export class PgRoomStore {
     return counts;
   }
 
+  async setBackgroundMatchmaking(userId: number, sourceRoomCode: string): Promise<boolean> {
+    const result = await withTransaction(this.db, async (db) => {
+      const source = await db.query(
+        `SELECT 1
+         FROM rooms r
+         JOIN room_seats human ON human.room_code = r.code AND human.user_id = $1
+         JOIN room_seats bot ON bot.room_code = r.code AND bot.controller = 'bot'
+         WHERE r.code = $2 AND r.status IN ('prep', 'playing')`,
+        [userId, sourceRoomCode.toUpperCase()],
+      );
+      if (source.rows.length === 0) return { rowCount: 0 };
+      const updated = await db.query(
+        `UPDATE matchmaking_entries
+         SET mode = 'background', source_room_code = $2
+         WHERE user_id = $1`,
+        [userId, sourceRoomCode.toUpperCase()],
+      );
+      await db.query("DELETE FROM pending_bot_starts WHERE user_id = $1", [userId]);
+      return updated;
+    });
+    if ((result.rowCount ?? 0) > 0) {
+      await appendClusterEvent(this.db, { type: "background-status-changed", userId });
+      return true;
+    }
+    return false;
+  }
+
+  async backgroundMatchmakingStatus(userId: number): Promise<BackgroundMatchmakingStatus> {
+    const { rows } = await this.db.query(
+      `SELECT q.format, q.mode, q.source_room_code, q.pending_offer_room_code,
+              (p.user_id IS NOT NULL) AS pending_bot_start
+       FROM matchmaking_entries q
+       LEFT JOIN pending_bot_starts p ON p.user_id = q.user_id
+       WHERE q.user_id = $1`,
+      [userId],
+    );
+    if (rows.length === 0) return { state: "inactive" };
+    const raw = dbObject(rows[0], "<matchmaking>", "background status");
+    const format = raw.format === "cc" || raw.format === "silver-age" ? raw.format : null;
+    if (!format) return { state: "inactive" };
+    if (raw.pending_bot_start === true) return { state: "pending", format };
+    if (raw.mode !== "background" || typeof raw.source_room_code !== "string") {
+      return { state: "inactive" };
+    }
+    if (typeof raw.pending_offer_room_code !== "string") return { state: "searching", format };
+    const room = await this.getRoom(raw.pending_offer_room_code);
+    if (!room || room.prepDeadlineAt === null) return { state: "searching", format };
+    const seat = room.seats.findIndex((member) => member?.userId === userId);
+    if (seat !== 0 && seat !== 1) return { state: "searching", format };
+    const me = room.seats[seat]!;
+    const opponent = room.seats[1 - seat];
+    const opponentHeroId = opponent ? heroIdForSeat(opponent) : undefined;
+    if (!opponent || !opponentHeroId) return { state: "searching", format };
+    return {
+      state: "offer",
+      format,
+      roomCode: room.code,
+      deadlineAt: room.prepDeadlineAt,
+      opponent: {
+        username: opponent.username ?? "Opponent",
+        heroId: opponentHeroId,
+        heroName: heroNameForSeat(opponent) ?? "Opponent",
+      },
+      acceptedByYou: me.accepted === true,
+      opponentAccepted: opponent.accepted === true,
+    };
+  }
+
+  async stopBackgroundMatchmaking(userId: number): Promise<boolean> {
+    const { rows } = await this.db.query(
+      `SELECT pending_offer_room_code FROM matchmaking_entries
+       WHERE user_id = $1 AND mode = 'background'`,
+      [userId],
+    );
+    if (rows.length === 0) return false;
+    const offerCode = (rows[0] as Record<string, unknown>).pending_offer_room_code;
+    if (typeof offerCode === "string") {
+      const declined = await this.declineBackgroundMatch(userId, offerCode, false);
+      return declined.ok;
+    }
+    return withTransaction(this.db, async (db) => {
+      const entry = await db.query(
+        `SELECT retained_room_code, source_room_code, format
+         FROM matchmaking_entries WHERE user_id = $1 AND mode = 'background'`,
+        [userId],
+      );
+      if (entry.rows.length === 0) return false;
+      const raw = dbObject(entry.rows[0], "<matchmaking>", "stopped background entry");
+      const retainedRoomCode = typeof raw.retained_room_code === "string"
+        && raw.retained_room_code !== raw.source_room_code
+        ? raw.retained_room_code
+        : null;
+      if (retainedRoomCode) {
+        const retained = await this.loadRoom(db, retainedRoomCode);
+        const retainedVersion = retained?.version ?? 0;
+        await db.query("DELETE FROM rooms WHERE code = $1", [retainedRoomCode]);
+        await appendClusterEvent(db, {
+          type: "room",
+          event: { code: retainedRoomCode, kind: "deleted", version: retainedVersion + 1 },
+        });
+      } else {
+        await db.query("DELETE FROM matchmaking_entries WHERE user_id = $1", [userId]);
+      }
+      await appendClusterEvent(db, { type: "background-status-changed", userId });
+      await appendClusterEvent(db, { type: "queue-changed" });
+      return true;
+    });
+  }
+
+  async stopBackgroundMatchmakingForSource(sourceRoomCode: string): Promise<void> {
+    const { rows } = await this.db.query(
+      `SELECT user_id FROM matchmaking_entries
+       WHERE mode = 'background' AND source_room_code = $1`,
+      [sourceRoomCode.toUpperCase()],
+    );
+    for (const row of rows) {
+      const raw = dbObject(row, "<matchmaking>", "finished bot background entry");
+      const userId = dbSafeInteger(raw.user_id, "<matchmaking>", "user_id");
+      await this.stopBackgroundMatchmaking(userId);
+    }
+  }
+
+  async declineBackgroundMatch(
+    userId: number,
+    code: string,
+    continueSearching = true,
+  ): Promise<{ ok: true; version: number } | { ok: false; error: string }> {
+    const upper = code.toUpperCase();
+    const r = await this.withRetry<{
+      choice: MatchmakingChoice;
+      sourceRoomCode: string;
+      joinedAt: number;
+      survivorUserId: number | null;
+    }>(upper, (room) => {
+      if (room.state || matchPrepPhase(room) !== "accept") {
+        return { error: "this room is not awaiting match acceptance" };
+      }
+      const seat = room.seats.findIndex((member) => member?.userId === userId);
+      if (seat !== 0 && seat !== 1) return { error: "not a player in this room" };
+      const member = room.seats[seat]!;
+      room.seats[seat] = null;
+      const survivor = room.seats[1 - seat];
+      if (survivor) survivor.accepted = false;
+      room.prep = null;
+      room.prepDeadlineAt = null;
+      updateGc(room);
+      return {
+        room,
+        result: {
+          choice: {
+            userId,
+            username: member.username ?? "unknown",
+            hero: member.hero,
+            deckId: member.deckId,
+            deckName: member.deckName,
+            cardPoolMode: room.cardPoolMode,
+          },
+          sourceRoomCode: "",
+          joinedAt: 0,
+          survivorUserId: survivor?.userId ?? null,
+        },
+        seatWrites: [
+          { kind: "delete" as const, seat: seat as SeatIndex },
+          ...(survivor
+            ? [{ kind: "full" as const, seat: (1 - seat) as SeatIndex, mode: "update" as const }]
+            : []),
+        ],
+      };
+    });
+    if (!r.ok) return { ok: false, error: r.error };
+    const metadata = await withTransaction(this.db, async (db) => {
+      const { rows } = await db.query(
+        `SELECT source_room_code, joined_at, avoided_room_codes
+         FROM matchmaking_entries
+         WHERE user_id = $1 AND mode = 'background' AND pending_offer_room_code = $2`,
+        [userId, upper],
+      );
+      if (rows.length === 0) return null;
+      const raw = dbObject(rows[0], "<matchmaking>", "declined background entry");
+      if (typeof raw.source_room_code !== "string") return null;
+      const avoided = dbStringArray(
+        raw.avoided_room_codes,
+        "<matchmaking>",
+        "avoided_room_codes",
+        MAX_MATCHMAKING_AVOID_ROOM_CODES,
+      ).filter((candidate) => candidate !== upper);
+      avoided.push(upper);
+      await db.query(
+        `UPDATE matchmaking_entries
+         SET pending_offer_room_code = NULL, retained_room_code = NULL, avoided_room_codes = $2
+         WHERE user_id = $1`,
+        [userId, JSON.stringify(avoided.slice(-MAX_MATCHMAKING_AVOID_ROOM_CODES))],
+      );
+      if (!continueSearching) {
+        await db.query("DELETE FROM matchmaking_entries WHERE user_id = $1", [userId]);
+      }
+      await db.query(
+        `UPDATE matchmaking_entries
+         SET pending_offer_room_code = NULL, retained_room_code = $2
+         WHERE pending_offer_room_code = $2`,
+        [userId, upper],
+      );
+      await db.query("DELETE FROM matchmaking_offers WHERE room_code = $1", [upper]);
+      await appendClusterEvent(db, { type: "background-status-changed", userId });
+      await appendClusterEvent(db, { type: "queue-changed" });
+      return { sourceRoomCode: raw.source_room_code, joinedAt: Number(raw.joined_at) };
+    });
+    if (!metadata) return { ok: false, error: "background matchmaking entry disappeared" };
+    if (continueSearching) {
+      await this.queueForMatch((await this.getRoom(metadata.sourceRoomCode))?.format ?? "cc", {
+        ...r.result.choice,
+        mode: "background",
+        sourceRoomCode: metadata.sourceRoomCode,
+        joinedAt: metadata.joinedAt,
+        avoidRoomCodes: [upper],
+      });
+    }
+    if (r.result.survivorUserId !== null) {
+      await this.advancePendingBotStart(r.result.survivorUserId, userId);
+    }
+    return { ok: true, version: r.version };
+  }
+
+  async advancePendingBotStart(
+    userId: number,
+    attemptedCandidateUserId?: number,
+  ): Promise<"matched" | "started" | "none"> {
+    const pendingRows = await this.db.query(
+      `SELECT p.format, p.deck_id, p.bot, p.card_pool_mode, p.requested_at,
+              q.joined_at, q.retained_room_code, q.avoided_room_codes,
+              u.username, q.deck_name
+       FROM pending_bot_starts p
+       JOIN matchmaking_entries q ON q.user_id = p.user_id
+       JOIN users u ON u.id = p.user_id
+       WHERE p.user_id = $1`,
+      [userId],
+    );
+    if (pendingRows.rows.length === 0) return "none";
+    if (attemptedCandidateUserId !== undefined) {
+      await withTransaction(this.db, async (db) => {
+        const offer = await db.query(
+          "SELECT pending_offer_room_code FROM matchmaking_entries WHERE user_id = $1",
+          [userId],
+        );
+        const offerCode = (offer.rows[0] as Record<string, unknown> | undefined)?.pending_offer_room_code;
+        await db.query(
+          `UPDATE pending_bot_start_candidates SET attempted = TRUE
+           WHERE starter_user_id = $1 AND candidate_user_id = $2`,
+          [userId, attemptedCandidateUserId],
+        );
+        await db.query(
+          "UPDATE matchmaking_entries SET pending_offer_room_code = NULL WHERE user_id = $1",
+          [userId],
+        );
+        if (typeof offerCode === "string") {
+          await db.query("DELETE FROM matchmaking_offers WHERE room_code = $1", [offerCode]);
+        }
+      });
+    }
+    const raw = dbObject(pendingRows.rows[0], "<matchmaking>", "pending bot start");
+    const format = raw.format === "cc" || raw.format === "silver-age" ? raw.format : null;
+    const bot = typeof raw.bot === "string" ? botDefinition(raw.bot as BotOpponent) : undefined;
+    if (!format || !bot || bot.format !== format || typeof raw.deck_id !== "string") return "none";
+    const retainedRoomCode = typeof raw.retained_room_code === "string"
+      ? raw.retained_room_code
+      : undefined;
+    const avoided = dbStringArray(
+      raw.avoided_room_codes,
+      "<matchmaking>",
+      "avoided_room_codes",
+      MAX_MATCHMAKING_AVOID_ROOM_CODES,
+    );
+    const result = await this.queueForMatch(format, {
+      userId,
+      username: String(raw.username),
+      deckId: raw.deck_id,
+      ...(typeof raw.deck_name === "string" ? { deckName: raw.deck_name } : {}),
+      cardPoolMode: raw.card_pool_mode === "future" || raw.card_pool_mode === "open"
+        ? raw.card_pool_mode
+        : "legal",
+      ...(retainedRoomCode ? { retainedRoomCode } : {}),
+      avoidRoomCodes: avoided,
+      joinedAt: Number(raw.joined_at),
+      continuePendingBotStart: true,
+    });
+    if (!result.ok) return "none";
+    if (result.kind === "matched") return "matched";
+
+    await this.db.query(
+      `UPDATE pending_bot_start_candidates SET skipped = TRUE
+       WHERE starter_user_id = $1 AND attempted = FALSE`,
+      [userId],
+    );
+
+    const created = await this.createBotRoom(format, {
+      deckId: raw.deck_id,
+      ...(typeof raw.deck_name === "string" ? { deckName: raw.deck_name } : {}),
+      username: String(raw.username),
+      userId,
+    }, raw.card_pool_mode === "future" || raw.card_pool_mode === "open"
+      ? raw.card_pool_mode
+      : "legal", raw.bot as BotOpponent);
+    await this.setBackgroundMatchmaking(userId, created.code);
+    await appendClusterEvent(this.db, { type: "bot-practice-ready", userId, code: created.code });
+    return "started";
+  }
+
+  async hasPendingBotStart(userId: number): Promise<boolean> {
+    const { rows } = await this.db.query(
+      "SELECT 1 FROM pending_bot_starts WHERE user_id = $1",
+      [userId],
+    );
+    return rows.length > 0;
+  }
+
+  async declinePendingBotMatch(
+    userId: number,
+    code: string,
+    credentials: SeatCredentials,
+  ): Promise<{ ok: true; version: number } | { ok: false; error: string }> {
+    const upper = code.toUpperCase();
+    const offer = await this.db.query(
+      `SELECT CASE WHEN first_user_id = $2 THEN second_user_id ELSE first_user_id END AS opponent_user_id
+       FROM matchmaking_offers
+       WHERE room_code = $1 AND (first_user_id = $2 OR second_user_id = $2)`,
+      [upper, userId],
+    );
+    if (offer.rows.length === 0 || !(await this.hasPendingBotStart(userId))) {
+      return { ok: false, error: "no pending bot match offer" };
+    }
+    const opponentUserId = Number((offer.rows[0] as Record<string, unknown>).opponent_user_id);
+    const entry = await this.db.query(
+      "SELECT avoided_room_codes FROM matchmaking_entries WHERE user_id = $1",
+      [userId],
+    );
+    const avoided = entry.rows.length > 0
+      ? dbStringArray(
+          (entry.rows[0] as Record<string, unknown>).avoided_room_codes,
+          "<matchmaking>",
+          "avoided_room_codes",
+          MAX_MATCHMAKING_AVOID_ROOM_CODES,
+        ).filter((candidate) => candidate !== upper)
+      : [];
+    avoided.push(upper);
+    const left = await this.leaveRoom(upper, credentials);
+    if (!left.ok) return left;
+    await withTransaction(this.db, async (db) => {
+      await db.query(
+        `UPDATE matchmaking_entries
+         SET pending_offer_room_code = NULL, retained_room_code = NULL, avoided_room_codes = $2
+         WHERE user_id = $1`,
+        [userId, JSON.stringify(avoided.slice(-MAX_MATCHMAKING_AVOID_ROOM_CODES))],
+      );
+      await db.query(
+        `UPDATE matchmaking_entries
+         SET pending_offer_room_code = NULL, retained_room_code = $2
+         WHERE user_id = $1`,
+        [opponentUserId, upper],
+      );
+      await db.query("DELETE FROM matchmaking_offers WHERE room_code = $1", [upper]);
+      await appendClusterEvent(db, { type: "background-status-changed", userId: opponentUserId });
+      await appendClusterEvent(db, { type: "queue-changed" });
+    });
+    await this.advancePendingBotStart(userId, opponentUserId);
+    return { ok: true, version: left.version };
+  }
+
+  async resolveOfferedPlayerLeave(
+    userId: number,
+    code: string,
+    format: Format,
+    cardPoolMode: CardPoolMode,
+    survivor: SeatRow | null,
+  ): Promise<boolean> {
+    const upper = code.toUpperCase();
+    const offer = await this.db.query(
+      `SELECT CASE WHEN first_user_id = $2 THEN second_user_id ELSE first_user_id END AS survivor_user_id
+       FROM matchmaking_offers
+       WHERE room_code = $1 AND (first_user_id = $2 OR second_user_id = $2)`,
+      [upper, userId],
+    );
+    if (offer.rows.length === 0) return false;
+    const survivorUserId = Number((offer.rows[0] as Record<string, unknown>).survivor_user_id);
+    await withTransaction(this.db, async (db) => {
+      await db.query("DELETE FROM matchmaking_entries WHERE user_id = $1", [userId]);
+      await db.query(
+        `UPDATE matchmaking_entries
+         SET pending_offer_room_code = NULL, retained_room_code = $2
+         WHERE user_id = $1`,
+        [survivorUserId, upper],
+      );
+      await db.query("DELETE FROM matchmaking_offers WHERE room_code = $1", [upper]);
+      await appendClusterEvent(db, { type: "background-status-changed", userId });
+      await appendClusterEvent(db, { type: "background-status-changed", userId: survivorUserId });
+      await appendClusterEvent(db, { type: "queue-changed" });
+    });
+    if (!survivor || survivor.userId !== survivorUserId) return true;
+    if (await this.hasPendingBotStart(survivorUserId)) {
+      await this.advancePendingBotStart(survivorUserId, userId);
+    } else {
+      await this.queueForMatch(format, {
+        userId: survivorUserId,
+        username: survivor.username ?? "unknown",
+        hero: survivor.hero,
+        deckId: survivor.deckId,
+        deckName: survivor.deckName,
+        retainedRoomCode: upper,
+        cardPoolMode,
+      });
+    }
+    return true;
+  }
+
   /** Matchmade prep room: acknowledge the pairing before sideboarding. */
   async acceptMatch(
     code: string,
     credentials: SeatCredentials,
-  ): Promise<{ ok: true; version: number } | { ok: false; error: string }> {
+  ): Promise<{ ok: true; version: number; replayFinalizationIds?: string[] } | { ok: false; error: string }> {
     const r = await this.withRetry<undefined>(code.toUpperCase(), (room) => {
       if (room.state) return { error: "game has already started" };
       const seatIdx = seatForCredentials(room, credentials);
@@ -1705,7 +2310,100 @@ export class PgRoomStore {
         seatWrites: [{ kind: "full", seat: seatIdx, mode: "update" }],
       };
     });
-    return r.ok ? { ok: true, version: r.version } : { ok: false, error: r.error };
+    if (!r.ok) return { ok: false, error: r.error };
+    const committed = await this.commitAcceptedOffer(code.toUpperCase());
+    return {
+      ok: true,
+      version: r.version,
+      ...(committed.replayFinalizationIds.length > 0
+        ? { replayFinalizationIds: committed.replayFinalizationIds }
+        : {}),
+    };
+  }
+
+  async acceptBackgroundMatch(
+    userId: number,
+    code: string,
+  ): Promise<{ ok: true; version: number; replayFinalizationIds?: string[] } | { ok: false; error: string }> {
+    const upper = code.toUpperCase();
+    const r = await this.withRetry<undefined>(upper, (room) => {
+      if (room.state || matchPrepPhase(room) !== "accept") {
+        return { error: "this room is not awaiting match acceptance" };
+      }
+      if (room.prepDeadlineAt !== null && Date.now() >= room.prepDeadlineAt) {
+        return { error: "match acceptance expired" };
+      }
+      const seat = room.seats.findIndex((member) => member?.userId === userId);
+      if (seat !== 0 && seat !== 1) return { error: "not a player in this room" };
+      const member = room.seats[seat]!;
+      if (member.accepted) return { room, result: undefined, versionNeutral: true };
+      member.accepted = true;
+      if (room.seats.every((candidate) => candidate?.accepted === true)) {
+        room.prepDeadlineAt = Date.now() + MATCH_FIRST_PICK_MS;
+      }
+      return {
+        room,
+        result: undefined,
+        seatWrites: [{ kind: "full", seat: seat as SeatIndex, mode: "update" }],
+      };
+    });
+    if (!r.ok) return { ok: false, error: r.error };
+    const committed = await this.commitAcceptedOffer(upper);
+    return {
+      ok: true,
+      version: r.version,
+      ...(committed.replayFinalizationIds.length > 0
+        ? { replayFinalizationIds: committed.replayFinalizationIds }
+        : {}),
+    };
+  }
+
+  private async commitAcceptedOffer(code: string): Promise<{ replayFinalizationIds: string[] }> {
+    return withTransaction(this.db, async (db) => {
+      const offer = await db.query(
+        "SELECT first_user_id, second_user_id FROM matchmaking_offers WHERE room_code = $1",
+        [code],
+      );
+      if (offer.rows.length === 0) return { replayFinalizationIds: [] };
+      const room = await this.loadRoom(db, code);
+      if (!room || !room.seats.every((seat) => seat?.accepted === true)) {
+        const row = offer.rows[0] as Record<string, unknown>;
+        for (const userId of [Number(row.first_user_id), Number(row.second_user_id)]) {
+          await appendClusterEvent(db, { type: "background-status-changed", userId });
+        }
+        return { replayFinalizationIds: [] };
+      }
+      const entries = await db.query(
+        `SELECT user_id, source_room_code FROM matchmaking_entries
+         WHERE pending_offer_room_code = $1`,
+        [code],
+      );
+      const replayFinalizationIds: string[] = [];
+      for (const rawEntry of entries.rows as Array<Record<string, unknown>>) {
+        if (typeof rawEntry.source_room_code !== "string") continue;
+        const source = await this.loadRoom(db, rawEntry.source_room_code);
+        if (!source || !source.seats.some((seat) => seat?.controller === "bot")) continue;
+        if (source.state) {
+          const replayId = await endReplayForRoom(db, source.code);
+          if (replayId) replayFinalizationIds.push(replayId);
+        }
+        await db.query("DELETE FROM rooms WHERE code = $1", [source.code]);
+        await appendClusterEvent(db, {
+          type: "room",
+          event: { code: source.code, kind: "deleted", version: source.version + 1 },
+        });
+      }
+      const row = offer.rows[0] as Record<string, unknown>;
+      const userIds = [Number(row.first_user_id), Number(row.second_user_id)];
+      await db.query("DELETE FROM matchmaking_entries WHERE user_id IN ($1, $2)", userIds);
+      await db.query("DELETE FROM matchmaking_offers WHERE room_code = $1", [code]);
+      for (const userId of userIds) {
+        await appendClusterEvent(db, { type: "match-ready", userId, code, created: false });
+        await appendClusterEvent(db, { type: "background-status-changed", userId });
+      }
+      await appendClusterEvent(db, { type: "queue-changed" });
+      return { replayFinalizationIds };
+    });
   }
 
   /**
@@ -2162,9 +2860,22 @@ export class PgRoomStore {
     for (const raw of rows) {
       if (Number(raw.prep_deadline_at) > now) continue;
       const code = String(raw.code);
+      const offerEntries = await this.db.query(
+        `SELECT q.user_id, q.format, q.hero, q.deck_id, q.deck_name, q.card_pool_mode,
+                q.joined_at, q.mode, q.source_room_code, q.avoided_room_codes,
+                (p.user_id IS NOT NULL) AS pending_bot_start, u.username
+         FROM matchmaking_offers o
+         JOIN matchmaking_entries q
+           ON q.user_id = o.first_user_id OR q.user_id = o.second_user_id
+         JOIN users u ON u.id = q.user_id
+         LEFT JOIN pending_bot_starts p ON p.user_id = q.user_id
+         WHERE o.room_code = $1`,
+        [code],
+      );
       const r = await this.withRetry<{
         started: boolean;
         survivor: { format: Format; choice: MatchmakingChoice } | null;
+        timedOutUserIds?: number[];
       }>(code, (room) => {
         if (room.state || room.prepDeadlineAt === null || room.prepDeadlineAt > now) {
           return { room, result: { started: false, survivor: null }, versionNeutral: true };
@@ -2192,6 +2903,10 @@ export class PgRoomStore {
           const userId = room.seats[seat]?.userId;
           return userId == null ? [] : [{ type: "match-timeout" as const, userId, code }];
         });
+        const timedOutUserIds = timedOut.flatMap((seat) => {
+          const userId = room.seats[seat]?.userId;
+          return userId == null ? [] : [userId];
+        });
         const survivorSeat = timedOut.length === 1 ? (1 - timedOut[0]!) as SeatIndex : null;
         const survivorRow = survivorSeat === null ? null : room.seats[survivorSeat];
         const survivor = survivorRow?.userId == null ? null : {
@@ -2213,7 +2928,11 @@ export class PgRoomStore {
         room.prepDeadlineAt = null;
         return {
           room,
-          result: { started: false, survivor },
+          result: {
+            started: false,
+            survivor,
+            timedOutUserIds,
+          },
           events,
           seatWrites: [
             ...timedOut.map((seat) => ({ kind: "delete" as const, seat })),
@@ -2225,7 +2944,77 @@ export class PgRoomStore {
       });
       if (!r.ok) continue;
       resolved.push({ code, version: r.version, started: r.result.started });
-      if (r.result.survivor) {
+      const timedOutUserIds = r.result.timedOutUserIds ?? [];
+      if (offerEntries.rows.length > 0 && timedOutUserIds.length > 0) {
+        const timedOut = new Set(timedOutUserIds);
+        const survivorUserId = r.result.survivor?.choice.userId;
+        await withTransaction(this.db, async (db) => {
+          await db.query("DELETE FROM matchmaking_offers WHERE room_code = $1", [code]);
+          await db.query(
+            "UPDATE matchmaking_entries SET pending_offer_room_code = NULL WHERE pending_offer_room_code = $1",
+            [code],
+          );
+          for (const userId of timedOut) {
+            await db.query("DELETE FROM matchmaking_entries WHERE user_id = $1", [userId]);
+            await appendClusterEvent(db, { type: "background-status-changed", userId });
+          }
+          if (survivorUserId !== undefined) {
+            await db.query(
+              "UPDATE matchmaking_entries SET retained_room_code = $2 WHERE user_id = $1",
+              [survivorUserId, code],
+            );
+          }
+          await appendClusterEvent(db, { type: "queue-changed" });
+        });
+
+        if (survivorUserId !== undefined) {
+          const metadataValue = offerEntries.rows.find(
+            (entry) => Number((entry as Record<string, unknown>).user_id) === survivorUserId,
+          );
+          const metadata = metadataValue
+            ? dbObject(metadataValue, "<matchmaking>", "timed-out offer survivor")
+            : null;
+          const attemptedUserId = timedOutUserIds.length === 1 ? timedOutUserIds[0] : undefined;
+          if (metadata?.pending_bot_start === true) {
+            await this.advancePendingBotStart(survivorUserId, attemptedUserId);
+          } else if (metadata && r.result.survivor) {
+            const format = metadata.format === "classic-battles" || metadata.format === "cc"
+              || metadata.format === "silver-age"
+              ? metadata.format
+              : null;
+            const sourceRoomCode = typeof metadata.source_room_code === "string"
+              ? metadata.source_room_code
+              : undefined;
+            const mode = metadata.mode === "background" ? "background" as const : "foreground" as const;
+            if (format && (mode === "foreground" || sourceRoomCode)) {
+              await this.queueForMatch(format, {
+                ...r.result.survivor.choice,
+                username: typeof metadata.username === "string"
+                  ? metadata.username
+                  : r.result.survivor.choice.username,
+                ...(metadata.hero === "rhinar" || metadata.hero === "dorinthea"
+                  ? { hero: metadata.hero }
+                  : {}),
+                ...(typeof metadata.deck_id === "string" ? { deckId: metadata.deck_id } : {}),
+                ...(typeof metadata.deck_name === "string" ? { deckName: metadata.deck_name } : {}),
+                cardPoolMode: metadata.card_pool_mode === "future" || metadata.card_pool_mode === "open"
+                  ? metadata.card_pool_mode
+                  : "legal",
+                retainedRoomCode: code,
+                joinedAt: Number(metadata.joined_at),
+                mode,
+                ...(sourceRoomCode ? { sourceRoomCode } : {}),
+                avoidRoomCodes: dbStringArray(
+                  metadata.avoided_room_codes,
+                  "<matchmaking>",
+                  "avoided_room_codes",
+                  MAX_MATCHMAKING_AVOID_ROOM_CODES,
+                ),
+              });
+            }
+          }
+        }
+      } else if (r.result.survivor) {
         await this.queueForMatch(r.result.survivor.format, r.result.survivor.choice);
       }
     }

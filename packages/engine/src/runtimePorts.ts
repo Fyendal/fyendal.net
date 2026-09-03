@@ -44,6 +44,7 @@ export type ScriptCommandName =
   | "pitchIntoPool"
   | "pitchProhibitedByEffect"
   | "pitchValueOfInstance"
+  | "putCardIntoSoul"
   | "putCardOnDeckBottom"
   | "queueDefendEventLayersAfterCurrent"
   | "recordDieResult"

@@ -10,8 +10,21 @@ import {
   WorkerBotPolicyExecutor,
   botPolicyWorkerUrl,
   type BotPolicyRequest,
+  type BotPolicyRuntimeMetric,
 } from "../botPolicyExecutor.js";
+import {
+  decodeBotPolicyWorkerResponse,
+  type BotPolicyWorkerMemory,
+} from "../botPolicyWorkerProtocol.js";
 import { encodePersistedState } from "../persistedState.js";
+
+const WORKER_MEMORY = {
+  processRssBytes: 501,
+  heapTotalBytes: 402,
+  heapUsedBytes: 303,
+  externalBytes: 204,
+  arrayBuffersBytes: 105,
+} satisfies BotPolicyWorkerMemory;
 
 function request(version = 1): BotPolicyRequest {
   return {
@@ -101,6 +114,7 @@ function success(taskId: number) {
     taskId,
     decision: { intent: { kind: "pass" } },
     computeMs: 5,
+    memory: WORKER_MEMORY,
   };
 }
 
@@ -109,6 +123,22 @@ afterEach(() => {
 });
 
 describe("bot policy worker executor", () => {
+  it("decodes exact, nonnegative worker memory counters", () => {
+    expect(decodeBotPolicyWorkerResponse(success(1))).toMatchObject({
+      memory: WORKER_MEMORY,
+    });
+    const { memory: _memory, ...withoutMemory } = success(1);
+    expect(decodeBotPolicyWorkerResponse(withoutMemory)).toBeNull();
+    expect(decodeBotPolicyWorkerResponse({
+      ...success(1),
+      memory: { ...WORKER_MEMORY, unexpected: 1 },
+    })).toBeNull();
+    expect(decodeBotPolicyWorkerResponse({
+      ...success(1),
+      memory: { ...WORKER_MEMORY, heapUsedBytes: -1 },
+    })).toBeNull();
+  });
+
   it("resolves TypeScript workers in development and JavaScript workers after bundling", () => {
     expect(botPolicyWorkerUrl("file:///srv/src/botPolicyExecutor.ts").href)
       .toBe("file:///srv/src/botPolicyWorker.ts");
@@ -118,8 +148,11 @@ describe("bot policy worker executor", () => {
 
   it("runs one FIFO task at a time and correlates responses", async () => {
     const worker = new FakeWorker();
+    const metrics: BotPolicyRuntimeMetric[] = [];
     const executor = new WorkerBotPolicyExecutor({
       workerFactory: () => worker,
+      metricLogger: (metric) => metrics.push(metric),
+      instanceId: "gateway-test",
     });
     try {
       const first = executor.decide(request(1));
@@ -137,6 +170,18 @@ describe("bot policy worker executor", () => {
       expect(worker.posted[1]).toMatchObject({ taskId: 2, version: 2 });
       worker.respond(success(2));
       await expect(second).resolves.toMatchObject({ queueDepth: 2, generation: 1 });
+      expect(metrics).toHaveLength(2);
+      expect(metrics[0]).toMatchObject({
+        event: "bot_policy_metrics",
+        instanceId: "gateway-test",
+        botId: "ira",
+        outcome: "result",
+        computeMs: 5,
+        queueDepth: 1,
+        generation: 1,
+        workerMemory: WORKER_MEMORY,
+      });
+      expect(JSON.stringify(metrics)).not.toContain("ABC123");
     } finally {
       executor.stop();
     }
@@ -144,16 +189,49 @@ describe("bot policy worker executor", () => {
 
   it("keeps the worker alive after a caught policy failure", async () => {
     const worker = new FakeWorker();
-    const executor = new WorkerBotPolicyExecutor({ workerFactory: () => worker });
+    const metrics: BotPolicyRuntimeMetric[] = [];
+    const executor = new WorkerBotPolicyExecutor({
+      workerFactory: () => worker,
+      metricLogger: (metric) => metrics.push(metric),
+    });
     try {
       const first = executor.decide(request(1));
       const second = executor.decide(request(2));
-      worker.respond({ kind: "error", taskId: 1, error: "policy exploded" });
+      worker.respond({
+        kind: "error",
+        taskId: 1,
+        error: "policy exploded",
+        memory: WORKER_MEMORY,
+      });
       await expect(first).rejects.toMatchObject({ reason: "policy" });
       expect(worker.terminate).not.toHaveBeenCalled();
+      expect(metrics[0]).toMatchObject({
+        outcome: "policy",
+        workerMemory: WORKER_MEMORY,
+      });
       expect(worker.posted).toHaveLength(2);
       worker.respond(success(2));
       await expect(second).resolves.toMatchObject({ generation: 1 });
+    } finally {
+      executor.stop();
+    }
+  });
+
+  it("does not disturb policy execution when telemetry logging fails", async () => {
+    const worker = new FakeWorker();
+    const executor = new WorkerBotPolicyExecutor({
+      workerFactory: () => worker,
+      metricLogger: () => {
+        throw new Error("logging failed");
+      },
+    });
+    try {
+      const decision = executor.decide(request());
+      worker.respond(success(1));
+      await expect(decision).resolves.toMatchObject({
+        decision: { intent: { kind: "pass" } },
+        workerMemory: WORKER_MEMORY,
+      });
     } finally {
       executor.stop();
     }
@@ -305,11 +383,19 @@ describe("bot policy worker executor", () => {
       parentPort.on("message", (task) => {
         const until = Date.now() + 100;
         while (Date.now() < until) {}
+        const memory = process.memoryUsage();
         parentPort.postMessage({
           kind: "result",
           taskId: task.taskId,
           decision: { intent: { kind: "pass" } },
           computeMs: 100,
+          memory: {
+            processRssBytes: memory.rss,
+            heapTotalBytes: memory.heapTotal,
+            heapUsedBytes: memory.heapUsed,
+            externalBytes: memory.external,
+            arrayBuffersBytes: memory.arrayBuffers,
+          },
         });
       });
     `;

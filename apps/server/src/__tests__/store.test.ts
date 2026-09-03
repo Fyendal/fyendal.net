@@ -72,6 +72,65 @@ async function matchedRoom(): Promise<{
   return { code: matched.code, userIds, tokens: [joinedA.token, joinedB.token] };
 }
 
+async function pendingBotOffer(): Promise<{
+  offerCode: string;
+  firstBotCode: string;
+  userIds: [number, number];
+  pendingToken: string;
+}> {
+  const users = await db.query(
+    `INSERT INTO users (username, username_lc, pass_hash, created_at)
+     VALUES ('BotOfferA','botoffera','hash',1), ('BotOfferB','botofferb','hash',2)
+     RETURNING id`,
+  );
+  const userIds = [Number(users.rows[0]!.id), Number(users.rows[1]!.id)] as [number, number];
+  const firstQueue = await store.queueForMatch("cc", {
+    userId: userIds[0],
+    username: "BotOfferA",
+    deckId: "precon-asb",
+    cardPoolMode: "legal",
+    joinedAt: 10,
+    pendingBotStart: {
+      format: "cc",
+      deckId: "precon-asb",
+      bot: "ira",
+      requestedAt: 10,
+    },
+  });
+  if (!firstQueue.ok || firstQueue.kind !== "opened") throw new Error("first bot queue did not open");
+  const firstBot = await store.createBotRoom("cc", {
+    userId: userIds[0], username: "BotOfferA", deckId: "precon-asb",
+  }, "legal", "ira");
+  await store.setBackgroundMatchmaking(userIds[0], firstBot.code);
+  await markStoredSeatPresent(firstBot.code, 0, "first-bot-source");
+  const matched = await store.queueForMatch("cc", {
+    userId: userIds[1],
+    username: "BotOfferB",
+    deckId: "precon-asb",
+    cardPoolMode: "legal",
+    joinedAt: 20,
+    pendingBotStart: {
+      format: "cc",
+      deckId: "precon-asb",
+      bot: "ira",
+      requestedAt: 20,
+    },
+  });
+  if (!matched.ok || matched.kind !== "matched") throw new Error("second bot queue did not match");
+  const joined = await store.joinRoom(matched.code, undefined, {
+    allowPlayer: true,
+    userId: userIds[1],
+    username: "BotOfferB",
+  });
+  if (!joined.ok || joined.kind !== "player") throw new Error("pending bot starter did not join offer");
+  return {
+    offerCode: matched.code,
+    firstBotCode: firstBot.code,
+    userIds,
+    pendingToken: joined.token,
+  };
+}
+
 async function startGame(code: string, tokens: [string, string]): Promise<void> {
   const room = await store.getRoom(code);
   const winner = room!.prep!.dieWinner;
@@ -1733,6 +1792,317 @@ describe("PgRoomStore storage", () => {
       { event_type: "match-ready", subject_user_id: firstId, room_code: matched.code },
       { event_type: "match-ready", subject_user_id: secondId, room_code: matched.code },
     ]);
+  });
+
+  it("offers an opted-in bot player to the next opted-in bot starter", async () => {
+    const users = await db.query(
+      `INSERT INTO users (username, username_lc, pass_hash, created_at)
+       VALUES ('BotQueueA','botqueuea','hash',1), ('BotQueueB','botqueueb','hash',2)
+       RETURNING id`,
+    );
+    const firstId = Number(users.rows[0]!.id);
+    const secondId = Number(users.rows[1]!.id);
+    const firstQueue = await store.queueForMatch("cc", {
+      userId: firstId,
+      username: "BotQueueA",
+      deckId: "precon-asb",
+      cardPoolMode: "legal",
+      pendingBotStart: {
+        format: "cc",
+        deckId: "precon-asb",
+        bot: "ira",
+        requestedAt: 10,
+      },
+    });
+    if (!firstQueue.ok || firstQueue.kind !== "opened") throw new Error("first bot queue did not open");
+    const firstBot = await store.createBotRoom("cc", {
+      userId: firstId,
+      username: "BotQueueA",
+      deckId: "precon-asb",
+    }, "legal", "ira");
+    await store.setBackgroundMatchmaking(firstId, firstBot.code);
+    await markStoredSeatPresent(firstBot.code, 0, "first-bot-source");
+
+    const second = await store.queueForMatch("cc", {
+      userId: secondId,
+      username: "BotQueueB",
+      deckId: "precon-asb",
+      cardPoolMode: "legal",
+      pendingBotStart: {
+        format: "cc",
+        deckId: "precon-asb",
+        bot: "ira",
+        requestedAt: 20,
+      },
+    });
+    expect(second).toMatchObject({ ok: true, kind: "matched", code: firstQueue.code });
+    if (!second.ok || second.kind !== "matched") throw new Error("second bot starter was not matched");
+    expect(await store.backgroundMatchmakingStatus(firstId)).toMatchObject({
+      state: "offer",
+      roomCode: firstQueue.code,
+      opponent: { username: "BotQueueB" },
+    });
+
+    expect(await store.acceptBackgroundMatch(firstId, firstQueue.code)).toMatchObject({ ok: true });
+    expect(await store.getRoom(firstBot.code)).not.toBeNull();
+    const joined = await store.joinRoom(firstQueue.code, undefined, {
+      allowPlayer: true,
+      userId: secondId,
+      username: "BotQueueB",
+    });
+    if (!joined.ok || joined.kind !== "player") throw new Error("second player did not reclaim offer seat");
+    expect(await store.acceptMatch(firstQueue.code, { token: joined.token, userId: secondId }))
+      .toMatchObject({ ok: true });
+    expect(await store.getRoom(firstBot.code)).toBeNull();
+    expect(await store.backgroundMatchmakingStatus(firstId)).toEqual({ state: "inactive" });
+  });
+
+  it("preserves an existing queue time and retained room when switching to bot practice", async () => {
+    const users = await db.query(
+      `INSERT INTO users (username, username_lc, pass_hash, created_at)
+       VALUES ('RetainedBot','retainedbot','hash',1) RETURNING id`,
+    );
+    const userId = Number(users.rows[0]!.id);
+    const opened = await store.queueForMatch("cc", {
+      userId,
+      username: "RetainedBot",
+      deckId: "precon-asb",
+      cardPoolMode: "legal",
+      joinedAt: 123,
+    });
+    if (!opened.ok || opened.kind !== "opened") throw new Error("queue did not open");
+    await markStoredSeatPresent(opened.code, 0);
+
+    const pending = await store.queueForMatch("cc", {
+      userId,
+      username: "RetainedBot",
+      deckId: "precon-asb",
+      cardPoolMode: "legal",
+      retainedRoomCode: opened.code,
+      pendingBotStart: {
+        format: "cc",
+        deckId: "precon-asb",
+        bot: "ira",
+        requestedAt: 456,
+      },
+    });
+    expect(pending).toEqual({ ok: true, kind: "queued" });
+    expect((await db.query(
+      "SELECT retained_room_code, joined_at FROM matchmaking_entries WHERE user_id = $1",
+      [userId],
+    )).rows).toEqual([{ retained_room_code: opened.code, joined_at: 123 }]);
+    expect(await store.backgroundMatchmakingStatus(userId)).toEqual({ state: "pending", format: "cc" });
+  });
+
+  it("falls back to bot practice after the pending starter rejects its snapshotted candidate", async () => {
+    const offer = await pendingBotOffer();
+    const lateUser = await db.query(
+      `INSERT INTO users (username, username_lc, pass_hash, created_at)
+       VALUES ('LateCandidate','latecandidate','hash',3) RETURNING id`,
+    );
+    const lateUserId = Number(lateUser.rows[0]!.id);
+    const lateQueue = await store.queueForMatch("cc", {
+      userId: lateUserId,
+      username: "LateCandidate",
+      deckId: "precon-asb",
+      cardPoolMode: "legal",
+      joinedAt: 30,
+    });
+    if (!lateQueue.ok || lateQueue.kind !== "opened") throw new Error("late candidate did not open");
+    await markStoredSeatPresent(lateQueue.code, 0, "late-candidate");
+    expect(await store.declinePendingBotMatch(offer.userIds[1], offer.offerCode, {
+      token: offer.pendingToken,
+      userId: offer.userIds[1],
+    })).toMatchObject({ ok: true });
+
+    expect(await store.backgroundMatchmakingStatus(offer.userIds[0])).toMatchObject({
+      state: "searching",
+      format: "cc",
+    });
+    expect(await store.backgroundMatchmakingStatus(offer.userIds[1])).toMatchObject({
+      state: "searching",
+      format: "cc",
+    });
+    expect(await store.getRoom(offer.firstBotCode)).not.toBeNull();
+    const entries = await db.query(
+      `SELECT user_id, mode, joined_at, avoided_room_codes, source_room_code
+       FROM matchmaking_entries ORDER BY user_id`,
+    );
+    expect(entries.rows).toEqual([
+      expect.objectContaining({ user_id: offer.userIds[0], mode: "background", joined_at: 10 }),
+      expect.objectContaining({
+        user_id: offer.userIds[1],
+        mode: "background",
+        joined_at: 20,
+        avoided_room_codes: [offer.offerCode],
+      }),
+      expect.objectContaining({ user_id: lateUserId, mode: "foreground", joined_at: 30 }),
+    ]);
+    expect(entries.rows[1]!.source_room_code).not.toBeNull();
+    expect((await db.query("SELECT room_code FROM matchmaking_offers")).rows).toEqual([]);
+    expect((await store.getRoom(lateQueue.code))?.seats.filter(Boolean)).toHaveLength(1);
+  });
+
+  it("holds each participant in at most one durable offer", async () => {
+    const offer = await pendingBotOffer();
+    const third = await db.query(
+      `INSERT INTO users (username, username_lc, pass_hash, created_at)
+       VALUES ('ThirdBotStarter','thirdbotstarter','hash',3) RETURNING id`,
+    );
+    const thirdId = Number(third.rows[0]!.id);
+    const queued = await new PgRoomStore(db, "rules-a").queueForMatch("cc", {
+      userId: thirdId,
+      username: "ThirdBotStarter",
+      deckId: "precon-asb",
+      cardPoolMode: "legal",
+      pendingBotStart: {
+        format: "cc",
+        deckId: "precon-asb",
+        bot: "ira",
+        requestedAt: 30,
+      },
+    });
+    expect(queued).toMatchObject({ ok: true, kind: "opened" });
+    expect((await db.query(
+      "SELECT room_code, first_user_id, second_user_id FROM matchmaking_offers",
+    )).rows).toEqual([{
+      room_code: offer.offerCode,
+      first_user_id: offer.userIds[0],
+      second_user_id: offer.userIds[1],
+    }]);
+  });
+
+  it("offers a pending bot starter its fixed candidates one at a time in FIFO order", async () => {
+    const users = await db.query(
+      `INSERT INTO users (username, username_lc, pass_hash, created_at)
+       VALUES ('SnapshotA','snapshota','hash',1),
+              ('SnapshotB','snapshotb','hash',2),
+              ('SnapshotStarter','snapshotstarter','hash',3)
+       RETURNING id`,
+    );
+    const firstId = Number(users.rows[0]!.id);
+    const secondId = Number(users.rows[1]!.id);
+    const starterId = Number(users.rows[2]!.id);
+    const first = await store.queueForMatch("cc", {
+      userId: firstId, username: "SnapshotA", deckId: "precon-asb", cardPoolMode: "legal", joinedAt: 1,
+    });
+    const second = await store.queueForMatch("cc", {
+      userId: secondId, username: "SnapshotB", deckId: "precon-asb", cardPoolMode: "legal", joinedAt: 2,
+    });
+    if (!first.ok || first.kind !== "opened" || !second.ok || second.kind !== "opened") {
+      throw new Error("snapshot candidates did not open retained rooms");
+    }
+    await markStoredSeatPresent(first.code, 0, "snapshot-a");
+    await markStoredSeatPresent(second.code, 0, "snapshot-b");
+
+    const firstOffer = await store.queueForMatch("cc", {
+      userId: starterId,
+      username: "SnapshotStarter",
+      deckId: "precon-asb",
+      cardPoolMode: "legal",
+      joinedAt: 3,
+      pendingBotStart: {
+        format: "cc", deckId: "precon-asb", bot: "ira", requestedAt: 3,
+      },
+    });
+    expect(firstOffer).toMatchObject({ ok: true, kind: "matched", code: first.code });
+    if (!firstOffer.ok || firstOffer.kind !== "matched") throw new Error("first offer missing");
+    const firstJoin = await store.joinRoom(first.code, undefined, {
+      allowPlayer: true, userId: starterId, username: "SnapshotStarter",
+    });
+    if (!firstJoin.ok || firstJoin.kind !== "player") throw new Error("starter did not join first offer");
+    await store.declinePendingBotMatch(starterId, first.code, {
+      token: firstJoin.token, userId: starterId,
+    });
+
+    const secondOffer = await db.query(
+      "SELECT room_code, first_user_id, second_user_id FROM matchmaking_offers",
+    );
+    expect(secondOffer.rows).toEqual([{
+      room_code: second.code,
+      first_user_id: secondId,
+      second_user_id: starterId,
+    }]);
+    const candidates = await db.query(
+      `SELECT candidate_user_id, ordinal, attempted, skipped
+       FROM pending_bot_start_candidates WHERE starter_user_id = $1 ORDER BY ordinal`,
+      [starterId],
+    );
+    expect(candidates.rows).toEqual([
+      { candidate_user_id: firstId, ordinal: 0, attempted: true, skipped: false },
+      { candidate_user_id: secondId, ordinal: 1, attempted: false, skipped: false },
+    ]);
+  });
+
+  it("cancels a timed-out pending bot start and safely requeues the practicing survivor", async () => {
+    const offer = await pendingBotOffer();
+    await store.acceptBackgroundMatch(offer.userIds[0], offer.offerCode);
+    const deadline = (await store.getRoom(offer.offerCode))!.prepDeadlineAt!;
+
+    await store.sweepMatchmadePrep(deadline + 1);
+
+    expect(await store.backgroundMatchmakingStatus(offer.userIds[0])).toMatchObject({
+      state: "searching",
+      format: "cc",
+    });
+    expect(await store.backgroundMatchmakingStatus(offer.userIds[1])).toEqual({ state: "inactive" });
+    expect(await store.getRoom(offer.firstBotCode)).not.toBeNull();
+    expect((await db.query(
+      "SELECT user_id, mode, joined_at FROM matchmaking_entries ORDER BY user_id",
+    )).rows).toEqual([{ user_id: offer.userIds[0], mode: "background", joined_at: 10 }]);
+  });
+
+  it("keeps bot practice but stops searching when the background player times out", async () => {
+    const offer = await pendingBotOffer();
+    await store.acceptMatch(offer.offerCode, {
+      token: offer.pendingToken,
+      userId: offer.userIds[1],
+    });
+    const deadline = (await store.getRoom(offer.offerCode))!.prepDeadlineAt!;
+
+    await store.sweepMatchmadePrep(deadline + 1);
+
+    expect(await store.backgroundMatchmakingStatus(offer.userIds[0])).toEqual({ state: "inactive" });
+    expect(await store.getRoom(offer.firstBotCode)).not.toBeNull();
+    expect(await store.backgroundMatchmakingStatus(offer.userIds[1])).toMatchObject({
+      state: "searching",
+      format: "cc",
+    });
+  });
+
+  it("stops an active background offer without stranding the pending starter", async () => {
+    const offer = await pendingBotOffer();
+
+    expect(await store.stopBackgroundMatchmaking(offer.userIds[0])).toBe(true);
+
+    expect(await store.backgroundMatchmakingStatus(offer.userIds[0])).toEqual({ state: "inactive" });
+    expect(await store.getRoom(offer.firstBotCode)).not.toBeNull();
+    expect(await store.backgroundMatchmakingStatus(offer.userIds[1])).toMatchObject({
+      state: "searching",
+      format: "cc",
+    });
+    expect((await db.query("SELECT room_code FROM matchmaking_offers")).rows).toEqual([]);
+  });
+
+  it("releases a durable offer when the foreground player leaves normally", async () => {
+    const offer = await pendingBotOffer();
+    const left = await store.leaveRoom(offer.offerCode, {
+      token: offer.pendingToken,
+      userId: offer.userIds[1],
+    });
+    if (!left.ok) throw new Error(left.error);
+
+    expect(await store.resolveOfferedPlayerLeave(
+      offer.userIds[1],
+      offer.offerCode,
+      left.format,
+      left.cardPoolMode,
+      left.remaining,
+    )).toBe(true);
+
+    expect(await store.backgroundMatchmakingStatus(offer.userIds[0])).toMatchObject({ state: "searching" });
+    expect(await store.backgroundMatchmakingStatus(offer.userIds[1])).toEqual({ state: "inactive" });
+    expect((await db.query("SELECT room_code FROM matchmaking_offers")).rows).toEqual([]);
   });
 
   it("does not match a new player into an opener whose owner is absent", async () => {

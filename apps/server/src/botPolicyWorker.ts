@@ -1,6 +1,7 @@
 import { parentPort } from "node:worker_threads";
 import { executeBotPolicyTask } from "./botPolicyTask.js";
 import {
+  collectBotPolicyWorkerMemory,
   decodeBotPolicyTask,
   type BotPolicyWorkerFailure,
   type BotPolicyWorkerSuccess,
@@ -16,6 +17,7 @@ port.on("message", (value: unknown) => {
       kind: "error",
       taskId: 0,
       error: "invalid bot policy task",
+      memory: collectBotPolicyWorkerMemory(),
     };
     port.postMessage(failure);
     return;
@@ -26,6 +28,7 @@ port.on("message", (value: unknown) => {
       kind: "result",
       taskId: task.taskId,
       ...result,
+      memory: collectBotPolicyWorkerMemory(),
     };
     port.postMessage(response);
   } catch (error) {
@@ -33,6 +36,7 @@ port.on("message", (value: unknown) => {
       kind: "error",
       taskId: task.taskId,
       error: error instanceof Error ? error.message.slice(0, 4_096) : "unknown bot policy error",
+      memory: collectBotPolicyWorkerMemory(),
     };
     port.postMessage(response);
   }

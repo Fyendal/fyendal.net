@@ -439,6 +439,55 @@ export const MIGRATIONS: Migration[] = [
     CREATE INDEX matchmaking_fifo_idx
       ON matchmaking_entries(format, card_pool_mode, joined_at, user_id);`,
   },
+  {
+    version: 26,
+    sql: `ALTER TABLE matchmaking_entries
+      ADD COLUMN mode TEXT NOT NULL DEFAULT 'foreground'
+        CHECK (mode IN ('foreground', 'background')),
+      ADD COLUMN source_room_code TEXT REFERENCES rooms(code) ON DELETE CASCADE,
+      ADD COLUMN pending_offer_room_code TEXT REFERENCES rooms(code) ON DELETE SET NULL,
+      ADD COLUMN avoided_room_codes JSONB NOT NULL DEFAULT '[]'::jsonb;
+    ALTER TABLE matchmaking_entries ADD CONSTRAINT matchmaking_entry_mode_check CHECK (
+      (mode = 'foreground' AND source_room_code IS NULL)
+      OR (mode = 'background' AND source_room_code IS NOT NULL)
+    );
+    CREATE UNIQUE INDEX matchmaking_pending_offer_user_idx
+      ON matchmaking_entries(pending_offer_room_code, user_id)
+      WHERE pending_offer_room_code IS NOT NULL;
+    CREATE INDEX matchmaking_source_room_idx
+      ON matchmaking_entries(source_room_code)
+      WHERE source_room_code IS NOT NULL;
+
+    CREATE TABLE pending_bot_starts (
+      user_id INTEGER PRIMARY KEY REFERENCES matchmaking_entries(user_id) ON DELETE CASCADE,
+      format TEXT NOT NULL CHECK (format IN ('cc', 'silver-age')),
+      deck_id TEXT NOT NULL,
+      bot TEXT NOT NULL CHECK (bot IN ('ira', 'hala', 'cindra', 'jarl', 'briar', 'bravo')),
+      card_pool_mode TEXT NOT NULL CHECK (card_pool_mode IN ('legal', 'future', 'open')),
+      requested_at BIGINT NOT NULL
+    );
+    CREATE TABLE pending_bot_start_candidates (
+      starter_user_id INTEGER NOT NULL REFERENCES pending_bot_starts(user_id) ON DELETE CASCADE,
+      candidate_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      ordinal INTEGER NOT NULL CHECK (ordinal >= 0),
+      attempted BOOLEAN NOT NULL DEFAULT FALSE,
+      skipped BOOLEAN NOT NULL DEFAULT FALSE,
+      PRIMARY KEY (starter_user_id, candidate_user_id),
+      UNIQUE (starter_user_id, ordinal)
+    );
+    CREATE INDEX pending_bot_candidates_next_idx
+      ON pending_bot_start_candidates(starter_user_id, attempted, skipped, ordinal);
+
+    CREATE TABLE matchmaking_offers (
+      room_code TEXT PRIMARY KEY REFERENCES rooms(code) ON DELETE CASCADE,
+      first_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      second_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      created_at BIGINT NOT NULL,
+      CHECK (first_user_id <> second_user_id)
+    );
+    CREATE UNIQUE INDEX matchmaking_offer_pair_idx
+      ON matchmaking_offers(first_user_id, second_user_id);`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

@@ -24,6 +24,14 @@ import { freshDb } from "./testdb.js";
 
 let runnerRoom: RoomRow;
 
+const WORKER_MEMORY = {
+  processRssBytes: 501,
+  heapTotalBytes: 402,
+  heapUsedBytes: 303,
+  externalBytes: 204,
+  arrayBuffersBytes: 105,
+} as const;
+
 beforeAll(async () => {
   const db = await freshDb();
   const store = new PgRoomStore(db, "bot-runner-unit-test");
@@ -141,6 +149,7 @@ describe("BotRunner reliability", () => {
       totalMs: 1,
       queueDepth: 1,
       generation: 1,
+      workerMemory: WORKER_MEMORY,
     });
     await Promise.resolve();
     await Promise.resolve();
@@ -544,6 +553,7 @@ describe("BotRunner reliability", () => {
         totalMs: 1_000,
         queueDepth: 1,
         generation: 1,
+        workerMemory: WORKER_MEMORY,
       }),
       stop: vi.fn(),
     } satisfies BotPolicyExecutor;
@@ -687,6 +697,7 @@ describe("BotRunner reliability", () => {
         totalMs: 11,
         queueDepth: 1,
         generation: 1,
+        workerMemory: WORKER_MEMORY,
       })),
       stop: vi.fn(),
     } satisfies BotPolicyExecutor;

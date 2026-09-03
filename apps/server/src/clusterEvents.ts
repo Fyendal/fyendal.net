@@ -16,6 +16,8 @@ export type ClusterEvent =
   | { type: "user-sessions-revoked"; userId: number }
   | { type: "match-ready"; userId: number; code: string; created: boolean }
   | { type: "match-timeout"; userId: number; code: string }
+  | { type: "background-status-changed"; userId: number }
+  | { type: "bot-practice-ready"; userId: number; code: string }
   | { type: "emote"; code: string; seat: 0 | 1; message: EmoteMessage };
 
 function safeInteger(value: unknown): number | null {
@@ -89,6 +91,19 @@ function decodeRow(value: unknown): { id: number; event: ClusterEvent } | null {
         ? { id, event: { type: "match-timeout", userId, code } }
         : null;
     }
+    case "background-status-changed": {
+      const userId = safeInteger(row.subject_user_id);
+      return userId !== null && userId > 0
+        ? { id, event: { type: "background-status-changed", userId } }
+        : null;
+    }
+    case "bot-practice-ready": {
+      const userId = safeInteger(row.subject_user_id);
+      const code = roomCode(row.room_code);
+      return userId !== null && userId > 0 && code
+        ? { id, event: { type: "bot-practice-ready", userId, code } }
+        : null;
+    }
     case "emote": {
       const code = roomCode(row.room_code);
       const seat = safeInteger(payload?.seat);
@@ -126,6 +141,11 @@ export async function appendClusterEvent(db: Queryable, event: ClusterEvent): Pr
     code = event.code;
     payload = { created: event.created };
   } else if (event.type === "match-timeout") {
+    userId = event.userId;
+    code = event.code;
+  } else if (event.type === "background-status-changed") {
+    userId = event.userId;
+  } else if (event.type === "bot-practice-ready") {
     userId = event.userId;
     code = event.code;
   } else if (event.type === "emote") {

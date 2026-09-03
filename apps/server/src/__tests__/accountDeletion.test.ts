@@ -1,11 +1,81 @@
 import { describe, expect, it } from "vitest";
+import { decodeAccountExportResponse } from "@fyendal/protocol";
 import { register } from "../auth.js";
-import { deleteAccount } from "../accounts.js";
+import { deleteAccount, exportAccount } from "../accounts.js";
 import type { Queryable } from "../db.js";
 import { PgRoomStore } from "../store.js";
 import { freshDb } from "./testdb.js";
 
 describe("account deletion races", () => {
+  it("exports and cascades pending bot matchmaking state", async () => {
+    const db = await freshDb();
+    await register(db, "Exported", "password1");
+    await register(db, "Candidate", "password1");
+    const users = await db.query("SELECT id, username FROM users ORDER BY id");
+    const exportedId = Number(users.rows[0]!.id);
+    const candidateId = Number(users.rows[1]!.id);
+    const store = new PgRoomStore(db, "test-ruleset");
+    const candidate = await store.queueForMatch("cc", {
+      userId: candidateId,
+      username: "Candidate",
+      deckId: "precon-asb",
+      cardPoolMode: "legal",
+      joinedAt: 1,
+    });
+    if (!candidate.ok || candidate.kind !== "opened") throw new Error("candidate did not open queue room");
+    await db.query(
+      `INSERT INTO room_presence (room_code, lease_id, token_hash, seat, last_seen_at)
+       SELECT room_code, 'candidate-presence', token_hash, seat, $2::bigint
+       FROM room_seats WHERE room_code = $1 AND user_id = $3`,
+      [candidate.code, Date.now(), candidateId],
+    );
+    const offered = await store.queueForMatch("cc", {
+      userId: exportedId,
+      username: "Exported",
+      deckId: "precon-asb",
+      cardPoolMode: "legal",
+      joinedAt: 2,
+      avoidRoomCodes: ["OLD123"],
+      pendingBotStart: {
+        format: "cc",
+        deckId: "precon-asb",
+        bot: "ira",
+        requestedAt: 3,
+      },
+    });
+    expect(offered).toMatchObject({ ok: true, kind: "matched", code: candidate.code });
+
+    const exported = await exportAccount(db, exportedId);
+    expect(exported?.matchmaking).toMatchObject({
+      mode: "foreground",
+      pendingOfferRoomCode: candidate.code,
+      avoidedRoomCodes: ["OLD123"],
+      pendingBotStart: {
+        bot: "ira",
+        candidates: [{ candidateUserId: candidateId, ordinal: 0, attempted: false, skipped: false }],
+      },
+      offer: { roomCode: candidate.code, opponentUserId: candidateId },
+    });
+    expect(decodeAccountExportResponse({ ok: true, export: exported })).not.toBeNull();
+
+    await db.query(
+      "UPDATE matchmaking_entries SET avoided_room_codes = $2 WHERE user_id = $1",
+      [exportedId, JSON.stringify({ corrupt: true })],
+    );
+    await expect(exportAccount(db, exportedId)).rejects.toThrow("avoided_room_codes is corrupt");
+
+    expect(await deleteAccount(db, exportedId, "password1")).toMatchObject({ status: "deleted" });
+    expect((await db.query("SELECT 1 FROM pending_bot_starts WHERE user_id = $1", [exportedId])).rows).toEqual([]);
+    expect((await db.query(
+      "SELECT 1 FROM pending_bot_start_candidates WHERE starter_user_id = $1 OR candidate_user_id = $1",
+      [exportedId],
+    )).rows).toEqual([]);
+    expect((await db.query(
+      "SELECT 1 FROM matchmaking_offers WHERE first_user_id = $1 OR second_user_id = $1",
+      [exportedId],
+    )).rows).toEqual([]);
+  });
+
   it("prevents a deleted cached identity from creating a new seat", async () => {
     const db = await freshDb();
     await register(db, "Raced", "password1");

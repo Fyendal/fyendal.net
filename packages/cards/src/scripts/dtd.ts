@@ -31,6 +31,12 @@ function isNonAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean 
 function isHerald(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return isAttack(ctx, card) && data(ctx, card).name.toLowerCase().includes("herald");
 }
+function duringActionPhase(ctx: ScriptCtx): boolean {
+  if (ctx.state.phase === "action" || ctx.state.phase === "defend" || ctx.state.phase === "reaction") return true;
+  return ctx.state.phase === "layer" &&
+    ctx.state.stackResume !== "begin-action-phase" &&
+    ctx.state.stackResume !== "end-phase";
+}
 function ownAttack(ctx: ScriptCtx): boolean {
   return !!ctx.link && !ctx.link.resolved && ctx.link.attacker === ctx.seat;
 }
@@ -212,7 +218,7 @@ function frontline(): CardScript {
 export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRarity, {
   "prism, advent of thrones|0": {
     onCardPutIntoSoul(ctx, card) {
-      if (ctx.state.phase !== "action" || !data(ctx, card).name.toLowerCase().includes("herald")) return;
+      if (!duringActionPhase(ctx) || !data(ctx, card).name.toLowerCase().includes("herald")) return;
       const controlledNames = new Set(ctx.player(ctx.seat).board.map((permanent) => data(ctx, permanent).name));
       const figments = ctx.player(ctx.seat).deck.filter((candidate) =>
         has(ctx, candidate, "figment") && !controlledNames.has(data(ctx, candidate).name),
