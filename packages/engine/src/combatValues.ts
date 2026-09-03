@@ -856,6 +856,30 @@ export function computeDefense(
   return Math.max(0, total);
 }
 
+/** Current combat damage before prevention. Damage replacements apply only
+ * when attack exceeds defense, after both combat values are calculated. */
+export function computeCombatDamage(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  link: ChainLinkState,
+  attack = computeAttack(state, runtime, link),
+  defense = computeDefense(state, runtime, link),
+): number {
+  const baseDamage = Math.max(0, attack - defense);
+  if (baseDamage === 0) return 0;
+  const damageBonus = activeModifiers(
+    state,
+    link,
+    ["chain-link", "combat-chain", "until-end-of-turn", "static"],
+  ).reduce((sum, modifier) => sum + Number(modifier.damage || 0), 0);
+  const damage = baseDamage + damageBonus;
+  const damageScript = scriptOf(state, link.attackingCard.cardId, link.attackingCard);
+  return Math.max(0, Math.floor(damageScript?.modifyCombatDamage?.(
+    runtime.makeCtx(state, link.attacker, link.attackingCard, link),
+    damage,
+  ) ?? damage));
+}
+
 /** Current defense of one non-equipment defending card. */
 function defendingCardDefense(
   state: GameStateInternal,

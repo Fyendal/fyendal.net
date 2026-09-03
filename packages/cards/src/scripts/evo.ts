@@ -70,7 +70,7 @@ function scrapCards(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
 
 function addSteamToChoice(ctx: ScriptCtx, hook: string): void {
   const choices = ctx.player(ctx.seat).board.filter((card) =>
-    isItem(ctx, card) && (data(ctx, card).keywords ?? []).some((keyword) => keyword.toLowerCase() === "crank"),
+    isItem(ctx, card) && ctx.hasCrank(card),
   );
   if (choices.length) ctx.requestCardChoice(
     hook,
@@ -258,7 +258,7 @@ function miniForcefield(steam: number): CardScript {
 
 function scrapAttack(effect?: (ctx: ScriptCtx) => void): CardScript {
   return {
-    additionalCost(ctx) {
+    declareAdditionalCost(ctx) {
       const choices = scrapCards(ctx);
       if (choices.length) ctx.requestCardChoice("scrap", decisionPrompt("Scrap an item or equipment from your graveyard?", "card.evo.scrap.choose", { optionMessages: commonOptionMessages("none") }), ["none", ...choices.map((card) => card.instanceId)]);
     },
@@ -376,14 +376,17 @@ const teklovossen: CardScript = {
     goAgain: false,
     oncePerTurn: true,
     timing: "instant",
-    onActivate(ctx) { ctx.setPlayerFlag(ctx.seat, "nextEvoAsInstant", true); },
+    onActivate(ctx) {
+      ctx.setPlayerFlag(ctx.seat, "nextEvoAsInstant", true);
+      ctx.setPlayerFlag(ctx.seat, "teklovossenNextEvoDraw", true);
+    },
   },
   triggers: [{
     event: "card-played",
     label: "Draw a card",
     condition: (ctx, played) => !!played && isEvo(ctx, played) &&
-      ctx.getPlayerFlag(ctx.seat, "nextEvoAsInstant") === true,
-    onTrigger: (ctx) => ctx.setPlayerFlag(ctx.seat, "nextEvoAsInstant", false),
+      ctx.getPlayerFlag(ctx.seat, "teklovossenNextEvoDraw") === true,
+    onTrigger: (ctx) => ctx.setPlayerFlag(ctx.seat, "teklovossenNextEvoDraw", false),
     effect: (ctx) => ctx.drawCards(ctx.seat, 1),
   }],
 };

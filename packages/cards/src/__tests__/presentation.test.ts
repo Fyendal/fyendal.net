@@ -58,7 +58,7 @@ describe("shared presentation validation", () => {
       pool,
       { ...presentation(), deck },
       "cc",
-      { allowFutureCards: true },
+      { cardPoolMode: "future" },
     ).ok).toBe(true);
   });
 

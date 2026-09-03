@@ -5,6 +5,7 @@ import {
   currentLink,
   enforceSpectraPolicy,
   functionalKey as key,
+  incomingAttackDamage,
   intentCard,
   isAttack,
   optionCard,
@@ -221,10 +222,10 @@ function scorePlay(
   } else if (data.cardType === "defense-reaction") {
     score = scoreDefenseReaction(data, input);
   } else if (functional === "oasis respite|1") {
-    const link = currentLink(input);
-    const remaining = link && link.attackingCard.owner !== input.seat
-      ? Math.max(0, link.attackValue - link.defenseValue - (link.damageToPrevent ?? 0))
-      : 0;
+    const remaining = Math.max(
+      0,
+      incomingAttackDamage(input) - (currentLink(input)?.damageToPrevent ?? 0),
+    );
     score = remaining > 0 ? 24 + Math.min(remaining, 4) * 3 : -100;
   } else if (functional === "arcane polarity|1") {
     score = input.view.turnFacts?.players[input.seat].arcaneDamageTaken ? 28 : -100;

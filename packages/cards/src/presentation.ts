@@ -1,5 +1,6 @@
 import type {
   CardData,
+  CardPoolMode,
   Decklist,
   DeckPool,
   EquipmentSlot,
@@ -84,7 +85,7 @@ export function validatePresentationAgainstCards(
   pool: DeckPool,
   presented: PresentedDeck,
   format: Format,
-  options: { allowFutureCards?: boolean } = {},
+  options: { cardPoolMode?: CardPoolMode } = {},
 ): PresentationResult {
   const legalityIssue = formatLegalityIssues(cards, pool, format, options)[0];
   if (legalityIssue) return { ok: false, error: legalityIssue.message };

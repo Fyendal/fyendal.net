@@ -1,5 +1,6 @@
 import type {
   CardView,
+  CardPoolMode,
   CombatValueModifierView,
   ClientMessage,
   DeckPool,
@@ -122,7 +123,7 @@ export interface AccountExport {
     winner: number | null;
     createdAt: number;
     seat: number;
-    allowFutureCards?: true;
+    cardPoolMode?: Exclude<CardPoolMode, "legal">;
   }>;
   matchmaking: null | {
     format: Format;
@@ -174,6 +175,7 @@ const GAME_LOG_ZONES = new Set([
 ]);
 
 const FORMATS = new Set(["classic-battles", "cc", "silver-age"]);
+const CARD_POOL_MODES = new Set(["legal", "future", "open"]);
 const HEROES = new Set(["dorinthea", "rhinar"]);
 const PHASES = new Set(["start", "action", "layer", "reaction", "defend", "end", "game-over"]);
 const MELD_SIDES = new Set(["left", "right", "both"]);
@@ -490,19 +492,19 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
       valid = exactKeys(message, ["type", "token"]) && string(message.token, 128, false);
       break;
     case "create-room":
-      valid = exactKeys(message, ["type", "format", "hero", "deckId", "private", "allowFutureCards"], ["type", "format"])
+      valid = exactKeys(message, ["type", "format", "hero", "deckId", "private", "cardPoolMode"], ["type", "format"])
         && FORMATS.has(String(message.format))
         && (message.hero === undefined || HEROES.has(String(message.hero)))
         && (message.deckId === undefined || id(message.deckId))
         && (message.private === undefined || typeof message.private === "boolean")
-        && (message.allowFutureCards === undefined || typeof message.allowFutureCards === "boolean");
+        && (message.cardPoolMode === undefined || CARD_POOL_MODES.has(String(message.cardPoolMode)));
       break;
     case "queue-join":
-      valid = exactKeys(message, ["type", "format", "hero", "deckId", "allowFutureCards", "avoidRoomCodes"], ["type", "format"])
+      valid = exactKeys(message, ["type", "format", "hero", "deckId", "cardPoolMode", "avoidRoomCodes"], ["type", "format"])
         && FORMATS.has(String(message.format))
         && (message.hero === undefined || HEROES.has(String(message.hero)))
         && (message.deckId === undefined || id(message.deckId))
-        && (message.allowFutureCards === undefined || typeof message.allowFutureCards === "boolean")
+        && (message.cardPoolMode === undefined || CARD_POOL_MODES.has(String(message.cardPoolMode)))
         && (message.avoidRoomCodes === undefined || (
           Array.isArray(message.avoidRoomCodes)
           && message.avoidRoomCodes.length <= MAX_MATCHMAKING_AVOID_ROOM_CODES
@@ -510,11 +512,11 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
         ));
       break;
     case "create-bot-room":
-      valid = exactKeys(message, ["type", "format", "deckId", "bot", "allowFutureCards"], ["type", "deckId"])
+      valid = exactKeys(message, ["type", "format", "deckId", "bot", "cardPoolMode"], ["type", "deckId"])
         && (message.format === undefined || message.format === "cc" || message.format === "silver-age")
         && id(message.deckId)
         && (message.bot === undefined || BOT_OPPONENTS.has(String(message.bot)))
-        && (message.allowFutureCards === undefined || typeof message.allowFutureCards === "boolean");
+        && (message.cardPoolMode === undefined || CARD_POOL_MODES.has(String(message.cardPoolMode)));
       break;
     case "join-room":
       valid = exactKeys(message, ["type", "code", "token", "deckId", "hero", "spectate"], ["type", "code"])
@@ -903,7 +905,7 @@ export function decodeGameView(value: unknown): GameView | null {
 
 function roomSummary(value: unknown): value is RoomSummary {
   const room = object(value);
-  return !!room && exactKeys(room, ["code", "format", "heroes", "createdAt", "spectateOnly", "started", "yours", "allowFutureCards"], ["code", "format", "heroes", "createdAt"])
+  return !!room && exactKeys(room, ["code", "format", "heroes", "createdAt", "spectateOnly", "started", "yours", "cardPoolMode"], ["code", "format", "heroes", "createdAt"])
     && string(room.code, 6, false) && FORMATS.has(String(room.format))
     && Array.isArray(room.heroes) && room.heroes.length === 2
     && room.heroes.every((hero) => hero === null || string(hero, MAX_SHORT_TEXT, false))
@@ -911,7 +913,7 @@ function roomSummary(value: unknown): value is RoomSummary {
     && optional(room.spectateOnly, (v): v is boolean => typeof v === "boolean")
     && optional(room.started, (v): v is true => v === true)
     && optional(room.yours, (v): v is boolean => typeof v === "boolean")
-    && optional(room.allowFutureCards, (v): v is true => v === true);
+    && optional(room.cardPoolMode, (v): v is "future" | "open" => v === "future" || v === "open");
 }
 
 function playerProfile(value: unknown): boolean {
@@ -923,11 +925,11 @@ function playerProfile(value: unknown): boolean {
 
 function roomInvite(value: unknown): boolean {
   const room = object(value);
-  return !!room && exactKeys(room, ["code", "format", "spectateOnly", "yours", "allowFutureCards"], ["code", "format"])
+  return !!room && exactKeys(room, ["code", "format", "spectateOnly", "yours", "cardPoolMode"], ["code", "format"])
     && string(room.code, 6, false) && FORMATS.has(String(room.format))
     && optional(room.spectateOnly, (v): v is boolean => typeof v === "boolean")
     && optional(room.yours, (v): v is boolean => typeof v === "boolean")
-    && optional(room.allowFutureCards, (v): v is true => v === true);
+    && optional(room.cardPoolMode, (v): v is "future" | "open" => v === "future" || v === "open");
 }
 
 function prepSeat(value: unknown): boolean {
@@ -942,7 +944,7 @@ function prepSeat(value: unknown): boolean {
 
 function prepView(value: unknown): value is PrepView {
   const prep = object(value);
-  if (!prep || !exactKeys(prep, ["format", "seats", "yourSeat", "yourDeckId", "die", "startPlayer", "botGame", "allowFutureCards", "deadlineAt", "deadlinePhase"], ["format", "seats", "yourSeat", "die", "startPlayer"])) return false;
+  if (!prep || !exactKeys(prep, ["format", "seats", "yourSeat", "yourDeckId", "die", "startPlayer", "botGame", "cardPoolMode", "deadlineAt", "deadlinePhase"], ["format", "seats", "yourSeat", "die", "startPlayer"])) return false;
   let dieValid = prep.die === null;
   if (!dieValid) {
     const die = object(prep.die);
@@ -955,7 +957,7 @@ function prepView(value: unknown): value is PrepView {
     && prep.seats.every((item) => item === null || prepSeat(item)) && seat(prep.yourSeat)
     && optional(prep.yourDeckId, id)
     && optional(prep.botGame, (v): v is boolean => typeof v === "boolean")
-    && optional(prep.allowFutureCards, (v): v is true => v === true)
+    && optional(prep.cardPoolMode, (v): v is "future" | "open" => v === "future" || v === "open")
     && optional(prep.deadlineAt, nonNegativeInteger)
     && optional(prep.deadlinePhase, (v): v is "accept" | "prepare" | "choose-first" =>
       v === "accept" || v === "prepare" || v === "choose-first")
@@ -1271,13 +1273,13 @@ function exportRoom(value: unknown): boolean {
   const room = object(value);
   return !!room && exactKeys(
     room,
-    ["code", "format", "status", "winner", "createdAt", "seat", "allowFutureCards"],
+    ["code", "format", "status", "winner", "createdAt", "seat", "cardPoolMode"],
     ["code", "format", "status", "winner", "createdAt", "seat"],
   )
     && string(room.code, 6, false) && FORMATS.has(String(room.format))
     && string(room.status, 32, false) && nullableSeat(room.winner)
     && nonNegativeInteger(room.createdAt) && seat(room.seat)
-    && optional(room.allowFutureCards, (v): v is true => v === true);
+    && optional(room.cardPoolMode, (v): v is "future" | "open" => v === "future" || v === "open");
 }
 
 function exportBugReport(value: unknown): boolean {

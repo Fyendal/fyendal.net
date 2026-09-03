@@ -956,6 +956,40 @@ describe("Briar policy", () => {
       .toEqual({ kind: "defend", instanceIds: [blockThree!.instanceId] });
   });
 
+  it("survives Arc Bending's extra damage when some attack damage gets through", () => {
+    const state = createGame({
+      decklists: [briarDeck(decklists.dorinthea), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 705121,
+      startPlayer: 1,
+    });
+    replaceHand(state, 0, ["SBA012", "SEA201"]);
+    state.players[0]!.life = 4;
+    const [blockTwo, blockThree] = state.players[0]!.hand;
+    const view = projectStateFor(state, 0);
+    view.priorityPlayer = 0;
+    view.phase = "defend";
+    view.pendingDecision = { player: 0, kind: "defend", prompt: "Choose defending cards" };
+    view.chain = [{
+      attackingCard: { instanceId: 99_910, cardId: "PEN202", owner: 1 },
+      defendingCards: [],
+      attackValue: 5,
+      defenseValue: 0,
+      damage: 6,
+      resolved: false,
+      reactions: [],
+    }];
+    const legal: GameIntent[] = [
+      { kind: "defend", instanceIds: [] },
+      { kind: "defend", instanceIds: [blockTwo!.instanceId] },
+      { kind: "defend", instanceIds: [blockThree!.instanceId] },
+    ];
+
+    expect(chooseBriarIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual({ kind: "defend", instanceIds: [blockThree!.instanceId] });
+  });
+
   it("uses a hand card instead of spent Blade Beckoner armor to survive a weapon attack", () => {
     const state = createGame({
       decklists: [briarDeck(decklists.dorinthea), decklists.dorinthea],

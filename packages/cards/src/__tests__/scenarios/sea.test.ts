@@ -251,6 +251,48 @@ describe("SEA — High Seas heroes and cogs", () => {
     expect(g.state.players[1]!.flags.crankedThisTurn).toBe(true);
   });
 
+  it("Polly Cranka can activate again after its returned card is untapped", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          board: ["polly cranka|0", "pearl amulet|3"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    const pollyId = g.state.players[0]!.board.find(
+      (card) => functionalKeyOf(cardData[card.cardId]!) === "polly cranka|0",
+    )!.instanceId;
+
+    g.activate("polly cranka|0", { settle: false })
+      .passPriority()
+      .passPriority()
+      .chooseOption("no")
+      .activate("pearl amulet|3")
+      .chooseCard("polly cranka|0");
+
+    expect(g.state.players[0]!.board.find(
+      (card) => card.instanceId === pollyId,
+    )?.tapped).toBeUndefined();
+    expect(legalIntents(g.state, 0)).toContainEqual(
+      expect.objectContaining({
+        kind: "activate-ability",
+        sourceInstanceId: pollyId,
+      }),
+    );
+
+    g.activate("polly cranka|0", { settle: false })
+      .expectInZone(0, "polly cranka|0", "banish")
+      .passPriority()
+      .passPriority();
+
+    expect(g.state.players[0]!.board.find(
+      (card) => card.instanceId === pollyId,
+    )).toMatchObject({ tapped: true, counters: { steam: 1 } });
+    expect(g.state.pendingDecision?.chooseHook).toBe("engine-crank");
+  });
+
   it("Cog in the Machine offers Crank for both Golden Cogs before its tap choice", () => {
     const g = scenario({
       seats: [

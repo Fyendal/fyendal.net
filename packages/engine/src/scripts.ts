@@ -417,6 +417,9 @@ export interface ScriptCtx {
   hasCardType(card: DeepReadonly<CardInstance>, cardType: CardType): boolean;
   /** Effective classes and subtypes, including all-zone and granted types. */
   cardTypes(card: DeepReadonly<CardInstance>): readonly string[];
+  /** Whether an item currently has Crank, including continuous grants from
+   * active sources and suppression of its printed abilities. */
+  hasCrank(card: DeepReadonly<CardInstance>): boolean;
   /** Count equipped cards with this effective class/subtype, including active
    * sources that explicitly count as additional equipped objects of that type. */
   countEquipped(type: string, targetSeat?: number): number;
@@ -1141,6 +1144,10 @@ export interface CardScript {
   onDefendAbility?(ctx: ScriptCtx): void;
   /** Additional cost/effect paid when the card is played (discard random, reveal, ...). */
   additionalCost?(ctx: ScriptCtx): void;
+  /** Optional additional-cost declaration made before resource costs are paid.
+   * If this opens a decision, the play resumes with the originally announced
+   * targets, method, variable value, and pitch cards after the decision ends. */
+  declareAdditionalCost?(ctx: ScriptCtx): void;
   /** Number of other hand cards that must remain available after pitching and
    * other announced costs so this card's mandatory additional cost can be
    * paid. The hook still performs the printed cost; this marker makes play

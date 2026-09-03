@@ -136,8 +136,16 @@ describe("Classic Constructed format legality", () => {
         cards,
         pool({ deck: ["FUTURE"] }),
         format,
-        { allowFutureCards: true },
+        { cardPoolMode: "future" },
       )).toEqual([]);
     }
+  });
+
+  it("lets Open use future, banned, and Living Legend cards", () => {
+    expect(formatLegalityIssues(cards, pool({
+      heroId: "AZALEA",
+      weaponIds: ["DEATH_DEALER"],
+      deck: ["ART", "FUTURE"],
+    }), "cc", { cardPoolMode: "open" })).toEqual([]);
   });
 });

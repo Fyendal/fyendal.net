@@ -128,6 +128,15 @@ export function endTurn(state: GameStateInternal, runtime: EngineRuntime): void 
   // chain-close trigger must finish before we resume this boundary.
   if (state.chain.length > 0) {
     runtime.dispatchFlow("closeChain", state);
+    const chainCloseDecision = state.pendingDecision;
+    if (chainCloseDecision?.chooseHook) {
+      // Chain-close hooks can ask either hero for a choice. Suspend the turn
+      // boundary before beginning-of-end-phase work starts, then re-enter it
+      // after the final chained choice is answered.
+      state.stackResume ??= "end-action-phase";
+      chainCloseDecision.resume ??= { kind: "continue-stack" };
+      return;
+    }
     if (state.stack.length > 0 || (state.pendingTriggeredLayers?.length ?? 0) > 0) {
       state.stackResume ??= "end-action-phase";
       runtime.dispatchFlow("continueStack", state);

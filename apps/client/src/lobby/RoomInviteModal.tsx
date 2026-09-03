@@ -4,7 +4,7 @@ import { useStore } from "../store.js";
 import { useShallow } from "zustand/react/shallow";
 import { Auth } from "../auth/AuthCard.js";
 import type { ConstructedFormat } from "../domain.js";
-import { DeckTile, deckChoicesFor } from "./DeckGrid.js";
+import { DeckTile, deckChoicesFor, deckIsLegalForRoom } from "./DeckGrid.js";
 import { formatLabel } from "./FormatBadge.js";
 
 /** URL-only room entry. Resolve the room first, then collect the deck or hero
@@ -125,7 +125,7 @@ export function RoomInviteModal() {
     const choices = deckChoicesFor(
       inviteRoom.format as ConstructedFormat,
       decks,
-      inviteRoom.allowFutureCards === true,
+      inviteRoom.cardPoolMode ?? "legal",
     );
     content = choices.length === 0 ? (
       <p className="muted">
@@ -142,6 +142,7 @@ export function RoomInviteModal() {
             <DeckTile
               key={deck.id}
               deck={deck}
+              blocked={!deckIsLegalForRoom(deck, inviteRoom.cardPoolMode ?? "legal")}
               onSelect={() => joinRoom(inviteRoom.code, deck.id)}
             />
           ))}
@@ -165,8 +166,12 @@ export function RoomInviteModal() {
         <h2 className="panel-title" id="invite-room-title">
           {intl.formatMessage({ id: "lobby.invite.title" }, { code: inviteRoom.code })}
         </h2>
-        {inviteRoom.allowFutureCards ? (
-          <p className="future-cards-note">{intl.formatMessage({ id: "lobby.futureCardsNote" })}</p>
+        {inviteRoom.cardPoolMode ? (
+          <p className="future-cards-note">
+            {intl.formatMessage({
+              id: inviteRoom.cardPoolMode === "open" ? "lobby.openCardPoolNote" : "lobby.futureCardsNote",
+            })}
+          </p>
         ) : null}
         {content}
         <div className="deck-actions">

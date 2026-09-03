@@ -51,7 +51,7 @@ export function RoomList(props: { onGoToFormat: (format: ConstructedFormat) => v
   const spectate = (code: string) => joinRoom(code, undefined, true);
 
   const pickerDecks = picker
-    ? deckChoicesFor(picker.format as ConstructedFormat, decks, picker.allowFutureCards === true)
+    ? deckChoicesFor(picker.format as ConstructedFormat, decks, picker.cardPoolMode ?? "legal")
     : [];
 
   return (
@@ -142,7 +142,7 @@ export function RoomList(props: { onGoToFormat: (format: ConstructedFormat) => v
                   <DeckTile
                     key={d.id}
                     deck={d}
-                    blocked={!deckIsLegalForRoom(d, picker.allowFutureCards === true)}
+                    blocked={!deckIsLegalForRoom(d, picker.cardPoolMode ?? "legal")}
                     onSelect={() => {
                       joinRoom(picker.code, d.id);
                       setPicker(null);

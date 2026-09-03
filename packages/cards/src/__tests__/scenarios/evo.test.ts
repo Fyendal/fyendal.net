@@ -491,6 +491,137 @@ describe("EVO — registration and core mechanics", () => {
       .expectZoneSize(0, "banish", 2);
   });
 
+  it("declares Scrap before pitching the attack's resource cost", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["hydraulic press|1", BLUE],
+          graveyard: ["medkit|3"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    const pitch = s.state.players[0]!.hand.find((card) => card.cardId === printingId(BLUE))!;
+
+    s.play("hydraulic press|1", { pitch: [BLUE] });
+
+    expect(s.state.pendingDecision?.chooseHook).toBe("scrap");
+    expect(s.state.players[0]!.pitch).toHaveLength(0);
+    expect(s.state.players[0]!.hand).toContainEqual(expect.objectContaining({ instanceId: pitch.instanceId }));
+
+    s.chooseCard("medkit|3");
+    expect(s.state.players[0]!.pitch).toContainEqual(expect.objectContaining({ instanceId: pitch.instanceId }));
+    expect(s.state.chain.at(-1)?.flags.overpower).toBe(true);
+  });
+
+  it("covers Scrap Hopper and Scrap Prospector payoffs", () => {
+    const hopper = scenario({
+      seats: [
+        { hero: "rhinar", resources: 10, hand: ["scrap hopper|1"], graveyard: ["medkit|3"] },
+        { hero: "dorinthea" },
+      ],
+    });
+    hopper.play("scrap hopper|1").chooseCard("medkit|3");
+    expect(hopper.state.players[0]!.board).toEqual(expect.arrayContaining([
+      expect.objectContaining({ cardId: printingId("quicken|0") }),
+    ]));
+
+    const prospector = scenario({
+      seats: [
+        { hero: "rhinar", resources: 10, hand: ["scrap prospector|1"], graveyard: ["medkit|3"] },
+        { hero: "dorinthea" },
+      ],
+    });
+    const cost = cardData[printingId("scrap prospector|1")]!.cost ?? 0;
+    prospector.play("scrap prospector|1").chooseCard("medkit|3");
+    expect(prospector.state.players[0]!.resources).toBe(11 - cost);
+  });
+
+  it("Scrap Harvester recognizes Crank granted to Hyper Driver by Maxx", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "maxx nitro|0",
+          resources: 10,
+          hand: ["scrap harvester|1"],
+          graveyard: ["medkit|3"],
+          board: ["hyper driver|0"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("scrap harvester|1")
+      .chooseCard("medkit|3");
+    expect(s.state.pendingDecision?.options).toContain(String(s.state.players[0]!.board[0]!.instanceId));
+    s.chooseCard("hyper driver|0");
+    expect(s.state.players[0]!.board[0]!.counters?.steam).toBe(1);
+  });
+
+  it("Scrap Compactor's next-Evo permission is consumed once without granting Teklovossen's draw", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "teklovossen|0",
+          resources: 20,
+          hand: ["scrap compactor|1", "evo sentry base head|1", "evo sentry base chest|1"],
+          deck: ["head jab|1"],
+          graveyard: ["medkit|3"],
+          equipment: { head: "proto base head|0", chest: "proto base chest|0" },
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("scrap compactor|1").chooseCard("medkit|3").blockWith().settle().expectAP(0, 0);
+    s.play("evo sentry base head|1", { asInstant: true });
+    expect(s.state.players[0]!.hand.some(
+      (card) => card.cardId === printingId("head jab|1"),
+    )).toBe(false);
+
+    const chest = s.state.players[0]!.hand.find(
+      (card) => card.cardId === printingId("evo sentry base chest|1"),
+    )!;
+    expect(legalIntents(s.state, 0).some((intent) =>
+      (intent.kind === "play-card" || intent.kind === "play-from-arsenal" || intent.kind === "play-from-zone") &&
+      intent.instanceId === chest.instanceId && intent.asInstant === true
+    )).toBe(false);
+  });
+
+  it("Hyper Scrapper gains no go again at X=0 and pays out after scrapping 3 Hyper Drivers", () => {
+    const zero = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["hyper scrapper|3"] },
+        { hero: "dorinthea" },
+      ],
+    });
+    zero.play("hyper scrapper|3").chooseOption("= 0").blockWith().settle().expectAP(0, 0);
+
+    const three = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 3,
+          hand: ["hyper scrapper|3"],
+          graveyard: ["hyper driver|1", "hyper driver|1", "hyper driver|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    three.play("hyper scrapper|3")
+      .chooseOption("= 3")
+      .chooseCard("hyper driver|1")
+      .chooseCard("hyper driver|1")
+      .chooseCard("hyper driver|1")
+      .expectResources(0, 6)
+      .blockWith()
+      .settle()
+      .expectAP(0, 1);
+  });
+
   it("Galvanize destroys an item and gives the defending card +2 defense", () => {
     const s = scenario({
       seats: [

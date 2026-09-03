@@ -949,7 +949,7 @@ describe("BotRunner", () => {
       deckId: "precon-sbz",
       username: "BravoRunner",
       userId,
-    }, false, "bravo");
+    }, "legal", "bravo");
     const pool = silverAgePrecon("precon-sbz")!.pool;
     await store.chooseFirst(created.code, { token: created.token, userId }, false);
     const ready = await store.presentDeck(created.code, { token: created.token, userId }, {
@@ -1001,7 +1001,7 @@ describe("BotRunner", () => {
       deckId: "precon-asb",
       username: "CindraRunner",
       userId,
-    }, false, "cindra");
+    }, "legal", "cindra");
     const pool = precon("precon-asb")!.pool;
     await store.chooseFirst(created.code, { token: created.token, userId }, false);
     const ready = await store.presentDeck(created.code, { token: created.token, userId }, {
@@ -1053,7 +1053,7 @@ describe("BotRunner", () => {
       deckId: "precon-asb",
       username: "JarlRunner",
       userId,
-    }, false, "jarl");
+    }, "legal", "jarl");
     const pool = precon("precon-asb")!.pool;
     await store.chooseFirst(created.code, { token: created.token, userId }, false);
     const ready = await store.presentDeck(created.code, { token: created.token, userId }, {

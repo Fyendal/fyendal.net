@@ -391,7 +391,7 @@ function wastesStackedDefenseReaction(data: CardData, input: BotPolicyInput): bo
   }, 0);
   if (pendingDefense === 0) return false;
 
-  const incoming = Math.max(0, link.attackValue - link.defenseValue - pendingDefense);
+  const incoming = Math.max(0, incomingAttackDamage(input) - pendingDefense);
   const meaningfulHit = (link.onHitEffects?.length ?? 0) > 0 || link.wagered === true;
   return !meaningfulHit && incoming > 0 && incoming < input.view.players[input.seat].life &&
     Math.max(0, data.defense ?? 0) > incoming;

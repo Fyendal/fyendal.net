@@ -321,6 +321,9 @@ export function noteCardPlayed(
   player.flags[`playedNameCount:${normalizedName}`] =
     (Number(player.flags[`playedNameCount:${normalizedName}`]) || 0) + 1;
   player.flags.playedCardThisTurn = true;
+  if (cardTypesOf(state, card).includes("evo")) {
+    player.flags.nextEvoAsInstant = false;
+  }
   for (const cardType of ["action", "instant"] as const) {
     if (cardHasType(state, card, cardType)) player.flags[`playedCardType:${cardType}`] = true;
   }

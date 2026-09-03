@@ -3,7 +3,7 @@ import { verifyPassword } from "./auth.js";
 import { listDecks } from "./decks.js";
 import { getReplay, listReplays } from "./replays.js";
 import { appendClusterEvent } from "./clusterEvents.js";
-import type { PlayerBadge, ReplayFile } from "@fyendal/shared";
+import type { CardPoolMode, PlayerBadge, ReplayFile } from "@fyendal/shared";
 
 export interface AccountBadgePreferences {
   availableBadges: PlayerBadge[];
@@ -61,7 +61,7 @@ export interface AccountExport {
     winner: number | null;
     createdAt: number;
     seat: number;
-    allowFutureCards?: true;
+    cardPoolMode?: Exclude<CardPoolMode, "legal">;
   }>;
   matchmaking: null | {
     format: string;
@@ -98,7 +98,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
     db.query("SELECT username, created_at, early_tester, selected_badge FROM users WHERE id = $1", [userId]),
     listDecks(db, userId),
     db.query(
-      `SELECT r.code, r.format, r.status, r.winner, r.created_at, r.allow_future_cards, s.seat
+      `SELECT r.code, r.format, r.status, r.winner, r.created_at, r.card_pool_mode, s.seat
        FROM rooms r JOIN room_seats s ON s.room_code = r.code
        WHERE s.user_id = $1 ORDER BY r.created_at, r.code`,
       [userId],
@@ -130,7 +130,9 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
       winner: row.winner == null ? null : Number(row.winner),
       createdAt: Number(row.created_at),
       seat: Number(row.seat),
-      ...(row.allow_future_cards === true ? { allowFutureCards: true as const } : {}),
+      ...(row.card_pool_mode === "future" || row.card_pool_mode === "open"
+        ? { cardPoolMode: row.card_pool_mode }
+        : {}),
     });
   }
   const bugReports: AccountExport["bugReports"] = [];

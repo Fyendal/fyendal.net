@@ -445,7 +445,7 @@ export function currentAttackIsOpponents(input: BotPolicyInput): boolean {
 export function incomingAttackDamage(input: BotPolicyInput): number {
   const link = currentLink(input);
   return link && link.attackingCard.owner !== input.seat
-    ? Math.max(0, link.attackValue - link.defenseValue)
+    ? Math.max(0, link.damage)
     : 0;
 }
 
@@ -640,7 +640,7 @@ export function plannedDefenseReactionPlan(
       preventionIds: [],
     });
   }
-  const incoming = Math.max(0, link.attackValue - link.defenseValue);
+  const incoming = Math.max(0, link.damage);
   const target = incoming >= me.life ? incoming - me.life + 1 : incoming;
   const covering = options.filter((option) => option.amount >= target);
   const ranked = covering.length > 0 ? covering : options;
@@ -671,7 +671,7 @@ function pendingDefenseReactionValue(input: BotPolicyInput): number {
 export function scoreDefenseReaction(data: CardData, input: BotPolicyInput): number {
   const link = currentLink(input);
   const incoming = link
-    ? Math.max(0, link.attackValue - link.defenseValue - pendingDefenseReactionValue(input))
+    ? Math.max(0, link.damage - pendingDefenseReactionValue(input))
     : 0;
   if (input.view.pendingDecision?.kind !== "defense-reaction" || incoming === 0) return -100;
   const defense = Math.max(0, data.defense ?? 0);
@@ -1110,7 +1110,7 @@ export function scoreDefenseIntentWithTrace(
       ...traceDefaults(),
     };
   }
-  const incoming = Math.max(0, link.attackValue - link.defenseValue);
+  const incoming = Math.max(0, link.damage);
   const me = input.view.players[input.seat];
   const chosen = intent.instanceIds.flatMap((id) => own.get(id) ?? []);
   if (model.canUseDefender && chosen.some((card) => !model.canUseDefender!(card, input))) {

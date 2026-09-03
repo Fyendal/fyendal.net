@@ -93,8 +93,12 @@ describe("initial schema", () => {
     )).rows).toEqual([{ data_type: "bytea" }]);
     expect((await db.query(
       `SELECT column_name FROM information_schema.columns
-       WHERE table_name = 'rooms' AND column_name = 'allow_future_cards'`,
-    )).rows).toEqual([{ column_name: "allow_future_cards" }]);
+       WHERE table_name = 'rooms' AND column_name IN ('allow_future_cards', 'card_pool_mode')
+       ORDER BY column_name`,
+    )).rows).toEqual([
+      { column_name: "allow_future_cards" },
+      { column_name: "card_pool_mode" },
+    ]);
     expect((await db.query(
       `SELECT column_name FROM information_schema.columns
        WHERE table_name = 'users' AND column_name = 'early_tester'`,

@@ -193,7 +193,7 @@ export function stampControlledName(
   player.flags[`controlledName:${controlledName}`] = true;
 }
 
-function hasCrank(
+export function hasCrank(
   state: GameStateInternal,
   runtime: EngineRuntime,
   player: PlayerState,

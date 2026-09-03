@@ -10,7 +10,7 @@ const roomListStore = vi.hoisted(() => ({
   queueLeave: vi.fn(),
   createRoom: vi.fn(),
   createBotRoom: vi.fn(),
-  setAllowFutureCards: vi.fn(),
+  setCardPoolMode: vi.fn(),
 }));
 
 vi.mock("../store.js", () => ({
@@ -32,7 +32,7 @@ describe("RoomList", () => {
     roomListStore.queueLeave.mockReset();
     roomListStore.createRoom.mockReset();
     roomListStore.createBotRoom.mockReset();
-    roomListStore.setAllowFutureCards.mockReset();
+    roomListStore.setCardPoolMode.mockReset();
     roomListStore.state = {
       rooms: [
         {
@@ -55,7 +55,7 @@ describe("RoomList", () => {
           createdAt: 3,
           spectateOnly: true,
           started: true,
-          allowFutureCards: true,
+          cardPoolMode: "future",
         },
       ],
       authUser: "NewPlayer",
@@ -63,13 +63,13 @@ describe("RoomList", () => {
       decksLoading: false,
       joinRoom: roomListStore.joinRoom,
       lastPlayedDecks: { cc: null, "silver-age": null },
-      allowFutureCards: { cc: false, "silver-age": false },
+      cardPoolModes: { cc: "legal", "silver-age": "legal" },
       queuedFormat: null,
       queueJoin: roomListStore.queueJoin,
       queueLeave: roomListStore.queueLeave,
       createRoom: roomListStore.createRoom,
       createBotRoom: roomListStore.createBotRoom,
-      setAllowFutureCards: roomListStore.setAllowFutureCards,
+      setCardPoolMode: roomListStore.setCardPoolMode,
     } as unknown as StoreState;
   });
 
@@ -160,8 +160,10 @@ describe("RoomList", () => {
     expect(html).not.toContain("Open Hero");
     expect(html).not.toContain("Started Hero");
     expect(html).toContain("Welcome back, NewPlayer.");
-    expect(html).toContain("Allow Future Cards");
-    expect(html).toContain('role="switch"');
+    expect(html).toContain(">Legal</button>");
+    expect(html).toContain(">Future</button>");
+    expect(html).toContain(">Open</button>");
+    expect(html).not.toContain('role="switch"');
     expect(html).not.toContain("Choose how you’d like to start playing.");
     expect(html).toContain("Play CC");
     expect(html).toContain("Find Match");
@@ -201,24 +203,23 @@ describe("RoomList", () => {
     expect(html).not.toContain("Invite Friend");
   });
 
-  it("shows independent Home future-card switches for both formats", () => {
+  it("shows an independent three-way card-pool control on each playable format", () => {
     roomListStore.state = {
       ...roomListStore.state,
-      allowFutureCards: { cc: true, "silver-age": true },
+      decks: [
+        { id: "cc", name: "CC", format: "cc", fabraryUrl: null, heroName: "Bravo", deckSize: 60, updatedAt: 1 },
+        { id: "sa", name: "SA", format: "silver-age", fabraryUrl: null, heroName: "Briar", deckSize: 40, updatedAt: 1 },
+      ],
+      cardPoolModes: { cc: "open", "silver-age": "future" },
     };
 
     const enabledHtml = renderLocalized(<Home onGoToFormat={() => {}} />);
-    expect(enabledHtml.match(/role="switch" checked=""/g)).toHaveLength(2);
-
-    roomListStore.state = {
-      ...roomListStore.state,
-      allowFutureCards: { cc: true, "silver-age": false },
-    };
-
-    const mixedHtml = renderLocalized(<Home onGoToFormat={() => {}} />);
-    expect(mixedHtml.match(/role="switch" checked=""/g)).toHaveLength(1);
-    expect(mixedHtml).toContain("Classic Constructed");
-    expect(mixedHtml).toContain("Silver Age");
+    expect(enabledHtml.match(/class="card-pool-control home-card-pool-control"/g)).toHaveLength(2);
+    expect(enabledHtml).toContain('data-mode="open"');
+    expect(enabledHtml).toContain('data-mode="future"');
+    expect(enabledHtml.match(/aria-pressed="true"/g)).toHaveLength(2);
+    expect(enabledHtml).toContain('data-tooltip="All implemented cards, including banned cards and Living Legend heroes."');
+    expect(enabledHtml).toContain("card-pool-segment-description");
   });
 
   it("waits for deck loading before showing the new-player choices", () => {
@@ -237,11 +238,9 @@ describe("RoomList", () => {
 
     expect(html).toContain("欢迎来到 Fyendal，NewPlayer。");
     expect(html).toContain("卡牌范围");
-    expect(html).toContain("允许未来卡牌");
-    expect(html).toContain("白银时代");
-    expect(html).toContain("Silver Age");
-    expect(html).toContain("经典构筑");
-    expect(html).toContain(">CC</span>");
+    expect(html).toContain(">合法</button>");
+    expect(html).toContain(">未来</button>");
+    expect(html).toContain(">开放</button>");
     expect(html).toContain("试用预构筑牌组");
     expect(html).toContain("寻找对局");
     expect(html).toContain("对战AI");

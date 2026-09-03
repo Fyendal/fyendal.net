@@ -7,6 +7,9 @@ export type HeroId = "dorinthea" | "rhinar";
  *  either a saved user deck or a shared format-legal preconstructed deck. */
 export type Format = "classic-battles" | "cc" | "silver-age";
 
+/** Constructed card eligibility selected for a room. */
+export type CardPoolMode = "legal" | "future" | "open";
+
 /** Stable identities for the supported practice opponents. */
 export type BotOpponent = "bravo" | "briar" | "cindra" | "ira" | "hala" | "jarl";
 
@@ -679,8 +682,8 @@ export type MatchPrepPhase = "accept" | "prepare" | "choose-first";
 /** Pre-game prep room state: sideboarding, die roll and first-player pick. */
 export interface PrepView {
   format: Format;
-  /** The room permits implemented cards from explicitly unreleased sets. */
-  allowFutureCards?: true;
+  /** Omitted for the tournament-legal default. */
+  cardPoolMode?: Exclude<CardPoolMode, "legal">;
   /** This room has a synthetic AI opponent and is deleted when its human ends it. */
   botGame?: boolean;
   seats: [PrepSeatView | null, PrepSeatView | null];
@@ -702,8 +705,8 @@ export interface PrepView {
 export interface RoomSummary {
   code: string;
   format: Format;
-  /** The room permits implemented cards from explicitly unreleased sets. */
-  allowFutureCards?: true;
+  /** Omitted for the tournament-legal default. */
+  cardPoolMode?: Exclude<CardPoolMode, "legal">;
   /** per-seat hero display names (null = open seat) — the lobby's vs headshots */
   heroes: [string | null, string | null];
   createdAt: number;
@@ -719,8 +722,8 @@ export interface RoomSummary {
 export interface RoomInvite {
   code: string;
   format: Format;
-  /** The room permits implemented cards from explicitly unreleased sets. */
-  allowFutureCards?: true;
+  /** Omitted for the tournament-legal default. */
+  cardPoolMode?: Exclude<CardPoolMode, "legal">;
   /** Both player seats are occupied, so the invite can only spectate. */
   spectateOnly?: boolean;
   /** The requesting account already owns a seat and can rejoin directly. */
@@ -746,9 +749,9 @@ export type PriorityWindowMode = "auto-pass" | "always-pause";
 export type ClientMessage =
   | { type: "auth"; token: string }
   /** classic-battles: hero; cc/silver-age: deckId of a saved deck */
-  | { type: "create-room"; format: Format; hero?: HeroId; deckId?: string; private?: boolean; allowFutureCards?: boolean }
+  | { type: "create-room"; format: Format; hero?: HeroId; deckId?: string; private?: boolean; cardPoolMode?: CardPoolMode }
   /** Create a dedicated constructed room with the selected AI opponent. */
-  | { type: "create-bot-room"; format?: "cc" | "silver-age"; deckId: string; bot?: BotOpponent; allowFutureCards?: boolean }
+  | { type: "create-bot-room"; format?: "cc" | "silver-age"; deckId: string; bot?: BotOpponent; cardPoolMode?: CardPoolMode }
   /** deckId required to take a player seat in cc/silver-age rooms; omit to spectate.
    *  classic-battles player seats pass hero (mirrors allowed; omitted = the
    *  opposite of the seated player). spectate forces a spectator slot even
@@ -757,7 +760,7 @@ export type ClientMessage =
   /** Resolve an invite URL before asking the player for a deck or hero. */
   | { type: "inspect-room"; code: string }
   | { type: "list-rooms" }
-  | { type: "queue-join"; format: Format; hero?: HeroId; deckId?: string; allowFutureCards?: boolean; avoidRoomCodes?: string[] }
+  | { type: "queue-join"; format: Format; hero?: HeroId; deckId?: string; cardPoolMode?: CardPoolMode; avoidRoomCodes?: string[] }
   | { type: "queue-leave" }
   /** Matchmade prep room: acknowledge the pairing before sideboarding. */
   | { type: "accept-match" }

@@ -859,6 +859,7 @@ describe("Hala policy", () => {
 
     view.ongoing = [];
     view.chain[0]!.defenseValue = 3;
+    view.chain[0]!.damage = 0;
     expect(chooseHalaIntent({ seat: 0, view, legal, cards: cardData })).toEqual({ kind: "pass" });
   });
 

@@ -141,6 +141,12 @@ export type { PresentationResult } from "./presentation.js";
 const KEYWORD_OVERRIDES: Record<string, string[]> = {
   // Older OUT data predates the explicit Blade Break keyword field.
   "mask of many faces|0": ["Blade Break"],
+  // These attacks gain go again only after their scripted additional cost succeeds.
+  "looking for a scrap|1": [],
+  "looking for a scrap|2": [],
+  "looking for a scrap|3": [],
+  "hyper scrapper|3": [],
+  "crash site salvage|2": ["Scrap"],
   // Wild Ride only GAINS go again if a 6+ card is discarded
   "wild ride|1": [],
   "wild ride|2": [],
@@ -767,7 +773,7 @@ export function validatePresentation(
   pool: DeckPool,
   presented: PresentedDeck,
   format: Format,
-  options: { allowFutureCards?: boolean } = {},
+  options: { cardPoolMode?: import("@fyendal/shared").CardPoolMode } = {},
 ) {
   return validatePresentationAgainstCards(cardData, pool, presented, format, options);
 }
@@ -907,7 +913,7 @@ export const silverAgePrecons: SilverAgePrecon[] = precons.filter(
 
 export function preconsForFormat(
   format: "cc" | "silver-age",
-  options: { allowFutureCards?: boolean } = {},
+  options: { cardPoolMode?: import("@fyendal/shared").CardPoolMode } = {},
 ): Precon[] {
   return precons.filter(
     (precon) =>

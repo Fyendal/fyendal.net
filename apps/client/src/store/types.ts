@@ -1,5 +1,6 @@
 import type {
   BotOpponent,
+  CardPoolMode,
   Format,
   GameIntent,
   GameTransitionView,
@@ -112,9 +113,9 @@ export interface StoreState {
   screen: Screen;
   lobbyRail: LobbyRail;
   setLobbyRail: (rail: LobbyRail) => void;
-  allowFutureCards: Record<ConstructedFormat, boolean>;
+  cardPoolModes: Record<ConstructedFormat, CardPoolMode>;
   lastPlayedDecks: Record<ConstructedFormat, string | null>;
-  setAllowFutureCards: (format: ConstructedFormat, allow: boolean) => void;
+  setCardPoolMode: (format: ConstructedFormat, mode: CardPoolMode) => void;
   roomCode: string | null;
   yourSeat: number | null;
   spectating: boolean;

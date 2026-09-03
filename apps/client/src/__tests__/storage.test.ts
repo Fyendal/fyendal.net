@@ -166,13 +166,13 @@ describe("client storage keys", () => {
     };
     expect(loadLobbySettings(storage, "Alice")).toEqual(DEFAULT_LOBBY_SETTINGS);
     saveLobbySettings(storage, "Alice", {
-      version: 3,
-      allowFutureCards: { cc: true, "silver-age": false },
+      version: 4,
+      cardPoolModes: { cc: "open", "silver-age": "legal" },
       lastPlayedDecks: { cc: "deck-cc", "silver-age": "deck-123" },
     });
     expect(loadLobbySettings(storage, "ALICE")).toEqual({
-      version: 3,
-      allowFutureCards: { cc: true, "silver-age": false },
+      version: 4,
+      cardPoolModes: { cc: "open", "silver-age": "legal" },
       lastPlayedDecks: { cc: "deck-cc", "silver-age": "deck-123" },
     });
     expect(loadLobbySettings(storage, "Bob")).toEqual(DEFAULT_LOBBY_SETTINGS);
@@ -196,8 +196,8 @@ describe("client storage keys", () => {
     expect(values.has(LOBBY_SETTINGS_STORAGE_KEY)).toBe(true);
 
     expect(loadLobbySettings(storage, "Alice", { migrateLegacy: true })).toEqual({
-      version: 3,
-      allowFutureCards: { cc: true, "silver-age": false },
+      version: 4,
+      cardPoolModes: { cc: "future", "silver-age": "legal" },
       lastPlayedDecks: { cc: null, "silver-age": "precon-sba" },
     });
     expect(values.has(LOBBY_SETTINGS_STORAGE_KEY)).toBe(false);
@@ -208,8 +208,8 @@ describe("client storage keys", () => {
       allowFutureCards: { cc: false, "silver-age": true },
     }));
     expect(loadLobbySettings(storage, "Charlie")).toEqual({
-      version: 3,
-      allowFutureCards: { cc: false, "silver-age": true },
+      version: 4,
+      cardPoolModes: { cc: "legal", "silver-age": "future" },
       lastPlayedDecks: { cc: null, "silver-age": null },
     });
 

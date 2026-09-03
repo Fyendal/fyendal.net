@@ -867,7 +867,7 @@ function clearingWardMakesChainLinkHit(input: BotPolicyInput): boolean {
   if (wards.length !== 1) return false;
   const ward = knownVisibleWardValue(wards[0]!, input);
   const link = currentLink(input);
-  const unblockedDamage = link ? Math.max(0, link.attackValue - link.defenseValue) : 0;
+  const unblockedDamage = Math.max(0, link?.damage ?? 0);
   return ward !== undefined && unblockedDamage > 0 && ward >= unblockedDamage;
 }
 

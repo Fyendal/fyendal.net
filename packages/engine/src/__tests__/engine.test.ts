@@ -30,6 +30,39 @@ function passTopLayer(state: ReturnType<typeof makeGame>): ReturnType<typeof mak
 }
 
 describe("game setup & turn structure", () => {
+  it("projects source-side combat damage modifiers before resolution", () => {
+    const state = makeGame(898);
+    const attack = player(state, 0).hand.shift()!;
+    attack.cardId = "ATK4";
+    state.chain = [{
+      attacker: 0,
+      attackingCard: attack,
+      attackCardType: "action",
+      defendingCards: [],
+      defendingEquipment: [],
+      reactions: [],
+      goAgain: false,
+      damage: 0,
+      hit: false,
+      resolved: false,
+      flags: {},
+    }];
+    state.modifiers.push({
+      id: state.nextModifierId++,
+      sourceInstanceId: attack.instanceId,
+      sourceCardId: attack.cardId,
+      seat: 0,
+      scope: "combat-chain",
+      damage: 1,
+    });
+
+    expect(projectStateFor(state, 1).chain[0]?.damage).toBe(5);
+
+    state.chain[0]!.resolved = true;
+    state.chain[0]!.damage = 3;
+    expect(projectStateFor(state, 1).chain[0]?.damage).toBe(3);
+  });
+
   it("recognizes printed and granted purple card color", () => {
     const state = makeGame(899);
     const purpleId = giveCard(state, 0, "PURPLE");
@@ -190,6 +223,67 @@ describe("game setup & turn structure", () => {
     expect(player(result.state, 0).graveyard).toContainEqual(
       expect.objectContaining({ instanceId: attack.instanceId }),
     );
+  });
+
+  it("resumes ending the turn after an opponent answers a chain-close choice", () => {
+    const state = makeGame(945);
+    state.scriptsRef = {
+      ...state.scriptsRef,
+      ATK4: {
+        ...state.scriptsRef.ATK4,
+        onCombatChainClosed(ctx) {
+          const opponent = ctx.player(1 - ctx.seat);
+          ctx.requestCardChoice(
+            "chain-close-choice",
+            "Choose a card",
+            opponent.hand.map((card) => card.instanceId),
+            opponent.seat,
+          );
+        },
+        onChoose(ctx, hook) {
+          if (hook === "chain-close-choice") {
+            ctx.setPlayerFlag(ctx.seat, "chainCloseChoiceAnswered", true);
+          }
+        },
+      },
+    };
+    const active = player(state, 0);
+    const attack = active.hand.shift()!;
+    attack.cardId = "ATK4";
+    active.hand = [];
+    state.chain = [{
+      attacker: 0,
+      attackingCard: attack,
+      attackCardType: "action",
+      defendingCards: [],
+      defendingEquipment: [],
+      reactions: [],
+      goAgain: false,
+      damage: 0,
+      hit: false,
+      resolved: true,
+      flags: {},
+    }];
+
+    let result = applyIntent(state, 0, { kind: "pass" });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.state.pendingDecision).toMatchObject({
+      player: 1,
+      chooseHook: "chain-close-choice",
+      resume: { kind: "continue-stack" },
+    });
+    expect(result.state.stackResume).toBe("end-action-phase");
+
+    const optionId = result.state.pendingDecision?.options?.[0];
+    expect(optionId).toBeDefined();
+    result = applyIntent(result.state, 1, { kind: "choose", optionId: optionId! });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.state.turn).toBe(2);
+    expect(result.state.activePlayer).toBe(1);
+    expect(result.state.stackResume).toBeNull();
+    expect(result.state.pendingDecision).toBeNull();
   });
 
   it.each([3, 5])("journals arsenal before draw-up at intellect %i", (intellect) => {

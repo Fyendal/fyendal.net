@@ -875,6 +875,21 @@ export interface PendingDecisionState extends PendingDecision {
   /** What to do after the decision is answered */
   resume?:
     | { kind: "stack-card"; seat: number; card: CardInstance }
+    | {
+        kind: "continue-play-after-declaration";
+        seat: number;
+        instanceId: number;
+        pitchInstanceIds: number[];
+        from: "hand" | "arsenal" | PlayableZone;
+        meldSide?: MeldSide;
+        targetAllyId?: number;
+        boost?: boolean;
+        boostCount?: number;
+        asInstant?: boolean;
+        alternativeCostCardInstanceIds?: number[];
+        targetCardInstanceId?: number;
+        declaredVariableX?: number;
+      }
     | { kind: "finish-play"; seat: number; card: CardInstance; from: "hand" | "arsenal" | PlayableZone; targetAllyId?: number; boost?: boolean; boostCount?: number; asInstant?: boolean }
   | { kind: "finish-reaction"; seat: number; card: CardInstance; from: "hand" | "arsenal" | PlayableZone }
   | { kind: "finish-window-instant"; seat: number; card: CardInstance; from: "hand" | "arsenal" | PlayableZone }

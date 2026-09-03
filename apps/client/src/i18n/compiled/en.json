@@ -21714,16 +21714,40 @@
       "value": "Bug fixed"
     }
   ],
-  "lobby.cardPool.allowFuture": [
+  "lobby.cardPool.future": [
     {
       "type": 0,
-      "value": "Allow Future Cards"
+      "value": "Future"
     }
   ],
-  "lobby.cardPool.description": [
+  "lobby.cardPool.futureDescription": [
     {
       "type": 0,
-      "value": "Set card eligibility separately for each format."
+      "value": "Tournament-legal and implemented future cards."
+    }
+  ],
+  "lobby.cardPool.legal": [
+    {
+      "type": 0,
+      "value": "Legal"
+    }
+  ],
+  "lobby.cardPool.legalDescription": [
+    {
+      "type": 0,
+      "value": "Tournament-legal cards only."
+    }
+  ],
+  "lobby.cardPool.open": [
+    {
+      "type": 0,
+      "value": "Open"
+    }
+  ],
+  "lobby.cardPool.openDescription": [
+    {
+      "type": 0,
+      "value": "All implemented cards, including banned cards and Living Legend heroes."
     }
   ],
   "lobby.cardPool.title": [
@@ -22280,6 +22304,16 @@
       "value": "Paste deck list"
     }
   ],
+  "lobby.deck.playWith": [
+    {
+      "type": 0,
+      "value": "Play with "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    }
+  ],
   "lobby.deck.playable": [
     {
       "type": 0,
@@ -22636,6 +22670,12 @@
     {
       "type": 0,
       "value": "Rooms"
+    }
+  ],
+  "lobby.openCardPoolNote": [
+    {
+      "type": 0,
+      "value": "This room allows all implemented cards, including banned cards and Living Legend heroes."
     }
   ],
   "lobby.room.fullHint": [
