@@ -13,7 +13,7 @@ interface BotOption {
   descriptionId: string;
 }
 
-type DeckType = "beginner" | "midrange" | "aggro" | "elemental" | "guardian";
+type DeckType = "beginner" | "midrange" | "aggro" | "elemental" | "guardian" | "boss";
 
 const BOTS: Readonly<Record<ConstructedFormat, readonly BotOption[]>> = {
   cc: [
@@ -48,6 +48,14 @@ const BOTS: Readonly<Record<ConstructedFormat, readonly BotOption[]>> = {
       heroName: "Jarl Vetreiði",
       deckType: "guardian",
       descriptionId: "lobby.bot.jarl.description",
+    },
+    {
+      id: "starvo",
+      name: "Starvo",
+      title: "Star of the Show",
+      heroName: "Bravo, Star of the Show",
+      deckType: "boss",
+      descriptionId: "lobby.bot.starvo.description",
     },
   ],
   "silver-age": [
@@ -168,6 +176,13 @@ function DeckTypeIcon(props: { type: DeckType }) {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="m13 2-8 12h7l-1 8 8-12h-7l1-8Z" />
+      </svg>
+    );
+  }
+  if (props.type === "boss") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="m12 2 2.8 5.8 6.2.9-4.5 4.4 1.1 6.2-5.6-2.9-5.6 2.9 1.1-6.2L3 8.7l6.2-.9L12 2Z" />
       </svg>
     );
   }

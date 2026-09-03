@@ -5,6 +5,7 @@ export {
   halaPresentationFor,
   iraPresentation,
   jarlPresentationFor,
+  starvoPresentationFor,
 } from "./sideboard.js";
 export { chooseBriarIntent, chooseBriarIntentWithTrace } from "./briar-policy.js";
 export type { BriarIntentDecision } from "./briar-policy.js";
@@ -36,3 +37,5 @@ export { chooseIraIntent, chooseIraIntentWithTrace } from "./ira-policy.js";
 export type { IraIntentDecision, IraTurnEvaluation, IraTurnPlan } from "./ira-policy.js";
 export { chooseJarlIntent, chooseJarlIntentWithTrace } from "./jarl-policy.js";
 export type { JarlIntentDecision } from "./jarl-policy.js";
+export { chooseStarvoIntent, chooseStarvoIntentWithTrace } from "./starvo-policy.js";
+export type { StarvoIntentDecision } from "./starvo-policy.js";

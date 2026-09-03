@@ -11,7 +11,7 @@ export type Format = "classic-battles" | "cc" | "silver-age";
 export type CardPoolMode = "legal" | "future" | "open";
 
 /** Stable identities for the supported practice opponents. */
-export type BotOpponent = "bravo" | "briar" | "cindra" | "ira" | "hala" | "jarl";
+export type BotOpponent = "bravo" | "briar" | "cindra" | "ira" | "hala" | "jarl" | "starvo";
 
 /** Numeric resources produced when pitched. Colored cards use their red/
  * yellow/blue/purple color value (1/2/3/4). */

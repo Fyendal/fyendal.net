@@ -125,6 +125,7 @@ export function transitionMotionEvents(
   current: GameView,
   transition: GameTransitionView,
   direction: "forward" | "backward",
+  options: { sourceIncludesPredictedTransition?: boolean } = {},
 ): GameMotionEvent[] {
   if (transition.kind === "replace") return [];
   const sourceView = direction === "forward" ? previous : current;
@@ -159,6 +160,11 @@ export function transitionMotionEvents(
   for (const move of moves) {
     const sourcePresentation = presentationFor(source.cards, move.instanceId, move.from);
     const destinationPresentation = presentationFor(destination.cards, move.instanceId, move.to);
+    const destinationAlreadyPresented = direction === "forward"
+      && options.sourceIncludesPredictedTransition === true
+      && move.instanceId !== undefined
+      && move.to !== null
+      && presentationFor(source.cards, move.instanceId, move.to) !== null;
     const sourceLocation = sourcePresentation?.location
       ?? (move.from ? basicLocation(move.from) : null);
     const destinationLocation = destinationPresentation?.location
@@ -197,20 +203,26 @@ export function transitionMotionEvents(
           Math.max(0, finalCount - total) + offset,
         );
       }
-      semantic.push({
-        kind: "move",
-        source: sourceLocation,
-        destination: destinationLocation,
-        visual: visualFor(sourcePresentation, destinationPresentation),
-        count: move.count,
-        confidence: move.instanceId === undefined ? "inferred" : "exact",
-        ...(move.instanceId === undefined ? {} : { instanceId: move.instanceId }),
-        ...(sourcePresentationKey ? { sourcePresentationKey } : {}),
-        ...(destinationPresentationKey ? { destinationPresentationKey } : {}),
-        ...(destinationLocation.kind === "deck" && destinationLocation.position === "bottom"
-          ? { destinationCoverVisual: deckCoverVisual(destinationView, destinationLocation.seat) }
-          : {}),
-      });
+      // An optimistic projection may already have shown the first part of an
+      // authoritative edge (such as hand -> stack). Omit only that
+      // exact movement; later cleanup and draw events on the same edge still
+      // need their semantic paths.
+      if (!destinationAlreadyPresented) {
+        semantic.push({
+          kind: "move",
+          source: sourceLocation,
+          destination: destinationLocation,
+          visual: visualFor(sourcePresentation, destinationPresentation),
+          count: move.count,
+          confidence: move.instanceId === undefined ? "inferred" : "exact",
+          ...(move.instanceId === undefined ? {} : { instanceId: move.instanceId }),
+          ...(sourcePresentationKey ? { sourcePresentationKey } : {}),
+          ...(destinationPresentationKey ? { destinationPresentationKey } : {}),
+          ...(destinationLocation.kind === "deck" && destinationLocation.position === "bottom"
+            ? { destinationCoverVisual: deckCoverVisual(destinationView, destinationLocation.seat) }
+            : {}),
+        });
+      }
     } else if (sourceLocation) {
       if (sourcePresentation && cardVisible(sourcePresentation.card)) {
         semantic.push({

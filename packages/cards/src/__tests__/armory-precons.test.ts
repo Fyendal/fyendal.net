@@ -31,11 +31,14 @@ describe("Classic Constructed shared decks", () => {
     const hidden = precons
       .filter((deck) => deck.format === "cc")
       .filter((deck) => formatLegalityIssues(cardData, deck.pool, deck.format).length > 0);
-    expect(hidden.map((deck) => deck.id)).toEqual(["precon-ako", "precon-aaz", "precon-ast"]);
+    expect(hidden.map((deck) => deck.id)).toEqual([
+      "precon-ako", "precon-aaz", "precon-ast", "bot-starvo-boss",
+    ]);
     expect(hidden.map((deck) => cardData[deck.pool.heroId]!.name)).toEqual([
       "Kayo, Armed and Dangerous",
       "Azalea, Ace in the Hole",
       "Aurora, Shooting Star",
+      "Bravo, Star of the Show",
     ]);
   });
 
@@ -97,6 +100,25 @@ describe("Classic Constructed shared decks", () => {
     expect(pool.deck).toHaveLength(60);
     expect(pool.weaponIds.length + pool.equipmentPool.length + pool.deck.length + pool.sideboard!.length)
       .toBe(80);
+    for (const id of [...pool.weaponIds, ...pool.equipmentPool, ...pool.deck, ...pool.sideboard!]) {
+      expect(cardData[id], id).toBeTruthy();
+      expect(isImplemented(cardData[id]!), id).toBe(true);
+    }
+  });
+
+  it("registers the open-pool Starvo boss only for the practice bot", () => {
+    const starvo = precon("bot-starvo-boss");
+    expect(starvo).toMatchObject({
+      name: "Bravo, Star of the Show — Boss Battle",
+      format: "cc",
+      botOnly: true,
+    });
+    expect(preconsForFormat("cc").map((deck) => deck.id)).not.toContain("bot-starvo-boss");
+
+    const pool = starvo!.pool;
+    expect(pool.deck).toHaveLength(60);
+    expect(pool.weaponIds.length + pool.equipmentPool.length + pool.deck.length + pool.sideboard!.length)
+      .toBe(77);
     for (const id of [...pool.weaponIds, ...pool.equipmentPool, ...pool.deck, ...pool.sideboard!]) {
       expect(cardData[id], id).toBeTruthy();
       expect(isImplemented(cardData[id]!), id).toBe(true);

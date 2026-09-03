@@ -191,14 +191,16 @@ export function useGameMotion({
     const classification = classifyViewUpdate(previousView, view, motionUpdate);
     let nextBatches: GameMotionBatch[] = [];
     if (previousView && classification.kind === "animate") {
-      const canUseSemanticTransition =
-        !previousViewPredictedSemanticTransitionRef.current && !predictsSemanticTransition;
-      const events = canUseSemanticTransition && motionUpdate.gameTransition
+      const events = motionUpdate.gameTransition
         ? transitionMotionEvents(
             previousView,
             view,
             motionUpdate.gameTransition,
             classification.direction,
+            {
+              sourceIncludesPredictedTransition:
+                previousViewPredictedSemanticTransitionRef.current,
+            },
           )
         : detectGameMotionEvents(previousView, view);
       nextBatches = resolveMotionBatches(

@@ -161,7 +161,7 @@ describe("initial schema", () => {
       "matchmaking_offers",
     ]));
     expect((await db.query("SELECT version FROM schema_migrations ORDER BY version DESC LIMIT 1")).rows)
-      .toEqual([{ version: 28 }]);
+      .toEqual([{ version: 29 }]);
   });
 
   it("adds candidate skip state to an already-applied version 26 database", async () => {
@@ -179,7 +179,33 @@ describe("initial schema", () => {
        WHERE table_name = 'pending_bot_start_candidates' AND column_name = 'skipped'`,
     )).rows).toEqual([{ column_name: "skipped" }]);
     expect((await db.query("SELECT version FROM schema_migrations ORDER BY version DESC LIMIT 1")).rows)
-      .toEqual([{ version: 28 }]);
+      .toEqual([{ version: 29 }]);
+  });
+
+  it("adds Starvo to durable pending bot starts", async () => {
+    const db = rawDb();
+    await applyMigrations(db, MIGRATIONS.filter((migration) => migration.version <= 28));
+    const user = await db.query(
+      `INSERT INTO users (username, username_lc, pass_hash, created_at)
+       VALUES ('StarvoQueue','starvoqueue','hash',1) RETURNING id`,
+    );
+    const userId = Number(user.rows[0]!.id);
+    await db.query(
+      `INSERT INTO matchmaking_entries (user_id, format, deck_id, joined_at)
+       VALUES ($1,'cc','precon-asb',1)`,
+      [userId],
+    );
+
+    await applyMigrations(db, MIGRATIONS);
+
+    await expect(db.query(
+      `INSERT INTO pending_bot_starts
+        (user_id, format, deck_id, bot, card_pool_mode, requested_at)
+       VALUES ($1,'cc','precon-asb','starvo','legal',1)`,
+      [userId],
+    )).resolves.toMatchObject({ rowCount: 1 });
+    expect((await db.query("SELECT bot FROM pending_bot_starts WHERE user_id = $1", [userId])).rows)
+      .toEqual([{ bot: "starvo" }]);
   });
 
   it("repairs the early version 26 pending-bot deck foreign key", async () => {

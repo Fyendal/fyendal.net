@@ -39,12 +39,17 @@ describe("background matchmaking UI", () => {
     const html = renderSearch("rail");
 
     expect(html).toContain("background-match-search background-match-rail");
-    expect(html).toContain("Searching for a real player while you practice…");
+    expect(html).toContain("Searching for a real player");
     expect(html).toContain(">Stop searching</button>");
   });
 
   it("renders searching inside the mobile More menu", () => {
-    expect(renderSearch("menu")).toContain("background-match-search background-match-menu");
+    const html = renderSearch("menu");
+
+    expect(html).toContain("background-match-search background-match-menu");
+    expect(html).toContain("background-match-search-dot");
+    expect(html).toContain(">Stop</button>");
+    expect(html).not.toContain(">Stop searching</button>");
   });
 
   it("renders an actionable offer as a separate popup", () => {
@@ -67,8 +72,11 @@ describe("background matchmaking UI", () => {
     );
 
     expect(html).toContain("background-match-offer");
+    expect(html).toContain("background-match-hero-image");
+    expect(html).toContain('src="https://content.fabrary.net/heroes/bravo.webp"');
     expect(html).toContain("Player found");
-    expect(html).toContain("BravoFan — Bravo");
+    expect(html).toContain(">Bravo</span>");
+    expect(html).not.toContain("BravoFan");
     expect(html).toContain("Accept");
     expect(html).toContain("Keep playing bot");
   });

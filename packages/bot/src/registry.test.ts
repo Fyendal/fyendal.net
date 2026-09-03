@@ -18,7 +18,7 @@ const opponent: Decklist = {
 
 describe("bot registry", () => {
   it("registers every bot with unique stable identity and deck mappings", () => {
-    expect(botDefinitions).toHaveLength(6);
+    expect(botDefinitions).toHaveLength(7);
     expect(new Set(botDefinitions.map(({ id }) => id)).size).toBe(botDefinitions.length);
     expect(new Set(botDefinitions.map(({ deckId }) => deckId)).size).toBe(botDefinitions.length);
     expect(Object.keys(BOT_DEFINITIONS).sort()).toEqual(
@@ -44,7 +44,9 @@ describe("bot registry", () => {
       if (!registered) continue;
       for (const turnOrder of ["first", "second"] as const) {
         const presented = definition.presentationFor(opponent, turnOrder);
-        expect(validatePresentation(registered.pool, presented, definition.format)).toMatchObject({
+        expect(validatePresentation(registered.pool, presented, definition.format, {
+          cardPoolMode: definition.presentationCardPoolMode,
+        })).toMatchObject({
           ok: true,
         });
       }

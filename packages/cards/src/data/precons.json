@@ -799,5 +799,51 @@
                 "SBR021", "SBR021"
             ]
         }
+    },
+    "_comment_bot_starvo": "Source: https://www.tcgplayer.com/content/article/Living-Legend-Library-Bravo-Star-of-the-Show/20ef7f41-bec2-4042-bb76-3a4d723bcc90/. This user-requested CC practice boss intentionally contains a Living Legend hero, signature weapon, and banned cards. It is bot-only and its presentation is validated in open-pool mode; the published 65-card deck is split into a 60-card registered main plus five sideboard cards and reconstructed exactly for play.",
+    "bot-starvo-boss": {
+        "name": "Bravo, Star of the Show — Boss Battle",
+        "format": "cc",
+        "botOnly": true,
+        "pool": {
+            "heroId": "EVR017",
+            "weaponIds": ["ELE003", "EVR018", "EVR155"],
+            "equipmentPool": [
+                "HVY195", "ROS028", "TCC033", "ELE115", "WTR150",
+                "AJV006", "ELE144", "ROS071", "ELE173"
+            ],
+            "deck": [
+                "ROS046", "ROS046", "ROS046",
+                "ELE186", "ELE186",
+                "ROS052", "ROS052", "ROS052",
+                "WTR043",
+                "ROS216",
+                "ELE119",
+                "ROS031", "ROS031", "ROS031",
+                "ROS055", "ROS055", "ROS055",
+                "ELE005",
+                "ELE112",
+                "ROS042", "ROS042",
+                "WTR044", "WTR044", "WTR044",
+                "ELE010", "ELE010",
+                "ROS047",
+                "ROS048", "ROS048", "ROS048",
+                "ELE006",
+                "ELE147", "ELE147",
+                "ROS054", "ROS054", "ROS054",
+                "ELE146", "ELE146", "ELE146",
+                "AJV017", "AJV017", "AJV017",
+                "ROS074", "ROS074", "ROS074",
+                "ROS087", "ROS087", "ROS087",
+                "AJV027",
+                "AJV020", "AJV020", "AJV020",
+                "ROS057", "ROS057", "ROS057",
+                "ROS097", "ROS097", "ROS097",
+                "AJV016", "AJV016"
+            ],
+            "sideboard": [
+                "UPR139", "ELE114", "ROS106", "DTD230", "AJV016"
+            ]
+        }
     }
 }

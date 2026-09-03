@@ -947,6 +947,72 @@ describe("game motion detection", () => {
     });
   });
 
+  it("continues draw-up after an optimistic arsenal move without replaying it", () => {
+    const kept = face(101);
+    const chosen = face(102);
+    const draws = [face(103), face(104), face(105)];
+    const optimisticallyArsenaled = { ...chosen, faceDown: true };
+    const previous = view([
+      player(0, {
+        hand: [kept],
+        handCount: 1,
+        deckCount: 10,
+        arsenal: [optimisticallyArsenaled],
+        arsenalCount: 1,
+      }),
+      player(1),
+    ], {
+      phase: "end",
+      pendingDecision: null,
+    });
+    const current = view([
+      player(0, {
+        hand: [kept, ...draws],
+        handCount: 4,
+        deckCount: 7,
+        arsenal: [optimisticallyArsenaled],
+        arsenalCount: 1,
+      }),
+      player(1),
+    ], { turn: 2, phase: "action" });
+
+    const events = transitionMotionEvents(previous, current, {
+      fromVersion: 11,
+      kind: "forward",
+      events: [
+        {
+          kind: "move",
+          from: { kind: "hand", seat: 0 },
+          to: { kind: "arsenal", seat: 0 },
+          count: 1,
+          instanceId: chosen.instanceId,
+        },
+        ...draws.map((card) => ({
+          kind: "move" as const,
+          from: { kind: "deck" as const, seat: 0, position: "top" as const },
+          to: { kind: "hand" as const, seat: 0 },
+          count: 1,
+          instanceId: card.instanceId,
+        })),
+      ],
+    }, "forward", { sourceIncludesPredictedTransition: true });
+
+    expect(events).not.toContainEqual(expect.objectContaining({
+      kind: "move",
+      destination: { kind: "arsenal", seat: 0 },
+    }));
+    expect(events.filter((event) => (
+      event.kind === "move"
+      && event.source.kind === "deck"
+      && event.destination.kind === "hand"
+    ))).toHaveLength(3);
+    expect(events).toContainEqual(expect.objectContaining({
+      kind: "reflow",
+      instanceId: kept.instanceId,
+      phase: "draw",
+    }));
+  });
+
   it("defers a new-turn stack trigger until end-phase motion completes", () => {
     const mentor = face(96);
     const pitched = face(97);

@@ -475,6 +475,60 @@ describe("server rooms over websocket", () => {
     a.ws.close();
   });
 
+  it("restores background bot matchmaking after reconnect", async () => {
+    const a = await authedClient();
+    a.sendMsg({
+      type: "create-bot-room",
+      format: "cc",
+      deckId: "precon-asb",
+      bot: "ira",
+      searchForPlayer: true,
+    });
+    const searching = await a.next((message) =>
+      message.type === "background-matchmaking" && message.status.state === "searching"
+    );
+    expect(searching).toMatchObject({
+      type: "background-matchmaking",
+      status: { state: "searching", format: "cc" },
+    });
+    const created = await a.next((message) => message.type === "room-created") as Extract<
+      ServerMessage,
+      { type: "room-created" }
+    >;
+
+    const disconnected = new Promise<void>((resolve) => a.ws.once("close", () => resolve()));
+    a.ws.close();
+    await disconnected;
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    expect((await db.query(
+      "SELECT mode, source_room_code FROM matchmaking_entries WHERE source_room_code = $1",
+      [created.code],
+    )).rows).toEqual([{ mode: "background", source_room_code: created.code }]);
+
+    const reconnected = await client();
+    reconnected.sendMsg({ type: "auth", token: a.authToken });
+    await reconnected.next((message) => message.type === "authed");
+    expect(await reconnected.next((message) => message.type === "background-matchmaking"))
+      .toMatchObject({
+        type: "background-matchmaking",
+        status: { state: "searching", format: "cc" },
+      });
+    reconnected.sendMsg({ type: "join-room", code: created.code, token: created.token });
+    expect(await reconnected.next((message) => message.type === "joined")).toMatchObject({
+      type: "joined",
+      code: created.code,
+      seat: created.seat,
+    });
+
+    reconnected.sendMsg({ type: "background-matchmaking-leave" });
+    await reconnected.next((message) =>
+      message.type === "background-matchmaking" && message.status.state === "inactive"
+    );
+    reconnected.sendMsg({ type: "leave-room", endGame: true });
+    await reconnected.next((message) => message.type === "left");
+    reconnected.ws.close();
+  });
+
   it("creates the selected Classic Constructed Cindra bot room", async () => {
     const a = await authedClient();
     a.sendMsg({
@@ -536,6 +590,54 @@ describe("server rooms over websocket", () => {
     });
     a.sendMsg({ type: "leave-room", endGame: true });
     expect(await a.next((message) => message.type === "left")).toEqual({ type: "left" });
+    a.ws.close();
+  });
+
+  it("creates the selected open-pool Starvo boss in a Classic Constructed room", async () => {
+    const a = await authedClient();
+    a.sendMsg({
+      type: "create-bot-room",
+      format: "cc",
+      deckId: "precon-asb",
+      bot: "starvo",
+    });
+    await a.next((message) => message.type === "room-created");
+    const prep = await a.next(
+      (message) => message.type === "prep-state" && message.prep.seats[1]?.username === "Starvo Bot",
+    );
+    expect(prep).toMatchObject({
+      type: "prep-state",
+      prep: {
+        format: "cc",
+        botGame: true,
+        seats: [
+          expect.anything(),
+          {
+            username: "Starvo Bot",
+            heroName: "Bravo, Star of the Show",
+            connected: true,
+          },
+        ],
+      },
+    });
+    const pool = precon("precon-asb")!.pool;
+    a.sendMsg({ type: "choose-first", first: false });
+    await a.next((message) => message.type === "prep-state" && message.prep.startPlayer === 1);
+    a.sendMsg({
+      type: "present-deck",
+      deck: { weaponIds: pool.weaponIds, equipment: {}, deck: pool.deck },
+    });
+    await a.next((message) => message.type === "game-started");
+    const initial = (await a.next((message) => message.type === "state")) as Extract<
+      ServerMessage,
+      { type: "state" }
+    >;
+    expect(initial.view.players[1].heroName).toBe("Bravo, Star of the Show");
+    expect(initial.view.activePlayer).toBe(1);
+    const advanced = (await a.next(
+      (message) => message.type === "state" && message.version > initial.version,
+    )) as Extract<ServerMessage, { type: "state" }>;
+    expect(advanced.version).toBeGreaterThan(initial.version);
     a.ws.close();
   });
 

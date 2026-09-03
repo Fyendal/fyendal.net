@@ -202,7 +202,7 @@ describe("optimistic interaction projection", () => {
     }));
   });
 
-  it("moves an arsenal choice face down and dismisses the decision", () => {
+  it("dismisses an arsenal choice without splitting its end-turn transition", () => {
     const card: CardView = { instanceId: 30, cardId: "WTR171", owner: 0 };
     const view = game(player(0, { hand: [card], handCount: 1 }), {
       player: 0,
@@ -216,10 +216,10 @@ describe("optimistic interaction projection", () => {
       optionId: "30",
     }));
 
-    expect(projection.predictsSemanticTransition).toBe(true);
+    expect(projection.predictsSemanticTransition).toBe(false);
     expect(projection.view?.pendingDecision).toBeNull();
-    expect(projection.view?.players[0]?.hand).toEqual([]);
-    expect(projection.view?.players[0]?.arsenal[0]).toMatchObject({ instanceId: 30, faceDown: true });
+    expect(projection.view?.players[0]?.hand).toEqual([card]);
+    expect(projection.view?.players[0]?.arsenal).toEqual([]);
   });
 
   it("keeps an unpredictable scripted choice mounted until acknowledgement", () => {

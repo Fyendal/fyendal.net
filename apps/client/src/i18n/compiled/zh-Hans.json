@@ -20896,6 +20896,12 @@
       "value": "与此 AI 练习时，Fyendal 会同时寻找 PvP 对手。"
     }
   ],
+  "lobby.bot.starvo.description": [
+    {
+      "type": 0,
+      "value": "挑战 FAB 历史上最强的牌组。"
+    }
+  ],
   "lobby.bot.type.aggro": [
     {
       "type": 0,
@@ -20906,6 +20912,12 @@
     {
       "type": 0,
       "value": "新手友好"
+    }
+  ],
+  "lobby.bot.type.boss": [
+    {
+      "type": 0,
+      "value": "首领"
     }
   ],
   "lobby.bot.type.elemental": [
@@ -21944,30 +21956,22 @@
       "value": "继续与 AI 对战"
     }
   ],
-  "matchmaking.background.opponent": [
-    {
-      "type": 1,
-      "value": "username"
-    },
-    {
-      "type": 0,
-      "value": " — "
-    },
-    {
-      "type": 1,
-      "value": "hero"
-    }
-  ],
   "matchmaking.background.searching": [
     {
       "type": 0,
-      "value": "练习期间正在寻找真人玩家…"
+      "value": "正在寻找真人玩家"
     }
   ],
   "matchmaking.background.stop": [
     {
       "type": 0,
       "value": "停止寻找"
+    }
+  ],
+  "matchmaking.background.stopShort": [
+    {
+      "type": 0,
+      "value": "停止"
     }
   ],
   "matchmaking.background.waiting": [
