@@ -196,6 +196,39 @@ function nextTurnArsenalValue(card: CardView, input: BotPolicyInput): number {
   return 25 + cardOpportunity(card, input);
 }
 
+function canFundBlossomAfterIris(
+  intent: Extract<GameIntent, { kind: "activate-ability" }>,
+  input: BotPolicyInput,
+): boolean {
+  const me = input.view.players[input.seat];
+  const unavailable = new Set([
+    ...intent.pitchInstanceIds,
+    ...(intent.alternativeCostCardInstanceIds ?? []),
+  ]);
+  const discardable = me.hand.filter((card) => !unavailable.has(card.instanceId));
+  if (discardable.length === 0) return false;
+
+  // The following discard decision uses the same opportunity score, so model
+  // the card the policy will actually spend before valuing the fetched attack.
+  const discard = discardable.reduce((best, card) =>
+    cardOpportunity(card, input) < cardOpportunity(best, input) ? card : best
+  );
+  const pitchFromActivation = intent.pitchInstanceIds.reduce((total, id) => {
+    const card = me.hand.find((candidate) => candidate.instanceId === id);
+    return total + Number(input.cards[card?.cardId ?? ""]?.pitch ?? 0);
+  }, 0);
+  const remainingPitch = discardable.reduce((total, card) =>
+    card.instanceId === discard.instanceId
+      ? total
+      : total + Number(input.cards[card.cardId]?.pitch ?? 0),
+  0);
+  const floatingAfterActivation = Math.max(
+    0,
+    me.resources + pitchFromActivation - Number(intent.pitchRequired ?? 0),
+  );
+  return floatingAfterActivation + remainingPitch >= 1;
+}
+
 function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: BotPolicyInput): number {
   const decision = input.view.pendingDecision;
   if (!decision) return 0;
@@ -269,7 +302,9 @@ function scorePlay(
       const alreadyHasBlossom = [...me.hand, ...me.arsenal, ...me.banish].some((candidate) =>
         key(input.cards[candidate.cardId]) === "whirling mist blossom|2"
       );
-      score = alreadyHasBlossom ? -20 : 12;
+      score = alreadyHasBlossom || !canFundBlossomAfterIris(intent, input)
+        ? -20
+        : 12;
     } else if (functional === "energy potion|3") {
       score = me.resources < 2 ? 18 : -5;
     } else {
