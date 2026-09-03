@@ -366,6 +366,42 @@ describe("Armory Decks — AMX, AGB, and ASR", () => {
     expect(driver?.counters?.steam).toBe(4);
   });
 
+  it("Clamp Press gives a Heart Wrencher attack +2 power", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "maxx 'the hype' nitro|0",
+          hand: ["heart wrencher|2"],
+          board: ["clamp press|3"],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.play("heart wrencher|2").expectAttackValue(4);
+  });
+
+  it("Clamp Press gives a Banksy attack +2 power", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "maxx 'the hype' nitro|0",
+          weapons: ["banksy|0"],
+          board: ["clamp press|3"],
+          resources: 1,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.state.players[0]!.flags.crankedThisTurn = true;
+
+    g.attackWithWeapon("banksy|0").expectAttackValue(5);
+  });
+
   it("Construct Bank Breaker transforms a wrench and three Hyper Drivers into the equipped back face", () => {
     const g = scenario({
       seats: [

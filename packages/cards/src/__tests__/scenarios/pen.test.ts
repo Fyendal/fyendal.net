@@ -14,6 +14,29 @@ describe("PEN — import and set mechanics", () => {
     expect(new Set(cards.map(functionalKeyOf))).toHaveLength(348);
   });
 
+  it("Speed Demon scraps a graveyard Hyper Driver without destroying one in the arena", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["speed demon|1"],
+        graveyard: ["hyper driver|1"],
+        board: ["hyper driver|0"],
+      },
+      { hero: "dorinthea" },
+    ] });
+
+    g.play("speed demon|1")
+      .chooseCard("hyper driver|1")
+      .expectAttackValue(4)
+      .expectInZone(0, "hyper driver|1", "banish");
+
+    const drivers = g.state.players[0]!.board.filter(
+      (card) => card.cardId === printingId("hyper driver|0"),
+    );
+    expect(drivers).toHaveLength(2);
+    expect(drivers.some((card) => card.counters?.steam === 2)).toBe(true);
+  });
+
   it("declares and pays Touch of Reality's X activation cost before tapping it", () => {
     const g = scenario({ seats: [
       { hero: "rhinar", hand: ["raging onslaught|3"], equipment: { ...NO_EQUIPMENT, arms: "touch of reality|0" } },

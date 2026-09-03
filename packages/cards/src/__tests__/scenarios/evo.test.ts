@@ -453,16 +453,42 @@ describe("EVO — registration and core mechanics", () => {
     levelerAttack.attackWithWeapon("teklo leveler|0").expectAttackValue(3);
   });
 
-  it("Scrap destroys the chosen material and enables the attack rider", () => {
+  it("Scrap banishes a graveyard item or equipment and leaves arena items alone", () => {
     const s = scenario({
       seats: [
-        { hero: "rhinar", resources: 3, hand: ["junkyard dogg|1"], board: ["medkit|3"] },
+        {
+          hero: "rhinar",
+          resources: 3,
+          hand: ["junkyard dogg|1"],
+          graveyard: ["ironrot helm|0"],
+          board: ["medkit|3"],
+        },
         { hero: "dorinthea" },
       ],
     });
-    s.play("junkyard dogg|1").chooseCard("medkit|3")
+    s.play("junkyard dogg|1").chooseCard("ironrot helm|0")
       .expectAttackValue(7)
-      .expectInZone(0, "medkit|3", "graveyard");
+      .expectInZone(0, "ironrot helm|0", "banish")
+      .expectInZone(0, "medkit|3", "board");
+  });
+
+  it("Scrap Trader may scrap two cards and gains 2 resources for each", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["scrap trader|1"],
+          graveyard: ["medkit|3", "ironrot helm|0"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("scrap trader|1")
+      .chooseCard("medkit|3")
+      .chooseCard("ironrot helm|0")
+      .expectResources(0, 4)
+      .expectZoneSize(0, "banish", 2);
   });
 
   it("Galvanize destroys an item and gives the defending card +2 defense", () => {
@@ -476,6 +502,45 @@ describe("EVO — registration and core mechanics", () => {
       .passPriority().passPriority()
       .chooseCard("medkit|3").settle()
       .expectLife(1, 18);
+  });
+
+  it("Adaptive Plating may Galvanize a Hyper Driver token", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["head jab|1"] },
+        {
+          hero: "dorinthea",
+          board: ["hyper driver|0"],
+          equipment: {
+            head: "adaptive plating|0",
+            arms: "cogwerx tinker rings|0",
+          },
+        },
+      ],
+    });
+    const driver = s.state.players[1]!.board[0]!;
+    driver.counters = { steam: 2 };
+
+    s.play("head jab|1")
+      .blockWith("adaptive plating|0", "cogwerx tinker rings|0");
+    const order = s.state.pendingDecision?.options;
+    expect(s.state.pendingDecision?.kind).toBe("order-triggers");
+    s.doRaw({ kind: "order-triggers", optionIds: [...order!].reverse() })
+      .passPriority()
+      .passPriority();
+
+    expect(s.state.pendingDecision?.chooseHook).toBe("engine-crank");
+    s.chooseOption("no");
+
+    expect(s.state.pendingDecision?.options).toContain(String(driver.instanceId));
+    expect(projectStateFor(s.state, 1).pendingDecision?.optionCards).toContainEqual(
+      expect.objectContaining({ instanceId: driver.instanceId }),
+    );
+    s.chooseCard("hyper driver|0");
+    expect(s.state.players[1]!.board).not.toContainEqual(
+      expect.objectContaining({ instanceId: driver.instanceId }),
+    );
+    s.expectFinalDefense(5);
   });
 
   it.each([

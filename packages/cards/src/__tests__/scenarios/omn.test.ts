@@ -84,6 +84,26 @@ describe("OMN — import and set mechanics", () => {
     expect(new Set(cards.map(functionalKeyOf))).toHaveLength(251);
   });
 
+  it("Crash Site Salvage scraps a graveyard cog for go again and Gold", () => {
+    const g = scenario({ seats: [
+      hero("puffin|0", {
+        hand: ["crash site salvage|2"],
+        graveyard: ["copper cog|3"],
+        board: ["golden cog|0"],
+      }),
+      foe(),
+    ] });
+
+    g.play("crash site salvage|2")
+      .chooseCard("copper cog|3")
+      .expectInZone(0, "copper cog|3", "banish")
+      .expectInZone(0, "golden cog|0", "board")
+      .expectInZone(0, "gold|0", "board")
+      .blockWith()
+      .settle()
+      .expectAP(0, 1);
+  });
+
   it("Draco Fire makes the next Draconic weapon attack cost 1 less to activate", () => {
     const g = scenario({
       seats: [

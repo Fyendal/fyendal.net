@@ -63,14 +63,9 @@ function initializeCogwerx(ctx: ScriptCtx): void {
   }
 }
 
-function itemOrEquipment(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
-  return [
-    ...ctx.player(ctx.seat).board.filter((card) => {
-      return hasTag(ctx, card, "item") || data(ctx, card).cardType === "token";
-    }),
-    ...Object.values(ctx.player(ctx.seat).equipment)
-      .filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
-  ];
+function scrapCards(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
+  return ctx.player(ctx.seat).graveyard.filter((card) =>
+    isItem(ctx, card) || data(ctx, card).cardType === "equipment");
 }
 
 function addSteamToChoice(ctx: ScriptCtx, hook: string): void {
@@ -264,12 +259,13 @@ function miniForcefield(steam: number): CardScript {
 function scrapAttack(effect?: (ctx: ScriptCtx) => void): CardScript {
   return {
     additionalCost(ctx) {
-      const choices = itemOrEquipment(ctx);
-      if (choices.length) ctx.requestCardChoice("scrap", decisionPrompt("Scrap an item, equipment, or token?", "card.evo.scrap.choose", { optionMessages: commonOptionMessages("none") }), ["none", ...choices.map((card) => card.instanceId)]);
+      const choices = scrapCards(ctx);
+      if (choices.length) ctx.requestCardChoice("scrap", decisionPrompt("Scrap an item or equipment from your graveyard?", "card.evo.scrap.choose", { optionMessages: commonOptionMessages("none") }), ["none", ...choices.map((card) => card.instanceId)]);
     },
     onChoose(ctx, hook, option) {
       if (hook !== "scrap" || option === "none") return;
-      if (ctx.destroyPermanent(Number(option))) ctx.setCounter("scrapped", 1);
+      const card = scrapCards(ctx).find((candidate) => candidate.instanceId === Number(option));
+      if (card && ctx.banish(card.instanceId)) ctx.setCounter("scrapped", 1);
     },
     onAttackDeclared(ctx) {
       if (ctx.getCounter("scrapped") > 0) effect?.(ctx);

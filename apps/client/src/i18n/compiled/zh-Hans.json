@@ -3228,7 +3228,13 @@
   "card.evo.scrap.choose": [
     {
       "type": 0,
-      "value": "拆解 (scrap) 一个物品、装备或衍生物？"
+      "value": "放逐你墓地中的一个物品或装备来拆解 (scrap)？"
+    }
+  ],
+  "card.evo.scrap.choose.next": [
+    {
+      "type": 0,
+      "value": "再放逐你墓地中的一个物品或装备来拆解 (scrap)？"
     }
   ],
   "card.evo.soul.charge": [
@@ -9266,7 +9272,7 @@
   "card.omn.permanent.scrap": [
     {
       "type": 0,
-      "value": "拆解 (scrap) 一个永久物？"
+      "value": "放逐你墓地中的一个物品或装备来拆解 (scrap)？"
     }
   ],
   "card.omn.red.action.banish": [
@@ -9888,7 +9894,7 @@
   "card.pen.scrap.choose": [
     {
       "type": 0,
-      "value": "拆解 (scrap) 一个物品、装备或衍生物？"
+      "value": "放逐你墓地中的一个物品或装备来拆解 (scrap)？"
     }
   ],
   "card.pen.seismic.resources.pay": [
