@@ -221,7 +221,7 @@ export function offerCrankDecision(
     !hasCrank(state, runtime, player, card) ||
     (card.counters?.steam ?? 0) <= 0
   ) return false;
-  const decision = {
+  const decision: PendingDecisionState = {
     player: player.seat,
     kind: "optional-effect",
     prompt: `${nameOf(state, card.cardId)}: Crank — remove a steam counter to gain 1 action point?`,
@@ -237,9 +237,11 @@ export function offerCrankDecision(
     defaultOption: "yes",
     sourceInstanceId: card.instanceId,
     chooseHook: "engine-crank",
-  } satisfies PendingDecisionState;
-  if (state.pendingDecision?.chooseHook) {
-    return queueDecisionBehindCrank(state, decision);
+  };
+  const existing = state.pendingDecision;
+  if (existing?.chooseHook) {
+    if (queueDecisionBehindCrank(state, decision)) return true;
+    decision.followUpDecisions = [existing];
   }
   state.pendingDecision = decision;
   return true;
