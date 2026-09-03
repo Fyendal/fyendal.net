@@ -133,15 +133,7 @@ function putAttackIntoSoulOnHit(extra: CardScript = {}): CardScript {
   return {
     ...extra,
     onHit(ctx) {
-      ctx.setFlag("link", "attackToSoul", true);
       extra.onHit?.(ctx);
-    },
-  };
-}
-
-function putAttackIntoSoulImmediatelyOnHit(): CardScript {
-  return {
-    onHit(ctx) {
       ctx.putIntoSoul(ctx.self.instanceId);
     },
   };
@@ -752,9 +744,9 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   "herald of tenacity|1": putAttackIntoSoulOnHit(),
   "herald of tenacity|2": putAttackIntoSoulOnHit(),
   "herald of tenacity|3": putAttackIntoSoulOnHit(),
-  "wartune herald|1": putAttackIntoSoulImmediatelyOnHit(),
-  "wartune herald|2": putAttackIntoSoulImmediatelyOnHit(),
-  "wartune herald|3": putAttackIntoSoulImmediatelyOnHit(),
+  "wartune herald|1": putAttackIntoSoulOnHit(),
+  "wartune herald|2": putAttackIntoSoulOnHit(),
+  "wartune herald|3": putAttackIntoSoulOnHit(),
 
   // ── Light Warrior / Light / Illusionist / Warrior ──────────────────────
   "battlefield blitz|1": { onAttackDeclared(ctx) { if (chargedThisTurn(ctx)) ctx.grantGoAgain(); } },

@@ -1428,6 +1428,33 @@ describe("game setup & turn structure", () => {
 });
 
 describe("scripted choices", () => {
+  it("queues a distinct card choice behind an open scripted choice", () => {
+    const s = makeGame(396);
+    const source = player(s, 0).hand[0]!;
+    const searched = player(s, 1).hand[0]!;
+    s.pendingDecision = {
+      player: 0,
+      kind: "optional-effect",
+      prompt: "First choice",
+      options: ["yes", "no"],
+      sourceInstanceId: player(s, 0).hero.instanceId,
+      chooseHook: "first-choice",
+    };
+
+    makeCtx(s, engineRuntime, 0, source).requestCardChoice(
+      "second-choice",
+      "Choose a card",
+      [searched.instanceId],
+    );
+
+    expect(s.pendingDecision.followUpDecisions?.[0]).toMatchObject({
+      chooseHook: "second-choice",
+      sourceInstanceId: source.instanceId,
+      options: [String(searched.instanceId)],
+      cardOptions: [searched.instanceId],
+    });
+  });
+
   it("keeps bounded card-choice metadata when the choice queues behind Crank", () => {
     const s = makeGame(397);
     const source = player(s, 0).hand[0]!;

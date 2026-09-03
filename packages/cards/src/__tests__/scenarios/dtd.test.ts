@@ -6,6 +6,14 @@ import { printingId, scenario } from "../harness.js";
 
 const BLUE = "wrecker romp|3";
 const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
+const SOUL_HERALD_KEYS = [...new Set(
+  Object.values(cardData)
+    .filter((card) =>
+      card.name.toLowerCase().includes("herald") &&
+      /(?:when|if) this hits.*put it into (?:your|your hero's) soul/i.test(card.text ?? "")
+    )
+    .map(functionalKeyOf),
+)].sort();
 
 describe("DTD — registration and core mechanics", () => {
   it("registers the complete set", () => {
@@ -585,6 +593,104 @@ describe("DTD — registration and core mechanics", () => {
 });
 
 describe("DTD — Prism and Figments", () => {
+  it("Empyrean Rapture passively discounts only the first hero activation after a Herald hit", () => {
+    const heroKey = "prism, sculptor of arc light|0";
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey,
+          equipment: { chest: "empyrean rapture|0" },
+          hand: ["herald of protection|1", BLUE],
+          soul: [BLUE],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("herald of protection|1", { pitch: [BLUE] })
+      .blockWith()
+      .settle()
+      .expectResources(0, 1)
+      .expectInZone(0, "herald of protection|1", "soul");
+
+    const heroId = s.state.players[0]!.hero.instanceId;
+    expect(legalIntents(s.state, 0)).toContainEqual(expect.objectContaining({
+      kind: "activate-ability",
+      sourceInstanceId: heroId,
+      pitchInstanceIds: [],
+    }));
+
+    s.activate(heroKey, { settle: false })
+      .chooseCard(BLUE)
+      .expectResources(0, 1);
+
+    expect(legalIntents(s.state, 0)).not.toContainEqual(expect.objectContaining({
+      kind: "activate-ability",
+      sourceInstanceId: heroId,
+    }));
+  });
+
+  it.each(SOUL_HERALD_KEYS)("%s enters soul on hit and triggers Prism's Figment search", (heraldKey) => {
+    expect(SOUL_HERALD_KEYS).toHaveLength(20);
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "prism, awakener of sol|0",
+          hand: [heraldKey],
+          deck: [BLUE, BLUE, "figment of protection|2"],
+          resources: 10,
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play(heraldKey)
+      .blockWith()
+      .settle()
+      .expectInZone(0, heraldKey, "soul");
+
+    expect(s.state.pendingDecision?.chooseHook).toBe("prism-figment");
+    const figment = s.state.players[0]!.deck.find(
+      (card) => functionalKeyOf(cardData[card.cardId]!) === "figment of protection|2",
+    );
+    expect(figment).toBeDefined();
+    expect(s.state.pendingDecision?.options).toContain(String(figment!.instanceId));
+
+    s.chooseCard("figment of protection|2")
+      .expectInZone(0, "figment of protection|2", "board")
+      .expectNotInZone(0, heraldKey, "graveyard");
+  });
+
+  it("queues Prism's search behind Herald of Rebirth's graveyard choice", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "prism, awakener of sol|0",
+          hand: ["herald of rebirth|1"],
+          graveyard: ["enigma chimera|1"],
+          deck: ["figment of protection|2"],
+          resources: 10,
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("herald of rebirth|1")
+      .blockWith()
+      .settle()
+      .expectInZone(0, "herald of rebirth|1", "soul");
+    expect(s.state.pendingDecision?.chooseHook).toBe("herald-rebirth");
+
+    s.chooseOption("none");
+    expect(s.state.pendingDecision?.chooseHook).toBe("prism-figment");
+
+    s.chooseCard("figment of protection|2")
+      .expectInZone(0, "figment of protection|2", "board");
+  });
+
   it("Prism, Awakener of Sol presents every Figment after Wartune Herald hits", () => {
     const s = scenario({
       seats: [
@@ -640,7 +746,6 @@ describe("DTD — Prism and Figments", () => {
       ],
     });
     s.play("herald of protection|1").blockWith().settle()
-      .doRaw({ kind: "close-chain" })
       .chooseCard("figment of protection|2");
     expect(s.state.players[0]!.board.some((card) => card.cardId === "DTD007")).toBe(true);
 

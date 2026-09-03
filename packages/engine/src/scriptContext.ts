@@ -374,16 +374,22 @@ export function makeCtx(
         ? { lookedCardIds: [...new Set(details.lookedCardIds)] }
         : {}),
     };
-    // Crank is an intervening enter-arena choice. Preserve later decisions
-    // from the resolving effect until that choice has been answered.
+    // Preserve distinct later decisions raised by the same resolving effect.
+    // Crank has additional ordering rules handled by its focused helper.
     if (existing?.chooseHook && !look) {
-      if (!queueDecisionBehindCrank(state, decision)) {
-        logPublic(state, gameLogMessage(
-          `(skipped duplicate choice: ${presentation.fallback})`,
-          "engine.log.decision.duplicate.skipped",
-          { prompt: presentation.fallback },
-        ));
+      if (queueDecisionBehindCrank(state, decision)) return;
+      if (
+        existing.sourceInstanceId !== decision.sourceInstanceId ||
+        existing.chooseHook !== decision.chooseHook
+      ) {
+        (existing.followUpDecisions ??= []).push(decision);
+        return;
       }
+      logPublic(state, gameLogMessage(
+        `(skipped duplicate choice: ${presentation.fallback})`,
+        "engine.log.decision.duplicate.skipped",
+        { prompt: presentation.fallback },
+      ));
       return;
     }
     state.pendingDecision = decision;
