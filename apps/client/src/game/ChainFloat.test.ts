@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import type { ChainLinkView } from "@fyendal/shared";
 import { describe, expect, it, vi } from "vitest";
 import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
-import { browseChainLink, ChainFloat, chainAttackIsActivatable } from "./ChainFloat.js";
+import { browseChainLink, ChainFloat, chainCardIsActivatable } from "./ChainFloat.js";
 import { chainTimelineRevision } from "./chainTimeline.js";
 
 function renderChain(props: ComponentProps<typeof ChainFloat>, children?: ReactNode) {
@@ -115,14 +115,38 @@ describe("combat-chain browsing", () => {
     const html = renderChain({
       links: [link],
       onRect: vi.fn(),
-      activatableAttackIds: new Set([42]),
+      activatableCardIds: new Set([42]),
       selectedAbilitySourceInstanceId: 42,
-      onActivateAttack: vi.fn(),
+      onActivateCard: vi.fn(),
     });
 
     expect(html).toContain("card-highlight");
     expect(html).toContain("card-selected");
     expect(html).toContain("card-clickable");
+  });
+
+  it("makes a defending card interactive when its ability is legally activatable", () => {
+    const link: ChainLinkView = {
+      attackingCard: { instanceId: 42, cardId: "SBA016", owner: 0 },
+      defendingCards: [{ instanceId: 84, cardId: "SEA225", owner: 1 }],
+      reactions: [],
+      attackValue: 3,
+      defenseValue: 2,
+      damage: 1,
+      resolved: false,
+    };
+    const html = renderChain({
+      links: [link],
+      onRect: vi.fn(),
+      activatableCardIds: new Set([84]),
+      selectedAbilitySourceInstanceId: 84,
+      onActivateCard: vi.fn(),
+    });
+
+    const defenderClasses = html.match(/<div class="([^"]*)" data-cardid="SEA225"/)?.[1];
+    expect(defenderClasses).toContain("card-highlight");
+    expect(defenderClasses).toContain("card-selected");
+    expect(defenderClasses).toContain("card-clickable");
   });
 
   it("only makes the newest unresolved appearance of an attack source interactive", () => {
@@ -139,9 +163,9 @@ describe("combat-chain browsing", () => {
     const currentLink = { ...pastLink, resolved: false };
     const activatable = new Set([42]);
 
-    expect(chainAttackIsActivatable(pastLink, 0, 2, activatable)).toBe(false);
-    expect(chainAttackIsActivatable(currentLink, 1, 2, activatable)).toBe(true);
-    expect(chainAttackIsActivatable(pastLink, 0, 1, activatable)).toBe(false);
+    expect(chainCardIsActivatable(pastLink, 0, 2, 42, activatable)).toBe(false);
+    expect(chainCardIsActivatable(currentLink, 1, 2, 42, activatable)).toBe(true);
+    expect(chainCardIsActivatable(pastLink, 0, 1, 42, activatable)).toBe(false);
   });
 
   it("shows go again as a tooltip icon instead of a text label", () => {

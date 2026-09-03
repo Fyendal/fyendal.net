@@ -1,6 +1,6 @@
-import type { GameIntent } from "@fyendal/shared";
+import type { ChainLinkView, GameIntent, PlayerView } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
-import { deriveBoardLegalState } from "./boardModel.js";
+import { abilityLabelForSource, deriveBoardLegalState } from "./boardModel.js";
 
 describe("board legal projection", () => {
   it("indexes playable and activatable action candidates", () => {
@@ -31,5 +31,31 @@ describe("board legal projection", () => {
     expect([...result.stageableDefenders]).toEqual([8, 9]);
     expect(result.canPass).toBe(true);
     expect(result.canCloseChain).toBe(true);
+  });
+
+  it("finds ability labels on defending combat-chain cards", () => {
+    const player = {
+      heroInstanceId: 1,
+      weapons: [],
+      equipment: {},
+      board: [],
+      hand: [],
+    } as unknown as PlayerView;
+    const chain = [{
+      attackingCard: { instanceId: 42, cardId: "SBA016", owner: 0 },
+      defendingCards: [{
+        instanceId: 84,
+        cardId: "SEA225",
+        owner: 1,
+        activatedAbilityLabels: ["Discard a card"],
+      }],
+      reactions: [],
+      attackValue: 3,
+      defenseValue: 2,
+      damage: 1,
+      resolved: false,
+    }] satisfies ChainLinkView[];
+
+    expect(abilityLabelForSource(player, chain, 84, 0)).toBe("Discard a card");
   });
 });

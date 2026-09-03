@@ -123,6 +123,38 @@ const BEAT_OF_THE_IRONSONG_MODES = [
   "damage can't be prevented",
 ] as const;
 
+const BATTLEFIELD_BEACON_MODES = ["courage", "toughness", "vigor"] as const;
+
+function battlefieldBeaconModePrompt(ctx: ScriptCtx, remaining: number) {
+  return decisionPrompt(
+    `Battlefield Beacon: choose a mode (${remaining} remaining)`,
+    "card.sup.beacon.mode.choose",
+    {
+      values: {
+        card: { kind: "card", cardId: ctx.self.cardId },
+        amount: remaining,
+      },
+      optionMessages: {
+        courage: decisionMessage("card.sup.option.courage"),
+        toughness: decisionMessage("card.sup.option.toughness"),
+        vigor: decisionMessage("card.sup.option.vigor"),
+      },
+    },
+  );
+}
+
+function requestBattlefieldBeaconMode(ctx: ScriptCtx): void {
+  const remaining = ctx.getCounter("beacon-modes-remaining");
+  if (remaining <= 0) return;
+  ctx.requestChoice(
+    "beacon-mode",
+    battlefieldBeaconModePrompt(ctx, remaining),
+    BATTLEFIELD_BEACON_MODES.filter(
+      (mode) => ctx.getCounter(`beacon-mode:${mode}`) < 3,
+    ),
+  );
+}
+
 function beatOfTheIronsongModeBit(option: string): number {
   const index = BEAT_OF_THE_IRONSONG_MODES.indexOf(
     option as (typeof BEAT_OF_THE_IRONSONG_MODES)[number],
@@ -946,7 +978,42 @@ Object.assign(sup, {
   "channel the tranquil domain|2": { onEnterArena(ctx: ScriptCtx) { const auras = ctx.state.players.flatMap((p) => p.board.filter((card) => aura(ctx, card) && card.instanceId !== ctx.self.instanceId)); if (auras[0]) ctx.putOnDeckBottom(auras[0].instanceId); }, triggers: [{ event: "begin-action-phase", label: "Bottom another aura", effect(ctx: ScriptCtx) { const auraCard = ctx.state.players.flatMap((p) => p.board.filter((card) => aura(ctx, card) && card.instanceId !== ctx.self.instanceId))[0]; if (auraCard) ctx.putOnDeckBottom(auraCard.instanceId); } }] },
   "light up the leaves|1": { arcaneDamageEffect: true, arcaneDamageEffectAmounts: [6], onPlay(ctx: ScriptCtx) { ctx.dealDamage(opponentSeat(ctx), 6, { arcane: true }); }, activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", fromHand: true, discardCost: { count: 1, types: ["earth"] }, onActivate(ctx: ScriptCtx) { ctx.preventNextArcaneDamage(ctx.seat, 6); } } },
   "angelic attendant|2": { onPlay(ctx: ScriptCtx) { const figments = ctx.player(ctx.seat).board.filter((card) => hasTag(ctx, card, "figment")); if (figments.length) ctx.requestCardChoice("awaken-figment", decisionPrompt("Awaken a figment", "card.sup.figment.awaken"), figments.map((card) => card.instanceId)); ctx.putIntoSoul(ctx.self.instanceId); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "awaken-figment") ctx.setFlag("player", `awakened:${option}`, true); } },
-  "battlefield beacon|2": { onAttackDeclared(ctx: ScriptCtx) { const n = Math.min(3, Number(ctx.getFlag("player", "soulBanishedThisChain")) || 0); for (let i = 0; i < n; i++) ctx.createToken([COURAGE, TOUGHNESS, VIGOR][i % 3]!); } },
+  "battlefield beacon|2": {
+    onAttackDeclared(ctx: ScriptCtx) {
+      const count = Math.min(
+        BATTLEFIELD_BEACON_MODES.length * 3,
+        Number(ctx.getFlag("player", "soulBanishedThisChain")) || 0,
+      );
+      if (count <= 0) return;
+      ctx.setCounter("beacon-modes-remaining", count);
+      for (const mode of BATTLEFIELD_BEACON_MODES) {
+        ctx.setCounter(`beacon-mode:${mode}`, 0);
+      }
+      requestBattlefieldBeaconMode(ctx);
+    },
+    onChoose(ctx: ScriptCtx, hook: string, option: string) {
+      if (hook !== "beacon-mode" || !BATTLEFIELD_BEACON_MODES.includes(
+        option as (typeof BATTLEFIELD_BEACON_MODES)[number],
+      )) return;
+      const mode = option as (typeof BATTLEFIELD_BEACON_MODES)[number];
+      const selected = ctx.getCounter(`beacon-mode:${mode}`);
+      if (selected >= 3) return;
+      ctx.setCounter(`beacon-mode:${mode}`, selected + 1);
+      const remaining = ctx.getCounter("beacon-modes-remaining") - 1;
+      ctx.setCounter("beacon-modes-remaining", remaining);
+      if (remaining > 0) {
+        requestBattlefieldBeaconMode(ctx);
+        return;
+      }
+      for (const [tokenMode, tokenId] of [
+        ["courage", COURAGE],
+        ["toughness", TOUGHNESS],
+        ["vigor", VIGOR],
+      ] as const) {
+        ctx.createTokens(tokenId, ctx.getCounter(`beacon-mode:${tokenMode}`));
+      }
+    },
+  },
   "gallow, end of the line|2": { ...attackAbility(1, { tap: true, oncePerTurn: false }), activated: [...attackAbility(1, { tap: true, oncePerTurn: false }), { cost: 0, isAttack: false, goAgain: false, timing: "instant", tap: true, oncePerTurn: false, label: "Suppress opposing on-hit triggers", effectCardCosts: [{ zone: "hand", move: "discard", count: 1, keyword: "watery grave", prompt: decisionPrompt("Discard a card with watery grave", "card.common.cost.waterygrave.discard") }], onActivate(ctx: ScriptCtx) { ctx.setFlag("player", "suppressOpponentHitTriggers", true); } }] },
   "catch of the day|3": { onPlay(ctx: ScriptCtx) { buffNextAttack(ctx, { attack: 2, appliesToSubtype: "arrow" }); ctx.setFlag("player", "doubleGoFish", true); } },
   "painful passage|1": { onPlay(ctx: ScriptCtx) { const attacks = ctx.player(ctx.seat).hand.filter((card) => ctx.hasCardType(card, "action") && hasTag(ctx, card, "attack")); if (attacks.length) ctx.requestCardChoice("painful", decisionPrompt("Banish an attack action?", "card.sup.attack.banish", { optionMessages: commonOptionMessages("pass") }), ["pass", ...attacks.map((card) => card.instanceId)]); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "painful" && option !== "pass" && ctx.banish(Number(option))) { ctx.addCardTempPower(Number(option), 3); ctx.allowPlayFrom(Number(option), "banish"); } } },

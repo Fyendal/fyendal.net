@@ -120,4 +120,23 @@ describe("bug reports", () => {
       { reportId: later.reportId, fixedAt: 456 },
     ]);
   });
+
+  it("does not notify the reporter when a report is closed without a fix", async () => {
+    const result = await createBugReport(
+      db,
+      userId,
+      "ABC123",
+      "The reported interaction is working as intended.",
+    );
+    if (!result.ok) throw new Error("report creation failed");
+
+    await db.query("UPDATE bug_reports SET closed_at = $2 WHERE id = $1", [result.reportId, 321]);
+
+    await expect(listFixedBugReportNotifications(db, userId)).resolves.toEqual([]);
+    await expect(dismissFixedBugReportNotifications(db, userId)).resolves.toBe(0);
+    await expect(db.query(
+      "UPDATE bug_reports SET fixed_at = $2 WHERE id = $1",
+      [result.reportId, 654],
+    )).rejects.toThrow();
+  });
 });

@@ -688,6 +688,27 @@ describe("ROS — Lightning and Runeblade", () => {
 });
 
 describe("ROS — Wizard and generic", () => {
+  it("Truce is destroyed and draws a card when its opponent attacks", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["truce|3", BLUE, "wounding blow|1", "wounding blow|2"],
+          deck: ["scar for a scar|1", "scar for a scar|2", "scar for a scar|3"],
+        },
+        { hero: "dorinthea", hand: ["snatch|1"] },
+      ],
+    });
+
+    g.play("truce|3", { pitch: [BLUE] })
+      .expectInZone(0, "truce|3", "board")
+      .endTurn()
+      .play("snatch|1")
+      .expectInZone(0, "truce|3", "graveyard")
+      .expectInZone(0, "scar for a scar|3", "hand")
+      .expectHandSize(0, 5);
+  });
+
   it("Calming Gesture creates a Spectral Shield token", () => {
     const g = scenario({
       seats: [

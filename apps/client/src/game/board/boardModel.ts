@@ -24,7 +24,11 @@ export function abilityLabelForSource(
     ...Object.values(player.equipment),
     ...player.board,
     ...player.hand,
-    ...chain.map((link) => link.attackingCard),
+    ...chain.flatMap((link) => [
+      link.attackingCard,
+      ...link.defendingCards,
+      ...link.reactions,
+    ]),
   ].find((card) => card?.instanceId === sourceInstanceId);
   return source?.activatedAbilityLabels?.[abilityIndex] ?? `Ability ${abilityIndex + 1}`;
 }

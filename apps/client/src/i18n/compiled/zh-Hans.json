@@ -11345,6 +11345,24 @@
       "value": "夺取一个灵气 (Aura)衍生物的操控权"
     }
   ],
+  "card.sup.beacon.mode.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一项模式（剩余 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 次）"
+    }
+  ],
   "card.sup.card.top.choose": [
     {
       "type": 0,
@@ -11527,6 +11545,12 @@
       "value": "喝倒彩 (boo) + 压制能力"
     }
   ],
+  "card.sup.option.courage": [
+    {
+      "type": 0,
+      "value": "生成 Courage 衍生物"
+    }
+  ],
   "card.sup.option.goagain": [
     {
       "type": 0,
@@ -11605,10 +11629,22 @@
       "value": " 点伤害"
     }
   ],
+  "card.sup.option.toughness": [
+    {
+      "type": 0,
+      "value": "生成 Toughness 衍生物"
+    }
+  ],
   "card.sup.option.unpreventable": [
     {
       "type": 0,
       "value": "伤害不能被防止"
+    }
+  ],
+  "card.sup.option.vigor": [
+    {
+      "type": 0,
+      "value": "生成 Vigor 衍生物"
     }
   ],
   "card.sup.pay.up.to": [
@@ -13259,6 +13295,12 @@
     {
       "type": 0,
       "value": "摧毁此牌"
+    }
+  ],
+  "card.trigger.common.self.destroy.draw": [
+    {
+      "type": 0,
+      "value": "摧毁此牌并抽一张牌"
     }
   ],
   "card.trigger.common.shiyana.copy": [

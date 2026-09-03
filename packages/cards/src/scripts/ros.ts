@@ -849,7 +849,33 @@ Object.assign(ros, {
   "arcanite fortress|0": { modifyDefense: (ctx: ScriptCtx) => Object.values(ctx.player(ctx.seat).equipment).filter((card) => card && data(ctx, card).name.includes("Arcanite")).length, wardValue: (ctx: ScriptCtx) => Object.values(ctx.player(ctx.seat).equipment).filter((card) => card && data(ctx, card).name.includes("Arcanite")).length },
   "cut through the facade|1": { canTriggerOnHit: (ctx: ScriptCtx) => ctx.link?.targetAllyId === undefined, onHit(ctx: ScriptCtx) { const auras = ctx.player(opponentSeat(ctx)).board.filter((card) => isAura(ctx, card)); if (auras.length) ctx.requestCardChoice("facade-aura", decisionPrompt("Destroy an aura", "card.ros.aura.destroy", { optionMessages: commonOptionMessages("no") }), ["no", ...auras.map((card) => card.instanceId)]); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "facade-aura" && option !== "no") ctx.destroyPermanent(Number(option)); } },
   "ten foot tall and bulletproof|1": { onAttackDeclared: (ctx: ScriptCtx) => ctx.setPlayerFlag(ctx.seat, "intellectPenaltyNextEnd", Number(ctx.getPlayerFlag(ctx.seat, "intellectPenaltyNextEnd")) + 2), onDefend: (ctx: ScriptCtx) => ctx.setPlayerFlag(ctx.seat, "intellectPenaltyNextEnd", Number(ctx.getPlayerFlag(ctx.seat, "intellectPenaltyNextEnd")) + 2) },
-  "truce|3": { onEnterArena: (ctx: ScriptCtx) => ctx.setCounter("opponent", opponentSeat(ctx)), triggers: [{ event: "end-of-turn", whose: "any", condition: (ctx: ScriptCtx) => ctx.state.activePlayer === ctx.getCounter("opponent"), label: "Both heroes gain 3 life", effect(ctx: ScriptCtx) { ctx.destroySelf(); ctx.gainLife(ctx.seat, 3); ctx.gainLife(opponentSeat(ctx), 3); } }] },
+  "truce|3": {
+    onEnterArena: (ctx: ScriptCtx) => ctx.setCounter("opponent", opponentSeat(ctx)),
+    triggers: [
+      {
+        event: "end-of-turn",
+        whose: "any",
+        condition: (ctx: ScriptCtx) => ctx.state.activePlayer === ctx.getCounter("opponent"),
+        label: "Both heroes gain 3 life",
+        effect(ctx: ScriptCtx) {
+          ctx.destroySelf();
+          ctx.gainLife(ctx.seat, 3);
+          ctx.gainLife(opponentSeat(ctx), 3);
+        },
+      },
+      {
+        event: "attack-declared",
+        whose: "any",
+        condition: (ctx: ScriptCtx) => ctx.link?.attacker === ctx.getCounter("opponent"),
+        label: "Destroy this and draw a card",
+        labelMessage: decisionMessage("card.trigger.common.self.destroy.draw"),
+        effect(ctx: ScriptCtx) {
+          ctx.destroySelf();
+          ctx.drawCards(ctx.seat, 1);
+        },
+      },
+    ],
+  },
   "widow veil respirator|0": {}, "widow back abdomen|0": {}, "widow claw tarsus|0": {}, "widow web crawler|0": {},
   "splatter skull|1": { canTriggerOnHit: (ctx: ScriptCtx) => ctx.link?.targetAllyId === undefined, onHit(ctx: ScriptCtx) { const cards = ctx.player(opponentSeat(ctx)).banish.filter((card) => card.intimidated === true); if (cards.length) ctx.requestCardChoice("splatter-card", decisionPrompt("Put an intimidated card in graveyard", "card.ros.intimidated.card.graveyard"), cards.map((card) => card.instanceId)); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "splatter-card") ctx.moveToGraveyard(Number(option), "banish"); } },
   "drink 'em under the table|1": {

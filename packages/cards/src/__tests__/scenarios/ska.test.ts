@@ -223,15 +223,15 @@ describe("SKA — utility cards", () => {
     const g = scenario({
       active: 1,
       seats: [
-        { ...kayo, hand: ["rally the coast guard|3", "bear hug|3"] },
+        { ...kayo, hand: ["SEA225", "bear hug|3"] },
         { hero: "dorinthea", hand: [], resources: 1 },
       ],
     });
 
     g.attackWithWeapon("dawnblade, resplendent|0")
-      .blockWith("rally the coast guard|3")
+      .blockWith("SEA225")
       .passPriority()
-      .activate("rally the coast guard|3", { pitch: ["bear hug|3"] })
+      .activate("SEA225", { pitch: ["bear hug|3"] })
       .expectFinalDefense(5);
   });
 });

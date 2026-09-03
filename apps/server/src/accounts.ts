@@ -101,6 +101,7 @@ export interface AccountExport {
     description: string;
     createdAt: number;
     fixedAt: number | null;
+    closedAt: number | null;
     dismissedAt: number | null;
   }>;
   replays: Array<{
@@ -170,7 +171,8 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
       [userId],
     ),
     db.query(
-      `SELECT id, room_code, room_version, ruleset_version, description, created_at, fixed_at, dismissed_at
+      `SELECT id, room_code, room_version, ruleset_version, description, created_at,
+              fixed_at, closed_at, dismissed_at
        FROM bug_reports WHERE reporter_user_id = $1 ORDER BY created_at, id`,
       [userId],
     ),
@@ -206,6 +208,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
       description: String(row.description),
       createdAt: Number(row.created_at),
       fixedAt: row.fixed_at == null ? null : Number(row.fixed_at),
+      closedAt: row.closed_at == null ? null : Number(row.closed_at),
       dismissedAt: row.dismissed_at == null ? null : Number(row.dismissed_at),
     });
   }
