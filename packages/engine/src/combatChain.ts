@@ -27,6 +27,7 @@ import {
   enterBanish,
   enterSoul,
   moveToGraveyard,
+  putCardIntoSoul,
 } from "./zoneMoves.js";
 import { controlledPermanents, lingeringModifierSources } from "./sourceQueries.js";
 import { transitionZone } from "./transitions.js";
@@ -300,6 +301,10 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
           }
         }
         runtime.makeCtx(state, c.owner, c, link).banish(c.instanceId);
+        continue;
+      }
+      if (scriptOf(state, c.cardId, c)?.settlesToSoulOnChainClose) {
+        putCardIntoSoul(state, runtime, c.instanceId);
         continue;
       }
       const flagged = link.flags[`destroyOnClose:${c.instanceId}`] === true;
