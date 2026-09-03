@@ -593,6 +593,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     onPlay(ctx) { create(ctx, "DVR028", 1, opponentSeat(ctx)); },
     canTriggerOnDefend: (ctx) => ctx.link?.goAgain === true,
     onDefend(ctx) {
+      ctx.notifyTrapTriggered();
       const targets = heroesAndAllies(ctx);
       if (targets.length) ctx.requestCardChoice("pen-quickening-tap", decisionPrompt("Tap target hero or ally", "card.pen.heroally.tap"), targets.map((card) => card.instanceId));
     },
@@ -853,7 +854,18 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   ...pitches("insult to injury", () => ({ onAttackDeclared(ctx) { if (higherLife(ctx)) ctx.grantGoAgain(); } })),
   ...pitches("bad breath", (pitch) => ({ onPlay(ctx) { queueIntimidate(ctx); ctx.addModifier({ scope: "until-end-of-turn", onHitCreateToken: { cardId: MIGHT, count: 4 - pitch } }); } })),
 
-  "myrkhellir helm|0": { modifyDefense: (ctx) => controls(ctx, "Gold") ? 1 : 0 },
+  "myrkhellir helm|0": {
+    modifyDefense: (ctx) => controls(ctx, "Gold") ? 1 : 0,
+    activated: {
+      cost: 2,
+      isAttack: false,
+      goAgain: true,
+      destroySelfCost: true,
+      onActivate(ctx) {
+        ctx.setPlayerFlag(ctx.seat, "doubleNextGoldDraw", true);
+      },
+    },
+  },
   "burnished bunkerplate|0": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "defense-reaction", destroySelfCost: true, canActivate: (ctx) => !!ctx.link && ctx.player(ctx.seat).arsenal.some((card) => ctx.hasCardType(card, "action")), onActivate(ctx) { const cards = ctx.player(ctx.seat).arsenal.filter((card) => ctx.hasCardType(card, "action")); ctx.requestCardChoice("pen-bunkerplate", decisionPrompt("Add an action from arsenal as a defender", "card.pen.arsenal.action.defend"), cards.map((card) => card.instanceId)); } }, onChoose(ctx, hook, option) { if (hook === "pen-bunkerplate") ctx.addDefenderFromArsenal(Number(option)); } },
   "unyielding grip|0": { modifyDefense: (ctx) => ctx.player(ctx.seat).hand.length === 0 ? 3 : 0 },
   "unflinching foothold|0": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true, canActivate: (ctx) => !!ctx.link, onActivate(ctx) { if (ctx.link) ctx.suppressCardKeyword(ctx.link.attackingCard.instanceId, "dominate"); } } },

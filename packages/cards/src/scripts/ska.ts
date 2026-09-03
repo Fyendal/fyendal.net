@@ -160,6 +160,7 @@ export const ska: Record<string, CardScript> = {
       isAttack: false,
       goAgain: false,
       oncePerTurn: false,
+      destroySelfCost: true,
       onActivate(ctx) {
         ctx.requestDieRoll("knucklehead", 6);
       },
@@ -168,7 +169,6 @@ export const ska: Record<string, CardScript> = {
       if (hook !== "knucklehead") return;
         ctx.setPlayerFlag(ctx.seat, "baseIntellectThisTurn", roll);
         ctx.logPublic(localizedCardLog(ctx, `Knucklehead rolls ${roll}; base intellect is ${roll} this turn`, "card.log.ska.knucklehead.roll", { result: roll }, { kind: "roll", result: roll, seat: ctx.seat, sides: 6 }));
-        ctx.destroySelf();
     },
   },
 
@@ -179,6 +179,7 @@ export const ska: Record<string, CardScript> = {
       goAgain: false,
       oncePerTurn: false,
       timing: "instant",
+      destroySelfCost: true,
       canActivate(ctx) {
         const player = ctx.player(ctx.seat);
         const current = [...ctx.state.chain].reverse().find((link) => !link.resolved);
@@ -192,7 +193,6 @@ export const ska: Record<string, CardScript> = {
         return controlled.some((card) => isSixPlus(ctx, card));
       },
       onActivate(ctx) {
-        ctx.destroySelf();
         ctx.changeResources(ctx.seat, 1);
         ctx.logPublic(localizedCardLog(ctx, "Predatory Plating gains {r}", "card.log.common.resources.gained", { amount: 1 }));
       },

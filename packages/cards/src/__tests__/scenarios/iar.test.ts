@@ -1742,3 +1742,183 @@ describe("August 31–September 1 IAR spoilers", () => {
       .expectLife(1, 10);
   });
 });
+
+describe("September 2 IAR spoilers", () => {
+  it("registers all four spoiled printings as implemented", () => {
+    const expected = {
+      IAR229: "Exorcism",
+      IAR254: "Bravery of the Blade",
+      IAR257: "Channel Stormgarden",
+      IAR258: "Blessing of Suraya",
+    } as const;
+
+    expect(Object.fromEntries(
+      Object.keys(expected).map((id) => [id, cardData[id]?.name]),
+    )).toEqual(expected);
+    expect(Object.keys(expected).every((id) => isImplemented(cardData[id]!))).toBe(true);
+  });
+
+  it("Exorcism empowers the next attack and turns the hit hero's banished cards face-down", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["exorcism|1", "snatch|1"],
+        resources: 1,
+        equipment: NO_EQUIPMENT,
+      },
+      {
+        hero: "dorinthea",
+        life: 20,
+        banish: ["snatch|1", "wounding blow|1"],
+        banishFaceDown: ["raging onslaught|3"],
+        equipment: NO_EQUIPMENT,
+      },
+    ] });
+
+    g.play("exorcism|1")
+      .play("snatch|1")
+      .blockWith()
+      .settle()
+      .expectFinalAttack(7)
+      .expectLife(1, 13);
+
+    expect(g.state.players[1]!.banish.every((card) => card.faceDown === true)).toBe(true);
+  });
+
+  it("Bravery of the Blade charges, gains go again, and creates Courage on hit", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["bravery of the blade|1", "raging onslaught|1"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("bravery of the blade|1")
+      .chooseCard("raging onslaught|1")
+      .blockWith()
+      .settle()
+      .expectInZone(0, "raging onslaught|1", "soul")
+      .expectLife(1, 17)
+      .expectAP(0, 1);
+
+    expect(boardNames(g, 0)).toContain("Courage");
+  });
+
+  it("Bravery of the Blade has neither conditional reward without a charge", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["bravery of the blade|1"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("bravery of the blade|1")
+      .blockWith()
+      .settle()
+      .expectLife(1, 17)
+      .expectAP(0, 0);
+
+    expect(boardNames(g, 0)).not.toContain("Courage");
+  });
+
+  it("Channel Stormgarden creates Lightning Flow and can pay Channel Lightning", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["channel stormgarden|2"],
+        pitch: ["arc ramp|3"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("channel stormgarden|2");
+    expect(boardNames(g, 0)).toContain("Lightning Flow");
+
+    g.doRaw({ kind: "pass" })
+      .settle()
+      .chooseCard("arc ramp|3")
+      .expectTurn(2)
+      .expectInZone(0, "channel stormgarden|2", "board")
+      .expectZoneSize(0, "pitch", 0);
+
+    const channel = g.state.players[0]!.board.find((card) =>
+      cardData[card.cardId]?.name === "Channel Stormgarden"
+    );
+    expect(channel?.counters?.flow).toBe(1);
+  });
+
+  it("Channel Stormgarden destroys itself when Channel Lightning cannot be paid", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        board: ["channel stormgarden|2"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.endTurn()
+      .expectInZone(0, "channel stormgarden|2", "graveyard")
+      .expectNotInZone(0, "channel stormgarden|2", "board");
+  });
+
+  it("Channel Stormgarden amps only the first Lightning Flow its controller destroys", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["arc ramp|3", "arc ramp|3"],
+        board: ["channel stormgarden|2", "lightning flow|0", "lightning flow|0"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("arc ramp|3")
+      .chooseCard("lightning flow|0")
+      .play("arc ramp|3")
+      .chooseCard("lightning flow|0");
+
+    expect(g.state.players[0]!.flags.nextArcaneBonus).toBe(3);
+    expect(boardNames(g, 0)).not.toContain("Lightning Flow");
+  });
+
+  it("Blessing of Suraya creates Ponder when its controller charges", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["light the way|1", "raging onslaught|1"],
+        board: ["blessing of suraya|2"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("light the way|1").chooseCard("raging onslaught|1");
+
+    expect(boardNames(g, 0)).toContain("Ponder");
+  });
+
+  it("Blessing of Suraya moves itself into soul and creates Ponder at start of turn", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          board: ["blessing of suraya|2"],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.endTurn()
+      .expectInZone(0, "blessing of suraya|2", "soul");
+
+    expect(boardNames(g, 0)).toContain("Ponder");
+  });
+});

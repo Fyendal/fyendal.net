@@ -213,6 +213,7 @@ export const sba: Record<string, CardScript> = {
       cost: 1,
       isAttack: false,
       goAgain: false,
+      destroySelfCost: true,
       canActivate(ctx) {
         const p = ctx.player(ctx.seat);
         return (
@@ -221,7 +222,6 @@ export const sba: Record<string, CardScript> = {
         );
       },
       onActivate(ctx) {
-        ctx.destroySelf();
         const attacks = ctx.player(ctx.seat).graveyard.filter((c) =>
           isRunebladeAction(ctx, c, true),
         );
@@ -268,10 +268,10 @@ export const sba: Record<string, CardScript> = {
       cost: 0,
       isAttack: false,
       goAgain: true,
+      destroySelfCost: true,
       canActivate: (ctx) => ctx.getFlag("player", "playedName:nimblism") === true,
       onActivate(ctx) {
         nextAttack({ attack: 2 })(ctx);
-        ctx.destroySelf();
       },
     },
   },
@@ -280,10 +280,10 @@ export const sba: Record<string, CardScript> = {
       cost: 0,
       isAttack: false,
       goAgain: true,
+      destroySelfCost: true,
       canActivate: (ctx) => ctx.getFlag("player", "playedName:nimblism") === true,
       onActivate(ctx) {
         nextAttack({ goAgain: true })(ctx);
-        ctx.destroySelf();
       },
     },
   },

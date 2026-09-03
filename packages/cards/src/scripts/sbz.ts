@@ -269,9 +269,9 @@ export const sbz: Record<string, CardScript> = {
       isAttack: false,
       goAgain: false,
       timing: "instant",
+      destroySelfCost: true,
       label: "Destroy: Opt 2",
       onActivate(ctx) {
-        ctx.destroySelf();
         opt(ctx, 2);
       },
     },
@@ -288,10 +288,10 @@ export const sbz: Record<string, CardScript> = {
       isAttack: false,
       goAgain: false,
       timing: "instant",
+      destroySelfCost: true,
       label: "Destroy: Gain {r}",
       canActivate: (ctx) => ctx.state.activePlayer !== ctx.seat,
       onActivate(ctx) {
-        ctx.destroySelf();
         ctx.changeResources(ctx.seat, 1);
         ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: gained {r}`, "card.log.common.resources.gained", { amount: 1 }));
       },
@@ -306,9 +306,9 @@ export const sbz: Record<string, CardScript> = {
       isAttack: false,
       goAgain: false,
       timing: "instant",
+      destroySelfCost: true,
       label: "Destroy: prevent 1, Opt 1",
       onActivate(ctx) {
-        ctx.destroySelf();
         ctx.preventNextDamage(ctx.seat, 1);
         opt(ctx, 1);
       },

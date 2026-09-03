@@ -1312,6 +1312,7 @@
   "card.trigger.common.self.destroy.draw": "Destroy this and draw a card",
   "card.trigger.common.showtime.destroy.draw": "Destroy Show Time! and draw a card",
   "card.trigger.common.sigilmuse.destroy.ponder": "Destroy Sigil of the Muse and create a Ponder",
+  "card.trigger.common.self.soul.put": "Put this into your soul",
   "card.trigger.common.soul.put": "Put {target} into your soul",
   "card.trigger.common.spellboundcreepers.maintain": "Maintain Spellbound Creepers",
   "card.trigger.common.steam.remove": "Remove a steam counter",
