@@ -1837,6 +1837,26 @@ export class PgRoomStore {
     });
   }
 
+  /**
+   * Drop queue state that requires a live foreground socket. Background bot
+   * practice is durable and is restored when the account reconnects.
+   */
+  async leaveForegroundMatchmakingOnDisconnect(userId: number): Promise<boolean> {
+    return withTransaction(this.db, async (db) => {
+      const { rows } = await db.query(
+        `DELETE FROM matchmaking_entries
+         WHERE user_id = $1 AND mode = 'foreground'
+         RETURNING format`,
+        [userId],
+      );
+      if (rows.length === 0) return false;
+      const format = String(rows[0]!.format);
+      await db.query("UPDATE matchmaking_locks SET generation = generation + 1 WHERE format = $1", [format]);
+      await appendClusterEvent(db, { type: "queue-changed" });
+      return true;
+    });
+  }
+
   async isRetainedMatchmakingRoom(userId: number, code: string): Promise<boolean> {
     const { rows } = await this.db.query(
       `SELECT 1
@@ -2066,9 +2086,9 @@ export class PgRoomStore {
       }
       await db.query(
         `UPDATE matchmaking_entries
-         SET pending_offer_room_code = NULL, retained_room_code = $2
-         WHERE pending_offer_room_code = $2`,
-        [userId, upper],
+         SET pending_offer_room_code = NULL, retained_room_code = $1
+         WHERE pending_offer_room_code = $1`,
+        [upper],
       );
       await db.query("DELETE FROM matchmaking_offers WHERE room_code = $1", [upper]);
       await appendClusterEvent(db, { type: "background-status-changed", userId });
@@ -2549,7 +2569,9 @@ export class PgRoomStore {
           return { error: `choose a ${room.format} deck to take this seat` };
         }
         const legality = formatLegalityErrors(cardData, deck.decklist, room.format, {
-          cardPoolMode: room.cardPoolMode,
+          cardPoolMode: opts.controller === "bot"
+            ? botDefinitionForDeckId(deck.id)?.presentationCardPoolMode ?? room.cardPoolMode
+            : room.cardPoolMode,
         });
         if (legality.length > 0) return { error: legality.join("; ") };
         seatRow = {
@@ -2655,7 +2677,7 @@ export class PgRoomStore {
           room.prep.startPlayer === botSeat ? "first" : "second",
         );
         const botValidation = validatePresentation(registered.pool, botPresentation, room.format, {
-          cardPoolMode: room.cardPoolMode,
+          cardPoolMode: definition.presentationCardPoolMode ?? room.cardPoolMode,
         });
         if (!botValidation.ok) return { error: botValidation.error };
         bot.presented = botValidation.decklist;
@@ -2751,7 +2773,7 @@ export class PgRoomStore {
             room.prep.startPlayer === botSeat ? "first" : "second",
           );
           const validation = validatePresentation(registered.pool, presentation, room.format, {
-            cardPoolMode: room.cardPoolMode,
+            cardPoolMode: definition.presentationCardPoolMode ?? room.cardPoolMode,
           });
           if (!validation.ok) return { error: validation.error };
           bot.presented = validation.decklist;

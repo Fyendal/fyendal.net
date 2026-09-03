@@ -4,7 +4,7 @@ import { BotOpponentModal } from "./BotOpponentModal.js";
 import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 
 describe("BotOpponentModal", () => {
-  it("offers Ira, Hala, Cindra, and Jarl in a focused opponent dialog", () => {
+  it("offers Ira, Hala, Cindra, Jarl, and Starvo in a focused opponent dialog", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>
         <BotOpponentModal format="cc" onSelect={vi.fn()} onClose={vi.fn()} />
@@ -31,7 +31,11 @@ describe("BotOpponentModal", () => {
     expect(html).toContain("Vetreiði");
     expect(html).toContain("Defensive");
     expect(html).toContain("A patient Earth and Ice Guardian that blocks efficiently and attacks with disruptive two-card hands.");
-    expect(html.match(/aria-hidden="true"/g)).toHaveLength(4);
+    expect(html).toContain("Starvo");
+    expect(html).toContain("Star of the Show");
+    expect(html).toContain("Boss");
+    expect(html).toContain("Challenge the best deck in FAB history.");
+    expect(html.match(/aria-hidden="true"/g)).toHaveLength(5);
   });
 
   it("offers Briar and Bravo for Silver Age", () => {

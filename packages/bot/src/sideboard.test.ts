@@ -8,6 +8,7 @@ import {
   halaPresentationFor,
   iraPresentation,
   jarlPresentationFor,
+  starvoPresentationFor,
 } from "./sideboard.js";
 
 function opponent(overrides: Partial<Decklist> = {}): Decklist {
@@ -253,6 +254,40 @@ describe("Jarl Fabrary matchup presentation", () => {
       "SDO001", "AKO001", "SEA010", "ROS019", "DTD133",
     ]) {
       expect(validatePresentation(pool, jarlPresentationFor(opponent({ heroId })), "cc"))
+        .toMatchObject({ ok: true });
+    }
+  });
+});
+
+describe("Starvo boss presentation", () => {
+  it("uses Stalagmite and the physical suite by default", () => {
+    const presented = starvoPresentationFor(opponent());
+    expect(presented).toMatchObject({
+      weaponIds: ["ELE003", "EVR018"],
+      equipment: {
+        head: "ELE115",
+        chest: "WTR150",
+        arms: "ELE173",
+        legs: "TCC033",
+      },
+    });
+    expect(presented.deck).toHaveLength(65);
+  });
+
+  it("uses the arcane package against Wizard and Greaves against Illusionist", () => {
+    expect(starvoPresentationFor(opponent({ heroId: "ROS019" }))).toMatchObject({
+      weaponIds: ["ELE003", "EVR155"],
+      equipment: { chest: "ELE144", legs: "ROS071" },
+    });
+    expect(starvoPresentationFor(opponent({ heroId: "SEN001" })).equipment.legs)
+      .toBe("ROS071");
+  });
+
+  it("reconstructs a valid 65-card open-pool presentation", () => {
+    const pool = precon("bot-starvo-boss")!.pool;
+    for (const heroId of ["RNR001", "ROS019", "SVI001", "SEN001"]) {
+      const presented = starvoPresentationFor(opponent({ heroId }));
+      expect(validatePresentation(pool, presented, "cc", { cardPoolMode: "open" }))
         .toMatchObject({ ok: true });
     }
   });

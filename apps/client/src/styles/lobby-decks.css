@@ -286,6 +286,7 @@
 .bot-deck-type-aggro { color: #f19a7f; }
 .bot-deck-type-elemental { color: #aacdf0; }
 .bot-deck-type-guardian { color: #c4b8a1; }
+.bot-deck-type-boss { color: #f3cf72; }
 .bot-opponent-title {
   overflow: hidden;
   margin-top: 1px;

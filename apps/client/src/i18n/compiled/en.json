@@ -21710,6 +21710,12 @@
       "value": "Practice against this bot while Fyendal looks for a PvP opponent."
     }
   ],
+  "lobby.bot.starvo.description": [
+    {
+      "type": 0,
+      "value": "Challenge the best deck in FAB history."
+    }
+  ],
   "lobby.bot.type.aggro": [
     {
       "type": 0,
@@ -21720,6 +21726,12 @@
     {
       "type": 0,
       "value": "Beginner"
+    }
+  ],
+  "lobby.bot.type.boss": [
+    {
+      "type": 0,
+      "value": "Boss"
     }
   ],
   "lobby.bot.type.elemental": [
@@ -22918,30 +22930,22 @@
       "value": "Keep playing bot"
     }
   ],
-  "matchmaking.background.opponent": [
-    {
-      "type": 1,
-      "value": "username"
-    },
-    {
-      "type": 0,
-      "value": " — "
-    },
-    {
-      "type": 1,
-      "value": "hero"
-    }
-  ],
   "matchmaking.background.searching": [
     {
       "type": 0,
-      "value": "Searching for a real player while you practice…"
+      "value": "Searching for a real player"
     }
   ],
   "matchmaking.background.stop": [
     {
       "type": 0,
       "value": "Stop searching"
+    }
+  ],
+  "matchmaking.background.stopShort": [
+    {
+      "type": 0,
+      "value": "Stop"
     }
   ],
   "matchmaking.background.waiting": [

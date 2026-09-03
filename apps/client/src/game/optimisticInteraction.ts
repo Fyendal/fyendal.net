@@ -295,28 +295,11 @@ function projectDecision(
     return { view: { ...view, pendingDecision: null }, predictsSemanticTransition: false };
   }
   if (decision.kind !== "arsenal" || intent.kind !== "choose") return null;
-  if (intent.optionId === "pass") {
-    return { view: { ...view, pendingDecision: null }, predictsSemanticTransition: false };
-  }
-  const instanceId = Number(intent.optionId);
-  if (!Number.isSafeInteger(instanceId)) return null;
-  const player = view.players[seat];
-  const card = player?.hand.find((candidate) => candidate.instanceId === instanceId);
-  if (!player || !card) return null;
-  const players = view.players.map((candidate) => candidate.seat === seat
-    ? {
-        ...candidate,
-        hand: candidate.hand.filter((entry) => entry.instanceId !== instanceId),
-        handCount: Math.max(0, candidate.handCount - 1),
-        arsenal: [...candidate.arsenal, { ...card, faceDown: true as const }],
-        arsenalCount: candidate.arsenalCount + 1,
-      }
-    : candidate
-  ) as GameView["players"];
-  return {
-    view: { ...view, players, pendingDecision: null },
-    predictsSemanticTransition: true,
-  };
+  // Completing the arsenal decision also commits pitch cleanup, draw-up, and
+  // the next turn in one authoritative edge. Dismiss the submitted prompt,
+  // but leave its zones untouched so that edge can animate as one continuous
+  // arsenal -> cleanup -> draw sequence when the server acknowledges it.
+  return { view: { ...view, pendingDecision: null }, predictsSemanticTransition: false };
 }
 
 export function optimisticInteractionView(

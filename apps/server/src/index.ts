@@ -1202,7 +1202,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
       lobbyClients.delete(ctx);
       if (queuedUserId != null && queuedUsers.get(queuedUserId) === ctx) {
         queuedUsers.delete(queuedUserId);
-        void rooms.leaveMatchmaking(queuedUserId)
+        void rooms.leaveForegroundMatchmakingOnDisconnect(queuedUserId)
           .then(() => clusterConsumer?.nudge())
           .catch((error) => consoleError("matchmaking disconnect cleanup failed", error));
       }

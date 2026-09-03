@@ -504,6 +504,21 @@ export const MIGRATIONS: Migration[] = [
     ALTER TABLE pending_bot_starts
       DROP CONSTRAINT IF EXISTS pending_bot_starts_deck_id_fk;`,
   },
+  {
+    version: 29,
+    // Bot ids are durable background-matchmaking state. Extend the v26
+    // allowlist for the Starvo practice opponent without editing that applied
+    // migration.
+    sql: `ALTER TABLE pending_bot_starts
+      DROP CONSTRAINT IF EXISTS pending_bot_starts_bot_check;
+    -- pg-mem assigns positional names to inline checks; production Postgres
+    -- uses the column-derived name above.
+    ALTER TABLE pending_bot_starts
+      DROP CONSTRAINT IF EXISTS pending_bot_starts_constraint_2;
+    ALTER TABLE pending_bot_starts
+      ADD CONSTRAINT pending_bot_starts_bot_check
+      CHECK (bot IN ('ira', 'hala', 'cindra', 'jarl', 'briar', 'bravo', 'starvo'));`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

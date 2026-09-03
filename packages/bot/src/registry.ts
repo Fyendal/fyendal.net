@@ -1,5 +1,6 @@
 import type {
   BotOpponent,
+  CardPoolMode,
   Decklist,
   GameIntent,
   PresentedDeck,
@@ -14,6 +15,7 @@ import {
 import { chooseHalaIntent, chooseHalaIntentWithTrace } from "./hala-policy.js";
 import { chooseIraIntent, chooseIraIntentWithTrace } from "./ira-policy.js";
 import { chooseJarlIntent, chooseJarlIntentWithTrace } from "./jarl-policy.js";
+import { chooseStarvoIntent, chooseStarvoIntentWithTrace } from "./starvo-policy.js";
 import type { BotPolicyInput } from "./policy.js";
 import type { TurnPlanCheckpoint, TurnPlannerCandidateTrace } from "./turn-planner.js";
 import {
@@ -23,6 +25,7 @@ import {
   halaPresentationFor,
   iraPresentation,
   jarlPresentationFor,
+  starvoPresentationFor,
 } from "./sideboard.js";
 
 export type ConstructedBotFormat = "cc" | "silver-age";
@@ -43,6 +46,9 @@ export interface BotDefinition {
   deckId: string;
   username: string;
   deckName: string;
+  /** Override only the bot's registered-pool legality check. Human decks keep
+   * the room's selected card-pool mode. */
+  presentationCardPoolMode?: CardPoolMode;
   chooseIntent(input: BotPolicyInput): GameIntent;
   /** Standard decision path used by the worker; planning telemetry is present
    * when the policy reached a bounded planner. */
@@ -143,6 +149,17 @@ export const BOT_DEFINITIONS = {
     chooseIntent: chooseJarlIntent,
     chooseDecision: (input) => botDecisionFromTrace(chooseJarlIntentWithTrace(input)),
     presentationFor: (opponent) => jarlPresentationFor(opponent),
+  },
+  starvo: {
+    id: "starvo",
+    format: "cc",
+    deckId: "bot-starvo-boss",
+    username: "Starvo Bot",
+    deckName: "Bravo, Star of the Show — Boss Battle",
+    presentationCardPoolMode: "open",
+    chooseIntent: chooseStarvoIntent,
+    chooseDecision: (input) => botDecisionFromTrace(chooseStarvoIntentWithTrace(input)),
+    presentationFor: (opponent) => starvoPresentationFor(opponent),
   },
 } as const satisfies Readonly<Record<BotOpponent, BotDefinition>>;
 

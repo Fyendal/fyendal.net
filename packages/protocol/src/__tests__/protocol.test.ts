@@ -300,6 +300,7 @@ describe("client messages", () => {
     { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "ira" },
     { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "cindra" },
     { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "jarl" },
+    { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "starvo" },
     { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "ira", searchForPlayer: true, avoidRoomCodes: ["ABC123"] },
     { type: "create-bot-room", deckId: "precon-sba" },
     { type: "join-room", code: "ABC123", token: "seat-token", deckId: "deck", hero: "dorinthea", spectate: false },

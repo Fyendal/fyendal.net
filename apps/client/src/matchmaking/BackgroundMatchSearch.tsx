@@ -16,9 +16,16 @@ export function BackgroundMatchSearch({
       role="status"
       aria-live="polite"
     >
-      <span>{intl.formatMessage({ id: "matchmaking.background.searching" })}</span>
+      <span className="background-match-search-label">
+        <span className="background-match-search-dot" aria-hidden="true" />
+        <span>{intl.formatMessage({ id: "matchmaking.background.searching" })}</span>
+      </span>
       <button type="button" onClick={onStop}>
-        {intl.formatMessage({ id: "matchmaking.background.stop" })}
+        {intl.formatMessage({
+          id: placement === "menu"
+            ? "matchmaking.background.stopShort"
+            : "matchmaking.background.stop",
+        })}
       </button>
     </aside>
   );

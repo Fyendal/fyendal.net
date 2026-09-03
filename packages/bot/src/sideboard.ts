@@ -8,6 +8,7 @@ const CINDRA_BOT_DECK_ID = "bot-cindra-head-jabs";
 const HALA_MASTERCLASS_PRECON_ID = "precon-hala-masterclass";
 const IRA_PRECON_ID = "precon-asr";
 const JARL_BOT_DECK_ID = "bot-jarl";
+const STARVO_BOT_DECK_ID = "bot-starvo-boss";
 
 const BRAVO_ARCANE_POLARITY = ["SBA030", "SBA030"];
 const BRAVO_RED_CHOKESLAM = ["SBR016", "SBR016"];
@@ -571,5 +572,41 @@ export function iraPresentation(): PresentedDeck {
     weaponIds: [...registered.pool.weaponIds],
     equipment: { head, chest, arms, legs },
     deck: [...registered.pool.deck],
+  };
+}
+
+/**
+ * Present the complete 65-card Michael Hamilton Starvo list from TCGplayer's
+ * Living Legend Library. This intentionally overpowered CC practice opponent
+ * keeps the published main intact. The article calls out Lightning Greaves for
+ * Illusionist, while arcane opponents get the list's Lantern, Heart, and
+ * Greaves package; physical opponents face Stalagmite and Tunic.
+ * Source: https://www.tcgplayer.com/content/article/Living-Legend-Library-Bravo-Star-of-the-Show/20ef7f41-bec2-4042-bb76-3a4d723bcc90/
+ */
+export function starvoPresentationFor(
+  opponent: Decklist,
+  cards: Readonly<Record<string, CardData>> = cardData,
+): PresentedDeck {
+  const registered = precon(STARVO_BOT_DECK_ID);
+  if (!registered || registered.format !== "cc" || registered.botOnly !== true) {
+    throw new Error("Starvo boss deck is not registered");
+  }
+  const opponentHero = cards[opponent.heroId];
+  const classes = opponentHero?.classes?.map((value) => value.toLowerCase()) ?? [];
+  const arcane = classes.includes("wizard") || classes.includes("runeblade");
+  const illusionist = classes.includes("illusionist");
+  const deck = [...registered.pool.deck, ...(registered.pool.sideboard ?? [])];
+  if (deck.length !== 65) {
+    throw new Error(`Starvo boss presentation has ${deck.length} cards, expected 65`);
+  }
+  return {
+    weaponIds: ["ELE003", arcane ? "EVR155" : "EVR018"],
+    equipment: {
+      head: "ELE115",
+      chest: arcane ? "ELE144" : "WTR150",
+      arms: "ELE173",
+      legs: arcane || illusionist ? "ROS071" : "TCC033",
+    },
+    deck,
   };
 }

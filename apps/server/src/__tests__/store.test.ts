@@ -1893,6 +1893,80 @@ describe("PgRoomStore storage", () => {
     ]));
   });
 
+  it("preserves background matchmaking when its socket disconnects", async () => {
+    const users = await db.query(
+      `INSERT INTO users (username, username_lc, pass_hash, created_at)
+       VALUES ('ReconnectBot','reconnectbot','hash',1), ('ReconnectQueue','reconnectqueue','hash',2)
+       RETURNING id`,
+    );
+    const backgroundUserId = Number(users.rows[0]!.id);
+    const foregroundUserId = Number(users.rows[1]!.id);
+    const queued = await store.queueForMatch("cc", {
+      userId: backgroundUserId,
+      username: "ReconnectBot",
+      deckId: "precon-asb",
+      cardPoolMode: "legal",
+      pendingBotStart: {
+        format: "cc",
+        deckId: "precon-asb",
+        bot: "ira",
+        requestedAt: 10,
+      },
+    });
+    if (!queued.ok || queued.kind !== "opened") throw new Error("bot queue did not open");
+    const source = await store.createBotRoom("cc", {
+      userId: backgroundUserId,
+      username: "ReconnectBot",
+      deckId: "precon-asb",
+    }, "legal", "ira");
+    expect(await store.setBackgroundMatchmaking(backgroundUserId, source.code)).toBe(true);
+
+    expect(await store.leaveForegroundMatchmakingOnDisconnect(backgroundUserId)).toBe(false);
+    expect(await store.backgroundMatchmakingStatus(backgroundUserId)).toEqual({
+      state: "searching",
+      format: "cc",
+    });
+
+    const foreground = await store.queueForMatch("classic-battles", {
+      userId: foregroundUserId,
+      username: "ReconnectQueue",
+      hero: "rhinar",
+      cardPoolMode: "legal",
+    });
+    expect(foreground).toMatchObject({ ok: true, kind: "opened" });
+    expect(await store.leaveForegroundMatchmakingOnDisconnect(foregroundUserId)).toBe(true);
+    expect((await db.query(
+      "SELECT 1 FROM matchmaking_entries WHERE user_id = $1",
+      [foregroundUserId],
+    )).rows).toEqual([]);
+  });
+
+  it("persists Starvo as a pending background-practice opponent", async () => {
+    const user = await db.query(
+      `INSERT INTO users (username, username_lc, pass_hash, created_at)
+       VALUES ('StarvoPractice','starvopractice','hash',1) RETURNING id`,
+    );
+    const userId = Number(user.rows[0]!.id);
+
+    await expect(store.queueForMatch("cc", {
+      userId,
+      username: "StarvoPractice",
+      deckId: "precon-asb",
+      cardPoolMode: "legal",
+      pendingBotStart: {
+        format: "cc",
+        deckId: "precon-asb",
+        bot: "starvo",
+        requestedAt: 10,
+      },
+    })).resolves.toMatchObject({ ok: true, kind: "opened" });
+
+    expect((await db.query(
+      "SELECT format, bot, card_pool_mode FROM pending_bot_starts WHERE user_id = $1",
+      [userId],
+    )).rows).toEqual([{ format: "cc", bot: "starvo", card_pool_mode: "legal" }]);
+  });
+
   it("preserves an existing queue time and retained room when switching to bot practice", async () => {
     const users = await db.query(
       `INSERT INTO users (username, username_lc, pass_hash, created_at)
@@ -1977,6 +2051,38 @@ describe("PgRoomStore storage", () => {
     expect(entries.rows[1]!.source_room_code).not.toBeNull();
     expect((await db.query("SELECT room_code FROM matchmaking_offers")).rows).toEqual([]);
     expect((await store.getRoom(lateQueue.code))?.seats.filter(Boolean)).toHaveLength(1);
+  });
+
+  it("keeps the background player searching after they decline an offer", async () => {
+    const offer = await pendingBotOffer();
+    const reassignmentWrites: Array<{ sql: string; params: unknown[] | undefined }> = [];
+    const measured = new PgRoomStore({
+      query: async (text, params) => {
+        if (
+          text.includes("SET pending_offer_room_code = NULL, retained_room_code") &&
+          text.includes("WHERE pending_offer_room_code")
+        ) {
+          reassignmentWrites.push({ sql: normalizedSql(text), params });
+        }
+        return db.query(text, params);
+      },
+    }, "rules-a");
+
+    await expect(measured.declineBackgroundMatch(
+      offer.userIds[0],
+      offer.offerCode,
+    )).resolves.toMatchObject({ ok: true });
+
+    expect(reassignmentWrites).toEqual([{
+      sql: "UPDATE matchmaking_entries SET pending_offer_room_code = NULL, retained_room_code = $1 WHERE pending_offer_room_code = $1",
+      params: [offer.offerCode],
+    }]);
+    expect(await store.backgroundMatchmakingStatus(offer.userIds[0])).toMatchObject({
+      state: "searching",
+      format: "cc",
+    });
+    expect(await store.getRoom(offer.firstBotCode)).not.toBeNull();
+    expect((await db.query("SELECT room_code FROM matchmaking_offers")).rows).toEqual([]);
   });
 
   it("holds each participant in at most one durable offer", async () => {
