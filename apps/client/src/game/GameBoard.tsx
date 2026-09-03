@@ -77,7 +77,7 @@ const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
   const intl = useIntl();
-  const { view, viewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, botGame, sendIntent, sendPriorityMode, sendRunechantSkip, sendEmote, latestEmote, undo, error, leave, opponentConnected, connected, roomCode, screen, replayFrames, watchReplay, downloadReplay, getRecordedViews, lastActionAt, claimVictory, reportBug } = useStore(
+  const { view, viewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, botGame, sendIntent, sendPriorityMode, sendRunechantSkip, sendEmote, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, watchReplay, downloadReplay, getRecordedViews, lastActionAt, claimVictory, reportBug } = useStore(
     useShallow((state) => ({
       view: state.view,
       viewUpdate: state.viewUpdate,
@@ -101,6 +101,7 @@ export function GameBoard() {
       leave: state.leave,
       opponentConnected: state.opponentConnected,
       connected: state.connected,
+      connectionIssueVisible: state.connectionIssueVisible,
       roomCode: state.roomCode,
       screen: state.screen,
       replayFrames: state.replayFrames,
@@ -1139,7 +1140,7 @@ export function GameBoard() {
         spectating={spectating}
         spectatorCount={spectatorCount}
         opponentConnected={opponentConnected}
-        connected={connected}
+        connectionIssueVisible={connectionIssueVisible}
         error={error}
         winnerText={
           view.winner !== null

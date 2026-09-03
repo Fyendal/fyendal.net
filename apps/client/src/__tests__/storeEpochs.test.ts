@@ -487,6 +487,7 @@ describe("client connection and account race fences", () => {
       screen: "room-loading",
       roomCode: "AAAAAA",
       connected: false,
+      connectionIssueVisible: false,
       error: null,
     });
     expect(localStorage.getItem("fyendal-room-session")).toContain("seat-token");
@@ -498,6 +499,30 @@ describe("client connection and account race fences", () => {
       { type: "auth", token: "account-token" },
       { type: "join-room", code: "AAAAAA", token: "seat-token" },
     ]);
+    await vi.advanceTimersByTimeAsync(5_000);
+    expect(useStore.getState().connectionIssueVisible).toBe(false);
+  });
+
+  it("shows one reconnect notice only after the connection stays down for five seconds", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    const { useStore } = await import("../store.js");
+
+    useStore.getState().joinRoom("AAAAAA");
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    socket.message({ type: "joined", code: "AAAAAA", seat: 0, token: "seat-token", version: 1 });
+    socket.message({ ...staleState, version: 2 });
+    socket.close();
+
+    await vi.advanceTimersByTimeAsync(4_999);
+    expect(useStore.getState()).toMatchObject({
+      connected: false,
+      connectionIssueVisible: false,
+      roomCode: "AAAAAA",
+    });
+    await vi.advanceTimersByTimeAsync(1);
+    expect(useStore.getState().connectionIssueVisible).toBe(true);
   });
 
   it("ignores every frame from a socket superseded by a newer room connection", async () => {
@@ -1002,10 +1027,12 @@ describe("client connection and account race fences", () => {
     expect(useStore.getState()).toMatchObject({
       roomCode: "AAAAAA",
       connected: false,
+      connectionIssueVisible: false,
       screen: "room-loading",
       view: null,
       legal: [],
       prep: null,
+      error: null,
     });
     expect(localStorage.getItem("fyendal-room-session")).toContain("seat-token");
     useStore.getState().leave();

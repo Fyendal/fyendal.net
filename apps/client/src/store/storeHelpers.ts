@@ -10,6 +10,7 @@ export function initialStoreProjection(
     screen: "lobby" as const,
     lobbyRail: "home" as const,
     connected: false,
+    connectionIssueVisible: false,
     roomCode: null,
     yourSeat: null,
     spectating: false,
@@ -94,6 +95,7 @@ export function clearedRoomProjection(): Pick<
   | "prep"
   | "prepDeck"
   | "error"
+  | "connectionIssueVisible"
 > {
   return {
     screen: "lobby",
@@ -126,6 +128,7 @@ export function clearedRoomProjection(): Pick<
     prep: null,
     prepDeck: null,
     error: null,
+    connectionIssueVisible: false,
   };
 }
 
