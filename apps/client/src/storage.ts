@@ -6,11 +6,46 @@ export const AUTH_STORAGE_KEY = "fyendal-auth";
 export const ROOM_SESSION_STORAGE_KEY = "fyendal-room-session";
 export const REPLAY_STORAGE_PREFIX = "fyendal-replay-";
 export const GAME_SETTINGS_STORAGE_KEY = "fyendal-game-settings";
+export const BOT_MATCHMAKING_PREFERENCE_STORAGE_KEY = "fyendal-bot-matchmaking-preference";
 /** Legacy browser-wide key. Read once to migrate it to the signed-in account. */
 export const LOBBY_SETTINGS_STORAGE_KEY = "fyendal-lobby-settings";
 const LOBBY_SETTINGS_STORAGE_PREFIX = `${LOBBY_SETTINGS_STORAGE_KEY}-`;
 const MATCHMAKING_AVOIDANCE_STORAGE_PREFIX = "fyendal-matchmaking-avoid-";
 const MATCHMAKING_AVOIDANCE_TTL_MS = 24 * 60 * 60 * 1000;
+
+export function loadBotMatchmakingPreference(
+  storage: Pick<Storage, "getItem">,
+): boolean {
+  try {
+    const raw = storage.getItem(BOT_MATCHMAKING_PREFERENCE_STORAGE_KEY);
+    if (raw === null) return true;
+    const value: unknown = JSON.parse(raw);
+    if (!value || typeof value !== "object") return true;
+    const record = value as Record<string, unknown>;
+    if (
+      Object.keys(record).length !== 2 ||
+      record.version !== 1 ||
+      typeof record.searchForPlayer !== "boolean"
+    ) return true;
+    return record.searchForPlayer;
+  } catch {
+    return true;
+  }
+}
+
+export function saveBotMatchmakingPreference(
+  storage: Pick<Storage, "setItem">,
+  searchForPlayer: boolean,
+): void {
+  try {
+    storage.setItem(BOT_MATCHMAKING_PREFERENCE_STORAGE_KEY, JSON.stringify({
+      version: 1,
+      searchForPlayer,
+    }));
+  } catch {
+    // A blocked/full localStorage should not prevent changing the checkbox.
+  }
+}
 
 interface RejectedMatchRoom {
   code: string;

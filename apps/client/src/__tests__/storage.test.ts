@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   AUTH_STORAGE_KEY,
+  BOT_MATCHMAKING_PREFERENCE_STORAGE_KEY,
   DEFAULT_GAME_SETTINGS,
   DEFAULT_LOBBY_SETTINGS,
   GAME_SETTINGS_STORAGE_KEY,
@@ -8,6 +9,7 @@ import {
   loadRejectedMatchRooms,
   loadRejectedMatchRoomsForChoice,
   loadGameSettings,
+  loadBotMatchmakingPreference,
   loadLobbySettings,
   lobbySettingsStorageKey,
   replayStorageKey,
@@ -15,6 +17,7 @@ import {
   pruneRejectedMatchRooms,
   ROOM_SESSION_STORAGE_KEY,
   saveGameSettings,
+  saveBotMatchmakingPreference,
   saveLobbySettings,
 } from "../storage.js";
 
@@ -23,6 +26,24 @@ describe("client storage keys", () => {
     expect(AUTH_STORAGE_KEY).toBe("fyendal-auth");
     expect(ROOM_SESSION_STORAGE_KEY).toBe("fyendal-room-session");
     expect(replayStorageKey("ABC123")).toBe("fyendal-replay-ABC123");
+  });
+
+  it("remembers whether bot practice should keep searching for a player", () => {
+    let stored: string | null = null;
+    const storage = {
+      getItem: (key: string) => key === BOT_MATCHMAKING_PREFERENCE_STORAGE_KEY ? stored : null,
+      setItem: (key: string, value: string) => {
+        if (key === BOT_MATCHMAKING_PREFERENCE_STORAGE_KEY) stored = value;
+      },
+    };
+
+    expect(loadBotMatchmakingPreference(storage)).toBe(true);
+    saveBotMatchmakingPreference(storage, false);
+    expect(loadBotMatchmakingPreference(storage)).toBe(false);
+    saveBotMatchmakingPreference(storage, true);
+    expect(loadBotMatchmakingPreference(storage)).toBe(true);
+    stored = JSON.stringify({ version: 1, searchForPlayer: "yes" });
+    expect(loadBotMatchmakingPreference(storage)).toBe(true);
   });
 
   it("round-trips the versioned game settings", () => {
