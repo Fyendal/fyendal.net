@@ -1906,6 +1906,7 @@
   "engine.log.card.turned.facedown.graveyard.watery.grave": "{card} 在墓地中翻至面朝下（Watery Grave）",
   "engine.log.cards.drawn": "{player} 抽 {count} 张牌",
   "engine.log.cards.revealed": "{hero} 展示 {cards}",
+  "engine.log.cards.revealed.from.hand": "{hero} 展示手牌中的 {cards}",
   "engine.log.cards.transform.into": "{cards} 转化为 {result}",
   "engine.log.clash.reveals": "{hero} 展示 {card}（{power} 攻击力）",
   "engine.log.clash.tie": "clash 平局，无人获胜",

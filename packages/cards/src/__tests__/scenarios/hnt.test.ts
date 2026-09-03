@@ -9,6 +9,120 @@ it("registers every HNT printing as implemented", () => {
   expect(cards.filter((card) => !isImplemented(card)).map((card) => card.id)).toEqual([]);
 });
 
+describe("HNT — Sound the Alarm", () => {
+  it("reveals the defending hero's hand and offers every defense reaction when an attack reaction is present", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 1,
+          hand: ["sound the alarm|1"],
+          deck: ["sink below|1", "fate foreseen|2", "wrecker romp|3"],
+        },
+        {
+          hero: "rhinar",
+          heroKey: "briar|0",
+          hand: ["razor reflex|1", "fry|1"],
+        },
+      ],
+    });
+
+    g.play("sound the alarm|1");
+
+    const revealedView = projectStateFor(g.state, 0);
+    expect(revealedView.log.at(-1)).toContain("Razor Reflex");
+    expect(revealedView.log.at(-1)).toContain("Fry");
+    expect(revealedView.log.at(-1)).toContain("from hand");
+    const latestEntry = revealedView.logEntries?.at(-1);
+    expect(latestEntry && "event" in latestEntry ? latestEntry.event : undefined).toMatchObject({
+      kind: "cards-revealed",
+      sourceZone: "hand",
+    });
+    expect(g.state.pendingDecision?.chooseHook).toBe("sound-alarm");
+    const offered = g.state.players[0]!.deck.filter((card) =>
+      g.state.pendingDecision?.options?.includes(String(card.instanceId))
+    );
+    expect(offered.map((card) => cardData[card.cardId]!.cardType)).toEqual([
+      "defense-reaction",
+      "defense-reaction",
+    ]);
+
+    g.chooseCard("sink below|1")
+      .expectDeckTop(0, "sink below|1");
+  });
+
+  it("reveals Briar's hand without offering a search for Lightning Press because it is an instant", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 1,
+          hand: ["sound the alarm|1"],
+          deck: ["sink below|1"],
+        },
+        {
+          hero: "rhinar",
+          heroKey: "briar|0",
+          hand: ["lightning press|1", "fry|1"],
+        },
+      ],
+    });
+
+    g.play("sound the alarm|1");
+
+    const revealedView = projectStateFor(g.state, 0);
+    expect(revealedView.log.at(-1)).toContain("Lightning Press");
+    expect(revealedView.log.at(-1)).toContain("Fry");
+    expect(revealedView.log.at(-1)).toContain("from hand");
+    expect(g.state.pendingDecision?.chooseHook).not.toBe("sound-alarm");
+  });
+});
+
+describe("HNT — opposing hand reveals", () => {
+  it.each([1, 2, 3] as const)(
+    "Cut from the Same Cloth pitch %s reveals the whole hand and marks for an attack reaction",
+    (pitch) => {
+      const g = scenario({
+        seats: [
+          {
+            hero: "rhinar",
+            hand: [`cut from the same cloth|${pitch}`],
+          },
+          {
+            hero: "dorinthea",
+            hand: ["razor reflex|1", "fry|1"],
+          },
+        ],
+      });
+
+      g.play(`cut from the same cloth|${pitch}`);
+
+      const revealed = projectStateFor(g.state, 0).log.filter((line) => line.includes("reveals")).at(-1);
+      expect(revealed).toContain("Razor Reflex");
+      expect(revealed).toContain("Fry");
+      expect(revealed).toContain("from hand");
+      expect(g.state.players[1]!.hero.counters?.marked).toBe(1);
+    },
+  );
+
+  it("Cut from the Same Cloth still reveals the whole hand without marking for an instant", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["cut from the same cloth|1"] },
+        { hero: "dorinthea", hand: ["lightning press|1", "fry|1"] },
+      ],
+    });
+
+    g.play("cut from the same cloth|1");
+
+    const revealed = projectStateFor(g.state, 0).log.filter((line) => line.includes("reveals")).at(-1);
+    expect(revealed).toContain("Lightning Press");
+    expect(revealed).toContain("Fry");
+    expect(revealed).toContain("from hand");
+    expect(g.state.players[1]!.hero.counters?.marked ?? 0).toBe(0);
+  });
+});
+
 describe("HNT — marked heroes and daggers", () => {
   it("Quickdodge Flexors has 2 base defense on each chain link without stacking", () => {
     const g = scenario({

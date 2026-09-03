@@ -145,6 +145,25 @@ describe("public deck-card events", () => {
     }]);
   });
 
+  it("shows every card when Sound the Alarm reveals an opposing hand", () => {
+    const razorReflex = Object.values(cardData).find((entry) => entry.name === "Razor Reflex")!;
+    const snatch = Object.values(cardData).find((entry) => entry.name === "Snatch")!;
+    expect(detectDeckCardEvents(
+      view({ log: [] }),
+      view({
+        log: [
+          `Opponent reveals Razor Reflex⟦${razorReflex.id}⟧, Snatch⟦${snatch.id}⟧ from hand`,
+        ],
+      }),
+    )).toEqual([{
+      kind: "reveal",
+      cardIds: [razorReflex.id, snatch.id],
+      label: "Revealed from hand",
+      sourceZone: "hand",
+      cardSeats: [1, 1],
+    }]);
+  });
+
   it("labels a fused card as revealed from hand", () => {
     const lightningPress = Object.values(cardData).find(
       (entry) => entry.name === "Lightning Press",
