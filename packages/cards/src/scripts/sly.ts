@@ -216,9 +216,9 @@ export const sly: Record<string, CardScript> = {
       cost: 3,
       isAttack: false,
       goAgain: true,
+      destroySelfCost: true,
       canActivate: (ctx) => controlsSuspenseAura(ctx),
       onActivate(ctx) {
-        ctx.destroySelf();
         ctx.createToken(CONFIDENCE);
       },
     },

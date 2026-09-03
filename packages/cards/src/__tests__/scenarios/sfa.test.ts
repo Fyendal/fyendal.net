@@ -424,7 +424,16 @@ describe("SFA — Rupture and hits-this-chain", () => {
     });
     s.play(RONIN).blockWith().settle()
       .play(RONIN).blockWith().settle()
-      .activate("double cross strap|0")
+      .activate("double cross strap|0", { settle: false })
+      .expectNoEquipment(0, "chest")
+      .expectResources(0, 0);
+
+    expect(legalIntents(s.state, 0).some(
+      (intent) => intent.kind === "activate-ability" &&
+        intent.sourceInstanceId === s.state.stack[0]?.sourceInstanceId,
+    )).toBe(false);
+
+    s.settle()
       .expectResources(0, 1)
       .expectNoEquipment(0, "chest");
   });

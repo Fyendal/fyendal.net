@@ -229,6 +229,7 @@ export const saz: Record<string, CardScript> = {
       cost: 0,
       isAttack: false,
       goAgain: true,
+      destroySelfCost: true,
       label: "Destroy: put an arrow from your hand into your arsenal — it gains +1{p} this turn",
       canActivate: (ctx) =>
         ctx.player(ctx.seat).arsenal.length === 0 &&
@@ -245,7 +246,6 @@ export const saz: Record<string, CardScript> = {
       if (hook !== "bulls-eye" || option === "pass") return;
       const card = ctx.player(ctx.seat).hand.find((c) => c.instanceId === Number(option));
       if (!card || !ctx.putIntoArsenal(card.instanceId, "hand")) return;
-      ctx.destroySelf();
       ctx.addCardTempPower(card.instanceId, 1);
       ctx.logPublic(localizedCardLog(ctx, `Bull's Eye Bracers: ${ctx.cardData(card.cardId).name} gets +1{p} this turn`, "card.log.saz.bracers.attack", { target: { kind: "card", cardId: card.cardId }, amount: 1 }));
     },
@@ -259,6 +259,7 @@ export const saz: Record<string, CardScript> = {
       isAttack: false,
       goAgain: false,
       timing: "attack-reaction",
+      destroySelfCost: true,
       label: "{r}, destroy: an arrow attack above its base {p} gets go again",
       canActivate(ctx) {
         const link = ctx.link;
@@ -267,7 +268,6 @@ export const saz: Record<string, CardScript> = {
         return ctx.attackBonusAboveBase(link.attackingCard.instanceId) > 0;
       },
       onActivate(ctx) {
-        ctx.destroySelf();
         ctx.grantGoAgain();
       },
     },

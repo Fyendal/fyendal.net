@@ -13883,6 +13883,12 @@
       "value": "Destroy this and draw a card"
     }
   ],
+  "card.trigger.common.self.soul.put": [
+    {
+      "type": 0,
+      "value": "Put this into your soul"
+    }
+  ],
   "card.trigger.common.shiyana.copy": [
     {
       "type": 0,

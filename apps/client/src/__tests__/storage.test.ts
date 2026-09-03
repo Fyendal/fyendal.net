@@ -56,9 +56,9 @@ describe("client storage keys", () => {
     };
 
     expect(loadGameSettings(storage)).toEqual({
-      version: 5,
+      version: 6,
       priorityWindowMode: "always-pause",
-      lessGuidance: false,
+      lessGuidance: true,
       skipPlayConfirmation: true,
       motionPreference: "system",
       playabilityCuePreference: "glow",
@@ -66,9 +66,9 @@ describe("client storage keys", () => {
       soundEffectsVolume: 35,
     });
     saveGameSettings(storage, {
-      version: 5,
+      version: 6,
       priorityWindowMode: "auto-pass",
-      lessGuidance: true,
+      lessGuidance: false,
       skipPlayConfirmation: false,
       motionPreference: "reduced",
       playabilityCuePreference: "high-contrast",
@@ -76,9 +76,9 @@ describe("client storage keys", () => {
       soundEffectsVolume: 60,
     });
     expect(loadGameSettings(storage)).toEqual({
-      version: 5,
+      version: 6,
       priorityWindowMode: "auto-pass",
-      lessGuidance: true,
+      lessGuidance: false,
       skipPlayConfirmation: false,
       motionPreference: "reduced",
       playabilityCuePreference: "high-contrast",
@@ -96,7 +96,7 @@ describe("client storage keys", () => {
         skipPlayConfirmation: false,
       }),
     })).toEqual({
-      version: 5,
+      version: 6,
       priorityWindowMode: "auto-pass",
       lessGuidance: true,
       skipPlayConfirmation: false,
@@ -117,7 +117,7 @@ describe("client storage keys", () => {
         motionPreference: "reduced",
       }),
     })).toEqual({
-      version: 5,
+      version: 6,
       priorityWindowMode: "auto-pass",
       lessGuidance: true,
       skipPlayConfirmation: false,
@@ -140,7 +140,7 @@ describe("client storage keys", () => {
         soundEffectsVolume: 60,
       }),
     })).toEqual({
-      version: 5,
+      version: 6,
       priorityWindowMode: "auto-pass",
       lessGuidance: true,
       skipPlayConfirmation: false,
@@ -151,7 +151,7 @@ describe("client storage keys", () => {
     });
   });
 
-  it("migrates version 1 users to pause priority and auto-confirm", () => {
+  it("migrates version 1 users to pause priority, auto-confirm, and hidden guidance", () => {
     expect(loadGameSettings({
       getItem: () => JSON.stringify({
         version: 1,
@@ -159,16 +159,28 @@ describe("client storage keys", () => {
         lessGuidance: true,
         skipPlayConfirmation: false,
       }),
-    })).toEqual({
-      ...DEFAULT_GAME_SETTINGS,
-      lessGuidance: true,
-    });
+    })).toEqual(DEFAULT_GAME_SETTINGS);
+  });
+
+  it("hides guidance once when migrating existing version 5 users", () => {
+    expect(loadGameSettings({
+      getItem: () => JSON.stringify({
+        version: 5,
+        priorityWindowMode: "always-pause",
+        lessGuidance: false,
+        skipPlayConfirmation: true,
+        motionPreference: "system",
+        playabilityCuePreference: "glow",
+        soundEffectsEnabled: true,
+        soundEffectsVolume: 35,
+      }),
+    })).toEqual(DEFAULT_GAME_SETTINGS);
   });
 
   it("falls back safely for invalid or future settings", () => {
     expect(loadGameSettings({ getItem: () => "not json" })).toEqual(DEFAULT_GAME_SETTINGS);
     expect(loadGameSettings({
-      getItem: () => JSON.stringify({ version: 6, priorityWindowMode: "auto-pass" }),
+      getItem: () => JSON.stringify({ version: 7, priorityWindowMode: "auto-pass" }),
     })).toEqual(DEFAULT_GAME_SETTINGS);
     expect(loadGameSettings({
       getItem: () => JSON.stringify({

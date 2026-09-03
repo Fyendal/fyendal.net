@@ -70,7 +70,7 @@ function playedAnotherRed(ctx: ScriptCtx): boolean {
 }
 
 /** Instant — Destroy this equipment: gain {r} (Blood Scent / Double Cross
- *  Strap). The destruction happens at resolution (stack-layer precedent). */
+ *  Strap). Destruction is an activation cost; gaining the resource resolves. */
 function destroyGainResource(canActivate: (ctx: ScriptCtx) => boolean, label: string): CardScript {
   return {
     activated: {
@@ -78,10 +78,10 @@ function destroyGainResource(canActivate: (ctx: ScriptCtx) => boolean, label: st
       isAttack: false,
       goAgain: false,
       timing: "instant",
+      destroySelfCost: true,
       label,
       canActivate,
       onActivate(ctx) {
-        ctx.destroySelf();
         ctx.changeResources(ctx.seat, 1);
         ctx.logPublic(localizedCardLog(
           ctx,
@@ -265,9 +265,9 @@ export const sfa: Record<string, CardScript> = {
       isAttack: false,
       goAgain: false,
       timing: "instant",
+      destroySelfCost: true,
       label: "Destroy: the next Crouching Tiger you play gets +2{p}",
       onActivate(ctx) {
-        ctx.destroySelf();
         buffNextAttack(ctx, { attack: 2, appliesToName: "crouching tiger" });
         ctx.logPublic(localizedCardLog(ctx, "Tearing Shuko: the next Crouching Tiger you play this turn gets +2{p}", "card.log.sfa.shuko.attack", { amount: 2 }));
       },
@@ -282,9 +282,9 @@ export const sfa: Record<string, CardScript> = {
       isAttack: false,
       goAgain: false,
       timing: "instant",
+      destroySelfCost: true,
       label: "Destroy: create a Crouching Tiger in your banished zone",
       onActivate(ctx) {
-        ctx.destroySelf();
         const tiger = ctx.createToken(CROUCHING_TIGER);
         if (!tiger) return;
         ctx.banish(tiger.instanceId);

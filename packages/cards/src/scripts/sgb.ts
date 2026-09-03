@@ -284,6 +284,7 @@ export const sgb: Record<string, CardScript> = {
       cost: 0,
       isAttack: false,
       goAgain: true,
+      destroySelfCost: true,
       canActivate: (ctx) => ctx.player(ctx.seat).hand.some((c) => isAlly(ctx, c)),
       onActivate(ctx) {
         const allies = ctx.player(ctx.seat).hand.filter((c) => isAlly(ctx, c));
@@ -300,7 +301,6 @@ export const sgb: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook !== "carrion-discard") return;
       if (!ctx.discardCard(ctx.seat, Number(option))) return;
-      ctx.destroySelf();
       ctx.drawCards(ctx.seat, 1);
     },
   },
@@ -334,8 +334,8 @@ export const sgb: Record<string, CardScript> = {
       cost: 1,
       isAttack: false,
       goAgain: true,
+      destroySelfCost: true,
       onActivate(ctx) {
-        ctx.destroySelf();
         ctx.setFlag("player", "nextNonAttackActionCardGoAgain", true);
         ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: the next non-attack action card played this turn gets go again`, "card.log.sgb.magemaster.goagain"));
       },
@@ -349,9 +349,9 @@ export const sgb: Record<string, CardScript> = {
       isAttack: false,
       goAgain: false,
       timing: "instant",
+      destroySelfCost: true,
       canActivate: (ctx) => ctx.player(ctx.seat).board.some((c) => isAlly(ctx, c)),
       onActivate(ctx) {
-        ctx.destroySelf();
         // only tapped allies are eligible — untapping an untapped ally fails
         const allies = ctx.player(ctx.seat).board.filter((c) => c.tapped && isAlly(ctx, c));
         if (allies.length > 0) {
@@ -655,10 +655,12 @@ export const sgb: Record<string, CardScript> = {
       cost: 2,
       isAttack: false,
       goAgain: true,
+      destroySelfCost: true,
       onActivate(ctx) {
-        ctx.destroySelf();
+        const drawCount = ctx.getFlag("player", "doubleNextGoldDraw") === true ? 2 : 1;
+        ctx.setFlag("player", "doubleNextGoldDraw", false);
         ctx.setFlag("player", "goldDrawEffect", true);
-        ctx.drawCards(ctx.seat, 1);
+        ctx.drawCards(ctx.seat, drawCount);
         ctx.setFlag("player", "goldDrawEffect", false);
       },
     },

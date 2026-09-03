@@ -192,13 +192,13 @@ export const svi: Record<string, CardScript> = {
       isAttack: false,
       goAgain: false,
       timing: "instant",
+      destroySelfCost: true,
       label: "Destroy with a Runechant: prevent 1 arcane damage",
       canActivate: (ctx) => runeCount(ctx) > 0,
       onActivate(ctx) {
         const rune = ctx.player(ctx.seat).board.find((card) => isCard(ctx, card.cardId, "Runechant"));
         if (!rune) return;
         ctx.destroyPermanent(rune.instanceId);
-        ctx.destroySelf();
         ctx.preventNextDamage(ctx.seat, 1);
       },
     },

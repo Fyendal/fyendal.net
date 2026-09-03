@@ -134,6 +134,7 @@ export const brute: Record<string, CardScript> = {
       isAttack: false,
       goAgain: false,
       timing: "instant",
+      destroySelfCost: true,
       onActivate(ctx) {
         ctx.requestDieRoll("barkbone", 6);
       },
@@ -152,7 +153,6 @@ export const brute: Record<string, CardScript> = {
           },
           { kind: "roll", result: roll, seat: ctx.seat, sides: 6 },
         ));
-        ctx.destroySelf();
     },
   },
 };

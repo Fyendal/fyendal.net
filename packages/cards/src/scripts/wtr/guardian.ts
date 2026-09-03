@@ -272,6 +272,7 @@ export const guardian: Record<string, CardScript> = {
       cost: 1,
       isAttack: false,
       goAgain: false,
+      destroySelfCost: true,
       onActivate(ctx) {
         ctx.setPlayerFlag(ctx.seat, "bonusIntellect", 1);
         ctx.logPublic(localizedLog(
@@ -279,7 +280,6 @@ export const guardian: Record<string, CardScript> = {
           "card.log.wtr.helm.intellect",
           { card: { kind: "card", cardId: ctx.self.cardId }, amount: 1 },
         ));
-        ctx.destroySelf();
       },
     },
   },

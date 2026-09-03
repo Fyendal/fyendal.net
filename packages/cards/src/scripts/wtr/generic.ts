@@ -191,6 +191,7 @@ const goliathGauntletScript = (): CardScript => ({
     cost: 0,
     isAttack: false,
     goAgain: true,
+    destroySelfCost: true,
     onActivate(ctx) {
       buffNextAttack(ctx, { attack: 2, appliesTo: "attack-action", minCost: 2 });
       ctx.logPublic(localizedLog(
@@ -198,7 +199,6 @@ const goliathGauntletScript = (): CardScript => ({
         "card.log.wtr.goliathgauntlet.attack",
         { card: { kind: "card", cardId: ctx.self.cardId }, cost: 2, amount: 2 },
       ));
-      ctx.destroySelf();
     },
   },
 });
@@ -210,6 +210,7 @@ const heartenedCrossStrapScript = (): CardScript => ({
     cost: 0,
     isAttack: false,
     goAgain: true,
+    destroySelfCost: true,
     onActivate(ctx) {
       ctx.setFlag("player", "nextActionCostReduction", 2);
       ctx.logPublic(localizedLog(
@@ -217,7 +218,6 @@ const heartenedCrossStrapScript = (): CardScript => ({
         "card.log.wtr.crossstrap.cost",
         { card: { kind: "card", cardId: ctx.self.cardId }, amount: 2 },
       ));
-      ctx.destroySelf();
     },
   },
 });
@@ -230,8 +230,8 @@ const hopeMerchantsHoodScript = (): CardScript => ({
     isAttack: false,
     goAgain: false,
     timing: "instant",
+    destroySelfCost: true,
     onActivate(ctx) {
-      ctx.destroySelf();
       const p = ctx.player(ctx.seat);
       if (p.hand.length === 0) return;
       ctx.requestCardChoice(
@@ -340,9 +340,9 @@ const potionOfStrengthScript = (): CardScript => ({
     cost: 0,
     isAttack: false,
     goAgain: true,
+    destroySelfCost: true,
     onActivate(ctx) {
       nextAttack({ attack: 2 })(ctx);
-      ctx.destroySelf();
     },
   },
 });
@@ -637,6 +637,7 @@ const timesnapPotionScript = (): CardScript => ({
     cost: 0,
     isAttack: false,
     goAgain: false,
+    destroySelfCost: true,
     onActivate(ctx) {
       ctx.changeActionPoints(ctx.seat, 2);
       ctx.logPublic(localizedLog(
@@ -644,7 +645,6 @@ const timesnapPotionScript = (): CardScript => ({
         "card.log.common.actionpoints.gained",
         { card: { kind: "card", cardId: ctx.self.cardId }, amount: 2 },
       ));
-      ctx.destroySelf();
     },
   },
 });

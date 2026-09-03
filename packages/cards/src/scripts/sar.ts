@@ -240,9 +240,9 @@ export const sar: Record<string, CardScript> = {
       isAttack: false,
       goAgain: false,
       timing: "attack-reaction",
+      destroySelfCost: true,
       label: "Destroy: mark the opposing hero",
       onActivate(ctx) {
-        ctx.destroySelf();
         markHero(ctx, opponentSeat(ctx));
       },
     },
@@ -258,9 +258,9 @@ export const sar: Record<string, CardScript> = {
       isAttack: false,
       goAgain: false,
       timing: "instant",
+      destroySelfCost: true,
       label: "Destroy: top-of-deck puts go on the bottom this turn",
       onActivate(ctx) {
-        ctx.destroySelf();
         for (const p of ctx.state.players) ctx.setPlayerFlag(p.seat, "topDeckToBottom", true);
         ctx.logPublic(localizedCardLog(ctx, "Topsy Turvy: cards put on top of a deck go on the bottom this turn", "card.log.sar.topsyturvy.replacement"));
       },
@@ -276,6 +276,7 @@ export const sar: Record<string, CardScript> = {
       isAttack: false,
       goAgain: false,
       timing: "attack-reaction",
+      destroySelfCost: true,
       label: "Destroy: another dagger deals 1 damage, then is destroyed",
       canActivate(ctx) {
         const link = ctx.link;
@@ -285,7 +286,6 @@ export const sar: Record<string, CardScript> = {
         );
       },
       onActivate(ctx) {
-        ctx.destroySelf();
         const link = ctx.link;
         const daggers = ctx.player(ctx.seat).weapons.filter(
           (w) => isDagger(ctx, w) && w.instanceId !== link?.attackingCard.instanceId,
@@ -320,10 +320,10 @@ export const sar: Record<string, CardScript> = {
       isAttack: false,
       goAgain: false,
       timing: "attack-reaction",
+      destroySelfCost: true,
       label: "Destroy: an attack with stealth gets go again",
       canActivate: (ctx) => myAttack(ctx) && hasStealth(ctx, ctx.link!.attackingCard.cardId),
       onActivate(ctx) {
-        ctx.destroySelf();
         ctx.grantGoAgain();
       },
     },

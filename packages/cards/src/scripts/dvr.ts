@@ -38,10 +38,10 @@ export const dvr: Record<string, CardScript> = {
       cost: 0,
       isAttack: false,
       goAgain: true,
+      destroySelfCost: true,
       onActivate(ctx) {
         ctx.changeResources(ctx.seat, 1);
         ctx.logPublic(localizedCardLog(ctx, "Blossom of Spring: gained {r}", "card.log.common.resources.gained", { amount: 1 }));
-        ctx.destroySelf();
       },
     },
   },
@@ -51,10 +51,10 @@ export const dvr: Record<string, CardScript> = {
       cost: 1,
       isAttack: false,
       goAgain: true,
+      destroySelfCost: true,
       onActivate(ctx) {
         ctx.addModifier({ scope: "until-end-of-turn", attack: 1, appliesTo: "weapon" });
         ctx.logPublic(localizedCardLog(ctx, "Gallantry Gold: weapon attacks gain +1 attack this turn", "card.log.dvr.gallantry.weapon.attack", { amount: 1 }));
-        ctx.destroySelf();
       },
     },
   },

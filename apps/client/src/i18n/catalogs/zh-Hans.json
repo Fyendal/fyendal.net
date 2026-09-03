@@ -1312,6 +1312,7 @@
   "card.trigger.common.self.destroy.draw": "摧毁此牌并抽一张牌",
   "card.trigger.common.showtime.destroy.draw": "摧毁 Show Time! 并抽一张牌",
   "card.trigger.common.sigilmuse.destroy.ponder": "摧毁 Sigil of the Muse 并生成一个 Ponder",
+  "card.trigger.common.self.soul.put": "将此牌置入你的 soul",
   "card.trigger.common.soul.put": "将 {target} 置入你的 soul",
   "card.trigger.common.spellboundcreepers.maintain": "维持 Spellbound Creepers",
   "card.trigger.common.steam.remove": "移除一个 steam 指示物",

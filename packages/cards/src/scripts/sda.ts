@@ -145,10 +145,10 @@ export const sda: Record<string, CardScript> = {
       isAttack: false,
       goAgain: false,
       timing: "instant",
+      destroySelfCost: true,
       label: "Destroy: gain 1 action point",
       canActivate: (ctx) => ctx.getFlag("player", "boostedThisTurn") === true,
       onActivate(ctx) {
-        ctx.destroySelf();
         ctx.gainActionPoint();
       },
     },

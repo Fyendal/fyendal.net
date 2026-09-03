@@ -101,6 +101,7 @@ const breakingScales: CardScript = {
     isAttack: false,
     goAgain: false,
     timing: "attack-reaction",
+    destroySelfCost: true,
     canActivate(ctx) {
       const link = ctx.state.chain[ctx.state.chain.length - 1];
       if (!link || link.resolved) return false;
@@ -113,7 +114,6 @@ const breakingScales: CardScript = {
         "card.log.wtr.breakingscales.attack",
         { card: { kind: "card", cardId: ctx.self.cardId }, amount: 1 },
       ));
-      ctx.destroySelf();
     },
   },
 };

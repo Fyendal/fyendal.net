@@ -1,5 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  ampNextArcane,
   attackAbility,
   bloodDebtScript as bloodDebt,
   buffNextAttack,
@@ -20,9 +21,11 @@ const RUNECHANT = "SBA036";
 const GATE = "IAR222";
 const BLASMOPHET = "IAR221";
 const CORRUPTED_CORPSE = "IAR090";
+const COURAGE = "DTD232";
 const EMBODIMENT_OF_EARTH = "AJV028";
 const FROSTBITE = "AJV029";
 const GRAPHENE_CHELICERA = "SAR033";
+const LIGHTNING_FLOW = "OMN203";
 const PONDER = "DYN244";
 const SPECTRAL_SHIELD = "SEN037";
 const EQUIPMENT_SLOTS = ["head", "chest", "arms", "legs"] as const;
@@ -117,6 +120,25 @@ function firstHeadBangingAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>
   const guardianCount = Number(ctx.getFlag("player", "playedAttackActionTypeCount:guardian"));
   const reveredCount = Number(ctx.getFlag("player", "playedAttackActionTypeCount:revered"));
   return guardianCount <= (guardian ? 1 : 0) && reveredCount <= (revered ? 1 : 0);
+}
+
+function maintainChannelStormgarden(ctx: ScriptCtx): void {
+  const remaining = ctx.getCounter("iarStormgardenRemaining");
+  if (remaining <= 0) return;
+  const lightning = ctx.player(ctx.seat).pitch.filter((card) => hasType(ctx, card, "lightning"));
+  if (lightning.length < remaining) {
+    ctx.destroySelf();
+    return;
+  }
+  ctx.requestCardChoice(
+    "iar-stormgarden-bottom",
+    decisionPrompt(
+      "Put a Lightning card from pitch on the bottom",
+      "card.ele.pitch.card.bottom",
+      { values: { type: "Lightning" } },
+    ),
+    lightning.map((card) => card.instanceId),
+  );
 }
 
 function controlsVox(ctx: ScriptCtx): boolean {
@@ -1665,6 +1687,52 @@ export const iar: Record<string, CardScript> = {
     },
   },
 
+  "exorcism|1": {
+    onPlay(ctx) {
+      buffNextAttack(ctx, {
+        attack: 3,
+        onHitScriptHook: {
+          hook: "iar-exorcism-hit",
+          label: "turn all cards in the hit hero's banished zone face-down",
+          heroOnly: true,
+        },
+      });
+    },
+    onGrantedHit(ctx, hook) {
+      if (hook !== "iar-exorcism-hit") return;
+      for (const card of ctx.player(opponentSeat(ctx)).banish) {
+        if (!card.faceDown) ctx.setCardFaceDown(card.instanceId, true);
+      }
+    },
+  },
+
+  "bravery of the blade|1": {
+    additionalCost(ctx) {
+      const hand = ctx.player(ctx.seat).hand;
+      if (hand.length === 0) return;
+      ctx.requestCardChoice(
+        "iar-bravery-charge",
+        decisionPrompt(
+          "Charge your hero's soul?",
+          "card.dtd.charge.soul.optional",
+          { optionMessages: commonOptionMessages("no") },
+        ),
+        ["no", ...hand.map((card) => card.instanceId)],
+      );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "iar-bravery-charge" && option !== "no") ctx.charge(Number(option));
+    },
+    onAttackDeclared(ctx) {
+      if (ctx.getFlag("player", "chargedThisTurn") === true) ctx.grantGoAgain();
+    },
+    canTriggerOnHit: (ctx) =>
+      selfHitsHero(ctx) && ctx.getFlag("player", "chargedThisTurn") === true,
+    onHit(ctx) {
+      ctx.createToken(COURAGE);
+    },
+  },
+
   "head banging chorus|2": {
     ...suspenseAura(),
     onFriendlyPlay(ctx, played) {
@@ -1684,6 +1752,56 @@ export const iar: Record<string, CardScript> = {
         ctx.drawCards(ctx.seat, 1);
       }
     },
+  },
+
+  "channel stormgarden|2": {
+    onEnterArena(ctx) {
+      ctx.createToken(LIGHTNING_FLOW);
+    },
+    onFriendlyDestroyed(ctx, destroyed, destroyingSeat) {
+      if (
+        destroyingSeat !== ctx.seat ||
+        !named(ctx, destroyed, "Lightning Flow") ||
+        Number(ctx.getFlag("player", "destroyedNameCount:lightning flow")) !== 1
+      ) return;
+      ampNextArcane(ctx, 1);
+    },
+    triggers: [{
+      event: "end-of-turn",
+      label: "Channel Lightning",
+      labelMessage: { id: "card.trigger.common.channel.lightning" },
+      effect(ctx) {
+        const flow = ctx.getCounter("flow") + 1;
+        ctx.setCounter("flow", flow);
+        ctx.setCounter("iarStormgardenRemaining", flow);
+        maintainChannelStormgarden(ctx);
+      },
+    }],
+    onChoose(ctx, hook, option) {
+      if (hook !== "iar-stormgarden-bottom") return;
+      if (ctx.putOnDeckBottom(Number(option))) {
+        ctx.setCounter(
+          "iarStormgardenRemaining",
+          ctx.getCounter("iarStormgardenRemaining") - 1,
+        );
+        maintainChannelStormgarden(ctx);
+      }
+    },
+  },
+
+  "blessing of suraya|2": {
+    onCardPutIntoSoul(ctx) {
+      ctx.createToken(PONDER);
+    },
+    triggers: [{
+      event: "start-of-turn",
+      whose: "subject",
+      label: "Put Blessing of Suraya into soul",
+      labelMessage: { id: "card.trigger.common.self.soul.put" },
+      effect(ctx) {
+        if (ctx.putIntoSoul(ctx.self.instanceId)) ctx.createToken(PONDER);
+      },
+    }],
   },
 
   "ice aged oak|3": {

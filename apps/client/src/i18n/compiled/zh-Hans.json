@@ -13303,6 +13303,12 @@
       "value": "摧毁此牌并抽一张牌"
     }
   ],
+  "card.trigger.common.self.soul.put": [
+    {
+      "type": 0,
+      "value": "将此牌置入你的 soul"
+    }
+  ],
   "card.trigger.common.shiyana.copy": [
     {
       "type": 0,

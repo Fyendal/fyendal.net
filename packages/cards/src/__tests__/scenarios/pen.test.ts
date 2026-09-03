@@ -68,6 +68,26 @@ describe("PEN — import and set mechanics", () => {
     expect(g.state.players[0]!.equipment.arms?.tapped).toBe(true);
   });
 
+  it("Myrkhellir Helm is destroyed as a cost and doubles the next Gold draw", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        equipment: { ...NO_EQUIPMENT, head: "myrkhellir helm|0" },
+        board: ["gold|0"],
+        deck: ["head jab|1", "snatch|1"],
+        resources: 4,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.activate("myrkhellir helm|0", { settle: false })
+      .expectNoEquipment(0, "head")
+      .settle()
+      .activate("gold|0")
+      .expectHandSize(0, 2)
+      .expectZoneSize(0, "board", 0);
+  });
+
   it("pays Touch of Reality's X cost from floating resources without another decision", () => {
     const g = scenario({ seats: [
       {
@@ -439,6 +459,24 @@ describe("PEN — import and set mechanics", () => {
     expect(g.state.pendingDecision?.chooseHook).toBe("pen-quickening-tap");
     g.chooseCard("aether ashwing|0");
     expect(g.state.players[0]!.board.find((card) => cardData[card.cardId]?.name === "Aether Ashwing")?.tapped).toBe(true);
+  });
+
+  it("Quickening Sand triggers Riptide when defending a weapon attack with go again", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        { hero: "rhinar", heroKey: "riptide|0", hand: ["quickening sand|3"], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", weapons: ["spider's bite|0"], resources: 2, equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.activate("spider's bite|0")
+      .blockWith("quickening sand|3")
+      .settle()
+      .chooseCard("riptide|0")
+      .settle();
+
+    expect(g.state.players[1]!.life).toBe(19);
   });
 
   it("Tiger Trap counts only attacks whose power is greater than base", () => {

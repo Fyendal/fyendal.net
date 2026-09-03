@@ -348,7 +348,7 @@ export type MotionPreference = "system" | "full" | "reduced";
 export type PlayabilityCuePreference = "glow" | "high-contrast";
 
 export interface GameSettings {
-  version: 5;
+  version: 6;
   priorityWindowMode: PriorityWindowMode;
   lessGuidance: boolean;
   skipPlayConfirmation: boolean;
@@ -359,9 +359,9 @@ export interface GameSettings {
 }
 
 export const DEFAULT_GAME_SETTINGS: GameSettings = {
-  version: 5,
+  version: 6,
   priorityWindowMode: "always-pause",
-  lessGuidance: false,
+  lessGuidance: true,
   skipPlayConfirmation: true,
   motionPreference: "system",
   playabilityCuePreference: "glow",
@@ -381,14 +381,11 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
     if (!value || typeof value !== "object") return DEFAULT_GAME_SETTINGS;
     const record = value as Record<string, unknown>;
 
-    // Version 2 rolls the current behavior defaults out once. Preserve the
-    // unrelated guidance preference while replacing the old defaults;
-    // subsequent version 2 choices remain user-controlled.
+    // Version 2 rolled the priority and confirmation defaults out once.
+    // Version 6 hides guidance once for every existing user; choices made
+    // after that migration remain user-controlled.
     if (record.version === 1) {
-      return {
-        ...DEFAULT_GAME_SETTINGS,
-        lessGuidance: typeof record.lessGuidance === "boolean" ? record.lessGuidance : false,
-      };
+      return DEFAULT_GAME_SETTINGS;
     }
     if (
       (
@@ -396,6 +393,7 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
         && record.version !== 3
         && record.version !== 4
         && record.version !== 5
+        && record.version !== 6
       )
       || (
         record.priorityWindowMode !== "auto-pass"
@@ -406,6 +404,7 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
       record.version === 3
       || record.version === 4
       || record.version === 5
+      || record.version === 6
     )
       && (
         record.motionPreference === "system"
@@ -415,7 +414,7 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
       ? record.motionPreference
       : "system";
     if (
-      (record.version === 4 || record.version === 5)
+      (record.version === 4 || record.version === 5 || record.version === 6)
       && (
         typeof record.soundEffectsEnabled !== "boolean"
         || typeof record.soundEffectsVolume !== "number"
@@ -424,7 +423,7 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
         || record.soundEffectsVolume > 100
       )
     ) return DEFAULT_GAME_SETTINGS;
-    const playabilityCuePreference = record.version === 5
+    const playabilityCuePreference = record.version === 5 || record.version === 6
       ? record.playabilityCuePreference
       : "glow";
     if (
@@ -432,18 +431,20 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
       && playabilityCuePreference !== "high-contrast"
     ) return DEFAULT_GAME_SETTINGS;
     return {
-      version: 5,
+      version: 6,
       priorityWindowMode: record.priorityWindowMode,
-      lessGuidance: typeof record.lessGuidance === "boolean" ? record.lessGuidance : false,
+      lessGuidance: record.version === 6 && typeof record.lessGuidance === "boolean"
+        ? record.lessGuidance
+        : true,
       skipPlayConfirmation: typeof record.skipPlayConfirmation === "boolean"
         ? record.skipPlayConfirmation
         : true,
       motionPreference,
       playabilityCuePreference,
-      soundEffectsEnabled: record.version === 4 || record.version === 5
+      soundEffectsEnabled: record.version === 4 || record.version === 5 || record.version === 6
         ? record.soundEffectsEnabled as boolean
         : true,
-      soundEffectsVolume: record.version === 4 || record.version === 5
+      soundEffectsVolume: record.version === 4 || record.version === 5 || record.version === 6
         ? record.soundEffectsVolume as number
         : 35,
     };
