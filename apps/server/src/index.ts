@@ -22,6 +22,7 @@ import { appendClusterEvent, ClusterEventConsumer, sweepClusterEvents, type Clus
 import { tryAcquireLease } from "./leases.js";
 import { consoleError } from "./logging.js";
 import { PgRateLimiter, sweepRateLimits } from "./rateLimits.js";
+import { startGatewayRuntimeMetrics, type RuntimeMetricLogger } from "./runtimeMetrics.js";
 import {
   PgRoomStore,
   hashReconnectToken,
@@ -65,6 +66,9 @@ interface ServerDeps {
   fabraryClient?: FabraryClient;
   /** Unique Cloud Run container identity; generated per gateway when omitted. */
   instanceId?: string;
+  /** Production observability seam. Tests and local development default off. */
+  runtimeMetricsIntervalMs?: number;
+  runtimeMetricLogger?: RuntimeMetricLogger;
 }
 
 /** http server → its WebSocketServer, so shutdown can reach ws clients. */
@@ -1037,6 +1041,45 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         .catch((error: Error) => consoleError("presence heartbeat failed", error));
     }, PRESENCE_HEARTBEAT_MS);
     server.on("close", () => clearInterval(heartbeat));
+  }
+
+  const configuredMetricsInterval = Number(
+    process.env.RUNTIME_METRICS_INTERVAL_MS ?? 30_000,
+  );
+  const runtimeMetricsIntervalMs = deps.runtimeMetricsIntervalMs
+    ?? (process.env.NODE_ENV === "production" ? configuredMetricsInterval : 0);
+  if (runtimeMetricsIntervalMs > 0) {
+    const pool = deps.db as Queryable & {
+      readonly totalCount?: number;
+      readonly idleCount?: number;
+      readonly waitingCount?: number;
+    };
+    const stopRuntimeMetrics = startGatewayRuntimeMetrics(
+      {
+        instanceId,
+        connections: () => ({
+          webSockets: wss.clients.size,
+          clients: allClients.size,
+          lobbyClients: lobbyClients.size,
+          rooms: clientsByRoom.size,
+          authenticatedSessions: connections.bySessionToken.size,
+          queuedUsers: queuedUsers.size,
+          clientIps: connsByIp.size,
+        }),
+        databasePool: typeof pool.totalCount === "number"
+          && typeof pool.idleCount === "number"
+          && typeof pool.waitingCount === "number"
+          ? () => ({
+              total: pool.totalCount!,
+              idle: pool.idleCount!,
+              waiting: pool.waitingCount!,
+            })
+          : undefined,
+      },
+      runtimeMetricsIntervalMs,
+      deps.runtimeMetricLogger,
+    );
+    server.on("close", stopRuntimeMetrics);
   }
   return server;
 }
