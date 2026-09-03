@@ -97,6 +97,7 @@ export const sda: Record<string, CardScript> = {
         goAgain: false,
         oncePerTurn: true,
         label: "Remove a steam counter: Attack",
+        removeCounterCost: { key: "steam", amount: 1 },
         canActivate: (ctx) => ctx.getCounter("steam") > 0,
       },
       {
@@ -111,10 +112,6 @@ export const sda: Record<string, CardScript> = {
         },
       },
     ],
-    onAttackDeclared(ctx) {
-      if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId) return;
-      ctx.setCounter("steam", Math.max(0, ctx.getCounter("steam") - 1));
-    },
     modifyAttack(ctx) {
       if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId) return 0;
       return 1 + boostedLinks(ctx);
@@ -122,10 +119,12 @@ export const sda: Record<string, CardScript> = {
   },
 
   "talishar, the lost prince|0": {
-    activated: { cost: 2, isAttack: true, goAgain: false, oncePerTurn: true },
-    onAttackDeclared(ctx) {
-      if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId) return;
-      ctx.setCounter("rust", ctx.getCounter("rust") + 1);
+    activated: {
+      cost: 2,
+      isAttack: true,
+      goAgain: false,
+      oncePerTurn: true,
+      putCounterCost: { key: "rust", amount: 1 },
     },
     triggers: [
       {

@@ -29,7 +29,7 @@ const FANG_STRIKE = "MST023";
 const FRAILTY = "SAZ035";
 const FROSTBITE = "EVR197";
 const GOLD = "DYN243";
-const HYPER_DRIVER = "ARC036";
+const HYPER_DRIVER = "EVO234";
 const INERTIA = "SAZ036";
 const LIGHTNING = "DTD195";
 const MIGHT = "SKA035";
@@ -551,7 +551,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       const driver = named(ctx, target, "Hyper Driver");
       if (ctx.destroyPermanent(target.instanceId) && driver) ctx.setCounter("scrappedDriver", 1);
     },
-    onAttackDeclared(ctx) { if (ctx.getCounter("scrappedDriver")) { const driver = ctx.createToken(HYPER_DRIVER); if (driver) ctx.setCardCounter(driver.instanceId, "steam", 2); } },
+    onAttackDeclared(ctx) { if (ctx.getCounter("scrappedDriver")) ctx.createToken(HYPER_DRIVER, undefined, { steam: 2 }); },
   },
   "assembly module|3": {
     onEnterArena(ctx) { ctx.setCounter("steam", 1); },

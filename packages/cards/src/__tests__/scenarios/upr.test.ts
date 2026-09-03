@@ -50,7 +50,10 @@ describe("UPR — registration and heroes", () => {
         { hero: "dorinthea" },
       ],
     });
-    s.activate("azvolai|0").chooseCard("DVR001").chooseOption("done").blockWith().settle();
+    const opposingHeroId = s.state.players[1]!.hero.instanceId;
+    s.activate("azvolai|0").chooseCard("DVR001");
+    expect(s.state.pendingDecision?.options).not.toContain(String(opposingHeroId));
+    s.chooseOption("done").blockWith().settle();
     s.expectLife(1, 17);
   });
 

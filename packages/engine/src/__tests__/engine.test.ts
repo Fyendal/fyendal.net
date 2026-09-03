@@ -493,6 +493,31 @@ describe("game setup & turn structure", () => {
     expect(p.board.some((card) => card.cardId === "TOKEN")).toBe(false);
   });
 
+  it("preserves a token's initial counters through a replacement decision", () => {
+    const s = makeGame(103);
+    const p = player(s, 0);
+    s.scriptsRef = {
+      ...s.scriptsRef,
+      HERO_A: {
+        optionalFriendlyTokenCreationReplacement: {
+          label: "Replace this token?",
+          condition: (_ctx, cardId) => cardId === "TOKEN",
+          effect: () => {},
+        },
+      },
+    };
+
+    makeCtx(s, engineRuntime, 0, p.hand[0]!).createToken(
+      "TOKEN",
+      undefined,
+      { steam: 2 },
+    );
+
+    expect(s.pendingDecision?.tokenCreationReplacement?.initialCounters).toEqual({ steam: 2 });
+    expect(answerTokenCreationReplacement(s, engineRuntime, 0, "no")).toBeUndefined();
+    expect(p.board.find((card) => card.cardId === "TOKEN")?.counters).toEqual({ steam: 2 });
+  });
+
   it("canonicalizes token reprints before creating distinct instances", () => {
     const s = makeGame(110);
     const p = player(s, 0);

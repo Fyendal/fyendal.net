@@ -19,6 +19,20 @@ describe("MPG — import and Guardian pressure", () => {
     expect(scripts.MPG001).toBeDefined();
   });
 
+  it("Visit Anvilheim removes the declared number of defense counters", () => {
+    const g = scenario({
+      seats: [
+        { ...valda, resources: 2, hand: ["visit anvilheim|3"], weapons: ["seasoned saviour|0"] },
+        { hero: "dorinthea" },
+      ],
+    });
+    g.state.players[0]!.weapons[0]!.defCounters = 2;
+
+    g.play("visit anvilheim|3").chooseOption("X = 2").chooseCard("seasoned saviour|0");
+
+    expect(g.state.players[0]!.weapons[0]?.defCounters).toBe(0);
+  });
+
   it("Valda, Seismic Impact creates Seismic Surges when an opponent draws during the action phase", () => {
     const g = scenario({
       active: 1,

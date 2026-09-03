@@ -34,6 +34,15 @@ const BLOODROT_POX = "SAZ034";
 const FRAILTY = "SAZ035";
 const INERTIA = "SAZ036";
 
+function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {
+  const player = ctx.player(seat);
+  return [
+    ...Object.values(player.equipment)
+      .filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
+    ...player.weapons.filter((card) => ctx.cardData(card.cardId).cardType === "equipment"),
+  ];
+}
+
 
 
 
@@ -300,9 +309,7 @@ export const saz: Record<string, CardScript> = {
       return ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
-      const equips = Object.values(ctx.player(opponentSeat(ctx)).equipment).filter(
-        (c): c is CardInstance => !!c,
-      );
+      const equips = equipmentCards(ctx, opponentSeat(ctx));
       if (equips.length === 0) return;
       ctx.requestCardChoice(
         "drill-shot",
@@ -312,8 +319,8 @@ export const saz: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "drill-shot") return;
-      const eq = Object.values(ctx.player(opponentSeat(ctx)).equipment).find(
-        (c) => c?.instanceId === Number(option),
+      const eq = equipmentCards(ctx, opponentSeat(ctx)).find(
+        (c) => c.instanceId === Number(option),
       );
       if (!eq) return;
       ctx.addCardDefenseCounters(eq.instanceId, 1);

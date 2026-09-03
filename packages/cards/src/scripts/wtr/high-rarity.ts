@@ -267,6 +267,7 @@ export const wtrHighRarity: Record<string, CardScript> = {
     activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", removeCounterCost: { key: "energy", amount: 3 }, onActivate(ctx) { ctx.changeResources(ctx.seat, 1); } },
   },
   "enlightened strike|1": {
+    requiredHandCardsForAdditionalCost: 1,
     additionalCost(ctx) { ctx.requestCardChoice("estrike-bottom", decisionPrompt("Enlightened Strike: put a card from hand on the bottom of your deck", "card.wtr.estrike.hand.bottom"), ctx.player(ctx.seat).hand.map((card) => card.instanceId)); },
     onChoose(ctx, hook, option) {
       if (hook === "estrike-bottom") { if (ctx.putOnDeckBottom(Number(option))) ctx.requestChoice("estrike-mode", decisionPrompt("Choose a mode", "card.wtr.estrike.mode.choose", { optionMessages: { draw: decisionMessage("card.wtr.estrike.option.draw"), "+2": decisionMessage("card.wtr.estrike.option.power"), "go again": decisionMessage("card.wtr.estrike.option.goagain") } }), ["draw", "+2", "go again"]); return; }

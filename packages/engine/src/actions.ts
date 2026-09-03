@@ -666,6 +666,9 @@ export function activateAbility(
     costAbility = {
       ...costAbility,
       cost: variableResourceCost(resolvedVariableCost, declaredVariableX!),
+      ...(variableCost?.removeCounterKey && declaredVariableX! > 0
+        ? { removeCounterCost: { key: variableCost.removeCounterKey, amount: declaredVariableX! } }
+        : {}),
     };
   }
   const discardCostPrep = prepareActivatedDiscardCost(

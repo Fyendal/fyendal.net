@@ -317,6 +317,37 @@ describe("OMN — import and set mechanics", () => {
     )).toBe(false);
   });
 
+  it("Beckon Steel does not queue an attack when a Flurry-enabled sword misses", () => {
+    const g = scenario({
+      seats: [
+        hero("hala, bladesaint of the vow|0", {
+          resources: 2,
+          weapons: ["zenith blade|0"],
+          board: ["flurry|0"],
+          hand: ["beckon steel|3"],
+        }),
+        foe({ hand: ["raging onslaught|1", "raging onslaught|1"] }),
+      ],
+    });
+    const sword = g.state.players[0]!.weapons[0]!;
+    sword.counters = { power: 2, sharpenedTurn: g.state.turn };
+
+    g.attackWithWeapon("zenith blade|0")
+      .blockWith("raging onslaught|1", "raging onslaught|1")
+      .react("beckon steel|3")
+      .settle();
+
+    expect(g.state.chain).toHaveLength(1);
+    expect(g.state.chain[0]).toMatchObject({ resolved: true, damage: 0 });
+    expect(g.state.log.some((entry) =>
+      entry.publicText?.includes("Beckon Steel triggers: On hit")
+    )).toBe(false);
+    expect(legalIntents(g.state, 0)).toContainEqual(expect.objectContaining({
+      kind: "activate-ability",
+      sourceInstanceId: sword.instanceId,
+    }));
+  });
+
   it("Reverent Rerebrace replaces Beckon Steel before its counter threshold", () => {
     const g = scenario({
       seats: [

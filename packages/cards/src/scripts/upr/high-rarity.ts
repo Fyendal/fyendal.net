@@ -74,6 +74,16 @@ const iyslander: CardScript = {
   triggers: [{ event: "card-played", label: "Create a Frostbite", condition: (ctx, card) => ctx.state.activePlayer !== ctx.seat && !!card && has(ctx, card, "ice"), effect: (ctx) => ctx.createToken(FROSTBITE, opponentSeat(ctx)) }],
 };
 
+function equippedCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {
+  return [
+    ...Object.values(ctx.player(seat).equipment)
+      .filter((card): card is DeepReadonly<CardInstance> => !!card),
+    ...ctx.player(seat).weapons.filter(
+      (card) => ctx.cardData(card.cardId).cardType === "equipment",
+    ),
+  ];
+}
+
 export const uprHighRarity: Record<string, CardScript> = {
   "blood of the dracai|1": { triggers: [{ event: "card-pitched", sourceZone: "pitch", label: "Discount the next 3 Draconic cards", condition: (ctx, pitched) => pitched?.instanceId === ctx.self.instanceId, effect(ctx) { ctx.setPlayerFlag(ctx.seat, "draconicDiscount", Number(ctx.getPlayerFlag(ctx.seat, "draconicDiscount")) + 3); } }] },
   "dromai, ash artist|0": dromai,
@@ -86,17 +96,16 @@ export const uprHighRarity: Record<string, CardScript> = {
       const red = revealRed(ctx, 2);
       if (red <= 0) return;
       ctx.setCounter("tomeltaiRed", red);
-      const equipment = Object.values(ctx.player(opponentSeat(ctx)).equipment)
-        .filter((card): card is DeepReadonly<CardInstance> => !!card);
+      const equipment = equippedCards(ctx, opponentSeat(ctx));
       if (equipment.length) ctx.requestCardChoice("tomeltai-equipment", decisionPrompt("Choose equipment for Tomeltai", "card.upr.tomeltai.equipment.choose"), equipment.map((card) => card.instanceId));
     },
     onChoose(ctx, hook, option) {
       if (hook !== "tomeltai-equipment") return;
-      const equipment = Object.values(ctx.player(opponentSeat(ctx)).equipment)
-        .find((card) => card?.instanceId === Number(option));
+      const equipment = equippedCards(ctx, opponentSeat(ctx))
+        .find((card) => card.instanceId === Number(option));
       if (!equipment) return;
       ctx.addCardDefenseCounters(equipment.instanceId, ctx.getCounter("tomeltaiRed"));
-      if ((ctx.cardData(equipment.cardId).defense ?? 0) - (equipment.defCounters ?? 0) - ctx.getCounter("tomeltaiRed") <= 0) {
+      if ((ctx.cardData(equipment.cardId).defense ?? 0) - (equipment.defCounters ?? 0) <= 0) {
         ctx.destroyPermanent(equipment.instanceId);
       }
     },
@@ -182,8 +191,8 @@ export const uprHighRarity: Record<string, CardScript> = {
       if (cause === "phantasm" && has(ctx, card, "illusionist")) ctx.addCounter(ctx.self.instanceId, "haunt", 1);
     },
     activated: [
-      { cost: 0, isAttack: false, goAgain: true, oncePerTurn: true, label: "Become an ally", canActivate: (ctx) => ctx.getCounter("haunt") > 0,
-        onActivate(ctx) { ctx.addCounter(ctx.self.instanceId, "haunt", -1); const n = ctx.getCounter("haunt"); if (ctx.becomeAllyUntilEndOfTurn(ctx.self.instanceId, n, n)) ctx.grantCardKeyword(ctx.self.instanceId, "phantasm"); } },
+      { cost: 0, isAttack: false, goAgain: true, oncePerTurn: true, removeCounterCost: { key: "haunt", amount: 1 }, label: "Become an ally", canActivate: (ctx) => ctx.getCounter("haunt") > 0,
+        onActivate(ctx) { const n = ctx.getCounter("haunt"); if (ctx.becomeAllyUntilEndOfTurn(ctx.self.instanceId, n, n)) ctx.grantCardKeyword(ctx.self.instanceId, "phantasm"); } },
       { cost: 3, isAttack: true, goAgain: false, oncePerTurn: true, label: "Attack", canActivate: (ctx) => has(ctx, ctx.self, "ally") },
     ],
   },

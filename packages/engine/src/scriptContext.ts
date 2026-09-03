@@ -1772,10 +1772,16 @@ export function makeCtx(
       const counters = (target.hero.counters ??= {});
       counters.auraTokenCreationLockedUntilTurn = state.turn + 1;
     },
-    createToken(cardId, tokenSeat) {
+    createToken(cardId, tokenSeat, initialCounters) {
       const target =
         tokenSeat === undefined ? player : (state.players[tokenSeat] as PlayerState);
-      return runtime.commands.createTokenFor(state, target, cardId, tokenCreationCause);
+      return runtime.commands.createTokenFor(
+        state,
+        target,
+        cardId,
+        tokenCreationCause,
+        initialCounters,
+      );
     },
     createTokenCopy(instanceId) {
       const source = findPermanent(state, instanceId);
@@ -1794,10 +1800,17 @@ export function makeCtx(
       }
       return token;
     },
-    createTokens(cardId, count, tokenSeat) {
+    createTokens(cardId, count, tokenSeat, initialCounters) {
       const target =
         tokenSeat === undefined ? player : (state.players[tokenSeat] as PlayerState);
-      return runtime.commands.createTokensFor(state, target, cardId, count, tokenCreationCause);
+      return runtime.commands.createTokensFor(
+        state,
+        target,
+        cardId,
+        count,
+        tokenCreationCause,
+        initialCounters,
+      );
     },
     createCardInHand(cardId, targetSeat) {
       const target =

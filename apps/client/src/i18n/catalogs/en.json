@@ -921,6 +921,7 @@
   "card.hnt.draconicdagger.equip.upto": "Equip up to {count} Draconic daggers from your graveyard",
   "card.hnt.equipment.defensecounter": "Put a -1 defense counter on equipment",
   "card.hnt.hand.card.banish": "Banish a card from your hand",
+  "card.hnt.ignite.discount": "The next Draconic card costs {amount} less resource to play or activate",
   "card.hnt.longwhisker.modes.choose": "Long Whisker Loyalty: choose {amount, plural, one {# mode} other {# modes}}",
   "card.hnt.longwhisker.modes.more": "Long Whisker Loyalty: choose {amount, plural, one {# more mode} other {# more modes}}",
   "card.hnt.longwhisker.option.additionalattack": "Attack with the target dagger an additional time",

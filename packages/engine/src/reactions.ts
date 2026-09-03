@@ -11,7 +11,11 @@ import {
 } from "./cardProperties.js";
 
 import { activeModifiers } from "./combatModifiers.js";
-import { attackHasDominate } from "./combatValues.js";
+import {
+  attackHasDominate,
+  attackMaxNonBlockDefenders,
+  attackNonBlockDefenderCount,
+} from "./combatValues.js";
 
 import {
   isValidVariableX,
@@ -381,6 +385,9 @@ export function activateWindowAbility(
     costAbility = {
       ...costAbility,
       cost: variableResourceCost(resolvedVariableCost, declaredVariableX!),
+      ...(variableCost?.removeCounterKey && declaredVariableX! > 0
+        ? { removeCounterCost: { key: variableCost.removeCounterKey, amount: declaredVariableX! } }
+        : {}),
     };
   }
   const discardCostPrep = prepareActivatedDiscardCost(
@@ -572,6 +579,14 @@ export function playReaction(
     return `${nameOf(state, card.cardId)} cannot be played due to a card-type restriction`;
   }
   const isDefReact = data.cardType === "defense-reaction";
+  const maxNonBlock = attackMaxNonBlockDefenders(state, link);
+  if (
+    isDefReact &&
+    maxNonBlock !== undefined &&
+    attackNonBlockDefenderCount(state, link) >= maxNonBlock
+  ) {
+    return `this attack can't be defended by more than ${maxNonBlock} non-block cards`;
+  }
   // "defense reactions can't be played (from arsenal) this chain link"
   const drRestriction = defenseReactionRestriction(state, link);
   if (isDefReact && drRestriction.all) {

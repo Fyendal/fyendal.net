@@ -326,6 +326,34 @@ describe("Armory Decks — AMX, AGB, and ASR", () => {
     expect(cards.every((card) => isImplemented(card))).toBe(true);
   });
 
+  it("Maxx offers Crank for the Hyper Driver token created by her ability", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "maxx 'the hype' nitro|0",
+          resources: 2,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.state.players[0]!.flags.boostedThisTurn = true;
+
+    g.activate("maxx 'the hype' nitro|0", { settle: false });
+    while (g.state.pendingDecision?.kind === "priority-window") g.passPriority();
+
+    expect(g.state.pendingDecision?.chooseHook).toBe("engine-crank");
+    const driver = g.state.players[0]!.board.find((card) =>
+      functionalKeyOf(cardData[card.cardId]!) === "hyper driver|0"
+    );
+    expect(driver?.counters?.steam).toBe(2);
+    g.chooseOption("yes");
+    expect(g.state.players[0]!.board.find((card) =>
+      functionalKeyOf(cardData[card.cardId]!) === "hyper driver|0"
+    )?.counters?.steam).toBe(1);
+  });
+
   it("Puffer Jacket gives a non-token Hyper Driver an additional steam counter", () => {
     const g = scenario({
       seats: [
@@ -446,6 +474,27 @@ describe("Armory Decks — AHA, AZS, and AOL", () => {
     });
     g.play("brimming blade|1").attackWithWeapon("zenith blade|0").blockWith().settle();
     g.expectFinalAttack(5).expectAP(0, 1);
+  });
+
+  it("Paragon Plate removes the attacking sword's counter when its ability is announced", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["zenith blade|0"],
+          resources: 1,
+          equipment: { ...NO_EQUIPMENT, chest: "paragon plate|0" },
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.state.players[0]!.weapons[0]!.counters = { power: 1 };
+
+    g.attackWithWeapon("zenith blade|0").blockWith().activate("paragon plate|0", { settle: false });
+
+    expect(g.state.chain.at(-1)?.attackingCard.counters?.power).toBe(0);
+    g.passPriority().passPriority();
+    g.expectResources(0, 1);
   });
 
   it("Zenith Blade only gets go again on its first attack when Flurry enables a second", () => {

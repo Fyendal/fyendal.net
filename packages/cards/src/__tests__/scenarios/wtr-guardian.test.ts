@@ -132,6 +132,17 @@ describe("WTR Guardian — crush attacks", () => {
       .expectLife(1, 14);
   });
 
+  it("Buckling Blow can put its counter on off-hand equipment", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["buckling blow|3"], resources: 4 },
+        { hero: "rhinar", hand: [], weapons: ["seasoned saviour|0"] },
+      ],
+    });
+    g.play("buckling blow|3").blockWith().settle().chooseOption("off-hand");
+    expect(g.state.players[1]!.weapons[0]?.defCounters).toBe(1);
+  });
+
   it("Cartilage Crush crush taxes the opponent's next action", () => {
     const g = scenario({
       seats: [

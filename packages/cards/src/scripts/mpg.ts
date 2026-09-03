@@ -732,14 +732,14 @@ Object.assign(mpg, {
     },
   },
   "visit anvilheim|3": {
-    variablePlayCost: { base: 0, counterKey: "anvilheimX", prompt: decisionPrompt("Choose X", "engine.decision.x.choose"), maximum(ctx: ScriptCtx) { return ctx.player(ctx.seat).weapons.filter((card) => hasType(ctx, card, "off-hand")).reduce((maximum, card) => Math.max(maximum, -(card.defCounters ?? 0)), 0); } },
+    variablePlayCost: { base: 0, counterKey: "anvilheimX", prompt: decisionPrompt("Choose X", "engine.decision.x.choose"), maximum(ctx: ScriptCtx) { return ctx.player(ctx.seat).weapons.filter((card) => hasType(ctx, card, "off-hand")).reduce((maximum, card) => Math.max(maximum, card.defCounters ?? 0), 0); } },
     onPlay(ctx: ScriptCtx) {
       const x = ctx.getCounter("anvilheimX");
-      const offHands = ctx.player(ctx.seat).weapons.filter((card) => hasType(ctx, card, "off-hand") && -(card.defCounters ?? 0) >= x);
+      const offHands = ctx.player(ctx.seat).weapons.filter((card) => hasType(ctx, card, "off-hand") && (card.defCounters ?? 0) >= x);
       if (x > 0 && offHands.length) ctx.requestCardChoice("anvilheim", decisionPrompt(`Remove ${x} -1 defense counter${x === 1 ? "" : "s"}`, "card.mpg.defensecounter.remove", { values: { count: x } }), offHands.map((card) => card.instanceId));
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
-      if (hook === "anvilheim") ctx.addCardDefenseCounters(Number(option), ctx.getCounter("anvilheimX"));
+      if (hook === "anvilheim") ctx.addCardDefenseCounters(Number(option), -ctx.getCounter("anvilheimX"));
     },
   },
   "daily grind|3": {

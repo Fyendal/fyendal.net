@@ -4029,6 +4029,20 @@
       "value": "Banish a card from your hand"
     }
   ],
+  "card.hnt.ignite.discount": [
+    {
+      "type": 0,
+      "value": "The next Draconic card costs "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " less resource to play or activate"
+    }
+  ],
   "card.hnt.longwhisker.modes.choose": [
     {
       "type": 0,

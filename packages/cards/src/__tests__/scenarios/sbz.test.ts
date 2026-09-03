@@ -128,11 +128,11 @@ describe("SBZ — Blaze, Firemind", () => {
     // Dorinthea attacks; the attack window opens (Blaze's instant ability is live)
     s.play("wounded bull|1", { settle: false });
     s.passPriority(); // Dorinthea yields the window to Blaze
-    s.activate(BLAZE, { settle: false }); // ability rides the stack
+    s.activate(BLAZE, { settle: false }); // declare X before the ability is stacked
+    s.doRaw({ kind: "choose", optionId: "X = 4" });
+    expect(s.state.players[0]!.hero.counters?.energy).toBe(0);
     s.passPriority(); // Blaze passes
     s.passPriority(); // Dorinthea passes; the ability resolves
-    s.chooseOption("4"); // remove 4 counters (settles into the banish choice)
-    expect(s.state.players[0]!.hero.counters?.energy).toBe(0);
     // answer the banish choice without settling — Blaze still needs the window
     const emeritus = s.state.players[0]!.hand.find((c) => c.cardId === "SBZ015")!;
     s.doRaw({ kind: "choose", optionId: String(emeritus.instanceId) });

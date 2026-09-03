@@ -227,6 +227,21 @@ describe("PersistedStateV1", () => {
       .pendingDecision).toEqual(source.pendingDecision);
   });
 
+  it("round trips initial counters for a queued token creation", () => {
+    const source = game();
+    source.pendingTokenCreations.push({
+      seat: 0,
+      cardId: "TOKEN",
+      count: 1,
+      cause: { kind: "effect", sourceCardId: source.players[0]!.hero.cardId },
+      initialCounters: { steam: 2 },
+    });
+
+    const encoded = encodePersistedState(source);
+    expect(decodePersistedState(jsonCopy(encoded), "ABC123", cardData, scripts)
+      .pendingTokenCreations).toEqual(source.pendingTokenCreations);
+  });
+
   it("round trips token provenance inherited by a delegated scripted choice", () => {
     const source = game();
     source.pendingDecision = {

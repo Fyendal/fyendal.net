@@ -363,6 +363,26 @@ describe("DYN — registration and heroes", () => {
   });
 });
 
+describe("DYN — defense counters", () => {
+  it("Reinforce Steel removes a counter from off-hand equipment", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["reinforce steel|1", BLUE],
+          weapons: ["seasoned saviour|0"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    g.state.players[0]!.weapons[0]!.defCounters = 1;
+
+    g.play("reinforce steel|1", { pitch: [BLUE] }).chooseCard("seasoned saviour|0");
+
+    expect(g.state.players[0]!.weapons[0]?.defCounters).toBe(0);
+  });
+});
+
 describe("DYN — rules regression coverage", () => {
   it("Emperor attacks directly with the searched Command and Conquer", () => {
     const originalCard = cardData.ARC159;

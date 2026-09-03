@@ -208,7 +208,7 @@ describe("SUP — heroes and the crowd", () => {
     });
   });
 
-  it("Hunter or Hunted? triggers Huntsman before defending and creates a Silver per banish", () => {
+  it("Hunter or Hunted? creates a Silver per banish and resumes the reaction window", () => {
     const g = scenario({
       seats: [
         foe({
@@ -271,6 +271,8 @@ describe("SUP — heroes and the crowd", () => {
     expect(g.state.players[1]!.board.filter(
       (card) => functionalKeyOf(cardData[card.cardId]!) === "silver|0",
     )).toHaveLength(3);
+    expect(g.state.pendingDecision).toMatchObject({ kind: "attack-reaction", player: 0 });
+    expect(g.state.stack).toHaveLength(0);
   });
 
   it("Bait stops its controller playing cards they own but leaves its own abilities usable", () => {

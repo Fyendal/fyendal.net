@@ -31,6 +31,7 @@ const cards: Record<string, CardData> = {
   OVERFLAG: { id: "OVERFLAG", name: "Granted Overpower", cardType: "action", subtypes: ["attack"], classes: ["generic"], pitch: 1, cost: 0, attack: 4, defense: 3, text: "Gains overpower when played" },
   BLOCK3: { id: "BLOCK3", name: "Blocker", cardType: "action", subtypes: [], classes: ["generic"], pitch: 3, cost: 0, attack: 0, defense: 3, text: "" },
   BLOCKCARD: { id: "BLOCKCARD", name: "Block Card", cardType: "block", classes: ["generic"], pitch: 3, defense: 3, text: "" },
+  DREACT: { id: "DREACT", name: "Test Defense Reaction", cardType: "defense-reaction", classes: ["generic"], pitch: 3, cost: 0, defense: 3, text: "" },
   GUARDMAX: { id: "GUARDMAX", name: "Small Guard", cardType: "defense-reaction", classes: ["generic"], pitch: 3, cost: 0, defense: 3, text: "This can only defend an attack with 3 or less base {p}" },
   TRANSC: { id: "TRANSC", name: "Test Transcend", cardType: "instant", classes: ["mystic"], pitch: 3, cost: 0, keywords: ["Transcend"], backId: "CHI3", text: "Transcend" },
   ZAP3: { id: "ZAP3", name: "Test Zap", cardType: "instant", classes: ["generic"], pitch: 3, cost: 0, text: "Deal 3 damage to the opposing hero" },
@@ -730,6 +731,75 @@ describe("declarative defender selection", () => {
       kind: "defend",
       instanceIds: [first, second, blockCard],
     });
+  });
+
+  it("does not allow a defense reaction after two non-block cards defend", () => {
+    let s = makeGame();
+    player(s, 1).hand = [];
+    s = declareAttack(s, 0, "ATK5");
+    s.modifiers.push({
+      id: s.nextModifierId++,
+      sourceInstanceId: s.chain.at(-1)!.attackingCard.instanceId,
+      seat: 0,
+      scope: "chain-link",
+      maxNonBlockDefenders: 2,
+    });
+    const first = giveCard(s, 1, "BLOCK3");
+    const second = giveCard(s, 1, "BLOCK3");
+    const reaction = giveCard(s, 1, "DREACT");
+
+    s = apply(s, 1, { kind: "defend", instanceIds: [first, second] });
+    s = apply(s, 0, { kind: "pass" });
+
+    expect(legalIntents(s, 1).some((intent) =>
+      (intent.kind === "play-card" || intent.kind === "play-from-arsenal") &&
+      intent.instanceId === reaction,
+    )).toBe(false);
+    const result = applyIntent(s, 1, {
+      kind: "play-card",
+      instanceId: reaction,
+      pitchInstanceIds: [],
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toMatch(/more than 2 non-block cards/);
+  });
+
+  it("fails a stacked defense reaction that would exceed the non-block limit", () => {
+    let s = makeGame();
+    player(s, 1).hand = [];
+    s = declareAttack(s, 0, "ATK5");
+    s.modifiers.push({
+      id: s.nextModifierId++,
+      sourceInstanceId: s.chain.at(-1)!.attackingCard.instanceId,
+      seat: 0,
+      scope: "chain-link",
+      maxNonBlockDefenders: 2,
+    });
+    const first = giveCard(s, 1, "DREACT");
+    const second = giveCard(s, 1, "DREACT");
+    const third = giveCard(s, 1, "DREACT");
+
+    s = apply(s, 1, { kind: "defend", instanceIds: [] });
+    s = apply(s, 0, { kind: "pass" });
+    s = apply(s, 1, { kind: "play-card", instanceId: first, pitchInstanceIds: [] });
+    s = apply(s, 1, { kind: "play-card", instanceId: second, pitchInstanceIds: [] });
+    s = apply(s, 1, { kind: "play-card", instanceId: third, pitchInstanceIds: [] });
+
+    s = apply(s, 1, { kind: "pass" });
+    s = apply(s, 0, { kind: "pass" });
+    s = apply(s, 0, { kind: "pass" });
+    s = apply(s, 1, { kind: "pass" });
+    s = apply(s, 0, { kind: "pass" });
+    s = apply(s, 1, { kind: "pass" });
+
+    expect(s.chain.at(-1)!.defendingCards.map((card) => card.instanceId)).toEqual([
+      third,
+      second,
+    ]);
+    expect(player(s, 1).graveyard.some((card) => card.instanceId === first)).toBe(true);
+    expect(s.log.some((entry) =>
+      entry.publicText?.includes("fails to resolve (it cannot defend this attack)"),
+    )).toBe(true);
   });
 
   it("does not offer equipment already defending on a previous chain link", () => {

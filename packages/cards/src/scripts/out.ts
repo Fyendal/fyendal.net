@@ -17,6 +17,14 @@ function has(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, tag: string): boo
 function isAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.hasCardType(card, "action") && has(ctx, card, "attack");
 }
+function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {
+  const player = ctx.player(seat);
+  return [
+    ...Object.values(player.equipment)
+      .filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
+    ...player.weapons.filter((card) => data(ctx, card).cardType === "equipment"),
+  ];
+}
 function isDagger(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean { return has(ctx, card, "dagger"); }
 function isStealth(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean { return has(ctx, card, "stealth"); }
 function comboWith(ctx: ScriptCtx, ...names: string[]): boolean {
@@ -366,7 +374,7 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
 
   "riptide|0": riptide(),
   "wayfinder's crest|0": { onDefend(ctx) { ctx.requestCardChoice("wayfinder", decisionPrompt("Look at the top card of target hero's deck", "card.out.scout.hero.choose"), ctx.state.players.map((p) => p.hero.instanceId)); }, onChoose(ctx, h, o) { if (h === "wayfinder") { const p = ctx.state.players.find((x) => x.hero.instanceId === Number(o)); if (p?.deck[0]) ctx.lookAt(p.deck[0].instanceId); } } },
-  "boulder trap|2": { canTriggerOnDefend: trapPower(), onDefend(ctx) { ctx.notifyTrapTriggered(); const eq = Object.values(ctx.player(ctx.link!.attacker).equipment).filter((card): card is NonNullable<typeof card> => !!card); if (eq.length) ctx.requestCardChoice("boulder", decisionPrompt("Put a -1 defense counter on equipment", "card.out.equipment.counter"), eq.map((card) => card.instanceId)); }, onChoose(ctx, h, o) { if (h === "boulder") ctx.addCardDefenseCounters(Number(o), 1); } },
+  "boulder trap|2": { canTriggerOnDefend: trapPower(), onDefend(ctx) { ctx.notifyTrapTriggered(); const eq = equipmentCards(ctx, ctx.link!.attacker); if (eq.length) ctx.requestCardChoice("boulder", decisionPrompt("Put a -1 defense counter on equipment", "card.out.equipment.counter"), eq.map((card) => card.instanceId)); }, onChoose(ctx, h, o) { if (h === "boulder") ctx.addCardDefenseCounters(Number(o), 1); } },
   "pendulum trap|2": trap(trapReaction(), (ctx) => { const p = ctx.player(ctx.link!.attacker); for (const card of p.deck.slice(0, 2)) ctx.moveToGraveyard(card.instanceId, "deck"); }),
   "tarpit trap|2": trap(trapGoAgain(), (ctx) => ctx.addModifier({ scope: "until-end-of-turn", seat: ctx.link!.attacker, appliesTo: "attack-action", suppressHitEffects: true })),
   "fletch a red tail|1": fletch(4, 1), "fletch a yellow tail|2": fletch(3, 2), "fletch a blue tail|3": fletch(2, 3),

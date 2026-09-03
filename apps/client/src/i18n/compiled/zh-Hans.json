@@ -3897,6 +3897,20 @@
       "value": "从你的手牌中放逐一张牌"
     }
   ],
+  "card.hnt.ignite.discount": [
+    {
+      "type": 0,
+      "value": "下一张龙族 (Draconic) 牌的打出或起动费用减少 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源"
+    }
+  ],
   "card.hnt.longwhisker.modes.choose": [
     {
       "type": 0,

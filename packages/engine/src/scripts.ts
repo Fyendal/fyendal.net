@@ -371,14 +371,24 @@ export interface ScriptCtx {
   /** Create a token/aura; returns the created instance, or undefined when a
    *  replacement effect prevents its creation. Defaults to the
    *  controller's board — pass `seat` to create it for another player
-   *  (e.g. Test of Strength's clash winner). */
-  createToken(cardId: string, seat?: number): DeepReadonly<CardInstance> | undefined;
+   *  (e.g. Test of Strength's clash winner). `initialCounters` are present
+   *  as the token enters, before Crank and enter-arena observers. */
+  createToken(
+    cardId: string,
+    seat?: number,
+    initialCounters?: Readonly<Record<string, number>>,
+  ): DeepReadonly<CardInstance> | undefined;
   /** Create a token copy of a public arena object, preserving its copiable
    * granted characteristics but not counters or temporary modifiers. */
   createTokenCopy(instanceId: number): DeepReadonly<CardInstance> | undefined;
   /** Create one token batch. Replacement effects that change "one or more"
    * token creation events observe the batch once, before any token enters. */
-  createTokens(cardId: string, count: number, seat?: number): DeepReadonly<CardInstance>[];
+  createTokens(
+    cardId: string,
+    count: number,
+    seat?: number,
+    initialCounters?: Readonly<Record<string, number>>,
+  ): DeepReadonly<CardInstance>[];
   /** Create a new card object directly in a player's hand. The created card's
    * identity is public because the generating effect names it. */
   createCardInHand(cardId: string, seat?: number): DeepReadonly<CardInstance>;
@@ -640,6 +650,10 @@ export interface ActivatedAbility {
     base: number;
     counterKey: string;
     resourcesPerX?: number;
+    /** Remove X named counters from this source as part of the activation
+     *  cost. `resourcesPerX` may be 0 when counters, rather than resources,
+     *  are the variable portion of the printed cost. */
+    removeCounterKey?: string;
     maximum?: number | ((ctx: ScriptCtx) => number);
     /** Restrict declarations to values that can produce the printed effect. */
     canDeclareX?(ctx: ScriptCtx, x: number): boolean;
@@ -674,6 +688,11 @@ export interface ActivatedAbility {
   destroySubcardCost?: boolean;
   /** Remove named counters from this source as part of the activation cost. */
   removeCounterCost?: { key: string; amount: number };
+  /** Remove named counters from the current attacking card as part of this
+   *  reaction ability's activation cost. */
+  removeAttackCounterCost?: { key: string; amount: number };
+  /** Put named counters on this source as part of the activation cost. */
+  putCounterCost?: { key: string; amount: number };
   /** Tap the controller's hero as part of the activation cost. */
   tapHeroCost?: boolean;
   /** Banish this many cards from the controller's hero soul as an activation

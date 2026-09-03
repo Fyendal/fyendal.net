@@ -36,6 +36,32 @@ function chooseHandCard(g: Scenario, seat: number, key: string): Scenario {
 }
 
 describe("WTR generic — attacks", () => {
+  it("requires another hand card to pay Enlightened Strike's additional cost", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["enlightened strike|1"] },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    const enlightenedStrike = g.state.players[0]!.hand.find(
+      (card) => card.cardId === printingId("enlightened strike|1"),
+    )!;
+    expect(legalIntents(g.state, 0)).not.toContainEqual(expect.objectContaining({
+      kind: "play-card",
+      instanceId: enlightenedStrike.instanceId,
+    }));
+
+    expect(applyIntent(g.state, 0, {
+      kind: "play-card",
+      instanceId: enlightenedStrike.instanceId,
+      pitchInstanceIds: [],
+    })).toMatchObject({
+      ok: false,
+      error: "cannot pay the card's additional hand-card cost",
+    });
+  });
+
   it("Enlightened Strike restores its mode choice without retaining go again", () => {
     const g = scenario({
       seats: [
@@ -59,6 +85,9 @@ describe("WTR generic — attacks", () => {
 
     g.play("enlightened strike|1").chooseCard("raging onslaught|2");
     const modeSnapshot = g.state;
+    expect(modeSnapshot.players[0]!.deck.at(-1)?.cardId).toBe(
+      printingId("raging onslaught|2"),
+    );
     expect(modeSnapshot.pendingDecision?.chooseHook).toBe("estrike-mode");
     expect(projectStateFor(modeSnapshot, 0).pendingDecision?.preStackSource).toMatchObject({
       card: { instanceId: enlightenedStrike.instanceId },

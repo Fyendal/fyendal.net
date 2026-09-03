@@ -175,6 +175,16 @@ export function attackMaxNonBlockDefenders(
   return limit;
 }
 
+/** Number of non-block cards already defending on this chain link. */
+export function attackNonBlockDefenderCount(
+  state: GameStateInternal,
+  link: ChainLinkState,
+): number {
+  return [...link.defendingCards, ...link.defendingEquipment].filter(
+    (card) => dataOf(state, card.cardId).cardType !== "block",
+  ).length;
+}
+
 /** Whether a link's attack has a printed, stamped, or live granted type. */
 export function linkAttackHasType(
   state: GameStateInternal,

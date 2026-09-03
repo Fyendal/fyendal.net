@@ -666,7 +666,12 @@ export function applyIntent(
       break;
     }
     case "choose-many": {
+      const resume = next.pendingDecision?.resume;
       err = answerChoices(next, runtime, seat, intent.optionIds);
+      // Match the single-choice path: a multi-select script decision may be
+      // the final pause inside a resolving trigger, so its deferred stack
+      // continuation must run once no chained scripted choice remains.
+      if (!err && !next.pendingDecision?.chooseHook) afterChoice(next, runtime, resume);
       break;
     }
     case "order-triggers": {

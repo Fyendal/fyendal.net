@@ -105,7 +105,7 @@ describe("interactions — choice option projection", () => {
     expect(opp?.optionCards).toBeUndefined();
   });
 
-  it("plain numeric options stay literal (no optionCards) — Blaze's remove-X choose", () => {
+  it("engine X options stay literal (no optionCards) — Blaze's counter-cost choice", () => {
     const s = scenario({
       seats: [
         {
@@ -124,12 +124,10 @@ describe("interactions — choice option projection", () => {
     s.play("wounded bull|1", { settle: false });
     s.passPriority(); // yields the attack window to Blaze
     s.activate("blaze, firemind|0", { settle: false });
-    s.passPriority();
-    s.passPriority(); // the ability resolves into the remove-X choice
     const pd = projectStateFor(s.state, 0).pendingDecision;
-    // "0".."4" are counter counts, not instances — instance 1 is a hero, so
+    // X values are counter counts, not instances — instance 1 is a hero, so
     // resolving them as cards rendered the opposing hero's name as an option
-    expect(pd?.options).toEqual(["0", "1", "2", "3", "4"]);
+    expect(pd?.options).toEqual(["X = 0", "X = 1", "X = 2", "X = 3", "X = 4"]);
     expect(pd?.optionCards).toBeUndefined();
   });
 });
