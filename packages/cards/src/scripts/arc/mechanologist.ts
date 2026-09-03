@@ -133,11 +133,11 @@ export const arcMechanologist: Record<string, CardScript> = {
         goAgain: false,
         oncePerTurn: true,
         timing: "attack-reaction",
+        removeCounterCost: { key: "steam", amount: 1 },
         label: "Remove a steam counter: put the attacking card on deck bottom when it hits",
         canActivate: (ctx) =>
           ctx.getCounter("steam") > 0 && ctx.link?.attackCardType === "action",
         onActivate(ctx) {
-          ctx.setCounter("steam", ctx.getCounter("steam") - 1);
           ctx.setFlag("link", "attackToBottom", true);
         },
       },
@@ -153,10 +153,10 @@ export const arcMechanologist: Record<string, CardScript> = {
       cost: 0,
       isAttack: false,
       goAgain: true,
+      removeCounterCost: { key: "steam", amount: 1 },
       label: "Remove a steam counter: next attack action gains dominate",
       canActivate: (ctx) => ctx.getCounter("steam") > 0,
       onActivate(ctx) {
-        ctx.setCounter("steam", ctx.getCounter("steam") - 1);
         buffNextAttack(ctx, { appliesTo: "attack-action", dominate: true });
       },
     },
@@ -223,10 +223,10 @@ export const arcMechanologist: Record<string, CardScript> = {
       cost: 0,
       isAttack: false,
       goAgain: true,
+      removeCounterCost: { key: "steam", amount: 1 },
       label: "Remove a steam counter: Opt 1",
       canActivate: (ctx) => ctx.getCounter("steam") > 0,
       onActivate(ctx) {
-        ctx.setCounter("steam", ctx.getCounter("steam") - 1);
         optN(ctx, 1);
       },
     },

@@ -12,7 +12,7 @@ import {
 } from "./shared-helpers.js";
 import { evoHighRarity } from "./evo/high-rarity.js";
 
-const HYPER_DRIVER = "EVO099";
+const HYPER_DRIVER = "EVO234";
 const QUICKEN = "DVR028";
 
 function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
@@ -366,8 +366,7 @@ const maxxNitro: CardScript = {
     oncePerTurn: true,
     canActivate: (ctx) => ctx.getPlayerFlag(ctx.seat, "boostedThisTurn") === true,
     onActivate(ctx) {
-      const driver = ctx.createToken(HYPER_DRIVER);
-      if (driver) ctx.setCardCounter(driver.instanceId, "steam", 2);
+      ctx.createToken(HYPER_DRIVER, undefined, { steam: 2 });
     },
   },
 };

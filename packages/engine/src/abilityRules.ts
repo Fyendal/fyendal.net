@@ -519,6 +519,15 @@ export function payActivatedAbilityCost(
   if (counterCost && (card.counters?.[counterCost.key] ?? 0) < counterCost.amount) {
     return `${nameOf(state, card.cardId)} does not have enough ${counterCost.key} counters`;
   }
+  const attackCounterCost = ability.removeAttackCounterCost;
+  const attackLink = currentLink(state);
+  const attackingCard = attackLink?.attacker === seat ? attackLink.attackingCard : undefined;
+  if (
+    attackCounterCost &&
+    (!attackingCard || (attackingCard.counters?.[attackCounterCost.key] ?? 0) < attackCounterCost.amount)
+  ) {
+    return `attacking card does not have enough ${attackCounterCost.key} counters`;
+  }
   const discardIds = opts?.discardInstanceIds ?? [];
   if (ability.discardCost) {
     const discardErr = validateDiscardCost(state, player, ability, discardIds);
@@ -559,6 +568,7 @@ export function payActivatedAbilityCost(
     const paid = findCardAnywhere(state, id)?.card;
     if (paid) paidCards.push(paid);
   }
+  if (attackCounterCost && attackingCard) paidCards.push(attackingCard);
   const costErr = payCost(state, runtime, player, resourceCost, pitchInstanceIds, undefined, {
     chiCost: opts?.chiCost,
   });
@@ -601,8 +611,19 @@ export function payActivatedAbilityCost(
   if (counterCost) {
     const counters = (card.counters ??= {});
     const remaining = (counters[counterCost.key] ?? 0) - counterCost.amount;
-    if (remaining > 0) counters[counterCost.key] = remaining;
-    else delete counters[counterCost.key];
+    counters[counterCost.key] = Math.max(0, remaining);
+  }
+  if (attackCounterCost && attackingCard) {
+    const counters = (attackingCard.counters ??= {});
+    counters[attackCounterCost.key] = Math.max(
+      0,
+      (counters[attackCounterCost.key] ?? 0) - attackCounterCost.amount,
+    );
+  }
+  const putCounterCost = ability.putCounterCost;
+  if (putCounterCost) {
+    const counters = (card.counters ??= {});
+    counters[putCounterCost.key] = (counters[putCounterCost.key] ?? 0) + putCounterCost.amount;
   }
   if ((ability.timing ?? "action") === "action") {
     consumeFirstActionExtraCost(state, player);

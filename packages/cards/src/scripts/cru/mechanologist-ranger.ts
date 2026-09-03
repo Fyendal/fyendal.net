@@ -71,6 +71,7 @@ function tekloPlasmaPistol(): CardScript {
         isAttack: true,
         goAgain: false,
         label: "Remove a steam counter: Attack",
+        removeCounterCost: { key: "steam", amount: 1 },
         canActivate: (ctx) => ctx.getCounter("steam") > 0,
       },
       {
@@ -84,10 +85,6 @@ function tekloPlasmaPistol(): CardScript {
         },
       },
     ],
-    onAttackDeclared(ctx) {
-      if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId) return;
-      ctx.setCounter("steam", Math.max(0, ctx.getCounter("steam") - 1));
-    },
   };
 }
 

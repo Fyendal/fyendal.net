@@ -18,6 +18,22 @@ describe("Uprising, Dynasty, and Outsiders rules regression coverage", () => {
     g.activate("tomeltai|0").chooseCard("ironrot helm|0").blockWith().settle();
     g.expectInZone(1, "ironrot helm|0", "graveyard");
   });
+  it("Tomeltai does not destroy equipment that still has defense", () => {
+    const g = scenario({ seats: [
+      { hero: "rhinar", resources: 3, board: ["tomeltai|0"], deck: ["wrecker romp|1", "wrecker romp|1"], weapons: [] },
+      { hero: "dorinthea", equipment: { chest: "heirloom of tiger hide|0" } },
+    ] });
+    g.activate("tomeltai|0").chooseCard("heirloom of tiger hide|0");
+    expect(g.state.players[1]!.equipment.chest?.defCounters).toBe(2);
+  });
+  it("Tomeltai can choose off-hand equipment in a weapon zone", () => {
+    const g = scenario({ seats: [
+      { hero: "rhinar", resources: 3, board: ["tomeltai|0"], deck: ["wrecker romp|1"], weapons: [] },
+      { hero: "dorinthea", weapons: ["seasoned saviour|0"] },
+    ] });
+    g.activate("tomeltai|0").chooseCard("seasoned saviour|0");
+    expect(g.state.players[1]!.weapons[0]?.defCounters).toBe(1);
+  });
   it("Dominia privately banishes a chosen defending-hand card", () => {
     const g = scenario({ seats: [
       { hero: "rhinar", resources: 3, board: ["dominia|0"], deck: ["wrecker romp|1"], weapons: [] },

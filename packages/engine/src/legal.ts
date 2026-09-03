@@ -27,6 +27,7 @@ import {
   attackHasDominate,
   attackHasOverpower,
   attackMaxNonBlockDefenders,
+  attackNonBlockDefenderCount,
   grantsAuraAttackMarker,
 } from "./combatValues.js";
 import { abilityList } from "./scripts.js";
@@ -631,6 +632,12 @@ function windowAbilityIntents(
         ability.removeCounterCost &&
         (card.counters?.[ability.removeCounterCost.key] ?? 0) < ability.removeCounterCost.amount
       ) continue;
+      if (
+        ability.removeAttackCounterCost &&
+        (!isAttacker || !link ||
+          (link.attackingCard.counters?.[ability.removeAttackCounterCost.key] ?? 0) <
+            ability.removeAttackCounterCost.amount)
+      ) continue;
       if (ability.banishSoulCost && heroSoulCards(player).length < ability.banishSoulCost) continue;
       if (!includeUnaffordable && !canPayAbilityLifeCost(player, ability)) continue;
       if (!canPayActivatedEffectCardCosts(state, player, ability)) continue;
@@ -768,6 +775,11 @@ function reactionIntents(
   // Dominate (8.3.4b): no defense reactions from hand once defended from hand
   const blockHandDefReacts =
     !isAttacker && attackHasDominate(state, link) && link.flags.defendedFromHand === true;
+  const maxNonBlock = attackMaxNonBlockDefenders(state, link);
+  const nonBlockDefenderLimitReached =
+    !isAttacker &&
+    maxNonBlock !== undefined &&
+    attackNonBlockDefenderCount(state, link) >= maxNonBlock;
   // "defense reactions can't be played (from arsenal) this chain link"
   const drRestriction = defenseReactionRestriction(state, link);
   const zones: { arr: CardInstance[]; fromArsenal: boolean; fromZone?: PlayableZone }[] = [
@@ -815,6 +827,7 @@ function reactionIntents(
         if (!asInstant) continue;
       }
       if (blockHandDefReacts && !fromArsenal && data.cardType === "defense-reaction") continue;
+      if (nonBlockDefenderLimitReached && data.cardType === "defense-reaction") continue;
       // "defense reactions can't be played to this chain link" / "...from arsenal"
       if (!isAttacker && data.cardType === "defense-reaction") {
         if (
@@ -917,6 +930,7 @@ function defendIntents(state: GameStateInternal,
   const dominate = attackHasDominate(state, link);
   const overpower = attackHasOverpower(state, link);
   const maxNonBlock = attackMaxNonBlockDefenders(state, link);
+  const existingNonBlockCount = attackNonBlockDefenderCount(state, link);
   const nonBlockCount = (ids: number[]) =>
     ids.filter((id) => {
       const c = [...nonEquipment, ...equipment].find((x) => x.instanceId === id);
@@ -952,7 +966,10 @@ function defendIntents(state: GameStateInternal,
   if (stagedEquipment.length < requiredEquipCount) return [];
   if (dominate && handDefenderCount(stagedNonEquipment) > 1) return [];
   if (overpower && actionDefenderCount(stagedNonEquipment) > 1) return [];
-  if (maxNonBlock !== undefined && nonBlockCount(stagedIds) > maxNonBlock) return [];
+  if (
+    maxNonBlock !== undefined &&
+    existingNonBlockCount + nonBlockCount(stagedIds) > maxNonBlock
+  ) return [];
 
   // Optional "when this defends, you may pay" costs are paid only when that
   // triggered layer resolves. requestPayment/requestXPayment enumerate any

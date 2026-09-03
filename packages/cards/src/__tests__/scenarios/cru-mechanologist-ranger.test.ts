@@ -100,17 +100,19 @@ describe("CRU — Mechanologist heroes and weapon", () => {
     const g = scenario({
       seats: [
         { hero: "rhinar", weapons: ["teklo plasma pistol|0"], resources: 1 },
-        { hero: "dorinthea" },
+        { hero: "dorinthea", hand: ["sigil of solace|1"] },
       ],
     });
 
     g.activate("teklo plasma pistol|0", { ability: 1 });
     expect(g.state.players[0]!.weapons[0]!.counters?.steam).toBe(1);
-    g.activate("teklo plasma pistol|0", { ability: 0 })
+    g.activate("teklo plasma pistol|0", { ability: 0, settle: false });
+    expect(g.state.players[0]!.weapons[0]!.counters?.steam ?? 0).toBe(0);
+    g.settle()
       .expectAttackValue(2)
       .blockWith()
       .settle();
-    expect(g.state.players[0]!.weapons[0]!.counters?.steam).toBe(0);
+    expect(g.state.players[0]!.weapons[0]!.counters?.steam ?? 0).toBe(0);
   });
 });
 

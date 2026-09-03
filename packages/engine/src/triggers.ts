@@ -36,6 +36,8 @@ import { moveToGraveyard } from "./zoneMoves.js";
 import {
   applyOneShotDefenseModifiers,
   attackHasDominate,
+  attackMaxNonBlockDefenders,
+  attackNonBlockDefenderCount,
   noteAttackDefendedBy,
 } from "./combatValues.js";
 
@@ -1085,6 +1087,19 @@ export function resolveTopStackCard(state: GameStateInternal, runtime: EngineRun
   }
   const isDefReact = dataOf(state, card.cardId).cardType === "defense-reaction";
   if (layer.meldStage !== 1 && link && isDefReact) {
+    const maxNonBlock = attackMaxNonBlockDefenders(state, link);
+    if (
+      maxNonBlock !== undefined &&
+      attackNonBlockDefenderCount(state, link) >= maxNonBlock
+    ) {
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, card.cardId)} fails to resolve (it cannot defend this attack)`,
+        "engine.log.card.resolve.failed.cannot.defend",
+        { card: logCardValue(card.cardId) },
+      ));
+      finishStackCardResolution(state, runtime, seat, false);
+      return;
+    }
     if (layer.fromHand && attackHasDominate(state, link) && link.flags.defendedFromHand === true) {
       logPublic(state, gameLogMessage(
         `${nameOf(state, card.cardId)} fails to resolve (Dominate)`,

@@ -36,8 +36,8 @@ function createExposedFrostbite(ctx: ScriptCtx, seat: number, slot: string): voi
   if (token) ctx.addCounter(token.instanceId, `frostZone:${slot}`, 1);
 }
 
-function allEquipment(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
-  return ctx.state.players.flatMap((player) => [
+function allEquipment(ctx: ScriptCtx, seat?: number): DeepReadonly<CardInstance>[] {
+  return ctx.state.players.filter((player) => seat === undefined || player.seat === seat).flatMap((player) => [
     ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
     ...player.weapons.filter((card) => data(ctx, card).cardType === "equipment"),
   ]);
@@ -166,8 +166,8 @@ export const ajv: Record<string, CardScript> = {
       return ctx.link?.targetAllyId === undefined && (ctx.link?.damage ?? 0) >= 4;
     },
     onHit(ctx) {
-      const equipment = Object.values(ctx.player(opponentSeat(ctx)).equipment)
-        .filter((card): card is DeepReadonly<CardInstance> => !!card && (card.defCounters ?? 0) > 0);
+      const equipment = allEquipment(ctx, opponentSeat(ctx))
+        .filter((card) => (card.defCounters ?? 0) > 0);
       if (equipment.length) ctx.requestCardChoice("mangle-equipment", decisionPrompt("Destroy equipment with a -1 defense counter", "card.ajv.equipment.destroy"), equipment.map((card) => card.instanceId));
     },
     onChoose(ctx, hook, option) { if (hook === "mangle-equipment") ctx.destroyPermanent(Number(option)); },
@@ -265,12 +265,12 @@ export const ajv: Record<string, CardScript> = {
         const target = Number(option);
         ctx.setCounter("exposedTarget", target);
         if (!ctx.requestPayment("exposed-pay", decisionPrompt("Pay 2 resources or an equipment with 0 defense may be destroyed", "card.ajv.exposed.pay", { optionMessages: commonOptionMessages("no") }), 2, target)) {
-          const equipment = Object.values(ctx.player(target).equipment).filter((card): card is DeepReadonly<CardInstance> => !!card && Math.max(0, (data(ctx, card).defense ?? 0) - (card.defCounters ?? 0)) === 0);
+          const equipment = allEquipment(ctx, target).filter((card) => Math.max(0, (data(ctx, card).defense ?? 0) - (card.defCounters ?? 0)) === 0);
           if (equipment.length) ctx.requestCardChoice("exposed-destroy", decisionPrompt("Destroy an equipment with 0 defense", "card.ajv.zero.equipment.destroy"), equipment.map((card) => card.instanceId));
         }
       } else if (hook === "exposed-pay" && option === "declined") {
         const target = ctx.getCounter("exposedTarget");
-        const equipment = Object.values(ctx.player(target).equipment).filter((card): card is DeepReadonly<CardInstance> => !!card && Math.max(0, (data(ctx, card).defense ?? 0) - (card.defCounters ?? 0)) === 0);
+        const equipment = allEquipment(ctx, target).filter((card) => Math.max(0, (data(ctx, card).defense ?? 0) - (card.defCounters ?? 0)) === 0);
         if (equipment.length) ctx.requestCardChoice("exposed-destroy", decisionPrompt("Destroy an equipment with 0 defense", "card.ajv.zero.equipment.destroy"), equipment.map((card) => card.instanceId));
       } else if (hook === "exposed-destroy") ctx.destroyPermanent(Number(option));
     },
@@ -278,12 +278,12 @@ export const ajv: Record<string, CardScript> = {
   "unforgetting unforgiving|1": {
     canTriggerOnDefend(ctx) {
       const attacker = ctx.link?.attacker;
-      return attacker !== undefined && Object.values(ctx.player(attacker).equipment)
-        .some((card) => (card?.defCounters ?? 0) > 0);
+      return attacker !== undefined && allEquipment(ctx, attacker)
+        .some((card) => (card.defCounters ?? 0) > 0);
     },
     onDefend(ctx) {
       const attacker = ctx.link?.attacker;
-      if (attacker === undefined || !Object.values(ctx.player(attacker).equipment).some((card) => (card?.defCounters ?? 0) > 0)) return;
+      if (attacker === undefined || !allEquipment(ctx, attacker).some((card) => (card.defCounters ?? 0) > 0)) return;
       const mangles = ctx.player(ctx.seat).deck.filter((card) => data(ctx, card).name.toLowerCase() === "mangle");
       if (mangles.length) ctx.requestCardChoice("unforgetting-mangle", decisionPrompt("Search for a Mangle, or decline", "card.ajv.mangle.search", { optionMessages: commonOptionMessages("none") }), ["none", ...mangles.map((card) => card.instanceId)]);
     },

@@ -15,6 +15,7 @@ import {
   attackHasOverpower,
   attackIntimidateCount,
   attackMaxNonBlockDefenders,
+  attackNonBlockDefenderCount,
   computeAttack,
   computeDefense,
   currentPowerOf,
@@ -262,7 +263,7 @@ export function stageDefenders(
   const { hand, arsenal, equipment } = legalDefenderCards(state, runtime, seat);
   const unique = [...new Set(instanceIds)];
   const maxNonBlock = attackMaxNonBlockDefenders(state, link);
-  let nonBlockCount = 0;
+  let nonBlockCount = attackNonBlockDefenderCount(state, link);
   for (const id of unique) {
     const card = hand.find((c) => c.instanceId === id) ??
       arsenal.find((c) => c.instanceId === id) ??
@@ -586,7 +587,7 @@ export function assignDefenders(
   const maxNonBlock = attackMaxNonBlockDefenders(state, link);
   const seen = new Set<number>();
   let handCount = 0;
-  let nonBlockCount = 0;
+  let nonBlockCount = attackNonBlockDefenderCount(state, link);
   // Overpower (8.3.22): at most one action card may defend (defense reactions,
   // block cards and equipment are unaffected)
   let actionDefenders = link.defendingCards.filter(

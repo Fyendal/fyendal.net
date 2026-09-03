@@ -96,6 +96,61 @@ describe("activated ability life costs", () => {
   });
 });
 
+describe("activated ability counter costs", () => {
+  it("retains an explicit zero so state-based destruction sees the paid counter", () => {
+    let { s, id } = boardCard(makeGame(190), 0, "AURA");
+    s.scriptsRef = {
+      ...s.scriptsRef,
+      AURA: {
+        ...s.scriptsRef.AURA,
+        activated: {
+          cost: 0,
+          isAttack: false,
+          goAgain: false,
+          removeCounterCost: { key: "charge", amount: 1 },
+        },
+      },
+    };
+    player(s, 0).board.find((card) => card.instanceId === id)!.counters = { charge: 1 };
+    player(s, 0).actionPoints = 1;
+
+    const activation = abilityIntents(s, 0, id)[0];
+    expect(activation).toBeDefined();
+    const accepted = applyIntent(s, 0, activation!);
+    expect(accepted.ok).toBe(true);
+    if (!accepted.ok) throw new Error(accepted.error);
+    s = accepted.state;
+    expect(player(s, 0).board.some((card) => card.instanceId === id)).toBe(false);
+    expect(player(s, 0).graveyard.find((card) => card.instanceId === id)?.counters?.charge).toBe(0);
+  });
+
+  it("puts a counter on the source before an attack layer resolves", () => {
+    const s = makeGame(191);
+    const weapon = player(s, 0).weapons[0]!;
+    s.scriptsRef = {
+      ...s.scriptsRef,
+      SWORD: {
+        activated: {
+          cost: 0,
+          isAttack: true,
+          goAgain: false,
+          oncePerTurn: true,
+          putCounterCost: { key: "rust", amount: 1 },
+        },
+      },
+    };
+    giveCard(s, 1, "INSTANT");
+
+    const activation = abilityIntents(s, 0, weapon.instanceId)[0];
+    expect(activation).toBeDefined();
+    const accepted = applyIntent(s, 0, activation!);
+    expect(accepted.ok).toBe(true);
+    if (!accepted.ok) throw new Error(accepted.error);
+    expect(player(accepted.state, 0).weapons[0]!.counters?.rust).toBe(1);
+    expect(accepted.state.chain[0]?.flags.attackStepBegan).not.toBe(true);
+  });
+});
+
 describe("multiple activated abilities per card", () => {
   it("projects spent once-per-turn weapon abilities to both players", () => {
     const s = makeGame(20);

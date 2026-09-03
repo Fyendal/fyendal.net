@@ -196,25 +196,22 @@ export const sbz: Record<string, CardScript> = {
       timing: "instant",
       oncePerTurn: true,
       label: "Remove X energy counters: play a Wizard non-attack action as an instant",
+      variableCost: {
+        base: 0,
+        resourcesPerX: 0,
+        counterKey: "blazeX",
+        removeCounterKey: "energy",
+        maximum: (ctx) => ctx.getCounter("energy"),
+        prompt: decisionPrompt(
+          "Blaze, Firemind: remove how many energy counters?",
+          "card.sbz.blaze.energy.choose",
+        ),
+      },
       canActivate: (ctx) =>
         ctx.getCounter("energy") > 0 ||
         ctx.player(ctx.seat).hand.some((card) => blazeMatches(ctx, card, 0)),
       onActivate(ctx) {
-        const max = ctx.getCounter("energy");
-        ctx.requestChoice(
-          "blaze-x",
-          decisionPrompt(
-            "Blaze, Firemind: remove how many energy counters?",
-            "card.sbz.blaze.energy.choose",
-          ),
-          Array.from({ length: max + 1 }, (_, i) => String(i)),
-        );
-      },
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "blaze-x") {
-        const x = Number(option);
-        ctx.setCounter("energy", ctx.getCounter("energy") - x);
+        const x = ctx.getCounter("blazeX");
         const matches = ctx.player(ctx.seat).hand.filter((card) =>
           blazeMatches(ctx, card, x)
         );
@@ -231,8 +228,9 @@ export const sbz: Record<string, CardScript> = {
           ),
           matches.map((c) => c.instanceId),
         );
-        return;
-      }
+      },
+    },
+    onChoose(ctx, hook, option) {
       if (hook === "blaze-banish") {
         const id = Number(option);
         const found = ctx.player(ctx.seat).hand.find((c) => c.instanceId === id);

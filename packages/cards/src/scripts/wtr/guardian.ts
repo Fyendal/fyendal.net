@@ -17,6 +17,9 @@ function opponentEquipmentOptions(ctx: ScriptCtx): string[] {
   for (const [slot, eq] of Object.entries(opp.equipment)) {
     if (eq) options.push(`${slot}:${eq.instanceId}`);
   }
+  for (const eq of opp.weapons) {
+    if (ctx.cardData(eq.cardId).cardType === "equipment") options.push(`off-hand:${eq.instanceId}`);
+  }
   return options;
 }
 
@@ -26,7 +29,10 @@ function findOpponentEquipment(
 ): { readonly instanceId: number; readonly cardId: string; readonly defCounters?: number } | undefined {
   const opp = ctx.player(opponentSeat(ctx));
   const instanceId = Number(optionId.split(":")[1]);
-  return Object.values(opp.equipment).find((eq) => eq?.instanceId === instanceId);
+  return [
+    ...Object.values(opp.equipment),
+    ...opp.weapons.filter((eq) => ctx.cardData(eq.cardId).cardType === "equipment"),
+  ].find((eq) => eq?.instanceId === instanceId);
 }
 
 // ── Auras: Blessing of Deliverance, Emerging Power, Stonewall Confidence ─────

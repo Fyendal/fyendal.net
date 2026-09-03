@@ -98,10 +98,9 @@ export const aha: Record<string, CardScript> = {
   "paragon plate|0": {
     activated: {
       cost: 0, isAttack: false, goAgain: false, timing: "attack-reaction", tap: true,
+      removeAttackCounterCost: { key: "power", amount: 1 },
       canActivate: (ctx) => isSwordAttack(ctx) && Number(ctx.link?.attackingCard.counters?.power) > 0,
       onActivate(ctx) {
-        const id = ctx.link?.attackingCard.instanceId;
-        if (id !== undefined) ctx.addCounter(id, "power", -1);
         ctx.changeResources(ctx.seat, 1);
       },
     },

@@ -31,7 +31,7 @@ function nonNegativeInteger(value: number): number {
 }
 
 function resourcesPerX(cost: VariableResourceCost): number {
-  return Math.max(1, Math.floor(cost.resourcesPerX ?? 1));
+  return Math.max(0, Math.floor(cost.resourcesPerX ?? 1));
 }
 
 export function variableResourceCost(cost: VariableResourceCost, x: number): number {

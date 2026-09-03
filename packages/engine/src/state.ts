@@ -152,6 +152,8 @@ export interface TokenCreationRequest {
   cardId: string;
   count: number;
   cause: TokenCreationContext;
+  /** Counters the created token has as it enters the arena. */
+  initialCounters?: Record<string, number>;
 }
 
 export interface TokenCreationReplacementBatch extends TokenCreationRequest {

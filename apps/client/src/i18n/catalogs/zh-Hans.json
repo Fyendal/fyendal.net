@@ -921,6 +921,7 @@
   "card.hnt.draconicdagger.equip.upto": "从墓地装备至多 {count} 把 Draconic 匕首",
   "card.hnt.equipment.defensecounter": "在一件装备上放置一个 -1 防御指示物",
   "card.hnt.hand.card.banish": "从你的手牌中放逐一张牌",
+  "card.hnt.ignite.discount": "下一张龙族 (Draconic) 牌的打出或起动费用减少 {amount} 点资源",
   "card.hnt.longwhisker.modes.choose": "Long Whisker Loyalty：选择 {amount} 个模式",
   "card.hnt.longwhisker.modes.more": "Long Whisker Loyalty：再选择 {amount} 个模式",
   "card.hnt.longwhisker.option.additionalattack": "本回合可用目标匕首额外攻击一次",

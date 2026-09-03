@@ -241,11 +241,13 @@ describe("SDA — Dash attack and item effects", () => {
     const g = scenario({
       seats: [
         { ...dash, weapons: ["talishar, the lost prince|0"], hand: [], resources: 2 },
-        { hero: "dorinthea", hand: [] },
+        { hero: "dorinthea", hand: ["sigil of solace|1"] },
       ],
     });
     g.state.players[0]!.weapons[0]!.counters = { rust: 2 };
-    g.attackWithWeapon("talishar, the lost prince|0")
+    g.attackWithWeapon("talishar, the lost prince|0", { settle: false });
+    expect(g.state.players[0]!.weapons[0]!.counters?.rust).toBe(3);
+    g.settle()
       .blockWith()
       .settle()
       .endTurn()
@@ -317,14 +319,16 @@ describe("SDA — Dash attack and item effects", () => {
           deck: ["throttle|3"],
           resources: 2,
         },
-        { hero: "dorinthea", hand: [] },
+        { hero: "dorinthea", hand: ["sigil of solace|1"] },
       ],
     });
     g.activate("plasma barrel shot|0", { ability: 1 })
       .play("zero to sixty|1", { boost: true })
       .blockWith()
       .settle()
-      .activate("plasma barrel shot|0", { ability: 0 })
+      .activate("plasma barrel shot|0", { ability: 0, settle: false });
+    expect(g.state.players[0]!.weapons[0]!.counters?.steam ?? 0).toBe(0);
+    g.settle()
       .expectAttackValue(2)
       .blockWith()
       .settle();

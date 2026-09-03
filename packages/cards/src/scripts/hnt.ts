@@ -26,6 +26,15 @@ function dataTags(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): readonly st
   return ctx.cardTypes(card);
 }
 
+function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {
+  const player = ctx.player(seat);
+  return [
+    ...Object.values(player.equipment)
+      .filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
+    ...player.weapons.filter((card) => ctx.cardData(card.cardId).cardType === "equipment"),
+  ];
+}
+
 function isDagger(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return dataTags(ctx, card).includes("dagger");
 }
@@ -356,12 +365,12 @@ export const hnt: Record<string, CardScript> = {
     onAttackDeclared(ctx) { if (currentAttackDraconic(ctx)) ctx.setFlag("link", "hntArtScale", true); },
     canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "hntArtScale") === true; },
     onHit(ctx) {
-      const equipment = Object.values(ctx.player(opponentSeat(ctx)).equipment).filter((card) => card !== undefined);
+      const equipment = equipmentCards(ctx, opponentSeat(ctx));
       if (equipment.length) ctx.requestCardChoice("art-scale", decisionPrompt("Put a -1 defense counter on equipment", "card.hnt.equipment.defensecounter"), equipment.map((card) => card.instanceId));
     },
     onChoose(ctx, hook, option) {
       if (hook !== "art-scale") return;
-      const card = Object.values(ctx.player(opponentSeat(ctx)).equipment).find((candidate) => candidate?.instanceId === Number(option));
+      const card = equipmentCards(ctx, opponentSeat(ctx)).find((candidate) => candidate.instanceId === Number(option));
       if (!card) return;
       const oldCounters = card.defCounters ?? 0;
       ctx.addCardDefenseCounters(card.instanceId, 1);
@@ -663,7 +672,23 @@ Object.assign(hnt, {
   },
   "anaphylactic shock|3": { onPlay(ctx) { for (const player of ctx.state.players) if (player.seat !== ctx.seat && player.flags.dealtDamageThisTurn === true) ctx.loseLife(player.seat, 1); } },
   "blood runs deep|1": { modifyPlayCost: (ctx, base) => base - draconicLinks(ctx), onAttackDeclared(ctx) { for (const dagger of [...ctx.player(ctx.seat).weapons]) { ctx.dealDamage(opponentSeat(ctx), 1, { sourceInstanceId: dagger.instanceId, countsAsHit: true }); ctx.destroyPermanent(dagger.instanceId); } ctx.grantGoAgain(); } },
-  "ignite|1": { onAttackDeclared(ctx) { ctx.addModifier({ scope: "combat-chain", playCostReduction: 1, activationCostReduction: 1, appliesToSubtype: "draconic", once: true }); } },
+  "ignite|1": {
+    triggers: [{
+      event: "attack-declared",
+      sourceZone: "self",
+      label: "The next Draconic card costs 1 less to play or activate",
+      labelMessage: decisionMessage("card.hnt.ignite.discount", { amount: 1 }),
+      effect(ctx) {
+        ctx.addModifier({
+          scope: "combat-chain",
+          playCostReduction: 1,
+          activationCostReduction: 1,
+          appliesToSubtype: "draconic",
+          once: true,
+        });
+      },
+    }],
+  },
   "art of the dragon: blood|1": { onAttackDeclared(ctx) { if (currentAttackDraconic(ctx)) { ctx.grantGoAgain(); ctx.addModifier({ scope: "until-end-of-turn", playCostReduction: 1, appliesToSubtype: "draconic", remainingCostUses: 3 }); } } },
   "devotion never dies|1": { canTriggerOnHit: lastAttackWasDraconic, onHit(ctx) { if (ctx.banish(ctx.self.instanceId)) ctx.allowPlayFrom(ctx.self.instanceId, "banish"); } },
   "prowess of agility|3": { onFriendlyAttackDeclared(ctx) { if (Number(ctx.getPlayerFlag(ctx.seat, "attacksDeclaredThisTurn")) === 4) { ctx.destroySelf(); ctx.drawCards(ctx.seat, 1); } }, triggers: [{ event: "end-of-turn", condition: (ctx) => Number(ctx.getPlayerFlag(ctx.seat, "attacksDeclaredThisTurn")) < 3, label: "Destroy Prowess of Agility", effect: (ctx) => ctx.destroySelf() }] },

@@ -42,6 +42,15 @@ function controls(ctx: ScriptCtx, name: string): boolean {
   ].some((card) => ctx.cardNames(card).includes(name.toLowerCase()));
 }
 
+function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {
+  const player = ctx.player(seat);
+  return [
+    ...Object.values(player.equipment)
+      .filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
+    ...player.weapons.filter((card) => data(ctx, card).cardType === "equipment"),
+  ];
+}
+
 function drawnThisTurn(ctx: ScriptCtx): boolean {
   return Number(ctx.getPlayerFlag(ctx.seat, "cardsDrawnThisTurn")) > 0;
 }
@@ -479,8 +488,7 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
   "colossal bearing|1": {
     canTriggerOnHit: (ctx) => ctx.currentAttackPower() >= 13 && ctx.link?.targetAllyId === undefined,
     onHit(ctx) {
-      const targets = Object.values(ctx.player(opponentSeat(ctx)).equipment)
-        .filter((card): card is DeepReadonly<CardInstance> => !!card)
+      const targets = equipmentCards(ctx, opponentSeat(ctx))
         .filter((card) => Math.max(0, (data(ctx, card).defense ?? 0) - (card.defCounters ?? 0)) <= 1);
       if (targets.length) ctx.requestCardChoice("colossal-destroy", decisionPrompt("Destroy equipment with 1 or less defense", "card.hvy.equipment.destroy", { values: { amount: 1 } }), targets.map((card) => card.instanceId));
     },

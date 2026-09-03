@@ -388,6 +388,7 @@ export interface PersistedPendingDecisionV1 {
     cardId: string;
     count: number;
     cause: { kind: "effect" | "wager"; sourceCardId?: string };
+    initialCounters?: Record<string, number>;
     remainingReplacements: { instanceId: number; kind: "global" | "friendly" | "optional-friendly" }[];
     controllerSeats?: number[];
   };
@@ -396,6 +397,7 @@ export interface PersistedPendingDecisionV1 {
     cardId: string;
     count: number;
     cause: { kind: "effect" | "wager"; sourceCardId?: string };
+    initialCounters?: Record<string, number>;
     remainingReplacements: { instanceId: number; kind: "global" | "friendly" | "optional-friendly" }[];
     controllerSeats?: number[];
   };
@@ -490,6 +492,7 @@ export interface PersistedGameStateV1 {
     cardId: string;
     count: number;
     cause: { kind: "effect" | "wager"; sourceCardId?: string };
+    initialCounters?: Record<string, number>;
   }[];
   reactionPasses: number;
   stack: PersistedStackLayerV1[];
@@ -815,11 +818,20 @@ function validateTokenCreationReplacementRefs(value: unknown, code: string, path
 function validateTokenCreationRequests(value: unknown, code: string, path: string): void {
   array(value, code, path, 256).forEach((entryValue, index) => {
     const entryPath = `${path}[${index}]`;
-    const entry = exact(entryValue, code, entryPath, ["seat", "cardId", "count", "cause"]);
+    const entry = exact(
+      entryValue,
+      code,
+      entryPath,
+      ["seat", "cardId", "count", "cause"],
+      ["initialCounters"],
+    );
     integer(entry.seat, code, `${entryPath}.seat`);
     string(entry.cardId, code, `${entryPath}.cardId`, 128);
     integer(entry.count, code, `${entryPath}.count`);
     validateTokenCreationCause(entry.cause, code, `${entryPath}.cause`);
+    optional(entry, "initialCounters", (counters, countersPath) => {
+      validateFlags(counters, code, countersPath, true);
+    }, entryPath);
   });
 }
 
@@ -1311,22 +1323,28 @@ function validateDecision(value: unknown, code: string, path: string, depth = 0)
     optional(variable, "declaredX", (entry, entryPath) => { integer(entry, code, entryPath); }, p);
   }, path);
   optional(decision, "tokenCreationReplacement", (v, p) => {
-    const batch = exact(v, code, p, ["seat", "cardId", "count", "cause", "remainingReplacements"], ["controllerSeats"]);
+    const batch = exact(v, code, p, ["seat", "cardId", "count", "cause", "remainingReplacements"], ["controllerSeats", "initialCounters"]);
     integer(batch.seat, code, `${p}.seat`);
     string(batch.cardId, code, `${p}.cardId`, 128);
     integer(batch.count, code, `${p}.count`);
     validateTokenCreationCause(batch.cause, code, `${p}.cause`);
+    optional(batch, "initialCounters", (counters, countersPath) => {
+      validateFlags(counters, code, countersPath, true);
+    }, p);
     validateTokenCreationReplacementRefs(batch.remainingReplacements, code, `${p}.remainingReplacements`);
     optional(batch, "controllerSeats", (entry, entryPath) => {
       validateIntegerArray(entry, code, entryPath);
     }, p);
   }, path);
   optional(decision, "tokenCreationReplacementOrder", (v, p) => {
-    const batch = exact(v, code, p, ["seat", "cardId", "count", "cause", "remainingReplacements"], ["controllerSeats"]);
+    const batch = exact(v, code, p, ["seat", "cardId", "count", "cause", "remainingReplacements"], ["controllerSeats", "initialCounters"]);
     integer(batch.seat, code, `${p}.seat`);
     string(batch.cardId, code, `${p}.cardId`, 128);
     integer(batch.count, code, `${p}.count`);
     validateTokenCreationCause(batch.cause, code, `${p}.cause`);
+    optional(batch, "initialCounters", (counters, countersPath) => {
+      validateFlags(counters, code, countersPath, true);
+    }, p);
     validateTokenCreationReplacementRefs(batch.remainingReplacements, code, `${p}.remainingReplacements`);
     optional(batch, "controllerSeats", (entry, entryPath) => {
       validateIntegerArray(entry, code, entryPath);

@@ -482,6 +482,58 @@ describe("HNT — marked heroes and daggers", () => {
       .expectNoLegalPlay("demonstrate devotion|1");
   });
 
+  it("Ignite grants its reduction only after its attack trigger resolves", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "fai, rising rebellion|0",
+          weapons: [],
+          hand: [
+            "ronin renegade|1",
+            "ronin renegade|1",
+            "ignite|1",
+            "demonstrate devotion|1",
+          ],
+          graveyard: ["phoenix flame|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("ronin renegade|1").blockWith().settle()
+      .play("ronin renegade|1").blockWith().settle()
+      .play("ignite|1", { settle: false })
+      .passPriority()
+      .passPriority();
+
+    expect(g.state.stack).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        label: "The next Draconic card costs 1 less to play or activate",
+      }),
+    ]));
+    expect(g.state.modifiers).not.toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        activationCostReduction: 1,
+        appliesToSubtype: "draconic",
+      }),
+    ]));
+
+    g.activate("fai, rising rebellion|0");
+
+    expect(g.state.players[0]!.hand).toEqual(expect.arrayContaining([
+      expect.objectContaining({ cardId: printingId("phoenix flame|1") }),
+    ]));
+    const igniteReduction = g.state.modifiers.find((modifier) =>
+      modifier.activationCostReduction === 1 &&
+      modifier.appliesToSubtype === "draconic"
+    );
+    expect(igniteReduction?.consumed).not.toBe(true);
+
+    g.blockWith().settle()
+      .play("demonstrate devotion|1");
+  });
+
   it("Cindra cannot equip a face-down Draconic dagger from the graveyard", () => {
     const g = scenario({
       seats: [

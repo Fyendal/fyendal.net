@@ -489,7 +489,12 @@ describe("SLY — equipment", () => {
       seats: [
         lyath({ board: ["confidence|0"], hand: ["short shrift|2"] }),
         foe({
-          hand: ["raging onslaught|2", "raging onslaught|2", "raging onslaught|2"],
+          hand: [
+            "raging onslaught|2",
+            "raging onslaught|2",
+            "raging onslaught|2",
+            "sink below|1",
+          ],
           equipment: { arms: "ironrot gauntlet|0" },
         }),
       ],
@@ -505,8 +510,9 @@ describe("SLY — equipment", () => {
     expect(() =>
       g.blockWith("raging onslaught|2", "raging onslaught|2", "ironrot gauntlet|0"),
     ).toThrow(/no legal defend intent/);
-    g.blockWith("raging onslaught|2", "raging onslaught|2")
-      .settle()
+    g.blockWith("raging onslaught|2", "raging onslaught|2").passPriority();
+    expect(() => g.react("sink below|1")).toThrow(/no legal intent/);
+    g.settle()
       .expectFinalDefense(6);
   });
 

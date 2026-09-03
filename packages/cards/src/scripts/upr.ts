@@ -577,6 +577,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     activated: dragonAttack(),
     onAttackDeclared(ctx) {
       ctx.setCounter("azvolaiHits", 0);
+      ctx.setCounter("azvolaiFirstTarget", 0);
       ctx.requestCardChoice("azvolai", decisionPrompt(`Azvolai: deal ${ctx.previewArcaneDamage(1)} arcane damage to up to 2 targets`, "card.upr.azvolai.targets", {
         values: { amount: ctx.previewArcaneDamage(1), count: 2 }, optionMessages: commonOptionMessages("done"),
       }), ["done", ...livingTargets(ctx)]);
@@ -586,9 +587,10 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
       dealToTarget(ctx, option, 1, true);
       const count = ctx.getCounter("azvolaiHits") + 1;
       ctx.setCounter("azvolaiHits", count);
+      if (count === 1) ctx.setCounter("azvolaiFirstTarget", Number(option));
       if (count < 2) ctx.requestCardChoice("azvolai", decisionPrompt(`Azvolai: deal ${ctx.previewArcaneDamage(1)} arcane damage to another target?`, "card.upr.azvolai.target.next", {
         values: { amount: ctx.previewArcaneDamage(1) }, optionMessages: commonOptionMessages("done"),
-      }), ["done", ...livingTargets(ctx)]);
+      }), ["done", ...livingTargets(ctx).filter((target) => Number(target) !== ctx.getCounter("azvolaiFirstTarget"))]);
     },
   },
   "cromai|0": {

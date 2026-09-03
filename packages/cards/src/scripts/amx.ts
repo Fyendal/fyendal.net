@@ -27,7 +27,7 @@ function wrenches(ctx: ScriptCtx) {
 function hyperDriver(steam: number): CardScript {
   return {
     destroyAtZeroCounter: "steam",
-    onEnterArena(ctx) { ctx.setCounter("steam", steam); },
+    onEnterArena(ctx) { if (steam > 0) ctx.setCounter("steam", steam); },
     onBoosted(ctx) {
       const used = `hyperDriverBoost:${ctx.self.instanceId}`;
       if (ctx.getPlayerFlag(ctx.seat, used) === true || ctx.getCounter("steam") <= 0) return;
@@ -61,8 +61,7 @@ export const amx: Record<string, CardScript> = {
       oncePerTurn: true,
       canActivate: (ctx) => ctx.getPlayerFlag(ctx.seat, "boostedThisTurn") === true,
       onActivate(ctx) {
-        const driver = ctx.createToken(HYPER_DRIVER);
-        if (driver) ctx.setCardCounter(driver.instanceId, "steam", 2);
+        ctx.createToken(HYPER_DRIVER, undefined, { steam: 2 });
       },
     },
   },
