@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { AddressInfo } from "node:net";
 import WebSocket from "ws";
 import type { ClientMessage, ServerMessage } from "@fyendal/shared";
+import { precon } from "@fyendal/cards";
 import { login, register } from "../auth.js";
 import type { Queryable } from "../db.js";
 import { closeGameServer, createGameServer } from "../index.js";
@@ -119,6 +120,70 @@ describe("multi-instance gateways", () => {
     expect(joined.code).toBe(created.code);
     expect((await db.query("SELECT COUNT(*) AS count FROM rooms")).rows[0]!.count).toBe(1);
     expect((await db.query("SELECT COUNT(*) AS count FROM matchmaking_entries")).rows[0]!.count).toBe(0);
+  });
+
+  it("hands a practicing player to PvP while preserving the active bot game", async () => {
+    const a = await authed((first.address() as AddressInfo).port, "CrossBotA");
+    const b = await authed((second.address() as AddressInfo).port, "CrossBotB");
+    a.send({
+      type: "create-bot-room",
+      format: "cc",
+      deckId: "precon-asb",
+      bot: "ira",
+      searchForPlayer: true,
+    });
+    const source = await a.next((message) => message.type === "room-created") as Extract<
+      ServerMessage,
+      { type: "room-created" }
+    >;
+    const user = await db.query("SELECT id FROM users WHERE username_lc = 'crossbota'");
+    const userId = Number(user.rows[0]!.id);
+    const practiceStore = new PgRoomStore(db, "rules-a");
+    expect(await practiceStore.chooseFirst(source.code, { token: source.token, userId }, true))
+      .toMatchObject({ ok: true, started: false });
+    const boltyn = precon("precon-asb")!.pool;
+    expect(await practiceStore.presentDeck(source.code, { token: source.token, userId }, {
+      weaponIds: boltyn.weaponIds,
+      equipment: {},
+      deck: boltyn.deck,
+    })).toMatchObject({ ok: true, started: true });
+
+    b.send({
+      type: "create-bot-room",
+      format: "cc",
+      deckId: "precon-asb",
+      bot: "ira",
+      searchForPlayer: true,
+    });
+    const [offer, joined] = await Promise.all([
+      a.next((message) =>
+        message.type === "background-matchmaking" && message.status.state === "offer"
+      ) as Promise<Extract<ServerMessage, { type: "background-matchmaking" }>>,
+      b.next((message) => message.type === "joined") as Promise<Extract<ServerMessage, { type: "joined" }>>,
+    ]);
+    if (offer.status.state !== "offer") throw new Error("background offer missing");
+    const offerCode = offer.status.roomCode;
+    expect(joined.code).toBe(offerCode);
+
+    a.send({ type: "background-match-accept", roomCode: offerCode });
+    b.send({ type: "accept-match" });
+    const handoff = await a.next((message) =>
+      message.type === "joined" && message.code === offerCode
+    ) as Extract<ServerMessage, { type: "joined" }>;
+    expect(handoff.code).toBe(offerCode);
+
+    const preserved = await practiceStore.getRoom(source.code);
+    expect(preserved?.state).not.toBeNull();
+    expect(preserved?.seats[0]?.userId).toBe(userId);
+    expect((await db.query(
+      "SELECT status FROM replay_games WHERE room_code = $1",
+      [source.code],
+    )).rows).toEqual([{ status: "recording" }]);
+    expect(await practiceStore.joinRoom(source.code, undefined, {
+      allowPlayer: true,
+      userId,
+      username: "CrossBotA",
+    })).toMatchObject({ ok: true, kind: "player", seat: 0, reconnected: true });
   });
 
   it("does not rematch a decliner with the retained room on another gateway", async () => {

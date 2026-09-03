@@ -108,6 +108,21 @@ describe("PlayerHalf", () => {
     expect(html).toContain('data-motion-zone="0:banish"');
     expect(html).toContain('data-motion-card="0:board:2"');
     expect(html).toContain('data-motion-card="0:board:3"');
+    expect(html).not.toContain("soul-pip");
+  });
+
+  it("shows the hero's soul count with the permanent soul icon", () => {
+    const html = renderPlayerHalf({
+      ...player,
+      soul: [
+        { instanceId: 10, cardId: "TST-SOUL-1", owner: 0 },
+        { instanceId: 11, cardId: "TST-SOUL-2", owner: 0 },
+      ],
+    });
+
+    expect(html).toContain('aria-label="2 cards in soul"');
+    expect(html).toContain('src="/icons/soul.svg" width="24" height="24"');
+    expect(html).toContain('class="soul-pip-count">2</span>');
   });
 
   it("uses a visible deck-top card as the exact deck motion endpoint", () => {

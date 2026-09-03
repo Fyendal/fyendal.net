@@ -381,6 +381,15 @@ describe("client messages", () => {
         deferPlayPresentation: true,
       },
     })).not.toBeNull();
+    expect(decodeClientMessage({
+      type: "intent",
+      intent: {
+        kind: "activate-ability",
+        sourceInstanceId: 1,
+        pitchInstanceIds: [2],
+        deferActivationPresentation: true,
+      },
+    })).not.toBeNull();
     for (const target of ["last-action", "current-turn", "previous-turn"]) {
       expect(decodeClientMessage({ type: "undo", target })).not.toBeNull();
     }
@@ -395,6 +404,7 @@ describe("client messages", () => {
     expect(decodeClientMessage({ type: "intent", intent: { kind: "play-card", instanceId: Number.MAX_SAFE_INTEGER + 1, pitchInstanceIds: [] } })).toBeNull();
     expect(decodeClientMessage({ type: "intent", intent: { kind: "play-card", instanceId: 1, pitchInstanceIds: [], pitchRequired: -1 } })).toBeNull();
     expect(decodeClientMessage({ type: "intent", intent: { kind: "play-card", instanceId: 1, pitchInstanceIds: [], deferPlayPresentation: false } })).toBeNull();
+    expect(decodeClientMessage({ type: "intent", intent: { kind: "activate-ability", sourceInstanceId: 1, pitchInstanceIds: [], deferActivationPresentation: false } })).toBeNull();
     expect(decodeClientMessage({ type: "intent", intent: { kind: "defend", instanceIds: Array(257).fill(1) } })).toBeNull();
     expect(decodeClientMessage({ type: "present-deck", deck: { weaponIds: [], equipment: { crown: "x" }, deck: [] } })).toBeNull();
     expect(decodeClientMessage({ type: "intent", intent: { kind: "pass" }, autoPass: false })).toBeNull();

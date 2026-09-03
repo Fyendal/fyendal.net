@@ -252,6 +252,48 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
       case "match-ready":
         await deliverMatch(event.userId, event.code, event.created);
         return;
+      case "match-handoff": {
+        const queued = queuedUsers.get(event.userId);
+        const ctx = queued && (queued.code === event.sourceCode || queued.code === event.code)
+          ? queued
+          : [...allClients].find((client) =>
+              client.user?.id === event.userId
+              && !client.closed
+              && (client.code === event.sourceCode || client.code === event.code)
+            );
+        if (!ctx) return;
+        queuedUsers.set(event.userId, ctx);
+        const previous = ctx.code === event.sourceCode
+          ? {
+              code: ctx.code,
+              token: ctx.token,
+              presenceLeaseId: ctx.presenceLeaseId,
+            }
+          : null;
+        if (previous) connections.detach(ctx);
+        await deliverMatch(event.userId, event.code, false);
+        if (previous?.token && previous.presenceLeaseId) {
+          try {
+            const found = await rooms.markAbsent(previous.code, previous.token, previous.presenceLeaseId);
+            if (found) {
+              await publishRoomEvent(
+                found.kind === "player"
+                  ? {
+                      code: previous.code,
+                      kind: "presence",
+                      seat: found.seat,
+                      connected: false,
+                      version: found.version,
+                    }
+                  : { code: previous.code, kind: "spectators", version: found.version },
+              );
+            }
+          } catch (error) {
+            consoleError("source room handoff cleanup failed", error);
+          }
+        }
+        return;
+      }
       case "background-status-changed": {
         const status = await rooms.backgroundMatchmakingStatus(event.userId);
         for (const ctx of [...allClients]) {

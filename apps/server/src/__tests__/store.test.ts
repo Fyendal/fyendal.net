@@ -1820,6 +1820,13 @@ describe("PgRoomStore storage", () => {
       username: "BotQueueA",
       deckId: "precon-asb",
     }, "legal", "ira");
+    await chooseBotTurn(firstBot.code, firstBot.token, firstId);
+    const boltyn = precon("precon-asb")!.pool;
+    expect(await store.presentDeck(firstBot.code, { token: firstBot.token, userId: firstId }, {
+      weaponIds: boltyn.weaponIds,
+      equipment: {},
+      deck: boltyn.deck,
+    })).toMatchObject({ ok: true, started: true });
     await store.setBackgroundMatchmaking(firstId, firstBot.code);
     await markStoredSeatPresent(firstBot.code, 0, "first-bot-source");
 
@@ -1851,10 +1858,39 @@ describe("PgRoomStore storage", () => {
       username: "BotQueueB",
     });
     if (!joined.ok || joined.kind !== "player") throw new Error("second player did not reclaim offer seat");
+    const beforeCommit = await db.query("SELECT COALESCE(MAX(id), 0) AS id FROM cluster_events");
     expect(await store.acceptMatch(firstQueue.code, { token: joined.token, userId: secondId }))
       .toMatchObject({ ok: true });
-    expect(await store.getRoom(firstBot.code)).toBeNull();
+    const preservedBot = await store.getRoom(firstBot.code);
+    expect(preservedBot).not.toBeNull();
+    expect(preservedBot?.state).not.toBeNull();
+    expect(preservedBot?.seats[0]?.userId).toBe(firstId);
+    expect(preservedBot?.seats[1]?.controller).toBe("bot");
+    expect((await db.query(
+      "SELECT status FROM replay_games WHERE room_code = $1",
+      [firstBot.code],
+    )).rows).toEqual([{ status: "recording" }]);
     expect(await store.backgroundMatchmakingStatus(firstId)).toEqual({ state: "inactive" });
+    const committedEvents = (await db.query(
+      "SELECT event_type, subject_user_id, room_code, payload FROM cluster_events WHERE id > $1 ORDER BY id",
+      [Number(beforeCommit.rows[0]!.id)],
+    )).rows;
+    expect(committedEvents).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        event_type: "match-handoff",
+        subject_user_id: firstId,
+        room_code: firstQueue.code,
+        payload: { sourceCode: firstBot.code },
+      }),
+      expect.objectContaining({
+        event_type: "match-ready",
+        subject_user_id: secondId,
+        room_code: firstQueue.code,
+      }),
+    ]));
+    expect(committedEvents).not.toEqual(expect.arrayContaining([
+      expect.objectContaining({ event_type: "room", room_code: firstBot.code }),
+    ]));
   });
 
   it("preserves an existing queue time and retained room when switching to bot practice", async () => {

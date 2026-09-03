@@ -58,6 +58,8 @@ function sideRailProps(
     onInspectCard: vi.fn(),
     mobilePrimaryAction: "end-turn",
     onMobilePrimaryAction: vi.fn(),
+    backgroundSearching: false,
+    onStopBackgroundSearch: vi.fn(),
     ...overrides,
   };
 }

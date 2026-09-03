@@ -1767,6 +1767,7 @@
   "game.zone.deckMineOrder": "Your Deck — draw order, next card first",
   "game.zone.deckOpponentOrder": "Opponent's Deck — draw order, next card first",
   "game.zone.stackedCards": "{count, plural, one {# stacked card} other {# stacked cards}}",
+  "game.soul.count": "{count, plural, one {# card in soul} other {# cards in soul}}",
   "game.deckToast.banishedFromDeck": "Banished from deck",
   "game.deckToast.banishedFromGraveyard": "Banished from graveyard",
   "game.deckToast.sentFromDeckToGraveyard": "Sent from deck to graveyard",

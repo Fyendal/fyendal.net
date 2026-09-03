@@ -77,7 +77,7 @@ const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
   const intl = useIntl();
-  const { view, viewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, botGame, sendIntent, sendPriorityMode, sendRunechantSkip, sendEmote, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, watchReplay, downloadReplay, getRecordedViews, lastActionAt, claimVictory, reportBug } = useStore(
+  const { view, viewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, botGame, sendIntent, sendPriorityMode, sendRunechantSkip, sendEmote, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, watchReplay, downloadReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, backgroundSearching, stopBackgroundMatchmaking } = useStore(
     useShallow((state) => ({
       view: state.view,
       viewUpdate: state.viewUpdate,
@@ -111,6 +111,8 @@ export function GameBoard() {
       lastActionAt: state.lastActionAt,
       claimVictory: state.claimVictory,
       reportBug: state.reportBug,
+      backgroundSearching: state.backgroundMatchmaking.state === "searching",
+      stopBackgroundMatchmaking: state.stopBackgroundMatchmaking,
     })),
   );
   const tableRef = useRef<HTMLDivElement>(null);
@@ -1186,6 +1188,8 @@ export function GameBoard() {
         mobilePrimaryAction={primaryAction}
         mobilePrimaryActionDisabled={defending && defendIntent === null}
         onMobilePrimaryAction={triggerPrimaryAction}
+        backgroundSearching={backgroundSearching}
+        onStopBackgroundSearch={stopBackgroundMatchmaking}
       />
 
       {showCardSearchOverlay ? (

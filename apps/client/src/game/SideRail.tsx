@@ -18,6 +18,7 @@ import { BugReportDialog, GameSettingsDialog } from "./SideRailDialogs.js";
 import { ModalSurface } from "../components/ModalSurface.js";
 import { PrimaryActionButton, type PrimaryAction } from "./StatusFloat.js";
 import { GameMessageText } from "../i18n/GameMessage.js";
+import { BackgroundMatchSearch } from "../matchmaking/BackgroundMatchSearch.js";
 
 type StructuredLogEntry = Extract<GameLogViewEntry, { message: unknown }>;
 
@@ -216,6 +217,8 @@ export function SideRail({
   mobilePrimaryAction,
   mobilePrimaryActionDisabled = false,
   onMobilePrimaryAction,
+  backgroundSearching,
+  onStopBackgroundSearch,
 }: {
   collapsed: boolean;
   onToggleCollapsed: () => void;
@@ -263,6 +266,8 @@ export function SideRail({
   mobilePrimaryAction: PrimaryAction | null;
   mobilePrimaryActionDisabled?: boolean;
   onMobilePrimaryAction: () => void;
+  backgroundSearching: boolean;
+  onStopBackgroundSearch: () => void;
 }) {
   const intl = useIntl();
   const [showSettings, setShowSettings] = useState(false);
@@ -439,6 +444,9 @@ export function SideRail({
         </div>
       )}
 
+      {backgroundSearching ? (
+        <BackgroundMatchSearch placement="rail" onStop={onStopBackgroundSearch} />
+      ) : null}
       <div className="log">
         <LogLines
           lines={renderedLog}
@@ -513,6 +521,9 @@ export function SideRail({
           className="game-utilities-sheet"
           onClose={() => setShowUtilities(false)}
         >
+          {backgroundSearching ? (
+            <BackgroundMatchSearch placement="menu" onStop={onStopBackgroundSearch} />
+          ) : null}
           <div className="game-utilities-actions">
             {(onConcede || onUndo || onPriorityWindowModeChange) ? (
               <button

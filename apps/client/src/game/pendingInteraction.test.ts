@@ -90,4 +90,13 @@ describe("pending interaction presentation", () => {
       alternativeCostCardInstanceIds: [12],
     }, player)).toEqual(new Set([11, 12]));
   });
+
+  it("keeps activation payment in hand while a pre-activation choice is pending", () => {
+    expect(optimisticInteractionHiddenIds({
+      kind: "activate-ability",
+      sourceInstanceId: 1,
+      pitchInstanceIds: [11],
+      deferActivationPresentation: true,
+    }, player)).toBeNull();
+  });
 });

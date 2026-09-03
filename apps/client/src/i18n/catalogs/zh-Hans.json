@@ -1767,6 +1767,7 @@
   "game.zone.deckMineOrder": "你的牌库 — 按抽牌顺序，下一张牌在最前",
   "game.zone.deckOpponentOrder": "对手的牌库 — 按抽牌顺序，下一张牌在最前",
   "game.zone.stackedCards": "堆叠的 {count} 张牌",
+  "game.soul.count": "soul 中有 {count} 张牌",
   "game.deckToast.banishedFromDeck": "从牌库放逐",
   "game.deckToast.banishedFromGraveyard": "从墓地放逐",
   "game.deckToast.sentFromDeckToGraveyard": "从牌库置入墓地",

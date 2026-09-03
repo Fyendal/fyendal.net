@@ -437,6 +437,8 @@
   }
   .pitch-pip { width: 34px; height: 34px; font-size: 17px; }
   .pile-pip { width: 31px; height: 31px; font-size: 15px; }
+  .soul-pip { top: -4px; right: -4px; }
+  .soul-pip-count { right: -5px; bottom: -5px; min-width: 17px; height: 17px; padding-inline: 3px; font-size: 10px; }
   .blood-debt-counter { right: -3px; bottom: -5px; width: 29px; height: 35px; font-size: 14px; }
   .blood-debt-counter > span { padding-top: 5px; }
   .mat-divider { height: 5px; margin-inline: -6px; }

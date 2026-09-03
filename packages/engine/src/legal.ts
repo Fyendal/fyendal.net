@@ -114,6 +114,21 @@ function variableAbilityHasChoice(
   )).length > 0;
 }
 
+/** A pre-activation choice leaves the source and declared pitch cards in their
+ * authoritative zones until that choice completes. Tell clients not to
+ * animate the eventual activation before the engine has actually paid it. */
+function activationPresentationHint(
+  ability: ActivatedAbility,
+): { deferActivationPresentation: true } | Record<string, never> {
+  return ability.variableCost
+    || ability.variableBanishSoulCost
+    || ability.banishSoulCost
+    || ability.discardCost
+    || ability.effectCardCosts?.length
+    ? { deferActivationPresentation: true }
+    : {};
+}
+
 function pitchRequirement(player: PlayerState, cost: number, chiCost = 0): number {
   return Math.max(
     0,
@@ -666,6 +681,7 @@ function windowAbilityIntents(
           sourceInstanceId: card.instanceId,
           pitchInstanceIds: pitches,
           pitchRequired: ability.variableCost ? undefined : pitchRequired,
+          ...activationPresentationHint(ability),
           ...(ai > 0 ? { abilityIndex: ai } : {}),
         });
       }
@@ -696,6 +712,7 @@ function windowAbilityIntents(
             pitchInstanceIds: pitches,
             pitchRequired: pitchRequirement(player, alternativeCost, ability.chiCost),
             alternativeCostCardInstanceIds,
+            ...activationPresentationHint(ability),
             ...(ai > 0 ? { abilityIndex: ai } : {}),
           });
         }
@@ -743,6 +760,7 @@ function windowAbilityIntents(
           sourceInstanceId: card.instanceId,
           pitchInstanceIds: pitches,
           pitchRequired: pitchRequirement(player, resourceCost),
+          ...activationPresentationHint(ability),
           ...(ai > 0 ? { abilityIndex: ai } : {}),
         });
       }
@@ -1058,6 +1076,7 @@ function abilityIntents(
                 sourceInstanceId: card.instanceId,
                 pitchInstanceIds: ability.variableCost ? [] : pitches,
                 pitchRequired: ability.variableCost ? undefined : pitchRequirement(player, resourceCost, ability.chiCost),
+                ...activationPresentationHint(ability),
                 ...(ai > 0 ? { abilityIndex: ai } : {}),
                 ...(targetAllyId !== undefined ? { targetAllyId } : {}),
               }) as GameIntent,
@@ -1085,6 +1104,7 @@ function abilityIntents(
               pitchInstanceIds: pitches,
               pitchRequired: pitchRequirement(player, alternativeCost, ability.chiCost),
               alternativeCostCardInstanceIds,
+              ...activationPresentationHint(ability),
               ...(ai > 0 ? { abilityIndex: ai } : {}),
               ...(targetAllyId !== undefined ? { targetAllyId } : {}),
             });
@@ -1126,6 +1146,7 @@ function abilityIntents(
           sourceInstanceId: card.instanceId,
           pitchInstanceIds: pitches,
           pitchRequired: pitchRequirement(player, resourceCost),
+          ...activationPresentationHint(ability),
           ...(ai > 0 ? { abilityIndex: ai } : {}),
         });
       }
