@@ -46,6 +46,37 @@ function firstPreferredPlay(
   return preferredPitchIntents(matches, input, own)[0];
 }
 
+function isPulseOfVolthavenIntent(
+  intent: GameIntent,
+  input: BotPolicyInput,
+  own: ReadonlyMap<number, CardView> = ownCards(input),
+): boolean {
+  const card = intentCard(intent, own);
+  return functionalKey(input.cards[card?.cardId ?? ""]) === "pulse of volthaven|1";
+}
+
+function hasPulseFollowUp(
+  input: BotPolicyInput,
+  pulseIntent: GameIntent,
+): boolean {
+  if (input.view.activePlayer !== input.seat) return false;
+  const own = ownCards(input);
+  const pulse = intentCard(pulseIntent, own);
+  if (!pulse) return false;
+  const legalWithoutPulse = input.legal.filter((intent) =>
+    !isPulseOfVolthavenIntent(intent, input, own)
+  );
+  if (legalWithoutPulse.length === 0) return false;
+  const followUp = chooseJarlIntentWithTrace({ ...input, legal: legalWithoutPulse }).intent;
+  if (followUp.kind !== "play-card" && followUp.kind !== "play-from-arsenal" &&
+    followUp.kind !== "play-from-zone") return false;
+  const card = intentCard(followUp, own);
+  const data = input.cards[card?.cardId ?? ""];
+  return card?.instanceId !== pulse.instanceId && !!data && isAttack(data) &&
+    ["ice", "lightning", "elemental"].some((subtype) => hasSubtype(data, subtype)) &&
+    !followUp.pitchInstanceIds.includes(pulse.instanceId);
+}
+
 function earthBanished(input: BotPolicyInput): number {
   return input.view.players[input.seat].banish.filter((card) =>
     hasSubtype(input.cards[card.cardId], "earth")
@@ -116,6 +147,11 @@ function starvoPriorityOverride(input: BotPolicyInput): GameIntent | undefined {
     ? firstPreferredPlay(input, "cadaverous tilling|1")
     : undefined;
   if (tilling) return tilling;
+
+  // Pulse only has value before the attack this policy would actually play.
+  // In particular, it does not buff Earth-only Felling or Cadaverous Tilling.
+  const pulse = firstPreferredPlay(input, "pulse of volthaven|1");
+  if (pulse && hasPulseFollowUp(input, pulse)) return pulse;
 
   // Convert otherwise floating resources into unavoidable damage only when
   // the current attack action is already getting through.
@@ -265,7 +301,16 @@ function starvoDefenseOverride(
 export function chooseStarvoIntentWithTrace(input: BotPolicyInput): StarvoIntentDecision {
   const override = starvoPriorityOverride(input);
   if (override) return { intent: override };
-  const sharedDecision = chooseJarlIntentWithTrace(input);
+  let sharedDecision = chooseJarlIntentWithTrace(input);
+  if (isPulseOfVolthavenIntent(sharedDecision.intent, input) &&
+    !hasPulseFollowUp(input, sharedDecision.intent)) {
+    const legalWithoutPulse = input.legal.filter((intent) =>
+      !isPulseOfVolthavenIntent(intent, input)
+    );
+    if (legalWithoutPulse.length > 0) {
+      sharedDecision = chooseJarlIntentWithTrace({ ...input, legal: legalWithoutPulse });
+    }
+  }
   const handDefense = fullHandDefense(input);
   if (handDefense && usesEquipmentDefender(input, sharedDecision.intent)) {
     return { intent: handDefense };

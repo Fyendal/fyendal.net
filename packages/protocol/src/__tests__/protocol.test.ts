@@ -844,6 +844,7 @@ describe("replays and HTTP responses", () => {
           description: "The attack resolved incorrectly.",
           createdAt: 2,
           fixedAt: null,
+          closedAt: null,
           dismissedAt: null,
         }],
         replays: [{

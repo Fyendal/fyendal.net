@@ -357,6 +357,7 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
   );
   // per-instance "this combat chain" defense grants (Shred) expire too
   for (const p of state.players as PlayerState[]) {
+    delete p.flags.soulBanishedThisChain;
     for (const zone of [p.hand, p.deck, p.arsenal, p.pitch, p.graveyard, p.banish, p.board]) {
       for (const c of zone) {
         if (c.playableFromUntilChainClose !== true) continue;

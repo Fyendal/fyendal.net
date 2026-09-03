@@ -519,6 +519,17 @@ export const MIGRATIONS: Migration[] = [
       ADD CONSTRAINT pending_bot_starts_bot_check
       CHECK (bot IN ('ira', 'hala', 'cindra', 'jarl', 'briar', 'bravo', 'starvo'));`,
   },
+  {
+    version: 30,
+    // Operators can close reports that are invalid, duplicates, or otherwise
+    // do not require a fix without sending the reporter a fixed notification.
+    sql: `ALTER TABLE bug_reports ADD COLUMN closed_at BIGINT;
+    ALTER TABLE bug_reports
+      ADD CONSTRAINT bug_reports_resolution_check
+      CHECK (fixed_at IS NULL OR closed_at IS NULL);
+    CREATE INDEX bug_reports_closed_created_idx
+      ON bug_reports (closed_at, created_at);`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

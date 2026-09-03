@@ -489,6 +489,10 @@ export function enterBanish(
 ): void {
   const owner = state.players[card.owner] as PlayerState;
   const causedBy = state.players[causedBySeat] as PlayerState | undefined;
+  if (from === "soul" && causedBySeat === owner.seat && state.chain.length > 0) {
+    owner.flags.soulBanishedThisChain =
+      (Number(owner.flags.soulBanishedThisChain) || 0) + 1;
+  }
   if (causedBy && (dataOf(state, card.cardId).keywords ?? []).some(
     (keyword) => keyword.trim().toLowerCase() === "blood debt"
   )) {

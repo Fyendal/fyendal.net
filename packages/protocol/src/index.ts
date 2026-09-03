@@ -162,6 +162,7 @@ export interface AccountExport {
     description: string;
     createdAt: number;
     fixedAt: number | null;
+    closedAt: number | null;
     dismissedAt: number | null;
   }>;
   replays: Array<{
@@ -1356,11 +1357,13 @@ function exportRoom(value: unknown): boolean {
 function exportBugReport(value: unknown): boolean {
   const report = object(value);
   return !!report
-    && exactKeys(report, ["id", "roomCode", "roomVersion", "rulesetVersion", "description", "createdAt", "fixedAt", "dismissedAt"])
+    && exactKeys(report, ["id", "roomCode", "roomVersion", "rulesetVersion", "description", "createdAt", "fixedAt", "closedAt", "dismissedAt"])
     && id(report.id) && string(report.roomCode, 6, false) && nonNegativeInteger(report.roomVersion)
     && string(report.rulesetVersion, MAX_SHORT_TEXT, false) && string(report.description, MAX_TEXT, false)
     && nonNegativeInteger(report.createdAt)
     && (report.fixedAt === null || nonNegativeInteger(report.fixedAt))
+    && (report.closedAt === null || nonNegativeInteger(report.closedAt))
+    && (report.fixedAt === null || report.closedAt === null)
     && (report.dismissedAt === null || nonNegativeInteger(report.dismissedAt));
 }
 

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { applyIntent, legalIntents, projectStateFor } from "@fyendal/engine";
 import { functionalKeyOf } from "../../functional.js";
 import { cardData, isImplemented } from "../../index.js";
-import { scenario, type SeatSpec } from "../harness.js";
+import { printingId, scenario, type SeatSpec } from "../harness.js";
 
 const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
 
@@ -31,6 +31,89 @@ describe("SUP — heroes and the crowd", () => {
     expect(cards).toHaveLength(276);
     expect(cards.every((card) => isImplemented(card))).toBe(true);
     expect(new Set(cards.map(functionalKeyOf))).toHaveLength(276);
+  });
+
+  it("Battlefield Beacon chooses a token mode per soul banished this combat chain", () => {
+    const yellow = "raging onslaught|2";
+    const g = scenario({
+      seats: [
+        hero("ser boltyn, breaker of dawn|0", {
+          hand: [
+            "beaming bravado|1", yellow,
+            "beaming bravado|1", yellow,
+            "beaming bravado|1", yellow,
+            "beaming bravado|1", yellow,
+            "battlefield beacon|2",
+          ],
+        }),
+        foe(),
+      ],
+    });
+
+    for (let banished = 0; banished < 4; banished++) {
+      g.play("beaming bravado|1")
+        .chooseCard(yellow)
+        .blockWith()
+        .activate("ser boltyn, breaker of dawn|0", { settle: false });
+      g.doRaw({
+        kind: "choose",
+        optionId: String(g.state.players[0]!.soul[0]!.instanceId),
+      });
+      g.passPriority()
+        .passPriority()
+        .settle();
+    }
+
+    g.play("battlefield beacon|2");
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "beacon-mode",
+      options: ["courage", "toughness", "vigor"],
+    });
+
+    g.chooseOption("courage")
+      .chooseOption("courage")
+      .chooseOption("courage");
+    expect(g.state.pendingDecision?.options).toEqual(["toughness", "vigor"]);
+    g.chooseOption("toughness");
+
+    expect(g.state.players[0]!.board.filter(
+      (card) => card.cardId === printingId("courage|0"),
+    )).toHaveLength(3);
+    expect(g.state.players[0]!.board.filter(
+      (card) => card.cardId === printingId("toughness|0"),
+    )).toHaveLength(1);
+    expect(g.state.players[0]!.board.filter(
+      (card) => card.cardId === printingId("vigor|0"),
+    )).toHaveLength(0);
+  });
+
+  it("Battlefield Beacon does not count soul cards banished on a closed combat chain", () => {
+    const yellow = "raging onslaught|2";
+    const g = scenario({
+      seats: [
+        hero("ser boltyn, breaker of dawn|0", {
+          hand: ["beaming bravado|1", yellow, "lead the charge|3", "battlefield beacon|2"],
+        }),
+        foe(),
+      ],
+    });
+
+    g.play("beaming bravado|1")
+      .chooseCard(yellow)
+      .blockWith()
+      .activate("ser boltyn, breaker of dawn|0", { settle: false });
+    g.doRaw({
+      kind: "choose",
+      optionId: String(g.state.players[0]!.soul[0]!.instanceId),
+    });
+    g.passPriority()
+      .passPriority()
+      .settle()
+      .play("lead the charge|3")
+      .play("battlefield beacon|2");
+
+    expect(g.state.pendingDecision).toMatchObject({ kind: "defend" });
+    expect(g.state.players[0]!.board).toHaveLength(0);
   });
 
   it("Light Up the Leaves requires and discards another Earth card for its instant mode", () => {

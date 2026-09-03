@@ -11885,6 +11885,24 @@
       "value": "Steal an aura token"
     }
   ],
+  "card.sup.beacon.mode.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose a mode ("
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " remaining)"
+    }
+  ],
   "card.sup.card.top.choose": [
     {
       "type": 0,
@@ -12115,6 +12133,12 @@
       "value": "Boo + suppress abilities"
     }
   ],
+  "card.sup.option.courage": [
+    {
+      "type": 0,
+      "value": "Create Courage"
+    }
+  ],
   "card.sup.option.goagain": [
     {
       "type": 0,
@@ -12185,10 +12209,22 @@
       "value": " damage"
     }
   ],
+  "card.sup.option.toughness": [
+    {
+      "type": 0,
+      "value": "Create Toughness"
+    }
+  ],
   "card.sup.option.unpreventable": [
     {
       "type": 0,
       "value": "Damage can't be prevented"
+    }
+  ],
+  "card.sup.option.vigor": [
+    {
+      "type": 0,
+      "value": "Create Vigor"
     }
   ],
   "card.sup.pay.up.to": [
@@ -13839,6 +13875,12 @@
     {
       "type": 0,
       "value": "Destroy this"
+    }
+  ],
+  "card.trigger.common.self.destroy.draw": [
+    {
+      "type": 0,
+      "value": "Destroy this and draw a card"
     }
   ],
   "card.trigger.common.shiyana.copy": [

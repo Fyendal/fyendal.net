@@ -166,15 +166,16 @@ function OnHitBadge({
   );
 }
 
-export function chainAttackIsActivatable(
+export function chainCardIsActivatable(
   link: ChainLinkView | undefined,
   index: number,
   linkCount: number,
-  activatableAttackIds?: ReadonlySet<number>,
+  sourceInstanceId: number,
+  activatableCardIds?: ReadonlySet<number>,
 ): boolean {
   return index === linkCount - 1 &&
     link?.resolved !== true &&
-    (activatableAttackIds?.has(link?.attackingCard.instanceId ?? -1) ?? false);
+    (activatableCardIds?.has(sourceInstanceId) ?? false);
 }
 
 /** Pointer browsing should return focus to the game board so Space remains the
@@ -202,9 +203,9 @@ export function ChainFloat({
   onUnstage,
   onUnstageAll,
   onCloseChain,
-  activatableAttackIds,
+  activatableCardIds,
   selectedAbilitySourceInstanceId,
-  onActivateAttack,
+  onActivateCard,
   miniHost,
   visibility,
   children,
@@ -220,10 +221,10 @@ export function ChainFloat({
   onUnstageAll?: () => void;
   /** the chain is open and closable by the viewer — shows a close button */
   onCloseChain?: (() => void) | null;
-  /** Attacking cards with an activated ability in the authoritative legal intents. */
-  activatableAttackIds?: ReadonlySet<number>;
+  /** Combat-chain cards with an activated ability in the authoritative legal intents. */
+  activatableCardIds?: ReadonlySet<number>;
   selectedAbilitySourceInstanceId?: number | null;
-  onActivateAttack?: (instanceId: number) => void;
+  onActivateCard?: (instanceId: number) => void;
   /** The playmat divider that anchors the minimized control. */
   miniHost?: HTMLElement | null;
   /** Optional controller shared with sibling floats on compact layouts. */
@@ -271,15 +272,17 @@ export function ChainFloat({
   // that current position remains available in the timeline.
   const emptyCurrentExists = chainCurrent?.resolved === true;
   const showingEmptyCurrent = emptyCurrentExists && browsedIndex === null;
-  // A weapon can appear on several links with the same instance id. Legal
-  // intents refer to the live source, so only its newest unresolved chain-link
+  // A card can appear on several links with the same instance id. Legal intents
+  // refer to the live source, so only its newest unresolved chain-link
   // appearance is interactive; older links are last-known snapshots.
-  const attackActivatable = chainAttackIsActivatable(
+  const cardIsActivatable = (instanceId: number) => chainCardIsActivatable(
     chain,
     chainIdx,
     chainLen,
-    activatableAttackIds,
+    instanceId,
+    activatableCardIds,
   );
+  const attackActivatable = cardIsActivatable(chain?.attackingCard.instanceId ?? -1);
   // staged defenders only belong to the link currently being defended
   const showStaged = staging && !showingEmptyCurrent && chainIdx === chainLen - 1;
   const open = chain !== undefined && !chainHidden;
@@ -440,8 +443,8 @@ export function ChainFloat({
                           selectedAbilitySourceInstanceId === chain.attackingCard.instanceId
                         }
                         onClick={
-                          attackActivatable && onActivateAttack
-                            ? () => onActivateAttack(chain.attackingCard.instanceId)
+                          attackActivatable && onActivateCard
+                            ? () => onActivateCard(chain.attackingCard.instanceId)
                             : undefined
                         }
                       />
@@ -518,22 +521,35 @@ export function ChainFloat({
                           )}
                         />
                       ) : null}
-                      {chain.defendingCards.map((defender, defenderIndex) => (
-                        <CardFace
-                          key={defender.instanceId}
-                          card={defender}
-                          size="zone"
-                          showTapped={false}
-                          motionKey={motionPresentationKey(
-                            {
-                              kind: "chain-defender",
-                              link: chainIdx,
-                              index: defenderIndex,
-                            },
-                            defender.instanceId,
-                          )}
-                        />
-                      ))}
+                      {chain.defendingCards.map((defender, defenderIndex) => {
+                        const activatable = cardIsActivatable(defender.instanceId);
+                        return (
+                          <CardFace
+                            key={defender.instanceId}
+                            card={defender}
+                            size="zone"
+                            showTapped={false}
+                            highlighted={activatable}
+                            selected={
+                              activatable &&
+                              selectedAbilitySourceInstanceId === defender.instanceId
+                            }
+                            onClick={
+                              activatable && onActivateCard
+                                ? () => onActivateCard(defender.instanceId)
+                                : undefined
+                            }
+                            motionKey={motionPresentationKey(
+                              {
+                                kind: "chain-defender",
+                                link: chainIdx,
+                                index: defenderIndex,
+                              },
+                              defender.instanceId,
+                            )}
+                          />
+                        );
+                      })}
                       {showStaged &&
                         staged.map((c, stagedIndex) => {
                           const cardName = cardData[c.cardId]?.name ?? c.name ?? intl.formatMessage({ id: "game.chain.defender" });

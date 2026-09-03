@@ -115,6 +115,10 @@ describe("initial schema", () => {
       `SELECT column_name FROM information_schema.columns
        WHERE table_name = 'bug_reports' AND column_name = 'dismissed_at'`,
     )).rows).toEqual([{ column_name: "dismissed_at" }]);
+    expect((await db.query(
+      `SELECT column_name FROM information_schema.columns
+       WHERE table_name = 'bug_reports' AND column_name = 'closed_at'`,
+    )).rows).toEqual([{ column_name: "closed_at" }]);
     expect(await tables(db)).toEqual(expect.arrayContaining([
       "users", "sessions", "decks", "rooms", "room_seats", "room_history", "room_presence",
       "bug_reports", "replay_games", "replay_frames", "replay_participants",
@@ -161,7 +165,7 @@ describe("initial schema", () => {
       "matchmaking_offers",
     ]));
     expect((await db.query("SELECT version FROM schema_migrations ORDER BY version DESC LIMIT 1")).rows)
-      .toEqual([{ version: 29 }]);
+      .toEqual([{ version: 30 }]);
   });
 
   it("adds candidate skip state to an already-applied version 26 database", async () => {
@@ -179,7 +183,7 @@ describe("initial schema", () => {
        WHERE table_name = 'pending_bot_start_candidates' AND column_name = 'skipped'`,
     )).rows).toEqual([{ column_name: "skipped" }]);
     expect((await db.query("SELECT version FROM schema_migrations ORDER BY version DESC LIMIT 1")).rows)
-      .toEqual([{ version: 29 }]);
+      .toEqual([{ version: 30 }]);
   });
 
   it("adds Starvo to durable pending bot starts", async () => {

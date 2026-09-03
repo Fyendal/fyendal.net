@@ -559,7 +559,11 @@ export function GameBoard() {
         ...me.weapons,
         ...Object.values(me.equipment),
         ...me.board,
-        ...view.chain.map((link) => link.attackingCard),
+        ...view.chain.flatMap((link) => [
+          link.attackingCard,
+          ...link.defendingCards,
+          ...link.reactions,
+        ]),
       ].find(
         (x) => x?.instanceId === id,
       )?.cardId;
@@ -1040,11 +1044,11 @@ export function GameBoard() {
             }
           : undefined}
         onCloseChain={derived.canCloseChain ? () => send({ kind: "close-chain" }) : null}
-        activatableAttackIds={derived.activatable}
+        activatableCardIds={derived.activatable}
         selectedAbilitySourceInstanceId={
           sel.kind === "activate" ? sel.sourceInstanceId : null
         }
-        onActivateAttack={(instanceId) => clickActivate(instanceId)()}
+        onActivateCard={(instanceId) => clickActivate(instanceId)()}
       >
         {chainTimingStatus}
       </ChainFloat>

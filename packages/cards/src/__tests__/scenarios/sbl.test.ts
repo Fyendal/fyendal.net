@@ -12,6 +12,7 @@ import { describe, expect, it } from "vitest";
 import { printingId, scenario } from "../harness.js";
 
 const BOLTYN = "boltyn|0";
+const SER_BOLTYN = "ser boltyn, breaker of dawn|0";
 const RAYDN = "raydn, duskbane|0";
 const YELLOW = "raging onslaught|2"; // vanilla yellow, not Light — charge fodder
 const RED_BLOCK = "raging onslaught|1"; // vanilla attack action, def 3
@@ -127,6 +128,39 @@ describe("SBL — soul payoffs", () => {
     s.play("duty bound blitz|1");
     s.blockWith().settle();
     s.expectFinalAttack(5);
+  });
+
+  it("keeps Duty Bound Blitz unlocked after Roaring Beam pays for Ser Boltyn", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: SER_BOLTYN,
+          weapons: [RAYDN],
+          hand: ["light the way|1", "roaring beam|2", "duty bound blitz|1"],
+        },
+        { hero: "dorinthea", hand: [RED_BLOCK] },
+      ],
+    });
+
+    s.play("light the way|1");
+    s.chooseOption("no");
+    s.blockWith(RED_BLOCK);
+    s.react("roaring beam|2", { settle: false });
+    s.passPriority().passPriority();
+    s.activate(SER_BOLTYN, { settle: false });
+    s.doRaw({
+      kind: "choose",
+      optionId: String(s.state.players[0]!.soul[0]!.instanceId),
+    });
+    s.passPriority().passPriority().settle();
+
+    s.expectInZone(0, "roaring beam|2", "banish");
+    s.expectAP(0, 1);
+    s.expectLog("Light the Way has Go again");
+    s.play("duty bound blitz|1");
+    s.blockWith().settle();
+    s.expectFinalAttack(6); // 5 base +1 from the Courage created by Roaring Beam
   });
 
   it("Valiant Thrust gets +3{p} when you've charged this turn", () => {

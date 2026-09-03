@@ -81,8 +81,9 @@ describe("Starvo policy", () => {
     const tilling: CardView = { instanceId: 170_050, cardId: "ROS052", owner: 0 };
     const oaken: CardView = { instanceId: 170_051, cardId: "ELE005", owner: 0 };
     const blue: CardView = { instanceId: 170_052, cardId: "AJV020", owner: 0 };
-    view.players[0].hand = [tilling, oaken, blue];
-    view.players[0].handCount = 3;
+    const pulse: CardView = { instanceId: 170_053, cardId: "ELE112", owner: 0 };
+    view.players[0].hand = [tilling, oaken, blue, pulse];
+    view.players[0].handCount = 4;
     view.players[0].graveyard = ["ROS046", "ROS047", "ROS097"].map((cardId, index) => ({
       instanceId: 170_060 + index,
       cardId,
@@ -103,11 +104,16 @@ describe("Starvo policy", () => {
       instanceId: oaken.instanceId,
       pitchInstanceIds: [blue.instanceId],
     };
+    const pulsePlay: GameIntent = {
+      kind: "play-card",
+      instanceId: pulse.instanceId,
+      pitchInstanceIds: [],
+    };
 
     expect(chooseStarvoIntent({
       seat: 0,
       view,
-      legal: [oakenPlay, tillingPlay, { kind: "pass" }],
+      legal: [oakenPlay, pulsePlay, tillingPlay, { kind: "pass" }],
       cards: cardData,
     })).toEqual(tillingPlay);
   });
@@ -137,8 +143,9 @@ describe("Starvo policy", () => {
     const felling: CardView = { instanceId: 170_080, cardId: "ROS031", owner: 0 };
     const oaken: CardView = { instanceId: 170_081, cardId: "ELE005", owner: 0 };
     const blue: CardView = { instanceId: 170_082, cardId: "AJV020", owner: 0 };
-    view.players[0].hand = [felling, oaken, blue];
-    view.players[0].handCount = 3;
+    const pulse: CardView = { instanceId: 170_083, cardId: "ELE112", owner: 0 };
+    view.players[0].hand = [felling, oaken, blue, pulse];
+    view.players[0].handCount = 4;
     view.players[0].banish = ["ROS046", "ROS047", "ROS048", "ROS052"]
       .map((cardId, index) => ({ instanceId: 170_090 + index, cardId, owner: 0 }));
     view.phase = "action";
@@ -155,13 +162,79 @@ describe("Starvo policy", () => {
       instanceId: oaken.instanceId,
       pitchInstanceIds: [blue.instanceId],
     };
+    const pulsePlay: GameIntent = {
+      kind: "play-card",
+      instanceId: pulse.instanceId,
+      pitchInstanceIds: [],
+    };
 
     expect(chooseStarvoIntent({
       seat: 0,
       view,
-      legal: [oakenPlay, fellingPlay, { kind: "pass" }],
+      legal: [oakenPlay, pulsePlay, fellingPlay, { kind: "pass" }],
       cards: cardData,
     })).toEqual(fellingPlay);
+  });
+
+  it.each([
+    ["the opponent's turn", 1],
+    ["its own turn without a follow-up attack", 0],
+  ] as const)("does not play Pulse of Volthaven during %s", (_, activePlayer) => {
+    const view = viewForTest();
+    const pulse: CardView = { instanceId: 170_095, cardId: "ELE112", owner: 0 };
+    view.players[0].hand = [pulse];
+    view.players[0].handCount = 1;
+    view.turn = 2;
+    view.phase = "action";
+    view.activePlayer = activePlayer;
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "priority-window", prompt: "Priority" };
+    const playPulse: GameIntent = {
+      kind: "play-card",
+      instanceId: pulse.instanceId,
+      pitchInstanceIds: [],
+    };
+
+    expect(chooseStarvoIntent({
+      seat: 0,
+      view,
+      legal: [playPulse, { kind: "pass" }],
+      cards: cardData,
+    })).toEqual({ kind: "pass" });
+  });
+
+  it("plays Pulse of Volthaven before a legal compatible attack on its own turn", () => {
+    const view = viewForTest();
+    const pulse: CardView = { instanceId: 170_096, cardId: "ELE112", owner: 0 };
+    const oaken: CardView = { instanceId: 170_097, cardId: "ELE005", owner: 0 };
+    const blue: CardView = { instanceId: 170_098, cardId: "AJV020", owner: 0 };
+    view.players[0].hand = [pulse, oaken, blue];
+    view.players[0].handCount = 3;
+    view.turn = 2;
+    view.phase = "action";
+    view.activePlayer = 0;
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "priority-window", prompt: "Priority" };
+    const playPulse: GameIntent = {
+      kind: "play-card",
+      instanceId: pulse.instanceId,
+      pitchInstanceIds: [],
+    };
+
+    expect(chooseStarvoIntent({
+      seat: 0,
+      view,
+      legal: [
+        playPulse,
+        {
+          kind: "play-card",
+          instanceId: oaken.instanceId,
+          pitchInstanceIds: [blue.instanceId],
+        },
+        { kind: "pass" },
+      ],
+      cards: cardData,
+    })).toEqual(playPulse);
   });
 
   it("spends a floating resource on Crown of Seeds while defending", () => {

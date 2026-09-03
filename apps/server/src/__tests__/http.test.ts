@@ -709,6 +709,7 @@ describe("account rights", () => {
         roomCode: "PRIV01",
         description: "The room stopped accepting legal actions.",
         fixedAt: 123,
+        closedAt: null,
         dismissedAt: expect.any(Number),
       }),
     ]);
