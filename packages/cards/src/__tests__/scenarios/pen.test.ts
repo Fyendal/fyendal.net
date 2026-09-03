@@ -642,6 +642,23 @@ describe("PEN — import and set mechanics", () => {
       intent.kind === "play-from-arsenal" && intent.instanceId === arsenal.instanceId,
     )).toBe(false);
   });
+
+  it("Solforge Gauntlet enters its hero's soul after defending", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["head jab|1"], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", equipment: { ...NO_EQUIPMENT, arms: "solforge gauntlet|0" } },
+      ],
+    });
+
+    g.play("head jab|1")
+      .blockWith("solforge gauntlet|0")
+      .settle()
+      .doRaw({ kind: "close-chain" });
+
+    g.expectInZone(1, "solforge gauntlet|0", "soul");
+    expect(g.state.players[1]!.equipment.arms).toBeUndefined();
+  });
 });
 
 describe("PEN — generalized rules interactions", () => {
