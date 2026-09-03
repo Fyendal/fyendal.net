@@ -26,6 +26,13 @@ const TRACE_KEYS = [
   "rootStrategic",
   "rootPrepared",
 ] as const satisfies readonly (keyof TurnPlannerCandidateTrace)[];
+const MEMORY_KEYS = [
+  "processRssBytes",
+  "heapTotalBytes",
+  "heapUsedBytes",
+  "externalBytes",
+  "arrayBuffersBytes",
+] as const;
 
 export interface BotPolicyTask {
   taskId: number;
@@ -41,17 +48,29 @@ export interface DecodedBotPolicyTask extends Omit<BotPolicyTask, "state"> {
   state: unknown;
 }
 
+export interface BotPolicyWorkerMemory {
+  /** Worker threads share one process, so RSS includes the gateway and worker. */
+  processRssBytes: number;
+  /** The remaining counters describe the worker's own V8 isolate. */
+  heapTotalBytes: number;
+  heapUsedBytes: number;
+  externalBytes: number;
+  arrayBuffersBytes: number;
+}
+
 export interface BotPolicyWorkerSuccess {
   kind: "result";
   taskId: number;
   decision: BotDecision;
   computeMs: number;
+  memory: BotPolicyWorkerMemory;
 }
 
 export interface BotPolicyWorkerFailure {
   kind: "error";
   taskId: number;
   error: string;
+  memory: BotPolicyWorkerMemory;
 }
 
 export type BotPolicyWorkerResponse = BotPolicyWorkerSuccess | BotPolicyWorkerFailure;
@@ -74,6 +93,32 @@ function safeInteger(value: unknown): value is number {
 
 function finiteNonnegative(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value) && value >= 0;
+}
+
+function decodeWorkerMemory(value: unknown): BotPolicyWorkerMemory | null {
+  const candidate = record(value);
+  if (!candidate || !exact(candidate, MEMORY_KEYS) ||
+    !safeInteger(candidate.processRssBytes) || !safeInteger(candidate.heapTotalBytes) ||
+    !safeInteger(candidate.heapUsedBytes) || !safeInteger(candidate.externalBytes) ||
+    !safeInteger(candidate.arrayBuffersBytes)) return null;
+  return {
+    processRssBytes: candidate.processRssBytes,
+    heapTotalBytes: candidate.heapTotalBytes,
+    heapUsedBytes: candidate.heapUsedBytes,
+    externalBytes: candidate.externalBytes,
+    arrayBuffersBytes: candidate.arrayBuffersBytes,
+  };
+}
+
+export function collectBotPolicyWorkerMemory(): BotPolicyWorkerMemory {
+  const memory = process.memoryUsage();
+  return {
+    processRssBytes: memory.rss,
+    heapTotalBytes: memory.heapTotal,
+    heapUsedBytes: memory.heapUsed,
+    externalBytes: memory.external,
+    arrayBuffersBytes: memory.arrayBuffers,
+  };
 }
 
 function decodeCheckpoint(value: unknown): TurnPlanCheckpoint | null {
@@ -167,16 +212,18 @@ export function decodeBotPolicyTask(value: unknown): DecodedBotPolicyTask | null
 export function decodeBotPolicyWorkerResponse(value: unknown): BotPolicyWorkerResponse | null {
   const candidate = record(value);
   if (!candidate || !safeInteger(candidate.taskId)) return null;
+  const memory = decodeWorkerMemory(candidate.memory);
+  if (!memory) return null;
   if (candidate.kind === "error") {
-    return exact(candidate, ["kind", "taskId", "error"]) &&
+    return exact(candidate, ["kind", "taskId", "error", "memory"]) &&
       typeof candidate.error === "string" && candidate.error.length <= 4_096
-      ? { kind: "error", taskId: candidate.taskId, error: candidate.error }
+      ? { kind: "error", taskId: candidate.taskId, error: candidate.error, memory }
       : null;
   }
-  if (candidate.kind !== "result" || !exact(candidate, ["kind", "taskId", "decision", "computeMs"]) ||
+  if (candidate.kind !== "result" || !exact(candidate, ["kind", "taskId", "decision", "computeMs", "memory"]) ||
     !finiteNonnegative(candidate.computeMs)) return null;
   const decision = decodeDecision(candidate.decision);
   return decision
-    ? { kind: "result", taskId: candidate.taskId, decision, computeMs: candidate.computeMs }
+    ? { kind: "result", taskId: candidate.taskId, decision, computeMs: candidate.computeMs, memory }
     : null;
 }

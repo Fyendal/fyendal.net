@@ -42,6 +42,8 @@ export function initialStoreProjection(
     queueCounts: { "classic-battles": 0, cc: 0, "silver-age": 0 },
     queuedFormat: null,
     matchmakingActive: false,
+    backgroundMatchmaking: { state: "inactive" as const },
+    pendingBotStart: false,
     matchAcceptanceRole: null,
     decks: [],
     decksLoading: auth !== null,
@@ -91,6 +93,8 @@ export function clearedRoomProjection(): Pick<
   | "inviteRoom"
   | "queuedFormat"
   | "matchmakingActive"
+  | "backgroundMatchmaking"
+  | "pendingBotStart"
   | "matchAcceptanceRole"
   | "prep"
   | "prepDeck"
@@ -124,6 +128,8 @@ export function clearedRoomProjection(): Pick<
     inviteRoom: null,
     queuedFormat: null,
     matchmakingActive: false,
+    backgroundMatchmaking: { state: "inactive" },
+    pendingBotStart: false,
     matchAcceptanceRole: null,
     prep: null,
     prepDeck: null,

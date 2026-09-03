@@ -21666,6 +21666,18 @@
       "value": "Who would you like to practice against?"
     }
   ],
+  "lobby.bot.searchForPlayer": [
+    {
+      "type": 0,
+      "value": "Keep searching for a real player"
+    }
+  ],
+  "lobby.bot.searchForPlayer.description": [
+    {
+      "type": 0,
+      "value": "Practice against this bot while Fyendal looks for a PvP opponent."
+    }
+  ],
   "lobby.bot.type.aggro": [
     {
       "type": 0,
@@ -22860,6 +22872,50 @@
     {
       "type": 0,
       "value": "Spectating — waiting for the game to start"
+    }
+  ],
+  "matchmaking.background.found": [
+    {
+      "type": 0,
+      "value": "Player found"
+    }
+  ],
+  "matchmaking.background.keepBot": [
+    {
+      "type": 0,
+      "value": "Keep playing bot"
+    }
+  ],
+  "matchmaking.background.opponent": [
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " — "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    }
+  ],
+  "matchmaking.background.searching": [
+    {
+      "type": 0,
+      "value": "Searching for a real player while you practice…"
+    }
+  ],
+  "matchmaking.background.stop": [
+    {
+      "type": 0,
+      "value": "Stop searching"
+    }
+  ],
+  "matchmaking.background.waiting": [
+    {
+      "type": 0,
+      "value": "Accepted — waiting for opponent"
     }
   ],
   "meta.home.description": [

@@ -23,6 +23,7 @@ import {
   removeFromArray,
 } from "./zoneQueries.js";
 import { controlledPermanents, hookSources } from "./sourceQueries.js";
+import { snapshotSerializable } from "./ruleQueries.js";
 
 import { clearPrivateZonePlacement, stampControlledName } from "./cardLifecycle.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
@@ -686,6 +687,60 @@ export function removeFromStackResolution(
 export function removeFromOwnerZones(state: GameStateInternal, instanceId: number): { owner: PlayerState; card: CardInstance; fromArena: boolean; fromZone: string } | undefined {
   return removeFromStackResolution(state, instanceId)
     ?? findAndRemoveCard(state, instanceId, { includeEquipment: true, includeBanish: true });
+}
+
+/** Move a card into its owner's soul, including an attack action that is
+ * currently represented only on the combat chain. The chain retains a
+ * last-known snapshot while settlement skips the card that already left. */
+export function putCardIntoSoul(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  instanceId: number,
+  causedBySeat?: number,
+): boolean {
+  const fromResolving = removeFromStackResolution(state, instanceId);
+  const link = currentLink(state);
+  const activeAttacker = !fromResolving &&
+    link?.attackingCard.instanceId === instanceId &&
+    link.flags.attackGone !== true;
+  const fromAttackingOwnerZone = activeAttacker
+    ? findAndRemoveCard(state, instanceId, { includeEquipment: true })
+    : undefined;
+  let fromChain: ReturnType<typeof findAndRemoveCard> = undefined;
+  if (activeAttacker && link) {
+    const card = link.attackingCard;
+    link.attackingCard = snapshotSerializable(card);
+    link.flags.attackGone = true;
+    if (!fromAttackingOwnerZone) {
+      fromChain = {
+        owner: state.players[card.owner] as PlayerState,
+        card,
+        fromArena: false,
+        fromZone: "chain",
+      };
+    }
+  }
+  const found = fromResolving
+    ?? fromAttackingOwnerZone
+    ?? fromChain
+    ?? findAndRemoveCard(state, instanceId, { includeEquipment: true, includeBanish: true });
+  if (!found) return false;
+  delete found.card.faceDown;
+  if (found.fromArena) fireLeaveArena(state, runtime, found.owner.seat, found.card, "soul");
+  enterSoul(state, runtime, found.card, false);
+  if (found.fromZone === "graveyard") {
+    runtime.events.fireCardLeavesGraveyard(state, found.owner.seat, found.card, "soul");
+  }
+  if (found.fromZone === "deck") {
+    runtime.events.queueTriggeredEvent(
+      state,
+      "card-moved-from-deck-by-effect",
+      found.owner.seat,
+      found.card,
+      { from: "deck", to: "soul", causedBySeat },
+    );
+  }
+  return true;
 }
 
 /** Move one card to its owner's deck bottom with hidden-zone-safe logging. */

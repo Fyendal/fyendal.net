@@ -1648,23 +1648,7 @@ export function makeCtx(
       return card;
     },
     putIntoSoul(instanceId) {
-      const found = runtime.commands.removeFromOwnerZones(state, instanceId);
-      if (!found) return false;
-      runtime.commands.enterSoul(state, found.card, false);
-      if (found.fromZone === "graveyard") {
-        runtime.events.fireCardLeavesGraveyard(state, found.owner.seat, found.card, "soul");
-      }
-      if (found.fromArena) runtime.commands.fireLeaveArena(state, found.owner.seat, found.card, "soul");
-      if (found.fromZone === "deck") {
-        runtime.events.queueTriggeredEvent(
-          state,
-          "card-moved-from-deck-by-effect",
-          found.owner.seat,
-          found.card,
-          { from: "deck", to: "soul", causedBySeat: seat },
-        );
-      }
-      return true;
+      return runtime.commands.putCardIntoSoul(state, instanceId, seat);
     },
     banish(instanceId, opts) {
       const before = findCardAnywhere(state, instanceId);

@@ -498,8 +498,8 @@ export function DeckGrid(props: {
       {botDeckId ? (
         <BotOpponentModal
           format={props.format}
-          onSelect={(bot) => {
-            createBotRoom(props.format, botDeckId, bot);
+          onSelect={(bot, searchForPlayer) => {
+            createBotRoom(props.format, botDeckId, bot, searchForPlayer);
             setBotDeckId(null);
           }}
           onClose={() => setBotDeckId(null)}

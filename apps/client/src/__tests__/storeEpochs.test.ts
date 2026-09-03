@@ -766,7 +766,60 @@ describe("client connection and account race fences", () => {
     expect(socket.readyState).toBe(FakeWebSocket.OPEN);
   });
 
-  it("waits for the matchmaking room to release before starting bot practice", async () => {
+  it("tracks opted-in bot startup separately from background offers", async () => {
+    localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+    const { useStore } = await import("../store.js");
+
+    useStore.getState().createBotRoom("cc", "precon-asb", "ira", true);
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    expect(socket.sent.map((message) => JSON.parse(message))).toContainEqual({
+      type: "create-bot-room",
+      format: "cc",
+      deckId: "precon-asb",
+      bot: "ira",
+      searchForPlayer: true,
+    });
+    expect(useStore.getState()).toMatchObject({
+      pendingBotStart: true,
+      backgroundMatchmaking: { state: "inactive" },
+    });
+
+    socket.message({ type: "background-matchmaking", status: { state: "pending", format: "cc" } });
+    expect(useStore.getState().pendingBotStart).toBe(true);
+    socket.message({
+      type: "background-matchmaking",
+      status: {
+        state: "offer",
+        format: "cc",
+        roomCode: "PVP123",
+        deadlineAt: Date.now() + 30_000,
+        opponent: { username: "Bob", heroId: "hero-bob", heroName: "Bob Hero" },
+        acceptedByYou: false,
+        opponentAccepted: false,
+      },
+    });
+    expect(useStore.getState()).toMatchObject({
+      pendingBotStart: false,
+      backgroundMatchmaking: { state: "offer", roomCode: "PVP123" },
+    });
+    useStore.getState().acceptBackgroundMatch();
+    expect(JSON.parse(socket.sent.at(-1)!)).toEqual({
+      type: "background-match-accept",
+      roomCode: "PVP123",
+    });
+    useStore.getState().declineBackgroundMatch();
+    expect(JSON.parse(socket.sent.at(-1)!)).toEqual({
+      type: "background-match-decline",
+      roomCode: "PVP123",
+    });
+    expect(useStore.getState().backgroundMatchmaking).toEqual({ state: "searching", format: "cc" });
+    useStore.getState().stopBackgroundMatchmaking();
+    expect(JSON.parse(socket.sent.at(-1)!)).toEqual({ type: "background-matchmaking-leave" });
+    expect(useStore.getState().backgroundMatchmaking).toEqual({ state: "inactive" });
+  });
+
+  it("preserves the retained matchmaking room when starting bot practice", async () => {
     localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
     const { useStore } = await import("../store.js");
 
@@ -783,21 +836,18 @@ describe("client connection and account race fences", () => {
     });
 
     useStore.getState().playBotFromPrep("cc", "precon-asb", "ira");
-    expect(JSON.parse(socket.sent.at(-1)!)).toEqual({ type: "leave-room" });
-    expect(socket.sent.map((message) => JSON.parse(message)))
-      .not.toContainEqual(expect.objectContaining({ type: "create-bot-room" }));
-
-    socket.message({ type: "left" });
     expect(JSON.parse(socket.sent.at(-1)!)).toEqual({
       type: "create-bot-room",
       format: "cc",
       deckId: "precon-asb",
       bot: "ira",
+      searchForPlayer: true,
     });
     expect(useStore.getState()).toMatchObject({
-      roomCode: null,
-      matchmakingActive: false,
+      roomCode: "QUEUE1",
+      matchmakingActive: true,
       botGame: true,
+      pendingBotStart: true,
     });
     expect(socket.readyState).toBe(FakeWebSocket.OPEN);
   });

@@ -72,11 +72,12 @@ const BOTS: Readonly<Record<ConstructedFormat, readonly BotOption[]>> = {
 
 export function BotOpponentModal(props: {
   format: ConstructedFormat;
-  onSelect: (bot: BotOpponent) => void;
+  onSelect: (bot: BotOpponent, searchForPlayer: boolean) => void;
   onClose: () => void;
 }) {
   const intl = useIntl();
   const bots = BOTS[props.format];
+  const [searchForPlayer, setSearchForPlayer] = useState(true);
   return (
     <div
       className="modal-backdrop bot-opponent-backdrop"
@@ -97,13 +98,24 @@ export function BotOpponentModal(props: {
           {intl.formatMessage({ id: "lobby.bot.chooseOpponent" })}
         </h2>
         <p className="muted">{intl.formatMessage({ id: "lobby.bot.prompt" })}</p>
+        <label className="bot-matchmaking-option">
+          <input
+            type="checkbox"
+            checked={searchForPlayer}
+            onChange={(event) => setSearchForPlayer(event.target.checked)}
+          />
+          <span>
+            <strong>{intl.formatMessage({ id: "lobby.bot.searchForPlayer" })}</strong>
+            <small>{intl.formatMessage({ id: "lobby.bot.searchForPlayer.description" })}</small>
+          </span>
+        </label>
         <div className="bot-opponent-options">
           {bots.map((bot, index) => (
             <button
               type="button"
               key={bot.id}
               autoFocus={index === 0}
-              onClick={() => props.onSelect(bot.id)}
+              onClick={() => props.onSelect(bot.id, searchForPlayer)}
             >
               <BotPortrait name={bot.name} heroName={bot.heroName} />
               <span className="bot-opponent-details">

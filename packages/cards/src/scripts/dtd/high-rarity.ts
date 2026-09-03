@@ -103,6 +103,12 @@ function angel(effect: (ctx: ScriptCtx) => void): CardScript {
   };
 }
 function figment(effect: (ctx: ScriptCtx) => void): CardScript { return { onEnterArena: effect }; }
+function duringActionPhase(ctx: ScriptCtx): boolean {
+  if (ctx.state.phase === "action" || ctx.state.phase === "defend" || ctx.state.phase === "reaction") return true;
+  return ctx.state.phase === "layer" &&
+    ctx.state.stackResume !== "begin-action-phase" &&
+    ctx.state.stackResume !== "end-phase";
+}
 function awakenFigment(ctx: ScriptCtx) {
   const choices = ctx.player(ctx.seat).board.filter((card) => has(ctx, card, "figment") && data(ctx, card).backId);
   if (choices.length) ctx.requestCardChoice("prism-awaken", decisionPrompt("Choose a Figment to awaken", "card.dtd.figment.awaken.choose"), choices.map((card) => card.instanceId));
@@ -110,7 +116,7 @@ function awakenFigment(ctx: ScriptCtx) {
 function prismAdult(): CardScript {
   return {
     onCardPutIntoSoul(ctx, card) {
-      if (ctx.state.phase !== "action" || !data(ctx, card).name.toLowerCase().includes("herald")) return;
+      if (!duringActionPhase(ctx) || !data(ctx, card).name.toLowerCase().includes("herald")) return;
       const figments = ctx.player(ctx.seat).deck.filter((candidate) => has(ctx, candidate, "figment"));
       if (figments.length) ctx.requestCardChoice("prism-figment", decisionPrompt("Search for a Figment?", "card.dtd.figment.search", { optionMessages: commonOptionMessages("no") }), ["no", ...figments.map((card) => card.instanceId)]);
     },

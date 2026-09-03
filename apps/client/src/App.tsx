@@ -4,6 +4,7 @@ import { roomCodeFromUrl, savedRoomCode, useStore } from "./store.js";
 import { Lobby } from "./lobby/Lobby.js";
 import { RoomLoading } from "./lobby/RoomLoading.js";
 import { savedReplayIdFromPath } from "./replay/route.js";
+import { BackgroundMatchBar } from "./matchmaking/BackgroundMatchBar.js";
 
 const WaitingRoom = lazy(() => import("./lobby/WaitingRoom.js").then((module) => ({ default: module.WaitingRoom })));
 const PrepRoom = lazy(() => import("./prep/PrepRoom.js").then((module) => ({ default: module.PrepRoom })));
@@ -148,5 +149,10 @@ export function App() {
   else if (screen === "waiting") content = <WaitingRoom />;
   else if (screen === "prep") content = <PrepRoom />;
   else content = <Lobby />;
-  return <Suspense fallback={<ScreenFallback />}>{content}</Suspense>;
+  return (
+    <Suspense fallback={<ScreenFallback />}>
+      {content}
+      <BackgroundMatchBar />
+    </Suspense>
+  );
 }

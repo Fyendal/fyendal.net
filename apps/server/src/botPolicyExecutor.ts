@@ -5,6 +5,7 @@ import type { PersistedStateV1 } from "./persistedState.js";
 import {
   decodeBotPolicyWorkerResponse,
   type BotPolicyTask,
+  type BotPolicyWorkerMemory,
 } from "./botPolicyWorkerProtocol.js";
 
 /** One wall-clock budget for every bot task, including queueing, worker
@@ -48,7 +49,29 @@ export interface BotPolicyExecutionResult {
   totalMs: number;
   queueDepth: number;
   generation: number;
+  workerMemory: BotPolicyWorkerMemory;
 }
+
+export interface BotPolicyRuntimeMetric {
+  severity: "INFO";
+  message: "bot policy metrics";
+  event: "bot_policy_metrics";
+  instanceId?: string;
+  botId: BotOpponent;
+  outcome: Exclude<BotPolicyExecutionFailure, "stopped"> | "result";
+  queueMs: number;
+  totalMs: number;
+  queueDepth: number;
+  generation: number;
+  computeMs?: number;
+  workerMemory?: BotPolicyWorkerMemory;
+}
+
+export type BotPolicyMetricLogger = (metric: BotPolicyRuntimeMetric) => void;
+
+export const consoleBotPolicyMetric: BotPolicyMetricLogger = (metric) => {
+  console.log(JSON.stringify(metric));
+};
 
 export interface BotPolicyExecutor {
   decide(request: BotPolicyRequest): Promise<BotPolicyExecutionResult>;
@@ -82,6 +105,8 @@ interface BotPolicyExecutorOptions {
   now?: () => number;
   workerUrl?: URL;
   workerFactory?: WorkerFactory;
+  metricLogger?: BotPolicyMetricLogger;
+  instanceId?: string;
 }
 
 export function botPolicyWorkerUrl(moduleUrl = import.meta.url): URL {
@@ -95,6 +120,8 @@ export class WorkerBotPolicyExecutor implements BotPolicyExecutor {
   private readonly now: () => number;
   private readonly url: URL;
   private readonly factory: WorkerFactory;
+  private readonly metricLogger: BotPolicyMetricLogger | undefined;
+  private readonly instanceId: string | undefined;
   private readonly queue: QueuedTask[] = [];
   private worker: WorkerPort | null = null;
   private active: QueuedTask | null = null;
@@ -107,6 +134,8 @@ export class WorkerBotPolicyExecutor implements BotPolicyExecutor {
     this.timeoutMs = options.timeoutMs ?? BOT_POLICY_DECISION_TIMEOUT_MS;
     this.maxQueue = options.maxQueue ?? MAX_BOT_POLICY_QUEUE;
     this.now = options.now ?? Date.now;
+    this.metricLogger = options.metricLogger;
+    this.instanceId = options.instanceId;
     this.factory = options.workerFactory ?? ((url) => {
       if (url.pathname.endsWith(".ts")) {
         const source = `import("tsx/esm/api").then(({ register }) => { register(); return import(${JSON.stringify(url.href)}); });`;
@@ -129,6 +158,18 @@ export class WorkerBotPolicyExecutor implements BotPolicyExecutor {
     }
     const outstanding = this.queue.length + (this.active ? 1 : 0);
     if (this.active && this.queue.length >= this.maxQueue) {
+      this.emitMetric({
+        severity: "INFO",
+        message: "bot policy metrics",
+        event: "bot_policy_metrics",
+        ...(this.instanceId ? { instanceId: this.instanceId } : {}),
+        botId: request.botId,
+        outcome: "overflow",
+        queueMs: 0,
+        totalMs: 0,
+        queueDepth: outstanding + 1,
+        generation: this.generation,
+      });
       return Promise.reject(new BotPolicyExecutionError(
         "overflow",
         "bot policy queue is full",
@@ -223,21 +264,25 @@ export class WorkerBotPolicyExecutor implements BotPolicyExecutor {
     }
     clearTimeout(active.timeout);
     this.active = null;
+    const finishedAt = this.now();
+    const telemetry = this.telemetry(active, finishedAt);
     if (response.kind === "error") {
+      this.emitTaskMetric(active, "policy", telemetry, response.memory);
       active.reject(new BotPolicyExecutionError(
         "policy",
         response.error,
-        this.telemetry(active, this.now()),
+        telemetry,
       ));
     } else {
-      const finishedAt = this.now();
+      this.emitTaskMetric(active, "result", telemetry, response.memory, response.computeMs);
       active.resolve({
         decision: response.decision,
-        queueMs: Math.max(0, (active.startedAt ?? finishedAt) - active.enqueuedAt),
+        queueMs: telemetry.queueMs,
         computeMs: response.computeMs,
-        totalMs: Math.max(0, finishedAt - active.enqueuedAt),
+        totalMs: telemetry.totalMs,
         queueDepth: active.queueDepth,
         generation: active.generation,
+        workerMemory: response.memory,
       });
     }
     this.pump();
@@ -252,10 +297,12 @@ export class WorkerBotPolicyExecutor implements BotPolicyExecutor {
     const failedAt = this.now();
     for (const task of tasks) {
       clearTimeout(task.timeout);
+      const telemetry = this.telemetry(task, failedAt);
+      if (error.reason !== "stopped") this.emitTaskMetric(task, error.reason, telemetry);
       task.reject(new BotPolicyExecutionError(
         error.reason,
         error.message,
-        this.telemetry(task, failedAt),
+        telemetry,
       ));
     }
     if (worker) void worker.terminate().catch(() => undefined);
@@ -268,5 +315,36 @@ export class WorkerBotPolicyExecutor implements BotPolicyExecutor {
       queueDepth: task.queueDepth,
       generation: task.generation || this.generation,
     };
+  }
+
+  private emitTaskMetric(
+    task: QueuedTask,
+    outcome: BotPolicyRuntimeMetric["outcome"],
+    telemetry: BotPolicyExecutionTelemetry,
+    workerMemory?: BotPolicyWorkerMemory,
+    computeMs?: number,
+  ): void {
+    this.emitMetric({
+      severity: "INFO",
+      message: "bot policy metrics",
+      event: "bot_policy_metrics",
+      ...(this.instanceId ? { instanceId: this.instanceId } : {}),
+      botId: task.task.botId,
+      outcome,
+      queueMs: telemetry.queueMs,
+      totalMs: telemetry.totalMs,
+      queueDepth: telemetry.queueDepth,
+      generation: telemetry.generation,
+      ...(computeMs !== undefined ? { computeMs } : {}),
+      ...(workerMemory ? { workerMemory } : {}),
+    });
+  }
+
+  private emitMetric(metric: BotPolicyRuntimeMetric): void {
+    try {
+      this.metricLogger?.(metric);
+    } catch {
+      // Observability must never disturb game execution or worker recovery.
+    }
   }
 }

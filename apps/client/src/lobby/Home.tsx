@@ -190,7 +190,7 @@ function PlayableDeckCard(props: {
   cardPoolDisabled: boolean;
   onCardPoolModeChange: (mode: CardPoolMode) => void;
   onFindMatch: (format: ConstructedFormat, choice: { deckId: string }) => void;
-  onPlayBot: (format: ConstructedFormat, deckId: string, bot?: BotOpponent) => void;
+  onPlayBot: (format: ConstructedFormat, deckId: string, bot?: BotOpponent, searchForPlayer?: boolean) => void;
 }) {
   const intl = useIntl();
   const [selectedDeckId, setSelectedDeckId] = useState("");
@@ -256,8 +256,8 @@ function PlayableDeckCard(props: {
       {choosingBot && selectedDeck ? (
         <BotOpponentModal
           format={props.format}
-          onSelect={(bot) => {
-            props.onPlayBot(props.format, selectedDeck.id, bot);
+          onSelect={(bot, searchForPlayer) => {
+            props.onPlayBot(props.format, selectedDeck.id, bot, searchForPlayer);
             setChoosingBot(false);
           }}
           onClose={() => setChoosingBot(false)}

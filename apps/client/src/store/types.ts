@@ -1,5 +1,6 @@
 import type {
   BotOpponent,
+  BackgroundMatchmakingStatus,
   CardPoolMode,
   Format,
   GameIntent,
@@ -143,6 +144,8 @@ export interface StoreState {
   queueCounts: Record<Format, number>;
   queuedFormat: Format | null;
   matchmakingActive: boolean;
+  backgroundMatchmaking: BackgroundMatchmakingStatus;
+  pendingBotStart: boolean;
   matchAcceptanceRole: MatchAcceptanceRole | null;
   prep: PrepView | null;
   createRoom: (
@@ -150,14 +153,17 @@ export interface StoreState {
     choice: { hero?: HeroId; deckId?: string },
     visibility?: "private" | "public",
   ) => void;
-  createBotRoom: (format: ConstructedFormat, deckId: string, bot?: BotOpponent) => void;
-  playBotFromPrep: (format: ConstructedFormat, deckId: string, bot?: BotOpponent) => void;
+  createBotRoom: (format: ConstructedFormat, deckId: string, bot?: BotOpponent, searchForPlayer?: boolean) => void;
+  playBotFromPrep: (format: ConstructedFormat, deckId: string, bot?: BotOpponent, searchForPlayer?: boolean) => void;
   joinRoom: (code: string, deckId?: string, spectate?: boolean, hero?: HeroId) => void;
   inspectRoom: (code: string) => void;
   dismissInvite: (resetUrl?: boolean) => void;
   listRooms: () => void;
   queueJoin: (format: Format, choice: { hero?: HeroId; deckId?: string }) => void;
   queueLeave: () => void;
+  stopBackgroundMatchmaking: () => void;
+  acceptBackgroundMatch: () => void;
+  declineBackgroundMatch: () => void;
   acceptMatch: () => void;
   declineMatch: () => void;
   presentDeck: (deck: PresentedDeck) => void;

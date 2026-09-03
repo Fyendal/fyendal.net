@@ -732,6 +732,20 @@ export interface RoomInvite {
 
 export type UndoTarget = "last-action" | "current-turn" | "previous-turn";
 
+export type BackgroundMatchmakingStatus =
+  | { state: "inactive" }
+  | { state: "pending"; format: "cc" | "silver-age" }
+  | { state: "searching"; format: "cc" | "silver-age" }
+  | {
+      state: "offer";
+      format: "cc" | "silver-age";
+      roomCode: string;
+      deadlineAt: number;
+      opponent: { username: string; heroId: string; heroName: string };
+      acceptedByYou: boolean;
+      opponentAccepted: boolean;
+    };
+
 /** Short, predefined table messages. They are broadcast live and never persisted. */
 export type EmoteMessage =
   | "Hello!"
@@ -751,7 +765,7 @@ export type ClientMessage =
   /** classic-battles: hero; cc/silver-age: deckId of a saved deck */
   | { type: "create-room"; format: Format; hero?: HeroId; deckId?: string; private?: boolean; cardPoolMode?: CardPoolMode }
   /** Create a dedicated constructed room with the selected AI opponent. */
-  | { type: "create-bot-room"; format?: "cc" | "silver-age"; deckId: string; bot?: BotOpponent; cardPoolMode?: CardPoolMode }
+  | { type: "create-bot-room"; format?: "cc" | "silver-age"; deckId: string; bot?: BotOpponent; cardPoolMode?: CardPoolMode; searchForPlayer?: boolean; avoidRoomCodes?: string[] }
   /** deckId required to take a player seat in cc/silver-age rooms; omit to spectate.
    *  classic-battles player seats pass hero (mirrors allowed; omitted = the
    *  opposite of the seated player). spectate forces a spectator slot even
@@ -762,6 +776,11 @@ export type ClientMessage =
   | { type: "list-rooms" }
   | { type: "queue-join"; format: Format; hero?: HeroId; deckId?: string; cardPoolMode?: CardPoolMode; avoidRoomCodes?: string[] }
   | { type: "queue-leave" }
+  | { type: "background-matchmaking-status" }
+  | { type: "background-matchmaking-leave" }
+  | { type: "background-match-accept"; roomCode: string }
+  | { type: "background-match-decline"; roomCode: string }
+  | { type: "decline-pending-bot-match"; roomCode: string }
   /** Matchmade prep room: acknowledge the pairing before sideboarding. */
   | { type: "accept-match" }
   /** prep room: after first-player choice, present a deck and set ready */
@@ -804,6 +823,7 @@ export type ServerMessage =
   | { type: "queue-status"; counts: Record<Format, number> }
   | { type: "queued"; format: Format }
   | { type: "queue-left" }
+  | { type: "background-matchmaking"; status: BackgroundMatchmakingStatus }
   /** This player lost a matchmade prep seat by missing its deadline. */
   | { type: "match-timeout" }
   /** pre-game prep room update */

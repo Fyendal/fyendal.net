@@ -51,9 +51,9 @@ export function CreateRoomModal({ onClose }: { onClose: () => void }) {
     onClose();
   };
 
-  const playBot = (bot: BotOpponent) => {
+  const playBot = (bot: BotOpponent, searchForPlayer: boolean) => {
     if (!selectionValid) return;
-    createBotRoom(format, deckId, bot);
+    createBotRoom(format, deckId, bot, searchForPlayer);
     onClose();
   };
 
@@ -127,7 +127,7 @@ export function CreateRoomModal({ onClose }: { onClose: () => void }) {
         {choosingBot ? (
           <BotOpponentModal
             format={format}
-            onSelect={(bot) => playBot(bot)}
+            onSelect={playBot}
             onClose={() => setChoosingBot(false)}
           />
         ) : null}

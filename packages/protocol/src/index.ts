@@ -131,6 +131,28 @@ export interface AccountExport {
     deckId: string | null;
     retainedRoomCode: string | null;
     joinedAt: number;
+    mode: "foreground" | "background";
+    sourceRoomCode: string | null;
+    pendingOfferRoomCode: string | null;
+    avoidedRoomCodes: string[];
+    pendingBotStart: null | {
+      format: "cc" | "silver-age";
+      deckId: string;
+      bot: string;
+      cardPoolMode: CardPoolMode;
+      requestedAt: number;
+      candidates: Array<{
+        candidateUserId: number;
+        ordinal: number;
+        attempted: boolean;
+        skipped: boolean;
+      }>;
+    };
+    offer: null | {
+      roomCode: string;
+      opponentUserId: number;
+      createdAt: number;
+    };
   };
   bugReports: Array<{
     id: string;
@@ -226,6 +248,8 @@ function string(value: unknown, max = MAX_TEXT, allowEmpty = true): value is str
 const id = (value: unknown): value is string => string(value, MAX_ID, false);
 const integer = (value: unknown): value is number => Number.isSafeInteger(value);
 const nonNegativeInteger = (value: unknown): value is number => integer(value) && (value as number) >= 0;
+const positiveInteger = (value: unknown): value is number => integer(value) && (value as number) > 0;
+const roomCode = (value: unknown): value is string => typeof value === "string" && /^[A-Z0-9]{6}$/.test(value);
 const finite = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value);
 const seat = (value: unknown): value is 0 | 1 => value === 0 || value === 1;
 const nullableSeat = (value: unknown): value is 0 | 1 | null => value === null || seat(value);
@@ -512,11 +536,17 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
         ));
       break;
     case "create-bot-room":
-      valid = exactKeys(message, ["type", "format", "deckId", "bot", "cardPoolMode"], ["type", "deckId"])
+      valid = exactKeys(message, ["type", "format", "deckId", "bot", "cardPoolMode", "searchForPlayer", "avoidRoomCodes"], ["type", "deckId"])
         && (message.format === undefined || message.format === "cc" || message.format === "silver-age")
         && id(message.deckId)
         && (message.bot === undefined || BOT_OPPONENTS.has(String(message.bot)))
-        && (message.cardPoolMode === undefined || CARD_POOL_MODES.has(String(message.cardPoolMode)));
+        && (message.cardPoolMode === undefined || CARD_POOL_MODES.has(String(message.cardPoolMode)))
+        && (message.searchForPlayer === undefined || typeof message.searchForPlayer === "boolean")
+        && (message.avoidRoomCodes === undefined || (
+          Array.isArray(message.avoidRoomCodes)
+          && message.avoidRoomCodes.length <= MAX_MATCHMAKING_AVOID_ROOM_CODES
+          && message.avoidRoomCodes.every((code) => typeof code === "string" && /^[A-Za-z0-9]{6}$/.test(code))
+        ));
       break;
     case "join-room":
       valid = exactKeys(message, ["type", "code", "token", "deckId", "hero", "spectate"], ["type", "code"])
@@ -570,6 +600,16 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
       break;
     case "accept-match":
       valid = exactKeys(message, ["type"]);
+      break;
+    case "background-matchmaking-status":
+    case "background-matchmaking-leave":
+      valid = exactKeys(message, ["type"]);
+      break;
+    case "background-match-accept":
+    case "background-match-decline":
+    case "decline-pending-bot-match":
+      valid = exactKeys(message, ["type", "roomCode"])
+        && typeof message.roomCode === "string" && /^[A-Za-z0-9]{6}$/.test(message.roomCode);
       break;
     case "leave-room":
       valid = exactKeys(message, ["type", "endGame"], ["type"])
@@ -965,6 +1005,32 @@ function prepView(value: unknown): value is PrepView {
     && dieValid && nullableSeat(prep.startPlayer);
 }
 
+function backgroundMatchmakingStatus(value: unknown): boolean {
+  const status = object(value);
+  if (!status || typeof status.state !== "string") return false;
+  if (status.state === "inactive") return exactKeys(status, ["state"]);
+  if (status.state === "pending" || status.state === "searching") {
+    return exactKeys(status, ["state", "format"])
+      && (status.format === "cc" || status.format === "silver-age");
+  }
+  if (status.state !== "offer") return false;
+  const opponent = object(status.opponent);
+  return exactKeys(status, [
+    "state", "format", "roomCode", "deadlineAt", "opponent",
+    "acceptedByYou", "opponentAccepted",
+  ])
+    && (status.format === "cc" || status.format === "silver-age")
+    && typeof status.roomCode === "string" && /^[A-Z0-9]{6}$/.test(status.roomCode)
+    && nonNegativeInteger(status.deadlineAt)
+    && !!opponent
+    && exactKeys(opponent, ["username", "heroId", "heroName"])
+    && string(opponent.username, MAX_SHORT_TEXT, false)
+    && id(opponent.heroId)
+    && string(opponent.heroName, MAX_SHORT_TEXT, false)
+    && typeof status.acceptedByYou === "boolean"
+    && typeof status.opponentAccepted === "boolean";
+}
+
 export function decodeServerMessage(value: unknown): ServerMessage | null {
   const message = object(value);
   if (!message || !string(message.type, 32, false)) return null;
@@ -976,6 +1042,10 @@ export function decodeServerMessage(value: unknown): ServerMessage | null {
       break;
     case "auth-failed": case "queue-left": case "left": case "match-timeout":
       valid = exactKeys(message, ["type"]);
+      break;
+    case "background-matchmaking":
+      valid = exactKeys(message, ["type", "status"])
+        && backgroundMatchmakingStatus(message.status);
       break;
     case "room-created":
       valid = exactKeys(message, ["type", "code", "seat", "token", "version"])
@@ -1296,13 +1366,54 @@ function exportBugReport(value: unknown): boolean {
 function exportMatchmaking(value: unknown): boolean {
   if (value === null) return true;
   const matchmaking = object(value);
+  const pendingBotStart = matchmaking ? object(matchmaking.pendingBotStart) : null;
+  const offer = matchmaking ? object(matchmaking.offer) : null;
   return !!matchmaking
-    && exactKeys(matchmaking, ["format", "hero", "deckId", "retainedRoomCode", "joinedAt"])
+    && exactKeys(matchmaking, [
+      "format", "hero", "deckId", "retainedRoomCode", "joinedAt", "mode", "sourceRoomCode",
+      "pendingOfferRoomCode", "avoidedRoomCodes", "pendingBotStart", "offer",
+    ])
     && FORMATS.has(String(matchmaking.format))
     && (matchmaking.hero === null || string(matchmaking.hero, MAX_SHORT_TEXT, false))
     && (matchmaking.deckId === null || id(matchmaking.deckId))
     && (matchmaking.retainedRoomCode === null || string(matchmaking.retainedRoomCode, 6, false))
-    && nonNegativeInteger(matchmaking.joinedAt);
+    && nonNegativeInteger(matchmaking.joinedAt)
+    && (matchmaking.mode === "foreground" || matchmaking.mode === "background")
+    && (matchmaking.sourceRoomCode === null || string(matchmaking.sourceRoomCode, 6, false))
+    && (matchmaking.pendingOfferRoomCode === null || string(matchmaking.pendingOfferRoomCode, 6, false))
+    && array(matchmaking.avoidedRoomCodes, roomCode, MAX_MATCHMAKING_AVOID_ROOM_CODES)
+    && (matchmaking.pendingBotStart === null || (
+      !!pendingBotStart
+      && exactKeys(pendingBotStart, [
+        "format", "deckId", "bot", "cardPoolMode", "requestedAt", "candidates",
+      ])
+      && (pendingBotStart.format === "cc" || pendingBotStart.format === "silver-age")
+      && id(pendingBotStart.deckId)
+      && BOT_OPPONENTS.has(String(pendingBotStart.bot))
+      && CARD_POOL_MODES.has(String(pendingBotStart.cardPoolMode))
+      && nonNegativeInteger(pendingBotStart.requestedAt)
+      && array(pendingBotStart.candidates, (candidate): candidate is {
+        candidateUserId: number;
+        ordinal: number;
+        attempted: boolean;
+        skipped: boolean;
+      } => {
+        const item = object(candidate);
+        return !!item
+          && exactKeys(item, ["candidateUserId", "ordinal", "attempted", "skipped"])
+          && positiveInteger(item.candidateUserId)
+          && nonNegativeInteger(item.ordinal)
+          && typeof item.attempted === "boolean"
+          && typeof item.skipped === "boolean";
+      }, MAX_ROOMS)
+    ))
+    && (matchmaking.offer === null || (
+      !!offer
+      && exactKeys(offer, ["roomCode", "opponentUserId", "createdAt"])
+      && roomCode(offer.roomCode)
+      && positiveInteger(offer.opponentUserId)
+      && nonNegativeInteger(offer.createdAt)
+    ));
 }
 
 function exportReplay(value: unknown): boolean {

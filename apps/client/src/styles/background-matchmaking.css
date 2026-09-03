@@ -1,0 +1,47 @@
+.background-match-bar {
+  position: fixed;
+  z-index: 80;
+  top: max(8px, env(safe-area-inset-top));
+  left: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: min(760px, calc(100vw - 24px));
+  min-height: 48px;
+  padding: 8px 10px 8px 16px;
+  transform: translateX(-50%);
+  border: 1px solid #b8933f;
+  border-radius: 6px;
+  background: #171008f5;
+  box-shadow: 0 8px 28px #000b;
+  color: #f0e5d0;
+}
+
+.background-match-bar.searching { width: min(470px, calc(100vw - 24px)); }
+.background-match-copy { display: grid; gap: 2px; min-width: 0; }
+.background-match-copy span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.background-match-actions { display: flex; align-items: center; gap: 8px; flex: none; }
+.background-match-actions button { white-space: nowrap; }
+
+.bot-matchmaking-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 12px 0;
+  padding: 10px 12px;
+  border: 1px solid #73582f99;
+  border-radius: 5px;
+  background: #21170d;
+  cursor: pointer;
+}
+.bot-matchmaking-option input { margin-top: 3px; }
+.bot-matchmaking-option span { display: grid; gap: 3px; }
+.bot-matchmaking-option small { color: #b8aa96; }
+
+@media (max-width: 700px) {
+  .background-match-bar { align-items: stretch; flex-direction: column; gap: 7px; }
+  .background-match-bar.searching { flex-direction: row; align-items: center; }
+  .background-match-actions { justify-content: stretch; }
+  .background-match-actions button { flex: 1; }
+}

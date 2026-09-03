@@ -16,7 +16,11 @@ import { RoomBroadcaster } from "./roomBroadcaster.js";
 import { ConnectionRegistry, type ClientCtx } from "./gateway/connectionSession.js";
 import { composeProductionGateway } from "./gateway/composition.js";
 import { BotRunner } from "./botRunner.js";
-import { WorkerBotPolicyExecutor, type BotPolicyExecutor } from "./botPolicyExecutor.js";
+import {
+  consoleBotPolicyMetric,
+  WorkerBotPolicyExecutor,
+  type BotPolicyExecutor,
+} from "./botPolicyExecutor.js";
 import { ReplayFinalizer, sweepReplays } from "./replays.js";
 import { appendClusterEvent, ClusterEventConsumer, sweepClusterEvents, type ClusterEvent } from "./clusterEvents.js";
 import { tryAcquireLease } from "./leases.js";
@@ -248,7 +252,28 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
       case "match-ready":
         await deliverMatch(event.userId, event.code, event.created);
         return;
+      case "background-status-changed": {
+        const status = await rooms.backgroundMatchmakingStatus(event.userId);
+        for (const ctx of [...allClients]) {
+          if (ctx.user?.id === event.userId && !ctx.closed) {
+            ctx.send({ type: "background-matchmaking", status });
+          }
+        }
+        return;
+      }
+      case "bot-practice-ready": {
+        const ctx = queuedUsers.get(event.userId)
+          ?? [...allClients].find((client) => client.user?.id === event.userId && !client.closed);
+        if (!ctx) return;
+        queuedUsers.set(event.userId, ctx);
+        connections.detach(ctx);
+        await deliverMatch(event.userId, event.code, true);
+        return;
+      }
       case "match-timeout":
+        if (queuedUsers.get(event.userId)?.user?.id === event.userId) {
+          queuedUsers.delete(event.userId);
+        }
         for (const ctx of [...allClients]) {
           if (ctx.user?.id !== event.userId || ctx.code !== event.code) continue;
           connections.detach(ctx);
@@ -281,7 +306,14 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
     version: number,
     replayFinalizationId?: string,
   ): Promise<void> => {
-    if (replayFinalizationId) replayFinalizer.enqueue(replayFinalizationId);
+    if (replayFinalizationId) {
+      replayFinalizer.enqueue(replayFinalizationId);
+      const committedRoom = await rooms.getRoom(code);
+      if (committedRoom?.state && committedRoom.state.winner !== null
+        && committedRoom.seats.some((seat) => seat?.controller === "bot")) {
+        await rooms.stopBackgroundMatchmakingForSource(code);
+      }
+    }
     await publishRoomEvent({ code, kind: "state", version });
   };
   const botRunner = new BotRunner({
@@ -290,7 +322,10 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
     afterCommit: afterStateCommit,
     logError: consoleError,
     claim: (code) => tryAcquireLease(deps.db, `bot:${code}`, instanceId, 30_000),
-    policyExecutor: deps.botPolicyExecutor ?? new WorkerBotPolicyExecutor(),
+    policyExecutor: deps.botPolicyExecutor ?? new WorkerBotPolicyExecutor({
+      metricLogger: consoleBotPolicyMetric,
+      instanceId,
+    }),
   });
   server.on("close", () => {
     botRunner.stop();
@@ -314,8 +349,18 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
   ): Promise<void> {
     const ctx = queuedUsers.get(userId);
     if (!ctx || ctx.closed || ctx.user?.id !== userId) return;
-    if (ctx.code !== null && ctx.code !== code) return;
-    if (!keepQueued) queuedUsers.delete(userId);
+    if (ctx.code !== null && ctx.code !== code) {
+      const status = await rooms.backgroundMatchmakingStatus(userId);
+      if (status.state === "offer" && status.roomCode === code) {
+        ctx.send({ type: "background-matchmaking", status });
+        return;
+      }
+      const previousRoom = await rooms.getRoom(ctx.code);
+      if (previousRoom) return;
+      connections.detach(ctx);
+    }
+    const durableMatchmakingStatus = await rooms.backgroundMatchmakingStatus(userId);
+    if (!keepQueued && durableMatchmakingStatus.state === "inactive") queuedUsers.delete(userId);
 
     if (ctx.code === code && ctx.seat !== null) {
       const room = await rooms.getRoom(code);
@@ -417,6 +462,9 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         ctx.user = user;
         connections.bindSession(ctx, msg.token);
         send(ws, { type: "authed", username: user.username });
+        const matchmakingStatus = await rooms.backgroundMatchmakingStatus(user.id);
+        if (matchmakingStatus.state !== "inactive") queuedUsers.set(user.id, ctx);
+        send(ws, { type: "background-matchmaking", status: matchmakingStatus });
         return;
       }
       case "create-room": {
@@ -452,12 +500,17 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         return;
       }
       case "create-bot-room": {
-        if (ctx.code !== null) {
-          send(ws, { type: "error", message: ALREADY_IN_ROOM });
-          return;
-        }
         if (!ctx.user) {
           send(ws, { type: "error", message: PLAY_REQUIRES_LOGIN });
+          return;
+        }
+        const retainedQueueCode = ctx.code !== null
+          && msg.searchForPlayer
+          && await rooms.isRetainedMatchmakingRoom(ctx.user.id, ctx.code)
+          ? ctx.code
+          : null;
+        if (ctx.code !== null && retainedQueueCode === null) {
+          send(ws, { type: "error", message: ALREADY_IN_ROOM });
           return;
         }
         // Legacy clients omitted format when Briar was the only bot.
@@ -479,14 +532,56 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           send(ws, { type: "error", message: "error" in choice ? choice.error : `choose a ${botFormat} deck` });
           return;
         }
+        if (msg.searchForPlayer) {
+          const previous = queuedUsers.get(ctx.user.id);
+          if (previous && previous !== ctx) previous.send({ type: "queue-left" });
+          queuedUsers.set(ctx.user.id, ctx);
+          const queued = await rooms.queueForMatch(botFormat, {
+            userId: ctx.user.id,
+            username: ctx.user.username,
+            ...choice.choice,
+            cardPoolMode: msg.cardPoolMode ?? "legal",
+            ...(retainedQueueCode ? { retainedRoomCode: retainedQueueCode } : {}),
+            avoidRoomCodes: msg.avoidRoomCodes,
+            pendingBotStart: {
+              format: botFormat,
+              deckId: choice.choice.deckId,
+              bot: botOpponent,
+              requestedAt: Date.now(),
+            },
+          });
+          if (!queued.ok) {
+            if (queuedUsers.get(ctx.user.id) === ctx) queuedUsers.delete(ctx.user.id);
+            send(ws, { type: "error", message: queued.error });
+            return;
+          }
+          if (queued.kind === "matched") {
+            clusterConsumer?.nudge();
+            return;
+          }
+          if (queued.kind !== "opened" && !(retainedQueueCode && queued.kind === "queued")) {
+            send(ws, { type: "error", message: "could not start matchmaking" });
+            return;
+          }
+        }
         const { code, seat, token } = await rooms.createBotRoom(botFormat, {
           deckId: choice.choice.deckId,
           deckName: choice.choice.deckName,
           username: ctx.user.username,
           userId: ctx.user.id,
         }, msg.cardPoolMode ?? "legal", botOpponent);
+        if (retainedQueueCode) connections.detach(ctx);
         connections.attach(ctx, code, seat, token);
         const version = await markAttachedPresent(ctx);
+        if (msg.searchForPlayer) {
+          const backgroundStarted = await rooms.setBackgroundMatchmaking(ctx.user.id, code);
+          send(ws, {
+            type: "background-matchmaking",
+            status: backgroundStarted
+              ? await rooms.backgroundMatchmakingStatus(ctx.user.id)
+              : { state: "inactive" },
+          });
+        }
         send(ws, { type: "room-created", code, seat, token, version });
         await publishRoomEvent({ code, kind: "created", version });
         await publishRoomEvent({ code, kind: "prep", version });
@@ -634,6 +729,69 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         }
         return;
       }
+      case "background-matchmaking-status": {
+        if (!ctx.user) {
+          send(ws, { type: "error", message: PLAY_REQUIRES_LOGIN });
+          return;
+        }
+        send(ws, {
+          type: "background-matchmaking",
+          status: await rooms.backgroundMatchmakingStatus(ctx.user.id),
+        });
+        return;
+      }
+      case "background-matchmaking-leave": {
+        if (ctx.user && await rooms.stopBackgroundMatchmaking(ctx.user.id)) {
+          queuedUsers.delete(ctx.user.id);
+          clusterConsumer?.nudge();
+        }
+        return;
+      }
+      case "background-match-accept": {
+        if (!ctx.user) {
+          send(ws, { type: "error", message: PLAY_REQUIRES_LOGIN });
+          return;
+        }
+        const r = await rooms.acceptBackgroundMatch(ctx.user.id, msg.roomCode);
+        if (!r.ok) {
+          send(ws, { type: "error", message: r.error });
+          return;
+        }
+        for (const replayId of r.replayFinalizationIds ?? []) replayFinalizer.enqueue(replayId);
+        await publishRoomEvent({ code: msg.roomCode.toUpperCase(), kind: "prep", version: r.version });
+        clusterConsumer?.nudge();
+        return;
+      }
+      case "background-match-decline": {
+        if (!ctx.user) {
+          send(ws, { type: "error", message: PLAY_REQUIRES_LOGIN });
+          return;
+        }
+        const r = await rooms.declineBackgroundMatch(ctx.user.id, msg.roomCode);
+        if (!r.ok) {
+          send(ws, { type: "error", message: r.error });
+          return;
+        }
+        await publishRoomEvent({ code: msg.roomCode.toUpperCase(), kind: "prep", version: r.version });
+        clusterConsumer?.nudge();
+        return;
+      }
+      case "decline-pending-bot-match": {
+        if (!ctx.user || !ctx.code || !ctx.token) {
+          send(ws, { type: "error", message: "not in a pending bot match" });
+          return;
+        }
+        const credentials = seatCredentials(ctx);
+        if (!credentials) return;
+        const r = await rooms.declinePendingBotMatch(ctx.user.id, msg.roomCode, credentials);
+        if (!r.ok) {
+          send(ws, { type: "error", message: r.error });
+          return;
+        }
+        connections.detach(ctx);
+        clusterConsumer?.nudge();
+        return;
+      }
       case "present-deck": {
         const player = requirePlayer(ws, ctx);
         if (!player) return;
@@ -663,6 +821,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           send(ws, { type: "error", message: r.error });
           return;
         }
+        for (const replayId of r.replayFinalizationIds ?? []) replayFinalizer.enqueue(replayId);
         await publishRoomEvent({ code: player.code, kind: "prep", version: r.version });
         return;
       }
@@ -698,14 +857,17 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         const credentials = seatCredentials(ctx);
         if (!credentials) return;
         if (msg.endGame) {
+          if (ctx.user) {
+            const matchmakingStatus = await rooms.backgroundMatchmakingStatus(ctx.user.id);
+            if (matchmakingStatus.state === "searching" || matchmakingStatus.state === "offer") {
+              await rooms.stopBackgroundMatchmaking(ctx.user.id);
+              queuedUsers.delete(ctx.user.id);
+            }
+          }
           const ended = await rooms.deleteBotRoom(code, credentials);
           if (!ended.ok) {
             send(ws, { type: "error", message: ended.error });
             return;
-          }
-          if (ctx.user && queuedUsers.get(ctx.user.id) === ctx) {
-            queuedUsers.delete(ctx.user.id);
-            await rooms.leaveMatchmaking(ctx.user.id);
           }
           if (ended.replayFinalizationId) replayFinalizer.enqueue(ended.replayFinalizationId);
           connections.detach(ctx);
@@ -713,12 +875,22 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           await publishRoomEvent({ code, kind: "deleted", version: ended.version });
           return;
         }
+        if (ctx.user) {
+          const matchmakingStatus = await rooms.backgroundMatchmakingStatus(ctx.user.id);
+          if (matchmakingStatus.state === "searching" || matchmakingStatus.state === "offer") {
+            await rooms.stopBackgroundMatchmaking(ctx.user.id);
+            queuedUsers.delete(ctx.user.id);
+          }
+        }
         const r = await rooms.leaveRoom(code, credentials);
         if (!r.ok) {
           send(ws, { type: "error", message: r.error });
           return;
         }
-        if (ctx.user && queuedUsers.get(ctx.user.id) === ctx) {
+        const resolvedOffer = ctx.user
+          ? await rooms.resolveOfferedPlayerLeave(ctx.user.id, code, r.format, r.cardPoolMode, r.remaining)
+          : false;
+        if (!resolvedOffer && ctx.user && queuedUsers.get(ctx.user.id) === ctx) {
           queuedUsers.delete(ctx.user.id);
           await rooms.leaveMatchmaking(ctx.user.id);
         }
@@ -729,20 +901,24 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           await publishRoomEvent({ code, kind: "prep", version: r.version });
           // A matchmade player whose opponent left goes straight back into the
           // queue, keeping their room (and prep page) for the next pairing.
-          if (r.remaining.fromQueue && r.remaining.userId != null) {
+          if (!resolvedOffer && r.remaining.fromQueue && r.remaining.userId != null) {
             const remainingCtx = [...(clientsByRoom.get(code) ?? [])].find(
               (c) => !!c.token && hashReconnectToken(c.token) === r.remaining!.tokenHash,
             );
             if (remainingCtx) queuedUsers.set(r.remaining.userId, remainingCtx);
-            await rooms.queueForMatch(r.format, {
-              userId: r.remaining.userId,
-              username: r.remaining.username ?? "unknown",
-              hero: r.remaining.hero,
-              deckId: r.remaining.deckId,
-              deckName: r.remaining.deckName,
-              retainedRoomCode: code,
-              cardPoolMode: r.cardPoolMode,
-            });
+            if (await rooms.hasPendingBotStart(r.remaining.userId)) {
+              await rooms.advancePendingBotStart(r.remaining.userId, ctx.user?.id);
+            } else {
+              await rooms.queueForMatch(r.format, {
+                userId: r.remaining.userId,
+                username: r.remaining.username ?? "unknown",
+                hero: r.remaining.hero,
+                deckId: r.remaining.deckId,
+                deckName: r.remaining.deckName,
+                retainedRoomCode: code,
+                cardPoolMode: r.cardPoolMode,
+              });
+            }
             clusterConsumer?.nudge();
           }
         }

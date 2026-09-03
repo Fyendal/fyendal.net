@@ -20870,6 +20870,18 @@
       "value": "你想与谁练习？"
     }
   ],
+  "lobby.bot.searchForPlayer": [
+    {
+      "type": 0,
+      "value": "继续寻找真人玩家"
+    }
+  ],
+  "lobby.bot.searchForPlayer.description": [
+    {
+      "type": 0,
+      "value": "与此 AI 练习时，Fyendal 会同时寻找 PvP 对手。"
+    }
+  ],
   "lobby.bot.type.aggro": [
     {
       "type": 0,
@@ -21904,6 +21916,50 @@
     {
       "type": 0,
       "value": "观战中——等待对局开始"
+    }
+  ],
+  "matchmaking.background.found": [
+    {
+      "type": 0,
+      "value": "已找到玩家"
+    }
+  ],
+  "matchmaking.background.keepBot": [
+    {
+      "type": 0,
+      "value": "继续与 AI 对战"
+    }
+  ],
+  "matchmaking.background.opponent": [
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " — "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    }
+  ],
+  "matchmaking.background.searching": [
+    {
+      "type": 0,
+      "value": "练习期间正在寻找真人玩家…"
+    }
+  ],
+  "matchmaking.background.stop": [
+    {
+      "type": 0,
+      "value": "停止寻找"
+    }
+  ],
+  "matchmaking.background.waiting": [
+    {
+      "type": 0,
+      "value": "已接受——等待对手"
     }
   ],
   "meta.home.description": [
