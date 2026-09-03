@@ -119,6 +119,59 @@ describe("Ira policy", () => {
     expect(options).toContain(intent.kind === "choose" ? intent.optionId : "");
   });
 
+  it("does not spend its last card on Iris when it cannot pay for Whirling Mist Blossom", () => {
+    const state = createGame({
+      decklists: [iraDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 91001,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    state.players[0]!.resources = 0;
+    state.players[0]!.flags.dealtDamageThisTurn = true;
+    replaceHand(state, 0, ["ASR010"]);
+    const irisId = state.players[0]!.equipment.head!.instanceId;
+    const legal = legalIntents(state, 0).filter((intent) =>
+      intent.kind === "pass" ||
+      (intent.kind === "activate-ability" && intent.sourceInstanceId === irisId)
+    );
+
+    expect(legal.some((intent) => intent.kind === "activate-ability")).toBe(true);
+    expect(chooseIraIntent({
+      seat: 0,
+      view: projectStateFor(state, 0),
+      legal,
+      cards: cardData,
+    })).toEqual({ kind: "pass" });
+  });
+
+  it("uses Iris when floating resources can pay for Whirling Mist Blossom", () => {
+    const state = createGame({
+      decklists: [iraDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 91002,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    state.players[0]!.resources = 1;
+    state.players[0]!.flags.dealtDamageThisTurn = true;
+    replaceHand(state, 0, ["ASR010"]);
+    const irisId = state.players[0]!.equipment.head!.instanceId;
+    const legal = legalIntents(state, 0).filter((intent) =>
+      intent.kind === "pass" ||
+      (intent.kind === "activate-ability" && intent.sourceInstanceId === irisId)
+    );
+
+    expect(chooseIraIntent({
+      seat: 0,
+      view: projectStateFor(state, 0),
+      legal,
+      cards: cardData,
+    })).toMatchObject({ kind: "activate-ability", sourceInstanceId: irisId });
+  });
+
   it("preserves its opening hand, then puts a card in arsenal", () => {
     let state = createGame({
       decklists: [iraDeck(), decklists.dorinthea],

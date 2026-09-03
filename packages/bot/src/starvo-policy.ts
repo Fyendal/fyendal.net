@@ -55,6 +55,32 @@ function isPulseOfVolthavenIntent(
   return functionalKey(input.cards[card?.cardId ?? ""]) === "pulse of volthaven|1";
 }
 
+function isElectromagneticSomersaultIntent(
+  intent: GameIntent,
+  input: BotPolicyInput,
+  own: ReadonlyMap<number, CardView> = ownCards(input),
+): boolean {
+  const card = intentCard(intent, own);
+  return functionalKey(input.cards[card?.cardId ?? ""]).startsWith(
+    "electromagnetic somersault|",
+  );
+}
+
+function hasFriendlySomersaultTarget(
+  input: BotPolicyInput,
+  somersaultIntent: GameIntent,
+): boolean {
+  const link = currentLink(input);
+  const somersault = intentCard(somersaultIntent, ownCards(input));
+  const data = input.cards[somersault?.cardId ?? ""];
+  if (!link || link.resolved || !data) return false;
+  const minimumCost = Math.max(0, Number(data.pitch ?? 1) - 1);
+  return [link.attackingCard, ...link.defendingCards].some((card) =>
+    card.owner === input.seat && isAttack(input.cards[card.cardId]) &&
+    Number(input.cards[card.cardId]?.cost ?? 0) >= minimumCost
+  );
+}
+
 function hasPulseFollowUp(
   input: BotPolicyInput,
   pulseIntent: GameIntent,
@@ -64,7 +90,9 @@ function hasPulseFollowUp(
   const pulse = intentCard(pulseIntent, own);
   if (!pulse) return false;
   const legalWithoutPulse = input.legal.filter((intent) =>
-    !isPulseOfVolthavenIntent(intent, input, own)
+    !isPulseOfVolthavenIntent(intent, input, own) &&
+    (!isElectromagneticSomersaultIntent(intent, input, own) ||
+      hasFriendlySomersaultTarget(input, intent))
   );
   if (legalWithoutPulse.length === 0) return false;
   const followUp = chooseJarlIntentWithTrace({ ...input, legal: legalWithoutPulse }).intent;
@@ -97,18 +125,29 @@ function canDecompose(input: BotPolicyInput): boolean {
 
 function starvoPriorityOverride(input: BotPolicyInput): GameIntent | undefined {
   const decision = input.view.pendingDecision;
+  const prompt = decision?.prompt.toLowerCase() ?? "";
+  if (prompt.includes("attack actions to return") ||
+    prompt.includes("choose another attack action")) {
+    const friendlyTarget = input.legal.find((intent) => {
+      if (intent.kind !== "choose") return false;
+      const index = decision?.options?.indexOf(intent.optionId) ?? -1;
+      return decision?.optionCards?.[index]?.owner === input.seat;
+    });
+    return friendlyTarget ?? input.legal.find((intent) =>
+      intent.kind === "choose" && intent.optionId === "done"
+    );
+  }
   if (decision?.kind === "optional-effect" &&
-    decision.prompt.toLowerCase().includes("bravo, star of the show") &&
-    decision.prompt.toLowerCase().includes("reveal earth, ice, and lightning")) {
+    prompt.includes("bravo, star of the show") &&
+    prompt.includes("reveal earth, ice, and lightning")) {
     return input.legal.find((intent) => intent.kind === "choose" && intent.optionId === "yes");
   }
-  if (decision?.prompt.toLowerCase().includes("reveal an earth, an ice, and a lightning card")) {
+  if (prompt.includes("reveal an earth, an ice, and a lightning card")) {
     return input.legal.find((intent) =>
       intent.kind === "choose" && /^\d+:\d+:\d+$/.test(intent.optionId)
     );
   }
-  if (decision?.prompt.toLowerCase().includes("cadaverous tilling") &&
-    decision.prompt.toLowerCase().includes("decompose")) {
+  if (prompt.includes("cadaverous tilling") && prompt.includes("decompose")) {
     return input.legal.find((intent) => intent.kind === "choose" && intent.optionId !== "no");
   }
 
@@ -302,14 +341,19 @@ export function chooseStarvoIntentWithTrace(input: BotPolicyInput): StarvoIntent
   const override = starvoPriorityOverride(input);
   if (override) return { intent: override };
   let sharedDecision = chooseJarlIntentWithTrace(input);
-  if (isPulseOfVolthavenIntent(sharedDecision.intent, input) &&
-    !hasPulseFollowUp(input, sharedDecision.intent)) {
-    const legalWithoutPulse = input.legal.filter((intent) =>
-      !isPulseOfVolthavenIntent(intent, input)
-    );
-    if (legalWithoutPulse.length > 0) {
-      sharedDecision = chooseJarlIntentWithTrace({ ...input, legal: legalWithoutPulse });
+  const legalWithoutWastefulInstants = input.legal.filter((intent) => {
+    if (isPulseOfVolthavenIntent(intent, input)) {
+      return hasPulseFollowUp(input, intent);
     }
+    return !isElectromagneticSomersaultIntent(intent, input) ||
+      hasFriendlySomersaultTarget(input, intent);
+  });
+  if (legalWithoutWastefulInstants.length > 0 &&
+    legalWithoutWastefulInstants.length !== input.legal.length) {
+    sharedDecision = chooseJarlIntentWithTrace({
+      ...input,
+      legal: legalWithoutWastefulInstants,
+    });
   }
   const handDefense = fullHandDefense(input);
   if (handDefense && usesEquipmentDefender(input, sharedDecision.intent)) {

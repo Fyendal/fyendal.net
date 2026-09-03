@@ -237,6 +237,104 @@ describe("Starvo policy", () => {
     })).toEqual(playPulse);
   });
 
+  it("does not play Electromagnetic Somersault without a friendly attack to recover", () => {
+    const view = viewForTest();
+    const somersault: CardView = { instanceId: 170_099, cardId: "ROS087", owner: 0 };
+    view.players[0].hand = [somersault];
+    view.players[0].handCount = 1;
+    view.turn = 3;
+    view.phase = "action";
+    view.activePlayer = 1;
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "priority-window", prompt: "Priority" };
+    const playSomersault: GameIntent = {
+      kind: "play-card",
+      instanceId: somersault.instanceId,
+      pitchInstanceIds: [],
+    };
+
+    expect(chooseStarvoIntent({
+      seat: 0,
+      view,
+      legal: [playSomersault, { kind: "pass" }],
+      cards: cardData,
+    })).toEqual({ kind: "pass" });
+  });
+
+  it("uses Electromagnetic Somersault only on its own attack action cards", () => {
+    const view = viewForTest();
+    const ownDefender: CardView = { instanceId: 170_110, cardId: "ROS046", owner: 0 };
+    const opposingAttack: CardView = { instanceId: 170_111, cardId: "WTR159", owner: 1 };
+    view.phase = "reaction";
+    view.activePlayer = 1;
+    view.priorityPlayer = 0;
+    view.chain = [{
+      attackingCard: opposingAttack,
+      defendingCards: [ownDefender],
+      attackValue: 4,
+      defenseValue: 3,
+      damage: 1,
+      resolved: false,
+      reactions: [],
+    }];
+    view.pendingDecision = {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Choose up to 2 attack actions to return when the link resolves",
+      options: ["done", String(opposingAttack.instanceId), String(ownDefender.instanceId)],
+      optionCards: [null, opposingAttack, ownDefender],
+    };
+    const legal: GameIntent[] = view.pendingDecision.options!.map((optionId) => ({
+      kind: "choose",
+      optionId,
+    }));
+
+    expect(chooseStarvoIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual({ kind: "choose", optionId: String(ownDefender.instanceId) });
+
+    view.pendingDecision.options = ["done", String(opposingAttack.instanceId)];
+    view.pendingDecision.optionCards = [null, opposingAttack];
+    expect(chooseStarvoIntent({
+      seat: 0,
+      view,
+      legal: legal.slice(0, 2),
+      cards: cardData,
+    })).toEqual({ kind: "choose", optionId: "done" });
+  });
+
+  it("plays Electromagnetic Somersault when it can recover its defender", () => {
+    const view = viewForTest();
+    const somersault: CardView = { instanceId: 170_120, cardId: "ROS087", owner: 0 };
+    const ownDefender: CardView = { instanceId: 170_121, cardId: "ROS046", owner: 0 };
+    view.players[0].hand = [somersault];
+    view.players[0].handCount = 1;
+    view.phase = "reaction";
+    view.activePlayer = 1;
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "priority-window", prompt: "Priority" };
+    view.chain = [{
+      attackingCard: { instanceId: 170_122, cardId: "WTR159", owner: 1 },
+      defendingCards: [ownDefender],
+      attackValue: 4,
+      defenseValue: 3,
+      damage: 1,
+      resolved: false,
+      reactions: [],
+    }];
+    const playSomersault: GameIntent = {
+      kind: "play-card",
+      instanceId: somersault.instanceId,
+      pitchInstanceIds: [],
+    };
+
+    expect(chooseStarvoIntent({
+      seat: 0,
+      view,
+      legal: [playSomersault, { kind: "pass" }],
+      cards: cardData,
+    })).toEqual(playSomersault);
+  });
+
   it("spends a floating resource on Crown of Seeds while defending", () => {
     const view = viewForTest();
     const crown = view.players[0].equipment.head!;
