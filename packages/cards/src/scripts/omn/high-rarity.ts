@@ -256,8 +256,8 @@ export const omnHighRarity: Record<string, CardScript> = {
     },
   },
   "crash site salvage|2": {
-    additionalCost(ctx) { const choices = [...ctx.player(ctx.seat).board, ...Object.values(ctx.player(ctx.seat).equipment).filter((card): card is Card => !!card)].filter((card) => has(ctx, card, "item") || has(ctx, card, "equipment") || has(ctx, card, "token")); if (choices.length) ctx.requestCardChoice("salvage-scrap", decisionPrompt("Scrap a permanent?", "card.omn.permanent.scrap", { optionMessages: commonOptionMessages("no") }), ["no", ...choices.map((card) => card.instanceId)]); },
-    onChoose(ctx, hook, option) { if (hook !== "salvage-scrap" || option === "no") return; const card = [...ctx.player(ctx.seat).board, ...Object.values(ctx.player(ctx.seat).equipment).filter((candidate): candidate is Card => !!candidate)].find((candidate) => candidate.instanceId === Number(option)); if (card && ctx.destroyPermanent(card.instanceId)) { ctx.setCounter("scrapped", 1); if (has(ctx, card, "cog")) ctx.setCounter("scrappedCog", 1); } },
+    additionalCost(ctx) { const choices = ctx.player(ctx.seat).graveyard.filter((card) => has(ctx, card, "item") || data(ctx, card).cardType === "equipment"); if (choices.length) ctx.requestCardChoice("salvage-scrap", decisionPrompt("Scrap an item or equipment from your graveyard?", "card.omn.permanent.scrap", { optionMessages: commonOptionMessages("no") }), ["no", ...choices.map((card) => card.instanceId)]); },
+    onChoose(ctx, hook, option) { if (hook !== "salvage-scrap" || option === "no") return; const card = ctx.player(ctx.seat).graveyard.find((candidate) => candidate.instanceId === Number(option) && (has(ctx, candidate, "item") || data(ctx, candidate).cardType === "equipment")); if (card && ctx.banish(card.instanceId)) { ctx.setCounter("scrapped", 1); if (has(ctx, card, "cog")) ctx.setCounter("scrappedCog", 1); } },
     onAttackDeclared(ctx) { if (ctx.getCounter("scrapped")) ctx.grantGoAgain(); if (ctx.getCounter("scrappedCog")) ctx.createToken(GOLD); },
   },
   "golden skull|2": { allZoneNames: ["Gold"] },

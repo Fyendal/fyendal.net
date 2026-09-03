@@ -540,16 +540,16 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "blast rig|1": { modifyAttack: (ctx) => controlledType(ctx, "evo").length },
   "speed demon|1": {
     additionalCost(ctx) {
-      const choices = [...ctx.player(ctx.seat).board, ...Object.values(ctx.player(ctx.seat).equipment).filter((card): card is Card => card !== undefined)];
-      if (choices.length) ctx.requestCardChoice("pen-scrap", decisionPrompt("Scrap an item, equipment, or token?", "card.pen.scrap.choose", { optionMessages: commonOptionMessages("no") }), ["no", ...choices.map((card) => card.instanceId)]);
+      const choices = ctx.player(ctx.seat).graveyard.filter((card) => hasTag(ctx, card, "item") || data(ctx, card).cardType === "equipment");
+      if (choices.length) ctx.requestCardChoice("pen-scrap", decisionPrompt("Scrap an item or equipment from your graveyard?", "card.pen.scrap.choose", { optionMessages: commonOptionMessages("no") }), ["no", ...choices.map((card) => card.instanceId)]);
     },
     modifyAttack: (ctx) => controls(ctx, "Hyper Driver") ? 1 : 0,
     onChoose(ctx, hook, option) {
       if (hook !== "pen-scrap" || option === "no") return;
-      const target = [...ctx.player(ctx.seat).board, ...Object.values(ctx.player(ctx.seat).equipment).filter((card): card is Card => card !== undefined)].find((card) => card.instanceId === Number(option));
+      const target = ctx.player(ctx.seat).graveyard.find((card) => card.instanceId === Number(option) && (hasTag(ctx, card, "item") || data(ctx, card).cardType === "equipment"));
       if (!target) return;
       const driver = named(ctx, target, "Hyper Driver");
-      if (ctx.destroyPermanent(target.instanceId) && driver) ctx.setCounter("scrappedDriver", 1);
+      if (ctx.banish(target.instanceId) && driver) ctx.setCounter("scrappedDriver", 1);
     },
     onAttackDeclared(ctx) { if (ctx.getCounter("scrappedDriver")) ctx.createToken(HYPER_DRIVER, undefined, { steam: 2 }); },
   },

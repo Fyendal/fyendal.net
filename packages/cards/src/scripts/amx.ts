@@ -220,8 +220,8 @@ export const amx: Record<string, CardScript> = {
       if (option === "remove") ctx.setCounter("steam", Math.max(0, ctx.getCounter("steam") - 1));
       else ctx.destroySelf();
     },
-    modifyAttack(ctx) {
-      return ctx.link?.attackCardType === "weapon" && hasSubtype(ctx, ctx.link.attackingCard, "wrench") ? 2 : 0;
+    modifyFriendlyAttack(ctx, attacking) {
+      return hasSubtype(ctx, attacking, "wrench") ? 2 : 0;
     },
   },
 
