@@ -256,7 +256,7 @@ export const omnHighRarity: Record<string, CardScript> = {
     },
   },
   "crash site salvage|2": {
-    additionalCost(ctx) { const choices = ctx.player(ctx.seat).graveyard.filter((card) => has(ctx, card, "item") || data(ctx, card).cardType === "equipment"); if (choices.length) ctx.requestCardChoice("salvage-scrap", decisionPrompt("Scrap an item or equipment from your graveyard?", "card.omn.permanent.scrap", { optionMessages: commonOptionMessages("no") }), ["no", ...choices.map((card) => card.instanceId)]); },
+    declareAdditionalCost(ctx) { const choices = ctx.player(ctx.seat).graveyard.filter((card) => has(ctx, card, "item") || data(ctx, card).cardType === "equipment"); if (choices.length) ctx.requestCardChoice("salvage-scrap", decisionPrompt("Scrap an item or equipment from your graveyard?", "card.omn.permanent.scrap", { optionMessages: commonOptionMessages("no") }), ["no", ...choices.map((card) => card.instanceId)]); },
     onChoose(ctx, hook, option) { if (hook !== "salvage-scrap" || option === "no") return; const card = ctx.player(ctx.seat).graveyard.find((candidate) => candidate.instanceId === Number(option) && (has(ctx, candidate, "item") || data(ctx, candidate).cardType === "equipment")); if (card && ctx.banish(card.instanceId)) { ctx.setCounter("scrapped", 1); if (has(ctx, card, "cog")) ctx.setCounter("scrappedCog", 1); } },
     onAttackDeclared(ctx) { if (ctx.getCounter("scrapped")) ctx.grantGoAgain(); if (ctx.getCounter("scrappedCog")) ctx.createToken(GOLD); },
   },

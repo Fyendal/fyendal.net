@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import {
   IDLE_VICTORY_MS,
   type BotOpponent,
+  type CardPoolMode,
   type Decklist,
   type EquipmentSlot,
   type Format,
@@ -129,7 +130,7 @@ export interface MatchmakingChoice {
   hero?: HeroId;
   deckId?: string;
   deckName?: string;
-  allowFutureCards: boolean;
+  cardPoolMode: CardPoolMode;
   retainedRoomCode?: string;
   /** Browser-local rooms this player explicitly declined. Never persisted. */
   avoidRoomCodes?: string[];
@@ -168,7 +169,7 @@ export interface RoomRow {
   /** Private rooms are accessible by code/URL and visible in the lobby only to seated accounts. */
   isPrivate: boolean;
   /** Room-wide format rule, fixed when the room is created. */
-  allowFutureCards: boolean;
+  cardPoolMode: CardPoolMode;
   /** Latest committed semantic edge. Its fromVersion fences reconnects and
    * coalesced multi-instance refreshes from replaying a partial path. */
   lastTransition: StoredRoomTransition | null;
@@ -356,7 +357,7 @@ type RawRoomRow = {
   prep_deadline_at: number | null;
   ruleset_version: string;
   is_private: boolean;
-  allow_future_cards: boolean;
+  card_pool_mode: CardPoolMode;
   last_transition: unknown;
 };
 
@@ -533,8 +534,8 @@ function decodeRawRoomRow(value: unknown): RawRoomRow {
   if (typeof row.is_private !== "boolean") {
     throw new CorruptRoomError(code, "row.is_private", "expected a boolean");
   }
-  if (typeof row.allow_future_cards !== "boolean") {
-    throw new CorruptRoomError(code, "row.allow_future_cards", "expected a boolean");
+  if (!(row.card_pool_mode === "legal" || row.card_pool_mode === "future" || row.card_pool_mode === "open")) {
+    throw new CorruptRoomError(code, "row.card_pool_mode", "expected a card-pool mode");
   }
   let decodedPrep: PrepState | null = null;
   if (row.prep !== null) {
@@ -566,7 +567,7 @@ function decodeRawRoomRow(value: unknown): RawRoomRow {
     prep_deadline_at: row.prep_deadline_at === null ? null : Number(row.prep_deadline_at),
     ruleset_version: row.ruleset_version,
     is_private: row.is_private,
-    allow_future_cards: row.allow_future_cards,
+    card_pool_mode: row.card_pool_mode,
     last_transition: row.last_transition,
   };
 }
@@ -659,7 +660,7 @@ function toRoom(value: unknown): RoomRow {
     prepDeadlineAt: r.prep_deadline_at == null ? null : Number(r.prep_deadline_at),
     rulesetVersion: r.ruleset_version,
     isPrivate: r.is_private,
-    allowFutureCards: r.allow_future_cards,
+    cardPoolMode: r.card_pool_mode,
     lastTransition: decodeStoredTransition(r.last_transition, r.code, "row.last_transition"),
   };
 }
@@ -778,7 +779,7 @@ export class PgRoomStore {
          GROUP BY p.room_code
        )
        SELECT r.code, r.format, r.spectators, r.state, r.prep, r.ruleset_version,
-              r.version, r.created_at, r.gc_at, r.prep_deadline_at, r.is_private, r.allow_future_cards,
+              r.version, r.created_at, r.gc_at, r.prep_deadline_at, r.is_private, r.card_pool_mode,
               r.last_transition,
               COALESCE(seat_data.seat_rows, '[]'::json) AS seat_rows,
               COALESCE(presence_data.presence_rows, '[]'::json) AS presence_rows
@@ -805,7 +806,7 @@ export class PgRoomStore {
     return {
       code: room.code,
       format: room.format,
-      ...(room.allowFutureCards ? { allowFutureCards: true as const } : {}),
+      ...(room.cardPoolMode === "legal" ? {} : { cardPoolMode: room.cardPoolMode }),
       ...(room.seats.every(Boolean) ? { spectateOnly: true } : {}),
       ...(userId != null && room.seats.some((seat) => seat?.userId === userId) ? { yours: true } : {}),
     };
@@ -1286,7 +1287,7 @@ export class PgRoomStore {
       fromQueue?: boolean;
     },
     visibility: "public" | "private" = "public",
-    allowFutureCards = false,
+    cardPoolMode: CardPoolMode = "legal",
   ): Promise<{ code: string; seat: number; token: string; version: number }> {
     // snapshot the hero for prep-room display (best-effort; caller validated)
     const heroId =
@@ -1304,9 +1305,9 @@ export class PgRoomStore {
           const now = Date.now();
           await db.query(
             `INSERT INTO rooms
-              (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at, status, winner, is_private, allow_future_cards)
+              (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at, status, winner, is_private, card_pool_mode)
              VALUES ($1, $2, '[]', NULL, NULL, $3, 0, $4, $5, 'open', NULL, $6, $7)`,
-            [code, format, this.rulesetVersion, now, now + GC_DELAY_MS, visibility === "private", allowFutureCards],
+            [code, format, this.rulesetVersion, now, now + GC_DELAY_MS, visibility === "private", cardPoolMode],
           );
           await db.query(
             `INSERT INTO room_seats
@@ -1339,14 +1340,14 @@ export class PgRoomStore {
       username: string;
       userId: number;
     },
-    allowFutureCards = false,
+    cardPoolMode: CardPoolMode = "legal",
     bot: BotOpponent = format === "cc" ? "hala" : "briar",
   ): Promise<{ code: string; seat: number; token: string; version: number }> {
     const definition = botDefinition(bot);
     if (!definition || definition.format !== format) {
       throw new Error(`${bot} is not available in ${format}`);
     }
-    const created = await this.createRoom(format, seat, "private", allowFutureCards);
+    const created = await this.createRoom(format, seat, "private", cardPoolMode);
     const joined = await this.joinRoom(created.code, undefined, {
       allowPlayer: true,
       deckId: definition.deckId,
@@ -1382,7 +1383,7 @@ export class PgRoomStore {
     const deck = await resolveDeck(db, choice.deckId);
     if (!deck || deck.format !== format || (deck.userId !== 0 && deck.userId !== choice.userId)) return null;
     if (formatLegalityErrors(cardData, deck.decklist, format, {
-      allowFutureCards: choice.allowFutureCards,
+      cardPoolMode: choice.cardPoolMode,
     }).length > 0) return null;
     return {
       tokenHash: hashReconnectToken(newToken()),
@@ -1437,11 +1438,11 @@ export class PgRoomStore {
          JOIN (
            SELECT room_code, COUNT(*) AS occupied FROM room_seats GROUP BY room_code
          ) occupancy ON occupancy.room_code = r.code
-         WHERE q.user_id = $1 AND q.format = $2 AND q.allow_future_cards = $3
+         WHERE q.user_id = $1 AND q.format = $2 AND q.card_pool_mode = $3
            AND q.retained_room_code IS NOT NULL AND occupancy.occupied = 1
            AND r.status = 'open'
          LIMIT 1`,
-        [choice.userId, format, choice.allowFutureCards],
+        [choice.userId, format, choice.cardPoolMode],
       );
       if (existingOpening.rows.length > 0) {
         return {
@@ -1455,7 +1456,7 @@ export class PgRoomStore {
       await db.query("DELETE FROM matchmaking_entries WHERE user_id = $1", [choice.userId]);
       await db.query(
         `INSERT INTO matchmaking_entries
-          (user_id, format, hero, deck_id, deck_name, allow_future_cards, retained_room_code, joined_at)
+          (user_id, format, hero, deck_id, deck_name, card_pool_mode, retained_room_code, joined_at)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
         [
           choice.userId,
@@ -1463,7 +1464,7 @@ export class PgRoomStore {
           choice.hero ?? null,
           choice.deckId ?? null,
           choice.deckName ?? null,
-          choice.allowFutureCards,
+          choice.cardPoolMode,
           choice.retainedRoomCode?.toUpperCase() ?? null,
           choice.joinedAt ?? Date.now(),
         ],
@@ -1492,15 +1493,15 @@ export class PgRoomStore {
           prepDeadlineAt: null,
           rulesetVersion: this.rulesetVersion,
           isPrivate: false,
-          allowFutureCards: choice.allowFutureCards,
+          cardPoolMode: choice.cardPoolMode,
           lastTransition: null,
         };
         await db.query(
           `INSERT INTO rooms
             (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at,
-             status, winner, is_private, allow_future_cards, prep_deadline_at)
+             status, winner, is_private, card_pool_mode, prep_deadline_at)
            VALUES ($1,$2,'[]',NULL,NULL,$3,0,$4,$5,'open',NULL,FALSE,$6,NULL)`,
-          [code, format, this.rulesetVersion, now, room.gcAt, choice.allowFutureCards],
+          [code, format, this.rulesetVersion, now, room.gcAt, choice.cardPoolMode],
         );
         await this.applySeatWrites(db, room, [{ kind: "full", seat: 0, mode: "insert" }]);
         await db.query(
@@ -1529,7 +1530,7 @@ export class PgRoomStore {
 
       const { rows } = await db.query(
         `SELECT q.user_id, u.username, q.hero, q.deck_id, q.deck_name,
-                q.allow_future_cards, q.retained_room_code
+                q.card_pool_mode, q.retained_room_code
          FROM matchmaking_entries q
          JOIN users u ON u.id = q.user_id
          JOIN (
@@ -1543,14 +1544,14 @@ export class PgRoomStore {
          ) live
            ON live.room_code = q.retained_room_code
           AND live.user_id = q.user_id
-         WHERE q.format = $1 AND q.allow_future_cards = $2 AND q.user_id <> $3
+         WHERE q.format = $1 AND q.card_pool_mode = $2 AND q.user_id <> $3
            AND (q.retained_room_code IS NULL OR $4::text IS NULL)
            AND q.retained_room_code IS NOT NULL
            ${avoidClause}
          ORDER BY q.joined_at, q.user_id LIMIT 1`,
         [
           format,
-          choice.allowFutureCards,
+          choice.cardPoolMode,
           choice.userId,
           choice.retainedRoomCode ?? null,
           Date.now() - PRESENCE_TIMEOUT_MS,
@@ -1571,7 +1572,9 @@ export class PgRoomStore {
         ...(raw.hero === "rhinar" || raw.hero === "dorinthea" ? { hero: raw.hero } : {}),
         ...(typeof raw.deck_id === "string" ? { deckId: raw.deck_id } : {}),
         ...(typeof raw.deck_name === "string" ? { deckName: raw.deck_name } : {}),
-        allowFutureCards: raw.allow_future_cards === true,
+        cardPoolMode: raw.card_pool_mode === "future" || raw.card_pool_mode === "open"
+          ? raw.card_pool_mode
+          : "legal",
         ...(typeof raw.retained_room_code === "string" ? { retainedRoomCode: raw.retained_room_code } : {}),
       };
       const opponentSeat = await this.matchmakingSeat(db, format, opponent);
@@ -1622,15 +1625,15 @@ export class PgRoomStore {
           prepDeadlineAt: now + MATCH_ACCEPT_MS,
           rulesetVersion: this.rulesetVersion,
           isPrivate: false,
-          allowFutureCards: choice.allowFutureCards,
+          cardPoolMode: choice.cardPoolMode,
           lastTransition: null,
         };
         await db.query(
           `INSERT INTO rooms
             (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at,
-             status, winner, is_private, allow_future_cards, prep_deadline_at)
+             status, winner, is_private, card_pool_mode, prep_deadline_at)
            VALUES ($1,$2,'[]',NULL,$3,$4,0,$5,$6,'prep',NULL,FALSE,$7,$8)`,
-          [code, format, JSON.stringify(room.prep), this.rulesetVersion, now, room.gcAt, choice.allowFutureCards, room.prepDeadlineAt],
+          [code, format, JSON.stringify(room.prep), this.rulesetVersion, now, room.gcAt, choice.cardPoolMode, room.prepDeadlineAt],
         );
         await this.applySeatWrites(db, room, [
           { kind: "full", seat: 0, mode: "insert" },
@@ -1844,7 +1847,7 @@ export class PgRoomStore {
           return { error: `choose a ${room.format} deck to take this seat` };
         }
         const legality = formatLegalityErrors(cardData, deck.decklist, room.format, {
-          allowFutureCards: room.allowFutureCards,
+          cardPoolMode: room.cardPoolMode,
         });
         if (legality.length > 0) return { error: legality.join("; ") };
         seatRow = {
@@ -1928,7 +1931,7 @@ export class PgRoomStore {
           : (seat.deckId ? await resolveDeck(this.db, seat.deckId) : null)?.decklist;
       if (!pool) return { error: "your deck is no longer available" };
       const v = validatePresentation(pool, presented, room.format, {
-        allowFutureCards: room.allowFutureCards,
+        cardPoolMode: room.cardPoolMode,
       });
       if (!v.ok) return { error: v.error };
       seat.presented = v.decklist;
@@ -1950,7 +1953,7 @@ export class PgRoomStore {
           room.prep.startPlayer === botSeat ? "first" : "second",
         );
         const botValidation = validatePresentation(registered.pool, botPresentation, room.format, {
-          allowFutureCards: room.allowFutureCards,
+          cardPoolMode: room.cardPoolMode,
         });
         if (!botValidation.ok) return { error: botValidation.error };
         bot.presented = botValidation.decklist;
@@ -2046,7 +2049,7 @@ export class PgRoomStore {
             room.prep.startPlayer === botSeat ? "first" : "second",
           );
           const validation = validatePresentation(registered.pool, presentation, room.format, {
-            allowFutureCards: room.allowFutureCards,
+            cardPoolMode: room.cardPoolMode,
           });
           if (!validation.ok) return { error: validation.error };
           bot.presented = validation.decklist;
@@ -2085,10 +2088,10 @@ export class PgRoomStore {
     code: string,
     credentials: SeatCredentials,
   ): Promise<
-    | { ok: true; freedSeat: number | null; remaining: SeatRow | null; format: Format; allowFutureCards: boolean; version: number }
+    | { ok: true; freedSeat: number | null; remaining: SeatRow | null; format: Format; cardPoolMode: CardPoolMode; version: number }
     | { ok: false; error: string }
   > {
-    const r = await this.withRetry<{ freedSeat: number | null; remaining: SeatRow | null; format: Format; allowFutureCards: boolean }>(
+    const r = await this.withRetry<{ freedSeat: number | null; remaining: SeatRow | null; format: Format; cardPoolMode: CardPoolMode }>(
       code.toUpperCase(),
       (room) => {
         if (room.state) return { error: "game has already started" };
@@ -2123,7 +2126,7 @@ export class PgRoomStore {
               freedSeat: seatIdx,
               remaining: room.seats[otherSeat] ?? null,
               format: room.format,
-              allowFutureCards: room.allowFutureCards,
+              cardPoolMode: room.cardPoolMode,
             },
           };
         }
@@ -2136,7 +2139,7 @@ export class PgRoomStore {
               freedSeat: null,
               remaining: null,
               format: room.format,
-              allowFutureCards: room.allowFutureCards,
+              cardPoolMode: room.cardPoolMode,
             },
           };
         }
@@ -2200,7 +2203,7 @@ export class PgRoomStore {
             deckId: survivorRow.deckId,
             deckName: survivorRow.deckName,
             retainedRoomCode: room.code,
-            allowFutureCards: room.allowFutureCards,
+            cardPoolMode: room.cardPoolMode,
             joinedAt: room.createdAt,
           },
         };
@@ -2287,7 +2290,7 @@ export class PgRoomStore {
     const presenceCutoff = Date.now() - PRESENCE_TIMEOUT_MS;
     const { rows } = await this.db.query(
       `SELECT r.code, r.format, r.created_at, (r.status = 'active') AS started,
-              r.is_private, r.allow_future_cards,
+              r.is_private, r.card_pool_mode,
               (live.room_code IS NOT NULL) AS has_live_player
        FROM rooms r
        LEFT JOIN (
@@ -2328,7 +2331,7 @@ export class PgRoomStore {
       created_at: number;
       started: boolean;
       is_private: boolean;
-      allow_future_cards: boolean;
+      card_pool_mode: CardPoolMode;
       has_live_player: boolean;
     }[]) {
       const format = raw.format;
@@ -2342,7 +2345,7 @@ export class PgRoomStore {
             format,
             heroes: [heroNameForSeat(a), heroNameForSeat(b)],
             createdAt: Number(raw.created_at),
-            ...(raw.allow_future_cards ? { allowFutureCards: true as const } : {}),
+            ...(raw.card_pool_mode === "legal" ? {} : { cardPoolMode: raw.card_pool_mode }),
             spectateOnly: true,
             ...(raw.started ? { started: true as const } : {}),
           },
@@ -2360,7 +2363,7 @@ export class PgRoomStore {
           format,
           heroes: [heroNameForSeat(a), heroNameForSeat(b)],
           createdAt: Number(raw.created_at),
-          ...(raw.allow_future_cards ? { allowFutureCards: true as const } : {}),
+          ...(raw.card_pool_mode === "legal" ? {} : { cardPoolMode: raw.card_pool_mode }),
         },
         ownerIds,
         isPrivate: raw.is_private,
@@ -3158,7 +3161,7 @@ export function prepViewFor(room: RoomRow, seat: number): PrepView {
   };
   return {
     format: room.format,
-    ...(room.allowFutureCards ? { allowFutureCards: true as const } : {}),
+    ...(room.cardPoolMode === "legal" ? {} : { cardPoolMode: room.cardPoolMode }),
     ...(room.seats.some((member) => member?.controller === "bot") ? { botGame: true } : {}),
     seats: [seatView(room.seats[0]), seatView(room.seats[1])],
     yourSeat: seat,

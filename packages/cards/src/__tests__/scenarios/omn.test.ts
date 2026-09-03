@@ -104,6 +104,23 @@ describe("OMN — import and set mechanics", () => {
       .expectAP(0, 1);
   });
 
+  it("Crash Site Salvage has no go again or Gold when Scrap is declined", () => {
+    const g = scenario({ seats: [
+      hero("puffin|0", {
+        hand: ["crash site salvage|2"],
+        graveyard: ["copper cog|3"],
+      }),
+      foe(),
+    ] });
+
+    g.play("crash site salvage|2")
+      .chooseOption("no")
+      .blockWith()
+      .settle()
+      .expectAP(0, 0);
+    expect(g.state.players[0]!.board.some((card) => card.cardId === printingId("gold|0"))).toBe(false);
+  });
+
   it("Draco Fire makes the next Draconic weapon attack cost 1 less to activate", () => {
     const g = scenario({
       seats: [

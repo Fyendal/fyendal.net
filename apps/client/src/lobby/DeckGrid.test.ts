@@ -55,7 +55,9 @@ describe("deckChoicesFor", () => {
     expect(html).toContain("Includes banned card");
     expect(html).toContain("Banned cards:\nArt of War");
     expect(html).toContain("deck-legality-hint banned");
-    expect(deckIsLegalForRoom(deck, false)).toBe(false);
+    expect(deckIsLegalForRoom(deck, "legal")).toBe(false);
+    expect(deckIsLegalForRoom(deck, "future")).toBe(false);
+    expect(deckIsLegalForRoom(deck, "open")).toBe(true);
   });
 });
 
@@ -96,13 +98,13 @@ describe("filterAndSortDecks", () => {
     expect(filterAndSortDecks(decks, {
       query: "bravo",
       legality: "playable",
-      allowFutureCards: false,
+      cardPoolMode: "legal",
       catalog: "mine",
     }).map((deck) => deck.id)).toEqual(["new", "old"]);
     expect(filterAndSortDecks(decks, {
       query: "",
       legality: "attention",
-      allowFutureCards: false,
+      cardPoolMode: "legal",
       catalog: "mine",
     }).map((deck) => deck.id)).toEqual(["future"]);
   });

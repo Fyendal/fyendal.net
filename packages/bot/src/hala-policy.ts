@@ -1412,7 +1412,9 @@ function openingHandCoversIncomingDamage(input: BotPolicyInput): boolean {
   if (!isOpeningTurnDefense(input)) return false;
   const link = currentLink(input);
   if (!link) return false;
-  const incoming = Math.max(0, link.attackValue - link.defenseValue);
+  // This asks whether hand defense can fully block the attack. Source-side
+  // damage increases never apply once attack is completely covered.
+  const defenseNeeded = Math.max(0, link.attackValue - link.defenseValue);
   const stageableIds = new Set(input.legal.flatMap((intent) =>
     intent.kind === "stage-defenders" ? intent.instanceIds : []
   ));
@@ -1421,7 +1423,7 @@ function openingHandCoversIncomingDamage(input: BotPolicyInput): boolean {
   );
   const defenseOf = (card: CardView): number => Math.max(0, card.defense ?? 0);
   if (link.dominate) {
-    return hand.reduce((best, card) => Math.max(best, defenseOf(card)), 0) >= incoming;
+    return hand.reduce((best, card) => Math.max(best, defenseOf(card)), 0) >= defenseNeeded;
   }
   if (link.overpower) {
     const actionDefense = hand.reduce((best, card) =>
@@ -1432,9 +1434,9 @@ function openingHandCoversIncomingDamage(input: BotPolicyInput): boolean {
     const otherDefense = hand.reduce((total, card) =>
       input.cards[card.cardId]?.cardType === "action" ? total : total + defenseOf(card),
     0);
-    return actionDefense + otherDefense >= incoming;
+    return actionDefense + otherDefense >= defenseNeeded;
   }
-  return hand.reduce((total, card) => total + defenseOf(card), 0) >= incoming;
+  return hand.reduce((total, card) => total + defenseOf(card), 0) >= defenseNeeded;
 }
 
 function scoreDefend(
@@ -1473,7 +1475,7 @@ function scoreDefend(
       if (toeIds.length > 0 && availableToeIds.length === 0 && toeTheLinePreventionCommitted(policyInput) === 0) {
         return null;
       }
-      const incoming = Math.max(0, link.attackValue - link.defenseValue);
+      const incoming = incomingAttackDamage(policyInput);
       const committed = toeTheLinePreventionCommitted(policyInput);
       const uncovered = Math.max(0, incoming - reactionPlan.amount - committed);
       const copies = Math.min(availableToeIds.length, Math.ceil(uncovered / 2));

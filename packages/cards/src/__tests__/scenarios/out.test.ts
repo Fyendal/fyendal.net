@@ -15,6 +15,30 @@ describe("OUT — registration and core mechanics", () => {
     }
   });
 
+  it("Looking for a Scrap gains +1 and go again only when its additional cost is paid", () => {
+    const declined = scenario({
+      seats: [
+        { hero: "rhinar", resources: 2, hand: ["looking for a scrap|1"], graveyard: ["infect|3"] },
+        { hero: "dorinthea" },
+      ],
+    });
+    declined.play("looking for a scrap|1").chooseOption("pass").blockWith().settle().expectAP(0, 0);
+
+    const paid = scenario({
+      seats: [
+        { hero: "rhinar", resources: 2, hand: ["looking for a scrap|1"], graveyard: ["infect|3"] },
+        { hero: "dorinthea" },
+      ],
+    });
+    const base = cardData[paid.state.players[0]!.hand[0]!.cardId]!.attack ?? 0;
+    paid.play("looking for a scrap|1")
+      .chooseCard("infect|3")
+      .expectAttackValue(base + 1)
+      .blockWith()
+      .settle()
+      .expectAP(0, 1);
+  });
+
   it("Arakni gives only the first stealth attack go again and Prowl buffs the next one", () => {
     const s = scenario({
       seats: [

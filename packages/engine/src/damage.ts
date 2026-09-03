@@ -5,6 +5,7 @@ import { scriptOf } from "./cardProperties.js";
 import { activeModifiers, modifierApplies } from "./combatModifiers.js";
 import {
   computeAttack,
+  computeCombatDamage,
   computeDefense,
   equipmentDefense,
 } from "./combatValues.js";
@@ -241,17 +242,8 @@ export function resolveLink(state: GameStateInternal, runtime: EngineRuntime): v
   const defenderPlayer = state.players[opponent(link.attacker)] as PlayerState;
   const attack = computeAttack(state, runtime, link);
   const defense = computeDefense(state, runtime, link);
-  const baseDamage = Math.max(0, attack - defense);
-  const damageBonus = baseDamage > 0
-    ? activeModifiers(state, link, ["chain-link", "combat-chain", "until-end-of-turn", "static"])
-      .reduce((sum, modifier) => sum + Number(modifier.damage || 0), 0)
-    : 0;
-  let damage = baseDamage + damageBonus;
   const damageScript = scriptOf(state, link.attackingCard.cardId, link.attackingCard);
-  damage = Math.max(0, Math.floor(damageScript?.modifyCombatDamage?.(
-    runtime.makeCtx(state, link.attacker, link.attackingCard, link),
-    damage,
-  ) ?? damage));
+  const damage = computeCombatDamage(state, runtime, link, attack, defense);
   if (link.targetAllyId !== undefined) {
     // Ally target (CR 8.2.8d/e/f): the attack could not be defended, damage
     // is dealt to the ally (the hero's prevention shields do not soak it, the

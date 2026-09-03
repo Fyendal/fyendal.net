@@ -1,6 +1,6 @@
 import { cardData, precon, scripts, validatePresentation } from "@fyendal/cards";
 import { createGame, legalIntents, projectStateFor } from "@fyendal/engine";
-import type { Decklist } from "@fyendal/shared";
+import type { CardView, Decklist, GameIntent } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
 import {
   BOT_DEFINITIONS,
@@ -96,4 +96,51 @@ describe("bot registry", () => {
       expect(firstDecision.intent, definition.id).toEqual(definition.chooseIntent(firstInput));
     }
   }, 15_000);
+
+  it("makes every bot survive source-side damage increases", () => {
+    for (const [index, definition] of botDefinitions.entries()) {
+      const registered = precon(definition.deckId)!;
+      const botDeck: Decklist = {
+        heroId: registered.pool.heroId,
+        ...definition.presentationFor(opponent, "second"),
+      };
+      const state = createGame({
+        decklists: [botDeck, opponent],
+        cards: cardData,
+        scripts,
+        seed: 5_100 + index,
+        startPlayer: 1,
+      });
+      const blockers: CardView[] = [
+        { instanceId: 510_000 + index * 2, cardId: "ASR007", owner: 0, defense: 2 },
+        { instanceId: 510_001 + index * 2, cardId: "ASR012", owner: 0, defense: 3 },
+      ];
+      const view = projectStateFor(state, 0);
+      view.turn = 2;
+      view.activePlayer = 1;
+      view.priorityPlayer = 0;
+      view.phase = "defend";
+      view.players[0].life = 4;
+      view.players[0].hand = blockers;
+      view.players[0].handCount = blockers.length;
+      view.pendingDecision = { player: 0, kind: "defend", prompt: "Choose defenders" };
+      view.chain = [{
+        attackingCard: { instanceId: 519_000 + index, cardId: "PEN202", owner: 1 },
+        defendingCards: [],
+        attackValue: 5,
+        defenseValue: 0,
+        damage: 6,
+        resolved: false,
+        reactions: [],
+      }];
+      const legal: GameIntent[] = [
+        { kind: "defend", instanceIds: [] },
+        { kind: "stage-defenders", instanceIds: [blockers[0]!.instanceId] },
+        { kind: "stage-defenders", instanceIds: [blockers[1]!.instanceId] },
+      ];
+
+      expect(definition.chooseIntent({ seat: 0, view, legal, cards: cardData }), definition.id)
+        .toEqual({ kind: "stage-defenders", instanceIds: [blockers[1]!.instanceId] });
+    }
+  });
 });

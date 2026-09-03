@@ -269,7 +269,7 @@ export function PrepRoom() {
       deck,
     };
     const validation = validatePresentation(pool, presented, prepDeck.format, {
-      allowFutureCards: prep?.allowFutureCards === true,
+      cardPoolMode: prep?.cardPoolMode ?? "legal",
     });
     if (!validation.ok) {
       setErrors([validation.error]);

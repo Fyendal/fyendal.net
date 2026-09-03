@@ -44,7 +44,7 @@ import {
 } from "./zoneQueries.js";
 
 import { controlledPermanents, hookSources, observingHookSources } from "./sourceQueries.js";
-import { clearPrivateZonePlacement, resetActivatedAbilityUsage } from "./cardLifecycle.js";
+import { clearPrivateZonePlacement, hasCrank, resetActivatedAbilityUsage } from "./cardLifecycle.js";
 import {
   transitionZone,
   transitionZoneFromEngineZone,
@@ -1145,10 +1145,14 @@ export function makeCtx(
       const normalized = keyword.toLowerCase();
       const keywords = (found.card.suppressedKeywords ??= []);
       if (!keywords.includes(normalized)) keywords.push(normalized);
-      if (normalized === "go again") {
-        for (const chainLink of state.chain) {
-          if (chainLink.attackingCard.instanceId === instanceId) chainLink.goAgain = false;
-        }
+      for (const chainLink of state.chain) {
+        if (chainLink.attackingCard.instanceId !== instanceId) continue;
+        // Arena permanents and their combat-chain representation become
+        // distinct objects after the JSON-safe state clone. Persist the
+        // suppression on the attack itself so combat rules continue to see it.
+        const attackKeywords = (chainLink.attackingCard.suppressedKeywords ??= []);
+        if (!attackKeywords.includes(normalized)) attackKeywords.push(normalized);
+        if (normalized === "go again") chainLink.goAgain = false;
       }
       return true;
     },
@@ -1950,6 +1954,12 @@ export function makeCtx(
     cardTypes(card) {
       const found = findCardAnywhere(state, card.instanceId)?.card;
       return cardTypesOf(state, found ?? card as CardInstance);
+    },
+    hasCrank(card) {
+      const found = findCardAnywhere(state, card.instanceId);
+      const target = found?.card ?? card as CardInstance;
+      const controller = state.players[found?.seat ?? seat] as PlayerState;
+      return hasCrank(state, runtime, controller, target);
     },
     countEquipped(type, targetSeat = seat) {
       const target = state.players[targetSeat] as PlayerState | undefined;

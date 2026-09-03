@@ -72,12 +72,6 @@
 .deck-legality-hint.future { color: #d9b8ff; }
 .deck-legality-cell { color: #b9aa92; font-size: 13px !important; }
 .deck-choice { position: relative; min-width: 0; aspect-ratio: 1.08; content-visibility: auto; contain-intrinsic-size: 0 230px; }
-.deck-choice.selected,
-.deck-choice:focus-within {
-  z-index: 20;
-  contain: none;
-  content-visibility: visible;
-}
 .deck-choice > .deck-card { width: 100%; height: 100%; }
 .deck-import-card {
   justify-content: center;
@@ -97,47 +91,6 @@
   font-size: 52px;
   font-weight: 300;
   line-height: 1;
-}
-.deck-menu {
-  position: absolute;
-  z-index: 12;
-  top: calc(100% + 8px);
-  left: 50%;
-  display: flex;
-  width: min(232px, calc(100vw - 40px));
-  flex-direction: column;
-  gap: 7px;
-  padding: 9px;
-  border: 1px solid #806334;
-  border-radius: 3px;
-  background: linear-gradient(180deg, #2a1c0d, #160e07);
-  box-shadow: 0 12px 30px #000c, inset 0 1px 0 #d4a95822;
-  transform: translateX(-50%);
-}
-.deck-menu-backdrop { display: contents; }
-.deck-menu::before {
-  position: absolute;
-  top: -6px;
-  left: calc(50% - 6px);
-  width: 10px;
-  height: 10px;
-  border-top: 1px solid #806334;
-  border-left: 1px solid #806334;
-  background: #291b0d;
-  content: "";
-  transform: rotate(45deg);
-}
-.deck-menu button {
-  width: 100%;
-  min-width: 0;
-  padding: 10px 12px;
-}
-.deck-menu-close { display: none; }
-.deck-menu-blocked {
-  margin: 3px 0 0;
-  color: #ffaaa2;
-  font-size: 12px;
-  line-height: 1.35;
 }
 .deck-section {
   margin: 18px 0 12px;
@@ -355,14 +308,236 @@
   font-size: 16px;
 }
 
-.home-card-pool-format {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
+.card-pool-control {
+  display: block;
 }
-.home-card-pool-format .format-name-subtitle {
-  color: #91836d;
+.card-pool-segments {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  isolation: isolate;
+  overflow: visible;
+  padding: 3px;
+  border: 1px solid #806334;
+  border-radius: 7px;
+  background: #100a06e8;
+  box-shadow: 0 4px 14px #0008;
+}
+.card-pool-segments::before {
+  position: absolute;
+  z-index: 0;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc((100% - 6px) / 3);
+  border-radius: 5px;
+  background: linear-gradient(180deg, #c34134, #96251f);
+  box-shadow: inset 0 1px 0 #ff9a7c55, 0 2px 7px #0008;
+  content: "";
+  transform: translateX(0);
+  transition: transform 200ms cubic-bezier(.2, .8, .2, 1);
+  will-change: transform;
+}
+.card-pool-segments[data-mode="future"]::before { transform: translateX(100%); }
+.card-pool-segments[data-mode="open"]::before { transform: translateX(200%); }
+.card-pool-segments button {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  min-height: 32px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  clip-path: none;
+  color: #c9b995;
+  font: 700 10px var(--font-lobby-ui);
+  letter-spacing: .9px;
+  text-transform: uppercase;
+  transition: color 160ms ease;
+}
+.card-pool-segments button:hover:not(:disabled) {
+  border-color: transparent;
+  background: transparent;
+  color: #fff5df;
+}
+.card-pool-segments button:focus-visible {
+  outline: 1px solid #ffd66b;
+  outline-offset: -2px;
+}
+.card-pool-segments button::after {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 10px);
+  left: 50%;
+  width: max-content;
+  max-width: 230px;
+  padding: 7px 9px;
+  border: 1px solid #806334;
+  border-radius: 6px;
+  background: #100a06f5;
+  box-shadow: 0 6px 18px #000c;
+  color: #f3e8d2;
+  content: attr(data-tooltip);
+  font: 500 11px/1.35 var(--font-lobby-ui);
+  letter-spacing: 0;
+  opacity: 0;
+  pointer-events: none;
+  text-align: left;
+  text-transform: none;
+  transform: translate(-50%, -4px);
+  transition: opacity 140ms ease, transform 140ms ease;
+  white-space: normal;
+}
+.card-pool-segments button:first-of-type::after {
+  left: 0;
+  transform: translateY(-4px);
+}
+.card-pool-segments button:last-of-type::after {
+  right: 0;
+  left: auto;
+  transform: translateY(-4px);
+}
+.card-pool-segments button:hover::after,
+.card-pool-segments button:focus-visible::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.card-pool-segments button:first-of-type:hover::after,
+.card-pool-segments button:first-of-type:focus-visible::after,
+.card-pool-segments button:last-of-type:hover::after,
+.card-pool-segments button:last-of-type:focus-visible::after {
+  transform: translateY(0);
+}
+.card-pool-segments button.selected {
+  background: transparent;
+  color: #fff5df;
+}
+.card-pool-segments button:disabled { cursor: not-allowed; opacity: .58; }
+.card-pool-segment-description {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  margin: -1px;
+  padding: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.deck-card-pool-control { width: 250px; }
+.deck-play-modal {
+  width: min(480px, calc(100vw - 40px));
+}
+.deck-library-panel > .modal-surface-backdrop { z-index: 200; }
+.deck-play-summary {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  align-items: center;
+  gap: 13px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.deck-play-summary img {
+  width: 64px;
+  height: 64px;
+  border: 1px solid #806334;
+  border-radius: 50%;
+  background: #100a06;
+  box-shadow: 0 4px 12px #0009;
+  object-fit: cover;
+}
+.deck-play-summary div {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+.deck-play-summary strong {
+  overflow: hidden;
+  color: var(--text-primary);
+  font: 700 18px/1.2 var(--font-lobby-title);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.deck-play-summary span {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+.deck-play-modal > .deck-card-pool-control {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  margin-bottom: 16px;
+}
+.deck-play-modal > .deck-card-pool-control .card-pool-segments { padding: 2px; }
+.deck-play-modal > .deck-card-pool-control .card-pool-segments::before {
+  top: 2px;
+  bottom: 2px;
+  left: 2px;
+  width: calc((100% - 4px) / 3);
+  border-radius: 4px;
+}
+.deck-play-modal > .deck-card-pool-control .card-pool-segments button {
+  min-height: 34px;
+  padding: 6px 8px;
   font-size: 10px;
+}
+.deck-play-blocked {
+  margin: -6px 0 15px;
+  padding: 9px 11px;
+  border: 1px solid #9a3c32;
+  border-radius: 5px;
+  background: #4b1714a8;
+  color: #ffb6ad;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.deck-play-actions {
+  display: grid;
+  gap: 9px;
+}
+.deck-play-actions > .btn-primary {
+  width: 100%;
+  min-height: 50px;
+  font-size: 17px;
+  letter-spacing: 2.5px;
+}
+.deck-play-secondary-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+.deck-play-secondary-actions button {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px 10px;
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+.deck-play-edit-action {
+  display: block;
+  width: fit-content;
+  min-width: 0;
+  margin: 15px auto 0;
+  padding: 4px 8px;
+  border: 0;
+  background: transparent;
+  clip-path: none;
+  color: var(--text-secondary);
+  font-size: 12px;
+  letter-spacing: .8px;
+}
+.deck-play-edit-action:hover {
+  border-color: transparent;
+  background: transparent;
+  color: var(--gold);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-pool-segments::before { transition: none; }
+  .card-pool-segments button::after { transition: none; }
 }
 
 @media (max-width: 700px) {
@@ -473,7 +648,6 @@
     background: linear-gradient(180deg, var(--surface-raised), var(--surface-panel));
     box-shadow: var(--shadow-raised);
   }
-  .mobile-deck-options-panel .deck-future-toggle { justify-content: space-between; }
   .mobile-deck-library-tools {
     grid-template-columns: 1fr;
     gap: 10px;
@@ -481,7 +655,6 @@
   }
   .deck-grid { grid-template-columns: 1fr; gap: 10px; }
   .deck-choice { aspect-ratio: auto; contain-intrinsic-size: 0 112px; }
-  .deck-choice.selected { z-index: 90; }
   .deck-choice > .deck-card {
     display: grid;
     height: auto;
@@ -507,68 +680,9 @@
   }
   .deck-card-details { align-self: start; }
   .deck-legality-hint { grid-column: 2; }
-  .deck-menu {
-    position: relative;
-    z-index: 80;
-    top: auto;
-    right: auto;
-    bottom: auto;
-    left: auto;
-    width: 100%;
-    max-height: calc(100dvh - 20px);
-    overflow-y: auto;
-    padding: 66px 12px 12px;
-    border-radius: 14px 14px 6px 6px;
-    transform: none;
-    box-shadow: 0 18px 45px #000e;
-  }
-  .deck-menu-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 79;
-    display: flex;
-    align-items: flex-end;
-    padding: 10px 10px max(10px, env(safe-area-inset-bottom));
-    background: #000b;
-  }
-  .deck-menu::before { display: none; }
-  .deck-menu-close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    display: inline-grid;
-    width: 44px !important;
-    min-width: 44px !important;
-    height: 44px;
-    min-height: 44px;
-    place-items: center;
-    padding: 0 !important;
-    clip-path: none;
-    font-size: 0;
-  }
-  .deck-menu-close::before,
-  .deck-menu-close::after {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 17px;
-    height: 2px;
-    border-radius: 1px;
-    background: currentColor;
-    content: "";
-  }
-  .deck-menu-close::before {
-    transform: translate(-50%, -50%) rotate(45deg);
-  }
-  .deck-menu-close::after {
-    transform: translate(-50%, -50%) rotate(-45deg);
-  }
-  .deck-menu button,
-  .deck-menu .btn-bot {
-    padding-inline: 6px;
-    overflow-wrap: anywhere;
-    white-space: normal;
-  }
+  .deck-play-modal { width: 100%; }
+  .deck-play-secondary-actions { grid-template-columns: 1fr; }
+  .deck-play-secondary-actions button { min-height: 46px; }
   .deck-actions { flex-direction: column; }
   .btn-bot { width: 100%; min-width: 0; }
   .bot-opponent-modal {
@@ -612,43 +726,6 @@
 
 /* ── home play options ── */
 .new-player-welcome { position: relative; }
-.home-future-toggle {
-  position: absolute;
-  z-index: 40;
-  top: 2px;
-  right: 0;
-}
-.card-pool-menu > summary {
-  min-height: 38px;
-  padding: 9px 13px;
-  border: 1px solid var(--border-subtle);
-  background: var(--surface-control);
-  color: var(--text-secondary);
-  cursor: pointer;
-  font: 700 12px var(--font-lobby-ui);
-  letter-spacing: 1px;
-  list-style: none;
-  text-transform: uppercase;
-}
-.card-pool-menu > summary::-webkit-details-marker { display: none; }
-.card-pool-menu > summary::after { content: " +"; color: var(--gold); }
-.card-pool-menu[open] > summary::after { content: " −"; }
-.card-pool-menu-panel {
-  position: absolute;
-  z-index: 30;
-  top: calc(100% + 8px);
-  right: 0;
-  display: grid;
-  width: min(310px, calc(100vw - 32px));
-  gap: 12px;
-  padding: 15px;
-  border: 1px solid var(--border-strong);
-  background: linear-gradient(180deg, var(--surface-raised), var(--surface-panel));
-  box-shadow: var(--shadow-raised);
-}
-.card-pool-menu-panel strong { color: var(--text-primary); font-size: 14px; }
-.card-pool-menu-panel p { margin: -6px 0 2px; color: var(--text-muted); font-size: 13px; }
-.card-pool-menu-panel .toggle-switch { justify-content: space-between; }
 .new-player-welcome-copy {
   margin-bottom: 22px;
   text-align: center;
@@ -753,17 +830,41 @@
   text-transform: uppercase;
 }
 .new-player-card-title {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  padding: 5px 28px 6px 8px;
+  background: linear-gradient(90deg, #0c0704e0 0%, #0c07049c 68%, transparent 100%);
+  text-shadow: 0 2px 4px #000, 0 4px 12px #000b;
+  text-wrap: balance;
+}
+.new-player-card-header {
   position: absolute;
   z-index: 2;
   top: 14px;
   left: 14px;
-  width: fit-content;
+  display: grid;
   max-width: calc(100% - 28px);
-  padding: 7px 11px 8px;
-  border-left: 3px solid var(--gold);
-  background: #0c0704e8;
-  box-shadow: 0 5px 18px #000a;
-  text-wrap: balance;
+  gap: 10px;
+}
+.home-card-pool-control {
+  width: 210px;
+  max-width: 100%;
+  justify-self: start;
+}
+.home-card-pool-control .card-pool-segments { padding: 2px; }
+.home-card-pool-control .card-pool-segments::before {
+  top: 2px;
+  bottom: 2px;
+  left: 2px;
+  width: calc((100% - 4px) / 3);
+  border-radius: 4px;
+}
+.home-card-pool-control .card-pool-segments button {
+  min-height: 26px;
+  padding: 4px 6px;
+  font-size: 9px;
+  letter-spacing: .75px;
 }
 .new-player-deck-select {
   display: grid;
@@ -825,25 +926,14 @@ button.new-player-import-card:focus-visible .new-player-card-art { transform: sc
 
 @media (max-width: 640px) {
   .new-player-welcome-copy.returning { display: none; }
-  .home-future-toggle {
-    position: relative;
-    top: auto;
-    right: auto;
-    display: flex;
-    width: fit-content;
-    margin: 0 0 16px auto;
-  }
-  .card-pool-menu-panel { top: calc(100% + 6px); }
   .new-player-options.two-options .new-player-card {
     min-height: 288px;
     aspect-ratio: auto;
   }
   .new-player-card-title {
-    top: 12px;
-    left: 12px;
-    max-width: calc(100% - 24px);
     font-size: 18px;
   }
+  .new-player-card-header { top: 12px; left: 12px; max-width: calc(100% - 24px); }
 }
 
 .room-section + .room-section { margin-top: 24px; }

@@ -59,10 +59,7 @@
   background: linear-gradient(180deg, #33220f, #241608);
   box-shadow: inset 0 0 0 1px #b8933f33;
 }
-.create-room-future-toggle {
-  width: max-content;
-  margin: -32px 0 11px auto;
-}
+.create-room-card-pool-control { margin: -32px 0 11px auto; width: min(280px, 100%); }
 .create-room-deck-select {
   position: relative;
   min-width: 0;
@@ -187,7 +184,7 @@
     max-height: calc(100dvh - 20px);
     padding: 16px;
   }
-  .create-room-future-toggle { margin: 0 0 11px; }
+  .create-room-card-pool-control { margin: 0 0 11px; width: 100%; }
   .create-room-deck-options { max-height: 42dvh; }
   .create-room-actions { grid-template-columns: 1fr; }
   .create-room-actions > button:last-child { grid-column: auto; }
@@ -498,7 +495,6 @@
    format, room-list, and matchmaking views. */
 .lobby-page :is(
   .new-player-play-actions,
-  .deck-menu,
   .rooms-header,
   .room-card-actions,
   .match-accept-panel,

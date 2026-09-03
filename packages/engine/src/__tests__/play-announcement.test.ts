@@ -3,6 +3,61 @@ import { actionCandidates, applyIntent, legalIntents, projectStateFor } from "..
 import { giveCard, makeGame, player } from "./fixtures.js";
 
 describe("card-play announcement", () => {
+  it("finishes an optional additional-cost declaration before pitching", () => {
+    let state = makeGame(151);
+    state.scriptsRef = {
+      ...state.scriptsRef,
+      BIG: {
+        declareAdditionalCost(ctx) {
+          ctx.requestChoice("declare-extra", "Pay the optional additional cost?", ["yes", "no"]);
+        },
+        onChoose(ctx, hook, option) {
+          if (hook === "declare-extra" && option === "yes") ctx.setCounter("declaredExtra", 1);
+        },
+      },
+    };
+    const playerZero = player(state, 0);
+    playerZero.hand = [];
+    const attackId = giveCard(state, 0, "BIG");
+    const pitchId = giveCard(state, 0, "BLUE");
+    const play = legalIntents(state, 0).find(
+      (intent) => intent.kind === "play-card" && intent.instanceId === attackId,
+    );
+
+    expect(play).toMatchObject({
+      pitchInstanceIds: [pitchId],
+      deferPlayPresentation: true,
+    });
+    let result = applyIntent(state, 0, play!);
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(result.error);
+    state = result.state;
+
+    expect(state.pendingDecision).toMatchObject({
+      chooseHook: "declare-extra",
+      resume: { kind: "continue-play-after-declaration", instanceId: attackId },
+    });
+    expect(player(state, 0).hand.map((card) => card.instanceId)).toEqual([attackId, pitchId]);
+    expect(player(state, 0).pitch).toHaveLength(0);
+    expect(player(state, 0).resources).toBe(0);
+    expect(projectStateFor(state, 0).pendingDecision?.preStackSource).toMatchObject({
+      card: { instanceId: attackId },
+      zone: "hand",
+    });
+
+    result = applyIntent(state, 0, { kind: "choose", optionId: "yes" });
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(result.error);
+    state = result.state;
+
+    expect(player(state, 0).pitch.map((card) => card.instanceId)).toEqual([pitchId]);
+    expect(player(state, 0).resources).toBe(1);
+    expect(state.chain.at(-1)?.attackingCard).toMatchObject({
+      instanceId: attackId,
+      counters: { declaredExtra: 1 },
+    });
+  });
+
   it("reserves a hand card for a mandatory additional discard cost", () => {
     let state = makeGame(149);
     state.scriptsRef = {

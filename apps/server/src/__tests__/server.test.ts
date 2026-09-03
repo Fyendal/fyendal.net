@@ -1186,35 +1186,59 @@ describe("cc prep room", () => {
     c.ws.close();
   });
 
-  it("matches a future-enabled player using a current-legal deck with the normal queue", async () => {
+  it("creates an Open room with a Living Legend hero and signature weapon", async () => {
+    const c = await authedClient();
+    c.sendMsg({
+      type: "create-room",
+      format: "cc",
+      deckId: "precon-aaz",
+      cardPoolMode: "open",
+    });
+    const created = (await c.next((message) => message.type === "room-created")) as Extract<
+      ServerMessage,
+      { type: "room-created" }
+    >;
+    expect((await db.query(
+      "SELECT card_pool_mode FROM rooms WHERE code = $1",
+      [created.code],
+    )).rows).toEqual([{ card_pool_mode: "open" }]);
+    c.ws.close();
+  });
+
+  it("matches players only within the same selected card-pool mode", async () => {
     const { c: futureEnabled, deckId: futureEnabledDeck } = await authedClientWithCcDeck();
-    const { c: currentOnly, deckId: currentOnlyDeck } = await authedClientWithCcDeck();
+    const { c: otherFuture, deckId: otherFutureDeck } = await authedClientWithCcDeck();
 
     futureEnabled.sendMsg({
       type: "queue-join",
       format: "cc",
       deckId: futureEnabledDeck,
-      allowFutureCards: true,
+      cardPoolMode: "future",
     });
     await futureEnabled.next((message) => message.type === "queued");
-    currentOnly.sendMsg({ type: "queue-join", format: "cc", deckId: currentOnlyDeck });
+    otherFuture.sendMsg({
+      type: "queue-join",
+      format: "cc",
+      deckId: otherFutureDeck,
+      cardPoolMode: "future",
+    });
 
     const created = (await futureEnabled.next((message) => message.type === "room-created")) as Extract<
       ServerMessage,
       { type: "room-created" }
     >;
-    const joined = (await currentOnly.next((message) => message.type === "joined")) as Extract<
+    const joined = (await otherFuture.next((message) => message.type === "joined")) as Extract<
       ServerMessage,
       { type: "joined" }
     >;
     expect(joined.code).toBe(created.code);
     expect((await db.query(
-      "SELECT allow_future_cards FROM rooms WHERE code = $1",
+      "SELECT card_pool_mode FROM rooms WHERE code = $1",
       [created.code],
-    )).rows).toEqual([{ allow_future_cards: false }]);
+    )).rows).toEqual([{ card_pool_mode: "future" }]);
 
     futureEnabled.ws.close();
-    currentOnly.ws.close();
+    otherFuture.ws.close();
   });
 
   it("pairs into a prep room; die roll, first-pick and ready-up start the game", async () => {

@@ -1,4 +1,4 @@
-import type { PriorityWindowMode } from "@fyendal/shared";
+import type { CardPoolMode, PriorityWindowMode } from "@fyendal/shared";
 import { MAX_MATCHMAKING_AVOID_ROOM_CODES } from "@fyendal/protocol";
 import type { ConstructedFormat } from "./domain.js";
 
@@ -163,14 +163,14 @@ export function pruneRejectedMatchRooms(
 }
 
 export interface LobbySettings {
-  version: 3;
-  allowFutureCards: Record<ConstructedFormat, boolean>;
+  version: 4;
+  cardPoolModes: Record<ConstructedFormat, CardPoolMode>;
   lastPlayedDecks: Record<ConstructedFormat, string | null>;
 }
 
 export const DEFAULT_LOBBY_SETTINGS: LobbySettings = {
-  version: 3,
-  allowFutureCards: { cc: false, "silver-age": false },
+  version: 4,
+  cardPoolModes: { cc: "legal", "silver-age": "legal" },
   lastPlayedDecks: { cc: null, "silver-age": null },
 };
 
@@ -183,17 +183,35 @@ function decodeLobbySettings(raw: string): LobbySettings {
     const value: unknown = JSON.parse(raw);
     if (!value || typeof value !== "object") return DEFAULT_LOBBY_SETTINGS;
     const record = value as Record<string, unknown>;
-    const future = record.allowFutureCards;
-    if (!future || typeof future !== "object") return DEFAULT_LOBBY_SETTINGS;
-    const flags = future as Record<string, unknown>;
-    if (typeof flags.cc !== "boolean" || typeof flags["silver-age"] !== "boolean") {
-      return DEFAULT_LOBBY_SETTINGS;
+    let cardPoolModes: Record<ConstructedFormat, CardPoolMode>;
+    if (record.version === 4) {
+      const modes = record.cardPoolModes;
+      if (!modes || typeof modes !== "object") return DEFAULT_LOBBY_SETTINGS;
+      const decoded = modes as Record<string, unknown>;
+      if (
+        !["legal", "future", "open"].includes(String(decoded.cc)) ||
+        !["legal", "future", "open"].includes(String(decoded["silver-age"]))
+      ) return DEFAULT_LOBBY_SETTINGS;
+      cardPoolModes = {
+        cc: decoded.cc as CardPoolMode,
+        "silver-age": decoded["silver-age"] as CardPoolMode,
+      };
+    } else {
+      const future = record.allowFutureCards;
+      if (!future || typeof future !== "object") return DEFAULT_LOBBY_SETTINGS;
+      const flags = future as Record<string, unknown>;
+      if (typeof flags.cc !== "boolean" || typeof flags["silver-age"] !== "boolean") {
+        return DEFAULT_LOBBY_SETTINGS;
+      }
+      cardPoolModes = {
+        cc: flags.cc ? "future" : "legal",
+        "silver-age": flags["silver-age"] ? "future" : "legal",
+      };
     }
-    const allowFutureCards = { cc: flags.cc, "silver-age": flags["silver-age"] };
     if (record.version === 1) {
       return {
-        version: 3,
-        allowFutureCards,
+        version: 4,
+        cardPoolModes,
         lastPlayedDecks: { cc: null, "silver-age": null },
       };
     }
@@ -201,8 +219,8 @@ function decodeLobbySettings(raw: string): LobbySettings {
       const lastPlayed = record.lastPlayedDeck;
       if (lastPlayed === null) {
         return {
-          version: 3,
-          allowFutureCards,
+          version: 4,
+          cardPoolModes,
           lastPlayedDecks: { cc: null, "silver-age": null },
         };
       }
@@ -215,15 +233,15 @@ function decodeLobbySettings(raw: string): LobbySettings {
         choice.deckId.length > 256
       ) return DEFAULT_LOBBY_SETTINGS;
       return {
-        version: 3,
-        allowFutureCards,
+        version: 4,
+        cardPoolModes,
         lastPlayedDecks: {
           cc: choice.format === "cc" ? choice.deckId : null,
           "silver-age": choice.format === "silver-age" ? choice.deckId : null,
         },
       };
     }
-    if (record.version !== 3) return DEFAULT_LOBBY_SETTINGS;
+    if (record.version !== 3 && record.version !== 4) return DEFAULT_LOBBY_SETTINGS;
 
     const lastPlayed = record.lastPlayedDecks;
     if (!lastPlayed || typeof lastPlayed !== "object") return DEFAULT_LOBBY_SETTINGS;
@@ -239,8 +257,8 @@ function decodeLobbySettings(raw: string): LobbySettings {
       ))
     ) return DEFAULT_LOBBY_SETTINGS;
     return {
-      version: 3,
-      allowFutureCards,
+      version: 4,
+      cardPoolModes,
       lastPlayedDecks: {
         cc: choices.cc as string | null,
         "silver-age": choices["silver-age"] as string | null,

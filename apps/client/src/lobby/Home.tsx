@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
-import type { BotOpponent } from "@fyendal/shared";
+import type { BotOpponent, CardPoolMode } from "@fyendal/shared";
 import type { DeckSummary } from "@fyendal/protocol";
 import type { ConstructedFormat } from "../domain.js";
 import { useStore } from "../store.js";
@@ -16,7 +16,7 @@ import {
 import { DeckDropdown } from "./CreateRoomModal.js";
 import { RoomCard } from "./RoomCard.js";
 import { BotOpponentModal } from "./BotOpponentModal.js";
-import { FormatName } from "./FormatBadge.js";
+import { CardPoolModeControl } from "./CardPoolModeControl.js";
 
 /** The focused starting point: play choices and rooms the account can reclaim. */
 export function Home(props: { onGoToFormat: (format: ConstructedFormat) => void }) {
@@ -58,24 +58,24 @@ function HomePlayOptions(props: {
   const intl = useIntl();
   const {
     authUser,
-    allowFutureCards,
+    cardPoolModes,
     createBotRoom,
     decks,
     decksLoading,
     lastPlayedDecks,
     queuedFormat,
     queueJoin,
-    setAllowFutureCards,
+    setCardPoolMode,
   } = useStore(useShallow((state) => ({
     authUser: state.authUser,
-    allowFutureCards: state.allowFutureCards,
+    cardPoolModes: state.cardPoolModes,
     createBotRoom: state.createBotRoom,
     decks: state.decks,
     decksLoading: state.decksLoading,
     lastPlayedDecks: state.lastPlayedDecks,
     queuedFormat: state.queuedFormat,
     queueJoin: state.queueJoin,
-    setAllowFutureCards: state.setAllowFutureCards,
+    setCardPoolMode: state.setCardPoolMode,
   })));
   const [importingFormat, setImportingFormat] = useState<ConstructedFormat | null>(null);
 
@@ -84,37 +84,17 @@ function HomePlayOptions(props: {
   }
 
   const hasSavedDecks = decks.length > 0;
-  const silverAgeAllowFuture = allowFutureCards["silver-age"];
+  const silverAgeCardPoolMode = cardPoolModes["silver-age"];
   const precons = hasSavedDecks
     ? []
-    : preconSummaries("silver-age", silverAgeAllowFuture)
-      .filter((deck) => deckIsLegalForRoom(deck, silverAgeAllowFuture));
+    : preconSummaries("silver-age", silverAgeCardPoolMode)
+      .filter((deck) => deckIsLegalForRoom(deck, silverAgeCardPoolMode));
   const silverAgeDecks = decks.filter((deck) => deck.format === "silver-age");
   const classicConstructedDecks = decks.filter((deck) => deck.format === "cc");
 
   return (
     <>
       <section className="new-player-welcome" aria-labelledby="new-player-welcome-title">
-        <details className="card-pool-menu home-future-toggle">
-          <summary>{intl.formatMessage({ id: "lobby.cardPool.title" })}</summary>
-          <div className="card-pool-menu-panel">
-            <strong>{intl.formatMessage({ id: "lobby.cardPool.allowFuture" })}</strong>
-            <p>{intl.formatMessage({ id: "lobby.cardPool.description" })}</p>
-            {(["cc", "silver-age"] as const).map((format) => (
-              <label className="toggle-switch" key={format}>
-                <FormatName format={format} className="home-card-pool-format" />
-                <input
-                  type="checkbox"
-                  role="switch"
-                  checked={allowFutureCards[format]}
-                  disabled={queuedFormat !== null}
-                  onChange={(event) => setAllowFutureCards(format, event.target.checked)}
-                />
-                <span className="switch-track" aria-hidden="true" />
-              </label>
-            ))}
-          </div>
-        </details>
         <div className={`new-player-welcome-copy${hasSavedDecks ? " returning" : ""}`}>
           <h3 id="new-player-welcome-title">
             {intl.formatMessage(
@@ -136,7 +116,9 @@ function HomePlayOptions(props: {
               format="silver-age"
               decks={precons}
               preferredDeckId={lastPlayedDecks["silver-age"]}
-              allowFuture={silverAgeAllowFuture}
+              cardPoolMode={silverAgeCardPoolMode}
+              cardPoolDisabled={queuedFormat !== null}
+              onCardPoolModeChange={(mode) => setCardPoolMode("silver-age", mode)}
               onFindMatch={queueJoin}
               onPlayBot={createBotRoom}
             />
@@ -149,7 +131,9 @@ function HomePlayOptions(props: {
               format="silver-age"
               decks={silverAgeDecks}
               preferredDeckId={lastPlayedDecks["silver-age"]}
-              allowFuture={silverAgeAllowFuture}
+              cardPoolMode={silverAgeCardPoolMode}
+              cardPoolDisabled={queuedFormat !== null}
+              onCardPoolModeChange={(mode) => setCardPoolMode("silver-age", mode)}
               onFindMatch={queueJoin}
               onPlayBot={createBotRoom}
             />
@@ -168,7 +152,9 @@ function HomePlayOptions(props: {
               format="cc"
               decks={classicConstructedDecks}
               preferredDeckId={lastPlayedDecks.cc}
-              allowFuture={allowFutureCards.cc}
+              cardPoolMode={cardPoolModes.cc}
+              cardPoolDisabled={queuedFormat !== null}
+              onCardPoolModeChange={(mode) => setCardPoolMode("cc", mode)}
               onFindMatch={queueJoin}
               onPlayBot={createBotRoom}
             />
@@ -200,7 +186,9 @@ function PlayableDeckCard(props: {
   format: ConstructedFormat;
   decks: DeckSummary[];
   preferredDeckId: string | null;
-  allowFuture: boolean;
+  cardPoolMode: CardPoolMode;
+  cardPoolDisabled: boolean;
+  onCardPoolModeChange: (mode: CardPoolMode) => void;
   onFindMatch: (format: ConstructedFormat, choice: { deckId: string }) => void;
   onPlayBot: (format: ConstructedFormat, deckId: string, bot?: BotOpponent) => void;
 }) {
@@ -208,13 +196,13 @@ function PlayableDeckCard(props: {
   const [selectedDeckId, setSelectedDeckId] = useState("");
   const [choosingBot, setChoosingBot] = useState(false);
   const selectedDeck = props.decks.find((deck) =>
-    deck.id === selectedDeckId && deckIsLegalForRoom(deck, props.allowFuture)
+    deck.id === selectedDeckId && deckIsLegalForRoom(deck, props.cardPoolMode)
   ) ?? props.decks.find((deck) =>
-    deck.id === props.preferredDeckId && deckIsLegalForRoom(deck, props.allowFuture)
+    deck.id === props.preferredDeckId && deckIsLegalForRoom(deck, props.cardPoolMode)
   ) ??
-    props.decks.find((deck) => deckIsLegalForRoom(deck, props.allowFuture));
+    props.decks.find((deck) => deckIsLegalForRoom(deck, props.cardPoolMode));
   const selectionValid = selectedDeck !== undefined &&
-    deckIsLegalForRoom(selectedDeck, props.allowFuture);
+    deckIsLegalForRoom(selectedDeck, props.cardPoolMode);
 
   return (
     <article className={`new-player-card new-player-play-card${props.artStyle === "precon" ? " new-player-precon-card" : ""}`}>
@@ -225,13 +213,21 @@ function PlayableDeckCard(props: {
         width={960}
         height={540}
       />
-      <h3 className="new-player-card-title">{props.title}</h3>
+      <div className="new-player-card-header">
+        <h3 className="new-player-card-title">{props.title}</h3>
+        <CardPoolModeControl
+          className="home-card-pool-control"
+          value={props.cardPoolMode}
+          disabled={props.cardPoolDisabled}
+          onChange={props.onCardPoolModeChange}
+        />
+      </div>
       <div className="new-player-card-content">
         <div className="new-player-deck-select">
           <DeckDropdown
             decks={props.decks}
             selected={selectedDeck}
-            allowFuture={props.allowFuture}
+            cardPoolMode={props.cardPoolMode}
             onSelect={setSelectedDeckId}
           />
         </div>

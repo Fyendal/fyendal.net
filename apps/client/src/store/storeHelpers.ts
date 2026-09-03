@@ -1,4 +1,4 @@
-import type { Format, HeroId } from "@fyendal/shared";
+import type { CardPoolMode, Format, HeroId } from "@fyendal/shared";
 import type { StoreState } from "./types.js";
 import type { LobbySettings } from "../storage.js";
 
@@ -47,7 +47,7 @@ export function initialStoreProjection(
     bugReportNotifications: [],
     prepDeck: null,
     prep: null,
-    allowFutureCards: lobbySettings.allowFutureCards,
+    cardPoolModes: lobbySettings.cardPoolModes,
     lastPlayedDecks: lobbySettings.lastPlayedDecks,
   };
 }
@@ -55,10 +55,11 @@ export function initialStoreProjection(
 export function matchmakingChoiceKey(
   format: Format,
   choice: { hero?: HeroId; deckId?: string },
+  cardPoolMode: CardPoolMode = "legal",
 ): string {
   return format === "classic-battles"
     ? `${format}:hero:${choice.hero ?? "none"}`
-    : `${format}:deck:${choice.deckId ?? "none"}`;
+    : `${format}:${cardPoolMode}:deck:${choice.deckId ?? "none"}`;
 }
 
 export function clearedRoomProjection(): Pick<

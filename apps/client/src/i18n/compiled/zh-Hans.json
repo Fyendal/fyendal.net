@@ -20918,16 +20918,40 @@
       "value": "问题已修复"
     }
   ],
-  "lobby.cardPool.allowFuture": [
+  "lobby.cardPool.future": [
     {
       "type": 0,
-      "value": "允许未来卡牌"
+      "value": "未来"
     }
   ],
-  "lobby.cardPool.description": [
+  "lobby.cardPool.futureDescription": [
     {
       "type": 0,
-      "value": "为每种赛制分别设置可用卡牌。"
+      "value": "允许比赛合法卡牌和已实现的未来卡牌。"
+    }
+  ],
+  "lobby.cardPool.legal": [
+    {
+      "type": 0,
+      "value": "合法"
+    }
+  ],
+  "lobby.cardPool.legalDescription": [
+    {
+      "type": 0,
+      "value": "仅限比赛合法卡牌。"
+    }
+  ],
+  "lobby.cardPool.open": [
+    {
+      "type": 0,
+      "value": "开放"
+    }
+  ],
+  "lobby.cardPool.openDescription": [
+    {
+      "type": 0,
+      "value": "允许所有已实现卡牌，包括禁用卡牌和传奇殿堂英雄。"
     }
   ],
   "lobby.cardPool.title": [
@@ -21320,6 +21344,20 @@
       "value": "粘贴牌表"
     }
   ],
+  "lobby.deck.playWith": [
+    {
+      "type": 0,
+      "value": "使用"
+    },
+    {
+      "type": 1,
+      "value": "name"
+    },
+    {
+      "type": 0,
+      "value": "游玩"
+    }
+  ],
   "lobby.deck.playable": [
     {
       "type": 0,
@@ -21676,6 +21714,12 @@
     {
       "type": 0,
       "value": "房间"
+    }
+  ],
+  "lobby.openCardPoolNote": [
+    {
+      "type": 0,
+      "value": "此房间允许所有已实现卡牌，包括禁用卡牌和传奇殿堂英雄。"
     }
   ],
   "lobby.room.fullHint": [

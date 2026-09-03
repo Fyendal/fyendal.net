@@ -2,13 +2,14 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import type { DeckSummary } from "@fyendal/protocol";
-import type { BotOpponent } from "@fyendal/shared";
+import type { BotOpponent, CardPoolMode } from "@fyendal/shared";
 import type { ConstructedFormat } from "../domain.js";
 import { useStore } from "../store.js";
 import { deckChoicesFor, deckIsLegalForRoom } from "./DeckGrid.js";
 import { FormatName } from "./FormatBadge.js";
 import { heroImageUrl } from "./heroImage.js";
 import { BotOpponentModal } from "./BotOpponentModal.js";
+import { CardPoolModeControl } from "./CardPoolModeControl.js";
 
 const ROOM_FORMATS = ["cc", "silver-age"] as const satisfies readonly ConstructedFormat[];
 const DROPDOWN_GAP = 5;
@@ -22,14 +23,14 @@ export function CreateRoomModal({ onClose }: { onClose: () => void }) {
     decks,
     createRoom,
     createBotRoom,
-    allowFutureCards,
-    setAllowFutureCards,
+    cardPoolModes,
+    setCardPoolMode,
   } = useStore(useShallow((state) => ({
     decks: state.decks,
     createRoom: state.createRoom,
     createBotRoom: state.createBotRoom,
-    allowFutureCards: state.allowFutureCards,
-    setAllowFutureCards: state.setAllowFutureCards,
+    cardPoolModes: state.cardPoolModes,
+    setCardPoolMode: state.setCardPoolMode,
   })));
   const [format, setFormat] = useState<ConstructedFormat>("cc");
   const [choosingBot, setChoosingBot] = useState(false);
@@ -38,11 +39,11 @@ export function CreateRoomModal({ onClose }: { onClose: () => void }) {
     "silver-age": "",
   });
 
-  const allowFuture = allowFutureCards[format];
-  const choices = deckChoicesFor(format, decks, allowFuture);
+  const cardPoolMode = cardPoolModes[format];
+  const choices = deckChoicesFor(format, decks, cardPoolMode);
   const deckId = deckFor[format];
   const selectedDeck = choices.find((deck) => deck.id === deckId);
-  const selectionValid = selectedDeck !== undefined && deckIsLegalForRoom(selectedDeck, allowFuture);
+  const selectionValid = selectedDeck !== undefined && deckIsLegalForRoom(selectedDeck, cardPoolMode);
 
   const createHostedRoom = (visibility: "public" | "private") => {
     if (!selectionValid) return;
@@ -91,21 +92,16 @@ export function CreateRoomModal({ onClose }: { onClose: () => void }) {
 
         <fieldset className="create-room-fieldset">
           <legend>{intl.formatMessage({ id: "common.deck" })}</legend>
-          <label className="toggle-switch create-room-future-toggle">
-            <span>{intl.formatMessage({ id: "lobby.cardPool.allowFuture" })}</span>
-            <input
-              type="checkbox"
-              role="switch"
-              checked={allowFuture}
-              onChange={(event) => setAllowFutureCards(format, event.target.checked)}
-            />
-            <span className="switch-track" aria-hidden="true" />
-          </label>
+          <CardPoolModeControl
+            className="create-room-card-pool-control"
+            value={cardPoolMode}
+            onChange={(mode) => setCardPoolMode(format, mode)}
+          />
           <DeckDropdown
             key={format}
             decks={choices}
             selected={selectedDeck}
-            allowFuture={allowFuture}
+            cardPoolMode={cardPoolMode}
             onSelect={(id) => setDeckFor((current) => ({ ...current, [format]: id }))}
           />
         </fieldset>
@@ -143,12 +139,12 @@ export function CreateRoomModal({ onClose }: { onClose: () => void }) {
 export function DeckDropdown({
   decks,
   selected,
-  allowFuture,
+  cardPoolMode,
   onSelect,
 }: {
   decks: DeckSummary[];
   selected: DeckSummary | undefined;
-  allowFuture: boolean;
+  cardPoolMode: CardPoolMode;
   onSelect: (id: string) => void;
 }) {
   const intl = useIntl();
@@ -248,7 +244,7 @@ export function DeckDropdown({
           style={{ maxHeight: layout.maxHeight }}
         >
           {decks.map((deck) => {
-            const blocked = !deckIsLegalForRoom(deck, allowFuture);
+            const blocked = !deckIsLegalForRoom(deck, cardPoolMode);
             return (
               <button
                 type="button"

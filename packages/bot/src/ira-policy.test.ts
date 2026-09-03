@@ -461,7 +461,7 @@ describe("Ira policy", () => {
       defendingCards: [],
       attackValue: 8,
       defenseValue: 0,
-      damage: 0,
+      damage: 8,
       resolved: false,
       reactions: [],
     }];

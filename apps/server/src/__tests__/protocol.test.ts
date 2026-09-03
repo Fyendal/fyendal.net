@@ -20,18 +20,18 @@ describe("decodeClientMessage", () => {
       format: "classic-battles",
       hero: "rhinar",
       private: true,
-      allowFutureCards: true,
+      cardPoolMode: "open",
     })).not.toBeNull();
     expect(decodeClientMessage({ type: "inspect-room", code: "ABC123" })).toEqual({
       type: "inspect-room",
       code: "ABC123",
     });
-    expect(decodeClientMessage({ type: "create-bot-room", format: "silver-age", deckId: "precon-sba", bot: "briar", allowFutureCards: true })).toEqual({
+    expect(decodeClientMessage({ type: "create-bot-room", format: "silver-age", deckId: "precon-sba", bot: "briar", cardPoolMode: "open" })).toEqual({
       type: "create-bot-room",
       format: "silver-age",
       deckId: "precon-sba",
       bot: "briar",
-      allowFutureCards: true,
+      cardPoolMode: "open",
     });
     expect(decodeClientMessage({
       type: "create-bot-room",

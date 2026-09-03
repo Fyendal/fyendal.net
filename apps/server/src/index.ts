@@ -1,7 +1,7 @@
 import http from "node:http";
 import { randomUUID } from "node:crypto";
 import { WebSocketServer, WebSocket } from "ws";
-import type { ClientMessage, Format, HeroId, ServerMessage } from "@fyendal/shared";
+import type { CardPoolMode, ClientMessage, Format, HeroId, ServerMessage } from "@fyendal/shared";
 import { cardData, formatLegalityIssues } from "@fyendal/cards";
 import { botDefinition } from "@fyendal/bot";
 import { deleteExpiredSessions, hashSessionToken, sessionForToken, type AuthUser } from "./auth.js";
@@ -375,30 +375,25 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
     format: Format,
     hero: HeroId | undefined,
     deckId: string | undefined,
-    allowFutureCards = false,
+    cardPoolMode: CardPoolMode = "legal",
   ): Promise<{
     choice: { hero?: HeroId; deckId?: string; deckName?: string };
-    requiresFutureCards: boolean;
   } | { error: string }> {
     if (format === "classic-battles") {
       if (hero !== "dorinthea" && hero !== "rhinar") return { error: "pick a hero" };
-      return { choice: { hero }, requiresFutureCards: false };
+      return { choice: { hero } };
     }
     if (!deckId) return { error: `choose a ${format} deck` };
     const refreshed = await resolveFreshDeck(deps.db, user.id, deckId, fabraryClient);
     if (!refreshed.ok) return { error: refreshed.error };
     const deck = refreshed.deck;
     if (deck.format !== format) return { error: `that is a ${deck.format} deck, not ${format}` };
-    const legality = formatLegalityIssues(cardData, deck.decklist, format);
-    const blockingIssues = allowFutureCards
-      ? legality.filter((issue) => issue.kind !== "future-card")
-      : legality;
-    if (blockingIssues.length > 0) {
-      return { error: blockingIssues.map((issue) => issue.message).join("; ") };
+    const legality = formatLegalityIssues(cardData, deck.decklist, format, { cardPoolMode });
+    if (legality.length > 0) {
+      return { error: legality.map((issue) => issue.message).join("; ") };
     }
     return {
       choice: { deckId: deck.id, deckName: deck.name },
-      requiresFutureCards: legality.some((issue) => issue.kind === "future-card"),
     };
   }
 
@@ -429,12 +424,13 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           send(ws, { type: "error", message: PLAY_REQUIRES_LOGIN });
           return;
         }
+        const cardPoolMode = msg.format === "classic-battles" ? "legal" : (msg.cardPoolMode ?? "legal");
         const choice = await resolveChoice(
           ctx.user,
           msg.format,
           msg.hero,
           msg.deckId,
-          msg.allowFutureCards === true,
+          cardPoolMode,
         );
         if ("error" in choice) {
           send(ws, { type: "error", message: choice.error });
@@ -444,7 +440,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           ...choice.choice,
           username: ctx.user.username,
           userId: ctx.user.id,
-        }, msg.private ? "private" : "public", msg.allowFutureCards === true);
+        }, msg.private ? "private" : "public", cardPoolMode);
         connections.attach(ctx, code, seat, token);
         const version = await markAttachedPresent(ctx);
         send(ws, { type: "room-created", code, seat, token, version });
@@ -473,7 +469,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           botFormat,
           undefined,
           msg.deckId,
-          msg.allowFutureCards === true,
+          msg.cardPoolMode ?? "legal",
         );
         if ("error" in choice || !choice.choice.deckId) {
           send(ws, { type: "error", message: "error" in choice ? choice.error : `choose a ${botFormat} deck` });
@@ -484,7 +480,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           deckName: choice.choice.deckName,
           username: ctx.user.username,
           userId: ctx.user.id,
-        }, msg.allowFutureCards === true, botOpponent);
+        }, msg.cardPoolMode ?? "legal", botOpponent);
         connections.attach(ctx, code, seat, token);
         const version = await markAttachedPresent(ctx);
         send(ws, { type: "room-created", code, seat, token, version });
@@ -599,7 +595,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           msg.format,
           msg.hero,
           msg.deckId,
-          msg.allowFutureCards === true,
+          msg.cardPoolMode ?? "legal",
         );
         if ("error" in choice) {
           send(ws, { type: "error", message: choice.error });
@@ -612,7 +608,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           userId: ctx.user.id,
           username: ctx.user.username,
           ...choice.choice,
-          allowFutureCards: choice.requiresFutureCards,
+          cardPoolMode: msg.format === "classic-battles" ? "legal" : (msg.cardPoolMode ?? "legal"),
           avoidRoomCodes: msg.avoidRoomCodes,
         });
         if (!result.ok) {
@@ -741,7 +737,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
               deckId: r.remaining.deckId,
               deckName: r.remaining.deckName,
               retainedRoomCode: code,
-              allowFutureCards: r.allowFutureCards,
+              cardPoolMode: r.cardPoolMode,
             });
             clusterConsumer?.nudge();
           }

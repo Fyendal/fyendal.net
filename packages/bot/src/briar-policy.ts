@@ -341,7 +341,7 @@ function arcaneSeedsLifeIsLastSurvivalOption(
     link &&
     link.attackingCard.owner !== input.seat
   ) {
-    return Math.max(0, link.attackValue - link.defenseValue) === me.life;
+    return incomingAttackDamage(input) === me.life;
   }
 
   const arcane = opponentArcaneDamageAmountOnStack(input);
@@ -562,7 +562,7 @@ function scoreDefend(intent: Extract<GameIntent, { kind: "defend" }>, input: Bot
       // Reserve Cloud Cover during the defense step and plan blocks around its
       // prevention plus any available defense reactions.
       if (cloudCoverIds.length > 0 && available.length === 0 && committed === 0) return null;
-      const incoming = Math.max(0, link.attackValue - link.defenseValue);
+      const incoming = incomingAttackDamage(policyInput);
       const minimumToSurvive = Math.max(0, incoming - me.life + 1);
       const planCloudCover = available.length > 0 && (
         incoming < me.life || reactionPlan.amount < minimumToSurvive

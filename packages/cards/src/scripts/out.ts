@@ -130,14 +130,14 @@ function infectiousHost(): CardScript {
 }
 function lookingForScrap(): CardScript {
   return {
-    additionalCost(ctx) {
+    declareAdditionalCost(ctx) {
       const choices = ctx.player(ctx.seat).graveyard.filter((card) => ctx.basePower(card) === 1);
       if (choices.length) ctx.requestCardChoice("scrap", decisionPrompt("Banish a 1 power card for +1 and go again?", "card.out.scrap.card.banish", { optionMessages: commonOptionMessages("pass") }), ["pass", ...choices.map((card) => card.instanceId)]);
     },
     onChoose(ctx, hook, option) {
       if (hook !== "scrap" || option === "pass" || !ctx.banish(Number(option))) return;
       ctx.addCardTempPower(ctx.self.instanceId, 1);
-      ctx.grantGoAgain();
+      ctx.grantCardKeyword(ctx.self.instanceId, "go again");
     },
   };
 }

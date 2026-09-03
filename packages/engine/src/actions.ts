@@ -105,6 +105,7 @@ export function playCard(
   alternativeCostCardInstanceIds?: number[],
   targetCardInstanceId?: number,
   declaredVariableX?: number,
+  additionalCostDeclared = false,
 ): string | undefined {
   const earlyPd = state.pendingDecision;
   if (state.phase !== "action" || earlyPd) return "cannot play a card right now";
@@ -301,10 +302,13 @@ export function playCard(
       variableCost,
       runtime.makeCtx(state, seat, card, undefined, from === "arsenal"),
     );
-    if (!isValidVariableX(declaredVariableX, resolvedVariableCost)) {
+    // Dynamic maxima may shrink while paying the declared additional cost
+    // (Hyper Scrapper removes the graveyard items that defined its maximum).
+    // The value was already validated when its declaration began.
+    if (!additionalCostDeclared && !isValidVariableX(declaredVariableX, resolvedVariableCost)) {
       return "invalid X declaration";
     }
-    variableBaseCost = variableResourceCost(resolvedVariableCost, declaredVariableX);
+    variableBaseCost = variableResourceCost(resolvedVariableCost, declaredVariableX!);
   }
   const effectiveCost = costForBase(variableBaseCost);
   if (!canPayRequiredHandCardsForAdditionalCost(
@@ -313,6 +317,33 @@ export function playCard(
     card,
     [...pitchInstanceIds, ...(alternativeCostCardInstanceIds ?? [])],
   )) return "cannot pay the card's additional hand-card cost";
+  if (variableCost) {
+    (card.counters ??= {})[variableCost.counterKey] = declaredVariableX!;
+  }
+  if (!additionalCostDeclared && script?.declareAdditionalCost) {
+    script.declareAdditionalCost(runtime.makeCtx(state, seat, card));
+    const declarationDecision = state.pendingDecision;
+    if (declarationDecision?.chooseHook) {
+      declarationDecision.resume = {
+        kind: "continue-play-after-declaration",
+        seat,
+        instanceId,
+        pitchInstanceIds: [...pitchInstanceIds],
+        from,
+        ...(meldSide ? { meldSide } : {}),
+        ...(targetAllyId === undefined ? {} : { targetAllyId }),
+        ...(boost ? { boost } : {}),
+        ...(boostCount === undefined ? {} : { boostCount }),
+        ...(asInstant === undefined ? {} : { asInstant }),
+        ...(alternativeCostCardInstanceIds === undefined
+          ? {}
+          : { alternativeCostCardInstanceIds: [...alternativeCostCardInstanceIds] }),
+        ...(targetCardInstanceId === undefined ? {} : { targetCardInstanceId }),
+        ...(declaredVariableX === undefined ? {} : { declaredVariableX }),
+      };
+      return undefined;
+    }
+  }
   const costErr = payCost(state, runtime, player, effectiveCost, pitchInstanceIds, instanceId, {
     beforePitch: () =>
       logPublic(state, gameLogMessage(
@@ -325,9 +356,6 @@ export function playCard(
       )),
   });
   if (costErr) return costErr;
-  if (variableCost) {
-    (card.counters ??= {})[variableCost.counterKey] = declaredVariableX!;
-  }
   if (isAttackAction) consumeAttackCostReductions(state, seat, card, targetAllyId);
   if (alternativeCostCardInstanceIds !== undefined) {
     const alternativeErr = payAlternativePlayCost(
@@ -905,6 +933,25 @@ function continueAfterScriptedChoice(
     );
     if (layer) layer.card = card;
     finishStackCardResolution(state, runtime, resume.seat);
+  }
+  if (resume?.kind === "continue-play-after-declaration") {
+    return playCard(
+      state,
+      runtime,
+      resume.seat,
+      resume.instanceId,
+      resume.pitchInstanceIds,
+      resume.from,
+      resume.meldSide,
+      resume.targetAllyId,
+      resume.boost ?? false,
+      resume.boostCount,
+      resume.asInstant,
+      resume.alternativeCostCardInstanceIds,
+      resume.targetCardInstanceId,
+      resume.declaredVariableX,
+      true,
+    );
   }
   if (resume?.kind === "finish-play") {
     const idx = state.resolving.findIndex((c) => c.instanceId === resume.card.instanceId);

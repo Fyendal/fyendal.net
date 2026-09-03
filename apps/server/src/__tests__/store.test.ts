@@ -56,12 +56,12 @@ async function matchedRoom(): Promise<{
   );
   const userIds = [Number(users.rows[0]!.id), Number(users.rows[1]!.id)] as [number, number];
   const opened = await store.queueForMatch("classic-battles", {
-    userId: userIds[0], username: "MatchA", hero: "rhinar", allowFutureCards: false,
+    userId: userIds[0], username: "MatchA", hero: "rhinar", cardPoolMode: "legal",
   });
   if (!opened.ok || opened.kind !== "opened") throw new Error("queue did not open a room");
   await markStoredSeatPresent(opened.code, 0);
   const matched = await store.queueForMatch("classic-battles", {
-    userId: userIds[1], username: "MatchB", hero: "dorinthea", allowFutureCards: false,
+    userId: userIds[1], username: "MatchB", hero: "dorinthea", cardPoolMode: "legal",
   });
   if (!matched.ok || matched.kind !== "matched") throw new Error("match failed");
   const joinedA = await store.joinRoom(matched.code, undefined, { allowPlayer: true, userId: userIds[0] });
@@ -138,18 +138,18 @@ function replayDml(queries: string[]): string[] {
 }
 
 describe("PgRoomStore storage", () => {
-  it("persists and advertises a room's future-card rule", async () => {
+  it("persists and advertises a room's card-pool mode", async () => {
     const created = await store.createRoom(
       "cc",
       { deckId: "precon-asb", username: "FutureHost" },
       "public",
-      true,
+      "future",
     );
     await markStoredSeatPresent(created.code, 0);
-    expect((await store.getRoom(created.code))?.allowFutureCards).toBe(true);
-    expect(await store.roomInvite(created.code)).toMatchObject({ allowFutureCards: true });
+    expect((await store.getRoom(created.code))?.cardPoolMode).toBe("future");
+    expect(await store.roomInvite(created.code)).toMatchObject({ cardPoolMode: "future" });
     expect(await store.listRooms()).toEqual([
-      expect.objectContaining({ code: created.code, allowFutureCards: true }),
+      expect.objectContaining({ code: created.code, cardPoolMode: "future" }),
     ]);
   });
 
@@ -354,7 +354,7 @@ describe("PgRoomStore storage", () => {
       deckId: "precon-sba",
       username: "BravoOwner",
       userId,
-    }, false, "bravo");
+    }, "legal", "bravo");
     let room = await store.getRoom(created.code);
     expect(room?.seats[1]).toMatchObject({
       controller: "bot",
@@ -453,7 +453,7 @@ describe("PgRoomStore storage", () => {
       deckId: "precon-asb",
       username: "IraOwner",
       userId,
-    }, false, "ira");
+    }, "legal", "ira");
 
     const room = await store.getRoom(created.code);
     expect(room?.seats[1]).toMatchObject({
@@ -477,7 +477,7 @@ describe("PgRoomStore storage", () => {
       deckId: "precon-asb",
       username: "CindraOwner",
       userId,
-    }, false, "cindra");
+    }, "legal", "cindra");
 
     let room = await store.getRoom(created.code);
     expect(room?.seats[1]).toMatchObject({
@@ -526,7 +526,7 @@ describe("PgRoomStore storage", () => {
       deckId: "precon-asb",
       username: "JarlOwner",
       userId,
-    }, false, "jarl");
+    }, "legal", "jarl");
 
     let room = await store.getRoom(created.code);
     expect(room?.seats[1]).toMatchObject({
@@ -1700,7 +1700,7 @@ describe("PgRoomStore storage", () => {
       userId: firstId,
       username: "QueueA",
       hero: "rhinar",
-      allowFutureCards: false,
+      cardPoolMode: "legal",
     });
     expect(opened).toMatchObject({ ok: true, kind: "opened", version: 0 });
     if (!opened.ok || opened.kind !== "opened") throw new Error("queue did not open a room");
@@ -1715,7 +1715,7 @@ describe("PgRoomStore storage", () => {
       userId: secondId,
       username: "QueueB",
       hero: "dorinthea",
-      allowFutureCards: false,
+      cardPoolMode: "legal",
     });
     expect(matched).toMatchObject({ ok: true, kind: "matched", code: opened.code, version: 1 });
     if (!matched.ok || matched.kind !== "matched") throw new Error("match was not created");
@@ -1747,7 +1747,7 @@ describe("PgRoomStore storage", () => {
       userId: absentId,
       username: "GoneQueue",
       hero: "rhinar",
-      allowFutureCards: false,
+      cardPoolMode: "legal",
     });
     if (!absent.ok || absent.kind !== "opened") throw new Error("queue did not open a room");
 
@@ -1755,7 +1755,7 @@ describe("PgRoomStore storage", () => {
       userId: liveId,
       username: "LiveQueue",
       hero: "dorinthea",
-      allowFutureCards: false,
+      cardPoolMode: "legal",
     });
     expect(live).toMatchObject({ ok: true, kind: "opened" });
     if (!live.ok || live.kind !== "opened") throw new Error("queue did not open a second room");
@@ -1781,7 +1781,7 @@ describe("PgRoomStore storage", () => {
       userId: openerId,
       username: "ManualA",
       hero: "rhinar",
-      allowFutureCards: false,
+      cardPoolMode: "legal",
     });
     if (!opened.ok || opened.kind !== "opened") throw new Error("queue did not open a room");
     await markStoredSeatPresent(opened.code, 0);
@@ -1802,7 +1802,7 @@ describe("PgRoomStore storage", () => {
       userId: laterId,
       username: "ManualC",
       hero: "dorinthea",
-      allowFutureCards: false,
+      cardPoolMode: "legal",
     });
     expect(later).toMatchObject({ ok: true, kind: "opened" });
     expect((await db.query(
@@ -1826,7 +1826,7 @@ describe("PgRoomStore storage", () => {
       username: "MatchA",
       hero: "rhinar",
       retainedRoomCode: declinedCode,
-      allowFutureCards: false,
+      cardPoolMode: "legal",
     })).toEqual({ ok: true, kind: "queued" });
 
     const opened = await store.queueForMatch("classic-battles", {
@@ -1834,7 +1834,7 @@ describe("PgRoomStore storage", () => {
       username: "MatchB",
       hero: "dorinthea",
       avoidRoomCodes: [declinedCode],
-      allowFutureCards: false,
+      cardPoolMode: "legal",
     });
     expect(opened).toMatchObject({ ok: true, kind: "opened", version: 0 });
     if (!opened.ok || opened.kind !== "opened") throw new Error("fallback room was not opened");
@@ -1849,7 +1849,7 @@ describe("PgRoomStore storage", () => {
       username: "MatchB",
       hero: "dorinthea",
       avoidRoomCodes: [declinedCode],
-      allowFutureCards: false,
+      cardPoolMode: "legal",
     })).toEqual(opened);
     expect((await db.query(
       "SELECT retained_room_code FROM matchmaking_entries ORDER BY user_id",
@@ -2020,7 +2020,7 @@ describe("PgRoomStore storage", () => {
           username: "PreconQueue",
           deckId: deck.id,
           deckName: deck.name,
-          allowFutureCards: false,
+          cardPoolMode: "legal",
         })).resolves.toMatchObject({ ok: true, kind: "opened", version: 0 });
         expect(await store.leaveMatchmaking(userId)).toBe(true);
       }

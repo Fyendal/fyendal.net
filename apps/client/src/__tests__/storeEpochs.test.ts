@@ -173,12 +173,12 @@ describe("client connection and account race fences", () => {
 
     await useStore.getState().logout();
     expect(useStore.getState().lastPlayedDecks).toEqual({ cc: null, "silver-age": null });
-    expect(useStore.getState().allowFutureCards).toEqual({ cc: false, "silver-age": false });
+    expect(useStore.getState().cardPoolModes).toEqual({ cc: "legal", "silver-age": "legal" });
 
     await useStore.getState().login("Bob", "password");
     expect(useStore.getState().authUser).toBe("Bob");
     expect(useStore.getState().lastPlayedDecks).toEqual({ cc: null, "silver-age": null });
-    expect(useStore.getState().allowFutureCards).toEqual({ cc: false, "silver-age": false });
+    expect(useStore.getState().cardPoolModes).toEqual({ cc: "legal", "silver-age": "legal" });
   });
 
   it("remembers the last played deck independently for each constructed format", async () => {
@@ -193,8 +193,8 @@ describe("client connection and account race fences", () => {
       "silver-age": "silver-deck",
     });
     expect(JSON.parse(localStorage.getItem("fyendal-lobby-settings-alice")!)).toEqual({
-      version: 3,
-      allowFutureCards: { cc: false, "silver-age": false },
+      version: 4,
+      cardPoolModes: { cc: "legal", "silver-age": "legal" },
       lastPlayedDecks: { cc: "cc-deck", "silver-age": "silver-deck" },
     });
   });

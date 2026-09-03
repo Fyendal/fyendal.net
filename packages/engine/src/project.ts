@@ -25,6 +25,7 @@ import {
   attackHasOverpower,
   attackValueModifiers,
   computeAttack,
+  computeCombatDamage,
   computeDefense,
   defenseValueModifiers,
   effectiveDefense,
@@ -1054,7 +1055,9 @@ function projectState(
         ? link.finalDefense
         : computeDefense(state, runtime, link);
     const onHitEffects = projectedOnHitEffects(state, runtime, link, revealAll ? undefined : seat);
-    const damage = Math.max(0, attack - defense);
+    const damage = link.resolved
+      ? link.damage
+      : computeCombatDamage(state, runtime, link, attack, defense);
     const prevention = i === lastLink
       ? projectedCombatPrevention(state, runtime, link, damage)
       : undefined;
@@ -1225,6 +1228,11 @@ function projectState(
                 instanceId: pd.variablePlayCost.instanceId,
                 zone: pd.variablePlayCost.from,
               }
+            : pd.resume?.kind === "continue-play-after-declaration"
+              ? {
+                  instanceId: pd.resume.instanceId,
+                  zone: pd.resume.from,
+                }
             : pd.resume?.kind === "finish-play"
               || pd.resume?.kind === "finish-reaction"
               || pd.resume?.kind === "finish-window-instant"

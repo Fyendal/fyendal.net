@@ -539,7 +539,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "mbrio base digits|0": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", tap: true, effectCardCosts: [{ zone: "arena", move: "tap", count: 1, subtype: "cog", prompt: decisionPrompt("Tap a cog", "card.common.cost.cog.tap") }], onActivate(ctx) { ctx.addCardTempDefense(ctx.self.instanceId, 1); } } },
   "blast rig|1": { modifyAttack: (ctx) => controlledType(ctx, "evo").length },
   "speed demon|1": {
-    additionalCost(ctx) {
+    declareAdditionalCost(ctx) {
       const choices = ctx.player(ctx.seat).graveyard.filter((card) => hasTag(ctx, card, "item") || data(ctx, card).cardType === "equipment");
       if (choices.length) ctx.requestCardChoice("pen-scrap", decisionPrompt("Scrap an item or equipment from your graveyard?", "card.pen.scrap.choose", { optionMessages: commonOptionMessages("no") }), ["no", ...choices.map((card) => card.instanceId)]);
     },

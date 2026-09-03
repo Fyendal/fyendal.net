@@ -1,4 +1,4 @@
-import type { CardData, DeckPool, Format } from "@fyendal/shared";
+import type { CardData, CardPoolMode, DeckPool, Format } from "@fyendal/shared";
 
 /**
  * Product codes whose spoiled cards are implemented but not tournament-legal
@@ -141,14 +141,15 @@ export function formatLegalityIssues(
   cards: Record<string, CardData>,
   pool: DeckPool,
   format: Format,
-  options: { allowFutureCards?: boolean } = {},
+  options: { cardPoolMode?: CardPoolMode } = {},
 ): FormatLegalityIssue[] {
+  const mode = options.cardPoolMode ?? "legal";
   const issues: FormatLegalityIssue[] = [];
   for (const id of uniquePoolIds(pool)) {
     const card = cards[id];
     if (!card) continue;
     const name = normalizedName(card);
-    if (format === "cc" && id === pool.heroId && LIVING_LEGEND_HEROES.has(name)) {
+    if (mode !== "open" && format === "cc" && id === pool.heroId && LIVING_LEGEND_HEROES.has(name)) {
       issues.push({
         kind: "living-legend-hero",
         cardId: id,
@@ -157,7 +158,7 @@ export function formatLegalityIssues(
       });
       continue;
     }
-    if (format === "cc" && card.cardType === "weapon" && LIVING_LEGEND_WEAPONS.has(name)) {
+    if (mode !== "open" && format === "cc" && card.cardType === "weapon" && LIVING_LEGEND_WEAPONS.has(name)) {
       issues.push({
         kind: "living-legend-weapon",
         cardId: id,
@@ -168,7 +169,7 @@ export function formatLegalityIssues(
     }
     const bannedAtEveryPitch = BANNED_CARD_NAMES.has(name);
     const bannedAtThisPitch = BANNED_FUNCTIONAL_KEYS.has(`${name}|${card.pitch ?? 0}`);
-    if (format === "cc" && (bannedAtEveryPitch || bannedAtThisPitch)) {
+    if (mode !== "open" && format === "cc" && (bannedAtEveryPitch || bannedAtThisPitch)) {
       const pitchLabel = !bannedAtEveryPitch && card.pitch ? ` (${PITCH_NAMES[card.pitch]})` : "";
       issues.push({
         kind: "banned-card",
@@ -178,7 +179,7 @@ export function formatLegalityIssues(
       });
       continue;
     }
-    if (!options.allowFutureCards && card.set && FUTURE_SET_CODES.has(card.set)) {
+    if (mode === "legal" && card.set && FUTURE_SET_CODES.has(card.set)) {
       issues.push({
         kind: "future-card",
         cardId: id,
@@ -194,7 +195,7 @@ export function formatLegalityErrors(
   cards: Record<string, CardData>,
   pool: DeckPool,
   format: Format,
-  options: { allowFutureCards?: boolean } = {},
+  options: { cardPoolMode?: CardPoolMode } = {},
 ): string[] {
   return formatLegalityIssues(cards, pool, format, options).map((issue) => issue.message);
 }

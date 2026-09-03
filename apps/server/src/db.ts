@@ -427,6 +427,18 @@ export const MIGRATIONS: Migration[] = [
     CREATE INDEX bug_reports_reporter_notification_idx
       ON bug_reports (reporter_user_id, dismissed_at, fixed_at);`,
   },
+  {
+    version: 25,
+    sql: `ALTER TABLE rooms ADD COLUMN card_pool_mode TEXT NOT NULL DEFAULT 'legal'
+      CHECK (card_pool_mode IN ('legal', 'future', 'open'));
+    UPDATE rooms SET card_pool_mode = 'future' WHERE allow_future_cards = TRUE;
+    ALTER TABLE matchmaking_entries ADD COLUMN card_pool_mode TEXT NOT NULL DEFAULT 'legal'
+      CHECK (card_pool_mode IN ('legal', 'future', 'open'));
+    UPDATE matchmaking_entries SET card_pool_mode = 'future' WHERE allow_future_cards = TRUE;
+    DROP INDEX matchmaking_fifo_idx;
+    CREATE INDEX matchmaking_fifo_idx
+      ON matchmaking_entries(format, card_pool_mode, joined_at, user_id);`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

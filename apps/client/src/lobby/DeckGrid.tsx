@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import { preconsForFormat } from "@fyendal/cards/client";
 import type { DeckSummary } from "@fyendal/protocol";
+import type { CardPoolMode } from "@fyendal/shared";
 import type { ConstructedFormat } from "../domain.js";
 import { useStore } from "../store.js";
 import { preconPrepDeck } from "../prep/prepDeck.js";
@@ -11,6 +12,7 @@ import { heroImageUrl } from "./heroImage.js";
 import { deckErrorMessages } from "./deckErrors.js";
 import { BotOpponentModal } from "./BotOpponentModal.js";
 import { ModalSurface } from "../components/ModalSurface.js";
+import { CardPoolModeControl } from "./CardPoolModeControl.js";
 
 export type DeckCatalogTab = "mine" | "precons";
 export type DeckLegalityFilter = "all" | "playable" | "attention";
@@ -20,14 +22,14 @@ export function filterAndSortDecks(
   options: {
     query: string;
     legality: DeckLegalityFilter;
-    allowFutureCards: boolean;
+    cardPoolMode: CardPoolMode;
     catalog: DeckCatalogTab;
   },
 ): DeckSummary[] {
   const query = options.query.trim().toLocaleLowerCase();
   return decks
     .filter((deck) => {
-      const legal = deckIsLegalForRoom(deck, options.allowFutureCards);
+      const legal = deckIsLegalForRoom(deck, options.cardPoolMode);
       if (options.legality === "playable" && !legal) return false;
       if (options.legality === "attention" && legal) return false;
       return !query || deck.name.toLocaleLowerCase().includes(query) ||
@@ -40,8 +42,8 @@ export function filterAndSortDecks(
 }
 
 /** Shared precons as deck tiles (synthesized, no DB row). */
-export function preconSummaries(format: ConstructedFormat, allowFutureCards = false): DeckSummary[] {
-  return preconsForFormat(format, { allowFutureCards }).map((p) => preconPrepDeck(p.id)!);
+export function preconSummaries(format: ConstructedFormat, cardPoolMode: CardPoolMode = "legal"): DeckSummary[] {
+  return preconsForFormat(format, { cardPoolMode }).map((p) => preconPrepDeck(p.id)!);
 }
 
 /**
@@ -51,42 +53,37 @@ export function preconSummaries(format: ConstructedFormat, allowFutureCards = fa
 export function deckChoicesFor(
   format: ConstructedFormat,
   decks: DeckSummary[],
-  allowFutureCards = false,
+  cardPoolMode: CardPoolMode = "legal",
 ): DeckSummary[] {
   const own = decks.filter((d) => d.format === format);
-  return [...own, ...preconSummaries(format, allowFutureCards)];
+  return [...own, ...preconSummaries(format, cardPoolMode)];
 }
 
-export function deckIsLegalForRoom(deck: DeckSummary, allowFutureCards: boolean): boolean {
-  return !deck.bannedCards?.length && (allowFutureCards || !deck.futureCards?.length);
+export function deckIsLegalForRoom(deck: DeckSummary, cardPoolMode: CardPoolMode): boolean {
+  return (cardPoolMode === "open" || !deck.bannedCards?.length) &&
+    (cardPoolMode !== "legal" || !deck.futureCards?.length);
 }
 
-export function deckLegalityReason(deck: DeckSummary, allowFutureCards: boolean): string | undefined {
+export function deckLegalityReason(deck: DeckSummary, cardPoolMode: CardPoolMode): string | undefined {
   const blocked = [
-    ...(deck.bannedCards ?? []),
-    ...(allowFutureCards ? [] : (deck.futureCards ?? [])),
+    ...(cardPoolMode === "open" ? [] : (deck.bannedCards ?? [])),
+    ...(cardPoolMode === "legal" ? (deck.futureCards ?? []) : []),
   ];
   return blocked.length > 0 ? `Illegal cards: ${blocked.join(", ")}` : undefined;
 }
 
-function FutureCardsToggle(props: {
-  checked: boolean;
+function DeckPoolControl(props: {
+  value: CardPoolMode;
   disabled: boolean;
-  onChange: (checked: boolean) => void;
+  onChange: (mode: CardPoolMode) => void;
 }) {
-  const intl = useIntl();
   return (
-    <label className="toggle-switch deck-future-toggle">
-      <span>{intl.formatMessage({ id: "lobby.cardPool.allowFuture" })}</span>
-      <input
-        type="checkbox"
-        role="switch"
-        checked={props.checked}
-        disabled={props.disabled}
-        onChange={(event) => props.onChange(event.target.checked)}
-      />
-      <span className="switch-track" aria-hidden="true" />
-    </label>
+    <CardPoolModeControl
+      className="deck-card-pool-control"
+      value={props.value}
+      disabled={props.disabled}
+      onChange={props.onChange}
+    />
   );
 }
 
@@ -212,7 +209,6 @@ export function DeckGrid(props: {
 }) {
   const intl = useIntl();
   const selectedDeckId = props.deckId;
-  const closeDeckMenu = props.onSelect;
   const {
     decks,
     queuedFormat,
@@ -220,8 +216,8 @@ export function DeckGrid(props: {
     queueLeave,
     createRoom,
     createBotRoom,
-    allowFutureCards,
-    setAllowFutureCards,
+    cardPoolModes,
+    setCardPoolMode,
   } = useStore(
     useShallow((state) => ({
       decks: state.decks,
@@ -230,11 +226,12 @@ export function DeckGrid(props: {
       queueLeave: state.queueLeave,
       createRoom: state.createRoom,
       createBotRoom: state.createBotRoom,
-      allowFutureCards: state.allowFutureCards,
-      setAllowFutureCards: state.setAllowFutureCards,
+      cardPoolModes: state.cardPoolModes,
+      setCardPoolMode: state.setCardPoolMode,
     })),
   );
-  const precons = preconSummaries(props.format, allowFutureCards[props.format]);
+  const cardPoolMode = cardPoolModes[props.format];
+  const precons = preconSummaries(props.format, cardPoolMode);
   const own = decks.filter((d) => d.format === props.format);
   const queued = queuedFormat === props.format;
   const [editingDeck, setEditingDeck] = useState<DeckSummary | null>(null);
@@ -243,51 +240,37 @@ export function DeckGrid(props: {
   const [catalog, setCatalog] = useState<DeckCatalogTab>("mine");
   const [query, setQuery] = useState("");
   const [legality, setLegality] = useState<DeckLegalityFilter>("all");
-  const deckMenuRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!selectedDeckId) return;
-
-    const closeMenuOnOutsideClick = (event: MouseEvent) => {
-      if (event.target instanceof Node && !deckMenuRef.current?.contains(event.target)) {
-        closeDeckMenu("");
-      }
-    };
-
-    document.addEventListener("click", closeMenuOnOutsideClick, true);
-    return () => document.removeEventListener("click", closeMenuOnOutsideClick, true);
-  }, [closeDeckMenu, selectedDeckId]);
-
+  const catalogDecks = catalog === "mine" ? own : precons;
   const visibleDecks = filterAndSortDecks(
-    catalog === "mine" ? own : precons,
+    catalogDecks,
     {
       query,
       legality,
-      allowFutureCards: allowFutureCards[props.format],
+      cardPoolMode,
       catalog,
     },
   );
+  const selectedDeck = catalogDecks.find((deck) => deck.id === selectedDeckId);
+  const selectedDeckIllegal = selectedDeck
+    ? !deckIsLegalForRoom(selectedDeck, cardPoolMode)
+    : false;
+  const selectedBlockedCards = selectedDeck ? [
+    ...(cardPoolMode === "open" ? [] : (selectedDeck.bannedCards ?? [])),
+    ...(cardPoolMode === "legal" ? (selectedDeck.futureCards ?? []) : []),
+  ] : [];
+  const selectedLegalityReason = selectedBlockedCards.length > 0
+    ? intl.formatMessage({ id: "lobby.deck.illegalCards" }, { cards: selectedBlockedCards.join(", ") })
+    : undefined;
 
   const tiles = (list: DeckSummary[], editable: boolean) => (
     <div className={`deck-grid${editable ? " deck-grid-saved" : " deck-grid-precons"}`}>
       {list.map((d) => {
         const selected = d.id === props.deckId;
-        const allowFuture = allowFutureCards[props.format];
-        const illegal = !deckIsLegalForRoom(d, allowFuture);
-        const blockedCards = [
-          ...(d.bannedCards ?? []),
-          ...(allowFuture ? [] : (d.futureCards ?? [])),
-        ];
-        const legalityReason = blockedCards.length > 0
-          ? intl.formatMessage({ id: "lobby.deck.illegalCards" }, { cards: blockedCards.join(", ") })
-          : undefined;
         return (
           <div
             className={`deck-choice${selected ? " selected" : ""}`}
             key={d.id}
-            onKeyDown={(event) => {
-              if (event.key === "Escape") props.onSelect("");
-            }}
           >
             <DeckTile
               deck={d}
@@ -295,70 +278,6 @@ export function DeckGrid(props: {
               source={editable ? "saved" : "preconstructed"}
               onSelect={() => props.onSelect(selected ? "" : d.id)}
             />
-            {selected ? (
-              <div className="deck-menu-backdrop" onClick={() => props.onSelect("")}>
-              <div
-                ref={deckMenuRef}
-                className="deck-menu"
-                role="group"
-                aria-label={intl.formatMessage({ id: "lobby.deck.actions" }, { name: d.name })}
-                onClick={(event) => event.stopPropagation()}
-              >
-                <button
-                  type="button"
-                  className="deck-menu-close"
-                  aria-label={intl.formatMessage({ id: "lobby.deck.closeActions" }, { name: d.name })}
-                  onClick={() => props.onSelect("")}
-                />
-                {queued ? (
-                  <button className="btn-primary" onClick={queueLeave}>
-                    {intl.formatMessage({ id: "lobby.action.cancelSearch" })}
-                  </button>
-                ) : (
-                  <button
-                    className="btn-primary"
-                    disabled={illegal}
-                    onClick={() => queueJoin(props.format, { deckId: d.id })}
-                  >
-                    {intl.formatMessage({ id: "lobby.action.findMatch" })}
-                  </button>
-                )}
-                <button
-                  className="btn-private-room"
-                  disabled={illegal}
-                  onClick={() => createRoom(props.format, { deckId: d.id })}
-                >
-                  {intl.formatMessage({ id: "lobby.action.inviteFriend" })}
-                </button>
-                <button
-                  className="btn-bot"
-                  disabled={illegal}
-                  onClick={() => {
-                    props.onSelect("");
-                    setBotDeckId(d.id);
-                  }}
-                >
-                  {intl.formatMessage({ id: "lobby.action.playBot" })}
-                </button>
-                {editable ? (
-                  <button onClick={() => {
-                    props.onSelect("");
-                    setEditingDeck(d);
-                  }}>
-                    {intl.formatMessage({ id: "lobby.deck.edit" })}
-                  </button>
-                ) : null}
-                {illegal ? (
-                  <p className="deck-menu-blocked" role="status">
-                    {intl.formatMessage(
-                      { id: "lobby.deck.blocked" },
-                      { reason: legalityReason },
-                    )}
-                  </p>
-                ) : null}
-              </div>
-              </div>
-            ) : null}
           </div>
         );
       })}
@@ -388,11 +307,6 @@ export function DeckGrid(props: {
           )}
         </h2>
         <div className="deck-panel-actions">
-          <FutureCardsToggle
-            checked={allowFutureCards[props.format]}
-            disabled={queued}
-            onChange={(checked) => setAllowFutureCards(props.format, checked)}
-          />
           <button className="btn-primary deck-import-action" onClick={() => setImporting(true)}>
             {intl.formatMessage({ id: "lobby.deck.import" })}
           </button>
@@ -437,11 +351,6 @@ export function DeckGrid(props: {
         <details className="mobile-deck-options">
           <summary>{intl.formatMessage({ id: "lobby.deck.searchOptions" })}</summary>
           <div className="mobile-deck-options-panel">
-            <FutureCardsToggle
-              checked={allowFutureCards[props.format]}
-              disabled={queued}
-              onChange={(checked) => setAllowFutureCards(props.format, checked)}
-            />
             <DeckLibraryFilters
               className="deck-library-tools mobile-deck-library-tools"
               query={query}
@@ -480,6 +389,105 @@ export function DeckGrid(props: {
           ) : null}
         </div>
       )}
+
+      {selectedDeck ? (
+        <ModalSurface
+          className="deck-play-modal"
+          title={intl.formatMessage({ id: "lobby.deck.playWith" }, { name: selectedDeck.name })}
+          onClose={() => props.onSelect("")}
+        >
+          <div className="deck-play-summary">
+            <img
+              src={heroImageUrl(selectedDeck.heroName)}
+              alt=""
+              width={64}
+              height={64}
+              onError={(event) => {
+                event.currentTarget.hidden = true;
+              }}
+            />
+            <div>
+              <strong>{selectedDeck.heroName}</strong>
+              <span>
+                {intl.formatMessage(
+                  { id: "lobby.deck.countAndSource" },
+                  {
+                    count: selectedDeck.deckSize,
+                    source: intl.formatMessage({
+                      id: catalog === "mine"
+                        ? "lobby.deck.source.saved"
+                        : "lobby.deck.source.preconstructed",
+                    }),
+                  },
+                )}
+              </span>
+            </div>
+          </div>
+
+          <DeckPoolControl
+            value={cardPoolMode}
+            disabled={queued}
+            onChange={(mode) => setCardPoolMode(props.format, mode)}
+          />
+
+          {selectedDeckIllegal ? (
+            <p className="deck-play-blocked" role="status">
+              {intl.formatMessage(
+                { id: "lobby.deck.blocked" },
+                { reason: selectedLegalityReason },
+              )}
+            </p>
+          ) : null}
+
+          <div className="deck-play-actions">
+            {queued ? (
+              <button className="btn-primary" data-modal-initial-focus onClick={queueLeave}>
+                {intl.formatMessage({ id: "lobby.action.cancelSearch" })}
+              </button>
+            ) : (
+              <button
+                className="btn-primary"
+                data-modal-initial-focus={selectedDeckIllegal ? undefined : ""}
+                disabled={selectedDeckIllegal}
+                onClick={() => queueJoin(props.format, { deckId: selectedDeck.id })}
+              >
+                {intl.formatMessage({ id: "lobby.action.findMatch" })}
+              </button>
+            )}
+            <div className="deck-play-secondary-actions">
+              <button
+                className="btn-private-room"
+                disabled={selectedDeckIllegal}
+                onClick={() => createRoom(props.format, { deckId: selectedDeck.id })}
+              >
+                {intl.formatMessage({ id: "lobby.action.inviteFriend" })}
+              </button>
+              <button
+                className="btn-bot"
+                disabled={selectedDeckIllegal}
+                onClick={() => {
+                  props.onSelect("");
+                  setBotDeckId(selectedDeck.id);
+                }}
+              >
+                {intl.formatMessage({ id: "lobby.action.playBot" })}
+              </button>
+            </div>
+          </div>
+
+          {catalog === "mine" ? (
+            <button
+              className="deck-play-edit-action"
+              onClick={() => {
+                props.onSelect("");
+                setEditingDeck(selectedDeck);
+              }}
+            >
+              {intl.formatMessage({ id: "lobby.deck.edit" })}
+            </button>
+          ) : null}
+        </ModalSurface>
+      ) : null}
 
       {editingDeck ? (
         <EditDeckModal deck={editingDeck} onClose={() => setEditingDeck(null)} />

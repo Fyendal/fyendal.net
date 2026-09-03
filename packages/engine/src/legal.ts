@@ -344,7 +344,7 @@ function playIntentsForCard(
     // A variable declaration or scripted additional cost can pause before the
     // card becomes a stack layer. The hint is deliberately conservative:
     // synchronous additional costs merely skip an optimistic animation.
-    const presented = script?.variablePlayCost || script?.additionalCost
+    const presented = script?.variablePlayCost || script?.declareAdditionalCost || script?.additionalCost
       ? intents.map((intent) => ({ ...intent, deferPlayPresentation: true as const }))
       : intents;
     if (data.cardType === "instant") return presented;

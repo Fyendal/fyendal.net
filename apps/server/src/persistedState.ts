@@ -320,6 +320,7 @@ export interface PersistedPendingArcaneV1 {
 
 export type PersistedDecisionResumeV1 =
   | { kind: "stack-card"; seat: number; card: PersistedCardInstanceV1 }
+  | { kind: "continue-play-after-declaration"; seat: number; instanceId: number; pitchInstanceIds: number[]; from: "hand" | "arsenal" | "banish" | "graveyard" | "deck"; meldSide?: "left" | "right" | "both"; targetAllyId?: number; boost?: boolean; boostCount?: number; asInstant?: boolean; alternativeCostCardInstanceIds?: number[]; targetCardInstanceId?: number; declaredVariableX?: number }
   | { kind: "finish-play"; seat: number; card: PersistedCardInstanceV1; from: "hand" | "arsenal" | "banish" | "graveyard" | "deck"; targetAllyId?: number; boost?: boolean; boostCount?: number; asInstant?: boolean }
   | { kind: "finish-reaction"; seat: number; card: PersistedCardInstanceV1; from: "hand" | "arsenal" | "banish" | "graveyard" | "deck" }
   | { kind: "finish-window-instant"; seat: number; card: PersistedCardInstanceV1; from: "hand" | "arsenal" | "banish" | "graveyard" | "deck" }
@@ -1110,10 +1111,27 @@ function validateArcane(value: unknown, code: string, path: string, depth: numbe
 
 function validateResume(value: unknown, code: string, path: string): void {
   const resume = object(value, code, path);
-  const kind = oneOf(resume.kind, ["stack-card", "finish-play", "finish-reaction", "finish-window-instant", "after-declare", "start-reaction-step", "after-resolution", "continue-stack", "finish-wager-result", "continue-wager-loss-replacements", "continue-wager-prizes", "reopen-reaction", "game-setup"] as const, code, `${path}.kind`);
+  const kind = oneOf(resume.kind, ["stack-card", "continue-play-after-declaration", "finish-play", "finish-reaction", "finish-window-instant", "after-declare", "start-reaction-step", "after-resolution", "continue-stack", "finish-wager-result", "continue-wager-loss-replacements", "continue-wager-prizes", "reopen-reaction", "game-setup"] as const, code, `${path}.kind`);
   if (kind === "stack-card") {
     const entry = exact(value, code, path, ["kind", "seat", "card"]);
     integer(entry.seat, code, `${path}.seat`); validateCard(entry.card, code, `${path}.card`);
+  } else if (kind === "continue-play-after-declaration") {
+    const entry = exact(value, code, path, ["kind", "seat", "instanceId", "pitchInstanceIds", "from"], ["meldSide", "targetAllyId", "boost", "boostCount", "asInstant", "alternativeCostCardInstanceIds", "targetCardInstanceId", "declaredVariableX"]);
+    integer(entry.seat, code, `${path}.seat`);
+    integer(entry.instanceId, code, `${path}.instanceId`);
+    validateIntegerArray(entry.pitchInstanceIds, code, `${path}.pitchInstanceIds`);
+    oneOf(entry.from, ["hand", "arsenal", "banish", "graveyard", "deck"] as const, code, `${path}.from`);
+    optional(entry, "meldSide", (v, p) => { oneOf(v, ["left", "right", "both"] as const, code, p); }, path);
+    optional(entry, "targetAllyId", (v, p) => { integer(v, code, p); }, path);
+    optional(entry, "boost", (v, p) => { bool(v, code, p); }, path);
+    optional(entry, "boostCount", (v, p) => {
+      const count = integer(v, code, p);
+      if (count < 2 || count > 8) fail(code, p, "expected a Boost count from 2 to 8");
+    }, path);
+    optional(entry, "asInstant", (v, p) => { bool(v, code, p); }, path);
+    optional(entry, "alternativeCostCardInstanceIds", (v, p) => validateIntegerArray(v, code, p), path);
+    optional(entry, "targetCardInstanceId", (v, p) => { integer(v, code, p); }, path);
+    optional(entry, "declaredVariableX", (v, p) => { integer(v, code, p); }, path);
   } else if (kind === "finish-play") {
     const entry = exact(value, code, path, ["kind", "seat", "card", "from"], ["targetAllyId", "boost", "boostCount", "asInstant"]);
     integer(entry.seat, code, `${path}.seat`); validateCard(entry.card, code, `${path}.card`);

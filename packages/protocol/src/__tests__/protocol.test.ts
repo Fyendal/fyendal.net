@@ -681,11 +681,11 @@ describe("GameView and server messages", () => {
       { type: "spectators", count: 2, version: 1 },
       { type: "opponent-disconnected", version: 1 }, { type: "opponent-reconnected", version: 1 },
       { type: "emote", seat: 1, message: "Good game!" },
-      { type: "rooms", rooms: [{ code: "ABC123", format: "cc", heroes: ["A", null], createdAt: 1, spectateOnly: false, yours: true, allowFutureCards: true }] },
-      { type: "room-info", room: { code: "ABC123", format: "silver-age", spectateOnly: true, yours: false, allowFutureCards: true } },
+      { type: "rooms", rooms: [{ code: "ABC123", format: "cc", heroes: ["A", null], createdAt: 1, spectateOnly: false, yours: true, cardPoolMode: "open" }] },
+      { type: "room-info", room: { code: "ABC123", format: "silver-age", spectateOnly: true, yours: false, cardPoolMode: "future" } },
       { type: "queue-status", counts: { "classic-battles": 0, cc: 1, "silver-age": 2 } },
       { type: "queued", format: "silver-age" }, { type: "queue-left" }, { type: "match-timeout" },
-      { type: "prep-state", version: 1, prep: { format: "cc", seats: [null, null], yourSeat: 0, die: null, startPlayer: null, botGame: true, allowFutureCards: true, deadlineAt: 30_000, deadlinePhase: "accept" } },
+      { type: "prep-state", version: 1, prep: { format: "cc", seats: [null, null], yourSeat: 0, die: null, startPlayer: null, botGame: true, cardPoolMode: "open", deadlineAt: 30_000, deadlinePhase: "accept" } },
       { type: "left" }, { type: "error", code: "ROOM_NOT_FOUND", message: "gone" },
     ];
     for (const message of variants) {
@@ -786,7 +786,7 @@ describe("replays and HTTP responses", () => {
           createdAt: 1,
           updatedAt: summary.updatedAt,
         }],
-        rooms: [{ code: "ABC123", format: "cc", status: "playing", winner: null, createdAt: 1, seat: 0, allowFutureCards: true }],
+        rooms: [{ code: "ABC123", format: "cc", status: "playing", winner: null, createdAt: 1, seat: 0, cardPoolMode: "open" }],
         matchmaking: {
           format: "silver-age",
           hero: null,

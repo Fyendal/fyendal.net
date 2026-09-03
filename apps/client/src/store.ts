@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import type {
   BotOpponent,
+  CardPoolMode,
   ClientMessage,
   EmoteMessage,
   HeroId,
@@ -238,7 +239,7 @@ export const useStore = create<StoreState>((set, get) => {
       replaysLoading: false,
       queueCounts: { "classic-battles": 0, cc: 0, "silver-age": 0 },
       lobbyRail: "home",
-      allowFutureCards: { ...DEFAULT_LOBBY_SETTINGS.allowFutureCards },
+      cardPoolModes: { ...DEFAULT_LOBBY_SETTINGS.cardPoolModes },
       lastPlayedDecks: { ...DEFAULT_LOBBY_SETTINGS.lastPlayedDecks },
     });
   }
@@ -739,7 +740,7 @@ export const useStore = create<StoreState>((set, get) => {
           activeMatchmakingChoiceKey = matchmakingChoiceKey(msg.prep.format, {
             hero: currentSeat?.hero,
             deckId: msg.prep.yourDeckId,
-          });
+          }, msg.prep.cardPoolMode ?? "legal");
         }
         const accepting = msg.prep.deadlinePhase === "accept";
         const matchAcceptanceRole = accepting
@@ -857,8 +858,8 @@ export const useStore = create<StoreState>((set, get) => {
     const lastPlayedDecks = { ...get().lastPlayedDecks, [format]: deckId };
     set({ lastPlayedDecks });
     persistLobbySettings({
-      version: 3,
-      allowFutureCards: get().allowFutureCards,
+      version: 4,
+      cardPoolModes: get().cardPoolModes,
       lastPlayedDecks,
     });
   };
@@ -878,12 +879,12 @@ export const useStore = create<StoreState>((set, get) => {
     ...accountActions,
     ...replayActions,
     setLobbyRail: (lobbyRail) => set({ lobbyRail }),
-    setAllowFutureCards: (format, allow) => {
-      const allowFutureCards = { ...get().allowFutureCards, [format]: allow };
-      set({ allowFutureCards });
+    setCardPoolMode: (format, mode) => {
+      const cardPoolModes = { ...get().cardPoolModes, [format]: mode };
+      set({ cardPoolModes });
       persistLobbySettings({
-        version: 3,
-        allowFutureCards,
+        version: 4,
+        cardPoolModes,
         lastPlayedDecks: get().lastPlayedDecks,
       });
     },
@@ -916,7 +917,7 @@ export const useStore = create<StoreState>((set, get) => {
         decks: [],
         decksLoading: true,
         bugReportNotifications: [],
-        allowFutureCards: accountLobbySettings.allowFutureCards,
+        cardPoolModes: accountLobbySettings.cardPoolModes,
         lastPlayedDecks: accountLobbySettings.lastPlayedDecks,
       });
       // proactively open the socket so ws auth happens without needing to
@@ -959,8 +960,8 @@ export const useStore = create<StoreState>((set, get) => {
           hero: choice.hero,
           deckId: choice.deckId,
           private: visibility === "private",
-          ...(format !== "classic-battles" && get().allowFutureCards[format]
-            ? { allowFutureCards: true }
+          ...(format !== "classic-battles" && get().cardPoolModes[format] !== "legal"
+            ? { cardPoolMode: get().cardPoolModes[format] }
             : {}),
         });
       });
@@ -977,7 +978,9 @@ export const useStore = create<StoreState>((set, get) => {
           format,
           deckId,
           ...(bot ? { bot } : {}),
-          ...(get().allowFutureCards[format] ? { allowFutureCards: true } : {}),
+          ...(get().cardPoolModes[format] !== "legal"
+            ? { cardPoolMode: get().cardPoolModes[format] }
+            : {}),
         });
       });
     },
@@ -1049,7 +1052,10 @@ export const useStore = create<StoreState>((set, get) => {
     queueJoin: (format, choice) => {
       roomEntryPending = false;
       pendingBotRoom = null;
-      const choiceKey = matchmakingChoiceKey(format, choice);
+      const cardPoolMode: CardPoolMode = format === "classic-battles"
+        ? "legal"
+        : get().cardPoolModes[format];
+      const choiceKey = matchmakingChoiceKey(format, choice, cardPoolMode);
       activeMatchmakingChoiceKey = choiceKey;
       if (format !== "classic-battles" && choice.deckId) {
         rememberPlayedDeck(format, choice.deckId);
@@ -1071,8 +1077,8 @@ export const useStore = create<StoreState>((set, get) => {
           hero: choice.hero,
           deckId: choice.deckId,
           ...(avoidRoomCodes.length > 0 ? { avoidRoomCodes } : {}),
-          ...(format !== "classic-battles" && get().allowFutureCards[format]
-            ? { allowFutureCards: true }
+          ...(cardPoolMode !== "legal"
+            ? { cardPoolMode }
             : {}),
         });
       });
@@ -1093,7 +1099,7 @@ export const useStore = create<StoreState>((set, get) => {
           ? matchmakingChoiceKey(prep.format, {
               hero: currentSeat?.hero,
               deckId: prep.yourDeckId,
-            })
+            }, prep.cardPoolMode ?? "legal")
           : "legacy");
         rememberRejectedMatchRoom(localStorage, username, code, Date.now(), choiceKey);
       }

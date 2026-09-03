@@ -302,6 +302,35 @@ describe("PersistedStateV1", () => {
       .pendingTokenCreations).toEqual(source.pendingTokenCreations);
   });
 
+  it("round trips a play paused for a pre-payment additional-cost declaration", () => {
+    const source = game();
+    const [card, pitch] = source.players[0]!.hand;
+    source.pendingDecision = {
+      player: 0,
+      kind: "optional-effect",
+      prompt: "Scrap an item?",
+      options: ["yes", "no"],
+      sourceInstanceId: card!.instanceId,
+      chooseHook: "scrap",
+      resume: {
+        kind: "continue-play-after-declaration",
+        seat: 0,
+        instanceId: card!.instanceId,
+        pitchInstanceIds: [pitch!.instanceId],
+        from: "hand",
+        boost: true,
+        boostCount: 2,
+        targetAllyId: 99,
+        targetCardInstanceId: 100,
+        declaredVariableX: 3,
+      },
+    };
+
+    const encoded = encodePersistedState(source);
+    expect(decodePersistedState(jsonCopy(encoded), "ABC123", cardData, scripts)
+      .pendingDecision).toEqual(source.pendingDecision);
+  });
+
   it("round trips wager-loss replacement ordering and continuation", () => {
     const source = game();
     const sourceIds = source.players[0]!.weapons.map((card) => card.instanceId);

@@ -128,6 +128,35 @@ describe("ELE — Fusion and Elemental heroes", () => {
     expect(g.state.chain.at(-1)?.goAgain).toBe(false);
   });
 
+  it("Blizzard stops a sharpened Zenith Blade from gaining go again after a Flurry trigger", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "hala, bladesaint of the vow|0",
+          weapons: ["zenith blade|0"],
+          board: ["flurry|0"],
+          resources: 3,
+        },
+        { hero: "dorinthea", hand: ["blizzard|3"] },
+      ],
+    });
+    g.state.players[0]!.weapons[0]!.counters = {
+      sharpenedTurn: g.state.turn,
+    };
+
+    g.attackWithWeapon("zenith blade|0", { settle: false })
+      .passPriority()
+      .react("blizzard|3", { targetCard: "zenith blade|0", settle: false })
+      .settle()
+      .chooseOption("no")
+      .blockWith()
+      .settle();
+
+    expect(g.state.chain.at(-1)?.goAgain).toBe(false);
+    g.expectAP(0, 0);
+  });
+
   it("Rosetta Thorn deals arcane damage after an attack and non-attack action", () => {
     const g = scenario({
       seats: [
