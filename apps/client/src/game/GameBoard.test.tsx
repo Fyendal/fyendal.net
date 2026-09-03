@@ -90,6 +90,8 @@ describe("GameBoard spectator presentation", () => {
       lastActionAt: null,
       claimVictory: vi.fn(),
       reportBug: vi.fn(),
+      backgroundMatchmaking: { state: "inactive" },
+      stopBackgroundMatchmaking: vi.fn(),
     } as unknown as StoreState;
 
     vi.stubGlobal("localStorage", {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { legalIntents, projectStateFor } from "@fyendal/engine";
+import { actionCandidates, legalIntents, projectStateFor } from "@fyendal/engine";
 import { cardData, scripts } from "../../index.js";
 import { functionalKeyOf } from "../../functional.js";
 import { printingId, scenario } from "../harness.js";
@@ -619,6 +619,11 @@ describe("DTD — Prism and Figments", () => {
       .expectInZone(0, "wartune herald|2", "soul")
       .expectInZone(0, "figment of protection|2", "board")
       .expectNotInZone(0, "wartune herald|2", "graveyard");
+    expect(actionCandidates(s.state, 0)).toContainEqual(expect.objectContaining({
+      kind: "activate-ability",
+      sourceInstanceId: s.state.players[0]!.hero.instanceId,
+      deferActivationPresentation: true,
+    }));
   });
 
   it("Prism searches for a Figment when a Herald enters her soul, then awakens it", () => {

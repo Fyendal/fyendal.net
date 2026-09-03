@@ -19964,6 +19964,20 @@
       "value": "）"
     }
   ],
+  "game.soul.count": [
+    {
+      "type": 0,
+      "value": "soul 中有 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张牌"
+    }
+  ],
   "game.spectating.count": [
     {
       "type": 1,

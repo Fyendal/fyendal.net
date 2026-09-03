@@ -1,28 +1,62 @@
-.background-match-bar {
-  position: fixed;
-  z-index: 80;
-  top: max(8px, env(safe-area-inset-top));
-  left: 50%;
+.background-match-search,
+.background-match-offer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  width: min(760px, calc(100vw - 24px));
   min-height: 48px;
   padding: 8px 10px 8px 16px;
-  transform: translateX(-50%);
   border: 1px solid #b8933f;
   border-radius: 6px;
   background: #171008f5;
-  box-shadow: 0 8px 28px #000b;
   color: #f0e5d0;
 }
 
-.background-match-bar.searching { width: min(470px, calc(100vw - 24px)); }
+.background-match-offer {
+  position: fixed;
+  z-index: 80;
+  top: max(8px, env(safe-area-inset-top));
+  left: 50%;
+  width: min(760px, calc(100vw - 24px));
+  transform: translateX(-50%);
+  box-shadow: 0 8px 28px #000b;
+}
 .background-match-copy { display: grid; gap: 2px; min-width: 0; }
 .background-match-copy span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .background-match-actions { display: flex; align-items: center; gap: 8px; flex: none; }
 .background-match-actions button { white-space: nowrap; }
+
+.background-match-rail,
+.background-match-menu {
+  display: grid;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+  min-height: 0;
+  padding: 10px;
+  font-size: 13px;
+  line-height: 1.35;
+}
+.background-match-rail {
+  border-color: #80652f;
+  background: #171008;
+  box-shadow: inset 0 0 18px #b8933f0a;
+}
+.background-match-menu { margin-bottom: 12px; }
+.background-match-rail .background-match-copy span,
+.background-match-menu .background-match-copy span { white-space: normal; }
+.background-match-rail .background-match-actions,
+.background-match-menu .background-match-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+.background-match-rail button,
+.background-match-menu button {
+  width: 100%;
+  min-height: 38px;
+  white-space: normal;
+}
 
 .bot-matchmaking-option {
   display: flex;
@@ -40,8 +74,7 @@
 .bot-matchmaking-option small { color: #b8aa96; }
 
 @media (max-width: 700px) {
-  .background-match-bar { align-items: stretch; flex-direction: column; gap: 7px; }
-  .background-match-bar.searching { flex-direction: row; align-items: center; }
-  .background-match-actions { justify-content: stretch; }
-  .background-match-actions button { flex: 1; }
+  .background-match-offer { align-items: stretch; flex-direction: column; gap: 7px; }
+  .background-match-offer .background-match-actions { justify-content: stretch; }
+  .background-match-offer .background-match-actions button { flex: 1; }
 }

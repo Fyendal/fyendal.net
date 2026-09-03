@@ -161,7 +161,53 @@ describe("initial schema", () => {
       "matchmaking_offers",
     ]));
     expect((await db.query("SELECT version FROM schema_migrations ORDER BY version DESC LIMIT 1")).rows)
-      .toEqual([{ version: 26 }]);
+      .toEqual([{ version: 28 }]);
+  });
+
+  it("adds candidate skip state to an already-applied version 26 database", async () => {
+    const db = rawDb();
+    await applyMigrations(db, MIGRATIONS.filter((migration) => migration.version <= 26));
+    expect((await db.query(
+      `SELECT column_name FROM information_schema.columns
+       WHERE table_name = 'pending_bot_start_candidates' AND column_name = 'skipped'`,
+    )).rows).toEqual([]);
+
+    await applyMigrations(db, MIGRATIONS);
+
+    expect((await db.query(
+      `SELECT column_name FROM information_schema.columns
+       WHERE table_name = 'pending_bot_start_candidates' AND column_name = 'skipped'`,
+    )).rows).toEqual([{ column_name: "skipped" }]);
+    expect((await db.query("SELECT version FROM schema_migrations ORDER BY version DESC LIMIT 1")).rows)
+      .toEqual([{ version: 28 }]);
+  });
+
+  it("repairs the early version 26 pending-bot deck foreign key", async () => {
+    const db = rawDb();
+    await applyMigrations(db, MIGRATIONS.filter((migration) => migration.version <= 27));
+    await db.query(
+      `ALTER TABLE pending_bot_starts
+       ADD CONSTRAINT pending_bot_starts_deck_id_fkey
+       FOREIGN KEY (deck_id) REFERENCES decks(id) ON DELETE CASCADE`,
+    );
+
+    await applyMigrations(db, MIGRATIONS);
+    const user = await db.query(
+      `INSERT INTO users (username, username_lc, pass_hash, created_at)
+       VALUES ('PreconRepair','preconrepair','hash',1) RETURNING id`,
+    );
+    const userId = Number(user.rows[0]!.id);
+    await db.query(
+      `INSERT INTO matchmaking_entries (user_id, format, deck_id, joined_at)
+       VALUES ($1,'silver-age','precon-sar',1)`,
+      [userId],
+    );
+    await expect(db.query(
+      `INSERT INTO pending_bot_starts
+        (user_id, format, deck_id, bot, card_pool_mode, requested_at)
+       VALUES ($1,'silver-age','precon-sar','briar','legal',1)`,
+      [userId],
+    )).resolves.toMatchObject({ rowCount: 1 });
   });
 
   it("repairs a legacy database whose bug reports table is missing", async () => {

@@ -193,6 +193,7 @@ function projectActivation(
   seat: number,
   intent: Extract<PendingInteraction["intent"], { kind: "activate-ability" }>,
 ): GameView | null {
+  if (intent.deferActivationPresentation) return null;
   const source = cardAnywhere(view, intent.sourceInstanceId);
   if (!source) return null;
   const sourceLeavesHand = view.players[seat]?.hand.some(

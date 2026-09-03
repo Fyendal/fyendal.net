@@ -16,6 +16,8 @@ export function EquipmentStack({
   motionLocation,
   underCardMotionLocation,
   showActivationDots = false,
+  soulCount,
+  soulCountLabel,
 }: {
   card: CardView;
   /** Additional public cards rendered behind the permanent, oldest first. */
@@ -28,10 +30,14 @@ export function EquipmentStack({
   underCardMotionLocation?: MotionLocation;
   /** Show turn activation capacity for weapon abilities. */
   showActivationDots?: boolean;
+  /** Hero-only soul count. Defined even at zero so the icon stays visible. */
+  soulCount?: number;
+  soulCountLabel?: string;
 }) {
   const cards = [...underCards, ...equipmentStackCards(card)];
   const step = cardStackStep(cards.length);
   const underCardCount = cards.length - 1;
+  const visibleSoulCount = soulCount !== undefined && soulCount > 0 ? soulCount : null;
   const explicitUnderCardIds = new Set(underCards.map((underCard) => underCard.instanceId));
   const activationGroups = showActivationDots
     ? (card.remainingAbilityActivations ?? []).flatMap((remaining, abilityIndex) =>
@@ -70,7 +76,24 @@ export function EquipmentStack({
           </div>
         );
       })}
-      {underCardCount > 0 ? (
+      {visibleSoulCount !== null ? (
+        <span
+          className="pip pile-pip equipment-stack-pip soul-pip"
+          role="img"
+          aria-label={soulCountLabel}
+          title={soulCountLabel}
+        >
+          <img
+            className="soul-pip-icon"
+            src="/icons/soul.svg"
+            width="24"
+            height="24"
+            alt=""
+            aria-hidden="true"
+          />
+          <span className="soul-pip-count">{visibleSoulCount}</span>
+        </span>
+      ) : soulCount === undefined && underCardCount > 0 ? (
         <span className="pip pile-pip equipment-stack-pip">{underCardCount}</span>
       ) : null}
       {activationGroups.length > 0 ? (

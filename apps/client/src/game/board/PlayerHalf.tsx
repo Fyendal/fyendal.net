@@ -314,6 +314,11 @@ export function PlayerHalf({
               selected={mine && interaction.selection.kind === "activate" &&
                 interaction.selection.sourceInstanceId === hero.instanceId}
               dimmed={heroBlocking || (mine && interaction.defending && !heroCanBlock)}
+              soulCount={player.soul.length}
+              soulCountLabel={intl.formatMessage(
+                { id: "game.soul.count" },
+                { count: player.soul.length },
+              )}
               onClick={heroCanBlock
                 ? () => interaction.onStage([...interaction.stagedIds, hero.instanceId])
                 : heroCanActivate

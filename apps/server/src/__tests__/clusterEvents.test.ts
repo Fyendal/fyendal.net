@@ -20,12 +20,19 @@ describe("cluster event log", () => {
       event: { code: "ABC123", kind: "presence", seat: 1, connected: true, version: 7 },
     });
     await appendClusterEvent(db, { type: "user-sessions-revoked", userId: 42 });
+    await appendClusterEvent(db, {
+      type: "match-handoff",
+      userId: 42,
+      code: "PVP123",
+      sourceCode: "BOT123",
+    });
     await Promise.all([a.pollNow(), b.pollNow()]);
 
     expect(first).toEqual(second);
     expect(first).toEqual([
       { type: "room", event: { code: "ABC123", kind: "presence", seat: 1, connected: true, version: 7 } },
       { type: "user-sessions-revoked", userId: 42 },
+      { type: "match-handoff", userId: 42, code: "PVP123", sourceCode: "BOT123" },
     ]);
   });
 

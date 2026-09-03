@@ -15,6 +15,7 @@ export type ClusterEvent =
   | { type: "session-revoked"; tokenHash: string }
   | { type: "user-sessions-revoked"; userId: number }
   | { type: "match-ready"; userId: number; code: string; created: boolean }
+  | { type: "match-handoff"; userId: number; code: string; sourceCode: string }
   | { type: "match-timeout"; userId: number; code: string }
   | { type: "background-status-changed"; userId: number }
   | { type: "bot-practice-ready"; userId: number; code: string }
@@ -84,6 +85,14 @@ function decodeRow(value: unknown): { id: number; event: ClusterEvent } | null {
         ? { id, event: { type: "match-ready", userId, code, created: payload.created } }
         : null;
     }
+    case "match-handoff": {
+      const userId = safeInteger(row.subject_user_id);
+      const code = roomCode(row.room_code);
+      const sourceCode = roomCode(payload?.sourceCode);
+      return userId !== null && userId > 0 && code && sourceCode
+        ? { id, event: { type: "match-handoff", userId, code, sourceCode } }
+        : null;
+    }
     case "match-timeout": {
       const userId = safeInteger(row.subject_user_id);
       const code = roomCode(row.room_code);
@@ -140,6 +149,10 @@ export async function appendClusterEvent(db: Queryable, event: ClusterEvent): Pr
     userId = event.userId;
     code = event.code;
     payload = { created: event.created };
+  } else if (event.type === "match-handoff") {
+    userId = event.userId;
+    code = event.code;
+    payload = { sourceCode: event.sourceCode };
   } else if (event.type === "match-timeout") {
     userId = event.userId;
     code = event.code;

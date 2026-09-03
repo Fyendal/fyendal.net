@@ -1556,7 +1556,7 @@ export class PgRoomStore {
              AND q.retained_room_code IS NOT NULL
              AND q.pending_offer_room_code IS NULL
              AND (q.mode = 'foreground' OR (
-               live_room.status IN ('prep', 'playing') AND bot_source.room_code IS NOT NULL
+               live_room.status IN ('prep', 'active') AND bot_source.room_code IS NOT NULL
              ))
            ORDER BY q.joined_at, q.user_id`,
           [choice.userId, format, choice.cardPoolMode, Date.now() - PRESENCE_TIMEOUT_MS],
@@ -1669,7 +1669,7 @@ export class PgRoomStore {
            AND q.retained_room_code IS NOT NULL
            AND q.pending_offer_room_code IS NULL
            AND (q.mode = 'foreground' OR (
-             live_room.status IN ('prep', 'playing') AND bot_source.room_code IS NOT NULL
+             live_room.status IN ('prep', 'active') AND bot_source.room_code IS NOT NULL
            ))
            AND (
              current_pending.user_id IS NULL
@@ -1875,7 +1875,7 @@ export class PgRoomStore {
          FROM rooms r
          JOIN room_seats human ON human.room_code = r.code AND human.user_id = $1
          JOIN room_seats bot ON bot.room_code = r.code AND bot.controller = 'bot'
-         WHERE r.code = $2 AND r.status IN ('prep', 'playing')`,
+         WHERE r.code = $2 AND r.status IN ('prep', 'active')`,
         [userId, sourceRoomCode.toUpperCase()],
       );
       if (source.rows.length === 0) return { rowCount: 0 };
@@ -2367,8 +2367,11 @@ export class PgRoomStore {
       if (offer.rows.length === 0) return { replayFinalizationIds: [] };
       const room = await this.loadRoom(db, code);
       if (!room || !room.seats.every((seat) => seat?.accepted === true)) {
-        const row = offer.rows[0] as Record<string, unknown>;
-        for (const userId of [Number(row.first_user_id), Number(row.second_user_id)]) {
+        const row = dbObject(offer.rows[0], code, "matchmaking offer");
+        for (const userId of [
+          dbSafeInteger(row.first_user_id, code, "matchmaking offer.first_user_id"),
+          dbSafeInteger(row.second_user_id, code, "matchmaking offer.second_user_id"),
+        ]) {
           await appendClusterEvent(db, { type: "background-status-changed", userId });
         }
         return { replayFinalizationIds: [] };
@@ -2378,31 +2381,32 @@ export class PgRoomStore {
          WHERE pending_offer_room_code = $1`,
         [code],
       );
-      const replayFinalizationIds: string[] = [];
-      for (const rawEntry of entries.rows as Array<Record<string, unknown>>) {
-        if (typeof rawEntry.source_room_code !== "string") continue;
-        const source = await this.loadRoom(db, rawEntry.source_room_code);
-        if (!source || !source.seats.some((seat) => seat?.controller === "bot")) continue;
-        if (source.state) {
-          const replayId = await endReplayForRoom(db, source.code);
-          if (replayId) replayFinalizationIds.push(replayId);
+      const sourceRoomsByUser = new Map<number, string>();
+      for (const entry of entries.rows) {
+        const rawEntry = dbObject(entry, code, "matchmaking entry");
+        const userId = dbSafeInteger(rawEntry.user_id, code, "matchmaking entry.user_id");
+        if (rawEntry.source_room_code === null) continue;
+        if (typeof rawEntry.source_room_code !== "string" || !/^[A-Z0-9]{6}$/.test(rawEntry.source_room_code)) {
+          throw new CorruptRoomError(code, "matchmaking entry.source_room_code", "invalid room code");
         }
-        await db.query("DELETE FROM rooms WHERE code = $1", [source.code]);
-        await appendClusterEvent(db, {
-          type: "room",
-          event: { code: source.code, kind: "deleted", version: source.version + 1 },
-        });
+        sourceRoomsByUser.set(userId, rawEntry.source_room_code);
       }
-      const row = offer.rows[0] as Record<string, unknown>;
-      const userIds = [Number(row.first_user_id), Number(row.second_user_id)];
+      const row = dbObject(offer.rows[0], code, "matchmaking offer");
+      const userIds = [
+        dbSafeInteger(row.first_user_id, code, "matchmaking offer.first_user_id"),
+        dbSafeInteger(row.second_user_id, code, "matchmaking offer.second_user_id"),
+      ];
       await db.query("DELETE FROM matchmaking_entries WHERE user_id IN ($1, $2)", userIds);
       await db.query("DELETE FROM matchmaking_offers WHERE room_code = $1", [code]);
       for (const userId of userIds) {
-        await appendClusterEvent(db, { type: "match-ready", userId, code, created: false });
+        const sourceCode = sourceRoomsByUser.get(userId);
+        await appendClusterEvent(db, sourceCode
+          ? { type: "match-handoff", userId, code, sourceCode }
+          : { type: "match-ready", userId, code, created: false });
         await appendClusterEvent(db, { type: "background-status-changed", userId });
       }
       await appendClusterEvent(db, { type: "queue-changed" });
-      return { replayFinalizationIds };
+      return { replayFinalizationIds: [] };
     });
   }
 

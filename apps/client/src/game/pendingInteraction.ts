@@ -16,6 +16,7 @@ export function optimisticInteractionHiddenIds(
   )) return null;
   if (intent.kind !== "activate-ability" && intent.deferPlayPresentation) return null;
   if (intent.kind === "activate-ability") {
+    if (intent.deferActivationPresentation) return null;
     return new Set([
       ...intent.pitchInstanceIds,
       ...(intent.alternativeCostCardInstanceIds ?? []),

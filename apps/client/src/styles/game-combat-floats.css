@@ -606,6 +606,42 @@
   z-index: 20;
   pointer-events: none;
 }
+.soul-pip {
+  top: -7px;
+  right: -7px;
+  left: auto;
+  width: 32px;
+  height: 32px;
+  transform: none;
+  border: 1px solid #fff8d199;
+  background: #17100af2;
+  box-shadow: 0 2px 7px #000d;
+  opacity: 1;
+}
+.soul-pip-icon {
+  width: 72%;
+  height: 72%;
+  filter: invert(91%) sepia(18%) saturate(1084%) hue-rotate(350deg) brightness(103%)
+    drop-shadow(0 1px 2px #000c);
+}
+.soul-pip-count {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding-inline: 3px;
+  border: 1px solid #fff8d1aa;
+  border-radius: 999px;
+  background: #17100af2;
+  color: #fff8d1;
+  font-size: 11px;
+  line-height: 1;
+  text-shadow: 0 1px 3px #000;
+}
 
 /* A weapon with at least two remaining turn activations shows one green dot
    per use. The indicator disappears once only the ordinary final use remains. */

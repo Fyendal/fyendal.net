@@ -471,12 +471,11 @@ export const MIGRATIONS: Migration[] = [
       candidate_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       ordinal INTEGER NOT NULL CHECK (ordinal >= 0),
       attempted BOOLEAN NOT NULL DEFAULT FALSE,
-      skipped BOOLEAN NOT NULL DEFAULT FALSE,
       PRIMARY KEY (starter_user_id, candidate_user_id),
       UNIQUE (starter_user_id, ordinal)
     );
     CREATE INDEX pending_bot_candidates_next_idx
-      ON pending_bot_start_candidates(starter_user_id, attempted, skipped, ordinal);
+      ON pending_bot_start_candidates(starter_user_id, attempted, ordinal);
 
     CREATE TABLE matchmaking_offers (
       room_code TEXT PRIMARY KEY REFERENCES rooms(code) ON DELETE CASCADE,
@@ -487,6 +486,23 @@ export const MIGRATIONS: Migration[] = [
     );
     CREATE UNIQUE INDEX matchmaking_offer_pair_idx
       ON matchmaking_offers(first_user_id, second_user_id);`,
+  },
+  {
+    version: 27,
+    sql: `ALTER TABLE pending_bot_start_candidates
+      ADD COLUMN skipped BOOLEAN NOT NULL DEFAULT FALSE;
+    DROP INDEX pending_bot_candidates_next_idx;
+    CREATE INDEX pending_bot_candidates_next_idx
+      ON pending_bot_start_candidates(starter_user_id, attempted, skipped, ordinal);`,
+  },
+  {
+    version: 28,
+    // Early local applications of v26 briefly included this FK. Built-in
+    // precon ids are registry-backed and intentionally have no decks row.
+    sql: `ALTER TABLE pending_bot_starts
+      DROP CONSTRAINT IF EXISTS pending_bot_starts_deck_id_fkey;
+    ALTER TABLE pending_bot_starts
+      DROP CONSTRAINT IF EXISTS pending_bot_starts_deck_id_fk;`,
   },
 ];
 

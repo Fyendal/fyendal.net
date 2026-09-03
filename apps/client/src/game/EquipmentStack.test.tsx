@@ -89,6 +89,8 @@ describe("EquipmentStack", () => {
       underCardMotionLocation: { kind: "soul", seat: 0 },
       highlighted: true,
       selected: true,
+      soulCount: soul.length,
+      soulCountLabel: "2 cards in soul",
       onClick: () => undefined,
     }));
 
@@ -97,9 +99,23 @@ describe("EquipmentStack", () => {
     expect(html.indexOf('data-cardid="MON063"')).toBeLessThan(html.indexOf('data-cardid="MON031"'));
     expect(html.match(/card-highlight/g)).toHaveLength(1);
     expect(html.match(/card-selected/g)).toHaveLength(1);
-    expect(html).toContain('class="pip pile-pip equipment-stack-pip">2</span>');
+    expect(html).toContain('class="pip pile-pip equipment-stack-pip soul-pip"');
+    expect(html).toContain('aria-label="2 cards in soul"');
+    expect(html).toContain('src="/icons/soul.svg" width="24" height="24"');
+    expect(html).toContain('class="soul-pip-count">2</span>');
     expect(html).toContain('data-motion-card="0:board:10"');
     expect(html).toContain('data-motion-card="0:soul:11"');
     expect(html).toContain('data-motion-card="0:soul:12"');
+  });
+
+  it("omits the hero soul icon at zero", () => {
+    const html = renderToStaticMarkup(createElement(EquipmentStack, {
+      card: { instanceId: 20, cardId: "MON031", owner: 0 },
+      soulCount: 0,
+      soulCountLabel: "0 cards in soul",
+    }));
+
+    expect(html).not.toContain("soul-pip");
+    expect(html).not.toContain("0 cards in soul");
   });
 });

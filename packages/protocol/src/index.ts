@@ -470,11 +470,12 @@ function decodeGameIntentValue(value: unknown): value is GameIntent {
         && optional(intent.alternativeCostCardInstanceIds, instanceIds)
         && additionalCostSelection(intent.additionalCostSelection);
     case "activate-ability":
-      return exactKeys(intent, ["kind", "sourceInstanceId", "pitchInstanceIds", "pitchRequired", "abilityIndex", "targetAllyId", "alternativeCostCardInstanceIds"], ["kind", "sourceInstanceId", "pitchInstanceIds"])
+      return exactKeys(intent, ["kind", "sourceInstanceId", "pitchInstanceIds", "pitchRequired", "abilityIndex", "targetAllyId", "alternativeCostCardInstanceIds", "deferActivationPresentation"], ["kind", "sourceInstanceId", "pitchInstanceIds"])
         && instanceId(intent.sourceInstanceId) && instanceIds(intent.pitchInstanceIds)
         && optional(intent.pitchRequired, nonNegativeInteger)
         && (intent.abilityIndex === undefined || (nonNegativeInteger(intent.abilityIndex) && intent.abilityIndex <= 32))
         && target(intent.targetAllyId)
+        && presenceFlag(intent.deferActivationPresentation)
         && optional(intent.alternativeCostCardInstanceIds, instanceIds);
     case "defend":
       return exactKeys(intent, ["kind", "instanceIds", "pitchInstanceIds"], ["kind", "instanceIds"])

@@ -153,6 +153,32 @@ describe("optimistic interaction projection", () => {
     }));
   });
 
+  it("does not move activation costs before a pre-activation choice", () => {
+    const hero: CardView = { instanceId: 100, cardId: "DTD005", owner: 0 };
+    const pitch: CardView = { instanceId: 21, cardId: "WTR171", owner: 0 };
+    const view = game(player(0, {
+      heroCardId: hero.cardId,
+      heroInstanceId: hero.instanceId,
+      hand: [pitch],
+      handCount: 1,
+    }));
+
+    const projection = optimisticInteractionView(view, 0, pending({
+      kind: "activate-ability",
+      sourceInstanceId: hero.instanceId,
+      abilityIndex: 0,
+      pitchInstanceIds: [pitch.instanceId],
+      deferActivationPresentation: true,
+    }));
+
+    expect(projection.view).toBe(view);
+    expect(projection.predictsSemanticTransition).toBe(false);
+    expect(projection.view?.players[0]?.hand).toEqual([pitch]);
+    expect(projection.view?.players[0]?.pitch).toEqual([]);
+    expect(projection.view?.stack).toEqual([]);
+    expect(detectGameMotionEvents(view, projection.view!)).toEqual([]);
+  });
+
   it("presents an attack action in the attack stack slot", () => {
     const attack: CardView = { instanceId: 25, cardId: "WTR006", owner: 0, attack: 9 };
     const view = game(player(0, { hand: [attack], handCount: 1 }));
