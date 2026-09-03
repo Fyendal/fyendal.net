@@ -1483,7 +1483,19 @@ function destroyItemOnHit(): CardScript {
 Object.assign(sea, {
   "riches of trōpal-dhani|2": { triggers: [{ event: "card-pitched", sourceZone: "pitch", label: "Create a Gold token", condition: (ctx, pitched) => pitched?.instanceId === ctx.self.instanceId, effect(ctx: ScriptCtx) { createGold(ctx); } }] },
   "puffin, hightail|0": sea["puffin|0"]!,
-  "polly cranka|0": { activated: { cost: 0, isAttack: false, goAgain: true, tap: true, banishSelfCost: true, onActivate(ctx: ScriptCtx) { ctx.createToken("SEA003"); } } },
+  "polly cranka|0": {
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: true,
+      tap: true,
+      banishSelfCost: true,
+      onActivate(ctx: ScriptCtx) {
+        ctx.setCardCounter(ctx.self.instanceId, "steam", 1);
+        ctx.settleCard(ctx.self.instanceId);
+      },
+    },
+  },
   "golden skywarden|2": {
     onDefend: requestSkywardenGalvanize,
     onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook !== "skywarden" || option === "pass") return; const item = ctx.player(ctx.seat).board.find((card) => card.instanceId === Number(option)); if (!item || !ctx.destroyPermanent(item.instanceId)) return; ctx.addCardTempDefense(ctx.self.instanceId, 1); if (named(ctx, item, "Golden Cog")) { createGold(ctx); requestSkywardenGalvanize(ctx); } },

@@ -207,6 +207,30 @@ describe("ROS — Earth heroes and Decompose", () => {
 });
 
 describe("ROS — Lightning and Runeblade", () => {
+  it("Current Funnel gives the next action card go again", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["current funnel|3", "wounding blow|1"],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+
+    g.play("current funnel|3")
+      .blockWith()
+      .settle()
+      .expectAP(0, 1)
+      .play("wounding blow|1");
+
+    expect(projectStateFor(g.state, 0).chain.at(-1)).toMatchObject({
+      goAgain: true,
+    });
+
+    g.blockWith().settle().expectAP(0, 1);
+  });
+
   it("Spellbound Creepers and Machinations stack their action points and give the next Runeblade attack go again", () => {
     const g = scenario({
       seats: [

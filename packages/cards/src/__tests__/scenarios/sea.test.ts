@@ -209,6 +209,48 @@ describe("SEA — High Seas heroes and cogs", () => {
     expect(projectStateFor(g.state, 1).pendingDecision?.promptMessage).toBeUndefined();
   });
 
+  it("Polly Cranka returns to its owner tapped with steam and offers Crank", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", board: ["polly cranka|0"] },
+        { hero: "dorinthea" },
+      ],
+    });
+    const polly = g.state.players[0]!.board.find(
+      (card) => functionalKeyOf(cardData[card.cardId]!) === "polly cranka|0",
+    )!;
+    polly.owner = 1;
+
+    g.activate("polly cranka|0", { settle: false })
+      .expectInZone(1, "polly cranka|0", "banish")
+      .passPriority()
+      .passPriority();
+
+    const returned = g.state.players[1]!.board.find(
+      (card) => card.instanceId === polly.instanceId,
+    );
+    expect(returned).toMatchObject({
+      instanceId: polly.instanceId,
+      owner: 1,
+      tapped: true,
+      counters: { steam: 1 },
+    });
+    expect(g.state.players[0]!.board).not.toContainEqual(
+      expect.objectContaining({ instanceId: polly.instanceId }),
+    );
+    expect(g.state.pendingDecision).toMatchObject({
+      player: 1,
+      chooseHook: "engine-crank",
+      defaultOption: "yes",
+    });
+
+    g.chooseOption("yes");
+    expect(g.state.players[1]!.board.find(
+      (card) => card.instanceId === polly.instanceId,
+    )?.counters?.steam ?? 0).toBe(0);
+    expect(g.state.players[1]!.flags.crankedThisTurn).toBe(true);
+  });
+
   it("Cog in the Machine offers Crank for both Golden Cogs before its tap choice", () => {
     const g = scenario({
       seats: [

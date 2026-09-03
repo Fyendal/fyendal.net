@@ -472,6 +472,14 @@ export function noteCardPlayed(
     }
   }
   state.modifiers = state.modifiers.filter((m) => !consumedNextPlay.has(m.id));
+  if (isAction) {
+    for (const key of Object.keys(player.flags)) {
+      if (key.startsWith("lastActionWasType:")) delete player.flags[key];
+    }
+    for (const type of cardTypesOf(state, card)) {
+      player.flags[`lastActionWasType:${type}`] = true;
+    }
+  }
   if (isAction && (d.subtypes ?? []).includes("attack")) {
     const tags = new Set([
       ...(d.classes ?? []),
