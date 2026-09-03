@@ -1906,6 +1906,7 @@
   "engine.log.card.turned.facedown.graveyard.watery.grave": "{card} is turned face down in its graveyard (Watery Grave)",
   "engine.log.cards.drawn": "{player} draws {count, plural, one {# card} other {# cards}}",
   "engine.log.cards.revealed": "{hero} reveals {cards}",
+  "engine.log.cards.revealed.from.hand": "{hero} reveals {cards} from hand",
   "engine.log.cards.transform.into": "{cards} transforms into {result}",
   "engine.log.clash.reveals": "{hero} reveals {card} ({power} power)",
   "engine.log.clash.tie": "The clash is a tie — no winner",

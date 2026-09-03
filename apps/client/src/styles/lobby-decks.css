@@ -542,6 +542,15 @@
 }
 
 @media (max-width: 700px) {
+  .card-pool-segments button::after {
+    box-sizing: border-box;
+    width: min(220px, calc(100vw - 24px));
+    max-width: none;
+  }
+  .card-pool-segments button:last-of-type::after {
+    right: auto;
+    left: -200%;
+  }
   .deck-library-panel { padding-bottom: 18px; }
   .mobile-deck-format-picker {
     position: relative;

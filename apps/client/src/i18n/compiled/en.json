@@ -17006,6 +17006,24 @@
       "value": "cards"
     }
   ],
+  "engine.log.cards.revealed.from.hand": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " reveals "
+    },
+    {
+      "type": 1,
+      "value": "cards"
+    },
+    {
+      "type": 0,
+      "value": " from hand"
+    }
+  ],
   "engine.log.cards.transform.into": [
     {
       "type": 1,

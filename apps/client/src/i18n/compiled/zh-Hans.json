@@ -16382,6 +16382,20 @@
       "value": "cards"
     }
   ],
+  "engine.log.cards.revealed.from.hand": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 展示手牌中的 "
+    },
+    {
+      "type": 1,
+      "value": "cards"
+    }
+  ],
   "engine.log.cards.transform.into": [
     {
       "type": 1,

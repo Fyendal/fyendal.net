@@ -536,7 +536,17 @@ export const hnt: Record<string, CardScript> = {
   "red alert boots|0": { modifyDefense: (ctx) => ctx.getFlag("link", "reactionPlayedOrActivated") ? 1 : 0 },
   "starting point|0": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "attack-reaction", destroySelfCost: true, canActivate: (ctx) => ctx.getFlag("link", `reactionBySeat:${ctx.seat}`) === true, onActivate: (ctx) => ctx.grantGoAgain() } },
   ...pitchSeries("to the point", (pitch) => ({ canPlay: currentDaggerAttack, onPlay(ctx) { ctx.addModifier({ scope: "chain-link", attack: 4 - pitch + (isMarked(ctx, opponentSeat(ctx)) ? 1 : 0) }); } })),
-  ...pitchSeries("cut from the same cloth", (pitch) => ({ onPlay(ctx) { const target = opponentSeat(ctx); const hand = ctx.player(target).hand; ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(ctx.player(target).heroCardId).name} reveals ${hand.map((card) => ctx.cardData(card.cardId).name).join(", ") || "an empty hand"}`, "card.log.hnt.hand.revealed", { target: { kind: "player", seat: target }, cards: hand.map((card) => ctx.cardData(card.cardId).name).join(", ") || "an empty hand" }, { kind: "cards-revealed", cards: hand.map((card) => ({ cardId: card.cardId, ownerSeat: target })), sourceZone: "hand" })); if (hand.some((card) => ctx.cardData(card.cardId).cardType === "attack-reaction")) markHero(ctx, target); buffNextAttack(ctx, { attack: 5 - pitch, appliesToSubtype: "dagger" }); } })),
+  ...pitchSeries("cut from the same cloth", (pitch) => ({
+    onPlay(ctx) {
+      const target = opponentSeat(ctx);
+      const hand = ctx.player(target).hand;
+      const revealed = hand.length === 0 || ctx.revealCards(hand.map((card) => card.instanceId), target);
+      if (revealed && hand.some((card) => ctx.cardData(card.cardId).cardType === "attack-reaction")) {
+        markHero(ctx, target);
+      }
+      buffNextAttack(ctx, { attack: 5 - pitch, appliesToSubtype: "dagger" });
+    },
+  })),
   ...pitchSeries("incision", (pitch) => daggerReaction(4 - pitch)),
   "scar tissue|2": daggerReaction(2, { mark: true }),
   "scar tissue|3": daggerReaction(1, { mark: true }),
@@ -549,14 +559,9 @@ export const hnt: Record<string, CardScript> = {
   "sound the alarm|1": {
     onAttackDeclared(ctx) {
       if (ctx.link?.targetAllyId !== undefined) return;
-      const hand = ctx.player(opponentSeat(ctx)).hand;
-      ctx.logPublic(localizedCardLog(
-        ctx,
-        `${ctx.cardData(ctx.player(opponentSeat(ctx)).heroCardId).name} reveals their hand`,
-        "card.log.hnt.hand.revealed.generic",
-        { target: { kind: "player", seat: opponentSeat(ctx) } },
-        { kind: "cards-revealed", cards: hand.map((card) => ({ cardId: card.cardId, ownerSeat: opponentSeat(ctx) })), sourceZone: "hand" },
-      ));
+      const target = opponentSeat(ctx);
+      const hand = ctx.player(target).hand;
+      if (hand.length > 0 && !ctx.revealCards(hand.map((card) => card.instanceId), target)) return;
       if (!hand.some((card) => ctx.cardData(card.cardId).cardType === "attack-reaction")) return;
       const reactions = ctx.player(ctx.seat).deck.filter((card) => ctx.cardData(card.cardId).cardType === "defense-reaction");
       if (reactions.length) ctx.requestCardChoice("sound-alarm", decisionPrompt("Search for a defense reaction?", "card.hnt.defensereaction.search", { optionMessages: commonOptionMessages("pass") }), ["pass", ...reactions.map((card) => card.instanceId)]);

@@ -69,16 +69,27 @@ function revealCards(
   });
   if (cards.length === 0) return false;
   const hero = state.players[revealingSeat] as PlayerState;
+  const sourceZone = (["hand", "deck", "inventory"] as const).find((zone) =>
+    cards.every((card) => (hero[zone] ?? []).some((candidate) => candidate.instanceId === card.instanceId))
+  );
+  const fromHand = sourceZone === "hand";
   logPublic(
     state,
     // the ⟦id⟧ tags let clients preview the exact printing of each reveal
     gameLogMessage(
-      `${nameOf(state, hero.heroCardId)} reveals ${cards.map((card) => `${nameOf(state, card.cardId)}⟦${card.cardId}⟧`).join(", ")}`,
-      "engine.log.cards.revealed",
+      `${nameOf(state, hero.heroCardId)} reveals ${cards.map((card) => `${nameOf(state, card.cardId)}⟦${card.cardId}⟧`).join(", ")}${fromHand ? " from hand" : ""}`,
+      fromHand ? "engine.log.cards.revealed.from.hand" : "engine.log.cards.revealed",
       {
         hero: logCardValue(hero.heroCardId),
         cards: cards.map((card) => nameOf(state, card.cardId)).join(", "),
       },
+      sourceZone === undefined
+        ? undefined
+        : {
+            kind: "cards-revealed",
+            cards: cards.map((card) => ({ cardId: card.cardId, ownerSeat: card.owner })),
+            sourceZone,
+          },
     ),
   );
   for (const controller of state.players as PlayerState[]) {
