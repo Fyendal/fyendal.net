@@ -28,7 +28,7 @@ function sideRailProps(
     spectating: false,
     spectatorCount: 0,
     opponentConnected: true,
-    connected: true,
+    connectionIssueVisible: false,
     error: null,
     winnerText: null,
     replaying: false,
@@ -165,6 +165,25 @@ describe("opponent connection status", () => {
     }));
 
     expect(html).not.toContain("opponent disconnected");
+  });
+});
+
+describe("local connection status", () => {
+  it("shows a connection warning only after the store exposes the delayed issue", () => {
+    const quiet = renderSideRail(sideRailProps({ connectionIssueVisible: false }));
+    const visible = renderSideRail(sideRailProps({ connectionIssueVisible: true }));
+
+    expect(quiet).not.toContain("connection lost");
+    expect(visible.match(/connection lost — reconnecting…/g)).toHaveLength(2);
+  });
+
+  it("hides the delayed connection warning while viewing a replay", () => {
+    const html = renderSideRail(sideRailProps({
+      connectionIssueVisible: true,
+      replaying: true,
+    }));
+
+    expect(html).not.toContain("connection lost");
   });
 });
 

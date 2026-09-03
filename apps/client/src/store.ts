@@ -61,6 +61,8 @@ import { createErrorController } from "./store/errorController.js";
 
 let ws: WebSocket | null = null;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+let reconnectNoticeTimer: ReturnType<typeof setTimeout> | null = null;
+const RECONNECT_NOTICE_GRACE_MS = 5_000;
 let reconnectAttempts = 0;
 let emoteSequence = 0;
 let viewUpdateSequence = 0;
@@ -84,6 +86,8 @@ removeUnsupportedLocalReplays(localStorage);
 import.meta.hot?.dispose(() => {
   const orphaned = ws;
   ws = null;
+  if (reconnectNoticeTimer) clearTimeout(reconnectNoticeTimer);
+  reconnectNoticeTimer = null;
   orphaned?.close();
 });
 
@@ -169,7 +173,22 @@ export const useStore = create<StoreState>((set, get) => {
     resetRoomCommandPipeline();
   }
 
+  function clearReconnectNotice(): void {
+    if (reconnectNoticeTimer) clearTimeout(reconnectNoticeTimer);
+    reconnectNoticeTimer = null;
+    if (get().connectionIssueVisible) set({ connectionIssueVisible: false });
+  }
+
+  function scheduleReconnectNotice(): void {
+    if (reconnectNoticeTimer || get().connectionIssueVisible || !get().roomCode) return;
+    reconnectNoticeTimer = setTimeout(() => {
+      reconnectNoticeTimer = null;
+      if (!get().connected && get().roomCode) set({ connectionIssueVisible: true });
+    }, RECONNECT_NOTICE_GRACE_MS);
+  }
+
   function closeCurrentSocket(): void {
+    clearReconnectNotice();
     const socket = ws;
     ws = null;
     connectionEpoch += 1;
@@ -272,7 +291,8 @@ export const useStore = create<StoreState>((set, get) => {
     socket.onopen = () => {
       if (ws !== socket || connectionEpoch !== epoch) return; // superseded by a newer socket
       reconnectAttempts = 0;
-      set({ connected: true });
+      clearReconnectNotice();
+      set({ connected: true, connectionIssueVisible: false });
       // authenticate the socket before anything else, when we have a token
       authSocketIfNeeded();
       const cbs = pendingOpen;
@@ -289,10 +309,12 @@ export const useStore = create<StoreState>((set, get) => {
       resetRoomCommandPipeline();
       set({ connected: false });
       if (roomEntryPending && roomEntryRetryable) {
+        scheduleReconnectNotice();
         scheduleReconnect();
         return;
       }
       if (failPendingRoomEntry("connection to room failed")) return;
+      scheduleReconnectNotice();
       scheduleReconnect();
     };
     socket.onerror = () => {
@@ -812,8 +834,9 @@ export const useStore = create<StoreState>((set, get) => {
           });
           if (ws) ws.close();
           else scheduleReconnect();
-          if (staleVersion) errors.clear();
-          else errors.show(msg.message);
+          // Recovery is automatic. Keep both expected stale-version reloads
+          // and post-commit resyncs quiet unless the reconnect grace expires.
+          errors.clear();
           break;
         }
         // The authoritative room no longer exists: drop only its stored
@@ -1151,6 +1174,7 @@ export const useStore = create<StoreState>((set, get) => {
     leave: () => {
       // An explicit Leave click wins over an in-flight practice handoff.
       pendingBotRoom = null;
+      clearReconnectNotice();
       if (reconnectTimer) clearTimeout(reconnectTimer);
       reconnectTimer = null;
       reconnectAttempts = 0;

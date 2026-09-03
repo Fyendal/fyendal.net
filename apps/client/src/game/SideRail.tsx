@@ -184,7 +184,7 @@ export function SideRail({
   spectating,
   spectatorCount,
   opponentConnected,
-  connected,
+  connectionIssueVisible,
   error,
   winnerText,
   replaying,
@@ -229,7 +229,7 @@ export function SideRail({
   spectating: boolean;
   spectatorCount: number;
   opponentConnected: boolean;
-  connected: boolean;
+  connectionIssueVisible: boolean;
   error: string | null;
   winnerText: string | null;
   replaying: boolean;
@@ -340,7 +340,7 @@ export function SideRail({
       </nav>
 
       <div className="mobile-game-alerts" aria-live="polite">
-        {!replaying && !connected ? (
+        {!replaying && connectionIssueVisible ? (
           <div className="toast">{intl.formatMessage({ id: "game.connection.lost" })}</div>
         ) : null}
         {showOpponentDisconnected ? (
@@ -425,7 +425,7 @@ export function SideRail({
         </div>
       )}
 
-      {!replaying && !connected && (
+      {!replaying && connectionIssueVisible && (
         <div className="toast">{intl.formatMessage({ id: "game.connection.lost" })}</div>
       )}
       {showOpponentDisconnected && (
