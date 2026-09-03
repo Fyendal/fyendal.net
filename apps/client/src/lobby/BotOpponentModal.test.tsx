@@ -1,7 +1,12 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { BotOpponentModal } from "./BotOpponentModal.js";
 import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
+import { BOT_MATCHMAKING_PREFERENCE_STORAGE_KEY } from "../storage.js";
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 describe("BotOpponentModal", () => {
   it("offers Ira, Hala, Cindra, Jarl, and Starvo in a focused opponent dialog", () => {
@@ -52,5 +57,22 @@ describe("BotOpponentModal", () => {
     expect(html).toContain("Flattering Showman");
     expect(html).toContain("Defensive");
     expect(html).not.toContain("Scarlet Revenger");
+  });
+
+  it("restores the saved matchmaking checkbox preference", () => {
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => key === BOT_MATCHMAKING_PREFERENCE_STORAGE_KEY
+        ? JSON.stringify({ version: 1, searchForPlayer: false })
+        : null,
+      setItem: vi.fn(),
+    });
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <BotOpponentModal format="cc" onSelect={vi.fn()} onClose={vi.fn()} />
+      </TestI18nProvider>,
+    );
+
+    expect(html).toContain('type="checkbox"');
+    expect(html).not.toContain('type="checkbox" checked=""');
   });
 });

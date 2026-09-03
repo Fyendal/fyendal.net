@@ -943,7 +943,36 @@ button.new-player-import-card:focus-visible .new-player-card-art { transform: sc
   .new-player-card-title {
     font-size: 18px;
   }
-  .new-player-card-header { top: 12px; left: 12px; max-width: calc(100% - 24px); }
+  .new-player-card-header {
+    top: 12px;
+    left: 12px;
+    max-width: calc(100% - 24px);
+    gap: 7px;
+  }
+  .home-card-pool-control { width: 186px; }
+  .home-card-pool-control .card-pool-segments {
+    padding: 1px;
+    border-color: #644b29;
+    border-radius: 5px;
+    background: #100a06d9;
+    box-shadow: 0 2px 8px #0007;
+  }
+  .home-card-pool-control .card-pool-segments::before {
+    top: 1px;
+    bottom: 1px;
+    left: 1px;
+    width: calc((100% - 2px) / 3);
+    border-radius: 3px;
+    background: linear-gradient(180deg, #a83b31, #76231e);
+    box-shadow: inset 0 1px 0 #ff9a7c38, 0 1px 4px #0007;
+  }
+  .home-card-pool-control .card-pool-segments button {
+    min-height: 26px;
+    padding: 4px;
+    color: #b9aa8c;
+    font-size: 9px;
+    letter-spacing: .65px;
+  }
 }
 
 .room-section + .room-section { margin-top: 24px; }

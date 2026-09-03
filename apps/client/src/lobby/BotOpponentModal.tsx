@@ -2,6 +2,10 @@ import { useState } from "react";
 import { useIntl } from "react-intl";
 import type { BotOpponent } from "@fyendal/shared";
 import type { ConstructedFormat } from "../domain.js";
+import {
+  loadBotMatchmakingPreference,
+  saveBotMatchmakingPreference,
+} from "../storage.js";
 import { heroImageUrl } from "./heroImage.js";
 
 interface BotOption {
@@ -85,7 +89,9 @@ export function BotOpponentModal(props: {
 }) {
   const intl = useIntl();
   const bots = BOTS[props.format];
-  const [searchForPlayer, setSearchForPlayer] = useState(true);
+  const [searchForPlayer, setSearchForPlayer] = useState(() =>
+    typeof localStorage === "undefined" ? true : loadBotMatchmakingPreference(localStorage)
+  );
   return (
     <div
       className="modal-backdrop bot-opponent-backdrop"
@@ -110,7 +116,13 @@ export function BotOpponentModal(props: {
           <input
             type="checkbox"
             checked={searchForPlayer}
-            onChange={(event) => setSearchForPlayer(event.target.checked)}
+            onChange={(event) => {
+              const enabled = event.target.checked;
+              setSearchForPlayer(enabled);
+              if (typeof localStorage !== "undefined") {
+                saveBotMatchmakingPreference(localStorage, enabled);
+              }
+            }}
           />
           <span>
             <strong>{intl.formatMessage({ id: "lobby.bot.searchForPlayer" })}</strong>
