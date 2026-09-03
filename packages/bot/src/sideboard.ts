@@ -577,10 +577,11 @@ export function iraPresentation(): PresentedDeck {
 
 /**
  * Present the complete 65-card Michael Hamilton Starvo list from TCGplayer's
- * Living Legend Library. This intentionally overpowered CC practice opponent
- * keeps the published main intact. The article calls out Lightning Greaves for
- * Illusionist, while arcane opponents get the list's Lantern, Heart, and
- * Greaves package; physical opponents face Stalagmite and Tunic.
+ * Living Legend Library. This CC practice opponent lets players challenge the
+ * best deck in FAB history and keeps the published main intact. The article
+ * calls out Lightning Greaves for Illusionist, while arcane opponents get the
+ * list's Lantern, Heart, and Greaves package; physical opponents face
+ * Stalagmite and Tunic.
  * Source: https://www.tcgplayer.com/content/article/Living-Legend-Library-Bravo-Star-of-the-Show/20ef7f41-bec2-4042-bb76-3a4d723bcc90/
  */
 export function starvoPresentationFor(

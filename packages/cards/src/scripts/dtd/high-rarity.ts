@@ -188,7 +188,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
   "empyrean rapture|0": {
     activated: { cost: 1, isAttack: false, goAgain: false, timing: "instant", oncePerTurn: true, label: "Gain ward 1", onActivate(ctx) { ctx.grantCardKeyword(ctx.self.instanceId, "ward 1"); } },
     onCardPutIntoSoul(ctx, card) {
-      if (ctx.state.phase === "action" && data(ctx, card).name.toLowerCase().includes("herald")) {
+      if (duringActionPhase(ctx) && data(ctx, card).name.toLowerCase().includes("herald")) {
         ctx.setPlayerFlag(ctx.seat, "empyreanHeroDiscount", true);
       }
     },

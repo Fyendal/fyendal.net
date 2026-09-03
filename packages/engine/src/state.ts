@@ -735,8 +735,9 @@ export interface PendingDecisionState extends PendingDecision {
   sourceInstanceId?: number;
   /** Hook key routed back to the owning script's choice callback. */
   chooseHook?: string;
-  /** Ordered decisions deferred while an entering permanent's Crank choice
-   * is being answered. Internal only; projection exposes the current choice. */
+  /** Ordered decisions deferred while another scripted choice from the same
+   * resolving effect is being answered. Internal only; projection exposes the
+   * current choice. */
   followUpDecisions?: PendingDecisionState[];
   /** Token-effect provenance inherited when one card delegates a scripted
    * choice to another card, such as Edict of Steel using Reverent Rerebrace. */
