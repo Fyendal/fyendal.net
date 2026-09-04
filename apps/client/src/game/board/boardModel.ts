@@ -37,6 +37,7 @@ export function abilityLabelForSource(
 export function deriveBoardLegalState(
   actionCandidates: readonly GameIntent[],
   legal: readonly GameIntent[],
+  actionsDisabled = false,
 ): BoardLegalState {
   const playableHand = new Set<number>();
   const playableArsenal = new Set<number>();
@@ -46,11 +47,13 @@ export function deriveBoardLegalState(
   let canPass = false;
   let canCloseChain = false;
 
-  for (const intent of actionCandidates) {
-    if (intent.kind === "play-card") playableHand.add(intent.instanceId);
-    if (intent.kind === "play-from-arsenal") playableArsenal.add(intent.instanceId);
-    if (intent.kind === "play-from-zone") playableZones.set(intent.instanceId, intent.zone);
-    if (intent.kind === "activate-ability") activatable.add(intent.sourceInstanceId);
+  if (!actionsDisabled) {
+    for (const intent of actionCandidates) {
+      if (intent.kind === "play-card") playableHand.add(intent.instanceId);
+      if (intent.kind === "play-from-arsenal") playableArsenal.add(intent.instanceId);
+      if (intent.kind === "play-from-zone") playableZones.set(intent.instanceId, intent.zone);
+      if (intent.kind === "activate-ability") activatable.add(intent.sourceInstanceId);
+    }
   }
   for (const intent of legal) {
     if (intent.kind === "stage-defenders") {

@@ -33,6 +33,30 @@ describe("board legal projection", () => {
     expect(result.canCloseChain).toBe(true);
   });
 
+  it("disables every playable card and activated ability while a room command is pending", () => {
+    const candidates: GameIntent[] = [
+      { kind: "play-card", instanceId: 1, pitchInstanceIds: [] },
+      { kind: "play-from-arsenal", instanceId: 2, pitchInstanceIds: [] },
+      { kind: "play-from-zone", instanceId: 3, zone: "banish", pitchInstanceIds: [] },
+      { kind: "activate-ability", sourceInstanceId: 4, abilityIndex: 0, pitchInstanceIds: [] },
+    ];
+    const legal: GameIntent[] = [
+      { kind: "stage-defenders", instanceIds: [8] },
+      { kind: "pass" },
+      { kind: "close-chain" },
+    ];
+
+    const result = deriveBoardLegalState(candidates, legal, true);
+
+    expect([...result.playableHand]).toEqual([]);
+    expect([...result.playableArsenal]).toEqual([]);
+    expect([...result.playableZones]).toEqual([]);
+    expect([...result.activatable]).toEqual([]);
+    expect([...result.stageableDefenders]).toEqual([8]);
+    expect(result.canPass).toBe(true);
+    expect(result.canCloseChain).toBe(true);
+  });
+
   it("finds ability labels on defending combat-chain cards", () => {
     const player = {
       heroInstanceId: 1,

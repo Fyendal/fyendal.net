@@ -1208,6 +1208,8 @@ export function scoreDefenseIntentWithTrace(
     Object.values(me.equipment).filter((card): card is CardView => !!card).map((card) => card.instanceId),
   );
   const selectedEquipment = chosen.filter((card) => equipmentIds.has(card.instanceId));
+  const handIds = new Set(me.hand.map((card) => card.instanceId));
+  const openingDefense = isOpeningTurnDefense(input);
   const stagedIds = new Set(
     input.view.pendingDecision?.kind === "defend"
       ? input.view.pendingDecision.stagedCards?.map((card) => card.instanceId) ?? []
@@ -1229,7 +1231,14 @@ export function scoreDefenseIntentWithTrace(
     stopsHit,
     onHit,
   };
-  const permission = model.defensePermission?.(candidate) ?? "allow";
+  // The defender's opening hand is replaced after turn one, so an offensive
+  // preservation veto from a hero policy must not stop those cards blocking.
+  // Keep lethal and non-hand restrictions under the hero policy's control.
+  const modelPermission = model.defensePermission?.(candidate) ?? "allow";
+  const permission = openingDefense && !lethal &&
+      chosen.every((card) => handIds.has(card.instanceId)) && modelPermission === "forbid"
+    ? "allow"
+    : modelPermission;
   if (permission === "forbid") {
     return {
       score: -1_000_000,
@@ -1249,12 +1258,16 @@ export function scoreDefenseIntentWithTrace(
     // chain. At that point score how best to complete the block rather than
     // treating the sunk equipment selection as a new strategic choice.
     if (stagedIds.has(card.instanceId)) return false;
-    if (lethal || isMidgameDurableArmor(card, input)) return false;
-    if (model.equipmentUseIsFree?.(card, input)) return false;
-    if (attackIsWeapon && isBladeBeckoner(card, input)) return false;
+    if (lethal) return false;
     // Early armor is justified by an on-hit or Wager only when the complete
     // defense actually stops that hit and therefore answers the effect.
     if (stopsHit && (meaningfulOnHit || link.wagered === true)) return false;
+    // Hand cards refill after the opening turn; do not spend fresh equipment
+    // to improve an otherwise nonlethal opening block.
+    if (openingDefense) return true;
+    if (isMidgameDurableArmor(card, input)) return false;
+    if (model.equipmentUseIsFree?.(card, input)) return false;
+    if (attackIsWeapon && isBladeBeckoner(card, input)) return false;
     return true;
   });
   if (protectedEquipment.length > 0) {
