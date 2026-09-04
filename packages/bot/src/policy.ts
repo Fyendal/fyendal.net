@@ -545,6 +545,42 @@ export function scoreBinaryChoice(
   return undefined;
 }
 
+/** Resolve cross-hero invariants before strategy-specific scoring. Shared
+ * policy may only return an intent already exposed by the engine. */
+export function chooseSharedPolicyIntent(input: BotPolicyInput): GameIntent | undefined {
+  const decision = input.view.pendingDecision;
+  if (!decision) return undefined;
+
+  const semanticAmount = decision.promptMessage?.id === "engine.decision.damage.arcane.barrier"
+    ? decision.promptMessage.values?.amount
+    : undefined;
+  const fallbackAmount = /arcane barrier: you would be dealt (\d+) arcane damage/i
+    .exec(decision.prompt)?.[1];
+  const incoming = typeof semanticAmount === "number"
+    ? semanticAmount
+    : fallbackAmount === undefined
+    ? undefined
+    : Number(fallbackAmount);
+  if (incoming === undefined || !Number.isSafeInteger(incoming) || incoming <= 0) {
+    return undefined;
+  }
+
+  const minimumToSurvive = incoming - input.view.players[input.seat].life + 1;
+  if (minimumToSurvive <= 0) return undefined;
+
+  const offered = input.legal.flatMap((intent) => {
+    if (intent.kind !== "choose") return [];
+    const match = /^pay (\d+)$/.exec(intent.optionId);
+    return match ? [{ intent, amount: Number(match[1]) }] : [];
+  });
+  const survivable = offered.filter(({ amount }) => amount >= minimumToSurvive);
+  if (survivable.length === 0) return undefined;
+
+  return survivable.reduce((best, candidate) =>
+    candidate.amount < best.amount ? candidate : best
+  ).intent;
+}
+
 export interface PlannedPrevention {
   amount: number;
   consumedIds: readonly number[];
@@ -1687,6 +1723,8 @@ export function enforceSpectraPolicy(input: BotPolicyInput, selected: GameIntent
 /** Deterministic projection-only baseline. Equal scores retain engine order. */
 export function chooseScoredIntent(input: BotPolicyInput, scorers: BotPolicyScorers): GameIntent {
   if (input.legal.length === 0) throw new Error("bot has no legal intents");
+  const shared = chooseSharedPolicyIntent(input);
+  if (shared) return shared;
   const requiredEquipment = requiredEquipmentStageIntent(input);
   if (requiredEquipment) return requiredEquipment;
   const own = ownCards(input);

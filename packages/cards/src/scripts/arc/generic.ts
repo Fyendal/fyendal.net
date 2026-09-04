@@ -98,7 +98,10 @@ function backAlleyBreakline(): CardScript {
       event: "card-moved-from-deck-by-effect",
       sourceZone: "any",
       label: "Gain 1 action point",
-      condition: (ctx, card) => card?.instanceId === ctx.self.instanceId,
+      condition: (ctx, card, eventContext) =>
+        card?.instanceId === ctx.self.instanceId &&
+        (eventContext?.effectSource === "action-card" ||
+          eventContext?.effectSource === "activated-ability"),
       effect: (ctx) => ctx.gainActionPoint(),
     }],
   };

@@ -17,6 +17,7 @@ import {
   nameOf,
 } from "./gameLog.js";
 import type { CardInstance, PlayerState } from "./state.js";
+import type { TriggerEventContext } from "./eventTypes.js";
 import {
   currentLink,
   findPermanent,
@@ -68,6 +69,7 @@ function enterGraveyard(
   card: CardInstance,
   from: string,
   causedBySeat?: number,
+  effectSource?: TriggerEventContext["effectSource"],
 ): void {
   const owner = state.players[card.owner] as PlayerState;
   if (dataOf(state, card.cardId).cardType === "token") return;
@@ -149,7 +151,7 @@ function enterGraveyard(
       "card-moved-from-deck-by-effect",
       card.owner,
       card,
-      { from, to: "graveyard", causedBySeat },
+      { from, to: "graveyard", causedBySeat, effectSource },
     );
   }
   scriptOf(state, card.cardId, card)?.onCardToGraveyard?.(
@@ -172,7 +174,8 @@ function enterGraveyard(
 
 /** Move a card to its owner's graveyard. */
 export function moveToGraveyard(state: GameStateInternal,
-  runtime: EngineRuntime, card: CardInstance, from = "chain", causedBySeat?: number): void {
+  runtime: EngineRuntime, card: CardInstance, from = "chain", causedBySeat?: number,
+  effectSource?: TriggerEventContext["effectSource"]): void {
   const script = scriptOf(state, card.cardId, card);
   const owner = state.players[card.owner] as PlayerState;
   const source = transitionZoneFromEngineZone(
@@ -226,7 +229,7 @@ export function moveToGraveyard(state: GameStateInternal,
     ceases ? null : transitionZone("graveyard", owner.seat),
     { from: sourcePrivate },
   );
-  enterGraveyard(state, runtime, card, from, causedBySeat);
+  enterGraveyard(state, runtime, card, from, causedBySeat, effectSource);
 }
 
 /** Destroy a permanent (equipment/aura/weapon); moves it to graveyard and fires onDestroyed. */
@@ -283,6 +286,21 @@ export function destroyPermanent(state: GameStateInternal,
     : p.weapons.some((candidate) => candidate.instanceId === card.instanceId)
       ? "weapon" as const
       : "board" as const;
+  // A permanent that attacked remains represented on its chain link while its
+  // arena object is live. Destruction moves that object outside the arena, so
+  // sever every matching chain representation before the physical card can be
+  // returned and become a new object (CR 3.0.9). Otherwise a close-of-chain
+  // instruction on the old attack can incorrectly affect the returned card.
+  for (const link of state.chain) {
+    if (
+      link.attackCardType !== "action" &&
+      link.flags.attackGone !== true &&
+      link.attackingCard.instanceId === card.instanceId
+    ) {
+      link.attackingCard = snapshotSerializable(link.attackingCard);
+      link.flags.attackGone = true;
+    }
+  }
   for (const [slot, eq] of Object.entries(p.equipment)) {
     if (eq?.instanceId === card.instanceId) {
       delete p.equipment[slot as keyof typeof p.equipment];
@@ -548,6 +566,7 @@ export function banishCard(
   instanceId: number,
   causedBySeat?: number,
   faceDown?: boolean,
+  effectSource?: TriggerEventContext["effectSource"],
 ): boolean {
   const applyBanishVisibility = (card: CardInstance): void => {
     if (faceDown === true) card.faceDown = true;
@@ -612,13 +631,13 @@ export function banishCard(
   if (fromArena) fireLeaveArena(state, runtime, owner.seat, card, "banish");
   applyBanishVisibility(card);
   enterBanish(state, runtime, card, fromZone, causedBySeat);
-  if (fromZone === "deck") {
+  if (fromZone === "deck" && !card.faceDown) {
     runtime.events.queueTriggeredEvent(
       state,
       "card-moved-from-deck-by-effect",
       owner.seat,
       card,
-      { from: "deck", to: "banish" },
+      { from: "deck", to: "banish", causedBySeat, effectSource },
     );
   }
   if (fromZone === "graveyard") {
@@ -701,6 +720,7 @@ export function putCardIntoSoul(
   runtime: EngineRuntime,
   instanceId: number,
   causedBySeat?: number,
+  effectSource?: TriggerEventContext["effectSource"],
 ): boolean {
   const fromResolving = removeFromStackResolution(state, instanceId);
   const link = currentLink(state);
@@ -741,7 +761,7 @@ export function putCardIntoSoul(
       "card-moved-from-deck-by-effect",
       found.owner.seat,
       found.card,
-      { from: "deck", to: "soul", causedBySeat },
+      { from: "deck", to: "soul", causedBySeat, effectSource },
     );
   }
   return true;

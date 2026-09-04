@@ -181,6 +181,63 @@ describe("MST — Ninja and generic", () => {
     g.play("orihon of mystic tenets|3", { pitch: ["wrecker romp|3"] }).expectHandSize(0, 3);
   });
 
+  it("Prismatic Leyline buffs only the next attack of each color", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: [
+            "prismatic leyline|2",
+            "head jab|1",
+            "head jab|2",
+            "head jab|3",
+            "head jab|2",
+          ],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("prismatic leyline|2")
+      .play("head jab|1")
+      .expectAttackValue(4)
+      .blockWith()
+      .settle()
+      .play("head jab|2")
+      .expectAttackValue(4)
+      .blockWith()
+      .settle()
+      .play("head jab|3")
+      .expectAttackValue(4)
+      .blockWith()
+      .settle()
+      .play("head jab|2")
+      .expectAttackValue(2);
+  });
+
+  it("Prismatic Leyline's next matching attack can be an ally attack", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          board: ["goldkiss rum|0", "wailer humperdinck|2"],
+          resources: 7,
+          hand: ["prismatic leyline|2", "saltwater swell|2"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("prismatic leyline|2")
+      .activate("goldkiss rum|0")
+      .activate("wailer humperdinck|2")
+      .expectAttackValue(13)
+      .blockWith()
+      .settle()
+      .play("saltwater swell|2")
+      .expectAttackValue(2);
+  });
+
   it("Aspect of Tiger triggers only after an attack action of its color", () => {
     const g = scenario({
       seats: [

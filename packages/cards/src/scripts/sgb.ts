@@ -487,13 +487,16 @@ export const sgb: Record<string, CardScript> = {
   "riggermortis|2": allyAttack(1),
   "swabbie|2": allyAttack(2),
 
-  // Back Alley Breakline — deck → graveyard by an effect: gain an action point
+  // Back Alley Breakline — a qualifying effect moves this face up from deck
   "back alley breakline|3": {
     triggers: [{
       event: "card-moved-from-deck-by-effect",
       sourceZone: "any",
       label: "Gain 1 action point",
-      condition: (ctx, card) => card?.instanceId === ctx.self.instanceId,
+      condition: (ctx, card, eventContext) =>
+        card?.instanceId === ctx.self.instanceId &&
+        (eventContext?.effectSource === "action-card" ||
+          eventContext?.effectSource === "activated-ability"),
       effect: (ctx) => ctx.gainActionPoint(),
     }],
   },
