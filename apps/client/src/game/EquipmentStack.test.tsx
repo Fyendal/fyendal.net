@@ -118,4 +118,38 @@ describe("EquipmentStack", () => {
     expect(html).not.toContain("soul-pip");
     expect(html).not.toContain("0 cards in soul");
   });
+
+  it("renders bound cards beneath a tapped ally in a landscape stack", () => {
+    const ally: CardView = {
+      instanceId: 30,
+      cardId: "IAR059",
+      owner: 0,
+      tapped: true,
+    };
+    const marks: CardView[] = [
+      { instanceId: 31, cardId: "IAR066", owner: 0, boundToInstanceId: ally.instanceId },
+      { instanceId: 32, cardId: "IAR067", owner: 0, boundToInstanceId: ally.instanceId },
+    ];
+
+    const html = renderToStaticMarkup(createElement(EquipmentStack, {
+      card: ally,
+      underCards: marks,
+      underCardMotionLocation: { kind: "board", seat: 0 },
+      boundCount: marks.length,
+      boundCountLabel: "2 bound cards",
+    }));
+
+    expect(html).toContain(
+      'class="equipment-stack equipment-stack-bound equipment-stack-bound-tapped"',
+    );
+    expect(html.match(/equipment-stack-card equipment-stack-card-bound/g)).toHaveLength(2);
+    expect(html.match(/data-bound-preview-card="true"/g)).toHaveLength(2);
+    expect(html.indexOf('data-cardid="IAR066"')).toBeLessThan(html.indexOf('data-cardid="IAR067"'));
+    expect(html.indexOf('data-cardid="IAR067"')).toBeLessThan(html.indexOf('data-cardid="IAR059"'));
+    expect(html).toContain('aria-label="2 bound cards"');
+    expect(html).toContain('src="/icons/bound.png" width="24" height="24"');
+    expect(html).toContain('class="bound-pip-count">2</span>');
+    expect(html).toContain('data-motion-card="0:board:31"');
+    expect(html).toContain('data-motion-card="0:board:32"');
+  });
 });

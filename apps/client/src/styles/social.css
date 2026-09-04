@@ -10,12 +10,31 @@
 
 @media (min-width: 701px) {
   #root:has(.table) .social-dock {
-    right: calc(var(--rail-w) + max(18px, env(safe-area-inset-right)));
+    --social-banish-zone-offset: calc(
+      clamp(68px, 10vh, 130px) + clamp(4px, .55vh, 7px)
+    );
+    /* The local banish pile occupies the playmat's bottom-right column. Keep
+       social in the adjacent empty column so its Blood Debt badge stays clear. */
+    right: calc(
+      var(--rail-w) + max(18px, env(safe-area-inset-right))
+      + var(--social-banish-zone-offset)
+    );
     left: auto;
     transition: right 180ms ease;
   }
   #root:has(.table.rail-is-collapsed) .social-dock {
-    right: calc(40px + max(18px, env(safe-area-inset-right)));
+    right: calc(
+      40px + max(18px, env(safe-area-inset-right))
+      + var(--social-banish-zone-offset)
+    );
+  }
+}
+
+@media (min-width: 1600px) and (min-height: 900px) {
+  #root:has(.table) .social-dock {
+    --social-banish-zone-offset: calc(
+      min(9.31vh, 7.8vw) + clamp(4px, .55vh, 7px)
+    );
   }
 }
 

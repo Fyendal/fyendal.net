@@ -131,6 +131,9 @@ export interface CardInstance {
   /** Card target announced for this play. It rides the object through stack
    * resolution so scripts can resolve against the declared target. */
   playTargetInstanceId?: number;
+  /** Arena permanent this card is bound to. A binding card remains its own
+   * permanent and is cleared when that object leaves the arena. */
+  boundToInstanceId?: number;
   /** Stable index of the arsenal zone holding this card. */
   arsenalSlot?: number;
   /** Card-scoped, turn-limited replacement granted by another effect. */

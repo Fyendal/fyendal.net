@@ -14,6 +14,7 @@ import {
   type MotionLocation,
 } from "../motion/motionTypes.js";
 import {
+  arrangeBoundBoardCards,
   boardCardInEquipmentZone,
   boardCardsOutsideEquipmentZones,
   groupBoardCards,
@@ -91,6 +92,7 @@ export function PlayerHalf({
   const arenaBoard = boardCardsOutsideEquipmentZones(
     player.board.filter((card) => !optimisticallyHiddenIds.has(card.instanceId)),
   );
+  const arrangedBoard = arrangeBoundBoardCards(arenaBoard);
 
   const activate = (instanceId: number) => () => interaction.onActivate(instanceId);
   const equipmentZone = (slot: "head" | "chest" | "arms" | "legs", area: string) => {
@@ -259,37 +261,56 @@ export function PlayerHalf({
       >
         {arenaBoard.length > 0 ? (
           <div className="board-strip board-cards">
-            {groupBoardCards(arenaBoard, mine ? interaction.legal.activatable : undefined).map((group) => (
-              <div
-                key={group.card.instanceId}
-                className={`board-card-stack${group.count > 1 ? " board-card-stack-multiple" : ""}${group.card.tapped ? " board-card-stack-tapped" : ""}`}
-                data-stack-depth={group.count > 1 ? Math.min(group.count, 3) : undefined}
-                data-cardid={group.card.cardId}
-                data-motion-card={motionPresentationKey(
-                  { kind: "board", seat: player.seat },
-                  group.card.instanceId,
-                )}
-                data-motion-card-aliases={group.instanceIds.slice(1).map((instanceId) => (
-                  motionPresentationKey({ kind: "board", seat: player.seat }, instanceId)
-                )).join(" ") || undefined}
-              >
-                <EquipmentStack
-                  card={group.card}
-                  highlighted={group.activatable}
-                  selected={mine && interaction.selection.kind === "activate" &&
-                    interaction.selection.sourceInstanceId === group.card.instanceId}
-                  onClick={group.activatable ? activate(group.card.instanceId) : undefined}
-                />
-                {group.count > 1 ? (
-                  <span
-                    className="board-card-count"
-                    aria-label={intl.formatMessage({ id: "game.zone.stackedCards" }, { count: group.count })}
-                  >
-                    ×{group.count}
-                  </span>
-                ) : null}
-              </div>
-            ))}
+            {groupBoardCards(
+              arrangedBoard.cards,
+              mine ? interaction.legal.activatable : undefined,
+              arrangedBoard.boundAllyIds,
+            ).map((group) => {
+              const boundCards = arrangedBoard.boundCardsByAlly.get(group.card.instanceId) ?? [];
+              return (
+                <div
+                  key={group.card.instanceId}
+                  className={`board-card-stack${group.count > 1 ? " board-card-stack-multiple" : ""}${group.card.tapped ? " board-card-stack-tapped" : ""}`}
+                  data-stack-depth={group.count > 1 ? Math.min(group.count, 3) : undefined}
+                  data-cardid={group.card.cardId}
+                  data-motion-card={motionPresentationKey(
+                    { kind: "board", seat: player.seat },
+                    group.card.instanceId,
+                  )}
+                  data-motion-card-aliases={group.instanceIds.slice(1).map((instanceId) => (
+                    motionPresentationKey({ kind: "board", seat: player.seat }, instanceId)
+                  )).join(" ") || undefined}
+                >
+                  <EquipmentStack
+                    card={group.card}
+                    underCards={boundCards}
+                    underCardMotionLocation={{ kind: "board", seat: player.seat }}
+                    boundCount={boundCards.length || undefined}
+                    boundCountLabel={boundCards.length > 0
+                      ? intl.formatMessage(
+                          { id: "game.bound.count" },
+                          { count: boundCards.length },
+                        )
+                      : undefined}
+                    highlighted={group.activatable}
+                    selected={mine && interaction.selection.kind === "activate" &&
+                      interaction.selection.sourceInstanceId === group.card.instanceId}
+                    onClick={group.activatable ? activate(group.card.instanceId) : undefined}
+                  />
+                  {group.count > 1 ? (
+                    <span
+                      className="board-card-count"
+                      aria-label={intl.formatMessage(
+                        { id: "game.zone.stackedCards" },
+                        { count: group.count },
+                      )}
+                    >
+                      ×{group.count}
+                    </span>
+                  ) : null}
+                </div>
+              );
+            })}
           </div>
         ) : undefined}
       </MatZone>

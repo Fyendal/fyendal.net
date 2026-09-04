@@ -346,8 +346,10 @@
   }
   .pitch-pip { width: 28px; height: 28px; font-size: 14px; }
   .pile-pip { width: 26px; height: 26px; font-size: 13px; }
-  .soul-pip { top: -4px; right: -4px; }
-  .soul-pip-count { right: -4px; bottom: -4px; min-width: 15px; height: 15px; padding-inline: 3px; font-size: 9px; }
+  .soul-pip,
+  .bound-pip { top: -4px; right: -4px; }
+  .soul-pip-count,
+  .bound-pip-count { right: -4px; bottom: -4px; min-width: 15px; height: 15px; padding-inline: 3px; font-size: 9px; }
   .blood-debt-counter { right: -4px; bottom: -5px; width: 27px; height: 32px; font-size: 13px; }
   .blood-debt-counter > span { padding-top: 5px; }
 

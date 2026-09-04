@@ -53,10 +53,16 @@ function defendView(defender: PlayerView): GameView {
 
 describe("optimistic defender staging", () => {
   it("projects requested hand, arsenal, equipment, board, and hero cards without mutating rules state", () => {
-    const hand: CardView = { instanceId: 11, cardId: "HAND", owner: 0 };
-    const equipment: CardView = { instanceId: 12, cardId: "HEAD", owner: 0 };
-    const ally: CardView = { instanceId: 13, cardId: "ALLY", owner: 0 };
-    const arsenal: CardView = { instanceId: 14, cardId: "AMBUSH", owner: 0, faceDown: true };
+    const hand: CardView = { instanceId: 11, cardId: "HAND", owner: 0, defense: 3 };
+    const equipment: CardView = { instanceId: 12, cardId: "HEAD", owner: 0, defense: 1 };
+    const ally: CardView = { instanceId: 13, cardId: "ALLY", owner: 0, defense: 4 };
+    const arsenal: CardView = {
+      instanceId: 14,
+      cardId: "AMBUSH",
+      owner: 0,
+      defense: 2,
+      faceDown: true,
+    };
     const view = defendView(player(0, {
       hand: [hand],
       handCount: 1,
@@ -73,8 +79,38 @@ describe("optimistic defender staging", () => {
     if (projected?.pendingDecision?.kind !== "defend") throw new Error("expected defend decision");
     expect(projected.pendingDecision.stagedCards?.map((card) => card.instanceId))
       .toEqual([11, 14, 12, 13, 100]);
-    expect(projected.pendingDecision.stagedDefense).toBe(0);
+    expect(projected.pendingDecision.stagedDefense).toBe(10);
     expect(view.pendingDecision?.kind === "defend" && view.pendingDecision.stagedCards).toEqual([]);
+    expect(view.pendingDecision?.kind === "defend" && view.pendingDecision.stagedDefense).toBe(0);
+  });
+
+  it("applies local deltas to the latest server total, then yields to reconciliation", () => {
+    const alreadyStaged: CardView = {
+      instanceId: 11,
+      cardId: "STAGED",
+      owner: 0,
+      defense: 3,
+    };
+    const added: CardView = { instanceId: 12, cardId: "ADDED", owner: 0, defense: 2 };
+    const view = defendView(player(0, { hand: [added], handCount: 1 }));
+    if (view.pendingDecision?.kind !== "defend") throw new Error("expected defend decision");
+    view.pendingDecision.stagedCards = [alreadyStaged];
+    // Includes an authoritative contextual +2 that the client cannot calculate.
+    view.pendingDecision.stagedDefense = 5;
+
+    const projected = optimisticDefenderView(view, 0, [11, 12]);
+    expect(projected?.pendingDecision?.kind === "defend"
+      && projected.pendingDecision.stagedDefense).toBe(7);
+    const cleared = optimisticDefenderView(view, 0, []);
+    expect(cleared?.pendingDecision?.kind === "defend"
+      && cleared.pendingDecision.stagedDefense).toBe(0);
+
+    const reconciled = defendView(player(0));
+    if (reconciled.pendingDecision?.kind !== "defend") throw new Error("expected defend decision");
+    reconciled.pendingDecision.stagedCards = [alreadyStaged, added];
+    reconciled.pendingDecision.stagedDefense = 8;
+    expect(optimisticDefenderView(reconciled, 0, null)).toBe(reconciled);
+    expect(reconciled.pendingDecision.stagedDefense).toBe(8);
   });
 
   it("returns the authoritative object when no optimistic set applies", () => {

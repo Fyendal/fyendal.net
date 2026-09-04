@@ -29,7 +29,7 @@ import {
   selectedDefendIntent,
   selectedResourcePaymentOption,
 } from "./legalSelection.js";
-import { equipmentStackCards } from "./boardGroups.js";
+import { arrangeBoundBoardCards, equipmentStackCards } from "./boardGroups.js";
 import { chainDefenderIds } from "./defenderState.js";
 import {
   passHotkeyIntent,
@@ -72,6 +72,7 @@ import { GameMotionLayer } from "./motion/GameMotionLayer.js";
 import { useGameMotion } from "./motion/useGameMotion.js";
 import { useGameSounds } from "./sound/useGameSounds.js";
 import { handChoiceDismissal } from "./handChoiceDismissal.js";
+import { hoverPreviewTarget } from "./hoverPreviewTarget.js";
 
 const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
@@ -125,12 +126,18 @@ export function GameBoard() {
     );
     const stackedEntry = Number.isSafeInteger(cardStackId)
       ? view.players
-        .flatMap((player) => [
-          { card: heroCard(player), underCards: player.soul },
-          ...Object.values(player.equipment).map((card) => ({ card, underCards: [] })),
-          ...player.weapons.map((card) => ({ card, underCards: [] })),
-          ...player.board.map((card) => ({ card, underCards: [] })),
-        ])
+        .flatMap((player) => {
+          const arrangedBoard = arrangeBoundBoardCards(player.board);
+          return [
+            { card: heroCard(player), underCards: player.soul },
+            ...Object.values(player.equipment).map((card) => ({ card, underCards: [] })),
+            ...player.weapons.map((card) => ({ card, underCards: [] })),
+            ...arrangedBoard.cards.map((card) => ({
+              card,
+              underCards: arrangedBoard.boundCardsByAlly.get(card.instanceId) ?? [],
+            })),
+          ];
+        })
         .find((entry) => entry.card?.instanceId === cardStackId)
       : undefined;
     const stackedCards = stackedEntry?.card
@@ -743,7 +750,7 @@ export function GameBoard() {
       setPreview(null);
       return;
     }
-    const el = target.closest<HTMLElement>("[data-cardid], [data-effect-label]");
+    const el = hoverPreviewTarget(target);
     if (!el) {
       setPreview(null);
       return;

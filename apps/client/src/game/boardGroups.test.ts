@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { CardView } from "@fyendal/shared";
 import {
+  arrangeBoundBoardCards,
   boardCardInEquipmentZone,
   boardCardsOutsideEquipmentZones,
   equipmentStackCards,
@@ -53,6 +54,42 @@ describe("board card grouping", () => {
 
   it("keeps currently activatable and inactive copies separate", () => {
     expect(groupBoardCards([card(1), card(2)], new Set([1]))).toHaveLength(2);
+  });
+});
+
+describe("bound board cards", () => {
+  it("moves binding cards underneath their ally in board order", () => {
+    const ally = card(1, { cardId: "IAR059" });
+    const firstMark = card(2, { cardId: "IAR066", boundToInstanceId: ally.instanceId });
+    const secondMark = card(3, { cardId: "IAR067", boundToInstanceId: ally.instanceId });
+
+    const arranged = arrangeBoundBoardCards([firstMark, ally, secondMark]);
+
+    expect(arranged.cards).toEqual([ally]);
+    expect(arranged.boundCardsByAlly.get(ally.instanceId)).toEqual([firstMark, secondMark]);
+    expect(arranged.boundAllyIds).toEqual(new Set([ally.instanceId]));
+  });
+
+  it("keeps a binding card visible when its target is absent", () => {
+    const staleMark = card(2, { cardId: "IAR066", boundToInstanceId: 99 });
+
+    const arranged = arrangeBoundBoardCards([staleMark]);
+
+    expect(arranged.cards).toEqual([staleMark]);
+    expect(arranged.boundCardsByAlly.size).toBe(0);
+  });
+
+  it("keeps otherwise identical allies separate when one has bindings", () => {
+    const firstAlly = card(1, { cardId: "IAR059" });
+    const secondAlly = card(2, { cardId: "IAR059" });
+    const mark = card(3, { cardId: "IAR066", boundToInstanceId: secondAlly.instanceId });
+    const arranged = arrangeBoundBoardCards([firstAlly, secondAlly, mark]);
+
+    expect(groupBoardCards(
+      arranged.cards,
+      undefined,
+      arranged.boundAllyIds,
+    )).toHaveLength(2);
   });
 });
 

@@ -28,7 +28,7 @@ export interface TriggerEventContext {
   readonly effectSource?: "action-card" | "activated-ability" | "other";
   readonly atRandom?: boolean;
   readonly tokenCount?: number;
-  readonly to?: "arsenal" | "banish" | "soul" | "hand" | "arena" | "graveyard" | "pitch";
+  readonly to?: "arsenal" | "banish" | "soul" | "hand" | "arena" | "graveyard" | "pitch" | "deck" | "subcard" | "cease-to-exist";
 }
 
 /** Why a token batch is being created. */

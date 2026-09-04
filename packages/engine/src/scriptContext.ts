@@ -886,6 +886,20 @@ export function makeCtx(
           }
         : undefined);
       if (!found) return false;
+      if (found.fromArena && dataOf(state, found.card.cardId).cardType === "token") {
+        runtime.commands.fireLeaveArena(
+          state,
+          found.owner.seat,
+          found.card,
+          "cease-to-exist",
+        );
+        logPublic(state, gameLogMessage(
+          `${nameOf(state, found.card.cardId)} ceases to exist`,
+          "engine.log.card.ceases.to.exist",
+          { card: logCardValue(found.card.cardId) },
+        ));
+        return true;
+      }
       clearPrivateZonePlacement(found.card);
       found.owner.hand.push(found.card);
       if (found.fromZone === "graveyard") {
@@ -1801,6 +1815,9 @@ export function makeCtx(
       if (!found || found.card.life === undefined) return false;
       found.card.life = Math.max(0, value);
       return true;
+    },
+    bindSelfTo(instanceId) {
+      return runtime.commands.bindPermanent(state, seat, self, instanceId);
     },
     increaseFirstAttackCostNextTurn(targetSeat, amount) {
       if (amount <= 0) return;

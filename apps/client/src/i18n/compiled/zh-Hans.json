@@ -4343,10 +4343,28 @@
       "value": "放逐一张手牌？"
     }
   ],
+  "card.iar.looter.discard.choose": [
+    {
+      "type": 0,
+      "value": "选择一张牌弃置"
+    }
+  ],
   "card.iar.malice.zombie.choose": [
     {
       "type": 0,
       "value": "选择墓地中的一个 zombie"
+    }
+  ],
+  "card.iar.mark.ally.bind.choose": [
+    {
+      "type": 0,
+      "value": "选择一个 ally 与此牌绑定"
+    }
+  ],
+  "card.iar.mark.neverest.banish.choose": [
+    {
+      "type": 0,
+      "value": "将你放逐区中的一张牌翻至面朝下，以生成一张 Corrupted Corpse？"
     }
   ],
   "card.iar.opponent.arsenal.banish": [
@@ -4405,6 +4423,12 @@
     {
       "type": 0,
       "value": " 点奥术伤害"
+    }
+  ],
+  "card.iar.violentgusto.aura.choose": [
+    {
+      "type": 0,
+      "value": "命名一个灵气 (Aura)永久物并将其返回？"
     }
   ],
   "card.jdg.librarian.tome.choose": [
@@ -13683,6 +13707,12 @@
       "value": "增加一个能量指示物"
     }
   ],
+  "card.trigger.iar.mark.neverest": [
+    {
+      "type": 0,
+      "value": "将一张已放逐的牌翻至面朝下，以生成一张 Corrupted Corpse"
+    }
+  ],
   "card.trigger.steam.maintain": [
     {
       "type": 0,
@@ -18508,6 +18538,20 @@
     {
       "type": 0,
       "value": " 点生命"
+    }
+  ],
+  "game.bound.count": [
+    {
+      "type": 0,
+      "value": "绑定了 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张牌"
     }
   ],
   "game.bug.currentRoom": [

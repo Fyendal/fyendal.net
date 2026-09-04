@@ -256,6 +256,10 @@ function playIntentsWithPitches(
   targetCardInstanceId?: number,
   includeUnaffordable = false,
 ): GameIntent[] {
+  if (
+    scriptOf(state, card.cardId, card)?.alternativePlayCost?.required === true &&
+    alternativeCostCardInstanceIds === undefined
+  ) return [];
   const excluded = [card.instanceId];
   if (alternativeCostCardInstanceIds !== undefined) {
     excluded.push(...alternativeCostCardInstanceIds);

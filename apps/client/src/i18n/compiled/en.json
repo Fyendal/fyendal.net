@@ -4515,10 +4515,28 @@
       "value": "Banish a card from hand?"
     }
   ],
+  "card.iar.looter.discard.choose": [
+    {
+      "type": 0,
+      "value": "Choose a card to discard"
+    }
+  ],
   "card.iar.malice.zombie.choose": [
     {
       "type": 0,
       "value": "Choose a zombie in your graveyard"
+    }
+  ],
+  "card.iar.mark.ally.bind.choose": [
+    {
+      "type": 0,
+      "value": "Choose an ally to bind this to"
+    }
+  ],
+  "card.iar.mark.neverest.banish.choose": [
+    {
+      "type": 0,
+      "value": "Turn a card in your banished zone face down to create a Corrupted Corpse?"
     }
   ],
   "card.iar.opponent.arsenal.banish": [
@@ -4603,6 +4621,12 @@
     {
       "type": 0,
       "value": " arcane damage to"
+    }
+  ],
+  "card.iar.violentgusto.aura.choose": [
+    {
+      "type": 0,
+      "value": "Name and return an aura permanent?"
     }
   ],
   "card.jdg.librarian.tome.choose": [
@@ -14263,6 +14287,12 @@
       "value": "Add an energy counter"
     }
   ],
+  "card.trigger.iar.mark.neverest": [
+    {
+      "type": 0,
+      "value": "Turn a banished card face down to create a Corrupted Corpse"
+    }
+  ],
   "card.trigger.steam.maintain": [
     {
       "type": 0,
@@ -19242,6 +19272,38 @@
     {
       "type": 0,
       "value": " life"
+    }
+  ],
+  "game.bound.count": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " bound card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " bound cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "game.bug.currentRoom": [

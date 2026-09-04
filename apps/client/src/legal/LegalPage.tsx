@@ -1,6 +1,6 @@
 // Terms of Service and Privacy Policy, rendered at /terms/ and /privacy/.
 // Plain-language, matching what the service actually does — keep them in
-// sync when data handling changes (accounts, decks, replays, and bug reports).
+// sync when data handling changes (accounts, games, social features, and reports).
 
 const CONTACT = "fyendalsupport@gmail.com";
 
@@ -32,13 +32,20 @@ const TERMS: Section[] = [
   {
     title: "Acceptable use",
     body: [
-      "Don't harass other players, don't cheat or exploit bugs for advantage (report them instead), don't automate access to the service or scrape it, and don't use the platform for anything unlawful. We may suspend accounts that break these rules.",
+      "Don't harass, threaten, impersonate, or spam other players. Don't send unlawful or abusive content, cheat or exploit bugs for advantage (report them instead), automate access to the service, scrape it, or use the platform for anything unlawful. We may restrict social features or suspend accounts that break these rules.",
+    ],
+  },
+  {
+    title: "Friends and messages",
+    body: [
+      "Friend requests, direct messages, and game invitations are provided for communication between players. Only send content you have the right to send, and don't share sensitive personal information through chat.",
+      "Direct messages are visible to the sender and recipient. A recipient may copy or share what you send, so messages should not be treated as confidential.",
     ],
   },
   {
     title: "Your content",
     body: [
-      "Decklists you import remain yours. You grant us the minimum needed to store and use them to run your games. Game records, including moves, results, room history, and full-information replays, may be kept to operate those features.",
+      "Decklists and messages you provide remain yours. You grant us the minimum permission needed to store, deliver, and use them to provide the features you choose. Game records, including moves, results, room history, and full-information replays, may be kept to operate those features.",
       "When you submit a bug report, you grant us permission to use its description and attached room trace to diagnose and fix the problem.",
     ],
   },
@@ -60,42 +67,44 @@ const PRIVACY: Section[] = [
   {
     title: "Information Fyendal stores",
     body: [
-      "Account information includes your username, password hash, and any cosmetic entitlement attached to your account. Fyendal does not collect an email address during registration.",
+      "Account information includes your username, sign-in credentials, and any cosmetic entitlement attached to your account. Fyendal does not collect an email address during registration.",
       "Game data: your saved decklists, room membership, and the state and history of games you play (needed to run, reconnect, and resume games). Completed replays contain full-information frames, including both players' hidden zones; they are available only to the two signed-in participants and expire after 7 days.",
+      "Social data: friend requests and connections, direct messages and their delivery or read information, whether friends are available, and game invitations. Your username, availability, and messages are shown only as needed to provide these features to the players involved.",
       "Bug reports: when you choose to submit one, we store your description, a report reference, and a server-side copy of the room's current state and recent history. The trace can contain both players' hidden game zones and is available only to service operators for diagnosis; it is not returned through the player-facing API.",
     ],
   },
   {
     title: "How Fyendal uses information",
     body: [
-      "Fyendal uses this information to create and secure accounts, run and resume games, save decks and replays, provide account controls, prevent abuse, and diagnose problems reported by players.",
+      "Fyendal uses this information to create and secure accounts, run and resume games, connect friends, deliver messages and invitations, show availability, save decks and replays, provide account controls, prevent abuse, and diagnose problems reported by players.",
     ],
   },
   {
     title: "Information kept in your browser",
     body: [
-      "Your session token, browser preferences, short-lived matchmaking avoidance list, and an in-progress fallback replay are kept in your browser's localStorage. Clearing site data removes those browser copies. Imported and exported replay files remain on your device.",
+      "Your browser keeps information needed to stay signed in, reconnect to your games, remember your preferences, and preserve an in-progress fallback replay. Clearing site data removes those browser copies. Imported and exported replay files remain on your device.",
     ],
   },
   {
     title: "Service providers and sharing",
     body: [
       "Fyendal has no advertising or analytics, does not track you across other websites, and does not sell or share your information with third parties for their own purposes. Because there is no cross-site tracking, browser Do Not Track signals do not change how Fyendal operates.",
-      "Fyendal uses Google Cloud to host and operate the service in the United States. Google processes network and stored service data on our behalf to provide hosting.",
-      "Card and hero images are loaded directly from Fabrary's content servers. When your browser requests those images, Fabrary receives ordinary request metadata such as your IP address and browser user agent. Fyendal sends no account token or username with those requests.",
+      "Service providers that help operate Fyendal may process information on Fyendal's behalf. They are not permitted to use it for their own purposes.",
+      "Card and hero images come from a third-party content provider. Loading those images shares standard connection information with that provider, but Fyendal does not send your account credentials or username with the request.",
     ],
   },
   {
     title: "Retention",
     body: [
-      "Rooms are normally deleted 15 minutes after a finished game or after all live presence is gone. Completed player replays expire 7 days after the game ends. Sessions expire after 30 days without renewal. Accounts, saved decks, and submitted bug reports persist until deletion.",
-      "Encrypted disaster-recovery backups are retained for up to 7 days. They are used only for disaster recovery and expire automatically.",
+      "Direct messages are kept for up to 30 days. Removing a friendship deletes the retained conversation. Friend connections remain until either player removes the friendship, and pending requests remain until they are accepted, declined, or canceled. Availability and game invitations are short-lived.",
+      "Rooms are normally deleted 15 minutes after a finished game or after everyone leaves. Completed player replays expire 7 days after the game ends. Sign-in sessions expire after 30 days without renewal. Accounts, saved decks, and submitted bug reports persist until deletion.",
+      "Deleted information may remain briefly in routine backup copies before those copies expire automatically.",
     ],
   },
   {
     title: "Your choices",
     body: [
-      "Signed-in users can download their account data or delete their account from the Account panel. Exports include retained player replays, bug-report descriptions, and trace references, but not hidden bug-report room-state attachments. Deletion removes the account, sessions, saved decks, replay copies, bug reports, and account-bound active rooms from Fyendal's active systems.",
+      "Signed-in users can download their account data or delete their account from the Account panel. Exports include friendships, pending friend requests, retained messages and replays, bug-report descriptions, and trace references, but not hidden bug-report room-state attachments. Deletion removes the account and associated social, game, and account data from Fyendal's active systems.",
       "Backups are not edited to remove individual records, but deleted information disappears as those backups expire.",
       `For a request you cannot complete while signed in, contact ${CONTACT}.`,
     ],
@@ -103,13 +112,13 @@ const PRIVACY: Section[] = [
   {
     title: "Security",
     body: [
-      "Passwords are hashed with scrypt, tokens are stored hashed, and all traffic is served over HTTPS. No system is perfectly secure; use a unique password.",
+      "Fyendal uses safeguards designed to protect account and service data. No system is perfectly secure; use a unique password and avoid sharing sensitive information in messages.",
     ],
   },
   {
     title: "Changes and contact",
     body: [
-      `Effective September 1, 2026. This policy may change; the current version is always at /privacy/. Questions: ${CONTACT}.`,
+      `Effective September 3, 2026. This policy may change; the current version is always at /privacy/. Questions: ${CONTACT}.`,
     ],
   },
 ];

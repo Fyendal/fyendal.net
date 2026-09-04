@@ -125,6 +125,27 @@ describe("PlayerHalf", () => {
     expect(html).toContain('class="soul-pip-count">2</span>');
   });
 
+  it("stacks bindings under their tapped ally with a bound indicator", () => {
+    const html = renderPlayerHalf({
+      ...player,
+      board: [
+        { instanceId: 2, cardId: "IAR059", owner: 0, tapped: true },
+        { instanceId: 10, cardId: "IAR066", owner: 0, boundToInstanceId: 2 },
+        { instanceId: 11, cardId: "IAR067", owner: 0, boundToInstanceId: 2 },
+      ],
+    });
+
+    expect(html).toContain(
+      'class="board-card-stack board-card-stack-tapped" data-cardid="IAR059"',
+    );
+    expect(html).toContain(
+      'class="equipment-stack equipment-stack-bound equipment-stack-bound-tapped"',
+    );
+    expect(html).toContain('aria-label="2 bound cards"');
+    expect(html.match(/data-motion-card="0:board:/g)).toHaveLength(3);
+    expect(html.match(/class="board-card-stack/g)).toHaveLength(1);
+  });
+
   it("uses a visible deck-top card as the exact deck motion endpoint", () => {
     const top = { instanceId: 20, cardId: "TST-TOP", owner: 0 };
     const html = renderPlayerHalf({

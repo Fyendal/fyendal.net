@@ -18,6 +18,8 @@ export function EquipmentStack({
   showActivationDots = false,
   soulCount,
   soulCountLabel,
+  boundCount,
+  boundCountLabel,
 }: {
   card: CardView;
   /** Additional public cards rendered behind the permanent, oldest first. */
@@ -33,11 +35,15 @@ export function EquipmentStack({
   /** Hero-only soul count. Defined even at zero so the icon stays visible. */
   soulCount?: number;
   soulCountLabel?: string;
+  /** Ally-only count for cards bound underneath this permanent. */
+  boundCount?: number;
+  boundCountLabel?: string;
 }) {
   const cards = [...underCards, ...equipmentStackCards(card)];
   const step = cardStackStep(cards.length);
   const underCardCount = cards.length - 1;
   const visibleSoulCount = soulCount !== undefined && soulCount > 0 ? soulCount : null;
+  const visibleBoundCount = boundCount !== undefined && boundCount > 0 ? boundCount : null;
   const explicitUnderCardIds = new Set(underCards.map((underCard) => underCard.instanceId));
   const activationGroups = showActivationDots
     ? (card.remainingAbilityActivations ?? []).flatMap((remaining, abilityIndex) =>
@@ -45,13 +51,18 @@ export function EquipmentStack({
     : [];
 
   return (
-    <div className="equipment-stack" data-card-stack-id={card.instanceId}>
+    <div
+      className={`equipment-stack${visibleBoundCount !== null ? " equipment-stack-bound" : ""}${visibleBoundCount !== null && card.tapped ? " equipment-stack-bound-tapped" : ""}`}
+      data-card-stack-id={card.instanceId}
+    >
       {cards.map((stackCard, index) => {
         const isTop = index === cards.length - 1;
         const depth = cards.length - index - 1;
+        const isExplicitUnderCard = explicitUnderCardIds.has(stackCard.instanceId);
         return (
           <div
-            className="equipment-stack-card"
+            className={`equipment-stack-card${visibleBoundCount !== null && isExplicitUnderCard ? " equipment-stack-card-bound" : ""}`}
+            data-bound-preview-card={visibleBoundCount !== null && isExplicitUnderCard ? "true" : undefined}
             key={stackCard.instanceId}
             style={{
               "--equipment-stack-offset": `-${depth * step}px`,
@@ -64,7 +75,7 @@ export function EquipmentStack({
               motionKey={
                 isTop && motionLocation
                   ? motionPresentationKey(motionLocation, stackCard.instanceId)
-                  : explicitUnderCardIds.has(stackCard.instanceId) && underCardMotionLocation
+                  : isExplicitUnderCard && underCardMotionLocation
                     ? motionPresentationKey(underCardMotionLocation, stackCard.instanceId)
                     : undefined
               }
@@ -76,7 +87,24 @@ export function EquipmentStack({
           </div>
         );
       })}
-      {visibleSoulCount !== null ? (
+      {visibleBoundCount !== null ? (
+        <span
+          className="pip pile-pip equipment-stack-pip bound-pip"
+          role="img"
+          aria-label={boundCountLabel}
+          title={boundCountLabel}
+        >
+          <img
+            className="bound-pip-icon"
+            src="/icons/bound.png"
+            width="24"
+            height="24"
+            alt=""
+            aria-hidden="true"
+          />
+          <span className="bound-pip-count">{visibleBoundCount}</span>
+        </span>
+      ) : visibleSoulCount !== null ? (
         <span
           className="pip pile-pip equipment-stack-pip soul-pip"
           role="img"

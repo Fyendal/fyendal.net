@@ -677,7 +677,7 @@ function cardView(value: unknown, depth = 0): value is CardView {
   const card = object(value);
   if (!card || !exactKeys(card, [
     "instanceId", "cardId", "name", "owner", "pitchCount", "attack", "defense", "faceDown", "tapped",
-    "defCounters", "counters", "usedAbilityIndexes", "remainingAbilityActivations", "activatedAbilityLabels", "life", "hidden", "subcards", "grantedNames", "chosenName",
+    "defCounters", "counters", "usedAbilityIndexes", "remainingAbilityActivations", "activatedAbilityLabels", "life", "hidden", "subcards", "grantedNames", "chosenName", "boundToInstanceId",
     "grantedTypes", "grantedColor", "playableFromSourceCardId", "intimidated",
   ], ["instanceId", "cardId", "owner"])) return false;
   const validInstanceId = instanceId(card.instanceId)
@@ -704,6 +704,7 @@ function cardView(value: unknown, depth = 0): value is CardView {
     && optional(card.subcards, (v): v is CardView[] => array(v, (entry) => cardView(entry, depth + 1), 16))
     && optional(card.grantedNames, (v): v is string[] => array(v, (entry): entry is string => string(entry, MAX_ID), 16))
     && optional(card.chosenName, (v): v is string => string(v, MAX_SHORT_TEXT, false))
+    && optional(card.boundToInstanceId, instanceId)
     && optional(card.grantedTypes, (v): v is string[] => array(v, (entry): entry is string => string(entry, MAX_ID), 16))
     && optional(card.grantedColor, (v): v is 1 | 2 | 3 | 4 =>
       v === 1 || v === 2 || v === 3 || v === 4)

@@ -168,6 +168,8 @@ export interface CardView {
   grantedNames?: string[];
   /** Public card name chosen for this object by a resolving effect. */
   chosenName?: string;
+  /** Arena permanent this visible card is currently bound to. */
+  boundToInstanceId?: number;
   /** Additional classes/subtypes currently granted to this object. */
   grantedTypes?: string[];
   /** Current red/yellow/blue/purple color override (1/2/3/4). */

@@ -9,6 +9,40 @@ export interface BoardCardGroup {
   instanceIds: number[];
 }
 
+export interface ArrangedBoundBoardCards {
+  /** Cards that retain their own position in the board strip. */
+  cards: CardView[];
+  /** Binding cards rendered underneath their bound ally, in board order. */
+  boundCardsByAlly: ReadonlyMap<number, CardView[]>;
+  /** Allies that must remain individually rendered instead of sharing a stack. */
+  boundAllyIds: ReadonlySet<number>;
+}
+
+/** Move live binding cards into their ally's visual stack. A stale binding
+ * remains standalone so a transient or older replay never hides a card. */
+export function arrangeBoundBoardCards(cards: readonly CardView[]): ArrangedBoundBoardCards {
+  const liveIds = new Set(cards.map((card) => card.instanceId));
+  const boundCardsByAlly = new Map<number, CardView[]>();
+  const standalone: CardView[] = [];
+
+  for (const card of cards) {
+    const allyId = card.boundToInstanceId;
+    if (allyId === undefined || allyId === card.instanceId || !liveIds.has(allyId)) {
+      standalone.push(card);
+      continue;
+    }
+    const attached = boundCardsByAlly.get(allyId);
+    if (attached) attached.push(card);
+    else boundCardsByAlly.set(allyId, [card]);
+  }
+
+  return {
+    cards: standalone,
+    boundCardsByAlly,
+    boundAllyIds: new Set(boundCardsByAlly.keys()),
+  };
+}
+
 /** Flatten public cards retained under equipment from oldest/deepest to the
  * currently equipped top card so every exposed edge can be inspected. */
 export function equipmentStackCards(topCard: CardView): CardView[] {
@@ -65,6 +99,7 @@ function boardCardStatusKey(card: CardView, activatable: boolean): string {
     [...(card.usedAbilityIndexes ?? [])].sort((a, b) => a - b),
     card.life,
     card.hidden ?? false,
+    card.boundToInstanceId,
     activatable,
   ]);
 }
@@ -73,11 +108,15 @@ function boardCardStatusKey(card: CardView, activatable: boolean): string {
 export function groupBoardCards(
   cards: readonly CardView[],
   activatableIds?: ReadonlySet<number>,
+  individuallyRenderedIds?: ReadonlySet<number>,
 ): BoardCardGroup[] {
   const groups = new Map<string, BoardCardGroup>();
   for (const card of cards) {
     const activatable = activatableIds?.has(card.instanceId) ?? false;
-    const key = boardCardStatusKey(card, activatable);
+    const statusKey = boardCardStatusKey(card, activatable);
+    const key = individuallyRenderedIds?.has(card.instanceId)
+      ? `${statusKey}\u0000${card.instanceId}`
+      : statusKey;
     const existing = groups.get(key);
     if (existing) {
       existing.count += 1;
