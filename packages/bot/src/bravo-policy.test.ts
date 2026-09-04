@@ -316,6 +316,86 @@ describe("Bravo policy", () => {
     },
   );
 
+  it.each(["Blaze, Firemind", "Kano, Dracai of Aether"])(
+    "plays Oasis before a visible four arcane damage packet from %s",
+    (heroName) => {
+      const state = createGame({
+        decklists: [bravoDeck(), decklists.dorinthea],
+        cards: cardData,
+        scripts,
+        seed: 9609,
+        startPlayer: 1,
+      });
+      replaceHand(state, 0, ["SLY019", "SBR023"]);
+      const view = projectStateFor(state, 0);
+      view.players[1].heroName = heroName;
+      view.phase = "action";
+      view.priorityPlayer = 0;
+      view.pendingDecision = {
+        player: 0,
+        kind: "priority-window",
+        prompt: "Priority window",
+      };
+      const [oasis, blue] = view.players[0].hand;
+      const damageSource: CardView = {
+        instanceId: 96_091,
+        cardId: "SBZ013",
+        owner: 1,
+      };
+      view.stack = [{
+        card: damageSource,
+        seat: 1,
+        label: "Aether Spindle",
+        optional: false,
+      }];
+      const legal: GameIntent[] = [
+        { kind: "pass" },
+        {
+          kind: "play-card",
+          instanceId: oasis!.instanceId,
+          pitchInstanceIds: [blue!.instanceId],
+        },
+      ];
+
+      expect(chooseBravoIntent({ seat: 0, view, legal, cards: cardData })).toEqual({
+        kind: "play-card",
+        instanceId: oasis!.instanceId,
+        pitchInstanceIds: [blue!.instanceId],
+      });
+
+      view.pendingDecision = {
+        player: 0,
+        kind: "choose-target",
+        prompt: "Oasis Respite: target which hero?",
+        promptMessage: { id: "card.sly.oasis.hero.choose" },
+        options: view.players.map((player) => String(player.heroInstanceId)),
+      };
+      expect(chooseBravoIntent({
+        seat: 0,
+        view,
+        legal: view.pendingDecision.options!.map((optionId) => ({ kind: "choose", optionId })),
+        cards: cardData,
+      })).toEqual({
+        kind: "choose",
+        optionId: String(view.players[0].heroInstanceId),
+      });
+
+      view.pendingDecision = {
+        player: 0,
+        kind: "choose-target",
+        prompt: "Prevent the next 4 damage from which source?",
+        promptMessage: { id: "card.sly.damage.source.choose", values: { amount: 4 } },
+        options: [String(view.players[1].heroInstanceId), String(damageSource.instanceId)],
+      };
+      expect(chooseBravoIntent({
+        seat: 0,
+        view,
+        legal: view.pendingDecision.options!.map((optionId) => ({ kind: "choose", optionId })),
+        cards: cardData,
+      })).toEqual({ kind: "choose", optionId: String(damageSource.instanceId) });
+    },
+  );
+
   it("uses Pummel when +4 secures a crush hit", () => {
     const state = createGame({
       decklists: [bravoDeck(), decklists.dorinthea],

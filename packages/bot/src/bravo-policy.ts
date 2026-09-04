@@ -1,6 +1,7 @@
 import type { CardData, CardView, GameIntent } from "@fyendal/shared";
 import {
   chooseScoredIntent,
+  committedEffectAmount,
   currentAttackIsOurs,
   currentLink,
   enforceSpectraPolicy,
@@ -8,6 +9,7 @@ import {
   incomingAttackDamage,
   intentCard,
   isAttack,
+  opponentDamageEffectOnStack,
   optionCard,
   ownCards,
   pitchIds,
@@ -20,6 +22,7 @@ import {
   scoreSpendCardChoice,
   shouldPreserveOpeningHand,
   spendsOpeningArsenalReserve,
+  visibleOpponentDamageAmount,
   type BotPolicyInput,
 } from "./policy.js";
 import {
@@ -93,6 +96,26 @@ function offensiveCards(input: BotPolicyInput): readonly CardView[] {
   return [...me.hand, ...me.arsenal, ...me.weapons];
 }
 
+function committedOasisPrevention(input: BotPolicyInput): number {
+  return committedEffectAmount(
+    input,
+    "oasis respite|1",
+    4,
+    (label) => Number(/prevent next (\d+) damage/i.exec(label)?.[1] ?? 4),
+  );
+}
+
+function damageWorthOasis(input: BotPolicyInput): number {
+  const attack = Math.max(
+    0,
+    incomingAttackDamage(input) - (currentLink(input)?.damageToPrevent ?? 0),
+  );
+  const effect = opponentDamageEffectOnStack(input)
+    ? Math.max(0, (visibleOpponentDamageAmount(input) ?? 0) - committedOasisPrevention(input))
+    : 0;
+  return Math.max(attack, effect);
+}
+
 /** Static Shock asks Bravo to spend a card either now for three physical
  * defense or later as Arcane Barrier pitch for only one prevention. When its
  * Lightning Flow on-hit is represented and a three-block is available, take
@@ -154,6 +177,19 @@ function nextTurnArsenalValue(card: CardView, input: BotPolicyInput): number {
 function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: BotPolicyInput): number {
   const decision = input.view.pendingDecision;
   if (!decision) return 0;
+  if (decision.promptMessage?.id === "card.sly.oasis.hero.choose") {
+    return intent.optionId === String(input.view.players[input.seat].heroInstanceId) ? 100 : -100;
+  }
+  if (decision.promptMessage?.id === "card.sly.damage.source.choose") {
+    const link = currentLink(input);
+    const attackSource = link?.attackingCard.owner !== input.seat
+      ? link?.attackingCard.instanceId
+      : undefined;
+    const stackSource = input.view.stack.find((layer) => layer.seat !== input.seat)
+      ?.card?.instanceId;
+    const desired = attackSource ?? stackSource;
+    return desired !== undefined && intent.optionId === String(desired) ? 100 : -100;
+  }
   if (decision.options?.length && decision.options.every((option) => /^pay \d+$/.test(option))) {
     return Number(/^pay (\d+)$/.exec(intent.optionId)?.[1] ?? -1) * 10;
   }
@@ -208,10 +244,11 @@ function scorePlay(
   const card = intentCard(intent, own);
   const data = card ? input.cards[card.cardId] : undefined;
   if (!card || !data) return -20;
-  if (shouldPreserveOpeningHand(input)) return -100;
+  const functional = key(data);
+  const oasisDamage = functional === "oasis respite|1" ? damageWorthOasis(input) : 0;
+  if (shouldPreserveOpeningHand(input) && oasisDamage === 0) return -100;
   if (spendsOpeningArsenalReserve(intent, input, own)) return -100;
 
-  const functional = key(data);
   let score = 0;
   if (intent.kind === "activate-ability") {
     if (functional === "bravo, flattering showman|0") {
@@ -243,11 +280,7 @@ function scorePlay(
   } else if (data.cardType === "defense-reaction") {
     score = scoreDefenseReaction(data, input);
   } else if (functional === "oasis respite|1") {
-    const remaining = Math.max(
-      0,
-      incomingAttackDamage(input) - (currentLink(input)?.damageToPrevent ?? 0),
-    );
-    score = remaining > 0 ? 24 + Math.min(remaining, 4) * 3 : -100;
+    score = oasisDamage > 0 ? 60 + Math.min(oasisDamage, 4) * 10 : -100;
   } else if (functional === "arcane polarity|1") {
     score = input.view.turnFacts?.players[input.seat].arcaneDamageTaken ? 28 : -100;
   } else if (functional === "edge of their seats|3") {
