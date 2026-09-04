@@ -321,8 +321,10 @@ export interface ScriptCtx {
   /** Destroy self (permanent or face-up attack); moves to graveyard and fires onDestroyed. */
   destroySelf(): void;
   /** Charge the controller's hero's soul: move the chosen card from their hand
-   *  into the soul zone, set the per-turn charge flags (`chargedThisTurn`,
-   *  `chargedPitch:<n>`), and fire the charged card's onCharged hook (Solflare).
+   *  toward the soul zone, set the per-turn charge flags (`chargedThisTurn`,
+   *  `chargedCountThisTurn`, `chargedPitch:<n>`), and fire the charged card's
+   *  onCharged hook (Solflare), even if a replacement effect changes the
+   *  move's destination.
    *  Returns the charged card, or undefined when it is not in hand. */
   charge(instanceId: number): DeepReadonly<CardInstance> | undefined;
   /** Move a card from any of its owner's zones into its owner's soul (face up).

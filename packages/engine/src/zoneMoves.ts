@@ -438,11 +438,27 @@ export function destroyControlledCard(
   return false;
 }
 
+function recordCharge(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  owner: PlayerState,
+  card: CardInstance,
+): void {
+  const color = cardColorOf(state, card);
+  owner.flags.chargedThisTurn = true;
+  owner.flags.chargedCountThisTurn =
+    (Number(owner.flags.chargedCountThisTurn) || 0) + 1;
+  owner.flags[`chargedPitch:${color}`] = (Number(owner.flags[`chargedPitch:${color}`]) || 0) + 1;
+  scriptOf(state, card.cardId, card)?.onCharged?.(
+    runtime.makeCtx(state, card.owner, card, currentLink(state)),
+  );
+}
+
 /**
  * Put a card into its owner's soul (face up, public). Records the per-turn
- * facts on the owner (`soulThisTurn`, `soulPitch:<n>` counts). When `charged`
- * (the Charge mechanic — hand into soul), also sets `chargedThisTurn`
- * / `chargedPitch:<n>` and fires the entering card's onCharged hook (Solflare).
+ * facts on the owner (`soulThisTurn`, `soulPitch:<n>` counts). When `charged`,
+ * also records the Charge named-event even if a replacement effect changes
+ * the destination, and fires the charged card's onCharged hook (Solflare).
  */
 export function enterSoul(
   state: GameStateInternal,
@@ -461,6 +477,7 @@ export function enterSoul(
     ));
     runtime.events.runHook(state, owner.seat, card, "onEnterArena");
     runtime.events.fireFriendlyEnterArena(state, owner.seat, card);
+    if (charged) recordCharge(state, runtime, owner, card);
     return;
   }
   owner.soul.push(card);
@@ -485,11 +502,7 @@ export function enterSoul(
     );
   }
   if (!charged) return;
-  owner.flags.chargedThisTurn = true;
-  owner.flags[`chargedPitch:${color}`] = (Number(owner.flags[`chargedPitch:${color}`]) || 0) + 1;
-  scriptOf(state, card.cardId, card)?.onCharged?.(
-    runtime.makeCtx(state, card.owner, card, currentLink(state)),
-  );
+  recordCharge(state, runtime, owner, card);
 }
 
 /** Search all owner zones for `instanceId` and remove the card. Equipment is
@@ -537,7 +550,25 @@ export function enterBanish(
 ): void {
   const owner = state.players[card.owner] as PlayerState;
   const causedBy = state.players[causedBySeat] as PlayerState | undefined;
-  if (from === "soul" && causedBySeat === owner.seat && state.chain.length > 0) {
+  // CR 5.1.2 / 7.0.2a: announcing an attack puts it on the stack and opens
+  // the combat chain before its effect-costs are paid. The engine keeps that
+  // announced card in `resolving` until scripted additional costs finish, so
+  // include soul cards banished during that opening window in chain totals.
+  const payingOpeningAttackCost = state.chain.length === 0 && state.resolving.some(
+    (resolving) => {
+      if (
+        resolving.owner !== causedBySeat ||
+        Number(resolving.counters?.payingAdditionalCost ?? 0) !== 1
+      ) return false;
+      const resolvingData = dataOf(state, resolving.cardId);
+      return resolvingData.cardType === "action" &&
+        (resolvingData.subtypes ?? []).includes("attack");
+    },
+  );
+  if (
+    from === "soul" && causedBySeat === owner.seat &&
+    (state.chain.length > 0 || payingOpeningAttackCost)
+  ) {
     owner.flags.soulBanishedThisChain =
       (Number(owner.flags.soulBanishedThisChain) || 0) + 1;
   }

@@ -2896,7 +2896,13 @@ export function makeCtx(
       if (!src) return;
       // the shield rides the source object: when it deals damage, it deducts
       // to a minimum of 0 (a later copy of the same-named card is not covered)
-      src.card.damagePrevented = { targetSeat, amount };
+      const existing = src.card.damagePrevented;
+      src.card.damagePrevented = {
+        targetSeat,
+        amount: existing?.targetSeat === targetSeat
+          ? existing.amount + amount
+          : amount,
+      };
       ctx.addModifier({
         scope: "until-end-of-turn",
         seat: targetSeat,

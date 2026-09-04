@@ -121,8 +121,9 @@ export interface CardInstance {
   life?: number;
   /** "Prevent the next N damage dealt to <hero> this turn by this source"
    *  (Oasis Respite): stamped on the SOURCE object — when it deals damage,
-   *  deduct to a minimum of 0. A later copy of the same-named card is not
-   *  covered. Cleared at end of turn. */
+   *  deduct to a minimum of 0. Multiple shields for the same hero and source
+   *  accumulate; a later copy of the same-named source is not covered. Cleared
+   *  at end of turn. */
   damagePrevented?: { targetSeat: number; amount: number };
   /** Transcend: the card's back face is active (its data comes from
    *  CardData.backId). Once set, this persists for the remainder of the game,

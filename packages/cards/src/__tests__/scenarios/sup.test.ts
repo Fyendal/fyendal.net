@@ -87,6 +87,32 @@ describe("SUP — heroes and the crowd", () => {
     )).toHaveLength(0);
   });
 
+  it("Battlefield Beacon counts soul cards banished to play the opening attack", () => {
+    const g = scenario({
+      seats: [
+        hero("ser boltyn, breaker of dawn|0", {
+          hand: ["celestial cataclysm|2", "battlefield beacon|2"],
+          soul: ["soul food|2", "tome of divinity|2", "beacon of victory|2"],
+        }),
+        foe(),
+      ],
+    });
+
+    g.play("celestial cataclysm|2")
+      .chooseCard("soul food|2")
+      .chooseCard("tome of divinity|2")
+      .chooseCard("beacon of victory|2")
+      .blockWith()
+      .settle()
+      .play("battlefield beacon|2");
+
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "beacon-mode",
+      promptMessage: { values: { amount: 3 } },
+      options: ["courage", "toughness", "vigor"],
+    });
+  });
+
   it("Battlefield Beacon does not count soul cards banished on a closed combat chain", () => {
     const yellow = "raging onslaught|2";
     const g = scenario({

@@ -145,6 +145,45 @@ describe("MON — Light and Charge", () => {
       .settle();
   });
 
+  it("Bolting Blade costs 2 less for each time the hero charged this turn", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "ser boltyn, breaker of dawn|0",
+          resources: 1,
+          hand: [
+            "v of the vanguard|2",
+            "bolting blade|2",
+            "beaming bravado|2",
+            "light the way|1",
+          ],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("v of the vanguard|2")
+      .chooseCard("beaming bravado|2")
+      .chooseCard("light the way|1")
+      .chooseOption("no")
+      .blockWith()
+      .activate("ser boltyn, breaker of dawn|0", { settle: false });
+    s.doRaw({
+      kind: "choose",
+      optionId: String(s.state.players[0]!.soul[0]!.instanceId),
+    });
+    s.passPriority()
+      .passPriority()
+      .settle()
+      .expectAP(0, 1)
+      .expectResources(0, 0)
+      .play("bolting blade|2")
+      .blockWith()
+      .settle()
+      .expectFinalAttack(9); // 7 base +2 from V of the Vanguard
+  });
+
   it("Herald of Judgment locks the hit hero out of playing from banish next turn", () => {
     const s = scenario({
       seats: [
