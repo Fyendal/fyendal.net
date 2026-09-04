@@ -249,7 +249,12 @@ export const monHighRarity: Record<string, CardScript> = {
   "valiant dynamo|0": { triggers: [{ event: "end-of-turn", optional: true, defaultOption: "yes", condition: (ctx) => weaponAttackCount(ctx) >= 2, label: "Recover Valiant Dynamo", effect(ctx) { ctx.addCardDefenseCounters(ctx.self.instanceId, -1); } }] },
   "spill blood|1": { onPlay(ctx) { ctx.addModifier({ scope: "until-end-of-turn", attack: 2, appliesTo: "weapon" }); ctx.addModifier({ scope: "until-end-of-turn", dominate: true, appliesTo: "weapon" }); } },
   "hexagore, the death hydra|0": weapon(2, { onAttackDeclared(ctx) { const blood = ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "blood debt")).length; ctx.dealDamage(ctx.seat, Math.max(0, 6 - blood), { sourceInstanceId: ctx.self.instanceId }); } }),
-  "deep rooted evil|2": bloodDebt({ canPlay: (ctx) => Number(ctx.getFlag("player", "banishedThisTurn")) >= 6 }, true),
+  "deep rooted evil|2": bloodDebt({ 
+    staticPlayableFrom: ["banish"],
+    canPlay: (ctx) => {
+      const inBanish = ctx.player(ctx.seat).banish.some((card) => card.instanceId === ctx.self.instanceId);
+      return !inBanish || ctx.getFlag("player", "banishedSixPlusThisTurn") === true;
+  }}, true),
   "mark of the beast|2": bloodDebt({ graveyardReplacement: "banish" }),
   "shadow of blasmophet|1": bloodDebt({ onAttackDeclared(ctx) { ctx.drawCards(ctx.seat, 1); if (randomDiscardSix(ctx)) { const cards = ctx.player(ctx.seat).deck.filter((card) => (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "blood debt")); if (cards.length) ctx.requestCardChoice("blasmophet-search", decisionPrompt("Choose a Blood Debt card", "card.mon.blooddebt.card.choose"), cards.map((card) => card.instanceId)); } }, onChoose(ctx, hook, option) { if (hook === "blasmophet-search" && ctx.banish(Number(option))) ctx.shuffleDeck(); } }),
   "chane, bound by shadow|0": { activated: { cost: 0, isAttack: false, goAgain: true, oncePerTurn: true, onActivate(ctx) { ctx.createToken(SOUL_SHACKLE); buffNextAttack(ctx, { goAgain: true, appliesToType: ["runeblade", "shadow"] }); } } },
