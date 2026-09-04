@@ -23,12 +23,13 @@ import {
   loadLobbySettings,
   pruneRejectedMatchRooms,
   rememberRejectedMatchRoom,
-  ROOM_SESSION_STORAGE_KEY,
   saveLobbySettings,
 } from "./storage.js";
 import {
   loadRoomSession,
   loadStoredAuth,
+  clearRoomSessions,
+  removeRoomSession,
   saveRoomSession,
   saveStoredAuth,
 } from "./store/sessionStorage.js";
@@ -66,6 +67,16 @@ const RECONNECT_NOTICE_GRACE_MS = 5_000;
 let reconnectAttempts = 0;
 let emoteSequence = 0;
 let viewUpdateSequence = 0;
+const friendInviteTimers = new Map<string, ReturnType<typeof setTimeout>>();
+const SOCIAL_ERROR_CODES = new Set([
+  "USER_NOT_FOUND",
+  "INVALID_FRIEND_REQUEST",
+  "FRIEND_REQUEST_CONFLICT",
+  "FRIEND_REQUIRED",
+  "FRIEND_UNAVAILABLE",
+  "MESSAGE_BOUNDS",
+  "MESSAGE_RATE_LIMITED",
+]);
 const roomVersions = new RoomVersionGate();
 const replayRuntime = createReplayRuntime(localStorage);
 
@@ -209,7 +220,7 @@ export const useStore = create<StoreState>((set, get) => {
     if (reconnectTimer) clearTimeout(reconnectTimer);
     reconnectTimer = null;
     reconnectAttempts = 0;
-    localStorage.removeItem(ROOM_SESSION_STORAGE_KEY);
+    removeRoomSession(localStorage, get().roomCode ?? roomCodeFromLocation(location.pathname));
     closeCurrentSocket();
     history.replaceState(null, "", "/");
     replayRuntime.discard();
@@ -232,7 +243,7 @@ export const useStore = create<StoreState>((set, get) => {
 
   function clearAuthenticatedState(): void {
     localStorage.removeItem(AUTH_STORAGE_KEY);
-    localStorage.removeItem(ROOM_SESSION_STORAGE_KEY);
+    clearRoomSessions(localStorage);
     if (reconnectTimer) clearTimeout(reconnectTimer);
     reconnectTimer = null;
     reconnectAttempts = 0;
@@ -246,6 +257,8 @@ export const useStore = create<StoreState>((set, get) => {
     prepHero = null;
     preReplay = null;
     resetRoomVersionState();
+    for (const timer of friendInviteTimers.values()) clearTimeout(timer);
+    friendInviteTimers.clear();
     set({
       ...clearedRoomProjection(),
       connected: false,
@@ -254,6 +267,15 @@ export const useStore = create<StoreState>((set, get) => {
       decks: [],
       decksLoading: false,
       bugReportNotifications: [],
+      friends: [],
+      friendRequests: [],
+      friendGameInvites: [],
+      socialOpen: false,
+      socialError: null,
+      activeChat: null,
+      chatMessages: {},
+      chatHasMore: {},
+      friendInviteTarget: null,
       savedReplays: [],
       replaysLoading: false,
       queueCounts: { "classic-battles": 0, cc: 0, "silver-age": 0 },
@@ -348,12 +370,13 @@ export const useStore = create<StoreState>((set, get) => {
   function scheduleReconnect(): void {
     if (reconnectTimer) return;
     const code = get().roomCode;
-    if (!code) return; // in the lobby — nothing to rejoin
+    if (!code && !get().authToken) return;
     const delay = Math.min(1000 * 2 ** reconnectAttempts, 10_000) + Math.random() * 500;
     reconnectAttempts += 1;
     reconnectTimer = setTimeout(() => {
       reconnectTimer = null;
-      get().joinRoom(code);
+      if (code) get().joinRoom(code);
+      else connect(() => send({ type: "list-rooms" }));
     }, delay);
   }
 
@@ -526,7 +549,7 @@ export const useStore = create<StoreState>((set, get) => {
     const pending = pendingBotRoom;
     if (!pending) return;
     pendingBotRoom = null;
-    localStorage.removeItem(ROOM_SESSION_STORAGE_KEY);
+    removeRoomSession(localStorage, get().roomCode);
     history.replaceState(null, "", "/");
     replayRuntime.discard(get().roomCode);
     resetRoomVersionState();
@@ -564,6 +587,82 @@ export const useStore = create<StoreState>((set, get) => {
         // logging in while on the lobby: re-list so "Your Games" flags appear
         if (get().screen === "lobby") get().listRooms();
         break;
+      case "social-snapshot": {
+        const friendKeys = new Set(msg.snapshot.friends.map((friend) => friend.username.toLowerCase()));
+        const chatMessages = Object.fromEntries(
+          Object.entries(get().chatMessages).filter(([key]) => friendKeys.has(key)),
+        );
+        const chatHasMore = Object.fromEntries(
+          Object.entries(get().chatHasMore).filter(([key]) => friendKeys.has(key)),
+        );
+        const activeChat = get().activeChat;
+        set({
+          friends: msg.snapshot.friends,
+          friendRequests: msg.snapshot.requests,
+          chatMessages,
+          chatHasMore,
+          activeChat: activeChat && friendKeys.has(activeChat.toLowerCase()) ? activeChat : null,
+        });
+        break;
+      }
+      case "friend-presence":
+        set({
+          friends: get().friends.map((friend) => friend.username.toLowerCase() === msg.username.toLowerCase()
+            ? { ...friend, presence: msg.presence }
+            : friend),
+        });
+        break;
+      case "chat-history": {
+        const key = msg.username.toLowerCase();
+        const current = get().chatMessages[key] ?? [];
+        const byId = new Map([...msg.messages, ...current].map((message) => [message.id, message]));
+        const messages = [...byId.values()].sort((a, b) => a.sentAt - b.sentAt || Number(a.id) - Number(b.id));
+        set({
+          chatMessages: { ...get().chatMessages, [key]: messages },
+          chatHasMore: { ...get().chatHasMore, [key]: msg.hasMore },
+        });
+        const latest = messages.at(-1);
+        if (latest && get().activeChat?.toLowerCase() === key && document.visibilityState === "visible") {
+          send({ type: "chat-read", username: msg.username, throughId: latest.id });
+        }
+        break;
+      }
+      case "chat-message": {
+        const key = msg.message.friendUsername.toLowerCase();
+        const current = get().chatMessages[key] ?? [];
+        const messages = current.some((message) => message.id === msg.message.id)
+          ? current.map((message) => message.id === msg.message.id ? msg.message : message)
+          : [...current, msg.message];
+        set({ chatMessages: { ...get().chatMessages, [key]: messages } });
+        if (get().activeChat?.toLowerCase() === key && document.visibilityState === "visible") {
+          send({ type: "chat-read", username: msg.message.friendUsername, throughId: msg.message.id });
+        }
+        break;
+      }
+      case "friend-game-invite": {
+        const remainingMs = 15 * 60 * 1000 - (Date.now() - msg.invite.sentAt);
+        if (remainingMs <= 0) break;
+        const previousTimer = friendInviteTimers.get(msg.invite.inviteId);
+        if (previousTimer) clearTimeout(previousTimer);
+        set({
+          friendGameInvites: [
+            ...get().friendGameInvites.filter((invite) => invite.inviteId !== msg.invite.inviteId),
+            msg.invite,
+          ],
+        });
+        friendInviteTimers.set(msg.invite.inviteId, setTimeout(() => {
+          friendInviteTimers.delete(msg.invite.inviteId);
+          set({ friendGameInvites: get().friendGameInvites.filter((invite) => invite.inviteId !== msg.invite.inviteId) });
+        }, remainingMs));
+        break;
+      }
+      case "friend-game-invite-dismissed": {
+        const timer = friendInviteTimers.get(msg.inviteId);
+        if (timer) clearTimeout(timer);
+        friendInviteTimers.delete(msg.inviteId);
+        set({ friendGameInvites: get().friendGameInvites.filter((invite) => invite.inviteId !== msg.inviteId) });
+        break;
+      }
       case "auth-failed":
         // The server rejected this account context. Abort its HTTP work and
         // clear every private/account-owned projection before reconnecting.
@@ -582,6 +681,7 @@ export const useStore = create<StoreState>((set, get) => {
           yourSeat: msg.seat,
           spectating: false,
           inviteRoom: null,
+          friendInviteTarget: null,
           error: null,
           queuedFormat: null,
           matchmakingActive: fromMatchmaking,
@@ -604,6 +704,7 @@ export const useStore = create<StoreState>((set, get) => {
           yourSeat: msg.seat,
           spectating: msg.spectator === true,
           inviteRoom: null,
+          friendInviteTarget: null,
           error: null,
           queuedFormat: null,
           matchmakingActive: fromMatchmaking,
@@ -749,7 +850,7 @@ export const useStore = create<StoreState>((set, get) => {
           : { backgroundMatchmaking: msg.status, pendingBotStart: false });
         break;
       case "match-timeout":
-        localStorage.removeItem(ROOM_SESSION_STORAGE_KEY);
+        removeRoomSession(localStorage, get().roomCode);
         history.replaceState(null, "", "/");
         replayRuntime.discard(get().roomCode);
         prepDeckId = null;
@@ -818,6 +919,10 @@ export const useStore = create<StoreState>((set, get) => {
       case "error": {
         pendingBotRoom = null;
         joiningRoomCode = null;
+        if (SOCIAL_ERROR_CODES.has(msg.code)) {
+          set({ socialError: msg.code });
+          break;
+        }
         if (failPendingRoomEntry(msg.message)) break;
         resetRoomCommandPipeline();
         const staleVersion = msg.message === "stale room version";
@@ -851,7 +956,7 @@ export const useStore = create<StoreState>((set, get) => {
         if (msg.code === "ROOM_NOT_FOUND") {
           if (reconnectTimer) clearTimeout(reconnectTimer);
           reconnectTimer = null;
-          localStorage.removeItem(ROOM_SESSION_STORAGE_KEY);
+          removeRoomSession(localStorage, get().roomCode);
           history.replaceState(null, "", "/");
           replayRuntime.discard();
           prepDeckId = null;
@@ -908,6 +1013,100 @@ export const useStore = create<StoreState>((set, get) => {
     ...initialStoreProjection(stored, lobbySettings),
     ...accountActions,
     ...replayActions,
+    setSocialOpen: (socialOpen) => set({ socialOpen }),
+    clearSocialError: () => set({ socialError: null }),
+    sendFriendRequest: (username) => {
+      set({ socialError: null });
+      send({ type: "friend-request", username });
+    },
+    respondFriendRequest: (username, accept) => {
+      set({ socialError: null });
+      send({ type: "friend-request-respond", username, accept });
+    },
+    cancelFriendRequest: (username) => {
+      set({ socialError: null });
+      send({ type: "friend-request-cancel", username });
+    },
+    removeFriend: (username) => {
+      set({ socialError: null });
+      send({ type: "friend-remove", username });
+    },
+    openChat: (username) => {
+      const canonical = get().friends.find((friend) =>
+        friend.username.toLowerCase() === username.toLowerCase())?.username ?? username;
+      const key = canonical.toLowerCase();
+      set({ activeChat: canonical, socialOpen: false, socialError: null });
+      send({ type: "chat-history", username: canonical });
+      const latest = get().chatMessages[key]?.at(-1);
+      if (latest) send({ type: "chat-read", username: canonical, throughId: latest.id });
+    },
+    closeChat: () => set({ activeChat: null }),
+    loadEarlierChat: (username) => {
+      const first = get().chatMessages[username.toLowerCase()]?.[0];
+      send({ type: "chat-history", username, ...(first ? { beforeId: first.id } : {}) });
+    },
+    sendChatMessage: (username, text) => {
+      const trimmed = text.trim();
+      if (!trimmed || trimmed.length > 1_000) return;
+      set({ socialError: null });
+      send({
+        type: "chat-send",
+        username,
+        text: trimmed,
+        clientMessageId: globalThis.crypto?.randomUUID?.()
+          ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}-chat`,
+      });
+    },
+    markChatRead: (username) => {
+      const latest = get().chatMessages[username.toLowerCase()]?.at(-1);
+      if (latest) send({ type: "chat-read", username, throughId: latest.id });
+    },
+    beginFriendInvite: (username) => {
+      if (get().roomCode || get().screen !== "lobby") return;
+      set({ socialError: null });
+      set({ friendInviteTarget: username, socialOpen: false });
+    },
+    cancelFriendInvite: () => set({ friendInviteTarget: null }),
+    createFriendRoom: (username, format, deckId) => {
+      if (get().roomCode || get().screen !== "lobby") {
+        set({ friendInviteTarget: null });
+        return;
+      }
+      rememberPlayedDeck(format, deckId);
+      prepDeckId = deckId;
+      prepHero = null;
+      roomEntryPending = false;
+      set({
+        prep: null,
+        prepDeck: null,
+        botGame: false,
+        socialError: null,
+      });
+      connect(() => send({
+        type: "create-friend-room",
+        username,
+        format,
+        deckId,
+        ...(get().cardPoolModes[format] === "legal" ? {} : { cardPoolMode: get().cardPoolModes[format] }),
+      }));
+    },
+    dismissFriendGameInvite: (inviteId) => {
+      const timer = friendInviteTimers.get(inviteId);
+      if (timer) clearTimeout(timer);
+      friendInviteTimers.delete(inviteId);
+      set({ friendGameInvites: get().friendGameInvites.filter((invite) => invite.inviteId !== inviteId) });
+      send({ type: "friend-game-invite-dismiss", inviteId });
+    },
+    acceptFriendGameInvite: (inviteId) => {
+      const invite = get().friendGameInvites.find((candidate) => candidate.inviteId === inviteId);
+      if (!invite) return;
+      get().dismissFriendGameInvite(inviteId);
+      if (get().roomCode || get().screen !== "lobby") {
+        window.open(`/${invite.room.code}`, "_blank", "noopener,noreferrer");
+      } else {
+        set({ inviteRoom: invite.room, socialOpen: false });
+      }
+    },
     setLobbyRail: (lobbyRail) => set({ lobbyRail }),
     setCardPoolMode: (format, mode) => {
       const cardPoolModes = { ...get().cardPoolModes, [format]: mode };
@@ -1054,7 +1253,7 @@ export const useStore = create<StoreState>((set, get) => {
       if (joiningRoomCode === upperCode) return;
       if (joiningRoomCode !== null) closeCurrentSocket();
       joiningRoomCode = upperCode;
-      const session = loadRoomSession(localStorage);
+      const session = loadRoomSession(localStorage, upperCode);
       const restoresSavedMembership = session?.code === upperCode;
       // Automatic reconnects of an already-rendered room retain their normal
       // retry behavior. Lobby/URL entry remains pending through first state.
@@ -1075,7 +1274,7 @@ export const useStore = create<StoreState>((set, get) => {
         set({ prep: null, prepDeck: null });
       }
       connect(() => {
-        const currentSession = loadRoomSession(localStorage);
+        const currentSession = loadRoomSession(localStorage, upperCode);
         const token = currentSession?.code === upperCode ? currentSession.token : undefined;
         send({ type: "join-room", code, token, deckId, hero, spectate });
       });
@@ -1242,7 +1441,7 @@ export const useStore = create<StoreState>((set, get) => {
       } else if (!get().roomCode && get().queuedFormat) {
         send({ type: "queue-leave" });
       }
-      localStorage.removeItem(ROOM_SESSION_STORAGE_KEY);
+      removeRoomSession(localStorage, get().roomCode);
       history.replaceState(null, "", "/");
       prepDeckId = null;
       prepHero = null;
@@ -1381,8 +1580,8 @@ function openReplay(file: ReplayFile, savedReplayId: string | null = null): void
 }
 
 /** Reconnect helper: returns the saved session code, if any. */
-export function savedRoomCode(): string | null {
-  return loadRoomSession(localStorage)?.code ?? null;
+export function hasSavedRoomSession(code: string): boolean {
+  return loadRoomSession(localStorage, code) !== null;
 }
 
 /** Room code from the URL path (/ABC123), if present and well-formed. */

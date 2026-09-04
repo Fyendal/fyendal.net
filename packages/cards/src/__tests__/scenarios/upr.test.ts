@@ -272,7 +272,7 @@ describe("UPR — rules regression coverage", () => {
     const s = scenario({
       active: 1,
       seats: [
-        { hero: "rhinar", resources: 1, equipment: { legs: "quelling slippers|0" } },
+        { hero: "rhinar", hand: [BLUE], equipment: { legs: "quelling slippers|0" } },
         { hero: "dorinthea", hand: ["snatch|1"] },
       ],
     });
@@ -286,7 +286,12 @@ describe("UPR — rules regression coverage", () => {
       player: 0,
       chooseHook: "quell",
     }));
-    s.chooseOption(`use ${slippers.instanceId}`).expectLife(0, 17);
+    s.chooseOption(`use ${slippers.instanceId}`);
+    expect(s.state.pendingDecision).toMatchObject({
+      chooseHook: "quell-pitch",
+      optionMessages: undefined,
+    });
+    s.chooseCard(BLUE).expectLife(0, 17);
     expect(s.state.pendingDestructions).toContainEqual({ seat: 0, instanceId: slippers.instanceId });
   });
 

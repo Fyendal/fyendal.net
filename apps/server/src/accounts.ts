@@ -5,6 +5,7 @@ import { getReplay, listReplays } from "./replays.js";
 import { appendClusterEvent } from "./clusterEvents.js";
 import type { CardPoolMode, PlayerBadge, ReplayFile } from "@fyendal/shared";
 import { MAX_MATCHMAKING_AVOID_ROOM_CODES } from "@fyendal/protocol";
+import { exportSocialData } from "./social.js";
 
 export interface AccountBadgePreferences {
   availableBadges: PlayerBadge[];
@@ -110,6 +111,9 @@ export interface AccountExport {
     expiresAt: number;
     replay: ReplayFile;
   }>;
+  friends: Array<{ username: string; friendsSince: number }>;
+  friendRequests: Array<{ username: string; direction: "incoming" | "outgoing"; createdAt: number }>;
+  friendMessages: import("@fyendal/shared").ChatMessage[];
 }
 
 export type DeleteAccountResult =
@@ -136,6 +140,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
     { rows: candidateRows },
     { rows: offerRows },
     { rows: reportRows },
+    social,
   ] = await Promise.all([
     db.query("SELECT username, created_at, early_tester, selected_badge FROM users WHERE id = $1", [userId]),
     listDecks(db, userId),
@@ -176,6 +181,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
        FROM bug_reports WHERE reporter_user_id = $1 ORDER BY created_at, id`,
       [userId],
     ),
+    exportSocialData(db, userId),
   ]);
   const user = users[0] as {
     username: string;
@@ -286,6 +292,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
       : null,
     bugReports,
     replays,
+    ...social,
   };
 }
 

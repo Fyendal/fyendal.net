@@ -1,6 +1,7 @@
 import type {
   CardView,
   CardPoolMode,
+  ChatMessage,
   CombatValueModifierView,
   ClientMessage,
   DeckPool,
@@ -15,6 +16,9 @@ import type {
   GameTransitionView,
   GameTurnStatsView,
   GameView,
+  FriendGameInvite,
+  FriendRequestSummary,
+  FriendSummary,
   OnHitEffectView,
   OnHitImpactView,
   PendingDecision,
@@ -171,6 +175,9 @@ export interface AccountExport {
     expiresAt: number;
     replay: ReplayFile;
   }>;
+  friends: Array<{ username: string; friendsSince: number }>;
+  friendRequests: FriendRequestSummary[];
+  friendMessages: ChatMessage[];
 }
 export interface AccountExportResponse { ok: true; export: AccountExport }
 
@@ -187,6 +194,8 @@ const MAX_COUNTERS = 128;
 const MAX_MESSAGE_VALUES = 16;
 const MAX_MESSAGE_VALUE_TEXT = 256;
 const MAX_MESSAGE_VALUE_KEY = 64;
+const MAX_CHAT_TEXT = 1_000;
+const MAX_SOCIAL_ITEMS = 2_000;
 export const MAX_MATCHMAKING_AVOID_ROOM_CODES = 20;
 
 const MESSAGE_ID_RE = /^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9]*)+$/;
@@ -213,6 +222,8 @@ const ERROR_CODES = new Set([
   "AUTH_REQUIRED", "ROOM_NOT_FOUND", "ROOM_BUSY", "ALREADY_IN_ROOM", "NOT_IN_ROOM",
   "SESSION_REPLACED", "INVALID_PRESENTATION", "INVALID_MESSAGE", "FORBIDDEN", "CONFLICT",
   "INTERNAL_ERROR", "RESYNC_REQUIRED",
+  "USER_NOT_FOUND", "INVALID_FRIEND_REQUEST", "FRIEND_REQUEST_CONFLICT", "FRIEND_REQUIRED",
+  "FRIEND_UNAVAILABLE", "MESSAGE_BOUNDS", "MESSAGE_RATE_LIMITED",
 ]);
 const UNDO_TARGETS = new Set(["last-action", "current-turn", "previous-turn"]);
 const EMOTE_MESSAGES = new Set([
@@ -268,6 +279,12 @@ const shortStrings = (value: unknown, max = MAX_CARDS): value is string[] =>
   array(value, (item): item is string => string(item, MAX_SHORT_TEXT), max);
 const instanceId = (value: unknown): value is number => nonNegativeInteger(value);
 const instanceIds = (value: unknown): value is number[] => array(value, instanceId, MAX_INPUT_CARDS);
+const username = (value: unknown): value is string =>
+  typeof value === "string" && /^[a-zA-Z0-9_]{3,20}$/.test(value);
+const decimalId = (value: unknown): value is string =>
+  typeof value === "string" && /^[1-9][0-9]{0,19}$/.test(value);
+const requestId = (value: unknown): value is string =>
+  typeof value === "string" && /^[A-Za-z0-9_-]{8,64}$/.test(value);
 
 function gameMessageValue(value: unknown): value is GameMessageValue {
   if (
@@ -516,6 +533,40 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
   switch (message.type) {
     case "auth":
       valid = exactKeys(message, ["type", "token"]) && string(message.token, 128, false);
+      break;
+    case "social-sync":
+      valid = exactKeys(message, ["type"]);
+      break;
+    case "friend-request":
+    case "friend-request-cancel":
+    case "friend-remove":
+      valid = exactKeys(message, ["type", "username"]) && username(message.username);
+      break;
+    case "friend-request-respond":
+      valid = exactKeys(message, ["type", "username", "accept"])
+        && username(message.username) && typeof message.accept === "boolean";
+      break;
+    case "chat-history":
+      valid = exactKeys(message, ["type", "username", "beforeId"], ["type", "username"])
+        && username(message.username) && optional(message.beforeId, decimalId);
+      break;
+    case "chat-send":
+      valid = exactKeys(message, ["type", "username", "text", "clientMessageId"])
+        && username(message.username) && string(message.text, MAX_CHAT_TEXT, false)
+        && message.text.trim().length > 0 && requestId(message.clientMessageId);
+      break;
+    case "chat-read":
+      valid = exactKeys(message, ["type", "username", "throughId"])
+        && username(message.username) && decimalId(message.throughId);
+      break;
+    case "create-friend-room":
+      valid = exactKeys(message, ["type", "username", "format", "deckId", "cardPoolMode"], ["type", "username", "format", "deckId"])
+        && username(message.username) && (message.format === "cc" || message.format === "silver-age")
+        && id(message.deckId)
+        && (message.cardPoolMode === undefined || CARD_POOL_MODES.has(String(message.cardPoolMode)));
+      break;
+    case "friend-game-invite-dismiss":
+      valid = exactKeys(message, ["type", "inviteId"]) && requestId(message.inviteId);
       break;
     case "create-room":
       valid = exactKeys(message, ["type", "format", "hero", "deckId", "private", "cardPoolMode"], ["type", "format"])
@@ -974,6 +1025,35 @@ function roomInvite(value: unknown): boolean {
     && optional(room.cardPoolMode, (v): v is "future" | "open" => v === "future" || v === "open");
 }
 
+function friendSummary(value: unknown): value is FriendSummary {
+  const friend = object(value);
+  return !!friend && exactKeys(friend, ["username", "presence", "friendsSince", "unreadCount"])
+    && username(friend.username) && (friend.presence === "online" || friend.presence === "offline")
+    && nonNegativeInteger(friend.friendsSince) && nonNegativeInteger(friend.unreadCount);
+}
+
+function friendRequestSummary(value: unknown): value is FriendRequestSummary {
+  const request = object(value);
+  return !!request && exactKeys(request, ["username", "direction", "createdAt"])
+    && username(request.username) && (request.direction === "incoming" || request.direction === "outgoing")
+    && nonNegativeInteger(request.createdAt);
+}
+
+function chatMessage(value: unknown): value is ChatMessage {
+  const message = object(value);
+  return !!message && exactKeys(message, ["id", "friendUsername", "senderUsername", "text", "sentAt", "readAt"])
+    && decimalId(message.id) && username(message.friendUsername) && username(message.senderUsername)
+    && string(message.text, MAX_CHAT_TEXT, false) && nonNegativeInteger(message.sentAt)
+    && (message.readAt === null || nonNegativeInteger(message.readAt));
+}
+
+function friendGameInvite(value: unknown): value is FriendGameInvite {
+  const invite = object(value);
+  return !!invite && exactKeys(invite, ["inviteId", "fromUsername", "room", "sentAt"])
+    && requestId(invite.inviteId) && username(invite.fromUsername) && roomInvite(invite.room)
+    && nonNegativeInteger(invite.sentAt);
+}
+
 function prepSeat(value: unknown): boolean {
   const item = object(value);
   return !!item && exactKeys(item, ["username", "heroId", "heroName", "hero", "ready", "connected", "accepted"], ["username", "heroId", "heroName", "ready", "connected"])
@@ -1041,6 +1121,32 @@ export function decodeServerMessage(value: unknown): ServerMessage | null {
   switch (message.type) {
     case "authed":
       valid = exactKeys(message, ["type", "username"]) && string(message.username, MAX_SHORT_TEXT, false);
+      break;
+    case "social-snapshot": {
+      const snapshot = object(message.snapshot);
+      valid = exactKeys(message, ["type", "snapshot"]) && !!snapshot
+        && exactKeys(snapshot, ["friends", "requests"])
+        && array(snapshot.friends, friendSummary, MAX_SOCIAL_ITEMS)
+        && array(snapshot.requests, friendRequestSummary, MAX_SOCIAL_ITEMS);
+      break;
+    }
+    case "friend-presence":
+      valid = exactKeys(message, ["type", "username", "presence"])
+        && username(message.username) && (message.presence === "online" || message.presence === "offline");
+      break;
+    case "chat-history":
+      valid = exactKeys(message, ["type", "username", "messages", "hasMore"])
+        && username(message.username) && array(message.messages, chatMessage, 51)
+        && typeof message.hasMore === "boolean";
+      break;
+    case "chat-message":
+      valid = exactKeys(message, ["type", "message"]) && chatMessage(message.message);
+      break;
+    case "friend-game-invite":
+      valid = exactKeys(message, ["type", "invite"]) && friendGameInvite(message.invite);
+      break;
+    case "friend-game-invite-dismissed":
+      valid = exactKeys(message, ["type", "inviteId"]) && requestId(message.inviteId);
       break;
     case "auth-failed": case "queue-left": case "left": case "match-timeout":
       valid = exactKeys(message, ["type"]);
@@ -1433,7 +1539,7 @@ export const decodeAccountExportResponse: Decoder<AccountExportResponse> = (valu
   const exported = data?.ok === true ? object(data.export) : null;
   const account = exported ? object(exported.account) : null;
   const valid = !!data && exactKeys(data, ["ok", "export"]) && data.ok === true && !!exported
-    && exactKeys(exported, ["exportedAt", "account", "decks", "rooms", "matchmaking", "bugReports", "replays"]) && !!account
+    && exactKeys(exported, ["exportedAt", "account", "decks", "rooms", "matchmaking", "bugReports", "replays", "friends", "friendRequests", "friendMessages"]) && !!account
     && exactKeys(account, ["username", "createdAt", "earlyTester", "selectedBadge"])
     && string(exported.exportedAt, 64, false) && string(account.username, MAX_SHORT_TEXT, false)
     && nonNegativeInteger(account.createdAt) && typeof account.earlyTester === "boolean"
@@ -1443,7 +1549,14 @@ export const decodeAccountExportResponse: Decoder<AccountExportResponse> = (valu
     && array(exported.rooms, (item): item is AccountExport["rooms"][number] => exportRoom(item), MAX_ROOMS)
     && exportMatchmaking(exported.matchmaking)
     && array(exported.bugReports, (item): item is AccountExport["bugReports"][number] => exportBugReport(item), MAX_ROOMS)
-    && array(exported.replays, (item): item is AccountExport["replays"][number] => exportReplay(item), MAX_ROOMS);
+    && array(exported.replays, (item): item is AccountExport["replays"][number] => exportReplay(item), MAX_ROOMS)
+    && array(exported.friends, (item): item is AccountExport["friends"][number] => {
+      const friend = object(item);
+      return !!friend && exactKeys(friend, ["username", "friendsSince"])
+        && username(friend.username) && nonNegativeInteger(friend.friendsSince);
+    }, MAX_SOCIAL_ITEMS)
+    && array(exported.friendRequests, friendRequestSummary, MAX_SOCIAL_ITEMS)
+    && array(exported.friendMessages, chatMessage, MAX_SOCIAL_ITEMS);
   return valid ? value as AccountExportResponse : null;
 };
 

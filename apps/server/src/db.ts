@@ -530,6 +530,58 @@ export const MIGRATIONS: Migration[] = [
     CREATE INDEX bug_reports_closed_created_idx
       ON bug_reports (closed_at, created_at);`,
   },
+  {
+    version: 31,
+    sql: `CREATE TABLE friendships (
+      user_low_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      user_high_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      created_at BIGINT NOT NULL,
+      PRIMARY KEY (user_low_id, user_high_id),
+      CHECK (user_low_id < user_high_id)
+    );
+    CREATE INDEX friendships_high_idx ON friendships (user_high_id, user_low_id);
+    CREATE TABLE friend_requests (
+      user_low_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      user_high_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      requester_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      created_at BIGINT NOT NULL,
+      PRIMARY KEY (user_low_id, user_high_id),
+      CHECK (user_low_id < user_high_id),
+      CHECK (requester_user_id = user_low_id OR requester_user_id = user_high_id)
+    );
+    CREATE INDEX friend_requests_low_created_idx ON friend_requests (user_low_id, created_at);
+    CREATE INDEX friend_requests_high_created_idx ON friend_requests (user_high_id, created_at);
+    CREATE TABLE friend_messages (
+      id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+      user_low_id INTEGER NOT NULL,
+      user_high_id INTEGER NOT NULL,
+      sender_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      recipient_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      client_message_id TEXT NOT NULL,
+      body TEXT NOT NULL,
+      created_at BIGINT NOT NULL,
+      read_at BIGINT,
+      FOREIGN KEY (user_low_id, user_high_id)
+        REFERENCES friendships(user_low_id, user_high_id) ON DELETE CASCADE,
+      UNIQUE (sender_user_id, client_message_id),
+      CHECK (user_low_id < user_high_id),
+      CHECK (sender_user_id <> recipient_user_id),
+      CHECK ((sender_user_id = user_low_id AND recipient_user_id = user_high_id)
+        OR (sender_user_id = user_high_id AND recipient_user_id = user_low_id))
+    );
+    CREATE INDEX friend_messages_conversation_idx
+      ON friend_messages (user_low_id, user_high_id, created_at DESC, id DESC);
+    CREATE INDEX friend_messages_unread_idx
+      ON friend_messages (recipient_user_id, read_at, created_at);
+    CREATE TABLE social_presence (
+      lease_id TEXT PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      last_seen_at BIGINT NOT NULL
+    );
+    CREATE INDEX social_presence_user_seen_idx
+      ON social_presence (user_id, last_seen_at);
+    CREATE INDEX social_presence_expiry_idx ON social_presence (last_seen_at);`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

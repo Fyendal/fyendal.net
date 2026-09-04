@@ -1,4 +1,4 @@
-import type { EmoteMessage } from "@fyendal/shared";
+import type { EmoteMessage, FriendGameInvite } from "@fyendal/shared";
 import type { Queryable } from "./db.js";
 import type { RoomBroadcastEvent } from "./roomBroadcaster.js";
 import type { ErrorLogger } from "./logging.js";
@@ -19,7 +19,12 @@ export type ClusterEvent =
   | { type: "match-timeout"; userId: number; code: string }
   | { type: "background-status-changed"; userId: number }
   | { type: "bot-practice-ready"; userId: number; code: string }
-  | { type: "emote"; code: string; seat: 0 | 1; message: EmoteMessage };
+  | { type: "emote"; code: string; seat: 0 | 1; message: EmoteMessage }
+  | { type: "social-refresh"; userId: number }
+  | { type: "social-presence"; userId: number }
+  | { type: "chat-message"; userId: number; messageId: string }
+  | { type: "friend-game-invite"; userId: number; invite: FriendGameInvite }
+  | { type: "friend-game-invite-dismiss"; userId: number; inviteId: string };
 
 function safeInteger(value: unknown): number | null {
   const parsed = typeof value === "number" ? value : Number(value);
@@ -28,6 +33,10 @@ function safeInteger(value: unknown): number | null {
 
 function roomCode(value: unknown): string | null {
   return typeof value === "string" && /^[A-Z0-9]{6}$/.test(value) ? value : null;
+}
+
+function username(value: unknown): value is string {
+  return typeof value === "string" && /^[A-Za-z0-9_]{3,20}$/.test(value);
 }
 
 const ROOM_KINDS = new Set<RoomBroadcastEvent["kind"]>([
@@ -121,6 +130,53 @@ function decodeRow(value: unknown): { id: number; event: ClusterEvent } | null {
         ? { id, event: { type: "emote", code, seat, message: message as EmoteMessage } }
         : null;
     }
+    case "social-refresh":
+    case "social-presence": {
+      const userId = safeInteger(row.subject_user_id);
+      return userId !== null && userId > 0
+        ? { id, event: { type: row.event_type, userId } as ClusterEvent }
+        : null;
+    }
+    case "chat-message": {
+      const userId = safeInteger(row.subject_user_id);
+      const messageId = payload?.messageId;
+      return userId !== null && userId > 0 && typeof messageId === "string" && /^[1-9][0-9]{0,19}$/.test(messageId)
+        ? { id, event: { type: "chat-message", userId, messageId } }
+        : null;
+    }
+    case "friend-game-invite": {
+      const userId = safeInteger(row.subject_user_id);
+      const inviteId = payload?.inviteId;
+      const fromUsername = payload?.fromUsername;
+      const format = payload?.format;
+      const sentAt = safeInteger(payload?.sentAt);
+      const code = roomCode(row.room_code);
+      const cardPoolMode = payload?.cardPoolMode;
+      if (userId === null || userId < 1 || !code || typeof inviteId !== "string"
+        || !/^[A-Za-z0-9_-]{8,64}$/.test(inviteId) || !username(fromUsername)
+        || sentAt === null || sentAt < 0 || (format !== "cc" && format !== "silver-age")
+        || (cardPoolMode !== undefined && cardPoolMode !== "future" && cardPoolMode !== "open")) return null;
+      return {
+        id,
+        event: {
+          type: "friend-game-invite",
+          userId,
+          invite: {
+            inviteId,
+            fromUsername,
+            room: { code, format, ...(cardPoolMode === undefined ? {} : { cardPoolMode }) },
+            sentAt,
+          },
+        },
+      };
+    }
+    case "friend-game-invite-dismiss": {
+      const userId = safeInteger(row.subject_user_id);
+      const inviteId = payload?.inviteId;
+      return userId !== null && userId > 0 && typeof inviteId === "string" && /^[A-Za-z0-9_-]{8,64}$/.test(inviteId)
+        ? { id, event: { type: "friend-game-invite-dismiss", userId, inviteId } }
+        : null;
+    }
     default:
       return null;
   }
@@ -164,6 +220,24 @@ export async function appendClusterEvent(db: Queryable, event: ClusterEvent): Pr
   } else if (event.type === "emote") {
     code = event.code;
     payload = { seat: event.seat, message: event.message };
+  } else if (event.type === "social-refresh" || event.type === "social-presence") {
+    userId = event.userId;
+  } else if (event.type === "chat-message") {
+    userId = event.userId;
+    payload = { messageId: event.messageId };
+  } else if (event.type === "friend-game-invite") {
+    userId = event.userId;
+    code = event.invite.room.code;
+    payload = {
+      inviteId: event.invite.inviteId,
+      fromUsername: event.invite.fromUsername,
+      format: event.invite.room.format,
+      ...(event.invite.room.cardPoolMode ? { cardPoolMode: event.invite.room.cardPoolMode } : {}),
+      sentAt: event.invite.sentAt,
+    };
+  } else if (event.type === "friend-game-invite-dismiss") {
+    userId = event.userId;
+    payload = { inviteId: event.inviteId };
   }
   const { rows } = await db.query(
     `INSERT INTO cluster_events

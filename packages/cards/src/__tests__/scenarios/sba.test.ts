@@ -381,8 +381,13 @@ describe("SBA — Arcane Barrier", () => {
   it("the defender may pitch to pay Arcane Barrier 1 and prevent the arcane damage", () => {
     const g = scenario({ seats: barrierSeats(["wrecker romp|3"]), active: 1 });
     g.play("path of same ends|1") // deals 1 arcane when it attacks
-      .chooseOption("1") // pay 1 for Arcane Barrier…
-      .chooseCard("wrecker romp|3") // …by pitching
+      .chooseOption("1"); // pay 1 for Arcane Barrier…
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "arcane-barrier-pitch",
+      options: [String(g.state.players[0]!.hand[0]!.instanceId)],
+      optionMessages: undefined,
+    });
+    g.chooseCard("wrecker romp|3") // …by pitching
       .expectLog("prevents 1 arcane damage")
       .blockWith()
       .settle()

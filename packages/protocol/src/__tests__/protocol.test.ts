@@ -294,6 +294,16 @@ const pool = {
 describe("client messages", () => {
   const variants = [
     { type: "auth", token: "token" },
+    { type: "social-sync" },
+    { type: "friend-request", username: "Alice_1" },
+    { type: "friend-request-respond", username: "Alice_1", accept: true },
+    { type: "friend-request-cancel", username: "Alice_1" },
+    { type: "friend-remove", username: "Alice_1" },
+    { type: "chat-history", username: "Alice_1", beforeId: "123" },
+    { type: "chat-send", username: "Alice_1", text: "hello", clientMessageId: "message-123" },
+    { type: "chat-read", username: "Alice_1", throughId: "123" },
+    { type: "create-friend-room", username: "Alice_1", format: "cc", deckId: "deck" },
+    { type: "friend-game-invite-dismiss", inviteId: "invite-123" },
     { type: "create-room", format: "classic-battles", hero: "rhinar" },
     { type: "create-room", format: "silver-age", deckId: "deck", private: true },
     { type: "create-bot-room", format: "silver-age", deckId: "precon-sba", bot: "briar" },
@@ -401,6 +411,12 @@ describe("client messages", () => {
     expect(decodeClientMessage({ type: "create-bot-room", format: "classic-battles", deckId: "precon-asr" })).toBeNull();
     expect(decodeClientMessage({ type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "kayo" })).toBeNull();
     expect(decodeClientMessage({ type: "auth", token: "x".repeat(129) })).toBeNull();
+    expect(decodeClientMessage({ type: "friend-request", username: "has space" })).toBeNull();
+    expect(decodeClientMessage({ type: "chat-send", username: "Alice", text: "x".repeat(1_001), clientMessageId: "message-1" })).toBeNull();
+    expect(decodeClientMessage({ type: "chat-send", username: "Alice", text: "", clientMessageId: "message-1" })).toBeNull();
+    expect(decodeClientMessage({ type: "chat-read", username: "Alice", throughId: "9007199254740992" })).not.toBeNull();
+    expect(decodeClientMessage({ type: "chat-read", username: "Alice", throughId: "1.5" })).toBeNull();
+    expect(decodeClientMessage({ type: "create-friend-room", username: "Alice", format: "classic-battles", deckId: "deck" })).toBeNull();
     expect(decodeClientMessage({ type: "intent", intent: { kind: "choose", optionId: "x".repeat(257) } })).toBeNull();
     expect(decodeClientMessage({ type: "intent", intent: { kind: "play-card", instanceId: Number.MAX_SAFE_INTEGER + 1, pitchInstanceIds: [] } })).toBeNull();
     expect(decodeClientMessage({ type: "intent", intent: { kind: "play-card", instanceId: 1, pitchInstanceIds: [], pitchRequired: -1 } })).toBeNull();
@@ -691,6 +707,12 @@ describe("GameView and server messages", () => {
   it("accepts every server variant", () => {
     const variants = [
       { type: "authed", username: "alice" }, { type: "auth-failed" },
+      { type: "social-snapshot", snapshot: { friends: [{ username: "Alice", presence: "online", friendsSince: 1, unreadCount: 2 }], requests: [{ username: "Bob", direction: "incoming", createdAt: 2 }] } },
+      { type: "friend-presence", username: "Alice", presence: "offline" },
+      { type: "chat-history", username: "Alice", messages: [{ id: "9007199254740992", friendUsername: "Alice", senderUsername: "Alice", text: "hello", sentAt: 1, readAt: null }], hasMore: false },
+      { type: "chat-message", message: { id: "123", friendUsername: "Alice", senderUsername: "alice", text: "hello", sentAt: 1, readAt: 2 } },
+      { type: "friend-game-invite", invite: { inviteId: "invite-123", fromUsername: "Alice", room: { code: "ABC123", format: "cc" }, sentAt: 1 } },
+      { type: "friend-game-invite-dismissed", inviteId: "invite-123" },
       { type: "room-created", code: "ABC123", seat: 0, token: "token", version: 1 },
       { type: "joined", code: "ABC123", seat: null, token: "", spectator: true, version: 1 },
       { type: "game-started", version: 1 },
@@ -725,6 +747,9 @@ describe("GameView and server messages", () => {
 
   it("rejects unknown fields, oversized collections, unsafe versions, and bad Boost", () => {
     expect(decodeServerMessage({ type: "auth-failed", why: "x" })).toBeNull();
+    expect(decodeServerMessage({ type: "friend-presence", username: "Alice", presence: "busy" })).toBeNull();
+    expect(decodeServerMessage({ type: "chat-message", message: { id: "1", friendUsername: "Alice", senderUsername: "Alice", text: "x".repeat(1_001), sentAt: 1, readAt: null } })).toBeNull();
+    expect(decodeServerMessage({ type: "chat-history", username: "Alice", messages: [{ id: "unsafe", friendUsername: "Alice", senderUsername: "Alice", text: "hi", sentAt: 1, readAt: null }], hasMore: false })).toBeNull();
     expect(decodeClientMessage({ type: "leave-room", endGame: false })).toBeNull();
     expect(decodeServerMessage({ type: "rooms", rooms: Array(10_001).fill({}) })).toBeNull();
     expect(decodeServerMessage({ type: "game-started", version: 1.5 })).toBeNull();
@@ -853,6 +878,9 @@ describe("replays and HTTP responses", () => {
           expiresAt: 4,
           replay: { version: 1, seat: 0, views: [gameView()] },
         }],
+        friends: [{ username: "Bob", friendsSince: 1 }],
+        friendRequests: [{ username: "Carol", direction: "outgoing", createdAt: 2 }],
+        friendMessages: [{ id: "1", friendUsername: "Bob", senderUsername: "alice", text: "hello", sentAt: 3, readAt: null }],
       },
     })).not.toBeNull();
     const replaySummary = {
@@ -900,6 +928,9 @@ describe("replays and HTTP responses", () => {
           matchmaking: null,
           bugReports: [],
           replays: [],
+          friends: [],
+          friendRequests: [],
+          friendMessages: [],
         },
       }],
       [decodeReplaysResponse, { ok: true, replays: [replaySummary] }],

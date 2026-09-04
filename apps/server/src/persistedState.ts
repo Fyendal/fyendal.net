@@ -1619,6 +1619,58 @@ function decodeEnvelope(value: unknown, code: string): PersistedStateV1 {
   };
 }
 
+/**
+ * A short-lived engine build carried the translated "pay N" option messages
+ * from an Arcane Barrier amount choice into its subsequent card-pitch choice.
+ * Those messages are presentation-only and do not correspond to the card
+ * options. Drop only that known stale metadata before exhaustive validation so
+ * rooms committed by that build remain recoverable.
+ */
+function repairArcaneBarrierPitchOptionMessages(value: unknown): unknown {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+  const envelope = value as JsonObject;
+  const state = envelope.state;
+  if (!state || typeof state !== "object" || Array.isArray(state)) return value;
+  const pendingDecision = (state as JsonObject).pendingDecision;
+  if (
+    !pendingDecision ||
+    typeof pendingDecision !== "object" ||
+    Array.isArray(pendingDecision)
+  ) return value;
+  const decision = pendingDecision as JsonObject;
+  const staleMessages = decision.optionMessages;
+  if (
+    decision.chooseHook !== "arcane-barrier-pitch" ||
+    !Array.isArray(staleMessages) ||
+    staleMessages.length < 2 ||
+    !staleMessages.every((message) => {
+      if (!message || typeof message !== "object" || Array.isArray(message)) return false;
+      const messageObject = message as JsonObject;
+      const values = messageObject.values;
+      if (
+        Object.keys(messageObject).length !== 2 ||
+        messageObject.id !== "common.option.pay" ||
+        !values ||
+        typeof values !== "object" ||
+        Array.isArray(values)
+      ) return false;
+      const valueObject = values as JsonObject;
+      return Object.keys(valueObject).length === 1 &&
+        Number.isSafeInteger(valueObject.amount) &&
+        Number(valueObject.amount) >= 0;
+    })
+  ) return value;
+
+  const { optionMessages: _staleOptionMessages, ...repairedDecision } = decision;
+  return {
+    ...envelope,
+    state: {
+      ...(state as JsonObject),
+      pendingDecision: repairedDecision,
+    },
+  };
+}
+
 /** Validate unknown persisted JSON exhaustively before restoring registries. */
 export function decodePersistedState(
   value: unknown,
@@ -1627,7 +1679,7 @@ export function decodePersistedState(
   scriptsRef: GameState["scriptsRef"],
   expectedRulesetVersion?: string,
 ): GameState {
-  const envelope = decodeEnvelope(value, code);
+  const envelope = decodeEnvelope(repairArcaneBarrierPitchOptionMessages(value), code);
   if (expectedRulesetVersion !== undefined && envelope.rulesetVersion !== expectedRulesetVersion) {
     fail(code, "rulesetVersion", "room belongs to another ruleset");
   }

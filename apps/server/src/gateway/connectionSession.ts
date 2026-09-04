@@ -11,6 +11,8 @@ export interface ClientCtx {
   presenceLeaseId: string | null;
   user: AuthUser | null;
   sessionToken: string | null;
+  /** Durable multi-instance online-presence lease for this authenticated socket. */
+  socialPresenceLeaseId: string;
   /** Process-local spam guard for ephemeral room emotes. */
   lastEmoteAt: number;
   close: (code: number, reason: string) => void;

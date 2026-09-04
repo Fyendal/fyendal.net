@@ -1235,6 +1235,8 @@ export function GameBoard() {
         onDismissGameOver={() => setGameOverDismissed(true)}
         onCloseOverlay={() => setOverlay(null)}
         onInspectCard={setInspectedCardId}
+        opponentUsername={playerProfiles?.[1 - seat]?.username ?? null}
+        botGame={botGame}
       />
       <GameMotionLayer
         batch={gameMotion.batch}

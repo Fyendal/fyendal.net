@@ -1799,6 +1799,7 @@ export function answerArcaneBarrier(
           values: { cost: piece.cost },
         },
         options,
+        optionMessages: undefined,
         cardOptions: options.map(Number),
         chooseHook: "quell-pitch",
         resume: undefined,
@@ -1846,6 +1847,7 @@ export function answerArcaneBarrier(
       state.pendingDecision = {
         ...pd,
         options,
+        optionMessages: undefined,
         cardOptions: options.map(Number),
         resume: undefined,
       };
@@ -1966,6 +1968,9 @@ export function answerArcaneBarrier(
               values: { total, need },
             },
         options,
+        // The amount-choice messages belong to the preceding "pay N"
+        // options. Card pitch choices render from cardOptions instead.
+        optionMessages: undefined,
         cardOptions: options.map(Number), // hand instance ids — own hand, visible
         chooseHook: "arcane-barrier-pitch",
         resume: undefined,
@@ -2010,6 +2015,7 @@ export function answerArcaneBarrier(
             values: { total, need },
           },
       options,
+      optionMessages: undefined,
       cardOptions: options.map(Number),
       resume: undefined,
     };

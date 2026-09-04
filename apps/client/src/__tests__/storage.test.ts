@@ -20,12 +20,47 @@ import {
   saveBotMatchmakingPreference,
   saveLobbySettings,
 } from "../storage.js";
+import {
+  clearRoomSessions,
+  loadRoomSession,
+  removeRoomSession,
+  saveRoomSession,
+} from "../store/sessionStorage.js";
+
+function memoryStorage(): Storage {
+  const values = new Map<string, string>();
+  return {
+    get length() { return values.size; },
+    clear: () => values.clear(),
+    getItem: (key) => values.get(key) ?? null,
+    key: (index) => [...values.keys()][index] ?? null,
+    removeItem: (key) => { values.delete(key); },
+    setItem: (key, value) => { values.set(key, value); },
+  };
+}
 
 describe("client storage keys", () => {
   it("uses the initial release namespace without migration generations", () => {
     expect(AUTH_STORAGE_KEY).toBe("fyendal-auth");
     expect(ROOM_SESSION_STORAGE_KEY).toBe("fyendal-room-session");
     expect(replayStorageKey("ABC123")).toBe("fyendal-replay-ABC123");
+  });
+
+  it("isolates room credentials and migrates the legacy single-room key on first read", () => {
+    const storage = memoryStorage();
+    storage.setItem(ROOM_SESSION_STORAGE_KEY, JSON.stringify({ code: "ABC123", token: "legacy" }));
+    expect(loadRoomSession(storage, "ABC123")).toEqual({ code: "ABC123", token: "legacy" });
+    expect(storage.getItem(ROOM_SESSION_STORAGE_KEY)).toBeNull();
+
+    saveRoomSession(storage, { code: "DEF456", token: "second" });
+    expect(loadRoomSession(storage, "ABC123")?.token).toBe("legacy");
+    expect(loadRoomSession(storage, "DEF456")?.token).toBe("second");
+    removeRoomSession(storage, "ABC123");
+    expect(loadRoomSession(storage, "ABC123")).toBeNull();
+    expect(loadRoomSession(storage, "DEF456")?.token).toBe("second");
+
+    clearRoomSessions(storage);
+    expect(loadRoomSession(storage, "DEF456")).toBeNull();
   });
 
   it("remembers whether bot practice should keep searching for a player", () => {

@@ -10,6 +10,7 @@ import {
 import { DeckCardToast, type useDeckCardFeedback } from "../DeckCardToast.js";
 import { GameOver } from "../GameOver.js";
 import { MobileCardInspect } from "../MobileCardInspect.js";
+import { PostGameFriendAction } from "../../social/PostGameFriendAction.js";
 import type { HoverSurfaceLayout } from "../hoverSurfaceLayout.js";
 import type { BoardOverlay } from "./BoardPrimitives.js";
 
@@ -45,6 +46,8 @@ export function BoardOverlays({
   onDismissGameOver,
   onCloseOverlay,
   onInspectCard,
+  opponentUsername,
+  botGame,
 }: {
   preview: BoardPreview | null;
   overlay: BoardOverlay | null;
@@ -69,6 +72,8 @@ export function BoardOverlays({
   onDismissGameOver: () => void;
   onCloseOverlay: () => void;
   onInspectCard: (cardId: string | null) => void;
+  opponentUsername: string | null;
+  botGame: boolean;
 }) {
   const intl = useIntl();
   return (
@@ -179,6 +184,9 @@ export function BoardOverlays({
           onDownloadReplay={replayAvailable ? onDownloadReplay : null}
           onBackToLobby={onLeave}
           onClose={onDismissGameOver}
+          friendAction={!botGame && !spectating && opponentUsername
+            ? <PostGameFriendAction username={opponentUsername} />
+            : null}
         />
       ) : null}
     </>

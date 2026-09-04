@@ -105,6 +105,52 @@ describe("PersistedStateV1", () => {
       .pendingDecision).toEqual(source.pendingDecision);
   });
 
+  it("repairs stale Arcane Barrier amount messages on a card-pitch decision", () => {
+    const source = game();
+    const pitchCard = source.players[0]!.hand[0]!;
+    source.pendingDecision = {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Pitch cards to pay 1 for Arcane Barrier",
+      promptMessage: {
+        id: "engine.decision.damage.arcane.barrier.pay",
+        values: { total: 1, need: 1 },
+      },
+      options: [String(pitchCard.instanceId)],
+      optionMessages: [
+        { id: "common.option.pay", values: { amount: 0 } },
+        { id: "common.option.pay", values: { amount: 1 } },
+      ],
+      cardOptions: [pitchCard.instanceId],
+      chooseHook: "arcane-barrier-pitch",
+      arcane: {
+        sourceInstanceId: source.players[1]!.hero.instanceId,
+        sourceSeat: 1,
+        targetSeat: 0,
+        amount: 1,
+        arcane: true,
+        payTotal: 1,
+      },
+    };
+
+    const encoded = jsonCopy(encodePersistedState(source));
+    const decoded = decodePersistedState(encoded, "ABC123", cardData, scripts);
+
+    expect(decoded.pendingDecision).toMatchObject({
+      chooseHook: "arcane-barrier-pitch",
+      options: [String(pitchCard.instanceId)],
+      cardOptions: [pitchCard.instanceId],
+    });
+    expect(decoded.pendingDecision?.optionMessages).toBeUndefined();
+
+    const malformed = jsonCopy(encoded) as unknown as {
+      state: { pendingDecision: { optionMessages: Array<Record<string, unknown>> } };
+    };
+    malformed.state.pendingDecision.optionMessages[0]!.unexpected = true;
+    expect(() => decodePersistedState(malformed, "ABC123", cardData, scripts))
+      .toThrowError(CorruptRoomError);
+  });
+
   it("rejects malformed semantic decision messages", () => {
     const encoded = jsonCopy(encodePersistedState(game())) as unknown as {
       state: { pendingDecision: Record<string, unknown> | null };
