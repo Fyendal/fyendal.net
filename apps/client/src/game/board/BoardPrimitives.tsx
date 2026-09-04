@@ -4,6 +4,8 @@ export interface BoardOverlay {
   title: string;
   cards: CardView[];
   inactiveZone?: boolean;
+  /** Allow the owner to inspect known face-down cards in this zone. */
+  showOwnedFaceDownIdentities?: boolean;
 }
 
 export function heroCard(player: PlayerView): CardView {

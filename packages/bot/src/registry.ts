@@ -15,7 +15,11 @@ import {
 import { chooseHalaIntent, chooseHalaIntentWithTrace } from "./hala-policy.js";
 import { chooseIraIntent, chooseIraIntentWithTrace } from "./ira-policy.js";
 import { chooseJarlIntent, chooseJarlIntentWithTrace } from "./jarl-policy.js";
-import { chooseStarvoIntent, chooseStarvoIntentWithTrace } from "./starvo-policy.js";
+import {
+  chooseStarvoContinuationIntent,
+  chooseStarvoIntent,
+  chooseStarvoIntentWithTrace,
+} from "./starvo-policy.js";
 import type { BotPolicyInput } from "./policy.js";
 import type { TurnPlanCheckpoint, TurnPlannerCandidateTrace } from "./turn-planner.js";
 import {
@@ -158,7 +162,8 @@ export const BOT_DEFINITIONS = {
     deckName: "Bravo, Star of the Show — Boss Battle",
     presentationCardPoolMode: "open",
     chooseIntent: chooseStarvoIntent,
-    chooseDecision: (input) => botDecisionFromTrace(chooseStarvoIntentWithTrace(input)),
+    chooseDecision: (input) => botDecisionFromTrace(chooseStarvoIntentWithTrace(input), true),
+    chooseContinuationIntent: chooseStarvoContinuationIntent,
     presentationFor: (opponent) => starvoPresentationFor(opponent),
   },
 } as const satisfies Readonly<Record<BotOpponent, BotDefinition>>;

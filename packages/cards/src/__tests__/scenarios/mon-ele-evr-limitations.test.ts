@@ -154,18 +154,30 @@ describe("Monarch, Tales of Aria, and Everfest rules regression coverage", () =>
     const result = Number(finalRolls[0]!.split(":")[1]);
     expect(g.state.modifiers).toEqual(expect.arrayContaining([expect.objectContaining({ attack: result })]));
   });
-  it("Bravo reveals three elemental cards as one cost", () => {
+  it("Bravo lets one multi-element card satisfy multiple reveal criteria", () => {
     const g = scenario({ active: 1, seats: [
-      { hero: "rhinar", heroKey: "bravo, star of the show|0", hand: ["pulse of candlehold|2", "blizzard|3", "blink|3"], equipment: NO_EQUIPMENT },
+      { hero: "rhinar", heroKey: "bravo, star of the show|0", hand: ["autumn's touch|1", "pulse of volthaven|1"], equipment: NO_EQUIPMENT },
       { hero: "dorinthea", equipment: NO_EQUIPMENT },
     ] });
     g.endTurn().chooseOption("yes");
     const reveal = g.state.pendingDecision?.options?.[0];
     expect(reveal).toBeDefined();
+    expect(new Set(reveal!.split(":"))).toHaveLength(2);
     g.chooseOption(reveal!);
     expect(g.state.modifiers).toEqual(expect.arrayContaining([
       expect.objectContaining({ attack: 2, dominate: true, goAgain: true, minCost: 3 }),
     ]));
+    const revealLog = g.state.log.at(-1)?.publicText ?? "";
+    expect(revealLog).toContain("reveals Autumn's Touch, Pulse of Volthaven");
+    expect(revealLog.match(/Pulse of Volthaven/g)).toHaveLength(1);
+  });
+  it("Bravo does not offer an incomplete elemental reveal", () => {
+    const g = scenario({ active: 1, seats: [
+      { hero: "rhinar", heroKey: "bravo, star of the show|0", hand: ["pulse of volthaven|1"], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+    g.endTurn();
+    expect(g.state.pendingDecision).toBeNull();
   });
   it("Earthlore Bounty identifies action-effect draws", () => {
     const g = scenario({ seats: [

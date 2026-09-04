@@ -129,6 +129,11 @@ export function BoardOverlays({
                 <InactiveZoneCard
                   key={card.instanceId}
                   card={card}
+                  showFaceDownIdentity={
+                    overlay.showOwnedFaceDownIdentities === true &&
+                    yourSeat !== null &&
+                    card.owner === yourSeat
+                  }
                   revealOwnerIntimidated={yourSeat !== null && card.owner === yourSeat}
                 />
               ) : <CardFace key={card.instanceId} card={card} size="zone" />)}

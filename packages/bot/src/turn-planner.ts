@@ -245,6 +245,11 @@ export interface TurnPlannerConfig<Evaluation extends TurnEvaluation> {
   maxRootCandidates?: number;
   maxActionDepth?: number;
   maxForcedSteps?: number;
+  /** Optional larger node slice for the highest-ranked root. */
+  firstRootNodeBudget?: number;
+  /** Optional larger slice for the highest-ranked root while retaining the
+   * same total transition cap across every candidate. */
+  firstRootTransitionBudget?: number;
 }
 
 interface SearchResult<Evaluation extends TurnEvaluation> {
@@ -653,10 +658,14 @@ export function planTurn<Evaluation extends TurnEvaluation>(
     if (context.nodes >= totalBudget || context.transitions >= totalTransitionBudget) break;
     const rootsRemaining = rootCandidates.length - index;
     const budgetRemaining = totalBudget - context.nodes;
-    const rootBudget = Math.max(1, Math.floor(budgetRemaining / rootsRemaining));
+    const rootBudget = index === 0 && config.firstRootNodeBudget !== undefined
+      ? Math.max(1, Math.min(budgetRemaining, config.firstRootNodeBudget))
+      : Math.max(1, Math.floor(budgetRemaining / rootsRemaining));
     context.nodeLimit = Math.min(totalBudget, context.nodes + rootBudget);
     const transitionsRemaining = totalTransitionBudget - context.transitions;
-    const rootTransitionBudget = Math.max(1, Math.floor(transitionsRemaining / rootsRemaining));
+    const rootTransitionBudget = index === 0 && config.firstRootTransitionBudget !== undefined
+      ? Math.max(1, Math.min(transitionsRemaining, config.firstRootTransitionBudget))
+      : Math.max(1, Math.floor(transitionsRemaining / rootsRemaining));
     context.transitionLimit = Math.min(
       totalTransitionBudget,
       context.transitions + rootTransitionBudget,

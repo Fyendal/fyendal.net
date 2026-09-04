@@ -579,30 +579,36 @@ export function CardBack({
 }
 
 /** Present a graveyard or banished card without leaking hidden identities.
- * The expanded zone list may reveal an owner's intimidated card because its
- * identity is already projected to that owner; opponents still receive a
- * hidden CardView and therefore keep seeing a card back. */
+ * An expanded private view may show an identity already projected to its owner;
+ * opponents still receive a hidden CardView and therefore keep seeing a card back. */
 export function InactiveZoneCard({
   card,
   showOverlays = true,
+  showFaceDownIdentity = false,
   revealOwnerIntimidated = false,
   motionKey,
 }: {
   card: CardView;
   showOverlays?: boolean;
+  /** Privately show a known face-down card while preserving its face-down state visually. */
+  showFaceDownIdentity?: boolean;
   revealOwnerIntimidated?: boolean;
   motionKey?: string;
 }) {
+  const showKnownFaceDown = showFaceDownIdentity &&
+    card.faceDown === true &&
+    card.hidden !== true;
   const revealIntimidated = revealOwnerIntimidated &&
     card.faceDown === true &&
     card.intimidated === true &&
     card.hidden !== true;
-  if (card.faceDown !== true || revealIntimidated) {
+  if (card.faceDown !== true || showKnownFaceDown || revealIntimidated) {
     return (
       <CardFace
         card={card}
         size="zone"
         showOverlays={showOverlays}
+        dimmed={showKnownFaceDown}
         motionKey={motionKey}
       />
     );
