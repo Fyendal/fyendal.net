@@ -21,5 +21,5 @@ export function PostGameFriendAction({ username }: { username: string }) {
     return <button type="button" onClick={() => respondRequest(request.username, true)}>{intl.formatMessage({ id: "social.acceptFriend" })}</button>;
   }
   if (request) return <button type="button" disabled>{intl.formatMessage({ id: "social.requestSent" })}</button>;
-  return <button type="button" onClick={() => sendRequest(username)}>{intl.formatMessage({ id: "social.addFriend" })}</button>;
+  return <button type="button" className="post-game-friend-add" onClick={() => sendRequest(username)}>{intl.formatMessage({ id: "social.addFriend" })}</button>;
 }

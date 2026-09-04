@@ -1034,13 +1034,13 @@
   .settings-options { flex-wrap: wrap; }
   .settings-info-tooltip::after { display: none; }
 
-  .gameover-panel { width: calc(100vw - 12px); height: calc(100dvh - 12px); }
-  .gameover-headline { font-size: 35px; letter-spacing: 3px; }
-  .gameover-sub { font-size: 14px; }
-  .gameover-key-stat { min-height: 78px; padding: 8px; }
-  .gameover-key-stat strong { font-size: 27px; }
+  .gameover-panel { width: calc(100vw - 16px); height: calc(100dvh - 24px); padding: 10px; }
+  .gameover-headline { font-size: 30px; letter-spacing: 2px; }
+  .gameover-sub { font-size: 12px; }
+  .gameover-key-stat { min-height: 62px; padding: 7px; }
+  .gameover-key-stat strong { font-size: 23px; }
   .gameover-table th,
-  .gameover-table td { padding: 7px 9px; }
+  .gameover-table td { padding: 5px 7px; }
 
   .replay-bar {
     left: 8px;
