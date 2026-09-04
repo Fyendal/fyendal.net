@@ -85,6 +85,62 @@ describe("lethal Arcane Barrier", () => {
   });
 });
 
+describe("opening-turn defense", () => {
+  for (const bot of botDefinitions) {
+    it(`${bot.id} blocks from the hand before spending fresh equipment`, () => {
+      const state = createGame({
+        decklists: [decklists.dorinthea, decklists.rhinar],
+        cards: cardData,
+        scripts,
+        seed: 94_151,
+        startPlayer: 1,
+      });
+      const handCard = state.players[0]!.hand[0]!;
+      handCard.cardId = "RNR020";
+      state.players[0]!.hand = [handCard];
+      const view = projectStateFor(state, 0);
+      view.players[0].life = 20;
+      view.priorityPlayer = 0;
+      view.phase = "defend";
+      view.pendingDecision = {
+        player: 0,
+        kind: "defend",
+        prompt: "Choose defending cards",
+        stagedCards: [],
+        stagedDefense: 0,
+      };
+      view.chain = [{
+        attackingCard: { instanceId: 99_451, cardId: "IAR078", owner: 1 },
+        defendingCards: [],
+        attackValue: 4,
+        defenseValue: 0,
+        damage: 4,
+        resolved: false,
+        reactions: [],
+      }];
+      const equipment = Object.values(view.players[0].equipment)
+        .filter((card): card is CardView => card !== undefined);
+      const durable = equipment[0]!;
+      durable.cardId = "UPR084";
+      durable.defense = 2;
+      const legal: GameIntent[] = [
+        { kind: "defend", instanceIds: [] },
+        { kind: "stage-defenders", instanceIds: [handCard.instanceId] },
+        ...equipment.map((card) => ({
+          kind: "stage-defenders" as const,
+          instanceIds: [card.instanceId],
+        })),
+      ];
+
+      expect(view.turn).toBe(1);
+      expect(bot.chooseIntent({ seat: 0, view, legal, cards: cardData })).toEqual({
+        kind: "stage-defenders",
+        instanceIds: [handCard.instanceId],
+      });
+    });
+  }
+});
+
 describe("opening-turn aggression", () => {
   function openingInput(): {
     input: BotPolicyInput;

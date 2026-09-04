@@ -854,6 +854,7 @@ describe("Starvo policy", () => {
     [20, "stage-defenders"],
   ] as const)("times its two-block Temper armor at %s life", (life, expectedKind) => {
     const view = viewForTest();
+    view.turn = 2;
     const civicSteps = view.players[0].equipment.legs!;
     expect(cardData[civicSteps.cardId]?.name).toBe("Civic Steps");
     view.players[0].life = life;

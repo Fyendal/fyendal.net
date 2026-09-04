@@ -233,8 +233,8 @@ export function GameBoard() {
   const { now, dismissedFor: idleDismissedFor, dismiss: dismissIdleVictory } =
     useIdleVictoryPrompt();
   const derived = useMemo(
-    () => deriveBoardLegalState(actionCandidates, legal),
-    [actionCandidates, legal],
+    () => deriveBoardLegalState(actionCandidates, legal, roomCommandPending),
+    [actionCandidates, legal, roomCommandPending],
   );
 
   const playerView = view !== null && yourSeat !== null ? view.players[yourSeat] : undefined;
@@ -1196,7 +1196,7 @@ export function GameBoard() {
         roomCode={roomCode}
         onInspectCard={setInspectedCardId}
         mobilePrimaryAction={primaryAction}
-        mobilePrimaryActionDisabled={defending && defendIntent === null}
+        mobilePrimaryActionDisabled={roomCommandPending || (defending && defendIntent === null)}
         onMobilePrimaryAction={triggerPrimaryAction}
         backgroundSearching={backgroundSearching}
         onStopBackgroundSearch={stopBackgroundMatchmaking}

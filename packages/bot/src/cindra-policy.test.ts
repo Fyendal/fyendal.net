@@ -155,6 +155,9 @@ function defendWith(game: TestState, seat: Seat, instanceIds: readonly number[])
 }
 
 function opposingAttack(view: ReturnType<typeof projectStateFor>, attackValue = 4): void {
+  // Synthetic defense tests exercise normal turn-cycle valuation unless a
+  // test explicitly restores turn one to cover the opening refill rule.
+  view.turn = Math.max(2, view.turn);
   view.priorityPlayer = 0;
   view.phase = "defend";
   view.pendingDecision = {
@@ -238,6 +241,38 @@ function ordinaryDefenseChoice(options: {
 }
 
 describe("Cindra Head Jabs policy", () => {
+  it("blocks opening Ominous Toll from hand without spending equipment", () => {
+    const game = state();
+    replaceHand(game, 0, ["OMN245", "GEM010", "HNT157", "HNT157"]);
+    const view = projectStateFor(game, 0);
+    opposingAttack(view, 3);
+    view.turn = 1;
+    view.chain[0]!.attackingCard.cardId = "IAR078";
+    const equipmentIds = new Set(Object.values(view.players[0].equipment)
+      .flatMap((card) => card ? [card.instanceId] : []));
+    const defenders = [
+      ...view.players[0].hand,
+      ...Object.values(view.players[0].equipment).filter((card) => card !== undefined),
+    ].filter((card) => (card.defense ?? 0) > 0);
+    const legal: GameIntent[] = [
+      { kind: "defend", instanceIds: [] },
+      ...defenders.map((card) => ({
+        kind: "stage-defenders" as const,
+        instanceIds: [card.instanceId],
+      })),
+      { kind: "concede" },
+    ];
+
+    const intent = chooseCindraIntent({ seat: 0, view, legal, cards: cardData });
+    expect(intent.kind).toBe("stage-defenders");
+    if (intent.kind !== "stage-defenders") return;
+    expect(intent.instanceIds.some((id) => equipmentIds.has(id))).toBe(false);
+    expect(intent.instanceIds.reduce((total, id) => {
+      const card = view.players[0].hand.find((candidate) => candidate.instanceId === id);
+      return total + (card?.defense ?? 0);
+    }, 0)).toBeGreaterThanOrEqual(3);
+  });
+
   it("plays Blaze Headlong as the second link before terminal Draconic attacks", () => {
     let game = state(0);
     game.turn = 2;
