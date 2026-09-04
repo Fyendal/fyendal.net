@@ -12,6 +12,12 @@ import {
  * startup, state hydration, legal-intent generation, and policy execution. */
 export const BOT_POLICY_DECISION_TIMEOUT_MS = 5_000;
 export const MAX_BOT_POLICY_QUEUE = 128;
+/** Human think time commonly leaves the expensive policy isolate unused. */
+export const BOT_POLICY_WORKER_IDLE_MS = 2 * 60_000;
+/** Bound allocator high-water retention during continuously active bot games. */
+export const BOT_POLICY_MAX_TASKS_PER_WORKER = 500;
+/** Recent healthy decisions use about 40–55 MiB; recycle rare high-heap outliers. */
+export const BOT_POLICY_WORKER_MAX_HEAP_USED_BYTES = 96 * 1024 * 1024;
 
 export type BotPolicyExecutionFailure = "timeout" | "overflow" | "crash" | "policy" | "stopped";
 
@@ -102,6 +108,9 @@ interface QueuedTask {
 interface BotPolicyExecutorOptions {
   timeoutMs?: number;
   maxQueue?: number;
+  workerIdleMs?: number;
+  maxTasksPerWorker?: number;
+  maxWorkerHeapUsedBytes?: number;
   now?: () => number;
   workerUrl?: URL;
   workerFactory?: WorkerFactory;
@@ -117,6 +126,9 @@ export function botPolicyWorkerUrl(moduleUrl = import.meta.url): URL {
 export class WorkerBotPolicyExecutor implements BotPolicyExecutor {
   private readonly timeoutMs: number;
   private readonly maxQueue: number;
+  private readonly workerIdleMs: number;
+  private readonly maxTasksPerWorker: number;
+  private readonly maxWorkerHeapUsedBytes: number;
   private readonly now: () => number;
   private readonly url: URL;
   private readonly factory: WorkerFactory;
@@ -127,12 +139,19 @@ export class WorkerBotPolicyExecutor implements BotPolicyExecutor {
   private active: QueuedTask | null = null;
   private nextTaskId = 1;
   private generation = 0;
+  private completedWorkerTasks = 0;
+  private workerIdleTimer: ReturnType<typeof setTimeout> | null = null;
+  private workerRetirement: Promise<void> | null = null;
   private stopped = false;
 
   constructor(options: BotPolicyExecutorOptions = {}) {
     this.url = options.workerUrl ?? botPolicyWorkerUrl();
     this.timeoutMs = options.timeoutMs ?? BOT_POLICY_DECISION_TIMEOUT_MS;
     this.maxQueue = options.maxQueue ?? MAX_BOT_POLICY_QUEUE;
+    this.workerIdleMs = options.workerIdleMs ?? BOT_POLICY_WORKER_IDLE_MS;
+    this.maxTasksPerWorker = options.maxTasksPerWorker ?? BOT_POLICY_MAX_TASKS_PER_WORKER;
+    this.maxWorkerHeapUsedBytes = options.maxWorkerHeapUsedBytes ??
+      BOT_POLICY_WORKER_MAX_HEAP_USED_BYTES;
     this.now = options.now ?? Date.now;
     this.metricLogger = options.metricLogger;
     this.instanceId = options.instanceId;
@@ -156,6 +175,7 @@ export class WorkerBotPolicyExecutor implements BotPolicyExecutor {
     if (this.stopped) {
       return Promise.reject(new BotPolicyExecutionError("stopped", "bot policy executor stopped"));
     }
+    this.clearWorkerIdleTimer();
     const outstanding = this.queue.length + (this.active ? 1 : 0);
     if (this.active && this.queue.length >= this.maxQueue) {
       this.emitMetric({
@@ -209,12 +229,14 @@ export class WorkerBotPolicyExecutor implements BotPolicyExecutor {
   stop(): void {
     if (this.stopped) return;
     this.stopped = true;
+    this.clearWorkerIdleTimer();
     this.abortAll(new BotPolicyExecutionError("stopped", "bot policy executor stopped"));
   }
 
   private spawn(): WorkerPort {
     const worker = this.factory(this.url);
     this.worker = worker;
+    this.completedWorkerTasks = 0;
     this.generation++;
     worker.on("message", (value) => this.onMessage(worker, value));
     worker.on("error", (error) => {
@@ -229,7 +251,7 @@ export class WorkerBotPolicyExecutor implements BotPolicyExecutor {
   }
 
   private pump(): void {
-    if (this.stopped || this.active || this.queue.length === 0) return;
+    if (this.stopped || this.active || this.workerRetirement || this.queue.length === 0) return;
     let worker: WorkerPort;
     try {
       worker = this.worker ?? this.spawn();
@@ -264,6 +286,7 @@ export class WorkerBotPolicyExecutor implements BotPolicyExecutor {
     }
     clearTimeout(active.timeout);
     this.active = null;
+    this.completedWorkerTasks++;
     const finishedAt = this.now();
     const telemetry = this.telemetry(active, finishedAt);
     if (response.kind === "error") {
@@ -285,12 +308,21 @@ export class WorkerBotPolicyExecutor implements BotPolicyExecutor {
         workerMemory: response.memory,
       });
     }
+    if (
+      this.completedWorkerTasks >= this.maxTasksPerWorker ||
+      response.memory.heapUsedBytes >= this.maxWorkerHeapUsedBytes
+    ) {
+      this.retireWorker(worker);
+    }
     this.pump();
+    this.armWorkerIdleTimer();
   }
 
   private abortAll(error: BotPolicyExecutionError): void {
+    this.clearWorkerIdleTimer();
     const worker = this.worker;
     this.worker = null;
+    this.completedWorkerTasks = 0;
     const tasks = [...(this.active ? [this.active] : []), ...this.queue];
     this.active = null;
     this.queue.length = 0;
@@ -306,6 +338,40 @@ export class WorkerBotPolicyExecutor implements BotPolicyExecutor {
       ));
     }
     if (worker) void worker.terminate().catch(() => undefined);
+  }
+
+  private clearWorkerIdleTimer(): void {
+    if (!this.workerIdleTimer) return;
+    clearTimeout(this.workerIdleTimer);
+    this.workerIdleTimer = null;
+  }
+
+  private armWorkerIdleTimer(): void {
+    this.clearWorkerIdleTimer();
+    if (this.stopped || !this.worker || this.active || this.queue.length > 0) return;
+    const worker = this.worker;
+    this.workerIdleTimer = setTimeout(() => {
+      this.workerIdleTimer = null;
+      if (this.worker !== worker || this.active || this.queue.length > 0) return;
+      this.retireWorker(worker);
+    }, this.workerIdleMs);
+    this.workerIdleTimer.unref?.();
+  }
+
+  /** Retire only an idle worker. Queued work is pumped into a fresh generation. */
+  private retireWorker(worker: WorkerPort): void {
+    if (this.worker !== worker || this.active) return;
+    this.clearWorkerIdleTimer();
+    this.worker = null;
+    this.completedWorkerTasks = 0;
+    const retirement = worker.terminate().then(() => undefined, () => undefined);
+    this.workerRetirement = retirement;
+    void retirement.then(() => {
+      if (this.workerRetirement !== retirement) return;
+      this.workerRetirement = null;
+      this.pump();
+      this.armWorkerIdleTimer();
+    });
   }
 
   private telemetry(task: QueuedTask, at: number): BotPolicyExecutionTelemetry {

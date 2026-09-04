@@ -11,8 +11,10 @@
  * two copies of Hunter or Hunted?; and SNAPBT — a private Silver Age practice
  * room against the Briar bot with Snap Shot already face up in arsenal and
  * Death Dealer unused; and OKANAS — a private CC practice room against the
- * Hala bot with Ira ready to test Okana Scar Wraps after a Vengeance attack.
- * These fixtures count as 8 "players in game" in the
+ * Hala bot with Ira ready to test Okana Scar Wraps after a Vengeance attack;
+ * and RALLYC — a private Silver Age room with Rally the Coast Guard already
+ * defending and two cards available to discard.
+ * These fixtures count as 10 "players in game" in the
  * lobby stats — dev only.
  * Alice also receives one fixed, undismissed bug-report notification for
  * exercising the lobby UI.
@@ -45,6 +47,7 @@ const USERS = [{ username: "alice" }, { username: "bob" }];
 const HUNTER_TEST_ROOM_CODE = "HUNTED";
 const SNAP_ARC_TEST_ROOM_CODE = "SNAPBT";
 const OKANA_TEST_ROOM_CODE = "OKANAS";
+const RALLY_TEST_ROOM_CODE = "RALLYC";
 
 /**
  * A lived-in mid-game board for the demo room: fixed seeds, random legal
@@ -209,6 +212,84 @@ function okanaTestGameState(): GameState {
   return state;
 }
 
+/** Kayo is already defending Ira's Edge of Autumn with Rally the Coast Guard.
+ * The reaction window belongs to Kayo, whose two remaining hand cards are
+ * both legal discard choices for Rally's once-per-turn instant ability. */
+function rallyTestGameState(): GameState {
+  const kayoPool = precon("precon-ska")?.pool;
+  const ira = botDefinition("ira");
+  const iraPool = precon(ira?.deckId ?? "")?.pool;
+  if (!kayoPool || !ira || !iraPool) throw new Error("Rally test fixture decks are unavailable");
+
+  const kayoDeck = {
+    heroId: kayoPool.heroId,
+    weaponIds: [...kayoPool.weaponIds],
+    equipment: {},
+    deck: [...kayoPool.deck],
+  };
+  const iraPresentation = ira.presentationFor(kayoDeck, "first");
+  let state = createGame({
+    decklists: [kayoDeck, { heroId: iraPool.heroId, ...iraPresentation }],
+    seed: 9032026,
+    cards: cardData,
+    scripts,
+    startPlayer: 1,
+  });
+
+  const kayo = state.players[0]!;
+  const kayoCards = [...kayo.hand, ...kayo.deck];
+  const take = (cardId: string) => {
+    const index = kayoCards.findIndex((card) => card.cardId === cardId);
+    if (index < 0) throw new Error(`Rally test fixture is missing ${cardId}`);
+    return kayoCards.splice(index, 1)[0]!;
+  };
+  const rally = take("SKA028");
+  kayo.hand = [rally, take("SKA029"), take("SKA029")];
+  kayo.deck = kayoCards;
+
+  const iraPlayer = state.players[1]!;
+  iraPlayer.resources = 1;
+  const applyLegal = (
+    current: GameState,
+    seat: number,
+    label: string,
+    predicate: (intent: ReturnType<typeof legalIntents>[number]) => boolean,
+  ): GameState => {
+    const intent = legalIntents(current, seat).find(predicate);
+    if (!intent) throw new Error(`Rally test fixture cannot ${label}`);
+    const result = applyIntent(current, seat, intent);
+    if (!result.ok) throw new Error(`Rally test fixture cannot ${label}: ${result.error}`);
+    return result.state;
+  };
+
+  const weaponInstanceId = iraPlayer.weapons[0]!.instanceId;
+  state = applyLegal(state, 1, "attack with Edge of Autumn", (intent) =>
+    intent.kind === "activate-ability" &&
+    intent.sourceInstanceId === weaponInstanceId &&
+    intent.pitchInstanceIds.length === 0
+  );
+  for (let guard = 0; guard < 4 && state.pendingDecision?.kind !== "defend"; guard++) {
+    const actor = state.pendingDecision?.player ?? state.priorityPlayer;
+    state = applyLegal(state, actor, "pass attack activation priority", (intent) => intent.kind === "pass");
+  }
+  if (state.pendingDecision?.kind !== "defend" || state.pendingDecision.player !== 0) {
+    throw new Error("Rally test fixture did not reach Kayo's defend step");
+  }
+  state = applyLegal(state, 0, "stage Rally as a defender", (intent) =>
+    intent.kind === "stage-defenders" && intent.instanceIds[0] === rally.instanceId
+  );
+  state = applyLegal(state, 0, "defend with Rally", (intent) =>
+    intent.kind === "defend" && intent.instanceIds.length === 1 &&
+    intent.instanceIds[0] === rally.instanceId
+  );
+  state = applyLegal(state, 1, "pass attacker reaction priority", (intent) => intent.kind === "pass");
+  const reactionDecision = state.pendingDecision;
+  if (reactionDecision?.kind !== "defense-reaction" || reactionDecision.player !== 0) {
+    throw new Error("Rally test fixture did not reach Kayo's reaction priority");
+  }
+  return state;
+}
+
 const pool = await createPool();
 try {
   const { rows: runtimeConfigRows } = await pool.query(
@@ -240,11 +321,12 @@ try {
   try {
     // These rooms are disposable local fixture data. Recreate them so rerunning
     // the seed also repairs stale ruleset envelopes and clears dependent history.
-    await pool.query("DELETE FROM rooms WHERE code IN ($1, $2, $3, $4)", [
+    await pool.query("DELETE FROM rooms WHERE code IN ($1, $2, $3, $4, $5)", [
       DEMO_ROOM_CODE,
       HUNTER_TEST_ROOM_CODE,
       SNAP_ARC_TEST_ROOM_CODE,
       OKANA_TEST_ROOM_CODE,
+      RALLY_TEST_ROOM_CODE,
     ]);
     await pool.query(
       `INSERT INTO rooms
@@ -396,6 +478,53 @@ try {
         briar.deckName,
       ],
     );
+    const rallyPrep = { rolls: [2, 6], dieWinner: 1, startPlayer: 1 };
+    const iraForRally = botDefinition("ira");
+    const kayoPoolForRally = precon("precon-ska")?.pool;
+    const iraPoolForRally = precon(iraForRally?.deckId ?? "")?.pool;
+    if (!iraForRally || !kayoPoolForRally || !iraPoolForRally) {
+      throw new Error("Rally test fixture room metadata is unavailable");
+    }
+    await pool.query(
+      `INSERT INTO rooms
+        (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at,
+         status, winner, is_private)
+       VALUES ($1, 'silver-age', '[]', $2, $3, $4, 0, $5, NULL, 'active', NULL, TRUE)`,
+      [
+        RALLY_TEST_ROOM_CODE,
+        JSON.stringify(dehydrateState(rallyTestGameState(), seedRulesetVersion)),
+        JSON.stringify(rallyPrep),
+        seedRulesetVersion,
+        Date.now(),
+      ],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, user_id, token_hash, username, hero_id, deck_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 0, $2, $3, 'alice', $4, 'precon-ska',
+               'Rally the Coast Guard test', FALSE, TRUE, 'human')`,
+      [
+        RALLY_TEST_ROOM_CODE,
+        aliceId,
+        hashReconnectToken(randomBytes(12).toString("hex")),
+        kayoPoolForRally.heroId,
+      ],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, token_hash, username, hero_id, deck_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 1, $2, $3, $4, $5, $6, FALSE, TRUE, 'bot')`,
+      [
+        RALLY_TEST_ROOM_CODE,
+        hashReconnectToken(randomBytes(12).toString("hex")),
+        iraForRally.username,
+        iraPoolForRally.heroId,
+        iraForRally.deckId,
+        iraForRally.deckName,
+      ],
+    );
     const fixedAt = Date.now();
     await pool.query(
       `INSERT INTO bug_reports
@@ -439,6 +568,7 @@ try {
   console.log(`seeded Hunter or Hunted? room ${HUNTER_TEST_ROOM_CODE} — log in as alice and open /${HUNTER_TEST_ROOM_CODE}`);
   console.log(`seeded Snap Shot / Arc Bending room ${SNAP_ARC_TEST_ROOM_CODE} — log in as alice and open /${SNAP_ARC_TEST_ROOM_CODE}`);
   console.log(`seeded Okana Scar Wraps / Enact Vengeance room ${OKANA_TEST_ROOM_CODE} — log in as alice and open /${OKANA_TEST_ROOM_CODE}`);
+  console.log(`seeded Rally the Coast Guard room ${RALLY_TEST_ROOM_CODE} — log in as alice and open /${RALLY_TEST_ROOM_CODE}`);
   console.log("seeded fixed bug notification for alice");
 } finally {
   await pool.end();

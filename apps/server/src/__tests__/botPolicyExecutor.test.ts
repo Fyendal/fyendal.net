@@ -187,6 +187,98 @@ describe("bot policy worker executor", () => {
     }
   });
 
+  it("retires an idle worker and lazily starts a fresh generation", async () => {
+    vi.useFakeTimers();
+    const workers: FakeWorker[] = [];
+    const executor = new WorkerBotPolicyExecutor({
+      workerIdleMs: 1_000,
+      workerFactory: () => {
+        const worker = new FakeWorker();
+        workers.push(worker);
+        return worker;
+      },
+    });
+    const first = executor.decide(request(1));
+    workers[0]!.respond(success(1));
+    await expect(first).resolves.toMatchObject({ generation: 1 });
+
+    await vi.advanceTimersByTimeAsync(999);
+    expect(workers[0]!.terminate).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(1);
+    expect(workers[0]!.terminate).toHaveBeenCalledOnce();
+
+    const second = executor.decide(request(2));
+    await vi.advanceTimersByTimeAsync(0);
+    expect(workers).toHaveLength(2);
+    workers[1]!.respond(success(2));
+    await expect(second).resolves.toMatchObject({ generation: 2 });
+    executor.stop();
+  });
+
+  it("does not retire an idle worker after new work becomes active", async () => {
+    vi.useFakeTimers();
+    const worker = new FakeWorker();
+    const executor = new WorkerBotPolicyExecutor({
+      workerIdleMs: 1_000,
+      workerFactory: () => worker,
+    });
+    const first = executor.decide(request(1));
+    worker.respond(success(1));
+    await first;
+
+    await vi.advanceTimersByTimeAsync(500);
+    const second = executor.decide(request(2));
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(worker.terminate).not.toHaveBeenCalled();
+    worker.respond(success(2));
+    await second;
+    executor.stop();
+  });
+
+  it("recycles a worker between queued tasks after its task budget", async () => {
+    const workers: FakeWorker[] = [];
+    const executor = new WorkerBotPolicyExecutor({
+      maxTasksPerWorker: 1,
+      workerFactory: () => {
+        const worker = new FakeWorker();
+        workers.push(worker);
+        return worker;
+      },
+    });
+    const first = executor.decide(request(1));
+    const second = executor.decide(request(2));
+    workers[0]!.respond(success(1));
+    await expect(first).resolves.toMatchObject({ generation: 1 });
+    await vi.waitFor(() => expect(workers).toHaveLength(2));
+    expect(workers[0]!.terminate).toHaveBeenCalledOnce();
+    expect(workers[1]!.posted[0]).toMatchObject({ taskId: 2, version: 2 });
+    workers[1]!.respond(success(2));
+    await expect(second).resolves.toMatchObject({ generation: 2 });
+    executor.stop();
+  });
+
+  it("recycles a worker after a high post-decision heap reading", async () => {
+    const workers: FakeWorker[] = [];
+    const executor = new WorkerBotPolicyExecutor({
+      maxWorkerHeapUsedBytes: 100,
+      workerFactory: () => {
+        const worker = new FakeWorker();
+        workers.push(worker);
+        return worker;
+      },
+    });
+    const first = executor.decide(request(1));
+    workers[0]!.respond(success(1));
+    await first;
+    await vi.waitFor(() => expect(workers[0]!.terminate).toHaveBeenCalledOnce());
+
+    const second = executor.decide(request(2));
+    await vi.waitFor(() => expect(workers).toHaveLength(2));
+    workers[1]!.respond(success(2));
+    await expect(second).resolves.toMatchObject({ generation: 2 });
+    executor.stop();
+  });
+
   it("keeps the worker alive after a caught policy failure", async () => {
     const worker = new FakeWorker();
     const metrics: BotPolicyRuntimeMetric[] = [];
