@@ -1510,15 +1510,42 @@ function sendRaw(ws: WebSocket, payload: string): boolean {
   return true;
 }
 
-/** Stop accepting connections, terminate ws clients, then close the server. */
-export function closeGameServer(server: http.Server): Promise<void> {
+const SERVICE_RESTART_CLOSE_CODE = 1012;
+const SERVICE_RESTART_CLOSE_REASON = "service restart";
+const SHUTDOWN_SOCKET_GRACE_MS = 10_000;
+
+/** Stop accepting connections, ask ws clients to reconnect, then force-close stragglers. */
+export function closeGameServer(
+  server: http.Server,
+  socketGraceMs = SHUTDOWN_SOCKET_GRACE_MS,
+): Promise<void> {
   return new Promise((resolve) => {
     const wss = wssByServer.get(server);
+    let httpClosed = false;
+    let socketsClosed = !wss;
+    let forceCloseTimer: ReturnType<typeof setTimeout> | undefined;
+    const finishIfClosed = (): void => {
+      if (!httpClosed || !socketsClosed) return;
+      if (forceCloseTimer) clearTimeout(forceCloseTimer);
+      resolve();
+    };
     if (wss) {
-      for (const client of wss.clients) client.terminate();
-      wss.close();
+      for (const client of wss.clients) {
+        client.close(SERVICE_RESTART_CLOSE_CODE, SERVICE_RESTART_CLOSE_REASON);
+      }
+      forceCloseTimer = setTimeout(() => {
+        for (const client of wss.clients) client.terminate();
+      }, socketGraceMs);
+      forceCloseTimer.unref?.();
+      wss.close(() => {
+        socketsClosed = true;
+        finishIfClosed();
+      });
     }
-    server.close(() => resolve());
+    server.close(() => {
+      httpClosed = true;
+      finishIfClosed();
+    });
   });
 }
 
