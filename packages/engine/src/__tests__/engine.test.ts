@@ -8,7 +8,7 @@ import { computeAttack } from "../combatValues.js";
 import { resolveWagerLayer, resumeWagerResult } from "../wagers.js";
 import { destroyPermanent } from "../zoneMoves.js";
 import { answerTokenCreationReplacement, answerTokenReplacementOrder } from "../tokens.js";
-import { cardColorOf, cardHasType, cardTypesOf } from "../cardProperties.js";
+import { cardColorOf, cardHasType, cardTypesOf, TALENT_SUPERTYPES } from "../cardProperties.js";
 import { logPrivate, logPublic } from "../gameLog.js";
 import { makeCtx } from "../scriptContext.js";
 import { abilityResourceCost } from "../abilityRules.js";
@@ -1082,6 +1082,34 @@ describe("game setup & turn structure", () => {
     startTurn(s, engineRuntime);
     expect(s.modifiers.some((modifier) => modifier.suppressesOwnedNames)).toBe(false);
   });
+
+  it.each(TALENT_SUPERTYPES)(
+    "type removal removes printed %s but preserves it when granted by another effect",
+    (talent) => {
+      const s = makeGame(104);
+      const owned = player(s, 1).hand[0]!;
+      s.cardsRef = {
+        ...s.cardsRef,
+        [owned.cardId]: {
+          ...s.cardsRef[owned.cardId]!,
+          classes: ["guardian"],
+          subtypes: [talent, "attack"],
+        },
+      };
+      makeCtx(s, engineRuntime, 0, player(s, 0).hero).addModifier({
+        scope: "until-end-of-turn",
+        seat: 1,
+        suppressesOwnedClassTalentTypes: true,
+      });
+
+      expect(cardTypesOf(s, owned)).not.toContain("guardian");
+      expect(cardTypesOf(s, owned)).not.toContain(talent);
+      expect(cardTypesOf(s, owned)).toContain("attack");
+
+      owned.grantedTypes = [talent];
+      expect(cardTypesOf(s, owned)).toContain(talent);
+    },
+  );
 
   it("keeps next-turn hero suppression through intervening extra turns", () => {
     const s = makeGame(103);

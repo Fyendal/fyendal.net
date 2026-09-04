@@ -5,7 +5,6 @@ import {
   cardColorOf,
   cardTypesOf,
   dataOf,
-  ownedClassTalentTypesSuppressed,
 } from "./cardProperties.js";
 import type { CardInstance, ChainLinkState, Modifier, PlayerState } from "./state.js";
 import { goAgainSuppressed } from "./ruleQueries.js";
@@ -25,6 +24,10 @@ function modifierMatches(
   grantedNames: readonly string[] = [],
   keywordAbilitiesActive = true,
   effectiveCardTypes: readonly string[] = [data.cardType],
+  effectiveTags: readonly string[] = [
+    ...(data.classes ?? []),
+    ...(data.subtypes ?? []),
+  ].map((tag) => tag.toLowerCase()),
 ): boolean {
   const appliesTo = modifier.appliesTo ?? "any";
   if (appliesTo === "weapon") {
@@ -66,7 +69,7 @@ function modifierMatches(
   ) return false;
   if (
     modifier.excludesSubtype &&
-    effectiveCardTypes.includes(modifier.excludesSubtype.toLowerCase())
+    effectiveTags.includes(modifier.excludesSubtype.toLowerCase())
   ) return false;
   if (modifier.appliesToCardType === "reaction") {
     if (
@@ -82,7 +85,7 @@ function modifierMatches(
   if (modifier.appliesToPitch !== undefined && color !== modifier.appliesToPitch) return false;
   const hasTag = (tag: string): boolean => {
     const normalized = tag.toLowerCase();
-    return effectiveCardTypes.includes(normalized) || granted(normalized);
+    return effectiveTags.includes(normalized) || granted(normalized);
   };
   if (modifier.appliesToClass && !hasTag(modifier.appliesToClass)) return false;
   if (modifier.appliesToSubtype) {
@@ -118,10 +121,11 @@ export function modifierAppliesTo(
     data,
     cardType,
     color,
-    ownedClassTalentTypesSuppressed(state, card) ? undefined : granted,
+    granted,
     grantedNames,
     !cardAbilitiesSuppressed(state, card),
-    [data.cardType, ...cardTypesOf(state, card)],
+    [data.cardType],
+    cardTypesOf(state, card),
   );
 }
 
@@ -150,7 +154,8 @@ export function modifierAppliesToDefense(
     undefined,
     undefined,
     !cardAbilitiesSuppressed(state, card),
-    [...effectiveCardTypes, ...cardTypesOf(state, card)],
+    effectiveCardTypes,
+    cardTypesOf(state, card),
   );
 }
 

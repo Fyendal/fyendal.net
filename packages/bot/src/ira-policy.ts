@@ -1,6 +1,7 @@
 import type { GameState } from "@fyendal/engine";
 import type { CardData, CardView, GameIntent } from "@fyendal/shared";
 import {
+  allyLethalThreshold,
   chooseScoredIntent,
   currentAttackIsOurs,
   currentLink,
@@ -50,8 +51,20 @@ function currentAttackHasOrWillGetGoAgain(input: BotPolicyInput): boolean {
   const link = currentLink(input);
   if (!link) return false;
   if (link.goAgain === true) return true;
+  const attack = input.cards[link.attackingCard.cardId];
+  const razorGrantsGoAgain = isAttack(attack) && (attack?.cost ?? Number.POSITIVE_INFINITY) <= 1;
+  if (input.view.stack.some((layer) => {
+    const pending = key(input.cards[layer.card?.cardId ?? ""]);
+    return pending === "snapdragon scalers|0" ||
+      (razorGrantsGoAgain && pending.startsWith("razor reflex|"));
+  })) return true;
   if (link.defenseValue >= link.attackValue) return false;
   return link.onHitEffects?.some((effect) => /\bgo again\b/i.test(effect.text)) === true;
+}
+
+function currentAllyAttackIsAlreadyLethal(input: BotPolicyInput): boolean {
+  const link = currentLink(input);
+  return !!link?.targetAlly && link.attackValue >= allyLethalThreshold(link.targetAlly, input);
 }
 
 function likelyGoAgain(functional: string, data: CardData, previous: string, input: BotPolicyInput): boolean {
@@ -338,7 +351,9 @@ function scorePlay(
     if (!currentAttackIsOurs(input) || input.view.pendingDecision?.kind !== "attack-reaction") {
       score = -100;
     } else if (functional.startsWith("razor reflex|")) {
-      score = 32 + (currentLink(input)?.goAgain === true || !reservedAttack ? 0 : 6);
+      score = currentAllyAttackIsAlreadyLethal(input) && currentAttackHasOrWillGetGoAgain(input)
+        ? -100
+        : 32 + (currentLink(input)?.goAgain === true || !reservedAttack ? 0 : 6);
     } else if (functional === "legacy of ikaru|3") {
       score = previous === "edge of autumn|0" ? 18 : 10;
     } else {

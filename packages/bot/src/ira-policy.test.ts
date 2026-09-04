@@ -423,6 +423,56 @@ describe("Ira policy", () => {
     expect(intent).toEqual({ kind: "pass" });
   });
 
+  it("does not add Razor Reflex after committing Snapdragon Scalers to a lethal ally attack", () => {
+    let state = createGame({
+      decklists: [iraDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 91101,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    state.players[0]!.life = 37;
+    state.players[1]!.life = 36;
+    replaceHand(state, 0, ["ASR011", "ASR016", "ASR008", "ASR012"]);
+    const ally = {
+      instanceId: state.nextInstanceId++,
+      cardId: "IAR085",
+      owner: 1 as const,
+      life: 3,
+    };
+    state.players[1]!.board.push(ally);
+    const scar = state.players[0]!.hand.find((card) => card.cardId === "ASR011")!;
+    state = apply(state, 0, {
+      kind: "play-card",
+      instanceId: scar.instanceId,
+      pitchInstanceIds: [],
+      targetAllyId: ally.instanceId,
+    });
+    state = advanceUntil(state, (candidate) =>
+      candidate.pendingDecision?.kind === "attack-reaction" &&
+      candidate.pendingDecision.player === 0
+    );
+
+    const scalers = state.players[0]!.equipment.legs!;
+    state = apply(state, 0, {
+      kind: "activate-ability",
+      sourceInstanceId: scalers.instanceId,
+      pitchInstanceIds: [],
+    });
+
+    const view = projectStateFor(state, 0);
+    expect(view.stack.some((layer) => layer.card?.cardId === scalers.cardId)).toBe(true);
+    const intent = chooseIraIntent({
+      seat: 0,
+      view,
+      legal: legalIntents(state, 0),
+      cards: cardData,
+    });
+
+    expect(intent).toEqual({ kind: "pass" });
+  });
+
   it("preserves Okana Scar Wraps when its attack is already overblocked", () => {
     const state = createGame({
       decklists: [iraDeck(), decklists.dorinthea],

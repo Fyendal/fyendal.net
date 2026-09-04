@@ -280,6 +280,38 @@ describe("SFA — granted Draconic types", () => {
       .expectLog("draconic in addition to its other types");
   });
 
+  it("Erase Face removes printed Draconic but Fealty can grant it back", () => {
+    const erased = scenario({
+      seats: [
+        { hero: "rhinar", resources: 2, hand: ["erase face|1"], deck: [] },
+        faiSeat({
+          hand: ["dragon power|3", RED, "raging onslaught|3", "raging onslaught|3"],
+          deck: [],
+        }),
+      ],
+    });
+
+    erased.play("erase face|1").blockWith().settle().endTurn()
+      .play("dragon power|3", { pitch: [RED] })
+      .expectAttackValue(2);
+
+    const granted = scenario({
+      seats: [
+        { hero: "rhinar", resources: 2, hand: ["erase face|1"], deck: [] },
+        faiSeat({
+          board: ["fealty|0"],
+          hand: ["dragon power|3", RED, "raging onslaught|3", "raging onslaught|3"],
+          deck: [],
+        }),
+      ],
+    });
+
+    granted.play("erase face|1").blockWith().settle().endTurn()
+      .activate("fealty|0")
+      .play("dragon power|3", { pitch: [RED] })
+      .expectAttackValue(5);
+  });
+
   it("destroys Fealty as an activation cost so it cannot be activated repeatedly", () => {
     const s = scenario({
       seats: [faiSeat({ board: ["fealty|0"] }), { hero: "rhinar", hand: [] }],
