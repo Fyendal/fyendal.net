@@ -4,7 +4,7 @@ import { cardData } from "@fyendal/cards/client";
 import {
   actionSelectionVariants,
   paidActionCandidates,
-  pitchResourceProgress,
+  actionPaymentProgress,
   selectedActionIntent,
 } from "./legalSelection.js";
 
@@ -354,11 +354,11 @@ export function useActionAnnouncement({
         ? additionalCostConfirmed
         : alternativeCostCardInstanceIds !== undefined
     ));
-  const pitchProgress = pitchResourceProgress(
+  const paymentProgress = actionPaymentProgress(
     selectedPaymentVariants,
     pitchSel,
     pitchValue,
-  ) ?? { selected: 0, required: 0 };
+  ) ?? { kind: "resource" as const, selected: 0, required: 0 };
   const boostOptions = [...new Set(paidVariants.map((intent) =>
     intent.kind !== "activate-ability" && intent.boost === true
       ? (intent.boostCount ?? 1)
@@ -441,7 +441,7 @@ export function useActionAnnouncement({
       selectedPaymentVariants.length > 0,
     normalCostPayableWithoutPitch,
     playMethodChoiceRequired,
-    pitchProgress,
+    paymentProgress,
     selectedAbilityIndexes,
     boostOptions,
     selectedBoostCount,

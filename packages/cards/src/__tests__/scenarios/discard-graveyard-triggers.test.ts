@@ -63,7 +63,7 @@ describe("discard trigger timing audit", () => {
     g.play("head jab|1")
       .blockWith("rally the rearguard|3")
       .passPriority()
-      .activate("rally the rearguard|3", { pitch: ["fool's gold|2"], settle: false })
+      .activate("rally the rearguard|3", { discard: ["fool's gold|2"], settle: false })
       .expectInZone(1, "fool's gold|2", "graveyard")
       .expectNotInZone(1, "gold|0", "board");
     expect(g.state.stack[0]?.label).toBe("Create a Gold token");
@@ -136,7 +136,7 @@ describe("discard trigger timing audit", () => {
     g.play("head jab|1")
       .blockWith("rally the rearguard|3")
       .passPriority()
-      .activate("rally the rearguard|3", { pitch: ["reincarnate|1"], settle: false })
+      .activate("rally the rearguard|3", { discard: ["reincarnate|1"], settle: false })
       .expectInZone(1, "reincarnate|1", "graveyard");
     expect(g.state.pendingTriggeredLayers ?? []).toEqual([]);
     expect(g.state.stack).toEqual([]);

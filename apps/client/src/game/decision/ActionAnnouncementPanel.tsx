@@ -53,8 +53,7 @@ export function ActionAnnouncementPanel({
     canConfirmAdditionalCost,
     onToggleAdditionalCostCard,
     onConfirmAdditionalCost,
-    pitchResourcesSelected,
-    pitchResourcesRequired,
+    paymentProgress,
     onCancel,
   } = model;
   if (sel.kind === "none") return null;
@@ -64,6 +63,7 @@ export function ActionAnnouncementPanel({
   const selectedAlternativeCostIds = Array.isArray(alternativeCostCardInstanceIds)
     ? alternativeCostCardInstanceIds
     : [];
+  const showPayment = !stagedAdditionalCost || additionalCostConfirmed;
   const attackLabel = intl.formatMessage({ id: "game.chain.stat.attack" });
 
   return (
@@ -235,15 +235,20 @@ export function ActionAnnouncementPanel({
               </div>
             </>
           ) : null}
-          {(!stagedAdditionalCost || additionalCostConfirmed) && pitchResourcesRequired > 0 ? (
+          {showPayment && paymentProgress.kind === "discard" && paymentProgress.required > 0 ? (
+            <span className="decision-context">
+              {intl.formatMessage({ id: "card.common.card.discard.choose" })}
+            </span>
+          ) : null}
+          {showPayment && paymentProgress.kind === "resource" && paymentProgress.required > 0 ? (
             <strong
               className="decision-resource-progress"
               aria-label={intl.formatMessage(
                 { id: "game.decision.pitchProgress" },
-                { selected: pitchResourcesSelected, required: pitchResourcesRequired },
+                { selected: paymentProgress.selected, required: paymentProgress.required },
               )}
             >
-              {pitchResourcesSelected}/{pitchResourcesRequired}
+              {paymentProgress.selected}/{paymentProgress.required}
             </strong>
           ) : null}
           {stagedAdditionalCost && !additionalCostConfirmed ? null : (

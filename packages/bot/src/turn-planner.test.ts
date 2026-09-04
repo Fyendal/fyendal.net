@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
   boundedRootCandidates,
   botObservationKey,
+  cloneStateForBotSimulation,
   DEFAULT_MAX_SEARCH_NODES,
   DEFAULT_MAX_SEARCH_TRANSITIONS,
   evaluateOpponentResponse,
@@ -20,6 +21,77 @@ function forcedIntent(legal: readonly GameIntent[]): GameIntent {
 }
 
 describe("bounded turn planning", () => {
+  it("removes presentation history from simulation clones without mutating live state", () => {
+    const state = createGame({
+      decklists: [decklists.dorinthea, decklists.rhinar],
+      cards: cardData,
+      scripts,
+      seed: 75,
+      startPlayer: 0,
+    });
+    state.log = [];
+    state.gameStats.turns = [];
+    for (let index = 1; index <= 100; index++) {
+      state.log.push({ publicText: `${index}:${"x".repeat(1_000)}` });
+      state.gameStats.turns.push({
+        turn: index,
+        activePlayer: index % 2,
+        attacks: [index, 0],
+        threatened: [index, 0],
+        blocked: [0, index],
+        damageDealt: [index, 0],
+      });
+    }
+    const originalBytes = JSON.stringify(state, (key, value) =>
+      key === "cardsRef" || key === "scriptsRef" ? undefined : value
+    ).length;
+
+    const simulation = cloneStateForBotSimulation(state, "compact-simulation");
+    const simulationBytes = JSON.stringify(simulation, (key, value) =>
+      key === "cardsRef" || key === "scriptsRef" ? undefined : value
+    ).length;
+
+    expect(simulation.log).toEqual([]);
+    expect(simulation.gameStats.turns).toEqual([state.gameStats.turns.at(-1)]);
+    expect(simulation.cardsRef).toBe(state.cardsRef);
+    expect(simulation.scriptsRef).toBe(state.scriptsRef);
+    expect(state.log).toHaveLength(100);
+    expect(state.gameStats.turns).toHaveLength(100);
+    expect(simulationBytes).toBeLessThan(originalBytes / 4);
+  });
+
+  it("ignores completed-turn history but retains current statistics in observation keys", () => {
+    const state = createGame({
+      decklists: [decklists.dorinthea, decklists.rhinar],
+      cards: cardData,
+      scripts,
+      seed: 76,
+      startPlayer: 0,
+    });
+    const view = projectStateFor(state, 0);
+    const current = {
+      turn: view.turn,
+      activePlayer: view.activePlayer,
+      attacks: [1, 0] as [number, number],
+      threatened: [3, 0] as [number, number],
+      blocked: [0, 0] as [number, number],
+      damageDealt: [2, 0] as [number, number],
+    };
+    view.gameStats = {
+      turns: [{ ...current, turn: view.turn - 1 }, current],
+    };
+    const legal = legalIntents(state, 0);
+    const withHistory = botObservationKey({ view, legal });
+    view.log = [];
+    view.logEntries = [];
+    expect(botObservationKey({ view, legal })).toBe(withHistory);
+    view.gameStats = { turns: [current] };
+    expect(botObservationKey({ view, legal })).toBe(withHistory);
+
+    view.gameStats.turns[0]!.threatened[0]++;
+    expect(botObservationKey({ view, legal })).not.toBe(withHistory);
+  });
+
   it("discounts goldfish damage with a public-information block model", () => {
     const state = createGame({
       decklists: [decklists.dorinthea, decklists.rhinar],

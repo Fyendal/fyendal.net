@@ -86,17 +86,17 @@ describe("card script layout", () => {
 
   it("uses computed types whenever a card instance is available", () => {
     const rawTypeReads = scriptSources(scriptsDir).flatMap(({ path, source }) =>
-      source.split("\n").flatMap((line, index) =>
+      source.split("\n").flatMap((line) =>
         /\.(?:classes|subtypes)\b/.test(line)
-          ? [`${path}:${index + 1}:${line.trim()}`]
+          ? [`${path}:${line.trim()}`]
           : [],
       ),
     );
 
     expect(rawTypeReads).toEqual([
-      "cru/high-rarity.ts:409:const heroClass = heroData.classes?.[0];",
-      "pen.ts:78:return [...(d.classes ?? []), ...(d.subtypes ?? [])].some(",
-      "sea.ts:38:return [...(d.classes ?? []), ...(d.subtypes ?? [])].some((value) => value.toLowerCase() === wanted);",
+      "cru/high-rarity.ts:const heroClass = heroData.classes?.[0];",
+      "pen.ts:return [...(d.classes ?? []), ...(d.subtypes ?? [])].some(",
+      "sea.ts:return [...(d.classes ?? []), ...(d.subtypes ?? [])].some((value) => value.toLowerCase() === wanted);",
     ]);
   });
 });

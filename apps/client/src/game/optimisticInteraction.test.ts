@@ -179,6 +179,38 @@ describe("optimistic interaction projection", () => {
     expect(detectGameMotionEvents(view, projection.view!)).toEqual([]);
   });
 
+  it("does not project an exact discard cost into the pitch zone", () => {
+    const rally: CardView = { instanceId: 20, cardId: "SKA028", owner: 0 };
+    const discarded: CardView = { instanceId: 21, cardId: "SKA029", owner: 0 };
+    const view = {
+      ...game(player(0, { hand: [discarded], handCount: 1 })),
+      phase: "reaction" as const,
+      chain: [{
+        attackingCard: { instanceId: 30, cardId: "WTR006", owner: 1 },
+        defendingCards: [rally],
+        attackValue: 3,
+        defenseValue: 3,
+        damage: 0,
+        resolved: false,
+        onStack: false,
+        reactions: [],
+      }],
+    };
+
+    const projection = optimisticInteractionView(view, 0, pending({
+      kind: "activate-ability",
+      sourceInstanceId: rally.instanceId,
+      pitchInstanceIds: [discarded.instanceId],
+      deferActivationPresentation: true,
+    }));
+
+    expect(projection.view).toBe(view);
+    expect(projection.predictsSemanticTransition).toBe(false);
+    expect(projection.view?.players[0]?.hand).toEqual([discarded]);
+    expect(projection.view?.players[0]?.pitch).toEqual([]);
+    expect(detectGameMotionEvents(view, projection.view!)).toEqual([]);
+  });
+
   it("presents an attack action in the attack stack slot", () => {
     const attack: CardView = { instanceId: 25, cardId: "WTR006", owner: 0, attack: 9 };
     const view = game(player(0, { hand: [attack], handCount: 1 }));

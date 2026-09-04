@@ -243,9 +243,10 @@ describe("SKA — utility cards", () => {
       kind: "activate-ability",
       sourceInstanceId: defendingCard.instanceId,
       pitchInstanceIds: [card.instanceId],
+      deferActivationPresentation: true,
     }))));
 
-    g.activate(rally, { pitch: ["bear hug|3"] })
+    g.activate(rally, { discard: ["bear hug|3"] })
       .expectFinalDefense(5);
   });
 });

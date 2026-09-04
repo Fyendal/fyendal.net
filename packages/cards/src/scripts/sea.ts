@@ -547,7 +547,12 @@ function graveLife(amount: number): CardScript {
 }
 
 function rallyDefense(): CardScript {
-  return { defenseAbility: { discard: 1, oncePerTurn: true }, onDefendAbility(ctx) { ctx.addModifier({ scope: "chain-link", defense: 3 }); } };
+  return {
+    defenseAbility: { discard: 1, oncePerTurn: true },
+    onDefendAbility(ctx) {
+      ctx.addModifier({ scope: "chain-link", defense: 3 });
+    },
+  };
 }
 
 function crashDownTheGates(): CardScript {

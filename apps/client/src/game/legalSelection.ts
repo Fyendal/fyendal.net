@@ -6,6 +6,31 @@ type PaidIntent = Extract<
   { kind: "play-card" | "play-from-arsenal" | "play-from-zone" | "activate-ability" }
 >;
 
+/** Normalize the established intent encoding at the UI boundary. Defending
+ * abilities predate pitchRequired and carry their exact discard choice in the
+ * pitch array; deferActivationPresentation distinguishes them from resources. */
+function actionPayment(intent: PaidIntent): {
+  kind: "resource" | "discard";
+  instanceIds: readonly number[];
+} {
+  const isDefendingDiscard = intent.kind === "activate-ability" &&
+    intent.deferActivationPresentation === true &&
+    intent.pitchRequired === undefined &&
+    intent.pitchInstanceIds.length > 0;
+  return {
+    kind: isDefendingDiscard ? "discard" : "resource",
+    instanceIds: intent.pitchInstanceIds,
+  };
+}
+
+/** Whether these variants ask for an exact discard rather than resources. */
+export function isDiscardPayment(
+  variants: readonly PaidIntent[],
+): boolean {
+  return variants.length > 0 &&
+    variants.every((intent) => actionPayment(intent).kind === "discard");
+}
+
 function sameIds(a: readonly number[], b: readonly number[]): boolean {
   return a.length === b.length && a.every((id) => b.includes(id));
 }
@@ -138,11 +163,11 @@ export function actionVariants(
 /** Variants matching the payment staged in the first announcement step. */
 export function paidActionVariants(
   variants: readonly PaidIntent[],
-  pitchInstanceIds: readonly number[],
+  paymentInstanceIds: readonly number[],
   alternativeCostCardInstanceIds: readonly number[] | null,
 ): PaidIntent[] {
   return variants.filter((intent) =>
-    sameOrderedIds(intent.pitchInstanceIds, pitchInstanceIds) &&
+    sameOrderedIds(actionPayment(intent).instanceIds, paymentInstanceIds) &&
     sameOptionalIds(intent.alternativeCostCardInstanceIds, alternativeCostCardInstanceIds),
   );
 }
@@ -154,14 +179,18 @@ function pitchTotal(
   return instanceIds.reduce((total, id) => total + pitchValue(id), 0);
 }
 
-/** Whether an exact client-selected pitch order pays this candidate. Pitching
- * must stop on the card that reaches the declared requirement. The server
- * repeats the full rules validation when the reconstructed intent arrives. */
+/** Whether the selected cards satisfy this candidate. Exact discard choices
+ * match server-enumerated ids; pitching stops on the card that reaches the
+ * declared resource requirement. */
 export function candidatePaymentReady(
   intent: PaidIntent,
   selected: readonly number[],
   pitchValue: (instanceId: number) => number,
 ): boolean {
+  const payment = actionPayment(intent);
+  if (payment.kind === "discard") {
+    return sameOrderedIds(payment.instanceIds, selected);
+  }
   if (intent.pitchRequired === undefined) {
     return sameOrderedIds(intent.pitchInstanceIds, selected);
   }
@@ -187,7 +216,7 @@ export function selectedActionIntent(
   meldSide: MeldSide | null,
   targetAllyId: number | null,
   targetCardInstanceId: number | null,
-  pitchInstanceIds: readonly number[],
+  paymentInstanceIds: readonly number[],
   boostCount: number | null = 0,
   asInstant = false,
   alternativeCostCardInstanceIds: readonly number[] | null = null,
@@ -208,21 +237,21 @@ export function selectedActionIntent(
   );
   const exactMatches = paidActionVariants(
     paymentVariants,
-    pitchInstanceIds,
+    paymentInstanceIds,
     alternativeCostCardInstanceIds,
   );
   const exact = pitchValue
-    ? exactMatches.find((intent) => candidatePaymentReady(intent, pitchInstanceIds, pitchValue))
+    ? exactMatches.find((intent) => candidatePaymentReady(intent, paymentInstanceIds, pitchValue))
     : exactMatches[0];
   if (exact) return exact;
   if (!pitchValue) return null;
-  const candidate = paidActionCandidates(paymentVariants, pitchInstanceIds, pitchValue)[0];
-  return candidate ? { ...candidate, pitchInstanceIds: [...pitchInstanceIds] } : null;
+  const candidate = paidActionCandidates(paymentVariants, paymentInstanceIds, pitchValue)[0];
+  return candidate ? { ...candidate, pitchInstanceIds: [...paymentInstanceIds] } : null;
 }
 
 /** Exact card costs follow the server-enumerated choices. Resource payments
  * allow any next pitch until the declared total is reached. */
-export function canAddPitch(
+export function canAddPaymentCard(
   variants: readonly PaidIntent[],
   selected: readonly number[],
   instanceId: number,
@@ -230,7 +259,8 @@ export function canAddPitch(
 ): boolean {
   const next = [...selected, instanceId];
   if (variants.some((intent) =>
-    intent.pitchRequired === undefined && startsWithIds(intent.pitchInstanceIds, next)
+    actionPayment(intent).kind === "discard" &&
+    startsWithIds(intent.pitchInstanceIds, next)
   )) return true;
   if (pitchValue) {
     const selectedTotal = pitchTotal(selected, pitchValue);
@@ -241,19 +271,30 @@ export function canAddPitch(
   return variants.some((intent) => startsWithIds(intent.pitchInstanceIds, next));
 }
 
-/** Compact progress for a partially selected server-offered payment. The
- * denominator is the tightest offered pitch total that can still include the
- * current selection, so staged payment stays aligned with legal intents. */
-export function pitchResourceProgress(
+/** Presentation state for a partially selected server-offered payment. */
+export function actionPaymentProgress(
   variants: readonly PaidIntent[],
   selected: readonly number[],
   pitchValue: (instanceId: number) => number,
-): { selected: number; required: number } | null {
+): { kind: "resource" | "discard"; selected: number; required: number } | null {
+  const discardVariants = variants.filter((intent) => actionPayment(intent).kind === "discard");
+  if (discardVariants.length > 0) {
+    const compatible = discardVariants.filter((intent) =>
+      startsWithIds(intent.pitchInstanceIds, selected)
+    );
+    if (compatible.length === 0) return null;
+    return {
+      kind: "discard",
+      selected: selected.length,
+      required: Math.min(...compatible.map((intent) => intent.pitchInstanceIds.length)),
+    };
+  }
   const explicitRequirements = variants.flatMap((intent) =>
     intent.pitchRequired === undefined ? [] : [intent.pitchRequired]
   );
   if (explicitRequirements.length > 0) {
     return {
+      kind: "resource",
       selected: pitchTotal(selected, pitchValue),
       required: Math.min(...explicitRequirements),
     };
@@ -263,6 +304,7 @@ export function pitchResourceProgress(
   );
   if (compatible.length === 0) return null;
   return {
+    kind: "resource",
     selected: selected.reduce((total, id) => total + pitchValue(id), 0),
     required: Math.min(...compatible.map((intent) =>
       intent.pitchRequired ??

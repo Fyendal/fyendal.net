@@ -351,10 +351,14 @@ export class Scenario {
     return a.every((id, index) => id === b[index]);
   }
 
-  private pitchMatches(intentPitches: number[], keys: string[] | undefined, seat: number): boolean {
+  private handSelectionMatches(
+    intentIds: readonly number[],
+    keys: string[] | undefined,
+    seat: number,
+  ): boolean {
     if (!keys) return true;
     const wanted = this.handInstances(seat, keys).sort((a, b) => a - b);
-    const got = [...intentPitches].sort((a, b) => a - b);
+    const got = [...intentIds].sort((a, b) => a - b);
     return wanted.length === got.length && wanted.every((v, i) => v === got[i]);
   }
 
@@ -467,7 +471,7 @@ export class Scenario {
           i.targetCardInstanceId === this.targetCardInstanceIdOf(opts.targetCard)) &&
         (opts.targetPermanent === undefined ||
           i.targetCardInstanceId === this.targetPermanentInstanceIdOf(opts.targetPermanent)) &&
-        this.pitchMatches(i.pitchInstanceIds, opts.pitch, seat),
+        this.handSelectionMatches(i.pitchInstanceIds, opts.pitch, seat),
     );
     // When both methods are legal, ordinary scenario plays default to the
     // action method; tests that exercise the alternate method opt in.
@@ -491,14 +495,23 @@ export class Scenario {
     return opts.settle === false ? this : this.settle();
   }
 
-  /** Activate a weapon/equipment/hero ability (incl. weapon attacks and
-   *  "while defending" abilities — there the pitch is the discard).
+  /** Activate a weapon/equipment/hero ability, including "while defending"
+   *  abilities with an explicit discard cost.
    *  `ability` selects one of several activated abilities on the same card;
    *  `targetAlly` aims an attack ability at an opposing ally. */
   activate(
     key: string,
-    opts: { pitch?: string[]; settle?: boolean; ability?: number; targetAlly?: string } = {},
+    opts: {
+      pitch?: string[];
+      discard?: string[];
+      settle?: boolean;
+      ability?: number;
+      targetAlly?: string;
+    } = {},
   ): this {
+    if (opts.pitch !== undefined && opts.discard !== undefined) {
+      throw new Error("activate accepts either pitch or discard, not both");
+    }
     const id = printingId(key);
     const seat = this.actor();
     const legal = legalIntents(this.state, seat).filter(
@@ -511,9 +524,13 @@ export class Scenario {
         (opts.targetAlly === undefined
           ? i.targetAllyId === undefined // default: aim at the hero
           : i.targetAllyId === this.targetAllyIdOf(seat, opts.targetAlly)) &&
-        this.pitchMatches(i.pitchInstanceIds, opts.pitch, seat),
+        (opts.discard === undefined || (
+          i.deferActivationPresentation === true && i.pitchRequired === undefined
+        )) &&
+        this.handSelectionMatches(i.pitchInstanceIds, opts.discard ?? opts.pitch, seat),
     );
-    const intent = opts.pitch ? matching[0] : this.pickIntent(matching);
+    const hasExplicitPayment = opts.pitch !== undefined || opts.discard !== undefined;
+    const intent = hasExplicitPayment ? matching[0] : this.pickIntent(matching);
     if (!intent) {
       throw new Error(`no legal intent to activate "${key}" — is it activatable in this setup?`);
     }
@@ -540,7 +557,7 @@ export class Scenario {
         (opts.targetAlly === undefined
           ? i.targetAllyId === undefined // default: aim at the hero
           : i.targetAllyId === this.targetAllyIdOf(seat, opts.targetAlly)) &&
-        this.pitchMatches(i.pitchInstanceIds, opts.pitch, seat),
+        this.handSelectionMatches(i.pitchInstanceIds, opts.pitch, seat),
     );
     const intent = opts.pitch ? matching[0] : this.pickIntent(matching);
     if (!intent) {
@@ -630,7 +647,7 @@ export class Scenario {
         i.targetCardInstanceId === this.targetCardInstanceIdOf(opts.targetCard))
       && (alternativeCostInstanceIds === undefined
         || this.sameInstanceIds(i.alternativeCostCardInstanceIds, alternativeCostInstanceIds))
-      && this.pitchMatches(i.pitchInstanceIds, opts.pitch, seat));
+      && this.handSelectionMatches(i.pitchInstanceIds, opts.pitch, seat));
     const costMatching =
       alternativeCostInstanceIds === undefined &&
       matching.some((i) => i.alternativeCostCardInstanceIds === undefined)
