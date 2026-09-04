@@ -2584,6 +2584,17 @@ describe("combat", () => {
     s = r.state;
     const b1 = giveCard(s, 1, "BLOCK3");
     const b2 = giveCard(s, 1, "BLOCK3");
+    r = applyIntent(s, 1, { kind: "stage-defenders", instanceIds: [b1] });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    s = r.state;
+    expect(legalIntents(s, 1)).not.toContainEqual({
+      kind: "stage-defenders",
+      instanceIds: [b2],
+    });
+    r = applyIntent(s, 1, { kind: "stage-defenders", instanceIds: [b1, b2] });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toMatch(/Dominate/);
     r = applyIntent(s, 1, { kind: "defend", instanceIds: [b1, b2] });
     expect(r.ok).toBe(false);
     r = applyIntent(s, 1, { kind: "defend", instanceIds: [b1] });

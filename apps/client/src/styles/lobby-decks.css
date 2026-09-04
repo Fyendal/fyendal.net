@@ -366,49 +366,25 @@
   outline: 1px solid #ffd66b;
   outline-offset: -2px;
 }
-.card-pool-segments button::after {
-  position: absolute;
-  z-index: 30;
-  top: calc(100% + 10px);
-  left: 50%;
+.card-pool-tooltip {
+  position: fixed;
+  z-index: 1000;
   width: max-content;
-  max-width: 230px;
+  max-width: min(320px, calc(100vw - 16px));
+  box-sizing: border-box;
   padding: 7px 9px;
   border: 1px solid #806334;
   border-radius: 6px;
   background: #100a06f5;
   box-shadow: 0 6px 18px #000c;
   color: #f3e8d2;
-  content: attr(data-tooltip);
   font: 500 11px/1.35 var(--font-lobby-ui);
   letter-spacing: 0;
-  opacity: 0;
   pointer-events: none;
   text-align: left;
   text-transform: none;
-  transform: translate(-50%, -4px);
-  transition: opacity 140ms ease, transform 140ms ease;
+  transform: translateX(-50%);
   white-space: normal;
-}
-.card-pool-segments button:first-of-type::after {
-  left: 0;
-  transform: translateY(-4px);
-}
-.card-pool-segments button:last-of-type::after {
-  right: 0;
-  left: auto;
-  transform: translateY(-4px);
-}
-.card-pool-segments button:hover::after,
-.card-pool-segments button:focus-visible::after {
-  opacity: 1;
-  transform: translate(-50%, 0);
-}
-.card-pool-segments button:first-of-type:hover::after,
-.card-pool-segments button:first-of-type:focus-visible::after,
-.card-pool-segments button:last-of-type:hover::after,
-.card-pool-segments button:last-of-type:focus-visible::after {
-  transform: translateY(0);
 }
 .card-pool-segments button.selected {
   background: transparent;
@@ -538,19 +514,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .card-pool-segments::before { transition: none; }
-  .card-pool-segments button::after { transition: none; }
 }
 
 @media (max-width: 700px) {
-  .card-pool-segments button::after {
-    box-sizing: border-box;
-    width: min(220px, calc(100vw - 24px));
-    max-width: none;
-  }
-  .card-pool-segments button:last-of-type::after {
-    right: auto;
-    left: -200%;
-  }
   .deck-library-panel { padding-bottom: 18px; }
   .mobile-deck-format-picker {
     position: relative;

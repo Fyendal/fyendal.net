@@ -604,6 +604,17 @@ describe("overpower", () => {
     s = declareAttack(s, 0, "OVER");
     const b1 = giveCard(s, 1, "BLOCK3");
     const b2 = giveCard(s, 1, "BLUE3");
+    let staged = applyIntent(s, 1, { kind: "stage-defenders", instanceIds: [b1] });
+    expect(staged.ok).toBe(true);
+    if (!staged.ok) return;
+    s = staged.state;
+    expect(legalIntents(s, 1)).not.toContainEqual({
+      kind: "stage-defenders",
+      instanceIds: [b2],
+    });
+    staged = applyIntent(s, 1, { kind: "stage-defenders", instanceIds: [b1, b2] });
+    expect(staged.ok).toBe(false);
+    if (!staged.ok) expect(staged.error).toMatch(/Overpower/);
     const r = applyIntent(s, 1, { kind: "defend", instanceIds: [b1, b2] });
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.error).toMatch(/Overpower/);
@@ -719,6 +730,22 @@ describe("declarative defender selection", () => {
     });
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.error).toMatch(/more than 2 non-block cards/);
+
+    result = applyIntent(s, 1, {
+      kind: "stage-defenders",
+      instanceIds: [first, second],
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    s = result.state;
+    expect(legalIntents(s, 1)).not.toContainEqual({
+      kind: "stage-defenders",
+      instanceIds: [third],
+    });
+    expect(legalIntents(s, 1)).toContainEqual({
+      kind: "stage-defenders",
+      instanceIds: [blockCard],
+    });
 
     result = applyIntent(s, 1, {
       kind: "stage-defenders",

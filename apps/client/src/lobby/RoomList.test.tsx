@@ -241,6 +241,8 @@ describe("RoomList", () => {
     expect(html).toContain(">合法</button>");
     expect(html).toContain(">未来</button>");
     expect(html).toContain(">开放</button>");
+    expect(html).toContain('data-tooltip="允许比赛合法卡牌和已实现的未来卡牌。"');
+    expect(html).toContain('data-tooltip="允许所有已实现卡牌，包括禁用卡牌和传奇殿堂英雄。"');
     expect(html).toContain("试用预构筑牌组");
     expect(html).toContain("寻找对局");
     expect(html).toContain("对战AI");

@@ -22,11 +22,14 @@ import {
   isAuraAttacker,
   mandatoryAttackTargets,
 } from "./attacks.js";
-import { attackAllowsDefender, legalDefenderCards } from "./defense.js";
+import {
+  attackAllowsDefender,
+  defenderSelectionError,
+  legalDefenderCards,
+} from "./defense.js";
 import { defenseReactionRestriction } from "./reactions.js";
 import {
   attackHasDominate,
-  attackHasOverpower,
   attackMaxNonBlockDefenders,
   attackNonBlockDefenderCount,
   grantsAuraAttackMarker,
@@ -948,26 +951,9 @@ function defendIntents(state: GameStateInternal,
   runtime: EngineRuntime, seat: number): GameIntent[] {
   const link = currentLink(state);
   if (!link) return [];
-  const { hand, arsenal, equipment } = legalDefenderCards(state, runtime, seat);
+  const defenders = legalDefenderCards(state, runtime, seat);
+  const { hand, arsenal, equipment } = defenders;
   const nonEquipment = [...hand, ...arsenal];
-  const dominate = attackHasDominate(state, link);
-  const overpower = attackHasOverpower(state, link);
-  const maxNonBlock = attackMaxNonBlockDefenders(state, link);
-  const existingNonBlockCount = attackNonBlockDefenderCount(state, link);
-  const nonBlockCount = (ids: number[]) =>
-    ids.filter((id) => {
-      const c = [...nonEquipment, ...equipment].find((x) => x.instanceId === id);
-      return c && dataOf(state, c.cardId).cardType !== "block";
-    }).length;
-  // Overpower (8.3.22): at most one ACTION card may defend (reactions, block
-  // cards and equipment are unaffected)
-  const actionDefenderCount = (ids: number[]) =>
-    ids.filter((id) => {
-      const c = nonEquipment.find((x) => x.instanceId === id);
-      return c && dataOf(state, c.cardId).cardType === "action";
-    }).length;
-  const handDefenderCount = (ids: number[]) =>
-    ids.filter((id) => hand.some((card) => card.instanceId === id)).length;
   // Defense selection is declarative: the client stages an exact set and the
   // engine validates that incoming set in stageDefenders/assignDefenders.
   // Advertising every hand × equipment subset is both redundant and
@@ -987,12 +973,7 @@ function defendIntents(state: GameStateInternal,
     Number(link.flags.mustDefendWithEquipmentCount ?? (requiredEquip ? 1 : 0)),
   );
   if (stagedEquipment.length < requiredEquipCount) return [];
-  if (dominate && handDefenderCount(stagedNonEquipment) > 1) return [];
-  if (overpower && actionDefenderCount(stagedNonEquipment) > 1) return [];
-  if (
-    maxNonBlock !== undefined &&
-    existingNonBlockCount + nonBlockCount(stagedIds) > maxNonBlock
-  ) return [];
+  if (defenderSelectionError(state, link, defenders, stagedIds)) return [];
 
   // Optional "when this defends, you may pay" costs are paid only when that
   // triggered layer resolves. requestPayment/requestXPayment enumerate any
@@ -1205,12 +1186,27 @@ function enumerateIntents(
     if (runechantSkipStep(state, seat) !== null) intents.unshift({ kind: "skip-runechant" });
     switch (pd.kind) {
       case "defend": {
-        const { hand, arsenal, equipment } = legalDefenderCards(state, runtime, seat);
+        const defenders = legalDefenderCards(state, runtime, seat);
+        const { hand, arsenal, equipment } = defenders;
+        const link = currentLink(state);
+        const stagedIds = pd.staged ?? [];
+        const stageable = [...hand, ...arsenal, ...equipment].filter(
+          (card) =>
+            !stagedIds.includes(card.instanceId) &&
+            link !== undefined &&
+            defenderSelectionError(
+              state,
+              link,
+              defenders,
+              [...stagedIds, card.instanceId],
+            ) === undefined,
+        );
         return [
           ...defendIntents(state, runtime, seat),
           // staging (uncommitted defender selection) is declarative: one
-          // single-card intent per stageable card advertises the candidates
-          ...[...hand, ...arsenal, ...equipment].map(
+          // single-card intent per card that can legally join the current
+          // staged set advertises the candidates
+          ...stageable.map(
             (c): GameIntent => ({ kind: "stage-defenders", instanceIds: [c.instanceId] }),
           ),
           ...intents,
