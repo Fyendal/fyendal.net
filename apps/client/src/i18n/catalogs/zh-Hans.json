@@ -379,6 +379,7 @@
   "card.common.option.keeporder": "保持顺序",
   "card.common.option.legs": "腿部",
   "card.common.option.power.one": "+1{p}",
+  "card.common.option.power.three": "+3{p}",
   "card.common.option.red": "红色",
   "card.common.option.swap": "交换",
   "card.common.option.yellow": "黄色",

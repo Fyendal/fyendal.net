@@ -745,6 +745,15 @@ export function playReaction(
     );
     if (alternativeErr) return alternativeErr;
   }
+  if (script?.onPlayCostPaid) {
+    const paidCards = pitchInstanceIds
+      .map((id) => player.pitch.find((candidate) => candidate.instanceId === id))
+      .filter((candidate): candidate is CardInstance => candidate !== undefined);
+    script.onPlayCostPaid(
+      runtime.makeCtx(state, seat, card, link, fromArsenal),
+      paidCards,
+    );
+  }
   if (isDefReact && Number(player.flags.nextDefenseReactionExtraCost || 0) > 0) {
     player.flags.nextDefenseReactionExtraCost = 0;
   }

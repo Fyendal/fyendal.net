@@ -248,7 +248,13 @@ export interface PersistedModifierV1 {
   extraDiceIgnoreLowest?: number;
   onHitClearHandAndArsenalAtEndPhase?: boolean;
   onHitDealDamage?: number;
-  onHitScriptHook?: { hook: string; label: string; heroOnly?: boolean; requiresAttackCounter?: string };
+  onHitScriptHook?: {
+    hook: string;
+    label: string;
+    heroOnly?: boolean;
+    requiresAttackCounter?: string;
+    requiresAttackNameContains?: string;
+  };
   onHitDestroyTopDeckCards?: { count: number; minimumDamage: number };
   replaceCombatDamageWithDefendingEquipment?: boolean;
   onDamageDealtCreateTokenPerPoint?: string;
@@ -1077,11 +1083,18 @@ function validateModifier(value: unknown, code: string, path: string): void {
     integer(effect.minimumDamage, code, `${p}.minimumDamage`);
   }, path);
   optional(modifier, "onHitScriptHook", (v, p) => {
-    const effect = exact(v, code, p, ["hook", "label"], ["heroOnly", "requiresAttackCounter"]);
+    const effect = exact(
+      v,
+      code,
+      p,
+      ["hook", "label"],
+      ["heroOnly", "requiresAttackCounter", "requiresAttackNameContains"],
+    );
     string(effect.hook, code, `${p}.hook`, 256);
     string(effect.label, code, `${p}.label`, 256);
     optional(effect, "heroOnly", (entry, entryPath) => { bool(entry, code, entryPath); }, p);
     optional(effect, "requiresAttackCounter", (entry, entryPath) => { string(entry, code, entryPath, 128); }, p);
+    optional(effect, "requiresAttackNameContains", (entry, entryPath) => { string(entry, code, entryPath, 128); }, p);
   }, path);
   optional(modifier, "defendingPitchDefenseAdjustment", (v, p) => {
     const adjustment = exact(v, code, p, ["pitch", "amount"], ["requiresAimCounter"]);

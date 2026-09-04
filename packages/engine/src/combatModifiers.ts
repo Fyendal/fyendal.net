@@ -3,7 +3,9 @@ import type { CardData } from "@fyendal/shared";
 import {
   cardAbilitiesSuppressed,
   cardColorOf,
+  cardTypesOf,
   dataOf,
+  ownedClassTalentTypesSuppressed,
 } from "./cardProperties.js";
 import type { CardInstance, ChainLinkState, Modifier, PlayerState } from "./state.js";
 import { goAgainSuppressed } from "./ruleQueries.js";
@@ -11,12 +13,6 @@ import { opponent } from "./zoneQueries.js";
 
 function isSword(data: CardData): boolean {
   return (data.subtypes ?? []).includes("sword");
-}
-
-export function hasClass(data: CardData, cardClass: string): boolean {
-  return (data.classes ?? []).some(
-    (candidate) => candidate.toLowerCase() === cardClass.toLowerCase(),
-  );
 }
 
 /** Does a modifier's static filter set match the supplied card properties? */
@@ -70,7 +66,7 @@ function modifierMatches(
   ) return false;
   if (
     modifier.excludesSubtype &&
-    (data.subtypes ?? []).includes(modifier.excludesSubtype)
+    effectiveCardTypes.includes(modifier.excludesSubtype.toLowerCase())
   ) return false;
   if (modifier.appliesToCardType === "reaction") {
     if (
@@ -84,12 +80,10 @@ function modifierMatches(
     !effectiveCardTypes.includes(modifier.appliesToCardType)
   ) return false;
   if (modifier.appliesToPitch !== undefined && color !== modifier.appliesToPitch) return false;
-  const hasTag = (tag: string): boolean =>
-    hasClass(data, tag) ||
-    (data.subtypes ?? []).some(
-      (subtype) => subtype.toLowerCase() === tag.toLowerCase(),
-    ) ||
-    granted(tag.toLowerCase());
+  const hasTag = (tag: string): boolean => {
+    const normalized = tag.toLowerCase();
+    return effectiveCardTypes.includes(normalized) || granted(normalized);
+  };
   if (modifier.appliesToClass && !hasTag(modifier.appliesToClass)) return false;
   if (modifier.appliesToSubtype) {
     const wanted = Array.isArray(modifier.appliesToSubtype)
@@ -124,9 +118,10 @@ export function modifierAppliesTo(
     data,
     cardType,
     color,
-    granted,
+    ownedClassTalentTypesSuppressed(state, card) ? undefined : granted,
     grantedNames,
     !cardAbilitiesSuppressed(state, card),
+    [data.cardType, ...cardTypesOf(state, card)],
   );
 }
 
@@ -155,7 +150,7 @@ export function modifierAppliesToDefense(
     undefined,
     undefined,
     !cardAbilitiesSuppressed(state, card),
-    effectiveCardTypes,
+    [...effectiveCardTypes, ...cardTypesOf(state, card)],
   );
 }
 
@@ -171,14 +166,9 @@ export function modifierApplies(
   ) return false;
   if (modifier.appliesToTargetType) {
     if (link.targetAllyId !== undefined) return false;
-    const targetHero = dataOf(
-      state,
-      (state.players[opponent(link.attacker)] as PlayerState).heroCardId,
-    );
+    const targetHero = (state.players[opponent(link.attacker)] as PlayerState).hero;
     const wanted = modifier.appliesToTargetType.toLowerCase();
-    const matches =
-      (targetHero.classes ?? []).some((tag) => tag.toLowerCase() === wanted) ||
-      (targetHero.subtypes ?? []).some((tag) => tag.toLowerCase() === wanted);
+    const matches = cardTypesOf(state, targetHero).includes(wanted);
     if (!matches) return false;
   }
   if (modifier.appliesToMarkedHero) {

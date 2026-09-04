@@ -104,7 +104,36 @@ describe("Uprising, Dynasty, and Outsiders rules regression coverage", () => {
     g.expectInZone(1, "come to fight|1", "hand");
     expect(g.state.players[1]!.actionPoints).toBe(1);
   });
-  it("Erase Face temporarily removes all card types", () => implementation("erase face|1", (script) => !!script.onHit));
+  it("Erase Face prevents Seismic Surge from discounting a Guardian attack", () => {
+    const g = scenario({ seats: [
+      { hero: "rhinar", resources: 2, hand: ["erase face|1"], deck: [] },
+      {
+        hero: "dorinthea",
+        hand: ["cartilage crush|1", "wrecker romp|3", "raging onslaught|3", "raging onslaught|3"],
+        deck: [],
+        board: ["seismic surge|0"],
+      },
+    ] });
+
+    g.play("erase face|1").blockWith().settle().endTurn()
+      .play("cartilage crush|1", { pitch: ["wrecker romp|3"], settle: false })
+      .expectResources(1, 0);
+  });
+  it("Erase Face prevents Boost from granting go again", () => {
+    const g = scenario({ seats: [
+      { hero: "rhinar", resources: 2, hand: ["erase face|1"], deck: [] },
+      {
+        hero: "dorinthea",
+        hand: ["zero to sixty|1", "raging onslaught|3", "raging onslaught|3", "raging onslaught|3"],
+        deck: ["zipper hit|1"],
+      },
+    ] });
+
+    g.play("erase face|1").blockWith().settle().endTurn()
+      .play("zero to sixty|1", { boost: true })
+      .blockWith().settle()
+      .expectAP(1, 0);
+  });
   it("Berserk registers a random-discard trigger", () => implementation("berserk|2", (script) => script.triggers?.some((trigger) => trigger.event === "card-discarded") === true));
   it("Spirit of Eirina replaces a soul-zone move", () => implementation("spirit of eirina|2", (script) => script.replacesSoulMoveWithArena === true && !!script.allowsFriendlyCardPlayAsInstant));
   it("Cleave deals resolved hit damage to another ally", () => {

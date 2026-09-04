@@ -1759,8 +1759,11 @@ function scoreAttackReaction(data: CardData, input: BotPolicyInput): number {
     margin >= allyLethalThreshold(link.targetAlly, input)
   ) return -100;
 
+  // Beckon Steel only pays off through its on-hit trigger, so a fully
+  // defended attack wastes it outright.
   if (functional === "beckon steel|3") {
-    return counters >= 2 && currentAttackHits(input) ? 100 : counters >= 2 ? 35 : 10;
+    if (!currentAttackHits(input)) return -100;
+    return counters >= 2 ? 100 : 10;
   }
   if (functional === "slice up|1") {
     return counters > 0 && currentAttackHits(input) && input.view.players[1 - input.seat]!.handCount > 0

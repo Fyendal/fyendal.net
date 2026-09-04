@@ -1016,7 +1016,47 @@ Object.assign(sup, {
   },
   "gallow, end of the line|2": { ...attackAbility(1, { tap: true, oncePerTurn: false }), activated: [...attackAbility(1, { tap: true, oncePerTurn: false }), { cost: 0, isAttack: false, goAgain: false, timing: "instant", tap: true, oncePerTurn: false, label: "Suppress opposing on-hit triggers", effectCardCosts: [{ zone: "hand", move: "discard", count: 1, keyword: "watery grave", prompt: decisionPrompt("Discard a card with watery grave", "card.common.cost.waterygrave.discard") }], onActivate(ctx: ScriptCtx) { ctx.setFlag("player", "suppressOpponentHitTriggers", true); } }] },
   "catch of the day|3": { onPlay(ctx: ScriptCtx) { buffNextAttack(ctx, { attack: 2, appliesToSubtype: "arrow" }); ctx.setFlag("player", "doubleGoFish", true); } },
-  "painful passage|1": { onPlay(ctx: ScriptCtx) { const attacks = ctx.player(ctx.seat).hand.filter((card) => ctx.hasCardType(card, "action") && hasTag(ctx, card, "attack")); if (attacks.length) ctx.requestCardChoice("painful", decisionPrompt("Banish an attack action?", "card.sup.attack.banish", { optionMessages: commonOptionMessages("pass") }), ["pass", ...attacks.map((card) => card.instanceId)]); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "painful" && option !== "pass" && ctx.banish(Number(option))) { ctx.addCardTempPower(Number(option), 3); ctx.allowPlayFrom(Number(option), "banish"); } } },
+  "painful passage|1": {
+    onPlay(ctx: ScriptCtx) {
+      const attacks = ctx.player(ctx.seat).hand.filter((card) =>
+        ctx.hasCardType(card, "action") && hasTag(ctx, card, "attack")
+      );
+      if (attacks.length) {
+        ctx.requestCardChoice(
+          "painful-card",
+          decisionPrompt("Banish an attack action?", "card.sup.attack.banish", {
+            optionMessages: commonOptionMessages("pass"),
+          }),
+          ["pass", ...attacks.map((card) => card.instanceId)],
+        );
+      }
+    },
+    onChoose(ctx: ScriptCtx, hook: string, option: string) {
+      if (hook === "painful-card") {
+        if (option === "pass") return;
+        const target = Number(option);
+        if (!ctx.banish(target)) return;
+        ctx.setCounter("painful-target", target);
+        ctx.requestChoice(
+          "painful-mode",
+          decisionPrompt("Choose +3 power or go again", "card.common.bonus.choose", {
+            optionMessages: {
+              power: decisionMessage("card.common.option.power.three"),
+              "go-again": decisionMessage("card.common.option.goagain"),
+            },
+          }),
+          ["power", "go-again"],
+        );
+        return;
+      }
+      if (hook !== "painful-mode") return;
+      const target = ctx.getCounter("painful-target");
+      if (option === "power") ctx.addCardTempPower(target, 3);
+      else if (option === "go-again") ctx.grantCardKeyword(target, "go again");
+      else return;
+      ctx.allowPlayFrom(target, "banish");
+    },
+  },
 } satisfies Record<string, CardScript>);
 
 sup["who blinks first?|3"]!.onChoose = (ctx, hook, option) => { if (hook === "blinks-aura") ctx.destroyPermanent(Number(option)); };

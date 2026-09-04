@@ -178,6 +178,24 @@ describe("authoritative legal-intent selection", () => {
     expect(canAddPitch(variants, [32], 33)).toBe(true);
   });
 
+  it("permits an exact discard choice when hand-card resource values are available", () => {
+    const variants = actionVariants(
+      [
+        { kind: "activate-ability", sourceInstanceId: 84, pitchInstanceIds: [31] },
+        { kind: "activate-ability", sourceInstanceId: 84, pitchInstanceIds: [32] },
+      ],
+      { kind: "activate", sourceInstanceId: 84 },
+      null,
+      null,
+      null,
+    );
+    const pitchValue = () => 3;
+
+    expect(canAddPitch(variants, [], 31, pitchValue)).toBe(true);
+    expect(canAddPitch(variants, [], 32, pitchValue)).toBe(true);
+    expect(canAddPitch(variants, [], 33, pitchValue)).toBe(false);
+  });
+
   it("preserves sequential pitch order", () => {
     const redThenBlue: GameIntent = {
       kind: "play-card",

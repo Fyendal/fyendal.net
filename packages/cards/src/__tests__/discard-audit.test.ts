@@ -16,6 +16,22 @@ function functionsIn(value: unknown, seen = new Set<unknown>()): AnyFunction[] {
 const dataByKey = new Map(cardList.map((card) => [functionalKeyOf(card), card]));
 
 describe("discard implementation audit", () => {
+  it("models every printed while-defending discard ability", () => {
+    const printedAbilities = cardList.filter((card) => {
+      const text = card.text.toLowerCase();
+      return text.includes("discard a card:") &&
+        (text.includes("while this is defending") || text.includes("while this card is defending"));
+    });
+
+    expect(printedAbilities.length).toBeGreaterThan(0);
+    for (const card of printedAbilities) {
+      const script = registry[functionalKeyOf(card)];
+      expect(script?.defenseAbility?.discard, card.id).toBe(1);
+      expect(script?.defenseAbility?.oncePerTurn, card.id).toBe(true);
+      expect(script?.onDefendAbility, card.id).toBeTypeOf("function");
+    }
+  });
+
   it("uses seeded random discard only when the printed text says random", () => {
     for (const [key, script] of Object.entries(registry)) {
       if (!script) continue;

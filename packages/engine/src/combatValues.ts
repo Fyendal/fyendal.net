@@ -6,6 +6,7 @@ import {
   cardAbilitiesSuppressed,
   cardColorOf,
   cardHasType,
+  cardTypesOf,
   dataOf,
   instanceHasKeyword,
   scriptOf,
@@ -14,7 +15,6 @@ import {
 import {
   activeModifiers,
   attackGrantedType,
-  hasClass,
   modifierApplies,
   modifierAppliesToDefense,
 } from "./combatModifiers.js";
@@ -192,11 +192,7 @@ export function linkAttackHasType(
   tag: string,
 ): boolean {
   const normalized = tag.toLowerCase();
-  const data = dataOf(state, link.attackingCard.cardId);
-  if (
-    hasClass(data, normalized) ||
-    (data.subtypes ?? []).some((subtype) => subtype.toLowerCase() === normalized)
-  ) return true;
+  if (cardTypesOf(state, link.attackingCard).includes(normalized)) return true;
   if (attackGrantedType(link, normalized)) return true;
   return state.modifiers.some(
     (modifier) =>
@@ -1101,8 +1097,7 @@ export function grantsAuraAttackMarker(
       if (marker.requiresWard !== false && wardValueOf(data) === undefined) continue;
       if (
         marker.requiresClass &&
-        !(data.classes ?? []).some((candidate) =>
-          candidate.toLowerCase() === marker.requiresClass!.toLowerCase())
+        !cardTypesOf(state, card).includes(marker.requiresClass.toLowerCase())
       ) continue;
       if (
         marker.requiresSubtype &&

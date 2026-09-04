@@ -110,18 +110,18 @@ describe("HVY — Pack Call (on defend, reveal top: 6+ stays, else bottom)", () 
 });
 
 describe("HVY — Rally the Rearguard", () => {
-  it("while defending, discard a card for +3 defense", () => {
+  it.each(["HVY228", "HVY229", "HVY230"])("%s discards a card for +3 defense", (rally) => {
     const g = scenario({
       seats: [
         { hero: "dorinthea", hand: ["en garde|1"] },
-        { hero: "rhinar", hand: ["rally the rearguard|3", "dodge|3"] },
+        { hero: "rhinar", hand: [rally, "dodge|3"] },
       ],
     });
     g.attackWithWeapon()
-      .blockWith("rally the rearguard|3")
+      .blockWith(rally)
       .passPriority() // attacker passes the reaction step
-      .activate("rally the rearguard|3", { pitch: ["dodge|3"] }) // discard is passed as "pitch"
-      .expectLog("Rally the Rearguard gains +3 defense")
+      .activate(rally, { pitch: ["dodge|3"] }) // discard is passed as "pitch"
+      .expectLog("Rally the Rearguard")
       .expectFinalDefense(5) // 2 + 3
       .expectLife(0, 20); // Dawnblade's 2 is fully defended
   });

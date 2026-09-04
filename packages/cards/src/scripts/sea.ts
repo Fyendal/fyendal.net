@@ -1585,7 +1585,33 @@ Object.assign(sea, {
   "hammerhead, harpoon cannon|0": { activated: { cost: 4, isAttack: false, goAgain: true, tap: true, onActivate(ctx: ScriptCtx) { buffNextAttack(ctx, { attack: 4, appliesToSubtype: "arrow", overpower: true }); ctx.setFlag("player", "activatedCannonThisTurn", true); } } },
   "king kraken harpoon|1": kingHarpoon("non-attack"),
   "king shark harpoon|1": kingHarpoon("attack"),
-  "big game trophy shot|2": { onPlay(ctx: ScriptCtx) { buffNextAttack(ctx, { attack: 4, appliesToSubtype: "arrow" }); ctx.drawCards(ctx.seat, 1); requestDiscardChoice(ctx, "big-game-discard", decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"), ctx.seat); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "big-game-discard") resolveDiscardChoice(ctx, option, ctx.seat); } },
+  "big game trophy shot|2": {
+    onPlay(ctx: ScriptCtx) {
+      buffNextAttack(ctx, {
+        attack: 4,
+        appliesToSubtype: "arrow",
+        onHitScriptHook: {
+          hook: "big-game-trophy-shot-hit",
+          label: "create a Gold token",
+          heroOnly: true,
+          requiresAttackNameContains: "harpoon",
+        },
+      });
+      ctx.drawCards(ctx.seat, 1);
+      requestDiscardChoice(
+        ctx,
+        "big-game-discard",
+        decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
+        ctx.seat,
+      );
+    },
+    onGrantedHit(ctx: ScriptCtx, hook: string) {
+      if (hook === "big-game-trophy-shot-hit") createGold(ctx);
+    },
+    onChoose(ctx: ScriptCtx, hook: string, option: string) {
+      if (hook === "big-game-discard") resolveDiscardChoice(ctx, option, ctx.seat);
+    },
+  },
   "gold the tip|2": { onPlay(ctx: ScriptCtx) { buffNextAttack(ctx, { attack: 3, appliesToSubtype: "arrow" }); if (ctx.player(ctx.seat).arsenal.some((card) => !card.faceDown && isArrow(ctx, card) && ctx.cardColor(card) === 2)) createGold(ctx); } },
   "redspine manta|0": { activated: { cost: 0, isAttack: false, goAgain: true, tap: true, canActivate: (ctx: ScriptCtx) => !ctx.player(ctx.seat).arsenal.length && ctx.player(ctx.seat).hand.some((card) => isArrow(ctx, card)), onActivate(ctx: ScriptCtx) { const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card)); ctx.requestCardChoice("manta", decisionPrompt("Put an arrow face-up into arsenal", "card.sea.arrow.hand.arsenal.required"), arrows.map((card) => card.instanceId)); } }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "manta") ctx.putIntoArsenal(Number(option), "hand"); } },
   "sealace sarong|0": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", tap: true, effectCardCosts: [{ zone: "arsenal", move: "turn-face-up", count: 1, pitch: 3, subtype: "arrow", prompt: decisionPrompt("Turn a blue arrow face-up", "card.common.cost.bluearrow.faceup") }], onActivate(ctx: ScriptCtx) { const arrow = ctx.player(ctx.seat).arsenal.find((card) => !card.faceDown && isArrow(ctx, card) && ctx.cardColor(card) === 3); if (arrow) ctx.grantCardKeyword(arrow.instanceId, "go again"); } } },

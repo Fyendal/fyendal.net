@@ -172,16 +172,23 @@ export function cardHasName(
   return cardNamesOf(state, card).includes(name.trim().toLowerCase());
 }
 
-/** Effective classes/subtypes of a card in its current zone. */
-export function cardTypesOf(state: GameStateInternal, card: CardInstance): string[] {
-  const data = instanceDataOf(state, card);
+/** Whether an owned card currently loses its class and talent types. */
+export function ownedClassTalentTypesSuppressed(
+  state: GameStateInternal,
+  card: CardInstance,
+): boolean {
   const owner = state.players[card.owner] as PlayerState;
-  const suppressClassTalent =
-    Number(owner.hero.counters?.classTalentTypesSuppressedUntilTurn ?? 0) >= state.turn ||
+  return Number(owner.hero.counters?.classTalentTypesSuppressedUntilTurn ?? 0) >= state.turn ||
     state.modifiers.some(
       (modifier) =>
         modifier.seat === owner.seat && modifier.suppressesOwnedClassTalentTypes === true,
     );
+}
+
+/** Effective classes/subtypes of a card in its current zone. */
+export function cardTypesOf(state: GameStateInternal, card: CardInstance): string[] {
+  const data = instanceDataOf(state, card);
+  const suppressClassTalent = ownedClassTalentTypesSuppressed(state, card);
   const allZone = card.faceDown
     ? []
     : (scriptOf(state, card.cardId, card)?.allZoneTypes ?? []);

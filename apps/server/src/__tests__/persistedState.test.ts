@@ -862,6 +862,12 @@ describe("PersistedStateV1", () => {
       extraDiceIgnoreLowest: 1,
       onHitClearHandAndArsenalAtEndPhase: true,
       onHitDealDamage: 2,
+      onHitScriptHook: {
+        hook: "test-name-qualified-hit",
+        label: "create a Gold token",
+        heroOnly: true,
+        requiresAttackNameContains: "harpoon",
+      },
       replaceCombatDamageWithDefendingEquipment: true,
       onDamageDealtCreateTokenPerPoint: "FYD-COPPER",
       minBasePower: 3,

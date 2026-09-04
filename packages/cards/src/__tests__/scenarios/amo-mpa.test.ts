@@ -210,7 +210,7 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
     expect(banished.playableFromUntilEndOfSeatTurn).toBe(1);
   });
 
-  it("Remember the Mists gets +2 when played from outside hand or arsenal", () => {
+  it("Painful Passage can give its banished attack +3 power", () => {
     const game = scenario({ seats: [
       {
         hero: "rhinar",
@@ -224,7 +224,30 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
 
     game.play("painful passage|1")
       .chooseCard(REMEMBER)
+      .chooseOption("power")
       .play(REMEMBER, { fromZone: "banish" })
       .expectAttackValue(9);
+  });
+
+  it("Painful Passage can give its banished attack go again", () => {
+    const game = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["painful passage|1", REMEMBER],
+        resources: 2,
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play("painful passage|1")
+      .chooseCard(REMEMBER)
+      .chooseOption("go-again")
+      .play(REMEMBER, { fromZone: "banish" })
+      .expectAttackValue(6)
+      .blockWith()
+      .settle()
+      .expectAP(0, 1);
   });
 });

@@ -85,7 +85,7 @@ export function discardCostOptions(
   if (!dc) return [];
   return player.hand.filter((c) => {
     const data = dataOf(state, c.cardId);
-    if (dc.classes && !(data.classes ?? []).some((cl) => dc.classes!.includes(cl.toLowerCase()))) {
+    if (dc.classes && !cardTypesOf(state, c).some((type) => dc.classes!.includes(type))) {
       return false;
     }
     if (dc.cardTypes && !dc.cardTypes.includes(data.cardType.toLowerCase())) return false;
@@ -276,8 +276,7 @@ export function abilitiesAsInstantForCard(
   player: PlayerState,
   card: CardInstance,
 ): boolean {
-  const data = dataOf(state, card.cardId);
-  return [...(data.classes ?? []), ...(data.subtypes ?? [])].some(
+  return cardTypesOf(state, card).some(
     (type) => player.flags[`abilitiesAsInstant:${type.toLowerCase()}`] === true,
   );
 }
@@ -303,6 +302,7 @@ function effectCardCostCandidates(
     : controlledCostCards(state, player).filter((card) => !card.faceDown);
   return cards.filter((card) => {
     const data = dataOf(state, card.cardId);
+    const types = cardTypesOf(state, card);
     return (cost.move !== "tap" || !card.tapped) &&
       (cost.move !== "untap" || card.tapped) &&
       (cost.move !== "turn-face-up" || card.faceDown === true) &&
@@ -310,9 +310,7 @@ function effectCardCostCandidates(
         !!cost.counter && (card.counters?.[cost.counter.key] ?? 0) >= cost.counter.amount
       )) &&
       (cost.pitch === undefined || cardColorOf(state, card) === cost.pitch) &&
-      (cost.class === undefined || (data.classes ?? []).some(
-        (cardClass) => cardClass.toLowerCase() === cost.class!.toLowerCase(),
-      )) &&
+      (cost.class === undefined || types.includes(cost.class.toLowerCase())) &&
       (cost.subtype === undefined || (data.subtypes ?? []).some(
         (subtype) => subtype.toLowerCase() === cost.subtype!.toLowerCase(),
       )) &&
@@ -320,8 +318,7 @@ function effectCardCostCandidates(
         (keyword) => keyword.toLowerCase() === cost.keyword!.toLowerCase(),
       )) &&
       (cost.types === undefined || cost.types.every((wanted) =>
-        [...(data.classes ?? []), ...(data.subtypes ?? [])]
-          .some((type) => type.toLowerCase() === wanted.toLowerCase()),
+        types.includes(wanted.toLowerCase()),
       )) &&
       (cost.withoutCounter === undefined || (card.counters?.[cost.withoutCounter] ?? 0) === 0) &&
       (cost.name === undefined || cardHasName(state, card, cost.name));

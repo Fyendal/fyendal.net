@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { basePowerOf, legalIntents } from "@fyendal/engine";
+import { actionCandidates, basePowerOf, legalIntents } from "@fyendal/engine";
 import { cardData } from "../../index.js";
 import { printingId, scenario } from "../harness.js";
 
@@ -219,19 +219,33 @@ describe("SKA — utility cards", () => {
     expect(after.some((intent) => intent.instanceId === roughshod.instanceId)).toBe(true);
   });
 
-  it("Rally the Coast Guard discards a card for +3 defense", () => {
+  it.each(["SEA223", "SEA224", "SEA225"])("Rally the Coast Guard %s discards a card for +3 defense", (rally) => {
     const g = scenario({
       active: 1,
       seats: [
-        { ...kayo, hand: ["SEA225", "bear hug|3"] },
+        { ...kayo, hand: [rally, "bear hug|3", "reincarnate|3"] },
         { hero: "dorinthea", hand: [], resources: 1 },
       ],
     });
 
     g.attackWithWeapon("dawnblade, resplendent|0")
-      .blockWith("SEA225")
-      .passPriority()
-      .activate("SEA225", { pitch: ["bear hug|3"] })
+      .blockWith(rally)
+      .passPriority();
+
+    const defendingCard = g.state.chain.at(-1)!.defendingCards[0]!;
+    const discardCards = g.state.players[0]!.hand;
+    const offeredDiscards = actionCandidates(g.state, 0).filter(
+      (intent) => intent.kind === "activate-ability" &&
+        intent.sourceInstanceId === defendingCard.instanceId,
+    );
+    expect(offeredDiscards).toHaveLength(discardCards.length);
+    expect(offeredDiscards).toEqual(expect.arrayContaining(discardCards.map((card) => ({
+      kind: "activate-ability",
+      sourceInstanceId: defendingCard.instanceId,
+      pitchInstanceIds: [card.instanceId],
+    }))));
+
+    g.activate(rally, { pitch: ["bear hug|3"] })
       .expectFinalDefense(5);
   });
 });
