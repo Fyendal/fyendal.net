@@ -727,7 +727,19 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
 
   "seeds of strength|1": { ...bond("earth", (ctx) => create(ctx, MIGHT, 4)), onPlay(ctx) { create(ctx, MIGHT, ctx.getCounter("bonded") ? 4 : 3); } },
   "arc bending|1": { ...bond("lightning", (ctx) => ctx.grantGoAgain()), onAttackDeclared(ctx) { if (ctx.getCounter("bonded")) ctx.grantGoAgain(); ctx.addModifier({ scope: "combat-chain", damage: 1, appliesToType: ["lightning", "elemental"] }); } },
-  "verdant tide|1": { ...bond("earth", (ctx) => create(ctx, EARTH)), replaceFriendlyTokenCreation(ctx, cardId, count) { return hasTag(ctx, cardId, "aura") && (hasTag(ctx, cardId, "elemental") || hasTag(ctx, cardId, "runeblade")) ? count + 1 : count; } },
+  "verdant tide|1": {
+    ...bond("earth", (ctx) => create(ctx, EARTH)),
+    onPlay(ctx) {
+      ctx.addModifier({ scope: "until-end-of-turn" });
+      if (ctx.getCounter("bonded")) create(ctx, EARTH);
+    },
+    replaceFriendlyTokenCreation(ctx, cardId, count) {
+      return hasTag(ctx, cardId, "aura") &&
+          (hasTag(ctx, cardId, "elemental") || hasTag(ctx, cardId, "runeblade"))
+        ? count + 1
+        : count;
+    },
+  },
   "voltic veil|1": { ...bond("lightning", (ctx) => dealArcane(ctx, opponentSeat(ctx), 1)), onPlay(ctx) { ctx.preventNextDamage(ctx.seat, 4); if (ctx.getCounter("bonded")) dealArcane(ctx, opponentSeat(ctx), 1); } },
   "colors of aria|1": { allZoneTypes: ["earth", "ice", "lightning"] },
   "frosthaven sheath|1": bond("ice", (ctx) => create(ctx, FROSTBITE, 1, ctx.link?.attacker ?? opponentSeat(ctx))),

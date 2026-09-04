@@ -719,6 +719,60 @@ describe("SEA — pirate and generic attacks", () => {
       .expectResources(0, 5);
   });
 
+  it("Big Game Trophy Shot creates Gold when the next arrow with harpoon in its name hits a hero", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["death dealer|0"],
+          resources: 2,
+          hand: ["big game trophy shot|2", "nimblism|3"],
+          arsenal: ["rusty harpoon|3"],
+          deck: ["titanium bauble|3"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("big game trophy shot|2")
+      .chooseCard("nimblism|3")
+      .play("rusty harpoon|3", { fromArsenal: true })
+      .expectAttackValue(5)
+      .blockWith()
+      .settle()
+      .expectInZone(0, "gold|0", "board");
+  });
+
+  it("Big Game Trophy Shot does not grant its Gold trigger to a non-Harpoon arrow", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["death dealer|0"],
+          resources: 2,
+          hand: ["big game trophy shot|2", "nimblism|3"],
+          arsenal: ["searing shot|1"],
+          deck: ["titanium bauble|3"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("big game trophy shot|2")
+      .chooseCard("nimblism|3")
+      .play("searing shot|1", { fromArsenal: true })
+      .expectAttackValue(8);
+
+    const link = projectStateFor(g.state, 0).chain.at(-1)!;
+    expect(link.onHitEffects?.some(
+      (effect) => effect.sourceCardId === printingId("big game trophy shot|2"),
+    ) ?? false).toBe(false);
+
+    g.blockWith()
+      .settle()
+      .expectNotInZone(0, "gold|0", "board");
+  });
+
   it("Gold-Baited Hook creates Gold on a Pirate hit when the defending hero controls none", () => {
     const g = scenario({
       seats: [

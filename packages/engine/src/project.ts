@@ -16,7 +16,7 @@ import type {
   TurnFactsView,
 } from "@fyendal/shared";
 import type { CardInstance, CombatValueModifier, Modifier, PendingDecisionState, PlayerState } from "./state.js";
-import { cardColorOf, dataOf, instanceDataOf, scriptOf } from "./cardProperties.js";
+import { cardColorOf, cardTypesOf, dataOf, instanceDataOf, scriptOf } from "./cardProperties.js";
 import { pendingOnHitEffects } from "./hits.js";
 import { conditionalModifierGrantsGoAgain } from "./combatModifiers.js";
 import {
@@ -626,11 +626,7 @@ function projectedCombatPrevention(
     addContribution(Number(repeatingShield.preventDamagePerEvent), repeatingShield);
   }
 
-  const sourceTypes = [
-    ...(dataOf(state, source.cardId).classes ?? []),
-    ...(dataOf(state, source.cardId).subtypes ?? []),
-    ...(source.grantedTypes ?? []),
-  ].map((type) => type.toLowerCase());
+  const sourceTypes = cardTypesOf(state, source);
   const nextEventShield = activeModifiers.find((modifier) => {
     const requiredType = modifier.appliesToDamageSourceType?.toLowerCase();
     return Number(modifier.preventNextDamageAmount ?? 0) > 0 &&

@@ -3104,7 +3104,7 @@ export function fireOnDiscard(
     const resolvingData = dataOf(state, card.cardId);
     return resolvingData.cardType === "action" &&
       (resolvingData.subtypes ?? []).includes("attack") &&
-      (resolvingData.classes ?? []).includes("brute");
+      cardTypesOf(state, card).includes("brute");
   });
   const priorBruteCostFlag = player.flags.discardingForBruteAttackCost;
   if (payingBruteAttackCost) player.flags.discardingForBruteAttackCost = true;

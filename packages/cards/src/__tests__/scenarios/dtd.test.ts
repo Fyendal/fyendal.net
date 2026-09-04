@@ -631,6 +631,26 @@ describe("DTD — Prism and Figments", () => {
     }));
   });
 
+  it("Prism's Spectral Shield activation is once per turn", () => {
+    const heroKey = "prism, sculptor of arc light|0";
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey, resources: 4, soul: [BLUE, BLUE] },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    const heroId = s.state.players[0]!.hero.instanceId;
+    const activations = () =>
+      legalIntents(s.state, 0).filter(
+        (i) => i.kind === "activate-ability" && i.sourceInstanceId === heroId,
+      );
+
+    expect(activations()).not.toHaveLength(0);
+    s.activate(heroKey, { settle: false }).chooseCard(BLUE);
+    expect(activations()).toHaveLength(0);
+  });
+
   it.each(SOUL_HERALD_KEYS)("%s enters soul on hit and triggers Prism's Figment search", (heraldKey) => {
     expect(SOUL_HERALD_KEYS).toHaveLength(20);
     const s = scenario({

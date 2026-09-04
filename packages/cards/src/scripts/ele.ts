@@ -1122,7 +1122,8 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       goAgain: false,
       timing: "instant",
       destroySelfCost: true,
-      canActivate: (ctx) => ctx.player(ctx.seat).arsenal.length > 0,
+      canActivate: (ctx) =>
+        ctx.player(ctx.seat).arsenal.length > 0 || ctx.player(ctx.seat).hand.length > 0,
       onActivate(ctx) {
         for (const card of [...ctx.player(ctx.seat).arsenal]) ctx.moveToHand(card.instanceId);
         const hand = ctx.player(ctx.seat).hand;

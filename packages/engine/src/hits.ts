@@ -2,6 +2,7 @@ import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import {
   cardAbilitiesSuppressed,
+  cardNamesOf,
   scriptOf,
 } from "./cardProperties.js";
 import { activeModifiers } from "./combatModifiers.js";
@@ -109,7 +110,7 @@ function resolveGrantedOnHitEffect(
   }
   // granted hit effects with their own scripted choices route back to the
   // granting card's script (which may since have changed zones)
-  if (grantedScriptHookFires(mod, link)) {
+  if (grantedScriptHookFires(state, mod, link)) {
     const source = findCardAnywhere(state, mod.sourceInstanceId)?.card;
     if (source) {
       scriptOf(state, source.cardId, source)?.onGrantedHit?.(
@@ -132,10 +133,12 @@ function resolveGrantedOnHitEffect(
   }
 }
 
-/** Whether a granted scripted on-hit hook fires for this hit: "hits a hero"
- *  wording excludes ally targets, and counter-gated grants (Dead Eye's aim
- *  condition) require the counter on the attacking card. */
-function grantedScriptHookFires(mod: Modifier, link: ChainLinkState): boolean {
+/** Whether a granted scripted on-hit hook fires for this hit. */
+function grantedScriptHookFires(
+  state: GameStateInternal,
+  mod: Modifier,
+  link: ChainLinkState,
+): boolean {
   const hook = mod.onHitScriptHook;
   if (!hook) return false;
   if (hook.heroOnly && link.targetAllyId !== undefined) return false;
@@ -143,10 +146,20 @@ function grantedScriptHookFires(mod: Modifier, link: ChainLinkState): boolean {
     hook.requiresAttackCounter !== undefined &&
     Number(link.attackingCard.counters?.[hook.requiresAttackCounter] ?? 0) <= 0
   ) return false;
+  if (
+    hook.requiresAttackNameContains !== undefined &&
+    !cardNamesOf(state, link.attackingCard).some((name) =>
+      name.includes(hook.requiresAttackNameContains!.trim().toLowerCase())
+    )
+  ) return false;
   return true;
 }
 
-function hasGrantedOnHitEffect(mod: Modifier, link: ChainLinkState): boolean {
+function hasGrantedOnHitEffect(
+  state: GameStateInternal,
+  mod: Modifier,
+  link: ChainLinkState,
+): boolean {
   return !!(
     mod.onHitGoAgain ||
     mod.onHitGainLife ||
@@ -163,7 +176,7 @@ function hasGrantedOnHitEffect(mod: Modifier, link: ChainLinkState): boolean {
     mod.onHitReenableAttackerIfMarked ||
     mod.onHitMark ||
     mod.onHitClearHandAndArsenalAtEndPhase ||
-    grantedScriptHookFires(mod, link)
+    grantedScriptHookFires(state, mod, link)
   );
 }
 
@@ -232,7 +245,7 @@ export function pendingOnHitEffects(
 
   const triggeredModifiers = new Map<number, Modifier>();
   const addModifier = (mod: Modifier | undefined): void => {
-    if (mod && hasGrantedOnHitEffect(mod, link)) triggeredModifiers.set(mod.id, mod);
+    if (mod && hasGrantedOnHitEffect(state, mod, link)) triggeredModifiers.set(mod.id, mod);
   };
   if (!attackAbilitiesSuppressed) {
     for (const mod of activeModifiers(state, link, ["chain-link"])) {

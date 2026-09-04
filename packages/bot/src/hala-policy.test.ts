@@ -1801,6 +1801,46 @@ describe("Hala policy", () => {
       .toBe("OMN238");
   });
 
+  it("does not waste Beckon Steel on a fully defended attack", () => {
+    let state = createGame({
+      decklists: [halaDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9304,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    state.players[0]!.resources = 1;
+    state.players[0]!.weapons[0]!.counters = { power: 2, sharpenedTurn: 2 };
+    replaceHand(state, 0, ["OMN238", "PEN056"]);
+    replaceHand(state, 1, ["PEN056", "PEN056"]);
+    const weaponId = state.players[0]!.weapons[0]!.instanceId;
+    const attack = legalIntents(state, 0).find((candidate) =>
+      candidate.kind === "activate-ability" && candidate.sourceInstanceId === weaponId &&
+      candidate.pitchInstanceIds.length === 0
+    );
+    if (!attack) throw new Error("weapon attack was not legal");
+    state = apply(state, 0, attack);
+    state = advanceUntil(state, (candidate) =>
+      candidate.pendingDecision?.kind === "defend" &&
+      candidate.pendingDecision.player === 1
+    );
+    const defenseIds = state.players[1]!.hand.map((card) => card.instanceId);
+    state = apply(state, 1, { kind: "defend", instanceIds: defenseIds });
+    state = advanceUntil(state, (candidate) =>
+      candidate.pendingDecision?.kind === "attack-reaction" &&
+      candidate.pendingDecision.player === 0
+    );
+
+    const intent = chooseHalaIntent({
+      seat: 0,
+      view: projectStateFor(state, 0),
+      legal: legalIntents(state, 0),
+      cards: cardData,
+    });
+    expect(intent.kind).not.toBe("play-card");
+  });
+
   it("does not spend Swordmaster's Shine on an already-lethal ally attack", () => {
     let state = createGame({
       decklists: [halaDeck(gravyDeck()), gravyDeck()],

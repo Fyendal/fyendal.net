@@ -227,13 +227,7 @@ function applyPreventionShields(
     for (const modifier of state.modifiers) {
       if (remaining <= 0) break;
       const requiredSourceType = modifier.appliesToDamageSourceType?.toLowerCase();
-      const sourceTypes = source
-        ? [
-            ...(dataOf(state, source.cardId).classes ?? []),
-            ...(dataOf(state, source.cardId).subtypes ?? []),
-            ...(source.grantedTypes ?? []),
-          ].map((type) => type.toLowerCase())
-        : [];
+      const sourceTypes = source ? cardTypesOf(state, source) : [];
       if (
         modifier.consumed ||
         modifier.seat !== target.seat ||
@@ -1201,11 +1195,7 @@ export function dealAllyDamage(state: GameStateInternal,
   }
   if (packet.amount <= 0) return 0;
   if (!packet.unpreventable && packet.amount > 0) {
-    const recipientTypes = [
-      ...(dataOf(state, ally.cardId).classes ?? []),
-      ...(dataOf(state, ally.cardId).subtypes ?? []),
-      ...(ally.grantedTypes ?? []),
-    ].map((type) => type.toLowerCase());
+    const recipientTypes = cardTypesOf(state, ally);
     const shield = state.modifiers.find((modifier) =>
       !modifier.consumed &&
       modifier.seat === found.seat &&
@@ -1291,10 +1281,7 @@ export function effectDamageBonus(state: GameStateInternal, packet: PendingArcan
   const source = findCardAnywhere(state, packet.sourceInstanceId)?.card;
   if (!source) return 0;
   const data = dataOf(state, source.cardId);
-  const tags = new Set(
-    [...(data.classes ?? []), ...(data.subtypes ?? []), ...(source.grantedTypes ?? [])]
-      .map((tag) => tag.toLowerCase()),
-  );
+  const tags = new Set(cardTypesOf(state, source));
   return state.modifiers.reduce((sum, mod) => {
     if (
       !mod.damage ||

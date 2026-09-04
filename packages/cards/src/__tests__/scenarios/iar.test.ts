@@ -541,6 +541,36 @@ describe("IAR spoiled cards", () => {
     expect(g.state.players[0]!.actionPoints).toBe(1);
   });
 
+  it("Viserai, Usurper gives go again when Malefic Incantation causes the traverse", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        heroKey: "viserai, the forsaken|0",
+        hand: [
+          "malefic incantation|1",
+          "otherworldly sins|1",
+          "otherworldly sins|1",
+          "bloodsong gloomblade|1",
+        ],
+        deck: ["raging onslaught|1", "raging onslaught|2", "raging onslaught|3"],
+        resources: 2,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 30, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("malefic incantation|1")
+      .play("otherworldly sins|1")
+      .play("otherworldly sins|1")
+      .play("bloodsong gloomblade|1")
+      .chooseCard("runechant|0")
+      .blockWith()
+      .settle();
+
+    expect(g.state.players[0]!.heroCardId).toBe("IAR106B");
+    expect(g.state.players[0]!.actionPoints).toBe(1);
+  });
+
   it("Viserai, Usurper counts a blood-debt attack played before traversing", () => {
     const g = scenario({ seats: [
       {

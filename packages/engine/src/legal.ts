@@ -5,6 +5,7 @@ import type { CardInstance, PlayerState } from "./state.js";
 import {
   activatedAbilitiesSuppressed,
   cardHasType,
+  cardTypesOf,
   dataOf,
   hasKeyword,
   instanceDataOf,
@@ -392,7 +393,7 @@ function playIntentsForCard(
   const extraCost = isAttackAction ? firstAttackExtraCost(state, player) : 0;
   const reduction =
     (isAttackAction ? Number(player.flags.nextActionCostReduction || 0) : 0) +
-    (isAttackAction && (data.classes ?? []).some((c) => c.toLowerCase() === "guardian")
+    (isAttackAction && cardTypesOf(state, card).includes("guardian")
       ? Number(player.flags.nextGuardianAttackCostReduction || 0)
       : 0);
   const sides: MeldSide[] = (script?.meld ? ["left", "right", "both"] as MeldSide[] : [])
@@ -1406,7 +1407,13 @@ export function actionCandidates(state: GameStateInternal,
   const candidates = new Map<string, PaidIntent>();
   for (const intent of enumerateIntents(state, runtime, seat, true)) {
     if (!isPaidIntent(intent)) continue;
-    const candidate: PaidIntent = { ...intent, pitchInstanceIds: [] };
+    // Resource-pitch sequences are client-selected against pitchRequired, but
+    // exact card costs (such as discarding a card while this is defending)
+    // must retain the authoritative choices the client is allowed to select.
+    const candidate: PaidIntent =
+      intent.pitchRequired === undefined && intent.pitchInstanceIds.length > 0
+        ? intent
+        : { ...intent, pitchInstanceIds: [] };
     const key = JSON.stringify(candidate);
     if (!candidates.has(key)) candidates.set(key, candidate);
   }

@@ -232,7 +232,7 @@ export function playCard(
     ? Number(player.flags.nextActionCostReduction || 0)
     : 0;
   const guardianAttackReduction =
-    isAttackAction && (data.classes ?? []).some((c) => c.toLowerCase() === "guardian")
+    isAttackAction && cardTypesOf(state, card).includes("guardian")
       ? Number(player.flags.nextGuardianAttackCostReduction || 0)
       : 0;
   const reduction = genericAttackReduction + guardianAttackReduction;
@@ -474,10 +474,7 @@ export function finishPlayCard(
           }
         }
         boosted = true;
-        boostSucceeded = boostSucceeded ||
-          (dataOf(state, banished.cardId).classes ?? []).some(
-            (c) => c.toLowerCase() === "mechanologist",
-          );
+        boostSucceeded = boostSucceeded || cardTypesOf(state, banished).includes("mechanologist");
         player.flags.boostedThisTurn = true;
         player.flags.boostCountThisTurn = (Number(player.flags.boostCountThisTurn) || 0) + 1;
         player.flags.lastBoostedCardInstanceId = banished.instanceId;

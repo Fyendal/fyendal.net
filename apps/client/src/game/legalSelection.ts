@@ -220,21 +220,24 @@ export function selectedActionIntent(
   return candidate ? { ...candidate, pitchInstanceIds: [...pitchInstanceIds] } : null;
 }
 
-/** Candidate mode allows any next pitch until the declared resource total is
- * reached. The legacy path still follows exact server-enumerated prefixes. */
+/** Exact card costs follow the server-enumerated choices. Resource payments
+ * allow any next pitch until the declared total is reached. */
 export function canAddPitch(
   variants: readonly PaidIntent[],
   selected: readonly number[],
   instanceId: number,
   pitchValue?: (instanceId: number) => number,
 ): boolean {
+  const next = [...selected, instanceId];
+  if (variants.some((intent) =>
+    intent.pitchRequired === undefined && startsWithIds(intent.pitchInstanceIds, next)
+  )) return true;
   if (pitchValue) {
     const selectedTotal = pitchTotal(selected, pitchValue);
     return variants.some((intent) =>
       intent.pitchRequired !== undefined && selectedTotal < intent.pitchRequired
     );
   }
-  const next = [...selected, instanceId];
   return variants.some((intent) => startsWithIds(intent.pitchInstanceIds, next));
 }
 

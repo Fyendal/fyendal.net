@@ -239,8 +239,7 @@ function modifierMatchesPlayedCard(
     mod.appliesToKeyword &&
     !(data.keywords ?? []).some((keyword) => keyword.toLowerCase() === mod.appliesToKeyword!.toLowerCase())
   ) return false;
-  const tags = [...(data.classes ?? []), ...(data.subtypes ?? []), ...(card.grantedTypes ?? [])]
-    .map((tag) => tag.toLowerCase());
+  const tags = cardTypesOf(state, card);
   if (mod.appliesToClass && !tags.includes(mod.appliesToClass.toLowerCase())) return false;
   if (mod.appliesToSubtype) {
     const wanted = Array.isArray(mod.appliesToSubtype) ? mod.appliesToSubtype : [mod.appliesToSubtype];
@@ -364,7 +363,8 @@ export function noteCardPlayed(
     player.flags[`playedSubtypeCount:${s.toLowerCase()}`] =
       (Number(player.flags[`playedSubtypeCount:${s.toLowerCase()}`]) || 0) + 1;
   }
-  for (const c of d.classes ?? []) {
+  const effectiveTypes = new Set(cardTypesOf(state, card));
+  for (const c of (d.classes ?? []).filter((cardClass) => effectiveTypes.has(cardClass.toLowerCase()))) {
     player.flags[`playedClass:${c.toLowerCase()}`] = true;
     player.flags[`playedClassCount:${c.toLowerCase()}`] =
       (Number(player.flags[`playedClassCount:${c.toLowerCase()}`]) || 0) + 1;
@@ -420,12 +420,12 @@ export function noteCardPlayed(
     delete player.flags[`asInstant:${card.instanceId}`];
     if (
       player.flags.nextWizardNonAttackAsInstant === true &&
-      (d.classes ?? []).includes("wizard")
+      effectiveTypes.has("wizard")
     ) {
       player.flags.nextWizardNonAttackAsInstant = false;
     }
     const wizardBonus = Number(player.flags.nextWizardNonAttackArcaneBonus || 0);
-    if (wizardBonus > 0 && (d.classes ?? []).includes("wizard")) {
+    if (wizardBonus > 0 && effectiveTypes.has("wizard")) {
       player.flags.nextWizardNonAttackArcaneBonus = 0;
       if (scriptOf(state, cardId, card)?.arcaneDamageEffect) {
         (card.counters ??= {}).arcaneBonus =
@@ -484,11 +484,7 @@ export function noteCardPlayed(
     }
   }
   if (isAction && (d.subtypes ?? []).includes("attack")) {
-    const tags = new Set([
-      ...(d.classes ?? []),
-      ...(d.subtypes ?? []),
-      ...(card.grantedTypes ?? []),
-    ].map((tag) => tag.toLowerCase()));
+    const tags = effectiveTypes;
     for (const tag of tags) {
       player.flags[`playedAttackActionTypeCount:${tag}`] =
         Number(player.flags[`playedAttackActionTypeCount:${tag}`] ?? 0) + 1;
@@ -496,11 +492,7 @@ export function noteCardPlayed(
   }
   consumeMatchingPlayCostReductions(state, player.seat, card);
   if (activeLink) {
-    const tags = [
-      ...(d.classes ?? []),
-      ...(d.subtypes ?? []),
-      ...(card.grantedTypes ?? []),
-    ];
+    const tags = effectiveTypes;
     for (const tag of tags) {
       activeLink.flags[`playedType:${tag.toLowerCase()}`] = true;
     }
@@ -584,7 +576,7 @@ export function canPlayAsInstant(
   if (player.flags.nextNonAttackAsInstant === true) return true;
   if (
     player.flags.nextWizardNonAttackAsInstant === true &&
-    (data.classes ?? []).some((cardClass) => cardClass.toLowerCase() === "wizard")
+    cardTypesOf(state, card).includes("wizard")
   ) return true;
   const extraZone = fromOverride === "banish" || fromOverride === "graveyard" || fromOverride === "deck"
     ? fromOverride
@@ -623,7 +615,7 @@ function validateDiscardCost(
     if (!c) return `card ${id} not in hand`;
     if (
       dc.classes &&
-      !(dataOf(state, c.cardId).classes ?? []).some((cl) => dc.classes!.includes(cl.toLowerCase()))
+      !cardTypesOf(state, c).some((type) => dc.classes!.includes(type))
     ) {
       return `${nameOf(state, c.cardId)} is not a valid discard for this ability`;
     }
@@ -672,8 +664,7 @@ function modifierMatchesAttackTarget(
   if (modifier.appliesToTargetType) {
     if (targetAllyId !== undefined) return false;
     const wanted = modifier.appliesToTargetType.toLowerCase();
-    const tags = [...(data.classes ?? []), ...(data.subtypes ?? [])]
-      .map((tag) => tag.toLowerCase());
+    const tags = cardTypesOf(state, target);
     if (!tags.includes(wanted)) return false;
   }
   if (modifier.appliesToTargetNamePrefix) {

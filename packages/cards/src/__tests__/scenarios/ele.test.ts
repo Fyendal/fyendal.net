@@ -681,6 +681,50 @@ describe("ELE — delayed and replacement effects", () => {
     expect(g.state.players[0]!.equipment.arms).toBeUndefined();
   });
 
+  it("Honing Hood is usable with an empty arsenal and a card in hand", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          hand: [BLUE],
+          equipment: { head: "honing hood|0" },
+        },
+        { hero: "dorinthea", hand: ["tag the target|1"] },
+      ],
+    });
+
+    g.play("tag the target|1", { settle: false })
+      .passPriority();
+
+    const hood = g.state.players[0]!.equipment.head!;
+    expect(legalIntents(g.state, 0)).toContainEqual(expect.objectContaining({
+      kind: "activate-ability",
+      sourceInstanceId: hood.instanceId,
+    }));
+
+    g.activate("honing hood|0", { settle: false });
+    expect(g.state.players[0]!.equipment.head).toBeUndefined();
+
+    g.passPriority()
+      .passPriority()
+      .chooseCard(BLUE)
+      .expectInZone(0, BLUE, "arsenal")
+      .expectFaceDown(0, BLUE, true);
+
+    const empty = scenario({
+      seats: [
+        { hero: "rhinar", equipment: { head: "honing hood|0" } },
+        { hero: "dorinthea" },
+      ],
+    });
+    const emptyHood = empty.state.players[0]!.equipment.head!;
+    expect(legalIntents(empty.state, 0)).not.toContainEqual(expect.objectContaining({
+      kind: "activate-ability",
+      sourceInstanceId: emptyHood.instanceId,
+    }));
+  });
+
   it("unused Spellbound Creepers do not trigger during the end phase", () => {
     const g = scenario({
       seats: [

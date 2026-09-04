@@ -498,6 +498,7 @@ function recordFirstViseraiBloodDebtAttack(
   if (ctx.getFlag("player", "iarViseraiBloodDebtAttackPlayed") === true ||
     !hasType(ctx, played, "attack") || !isBloodDebtAction(ctx, played)) return false;
   ctx.setFlag("player", "iarViseraiBloodDebtAttackPlayed", true);
+  ctx.setFlag("player", "iarViseraiBloodDebtAttackInstanceId", played.instanceId);
   return true;
 }
 
@@ -520,6 +521,12 @@ const viseraiFront: CardScript = {
 };
 
 const viseraiBack: CardScript = {
+  onBecomeHero(ctx) {
+    const firstAttackId = ctx.getFlag("player", "iarViseraiBloodDebtAttackInstanceId");
+    if (typeof firstAttackId === "number") {
+      ctx.grantCardKeyword(firstAttackId, "go again");
+    }
+  },
   onFriendlyPlay(ctx, played) {
     if (recordFirstViseraiBloodDebtAttack(ctx, played)) {
       ctx.grantCardKeyword(played.instanceId, "Go again");

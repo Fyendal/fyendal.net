@@ -566,8 +566,16 @@ export interface Modifier {
    *  own choices (Shadow Puppetry's look-and-banish, Dead Eye's look-and-
    *  discard). `label` is the projected on-hit text; `heroOnly` implements
    *  "hits a hero" wording; `requiresAttackCounter` requires the attacking
-   *  card to carry the named counter (Dead Eye's aim condition). */
-  onHitScriptHook?: { hook: string; label: string; heroOnly?: boolean; requiresAttackCounter?: string };
+   *  card to carry the named counter (Dead Eye's aim condition), and
+   *  `requiresAttackNameContains` requires one of its effective names to
+   *  contain the normalized fragment. */
+  onHitScriptHook?: {
+    hook: string;
+    label: string;
+    heroOnly?: boolean;
+    requiresAttackCounter?: string;
+    requiresAttackNameContains?: string;
+  };
   /** Replace combat damage from the affected weapon with optional destruction
    * of one defending equipment whose defense is less than that damage. */
   replaceCombatDamageWithDefendingEquipment?: boolean;

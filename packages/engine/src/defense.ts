@@ -2,6 +2,7 @@ import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import {
   cardHasType,
+  cardTypesOf,
   dataOf,
   instanceDataOf,
   instanceHasKeyword,
@@ -292,7 +293,7 @@ function phantasmDefender(state: GameStateInternal,
   return link.defendingCards.some((c) => {
     const d = dataOf(state, c.cardId);
     if (d.cardType !== "action" || !(d.subtypes ?? []).includes("attack")) return false;
-    if ((d.classes ?? []).some((cl) => cl.toLowerCase() === "illusionist")) return false;
+    if (cardTypesOf(state, c).includes("illusionist")) return false;
     return currentPowerOf(state, runtime, c, link) >= 6;
   });
 }

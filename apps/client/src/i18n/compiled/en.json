@@ -1585,6 +1585,16 @@
       "value": "p"
     }
   ],
+  "card.common.option.power.three": [
+    {
+      "type": 0,
+      "value": "+3"
+    },
+    {
+      "type": 1,
+      "value": "p"
+    }
+  ],
   "card.common.option.red": [
     {
       "type": 0,

@@ -379,6 +379,7 @@
   "card.common.option.keeporder": "Keep order",
   "card.common.option.legs": "Legs",
   "card.common.option.power.one": "+1{p}",
+  "card.common.option.power.three": "+3{p}",
   "card.common.option.red": "Red",
   "card.common.option.swap": "Swap",
   "card.common.option.yellow": "Yellow",

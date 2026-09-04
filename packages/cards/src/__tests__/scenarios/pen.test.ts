@@ -792,6 +792,26 @@ describe("PEN — generalized rules interactions", () => {
       .expectAP(0, 1);
   });
 
+  it("Voltic Veil deals arcane damage when Second Strike is pitched to play it", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["head jab|1"], equipment: NO_EQUIPMENT },
+        {
+          hero: "dorinthea",
+          hand: ["voltic veil|1", "second strike|1"],
+          equipment: NO_EQUIPMENT,
+        },
+      ],
+    });
+
+    g.play("head jab|1")
+      .blockWith()
+      .passPriority()
+      .react("voltic veil|1", { pitch: ["second strike|1"] })
+      .settle()
+      .expectLife(0, 19);
+  });
+
   it("Distant Rumbling inserts the chosen card fifth from the top", () => {
     const g = scenario({
       seats: [
