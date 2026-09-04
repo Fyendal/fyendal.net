@@ -1134,6 +1134,90 @@ describe("Cindra Head Jabs policy", () => {
       .toEqual({ kind: "activate-ability", sourceInstanceId: flightPath.instanceId, pitchInstanceIds: [] });
   });
 
+  it("does not pitch Art and destroy Dragonscaler solely for an unknown Mask draw", () => {
+    const game = state();
+    const art = { instanceId: game.nextInstanceId++, cardId: "FAB307", owner: 0 as const };
+    game.players[0].hand = [art];
+    const view = projectStateFor(game, 0);
+    const flightPath = view.players[0].equipment.legs!;
+    view.priorityPlayer = 0;
+    view.activePlayer = 0;
+    view.turn = 2;
+    view.phase = "reaction";
+    view.pendingDecision = { player: 0, kind: "attack-reaction", prompt: "Attack reactions" };
+    view.chain = [
+      {
+        attackingCard: { instanceId: 90_146_1, cardId: "HNT083", owner: 0 },
+        defendingCards: [], attackValue: 3, defenseValue: 0, damage: 3,
+        resolved: true, hit: true, goAgain: true, reactions: [],
+      },
+      {
+        attackingCard: { instanceId: 90_146_2, cardId: "HNT056", owner: 0 },
+        defendingCards: [], attackValue: 4, defenseValue: 0, damage: 4,
+        resolved: true, hit: true, goAgain: true, reactions: [],
+      },
+      {
+        attackingCard: { instanceId: 90_146_3, cardId: "SFA019", owner: 0 },
+        defendingCards: [], attackValue: 2, defenseValue: 0, damage: 2,
+        resolved: false, hit: true, reactions: [],
+      },
+    ];
+    const legal: GameIntent[] = [
+      {
+        kind: "activate-ability",
+        sourceInstanceId: flightPath.instanceId,
+        pitchInstanceIds: [art.instanceId],
+        pitchRequired: 1,
+      },
+      { kind: "pass" },
+      { kind: "concede" },
+    ];
+
+    expect(chooseCindraIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual({ kind: "pass" });
+  });
+
+  it("plays Art over a below-rupture Lava Burst after Fire Tenet and Kunai", () => {
+    const game = state();
+    const art = { instanceId: game.nextInstanceId++, cardId: "FAB307", owner: 0 as const };
+    const lavaBurst = { instanceId: game.nextInstanceId++, cardId: "SFA019", owner: 0 as const };
+    game.players[0].hand = [art, lavaBurst];
+    const view = projectStateFor(game, 0);
+    view.priorityPlayer = 0;
+    view.activePlayer = 0;
+    view.turn = 2;
+    view.phase = "action";
+    view.pendingDecision = null;
+    view.players[0].actionPoints = 1;
+    view.chain = [
+      {
+        attackingCard: { instanceId: 90_146_4, cardId: "HNT083", owner: 0 },
+        defendingCards: [], attackValue: 3, defenseValue: 0, damage: 3,
+        resolved: true, hit: true, goAgain: true, reactions: [],
+      },
+      {
+        attackingCard: { instanceId: 90_146_5, cardId: "HNT056", owner: 0 },
+        defendingCards: [], attackValue: 4, defenseValue: 0, damage: 4,
+        resolved: true, hit: true, goAgain: true, reactions: [],
+      },
+    ];
+    const playArt: GameIntent = {
+      kind: "play-card",
+      instanceId: art.instanceId,
+      pitchInstanceIds: [],
+    };
+    const legal: GameIntent[] = [
+      playArt,
+      { kind: "play-card", instanceId: lavaBurst.instanceId, pitchInstanceIds: [] },
+      { kind: "close-chain" },
+      { kind: "pass" },
+      { kind: "concede" },
+    ];
+
+    expect(chooseCindraIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual(playArt);
+  });
+
   it("uses Flick and Vest to pay the last resource for Dragonscaler", () => {
     const game = state();
     const firstSnatch = { instanceId: game.nextInstanceId++, cardId: "ANQ031", owner: 0 };
