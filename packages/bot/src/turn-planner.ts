@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { applyIntent, legalIntents, projectStateFor, type GameState } from "@fyendal/engine";
 import type { CardView, GameIntent } from "@fyendal/shared";
 import { strategicPitchIntents, type BotPolicyInput } from "./policy.js";
@@ -5,6 +6,8 @@ import { strategicPitchIntents, type BotPolicyInput } from "./policy.js";
 export const DEFAULT_MAX_SEARCH_NODES = 64;
 export const DEFAULT_MAX_SEARCH_TRANSITIONS = 512;
 export const MAX_ROOT_CANDIDATES = 48;
+export const BOT_OBSERVATION_KEY_LENGTH = 64;
+export const MAX_BOT_CONTINUATION_STEPS = 32;
 const DEFAULT_MAX_ACTION_DEPTH = 12;
 const DEFAULT_MAX_FORCED_STEPS = 160;
 
@@ -355,10 +358,10 @@ function observation(
   };
 }
 
-/** Exact policy-relevant projection-and-legality identity used both by planner
- * memoization and speculative continuation validation. Presentation logs and
- * completed-turn statistics are deliberately excluded so growing histories
- * cannot invalidate an otherwise identical decision. */
+/** Deterministic policy-relevant projection-and-legality fingerprint used for
+ * speculative continuation validation. Presentation logs and completed-turn
+ * statistics are deliberately excluded so growing histories cannot invalidate
+ * an otherwise identical decision. */
 export function botObservationKey(input: Pick<BotPolicyInput, "view" | "legal">): string {
   const {
     log: _log,
@@ -367,7 +370,7 @@ export function botObservationKey(input: Pick<BotPolicyInput, "view" | "legal">)
     ...policyVisible
   } = input.view;
   const currentTurnStats = gameStats?.turns.at(-1);
-  return JSON.stringify({
+  const serialized = JSON.stringify({
     view: {
       ...policyVisible,
       ...(gameStats
@@ -376,6 +379,13 @@ export function botObservationKey(input: Pick<BotPolicyInput, "view" | "legal">)
     },
     legal: input.legal,
   });
+  return createHash("sha256").update(serialized).digest("hex");
+}
+
+export function isBotObservationKey(value: unknown): value is string {
+  return typeof value === "string" &&
+    value.length === BOT_OBSERVATION_KEY_LENGTH &&
+    /^[0-9a-f]+$/.test(value);
 }
 
 export function isCleanActionDecision(state: GameState, seat: 0 | 1): boolean {

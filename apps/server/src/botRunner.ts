@@ -35,7 +35,9 @@ export const BOT_STANDBY_RETRY_MS = 5_000;
 export const SLOW_BOT_DECISION_MS = 250;
 export const SLOW_BOT_TURN_MS = 2_000;
 export const BOT_RETRY_DELAYS_MS = [1_000, 2_000, 5_000, 10_000, 30_000] as const;
-export const MAX_CACHED_BOT_CONTINUATIONS = 128;
+/** Continuations are disposable optimization hints. Eviction only forces the
+ * bot to plan again, so keep this process-local cache deliberately small. */
+export const MAX_CACHED_BOT_CONTINUATIONS = 32;
 
 interface CachedBotContinuation {
   turn: number;

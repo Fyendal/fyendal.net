@@ -1,5 +1,7 @@
 import {
+  MAX_BOT_CONTINUATION_STEPS,
   botDefinition,
+  isBotObservationKey,
   type BotDecision,
   type TurnPlanCheckpoint,
   type TurnPlannerCandidateTrace,
@@ -124,9 +126,7 @@ export function collectBotPolicyWorkerMemory(): BotPolicyWorkerMemory {
 function decodeCheckpoint(value: unknown): TurnPlanCheckpoint | null {
   const candidate = record(value);
   if (!candidate || !exact(candidate, ["observationKey", "intent"])) return null;
-  if (typeof candidate.observationKey !== "string" || candidate.observationKey.length > 100_000) {
-    return null;
-  }
+  if (!isBotObservationKey(candidate.observationKey)) return null;
   return isGameIntent(candidate.intent)
     ? { observationKey: candidate.observationKey, intent: candidate.intent }
     : null;
@@ -160,7 +160,8 @@ function decodeDecision(value: unknown): BotDecision | null {
   if (!isGameIntent(candidate.intent)) return null;
   let continuation: readonly TurnPlanCheckpoint[] | undefined;
   if (candidate.continuation !== undefined) {
-    if (!Array.isArray(candidate.continuation) || candidate.continuation.length > 160) return null;
+    if (!Array.isArray(candidate.continuation) ||
+      candidate.continuation.length > MAX_BOT_CONTINUATION_STEPS) return null;
     const decoded: TurnPlanCheckpoint[] = [];
     for (const value of candidate.continuation) {
       const checkpoint = decodeCheckpoint(value);

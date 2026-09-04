@@ -3,12 +3,14 @@ import { createGame, legalIntents, projectStateFor } from "@fyendal/engine";
 import type { GameIntent } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
 import {
+  BOT_OBSERVATION_KEY_LENGTH,
   boundedRootCandidates,
   botObservationKey,
   cloneStateForBotSimulation,
   DEFAULT_MAX_SEARCH_NODES,
   DEFAULT_MAX_SEARCH_TRANSITIONS,
   evaluateOpponentResponse,
+  isBotObservationKey,
   MAX_ROOT_CANDIDATES,
   planTurn,
   type TurnPlannerRoot,
@@ -82,6 +84,9 @@ describe("bounded turn planning", () => {
     };
     const legal = legalIntents(state, 0);
     const withHistory = botObservationKey({ view, legal });
+    expect(withHistory).toHaveLength(BOT_OBSERVATION_KEY_LENGTH);
+    expect(isBotObservationKey(withHistory)).toBe(true);
+    expect(isBotObservationKey(withHistory.toUpperCase())).toBe(false);
     view.log = [];
     view.logEntries = [];
     expect(botObservationKey({ view, legal })).toBe(withHistory);

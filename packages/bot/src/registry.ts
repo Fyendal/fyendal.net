@@ -21,7 +21,11 @@ import {
   chooseStarvoIntentWithTrace,
 } from "./starvo-policy.js";
 import type { BotPolicyInput } from "./policy.js";
-import type { TurnPlanCheckpoint, TurnPlannerCandidateTrace } from "./turn-planner.js";
+import {
+  MAX_BOT_CONTINUATION_STEPS,
+  type TurnPlanCheckpoint,
+  type TurnPlannerCandidateTrace,
+} from "./turn-planner.js";
 import {
   bravoPresentationFor,
   briarPresentationFor,
@@ -82,7 +86,9 @@ function botDecisionFromTrace(
   if (!decision.plan) return { intent: decision.intent };
   return {
     intent: decision.intent,
-    ...(includeContinuation ? { continuation: decision.plan.checkpoints } : {}),
+    ...(includeContinuation
+      ? { continuation: decision.plan.checkpoints.slice(0, MAX_BOT_CONTINUATION_STEPS) }
+      : {}),
     planning: {
       nodes: decision.plan.nodes,
       transitions: decision.plan.transitions,
