@@ -473,6 +473,38 @@ describe("HNT — marked heroes and daggers", () => {
     expect(g.state.players[0]!.weapons).toHaveLength(0);
   });
 
+  it("Cindra's returned Kunai survives the old attack's chain-close destruction", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "cindra|0",
+          resources: 4,
+          weapons: ["kunai of retribution|0"],
+          equipment: { arms: "flick knives|0" },
+          hand: ["head jab|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    const kunaiId = g.state.players[0]!.weapons[0]!.instanceId;
+    g.attackWithWeapon("kunai of retribution|0")
+      .blockWith()
+      .settle()
+      .play("head jab|1")
+      .blockWith()
+      .activate("flick knives|0")
+      .chooseCard("kunai of retribution|0")
+      .activate("cindra|0")
+      .chooseCard("kunai of retribution|0")
+      .settle()
+      .endTurn();
+
+    expect(g.state.players[0]!.weapons.map((card) => card.instanceId)).toContain(kunaiId);
+    expect(g.state.players[0]!.graveyard.map((card) => card.instanceId)).not.toContain(kunaiId);
+  });
+
   it("Blood Splattered Vest is optional and is destroyed by its third stain counter", () => {
     const g = scenario({
       seats: [

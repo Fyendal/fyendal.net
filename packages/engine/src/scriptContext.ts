@@ -4,6 +4,7 @@ import type { EquipmentSlot, GameLogPayload } from "@fyendal/shared";
 import type {
   ScriptCtx,
   ScriptPrompt,
+  TriggerEventContext,
   TokenCreationContext,
 } from "./scripts.js";
 import { scriptPromptParts } from "./scriptPresentation.js";
@@ -329,6 +330,18 @@ export function makeCtx(
     controlledPermanents(state, candidate.seat, { faceDownEquipment: false })
       .some((source) => scriptOf(state, source.cardId, source)?.prohibitsDeckSearches === true),
   );
+  const deckMoveEffectSource = (): NonNullable<TriggerEventContext["effectSource"]> => {
+    if (cardHasType(state, self, "action")) return "action-card";
+    const resolvingLayer = state.stack[0];
+    if (resolvingLayer?.ability === true && resolvingLayer.sourceInstanceId === self.instanceId) {
+      return "activated-ability";
+    }
+    if (
+      link?.attackingCard.instanceId === self.instanceId &&
+      link.attackCardType !== "action"
+    ) return "activated-ability";
+    return "other";
+  };
   const requestScriptedChoice = (
     hook: string,
     prompt: ScriptPrompt,
@@ -841,7 +854,13 @@ export function makeCtx(
     moveToGraveyard(instanceId, from = "effect") {
       const found = runtime.commands.removeFromOwnerZones(state, instanceId);
       if (!found) return false;
-      runtime.commands.moveToGraveyard(state, found.card, from, seat);
+      runtime.commands.moveToGraveyard(
+        state,
+        found.card,
+        from,
+        seat,
+        deckMoveEffectSource(),
+      );
       if (found.fromArena) runtime.commands.fireLeaveArena(state, found.owner.seat, found.card, "graveyard");
       return true;
     },
@@ -879,7 +898,12 @@ export function makeCtx(
           "card-moved-from-deck-by-effect",
           found.owner.seat,
           found.card,
-          { from: "deck", to: "hand", causedBySeat: seat },
+          {
+            from: "deck",
+            to: "hand",
+            causedBySeat: seat,
+            effectSource: deckMoveEffectSource(),
+          },
         );
       }
       return true;
@@ -906,10 +930,25 @@ export function makeCtx(
       if (!found) return false;
       const pitch = runtime.commands.pitchValueOfInstance(state, found.card);
       runtime.commands.notePitch(state, found.owner, found.card);
+      clearPrivateZonePlacement(found.card);
       found.owner.pitch.push(found.card);
       runtime.commands.pitchIntoPool(state, found.owner, found.card, pitch);
       if (found.fromZone === "graveyard") {
         runtime.events.fireCardLeavesGraveyard(state, found.owner.seat, found.card, "pitch");
+      }
+      if (found.fromZone === "deck") {
+        runtime.events.queueTriggeredEvent(
+          state,
+          "card-moved-from-deck-by-effect",
+          found.owner.seat,
+          found.card,
+          {
+            from: "deck",
+            to: "pitch",
+            causedBySeat: seat,
+            effectSource: deckMoveEffectSource(),
+          },
+        );
       }
       return true;
     },
@@ -933,7 +972,12 @@ export function makeCtx(
           "card-moved-from-deck-by-effect",
           found.owner.seat,
           found.card,
-          { from: "deck", to: "arena", causedBySeat: seat },
+          {
+            from: "deck",
+            to: "arena",
+            causedBySeat: seat,
+            effectSource: deckMoveEffectSource(),
+          },
         );
       }
       return true;
@@ -1665,11 +1709,22 @@ export function makeCtx(
       return card;
     },
     putIntoSoul(instanceId) {
-      return runtime.commands.putCardIntoSoul(state, instanceId, seat);
+      return runtime.commands.putCardIntoSoul(
+        state,
+        instanceId,
+        seat,
+        deckMoveEffectSource(),
+      );
     },
     banish(instanceId, opts) {
       const before = findCardAnywhere(state, instanceId);
-      const moved = runtime.commands.banishCard(state, instanceId, seat, opts?.faceDown);
+      const moved = runtime.commands.banishCard(
+        state,
+        instanceId,
+        seat,
+        opts?.faceDown,
+        deckMoveEffectSource(),
+      );
       if (moved && before && before.card.owner !== seat) {
         fireFriendlyBanishesOpponentCard(state, runtime, seat, before.card);
       }
@@ -2225,7 +2280,12 @@ export function makeCtx(
           "card-moved-from-deck-by-effect",
           owner.seat,
           card,
-          { from: "deck", to: "arsenal", causedBySeat: seat },
+          {
+            from: "deck",
+            to: "arsenal",
+            causedBySeat: seat,
+            effectSource: deckMoveEffectSource(),
+          },
         );
       }
       return true;

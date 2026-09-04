@@ -4,6 +4,7 @@ import type { CardData, CardView, GameIntent } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
 import {
   chooseScoredIntent,
+  chooseSharedPolicyIntent,
   allyLethalThreshold,
   enforceAllyTargetPolicy,
   enforceSpectraPolicy,
@@ -19,6 +20,70 @@ import {
   type BotPolicyInput,
   type BotPolicyScorers,
 } from "./policy.js";
+import { botDefinitions } from "./registry.js";
+
+describe("lethal Arcane Barrier", () => {
+  for (const bot of botDefinitions) {
+    it(`${bot.id} pays the minimum amount that prevents lethal arcane damage`, () => {
+      const state = createGame({
+        decklists: [decklists.dorinthea, decklists.rhinar],
+        cards: cardData,
+        scripts,
+        seed: 94_149,
+        startPlayer: 1,
+      });
+      const view = projectStateFor(state, 0);
+      view.players[0].life = 2;
+      const options = ["pay 0", "pay 1", "pay 2", "pay 3"];
+      view.pendingDecision = {
+        player: 0,
+        kind: "choose-target",
+        prompt: "Arcane Barrier: you would be dealt 3 arcane damage — pay {r} to prevent that much?",
+        promptMessage: {
+          id: "engine.decision.damage.arcane.barrier",
+          values: { amount: 3 },
+        },
+        options,
+      };
+      const legal: GameIntent[] = options.map((optionId) => ({
+        kind: "choose",
+        optionId,
+      }));
+
+      expect(bot.chooseIntent({ seat: 0, view, legal, cards: cardData }))
+        .toEqual({ kind: "choose", optionId: "pay 2" });
+    });
+  }
+
+  it("recognizes the legacy Runechant Arcane Barrier prompt", () => {
+    const state = createGame({
+      decklists: [decklists.dorinthea, decklists.rhinar],
+      cards: cardData,
+      scripts,
+      seed: 94_148,
+      startPlayer: 1,
+    });
+    const view = projectStateFor(state, 0);
+    view.players[0].life = 1;
+    view.pendingDecision = {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Arcane Barrier: you would be dealt 1 arcane damage — pay {r} to prevent that much?",
+      options: ["pay 0", "pay 1"],
+    };
+    const input: BotPolicyInput = {
+      seat: 0,
+      view,
+      legal: [
+        { kind: "choose", optionId: "pay 0" },
+        { kind: "choose", optionId: "pay 1" },
+      ],
+      cards: cardData,
+    };
+
+    expect(chooseSharedPolicyIntent(input)).toEqual({ kind: "choose", optionId: "pay 1" });
+  });
+});
 
 describe("opening-turn aggression", () => {
   function openingInput(): {

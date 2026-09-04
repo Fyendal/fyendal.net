@@ -794,6 +794,92 @@ describe("SGB — Gravy Bones hero", () => {
 });
 
 describe("SGB — Back Alley Breakline", () => {
+  it("gains an action point when Pull from Beyond banishes it from the deck", () => {
+    const g = scenario({
+      seats: [
+        { ...GRAVY, hand: ["pull from beyond|1"], deck: ["back alley breakline|3"] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    g.play("pull from beyond|1")
+      .chooseOption("pass")
+      .expectInZone(0, "back alley breakline|3", "banish")
+      .expectLog("Back Alley Breakline triggers: Gain 1 action point")
+      .expectAP(0, 2); // 1 from Breakline, then 1 from Pull from Beyond's go again
+  });
+
+  it("gains an action point when Call to the Grave moves it from deck to graveyard", () => {
+    const g = scenario({
+      seats: [
+        { ...GRAVY, hand: ["call to the grave|3"], deck: ["back alley breakline|3"] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    g.play("call to the grave|3")
+      .chooseCard("back alley breakline|3")
+      .expectInZone(0, "back alley breakline|3", "graveyard")
+      .expectLog("Back Alley Breakline triggers: Gain 1 action point")
+      .expectAP(0, 2); // 1 from Breakline, then 1 from Call to the Grave's go again
+  });
+
+  it("gains an action point when Azalea's activated ability moves it from deck", () => {
+    const g = scenario({
+      seats: [
+        {
+          ...GRAVY,
+          heroKey: "azalea|0",
+          arsenal: ["battalion barque|1"],
+          deck: ["back alley breakline|3"],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    g.activate("azalea|0")
+      .expectInZone(0, "back alley breakline|3", "arsenal")
+      .expectLog("Back Alley Breakline triggers: Gain 1 action point")
+      .expectAP(0, 2); // 1 from Breakline, then 1 from the ability's go again
+  });
+
+  it("does not trigger when Viserai's triggered hero ability banishes it", () => {
+    const g = scenario({
+      seats: [
+        {
+          ...GRAVY,
+          heroKey: "viserai, the forsaken|0",
+          hand: ["runic reaving|1"],
+          deck: ["back alley breakline|3"],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    g.activate("runic reaving|1", { settle: false })
+      .passPriority()
+      .passPriority()
+      .passPriority()
+      .passPriority()
+      .expectInZone(0, "back alley breakline|3", "banish")
+      .expectNoLog("Back Alley Breakline triggers: Gain 1 action point");
+  });
+
+  it("gains an action point when Saltwater Swell pitches it from the deck", () => {
+    const g = scenario({
+      seats: [
+        {
+          ...GRAVY,
+          hand: ["saltwater swell|1", "battalion barque|1"],
+          deck: ["back alley breakline|3"],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    g.play("saltwater swell|1", { pitch: ["battalion barque|1"] })
+      .expectInZone(0, "back alley breakline|3", "pitch")
+      .expectLog("Back Alley Breakline triggers: Gain 1 action point")
+      .blockWith()
+      .settle()
+      .expectAP(0, 2); // 1 from Breakline, then 1 from Saltwater Swell's go again
+  });
+
   it("gains an action point when destroyed off the top of the deck", () => {
     const g = scenario({
       seats: [

@@ -24,6 +24,8 @@ export type TriggerEvent =
 export interface TriggerEventContext {
   readonly from?: string;
   readonly causedBySeat?: number;
+  /** The kind of resolving effect responsible for a zone movement. */
+  readonly effectSource?: "action-card" | "activated-ability" | "other";
   readonly atRandom?: boolean;
   readonly tokenCount?: number;
   readonly to?: "arsenal" | "banish" | "soul" | "hand" | "arena" | "graveyard" | "pitch";

@@ -261,7 +261,10 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
         moveToGraveyard(state, runtime, link.attackingCard);
       }
     }
-    if (link.flags.destroyAttackerOnChainClose === true) {
+    if (
+      link.flags.destroyAttackerOnChainClose === true &&
+      link.flags.attackGone !== true
+    ) {
       const controller = state.players[link.attacker] as PlayerState;
       const liveAttacker =
         controller.weapons.find(
