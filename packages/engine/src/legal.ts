@@ -823,7 +823,11 @@ function reactionIntents(
           intents.push({
             kind: "activate-ability",
             sourceInstanceId: c.instanceId,
+            // This established wire field carries the exact discard choice
+            // for while-defending abilities. The presentation hint prevents
+            // clients from projecting it as a resource pitch.
             pitchInstanceIds: [h.instanceId],
+            deferActivationPresentation: true,
           });
         }
       }
@@ -1408,10 +1412,12 @@ export function actionCandidates(state: GameStateInternal,
   for (const intent of enumerateIntents(state, runtime, seat, true)) {
     if (!isPaidIntent(intent)) continue;
     // Resource-pitch sequences are client-selected against pitchRequired, but
-    // exact card costs (such as discarding a card while this is defending)
-    // must retain the authoritative choices the client is allowed to select.
+    // exact while-defending discards retain their authoritative card choice.
     const candidate: PaidIntent =
-      intent.pitchRequired === undefined && intent.pitchInstanceIds.length > 0
+      intent.kind === "activate-ability" &&
+      intent.deferActivationPresentation === true &&
+      intent.pitchRequired === undefined &&
+      intent.pitchInstanceIds.length > 0
         ? intent
         : { ...intent, pitchInstanceIds: [] };
     const key = JSON.stringify(candidate);

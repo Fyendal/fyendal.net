@@ -120,7 +120,7 @@ describe("HVY — Rally the Rearguard", () => {
     g.attackWithWeapon()
       .blockWith(rally)
       .passPriority() // attacker passes the reaction step
-      .activate(rally, { pitch: ["dodge|3"] }) // discard is passed as "pitch"
+      .activate(rally, { discard: ["dodge|3"] })
       .expectLog("Rally the Rearguard")
       .expectFinalDefense(5) // 2 + 3
       .expectLife(0, 20); // Dawnblade's 2 is fully defended

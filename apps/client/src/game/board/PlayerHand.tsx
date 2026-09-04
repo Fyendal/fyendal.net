@@ -12,8 +12,9 @@ import { cardData } from "@fyendal/cards/client";
 import { CardBack, CardFace } from "../Card.js";
 import { cardLegalityExplanation } from "../causalExplanations.js";
 import {
-  canAddPitch,
+  canAddPaymentCard,
   canAddResourcePaymentPitch,
+  isDiscardPayment,
 } from "../legalSelection.js";
 import { playableZoneTooltip } from "../playableZoneTooltip.js";
 import {
@@ -86,7 +87,7 @@ export interface PlayerHandInteraction {
    * reopening the local action-announcement state. */
   preStackSelectedInstanceId: number | null;
   pitchSelection: readonly number[];
-  selectedPaymentVariants: Parameters<typeof canAddPitch>[0];
+  selectedPaymentVariants: Parameters<typeof canAddPaymentCard>[0];
   resourcePayment?: ResourcePayment;
   stagedIds: ReadonlySet<number>;
   optimisticallyHiddenIds: ReadonlySet<number>;
@@ -188,6 +189,7 @@ export function PlayerHand({
     const card = player.hand.find((candidate) => candidate.instanceId === instanceId);
     return card ? (cardData[card.cardId]?.pitch ?? 0) : 0;
   };
+  const discardPayment = isDiscardPayment(interaction.selectedPaymentVariants);
 
   return (
     <>
@@ -226,7 +228,7 @@ export function PlayerHand({
             );
             const pitchable = interaction.selection.kind !== "none" && !selected && (
               interaction.pitchSelection.includes(card.instanceId) ||
-              canAddPitch(
+              canAddPaymentCard(
                 interaction.selectedPaymentVariants,
                 interaction.pitchSelection,
                 card.instanceId,
@@ -253,8 +255,10 @@ export function PlayerHand({
                 motionKey={motionPresentationKey(handMotionLocation, card.instanceId)}
                 onClick={actionable ? () => interaction.onCardClick(card) : undefined}
                 explanation={explanation}
-                selected={selected}
-                pitched={interaction.pitchSelection.includes(card.instanceId)}
+                selected={selected || (
+                  discardPayment && interaction.pitchSelection.includes(card.instanceId)
+                )}
+                pitched={!discardPayment && interaction.pitchSelection.includes(card.instanceId)}
                 highlighted={actionable}
                 dimmed={interaction.defending && !stageable}
               />

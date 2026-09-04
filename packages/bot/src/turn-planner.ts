@@ -285,9 +285,30 @@ type AdvancedState =
   | { kind: "decision"; state: GameState }
   | { kind: "terminal"; state: GameState; complete: boolean };
 
-function cloneForSimulation(state: GameState, publicGameId: string): GameState {
-  const { cardsRef, scriptsRef, ...serializable } = state;
-  const copy = JSON.parse(JSON.stringify(serializable)) as GameState;
+function compactSimulationHistory(state: GameState): void {
+  state.log.length = 0;
+  if (state.gameStats.turns.length > 1) {
+    state.gameStats.turns.splice(0, state.gameStats.turns.length - 1);
+  }
+}
+
+/** Clone only rules-relevant state for speculative planning. Historical logs
+ * and completed-turn statistics are presentation data; engine and bot policy
+ * decisions use flags plus the latest turn-stat row. */
+export function cloneStateForBotSimulation(state: GameState, publicGameId: string): GameState {
+  const {
+    cardsRef,
+    scriptsRef,
+    log: _log,
+    gameStats,
+    ...serializable
+  } = state;
+  const currentTurnStats = gameStats.turns.at(-1);
+  const copy = JSON.parse(JSON.stringify({
+    ...serializable,
+    gameStats: { turns: currentTurnStats ? [currentTurnStats] : [] },
+    log: [],
+  })) as GameState;
   copy.cardsRef = cardsRef;
   copy.scriptsRef = scriptsRef;
 
@@ -310,6 +331,16 @@ function cloneForSimulation(state: GameState, publicGameId: string): GameState {
   return copy;
 }
 
+function applySimulationIntent(
+  state: GameState,
+  seat: number,
+  intent: GameIntent,
+): ReturnType<typeof applyIntent> {
+  const applied = applyIntent(state, seat, intent);
+  if (applied.ok) compactSimulationHistory(applied.state);
+  return applied;
+}
+
 function observation(
   state: GameState,
   seat: 0 | 1,
@@ -324,13 +355,27 @@ function observation(
   };
 }
 
-/** Exact projection-and-legality identity used both by planner memoization and
- * speculative continuation validation. Logs are deliberately excluded so a
- * growing presentation-only history cannot invalidate an otherwise identical
- * decision. */
+/** Exact policy-relevant projection-and-legality identity used both by planner
+ * memoization and speculative continuation validation. Presentation logs and
+ * completed-turn statistics are deliberately excluded so growing histories
+ * cannot invalidate an otherwise identical decision. */
 export function botObservationKey(input: Pick<BotPolicyInput, "view" | "legal">): string {
-  const { log: _log, ...policyVisible } = input.view;
-  return JSON.stringify({ view: policyVisible, legal: input.legal });
+  const {
+    log: _log,
+    logEntries: _logEntries,
+    gameStats,
+    ...policyVisible
+  } = input.view;
+  const currentTurnStats = gameStats?.turns.at(-1);
+  return JSON.stringify({
+    view: {
+      ...policyVisible,
+      ...(gameStats
+        ? { gameStats: { turns: currentTurnStats ? [currentTurnStats] : [] } }
+        : {}),
+    },
+    legal: input.legal,
+  });
 }
 
 export function isCleanActionDecision(state: GameState, seat: 0 | 1): boolean {
@@ -400,7 +445,7 @@ function advanceForced<Evaluation extends TurnEvaluation>(
       : opponentRolloutIntent(current);
     if (!intent) return { kind: "terminal", state: current, complete: false };
     context.transitions++;
-    const applied = applyIntent(current, actor, intent);
+    const applied = applySimulationIntent(current, actor, intent);
     if (!applied.ok) return { kind: "terminal", state: current, complete: false };
     current = applied.state;
     if (current.players[root.seat].hand.some((card) => root.deckIds.has(card.instanceId))) {
@@ -567,7 +612,7 @@ function search<Evaluation extends TurnEvaluation>(
     if (context.nodes >= context.nodeLimit || context.transitions >= context.transitionLimit) break;
     context.nodes++;
     context.transitions++;
-    const applied = applyIntent(state, context.root.seat, intent);
+    const applied = applySimulationIntent(state, context.root.seat, intent);
     if (!applied.ok) continue;
     const intentScore = context.config.scoreIntent?.(intent, observed) ?? 0;
     const advanced = advanceForced(applied.state, context);
@@ -607,7 +652,7 @@ export function planTurn<Evaluation extends TurnEvaluation>(
   config: TurnPlannerConfig<Evaluation>,
 ): TurnPlan<Evaluation> | undefined {
   if (!input.state || !isCleanActionDecision(input.state, input.seat)) return undefined;
-  const simulation = cloneForSimulation(input.state, input.view.gameId);
+  const simulation = cloneStateForBotSimulation(input.state, input.view.gameId);
   const me = input.view.players[input.seat];
   const deck = simulation.players[input.seat].deck;
   const root: TurnPlannerRoot = {
@@ -673,7 +718,7 @@ export function planTurn<Evaluation extends TurnEvaluation>(
     context.memo = new Map();
     context.nodes++;
     context.transitions++;
-    const applied = applyIntent(simulation, input.seat, intent);
+    const applied = applySimulationIntent(simulation, input.seat, intent);
     if (!applied.ok) continue;
     const intentScore = config.scoreIntent?.(intent, input) ?? 0;
     const advanced = advanceForced(applied.state, context);

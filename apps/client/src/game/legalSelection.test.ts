@@ -3,12 +3,12 @@ import type { GameIntent } from "@fyendal/shared";
 import {
   actionSelectionVariants,
   actionVariants,
-  canAddPitch,
+  canAddPaymentCard,
   canAddResourcePaymentPitch,
   offeredMeldSides,
   paidActionCandidates,
   paidActionVariants,
-  pitchResourceProgress,
+  actionPaymentProgress,
   selectedActionIntent,
   selectedDefendIntent,
   selectedResourcePaymentOption,
@@ -173,16 +173,16 @@ describe("authoritative legal-intent selection", () => {
       null,
       null,
     );
-    expect(canAddPitch(variants, [], 32)).toBe(true);
-    expect(canAddPitch(variants, [32], 31)).toBe(false);
-    expect(canAddPitch(variants, [32], 33)).toBe(true);
+    expect(canAddPaymentCard(variants, [], 32)).toBe(true);
+    expect(canAddPaymentCard(variants, [32], 31)).toBe(false);
+    expect(canAddPaymentCard(variants, [32], 33)).toBe(true);
   });
 
   it("permits an exact discard choice when hand-card resource values are available", () => {
     const variants = actionVariants(
       [
-        { kind: "activate-ability", sourceInstanceId: 84, pitchInstanceIds: [31] },
-        { kind: "activate-ability", sourceInstanceId: 84, pitchInstanceIds: [32] },
+        { kind: "activate-ability", sourceInstanceId: 84, pitchInstanceIds: [31], deferActivationPresentation: true },
+        { kind: "activate-ability", sourceInstanceId: 84, pitchInstanceIds: [32], deferActivationPresentation: true },
       ],
       { kind: "activate", sourceInstanceId: 84 },
       null,
@@ -191,9 +191,9 @@ describe("authoritative legal-intent selection", () => {
     );
     const pitchValue = () => 3;
 
-    expect(canAddPitch(variants, [], 31, pitchValue)).toBe(true);
-    expect(canAddPitch(variants, [], 32, pitchValue)).toBe(true);
-    expect(canAddPitch(variants, [], 33, pitchValue)).toBe(false);
+    expect(canAddPaymentCard(variants, [], 31, pitchValue)).toBe(true);
+    expect(canAddPaymentCard(variants, [], 32, pitchValue)).toBe(true);
+    expect(canAddPaymentCard(variants, [], 33, pitchValue)).toBe(false);
   });
 
   it("preserves sequential pitch order", () => {
@@ -210,9 +210,9 @@ describe("authoritative legal-intent selection", () => {
       null,
     );
 
-    expect(canAddPitch(variants, [], 31)).toBe(true);
-    expect(canAddPitch(variants, [], 32)).toBe(false);
-    expect(canAddPitch(variants, [31], 32)).toBe(true);
+    expect(canAddPaymentCard(variants, [], 31)).toBe(true);
+    expect(canAddPaymentCard(variants, [], 32)).toBe(false);
+    expect(canAddPaymentCard(variants, [31], 32)).toBe(true);
     expect(selectedActionIntent(
       [redThenBlue],
       { kind: "play-hand", instanceId: 10 },
@@ -240,11 +240,11 @@ describe("authoritative legal-intent selection", () => {
     const values = new Map([[31, 1], [32, 3], [33, 1]]);
     const pitchValue = (id: number) => values.get(id) ?? 0;
 
-    expect(canAddPitch(variants, [], 32, pitchValue)).toBe(true);
-    expect(canAddPitch(variants, [32], 31, pitchValue)).toBe(true);
+    expect(canAddPaymentCard(variants, [], 32, pitchValue)).toBe(true);
+    expect(canAddPaymentCard(variants, [32], 31, pitchValue)).toBe(true);
     expect(paidActionCandidates(variants, [32], pitchValue)).toEqual([]);
     expect(paidActionCandidates(variants, [32, 31], pitchValue)).toEqual([candidate]);
-    expect(canAddPitch(variants, [32, 31], 33, pitchValue)).toBe(false);
+    expect(canAddPaymentCard(variants, [32, 31], 33, pitchValue)).toBe(false);
     expect(selectedActionIntent(
       [candidate],
       { kind: "play-hand", instanceId: 10 },
@@ -272,7 +272,8 @@ describe("authoritative legal-intent selection", () => {
     );
     const values = new Map([[31, 3], [32, 2], [33, 1]]);
 
-    expect(pitchResourceProgress(variants, [32], (id) => values.get(id) ?? 0)).toEqual({
+    expect(actionPaymentProgress(variants, [32], (id) => values.get(id) ?? 0)).toEqual({
+      kind: "resource",
       selected: 2,
       required: 3,
     });
@@ -293,9 +294,34 @@ describe("authoritative legal-intent selection", () => {
     );
     const values = new Map([[31, 1], [32, 3]]);
 
-    expect(pitchResourceProgress(variants, [31], (id) => values.get(id) ?? 0)).toEqual({
+    expect(actionPaymentProgress(variants, [31], (id) => values.get(id) ?? 0)).toEqual({
+      kind: "resource",
       selected: 1,
       required: 2,
+    });
+  });
+
+  it("counts exact discard choices as cards instead of pitch resources", () => {
+    const variants = actionVariants(
+      [
+        { kind: "activate-ability", sourceInstanceId: 84, pitchInstanceIds: [31], deferActivationPresentation: true },
+        { kind: "activate-ability", sourceInstanceId: 84, pitchInstanceIds: [32], deferActivationPresentation: true },
+      ],
+      { kind: "activate", sourceInstanceId: 84 },
+      null,
+      null,
+      null,
+    );
+
+    expect(actionPaymentProgress(variants, [], () => 3)).toEqual({
+      kind: "discard",
+      selected: 0,
+      required: 1,
+    });
+    expect(actionPaymentProgress(variants, [31], () => 3)).toEqual({
+      kind: "discard",
+      selected: 1,
+      required: 1,
     });
   });
 

@@ -54,8 +54,7 @@ function paymentModel(
     onToggleAdditionalCostCard: noop,
     onConfirmAdditionalCost: noop,
     pitchSel: [],
-    pitchResourcesSelected: 0,
-    pitchResourcesRequired: 2,
+    paymentProgress: { kind: "resource", selected: 0, required: 2 },
     onCancel: noop,
   };
 }
@@ -117,6 +116,24 @@ describe("alternative-cost payment choices", () => {
 });
 
 describe("activated ability mode choices", () => {
+  it("presents an exact defense-ability cost as a plain discard prompt", () => {
+    const html = renderLocalized(
+      <ActionAnnouncementPanel
+        model={{
+          ...paymentModel(false),
+          sel: { kind: "activate", sourceInstanceId: 1 },
+          alternativeCostChoices: [],
+          paymentProgress: { kind: "discard", selected: 0, required: 1 },
+        }}
+        viewerSeat={0}
+      />,
+    );
+
+    expect(html).toContain("Choose a card to discard");
+    expect(html).not.toContain("0/1");
+    expect(html).not.toContain("pitch resources selected");
+  });
+
   it("shows the mode prompt before pitch progress", () => {
     const html = renderLocalized(
       <ActionAnnouncementPanel

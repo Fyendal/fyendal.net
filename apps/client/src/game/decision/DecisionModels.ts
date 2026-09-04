@@ -69,7 +69,10 @@ export interface ActionAnnouncementModel {
   onToggleAdditionalCostCard: (instanceId: number) => void;
   onConfirmAdditionalCost: () => void;
   pitchSel: number[];
-  pitchResourcesSelected: number;
-  pitchResourcesRequired: number;
+  paymentProgress: {
+    kind: "resource" | "discard";
+    selected: number;
+    required: number;
+  };
   onCancel: () => void;
 }

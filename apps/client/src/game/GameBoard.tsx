@@ -23,7 +23,7 @@ import {
 import { useDeckCardFeedback } from "./DeckCardToast.js";
 import { SideRail } from "./SideRail.js";
 import {
-  canAddPitch,
+  canAddPaymentCard,
   canAddResourcePaymentPitch,
   offeredMeldSides,
   selectedDefendIntent,
@@ -263,7 +263,7 @@ export function GameBoard() {
     canConfirmAdditionalCost,
     normalCostPayableWithoutPitch,
     playMethodChoiceRequired,
-    pitchProgress,
+    paymentProgress,
     selectedAbilityIndexes,
     boostOptions,
     selectedBoostCount,
@@ -521,7 +521,7 @@ export function GameBoard() {
       if (stagedAdditionalCostDefinition && !additionalCostConfirmed) return;
       if (
         pitchSel.includes(c.instanceId) ||
-        canAddPitch(
+        canAddPaymentCard(
           selectedPaymentVariants,
           pitchSel,
           c.instanceId,
@@ -1123,8 +1123,7 @@ export function GameBoard() {
           onToggleAdditionalCostCard: toggleAdditionalCostCard,
           onConfirmAdditionalCost: confirmAdditionalCost,
           pitchSel,
-          pitchResourcesSelected: pitchProgress.selected,
-          pitchResourcesRequired: pitchProgress.required,
+          paymentProgress,
           onCancel: resetSel,
         }}
       /> : null}
