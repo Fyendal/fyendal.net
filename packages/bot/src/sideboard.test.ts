@@ -1,4 +1,4 @@
-import { precon, validatePresentation } from "@fyendal/cards";
+import { cardData, precon, validatePresentation } from "@fyendal/cards";
 import type { Decklist } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
 import {
@@ -68,18 +68,28 @@ describe("Briar matchup presentation", () => {
 });
 
 describe("Bravo Fabrary matchup presentation", () => {
-  it("uses the anti-arcane Blaze package and full AB equipment", () => {
-    const presented = bravoPresentationFor(opponent({ heroId: "SBZ001" }));
-    expect(presented.equipment).toEqual({
-      head: "SBR006",
-      chest: "SBR007",
-      arms: "SGB006",
-      legs: "SBL010",
-    });
-    expect(presented.deck.filter((id) => id === "SBA030")).toHaveLength(2);
-    expect(presented.deck.filter((id) => id === "SLY019")).toHaveLength(2);
-    expect(presented.deck).not.toContain("SBR017");
-  });
+  it.each(["SBZ001", "ARC113"])(
+    "uses the fatigue package and AB3 equipment against %s",
+    (heroId) => {
+      const presented = bravoPresentationFor(opponent({ heroId }));
+      expect(presented.equipment).toEqual({
+        head: "SBR006",
+        chest: "SBR007",
+        arms: "SGB006",
+        legs: "SBL010",
+      });
+      const arcaneBarrier = Object.values(presented.equipment).reduce((total, id) =>
+        total + (cardData[id!]?.keywords ?? []).reduce((pieceTotal, keyword) => {
+          const amount = /^Arcane Barrier (\d+)$/.exec(keyword)?.[1];
+          return pieceTotal + Number(amount ?? 0);
+        }, 0),
+      0);
+      expect(arcaneBarrier).toBe(3);
+      expect(presented.deck.filter((id) => id === "SBA030")).toHaveLength(2);
+      expect(presented.deck.filter((id) => id === "SLY019")).toHaveLength(2);
+      expect(presented.deck).not.toContain("SBR017");
+    },
+  );
 
   it("uses the anti-arcane package against Iyslander", () => {
     const presented = bravoPresentationFor(opponent({ heroId: "SIY001" }));
@@ -117,6 +127,7 @@ describe("Bravo Fabrary matchup presentation", () => {
     for (const matchup of [
       opponent(),
       opponent({ heroId: "SBZ001" }),
+      opponent({ heroId: "ARC113" }),
       opponent({ heroId: "SBR001" }),
       opponent({ heroId: "SBA001" }),
       opponent({ heroId: "DRO001" }),

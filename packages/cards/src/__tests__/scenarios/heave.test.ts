@@ -48,6 +48,12 @@ describe("Heave", () => {
 
       game.settle().doRaw({ kind: "pass" }).settle();
       expect(game.state.pendingDecision?.resourcePayment?.cost).toBe(amount);
+      const source = game.state.players[0]!.hand.find((candidate) =>
+        functionalKeyOf(cardData[candidate.cardId]!) === card
+      )!;
+      expect(game.state.pendingDecision?.resourcePayment?.options.every((option) =>
+        !option.pitchInstanceIds.includes(source.instanceId)
+      )).toBe(true);
 
       game.chooseOption("pitch Wrecker Romp")
         .expectInZone(0, card, "arsenal")

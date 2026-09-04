@@ -493,9 +493,17 @@ export interface ScriptCtx {
   requestNameChoice(hook: string, prompt: ScriptPrompt, seat?: number): void;
   /** Offer a resource payment during a resolving effect or trigger. Legal
    *  options include floating pools and pitchable cards from the paying
-   *  player's hand. Returns false when the player cannot pay, otherwise queues
-   *  a decision whose onChoose result is normalized to "paid" or "declined". */
-  requestPayment(hook: string, prompt: ScriptPrompt, cost: number, seat?: number): boolean;
+   *  player's hand, except explicitly excluded instances that the resolving
+   *  effect still needs in place. Returns false when the player cannot pay,
+   *  otherwise queues a decision whose onChoose result is normalized to
+   *  "paid" or "declined". */
+  requestPayment(
+    hook: string,
+    prompt: ScriptPrompt,
+    cost: number,
+    seat?: number,
+    excludeInstanceIds?: readonly number[],
+  ): boolean;
   /** Offer a payment whose follow-up hook belongs to another active source. */
   requestPaymentFrom(sourceInstanceId: number, hook: string, prompt: ScriptPrompt, cost: number, seat?: number): boolean;
   /** Declare X, then pay the resulting resource cost while playing a card.
