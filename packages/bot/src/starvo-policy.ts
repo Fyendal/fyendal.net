@@ -3,12 +3,16 @@ import {
   currentAttackIsOurs,
   currentLink,
   functionalKey,
+  attackIntentVariantKey,
+  allyLethalThreshold,
   incomingAttackDamage,
   intentCard,
   isAttack,
+  opponentAllies,
   ownCards,
   preferredPitchIntents,
   shouldPreserveOpeningHand,
+  targetableAttackIntent,
   type BotPolicyInput,
 } from "./policy.js";
 import {
@@ -18,6 +22,9 @@ import {
 import { evaluateOnHit } from "./value.js";
 
 export type StarvoIntentDecision = JarlIntentDecision;
+
+const CHUM = "chum, friendly first mate|2";
+const SAWBONES = "sawbones, dock hand|2";
 
 function firstPreferredAbility(
   input: BotPolicyInput,
@@ -258,6 +265,23 @@ function defenderIds(intent: GameIntent): readonly number[] {
     : [];
 }
 
+function withoutNonlethalTunicDefense(input: BotPolicyInput): BotPolicyInput {
+  const link = currentLink(input);
+  const me = input.view.players[input.seat];
+  if (!link || link.damage >= me.life) return input;
+  const own = ownCards(input);
+  const tunic = [...own.values()].find((card) =>
+    functionalKey(input.cards[card.cardId]) === "fyendal's spring tunic|0"
+  );
+  if (!tunic) return input;
+  const legal = input.legal.filter((intent) =>
+    !defenderIds(intent).includes(tunic.instanceId)
+  );
+  return legal.length > 0 && legal.length !== input.legal.length
+    ? { ...input, legal }
+    : input;
+}
+
 function usesEquipmentDefender(input: BotPolicyInput, intent: GameIntent): boolean {
   const me = input.view.players[input.seat];
   const equipmentIds = new Set([
@@ -329,6 +353,37 @@ function starvoDefenseOverride(
       left.intent.instanceIds.length - right.intent.instanceIds.length)[0]?.intent;
 }
 
+function avoidWastefulAllyOverkill(
+  input: BotPolicyInput,
+  intent: GameIntent,
+): GameIntent {
+  if (!targetableAttackIntent(intent) || intent.targetAllyId === undefined) return intent;
+  const ally = opponentAllies(input).find((candidate) =>
+    candidate.instanceId === intent.targetAllyId
+  );
+  if (!ally) return intent;
+  const allyKey = functionalKey(input.cards[ally.cardId]);
+  if (allyKey === CHUM || allyKey === SAWBONES) return intent;
+
+  const card = intentCard(intent, ownCards(input));
+  const damage = Math.max(0, card?.attack ?? input.cards[card?.cardId ?? ""]?.attack ?? 0);
+  if (damage - allyLethalThreshold(ally, input) <= 1) return intent;
+  const variant = attackIntentVariantKey(intent);
+  return input.legal.find((candidate) =>
+    targetableAttackIntent(candidate) && candidate.targetAllyId === undefined &&
+    attackIntentVariantKey(candidate) === variant
+  ) ?? intent;
+}
+
+function starvoDecision(
+  input: BotPolicyInput,
+  intent: GameIntent,
+  plan?: JarlIntentDecision["plan"],
+): StarvoIntentDecision {
+  const targeted = avoidWastefulAllyOverkill(input, intent);
+  return plan ? { intent: targeted, plan } : { intent: targeted };
+}
+
 /**
  * Starvo starts from the battle-tested Earth/Ice Guardian policy used by Jarl:
  * it protects disruptive hands, saves Stalagmite for a go-again link, favors
@@ -338,30 +393,37 @@ function starvoDefenseOverride(
  * exposing any opponent-hidden information.
  */
 export function chooseStarvoIntentWithTrace(input: BotPolicyInput): StarvoIntentDecision {
-  const override = starvoPriorityOverride(input);
-  if (override) return { intent: override };
-  let sharedDecision = chooseJarlIntentWithTrace(input);
-  const legalWithoutWastefulInstants = input.legal.filter((intent) => {
-    if (isPulseOfVolthavenIntent(intent, input)) {
-      return hasPulseFollowUp(input, intent);
+  const guardedInput = withoutNonlethalTunicDefense(input);
+  const override = starvoPriorityOverride(guardedInput);
+  if (override) return starvoDecision(guardedInput, override);
+  let sharedDecision = chooseJarlIntentWithTrace(guardedInput);
+  const legalWithoutWastefulInstants = guardedInput.legal.filter((intent) => {
+    if (isPulseOfVolthavenIntent(intent, guardedInput)) {
+      return hasPulseFollowUp(guardedInput, intent);
     }
-    return !isElectromagneticSomersaultIntent(intent, input) ||
-      hasFriendlySomersaultTarget(input, intent);
+    return !isElectromagneticSomersaultIntent(intent, guardedInput) ||
+      hasFriendlySomersaultTarget(guardedInput, intent);
   });
   if (legalWithoutWastefulInstants.length > 0 &&
-    legalWithoutWastefulInstants.length !== input.legal.length) {
+    legalWithoutWastefulInstants.length !== guardedInput.legal.length) {
     sharedDecision = chooseJarlIntentWithTrace({
-      ...input,
+      ...guardedInput,
       legal: legalWithoutWastefulInstants,
     });
   }
-  const handDefense = fullHandDefense(input);
-  if (handDefense && usesEquipmentDefender(input, sharedDecision.intent)) {
-    return { intent: handDefense };
+  const handDefense = fullHandDefense(guardedInput);
+  if (handDefense && usesEquipmentDefender(guardedInput, sharedDecision.intent)) {
+    return starvoDecision(guardedInput, handDefense);
   }
-  if (handDefense) return sharedDecision;
-  const defense = starvoDefenseOverride(input, sharedDecision.intent);
-  return defense ? { intent: defense } : sharedDecision;
+  if (handDefense) {
+    return starvoDecision(guardedInput, sharedDecision.intent, sharedDecision.plan);
+  }
+  const defense = starvoDefenseOverride(guardedInput, sharedDecision.intent);
+  return starvoDecision(
+    guardedInput,
+    defense ?? sharedDecision.intent,
+    defense ? undefined : sharedDecision.plan,
+  );
 }
 
 export function chooseStarvoIntent(input: BotPolicyInput): GameIntent {
