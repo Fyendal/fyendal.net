@@ -12,8 +12,8 @@ import { useStore } from "../store.js";
 import {
   CARD_PREVIEW_HEIGHT,
   CARD_PREVIEW_WIDTH,
+  CardArtwork,
   CardFace,
-  cardImageUrl,
 } from "../game/Card.js";
 import { MobileCardInspect } from "../game/MobileCardInspect.js";
 import { useMobileCardLongPress } from "../game/mobileCardLongPress.js";
@@ -360,7 +360,7 @@ export function PrepRoom() {
             <>
               <div className="prep-versus">
                 <div className="prep-vs-side">
-                  <img className="prep-hero" src={cardImageUrl(pool.heroId)} alt={intl.formatMessage({ id: "prep.yourHero" })} width={126} height={174} data-cardid={pool.heroId} />
+                  <CardArtwork className="prep-hero" cardId={pool.heroId} alt={intl.formatMessage({ id: "prep.yourHero" })} width={126} height={174} />
                   <div className="prep-opp-name">
                     {cardData[pool.heroId]?.name ?? intl.formatMessage({ id: "prep.yourHero" })}
                   </div>
@@ -368,7 +368,7 @@ export function PrepRoom() {
                 </div>
                 <div className="prep-vs">VS</div>
                 <div className="prep-vs-side">
-                  <img className="prep-hero" src={cardImageUrl(opp.heroId)} alt={opp.heroName} width={126} height={174} data-cardid={opp.heroId} />
+                  <CardArtwork className="prep-hero" cardId={opp.heroId} alt={opp.heroName} width={126} height={174} />
                   <div className="prep-opp-name">{opp.heroName}</div>
                   <div className="muted">
                     {opp.username} — {intl.formatMessage({
@@ -577,12 +577,12 @@ export function PrepRoom() {
           <div className={`prep-match-status prep-mobile-match-status${opp ? "" : " no-opponent"}`}>
             {opp ? (
               <div className="prep-ready-opponent">
-                <img
-                  src={cardImageUrl(opp.heroId)}
+                <CardArtwork
+                  className="prep-ready-opponent-art"
+                  cardId={opp.heroId}
                   alt={intl.formatMessage({ id: "prep.opponentHeroAria" }, { hero: opp.heroName })}
                   width={38}
                   height={52}
-                  data-cardid={opp.heroId}
                 />
                 <div>
                   <span>{intl.formatMessage({ id: "prep.opponent" })}</span>

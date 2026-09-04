@@ -61,7 +61,9 @@
   text-shadow: 0 2px 9px #000;
 }
 .prep-hero {
+  display: block;
   width: 126px;
+  height: 174px;
   border-radius: 9px;
   border: 1px solid #5a4426;
   box-shadow: 0 7px 23px #000a;
@@ -161,7 +163,9 @@
 }
 .prep-cardrow { display: flex; gap: 12px; flex-wrap: wrap; }
 .prep-card {
+  display: block;
   width: 105px;
+  height: 147px;
   border-radius: 7px;
   border: 2px solid #5a4426;
   transition: transform 0.08s ease-out, border-color 0.08s ease-out;
@@ -195,6 +199,7 @@
 }
 .prep-card-check {
   position: absolute;
+  z-index: 3;
   top: -7px;
   right: -7px;
   display: none;
@@ -279,6 +284,7 @@
   box-shadow: 0 3px 8px #000b;
   pointer-events: none;
 }
+.prep-stack-card .card-artwork-placeholder { border-radius: inherit; }
 .prep-empty-zone { margin: 0; align-self: center; }
 .prep-ready-float {
   position: fixed;
@@ -374,14 +380,20 @@
   gap: 8px;
   min-width: 0;
 }
-.prep-ready-opponent img {
+.prep-ready-opponent-art {
   width: 38px;
+  height: 52px;
   aspect-ratio: 300 / 413;
   flex: 0 0 auto;
   border: 1px solid #5a4426;
   border-radius: 4px;
   box-shadow: 0 3px 9px #000a;
 }
+.prep-ready-opponent-art .card-artwork-placeholder { padding: 3px; }
+.prep-ready-opponent-art .c-name { padding: 0; font-size: 6px; }
+.prep-ready-opponent-art .c-text,
+.prep-ready-opponent-art .c-cost,
+.prep-ready-opponent-art .c-stats { display: none; }
 .prep-ready-opponent div {
   display: flex;
   flex-direction: column;

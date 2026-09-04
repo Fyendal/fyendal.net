@@ -38,6 +38,8 @@ describe("PrepPresentation equipment controls", () => {
     expect(html).toContain('aria-pressed="false"');
     expect(html).toContain("Select Balance of Justice for head");
     expect(html).toContain("prep-card-check");
+    expect(html).toContain("card-artwork-placeholder");
+    expect(html).toContain("Compass of Sunken Depths");
   });
 
   it("shows copy counts through stacked card faces without a duplicate badge", () => {
@@ -68,7 +70,9 @@ describe("PrepPresentation equipment controls", () => {
     })));
 
     expect(html.match(/HVY103\.webp/g)).toHaveLength(3);
-    expect(html.match(/loading="eager"/g)).toHaveLength(3);
+    expect(html.match(/loading="eager"/g)).toHaveLength(4);
+    expect(html.match(/card-artwork-placeholder/g)).toHaveLength(4);
+    expect(html).toContain("Up the Ante");
     expect(html).not.toContain("prep-stack-count");
   });
 
