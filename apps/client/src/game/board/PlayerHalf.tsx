@@ -221,7 +221,14 @@ export function PlayerHalf({
       label={zoneLabel(kind)}
       className={`zone-${kind}`}
       motionZone={motionLocationKey(location)}
-      onClick={cards.length ? () => onOpenOverlay({ title, cards, inactiveZone: true }) : undefined}
+      onClick={cards.length
+        ? () => onOpenOverlay({
+            title,
+            cards,
+            inactiveZone: true,
+            showOwnedFaceDownIdentities: mine && kind === "graveyard",
+          })
+        : undefined}
     >
       {cards.length > 0 ? (
         <div

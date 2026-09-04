@@ -21478,40 +21478,94 @@
       "value": "A Fyendal game between Briar and a Bravo practice bot"
     }
   ],
-  "landing.faq.bot.answer": [
+  "landing.faq.contribute.answer": [
     {
       "type": 0,
-      "value": "Yes. Fyendal offers hero-specific practice bots in both supported formats."
+      "value": "Fyendal is open source. Explore the "
+    },
+    {
+      "type": 8,
+      "value": "github",
+      "children": [
+        {
+          "type": 0,
+          "value": "GitHub repository"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": ", then join the "
+    },
+    {
+      "type": 8,
+      "value": "discord",
+      "children": [
+        {
+          "type": 0,
+          "value": "Fyendal Discord"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": " to discuss where you would like to help."
     }
   ],
-  "landing.faq.bot.question": [
+  "landing.faq.contribute.question": [
     {
       "type": 0,
-      "value": "Can I play Flesh and Blood against a bot?"
+      "value": "How can I become a contributor?"
+    }
+  ],
+  "landing.faq.download.answer": [
+    {
+      "type": 0,
+      "value": "No. Fyendal runs in a modern web browser, so there is nothing to install."
+    }
+  ],
+  "landing.faq.download.question": [
+    {
+      "type": 0,
+      "value": "Do I need to download anything?"
     }
   ],
   "landing.faq.free.answer": [
     {
       "type": 0,
-      "value": "Yes. Fyendal is a free, non-commercial community project."
+      "value": "Yes. Fyendal is a free, open-source, non-commercial community project."
     }
   ],
   "landing.faq.free.question": [
     {
       "type": 0,
-      "value": "Is Fyendal free?"
+      "value": "Is Fyendal free to play?"
     }
   ],
-  "landing.faq.import.answer": [
+  "landing.faq.inPerson.answer": [
     {
       "type": 0,
-      "value": "Yes. Import a public Fabrary URL or Fabrary export text. Every card must be supported by Fyendal."
+      "value": "Use the official "
+    },
+    {
+      "type": 8,
+      "value": "events",
+      "children": [
+        {
+          "type": 0,
+          "value": "Flesh and Blood event locator"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": " to find Armory events, local game stores, and other organized play near you."
     }
   ],
-  "landing.faq.import.question": [
+  "landing.faq.inPerson.question": [
     {
       "type": 0,
-      "value": "Can I import a Fabrary deck?"
+      "value": "Where can I play in person?"
     }
   ],
   "landing.faq.kicker": [
@@ -21523,19 +21577,57 @@
   "landing.faq.official.answer": [
     {
       "type": 0,
-      "value": "No. Fyendal is an unofficial fan project and its game results are not official rules rulings."
+      "value": "No. Fyendal is a fan-made project and is not affiliated with or endorsed by Legend Story Studios. For authoritative rulings, use the official rules or ask a judge."
     }
   ],
   "landing.faq.official.question": [
     {
       "type": 0,
-      "value": "Is Fyendal official?"
+      "value": "Is this an official Flesh & Blood platform?"
+    }
+  ],
+  "landing.faq.offline.answer": [
+    {
+      "type": 0,
+      "value": "No. The hosted game requires an internet connection because matches and hidden information are managed securely by the server."
+    }
+  ],
+  "landing.faq.offline.question": [
+    {
+      "type": 0,
+      "value": "Can I play offline?"
+    }
+  ],
+  "landing.faq.support.answer": [
+    {
+      "type": 0,
+      "value": "Use the bug button during a game to send a report with useful match context. For suggestions or general feedback, join the "
+    },
+    {
+      "type": 8,
+      "value": "discord",
+      "children": [
+        {
+          "type": 0,
+          "value": "Fyendal Discord"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": "."
+    }
+  ],
+  "landing.faq.support.question": [
+    {
+      "type": 0,
+      "value": "What if I find a bug or have a suggestion?"
     }
   ],
   "landing.faq.title": [
     {
       "type": 0,
-      "value": "About Playing On Fyendal"
+      "value": "About Playing on Fyendal"
     }
   ],
   "landing.inGame": [

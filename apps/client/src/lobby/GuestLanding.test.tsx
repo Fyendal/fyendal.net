@@ -36,8 +36,13 @@ describe("guest search landing", () => {
     expect(html).toContain('src="/fyendal-gameplay-demo-poster.jpg"');
     expect(html).toContain('loading="lazy"');
     expect(html).toContain('id="practice-bots"');
-    expect(html).toContain("Fabrary");
-    expect(html).toContain("Can I play Flesh and Blood against a bot?");
+    expect(html.match(/<details/g)).toHaveLength(7);
+    expect(html).toContain("Is Fyendal free to play?");
+    expect(html).not.toContain("How do I create an account?");
+    expect(html).not.toContain("Does Fyendal offer matchmaking or ranked play?");
+    expect(html).toContain('href="https://fabtcg.com/en/events/"');
+    expect(html).toContain('href="https://github.com/Fyendal/fyendal.net"');
+    expect(html).toContain('href="https://discord.gg/DpTjVbfPVv"');
   });
 
   it("provides complete meaningful content for the initial HTML", () => {
@@ -62,6 +67,7 @@ describe("guest search landing", () => {
     expect(html).toContain("在线畅玩赤魂战纪 (Flesh &amp; Blood)");
     expect(html).toContain("<strong>2</strong> 人正在对局");
     expect(html).toContain("常见问题");
-    expect(html).toContain("我可以导入 Fabrary 牌组吗？");
+    expect(html).toContain("我需要下载或安装什么吗？");
+    expect(html).toContain("如何成为贡献者？");
   });
 });

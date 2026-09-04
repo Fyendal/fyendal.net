@@ -6,6 +6,61 @@ interface LandingStats {
   openRooms: number;
 }
 
+const FAQ_KEYS = [
+  "free",
+  "download",
+  "offline",
+  "official",
+  "support",
+  "inPerson",
+  "contribute",
+] as const;
+
+type FaqKey = (typeof FAQ_KEYS)[number];
+
+function FaqAnswer({ intl, faq }: { intl: IntlShape; faq: FaqKey }) {
+  const message = { id: `landing.faq.${faq}.answer` };
+
+  if (faq === "support") {
+    return intl.formatMessage(message, {
+      discord: (chunks) => (
+        <a href="https://discord.gg/DpTjVbfPVv" target="_blank" rel="noopener noreferrer">
+          {chunks}
+        </a>
+      ),
+    });
+  }
+  if (faq === "inPerson") {
+    return intl.formatMessage(message, {
+      events: (chunks) => (
+        <a href="https://fabtcg.com/en/events/" target="_blank" rel="noopener noreferrer">
+          {chunks}
+        </a>
+      ),
+    });
+  }
+  if (faq === "contribute") {
+    return intl.formatMessage(message, {
+      github: (chunks) => (
+        <a
+          href="https://github.com/Fyendal/fyendal.net"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {chunks}
+        </a>
+      ),
+      discord: (chunks) => (
+        <a href="https://discord.gg/DpTjVbfPVv" target="_blank" rel="noopener noreferrer">
+          {chunks}
+        </a>
+      ),
+    });
+  }
+
+  return intl.formatMessage(message);
+}
+
 function LobbyBrandView({ intl }: { intl: IntlShape }) {
   return (
     <div className="brand">
@@ -101,22 +156,12 @@ function GuestLandingDetailsView({ intl }: { intl: IntlShape }) {
           <h2 id="faq-title">{intl.formatMessage({ id: "landing.faq.title" })}</h2>
         </div>
         <div className="landing-faq-grid">
-          <details>
-            <summary>{intl.formatMessage({ id: "landing.faq.free.question" })}</summary>
-            <p>{intl.formatMessage({ id: "landing.faq.free.answer" })}</p>
-          </details>
-          <details>
-            <summary>{intl.formatMessage({ id: "landing.faq.bot.question" })}</summary>
-            <p>{intl.formatMessage({ id: "landing.faq.bot.answer" })}</p>
-          </details>
-          <details>
-            <summary>{intl.formatMessage({ id: "landing.faq.import.question" })}</summary>
-            <p>{intl.formatMessage({ id: "landing.faq.import.answer" })}</p>
-          </details>
-          <details>
-            <summary>{intl.formatMessage({ id: "landing.faq.official.question" })}</summary>
-            <p>{intl.formatMessage({ id: "landing.faq.official.answer" })}</p>
-          </details>
+          {FAQ_KEYS.map((faq) => (
+            <details key={faq}>
+              <summary>{intl.formatMessage({ id: `landing.faq.${faq}.question` })}</summary>
+              <p><FaqAnswer intl={intl} faq={faq} /></p>
+            </details>
+          ))}
         </div>
       </section>
     </div>

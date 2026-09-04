@@ -26,9 +26,10 @@ function elementalRevealOptions(ctx: ScriptCtx): string[] {
   const lightning = hand.filter((card) => hasType(ctx, card, "lightning"));
   const options = new Set<string>();
   for (const a of earth) for (const b of ice) for (const c of lightning) {
-    if (new Set([a.instanceId, b.instanceId, c.instanceId]).size === 3) {
-      options.add(`${a.instanceId}:${b.instanceId}:${c.instanceId}`);
-    }
+    // A multi-element card may satisfy more than one criterion. Keep the
+    // three roles in the stable option id while revealCards deduplicates the
+    // physical cards into one reveal event.
+    options.add(`${a.instanceId}:${b.instanceId}:${c.instanceId}`);
   }
   return [...options];
 }

@@ -158,6 +158,7 @@
   color: var(--text-secondary);
   line-height: 1.55;
 }
+.landing-faq details a { color: #e3c77f; }
 .landing-static-account .auth-card { padding: 25px; }
 
 @media (max-width: 1035px) {

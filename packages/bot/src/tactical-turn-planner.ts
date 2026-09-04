@@ -7,6 +7,7 @@ import {
   planTurn,
   responseWeightedDamage,
   type TurnPlan,
+  type TurnPlannerConfig,
   type TurnPlannerRoot,
 } from "./turn-planner.js";
 
@@ -25,12 +26,17 @@ export interface TacticalTurnConfig {
   nextTurnArsenal(card: CardView, input: BotPolicyInput): number;
   estimateRemaining(cards: readonly CardView[], input: BotPolicyInput): number;
   rankCandidate?(intent: GameIntent, input: BotPolicyInput): number;
+  scoreIntent?(intent: GameIntent, input: BotPolicyInput): number;
+  prepareCandidates?: TurnPlannerConfig<TacticalTurnEvaluation>["prepareCandidates"];
   equipmentCost?: number;
   maxSearchNodes?: number;
   maxTransitions?: number;
   recordCheckpoints?: boolean;
   maxRootCandidates?: number;
+  maxActionDepth?: number;
   maxForcedSteps?: number;
+  firstRootNodeBudget?: number;
+  firstRootTransitionBudget?: number;
 }
 
 export interface TacticalIntentConfig extends TacticalTurnConfig {
@@ -92,11 +98,16 @@ export function planTacticalTurn(
     chooseForced: config.chooseForced,
     cardOpportunity: config.cardOpportunity,
     rankCandidate: config.rankCandidate,
+    scoreIntent: config.scoreIntent,
+    prepareCandidates: config.prepareCandidates,
     maxSearchNodes: config.maxSearchNodes ?? DEFAULT_TACTICAL_MAX_SEARCH_NODES,
     maxTransitions: config.maxTransitions ?? DEFAULT_TACTICAL_MAX_TRANSITIONS,
     recordCheckpoints: config.recordCheckpoints,
     maxRootCandidates: config.maxRootCandidates ?? DEFAULT_TACTICAL_MAX_ROOT_CANDIDATES,
+    maxActionDepth: config.maxActionDepth,
     maxForcedSteps: config.maxForcedSteps,
+    firstRootNodeBudget: config.firstRootNodeBudget,
+    firstRootTransitionBudget: config.firstRootTransitionBudget,
     evaluateEnd: (state, observed, root, complete) =>
       evaluateTacticalTurn(state, observed, root, config, complete),
     evaluateHorizon(state, observed, root) {

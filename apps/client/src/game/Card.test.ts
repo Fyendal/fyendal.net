@@ -514,6 +514,27 @@ describe("InactiveZoneCard", () => {
     expect(html).not.toContain("WTR160.webp");
   });
 
+  it("can present a known face-down graveyard card as a faded card face", () => {
+    const html = renderToStaticMarkup(createElement(InactiveZoneCard, {
+      card: { instanceId: 47, cardId: "WTR160", owner: 0, faceDown: true },
+      showFaceDownIdentity: true,
+    }));
+
+    expect(html).toContain("WTR160.webp");
+    expect(html).toContain("card-dim");
+    expect(html).not.toContain("card-back");
+  });
+
+  it("does not reveal a redacted face-down card when asked to show its identity", () => {
+    const html = renderToStaticMarkup(createElement(InactiveZoneCard, {
+      card: { instanceId: -1, cardId: "", owner: 1, faceDown: true, hidden: true },
+      showFaceDownIdentity: true,
+    }));
+
+    expect(html).toContain("card-back");
+    expect(html).not.toContain("card-dim");
+  });
+
   it("reveals the owner's intimidated card with its icon in an expanded zone list", () => {
     const html = renderToStaticMarkup(createElement(InactiveZoneCard, {
       card: {
