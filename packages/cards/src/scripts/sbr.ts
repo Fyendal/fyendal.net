@@ -243,10 +243,16 @@ export const sbr: Record<string, CardScript> = {
           return ctx.player(ctx.seat).arsenal.length === 0;
         },
         effect(ctx) {
+          const player = ctx.player(ctx.seat);
+          if (player.arsenal.length > 0 || !player.hand.some((card) =>
+            card.instanceId === ctx.self.instanceId
+          )) return;
           ctx.requestPayment(
             "thunder-quake-heave",
             decisionPrompt("Thunder Quake: pay {r}{r}{r} to heave it face up into your arsenal?", "card.sbr.thunderquake.heave"),
             3,
+            undefined,
+            [ctx.self.instanceId],
           );
         },
       },

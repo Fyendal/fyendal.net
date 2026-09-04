@@ -31,6 +31,11 @@ function attackCost(data: CardData): number {
   return data.cardType === "weapon" ? 3 : Math.max(0, data.cost ?? 0);
 }
 
+function isWizardFatigueMatchup(input: BotPolicyInput): boolean {
+  const opponent = input.view.players[1 - input.seat]!.heroName.trim().toLowerCase();
+  return opponent.includes("blaze") || opponent.includes("kano");
+}
+
 function attackValue(data: CardData, input: BotPolicyInput): number {
   let value = data.attack ?? 0;
   const text = data.text.toLowerCase();
@@ -53,6 +58,11 @@ function cardOpportunity(card: CardView, input: BotPolicyInput): number {
   if (functional === "oasis respite|1") return 8;
   if (functional === "arcane polarity|1") {
     return input.view.turnFacts?.players[input.seat].arcaneDamageTaken ? 8 : 2;
+  }
+  if (isWizardFatigueMatchup(input) && data.pitch === 3) {
+    // A blue represents up to the full AB3 activation against the next arcane
+    // packet, so preserve it over an otherwise interchangeable red blocker.
+    return 15 + Math.max(0, data.defense ?? 0);
   }
   if (isAttack(data)) return attackValue(data, input);
   if (data.cardType === "block") return Math.max(2, data.defense ?? 0);
@@ -114,6 +124,7 @@ function scoreDefend(
       damageThreatened: estimateBravoDamage(cards, policyInput),
     }),
     cardOpportunity,
+    responseLossWeight: isWizardFatigueMatchup(input) ? 0.1 : 1,
     defensePermission: (candidate) => {
       if (!shouldBlockStaticShockWithThree(candidate.input)) return "allow";
       const handIds = new Set(candidate.input.view.players[candidate.input.seat].hand.map(
@@ -148,6 +159,15 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
   }
   if (decision.kind === "arsenal") {
     return scoreArsenalChoice(intent, input, nextTurnArsenalValue, -10);
+  }
+  if (isWizardFatigueMatchup(input) &&
+    (decision.promptMessage?.id === "engine.decision.damage.arcane.barrier.pay" ||
+      /pitch cards to pay \d+ for arcane barrier/i.test(decision.prompt))) {
+    const card = optionCard(intent, input);
+    const data = card ? input.cards[card.cardId] : undefined;
+    return card && data
+      ? Number(data.pitch ?? 0) * 100 - cardOpportunity(card, input)
+      : -100;
   }
   const card = optionCard(intent, input);
   if (/reveal|clash/i.test(decision.prompt) && card) {
@@ -195,6 +215,7 @@ function scorePlay(
   let score = 0;
   if (intent.kind === "activate-ability") {
     if (functional === "bravo, flattering showman|0") {
+      if (isWizardFatigueMatchup(input)) return -100;
       const attack = heroArsenalAttack(input);
       const attackData = attack ? input.cards[attack.cardId] : undefined;
       const floating = resourcesAfterCost(intent, 2, input, own);
@@ -242,6 +263,20 @@ function scorePlay(
 }
 
 function chooseBravoReactiveIntent(input: BotPolicyInput): GameIntent {
+  if (isWizardFatigueMatchup(input)) {
+    const payments = input.legal.flatMap((intent) => {
+      if (intent.kind !== "choose") return [];
+      const amount = /^pay (\d+)$/.exec(intent.optionId)?.[1];
+      return amount === undefined ? [] : [{ intent, amount: Number(amount) }];
+    });
+    if (payments.length > 0 &&
+      (input.view.pendingDecision?.promptMessage?.id === "engine.decision.damage.arcane.barrier" ||
+        /arcane barrier/i.test(input.view.pendingDecision?.prompt ?? ""))) {
+      return payments.reduce((best, candidate) =>
+        candidate.amount > best.amount ? candidate : best
+      ).intent;
+    }
+  }
   return chooseScoredIntent(input, {
     defend: scoreDefend,
     choose: scoreChoice,
@@ -250,8 +285,9 @@ function chooseBravoReactiveIntent(input: BotPolicyInput): GameIntent {
   });
 }
 
-/** Deterministic Bravo policy: retain one large attack plus its best pitch,
- * block with the remainder, and validate its ranked clean-turn opening. */
+/** Deterministic Bravo policy: retain one large attack plus its best pitch and
+ * validate its ranked clean-turn opening. Into Blaze and Kano, keep that
+ * pressure but reserve blue pitch for AB3 instead of the hero activation. */
 export interface BravoIntentDecision {
   intent: GameIntent;
   plan?: TacticalTurnPlan;

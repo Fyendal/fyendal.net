@@ -47,6 +47,7 @@ type BravoMatchup =
   | "enigma"
   | "fai"
   | "iyslander"
+  | "kano"
   | "oldhim"
   | "olympia"
   | "oscilio"
@@ -383,6 +384,7 @@ function bravoMatchupFor(
   if (name.includes("enigma")) return "enigma";
   if (name.includes("fai")) return "fai";
   if (name.includes("iyslander")) return "iyslander";
+  if (name.includes("kano")) return "kano";
   if (name.includes("oldhim")) return "oldhim";
   if (name.includes("olympia")) return "olympia";
   if (name.includes("oscilio")) return "oscilio";
@@ -425,7 +427,7 @@ export function bravoPresentationFor(
   let deck = [...registered.pool.deck];
   let additions: string[];
 
-  if (matchup === "blaze" || matchup === "iyslander") {
+  if (matchup === "blaze" || matchup === "iyslander" || matchup === "kano") {
     deck = deck.filter((id) => id !== "SBR017");
     additions = [...BRAVO_ARCANE_POLARITY, ...BRAVO_OASIS, ...BRAVO_PUMMEL];
   } else if (matchup === "bravo") {
@@ -446,7 +448,8 @@ export function bravoPresentationFor(
     throw new Error(`Bravo matchup presentation has ${deck.length} cards, expected 40`);
   }
 
-  const arcaneEquipment = matchup === "blaze" || matchup === "iyslander" || matchup === "oscilio";
+  const arcaneEquipment = matchup === "blaze" || matchup === "iyslander" ||
+    matchup === "kano" || matchup === "oscilio";
   const briarEquipment = matchup === "briar";
   return {
     weaponIds: ["SLY002", "SBR004"],

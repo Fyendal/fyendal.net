@@ -2145,7 +2145,7 @@ export function makeCtx(
       }
       state.pendingDecision = decision;
     },
-    requestPayment(hook, prompt, cost, choiceSeat) {
+    requestPayment(hook, prompt, cost, choiceSeat, excludeInstanceIds = []) {
       const payingSeat = choiceSeat ?? seat;
       const paying = state.players[payingSeat] as PlayerState;
       const pitchOptions = runtime.commands.scriptedPaymentOptions(
@@ -2153,6 +2153,7 @@ export function makeCtx(
         paying,
         cost,
         "paid",
+        excludeInstanceIds,
       ) as Record<string, { cost: number; pitchIds: number[]; result: string }>;
       const options = Object.keys(pitchOptions);
       if (options.length === 0) return false;

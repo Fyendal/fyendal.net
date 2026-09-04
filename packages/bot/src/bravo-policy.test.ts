@@ -232,6 +232,90 @@ describe("Bravo policy", () => {
     });
   });
 
+  it.each(["Blaze, Firemind", "Kano, Dracai of Aether"])(
+    "keeps a two-card attack but does not spend its blue on Bravo into %s",
+    (heroName) => {
+      const state = createGame({
+        decklists: [bravoDeck(), decklists.dorinthea],
+        cards: cardData,
+        scripts,
+        seed: 9607,
+        startPlayer: 0,
+      });
+      state.turn = 2;
+      replaceHand(state, 0, ["SBR013", "SBR023", "SBR022", "MPG047"]);
+      state.players[0]!.arsenal = [{
+        instanceId: state.nextInstanceId++,
+        cardId: "SBR013",
+        owner: 0,
+        faceDown: true,
+      }];
+      const view = projectStateFor(state, 0);
+      view.players[1].heroName = heroName;
+      const legal = legalIntents(state, 0);
+      const intent = chooseBravoIntent({ seat: 0, view, legal, cards: cardData });
+
+      expect(intent.kind).toBe("play-from-arsenal");
+      if (intent.kind !== "play-from-arsenal") return;
+      expect(intent.instanceId).toBe(view.players[0].arsenal[0]!.instanceId);
+      expect(intent.pitchInstanceIds).toEqual([view.players[0].hand[1]!.instanceId]);
+    },
+  );
+
+  it.each(["Blaze, Firemind", "Kano, Dracai of Aether"])(
+    "pays the full available AB3 and pitches a blue into %s",
+    (heroName) => {
+      const state = createGame({
+        decklists: [bravoDeck(), decklists.dorinthea],
+        cards: cardData,
+        scripts,
+        seed: 9608,
+        startPlayer: 1,
+      });
+      replaceHand(state, 0, ["SBR013", "SBR023", "SBR022"]);
+      const view = projectStateFor(state, 0);
+      view.players[1].heroName = heroName;
+      view.players[0].life = 2;
+      view.pendingDecision = {
+        player: 0,
+        kind: "choose-target",
+        prompt: "Arcane Barrier: you would be dealt 4 arcane damage — pay {r} to prevent that much?",
+        promptMessage: {
+          id: "engine.decision.damage.arcane.barrier",
+          values: { amount: 4 },
+        },
+        options: ["pay 0", "pay 1", "pay 2", "pay 3"],
+      };
+      let legal: GameIntent[] = view.pendingDecision.options!.map((optionId) => ({
+        kind: "choose",
+        optionId,
+      }));
+      expect(chooseBravoIntent({ seat: 0, view, legal, cards: cardData }))
+        .toEqual({ kind: "choose", optionId: "pay 3" });
+
+      const [red, blue, block] = view.players[0].hand;
+      view.pendingDecision = {
+        player: 0,
+        kind: "choose-target",
+        prompt: "Pitch cards to pay 3 for Arcane Barrier (3 more needed)",
+        promptMessage: {
+          id: "engine.decision.damage.arcane.barrier.pay",
+          values: { total: 3, need: 3 },
+        },
+        options: [String(red!.instanceId), String(blue!.instanceId), String(block!.instanceId)],
+        optionCards: [red!, blue!, block!],
+      };
+      legal = [red!, blue!, block!].map((card) => ({
+        kind: "choose",
+        optionId: String(card.instanceId),
+      }));
+      expect(chooseBravoIntent({ seat: 0, view, legal, cards: cardData })).toEqual({
+        kind: "choose",
+        optionId: String(blue!.instanceId),
+      });
+    },
+  );
+
   it("uses Pummel when +4 secures a crush hit", () => {
     const state = createGame({
       decklists: [bravoDeck(), decklists.dorinthea],

@@ -98,7 +98,11 @@ function heaveThree(): CardScript {
       label: "Heave 3",
       condition: (ctx) => ctx.player(ctx.seat).arsenal.length === 0,
       effect(ctx) {
-        ctx.requestPayment("heave-three", decisionPrompt(`${ctx.data.name}: pay {r}{r}{r} to put it face up into arsenal?`, "card.evr.heave.pay", { values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: 3 }, optionMessages: commonOptionMessages("no") }), 3);
+        const player = ctx.player(ctx.seat);
+        if (player.arsenal.length > 0 || !player.hand.some((card) =>
+          card.instanceId === ctx.self.instanceId
+        )) return;
+        ctx.requestPayment("heave-three", decisionPrompt(`${ctx.data.name}: pay {r}{r}{r} to put it face up into arsenal?`, "card.evr.heave.pay", { values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: 3 }, optionMessages: commonOptionMessages("no") }), 3, undefined, [ctx.self.instanceId]);
       },
     }],
     onChoose(ctx, hook, option) {

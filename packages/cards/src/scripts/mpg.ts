@@ -445,12 +445,18 @@ function heave(amount: number, extra: CardScript = {}): CardScript {
         label: `Heave ${amount}`,
         condition: (ctx) => ctx.player(ctx.seat).arsenal.length === 0,
         effect(ctx) {
+          const player = ctx.player(ctx.seat);
+          if (player.arsenal.length > 0 || !player.hand.some((card) =>
+            card.instanceId === ctx.self.instanceId
+          )) return;
           ctx.requestPayment(
             `heave-${amount}`,
             decisionPrompt(`${ctx.data.name}: pay ${Array(amount).fill("{r}").join("")} to heave it?`, "card.mpg.heave.pay", {
               values: { card: { kind: "card", cardId: ctx.self.cardId }, amount },
             }),
             amount,
+            undefined,
+            [ctx.self.instanceId],
           );
         },
       },
