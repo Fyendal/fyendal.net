@@ -1835,6 +1835,27 @@ describe("September 2 IAR spoilers", () => {
     expect(boardNames(g, 0)).toContain("Courage");
   });
 
+  it("Bravery of the Blade keeps its charge rewards when Spirit of Eirina replaces the soul move", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["bravery of the blade|1", "spirit of eirina|2"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("bravery of the blade|1")
+      .chooseCard("spirit of eirina|2")
+      .blockWith()
+      .settle()
+      .expectInZone(0, "spirit of eirina|2", "board")
+      .expectLife(1, 17)
+      .expectAP(0, 1);
+
+    expect(boardNames(g, 0)).toContain("Courage");
+  });
+
   it("Bravery of the Blade has neither conditional reward without a charge", () => {
     const g = scenario({ seats: [
       {

@@ -654,6 +654,28 @@ describe("SLY — attacks and defense", () => {
     g.blockWith().settle().expectLife(0, 18); // 4 damage, all prevented
   });
 
+  it("multiple Oasis Respites stack against the same damage source", () => {
+    const g = scenario({
+      seats: [
+        lyath({ hand: ["oasis respite|1", "oasis respite|1", "mocking blow|3"] }),
+        foe({ hand: ["raging onslaught|2", "mocking blow|3"] }),
+      ],
+      active: 1,
+    });
+    g.play("raging onslaught|2", { pitch: ["mocking blow|3"] }); // 6{p}
+    g.blockWith();
+    g.passPriority(); // attacker passes → defense reaction window
+    g.react("oasis respite|1", { pitch: ["mocking blow|3"], settle: false });
+    g.react("oasis respite|1", { settle: false });
+    g.settle()
+      .chooseCard("lyath goldmane|0")
+      .chooseCard("raging onslaught|2")
+      .chooseCard("lyath goldmane|0")
+      .chooseCard("raging onslaught|2")
+      .expectLog("is prevented (6)")
+      .expectLife(0, 20);
+  });
+
   it("Oasis Respite can shield the opponent; their controller decides the life gain", () => {
     const g = scenario({
       seats: [

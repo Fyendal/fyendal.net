@@ -5,8 +5,9 @@ import { attackAbility, buffNextAttack, commonOptionMessages, decisionPrompt, lo
 //
 // Light Warrior cards. New mechanics used here:
 // - The hero's soul zone + Charge (engine: PlayerState.soul, ctx.charge /
-//   ctx.putIntoSoul, per-turn flags `chargedThisTurn` / `chargedPitch:<n>` /
-//   `soulPitch:<n>`, and the onCharged script hook for Solflare). Charging as
+//   ctx.putIntoSoul, per-turn flags `chargedThisTurn` /
+//   `chargedCountThisTurn` / `chargedPitch:<n>` / `soulPitch:<n>`, and the
+//   onCharged script hook for Solflare). Charging as
 //   an optional additional cost is a scripted yes/no choice that pauses the
 //   play (the Fusion pause/resume machinery); the charged card's pitch is
 //   stamped on the played card as a `chargedPitch` counter so "if a yellow
