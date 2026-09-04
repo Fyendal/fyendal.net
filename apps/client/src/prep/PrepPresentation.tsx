@@ -3,9 +3,9 @@ import { useIntl } from "react-intl";
 import type { DeckPool, EquipmentSlot } from "@fyendal/shared";
 import { cardData, equipmentFitsSlot } from "@fyendal/cards/client";
 import {
+  CardArtwork,
   CARD_PREVIEW_HEIGHT,
   CARD_PREVIEW_WIDTH,
-  cardImageUrl,
 } from "../game/Card.js";
 import { EQUIPMENT_SLOTS } from "../domain.js";
 import type { PrepSelection } from "./selection.js";
@@ -80,14 +80,12 @@ function CardStack({
       onClick={immovable ? undefined : onMove}
     >
       {Array.from({ length: count }, (_, index) => (
-        <img
+        <CardArtwork
           key={index}
           className="prep-stack-card"
           style={{ top: index * STACK_COPY_OFFSET }}
-          src={cardImageUrl(id)}
+          cardId={id}
           alt=""
-          draggable={false}
-          loading="eager"
         />
       ))}
     </button>
@@ -134,13 +132,12 @@ export const PrepPresentation = memo(function PrepPresentation({
       <div className="prep-section">
         <span className="play-label">{intl.formatMessage({ id: "prep.presentation.hero" })}</span>
         <div className="prep-cardrow">
-          <img
+          <CardArtwork
             className="prep-card selected"
-            src={cardImageUrl(pool.heroId)}
+            cardId={pool.heroId}
             alt={cardData[pool.heroId]?.name ?? intl.formatMessage({ id: "prep.presentation.hero" })}
             width={PREP_CARD_WIDTH}
             height={PREP_CARD_HEIGHT}
-            data-cardid={pool.heroId}
           />
         </div>
       </div>
@@ -169,9 +166,9 @@ export const PrepPresentation = memo(function PrepPresentation({
                     data-cardid={id}
                     onClick={() => onToggleWeapon(index)}
                   >
-                    <img
+                    <CardArtwork
                       className="prep-card"
-                      src={cardImageUrl(id)}
+                      cardId={id}
                       alt=""
                       width={PREP_CARD_WIDTH}
                       height={PREP_CARD_HEIGHT}
@@ -212,9 +209,9 @@ export const PrepPresentation = memo(function PrepPresentation({
                       data-cardid={id}
                       onClick={() => onToggleEquipment(slot, id)}
                     >
-                      <img
+                      <CardArtwork
                         className="prep-card"
-                        src={cardImageUrl(id)}
+                        cardId={id}
                         alt=""
                         width={PREP_CARD_WIDTH}
                         height={PREP_CARD_HEIGHT}

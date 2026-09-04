@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import type { CardView } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
@@ -137,6 +137,68 @@ export const CARD_BACK_IMAGE_URL = "https://content.fabrary.net/cards/cardback.w
 
 export function cardImageUrl(cardId: string): string {
   return resolveCardImageUrl(cardId, cardData[cardId]);
+}
+
+/** A resilient card-art surface for screens that do not need the interactive
+ * game-card frame. The text presentation stays behind the artwork so a failed
+ * CDN image never leaves the browser's broken-image icon visible. */
+export function CardArtwork({
+  cardId,
+  className,
+  alt,
+  width,
+  height,
+  style,
+}: {
+  cardId: string;
+  className?: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  style?: CSSProperties;
+}) {
+  const [imageFailure, setImageFailure] = useState<{ cardId: string; attempts: number } | null>(null);
+  const data = cardData[cardId];
+  const name = data?.name ?? cardId;
+  const imageUrls = resolveCardImageUrls(cardId, data);
+  const failedAttempts = imageFailure?.cardId === cardId ? imageFailure.attempts : 0;
+  const showImg = cardId !== "" && failedAttempts < imageUrls.length;
+
+  return (
+    <span
+      className={["card-artwork", showImg ? "" : PITCH_CLASS[data?.pitch ?? 0] ?? "", className ?? ""]
+        .filter(Boolean)
+        .join(" ")}
+      data-cardid={cardId}
+      role={alt ? "img" : undefined}
+      aria-label={alt || undefined}
+      aria-hidden={alt ? undefined : true}
+      style={{ width, height, ...style }}
+    >
+      <span className="card-artwork-placeholder">
+        {data?.cost !== undefined ? <span className="c-cost">{data.cost}</span> : null}
+        <span className="c-name">{name}</span>
+        {data?.text ? <span className="c-text">{data.text}</span> : null}
+        <span className="c-stats">
+          {data?.attack !== undefined ? <span className="c-atk">{data.attack}</span> : null}
+          {data?.defense !== undefined ? <span className="c-def">{data.defense}</span> : null}
+        </span>
+      </span>
+      {showImg ? (
+        <img
+          className="card-artwork-image"
+          src={imageUrls[failedAttempts]}
+          alt=""
+          draggable={false}
+          loading="eager"
+          onError={() => setImageFailure((current) => ({
+            cardId,
+            attempts: current?.cardId === cardId ? current.attempts + 1 : 1,
+          }))}
+        />
+      ) : null}
+    </span>
+  );
 }
 
 export function CardFace({
