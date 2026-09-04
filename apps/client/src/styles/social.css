@@ -293,6 +293,19 @@
 .social-friend-actions .social-remove { padding: 0; color: #d7857e; font-size: 18px; }
 .social-empty { margin: 14px 5px; color: var(--text-muted); font-size: 13px; line-height: 1.4; }
 
+.post-game-friend-add {
+  border-color: #bd9147;
+  background: linear-gradient(180deg, #6b4a1e, #422b10);
+  box-shadow: inset 0 1px 0 #ffe0a035;
+  color: #ffe1a0;
+  text-shadow: 0 1px 2px #0009;
+}
+.post-game-friend-add:hover {
+  border-color: #e0b45f;
+  background: linear-gradient(180deg, #805c26, #513514);
+  color: #fff0c7;
+}
+
 .friend-room-modal {
   position: relative;
   width: min(430px, calc(100vw - 32px));
