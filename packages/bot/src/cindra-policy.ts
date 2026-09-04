@@ -320,8 +320,15 @@ function flightPathHasPayoff(
   );
   const convertsHand = hasFundableHandAttack &&
     (remainingHand.length >= 2 || flightPathActivationCost(input) === 0);
-  return convertsHand || currentAttackHasOnHitDraw(input) ||
-    currentAttackThreatensMaskDraw(input);
+  const spendsHandCard = input.view.players[input.seat].hand.some((card) =>
+    excludedIds.has(card.instanceId)
+  );
+  // Do not trade a known attack and Flight Path merely to speculate on the
+  // card drawn by Snatch or Mask. A pitchless activation can still turn that
+  // draw into a continuation, while a paid activation needs a known followup.
+  const convertsDraw = !spendsHandCard &&
+    (currentAttackHasOnHitDraw(input) || currentAttackThreatensMaskDraw(input));
+  return convertsHand || convertsDraw;
 }
 
 function shouldUseFlightPath(
@@ -1407,13 +1414,28 @@ function attackIdentityScore(
       !likelyGoAgain(candidate, input) && canFundAttack(candidate, input, excludedIds)
     );
     const draconic = isDraconicAttack(card, input);
-    if (draconic && terminalFollowups.some((candidate) => !isDraconicAttack(candidate, input))) {
+    const pitchValue = input.view.players[input.seat].hand.reduce((total, held) =>
+      held.instanceId !== card.instanceId && excludedIds.has(held.instanceId)
+        ? total + Number(input.cards[held.cardId]?.pitch ?? 0)
+        : total,
+    0);
+    const resourcesAfterAttack = Math.max(
+      0,
+      input.view.players[input.seat].resources + pitchValue - estimatedPlayCost(card, input),
+    );
+    const flightPathCostAfterAttack = Math.max(
+      0,
+      flightPathActivationCost(input) - (draconic ? 1 : 0),
+    );
+    const canConvertWithFlightPath = draconic &&
+      equipmentHasKey(input, "legs", CARD.dragonscalerFlightPath) &&
+      resourcesAfterAttack >= flightPathCostAfterAttack;
+    if (canConvertWithFlightPath &&
+      terminalFollowups.some((candidate) => !isDraconicAttack(candidate, input))) {
       // Flight Path only targets Draconic attacks, so lead the terminal half
-      // with the Draconic card and leave the non-Draconic card as its payoff.
+      // with the Draconic card and leave the non-Draconic card as its payoff,
+      // but only when the held payoff is not itself needed to fund the legs.
       score += 220;
-    }
-    if (!draconic && terminalFollowups.some((candidate) => isDraconicAttack(candidate, input))) {
-      score -= 220;
     }
   }
   return score;
