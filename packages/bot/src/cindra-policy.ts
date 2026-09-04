@@ -1246,6 +1246,21 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
   const data = card ? input.cards[card.cardId] : undefined;
   const prompt = decision.prompt.toLowerCase();
 
+  if (
+    decision.promptMessage?.id === "card.hnt.draconic.attack.choose" ||
+    prompt.includes("dragonscaler flight path")
+  ) {
+    const link = currentLink(input);
+    const currentIndex = link ? input.view.chain.lastIndexOf(link) : -1;
+    const currentOption = `chain:${currentIndex}`;
+    if (currentIndex >= 0 && decision.options?.includes(currentOption)) {
+      // Cindra only spends Flight Path to continue from the active attack.
+      // Targeting a resolved action attack cannot grant an action point
+      // retroactively, even when that older card has a higher generic value.
+      return intent.optionId === currentOption ? 1_000 : -1_000;
+    }
+  }
+
   if (decision.kind === "arsenal") {
     return scoreArsenalChoice(intent, input, nextTurnArsenalValue, -20);
   }

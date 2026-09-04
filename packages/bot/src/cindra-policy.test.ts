@@ -491,6 +491,43 @@ describe("Cindra Head Jabs policy", () => {
     expect(chooseCindraIntent({ seat: 0, view, legal, cards: cardData })).toEqual(activation);
   });
 
+  it("targets the current Hunt the Hunter with Flight Path instead of a resolved attack", () => {
+    const game = state();
+    const view = projectStateFor(game, 0);
+    view.priorityPlayer = 0;
+    view.activePlayer = 0;
+    view.turn = 2;
+    view.phase = "reaction";
+    view.chain = [
+      {
+        attackingCard: { instanceId: 90_016, cardId: "HNT067", owner: 0 },
+        defendingCards: [], attackValue: 3, defenseValue: 0, damage: 3,
+        resolved: true, hit: true, goAgain: true, reactions: [],
+      },
+      {
+        attackingCard: { instanceId: 90_017, cardId: "HNT161", owner: 0 },
+        defendingCards: [], attackValue: 5, defenseValue: 0, damage: 5,
+        resolved: false, hit: true, goAgain: false, reactions: [],
+      },
+    ];
+    view.pendingDecision = {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Dragonscaler Flight Path: choose a Draconic attack",
+      promptMessage: { id: "card.hnt.draconic.attack.choose" },
+      options: ["chain:0", "chain:1"],
+      optionCards: view.chain.map((link) => link.attackingCard),
+    };
+    const legal: GameIntent[] = [
+      { kind: "choose", optionId: "chain:0" },
+      { kind: "choose", optionId: "chain:1" },
+      { kind: "concede" },
+    ];
+
+    expect(chooseCindraIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual({ kind: "choose", optionId: "chain:1" });
+  });
+
   it("no-blocks a nonlethal attack to protect the five-card offense", () => {
     const game = state();
     const view = projectStateFor(game, 0);
