@@ -141,6 +141,9 @@ export type { PresentationResult } from "./presentation.js";
 const KEYWORD_OVERRIDES: Record<string, string[]> = {
   // Older OUT data predates the explicit Blade Break keyword field.
   "mask of many faces|0": ["Blade Break"],
+  // Harmonized Kodachi gains go again only while its controller has a cost-0
+  // card in their pitch zone.
+  "harmonized kodachi|0": [],
   // These attacks gain go again only after their scripted additional cost succeeds.
   "looking for a scrap|1": [],
   "looking for a scrap|2": [],

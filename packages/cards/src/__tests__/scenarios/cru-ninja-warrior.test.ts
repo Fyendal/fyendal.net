@@ -150,6 +150,43 @@ describe("CRU — Ninja heroes and weapons", () => {
     g.attackWithWeapon("harmonized kodachi|0").blockWith().settle().expectAP(0, 1);
   });
 
+  it("Harmonized Kodachi does not get go again from a chest's floating resource", () => {
+    const g = scenario({
+      seats: [
+        {
+          ...ninja,
+          weapons: ["harmonized kodachi|0"],
+          equipment: { chest: "blossom of spring|0" },
+        },
+        { hero: "dorinthea", weapons: [], hand: [] },
+      ],
+    });
+
+    g.activate("blossom of spring|0")
+      .expectResources(0, 1);
+    expect(g.state.players[0]!.pitch).toHaveLength(0);
+    g.attackWithWeapon("harmonized kodachi|0")
+      .blockWith()
+      .settle()
+      .expectAP(0, 0);
+  });
+
+  it("Harmonized Kodachi requires the pitched card to have a cost property", () => {
+    const g = scenario({
+      seats: [
+        {
+          ...ninja,
+          weapons: ["harmonized kodachi|0"],
+          pitch: ["heart of fyendal|3"],
+          resources: 1,
+        },
+        { hero: "dorinthea", weapons: [], hand: [] },
+      ],
+    });
+
+    g.attackWithWeapon("harmonized kodachi|0").blockWith().settle().expectAP(0, 0);
+  });
+
   it("Zephyr Needle waits until the combat chain closes to break", () => {
     const g = scenario({
       seats: [

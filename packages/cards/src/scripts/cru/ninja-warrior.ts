@@ -244,10 +244,11 @@ export const cruNinjaWarrior: Record<string, CardScript> = {
 
   "harmonized kodachi|0": {
     activated: { cost: 1, isAttack: true, goAgain: false, oncePerTurn: true },
+    // Go again is conditional (KEYWORD_OVERRIDES strips the catalog keyword).
     onAttackDeclared(ctx) {
       if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId) return;
       const hasZero = ctx.state.players[ctx.seat]!.pitch.some(
-        (card) => (ctx.cardData(card.cardId).cost ?? 0) === 0,
+        (card) => ctx.cardData(card.cardId).cost === 0,
       );
       if (hasZero) ctx.grantGoAgain();
     },

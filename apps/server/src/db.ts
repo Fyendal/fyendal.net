@@ -582,6 +582,20 @@ export const MIGRATIONS: Migration[] = [
       ON social_presence (user_id, last_seen_at);
     CREATE INDEX social_presence_expiry_idx ON social_presence (last_seen_at);`,
   },
+  {
+    version: 32,
+    // Replay finalization is asynchronous and may fail on an unusually large
+    // recording. Persist retry state so every gateway and every maintenance
+    // sweep observes the same backoff instead of retrying a costly query once
+    // per minute on each surviving Cloud Run revision.
+    sql: `ALTER TABLE replay_games
+      ADD COLUMN finalization_attempts INTEGER NOT NULL DEFAULT 0
+        CHECK (finalization_attempts >= 0),
+      ADD COLUMN finalization_retry_at BIGINT;
+    CREATE INDEX replay_games_finalization_retry_idx
+      ON replay_games (finalization_retry_at, finished_at)
+      WHERE status = 'finalizing';`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

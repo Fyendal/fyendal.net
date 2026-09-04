@@ -165,7 +165,7 @@ describe("initial schema", () => {
       "matchmaking_offers",
     ]));
     expect((await db.query("SELECT version FROM schema_migrations ORDER BY version DESC LIMIT 1")).rows)
-      .toEqual([{ version: 31 }]);
+      .toEqual([{ version: 32 }]);
   });
 
   it("adds candidate skip state to an already-applied version 26 database", async () => {
@@ -183,7 +183,26 @@ describe("initial schema", () => {
        WHERE table_name = 'pending_bot_start_candidates' AND column_name = 'skipped'`,
     )).rows).toEqual([{ column_name: "skipped" }]);
     expect((await db.query("SELECT version FROM schema_migrations ORDER BY version DESC LIMIT 1")).rows)
-      .toEqual([{ version: 31 }]);
+      .toEqual([{ version: 32 }]);
+  });
+
+  it("adds durable replay finalization backoff to a version 31 database", async () => {
+    const db = rawDb();
+    await applyMigrations(db, MIGRATIONS.filter((migration) => migration.version <= 31));
+
+    await applyMigrations(db, MIGRATIONS);
+
+    expect((await db.query(
+      `SELECT column_name FROM information_schema.columns
+       WHERE table_name = 'replay_games'
+         AND column_name IN ('finalization_attempts', 'finalization_retry_at')
+       ORDER BY column_name`,
+    )).rows).toEqual([
+      { column_name: "finalization_attempts" },
+      { column_name: "finalization_retry_at" },
+    ]);
+    expect((await db.query("SELECT version FROM schema_migrations ORDER BY version DESC LIMIT 1")).rows)
+      .toEqual([{ version: 32 }]);
   });
 
   it("adds Starvo to durable pending bot starts", async () => {

@@ -6,6 +6,7 @@ import type { Queryable } from "../db.js";
 import {
   deleteReplay,
   discardUnfinishedReplaysOtherRulesets,
+  REPLAY_FRAME_BATCH_SIZE,
   finalizeReplayForRoom,
   getReplay,
   listReplays,
@@ -161,7 +162,7 @@ describe("server replay retention", () => {
     let frameLoads = 0;
     const measuredDb: Queryable = {
       query: async (text, params) => {
-        if (text.includes("SELECT view, transition FROM replay_frames")) frameLoads += 1;
+        if (text.includes("SELECT room_version, view, transition FROM replay_frames")) frameLoads += 1;
         return db.query(text, params);
       },
     };
@@ -238,10 +239,74 @@ describe("server replay retention", () => {
     expect((await db.query("SELECT status FROM replay_games WHERE id=$1", [
       conceded.replayFinalizationId,
     ])).rows[0]!.status).toBe("finalizing");
+    const deferred = (await db.query(
+      `SELECT finalization_attempts, finalization_retry_at
+       FROM replay_games WHERE id=$1`,
+      [conceded.replayFinalizationId],
+    )).rows[0]!;
+    expect(deferred.finalization_attempts).toBe(1);
+    expect(Number(deferred.finalization_retry_at)).toBeGreaterThan(Date.now());
 
+    expect(await finalizer.recoverPending()).toBe(0);
+    await db.query(
+      "UPDATE replay_games SET finalization_retry_at=0 WHERE id=$1",
+      [conceded.replayFinalizationId],
+    );
     expect(await finalizer.recoverPending()).toBe(1);
     await finalizer.waitForIdle();
     expect(await listReplays(db, game.users[0])).toHaveLength(1);
+  });
+
+  it("loads large replay recordings in bounded frame batches", async () => {
+    const game = await startedGame();
+    const conceded = await store.applyIntent(
+      game.code,
+      { token: game.tokens[0], userId: game.users[0] },
+      { kind: "concede" },
+    );
+    if (!conceded.ok || !conceded.replayFinalizationId) throw new Error("concede failed");
+    const finalFrame = (await db.query(
+      `SELECT view FROM replay_frames WHERE replay_id=$1
+       ORDER BY room_version DESC LIMIT 1`,
+      [conceded.replayFinalizationId],
+    )).rows[0]!;
+    let frameLoads = 0;
+    const pagedDb: Queryable = {
+      query: async (text, params) => {
+        if (!text.includes("SELECT room_version, view, transition FROM replay_frames")) {
+          return db.query(text, params);
+        }
+        frameLoads += 1;
+        expect(params?.[2]).toBe(REPLAY_FRAME_BATCH_SIZE);
+        const afterRoomVersion = Number(params?.[1]);
+        if (afterRoomVersion < 0) {
+          return {
+            rows: Array.from({ length: REPLAY_FRAME_BATCH_SIZE }, (_, index) => ({
+              room_version: index + 1,
+              view: finalFrame.view,
+              transition: null,
+            })),
+            rowCount: REPLAY_FRAME_BATCH_SIZE,
+          };
+        }
+        return {
+          rows: [{
+            room_version: REPLAY_FRAME_BATCH_SIZE + 1,
+            view: finalFrame.view,
+            transition: null,
+          }],
+          rowCount: 1,
+        };
+      },
+    };
+    const finalizer = new ReplayFinalizer(pagedDb);
+
+    finalizer.enqueue(conceded.replayFinalizationId);
+    await finalizer.waitForIdle();
+
+    expect(frameLoads).toBe(2);
+    expect((await listReplays(db, game.users[0]))[0]?.frameCount)
+      .toBe(REPLAY_FRAME_BATCH_SIZE + 1);
   });
 
   it("waits for a room replay that is still finalizing", async () => {

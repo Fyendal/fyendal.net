@@ -21,6 +21,14 @@ import { consoleError, type ErrorLogger } from "./logging.js";
 export const REPLAY_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_REPLAY_VIEWS = 10_000;
 const REPLAY_YIELD_BUDGET_MS = 8;
+export const REPLAY_FRAME_BATCH_SIZE = 100;
+export const REPLAY_FINALIZATION_RETRY_DELAYS_MS = [
+  5 * 60_000,
+  30 * 60_000,
+  2 * 60 * 60_000,
+  6 * 60 * 60_000,
+  24 * 60 * 60_000,
+] as const;
 const gzip = promisify(gzipCallback);
 const gunzip = promisify(gunzipCallback);
 
@@ -198,21 +206,32 @@ async function replayFiles(
 ): Promise<GameViewBuild> {
   const id = String(replay.id);
   const uniqueSeats = [...new Set(seats)];
-  const { rows } = await db.query(
-    "SELECT view, transition FROM replay_frames WHERE replay_id = $1 ORDER BY room_version",
-    [id],
-  );
-  if (rows.length > MAX_REPLAY_VIEWS) throw new Error(`replay ${id} has too many frames`);
   const frames: Array<{ view: GameView; transition: unknown }> = [];
   let yieldedAt = performance.now();
-  for (let index = 0; index < rows.length; index++) {
-    const view = decodeGameView(rows[index]!.view);
-    if (!view) throw new Error(`replay ${id} frame ${index + 1} failed validation`);
-    frames.push({ view, transition: rows[index]!.transition ?? null });
-    if (index + 1 < rows.length && performance.now() - yieldedAt >= REPLAY_YIELD_BUDGET_MS) {
-      await yieldControl();
-      yieldedAt = performance.now();
+  let afterRoomVersion = -1;
+  while (true) {
+    const { rows } = await db.query(
+      `SELECT room_version, view, transition FROM replay_frames
+       WHERE replay_id = $1 AND room_version > $2
+       ORDER BY room_version LIMIT $3`,
+      [id, afterRoomVersion, REPLAY_FRAME_BATCH_SIZE],
+    );
+    if (frames.length + rows.length > MAX_REPLAY_VIEWS) {
+      throw new Error(`replay ${id} has too many frames`);
     }
+    for (const row of rows) {
+      const roomVersion = safeInteger(row.room_version, "replay room version");
+      if (roomVersion <= afterRoomVersion) throw new Error(`replay ${id} frames are out of order`);
+      const view = decodeGameView(row.view);
+      if (!view) throw new Error(`replay ${id} frame ${frames.length + 1} failed validation`);
+      frames.push({ view, transition: row.transition ?? null });
+      afterRoomVersion = roomVersion;
+      if (performance.now() - yieldedAt >= REPLAY_YIELD_BUDGET_MS) {
+        await yieldControl();
+        yieldedAt = performance.now();
+      }
+    }
+    if (rows.length < REPLAY_FRAME_BATCH_SIZE) break;
   }
   return {
     files: new Map(
@@ -288,7 +307,9 @@ export async function finalizeReplay(db: Queryable, replayIdValue: string): Prom
       );
     }
     await tx.query(
-      `UPDATE replay_games SET status='ready', frame_count=$2
+      `UPDATE replay_games
+       SET status='ready', frame_count=$2,
+           finalization_attempts=0, finalization_retry_at=NULL
        WHERE id=$1 AND status='finalizing'`,
       [replay.id, payloads[0]?.frames ?? 0],
     );
@@ -322,12 +343,15 @@ export async function discardUnfinishedReplaysOtherRulesets(
 export async function finalizePendingReplays(
   db: Queryable,
   rulesetVersion?: string,
+  now = Date.now(),
 ): Promise<number> {
   const { rows } = await db.query(
     `SELECT id FROM replay_games
-     WHERE status = 'finalizing'${rulesetVersion ? " AND ruleset_version = $1" : ""}
+     WHERE status = 'finalizing'
+       AND (finalization_retry_at IS NULL OR finalization_retry_at <= $1)
+       ${rulesetVersion ? "AND ruleset_version = $2" : ""}
      ORDER BY finished_at`,
-    rulesetVersion ? [rulesetVersion] : [],
+    rulesetVersion ? [now, rulesetVersion] : [now],
   );
   let finalized = 0;
   for (const row of rows) {
@@ -356,12 +380,14 @@ export class ReplayFinalizer {
     this.schedule();
   }
 
-  async recoverPending(rulesetVersion?: string): Promise<number> {
+  async recoverPending(rulesetVersion?: string, now = Date.now()): Promise<number> {
     const { rows } = await this.db.query(
       `SELECT id FROM replay_games
-       WHERE status = 'finalizing'${rulesetVersion ? " AND ruleset_version = $1" : ""}
+       WHERE status = 'finalizing'
+         AND (finalization_retry_at IS NULL OR finalization_retry_at <= $1)
+         ${rulesetVersion ? "AND ruleset_version = $2" : ""}
        ORDER BY finished_at`,
-      rulesetVersion ? [rulesetVersion] : [],
+      rulesetVersion ? [now, rulesetVersion] : [now],
     );
     for (const row of rows) this.enqueue(String(row.id));
     return rows.length;
@@ -399,6 +425,11 @@ export class ReplayFinalizer {
           await finalizeReplay(this.db, replayIdValue);
         } catch (error) {
           this.logError(`replay finalization failed (${replayIdValue})`, error);
+          try {
+            await deferReplayFinalization(this.db, replayIdValue);
+          } catch (backoffError) {
+            this.logError(`replay finalization backoff failed (${replayIdValue})`, backoffError);
+          }
         } finally {
           this.queued.delete(replayIdValue);
         }
@@ -415,6 +446,29 @@ export class ReplayFinalizer {
     for (const resolve of this.idleWaiters) resolve();
     this.idleWaiters.clear();
   }
+}
+
+async function deferReplayFinalization(
+  db: Queryable,
+  replayIdValue: string,
+  now = Date.now(),
+): Promise<void> {
+  const { rows } = await db.query(
+    `SELECT finalization_attempts FROM replay_games
+     WHERE id = $1 AND status = 'finalizing'`,
+    [replayIdValue],
+  );
+  if (!rows.length) return;
+  const attempts = safeInteger(rows[0]!.finalization_attempts, "replay finalization attempts");
+  const delayMs = REPLAY_FINALIZATION_RETRY_DELAYS_MS[
+    Math.min(attempts, REPLAY_FINALIZATION_RETRY_DELAYS_MS.length - 1)
+  ]!;
+  await db.query(
+    `UPDATE replay_games
+     SET finalization_attempts = $2, finalization_retry_at = $3
+     WHERE id = $1 AND status = 'finalizing'`,
+    [replayIdValue, attempts + 1, now + delayMs],
+  );
 }
 
 export async function listReplays(
