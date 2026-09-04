@@ -1,6 +1,10 @@
 import { EventEmitter } from "node:events";
 import { Worker } from "node:worker_threads";
-import { botDefinition } from "@fyendal/bot";
+import {
+  BOT_OBSERVATION_KEY_LENGTH,
+  MAX_BOT_CONTINUATION_STEPS,
+  botDefinition,
+} from "@fyendal/bot";
 import { cardData, decklists, precon, scripts } from "@fyendal/cards";
 import { createGame } from "@fyendal/engine";
 import type { Decklist } from "@fyendal/shared";
@@ -136,6 +140,45 @@ describe("bot policy worker executor", () => {
     expect(decodeBotPolicyWorkerResponse({
       ...success(1),
       memory: { ...WORKER_MEMORY, heapUsedBytes: -1 },
+    })).toBeNull();
+  });
+
+  it("accepts only fixed-size continuation fingerprints within the step budget", () => {
+    const checkpoint = {
+      observationKey: "a".repeat(BOT_OBSERVATION_KEY_LENGTH),
+      intent: { kind: "pass" },
+    };
+    const response = {
+      ...success(1),
+      decision: { intent: { kind: "pass" }, continuation: [checkpoint] },
+    };
+    const decoded = decodeBotPolicyWorkerResponse(response);
+    expect(decoded).toMatchObject({ kind: "result" });
+    if (!decoded || decoded.kind !== "result") throw new Error("expected decoded result");
+    expect(decoded.decision.continuation).toEqual([checkpoint]);
+    expect(decodeBotPolicyWorkerResponse({
+      ...response,
+      decision: {
+        intent: { kind: "pass" },
+        continuation: [{ ...checkpoint, observationKey: "a".repeat(100_000) }],
+      },
+    })).toBeNull();
+    expect(decodeBotPolicyWorkerResponse({
+      ...response,
+      decision: {
+        intent: { kind: "pass" },
+        continuation: [{ ...checkpoint, observationKey: checkpoint.observationKey.toUpperCase() }],
+      },
+    })).toBeNull();
+    expect(decodeBotPolicyWorkerResponse({
+      ...response,
+      decision: {
+        intent: { kind: "pass" },
+        continuation: Array.from(
+          { length: MAX_BOT_CONTINUATION_STEPS + 1 },
+          () => checkpoint,
+        ),
+      },
     })).toBeNull();
   });
 

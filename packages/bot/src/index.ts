@@ -29,7 +29,13 @@ export {
   chooseCindraIntentWithTrace,
 } from "./cindra-policy.js";
 export type { CindraIntentDecision } from "./cindra-policy.js";
-export { botObservationKey, isCleanActionDecision } from "./turn-planner.js";
+export {
+  BOT_OBSERVATION_KEY_LENGTH,
+  MAX_BOT_CONTINUATION_STEPS,
+  botObservationKey,
+  isBotObservationKey,
+  isCleanActionDecision,
+} from "./turn-planner.js";
 export type { TurnPlanCheckpoint, TurnPlannerCandidateTrace } from "./turn-planner.js";
 export { chooseHalaIntent, chooseHalaIntentWithTrace } from "./hala-policy.js";
 export type { HalaIntentDecision, HalaTurnEvaluation, HalaTurnPlan } from "./hala-policy.js";
