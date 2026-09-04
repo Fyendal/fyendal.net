@@ -3,6 +3,7 @@ import type { GameStateInternal } from "./runtimeState.js";
 import {
   cardAbilitiesSuppressed,
   cardColorOf,
+  cardTypesOf,
   dataOf,
   scriptOf,
 } from "./cardProperties.js";
@@ -251,12 +252,41 @@ export function fireLeaveArena(
     "card-left-arena",
     seat,
     card,
-    { from: "arena" },
+    { from: "arena", to },
   );
+  delete card.boundToInstanceId;
+  const attachments = (state.players as PlayerState[]).flatMap((player) =>
+    player.board
+      .filter((candidate) => candidate.boundToInstanceId === card.instanceId)
+      .map((candidate) => ({ seat: player.seat, card: candidate })),
+  );
+  for (const attachment of attachments) {
+    destroyPermanent(state, runtime, attachment.seat, attachment.card);
+  }
   scriptOf(state, card.cardId, card)?.onLeaveArena?.(
     runtime.makeCtx(state, seat, card, currentLink(state), undefined, undefined, asActivationCost),
     to,
   );
+}
+
+/** Attach one independent arena permanent to a friendly ally. */
+export function bindPermanent(
+  state: GameStateInternal,
+  seat: number,
+  source: CardInstance,
+  targetInstanceId: number,
+): boolean {
+  const sourcePermanent = findPermanent(state, source.instanceId);
+  const target = findPermanent(state, targetInstanceId);
+  if (
+    !sourcePermanent || sourcePermanent.seat !== seat ||
+    !target || target.seat !== seat ||
+    !(state.players[seat] as PlayerState).board.some((card) => card.instanceId === targetInstanceId) ||
+    !cardTypesOf(state, target.card).includes("ally") ||
+    source.boundToInstanceId !== undefined
+  ) return false;
+  source.boundToInstanceId = targetInstanceId;
+  return true;
 }
 
 export function destroyPermanent(state: GameStateInternal,

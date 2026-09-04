@@ -13,7 +13,7 @@ import { notePitch, pitchIntoPool, pitchProhibitedByEffect, pitchValueOfInstance
 import { compareLife, snapshotSerializable } from "./ruleQueries.js";
 import { discardToGraveyard, fireOnDiscard, fireTransformHook } from "./scriptContext.js";
 import { createTokenFor, createTokensFor } from "./tokens.js";
-import { banishCard, destroyPermanent, enterSoul, fireLeaveArena, moveToGraveyard, putCardIntoSoul, putCardOnDeckBottom, removeFromOwnerZones, removeFromStackResolution } from "./zoneMoves.js";
+import { banishCard, bindPermanent, destroyPermanent, enterSoul, fireLeaveArena, moveToGraveyard, putCardIntoSoul, putCardOnDeckBottom, removeFromOwnerZones, removeFromStackResolution } from "./zoneMoves.js";
 import { noopTransitionRecorder, type TransitionRecorder } from "./transitions.js";
 
 type RuntimeFunction = (...args: any[]) => any;
@@ -43,6 +43,7 @@ export function createEngineRuntime(
       attackWithPermanent: bind(attackWithPermanent, true),
       banishCard: bind(banishCard, true),
       basePowerOf: bind(basePowerOf, true),
+      bindPermanent: bind(bindPermanent, false),
       boundArcaneCardBonus: bind(boundArcaneCardBonus, false),
       chainLinkNumber: bind(chainLinkNumber, false),
       chainLinksControlled: bind(chainLinksControlled, false),

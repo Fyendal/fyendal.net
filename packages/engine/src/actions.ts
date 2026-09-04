@@ -188,6 +188,9 @@ export function playCard(
   if (alternativeCostCardInstanceIds !== undefined && !script?.alternativePlayCost) {
     return `${nameOf(state, card.cardId)} has no alternative play cost`;
   }
+  if (script?.alternativePlayCost?.required === true && alternativeCostCardInstanceIds === undefined) {
+    return `${nameOf(state, card.cardId)} requires an additional cost`;
+  }
   if (
     alternativeCostCardInstanceIds?.some((id) => pitchInstanceIds.includes(id))
   ) {

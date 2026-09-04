@@ -1049,6 +1049,19 @@ export function alternativePlayCostOptions(
     }
     return options;
   }
+  if (cost.kind === "discard-or-destroy-controlled-subtype") {
+    const wanted = cost.subtype.trim().toLowerCase();
+    return [
+      ...player.hand.filter(
+        (candidate) =>
+          candidate.instanceId !== card.instanceId &&
+          cardTypesOf(state, candidate).includes(wanted),
+      ),
+      ...controlledCostCards(state, player).filter(
+        (candidate) => cardTypesOf(state, candidate).includes(wanted),
+      ),
+    ].map((candidate) => [candidate.instanceId]);
+  }
   const wanted = cost.name.trim().toLowerCase();
   return [
     ...player.hand.filter(
@@ -1136,6 +1149,26 @@ export function payAlternativePlayCost(
       }
       runtime.commands.discardToGraveyard(state, player.seat, paid, false, player.seat);
       runtime.commands.fireOnDiscard(state, player.seat, paid, false);
+    }
+  } else if (cost.kind === "discard-or-destroy-controlled-subtype") {
+    const id = option[0]!;
+    const wanted = cost.subtype.trim().toLowerCase();
+    const fromHand = player.hand.find(
+      (candidate) => candidate.instanceId === id && cardTypesOf(state, candidate).includes(wanted),
+    );
+    if (fromHand) {
+      removeFromArray(player.hand, id);
+      runtime.commands.discardToGraveyard(state, player.seat, fromHand, false, player.seat);
+      runtime.commands.fireOnDiscard(state, player.seat, fromHand, false);
+      paidCards.push(fromHand);
+    } else {
+      const permanent = controlledCostCards(state, player).find(
+        (candidate) => candidate.instanceId === id && cardTypesOf(state, candidate).includes(wanted),
+      );
+      if (!permanent || !destroyControlledCard(state, runtime, player.seat, permanent)) {
+        return "could not destroy alternative-cost card";
+      }
+      paidCards.push(permanent);
     }
   } else {
     const id = option[0]!;

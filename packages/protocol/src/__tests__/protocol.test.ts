@@ -537,6 +537,18 @@ describe("GameView and server messages", () => {
       chosenName: "Sink Below",
     }];
     expect(decodeGameView(chosenName)).not.toBeNull();
+    const boundCard = gameView();
+    (boundCard.players[0] as unknown as { hand: unknown[] }).hand = [{
+      ...card,
+      boundToInstanceId: 42,
+    }];
+    expect(decodeGameView(boundCard)).not.toBeNull();
+    const badBoundCard = gameView();
+    (badBoundCard.players[0] as unknown as { hand: unknown[] }).hand = [{
+      ...card,
+      boundToInstanceId: -1,
+    }];
+    expect(decodeGameView(badBoundCard)).toBeNull();
     const badChosenName = gameView();
     (badChosenName.chain[0] as unknown as { defendingCards: unknown[] }).defendingCards = [{
       ...card,

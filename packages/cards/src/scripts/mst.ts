@@ -51,8 +51,7 @@ function controlsIllusionistAura(ctx: ScriptCtx): boolean {
 }
 
 function createInHand(ctx: ScriptCtx, cardId: string): void {
-  const token = ctx.createToken(cardId);
-  if (token) ctx.moveToHand(token.instanceId);
+  ctx.createCardInHand(cardId);
 }
 
 function createTigerInBanish(ctx: ScriptCtx, power = 0): void {

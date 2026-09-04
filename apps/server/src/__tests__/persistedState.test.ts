@@ -859,6 +859,7 @@ describe("PersistedStateV1", () => {
     arsenalCard.playableFromUntilStartOfSeatTurn = 1;
     arsenalCard.playableFromUntilEndOfSeatTurn = 1;
     arsenalCard.playableFromGrantedTurn = source.turn;
+    arsenalCard.boundToInstanceId = source.players[1]!.hero.instanceId;
     arsenalCard.grantedBaseAbilitiesCardIds = [source.players[1]!.hero.cardId];
     arsenalCard.temporaryAlly = { power: 2, life: 3 };
     arsenalCard.temporaryGraveyardReplacement = "banish";

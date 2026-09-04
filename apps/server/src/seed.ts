@@ -13,8 +13,10 @@
  * Death Dealer unused; and OKANAS — a private CC practice room against the
  * Hala bot with Ira ready to test Okana Scar Wraps after a Vengeance attack;
  * and RALLYC — a private Silver Age room with Rally the Coast Guard already
- * defending and two cards available to discard.
- * These fixtures count as 10 "players in game" in the
+ * defending and two cards available to discard; and MARKS3 — a private CC
+ * room for testing Malice, Danse Macabre, the three Marks, and Restless zombies
+ * against the standard Hala bot.
+ * These fixtures count as 12 "players in game" in the
  * lobby stats — dev only.
  * Alice also receives one fixed, undismissed bug-report notification for
  * exercising the lobby UI.
@@ -48,6 +50,7 @@ const HUNTER_TEST_ROOM_CODE = "HUNTED";
 const SNAP_ARC_TEST_ROOM_CODE = "SNAPBT";
 const OKANA_TEST_ROOM_CODE = "OKANAS";
 const RALLY_TEST_ROOM_CODE = "RALLYC";
+const MARKS_TEST_ROOM_CODE = "MARKS3";
 
 /**
  * A lived-in mid-game board for the demo room: fixed seeds, random legal
@@ -212,6 +215,55 @@ function okanaTestGameState(): GameState {
   return state;
 }
 
+/** Malice starts with all three Marks and Tome of Necrosis in hand. Restless
+ * Templar, Restless Looter, and Restless Outlaw are in the graveyard for her
+ * activated ability, while Danse Macabre and Vox Necropolis are ready. */
+function marksTestGameState(): GameState {
+  const hala = botDefinition("hala");
+  const halaPool = precon(hala?.deckId ?? "")?.pool;
+  if (!hala || !halaPool) throw new Error("Marks test fixture bot deck is unavailable");
+
+  const malice = {
+    heroId: "IAR054",
+    weaponIds: ["IAR055"],
+    equipment: { legs: "IAR091" },
+    deck: [
+      "IAR059",
+      "IAR063",
+      "IAR086",
+      "IAR066",
+      "IAR067",
+      "IAR068",
+      "IAR092",
+      "ASB012",
+      ...Array<string>(52).fill("RNR020"),
+    ],
+  };
+  const halaPresentation = hala.presentationFor(malice, "second");
+  const state = createGame({
+    decklists: [malice, { heroId: halaPool.heroId, ...halaPresentation }],
+    seed: 9032026,
+    cards: cardData,
+    scripts,
+    startPlayer: 0,
+  });
+
+  const player = state.players[0]!;
+  const cards = [...player.hand, ...player.deck];
+  const take = (cardId: string) => {
+    const index = cards.findIndex((card) => card.cardId === cardId);
+    if (index < 0) throw new Error(`Marks test fixture is missing ${cardId}`);
+    return cards.splice(index, 1)[0]!;
+  };
+  player.hand = [take("IAR066"), take("IAR067"), take("IAR068"), take("IAR092")];
+  player.graveyard = [take("IAR059"), take("IAR063"), take("IAR086")];
+  player.banish = [take("ASB012")];
+  player.deck = cards;
+  player.resources = 9;
+  player.actionPoints = 1;
+  return state;
+}
+
 /** Kayo is already defending Ira's Edge of Autumn with Rally the Coast Guard.
  * The reaction window belongs to Kayo, whose two remaining hand cards are
  * both legal discard choices for Rally's once-per-turn instant ability. */
@@ -321,12 +373,13 @@ try {
   try {
     // These rooms are disposable local fixture data. Recreate them so rerunning
     // the seed also repairs stale ruleset envelopes and clears dependent history.
-    await pool.query("DELETE FROM rooms WHERE code IN ($1, $2, $3, $4, $5)", [
+    await pool.query("DELETE FROM rooms WHERE code IN ($1, $2, $3, $4, $5, $6)", [
       DEMO_ROOM_CODE,
       HUNTER_TEST_ROOM_CODE,
       SNAP_ARC_TEST_ROOM_CODE,
       OKANA_TEST_ROOM_CODE,
       RALLY_TEST_ROOM_CODE,
+      MARKS_TEST_ROOM_CODE,
     ]);
     await pool.query(
       `INSERT INTO rooms
@@ -352,6 +405,51 @@ try {
     );
     const aliceId = Number(aliceRows[0]?.id);
     if (!Number.isSafeInteger(aliceId)) throw new Error("seeded alice account is missing");
+    const marksPrep = { rolls: [6, 2], dieWinner: 0, startPlayer: 0 };
+    const halaForMarks = botDefinition("hala");
+    const halaPoolForMarks = precon(halaForMarks?.deckId ?? "")?.pool;
+    if (!halaForMarks || !halaPoolForMarks) {
+      throw new Error("Marks test fixture room metadata is unavailable");
+    }
+    await pool.query(
+      `INSERT INTO rooms
+        (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at,
+         status, winner, is_private)
+       VALUES ($1, 'cc', '[]', $2, $3, $4, 0, $5, NULL, 'active', NULL, TRUE)`,
+      [
+        MARKS_TEST_ROOM_CODE,
+        JSON.stringify(dehydrateState(marksTestGameState(), seedRulesetVersion)),
+        JSON.stringify(marksPrep),
+        seedRulesetVersion,
+        Date.now(),
+      ],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, user_id, token_hash, username, hero_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 0, $2, $3, 'alice', 'IAR054', 'Marks / Restless zombies test',
+               FALSE, TRUE, 'human')`,
+      [
+        MARKS_TEST_ROOM_CODE,
+        aliceId,
+        hashReconnectToken(randomBytes(12).toString("hex")),
+      ],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, token_hash, username, hero_id, deck_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 1, $2, $3, $4, $5, $6, FALSE, TRUE, 'bot')`,
+      [
+        MARKS_TEST_ROOM_CODE,
+        hashReconnectToken(randomBytes(12).toString("hex")),
+        halaForMarks.username,
+        halaPoolForMarks.heroId,
+        halaForMarks.deckId,
+        halaForMarks.deckName,
+      ],
+    );
     const hunterPrep = { rolls: [2, 5], dieWinner: 1, startPlayer: 1 };
     await pool.query(
       `INSERT INTO rooms
@@ -569,6 +667,7 @@ try {
   console.log(`seeded Snap Shot / Arc Bending room ${SNAP_ARC_TEST_ROOM_CODE} — log in as alice and open /${SNAP_ARC_TEST_ROOM_CODE}`);
   console.log(`seeded Okana Scar Wraps / Enact Vengeance room ${OKANA_TEST_ROOM_CODE} — log in as alice and open /${OKANA_TEST_ROOM_CODE}`);
   console.log(`seeded Rally the Coast Guard room ${RALLY_TEST_ROOM_CODE} — log in as alice and open /${RALLY_TEST_ROOM_CODE}`);
+  console.log(`seeded Marks / Restless zombies room ${MARKS_TEST_ROOM_CODE} — log in as alice and open /${MARKS_TEST_ROOM_CODE}`);
   console.log("seeded fixed bug notification for alice");
 } finally {
   await pool.end();

@@ -449,6 +449,50 @@
     "set": "IAR"
   },
   {
+    "id": "IAR059",
+    "name": "Restless Templar",
+    "cardType": "action",
+    "classes": [
+      "necromancer"
+    ],
+    "subtypes": [
+      "shadow",
+      "zombie",
+      "ally"
+    ],
+    "text": "Whenever a zombie you control with decay dies, create a Gate to i'Arathael token.\nDecay (At the beginning of your end phase, put a -1{h} counter on this.)",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 3,
+    "life": 3,
+    "keywords": [
+      "Decay"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR063",
+    "name": "Restless Looter",
+    "cardType": "action",
+    "classes": [
+      "necromancer"
+    ],
+    "subtypes": [
+      "shadow",
+      "zombie",
+      "ally"
+    ],
+    "text": "Instant - {t}: Discard a card. If you do, draw a card.\nDecay (At the beginning of your end phase, put a -1{h} counter on this.)",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 3,
+    "life": 3,
+    "keywords": [
+      "Decay"
+    ],
+    "set": "IAR"
+  },
+  {
     "id": "IAR064",
     "name": "Restless Magister",
     "cardType": "action",
@@ -489,6 +533,63 @@
     "life": 3,
     "keywords": [
       "Decay"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR066",
+    "name": "Mark of Neverest",
+    "cardType": "instant",
+    "classes": [
+      "necromancer"
+    ],
+    "subtypes": [
+      "shadow",
+      "aura"
+    ],
+    "text": "Binds to an ally permanent you control. (Attach this to an ally. Destroy this if the ally leaves the arena.)\nThe bound ally gets +1{p} and \"Whenever this hits a hero or dies, you may turn a card in your banished zone face-down. If you do, create a Corrupted Corpse in your banished zone.\"",
+    "pitch": 3,
+    "cost": 0,
+    "keywords": [
+      "Bind"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR067",
+    "name": "Mark of Pathstone",
+    "cardType": "instant",
+    "classes": [
+      "necromancer"
+    ],
+    "subtypes": [
+      "shadow",
+      "aura"
+    ],
+    "text": "Binds to an ally permanent you control. (Attach this to an ally. Destroy this if the ally leaves the arena.)\nThe bound ally gets +1{p} and \"Whenever this hits a hero or dies, gain 1{h}.\"",
+    "pitch": 3,
+    "cost": 0,
+    "keywords": [
+      "Bind"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR068",
+    "name": "Mark of Ushering",
+    "cardType": "instant",
+    "classes": [
+      "necromancer"
+    ],
+    "subtypes": [
+      "shadow",
+      "aura"
+    ],
+    "text": "Binds to an ally permanent you control. (Attach this to an ally. Destroy this if the ally leaves the arena.)\nThe bound ally gets +1{p} and \"Whenever this hits a hero or dies, create a Gate to i'Arathael token.\"",
+    "pitch": 3,
+    "cost": 0,
+    "keywords": [
+      "Bind"
     ],
     "set": "IAR"
   },
@@ -695,6 +796,22 @@
     "defense": 1,
     "keywords": [
       "Blade Break"
+    ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR092",
+    "name": "Tome of Necrosis",
+    "cardType": "action",
+    "classes": [
+      "necromancer"
+    ],
+    "text": "As an additional cost to play this, destroy an ally you control or discard an ally.\nDraw a card and {u} your hero.\nGo again",
+    "pitch": 1,
+    "cost": 0,
+    "defense": 3,
+    "keywords": [
+      "Go again"
     ],
     "set": "IAR"
   },
@@ -1882,6 +1999,23 @@
     "keywords": [
       "Blade Break"
     ],
+    "set": "IAR"
+  },
+  {
+    "id": "IAR228",
+    "name": "Violent Gusto",
+    "cardType": "action",
+    "classes": [
+      "generic"
+    ],
+    "subtypes": [
+      "attack"
+    ],
+    "text": "When this attacks a hero, you may name an aura permanent they control and return it to its owner's hand. (Aura tokens cease to exist.)\nWhen this hits a hero, return all aura permanents they control with that name to their owner's hand.",
+    "pitch": 1,
+    "cost": 2,
+    "attack": 6,
+    "defense": 3,
     "set": "IAR"
   },
   {

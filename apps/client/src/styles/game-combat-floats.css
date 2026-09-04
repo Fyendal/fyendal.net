@@ -534,8 +534,9 @@
   position: relative;
   inset: auto;
 }
-/* Arena stacks stay collapsed during play, then fan their public cards like
-   pitch on hover so transformed sub-cards and hero soul cards can be previewed. */
+/* Arena stacks stay collapsed during play, then fan their public cards upward
+   on hover so transformed sub-cards, hero soul cards, and bindings can be
+   previewed from the permanent's top edge. */
 .equipment-stack {
   position: relative;
   display: flex;
@@ -552,6 +553,11 @@
 .equipment-stack-card:last-of-type {
   position: relative;
   inset: auto;
+}
+/* A tapped ally is landscape, so its bindings use that same orientation. The
+   wrapper still travels vertically on hover, exposing horizontal top edges. */
+.equipment-stack-bound-tapped .equipment-stack-card-bound .card {
+  transform: rotate(90deg);
 }
 @media (hover: hover) and (pointer: fine) {
   .equipment-stack:hover { z-index: 3; }
@@ -606,7 +612,8 @@
   z-index: 20;
   pointer-events: none;
 }
-.soul-pip {
+.soul-pip,
+.bound-pip {
   top: -7px;
   right: -7px;
   left: auto;
@@ -618,13 +625,15 @@
   box-shadow: 0 2px 7px #000d;
   opacity: 1;
 }
-.soul-pip-icon {
+.soul-pip-icon,
+.bound-pip-icon {
   width: 72%;
   height: 72%;
   filter: invert(91%) sepia(18%) saturate(1084%) hue-rotate(350deg) brightness(103%)
     drop-shadow(0 1px 2px #000c);
 }
-.soul-pip-count {
+.soul-pip-count,
+.bound-pip-count {
   position: absolute;
   right: -6px;
   bottom: -6px;

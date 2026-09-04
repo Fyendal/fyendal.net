@@ -49,6 +49,8 @@ export interface SeatSpec {
   /** Override the hero card (functional key or printing id) — for heroes with
    *  no registered decklist (e.g. precon heroes under test). */
   heroKey?: string;
+  /** Start the hero tapped for setup-only mid-game scenarios. */
+  heroTapped?: boolean;
   life?: number;
   hand?: string[];
   /** Top-first. */
@@ -201,6 +203,7 @@ export class Scenario {
         }
       }
       p.life = spec.life ?? cardData[p.heroCardId]?.life ?? 20;
+      if (spec.heroTapped) p.hero.tapped = true;
       p.resources = spec.resources ?? 0;
       p.actionPoints = seat === active ? 1 : 0;
       p.flags = {};

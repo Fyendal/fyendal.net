@@ -1665,7 +1665,6 @@ describe("August 31–September 1 IAR spoilers", () => {
       Object.keys(expected).map((id) => [id, cardData[id]?.name]),
     )).toEqual(expected);
     expect(Object.keys(expected).every((id) => isImplemented(cardData[id]!))).toBe(true);
-    expect(cardData.IAR066).toBeUndefined();
   });
 
   it("Ingest the Unknown banishes the top card and gains its base power", () => {
@@ -1950,5 +1949,218 @@ describe("September 2 IAR spoilers", () => {
       .expectInZone(0, "blessing of suraya|2", "soul");
 
     expect(boardNames(g, 0)).toContain("Ponder");
+  });
+});
+
+describe("September 3 IAR spoilers", () => {
+  it("registers all seven spoiled printings as implemented", () => {
+    const expected = {
+      IAR059: "Restless Templar",
+      IAR063: "Restless Looter",
+      IAR066: "Mark of Neverest",
+      IAR067: "Mark of Pathstone",
+      IAR068: "Mark of Ushering",
+      IAR092: "Tome of Necrosis",
+      IAR228: "Violent Gusto",
+    } as const;
+
+    expect(Object.fromEntries(
+      Object.keys(expected).map((id) => [id, cardData[id]?.name]),
+    )).toEqual(expected);
+    expect(["IAR066", "IAR067", "IAR068"].map((id) => cardData[id]?.pitch))
+      .toEqual([3, 3, 3]);
+    expect(Object.keys(expected).every((id) => isImplemented(cardData[id]!))).toBe(true);
+  });
+
+  it("Mark of Pathstone binds to an ally, gives it +1 attack, and gains life on hit", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        life: 18,
+        hand: ["mark of pathstone|3"],
+        board: ["restless outlaw|1"],
+        weapons: ["vox necropolis|0"],
+        resources: 1,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("mark of pathstone|3").chooseCard("restless outlaw|1");
+
+    const ally = g.state.players[0]!.board.find((card) => card.cardId === "IAR086")!;
+    expect(g.state.players[0]!.board.find((card) => card.cardId === "IAR067"))
+      .toEqual(expect.objectContaining({ boundToInstanceId: ally.instanceId }));
+
+    g.activate("restless outlaw|1")
+      .blockWith()
+      .settle()
+      .expectFinalAttack(4)
+      .expectLife(0, 19)
+      .expectLife(1, 16);
+  });
+
+  it("a Mark played during reactions immediately gives its bound attacking ally +1 attack", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        life: 18,
+        hand: ["mark of pathstone|3"],
+        board: ["restless outlaw|1"],
+        weapons: ["vox necropolis|0"],
+        resources: 1,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.activate("restless outlaw|1")
+      .blockWith()
+      .expectAttackValue(3)
+      .react("mark of pathstone|3")
+      .chooseCard("restless outlaw|1")
+      .expectFinalAttack(4)
+      .expectLife(0, 19)
+      .expectLife(1, 16);
+  });
+
+  it("Mark of Neverest turns a banished card face-down and creates a Corrupted Corpse", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["mark of neverest|3"],
+        board: ["restless outlaw|1"],
+        weapons: ["vox necropolis|0"],
+        banish: ["snatch|1"],
+        resources: 1,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("mark of neverest|3")
+      .chooseCard("restless outlaw|1")
+      .activate("restless outlaw|1")
+      .blockWith()
+      .settle()
+      .chooseCard("snatch|1");
+
+    expect(g.state.players[0]!.banish).toEqual(expect.arrayContaining([
+      expect.objectContaining({ cardId: "ASB012", faceDown: true }),
+      expect.objectContaining({ cardId: "IAR090" }),
+    ]));
+  });
+
+  it("a bound Mark triggers when its ally dies and is then cleared from the arena", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["mark of ushering|3", "tome of necrosis|1"],
+        board: ["restless outlaw|1"],
+        deck: ["snatch|1"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("mark of ushering|3")
+      .chooseCard("restless outlaw|1")
+      .play("tome of necrosis|1", { alternativeCost: "restless outlaw|1" });
+
+    expect(boardNames(g, 0)).toContain("Gate to i'Arathael");
+    expect(boardNames(g, 0)).not.toContain("Mark of Ushering");
+    g.expectInZone(0, "mark of ushering|3", "graveyard")
+      .expectInZone(0, "restless outlaw|1", "graveyard")
+      .expectInZone(0, "snatch|1", "hand");
+    expect(g.state.players[0]!.hero.tapped).toBeUndefined();
+  });
+
+  it("Restless Templar creates a Gate when another Decay zombie dies", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["tome of necrosis|1"],
+        board: ["restless templar|1", "restless outlaw|1"],
+        deck: ["snatch|1"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("tome of necrosis|1", { alternativeCost: "restless outlaw|1" });
+
+    expect(boardNames(g, 0)).toContain("Gate to i'Arathael");
+  });
+
+  it("Tome of Necrosis can discard an ally, then draws and untaps the hero", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        heroTapped: true,
+        hand: ["tome of necrosis|1", "restless outlaw|1"],
+        deck: ["snatch|1"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    const tome = g.state.players[0]!.hand.find((card) => card.cardId === "IAR092")!;
+    const tomeIntents = legalIntents(g.state, 0).filter((intent) =>
+      intent.kind === "play-card" && intent.instanceId === tome.instanceId
+    );
+    expect(tomeIntents.length).toBeGreaterThan(0);
+    expect(tomeIntents.every((intent) =>
+      intent.kind === "play-card" && intent.alternativeCostCardInstanceIds?.length === 1
+    )).toBe(true);
+
+    g.play("tome of necrosis|1", { alternativeCost: "restless outlaw|1" })
+      .expectInZone(0, "restless outlaw|1", "graveyard")
+      .expectInZone(0, "snatch|1", "hand");
+    expect(g.state.players[0]!.hero.tapped).toBeUndefined();
+  });
+
+  it("Restless Looter discards, draws, and taps as an instant", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["snatch|1"],
+        deck: ["wounding blow|1"],
+        board: ["restless looter|1"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.activate("restless looter|1")
+      .chooseCard("snatch|1")
+      .expectInZone(0, "snatch|1", "graveyard")
+      .expectInZone(0, "wounding blow|1", "hand");
+    expect(g.state.players[0]!.board[0]!.tapped).toBe(true);
+  });
+
+  it("Violent Gusto returns every aura with the named aura's name and token auras cease", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["violent gusto|1"],
+        resources: 2,
+        equipment: NO_EQUIPMENT,
+      },
+      {
+        hero: "dorinthea",
+        life: 20,
+        board: ["runechant|0", "runechant|0"],
+        equipment: NO_EQUIPMENT,
+      },
+    ] });
+
+    g.play("violent gusto|1")
+      .chooseCard("runechant|0")
+      .blockWith()
+      .settle()
+      .expectLife(1, 14);
+
+    expect(boardNames(g, 1)).not.toContain("Runechant");
+    expect(g.state.players[1]!.hand).toHaveLength(0);
   });
 });

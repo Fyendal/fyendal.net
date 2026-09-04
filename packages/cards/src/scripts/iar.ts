@@ -1,4 +1,10 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type {
+  CardInstance,
+  CardScript,
+  DeepReadonly,
+  ScriptCtx,
+  TriggerDef,
+} from "@fyendal/engine";
 import {
   ampNextArcane,
   attackAbility,
@@ -176,6 +182,183 @@ function zombieAttack() {
     oncePerTurn: false,
     canActivate: controlsVox,
   });
+}
+
+type MarkEffect = "neverest" | "pathstone" | "ushering";
+
+function resolveMarkEffect(ctx: ScriptCtx, effect: MarkEffect): void {
+  if (effect === "pathstone") {
+    ctx.gainLife(ctx.seat, 1);
+    return;
+  }
+  if (effect === "ushering") {
+    ctx.createToken(GATE);
+    return;
+  }
+  const banished = ctx.player(ctx.seat).banish.filter((card) => !card.faceDown);
+  if (banished.length === 0) return;
+  ctx.requestCardChoice(
+    "iar-mark-neverest-banish",
+    decisionPrompt(
+      "Turn a card in your banished zone face-down to create a Corrupted Corpse?",
+      "card.iar.mark.neverest.banish.choose",
+      { optionMessages: commonOptionMessages("no") },
+    ),
+    ["no", ...banished.map((card) => card.instanceId)],
+  );
+}
+
+function markOf(effect: MarkEffect): CardScript {
+  const label = effect === "neverest"
+    ? "Turn a banished card face-down to create a Corrupted Corpse"
+    : effect === "pathstone"
+      ? "Gain 1 life"
+      : "Create a Gate to i'Arathael";
+  const labelMessage = effect === "neverest"
+    ? { id: "card.trigger.iar.mark.neverest" }
+    : effect === "pathstone"
+      ? { id: "card.trigger.common.life.gain", values: { amount: 1 } }
+      : { id: "card.iar.forsaken.option.gate" };
+  return {
+    onEnterArena(ctx) {
+      const allies = ctx.player(ctx.seat).board.filter((card) =>
+        card.instanceId !== ctx.self.instanceId && hasType(ctx, card, "ally")
+      );
+      if (allies.length === 0) {
+        ctx.destroySelf();
+        return;
+      }
+      ctx.requestCardChoice(
+        "iar-mark-bind",
+        decisionPrompt("Choose an ally to bind this to", "card.iar.mark.ally.bind.choose"),
+        allies.map((card) => card.instanceId),
+      );
+    },
+    modifyFriendlyAttack(ctx, attacking) {
+      return attacking.instanceId === ctx.self.boundToInstanceId ? 1 : 0;
+    },
+    canTriggerOnHit(ctx) {
+      return ctx.self.boundToInstanceId !== undefined &&
+        ctx.link?.attackingCard.instanceId === ctx.self.boundToInstanceId &&
+        ctx.link.targetAllyId === undefined;
+    },
+    onHit(ctx) {
+      resolveMarkEffect(ctx, effect);
+    },
+    triggers: [{
+      event: "card-left-arena",
+      label,
+      labelMessage,
+      condition: (ctx, left, event) => !!left &&
+        left.instanceId === ctx.self.boundToInstanceId &&
+        hasType(ctx, left, "ally") &&
+        (event?.to === "graveyard" || event?.to === "cease-to-exist"),
+      effect(ctx) { resolveMarkEffect(ctx, effect); },
+    }],
+    onChoose(ctx, hook, option) {
+      if (hook === "iar-mark-bind") {
+        ctx.bindSelfTo(Number(option));
+        return;
+      }
+      if (hook !== "iar-mark-neverest-banish" || option === "no") return;
+      const card = ctx.player(ctx.seat).banish.find((candidate) =>
+        candidate.instanceId === Number(option) && !candidate.faceDown
+      );
+      if (!card || !ctx.setCardFaceDown(card.instanceId, true)) return;
+      ctx.createCardInBanish(CORRUPTED_CORPSE);
+    },
+  };
+}
+
+function restlessTemplar(): CardScript {
+  const condition = (
+    ctx: ScriptCtx,
+    left: DeepReadonly<CardInstance> | undefined,
+    to: string | undefined,
+  ): boolean => !!left && left.owner === ctx.seat && hasType(ctx, left, "zombie") &&
+    (ctx.cardData(left.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "decay") &&
+    (to === "graveyard" || to === "cease-to-exist");
+  const gateTrigger = (sourceZone?: "self"): TriggerDef => ({
+    event: "card-left-arena",
+    ...(sourceZone ? { sourceZone } : {}),
+    label: "Create a Gate to i'Arathael",
+    labelMessage: { id: "card.iar.forsaken.option.gate" },
+    condition: (ctx, left, event) =>
+      condition(ctx, left, event?.to) &&
+      (sourceZone !== "self" || left?.instanceId === ctx.self.instanceId),
+    effect(ctx: ScriptCtx) { ctx.createToken(GATE); },
+  });
+  return {
+    activated: zombieAttack(),
+    triggers: [gateTrigger(), gateTrigger("self"), ...decay().triggers!],
+  };
+}
+
+function restlessLooter(): CardScript {
+  return {
+    activated: [{
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      tap: true,
+      label: "Discard a card, then draw a card",
+      onActivate(ctx) {
+        const hand = ctx.player(ctx.seat).hand;
+        if (hand.length > 0) {
+          ctx.requestCardChoice(
+            "iar-looter-discard",
+            decisionPrompt("Choose a card to discard", "card.iar.looter.discard.choose"),
+            hand.map((card) => card.instanceId),
+          );
+        }
+      },
+    }, ...zombieAttack().map((ability) => ({ ...ability, label: "Attack" }))],
+    onChoose(ctx, hook, option) {
+      if (hook === "iar-looter-discard" && ctx.discardCard(ctx.seat, Number(option))) {
+        ctx.drawCards(ctx.seat, 1);
+      }
+    },
+    ...decay(),
+  };
+}
+
+function violentGusto(): CardScript {
+  return {
+    onAttackDeclared(ctx) {
+      if (!selfHitsHero(ctx)) return;
+      const auras = ctx.player(opponentSeat(ctx)).board.filter((card) => hasType(ctx, card, "aura"));
+      if (auras.length === 0) return;
+      ctx.requestCardChoice(
+        "iar-violent-gusto-aura",
+        decisionPrompt(
+          "Name and return an aura permanent?",
+          "card.iar.violentgusto.aura.choose",
+          { optionMessages: commonOptionMessages("no") },
+        ),
+        ["no", ...auras.map((card) => card.instanceId)],
+      );
+    },
+    canTriggerOnHit: (ctx) => selfHitsHero(ctx) && !!ctx.self.chosenName,
+    onHit(ctx) {
+      const chosen = ctx.self.chosenName?.toLowerCase();
+      if (!chosen) return;
+      for (const aura of [...ctx.player(opponentSeat(ctx)).board]) {
+        if (hasType(ctx, aura, "aura") && ctx.cardNames(aura).includes(chosen)) {
+          ctx.moveToHand(aura.instanceId);
+        }
+      }
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "iar-violent-gusto-aura" || option === "no") return;
+      const aura = ctx.player(opponentSeat(ctx)).board.find((card) =>
+        card.instanceId === Number(option) && hasType(ctx, card, "aura")
+      );
+      if (!aura) return;
+      ctx.setChosenName(ctx.cardData(aura.cardId).name);
+      ctx.moveToHand(aura.instanceId);
+    },
+  };
 }
 
 function requestForsakenStrikeMode(ctx: ScriptCtx): void {
@@ -928,6 +1111,31 @@ export const iar: Record<string, CardScript> = {
     },
     ...decay(),
   },
+
+  "restless templar|1": restlessTemplar(),
+
+  "restless looter|1": restlessLooter(),
+
+  "mark of neverest|3": markOf("neverest"),
+
+  "mark of pathstone|3": markOf("pathstone"),
+
+  "mark of ushering|3": markOf("ushering"),
+
+  "tome of necrosis|1": {
+    alternativePlayCost: {
+      kind: "discard-or-destroy-controlled-subtype",
+      subtype: "ally",
+      replacesResourceCost: false,
+      required: true,
+    },
+    onPlay(ctx) {
+      ctx.drawCards(ctx.seat, 1);
+      ctx.untap(ctx.player(ctx.seat).hero.instanceId);
+    },
+  },
+
+  "violent gusto|1": violentGusto(),
 
   "become the shadow lord|3": {
     requiredHandCardsForAdditionalCost: 1,

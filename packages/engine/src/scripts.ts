@@ -360,6 +360,9 @@ export interface ScriptCtx {
   setCardCounter(instanceId: number, key: string, value: number): void;
   /** Set the current life of a living permanent, bounded at zero. */
   setPermanentLife(instanceId: number, value: number): boolean;
+  /** Bind this in-arena permanent to a friendly ally permanent. Binding cards
+   * remain independent objects and are cleared when the ally leaves play. */
+  bindSelfTo(instanceId: number): boolean;
   /** Make a hero's first attack during their next turn cost additional
    *  resources. Multiple delayed effects for that turn stack. */
   increaseFirstAttackCostNextTurn(targetSeat: number, amount: number): void;
@@ -849,6 +852,7 @@ type AlternativePlayCost = (
     }
   | { kind: "banish-hand"; min: number }
   | { kind: "discard-or-destroy-controlled-named"; name: string }
+  | { kind: "discard-or-destroy-controlled-subtype"; subtype: string }
   | {
       kind: "destroy-controlled-and-or-discard-hand-subtype";
       subtype: string;
@@ -860,6 +864,8 @@ type AlternativePlayCost = (
   /** Additional effect-costs use the same announced-card plumbing without
    * replacing the printed resource cost. Defaults to true. */
   replacesResourceCost?: boolean;
+  /** The card cannot be announced without choosing one of these costs. */
+  required?: boolean;
 };
 
 /**

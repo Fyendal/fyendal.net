@@ -14,6 +14,7 @@ export type ScriptCommandName =
   | "attackWithPermanent"
   | "banishCard"
   | "basePowerOf"
+  | "bindPermanent"
   | "boundArcaneCardBonus"
   | "chainLinkNumber"
   | "chainLinksControlled"
