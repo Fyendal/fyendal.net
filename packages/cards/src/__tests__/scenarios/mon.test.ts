@@ -391,6 +391,41 @@ describe("MON — Shadow Brute and Blood Debt", () => {
     });
     expect(legalIntents(faceDown.state, 0).filter((i) => i.kind === "play-card")).toEqual([]);
   });
+
+  it("Blood-debt attacks with conditional permission can be played from hand", () => {
+    const s = scenario({
+      seats: [
+        leviaSeat({ banish: [], hand: [BLUE, "deep rooted evil|2"] }),
+        { hero: "dorinthea" },
+      ],
+    });
+    s.state.players[0]!.flags.banishedSixPlusThisTurn = false;
+
+    s.play("deep rooted evil|2", { pitch: [BLUE] })
+      .blockWith()
+      .settle()
+      .expectFinalAttack(6)
+  });
+
+  it("Blood-debt attacks with conditional permission can be played from banish", () => {
+    const s = scenario({
+      seats: [leviaSeat({ banish: ["deep rooted evil|2"], hand: [BLUE] }), { hero: "dorinthea" }],
+    });
+    s.state.players[0]!.flags.banishedSixPlusThisTurn = true;
+
+    s.play("deep rooted evil|2", { pitch: [BLUE], fromZone: "banish" })
+      .blockWith()
+      .settle()
+      .expectFinalAttack(6)
+  });
+
+  it("Blood-debt attacks with conditional permission cannot be played from banish", () => {
+    const s = scenario({
+      seats: [leviaSeat({ banish: ["deep rooted evil|2"], hand: [BLUE] }), { hero: "dorinthea" }],
+    });
+    s.state.players[0]!.flags.banishedSixPlusThisTurn = false;
+    expect(legalIntents(s.state, 0).filter((i) => i.kind === "play-card")).toEqual([]);
+  });
 });
 
 describe("MON — Chane and banished-zone play", () => {
