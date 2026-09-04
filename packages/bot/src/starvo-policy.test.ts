@@ -335,6 +335,75 @@ describe("Starvo policy", () => {
     })).toEqual(playSomersault);
   });
 
+  it("sends a 7-power attack to the hero instead of an ordinary 2-life ally", () => {
+    const view = viewForTest();
+    const attack: CardView = { instanceId: 170_130, cardId: "ROS046", owner: 0 };
+    const blue: CardView = { instanceId: 170_131, cardId: "AJV020", owner: 0 };
+    const ally: CardView = {
+      instanceId: 170_132,
+      cardId: "SEA051",
+      owner: 1,
+      life: 2,
+    };
+    view.players[0].hand = [attack, blue];
+    view.players[0].handCount = 2;
+    view.players[1].board = [ally];
+    view.turn = 2;
+    view.phase = "action";
+    view.activePlayer = 0;
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "priority-window", prompt: "Priority" };
+    const heroAttack: GameIntent = {
+      kind: "play-card",
+      instanceId: attack.instanceId,
+      pitchInstanceIds: [blue.instanceId],
+    };
+    const allyAttack: GameIntent = { ...heroAttack, targetAllyId: ally.instanceId };
+
+    expect(chooseStarvoIntent({
+      seat: 0,
+      view,
+      legal: [allyAttack, heroAttack, { kind: "pass" }],
+      cards: cardData,
+    })).toEqual(heroAttack);
+  });
+
+  it.each([
+    ["Chum", "SEA050"],
+    ["Sawbones", "SEA264"],
+  ])("allows an oversized attack to remove %s", (_, allyCardId) => {
+    const view = viewForTest();
+    const attack: CardView = { instanceId: 170_140, cardId: "ROS046", owner: 0 };
+    const blue: CardView = { instanceId: 170_141, cardId: "AJV020", owner: 0 };
+    const ally: CardView = {
+      instanceId: 170_142,
+      cardId: allyCardId,
+      owner: 1,
+      life: 2,
+    };
+    view.players[0].hand = [attack, blue];
+    view.players[0].handCount = 2;
+    view.players[1].board = [ally];
+    view.turn = 2;
+    view.phase = "action";
+    view.activePlayer = 0;
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "priority-window", prompt: "Priority" };
+    const heroAttack: GameIntent = {
+      kind: "play-card",
+      instanceId: attack.instanceId,
+      pitchInstanceIds: [blue.instanceId],
+    };
+    const allyAttack: GameIntent = { ...heroAttack, targetAllyId: ally.instanceId };
+
+    expect(chooseStarvoIntent({
+      seat: 0,
+      view,
+      legal: [allyAttack, heroAttack, { kind: "pass" }],
+      cards: cardData,
+    })).toEqual(allyAttack);
+  });
+
   it("spends a floating resource on Crown of Seeds while defending", () => {
     const view = viewForTest();
     const crown = view.players[0].equipment.head!;
@@ -428,6 +497,37 @@ describe("Starvo policy", () => {
       kind: "defend",
       instanceIds: [handCard.instanceId],
     });
+  });
+
+  it("only defends with Fyendal's Spring Tunic against lethal damage", () => {
+    const view = viewForTest();
+    const tunic = view.players[0].equipment.chest!;
+    expect(cardData[tunic.cardId]?.name).toBe("Fyendal's Spring Tunic");
+    view.players[0].life = 2;
+    view.phase = "defend";
+    view.activePlayer = 1;
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "defend", prompt: "Choose defenders" };
+    view.chain = [{
+      attackingCard: { instanceId: 170_340, cardId: "WTR167", owner: 1 },
+      defendingCards: [],
+      attackValue: 1,
+      defenseValue: 0,
+      damage: 1,
+      resolved: false,
+      reactions: [],
+    }];
+    const legal: GameIntent[] = [
+      { kind: "defend", instanceIds: [] },
+      { kind: "stage-defenders", instanceIds: [tunic.instanceId] },
+    ];
+
+    expect(chooseStarvoIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual({ kind: "defend", instanceIds: [] });
+
+    view.players[0].life = 1;
+    expect(chooseStarvoIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual({ kind: "stage-defenders", instanceIds: [tunic.instanceId] });
   });
 
   it.each([
