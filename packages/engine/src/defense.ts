@@ -244,6 +244,58 @@ export function legalDefenderCards(
   return { hand, arsenal, equipment };
 }
 
+/** Validate restrictions that apply to the proposed defender set as a whole.
+ * This is shared by staging, legal-intent projection, and the final commit so
+ * the UI cannot advertise a defender that would make the staged set illegal. */
+export function defenderSelectionError(
+  state: GameStateInternal,
+  link: ChainLinkState,
+  defenders: ReturnType<typeof legalDefenderCards>,
+  instanceIds: readonly number[],
+): string | undefined {
+  const { hand, arsenal, equipment } = defenders;
+  const dominate = attackHasDominate(state, link);
+  const overpower = attackHasOverpower(state, link);
+  const maxNonBlock = attackMaxNonBlockDefenders(state, link);
+  const seen = new Set<number>();
+  let handCount = 0;
+  let nonBlockCount = attackNonBlockDefenderCount(state, link);
+  let actionDefenders = link.defendingCards.filter(
+    (card) => dataOf(state, card.cardId).cardType === "action",
+  ).length;
+
+  for (const id of instanceIds) {
+    if (seen.has(id)) return `card ${id} cannot defend twice`;
+    seen.add(id);
+    const handCard = hand.find((card) => card.instanceId === id);
+    const arsenalCard = arsenal.find((card) => card.instanceId === id);
+    const equipmentCard = equipment.find((card) => card.instanceId === id);
+    const card = handCard ?? arsenalCard ?? equipmentCard;
+    if (!card) return `card ${id} cannot defend`;
+
+    const cardType = dataOf(state, card.cardId).cardType;
+    if (cardType !== "block") {
+      nonBlockCount++;
+      if (maxNonBlock !== undefined && nonBlockCount > maxNonBlock) {
+        return `this attack can't be defended by more than ${maxNonBlock} non-block cards`;
+      }
+    }
+    if (handCard) {
+      handCount++;
+      if (dominate && handCount > 1) {
+        return "Dominate: at most 1 card from hand may defend";
+      }
+    }
+    if ((handCard || arsenalCard) && cardType === "action") {
+      actionDefenders++;
+      if (overpower && actionDefenders > 1) {
+        return "Overpower: this attack can't be defended by more than one action card";
+      }
+    }
+  }
+  return undefined;
+}
+
 /**
  * Stage (or clear) defenders for the active defend decision without
  * committing them. Declarative — the defender sends the full staged set each
@@ -261,24 +313,10 @@ export function stageDefenders(
   if (!pd || pd.kind !== "defend" || pd.player !== seat) return "not your defend decision";
   const link = currentLink(state);
   if (!link) return "no attack to defend";
-  const { hand, arsenal, equipment } = legalDefenderCards(state, runtime, seat);
+  const defenders = legalDefenderCards(state, runtime, seat);
   const unique = [...new Set(instanceIds)];
-  const maxNonBlock = attackMaxNonBlockDefenders(state, link);
-  let nonBlockCount = attackNonBlockDefenderCount(state, link);
-  for (const id of unique) {
-    const card = hand.find((c) => c.instanceId === id) ??
-      arsenal.find((c) => c.instanceId === id) ??
-      equipment.find((c) => c.instanceId === id);
-    if (!card) {
-      return `card ${id} cannot defend`;
-    }
-    if (dataOf(state, card.cardId).cardType !== "block") {
-      nonBlockCount++;
-      if (maxNonBlock !== undefined && nonBlockCount > maxNonBlock) {
-        return `this attack can't be defended by more than ${maxNonBlock} non-block cards`;
-      }
-    }
-  }
+  const restrictionError = defenderSelectionError(state, link, defenders, unique);
+  if (restrictionError) return restrictionError;
   pd.staged = unique.length > 0 ? unique : undefined;
   return undefined;
 }
@@ -572,7 +610,8 @@ export function assignDefenders(
   const link = currentLink(state);
   if (!pd || pd.kind !== "defend" || pd.player !== seat || !link) return "not your decision";
   const player = state.players[seat] as PlayerState;
-  const { hand, arsenal, equipment } = legalDefenderCards(state, runtime, seat);
+  const defenders = legalDefenderCards(state, runtime, seat);
+  const { hand, arsenal, equipment } = defenders;
   const requiredEquipment = Math.min(
     equipment.length,
     Number(link.flags.mustDefendWithEquipmentCount ?? (link.flags.mustDefendWithEquipment === true ? 1 : 0)),
@@ -583,43 +622,16 @@ export function assignDefenders(
   if (selectedEquipment < requiredEquipment) {
     return `this attack must be defended with ${requiredEquipment} equipment if able`;
   }
-  const dominate = attackHasDominate(state, link);
-  const overpower = attackHasOverpower(state, link);
-  const maxNonBlock = attackMaxNonBlockDefenders(state, link);
-  const seen = new Set<number>();
+  const restrictionError = defenderSelectionError(state, link, defenders, instanceIds);
+  if (restrictionError) return restrictionError;
   let handCount = 0;
-  let nonBlockCount = attackNonBlockDefenderCount(state, link);
-  // Overpower (8.3.22): at most one action card may defend (defense reactions,
-  // block cards and equipment are unaffected)
-  let actionDefenders = link.defendingCards.filter(
-    (c) => dataOf(state, c.cardId).cardType === "action",
-  ).length;
   for (const id of instanceIds) {
-    // reject duplicates: the legal-defender snapshots above still contain a
-    // card after it was removed from the live zone, so a repeated id would
-    // otherwise defend (and trigger hooks) multiple times
-    if (seen.has(id)) return `card ${id} cannot defend twice`;
-    seen.add(id);
     const hc = hand.find((c) => c.instanceId === id);
     const ac = arsenal.find((c) => c.instanceId === id);
     const ec = equipment.find((c) => c.instanceId === id);
-    if (!hc && !ac && !ec) return `card ${id} cannot defend`;
-    if (dataOf(state, (hc ?? ac ?? ec)!.cardId).cardType !== "block") {
-      nonBlockCount++;
-      if (maxNonBlock !== undefined && nonBlockCount > maxNonBlock) {
-        return `this attack can't be defended by more than ${maxNonBlock} non-block cards`;
-      }
-    }
     if (hc || ac) {
       const defendingCard = hc ?? ac as CardInstance;
       if (hc) handCount++;
-      if (hc && dominate && handCount > 1) return "Dominate: at most 1 card from hand may defend";
-      if (dataOf(state, defendingCard.cardId).cardType === "action") {
-        actionDefenders++;
-        if (overpower && actionDefenders > 1) {
-          return "Overpower: this attack can't be defended by more than one action card";
-        }
-      }
       if (hc) removeFromArray(player.hand, id);
       else removeFromArray(player.arsenal, id);
       delete defendingCard.faceDown;

@@ -10,6 +10,7 @@ import { DiscordLink } from "./DiscordLink.js";
 import { FormatName } from "./FormatBadge.js";
 import { ModalSurface } from "../components/ModalSurface.js";
 import { LanguagePicker } from "../i18n/LanguagePicker.js";
+import { BugFixedNotification } from "./BugFixedNotification.js";
 import { mobileDeckDestination, mobileLobbyDestinationSelected } from "./mobileNavigation.js";
 import {
   GuestLandingDetails,
@@ -203,20 +204,7 @@ export function Lobby() {
       <header className="topbar lobby-topbar lobby-topbar-authenticated">
         <LobbyBrand />
         {bugReportNotification ? (
-          <div className="bug-fixed-notification" role="status" aria-live="polite">
-            <span className="bug-fixed-notification-icon" aria-hidden="true">✓</span>
-            <span>
-              <strong>{intl.formatMessage({ id: "lobby.bugFixed.title" })}</strong>
-              {intl.formatMessage({ id: "lobby.bugFixed.body" })}
-            </span>
-            <button
-              type="button"
-              aria-label={intl.formatMessage({ id: "lobby.bugFixed.dismiss" })}
-              onClick={() => void dismissBugReportNotifications()}
-            >
-              ×
-            </button>
-          </div>
+          <BugFixedNotification onDismiss={() => void dismissBugReportNotifications()} />
         ) : null}
         <div className="topbar-actions">
           <div className="topbar-tools">
