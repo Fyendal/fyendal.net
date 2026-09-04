@@ -10,6 +10,8 @@ export interface StoredRoomSession {
   token: string;
 }
 
+const ROOM_SESSION_PREFIX = `${ROOM_SESSION_STORAGE_KEY}:`;
+
 function exactRecord(value: unknown, keys: string[]): Record<string, unknown> | null {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return null;
   const record = value as Record<string, unknown>;
@@ -19,12 +21,12 @@ function exactRecord(value: unknown, keys: string[]): Record<string, unknown> | 
 }
 
 export function saveRoomSession(storage: Storage, session: StoredRoomSession): void {
-  storage.setItem(ROOM_SESSION_STORAGE_KEY, JSON.stringify(session));
+  storage.setItem(`${ROOM_SESSION_PREFIX}${session.code}`, JSON.stringify(session));
+  storage.removeItem(ROOM_SESSION_STORAGE_KEY);
 }
 
-export function loadRoomSession(storage: Storage): StoredRoomSession | null {
+function decodeRoomSession(raw: string | null): StoredRoomSession | null {
   try {
-    const raw = storage.getItem(ROOM_SESSION_STORAGE_KEY);
     if (!raw) return null;
     const record = exactRecord(JSON.parse(raw) as unknown, ["code", "token"]);
     if (!record || typeof record.code !== "string" || !/^[A-Z0-9]{6}$/.test(record.code) ||
@@ -32,6 +34,32 @@ export function loadRoomSession(storage: Storage): StoredRoomSession | null {
     return { code: record.code, token: record.token };
   } catch {
     return null;
+  }
+}
+
+export function loadRoomSession(storage: Storage, code: string): StoredRoomSession | null {
+  const upperCode = code.toUpperCase();
+  const current = decodeRoomSession(storage.getItem(`${ROOM_SESSION_PREFIX}${upperCode}`));
+  if (current?.code === upperCode) return current;
+  const legacy = decodeRoomSession(storage.getItem(ROOM_SESSION_STORAGE_KEY));
+  if (legacy) {
+    saveRoomSession(storage, legacy);
+    return legacy.code === upperCode ? legacy : null;
+  }
+  return null;
+}
+
+export function removeRoomSession(storage: Storage, code: string | null): void {
+  if (code) storage.removeItem(`${ROOM_SESSION_PREFIX}${code.toUpperCase()}`);
+  storage.removeItem(ROOM_SESSION_STORAGE_KEY);
+}
+
+export function clearRoomSessions(storage: Storage): void {
+  const keys = Array.from({ length: storage.length }, (_, index) => storage.key(index));
+  for (const key of keys) {
+    if (key === ROOM_SESSION_STORAGE_KEY || key?.startsWith(ROOM_SESSION_PREFIX)) {
+      storage.removeItem(key);
+    }
   }
 }
 

@@ -26,6 +26,20 @@ describe("cluster event log", () => {
       code: "PVP123",
       sourceCode: "BOT123",
     });
+    await appendClusterEvent(db, { type: "social-refresh", userId: 42 });
+    await appendClusterEvent(db, { type: "social-presence", userId: 42 });
+    await appendClusterEvent(db, { type: "chat-message", userId: 42, messageId: "9007199254740992" });
+    await appendClusterEvent(db, {
+      type: "friend-game-invite",
+      userId: 42,
+      invite: {
+        inviteId: "invite-123",
+        fromUsername: "Alice",
+        room: { code: "SOC123", format: "cc", cardPoolMode: "open" },
+        sentAt: 123,
+      },
+    });
+    await appendClusterEvent(db, { type: "friend-game-invite-dismiss", userId: 42, inviteId: "invite-123" });
     await Promise.all([a.pollNow(), b.pollNow()]);
 
     expect(first).toEqual(second);
@@ -33,6 +47,20 @@ describe("cluster event log", () => {
       { type: "room", event: { code: "ABC123", kind: "presence", seat: 1, connected: true, version: 7 } },
       { type: "user-sessions-revoked", userId: 42 },
       { type: "match-handoff", userId: 42, code: "PVP123", sourceCode: "BOT123" },
+      { type: "social-refresh", userId: 42 },
+      { type: "social-presence", userId: 42 },
+      { type: "chat-message", userId: 42, messageId: "9007199254740992" },
+      {
+        type: "friend-game-invite",
+        userId: 42,
+        invite: {
+          inviteId: "invite-123",
+          fromUsername: "Alice",
+          room: { code: "SOC123", format: "cc", cardPoolMode: "open" },
+          sentAt: 123,
+        },
+      },
+      { type: "friend-game-invite-dismiss", userId: 42, inviteId: "invite-123" },
     ]);
   });
 

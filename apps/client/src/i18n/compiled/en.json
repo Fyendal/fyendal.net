@@ -24459,5 +24459,315 @@
       "type": 0,
       "value": "Sound effects volume"
     }
+  ],
+  "social.accept": [
+    {
+      "type": 0,
+      "value": "Accept"
+    }
+  ],
+  "social.acceptFriend": [
+    {
+      "type": 0,
+      "value": "Accept Friend"
+    }
+  ],
+  "social.addFriend": [
+    {
+      "type": 0,
+      "value": "Add Friend"
+    }
+  ],
+  "social.cancelRequest": [
+    {
+      "type": 0,
+      "value": "Cancel"
+    }
+  ],
+  "social.chat.empty": [
+    {
+      "type": 0,
+      "value": "No messages yet. Say hello."
+    }
+  ],
+  "social.chat.loadEarlier": [
+    {
+      "type": 0,
+      "value": "Load earlier"
+    }
+  ],
+  "social.chat.placeholder": [
+    {
+      "type": 0,
+      "value": "Write a message"
+    }
+  ],
+  "social.chat.send": [
+    {
+      "type": 0,
+      "value": "Send"
+    }
+  ],
+  "social.chat.unreadFrom": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " unread message from "
+            },
+            {
+              "type": 1,
+              "value": "username"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " unread messages from "
+            },
+            {
+              "type": 1,
+              "value": "username"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "social.decline": [
+    {
+      "type": 0,
+      "value": "Decline"
+    }
+  ],
+  "social.empty": [
+    {
+      "type": 0,
+      "value": "Add a player by username, or add an opponent after a game."
+    }
+  ],
+  "social.error.conflict": [
+    {
+      "type": 0,
+      "value": "That request does not match the current friendship state."
+    }
+  ],
+  "social.error.friendRequired": [
+    {
+      "type": 0,
+      "value": "You must be friends to do that."
+    }
+  ],
+  "social.error.messageBounds": [
+    {
+      "type": 0,
+      "value": "Messages must contain 1 to 1,000 characters."
+    }
+  ],
+  "social.error.rateLimited": [
+    {
+      "type": 0,
+      "value": "Too many social actions. Try again later."
+    }
+  ],
+  "social.error.self": [
+    {
+      "type": 0,
+      "value": "You cannot add yourself."
+    }
+  ],
+  "social.error.unavailable": [
+    {
+      "type": 0,
+      "value": "That friend is offline."
+    }
+  ],
+  "social.error.userNotFound": [
+    {
+      "type": 0,
+      "value": "No player has that username."
+    }
+  ],
+  "social.friendCount": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " friend"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " friends"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "social.friends": [
+    {
+      "type": 0,
+      "value": "Friends"
+    }
+  ],
+  "social.gameInvites": [
+    {
+      "type": 0,
+      "value": "Game invitations"
+    }
+  ],
+  "social.invite.action": [
+    {
+      "type": 0,
+      "value": "Invite to game"
+    }
+  ],
+  "social.invite.modalTitle": [
+    {
+      "type": 0,
+      "value": "Invite "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    }
+  ],
+  "social.invite.noDeck": [
+    {
+      "type": 0,
+      "value": "Import a deck for this format before creating the room."
+    }
+  ],
+  "social.invite.send": [
+    {
+      "type": 0,
+      "value": "Send invite"
+    }
+  ],
+  "social.invite.title": [
+    {
+      "type": 0,
+      "value": "Invite "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " to a game"
+    }
+  ],
+  "social.message": [
+    {
+      "type": 0,
+      "value": "Message"
+    }
+  ],
+  "social.messageNamed": [
+    {
+      "type": 0,
+      "value": "Message "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    }
+  ],
+  "social.offline": [
+    {
+      "type": 0,
+      "value": "Offline"
+    }
+  ],
+  "social.online": [
+    {
+      "type": 0,
+      "value": "Online"
+    }
+  ],
+  "social.pending": [
+    {
+      "type": 0,
+      "value": "Pending"
+    }
+  ],
+  "social.removeConfirm": [
+    {
+      "type": 0,
+      "value": "Remove "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " and delete this conversation?"
+    }
+  ],
+  "social.removeNamed": [
+    {
+      "type": 0,
+      "value": "Remove "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    }
+  ],
+  "social.requestSent": [
+    {
+      "type": 0,
+      "value": "Request sent"
+    }
+  ],
+  "social.requests.incoming": [
+    {
+      "type": 0,
+      "value": "Friend requests"
+    }
+  ],
+  "social.requests.outgoing": [
+    {
+      "type": 0,
+      "value": "Sent requests"
+    }
+  ],
+  "social.username": [
+    {
+      "type": 0,
+      "value": "Username"
+    }
   ]
 }

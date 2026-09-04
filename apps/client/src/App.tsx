@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { useIntl } from "react-intl";
-import { roomCodeFromUrl, savedRoomCode, useStore } from "./store.js";
+import { hasSavedRoomSession, roomCodeFromUrl, useStore } from "./store.js";
 import { Lobby } from "./lobby/Lobby.js";
 import { RoomLoading } from "./lobby/RoomLoading.js";
 import { savedReplayIdFromPath } from "./replay/route.js";
@@ -11,6 +11,7 @@ const PrepRoom = lazy(() => import("./prep/PrepRoom.js").then((module) => ({ def
 const GameBoard = lazy(() => import("./game/GameBoard.js").then((module) => ({ default: module.GameBoard })));
 const ReplayBar = lazy(() => import("./replay/ReplayBar.js").then((module) => ({ default: module.ReplayBar })));
 const LegalPage = lazy(() => import("./legal/LegalPage.js").then((module) => ({ default: module.LegalPage })));
+const SocialDock = lazy(() => import("./social/SocialDock.js").then((module) => ({ default: module.SocialDock })));
 
 function setMetaContent(selector: string, content: string): void {
   let element = document.head.querySelector<HTMLMetaElement>(selector);
@@ -97,14 +98,14 @@ export function App() {
   const restoringSavedRoom = screen === "lobby"
     && authUser !== null
     && routeRoomCode !== null
-    && savedRoomCode() === routeRoomCode;
+    && hasSavedRoomSession(routeRoomCode);
 
   // Resolve /ROOM-ID as an invite, or reconnect an already-known session.
   useEffect(() => {
     if (!routeRoomCode) return;
     // Known sessions reconnect immediately. New authenticated invitees first
     // inspect the room so they can choose the matching deck or box hero.
-    if (authUser && savedRoomCode() === routeRoomCode) joinRoom(routeRoomCode);
+    if (authUser && hasSavedRoomSession(routeRoomCode)) joinRoom(routeRoomCode);
     else inspectRoom(routeRoomCode);
   }, [authUser, inspectRoom, joinRoom, routeRoomCode]);
 
@@ -153,6 +154,7 @@ export function App() {
     <Suspense fallback={<ScreenFallback />}>
       {content}
       <BackgroundMatchOffer />
+      {authUser && screen !== "replay" ? <SocialDock /> : null}
     </Suspense>
   );
 }

@@ -165,7 +165,7 @@ describe("initial schema", () => {
       "matchmaking_offers",
     ]));
     expect((await db.query("SELECT version FROM schema_migrations ORDER BY version DESC LIMIT 1")).rows)
-      .toEqual([{ version: 30 }]);
+      .toEqual([{ version: 31 }]);
   });
 
   it("adds candidate skip state to an already-applied version 26 database", async () => {
@@ -183,7 +183,7 @@ describe("initial schema", () => {
        WHERE table_name = 'pending_bot_start_candidates' AND column_name = 'skipped'`,
     )).rows).toEqual([{ column_name: "skipped" }]);
     expect((await db.query("SELECT version FROM schema_migrations ORDER BY version DESC LIMIT 1")).rows)
-      .toEqual([{ version: 30 }]);
+      .toEqual([{ version: 31 }]);
   });
 
   it("adds Starvo to durable pending bot starts", async () => {

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { useIntl } from "react-intl";
 import type { GameView } from "@fyendal/shared";
 import {
@@ -24,6 +24,7 @@ export function GameOver({
   onDownloadReplay,
   onBackToLobby,
   onClose,
+  friendAction = null,
 }: {
   view: GameView;
   seat: number;
@@ -33,6 +34,7 @@ export function GameOver({
   onDownloadReplay: (() => void) | null;
   onBackToLobby: () => void;
   onClose: () => void;
+  friendAction?: ReactNode;
 }) {
   const intl = useIntl();
   const winner = view.winner;
@@ -69,6 +71,7 @@ export function GameOver({
         ) : null}
 
         <div className="rail-actions gameover-actions">
+          {friendAction}
           {onDownloadReplay ? (
             <button onClick={onDownloadReplay}>{intl.formatMessage({ id: "replay.controls.export" })}</button>
           ) : null}

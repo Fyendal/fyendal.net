@@ -28,6 +28,26 @@ import { consoleError } from "./logging.js";
 import { PgRateLimiter, sweepRateLimits } from "./rateLimits.js";
 import { startGatewayRuntimeMetrics, type RuntimeMetricLogger } from "./runtimeMetrics.js";
 import {
+  cancelFriendRequest,
+  chatHistory,
+  chatMessageForUser,
+  friendByUsername,
+  friendsOf,
+  isUserOnline,
+  markChatRead,
+  markSocialPresent,
+  markSocialPresentBatch,
+  removeFriend,
+  removeSocialPresence,
+  respondFriendRequest,
+  sendChatMessage,
+  sendFriendRequest,
+  socialSnapshot,
+  sweepFriendMessages,
+  sweepSocialPresence,
+  type SocialFailure,
+} from "./social.js";
+import {
   PgRoomStore,
   hashReconnectToken,
   PLAY_REQUIRES_LOGIN,
@@ -98,6 +118,9 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
   const messageRateWindowMs = deps.wsMessageRateWindowMs ?? WS_MESSAGE_RATE_WINDOW_MS;
   const pingIntervalMs = deps.wsPingIntervalMs ?? WS_PING_INTERVAL_MS;
   const instanceId = deps.instanceId ?? `gateway-${randomUUID()}`;
+  const friendRequestLimiter = new PgRateLimiter(deps.db, "friend-request", 10, 60 * 60 * 1000);
+  const chatLimiter = new PgRateLimiter(deps.db, "friend-chat", 60, 60 * 1000);
+  const friendInviteLimiter = new PgRateLimiter(deps.db, "friend-invite", 10, 60 * 1000);
   let clusterConsumer: ClusterEventConsumer | null = null;
 
   async function publishClusterEvent(event: ClusterEvent): Promise<void> {
@@ -116,6 +139,26 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
   const clientsByRoom = connections.byRoom;
   const allClients = connections.all;
   const lobbyClients = connections.lobby;
+  const socialErrorMessage: Record<SocialFailure | "FRIEND_UNAVAILABLE" | "MESSAGE_RATE_LIMITED", string> = {
+    USER_NOT_FOUND: "player not found",
+    INVALID_FRIEND_REQUEST: "you cannot add yourself",
+    FRIEND_REQUEST_CONFLICT: "friend request conflicts with the current relationship",
+    FRIEND_REQUIRED: "you must be friends to do that",
+    FRIEND_UNAVAILABLE: "friend is offline",
+    MESSAGE_BOUNDS: "message must contain 1 to 1,000 characters",
+    MESSAGE_RATE_LIMITED: "too many social actions, try again later",
+  };
+  const sendSocialError = (ctx: ClientCtx, code: keyof typeof socialErrorMessage): void => {
+    ctx.send({ type: "error", code, message: socialErrorMessage[code] });
+  };
+  const localClientsForUser = (userId: number): ClientCtx[] =>
+    [...allClients].filter((client) => client.user?.id === userId && !client.closed);
+  const sendSocialSnapshot = async (userId: number): Promise<void> => {
+    const recipients = localClientsForUser(userId);
+    if (recipients.length === 0) return;
+    const message = { type: "social-snapshot", snapshot: await socialSnapshot(deps.db, userId) } as const;
+    for (const client of recipients) client.send(message);
+  };
   let statsCache: { value: { inGame: number; openRooms: number }; expiresAt: number } | null = null;
   const server = createApiServer({
     db: deps.db,
@@ -331,6 +374,34 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         }
         return;
       }
+      case "social-refresh":
+        await sendSocialSnapshot(event.userId);
+        return;
+      case "social-presence": {
+        const affected = [event.userId, ...(await friendsOf(deps.db, event.userId))];
+        await Promise.all([...new Set(affected)].map(sendSocialSnapshot));
+        return;
+      }
+      case "chat-message": {
+        const message = await chatMessageForUser(deps.db, event.userId, event.messageId);
+        if (message) {
+          for (const client of localClientsForUser(event.userId)) {
+            client.send({ type: "chat-message", message });
+          }
+        }
+        await sendSocialSnapshot(event.userId);
+        return;
+      }
+      case "friend-game-invite":
+        for (const client of localClientsForUser(event.userId)) {
+          client.send({ type: "friend-game-invite", invite: event.invite });
+        }
+        return;
+      case "friend-game-invite-dismiss":
+        for (const client of localClientsForUser(event.userId)) {
+          client.send({ type: "friend-game-invite-dismissed", inviteId: event.inviteId });
+        }
+        return;
     }
   }, { logError: consoleError });
   clusterPublisherByServer.set(server, publishRoomEvent);
@@ -494,8 +565,13 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
       case "auth": {
         // A failed re-authentication must not retain privileges from an older
         // session presented on the same socket.
+        const previousUserId = ctx.user?.id;
         ctx.user = null;
         connections.unbindSession(ctx);
+        if (previousUserId) {
+          await removeSocialPresence(deps.db, ctx.socialPresenceLeaseId);
+          await publishClusterEvent({ type: "social-presence", userId: previousUserId });
+        }
         const user = await sessionForToken(deps.db, msg.token);
         if (!user) {
           send(ws, { type: "auth-failed" });
@@ -503,10 +579,118 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         }
         ctx.user = user;
         connections.bindSession(ctx, msg.token);
+        await markSocialPresent(deps.db, user.id, ctx.socialPresenceLeaseId);
+        await publishClusterEvent({ type: "social-presence", userId: user.id });
         send(ws, { type: "authed", username: user.username });
+        send(ws, { type: "social-snapshot", snapshot: await socialSnapshot(deps.db, user.id) });
         const matchmakingStatus = await rooms.backgroundMatchmakingStatus(user.id);
         if (matchmakingStatus.state !== "inactive") queuedUsers.set(user.id, ctx);
         send(ws, { type: "background-matchmaking", status: matchmakingStatus });
+        return;
+      }
+      case "social-sync": {
+        if (!ctx.user) return sendSocialError(ctx, "FRIEND_REQUIRED");
+        ctx.send({ type: "social-snapshot", snapshot: await socialSnapshot(deps.db, ctx.user.id) });
+        return;
+      }
+      case "friend-request": {
+        if (!ctx.user) return sendSocialError(ctx, "FRIEND_REQUIRED");
+        if (!(await friendRequestLimiter.allow(String(ctx.user.id), "send"))) {
+          return sendSocialError(ctx, "MESSAGE_RATE_LIMITED");
+        }
+        const result = await sendFriendRequest(deps.db, ctx.user.id, msg.username);
+        if (!result.ok) sendSocialError(ctx, result.error);
+        clusterConsumer?.nudge();
+        return;
+      }
+      case "friend-request-respond": {
+        if (!ctx.user) return sendSocialError(ctx, "FRIEND_REQUIRED");
+        const result = await respondFriendRequest(deps.db, ctx.user.id, msg.username, msg.accept);
+        if (!result.ok) sendSocialError(ctx, result.error);
+        clusterConsumer?.nudge();
+        return;
+      }
+      case "friend-request-cancel": {
+        if (!ctx.user) return sendSocialError(ctx, "FRIEND_REQUIRED");
+        const result = await cancelFriendRequest(deps.db, ctx.user.id, msg.username);
+        if (!result.ok) sendSocialError(ctx, result.error);
+        clusterConsumer?.nudge();
+        return;
+      }
+      case "friend-remove": {
+        if (!ctx.user) return sendSocialError(ctx, "FRIEND_REQUIRED");
+        const result = await removeFriend(deps.db, ctx.user.id, msg.username);
+        if (!result.ok) sendSocialError(ctx, result.error);
+        clusterConsumer?.nudge();
+        return;
+      }
+      case "chat-history": {
+        if (!ctx.user) return sendSocialError(ctx, "FRIEND_REQUIRED");
+        const result = await chatHistory(deps.db, ctx.user.id, msg.username, msg.beforeId);
+        if (!result.ok) return sendSocialError(ctx, result.error);
+        ctx.send({ type: "chat-history", username: msg.username, messages: result.messages, hasMore: result.hasMore });
+        return;
+      }
+      case "chat-send": {
+        if (!ctx.user) return sendSocialError(ctx, "FRIEND_REQUIRED");
+        if (!(await chatLimiter.allow(String(ctx.user.id), "send"))) {
+          return sendSocialError(ctx, "MESSAGE_RATE_LIMITED");
+        }
+        const result = await sendChatMessage(deps.db, ctx.user.id, msg.username, msg.text, msg.clientMessageId);
+        if (!result.ok) sendSocialError(ctx, result.error);
+        clusterConsumer?.nudge();
+        return;
+      }
+      case "chat-read": {
+        if (!ctx.user) return sendSocialError(ctx, "FRIEND_REQUIRED");
+        const result = await markChatRead(deps.db, ctx.user.id, msg.username, msg.throughId);
+        if (!result.ok) sendSocialError(ctx, result.error);
+        clusterConsumer?.nudge();
+        return;
+      }
+      case "friend-game-invite-dismiss": {
+        if (!ctx.user) return sendSocialError(ctx, "FRIEND_REQUIRED");
+        await publishClusterEvent({ type: "friend-game-invite-dismiss", userId: ctx.user.id, inviteId: msg.inviteId });
+        return;
+      }
+      case "create-friend-room": {
+        if (ctx.code !== null) {
+          send(ws, { type: "error", message: ALREADY_IN_ROOM });
+          return;
+        }
+        if (!ctx.user) return sendSocialError(ctx, "FRIEND_REQUIRED");
+        if (!(await friendInviteLimiter.allow(String(ctx.user.id), "send"))) {
+          return sendSocialError(ctx, "MESSAGE_RATE_LIMITED");
+        }
+        const friend = await friendByUsername(deps.db, ctx.user.id, msg.username);
+        if (!friend) return sendSocialError(ctx, "FRIEND_REQUIRED");
+        if (!(await isUserOnline(deps.db, friend.id))) return sendSocialError(ctx, "FRIEND_UNAVAILABLE");
+        const cardPoolMode = msg.cardPoolMode ?? "legal";
+        const choice = await resolveChoice(ctx.user, msg.format, undefined, msg.deckId, cardPoolMode);
+        if ("error" in choice) {
+          send(ws, { type: "error", message: choice.error });
+          return;
+        }
+        const { code, seat, token } = await rooms.createRoom(msg.format, {
+          ...choice.choice,
+          username: ctx.user.username,
+          userId: ctx.user.id,
+        }, "private", cardPoolMode);
+        connections.attach(ctx, code, seat, token);
+        const version = await markAttachedPresent(ctx);
+        const invite = {
+          inviteId: randomUUID(),
+          fromUsername: ctx.user.username,
+          room: {
+            code,
+            format: msg.format,
+            ...(cardPoolMode === "legal" ? {} : { cardPoolMode }),
+          },
+          sentAt: Date.now(),
+        } as const;
+        send(ws, { type: "room-created", code, seat, token, version });
+        await publishRoomEvent({ code, kind: "created", version });
+        await publishClusterEvent({ type: "friend-game-invite", userId: friend.id, invite });
         return;
       }
       case "create-room": {
@@ -1104,6 +1288,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
       presenceLeaseId: null,
       user: null,
       sessionToken: null,
+      socialPresenceLeaseId: randomUUID(),
       lastEmoteAt: 0,
       close: (code, reason) => {
         ctx.closed = true;
@@ -1200,6 +1385,9 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
       connections.detach(ctx);
       allClients.delete(ctx);
       lobbyClients.delete(ctx);
+      void removeSocialPresence(deps.db, ctx.socialPresenceLeaseId)
+        .then((userId) => userId ? publishClusterEvent({ type: "social-presence", userId }) : undefined)
+        .catch((error: Error) => consoleError("social presence cleanup failed", error));
       if (queuedUserId != null && queuedUsers.get(queuedUserId) === ctx) {
         queuedUsers.delete(queuedUserId);
         void rooms.leaveForegroundMatchmakingOnDisconnect(queuedUserId)
@@ -1254,9 +1442,15 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           ? [{ code: c.code, token: c.token, leaseId: c.presenceLeaseId, seat: c.seat }]
           : [],
       );
-      deps.rooms
-        .markPresentBatch(leases)
-        .catch((error: Error) => consoleError("presence heartbeat failed", error));
+      void Promise.all([
+        deps.rooms.markPresentBatch(leases),
+        markSocialPresentBatch(
+          deps.db,
+          [...allClients].flatMap((client) => client.user
+            ? [{ userId: client.user.id, leaseId: client.socialPresenceLeaseId }]
+            : []),
+        ),
+      ]).catch((error: Error) => consoleError("presence heartbeat failed", error));
     }, PRESENCE_HEARTBEAT_MS);
     server.on("close", () => clearInterval(heartbeat));
   }
@@ -1359,6 +1553,7 @@ const port = Number(process.env.PORT ?? 8080);
 /** How often expired rooms (game over / both players disconnected) are deleted. */
 const SWEEP_INTERVAL_MS = 60_000;
 const MATCH_PREP_SWEEP_INTERVAL_MS = 5_000;
+const SOCIAL_CLEANUP_INTERVAL_MS = 60 * 60 * 1000;
 if (!process.env.VITEST) {
   // Initialize shared persistence and this gateway before accepting traffic.
   const { db: pool, rooms } = await composeProductionGateway();
@@ -1386,12 +1581,23 @@ if (!process.env.VITEST) {
         await sweepClusterEvents(pool);
         await sweepRoomCommands(pool);
         await sweepRateLimits(pool);
+        const offlineUserIds = await sweepSocialPresence(pool);
+        for (const userId of offlineUserIds) {
+          await appendClusterEvent(pool, { type: "social-presence", userId });
+        }
       })
       .catch((error: Error) => consoleError("room sweep failed", error))
       .finally(() => { sweeping = false; });
   };
   sweep();
   const sweepTimer = setInterval(sweep, SWEEP_INTERVAL_MS);
+  const cleanupSocial = (): void => {
+    void tryAcquireLease(pool, "maintenance:social", instanceId, 2 * SOCIAL_CLEANUP_INTERVAL_MS)
+      .then((claimed) => claimed ? sweepFriendMessages(pool) : 0)
+      .catch((error: Error) => consoleError("social cleanup failed", error));
+  };
+  cleanupSocial();
+  const socialCleanupTimer = setInterval(cleanupSocial, SOCIAL_CLEANUP_INTERVAL_MS);
   const sweepMatchPrep = (): void => {
     void tryAcquireLease(pool, "maintenance:match-prep", instanceId, 2 * MATCH_PREP_SWEEP_INTERVAL_MS)
       .then((claimed) => claimed ? rooms.sweepMatchmadePrep() : [])
@@ -1406,6 +1612,7 @@ if (!process.env.VITEST) {
     shuttingDown = true;
     console.log(`${signal} received — shutting down`);
     clearInterval(sweepTimer);
+    clearInterval(socialCleanupTimer);
     clearInterval(matchPrepSweepTimer);
     closeGameServer(server)
       .then(() => pool.end())

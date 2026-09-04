@@ -490,7 +490,7 @@ describe("client connection and account race fences", () => {
       connectionIssueVisible: false,
       error: null,
     });
-    expect(localStorage.getItem("fyendal-room-session")).toContain("seat-token");
+    expect(localStorage.getItem("fyendal-room-session:AAAAAA")).toContain("seat-token");
 
     await vi.advanceTimersByTimeAsync(1_000);
     const recovered = FakeWebSocket.instances[1]!;
@@ -550,7 +550,7 @@ describe("client connection and account race fences", () => {
       view: null,
       error: null,
     });
-    expect(localStorage.getItem("fyendal-room-session")).toContain("BBBBBB");
+    expect(localStorage.getItem("fyendal-room-session:BBBBBB")).toContain("BBBBBB");
   });
 
   it("aborts and discards deck work from a previous account", async () => {
@@ -1084,7 +1084,7 @@ describe("client connection and account race fences", () => {
       prep: null,
       error: null,
     });
-    expect(localStorage.getItem("fyendal-room-session")).toContain("seat-token");
+    expect(localStorage.getItem("fyendal-room-session:AAAAAA")).toContain("seat-token");
     useStore.getState().leave();
   });
 
@@ -1394,7 +1394,7 @@ describe("client connection and account race fences", () => {
       legal: [],
       error: null,
     });
-    expect(localStorage.getItem("fyendal-room-session")).toContain("seat-token");
+    expect(localStorage.getItem("fyendal-room-session:AAAAAA")).toContain("seat-token");
     useStore.getState().leave();
   });
 

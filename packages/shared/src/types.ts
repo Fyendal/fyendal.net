@@ -757,11 +757,61 @@ export type EmoteMessage =
   | "Thinking..."
   | "Oops!";
 
+// ── Friends and one-to-one chat ───────────────────────────────────────────
+
+export type FriendPresence = "online" | "offline";
+
+export interface FriendSummary {
+  username: string;
+  presence: FriendPresence;
+  friendsSince: number;
+  unreadCount: number;
+}
+
+export interface FriendRequestSummary {
+  username: string;
+  direction: "incoming" | "outgoing";
+  createdAt: number;
+}
+
+export interface SocialSnapshot {
+  friends: FriendSummary[];
+  requests: FriendRequestSummary[];
+}
+
+export interface ChatMessage {
+  /** PostgreSQL bigint represented as a decimal string on the wire. */
+  id: string;
+  friendUsername: string;
+  senderUsername: string;
+  text: string;
+  sentAt: number;
+  readAt: number | null;
+}
+
+/** Live-only invitation. It is never restored after all recipient sockets disconnect. */
+export interface FriendGameInvite {
+  inviteId: string;
+  fromUsername: string;
+  room: RoomInvite;
+  sentAt: number;
+}
+
 /** How a seat wants empty priority/reaction windows handled. */
 export type PriorityWindowMode = "auto-pass" | "always-pause";
 
 export type ClientMessage =
   | { type: "auth"; token: string }
+  | { type: "social-sync" }
+  | { type: "friend-request"; username: string }
+  | { type: "friend-request-respond"; username: string; accept: boolean }
+  | { type: "friend-request-cancel"; username: string }
+  | { type: "friend-remove"; username: string }
+  | { type: "chat-history"; username: string; beforeId?: string }
+  | { type: "chat-send"; username: string; text: string; clientMessageId: string }
+  | { type: "chat-read"; username: string; throughId: string }
+  | { type: "create-friend-room"; username: string; format: "cc" | "silver-age"; deckId: string; cardPoolMode?: CardPoolMode }
+  | { type: "friend-game-invite-dismiss"; inviteId: string }
   /** classic-battles: hero; cc/silver-age: deckId of a saved deck */
   | { type: "create-room"; format: Format; hero?: HeroId; deckId?: string; private?: boolean; cardPoolMode?: CardPoolMode }
   /** Create a dedicated constructed room with the selected AI opponent. */
@@ -809,6 +859,12 @@ export type ClientMessage =
 export type ServerMessage =
   | { type: "authed"; username: string }
   | { type: "auth-failed" }
+  | { type: "social-snapshot"; snapshot: SocialSnapshot }
+  | { type: "friend-presence"; username: string; presence: FriendPresence }
+  | { type: "chat-history"; username: string; messages: ChatMessage[]; hasMore: boolean }
+  | { type: "chat-message"; message: ChatMessage }
+  | { type: "friend-game-invite"; invite: FriendGameInvite }
+  | { type: "friend-game-invite-dismissed"; inviteId: string }
   | { type: "room-created"; code: string; seat: number; token: string; version: number }
   | { type: "joined"; code: string; seat: number | null; token: string; spectator?: boolean; resumed?: true; version: number }
   | { type: "room-info"; room: RoomInvite }
@@ -845,4 +901,11 @@ export type ErrorCode =
   | "INVALID_MESSAGE"
   | "FORBIDDEN"
   | "CONFLICT"
+  | "USER_NOT_FOUND"
+  | "INVALID_FRIEND_REQUEST"
+  | "FRIEND_REQUEST_CONFLICT"
+  | "FRIEND_REQUIRED"
+  | "FRIEND_UNAVAILABLE"
+  | "MESSAGE_BOUNDS"
+  | "MESSAGE_RATE_LIMITED"
   | "INTERNAL_ERROR";

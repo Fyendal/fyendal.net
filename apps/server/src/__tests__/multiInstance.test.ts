@@ -89,6 +89,73 @@ describe("multi-instance gateways", () => {
     return client;
   }
 
+  async function authedWithToken(port: number, token: string): Promise<TestClient> {
+    const client = await connect(port);
+    clients.push(client);
+    client.send({ type: "auth", token });
+    await client.next((message) => message.type === "authed");
+    return client;
+  }
+
+  it("fans social state, chat, multi-tab presence, and ephemeral invites across gateways", async () => {
+    const alice = await authed((first.address() as AddressInfo).port, "SocialAlice");
+    expect(await register(db, "SocialBob", "password1")).toEqual({ ok: true });
+    const bobSession = await login(db, "SocialBob", "password1");
+    if (!bobSession.ok) throw new Error("login failed");
+    const bob = await authedWithToken((second.address() as AddressInfo).port, bobSession.token);
+    const bobOtherTab = await authedWithToken((first.address() as AddressInfo).port, bobSession.token);
+
+    alice.send({ type: "friend-request", username: "socialbob" });
+    await bob.next((message) => message.type === "social-snapshot"
+      && message.snapshot.requests.some((request) => request.username === "SocialAlice"));
+    bob.send({ type: "friend-request-respond", username: "SOCIALALICE", accept: true });
+    const aliceFriends = await alice.next((message) => message.type === "social-snapshot"
+      && message.snapshot.friends.some((friend) => friend.username === "SocialBob"));
+    expect(aliceFriends).toMatchObject({
+      type: "social-snapshot",
+      snapshot: { friends: [{ username: "SocialBob", presence: "online" }] },
+    });
+
+    alice.send({ type: "chat-send", username: "SocialBob", text: "cross-instance", clientMessageId: "social-message-1" });
+    const [bobMessage, otherTabMessage] = await Promise.all([
+      bob.next((message) => message.type === "chat-message" && message.message.text === "cross-instance"),
+      bobOtherTab.next((message) => message.type === "chat-message" && message.message.text === "cross-instance"),
+    ]);
+    expect(bobMessage).toMatchObject({ type: "chat-message", message: { senderUsername: "SocialAlice" } });
+    expect(otherTabMessage).toMatchObject({ type: "chat-message", message: { senderUsername: "SocialAlice" } });
+
+    const bobClosed = new Promise<void>((resolve) => bob.ws.once("close", () => resolve()));
+    bob.ws.close();
+    await bobClosed;
+    alice.send({ type: "social-sync" });
+    const stillOnline = await alice.next((message) => message.type === "social-snapshot"
+      && message.snapshot.friends.some((friend) => friend.username === "SocialBob" && friend.presence === "online"));
+    expect(stillOnline).toMatchObject({ type: "social-snapshot" });
+
+    alice.send({
+      type: "create-friend-room",
+      username: "SocialBob",
+      format: "cc",
+      deckId: "precon-asb",
+    });
+    const [created, invite] = await Promise.all([
+      alice.next((message) => message.type === "room-created"),
+      bobOtherTab.next((message) => message.type === "friend-game-invite"),
+    ]);
+    expect(invite).toMatchObject({
+      type: "friend-game-invite",
+      invite: { fromUsername: "SocialAlice", room: { format: "cc" } },
+    });
+    if (created.type !== "room-created" || invite.type !== "friend-game-invite") throw new Error("invite failed");
+    expect(invite.invite.room.code).toBe(created.code);
+
+    bobOtherTab.send({ type: "friend-game-invite-dismiss", inviteId: invite.invite.inviteId });
+    await expect(bobOtherTab.next((message) => message.type === "friend-game-invite-dismissed"
+      && message.inviteId === invite.invite.inviteId)).resolves.toMatchObject({
+        type: "friend-game-invite-dismissed",
+      });
+  });
+
   it("fans a room mutation out to the opponent's gateway", async () => {
     const a = await authed((first.address() as AddressInfo).port, "CrossRoomA");
     const b = await authed((second.address() as AddressInfo).port, "CrossRoomB");

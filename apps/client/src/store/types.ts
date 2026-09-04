@@ -2,7 +2,12 @@ import type {
   BotOpponent,
   BackgroundMatchmakingStatus,
   CardPoolMode,
+  ChatMessage,
+  ErrorCode,
   Format,
+  FriendGameInvite,
+  FriendRequestSummary,
+  FriendSummary,
   GameIntent,
   GameTransitionView,
   GameView,
@@ -94,6 +99,32 @@ export interface StoreState {
   bugReportNotifications: FixedBugReportNotification[];
   refreshBugReportNotifications: () => Promise<void>;
   dismissBugReportNotifications: () => Promise<void>;
+
+  friends: FriendSummary[];
+  friendRequests: FriendRequestSummary[];
+  friendGameInvites: FriendGameInvite[];
+  socialOpen: boolean;
+  socialError: ErrorCode | null;
+  activeChat: string | null;
+  chatMessages: Record<string, ChatMessage[]>;
+  chatHasMore: Record<string, boolean>;
+  friendInviteTarget: string | null;
+  setSocialOpen: (open: boolean) => void;
+  clearSocialError: () => void;
+  sendFriendRequest: (username: string) => void;
+  respondFriendRequest: (username: string, accept: boolean) => void;
+  cancelFriendRequest: (username: string) => void;
+  removeFriend: (username: string) => void;
+  openChat: (username: string) => void;
+  closeChat: () => void;
+  loadEarlierChat: (username: string) => void;
+  sendChatMessage: (username: string, text: string) => void;
+  markChatRead: (username: string) => void;
+  beginFriendInvite: (username: string) => void;
+  cancelFriendInvite: () => void;
+  createFriendRoom: (username: string, format: ConstructedFormat, deckId: string) => void;
+  dismissFriendGameInvite: (inviteId: string) => void;
+  acceptFriendGameInvite: (inviteId: string) => void;
 
   decks: DeckSummary[];
   decksLoading: boolean;

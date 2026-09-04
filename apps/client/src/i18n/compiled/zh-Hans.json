@@ -23343,5 +23343,275 @@
       "type": 0,
       "value": "音效音量"
     }
+  ],
+  "social.accept": [
+    {
+      "type": 0,
+      "value": "接受"
+    }
+  ],
+  "social.acceptFriend": [
+    {
+      "type": 0,
+      "value": "接受好友请求"
+    }
+  ],
+  "social.addFriend": [
+    {
+      "type": 0,
+      "value": "添加好友"
+    }
+  ],
+  "social.cancelRequest": [
+    {
+      "type": 0,
+      "value": "取消"
+    }
+  ],
+  "social.chat.empty": [
+    {
+      "type": 0,
+      "value": "还没有消息，打个招呼吧。"
+    }
+  ],
+  "social.chat.loadEarlier": [
+    {
+      "type": 0,
+      "value": "加载更早消息"
+    }
+  ],
+  "social.chat.placeholder": [
+    {
+      "type": 0,
+      "value": "输入消息"
+    }
+  ],
+  "social.chat.send": [
+    {
+      "type": 0,
+      "value": "发送"
+    }
+  ],
+  "social.chat.unreadFrom": [
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " 的 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 条未读消息"
+    }
+  ],
+  "social.decline": [
+    {
+      "type": 0,
+      "value": "拒绝"
+    }
+  ],
+  "social.empty": [
+    {
+      "type": 0,
+      "value": "输入用户名添加玩家，或在对局结束后添加对手。"
+    }
+  ],
+  "social.error.conflict": [
+    {
+      "type": 0,
+      "value": "该请求与当前好友状态不符。"
+    }
+  ],
+  "social.error.friendRequired": [
+    {
+      "type": 0,
+      "value": "只有好友之间可以进行此操作。"
+    }
+  ],
+  "social.error.messageBounds": [
+    {
+      "type": 0,
+      "value": "消息必须包含 1 到 1,000 个字符。"
+    }
+  ],
+  "social.error.rateLimited": [
+    {
+      "type": 0,
+      "value": "操作过于频繁，请稍后再试。"
+    }
+  ],
+  "social.error.self": [
+    {
+      "type": 0,
+      "value": "不能添加自己。"
+    }
+  ],
+  "social.error.unavailable": [
+    {
+      "type": 0,
+      "value": "该好友当前离线。"
+    }
+  ],
+  "social.error.userNotFound": [
+    {
+      "type": 0,
+      "value": "找不到该用户名。"
+    }
+  ],
+  "social.friendCount": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 位好友"
+    }
+  ],
+  "social.friends": [
+    {
+      "type": 0,
+      "value": "好友"
+    }
+  ],
+  "social.gameInvites": [
+    {
+      "type": 0,
+      "value": "对局邀请"
+    }
+  ],
+  "social.invite.action": [
+    {
+      "type": 0,
+      "value": "邀请对局"
+    }
+  ],
+  "social.invite.modalTitle": [
+    {
+      "type": 0,
+      "value": "邀请 "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    }
+  ],
+  "social.invite.noDeck": [
+    {
+      "type": 0,
+      "value": "请先为该赛制导入一副牌组。"
+    }
+  ],
+  "social.invite.send": [
+    {
+      "type": 0,
+      "value": "发送邀请"
+    }
+  ],
+  "social.invite.title": [
+    {
+      "type": 0,
+      "value": "邀请 "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " 对局"
+    }
+  ],
+  "social.message": [
+    {
+      "type": 0,
+      "value": "消息"
+    }
+  ],
+  "social.messageNamed": [
+    {
+      "type": 0,
+      "value": "给 "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " 发消息"
+    }
+  ],
+  "social.offline": [
+    {
+      "type": 0,
+      "value": "离线"
+    }
+  ],
+  "social.online": [
+    {
+      "type": 0,
+      "value": "在线"
+    }
+  ],
+  "social.pending": [
+    {
+      "type": 0,
+      "value": "等待中"
+    }
+  ],
+  "social.removeConfirm": [
+    {
+      "type": 0,
+      "value": "移除 "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " 并删除这段对话吗？"
+    }
+  ],
+  "social.removeNamed": [
+    {
+      "type": 0,
+      "value": "移除 "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    }
+  ],
+  "social.requestSent": [
+    {
+      "type": 0,
+      "value": "请求已发送"
+    }
+  ],
+  "social.requests.incoming": [
+    {
+      "type": 0,
+      "value": "好友请求"
+    }
+  ],
+  "social.requests.outgoing": [
+    {
+      "type": 0,
+      "value": "已发送请求"
+    }
+  ],
+  "social.username": [
+    {
+      "type": 0,
+      "value": "用户名"
+    }
   ]
 }
