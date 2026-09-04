@@ -117,6 +117,43 @@ describe("CRU — Mechanologist heroes and weapon", () => {
 });
 
 describe("CRU — Mechanologist attacks and Workshop", () => {
+  it("Viziertronic Model i does not trigger on Boost until activated", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["zero to sixty|1"],
+          deck: ["zipper hit|3", BLUE],
+          equipment: { head: "viziertronic model i|0" },
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("zero to sixty|1", { boost: true }).expectHandSize(0, 0);
+    expect(g.state.pendingDecision?.kind).toBe("defend");
+  });
+
+  it("Viziertronic Model i offers to replace the drawn card after activation", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["zero to sixty|1"],
+          deck: ["zipper hit|3", BLUE],
+          equipment: { head: "viziertronic model i|0" },
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.activate("viziertronic model i|0")
+      .expectNoEquipment(0, "head")
+      .play("zero to sixty|1", { boost: true })
+      .expectHandSize(0, 1);
+    expect(g.state.pendingDecision?.chooseHook).toBe("viz-top");
+  });
+
   it("High Speed Impact gives the next boosted attack this chain dominate", () => {
     const g = scenario({
       seats: [

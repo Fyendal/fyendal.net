@@ -363,7 +363,7 @@ export function noteCardPlayed(
     player.flags[`playedSubtypeCount:${s.toLowerCase()}`] =
       (Number(player.flags[`playedSubtypeCount:${s.toLowerCase()}`]) || 0) + 1;
   }
-  const effectiveTypes = new Set(cardTypesOf(state, card));
+  let effectiveTypes = new Set(cardTypesOf(state, card));
   for (const c of (d.classes ?? []).filter((cardClass) => effectiveTypes.has(cardClass.toLowerCase()))) {
     player.flags[`playedClass:${c.toLowerCase()}`] = true;
     player.flags[`playedClassCount:${c.toLowerCase()}`] =
@@ -475,6 +475,9 @@ export function noteCardPlayed(
     }
   }
   state.modifiers = state.modifiers.filter((m) => !consumedNextPlay.has(m.id));
+  // Type-removal effects only remove existing supertypes; types granted by
+  // another effect (such as Fealty making this Draconic) remain effective.
+  effectiveTypes = new Set(cardTypesOf(state, card));
   if (isAction) {
     for (const key of Object.keys(player.flags)) {
       if (key.startsWith("lastActionWasType:")) delete player.flags[key];

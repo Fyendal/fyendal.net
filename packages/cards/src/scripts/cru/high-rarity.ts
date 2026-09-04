@@ -193,6 +193,12 @@ const unifiedDecree: CardScript = {
 const viziertronic: CardScript = {
   activated: { cost: 0, isAttack: false, goAgain: true, destroySelfCost: true, onActivate(ctx) { ctx.addModifier({ scope: "until-end-of-turn" }); } },
   onBoosted(ctx) {
+    const activated = ctx.state.modifiers.some((modifier) =>
+      modifier.sourceInstanceId === ctx.self.instanceId &&
+      modifier.scope === "until-end-of-turn" &&
+      !modifier.consumed
+    );
+    if (!activated) return;
     ctx.drawCards(ctx.seat, 1);
     const hand = ctx.player(ctx.seat).hand;
     if (hand.length > 0) ctx.requestCardChoice(

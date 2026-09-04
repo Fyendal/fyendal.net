@@ -4,6 +4,26 @@ import type { CardScript } from "./scripts.js";
 import type { CardInstance, PlayerState } from "./state.js";
 import { currentLink } from "./zoneQueries.js";
 
+// Card data currently stores talent supertypes beside ordinary subtypes.
+// Keep this aligned with CR 2.11.6b so effects such as Erase Face can remove
+// printed talents without stripping true subtypes such as Attack or Aura. The
+// parameterized engine regression covers every entry added here.
+export const TALENT_SUPERTYPES = [
+  "chaos",
+  "draconic",
+  "earth",
+  "elemental",
+  "ice",
+  "light",
+  "lightning",
+  "mystic",
+  "revered",
+  "reviled",
+  "royal",
+  "shadow",
+] as const;
+const TALENT_SUPERTYPE_SET = new Set<string>(TALENT_SUPERTYPES);
+
 export function dataOf(state: GameStateInternal, cardId: string): CardData {
   const data = state.cardsRef[cardId];
   if (!data) throw new Error(`unknown card id: ${cardId}`);
@@ -172,8 +192,8 @@ export function cardHasName(
   return cardNamesOf(state, card).includes(name.trim().toLowerCase());
 }
 
-/** Whether an owned card currently loses its class and talent types. */
-export function ownedClassTalentTypesSuppressed(
+/** Whether an owned card currently loses its printed class and talent types. */
+function ownedClassTalentTypesSuppressed(
   state: GameStateInternal,
   card: CardInstance,
 ): boolean {
@@ -194,16 +214,18 @@ export function cardTypesOf(state: GameStateInternal, card: CardInstance): strin
     : (scriptOf(state, card.cardId, card)?.allZoneTypes ?? []);
   return [...new Set([
     ...(!suppressClassTalent ? (data.classes ?? []) : []),
-    ...(data.subtypes ?? []),
-    ...(!suppressClassTalent ? allZone : []),
-    ...(!suppressClassTalent ? (card.grantedTypes ?? []) : []),
+    ...(data.subtypes ?? []).filter(
+      (type) => !suppressClassTalent || !TALENT_SUPERTYPE_SET.has(type.toLowerCase()),
+    ),
+    ...allZone,
+    ...(card.grantedTypes ?? []),
     ...(card.temporaryAlly ? ["ally"] : []),
-    ...(!suppressClassTalent ? state.modifiers.flatMap((modifier) => {
+    ...state.modifiers.flatMap((modifier) => {
       const name = modifier.grantsTypeToName?.trim().toLowerCase();
       return name && modifier.grantsType && cardNamesOf(state, card).includes(name)
         ? [modifier.grantsType]
         : [];
-    }) : []),
+    }),
   ].map((type) => type.toLowerCase()))];
 }
 
