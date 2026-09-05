@@ -18,7 +18,7 @@
     "perf:load": "pnpm --filter @fyendal/server exec node --import tsx ../../scripts/perf/load.mts",
     "perf:test": "pnpm --filter @fyendal/server exec node --import tsx --test ../../scripts/perf/*.test.mts",
     "perf:typecheck": "pnpm --filter @fyendal/server exec tsc -p ../../scripts/perf/tsconfig.json",
-    "perf:load:500": "PERF_GAMES=500 PERF_SETUP_CONCURRENCY=16 PERF_MATCHMAKING_PAIRS=20 PERF_CORRECTNESS_GAMES=20 PERF_ACTION_THINK_SECONDS=10 PERF_PASS_THINK_SECONDS=1 PERF_FINISH_RATE=2 PERF_FINISH_DURATION_SECONDS=60 PERF_LONG_REPLAY_GAMES=2 PERF_LONG_REPLAY_FRAMES=550 PERF_REQUEST_TIMEOUT_MS=120000 pnpm perf:load",
+    "perf:load:500": "PERF_GAMES=500 PERF_SETUP_CONCURRENCY=16 PERF_MATCHMAKING_PAIRS=20 PERF_CORRECTNESS_GAMES=20 PERF_ACTION_THINK_SECONDS=10 PERF_PASS_THINK_SECONDS=1 PERF_FINISH_RATE=2 PERF_FINISH_DURATION_SECONDS=60 PERF_UNDO_CHURN_GAMES=2 PERF_UNDO_CHURN_COMMITS=550 PERF_REQUEST_TIMEOUT_MS=120000 pnpm perf:load",
     "perf:stats": "docker compose -f docker-compose.perf.yml stats --no-stream",
     "perf:logs": "docker compose -f docker-compose.perf.yml logs app-1 app-2 db db-proxy",
     "perf:down": "docker compose -f docker-compose.perf.yml down",

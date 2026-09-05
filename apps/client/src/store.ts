@@ -823,7 +823,7 @@ export const useStore = create<StoreState>((set, get) => {
         // keep recording frames even while watching a replay of this room
         const code = get().roomCode;
         const frames = code
-          ? replayRuntime.recordFrame(code, msg.view, msg.yourSeat, msg.transition)
+          ? replayRuntime.recordFrame(code, msg.version, msg.view, msg.yourSeat, msg.transition)
           : get().replayFrames;
         const commandState = acceptRoomCommandState(msg.version, msg);
         if (get().screen === "replay") {

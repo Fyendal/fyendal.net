@@ -192,6 +192,7 @@ function seatDml(queries: string[]): string[] {
 function replayDml(queries: string[]): string[] {
   return queries.filter((query) =>
     query.startsWith("INSERT INTO replay_frames") ||
+    query.startsWith("DELETE FROM replay_frames") ||
     query.startsWith("UPDATE replay_games")
   );
 }
@@ -958,7 +959,7 @@ describe("PgRoomStore storage", () => {
     expect(await rawSeats(code)).toEqual(afterIntent);
     expect(seatDml(queries)).toEqual([]);
     expect(replayDml(queries)).toHaveLength(1);
-    expect(replayDml(queries)[0]).toContain("SELECT active.id, $2::bigint");
+    expect(replayDml(queries)[0]).toContain("DELETE FROM replay_frames");
   });
 
   it("does not rewrite seats when claiming an idle victory", async () => {

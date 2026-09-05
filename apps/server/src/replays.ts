@@ -169,6 +169,26 @@ export async function appendReplayView(
   return null;
 }
 
+/** Remove replay frames belonging to actions invalidated by an undo. The
+ * restored state is already represented by the frame immediately before
+ * `fromRoomVersion`; Undo itself is deliberately not another replay frame. */
+export async function pruneReplayFramesFrom(
+  db: Queryable,
+  roomCode: string,
+  fromRoomVersion: number,
+): Promise<number> {
+  const deleted = await db.query(
+    `DELETE FROM replay_frames
+     WHERE replay_id = (
+       SELECT id FROM replay_games
+       WHERE room_code = $1 AND status = 'recording'
+       ORDER BY created_at DESC LIMIT 1
+     ) AND room_version >= $2`,
+    [roomCode, fromRoomVersion],
+  );
+  return deleted.rowCount ?? 0;
+}
+
 /** Finish the latest in-progress room replay without declaring a winner.
  * Used when a player explicitly ends a bot practice game. The most recently
  * committed frame is already authoritative, so finalization only needs to

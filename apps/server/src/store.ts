@@ -55,6 +55,7 @@ import { CorruptRoomError, decodePersistedState, encodePersistedState } from "./
 import {
   appendReplayView,
   endReplayForRoom,
+  pruneReplayFramesFrom,
   startReplay,
 } from "./replays.js";
 import { hashToken } from "./tokenHash.js";
@@ -188,6 +189,7 @@ export interface RoomRow {
 export interface StoredRoomTransition {
   fromVersion: number;
   kind: "forward" | "replace";
+  restoreVersion?: number;
   events: EngineTransitionMove[];
 }
 
@@ -418,11 +420,15 @@ function decodeStoredTransition(
 ): StoredRoomTransition | null {
   if (value === null || value === undefined) return null;
   const transition = dbObject(value, code, path);
-  if (Object.keys(transition).some((key) => !["fromVersion", "kind", "events"].includes(key))) {
+  if (Object.keys(transition).some((key) => !["fromVersion", "kind", "restoreVersion", "events"].includes(key))) {
     throw new CorruptRoomError(code, path, "unknown transition field");
   }
   const fromVersion = dbSafeInteger(transition.fromVersion, code, `${path}.fromVersion`);
+  const restoreVersion = transition.restoreVersion === undefined
+    ? undefined
+    : dbSafeInteger(transition.restoreVersion, code, `${path}.restoreVersion`);
   if (fromVersion < 0 || !(transition.kind === "forward" || transition.kind === "replace")
+    || (restoreVersion !== undefined && (restoreVersion < 0 || transition.kind !== "replace"))
     || !Array.isArray(transition.events) || transition.events.length > 512) {
     throw new CorruptRoomError(code, path, "invalid transition envelope");
   }
@@ -457,7 +463,12 @@ function decodeStoredTransition(
   if (transition.kind === "replace" && events.length > 0) {
     throw new CorruptRoomError(code, path, "replace transition must not contain events");
   }
-  return { fromVersion, kind: transition.kind, events };
+  return {
+    fromVersion,
+    kind: transition.kind,
+    ...(restoreVersion === undefined ? {} : { restoreVersion }),
+    events,
+  };
 }
 
 function historyMetadataFromState(state: GameState): Omit<HistoryMetadata, "version"> {
@@ -3537,21 +3548,21 @@ export class PgRoomStore {
         // opted into auto-pass after the snapshot was written; pass it out
         // in this commit rather than stranding the seat until a resend.
         this.applyServerShortcuts(room);
-        room.lastTransition = { fromVersion: room.version, kind: "replace", events: [] };
+        const restoreVersion = selected.version - 1;
+        if (restoreVersion < 0) throw new CorruptRoomError(upper, "selectedHistory.version", "expected a positive version");
+        room.lastTransition = {
+          fromVersion: room.version,
+          kind: "replace",
+          restoreVersion,
+          events: [],
+        };
         updateGc(room);
         if (!(await this.save(room, db))) throw VERSION_CONFLICT;
         await db.query(
           "DELETE FROM room_history WHERE room_code = $1 AND version >= $2",
           [upper, selected.version],
         );
-        const replayFinalizationId = await appendReplayView(
-          db,
-          upper,
-          room.version + 1,
-          room.state,
-          room.state.winner,
-          room.lastTransition,
-        );
+        await pruneReplayFramesFrom(db, upper, selected.version);
         await appendClusterEvent(db, {
           type: "room",
           event: { code: upper, kind: "sync", version: room.version + 1 },
@@ -3567,7 +3578,6 @@ export class PgRoomStore {
         return {
           ok: true as const,
           version: room.version + 1,
-          ...(replayFinalizationId ? { replayFinalizationId } : {}),
         };
       }),
       () => ({ ok: false as const, error: "room is busy, try again" }),
@@ -3944,6 +3954,9 @@ export function stateMessage(room: RoomRow, seat: number | null): ServerMessage 
           transition: {
             fromVersion: room.lastTransition.fromVersion,
             kind: room.lastTransition.kind,
+            ...(room.lastTransition.restoreVersion === undefined
+              ? {}
+              : { restoreVersion: room.lastTransition.restoreVersion }),
             events: projectTransitionEvents(room.lastTransition.events, seat),
           },
         }

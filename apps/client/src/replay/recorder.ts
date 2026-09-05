@@ -19,21 +19,31 @@ export interface EnumerableStorageLike extends StorageLike {
 }
 
 interface LocalReplayEnvelope {
-  storageVersion: 1;
+  storageVersion: 2;
+  roomVersions: number[];
   replay: ReplayFile;
 }
 
-function decodeLocalReplay(raw: string): ReplayFile | null {
+function decodeLocalReplay(raw: string): { replay: ReplayFile; roomVersions: number[] } | null {
   try {
     const value: unknown = JSON.parse(raw);
     if (!value || typeof value !== "object" || Array.isArray(value)) return null;
     const envelope = value as Record<string, unknown>;
     if (
-      Object.keys(envelope).length !== 2 ||
-      envelope.storageVersion !== 1 ||
+      Object.keys(envelope).length !== 3 ||
+      envelope.storageVersion !== 2 ||
+      !Array.isArray(envelope.roomVersions) ||
       !("replay" in envelope)
     ) return null;
-    return decodeReplayFile(envelope.replay);
+    const replay = decodeReplayFile(envelope.replay);
+    if (!replay) return null;
+    const frameCount = replayFileViews(replay).length;
+    const roomVersions = envelope.roomVersions;
+    if (roomVersions.length !== frameCount || !roomVersions.every((version, index) =>
+      typeof version === "number" && Number.isSafeInteger(version) && version >= 0
+      && (index === 0 || version > Number(roomVersions[index - 1]))
+    )) return null;
+    return { replay, roomVersions: roomVersions as number[] };
   } catch {
     return null;
   }
@@ -78,6 +88,7 @@ export const PERSIST_EVERY = 25;
 export class ReplayRecorder {
   private views: GameView[] = [];
   private transitions: Array<Omit<GameTransitionView, "fromVersion"> | null> = [];
+  private roomVersions: number[] = [];
   private seat: number | null = null;
   private sincePersist = 0;
   private storageFailed = false;
@@ -91,9 +102,10 @@ export class ReplayRecorder {
       if (raw) {
         const saved = decodeLocalReplay(raw);
         if (saved) {
-          this.views = replayFileViews(saved);
-          this.transitions = replayFileTransitions(saved);
-          this.seat = saved.seat;
+          this.views = replayFileViews(saved.replay);
+          this.transitions = replayFileTransitions(saved.replay);
+          this.roomVersions = saved.roomVersions;
+          this.seat = saved.replay.seat;
         } else {
           storage.removeItem(replayStorageKey(code));
         }
@@ -112,16 +124,32 @@ export class ReplayRecorder {
   }
 
   /**
-   * Append a frame. Reconnects re-send the current state, so a frame identical
-   * to the previous one is skipped. Returns true when a frame was added.
+   * Append a committed frame. Room versions make reconnect deduplication O(1).
+   * A versioned restore truncates the invalidated tail and aliases the retained
+   * baseline to the new monotonic version instead of recording an undo frame.
    */
-  record(view: GameView, seat: number | null, transition?: GameTransitionView): boolean {
+  record(
+    roomVersion: number,
+    view: GameView,
+    seat: number | null,
+    transition?: GameTransitionView,
+  ): boolean {
     this.seat = seat;
-    const last = this.views[this.views.length - 1];
-    if (last && JSON.stringify(last) === JSON.stringify(view)) return false;
+    if (transition?.kind === "replace" && transition.restoreVersion !== undefined) {
+      return this.restore(roomVersion, transition.restoreVersion, view);
+    }
+    const lastVersion = this.roomVersions.at(-1);
+    if (lastVersion !== undefined && roomVersion <= lastVersion) return false;
     this.views.push(view);
+    this.roomVersions.push(roomVersion);
     this.transitions.push(transition
-      ? { kind: transition.kind, events: transition.events }
+      ? {
+          kind: transition.kind,
+          ...(transition.restoreVersion === undefined
+            ? {}
+            : { restoreVersion: transition.restoreVersion }),
+          events: transition.events,
+        }
       : null);
     if (++this.sincePersist >= PERSIST_EVERY) this.persist();
     return true;
@@ -141,6 +169,7 @@ export class ReplayRecorder {
   replace(file: ReplayFile): void {
     this.views = replayFileViews(file);
     this.transitions = replayFileTransitions(file);
+    this.roomVersions = this.views.map((_, index) => index);
     this.seat = file.seat;
     this.sincePersist = 0;
     this.storageFailed = false;
@@ -172,6 +201,40 @@ export class ReplayRecorder {
     }
     this.views = [];
     this.transitions = [];
+    this.roomVersions = [];
+  }
+
+  private restore(roomVersion: number, restoreVersion: number, view: GameView): boolean {
+    let retainedIndex = -1;
+    for (let index = this.roomVersions.length - 1; index >= 0; index--) {
+      if (this.roomVersions[index]! <= restoreVersion) {
+        retainedIndex = index;
+        break;
+      }
+    }
+    this.views.length = retainedIndex + 1;
+    this.transitions.length = retainedIndex + 1;
+    this.roomVersions.length = retainedIndex + 1;
+    if (retainedIndex >= 0) {
+      // The retained projection now represents the restored content at the
+      // new monotonic room version for any later action/undo pair.
+      this.roomVersions[retainedIndex] = roomVersion;
+    } else {
+      // A late join or cleared checkpoint may not have the historical frame.
+      // Keep the authoritative replacement as a safe local replay baseline.
+      this.views.push(view);
+      this.transitions.push(null);
+      this.roomVersions.push(roomVersion);
+    }
+    this.sincePersist = 0;
+    try {
+      // A stale checkpoint is worse than temporarily having no reload
+      // fallback. Future frames will establish a fresh bounded checkpoint.
+      this.storage.removeItem(replayStorageKey(this.code));
+    } catch {
+      // Storage access is optional; the in-memory timeline remains correct.
+    }
+    return false;
   }
 
   private persist(): void {
@@ -179,7 +242,8 @@ export class ReplayRecorder {
     if (this.storageFailed) return;
     try {
       const envelope: LocalReplayEnvelope = {
-        storageVersion: 1,
+        storageVersion: 2,
+        roomVersions: this.roomVersions,
         replay: this.toFile(),
       };
       this.storage.setItem(replayStorageKey(this.code), JSON.stringify(envelope));
