@@ -95,6 +95,7 @@ export interface PlayerHandInteraction {
   choosingArsenal: boolean;
   handPick: ReadonlyMap<number, string> | null;
   onCardClick: (card: CardView) => void;
+  onActivate: (instanceId: number) => void;
   onSelect: (selection: Sel) => void;
 }
 
@@ -139,6 +140,13 @@ export function PlayerHand({
           .find((candidate) => candidate.instanceId === instanceId);
         return card ? [{ card, zone }] : [];
       });
+  const activatableZoneCards = spectating
+    ? []
+    : [...player.graveyard, ...player.banish].filter((card) =>
+      !interaction.optimisticallyHiddenIds.has(card.instanceId) &&
+      interaction.legalState.activatable.has(card.instanceId) &&
+      !interaction.legalState.playableZones.has(card.instanceId)
+    );
   const handRef = useRef<HTMLDivElement>(null);
   const [scrollAvailability, setScrollAvailability] = useState<HandScrollAvailability>({
     left: false,
@@ -169,6 +177,7 @@ export function PlayerHand({
       window.removeEventListener("resize", updateScrollAvailability);
     };
   }, [
+    activatableZoneCards.length,
     player.handCount,
     playableZoneCards.length,
     updateScrollAvailability,
@@ -280,7 +289,19 @@ export function PlayerHand({
               highlighted
             />
         ))}
-        {!spectating && visibleCards.length === 0 && playableZoneCards.length === 0
+        {activatableZoneCards.map((card) => (
+          <CardFace
+            key={`activate-${card.instanceId}`}
+            card={card}
+            ghost
+            onClick={() => interaction.onActivate(card.instanceId)}
+            selected={interaction.selection.kind === "activate" &&
+              interaction.selection.sourceInstanceId === card.instanceId}
+            highlighted
+          />
+        ))}
+        {!spectating && visibleCards.length === 0 && playableZoneCards.length === 0 &&
+          activatableZoneCards.length === 0
           ? <span className="muted">{intl.formatMessage({ id: "game.hand.empty" })}</span>
           : null}
       </div>

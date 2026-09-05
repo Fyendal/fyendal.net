@@ -88,6 +88,33 @@ export function SocialDock() {
     return () => document.removeEventListener("pointerdown", closeOnOutsidePointer, true);
   }, [open, setOpen]);
 
+  useEffect(() => {
+    const dock = dockRef.current;
+    if (screen !== "prep" || !dock) return;
+
+    const readyFloat = document.querySelector<HTMLElement>(".prep-ready-float");
+    if (!readyFloat) return;
+
+    const updateOffset = () => {
+      const gap = 12;
+      const readyTop = readyFloat.getBoundingClientRect().top;
+      dock.style.setProperty(
+        "--prep-ready-float-offset",
+        `${Math.max(gap, window.innerHeight - readyTop + gap)}px`,
+      );
+    };
+    updateOffset();
+
+    const observer = new ResizeObserver(updateOffset);
+    observer.observe(readyFloat);
+    window.addEventListener("resize", updateOffset);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateOffset);
+      dock.style.removeProperty("--prep-ready-float-offset");
+    };
+  }, [screen]);
+
   if (!authUser) return null;
 
   const submitRequest = (event: React.FormEvent) => {

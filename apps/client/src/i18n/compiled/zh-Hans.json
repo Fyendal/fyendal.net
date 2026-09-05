@@ -9007,6 +9007,24 @@
       "value": "搜寻一张 Inner Chi"
     }
   ],
+  "card.mst.justanick.mode": [
+    {
+      "type": 0,
+      "value": "Just a Nick：选择一项或两项"
+    }
+  ],
+  "card.mst.justanick.option.banish": [
+    {
+      "type": 0,
+      "value": "该攻击获得“当此攻击命中英雄时，放逐其牌库顶的一张牌”"
+    }
+  ],
+  "card.mst.justanick.option.power": [
+    {
+      "type": 0,
+      "value": "该攻击行动牌的攻击力 +5"
+    }
+  ],
   "card.mst.matchingcolor.card.banish": [
     {
       "type": 0,
@@ -11679,6 +11697,12 @@
     {
       "type": 0,
       "value": "生成 Vigor 衍生物"
+    }
+  ],
+  "card.sup.outside.interference.choose": [
+    {
+      "type": 0,
+      "value": "Outside Interference：从 inventory 展示一张 Reviled 攻击行动牌？"
     }
   ],
   "card.sup.pay.up.to": [

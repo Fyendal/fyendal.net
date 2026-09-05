@@ -574,9 +574,12 @@ export function GameBoard() {
       if (id === me.heroInstanceId) return me.heroCardId;
       return [
         ...me.hand,
+        ...me.arsenal,
         ...me.weapons,
         ...Object.values(me.equipment),
         ...me.board,
+        ...me.graveyard,
+        ...me.banish,
         ...view.chain.flatMap((link) => [
           link.attackingCard,
           ...link.defendingCards,
@@ -989,6 +992,7 @@ export function GameBoard() {
             choosingArsenal,
             handPick,
             onCardClick: onHandClick,
+            onActivate: (instanceId) => clickActivate(instanceId)(),
             onSelect: setSel,
           }}
         />

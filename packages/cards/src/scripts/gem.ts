@@ -14,8 +14,16 @@ function specializedRunechant(
   return {
     runechantToken: true,
     onUsurped,
-    onDestroyed(ctx) { ctx.createToken(RUNECHANT); },
     triggers: [
+      {
+        event: "card-left-arena",
+        sourceZone: "any",
+        label: "Create a Runechant",
+        labelMessage: { id: "card.trigger.common.runechant.create" },
+        condition: (ctx, left, event) =>
+          left?.instanceId === ctx.self.instanceId && event?.to === "graveyard",
+        effect(ctx) { ctx.createToken(RUNECHANT); },
+      },
       {
         event: "begin-action-phase",
         whose: "subject",

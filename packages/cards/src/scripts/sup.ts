@@ -749,7 +749,36 @@ Object.assign(sup, {
   "tame the beastly behavior|1": { modifyAttack: (ctx: ScriptCtx) => heroHas(ctx, opponentSeat(ctx), "reviled") ? 1 : 0, canTriggerOnHit(ctx: ScriptCtx) { return ctx.link?.targetAllyId === undefined && heroHas(ctx, opponentSeat(ctx), "reviled"); }, onHit(ctx: ScriptCtx) { const card = ctx.player(opponentSeat(ctx)).arsenal[0]; if (card) ctx.putOnDeckBottom(card.instanceId); } },
   "renounce violence|3": convertTokens("Might", TOUGHNESS),
   "kayo, underhanded cheat|0": sup["kayo, strong-arm|0"]!,
-  "outside interference|3": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", fromHand: true, onActivate(ctx: ScriptCtx) { ctx.setFlag("player", "outsideInterference", true); } } },
+  "outside interference|3": {
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      fromHand: true,
+      onActivate(ctx: ScriptCtx) {
+        const attacks = (ctx.player(ctx.seat).inventory ?? []).filter((card) =>
+          ctx.hasCardType(card, "action") && hasTag(ctx, card, "attack") && hasTag(ctx, card, "reviled")
+        );
+        if (attacks.length) {
+          ctx.requestCardChoice(
+            "outside-interference",
+            decisionPrompt(
+              "Outside Interference: reveal a Reviled attack action card from inventory?",
+              "card.sup.outside.interference.choose",
+              { optionMessages: commonOptionMessages("pass") },
+            ),
+            ["pass", ...attacks.map((card) => card.instanceId)],
+          );
+        }
+      },
+    },
+    onChoose(ctx: ScriptCtx, hook: string, option: string) {
+      if (hook !== "outside-interference" || option === "pass") return;
+      const instanceId = Number(option);
+      if (ctx.revealCards([instanceId])) ctx.moveInventoryToHand(instanceId);
+    },
+  },
   "big bully|1": {
     onAttackDeclared(ctx: ScriptCtx) {
       if (ctx.link?.targetAllyId === undefined && ctx.compareLife(ctx.seat, opponentSeat(ctx)) > 0) {

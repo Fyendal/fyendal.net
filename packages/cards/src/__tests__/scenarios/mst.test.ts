@@ -154,6 +154,31 @@ describe("MST — Assassin", () => {
       .expectZoneSize(1, "banish", 2);
   });
 
+  it("Just a Nick lets Unmake the Underlings choose both modes and banish on hit", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["unmake the underlings|3", "just a nick|1"] },
+        { hero: "dorinthea", deck: ["wounding blow|1"] },
+      ],
+    });
+
+    g.play("unmake the underlings|3")
+      .blockWith()
+      .react("just a nick|1");
+
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "just-a-nick-mode",
+      options: ["power", "banish", "both"],
+    });
+
+    g.chooseOption("both")
+      .expectFinalAttack(6)
+      .settle()
+      .expectLife(1, 14)
+      .expectInZone(1, "wounding blow|1", "banish")
+      .expectZoneSize(1, "deck", 0);
+  });
+
   it("Nuu may play an opponent's banished blue card for free", () => {
     const g = scenario({
       seats: [

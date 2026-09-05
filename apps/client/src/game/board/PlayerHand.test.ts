@@ -115,6 +115,7 @@ describe("hand motion anchors", () => {
         choosingArsenal: false,
         handPick: null,
         onCardClick: () => undefined,
+        onActivate: () => undefined,
         onSelect: () => undefined,
       },
     })));
@@ -189,6 +190,7 @@ describe("hand motion anchors", () => {
         choosingArsenal: false,
         handPick: null,
         onCardClick: () => undefined,
+        onActivate: () => undefined,
         onSelect: () => undefined,
       },
     })));
@@ -197,5 +199,94 @@ describe("hand motion anchors", () => {
     expect(html).toContain('class="card card-hand card-back ');
     expect(html).toContain('data-motion-card="0:hand:opaque"');
     expect(html).toContain('data-motion-card="0:hand:opaque:1"');
+  });
+
+  it("surfaces an activatable graveyard card as a clickable ghost", () => {
+    const gravenCall = {
+      instanceId: 245,
+      cardId: "HVY245",
+      owner: 0,
+      activatedAbilityLabels: ["Attack", "Equip from graveyard"],
+    };
+    const player: PlayerView = {
+      seat: 0,
+      heroCardId: "HERO",
+      heroInstanceId: 100,
+      heroName: "Hero",
+      life: 20,
+      actionPoints: 1,
+      resources: 0,
+      hand: [],
+      handCount: 0,
+      deckCount: 0,
+      arsenal: [],
+      arsenalCount: 0,
+      pitch: [],
+      pitchCount: 0,
+      graveyard: [gravenCall],
+      banish: [],
+      soul: [],
+      equipment: {},
+      weapons: [],
+      board: [],
+    };
+    const opponent = { ...player, seat: 1, graveyard: [] } as PlayerView;
+    const view: GameView = {
+      gameId: "graveyard-activation",
+      turn: 9,
+      phase: "action",
+      activePlayer: 0,
+      priorityPlayer: 0,
+      players: [player, opponent],
+      chain: [],
+      stack: [],
+      ongoing: [],
+      pendingDecision: null,
+      winner: null,
+      log: [],
+    };
+    const html = renderToStaticMarkup(createElement(TestI18nProvider, null, createElement(PlayerHand, {
+      view,
+      player,
+      viewerSeat: 0,
+      spectating: false,
+      replaying: false,
+      interaction: {
+        legalState: {
+          playableHand: new Set<number>(),
+          playableArsenal: new Set<number>(),
+          playableZones: new Map(),
+          activatable: new Set([gravenCall.instanceId]),
+          stageableDefenders: new Set<number>(),
+          canPass: true,
+          canCloseChain: false,
+        },
+        legalIntents: [{
+          kind: "activate-ability",
+          sourceInstanceId: gravenCall.instanceId,
+          abilityIndex: 1,
+          pitchInstanceIds: [],
+          deferActivationPresentation: true,
+        }],
+        selection: { kind: "none" },
+        preStackSelectedInstanceId: null,
+        pitchSelection: [],
+        selectedPaymentVariants: [],
+        stagedIds: new Set<number>(),
+        optimisticallyHiddenIds: new Set<number>(),
+        defending: false,
+        choosingArsenal: false,
+        handPick: null,
+        onCardClick: () => undefined,
+        onActivate: () => undefined,
+        onSelect: () => undefined,
+      },
+    })));
+
+    expect(html).toContain('data-cardid="HVY245"');
+    expect(html).toContain("card-ghost");
+    expect(html).toContain("card-highlight");
+    expect(html).toContain("card-clickable");
+    expect(html).not.toContain("no cards in hand");
   });
 });
