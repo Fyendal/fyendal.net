@@ -27,6 +27,7 @@ export function SocialDock() {
     friends,
     requests,
     invites,
+    incomingChatToast,
     socialError,
     setOpen,
     clearSocialError,
@@ -35,6 +36,7 @@ export function SocialDock() {
     cancelRequest,
     removeFriend,
     openChat,
+    dismissIncomingChatToast,
     beginInvite,
     dismissInvite,
     acceptInvite,
@@ -46,6 +48,7 @@ export function SocialDock() {
     friends: state.friends,
     requests: state.friendRequests,
     invites: state.friendGameInvites,
+    incomingChatToast: state.incomingChatToast,
     socialError: state.socialError,
     setOpen: state.setSocialOpen,
     clearSocialError: state.clearSocialError,
@@ -54,6 +57,7 @@ export function SocialDock() {
     cancelRequest: state.cancelFriendRequest,
     removeFriend: state.removeFriend,
     openChat: state.openChat,
+    dismissIncomingChatToast: state.dismissIncomingChatToast,
     beginInvite: state.beginFriendInvite,
     dismissInvite: state.dismissFriendGameInvite,
     acceptInvite: state.acceptFriendGameInvite,
@@ -65,10 +69,15 @@ export function SocialDock() {
     b.unreadCount - a.unreadCount
       || Number(b.presence === "online") - Number(a.presence === "online")
       || a.username.localeCompare(b.username)), [friends]);
-  const unreadFriends = sortedFriends.filter((friend) => friend.unreadCount > 0);
   const notificationCount = friends.reduce((total, friend) => total + friend.unreadCount, 0)
     + incoming.length + invites.length;
   const canInviteFriends = screen === "lobby" && roomCode === null;
+
+  useEffect(() => {
+    if (!incomingChatToast) return;
+    const timeout = window.setTimeout(dismissIncomingChatToast, 6_000);
+    return () => window.clearTimeout(timeout);
+  }, [dismissIncomingChatToast, incomingChatToast]);
 
   useEffect(() => {
     if (!open) return;
@@ -249,36 +258,42 @@ export function SocialDock() {
             </div>
           </aside>
         ) : null}
+        {!open && incomingChatToast ? (
+          <div className="social-message-toast" role="status" aria-live="polite">
+            <button
+              type="button"
+              aria-label={intl.formatMessage(
+                { id: "social.chat.newMessageFrom" },
+                { username: incomingChatToast.friendUsername, message: incomingChatToast.text },
+              )}
+              onClick={() => {
+                dismissIncomingChatToast();
+                openChat(incomingChatToast.friendUsername);
+              }}
+            >
+              <span className="social-message-toast-avatar" aria-hidden="true">
+                {incomingChatToast.friendUsername.charAt(0).toUpperCase()}
+              </span>
+              <span className="social-message-toast-copy">
+                <strong>{incomingChatToast.friendUsername}</strong>
+                <span>{incomingChatToast.text}</span>
+              </span>
+            </button>
+          </div>
+        ) : null}
         <button
           type="button"
           className="social-bubble"
           aria-label={intl.formatMessage({ id: "social.friends" })}
           aria-expanded={open}
-          onClick={() => setOpen(!open)}
+          onClick={() => {
+            if (!open) dismissIncomingChatToast();
+            setOpen(!open);
+          }}
         >
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3.5 20v-2a5.5 5.5 0 0 1 11 0v2M14 15a4.5 4.5 0 0 1 6.5 4v1"/></svg>
           {notificationCount > 0 ? <span>{notificationCount > 99 ? "99+" : notificationCount}</span> : null}
         </button>
-        {!open && unreadFriends.length > 0 ? (
-          <div className="social-quick-chats">
-            {unreadFriends.map((friend) => (
-              <button
-                type="button"
-                className="social-quick-chat"
-                key={friend.username}
-                aria-label={intl.formatMessage(
-                  { id: "social.chat.unreadFrom" },
-                  { username: friend.username, count: friend.unreadCount },
-                )}
-                onClick={() => openChat(friend.username)}
-              >
-                <span className="social-quick-avatar" aria-hidden="true">{friend.username.charAt(0).toUpperCase()}</span>
-                <span className="social-quick-name">{friend.username}</span>
-                <span className="social-row-badge">{formatUnreadCount(friend.unreadCount)}</span>
-              </button>
-            ))}
-          </div>
-        ) : null}
       </div>
       <ChatModal />
       <FriendRoomModal />

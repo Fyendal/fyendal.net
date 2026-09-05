@@ -1138,8 +1138,7 @@ export const iar: Record<string, CardScript> = {
   "violent gusto|1": violentGusto(),
 
   "become the shadow lord|3": {
-    requiredHandCardsForAdditionalCost: 1,
-    additionalCost(ctx) {
+    onPlay(ctx) {
       const hand = ctx.player(ctx.seat).hand;
       if (hand.length > 0) {
         ctx.requestCardChoice(

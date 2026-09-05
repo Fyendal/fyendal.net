@@ -106,6 +106,7 @@ export interface StoreState {
   socialOpen: boolean;
   socialError: ErrorCode | null;
   activeChat: string | null;
+  incomingChatToast: ChatMessage | null;
   chatMessages: Record<string, ChatMessage[]>;
   chatHasMore: Record<string, boolean>;
   friendInviteTarget: string | null;
@@ -117,6 +118,7 @@ export interface StoreState {
   removeFriend: (username: string) => void;
   openChat: (username: string) => void;
   closeChat: () => void;
+  dismissIncomingChatToast: () => void;
   loadEarlierChat: (username: string) => void;
   sendChatMessage: (username: string, text: string) => void;
   markChatRead: (username: string) => void;

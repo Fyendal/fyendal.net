@@ -24558,6 +24558,24 @@
       "value": "Load earlier"
     }
   ],
+  "social.chat.newMessageFrom": [
+    {
+      "type": 0,
+      "value": "New message from "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "message"
+    }
+  ],
   "social.chat.placeholder": [
     {
       "type": 0,
@@ -24568,46 +24586,6 @@
     {
       "type": 0,
       "value": "Send"
-    }
-  ],
-  "social.chat.unreadFrom": [
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "one": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " unread message from "
-            },
-            {
-              "type": 1,
-              "value": "username"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " unread messages from "
-            },
-            {
-              "type": 1,
-              "value": "username"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
     }
   ],
   "social.decline": [

@@ -23424,6 +23424,20 @@
       "value": "加载更早消息"
     }
   ],
+  "social.chat.newMessageFrom": [
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " 发来新消息："
+    },
+    {
+      "type": 1,
+      "value": "message"
+    }
+  ],
   "social.chat.placeholder": [
     {
       "type": 0,
@@ -23434,24 +23448,6 @@
     {
       "type": 0,
       "value": "发送"
-    }
-  ],
-  "social.chat.unreadFrom": [
-    {
-      "type": 1,
-      "value": "username"
-    },
-    {
-      "type": 0,
-      "value": " 的 "
-    },
-    {
-      "type": 1,
-      "value": "count"
-    },
-    {
-      "type": 0,
-      "value": " 条未读消息"
     }
   ],
   "social.decline": [

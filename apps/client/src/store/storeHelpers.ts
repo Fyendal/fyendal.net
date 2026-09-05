@@ -54,6 +54,7 @@ export function initialStoreProjection(
     socialOpen: false,
     socialError: null,
     activeChat: null,
+    incomingChatToast: null,
     chatMessages: {},
     chatHasMore: {},
     friendInviteTarget: null,

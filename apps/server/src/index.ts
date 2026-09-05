@@ -99,6 +99,7 @@ interface ServerDeps {
 const wssByServer = new WeakMap<http.Server, WebSocketServer>();
 const replayFinalizerByServer = new WeakMap<http.Server, ReplayFinalizer>();
 const clusterPublisherByServer = new WeakMap<http.Server, (event: Parameters<RoomBroadcaster<ClientCtx>["afterCommit"]>[0]) => Promise<void>>();
+const disconnectTasksByServer = new WeakMap<http.Server, Set<Promise<void>>>();
 
 export function createGameServer(port: number, deps: ServerDeps): http.Server {
   const rooms = deps.rooms;
@@ -186,6 +187,16 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
     onUserSessionsRevoked: () => clusterConsumer?.nudge(),
     onRoomsDeleted: () => clusterConsumer?.nudge(),
   });
+  const disconnectTasks = new Set<Promise<void>>();
+  disconnectTasksByServer.set(server, disconnectTasks);
+  const trackDisconnectTask = (task: Promise<unknown>, failureMessage: string): void => {
+    let tracked!: Promise<void>;
+    tracked = task
+      .then(() => undefined)
+      .catch((error: Error) => consoleError(failureMessage, error))
+      .finally(() => disconnectTasks.delete(tracked));
+    disconnectTasks.add(tracked);
+  };
   const wss = new WebSocketServer({
     server,
     maxPayload: WS_MAX_PAYLOAD,
@@ -1385,25 +1396,32 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
       connections.detach(ctx);
       allClients.delete(ctx);
       lobbyClients.delete(ctx);
-      void removeSocialPresence(deps.db, ctx.socialPresenceLeaseId)
-        .then((userId) => userId ? publishClusterEvent({ type: "social-presence", userId }) : undefined)
-        .catch((error: Error) => consoleError("social presence cleanup failed", error));
+      trackDisconnectTask(
+        removeSocialPresence(deps.db, ctx.socialPresenceLeaseId)
+          .then((userId) => userId ? publishClusterEvent({ type: "social-presence", userId }) : undefined),
+        "social presence cleanup failed",
+      );
       if (queuedUserId != null && queuedUsers.get(queuedUserId) === ctx) {
         queuedUsers.delete(queuedUserId);
-        void rooms.leaveForegroundMatchmakingOnDisconnect(queuedUserId)
-          .then(() => clusterConsumer?.nudge())
-          .catch((error) => consoleError("matchmaking disconnect cleanup failed", error));
+        trackDisconnectTask(
+          rooms.leaveForegroundMatchmakingOnDisconnect(queuedUserId)
+            .then(() => clusterConsumer?.nudge()),
+          "matchmaking disconnect cleanup failed",
+        );
       }
       if (!code || !token || !presenceLeaseId) return;
-      void (async () => {
-        const found = await rooms.markAbsent(code, token, presenceLeaseId);
-        if (!found) return;
-        await publishRoomEvent(
-          found.kind === "player"
-            ? { code, kind: "presence", seat: found.seat, connected: false, version: found.version }
-            : { code, kind: "spectators", version: found.version },
-        );
-      })().catch((error: Error) => consoleError("disconnect bookkeeping failed", error));
+      trackDisconnectTask(
+        (async () => {
+          const found = await rooms.markAbsent(code, token, presenceLeaseId);
+          if (!found) return;
+          await publishRoomEvent(
+            found.kind === "player"
+              ? { code, kind: "presence", seat: found.seat, connected: false, version: found.version }
+              : { code, kind: "spectators", version: found.version },
+          );
+        })(),
+        "disconnect bookkeeping failed",
+      );
     });
 
   });
@@ -1521,13 +1539,20 @@ export function closeGameServer(
 ): Promise<void> {
   return new Promise((resolve) => {
     const wss = wssByServer.get(server);
+    const disconnectTasks = disconnectTasksByServer.get(server);
     let httpClosed = false;
     let socketsClosed = !wss;
+    let finishing = false;
     let forceCloseTimer: ReturnType<typeof setTimeout> | undefined;
     const finishIfClosed = (): void => {
-      if (!httpClosed || !socketsClosed) return;
+      if (!httpClosed || !socketsClosed || finishing) return;
+      finishing = true;
       if (forceCloseTimer) clearTimeout(forceCloseTimer);
-      resolve();
+      void (async () => {
+        while (disconnectTasks?.size) {
+          await Promise.all([...disconnectTasks]);
+        }
+      })().then(resolve);
     };
     if (wss) {
       for (const client of wss.clients) {

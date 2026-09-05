@@ -455,6 +455,65 @@ describe("IAR spoiled cards", () => {
     expect(g.state.players[0]!.board.filter((card) => card.cardId === "IAR222")).toHaveLength(2);
   });
 
+  it("Become the Shadow Lord banishes from hand only when its layer resolves", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        heroKey: "viserai, the forsaken|0",
+        hand: ["become the shadow lord|3", "cull|1", "runic reaving|1"],
+        deck: ["bounding demigon|1", "bounding demigon|1"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("become the shadow lord|3", { settle: false });
+
+    expect(g.state.pendingDecision?.kind).toBe("priority-window");
+    expect(g.state.players[0]!.banish).toHaveLength(0);
+    expect(g.state.players[0]!.board).toHaveLength(0);
+
+    g.passPriority().passPriority();
+
+    expect(g.state.pendingDecision?.kind).toBe("choose-target");
+    expect(g.state.stack[0]?.card?.cardId).toBe("IAR113");
+    const cull = g.state.players[0]!.hand.find((card) => card.cardId === "HNT259")!;
+    g.doRaw({ kind: "choose", optionId: String(cull.instanceId) });
+
+    expect(g.state.stack.some((layer) => layer.card?.cardId === "IAR113")).toBe(false);
+    expect(g.state.players[0]!.graveyard).toContainEqual(
+      expect.objectContaining({ cardId: "IAR113" }),
+    );
+    expect(g.state.stack[0]?.label).toContain("Banish the top card");
+
+    g.activate("runic reaving|1", { settle: false }).settle();
+
+    expect(g.state.stack).toHaveLength(0);
+    expect(g.state.players[0]!.graveyard).toContainEqual(
+      expect.objectContaining({ cardId: "IAR149" }),
+    );
+    expect(g.state.players[0]!.banish).toHaveLength(3);
+  });
+
+  it("Become the Shadow Lord can resolve with no other card in hand", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["become the shadow lord|3"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("become the shadow lord|3");
+
+    expect(g.state.stack).toHaveLength(0);
+    expect(g.state.players[0]!.graveyard).toContainEqual(
+      expect.objectContaining({ cardId: "IAR113" }),
+    );
+    expect(g.state.players[0]!.actionPoints).toBe(1);
+  });
+
   it("Pull from Beyond creates a Gate when the post-opt top card matches", () => {
     const g = scenario({ seats: [
       {

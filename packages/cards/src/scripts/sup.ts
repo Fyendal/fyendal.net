@@ -1054,7 +1054,6 @@ Object.assign(sup, {
       if (option === "power") ctx.addCardTempPower(target, 3);
       else if (option === "go-again") ctx.grantCardKeyword(target, "go again");
       else return;
-      ctx.allowPlayFrom(target, "banish");
     },
   },
 } satisfies Record<string, CardScript>);

@@ -1,5 +1,5 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, buffNextAttack, commonOptionMessages, decisionPrompt, isCard, localizedCardLog, opponentSeat, yesNoPrompt } from "./shared-helpers.js";
+import { attackAbility, buffNextAttack, commonOptionMessages, decisionMessage, decisionPrompt, isCard, localizedCardLog, opponentSeat, yesNoPrompt } from "./shared-helpers.js";
 
 // ── SFA (Silver Age: Fai precon, Chapter 2) ─────────────────────────────────
 //
@@ -380,15 +380,20 @@ export const sfa: Record<string, CardScript> = {
   "fire that burns within|1": {
     // "When this attacks, you may discard a Phoenix Flame. If you do, draw a
     //  card and this gets +2{p}." Go again is printed (native).
-    onAttackDeclared(ctx) {
-      const flames = ctx.player(ctx.seat).hand.filter((c) => isPhoenixFlame(ctx, c.cardId));
-      if (flames.length === 0) return;
-      ctx.requestCardChoice(
-        "fire-that-burns",
-        decisionPrompt("Fire that Burns Within: discard a Phoenix Flame to draw a card and get +2{p}?", "card.sfa.flame.discard.draw", { optionMessages: commonOptionMessages("pass") }),
-        ["pass", ...flames.map((c) => c.instanceId)],
-      );
-    },
+    triggers: [{
+      event: "attack-declared",
+      sourceZone: "self",
+      label: "Discard a Phoenix Flame to draw a card and get +2{p}?",
+      labelMessage: decisionMessage("card.sfa.flame.discard.draw"),
+      effect(ctx) {
+        const flames = ctx.player(ctx.seat).hand.filter((c) => isPhoenixFlame(ctx, c.cardId));
+        ctx.requestCardChoice(
+          "fire-that-burns",
+          decisionPrompt("Fire that Burns Within: discard a Phoenix Flame to draw a card and get +2{p}?", "card.sfa.flame.discard.draw", { optionMessages: commonOptionMessages("pass") }),
+          ["pass", ...flames.map((c) => c.instanceId)],
+        );
+      },
+    }],
     onChoose(ctx, hook, option) {
       if (hook !== "fire-that-burns" || option === "pass") return;
       if (!ctx.discardCard(ctx.seat, Number(option))) return;

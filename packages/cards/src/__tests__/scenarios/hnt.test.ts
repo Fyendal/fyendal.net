@@ -993,12 +993,15 @@ describe("HNT — marked heroes and daggers", () => {
 });
 
 describe("HNT — rules regression coverage", () => {
-  it("Cull can be played as an instant after life loss and resolves to graveyard", () => {
+  it("Cull can be played as an instant after life loss and lets each hero choose a card to banish", () => {
     const g = scenario({
       active: 1,
       seats: [
-        { hero: "rhinar", hand: ["cull|1"] },
-        { hero: "dorinthea", hand: ["wounding blow|1", "raging onslaught|3"] },
+        { hero: "rhinar", hand: ["cull|1", "fry|1", "fate foreseen|2"] },
+        {
+          hero: "dorinthea",
+          hand: ["wounding blow|1", "raging onslaught|3", "sink below|1"],
+        },
       ],
     });
 
@@ -1009,10 +1012,26 @@ describe("HNT — rules regression coverage", () => {
     expect(g.state.players[0]!.flags.lostLifeThisTurn).toBe(true);
 
     g.passPriority()
-      .react("cull|1")
+      .react("cull|1");
+
+    expect(g.state.pendingDecision).toMatchObject({
+      player: 1,
+      chooseHook: "cull-hand:1",
+    });
+
+    g.chooseCard("sink below|1");
+    expect(g.state.pendingDecision).toMatchObject({
+      player: 0,
+      chooseHook: "cull-hand:0",
+    });
+
+    g.chooseCard("fry|1")
       .expectInZone(0, "cull|1", "graveyard")
       .expectNotInZone(0, "cull|1", "banish")
-      .expectInZone(1, "raging onslaught|3", "banish");
+      .expectInZone(0, "fry|1", "banish")
+      .expectInZone(0, "fate foreseen|2", "hand")
+      .expectInZone(1, "sink below|1", "banish")
+      .expectInZone(1, "raging onslaught|3", "hand");
   });
 
   it("Cull goes to graveyard after defending", () => {

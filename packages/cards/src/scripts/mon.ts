@@ -917,6 +917,13 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       ctx.setFlag("player", "chaneNextActionGoAgain", false);
       ctx.grantCardKeyword(played.instanceId, "go again");
     },
+    onFriendlyActivate(ctx, activated, timing) {
+      if (ctx.getFlag("player", "chaneNextActionGoAgain") !== true) return;
+      if (timing !== "action") return;
+      if (!hasType(ctx, activated, "runeblade") && !hasType(ctx, activated, "shadow")) return;
+      ctx.setFlag("player", "chaneNextActionGoAgain", false);
+      ctx.setFlag("player", "nextActionGoAgain", true);
+    },
   },
   "soul shackle|0": {
     triggers: [{
