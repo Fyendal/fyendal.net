@@ -14,6 +14,30 @@ describe("PEN — import and set mechanics", () => {
     expect(new Set(cards.map(functionalKeyOf))).toHaveLength(348);
   });
 
+  it("Kano can play the card banished by his ability as an instant on the opponent's turn", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "kano|0",
+          resources: 4,
+          deck: ["snapback|3"],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.passPriority()
+      .activate("kano|0")
+      .chooseCard("snapback|3")
+      .passPriority()
+      .react("snapback|3")
+      .chooseOption("opposing hero")
+      .expectLife(1, 19);
+  });
+
   it("Speed Demon scraps a graveyard Hyper Driver without destroying one in the arena", () => {
     const g = scenario({ seats: [
       {
