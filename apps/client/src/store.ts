@@ -97,6 +97,8 @@ removeUnsupportedLocalReplays(localStorage);
 import.meta.hot?.dispose(() => {
   const orphaned = ws;
   ws = null;
+  if (reconnectTimer) clearTimeout(reconnectTimer);
+  reconnectTimer = null;
   if (reconnectNoticeTimer) clearTimeout(reconnectNoticeTimer);
   reconnectNoticeTimer = null;
   orphaned?.close();
@@ -127,6 +129,9 @@ export const useStore = create<StoreState>((set, get) => {
   /** Coalesces React Strict Mode and other overlapping attempts to restore the
    *  same room before its first authoritative projection arrives. */
   let joiningRoomCode: string | null = null;
+  /** Browser lifecycle is deterministic: hidden tabs suspend their socket and
+   *  one fresh connection is established when the page becomes active. */
+  let browserConnectionState: "active" | "suspended" | "restoring" = "active";
   /** A bot-room request waiting for the retained matchmaking room to release
    *  this socket. WebSocket commands stay ordered by waiting for `left`. */
   let pendingBotRoom: { format: ConstructedFormat; deckId: string; bot?: BotOpponent; searchForPlayer?: boolean } | null = null;
@@ -190,6 +195,13 @@ export const useStore = create<StoreState>((set, get) => {
     if (get().connectionIssueVisible) set({ connectionIssueVisible: false });
   }
 
+  function cancelReconnect(): void {
+    if (reconnectTimer) clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+    reconnectAttempts = 0;
+    clearReconnectNotice();
+  }
+
   function scheduleReconnectNotice(): void {
     if (reconnectNoticeTimer || get().connectionIssueVisible || !get().roomCode) return;
     reconnectNoticeTimer = setTimeout(() => {
@@ -199,7 +211,8 @@ export const useStore = create<StoreState>((set, get) => {
   }
 
   function closeCurrentSocket(): void {
-    clearReconnectNotice();
+    cancelReconnect();
+    browserConnectionState = "active";
     const socket = ws;
     ws = null;
     connectionEpoch += 1;
@@ -217,9 +230,6 @@ export const useStore = create<StoreState>((set, get) => {
     roomEntryPending = false;
     roomEntryRetryable = false;
     joiningRoomCode = null;
-    if (reconnectTimer) clearTimeout(reconnectTimer);
-    reconnectTimer = null;
-    reconnectAttempts = 0;
     removeRoomSession(localStorage, get().roomCode ?? roomCodeFromLocation(location.pathname));
     closeCurrentSocket();
     history.replaceState(null, "", "/");
@@ -244,9 +254,6 @@ export const useStore = create<StoreState>((set, get) => {
   function clearAuthenticatedState(): void {
     localStorage.removeItem(AUTH_STORAGE_KEY);
     clearRoomSessions(localStorage);
-    if (reconnectTimer) clearTimeout(reconnectTimer);
-    reconnectTimer = null;
-    reconnectAttempts = 0;
     roomEntryPending = false;
     roomEntryRetryable = false;
     joiningRoomCode = null;
@@ -312,8 +319,7 @@ export const useStore = create<StoreState>((set, get) => {
     const epoch = ++connectionEpoch;
     socket.onopen = () => {
       if (ws !== socket || connectionEpoch !== epoch) return; // superseded by a newer socket
-      reconnectAttempts = 0;
-      clearReconnectNotice();
+      cancelReconnect();
       set({ connected: true, connectionIssueVisible: false });
       // authenticate the socket before anything else, when we have a token
       authSocketIfNeeded();
@@ -325,19 +331,22 @@ export const useStore = create<StoreState>((set, get) => {
       if (ws !== socket || connectionEpoch !== epoch) return; // superseded by a newer socket
       ws = null;
       connectionEpoch += 1;
+      browserConnectionState = "active";
       pendingOpen = [];
       authedToken = null;
       joiningRoomCode = null;
       resetRoomCommandPipeline();
       set({ connected: false });
-      if (roomEntryPending && roomEntryRetryable) {
-        scheduleReconnectNotice();
-        scheduleReconnect();
+      if (roomEntryPending && !roomEntryRetryable) {
+        failPendingRoomEntry("connection to room failed");
         return;
       }
-      if (failPendingRoomEntry("connection to room failed")) return;
-      scheduleReconnectNotice();
-      scheduleReconnect();
+      if (typeof document !== "undefined" && document.visibilityState === "hidden") {
+        browserConnectionState = "suspended";
+        clearReconnectNotice();
+        return;
+      }
+      reconnectWithBackoff();
     };
     socket.onerror = () => {
       if (ws !== socket || connectionEpoch !== epoch) return; // a superseded socket failing is not news
@@ -350,6 +359,7 @@ export const useStore = create<StoreState>((set, get) => {
     };
     socket.onmessage = (ev) => {
       if (ws !== socket || connectionEpoch !== epoch) return;
+      browserConnectionState = "active";
       try {
         const message = decodeServerMessage(JSON.parse(String(ev.data)));
         if (message) handleMessage(message);
@@ -369,15 +379,54 @@ export const useStore = create<StoreState>((set, get) => {
    */
   function scheduleReconnect(): void {
     if (reconnectTimer) return;
-    const code = get().roomCode;
-    if (!code && !get().authToken) return;
+    if (!get().roomCode && !get().authToken) return;
     const delay = Math.min(1000 * 2 ** reconnectAttempts, 10_000) + Math.random() * 500;
     reconnectAttempts += 1;
     reconnectTimer = setTimeout(() => {
       reconnectTimer = null;
-      if (code) get().joinRoom(code);
-      else connect(() => send({ type: "list-rooms" }));
+      restoreConnection();
     }, delay);
+  }
+
+  function restoreConnection(): void {
+    const code = get().roomCode;
+    if (code) get().joinRoom(code);
+    else connect(() => send({ type: "list-rooms" }));
+  }
+
+  function reconnectWithBackoff(): void {
+    scheduleReconnectNotice();
+    scheduleReconnect();
+  }
+
+  /** Hidden mobile tabs deliberately release their socket. Becoming active
+   * always starts one fresh connection, so browser lifecycle never depends on
+   * a stale WebSocket readyState or an additional liveness timeout. */
+  function setConnectionActive(active: boolean): void {
+    // A brand-new room entry still needs its original deck/hero parameters.
+    // Its own socket callbacks remain authoritative until membership exists.
+    if (joiningRoomCode !== null && !get().roomCode) return;
+
+    if (!active) {
+      const hadConnection = ws !== null || reconnectTimer !== null || get().connected;
+      if (!hadConnection) return;
+      closeCurrentSocket();
+      browserConnectionState = "suspended";
+      set({ connected: false });
+      return;
+    }
+
+    if (browserConnectionState === "restoring") return;
+    const shouldRestore = browserConnectionState === "suspended"
+      || reconnectTimer !== null
+      || ws !== null
+      || get().roomCode !== null;
+    if (!shouldRestore) return;
+
+    closeCurrentSocket();
+    browserConnectionState = "restoring";
+    set({ connected: false });
+    restoreConnection();
   }
 
   function send(msg: ClientMessage): boolean {
@@ -957,8 +1006,8 @@ export const useStore = create<StoreState>((set, get) => {
             spectatorCount: 0,
             opponentConnected: true,
           });
-          if (ws) ws.close();
-          else scheduleReconnect();
+          closeCurrentSocket();
+          reconnectWithBackoff();
           // Recovery is automatic. Keep both expected stale-version reloads
           // and post-commit resyncs quiet unless the reconnect grace expires.
           errors.clear();
@@ -967,8 +1016,7 @@ export const useStore = create<StoreState>((set, get) => {
         // The authoritative room no longer exists: drop only its stored
         // membership and return to the lobby instead of retrying forever.
         if (msg.code === "ROOM_NOT_FOUND") {
-          if (reconnectTimer) clearTimeout(reconnectTimer);
-          reconnectTimer = null;
+          cancelReconnect();
           removeRoomSession(localStorage, get().roomCode);
           history.replaceState(null, "", "/");
           replayRuntime.discard();
@@ -1312,6 +1360,7 @@ export const useStore = create<StoreState>((set, get) => {
       connect(() => {
         send({ type: "list-rooms" });
       }),
+    setConnectionActive,
     queueJoin: (format, choice) => {
       roomEntryPending = false;
       pendingBotRoom = null;
@@ -1444,10 +1493,7 @@ export const useStore = create<StoreState>((set, get) => {
     leave: () => {
       // An explicit Leave click wins over an in-flight practice handoff.
       pendingBotRoom = null;
-      clearReconnectNotice();
-      if (reconnectTimer) clearTimeout(reconnectTimer);
-      reconnectTimer = null;
-      reconnectAttempts = 0;
+      cancelReconnect();
       roomEntryPending = false;
       roomEntryRetryable = false;
       joiningRoomCode = null;

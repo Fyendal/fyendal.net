@@ -84,6 +84,7 @@ export function App() {
   const joinRoom = useStore((state) => state.joinRoom);
   const watchSavedReplay = useStore((state) => state.watchSavedReplay);
   const setError = useStore((state) => state.setError);
+  const setConnectionActive = useStore((state) => state.setConnectionActive);
   const replayLoadRef = useRef<string | null>(null);
   const [, setReplayRouteFailure] = useState<string | null>(null);
   const path = location.pathname;
@@ -99,6 +100,23 @@ export function App() {
     && authUser !== null
     && routeRoomCode !== null
     && hasSavedRoomSession(routeRoomCode);
+
+  useEffect(() => {
+    const syncVisibility = () => {
+      setConnectionActive(document.visibilityState === "visible");
+    };
+    const restoreIfVisible = () => {
+      if (document.visibilityState === "visible") setConnectionActive(true);
+    };
+    document.addEventListener("visibilitychange", syncVisibility);
+    window.addEventListener("online", restoreIfVisible);
+    window.addEventListener("pageshow", restoreIfVisible);
+    return () => {
+      document.removeEventListener("visibilitychange", syncVisibility);
+      window.removeEventListener("online", restoreIfVisible);
+      window.removeEventListener("pageshow", restoreIfVisible);
+    };
+  }, [setConnectionActive]);
 
   // Resolve /ROOM-ID as an invite, or reconnect an already-known session.
   useEffect(() => {

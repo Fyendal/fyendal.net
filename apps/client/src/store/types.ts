@@ -192,6 +192,8 @@ export interface StoreState {
   inspectRoom: (code: string) => void;
   dismissInvite: (resetUrl?: boolean) => void;
   listRooms: () => void;
+  /** Suspend background sockets or establish one fresh active connection. */
+  setConnectionActive: (active: boolean) => void;
   queueJoin: (format: Format, choice: { hero?: HeroId; deckId?: string }) => void;
   queueLeave: () => void;
   stopBackgroundMatchmaking: () => void;
