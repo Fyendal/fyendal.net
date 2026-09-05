@@ -168,6 +168,41 @@ describe("SUP — heroes and the crowd", () => {
       .expectInZone(0, "autumn's touch|3", "graveyard");
   });
 
+  it("Outside Interference may reveal a Reviled attack action from inventory into hand", () => {
+    const g = scenario({
+      seats: [
+        hero("kayo, underhanded cheat|0", {
+          hand: ["outside interference|3"],
+          inventory: ["big bully|1", "wind up the crowd|3", "raging onslaught|1"],
+        }),
+        foe(),
+      ],
+    });
+    const bigBully = g.state.players[0]!.inventory!.find(
+      (card) => card.cardId === printingId("big bully|1"),
+    )!;
+
+    g.activate("outside interference|3");
+
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "outside-interference",
+      options: ["pass", String(bigBully.instanceId)],
+      cardOptions: [null, bigBully.instanceId],
+    });
+    expect(projectStateFor(g.state, 0).pendingDecision?.optionCards).toMatchObject([
+      null,
+      { instanceId: bigBully.instanceId, cardId: bigBully.cardId },
+    ]);
+
+    g.chooseCard("big bully|1")
+      .expectInZone(0, "outside interference|3", "graveyard")
+      .expectInZone(0, "big bully|1", "hand");
+    expect(g.state.players[0]!.inventory!.map((card) => card.cardId)).toEqual([
+      printingId("wind up the crowd|3"),
+      printingId("raging onslaught|1"),
+    ]);
+  });
+
   it("Backspin Thrust untaps a cog, then chooses one bonus once per turn", () => {
     const g = scenario({
       seats: [

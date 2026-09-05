@@ -64,6 +64,9 @@ describe("board legal projection", () => {
       equipment: {},
       board: [],
       hand: [],
+      arsenal: [],
+      graveyard: [],
+      banish: [],
     } as unknown as PlayerView;
     const chain = [{
       attackingCard: { instanceId: 42, cardId: "SBA016", owner: 0 },
@@ -81,5 +84,25 @@ describe("board legal projection", () => {
     }] satisfies ChainLinkView[];
 
     expect(abilityLabelForSource(player, chain, 84, 0)).toBe("Discard a card");
+  });
+
+  it("finds ability labels on graveyard cards", () => {
+    const player = {
+      heroInstanceId: 1,
+      weapons: [],
+      equipment: {},
+      board: [],
+      hand: [],
+      arsenal: [],
+      graveyard: [{
+        instanceId: 245,
+        cardId: "HVY245",
+        owner: 0,
+        activatedAbilityLabels: ["Attack", "Equip from graveyard"],
+      }],
+      banish: [],
+    } as unknown as PlayerView;
+
+    expect(abilityLabelForSource(player, [], 245, 1)).toBe("Equip from graveyard");
   });
 });

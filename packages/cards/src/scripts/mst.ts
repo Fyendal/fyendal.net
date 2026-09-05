@@ -29,9 +29,14 @@ function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string)
 }
 
 function hasKeyword(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, keyword: string): boolean {
-  return (data(ctx, card).keywords ?? []).some(
-    (candidate) => candidate.toLowerCase() === keyword.toLowerCase(),
-  );
+  const normalized = keyword.toLowerCase();
+  if ((card.suppressedKeywords ?? []).some((candidate) => candidate.toLowerCase() === normalized)) {
+    return false;
+  }
+  return [
+    ...(data(ctx, card).keywords ?? []),
+    ...(card.grantedKeywords ?? []),
+  ].some((candidate) => candidate.toLowerCase() === normalized);
 }
 
 function isAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
@@ -684,7 +689,59 @@ Object.assign(mst, {
   "orihon of mystic tenets|3": { onPlay(ctx) { ctx.drawCards(ctx.seat, pitchedBlue(ctx) ? 3 : 2); } },
   "bonds of agony|3": { modifyAttack: (ctx) => reactionCount(ctx) >= 3 ? 3 : 0, canTriggerOnHit(ctx) { return reactionCount(ctx) >= 3 && ctx.link?.targetAllyId === undefined; }, onHit(ctx) { const target = opponentSeat(ctx); const hand = ctx.player(target).hand; for (const card of hand) ctx.lookAt(card.instanceId); if (hand.length) ctx.requestCardChoice("agony-name", decisionPrompt("Choose a card", "card.mst.card.choose"), hand.map((card) => card.instanceId)); }, onChoose(ctx, hook, option) { if (hook !== "agony-name") return; const target = opponentSeat(ctx); const chosen = ctx.player(target).hand.find((card) => card.instanceId === Number(option)); if (!chosen) return; const name = data(ctx, chosen).name; for (const card of [...ctx.player(target).hand, ...ctx.player(target).deck, ...ctx.player(target).graveyard].filter((card) => data(ctx, card).name === name).slice(0, 3)) ctx.banish(card.instanceId); ctx.shuffleDeck(target); } },
   "persuasive prognosis|3": { canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined; }, onHit(ctx) { const target = opponentSeat(ctx); const top = ctx.player(target).deck[0]; if (!top || !ctx.banish(top.instanceId)) return; if (isAttackAction(ctx, top)) ctx.gainLife(ctx.seat, 1); const hand = ctx.player(target).hand; for (const card of hand) ctx.lookAt(card.instanceId); const same = hand.filter((card) => ctx.cardColor(card) === ctx.cardColor(top)); if (same.length) ctx.requestCardChoice("prognosis-hand", decisionPrompt("Banish a matching-color card", "card.mst.matchingcolor.card.banish"), same.map((card) => card.instanceId)); }, onChoose(ctx, hook, option) { if (hook === "prognosis-hand" && ctx.banish(Number(option))) { const card = ctx.player(opponentSeat(ctx)).banish.find((candidate) => candidate.instanceId === Number(option)); if (card && isAttackAction(ctx, card)) ctx.gainLife(ctx.seat, 1); } } },
-  "just a nick|1": { canPlay: (ctx) => !!ctx.link && ctx.link.attacker === ctx.seat, onPlay(ctx) { if (!ctx.link) return; if (ctx.basePower(ctx.link.attackingCard) <= 1) ctx.addModifier({ scope: "chain-link", attack: 5 }); } },
+  "just a nick|1": {
+    canPlay(ctx) {
+      if (!ctx.link || ctx.link.attacker !== ctx.seat) return false;
+      return (ctx.link.attackCardType === "action" && ctx.basePower(ctx.link.attackingCard) <= 1) ||
+        hasKeyword(ctx, ctx.link.attackingCard, "stealth");
+    },
+    additionalCost(ctx) {
+      if (!ctx.link) return;
+      const powerMode = ctx.link.attackCardType === "action" &&
+        ctx.basePower(ctx.link.attackingCard) <= 1;
+      const banishMode = hasKeyword(ctx, ctx.link.attackingCard, "stealth");
+      if (powerMode && banishMode) {
+        ctx.requestChoice(
+          "just-a-nick-mode",
+          decisionPrompt("Just a Nick: choose 1 or both", "card.mst.justanick.mode", { optionMessages: {
+            power: decisionMessage("card.mst.justanick.option.power"),
+            banish: decisionMessage("card.mst.justanick.option.banish"),
+            both: decisionMessage("common.option.both"),
+          } }),
+          ["power", "banish", "both"],
+        );
+      }
+    },
+    onPlay(ctx) {
+      if (!ctx.link) return;
+      const powerMode = ctx.link.attackCardType === "action" &&
+        ctx.basePower(ctx.link.attackingCard) <= 1;
+      const banishMode = hasKeyword(ctx, ctx.link.attackingCard, "stealth");
+      const selectedMode = ctx.getCounter("justANickMode");
+      if (powerMode && (!banishMode || selectedMode === 1 || selectedMode === 3)) {
+        ctx.addModifier({ scope: "chain-link", attack: 5 });
+      }
+      if (banishMode && (!powerMode || selectedMode === 2 || selectedMode === 3)) {
+        ctx.addModifier({
+          scope: "chain-link",
+          onHitScriptHook: {
+            hook: "just-a-nick-hit",
+            label: "banish the top card of the defending hero's deck",
+            heroOnly: true,
+          },
+        });
+      }
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "just-a-nick-mode") return;
+      ctx.setCounter("justANickMode", option === "power" ? 1 : option === "banish" ? 2 : 3);
+    },
+    onGrantedHit(ctx, hook) {
+      if (hook !== "just-a-nick-hit" || ctx.link?.targetAllyId !== undefined) return;
+      const top = ctx.player(opponentSeat(ctx)).deck[0];
+      if (top) ctx.banish(top.instanceId);
+    },
+  },
   "10,000 year reunion|1": { wardValue: () => 10 },
   "rage specter|3": { onEnterArena(ctx) { if (!ctx.player(ctx.seat).board.some((card) => card.instanceId !== ctx.self.instanceId && isIllusionistAura(ctx, card))) ctx.gainActionPoint(); }, wardValue: (ctx) => ctx.state.activePlayer === ctx.seat ? 6 : 1 },
   "restless coalescence|2": {

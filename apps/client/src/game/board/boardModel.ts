@@ -24,6 +24,9 @@ export function abilityLabelForSource(
     ...Object.values(player.equipment),
     ...player.board,
     ...player.hand,
+    ...player.arsenal,
+    ...player.graveyard,
+    ...player.banish,
     ...chain.flatMap((link) => [
       link.attackingCard,
       ...link.defendingCards,

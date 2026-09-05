@@ -362,7 +362,7 @@ describe("IAR spoiled cards", () => {
     expect(g.state.players[0]!.resources).toBe(1);
   });
 
-  it("Usurp destroys a specialized Runechant and applies both power bonuses", () => {
+  it("Usurp replaces a specialized Runechant after the attack is played", () => {
     const g = scenario({ seats: [
       {
         hero: "rhinar",
@@ -376,10 +376,10 @@ describe("IAR spoiled cards", () => {
     g.play("demonbound gloomblade|1").chooseCard("runechant of pride|2")
       .blockWith()
       .settle()
-      .expectLife(1, 13);
+      .expectLife(1, 14)
+      .expectInZone(0, "runechant|0", "board");
 
     expect(g.state.players[0]!.flags.usurpedThisTurn).toBe(true);
-    expect(g.state.players[0]!.board).toHaveLength(0);
   });
 
   it("Runic Reaving can be discarded at instant speed to create a Runechant", () => {
@@ -435,6 +435,26 @@ describe("IAR spoiled cards", () => {
       .expectLife(1, 14);
 
     expect(g.state.players[0]!.board).toHaveLength(0);
+  });
+
+  it("Runic Reaving does not trigger the Runechant created by usurping Sloth", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["runic reaving|1"],
+        board: ["runechant of sloth|2"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("runic reaving|1")
+      .chooseCard("runechant of sloth|2")
+      .blockWith()
+      .settle()
+      .expectLife(1, 14)
+      .expectAP(0, 1)
+      .expectInZone(0, "runechant|0", "board");
   });
 
   it("Become the Shadow Lord and Open the Gate each create their Gate", () => {

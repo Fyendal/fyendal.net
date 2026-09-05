@@ -661,15 +661,19 @@
 
 @media (max-width: 700px) {
   .social-dock { right: auto; bottom: calc(84px + env(safe-area-inset-bottom)); left: max(16px, env(safe-area-inset-left)); }
-  #root:has(.table) .social-dock {
+  #root:has(.table) .social-dock,
+  #root:has(.prep-page) .social-dock {
     right: max(16px, env(safe-area-inset-right));
     left: auto;
   }
-  #root:has(.table) .social-message-toast {
+  #root:has(.table) .social-message-toast,
+  #root:has(.prep-page) .social-message-toast {
     right: 0;
     left: auto;
   }
-  #root:has(.prep-page) .social-dock { bottom: calc(84px + env(safe-area-inset-bottom)); }
+  #root:has(.prep-page) .social-dock {
+    bottom: var(--prep-ready-float-offset, calc(190px + env(safe-area-inset-bottom)));
+  }
   .social-mobile-backdrop {
     position: fixed;
     z-index: 0;
@@ -700,7 +704,8 @@
     padding-bottom: 0;
     border-radius: 12px;
   }
-  #root:has(.table) .social-panel {
+  #root:has(.table) .social-panel,
+  #root:has(.prep-page) .social-panel {
     right: 0;
     left: auto;
   }

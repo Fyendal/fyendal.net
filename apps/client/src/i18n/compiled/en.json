@@ -9485,6 +9485,24 @@
       "value": "Search for an Inner Chi"
     }
   ],
+  "card.mst.justanick.mode": [
+    {
+      "type": 0,
+      "value": "Just a Nick: choose 1 or both"
+    }
+  ],
+  "card.mst.justanick.option.banish": [
+    {
+      "type": 0,
+      "value": "The attack gains \"When this hits a hero, banish the top card of their deck\""
+    }
+  ],
+  "card.mst.justanick.option.power": [
+    {
+      "type": 0,
+      "value": "The attack action card gets +5 attack"
+    }
+  ],
   "card.mst.matchingcolor.card.banish": [
     {
       "type": 0,
@@ -12259,6 +12277,12 @@
     {
       "type": 0,
       "value": "Create Vigor"
+    }
+  ],
+  "card.sup.outside.interference.choose": [
+    {
+      "type": 0,
+      "value": "Outside Interference: reveal a Reviled attack action card from inventory?"
     }
   ],
   "card.sup.pay.up.to": [
