@@ -348,6 +348,24 @@ describe("SBR — defensive and token effects", () => {
       .expectAP(0, 0);
   });
 
+  it("Zealous Belting sees Kayo's power bonus on a pitched Agile Windup", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "kayo|0",
+          hand: ["zealous belting|1", "agile windup|3"],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+
+    g.play("zealous belting|1", { pitch: ["agile windup|3"] })
+      .blockWith()
+      .settle()
+      .expectAP(0, 1);
+  });
+
   it("Thunder Quake remains a playable 8-power attack", () => {
     const g = scenario({
       seats: [
