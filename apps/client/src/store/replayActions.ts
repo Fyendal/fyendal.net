@@ -1,11 +1,15 @@
 import {
   apiDeleteReplay,
   apiReplay,
+  apiReplayNotes,
   apiReplays,
 } from "../auth/auth.js";
+import type { ReplayServerNote } from "@fyendal/protocol";
+import type { ReplayFile } from "@fyendal/shared";
 import { savedReplayPath } from "../replay/route.js";
 import type { AuthRequest } from "./accountActions.js";
 import { downloadReplayFile } from "./replayRuntime.js";
+import { withReplayNotes } from "../replay/replayFileNotes.js";
 import type { StoreState } from "./types.js";
 
 type ReplayActionKey =
@@ -26,9 +30,33 @@ export function createReplayActions({
   get: () => StoreState;
   authRequest: (token: string) => AuthRequest;
   isCurrentAuth: (request: AuthRequest) => boolean;
-  openReplay: (file: Parameters<typeof downloadReplayFile>[0], savedReplayId: string) => void;
+  openReplay: (
+    file: Parameters<typeof downloadReplayFile>[0],
+    savedReplayId: string,
+    serverNotes?: ReplayServerNote[],
+    serverTarget?: { replayId: string } | { roomCode: string } | null,
+  ) => void;
   showError: (message: string) => void;
 }): Pick<StoreState, ReplayActionKey> {
+  const loadSavedReplay = async (id: string): Promise<
+    | { ok: true; replay: ReplayFile; notes: ReplayServerNote[] }
+    | { ok: false; error: string }
+  > => {
+    const token = get().authToken;
+    if (!token) return { ok: false, error: "not logged in" };
+    const request = authRequest(token);
+    const [replayResult, noteResult] = await Promise.all([
+      apiReplay(token, id, request.signal),
+      apiReplayNotes(token, { replayId: id }, request.signal),
+    ]);
+    if (!isCurrentAuth(request)) {
+      return { ok: false, error: "account request was superseded" };
+    }
+    if (!replayResult.ok) return replayResult;
+    if (!noteResult.ok) return noteResult;
+    return { ok: true, replay: replayResult.replay, notes: noteResult.notes };
+  };
+
   return {
     refreshReplays: async () => {
       const token = get().authToken;
@@ -47,25 +75,17 @@ export function createReplayActions({
       if (!result.ok) showError(result.error);
     },
     watchSavedReplay: async (id) => {
-      const token = get().authToken;
-      if (!token) return "not logged in";
-      const request = authRequest(token);
-      const result = await apiReplay(token, id, request.signal);
-      if (!isCurrentAuth(request)) return "account request was superseded";
+      const result = await loadSavedReplay(id);
       if (!result.ok) return result.error;
       const path = savedReplayPath(id);
       if (location.pathname !== path) history.pushState(null, "", path);
-      openReplay(result.replay, id);
+      openReplay(result.replay, id, result.notes, { replayId: id });
       return null;
     },
     exportSavedReplay: async (id) => {
-      const token = get().authToken;
-      if (!token) return "not logged in";
-      const request = authRequest(token);
-      const result = await apiReplay(token, id, request.signal);
-      if (!isCurrentAuth(request)) return "account request was superseded";
+      const result = await loadSavedReplay(id);
       if (!result.ok) return result.error;
-      downloadReplayFile(result.replay);
+      downloadReplayFile(withReplayNotes(result.replay, result.notes));
       return null;
     },
     deleteSavedReplay: async (id) => {

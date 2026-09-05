@@ -42,6 +42,7 @@ describe("GameOver player statistics", () => {
       </TestI18nProvider>,
     );
 
+    expect(html).toContain('class="overlay gameover-overlay"');
     expect(html).toContain("View statistics for");
     expect(html).toContain('role="group"');
     expect(html).toContain('aria-pressed="true"');

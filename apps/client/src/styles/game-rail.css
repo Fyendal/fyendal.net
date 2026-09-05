@@ -66,6 +66,10 @@
   line-height: 1;
   padding: 2px 9px;
 }
+.rail-actions .rail-note-active {
+  border-color: #ffbd18;
+  color: #ffcf55;
+}
 .rail-actions .rail-exit { border-left-color: #806334; }
 .rail-actions .rail-exit-danger {
   border-color: #8f3d34;
@@ -287,6 +291,23 @@
 .game-utilities-actions button { min-height: 46px; }
 .game-confirm-actions { grid-template-columns: 1fr 1fr; }
 .game-confirm-actions button { min-height: 46px; }
+.game-note-sheet { width: min(430px, calc(100vw - 24px)); }
+.game-note-editor {
+  display: grid;
+  gap: 12px;
+}
+.game-note-editor textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 130px;
+  resize: vertical;
+}
+.game-note-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.game-note-actions .btn-danger { margin-right: auto; }
 
 @media (min-width: 701px) {
   .rail-right.rail-collapsed {

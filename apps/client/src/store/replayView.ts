@@ -1,5 +1,5 @@
 import type { ReplayFile } from "@fyendal/shared";
-import { replayFileTransitions, replayFileViews } from "@fyendal/protocol";
+import { replayFileNotes, replayFileTransitions, replayFileViews } from "@fyendal/protocol";
 import type { PreReplaySnapshot, StoreState } from "./types.js";
 
 export function snapshotBeforeReplay(state: StoreState): PreReplaySnapshot | null {
@@ -25,6 +25,7 @@ export function replayViewerProjection(
     replayViews: views,
     replayTransitions: replayFileTransitions(file),
     replayStep: 0,
+    replayNotes: replayFileNotes(file),
     activeSavedReplayId: savedReplayId,
     view: views[0]!,
     legal: [],

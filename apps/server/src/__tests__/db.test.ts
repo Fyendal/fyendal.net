@@ -121,7 +121,7 @@ describe("initial schema", () => {
     )).rows).toEqual([{ column_name: "closed_at" }]);
     expect(await tables(db)).toEqual(expect.arrayContaining([
       "users", "sessions", "decks", "rooms", "room_seats", "room_history", "room_presence",
-      "bug_reports", "replay_games", "replay_frames", "replay_participants",
+      "bug_reports", "replay_games", "replay_frames", "replay_participants", "replay_notes",
       "analytics_events", "schema_metadata", "schema_migrations",
     ]));
     expect(await tables(db)).not.toContain("replay_events");
@@ -165,7 +165,7 @@ describe("initial schema", () => {
       "matchmaking_offers",
     ]));
     expect((await db.query("SELECT version FROM schema_migrations ORDER BY version DESC LIMIT 1")).rows)
-      .toEqual([{ version: 32 }]);
+      .toEqual([{ version: MIGRATIONS.at(-1)!.version }]);
   });
 
   it("adds candidate skip state to an already-applied version 26 database", async () => {
@@ -183,7 +183,7 @@ describe("initial schema", () => {
        WHERE table_name = 'pending_bot_start_candidates' AND column_name = 'skipped'`,
     )).rows).toEqual([{ column_name: "skipped" }]);
     expect((await db.query("SELECT version FROM schema_migrations ORDER BY version DESC LIMIT 1")).rows)
-      .toEqual([{ version: 32 }]);
+      .toEqual([{ version: MIGRATIONS.at(-1)!.version }]);
   });
 
   it("adds durable replay finalization backoff to a version 31 database", async () => {
@@ -202,7 +202,29 @@ describe("initial schema", () => {
       { column_name: "finalization_retry_at" },
     ]);
     expect((await db.query("SELECT version FROM schema_migrations ORDER BY version DESC LIMIT 1")).rows)
-      .toEqual([{ version: 32 }]);
+      .toEqual([{ version: MIGRATIONS.at(-1)!.version }]);
+  });
+
+  it("adds private participant replay notes to a version 32 database", async () => {
+    const db = rawDb();
+    await applyMigrations(db, MIGRATIONS.filter((migration) => migration.version <= 32));
+    expect(await tables(db)).not.toContain("replay_notes");
+
+    await applyMigrations(db, MIGRATIONS);
+
+    expect(await tables(db)).toContain("replay_notes");
+    expect((await db.query(
+      `SELECT column_name FROM information_schema.columns
+       WHERE table_name = 'replay_notes'
+       ORDER BY ordinal_position`,
+    )).rows.map((row) => row.column_name)).toEqual([
+      "id",
+      "replay_id",
+      "user_id",
+      "room_version",
+      "frame_index",
+      "note",
+    ]);
   });
 
   it("adds Starvo to durable pending bot starts", async () => {

@@ -556,6 +556,38 @@ describe("replay transport compression", () => {
     if (!(await store.getRoom(host.code))?.state) throw new Error("game did not start");
 
     const url = await startApi();
+    const roomVersion = Number((await db.query(
+      `SELECT f.room_version FROM replay_frames f
+       JOIN replay_games g ON g.id=f.replay_id
+       WHERE g.room_code=$1 ORDER BY f.room_version LIMIT 1`,
+      [host.code],
+    )).rows[0]!.room_version);
+    const savedNote = await fetch(`${url}/api/replay-notes`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionA.token}`,
+      },
+      body: JSON.stringify({
+        roomCode: host.code,
+        roomVersion,
+        frame: 0,
+        text: "Private opening note",
+      }),
+    });
+    expect(savedNote.status).toBe(200);
+    const aliceLiveNotes = await fetch(`${url}/api/replay-notes/room/${host.code}`, {
+      headers: { Authorization: `Bearer ${sessionA.token}` },
+    });
+    expect(await aliceLiveNotes.json()).toEqual({
+      ok: true,
+      notes: [{ frame: 0, roomVersion, text: "Private opening note" }],
+    });
+    const bobLiveNotes = await fetch(`${url}/api/replay-notes/room/${host.code}`, {
+      headers: { Authorization: `Bearer ${sessionB.token}` },
+    });
+    expect(await bobLiveNotes.json()).toEqual({ ok: true, notes: [] });
+
     const response = await fetch(`${url}/api/replays/room/${host.code}`, {
       headers: {
         Authorization: `Bearer ${sessionA.token}`,
@@ -582,6 +614,19 @@ describe("replay transport compression", () => {
     };
     expect(completedBody.replay.frames[0]!.view.players[0].hand.length).toBeGreaterThan(0);
     expect(completedBody.replay.frames[0]!.view.players[1].hand.length).toBeGreaterThan(0);
+    const aliceFinalNotes = await fetch(
+      `${url}/api/replay-notes/${conceded.replayFinalizationId}`,
+      { headers: { Authorization: `Bearer ${sessionA.token}` } },
+    );
+    expect(await aliceFinalNotes.json()).toEqual({
+      ok: true,
+      notes: [{ frame: 0, text: "Private opening note" }],
+    });
+    const bobFinalNotes = await fetch(
+      `${url}/api/replay-notes/${conceded.replayFinalizationId}`,
+      { headers: { Authorization: `Bearer ${sessionB.token}` } },
+    );
+    expect(await bobFinalNotes.json()).toEqual({ ok: true, notes: [] });
   });
 });
 

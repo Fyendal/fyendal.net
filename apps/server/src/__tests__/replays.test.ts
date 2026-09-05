@@ -10,9 +10,11 @@ import {
   REPLAY_FRAME_BATCH_SIZE,
   finalizeReplayForRoom,
   getReplay,
+  getReplayNotes,
   listReplays,
   ReplayFinalizer,
   REPLAY_TTL_MS,
+  saveReplayNote,
   sweepReplays,
   waitForReplayPayloadForRoom,
 } from "../replays.js";
@@ -81,6 +83,73 @@ async function startedGame() {
 }
 
 describe("server replay retention", () => {
+  it("stores notes per participant and carries live bookmarks into the final replay", async () => {
+    const game = await startedGame();
+    const frameRow = (await db.query(
+      `SELECT f.room_version FROM replay_frames f
+       JOIN replay_games g ON g.id=f.replay_id
+       WHERE g.room_code=$1 ORDER BY f.room_version LIMIT 1`,
+      [game.code],
+    )).rows[0]!;
+    const roomVersion = Number(frameRow.room_version);
+
+    expect(await saveReplayNote(db, game.users[0], {
+      roomCode: game.code,
+      roomVersion,
+      frame: 0,
+      text: "Alice's private thought",
+    }, 100)).toBe(true);
+    expect(await getReplayNotes(db, game.users[0], {
+      roomCode: game.code,
+    })).toEqual([{ frame: 0, roomVersion, text: "Alice's private thought" }]);
+    expect(await getReplayNotes(db, game.users[1], {
+      roomCode: game.code,
+    })).toEqual([]);
+    expect(await getReplayNotes(db, game.users[1] + 99, {
+      roomCode: game.code,
+    })).toBeNull();
+
+    const conceded = await store.applyIntent(
+      game.code,
+      { token: game.tokens[0], userId: game.users[0] },
+      { kind: "concede" },
+    );
+    if (!conceded.ok || !conceded.replayFinalizationId) throw new Error("concede failed");
+    expect(await finalizeReplayForRoom(db, game.code)).toBe(true);
+
+    expect(await getReplayNotes(db, game.users[0], {
+      replayId: conceded.replayFinalizationId,
+    })).toEqual([{ frame: 0, text: "Alice's private thought" }]);
+    expect(await getReplayNotes(db, game.users[1], {
+      replayId: conceded.replayFinalizationId,
+    })).toEqual([]);
+    const aliceExport = await exportAccount(db, game.users[0]);
+    const bobExport = await exportAccount(db, game.users[1]);
+    expect(aliceExport?.replays[0]?.replay).toMatchObject({
+      version: 3,
+      notes: [{ frame: 0, text: "Alice's private thought" }],
+    });
+    expect(bobExport?.replays[0]?.replay.version).toBe(2);
+
+    expect(await saveReplayNote(db, game.users[0], {
+      replayId: conceded.replayFinalizationId,
+      frame: 0,
+      text: "",
+    }, 101)).toBe(true);
+    expect(await getReplayNotes(db, game.users[0], {
+      replayId: conceded.replayFinalizationId,
+    })).toEqual([]);
+    const expiresAt = (await listReplays(db, game.users[0]))[0]!.expiresAt;
+    expect(await getReplayNotes(db, game.users[0], {
+      replayId: conceded.replayFinalizationId,
+    }, expiresAt)).toBeNull();
+    expect(await saveReplayNote(db, game.users[0], {
+      replayId: conceded.replayFinalizationId,
+      frame: 0,
+      text: "Too late",
+    }, expiresAt)).toBe(false);
+  });
+
   it("prunes invalidated action frames instead of recording Undo", async () => {
     const game = await startedGame();
     const before = await store.getRoom(game.code);
@@ -99,6 +168,17 @@ describe("server replay retention", () => {
        JOIN replay_games g ON g.id = f.replay_id WHERE g.room_code = $1`,
       [game.code],
     )).rows[0]!.count)).toBe(2);
+    const invalidatedVersion = Number((await db.query(
+      `SELECT MAX(f.room_version) AS room_version FROM replay_frames f
+       JOIN replay_games g ON g.id=f.replay_id WHERE g.room_code=$1`,
+      [game.code],
+    )).rows[0]!.room_version);
+    expect(await saveReplayNote(db, game.users[actor], {
+      roomCode: game.code,
+      roomVersion: invalidatedVersion,
+      frame: 1,
+      text: "This line will be undone",
+    })).toBe(true);
 
     const other = (1 - actor) as 0 | 1;
     const undone = await store.undo(
@@ -126,6 +206,9 @@ describe("server replay retention", () => {
       [game.code],
     )).rows;
     expect(frames.map((row) => Number(row.room_version))).toEqual([before.version]);
+    expect(await getReplayNotes(db, game.users[actor], {
+      roomCode: game.code,
+    })).toEqual([]);
   });
 
   it("does not roll back a game action when an older revision cannot project a replay card", async () => {
@@ -390,12 +473,26 @@ describe("server replay retention", () => {
     if (!conceded.ok || !conceded.replayFinalizationId) throw new Error("concede failed");
     await finalizeReplayForRoom(db, game.code);
     const id = conceded.replayFinalizationId;
+    expect(await saveReplayNote(db, game.users[0], {
+      replayId: id,
+      frame: 0,
+      text: "Alice note",
+    })).toBe(true);
+    expect(await saveReplayNote(db, game.users[1], {
+      replayId: id,
+      frame: 0,
+      text: "Bob note",
+    })).toBe(true);
 
     expect(await deleteReplay(db, game.users[0], id)).toBe(true);
     expect(await listReplays(db, game.users[0])).toEqual([]);
     expect(await getReplay(db, game.users[0], id)).toBeNull();
     expect(await listReplays(db, game.users[1])).toHaveLength(1);
     expect(await getReplay(db, game.users[1], id)).not.toBeNull();
+    expect((await db.query(
+      "SELECT user_id, note FROM replay_notes WHERE replay_id=$1",
+      [id],
+    )).rows).toEqual([{ user_id: game.users[1], note: "Bob note" }]);
     expect(await deleteReplay(db, game.users[0], id)).toBe(false);
 
     expect(await deleteReplay(db, game.users[1], id)).toBe(true);

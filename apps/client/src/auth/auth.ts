@@ -12,6 +12,7 @@ import {
   decodeLoginResponse,
   decodeOkResponse,
   decodeReplayResponse,
+  decodeReplayNotesResponse,
   decodeReplaysResponse,
   decodeStatsResponse,
   type AccountBadgesResponse,
@@ -26,6 +27,8 @@ import {
   type LoginResponse,
   type OkResponse,
   type ReplayResponse,
+  type ReplayNotesResponse,
+  type ReplayNoteInput,
   type ReplaysResponse,
   type StatsResponse,
 } from "@fyendal/protocol";
@@ -191,6 +194,25 @@ export function apiRoomReplay(
   signal?: AbortSignal,
 ): Promise<ReplayResponse | ApiError> {
   return get(`replays/room/${roomCode}`, decodeReplayResponse, { token, signal });
+}
+
+export function apiReplayNotes(
+  token: string,
+  target: { replayId: string } | { roomCode: string },
+  signal?: AbortSignal,
+): Promise<ReplayNotesResponse | ApiError> {
+  const path = "replayId" in target
+    ? `replay-notes/${target.replayId}`
+    : `replay-notes/room/${target.roomCode}`;
+  return get(path, decodeReplayNotesResponse, { token, signal });
+}
+
+export function apiSaveReplayNote(
+  token: string,
+  input: ReplayNoteInput,
+  signal?: AbortSignal,
+): Promise<OkResponse | ApiError> {
+  return post("replay-notes", input, okOnly, { token, signal });
 }
 
 export type DeleteReplayResult = OkResponse | ApiError;

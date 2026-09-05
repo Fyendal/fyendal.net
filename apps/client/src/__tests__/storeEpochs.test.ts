@@ -441,6 +441,123 @@ describe("client connection and account race fences", () => {
     });
   });
 
+  it("bookmarks live room states and removes notes for frames discarded by undo", async () => {
+    localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+    const savedNotes: unknown[] = [];
+    vi.stubGlobal("fetch", vi.fn((input: string | URL | Request, init?: RequestInit) => {
+      const url = String(input);
+      if (url.endsWith("/api/replay-notes/room/AAAAAA")) {
+        return Promise.resolve(jsonResponse({ ok: true, notes: [] }));
+      }
+      if (url.endsWith("/api/replay-notes") && init?.method === "POST") {
+        savedNotes.push(JSON.parse(String(init.body)));
+        return Promise.resolve(jsonResponse({ ok: true }));
+      }
+      if (url.endsWith("/api/replays")) {
+        return Promise.resolve(jsonResponse({ ok: true, replays: [] }));
+      }
+      throw new Error(`unexpected fetch ${url}`);
+    }));
+    const { useStore } = await import("../store.js");
+    useStore.getState().joinRoom("AAAAAA");
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    socket.message({ type: "joined", code: "AAAAAA", seat: 0, token: "seat", version: 1 });
+    socket.message({ ...staleState, version: 2 });
+
+    useStore.getState().setLiveReplayNote(2, 0, "  Opening decision  ");
+    expect(useStore.getState().replayNotes).toEqual([
+      { roomVersion: 2, frame: 0, text: "Opening decision" },
+    ]);
+    expect(Array.from({ length: localStorage.length }, (_, index) => localStorage.key(index))
+      .some((key) => key?.includes("replay-notes"))).toBe(false);
+
+    socket.message({
+      ...staleState,
+      version: 3,
+      view: { ...staleState.view, turn: 2 },
+    });
+    useStore.getState().setLiveReplayNote(3, 1, "Undo this line");
+    expect(useStore.getState().replayNotes).toHaveLength(2);
+
+    socket.message({
+      ...staleState,
+      version: 4,
+      transition: { fromVersion: 3, kind: "replace", restoreVersion: 2, events: [] },
+    });
+    expect(useStore.getState()).toMatchObject({
+      replayFrames: 1,
+      replayNotes: [{ roomVersion: 2, frame: 0, text: "Opening decision" }],
+    });
+    expect(savedNotes).toEqual([
+      { roomCode: "AAAAAA", roomVersion: 2, frame: 0, text: "Opening decision" },
+      { roomCode: "AAAAAA", roomVersion: 3, frame: 1, text: "Undo this line" },
+    ]);
+  });
+
+  it("hydrates private notes when entering a live room", async () => {
+    localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+    vi.stubGlobal("fetch", vi.fn((input: string | URL | Request) => {
+      const url = String(input);
+      if (url.endsWith("/api/replay-notes/room/AAAAAA")) {
+        return Promise.resolve(jsonResponse({
+          ok: true,
+          notes: [{ frame: 0, roomVersion: 2, text: "Stored thought" }],
+        }));
+      }
+      if (url.endsWith("/api/replays")) {
+        return Promise.resolve(jsonResponse({ ok: true, replays: [] }));
+      }
+      throw new Error(`unexpected fetch ${url}`);
+    }));
+    const { useStore } = await import("../store.js");
+    useStore.getState().joinRoom("AAAAAA");
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    socket.message({ type: "joined", code: "AAAAAA", seat: 0, token: "seat", version: 1 });
+    socket.message({ ...staleState, version: 2 });
+
+    await vi.waitFor(() => {
+      expect(useStore.getState().replayNotes).toEqual([
+        { frame: 0, roomVersion: 2, text: "Stored thought" },
+      ]);
+    });
+  });
+
+  it("does not let pending live-note hydration replace a newer edit", async () => {
+    const liveNotes = deferred<Response>();
+    localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+    vi.stubGlobal("fetch", vi.fn((input: string | URL | Request, init?: RequestInit) => {
+      const url = String(input);
+      if (url.endsWith("/api/replay-notes/room/AAAAAA")) return liveNotes.promise;
+      if (url.endsWith("/api/replay-notes") && init?.method === "POST") {
+        return Promise.resolve(jsonResponse({ ok: true }));
+      }
+      if (url.endsWith("/api/replays")) {
+        return Promise.resolve(jsonResponse({ ok: true, replays: [] }));
+      }
+      throw new Error(`unexpected fetch ${url}`);
+    }));
+    const { useStore } = await import("../store.js");
+    useStore.getState().joinRoom("AAAAAA");
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    socket.message({ type: "joined", code: "AAAAAA", seat: 0, token: "seat", version: 1 });
+    socket.message({ ...staleState, version: 2 });
+
+    useStore.getState().setLiveReplayNote(2, 0, "New local thought");
+    liveNotes.resolve(jsonResponse({
+      ok: true,
+      notes: [{ frame: 0, roomVersion: 2, text: "Older server thought" }],
+    }));
+
+    await vi.waitFor(() => {
+      expect(useStore.getState().replayNotes).toEqual([
+        { frame: 0, roomVersion: 2, text: "New local thought" },
+      ]);
+    });
+  });
+
   it("moves a restored prep spectator from loading to the waiting screen", async () => {
     localStorage.setItem("fyendal-auth", JSON.stringify({ token: "account-token", username: "Alice" }));
     localStorage.setItem("fyendal-room-session", JSON.stringify({
@@ -998,9 +1115,19 @@ describe("client connection and account race fences", () => {
 
   it("routes saved replays but keeps imported replay files local-only", async () => {
     const replayId = "0123456789abcdef01234567";
+    let serverNotes: Array<{ frame: number; text: string }> = [];
     localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
-    vi.stubGlobal("fetch", vi.fn((input: string | URL | Request) => {
-      expect(String(input)).toBe(`http://localhost:8080/api/replays/${replayId}`);
+    vi.stubGlobal("fetch", vi.fn((input: string | URL | Request, init?: RequestInit) => {
+      const url = String(input);
+      if (url.endsWith(`/api/replay-notes/${replayId}`)) {
+        return Promise.resolve(jsonResponse({ ok: true, notes: serverNotes }));
+      }
+      if (url.endsWith("/api/replay-notes") && init?.method === "POST") {
+        const note = JSON.parse(String(init.body)) as { frame: number; text: string };
+        serverNotes = note.text ? [{ frame: note.frame, text: note.text }] : [];
+        return Promise.resolve(jsonResponse({ ok: true }));
+      }
+      expect(url).toBe(`http://localhost:8080/api/replays/${replayId}`);
       return Promise.resolve(jsonResponse({
         ok: true,
         replay: { version: 1, seat: 0, views: [staleState.view] },
@@ -1014,15 +1141,36 @@ describe("client connection and account race fences", () => {
       screen: "replay",
       activeSavedReplayId: replayId,
     });
+    useStore.getState().setReplayNote(0, "  Review this opening hand.  ");
+    expect(useStore.getState().replayNotes).toEqual([
+      { frame: 0, text: "Review this opening hand." },
+    ]);
 
     useStore.getState().closeReplay();
-    const imported = JSON.stringify({ version: 1, seat: 0, views: [staleState.view] });
+    await expect(useStore.getState().watchSavedReplay(replayId)).resolves.toBeNull();
+    expect(useStore.getState().replayNotes).toEqual([
+      { frame: 0, text: "Review this opening hand." },
+    ]);
+
+    useStore.getState().closeReplay();
+    const imported = JSON.stringify({
+      version: 3,
+      seat: 0,
+      frames: [{ view: staleState.view, transition: null }],
+      notes: [{ frame: 0, text: "Imported thought" }],
+    });
     expect(useStore.getState().openReplayText(imported)).toBeNull();
     expect(useStore.getState()).toMatchObject({
       screen: "replay",
       activeSavedReplayId: null,
+      replayNotes: [{ frame: 0, text: "Imported thought" }],
     });
-    expect(history.pushState).toHaveBeenCalledOnce();
+    useStore.getState().setReplayNote(0, "Updated imported thought");
+    expect(useStore.getState().replayNotes).toEqual([
+      { frame: 0, text: "Updated imported thought" },
+    ]);
+    expect(serverNotes).toEqual([{ frame: 0, text: "Review this opening hand." }]);
+    expect(history.pushState).toHaveBeenCalledTimes(2);
   });
 
   it("waits for authoritative game-over frames before opening an immediate replay", async () => {
@@ -1031,6 +1179,9 @@ describe("client connection and account race fences", () => {
     vi.stubGlobal("fetch", vi.fn((input: string | URL | Request) => {
       const url = String(input);
       if (url.endsWith("/api/replays/room/BOT001")) return roomReplay.promise;
+      if (url.endsWith("/api/replay-notes/room/BOT001")) {
+        return Promise.resolve(jsonResponse({ ok: true, notes: [] }));
+      }
       if (url.endsWith("/api/replays")) {
         return Promise.resolve(jsonResponse({ ok: true, replays: [] }));
       }

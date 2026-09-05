@@ -78,7 +78,7 @@ const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
   const intl = useIntl();
-  const { view, viewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, botGame, sendIntent, sendPriorityMode, sendRunechantSkip, sendEmote, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, watchReplay, downloadReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, backgroundSearching, stopBackgroundMatchmaking } = useStore(
+  const { view, viewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, botGame, sendIntent, sendPriorityMode, sendRunechantSkip, sendEmote, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, backgroundSearching, stopBackgroundMatchmaking } = useStore(
     useShallow((state) => ({
       view: state.view,
       viewUpdate: state.viewUpdate,
@@ -106,6 +106,8 @@ export function GameBoard() {
       roomCode: state.roomCode,
       screen: state.screen,
       replayFrames: state.replayFrames,
+      replayNotes: state.replayNotes,
+      setLiveReplayNote: state.setLiveReplayNote,
       watchReplay: state.watchReplay,
       downloadReplay: state.downloadReplay,
       getRecordedViews: state.getRecordedViews,
@@ -336,6 +338,15 @@ export function GameBoard() {
   const causal = causalStatus(view, spectating ? null : yourSeat);
   const seat: 0 | 1 = yourSeat === 1 ? 1 : 0; // spectators watch from seat 0's side of the table
   const replaying = screen === "replay";
+  const liveNoteFrame = !replaying && replayFrames > 0 ? replayFrames - 1 : null;
+  const liveNoteRoomVersion = !replaying && viewUpdate.source === "live"
+    ? viewUpdate.roomVersion ?? null
+    : null;
+  const liveNoteText = liveNoteFrame === null
+    ? null
+    : replayNotes.find((note) =>
+        note.roomVersion === liveNoteRoomVersion
+        || (note.roomVersion === undefined && note.frame === liveNoteFrame))?.text ?? null;
   const canSendEmote = !spectating && !replaying && connected;
   const authoritativeMe = view.players[seat]!;
   const me = presentedView.players[seat]!;
@@ -1170,6 +1181,10 @@ export function GameBoard() {
         emoteSeat={mobileFloatViewport && canSendEmote ? seat : null}
         onSendEmote={mobileFloatViewport && canSendEmote ? sendEmote : null}
         onReportBug={!spectating && !replaying ? reportBug : null}
+        noteFrame={liveNoteFrame}
+        noteRoomVersion={liveNoteRoomVersion}
+        noteText={liveNoteText}
+        onSetFrameNote={!spectating && !replaying ? setLiveReplayNote : null}
         onShowGameOver={
           !replaying && view.winner !== null && gameOverDismissed
             ? () => setGameOverDismissed(false)

@@ -30,6 +30,7 @@ import type {
   DeckDetailResponse,
   DeckSummary,
   ReplaySummary,
+  ReplayServerNote,
 } from "@fyendal/protocol";
 import type {
   DeckResult,
@@ -217,6 +218,7 @@ export interface StoreState {
   replayViews: GameView[] | null;
   replayTransitions: Array<Omit<GameTransitionView, "fromVersion"> | null> | null;
   replayStep: number;
+  replayNotes: ReplayServerNote[];
   activeSavedReplayId: string | null;
   savedReplays: ReplaySummary[];
   replaysLoading: boolean;
@@ -229,6 +231,8 @@ export interface StoreState {
   getRecordedViews: () => GameView[];
   openReplayText: (text: string) => string | null;
   setReplayStep: (step: number) => void;
+  setReplayNote: (frame: number, text: string) => void;
+  setLiveReplayNote: (roomVersion: number, frame: number, text: string) => void;
   closeReplay: () => void;
 }
 

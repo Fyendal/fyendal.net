@@ -1055,6 +1055,12 @@
   }
   .replay-bar .replay-scrubber { order: 3; width: 100%; }
   .replay-bar .replay-title { display: none; }
+  .replay-notes-panel {
+    right: 0;
+    left: 0;
+    width: auto;
+    max-height: calc(100dvh - 250px);
+  }
   .replay-bar.replay-bar-collapsed {
     top: auto;
     bottom: 0;

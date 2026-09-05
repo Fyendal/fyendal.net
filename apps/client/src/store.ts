@@ -14,7 +14,12 @@ import {
 } from "./replay/recorder.js";
 import { savedReplayIdFromPath } from "./replay/route.js";
 import { RoomVersionGate } from "./versionGate.js";
-import { decodeServerMessage } from "@fyendal/protocol";
+import {
+  decodeServerMessage,
+  MAX_REPLAY_NOTE_LENGTH,
+  replayFileNotes,
+  type ReplayServerNote,
+} from "@fyendal/protocol";
 import {
   AUTH_STORAGE_KEY,
   DEFAULT_LOBBY_SETTINGS,
@@ -52,13 +57,16 @@ import {
   apiDeck,
   apiLogin,
   apiLogout,
+  apiReplayNotes,
   apiRegister,
   apiRoomReplay,
+  apiSaveReplayNote,
 } from "./auth/auth.js";
 import { createAccountActions } from "./store/accountActions.js";
 import { createReplayActions } from "./store/replayActions.js";
 import { replayViewerProjection, snapshotBeforeReplay } from "./store/replayView.js";
 import { createErrorController } from "./store/errorController.js";
+import { withReplayNotes } from "./replay/replayFileNotes.js";
 
 let ws: WebSocket | null = null;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
@@ -111,6 +119,22 @@ let prepHero: HeroId | null = null;
 
 /** store snapshot taken when a replay opens from the game screen; restored on close */
 let preReplay: PreReplaySnapshot | null = null;
+/** Database target for edits in a server-backed replay; imported files use null. */
+let activeReplayNoteServerTarget: { replayId: string } | { roomCode: string } | null = null;
+/** Prevent an older note fetch from replacing a newer local edit. */
+let replayNoteMutationEpoch = 0;
+
+function replaceReplayNote(
+  notes: readonly ReplayServerNote[],
+  frame: number,
+  text: string,
+  roomVersion?: number,
+): ReplayServerNote[] {
+  return notes
+    .filter((note) => note.frame !== frame)
+    .concat(text ? [{ frame, text, ...(roomVersion === undefined ? {} : { roomVersion }) }] : [])
+    .sort((a, b) => a.frame - b.frame);
+}
 
 export const useStore = create<StoreState>((set, get) => {
   const errors = createErrorController(set);
@@ -236,6 +260,7 @@ export const useStore = create<StoreState>((set, get) => {
     prepDeckId = null;
     prepHero = null;
     preReplay = null;
+    activeReplayNoteServerTarget = null;
     resetRoomVersionState();
     set({ ...clearedRoomProjection(), connected: false });
     // The lobby component may already be mounted, so its auth-dependent effect
@@ -615,11 +640,20 @@ export const useStore = create<StoreState>((set, get) => {
     const token = get().authToken;
     if (!token) return Promise.resolve(null);
     const request = authRequest(token);
+    const noteMutationAtRequest = replayNoteMutationEpoch;
     const promise = (async () => {
       const result = await apiRoomReplay(token, code, request.signal);
       if (!isCurrentAuth(request) || get().roomCode !== code || !result.ok) return null;
+      const noteResult = await apiReplayNotes(token, { roomCode: code }, request.signal);
+      if (!isCurrentAuth(request) || get().roomCode !== code) return null;
+      if (!noteResult.ok) return null;
       const frames = replayRuntime.replace(code, result.replay);
-      set({ replayFrames: frames });
+      set({
+        replayFrames: frames,
+        replayNotes: replayNoteMutationEpoch === noteMutationAtRequest
+          ? noteResult.notes
+          : get().replayNotes,
+      });
       return result.replay;
     })().finally(() => {
       if (completedReplaySync?.promise === promise) completedReplaySync = null;
@@ -818,6 +852,7 @@ export const useStore = create<StoreState>((set, get) => {
           latestEmote: null,
           matchmakingActive: false,
           matchAcceptanceRole: null,
+          replayNotes: [],
         });
         break;
       case "state": {
@@ -841,6 +876,28 @@ export const useStore = create<StoreState>((set, get) => {
           break; // replay viewer owns the screen
         }
         const current = get();
+        const restoreVersion = msg.transition?.kind === "replace"
+          ? msg.transition.restoreVersion ?? null
+          : null;
+        const replayNotes = current.replayNotes.filter((note) =>
+          note.frame < frames
+          && (restoreVersion === null
+            || note.roomVersion === undefined
+            || note.roomVersion <= restoreVersion));
+        if (code && current.replayFrames === 0 && current.authToken) {
+          const notesCode = code;
+          const notesToken = current.authToken;
+          const noteMutationAtRequest = replayNoteMutationEpoch;
+          void apiReplayNotes(notesToken, { roomCode: notesCode }).then((result) => {
+            if (result.ok && get().authToken === notesToken
+              && get().roomCode === notesCode && get().screen === "game"
+              && replayNoteMutationEpoch === noteMutationAtRequest) {
+              set({
+                replayNotes: result.notes.filter((note) => note.frame < get().replayFrames),
+              });
+            }
+          });
+        }
         const previousLiveVersion = current.viewUpdate.source === "live"
           ? current.viewUpdate.roomVersion
           : undefined;
@@ -873,6 +930,7 @@ export const useStore = create<StoreState>((set, get) => {
           lastActionAt: msg.lastActionAt,
           screen: "game",
           replayFrames: frames,
+          replayNotes,
           ...(msg.botGame === true ? { pendingBotStart: false } : {}),
         });
         if (msg.botGame === true) send({ type: "background-matchmaking-status" });
@@ -1534,30 +1592,36 @@ export const useStore = create<StoreState>((set, get) => {
         const current = get();
         if (current.roomCode !== code || current.screen !== "game") return;
         if (file) {
-          openReplay(file);
+          openReplay(file, null, get().replayNotes, { roomCode: code });
         } else {
-          errors.show("Replay finalization did not complete. Try again.");
+          errors.show("Replay or notes could not be loaded. Try again.");
         }
         return;
       }
       const file = replayRuntime.getFile();
-      if (file) openReplay(file);
+      if (file) {
+        openReplay(
+          file,
+          null,
+          get().replayNotes,
+          code ? { roomCode: code } : null,
+        );
+      }
     },
     getRecordedViews: replayRuntime.getViews,
     downloadReplay: () => {
       const views = get().replayViews;
       const transitions = get().replayTransitions;
-      const file: ReplayFile | null =
-        get().screen === "replay" && views
-          ? {
-              version: 2,
-              seat: get().yourSeat,
-              frames: views.map((view, index) => ({
-                view,
-                transition: transitions?.[index] ?? null,
-              })),
-            }
+      const notes = get().replayNotes;
+      const frames = views?.map((view, index) => ({
+        view,
+        transition: transitions?.[index] ?? null,
+      }));
+      const baseFile: ReplayFile | null =
+        get().screen === "replay" && frames
+          ? { version: 2, seat: get().yourSeat, frames }
           : replayRuntime.getFile();
+      const file = baseFile ? withReplayNotes(baseFile, notes) : null;
       if (!file) return;
       downloadReplayFile(file);
     },
@@ -1598,14 +1662,80 @@ export const useStore = create<StoreState>((set, get) => {
         }),
       });
     },
+    setReplayNote: (frame, text) => {
+      const state = get();
+      const frameCount = state.replayViews?.length
+        ?? (state.screen === "game" ? state.replayFrames : 0);
+      if (!Number.isSafeInteger(frame) || frame < 0 || frame >= frameCount) {
+        return;
+      }
+      const normalized = text.trim().slice(0, MAX_REPLAY_NOTE_LENGTH);
+      const currentNote = state.replayNotes.find((note) => note.frame === frame);
+      const notes = replaceReplayNote(
+        state.replayNotes,
+        frame,
+        normalized,
+        currentNote?.roomVersion,
+      );
+      replayNoteMutationEpoch += 1;
+      set({ replayNotes: notes });
+      const token = state.authToken;
+      const target = activeReplayNoteServerTarget
+        ? "replayId" in activeReplayNoteServerTarget
+          ? { ...activeReplayNoteServerTarget, frame }
+          : {
+              ...activeReplayNoteServerTarget,
+              frame,
+              ...(currentNote?.roomVersion === undefined
+                ? {}
+                : { roomVersion: currentNote.roomVersion }),
+            }
+        : null;
+      if (token && target) {
+        void apiSaveReplayNote(token, { ...target, text: normalized }).then((result) => {
+          if (!result.ok) {
+            if (get().replayNotes === notes) {
+              replayNoteMutationEpoch += 1;
+              set({ replayNotes: state.replayNotes });
+            }
+            errors.show(result.error);
+          }
+        });
+      }
+    },
+    setLiveReplayNote: (roomVersion, frame, text) => {
+      const state = get();
+      if (!state.roomCode || !state.authToken || !Number.isSafeInteger(roomVersion)) return;
+      const normalized = text.trim().slice(0, MAX_REPLAY_NOTE_LENGTH);
+      const replayNotes = replaceReplayNote(state.replayNotes, frame, normalized, roomVersion);
+      replayNoteMutationEpoch += 1;
+      set({ replayNotes });
+      void apiSaveReplayNote(state.authToken, {
+        roomCode: state.roomCode,
+        roomVersion,
+        frame,
+        text: normalized,
+      }).then((result) => {
+        if (!result.ok) {
+          if (get().replayNotes === replayNotes) {
+            replayNoteMutationEpoch += 1;
+            set({ replayNotes: state.replayNotes });
+          }
+          errors.show(result.error);
+        }
+      });
+    },
     closeReplay: () => {
       const snap = preReplay;
       const savedReplayId = get().activeSavedReplayId;
+      const replayNotes = get().replayNotes;
       preReplay = null;
+      activeReplayNoteServerTarget = null;
       const base = {
         replayViews: null,
         replayTransitions: null,
         replayStep: 0,
+        replayNotes: [],
         activeSavedReplayId: null,
       };
       if (savedReplayIdFromPath(location.pathname) === savedReplayId) {
@@ -1615,6 +1745,8 @@ export const useStore = create<StoreState>((set, get) => {
       if (snap && get().roomCode) {
         set({
           ...base,
+          replayNotes: replayNotes.filter((note) =>
+            note.frame < replayRuntime.getViews().length),
           screen: "game",
           ...snap,
           viewUpdate: nextViewUpdate({ source: "restore", transition: "replace" }),
@@ -1636,11 +1768,21 @@ export const useStore = create<StoreState>((set, get) => {
 });
 
 /** Switch the screen to the replay viewer for the given recording. */
-function openReplay(file: ReplayFile, savedReplayId: string | null = null): void {
+function openReplay(
+  file: ReplayFile,
+  savedReplayId: string | null = null,
+  serverNotes?: ReplayServerNote[],
+  serverTarget: { replayId: string } | { roomCode: string } | null = null,
+): void {
   const s = useStore.getState();
   preReplay = snapshotBeforeReplay(s);
+  activeReplayNoteServerTarget = serverTarget;
+  const replayNotes = (serverNotes ?? replayFileNotes(file)).slice().sort(
+    (a, b) => a.frame - b.frame,
+  );
   useStore.setState({
     ...replayViewerProjection(file, savedReplayId),
+    replayNotes,
     viewUpdate: nextViewUpdate({
       source: "replay",
       transition: "replace",

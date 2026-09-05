@@ -19,6 +19,7 @@ import { ModalSurface } from "../components/ModalSurface.js";
 import { PrimaryActionButton, type PrimaryAction } from "./StatusFloat.js";
 import { GameMessageText } from "../i18n/GameMessage.js";
 import { BackgroundMatchSearch } from "../matchmaking/BackgroundMatchSearch.js";
+import { MAX_REPLAY_NOTE_LENGTH } from "@fyendal/protocol";
 
 type StructuredLogEntry = Extract<GameLogViewEntry, { message: unknown }>;
 
@@ -125,7 +126,7 @@ function LogLines({
   ));
 }
 
-function ControlIcon({ kind }: { kind: "undo" | "bug" | "settings" }) {
+function ControlIcon({ kind }: { kind: "undo" | "bug" | "note" | "settings" }) {
   const content = kind === "undo" ? (
     <>
       <path d="M9 7H5V3" />
@@ -137,6 +138,11 @@ function ControlIcon({ kind }: { kind: "undo" | "bug" | "settings" }) {
       <path d="M8 4 6.5 2.5M16 4l1.5-1.5" />
       <rect x="6" y="7" width="12" height="14" rx="6" />
       <path d="M12 11v10M6 11H3M18 11h3M6 16H3M18 16h3" />
+    </>
+  ) : kind === "note" ? (
+    <>
+      <path d="M6 3h12v18l-6-4-6 4V3Z" />
+      <path d="M9 8h6M12 5v6" />
     </>
   ) : (
     <>
@@ -192,6 +198,10 @@ export function SideRail({
   emoteSeat,
   onSendEmote,
   onReportBug,
+  noteFrame,
+  noteRoomVersion,
+  noteText,
+  onSetFrameNote,
   onShowGameOver,
   priorityWindowMode,
   onPriorityWindowModeChange,
@@ -241,6 +251,10 @@ export function SideRail({
   onReportBug: ((description: string) => Promise<
     { ok: true; reportId: string } | { ok: false; error: string }
   >) | null;
+  noteFrame: number | null;
+  noteRoomVersion: number | null;
+  noteText: string | null;
+  onSetFrameNote: ((roomVersion: number, frame: number, text: string) => void) | null;
   onShowGameOver: (() => void) | null;
   priorityWindowMode: PriorityWindowMode;
   onPriorityWindowModeChange: ((mode: PriorityWindowMode) => void) | null;
@@ -274,11 +288,26 @@ export function SideRail({
   const [showBugReport, setShowBugReport] = useState(false);
   const [showMobileLog, setShowMobileLog] = useState(false);
   const [showUtilities, setShowUtilities] = useState(false);
+  const [editingNote, setEditingNote] = useState<{
+    roomVersion: number;
+    frame: number;
+    text: string;
+    existed: boolean;
+  } | null>(null);
   const [confirmingAction, setConfirmingAction] = useState<"leave" | "concede" | null>(null);
   const leaveLabel = intl.formatMessage({
     id: leaveAction === "end-game" ? "common.endGame" : "common.leave",
   });
   const showOpponentDisconnected = !replaying && !opponentConnected && winnerText === null;
+  const openFrameNote = () => {
+    if (noteFrame === null || noteRoomVersion === null || !onSetFrameNote) return;
+    setEditingNote({
+      roomVersion: noteRoomVersion,
+      frame: noteFrame,
+      text: noteText ?? "",
+      existed: noteText !== null,
+    });
+  };
   const renderedLog = useMemo(
     () => (logEntries ?? log.map((fallback): GameLogViewEntry => ({ fallback })))
       .slice()
@@ -377,6 +406,8 @@ export function SideRail({
       <div className="rail-actions">
         {onUndo && (
           <button
+            className="rail-icon"
+            aria-label={intl.formatMessage({ id: "game.undoLast" })}
             title={intl.formatMessage({ id: "game.undoDescription" })}
             disabled={undoDisabled}
             onClick={(event) => undoWithoutFocus(
@@ -385,9 +416,23 @@ export function SideRail({
             )}
           >
             <ControlIcon kind="undo" />
-            {intl.formatMessage({ id: "game.undo" })}
           </button>
         )}
+        {noteFrame !== null && noteRoomVersion !== null && onSetFrameNote ? (
+          <button
+            className={`rail-icon${noteText !== null ? " rail-note-active" : ""}`}
+            aria-label={intl.formatMessage({
+              id: noteText !== null ? "game.notes.edit" : "game.notes.add",
+            })}
+            title={intl.formatMessage({
+              id: noteText !== null ? "game.notes.edit" : "game.notes.add",
+            })}
+            aria-pressed={noteText !== null}
+            onClick={openFrameNote}
+          >
+            <ControlIcon kind="note" />
+          </button>
+        ) : null}
         {onReportBug ? (
           <button
             className="rail-icon"
@@ -515,6 +560,62 @@ export function SideRail({
         />
       ) : null}
 
+      {editingNote && onSetFrameNote ? (
+        <ModalSurface
+          title={intl.formatMessage(
+            { id: "game.notes.title" },
+            { frame: editingNote.frame + 1 },
+          )}
+          description={intl.formatMessage({ id: "game.notes.description" })}
+          className="game-note-sheet"
+          onClose={() => setEditingNote(null)}
+        >
+          <div className="game-note-editor">
+            <textarea
+              data-modal-initial-focus
+              maxLength={MAX_REPLAY_NOTE_LENGTH}
+              value={editingNote.text}
+              placeholder={intl.formatMessage({ id: "replay.notes.placeholder" })}
+              aria-label={intl.formatMessage(
+                { id: "replay.notes.input" },
+                { frame: editingNote.frame + 1 },
+              )}
+              onChange={(event) => setEditingNote({
+                ...editingNote,
+                text: event.target.value,
+              })}
+            />
+            <div className="game-note-actions">
+              {editingNote.existed ? (
+                <button
+                  type="button"
+                  className="btn-danger"
+                  onClick={() => {
+                    onSetFrameNote(editingNote.roomVersion, editingNote.frame, "");
+                    setEditingNote(null);
+                  }}
+                >
+                  {intl.formatMessage({ id: "replay.notes.remove" })}
+                </button>
+              ) : null}
+              <button type="button" onClick={() => setEditingNote(null)}>
+                {intl.formatMessage({ id: "common.cancel" })}
+              </button>
+              <button
+                type="button"
+                disabled={editingNote.text.trim().length === 0}
+                onClick={() => {
+                  onSetFrameNote(editingNote.roomVersion, editingNote.frame, editingNote.text);
+                  setEditingNote(null);
+                }}
+              >
+                {intl.formatMessage({ id: "replay.notes.save" })}
+              </button>
+            </div>
+          </div>
+        </ModalSurface>
+      ) : null}
+
       {showUtilities ? (
         <ModalSurface
           title={intl.formatMessage({ id: "game.controls" })}
@@ -525,6 +626,18 @@ export function SideRail({
             <BackgroundMatchSearch placement="menu" onStop={onStopBackgroundSearch} />
           ) : null}
           <div className="game-utilities-actions">
+            {noteFrame !== null && noteRoomVersion !== null && onSetFrameNote ? (
+              <button
+                onClick={() => {
+                  setShowUtilities(false);
+                  openFrameNote();
+                }}
+              >
+                {intl.formatMessage({
+                  id: noteText !== null ? "game.notes.edit" : "game.notes.add",
+                })}
+              </button>
+            ) : null}
             {(onConcede || onUndo || onPriorityWindowModeChange) ? (
               <button
                 onClick={() => {

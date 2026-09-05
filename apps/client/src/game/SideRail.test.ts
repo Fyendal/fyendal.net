@@ -35,6 +35,10 @@ function sideRailProps(
     emoteSeat: 0,
     onSendEmote: vi.fn(),
     onReportBug: async () => ({ ok: true as const, reportId: "report" }),
+    noteFrame: null,
+    noteRoomVersion: null,
+    noteText: null,
+    onSetFrameNote: null,
     onShowGameOver: null,
     priorityWindowMode: "auto-pass",
     onPriorityWindowModeChange: vi.fn(),
@@ -101,10 +105,24 @@ describe("game control icons", () => {
     expect(html).not.toContain("mobile-gamebar-status");
     expect(html).not.toContain("ACTION PHASE");
     expect(html).not.toContain("End Game");
+    expect(html).not.toContain(">Undo</button>");
     expect(html).toContain(">Leave</button>");
     expect(html.match(/aria-label="More game controls"/g)).toHaveLength(1);
     expect(html).not.toContain("⚙");
     expect(html).not.toContain("💬");
+  });
+
+  it("offers a bookmark control for the current live room state", () => {
+    const html = renderSideRail(sideRailProps({
+      noteFrame: 12,
+      noteRoomVersion: 42,
+      noteText: null,
+      onSetFrameNote: vi.fn(),
+    }));
+
+    expect(html).toContain('aria-label="Bookmark current state"');
+    expect(html).toContain('data-control-icon="note"');
+    expect(html).toContain('aria-pressed="false"');
   });
 
   it("omits the mobile action slot when there is no contextual action", () => {

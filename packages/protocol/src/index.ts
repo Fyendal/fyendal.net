@@ -26,6 +26,7 @@ import type {
   PlayerView,
   PrepView,
   ReplayFile,
+  ReplayNote,
   RoomSummary,
   ServerMessage,
   PlayerTurnFactsView,
@@ -97,6 +98,14 @@ export interface ReplaySummary {
 }
 export interface ReplaysResponse { ok: true; replays: ReplaySummary[] }
 export interface ReplayResponse { ok: true; replay: ReplayFile }
+export interface ReplayServerNote extends ReplayNote {
+  /** Present while a replay is still recording/finalizing. */
+  roomVersion?: number;
+}
+export interface ReplayNotesResponse { ok: true; notes: ReplayServerNote[] }
+export type ReplayNoteInput =
+  | { replayId: string; frame: number; text: string }
+  | { roomCode: string; roomVersion?: number; frame: number; text: string };
 export interface AccountBadgesResponse {
   ok: true;
   availableBadges: PlayerBadge[];
@@ -190,6 +199,8 @@ const MAX_LOG = 200;
 const MAX_ROOMS = 10_000;
 const MAX_DECKS = 1_000;
 const MAX_REPLAY_VIEWS = 10_000;
+export const MAX_REPLAY_NOTE_LENGTH = 2_000;
+const MAX_REPLAY_NOTES = MAX_REPLAY_VIEWS;
 const MAX_COUNTERS = 128;
 const MAX_MESSAGE_VALUES = 16;
 const MAX_MESSAGE_VALUE_TEXT = 256;
@@ -1231,7 +1242,10 @@ export function decodeReplayFile(value: unknown): ReplayFile | null {
       ? { version: 1, seat: replay.seat, views }
       : null;
   }
-  if (replay.version !== 2 || !exactKeys(replay, ["version", "seat", "frames"])
+  if ((replay.version !== 2 && replay.version !== 3)
+    || !exactKeys(replay, replay.version === 3
+      ? ["version", "seat", "frames", "notes"]
+      : ["version", "seat", "frames"])
     || !Array.isArray(replay.frames) || replay.frames.length > MAX_REPLAY_VIEWS) return null;
   const frames = replay.frames.map((value, index) => {
     const frame = object(value);
@@ -1248,9 +1262,28 @@ export function decodeReplayFile(value: unknown): ReplayFile | null {
     if (!view || (frame.transition !== null && transition === null)) return null;
     return { view, transition };
   });
-  return frames.every((frame): frame is NonNullable<typeof frame> => frame !== null)
-    ? { version: 2, seat: replay.seat, frames }
+  if (!frames.every((frame): frame is NonNullable<typeof frame> => frame !== null)) return null;
+  if (replay.version === 2) return { version: 2, seat: replay.seat, frames };
+  const notes = decodeReplayNotes(replay.notes, frames.length);
+  return notes
+    ? { version: 3, seat: replay.seat, frames, notes }
     : null;
+}
+
+export function decodeReplayNotes(value: unknown, frameCount: number): ReplayNote[] | null {
+  if (!Array.isArray(value) || value.length > MAX_REPLAY_NOTES
+    || value.length > frameCount) return null;
+  const seenFrames = new Set<number>();
+  const notes = value.map((entry) => {
+    const note = object(entry);
+    if (!note || !exactKeys(note, ["frame", "text"])
+      || !nonNegativeInteger(note.frame) || note.frame >= frameCount
+      || seenFrames.has(note.frame)
+      || !string(note.text, MAX_REPLAY_NOTE_LENGTH, false)) return null;
+    seenFrames.add(note.frame);
+    return { frame: note.frame, text: note.text };
+  });
+  return notes.every((note): note is ReplayNote => note !== null) ? notes : null;
 }
 
 export function replayFileViews(file: ReplayFile): GameView[] {
@@ -1263,6 +1296,10 @@ export function replayFileTransitions(
   return file.version === 1
     ? file.views.map(() => null)
     : file.frames.map((frame) => frame.transition);
+}
+
+export function replayFileNotes(file: ReplayFile): ReplayNote[] {
+  return file.version === 3 ? file.notes : [];
 }
 
 export const decodeApiError: Decoder<ApiError> = (value) => {
@@ -1333,6 +1370,55 @@ export const decodeReplayResponse: Decoder<ReplayResponse> = (value) => {
   if (!data || !exactKeys(data, ["ok", "replay"]) || data.ok !== true) return null;
   const replay = decodeReplayFile(data.replay);
   return replay ? { ok: true, replay } : null;
+};
+
+export const decodeReplayNotesResponse: Decoder<ReplayNotesResponse> = (value) => {
+  const data = object(value);
+  if (!data || !exactKeys(data, ["ok", "notes"]) || data.ok !== true
+    || !Array.isArray(data.notes) || data.notes.length > MAX_REPLAY_NOTES) return null;
+  const notes = data.notes.map((value) => {
+    const note = object(value);
+    if (!note || !exactKeys(note, ["frame", "text", "roomVersion"], ["frame", "text"])
+      || !nonNegativeInteger(note.frame)
+      || !string(note.text, MAX_REPLAY_NOTE_LENGTH, false)
+      || ("roomVersion" in note && !nonNegativeInteger(note.roomVersion))) return null;
+    return {
+      frame: note.frame,
+      text: note.text,
+      ...(note.roomVersion === undefined ? {} : { roomVersion: note.roomVersion }),
+    };
+  });
+  if (!notes.every((note): note is ReplayServerNote => note !== null)) return null;
+  const targets = new Set(notes.map((note) => note.roomVersion === undefined
+    ? `frame:${note.frame}`
+    : `version:${note.roomVersion}`));
+  return targets.size === notes.length
+    ? { ok: true, notes }
+    : null;
+};
+
+export const decodeReplayNoteInput: Decoder<ReplayNoteInput> = (value) => {
+  const input = object(value);
+  if (!input || !nonNegativeInteger(input.frame) || typeof input.text !== "string") return null;
+  const text = input.text.trim();
+  if (text.length > MAX_REPLAY_NOTE_LENGTH) return null;
+  if (typeof input.replayId === "string") {
+    return exactKeys(input, ["replayId", "frame", "text"])
+      && /^[a-f0-9]{24}$/.test(input.replayId)
+      ? { replayId: input.replayId, frame: input.frame, text }
+      : null;
+  }
+  return exactKeys(input, ["roomCode", "roomVersion", "frame", "text"], ["roomCode", "frame", "text"])
+    && typeof input.roomCode === "string"
+    && /^[A-Za-z0-9]{6}$/.test(input.roomCode)
+    && optional(input.roomVersion, nonNegativeInteger)
+    ? {
+        roomCode: input.roomCode.toUpperCase(),
+        frame: input.frame,
+        text,
+        ...(input.roomVersion === undefined ? {} : { roomVersion: input.roomVersion }),
+      }
+    : null;
 };
 
 export const decodeLoginResponse: Decoder<LoginResponse> = (value) => {

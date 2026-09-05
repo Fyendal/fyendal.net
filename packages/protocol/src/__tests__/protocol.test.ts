@@ -16,6 +16,8 @@ import {
   decodeLoginResponse,
   decodeOkResponse,
   decodeReplayFile,
+  decodeReplayNoteInput,
+  decodeReplayNotesResponse,
   decodeReplayResponse,
   decodeReplaysResponse,
   decodeServerMessage,
@@ -785,7 +787,20 @@ describe("replays and HTTP responses", () => {
       { view: gameView(), transition: null },
       { view: { ...gameView(), turn: 2 }, transition: { kind: "forward", events: [{ kind: "move", from: { kind: "deck", seat: 0 }, to: { kind: "hand", seat: 0 }, count: 1 }] } },
     ] })).not.toBeNull();
+    expect(decodeReplayFile({ version: 3, seat: 0, frames: [
+      { view: gameView(), transition: null },
+      { view: { ...gameView(), turn: 2 }, transition: null },
+    ], notes: [{ frame: 1, text: "Reconsider this block." }] })).toMatchObject({
+      version: 3,
+      notes: [{ frame: 1, text: "Reconsider this block." }],
+    });
     expect(decodeReplayFile({ version: 2, seat: 0, views: [gameView()] })).toBeNull();
+    expect(decodeReplayFile({ version: 3, seat: 0, frames: [
+      { view: gameView(), transition: null },
+    ], notes: [{ frame: 1, text: "Out of range" }] })).toBeNull();
+    expect(decodeReplayFile({ version: 3, seat: 0, frames: [
+      { view: gameView(), transition: null },
+    ], notes: [{ frame: 0, text: "First" }, { frame: 0, text: "Duplicate" }] })).toBeNull();
     expect(decodeReplayFile({ version: 1, seat: 0, views: [gameView()], extra: true })).toBeNull();
     expect(decodeReplayFile({ version: 1, seat: 0, views: Array(10_001).fill(gameView()) })).toBeNull();
   });
@@ -799,6 +814,38 @@ describe("replays and HTTP responses", () => {
   it("decodes every HTTP response shape with exact keys and bounds", () => {
     expect(decodeApiError({ ok: false, error: "bad" })).not.toBeNull();
     expect(decodeOkResponse({ ok: true })).not.toBeNull();
+    expect(decodeReplayNotesResponse({
+      ok: true,
+      notes: [
+        { frame: 0, roomVersion: 12, text: "Live thought" },
+        { frame: 2, text: "Final thought" },
+      ],
+    })).not.toBeNull();
+    expect(decodeReplayNotesResponse({
+      ok: true,
+      notes: [{ frame: 0, text: "First" }, { frame: 0, text: "Duplicate" }],
+    })).toBeNull();
+    expect(decodeReplayNotesResponse({
+      ok: true,
+      notes: [{ frame: 0, text: "Note", opponent: true }],
+    })).toBeNull();
+    expect(decodeReplayNoteInput({
+      roomCode: "abc123",
+      roomVersion: 12,
+      frame: 0,
+      text: "  Live thought  ",
+    })).toEqual({ roomCode: "ABC123", roomVersion: 12, frame: 0, text: "Live thought" });
+    expect(decodeReplayNoteInput({
+      replayId: "0123456789abcdef01234567",
+      frame: 2,
+      text: "",
+    })).not.toBeNull();
+    expect(decodeReplayNoteInput({
+      replayId: "0123456789abcdef01234567",
+      roomCode: "ABC123",
+      frame: 0,
+      text: "Invalid mixed target",
+    })).toBeNull();
     expect(decodeLoginResponse({ ok: true, token: "token", username: "alice" })).not.toBeNull();
     expect(decodeStatsResponse({ ok: true, inGame: 1, openRooms: 2 })).not.toBeNull();
     expect(decodeBugReportResponse({ ok: true, reportId: "report-id" })).not.toBeNull();
