@@ -29,15 +29,16 @@ managed-environment capacity check.
 - per-game decisions for 60 seconds: 10 seconds for an ordinary action and 1
   second for a pass, with initial decisions staggered across the think window
 - up to 10 post-measurement undo checks
-- one replay grown past 500 frames through real action and undo commits
+- one room driven through more than 500 real action and undo commits while its
+  accepted-timeline replay remains bounded
 - 120 games finished at 2 games per second for 60 seconds, including replay
   finalization
-- replay-row, participant-payload, and long-replay HTTP retrieval validation
+- replay-row, participant-payload, undo-pruning, and HTTP retrieval validation
 
 The harness addresses both gateways directly instead of placing a local proxy
 in front of them. This makes placement deterministic: opponents use different
-gateways, reconnects move to the other gateway, and long replay retrieval goes
-through the gateway that did not host the requesting player. Production session
+gateways, reconnects move to the other gateway, and replay retrieval after undo
+churn goes through the gateway that did not host the requesting player. Production session
 affinity is therefore not required for the test to pass.
 
 The correctness phase is excluded from latency measurement. For each selected
@@ -134,9 +135,9 @@ PERF_RECONNECT_PERCENT=5 \
 PERF_SPECTATORS=10 \
 PERF_MATCHMAKING_PAIRS=10 \
 PERF_CORRECTNESS_GAMES=10 \
-PERF_LONG_REPLAY_GAMES=1 \
-PERF_LONG_REPLAY_FRAMES=550 \
-PERF_LONG_REPLAY_COMMITS_PER_SECOND=10 \
+PERF_UNDO_CHURN_GAMES=1 \
+PERF_UNDO_CHURN_COMMITS=550 \
+PERF_UNDO_CHURN_COMMITS_PER_SECOND=10 \
 PERF_FINISH_RATE=2 \
 PERF_FINISH_DURATION_SECONDS=60 \
 PERF_FINISH_GAMES=120 \
@@ -151,11 +152,11 @@ matchmaking; pairs are set up serially while each pair's two submissions race.
 `PERF_CORRECTNESS_GAMES` selects how many active games receive the explicit
 cross-gateway fencing/deduplication checks. Set either to `0` to disable that
 phase. Both default to the smaller of 10 and `PERF_GAMES`.
-`PERF_LONG_REPLAY_GAMES=0` disables long-replay construction, and
-`PERF_LONG_REPLAY_FRAMES=0` disables it regardless of the game count. Long
-replays are built before paced completion and must be among the games that
-finish so the harness can fetch and decode the saved payload. Long-replay
-commits are paced across both player sockets; keep their rate below the
+`PERF_UNDO_CHURN_GAMES=0` disables action/undo churn, and
+`PERF_UNDO_CHURN_COMMITS=0` disables it regardless of the game count. Churned
+rooms are exercised before paced completion and must be among the games that
+finish so the harness can verify the bounded saved payload. Churn commits are
+paced across both player sockets; keep their rate below the
 production WebSocket message-rate limit unless testing that protection is the
 goal.
 
@@ -170,7 +171,7 @@ PERF_RECONNECT_PERCENT=50 \
 PERF_SPECTATORS=1 \
 PERF_MATCHMAKING_PAIRS=1 \
 PERF_CORRECTNESS_GAMES=2 \
-PERF_LONG_REPLAY_FRAMES=20 \
+PERF_UNDO_CHURN_COMMITS=20 \
 PERF_FINISH_RATE=2 \
 PERF_FINISH_DURATION_SECONDS=1 \
 pnpm perf:load

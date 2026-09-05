@@ -69,20 +69,63 @@ function frame(turn: number, winner: number | null = null): GameView {
 }
 
 describe("ReplayRecorder", () => {
-  it("appends frames and skips consecutive duplicates (reconnect re-sends)", () => {
+  it("appends frames and skips a repeated room version", () => {
     const rec = new ReplayRecorder("ABC123", fakeStorage());
-    expect(rec.record(frame(1), 0)).toBe(true);
-    expect(rec.record(frame(2), 0)).toBe(true);
+    expect(rec.record(1, frame(1), 0)).toBe(true);
+    expect(rec.record(2, frame(2), 0)).toBe(true);
     // same state pushed again after a reconnect — not recorded twice
-    expect(rec.record(frame(2), 0)).toBe(false);
+    expect(rec.record(2, frame(2), 0)).toBe(false);
     expect(rec.length).toBe(2);
     expect(rec.recordedSeat).toBe(0);
+  });
+
+  it("truncates invalidated frames without recording versioned restores", () => {
+    const storage = fakeStorage();
+    const rec = new ReplayRecorder("ABC123", storage);
+    rec.record(10, frame(1), 0);
+    rec.record(11, frame(2), 0);
+    rec.record(12, frame(3), 0);
+    rec.checkpoint();
+    expect(storage.data.size).toBe(1);
+
+    expect(rec.record(13, frame(1), 0, {
+      fromVersion: 12,
+      kind: "replace",
+      restoreVersion: 10,
+      events: [],
+    })).toBe(false);
+    expect(rec.length).toBe(1);
+    expect(replayFileViews(rec.toFile()).map((view) => view.turn)).toEqual([1]);
+    expect(storage.data.size).toBe(0);
+
+    rec.record(14, frame(4), 0);
+    expect(rec.record(15, frame(1), 0, {
+      fromVersion: 14,
+      kind: "replace",
+      restoreVersion: 13,
+      events: [],
+    })).toBe(false);
+    expect(replayFileViews(rec.toFile()).map((view) => view.turn)).toEqual([1]);
+  });
+
+  it("keeps an authoritative restore as the baseline when history is absent", () => {
+    const rec = new ReplayRecorder("ABC123", fakeStorage());
+    rec.record(20, frame(3), 0);
+
+    expect(rec.record(21, frame(1), 0, {
+      fromVersion: 20,
+      kind: "replace",
+      restoreVersion: 5,
+      events: [],
+    })).toBe(false);
+    expect(rec.length).toBe(1);
+    expect(replayFileViews(rec.toFile()).map((view) => view.turn)).toEqual([1]);
   });
 
   it("persists every PERSIST_EVERY frames and on finish, and reloads from storage", () => {
     const storage = fakeStorage();
     const rec = new ReplayRecorder("ABC123", storage);
-    for (let i = 1; i <= PERSIST_EVERY; i++) rec.record(frame(i), 1);
+    for (let i = 1; i <= PERSIST_EVERY; i++) rec.record(i, frame(i), 1);
     expect(storage.data.size).toBe(1);
 
     // simulates a page reload mid-game: a new recorder resumes from storage
@@ -90,7 +133,7 @@ describe("ReplayRecorder", () => {
     expect(resumed.length).toBe(PERSIST_EVERY);
     expect(resumed.recordedSeat).toBe(1);
 
-    resumed.record(frame(PERSIST_EVERY + 1, 0), 1);
+    resumed.record(PERSIST_EVERY + 1, frame(PERSIST_EVERY + 1, 0), 1);
     resumed.finish();
     const reloaded = new ReplayRecorder("ABC123", storage);
     expect(reloaded.length).toBe(PERSIST_EVERY + 1);
@@ -101,7 +144,7 @@ describe("ReplayRecorder", () => {
     const storage = fakeStorage();
     storage.failWrites = true;
     const rec = new ReplayRecorder("ABC123", storage);
-    for (let i = 1; i <= PERSIST_EVERY + 5; i++) rec.record(frame(i), 0);
+    for (let i = 1; i <= PERSIST_EVERY + 5; i++) rec.record(i, frame(i), 0);
     rec.finish();
     expect(rec.length).toBe(PERSIST_EVERY + 5);
     expect(replayFileViews(rec.toFile()).length).toBe(PERSIST_EVERY + 5);
@@ -111,7 +154,7 @@ describe("ReplayRecorder", () => {
   it("discard removes the persisted entry", () => {
     const storage = fakeStorage();
     const rec = new ReplayRecorder("ABC123", storage);
-    for (let i = 1; i <= PERSIST_EVERY; i++) rec.record(frame(i), 0);
+    for (let i = 1; i <= PERSIST_EVERY; i++) rec.record(i, frame(i), 0);
     expect(storage.data.size).toBe(1);
     rec.discard();
     expect(storage.data.size).toBe(0);
@@ -125,7 +168,7 @@ describe("ReplayRecorder", () => {
       JSON.stringify({ version: 1, seat: 0, views: [frame(1)] }),
     );
     const current = new ReplayRecorder("NEW123", storage);
-    current.record(frame(1), 0);
+    current.record(1, frame(1), 0);
     current.finish();
 
     expect(removeUnsupportedLocalReplays(storage)).toBe(1);
@@ -136,8 +179,8 @@ describe("ReplayRecorder", () => {
   it("checkpoints a short recording and replaces it with authoritative history", () => {
     const storage = fakeStorage();
     const rec = new ReplayRecorder("ABC123", storage);
-    rec.record(frame(1), 0);
-    rec.record(frame(2), 0);
+    rec.record(1, frame(1), 0);
+    rec.record(2, frame(2), 0);
     rec.checkpoint();
     expect(new ReplayRecorder("ABC123", storage).length).toBe(2);
 
@@ -159,8 +202,8 @@ describe("parseReplayFile", () => {
 
   it("round-trips a recorder file", () => {
     const rec = new ReplayRecorder("ABC123", fakeStorage());
-    rec.record(frame(1), 0);
-    rec.record(frame(2, 1), 0);
+    rec.record(1, frame(1), 0);
+    rec.record(2, frame(2, 1), 0);
     const r = parseReplayFile(JSON.stringify(rec.toFile()));
     expect(r.ok).toBe(true);
     if (r.ok) {

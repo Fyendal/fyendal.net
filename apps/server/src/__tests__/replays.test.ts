@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { gunzipSync } from "node:zlib";
 import { decklists } from "@fyendal/cards";
+import { legalIntents } from "@fyendal/engine";
 import { decodeGameView, decodeReplayResponse, replayFileViews } from "@fyendal/protocol";
 import type { Queryable } from "../db.js";
 import {
@@ -15,7 +16,7 @@ import {
   sweepReplays,
   waitForReplayPayloadForRoom,
 } from "../replays.js";
-import { dehydrateState, PgRoomStore } from "../store.js";
+import { dehydrateState, PgRoomStore, stateMessage } from "../store.js";
 import { exportAccount } from "../accounts.js";
 import { freshDb } from "./testdb.js";
 
@@ -80,6 +81,53 @@ async function startedGame() {
 }
 
 describe("server replay retention", () => {
+  it("prunes invalidated action frames instead of recording Undo", async () => {
+    const game = await startedGame();
+    const before = await store.getRoom(game.code);
+    if (!before?.state) throw new Error("game did not start");
+    const actor = (before.state.pendingDecision?.player ?? before.state.priorityPlayer) as 0 | 1;
+    const intent = legalIntents(before.state, actor).find((candidate) => candidate.kind !== "concede");
+    if (!intent) throw new Error("no legal action");
+
+    expect((await store.applyIntent(
+      game.code,
+      { token: game.tokens[actor], userId: game.users[actor] },
+      intent,
+    )).ok).toBe(true);
+    expect(Number((await db.query(
+      `SELECT COUNT(*) AS count FROM replay_frames f
+       JOIN replay_games g ON g.id = f.replay_id WHERE g.room_code = $1`,
+      [game.code],
+    )).rows[0]!.count)).toBe(2);
+
+    const other = (1 - actor) as 0 | 1;
+    const undone = await store.undo(
+      game.code,
+      { token: game.tokens[other], userId: game.users[other] },
+    );
+    expect(undone.ok).toBe(true);
+    const after = await store.getRoom(game.code);
+    expect(after?.lastTransition).toMatchObject({
+      kind: "replace",
+      restoreVersion: before.version,
+    });
+    expect(after && stateMessage(after, actor)).toMatchObject({
+      type: "state",
+      transition: {
+        kind: "replace",
+        restoreVersion: before.version,
+        events: [],
+      },
+    });
+    const frames = (await db.query(
+      `SELECT f.room_version FROM replay_frames f
+       JOIN replay_games g ON g.id = f.replay_id
+       WHERE g.room_code = $1 ORDER BY f.room_version`,
+      [game.code],
+    )).rows;
+    expect(frames.map((row) => Number(row.room_version))).toEqual([before.version]);
+  });
+
   it("does not roll back a game action when an older revision cannot project a replay card", async () => {
     const game = await startedGame();
     const room = await store.getRoom(game.code);

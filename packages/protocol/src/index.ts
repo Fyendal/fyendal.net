@@ -741,9 +741,11 @@ function gameTransitionMove(value: unknown): value is GameTransitionMove {
 function gameTransitionView(value: unknown): value is GameTransitionView {
   const transition = object(value);
   return !!transition
-    && exactKeys(transition, ["fromVersion", "kind", "events"])
+    && exactKeys(transition, ["fromVersion", "kind", "restoreVersion", "events"], ["fromVersion", "kind", "events"])
     && nonNegativeInteger(transition.fromVersion)
     && (transition.kind === "forward" || transition.kind === "replace")
+    && optional(transition.restoreVersion, nonNegativeInteger)
+    && (transition.kind === "replace" || transition.restoreVersion === undefined)
     && array(transition.events, gameTransitionMove, 512)
     && (transition.kind === "forward" || transition.events.length === 0);
 }

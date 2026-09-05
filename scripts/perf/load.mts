@@ -16,6 +16,7 @@ import type {
 import {
   decodeReplayResponse,
   decodeServerMessage,
+  replayFileViews,
 } from "../../packages/protocol/src/index.js";
 import { decklists } from "../../packages/cards/src/index.js";
 import { createPool } from "../../apps/server/src/db.js";
@@ -58,10 +59,9 @@ const config = {
   passThinkSeconds: numberEnv("PERF_PASS_THINK_SECONDS", 1, 0.1, 600),
   reconnectPercent: numberEnv("PERF_RECONNECT_PERCENT", 5, 0, 100),
   spectators: integerEnv("PERF_SPECTATORS", 10, 0, 500),
-  longReplayGames: integerEnv("PERF_LONG_REPLAY_GAMES", 1, 0, 10),
-  // Leave one frame for the finishing intent; replay decoders accept 10,000.
-  longReplayFrames: integerEnv("PERF_LONG_REPLAY_FRAMES", 550, 0, 9_999),
-  longReplayCommitsPerSecond: numberEnv("PERF_LONG_REPLAY_COMMITS_PER_SECOND", 10, 0.1, 100),
+  undoChurnGames: integerEnv("PERF_UNDO_CHURN_GAMES", 1, 0, 10),
+  undoChurnCommits: integerEnv("PERF_UNDO_CHURN_COMMITS", 550, 0, 9_999),
+  undoChurnCommitsPerSecond: numberEnv("PERF_UNDO_CHURN_COMMITS_PER_SECOND", 10, 0.1, 100),
   finishRate,
   finishDurationSeconds,
   finishGames: integerEnv("PERF_FINISH_GAMES", scheduledFinishCapacity, 0, scheduledFinishCapacity),
@@ -806,7 +806,7 @@ async function validateConcurrencyCorrectness(
   return result;
 }
 
-interface LongReplayResult {
+interface UndoChurnResult {
   game: GameSession;
   frames: number;
   commits: number;
@@ -832,34 +832,33 @@ async function replayFrameCount(
   return frames;
 }
 
-/** Build a long replay through ordinary protocol operations. Alternating a
- * legal action with undo keeps the game alive while each committed state is
- * still recorded and later serialized by the production finalizer. */
-async function buildLongReplay(
+/** Exercise a long-lived room through ordinary action/undo pairs. Each Undo
+ * must prune the invalidated action frame, so retained replay growth stays
+ * bounded even while room versions and committed work continue to advance. */
+async function runUndoChurn(
   pool: Awaited<ReturnType<typeof createPool>>,
   game: GameSession,
-  targetFrames: number,
-): Promise<LongReplayResult> {
-  let frames = await replayFrameCount(pool, game);
+  targetCommits: number,
+): Promise<UndoChurnResult> {
+  const initialFrames = await replayFrameCount(pool, game);
   let commits = 0;
   const startedAt = performance.now();
-  const commitIntervalMs = 1_000 / config.longReplayCommitsPerSecond;
+  const commitIntervalMs = 1_000 / config.undoChurnCommitsPerSecond;
   let nextCommitAt = startedAt;
   const paceCommit = async (): Promise<void> => {
     const wait = nextCommitAt - performance.now();
     if (wait > 0) await delay(wait);
     nextCommitAt = performance.now() + commitIntervalMs;
   };
-  let nextProgress = Math.ceil((frames + 1) / 100) * 100;
-  while (frames < targetFrames) {
+  let nextProgress = 100;
+  while (commits < targetCommits) {
     await paceCommit();
     const applied = await applyOneAction(game);
-    if (applied.error) throw new Error(`long replay game ${game.index}: ${applied.error}`);
-    frames += 1;
+    if (applied.error) throw new Error(`undo churn game ${game.index}: ${applied.error}`);
     commits += 1;
-    if (frames < targetFrames) {
+    if (commits < targetCommits) {
       const lastActor = game.lastActor;
-      if (!lastActor) throw new Error(`long replay game ${game.index} lost its last actor`);
+      if (!lastActor) throw new Error(`undo churn game ${game.index} lost its last actor`);
       // Either player may undo. Use the peer so a synthetic tight loop does
       // not trip the production per-socket message-rate guard.
       const actor = lastActor === game.host ? game.guest : game.host;
@@ -871,20 +870,20 @@ async function buildLongReplay(
       const state = await actor.request(
         { type: "undo", ...commandFields(actor) },
         (message): message is StateMessage => message.type === "state" && message.version > beforeVersion,
-        "long replay undo state",
+        "undo churn state",
       );
-      await synchronizePlayers(game, state.version, "long replay peer state after undo");
-      frames += 1;
+      await synchronizePlayers(game, state.version, "undo churn peer state after undo");
       commits += 1;
     }
-    if (frames >= nextProgress) {
-      console.log(`long replay game ${game.index}: ${Math.min(frames, targetFrames)}/${targetFrames} frames`);
+    if (commits >= nextProgress) {
+      console.log(`undo churn game ${game.index}: ${Math.min(commits, targetCommits)}/${targetCommits} commits`);
       nextProgress += 100;
     }
   }
   const storedFrames = await replayFrameCount(pool, game);
-  if (storedFrames < targetFrames) {
-    throw new Error(`long replay game ${game.index} stored ${storedFrames}/${targetFrames} frames`);
+  const expectedFrames = initialFrames + (commits % 2);
+  if (storedFrames !== expectedFrames) {
+    throw new Error(`undo churn game ${game.index} retained ${storedFrames}/${expectedFrames} expected frames`);
   }
   return { game, frames: storedFrames, commits, elapsedMs: performance.now() - startedAt };
 }
@@ -1054,7 +1053,7 @@ async function fetchRoomReplay(game: GameSession): Promise<{ frames: number; lat
   if (!response.ok || !decoded) {
     throw new Error(`game ${game.index} replay endpoint returned ${response.status}`);
   }
-  return { frames: decoded.replay.views.length, latencyMs: performance.now() - startedAt };
+  return { frames: replayFileViews(decoded.replay).length, latencyMs: performance.now() - startedAt };
 }
 
 async function databaseSnapshot(pool: Awaited<ReturnType<typeof createPool>>) {
@@ -1215,22 +1214,22 @@ try {
 
   const activeGames = games.filter((game) => game.host.latestState?.view.winner === null);
   const finishGames = activeGames.slice(0, config.finishGames);
-  const longReplayGames = config.longReplayFrames > 0
-    ? finishGames.slice(0, config.longReplayGames)
+  const undoChurnGames = config.undoChurnCommits > 0
+    ? finishGames.slice(0, config.undoChurnGames)
     : [];
-  const longReplayResults = await mapConcurrent(
-    longReplayGames,
-    Math.max(1, longReplayGames.length),
-    (game) => buildLongReplay(pool, game, config.longReplayFrames),
+  const undoChurnResults = await mapConcurrent(
+    undoChurnGames,
+    Math.max(1, undoChurnGames.length),
+    (game) => runUndoChurn(pool, game, config.undoChurnCommits),
   );
-  if (longReplayResults.length) {
-    console.log("\nlong replay construction");
+  if (undoChurnResults.length) {
+    console.log("\nundo churn");
     console.table({
-      games: longReplayResults.length,
-      target_frames: config.longReplayFrames,
-      stored_frames_min: Math.min(...longReplayResults.map((result) => result.frames)),
-      state_commits: longReplayResults.reduce((sum, result) => sum + result.commits, 0),
-      elapsed_seconds_max: Number((Math.max(...longReplayResults.map((result) => result.elapsedMs)) / 1_000).toFixed(2)),
+      games: undoChurnResults.length,
+      target_commits: config.undoChurnCommits,
+      retained_frames_max: Math.max(...undoChurnResults.map((result) => result.frames)),
+      state_commits: undoChurnResults.reduce((sum, result) => sum + result.commits, 0),
+      elapsed_seconds_max: Number((Math.max(...undoChurnResults.map((result) => result.elapsedMs)) / 1_000).toFixed(2)),
     });
   }
 
@@ -1263,13 +1262,14 @@ try {
   const storedReplays = await validateStoredReplays(pool, finishGames);
   const replayErrors = [...storedReplays.errors];
   const retrievals: Array<{ frames: number; latencyMs: number }> = [];
-  for (const result of longReplayResults) {
+  for (const result of undoChurnResults) {
     try {
       const retrieved = await fetchRoomReplay(result.game);
       retrievals.push(retrieved);
-      if (retrieved.frames < config.longReplayFrames) {
+      const expectedFrames = result.frames + 1;
+      if (retrieved.frames !== expectedFrames) {
         replayErrors.push(
-          `game ${result.game.index}: retrieved ${retrieved.frames}/${config.longReplayFrames} frames`,
+          `game ${result.game.index}: retrieved ${retrieved.frames}/${expectedFrames} expected frames`,
         );
       }
     } catch (error) {

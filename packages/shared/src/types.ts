@@ -571,6 +571,10 @@ export interface GameTransitionView {
   fromVersion: number;
   /** Undo/restoration edges settle immediately and contain no invented path. */
   kind: "forward" | "replace";
+  /** Historical room version whose projected state is restored. Present only
+   * for replacement edges so replay recorders can discard invalidated frames
+   * without recording the rollback as another frame. */
+  restoreVersion?: number;
   events: GameTransitionMove[];
 }
 
