@@ -915,7 +915,12 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
         if (ctx.hasCardType(top, "action") && !hasTag(ctx, top, "attack")) ctx.requestCardChoice("pen-kano", decisionPrompt("Banish the top card and play it as an instant?", "card.pen.deck.top.instant", { optionMessages: commonOptionMessages("no") }), ["no", top.instanceId]);
       },
     },
-    onChoose(ctx, hook, option) { if (hook === "pen-kano" && option !== "no" && ctx.banish(Number(option))) ctx.allowPlayFrom(Number(option), "banish"); },
-    allowsFriendlyCardPlayAsInstant(ctx, card, zone) { return zone === "banish" && ctx.getFlag("player", `playFrom:banish:${card.instanceId}`) === true; },
+    onChoose(ctx, hook, option) {
+      if (hook !== "pen-kano" || option === "no") return;
+      const instanceId = Number(option);
+      if (ctx.banish(instanceId)) {
+        ctx.allowPlayFrom(instanceId, "banish", { asInstant: true });
+      }
+    },
   },
 });
