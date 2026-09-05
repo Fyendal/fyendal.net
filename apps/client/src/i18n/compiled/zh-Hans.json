@@ -19830,6 +19830,38 @@
       "value": "status"
     }
   ],
+  "game.notes.add": [
+    {
+      "type": 0,
+      "value": "标记当前状态"
+    }
+  ],
+  "game.notes.description": [
+    {
+      "type": 0,
+      "value": "立即标记此房间状态，之后复盘时可返回查看笔记。"
+    }
+  ],
+  "game.notes.edit": [
+    {
+      "type": 0,
+      "value": "编辑当前状态的笔记"
+    }
+  ],
+  "game.notes.title": [
+    {
+      "type": 0,
+      "value": "对局笔记 · 回放第 "
+    },
+    {
+      "type": 1,
+      "value": "frame"
+    },
+    {
+      "type": 0,
+      "value": " 帧"
+    }
+  ],
   "game.over.backToBoard": [
     {
       "type": 0,
@@ -23012,6 +23044,138 @@
     {
       "type": 1,
       "value": "secondHero"
+    }
+  ],
+  "replay.notes.add": [
+    {
+      "type": 0,
+      "value": "为第 "
+    },
+    {
+      "type": 1,
+      "value": "frame"
+    },
+    {
+      "type": 0,
+      "value": " 帧添加笔记"
+    }
+  ],
+  "replay.notes.close": [
+    {
+      "type": 0,
+      "value": "关闭回放笔记"
+    }
+  ],
+  "replay.notes.edit": [
+    {
+      "type": 0,
+      "value": "编辑第 "
+    },
+    {
+      "type": 1,
+      "value": "frame"
+    },
+    {
+      "type": 0,
+      "value": " 帧的笔记"
+    }
+  ],
+  "replay.notes.frame": [
+    {
+      "type": 0,
+      "value": "第 "
+    },
+    {
+      "type": 1,
+      "value": "frame"
+    },
+    {
+      "type": 0,
+      "value": " 帧"
+    }
+  ],
+  "replay.notes.frameTitle": [
+    {
+      "type": 0,
+      "value": "第 "
+    },
+    {
+      "type": 1,
+      "value": "frame"
+    },
+    {
+      "type": 0,
+      "value": " 帧笔记"
+    }
+  ],
+  "replay.notes.input": [
+    {
+      "type": 0,
+      "value": "第 "
+    },
+    {
+      "type": 1,
+      "value": "frame"
+    },
+    {
+      "type": 0,
+      "value": " 帧的笔记"
+    }
+  ],
+  "replay.notes.nextPage": [
+    {
+      "type": 0,
+      "value": "下一组已标记帧"
+    }
+  ],
+  "replay.notes.openFrame": [
+    {
+      "type": 0,
+      "value": "打开第 "
+    },
+    {
+      "type": 1,
+      "value": "frame"
+    },
+    {
+      "type": 0,
+      "value": " 帧的笔记"
+    }
+  ],
+  "replay.notes.panel": [
+    {
+      "type": 0,
+      "value": "回放笔记"
+    }
+  ],
+  "replay.notes.placeholder": [
+    {
+      "type": 0,
+      "value": "这里有什么值得注意？记录要复盘的决策、失误或想法。"
+    }
+  ],
+  "replay.notes.previousPage": [
+    {
+      "type": 0,
+      "value": "上一组已标记帧"
+    }
+  ],
+  "replay.notes.remove": [
+    {
+      "type": 0,
+      "value": "删除笔记"
+    }
+  ],
+  "replay.notes.save": [
+    {
+      "type": 0,
+      "value": "保存笔记"
+    }
+  ],
+  "replay.notes.saved": [
+    {
+      "type": 0,
+      "value": "已标记帧"
     }
   ],
   "replay.openFile": [

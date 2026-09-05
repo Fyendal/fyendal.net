@@ -6,7 +6,9 @@ const replayStore = vi.hoisted(() => {
   const state = {
     replayViews: [] as unknown[] | null,
     replayStep: 0,
+    replayNotes: [] as Array<{ frame: number; text: string }>,
     setReplayStep: vi.fn(),
+    setReplayNote: vi.fn(),
     closeReplay: vi.fn(),
     downloadReplay: vi.fn(),
   };
@@ -26,6 +28,7 @@ vi.mock("../store.js", () => {
 import {
   CollapsedReplayControls,
   ReplayBar,
+  paginateReplayNotes,
   replayStartsCollapsed,
   replayStepTarget,
   shouldAdvanceReplayOnSpace,
@@ -36,6 +39,7 @@ afterEach(() => {
   Object.assign(replayStore.state, {
     replayViews: null,
     replayStep: 0,
+    replayNotes: [],
   });
 });
 
@@ -64,6 +68,7 @@ describe("replay controls", () => {
     expect(html).toContain('<kbd class="shortcut-key replay-next-shortcut" aria-label="Space key"></kbd>');
     expect(html).toContain('aria-label="Replay step size: 1 frame"');
     expect(html).toContain('class="replay-action-icon" aria-label="Export replay"');
+    expect(html).toContain('aria-label="Add a note to frame 2"');
     expect(html).toContain('class="replay-action-icon" aria-label="Exit replay"');
     expect(html).not.toContain('>Export replay</button>');
     expect(html).not.toContain('>Exit replay</button>');
@@ -71,6 +76,23 @@ describe("replay controls", () => {
     expect(html).not.toContain("Play replay");
     expect(html).toContain("1×");
     expect(html).not.toContain("replay-bar-collapsed");
+  });
+
+  it("highlights marked frames on the scrubber and current note control", () => {
+    Object.assign(replayStore.state, {
+      replayViews: [{}, {}, {}],
+      replayStep: 1,
+      replayNotes: [{ frame: 1, text: "Pitch differently here." }],
+    });
+
+    const html = renderToStaticMarkup(
+      createElement(TestI18nProvider, null, createElement(ReplayBar)),
+    );
+
+    expect(html).toContain('class="replay-action-icon replay-note-button active"');
+    expect(html).toContain('aria-label="Edit the note on frame 2"');
+    expect(html).toContain('aria-label="Open note on frame 2"');
+    expect(html).toContain('title="Pitch differently here."');
   });
 
   it("reduces the minimized transport to back, next, and maximize", () => {
@@ -101,6 +123,21 @@ describe("replay controls", () => {
     expect(replayStepTarget(10, 20, "next", 5)).toBe(15);
     expect(replayStepTarget(2, 20, "previous", 5)).toBe(0);
     expect(replayStepTarget(18, 20, "next", 5)).toBe(19);
+  });
+
+  it("paginates marked frames in groups of five and clamps stale pages", () => {
+    const notes = Array.from({ length: 12 }, (_, frame) => ({ frame, text: `Note ${frame}` }));
+
+    expect(paginateReplayNotes(notes, 0)).toMatchObject({
+      page: 0,
+      pageCount: 3,
+      items: notes.slice(0, 5),
+    });
+    expect(paginateReplayNotes(notes, 1).items).toEqual(notes.slice(5, 10));
+    expect(paginateReplayNotes(notes, 99)).toMatchObject({
+      page: 2,
+      items: notes.slice(10),
+    });
   });
 
   it("uses unmodified Space outside interactive controls", () => {

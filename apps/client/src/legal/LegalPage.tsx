@@ -45,7 +45,7 @@ const TERMS: Section[] = [
   {
     title: "Your content",
     body: [
-      "Decklists and messages you provide remain yours. You grant us the minimum permission needed to store, deliver, and use them to provide the features you choose. Game records, including moves, results, room history, and full-information replays, may be kept to operate those features.",
+      "Decklists, replay notes, and messages you provide remain yours. You grant us the minimum permission needed to store, deliver, and use them to provide the features you choose. Game records, including moves, results, room history, and full-information replays, may be kept to operate those features.",
       "When you submit a bug report, you grant us permission to use its description and attached room trace to diagnose and fix the problem.",
     ],
   },
@@ -68,7 +68,7 @@ const PRIVACY: Section[] = [
     title: "Information Fyendal stores",
     body: [
       "Account information includes your username, sign-in credentials, and any cosmetic entitlement attached to your account. Fyendal does not collect an email address during registration.",
-      "Game data: your saved decklists, room membership, and the state and history of games you play (needed to run, reconnect, and resume games). Completed replays contain full-information frames, including both players' hidden zones; they are available only to the two signed-in participants and expire after 7 days.",
+      "Game data: your saved decklists, room membership, private replay notes, and the state and history of games you play (needed to run, reconnect, resume, and review games). Completed replays contain full-information frames, including both players' hidden zones; they are available only to the two signed-in participants. A replay note is available only to the participant who created it and is not shown in the opponent's replay.",
       "Social data: friend requests and connections, direct messages and their delivery or read information, whether friends are available, and game invitations. Your username, availability, and messages are shown only as needed to provide these features to the players involved.",
       "Bug reports: when you choose to submit one, we store your description, a report reference, and a server-side copy of the room's current state and recent history. The trace can contain both players' hidden game zones and is available only to service operators for diagnosis; it is not returned through the player-facing API.",
     ],
@@ -97,14 +97,14 @@ const PRIVACY: Section[] = [
     title: "Retention",
     body: [
       "Direct messages are kept for up to 30 days. Removing a friendship deletes the retained conversation. Friend connections remain until either player removes the friendship, and pending requests remain until they are accepted, declined, or canceled. Availability and game invitations are short-lived.",
-      "Rooms are normally deleted 15 minutes after a finished game or after everyone leaves. Completed player replays expire 7 days after the game ends. Sign-in sessions expire after 30 days without renewal. Accounts, saved decks, and submitted bug reports persist until deletion.",
+      "Rooms are normally deleted 15 minutes after a finished game or after everyone leaves. Completed player replays and their private notes expire 7 days after the game ends. Sign-in sessions expire after 30 days without renewal. Accounts, saved decks, and submitted bug reports persist until deletion.",
       "Deleted information may remain briefly in routine backup copies before those copies expire automatically.",
     ],
   },
   {
     title: "Your choices",
     body: [
-      "Signed-in users can download their account data or delete their account from the Account panel. Exports include friendships, pending friend requests, retained messages and replays, bug-report descriptions, and trace references, but not hidden bug-report room-state attachments. Deletion removes the account and associated social, game, and account data from Fyendal's active systems.",
+      "Signed-in users can download their account data or delete their account from the Account panel. Exports include friendships, pending friend requests, retained messages, replays and private replay notes, bug-report descriptions, and trace references, but not hidden bug-report room-state attachments. Deletion removes the account and associated social, game, and account data from Fyendal's active systems.",
       "Backups are not edited to remove individual records, but deleted information disappears as those backups expire.",
       `For a request you cannot complete while signed in, contact ${CONTACT}.`,
     ],
@@ -118,7 +118,7 @@ const PRIVACY: Section[] = [
   {
     title: "Changes and contact",
     body: [
-      `Effective September 3, 2026. This policy may change; the current version is always at /privacy/. Questions: ${CONTACT}.`,
+      `Effective September 4, 2026. This policy may change; the current version is always at /privacy/. Questions: ${CONTACT}.`,
     ],
   },
 ];

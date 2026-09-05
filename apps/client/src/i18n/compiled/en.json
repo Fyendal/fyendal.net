@@ -20584,6 +20584,34 @@
       "value": "status"
     }
   ],
+  "game.notes.add": [
+    {
+      "type": 0,
+      "value": "Bookmark current state"
+    }
+  ],
+  "game.notes.description": [
+    {
+      "type": 0,
+      "value": "Bookmark this room state now and revisit the note when reviewing the replay."
+    }
+  ],
+  "game.notes.edit": [
+    {
+      "type": 0,
+      "value": "Edit note for current state"
+    }
+  ],
+  "game.notes.title": [
+    {
+      "type": 0,
+      "value": "Game note · Replay frame "
+    },
+    {
+      "type": 1,
+      "value": "frame"
+    }
+  ],
   "game.over.backToBoard": [
     {
       "type": 0,
@@ -24154,6 +24182,118 @@
     {
       "type": 1,
       "value": "secondHero"
+    }
+  ],
+  "replay.notes.add": [
+    {
+      "type": 0,
+      "value": "Add a note to frame "
+    },
+    {
+      "type": 1,
+      "value": "frame"
+    }
+  ],
+  "replay.notes.close": [
+    {
+      "type": 0,
+      "value": "Close replay notes"
+    }
+  ],
+  "replay.notes.edit": [
+    {
+      "type": 0,
+      "value": "Edit the note on frame "
+    },
+    {
+      "type": 1,
+      "value": "frame"
+    }
+  ],
+  "replay.notes.frame": [
+    {
+      "type": 0,
+      "value": "Frame "
+    },
+    {
+      "type": 1,
+      "value": "frame"
+    }
+  ],
+  "replay.notes.frameTitle": [
+    {
+      "type": 0,
+      "value": "Frame "
+    },
+    {
+      "type": 1,
+      "value": "frame"
+    },
+    {
+      "type": 0,
+      "value": " note"
+    }
+  ],
+  "replay.notes.input": [
+    {
+      "type": 0,
+      "value": "Note for frame "
+    },
+    {
+      "type": 1,
+      "value": "frame"
+    }
+  ],
+  "replay.notes.nextPage": [
+    {
+      "type": 0,
+      "value": "Next marked frames"
+    }
+  ],
+  "replay.notes.openFrame": [
+    {
+      "type": 0,
+      "value": "Open note on frame "
+    },
+    {
+      "type": 1,
+      "value": "frame"
+    }
+  ],
+  "replay.notes.panel": [
+    {
+      "type": 0,
+      "value": "Replay notes"
+    }
+  ],
+  "replay.notes.placeholder": [
+    {
+      "type": 0,
+      "value": "What stood out here? Record a decision, mistake, or idea to revisit."
+    }
+  ],
+  "replay.notes.previousPage": [
+    {
+      "type": 0,
+      "value": "Previous marked frames"
+    }
+  ],
+  "replay.notes.remove": [
+    {
+      "type": 0,
+      "value": "Remove note"
+    }
+  ],
+  "replay.notes.save": [
+    {
+      "type": 0,
+      "value": "Save note"
+    }
+  ],
+  "replay.notes.saved": [
+    {
+      "type": 0,
+      "value": "Marked frames"
     }
   ],
   "replay.openFile": [

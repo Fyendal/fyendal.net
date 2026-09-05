@@ -3,6 +3,7 @@ import { promisify } from "node:util";
 import { gunzip as gunzipCallback } from "node:zlib";
 import type { DeckPool, Format } from "@fyendal/shared";
 import { cardData, formatLegalityIssues } from "@fyendal/cards";
+import { decodeReplayNoteInput } from "@fyendal/protocol";
 import type { Queryable } from "./db.js";
 import {
   login,
@@ -30,7 +31,9 @@ import { asRecord } from "./validation.js";
 import {
   deleteReplay,
   getReplayPayload,
+  getReplayNotes,
   listReplays,
+  saveReplayNote,
   waitForReplayPayloadForRoom,
 } from "./replays.js";
 import { createFabraryClient, parseFabraryDeckUrl, type FabraryClient } from "./fabrary.js";
@@ -494,6 +497,15 @@ export function createApiServer(deps: ApiDeps): http.Server {
         ? { status: 200, body: { ok: true } }
         : { status: 404, body: { ok: false, error: "replay not found" } };
     },
+    "/api/replay-notes": async (body, user) => {
+      if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };
+      const input = decodeReplayNoteInput(body);
+      if (!input) return { status: 400, body: { ok: false, error: "invalid replay note" } };
+      const ok = await saveReplayNote(deps.db, user.id, input);
+      return ok
+        ? { status: 200, body: { ok: true } }
+        : { status: 404, body: { ok: false, error: "replay frame not found" } };
+    },
   };
 
   return http.createServer((req, res) => {
@@ -573,6 +585,40 @@ export function createApiServer(deps: ApiDeps): http.Server {
         .then(async (user) => {
           if (!user) return sendJson(res, 401, { ok: false, error: "not logged in" });
           sendJson(res, 200, { ok: true, replays: await listReplays(deps.db, user.id) });
+        })
+        .catch((e) => internalError(res, e));
+      return;
+    }
+    const roomReplayNotesMatch = req.method === "GET"
+      ? /^\/api\/replay-notes\/room\/([A-Za-z0-9]{6})$/.exec(url.pathname)
+      : null;
+    if (roomReplayNotesMatch) {
+      authUser(req)
+        .then(async (user) => {
+          if (!user) return sendJson(res, 401, { ok: false, error: "not logged in" });
+          const notes = await getReplayNotes(deps.db, user.id, {
+            roomCode: roomReplayNotesMatch[1]!,
+          });
+          return notes
+            ? sendJson(res, 200, { ok: true, notes })
+            : sendJson(res, 404, { ok: false, error: "replay not found" });
+        })
+        .catch((e) => internalError(res, e));
+      return;
+    }
+    const replayNotesMatch = req.method === "GET"
+      ? /^\/api\/replay-notes\/([a-f0-9]{24})$/.exec(url.pathname)
+      : null;
+    if (replayNotesMatch) {
+      authUser(req)
+        .then(async (user) => {
+          if (!user) return sendJson(res, 401, { ok: false, error: "not logged in" });
+          const notes = await getReplayNotes(deps.db, user.id, {
+            replayId: replayNotesMatch[1]!,
+          });
+          return notes
+            ? sendJson(res, 200, { ok: true, notes })
+            : sendJson(res, 404, { ok: false, error: "replay not found" });
         })
         .catch((e) => internalError(res, e));
       return;

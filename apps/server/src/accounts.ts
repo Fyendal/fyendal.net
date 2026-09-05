@@ -1,7 +1,7 @@
 import { withTransaction, type Queryable } from "./db.js";
 import { verifyPassword } from "./auth.js";
 import { listDecks } from "./decks.js";
-import { getReplay, listReplays } from "./replays.js";
+import { attachReplayNotes, getReplay, getReplayNotes, listReplays } from "./replays.js";
 import { appendClusterEvent } from "./clusterEvents.js";
 import type { CardPoolMode, PlayerBadge, ReplayFile } from "@fyendal/shared";
 import { MAX_MATCHMAKING_AVOID_ROOM_CODES } from "@fyendal/protocol";
@@ -221,13 +221,16 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
   const replaySummaries = await listReplays(db, userId);
   const replays: AccountExport["replays"] = [];
   for (const summary of replaySummaries) {
-    const replay = await getReplay(db, userId, summary.id);
+    const [replay, notes] = await Promise.all([
+      getReplay(db, userId, summary.id),
+      getReplayNotes(db, userId, { replayId: summary.id }),
+    ]);
     if (replay) {
       replays.push({
         id: summary.id,
         finishedAt: summary.finishedAt,
         expiresAt: summary.expiresAt,
-        replay,
+        replay: attachReplayNotes(replay, notes ?? []),
       });
     }
   }

@@ -61,7 +61,7 @@ export function GameOver({
   const opponent = selectedSeat === 0 ? 1 : 0;
 
   return (
-    <div className="overlay">
+    <div className="overlay gameover-overlay">
       <div className="overlay-panel gameover-panel">
         <div className="gameover-headline">{headline}</div>
         {!spectating ? (

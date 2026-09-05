@@ -29,6 +29,7 @@ export function initialStoreProjection(
     replayViews: null,
     replayTransitions: null,
     replayStep: 0,
+    replayNotes: [],
     activeSavedReplayId: null,
     savedReplays: [],
     replaysLoading: false,
@@ -98,6 +99,7 @@ export function clearedRoomProjection(): Pick<
   | "replayViews"
   | "replayTransitions"
   | "replayStep"
+  | "replayNotes"
   | "activeSavedReplayId"
   | "rooms"
   | "inviteRoom"
@@ -133,6 +135,7 @@ export function clearedRoomProjection(): Pick<
     replayViews: null,
     replayTransitions: null,
     replayStep: 0,
+    replayNotes: [],
     activeSavedReplayId: null,
     rooms: [],
     inviteRoom: null,

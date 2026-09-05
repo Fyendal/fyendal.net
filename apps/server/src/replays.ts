@@ -11,6 +11,9 @@ import {
   decodeReplayFile,
   decodeReplayResponse,
   decodeGameView,
+  MAX_REPLAY_NOTE_LENGTH,
+  type ReplayNoteInput,
+  type ReplayServerNote,
   type ReplaySummary,
 } from "@fyendal/protocol";
 import type { Format, GameView, ReplayFile } from "@fyendal/shared";
@@ -177,6 +180,15 @@ export async function pruneReplayFramesFrom(
   roomCode: string,
   fromRoomVersion: number,
 ): Promise<number> {
+  await db.query(
+    `DELETE FROM replay_notes
+     WHERE replay_id = (
+       SELECT id FROM replay_games
+       WHERE room_code = $1 AND status = 'recording'
+       ORDER BY created_at DESC LIMIT 1
+     ) AND room_version >= $2`,
+    [roomCode, fromRoomVersion],
+  );
   const deleted = await db.query(
     `DELETE FROM replay_frames
      WHERE replay_id = (
@@ -227,6 +239,7 @@ async function replayFiles(
   const id = String(replay.id);
   const uniqueSeats = [...new Set(seats)];
   const frames: Array<{ view: GameView; transition: unknown }> = [];
+  const rowsRoomVersions: number[] = [];
   let yieldedAt = performance.now();
   let afterRoomVersion = -1;
   while (true) {
@@ -245,6 +258,7 @@ async function replayFiles(
       const view = decodeGameView(row.view);
       if (!view) throw new Error(`replay ${id} frame ${frames.length + 1} failed validation`);
       frames.push({ view, transition: row.transition ?? null });
+      rowsRoomVersions.push(roomVersion);
       afterRoomVersion = roomVersion;
       if (performance.now() - yieldedAt >= REPLAY_YIELD_BUDGET_MS) {
         await yieldControl();
@@ -261,11 +275,13 @@ async function replayFiles(
         return [seat, file];
       }),
     ),
+    roomVersions: rowsRoomVersions,
   };
 }
 
 interface GameViewBuild {
   files: Map<0 | 1, ReplayFile>;
+  roomVersions: number[];
 }
 
 function replayViews(file: ReplayFile): GameView[] {
@@ -332,6 +348,29 @@ export async function finalizeReplay(db: Queryable, replayIdValue: string): Prom
            finalization_attempts=0, finalization_retry_at=NULL
        WHERE id=$1 AND status='finalizing'`,
       [replay.id, payloads[0]?.frames ?? 0],
+    );
+    const frameByRoomVersion = new Map(
+      built.roomVersions.map((roomVersion, frame) => [roomVersion, frame]),
+    );
+    const noteVersions = await tx.query(
+      `SELECT DISTINCT room_version FROM replay_notes
+       WHERE replay_id=$1 AND room_version IS NOT NULL`,
+      [replay.id],
+    );
+    for (const row of noteVersions.rows) {
+      const roomVersion = safeInteger(row.room_version, "replay note room version");
+      const frame = frameByRoomVersion.get(roomVersion);
+      if (frame === undefined) continue;
+      await tx.query(
+        `UPDATE replay_notes
+         SET room_version=NULL, frame_index=$3
+         WHERE replay_id=$1 AND room_version=$2`,
+        [replay.id, roomVersion, frame],
+      );
+    }
+    await tx.query(
+      "DELETE FROM replay_notes WHERE replay_id=$1 AND room_version IS NOT NULL",
+      [replay.id],
     );
     await tx.query("DELETE FROM replay_frames WHERE replay_id = $1", [replay.id]);
   });
@@ -623,6 +662,163 @@ export async function waitForReplayPayloadForRoom(
     waitedMs += nextDelayMs;
     delayMs = Math.min(delayMs * 2, 500);
   }
+}
+
+type ReplayNoteReference =
+  | { replayId: string }
+  | { roomCode: string };
+
+async function replayForNoteTarget(
+  db: Queryable,
+  userId: number,
+  target: ReplayNoteReference,
+  now: number,
+  lock = false,
+): Promise<{
+  id: string;
+  status: "recording" | "finalizing" | "ready";
+  frameCount: number | null;
+} | null> {
+  const suffix = lock ? " FOR UPDATE" : "";
+  const result = "replayId" in target
+    ? await db.query(
+        `SELECT g.id, g.status, g.frame_count FROM replay_games g
+         JOIN replay_participants p ON p.replay_id=g.id
+         WHERE g.id=$1 AND p.user_id=$2
+           AND (g.status <> 'ready' OR g.expires_at > $3)${suffix}`,
+        [target.replayId, userId, now],
+      )
+    : await db.query(
+        `SELECT g.id, g.status, g.frame_count FROM replay_games g
+         JOIN replay_participants p ON p.replay_id=g.id
+         WHERE g.room_code=$1 AND p.user_id=$2
+           AND (g.status <> 'ready' OR g.expires_at > $3)
+         ORDER BY g.created_at DESC LIMIT 1${suffix}`,
+        [target.roomCode.toUpperCase(), userId, now],
+      );
+  const row = result.rows[0];
+  if (!row) return null;
+  const status = String(row.status);
+  if (status !== "recording" && status !== "finalizing" && status !== "ready") {
+    throw new Error("invalid replay status");
+  }
+  return {
+    id: String(row.id),
+    status,
+    frameCount: row.frame_count === null ? null : safeInteger(row.frame_count, "replay frame count"),
+  };
+}
+
+export async function getReplayNotes(
+  db: Queryable,
+  userId: number,
+  target: ReplayNoteReference,
+  now = Date.now(),
+): Promise<ReplayServerNote[] | null> {
+  const replay = await replayForNoteTarget(db, userId, target, now);
+  if (!replay) return null;
+  const { rows } = await db.query(
+    `SELECT room_version, frame_index, note FROM replay_notes
+     WHERE replay_id=$1 AND user_id=$2
+     ORDER BY COALESCE(frame_index, room_version)`,
+    [replay.id, userId],
+  );
+  let frameByRoomVersion: Map<number, number> | null = null;
+  if (rows.some((row) => row.room_version !== null)) {
+    const frames = await db.query(
+      "SELECT room_version FROM replay_frames WHERE replay_id=$1 ORDER BY room_version",
+      [replay.id],
+    );
+    frameByRoomVersion = new Map(frames.rows.map((row, frame) => [
+      safeInteger(row.room_version, "replay room version"),
+      frame,
+    ]));
+  }
+  return rows.flatMap((row): ReplayServerNote[] => {
+    const roomVersion = row.room_version === null
+      ? undefined
+      : safeInteger(row.room_version, "replay note room version");
+    const frame = row.frame_index !== null
+      ? safeInteger(row.frame_index, "replay note frame")
+      : roomVersion === undefined
+        ? undefined
+        : frameByRoomVersion?.get(roomVersion);
+    if (frame === undefined) return [];
+    return [{
+      frame,
+      text: String(row.note),
+      ...(roomVersion === undefined ? {} : { roomVersion }),
+    }];
+  });
+}
+
+export async function saveReplayNote(
+  db: Queryable,
+  userId: number,
+  input: ReplayNoteInput,
+  now = Date.now(),
+): Promise<boolean> {
+  const text = input.text.trim();
+  if (text.length > MAX_REPLAY_NOTE_LENGTH) return false;
+  return withTransaction(db, async (tx) => {
+    const replay = await replayForNoteTarget(tx, userId, input, now, true);
+    if (!replay) return false;
+    const ready = replay.status === "ready";
+    if (ready) {
+      if (replay.frameCount === null || input.frame < 0 || input.frame >= replay.frameCount) {
+        return false;
+      }
+    } else {
+      if (!("roomCode" in input) || input.roomVersion === undefined) return false;
+      const frame = await tx.query(
+        "SELECT 1 FROM replay_frames WHERE replay_id=$1 AND room_version=$2",
+        [replay.id, input.roomVersion],
+      );
+      if (!frame.rows.length) return false;
+    }
+    const keyColumn = ready ? "frame_index" : "room_version";
+    const key = ready
+      ? input.frame
+      : "roomCode" in input
+        ? input.roomVersion
+        : undefined;
+    if (key === undefined) return false;
+    if (!text) {
+      await tx.query(
+        `DELETE FROM replay_notes
+         WHERE replay_id=$1 AND user_id=$2 AND ${keyColumn}=$3`,
+        [replay.id, userId, key],
+      );
+      return true;
+    }
+    const updated = await tx.query(
+      `UPDATE replay_notes SET note=$4
+       WHERE replay_id=$1 AND user_id=$2 AND ${keyColumn}=$3
+       RETURNING id`,
+      [replay.id, userId, key, text],
+    );
+    if (!updated.rows.length) {
+      await tx.query(
+        `INSERT INTO replay_notes
+          (replay_id, user_id, room_version, frame_index, note)
+         VALUES ($1,$2,$3,$4,$5)`,
+        [replay.id, userId, ready ? null : key, ready ? key : null, text],
+      );
+    }
+    return true;
+  });
+}
+
+export function attachReplayNotes(file: ReplayFile, notes: readonly ReplayServerNote[]): ReplayFile {
+  if (!notes.length) return file;
+  return {
+    version: 3,
+    seat: file.seat,
+    frames: file.version === 1
+      ? file.views.map((view) => ({ view, transition: null }))
+      : file.frames,
+    notes: notes.map(({ frame, text }) => ({ frame, text })),
+  };
 }
 
 /** Remove one participant's retained replay. The opponent's independently

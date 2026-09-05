@@ -651,7 +651,23 @@ export interface ReplayFileV2 {
   frames: ReplayFrameV2[];
 }
 
-export type ReplayFile = ReplayFileV1 | ReplayFileV2;
+/** A private review note attached to one zero-based replay frame. */
+export interface ReplayNote {
+  frame: number;
+  text: string;
+}
+
+/** Portable annotated replay. Server-retained board payloads remain version 2;
+ * private account notes are combined with them only for the owner's export. */
+export interface ReplayFileV3 {
+  version: 3;
+  /** Board orientation seat, or null for a spectator recording. */
+  seat: number | null;
+  frames: ReplayFrameV2[];
+  notes: ReplayNote[];
+}
+
+export type ReplayFile = ReplayFileV1 | ReplayFileV2 | ReplayFileV3;
 
 // ── Room / lobby wire protocol ──────────────────────────────────────────────
 

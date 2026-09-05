@@ -521,6 +521,9 @@
 .bug-report-success button { align-self: flex-end; }
 
 /* ── end-of-game takeover ── */
+.gameover-overlay {
+  z-index: 60;
+}
 .gameover-panel {
   width: min(820px, calc(100vw - 40px));
   max-width: calc(100vw - 40px);
@@ -574,7 +577,10 @@
   text-align: center;
 }
 .gameover-body {
+  min-height: 0;
+  flex: 1 1 auto;
   overflow-y: auto;
+  overscroll-behavior: contain;
   width: 100%;
   padding: 1px 2px 8px;
   scrollbar-color: #6c512c transparent;
@@ -754,6 +760,15 @@
 .gameover-table tfoot tr:first-child td { border-top: 1px solid #45331f; }
 
 @media (max-width: 700px) {
+  .overlay.gameover-overlay {
+    padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom));
+  }
+  .gameover-overlay > .gameover-panel {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+  }
   .gameover-panel { width: calc(100vw - 16px); max-width: calc(100vw - 16px); height: calc(100dvh - 24px); padding: 10px; }
   .gameover-player-picker { align-items: stretch; flex-direction: column; gap: 7px; }
   .gameover-player-picker-label { text-align: center; }
@@ -916,4 +931,141 @@
   width: 18px;
   height: 18px;
   fill: currentColor;
+}
+.replay-note-button.active {
+  border-color: #ffbd18;
+  color: #ffcf55;
+}
+.replay-note-markers {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+}
+.replay-note-markers button {
+  position: absolute;
+  top: 1px;
+  width: 10px;
+  min-width: 10px;
+  height: 10px;
+  padding: 0;
+  transform: translateX(-50%) rotate(45deg);
+  border: 1px solid #1a120a;
+  border-radius: 1px;
+  clip-path: none;
+  background: #71c6ff;
+  pointer-events: auto;
+}
+.replay-note-markers button:hover,
+.replay-note-markers button.active {
+  border-color: #fff;
+  background: #ffcf55;
+}
+.replay-note-markers button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+.replay-notes-panel {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  display: grid;
+  width: min(420px, calc(100vw - 24px));
+  max-height: min(520px, calc(100dvh - 110px));
+  gap: 9px;
+  overflow-y: auto;
+  padding: 12px;
+  border: 1px solid #685035;
+  border-radius: 4px;
+  background: #17110b;
+  box-shadow: 0 12px 36px #000b;
+}
+.replay-notes-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #ffd479;
+}
+.replay-notes-heading strong {
+  font-family: var(--font-display);
+  font-size: 16px;
+  letter-spacing: .04em;
+}
+.replay-bar .replay-note-close {
+  min-width: 30px;
+  padding: 2px 7px;
+  clip-path: none;
+  font-size: 19px;
+  line-height: 1;
+}
+.replay-notes-panel textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 100px;
+  resize: vertical;
+}
+.replay-note-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+}
+.replay-note-actions .danger {
+  margin-right: auto;
+  border-color: #743a33;
+  color: #f2aaa1;
+}
+.replay-note-list {
+  display: grid;
+  gap: 5px;
+  padding-top: 8px;
+  border-top: 1px solid #45331f;
+}
+.replay-note-list-header {
+  display: flex;
+  min-height: 28px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.replay-note-list-header > span {
+  color: #9aa4b8;
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.replay-note-pagination {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #9aa4b8;
+  font-size: 12px;
+}
+.replay-bar .replay-note-pagination button {
+  display: grid;
+  width: 28px;
+  min-width: 28px;
+  height: 26px;
+  padding: 0;
+  clip-path: none;
+  place-items: center;
+  font-size: 19px;
+  line-height: 1;
+}
+.replay-note-list button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 9px;
+  min-width: 0;
+  padding: 7px 9px;
+  clip-path: none;
+  text-align: left;
+}
+.replay-note-list button.active { border-color: #ffbd18; }
+.replay-note-list button strong { color: #ffd479; white-space: nowrap; }
+.replay-note-list button span {
+  overflow: hidden;
+  color: #d7d0c3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

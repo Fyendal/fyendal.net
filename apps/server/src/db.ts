@@ -596,6 +596,33 @@ export const MIGRATIONS: Migration[] = [
       ON replay_games (finalization_retry_at, finished_at)
       WHERE status = 'finalizing';`,
   },
+  {
+    version: 33,
+    // Replay notes are private participant-owned metadata. Live notes use the
+    // authoritative room version until finalization resolves it to a frame.
+    sql: `CREATE TABLE replay_notes (
+      id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+      replay_id TEXT NOT NULL,
+      user_id INTEGER NOT NULL,
+      room_version BIGINT,
+      frame_index INTEGER,
+      note VARCHAR(2000) NOT NULL CHECK (note <> ''),
+      FOREIGN KEY (replay_id, user_id)
+        REFERENCES replay_participants(replay_id, user_id) ON DELETE CASCADE,
+      CHECK ((room_version IS NOT NULL AND frame_index IS NULL)
+        OR (room_version IS NULL AND frame_index IS NOT NULL)),
+      CHECK (room_version IS NULL OR room_version >= 0),
+      CHECK (frame_index IS NULL OR frame_index >= 0)
+    );
+    CREATE UNIQUE INDEX replay_notes_room_version_idx
+      ON replay_notes(replay_id, user_id, room_version)
+      WHERE room_version IS NOT NULL;
+    CREATE UNIQUE INDEX replay_notes_frame_idx
+      ON replay_notes(replay_id, user_id, frame_index)
+      WHERE frame_index IS NOT NULL;
+    CREATE INDEX replay_notes_owner_idx
+      ON replay_notes(replay_id, user_id);`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {
