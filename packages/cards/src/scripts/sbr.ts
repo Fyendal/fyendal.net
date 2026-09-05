@@ -174,7 +174,7 @@ export const sbr: Record<string, CardScript> = {
   "zealous belting|1": {
     onAttackDeclared(ctx) {
       const basePower = ctx.data.attack ?? 0;
-      if (ctx.player(ctx.seat).pitch.some((card) => (ctx.cardData(card.cardId).attack ?? 0) > basePower)) {
+      if (ctx.player(ctx.seat).pitch.some((card) => ctx.basePower(card) > basePower)) {
         ctx.grantGoAgain();
       }
     },
