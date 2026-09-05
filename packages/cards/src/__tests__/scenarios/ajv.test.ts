@@ -48,4 +48,37 @@ describe("AJV — Jarl", () => {
 
     expect(g.state.players[1]!.weapons).toHaveLength(0);
   });
+
+  it("Unforgetting Unforgiving lets Jarl play the searched Mangle next action phase", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "MPG000",
+          hand: ["AJV013", "SIY033", "SIY033"],
+          deck: ["AJV011"],
+          weapons: ["SLY002", "EVR018"],
+        },
+        {
+          hero: "dorinthea",
+          hand: ["head jab|1"],
+          weapons: ["SGB002"],
+        },
+      ],
+    });
+    g.state.players[1]!.weapons[0]!.defCounters = 1;
+
+    g.play("head jab|1")
+      .blockWith("AJV013")
+      .settle()
+      .chooseCard("AJV011")
+      .settle()
+      .endTurn();
+
+    expect(g.state.activePlayer).toBe(0);
+    expect(g.state.players[0]!.banish[0]?.playableFrom).toContain("banish");
+
+    g.play("AJV011", { fromZone: "banish", pitch: ["SIY033", "SIY033"] });
+  });
 });

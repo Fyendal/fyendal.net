@@ -212,7 +212,6 @@ export function activateAuraAttack(
   const cost = attackActivationCost(state, runtime, player, card, marker.cost, targetAllyId);
   const costErr = payCost(state, runtime, player, cost, pitchInstanceIds);
   if (costErr) return costErr;
-  const nextActionGoAgain = consumeNextActionGoAgain(player);
   consumeAttackCostReductions(state, seat, card, targetAllyId);
   consumeFirstActionExtraCost(state, player);
   consumeFirstAttackExtraCost(state, player);
@@ -221,6 +220,8 @@ export function activateAuraAttack(
   player.flags[activatedFlagKey(card.instanceId, grantedIndex)] = true;
   (card.counters ??= {}).attacked = 1;
   runtime.events.fireOnFriendlyActivate(state, seat, card, "action");
+  // Observers may grant go again specifically to this action activation.
+  const nextActionGoAgain = consumeNextActionGoAgain(player);
   // The granting effect makes the qualifying aura a weapon for the turn, so
   // activating this generated attack is a weapon-attack activation.
   runtime.dispatchFlow("deferEventTriggers", state, "weapon-attack-activated", seat, state.nextInstanceId, card);

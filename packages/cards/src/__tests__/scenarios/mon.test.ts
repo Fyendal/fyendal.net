@@ -450,6 +450,26 @@ describe("MON — Chane and banished-zone play", () => {
       .expectLife(1, 15);
   });
 
+  it("Chane gives a Runeblade weapon attack go again", () => {
+    const s = scenario({
+      seats: [
+        chaneSeat({
+          weapons: ["nebula blade|0"],
+          hand: [BLUE],
+          banish: ["ghostly visit|1"],
+        }),
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.activate("chane|0")
+      .attackWithWeapon("nebula blade|0", { pitch: [BLUE] })
+      .blockWith()
+      .settle()
+      .expectAP(0, 1)
+      .play("ghostly visit|1", { fromZone: "banish" });
+  });
+
   it("Soul Shackle banishes the top card at the beginning of its controller's action phase", () => {
     const s = scenario({
       seats: [

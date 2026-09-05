@@ -1194,8 +1194,13 @@ export interface CardScript {
    * public by the time this observer runs. */
   onOpponentPlay?(ctx: ScriptCtx, played: DeepReadonly<CardInstance>, from?: string): void;
   /** A card controlled by this source's controller activated an ability.
-   *  Called after costs are paid, for the hero and arena permanents. */
-  onFriendlyActivate?(ctx: ScriptCtx, activated: DeepReadonly<CardInstance>): void;
+   *  Called after costs are paid, for the hero and arena permanents. `timing`
+   *  is the announced timing of that ability. */
+  onFriendlyActivate?(
+    ctx: ScriptCtx,
+    activated: DeepReadonly<CardInstance>,
+    timing: "action" | "instant" | "attack-reaction" | "defense-reaction",
+  ): void;
   /** The opposing hero activated an ability. `timing` is the announced
    * timing of that ability. */
   onOpponentActivate?(

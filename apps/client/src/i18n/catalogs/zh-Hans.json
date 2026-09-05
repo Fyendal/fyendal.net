@@ -2527,7 +2527,7 @@
   "social.chat.empty": "还没有消息，打个招呼吧。",
   "social.chat.placeholder": "输入消息",
   "social.chat.send": "发送",
-  "social.chat.unreadFrom": "{username} 的 {count} 条未读消息",
+  "social.chat.newMessageFrom": "{username} 发来新消息：{message}",
   "social.error.userNotFound": "找不到该用户名。",
   "social.error.self": "不能添加自己。",
   "social.error.conflict": "该请求与当前好友状态不符。",

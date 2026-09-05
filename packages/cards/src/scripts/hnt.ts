@@ -992,11 +992,31 @@ Object.assign(hnt, {
       (player) => player.flags.lostLifeThisTurn === true,
     ),
     onPlay(ctx) {
-      for (const player of ctx.state.players) {
+      const turnPlayer = ctx.state.activePlayer;
+      const playerOrder = [
+        ctx.state.players[turnPlayer],
+        ...ctx.state.players.filter((player) => player.seat !== turnPlayer),
+      ];
+      for (const player of playerOrder) {
+        if (!player) continue;
         if (player.hand.length) {
-          ctx.banish(player.hand[ctx.randomInt(player.hand.length)]!.instanceId);
+          ctx.requestCardChoice(
+            `cull-hand:${player.seat}`,
+            decisionPrompt("Banish a card from your hand", "card.hnt.hand.card.banish"),
+            player.hand.map((card) => card.instanceId),
+            player.seat,
+          );
         }
       }
+    },
+    onChoose(ctx, hook, option) {
+      if (!hook.startsWith("cull-hand:")) return;
+      const choosingSeat = Number(hook.slice("cull-hand:".length));
+      if (!Number.isSafeInteger(choosingSeat)) return;
+      const chosen = ctx.state.players.find((player) => player.seat === choosingSeat)?.hand.find(
+        (card) => card.instanceId === Number(option),
+      );
+      if (chosen) ctx.banish(chosen.instanceId);
     },
   }),
 } satisfies Record<string, CardScript>);

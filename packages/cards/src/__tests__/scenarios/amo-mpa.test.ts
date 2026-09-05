@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { legalIntents } from "@fyendal/engine";
 import { cardData } from "../../index.js";
 import { scenario } from "../harness.js";
 
@@ -8,6 +9,7 @@ const MAD = "mutually assured destruction|1";
 const PREY = "prey on insecurity|1";
 const REMEMBER = "remember the mists|3";
 const VIRAL_DIFFUSION = "viral diffusion|1";
+const WIDESPREAD_RUIN = "widespread ruin|1";
 const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
 
 function boardNames(game: ReturnType<typeof scenario>, seat: number): string[] {
@@ -214,8 +216,8 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
     const game = scenario({ seats: [
       {
         hero: "rhinar",
-        hand: ["painful passage|1", REMEMBER],
-        resources: 2,
+        hand: ["painful passage|1", WIDESPREAD_RUIN],
+        board: ["runechant|0", "runechant|0"],
         weapons: [],
         equipment: NO_EQUIPMENT,
       },
@@ -223,9 +225,9 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
     ] });
 
     game.play("painful passage|1")
-      .chooseCard(REMEMBER)
+      .chooseCard(WIDESPREAD_RUIN)
       .chooseOption("power")
-      .play(REMEMBER, { fromZone: "banish" })
+      .play(WIDESPREAD_RUIN, { fromZone: "banish" })
       .expectAttackValue(9);
   });
 
@@ -233,8 +235,8 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
     const game = scenario({ seats: [
       {
         hero: "rhinar",
-        hand: ["painful passage|1", REMEMBER],
-        resources: 2,
+        hand: ["painful passage|1", WIDESPREAD_RUIN],
+        board: ["runechant|0", "runechant|0"],
         weapons: [],
         equipment: NO_EQUIPMENT,
       },
@@ -242,12 +244,39 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
     ] });
 
     game.play("painful passage|1")
-      .chooseCard(REMEMBER)
+      .chooseCard(WIDESPREAD_RUIN)
       .chooseOption("go-again")
-      .play(REMEMBER, { fromZone: "banish" })
+      .play(WIDESPREAD_RUIN, { fromZone: "banish" })
       .expectAttackValue(6)
       .blockWith()
       .settle()
       .expectAP(0, 1);
+  });
+
+  it("Painful Passage does not let a banished attack bypass Rune Gate", () => {
+    const game = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["painful passage|1", WIDESPREAD_RUIN, "wounding blow|3"],
+        board: ["runechant|0"],
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play("painful passage|1")
+      .chooseCard(WIDESPREAD_RUIN)
+      .chooseOption("power");
+
+    const ruin = game.state.players[0]!.banish.find(
+      (card) => cardData[card.cardId]!.name === "Widespread Ruin",
+    )!;
+    expect(ruin.playableFrom).toBeUndefined();
+    expect(legalIntents(game.state, 0)).not.toContainEqual(expect.objectContaining({
+      kind: "play-from-zone",
+      zone: "banish",
+      instanceId: ruin.instanceId,
+    }));
   });
 });

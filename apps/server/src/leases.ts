@@ -1,5 +1,7 @@
 import type { Queryable } from "./db.js";
 
+const MAX_LEASE_DURATION_MS = 2 * 60 * 60_000;
+
 /** Try to acquire or renew one expiring work lease. The conditional update is
  * the cross-instance ownership decision; insertion handles the first owner. */
 export async function tryAcquireLease(
@@ -11,7 +13,7 @@ export async function tryAcquireLease(
 ): Promise<boolean> {
   if (!/^[A-Za-z0-9:_-]{1,160}$/.test(name)) throw new Error("invalid lease name");
   if (!/^[A-Za-z0-9:_-]{1,160}$/.test(ownerId)) throw new Error("invalid lease owner");
-  if (!Number.isSafeInteger(ttlMs) || ttlMs < 1_000 || ttlMs > 10 * 60_000) {
+  if (!Number.isSafeInteger(ttlMs) || ttlMs < 1_000 || ttlMs > MAX_LEASE_DURATION_MS) {
     throw new Error("invalid lease duration");
   }
   const leaseUntil = now + ttlMs;

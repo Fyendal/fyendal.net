@@ -2527,7 +2527,7 @@
   "social.chat.empty": "No messages yet. Say hello.",
   "social.chat.placeholder": "Write a message",
   "social.chat.send": "Send",
-  "social.chat.unreadFrom": "{count, plural, one {# unread message from {username}} other {# unread messages from {username}}}",
+  "social.chat.newMessageFrom": "New message from {username}: {message}",
   "social.error.userNotFound": "No player has that username.",
   "social.error.self": "You cannot add yourself.",
   "social.error.conflict": "That request does not match the current friendship state.",

@@ -9,6 +9,10 @@
 .social-mobile-backdrop { display: none; }
 
 @media (min-width: 701px) {
+  #root:has(.table) .social-message-toast {
+    right: 0;
+    left: auto;
+  }
   #root:has(.table) .social-dock {
     --social-banish-zone-offset: calc(
       clamp(68px, 10vh, 130px) + clamp(4px, .55vh, 7px)
@@ -71,83 +75,86 @@
 }
 .social-bubble > span { position: absolute; top: -5px; right: -5px; }
 
-.social-quick-chats { display: none; }
-
-@media (hover: hover) and (pointer: fine) {
-  .social-quick-chats {
-    position: absolute;
-    bottom: 0;
-    left: 52px;
-    display: flex;
-    max-width: calc(100vw - 104px);
-    gap: 7px;
-    overflow-x: auto;
-    padding-left: 10px;
-    opacity: 0;
-    scrollbar-width: none;
-    transform: translateX(-5px);
-    transition: opacity 140ms ease, transform 140ms ease, visibility 140ms;
-    visibility: hidden;
-    pointer-events: none;
-  }
-  .social-quick-chats::-webkit-scrollbar { display: none; }
-  #root:has(.table) .social-quick-chats {
-    right: 52px;
-    left: auto;
-    flex-direction: row-reverse;
-    padding-right: 10px;
-    padding-left: 0;
-    transform: translateX(5px);
-  }
-  .social-dock:hover .social-quick-chats,
-  .social-dock:focus-within .social-quick-chats {
-    opacity: 1;
-    transform: translateX(0);
-    visibility: visible;
-    pointer-events: auto;
-  }
-  .social-quick-chat {
-    display: inline-flex;
-    height: 42px;
-    min-height: 42px;
-    flex: 0 0 auto;
-    align-items: center;
-    gap: 7px;
-    padding: 4px 8px 4px 5px;
-    border-color: #73572e;
-    border-radius: 999px;
-    background: linear-gradient(180deg, #2c1d0f, #1b1109);
-    box-shadow: 0 8px 22px #000b, inset 0 1px 0 #ffe4a21f;
-    clip-path: none;
-    color: var(--text-primary);
-    font-family: var(--font-lobby-ui);
-    font-size: 12px;
-    font-weight: 650;
-    letter-spacing: 0;
-    text-transform: none;
-  }
-  .social-quick-chat:hover {
-    border-color: #ae8544;
-    background: linear-gradient(180deg, #3b2915, #26170b);
-  }
-  .social-quick-avatar {
-    display: grid;
-    width: 30px;
-    height: 30px;
-    place-items: center;
-    border: 1px solid #806132;
-    border-radius: 50%;
-    background: #33220f;
-    color: #f1cf84;
-    font-size: 12px;
-    font-weight: 800;
-  }
-  .social-quick-name {
-    overflow: hidden;
-    max-width: 120px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+.social-message-toast {
+  position: absolute;
+  bottom: 63px;
+  left: 0;
+  width: min(224px, calc(100vw - 56px));
+  filter: none;
+  animation: social-toast-in 150ms ease-out;
+}
+.social-message-toast > button {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  padding: 6px 10px 6px 7px;
+  border: 1px solid #655033;
+  border-radius: 10px;
+  background: #21170f;
+  box-shadow: 0 5px 14px #0009;
+  clip-path: none;
+  color: var(--text-primary);
+  font-family: var(--font-lobby-ui);
+  letter-spacing: 0;
+  text-align: left;
+  text-transform: none;
+}
+.social-message-toast > button:hover {
+  border-color: #8b6a3b;
+  background: #2a1d12;
+}
+.social-message-toast-avatar {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  place-items: center;
+  border: 1px solid #705630;
+  border-radius: 50%;
+  background: #33230f;
+  box-shadow: none;
+  clip-path: none;
+  color: #efd080;
+  font-size: 12px;
+  font-weight: 850;
+}
+.social-message-toast-copy {
+  display: grid;
+  min-width: 0;
+  gap: 0;
+}
+.social-message-toast-copy strong {
+  overflow: hidden;
+  color: #efd080;
+  font-size: 11px;
+  line-height: 1.15;
+  letter-spacing: .1px;
+  text-overflow: ellipsis;
+  text-transform: none;
+  white-space: nowrap;
+}
+.social-message-toast-copy > span {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #c7bca9;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.2;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+@keyframes social-toast-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .social-message-toast { animation: none; }
 }
 
 .social-panel {
@@ -333,7 +340,7 @@
   border-color: #775c31;
   border-radius: 14px;
   background: #171008;
-  box-shadow: 0 24px 70px #000f, 0 0 0 1px #ffd4790d, inset 0 1px 0 #ffe3a01f;
+  box-shadow: 0 20px 56px #000e;
   font-family: var(--font-lobby-ui);
 }
 .friend-room-modal .modal-surface-header {
@@ -484,27 +491,18 @@
 }
 .chat-modal .modal-surface-header {
   top: -16px;
-  min-height: 68px;
+  min-height: 54px;
   align-items: flex-start;
   margin: -16px -16px 0;
-  padding: 15px 58px 14px 70px;
+  padding: 9px 48px 8px 56px;
   border-bottom-color: #5943238f;
-  background: linear-gradient(180deg, #24180dfc, #1b120af8);
-}
-.chat-modal .modal-surface-header::after {
-  position: absolute;
-  right: 0;
-  bottom: -1px;
-  left: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, #d4ab5b99 48%, transparent);
-  content: "";
+  background: #1d140d;
 }
 .chat-modal .modal-surface-header h2 {
   overflow: hidden;
   max-width: 100%;
   color: #f5dfad;
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 700;
   line-height: 22px;
   text-overflow: ellipsis;
@@ -512,11 +510,11 @@
 }
 .chat-modal .modal-surface-close {
   position: absolute;
-  top: 13px;
-  right: 14px;
-  width: 38px;
-  min-width: 38px;
-  height: 38px;
+  top: 8px;
+  right: 10px;
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
   border: 0;
   border-radius: 10px;
   background: transparent;
@@ -526,26 +524,27 @@
 .chat-modal .modal-surface-close svg { width: 17px; height: 17px; }
 .chat-contact-avatar {
   position: absolute;
-  top: 14px;
-  left: 17px;
+  top: 10px;
+  left: 14px;
   z-index: 3;
   display: grid;
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   place-items: center;
   border: 1px solid #93713a;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 25%, #5a4020, #291a0b 72%);
-  box-shadow: inset 0 1px 0 #ffe3a02b, 0 3px 12px #0008;
+  background: #35240f;
+  box-shadow: none;
   color: #f5d58e;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 800;
 }
 .chat-presence {
   position: absolute;
-  top: 39px;
-  left: 70px;
+  top: 29px;
+  left: 56px;
   z-index: 3;
+  gap: 4px;
   margin: 0;
   font-size: 11px;
 }
@@ -561,9 +560,7 @@
   padding: 18px 16px 14px;
   scrollbar-color: #6c512c transparent;
   scrollbar-width: thin;
-  background:
-    radial-gradient(circle at 50% 0, #6e4a1712, transparent 48%),
-    #100a06;
+  background: #100a06;
 }
 .chat-log .social-empty {
   margin: auto;
@@ -589,8 +586,8 @@
   padding: 8px 11px;
   border: 1px solid #4a3925;
   border-radius: 12px 12px 12px 4px;
-  background: linear-gradient(180deg, #292016, #21180f);
-  box-shadow: 0 3px 10px #0004;
+  background: #211810;
+  box-shadow: none;
   color: #eee2cd;
   font-size: 14px;
   line-height: 1.4;
@@ -601,8 +598,8 @@
 .chat-message.own p {
   border-color: #8a5d2d;
   border-radius: 12px 12px 4px 12px;
-  background: linear-gradient(145deg, #66401e, #4b2c15);
-  box-shadow: 0 3px 12px #0005, inset 0 1px 0 #ffd48818;
+  background: #503019;
+  box-shadow: none;
   color: #fff0d4;
   text-align: left;
 }
@@ -628,7 +625,7 @@
   border: 1px solid #564127;
   border-radius: 11px;
   background: #100a06;
-  box-shadow: inset 0 1px 8px #0005;
+  box-shadow: none;
   padding: 11px 52px 11px 12px;
   color: var(--text-primary);
   font: 14px/1.35 var(--font-lobby-ui);
@@ -642,7 +639,7 @@
 .chat-compose input:focus {
   outline: none;
   border-color: #ac8343;
-  box-shadow: 0 0 0 2px #b8933f24, inset 0 1px 8px #0005;
+  box-shadow: 0 0 0 2px #b8933f24;
 }
 .chat-compose button {
   position: absolute;
@@ -666,6 +663,10 @@
   .social-dock { right: auto; bottom: calc(84px + env(safe-area-inset-bottom)); left: max(16px, env(safe-area-inset-left)); }
   #root:has(.table) .social-dock {
     right: max(16px, env(safe-area-inset-right));
+    left: auto;
+  }
+  #root:has(.table) .social-message-toast {
+    right: 0;
     left: auto;
   }
   #root:has(.prep-page) .social-dock { bottom: calc(84px + env(safe-area-inset-bottom)); }

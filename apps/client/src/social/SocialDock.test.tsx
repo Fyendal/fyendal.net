@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
     friendGameInvites: [],
     socialError: null,
     activeChat: null,
+    incomingChatToast: null,
     chatMessages: {},
     chatHasMore: {},
     setSocialOpen: vi.fn(),
@@ -22,6 +23,7 @@ const mocks = vi.hoisted(() => ({
     cancelFriendRequest: vi.fn(),
     removeFriend: vi.fn(),
     openChat: vi.fn(),
+    dismissIncomingChatToast: vi.fn(),
     closeChat: vi.fn(),
     loadEarlierChat: vi.fn(),
     sendChatMessage: vi.fn(),
@@ -102,6 +104,29 @@ describe("SocialDock", () => {
 
     Object.assign(mocks.state, { screen: "game", roomCode: "ABC123" });
     expect(render()).not.toContain("Invite Online to a game");
+  });
+
+  it("shows an escaped incoming-message toast while the friend panel is closed", () => {
+    Object.assign(mocks.state, {
+      screen: "lobby",
+      roomCode: null,
+      socialOpen: false,
+      friends: [{ username: "Alice", presence: "online", friendsSince: 1, unreadCount: 1 }],
+      friendRequests: [],
+      friendGameInvites: [],
+      incomingChatToast: {
+        id: "1",
+        friendUsername: "Alice",
+        senderUsername: "Alice",
+        text: '<img src=x onerror="alert(1)">',
+        sentAt: 1,
+        readAt: null,
+      },
+    });
+    const html = render();
+    expect(html).toContain("social-message-toast");
+    expect(html).toContain("&lt;img src=x onerror=&quot;alert(1)&quot;&gt;");
+    expect(html).not.toContain('<img src=x onerror="alert(1)">');
   });
 });
 

@@ -22,6 +22,13 @@ export function cardLongPressMoved(
     || Math.abs(currentY - startY) > CARD_LONG_PRESS_MOVE_PX;
 }
 
+/** Actionable cards reserve touch gestures for their primary action. An inert
+ * card may use the same gesture to open the mobile inspection sheet. */
+export function mobileCardLongPressCardId(target: HTMLElement): string | null {
+  if (target.closest(".overlay, .card-clickable")) return null;
+  return target.closest<HTMLElement>("[data-cardid]")?.dataset.cardid ?? null;
+}
+
 /** Delegated mobile card inspection gesture shared by every card surface. */
 export function useMobileCardLongPress(
   onLongPress: (cardId: string, target: HTMLElement) => void,
@@ -48,8 +55,7 @@ export function useMobileCardLongPress(
       || !window.matchMedia(MOBILE_CARD_INSPECT_QUERY).matches
     ) return;
     const target = event.target as HTMLElement;
-    if (target.closest(".overlay")) return;
-    const cardId = target.closest<HTMLElement>("[data-cardid]")?.dataset.cardid;
+    const cardId = mobileCardLongPressCardId(target);
     if (!cardId) return;
 
     cancel();

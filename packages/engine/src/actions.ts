@@ -773,7 +773,6 @@ export function activateAbility(
   const resourceCost = ability.isAttack
     ? attackActivationCost(state, runtime, player, card, costAbility.cost, targetAllyId)
     : abilityResourceCost(state, runtime, seat, card, costAbility);
-  const nextActionGoAgain = timing === "action" && consumeNextActionGoAgain(player);
   const prepErr = payActivatedAbilityCost(state, runtime, seat, card, costAbility, abilityIndex, pitchInstanceIds, resourceCost, {
     chiCost: ability.chiCost,
     soulInstanceIds: selectedSoulIds,
@@ -781,6 +780,9 @@ export function activateAbility(
     discardInstanceIds,
   });
   if (prepErr) return prepErr;
+  // Cost payment notifies friendly observers, which may grant go again to
+  // this qualifying action activation (for example, Chane).
+  const nextActionGoAgain = timing === "action" && consumeNextActionGoAgain(player);
   if (variableCost) (card.counters ??= {})[variableCost.counterKey] = declaredVariableX!;
   if (ability.isAttack) consumeAttackCostReductions(state, seat, card, targetAllyId);
   if (costsAP) player.actionPoints -= 1;

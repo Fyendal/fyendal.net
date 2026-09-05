@@ -299,7 +299,7 @@ export const ajv: Record<string, CardScript> = {
         { kind: "card-moved", cardId: card.cardId, ownerSeat: ctx.seat, from: "deck", to: "banish" },
       ));
       ctx.shuffleDeck();
-      ctx.allowPlayFrom(card.instanceId, "banish", { untilNextTurn: true });
+      ctx.allowPlayFrom(card.instanceId, "banish", { untilEndOfNextTurn: true });
     },
   },
 };

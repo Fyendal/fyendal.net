@@ -665,9 +665,41 @@ describe("SFA — Phoenix Flame support", () => {
 
     s.passPriority().passPriority();
 
-    expect(s.state.pendingDecision).toMatchObject({ chooseHook: "fire-that-burns", player: 0 });
+    expect(s.state.pendingDecision).toMatchObject({ kind: "priority-window", player: 0 });
+    expect(s.state.pendingDecision?.chooseHook).toBeUndefined();
     expect(projectStateFor(s.state, 0).chain.at(-1)?.onStack).toBeUndefined();
     expect(projectStateFor(s.state, 0).stackContext).toBe("ATTACK STEP · TRIGGERS");
+  });
+
+  it("lets Fai return a Phoenix Flame before Fire that Burns Within's trigger resolves", () => {
+    const s = scenario({
+      seats: [
+        faiSeat({ hand: ["fire that burns within|1", BLUE], deck: [RED], graveyard: [FLAME] }),
+        { hero: "rhinar", hand: ["sigil of solace|1"] },
+      ],
+    });
+
+    // The blue pays 1 for Fire and leaves 2 resources. Fire does not count as
+    // a chain link during the Layer Step, so Fai still has its full cost.
+    s.play("fire that burns within|1", { pitch: [BLUE], settle: false });
+    s.expectResources(0, 2);
+
+    // Once Fire becomes the first Draconic chain link, its triggered layer is
+    // on the stack and Fai costs 2. Resolve Fai above that trigger, then use
+    // the returned Flame when Fire's trigger resolves.
+    s.passPriority().passPriority();
+    expect(s.state.pendingDecision).toMatchObject({ kind: "priority-window", player: 0 });
+    expect(abilityIntentsOn(s, 0, FAI)).toContainEqual(
+      expect.objectContaining({ pitchRequired: 0, pitchInstanceIds: [] }),
+    );
+
+    s.activate(FAI)
+      .chooseCard(FLAME)
+      .chooseCard(FLAME)
+      .expectAttackValue(4)
+      .expectResources(0, 0)
+      .expectInZone(0, RED, "hand")
+      .expectInZone(0, FLAME, "graveyard");
   });
 
   it("Fire that Burns Within: discard a Phoenix Flame to draw and get +2{p}", () => {

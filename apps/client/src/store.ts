@@ -596,12 +596,17 @@ export const useStore = create<StoreState>((set, get) => {
           Object.entries(get().chatHasMore).filter(([key]) => friendKeys.has(key)),
         );
         const activeChat = get().activeChat;
+        const incomingChatToast = get().incomingChatToast;
         set({
           friends: msg.snapshot.friends,
           friendRequests: msg.snapshot.requests,
           chatMessages,
           chatHasMore,
           activeChat: activeChat && friendKeys.has(activeChat.toLowerCase()) ? activeChat : null,
+          incomingChatToast: incomingChatToast
+            && friendKeys.has(incomingChatToast.friendUsername.toLowerCase())
+            ? incomingChatToast
+            : null,
         });
         break;
       }
@@ -630,10 +635,18 @@ export const useStore = create<StoreState>((set, get) => {
       case "chat-message": {
         const key = msg.message.friendUsername.toLowerCase();
         const current = get().chatMessages[key] ?? [];
-        const messages = current.some((message) => message.id === msg.message.id)
+        const alreadyReceived = current.some((message) => message.id === msg.message.id);
+        const messages = alreadyReceived
           ? current.map((message) => message.id === msg.message.id ? msg.message : message)
           : [...current, msg.message];
-        set({ chatMessages: { ...get().chatMessages, [key]: messages } });
+        const isIncoming = msg.message.senderUsername.toLowerCase() !== get().authUser?.toLowerCase();
+        const conversationIsOpen = get().activeChat?.toLowerCase() === key;
+        set({
+          chatMessages: { ...get().chatMessages, [key]: messages },
+          ...(isIncoming && !conversationIsOpen && !alreadyReceived
+            ? { incomingChatToast: msg.message }
+            : {}),
+        });
         if (get().activeChat?.toLowerCase() === key && document.visibilityState === "visible") {
           send({ type: "chat-read", username: msg.message.friendUsername, throughId: msg.message.id });
         }
@@ -1035,12 +1048,19 @@ export const useStore = create<StoreState>((set, get) => {
       const canonical = get().friends.find((friend) =>
         friend.username.toLowerCase() === username.toLowerCase())?.username ?? username;
       const key = canonical.toLowerCase();
-      set({ activeChat: canonical, socialOpen: false, socialError: null });
+      const toastBelongsToConversation = get().incomingChatToast?.friendUsername.toLowerCase() === key;
+      set({
+        activeChat: canonical,
+        socialOpen: false,
+        socialError: null,
+        ...(toastBelongsToConversation ? { incomingChatToast: null } : {}),
+      });
       send({ type: "chat-history", username: canonical });
       const latest = get().chatMessages[key]?.at(-1);
       if (latest) send({ type: "chat-read", username: canonical, throughId: latest.id });
     },
     closeChat: () => set({ activeChat: null }),
+    dismissIncomingChatToast: () => set({ incomingChatToast: null }),
     loadEarlierChat: (username) => {
       const first = get().chatMessages[username.toLowerCase()]?.[0];
       send({ type: "chat-history", username, ...(first ? { beforeId: first.id } : {}) });

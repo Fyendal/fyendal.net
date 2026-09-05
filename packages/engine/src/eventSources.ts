@@ -280,6 +280,7 @@ export function fireOnFriendlyActivate(
     scriptOf(state, src.cardId, src)?.onFriendlyActivate?.(
       runtime.makeCtx(state, seat, src, currentLink(state)),
       activated,
+      timing,
     );
   }
   for (const modifier of state.modifiers) {
