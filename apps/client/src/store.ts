@@ -129,9 +129,9 @@ export const useStore = create<StoreState>((set, get) => {
   /** Coalesces React Strict Mode and other overlapping attempts to restore the
    *  same room before its first authoritative projection arrives. */
   let joiningRoomCode: string | null = null;
-  /** Browser lifecycle is deterministic: hidden tabs suspend their socket and
-   *  one fresh connection is established when the page becomes active. */
-  let browserConnectionState: "active" | "suspended" | "restoring" = "active";
+  /** Visibility controls when retries run, but does not define socket health. */
+  let pageActive = true;
+  let reconnectOnActive = false;
   /** A bot-room request waiting for the retained matchmaking room to release
    *  this socket. WebSocket commands stay ordered by waiting for `left`. */
   let pendingBotRoom: { format: ConstructedFormat; deckId: string; bot?: BotOpponent; searchForPlayer?: boolean } | null = null;
@@ -212,7 +212,6 @@ export const useStore = create<StoreState>((set, get) => {
 
   function closeCurrentSocket(): void {
     cancelReconnect();
-    browserConnectionState = "active";
     const socket = ws;
     ws = null;
     connectionEpoch += 1;
@@ -331,7 +330,6 @@ export const useStore = create<StoreState>((set, get) => {
       if (ws !== socket || connectionEpoch !== epoch) return; // superseded by a newer socket
       ws = null;
       connectionEpoch += 1;
-      browserConnectionState = "active";
       pendingOpen = [];
       authedToken = null;
       joiningRoomCode = null;
@@ -341,8 +339,9 @@ export const useStore = create<StoreState>((set, get) => {
         failPendingRoomEntry("connection to room failed");
         return;
       }
-      if (typeof document !== "undefined" && document.visibilityState === "hidden") {
-        browserConnectionState = "suspended";
+      if (!pageActive || (typeof document !== "undefined" && document.visibilityState === "hidden")) {
+        pageActive = false;
+        reconnectOnActive = true;
         clearReconnectNotice();
         return;
       }
@@ -359,7 +358,6 @@ export const useStore = create<StoreState>((set, get) => {
     };
     socket.onmessage = (ev) => {
       if (ws !== socket || connectionEpoch !== epoch) return;
-      browserConnectionState = "active";
       try {
         const message = decodeServerMessage(JSON.parse(String(ev.data)));
         if (message) handleMessage(message);
@@ -399,32 +397,38 @@ export const useStore = create<StoreState>((set, get) => {
     scheduleReconnect();
   }
 
-  /** Hidden mobile tabs deliberately release their socket. Becoming active
-   * always starts one fresh connection, so browser lifecycle never depends on
-   * a stale WebSocket readyState or an additional liveness timeout. */
+  /** Visibility changes do not imply a disconnect. Keep a browser-reported
+   * OPEN/CONNECTING socket, and only accelerate recovery of a socket whose
+   * close event has already run. */
   function setConnectionActive(active: boolean): void {
+    pageActive = active;
+
+    if (!active) {
+      if (reconnectTimer) {
+        reconnectOnActive = true;
+        cancelReconnect();
+      }
+      return;
+    }
+
+    if (ws?.readyState === WebSocket.OPEN || ws?.readyState === WebSocket.CONNECTING) {
+      reconnectOnActive = false;
+      clearReconnectNotice();
+      return;
+    }
+
     // A brand-new room entry still needs its original deck/hero parameters.
     // Its own socket callbacks remain authoritative until membership exists.
     if (joiningRoomCode !== null && !get().roomCode) return;
 
-    if (!active) {
-      const hadConnection = ws !== null || reconnectTimer !== null || get().connected;
-      if (!hadConnection) return;
-      closeCurrentSocket();
-      browserConnectionState = "suspended";
-      set({ connected: false });
-      return;
-    }
-
-    if (browserConnectionState === "restoring") return;
-    const shouldRestore = browserConnectionState === "suspended"
+    const shouldRestore = reconnectOnActive
       || reconnectTimer !== null
       || ws !== null
       || get().roomCode !== null;
     if (!shouldRestore) return;
 
+    reconnectOnActive = false;
     closeCurrentSocket();
-    browserConnectionState = "restoring";
     set({ connected: false });
     restoreConnection();
   }

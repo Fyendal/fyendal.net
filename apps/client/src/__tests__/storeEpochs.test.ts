@@ -525,7 +525,7 @@ describe("client connection and account race fences", () => {
     expect(useStore.getState().connectionIssueVisible).toBe(true);
   });
 
-  it("suspends a hidden room socket and restores it once when foregrounded", async () => {
+  it("keeps a healthy room socket across background and foreground transitions", async () => {
     vi.useFakeTimers();
     const { useStore } = await import("../store.js");
 
@@ -538,10 +538,10 @@ describe("client connection and account race fences", () => {
     useStore.getState().setConnectionActive(false);
     await vi.advanceTimersByTimeAsync(5_000);
 
-    expect(socket.readyState).toBe(FakeWebSocket.CLOSED);
+    expect(socket.readyState).toBe(FakeWebSocket.OPEN);
     expect(FakeWebSocket.instances).toHaveLength(1);
     expect(useStore.getState()).toMatchObject({
-      connected: false,
+      connected: true,
       connectionIssueVisible: false,
       screen: "game",
       roomCode: "AAAAAA",
@@ -549,40 +549,27 @@ describe("client connection and account race fences", () => {
 
     useStore.getState().setConnectionActive(true);
     useStore.getState().setConnectionActive(true);
-    expect(FakeWebSocket.instances).toHaveLength(2);
-    const recovered = FakeWebSocket.instances[1]!;
-    recovered.open();
-    expect(recovered.sent.map((message) => JSON.parse(message))).toEqual([
-      { type: "join-room", code: "AAAAAA", token: "seat-token" },
-    ]);
+    expect(FakeWebSocket.instances).toHaveLength(1);
   });
 
-  it("foregrounding replaces a socket that the browser still reports open", async () => {
+  it("keeps an in-flight connection across a visibility transition", async () => {
     const { useStore } = await import("../store.js");
 
-    useStore.getState().joinRoom("AAAAAA");
-    const staleSocket = FakeWebSocket.instances[0]!;
-    staleSocket.open();
-    staleSocket.message({ type: "joined", code: "AAAAAA", seat: 0, token: "seat-token", version: 1 });
-    staleSocket.message({ ...staleState, version: 2 });
-
+    useStore.getState().joinRoom("AAAAAA", "deck-a");
+    const socket = FakeWebSocket.instances[0]!;
+    useStore.getState().setConnectionActive(false);
     useStore.getState().setConnectionActive(true);
 
-    expect(staleSocket.readyState).toBe(FakeWebSocket.CLOSED);
-    expect(FakeWebSocket.instances).toHaveLength(2);
-    expect(useStore.getState()).toMatchObject({
-      connected: false,
-      connectionIssueVisible: false,
-      screen: "game",
-      roomCode: "AAAAAA",
-    });
+    expect(FakeWebSocket.instances).toHaveLength(1);
+    socket.open();
+    expect(socket.sent.map((message) => JSON.parse(message))).toEqual([
+      { type: "join-room", code: "AAAAAA", deckId: "deck-a" },
+    ]);
   });
 
   it("defers an unexpected hidden-tab disconnect until the page is active", async () => {
     vi.useFakeTimers();
     vi.spyOn(Math, "random").mockReturnValue(0);
-    const visibility = { visibilityState: "hidden" };
-    vi.stubGlobal("document", visibility);
     const { useStore } = await import("../store.js");
 
     useStore.getState().joinRoom("AAAAAA");
@@ -590,13 +577,13 @@ describe("client connection and account race fences", () => {
     socket.open();
     socket.message({ type: "joined", code: "AAAAAA", seat: 0, token: "seat-token", version: 1 });
     socket.message({ ...staleState, version: 2 });
+    useStore.getState().setConnectionActive(false);
     socket.close();
 
     await vi.advanceTimersByTimeAsync(10_000);
     expect(FakeWebSocket.instances).toHaveLength(1);
     expect(useStore.getState().connectionIssueVisible).toBe(false);
 
-    visibility.visibilityState = "visible";
     useStore.getState().setConnectionActive(true);
     expect(FakeWebSocket.instances).toHaveLength(2);
   });
