@@ -146,6 +146,9 @@ describe("HNT — marked heroes and daggers", () => {
       .expectAttackValue(2);
 
     expect(g.state.chain[0]!.reactions).toEqual([]);
+    expect(projectStateFor(g.state, 0).chain[0]!.reactions).toContainEqual(
+      expect.objectContaining({ cardId: printingId("fire and brimstone|1") }),
+    );
   });
 
   it("Quickdodge Flexors has 2 base defense on each chain link without stacking", () => {

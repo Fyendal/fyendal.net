@@ -1221,6 +1221,11 @@ export function finishStackCardResolution(
         [{ card: resolvedCard, fragmentTriggered }],
         layer.fromHand === true,
       );
+    } else if (resolvedSuccessfully && link && cardType === "attack-reaction") {
+      // The card clears to graveyard (CR 8.1.2b), but retain last-known
+      // presentation data so the resolved reaction remains visible beside the
+      // chain link without being treated as an object on the combat chain.
+      (link.resolvedReactionAbilitySources ??= []).push(resolvedCard);
     }
     const remainsOnChain = state.chain.some((link) =>
       link.attackingCard.instanceId === resolvedCard.instanceId ||

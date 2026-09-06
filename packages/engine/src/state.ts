@@ -322,10 +322,11 @@ export interface ChainLinkState {
   /** Legacy attack-reaction cards retained by older persisted states. New
    * attack-reaction card-layers clear to graveyard when they resolve. */
   reactions: CardInstance[];
-  /** Last-known sources of activated attack/defense reaction abilities that
-   *  resolved on this link. Display provenance only: unlike reaction cards,
-   *  these objects stay in (or have already left) their normal arena zone and
-   *  do not participate in combat hooks or close-chain settlement. */
+  /** Last-known display sources of resolved reaction cards and activated
+   *  reaction abilities. The persisted field name predates card-layer
+   *  snapshots. Presentation only: these objects have moved to their normal
+   *  destination (or remain in the arena) and do not participate in combat
+   *  hooks or close-chain settlement. */
   resolvedReactionAbilitySources?: CardInstance[];
   goAgain: boolean;
   damage: number;
