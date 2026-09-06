@@ -190,6 +190,8 @@ export function SideRail({
   onConcede,
   spectating,
   spectatorCount,
+  spectatorUsernames = [],
+  onKickSpectator,
   opponentConnected,
   connectionIssueVisible,
   error,
@@ -241,6 +243,8 @@ export function SideRail({
   onConcede: (() => void) | null;
   spectating: boolean;
   spectatorCount: number;
+  spectatorUsernames: Array<string | null>;
+  onKickSpectator: ((username: string) => void) | null;
   opponentConnected: boolean;
   connectionIssueVisible: boolean;
   error: string | null;
@@ -470,8 +474,36 @@ export function SideRail({
         </div>
       )}
       {spectatorCount > 0 && (
-        <div className="spec-count">
-          👁 {intl.formatMessage({ id: "game.spectating.count" }, { count: spectatorCount })}
+        <div className="spec-count" tabIndex={0}>
+          <span>
+            👁 {intl.formatMessage({ id: "game.spectating.count" }, { count: spectatorCount })}
+          </span>
+          <div className="spec-list" role="tooltip">
+            <div className="spec-list-title">
+              {intl.formatMessage({ id: "game.spectating.list" })}
+            </div>
+            {spectatorUsernames.map((username, index) => (
+              <div className="spec-list-row" key={`${username ?? "guest"}-${index}`}>
+                <span>{username ?? intl.formatMessage({ id: "game.spectating.guest" })}</span>
+                {username && onKickSpectator ? (
+                  <button
+                    type="button"
+                    aria-label={intl.formatMessage(
+                      { id: "game.spectating.kickNamed" },
+                      { username },
+                    )}
+                    title={intl.formatMessage(
+                      { id: "game.spectating.kickNamed" },
+                      { username },
+                    )}
+                    onClick={() => onKickSpectator(username)}
+                  >
+                    ×
+                  </button>
+                ) : null}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

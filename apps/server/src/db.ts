@@ -623,6 +623,13 @@ export const MIGRATIONS: Migration[] = [
     CREATE INDEX replay_notes_owner_idx
       ON replay_notes(replay_id, user_id);`,
   },
+  {
+    version: 34,
+    sql: `ALTER TABLE room_presence
+      ADD COLUMN user_id INTEGER REFERENCES users(id) ON DELETE SET NULL;
+    CREATE INDEX room_presence_spectator_user_idx
+      ON room_presence(room_code, user_id) WHERE seat IS NULL;`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

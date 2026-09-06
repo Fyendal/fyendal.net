@@ -157,6 +157,8 @@ export interface StoreState {
   yourSeat: number | null;
   spectating: boolean;
   spectatorCount: number;
+  spectatorUsernames: Array<string | null>;
+  spectatorKicked: boolean;
   botGame: boolean;
   playerProfiles: [PlayerProfileView, PlayerProfileView] | null;
   view: GameView | null;
@@ -210,6 +212,7 @@ export interface StoreState {
   sendPriorityMode: (mode: PriorityWindowMode) => void;
   sendRunechantSkip: (enabled: boolean) => void;
   sendEmote: (message: EmoteMessage) => void;
+  kickSpectator: (username: string) => void;
   undo: (target?: UndoTarget) => void;
   claimVictory: () => void;
   leave: () => void;
@@ -243,5 +246,6 @@ export interface PreReplaySnapshot {
   yourSeat: number | null;
   spectating: boolean;
   spectatorCount: number;
+  spectatorUsernames: Array<string | null>;
   playerProfiles: [PlayerProfileView, PlayerProfileView] | null;
 }

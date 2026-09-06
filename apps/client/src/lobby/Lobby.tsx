@@ -76,6 +76,7 @@ export function Lobby() {
   const intl = useIntl();
   const {
     error,
+    spectatorKicked,
     connected,
     authUser,
     logout,
@@ -92,6 +93,7 @@ export function Lobby() {
     dismissBugReportNotifications,
   } = useStore(useShallow((state) => ({
     error: state.error,
+    spectatorKicked: state.spectatorKicked,
     connected: state.connected,
     authUser: state.authUser,
     logout: state.logout,
@@ -194,7 +196,9 @@ export function Lobby() {
         </main>
         {inviteRoom ? <Suspense fallback={null}><RoomInviteModal /></Suspense> : null}
         <SiteFooter />
-      {error && <div className="toast">{error}</div>}
+      {spectatorKicked ? (
+        <div className="toast">{intl.formatMessage({ id: "game.spectating.kicked" })}</div>
+      ) : error ? <div className="toast">{error}</div> : null}
       </div>
     );
   }
@@ -401,7 +405,9 @@ export function Lobby() {
       ) : null}
       {inviteRoom ? <Suspense fallback={null}><RoomInviteModal /></Suspense> : null}
       <SiteFooter />
-      {error && <div className="toast">{error}</div>}
+      {spectatorKicked ? (
+        <div className="toast">{intl.formatMessage({ id: "game.spectating.kicked" })}</div>
+      ) : error ? <div className="toast">{error}</div> : null}
     </div>
   );
 }

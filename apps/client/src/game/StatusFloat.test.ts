@@ -1,7 +1,13 @@
 import { createElement, type ComponentProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import { damagePacketsFromLog, lifeChange, StatusFloat } from "./StatusFloat.js";
+import type { GameLogViewEntry } from "@fyendal/shared";
+import {
+  damagePacketsFromLog,
+  damagePacketsFromLogEntries,
+  lifeChange,
+  StatusFloat,
+} from "./StatusFloat.js";
 import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 
 function renderStatus(props: ComponentProps<typeof StatusFloat>, locale: "en" | "zh-Hans" = "en") {
@@ -49,6 +55,60 @@ describe("life change animation", () => {
     expect(damagePacketsFromLog(previous, current, "Dorinthea Ironsong", 3))
       .toEqual([3]);
     expect(damagePacketsFromLog(previous, current, "Rhinar", 3)).toBeNull();
+  });
+
+  it("maps combat damage to slash and arcane packets to zap", () => {
+    const previous: GameLogViewEntry[] = [{
+      fallback: "before",
+      sequence: 8,
+      message: { id: "engine.log.before" },
+    }];
+    const combat: GameLogViewEntry = {
+      fallback: "Attack hits for 4",
+      sequence: 9,
+      message: { id: "engine.log.damage.hit" },
+      event: {
+        kind: "damage",
+        targetSeat: 1,
+        amount: 4,
+        damageType: "physical",
+      },
+    };
+    const arcane: GameLogViewEntry = {
+      fallback: "Hero takes 1 arcane damage",
+      sequence: 10,
+      message: { id: "engine.log.damage.hero.takes.arcane" },
+      event: {
+        kind: "damage",
+        targetSeat: 1,
+        amount: 1,
+        damageType: "arcane",
+      },
+    };
+
+    expect(damagePacketsFromLogEntries(previous, [...previous, combat], 1, 4))
+      .toEqual([{ amount: 4, animation: "slash" }]);
+    expect(damagePacketsFromLogEntries([...previous, combat], [...previous, combat, arcane], 1, 1))
+      .toEqual([{ amount: 1, animation: "zap" }]);
+  });
+
+  it("keeps non-combat physical damage on the default life-loss animation", () => {
+    const entry: GameLogViewEntry = {
+      fallback: "Effect deals 1 damage",
+      sequence: 1,
+      message: { id: "card.log.effect.damage" },
+      event: {
+        kind: "damage",
+        targetSeat: 0,
+        amount: 1,
+        damageType: "physical",
+      },
+    };
+
+    expect(damagePacketsFromLogEntries([], [entry], 0, 1))
+      .toEqual([{ amount: 1, animation: "default" }]);
+    expect(damagePacketsFromLogEntries([], [entry], 1, 1)).toBeNull();
+    expect(damagePacketsFromLogEntries([], [entry], 0, 2)).toBeNull();
   });
 });
 

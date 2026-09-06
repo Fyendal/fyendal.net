@@ -1,20 +1,29 @@
 import type { GameSoundCue, GameSoundKind } from "./gameSoundCues.js";
 
-const SOUND_URLS: Readonly<Record<GameSoundKind, readonly string[]>> = {
-  draw: ["draw-1.ogg", "draw-2.ogg", "draw-3.ogg"],
-  play: ["play-1.ogg", "play-2.ogg"],
-  shuffle: ["shuffle.ogg"],
+type SampleSoundKind = Exclude<GameSoundKind, "priority">;
+
+const SOUND_URLS: Readonly<Record<SampleSoundKind, readonly string[]>> = {
+  draw: ["cards/draw-1.ogg", "cards/draw-2.ogg", "cards/draw-3.ogg"],
+  play: ["cards/play-1.ogg", "cards/play-2.ogg"],
+  shuffle: ["cards/shuffle.ogg"],
+  slash: ["damage/slash.wav"],
+  zap: ["damage/zap.wav"],
 };
 
 const CUE_GAIN: Readonly<Record<GameSoundKind, number>> = {
   draw: 0.55,
   play: 0.7,
   shuffle: 0.45,
+  priority: 0.32,
+  slash: 0.72,
+  zap: 0.58,
 };
 
 const MAX_CUE_DURATION_SECONDS: Readonly<Partial<Record<GameSoundKind, number>>> = {
   // Match the deck shuffle animation instead of playing the full 3-second sample.
   shuffle: 0.9,
+  // Keep combat hits tight even when the source sample has a longer decay.
+  slash: 0.65,
 };
 
 const CUE_FADE_SECONDS = 0.08;
@@ -32,7 +41,7 @@ export function gameSoundPlaybackDuration(
 }
 
 function soundUrl(filename: string): string {
-  return `${import.meta.env.BASE_URL}audio/cards/${filename}`;
+  return `${import.meta.env.BASE_URL}audio/${filename}`;
 }
 
 export class GameAudioPlayer {
@@ -40,12 +49,14 @@ export class GameAudioPlayer {
   private masterGain: GainNode | null = null;
   private loadPromise: Promise<void> | null = null;
   private readonly buffers = new Map<string, AudioBuffer>();
-  private readonly nextVariant: Record<GameSoundKind, number> = {
+  private readonly nextVariant: Record<SampleSoundKind, number> = {
     draw: 0,
     play: 0,
     shuffle: 0,
+    slash: 0,
+    zap: 0,
   };
-  private readonly activeSources = new Set<AudioBufferSourceNode>();
+  private readonly activeSources = new Set<AudioScheduledSourceNode>();
   private enabled = true;
   private volume = 0.35;
 
@@ -128,6 +139,10 @@ export class GameAudioPlayer {
 
   private startCue(cue: GameSoundCue): void {
     if (!this.context || !this.masterGain) return;
+    if (cue.kind === "priority") {
+      this.startPriorityCue(cue.delayMs);
+      return;
+    }
     const variants = SOUND_URLS[cue.kind];
     const variantIndex = this.nextVariant[cue.kind] % variants.length;
     this.nextVariant[cue.kind] += 1;
@@ -157,6 +172,35 @@ export class GameAudioPlayer {
     }
     source.start(startsAt);
     if (endsAt !== undefined) source.stop(endsAt);
+  }
+
+  private startPriorityCue(delayMs: number): void {
+    if (!this.context || !this.masterGain) return;
+    const context = this.context;
+    const startsAt = context.currentTime + Math.max(0, delayMs) / 1_000;
+    // A restrained rising interval reads as "ready" without competing with
+    // the physical card sounds. Each note has a quick, click-free envelope.
+    for (const [index, frequency] of [523.25, 659.25].entries()) {
+      const noteStartsAt = startsAt + index * 0.09;
+      const noteEndsAt = noteStartsAt + 0.2;
+      const oscillator = context.createOscillator();
+      const cueGain = context.createGain();
+      oscillator.type = "sine";
+      oscillator.frequency.setValueAtTime(frequency, noteStartsAt);
+      cueGain.gain.setValueAtTime(0, noteStartsAt);
+      cueGain.gain.linearRampToValueAtTime(CUE_GAIN.priority, noteStartsAt + 0.018);
+      cueGain.gain.exponentialRampToValueAtTime(0.001, noteEndsAt);
+      oscillator.connect(cueGain);
+      cueGain.connect(this.masterGain);
+      oscillator.onended = () => {
+        this.activeSources.delete(oscillator);
+        oscillator.disconnect();
+        cueGain.disconnect();
+      };
+      this.activeSources.add(oscillator);
+      oscillator.start(noteStartsAt);
+      oscillator.stop(noteEndsAt);
+    }
   }
 
   private stopActiveSources(): void {

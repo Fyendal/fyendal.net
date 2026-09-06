@@ -655,6 +655,9 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
       valid = exactKeys(message, ["type", "message"])
         && EMOTE_MESSAGES.has(String(message.message));
       break;
+    case "kick-spectator":
+      valid = exactKeys(message, ["type", "username"]) && username(message.username);
+      break;
     case "list-rooms":
     case "queue-leave":
     case "prep-unready":
@@ -1162,7 +1165,7 @@ export function decodeServerMessage(value: unknown): ServerMessage | null {
     case "friend-game-invite-dismissed":
       valid = exactKeys(message, ["type", "inviteId"]) && requestId(message.inviteId);
       break;
-    case "auth-failed": case "queue-left": case "left": case "match-timeout":
+    case "auth-failed": case "queue-left": case "left": case "match-timeout": case "spectator-kicked":
       valid = exactKeys(message, ["type"]);
       break;
     case "background-matchmaking":
@@ -1204,6 +1207,11 @@ export function decodeServerMessage(value: unknown): ServerMessage | null {
     case "spectators":
       valid = exactKeys(message, ["type", "count", "version"])
         && nonNegativeInteger(message.count) && version();
+      break;
+    case "spectator-list":
+      valid = exactKeys(message, ["type", "usernames", "version"])
+        && array(message.usernames, (name): name is string | null => name === null || username(name), 20)
+        && version();
       break;
     case "rooms":
       valid = exactKeys(message, ["type", "rooms"]) && array(message.rooms, roomSummary, MAX_ROOMS);

@@ -15,6 +15,8 @@ export function initialStoreProjection(
     yourSeat: null,
     spectating: false,
     spectatorCount: 0,
+    spectatorUsernames: [],
+    spectatorKicked: false,
     botGame: false,
     playerProfiles: null,
     view: null,
@@ -83,6 +85,8 @@ export function clearedRoomProjection(): Pick<
   | "yourSeat"
   | "spectating"
   | "spectatorCount"
+  | "spectatorUsernames"
+  | "spectatorKicked"
   | "botGame"
   | "playerProfiles"
   | "view"
@@ -119,6 +123,8 @@ export function clearedRoomProjection(): Pick<
     yourSeat: null,
     spectating: false,
     spectatorCount: 0,
+    spectatorUsernames: [],
+    spectatorKicked: false,
     botGame: false,
     playerProfiles: null,
     view: null,

@@ -83,7 +83,7 @@ pnpm --filter @fyendal/server seed
 
 This creates local `alice` and `bob` accounts with password `password123` and
 the `DEMO00` room. The command refuses production environments and remote
-Cloud SQL connections. Never point it at a shared database.
+database connections. Never point it at a shared database.
 
 ## Commands
 

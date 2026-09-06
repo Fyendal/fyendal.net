@@ -27,6 +27,8 @@ function sideRailProps(
     onConcede: vi.fn(),
     spectating: false,
     spectatorCount: 0,
+    spectatorUsernames: [],
+    onKickSpectator: vi.fn(),
     opponentConnected: true,
     connectionIssueVisible: false,
     error: null,
@@ -154,6 +156,21 @@ describe("game control icons", () => {
     expect(html).toContain("你正在观战");
     expect(html).toContain("2 人正在观战");
     expect(html).toContain("对手已断开连接");
+  });
+
+  it("shows spectator identities and only offers removal for named accounts", () => {
+    const kick = vi.fn();
+    const html = renderSideRail(sideRailProps({
+      spectatorCount: 2,
+      spectatorUsernames: ["Alice", null],
+      onKickSpectator: kick,
+    }));
+
+    expect(html).toContain("Spectators");
+    expect(html).toContain("Alice");
+    expect(html).toContain("Guest");
+    expect(html).toContain('aria-label="Remove Alice from the room"');
+    expect(html.match(/class="spec-list-row"/g)).toHaveLength(2);
   });
 
 });

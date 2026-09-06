@@ -338,6 +338,7 @@ describe("client messages", () => {
     { type: "leave-room", endGame: true },
     { type: "undo" },
     { type: "emote", message: "Thinking..." },
+    { type: "kick-spectator", username: "Alice_1" },
     { type: "claim-victory" },
   ];
   const intents = [
@@ -733,8 +734,10 @@ describe("GameView and server messages", () => {
       { type: "state", version: 1, view: gameView(), transition: { fromVersion: 0, kind: "forward", events: [{ kind: "move", from: { kind: "deck", seat: 0, position: "top" }, to: { kind: "hand", seat: 0 }, count: 1 }] }, playerProfiles, yourSeat: 0, legal: [{ kind: "play-card", instanceId: 1, pitchInstanceIds: [], boost: true }], actionCandidates: [{ kind: "play-card", instanceId: 2, pitchInstanceIds: [], pitchRequired: 4, deferPlayPresentation: true }], spectators: 2, lastActionAt: [0, 1], botGame: true },
       { type: "state", version: 3, view: gameView(), transition: { fromVersion: 2, kind: "replace", restoreVersion: 1, events: [] }, playerProfiles, yourSeat: 0, legal: [], lastActionAt: [0, 1] },
       { type: "spectators", count: 2, version: 1 },
+      { type: "spectator-list", usernames: ["Alice", null], version: 1 },
       { type: "opponent-disconnected", version: 1 }, { type: "opponent-reconnected", version: 1 },
       { type: "emote", seat: 1, message: "Good game!" },
+      { type: "spectator-kicked" },
       { type: "rooms", rooms: [{ code: "ABC123", format: "cc", heroes: ["A", null], createdAt: 1, spectateOnly: false, yours: true, cardPoolMode: "open" }] },
       { type: "room-info", room: { code: "ABC123", format: "silver-age", spectateOnly: true, yours: false, cardPoolMode: "future" } },
       { type: "queue-status", counts: { "classic-battles": 0, cc: 1, "silver-age": 2 } },

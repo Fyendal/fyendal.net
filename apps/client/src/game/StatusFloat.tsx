@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useIntl } from "react-intl";
+import type { GameLogViewEntry } from "@fyendal/shared";
 import { heroImageUrl } from "../lobby/heroImage.js";
 
 export type PrimaryAction = "end-turn" | "confirm-blocks" | "confirm-no-blocks" | "pass";
@@ -7,6 +8,13 @@ export type PrimaryAction = "end-turn" | "confirm-blocks" | "confirm-no-blocks" 
 export type LifeChange = {
   amount: number;
   kind: "damage" | "gain";
+};
+
+export type DamageAnimation = "default" | "slash" | "zap";
+
+export type DamagePacket = {
+  amount: number;
+  animation: DamageAnimation;
 };
 
 export function lifeChange(previousLife: number, currentLife: number): LifeChange | null {
@@ -67,46 +75,101 @@ export function damagePacketsFromLog(
   return packets.length > 0 && total === totalDamage ? packets : null;
 }
 
+/** Prefer semantic damage metadata when available. Combat logs have stable
+ * engine message ids, while arcane damage is identified directly by its
+ * damage event. Other physical damage keeps the default life-loss effect. */
+export function damagePacketsFromLogEntries(
+  previousEntries: readonly GameLogViewEntry[] | undefined,
+  currentEntries: readonly GameLogViewEntry[] | undefined,
+  targetSeat: number,
+  totalDamage: number,
+): DamagePacket[] | null {
+  if (!currentEntries) return null;
+  const previousSequence = previousEntries?.reduce((highest, entry) => (
+    "sequence" in entry ? Math.max(highest, entry.sequence) : highest
+  ), 0) ?? 0;
+  const packets: DamagePacket[] = [];
+  let total = 0;
+  for (const entry of currentEntries) {
+    if (!("sequence" in entry) || entry.sequence <= previousSequence) continue;
+    const event = entry.event;
+    if (event?.kind !== "damage" || event.targetSeat !== targetSeat) continue;
+    const combat = event.damageType === "physical" && (
+      entry.message.id === "engine.log.damage.hit"
+      || entry.message.id === "engine.log.damage.redirected"
+    );
+    packets.push({
+      amount: event.amount,
+      animation: event.damageType === "arcane" ? "zap" : combat ? "slash" : "default",
+    });
+    total += event.amount;
+  }
+  return packets.length > 0 && total === totalDamage ? packets : null;
+}
+
 function LifeStatus({
   life,
   side,
+  seat,
   heroName,
   log,
+  logEntries,
 }: {
   life: number;
   side: "opp" | "me";
+  seat: number;
   heroName: string;
   log: readonly string[];
+  logEntries?: readonly GameLogViewEntry[];
 }) {
   const intl = useIntl();
   const previousLife = useRef(life);
   const previousLog = useRef(log);
+  const previousLogEntries = useRef(logEntries);
   const [change, setChange] = useState<LifeChange & {
     lifeAfter: number;
     sequence: number;
-    damagePackets?: number[];
+    damagePackets?: DamagePacket[];
   } | null>(null);
 
   useEffect(() => {
     const nextChange = lifeChange(previousLife.current, life);
-    const damagePackets = nextChange?.kind === "damage"
+    const semanticDamagePackets = nextChange?.kind === "damage"
+      ? damagePacketsFromLogEntries(
+          previousLogEntries.current,
+          logEntries,
+          seat,
+          nextChange.amount,
+        )
+      : null;
+    const legacyDamagePackets = nextChange?.kind === "damage" && !semanticDamagePackets
       ? damagePacketsFromLog(previousLog.current, log, heroName, nextChange.amount)
       : null;
+    const damagePackets = semanticDamagePackets ?? legacyDamagePackets?.map((amount) => ({
+      amount,
+      animation: "default" as const,
+    })) ?? null;
     previousLife.current = life;
     previousLog.current = log;
+    previousLogEntries.current = logEntries;
     if (!nextChange) return;
     setChange((current) => ({
       ...nextChange,
       lifeAfter: life,
       sequence: (current?.sequence ?? 0) + 1,
-      ...(damagePackets && damagePackets.length > 1 ? { damagePackets } : {}),
+      ...(damagePackets ? { damagePackets } : {}),
     }));
-  }, [heroName, life, log]);
+  }, [heroName, life, log, logEntries, seat]);
 
   const owner = intl.formatMessage({ id: side === "me" ? "game.owner.your" : "game.owner.opponent" });
   const activeChange = change?.lifeAfter === life ? change : null;
-  const displayedAmounts = activeChange?.damagePackets ??
-    (activeChange ? [activeChange.amount] : []);
+  const displayedPackets = activeChange?.damagePackets ?? (activeChange ? [{
+    amount: activeChange.amount,
+    animation: "default" as const,
+  }] : []);
+  const impactAnimation = activeChange?.kind === "damage"
+    ? displayedPackets.find((packet) => packet.animation !== "default")?.animation ?? "damage"
+    : activeChange?.kind;
   const heroPortrait = (
     <img
       className="life-hero"
@@ -127,7 +190,7 @@ function LifeStatus({
     >
       {side === "me" ? heroPortrait : null}
       <span
-        className={`life-impact ${activeChange ? `life-impact-${activeChange.kind}` : ""}`}
+        className={`life-impact ${impactAnimation ? `life-impact-${impactAnimation}` : ""}`}
         key={activeChange?.sequence ?? 0}
         aria-hidden="true"
       >
@@ -135,17 +198,23 @@ function LifeStatus({
         <span>{life}</span>
       </span>
       {side === "opp" ? heroPortrait : null}
-      {activeChange ? displayedAmounts.map((amount, index) => (
+      {activeChange ? displayedPackets.map((packet, index) => (
         <span
-          className={`life-change-pop life-change-pop-${activeChange.kind}`}
+          className={`life-change-pop life-change-pop-${activeChange.kind} life-change-pop-${packet.animation}`}
           key={`${activeChange.kind}-${activeChange.sequence}-${index}`}
           style={{
-            "--life-change-offset": `${(index - (displayedAmounts.length - 1) / 2) * 15}px`,
+            "--life-change-offset": `${(index - (displayedPackets.length - 1) / 2) * 15}px`,
             animationDelay: `${index * 90}ms`,
           } as CSSProperties}
           aria-hidden="true"
         >
-          {activeChange.kind === "gain" ? "+" : "−"}{amount}
+          {activeChange.kind === "damage" && packet.animation !== "default" ? (
+            <span
+              className={`life-damage-fx life-damage-fx-${packet.animation}`}
+              style={{ animationDelay: `${index * 90}ms` }}
+            />
+          ) : null}
+          {activeChange.kind === "gain" ? "+" : "−"}{packet.amount}
         </span>
       )) : null}
       <span className="life-change-live" aria-live="polite">
@@ -201,7 +270,9 @@ export function StatusFloat({
   myLife,
   oppHeroName,
   myHeroName,
+  mySeat = 0,
   log,
+  logEntries,
   activeHeroName,
   actionPoints,
   primaryAction,
@@ -213,7 +284,9 @@ export function StatusFloat({
   myLife: number;
   oppHeroName: string;
   myHeroName: string;
+  mySeat?: 0 | 1;
   log: readonly string[];
+  logEntries?: readonly GameLogViewEntry[];
   activeHeroName: string;
   actionPoints: number;
   primaryAction: PrimaryAction | null;
@@ -226,7 +299,14 @@ export function StatusFloat({
       className="float status-float game-hud"
       aria-label={intl.formatMessage({ id: "game.hud.label" })}
     >
-      <LifeStatus life={oppLife} side="opp" heroName={oppHeroName} log={log} />
+      <LifeStatus
+        life={oppLife}
+        side="opp"
+        seat={mySeat === 0 ? 1 : 0}
+        heroName={oppHeroName}
+        log={log}
+        logEntries={logEntries}
+      />
       <div
         className="ap-pip"
         title={intl.formatMessage({ id: "game.actionPoints.hero" }, { hero: activeHeroName })}
@@ -244,7 +324,14 @@ export function StatusFloat({
           onSelect={onPass}
         />
       ) : null}
-      <LifeStatus life={myLife} side="me" heroName={myHeroName} log={log} />
+      <LifeStatus
+        life={myLife}
+        side="me"
+        seat={mySeat}
+        heroName={myHeroName}
+        log={log}
+        logEntries={logEntries}
+      />
     </div>
   );
 }

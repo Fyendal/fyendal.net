@@ -110,6 +110,9 @@ export interface SeatRow {
 
 export interface SpectatorRow {
   tokenHash: string;
+  /** Runtime-only identity projected from the current presence lease. */
+  username?: string;
+  userId?: number;
   /** presence: last heartbeat/attach (epoch ms); 0 = absent */
   lastSeenAt: number;
 }
@@ -198,6 +201,7 @@ export interface PresenceLease {
   token: string;
   leaseId: string;
   seat: number | null;
+  userId?: number;
 }
 
 export interface LobbyRoomSnapshot {
@@ -336,6 +340,7 @@ function newToken(): string {
 }
 
 export const hashReconnectToken = hashToken;
+export const SPECTATOR_REACTION_COOLDOWN_MS = 10_000;
 
 /** Strip runtime-only engine registries at the one persistence boundary.
  *  They are immutable process-wide dependencies, not game state. Persisting
@@ -348,8 +353,8 @@ export function dehydrateState(
   return encodePersistedState(state, rulesetVersion);
 }
 
-function dehydrateMembers<T extends { lastSeenAt: number }>(members: T[]): Omit<T, "lastSeenAt">[] {
-  return members.map(({ lastSeenAt: _lastSeenAt, ...member }) => member);
+function dehydrateSpectators(spectators: SpectatorRow[]): Array<{ tokenHash: string }> {
+  return spectators.map(({ tokenHash }) => ({ tokenHash }));
 }
 
 function hydrateState(s: unknown, code: string, rulesetVersion?: string): GameState | null {
@@ -652,26 +657,35 @@ function toRoom(value: unknown): RoomRow {
   const seatRows = dbRowArray(loaded.seat_rows, r.code, "row.seat_rows");
   const presenceRows = dbRowArray(loaded.presence_rows, r.code, "row.presence_rows");
   const seats = decodeSeatRows(seatRows, r.code);
-  const newestByToken = new Map<string, number>();
+  const newestByToken = new Map<string, { seenAt: number; username?: string; userId?: number }>();
   for (const [index, value] of presenceRows.entries()) {
     const p = dbObject(value, r.code, `presence[${index}]`);
     if (typeof p.token_hash !== "string" || !Number.isFinite(Number(p.last_seen_at))) {
       throw new CorruptRoomError(r.code, `presence[${index}]`, "invalid lease row");
     }
     const seen = Number(p.last_seen_at);
-    newestByToken.set(p.token_hash, Math.max(newestByToken.get(p.token_hash) ?? 0, seen));
+    const previous = newestByToken.get(p.token_hash);
+    if (!previous || seen >= previous.seenAt) {
+      newestByToken.set(p.token_hash, {
+        seenAt: seen,
+        ...(typeof p.username === "string" ? { username: p.username } : {}),
+        ...(p.user_id == null ? {} : { userId: dbSafeInteger(p.user_id, r.code, `presence[${index}].user_id`) }),
+      });
+    }
   }
-  const seenAt = (token: string): number => newestByToken.get(token) ?? 0;
+  const presenceFor = (token: string) => newestByToken.get(token);
 
   return {
     code: r.code,
     format: r.format,
     seats: seats.map((s) =>
-      s ? { ...s, lastSeenAt: seenAt(s.tokenHash) } : s,
+      s ? { ...s, lastSeenAt: presenceFor(s.tokenHash)?.seenAt ?? 0 } : s,
     ) as [SeatRow | null, SeatRow | null],
     spectators: r.spectators.map((s) => ({
       ...s,
-      lastSeenAt: seenAt(s.tokenHash),
+      lastSeenAt: presenceFor(s.tokenHash)?.seenAt ?? 0,
+      ...(presenceFor(s.tokenHash)?.username ? { username: presenceFor(s.tokenHash)!.username } : {}),
+      ...(presenceFor(s.tokenHash)?.userId !== undefined ? { userId: presenceFor(s.tokenHash)!.userId } : {}),
     })),
     state: hydrateState(r.state, String(r.code ?? "<unknown>"), r.ruleset_version),
     prep: r.prep,
@@ -795,8 +809,12 @@ export class PgRoomStore {
          GROUP BY s.room_code
        ), presence_data AS (
          SELECT p.room_code, json_agg(p ORDER BY p.lease_id) AS presence_rows
-         FROM room_presence AS p
-         WHERE p.room_code = $1
+         FROM (
+           SELECT p.*, u.username
+           FROM room_presence AS p
+           LEFT JOIN users AS u ON u.id = p.user_id
+           WHERE p.room_code = $1
+         ) AS p
          GROUP BY p.room_code
        )
        SELECT r.code, r.format, r.spectators, r.state, r.prep, r.ruleset_version,
@@ -853,7 +871,7 @@ export class PgRoomStore {
        WHERE code=$1 AND version=$10`,
       [
         room.code,
-        JSON.stringify(dehydrateMembers(room.spectators)),
+        JSON.stringify(dehydrateSpectators(room.spectators)),
         room.state ? JSON.stringify(dehydrateState(room.state, room.rulesetVersion)) : null,
         room.gcAt,
         room.prep ? JSON.stringify(room.prep) : null,
@@ -3632,6 +3650,52 @@ export class PgRoomStore {
       : { ok: false, error: r.error };
   }
 
+  /** Revoke all currently live spectator memberships for one account. */
+  async kickSpectator(
+    code: string,
+    credentials: SeatCredentials,
+    username: string,
+  ): Promise<{ ok: true; version: number } | { ok: false; error: string }> {
+    const upper = code.toUpperCase();
+    return this.retryVersionConflicts(
+      () => withTransaction(this.db, async (db) => {
+        const room = await this.loadRoom(db, upper);
+        if (!room) return { ok: false as const, error: "room not found" };
+        if (seatForCredentials(room, credentials) === null) {
+          return { ok: false as const, error: "not a player in this room" };
+        }
+        const users = await db.query("SELECT id FROM users WHERE username_lc = $1", [username.toLowerCase()]);
+        if (!users.rows.length) return { ok: false as const, error: "spectator not found" };
+        const userId = dbSafeInteger(users.rows[0].id, upper, "spectator.user_id");
+        const presence = await db.query(
+          `SELECT DISTINCT token_hash FROM room_presence
+           WHERE room_code = $1 AND seat IS NULL AND user_id = $2
+             AND last_seen_at > $3`,
+          [upper, userId, Date.now() - PRESENCE_TIMEOUT_MS],
+        );
+        const tokenHashes = new Set<string>();
+        for (const [index, row] of presence.rows.entries()) {
+          if (typeof row.token_hash !== "string") {
+            throw new CorruptRoomError(upper, `presence[${index}].token_hash`, "expected a string");
+          }
+          tokenHashes.add(row.token_hash);
+        }
+        if (tokenHashes.size === 0) return { ok: false as const, error: "spectator not found" };
+        const before = room.spectators.length;
+        room.spectators = room.spectators.filter((spectator) => !tokenHashes.has(spectator.tokenHash));
+        if (room.spectators.length === before) return { ok: false as const, error: "spectator not found" };
+        updateGc(room);
+        if (!(await this.save(room, db))) throw VERSION_CONFLICT;
+        await db.query(
+          "DELETE FROM room_presence WHERE room_code = $1 AND seat IS NULL AND user_id = $2",
+          [upper, userId],
+        );
+        return { ok: true as const, version: room.version + 1 };
+      }),
+      () => ({ ok: false as const, error: "room is busy, try again" }),
+    );
+  }
+
   /** Upsert every local socket lease with two small queries regardless of the
    *  number of sockets. Membership is revalidated from the small room columns
    *  so a superseded seat token cannot keep a room alive. */
@@ -3695,14 +3759,15 @@ export class PgRoomStore {
     const params: unknown[] = [];
     const values = valid.map(({ lease, tokenHash }) => {
       const base = params.length;
-      params.push(lease.code, lease.leaseId, tokenHash, lease.seat, now);
-      return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5})`;
+      params.push(lease.code, lease.leaseId, tokenHash, lease.seat, now, lease.userId ?? null);
+      return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6})`;
     });
     await this.db.query(
-      `INSERT INTO room_presence (room_code, lease_id, token_hash, seat, last_seen_at)
+      `INSERT INTO room_presence (room_code, lease_id, token_hash, seat, last_seen_at, user_id)
        VALUES ${values.join(", ")}
        ON CONFLICT (room_code, lease_id) DO UPDATE SET
-         token_hash = EXCLUDED.token_hash, seat = EXCLUDED.seat, last_seen_at = EXCLUDED.last_seen_at`,
+         token_hash = EXCLUDED.token_hash, seat = EXCLUDED.seat,
+         last_seen_at = EXCLUDED.last_seen_at, user_id = EXCLUDED.user_id`,
       params,
     );
     const activeCodes = [...new Set(valid.map(({ lease }) => lease.code))];
@@ -3725,6 +3790,7 @@ export class PgRoomStore {
     token: string,
     leaseId = token,
     seat?: number | null,
+    userId?: number,
   ): Promise<VersionedPresence | null> {
     const upper = code.toUpperCase();
     let expectedSeat = seat;
@@ -3737,7 +3803,13 @@ export class PgRoomStore {
       else if (decodeStoredSpectators(rows[0].spectators, upper, "row.spectators").some((s) => s.tokenHash === tokenHash)) expectedSeat = null;
       else return null;
     }
-    const result = await this.markPresentBatch([{ code: upper, token, leaseId, seat: expectedSeat }]);
+    const result = await this.markPresentBatch([{
+      code: upper,
+      token,
+      leaseId,
+      seat: expectedSeat,
+      ...(userId === undefined ? {} : { userId }),
+    }]);
     const found = result.get(`${upper}\0${leaseId}`);
     if (!found) return null;
     const { rows } = await this.db.query(
@@ -3936,6 +4008,21 @@ export async function sweepRoomCommands(
 export function spectatorCount(room: RoomRow): number {
   const now = Date.now();
   return room.spectators.filter((s) => isPresent(s.lastSeenAt, now)).length;
+}
+
+export function spectatorUsernames(room: RoomRow): Array<string | null> {
+  const now = Date.now();
+  return room.spectators
+    .filter((spectator) => isPresent(spectator.lastSeenAt, now))
+    .map((spectator) => spectator.username ?? null);
+}
+
+export function spectatorListMessage(room: RoomRow): ServerMessage {
+  return {
+    type: "spectator-list",
+    usernames: spectatorUsernames(room),
+    version: room.version,
+  };
 }
 
 export function stateMessage(room: RoomRow, seat: number | null): ServerMessage | null {

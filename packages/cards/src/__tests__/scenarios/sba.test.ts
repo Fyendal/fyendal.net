@@ -303,6 +303,15 @@ describe("SBA — Fusion", () => {
       .settle()
       .expectLife(1, 15); // 4 combat + 1 arcane
     expect(projectStateFor(g.state, 1).logEntries).toContainEqual(expect.objectContaining({
+      message: expect.objectContaining({ id: "engine.log.damage.hero.takes.arcane" }),
+      event: {
+        kind: "damage",
+        targetSeat: 1,
+        amount: 1,
+        damageType: "arcane",
+      },
+    }));
+    expect(projectStateFor(g.state, 1).logEntries).toContainEqual(expect.objectContaining({
       message: {
         id: "card.log.common.fusion.revealed",
         values: {

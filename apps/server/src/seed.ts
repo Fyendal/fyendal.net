@@ -2,21 +2,26 @@
  * Seed local development data:
  *
  *   alice
- *   bob   (password for both: password123)
+ *   bob
+ *   charlie
+ *   diana   (password for all: password123)
  *
  * plus the demo room DEMO00 — a GC-exempt classic-battles match already in
- * progress (Rhinar vs Dorinthea, both seats phantom) that anyone can spectate
+ * progress (Rhinar vs Dorinthea, both seats phantom) that alice can spectate
  * from the lobby's room list or via /DEMO00; HUNTED — a private CC practice
  * room owned by alice against the standard Hala bot, with Arakni starting with
  * two copies of Hunter or Hunted?; and SNAPBT — a private Silver Age practice
  * room against the Briar bot with Snap Shot already face up in arsenal and
- * Death Dealer unused; and OKANAS — a private CC practice room against the
+ * Death Dealer unused; DMGFX1 — a private Silver Age room where alice controls
+ * Briar with Arcanic Shockwave and Lightning fusion cards ready against an
+ * empty-handed, unequipped bot while bob, charlie, and diana spectate; and
+ * OKANAS — a private CC practice room against the
  * Hala bot with Ira ready to test Okana Scar Wraps after a Vengeance attack;
  * and RALLYC — a private Silver Age room with Rally the Coast Guard already
  * defending and two cards available to discard; and MARKS3 — a private CC
  * room for testing Malice, Danse Macabre, the three Marks, and Restless zombies
  * against the standard Hala bot.
- * These fixtures count as 12 "players in game" in the
+ * These fixtures count as 14 "players in game" in the
  * lobby stats — dev only.
  * Alice also receives one fixed, undismissed bug-report notification for
  * exercising the lobby UI.
@@ -45,9 +50,16 @@ assertSafeToSeed();
 
 const PASSWORD = "password123";
 const DEFAULT_DEVELOPMENT_RULESET_VERSION = "development-seed";
-const USERS = [{ username: "alice" }, { username: "bob" }];
+const USERS = [
+  { username: "alice" },
+  { username: "bob" },
+  { username: "charlie" },
+  { username: "diana" },
+];
+const PINNED_LOCAL_PRESENCE_AT = Date.UTC(3000, 0, 1);
 const HUNTER_TEST_ROOM_CODE = "HUNTED";
 const SNAP_ARC_TEST_ROOM_CODE = "SNAPBT";
+const DAMAGE_FX_TEST_ROOM_CODE = "DMGFX1";
 const OKANA_TEST_ROOM_CODE = "OKANAS";
 const RALLY_TEST_ROOM_CODE = "RALLYC";
 const MARKS_TEST_ROOM_CODE = "MARKS3";
@@ -120,10 +132,58 @@ function hunterTestGameState(): GameState {
   return state;
 }
 
+/** Briar opens with two Arcanic Shockwaves and two Lightning cards. Revealing
+ * Burn Up // Shock to fuse Arcanic Shockwave produces an arcane packet before
+ * the physical attack resolves. The bot has neither hand cards nor equipment,
+ * making both damage effects deterministic for presentation testing. */
+function damageFxTestGameState(): GameState {
+  const humanPool = precon("precon-sba")?.pool;
+  const opponentBot = botDefinition("briar");
+  const opponentPool = precon(opponentBot?.deckId ?? "")?.pool;
+  if (!humanPool || !opponentBot || !opponentPool) {
+    throw new Error("Damage-effects test fixture decks are unavailable");
+  }
+  const humanDeck = {
+    heroId: humanPool.heroId,
+    weaponIds: [humanPool.weaponIds[0]!],
+    equipment: {},
+    deck: [...humanPool.deck],
+  };
+  const opponentPresentation = opponentBot.presentationFor(humanDeck, "second");
+  const state = createGame({
+    decklists: [
+      humanDeck,
+      { heroId: opponentPool.heroId, ...opponentPresentation },
+    ],
+    seed: 6092026,
+    cards: cardData,
+    scripts,
+    startPlayer: 0,
+  });
+  const player = state.players[0]!;
+  const cards = [...player.hand, ...player.deck];
+  const take = (cardId: string) => {
+    const index = cards.findIndex((card) => card.cardId === cardId);
+    if (index < 0) throw new Error(`Damage-effects test fixture is missing ${cardId}`);
+    return cards.splice(index, 1)[0]!;
+  };
+  player.hand = [take("SBA011"), take("SBA011"), take("SBA025"), take("SBA025")];
+  player.deck = cards;
+  player.resources = 0;
+  player.actionPoints = 1;
+
+  const opponent = state.players[1]!;
+  opponent.deck.push(...opponent.hand);
+  opponent.hand = [];
+  opponent.equipment = {};
+  return state;
+}
+
 /** Snap Shot starts face up in arsenal while Death Dealer is unused. Fuse it,
  * then use Death Dealer to load and play Arc Bending before using the granted
  * second activation to load the follow-up arrow. Pitching Heaven's Claws to
- * Arc Bending also exercises Lightning Bond against the ordinary Briar bot. */
+ * Arc Bending also exercises Lightning Bond. Briar's opening hand is returned
+ * to its deck so the test attack can hit without a hand-card block. */
 function snapArcTestGameState(): GameState {
   const briar = botDefinition("briar");
   const briarPool = precon(briar?.deckId ?? "")?.pool;
@@ -166,6 +226,9 @@ function snapArcTestGameState(): GameState {
   // to be pitched when Arc Bending is played and exercising Lightning Bond.
   player.resources = 1;
   player.actionPoints = 1;
+  const opponent = state.players[1]!;
+  opponent.deck.push(...opponent.hand);
+  opponent.hand = [];
   return state;
 }
 
@@ -364,7 +427,7 @@ try {
     );
     console.log(rows.length > 0 ? `seeded ${u.username}` : `${u.username} already exists — skipped`);
   }
-  console.log(`\ntest login: alice / ${PASSWORD}  (or bob / ${PASSWORD})`);
+  console.log(`\ntest login: alice / ${PASSWORD}  (or bob, charlie, diana / ${PASSWORD})`);
 
   // phantom seats: random tokens nobody holds, so all joins are spectators
   const seats = [randomBytes(12).toString("hex"), randomBytes(12).toString("hex")];
@@ -373,10 +436,11 @@ try {
   try {
     // These rooms are disposable local fixture data. Recreate them so rerunning
     // the seed also repairs stale ruleset envelopes and clears dependent history.
-    await pool.query("DELETE FROM rooms WHERE code IN ($1, $2, $3, $4, $5, $6)", [
+    await pool.query("DELETE FROM rooms WHERE code IN ($1, $2, $3, $4, $5, $6, $7)", [
       DEMO_ROOM_CODE,
       HUNTER_TEST_ROOM_CODE,
       SNAP_ARC_TEST_ROOM_CODE,
+      DAMAGE_FX_TEST_ROOM_CODE,
       OKANA_TEST_ROOM_CODE,
       RALLY_TEST_ROOM_CODE,
       MARKS_TEST_ROOM_CODE,
@@ -405,6 +469,82 @@ try {
     );
     const aliceId = Number(aliceRows[0]?.id);
     if (!Number.isSafeInteger(aliceId)) throw new Error("seeded alice account is missing");
+    const crowd: Array<{ username: string; userId: number; tokenHash: string }> = [];
+    for (const username of ["bob", "charlie", "diana"]) {
+      const { rows } = await pool.query(
+        "SELECT id FROM users WHERE username_lc = $1",
+        [username],
+      );
+      const userId = Number(rows[0]?.id);
+      if (!Number.isSafeInteger(userId)) {
+        throw new Error(`seeded ${username} account is missing`);
+      }
+      crowd.push({
+        username,
+        userId,
+        tokenHash: hashReconnectToken(randomBytes(12).toString("hex")),
+      });
+    }
+    const damageFxPrep = { rolls: [6, 1], dieWinner: 0, startPlayer: 0 };
+    const damageFxBot = botDefinition("briar");
+    const damageFxBotPool = precon(damageFxBot?.deckId ?? "")?.pool;
+    if (!damageFxBot || !damageFxBotPool) {
+      throw new Error("Damage-effects test fixture room metadata is unavailable");
+    }
+    await pool.query(
+      `INSERT INTO rooms
+        (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at,
+         status, winner, is_private)
+       VALUES ($1, 'silver-age', $2, $3, $4, $5, 0, $6, NULL, 'active', NULL, TRUE)`,
+      [
+        DAMAGE_FX_TEST_ROOM_CODE,
+        JSON.stringify(crowd.map(({ tokenHash }) => ({ tokenHash }))),
+        JSON.stringify(dehydrateState(damageFxTestGameState(), seedRulesetVersion)),
+        JSON.stringify(damageFxPrep),
+        seedRulesetVersion,
+        Date.now(),
+      ],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, user_id, token_hash, username, hero_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 0, $2, $3, 'alice', 'SBA001', 'Combat / arcane damage effects test',
+               FALSE, TRUE, 'human')`,
+      [
+        DAMAGE_FX_TEST_ROOM_CODE,
+        aliceId,
+        hashReconnectToken(randomBytes(12).toString("hex")),
+      ],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, token_hash, username, hero_id, deck_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 1, $2, $3, $4, $5, $6, FALSE, TRUE, 'bot')`,
+      [
+        DAMAGE_FX_TEST_ROOM_CODE,
+        hashReconnectToken(randomBytes(12).toString("hex")),
+        damageFxBot.username,
+        damageFxBotPool.heroId,
+        damageFxBot.deckId,
+        damageFxBot.deckName,
+      ],
+    );
+    for (const spectator of crowd) {
+      await pool.query(
+        `INSERT INTO room_presence
+          (room_code, lease_id, token_hash, seat, last_seen_at, user_id)
+         VALUES ($1, $2, $3, NULL, $4, $5)`,
+        [
+          DAMAGE_FX_TEST_ROOM_CODE,
+          `seed-spectator-${spectator.username}`,
+          spectator.tokenHash,
+          PINNED_LOCAL_PRESENCE_AT,
+          spectator.userId,
+        ],
+      );
+    }
     const marksPrep = { rolls: [6, 2], dieWinner: 0, startPlayer: 0 };
     const halaForMarks = botDefinition("hala");
     const halaPoolForMarks = precon(halaForMarks?.deckId ?? "")?.pool;
@@ -662,9 +802,10 @@ try {
     await pool.query("ROLLBACK");
     throw error;
   }
-  console.log(`seeded demo room ${DEMO_ROOM_CODE} — spectate from the room list or /${DEMO_ROOM_CODE}`);
+  console.log(`seeded demo room ${DEMO_ROOM_CODE} — log in as alice and spectate Rhinar vs Dorinthea from /${DEMO_ROOM_CODE}`);
   console.log(`seeded Hunter or Hunted? room ${HUNTER_TEST_ROOM_CODE} — log in as alice and open /${HUNTER_TEST_ROOM_CODE}`);
   console.log(`seeded Snap Shot / Arc Bending room ${SNAP_ARC_TEST_ROOM_CODE} — log in as alice and open /${SNAP_ARC_TEST_ROOM_CODE}`);
+  console.log(`seeded damage-effects room ${DAMAGE_FX_TEST_ROOM_CODE} — log in as alice and open /${DAMAGE_FX_TEST_ROOM_CODE}; bob, charlie, and diana are spectating`);
   console.log(`seeded Okana Scar Wraps / Enact Vengeance room ${OKANA_TEST_ROOM_CODE} — log in as alice and open /${OKANA_TEST_ROOM_CODE}`);
   console.log(`seeded Rally the Coast Guard room ${RALLY_TEST_ROOM_CODE} — log in as alice and open /${RALLY_TEST_ROOM_CODE}`);
   console.log(`seeded Marks / Restless zombies room ${MARKS_TEST_ROOM_CODE} — log in as alice and open /${MARKS_TEST_ROOM_CODE}`);

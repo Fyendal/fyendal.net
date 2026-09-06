@@ -227,6 +227,18 @@ describe("initial schema", () => {
     ]);
   });
 
+  it("adds live spectator identity to a version 33 database", async () => {
+    const db = rawDb();
+    await applyMigrations(db, MIGRATIONS.filter((migration) => migration.version <= 33));
+
+    await applyMigrations(db, MIGRATIONS);
+
+    expect((await db.query(
+      `SELECT column_name FROM information_schema.columns
+       WHERE table_name = 'room_presence' AND column_name = 'user_id'`,
+    )).rows).toEqual([{ column_name: "user_id" }]);
+  });
+
   it("adds Starvo to durable pending bot starts", async () => {
     const db = rawDb();
     await applyMigrations(db, MIGRATIONS.filter((migration) => migration.version <= 28));

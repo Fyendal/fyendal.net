@@ -4,6 +4,7 @@ import {
   type PgRoomStore,
   prepViewFor,
   spectatorCount,
+  spectatorUsernames,
   stateMessage,
   type RoomRow,
 } from "./store.js";
@@ -121,6 +122,11 @@ export class RoomBroadcaster<Client extends RoomBroadcastClient> {
         client.sendRaw(encoded("spectators", () => ({
           type: "spectators",
           count: spectatorCount(room),
+          version: room.version,
+        }))!);
+        client.sendRaw(encoded("spectator-list", () => ({
+          type: "spectator-list",
+          usernames: spectatorUsernames(room),
           version: room.version,
         }))!);
       }

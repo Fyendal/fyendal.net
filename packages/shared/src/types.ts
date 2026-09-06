@@ -875,6 +875,8 @@ export type ClientMessage =
   | { type: "undo"; target?: UndoTarget; commandId?: string; expectedVersion?: number }
   /** Broadcast a predefined, ephemeral message to the current room. */
   | { type: "emote"; message: EmoteMessage }
+  /** Seated players may remove every live spectator session owned by this account. */
+  | { type: "kick-spectator"; username: string }
   /** end the game as winner because the opponent has been idle (IDLE_VICTORY_MS) */
   | { type: "claim-victory"; commandId?: string; expectedVersion?: number };
 
@@ -893,10 +895,13 @@ export type ServerMessage =
   | { type: "game-started"; version: number }
   | { type: "state"; version: number; view: GameView; transition?: GameTransitionView; playerProfiles: [PlayerProfileView, PlayerProfileView]; yourSeat: number | null; legal: GameIntent[]; /** Structurally available plays/activations, including unaffordable ones. */ actionCandidates?: GameIntent[]; spectators?: number; lastActionAt: [number, number]; botGame?: boolean }
   | { type: "spectators"; count: number; version: number }
+  /** Additive companion to the legacy count message; null identifies a guest. */
+  | { type: "spectator-list"; usernames: Array<string | null>; version: number }
   | { type: "opponent-disconnected"; version: number }
   | { type: "opponent-reconnected"; version: number }
   /** Ephemeral room event; intentionally carries no room version or persisted state. */
   | { type: "emote"; seat: number; message: EmoteMessage }
+  | { type: "spectator-kicked" }
   | { type: "rooms"; rooms: RoomSummary[] }
   | { type: "queue-status"; counts: Record<Format, number> }
   | { type: "queued"; format: Format }
