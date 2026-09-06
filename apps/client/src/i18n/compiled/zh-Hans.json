@@ -23072,6 +23072,60 @@
       "value": "导出回放 JSON"
     }
   ],
+  "replay.favorite": [
+    {
+      "type": 0,
+      "value": "收藏回放"
+    }
+  ],
+  "replay.favoriteEmptyBody": [
+    {
+      "type": 0,
+      "value": "收藏回放即可永久保留，并在这里快速找到。"
+    }
+  ],
+  "replay.favoriteEmptyTitle": [
+    {
+      "type": 0,
+      "value": "暂无收藏的回放"
+    }
+  ],
+  "replay.favoriteLimit": [
+    {
+      "type": 0,
+      "value": "最多只能收藏 20 个回放。请先取消收藏一个回放。"
+    }
+  ],
+  "replay.favoriteRetained": [
+    {
+      "type": 0,
+      "value": "已收藏 · 永久保留"
+    }
+  ],
+  "replay.favoriteSaving": [
+    {
+      "type": 0,
+      "value": "正在保存收藏"
+    }
+  ],
+  "replay.filterAll": [
+    {
+      "type": 0,
+      "value": "全部"
+    }
+  ],
+  "replay.filterFavorites": [
+    {
+      "type": 0,
+      "value": "收藏"
+    }
+  ],
+  "replay.filterLabel": [
+    {
+      "type": 0,
+      "value": "回放列表"
+    }
+  ],
   "replay.frameCount": [
     {
       "type": 1,
@@ -23255,13 +23309,19 @@
   "replay.retention": [
     {
       "type": 0,
-      "value": "回放将保存 7 天。请导出你想长期保留的回放。"
+      "value": "回放将保存 7 天。最多可收藏 20 个回放并永久保留。"
     }
   ],
   "replay.title": [
     {
       "type": 0,
       "value": "我的回放"
+    }
+  ],
+  "replay.unfavorite": [
+    {
+      "type": 0,
+      "value": "取消收藏回放"
     }
   ],
   "replay.victory": [

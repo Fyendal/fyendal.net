@@ -348,6 +348,34 @@
 .replay-empty p { margin: 0; color: #a99778; line-height: 1.45; }
 .replay-library-import { flex: 0 0 auto; }
 .replay-open-label-mobile { display: none; }
+.replay-library-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.replay-library-tabs button {
+  min-height: 44px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  clip-path: none;
+  background: transparent;
+  color: var(--text-secondary);
+}
+.replay-library-tabs button.selected {
+  border-bottom-color: var(--gold);
+  background: #2a1b0d99;
+  color: var(--gold);
+}
+.replay-library-tabs button span {
+  display: inline-grid;
+  min-width: 23px;
+  min-height: 23px;
+  place-items: center;
+  margin-left: 5px;
+  border-radius: 999px;
+  background: #0006;
+}
 .replay-empty {
   padding: 42px 18px;
   text-align: center;
@@ -408,10 +436,11 @@
 .replay-ended { color: #c7b17e; }
 .replay-expiry { color: #c7b17e; }
 .replay-expiry.urgent { color: #ef9b61; font-weight: 700; }
+.replay-favorite-retained { color: #e0b84f; font-weight: 700; }
 .replay-card-actions { display: flex; flex-direction: column; gap: 8px; min-width: 130px; }
 .replay-card-secondary-actions {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 .replay-card-icon-button {
@@ -425,6 +454,11 @@
   width: 20px;
   height: 20px;
   fill: currentColor;
+}
+.replay-favorite-button.selected {
+  border-color: #c79b31;
+  background: #4a3510;
+  color: #f0c85a;
 }
 
 @media (max-width: 900px) {
@@ -453,6 +487,17 @@
   }
   .replay-open-label-desktop { display: none; }
   .replay-open-label-mobile { display: inline; }
+  .replay-library-tabs {
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+  .replay-library-tabs button {
+    min-width: 0;
+    flex: 1;
+    padding-inline: 7px;
+    font-size: 14px;
+    letter-spacing: .6px;
+  }
   .replay-grid { gap: 10px; }
   .replay-card {
     contain-intrinsic-size: 0 164px;
@@ -496,7 +541,7 @@
   }
   .replay-card-actions > button { min-height: 44px; }
   .replay-card-secondary-actions {
-    grid-template-columns: repeat(2, 44px);
+    grid-template-columns: repeat(3, 44px);
     gap: 7px;
   }
   .replay-card-icon-button { height: 44px; }

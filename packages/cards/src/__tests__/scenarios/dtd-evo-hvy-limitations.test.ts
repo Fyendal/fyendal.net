@@ -295,7 +295,48 @@ describe("DTD, EVO, and HVY rules regression coverage", () => {
   it("Already Dead completes Contract", () => expect(script("already dead|1").onFriendlyBanishesOpponentCard).toBeTypeOf("function"));
   it("Emboldened checks defense reaction", () => expect(script("emboldened blade|3").playTargetOptions).toBeTypeOf("function"));
   it("Contest lowers intellect", () => expect(script("contest the mindfield|3").modifyBaseDefense).toBeTypeOf("function"));
-  it("Warband grants delayed charge", () => expect(script("warband of bellona|0").onFriendlyPlay).toBeTypeOf("function"));
+  it("Warband's Banneret charge resumes the attack layer", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          heroKey: "ser boltyn, breaker of dawn|0",
+          resources: 2,
+          hand: ["DTD049", "FAB162", "DTD049"],
+          deck: ["head jab|1"],
+          equipment: { head: "warband of bellona|0" },
+        },
+        { hero: "rhinar" },
+      ],
+    });
+
+    g.activate("warband of bellona|0")
+      .play("DTD049", { pitch: ["FAB162"], settle: false });
+    const charged = g.state.players[0]!.hand.find((card) => card.cardId === "DTD049")!;
+    expect(g.state.pendingDecision).toMatchObject({
+      player: 0,
+      chooseHook: "warband-charge",
+      resume: { kind: "continue-stack", seat: 0 },
+    });
+
+    g.doRaw({ kind: "choose", optionId: String(charged.instanceId) });
+
+    expect(g.state.chain.at(-1)?.flags.attackStepBegan).toBe(true);
+    expect(g.state.pendingDecision).toMatchObject({
+      player: 1,
+      kind: "defend",
+    });
+    expect(legalIntents(g.state, 1)).toContainEqual({ kind: "defend", instanceIds: [] });
+    expect(g.state.players[0]!.soul).toContainEqual(expect.objectContaining({
+      instanceId: charged.instanceId,
+    }));
+    expect(g.state.players[0]!.board).toContainEqual(expect.objectContaining({
+      cardId: printingId("quicken|0"),
+    }));
+    expect(g.state.players[0]!.hand).toContainEqual(expect.objectContaining({
+      cardId: printingId("head jab|1"),
+    }));
+  });
   it("Cast Bones randomizes top six", () => expect(script("cast bones|1").onChoose).toBeTypeOf("function"));
   it("Up the Ante chooses modes", () => expect(script("up the ante|3").playTargetOptions).toBeTypeOf("function"));
   it("Double Down replaces wager tokens", () => expect(script("double down|1").globalTokenCreationReplacement?.replace).toBeTypeOf("function"));

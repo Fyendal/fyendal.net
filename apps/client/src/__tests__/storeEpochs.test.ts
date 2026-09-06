@@ -1105,11 +1105,41 @@ describe("client connection and account race fences", () => {
       finishedAt: 1,
       expiresAt: 2,
       frameCount: 3,
+      favorite: false,
     };
     useStore.setState({ savedReplays: [replay] });
 
     await expect(useStore.getState().deleteSavedReplay(replay.id)).resolves.toEqual({ ok: true });
     expect(useStore.getState().savedReplays).toEqual([]);
+    expect(fetchMock).toHaveBeenCalledOnce();
+  });
+
+  it("updates a saved replay after the server accepts its favorite state", async () => {
+    localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+    const fetchMock = vi.fn((input: string | URL | Request, init?: RequestInit) => {
+      expect(String(input)).toBe("http://localhost:8080/api/replays/favorite");
+      expect(init?.method).toBe("POST");
+      expect(JSON.parse(String(init?.body))).toEqual({ id: "replay-1", favorite: true });
+      return Promise.resolve(jsonResponse({ ok: true }));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const { useStore } = await import("../store.js");
+    const replay = {
+      id: "replay-1",
+      format: "cc" as const,
+      heroIds: ["HERO0", "HERO1"] as [string, string],
+      yourSeat: 0 as const,
+      winner: 0 as const,
+      finishedAt: 1,
+      expiresAt: Date.now() + 1_000,
+      frameCount: 3,
+      favorite: false,
+    };
+    useStore.setState({ savedReplays: [replay] });
+
+    await expect(useStore.getState().setSavedReplayFavorite(replay.id, true))
+      .resolves.toEqual({ ok: true });
+    expect(useStore.getState().savedReplays).toEqual([{ ...replay, favorite: true }]);
     expect(fetchMock).toHaveBeenCalledOnce();
   });
 

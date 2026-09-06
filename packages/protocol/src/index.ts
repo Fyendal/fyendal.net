@@ -85,6 +85,7 @@ export interface BugReportNotificationsResponse {
   ok: true;
   notifications: FixedBugReportNotification[];
 }
+export const MAX_FAVORITE_REPLAYS = 20;
 export interface ReplaySummary {
   id: string;
   format: Format;
@@ -95,6 +96,7 @@ export interface ReplaySummary {
   finishedAt: number;
   expiresAt: number;
   frameCount: number;
+  favorite: boolean;
 }
 export interface ReplaysResponse { ok: true; replays: ReplaySummary[] }
 export interface ReplayResponse { ok: true; replay: ReplayFile }
@@ -182,6 +184,7 @@ export interface AccountExport {
     id: string;
     finishedAt: number;
     expiresAt: number;
+    favorite: boolean;
     replay: ReplayFile;
   }>;
   friends: Array<{ username: string; friendsSince: number }>;
@@ -1352,13 +1355,14 @@ export const decodeBugReportNotificationsResponse: Decoder<BugReportNotification
 function decodeReplaySummary(value: unknown): ReplaySummary | null {
   const replay = object(value);
   return replay
-    && exactKeys(replay, ["id", "format", "heroIds", "yourSeat", "winner", "finishedAt", "expiresAt", "frameCount"])
+    && exactKeys(replay, ["id", "format", "heroIds", "yourSeat", "winner", "finishedAt", "expiresAt", "frameCount", "favorite"])
     && id(replay.id)
     && FORMATS.has(String(replay.format))
     && Array.isArray(replay.heroIds) && replay.heroIds.length === 2 && replay.heroIds.every(id)
     && seat(replay.yourSeat) && nullableSeat(replay.winner)
     && nonNegativeInteger(replay.finishedAt) && nonNegativeInteger(replay.expiresAt)
     && nonNegativeInteger(replay.frameCount)
+    && typeof replay.favorite === "boolean"
     ? value as ReplaySummary
     : null;
 }
@@ -1626,8 +1630,9 @@ function exportMatchmaking(value: unknown): boolean {
 function exportReplay(value: unknown): boolean {
   const replay = object(value);
   return !!replay
-    && exactKeys(replay, ["id", "finishedAt", "expiresAt", "replay"])
+    && exactKeys(replay, ["id", "finishedAt", "expiresAt", "favorite", "replay"])
     && id(replay.id) && nonNegativeInteger(replay.finishedAt) && nonNegativeInteger(replay.expiresAt)
+    && typeof replay.favorite === "boolean"
     && decodeReplayFile(replay.replay) !== null;
 }
 

@@ -630,6 +630,15 @@ export const MIGRATIONS: Migration[] = [
     CREATE INDEX room_presence_spectator_user_idx
       ON room_presence(room_code, user_id) WHERE seat IS NULL;`,
   },
+  {
+    version: 35,
+    // Favorites are participant-owned: retaining a replay for one player must
+    // not extend the other player's private payload or notes.
+    sql: `ALTER TABLE replay_participants
+      ADD COLUMN favorite BOOLEAN NOT NULL DEFAULT FALSE;
+    CREATE INDEX replay_participants_favorite_user_idx
+      ON replay_participants(user_id, replay_id) WHERE favorite = TRUE;`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

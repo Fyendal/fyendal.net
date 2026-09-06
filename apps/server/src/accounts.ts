@@ -109,6 +109,7 @@ export interface AccountExport {
     id: string;
     finishedAt: number;
     expiresAt: number;
+    favorite: boolean;
     replay: ReplayFile;
   }>;
   friends: Array<{ username: string; friendsSince: number }>;
@@ -230,6 +231,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
         id: summary.id,
         finishedAt: summary.finishedAt,
         expiresAt: summary.expiresAt,
+        favorite: summary.favorite,
         replay: attachReplayNotes(replay, notes ?? []),
       });
     }

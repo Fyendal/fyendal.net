@@ -3,6 +3,58 @@ import { actionCandidates, applyIntent, legalIntents, projectStateFor } from "..
 import { giveCard, makeGame, player } from "./fixtures.js";
 
 describe("card-play announcement", () => {
+  it("resumes an attack layer after a friendly-play observer choice", () => {
+    let state = makeGame(152);
+    state.scriptsRef = {
+      ...state.scriptsRef,
+      SWORD: {
+        ...state.scriptsRef.SWORD,
+        onFriendlyPlay(ctx, played) {
+          if (played.cardId === "ATK4") {
+            ctx.requestChoice("observe-attack", "Choose an attack bonus", ["power", "draw"]);
+          }
+        },
+        onChoose(ctx, hook, option) {
+          if (hook === "observe-attack" && option === "power") {
+            ctx.setFlag("player", "attackBonusChosen", true);
+          }
+        },
+      },
+    };
+    const attackId = giveCard(state, 0, "ATK4");
+    const play = legalIntents(state, 0).find(
+      (intent) => intent.kind === "play-card" && intent.instanceId === attackId,
+    );
+
+    let result = applyIntent(state, 0, play!);
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(result.error);
+    state = result.state;
+
+    expect(state.pendingDecision).toMatchObject({
+      player: 0,
+      chooseHook: "observe-attack",
+      resume: { kind: "continue-stack", seat: 0 },
+    });
+    expect(state.chain.at(-1)).toMatchObject({
+      attackingCard: { instanceId: attackId },
+      resolved: false,
+    });
+
+    result = applyIntent(state, 0, { kind: "choose", optionId: "power" });
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(result.error);
+    state = result.state;
+
+    expect(state.players[0]!.flags.attackBonusChosen).toBe(true);
+    expect(state.chain.at(-1)?.flags.attackStepBegan).toBe(true);
+    expect(state.pendingDecision).toMatchObject({
+      player: 1,
+      kind: "defend",
+    });
+    expect(legalIntents(state, 1)).toContainEqual({ kind: "defend", instanceIds: [] });
+  });
+
   it("finishes an optional additional-cost declaration before pitching", () => {
     let state = makeGame(151);
     state.scriptsRef = {

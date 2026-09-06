@@ -7,6 +7,7 @@ import type { Queryable } from "../db.js";
 import {
   deleteReplay,
   discardUnfinishedReplaysOtherRulesets,
+  MAX_FAVORITE_REPLAYS,
   REPLAY_FRAME_BATCH_SIZE,
   finalizeReplayForRoom,
   getReplay,
@@ -15,6 +16,7 @@ import {
   ReplayFinalizer,
   REPLAY_TTL_MS,
   saveReplayNote,
+  setReplayFavorite,
   sweepReplays,
   waitForReplayPayloadForRoom,
 } from "../replays.js";
@@ -512,6 +514,70 @@ describe("server replay retention", () => {
     expect(await listReplays(db, game.users[0], replay.expiresAt)).toEqual([]);
     expect(await sweepReplays(db, replay.expiresAt)).toBe(1);
     expect(await db.query("SELECT 1 FROM replay_games")).toMatchObject({ rows: [] });
+  });
+
+  it("retains a favorite past seven days only for the participant who favorited it", async () => {
+    const game = await startedGame();
+    await store.applyIntent(
+      game.code,
+      { token: game.tokens[0], userId: game.users[0] },
+      { kind: "concede" },
+    );
+    await finalizeReplayForRoom(db, game.code);
+    const replay = (await listReplays(db, game.users[0]))[0]!;
+
+    expect(await setReplayFavorite(db, game.users[0], replay.id, true)).toBe("updated");
+    expect((await listReplays(db, game.users[0], replay.expiresAt))[0]).toMatchObject({
+      id: replay.id,
+      favorite: true,
+    });
+    expect((await exportAccount(db, game.users[0]))?.replays[0]?.favorite).toBe(true);
+    expect(await getReplay(db, game.users[0], replay.id, replay.expiresAt)).not.toBeNull();
+    expect(await listReplays(db, game.users[1], replay.expiresAt)).toEqual([]);
+    expect(await getReplay(db, game.users[1], replay.id, replay.expiresAt)).toBeNull();
+
+    expect(await sweepReplays(db, replay.expiresAt)).toBe(0);
+    expect((await db.query(
+      "SELECT user_id, favorite FROM replay_participants WHERE replay_id=$1",
+      [replay.id],
+    )).rows).toEqual([{ user_id: game.users[0], favorite: true }]);
+
+    expect(await setReplayFavorite(
+      db,
+      game.users[0],
+      replay.id,
+      false,
+      replay.expiresAt,
+    )).toBe("updated");
+    expect((await db.query("SELECT 1 FROM replay_games WHERE id=$1", [replay.id])).rows).toEqual([]);
+  });
+
+  it("limits each account to twenty favorite replays", async () => {
+    const userId = await user("Collector");
+    const now = 1_000;
+    for (let index = 0; index <= MAX_FAVORITE_REPLAYS; index += 1) {
+      const id = index.toString(16).padStart(24, "0");
+      await db.query(
+        `INSERT INTO replay_games
+          (id, room_code, ruleset_version, format, hero_0_id, hero_1_id,
+           winner, status, created_at, finished_at, expires_at, frame_count)
+         VALUES ($1,$2,'rules-a','cc','HERO0','HERO1',0,'ready',$3,$3,$4,1)`,
+        [id, `CAP${index.toString().padStart(3, "0")}`, now + index, now + REPLAY_TTL_MS],
+      );
+      await db.query(
+        `INSERT INTO replay_participants (replay_id, user_id, seat, payload, payload_bytes)
+         VALUES ($1,$2,0,NULL,NULL)`,
+        [id, userId],
+      );
+    }
+    for (let index = 0; index < MAX_FAVORITE_REPLAYS; index += 1) {
+      const id = index.toString(16).padStart(24, "0");
+      expect(await setReplayFavorite(db, userId, id, true, now)).toBe("updated");
+    }
+    const overflowId = MAX_FAVORITE_REPLAYS.toString(16).padStart(24, "0");
+    expect(await setReplayFavorite(db, userId, overflowId, true, now)).toBe("limit");
+    expect((await listReplays(db, userId, now)).filter((replay) => replay.favorite))
+      .toHaveLength(MAX_FAVORITE_REPLAYS);
   });
 
   it("discards unfinished recordings after an incompatible ruleset bump", async () => {

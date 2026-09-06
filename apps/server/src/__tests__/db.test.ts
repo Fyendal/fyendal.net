@@ -239,6 +239,18 @@ describe("initial schema", () => {
     )).rows).toEqual([{ column_name: "user_id" }]);
   });
 
+  it("adds participant-owned replay favorites to a version 34 database", async () => {
+    const db = rawDb();
+    await applyMigrations(db, MIGRATIONS.filter((migration) => migration.version <= 34));
+
+    await applyMigrations(db, MIGRATIONS);
+
+    expect((await db.query(
+      `SELECT column_name FROM information_schema.columns
+       WHERE table_name = 'replay_participants' AND column_name = 'favorite'`,
+    )).rows).toEqual([{ column_name: "favorite" }]);
+  });
+
   it("adds Starvo to durable pending bot starts", async () => {
     const db = rawDb();
     await applyMigrations(db, MIGRATIONS.filter((migration) => migration.version <= 28));

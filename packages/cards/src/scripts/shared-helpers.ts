@@ -857,8 +857,12 @@ type NextAttackMod = Omit<Modifier, "id" | "sourceInstanceId" | "sourceCardId" |
 type NextAttackModWithSeat = NextAttackMod & { seat?: number };
 
 /** Apply a modifier scoped to the controller's next attack this turn. */
-export function buffNextAttack(ctx: ScriptCtx, mod: NextAttackModWithSeat): void {
-  ctx.addModifier({ scope: "next-attack", seat: ctx.seat, ...mod });
+export function buffNextAttack(
+  ctx: ScriptCtx,
+  mod: NextAttackModWithSeat,
+  source?: DeepReadonly<CardInstance>,
+): void {
+  ctx.addModifier({ scope: "next-attack", seat: ctx.seat, ...mod }, source);
 }
 
 /** "Your next … attack this turn gains …" on-play buff factory */

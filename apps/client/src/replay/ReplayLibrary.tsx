@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { cardData } from "@fyendal/cards/client";
+import { MAX_FAVORITE_REPLAYS } from "@fyendal/protocol";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import { useStore } from "../store.js";
@@ -18,6 +19,15 @@ function expiryStatus(expiresAt: number): {
   return { kind: "days", days, urgent: days <= 2 };
 }
 
+type ReplayLibraryFilter = "all" | "favorites";
+
+export function replaysForFilter<T extends { favorite: boolean }>(
+  replays: readonly T[],
+  filter: ReplayLibraryFilter,
+): readonly T[] {
+  return filter === "favorites" ? replays.filter((replay) => replay.favorite) : replays;
+}
+
 export function ReplayLibrary() {
   const intl = useIntl();
   const {
@@ -26,6 +36,7 @@ export function ReplayLibrary() {
     refreshReplays,
     watchSavedReplay,
     exportSavedReplay,
+    setSavedReplayFavorite,
     deleteSavedReplay,
     openReplayText,
   } = useStore(useShallow((state) => ({
@@ -34,12 +45,19 @@ export function ReplayLibrary() {
     refreshReplays: state.refreshReplays,
     watchSavedReplay: state.watchSavedReplay,
     exportSavedReplay: state.exportSavedReplay,
+    setSavedReplayFavorite: state.setSavedReplayFavorite,
     deleteSavedReplay: state.deleteSavedReplay,
     openReplayText: state.openReplayText,
   })));
   const fileInput = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  const [filter, setFilter] = useState<ReplayLibraryFilter>("all");
+  const favoriteCount = savedReplays.reduce(
+    (count, replay) => count + (replay.favorite ? 1 : 0),
+    0,
+  );
+  const visibleReplays = replaysForFilter(savedReplays, filter);
 
   useEffect(() => {
     void refreshReplays();
@@ -63,6 +81,18 @@ export function ReplayLibrary() {
     const result = await deleteSavedReplay(id);
     setBusy(null);
     if (!result.ok) setError(result.error);
+  };
+
+  const toggleFavorite = async (id: string, favorite: boolean) => {
+    setBusy(`favorite:${id}`);
+    setError(null);
+    const result = await setSavedReplayFavorite(id, favorite);
+    setBusy(null);
+    if (!result.ok) {
+      setError(result.error === "favorite replay limit reached"
+        ? intl.formatMessage({ id: "replay.favoriteLimit" })
+        : result.error);
+    }
   };
 
   const onReplayFile = async (file: File | undefined) => {
@@ -98,18 +128,58 @@ export function ReplayLibrary() {
         </div>
       </header>
 
-      {replaysLoading && savedReplays.length === 0 ? (
-        <p className="muted">{intl.formatMessage({ id: "replay.loading" })}</p>
-      ) : null}
-      {!replaysLoading && savedReplays.length === 0 ? (
-        <div className="replay-empty">
-          <h3>{intl.formatMessage({ id: "replay.emptyTitle" })}</h3>
-          <p>{intl.formatMessage({ id: "replay.emptyBody" })}</p>
-        </div>
-      ) : null}
+      <div
+        className="replay-library-tabs"
+        role="tablist"
+        aria-label={intl.formatMessage({ id: "replay.filterLabel" })}
+      >
+        <button
+          id="replay-tab-all"
+          type="button"
+          role="tab"
+          aria-selected={filter === "all"}
+          aria-controls="replay-list-panel"
+          className={filter === "all" ? "selected" : ""}
+          onClick={() => setFilter("all")}
+        >
+          {intl.formatMessage({ id: "replay.filterAll" })} <span>{savedReplays.length}</span>
+        </button>
+        <button
+          id="replay-tab-favorites"
+          type="button"
+          role="tab"
+          aria-selected={filter === "favorites"}
+          aria-controls="replay-list-panel"
+          className={filter === "favorites" ? "selected" : ""}
+          onClick={() => setFilter("favorites")}
+        >
+          {intl.formatMessage({ id: "replay.filterFavorites" })} <span>{favoriteCount}</span>
+        </button>
+      </div>
 
-      <div className="replay-grid">
-        {savedReplays.map((replay) => {
+      <div
+        id="replay-list-panel"
+        role="tabpanel"
+        aria-labelledby={filter === "all" ? "replay-tab-all" : "replay-tab-favorites"}
+      >
+        {replaysLoading && savedReplays.length === 0 ? (
+          <p className="muted">{intl.formatMessage({ id: "replay.loading" })}</p>
+        ) : null}
+        {!replaysLoading && savedReplays.length === 0 ? (
+          <div className="replay-empty">
+            <h3>{intl.formatMessage({ id: "replay.emptyTitle" })}</h3>
+            <p>{intl.formatMessage({ id: "replay.emptyBody" })}</p>
+          </div>
+        ) : null}
+        {!replaysLoading && savedReplays.length > 0 && visibleReplays.length === 0 ? (
+          <div className="replay-empty">
+            <h3>{intl.formatMessage({ id: "replay.favoriteEmptyTitle" })}</h3>
+            <p>{intl.formatMessage({ id: "replay.favoriteEmptyBody" })}</p>
+          </div>
+        ) : null}
+
+        <div className="replay-grid">
+          {visibleReplays.map((replay) => {
           const heroes = replay.heroIds.map((id) => cardData[id]?.name ?? id) as [string, string];
           const expiry = expiryStatus(replay.expiresAt);
           const result = replayResult(replay.winner, replay.yourSeat);
@@ -161,15 +231,21 @@ export function ReplayLibrary() {
                   { id: "replay.frameCount" },
                   { count: replay.frameCount },
                 )}</span>
-                <time
-                  className={expiry.urgent ? "replay-expiry urgent" : "replay-expiry"}
-                  dateTime={new Date(replay.expiresAt).toISOString()}
-                  title={intl.formatMessage({ id: "replay.expiresAt" }, { date: expiresAt })}
-                >
-                  {expiry.kind === "today"
-                    ? intl.formatMessage({ id: "replay.expiresToday" })
-                    : intl.formatMessage({ id: "replay.daysLeft" }, { count: expiry.days })}
-                </time>
+                {replay.favorite ? (
+                  <span className="replay-favorite-retained">
+                    {intl.formatMessage({ id: "replay.favoriteRetained" })}
+                  </span>
+                ) : (
+                  <time
+                    className={expiry.urgent ? "replay-expiry urgent" : "replay-expiry"}
+                    dateTime={new Date(replay.expiresAt).toISOString()}
+                    title={intl.formatMessage({ id: "replay.expiresAt" }, { date: expiresAt })}
+                  >
+                    {expiry.kind === "today"
+                      ? intl.formatMessage({ id: "replay.expiresToday" })
+                      : intl.formatMessage({ id: "replay.daysLeft" }, { count: expiry.days })}
+                  </time>
+                )}
               </div>
               <div className="replay-card-actions">
                 <button
@@ -181,6 +257,32 @@ export function ReplayLibrary() {
                     : intl.formatMessage({ id: "replay.watch" })}
                 </button>
                 <div className="replay-card-secondary-actions">
+                  <button
+                    className={`replay-card-icon-button replay-favorite-button${replay.favorite ? " selected" : ""}`}
+                    disabled={busy !== null || (
+                      !replay.favorite && favoriteCount >= MAX_FAVORITE_REPLAYS
+                    )}
+                    onClick={() => void toggleFavorite(replay.id, !replay.favorite)}
+                    aria-pressed={replay.favorite}
+                    aria-label={intl.formatMessage({
+                      id: busy === `favorite:${replay.id}`
+                        ? "replay.favoriteSaving"
+                        : replay.favorite
+                          ? "replay.unfavorite"
+                          : "replay.favorite",
+                    })}
+                    title={intl.formatMessage({
+                      id: !replay.favorite && favoriteCount >= MAX_FAVORITE_REPLAYS
+                        ? "replay.favoriteLimit"
+                        : replay.favorite
+                          ? "replay.unfavorite"
+                          : "replay.favorite",
+                    })}
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m12 2.4 2.95 5.98 6.6.96-4.78 4.66 1.13 6.57L12 17.47l-5.9 3.1L7.23 14 2.45 9.34l6.6-.96L12 2.4Z" />
+                    </svg>
+                  </button>
                   <button
                     className="replay-card-icon-button"
                     disabled={busy !== null}
@@ -211,7 +313,8 @@ export function ReplayLibrary() {
               </div>
             </article>
           );
-        })}
+          })}
+        </div>
       </div>
       {error ? <p className="error" role="alert">{error}</p> : null}
     </div>

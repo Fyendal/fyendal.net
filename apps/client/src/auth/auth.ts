@@ -216,6 +216,16 @@ export function apiSaveReplayNote(
 }
 
 export type DeleteReplayResult = OkResponse | ApiError;
+export type FavoriteReplayResult = OkResponse | ApiError;
+
+export function apiSetReplayFavorite(
+  token: string,
+  id: string,
+  favorite: boolean,
+  signal?: AbortSignal,
+): Promise<FavoriteReplayResult> {
+  return post("replays/favorite", { id, favorite }, okOnly, { token, signal });
+}
 
 export function apiDeleteReplay(
   token: string,
