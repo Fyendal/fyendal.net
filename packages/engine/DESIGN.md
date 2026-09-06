@@ -112,8 +112,11 @@ through engine commands.
 
 Combat proceeds through declaration, defense, reactions, damage, resolution,
 and a possible next link. Resolved links remain on the combat chain until it
-closes. Weapon and ally attackers remain in the arena; attack actions,
-defenders, and reactions settle when the chain closes. Current calculations
+closes. Weapon and ally attackers remain in the arena; attack actions and
+defenders settle when the chain closes, while attack reactions clear to their
+owners' graveyards as their stack layers resolve. The link may retain a
+last-known presentation snapshot of a resolved reaction, but that snapshot is
+not an object on the combat chain. Current calculations
 and legality live in focused combat modules (`src/attacks.ts`,
 `src/combatValues.ts`, `src/defense.ts`, `src/reactions.ts`, `src/hits.ts`,
 `src/wagers.ts`, `src/damage.ts`, and `src/combatChain.ts`) plus

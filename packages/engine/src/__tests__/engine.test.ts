@@ -2573,6 +2573,9 @@ describe("combat", () => {
     expect(s.stack.some((layer) => layer.card?.instanceId === reaction)).toBe(false);
     expect(s.chain[0]!.reactions.some((card) => card.instanceId === reaction)).toBe(false);
     expect(player(s, 0).graveyard.some((card) => card.instanceId === reaction)).toBe(true);
+    expect(projectStateFor(s, 0).chain[0]!.reactions).toContainEqual(
+      expect.objectContaining({ instanceId: reaction }),
+    );
     expect(projectStateFor(s, 0).chain[0]!.attackValue).toBe(6);
   });
 
