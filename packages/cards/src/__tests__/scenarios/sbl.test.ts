@@ -548,7 +548,7 @@ describe("SBL — counters, prevention, redirects", () => {
 
     // Edict resolves only after both players pass priority.
     s.passPriority().passPriority();
-    s.expectLog("+1{p} counter");
+    s.expectLog("is sharpened 1 time(s)");
     s.expectInZone(0, "flurry|0", "board");
     s.expectAP(0, 1); // go again
     s.attackWithWeapon(RAYDN); // 0 base + 1 counter (Flurry re-enables and is destroyed)

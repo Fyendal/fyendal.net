@@ -561,11 +561,15 @@ export interface ScriptCtx {
     graveyardReplacement?: "banish";
     asInstant?: boolean;
   }): void;
+  /** Whether the target hero has an empty arsenal zone, including any
+   *  additional zones granted by active continuous effects. */
+  hasArsenalSpace(targetSeat?: number): boolean;
   /** Put one of the controller's cards (from hand, deck, or graveyard, by instance id)
    *  into their arsenal face up, firing onEnterArsenal hooks (the entering
    *  card's own and the controller's permanents'). `from` names the source
    *  zone ("hand" / "deck") for triggers that care ("from your deck").
-   *  Returns false when the card isn't in hand or deck. */
+   *  Returns false when the card isn't in the named zone or its owner's
+   *  arsenal has no empty zone. */
   putIntoArsenal(instanceId: number, from: "hand" | "deck" | "graveyard", opts?: { faceUp?: boolean }): boolean;
   /** Move a card from its owner's deck directly onto the current chain link as
    *  a defending card, firing its ordinary onDefend hook. */
@@ -1129,6 +1133,10 @@ export interface CardScript {
    * Limited/ordinal triggers use this to avoid creating a stack layer after
    * their trigger condition or per-turn limit has already been consumed. */
   canTriggerOnHit?(ctx: ScriptCtx): boolean;
+  /** Number of triggered layers this source's on-hit effect creates for the
+   * pending hit-event. Replacement effects that make an ability trigger more
+   * than once use this; the default is one. */
+  onHitTriggerCount?(ctx: ScriptCtx): number;
   /** Called when a link resolves as a hit. Unqualified "hits" include ally
    *  targets; scripts whose text says "hits a hero" must check targetAllyId. */
   onHit?(ctx: ScriptCtx): void;

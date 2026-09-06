@@ -6,6 +6,7 @@ import {
   cardAbilitiesSuppressed,
   cardColorOf,
   cardHasType,
+  cardNamesOf,
   cardTypesOf,
   dataOf,
   instanceHasKeyword,
@@ -139,7 +140,14 @@ export function attackHasOverpower(
   if (instanceHasKeyword(state, link.attackingCard, "overpower")) return true;
   if (link.flags.overpower === true) return true;
   return activeModifiers(state, link, ["chain-link", "until-end-of-turn"])
-    .some((modifier) => modifier.overpower);
+    .some((modifier) =>
+      modifier.overpower || (
+        modifier.overpowerIfNameContains !== undefined &&
+        cardNamesOf(state, link.attackingCard).some((name) =>
+          name.includes(modifier.overpowerIfNameContains!.trim().toLowerCase())
+        )
+      )
+    );
 }
 
 export function attackIntimidateCount(

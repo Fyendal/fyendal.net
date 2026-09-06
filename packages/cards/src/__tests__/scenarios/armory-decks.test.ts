@@ -1515,6 +1515,35 @@ describe("Armory Decks — rules regression coverage", () => {
     )).toBe(true);
   });
 
+  it("red Edict of Steel offers Reverent Rerebrace before creating Flurry", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["zenith blade|0"],
+          hand: ["edict of steel|1"],
+          resources: 1,
+          equipment: { ...NO_EQUIPMENT, arms: "reverent rerebrace|0" },
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.play("edict of steel|1");
+    expect(g.state.pendingDecision?.prompt).toContain("Reverent Rerebrace");
+    expect(g.state.players[0]!.weapons[0]!.counters?.power).toBe(1);
+    expect(g.state.players[0]!.board.some((card) =>
+      functionalKeyOf(cardData[card.cardId]!) === "flurry|0"
+    )).toBe(false);
+
+    g.chooseOption("pay 1");
+    expect(g.state.players[0]!.weapons[0]!.counters?.power).toBe(2);
+    expect(g.state.players[0]!.equipment.arms).toBeUndefined();
+    expect(g.state.players[0]!.board.some((card) =>
+      functionalKeyOf(cardData[card.cardId]!) === "flurry|0"
+    )).toBe(true);
+  });
+
   it("Ripple Away replaces Edict of Steel's Flurry after Reverent Rerebrace's choice", () => {
     const g = scenario({
       seats: [

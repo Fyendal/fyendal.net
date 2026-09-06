@@ -45,7 +45,7 @@ import {
 } from "./zoneQueries.js";
 
 import { controlledPermanents, hookSources, observingHookSources } from "./sourceQueries.js";
-import { clearPrivateZonePlacement, hasCrank, resetActivatedAbilityUsage } from "./cardLifecycle.js";
+import { arsenalCapacity, clearPrivateZonePlacement, hasCrank, resetActivatedAbilityUsage } from "./cardLifecycle.js";
 import {
   transitionZone,
   transitionZoneFromEngineZone,
@@ -537,6 +537,10 @@ export function makeCtx(
     },
     player(targetSeat) {
       return state.players[targetSeat] as PlayerState;
+    },
+    hasArsenalSpace(targetSeat = seat) {
+      const target = state.players[targetSeat] as PlayerState;
+      return target.arsenal.length < arsenalCapacity(state, targetSeat);
     },
     changeResources(targetSeat, delta) {
       const target = state.players[targetSeat] as PlayerState;

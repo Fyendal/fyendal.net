@@ -888,6 +888,7 @@ describe("PersistedStateV1", () => {
       activationCostReduction: 1,
       appliesToFirstDefenderOnly: true,
       overpower: true,
+      overpowerIfNameContains: "harpoon",
       preventNextDamagePool: 2,
       preventDamagePerEvent: 1,
       preventDamageEventsRemaining: 2,

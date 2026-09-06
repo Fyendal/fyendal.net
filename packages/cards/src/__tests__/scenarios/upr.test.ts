@@ -57,6 +57,17 @@ describe("UPR — registration and heroes", () => {
     s.expectLife(1, 17);
   });
 
+  it("Storm of Sandikai grants Aether Ashwing its attack", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "dromai|0", board: ["aether ashwing|0"], weapons: ["storm of sandikai|0"] },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.activate("aether ashwing|0").blockWith().settle();
+    s.expectLife(1, 19);
+  });
+
   it("Fai returns a Phoenix Flame from his graveyard", () => {
     const s = scenario({
       seats: [
@@ -332,6 +343,36 @@ describe("UPR — rules regression coverage", () => {
     });
     s.activate("kyloria|0").blockWith().settle().chooseCard("talisman of recompense|2").endTurn();
     s.expectInZone(0, "talisman of recompense|2", "board");
+  });
+
+  it("Kyloria triggers only when Kyloria itself hits a hero", () => {
+    const otherDragon = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          board: ["kyloria|0", "aether ashwing|0"],
+          weapons: ["storm of sandikai|0"],
+          deck: [RED],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    otherDragon.activate("aether ashwing|0").blockWith().settle();
+    expect(otherDragon.state.players[0]!.hand).toHaveLength(0);
+
+    const kyloria = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          board: ["kyloria|0"],
+          weapons: ["storm of sandikai|0"],
+          deck: [RED],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    kyloria.activate("kyloria|0").blockWith().settle();
+    kyloria.expectInZone(0, RED, "hand");
   });
 
   it("Yendurai consumes endurance during an incoming ally damage event", () => {
