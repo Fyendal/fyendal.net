@@ -397,6 +397,15 @@ function wastesStackedDefenseReaction(data: CardData, input: BotPolicyInput): bo
     Math.max(0, data.defense ?? 0) > incoming;
 }
 
+function shouldSaveDefenseReaction(data: CardData, input: BotPolicyInput): boolean {
+  if (data.cardType !== "defense-reaction" ||
+    input.view.pendingDecision?.kind !== "defense-reaction") return false;
+
+  const link = currentLink(input);
+  const me = input.view.players[input.seat];
+  return !!link && link.attackValue <= 3 && link.damage < me.life;
+}
+
 function scorePlay(
   intent: GameIntent,
   input: BotPolicyInput,
@@ -413,6 +422,11 @@ function scorePlay(
   const enemyCompass = compass(input);
   const compassIsMarked = markedCompass(input);
   const me = input.view.players[input.seat];
+
+  // Preserve Jarl's high-value defense reactions on attacks whose current,
+  // fully modified attack value is three or less, unless the remaining damage
+  // would otherwise be lethal.
+  if (shouldSaveDefenseReaction(data, input)) return -100;
 
   let score: number;
   if (intent.kind === "activate-ability") {

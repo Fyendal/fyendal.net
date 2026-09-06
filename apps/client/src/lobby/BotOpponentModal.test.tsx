@@ -59,11 +59,12 @@ describe("BotOpponentModal", () => {
     expect(html).not.toContain("Scarlet Revenger");
   });
 
-  it("restores the saved matchmaking checkbox preference", () => {
+  it("starts with matchmaking checked even when the saved preference is disabled", () => {
+    const getItem = vi.fn((key: string) => key === BOT_MATCHMAKING_PREFERENCE_STORAGE_KEY
+      ? JSON.stringify({ version: 1, searchForPlayer: false })
+      : null);
     vi.stubGlobal("localStorage", {
-      getItem: (key: string) => key === BOT_MATCHMAKING_PREFERENCE_STORAGE_KEY
-        ? JSON.stringify({ version: 1, searchForPlayer: false })
-        : null,
+      getItem,
       setItem: vi.fn(),
     });
     const html = renderToStaticMarkup(
@@ -73,6 +74,7 @@ describe("BotOpponentModal", () => {
     );
 
     expect(html).toContain('type="checkbox"');
-    expect(html).not.toContain('type="checkbox" checked=""');
+    expect(html).toContain('type="checkbox" checked=""');
+    expect(getItem).not.toHaveBeenCalled();
   });
 });
