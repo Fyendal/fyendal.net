@@ -378,6 +378,56 @@ describe("Jarl policy", () => {
     })).toEqual(playSink);
   });
 
+  it("only plays defense reactions above three attack or to prevent lethal", () => {
+    const state = createGame({
+      decklists: [jarlDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 12_109_2,
+      startPlayer: 1,
+    });
+    replaceHand(state, ["ROS042"]);
+    const view = projectStateFor(state, 0);
+    const rootbound = view.players[0].hand[0]!;
+    view.phase = "reaction";
+    view.priorityPlayer = 0;
+    view.pendingDecision = {
+      player: 0,
+      kind: "defense-reaction",
+      prompt: "Play a defense reaction or pass",
+    };
+    const link = {
+      attackingCard: { instanceId: 84_003, cardId: "WTR078", owner: 1 },
+      defendingCards: [],
+      attackValue: 3,
+      defenseValue: 0,
+      damage: 3,
+      resolved: false,
+      reactions: [],
+    };
+    view.chain = [link];
+    const playRootbound: GameIntent = {
+      kind: "play-card",
+      instanceId: rootbound.instanceId,
+      pitchInstanceIds: [],
+    };
+    const legal: GameIntent[] = [playRootbound, { kind: "pass" }];
+
+    expect(chooseJarlIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual({ kind: "pass" });
+
+    link.attackValue = 4;
+    link.damage = 4;
+    expect(chooseJarlIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual(playRootbound);
+
+    link.attackValue = 3;
+    link.damage = 3;
+    view.players[0].life = 3;
+    expect(chooseJarlIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual(playRootbound);
+  });
+
   it("gives Enlightened Strike go again to convert a three-card hand into a hammer attack", () => {
     const state = createGame({
       decklists: [jarlDeck(), decklists.dorinthea],
