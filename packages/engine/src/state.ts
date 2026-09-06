@@ -745,6 +745,10 @@ export interface PendingArcane {
 export interface PendingDecisionState extends PendingDecision {
   /** Card instance whose script owns a "choose-target"/"optional-effect" decision */
   sourceInstanceId?: number;
+  /** Last-known source retained when the script-owning object has already
+   * ceased to exist. Scripted choices still resolve independently of whether
+   * their source remains in a game zone. Internal only. */
+  scriptSourceSnapshot?: { seat: number; card: CardInstance };
   /** Hook key routed back to the owning script's choice callback. */
   chooseHook?: string;
   /** Ordered decisions deferred while another scripted choice from the same

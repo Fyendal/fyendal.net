@@ -15,6 +15,18 @@ describe("OUT — registration and core mechanics", () => {
     }
   });
 
+  it("Trench of Sunken Treasure does not prevent arcane damage without payment", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", board: ["runechant|0"], hand: ["ravenous rabble|1"] },
+        { hero: "dorinthea", hand: [], equipment: { chest: "trench of sunken treasure|0" } },
+      ],
+    });
+
+    g.play("ravenous rabble|1").expectLife(1, 19);
+    expect(g.state.pendingDecision?.kind).toBe("defend");
+  });
+
   it("Looking for a Scrap gains +1 and go again only when its additional cost is paid", () => {
     const declined = scenario({
       seats: [

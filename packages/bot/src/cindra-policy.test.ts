@@ -685,6 +685,35 @@ describe("Cindra Head Jabs policy", () => {
       .toEqual({ kind: "play-card", instanceId: reaction.instanceId, pitchInstanceIds: [] });
   });
 
+  it("does not stack defense reactions after a pending reaction covers the attack", () => {
+    const game = state();
+    const [pending, sinkBelow, shelter] = ["ANQ034", "ANQ034", "PEN321"].map((cardId) => ({
+      instanceId: game.nextInstanceId++,
+      cardId,
+      owner: 0 as const,
+    }));
+    game.players[0].hand = [sinkBelow!, shelter!];
+    const view = projectStateFor(game, 0);
+    opposingAttack(view, 4);
+    view.phase = "reaction";
+    view.pendingDecision = { player: 0, kind: "defense-reaction", prompt: "Defense reactions" };
+    view.stack = [{
+      card: pending!,
+      seat: 0,
+      label: "Sink Below",
+      optional: false,
+    }];
+    const legal: GameIntent[] = [
+      { kind: "play-card", instanceId: sinkBelow!.instanceId, pitchInstanceIds: [] },
+      { kind: "play-card", instanceId: shelter!.instanceId, pitchInstanceIds: [] },
+      { kind: "pass" },
+      { kind: "concede" },
+    ];
+
+    expect(chooseCindraIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual({ kind: "pass" });
+  });
+
   it("uses Ancestral instead of Flick when its pump makes the current link hit", () => {
     const game = state();
     const view = projectStateFor(game, 0);

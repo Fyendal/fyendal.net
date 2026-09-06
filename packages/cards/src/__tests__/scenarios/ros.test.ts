@@ -888,6 +888,29 @@ describe("ROS — Wizard and generic", () => {
     expect(g.state.players[0]!.flags.nextArcaneBonus).toBe(1);
   });
 
+  it("Aether Bindings does not trigger when a Sigil leaves unless it was activated", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          equipment: { arms: "aether bindings of the third age|0" },
+          board: ["sigil of aether|3"],
+          hand: ["deadwood dirge|3"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("deadwood dirge|3")
+      .chooseCard("sigil of aether|3");
+
+    expect(g.state.pendingDecision?.prompt).toBe("Deal 1 arcane damage to a target");
+    expect(g.state.players[0]!.flags.nextArcaneBonus).toBeUndefined();
+    g.chooseOption("opposing hero")
+      .expectLog("Sigil of Aether would deal 1 arcane damage to Dorinthea")
+      .expectLife(1, 19);
+  });
+
   it("Hand Behind the Pen reveals then banishes a matching arsenal card", () => {
     const g = scenario({
       seats: [

@@ -827,7 +827,15 @@ Object.assign(ros, {
     triggers: [{
       event: "card-left-arena",
       label: "Amp 1",
-      condition: (ctx, left) => !!left && isAura(ctx, left) && data(ctx, left).name.toLowerCase().includes("sigil"),
+      condition: (ctx, left) =>
+        ctx.state.modifiers.some((modifier) =>
+          modifier.sourceInstanceId === ctx.self.instanceId &&
+          modifier.scope === "until-end-of-turn" &&
+          !modifier.consumed
+        ) &&
+        !!left &&
+        isAura(ctx, left) &&
+        data(ctx, left).name.toLowerCase().includes("sigil"),
       effect: (ctx: ScriptCtx) => ampNextArcane(ctx, 1),
     }],
   },

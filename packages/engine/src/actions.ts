@@ -432,6 +432,10 @@ export function finishPlayCard(
       (asInstant === undefined && player.actionPoints < 1 && instantPermission)
     );
   if (!isInstant) player.actionPoints -= 1;
+  // A non-attack action can only be played after the resolved combat chain
+  // closes. Process close-event effects first so permanents they create can
+  // observe this card's subsequent played event.
+  if (!isInstant && !isAttackCard(data)) closeChain(state, runtime);
   const playEventNextId = state.nextInstanceId;
   const { goAgain, layers: playedTriggers } = announceCardPlayed(state, runtime, seat, card, from);
 
@@ -527,9 +531,6 @@ export function finishPlayCard(
     );
     return;
   }
-  // Playing a non-attack action closes the combat chain; an instant leaves it
-  // open and lets the priority holder continue adding layers.
-  if (!isInstant) closeChain(state, runtime);
   // go again is announced when the card is played (keyword / granted "the next
   // non-attack action card you play gets go again"); the action point itself
   // is refunded only when the card resolves (finishStackCardResolution)
@@ -834,10 +835,11 @@ function dispatchScriptChoice(
   runtime: EngineRuntime,
   sourceInstanceId: number | undefined,
   tokenCreationCause: TokenCreationContext | undefined,
+  scriptSourceSnapshot: PendingDecisionState["scriptSourceSnapshot"],
   visit: (script: CardScript, ctx: ScriptCtx) => void,
 ): void {
   if (sourceInstanceId === undefined) return;
-  const owner = findCardAnywhere(state, sourceInstanceId);
+  const owner = findCardAnywhere(state, sourceInstanceId) ?? scriptSourceSnapshot;
   if (!owner) return;
   const ctx = runtime.makeCtx(
     state,
@@ -868,10 +870,11 @@ function resolveScriptChoice(
   hook: string | undefined,
   result: string,
   tokenCreationCause?: TokenCreationContext,
+  scriptSourceSnapshot?: PendingDecisionState["scriptSourceSnapshot"],
 ): void {
   if (!hook) return;
   dispatchScriptChoice(
-    state, runtime, sourceInstanceId, tokenCreationCause,
+    state, runtime, sourceInstanceId, tokenCreationCause, scriptSourceSnapshot,
     (script, ctx) => script.onChoose?.(ctx, hook, result),
   );
 }
@@ -883,10 +886,11 @@ function resolveScriptChoices(
   hook: string | undefined,
   optionIds: readonly string[],
   tokenCreationCause?: TokenCreationContext,
+  scriptSourceSnapshot?: PendingDecisionState["scriptSourceSnapshot"],
 ): void {
   if (!hook) return;
   dispatchScriptChoice(
-    state, runtime, sourceInstanceId, tokenCreationCause,
+    state, runtime, sourceInstanceId, tokenCreationCause, scriptSourceSnapshot,
     (script, ctx) => script.onChooseMany?.(ctx, hook, optionIds),
   );
 }
@@ -1014,9 +1018,18 @@ export function answerChoices(
   const hook = pd.chooseHook;
   const resume = pd.resume;
   const tokenCreationCause = pd.tokenCreationCause;
+  const scriptSourceSnapshot = pd.scriptSourceSnapshot;
   const followUpDecisions = pd.followUpDecisions;
   state.pendingDecision = null;
-  resolveScriptChoices(state, runtime, srcId, hook, optionIds, tokenCreationCause);
+  resolveScriptChoices(
+    state,
+    runtime,
+    srcId,
+    hook,
+    optionIds,
+    tokenCreationCause,
+    scriptSourceSnapshot,
+  );
   return continueAfterScriptedChoice(state, runtime, resume, hook, followUpDecisions);
 }
 
@@ -1051,6 +1064,7 @@ export function answerChoice(
   const hook = pd.chooseHook;
   const resume = pd.resume;
   const tokenCreationCause = pd.tokenCreationCause;
+  const scriptSourceSnapshot = pd.scriptSourceSnapshot;
   const followUpDecisions = pd.followUpDecisions;
   if (hook === "combat-damage-equipment-replacement" || hook === "lethal-damage-prevention" || hook === "arcane-barrier" || hook === "arcane-barrier-pitch" || hook === "spellvoid" || hook === "ward" || hook === "quell" || hook === "quell-pitch" || hook === "optional-damage-prevention" || hook === "discard-damage-prevention" || hook === "soul-damage-prevention") {
     // engine-owned decision (Ward / Spellvoid / Arcane Barrier prevention):
@@ -1128,7 +1142,15 @@ export function answerChoice(
       const err = payCost(state, runtime, paying, noPitch.cost, []);
       if (err) return err;
       state.pendingDecision = null;
-      resolveScriptChoice(state, runtime, srcId, hook, noPitch.result, tokenCreationCause);
+      resolveScriptChoice(
+        state,
+        runtime,
+        srcId,
+        hook,
+        noPitch.result,
+        tokenCreationCause,
+        scriptSourceSnapshot,
+      );
     } else {
       state.pendingDecision = {
         player: seat,
@@ -1137,6 +1159,7 @@ export function answerChoice(
         promptMessage: { id: "engine.decision.payment", values: { cost: declared.cost } },
         options,
         sourceInstanceId: srcId,
+        ...(scriptSourceSnapshot ? { scriptSourceSnapshot } : {}),
         chooseHook: hook,
         ...(tokenCreationCause ? { tokenCreationCause } : {}),
         payment: { pitchOptions },
@@ -1165,10 +1188,19 @@ export function answerChoice(
       hook,
       picked ? picked.result : "declined",
       tokenCreationCause,
+      scriptSourceSnapshot,
     );
   } else {
     state.pendingDecision = null;
-    resolveScriptChoice(state, runtime, srcId, hook, resolvedOption, tokenCreationCause);
+    resolveScriptChoice(
+      state,
+      runtime,
+      srcId,
+      hook,
+      resolvedOption,
+      tokenCreationCause,
+      scriptSourceSnapshot,
+    );
   }
   return continueAfterScriptedChoice(state, runtime, resume, hook, followUpDecisions);
 }

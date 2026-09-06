@@ -1499,7 +1499,10 @@ function scoreNonAttackCard(
     if (functional === CARD.ancestralEmpowerment) return 500 + (hits >= 1 ? 80 : 0);
     return 100;
   }
-  if (data.cardType === "defense-reaction") return 500 + scoreDefenseReaction(data, input);
+  if (data.cardType === "defense-reaction") {
+    const reactionScore = scoreDefenseReaction(data, input);
+    return reactionScore < 0 ? reactionScore : 500 + reactionScore;
+  }
   if (functional === CARD.dracoFire) {
     const conversion = dracoFireConversionValue(input, excludedIds);
     return conversion === undefined ? -10_000 : 1_200 + conversion * 40;
