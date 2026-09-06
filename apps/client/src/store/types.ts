@@ -36,6 +36,7 @@ import type {
   DeckResult,
   DeleteDeckResult,
   DeleteReplayResult,
+  FavoriteReplayResult,
   BugReportResult,
   LoginResult,
   RegisterResult,
@@ -228,6 +229,7 @@ export interface StoreState {
   refreshReplays: () => Promise<void>;
   watchSavedReplay: (id: string) => Promise<string | null>;
   exportSavedReplay: (id: string) => Promise<string | null>;
+  setSavedReplayFavorite: (id: string, favorite: boolean) => Promise<FavoriteReplayResult>;
   deleteSavedReplay: (id: string) => Promise<DeleteReplayResult>;
   watchReplay: () => Promise<void>;
   downloadReplay: () => void;

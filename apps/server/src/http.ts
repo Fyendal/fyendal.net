@@ -34,6 +34,7 @@ import {
   getReplayNotes,
   listReplays,
   saveReplayNote,
+  setReplayFavorite,
   waitForReplayPayloadForRoom,
 } from "./replays.js";
 import { createFabraryClient, parseFabraryDeckUrl, type FabraryClient } from "./fabrary.js";
@@ -495,6 +496,18 @@ export function createApiServer(deps: ApiDeps): http.Server {
       const ok = await deleteReplay(deps.db, user.id, field(body, "id"));
       return ok
         ? { status: 200, body: { ok: true } }
+        : { status: 404, body: { ok: false, error: "replay not found" } };
+    },
+    "/api/replays/favorite": async (body, user) => {
+      if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };
+      const favorite = valueField(body, "favorite");
+      if (typeof favorite !== "boolean") {
+        return { status: 400, body: { ok: false, error: "invalid favorite value" } };
+      }
+      const result = await setReplayFavorite(deps.db, user.id, field(body, "id"), favorite);
+      if (result === "updated") return { status: 200, body: { ok: true } };
+      return result === "limit"
+        ? { status: 409, body: { ok: false, error: "favorite replay limit reached" } }
         : { status: 404, body: { ok: false, error: "replay not found" } };
     },
     "/api/replay-notes": async (body, user) => {

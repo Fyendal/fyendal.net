@@ -24188,6 +24188,60 @@
       "value": "Export replay JSON"
     }
   ],
+  "replay.favorite": [
+    {
+      "type": 0,
+      "value": "Favorite replay"
+    }
+  ],
+  "replay.favoriteEmptyBody": [
+    {
+      "type": 0,
+      "value": "Favorite a replay to keep it indefinitely and find it here."
+    }
+  ],
+  "replay.favoriteEmptyTitle": [
+    {
+      "type": 0,
+      "value": "No favorite replays yet"
+    }
+  ],
+  "replay.favoriteLimit": [
+    {
+      "type": 0,
+      "value": "You can favorite up to 20 replays. Remove one from favorites first."
+    }
+  ],
+  "replay.favoriteRetained": [
+    {
+      "type": 0,
+      "value": "Favorited · kept indefinitely"
+    }
+  ],
+  "replay.favoriteSaving": [
+    {
+      "type": 0,
+      "value": "Saving favorite"
+    }
+  ],
+  "replay.filterAll": [
+    {
+      "type": 0,
+      "value": "All"
+    }
+  ],
+  "replay.filterFavorites": [
+    {
+      "type": 0,
+      "value": "Favorites"
+    }
+  ],
+  "replay.filterLabel": [
+    {
+      "type": 0,
+      "value": "Replay lists"
+    }
+  ],
   "replay.frameCount": [
     {
       "type": 6,
@@ -24373,13 +24427,19 @@
   "replay.retention": [
     {
       "type": 0,
-      "value": "Replays are saved for 7 days. Export anything you want to keep."
+      "value": "Replays are saved for 7 days. Favorite up to 20 to keep them indefinitely."
     }
   ],
   "replay.title": [
     {
       "type": 0,
       "value": "My Replays"
+    }
+  ],
+  "replay.unfavorite": [
+    {
+      "type": 0,
+      "value": "Remove replay from favorites"
     }
   ],
   "replay.victory": [

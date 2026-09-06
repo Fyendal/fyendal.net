@@ -3,6 +3,7 @@ import {
   apiReplay,
   apiReplayNotes,
   apiReplays,
+  apiSetReplayFavorite,
 } from "../auth/auth.js";
 import type { ReplayServerNote } from "@fyendal/protocol";
 import type { ReplayFile } from "@fyendal/shared";
@@ -16,6 +17,7 @@ type ReplayActionKey =
   | "refreshReplays"
   | "watchSavedReplay"
   | "exportSavedReplay"
+  | "setSavedReplayFavorite"
   | "deleteSavedReplay";
 
 export function createReplayActions({
@@ -87,6 +89,27 @@ export function createReplayActions({
       if (!result.ok) return result.error;
       downloadReplayFile(withReplayNotes(result.replay, result.notes));
       return null;
+    },
+    setSavedReplayFavorite: async (id, favorite) => {
+      const token = get().authToken;
+      if (!token) return { ok: false, error: "not logged in" };
+      const request = authRequest(token);
+      const result = await apiSetReplayFavorite(token, id, favorite, request.signal);
+      if (!isCurrentAuth(request)) {
+        return { ok: false, error: "account request was superseded" };
+      }
+      if (result.ok) {
+        const now = Date.now();
+        set({
+          savedReplays: get().savedReplays.flatMap((replay) =>
+            replay.id !== id
+              ? [replay]
+              : !favorite && replay.expiresAt <= now
+                ? []
+                : [{ ...replay, favorite }]),
+        });
+      }
+      return result;
     },
     deleteSavedReplay: async (id) => {
       const token = get().authToken;

@@ -1491,6 +1491,16 @@ function finishStack(state: GameStateInternal, runtime: EngineRuntime): void {
 export function enterAttackLayerWindow(state: GameStateInternal, runtime: EngineRuntime): void {
   state.phase = "layer";
   state.stackResume = "start-attack-step";
+  // Friendly-play observers can pause attack announcement on a scripted
+  // choice before this layer window is entered. Resume the stack machine once
+  // that choice is answered; otherwise the unresolved attack layer is left
+  // without a priority decision and the game cannot advance.
+  if (state.pendingDecision?.chooseHook) {
+    state.pendingDecision.resume ??= {
+      kind: "continue-stack",
+      seat: currentLink(state)?.attacker ?? state.activePlayer,
+    };
+  }
   continueStack(state, runtime, currentLink(state)?.attacker ?? state.activePlayer);
 }
 

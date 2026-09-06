@@ -40,6 +40,7 @@ export function resolveSharpenFollowup(
   instanceId: number,
   threshold: number,
   kind: number,
+  source?: Card,
 ): void {
   const sword = controlledSword(ctx, instanceId);
   if (!sword || Number(sword.counters?.power ?? 0) < threshold) return;
@@ -49,7 +50,7 @@ export function resolveSharpenFollowup(
       ctx.createToken(SBL_FLURRY);
       break;
     case SHARPEN_FOLLOWUP.DISCOUNT:
-      buffNextAttack(ctx, { attackActivationCostReduction: 1, appliesToInstanceId: instanceId });
+      buffNextAttack(ctx, { attackActivationCostReduction: 1, appliesToInstanceId: instanceId }, source);
       break;
     case SHARPEN_FOLLOWUP.BLADE_DANCE:
       ctx.createToken(BLADE_DANCE);
@@ -63,7 +64,7 @@ export function resolveSharpenFollowup(
         appliesToInstanceId: instanceId,
         onHitDraw: 1,
         once: true,
-      });
+      }, source);
       break;
     case SHARPEN_FOLLOWUP.TOP_ATTACK_REACTION: {
       const reactions = ctx.player(ctx.seat).graveyard.filter((card) =>
@@ -86,7 +87,7 @@ export function resolveSharpenFollowup(
         scope: "next-attack",
         appliesToInstanceId: instanceId,
         onDefendedDealDamage: 1,
-      });
+      }, source);
       break;
   }
 }
@@ -132,6 +133,7 @@ export function sharpenSword(
     ctx.setCardCounter(rerebrace.instanceId, "sharpenTarget", instanceId);
     ctx.setCardCounter(rerebrace.instanceId, "sharpenFollowupThreshold", followup?.threshold ?? 0);
     ctx.setCardCounter(rerebrace.instanceId, "sharpenFollowupKind", followup?.kind ?? 0);
+    ctx.setCardCounter(rerebrace.instanceId, "sharpenFollowupSource", followup ? ctx.self.instanceId : 0);
     const requested = ctx.requestPaymentFrom(
       rerebrace.instanceId,
       "rerebrace-sharpen",

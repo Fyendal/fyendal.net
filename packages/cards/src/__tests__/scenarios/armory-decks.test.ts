@@ -1613,6 +1613,32 @@ describe("Armory Decks — rules regression coverage", () => {
     expect(g.state.players[0]!.equipment.arms).toBeUndefined();
   });
 
+  it("keeps Drawn to the Blade as the source after Reverent Rerebrace resolves its follow-up", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["zenith blade|0"],
+          hand: ["drawn to the blade|2"],
+          resources: 1,
+          equipment: { ...NO_EQUIPMENT, arms: "reverent rerebrace|0" },
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.state.players[0]!.weapons[0]!.counters = { power: 1 };
+
+    g.play("drawn to the blade|2");
+    expect(g.state.pendingDecision?.prompt).toContain("Reverent Rerebrace");
+    g.chooseOption("no");
+
+    expect(projectStateFor(g.state, 0).ongoing).toContainEqual({
+      seat: 0,
+      cardId: printingId("drawn to the blade|2"),
+      label: "draw 1 on next hit · this turn",
+    });
+  });
+
   it("Reverent Rerebrace replaces Sharpening Sparks and Zenith Blade gains go again", () => {
     const g = scenario({
       seats: [

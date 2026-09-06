@@ -941,6 +941,7 @@ describe("replays and HTTP responses", () => {
           id: "replay-id",
           finishedAt: 3,
           expiresAt: 4,
+          favorite: true,
           replay: { version: 1, seat: 0, views: [gameView()] },
         }],
         friends: [{ username: "Bob", friendsSince: 1 }],
@@ -957,6 +958,7 @@ describe("replays and HTTP responses", () => {
       finishedAt: 3,
       expiresAt: 4,
       frameCount: 2,
+      favorite: false,
     };
     expect(decodeReplaysResponse({ ok: true, replays: [replaySummary] })).not.toBeNull();
     expect(decodeReplaysResponse({

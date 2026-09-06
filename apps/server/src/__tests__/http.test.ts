@@ -501,6 +501,24 @@ describe("replay transport compression", () => {
     expect(identity.headers.get("content-encoding")).toBeNull();
     expect(identity.headers.get("content-length")).toBe(String(raw.length));
     expect(await identity.json()).toEqual(body);
+
+    const favorited = await fetch(`${url}/api/replays/favorite`, {
+      method: "POST",
+      headers: {
+        Authorization: authorization,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id, favorite: true }),
+    });
+    expect(favorited.status).toBe(200);
+    expect(await favorited.json()).toEqual({ ok: true });
+    const listed = await fetch(`${url}/api/replays`, {
+      headers: { Authorization: authorization },
+    });
+    expect(await listed.json()).toEqual({
+      ok: true,
+      replays: [expect.objectContaining({ id, favorite: true })],
+    });
   });
 
   it("exposes full-information room replays only after finalization", async () => {

@@ -115,14 +115,17 @@ export const aha: Record<string, CardScript> = {
       const target = ctx.getCounter("sharpenTarget");
       const threshold = ctx.getCounter("sharpenFollowupThreshold");
       const payoff = ctx.getCounter("sharpenFollowupKind");
+      const sourceId = ctx.getCounter("sharpenFollowupSource");
+      const source = ctx.state.resolving.find((card) => card.instanceId === sourceId);
       ctx.setCardCounter(ctx.self.instanceId, "sharpenFollowupThreshold", 0);
       ctx.setCardCounter(ctx.self.instanceId, "sharpenFollowupKind", 0);
+      ctx.setCardCounter(ctx.self.instanceId, "sharpenFollowupSource", 0);
       if (option === "paid") {
         ctx.addCounter(target, "power", 1);
         ctx.destroySelf();
         ctx.logPublic(localizedCardLog(ctx, "Reverent Rerebrace sharpens Zenith Blade an additional time", "card.log.aha.rerebrace.sharpen"));
       }
-      resolveSharpenFollowup(ctx, target, threshold, payoff);
+      resolveSharpenFollowup(ctx, target, threshold, payoff, source);
     },
   },
   "silverstride dodgers|0": {

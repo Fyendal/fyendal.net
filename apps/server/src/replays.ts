@@ -11,6 +11,7 @@ import {
   decodeReplayFile,
   decodeReplayResponse,
   decodeGameView,
+  MAX_FAVORITE_REPLAYS,
   MAX_REPLAY_NOTE_LENGTH,
   type ReplayNoteInput,
   type ReplayServerNote,
@@ -22,6 +23,7 @@ import { tryAcquireLease } from "./leases.js";
 import { consoleError, type ErrorLogger } from "./logging.js";
 
 export const REPLAY_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+export { MAX_FAVORITE_REPLAYS };
 const MAX_REPLAY_VIEWS = 10_000;
 const REPLAY_YIELD_BUDGET_MS = 8;
 export const REPLAY_FRAME_BATCH_SIZE = 100;
@@ -537,10 +539,11 @@ export async function listReplays(
 ): Promise<ReplaySummary[]> {
   const { rows } = await db.query(
     `SELECT g.id, g.format, g.hero_0_id, g.hero_1_id, p.seat, g.winner,
-            g.finished_at, g.expires_at, g.frame_count
+            g.finished_at, g.expires_at, g.frame_count, p.favorite
      FROM replay_games g
      JOIN replay_participants p ON p.replay_id = g.id
-     WHERE p.user_id = $1 AND g.status = 'ready' AND g.expires_at > $2
+     WHERE p.user_id = $1 AND g.status = 'ready'
+       AND (p.favorite = TRUE OR g.expires_at > $2)
      ORDER BY g.finished_at DESC, g.id DESC`,
     [userId, now],
   );
@@ -560,6 +563,7 @@ export async function listReplays(
       finishedAt: safeInteger(row.finished_at, "replay finished time"),
       expiresAt: safeInteger(row.expires_at, "replay expiry"),
       frameCount: safeInteger(row.frame_count, "replay frame count"),
+      favorite: row.favorite === true,
     };
   });
 }
@@ -585,7 +589,8 @@ export async function getReplayPayload(
   const { rows } = await db.query(
     `SELECT p.payload FROM replay_participants p
      JOIN replay_games g ON g.id = p.replay_id
-     WHERE p.replay_id=$1 AND p.user_id=$2 AND g.status='ready' AND g.expires_at > $3`,
+     WHERE p.replay_id=$1 AND p.user_id=$2 AND g.status='ready'
+       AND (p.favorite = TRUE OR g.expires_at > $3)`,
     [id, userId, now],
   );
   if (!rows.length || !Buffer.isBuffer(rows[0].payload)) return null;
@@ -616,7 +621,7 @@ async function replayPayloadStateForRoom(
   now: number,
 ): Promise<RoomReplayPayloadState> {
   const { rows } = await db.query(
-    `SELECT g.status, g.expires_at, p.payload FROM replay_participants p
+    `SELECT g.status, g.expires_at, p.favorite, p.payload FROM replay_participants p
      JOIN replay_games g ON g.id = p.replay_id
      WHERE g.room_code=$1 AND p.user_id=$2
      ORDER BY g.created_at DESC LIMIT 1`,
@@ -625,7 +630,9 @@ async function replayPayloadStateForRoom(
   const row = rows[0];
   if (!row) return { kind: "unavailable" };
   const expiresAt = Number(row.expires_at);
-  if (!Number.isSafeInteger(expiresAt) || expiresAt <= now) return { kind: "unavailable" };
+  if (!Number.isSafeInteger(expiresAt) || (row.favorite !== true && expiresAt <= now)) {
+    return { kind: "unavailable" };
+  }
   if (row.status === "finalizing") return { kind: "finalizing" };
   return row.status === "ready" && Buffer.isBuffer(row.payload)
     ? { kind: "ready", payload: row.payload }
@@ -685,14 +692,14 @@ async function replayForNoteTarget(
         `SELECT g.id, g.status, g.frame_count FROM replay_games g
          JOIN replay_participants p ON p.replay_id=g.id
          WHERE g.id=$1 AND p.user_id=$2
-           AND (g.status <> 'ready' OR g.expires_at > $3)${suffix}`,
+           AND (g.status <> 'ready' OR p.favorite = TRUE OR g.expires_at > $3)${suffix}`,
         [target.replayId, userId, now],
       )
     : await db.query(
         `SELECT g.id, g.status, g.frame_count FROM replay_games g
          JOIN replay_participants p ON p.replay_id=g.id
          WHERE g.room_code=$1 AND p.user_id=$2
-           AND (g.status <> 'ready' OR g.expires_at > $3)
+           AND (g.status <> 'ready' OR p.favorite = TRUE OR g.expires_at > $3)
          ORDER BY g.created_at DESC LIMIT 1${suffix}`,
         [target.roomCode.toUpperCase(), userId, now],
       );
@@ -821,6 +828,61 @@ export function attachReplayNotes(file: ReplayFile, notes: readonly ReplayServer
   };
 }
 
+export type SetReplayFavoriteResult = "updated" | "limit" | "not-found";
+
+/** Update one participant's retention preference. Locking the owning user
+ * serializes requests across gateways so concurrent favorites cannot exceed
+ * the per-account cap. */
+export async function setReplayFavorite(
+  db: Queryable,
+  userId: number,
+  id: string,
+  favorite: boolean,
+  now = Date.now(),
+): Promise<SetReplayFavoriteResult> {
+  return withTransaction(db, async (tx) => {
+    const owner = await tx.query("SELECT id FROM users WHERE id=$1 FOR UPDATE", [userId]);
+    if (!owner.rows.length) return "not-found";
+    const target = await tx.query(
+      `SELECT p.favorite, g.expires_at FROM replay_participants p
+       JOIN replay_games g ON g.id=p.replay_id
+       WHERE p.replay_id=$1 AND p.user_id=$2 AND g.status='ready'
+         AND (p.favorite = TRUE OR g.expires_at > $3)`,
+      [id, userId, now],
+    );
+    if (!target.rows.length) return "not-found";
+    if (target.rows[0]!.favorite === favorite) return "updated";
+    if (favorite) {
+      const count = await tx.query(
+        `SELECT COUNT(*) AS count FROM replay_participants
+         WHERE user_id=$1 AND favorite=TRUE`,
+        [userId],
+      );
+      if (safeInteger(count.rows[0]?.count, "favorite replay count") >= MAX_FAVORITE_REPLAYS) {
+        return "limit";
+      }
+    }
+    const updated = await tx.query(
+      `UPDATE replay_participants SET favorite=$3
+       WHERE replay_id=$1 AND user_id=$2 RETURNING replay_id`,
+      [id, userId, favorite],
+    );
+    if (!updated.rows.length) return "not-found";
+    if (!favorite && safeInteger(target.rows[0]!.expires_at, "replay expiry") <= now) {
+      await tx.query(
+        "DELETE FROM replay_participants WHERE replay_id=$1 AND user_id=$2",
+        [id, userId],
+      );
+      await tx.query(
+        `DELETE FROM replay_games WHERE id=$1
+         AND NOT EXISTS (SELECT 1 FROM replay_participants WHERE replay_id=$1)`,
+        [id],
+      );
+    }
+    return "updated";
+  });
+}
+
 /** Remove one participant's retained replay. The opponent's independently
  * owned copy remains available; an unreferenced replay game is deleted so its
  * metadata and any remaining frames cascade immediately. */
@@ -858,13 +920,33 @@ export async function sweepReplays(db: Queryable, now = Date.now(), limit = 500)
   // Filter BIGINT deadlines in JS because pg-mem's range comparison is
   // incorrect once an index exists; production still uses the IS NOT NULL index.
   const expired = await db.query(
-    `SELECT id, expires_at FROM replay_games WHERE expires_at IS NOT NULL
-     ORDER BY expires_at LIMIT $1`,
+    `SELECT DISTINCT g.id, g.expires_at FROM replay_games g
+     JOIN replay_participants p ON p.replay_id=g.id
+     WHERE g.expires_at IS NOT NULL AND p.favorite=FALSE
+     ORDER BY g.expires_at LIMIT $1`,
     [limit],
   );
-  expired.rows
-    .filter((row) => Number(row.expires_at) <= now)
-    .forEach((row) => ids.add(String(row.id)));
+  for (const row of expired.rows.filter((value) => Number(value.expires_at) <= now)) {
+    const id = String(row.id);
+    const deleted = await withTransaction(db, async (tx) => {
+      const locked = await tx.query(
+        "SELECT expires_at FROM replay_games WHERE id=$1 FOR UPDATE",
+        [id],
+      );
+      if (!locked.rows.length || Number(locked.rows[0]!.expires_at) > now) return false;
+      await tx.query(
+        "DELETE FROM replay_participants WHERE replay_id=$1 AND favorite=FALSE",
+        [id],
+      );
+      const removed = await tx.query(
+        `DELETE FROM replay_games WHERE id=$1
+         AND NOT EXISTS (SELECT 1 FROM replay_participants WHERE replay_id=$1)`,
+        [id],
+      );
+      return Boolean(removed.rowCount);
+    });
+    if (deleted) ids.add(id);
+  }
   if (ids.size < limit) {
     const orphaned = await db.query(
       `SELECT id FROM replay_games

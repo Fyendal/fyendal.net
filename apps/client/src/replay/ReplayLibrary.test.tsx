@@ -14,11 +14,13 @@ const replayStore = vi.hoisted(() => {
       finishedAt: 1,
       expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1_000,
       frameCount: 3,
+      favorite: false,
     }],
     replaysLoading: false,
     refreshReplays: vi.fn(),
     watchSavedReplay: vi.fn(),
     exportSavedReplay: vi.fn(),
+    setSavedReplayFavorite: vi.fn(),
     deleteSavedReplay: vi.fn(),
     openReplayText: vi.fn(),
   };
@@ -29,16 +31,23 @@ const replayStore = vi.hoisted(() => {
 
 vi.mock("../store.js", () => ({ useStore: replayStore.useStore }));
 
-import { ReplayLibrary } from "./ReplayLibrary.js";
+import { ReplayLibrary, replaysForFilter } from "./ReplayLibrary.js";
 
 describe("ReplayLibrary", () => {
-  it("keeps export and delete as accessible icon actions in one row", () => {
+  it("keeps favorite, export, and delete as accessible icon actions in one row", () => {
     const html = renderToStaticMarkup(
       createElement(TestI18nProvider, null, createElement(ReplayLibrary)),
     );
 
     expect(html).toContain("Open Replay File…");
+    expect(html).toContain('aria-label="Replay lists"');
+    expect(html).toContain('id="replay-tab-all"');
+    expect(html).toContain('id="replay-tab-favorites"');
+    expect(html).toContain('aria-selected="true"');
+    expect(html).toContain("Favorites");
     expect(html).toContain('class="replay-card-secondary-actions"');
+    expect(html).toContain('aria-label="Favorite replay"');
+    expect(html).toContain('aria-pressed="false"');
     expect(html).toContain('aria-label="Export replay JSON"');
     expect(html).toContain('aria-label="Delete replay"');
     expect(html).toContain('class="replay-card-icon-button btn-danger"');
@@ -52,8 +61,21 @@ describe("ReplayLibrary", () => {
     );
 
     expect(html).toContain("我的回放");
+    expect(html).toContain("全部");
+    expect(html).toContain("收藏");
     expect(html).toContain("3 帧");
     expect(html).toContain('aria-label="导出回放 JSON"');
+    expect(html).toContain('aria-label="收藏回放"');
     expect(html).toContain("HERO0 对阵 HERO1");
+  });
+
+  it("shows only favorite replays in the favorites tab", () => {
+    const replays = [
+      { id: "ordinary", favorite: false },
+      { id: "favorite", favorite: true },
+    ];
+
+    expect(replaysForFilter(replays, "all")).toEqual(replays);
+    expect(replaysForFilter(replays, "favorites")).toEqual([replays[1]]);
   });
 });
