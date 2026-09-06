@@ -14,23 +14,25 @@ describe("mobile card long press", () => {
     expect(cardLongPressMoved(100, 200, 100, 200 + CARD_LONG_PRESS_MOVE_PX + 1)).toBe(true);
   });
 
-  it("does not inspect an actionable card", () => {
+  it("finds an actionable card for long-press inspection", () => {
     const target = {
-      closest: (selector: string) => selector === ".overlay, .card-clickable"
-        ? { className: "card-clickable" }
+      closest: (selector: string) => selector === ".overlay"
+        ? null
+        : selector === "[data-cardid]"
+          ? { dataset: { cardid: "SEA225" }, className: "card-clickable" }
+          : null,
+    } as unknown as HTMLElement;
+
+    expect(mobileCardLongPressCardId(target)).toBe("SEA225");
+  });
+
+  it("does not inspect a card through an open overlay", () => {
+    const target = {
+      closest: (selector: string) => selector === ".overlay"
+        ? { className: "overlay" }
         : { dataset: { cardid: "SEA225" } },
     } as unknown as HTMLElement;
 
     expect(mobileCardLongPressCardId(target)).toBeNull();
-  });
-
-  it("finds an inert card for inspection", () => {
-    const target = {
-      closest: (selector: string) => selector === ".overlay, .card-clickable"
-        ? null
-        : { dataset: { cardid: "SEA225" } },
-    } as unknown as HTMLElement;
-
-    expect(mobileCardLongPressCardId(target)).toBe("SEA225");
   });
 });

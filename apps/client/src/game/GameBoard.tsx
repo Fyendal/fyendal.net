@@ -820,8 +820,8 @@ export function GameBoard() {
     });
   };
 
-  // Touch screens have no hover preview. Tapping or holding an inert card opens
-  // the full-size sheet; actionable cards reserve touch for their normal tap.
+  // Touch screens have no hover preview. Tapping an inert card or holding any
+  // card opens the full-size sheet; a short tap on an actionable card acts.
   const onTableClick = (e: React.MouseEvent) => {
     if (!window.matchMedia("(max-width: 700px)").matches) return;
     const target = e.target as HTMLElement;

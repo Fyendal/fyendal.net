@@ -22,10 +22,11 @@ export function cardLongPressMoved(
     || Math.abs(currentY - startY) > CARD_LONG_PRESS_MOVE_PX;
 }
 
-/** Actionable cards reserve touch gestures for their primary action. An inert
- * card may use the same gesture to open the mobile inspection sheet. */
+/** Find the card represented by a mobile inspection gesture. Overlay content
+ * owns its own interactions, while both actionable and inert cards remain
+ * inspectable by long press. */
 export function mobileCardLongPressCardId(target: HTMLElement): string | null {
-  if (target.closest(".overlay, .card-clickable")) return null;
+  if (target.closest(".overlay")) return null;
   return target.closest<HTMLElement>("[data-cardid]")?.dataset.cardid ?? null;
 }
 

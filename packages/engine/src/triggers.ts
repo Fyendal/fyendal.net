@@ -1221,10 +1221,6 @@ export function finishStackCardResolution(
         [{ card: resolvedCard, fragmentTriggered }],
         layer.fromHand === true,
       );
-    } else if (resolvedSuccessfully && link && cardType === "attack-reaction") {
-      // Attack reactions are retained with the chain link for presentation and
-      // chain-close settlement, but not until their stack effects are complete.
-      link.reactions.push(resolvedCard);
     }
     const remainsOnChain = state.chain.some((link) =>
       link.attackingCard.instanceId === resolvedCard.instanceId ||
