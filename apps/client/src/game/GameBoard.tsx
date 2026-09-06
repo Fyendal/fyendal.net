@@ -78,7 +78,7 @@ const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
   const intl = useIntl();
-  const { view, viewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, botGame, sendIntent, sendPriorityMode, sendRunechantSkip, sendEmote, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, backgroundSearching, stopBackgroundMatchmaking } = useStore(
+  const { view, viewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, sendIntent, sendPriorityMode, sendRunechantSkip, sendEmote, kickSpectator, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, backgroundSearching, stopBackgroundMatchmaking } = useStore(
     useShallow((state) => ({
       view: state.view,
       viewUpdate: state.viewUpdate,
@@ -91,11 +91,13 @@ export function GameBoard() {
       yourSeat: state.yourSeat,
       spectating: state.spectating,
       spectatorCount: state.spectatorCount,
+      spectatorUsernames: state.spectatorUsernames,
       botGame: state.botGame,
       sendIntent: state.sendIntent,
       sendPriorityMode: state.sendPriorityMode,
       sendRunechantSkip: state.sendRunechantSkip,
       sendEmote: state.sendEmote,
+      kickSpectator: state.kickSpectator,
       latestEmote: state.latestEmote,
       undo: state.undo,
       error: state.error,
@@ -155,6 +157,7 @@ export function GameBoard() {
     }
   });
   const [preview, setPreview] = useState<BoardPreview | null>(null);
+
   const {
     railCollapsed,
     setRailCollapsed,
@@ -212,6 +215,7 @@ export function GameBoard() {
     viewUpdate,
     enabled: soundEffectsEnabled && screen !== "replay",
     volume: soundEffectsVolume,
+    seat: spectating ? null : yourSeat,
   });
   // end-of-game popup can be dismissed to inspect the final board; re-arm it
   // whenever a new winner is decided (fresh game in the same room)
@@ -1027,7 +1031,9 @@ export function GameBoard() {
         myLife={me.life}
         oppHeroName={opp.heroName}
         myHeroName={me.heroName}
+        mySeat={seat}
         log={view.log}
+        logEntries={view.logEntries}
         activeHeroName={activeHeroName}
         actionPoints={view.players[view.activePlayer]!.actionPoints}
         primaryAction={primaryAction}
@@ -1169,6 +1175,8 @@ export function GameBoard() {
         }
         spectating={spectating}
         spectatorCount={spectatorCount}
+        spectatorUsernames={spectatorUsernames}
+        onKickSpectator={!spectating && !replaying ? kickSpectator : null}
         opponentConnected={opponentConnected}
         connectionIssueVisible={connectionIssueVisible}
         error={error}

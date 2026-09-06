@@ -780,6 +780,7 @@ export const useStore = create<StoreState>((set, get) => {
           roomCode: msg.code,
           yourSeat: msg.seat,
           spectating: false,
+          spectatorKicked: false,
           inviteRoom: null,
           friendInviteTarget: null,
           error: null,
@@ -803,6 +804,7 @@ export const useStore = create<StoreState>((set, get) => {
           roomCode: msg.code,
           yourSeat: msg.seat,
           spectating: msg.spectator === true,
+          spectatorKicked: false,
           inviteRoom: null,
           friendInviteTarget: null,
           error: null,
@@ -946,6 +948,9 @@ export const useStore = create<StoreState>((set, get) => {
       case "spectators":
         set({ spectatorCount: msg.count });
         break;
+      case "spectator-list":
+        set({ spectatorUsernames: msg.usernames });
+        break;
       case "rooms":
         if (get().authUser) {
           pruneRejectedMatchRooms(
@@ -1030,6 +1035,17 @@ export const useStore = create<StoreState>((set, get) => {
         // Normal exits reset optimistically in leave(). A queue-to-bot handoff
         // waits for this acknowledgement before reusing the socket.
         launchPendingBotRoom();
+        break;
+      case "spectator-kicked":
+        cancelReconnect();
+        removeRoomSession(localStorage, get().roomCode);
+        history.replaceState(null, "", "/");
+        replayRuntime.discard(get().roomCode);
+        prepDeckId = null;
+        prepHero = null;
+        resetRoomVersionState();
+        set({ ...clearedRoomProjection(), spectatorKicked: true });
+        get().listRooms();
         break;
       case "opponent-disconnected":
         set({ opponentConnected: false });
@@ -1542,6 +1558,7 @@ export const useStore = create<StoreState>((set, get) => {
       send({ type: "runechant-skip", enabled, ...roomCommand() });
     },
     sendEmote: (message: EmoteMessage) => send({ type: "emote", message }),
+    kickSpectator: (username) => send({ type: "kick-spectator", username }),
     undo: (target = "last-action") => {
       get().clearError();
       sendVersionedRoomCommand((command) => ({ type: "undo", target, ...command }));

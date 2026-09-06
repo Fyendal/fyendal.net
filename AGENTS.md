@@ -5,10 +5,11 @@ the boundaries below; they are release invariants, not suggestions.
 
 ## Architecture invariants
 
-- Production may run multiple Cloud Run instances. Live sockets and their
-  delivery bindings remain local; durable matchmaking, leases, commands, and
-  compact cross-instance events live in Postgres. Fan-out polls the event log;
-  do not add `LISTEN`/`NOTIFY` or assume an external distributed queue.
+- Production runs as one active gateway, but it must remain safe to scale
+  across multiple processes or instances. Live sockets and their delivery
+  bindings remain local; durable matchmaking, leases, commands, and compact
+  cross-instance events live in Postgres. Fan-out polls the event log; do not
+  add `LISTEN`/`NOTIFY` or assume an external distributed queue.
 - Schema epoch 1 is the initial empty-database baseline. Unexpected application
   tables or another epoch fail with `RESET_REQUIRED`. Future changes append
   immutable migrations; never edit an applied migration.
@@ -224,4 +225,4 @@ pnpm release:check                  # significant engine/server changes only
 - Do not build browser bots, Playwright flows, or screenshot rigs; UI smoke
   testing is manual.
 - `pnpm --filter @fyendal/server seed` is local-only. Never weaken its
-  production, Cloud Run, or Cloud SQL guards.
+  production-environment or remote-database guards.

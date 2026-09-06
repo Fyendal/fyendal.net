@@ -20160,6 +20160,38 @@
       "value": " 人正在观战"
     }
   ],
+  "game.spectating.guest": [
+    {
+      "type": 0,
+      "value": "访客"
+    }
+  ],
+  "game.spectating.kickNamed": [
+    {
+      "type": 0,
+      "value": "将 "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " 移出房间"
+    }
+  ],
+  "game.spectating.kicked": [
+    {
+      "type": 0,
+      "value": "一名玩家已将你移出房间。"
+    }
+  ],
+  "game.spectating.list": [
+    {
+      "type": 0,
+      "value": "观战者"
+    }
+  ],
   "game.spectating.live": [
     {
       "type": 0,
@@ -23555,7 +23587,7 @@
   "settings.soundEffects.tooltip": [
     {
       "type": 0,
-      "value": "抽牌、洗牌或打出卡牌时播放轻微音效。"
+      "value": "播放轻微的卡牌音效；当游戏未获焦点且优先权回到你时发出提醒。"
     }
   ],
   "settings.title": [

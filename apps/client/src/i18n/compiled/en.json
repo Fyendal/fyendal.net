@@ -20954,6 +20954,38 @@
       "value": " spectating"
     }
   ],
+  "game.spectating.guest": [
+    {
+      "type": 0,
+      "value": "Guest"
+    }
+  ],
+  "game.spectating.kickNamed": [
+    {
+      "type": 0,
+      "value": "Remove "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    },
+    {
+      "type": 0,
+      "value": " from the room"
+    }
+  ],
+  "game.spectating.kicked": [
+    {
+      "type": 0,
+      "value": "A player removed you from the room."
+    }
+  ],
+  "game.spectating.list": [
+    {
+      "type": 0,
+      "value": "Spectators"
+    }
+  ],
   "game.spectating.live": [
     {
       "type": 0,
@@ -24665,7 +24697,7 @@
   "settings.soundEffects.tooltip": [
     {
       "type": 0,
-      "value": "Plays subtle sounds when cards are drawn, shuffled, or played."
+      "value": "Plays subtle card sounds and alerts you when priority returns while the game is out of focus."
     }
   ],
   "settings.title": [

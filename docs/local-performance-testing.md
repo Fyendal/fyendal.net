@@ -1,17 +1,17 @@
 # Local capacity testing
 
-This profile measures the horizontally scaled production architecture with two
+This profile measures the application's multi-gateway architecture with two
 real server gateways, PostgreSQL 16, and protocol-level WebSocket clients. It
 is isolated from the normal development and self-host stacks: the database is
 named `fyendal_perf`, binds only to localhost on port `55432`, and uses its own
 Docker volume.
 
-It is a repeatable preflight, not an exact Cloud SQL emulator. Docker can bound
-CPU, memory, connections, and network delay. It cannot reproduce shared-core
-scheduling, managed storage, Cloud SQL maintenance, or Google Cloud network
-jitter. The harness intentionally accepts only localhost application and
-database endpoints; use a separate, explicitly non-production load plan for a
-managed-environment capacity check.
+It is a repeatable preflight, not an exact production-environment emulator.
+Docker can bound CPU, memory, connections, and network delay. It cannot
+reproduce managed-database scheduling, storage, maintenance, or production
+network jitter. The harness intentionally accepts only localhost application
+and database endpoints; use a separate, explicitly non-production load plan
+for a managed-environment capacity check.
 
 ## Default profile
 
@@ -20,7 +20,8 @@ managed-environment capacity check.
 - 192 MB PostgreSQL shared-buffer cache
 - 40 maximum PostgreSQL connections (two 5-connection gateway pools plus the harness)
 - 2 ms one-way application-to-database delay, approximately 4 ms round trip
-- two gateways, each with 1 CPU and 768 MiB, matching the launch Cloud Run shape
+- two gateways, each with 1 CPU and 768 MiB, exercising cross-gateway behavior
+  with an intentionally constrained test profile
 - 200 active games, 400 authenticated player sockets, and 10 spectators
 - every game's players deliberately connected to different gateways
 - 10 games created through simultaneous cross-gateway durable matchmaking
@@ -118,7 +119,7 @@ PERF_APP_CPUS=2.0 PERF_APP_MEMORY=1g pnpm perf:up
 `PERF_DB_MAX_CONNECTIONS` and `PERF_DB_SHARED_BUFFERS` can be set to values
 read from the target instance's `pg_settings`. Recreate the stack between
 resource shapes. Set the proxy delay to zero for a same-host baseline or
-adjust it to a measured one-way Cloud SQL value:
+adjust it to a measured one-way production-database value:
 
 ```sh
 PERF_DB_ONE_WAY_DELAY_MS=0 pnpm perf:up

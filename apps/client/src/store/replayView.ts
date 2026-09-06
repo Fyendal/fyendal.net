@@ -11,6 +11,7 @@ export function snapshotBeforeReplay(state: StoreState): PreReplaySnapshot | nul
     yourSeat: state.yourSeat,
     spectating: state.spectating,
     spectatorCount: state.spectatorCount,
+    spectatorUsernames: state.spectatorUsernames,
     playerProfiles: state.playerProfiles,
   };
 }
@@ -33,6 +34,7 @@ export function replayViewerProjection(
     yourSeat: file.seat,
     spectating: true,
     spectatorCount: 0,
+    spectatorUsernames: [],
     playerProfiles: null,
     botGame: false,
     error: null,

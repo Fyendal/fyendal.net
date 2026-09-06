@@ -583,6 +583,12 @@ function applyEffectDamage(state: GameStateInternal,
       amount: packet.amount,
       life: target.life,
     },
+    packet.amount > 0 ? {
+      kind: "damage",
+      targetSeat: packet.targetSeat,
+      amount: packet.amount,
+      damageType: packet.arcane ? "arcane" : "physical",
+    } : undefined,
   ));
   if (packet.amount > 0 && packet.countsAsHit) {
     // A hit by any object during a chain link makes the active chain link

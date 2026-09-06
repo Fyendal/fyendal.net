@@ -5,18 +5,24 @@ import { detectDeckCardEvents } from "../deckCardEvents.js";
 import { classifyViewUpdate } from "../motion/classifyViewUpdate.js";
 import { detectGameMotionEvents } from "../motion/detectMotionEvents.js";
 import { GameAudioPlayer } from "./gameAudioPlayer.js";
-import { gameSoundCuesForEvents } from "./gameSoundCues.js";
+import {
+  damageSoundCuesForViews,
+  gameSoundCuesForEvents,
+  prioritySoundCueForViews,
+} from "./gameSoundCues.js";
 
 export function useGameSounds({
   view,
   viewUpdate,
   enabled,
   volume,
+  seat,
 }: {
   view: GameView | null;
   viewUpdate: ViewUpdate;
   enabled: boolean;
   volume: number;
+  seat: number | null;
 }): void {
   const playerRef = useRef<GameAudioPlayer | null>(null);
   if (!playerRef.current) playerRef.current = new GameAudioPlayer();
@@ -53,10 +59,16 @@ export function useGameSounds({
     if (!enabled || !previous || !view) return;
     const classification = classifyViewUpdate(previous, view, viewUpdate);
     if (classification.kind !== "animate" || classification.direction !== "forward") return;
-    const cues = gameSoundCuesForEvents(
-      detectGameMotionEvents(previous, view),
-      detectDeckCardEvents(previous, view),
-    );
+    const attentionNeeded = document.visibilityState !== "visible" || !document.hasFocus();
+    const cues = [
+      ...gameSoundCuesForEvents(
+        detectGameMotionEvents(previous, view),
+        detectDeckCardEvents(previous, view),
+      ),
+      ...damageSoundCuesForViews(previous, view),
+      ...prioritySoundCueForViews(previous, view, seat, attentionNeeded),
+    ];
     playerRef.current?.play(cues);
-  }, [enabled, view, viewUpdate]);
+  }, [enabled, seat, view, viewUpdate]);
+
 }

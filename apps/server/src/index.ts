@@ -53,6 +53,7 @@ import {
   PLAY_REQUIRES_LOGIN,
   PRESENCE_HEARTBEAT_MS,
   prepViewFor,
+  spectatorListMessage,
   sweepRoomCommands,
   stateMessage,
   type RoomRow,
@@ -459,7 +460,13 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
 
   async function markAttachedPresent(ctx: ClientCtx): Promise<number> {
     if (!ctx.code || !ctx.token || !ctx.presenceLeaseId) throw new Error("socket is not attached");
-    const presence = await rooms.markPresent(ctx.code, ctx.token, ctx.presenceLeaseId, ctx.seat);
+    const presence = await rooms.markPresent(
+      ctx.code,
+      ctx.token,
+      ctx.presenceLeaseId,
+      ctx.seat,
+      ctx.user?.id,
+    );
     if (!presence) throw new Error("room membership disappeared during attach");
     return presence.version;
   }
@@ -525,7 +532,14 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
   /** Return the seat this socket is currently authorized to view. Undefined
    * means a formerly privileged socket has been superseded and was detached. */
   function authorizedProjectionSeat(room: RoomRow, ctx: ClientCtx): number | null | undefined {
-    if (ctx.seat === null) return null;
+    if (ctx.seat === null) {
+      if (ctx.token && room.spectators.some(
+        (spectator) => spectator.tokenHash === hashReconnectToken(ctx.token!),
+      )) return null;
+      ctx.send({ type: "spectator-kicked" });
+      connections.detach(ctx);
+      return undefined;
+    }
     if (!ctx.token) return undefined;
     const seat = room.seats[ctx.seat];
     const accountMatches = seat?.userId == null || seat.userId === ctx.user?.id;
@@ -829,8 +843,9 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           send(ws, { type: "error", message: ALREADY_IN_ROOM });
           return;
         }
-        // player seats (new or seat-token reconnect) require an account;
-        // spectator joins stay anonymous
+        // Player seats (new or seat-token reconnect) require an account.
+        // Guests may still spectate; authenticated spectators expose only
+        // their public username through the live presence projection.
         let deckName: string | undefined;
         if (msg.deckId) {
           if (!ctx.user) {
@@ -865,6 +880,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           const room = await rooms.getRoom(code);
           const state = room ? stateMessage(room, null) : null;
           if (state) send(ws, state);
+          if (room) send(ws, spectatorListMessage(room));
           await publishRoomEvent({ code, kind: "spectators", version });
           return;
         }
@@ -880,6 +896,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           const room = await rooms.getRoom(code);
           const state = room ? stateMessage(room, r.seat) : null;
           if (state) send(ws, state);
+          if (room) send(ws, spectatorListMessage(room));
           // reconnecting into a prep room restores the prep screen
           if (room && !room.state && r.seat !== null) {
             send(ws, { type: "prep-state", prep: prepViewFor(room, r.seat), version: room.version });
@@ -1256,6 +1273,17 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         await publishClusterEvent({ type: "emote", code: player.code, seat: senderSeat, message: msg.message });
         return;
       }
+      case "kick-spectator": {
+        const player = requirePlayer(ws, ctx);
+        if (!player) return;
+        const kicked = await rooms.kickSpectator(player.code, player.credentials, msg.username);
+        if (!kicked.ok) {
+          send(ws, { type: "error", message: kicked.error });
+          return;
+        }
+        await publishRoomEvent({ code: player.code, kind: "spectators", version: kicked.version });
+        return;
+      }
       case "claim-victory": {
         const player = requirePlayer(ws, ctx);
         if (!player) return;
@@ -1457,7 +1485,13 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
     const heartbeat = setInterval(() => {
       const leases = [...allClients].flatMap((c) =>
         c.code && c.token && c.presenceLeaseId
-          ? [{ code: c.code, token: c.token, leaseId: c.presenceLeaseId, seat: c.seat }]
+          ? [{
+              code: c.code,
+              token: c.token,
+              leaseId: c.presenceLeaseId,
+              seat: c.seat,
+              ...(c.user?.id === undefined ? {} : { userId: c.user.id }),
+            }]
           : [],
       );
       void Promise.all([

@@ -69,7 +69,7 @@ function client(): Promise<{
 }
 
 type Client = Awaited<ReturnType<typeof client>>;
-type AuthedClient = Client & { authToken: string };
+type AuthedClient = Client & { authToken: string; username: string };
 
 /**
  * Classic-battles prep over ws: the die winner chooses first, then both seats
@@ -129,7 +129,7 @@ async function authedClient(): Promise<AuthedClient> {
   c.sendMsg({ type: "auth", token: l.token });
   const authed = await c.next((m) => m.type === "authed");
   expect(authed).toMatchObject({ type: "authed", username });
-  return { ...c, authToken: l.token };
+  return { ...c, authToken: l.token, username };
 }
 
 describe("auth gating", () => {
@@ -970,6 +970,7 @@ describe("server rooms over websocket", () => {
       { type: "spectators" }
     >;
     expect(specMsg.count).toBe(1);
+    expect(await a.next((m) => m.type === "spectator-list")).toMatchObject({ usernames: [null] });
 
     // spectators cannot act
     s.sendMsg({ type: "intent", intent: { kind: "pass" } });
@@ -978,6 +979,9 @@ describe("server rooms over websocket", () => {
       { type: "error" }
     >;
     expect(err.message).toBeTruthy();
+
+    s.sendMsg({ type: "kick-spectator", username: a.username });
+    expect(await s.next((m) => m.type === "error")).toMatchObject({ code: "FORBIDDEN" });
 
     // spectator leaving updates the count
     s.ws.close();
@@ -989,6 +993,40 @@ describe("server rooms over websocket", () => {
     a.ws.close();
     b.ws.close();
     otherHost.ws.close();
+  });
+
+  it("lists named spectators and lets a player remove them", async () => {
+    const a = await authedClient();
+    a.sendMsg({ type: "create-room", format: "classic-battles", hero: "dorinthea" });
+    const created = await a.next((message) => message.type === "room-created") as Extract<
+      ServerMessage,
+      { type: "room-created" }
+    >;
+    const b = await authedClient();
+    b.sendMsg({ type: "join-room", code: created.code });
+    await startCbGameOverWs(a, b);
+
+    const spectator = await authedClient();
+    spectator.sendMsg({ type: "join-room", code: created.code, spectate: true });
+    await spectator.next((message) => message.type === "joined");
+    await spectator.next((message) => message.type === "state");
+    expect(await a.next((message) => message.type === "spectators")).toMatchObject({ count: 1 });
+    expect(await a.next((message) =>
+      message.type === "spectator-list" && message.usernames.includes(spectator.username)
+    )).toMatchObject({ usernames: [spectator.username] });
+
+    a.sendMsg({ type: "kick-spectator", username: spectator.username });
+    expect(await spectator.next((message) => message.type === "spectator-kicked"))
+      .toEqual({ type: "spectator-kicked" });
+    const empty = await a.next((message) => message.type === "spectators" && message.count === 0) as Extract<
+      ServerMessage,
+      { type: "spectators" }
+    >;
+    expect(await a.next((message) => message.type === "spectator-list")).toMatchObject({ usernames: [] });
+
+    a.ws.close();
+    b.ws.close();
+    spectator.ws.close();
   });
 
   it("a swept room kicks its local clients with 'room not found'", async () => {

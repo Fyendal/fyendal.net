@@ -17,7 +17,8 @@ function errorCodeFor(message: string): ErrorCode {
   if (message.includes("presentation") || message.includes("main deck") || message.includes("weapon")) {
     return "INVALID_PRESENTATION";
   }
-  if (message.includes("not a player") || message.includes("spectators cannot")) return "FORBIDDEN";
+  if (message.includes("not a player") || message.includes("spectators cannot")
+    || message.includes("not a spectator") || message.includes("only spectators")) return "FORBIDDEN";
   return "CONFLICT";
 }
 
