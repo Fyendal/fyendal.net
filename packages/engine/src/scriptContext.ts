@@ -377,6 +377,14 @@ export function makeCtx(
       ...(presentation.optionMessages ? { optionMessages: presentation.optionMessages } : {}),
       options,
       sourceInstanceId: self.instanceId,
+      ...(!findCardAnywhere(state, self.instanceId)
+        ? {
+            scriptSourceSnapshot: {
+              seat,
+              card: runtime.commands.snapshotSerializable(self),
+            },
+          }
+        : {}),
       chooseHook: hook,
       ...(tokenCreationCause.kind !== "effect" || tokenCreationCause.sourceCardId !== self.cardId
         ? { tokenCreationCause }

@@ -354,6 +354,7 @@ export interface PersistedPendingDecisionV1 {
   optionMessages?: (GameMessage | null)[];
   optionCounts?: (number | null)[];
   sourceInstanceId?: number;
+  scriptSourceSnapshot?: { seat: number; card: PersistedCardInstanceV1 };
   chooseHook?: string;
   followUpDecisions?: PersistedPendingDecisionV1[];
   tokenCreationCause?: { kind: "effect" | "wager"; sourceCardId?: string };
@@ -1184,7 +1185,7 @@ function validateResume(value: unknown, code: string, path: string): void {
 
 function validateDecision(value: unknown, code: string, path: string, depth = 0): void {
   if (depth > 16) fail(code, path, "follow-up decision nesting is too deep");
-  const decision = exact(value, code, path, ["player", "kind", "prompt"], ["promptMessage", "options", "minimumSelections", "maximumSelections", "defaultOption", "optionLabels", "optionMessages", "optionCounts", "sourceInstanceId", "chooseHook", "followUpDecisions", "tokenCreationCause", "cardOptions", "revealedCardIds", "lookedCardIds", "payment", "resourcePayment", "xPayment", "variablePlayCost", "variableActivationCost", "tokenCreationReplacement", "tokenCreationReplacementOrder", "wagerLossReplacementOrder", "activationCost", "clash", "arcane", "triggerOrder", "deckBottomOrder", "dieRoll", "staged", "resume"]);
+  const decision = exact(value, code, path, ["player", "kind", "prompt"], ["promptMessage", "options", "minimumSelections", "maximumSelections", "defaultOption", "optionLabels", "optionMessages", "optionCounts", "sourceInstanceId", "scriptSourceSnapshot", "chooseHook", "followUpDecisions", "tokenCreationCause", "cardOptions", "revealedCardIds", "lookedCardIds", "payment", "resourcePayment", "xPayment", "variablePlayCost", "variableActivationCost", "tokenCreationReplacement", "tokenCreationReplacementOrder", "wagerLossReplacementOrder", "activationCost", "clash", "arcane", "triggerOrder", "deckBottomOrder", "dieRoll", "staged", "resume"]);
   integer(decision.player, code, `${path}.player`);
   oneOf(decision.kind, ["defend", "attack-reaction", "defense-reaction", "priority-window", "arsenal", "choose-target", "choose-name", "order-triggers", "optional-effect"] as const, code, `${path}.kind`);
   string(decision.prompt, code, `${path}.prompt`);
@@ -1241,6 +1242,11 @@ function validateDecision(value: unknown, code: string, path: string, depth = 0)
         fail(code, `${p}[${index}]`, `expected null or an integer from 2 to ${MAX_TRIGGER_COUNT}`);
       }
     });
+  }, path);
+  optional(decision, "scriptSourceSnapshot", (v, p) => {
+    const source = exact(v, code, p, ["seat", "card"]);
+    integer(source.seat, code, `${p}.seat`);
+    validateCard(source.card, code, `${p}.card`);
   }, path);
   if (
     Array.isArray(decision.options) &&

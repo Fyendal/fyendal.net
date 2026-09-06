@@ -144,6 +144,28 @@ describe("PEN — import and set mechanics", () => {
     expect(g.state.players[0]!.board.filter((card) => functionalKeyOf(cardData[card.cardId]!) === "embodiment of earth|0")).toHaveLength(3);
   });
 
+  it("Sigil of Fate can put the opted card on the bottom after the token ceases to exist", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          board: ["sigil of fate|0"],
+          hand: ["dodge|3", "dodge|3", "dodge|3", "dodge|3"],
+          deck: ["sigil of solace|1", "head jab|1"],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.endTurn();
+    expect(g.state.pendingDecision?.prompt).toContain("Opt 1");
+    g.chooseOption("bottom")
+      .expectDeckTop(0, "head jab|1")
+      .expectDeckBottom(0, "sigil of solace|1");
+  });
+
   it("Rip Off the Top pitches a random card without asking the player to choose", () => {
     const g = scenario({
       seed: 1,

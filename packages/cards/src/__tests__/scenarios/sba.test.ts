@@ -452,6 +452,29 @@ describe("SBA — weapons", () => {
       .expectAP(0, 1); // go again
   });
 
+  it("Star Fall gains +1{p} and go again when a Lightning instant is played during reactions", () => {
+    const g = scenario({
+      seats: [
+        {
+          ...briar,
+          weapons: ["star fall|0"],
+          hand: ["electrostatic discharge|1", "wrecker romp|3"],
+        },
+        { hero: "rhinar", hand: [] },
+      ],
+    });
+
+    g.attackWithWeapon("star fall|0", { pitch: ["wrecker romp|3"] })
+      .expectAttackValue(1)
+      .blockWith()
+      .react("electrostatic discharge|1", { settle: false })
+      .expectAttackValue(2)
+      .settle()
+      .expectFinalAttack(2)
+      .expectLife(1, 18)
+      .expectAP(0, 1);
+  });
+
   it("Star Fall is a plain 1{p} attack without a Lightning card played", () => {
     const g = scenario({
       seats: [

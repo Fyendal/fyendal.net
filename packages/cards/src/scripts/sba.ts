@@ -185,6 +185,11 @@ export const sba: Record<string, CardScript> = {
       ctx.grantGoAgain();
       ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: +1{p} and go again (played a Lightning card this turn)`, "card.log.sba.starfall.lightning", { amount: 1 }));
     },
+    onFriendlyPlay(ctx, played) {
+      if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId) return;
+      if (!ctx.cardTypes(played).includes("lightning")) return;
+      ctx.grantGoAgain();
+    },
   },
 
   // Blade Beckoner Helm / Gauntlets / Boots — +1{d} while defending a weapon

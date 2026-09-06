@@ -98,6 +98,39 @@ describe("Blood Debt and Rune Gate", () => {
       .expectInZone(0, "eloquence|0", "board");
   });
 
+  it("Eloquent Eulogy's Eloquence triggers on the non-attack that closes its chain", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["mauvrion skies|1", "deadwood dirge|3"],
+          banish: ["eloquent eulogy|1"],
+          board: ["runechant|0"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("mauvrion skies|1")
+      .play("eloquent eulogy|1", { fromZone: "banish" })
+      .blockWith()
+      .settle();
+    const eloquenceInstanceId = g.state.nextInstanceId;
+
+    g.play("deadwood dirge|3")
+      .expectNotInZone(0, "eloquence|0", "board");
+
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "dirge-aura",
+      cardOptions: expect.arrayContaining(
+        g.state.players[0]!.board
+          .filter((card) => card.cardId === printingId("runechant|0"))
+          .map((card) => card.instanceId),
+      ),
+    });
+    expect(g.state.pendingDecision?.cardOptions).not.toContain(eloquenceInstanceId);
+  });
+
   it("Blood Debt does not replace an attack's normal move to graveyard", () => {
     const g = scenario({
       seats: [

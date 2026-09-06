@@ -98,6 +98,12 @@ describe("PersistedStateV1", () => {
       },
       options: ["yes", "no"],
       optionMessages: [{ id: "common.option.yes" }, { id: "common.option.no" }],
+      sourceInstanceId: source.players[0]!.hero.instanceId,
+      scriptSourceSnapshot: {
+        seat: 0,
+        card: jsonCopy(source.players[0]!.hero),
+      },
+      chooseHook: "test-choice",
     };
 
     const encoded = encodePersistedState(source);
