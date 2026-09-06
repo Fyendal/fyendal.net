@@ -124,6 +124,30 @@ describe("HNT — opposing hand reveals", () => {
 });
 
 describe("HNT — marked heroes and daggers", () => {
+  it("Fire and Brimstone clears to graveyard while its combat-chain effect persists", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          heroKey: "fang|0",
+          weapons: ["obsidian fire vein|0"],
+          resources: 3,
+          hand: ["fire and brimstone|1"],
+        },
+        { hero: "rhinar" },
+      ],
+    });
+
+    g.attackWithWeapon("obsidian fire vein|0")
+      .blockWith()
+      .react("fire and brimstone|1")
+      .expectInZone(0, "fire and brimstone|1", "graveyard")
+      .attackWithWeapon("obsidian fire vein|0", { settle: false })
+      .expectAttackValue(2);
+
+    expect(g.state.chain[0]!.reactions).toEqual([]);
+  });
+
   it("Quickdodge Flexors has 2 base defense on each chain link without stacking", () => {
     const g = scenario({
       seats: [

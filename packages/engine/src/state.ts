@@ -319,7 +319,8 @@ export interface ChainLinkState {
   defendingCards: CardInstance[];
   /** Equipment used to defend (Blade Break destroyed at resolution) */
   defendingEquipment: CardInstance[];
-  /** Reaction cards played onto this link */
+  /** Legacy attack-reaction cards retained by older persisted states. New
+   * attack-reaction card-layers clear to graveyard when they resolve. */
   reactions: CardInstance[];
   /** Last-known sources of activated attack/defense reaction abilities that
    *  resolved on this link. Display provenance only: unlike reaction cards,
