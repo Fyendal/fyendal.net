@@ -522,6 +522,34 @@ describe("SEA — High Seas heroes and cogs", () => {
       .expectFaceDown(0, "rusty harpoon|3", false);
   });
 
+  it("Marlynn may use New Horizon's additional arsenal zone after drawing an arrow", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "marlynn|0",
+          board: ["gold|0"],
+          equipment: { head: "new horizon|0" },
+          arsenal: ["red fin harpoon|3"],
+          resources: 2,
+          deck: ["rusty harpoon|3"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.activate("gold|0", { settle: false })
+      .passPriority()
+      .passPriority();
+
+    expect(g.state.pendingDecision?.chooseHook).toBe("marlynn-arrow");
+    g.chooseCard("rusty harpoon|3")
+      .expectInZone(0, "red fin harpoon|3", "arsenal")
+      .expectInZone(0, "rusty harpoon|3", "arsenal")
+      .expectFaceDown(0, "rusty harpoon|3", false);
+    expect(g.state.players[0]!.arsenal).toHaveLength(2);
+  });
+
   it("Rust Belt taps a cog as an effect cost before gaining a resource", () => {
     const g = scenario({
       seats: [
@@ -906,6 +934,44 @@ describe("SEA — pirate and generic attacks", () => {
 });
 
 describe("SEA — rules regression coverage", () => {
+  it("Hammerhead gives overpower only to its next arrow with Harpoon in its name", () => {
+    const batteringBolt = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["hammerhead, harpoon cannon|0"],
+          arsenal: ["battering bolt|1"],
+          resources: 6,
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    batteringBolt
+      .activate("hammerhead, harpoon cannon|0")
+      .play("battering bolt|1", { fromArsenal: true })
+      .expectAttackValue(10);
+    expect(projectStateFor(batteringBolt.state, 0).chain.at(-1)?.overpower).toBe(false);
+
+    const rustyHarpoon = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["hammerhead, harpoon cannon|0"],
+          arsenal: ["rusty harpoon|3"],
+          resources: 4,
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    rustyHarpoon
+      .activate("hammerhead, harpoon cannon|0")
+      .play("rusty harpoon|3", { fromArsenal: true })
+      .expectAttackValue(5);
+    expect(projectStateFor(rustyHarpoon.state, 0).chain.at(-1)?.overpower).toBe(true);
+  });
+
   it("Treasure Island starts and functions without a High Seas hero", () => {
     const g = scenario({
       globals: ["treasure island|0"],

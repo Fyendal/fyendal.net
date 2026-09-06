@@ -76,6 +76,28 @@ describe("SKA — Kayo and equipment", () => {
       .expectNoEquipment(0, "chest")
       .expectResources(0, 1);
   });
+
+  it("Predatory Plating uses the current power of Kayo's attack", () => {
+    const g = scenario({
+      seats: [
+        {
+          ...kayo,
+          board: ["might|0"],
+          hand: ["strongest survive|3", "agile windup|3"],
+          equipment: { chest: "predatory plating|0" },
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+
+    g.endTurn()
+      .endTurn()
+      .play("strongest survive|3", { pitch: ["agile windup|3"], settle: false })
+      .expectAttackValue(6)
+      .activate("predatory plating|0")
+      .expectNoEquipment(0, "chest")
+      .expectResources(0, 1);
+  });
 });
 
 describe("SKA — attacks and clashes", () => {

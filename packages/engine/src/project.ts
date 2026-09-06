@@ -494,15 +494,17 @@ function projectedOnHitEffects(
 ): NonNullable<ChainLinkView["onHitEffects"]> {
   return pendingOnHitEffects(state, runtime, link).flatMap((effect) => {
     if (effect.kind === "hook") {
-      return effect.rulesCardIds.map((cardId) => {
-        const text = printedOnHitText(state, cardId);
-        const impact = projectedOnHitImpact(text);
-        return {
-          sourceCardId: cardId,
-          text,
-          ...(impact ? { impact } : {}),
-        };
-      });
+      return Array.from({ length: effect.triggerCount }, () =>
+        effect.rulesCardIds.map((cardId) => {
+          const text = printedOnHitText(state, cardId);
+          const impact = projectedOnHitImpact(text);
+          return {
+            sourceCardId: cardId,
+            text,
+            ...(impact ? { impact } : {}),
+          };
+        })
+      ).flat();
     }
     const source = findCardAnywhere(state, effect.modifier.sourceInstanceId);
     const secret = !source || (

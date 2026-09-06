@@ -424,6 +424,7 @@ function yellowDiscardAttack(hook: string): CardScript {
 function goFish(color: 1 | 2 | 3): CardScript {
   return {
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
+    onHitTriggerCount: (ctx) => ctx.getFlag("player", "doubleGoFish") === true ? 2 : 1,
     onHit(ctx) {
       const target = opponentSeat(ctx);
       const hand = ctx.player(target).hand;
@@ -793,7 +794,7 @@ export const sea: Record<string, CardScript> = {
     onFriendlyDraws(ctx) {
       if (ctx.state.activePlayer !== ctx.seat || ctx.state.phase === "start" || ctx.state.phase === "end" || ctx.state.phase === "game-over") return;
       const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card));
-      if (!ctx.player(ctx.seat).arsenal.length && arrows.length) ctx.requestCardChoice(
+      if (ctx.hasArsenalSpace() && arrows.length) ctx.requestCardChoice(
         "marlynn-arrow",
         decisionPrompt(
           "Marlynn: put an arrow face-up into your arsenal?",
@@ -1449,6 +1450,7 @@ function dealSeaTarget(ctx: ScriptCtx, option: string, amount: number, arcane = 
 function kingHarpoon(kind: "attack" | "non-attack"): CardScript {
   return {
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
+    onHitTriggerCount: (ctx) => ctx.getFlag("player", "doubleGoFish") === true ? 2 : 1,
     onHit(ctx) {
       const target = opponentSeat(ctx); const hand = ctx.player(target).hand;
       if (!hand.length) return;
@@ -1587,7 +1589,22 @@ Object.assign(sea, {
   "wailer humperdinck|2": attackAbilityForAlly(6),
   "dead threads|0": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", tap: true, canActivate: (ctx: ScriptCtx) => ctx.getFlag("player", "graveSubtype:ally") === true, onActivate(ctx: ScriptCtx) { ctx.changeResources(ctx.seat, 1); } } },
   "marlynn, treasure hunter|0": sea["marlynn|0"]!,
-  "hammerhead, harpoon cannon|0": { activated: { cost: 4, isAttack: false, goAgain: true, tap: true, onActivate(ctx: ScriptCtx) { buffNextAttack(ctx, { attack: 4, appliesToSubtype: "arrow", overpower: true }); ctx.setFlag("player", "activatedCannonThisTurn", true); } } },
+  "hammerhead, harpoon cannon|0": {
+    activated: {
+      cost: 4,
+      isAttack: false,
+      goAgain: true,
+      tap: true,
+      onActivate(ctx: ScriptCtx) {
+        buffNextAttack(ctx, {
+          attack: 4,
+          appliesToSubtype: "arrow",
+          overpowerIfNameContains: "harpoon",
+        });
+        ctx.setFlag("player", "activatedCannonThisTurn", true);
+      },
+    },
+  },
   "king kraken harpoon|1": kingHarpoon("non-attack"),
   "king shark harpoon|1": kingHarpoon("attack"),
   "big game trophy shot|2": {

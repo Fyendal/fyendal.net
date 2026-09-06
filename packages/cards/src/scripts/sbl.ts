@@ -1,4 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import { SHARPEN_FOLLOWUP, sharpenSword } from "./aha/warrior-sharpen.js";
 import { attackAbility, buffNextAttack, commonOptionMessages, decisionPrompt, localizedCardLog } from "./shared-helpers.js";
 
 // ── SBL (Silver Age: Boltyn precon) ─────────────────────────────────────────
@@ -38,6 +39,13 @@ function isLight(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
 
 function isSword(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.cardTypes(card).includes("sword");
+}
+
+function sharpenForEdict(ctx: ScriptCtx, instanceId: number): void {
+  sharpenSword(ctx, instanceId, 1, {
+    threshold: 1,
+    kind: SHARPEN_FOLLOWUP.SBL_FLURRY,
+  });
 }
 
 function chargedThisTurn(ctx: ScriptCtx): boolean {
@@ -372,7 +380,7 @@ export const sbl: Record<string, CardScript> = {
     onPlay(ctx) {
       const swords = ctx.player(ctx.seat).weapons.filter((w) => isSword(ctx, w));
       if (swords.length === 1 && swords[0]) {
-        sharpenSword(ctx, swords[0].instanceId);
+        sharpenForEdict(ctx, swords[0].instanceId);
         return;
       }
       ctx.requestCardChoice(
@@ -383,7 +391,7 @@ export const sbl: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "edict-sword") return;
-      sharpenSword(ctx, Number(option));
+      sharpenForEdict(ctx, Number(option));
     },
   },
 
@@ -503,25 +511,3 @@ export const sbl: Record<string, CardScript> = {
     ],
   },
 };
-
-/** Edict of Steel: a +1{p} counter on the sword, and a Flurry token when it
- *  ends up with 1 or more. */
-function sharpenSword(ctx: ScriptCtx, instanceId: number): void {
-  const extra = ctx.getFlag("player", "ahaExtraSharpen") === true ? 1 : 0;
-  if (extra) ctx.setFlag("player", "ahaExtraSharpen", false);
-  ctx.addCounter(instanceId, "power", 1 + extra);
-  ctx.setCardCounter(instanceId, "sharpenedTurn", ctx.state.turn);
-  ctx.setFlag(
-    "player",
-    "clearWeaponPowerCountersAtTurn",
-    ctx.state.activePlayer === ctx.seat ? ctx.state.turn : ctx.state.turn + 1,
-  );
-  const sword = ctx.player(ctx.seat).weapons.find((w) => w.instanceId === instanceId);
-  ctx.logPublic(localizedCardLog(
-    ctx,
-    `Edict of Steel: ${sword ? ctx.cardData(sword.cardId).name : "the sword"} gets ${1 + extra} +1{p} counter(s)`,
-    "card.log.sbl.edict.counters",
-    { amount: 1 + extra, target: sword ? { kind: "card", cardId: sword.cardId } : "the sword" },
-  ));
-  if ((sword?.counters?.power ?? 0) + 1 + extra >= 1) ctx.createToken(FLURRY);
-}

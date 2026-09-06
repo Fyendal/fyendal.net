@@ -703,7 +703,7 @@ Object.assign(ros, {
     meld: {
       leftName: "Vaporize",
       rightName: "Shock",
-      leftCardType: "action",
+      leftCardType: "instant",
       rightCardType: "instant",
     },
     arcaneDamageEffect: true,

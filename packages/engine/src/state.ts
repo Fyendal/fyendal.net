@@ -431,6 +431,9 @@ export interface Modifier {
   goAgain?: boolean;
   dominate?: boolean;
   overpower?: boolean;
+  /** Grant overpower only when one of the affected attack's effective names
+   * contains this normalized fragment. */
+  overpowerIfNameContains?: string;
   intimidate?: number;
   /** granted: matching attacks count as having this class/subtype in addition
    *  to their printed types ("your next attack is Draconic"); stamped on the

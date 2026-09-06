@@ -33,6 +33,55 @@ describe("SUP — heroes and the crowd", () => {
     expect(new Set(cards.map(functionalKeyOf))).toHaveLength(276);
   });
 
+  it("Catch of the Day makes a Go Fish effect create two triggered layers", () => {
+    const g = scenario({
+      seats: [
+        hero("marlynn, treasure hunter|0", {
+          weapons: ["hammerhead, harpoon cannon|0"],
+          hand: ["catch of the day|3", "blue fin harpoon|3"],
+          arsenal: ["king kraken harpoon|1"],
+        }),
+        foe({ hand: ["lead the charge|3", "head jab|1"] }),
+      ],
+    });
+
+    g.play("catch of the day|3")
+      .play("king kraken harpoon|1", {
+        fromArsenal: true,
+        pitch: ["blue fin harpoon|3"],
+      })
+      .blockWith()
+      .settle();
+
+    expect(g.state.pendingDecision).toMatchObject({
+      player: 1,
+      chooseHook: "king-non-attack",
+    });
+    expect(g.state.log.filter(
+      (entry) => entry.publicText?.includes("King Kraken Harpoon triggers: On hit"),
+    )).toHaveLength(2);
+
+    const nonAttack = g.state.players[1]!.hand.find(
+      (card) => card.cardId === printingId("lead the charge|3"),
+    )!;
+    g.doRaw({ kind: "choose", optionId: String(nonAttack.instanceId) });
+
+    expect(g.state.pendingDecision).toMatchObject({ kind: "priority-window" });
+    expect(g.state.stack).toHaveLength(1);
+
+    g.passPriority()
+      .passPriority();
+    expect(g.state.pendingDecision).toMatchObject({
+      player: 1,
+      chooseHook: "king-non-attack",
+    });
+
+    g.chooseCard("head jab|1");
+    expect(g.state.players[0]!.board.filter(
+      (card) => card.cardId === printingId("gold|0"),
+    )).toHaveLength(1);
+  });
+
   it("Battlefield Beacon chooses a token mode per soul banished this combat chain", () => {
     const yellow = "raging onslaught|2";
     const g = scenario({

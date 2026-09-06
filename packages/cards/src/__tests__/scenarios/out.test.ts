@@ -156,6 +156,32 @@ describe("OUT — registration and core mechanics", () => {
     s.play("toxicity|1").play("infect|1").blockWith().settle().expectLife(1, 12);
   });
 
+  it("Codex of Frailty makes an opponent with an empty arsenal recover and discard an attack", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["codex of frailty|2", BLUE],
+          graveyard: ["infect|1"],
+        },
+        {
+          hero: "dorinthea",
+          hand: [NON_ATTACK],
+          graveyard: ["the weakest link|1"],
+        },
+      ],
+    });
+
+    s.play("codex of frailty|2")
+      .chooseCard("infect|1")
+      .chooseCard("the weakest link|1")
+      .chooseCard(BLUE)
+      .chooseCard(NON_ATTACK)
+      .expectInZone(0, "infect|1", "arsenal")
+      .expectInZone(1, "the weakest link|1", "arsenal")
+      .expectInZone(1, NON_ATTACK, "graveyard");
+  });
+
   it("Hurl attributes its optional effect hit to the chosen dagger and destroys it", () => {
     const s = scenario({
       seats: [
@@ -338,6 +364,36 @@ describe("OUT — registration and core mechanics", () => {
 });
 
 describe("OUT — rules regression coverage", () => {
+  it.each([
+    ["Bonds of Ancestry", 4],
+    ["Bonds of Agony", 2],
+  ] as const)(
+    "Dishonor checks Retrace the Past named %s for its combo bonus",
+    (chosenName, expectedAttack) => {
+      const s = scenario({
+        seats: [
+          {
+            hero: "rhinar",
+            resources: 2,
+            hand: [
+              "surging strike|1",
+              "descendent gustwave|1",
+              "retrace the past|3",
+              "dishonor|3",
+            ],
+          },
+          { hero: "dorinthea" },
+        ],
+      });
+
+      s.play("surging strike|1").blockWith().settle()
+        .play("descendent gustwave|1").blockWith().settle()
+        .play("retrace the past|3").chooseName(chosenName).blockWith().settle()
+        .play("dishonor|3")
+        .expectAttackValue(expectedAttack);
+    },
+  );
+
   it.each(["Crazy Brew", "Crouching Tiger", "Moon Wish"])(
     "Mask of Many Faces can name %s",
     (chosenName) => {

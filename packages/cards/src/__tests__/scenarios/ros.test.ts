@@ -593,6 +593,31 @@ describe("ROS — Lightning and Runeblade", () => {
       .expectNotInZone(0, "succumb to temptation|2", "hand");
   });
 
+  it("Vaporize // Shock can meld during combat and destroy an aura after Shock resolves", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        { hero: "rhinar", hand: ["vaporize // shock|2"] },
+        { hero: "dorinthea", hand: ["snatch|1"], board: ["sigil of lightning|3"] },
+      ],
+    });
+
+    g.play("snatch|1")
+      .blockWith()
+      .passPriority()
+      .react("vaporize // shock|2", { meldSide: "both" })
+      .chooseOption("opposing hero");
+
+    expect(g.state.pendingDecision).toMatchObject({
+      player: 0,
+      chooseHook: "vaporize-aura",
+    });
+    g.chooseCard("sigil of lightning|3")
+      .expectLife(1, 19)
+      .expectInZone(1, "sigil of lightning|3", "graveyard")
+      .expectInZone(0, "vaporize // shock|2", "graveyard");
+  });
+
   it("Succumb to Temptation makes the next Runeblade attack-action hit discard", () => {
     const g = scenario({
       seats: [

@@ -546,6 +546,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   // Storm's continuous grant is represented on each Dragon ally so the
   // engine can enumerate the granted attack through legalIntents.
   "storm of sandikai|0": {},
+  "aether ashwing|0": { activated: dragonAttack() },
 
   // Hero
   "dromai|0": {
@@ -608,7 +609,8 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   },
   "kyloria|0": {
     activated: dragonAttack(),
-    canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
+    canTriggerOnHit: (ctx) => !!ctx.link && ctx.link.targetAllyId === undefined &&
+      ctx.link.attackingCard.instanceId === ctx.self.instanceId,
     onHit(ctx) {
       const items = ctx.player(opponentSeat(ctx)).board.filter((card) => hasSubtype(ctx, card, "item"));
       if (items.length === 0) {

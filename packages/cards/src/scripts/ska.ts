@@ -188,9 +188,9 @@ export const ska: Record<string, CardScript> = {
           ...player.weapons,
           ...Object.values(player.equipment).filter((card) => card !== undefined),
           ...player.board,
-          ...(current?.attacker === ctx.seat ? [current.attackingCard] : []),
         ];
-        return controlled.some((card) => isSixPlus(ctx, card));
+        return controlled.some((card) => ctx.currentPower(card) >= 6) ||
+          (current?.attacker === ctx.seat && ctx.currentAttackPower() >= 6);
       },
       onActivate(ctx) {
         ctx.changeResources(ctx.seat, 1);
