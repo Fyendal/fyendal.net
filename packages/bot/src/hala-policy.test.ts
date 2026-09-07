@@ -169,6 +169,7 @@ describe("Hala policy", () => {
     });
     expect(opening).toEqual({ kind: "pass" });
     state = apply(state, 0, opening);
+    state = apply(state, 1, { kind: "pass" });
 
     const arsenal = chooseHalaIntent({
       seat: 0,
@@ -199,6 +200,7 @@ describe("Hala policy", () => {
     });
     expect(opening).toEqual({ kind: "pass" });
     state = apply(state, 0, opening);
+    state = apply(state, 1, { kind: "pass" });
 
     const arsenal = chooseHalaIntent({
       seat: 0,
@@ -1490,8 +1492,7 @@ describe("Hala policy", () => {
       { kind: "close-chain" },
       { kind: "pass" },
     ]);
-    expect(decision.plan?.evaluation.projectedSwordAttacks).toBe(2);
-    expect(decision.plan?.evaluation.flurryAttackValue).toBeGreaterThanOrEqual(5);
+    expect(decision.plan?.evaluation.damage).toBe(12);
     expect(decision.plan?.nodes).toBeLessThanOrEqual(72);
     expect(decision.plan?.transitions).toBeLessThanOrEqual(192);
     expect(decision.plan?.candidateTrace.rootPrepared).toBeLessThanOrEqual(5);

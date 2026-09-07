@@ -224,13 +224,22 @@ function hyperDriver(steam: number): CardScript {
   return {
     destroyAtZeroCounter: "steam",
     onEnterArena(ctx) { ctx.setCounter("steam", steam); },
-    onBoosted(ctx) {
-      const key = `hyperDriverBoost:${ctx.self.instanceId}`;
-      if (ctx.getFlag("player", key) === true || ctx.getCounter("steam") <= 0) return;
-      ctx.setFlag("player", key, true);
-      ctx.setCounter("steam", ctx.getCounter("steam") - 1);
-      ctx.changeResources(ctx.seat, 1);
-    },
+    triggers: [{
+      event: "card-boosted",
+      label: "Remove a steam counter and gain 1 resource",
+      labelMessage: decisionMessage("card.trigger.hyperdriver.boost"),
+      condition(ctx) {
+        return ctx.getFlag("player", `hyperDriverBoost:${ctx.self.instanceId}`) !== true &&
+          ctx.getCounter("steam") > 0;
+      },
+      onTrigger(ctx) { ctx.setFlag("player", `hyperDriverBoost:${ctx.self.instanceId}`, true); },
+      effect(ctx) {
+        const steam = ctx.getCounter("steam");
+        if (steam <= 0) return;
+        ctx.setCounter("steam", steam - 1);
+        ctx.changeResources(ctx.seat, 1);
+      },
+    }],
   };
 }
 
@@ -427,7 +436,7 @@ function tranquilPassing(maxCost: number): CardScript {
 export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRarity, {
   // Its Construct target is outside this C/R import; keeping Material here
   // avoids treating its +1 power grant as vanilla behavior.
-  "galvanic bender|0": {},
+  "galvanic bender|0": { materialPower: 1 },
 
   // Heroes
   "arakni|0": {

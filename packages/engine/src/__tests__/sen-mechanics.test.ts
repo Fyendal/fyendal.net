@@ -346,7 +346,8 @@ describe("chi points", () => {
     let s = makeGame();
     player(s, 0).chi = 2;
     player(s, 0).resources = 1;
-    s = apply(s, 0, { kind: "pass" }); // end phase
+    s = apply(s, 0, { kind: "pass" });
+    s = apply(s, 1, { kind: "pass" }); // end phase after both players pass
     if (s.pendingDecision?.kind === "arsenal") {
       s = apply(s, s.pendingDecision.player, { kind: "pass" });
     }
@@ -904,6 +905,7 @@ describe("cloaked", () => {
     expect(player(s, 1).life).toBe(21);
     // face up now: it can defend and its ward functions
     s = apply(s, 1, { kind: "pass" });
+    s = apply(s, 0, { kind: "pass" });
     if (s.pendingDecision?.kind === "arsenal") s = apply(s, s.pendingDecision.player, { kind: "pass" });
     expect(s.activePlayer).toBe(0);
     s = declareAttack(s, 0, "ATK5");

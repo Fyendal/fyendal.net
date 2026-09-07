@@ -247,7 +247,7 @@ function anyWindowAbility(
         discardCostOptions(state, player, ability)
           .filter((candidate) => candidate.instanceId !== card.instanceId).length < ability.discardCost.count
       ) continue;
-      if (!canPayActivatedEffectCardCosts(state, player, ability)) continue;
+      if (!canPayActivatedEffectCardCosts(state, player, card, ability)) continue;
       return true;
     }
   }
@@ -440,29 +440,21 @@ export function passWindow(state: GameStateInternal,
 }
 
 /**
- * The turn-player's empty-stack pass does not end the action phase by itself:
- * every other player must also pass in succession (CR 4.3.4). Open the
- * opponent's priority window when they have an instant-speed play candidate;
- * otherwise the caller may advance directly to the end phase. Candidate
- * discovery deliberately ignores resource affordability so it matches the
- * actions the client presents and does not auto-pass underneath one of them.
+ * The turn-player's empty-stack pass gives priority to the opponent. Once
+ * both players pass, the pending continuation either closes a resolved combat
+ * chain (CR 7.6.4) or ends the Action Phase (CR 4.3.4). Even an empty window
+ * must be represented here: whether to take the ordinary gameplay shortcut
+ * and auto-pass it is a player preference enforced by the server, not a rules
+ * decision for the engine.
  */
 export function offerEndActionPriority(
   state: GameStateInternal,
-  runtime: EngineRuntime,
   passingSeat: number,
-): boolean {
+): void {
   const nextSeat = opponent(passingSeat);
-  if (
-    windowInstantPlays(state, runtime, nextSeat, true).length === 0 &&
-    !anyWindowAbility(state, runtime, nextSeat, true)
-  ) {
-    return false;
-  }
   state.stackResume = "end-action-phase";
   // The turn-player's pass is already the first consecutive pass.
   openWindow(state, nextSeat, 1);
-  return true;
 }
 
 /** Playing or activating during the proposed end-of-action window cancels
@@ -1456,6 +1448,30 @@ function finishStack(state: GameStateInternal, runtime: EngineRuntime): void {
     return;
   }
   if (resume === "end-action-phase") {
+    // A pass while a resolved combat chain is still open belongs to the
+    // Resolution Step (CR 7.6.4), not the end-of-action pass sequence. Once
+    // both players pass, close the chain and return priority to the turn
+    // player in the Action Phase. Ending the phase requires a fresh pair of
+    // passes after the Close Step has finished (CR 4.3.4).
+    if (state.chain.length > 0) {
+      runtime.dispatchFlow("closeChain", state);
+      // dispatchFlow may synchronously open a scripted chain-close choice;
+      // widen past the pre-dispatch null assignment above.
+      const chainCloseDecision = state.pendingDecision as GameStateInternal["pendingDecision"];
+      if (chainCloseDecision?.chooseHook) {
+        state.stackResume ??= "begin-action";
+        chainCloseDecision.resume ??= { kind: "continue-stack" };
+        return;
+      }
+      if (state.stack.length > 0 || (state.pendingTriggeredLayers?.length ?? 0) > 0) {
+        state.stackResume ??= "begin-action";
+        runtime.dispatchFlow("continueStack", state);
+        return;
+      }
+      state.phase = "action";
+      state.priorityPlayer = state.activePlayer;
+      return;
+    }
     runtime.dispatchFlow("endTurn", state);
     return;
   }

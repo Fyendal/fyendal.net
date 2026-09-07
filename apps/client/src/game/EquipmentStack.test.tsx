@@ -18,14 +18,20 @@ describe("EquipmentStack", () => {
       }],
     };
 
-    const html = renderToStaticMarkup(createElement(EquipmentStack, { card }));
+    const html = renderToStaticMarkup(createElement(EquipmentStack, {
+      card,
+      underCardCountLabel: "2 cards underneath",
+    }));
 
     expect(html).toContain('data-card-stack-id="3"');
     expect(html.match(/class="equipment-stack-card"/g)).toHaveLength(3);
     expect(html).toContain('data-cardid="EVO022"');
     expect(html).toContain('data-cardid="EVO018"');
     expect(html).toContain('data-cardid="DYN092B"');
-    expect(html).toContain('class="pip pile-pip equipment-stack-pip">2</span>');
+    expect(html).toContain(
+      'class="pip pile-pip equipment-stack-pip under-pip" role="img" aria-label="2 cards underneath" title="2 cards underneath"',
+    );
+    expect(html).toContain('class="under-pip-count">×2</span>');
   });
 
   it("omits the underneath count when the permanent has no subcards", () => {

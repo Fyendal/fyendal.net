@@ -276,7 +276,7 @@ describe("DTD — registration and core mechanics", () => {
       ],
     });
 
-    s.doRaw({ kind: "pass" });
+    s.passActionPhase();
     const order = s.state.pendingDecision;
     expect(order?.kind).toBe("order-triggers");
     const blasmophet = order?.options?.find((_, index) =>
@@ -307,7 +307,7 @@ describe("DTD — registration and core mechanics", () => {
         { hero: "dorinthea" },
       ],
     });
-    s.doRaw({ kind: "pass" }).expectLife(0, 13);
+    s.passActionPhase().expectLife(0, 13);
     expect(s.state.pendingDecision).toMatchObject({
       kind: "optional-effect",
       prompt: "Transform into Blasmophet, Levia Consumed?",
@@ -336,7 +336,7 @@ describe("DTD — registration and core mechanics", () => {
         { hero: "dorinthea" },
       ],
     });
-    s.doRaw({ kind: "pass" });
+    s.passActionPhase();
     s.doRaw({ kind: "choose", optionId: "yes" }).expectLife(0, 13).expectTurn(2);
     expect(cardData[s.state.players[0]!.heroCardId]?.name).toBe("Blasmophet, Levia Consumed");
     expect(s.state.players[0]!.inventory).toEqual([]);
@@ -361,7 +361,7 @@ describe("DTD — registration and core mechanics", () => {
         { hero: "dorinthea" },
       ],
     });
-    s.doRaw({ kind: "pass" });
+    s.passActionPhase();
     s.doRaw({ kind: "choose", optionId: "no" }).expectLife(0, 12).expectTurn(2);
     expect(cardData[s.state.players[0]!.heroCardId]?.name)
       .toBe("Levia, Shadowborn Abomination");

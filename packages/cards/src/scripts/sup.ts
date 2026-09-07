@@ -204,9 +204,10 @@ function crowdAttack(kind: "cheer" | "boo", compare: "less" | "more", bonus: num
   };
 }
 
-function crowdWhenBehind(kind: "cheer" | "boo"): CardScript {
+function crowdWhenLifeCompares(kind: "cheer" | "boo", compare: "less" | "more"): CardScript {
   const resolve = (ctx: ScriptCtx) => {
-    if (ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0) {
+    const comparison = ctx.compareLife(ctx.seat, opponentSeat(ctx));
+    if (compare === "less" ? comparison < 0 : comparison > 0) {
       if (kind === "cheer") ctx.crowdCheer(ctx.seat); else ctx.crowdBoo(ctx.seat);
     }
   };
@@ -522,7 +523,7 @@ export const sup: Record<string, CardScript> = {
   "will of the crowd|3": { canTriggerOnDefend: (ctx) => ctx.getFlag("player", "cheeredThisTurn") === true, onDefend(ctx) { if (ctx.getFlag("player", "cheeredThisTurn")) for (const card of ctx.link?.defendingCards ?? []) if (ctx.hasCardType(card, "action")) ctx.addCardTempDefense(card.instanceId, 3); } },
   ...pitches("dig in", () => xTokens(TOUGHNESS, "defend")),
   "empowering ruckus|2": { modifyAttack: (ctx) => ctx.getFlag("player", "cheeredThisTurn") ? 1 : 0 },
-  ...pitches("fight from behind", () => crowdWhenBehind("cheer")),
+  ...pitches("fight from behind", () => crowdWhenLifeCompares("cheer", "less")),
   ...pitches("rapturous applause", () => revealCrowd("cheer")),
   ...pitches("tough smashup", () => clashToken(TOUGHNESS)),
   ...pitches("turn the crowd grateful", () => subtypeOpponentAttack("reviled", 1, "cheer")),
@@ -571,7 +572,7 @@ export const sup: Record<string, CardScript> = {
   },
   "arrogant showboating|3": { onPlay(ctx) { const n = ctx.state.chain.flatMap((link) => [...link.defendingCards, ...link.defendingEquipment]).filter((card) => card.owner !== ctx.seat).length; createMany(ctx, MIGHT, n); } },
   ...pitches("bask in your own greatness", () => xTokens(MIGHT, "attack")),
-  ...pitches("clench the upper hand", () => crowdWhenBehind("boo")),
+  ...pitches("clench the upper hand", () => crowdWhenLifeCompares("boo", "more")),
   "goon battery|3": { modifyAttack: (ctx) => countAuras(ctx) >= 3 ? 3 : 0, canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && countAuras(ctx) >= 3; }, onHit(ctx) { ctx.tap(ctx.player(opponentSeat(ctx)).hero.instanceId); } },
   ...pitches("instill fear", () => ({ onAttackDeclared(ctx) { queueIntimidate(ctx); } })),
   "low blow|1": { modifyAttack: (ctx) => ctx.getFlag("player", "booedThisTurn") ? 3 : 0 },

@@ -18,7 +18,7 @@ function isMech(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
 }
 
 function crankItem(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return isItem(ctx, card) && (data(ctx, card).keywords ?? []).some((keyword) => keyword.toLowerCase() === "crank");
+  return isItem(ctx, card) && ctx.hasCrank(card);
 }
 
 function addSteamChoice(ctx: ScriptCtx, hook: string): void {
@@ -158,7 +158,13 @@ export const aio: Record<string, CardScript> = {
   },
   "fast and furious|1": {
     modifyAttack: (ctx) => ctx.getFlag("player", "crankedThisTurn") === true ? 1 : 0,
-    onBanishedForBoost(ctx) { addSteamChoice(ctx, "fast-furious-steam"); },
+    triggers: [{
+      event: "card-banished-for-boost",
+      sourceZone: "banish",
+      label: "Put a steam counter on an item with crank",
+      labelMessage: decisionMessage("card.aio.crankitem.steam"),
+      effect(ctx) { addSteamChoice(ctx, "fast-furious-steam"); },
+    }],
     onChoose(ctx, hook, option) {
       if (hook === "fast-furious-steam") ctx.addCounter(Number(option), "steam", 1);
     },

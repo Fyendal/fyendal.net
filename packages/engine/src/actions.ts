@@ -519,6 +519,13 @@ export function finishPlayCard(
           runtime.makeCtx(state, seat, banished),
           card,
         );
+        deferEventTriggers(
+          state, runtime,
+          "card-boosted",
+          seat,
+          boostEventNextId,
+          card,
+        );
         for (const src of boostSources) {
           scriptOf(state, src.cardId, src)?.onBoosted?.(runtime.makeCtx(state, seat, src), card, banished);
         }

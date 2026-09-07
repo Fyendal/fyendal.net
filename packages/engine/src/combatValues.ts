@@ -396,6 +396,9 @@ function attackValueAdjustments(
 
   const liveAttack =
     findCardAnywhere(state, link.attackingCard.instanceId)?.card ?? link.attackingCard;
+  for (const material of liveAttack.subcards ?? []) {
+    add(material, scriptOf(state, material.cardId, material)?.materialPower ?? 0);
+  }
   add(liveAttack, liveAttack.counters?.power ?? 0);
   add(liveAttack, liveAttack.tempPower ?? 0);
   for (const piercing of piercingValueModifiers(state, link)) {
@@ -686,6 +689,10 @@ export function currentPowerOf(
     return dataOf(state, card.cardId).attack ?? 0;
   }
   let power = basePowerOf(state, runtime, card.owner, card, dataOf(state, card.cardId).attack ?? 0);
+  power += (card.subcards ?? []).reduce(
+    (total, material) => total + (scriptOf(state, material.cardId, material)?.materialPower ?? 0),
+    0,
+  );
   power += Number(card.counters?.power ?? 0) + Number(card.tempPower ?? 0);
   if (!link || !link.defendingCards.some((candidate) => candidate.instanceId === card.instanceId)) {
     return power;

@@ -20,6 +20,7 @@ export function EquipmentStack({
   soulCountLabel,
   boundCount,
   boundCountLabel,
+  underCardCountLabel,
 }: {
   card: CardView;
   /** Additional public cards rendered behind the permanent, oldest first. */
@@ -38,6 +39,8 @@ export function EquipmentStack({
   /** Ally-only count for cards bound underneath this permanent. */
   boundCount?: number;
   boundCountLabel?: string;
+  /** Accessible description for the generic public cards under this permanent. */
+  underCardCountLabel?: string;
 }) {
   const cards = [...underCards, ...equipmentStackCards(card)];
   const step = cardStackStep(cards.length);
@@ -122,7 +125,14 @@ export function EquipmentStack({
           <span className="soul-pip-count">{visibleSoulCount}</span>
         </span>
       ) : soulCount === undefined && underCardCount > 0 ? (
-        <span className="pip pile-pip equipment-stack-pip">{underCardCount}</span>
+        <span
+          className="pip pile-pip equipment-stack-pip under-pip"
+          role={underCardCountLabel ? "img" : undefined}
+          aria-label={underCardCountLabel}
+          title={underCardCountLabel}
+        >
+          <span className="under-pip-count">×{underCardCount}</span>
+        </span>
       ) : null}
       {activationGroups.length > 0 ? (
         <span className="weapon-activation-indicators">

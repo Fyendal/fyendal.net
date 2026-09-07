@@ -293,12 +293,14 @@ export function canPayAbilityLifeCost(
 function effectCardCostCandidates(
   state: GameStateInternal,
   player: PlayerState,
+  source: CardInstance,
   cost: NonNullable<ActivatedAbility["effectCardCosts"]>[number],
 ): CardInstance[] {
   const cards = cost.zone === "hand"
     ? player.hand
     : cost.zone === "graveyard" ? player.graveyard
     : cost.zone === "arsenal" ? player.arsenal
+    : cost.zone === "under" ? (cost.move === "banish" ? source.subcards ?? [] : [])
     : controlledCostCards(state, player).filter((card) => !card.faceDown);
   return cards.filter((card) => {
     const data = dataOf(state, card.cardId);
@@ -331,13 +333,14 @@ function effectCardCostCandidates(
 export function activatedEffectCardCostOptions(
   state: GameStateInternal,
   player: PlayerState,
+  source: CardInstance,
   costs: readonly ActivatedEffectCardCost[],
 ): number[][] {
   if (costs.length === 0) return [];
   let options: number[][] = [[]];
   for (const cost of costs) {
     const combinations = exactCardCombinations(
-      effectCardCostCandidates(state, player, cost),
+      effectCardCostCandidates(state, player, source, cost),
       cost.count,
     );
     const next: number[][] = [];
@@ -360,10 +363,11 @@ export function activatedEffectCardCostOptions(
 export function canPayActivatedEffectCardCosts(
   state: GameStateInternal,
   player: PlayerState,
+  source: CardInstance,
   ability: ActivatedAbility,
 ): boolean {
   const slots = (ability.effectCardCosts ?? []).flatMap((cost) =>
-    Array.from({ length: cost.count }, () => effectCardCostCandidates(state, player, cost)));
+    Array.from({ length: cost.count }, () => effectCardCostCandidates(state, player, source, cost)));
   const used = new Set<number>();
   const assign = (index: number): boolean => {
     if (index >= slots.length) return true;
@@ -381,6 +385,7 @@ export function canPayActivatedEffectCardCosts(
 function validateEffectCardCostSelections(
   state: GameStateInternal,
   player: PlayerState,
+  source: CardInstance,
   ability: ActivatedAbility,
   selectedIds: number[],
   complete: boolean,
@@ -391,7 +396,7 @@ function validateEffectCardCostSelections(
     if (!Number.isSafeInteger(cost.count) || cost.count <= 0) return "invalid effect card cost";
     const group = selectedIds.slice(offset, offset + cost.count);
     const candidates = new Set(
-      effectCardCostCandidates(state, player, cost).map((card) => card.instanceId),
+      effectCardCostCandidates(state, player, source, cost).map((card) => card.instanceId),
     );
     if (group.some((id) => !candidates.has(id))) return "effect cost card not found";
     if (complete && group.length !== cost.count) return "wrong number of effect cost cards";
@@ -425,6 +430,7 @@ export function prepareActivatedEffectCardCosts(
   const selectionErr = validateEffectCardCostSelections(
     state,
     player,
+    card,
     ability,
     selectedIds,
     false,
@@ -439,7 +445,7 @@ export function prepareActivatedEffectCardCosts(
         ...pitchInstanceIds,
         ...discardInstanceIds,
       ]);
-      const options = effectCardCostCandidates(state, player, cost)
+      const options = effectCardCostCandidates(state, player, card, cost)
         .filter((candidate) => !selected.has(candidate.instanceId));
       const remaining = cost.count - selectedInGroup;
       if (options.length < remaining) return "cannot pay effect card cost";
@@ -474,7 +480,7 @@ export function prepareActivatedEffectCardCosts(
     }
     offset += cost.count;
   }
-  return validateEffectCardCostSelections(state, player, ability, selectedIds, true);
+  return validateEffectCardCostSelections(state, player, card, ability, selectedIds, true);
 }
 
 /** Validate and pay every part of an activated ability's cost,
@@ -549,6 +555,7 @@ export function payActivatedAbilityCost(
   const effectCostErr = validateEffectCardCostSelections(
     state,
     player,
+    card,
     ability,
     effectCostIds,
     true,
@@ -585,7 +592,10 @@ export function payActivatedAbilityCost(
   let effectOffset = 0;
   for (const cost of ability.effectCardCosts ?? []) {
     for (const id of effectCostIds.slice(effectOffset, effectOffset + cost.count)) {
-      if (cost.move === "banish") {
+      if (cost.zone === "under" && cost.move === "banish") {
+        runtime.makeCtx(state, seat, card).banishSubcard(card.instanceId, id);
+      }
+      else if (cost.move === "banish") {
         runtime.makeCtx(state, seat, card).banish(id, { faceDown: cost.faceDown });
       }
       else if (cost.move === "discard") runtime.makeCtx(state, seat, card).discardCard(seat, id);

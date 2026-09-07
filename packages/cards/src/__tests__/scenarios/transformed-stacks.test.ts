@@ -289,4 +289,145 @@ describe("transformed permanent stacks", () => {
       expect(projectedNitro?.subcards).toHaveLength(8);
     }
   });
+
+  it("allows Nitro Mechanoid to defend from the arena", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 4,
+          hand: ["construct nitro mechanoid|2"],
+          weapons: ["teklo plasma pistol|0"],
+          equipment: {
+            head: "teklo base head|0",
+            chest: "teklo base chest|0",
+            arms: "teklo base arms|0",
+            legs: "teklo base legs|0",
+          },
+          board: ["hyper driver|0", "hyper driver|0", "hyper driver|0"],
+        },
+        { hero: "dorinthea", hand: ["head jab|1"] },
+      ],
+    });
+
+    g.play("construct nitro mechanoid|2").endTurn();
+    const nitro = g.state.players[0]!.board.find(
+      (card) => card.cardId === printingId("nitro mechanoid|0"),
+    )!;
+
+    g.play("head jab|1");
+    expect(legalIntents(g.state, 0)).toContainEqual({
+      kind: "stage-defenders",
+      instanceIds: [nitro.instanceId],
+    });
+    g.doRaw({ kind: "stage-defenders", instanceIds: [nitro.instanceId] });
+    g.doRaw({ kind: "defend", instanceIds: [nitro.instanceId] }).settle();
+
+    expect(g.state.chain.at(-1)?.defendingEquipment).toContainEqual(
+      expect.objectContaining({ instanceId: nitro.instanceId }),
+    );
+  });
+
+  it("allows Nitro Mechanoid to attack more than once per turn with enough action points", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 4,
+          hand: ["construct nitro mechanoid|2"],
+          weapons: ["teklo plasma pistol|0"],
+          equipment: {
+            head: "teklo base head|0",
+            chest: "teklo base chest|0",
+            arms: "teklo base arms|0",
+            legs: "teklo base legs|0",
+          },
+          board: ["hyper driver|0", "hyper driver|0", "hyper driver|0"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("construct nitro mechanoid|2");
+    const nitro = g.state.players[0]!.board.find(
+      (card) => card.cardId === printingId("nitro mechanoid|0"),
+    )!;
+    const [firstMaterial, secondMaterial] = nitro.subcards!;
+    g.state.players[0]!.actionPoints = 2;
+
+    g.activate("nitro mechanoid|0", { settle: false });
+    g.doRaw({ kind: "choose", optionId: String(firstMaterial!.instanceId) }).settle();
+    g.blockWith().settle().expectAP(0, 1);
+
+    g.activate("nitro mechanoid|0", { settle: false });
+    g.doRaw({ kind: "choose", optionId: String(secondMaterial!.instanceId) }).settle();
+    g.blockWith().settle().expectAP(0, 0);
+
+    expect(
+      g.state.players[0]!.board.find((card) => card.instanceId === nitro.instanceId)?.subcards,
+    ).toHaveLength(6);
+  });
+
+  it("chooses and banishes Nitro Mechanoid's attack cost and applies Galvanic Bender", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 4,
+          hand: ["construct nitro mechanoid|2"],
+          weapons: ["teklo plasma pistol|0"],
+          equipment: {
+            head: "teklo base head|0",
+            chest: "teklo base chest|0",
+            arms: "galvanic bender|0",
+            legs: "teklo base legs|0",
+          },
+          board: ["hyper driver|0", "hyper driver|0", "hyper driver|0"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("construct nitro mechanoid|2");
+    const nitro = g.state.players[0]!.board.find(
+      (card) => card.cardId === printingId("nitro mechanoid|0"),
+    )!;
+    const bender = nitro.subcards!.find(
+      (card) => card.cardId === printingId("galvanic bender|0"),
+    )!;
+    const chosen = nitro.subcards!.find(
+      (card) => card.cardId === printingId("teklo base head|0"),
+    )!;
+
+    g.activate("nitro mechanoid|0", { settle: false });
+    expect(g.state.pendingDecision).toMatchObject({
+      player: 0,
+      chooseHook: "engine-activation-effect-cost",
+      cardOptions: expect.arrayContaining([bender.instanceId, chosen.instanceId]),
+    });
+    expect(projectStateFor(g.state, 0).pendingDecision?.optionCards).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ instanceId: bender.instanceId }),
+        expect.objectContaining({ instanceId: chosen.instanceId }),
+      ]),
+    );
+
+    g.doRaw({ kind: "choose", optionId: String(chosen.instanceId) }).settle();
+
+    expect(g.state.players[0]!.banish).toContainEqual(
+      expect.objectContaining({ instanceId: chosen.instanceId }),
+    );
+    const attackingNitro = g.state.players[0]!.board.find(
+      (card) => card.instanceId === nitro.instanceId,
+    )!;
+    expect(attackingNitro.subcards).toContainEqual(
+      expect.objectContaining({ instanceId: bender.instanceId }),
+    );
+    const projectedLink = projectStateFor(g.state, 0).chain.at(-1)!;
+    expect(projectedLink.attackValue).toBe(6);
+    expect(projectedLink.attackModifiers).toContainEqual({
+      sourceCardId: printingId("galvanic bender|0"),
+      amount: 1,
+    });
+  });
 });

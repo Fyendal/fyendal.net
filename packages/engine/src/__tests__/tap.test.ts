@@ -31,6 +31,12 @@ function endTurn(s: GameStateInternal): GameStateInternal {
   expect(r.ok).toBe(true);
   if (!r.ok) throw new Error(r.error);
   let cur = r.state;
+  if (cur.pendingDecision?.kind === "priority-window") {
+    r = applyIntent(cur, cur.pendingDecision.player, { kind: "pass" });
+    expect(r.ok).toBe(true);
+    if (!r.ok) throw new Error(r.error);
+    cur = r.state;
+  }
   if (cur.pendingDecision?.kind === "arsenal") {
     r = applyIntent(cur, seat, { kind: "pass" });
     expect(r.ok).toBe(true);

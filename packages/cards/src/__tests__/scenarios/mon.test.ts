@@ -284,7 +284,7 @@ describe("MON — Shadow Brute and Blood Debt", () => {
       ],
     });
 
-    s.doRaw({ kind: "pass" });
+    s.passActionPhase();
     s.expectLife(0, 19).expectTurn(1);
     expect(s.state.pendingDecision?.kind).toBe("arsenal");
     expect(s.state.stack).toHaveLength(0);
@@ -299,7 +299,7 @@ describe("MON — Shadow Brute and Blood Debt", () => {
       ],
     });
 
-    s.doRaw({ kind: "pass" });
+    s.passActionPhase();
     s.expectLife(0, 18).expectTurn(2);
     expect(s.state.pendingDecision).toBeNull();
     expect(s.state.pendingDecision?.kind).not.toBe("order-triggers");
@@ -327,7 +327,7 @@ describe("MON — Shadow Brute and Blood Debt", () => {
       ],
     });
 
-    s.doRaw({ kind: "pass" });
+    s.passActionPhase();
     expect(s.state.pendingDecision).toMatchObject({
       kind: "order-triggers",
       optionLabels: [
@@ -359,7 +359,7 @@ describe("MON — Shadow Brute and Blood Debt", () => {
       ],
     });
 
-    s.doRaw({ kind: "pass" });
+    s.passActionPhase();
     const decision = s.state.pendingDecision;
     const bloodDebt = decision?.options?.find((_, index) =>
       decision.optionLabels?.[index] === "Blood Debt — lose 1 life"
@@ -651,8 +651,7 @@ describe("MON — rules regression coverage", () => {
       .attackWithWeapon()
       .blockWith()
       .settle()
-      .passPriority()
-      .settle()
+      .passActionPhase()
       .chooseOption("yes")
       .expectEquipmentDefense(0, "legs", 1);
   });

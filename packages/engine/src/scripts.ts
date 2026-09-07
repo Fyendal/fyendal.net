@@ -642,7 +642,8 @@ export interface ScriptCtx {
 }
 
 export interface ActivatedEffectCardCost {
-  zone: "hand" | "graveyard" | "arsenal" | "arena";
+  /** `under` selects from the source permanent's public sub-cards. */
+  zone: "hand" | "graveyard" | "arsenal" | "arena" | "under";
   move: "banish" | "discard" | "destroy" | "put-on-deck-bottom" | "tap" | "untap" | "remove-counter" | "turn-face-up";
   count: number;
   /** Banish the selected card face down, keeping its identity private. */
@@ -981,6 +982,9 @@ export interface CardScript {
   /** Static keywords this card grants to its top-card while it is a sub-card
    * (Material). */
   materialKeywords?: string[];
+  /** Continuous power adjustment this card grants to the permanent it is
+   * under (Material). */
+  materialPower?: number;
   /** Game-setup effect ("you may start the game with …"), run on the hero
    *  after the decks are shuffled and before the opening hands are drawn. */
   onGameStart?(ctx: ScriptCtx): void;

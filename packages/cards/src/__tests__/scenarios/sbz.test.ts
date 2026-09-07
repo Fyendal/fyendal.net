@@ -173,6 +173,7 @@ describe("SBZ — Blaze, Firemind", () => {
   });
 
   it.each([
+    ["aether arc|3", 1],
     ["voltic bolt|2", 4],
     ["zap|1", 3],
     ["forked lightning|1", 2],
@@ -472,7 +473,7 @@ describe("SBZ — Turn to Mindfire & Ponder", () => {
       ],
     });
 
-    s.doRaw({ kind: "pass" });
+    s.passActionPhase();
     s.expectNotInZone(0, "ponder|0", "board");
     expect(s.state.pendingDecision?.kind).not.toBe("priority-window");
     expect(s.lastEvents.slice(0, 2).map(({ from, to }) => ({ from, to }))).toEqual([

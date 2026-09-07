@@ -191,7 +191,7 @@ describe("game setup & turn structure", () => {
     });
   });
 
-  it("closes the combat chain and settles equipment before entering the end phase", () => {
+  it("closes the combat chain before offering a fresh action-phase pass sequence", () => {
     const state = makeGame(944);
     const active = player(state, 0);
     const defending = player(state, 1);
@@ -213,19 +213,39 @@ describe("game setup & turn structure", () => {
       flags: {},
     }];
 
-    const result = applyIntent(state, 0, { kind: "pass" });
+    const offered = applyIntent(state, 0, { kind: "pass" });
+    expect(offered.ok).toBe(true);
+    if (!offered.ok) return;
+    expect(offered.state.pendingDecision).toMatchObject({
+      kind: "priority-window",
+      player: 1,
+    });
+
+    const result = applyIntent(offered.state, 1, { kind: "pass" });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
 
-    expect(result.state.phase).toBe("end");
+    expect(result.state.phase).toBe("action");
+    expect(result.state.activePlayer).toBe(0);
+    expect(result.state.priorityPlayer).toBe(0);
+    expect(result.state.pendingDecision).toBeNull();
     expect(result.state.chain).toEqual([]);
     expect(player(result.state, 1).equipment.chest?.defCounters).toBe(1);
     expect(player(result.state, 0).graveyard).toContainEqual(
       expect.objectContaining({ instanceId: attack.instanceId }),
     );
+
+    const endPhasePass = applyIntent(result.state, 0, { kind: "pass" });
+    expect(endPhasePass.ok).toBe(true);
+    if (!endPhasePass.ok) return;
+    expect(endPhasePass.state.pendingDecision).toMatchObject({
+      kind: "priority-window",
+      player: 1,
+    });
+    expect(endPhasePass.state.chain).toEqual([]);
   });
 
-  it("resumes ending the turn after an opponent answers a chain-close choice", () => {
+  it("returns to action priority after an opponent answers a chain-close choice", () => {
     const state = makeGame(945);
     state.scriptsRef = {
       ...state.scriptsRef,
@@ -268,20 +288,25 @@ describe("game setup & turn structure", () => {
     let result = applyIntent(state, 0, { kind: "pass" });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
+    result = applyIntent(result.state, 1, { kind: "pass" });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
     expect(result.state.pendingDecision).toMatchObject({
       player: 1,
       chooseHook: "chain-close-choice",
       resume: { kind: "continue-stack" },
     });
-    expect(result.state.stackResume).toBe("end-action-phase");
+    expect(result.state.stackResume).toBe("begin-action");
 
     const optionId = result.state.pendingDecision?.options?.[0];
     expect(optionId).toBeDefined();
     result = applyIntent(result.state, 1, { kind: "choose", optionId: optionId! });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.state.turn).toBe(2);
-    expect(result.state.activePlayer).toBe(1);
+    expect(result.state.turn).toBe(1);
+    expect(result.state.activePlayer).toBe(0);
+    expect(result.state.phase).toBe("action");
+    expect(result.state.priorityPlayer).toBe(0);
     expect(result.state.stackResume).toBeNull();
     expect(result.state.pendingDecision).toBeNull();
   });
@@ -1189,11 +1214,14 @@ describe("game setup & turn structure", () => {
     s = r.state;
     expect(player(s, 1).life).toBe(16); // 20 - 4
     expect(s.chain).toHaveLength(1); // resolved link stays until the chain closes
-    // end turn: arsenal decision appears (hand non-empty); the chain closes in cleanup
-    r = applyIntent(s, 0, { kind: "pass" });
-    expect(r.ok).toBe(true);
-    if (!r.ok) return;
-    s = r.state;
+    // The first pair closes the resolved chain; the second ends the action
+    // phase, after both players receive the post-chain priority window.
+    for (const seat of [0, 1, 0, 1] as const) {
+      r = applyIntent(s, seat, { kind: "pass" });
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      s = r.state;
+    }
     if (s.pendingDecision?.kind === "arsenal") {
       r = applyIntent(s, 0, { kind: "pass" });
       expect(r.ok).toBe(true);
@@ -1210,6 +1238,10 @@ describe("game setup & turn structure", () => {
     const card = player(s, 0).hand[0]!;
 
     let r = applyIntent(s, 0, { kind: "pass" });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    s = r.state;
+    r = applyIntent(s, 1, { kind: "pass" });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     s = r.state;
@@ -1405,11 +1437,13 @@ describe("game setup & turn structure", () => {
     }
     expect(player(s, 0).hand.length).toBe(3); // spent 1 of 4
     expect(player(s, 1).hand.length).toBe(3);
-    // end turn 1
-    r = applyIntent(s, 0, { kind: "pass" });
-    expect(r.ok).toBe(true);
-    if (!r.ok) return;
-    s = r.state;
+    // The first pair closes the chain; the second ends the action phase.
+    for (const seat of [0, 1, 0, 1] as const) {
+      r = applyIntent(s, seat, { kind: "pass" });
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      s = r.state;
+    }
     if (s.pendingDecision?.kind === "arsenal") {
       r = applyIntent(s, 0, { kind: "pass" });
       expect(r.ok).toBe(true);
@@ -1438,11 +1472,13 @@ describe("game setup & turn structure", () => {
       s = r.state;
     }
     expect(player(s, 0).hand.length).toBe(3); // spent a card defending
-    // end turn 2
-    r = applyIntent(s, 1, { kind: "pass" });
-    expect(r.ok).toBe(true);
-    if (!r.ok) return;
-    s = r.state;
+    // The first pair closes the chain; the second ends the action phase.
+    for (const seat of [1, 0, 1, 0] as const) {
+      r = applyIntent(s, seat, { kind: "pass" });
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      s = r.state;
+    }
     if (s.pendingDecision?.kind === "arsenal") {
       r = applyIntent(s, 1, { kind: "pass" });
       expect(r.ok).toBe(true);
@@ -2737,10 +2773,14 @@ describe("combat", () => {
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     s = r.state;
-    r = applyIntent(s, 0, { kind: "pass" });
-    expect(r.ok).toBe(true);
-    if (!r.ok) return;
-    s = r.state;
+    // The first pair closes the resolved chain; the second ends the action
+    // phase and begins the end phase.
+    for (const seat of [0, 1, 0, 1] as const) {
+      r = applyIntent(s, seat, { kind: "pass" });
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      s = r.state;
+    }
     // the card returns at the beginning of the end phase — before arsenalling
     expect(s.pendingDecision?.kind).toBe("arsenal");
     expect(player(s, 1).banish.every((c) => c.intimidated !== true)).toBe(true);

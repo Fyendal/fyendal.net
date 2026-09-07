@@ -17,6 +17,7 @@ import {
   arrangeBoundBoardCards,
   boardCardInEquipmentZone,
   boardCardsOutsideEquipmentZones,
+  equipmentStackCards,
   groupBoardCards,
 } from "../boardGroups.js";
 import type { Sel } from "../useActionAnnouncement.js";
@@ -267,6 +268,18 @@ export function PlayerHalf({
               arrangedBoard.boundAllyIds,
             ).map((group) => {
               const boundCards = arrangedBoard.boundCardsByAlly.get(group.card.instanceId) ?? [];
+              const underCardCount = equipmentStackCards(group.card).length - 1;
+              const blocking = group.instanceIds.some((instanceId) =>
+                interaction.stagedIds.has(instanceId) ||
+                interaction.committedDefenderIds.has(instanceId)
+              );
+              const stageableDefenderId = mine && interaction.defending && !blocking
+                ? group.instanceIds.find((instanceId) =>
+                    interaction.legal.stageableDefenders.has(instanceId)
+                  )
+                : undefined;
+              const canBlock = stageableDefenderId !== undefined;
+              const canActivate = mine && !interaction.defending && group.activatable;
               return (
                 <div
                   key={group.card.instanceId}
@@ -292,10 +305,21 @@ export function PlayerHalf({
                           { count: boundCards.length },
                         )
                       : undefined}
-                    highlighted={group.activatable}
+                    underCardCountLabel={underCardCount > 0
+                      ? intl.formatMessage(
+                          { id: "game.under.count" },
+                          { count: underCardCount },
+                        )
+                      : undefined}
+                    highlighted={canActivate || canBlock}
                     selected={mine && interaction.selection.kind === "activate" &&
                       interaction.selection.sourceInstanceId === group.card.instanceId}
-                    onClick={group.activatable ? activate(group.card.instanceId) : undefined}
+                    dimmed={blocking || (mine && interaction.defending && !canBlock)}
+                    onClick={canBlock
+                      ? () => interaction.onStage([...interaction.stagedIds, stageableDefenderId])
+                      : canActivate
+                        ? activate(group.card.instanceId)
+                        : undefined}
                   />
                   {group.count > 1 ? (
                     <span

@@ -42,6 +42,46 @@ describe("WTR, ARC, and CRU high-rarity cards", () => {
     g.play("chain lightning|2").expectLife(1, 17);
   });
 
+  it.each(["WTR161", "1HP362", "JDG017"])(
+    "%s Last Ditch Effort gains neither +4 nor go again while its controller has cards in deck",
+    (printingId) => {
+      const g = scenario({ seats: [
+        {
+          hero: "rhinar",
+          hand: [printingId],
+          deck: ["raging onslaught|1"],
+          resources: 3,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ] });
+
+      g.play(printingId)
+        .expectAttackValue(4)
+        .blockWith()
+        .settle()
+        .expectAP(0, 0);
+    },
+  );
+
+  it("Last Ditch Effort gains +4 and go again when its controller has no cards in deck", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["WTR161"],
+        resources: 3,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("WTR161")
+      .expectAttackValue(8)
+      .blockWith()
+      .settle()
+      .expectAP(0, 1);
+  });
+
   it("Coax a Commotion can give every hero all three benefits", () => {
     const g = scenario({ seats: [
       { hero: "rhinar", hand: ["coax a commotion|1"], deck: ["raging onslaught|1"], life: 10, equipment: NO_EQUIPMENT },

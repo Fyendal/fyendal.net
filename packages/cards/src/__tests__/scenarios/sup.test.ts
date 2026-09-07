@@ -619,6 +619,41 @@ describe("SUP — heroes and the crowd", () => {
     expect(g.state.players[0]!.board.every((card) => card.cardId.endsWith("036"))).toBe(true);
   });
 
+  it("Clench the Upper Hand boos its controller when attacking with more life", () => {
+    const g = scenario({
+      seats: [
+        hero("kayo, strong-arm|0", {
+          life: 20,
+          hand: ["clench the upper hand|3"],
+        }),
+        foe({ life: 16 }),
+      ],
+    });
+
+    g.play("clench the upper hand|3")
+      .expectLog("The crowd boos Kayo, Strong-arm");
+    expect(g.state.players[0]!.flags.booedThisTurn).toBe(true);
+  });
+
+  it("Clench the Upper Hand boos its controller when defending with more life", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        hero("kayo, strong-arm|0", {
+          life: 17,
+          hand: ["clench the upper hand|3"],
+        }),
+        foe({ life: 14, hand: ["head jab|1"] }),
+      ],
+    });
+
+    g.play("head jab|1")
+      .blockWith("clench the upper hand|3")
+      .settle()
+      .expectLog("The crowd boos Kayo, Strong-arm");
+    expect(g.state.players[0]!.flags.booedThisTurn).toBe(true);
+  });
+
   it("Song of Sinew lets its controller reorder the revealed cards", () => {
     const g = scenario({
       seats: [

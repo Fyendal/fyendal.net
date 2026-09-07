@@ -98,7 +98,8 @@ describe("activated ability life costs", () => {
 
 describe("activated ability counter costs", () => {
   it("retains an explicit zero so state-based destruction sees the paid counter", () => {
-    let { s, id } = boardCard(makeGame(190), 0, "AURA");
+    const { s: initialState, id } = boardCard(makeGame(190), 0, "AURA");
+    let s = initialState;
     s.scriptsRef = {
       ...s.scriptsRef,
       AURA: {
@@ -282,6 +283,33 @@ describe("multiple activated abilities per card", () => {
 });
 
 describe("empty-stack action-phase priority", () => {
+  it("gives the opponent final priority even when they have no available instant", () => {
+    let s = makeGame(239);
+    for (const p of s.players) {
+      p.hand = [];
+      p.arsenal = [];
+      p.board = [];
+      p.weapons = [];
+      p.equipment = {};
+    }
+
+    let result = applyIntent(s, 0, { kind: "pass" });
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(result.error);
+    s = result.state;
+    expect(s.phase).toBe("layer");
+    expect(s.stack).toHaveLength(0);
+    expect(s.stackResume).toBe("end-action-phase");
+    expect(s.pendingDecision).toMatchObject({ kind: "priority-window", player: 1 });
+    expect(legalIntents(s, 1)).toEqual(expect.arrayContaining([{ kind: "pass" }]));
+
+    result = applyIntent(s, 1, { kind: "pass" });
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(result.error);
+    expect(result.state.activePlayer).toBe(1);
+    expect(result.state.turn).toBe(2);
+  });
+
   it("activates an action ability with granted instant timing at zero action points", () => {
     let s = makeGame(23);
     const idolId = grantActionIdolInstantTiming(s, 0);
@@ -471,6 +499,12 @@ describe("destroy at the beginning of the end phase", () => {
     expect(r.ok).toBe(true);
     if (!r.ok) throw new Error(r.error);
     s = r.state;
+    if (s.pendingDecision?.kind === "priority-window") {
+      r = applyIntent(s, s.pendingDecision.player, { kind: "pass" });
+      expect(r.ok).toBe(true);
+      if (!r.ok) throw new Error(r.error);
+      s = r.state;
+    }
     if (s.pendingDecision?.kind === "arsenal") {
       r = applyIntent(s, 0, { kind: "pass" });
       expect(r.ok).toBe(true);

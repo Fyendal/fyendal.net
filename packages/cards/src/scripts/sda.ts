@@ -8,7 +8,7 @@ import {
 
 // SDA — Silver Age Chapter 1 Dash precon.
 // Boost is engine-native: the play intent carries the optional cost and fires
-// onBoosted/onBanishedForBoost after banishing the deck top.
+// card-boosted/card-banished-for-boost after banishing the deck top.
 // Dash's setup ability pauses game creation on a card-backed choice. Crank is
 // engine-native: as an item enters, its controller may remove steam for 1 AP.
 
@@ -212,15 +212,23 @@ export const sda: Record<string, CardScript> = {
     onEnterArena(ctx) {
       ctx.setCounter("steam", 3);
     },
-    onBoosted(ctx) {
-      const used = `hyperDriverBoost:${ctx.self.instanceId}`;
-      const steam = ctx.getCounter("steam");
-      if (ctx.getFlag("player", used) === true || steam <= 0) return;
-      ctx.setFlag("player", used, true);
-      ctx.setCounter("steam", steam - 1);
-      ctx.changeResources(ctx.seat, 1);
-      ctx.logPublic(localizedCardLog(ctx, `Hyper Driver: remove a steam counter (${steam} → ${steam - 1}) and gain {r}`, "card.log.sda.hyperdriver.spent", { from: steam, to: steam - 1, amount: 1 }));
-    },
+    triggers: [{
+      event: "card-boosted",
+      label: "Remove a steam counter and gain 1 resource",
+      labelMessage: decisionMessage("card.trigger.hyperdriver.boost"),
+      condition(ctx) {
+        return ctx.getFlag("player", `hyperDriverBoost:${ctx.self.instanceId}`) !== true &&
+          ctx.getCounter("steam") > 0;
+      },
+      onTrigger(ctx) { ctx.setFlag("player", `hyperDriverBoost:${ctx.self.instanceId}`, true); },
+      effect(ctx) {
+        const steam = ctx.getCounter("steam");
+        if (steam <= 0) return;
+        ctx.setCounter("steam", steam - 1);
+        ctx.changeResources(ctx.seat, 1);
+        ctx.logPublic(localizedCardLog(ctx, `Hyper Driver: remove a steam counter (${steam} → ${steam - 1}) and gain {r}`, "card.log.sda.hyperdriver.spent", { from: steam, to: steam - 1, amount: 1 }));
+      },
+    }],
   },
 
   "teklo trebuchet 2000|3": {

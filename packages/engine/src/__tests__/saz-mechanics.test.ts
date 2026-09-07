@@ -267,7 +267,9 @@ describe("per-instance grants", () => {
     // use a fresh unplayed arrow to check expiry
     const stashed = giveArsenal(s, 0, "ARROW_ETB");
     stashed.tempPower = 1;
-    s = apply(s, 0, { kind: "pass" });
+    // The first pair of passes closes the resolved combat chain. A fresh pair
+    // ends the action phase.
+    for (const seat of [0, 1, 0, 1]) s = apply(s, seat, { kind: "pass" });
     if (s.pendingDecision?.kind === "arsenal") s = apply(s, s.pendingDecision.player, { kind: "pass" });
     const live = player(s, 0).arsenal.find((c) => c.instanceId === stashed.instanceId);
     expect(live?.tempPower).toBeUndefined();

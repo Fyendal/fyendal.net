@@ -663,7 +663,7 @@ function windowAbilityIntents(
       ) continue;
       if (ability.banishSoulCost && heroSoulCards(player).length < ability.banishSoulCost) continue;
       if (!includeUnaffordable && !canPayAbilityLifeCost(player, ability)) continue;
-      if (!canPayActivatedEffectCardCosts(state, player, ability)) continue;
+      if (!canPayActivatedEffectCardCosts(state, player, card, ability)) continue;
       if (ability.canActivate && !ability.canActivate(runtime.makeCtx(state, player.seat, card, link))) {
         continue;
       }
@@ -696,6 +696,7 @@ function windowAbilityIntents(
       for (const alternativeCostCardInstanceIds of activatedEffectCardCostOptions(
         state,
         player,
+        card,
         ability.alternativeEffectCardCosts ?? [],
       )) {
         const alternativeAbility = { ...ability, cost: 0 };
@@ -753,7 +754,7 @@ function windowAbilityIntents(
         discardCostOptions(state, player, ability)
           .filter((candidate) => candidate.instanceId !== card.instanceId).length < ability.discardCost.count
       ) continue;
-      if (!canPayActivatedEffectCardCosts(state, player, ability)) continue;
+      if (!canPayActivatedEffectCardCosts(state, player, card, ability)) continue;
       const resourceCost = abilityResourceCost(state, runtime, player.seat, card, ability, link);
       for (const pitches of pitchOptions(
         state,
@@ -1035,7 +1036,7 @@ function abilityIntents(
       if (timing === "action" && !grantedInstantTiming && player.actionPoints < 1) continue;
       if (ability.banishSoulCost && heroSoulCards(player).length < ability.banishSoulCost) continue;
       if (!includeUnaffordable && !canPayAbilityLifeCost(player, ability)) continue;
-      if (!canPayActivatedEffectCardCosts(state, player, ability)) continue;
+      if (!canPayActivatedEffectCardCosts(state, player, card, ability)) continue;
       if (ability.canActivate && !ability.canActivate(runtime.makeCtx(state, player.seat, card))) continue;
       // mirror activateAbility's effective cost so the offered pitches match
       // what applyIntent will accept (modifyAttackActivationCost / modifyCost
@@ -1083,6 +1084,7 @@ function abilityIntents(
         for (const alternativeCostCardInstanceIds of activatedEffectCardCostOptions(
           state,
           player,
+          card,
           ability.alternativeEffectCardCosts ?? [],
         )) {
           const alternativeCost = ability.isAttack
@@ -1129,7 +1131,7 @@ function abilityIntents(
         discardCostOptions(state, player, ability)
           .filter((candidate) => candidate.instanceId !== card.instanceId).length < ability.discardCost.count
       ) continue;
-      if (!canPayActivatedEffectCardCosts(state, player, ability)) continue;
+      if (!canPayActivatedEffectCardCosts(state, player, card, ability)) continue;
       const resourceCost = abilityResourceCost(state, runtime, player.seat, card, ability);
       for (const pitches of pitchOptions(
         state,

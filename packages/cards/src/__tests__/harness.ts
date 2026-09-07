@@ -739,12 +739,31 @@ export class Scenario {
     return this;
   }
 
+  /** Pass only the empty-stack windows needed to leave the action phase.
+   *  With a resolved chain, one pair closes combat and a fresh pair ends the
+   *  phase. End-phase triggers and choices are left at exactly the state
+   *  produced by the final pass so tests can inspect them. */
+  passActionPhase(): this {
+    const turn = this.state.turn;
+    for (let guard = 0; guard < 4 && this.state.turn === turn; guard++) {
+      const pd = this.state.pendingDecision;
+      const cleanAction = !pd && this.state.phase === "action";
+      const endingWindow =
+        pd?.kind === "priority-window" &&
+        this.state.stack.length === 0 &&
+        this.state.stackResume === "end-action-phase";
+      if (!cleanAction && !endingWindow) break;
+      this.do({ kind: "pass" });
+    }
+    return this;
+  }
+
   /** Pass the action phase and fast-forward to the next clean decision
    *  (may be a start-of-turn trigger choice, e.g. a mentor flip). */
   endTurn(): this {
     this.settle();
     const turn = this.state.turn;
-    this.do({ kind: "pass" });
+    this.passActionPhase();
     this.settle();
     expect(this.state.turn, "endTurn() did not advance the turn").toBe(turn + 1);
     return this;
