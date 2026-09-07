@@ -331,6 +331,18 @@
   padding-left: 41px;
   margin-block: -10px;
 }
+/* Expanded material stacks may cross the center seam. Lift their zone above
+   the neighboring mat half and relax the strip clip only for the preview. */
+@media (hover: hover) and (pointer: fine) {
+  .zone-board:has(.equipment-stack:hover),
+  .zone-board:has(.equipment-stack:focus-within) {
+    z-index: 6;
+  }
+  .board-cards:has(.equipment-stack:hover),
+  .board-cards:has(.equipment-stack:focus-within) {
+    overflow: visible;
+  }
+}
 .board-cards .card:not(.card-highlight):not(.card-selected) {
   border-color: #5a8a9c;
   box-shadow: 0 0 7px #5a8a9c33;

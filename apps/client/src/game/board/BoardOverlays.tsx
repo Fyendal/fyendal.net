@@ -1,26 +1,14 @@
 import type { GameView } from "@fyendal/shared";
 import { useIntl } from "react-intl";
-import { cardData } from "@fyendal/cards/client";
-import {
-  CARD_PREVIEW_HEIGHT,
-  CARD_PREVIEW_WIDTH,
-  CardFace,
-  InactiveZoneCard,
-} from "../Card.js";
+import { CardFace, InactiveZoneCard } from "../Card.js";
 import { DeckCardToast, type useDeckCardFeedback } from "../DeckCardToast.js";
 import { GameOver } from "../GameOver.js";
+import { HoverCardPreview, type BoardPreview } from "../HoverCardPreview.js";
 import { MobileCardInspect } from "../MobileCardInspect.js";
 import { PostGameFriendAction } from "../../social/PostGameFriendAction.js";
-import type { HoverSurfaceLayout } from "../hoverSurfaceLayout.js";
 import type { BoardOverlay } from "./BoardPrimitives.js";
 
-export interface BoardPreview {
-  id: string | null;
-  x: number;
-  y: number;
-  size?: { width: number; height: number };
-  effectTooltip?: { label: string; position: HoverSurfaceLayout["tooltip"] };
-}
+export type { BoardPreview } from "../HoverCardPreview.js";
 
 export function BoardOverlays({
   preview,
@@ -78,19 +66,7 @@ export function BoardOverlays({
   const intl = useIntl();
   return (
     <>
-      {preview?.id && cardData[preview.id] ? (
-        <div
-          className="card-preview"
-          style={{
-            left: preview.x,
-            top: preview.y,
-            width: preview.size?.width ?? CARD_PREVIEW_WIDTH,
-            height: preview.size?.height ?? CARD_PREVIEW_HEIGHT,
-          }}
-        >
-          <CardFace card={{ instanceId: -999, cardId: preview.id, owner: seat }} size="preview" />
-        </div>
-      ) : null}
+      {preview ? <HoverCardPreview preview={preview} owner={seat} /> : null}
       {preview?.effectTooltip ? (
         <div
           className="effect-tip effect-tip-floating"

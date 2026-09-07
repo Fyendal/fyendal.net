@@ -229,7 +229,7 @@ export function PlayerHalf({
             title,
             cards,
             inactiveZone: true,
-            showOwnedFaceDownIdentities: mine && kind === "graveyard",
+            showOwnedFaceDownIdentities: mine,
           })
         : undefined}
     >

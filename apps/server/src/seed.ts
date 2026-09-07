@@ -20,8 +20,10 @@
  * and RALLYC — a private Silver Age room with Rally the Coast Guard already
  * defending and two cards available to discard; and MARKS3 — a private CC
  * room for testing Malice, Danse Macabre, the three Marks, and Restless zombies
- * against the standard Hala bot.
- * These fixtures count as 14 "players in game" in the
+ * against the standard Hala bot; and NITRO8 — a private CC room where alice
+ * can construct Nitro Mechanoid, play Hit the Gas for 3 action points, attack
+ * repeatedly, then pass to the standard Hala bot.
+ * These fixtures count as 16 "players in game" in the
  * lobby stats — dev only.
  * Alice also receives one fixed, undismissed bug-report notification for
  * exercising the lobby UI.
@@ -63,6 +65,7 @@ const DAMAGE_FX_TEST_ROOM_CODE = "DMGFX1";
 const OKANA_TEST_ROOM_CODE = "OKANAS";
 const RALLY_TEST_ROOM_CODE = "RALLYC";
 const MARKS_TEST_ROOM_CODE = "MARKS3";
+const NITRO_TEST_ROOM_CODE = "NITRO8";
 
 /**
  * A lived-in mid-game board for the demo room: fixed seeds, random legal
@@ -327,6 +330,58 @@ function marksTestGameState(): GameState {
   return state;
 }
 
+/** Maxx can immediately construct Nitro Mechanoid from four equipment pieces,
+ * Banksy, and three live Hyper Drivers. Hit the Gas turns three more banished
+ * Hyper Drivers face-down for 3 action points, allowing three Mechanoid attacks
+ * before alice passes to the ordinary Hala bot turn. */
+function nitroTestGameState(): GameState {
+  const maxxPool = precon("precon-amx")?.pool;
+  const hala = botDefinition("hala");
+  const halaPool = precon(hala?.deckId ?? "")?.pool;
+  if (!maxxPool || !hala || !halaPool) {
+    throw new Error("Nitro test fixture decks are unavailable");
+  }
+  const maxxDeck = {
+    heroId: maxxPool.heroId,
+    weaponIds: [...maxxPool.weaponIds],
+    equipment: {
+      head: "AMX003",
+      chest: "AMX004",
+      arms: "AMX005",
+      legs: "AMX006",
+    },
+    deck: [...maxxPool.deck, "DYN092", "SUP255"],
+  };
+  const halaPresentation = hala.presentationFor(maxxDeck, "second");
+  const state = createGame({
+    decklists: [maxxDeck, { heroId: halaPool.heroId, ...halaPresentation }],
+    seed: 9082026,
+    cards: cardData,
+    scripts,
+    startPlayer: 0,
+  });
+
+  const player = state.players[0]!;
+  const cards = [...player.hand, ...player.deck];
+  const take = (cardId: string) => {
+    const index = cards.findIndex((card) => card.cardId === cardId);
+    if (index < 0) throw new Error(`Nitro test fixture is missing ${cardId}`);
+    return cards.splice(index, 1)[0]!;
+  };
+  const driver = (cardId: string, steam: number) => {
+    const card = take(cardId);
+    card.counters = { steam };
+    return card;
+  };
+  player.hand = [take("DYN092"), take("SUP255")];
+  player.board = [driver("AMX019", 3), driver("AMX023", 2), driver("AMX027", 1)];
+  player.banish = [take("AMX019"), take("AMX023"), take("AMX027")];
+  player.deck = cards;
+  player.resources = 4;
+  player.actionPoints = 1;
+  return state;
+}
+
 /** Kayo is already defending Ira's Edge of Autumn with Rally the Coast Guard.
  * The reaction window belongs to Kayo, whose two remaining hand cards are
  * both legal discard choices for Rally's once-per-turn instant ability. */
@@ -436,7 +491,7 @@ try {
   try {
     // These rooms are disposable local fixture data. Recreate them so rerunning
     // the seed also repairs stale ruleset envelopes and clears dependent history.
-    await pool.query("DELETE FROM rooms WHERE code IN ($1, $2, $3, $4, $5, $6, $7)", [
+    await pool.query("DELETE FROM rooms WHERE code IN ($1, $2, $3, $4, $5, $6, $7, $8)", [
       DEMO_ROOM_CODE,
       HUNTER_TEST_ROOM_CODE,
       SNAP_ARC_TEST_ROOM_CODE,
@@ -444,6 +499,7 @@ try {
       OKANA_TEST_ROOM_CODE,
       RALLY_TEST_ROOM_CODE,
       MARKS_TEST_ROOM_CODE,
+      NITRO_TEST_ROOM_CODE,
     ]);
     await pool.query(
       `INSERT INTO rooms
@@ -588,6 +644,51 @@ try {
         halaPoolForMarks.heroId,
         halaForMarks.deckId,
         halaForMarks.deckName,
+      ],
+    );
+    const nitroPrep = { rolls: [6, 2], dieWinner: 0, startPlayer: 0 };
+    const halaForNitro = botDefinition("hala");
+    const halaPoolForNitro = precon(halaForNitro?.deckId ?? "")?.pool;
+    if (!halaForNitro || !halaPoolForNitro) {
+      throw new Error("Nitro test fixture room metadata is unavailable");
+    }
+    await pool.query(
+      `INSERT INTO rooms
+        (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at,
+         status, winner, is_private)
+       VALUES ($1, 'cc', '[]', $2, $3, $4, 0, $5, NULL, 'active', NULL, TRUE)`,
+      [
+        NITRO_TEST_ROOM_CODE,
+        JSON.stringify(dehydrateState(nitroTestGameState(), seedRulesetVersion)),
+        JSON.stringify(nitroPrep),
+        seedRulesetVersion,
+        Date.now(),
+      ],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, user_id, token_hash, username, hero_id, deck_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 0, $2, $3, 'alice', 'AMX001', 'precon-amx',
+               'Nitro Mechanoid repeat attacks', FALSE, TRUE, 'human')`,
+      [
+        NITRO_TEST_ROOM_CODE,
+        aliceId,
+        hashReconnectToken(randomBytes(12).toString("hex")),
+      ],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, token_hash, username, hero_id, deck_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 1, $2, $3, $4, $5, $6, FALSE, TRUE, 'bot')`,
+      [
+        NITRO_TEST_ROOM_CODE,
+        hashReconnectToken(randomBytes(12).toString("hex")),
+        halaForNitro.username,
+        halaPoolForNitro.heroId,
+        halaForNitro.deckId,
+        halaForNitro.deckName,
       ],
     );
     const hunterPrep = { rolls: [2, 5], dieWinner: 1, startPlayer: 1 };
@@ -809,6 +910,7 @@ try {
   console.log(`seeded Okana Scar Wraps / Enact Vengeance room ${OKANA_TEST_ROOM_CODE} — log in as alice and open /${OKANA_TEST_ROOM_CODE}`);
   console.log(`seeded Rally the Coast Guard room ${RALLY_TEST_ROOM_CODE} — log in as alice and open /${RALLY_TEST_ROOM_CODE}`);
   console.log(`seeded Marks / Restless zombies room ${MARKS_TEST_ROOM_CODE} — log in as alice and open /${MARKS_TEST_ROOM_CODE}`);
+  console.log(`seeded Nitro Mechanoid room ${NITRO_TEST_ROOM_CODE} — log in as alice and open /${NITRO_TEST_ROOM_CODE}`);
   console.log("seeded fixed bug notification for alice");
 } finally {
   await pool.end();

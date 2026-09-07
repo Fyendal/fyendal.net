@@ -37,6 +37,7 @@ describe("cardImageUrl", () => {
     ["AMO001", "AMO001-RF"],
     ["AZS001", "AZS001-RF"],
     ["AZS002", "AZS002-RF"],
+    ["DYN092B", "GEM119_BACK"],
     ["FAB337", "SEA080"],
     ["FAB464", "FAB464-MV"],
     ["FAB469", "FAB469-CF"],

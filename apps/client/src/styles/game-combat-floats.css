@@ -561,7 +561,8 @@
 }
 @media (hover: hover) and (pointer: fine) {
   .equipment-stack:hover { z-index: 3; }
-  .equipment-stack:hover .equipment-stack-card {
+  .equipment-stack:hover .equipment-stack-card,
+  .equipment-stack:focus-within .equipment-stack-card {
     transform: translateY(var(--equipment-stack-offset));
   }
 }

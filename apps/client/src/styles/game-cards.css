@@ -59,10 +59,13 @@
 /* ── hover preview (positioned next to the hovered card via inline style) ── */
 .card-preview {
   position: fixed;
+  display: flex;
+  gap: 12px;
   /* above in-game floats and the deck-card toast (z-index 45), below modals */
   z-index: 46;
   pointer-events: none;
 }
+.card-preview-face { flex: 0 0 auto; }
 .card-preview-frame { width: 100%; height: 100%; padding: 14px; }
 .card-preview-frame .c-name { font-size: 20px; }
 .card-preview-frame .c-type {

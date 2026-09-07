@@ -19,6 +19,7 @@ import {
   opponentSeat,
   previousAttackHasName,
   requestDiscardChoice,
+  revealTopSixPlusStays,
   resolveDiscardChoice,
   suspenseAura,
 } from "./shared-helpers.js";
@@ -524,6 +525,208 @@ function hellboundAssault(): CardScript {
   });
 }
 
+function cleaveTheHeavens(): CardScript {
+  return bloodDebt({
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      fromHand: true,
+      fromHandMove: "banish",
+      onActivate(ctx) { ctx.createToken(GATE); },
+    },
+  });
+}
+
+function revealTopForAttack(
+  payoff: (ctx: ScriptCtx) => void,
+): CardScript {
+  return {
+    onAttackDeclared(ctx) {
+      const top = ctx.player(ctx.seat).deck[0];
+      if (!top || !ctx.revealCards([top.instanceId])) return;
+      if (ctx.basePower(top) >= 6) payoff(ctx);
+    },
+  };
+}
+
+type ZombieDiscardPayoff = "corpse" | "next-attack" | "recover";
+
+function zombieDiscardAttack(payoff: ZombieDiscardPayoff): CardScript {
+  return {
+    onAttackDeclared(ctx) {
+      const zombies = ctx.player(ctx.seat).hand.filter((card) => hasType(ctx, card, "zombie"));
+      if (zombies.length === 0) return;
+      ctx.requestCardChoice(
+        "iar-zombie-discard",
+        decisionPrompt(
+          "Discard a zombie?",
+          "card.iar.zombie.discard.optional",
+          { optionMessages: commonOptionMessages("no") },
+        ),
+        ["no", ...zombies.map((card) => card.instanceId)],
+      );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "iar-zombie-discard") {
+        if (option === "no") return;
+        const zombie = ctx.player(ctx.seat).hand.find((card) =>
+          card.instanceId === Number(option) && hasType(ctx, card, "zombie")
+        );
+        if (!zombie || !ctx.discardCard(ctx.seat, zombie.instanceId)) return;
+        if (payoff === "corpse") {
+          ctx.createCardInBanish(CORRUPTED_CORPSE);
+        } else if (payoff === "next-attack") {
+          buffNextAttack(ctx, { attack: 1 });
+        } else {
+          const banished = ctx.player(ctx.seat).banish;
+          if (banished.length > 0) {
+            ctx.requestCardChoice(
+              "iar-malignant-recover",
+              decisionPrompt(
+                "Put a card from your banished zone into your graveyard",
+                "card.iar.banished.graveyard.put",
+              ),
+              banished.map((card) => card.instanceId),
+            );
+          }
+        }
+        return;
+      }
+      if (hook === "iar-malignant-recover") {
+        ctx.moveToGraveyard(Number(option), "banish");
+      }
+    },
+  };
+}
+
+function arknightDescendancy(): CardScript {
+  return bloodDebt({
+    modifyPlayCost(ctx, base) {
+      const runechants = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "Runechant"));
+      return Math.max(0, base - runechants.length);
+    },
+    onSelfBanished(ctx) {
+      const maximum = Math.min(3, Math.max(0, ctx.player(ctx.seat).life - 1));
+      ctx.requestChoice(
+        "iar-arknight-life",
+        decisionPrompt("Pay up to 3 life", "card.iar.arknight.life.pay"),
+        Array.from({ length: maximum + 1 }, (_, amount) => String(amount)),
+      );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "iar-arknight-life") return;
+      const amount = Number(option);
+      const maximum = Math.min(3, Math.max(0, ctx.player(ctx.seat).life - 1));
+      if (!Number.isInteger(amount) || amount < 0 || amount > maximum) return;
+      if (amount > 0) ctx.loseLife(ctx.seat, amount);
+      ctx.createTokens(RUNECHANT, amount);
+    },
+  });
+}
+
+function forbiddenHarvest(): CardScript {
+  return {
+    onPlay(ctx) {
+      const banished = ctx.player(ctx.seat).banish.filter((card) => !card.faceDown);
+      if (banished.length === 0) return;
+      ctx.requestCardChoices(
+        "iar-forbidden-harvest",
+        decisionPrompt(
+          "Turn up to 3 cards in your banished zone face-down",
+          "card.iar.banished.facedown.upto",
+          { values: { amount: 3 } },
+        ),
+        banished.map((card) => card.instanceId),
+        0,
+        Math.min(3, banished.length),
+      );
+    },
+    onChooseMany(ctx, hook, options) {
+      if (hook !== "iar-forbidden-harvest" || options.length > 3) return;
+      let shadow = 0;
+      for (const option of options) {
+        const card = ctx.player(ctx.seat).banish.find((candidate) =>
+          candidate.instanceId === Number(option) && !candidate.faceDown
+        );
+        if (!card) continue;
+        const isShadow = hasType(ctx, card, "shadow");
+        if (!ctx.setCardFaceDown(card.instanceId, true)) continue;
+        if (isShadow) shadow++;
+      }
+      ctx.createTokens(RUNECHANT, shadow);
+    },
+  };
+}
+
+function bloodfrenzyGloomblade(): CardScript {
+  return bloodDebt({
+    ...usurp(),
+    onAttackDeclared(ctx) {
+      if (ctx.getFlag("player", "dealtDamageThisTurn") === true) ctx.grantGoAgain();
+    },
+    canTriggerOnHit: selfHitsHero,
+    onHit(ctx) {
+      ctx.grantGoAgain();
+    },
+    onChoose(ctx, hook, option) {
+      resolveUsurp(ctx, hook, option);
+    },
+  }, true);
+}
+
+function murmuringGloomblade(): CardScript {
+  return bloodDebt({
+    ...usurp(),
+    onAttackDeclared(ctx) {
+      ctx.createToken(RUNECHANT);
+    },
+    onHit(ctx) {
+      ctx.createToken(RUNECHANT);
+    },
+    onChoose(ctx, hook, option) {
+      resolveUsurp(ctx, hook, option);
+    },
+  }, true);
+}
+
+function gateOnHit(): CardScript {
+  return bloodDebt({ onHit(ctx) { ctx.createToken(GATE); } });
+}
+
+type ShadowrealmHandPayoff = "go-again" | "power" | "gate";
+
+function shadowrealmHandBanish(payoff: ShadowrealmHandPayoff): CardScript {
+  return bloodDebt({
+    onAttackDeclared(ctx) {
+      const hand = ctx.player(ctx.seat).hand;
+      if (hand.length === 0) return;
+      ctx.requestCardChoice(
+        "iar-shadowrealm-hand",
+        decisionPrompt(
+          "Banish a card from your hand?",
+          "card.iar.hand.banish.optional",
+          { optionMessages: commonOptionMessages("no") },
+        ),
+        ["no", ...hand.map((card) => card.instanceId)],
+      );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "iar-shadowrealm-hand" || option === "no") return;
+      const card = ctx.player(ctx.seat).hand.find((candidate) =>
+        candidate.instanceId === Number(option)
+      );
+      if (!card) return;
+      const shadow = hasType(ctx, card, "shadow");
+      if (!ctx.banish(card.instanceId) || !shadow) return;
+      if (payoff === "go-again") ctx.grantGoAgain();
+      else if (payoff === "power") ctx.addCardTempPower(ctx.self.instanceId, 2);
+      else ctx.createToken(GATE);
+    },
+  });
+}
+
 function embraceUrsur(): CardScript {
   return {
     onAttackDeclared(ctx) {
@@ -822,6 +1025,17 @@ export const iar: Record<string, CardScript> = {
     }],
   },
 
+  "devouring doomwake|1": bloodDebt({
+    onHit(ctx) {
+      const link = ctx.link;
+      if (!link) return;
+      ctx.setFlag("link", "attackToBanish", true);
+      for (const defending of [...link.defendingCards, ...link.defendingEquipment]) {
+        ctx.banish(defending.instanceId);
+      }
+    },
+  }),
+
   "hex gauntlet|0": bloodDebt(repentanceEquipment("banish")),
 
   "blood harvest|0": bloodDebt({
@@ -902,6 +1116,10 @@ export const iar: Record<string, CardScript> = {
   "hellbound assault|2": hellboundAssault(),
   "hellbound assault|3": hellboundAssault(),
 
+  "cleave the heavens|1": cleaveTheHeavens(),
+  "cleave the heavens|2": cleaveTheHeavens(),
+  "cleave the heavens|3": cleaveTheHeavens(),
+
   "beckoning hunger|1": bloodDebt({
     onAttackDeclared(ctx) {
       const top = ctx.player(ctx.seat).deck[0];
@@ -930,6 +1148,16 @@ export const iar: Record<string, CardScript> = {
   "battle clearing bellow|3": {
     onPlay(ctx) { buffNextAttack(ctx, { attack: 6, minBasePower: 6 }); },
   },
+
+  "boneseer skullcap|0": { onDefend: revealTopSixPlusStays },
+
+  "peak power|1": revealTopForAttack((ctx) => ctx.setFlag("link", "overpower", true)),
+  "peak power|2": revealTopForAttack((ctx) => ctx.setFlag("link", "overpower", true)),
+  "peak power|3": revealTopForAttack((ctx) => ctx.setFlag("link", "overpower", true)),
+
+  "headstrong stampede|1": revealTopForAttack((ctx) => ctx.grantGoAgain()),
+  "headstrong stampede|2": revealTopForAttack((ctx) => ctx.grantGoAgain()),
+  "headstrong stampede|3": revealTopForAttack((ctx) => ctx.grantGoAgain()),
 
   "malice|0": {
     activated: {
@@ -981,6 +1209,16 @@ export const iar: Record<string, CardScript> = {
       onActivate(ctx) { ctx.preventNextDamage(ctx.seat, 2); },
     },
   },
+
+  "acrid stench|1": zombieDiscardAttack("corpse"),
+  "acrid stench|2": zombieDiscardAttack("corpse"),
+  "acrid stench|3": zombieDiscardAttack("corpse"),
+  "bone mass|1": zombieDiscardAttack("next-attack"),
+  "bone mass|2": zombieDiscardAttack("next-attack"),
+  "bone mass|3": zombieDiscardAttack("next-attack"),
+  "malignant migration|1": zombieDiscardAttack("recover"),
+  "malignant migration|2": zombieDiscardAttack("recover"),
+  "malignant migration|3": zombieDiscardAttack("recover"),
 
   "bridge of damnation|3": {
     triggers: [{
@@ -1262,6 +1500,18 @@ export const iar: Record<string, CardScript> = {
   "vexing gloomblade|1": vexingGloomblade(),
   "vexing gloomblade|2": vexingGloomblade(),
   "vexing gloomblade|3": vexingGloomblade(),
+
+  "arknight descendancy|3": arknightDescendancy(),
+
+  "forbidden harvest|2": forbiddenHarvest(),
+
+  "bloodfrenzy gloomblade|1": bloodfrenzyGloomblade(),
+  "bloodfrenzy gloomblade|2": bloodfrenzyGloomblade(),
+  "bloodfrenzy gloomblade|3": bloodfrenzyGloomblade(),
+
+  "murmuring gloomblade|1": murmuringGloomblade(),
+  "murmuring gloomblade|2": murmuringGloomblade(),
+  "murmuring gloomblade|3": murmuringGloomblade(),
 
   "embrace sin|2": {
     onPlay(ctx) {
@@ -1637,6 +1887,23 @@ export const iar: Record<string, CardScript> = {
       if (ctx.getFlag("link", "fromBanish") === true) ctx.createToken(GATE);
     },
   }),
+
+  "breach flesh|1": gateOnHit(),
+  "breach flesh|2": gateOnHit(),
+  "breach flesh|3": gateOnHit(),
+  "corporeal chasm|1": gateOnHit(),
+  "corporeal chasm|2": gateOnHit(),
+  "corporeal chasm|3": gateOnHit(),
+
+  "shadowrealm bloodhound|1": shadowrealmHandBanish("go-again"),
+  "shadowrealm bloodhound|2": shadowrealmHandBanish("go-again"),
+  "shadowrealm bloodhound|3": shadowrealmHandBanish("go-again"),
+  "shadowrealm ripper|1": shadowrealmHandBanish("power"),
+  "shadowrealm ripper|2": shadowrealmHandBanish("power"),
+  "shadowrealm ripper|3": shadowrealmHandBanish("power"),
+  "shadowrealm walker|1": shadowrealmHandBanish("gate"),
+  "shadowrealm walker|2": shadowrealmHandBanish("gate"),
+  "shadowrealm walker|3": shadowrealmHandBanish("gate"),
 
   "harbinger of destruction|1": bloodDebt({
     requiredHandCardsForAdditionalCost: 1,
