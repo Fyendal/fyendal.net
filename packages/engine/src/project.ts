@@ -390,6 +390,9 @@ function modifierEffectLabel(state: GameStateInternal, m: Modifier): string {
     parts.push(`create ${dataOf(state, m.onPreventCreateToken).name} when damage is prevented`);
   }
   if (m.suppressesHeroAbilities) parts.push("hero abilities disabled");
+  if (m.suppressesHeroAbilitiesDuringActionPhase) {
+    parts.push("hero abilities disabled during action phase");
+  }
   return parts.join(", ") || "ongoing effect";
 }
 
@@ -720,7 +723,12 @@ function ongoingEffects(state: GameStateInternal, viewer: number | null | undefi
       ? (secret ? "" : src.card.cardId)
       : (m.sourceCardId ?? "");
     const key = `${m.sourceInstanceId}:${m.seat}:${m.scope}`;
-    const duration = m.scope === "next-attack"
+    const duration = m.suppressesHeroAbilitiesDuringActionPhase
+      ? (m.seat === state.activePlayer &&
+          ["action", "layer", "reaction", "defend"].includes(state.phase)
+          ? "this action phase"
+          : "next action phase")
+      : m.scope === "next-attack"
       ? (m.appliesToRuneGated ? "next rune-gated attack" : "next attack")
       : m.scope === "next-play"
         ? nextPlayDurationLabel(m)

@@ -509,6 +509,9 @@ export interface Modifier {
   grantsType?: string;
   /** Owned objects of the affected seat lose the named property. */
   suppressesHeroAbilities?: boolean;
+  /** The affected hero loses its abilities only while that hero is the turn
+   * player within an action phase (including its stack and combat windows). */
+  suppressesHeroAbilitiesDuringActionPhase?: boolean;
   suppressesOwnedNames?: boolean;
   suppressesOwnedClassTalentTypes?: boolean;
   /** Per-turn action-card play caps carried by this temporal effect. */

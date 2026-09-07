@@ -579,8 +579,10 @@ export const mpw: Record<string, CardScript> = {
     onChoose(ctx, hook, option) { if (hook === "dome-discard") ctx.discardCard(opponentSeat(ctx), Number(option)); },
   },
   "take the lead|1": {
-    ...weaponReaction(3),
-    canPlay: (ctx) => ctx.link?.attacker === ctx.seat && ctx.getFlag("link", "wagered") === true,
+    onPlay(ctx) {
+      ctx.preventNextDamageEvent(ctx.seat, 2);
+      ctx.addModifier({ scope: "until-end-of-turn", onPreventCreateToken: BLADE_DANCE });
+    },
   },
   "a moment's peace|3": {
     canTriggerOnDefend: isSwordAttack,

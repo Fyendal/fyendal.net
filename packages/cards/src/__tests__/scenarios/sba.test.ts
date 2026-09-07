@@ -264,6 +264,7 @@ describe("SBA — Runechants and split cards", () => {
       ],
     });
     g.play("burn up // shock|1", { meldSide: "both" })
+      .chooseOption("opposing hero")
       .expectLife(1, 19) // Shock half
       .expectAP(0, 1) // the action half costs 1 AP; Burn Up's go again refunds it
       .play("fry|1")
@@ -284,6 +285,21 @@ describe("SBA — Runechants and split cards", () => {
     g.settle()
       .expectLife(1, 12); // Burn Up's 4 arcane resolves from its layer
     expect(g.state.chain.at(-1)?.resolved).toBe(true);
+  });
+
+  it("Shock can deal its arcane damage to an ally", () => {
+    const g = scenario({
+      seats: [
+        { ...briar, hand: ["burn up // shock|1"] },
+        { hero: "rhinar", board: ["limpit, hop-a-long|2"], hand: [] },
+      ],
+    });
+
+    g.play("burn up // shock|1", { meldSide: "right" })
+      .chooseOption("ally")
+      .expectNotInZone(1, "limpit, hop-a-long|2", "board")
+      .expectInZone(1, "limpit, hop-a-long|2", "graveyard")
+      .expectLife(1, 20);
   });
 
 });

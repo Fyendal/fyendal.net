@@ -318,8 +318,16 @@ export const penHighRarity: Record<string, CardScript> = {
   } },
   "lobotomy|1": {
     onAttackDeclared(ctx) { const orbit = (ctx.player(ctx.seat).inventory ?? []).find((card) => data(ctx, card).name.includes("Orbitoclast")); if (orbit) ctx.requestCardChoice("lobotomy-equip", decisionPrompt("Equip an Orbitoclast?", "card.pen.orbitoclast.equip", { optionMessages: commonOptionMessages("no") }), ["no", orbit.instanceId]); },
-    canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && Object.values(ctx.player(ctx.seat).equipment).some((card) => card && data(ctx, card).name.includes("Orbitoclast")); },
-    onHit(ctx) { ctx.suppressHeroAbilitiesThroughNextTurn(opponentSeat(ctx)); },
+    canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.player(ctx.seat).weapons.some((card) => named(ctx, card, "Orbitoclast")); },
+    onHit(ctx) {
+      const target = opponentSeat(ctx);
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        seat: target,
+        suppressesHeroAbilitiesDuringActionPhase: true,
+        expiresAtEndOfSeatTurn: target,
+      });
+    },
     onChoose(ctx, hook, option) { if (hook === "lobotomy-equip" && option !== "no") ctx.equipFromInventory(Number(option)); },
   },
   "seeker kunai|1": {

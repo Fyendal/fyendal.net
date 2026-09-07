@@ -100,6 +100,25 @@ describe("Contract", () => {
     expect(silverCount(game)).toBe(3);
   });
 
+  it("Eradicate banishes cards equal to damage dealt after defense", () => {
+    const game = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["eradicate|2"], resources: 1 },
+        {
+          hero: "dorinthea",
+          hand: ["raging onslaught|3"],
+          deck: ["head jab|2", "flex claws|2", "wrecker romp|2", "head jab|1"],
+        },
+      ],
+    });
+
+    game.play("eradicate|2").blockWith("raging onslaught|3").settle();
+
+    game.expectLife(1, 19);
+    expect(game.state.players[1]!.deck).toHaveLength(3);
+    expect(silverCount(game)).toBe(1);
+  });
+
   it("Surgical Extraction completes for blue cards banished from deck and hand", () => {
     const game = scenario({
       seats: [

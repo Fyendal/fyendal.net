@@ -151,6 +151,37 @@ describe("PEN — import and set mechanics", () => {
       .expectZoneSize(0, "board", 0);
   });
 
+  it("Lobotomy suppresses Ira's second-attack bonus during her next action phase", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        heroKey: "uzuri, switchblade|0",
+        hand: ["lobotomy|1"],
+        inventory: ["orbitoclast|0"],
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+      {
+        hero: "dorinthea",
+        heroKey: "ira, scarlet revenger|0",
+        hand: ["head jab|3", "raging onslaught|3"],
+        weapons: ["edge of autumn|0"],
+        equipment: NO_EQUIPMENT,
+      },
+    ] });
+
+    g.play("lobotomy|1")
+      .chooseCard("orbitoclast|0")
+      .blockWith()
+      .settle()
+      .endTurn()
+      .attackWithWeapon("edge of autumn|0")
+      .blockWith()
+      .settle()
+      .play("head jab|3")
+      .expectAttackValue(1);
+  });
+
   it("pays Touch of Reality's X cost from floating resources without another decision", () => {
     const g = scenario({ seats: [
       {
@@ -227,6 +258,72 @@ describe("PEN — import and set mechanics", () => {
     expect(g.state.players[0]!.pitch).toHaveLength(1);
     g.expectInZone(0, "dodge|3", "pitch")
       .expectInZone(0, "pack hunt|1", "hand");
+  });
+
+  it("Pound of Flesh lets each hero choose the card they banish", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "levia|0",
+          hand: ["pound of flesh|3", "head jab|1", "pack hunt|1"],
+          equipment: NO_EQUIPMENT,
+        },
+        {
+          hero: "dorinthea",
+          hand: ["head jab|1", "pack hunt|1"],
+          equipment: NO_EQUIPMENT,
+        },
+      ],
+    });
+
+    g.play("pound of flesh|3");
+    expect(g.state.pendingDecision).toMatchObject({
+      player: 0,
+      chooseHook: "pen-pound-banish:0",
+    });
+
+    g.chooseCard("pack hunt|1");
+    expect(g.state.pendingDecision).toMatchObject({
+      player: 1,
+      chooseHook: "pen-pound-banish:1",
+    });
+
+    g.chooseCard("head jab|1")
+      .expectInZone(0, "pack hunt|1", "banish")
+      .expectInZone(0, "head jab|1", "hand")
+      .expectInZone(1, "head jab|1", "banish")
+      .expectInZone(1, "pack hunt|1", "hand")
+      .expectLife(0, 20)
+      .expectLife(1, 19);
+  });
+
+  it("Pound of Flesh makes an empty-handed hero lose life without opening an empty choice", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "levia|0",
+          hand: ["pound of flesh|3"],
+          equipment: NO_EQUIPMENT,
+        },
+        {
+          hero: "dorinthea",
+          hand: ["pack hunt|1"],
+          equipment: NO_EQUIPMENT,
+        },
+      ],
+    });
+
+    g.play("pound of flesh|3");
+    expect(g.state.pendingDecision).toMatchObject({
+      player: 1,
+      chooseHook: "pen-pound-banish:1",
+    });
+
+    g.chooseCard("pack hunt|1")
+      .expectLife(0, 19)
+      .expectLife(1, 20);
   });
 
   it("Cloud Cover prevents the next damage event", () => {

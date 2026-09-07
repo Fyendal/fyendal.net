@@ -193,6 +193,9 @@ const KEYWORD_OVERRIDES: Record<string, string[]> = {
   "path of same ends|1": [],
   "path of same ends|2": [],
   "path of same ends|3": [],
+  // Shadowrealm Horror gains go again only if its additional cost banishes at
+  // least two cards with 6 or more power.
+  "shadowrealm horror|1": ["Blood Debt"],
   // OMN labels and conditional keywords are implemented by their scripts.
   "aethersling|1": [],
   "arc ramp|1": ["Amp 3"],

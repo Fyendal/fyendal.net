@@ -34,6 +34,44 @@ function isNamed(ctx: ScriptCtx, cardId: string, name: string): boolean {
   return ctx.cardData(cardId).name.trim().toLowerCase() === name.toLowerCase();
 }
 
+function requestAnyTarget(ctx: ScriptCtx, hook: string, amount: number): void {
+  const options = ["opposing hero", "your hero"];
+  const cardOptions: (number | null)[] = [null, null];
+  for (const player of ctx.state.players) {
+    for (const card of player.board) {
+      if (!ctx.cardTypes(card).includes("ally")) continue;
+      options.push(`ally:${player.seat}:${card.instanceId}`);
+      cardOptions.push(card.instanceId);
+    }
+  }
+  ctx.requestChoice(
+    hook,
+    decisionPrompt(
+      `${ctx.data.name}: deal ${ctx.previewArcaneDamage(amount)} arcane damage to a target`,
+      "card.ros.arcane.target.choose",
+      {
+        values: {
+          card: { kind: "card", cardId: ctx.self.cardId },
+          amount: ctx.previewArcaneDamage(amount),
+        },
+        optionMessages: commonOptionMessages("opposing hero", "your hero"),
+      },
+    ),
+    options,
+    ctx.seat,
+    cardOptions,
+  );
+}
+
+function dealArcaneToTarget(ctx: ScriptCtx, option: string, amount: number): void {
+  const ally = /^ally:(\d+):(\d+)$/.exec(option);
+  if (ally) {
+    dealArcane(ctx, Number(ally[1]), amount, Number(ally[2]));
+    return;
+  }
+  dealArcane(ctx, option === "your hero" ? ctx.seat : opponentSeat(ctx), amount);
+}
+
 // ── Fusion ──────────────────────────────────────────────────────────────────
 
 /** Lightning Fusion: optional additional cost — reveal a Lightning card from
@@ -503,9 +541,14 @@ export const sba: Record<string, CardScript> = {
         ctx.setFlag("player", "burnUpArmed", true);
       },
       right(ctx) {
-        dealArcane(ctx, opponentSeat(ctx), 1);
+        requestAnyTarget(ctx, "burn-up-shock-target", 1);
       },
     }),
+    arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [4, 1],
+    onChoose(ctx, hook, option) {
+      if (hook === "burn-up-shock-target") dealArcaneToTarget(ctx, option, 1);
+    },
     canTriggerOnHit(ctx) {
       return ctx.link?.targetAllyId === undefined &&
         ctx.link?.attacker === ctx.seat &&

@@ -2,6 +2,7 @@ import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import {
   cardColorOf,
+  cardHasType,
   cardTypesOf,
   dataOf,
   instanceHasKeyword,
@@ -602,7 +603,7 @@ function replaceAttackFromPlayerZone(
 ): boolean {
   const link = currentLink(state);
   const player = state.players[seat] as PlayerState;
-  if (!link || link.attacker !== seat || link.attackCardType !== "action") return false;
+  if (!link || link.attacker !== seat || link.flags.attackGone === true) return false;
   const source = player[from];
   const index = source.findIndex((card) => card.instanceId === instanceId);
   if (index < 0) return false;
@@ -615,16 +616,27 @@ function replaceAttackFromPlayerZone(
     (replacementData.cost ?? 0) > maximumCost
   ) return false;
   const previous = link.attackingCard;
+  const previousCardType = link.attackCardType;
+  const previousIsToken = cardHasType(state, previous, "token");
+  const previousIsInArena = previousCardType === "action" ||
+    player.weapons.some((card) => card.instanceId === previous.instanceId) ||
+    player.board.some((card) => card.instanceId === previous.instanceId);
+  if (!previousIsInArena) return false;
   source.splice(index, 1);
-  const previousOwner = state.players[previous.owner] as PlayerState;
-  previousOwner.deck.push(previous);
   link.attackingCard = replacement;
-  runtime.transitions.move(
-    previous,
-    transitionZone("chain", previousOwner.seat),
-    transitionZone("deck", previousOwner.seat, "bottom"),
-    { to: true },
-  );
+  link.attackCardType = "action";
+  if (previousCardType === "action") {
+    const previousOwner = state.players[previous.owner] as PlayerState;
+    previousOwner.deck.push(previous);
+    runtime.transitions.move(
+      previous,
+      transitionZone("chain", previousOwner.seat),
+      transitionZone("deck", previousOwner.seat, "bottom"),
+      { to: true },
+    );
+  } else {
+    runtime.commands.putCardOnDeckBottom(state, previous.instanceId);
+  }
   runtime.transitions.move(
     replacement,
     transitionZone(from, player.seat),
@@ -632,17 +644,19 @@ function replaceAttackFromPlayerZone(
     { from: true },
   );
   if (instanceHasKeyword(state, replacement, "go again")) runtime.events.grantLinkGoAgain(state, link);
-  logPublic(
-    state,
-    gameLogMessage(
-      `${nameOf(state, previous.cardId)} is put on the bottom of its owner's deck and replaced by ${nameOf(state, replacement.cardId)} as the attacking card`,
-      "engine.log.combat.attacker.replaced",
-      {
-        previous: logCardValue(previous.cardId),
-        replacement: logCardValue(replacement.cardId),
-      },
-    ),
-  );
+  if (!previousIsToken) {
+    logPublic(
+      state,
+      gameLogMessage(
+        `${nameOf(state, previous.cardId)} is put on the bottom of its owner's deck and replaced by ${nameOf(state, replacement.cardId)} as the attacking card`,
+        "engine.log.combat.attacker.replaced",
+        {
+          previous: logCardValue(previous.cardId),
+          replacement: logCardValue(replacement.cardId),
+        },
+      ),
+    );
+  }
   return true;
 }
 

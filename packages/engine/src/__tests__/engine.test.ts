@@ -1152,6 +1152,34 @@ describe("game setup & turn structure", () => {
     finishEndPhase(s, engineRuntime);
     expect(heroAbilitiesDisabled(s, 1)).toBe(false);
   });
+
+  it("limits action-phase hero suppression to the affected hero's next action phase", () => {
+    const s = makeGame(105);
+    makeCtx(s, engineRuntime, 0, player(s, 0).hero).addModifier({
+      scope: "until-end-of-turn",
+      seat: 1,
+      suppressesHeroAbilitiesDuringActionPhase: true,
+      expiresAtEndOfSeatTurn: 1,
+    });
+
+    expect(heroAbilitiesDisabled(s, 1)).toBe(false);
+
+    s.activePlayer = 1;
+    s.turn = 2;
+    s.phase = "start";
+    expect(heroAbilitiesDisabled(s, 1)).toBe(false);
+
+    startTurn(s, engineRuntime);
+    expect(heroAbilitiesDisabled(s, 1)).toBe(true);
+
+    s.phase = "end";
+    expect(heroAbilitiesDisabled(s, 1)).toBe(false);
+    finishEndPhase(s, engineRuntime);
+    expect(s.modifiers.some((modifier) =>
+      modifier.suppressesHeroAbilitiesDuringActionPhase
+    )).toBe(false);
+  });
+
   it("creates a game, seat 0 starts, both players draw opening hands", () => {
     const s = makeGame(1);
     expect(s.turn).toBe(1);

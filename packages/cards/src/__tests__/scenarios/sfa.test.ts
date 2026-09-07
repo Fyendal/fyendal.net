@@ -580,7 +580,8 @@ describe("SFA — Mask of the Swarming Claw", () => {
       .passPriority() // defender's reaction window
       .react("burn up // shock|1", { meldSide: "right", settle: false })
       .passPriority()
-      .passPriority(); // Shock resolves and deals 1 arcane damage
+      .passPriority() // Shock resolves and asks for its target
+      .chooseOption("opposing hero");
     expect(
       s.state.pendingDecision?.chooseHook,
       JSON.stringify({

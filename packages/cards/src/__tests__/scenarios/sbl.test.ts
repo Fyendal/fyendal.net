@@ -148,6 +148,10 @@ describe("SBL — soul payoffs", () => {
     s.blockWith(RED_BLOCK);
     s.react("roaring beam|2", { settle: false });
     s.passPriority().passPriority();
+    const beam = s.state.players[0]!.hand.find(
+      (card) => card.cardId === printingId("roaring beam|2"),
+    )!;
+    s.doRaw({ kind: "choose", optionId: String(beam.instanceId) });
     s.activate(SER_BOLTYN, { settle: false });
     s.doRaw({
       kind: "choose",
@@ -678,19 +682,21 @@ describe("SBL — counters, prevention, redirects", () => {
     s.expectZoneSize(1, "board", 2);
   });
 
-  it("Roaring Beam: creates a Courage token; with an empty soul, returns to hand and charges", () => {
+  it("Roaring Beam: returns to hand, then lets its controller choose a card to charge", () => {
     const s = scenario({
       seats: [
-        boltynSeat({ hand: ["snatch|1", "roaring beam|2"], deck: [YELLOW] }),
+        boltynSeat({ hand: ["snatch|1", "roaring beam|2", YELLOW] }),
         { hero: "dorinthea" },
       ],
     });
     s.play("snatch|1", { settle: false });
     s.blockWith(); // attack-reaction window
-    s.react("roaring beam|2"); // resolves: token, return to hand, charge
+    s.react("roaring beam|2"); // resolves: token, return to hand, charge choice
     s.expectInZone(0, "courage|0", "board");
-    s.expectInZone(0, "roaring beam|2", "soul");
-    s.expectInZone(0, YELLOW, "hand"); // Snatch draws the untouched deck card
+    s.expectInZone(0, "roaring beam|2", "hand");
+    s.chooseCard(YELLOW);
+    s.expectInZone(0, YELLOW, "soul");
+    s.expectInZone(0, "roaring beam|2", "hand");
   });
 
   it("Springboard Somersault defends for 2 from hand, 4 from arsenal", () => {
