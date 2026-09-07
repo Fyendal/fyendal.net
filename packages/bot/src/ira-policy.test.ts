@@ -172,6 +172,95 @@ describe("Ira policy", () => {
     })).toMatchObject({ kind: "activate-ability", sourceInstanceId: irisId });
   });
 
+  it("does not use Iris without an action point to play Whirling Mist Blossom", () => {
+    const state = createGame({
+      decklists: [iraDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 91003,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    state.players[0]!.actionPoints = 0;
+    state.players[0]!.resources = 1;
+    state.players[0]!.flags.dealtDamageThisTurn = true;
+    replaceHand(state, 0, ["ASR010"]);
+    const irisId = state.players[0]!.equipment.head!.instanceId;
+    const legal = legalIntents(state, 0).filter((intent) =>
+      intent.kind === "pass" ||
+      (intent.kind === "activate-ability" && intent.sourceInstanceId === irisId)
+    );
+
+    expect(legal.some((intent) => intent.kind === "activate-ability")).toBe(true);
+    expect(chooseIraIntent({
+      seat: 0,
+      view: projectStateFor(state, 0),
+      legal,
+      cards: cardData,
+    })).toEqual({ kind: "pass" });
+  });
+
+  it("does not use Iris while another Whirling Mist Blossom is stranded in banish", () => {
+    const state = createGame({
+      decklists: [iraDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 910031,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    state.players[0]!.resources = 1;
+    state.players[0]!.flags.dealtDamageThisTurn = true;
+    replaceHand(state, 0, ["ASR010"]);
+    const blossom = state.players[0]!.deck.find((card) => card.cardId === "ASR019")!;
+    state.players[0]!.deck = state.players[0]!.deck.filter((card) => card !== blossom);
+    state.players[0]!.banish.push(blossom);
+    const irisId = state.players[0]!.equipment.head!.instanceId;
+    const legal = legalIntents(state, 0).filter((intent) =>
+      intent.kind === "pass" ||
+      (intent.kind === "activate-ability" && intent.sourceInstanceId === irisId)
+    );
+
+    expect(chooseIraIntent({
+      seat: 0,
+      view: projectStateFor(state, 0),
+      legal,
+      cards: cardData,
+    })).toEqual({ kind: "pass" });
+  });
+
+  it("plays an Iris-fetched Whirling Mist Blossom before spending its only resource", () => {
+    const state = createGame({
+      decklists: [iraDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 91004,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    state.players[0]!.resources = 1;
+    state.players[0]!.flags.dealtDamageThisTurn = true;
+    replaceHand(state, 0, []);
+    const blossom = state.players[0]!.deck.find((card) => card.cardId === "ASR019")!;
+    state.players[0]!.deck = state.players[0]!.deck.filter((card) => card !== blossom);
+    blossom.playableFrom = ["banish"];
+    blossom.playableFromSourceCardId = state.players[0]!.equipment.head!.cardId;
+    state.players[0]!.banish.push(blossom);
+
+    const legal = legalIntents(state, 0);
+    const blossomIntent = legal.find((intent) =>
+      intent.kind === "play-from-zone" && intent.instanceId === blossom.instanceId
+    );
+    expect(blossomIntent).toBeDefined();
+    expect(chooseIraIntent({
+      seat: 0,
+      view: projectStateFor(state, 0),
+      legal,
+      cards: cardData,
+      state,
+    })).toEqual(blossomIntent);
+  });
+
   it("preserves its opening hand, then puts a card in arsenal", () => {
     let state = createGame({
       decklists: [iraDeck(), decklists.dorinthea],
@@ -190,6 +279,7 @@ describe("Ira policy", () => {
     });
     expect(opening).toEqual({ kind: "pass" });
     state = apply(state, 0, opening);
+    state = apply(state, 1, { kind: "pass" });
 
     const arsenal = chooseIraIntent({
       seat: 0,

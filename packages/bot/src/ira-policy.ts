@@ -242,6 +242,12 @@ function canFundBlossomAfterIris(
   return floatingAfterActivation + remainingPitch >= 1;
 }
 
+function canPlayActionAfterIris(input: BotPolicyInput): boolean {
+  if (input.view.activePlayer !== input.seat) return false;
+  if (input.view.players[input.seat].actionPoints > 0) return true;
+  return currentAttackIsOurs(input) && currentAttackHasOrWillGetGoAgain(input);
+}
+
 function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: BotPolicyInput): number {
   const decision = input.view.pendingDecision;
   if (!decision) return 0;
@@ -315,8 +321,9 @@ function scorePlay(
       const alreadyHasBlossom = [...me.hand, ...me.arsenal, ...me.banish].some((candidate) =>
         key(input.cards[candidate.cardId]) === "whirling mist blossom|2"
       );
-      score = alreadyHasBlossom || !canFundBlossomAfterIris(intent, input)
-        ? -20
+      score = alreadyHasBlossom || !canFundBlossomAfterIris(intent, input) ||
+          !canPlayActionAfterIris(input)
+        ? -100
         : 12;
     } else if (functional === "energy potion|3") {
       score = me.resources < 2 ? 18 : -5;
@@ -344,6 +351,9 @@ function scorePlay(
     if (functional === "whirling mist blossom|2") {
       const priorHit = [...input.view.chain].reverse().find((link) => link.resolved)?.hit === true;
       if (priorHit) score += 10;
+      if (key(input.cards[card.playableFromSourceCardId ?? ""]) === "iris of the blossom|0") {
+        score += 40;
+      }
     }
     if (functional.startsWith("snatch|")) score += 4;
     if (intent.kind === "play-from-arsenal") score += 2;

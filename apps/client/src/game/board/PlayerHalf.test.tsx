@@ -34,7 +34,7 @@ function renderPlayerHalf(
   playerView: PlayerView,
   mine = true,
   visibleDeckTop?: PlayerView["visibleDeckTop"],
-  defendFromArsenal?: number,
+  stageableDefenderId?: number,
   locale: "en" | "zh-Hans" = "en",
 ): string {
   return renderToStaticMarkup(
@@ -54,7 +54,7 @@ function renderPlayerHalf(
           playableArsenal: new Set(),
           playableZones: new Map(),
           activatable: new Set(),
-          stageableDefenders: new Set(defendFromArsenal === undefined ? [] : [defendFromArsenal]),
+          stageableDefenders: new Set(stageableDefenderId === undefined ? [] : [stageableDefenderId]),
           canPass: false,
           canCloseChain: false,
         },
@@ -63,7 +63,7 @@ function renderPlayerHalf(
         stagedIds: new Set(),
         committedDefenderIds: new Set(),
         optimisticallyHiddenIds: new Set(),
-        defending: defendFromArsenal !== undefined,
+        defending: stageableDefenderId !== undefined,
         onStage: () => undefined,
         onActivate: () => undefined,
         onSelect: () => undefined,
@@ -222,5 +222,32 @@ describe("PlayerHalf", () => {
     expect(html).toMatch(
       /class="card card-zone [^"]*card-highlight[^"]*card-clickable"[^>]*data-cardid="TST-AMBUSH"/,
     );
+  });
+
+  it("makes a stageable arena permanent highlighted and clickable", () => {
+    const html = renderPlayerHalf(player, true, undefined, 2);
+
+    expect(html).toMatch(
+      /class="card card-zone [^"]*card-highlight[^"]*card-clickable"[^>]*data-cardid="TST-UPRIGHT"/,
+    );
+  });
+
+  it("shows how many cards remain under an arena construct", () => {
+    const html = renderPlayerHalf({
+      ...player,
+      board: [{
+        instanceId: 40,
+        cardId: "DYN092B",
+        owner: 0,
+        subcards: [
+          { instanceId: 41, cardId: "DYN111", owner: 0 },
+          { instanceId: 42, cardId: "DYN111", owner: 0 },
+          { instanceId: 43, cardId: "DYN111", owner: 0 },
+        ],
+      }],
+    });
+
+    expect(html).toContain('aria-label="3 cards underneath"');
+    expect(html).toContain('class="under-pip-count">×3</span>');
   });
 });

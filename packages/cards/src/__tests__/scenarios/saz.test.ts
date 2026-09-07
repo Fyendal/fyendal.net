@@ -498,7 +498,7 @@ describe("SAZ — tokens", () => {
       seats: [azaleaSeat({ board: ["bloodrot pox|0"], hand: [], resources: 3 }), { hero: "rhinar", hand: [] }],
     });
     s.settle();
-    s.doRaw({ kind: "pass" }); // action phase → end phase; the trigger opens the choice
+    s.passActionPhase(); // the end-phase trigger opens the choice
     expect(s.state.pendingDecision?.kind).not.toBe("priority-window");
     s.chooseOption("pay 3");
     s.expectTurn(2).expectLife(0, 20).expectZoneSize(0, "board", 0).expectLog("paid");
@@ -536,7 +536,7 @@ describe("SAZ — tokens", () => {
       ],
     });
     s.settle();
-    s.doRaw({ kind: "pass" }).chooseCard(RED)
+    s.passActionPhase().chooseCard(RED)
       .expectZoneSize(0, "board", 0)
       .expectLog("put on the bottom of the deck")
       .expectDeckBottom(0, "searing shot|1") // arsenal cards bottom after hand cards
@@ -555,7 +555,7 @@ describe("SAZ — tokens", () => {
       ],
     });
 
-    s.doRaw({ kind: "pass" });
+    s.passActionPhase();
     expect(s.lastEvents.map(({ from, to }) => ({ from, to }))).toEqual([
       { from: { kind: "board", seat: 0 }, to: null },
       { from: { kind: "hand", seat: 0 }, to: { kind: "deck", seat: 0, position: "bottom" } },
@@ -579,7 +579,7 @@ describe("SAZ — tokens", () => {
       ],
     });
     s.settle();
-    s.doRaw({ kind: "pass" });
+    s.passActionPhase();
     const controllerDecision = projectStateFor(s.state, 0).pendingDecision;
     const opponentDecision = projectStateFor(s.state, 1).pendingDecision;
     expect(controllerDecision?.options).toHaveLength(3);

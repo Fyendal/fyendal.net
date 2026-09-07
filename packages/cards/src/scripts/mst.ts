@@ -51,6 +51,21 @@ function isIllusionistAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): bo
   return isAura(ctx, card) && hasType(ctx, card, "illusionist");
 }
 
+function instantEvoEquipment(extra: CardScript = {}): CardScript {
+  return {
+    ...extra,
+    additionalCardTypes: ["instant"],
+    playableEquipment: true,
+    canPlay(ctx) {
+      const slot = (["head", "chest", "arms", "legs"] as const)
+        .find((candidate) => hasType(ctx, ctx.self, candidate));
+      const base = slot ? ctx.player(ctx.seat).equipment[slot] : undefined;
+      return !!base && hasType(ctx, base, "base") && (extra.canPlay?.(ctx) ?? true);
+    },
+    playAsInstant: () => true,
+  };
+}
+
 function controlsIllusionistAura(ctx: ScriptCtx): boolean {
   return ctx.player(ctx.seat).board.some((card) => isIllusionistAura(ctx, card));
 }
@@ -767,10 +782,10 @@ Object.assign(mst, {
   "visit goldmane estate|3": { onPlay(ctx) { createNamed(ctx, "Gold"); const player = ctx.player(ctx.seat); const gold = [...player.board, ...player.weapons, ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined)].filter((card) => ctx.cardNames(card).includes("gold")).length; if (gold >= 3) createNamed(ctx, "Might", gold); } },
   "visit the golden anvil|3": {},
   "supercell|3": { variablePlayCost: { base: 0, counterKey: "supercellX", prompt: decisionPrompt("Choose X", "engine.decision.x.choose") }, onPlay(ctx) { const x = ctx.getCounter("supercellX"); const id = tokenNamed(ctx, "Hyper Driver"); if (id) ctx.createToken(id, undefined, { steam: x }); } },
-  "evo recall|3": { onEnterArena(ctx) { const cards = ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && hasType(ctx, card, "mechanologist") && ctx.hasCardType(card, "action")); if (cards.length) ctx.requestCardChoice("recall-card", decisionPrompt("Put a Mechanologist action on top", "card.mst.mechanologist.action.top", { optionMessages: commonOptionMessages("no") }), ["no", ...cards.map((card) => card.instanceId)]); }, onChoose(ctx, hook, option) { if (hook === "recall-card" && option !== "no") ctx.putOnDeckTop(Number(option)); } },
-  "evo heartdrive|3": { onEnterArena: (ctx) => ctx.addModifier({ scope: "next-play", playCostReduction: 1, appliesTo: "attack-action" }) },
-  "evo shortcircuit|3": { onEnterArena(ctx) { ctx.requestChoice("shortcircuit-target", decisionPrompt("Deal 1 damage to which hero?", "card.mst.hero.damage.choose", { values: { amount: 1 }, optionMessages: { "opposing hero": decisionMessage("common.option.opponent"), "your hero": decisionMessage("card.mst.option.yourhero") } }), ["opposing hero", "your hero"]); }, onChoose(ctx, hook, option) { if (hook === "shortcircuit-target") ctx.dealDamage(option === "your hero" ? ctx.seat : opponentSeat(ctx), 1); } },
-  "evo speedslip|3": { onEnterArena: (ctx) => ctx.addModifier({ scope: "next-play", grantKeyword: "boost", appliesTo: "attack-action" }) },
+  "evo recall|3": instantEvoEquipment({ onEnterArena(ctx) { const cards = ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && hasType(ctx, card, "mechanologist") && ctx.hasCardType(card, "action")); if (cards.length) ctx.requestCardChoice("recall-card", decisionPrompt("Put a Mechanologist action on top", "card.mst.mechanologist.action.top", { optionMessages: commonOptionMessages("no") }), ["no", ...cards.map((card) => card.instanceId)]); }, onChoose(ctx, hook, option) { if (hook === "recall-card" && option !== "no") ctx.putOnDeckTop(Number(option)); } }),
+  "evo heartdrive|3": instantEvoEquipment({ onEnterArena: (ctx) => ctx.addModifier({ scope: "next-play", playCostReduction: 1, appliesTo: "attack-action" }) }),
+  "evo shortcircuit|3": instantEvoEquipment({ onEnterArena(ctx) { ctx.requestChoice("shortcircuit-target", decisionPrompt("Deal 1 damage to which hero?", "card.mst.hero.damage.choose", { values: { amount: 1 }, optionMessages: { "opposing hero": decisionMessage("common.option.opponent"), "your hero": decisionMessage("card.mst.option.yourhero") } }), ["opposing hero", "your hero"]); }, onChoose(ctx, hook, option) { if (hook === "shortcircuit-target") ctx.dealDamage(option === "your hero" ? ctx.seat : opponentSeat(ctx), 1); } }),
+  "evo speedslip|3": instantEvoEquipment({ onEnterArena: (ctx) => ctx.addModifier({ scope: "next-play", grantKeyword: "boost", appliesTo: "attack-action" }) }),
   "longdraw half-glove|0": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true, canActivate: (ctx) => ctx.player(ctx.seat).hand.length + ctx.player(ctx.seat).arsenal.length >= 2, onActivate: (ctx) => buffNextAttack(ctx, { attack: 4, appliesToSubtype: "arrow" }) } },
   "murky water|1": { modifyAttack: (ctx) => (ctx.self.counters?.aim ?? 0) > 0 ? 1 : 0, onAttackDeclared(ctx) { if ((ctx.self.counters?.aim ?? 0) > 0) ctx.grantCardKeyword(ctx.self.instanceId, "dominate"); } },
   "kindle|1": { onPlay(ctx) { ampNextArcane(ctx, 1); if (ctx.player(ctx.seat).hand.length === 0) ctx.drawCards(ctx.seat, 1); } },

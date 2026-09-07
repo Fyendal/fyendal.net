@@ -59,7 +59,6 @@ import {
   answerArsenal,
   answerEndPhasePitchOrder,
   drawUpTo,
-  endTurn,
   startTurn,
 } from "./turn.js";
 import { globalHookSources } from "./sourceQueries.js";
@@ -613,7 +612,7 @@ export function applyIntent(
         !currentLink(next) &&
         seat === next.priorityPlayer
       ) {
-        if (!offerEndActionPriority(next, runtime, seat)) endTurn(next, runtime);
+        offerEndActionPriority(next, seat);
       } else {
         // scripted decisions decline on "no"; a decision without "no" but with
         // an explicit "pass" option (look-at acknowledgments, opt, ordering

@@ -613,7 +613,8 @@
   pointer-events: none;
 }
 .soul-pip,
-.bound-pip {
+.bound-pip,
+.under-pip {
   top: -7px;
   right: -7px;
   left: auto;
@@ -650,6 +651,10 @@
   font-size: 11px;
   line-height: 1;
   text-shadow: 0 1px 3px #000;
+}
+.under-pip-count {
+  font-size: 12px;
+  line-height: 1;
 }
 
 /* A weapon with at least two remaining turn activations shows one green dot

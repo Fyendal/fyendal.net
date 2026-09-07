@@ -490,6 +490,42 @@ describe("EVO — registration and core mechanics", () => {
       .expectAttackValue(2);
   });
 
+  it("Terminator Tank gains overpower only with at least three Evos equipped", () => {
+    const attackWith = (equipment: {
+      head: string;
+      chest: string;
+      arms: string;
+      legs: string;
+    }) => {
+      const s = scenario({
+        seats: [
+          {
+            hero: "rhinar",
+            resources: 3,
+            hand: ["terminator tank|1"],
+            equipment,
+          },
+          { hero: "dorinthea" },
+        ],
+      });
+      s.play("terminator tank|1");
+      return projectStateFor(s.state, 0).chain.at(-1)?.overpower;
+    };
+
+    expect(attackWith({
+      head: "evo beta base head|3",
+      chest: "cogwerx base chest|0",
+      arms: "cogwerx base arms|0",
+      legs: "evo beta base legs|3",
+    })).toBe(false);
+    expect(attackWith({
+      head: "evo beta base head|3",
+      chest: "cogwerx base chest|0",
+      arms: "evo beta base arms|3",
+      legs: "evo beta base legs|3",
+    })).toBe(true);
+  });
+
   it("Scrap banishes a graveyard item or equipment and leaves arena items alone", () => {
     const s = scenario({
       seats: [

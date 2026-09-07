@@ -100,6 +100,69 @@ describe("MST — Mystic heroes and cloaked equipment", () => {
   });
 });
 
+describe("MST — Mechanologist", () => {
+  it("Evo Recall plays as an instant, transforms a base head, and recalls a banished action", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["evo recall|3"],
+          banish: ["zero to sixty|1"],
+          equipment: { head: "cogwerx base head|0" },
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    const recall = g.state.players[0]!.hand[0]!;
+
+    expect(legalIntents(g.state, 0)).toContainEqual(expect.objectContaining({
+      kind: "play-card",
+      instanceId: recall.instanceId,
+      asInstant: true,
+    }));
+
+    g.play("evo recall|3", { asInstant: true })
+      .chooseCard("zero to sixty|1")
+      .expectEquipped(0, "head", "evo recall|3");
+    expect(g.state.players[0]!.equipment.head?.subcards?.[0]?.cardId)
+      .toBe(printingId("cogwerx base head|0"));
+    expect(g.state.players[0]!.deck[0]?.cardId).toBe(printingId("zero to sixty|1"));
+  });
+
+  it("MST instant Evos require matching base equipment", () => {
+    for (const [evo, equipment] of [
+      ["evo recall|3", { head: "cogwerx base head|0" }],
+      ["evo heartdrive|3", { chest: "cogwerx base chest|0" }],
+      ["evo shortcircuit|3", { arms: "cogwerx base arms|0" }],
+      ["evo speedslip|3", { legs: "cogwerx base legs|0" }],
+    ] as const) {
+      const withBase = scenario({
+        seats: [
+          { hero: "rhinar", hand: [evo], equipment },
+          { hero: "dorinthea" },
+        ],
+      });
+      const playableCard = withBase.state.players[0]!.hand[0]!;
+      expect(legalIntents(withBase.state, 0)).toContainEqual(expect.objectContaining({
+        kind: "play-card",
+        instanceId: playableCard.instanceId,
+        asInstant: true,
+      }));
+
+      const withoutBase = scenario({
+        seats: [
+          { hero: "rhinar", hand: [evo], equipment: { head: null, chest: null, arms: null, legs: null } },
+          { hero: "dorinthea" },
+        ],
+      });
+      const blockedCard = withoutBase.state.players[0]!.hand[0]!;
+      expect(legalIntents(withoutBase.state, 0).some(
+        (intent) => intent.kind === "play-card" && intent.instanceId === blockedCard.instanceId,
+      ), evo).toBe(false);
+    }
+  });
+});
+
 describe("MST — Assassin", () => {
   it("Nuu banishes action cards defending a stealth attack when the link resolves", () => {
     const g = scenario({

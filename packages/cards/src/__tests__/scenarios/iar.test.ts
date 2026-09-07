@@ -66,7 +66,7 @@ describe("IAR spoiled cards", () => {
       { hero: "dorinthea", equipment: NO_EQUIPMENT },
     ] });
 
-    g.doRaw({ kind: "pass" });
+    g.passActionPhase();
     expect(g.state.pendingDecision?.kind).not.toBe("priority-window");
     expect(g.state.stack).toHaveLength(0);
     expect(g.state.players[0]!.equipment.arms).toBeDefined();

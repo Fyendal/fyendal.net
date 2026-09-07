@@ -1297,6 +1297,58 @@ describe("PgRoomStore storage", () => {
     expect(await store.getHistory(code)).toHaveLength(0);
   });
 
+  it("honors priority preferences at the final action-phase window", async () => {
+    const { code, tokens } = await fullRoom();
+    await startGame(code, tokens);
+    const room = await store.getRoom(code);
+    const turnPlayer = room!.state!.activePlayer as 0 | 1;
+    const opponent = (1 - turnPlayer) as 0 | 1;
+    const state = room!.state!;
+    const opponentState = state.players[opponent]!;
+    opponentState.hand = [];
+    opponentState.arsenal = [];
+    opponentState.banish = [];
+    opponentState.graveyard = [];
+    opponentState.board = [];
+    opponentState.weapons = [];
+    opponentState.equipment = {};
+    await db.query("UPDATE rooms SET state = $2 WHERE code = $1", [
+      code,
+      JSON.stringify(dehydrateState(state, "rules-a")),
+    ]);
+
+    // The default always-pause preference preserves the opponent's final
+    // priority even when the engine finds no playable response.
+    expect((await store.applyIntent(
+      code,
+      { token: tokens[turnPlayer] },
+      { kind: "pass" },
+    )).ok).toBe(true);
+    let current = await store.getRoom(code);
+    expect(current!.state!.pendingDecision).toMatchObject({
+      player: opponent,
+      kind: "priority-window",
+    });
+    expect(current!.state!.stackResume).toBe("end-action-phase");
+    expect(legalIntents(current!.state!, opponent).every(
+      (intent) => intent.kind === "pass" || intent.kind === "concede",
+    )).toBe(true);
+
+    // Opting into auto-pass immediately takes the same empty window and lets
+    // the turn proceed to the turn-player's arsenal decision.
+    const opted = await store.setPriorityMode(
+      code,
+      { token: tokens[opponent] },
+      "auto-pass",
+    );
+    expect(opted).toMatchObject({ ok: true, autoPassed: true });
+    current = await store.getRoom(code);
+    expect(current!.state!.pendingDecision).toMatchObject({
+      player: turnPlayer,
+      kind: "arsenal",
+    });
+  });
+
   it("deduplicates a retried room command and rejects a different stale command", async () => {
     const { code, tokens } = await fullRoom();
     await startGame(code, tokens);

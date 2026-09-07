@@ -1,5 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, commonOptionMessages, decisionPrompt } from "./shared-helpers.js";
+import { attackAbility, commonOptionMessages, decisionMessage, decisionPrompt } from "./shared-helpers.js";
 
 const HYPER_DRIVER = "AMX028";
 const BANK_BREAKER = "AMX022B";
@@ -28,13 +28,22 @@ function hyperDriver(steam: number): CardScript {
   return {
     destroyAtZeroCounter: "steam",
     onEnterArena(ctx) { if (steam > 0) ctx.setCounter("steam", steam); },
-    onBoosted(ctx) {
-      const used = `hyperDriverBoost:${ctx.self.instanceId}`;
-      if (ctx.getPlayerFlag(ctx.seat, used) === true || ctx.getCounter("steam") <= 0) return;
-      ctx.setPlayerFlag(ctx.seat, used, true);
-      ctx.setCounter("steam", ctx.getCounter("steam") - 1);
-      ctx.changeResources(ctx.seat, 1);
-    },
+    triggers: [{
+      event: "card-boosted",
+      label: "Remove a steam counter and gain 1 resource",
+      labelMessage: decisionMessage("card.trigger.hyperdriver.boost"),
+      condition(ctx) {
+        return ctx.getPlayerFlag(ctx.seat, `hyperDriverBoost:${ctx.self.instanceId}`) !== true &&
+          ctx.getCounter("steam") > 0;
+      },
+      onTrigger(ctx) { ctx.setPlayerFlag(ctx.seat, `hyperDriverBoost:${ctx.self.instanceId}`, true); },
+      effect(ctx) {
+        const steam = ctx.getCounter("steam");
+        if (steam <= 0) return;
+        ctx.setCounter("steam", steam - 1);
+        ctx.changeResources(ctx.seat, 1);
+      },
+    }],
   };
 }
 

@@ -308,6 +308,10 @@ const KEYWORD_OVERRIDES: Record<string, string[]> = {
   "bull bar|1": ["Boost"],
   "bull bar|2": ["Boost"],
   "bull bar|3": ["Boost"],
+  // These Evo Upgrade attacks gain overpower only with 3+ equipped Evos.
+  "annihilator engine|1": [],
+  "terminator tank|1": [],
+  "war machine|1": [],
   // Photon Rush only GAINS go again after another Lightning card was played.
   "photon rush|1": ["Lightning Flow"],
   "photon rush|3": ["Lightning Flow"],

@@ -240,7 +240,24 @@ export const dynHighRarity: Record<string, CardScript> = {
     }],
   },
   "construct nitro mechanoid|2": { onPlay(ctx) { const equipment = ["head", "chest", "arms", "legs"].flatMap((slot) => { const card = ctx.player(ctx.seat).equipment[slot as "head" | "chest" | "arms" | "legs"]; return card && has(ctx, card, "mechanologist") ? [card] : []; }); const weaponCard = ctx.player(ctx.seat).weapons.find((card) => has(ctx, card, "mechanologist")); const drivers = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "hyper driver")).slice(0, 3); if (equipment.length === 4 && weaponCard && drivers.length === 3) ctx.transformInto("DYN092B", [...equipment, weaponCard, ...drivers].map((card) => card.instanceId)); } },
-  "nitro mechanoid|0": { activated: { cost: 0, isAttack: true, goAgain: false, oncePerTurn: true, destroySubcardCost: true }, onAttackDeclared(ctx) { ctx.setFlag("link", "overpower", true); } },
+  "nitro mechanoid|0": {
+    additionalCardTypes: ["equipment"],
+    activated: {
+      cost: 0,
+      isAttack: true,
+      goAgain: false,
+      effectCardCosts: [{
+        zone: "under",
+        move: "banish",
+        count: 1,
+        prompt: decisionPrompt(
+          "Choose a card to banish from under Nitro Mechanoid",
+          "card.dyn.nitromechanoid.card.banish",
+        ),
+      }],
+    },
+    onAttackDeclared(ctx) { ctx.setFlag("link", "overpower", true); },
+  },
   "plasma mainline|1": { onEnterArena(ctx) { ctx.addCounter(ctx.self.instanceId, "steam", 5); }, onFriendlyEnterArena(ctx, card) { if (!has(ctx, card, "mechanologist") || !has(ctx, card, "item") || (ctx.cardData(card.cardId).cost ?? 99) > 2 || ctx.getCounter("steam") <= 0) return; ctx.addCounter(ctx.self.instanceId, "steam", -1); ctx.addCounter(card.instanceId, "steam", 1); } },
   "powder keg|3": {
     onFriendlyCombatDamageDealt(ctx, source, target, amount) {

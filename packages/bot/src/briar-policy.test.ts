@@ -66,6 +66,10 @@ describe("Briar policy", () => {
     expect(ended.ok, ended.ok ? "" : ended.error).toBe(true);
     if (!ended.ok) return;
     state = ended.state;
+    const opponentPass = applyIntent(state, 1, { kind: "pass" });
+    expect(opponentPass.ok, opponentPass.ok ? "" : opponentPass.error).toBe(true);
+    if (!opponentPass.ok) return;
+    state = opponentPass.state;
     const arsenalChoice = chooseBriarIntent({
       seat: 0,
       view: projectStateFor(state, 0),

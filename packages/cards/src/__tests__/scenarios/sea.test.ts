@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { legalIntents, projectStateFor } from "@fyendal/engine";
+import { actionCandidates, legalIntents, projectStateFor } from "@fyendal/engine";
 import { functionalKeyOf } from "../../functional.js";
 import { cardData, isImplemented, scripts } from "../../index.js";
 import { printingId, scenario } from "../harness.js";
@@ -341,6 +341,49 @@ describe("SEA — High Seas heroes and cogs", () => {
     expect(g.state.log.some(
       (entry) => entry.publicText?.includes("skipped duplicate choice"),
     )).toBe(false);
+  });
+
+  it("Sky Skimmer can tap a cog for its instant ability while attacking", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["sky skimmer|1"],
+          board: ["golden cog|0"],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+
+    g.play("sky skimmer|1")
+      .blockWith();
+
+    const attackId = g.state.chain.at(-1)!.attackingCard.instanceId;
+    expect(legalIntents(g.state, 0)).toContainEqual(expect.objectContaining({
+      kind: "activate-ability",
+      sourceInstanceId: attackId,
+    }));
+    expect(actionCandidates(g.state, 0)).toContainEqual(expect.objectContaining({
+      kind: "activate-ability",
+      sourceInstanceId: attackId,
+    }));
+
+    g.activate("sky skimmer|1", { settle: false });
+    const cogOption = g.state.pendingDecision?.options?.[0];
+    expect(cogOption).toBeDefined();
+    expect(projectStateFor(g.state, 0).pendingDecision?.optionCards).toEqual([
+      expect.objectContaining({ cardId: printingId("golden cog|0") }),
+    ]);
+    g.doRaw({ kind: "choose", optionId: cogOption! })
+      .passPriority()
+      .passPriority();
+    expect(g.state.pendingDecision?.chooseHook).toBe("skimmer-mode");
+    g.doRaw({ kind: "choose", optionId: "power" })
+      .expectAttackValue(5);
+
+    expect(g.state.players[0]!.board.find(
+      (card) => functionalKeyOf(cardData[card.cardId]!) === "golden cog|0",
+    )?.tapped).toBe(true);
   });
 
   it("Golden Skywarden repeats Galvanize after destroying a Golden Cog", () => {

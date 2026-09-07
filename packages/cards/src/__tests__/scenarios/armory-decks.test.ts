@@ -240,6 +240,48 @@ describe("Armory Decks — AIO, AJV, and AST", () => {
       .expectFinalAttack(4);
   });
 
+  it("Fast and Furious can save a one-counter Hyper Driver when banished for Boost", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "maxx 'the hype' nitro|0",
+          board: ["hyper driver|2"],
+          hand: ["fast and furious|1"],
+          deck: ["fast and furious|1"],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    const driver = g.state.players[0]!.board.find((card) =>
+      functionalKeyOf(cardData[card.cardId]!) === "hyper driver|2"
+    )!;
+    driver.counters = { steam: 1 };
+
+    g.play("fast and furious|1", { boost: true, settle: false });
+    const triggers = g.state.pendingDecision?.triggerOrder?.remaining ?? [];
+    const fastAndFurious = triggers.find((layer) =>
+      layer.label === "Put a steam counter on an item with crank"
+    );
+    const hyperDriver = triggers.find((layer) =>
+      layer.label === "Remove a steam counter and gain 1 resource"
+    );
+    expect(fastAndFurious).toBeDefined();
+    expect(hyperDriver).toBeDefined();
+
+    g.doRaw({
+      kind: "order-triggers",
+      optionIds: [
+        `${fastAndFurious!.sourceInstanceId}:${fastAndFurious!.triggerIndex}`,
+        `${hyperDriver!.sourceInstanceId}:${hyperDriver!.triggerIndex}`,
+      ],
+    }).settle().chooseCard("hyper driver|2");
+
+    expect(g.state.players[0]!.board.find((card) => card.instanceId === driver.instanceId))
+      .toMatchObject({ counters: { steam: 1 } });
+  });
+
   it("Jarl creates a Frostbite in an exposed zone when he plays an Ice card", () => {
     const g = scenario({
       seats: [

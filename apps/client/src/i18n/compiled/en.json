@@ -2323,6 +2323,12 @@
       "value": "Return a Hyper Driver to the arena?"
     }
   ],
+  "card.dyn.nitromechanoid.card.banish": [
+    {
+      "type": 0,
+      "value": "Choose a card to banish from under Nitro Mechanoid"
+    }
+  ],
   "card.dyn.patience.hero.choose": [
     {
       "type": 0,
@@ -14311,6 +14317,12 @@
       "value": "Add an energy counter"
     }
   ],
+  "card.trigger.hyperdriver.boost": [
+    {
+      "type": 0,
+      "value": "Remove a steam counter and gain 1 resource"
+    }
+  ],
   "card.trigger.iar.mark.neverest": [
     {
       "type": 0,
@@ -21418,6 +21430,38 @@
     {
       "type": 0,
       "value": "Your turn"
+    }
+  ],
+  "game.under.count": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " card underneath"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cards underneath"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "game.undo": [

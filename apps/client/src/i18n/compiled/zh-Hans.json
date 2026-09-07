@@ -2327,6 +2327,12 @@
       "value": "将一张 Hyper Driver 返回竞技场？"
     }
   ],
+  "card.dyn.nitromechanoid.card.banish": [
+    {
+      "type": 0,
+      "value": "选择一张 Nitro Mechanoid 下方的牌并放逐"
+    }
+  ],
   "card.dyn.patience.hero.choose": [
     {
       "type": 0,
@@ -13731,6 +13737,12 @@
       "value": "增加一个能量指示物"
     }
   ],
+  "card.trigger.hyperdriver.boost": [
+    {
+      "type": 0,
+      "value": "移除一个 steam 指示物并获得 1 点资源"
+    }
+  ],
   "card.trigger.iar.mark.neverest": [
     {
       "type": 0,
@@ -20628,6 +20640,20 @@
     {
       "type": 0,
       "value": "你的回合"
+    }
+  ],
+  "game.under.count": [
+    {
+      "type": 0,
+      "value": "下方有 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张牌"
     }
   ],
   "game.undo": [
