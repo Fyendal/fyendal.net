@@ -343,6 +343,73 @@ describe("SEA — High Seas heroes and cogs", () => {
     )).toBe(false);
   });
 
+  it("Cogwerx Zeppelin does not gain go again from its instant ability", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["cogwerx zeppelin|1"],
+          board: ["copper cog|3"],
+          resources: 2,
+        },
+        {
+          hero: "dorinthea",
+          hand: ["raging onslaught|1", "raging onslaught|1", "raging onslaught|1"],
+        },
+      ],
+    });
+
+    g.play("cogwerx zeppelin|1")
+      .blockWith("raging onslaught|1", "raging onslaught|1", "raging onslaught|1");
+
+    expect(g.state.chain.at(-1)?.goAgain).toBe(false);
+    expect(projectStateFor(g.state, 0).chain.at(-1)?.goAgain).toBe(false);
+    g.activate("cogwerx zeppelin|1", { settle: false })
+      .chooseCard("copper cog|3");
+    expect(g.state.players[0]!.actionPoints).toBe(0);
+  });
+
+  it("Cogwerx Workshop lets its player choose up to 2 cogs for steam counters", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["cogwerx workshop|3"],
+          board: ["copper cog|3"],
+          resources: 1,
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("cogwerx workshop|3", { settle: false })
+      .passPriority()
+      .passPriority();
+
+    expect(g.state.pendingDecision?.chooseHook).toBe("engine-crank");
+    g.chooseOption("no");
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "cogwerx-workshop-steam",
+      minimumSelections: 0,
+      maximumSelections: 2,
+    });
+
+    const goldenCog = g.state.players[0]!.board.find(
+      (card) => functionalKeyOf(cardData[card.cardId]!) === "golden cog|0",
+    )!;
+    g.doRaw({
+      kind: "choose-many",
+      optionIds: [String(goldenCog.instanceId)],
+    }).settle();
+
+    expect(g.state.players[0]!.board.find(
+      (card) => card.instanceId === goldenCog.instanceId,
+    )?.counters?.steam).toBe(2);
+    expect(g.state.players[0]!.board.find(
+      (card) => functionalKeyOf(cardData[card.cardId]!) === "copper cog|3",
+    )?.counters?.steam).toBeUndefined();
+  });
+
   it("Sky Skimmer can tap a cog for its instant ability while attacking", () => {
     const g = scenario({
       seats: [

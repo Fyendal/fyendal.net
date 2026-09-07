@@ -1577,7 +1577,30 @@ Object.assign(sea, {
     },
   },
   "cog in the machine|1": { onPlay(ctx: ScriptCtx) { ctx.createTokens(GOLDEN_COG, 2); tapChoice(ctx, "cog-machine", "Tap a cog to bottom this?", "card.sea.cogmachine.cog.tap", controlledCogs(ctx, false)); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "cog-machine" && option !== "pass" && ctx.tap(Number(option))) ctx.putOnDeckBottom(ctx.self.instanceId); } },
-  "cogwerx workshop|3": { onPlay(ctx: ScriptCtx) { createGoldenCog(ctx); for (const cog of controlledCogs(ctx).slice(0, 2)) ctx.addCounter(cog.instanceId, "steam", 1); } },
+  "cogwerx workshop|3": {
+    onPlay(ctx: ScriptCtx) {
+      createGoldenCog(ctx);
+      const cogs = controlledCogs(ctx);
+      if (cogs.length) ctx.requestCardChoices(
+        "cogwerx-workshop-steam",
+        decisionPrompt(
+          "Choose up to 2 cogs to put a steam counter on",
+          "card.sea.workshop.cogs.steam",
+        ),
+        cogs.map((card) => card.instanceId),
+        0,
+        Math.min(2, cogs.length),
+      );
+    },
+    onChooseMany(ctx: ScriptCtx, hook: string, options: readonly string[]) {
+      if (hook !== "cogwerx-workshop-steam") return;
+      const controlledCogIds = new Set(controlledCogs(ctx).map((card) => card.instanceId));
+      for (const option of options) {
+        const instanceId = Number(option);
+        if (controlledCogIds.has(instanceId)) ctx.addCounter(instanceId, "steam", 1);
+      }
+    },
+  },
   "blood in the water|1": {
     onDefend(ctx: ScriptCtx) { const p = ctx.player(ctx.seat); ctx.requestCardChoice("blood-water", decisionPrompt("Discard or destroy the top card?", "card.sea.bloodwater.choose", { optionMessages: { ...commonOptionMessages("pass"), "deck-top": decisionMessage("card.sea.option.decktop") } }), ["pass", ...p.hand.map((card) => card.instanceId), ...(p.deck.length ? ["deck-top"] : [])]); },
     onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook !== "blood-water" || option === "pass") return; const card = option === "deck-top" ? ctx.player(ctx.seat).deck[0] : ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option)); if (!card) return; const watery = (data(ctx, card).keywords ?? []).some((keyword) => keyword.toLowerCase() === "watery grave"); if (option === "deck-top") ctx.moveToGraveyard(card.instanceId, "deck"); else ctx.discardCard(ctx.seat, card.instanceId); if (watery) ctx.addCardTempDefense(ctx.self.instanceId, 2); },

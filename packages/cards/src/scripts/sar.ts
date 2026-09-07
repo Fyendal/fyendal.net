@@ -223,6 +223,7 @@ export const sar: Record<string, CardScript> = {
     // Once per Turn Action — {r}: Attack. "When this attacks a marked hero,
     //  the attack gets go again." (Go again is conditional —
     //  KEYWORD_OVERRIDES strips the printed keyword; Stealth is a tag.)
+    additionalCardTypes: ["token"],
     activated: attackAbility(1),
     onAttackDeclared(ctx) {
       if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId) return;

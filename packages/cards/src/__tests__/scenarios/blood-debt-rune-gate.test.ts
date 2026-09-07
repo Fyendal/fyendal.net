@@ -153,6 +153,44 @@ describe("Blood Debt and Rune Gate", () => {
       .expectNotInZone(0, "shadowrealm horror|1", "banish");
   });
 
+  it("Shadowrealm Horror gets go again only after banishing at least two 6-power cards", () => {
+    const oneSix = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["shadowrealm horror|1"],
+          graveyard: ["raging onslaught|1", "wounding blow|1", "wounding blow|2"],
+          resources: 2,
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    oneSix.play("shadowrealm horror|1")
+      .expectAttackValue(7)
+      .blockWith()
+      .settle()
+      .expectAP(0, 0);
+
+    const twoSixes = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["shadowrealm horror|1"],
+          graveyard: ["raging onslaught|1", "raging onslaught|2", "wounding blow|1"],
+          resources: 2,
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    twoSixes.play("shadowrealm horror|1")
+      .expectAttackValue(7)
+      .blockWith()
+      .settle()
+      .expectAP(0, 1);
+  });
+
   it("Widespread Annihilation lets each affected hero choose their hand card", () => {
     const g = scenario({
       seats: [

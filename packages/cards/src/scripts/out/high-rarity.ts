@@ -81,7 +81,7 @@ export const uzuriAbility: CardScript = {
     }],
     canActivate: (ctx) => !!ctx.link &&
       ctx.link.attacker === ctx.seat &&
-      ctx.link.attackCardType === "action" &&
+      ctx.link.flags.attackGone !== true &&
       (ctx.cardData(ctx.link.attackingCard.cardId).keywords ?? [])
         .some((keyword) => keyword.toLowerCase() === "stealth") &&
       ctx.player(ctx.seat).hand.length > 0,

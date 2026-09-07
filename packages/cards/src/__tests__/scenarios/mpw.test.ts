@@ -111,6 +111,41 @@ describe("MPW — import and Warrior mastery", () => {
     )).toBe(false);
   });
 
+  it("Take the Lead plays from arsenal, prevents damage, and creates Blade Dance", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["snatch|1"], equipment: NO_EQUIPMENT },
+        {
+          hero: "dorinthea",
+          life: 20,
+          arsenal: ["take the lead|1"],
+          equipment: NO_EQUIPMENT,
+        },
+      ],
+    });
+
+    g.play("snatch|1", { settle: false })
+      .passPriority()
+      .passPriority()
+      .passPriority()
+      .passPriority()
+      .blockWith()
+      .passPriority();
+
+    const takeTheLead = g.state.players[1]!.arsenal[0]!;
+    expect(legalIntents(g.state, 1)).toContainEqual(expect.objectContaining({
+      kind: "play-from-arsenal",
+      instanceId: takeTheLead.instanceId,
+    }));
+
+    g.react("take the lead|1", { settle: false })
+      .passPriority()
+      .passPriority()
+      .settle()
+      .expectLife(1, 18)
+      .expectInZone(1, "blade dance|0", "board");
+  });
+
   it("Peaceful Sanctuary stops aura-token creation", () => {
     const g = scenario({
       seats: [

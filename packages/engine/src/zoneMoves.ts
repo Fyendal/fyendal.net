@@ -3,6 +3,7 @@ import type { GameStateInternal } from "./runtimeState.js";
 import {
   cardAbilitiesSuppressed,
   cardColorOf,
+  cardHasType,
   cardTypesOf,
   dataOf,
   scriptOf,
@@ -850,9 +851,23 @@ export function putCardOnDeckBottom(
     || (found.fromZone === "arsenal" && found.card.faceDown)
     || (found.fromZone === "banish" && found.card.faceDown);
   const sourceWasFaceDown = found.card.faceDown === true;
+  const source = found.fromArena && dataOf(state, found.card.cardId).cardType === "weapon"
+    ? transitionZone("weapon", found.owner.seat)
+    : found.fromArena && dataOf(state, found.card.cardId).cardType === "equipment"
+      ? transitionZone("equipment", found.owner.seat)
+      : transitionZoneFromEngineZone(found.fromZone, found.owner.seat);
+  if (found.fromArena && cardHasType(state, found.card, "token")) {
+    runtime.transitions.move(found.card, source, null, { from: false });
+    fireLeaveArena(state, runtime, found.owner.seat, found.card, "cease-to-exist", asActivationCost);
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, found.card.cardId)} ceases to exist`,
+      "engine.log.card.ceases.to.exist",
+      { card: logCardValue(found.card.cardId) },
+    ));
+    return true;
+  }
   clearPrivateZonePlacement(found.card);
   found.owner.deck.push(found.card);
-  const source = transitionZoneFromEngineZone(found.fromZone, found.owner.seat);
   runtime.transitions.move(
     found.card,
     source,

@@ -5,6 +5,7 @@ import { scenario } from "../harness.js";
 
 const BLUE = "wrecker romp|3";
 const NON_ATTACK = "nimblism|3";
+const GRAPHENE = "graphene chelicera|0";
 
 describe("OUT — registration and core mechanics", () => {
   it("registers every printing and all heroes", () => {
@@ -546,5 +547,30 @@ describe("OUT — rules regression coverage", () => {
     expect(cardData[s.state.chain.at(-1)!.attackingCard.cardId]!.name).toBe("Infect");
     expect(s.state.players[0]!.banish).toHaveLength(1);
     expect(s.state.players[0]!.banish[0]!.faceDown).not.toBe(true);
+  });
+
+  it("Uzuri replaces an attacking Graphene Chelicera and the token ceases to exist", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "uzuri|0",
+          weapons: [GRAPHENE],
+          resources: 1,
+          hand: ["sneak attack|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.attackWithWeapon(GRAPHENE).blockWith()
+      .activate("uzuri|0")
+      .chooseCard("sneak attack|1");
+
+    expect(cardData[s.state.chain.at(-1)!.attackingCard.cardId]!.name).toBe("Sneak Attack");
+    expect(s.state.chain.at(-1)!.attackCardType).toBe("action");
+    expect(s.state.players[0]!.weapons).toHaveLength(0);
+    s.expectNotInZone(0, GRAPHENE, "deck")
+      .expectNotInZone(0, GRAPHENE, "graveyard")
+      .expectLog("Graphene Chelicera ceases to exist");
   });
 });

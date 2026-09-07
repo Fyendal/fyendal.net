@@ -790,6 +790,21 @@ Object.assign(mst, {
   "murky water|1": { modifyAttack: (ctx) => (ctx.self.counters?.aim ?? 0) > 0 ? 1 : 0, onAttackDeclared(ctx) { if ((ctx.self.counters?.aim ?? 0) > 0) ctx.grantCardKeyword(ctx.self.instanceId, "dominate"); } },
   "kindle|1": { onPlay(ctx) { ampNextArcane(ctx, 1); if (ctx.player(ctx.seat).hand.length === 0) ctx.drawCards(ctx.seat, 1); } },
   "dust from stillwater shrine|1": { materialKeywords: ["phantasm"] },
-  "shadowrealm horror|1": bloodDebt({ additionalCost(ctx) { for (const card of [...ctx.player(ctx.seat).graveyard].sort(() => ctx.randomInt(3) - 1).slice(0, 3)) ctx.banish(card.instanceId); }, modifyAttack: (ctx) => Number(ctx.getPlayerFlag(ctx.seat, "banishedSixPlusThisTurn")) > 0 ? 1 : 0 }),
+  "shadowrealm horror|1": bloodDebt({
+    additionalCost(ctx) {
+      let sixPlusBanished = 0;
+      const cards = [...ctx.player(ctx.seat).graveyard]
+        .sort(() => ctx.randomInt(3) - 1)
+        .slice(0, 3);
+      for (const card of cards) {
+        if (ctx.banish(card.instanceId) && ctx.basePower(card) >= 6) sixPlusBanished++;
+      }
+      ctx.setCounter("shadowrealmSixPlusBanished", sixPlusBanished);
+    },
+    modifyAttack: (ctx) => ctx.getCounter("shadowrealmSixPlusBanished") >= 1 ? 1 : 0,
+    onAttackDeclared(ctx) {
+      if (ctx.getCounter("shadowrealmSixPlusBanished") >= 2) ctx.grantGoAgain();
+    },
+  }),
   "eloquent eulogy|1": bloodDebt({ runeGate: true, onCombatChainClosed(ctx) { if (ctx.getFlag("player", "lostLifeThisTurn") === true || ctx.getPlayerFlag(opponentSeat(ctx), "lostLifeThisTurn") === true) createNamed(ctx, "Eloquence"); } }),
 } satisfies Record<string, CardScript>);

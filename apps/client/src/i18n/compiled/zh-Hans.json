@@ -9857,6 +9857,12 @@
       "value": " 墓地中的一张牌放逐"
     }
   ],
+  "card.pen.hand.card.banish": [
+    {
+      "type": 0,
+      "value": "选择一张手牌放逐"
+    }
+  ],
   "card.pen.hand.fifthfromtop": [
     {
       "type": 0,
@@ -10433,6 +10439,12 @@
       "value": "：选择一张手牌进行充能，或拒绝"
     }
   ],
+  "card.sbl.charge.required": [
+    {
+      "type": 0,
+      "value": "Roaring Beam：选择一张手牌进行充能"
+    }
+  ],
   "card.sbl.halo.soul": [
     {
       "type": 0,
@@ -10943,6 +10955,12 @@
     {
       "type": 0,
       "value": "从 Treasure Island 上移除一个金指示物？"
+    }
+  ],
+  "card.sea.workshop.cogs.steam": [
+    {
+      "type": 0,
+      "value": "选择至多 2 个 cog，各放置一个 steam 指示物"
     }
   ],
   "card.sea.yellow.discard": [

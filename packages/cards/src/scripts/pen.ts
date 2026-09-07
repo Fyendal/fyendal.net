@@ -104,6 +104,28 @@ function requestDeepRecessesBanish(ctx: ScriptCtx, startSeat = 0): void {
   }
 }
 
+function continuePoundOfFlesh(ctx: ScriptCtx, startIndex = 0): void {
+  const seats = [
+    ctx.seat,
+    ...ctx.state.players.map((player) => player.seat).filter((seat) => seat !== ctx.seat),
+  ];
+  for (let index = startIndex; index < seats.length; index++) {
+    const seat = seats[index]!;
+    const hand = ctx.player(seat).hand;
+    if (hand.length === 0) continue;
+    ctx.requestCardChoice(
+      `pen-pound-banish:${index}`,
+      decisionPrompt("Banish a card from your hand", "card.pen.hand.card.banish"),
+      hand.map((card) => card.instanceId),
+      seat,
+    );
+    return;
+  }
+  for (const player of ctx.state.players) {
+    if (ctx.getCounter(`pound-six:${player.seat}`) !== 1) ctx.loseLife(player.seat, 1);
+  }
+}
+
 function hasKeyword(ctx: ScriptCtx, card: Card, keyword: string): boolean {
   const wanted = keyword.toLowerCase();
   if ((card.suppressedKeywords ?? []).some((entry) => entry.toLowerCase() === wanted)) return false;
@@ -689,7 +711,27 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "blessing of themis|2": { triggers: [{ event: "start-of-turn", label: "Put Blessing of Themis into your soul", effect(ctx) { ctx.putIntoSoul(ctx.self.instanceId); } }] },
   "duty bound blitz|3": { canPlay: (ctx) => Number(ctx.getFlag("player", "soulPitch:2")) > 0 },
   ...pitches("soul bond belief", () => ({ onAttackDeclared(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top && ctx.cardColor(top) === 2 && ctx.putIntoSoul(top.instanceId)) ctx.addModifier({ scope: "chain-link", attack: 1 }); } })),
-  "pound of flesh|3": { onPlay(ctx) { for (const player of ctx.state.players) { const hand = player.hand; if (!hand.length) { ctx.loseLife(player.seat, 1); continue; } const card = hand[ctx.randomInt(hand.length)]!; const big = isSixPlus(ctx, card); ctx.banish(card.instanceId); if (!big) ctx.loseLife(player.seat, 1); } } },
+  "pound of flesh|3": {
+    onPlay(ctx) {
+      continuePoundOfFlesh(ctx);
+    },
+    onChoose(ctx, hook, option) {
+      const match = /^pen-pound-banish:(\d+)$/.exec(hook);
+      if (!match) return;
+      const index = Number(match[1]);
+      const seats = [
+        ctx.seat,
+        ...ctx.state.players.map((player) => player.seat).filter((seat) => seat !== ctx.seat),
+      ];
+      const seat = seats[index];
+      if (seat === undefined) return;
+      const card = ctx.player(seat).hand.find((candidate) => candidate.instanceId === Number(option));
+      if (card && ctx.banish(card.instanceId) && isSixPlus(ctx, card)) {
+        ctx.setCounter(`pound-six:${seat}`, 1);
+      }
+      continuePoundOfFlesh(ctx, index + 1);
+    },
+  },
   "deep recesses of existence|3": bloodDebt({
     runeGate: true,
     onCombatChainClosed(ctx) {

@@ -10347,6 +10347,12 @@
       "value": "'s graveyard to banish"
     }
   ],
+  "card.pen.hand.card.banish": [
+    {
+      "type": 0,
+      "value": "Banish a card from your hand"
+    }
+  ],
   "card.pen.hand.fifthfromtop": [
     {
       "type": 0,
@@ -10919,6 +10925,12 @@
       "value": ": choose a card from your hand to charge, or decline"
     }
   ],
+  "card.sbl.charge.required": [
+    {
+      "type": 0,
+      "value": "Roaring Beam: choose a card from your hand to charge"
+    }
+  ],
   "card.sbl.halo.soul": [
     {
       "type": 0,
@@ -11429,6 +11441,12 @@
     {
       "type": 0,
       "value": "Remove a Treasure Island gold counter?"
+    }
+  ],
+  "card.sea.workshop.cogs.steam": [
+    {
+      "type": 0,
+      "value": "Choose up to 2 cogs to put a steam counter on"
     }
   ],
   "card.sea.yellow.discard": [

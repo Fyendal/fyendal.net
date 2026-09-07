@@ -897,6 +897,7 @@ describe("PersistedStateV1", () => {
       grantsTypeToName: "test name",
       grantsType: "ninja",
       suppressesHeroAbilities: true,
+      suppressesHeroAbilitiesDuringActionPhase: true,
       suppressesOwnedNames: true,
       suppressesOwnedClassTalentTypes: true,
       attackActionCardCap: 1,
