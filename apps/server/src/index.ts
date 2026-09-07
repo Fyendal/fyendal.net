@@ -420,7 +420,13 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
   const replayFinalizer = new ReplayFinalizer(
     deps.db,
     consoleError,
-    instanceId,
+    {
+      ownerId: instanceId,
+      isDatabaseBusy: () => {
+        const waitingCount = (deps.db as Queryable & { waitingCount?: number }).waitingCount;
+        return typeof waitingCount === "number" && waitingCount > 0;
+      },
+    },
   );
   replayFinalizerByServer.set(server, replayFinalizer);
   void replayFinalizer.recoverPending().catch((error) =>
@@ -1662,8 +1668,15 @@ if (!process.env.VITEST) {
           const omitted = codes.length > 20 ? `, … ${codes.length - 20} more` : "";
           console.log(`swept ${codes.length} expired room(s): ${shown}${omitted}`);
         }
-        await replayFinalizerByServer.get(server)?.recoverPending();
-        await sweepReplays(pool);
+        const replayFinalizer = replayFinalizerByServer.get(server);
+        await replayFinalizer?.recoverPending();
+        if (replayFinalizer) {
+          await replayFinalizer.runMaintenance((waitForCapacity) => (
+            sweepReplays(pool, Date.now(), 500, waitForCapacity)
+          ));
+        } else {
+          await sweepReplays(pool);
+        }
         await sweepClusterEvents(pool);
         await sweepRoomCommands(pool);
         await sweepRateLimits(pool);
