@@ -4407,10 +4407,30 @@
       "value": "Destroy a card defending your attack with 6 or more base power"
     }
   ],
+  "card.iar.arknight.life.pay": [
+    {
+      "type": 0,
+      "value": "Pay up to 3 life"
+    }
+  ],
   "card.iar.arsenal.banish.choose": [
     {
       "type": 0,
       "value": "Choose an arsenal card to banish"
+    }
+  ],
+  "card.iar.banished.facedown.upto": [
+    {
+      "type": 0,
+      "value": "Turn up to "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " cards in your banished zone face down"
     }
   ],
   "card.iar.banished.graveyard.put": [
@@ -4633,6 +4653,12 @@
     {
       "type": 0,
       "value": "Name and return an aura permanent?"
+    }
+  ],
+  "card.iar.zombie.discard.optional": [
+    {
+      "type": 0,
+      "value": "Discard a zombie?"
     }
   ],
   "card.jdg.librarian.tome.choose": [

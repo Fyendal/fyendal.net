@@ -1208,8 +1208,9 @@ function projectState(
               const ac = defender.arsenal.find((c) => c.instanceId === id);
               const ec = Object.values(defender.equipment).find((c) => c?.instanceId === id);
               const wc = defender.weapons.find((c) => c.instanceId === id);
+              const bc = defender.board.find((c) => c.instanceId === id);
               const hero = defender.hero.instanceId === id ? defender.hero : undefined;
-              const c = hc ?? ac ?? ec ?? wc ?? hero;
+              const c = hc ?? ac ?? ec ?? wc ?? bc ?? hero;
               if (!c) continue;
               stagedInstances.push(c);
               if (mine) {

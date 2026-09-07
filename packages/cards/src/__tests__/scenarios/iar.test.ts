@@ -10,45 +10,11 @@ function boardNames(game: ReturnType<typeof scenario>, seat: number): string[] {
   return game.state.players[seat]!.board.map((card) => cardData[card.cardId]!.name);
 }
 
-describe("IAR spoiled cards", () => {
-  it("registers the latest spoiled collector numbers", () => {
-    expect(Object.fromEntries([
-      "IAR115",
-      "IAR116",
-      "IAR118",
-      "IAR119",
-      "IAR146",
-      "IAR167",
-      "IAR179",
-      "IAR180",
-      "IAR209",
-      "IAR211",
-      "IAR243",
-      "IAR245",
-      "IAR248",
-      "IAR249",
-      "IAR250",
-      "IAR252",
-      "IAR259",
-    ].map((id) => [id, cardData[id]?.name]))).toEqual({
-      IAR115: "Cullingsong Gloomblade",
-      IAR116: "Plundersong Gloomblade",
-      IAR118: "Vexing Gloomblade",
-      IAR119: "Vexing Gloomblade",
-      IAR146: "Runic Disposition",
-      IAR167: "Countdown to Extinction",
-      IAR179: "Dimenxxional Ferryman",
-      IAR180: "Planar Chaos",
-      IAR209: "Darkest Hour",
-      IAR211: "Darkest Hour",
-      IAR243: "Deadly Spinneret",
-      IAR245: "Stoke Vengeance",
-      IAR248: "Echoing Trap",
-      IAR249: "Sigil of the Muse",
-      IAR250: "Astral Ambience",
-      IAR252: "Rush of Knowledge",
-      IAR259: "Chains of Consecration",
-    });
+describe("IAR cards", () => {
+  it("registers every IAR card as implemented", () => {
+    const cards = Object.values(cardData).filter((card) => card.set === "IAR");
+    expect(cards.length).toBeGreaterThan(0);
+    expect(cards.every(isImplemented)).toBe(true);
   });
 
   it("Forsaken Strike is a yellow zero-cost attack", () => {

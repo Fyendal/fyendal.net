@@ -321,6 +321,22 @@ describe("transformed permanent stacks", () => {
       instanceIds: [nitro.instanceId],
     });
     g.doRaw({ kind: "stage-defenders", instanceIds: [nitro.instanceId] });
+    const defenderDecision = projectStateFor(g.state, 0).pendingDecision;
+    expect(defenderDecision?.stagedCards).toEqual([
+      expect.objectContaining({
+        instanceId: nitro.instanceId,
+        cardId: printingId("nitro mechanoid|0"),
+      }),
+    ]);
+    expect(defenderDecision?.stagedDefense).toBe(5);
+    const attackerDecision = projectStateFor(g.state, 1).pendingDecision;
+    expect(attackerDecision?.stagedCards).toEqual([
+      expect.objectContaining({
+        instanceId: nitro.instanceId,
+        cardId: printingId("nitro mechanoid|0"),
+      }),
+    ]);
+    expect(attackerDecision?.stagedDefense).toBe(0);
     g.doRaw({ kind: "defend", instanceIds: [nitro.instanceId] }).settle();
 
     expect(g.state.chain.at(-1)?.defendingEquipment).toContainEqual(

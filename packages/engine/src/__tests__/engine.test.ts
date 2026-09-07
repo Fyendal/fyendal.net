@@ -3773,6 +3773,7 @@ describe("trigger stack & priority windows", () => {
     const atk = giveCard(s, 0, "ATK4");
     const block = giveCard(s, 1, "BLOCK3");
     player(s, 1).equipment.chest = { instanceId: 994, cardId: "BW", owner: 1 };
+    player(s, 1).board.push({ instanceId: 995, cardId: "BW", owner: 1 });
     let r = applyIntent(s, 0, { kind: "play-card", instanceId: atk, pitchInstanceIds: [] });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
@@ -3786,22 +3787,24 @@ describe("trigger stack & priority windows", () => {
     r = applyIntent(s, 1, { kind: "stage-defenders", instanceIds: [mentor] });
     expect(r.ok).toBe(false);
 
-    // stage a hand card + an equipment (declarative full set)
-    r = applyIntent(s, 1, { kind: "stage-defenders", instanceIds: [block, 994] });
+    // Stage a hand card, slotted equipment, and an arena equipment permanent.
+    r = applyIntent(s, 1, { kind: "stage-defenders", instanceIds: [block, 994, 995] });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     s = r.state;
     // staging is cosmetic: the cards stay in their zones until the commit
     expect(player(s, 1).hand.some((c) => c.instanceId === block)).toBe(true);
     expect(player(s, 1).equipment.chest?.instanceId).toBe(994);
+    expect(player(s, 1).board.some((c) => c.instanceId === 995)).toBe(true);
 
     const mine = projectStateFor(s, 1).pendingDecision;
-    expect(mine?.stagedCards?.map((c) => c.cardId)).toEqual(["BLOCK3", "BW"]);
-    expect(mine?.stagedDefense).toBe(5); // 3 + 2
+    expect(mine?.stagedCards?.map((c) => c.cardId)).toEqual(["BLOCK3", "BW", "BW"]);
+    expect(mine?.stagedDefense).toBe(7); // 3 + 2 + 2
     const opp = projectStateFor(s, 0).pendingDecision;
     expect(opp?.stagedCards?.[0]!.hidden).toBe(true); // hand card face-down
     expect(opp?.stagedCards?.[0]!.cardId).toBe("");
     expect(opp?.stagedCards?.[1]!.cardId).toBe("BW"); // equipment stays public
+    expect(opp?.stagedCards?.[2]!.cardId).toBe("BW"); // arena equipment stays public
     expect(opp?.stagedDefense).toBe(0);
 
     // unstage the equipment declaratively, then commit the rest

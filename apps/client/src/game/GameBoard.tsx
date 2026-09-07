@@ -46,6 +46,7 @@ import {
 import { handCardChoiceOptions } from "./decisionPresentation.js";
 import { shouldHidePriorityGuidance } from "./decisionPass.js";
 import { hoverSurfaceLayout } from "./hoverSurfaceLayout.js";
+import { cardPreviewSurfaceSize } from "./cardPreviewFaces.js";
 import { canSkipRunechant } from "./runechantSkip.js";
 import { PlayerNameplate } from "./PlayerNameplate.js";
 import { shouldShowIdleVictoryClaim } from "./idleVictory.js";
@@ -804,10 +805,11 @@ export function GameBoard() {
       return;
     }
     const previewSize = cardPreviewSize(window.innerHeight);
+    const previewSurfaceSize = cardPreviewSurfaceSize(cardId, previewSize);
     const layout = hoverSurfaceLayout(
       r,
       { width: window.innerWidth, height: window.innerHeight },
-      previewSize,
+      previewSurfaceSize,
       240, // keep the card preview clear of the side panel when space permits
     );
     // Contextual card explanations use the preview side; effect chips also

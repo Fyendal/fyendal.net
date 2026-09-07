@@ -23,6 +23,7 @@ const FABRARY_IMAGE_ID_OVERRIDES: Readonly<Record<string, string>> = {
   CON002: "CON002-RF",
   CON003: "CON003-RF",
   CON004: "CON004-RF",
+  DYN092B: "GEM119_BACK",
   FAB337: "SEA080",
   FAB338: "SEA095",
   FAB414: "PEN299",
@@ -118,7 +119,6 @@ const CANONICAL_TOKEN_ART_IDS: Readonly<Record<string, string>> = {
 const FABRARY_BACK_FACE_AT_BASE_ID: ReadonlySet<string> = new Set([
   "ARC114B",
   "ARC115B",
-  "DYN092B",
   "ELE111B",
   "ELE202B",
   "ELE222B",
@@ -153,8 +153,9 @@ export function resolveCardImageUrl(cardId: string, data?: CardImageData): strin
     ? `${data.name.trim().toLowerCase().replace(/\s+/g, " ")}|${data.pitch ?? 0}`
     : undefined;
   const artCardId = tokenKey ? CANONICAL_TOKEN_ART_IDS[tokenKey] ?? cardId : cardId;
-  let imageId = FABRARY_IMAGE_ID_OVERRIDES[artCardId] ?? artCardId;
-  if (artCardId.endsWith("B")) {
+  const imageOverride = FABRARY_IMAGE_ID_OVERRIDES[artCardId];
+  let imageId = imageOverride ?? artCardId;
+  if (!imageOverride && artCardId.endsWith("B")) {
     const baseId = artCardId.slice(0, -1);
     imageId = FABRARY_BACK_FACE_AT_BASE_ID.has(artCardId) ? baseId : `${baseId}_BACK`;
   }
