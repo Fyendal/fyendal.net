@@ -404,6 +404,8 @@ describe("server replay retention", () => {
       [conceded.replayFinalizationId],
     )).rows[0]!;
     let frameLoads = 0;
+    let databaseBusy = false;
+    let pressureWaits = 0;
     const pagedDb: Queryable = {
       query: async (text, params) => {
         if (!text.includes("SELECT room_version, view, transition FROM replay_frames")) {
@@ -413,6 +415,7 @@ describe("server replay retention", () => {
         expect(params?.[2]).toBe(REPLAY_FRAME_BATCH_SIZE);
         const afterRoomVersion = Number(params?.[1]);
         if (afterRoomVersion < 0) {
+          databaseBusy = true;
           return {
             rows: Array.from({ length: REPLAY_FRAME_BATCH_SIZE }, (_, index) => ({
               room_version: index + 1,
@@ -432,14 +435,47 @@ describe("server replay retention", () => {
         };
       },
     };
-    const finalizer = new ReplayFinalizer(pagedDb);
+    const finalizer = new ReplayFinalizer(pagedDb, undefined, {
+      isDatabaseBusy: () => databaseBusy,
+      waitForPressureRelief: async () => {
+        pressureWaits += 1;
+        databaseBusy = false;
+      },
+    });
 
     finalizer.enqueue(conceded.replayFinalizationId);
     await finalizer.waitForIdle();
 
     expect(frameLoads).toBe(2);
+    expect(pressureWaits).toBe(1);
     expect((await listReplays(db, game.users[0]))[0]?.frameCount)
       .toBe(REPLAY_FRAME_BATCH_SIZE + 1);
+  });
+
+  it("serializes replay maintenance behind queued finalization", async () => {
+    const game = await startedGame();
+    const conceded = await store.applyIntent(
+      game.code,
+      { token: game.tokens[0], userId: game.users[0] },
+      { kind: "concede" },
+    );
+    if (!conceded.ok || !conceded.replayFinalizationId) throw new Error("concede failed");
+    const errors = vi.fn();
+    const finalizer = new ReplayFinalizer(db, errors);
+
+    finalizer.enqueue(conceded.replayFinalizationId);
+    await finalizer.runMaintenance(async (waitForCapacity) => {
+      await waitForCapacity();
+      const replay = await db.query(
+        "SELECT status FROM replay_games WHERE id=$1",
+        [conceded.replayFinalizationId],
+      );
+      expect(replay.rows[0]?.status).toBe("ready");
+    });
+    await finalizer.waitForIdle();
+
+    expect(errors).not.toHaveBeenCalled();
+    expect(await listReplays(db, game.users[0])).toHaveLength(1);
   });
 
   it("waits for a room replay that is still finalizing", async () => {

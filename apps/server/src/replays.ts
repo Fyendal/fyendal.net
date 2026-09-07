@@ -26,7 +26,8 @@ export const REPLAY_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 export { MAX_FAVORITE_REPLAYS };
 const MAX_REPLAY_VIEWS = 10_000;
 const REPLAY_YIELD_BUDGET_MS = 8;
-export const REPLAY_FRAME_BATCH_SIZE = 100;
+export const REPLAY_FRAME_BATCH_SIZE = 25;
+const REPLAY_PRESSURE_RETRY_MS = 250;
 export const REPLAY_FINALIZATION_RETRY_DELAYS_MS = [
   5 * 60_000,
   30 * 60_000,
@@ -237,6 +238,7 @@ async function replayFiles(
   replay: Record<string, unknown>,
   seats: readonly (0 | 1)[],
   yieldControl: () => Promise<void> = yieldToEventLoop,
+  waitForCapacity: () => Promise<void> = async () => {},
 ): Promise<GameViewBuild> {
   const id = String(replay.id);
   const uniqueSeats = [...new Set(seats)];
@@ -245,6 +247,7 @@ async function replayFiles(
   let yieldedAt = performance.now();
   let afterRoomVersion = -1;
   while (true) {
+    await waitForCapacity();
     const { rows } = await db.query(
       `SELECT room_version, view, transition FROM replay_frames
        WHERE replay_id = $1 AND room_version > $2
@@ -290,7 +293,12 @@ function replayViews(file: ReplayFile): GameView[] {
   return file.version === 1 ? file.views : file.frames.map((frame) => frame.view);
 }
 
-export async function finalizeReplay(db: Queryable, replayIdValue: string): Promise<boolean> {
+export async function finalizeReplay(
+  db: Queryable,
+  replayIdValue: string,
+  waitForCapacity: () => Promise<void> = async () => {},
+): Promise<boolean> {
+  await waitForCapacity();
   const { rows } = await db.query(
     `SELECT id, winner
      FROM replay_games WHERE id = $1 AND status = 'finalizing'`,
@@ -301,6 +309,7 @@ export async function finalizeReplay(db: Queryable, replayIdValue: string): Prom
   if (!(replay.winner === null || replay.winner === 0 || replay.winner === 1)) {
     throw new Error(`invalid replay winner ${String(replay.id)}`);
   }
+  await waitForCapacity();
   const participants = await db.query(
     "SELECT user_id, seat FROM replay_participants WHERE replay_id = $1 ORDER BY seat",
     [replay.id],
@@ -316,7 +325,13 @@ export async function finalizeReplay(db: Queryable, replayIdValue: string): Prom
     };
   });
   if (!decodedParticipants.length) throw new Error(`replay ${String(replay.id)} has no participants`);
-  const built = await replayFiles(db, replay, decodedParticipants.map(({ seat }) => seat));
+  const built = await replayFiles(
+    db,
+    replay,
+    decodedParticipants.map(({ seat }) => seat),
+    yieldToEventLoop,
+    waitForCapacity,
+  );
   const firstFile = built.files.values().next().value;
   const finalView = firstFile ? replayViews(firstFile).at(-1) : undefined;
   if (!finalView || finalView.winner !== replay.winner) {
@@ -336,6 +351,7 @@ export async function finalizeReplay(db: Queryable, replayIdValue: string): Prom
       frames: replayViews(decoded).length,
     };
   }));
+  await waitForCapacity();
   await withTransaction(db, async (tx) => {
     for (const payload of payloads) {
       await tx.query(
@@ -421,8 +437,23 @@ export async function finalizePendingReplays(
   return finalized;
 }
 
+type ReplayFinalizerWork =
+  | { kind: "replay"; replayId: string }
+  | {
+    kind: "maintenance";
+    run: (waitForCapacity: () => Promise<void>) => Promise<unknown>;
+    resolve: () => void;
+    reject: (error: unknown) => void;
+  };
+
+export interface ReplayFinalizerOptions {
+  ownerId?: string;
+  isDatabaseBusy?: () => boolean;
+  waitForPressureRelief?: () => Promise<void>;
+}
+
 export class ReplayFinalizer {
-  private readonly pending: string[] = [];
+  private readonly pending: ReplayFinalizerWork[] = [];
   private readonly queued = new Set<string>();
   private readonly idleWaiters = new Set<() => void>();
   private draining = false;
@@ -431,14 +462,24 @@ export class ReplayFinalizer {
   constructor(
     private readonly db: Queryable,
     private readonly logError: ErrorLogger = consoleError,
-    private readonly ownerId?: string,
+    private readonly options: ReplayFinalizerOptions = {},
   ) {}
 
   enqueue(replayIdValue: string): void {
     if (this.stopped || this.queued.has(replayIdValue)) return;
     this.queued.add(replayIdValue);
-    this.pending.push(replayIdValue);
+    this.pending.push({ kind: "replay", replayId: replayIdValue });
     this.schedule();
+  }
+
+  runMaintenance(
+    run: (waitForCapacity: () => Promise<void>) => Promise<unknown>,
+  ): Promise<void> {
+    if (this.stopped) return Promise.reject(new Error("replay finalizer is stopped"));
+    return new Promise<void>((resolve, reject) => {
+      this.pending.push({ kind: "maintenance", run, resolve, reject });
+      this.schedule();
+    });
   }
 
   async recoverPending(rulesetVersion?: string, now = Date.now()): Promise<number> {
@@ -461,6 +502,9 @@ export class ReplayFinalizer {
 
   stop(): void {
     this.stopped = true;
+    for (const work of this.pending) {
+      if (work.kind === "maintenance") work.reject(new Error("replay finalizer is stopped"));
+    }
     this.pending.length = 0;
     this.queued.clear();
     if (!this.draining) this.resolveIdle();
@@ -475,15 +519,27 @@ export class ReplayFinalizer {
   private async drain(): Promise<void> {
     try {
       while (!this.stopped && this.pending.length > 0) {
-        const replayIdValue = this.pending.shift()!;
+        const work = this.pending.shift()!;
+        await this.waitForCapacity();
+        if (this.stopped) break;
+        if (work.kind === "maintenance") {
+          try {
+            await work.run(() => this.waitForCapacity());
+            work.resolve();
+          } catch (error) {
+            work.reject(error);
+          }
+          continue;
+        }
+        const replayIdValue = work.replayId;
         try {
-          if (this.ownerId && !(await tryAcquireLease(
+          if (this.options.ownerId && !(await tryAcquireLease(
             this.db,
             `replay:${replayIdValue}`,
-            this.ownerId,
+            this.options.ownerId,
             5 * 60_000,
           ))) continue;
-          await finalizeReplay(this.db, replayIdValue);
+          await finalizeReplay(this.db, replayIdValue, () => this.waitForCapacity());
         } catch (error) {
           this.logError(`replay finalization failed (${replayIdValue})`, error);
           try {
@@ -500,6 +556,14 @@ export class ReplayFinalizer {
       this.draining = false;
       this.resolveIdle();
       if (this.pending.length > 0) this.schedule();
+    }
+  }
+
+  private async waitForCapacity(): Promise<void> {
+    while (!this.stopped && this.options.isDatabaseBusy?.()) {
+      await (this.options.waitForPressureRelief?.() ?? new Promise<void>((resolve) => {
+        setTimeout(resolve, REPLAY_PRESSURE_RETRY_MS);
+      }));
     }
   }
 
@@ -915,10 +979,16 @@ export async function deleteReplay(
   });
 }
 
-export async function sweepReplays(db: Queryable, now = Date.now(), limit = 500): Promise<number> {
+export async function sweepReplays(
+  db: Queryable,
+  now = Date.now(),
+  limit = 500,
+  waitForCapacity: () => Promise<void> = async () => {},
+): Promise<number> {
   const ids = new Set<string>();
   // Filter BIGINT deadlines in JS because pg-mem's range comparison is
   // incorrect once an index exists; production still uses the IS NOT NULL index.
+  await waitForCapacity();
   const expired = await db.query(
     `SELECT DISTINCT g.id, g.expires_at FROM replay_games g
      JOIN replay_participants p ON p.replay_id=g.id
@@ -927,6 +997,7 @@ export async function sweepReplays(db: Queryable, now = Date.now(), limit = 500)
     [limit],
   );
   for (const row of expired.rows.filter((value) => Number(value.expires_at) <= now)) {
+    await waitForCapacity();
     const id = String(row.id);
     const deleted = await withTransaction(db, async (tx) => {
       const locked = await tx.query(
@@ -948,6 +1019,7 @@ export async function sweepReplays(db: Queryable, now = Date.now(), limit = 500)
     if (deleted) ids.add(id);
   }
   if (ids.size < limit) {
+    await waitForCapacity();
     const orphaned = await db.query(
       `SELECT id FROM replay_games
        WHERE id NOT IN (SELECT replay_id FROM replay_participants)
@@ -957,6 +1029,7 @@ export async function sweepReplays(db: Queryable, now = Date.now(), limit = 500)
     orphaned.rows.forEach((row) => ids.add(String(row.id)));
   }
   if (ids.size < limit) {
+    await waitForCapacity();
     const recordings = await db.query(
       `SELECT g.id FROM replay_games g
        LEFT JOIN rooms r ON r.code = g.room_code AND r.created_at <= g.created_at
@@ -967,6 +1040,7 @@ export async function sweepReplays(db: Queryable, now = Date.now(), limit = 500)
     recordings.rows.forEach((row) => ids.add(String(row.id)));
   }
   for (const id of ids) {
+    await waitForCapacity();
     await db.query("DELETE FROM replay_games WHERE id = $1", [id]);
   }
   return ids.size;
