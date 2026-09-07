@@ -1872,17 +1872,37 @@ export class PgRoomStore {
    */
   async leaveForegroundMatchmakingOnDisconnect(userId: number): Promise<boolean> {
     return withTransaction(this.db, async (db) => {
-      const { rows } = await db.query(
-        `DELETE FROM matchmaking_entries
-         WHERE user_id = $1 AND mode = 'foreground'
-         RETURNING format`,
-        [userId],
-      );
-      if (rows.length === 0) return false;
-      const format = String(rows[0]!.format);
-      await db.query("UPDATE matchmaking_locks SET generation = generation + 1 WHERE format = $1", [format]);
-      await appendClusterEvent(db, { type: "queue-changed" });
-      return true;
+      const lockedFormats = new Set<string>();
+      while (true) {
+        const { rows } = await db.query(
+          `SELECT format FROM matchmaking_entries
+           WHERE user_id = $1 AND mode = 'foreground'`,
+          [userId],
+        );
+        if (rows.length === 0) return false;
+        const format = String(rows[0]!.format);
+
+        // Match queueForMatch's format-before-entry lock order. If the entry
+        // changes format while this transaction waits, retain the old format
+        // lock and retry; there are only three valid formats, so a concurrent
+        // queue transaction cannot keep moving the row indefinitely.
+        if (!lockedFormats.has(format)) {
+          await db.query(
+            "UPDATE matchmaking_locks SET generation = generation + 1 WHERE format = $1",
+            [format],
+          );
+          lockedFormats.add(format);
+        }
+        const removed = await db.query(
+          `DELETE FROM matchmaking_entries
+           WHERE user_id = $1 AND mode = 'foreground' AND format = $2
+           RETURNING user_id`,
+          [userId, format],
+        );
+        if (removed.rows.length === 0) continue;
+        await appendClusterEvent(db, { type: "queue-changed" });
+        return true;
+      }
     });
   }
 
