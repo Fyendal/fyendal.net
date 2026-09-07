@@ -1942,6 +1942,52 @@ describe("PgRoomStore storage", () => {
     )).rows).toEqual([]);
   });
 
+  it("locks the format before removing foreground matchmaking on disconnect", async () => {
+    const user = await db.query(
+      `INSERT INTO users (username, username_lc, pass_hash, created_at)
+       VALUES ('LockOrderQueue','lockorderqueue','hash',1) RETURNING id`,
+    );
+    const userId = Number(user.rows[0]!.id);
+    await expect(store.queueForMatch("classic-battles", {
+      userId,
+      username: "LockOrderQueue",
+      hero: "rhinar",
+      cardPoolMode: "legal",
+    })).resolves.toMatchObject({ ok: true, kind: "opened" });
+
+    const disconnectQueries: string[] = [];
+    let returnStaleFormat = true;
+    const disconnectStore = new PgRoomStore({
+      query: async (text, params) => {
+        const sql = normalizedSql(text);
+        disconnectQueries.push(sql);
+        if (
+          returnStaleFormat
+          && sql === "SELECT format FROM matchmaking_entries WHERE user_id = $1 AND mode = 'foreground'"
+        ) {
+          returnStaleFormat = false;
+          return { rows: [{ format: "cc" }], rowCount: 1 };
+        }
+        return db.query(text, params);
+      },
+    }, "rules-a");
+    expect(await disconnectStore.leaveForegroundMatchmakingOnDisconnect(userId)).toBe(true);
+    expect((await db.query(
+      "SELECT 1 FROM matchmaking_entries WHERE user_id = $1",
+      [userId],
+    )).rows).toEqual([]);
+    expect(disconnectQueries.filter((query) =>
+      query.includes("matchmaking_entries") || query.includes("matchmaking_locks")
+    )).toEqual([
+      "SELECT format FROM matchmaking_entries WHERE user_id = $1 AND mode = 'foreground'",
+      "UPDATE matchmaking_locks SET generation = generation + 1 WHERE format = $1",
+      "DELETE FROM matchmaking_entries WHERE user_id = $1 AND mode = 'foreground' AND format = $2 RETURNING user_id",
+      "SELECT format FROM matchmaking_entries WHERE user_id = $1 AND mode = 'foreground'",
+      "UPDATE matchmaking_locks SET generation = generation + 1 WHERE format = $1",
+      "DELETE FROM matchmaking_entries WHERE user_id = $1 AND mode = 'foreground' AND format = $2 RETURNING user_id",
+    ]);
+  });
+
   it("persists Starvo as a pending background-practice opponent", async () => {
     const user = await db.query(
       `INSERT INTO users (username, username_lc, pass_hash, created_at)
