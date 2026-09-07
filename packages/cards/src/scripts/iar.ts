@@ -2013,7 +2013,7 @@ export const iar: Record<string, CardScript> = {
       label: "Put Blessing of Suraya into soul",
       labelMessage: { id: "card.trigger.common.self.soul.put" },
       effect(ctx) {
-        if (ctx.putIntoSoul(ctx.self.instanceId)) ctx.createToken(PONDER);
+        ctx.putIntoSoul(ctx.self.instanceId);
       },
     }],
   },

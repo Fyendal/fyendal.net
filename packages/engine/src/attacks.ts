@@ -27,6 +27,7 @@ import {
   nameOf,
 } from "./gameLog.js";
 import { abilityList, activatedFlagKey } from "./scripts.js";
+import type { ActivatedAbility } from "./scripts.js";
 import type { CardInstance, ChainLinkState, Modifier, PlayerState } from "./state.js";
 
 import { controlledPermanents, observingHookSources } from "./sourceQueries.js";
@@ -126,8 +127,9 @@ export function isAuraAttacker(
   return !player.flags[activatedFlagKey(card.instanceId, abilityIndex)];
 }
 
-/** The resource cost of a weapon/aura attack activation after
- *  modifyAttackActivationCost hooks on the attacker's hero and permanents
+/** The resource cost of a weapon/aura attack activation after the ability's
+ *  own dynamic adjustment and modifyAttackActivationCost hooks on the
+ *  attacker's hero and permanents
  *  (e.g. Enigma's "your first Spectral Shield attack each turn costs {r}
  *  less"). Pure — consulted in enumeration AND validation. */
 export function attackActivationCost(
@@ -137,8 +139,12 @@ export function attackActivationCost(
   attacker: CardInstance,
   baseCost: number,
   targetAllyId?: number,
+  modifyCost?: ActivatedAbility["modifyCost"],
 ): number {
-  let cost = baseCost + firstActionExtraCost(state, player) + firstAttackExtraCost(state, player);
+  let cost = modifyCost
+    ? modifyCost(runtime.makeCtx(state, player.seat, attacker), baseCost)
+    : baseCost;
+  cost += firstActionExtraCost(state, player) + firstAttackExtraCost(state, player);
   const sources = controlledPermanents(state, player.seat, { faceDownEquipment: false });
   for (const src of sources) {
     const sourceScript = scriptOf(state, src.cardId, src);

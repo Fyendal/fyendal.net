@@ -144,6 +144,14 @@ const KEYWORD_OVERRIDES: Record<string, string[]> = {
   // Harmonized Kodachi gains go again only while its controller has a cost-0
   // card in their pitch zone.
   "harmonized kodachi|0": [],
+  // These Ninja attacks gain go again only while their Combo condition is met.
+  "bonds of ancestry|1": ["Combo"],
+  "bonds of ancestry|2": ["Combo"],
+  "bonds of ancestry|3": ["Combo"],
+  "gustwave of the second wind|1": ["Combo"],
+  "whelming gustwave|1": ["Combo"],
+  "whelming gustwave|2": ["Combo"],
+  "whelming gustwave|3": ["Combo"],
   // These attacks gain go again only after their scripted additional cost succeeds.
   "looking for a scrap|1": [],
   "looking for a scrap|2": [],

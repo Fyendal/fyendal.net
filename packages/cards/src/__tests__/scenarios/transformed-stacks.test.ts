@@ -159,11 +159,14 @@ describe("transformed permanent stacks", () => {
 
     g.play("singularity|1");
     const heroId = g.state.players[0]!.hero.instanceId;
+    const opponentStartingLife = g.state.players[1]!.life;
     g.activate("teklovossen, the mechropotent|0", { settle: false })
       .chooseCard("wounding blow|1")
       .chooseCard("wounding blow|2")
       .blockWith()
       .settle();
+
+    expect(g.state.players[1]!.life).toBe(opponentStartingLife - 6);
 
     expect(actionCandidates(g.state, 0)).toContainEqual(expect.objectContaining({
       kind: "activate-ability",
@@ -176,6 +179,10 @@ describe("transformed permanent stacks", () => {
       .settle();
 
     expect(g.state.chain.map((link) => link.attackingCard.instanceId)).toEqual([heroId, heroId]);
+    expect(g.state.players[1]!.life).toBe(opponentStartingLife - 12);
+    expect(g.state.log.some((entry) =>
+      entry.publicPayload?.message.id === "engine.log.combat.resolve.failed.source.left.arena"
+    )).toBe(false);
     expect(g.state.players[0]!.resources).toBe(0);
     expect(g.state.players[0]!.actionPoints).toBe(0);
     expect(g.state.players[0]!.soul).toHaveLength(0);

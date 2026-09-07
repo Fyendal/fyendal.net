@@ -168,6 +168,30 @@ describe("WTR Ninja — combo attacks", () => {
       .expectInZone(0, "raging onslaught|2", "hand");
   });
 
+  it("Whelming Gustwave does not gain go again when Surging Strike was not the last attack", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          hand: ["surging strike|1", "whelming gustwave|1", "whelming gustwave|1", "raging onslaught|2"],
+        },
+        { hero: "rhinar", hand: [] },
+      ],
+    });
+
+    g.play("surging strike|1", { pitch: ["raging onslaught|2"] })
+      .blockWith()
+      .settle()
+      .play("whelming gustwave|1")
+      .blockWith()
+      .settle()
+      .expectAP(0, 1)
+      .play("whelming gustwave|1")
+      .blockWith()
+      .settle()
+      .expectAP(0, 0);
+  });
+
   it("Fluster Fist gains +1 for each hit this chain after Open the Center", () => {
     const g = scenario({
       seats: [

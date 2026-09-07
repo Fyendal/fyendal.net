@@ -2048,7 +2048,7 @@ describe("September 2 IAR spoilers", () => {
     g.endTurn()
       .expectInZone(0, "blessing of suraya|2", "soul");
 
-    expect(boardNames(g, 0)).toContain("Ponder");
+    expect(boardNames(g, 0).filter((name) => name === "Ponder")).toHaveLength(1);
   });
 });
 

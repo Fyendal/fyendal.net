@@ -1995,6 +1995,37 @@ describe("pitch & costs", () => {
     }
   });
 
+  it("applies an attack ability's dynamic cost adjustment during enumeration and activation", () => {
+    const s = makeGame(413);
+    const p = player(s, 0);
+    p.hand = [];
+    s.scriptsRef = {
+      ...s.scriptsRef,
+      SWORD: {
+        activated: {
+          cost: 3,
+          isAttack: true,
+          goAgain: true,
+          oncePerTurn: true,
+          modifyCost: (_ctx, base) => base - 2,
+        },
+      },
+    };
+    const red = giveCard(s, 0, "ATK6");
+    const sourceInstanceId = p.weapons[0]!.instanceId;
+    const offered = legalIntents(s, 0).find(
+      (intent) => intent.kind === "activate-ability" &&
+        intent.sourceInstanceId === sourceInstanceId &&
+        intent.pitchInstanceIds[0] === red,
+    );
+
+    expect(offered).toMatchObject({ pitchInstanceIds: [red], pitchRequired: 1 });
+    if (!offered) return;
+    const result = applyIntent(s, 0, offered);
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(player(result.state, 0).resources).toBe(0);
+  });
+
   it("allows red then blue to pay 3, but rejects blue then red", () => {
     const s = makeGame(411);
     const p = player(s, 0);

@@ -107,7 +107,7 @@ function variableAbilityHasChoice(
     return false;
   }
   const costForBase = (base: number): number => ability.isAttack
-    ? attackActivationCost(state, runtime, player, card, base, targetAllyId)
+    ? attackActivationCost(state, runtime, player, card, base, targetAllyId, ability.modifyCost)
     : abilityResourceCost(state, runtime, player.seat, card, { ...ability, cost: base }, link);
   return Object.keys(variableResourceChoices(
     state,
@@ -1046,7 +1046,15 @@ function abilityIntents(
           state, runtime, player, card, ability, includeUnaffordable, undefined, targetAllyId,
         )) continue;
         const resourceCost = ability.isAttack
-          ? attackActivationCost(state, runtime, player, card, ability.variableCost?.base ?? ability.cost, targetAllyId)
+          ? attackActivationCost(
+              state,
+              runtime,
+              player,
+              card,
+              ability.variableCost?.base ?? ability.cost,
+              targetAllyId,
+              ability.modifyCost,
+            )
           : abilityResourceCost(state, runtime, player.seat, card, ability.variableCost
               ? { ...ability, cost: ability.variableCost.base }
               : ability);
@@ -1078,7 +1086,7 @@ function abilityIntents(
           ability.alternativeEffectCardCosts ?? [],
         )) {
           const alternativeCost = ability.isAttack
-            ? attackActivationCost(state, runtime, player, card, 0, targetAllyId)
+            ? attackActivationCost(state, runtime, player, card, 0, targetAllyId, ability.modifyCost)
             : abilityResourceCost(state, runtime, player.seat, card, { ...ability, cost: 0 });
           for (const pitches of activatedAbilityPitchOptions(
             state,
