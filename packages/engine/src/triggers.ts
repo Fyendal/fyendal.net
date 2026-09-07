@@ -703,6 +703,7 @@ export function announceCardPlayed(
   seat: number,
   card: CardInstance,
   origin: "hand" | "arsenal" | PlayableZone,
+  playEventNextId = state.nextInstanceId,
 ): { goAgain: boolean; layers: StackLayer[] } {
   const player = state.players[seat] as PlayerState;
   // The played object is already public but has not reached the stack yet.
@@ -723,7 +724,6 @@ export function announceCardPlayed(
         modifierMatchesPlayedCard(state, modifier, card)
       ) modifier.consumed = true;
     }
-    const playEventNextId = state.nextInstanceId;
     const layers = [
       ...noteCardPlayed(state, player, card),
       ...collectCardPlayedTriggerLayers(state, runtime, seat, card, playEventNextId, origin),

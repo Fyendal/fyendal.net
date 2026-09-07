@@ -262,7 +262,9 @@ function bonds(pitch: number): CardScript {
 }
 function bondsSearch(ctx: ScriptCtx, hook: string, option: string): void {
   if (hook !== "bonds-search") return;
-  if (ctx.banish(Number(option))) ctx.allowPlayFrom(Number(option), "banish");
+  if (ctx.banish(Number(option))) {
+    ctx.allowPlayFrom(Number(option), "banish", { untilChainClose: true });
+  }
   ctx.shuffleDeck();
 }
 function backHeel(): CardScript {

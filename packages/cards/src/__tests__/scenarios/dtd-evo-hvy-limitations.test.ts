@@ -316,7 +316,7 @@ describe("DTD, EVO, and HVY rules regression coverage", () => {
     expect(g.state.pendingDecision).toMatchObject({
       player: 0,
       chooseHook: "warband-charge",
-      resume: { kind: "continue-stack", seat: 0 },
+      resume: { kind: "after-declare" },
     });
 
     g.doRaw({ kind: "choose", optionId: String(charged.instanceId) });
@@ -336,6 +336,42 @@ describe("DTD, EVO, and HVY rules regression coverage", () => {
     expect(g.state.players[0]!.hand).toContainEqual(expect.objectContaining({
       cardId: printingId("head jab|1"),
     }));
+  });
+  it("Warband of Bellona offers to charge when the next attack is a weapon", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          heroKey: "ser boltyn, breaker of dawn|0",
+          hand: ["v of the vanguard|2", "banneret of gallantry|2"],
+          deck: ["head jab|1"],
+          weapons: ["raydn, duskbane|0"],
+          equipment: { head: "warband of bellona|0" },
+        },
+        { hero: "rhinar" },
+      ],
+    });
+
+    g.activate("warband of bellona|0", { pitch: ["v of the vanguard|2"] })
+      .attackWithWeapon("raydn, duskbane|0");
+    const charged = g.state.players[0]!.hand.find(
+      (card) => card.cardId === printingId("banneret of gallantry|2"),
+    )!;
+    expect(g.state.pendingDecision).toMatchObject({
+      player: 0,
+      chooseHook: "warband-charge",
+      resume: { kind: "after-declare" },
+    });
+
+    g.doRaw({ kind: "choose", optionId: String(charged.instanceId) });
+
+    expect(g.state.players[0]!.soul).toContainEqual(expect.objectContaining({
+      instanceId: charged.instanceId,
+    }));
+    expect(g.state.players[0]!.hand).toContainEqual(expect.objectContaining({
+      cardId: printingId("head jab|1"),
+    }));
+    expect(g.state.pendingDecision).toMatchObject({ player: 1, kind: "defend" });
   });
   it("Cast Bones randomizes top six", () => expect(script("cast bones|1").onChoose).toBeTypeOf("function"));
   it("Up the Ante chooses modes", () => expect(script("up the ante|3").playTargetOptions).toBeTypeOf("function"));

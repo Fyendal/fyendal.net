@@ -354,6 +354,38 @@ export const evoHighRarity: Record<string, CardScript> = {
   "phantom tidemaw|3": { onFriendlyDestroyed(ctx, card) { if (has(ctx, card, "illusionist")) ctx.addCounter(ctx.self.instanceId, "power", 1); }, modifyAttack: (ctx) => ctx.getCounter("power") },
   "tome of imperial flame|1": { onPlay(ctx) { ctx.drawCards(ctx.seat, has(ctx, ctx.player(ctx.seat).hero, "royal") ? 2 : 1); const reds = ctx.player(ctx.seat).hand.filter((card) => ctx.cardColor(card) === 1); if (reds.length >= 2) ctx.requestCardChoice("tome-red-1", decisionPrompt("Pitch the first of 2 red cards?", "card.evo.red.pitch.first", { values: { count: 2 }, optionMessages: commonOptionMessages("decline") }), ["decline", ...reds.map((card) => card.instanceId)]); else for (const card of [...ctx.player(ctx.seat).hand]) ctx.banish(card.instanceId); }, onChoose(ctx, hook, option) { if (hook === "tome-red-1") { if (option === "decline") { for (const card of [...ctx.player(ctx.seat).hand]) ctx.banish(card.instanceId); return; } ctx.pitchCard(Number(option)); const reds = ctx.player(ctx.seat).hand.filter((card) => ctx.cardColor(card) === 1); if (reds.length) ctx.requestCardChoice("tome-red-2", decisionPrompt("Pitch the second red card?", "card.evo.red.pitch.second", { optionMessages: commonOptionMessages("decline") }), ["decline", ...reds.map((card) => card.instanceId)]); } else if (hook === "tome-red-2") { if (option === "decline") for (const card of [...ctx.player(ctx.seat).hand]) ctx.banish(card.instanceId); else ctx.pitchCard(Number(option)); } } },
   "dust from the chrome caverns|1": { materialKeywords: ["phantasm"] },
-  "warband of bellona|0": { activated: { cost: 2, isAttack: false, goAgain: true, destroySelfCost: true, label: "Charge on next attack", onActivate(ctx) { ctx.addModifier({ scope: "until-end-of-turn" }); ctx.setPlayerFlag(ctx.seat, "warbandCharge", true); } }, onFriendlyPlay(ctx, card) { if (ctx.getPlayerFlag(ctx.seat, "warbandCharge") !== true || !ctx.hasCardType(card, "action") || !has(ctx, card, "attack")) return; ctx.setPlayerFlag(ctx.seat, "warbandCharge", false); const hand = ctx.player(ctx.seat).hand; if (hand.length) ctx.requestCardChoice("warband-charge", decisionPrompt("Charge your hero's soul?", "card.evo.soul.charge", { optionMessages: commonOptionMessages("no") }), ["no", ...hand.map((candidate) => candidate.instanceId)]); }, onChoose(ctx, hook, option) { if (hook === "warband-charge" && option !== "no") { const charged = ctx.charge(Number(option)); if (charged && ctx.cardColor(charged) === 2) ctx.drawCards(ctx.seat, 1); } } },
+  "warband of bellona|0": {
+    activated: {
+      cost: 2,
+      isAttack: false,
+      goAgain: true,
+      destroySelfCost: true,
+      label: "Charge on next attack",
+      onActivate(ctx) {
+        ctx.addModifier({ scope: "until-end-of-turn" });
+        ctx.setPlayerFlag(ctx.seat, "warbandCharge", true);
+      },
+    },
+    onFriendlyAttackDeclared(ctx) {
+      if (ctx.getPlayerFlag(ctx.seat, "warbandCharge") !== true) return;
+      ctx.setPlayerFlag(ctx.seat, "warbandCharge", false);
+      const hand = ctx.player(ctx.seat).hand;
+      if (hand.length) {
+        ctx.requestCardChoice(
+          "warband-charge",
+          decisionPrompt("Charge your hero's soul?", "card.evo.soul.charge", {
+            optionMessages: commonOptionMessages("no"),
+          }),
+          ["no", ...hand.map((candidate) => candidate.instanceId)],
+        );
+      }
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "warband-charge" && option !== "no") {
+        const charged = ctx.charge(Number(option));
+        if (charged && ctx.cardColor(charged) === 2) ctx.drawCards(ctx.seat, 1);
+      }
+    },
+  },
   "slay|1": { playTargetOptions(ctx) { return ctx.state.players.flatMap((player) => player.board).filter((card) => has(ctx, card, "angel")).map((card) => card.instanceId); }, onPlay(ctx) { if (ctx.playTargetInstanceId !== undefined) ctx.destroyPermanent(ctx.playTargetInstanceId); } },
 };

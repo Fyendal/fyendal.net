@@ -453,6 +453,43 @@ describe("EVO — registration and core mechanics", () => {
     levelerAttack.attackWithWeapon("teklo leveler|0").expectAttackValue(3);
   });
 
+  it("Teklo Leveler costs 1 resource with three Evos equipped", () => {
+    const red = "wrecker romp|1";
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "teklovossen, esteemed magnate|0",
+          weapons: ["teklo leveler|0"],
+          hand: [red],
+          equipment: {
+            head: "evo beta base head|3",
+            arms: "evo beta base arms|3",
+            legs: "evo beta base legs|3",
+          },
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    const leveler = s.state.players[0]!.weapons[0]!;
+    const pitch = s.state.players[0]!.hand[0]!;
+
+    expect(legalIntents(s.state, 0)).toContainEqual(expect.objectContaining({
+      kind: "activate-ability",
+      sourceInstanceId: leveler.instanceId,
+      pitchInstanceIds: [pitch.instanceId],
+      pitchRequired: 1,
+    }));
+    expect(actionCandidates(s.state, 0)).toContainEqual(expect.objectContaining({
+      kind: "activate-ability",
+      sourceInstanceId: leveler.instanceId,
+      pitchRequired: 1,
+    }));
+    s.attackWithWeapon("teklo leveler|0", { pitch: [red] })
+      .expectResources(0, 0)
+      .expectAttackValue(2);
+  });
+
   it("Scrap banishes a graveyard item or equipment and leaves arena items alone", () => {
     const s = scenario({
       seats: [

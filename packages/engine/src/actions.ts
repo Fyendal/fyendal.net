@@ -323,6 +323,12 @@ export function playCard(
   if (variableCost) {
     (card.counters ??= {})[variableCost.counterKey] = declaredVariableX!;
   }
+  // Attack-play trigger sources are fixed when the play is announced.
+  // Permanents created while declaring or paying costs must not retroactively
+  // observe that same attack (for example, Courage created by charging it).
+  if (isAttackAction) {
+    (card.counters ??= {}).enginePlayEventNextId ??= state.nextInstanceId;
+  }
   if (!additionalCostDeclared && script?.declareAdditionalCost) {
     script.declareAdditionalCost(runtime.makeCtx(state, seat, card));
     const declarationDecision = state.pendingDecision;
@@ -436,8 +442,16 @@ export function finishPlayCard(
   // closes. Process close-event effects first so permanents they create can
   // observe this card's subsequent played event.
   if (!isInstant && !isAttackCard(data)) closeChain(state, runtime);
-  const playEventNextId = state.nextInstanceId;
-  const { goAgain, layers: playedTriggers } = announceCardPlayed(state, runtime, seat, card, from);
+  const playEventNextId = card.counters?.enginePlayEventNextId ?? state.nextInstanceId;
+  delete card.counters?.enginePlayEventNextId;
+  const { goAgain, layers: playedTriggers } = announceCardPlayed(
+    state,
+    runtime,
+    seat,
+    card,
+    from,
+    playEventNextId,
+  );
 
   if (isAttackCard(data)) {
     let boosted = false;
@@ -652,7 +666,7 @@ export function activateAbility(
     ? resolveVariableAbilityCost(variableCost, ctx)
     : undefined;
   const resourceCostForBase = (base: number): number => ability.isAttack
-    ? attackActivationCost(state, runtime, player, card, base, targetAllyId)
+    ? attackActivationCost(state, runtime, player, card, base, targetAllyId, ability.modifyCost)
     : abilityResourceCost(state, runtime, seat, card, { ...ability, cost: base });
   if (resolvedVariableCost && declaredVariableX === undefined) {
     if (pitchInstanceIds.length > 0) return "declare X before pitching for this ability";
@@ -772,7 +786,15 @@ export function activateAbility(
     return undefined;
   }
   const resourceCost = ability.isAttack
-    ? attackActivationCost(state, runtime, player, card, costAbility.cost, targetAllyId)
+    ? attackActivationCost(
+        state,
+        runtime,
+        player,
+        card,
+        costAbility.cost,
+        targetAllyId,
+        costAbility.modifyCost,
+      )
     : abilityResourceCost(state, runtime, seat, card, costAbility);
   const prepErr = payActivatedAbilityCost(state, runtime, seat, card, costAbility, abilityIndex, pitchInstanceIds, resourceCost, {
     chiCost: ability.chiCost,

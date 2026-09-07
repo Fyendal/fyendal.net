@@ -365,6 +365,48 @@ describe("OUT — registration and core mechanics", () => {
 
 describe("OUT — rules regression coverage", () => {
   it.each([
+    "bonds of ancestry|1",
+    "gustwave of the second wind|1",
+  ])("%s does not have unconditional go again", (card) => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", resources: 2, hand: [card] },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play(card).blockWith().settle().expectAP(0, 0);
+  });
+
+  it("Bonds of Ancestry lets its searched same-name card be played this combat chain", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 2,
+          hand: ["surging strike|1", "descendent gustwave|1", "bonds of ancestry|1"],
+          graveyard: ["gustwave of the second wind|1"],
+          deck: ["gustwave of the second wind|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("surging strike|1")
+      .blockWith()
+      .settle()
+      .play("descendent gustwave|1")
+      .blockWith()
+      .settle()
+      .play("bonds of ancestry|1")
+      .chooseCard("gustwave of the second wind|1")
+      .chooseCard("gustwave of the second wind|1")
+      .blockWith()
+      .settle()
+      .play("gustwave of the second wind|1", { fromZone: "banish" });
+  });
+
+  it.each([
     ["Bonds of Ancestry", 4],
     ["Bonds of Agony", 2],
   ] as const)(

@@ -22,7 +22,12 @@ import type { ChainLinkState, PendingArcane, PlayerState } from "./state.js";
 
 import { tokenCreationCauseForModifier } from "./tokenQueries.js";
 import { createTokensFor } from "./tokens.js";
-import { currentLink, findCardAnywhere, opponent } from "./zoneQueries.js";
+import {
+  currentLink,
+  findCardAnywhere,
+  isPermanentSource,
+  opponent,
+} from "./zoneQueries.js";
 import { destroyPermanent } from "./zoneMoves.js";
 import { hookSources, lingeringModifierSources } from "./sourceQueries.js";
 
@@ -201,9 +206,7 @@ export function resumeCombatDamage(state: GameStateInternal,
 function attackSourceInArena(state: GameStateInternal, link: ChainLinkState): boolean {
   if (link.attackCardType === "action") return true;
   const attacker = state.players[link.attacker] as PlayerState;
-  const id = link.attackingCard.instanceId;
-  if (attacker.weapons.some((c) => c.instanceId === id)) return true;
-  return attacker.board.some((c) => c.instanceId === id);
+  return isPermanentSource(attacker, link.attackingCard.instanceId);
 }
 
 export function resolveLink(state: GameStateInternal, runtime: EngineRuntime): void {

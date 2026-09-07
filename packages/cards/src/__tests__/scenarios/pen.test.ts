@@ -14,6 +14,45 @@ describe("PEN — import and set mechanics", () => {
     expect(new Set(cards.map(functionalKeyOf))).toHaveLength(348);
   });
 
+  it("Blessing of Bellona's newly created Courage does not trigger for the attack that charged", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        heroKey: "ser boltyn, breaker of dawn|0",
+        hand: ["spirit of war|1", "beaming bravado|2"],
+        board: ["blessing of bellona|2"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("spirit of war|1")
+      .chooseCard("beaming bravado|2")
+      .expectAttackValue(3)
+      .expectZoneSize(0, "board", 2)
+      .expectNoLog("Courage triggers");
+  });
+
+  it("two Blessings of Bellona create three Courage when they enter soul in sequence", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "ser boltyn, breaker of dawn|0",
+          board: ["blessing of bellona|2", "blessing of bellona|2"],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.endTurn().expectZoneSize(0, "board", 3);
+    expect(g.state.players[0]!.soul.filter(
+      (card) => functionalKeyOf(cardData[card.cardId]!) === "blessing of bellona|2",
+    )).toHaveLength(2);
+  });
+
   it("Kano can play the card banished by his ability as an instant on the opponent's turn", () => {
     const g = scenario({
       active: 1,

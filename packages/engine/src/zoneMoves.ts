@@ -465,6 +465,7 @@ export function enterSoul(
   runtime: EngineRuntime,
   card: CardInstance,
   charged: boolean,
+  lastKnownObserver?: CardInstance,
 ): void {
   const owner = state.players[card.owner] as PlayerState;
   if (scriptOf(state, card.cardId, card)?.replacesSoulMoveWithArena === true) {
@@ -492,9 +493,14 @@ export function enterSoul(
       card: logCardValue(card.cardId),
     },
   ));
-  for (const source of controlledPermanents(state, owner.seat, {
-    faceDownEquipment: false,
-  })) {
+  // A permanent moving itself into soul still observes that move using its
+  // last-known arena state. Other observers are the permanents that remain in
+  // the arena after the move.
+  const observers = [
+    ...(lastKnownObserver ? [lastKnownObserver] : []),
+    ...controlledPermanents(state, owner.seat, { faceDownEquipment: false }),
+  ];
+  for (const source of observers) {
     scriptOf(state, source.cardId, source)?.onCardPutIntoSoul?.(
       runtime.makeCtx(state, owner.seat, source, currentLink(state)),
       card,
@@ -810,9 +816,12 @@ export function putCardIntoSoul(
     ?? fromChain
     ?? findAndRemoveCard(state, instanceId, { includeEquipment: true, includeBanish: true });
   if (!found) return false;
+  const lastKnownObserver = found.fromArena && found.owner.seat === found.card.owner
+    ? snapshotSerializable(found.card)
+    : undefined;
   delete found.card.faceDown;
   if (found.fromArena) fireLeaveArena(state, runtime, found.owner.seat, found.card, "soul");
-  enterSoul(state, runtime, found.card, false);
+  enterSoul(state, runtime, found.card, false, lastKnownObserver);
   if (found.fromZone === "graveyard") {
     runtime.events.fireCardLeavesGraveyard(state, found.owner.seat, found.card, "soul");
   }
