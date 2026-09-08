@@ -144,7 +144,10 @@ export interface ScriptCtx {
   /** Move one card retained in this hero's private inventory into their hand. */
   moveInventoryToHand(instanceId: number): boolean;
   pitchCard(instanceId: number): boolean;
-  settleCard(instanceId: number, opts?: { allowCrank?: boolean; controllerSeat?: number }): boolean;
+  settleCard(
+    instanceId: number,
+    opts?: { allowCrank?: boolean; controllerSeat?: number; tapped?: boolean },
+  ): boolean;
   setCardFaceDown(instanceId: number, faceDown: boolean): boolean;
   addCardTempPower(instanceId: number, delta: number): boolean;
   /** Grant an additional name to a card object for subsequent name checks. */
@@ -413,6 +416,9 @@ export interface ScriptCtx {
   becomeAllyUntilEndOfTurn(instanceId: number, power: number, life: number): boolean;
   /** Look up static data for any card id */
   cardData(cardId: string): CardData;
+  /** Evaluate a card's printed cost outside the stack. An undefined X is 0,
+   * so an X+3 cost evaluates to 3 while a plain X cost evaluates to 0. */
+  printedCost(cardId: string): number | undefined;
   /** Printed amounts of the registered card's direct arcane-damage effects.
    * Values are read in non-layer zones before conditional replacements or
    * damage modifiers; an undetermined X is 0. */

@@ -670,6 +670,7 @@ export function InactiveZoneCard({
         card={card}
         size="zone"
         showOverlays={showOverlays}
+        showTapped={false}
         dimmed={showKnownFaceDown}
         motionKey={motionKey}
       />
@@ -684,6 +685,7 @@ export function InactiveZoneCard({
       card={faceDownCard}
       size="zone"
       showOverlays={showOverlays}
+      showTapped={false}
       motionKey={motionKey}
     />
   );

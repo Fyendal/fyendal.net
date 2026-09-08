@@ -18210,6 +18210,16 @@
       "value": "因战斗链环已离场，防守触发结算时不产生效果"
     }
   ],
+  "engine.log.trigger.delayed.destroy.card": [
+    {
+      "type": 0,
+      "value": "一个延迟效果触发：摧毁 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
   "engine.log.trigger.delayed.lose.life": [
     {
       "type": 1,
@@ -18458,6 +18468,16 @@
     {
       "type": 0,
       "value": "因来源已离开墓地，Watery Grave 结算时不产生效果"
+    }
+  ],
+  "engine.term.card.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 "
+    },
+    {
+      "type": 1,
+      "value": "card"
     }
   ],
   "footer.legal": [

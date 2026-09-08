@@ -176,7 +176,7 @@ export const sly: Record<string, CardScript> = {
     activated: attackAbility(3),
     modifyAttack(ctx) {
       return ctx.link?.attackingCard.instanceId === ctx.self.instanceId &&
-        ctx.player(ctx.seat).pitch.some((c) => (ctx.cardData(c.cardId).cost ?? 0) >= 3)
+        ctx.player(ctx.seat).pitch.some((c) => (ctx.printedCost(c.cardId) ?? 0) >= 3)
         ? 1
         : 0;
     },

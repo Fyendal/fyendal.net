@@ -1511,7 +1511,7 @@ Object.assign(sea, {
       banishSelfCost: true,
       onActivate(ctx: ScriptCtx) {
         ctx.setCardCounter(ctx.self.instanceId, "steam", 1);
-        ctx.settleCard(ctx.self.instanceId);
+        ctx.settleCard(ctx.self.instanceId, { tapped: true });
       },
     },
   },

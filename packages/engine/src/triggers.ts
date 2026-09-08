@@ -30,8 +30,8 @@ import {
   variableResourceCost,
 } from "./costs.js";
 import type { CardInstance, PlayerState, StackLayer, StackResume } from "./state.js";
-import { currentLink, findCardAnywhere, opponent, removeFromArray } from "./zoneQueries.js";
-import { moveToGraveyard } from "./zoneMoves.js";
+import { currentLink, findCardAnywhere, findPermanent, opponent, removeFromArray } from "./zoneQueries.js";
+import { destroyPermanent, moveToGraveyard } from "./zoneMoves.js";
 
 import {
   applyOneShotDefenseModifiers,
@@ -50,7 +50,7 @@ import { consumeFirstActionExtraCost, firstActionExtraCost, goAgainSuppressed, i
 import { opposingActionsProhibited } from "./restrictions.js";
 import { defendingHeroCannotRespondBelowPower } from "./combatRestrictions.js";
 import { pushCardLayer } from "./stackCore.js";
-import { triggerLabelMessage } from "./triggerPresentation.js";
+import { DESTROY_AT_END_PHASE_HOOK, triggerLabelMessage } from "./triggerPresentation.js";
 
 import {
   holdPriorityWindow,
@@ -897,6 +897,12 @@ function advanceStack(state: GameStateInternal, runtime: EngineRuntime): void {
   if (layer.engineEffect?.kind === "delayed-trigger") {
     state.stack.shift();
     const { source, hook } = layer.engineEffect;
+    if (hook === DESTROY_AT_END_PHASE_HOOK) {
+      const found = findPermanent(state, source.instanceId);
+      if (found) destroyPermanent(state, runtime, layer.seat, found.card);
+      continueStack(state, runtime, layer.seat);
+      return;
+    }
     scriptOf(state, source.cardId, source)?.onDelayedTrigger?.(
       runtime.makeCtx(state, layer.seat, source, currentLink(state)),
       hook,
@@ -1740,6 +1746,41 @@ export function collectEventTriggerLayers(
     eventCard,
     eventContext,
   ) as { seat: number; layers: StackLayer[] }[];
+  let addedEngineDelayedEffect = false;
+  if (event === "end-of-turn") {
+    const pending = state.pendingDestructions.splice(0);
+    for (const { seat, instanceId } of pending) {
+      const found = findPermanent(state, instanceId);
+      if (!found) continue;
+      const source = runtime.commands.snapshotSerializable(found.card);
+      const cardName = nameOf(state, source.cardId);
+      const label = `Destroy ${cardName}`;
+      let group = groups.find((candidate) => candidate.seat === seat);
+      if (!group) {
+        group = { seat, layers: [] };
+        groups.push(group);
+      }
+      group.layers.push({
+        sourceInstanceId: source.instanceId,
+        seat,
+        triggerIndex: -10,
+        triggerSource: source,
+        label,
+        optional: false,
+        engineEffect: {
+          kind: "delayed-trigger",
+          source,
+          hook: DESTROY_AT_END_PHASE_HOOK,
+        },
+      });
+      logPublic(state, gameLogMessage(
+        `A delayed effect triggers: destroy ${cardName}`,
+        "engine.log.trigger.delayed.destroy.card",
+        { card: logCardValue(source.cardId) },
+      ));
+      addedEngineDelayedEffect = true;
+    }
+  }
   const dueDelayed = state.delayedTriggers.filter(
     (delayed) =>
       delayed.event === event &&
@@ -1773,6 +1814,8 @@ export function collectEventTriggerLayers(
         delayed.labelMessage ?? { id: "engine.term.delayed.effect" },
       ));
     }
+  }
+  if (addedEngineDelayedEffect || dueDelayed.length > 0) {
     const seatOrder = [subject, opponent(subject)];
     groups.sort((a, b) => seatOrder.indexOf(a.seat) - seatOrder.indexOf(b.seat));
   }
