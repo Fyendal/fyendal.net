@@ -38,7 +38,9 @@ function lessLifePlayTrigger(effect: { attack?: number; keyword?: string }): Car
       effect(ctx, played) {
         if (!played) return;
         if (effect.attack) ctx.addCardTempPower(played.instanceId, effect.attack);
-        if (effect.keyword === "dominate") ctx.setFlag("link", "dominate", true);
+        if (effect.keyword === "dominate") {
+          ctx.addModifier({ scope: "chain-link", dominate: true });
+        }
         else if (effect.keyword) ctx.grantCardKeyword(played.instanceId, effect.keyword);
       },
     }],

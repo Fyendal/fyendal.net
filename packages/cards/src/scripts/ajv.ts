@@ -147,8 +147,8 @@ export const ajv: Record<string, CardScript> = {
       goAgain: true,
       oncePerTurn: true,
       onCostPaid(ctx, paid) {
-        if (paid.some((card) => hasType(ctx, card, "earth"))) ctx.setCounter("earthPaid", 1);
-        if (paid.some((card) => hasType(ctx, card, "ice"))) ctx.setCounter("icePaid", 1);
+        ctx.setCounter("earthPaid", paid.some((card) => hasType(ctx, card, "earth")) ? 1 : 0);
+        ctx.setCounter("icePaid", paid.some((card) => hasType(ctx, card, "ice")) ? 1 : 0);
       },
       onActivate(ctx) {
         if (ctx.getCounter("earthPaid")) ctx.addModifier({ scope: "until-end-of-turn", attack: 2, appliesToName: "mangle" });
