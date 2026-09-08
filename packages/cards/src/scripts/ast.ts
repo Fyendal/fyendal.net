@@ -127,7 +127,7 @@ export const ast: Record<string, CardScript> = {
       );
       if (marker) ctx.consumeModifier(marker.id);
     },
-    onGainGoAgain(ctx) { requestAnyTarget(ctx, "arc-lightning-target", `Arc Lightning: deal ${ctx.previewArcaneDamage(1)} arcane damage to any target`); },
+    onGoAgainResolved(ctx) { requestAnyTarget(ctx, "arc-lightning-target", `Arc Lightning: deal ${ctx.previewArcaneDamage(1)} arcane damage to any target`); },
     onChoose(ctx, hook, option) { if (hook === "arc-lightning-target") dealToChoice(ctx, option); },
   },
   "skyward serenade|2": {

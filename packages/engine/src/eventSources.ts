@@ -444,6 +444,7 @@ export function runHook<K extends
   | "onAttackDeclaredTriggersResolved"
   | "onFriendlyAttackDeclared"
   | "onGainGoAgain"
+  | "onGoAgainResolved"
   | "onHit"
   | "onSuppressedHit"
   | "onMiss"
@@ -518,9 +519,10 @@ export function grantLinkGoAgain(state: GameStateInternal,
   notifyGoAgain(state, runtime, link);
 }
 
-/** Notify sources that their controller gained go again from a resolving non-attack action. */
-export function notifyPlayerGainedGoAgain(state: GameStateInternal,
-  runtime: EngineRuntime, seat: number): void {
+/** Notify active and lingering sources when go again resolves and grants their
+ * controller an action point. */
+export function notifyGoAgainResolved(state: GameStateInternal,
+  runtime: EngineRuntime, seat: number, link?: ChainLinkState): void {
   const active = hookSources(state, seat, {
     board: true,
     equipment: true,
@@ -529,5 +531,7 @@ export function notifyPlayerGainedGoAgain(state: GameStateInternal,
   const sources = [...active, ...lingeringModifierSources(state, seat).filter(
     (candidate) => !active.some((source) => source.instanceId === candidate.instanceId),
   )];
-  for (const source of sources) runtime.events.runHook(state, seat, source, "onGainGoAgain");
+  for (const source of sources) {
+    runtime.events.runHook(state, seat, source, "onGoAgainResolved", link);
+  }
 }

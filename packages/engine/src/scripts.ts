@@ -1039,6 +1039,9 @@ export interface CardScript {
   /** The current link's attack gained go again — at declaration or later
    *  (e.g. granted on hit). Called for the attacking card and the hero. */
   onGainGoAgain?(ctx: ScriptCtx): void;
+  /** The controller actually went again: a resolving non-attack layer or an
+   * attack at the beginning of its Resolution Step granted its action point. */
+  onGoAgainResolved?(ctx: ScriptCtx): void;
   /** Conditional attack bonus, re-evaluated at resolution. On an attacking
    * object (including a weapon), this modifies only that object's attack;
    * observer effects belong on explicit friendly-attack/modifier hooks. */
