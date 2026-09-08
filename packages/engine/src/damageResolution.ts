@@ -202,15 +202,15 @@ function applyPreventionShields(
   }
   if (preventable && remaining > 0) remaining = applyPitchSourcePrevention(state, target, remaining, source);
   if (preventable && remaining > 0) {
-    const repeating = state.modifiers.find(
-      (modifier) =>
-        modifier.scope === "until-end-of-turn" &&
-        modifier.seat === target.seat &&
-        !modifier.consumed &&
-        Number(modifier.preventDamagePerEvent || 0) > 0 &&
-        Number(modifier.preventDamageEventsRemaining || 0) > 0,
-    );
-    if (repeating) {
+    for (const repeating of state.modifiers) {
+      if (remaining <= 0) break;
+      if (
+        repeating.scope !== "until-end-of-turn" ||
+        repeating.seat !== target.seat ||
+        repeating.consumed ||
+        Number(repeating.preventDamagePerEvent || 0) <= 0 ||
+        Number(repeating.preventDamageEventsRemaining || 0) <= 0
+      ) continue;
       const prevented = Math.min(Number(repeating.preventDamagePerEvent), remaining);
       remaining -= prevented;
       repeating.preventDamageEventsRemaining =

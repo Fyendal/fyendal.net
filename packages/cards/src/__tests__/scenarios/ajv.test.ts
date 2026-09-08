@@ -49,6 +49,38 @@ describe("AJV — Jarl", () => {
     expect(g.state.players[1]!.weapons).toHaveLength(0);
   });
 
+  it("a fused Frozen to Death keeps its exposed-zone marker through a declined token replacement", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "MPG000",
+          hand: ["AJV020", "AJV018", "SIY033"],
+          weapons: ["SLY002", "EVR018"],
+        },
+        {
+          hero: "dorinthea",
+          hand: [],
+          graveyard: ["smoldering steel|1"],
+          equipment: { chest: "HVY097" },
+          weapons: ["SGB002"],
+        },
+      ],
+    });
+    g.state.players[1]!.equipment.chest!.defCounters = 1;
+
+    g.play("AJV020", { pitch: ["SIY033"] })
+      .chooseOption("ice:")
+      .chooseCard("HVY097")
+      .chooseOption("chest")
+      .chooseOption("no");
+
+    expect(g.state.players[1]!.equipment.chest).toBeUndefined();
+    expect(g.state.players[1]!.board.some(
+      (card) => card.counters?.["frostZone:chest"] === 1,
+    )).toBe(true);
+  });
+
   it("Unforgetting Unforgiving lets Jarl play the searched Mangle next action phase", () => {
     const g = scenario({
       active: 1,

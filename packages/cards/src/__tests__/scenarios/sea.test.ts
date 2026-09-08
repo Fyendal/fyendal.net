@@ -624,9 +624,7 @@ describe("SEA — High Seas heroes and cogs", () => {
       ],
     });
 
-    g.activate("gold|0", { settle: false })
-      .passPriority()
-      .passPriority()
+    g.activate("gold|0")
       .chooseCard("rusty harpoon|3")
       .expectInZone(0, "rusty harpoon|3", "arsenal")
       .expectFaceDown(0, "rusty harpoon|3", false);
@@ -648,9 +646,7 @@ describe("SEA — High Seas heroes and cogs", () => {
       ],
     });
 
-    g.activate("gold|0", { settle: false })
-      .passPriority()
-      .passPriority();
+    g.activate("gold|0");
 
     expect(g.state.pendingDecision?.chooseHook).toBe("marlynn-arrow");
     g.chooseCard("rusty harpoon|3")
@@ -857,6 +853,30 @@ describe("SEA — pirate and generic attacks", () => {
       .expectResources(0, 5);
   });
 
+  it("King Kraken Harpoon does not discard a revealed instant", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["death dealer|0"],
+          hand: ["titanium bauble|3"],
+          arsenal: ["king kraken harpoon|1"],
+        },
+        { hero: "dorinthea", hand: ["sigil of aether|3"] },
+      ],
+    });
+
+    g.play("king kraken harpoon|1", {
+      fromArsenal: true,
+      pitch: ["titanium bauble|3"],
+    })
+      .blockWith()
+      .settle()
+      .chooseCard("sigil of aether|3")
+      .expectInZone(1, "sigil of aether|3", "hand")
+      .expectNotInZone(0, "gold|0", "board");
+  });
+
   it("Big Game Trophy Shot creates Gold when the next arrow with harpoon in its name hits a hero", () => {
     const g = scenario({
       seats: [
@@ -879,6 +899,31 @@ describe("SEA — pirate and generic attacks", () => {
       .blockWith()
       .settle()
       .expectInZone(0, "gold|0", "board");
+  });
+
+  it("Big Game Trophy Shot discards before Marlynn can arsenal the drawn arrow", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "marlynn|0",
+          hand: ["big game trophy shot|2", "sea floor salvage|3", "golden tipple|3"],
+          deck: ["king kraken harpoon|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("big game trophy shot|2", { pitch: ["sea floor salvage|3"] });
+    expect(g.state.pendingDecision?.chooseHook).toBe("big-game-discard");
+
+    g.chooseCard("golden tipple|3");
+    expect(g.state.pendingDecision?.chooseHook).toBe("marlynn-arrow");
+
+    g.chooseCard("king kraken harpoon|1")
+      .expectInZone(0, "king kraken harpoon|1", "arsenal")
+      .expectFaceDown(0, "king kraken harpoon|1", false)
+      .expectInZone(0, "golden tipple|3", "graveyard");
   });
 
   it("Big Game Trophy Shot does not grant its Gold trigger to a non-Harpoon arrow", () => {

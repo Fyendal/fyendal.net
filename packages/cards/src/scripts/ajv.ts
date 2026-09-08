@@ -32,8 +32,7 @@ function offerExposedFrostbite(ctx: ScriptCtx, hook: string, seat: number, optio
 
 function createExposedFrostbite(ctx: ScriptCtx, seat: number, slot: string): void {
   if (!SLOTS.includes(slot as typeof SLOTS[number]) || !exposed(ctx, seat).includes(slot)) return;
-  const token = ctx.createToken(FROSTBITE, seat);
-  if (token) ctx.addCounter(token.instanceId, `frostZone:${slot}`, 1);
+  ctx.createToken(FROSTBITE, seat, { [`frostZone:${slot}`]: 1 });
 }
 
 function allEquipment(ctx: ScriptCtx, seat?: number): DeepReadonly<CardInstance>[] {

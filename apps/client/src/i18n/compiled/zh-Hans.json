@@ -10863,6 +10863,12 @@
       "value": "Marlynn：将一张 arrow 正面朝上放入 arsenal？"
     }
   ],
+  "card.sea.marlynn.trigger.arrow.arsenal": [
+    {
+      "type": 0,
+      "value": "将一张 arrow 正面朝上放入你的 arsenal？"
+    }
+  ],
   "card.sea.money.goldordamage": [
     {
       "type": 0,

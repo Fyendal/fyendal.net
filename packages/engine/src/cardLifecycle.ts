@@ -124,10 +124,12 @@ export function drawCards(
     }
   }
   const before = player.hand.length;
+  const drawnCards: CardInstance[] = [];
   for (let i = 0; i < count && player.deck.length > 0; i++) {
     const card = player.deck.shift() as CardInstance;
     clearPrivateZonePlacement(card);
     player.hand.push(card);
+    drawnCards.push(card);
     runtime.transitions.move(
       card,
       transitionZone("deck", player.seat, "top"),
@@ -139,6 +141,15 @@ export function drawCards(
   if (drawn <= 0) return;
   player.flags.cardsDrawnThisTurn =
     (Number(player.flags.cardsDrawnThisTurn) || 0) + drawn;
+  for (const card of drawnCards) {
+    runtime.events.queueTriggeredEvent(
+      state,
+      "card-drawn",
+      player.seat,
+      card,
+      { causedBySeat: player.seat, from: "deck", to: "hand" },
+    );
+  }
   for (const source of hookSources(state, player.seat, {
     board: true,
     equipment: true,

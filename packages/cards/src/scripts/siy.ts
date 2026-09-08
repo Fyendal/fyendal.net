@@ -449,8 +449,7 @@ export const siy: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook !== "frost-spike-zone") return;
       const [seatText, slot] = option.split(":");
-      const token = ctx.createToken(FROSTBITE, Number(seatText));
-      if (token) ctx.addCounter(token.instanceId, `frostZone:${slot}`, 1);
+      ctx.createToken(FROSTBITE, Number(seatText), { [`frostZone:${slot}`]: 1 });
     },
   },
 

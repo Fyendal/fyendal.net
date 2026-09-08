@@ -624,11 +624,11 @@ function projectedCombatPrevention(
   );
   if (pitchShield) addContribution(eventAmount, pitchShield);
 
-  const repeatingShield = activeModifiers.find((modifier) =>
-    Number(modifier.preventDamagePerEvent ?? 0) > 0 &&
-    Number(modifier.preventDamageEventsRemaining ?? 0) > 0
-  );
-  if (repeatingShield) {
+  for (const repeatingShield of activeModifiers) {
+    if (
+      Number(repeatingShield.preventDamagePerEvent ?? 0) <= 0 ||
+      Number(repeatingShield.preventDamageEventsRemaining ?? 0) <= 0
+    ) continue;
     addContribution(Number(repeatingShield.preventDamagePerEvent), repeatingShield);
   }
 
