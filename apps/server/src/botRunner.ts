@@ -132,6 +132,27 @@ export function fallbackBotIntent(input: BotPolicyInput): GameIntent | undefined
     );
     if (choice) return choice;
   }
+  // A policy timeout or crash must not turn an already-funded weapon attack
+  // into an end-turn pass. Prefer the no-pitch hero-targeted activation in a
+  // clean action window; it spends no hidden card and still comes directly
+  // from the authoritative legal-intent set.
+  if (
+    input.view.phase === "action" && input.view.pendingDecision === null &&
+    input.view.activePlayer === input.seat && input.view.priorityPlayer === input.seat
+  ) {
+    const weaponIds = new Set(
+      input.view.players[input.seat].weapons.map((card) => card.instanceId),
+    );
+    const weaponAttacks = input.legal.filter((intent) =>
+      intent.kind === "activate-ability" && weaponIds.has(intent.sourceInstanceId) &&
+      intent.pitchInstanceIds.length === 0
+    );
+    const heroAttack = weaponAttacks.find((intent) =>
+      intent.kind === "activate-ability" && intent.targetAllyId === undefined
+    );
+    if (heroAttack) return heroAttack;
+    if (weaponAttacks[0]) return weaponAttacks[0];
+  }
   return input.legal.find((intent) => intent.kind === "pass")
     ?? input.legal.find((intent) => intent.kind !== "concede");
 }

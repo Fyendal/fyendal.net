@@ -384,6 +384,82 @@ describe("DYN — defense counters", () => {
 });
 
 describe("DYN — rules regression coverage", () => {
+  it("Plasma Mainline asks before moving a steam counter after an item is cranked", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          board: ["plasma mainline|1"],
+          hand: ["backup protocol: red|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    const mainline = s.state.players[0]!.board.find(
+      (card) => functionalKeyOf(cardData[card.cardId]!) === "plasma mainline|1",
+    )!;
+    mainline.counters = { steam: 5 };
+    const mainlineId = mainline.instanceId;
+
+    s.play("backup protocol: red|1", { settle: false })
+      .passPriority()
+      .passPriority();
+
+    expect(s.state.pendingDecision?.chooseHook).toBe("engine-crank");
+    s.chooseOption("yes");
+
+    const protocol = s.state.players[0]!.board.find(
+      (card) => functionalKeyOf(cardData[card.cardId]!) === "backup protocol: red|1",
+    )!;
+    expect(s.state.pendingDecision).toMatchObject({
+      kind: "optional-effect",
+      player: 0,
+      sourceInstanceId: mainlineId,
+      chooseHook: `plasma-mainline:${protocol.instanceId}`,
+      promptMessage: {
+        id: "card.dyn.plasmamainline.counter.move",
+        values: {
+          card: { kind: "card", cardId: mainline.cardId },
+          target: { kind: "card", cardId: protocol.cardId },
+        },
+      },
+    });
+    expect(s.state.players[0]!.board.find((card) => card.instanceId === mainlineId)?.counters?.steam).toBe(5);
+    expect(protocol.counters?.steam).toBeUndefined();
+
+    s.chooseOption("no");
+    expect(s.state.players[0]!.board.find((card) => card.instanceId === mainlineId)?.counters?.steam).toBe(5);
+    expect(s.state.players[0]!.board.find((card) => card.instanceId === protocol.instanceId)?.counters?.steam).toBeUndefined();
+  });
+
+  it("Plasma Mainline moves the steam counter when its player accepts", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          board: ["plasma mainline|1"],
+          hand: ["backup protocol: red|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    const mainline = s.state.players[0]!.board[0]!;
+    mainline.counters = { steam: 5 };
+    const mainlineId = mainline.instanceId;
+
+    s.play("backup protocol: red|1", { settle: false })
+      .passPriority()
+      .passPriority()
+      .chooseOption("yes")
+      .chooseOption("yes");
+
+    const protocol = s.state.players[0]!.board.find(
+      (card) => functionalKeyOf(cardData[card.cardId]!) === "backup protocol: red|1",
+    )!;
+    expect(s.state.players[0]!.board.find((card) => card.instanceId === mainlineId)?.counters?.steam).toBe(4);
+    expect(protocol.counters?.steam).toBe(1);
+  });
+
   it("Emperor attacks directly with the searched Command and Conquer", () => {
     const originalCard = cardData.ARC159;
     const originalScript = scripts.ARC159;

@@ -414,7 +414,7 @@ export const evrHighRarity: Record<string, CardScript> = {
     onDelayedTrigger(ctx, hook) {
       if (hook === "revel-cleanup") {
         for (const card of [...ctx.player(ctx.seat).board]) {
-          if (ctx.cardData(card.cardId).name.toLowerCase() === "runechant") ctx.destroyPermanent(card.instanceId);
+          if (ctx.isRunechant(card)) ctx.destroyPermanent(card.instanceId);
         }
       }
     },

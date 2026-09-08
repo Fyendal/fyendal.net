@@ -39,6 +39,15 @@ function isDagger(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return dataTags(ctx, card).includes("dagger");
 }
 
+function hitWithDaggerThisChain(ctx: ScriptCtx): boolean {
+  return ctx.state.chain.some((link) =>
+    link.attacker === ctx.seat && (
+      (link.damage > 0 && isDagger(ctx, link.attackingCard)) ||
+      Number(link.flags["effectDamageBySubtype:dagger"]) > 0
+    )
+  );
+}
+
 function isDraconic(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return dataTags(ctx, card).includes("draconic");
 }
@@ -515,7 +524,10 @@ export const hnt: Record<string, CardScript> = {
       ],
     ),
   ),
-  ...pitchSeries("cut through", () => ({ onAttackDeclared(ctx) { const hit = ctx.state.chain.some((link) => link.attacker === ctx.seat && ((link.hit && isDagger(ctx, link.attackingCard)) || Number(link.flags["effectDamageBySubtype:dagger"]) > 0)); if (hit) { ctx.addModifier({ scope: "chain-link", attack: 1 }); ctx.grantGoAgain(); } } })),
+  ...pitchSeries("cut through", () => ({
+    modifyAttack: (ctx) => hitWithDaggerThisChain(ctx) ? 1 : 0,
+    hasConditionalGoAgain: (ctx) => hitWithDaggerThisChain(ctx),
+  })),
   "up sticks and run|1": { onPlay(ctx) { offerRetrieveDagger(ctx, "up-sticks-1"); buffNextAttack(ctx, { attack: 4, appliesToSubtype: "dagger" }); }, onChoose(ctx, hook, option) { resolveRetrieveDagger(ctx, hook, option, "up-sticks-1"); } },
   "up sticks and run|2": { onPlay(ctx) { offerRetrieveDagger(ctx, "up-sticks-2"); buffNextAttack(ctx, { attack: 3, appliesToSubtype: "dagger" }); }, onChoose(ctx, hook, option) { resolveRetrieveDagger(ctx, hook, option, "up-sticks-2"); } },
   "up sticks and run|3": { onPlay(ctx) { offerRetrieveDagger(ctx, "up-sticks-3"); buffNextAttack(ctx, { attack: 2, appliesToSubtype: "dagger" }); }, onChoose(ctx, hook, option) { resolveRetrieveDagger(ctx, hook, option, "up-sticks-3"); } },

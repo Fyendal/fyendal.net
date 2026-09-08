@@ -14,8 +14,8 @@ import {
 
 const RUNECHANT = "SVI034";
 
-function isRunechant(ctx: ScriptCtx, card: { readonly cardId: string }): boolean {
-  return ctx.cardData(card.cardId).name === "Runechant";
+function isRunechant(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
+  return ctx.isRunechant(card);
 }
 
 function runeCount(ctx: ScriptCtx): number {

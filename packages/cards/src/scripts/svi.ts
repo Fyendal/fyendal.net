@@ -31,7 +31,7 @@ function isNonAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): bo
 }
 
 function runeCount(ctx: ScriptCtx): number {
-  return ctx.player(ctx.seat).board.filter((card) => isCard(ctx, card.cardId, "Runechant")).length;
+  return ctx.player(ctx.seat).board.filter((card) => ctx.isRunechant(card)).length;
 }
 
 function playedOrCreatedAura(ctx: ScriptCtx): boolean {
@@ -196,7 +196,7 @@ export const svi: Record<string, CardScript> = {
       label: "Destroy with a Runechant: prevent 1 arcane damage",
       canActivate: (ctx) => runeCount(ctx) > 0,
       onActivate(ctx) {
-        const rune = ctx.player(ctx.seat).board.find((card) => isCard(ctx, card.cardId, "Runechant"));
+        const rune = ctx.player(ctx.seat).board.find((card) => ctx.isRunechant(card));
         if (!rune) return;
         ctx.destroyPermanent(rune.instanceId);
         ctx.preventNextDamage(ctx.seat, 1);

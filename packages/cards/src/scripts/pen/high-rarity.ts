@@ -413,9 +413,15 @@ export const penHighRarity: Record<string, CardScript> = {
     preventsOpponentDestroyingFriendly: (ctx, target) => named(ctx, target, "Fealty"),
     modifyDefense: (ctx) => ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "Fealty")).length >= 3 ? 1 : 0,
   },
-  "art of the phoenix: war|1": { additionalCost(ctx) {
-    const flame = ctx.player(ctx.seat).hand.find((card) => named(ctx, card, "Phoenix Flame")); if (flame) ctx.discardCard(ctx.seat, flame.instanceId);
-  }, onPlay(ctx) { ctx.addModifier({ scope: "until-end-of-turn", attack: 1, appliesToType: ["draconic"], appliesTo: "attack-action" }); ctx.drawCards(ctx.seat, 2); } },
+  "art of the phoenix: war|1": {
+    alternativePlayCost: {
+      kind: "discard-hand-named",
+      name: "Phoenix Flame",
+      replacesResourceCost: false,
+      required: true,
+    },
+    onPlay(ctx) { ctx.addModifier({ scope: "until-end-of-turn", attack: 1, appliesToType: ["draconic"], appliesTo: "attack-action" }); ctx.drawCards(ctx.seat, 2); },
+  },
   "rippling wave|0": { activated: { cost: 0, chiCost: 3, isAttack: false, goAgain: false, timing: "defense-reaction", turnsFaceUp: true, canActivate: (ctx) => !!ctx.link, onActivate(ctx) {
     const card = ctx.link?.defendingCards.find((candidate) => ctx.cardColor(candidate) === 3 && isAttack(ctx, candidate)); if (card) ctx.moveToHand(card.instanceId);
   } } },

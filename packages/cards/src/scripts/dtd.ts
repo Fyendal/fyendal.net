@@ -399,7 +399,10 @@ export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRar
   "scepter of pain|0": {
     activated: {
       cost: 2, isAttack: false, goAgain: true, oncePerTurn: true, label: "Deal 1 arcane damage",
-      onActivate(ctx) { if (ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true }) > 0) ctx.createToken(RUNECHANT); },
+      onActivate(ctx) { ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true }); },
+    },
+    onDamageDealt(ctx, target, amount, arcane) {
+      if (target !== ctx.seat && arcane && amount > 0) ctx.createTokens(RUNECHANT, amount);
     },
   },
   "reality refractor|0": {

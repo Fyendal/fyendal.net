@@ -320,11 +320,19 @@ function jarlArcaneEquipment(): Partial<Record<EquipmentSlot, string>> {
   };
 }
 
+function jarlRunebladeEquipment(): Partial<Record<EquipmentSlot, string>> {
+  return {
+    ...jarlPhysicalEquipment(),
+    legs: "SBL010",
+  };
+}
+
 /**
  * Present the supplied Jarl Fabrary pool using each published matchup's main
  * deck quantities. The Fabrary guide declares no turn-order preference and
  * exposes the full arena pool rather than one equipment loadout, so the bot
- * uses Barkskin for physical games and the registered AB package for arcane
+ * uses Barkskin for physical games, AB1 against Vynnset's one-damage
+ * Runechant packets, and the registered AB package for Wizard-style arcane
  * heroes. Unknown opponents get the guide's sixty-card Guardian branch.
  * Source: https://fabrary.net/decks/01M0K4BKRHN7J89ZSB6XGDHRSH
  */
@@ -364,10 +372,12 @@ export function jarlPresentationFor(
     deck.push(...JARL_MANGLE);
   }
 
-  const arcane = matchup === "aurora" || matchup === "oscilio" || matchup === "vynnset";
+  const arcane = matchup === "aurora" || matchup === "oscilio";
   return {
     weaponIds: ["SLY002", "EVR018"],
-    equipment: arcane ? jarlArcaneEquipment() : jarlPhysicalEquipment(),
+    equipment: matchup === "vynnset"
+      ? jarlRunebladeEquipment()
+      : arcane ? jarlArcaneEquipment() : jarlPhysicalEquipment(),
     deck,
   };
 }

@@ -36,7 +36,7 @@ describe("DTD, EVO, and HVY rules regression coverage", () => {
   it("Fabricate chooses two modes", () => expect(script("fabricate|1").onChoose).toBeTypeOf("function"));
   it("Tome enforces its post-draw payment", () => expect(script("tome of imperial flame|1").onChoose).toBeTypeOf("function"));
   it("Deathmatch supports multiplayer targets", () => expect(script("deathmatch arena|0").onFriendlyCombatDamageDealt).toBeTypeOf("function"));
-  it("No Fear returns its cost cards", () => expect(script("no fear|1").triggers?.some((trigger) => trigger.event === "end-of-turn")).toBe(true));
+  it("No Fear returns its cost cards", () => expect(script("no fear|1").onDelayedTrigger).toBeTypeOf("function"));
   it("Gauntlets replace a power gain", () => expect(script("gauntlets of iron will|0").replacePowerGain).toBeTypeOf("function"));
   it("Talk creates Might at its threshold", () => expect(script("talk a big game|3").onFriendlyDamageDealt).toBeTypeOf("function"));
   it("Ripple replaces a token batch", () => expect(script("ripple away|3").globalTokenCreationReplacement?.replace).toBeTypeOf("function"));

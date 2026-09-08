@@ -137,6 +137,48 @@ describe("DTD — registration and core mechanics", () => {
     expect(canPlayCullAsInstant()).toBe(true);
   });
 
+  it("Scepter of Pain creates a Runechant after deferred arcane damage resolves", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", weapons: ["scepter of pain|0"], resources: 2 },
+        {
+          hero: "dorinthea",
+          hand: [BLUE],
+          equipment: { head: "crown of dichotomy|0" },
+        },
+      ],
+    });
+
+    s.activate("scepter of pain|0", { pitch: [] });
+    expect(s.state.pendingDecision).toMatchObject({
+      player: 1,
+      chooseHook: "arcane-barrier",
+    });
+
+    s.chooseOption("0")
+      .expectLife(1, 19)
+      .expectInZone(0, "runechant|0", "board");
+  });
+
+  it("Scepter of Pain creates no Runechant when its damage is prevented", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", weapons: ["scepter of pain|0"], resources: 2 },
+        {
+          hero: "dorinthea",
+          hand: [BLUE],
+          equipment: { head: "crown of dichotomy|0" },
+        },
+      ],
+    });
+
+    s.activate("scepter of pain|0", { pitch: [] })
+      .chooseOption("1")
+      .chooseCard(BLUE)
+      .expectLife(1, 20)
+      .expectNotInZone(0, "runechant|0", "board");
+  });
+
   it("Poison the Well replaces the next life gain with equal life loss", () => {
     const s = scenario({
       seats: [

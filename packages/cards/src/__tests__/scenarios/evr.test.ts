@@ -249,6 +249,37 @@ describe("EVR — auras, items, and utility", () => {
     s.expectNotInZone(0, "runechant|0", "board");
   });
 
+  it("Revel in Runeblood resolves through Spellbound Creepers during combat", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          equipment: { legs: "spellbound creepers|0" },
+          hand: ["runeblood incantation|3", BLUE, BLUE, "head jab|1", "revel in runeblood|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("runeblood incantation|3", { pitch: [BLUE] })
+      .play("head jab|1")
+      .blockWith()
+      .activate("spellbound creepers|0", { settle: false })
+      .passPriority()
+      .passPriority()
+      .play("revel in runeblood|1", { asInstant: true })
+      .expectZoneSize(0, "board", 5)
+      .expectInZone(0, "revel in runeblood|1", "graveyard")
+      .expectAP(0, 2);
+
+    expect(s.state.players[0]!.board.filter((card) => cardData[card.cardId]?.name === "Runechant"))
+      .toHaveLength(4);
+
+    s.endTurn()
+      .expectNotInZone(0, "runechant|0", "board")
+      .expectNoEquipment(0, "legs");
+  });
+
   it("Revel in Runeblood schedules Runechant cleanup independently of its later zone", () => {
     const s = scenario({
       seats: [

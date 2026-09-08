@@ -1,3 +1,4 @@
+import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { CardData } from "@fyendal/shared";
 import {
@@ -5,6 +6,7 @@ import {
   cardColorOf,
   cardTypesOf,
   dataOf,
+  scriptOf,
 } from "./cardProperties.js";
 import type { CardInstance, ChainLinkState, Modifier, PlayerState } from "./state.js";
 import { goAgainSuppressed } from "./ruleQueries.js";
@@ -239,4 +241,32 @@ export function conditionalModifierGrantsGoAgain(
       currentAttack >= modifier.goAgainIfAttackPowerAtLeast
     );
   });
+}
+
+/** Whether the attacking object's own live conditional ability currently
+ * gives it go again. Unlike declaration hooks, this can become true during
+ * the reaction step before the Resolution Step begins. */
+export function conditionalScriptGrantsGoAgain(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  link: ChainLinkState,
+): boolean {
+  if (
+    link.flags.attackAbilitiesSuppressed === true ||
+    goAgainSuppressed(state, link.attacker) ||
+    (link.attackingCard.suppressedKeywords ?? []).some(
+      (keyword) => keyword.toLowerCase() === "go again",
+    )
+  ) return false;
+  const ctx = runtime.makeCtx(state, link.attacker, link.attackingCard, link);
+  if (
+    scriptOf(state, link.attackingCard.cardId, link.attackingCard)
+      ?.hasConditionalGoAgain?.(ctx) === true
+  ) return true;
+  return [
+    ...(link.attackingCard.grantedBaseAbilitiesCardId
+      ? [link.attackingCard.grantedBaseAbilitiesCardId]
+      : []),
+    ...(link.attackingCard.grantedBaseAbilitiesCardIds ?? []),
+  ].some((cardId) => state.scriptsRef[cardId]?.hasConditionalGoAgain?.(ctx) === true);
 }

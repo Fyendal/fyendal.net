@@ -16,7 +16,7 @@ function isNonAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean 
 }
 
 function runeCount(ctx: ScriptCtx): number {
-  return ctx.player(ctx.seat).board.filter((card) => ctx.cardData(card.cardId).name === "Runechant").length;
+  return ctx.player(ctx.seat).board.filter((card) => ctx.isRunechant(card)).length;
 }
 
 function reload(ctx: ScriptCtx): void {

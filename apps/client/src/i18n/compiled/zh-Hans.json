@@ -2347,6 +2347,28 @@
       "value": " 点生命"
     }
   ],
+  "card.dyn.plasmamainline.counter.move": [
+    {
+      "type": 0,
+      "value": "将一个蒸汽指示物从 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 移到 "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": "？"
+    }
+  ],
   "card.dyn.point.arrow.choose": [
     {
       "type": 0,
@@ -2983,6 +3005,16 @@
     {
       "type": 0,
       "value": "在一个具有 crank 的物品上放置一个蒸汽指示物？"
+    }
+  ],
+  "card.evo.defender.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一张防守牌放逐"
     }
   ],
   "card.evo.defendinghero.item.control": [
@@ -8601,6 +8633,34 @@
     {
       "type": 0,
       "value": "：从你的牌库中选择一张 Minnowism"
+    }
+  ],
+  "card.mon.opposing.graveyard.banish.next": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：再选择一张对方英雄墓地中的牌放逐，或结束选择"
+    }
+  ],
+  "card.mon.opposing.graveyard.banish.upto": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择至多 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张对方英雄墓地中的牌放逐"
     }
   ],
   "card.mon.option.goagain": [

@@ -1,5 +1,10 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, attackedWithWeapon, isCard, isSwordAttack, isWeaponAttack, lessonCounter, localizedCardLog, mentorFlipTrigger, mentorPayoff, nextAttack, reprise, weaponAttackCount } from "./shared-helpers.js";
+import { attackAbility, attackedWithWeapon, isCard, isSwordAttack, isWeaponAttack, lessonCounter, localizedCardLog, localizedLog, mentorFlipTrigger, mentorPayoff, nextAttack, reprise, weaponAttackCount } from "./shared-helpers.js";
+
+function isDawnblade(ctx: ScriptCtx, cardId: string): boolean {
+  return isCard(ctx, cardId, "Dawnblade") ||
+    isCard(ctx, cardId, "Dawnblade, Resplendent");
+}
 
 // ── Dorinthea (hero / weapon / equipment / mentor / token / deck cards) ──
 export const dvr: Record<string, CardScript> = {
@@ -183,11 +188,16 @@ export const dvr: Record<string, CardScript> = {
     canTriggerOnHit(ctx) {
       const link = ctx.link;
       return !!link && link.targetAllyId === undefined &&
-        isCard(ctx, link.attackingCard.cardId, "Dawnblade, Resplendent");
+        isDawnblade(ctx, link.attackingCard.cardId);
     },
     onHit(ctx) {
-      ctx.addModifier({ scope: "static", attack: 1, appliesTo: "sword" });
-      ctx.logPublic(localizedCardLog(ctx, "Dawnblade, Resplendent gets a +1 attack counter", "card.log.dvr.dawnblade.counter", { amount: 1 }));
+      const dawnblade = ctx.link!.attackingCard;
+      ctx.addCounter(dawnblade.instanceId, "power", 1);
+      ctx.logPublic(localizedLog(
+        `${ctx.cardData(dawnblade.cardId).name} gets a +1 attack counter`,
+        "card.log.dvr.dawnblade.counter",
+        { card: { kind: "card", cardId: dawnblade.cardId }, amount: 1 },
+      ));
     },
   },
   "on a knife edge|2": {

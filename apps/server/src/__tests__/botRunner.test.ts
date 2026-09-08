@@ -245,6 +245,34 @@ describe("BotRunner reliability", () => {
     })).toEqual({ kind: "defend", instanceIds: [1, 2] });
   });
 
+  it("uses an already-funded weapon attack instead of passing after a policy failure", () => {
+    const weapon = { instanceId: 66, cardId: "MPW005", owner: 1 as const };
+    const pass = { kind: "pass" as const };
+    const attack = {
+      kind: "activate-ability" as const,
+      sourceInstanceId: weapon.instanceId,
+      pitchInstanceIds: [],
+      pitchRequired: 0,
+    };
+    const inputView = {
+      phase: "action" as const,
+      activePlayer: 1 as const,
+      priorityPlayer: 1 as const,
+      pendingDecision: null,
+      players: [
+        {} as BotPolicyInput["view"]["players"][0],
+        { weapons: [weapon] } as unknown as BotPolicyInput["view"]["players"][1],
+      ],
+    } as unknown as BotPolicyInput["view"];
+
+    expect(fallbackBotIntent({
+      seat: 1,
+      view: inputView,
+      cards: {},
+      legal: [pass, attack],
+    })).toEqual(attack);
+  });
+
   it("checks bot priority before claiming a lease", async () => {
     vi.useFakeTimers();
     const claim = vi.fn().mockResolvedValue(true);

@@ -465,7 +465,7 @@ function usurp(): Pick<CardScript, "additionalCost" | "onChoose"> {
   return {
     additionalCost(ctx) {
       const runechants = ctx.player(ctx.seat).board.filter((card) =>
-        ctx.cardData(card.cardId).name.toLowerCase().includes("runechant")
+        ctx.isRunechant(card)
       );
       if (runechants.length > 0) {
         ctx.requestCardChoice(
@@ -607,7 +607,7 @@ function zombieDiscardAttack(payoff: ZombieDiscardPayoff): CardScript {
 function arknightDescendancy(): CardScript {
   return bloodDebt({
     modifyPlayCost(ctx, base) {
-      const runechants = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "Runechant"));
+      const runechants = ctx.player(ctx.seat).board.filter((card) => ctx.isRunechant(card));
       return Math.max(0, base - runechants.length);
     },
     onSelfBanished(ctx) {
@@ -767,13 +767,13 @@ function sonataDystopia(): CardScript {
       counterKey: "iarSonataDystopiaX",
       prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
       maximum(ctx) {
-        return ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "Runechant")).length;
+        return ctx.player(ctx.seat).board.filter((card) => ctx.isRunechant(card)).length;
       },
     },
     additionalCost(ctx) {
       const x = ctx.getCounter("iarSonataDystopiaX");
       if (x <= 0) return;
-      const runechants = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "Runechant"));
+      const runechants = ctx.player(ctx.seat).board.filter((card) => ctx.isRunechant(card));
       ctx.requestCardChoices(
         "iar-sonata-dystopia-runechants",
         decisionPrompt(
@@ -789,7 +789,7 @@ function sonataDystopia(): CardScript {
     onChooseMany(ctx, hook, options) {
       if (hook !== "iar-sonata-dystopia-runechants") return;
       const runechantIds = new Set(
-        ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "Runechant"))
+        ctx.player(ctx.seat).board.filter((card) => ctx.isRunechant(card))
           .map((card) => card.instanceId),
       );
       for (const option of options) {

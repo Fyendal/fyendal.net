@@ -18,7 +18,10 @@ import type {
 import type { CardInstance, CombatValueModifier, Modifier, PendingDecisionState, PlayerState } from "./state.js";
 import { cardColorOf, cardTypesOf, dataOf, instanceDataOf, scriptOf } from "./cardProperties.js";
 import { pendingOnHitEffects } from "./hits.js";
-import { conditionalModifierGrantsGoAgain } from "./combatModifiers.js";
+import {
+  conditionalModifierGrantsGoAgain,
+  conditionalScriptGrantsGoAgain,
+} from "./combatModifiers.js";
 import {
   attackHasDominate,
   attackMaxNonBlockDefenders,
@@ -1115,7 +1118,11 @@ function projectState(
       hit: link.hit,
       // Go again persists on the link; granted defense-restriction keywords
       // are snapshotted before chain-link modifiers expire.
-      goAgain: link.goAgain || conditionalModifierGrantsGoAgain(state, link, attack),
+      goAgain: link.goAgain ||
+        (!link.resolved && (
+          conditionalModifierGrantsGoAgain(state, link, attack) ||
+          conditionalScriptGrantsGoAgain(state, runtime, link)
+        )),
       wagered: link.flags.wagered === true,
       ...(link.wagerRewards?.length ? { wagerRewards: [...link.wagerRewards] } : {}),
       dominate: link.resolved

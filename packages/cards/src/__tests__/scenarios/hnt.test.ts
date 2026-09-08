@@ -427,6 +427,31 @@ describe("HNT — marked heroes and daggers", () => {
     expect(g.state.players[0]!.weapons).toHaveLength(0);
   });
 
+  it("Cut Through gains +1 attack and go again when Flick Knives makes a dagger hit", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["kunai of retribution|0"],
+          equipment: { arms: "flick knives|0" },
+          hand: ["cut through|1"],
+        },
+        { hero: "dorinthea", hand: ["wounding blow|1"] },
+      ],
+    });
+    const kunaiId = g.state.players[0]!.weapons[0]!.instanceId;
+
+    g.play("cut through|1")
+      .blockWith("wounding blow|1")
+      .expectAttackValue(3)
+      .activate("flick knives|0")
+      .doRaw({ kind: "choose", optionId: String(kunaiId) })
+      .expectAttackValue(4)
+      .settle()
+      .expectFinalAttack(4)
+      .expectAP(0, 1);
+  });
+
   it("Throw Dagger cannot destroy the dagger on the active chain link", () => {
     const g = scenario({
       seats: [

@@ -101,6 +101,7 @@ export interface PersistedDelayedTriggerV1 {
   turn: number;
   hook: string;
   label: string;
+  labelMessage?: GameMessage;
 }
 
 export interface PersistedPlayerV1 {
@@ -570,6 +571,12 @@ type _PlayerShapeIsCompatible = Assert<
 type _ChainKeysAreExhaustive = Assert<SameKeys<GameState["chain"][number], PersistedChainLinkV1>>;
 type _ChainShapeIsCompatible = Assert<
   SameShape<GameState["chain"][number], PersistedChainLinkV1>
+>;
+type _DelayedTriggerKeysAreExhaustive = Assert<
+  SameKeys<GameState["delayedTriggers"][number], PersistedDelayedTriggerV1>
+>;
+type _DelayedTriggerShapeIsCompatible = Assert<
+  SameShape<GameState["delayedTriggers"][number], PersistedDelayedTriggerV1>
 >;
 type _StackKeysAreExhaustive = Assert<SameKeys<GameState["stack"][number], PersistedStackLayerV1>>;
 type _StackShapeIsCompatible = Assert<
@@ -1500,12 +1507,21 @@ function validateState(value: unknown, code: string): PersistedGameStateV1 {
   optional(state, "delayedTriggers", (value, valuePath) => {
     array(value, code, valuePath, 128).forEach((entryValue, index) => {
       const entryPath = `${valuePath}[${index}]`;
-      const entry = exact(entryValue, code, entryPath, ["source", "seat", "subjectSeat", "event", "turn", "hook", "label"]);
+      const entry = exact(
+        entryValue,
+        code,
+        entryPath,
+        ["source", "seat", "subjectSeat", "event", "turn", "hook", "label"],
+        ["labelMessage"],
+      );
       validateCard(entry.source, code, `${entryPath}.source`);
       for (const key of ["seat", "subjectSeat", "turn"] as const) integer(entry[key], code, `${entryPath}.${key}`);
       oneOf(entry.event, ["end-of-turn"] as const, code, `${entryPath}.event`);
       string(entry.hook, code, `${entryPath}.hook`, 256);
       string(entry.label, code, `${entryPath}.label`, 512);
+      optional(entry, "labelMessage", (message, messagePath) => {
+        validateGameMessage(message, code, messagePath);
+      }, entryPath);
     });
   }, path);
   array(state.pendingDestructions, code, `${path}.pendingDestructions`).forEach((entryValue, index) => {

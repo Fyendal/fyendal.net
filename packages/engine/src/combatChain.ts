@@ -2,7 +2,11 @@ import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
 
 import { dataOf, hasKeyword, scriptOf } from "./cardProperties.js";
-import { activeModifiers, conditionalModifierGrantsGoAgain } from "./combatModifiers.js";
+import {
+  activeModifiers,
+  conditionalModifierGrantsGoAgain,
+  conditionalScriptGrantsGoAgain,
+} from "./combatModifiers.js";
 import {
   attackHasDominate,
   attackHasOverpower,
@@ -65,6 +69,9 @@ function beginLinkResolutionStep(state: GameStateInternal,
     link,
     computeAttack(state, runtime, link),
   )) {
+    runtime.events.grantLinkGoAgain(state, link);
+  }
+  if (!link.goAgain && conditionalScriptGrantsGoAgain(state, runtime, link)) {
     runtime.events.grantLinkGoAgain(state, link);
   }
   if (link.goAgain) {
