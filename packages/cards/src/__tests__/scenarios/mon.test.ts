@@ -528,6 +528,73 @@ describe("MON — Chane and banished-zone play", () => {
       .settle()
       .expectFinalAttack(6);
   });
+
+  it("Invert Existence chooses opposing graveyard cards and its arcane damage maintains Spellbound Creepers", () => {
+    const s = scenario({
+      seats: [
+        chaneSeat({
+          resources: 5,
+          banish: ["ghostly visit|1", "invert existence|3"],
+          equipment: { legs: "spellbound creepers|0" },
+        }),
+        {
+          hero: "dorinthea",
+          life: 20,
+          graveyard: ["ironrot gauntlet|0", "snatch|1", "snapback|3"],
+        },
+      ],
+    });
+
+    s.activate("chane|0")
+      .play("ghostly visit|1", { fromZone: "banish" })
+      .blockWith()
+      .settle()
+      .expectLife(1, 16)
+      .activate("spellbound creepers|0")
+      .play("invert existence|3", { fromZone: "banish" })
+      .chooseCard("snatch|1")
+      .chooseCard("snapback|3")
+      .expectLife(1, 14)
+      .expectLog("takes 2 arcane damage")
+      .expectInZone(1, "snatch|1", "banish")
+      .expectInZone(1, "snapback|3", "banish")
+      .expectInZone(1, "ironrot gauntlet|0", "graveyard")
+      .endTurn()
+      .expectEquipped(0, "legs", "spellbound creepers|0");
+  });
+
+  it("Invert Existence only deals damage for an attack and a non-attack action", () => {
+    const s = scenario({
+      seats: [
+        chaneSeat({ resources: 3, banish: ["invert existence|3"] }),
+        {
+          hero: "dorinthea",
+          life: 20,
+          graveyard: ["snatch|1", "ironrot gauntlet|0"],
+        },
+      ],
+    });
+
+    s.play("invert existence|3", { fromZone: "banish" })
+      .chooseCard("snatch|1")
+      .chooseCard("ironrot gauntlet|0")
+      .expectLife(1, 20);
+  });
+
+  it("Invert Existence may banish fewer than two cards", () => {
+    const s = scenario({
+      seats: [
+        chaneSeat({ resources: 3, banish: ["invert existence|3"] }),
+        { hero: "dorinthea", graveyard: ["snatch|1", "snapback|3"] },
+      ],
+    });
+
+    s.play("invert existence|3", { fromZone: "banish" })
+      .chooseCard("snatch|1")
+      .chooseOption("done")
+      .expectInZone(1, "snatch|1", "banish")
+      .expectInZone(1, "snapback|3", "graveyard");
+  });
 });
 
 describe("MON — generic commons and rares", () => {

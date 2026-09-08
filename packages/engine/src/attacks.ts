@@ -11,6 +11,7 @@ import {
 } from "./cardProperties.js";
 import {
   conditionalModifierGrantsGoAgain,
+  conditionalScriptGrantsGoAgain,
   modifierApplies,
   modifierAppliesTo,
 } from "./combatModifiers.js";
@@ -369,7 +370,8 @@ export function beginAttackStep(state: GameStateInternal, runtime: EngineRuntime
   attachNextAttackModifiers(state, runtime, link);
   if (
     innateGoAgain ||
-    conditionalModifierGrantsGoAgain(state, link, computeAttack(state, runtime, link))
+    conditionalModifierGrantsGoAgain(state, link, computeAttack(state, runtime, link)) ||
+    conditionalScriptGrantsGoAgain(state, runtime, link)
   ) {
     runtime.events.grantLinkGoAgain(state, link);
   }

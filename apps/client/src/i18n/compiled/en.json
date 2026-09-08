@@ -2343,6 +2343,28 @@
       "value": " life"
     }
   ],
+  "card.dyn.plasmamainline.counter.move": [
+    {
+      "type": 0,
+      "value": "Move a steam counter from "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " to "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": "?"
+    }
+  ],
   "card.dyn.point.arrow.choose": [
     {
       "type": 0,
@@ -3087,6 +3109,16 @@
     {
       "type": 0,
       "value": "Put a steam counter on an item with crank?"
+    }
+  ],
+  "card.evo.defender.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose a defending card to banish"
     }
   ],
   "card.evo.defendinghero.item.control": [
@@ -9059,6 +9091,34 @@
     {
       "type": 0,
       "value": ": choose a Minnowism from your deck"
+    }
+  ],
+  "card.mon.opposing.graveyard.banish.next": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose another card in the opposing hero's graveyard to banish, or finish"
+    }
+  ],
+  "card.mon.opposing.graveyard.banish.upto": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose up to "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " cards in the opposing hero's graveyard to banish"
     }
   ],
   "card.mon.option.goagain": [

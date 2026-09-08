@@ -343,7 +343,34 @@ export const evoHighRarity: Record<string, CardScript> = {
       },
     },
   },
-  "already dead|1": { ...contractWithSilver((ctx, card) => !ctx.hasCardType(card, "action")), canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined, onHit(ctx) { const target = opponentSeat(ctx); const cards = [ctx.player(target).deck[0], ctx.link?.defendingCards[0]].filter((card): card is DeepReadonly<CardInstance> => !!card); for (const card of cards) ctx.banish(card.instanceId); } },
+  "already dead|1": {
+    ...contractWithSilver((ctx, card) => !ctx.hasCardType(card, "action")),
+    canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
+    onHit(ctx) {
+      const top = ctx.player(opponentSeat(ctx)).deck[0];
+      if (top) ctx.banish(top.instanceId);
+
+      const defenders = ctx.state.chain.flatMap((link) => [
+        ...link.defendingCards,
+        ...link.defendingEquipment,
+      ]);
+      if (defenders.length === 1) ctx.banish(defenders[0]!.instanceId);
+      else if (defenders.length > 1) {
+        ctx.requestCardChoice(
+          "already-dead-defender",
+          decisionPrompt(
+            `${ctx.data.name}: choose a defending card to banish`,
+            "card.evo.defender.banish",
+            { values: { card: { kind: "card", cardId: ctx.self.cardId } } },
+          ),
+          defenders.map((card) => card.instanceId),
+        );
+      }
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "already-dead-defender") ctx.banish(Number(option));
+    },
+  },
   "smashing performance|2": { onAttackDeclared(ctx) { ctx.drawCards(ctx.seat, 1); const card = ctx.discardRandom(ctx.seat, 1)[0]; if (card && ctx.basePower(card) >= 6) { const items = ctx.state.players.flatMap((player) => player.board).filter((item) => isItem(ctx, item)); if (items.length) ctx.destroyPermanent(items[ctx.randomInt(items.length)]!.instanceId); } } },
   "tectonic rift|3": { variablePlayCost: { base: 0, counterKey: "tectonicX", prompt: decisionPrompt("Choose X", "engine.decision.x.choose") }, onPlay(ctx) { ctx.createTokens(SEISMIC, ctx.getCounter("tectonicX")); } },
   "wax off|3": { onPlay(ctx) { if (ctx.getPlayerFlag(ctx.seat, "playedName:wax on") === true) ctx.createToken("OUT239"); } },

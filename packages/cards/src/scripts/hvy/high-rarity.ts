@@ -92,7 +92,57 @@ export const hvyHighRarity: Record<string, CardScript> = {
   "send packing|2": { onAttackDeclared(ctx) { const arsenal = ctx.player(opponentSeat(ctx)).arsenal[0]; if (arsenal) { ctx.banish(arsenal.instanceId, { faceDown: false }); ctx.setCounter("packed", arsenal.instanceId); } }, onMiss(ctx) { const id = ctx.getCounter("packed"); if (id) ctx.moveToHand(id); } },
   "cast bones|1": { onPlay(ctx) { const cards = [...topCards(ctx, 6)]; ctx.revealCards(cards.map((card) => card.instanceId)); const sixes = cards.filter((card) => isSix(ctx, card)).length; ctx.createTokens(MIGHT, sixes); const order: DeepReadonly<CardInstance>[] = []; while (cards.length) order.push(cards.splice(ctx.randomInt(cards.length), 1)[0]!); for (const card of [...order].reverse()) ctx.putOnDeckTop(card.instanceId); if (ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "might")).length >= 6) ctx.createToken(AGILITY); }, onChoose() {} },
   "reckless charge|3": { onPlay(ctx) { ctx.requestDieRoll("reckless", 6); }, onDieRollResolved(ctx, hook, result) { if (hook !== "reckless") return; ctx.changeActionPoints(ctx.seat, Math.floor(result / 2)); if (ctx.getPlayerFlag(ctx.seat, "rolledDie:6") === true) ctx.drawCards(ctx.seat, 1); } },
-  "no fear|1": { additionalCost(ctx) { const cards = ctx.player(ctx.seat).hand.filter((card) => isSix(ctx, card)); if (cards.length) ctx.requestCardChoice("no-fear", decisionPrompt("Banish a 6-power card?", "card.hvy.six.banish", { values: { amount: 6 }, optionMessages: commonOptionMessages("done") }), ["done", ...cards.map((card) => card.instanceId)]); else ctx.preventNextDamage(ctx.seat, 2); }, onChoose(ctx, hook, option) { if (hook !== "no-fear" || option === "done") { if (hook === "no-fear") ctx.preventNextDamage(ctx.seat, 2 + ctx.getCounter("fear-count")); return; } if (ctx.banish(Number(option))) { const count = ctx.getCounter("fear-count") + 1; ctx.setCounter("fear-count", count); ctx.setCounter(`fear-card-${count}`, Number(option)); const cards = ctx.player(ctx.seat).hand.filter((card) => isSix(ctx, card)); ctx.requestCardChoice("no-fear", decisionPrompt("Banish another?", "card.hvy.six.banish.next", { optionMessages: commonOptionMessages("done") }), ["done", ...cards.map((card) => card.instanceId)]); } }, triggers: [{ event: "end-of-turn", sourceZone: "graveyard", label: "Return cards banished by No Fear", effect(ctx) { for (let i = 1; i <= ctx.getCounter("fear-count"); i++) ctx.moveToHand(ctx.getCounter(`fear-card-${i}`)); } }] },
+  "no fear|1": {
+    additionalCost(ctx) {
+      const cards = ctx.player(ctx.seat).hand.filter((card) => isSix(ctx, card));
+      if (cards.length) {
+        ctx.requestCardChoice(
+          "no-fear",
+          decisionPrompt("Banish a 6-power card?", "card.hvy.six.banish", {
+            values: { amount: 6 },
+            optionMessages: commonOptionMessages("done"),
+          }),
+          ["done", ...cards.map((card) => card.instanceId)],
+        );
+      } else {
+        ctx.preventNextDamage(ctx.seat, 2);
+      }
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "no-fear") return;
+      if (option === "done") {
+        const count = ctx.getCounter("fear-count");
+        ctx.preventNextDamage(ctx.seat, 2 + count);
+        if (count > 0) {
+          ctx.scheduleEndOfTurnTrigger(
+            "no-fear-return",
+            decisionPrompt("Return cards banished by No Fear", "card.trigger.common.nofear.return"),
+            ctx.state.activePlayer,
+          );
+          ctx.setCounter("fear-count", 0);
+        }
+        return;
+      }
+      if (ctx.banish(Number(option))) {
+        const count = ctx.getCounter("fear-count") + 1;
+        ctx.setCounter("fear-count", count);
+        ctx.setCounter(`fear-card-${count}`, Number(option));
+        const cards = ctx.player(ctx.seat).hand.filter((card) => isSix(ctx, card));
+        ctx.requestCardChoice(
+          "no-fear",
+          decisionPrompt("Banish another?", "card.hvy.six.banish.next", {
+            optionMessages: commonOptionMessages("done"),
+          }),
+          ["done", ...cards.map((card) => card.instanceId)],
+        );
+      }
+    },
+    onDelayedTrigger(ctx, hook) {
+      if (hook !== "no-fear-return") return;
+      const count = ctx.getCounter("fear-count");
+      for (let i = 1; i <= count; i++) ctx.moveToHand(ctx.getCounter(`fear-card-${i}`));
+    },
+  },
   "betsy, skin in the game|0": { triggers: [{ event: "wager-generated", label: "Pay 2 for +1 and overpower?", effect(ctx, attacking) { if (!attacking) return; ctx.setCounter("betsy-attack", attacking.instanceId); ctx.requestPayment("betsy-pay", decisionPrompt("Pay 2 for +1 and overpower?", "card.hvy.betsy.pay.generic", { values: { amount: 2 }, optionMessages: commonOptionMessages("no") }), 2); } }], onChoose(ctx, hook, option) { if (hook === "betsy-pay" && option === "paid") { ctx.addModifier({ scope: "chain-link", attack: 1, appliesToInstanceId: ctx.getCounter("betsy-attack"), overpower: true }); } } },
   "victor goldmane, high and mighty|0": { firstFailedClashReplacement: { costPermanentName: "Gold", choiceHook: "victor-adult-reclash" }, onFriendlyTokenCreated(ctx, token) { if (named(ctx, token, "gold") && ctx.getPlayerFlag(ctx.seat, "victorGoldDrawn") !== true) { ctx.setPlayerFlag(ctx.seat, "victorGoldDrawn", true); ctx.drawCards(ctx.seat, 1); } } },
   "aurum aegis|0": { allZoneNames: ["Gold"] },
@@ -142,7 +192,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
   "evo magneto|3": evoEquipment({ onDefend(ctx) { if (ctx.destroySubcard(ctx.self.instanceId)) { const items = ctx.player(opponentSeat(ctx)).board.filter((card) => isAttack(ctx, card) === false && has(ctx, card, "item") && (data(ctx, card).cost ?? 0) <= 1); if (items.length) ctx.requestCardChoice("magneto", decisionPrompt("Gain control of an item", "card.hvy.item.control"), items.map((card) => card.instanceId)); } }, onChoose(ctx, hook, option) { if (hook === "magneto") ctx.steal(Number(option), { duration: "indefinite" }); } }),
   "judge, jury, executioner|1": { canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && (ctx.getCounter("aim") > 0 || ctx.getFlag("link", "aim") === true); }, onHit(ctx) { const target = opponentSeat(ctx); const hand = ctx.player(target).hand; if (hand.length > 1) ctx.requestCardChoice("judge-keep", decisionPrompt("Choose a card to keep", "card.hvy.hand.keep"), hand.map((card) => card.instanceId), target); }, onChoose(ctx, hook, option) { if (hook !== "judge-keep") return; const target = opponentSeat(ctx); for (const card of [...ctx.player(target).hand]) if (card.instanceId !== Number(option)) ctx.discardCard(target, card.instanceId); } },
   "reel in|3": { variablePlayCost: { base: 0, counterKey: "reelX", prompt: decisionPrompt("Choose X", "engine.decision.x.choose") }, onPlay(ctx) { const looked = topCards(ctx, ctx.getCounter("reelX") + 1); for (const card of looked) ctx.lookAt(card.instanceId); const cards = looked.filter((card) => has(ctx, card, "trap")).slice(0, 4); ctx.revealCards(cards.map((card) => card.instanceId)); for (const card of cards) ctx.moveToHand(card.instanceId); ctx.shuffleDeck(); } },
-  "sonata galaxia|1": { variablePlayCost: { base: 0, resourcesPerX: 2, counterKey: "galaxiaX", prompt: decisionPrompt("Choose X", "engine.decision.x.choose") }, modifyPlayCost(ctx, base) { const runechants = ctx.player(ctx.seat).board.filter((card) => data(ctx, card).name.toLowerCase() === "runechant").length; return Math.max(0, base - runechants); }, onPlay(ctx) { const x = ctx.getCounter("galaxiaX"); const cards = ctx.player(ctx.seat).deck.filter((card) => has(ctx, card, "runeblade") && has(ctx, card, "aura") && (data(ctx, card).cost ?? 0) <= x); if (cards.length) { ctx.requestCardChoice("galaxia-aura", decisionPrompt(`Choose a Runeblade aura with cost ${x} or less`, "card.hvy.runeblade.aura.choose", { values: { amount: x } }), cards.map((card) => card.instanceId)); return; } ctx.shuffleDeck(); if (x >= 2) ctx.gainActionPoint(); }, onChoose(ctx, hook, option) { if (hook !== "galaxia-aura") return; const card = ctx.player(ctx.seat).deck.find((candidate) => candidate.instanceId === Number(option)); if (card && has(ctx, card, "runeblade") && has(ctx, card, "aura") && (data(ctx, card).cost ?? 0) <= ctx.getCounter("galaxiaX")) ctx.settleCard(card.instanceId); ctx.shuffleDeck(); if (ctx.getCounter("galaxiaX") >= 2) ctx.gainActionPoint(); } },
+  "sonata galaxia|1": { variablePlayCost: { base: 0, resourcesPerX: 2, counterKey: "galaxiaX", prompt: decisionPrompt("Choose X", "engine.decision.x.choose") }, modifyPlayCost(ctx, base) { const runechants = ctx.player(ctx.seat).board.filter((card) => ctx.isRunechant(card)).length; return Math.max(0, base - runechants); }, onPlay(ctx) { const x = ctx.getCounter("galaxiaX"); const cards = ctx.player(ctx.seat).deck.filter((card) => has(ctx, card, "runeblade") && has(ctx, card, "aura") && (data(ctx, card).cost ?? 0) <= x); if (cards.length) { ctx.requestCardChoice("galaxia-aura", decisionPrompt(`Choose a Runeblade aura with cost ${x} or less`, "card.hvy.runeblade.aura.choose", { values: { amount: x } }), cards.map((card) => card.instanceId)); return; } ctx.shuffleDeck(); if (x >= 2) ctx.gainActionPoint(); }, onChoose(ctx, hook, option) { if (hook !== "galaxia-aura") return; const card = ctx.player(ctx.seat).deck.find((candidate) => candidate.instanceId === Number(option)); if (card && has(ctx, card, "runeblade") && has(ctx, card, "aura") && (data(ctx, card).cost ?? 0) <= ctx.getCounter("galaxiaX")) ctx.settleCard(card.instanceId); ctx.shuffleDeck(); if (ctx.getCounter("galaxiaX") >= 2) ctx.gainActionPoint(); } },
   "aether arc|3": { arcaneDamageEffect: true, arcaneDamageEffectAmounts: [1], prospectiveHeroDamage(ctx) { return ctx.state.players.filter((player) => player.seat !== ctx.seat).map((player) => ({ targetSeat: player.seat, amount: 1 })); }, onPlay(ctx) { for (const target of ctx.state.players.filter((player) => player.seat !== ctx.seat)) if (ctx.dealDamage(target.seat, 1, { arcane: true }) > 0) ctx.createToken(PONDER); } },
   "dissolve reality|2": { onPlay(ctx) { for (const player of ctx.state.players) { for (const card of [...player.arsenal]) ctx.putOnDeckBottom(card.instanceId); ctx.createToken(PONDER, player.seat); } } },
   "luminaris, angel's glow|0": { onFriendlyPlay(ctx, card) { if (!isAttack(ctx, card) || !ctx.player(ctx.seat).pitch.some((pitch) => ctx.cardColor(pitch) === 2)) return; if (data(ctx, card).name.includes("Herald") && ctx.getPlayerFlag(ctx.seat, "luminarisHerald") !== true) { ctx.setPlayerFlag(ctx.seat, "luminarisHerald", true); ctx.grantCardKeyword(card.instanceId, "go again"); } }, onFriendlyActivate(ctx, card) { if (!has(ctx, card, "angel") || !ctx.player(ctx.seat).pitch.some((pitch) => ctx.cardColor(pitch) === 2) || ctx.getPlayerFlag(ctx.seat, "luminarisAngel") === true) return; ctx.setPlayerFlag(ctx.seat, "luminarisAngel", true); ctx.grantCardKeyword(card.instanceId, "go again"); } },

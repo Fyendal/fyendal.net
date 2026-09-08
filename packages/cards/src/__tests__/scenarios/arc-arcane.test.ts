@@ -66,6 +66,24 @@ describe("ARC — Runeblade commons and rares", () => {
       .expectZoneSize(1, "board", 2);
   });
 
+  it("a specialized Runechant discounts Reduce to Runechant", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["wounded bull|1", BLUE] },
+        {
+          hero: "dorinthea",
+          board: ["runechant of greed|2"],
+          hand: ["reduce to runechant|2"],
+        },
+      ],
+    });
+
+    s.play("wounded bull|1", { pitch: [BLUE] }).blockWith().passPriority();
+    s.react("reduce to runechant|2")
+      .expectResources(1, 0)
+      .expectZoneSize(1, "board", 2);
+  });
+
   it("Bloodspill Invocation destroys itself and creates Runechants when an attack action hits", () => {
     const s = scenario({
       seats: [

@@ -1024,6 +1024,16 @@ export function alternativePlayCostOptions(
     );
     return nonEmptyCardSubsets(candidates).filter((ids) => ids.length >= cost.min);
   }
+  if (cost.kind === "discard-hand-named") {
+    const wanted = cost.name.trim().toLowerCase();
+    return player.hand
+      .filter(
+        (candidate) =>
+          candidate.instanceId !== card.instanceId &&
+          cardHasName(state, candidate, wanted),
+      )
+      .map((candidate) => [candidate.instanceId]);
+  }
   if (cost.kind === "destroy-controlled-and-or-discard-hand-subtype") {
     const controlled = controlledCostCards(state, player).filter((candidate) =>
       cardTypesOf(state, candidate).includes(cost.subtype.toLowerCase())
@@ -1127,6 +1137,18 @@ export function payAlternativePlayCost(
       removeFromArray(player.hand, paid.instanceId);
       enterBanish(state, runtime, paid, "hand");
     }
+  } else if (cost.kind === "discard-hand-named") {
+    const id = option[0]!;
+    const wanted = cost.name.trim().toLowerCase();
+    const paid = player.hand.find(
+      (candidate) => candidate.instanceId === id && cardHasName(state, candidate, wanted),
+    );
+    if (!paid || !removeFromArray(player.hand, id)) {
+      return "additional-cost card is no longer in hand";
+    }
+    runtime.commands.discardToGraveyard(state, player.seat, paid, false, player.seat);
+    runtime.commands.fireOnDiscard(state, player.seat, paid, false);
+    paidCards.push(paid);
   } else if (cost.kind === "destroy-controlled-and-or-discard-hand-subtype") {
     const controlled = controlledCostCards(state, player);
     for (const id of option) {

@@ -226,19 +226,33 @@ describe("HVY — Heavy Hitters mechanics", () => {
       .expectAP(0, 1);
   });
 
-  it("No Fear returns its banished cost cards despite its lingering prevention", () => {
+  it("No Fear returns its banished cost cards in the opponent's end phase", () => {
     const g = scenario({ seats: [
-      { hero: "rhinar", hand: ["no fear|1", "beast mode|1"] },
-      { hero: "dorinthea" },
-    ] });
+      {
+        hero: "rhinar",
+        hand: ["no fear|1", "beast mode|1", "raging onslaught|2", "wrecker romp|3"],
+      },
+      { hero: "dorinthea", hand: ["raging onslaught|2", "titanium bauble|3"] },
+    ], active: 1 });
 
-    g.play("no fear|1", { settle: false })
+    g.play("raging onslaught|2", { pitch: ["titanium bauble|3"], settle: false })
+      .passPriority()
+      .react("no fear|1", { settle: false })
       .chooseCard("beast mode|1")
+      .chooseCard("raging onslaught|2")
+      .chooseCard("wrecker romp|3")
       .chooseOption("done")
       .settle()
       .expectInZone(0, "beast mode|1", "banish")
+      .expectInZone(0, "raging onslaught|2", "banish")
+      .expectInZone(0, "wrecker romp|3", "banish")
+      .blockWith()
+      .settle()
+      .expectLife(0, 19)
       .endTurn()
-      .expectInZone(0, "beast mode|1", "hand");
+      .expectInZone(0, "beast mode|1", "hand")
+      .expectInZone(0, "raging onslaught|2", "hand")
+      .expectInZone(0, "wrecker romp|3", "hand");
   });
 
   it("declares and pays Reel In's X cost while preserving the priority window", () => {

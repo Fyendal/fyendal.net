@@ -2045,6 +2045,11 @@ export function makeCtx(
       const found = findCardAnywhere(state, card.instanceId)?.card;
       return cardTypesOf(state, found ?? card as CardInstance);
     },
+    isRunechant(card) {
+      const found = findCardAnywhere(state, card.instanceId)?.card;
+      const target = found ?? card as CardInstance;
+      return !target.faceDown && scriptOf(state, target.cardId, target)?.runechantToken === true;
+    },
     hasCrank(card) {
       const found = findCardAnywhere(state, card.instanceId);
       const target = found?.card ?? card as CardInstance;

@@ -1007,6 +1007,7 @@ describe("PersistedStateV1", () => {
       turn: source.turn,
       hook: "test-cleanup",
       label: "Resolve delayed cleanup",
+      labelMessage: { id: "card.trigger.common.runechants.destroy" },
     });
 
     const encoded = encodePersistedState(source);

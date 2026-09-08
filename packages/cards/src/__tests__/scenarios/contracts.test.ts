@@ -198,6 +198,36 @@ describe("Contract", () => {
     expect(silverCount(game)).toBe(1);
   });
 
+  it("Already Dead lets its controller choose between defending cards", () => {
+    const game = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["already dead|1"], resources: 2 },
+        {
+          hero: "dorinthea",
+          hand: ["head jab|1", "snatch|1"],
+          deck: ["wrecker romp|1"],
+        },
+      ],
+    });
+
+    game.play("already dead|1")
+      .blockWith("head jab|1", "snatch|1")
+      .settle();
+
+    expect(game.state.pendingDecision).toMatchObject({
+      player: 0,
+      chooseHook: "already-dead-defender",
+    });
+    expect(game.state.pendingDecision?.options).toHaveLength(2);
+
+    game.chooseCard("snatch|1")
+      .expectInZone(1, "snatch|1", "banish");
+
+    expect(game.state.players[1]!.banish.some((card) =>
+      functionalKeyOf(cardData[card.cardId]!) === "head jab|1"
+    )).toBe(false);
+  });
+
   it("Mist Hunter completes once for each blue Inner Chi it banishes", () => {
     const game = scenario({
       seats: [

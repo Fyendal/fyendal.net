@@ -1,4 +1,4 @@
-import { describe, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { scenario } from "../harness.js";
 
 /**
@@ -93,6 +93,34 @@ describe("DVR — Dawnblade / Dorinthea hero", () => {
       .settle()
       .expectAP(0, 0)
       .expectLife(1, 14);
+  });
+
+  it("Glistening Steelblade puts counters on the original Dawnblade", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          heroKey: "dorinthea ironsong|0",
+          weapons: ["dawnblade|0"],
+          hand: ["glistening steelblade|2", "en garde|1", "en garde|1", "en garde|1"],
+        },
+        { hero: "rhinar", hand: [] },
+      ],
+    });
+    g.play("glistening steelblade|2", { pitch: ["en garde|1"] })
+      .attackWithWeapon()
+      .blockWith()
+      .settle()
+      .expectLog("Glistening Steelblade triggers: On hit")
+      .expectLog("Dawnblade gets a +1 attack counter")
+      .expectAP(0, 1)
+      .attackWithWeapon()
+      .expectAttackValue(4)
+      .blockWith()
+      .settle();
+
+    // One counter from each Glistening trigger, plus Dawnblade's own second-hit counter.
+    expect(g.state.players[0]!.weapons[0]!.counters?.power).toBe(3);
   });
 
   it("Hala Goldenhelm: flip, lesson counters on sword hits, payoff searches Glistening Steelblade", () => {

@@ -3,6 +3,7 @@ import {
   bloodDebtScript as bloodDebt,
   buffNextAttack,
   commonOptionMessages,
+  dealArcane,
   decisionMessage,
   decisionPrompt,
   opponentSeat,
@@ -16,6 +17,31 @@ const URSUR = "MON220";
 
 function isAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("attack");
+}
+
+function isNonAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
+  return ctx.hasCardType(card, "action") && !ctx.cardTypes(card).includes("attack");
+}
+
+function requestInvertExistenceChoice(ctx: ScriptCtx, another = false): void {
+  const cards = ctx.player(opponentSeat(ctx)).graveyard;
+  if (!cards.length) return;
+  ctx.requestCardChoice(
+    "invert-existence-banish",
+    decisionPrompt(
+      another
+        ? "Invert Existence: choose another opposing graveyard card to banish, or finish"
+        : "Invert Existence: choose up to 2 opposing graveyard cards to banish",
+      another
+        ? "card.mon.opposing.graveyard.banish.next"
+        : "card.mon.opposing.graveyard.banish.upto",
+      {
+        values: { card: { kind: "card", cardId: ctx.self.cardId }, count: 2 },
+        optionMessages: commonOptionMessages("done"),
+      },
+    ),
+    ["done", ...cards.map((card) => card.instanceId)],
+  );
 }
 
 function weapon(cost: number, extra: CardScript = {}): CardScript {
@@ -256,7 +282,35 @@ export const monHighRarity: Record<string, CardScript> = {
   "galaxxi black|0": weapon(1, { modifyAttack(ctx) { return ctx.getFlag("player", "playedFromBanishThisTurn") === true ? 2 : 0; }, onHit(ctx) { ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true, sourceInstanceId: ctx.self.instanceId }); } }),
   "shadow of ursur|3": bloodDebt({ additionalCost(ctx) { const cards = ctx.player(ctx.seat).hand.filter((card) => (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "blood debt")); if (cards.length) ctx.requestCardChoice("ursur-banish", decisionPrompt("Banish a Blood Debt card for go again?", "card.mon.blooddebt.banish.goagain", { optionMessages: commonOptionMessages("no") }), ["no", ...cards.map((card) => card.instanceId)]); }, onChoose(ctx, hook, option) { if (hook === "ursur-banish" && option !== "no" && ctx.banish(Number(option))) ctx.grantGoAgain(); } }, true),
   "dimenxxional crossroads|2": { triggers: [{ event: "card-played", label: "Deal 1 arcane damage", condition(ctx, played, event) { if (!played || event?.from !== "banish" || !ctx.hasCardType(played, "action")) return false; const kind = ctx.cardTypes(played).includes("attack") ? "attack" : "nonattack"; return !ctx.getCounter(`crossroads:${kind}`); }, onTrigger(ctx, played) { if (!played) return; const kind = ctx.cardTypes(played).includes("attack") ? "attack" : "nonattack"; ctx.setCounter(`crossroads:${kind}`, 1); }, effect(ctx) { ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true, sourceInstanceId: ctx.self.instanceId }); } }] },
-  "invert existence|3": bloodDebt({ staticPlayableFrom: ["banish"], onPlay(ctx) { const cards = ctx.player(opponentSeat(ctx)).graveyard.slice(0, 2); for (const card of cards) ctx.banish(card.instanceId); const attack = cards.some((card) => isAttack(ctx, card)); const nonattack = cards.some((card) => !isAttack(ctx, card)); if (attack && nonattack) ctx.dealDamage(opponentSeat(ctx), 2, { sourceInstanceId: ctx.self.instanceId }); } }, true),
+  "invert existence|3": bloodDebt({
+    staticPlayableFrom: ["banish"],
+    arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [2],
+    onPlay(ctx) {
+      requestInvertExistenceChoice(ctx);
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "invert-existence-banish" || option === "done") return;
+      const card = ctx.player(opponentSeat(ctx)).graveyard.find((candidate) =>
+        candidate.instanceId === Number(option)
+      );
+      if (!card) return;
+      const attack = isAttack(ctx, card);
+      const nonAttack = isNonAttackAction(ctx, card);
+      if (!ctx.banish(card.instanceId)) return;
+      if (attack) ctx.setCounter("invertExistenceAttack", 1);
+      if (nonAttack) ctx.setCounter("invertExistenceNonAttack", 1);
+      const count = ctx.getCounter("invertExistenceCount") + 1;
+      ctx.setCounter("invertExistenceCount", count);
+      if (count < 2 && ctx.player(opponentSeat(ctx)).graveyard.length) {
+        requestInvertExistenceChoice(ctx, true);
+        return;
+      }
+      if (ctx.getCounter("invertExistenceAttack") && ctx.getCounter("invertExistenceNonAttack")) {
+        dealArcane(ctx, opponentSeat(ctx), 2);
+      }
+    },
+  }, true),
   "carrion husk|0": bloodDebt({
     onDefend(ctx) {
       ctx.setFlag("link", `banishOnClose:${ctx.self.instanceId}`, true);

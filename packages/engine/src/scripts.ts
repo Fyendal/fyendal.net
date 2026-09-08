@@ -428,6 +428,8 @@ export interface ScriptCtx {
   hasCardType(card: DeepReadonly<CardInstance>, cardType: CardType): boolean;
   /** Effective classes and subtypes, including all-zone and granted types. */
   cardTypes(card: DeepReadonly<CardInstance>): readonly string[];
+  /** Whether this permanent currently counts as a Runechant. */
+  isRunechant(card: DeepReadonly<CardInstance>): boolean;
   /** Whether an item currently has Crank, including continuous grants from
    * active sources and suppression of its printed abilities. */
   hasCrank(card: DeepReadonly<CardInstance>): boolean;
@@ -872,6 +874,7 @@ type AlternativePlayCost = (
       options: { name: string; count: number }[];
     }
   | { kind: "banish-hand"; min: number }
+  | { kind: "discard-hand-named"; name: string }
   | { kind: "discard-or-destroy-controlled-named"; name: string }
   | { kind: "discard-or-destroy-controlled-subtype"; subtype: string }
   | {
@@ -1046,6 +1049,10 @@ export interface CardScript {
    * object (including a weapon), this modifies only that object's attack;
    * observer effects belong on explicit friendly-attack/modifier hooks. */
   modifyAttack?(ctx: ScriptCtx): number;
+  /** Whether this attack currently has go again from its own conditional
+   * static ability. Re-evaluated when the attack is declared, projected, and
+   * at the beginning of the Resolution Step. */
+  hasConditionalGoAgain?(ctx: ScriptCtx): boolean;
   /** Continuous adjustment to a friendly attack while this source is active. */
   modifyFriendlyAttack?(ctx: ScriptCtx, attacking: DeepReadonly<CardInstance>): number;
   /** Replace one positive power gain applied to this face-up object. The

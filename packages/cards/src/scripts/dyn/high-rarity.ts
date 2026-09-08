@@ -9,6 +9,7 @@ import {
   decisionPrompt,
   opponentSeat,
   previousAttackHasName,
+  yesNoPrompt,
 } from "../shared-helpers.js";
 
 const CROUCHING_TIGER = "DYN065";
@@ -258,7 +259,42 @@ export const dynHighRarity: Record<string, CardScript> = {
     },
     onAttackDeclared(ctx) { ctx.setFlag("link", "overpower", true); },
   },
-  "plasma mainline|1": { onEnterArena(ctx) { ctx.addCounter(ctx.self.instanceId, "steam", 5); }, onFriendlyEnterArena(ctx, card) { if (!has(ctx, card, "mechanologist") || !has(ctx, card, "item") || (ctx.cardData(card.cardId).cost ?? 99) > 2 || ctx.getCounter("steam") <= 0) return; ctx.addCounter(ctx.self.instanceId, "steam", -1); ctx.addCounter(card.instanceId, "steam", 1); } },
+  "plasma mainline|1": {
+    onEnterArena(ctx) { ctx.addCounter(ctx.self.instanceId, "steam", 5); },
+    onFriendlyEnterArena(ctx, card) {
+      if (
+        !has(ctx, card, "mechanologist") ||
+        !has(ctx, card, "item") ||
+        (ctx.cardData(card.cardId).cost ?? 99) > 2 ||
+        ctx.getCounter("steam") <= 0
+      ) return;
+      ctx.requestChoice(
+        `plasma-mainline:${card.instanceId}`,
+        yesNoPrompt(
+          `Move a steam counter from Plasma Mainline to ${ctx.cardData(card.cardId).name}?`,
+          "card.dyn.plasmamainline.counter.move",
+          {
+            card: { kind: "card", cardId: ctx.self.cardId },
+            target: { kind: "card", cardId: card.cardId },
+          },
+        ),
+        ["yes", "no"],
+      );
+    },
+    onChoose(ctx, hook, option) {
+      if (!hook.startsWith("plasma-mainline:") || option !== "yes" || ctx.getCounter("steam") <= 0) return;
+      const targetId = Number(hook.split(":")[1]);
+      const target = ctx.player(ctx.seat).board.find((card) => card.instanceId === targetId);
+      if (
+        !target ||
+        !has(ctx, target, "mechanologist") ||
+        !has(ctx, target, "item") ||
+        (ctx.cardData(target.cardId).cost ?? 99) > 2
+      ) return;
+      ctx.addCounter(ctx.self.instanceId, "steam", -1);
+      ctx.addCounter(target.instanceId, "steam", 1);
+    },
+  },
   "powder keg|3": {
     onFriendlyCombatDamageDealt(ctx, source, target, amount) {
       const sourceTypes = ctx.cardTypes(source);

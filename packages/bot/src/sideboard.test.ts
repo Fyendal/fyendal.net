@@ -257,6 +257,23 @@ describe("Jarl Fabrary matchup presentation", () => {
     expect(huntsman.deck.filter((id) => id === "HNT231")).toHaveLength(2);
   });
 
+  it("uses only AB1 against Vynnset's one-damage Runechant packets", () => {
+    const presented = jarlPresentationFor(opponent({ heroId: "DTD133" }));
+    expect(presented.equipment).toEqual({
+      head: "PEN310",
+      chest: "ROS028",
+      arms: "AJV006",
+      legs: "SBL010",
+    });
+    const arcaneBarrier = Object.values(presented.equipment).reduce((total, id) =>
+      total + (cardData[id!]?.keywords ?? []).reduce((pieceTotal, keyword) => {
+        const amount = /^Arcane Barrier (\d+)$/.exec(keyword)?.[1];
+        return pieceTotal + Number(amount ?? 0);
+      }, 0),
+    0);
+    expect(arcaneBarrier).toBe(1);
+  });
+
   it("always produces a legal presentation from the bot-only pool", () => {
     const pool = precon("bot-jarl")!.pool;
     for (const heroId of [

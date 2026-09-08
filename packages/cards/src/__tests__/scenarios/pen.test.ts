@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { legalIntents, projectStateFor } from "@fyendal/engine";
+import type { GameIntent } from "@fyendal/shared";
 import { cardData, isImplemented } from "../../index.js";
 import { functionalKeyOf } from "../../functional.js";
 import { printingId, scenario } from "../harness.js";
@@ -258,6 +259,53 @@ describe("PEN — import and set mechanics", () => {
     expect(g.state.players[0]!.pitch).toHaveLength(1);
     g.expectInZone(0, "dodge|3", "pitch")
       .expectInZone(0, "pack hunt|1", "hand");
+  });
+
+  it("Art of the Phoenix: War pays resources and discards a separate Phoenix Flame", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["art of the phoenix: war|1", "phoenix flame|1", "raging onslaught|3"],
+          deck: ["head jab|1", "pack hunt|1"],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    const war = g.state.players[0]!.hand.find(
+      (card) => functionalKeyOf(cardData[card.cardId]!) === "art of the phoenix: war|1",
+    )!;
+    const flame = g.state.players[0]!.hand.find(
+      (card) => functionalKeyOf(cardData[card.cardId]!) === "phoenix flame|1",
+    )!;
+    const blue = g.state.players[0]!.hand.find(
+      (card) => functionalKeyOf(cardData[card.cardId]!) === "raging onslaught|3",
+    )!;
+
+    const plays = legalIntents(g.state, 0).filter(
+      (intent): intent is Extract<GameIntent, { kind: "play-card" }> =>
+        intent.kind === "play-card" && intent.instanceId === war.instanceId,
+    );
+    expect(plays).not.toHaveLength(0);
+    expect(plays.every(
+      (intent) =>
+        intent.alternativeCostCardInstanceIds?.[0] === flame.instanceId &&
+        !intent.pitchInstanceIds.includes(flame.instanceId),
+    )).toBe(true);
+    expect(plays).toContainEqual(expect.objectContaining({
+      pitchInstanceIds: [blue.instanceId],
+      alternativeCostCardInstanceIds: [flame.instanceId],
+    }));
+
+    g.play("art of the phoenix: war|1", {
+      pitch: ["raging onslaught|3"],
+      alternativeCost: "phoenix flame|1",
+    })
+      .expectInZone(0, "raging onslaught|3", "pitch")
+      .expectInZone(0, "phoenix flame|1", "graveyard")
+      .expectHandSize(0, 2);
+    expect(g.state.players[0]!.resources).toBe(2);
   });
 
   it("Pound of Flesh lets each hero choose the card they banish", () => {

@@ -39,7 +39,7 @@ function previousNamed(ctx: ScriptCtx, name: string): boolean {
 }
 
 function runeCount(ctx: ScriptCtx): number {
-  return ctx.player(ctx.seat).board.filter((card) => ctx.cardData(card.cardId).name === "Runechant").length;
+  return ctx.player(ctx.seat).board.filter((card) => ctx.isRunechant(card)).length;
 }
 
 function ownedCards(ctx: ScriptCtx): readonly DeepReadonly<CardInstance>[] {
@@ -459,7 +459,7 @@ export const cruHighRarity: Record<string, CardScript> = {
     },
     replaceDamageToController(ctx, amount) {
       const runechants = ctx.player(ctx.seat).board.filter((card) =>
-        ctx.cardData(card.cardId).name === "Runechant"
+        ctx.isRunechant(card)
       );
       const prevented = Math.min(amount, runechants.length);
       for (const token of runechants.slice(0, prevented)) ctx.destroyPermanent(token.instanceId);
