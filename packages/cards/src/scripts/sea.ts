@@ -791,19 +791,29 @@ export const sea: Record<string, CardScript> = {
     onFriendlyActivate(ctx, activated) {
       if (hasTag(ctx, activated, "cannon")) ctx.setFlag("player", "activatedCannonThisTurn", true);
     },
-    onFriendlyDraws(ctx) {
-      if (ctx.state.activePlayer !== ctx.seat || ctx.state.phase === "start" || ctx.state.phase === "end" || ctx.state.phase === "game-over") return;
-      const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card));
-      if (ctx.hasArsenalSpace() && arrows.length) ctx.requestCardChoice(
-        "marlynn-arrow",
-        decisionPrompt(
-          "Marlynn: put an arrow face-up into your arsenal?",
-          "card.sea.marlynn.arrow.arsenal",
-          { optionMessages: commonOptionMessages("pass") },
-        ),
-        ["pass", ...arrows.map((card) => card.instanceId)],
-      );
-    },
+    triggers: [{
+      event: "card-drawn",
+      simultaneousKey: "marlynn-card-drawn",
+      label: "Put an arrow face up into your arsenal?",
+      labelMessage: { id: "card.sea.marlynn.trigger.arrow.arsenal" },
+      condition: (ctx) =>
+        ctx.state.activePlayer === ctx.seat &&
+        ctx.state.phase !== "start" &&
+        ctx.state.phase !== "end" &&
+        ctx.state.phase !== "game-over",
+      effect(ctx) {
+        const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card));
+        if (ctx.hasArsenalSpace() && arrows.length) ctx.requestCardChoice(
+          "marlynn-arrow",
+          decisionPrompt(
+            "Marlynn: put an arrow face-up into your arsenal?",
+            "card.sea.marlynn.arrow.arsenal",
+            { optionMessages: commonOptionMessages("pass") },
+          ),
+          ["pass", ...arrows.map((card) => card.instanceId)],
+        );
+      },
+    }],
     onChoose(ctx, hook, option) { if (hook === "marlynn-arrow" && option !== "pass") ctx.putIntoArsenal(Number(option), "hand"); },
   },
   "blue fin harpoon|3": goFish(3),
@@ -1469,8 +1479,10 @@ function kingHarpoon(kind: "attack" | "non-attack"): CardScript {
       const target = opponentSeat(ctx); const card = ctx.player(target).hand.find((candidate) => candidate.instanceId === Number(option));
       if (!card) return;
       ctx.revealCards([card.instanceId], target);
-      const attack = ctx.hasCardType(card, "action") && hasTag(ctx, card, "attack");
-      if ((kind === "attack") === attack && ctx.discardCard(target, card.instanceId)) createGold(ctx);
+      const action = ctx.hasCardType(card, "action");
+      const attack = action && hasTag(ctx, card, "attack");
+      const matches = action && (kind === "attack" ? attack : !attack);
+      if (matches && ctx.discardCard(target, card.instanceId)) createGold(ctx);
     },
   };
 }

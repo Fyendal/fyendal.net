@@ -11349,6 +11349,12 @@
       "value": "Marlynn: put an arrow face up into your arsenal?"
     }
   ],
+  "card.sea.marlynn.trigger.arrow.arsenal": [
+    {
+      "type": 0,
+      "value": "Put an arrow face up into your arsenal?"
+    }
+  ],
   "card.sea.money.goldordamage": [
     {
       "type": 0,

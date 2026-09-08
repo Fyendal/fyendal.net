@@ -6,6 +6,7 @@ export type TriggerEvent =
   | "card-entered-arena"
   | "card-played"
   | "card-pitched"
+  | "card-drawn"
   | "card-left-arena"
   | "card-discarded"
   | "card-banished-for-boost"

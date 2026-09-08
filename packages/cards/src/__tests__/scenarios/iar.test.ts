@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { legalIntents, projectStateFor } from "@fyendal/engine";
+import { applyIntent, legalIntents, projectStateFor } from "@fyendal/engine";
 import { cardData, isImplemented } from "../../index.js";
 import { scenario } from "../harness.js";
 
@@ -914,14 +914,34 @@ describe("IAR cards", () => {
     const g = scenario({ seats: [
       {
         hero: "rhinar",
-        hand: ["ice aged oak|3", "ice quake|3"],
+        heroKey: "MPG000",
+        hand: ["ROS057", "IAR260", "AJV017"],
         equipment: NO_EQUIPMENT,
       },
-      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+      {
+        hero: "dorinthea",
+        heroKey: "HNT054",
+        life: 20,
+        hand: ["raging onslaught|1", "raging onslaught|2"],
+        equipment: NO_EQUIPMENT,
+      },
     ] });
 
-    g.play("ice aged oak|3", { pitch: ["ice quake|3"] });
+    g.activate("ROS057")
+      .play("IAR260", { pitch: ["AJV017"] });
     expect(g.state.chain.at(-1)?.flags.dominate).toBe(true);
+    expect(projectStateFor(g.state, 1).chain.at(-1)?.dominate).toBe(true);
+
+    const bothHandCards = g.state.players[1]!.hand.map((card) => card.instanceId);
+    const illegalDefense = applyIntent(g.state, 1, {
+      kind: "stage-defenders",
+      instanceIds: bothHandCards,
+    });
+    expect(illegalDefense).toMatchObject({
+      ok: false,
+      error: "Dominate: at most 1 card from hand may defend",
+    });
+
     g.blockWith().settle().expectLife(1, 16);
 
     expect(g.state.players[0]!.board.filter((card) => card.cardId === "AJV028"))

@@ -106,8 +106,7 @@ function exposedEquipmentSlots(ctx: ScriptCtx, seat: number): readonly string[] 
 
 function createFrostbitesInExposedZones(ctx: ScriptCtx, seat: number): void {
   for (const slot of exposedEquipmentSlots(ctx, seat)) {
-    const token = ctx.createToken(FROSTBITE, seat);
-    if (token) ctx.addCounter(token.instanceId, `frostZone:${slot}`, 1);
+    ctx.createToken(FROSTBITE, seat, { [`frostZone:${slot}`]: 1 });
   }
 }
 

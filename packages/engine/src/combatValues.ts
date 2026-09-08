@@ -127,6 +127,7 @@ export function attackHasDominate(
     return false;
   }
   if (instanceHasKeyword(state, link.attackingCard, "dominate")) return true;
+  if (link.flags.dominate === true) return true;
   return activeModifiers(state, link, ["chain-link", "until-end-of-turn"])
     .some((modifier) => modifier.dominate);
 }

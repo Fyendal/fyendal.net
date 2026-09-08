@@ -1,7 +1,7 @@
 import { engineRuntime } from "../engineRuntime.js";
 import { describe, expect, it } from "vitest";
 import type { CardData, Decklist, EquipmentSlot, GameIntent } from "@fyendal/shared";
-import { applyIntent, legalIntents } from "../index.js";
+import { applyIntent, legalIntents, projectStateFor } from "../index.js";
 import type { CardScript } from "../scripts.js";
 import { createGame as createGameState, type GameStateInternal } from "../runtimeState.js";
 import type { CardInstance, PlayerState } from "../state.js";
@@ -318,6 +318,46 @@ describe("repeating damage-event prevention", () => {
     s = playAndResolve(s, 0, hits);
     expect(player(s, 0).life).toBe(17);
     expect(s.modifiers.some((modifier) => modifier.preventDamagePerEvent === 1 && !modifier.consumed)).toBe(false);
+  });
+
+  it("stacks independent prevention effects on the same damage events", () => {
+    let s = makeGame();
+    const firstShield = giveCard(s, 0, "REPEAT_SHIELD");
+    const secondShield = giveCard(s, 0, "REPEAT_SHIELD");
+    const hits = giveCard(s, 0, "THREE_HITS");
+    s = playAndResolve(s, 0, firstShield);
+    s = playAndResolve(s, 0, secondShield);
+
+    const attackingCard = player(s, 1).hand.shift()!;
+    attackingCard.cardId = "ATK4";
+    s.chain.push({
+      attacker: 1,
+      attackingCard,
+      attackCardType: "action",
+      defendingCards: [],
+      defendingEquipment: [],
+      reactions: [],
+      goAgain: false,
+      damage: 0,
+      hit: false,
+      resolved: false,
+      flags: {},
+    });
+    const projectedLink = projectStateFor(s, 0).chain.at(-1);
+    expect(projectedLink?.damageToPrevent).toBe(2);
+    expect(
+      projectedLink?.preventionModifiers?.map((modifier) => modifier.sourceCardId),
+    ).toEqual(["REPEAT_SHIELD", "REPEAT_SHIELD"]);
+    s.chain.pop();
+
+    s = playAndResolve(s, 0, hits);
+    expect(player(s, 0).life).toBe(20);
+    expect(
+      s.modifiers.filter((modifier) => modifier.preventDamagePerEvent === 1),
+    ).toEqual([
+      expect.objectContaining({ preventDamageEventsRemaining: 0, consumed: true }),
+      expect.objectContaining({ preventDamageEventsRemaining: 0, consumed: true }),
+    ]);
   });
 });
 
