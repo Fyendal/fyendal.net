@@ -1,6 +1,8 @@
 import {
   botDefinition,
+  decodeFaiPolicyState,
   type BotDecision,
+  type FaiPolicyStateV1,
   type TurnPlanCheckpoint,
   type TurnPlannerCandidateTrace,
 } from "@fyendal/bot";
@@ -15,6 +17,8 @@ const TASK_KEYS = [
   "rulesetVersion",
   "botId",
   "seat",
+  "resetSession",
+  "policyState",
   "state",
 ] as const;
 const TRACE_KEYS = [
@@ -34,6 +38,8 @@ export interface BotPolicyTask {
   rulesetVersion: string;
   botId: BotOpponent;
   seat: 0 | 1;
+  resetSession: boolean;
+  policyState: FaiPolicyStateV1 | null;
   state: PersistedStateV1;
 }
 
@@ -45,6 +51,7 @@ export interface BotPolicyWorkerSuccess {
   kind: "result";
   taskId: number;
   decision: BotDecision;
+  nextPolicyState: FaiPolicyStateV1 | null;
   computeMs: number;
 }
 
@@ -152,6 +159,11 @@ export function decodeBotPolicyTask(value: unknown): DecodedBotPolicyTask | null
     : undefined;
   if (!definition) return null;
   if (!(candidate.seat === 0 || candidate.seat === 1)) return null;
+  if (typeof candidate.resetSession !== "boolean") return null;
+  const policyState = candidate.policyState === null
+    ? null
+    : decodeFaiPolicyState(candidate.policyState);
+  if (policyState === undefined || (definition.id !== "fai" && policyState !== null)) return null;
   if (!record(candidate.state)) return null;
   return {
     taskId: candidate.taskId,
@@ -160,6 +172,8 @@ export function decodeBotPolicyTask(value: unknown): DecodedBotPolicyTask | null
     rulesetVersion: candidate.rulesetVersion,
     botId: definition.id,
     seat: candidate.seat,
+    resetSession: candidate.resetSession,
+    policyState,
     state: candidate.state,
   };
 }
@@ -173,10 +187,26 @@ export function decodeBotPolicyWorkerResponse(value: unknown): BotPolicyWorkerRe
       ? { kind: "error", taskId: candidate.taskId, error: candidate.error }
       : null;
   }
-  if (candidate.kind !== "result" || !exact(candidate, ["kind", "taskId", "decision", "computeMs"]) ||
+  if (candidate.kind !== "result" || !exact(candidate, [
+    "kind",
+    "taskId",
+    "decision",
+    "nextPolicyState",
+    "computeMs",
+  ]) ||
     !finiteNonnegative(candidate.computeMs)) return null;
   const decision = decodeDecision(candidate.decision);
+  const nextPolicyState = candidate.nextPolicyState === null
+    ? null
+    : decodeFaiPolicyState(candidate.nextPolicyState);
+  if (nextPolicyState === undefined) return null;
   return decision
-    ? { kind: "result", taskId: candidate.taskId, decision, computeMs: candidate.computeMs }
+    ? {
+        kind: "result",
+        taskId: candidate.taskId,
+        decision,
+        nextPolicyState,
+        computeMs: candidate.computeMs,
+      }
     : null;
 }

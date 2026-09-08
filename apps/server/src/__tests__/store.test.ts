@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { initialFaiAggroPolicyState } from "@fyendal/bot";
 import { decklists, precon, preconsForFormat, silverAgePrecon } from "@fyendal/cards";
 import { legalIntents } from "@fyendal/engine";
 import { decodeServerMessage, replayFileViews } from "@fyendal/protocol";
@@ -384,6 +385,151 @@ describe("PgRoomStore storage", () => {
     expect(room!.seats[1]!.presented!.deck.filter((id) => id === "SBR016")).toHaveLength(2);
     expect(room!.prep?.startPlayer).toBe(1);
     expect(room!.state).not.toBeNull();
+  });
+
+  it.each([
+    {
+      matchup: "arcane Briar",
+      humanDeckId: "precon-sba",
+      expectedWeapons: ["HNT056", "SLY003"],
+      expectedHead: "SFA004",
+      expectedFire: 0,
+      expectedPotion: 0,
+    },
+    {
+      matchup: "long-game Bravo",
+      humanDeckId: "precon-sbr",
+      expectedWeapons: ["SFA002"],
+      expectedHead: "SBA004",
+      expectedFire: 2,
+      expectedPotion: 2,
+    },
+  ])("durably presents Fai's automatic $matchup plan", async ({
+    humanDeckId,
+    expectedWeapons,
+    expectedHead,
+    expectedFire,
+    expectedPotion,
+  }) => {
+    const user = await db.query(
+      `INSERT INTO users (username, username_lc, pass_hash, created_at)
+       VALUES ($1,$2,'hash',1) RETURNING id`,
+      [`FaiOwner${humanDeckId}`, `faiowner${humanDeckId}`],
+    );
+    const userId = Number(user.rows[0]!.id);
+    const created = await store.createBotRoom("silver-age", {
+      deckId: humanDeckId,
+      username: "FaiOwner",
+      userId,
+    }, false, "fai");
+    const human = silverAgePrecon(humanDeckId)!.pool;
+    await chooseBotTurn(created.code, created.token, userId);
+    const ready = await store.presentDeck(created.code, { token: created.token, userId }, {
+      weaponIds: human.weaponIds.slice(0, 1),
+      equipment: {},
+      deck: human.deck.slice(0, 40),
+    });
+    expect(ready.ok).toBe(true);
+
+    const room = await store.getRoom(created.code);
+    expect(room?.seats[1]).toMatchObject({
+      controller: "bot",
+      username: "Fai Bot",
+      deckId: "bot-fai",
+      presented: {
+        weaponIds: expectedWeapons,
+        equipment: { head: expectedHead },
+      },
+    });
+    const botDeck = room!.seats[1]!.presented!.deck;
+    expect(botDeck).toHaveLength(40);
+    expect(botDeck.filter((id) => id === "SFA016")).toHaveLength(expectedFire);
+    expect(botDeck.filter((id) => id === "SFA035")).toHaveLength(expectedPotion);
+    expect(room!.state).not.toBeNull();
+  });
+
+  it("atomically stores optional bot policy state and restores its Undo snapshot", async () => {
+    const user = await db.query(
+      `INSERT INTO users (username, username_lc, pass_hash, created_at)
+       VALUES ('FaiStateOwner','faistateowner','hash',1) RETURNING id`,
+    );
+    const userId = Number(user.rows[0]!.id);
+    const created = await store.createBotRoom("silver-age", {
+      deckId: "precon-svi",
+      username: "FaiStateOwner",
+      userId,
+    }, false, "fai");
+    const human = silverAgePrecon("precon-svi")!.pool;
+    await chooseBotTurn(created.code, created.token, userId);
+    expect((await store.presentDeck(created.code, { token: created.token, userId }, {
+      weaponIds: human.weaponIds.slice(0, 1),
+      equipment: {},
+      deck: human.deck.slice(0, 40),
+    })).ok).toBe(true);
+    const before = await store.getRoom(created.code);
+    if (!before?.state) throw new Error("Fai bot room did not start");
+    const botSeat = before.seats.findIndex((seat) => seat?.controller === "bot");
+    if (!(botSeat === 0 || botSeat === 1)) throw new Error("Fai bot seat was missing");
+    const intent = legalIntents(before.state, botSeat)
+      .find((candidate) => candidate.kind !== "concede" && candidate.kind !== "stage-defenders");
+    if (!intent) throw new Error("Fai bot had no policy-state test intent");
+    const committedState = {
+      ...initialFaiAggroPolicyState(),
+      memory: { ...initialFaiAggroPolicyState().memory, turn: before.state.turn },
+    };
+    expect((await store.applyBotIntent(
+      created.code,
+      before.version,
+      intent,
+      committedState,
+    )).ok).toBe(true);
+    expect((await store.getRoom(created.code))?.botPolicyState).toEqual(committedState);
+    const rejectedState = {
+      ...initialFaiAggroPolicyState(),
+      memory: { ...initialFaiAggroPolicyState().memory, turn: 99 },
+    };
+    expect(await store.applyBotIntent(
+      created.code,
+      before.version,
+      intent,
+      rejectedState,
+    )).toEqual({ ok: false, error: "stale bot observation" });
+    expect((await store.getRoom(created.code))?.botPolicyState).toEqual(committedState);
+    const automaticHistory = await db.query(
+      `SELECT bot_policy_state FROM room_history
+       WHERE room_code = $1 ORDER BY version DESC LIMIT 1`,
+      [created.code],
+    );
+    expect(automaticHistory.rows[0]?.bot_policy_state ?? null).toBeNull();
+
+    const after = await store.getRoom(created.code);
+    if (!after?.state) throw new Error("Fai bot room lost game state");
+    const historicalState = after.state;
+    historicalState.activePlayer = 0;
+    historicalState.priorityPlayer = 0;
+    historicalState.phase = "action";
+    historicalState.pendingDecision = null;
+    const historicalPolicyState = {
+      ...initialFaiAggroPolicyState(),
+      memory: { ...initialFaiAggroPolicyState().memory, turn: 3 },
+    };
+    await db.query("DELETE FROM room_history WHERE room_code = $1", [created.code]);
+    await db.query(
+      `INSERT INTO room_history
+        (room_code, version, state, snapshot_turn, undo_seat, bot_policy_state)
+       VALUES ($1, 500, $2, $3, 0, $4)`,
+      [
+        created.code,
+        JSON.stringify(dehydrateState(historicalState, "rules-a")),
+        historicalState.turn,
+        JSON.stringify(historicalPolicyState),
+      ],
+    );
+    expect((await store.undo(created.code, {
+      token: created.token,
+      userId,
+    })).ok).toBe(true);
+    expect((await store.getRoom(created.code))?.botPolicyState).toEqual(historicalPolicyState);
   });
 
   it("durably seats, sideboards, and presents the Classic Constructed Hala bot", async () => {
@@ -1615,6 +1761,18 @@ describe("PgRoomStore storage", () => {
     await expect(store.getRoom(created.code)).rejects.toMatchObject({
       name: "CorruptRoomError",
       path: "schemaVersion",
+    });
+  });
+
+  it("rejects malformed persisted bot policy state at the room boundary", async () => {
+    const created = await store.createRoom("classic-battles", { hero: "rhinar" });
+    await db.query("UPDATE rooms SET bot_policy_state = $2 WHERE code = $1", [
+      created.code,
+      JSON.stringify({ strategy: "aggro", hiddenInput: {} }),
+    ]);
+    await expect(store.getRoom(created.code)).rejects.toMatchObject({
+      name: "CorruptRoomError",
+      path: "row.bot_policy_state",
     });
   });
 

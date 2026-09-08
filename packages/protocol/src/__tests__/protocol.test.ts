@@ -297,6 +297,7 @@ describe("client messages", () => {
     { type: "create-room", format: "classic-battles", hero: "rhinar" },
     { type: "create-room", format: "silver-age", deckId: "deck", private: true },
     { type: "create-bot-room", format: "silver-age", deckId: "precon-sba", bot: "briar" },
+    { type: "create-bot-room", format: "silver-age", deckId: "precon-sba", bot: "fai" },
     { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "ira" },
     { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "cindra" },
     { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "jarl" },

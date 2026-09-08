@@ -96,6 +96,14 @@ describe("initial schema", () => {
        WHERE table_name = 'rooms' AND column_name = 'allow_future_cards'`,
     )).rows).toEqual([{ column_name: "allow_future_cards" }]);
     expect((await db.query(
+      `SELECT table_name, column_name FROM information_schema.columns
+       WHERE table_name IN ('rooms', 'room_history') AND column_name = 'bot_policy_state'
+       ORDER BY table_name`,
+    )).rows).toEqual([
+      { table_name: "room_history", column_name: "bot_policy_state" },
+      { table_name: "rooms", column_name: "bot_policy_state" },
+    ]);
+    expect((await db.query(
       `SELECT column_name FROM information_schema.columns
        WHERE table_name = 'users' AND column_name = 'early_tester'`,
     )).rows).toEqual([{ column_name: "early_tester" }]);

@@ -11489,6 +11489,20 @@
       "value": "Fire that Burns Within: discard a Phoenix Flame to draw a card and get +2 power?"
     }
   ],
+  "card.sfa.flame.discard.draw.trigger": [
+    {
+      "type": 0,
+      "value": "Discard a Phoenix Flame to draw a card and get +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " power"
+    }
+  ],
   "card.sfa.flame.return": [
     {
       "type": 0,
@@ -21620,6 +21634,12 @@
     {
       "type": 0,
       "value": "A fast redline deck built to keep the pressure on."
+    }
+  ],
+  "lobby.bot.fai.description": [
+    {
+      "type": 0,
+      "value": "An aggressive deck that maintains pressure through continuous attacks."
     }
   ],
   "lobby.bot.hala.description": [

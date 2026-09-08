@@ -203,7 +203,7 @@ export function endTurn(state: GameStateInternal, runtime: EngineRuntime): void 
     pl.banish = pl.banish.filter((card) => !due(card));
     for (const c of returning) {
       const wasIntimidated = c.intimidated === true;
-      c.faceDown = undefined;
+      delete c.faceDown;
       delete c.intimidated;
       delete c.returnToHandAtTurn;
       pl.hand.push(c);

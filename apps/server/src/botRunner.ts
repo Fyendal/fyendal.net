@@ -5,6 +5,7 @@ import {
   type BotDecision,
   type BotDefinition,
   type BotPolicyInput,
+  type FaiPolicyStateV1,
   type TurnPlanCheckpoint,
 } from "@fyendal/bot";
 import { cardData } from "@fyendal/cards";
@@ -89,7 +90,15 @@ export function fallbackBotIntent(input: BotPolicyInput): GameIntent | undefined
     if (commit && (input.view.pendingDecision.stagedDefense ?? 0) >= incoming) return commit;
     const candidates = input.legal.flatMap((intent) =>
       intent.kind === "stage-defenders" ? intent.instanceIds : []
-    ).filter((id) => !stagedIds.includes(id));
+    ).filter((id) => {
+      if (stagedIds.includes(id)) return false;
+      const card = visible.get(id);
+      const data = input.cards[card?.cardId ?? ""];
+      // Hope Merchant's Hood has a useful activated ability but zero defense.
+      // A worker-failure fallback must not destroy it for no prevention.
+      return !(data?.name.toLowerCase() === "hope merchant's hood" &&
+        (card?.defense ?? data.defense ?? 0) <= 0);
+    });
     const allowed = (id: number): boolean => {
       const ids = [...stagedIds, id];
       if (link?.dominate && ids.filter((candidate) => handIds.has(candidate)).length > 1) return false;
@@ -264,11 +273,12 @@ export class BotRunner {
     code: string,
     version: number,
     input: BotPolicyInput,
+    policyState: FaiPolicyStateV1 | null,
     rejected?: GameIntent,
   ) {
     const fallback = fallbackBotIntent(input);
     if (!fallback || (rejected && sameIntent(fallback, rejected))) return undefined;
-    return this.deps.rooms.applyBotIntent(code, version, fallback);
+    return this.deps.rooms.applyBotIntent(code, version, fallback, policyState);
   }
 
   private async tick(code: string): Promise<void> {
@@ -336,6 +346,8 @@ export class BotRunner {
             rulesetVersion: room.rulesetVersion,
             botId: definition.id,
             seat,
+            resetSession: room.lastTransition?.kind === "replace",
+            policyState: room.botPolicyState,
             state: dehydrateState(room.state, room.rulesetVersion),
           });
           if (this.stopped) return;
@@ -383,7 +395,18 @@ export class BotRunner {
       return;
     }
 
-    let applied = await this.deps.rooms.applyBotIntent(code, room.version, intent);
+    // A policy snapshot describes exactly the intent returned beside it. If
+    // validation replaces that intent with a fallback, retain the previously
+    // committed state instead of recording memory for an action never taken.
+    const committedPolicyState = workerTiming && decision && sameIntent(decision.intent, intent)
+      ? workerTiming.nextPolicyState
+      : room.botPolicyState;
+    let applied = await this.deps.rooms.applyBotIntent(
+      code,
+      room.version,
+      intent,
+      committedPolicyState,
+    );
     if (!applied.ok) {
       this.clearContinuation(code);
       if (applied.error === "stale bot observation" || applied.error === "bot does not have priority") {
@@ -391,7 +414,13 @@ export class BotRunner {
         return;
       }
       this.deps.logError?.(`Bot action rejected in room ${code}: ${applied.error}`);
-      const fallback = await this.applyFallback(code, room.version, input, intent);
+      const fallback = await this.applyFallback(
+        code,
+        room.version,
+        input,
+        room.botPolicyState,
+        intent,
+      );
       if (!fallback?.ok) {
         if (fallback && (
           fallback.error === "stale bot observation" || fallback.error === "bot does not have priority"

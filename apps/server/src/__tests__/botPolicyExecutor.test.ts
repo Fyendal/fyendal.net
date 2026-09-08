@@ -20,6 +20,8 @@ function request(version = 1): BotPolicyRequest {
     rulesetVersion: "worker-test",
     botId: "ira",
     seat: 0,
+    resetSession: false,
+    policyState: null,
     state: encodePersistedState(createGame({
       decklists: [decklists.dorinthea, decklists.rhinar],
       cards: cardData,
@@ -78,6 +80,8 @@ function halaReplayRequest(allyCardId?: string): BotPolicyRequest {
     rulesetVersion: "worker-test",
     botId: "hala",
     seat: 1,
+    resetSession: false,
+    policyState: null,
     state: encodePersistedState(state, "worker-test"),
   };
 }
@@ -100,6 +104,7 @@ function success(taskId: number) {
     kind: "result",
     taskId,
     decision: { intent: { kind: "pass" } },
+    nextPolicyState: null,
     computeMs: 5,
   };
 }
@@ -309,6 +314,7 @@ describe("bot policy worker executor", () => {
           kind: "result",
           taskId: task.taskId,
           decision: { intent: { kind: "pass" } },
+          nextPolicyState: null,
           computeMs: 100,
         });
       });

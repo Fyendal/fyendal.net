@@ -102,4 +102,23 @@ describe("silver-age precon pools", () => {
       expect(isImplemented(cardData[id]!), id).toBe(true);
     }
   });
+
+  it("registers the Fai bot pool without offering it as a player precon", () => {
+    const fai = precon("bot-fai");
+    expect(fai).toMatchObject({
+      name: "Fai",
+      format: "silver-age",
+      botOnly: true,
+    });
+    expect(preconsForFormat("silver-age").map((deck) => deck.id))
+      .not.toContain("bot-fai");
+    const pool = fai!.pool;
+    expect(pool.weaponIds.length + pool.equipmentPool.length + pool.deck.length + pool.sideboard!.length)
+      .toBe(53);
+    expect(pool.deck).toHaveLength(40);
+    for (const id of [...pool.weaponIds, ...pool.equipmentPool, ...pool.deck, ...pool.sideboard!]) {
+      expect(cardData[id], id).toBeTruthy();
+      expect(isImplemented(cardData[id]!), id).toBe(true);
+    }
+  });
 });

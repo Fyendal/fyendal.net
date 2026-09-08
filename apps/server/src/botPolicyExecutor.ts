@@ -1,5 +1,5 @@
 import { Worker } from "node:worker_threads";
-import type { BotDecision } from "@fyendal/bot";
+import type { BotDecision, FaiPolicyStateV1 } from "@fyendal/bot";
 import type { BotOpponent } from "@fyendal/shared";
 import type { PersistedStateV1 } from "./persistedState.js";
 import {
@@ -38,11 +38,14 @@ export interface BotPolicyRequest {
   rulesetVersion: string;
   botId: BotOpponent;
   seat: 0 | 1;
+  resetSession: boolean;
+  policyState: FaiPolicyStateV1 | null;
   state: PersistedStateV1;
 }
 
 export interface BotPolicyExecutionResult {
   decision: BotDecision;
+  nextPolicyState: FaiPolicyStateV1 | null;
   queueMs: number;
   computeMs: number;
   totalMs: number;
@@ -233,6 +236,7 @@ export class WorkerBotPolicyExecutor implements BotPolicyExecutor {
       const finishedAt = this.now();
       active.resolve({
         decision: response.decision,
+        nextPolicyState: response.nextPolicyState,
         queueMs: Math.max(0, (active.startedAt ?? finishedAt) - active.enqueuedAt),
         computeMs: response.computeMs,
         totalMs: Math.max(0, finishedAt - active.enqueuedAt),

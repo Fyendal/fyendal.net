@@ -12,6 +12,7 @@ import {
   chooseCindraIntentWithTrace,
 } from "./cindra-policy.js";
 import { chooseHalaIntent, chooseHalaIntentWithTrace } from "./hala-policy.js";
+import { createFaiProductionSession } from "./fai-production.js";
 import { chooseIraIntent, chooseIraIntentWithTrace } from "./ira-policy.js";
 import { chooseJarlIntent, chooseJarlIntentWithTrace } from "./jarl-policy.js";
 import type { BotPolicyInput } from "./policy.js";
@@ -20,6 +21,7 @@ import {
   bravoPresentationFor,
   briarPresentationFor,
   cindraPresentationFor,
+  faiPresentationFor,
   halaPresentationFor,
   iraPresentation,
   jarlPresentationFor,
@@ -55,7 +57,7 @@ export interface BotDefinition {
   ): PresentedDeck;
 }
 
-interface TracedPolicyDecision {
+export interface TracedPolicyDecision {
   intent: GameIntent;
   plan?: {
     checkpoints: readonly TurnPlanCheckpoint[];
@@ -65,7 +67,7 @@ interface TracedPolicyDecision {
   };
 }
 
-function botDecisionFromTrace(
+export function botDecisionFromTrace(
   decision: TracedPolicyDecision,
   includeContinuation = false,
 ): BotDecision {
@@ -113,6 +115,18 @@ export const BOT_DEFINITIONS = {
       botDecisionFromTrace(chooseCindraIntentWithTrace(input), true),
     chooseContinuationIntent: chooseCindraContinuationIntent,
     presentationFor: (opponent) => cindraPresentationFor(opponent),
+  },
+  fai: {
+    id: "fai",
+    format: "silver-age",
+    deckId: "bot-fai",
+    username: "Fai Bot",
+    deckName: "Fai",
+    chooseIntent: (input) => createFaiProductionSession(input).chooseIntent(input),
+    chooseDecision: (input) => botDecisionFromTrace(
+      createFaiProductionSession(input).chooseWithTrace(input),
+    ),
+    presentationFor: (opponent, turnOrder) => faiPresentationFor(opponent, turnOrder),
   },
   ira: {
     id: "ira",

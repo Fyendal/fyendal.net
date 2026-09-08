@@ -32,13 +32,17 @@ describe("BotOpponentModal", () => {
     expect(html.match(/aria-hidden="true"/g)).toHaveLength(4);
   });
 
-  it("offers Briar and Bravo for Silver Age", () => {
+  it("offers Fai, Briar, and Bravo for Silver Age", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>
         <BotOpponentModal format="silver-age" onSelect={vi.fn()} onClose={vi.fn()} />
       </TestI18nProvider>,
     );
 
+    expect(html).toContain("Fai");
+    expect(html).toContain("Draconic Ninja");
+    expect(html).not.toContain("Aggro / Midrange");
+    expect(html).toContain("An aggressive deck that maintains pressure through continuous attacks.");
     expect(html).toContain("Briar");
     expect(html).toContain("Elemental Runeblade");
     expect(html).toContain("Aggro");

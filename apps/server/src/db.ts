@@ -427,6 +427,14 @@ export const MIGRATIONS: Migration[] = [
     CREATE INDEX bug_reports_reporter_notification_idx
       ON bug_reports (reporter_user_id, dismissed_at, fixed_at);`,
   },
+  {
+    version: 25,
+    // Bot policy state is optional, versioned JSON owned by the bot package.
+    // Keeping the current value and each undo snapshot beside room state lets
+    // worker and Cloud Run instance replacement preserve strategy decisions.
+    sql: `ALTER TABLE rooms ADD COLUMN bot_policy_state JSONB;
+    ALTER TABLE room_history ADD COLUMN bot_policy_state JSONB;`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

@@ -20,6 +20,46 @@ function forcedIntent(legal: readonly GameIntent[]): GameIntent {
 }
 
 describe("bounded turn planning", () => {
+  it("completes a turn when the final pitch-order choice also refills the hand", () => {
+    const state = createGame({
+      decklists: [decklists.dorinthea, decklists.rhinar],
+      cards: cardData,
+      scripts,
+      seed: 80,
+      startPlayer: 0,
+    });
+    state.players[0].pitch = state.players[0].hand.splice(0, 2);
+    state.players[0].graveyard.push(...state.players[0].hand.splice(0));
+    const input = {
+      seat: 0 as const,
+      view: projectStateFor(state, 0),
+      legal: legalIntents(state, 0),
+      cards: cardData,
+      state,
+    };
+    let pitchChoices = 0;
+    const plan = planTurn(input, {
+      completeAfterForcedTurnAdvance: true,
+      chooseForced: (forced) => {
+        if (forced.view.pendingDecision?.prompt.includes("bottom of your deck")) {
+          pitchChoices++;
+        }
+        return forcedIntent(forced.legal);
+      },
+      prepareCandidates: (candidates) => candidates.filter((intent) => intent.kind === "pass"),
+      cardOpportunity: () => 0,
+      evaluateEnd: (end, _observed, root, complete) => ({
+        score: 0,
+        complete,
+        turn: end.turn,
+        drewCards: end.players[0].hand.some((card) => root.deckIds.has(card.instanceId)),
+      }),
+    });
+    expect(pitchChoices).toBeGreaterThan(0);
+    expect(plan?.line).toEqual([{ kind: "pass" }]);
+    expect(plan?.evaluation).toEqual({ score: 0, complete: true, turn: state.turn + 1, drewCards: true });
+  });
+
   it("discounts goldfish damage with a public-information block model", () => {
     const state = createGame({
       decklists: [decklists.dorinthea, decklists.rhinar],
@@ -98,6 +138,7 @@ describe("bounded turn planning", () => {
     const first = planTurn(input, config);
     const second = planTurn(input, config);
     expect(first?.nodes).toBeLessThanOrEqual(2);
+    expect(first?.evaluation.complete).toBe(false);
     expect(first?.transitions).toBeLessThanOrEqual(DEFAULT_MAX_SEARCH_TRANSITIONS);
     expect(first?.candidateTrace.rootPrepared).toBeLessThanOrEqual(2);
     expect(first?.checkpoints[0]).toEqual({
@@ -131,6 +172,7 @@ describe("bounded turn planning", () => {
       recordCheckpoints: true,
     });
     expect(plan?.transitions).toBe(1);
+    expect(plan?.evaluation.complete).toBe(false);
     expect(plan?.checkpoints[0]?.observationKey).toBe(botObservationKey(input));
   });
 

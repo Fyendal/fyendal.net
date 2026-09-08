@@ -5,6 +5,10 @@ import {
   bravoPresentationFor,
   briarPresentationFor,
   cindraPresentationFor,
+  faiAggroPresentation,
+  faiMatchupPlanFor,
+  faiMatchupPlanForHero,
+  faiPresentationFor,
   halaPresentationFor,
   iraPresentation,
   jarlPresentationFor,
@@ -127,6 +131,67 @@ describe("Bravo Fabrary matchup presentation", () => {
     ]) {
       expect(validatePresentation(pool, bravoPresentationFor(matchup), "silver-age"))
         .toMatchObject({ ok: true });
+    }
+  });
+});
+
+describe("Fai core Aggro presentation", () => {
+  it("uses the fixed Aggro equipment and excludes the Midrange flex cards", () => {
+    const presented = faiAggroPresentation();
+    expect(presented).toMatchObject({
+      weaponIds: ["HNT056", "SLY003"],
+      equipment: {
+        head: "SFA004",
+        chest: "SFA006",
+        arms: "SFA008",
+        legs: "SFA009",
+      },
+    });
+    expect(presented.deck).toHaveLength(40);
+    expect(presented.deck).not.toContain("SFA016");
+    expect(presented.deck).not.toContain("SFA035");
+  });
+
+  it("routes arcane, long-game physical, and unknown matchups deterministically", () => {
+    expect(faiMatchupPlanFor(opponent({ heroId: "SBA001" }))).toEqual({
+      strategy: "aggro",
+      equipmentPlan: "arcane-lantern",
+    });
+    expect(faiMatchupPlanFor(opponent({ heroId: "SBR001" }))).toEqual({
+      strategy: "midrange",
+      equipmentPlan: "searing-emberblade",
+    });
+    expect(faiMatchupPlanForHero("Florian", ["runeblade"])).toEqual({
+      strategy: "midrange",
+      equipmentPlan: "searing-emberblade",
+    });
+    expect(faiMatchupPlanForHero("Future Warrior", ["warrior"])).toEqual({
+      strategy: "midrange",
+      equipmentPlan: "searing-emberblade",
+    });
+    expect(faiMatchupPlanForHero("Future Guardian", ["guardian", "runeblade"])).toEqual({
+      strategy: "midrange",
+      equipmentPlan: "searing-emberblade",
+    });
+    expect(faiMatchupPlanFor(opponent())).toEqual({
+      strategy: "aggro",
+      equipmentPlan: "bloodied-oval",
+    });
+  });
+
+  it("uses legal production presentations for both turn orders", () => {
+    const pool = precon("bot-fai")!.pool;
+    for (const [heroId, weaponIds] of [
+      ["SBA001", ["HNT056", "SLY003"]],
+      ["SBR001", ["SFA002"]],
+      ["RNR001", ["HNT056", "HVY206"]],
+    ] as const) {
+      for (const turnOrder of ["first", "second"] as const) {
+        const presented = faiPresentationFor(opponent({ heroId }), turnOrder);
+        expect(presented.weaponIds).toEqual(weaponIds);
+        expect(presented.deck).toHaveLength(40);
+        expect(validatePresentation(pool, presented, "silver-age")).toMatchObject({ ok: true });
+      }
     }
   });
 });

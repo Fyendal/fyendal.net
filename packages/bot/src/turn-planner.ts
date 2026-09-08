@@ -204,6 +204,14 @@ export function evaluateTurnFuture(
 }
 
 export interface TurnPlannerConfig<Evaluation extends TurnEvaluation> {
+  /** Treat a forced transition that both advances the turn and refills the
+   * hand as a completed route before private-draw detection. Fai opts in;
+   * legacy policies retain their existing horizon-evaluation behavior. */
+  completeAfterForcedTurnAdvance?: boolean;
+  /** Optional lexicographic policy objectives. A positive result prefers left.
+   * When supplied, this replaces scalar score/scoreIntent comparison only;
+   * existing policies retain their original behavior. */
+  compareEvaluations?(left: Evaluation, right: Evaluation): number;
   chooseForced(input: BotPolicyInput): GameIntent;
   cardOpportunity(card: CardView, input: BotPolicyInput): number;
   evaluateEnd(
@@ -398,6 +406,15 @@ function advanceForced<Evaluation extends TurnEvaluation>(
     const applied = applyIntent(current, actor, intent);
     if (!applied.ok) return { kind: "terminal", state: current, complete: false };
     current = applied.state;
+    // A final cleanup choice can refill the hand and start the next turn in
+    // one transition. That completes this route; only a draw within the root
+    // turn is an unknown continuation that must remain incomplete.
+    if (
+      current.winner !== null ||
+      (config.completeAfterForcedTurnAdvance === true && current.turn !== root.turn)
+    ) {
+      return { kind: "terminal", state: current, complete: true };
+    }
     if (current.players[root.seat].hand.some((card) => root.deckIds.has(card.instanceId))) {
       // Stop before a simulated private draw can influence another action.
       return { kind: "terminal", state: current, complete: false };
@@ -587,7 +604,9 @@ function search<Evaluation extends TurnEvaluation>(
             evaluation,
           };
         })();
-    if (!best || result.score > best.score) best = result;
+    if (!best || (context.config.compareEvaluations
+      ? context.config.compareEvaluations(result.evaluation, best.evaluation) > 0
+      : result.score > best.score)) best = result;
   }
   const result = best ?? (() => {
     const evaluation = evaluateHorizon(state, context);
@@ -689,7 +708,9 @@ export function planTurn<Evaluation extends TurnEvaluation>(
             evaluation,
           };
         })();
-    if (!best || result.score > best.score) best = result;
+    if (!best || (config.compareEvaluations
+      ? config.compareEvaluations(result.evaluation, best.evaluation) > 0
+      : result.score > best.score)) best = result;
   }
   const first = best?.line[0];
   return first && best

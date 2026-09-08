@@ -18,6 +18,12 @@ export interface BotPolicyInput {
   /** Authoritative state is used only by bounded, projection-safe rollout
    * adapters. Ordinary policy scoring must continue to read `view`. */
   state?: GameState;
+  /** Own pre-shuffle main-deck multiset for local construction experiments.
+   * This is deck-building knowledge, never the live hidden deck order. */
+  knownOwnDeck?: readonly string[];
+  /** Experimental tie-break only: prefer a possible draw into an otherwise
+   * empty arsenal after equal damage and existing conversion priorities. */
+  faiDrawReserveTiebreak?: boolean;
 }
 
 export type DefendIntent = Extract<GameIntent, { kind: "defend" }>;

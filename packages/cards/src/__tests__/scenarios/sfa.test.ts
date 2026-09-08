@@ -607,6 +607,42 @@ describe("SFA — defense", () => {
 });
 
 describe("SFA — Phoenix Flame support", () => {
+  it("responds to Fire that Burns Within's third-link trigger with a free Fai return before discarding", () => {
+    const s = scenario({
+      seats: [
+        faiSeat({ hand: [RONIN, RONIN, "fire that burns within|1", RED], graveyard: [FLAME], deck: [BLUE] }),
+        { hero: "rhinar", hand: ["sigil of solace|1"] },
+      ],
+    });
+    s.play(RONIN).blockWith().settle()
+      .play(RONIN).blockWith().settle()
+      .play("fire that burns within|1", { pitch: [RED], settle: false });
+
+    // The unresolved attack is not the third Draconic link yet.
+    expect(abilityIntentsOn(s, 0, FAI).some((intent) =>
+      intent.pitchInstanceIds.length === 0 && (intent.pitchRequired ?? 0) === 0)).toBe(false);
+    s.passPriority().passPriority();
+
+    const attackId = s.state.chain.at(-1)!.attackingCard.instanceId;
+    expect(s.state.chain).toHaveLength(3);
+    expect(s.state.pendingDecision).toMatchObject({ kind: "priority-window", player: 0 });
+    expect(s.state.stack).toContainEqual(expect.objectContaining({ sourceInstanceId: attackId, triggerIndex: 0 }));
+    expect(abilityIntentsOn(s, 0, FAI)).toContainEqual(expect.objectContaining({ pitchInstanceIds: [] }));
+    s.expectResources(0, 0)
+      .activate(FAI, { pitch: [] })
+      .chooseCard(FLAME)
+      .expectInZone(0, FLAME, "hand");
+    expect(s.state.pendingDecision).toMatchObject({ chooseHook: "fire-that-burns", player: 0 });
+    s.chooseCard(FLAME)
+      .expectAttackValue(4)
+      .expectInZone(0, BLUE, "hand")
+      .expectInZone(0, FLAME, "graveyard")
+      .expectResources(0, 0)
+      .blockWith().settle()
+      .expectFinalAttack(4)
+      .expectLife(1, 10);
+  });
+
   it("Fire that Burns Within waits for its attack-layer to resolve before triggering", () => {
     const s = scenario({
       seats: [
@@ -624,9 +660,17 @@ describe("SFA — Phoenix Flame support", () => {
 
     s.passPriority().passPriority();
 
-    expect(s.state.pendingDecision).toMatchObject({ chooseHook: "fire-that-burns", player: 0 });
+    expect(s.state.pendingDecision).toMatchObject({ kind: "priority-window", player: 0 });
+    expect(s.state.pendingDecision?.chooseHook).toBeUndefined();
+    expect(s.state.stack).toContainEqual(expect.objectContaining({
+      sourceInstanceId: s.state.chain.at(-1)!.attackingCard.instanceId,
+      triggerIndex: 0,
+    }));
     expect(projectStateFor(s.state, 0).chain.at(-1)?.onStack).toBeUndefined();
     expect(projectStateFor(s.state, 0).stackContext).toBe("ATTACK STEP · TRIGGERS");
+
+    s.passPriority().passPriority();
+    expect(s.state.pendingDecision).toMatchObject({ chooseHook: "fire-that-burns", player: 0 });
   });
 
   it("Fire that Burns Within: discard a Phoenix Flame to draw and get +2{p}", () => {
@@ -647,6 +691,36 @@ describe("SFA — Phoenix Flame support", () => {
     s.play("fire that burns within|1", { pitch: [BLUE] })
       .chooseOption("pass")
       .expectAttackValue(2);
+  });
+
+  it("Fire that Burns Within resolves without a discard choice when no Phoenix Flame is available", () => {
+    const s = scenario({
+      seats: [
+        faiSeat({ hand: ["fire that burns within|1", BLUE], deck: [BLUE] }),
+        { hero: "rhinar", hand: [] },
+      ],
+    });
+    s.play("fire that burns within|1", { pitch: [BLUE] }).expectAttackValue(2);
+    expect(s.state.pendingDecision).toMatchObject({ kind: "defend" });
+    expect(s.state.players[0]!.hand).toHaveLength(0);
+    s.expectInZone(0, BLUE, "deck").blockWith().settle().expectFinalAttack(2);
+  });
+
+  it("Fire that Burns Within neither triggers again nor buffs the next attack on the chain", () => {
+    const s = scenario({
+      seats: [
+        faiSeat({ hand: ["fire that burns within|1", FLAME, RONIN, BLUE], deck: [FLAME] }),
+        { hero: "rhinar", hand: [] },
+      ],
+    });
+    s.play("fire that burns within|1", { pitch: [BLUE] })
+      .chooseCard(FLAME).expectAttackValue(4)
+      .blockWith().settle()
+      .play(RONIN).expectAttackValue(3)
+      .expectInZone(0, FLAME, "hand");
+    expect(s.state.chain).toHaveLength(2);
+    expect(s.state.pendingDecision).toMatchObject({ kind: "defend" });
+    s.blockWith().settle().expectFinalAttack(3).expectLife(1, 13);
   });
 
   it("Flamecall Awakening searches a Phoenix Flame after another red card", () => {

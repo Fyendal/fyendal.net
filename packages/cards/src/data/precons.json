@@ -667,6 +667,44 @@
             ]
         }
     },
+    "_comment_bot_fai": "Source: https://fabrary.net/decks/01M1FAKS2K3ZG1P7BHQ0X0YTGA and its Silver Age matchup guide. The pool supports the production Aggro and Midrange presentations.",
+    "bot-fai": {
+        "name": "Fai",
+        "format": "silver-age",
+        "botOnly": true,
+        "pool": {
+            "heroId": "SFA001",
+            "weaponIds": ["SLY003", "HVY206", "HNT056", "SFA002"],
+            "equipmentPool": ["SBA004", "SFA006", "SFA004", "SFA009", "SFA008"],
+            "deck": [
+                "SFA011", "SFA011",
+                "SFA012", "SFA012",
+                "HNT064", "HNT064",
+                "HNT151", "HNT151",
+                "SFA013", "SFA013",
+                "SFA014", "SFA014",
+                "SFA015", "SFA015",
+                "TCC086", "TCC086",
+                "SFA018", "SFA018",
+                "SFA019", "SFA019",
+                "UPR069", "UPR069",
+                "HNT153",
+                "SFA021",
+                "AAZ012", "AAZ012",
+                "SFA027", "SFA027",
+                "SFA022", "SFA022",
+                "SFA023", "SFA023",
+                "SEA218", "SEA218",
+                "SFA029", "SFA029",
+                "HNT084", "HNT084",
+                "CRU073", "CRU073"
+            ],
+            "sideboard": [
+                "SFA016", "SFA016",
+                "SFA035", "SFA035"
+            ]
+        }
+    },
     "bot-cindra-head-jabs": {
         "name": "Art of the Dragon: Head Jab",
         "format": "cc",

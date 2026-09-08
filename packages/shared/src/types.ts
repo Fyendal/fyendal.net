@@ -8,7 +8,7 @@ export type HeroId = "dorinthea" | "rhinar";
 export type Format = "classic-battles" | "cc" | "silver-age";
 
 /** Stable identities for the supported practice opponents. */
-export type BotOpponent = "bravo" | "briar" | "cindra" | "ira" | "hala" | "jarl";
+export type BotOpponent = "bravo" | "briar" | "cindra" | "fai" | "ira" | "hala" | "jarl";
 
 /** Numeric resources produced when pitched. Colored cards use their red/
  * yellow/blue/purple color value (1/2/3/4). */

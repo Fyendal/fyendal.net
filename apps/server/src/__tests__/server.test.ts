@@ -571,6 +571,38 @@ describe("server rooms over websocket", () => {
     a.ws.close();
   });
 
+  it("creates the selected Silver Age Fai bot room", async () => {
+    const a = await authedClient();
+    a.sendMsg({
+      type: "create-bot-room",
+      format: "silver-age",
+      deckId: "precon-sba",
+      bot: "fai",
+    });
+    await a.next((message) => message.type === "room-created");
+    const prep = await a.next(
+      (message) => message.type === "prep-state" && message.prep.seats[1]?.username === "Fai Bot",
+    );
+    expect(prep).toMatchObject({
+      type: "prep-state",
+      prep: {
+        format: "silver-age",
+        botGame: true,
+        seats: [
+          expect.anything(),
+          {
+            username: "Fai Bot",
+            heroName: "Fai",
+            connected: true,
+          },
+        ],
+      },
+    });
+    a.sendMsg({ type: "leave-room", endGame: true });
+    expect(await a.next((message) => message.type === "left")).toEqual({ type: "left" });
+    a.ws.close();
+  });
+
   it("reloads and broadcasts the authoritative room after a committed mutation", async () => {
     const a = await authedClient();
     const b = await authedClient();

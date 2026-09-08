@@ -18,7 +18,7 @@ const opponent: Decklist = {
 
 describe("bot registry", () => {
   it("registers every bot with unique stable identity and deck mappings", () => {
-    expect(botDefinitions).toHaveLength(6);
+    expect(botDefinitions).toHaveLength(7);
     expect(new Set(botDefinitions.map(({ id }) => id)).size).toBe(botDefinitions.length);
     expect(new Set(botDefinitions.map(({ deckId }) => deckId)).size).toBe(botDefinitions.length);
     expect(Object.keys(BOT_DEFINITIONS).sort()).toEqual(
@@ -34,6 +34,15 @@ describe("bot registry", () => {
     }
     expect(botDefinition("unknown")).toBeUndefined();
     expect(botDefinitionForDeckId("unknown")).toBeUndefined();
+  });
+
+  it("exposes Fai to production", () => {
+    expect(botDefinition("fai")).toMatchObject({
+      deckId: "bot-fai",
+      format: "silver-age",
+      username: "Fai Bot",
+      deckName: "Fai",
+    });
   });
 
   it("produces a legal presentation for both possible turn orders", () => {
@@ -71,7 +80,11 @@ describe("bot registry", () => {
       altered.cardsRef = cardData;
       altered.scriptsRef = scripts;
       const hidden = altered.players[1]!;
-      [hidden.hand[0], hidden.deck[0]] = [hidden.deck[0]!, hidden.hand[0]!];
+      if (hidden.hand.length > 0) {
+        [hidden.hand[0], hidden.deck[0]] = [hidden.deck[0]!, hidden.hand[0]!];
+      } else {
+        [hidden.deck[0], hidden.deck[1]] = [hidden.deck[1]!, hidden.deck[0]!];
+      }
 
       const firstView = projectStateFor(state, 0);
       const alteredView = projectStateFor(altered, 0);

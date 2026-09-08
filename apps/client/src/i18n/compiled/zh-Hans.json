@@ -11003,6 +11003,16 @@
       "value": "Fire that Burns Within：弃置一张凤凰烈焰以抽一张牌，并使力量 +2？"
     }
   ],
+  "card.sfa.flame.discard.draw.trigger": [
+    {
+      "type": 0,
+      "value": "弃置一张凤凰烈焰以抽一张牌，并使力量 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    }
+  ],
   "card.sfa.flame.return": [
     {
       "type": 0,
@@ -20824,6 +20834,12 @@
     {
       "type": 0,
       "value": "以持续施压为目标的高速红线牌组。"
+    }
+  ],
+  "lobby.bot.fai.description": [
+    {
+      "type": 0,
+      "value": "以连续攻击持续施压的快攻牌组。"
     }
   ],
   "lobby.bot.hala.description": [

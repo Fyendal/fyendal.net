@@ -2530,7 +2530,9 @@ describe("combat", () => {
     if (!r.ok) return;
     s = r.state;
     expect(player(s, 1).banish.every((c) => c.intimidated !== true)).toBe(true);
-    expect(player(s, 1).hand.some((c) => c.instanceId === banishedId && !c.faceDown)).toBe(true);
+    const returned = player(s, 1).hand.find((c) => c.instanceId === banishedId);
+    expect(returned).toBeDefined();
+    expect(returned).not.toHaveProperty("faceDown");
   });
 
   it("blade break equipment is destroyed when the combat chain closes", () => {

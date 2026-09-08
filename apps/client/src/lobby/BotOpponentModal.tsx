@@ -52,6 +52,14 @@ const BOTS: Readonly<Record<ConstructedFormat, readonly BotOption[]>> = {
   ],
   "silver-age": [
     {
+      id: "fai",
+      name: "Fai",
+      title: "Draconic Ninja",
+      heroName: "Fai",
+      deckType: "aggro",
+      descriptionId: "lobby.bot.fai.description",
+    },
+    {
       id: "briar",
       name: "Briar",
       title: "Elemental Runeblade",

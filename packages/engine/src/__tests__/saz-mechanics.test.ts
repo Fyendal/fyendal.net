@@ -235,6 +235,7 @@ describe("putIntoArsenal", () => {
     next = apply(next, next.priorityPlayer, { kind: "pass" });
     const arrow = player(next, 0).arsenal.find((c) => c.cardId === "ARROW_ETB");
     expect(arrow).toBeTruthy();
+    expect(arrow).not.toHaveProperty("faceDown");
     expect(arrow!.tempPower).toBe(2); // the card's own onEnterArsenal
     expect(arrow!.counters?.aim).toBe(1); // the quiver's onEnterArsenal
     expect(player(next, 0).deck.some((c) => c.cardId === "ARROW_ETB")).toBe(false);

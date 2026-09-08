@@ -5,9 +5,121 @@ import { briarMatchupForHeroName } from "./briar-strategy.js";
 const BRIAR_BOT_DECK_ID = "bot-briar-broccoli";
 const BRAVO_BOT_DECK_ID = "bot-bravo-flarvo";
 const CINDRA_BOT_DECK_ID = "bot-cindra-head-jabs";
+// Stable pool ID: keep historical deck references valid after the Aggro rename.
+const FAI_BOT_DECK_ID = "bot-fai";
 const HALA_MASTERCLASS_PRECON_ID = "precon-hala-masterclass";
 const IRA_PRECON_ID = "precon-asr";
 const JARL_BOT_DECK_ID = "bot-jarl";
+
+const FAI_NON_AGGRO_FLEX_IDS = new Set([
+  "SFA016", // Fire that Burns Within (red)
+  "SFA035", // Energy Potion (blue)
+]);
+
+/**
+ * Present only the published core Aggro plan. This intentionally ignores the
+ * opponent and turn order. The matchup plan chooses between Arcane Lantern
+ * and Bloodied Oval.
+ * Source: https://fabrary.net/decks/01M1FAKS2K3ZG1P7BHQ0X0YTGA
+ */
+export type FaiAggroOffHand = "lantern" | "shield";
+export function faiAggroPresentation(offHand: FaiAggroOffHand = "lantern"): PresentedDeck {
+  const registered = precon(FAI_BOT_DECK_ID);
+  if (!registered || registered.format !== "silver-age" || registered.botOnly !== true) {
+    throw new Error("Fai Aggro bot deck is not registered");
+  }
+  const deck = registered.pool.deck.filter((id) => !FAI_NON_AGGRO_FLEX_IDS.has(id));
+  if (deck.length !== 40) {
+    throw new Error(`Fai Aggro presentation has ${deck.length} cards, expected 40`);
+  }
+  return {
+    weaponIds: ["HNT056", offHand === "lantern" ? "SLY003" : "HVY206"],
+    equipment: {
+      head: "SFA004",
+      chest: "SFA006",
+      arms: "SFA008",
+      legs: "SFA009",
+    },
+    deck,
+  };
+}
+
+export type FaiStrategy = "aggro" | "midrange";
+
+export interface FaiMatchupPlan {
+  strategy: FaiStrategy;
+  equipmentPlan: "arcane-lantern" | "bloodied-oval" | "searing-emberblade";
+}
+
+const FAI_MIDRANGE_HEROES = [
+  "bravo",
+  "enigma",
+  "florian",
+  "lexi",
+  "nuu",
+  "oldhim",
+] as const;
+
+/**
+ * Simplified production routing distilled from the matchup guide.
+ * Guardians, Warriors, and the guide's known long-game matchups use Midrange.
+ * That check precedes the general arcane rule so hybrid Guardians and Florian
+ * remain on the two-handed Searing Emberblade plan. Other Wizards and
+ * Runeblades use Aggro with Arcane Lantern; every unknown matchup falls back
+ * to Aggro + shield.
+ * Guide reviewed 2026-09-06:
+ * https://fabrary.net/decks/01M1FAKS2K3ZG1P7BHQ0X0YTGA
+ */
+export function faiMatchupPlanForHero(
+  heroName: string,
+  heroClasses: readonly string[] = [],
+): FaiMatchupPlan {
+  const name = heroName.trim().toLowerCase();
+  const classes = heroClasses.map((value) => value.trim().toLowerCase());
+  if (classes.includes("guardian") || classes.includes("warrior") ||
+    FAI_MIDRANGE_HEROES.some((hero) => name.includes(hero))) {
+    return { strategy: "midrange", equipmentPlan: "searing-emberblade" };
+  }
+  if (classes.includes("wizard") || classes.includes("runeblade")) {
+    return { strategy: "aggro", equipmentPlan: "arcane-lantern" };
+  }
+  return { strategy: "aggro", equipmentPlan: "bloodied-oval" };
+}
+
+export function faiMatchupPlanFor(
+  opponent: Decklist,
+  cards: Readonly<Record<string, CardData>> = cardData,
+): FaiMatchupPlan {
+  const hero = cards[opponent.heroId];
+  return faiMatchupPlanForHero(hero?.name ?? "", hero?.classes ?? []);
+}
+
+/** User-reviewed local Midrange + Helm configuration. Same registered pool. */
+export function faiMidrangePresentation(): PresentedDeck {
+  const presented = faiAggroPresentation("shield");
+  for (const id of ["TCC086", "HNT153", "SEA218", "SEA218"]) {
+    const index = presented.deck.indexOf(id);
+    if (index < 0) throw new Error(`missing Fai Midrange sideboard slot: ${id}`);
+    presented.deck.splice(index, 1);
+  }
+  presented.deck.push("SFA016", "SFA016", "SFA035", "SFA035");
+  presented.weaponIds = ["SFA002"];
+  presented.equipment.head = "SBA004";
+  return presented;
+}
+
+/** Production presentation for the single website-visible Fai opponent. */
+export function faiPresentationFor(
+  opponent: Decklist,
+  _turnOrder: "first" | "second" = "first",
+  cards: Readonly<Record<string, CardData>> = cardData,
+): PresentedDeck {
+  const plan = faiMatchupPlanFor(opponent, cards);
+  if (plan.strategy === "midrange") return faiMidrangePresentation();
+  return faiAggroPresentation(
+    plan.equipmentPlan === "arcane-lantern" ? "lantern" : "shield",
+  );
+}
 
 const BRAVO_ARCANE_POLARITY = ["SBA030", "SBA030"];
 const BRAVO_RED_CHOKESLAM = ["SBR016", "SBR016"];

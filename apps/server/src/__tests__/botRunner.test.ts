@@ -1,5 +1,7 @@
 import {
+  botDefinition,
   botObservationKey,
+  initialFaiAggroPolicyState,
   isCleanActionDecision,
   type BotDefinition,
   type BotPolicyInput,
@@ -136,6 +138,7 @@ describe("BotRunner reliability", () => {
     runner.stop();
     finish({
       decision: { intent: pass },
+      nextPolicyState: null,
       queueMs: 0,
       computeMs: 1,
       totalMs: 1,
@@ -146,6 +149,108 @@ describe("BotRunner reliability", () => {
     await Promise.resolve();
     expect(applyBotIntent).not.toHaveBeenCalled();
     vi.useRealTimers();
+  });
+
+  it("tells the worker to reset Fai-style session memory after Undo", async () => {
+    vi.useFakeTimers();
+    const room = clonedRunnerRoom(true);
+    room.lastTransition = {
+      fromVersion: room.version - 1,
+      kind: "replace",
+      events: [],
+    };
+    const message = stateMessage(room, 1);
+    if (!message || message.type !== "state") throw new Error("expected state message");
+    const pass = message.legal.find((intent) => intent.kind === "pass")!;
+    const policyExecutor = {
+      decide: vi.fn().mockResolvedValue({
+        decision: { intent: pass },
+        nextPolicyState: null,
+        queueMs: 0,
+        computeMs: 1,
+        totalMs: 1,
+        queueDepth: 1,
+        generation: 1,
+      }),
+      stop: vi.fn(),
+    } satisfies BotPolicyExecutor;
+    const runner = new BotRunner({
+      rooms: {
+        getRoom: vi.fn().mockResolvedValue(room),
+        applyBotIntent: vi.fn().mockResolvedValue({ ok: true, version: room.version + 1 }),
+      } as unknown as PgRoomStore,
+      afterCommit: vi.fn().mockResolvedValue(undefined),
+      policyExecutor,
+    });
+    try {
+      runner.schedule(room.code, 0);
+      await vi.advanceTimersByTimeAsync(0);
+      expect(policyExecutor.decide).toHaveBeenCalledWith(
+        expect.objectContaining({ resetSession: true }),
+      );
+    } finally {
+      runner.stop();
+      vi.useRealTimers();
+    }
+  });
+
+  it("passes committed policy state to the worker and atomically applies its successor", async () => {
+    vi.useFakeTimers();
+    const room = clonedRunnerRoom(true);
+    const currentPolicyState = {
+      ...initialFaiAggroPolicyState(),
+      memory: { ...initialFaiAggroPolicyState().memory, turn: 1 },
+    };
+    const nextPolicyState = {
+      ...initialFaiAggroPolicyState(),
+      memory: { ...initialFaiAggroPolicyState().memory, turn: 2 },
+    };
+    room.botPolicyState = currentPolicyState;
+    const message = stateMessage(room, 1);
+    if (!message || message.type !== "state") throw new Error("expected state message");
+    const pass = message.legal.find((intent) => intent.kind === "pass")!;
+    const policyExecutor = {
+      decide: vi.fn().mockResolvedValue({
+        decision: { intent: pass },
+        nextPolicyState,
+        queueMs: 0,
+        computeMs: 1,
+        totalMs: 1,
+        queueDepth: 1,
+        generation: 1,
+      }),
+      stop: vi.fn(),
+    } satisfies BotPolicyExecutor;
+    const applyBotIntent = vi.fn().mockResolvedValue({
+      ok: true,
+      version: room.version + 1,
+    });
+    const runner = new BotRunner({
+      rooms: {
+        getRoom: vi.fn().mockResolvedValue(room),
+        applyBotIntent,
+      } as unknown as PgRoomStore,
+      afterCommit: vi.fn().mockResolvedValue(undefined),
+      policyExecutor,
+      definitionForDeckId: () => botDefinition("fai"),
+    });
+    try {
+      runner.schedule(room.code, 0);
+      await vi.advanceTimersByTimeAsync(0);
+      expect(policyExecutor.decide).toHaveBeenCalledWith(expect.objectContaining({
+        botId: "fai",
+        policyState: currentPolicyState,
+      }));
+      expect(applyBotIntent).toHaveBeenCalledWith(
+        room.code,
+        room.version,
+        pass,
+        nextPolicyState,
+      );
+    } finally {
+      runner.stop();
+      vi.useRealTimers();
+    }
   });
 
   it("stages the strongest visible defender before accepting fallback damage", () => {
@@ -186,6 +291,52 @@ describe("BotRunner reliability", () => {
         { kind: "stage-defenders", instanceIds: [2] },
       ],
     })).toEqual({ kind: "stage-defenders", instanceIds: [2] });
+  });
+
+  it("does not sacrifice zero-defense Hope Merchant's Hood in fallback defense", () => {
+    const hood = { instanceId: 7, cardId: "hood", owner: 1 as const, defense: 0 };
+    const inputView = {
+      pendingDecision: {
+        player: 1,
+        kind: "defend" as const,
+        prompt: "Choose defending cards",
+      },
+      chain: [{
+        attackingCard: { instanceId: 99, cardId: "", owner: 0 },
+        defendingCards: [],
+        attackValue: 4,
+        defenseValue: 0,
+        damage: 4,
+        resolved: false,
+        reactions: [],
+      }],
+      players: [
+        {} as BotPolicyInput["view"]["players"][0],
+        {
+          hand: [],
+          arsenal: [],
+          equipment: { head: hood },
+        } as unknown as BotPolicyInput["view"]["players"][1],
+      ],
+    } as unknown as BotPolicyInput["view"];
+
+    expect(fallbackBotIntent({
+      seat: 1,
+      view: inputView,
+      cards: {
+        hood: {
+          id: "hood",
+          name: "Hope Merchant's Hood",
+          cardType: "equipment",
+          defense: 0,
+          text: "",
+        },
+      },
+      legal: [
+        { kind: "defend", instanceIds: [] },
+        { kind: "stage-defenders", instanceIds: [hood.instanceId] },
+      ],
+    })).toEqual({ kind: "defend", instanceIds: [] });
   });
 
   it("commits staged defense instead of exceeding a non-block defender limit", () => {
@@ -539,6 +690,7 @@ describe("BotRunner reliability", () => {
     const policyExecutor = {
       decide: vi.fn().mockResolvedValue({
         decision: { intent: pass },
+        nextPolicyState: null,
         queueMs: 0,
         computeMs: 1_000,
         totalMs: 1_000,
@@ -682,6 +834,7 @@ describe("BotRunner reliability", () => {
     const policyExecutor = {
       decide: vi.fn(async () => ({
         decision: workerDecisions[forcedIndex++]!,
+        nextPolicyState: null,
         queueMs: 1,
         computeMs: 10,
         totalMs: 11,

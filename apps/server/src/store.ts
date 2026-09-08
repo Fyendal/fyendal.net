@@ -23,6 +23,8 @@ import {
 import {
   botDefinition,
   botDefinitionForDeckId,
+  decodeFaiPolicyState,
+  type FaiPolicyStateV1,
 } from "@fyendal/bot";
 import {
   actionCandidates,
@@ -172,6 +174,8 @@ export interface RoomRow {
   /** Latest committed semantic edge. Its fromVersion fences reconnects and
    * coalesced multi-instance refreshes from replaying a partial path. */
   lastTransition: StoredRoomTransition | null;
+  /** Optional bot-owned strategy facts committed with the same room version. */
+  botPolicyState: FaiPolicyStateV1 | null;
 }
 
 export interface StoredRoomTransition {
@@ -358,6 +362,7 @@ type RawRoomRow = {
   is_private: boolean;
   allow_future_cards: boolean;
   last_transition: unknown;
+  bot_policy_state: unknown;
 };
 
 function dbObject(value: unknown, code: string, path: string): Record<string, unknown> {
@@ -372,6 +377,17 @@ function dbSafeInteger(value: unknown, code: string, path: string): number {
   if (!Number.isSafeInteger(decoded)) {
     throw new CorruptRoomError(code, path, "expected a safe integer");
   }
+  return decoded;
+}
+
+function decodeStoredBotPolicyState(
+  value: unknown,
+  code: string,
+  path: string,
+): FaiPolicyStateV1 | null {
+  if (value === null || value === undefined) return null;
+  const decoded = decodeFaiPolicyState(value);
+  if (!decoded) throw new CorruptRoomError(code, path, "invalid bot policy state");
   return decoded;
 }
 
@@ -568,6 +584,7 @@ function decodeRawRoomRow(value: unknown): RawRoomRow {
     is_private: row.is_private,
     allow_future_cards: row.allow_future_cards,
     last_transition: row.last_transition,
+    bot_policy_state: row.bot_policy_state,
   };
 }
 
@@ -661,6 +678,11 @@ function toRoom(value: unknown): RoomRow {
     isPrivate: r.is_private,
     allowFutureCards: r.allow_future_cards,
     lastTransition: decodeStoredTransition(r.last_transition, r.code, "row.last_transition"),
+    botPolicyState: decodeStoredBotPolicyState(
+      r.bot_policy_state,
+      r.code,
+      "row.bot_policy_state",
+    ),
   };
 }
 
@@ -747,6 +769,7 @@ function maybeStart(room: RoomRow): boolean {
   const startPlayer = room.prep?.startPlayer;
   if (startPlayer == null) return false;
   room.state = createGame(gameConfig([a.presented, b.presented], startPlayer));
+  room.botPolicyState = null;
   // both seats count as active from the first turn (idle-claim baseline)
   a.lastActionAt = Date.now();
   b.lastActionAt = a.lastActionAt;
@@ -779,7 +802,7 @@ export class PgRoomStore {
        )
        SELECT r.code, r.format, r.spectators, r.state, r.prep, r.ruleset_version,
               r.version, r.created_at, r.gc_at, r.prep_deadline_at, r.is_private, r.allow_future_cards,
-              r.last_transition,
+              r.last_transition, r.bot_policy_state,
               COALESCE(seat_data.seat_rows, '[]'::json) AS seat_rows,
               COALESCE(presence_data.presence_rows, '[]'::json) AS presence_rows
        FROM rooms AS r
@@ -827,8 +850,9 @@ export class PgRoomStore {
     const { status, winner } = lifecycle(room);
     const { rowCount } = await db.query(
       `UPDATE rooms SET spectators=$2, state=$3, gc_at=$4, prep=$5,
-         status=$6, winner=$7, prep_deadline_at=$8, last_transition=$9, version=version+1
-       WHERE code=$1 AND version=$10`,
+         status=$6, winner=$7, prep_deadline_at=$8, last_transition=$9,
+         bot_policy_state=$10, version=version+1
+       WHERE code=$1 AND version=$11`,
       [
         room.code,
         JSON.stringify(dehydrateMembers(room.spectators)),
@@ -839,6 +863,7 @@ export class PgRoomStore {
         winner,
         room.prepDeadlineAt,
         room.lastTransition ? JSON.stringify(room.lastTransition) : null,
+        room.botPolicyState ? JSON.stringify(room.botPolicyState) : null,
         room.version,
       ],
     );
@@ -954,18 +979,20 @@ export class PgRoomStore {
     db: Queryable,
     room: RoomRow,
     snapshot: GameState,
+    botPolicyState: FaiPolicyStateV1 | null,
   ): Promise<void> {
     const metadata = historyMetadataFromState(snapshot);
     await db.query(
       `INSERT INTO room_history
-        (room_code, version, state, snapshot_turn, undo_seat)
-       VALUES ($1, $2, $3, $4, $5)`,
+        (room_code, version, state, snapshot_turn, undo_seat, bot_policy_state)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
       [
         room.code,
         room.version + 1,
         JSON.stringify(dehydrateState(snapshot, room.rulesetVersion)),
         metadata.snapshotTurn,
         metadata.undoSeat,
+        botPolicyState ? JSON.stringify(botPolicyState) : null,
       ],
     );
     const history = await this.loadHistoryMetadata(db, room.code, room.rulesetVersion);
@@ -1168,6 +1195,7 @@ export class PgRoomStore {
         const preferencesBefore = room.seats.map((seat) => seat
           ? [seat.priorityMode ?? "always-pause", seat.runechantSkip ?? false] as const
           : null);
+        const botPolicyStateBefore = room.botPolicyState;
         const out = await fn(room);
         if ("error" in out) return { ok: false as const, error: out.error };
         const fullSeatWrites = new Set(
@@ -1208,7 +1236,9 @@ export class PgRoomStore {
             await appendClusterEvent(db, { type: "queue-changed" });
           }
         }
-        if (out.snapshot) await this.saveSnapshot(db, room, out.snapshot);
+        if (out.snapshot) {
+          await this.saveSnapshot(db, room, out.snapshot, botPolicyStateBefore);
+        }
         let replayFinalizationId: string | undefined;
         if (out.replay?.kind === "start" && out.room.state) {
           const participants = ([0, 1] as const).map((seat) => {
@@ -1494,6 +1524,7 @@ export class PgRoomStore {
           isPrivate: false,
           allowFutureCards: choice.allowFutureCards,
           lastTransition: null,
+          botPolicyState: null,
         };
         await db.query(
           `INSERT INTO rooms
@@ -1624,6 +1655,7 @@ export class PgRoomStore {
           isPrivate: false,
           allowFutureCards: choice.allowFutureCards,
           lastTransition: null,
+          botPolicyState: null,
         };
         await db.query(
           `INSERT INTO rooms
@@ -2589,6 +2621,7 @@ export class PgRoomStore {
     code: string,
     expectedVersion: number,
     intent: GameIntent,
+    nextPolicyState: FaiPolicyStateV1 | null = null,
   ): Promise<{ ok: true; version: number; replayFinalizationId?: string } | { ok: false; error: string }> {
     const r = await this.withRetry(code.toUpperCase(), (room) => {
       if (room.version !== expectedVersion) return { error: "stale bot observation" };
@@ -2601,6 +2634,7 @@ export class PgRoomStore {
       if (!res.ok) return { error: res.error };
       const snapshot = intent.kind === "stage-defenders" ? undefined : room.state;
       room.state = res.state;
+      room.botPolicyState = nextPolicyState;
       const events = [...res.events];
       this.applyServerShortcuts(room, events);
       room.lastTransition = { fromVersion: room.version, kind: "forward", events };
@@ -2692,13 +2726,19 @@ export class PgRoomStore {
           return { ok: false as const, error: `beginning of ${label} turn is not in undo history` };
         }
         const { rows: selectedRows } = await db.query(
-          "SELECT state FROM room_history WHERE room_code = $1 AND version = $2",
+          `SELECT state, bot_policy_state FROM room_history
+           WHERE room_code = $1 AND version = $2`,
           [upper, selected.version],
         );
         if (!selectedRows.length) throw VERSION_CONFLICT;
         const selectedRow = dbObject(selectedRows[0], upper, "selectedHistory");
         const prev = hydrateState(selectedRow.state, upper, room.rulesetVersion);
         if (!prev) throw new CorruptRoomError(upper, "selectedHistory.state", "expected game state");
+        const previousBotPolicyState = decodeStoredBotPolicyState(
+          selectedRow.bot_policy_state,
+          upper,
+          "selectedHistory.bot_policy_state",
+        );
         const undoText = target === "last-action"
           ? "⤺ the last action was undone"
           : `⤺ returned to the beginning of turn ${prev.turn}`;
@@ -2715,6 +2755,7 @@ export class PgRoomStore {
           ...prev,
           ...appendSemanticGameLog(prev, undoPayload),
         };
+        room.botPolicyState = previousBotPolicyState;
         // The restored snapshot can hold an empty window for a seat that
         // opted into auto-pass after the snapshot was written; pass it out
         // in this commit rather than stranding the seat until a resend.

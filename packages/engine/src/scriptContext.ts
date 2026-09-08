@@ -2160,7 +2160,8 @@ export function makeCtx(
         removeFromArray(owner.hand, instanceId) ?? removeFromArray(owner.deck, instanceId) ??
         removeFromArray(owner.graveyard, instanceId);
       if (!card) return false;
-      card.faceDown = opts?.faceUp === false ? true : undefined;
+      if (opts?.faceUp === false) card.faceDown = true;
+      else delete card.faceDown;
       card.arsenalSlot = nextArsenalSlot(owner);
       owner.arsenal.push(card);
       if (fromGraveyard) {
