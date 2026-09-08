@@ -22,7 +22,9 @@ export const lev: Record<string, CardScript> = {
       if (!played) return;
       const top = ctx.player(ctx.seat).deck[0];
       if (!top || !ctx.banish(top.instanceId) || !isSixPlus(ctx, top)) return;
-      if (ctx.link?.attackingCard.instanceId === played.instanceId) ctx.setFlag("link", "dominate", true);
+      if (ctx.link?.attackingCard.instanceId === played.instanceId) {
+        ctx.addModifier({ scope: "chain-link", dominate: true });
+      }
       if (lessonCounter(ctx) >= 2) mentorSpecializationPayoff(ctx, SEARCH_HOOK);
       },
     }],

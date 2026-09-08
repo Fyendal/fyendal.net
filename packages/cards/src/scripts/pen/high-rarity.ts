@@ -391,7 +391,7 @@ export const penHighRarity: Record<string, CardScript> = {
   }, onAttackDeclared(ctx) { if (ctx.getFlag("link", "fromBanish") === true) ctx.grantGoAgain(); } }),
   "elemental strike|1": {
     additionalCost(ctx) { const hand = ctx.player(ctx.seat).hand; if (hand.length) ctx.requestCardChoice("elemental-banish", decisionPrompt("Banish a card", "card.pen.card.banish"), hand.map((card) => card.instanceId)); },
-    onChoose(ctx, hook, option) { if (hook !== "elemental-banish") return; const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option)); if (!card || !ctx.banish(card.instanceId)) return; if (has(ctx, card, "earth")) ctx.addModifier({ scope: "chain-link", attack: 2 }); if (has(ctx, card, "lightning")) ctx.grantGoAgain(); if (has(ctx, card, "ice")) ctx.setFlag("link", "dominate", true); },
+    onChoose(ctx, hook, option) { if (hook !== "elemental-banish") return; const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option)); if (!card || !ctx.banish(card.instanceId)) return; if (has(ctx, card, "earth")) ctx.addModifier({ scope: "chain-link", attack: 2 }); if (has(ctx, card, "lightning")) ctx.grantGoAgain(); if (has(ctx, card, "ice")) ctx.addModifier({ scope: "chain-link", dominate: true }); },
   },
   "crown of everbloom|0": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true, canActivate: (ctx) => ctx.player(ctx.seat).arsenal.length > 0, onActivate(ctx) {
     const card = ctx.player(ctx.seat).arsenal[0]; if (card && ctx.putOnDeckBottom(card.instanceId)) { ctx.drawCards(ctx.seat, 1); ctx.createToken(SPELLBANE); }

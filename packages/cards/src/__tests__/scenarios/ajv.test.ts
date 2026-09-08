@@ -1,7 +1,31 @@
 import { describe, expect, it } from "vitest";
+import { projectStateFor } from "@fyendal/engine";
 import { scenario } from "../harness.js";
 
 describe("AJV — Jarl", () => {
+  it("Gauntlets of the Boreal Domain forgets elements pitched for an earlier activation", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["ELE114", "IAR260", "AJV011", "SEA258"],
+          equipment: { arms: "AJV006" },
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+
+    g.activate("AJV006", { pitch: ["ELE114"] })
+      .endTurn()
+      .endTurn()
+      .activate("AJV006", { pitch: ["IAR260"] })
+      .play("AJV011", { pitch: ["SEA258"] });
+
+    const mangle = projectStateFor(g.state, 0).chain.at(-1);
+    expect(mangle?.attackValue).toBe(10);
+    expect(mangle?.dominate).toBe(false);
+  });
+
   it("Crumble to Eternity can mark off-hand equipment in a weapon zone", () => {
     const g = scenario({
       seats: [

@@ -929,7 +929,6 @@ describe("IAR cards", () => {
 
     g.activate("ROS057")
       .play("IAR260", { pitch: ["AJV017"] });
-    expect(g.state.chain.at(-1)?.flags.dominate).toBe(true);
     expect(projectStateFor(g.state, 1).chain.at(-1)?.dominate).toBe(true);
 
     const bothHandCards = g.state.players[1]!.hand.map((card) => card.instanceId);

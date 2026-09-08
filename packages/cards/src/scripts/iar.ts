@@ -2289,7 +2289,9 @@ export const iar: Record<string, CardScript> = {
       if (paidWithType(ctx, paid, "ice")) ctx.setCounter("iarIceBond", 1);
     },
     onAttackDeclared(ctx) {
-      if (ctx.getCounter("iarIceBond") > 0) ctx.setFlag("link", "dominate", true);
+      if (ctx.getCounter("iarIceBond") > 0) {
+        ctx.addModifier({ scope: "chain-link", dominate: true });
+      }
     },
     canTriggerOnHit: selfHitsHero,
     onHit(ctx) {
