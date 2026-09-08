@@ -191,6 +191,34 @@ describe("GameBoard spectator presentation", () => {
 });
 
 describe("GameBoard pending interactions", () => {
+  it("keeps a disabled Pass action in both HUD layouts while waiting on the opponent", () => {
+    vi.stubGlobal("localStorage", {
+      getItem: () => null,
+      setItem: () => undefined,
+      removeItem: () => undefined,
+    });
+
+    gameStore.state = {
+      ...liveState(false),
+      view: {
+        ...interactiveView(),
+        activePlayer: 1,
+        priorityPlayer: 1,
+      },
+      legal: [],
+      actionCandidates: [],
+    };
+
+    const html = renderToStaticMarkup(
+      <TestI18nProvider><GameBoard /></TestI18nProvider>,
+    );
+
+    expect(html.match(/class="btn-primary btn-pass shortcut-button"[^>]*disabled=""/g))
+      .toHaveLength(2);
+    expect(html.match(/title="Pass \(Space\)"/g)).toHaveLength(2);
+    expect(html).toContain("mobile-primary-action");
+  });
+
   it("locks playable hand cards and board or combat-chain abilities with the primary action", () => {
     vi.stubGlobal("localStorage", {
       getItem: () => null,

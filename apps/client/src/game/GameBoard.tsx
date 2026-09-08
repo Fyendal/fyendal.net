@@ -744,15 +744,19 @@ export function GameBoard() {
     ? null
     : defending
       ? stagedIds.size > 0 ? "confirm-blocks" : "confirm-no-blocks"
-      : !derived.canPass
-      ? null
       : myDecision
-        ? statusPassDecision
+        ? derived.canPass && statusPassDecision
           ? "pass"
           : null // button-choice decisions carry their own pass/decline button
-        : view.phase === "action" && myTurn
-          ? "end-turn"
-          : "pass";
+        : spectating || replaying || view.winner !== null
+          ? null
+          : view.phase === "action" && myTurn
+            ? "end-turn"
+            : "pass";
+  const primaryActionDisabled =
+    roomCommandPending ||
+    !connected ||
+    (defending ? defendIntent === null : !derived.canPass);
   const triggerPrimaryAction = defending
     ? () => {
         if (defendIntent) send(defendIntent);
@@ -1039,7 +1043,7 @@ export function GameBoard() {
         activeHeroName={activeHeroName}
         actionPoints={view.players[view.activePlayer]!.actionPoints}
         primaryAction={primaryAction}
-        passDisabled={roomCommandPending || (defending && defendIntent === null)}
+        passDisabled={primaryActionDisabled}
         onPass={triggerPrimaryAction}
       />
 
@@ -1228,7 +1232,7 @@ export function GameBoard() {
         roomCode={roomCode}
         onInspectCard={setInspectedCardId}
         mobilePrimaryAction={primaryAction}
-        mobilePrimaryActionDisabled={roomCommandPending || (defending && defendIntent === null)}
+        mobilePrimaryActionDisabled={primaryActionDisabled}
         onMobilePrimaryAction={triggerPrimaryAction}
         backgroundSearching={backgroundSearching}
         onStopBackgroundSearch={stopBackgroundMatchmaking}
