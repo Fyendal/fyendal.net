@@ -78,7 +78,7 @@ export type ScriptEventName =
   | "fireOnFriendlyCrank"
   | "fireOnFriendlyPlay"
   | "grantLinkGoAgain"
-  | "notifyPlayerGainedGoAgain"
+  | "notifyGoAgainResolved"
   | "queueTriggeredEvent"
   | "runHook";
 

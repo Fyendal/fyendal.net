@@ -1245,7 +1245,7 @@ export function finishStackCardResolution(
   if (resolvedLayerIndex >= 0) state.stack.splice(resolvedLayerIndex, 1);
   runtime.dispatchFlow("consumeQueuedIntimidate", state, seat);
   if (gainedGoAgain) {
-    runtime.events.notifyPlayerGainedGoAgain(state, layer.seat);
+    runtime.events.notifyGoAgainResolved(state, layer.seat);
   }
   if (resolvedSuccessfully && resolvedCard) {
     runtime.events.runHook(state, seat, resolvedCard, "onResolved", currentLink(state), !layer?.fromHand);

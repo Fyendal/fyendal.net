@@ -327,7 +327,7 @@ describe("Armory Decks — AIO, AJV, and AST", () => {
       .expectFinalAttack(6);
   });
 
-  it("Arc Lightning observes go again on a later attack from the graveyard", () => {
+  it("Arc Lightning triggers when go again resolves on a later attack", () => {
     const g = scenario({
       seats: [
         { hero: "rhinar", hand: ["arc lightning|2", "skyzyk|1"], resources: 2, equipment: NO_EQUIPMENT },
@@ -337,10 +337,11 @@ describe("Armory Decks — AIO, AJV, and AST", () => {
     g.play("arc lightning|2");
     g.chooseOption("opposing hero");
     g.play("skyzyk|1");
+    expect(g.state.pendingDecision?.kind).toBe("defend");
     g
-      .chooseOption("opposing hero")
       .blockWith()
       .settle()
+      .chooseOption("opposing hero")
       .expectLife(1, 14)
       .expectFinalAttack(4);
   });
