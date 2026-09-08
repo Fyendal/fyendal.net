@@ -75,6 +75,38 @@ describe("SLY — Lyath's halving", () => {
       .expectAttackValue(4);
   });
 
+  it("Titan's Fist recognizes a 3-cost card pitched to pay for its attack", () => {
+    const qualifying = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["titan's fist|0"],
+          hand: ["power play|3"],
+        },
+        foe({}),
+      ],
+    });
+    qualifying
+      .attackWithWeapon("titan's fist|0", { pitch: ["power play|3"] })
+      .expectAttackValue(4); // blue pitch, cost 3
+  });
+
+  it("Titan's Fist counts the fixed portion of an X+3 cost", () => {
+    const xCost = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["titan's fist|0"],
+          hand: ["imposing visage|3"],
+        },
+        foe({}),
+      ],
+    });
+    xCost
+      .attackWithWeapon("titan's fist|0", { pitch: ["imposing visage|3"] })
+      .expectAttackValue(4); // X is undefined in pitch, so X+3 evaluates to 3
+  });
+
   it("'above base' does not fulfill itself", () => {
     const g = scenario({
       seats: [lyath({ hand: ["short shrift|2"] }), foe({})],

@@ -505,6 +505,14 @@ describe("CardFace counter icons", () => {
 });
 
 describe("InactiveZoneCard", () => {
+  it("does not render stale arena tap state in an inactive zone", () => {
+    const html = renderToStaticMarkup(createElement(InactiveZoneCard, {
+      card: { instanceId: 46, cardId: "WTR160", owner: 0, tapped: true },
+    }));
+
+    expect(html).not.toContain("card-tapped");
+  });
+
   it("presents an owner-visible face-down card as a card back", () => {
     const html = renderToStaticMarkup(createElement(InactiveZoneCard, {
       card: { instanceId: 47, cardId: "WTR160", owner: 0, faceDown: true },

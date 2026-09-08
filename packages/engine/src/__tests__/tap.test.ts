@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import type { GameIntent } from "@fyendal/shared";
 import { applyIntent, legalIntents } from "../index.js";
 import { tapPermanent } from "../cardLifecycle.js";
+import { destroyPermanent } from "../zoneMoves.js";
 
 import { giveCard, makeGame, player } from "./fixtures.js";
 
@@ -139,5 +140,26 @@ describe("tap / untap", () => {
     expect(tapPermanent(s, engineRuntime, heroId, true)).toBe(false); // already tapped
     expect(tapPermanent(s, engineRuntime, heroId, false)).toBe(true);
     expect(tapPermanent(s, engineRuntime, heroId, false)).toBe(false); // already untapped
+  });
+
+  it("clears arena tap state when a permanent enters graveyard or banish", () => {
+    const s = makeGame(11);
+    const p = player(s, 0);
+    const moveToBoard = (): number => {
+      const instanceId = giveCard(s, 0, "IDOL");
+      const index = p.hand.findIndex((card) => card.instanceId === instanceId);
+      p.board.push(p.hand.splice(index, 1)[0]!);
+      return instanceId;
+    };
+
+    const destroyedId = moveToBoard();
+    expect(tapPermanent(s, engineRuntime, destroyedId, true)).toBe(true);
+    expect(destroyPermanent(s, engineRuntime, 0, p.board[0]!)).toBe(true);
+    expect(p.graveyard.find((card) => card.instanceId === destroyedId)?.tapped).toBeUndefined();
+
+    const banishedId = moveToBoard();
+    expect(tapPermanent(s, engineRuntime, banishedId, true)).toBe(true);
+    expect(engineRuntime.makeCtx(s, 0, p.hero).banish(banishedId)).toBe(true);
+    expect(p.banish.find((card) => card.instanceId === banishedId)?.tapped).toBeUndefined();
   });
 });

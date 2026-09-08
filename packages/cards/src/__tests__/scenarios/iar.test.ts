@@ -90,6 +90,37 @@ describe("IAR cards", () => {
     g.play("raging onslaught|1").blockWith().settle().expectLife(1, 13);
   });
 
+  it("Malignant Migration cannot choose a face-down banished card", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["malignant migration|1", "restless cleric|1"],
+        banish: ["corrupted corpse|0"],
+        banishFaceDown: ["restless templar|1"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+    const faceUp = g.state.players[0]!.banish.find((card) => card.cardId === "IAR090")!;
+    const faceDown = g.state.players[0]!.banish.find((card) => card.cardId === "IAR059")!;
+
+    g.play("malignant migration|1").chooseCard("restless cleric|1");
+
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "iar-malignant-recover",
+      options: [String(faceUp.instanceId)],
+    });
+    expect(g.state.pendingDecision?.options).not.toContain(String(faceDown.instanceId));
+
+    g.chooseCard("corrupted corpse|0");
+    expect(g.state.players[0]!.graveyard).toContainEqual(
+      expect.objectContaining({ instanceId: faceUp.instanceId }),
+    );
+    expect(g.state.players[0]!.banish).toContainEqual(
+      expect.objectContaining({ instanceId: faceDown.instanceId, faceDown: true }),
+    );
+  });
+
   it("Restless Cleric gains life and then loses base life to Decay", () => {
     const g = scenario({ seats: [
       {
@@ -1042,12 +1073,44 @@ describe("IAR cards", () => {
       .expectAP(0, 1);
     expect(g.state.players[0]!.equipment.legs?.tapped).toBe(true);
 
-    g.endTurn();
+    const lifeBeforeEndPhase = g.state.players[0]!.life;
+    g.passActionPhase();
+    const triggerOrder = g.state.pendingDecision;
+    expect(triggerOrder).toMatchObject({
+      kind: "order-triggers",
+      player: 0,
+      optionLabels: expect.arrayContaining([
+        "Decay",
+        "Destroy Restless Cleric",
+      ]),
+    });
+    expect(projectStateFor(g.state, 0).pendingDecision?.optionMessages).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "engine.term.card.destroy",
+          values: { card: { kind: "card", cardId: "IAR084" } },
+        }),
+      ]),
+    );
+    const destroy = triggerOrder?.options?.find((_, index) =>
+      triggerOrder.optionLabels?.[index] === "Destroy Restless Cleric"
+    );
+    const decay = triggerOrder?.options?.find((_, index) =>
+      triggerOrder.optionLabels?.[index] === "Decay"
+    );
+    expect(destroy).toBeDefined();
+    expect(decay).toBeDefined();
+    g.doRaw({ kind: "order-triggers", optionIds: [destroy!, decay!] })
+      .settle();
+
     expect(g.state.players[0]!.board).toHaveLength(0);
     expect(g.state.players[0]!.banish).toContainEqual(expect.objectContaining({
       cardId: "IAR084",
       faceDown: true,
     }));
+    expect(g.state.players[0]!.banish.find((card) => card.cardId === "IAR090")?.faceDown)
+      .toBeUndefined();
+    expect(g.state.players[0]!.life).toBe(lifeBeforeEndPhase);
   });
 
   it("Forsaken Strike destroys and discards zombies for independently chosen modes", () => {

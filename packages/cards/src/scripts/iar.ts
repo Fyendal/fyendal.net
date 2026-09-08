@@ -579,7 +579,7 @@ function zombieDiscardAttack(payoff: ZombieDiscardPayoff): CardScript {
         } else if (payoff === "next-attack") {
           buffNextAttack(ctx, { attack: 1 });
         } else {
-          const banished = ctx.player(ctx.seat).banish;
+          const banished = ctx.player(ctx.seat).banish.filter((card) => !card.faceDown);
           if (banished.length > 0) {
             ctx.requestCardChoice(
               "iar-malignant-recover",
@@ -594,7 +594,11 @@ function zombieDiscardAttack(payoff: ZombieDiscardPayoff): CardScript {
         return;
       }
       if (hook === "iar-malignant-recover") {
-        ctx.moveToGraveyard(Number(option), "banish");
+        const instanceId = Number(option);
+        const selected = ctx.player(ctx.seat).banish.find((card) =>
+          card.instanceId === instanceId && !card.faceDown
+        );
+        if (selected) ctx.moveToGraveyard(instanceId, "banish");
       }
     },
   };

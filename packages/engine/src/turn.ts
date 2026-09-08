@@ -6,8 +6,7 @@ import { dataOf, scriptOf } from "./cardProperties.js";
 import { gameLogMessage, logCardValue, logPlayerValue, logPublic, nameOf } from "./gameLog.js";
 
 import { beginStatsTurn } from "./stats.js";
-import { findPermanent, opponent } from "./zoneQueries.js";
-import { destroyPermanent } from "./zoneMoves.js";
+import { opponent } from "./zoneQueries.js";
 import { controlledPermanents } from "./sourceQueries.js";
 import { arsenalCapacity, canUntapPermanent, drawCards, stampControlledName } from "./cardLifecycle.js";
 import { transitionZone } from "./transitions.js";
@@ -144,12 +143,10 @@ export function endTurn(state: GameStateInternal, runtime: EngineRuntime): void 
     }
   }
   state.phase = "end";
-  // scheduled delayed destructions fire at the beginning of the end phase
-  const pending = state.pendingDestructions.splice(0);
-  for (const { seat, instanceId } of pending) {
-    const found = findPermanent(state, instanceId);
-    if (found) destroyPermanent(state, runtime, seat, found.card);
-  }
+  // Scheduled delayed destructions are collected with the other simultaneous
+  // beginning-of-end-phase triggers below. They must not resolve before those
+  // triggers are created: doing so can create new sources (for example a
+  // blood-debt card) that were not present when the end phase began.
   // delayed counter wipes (Glisten's "at the beginning of your end phase,
   // remove all +1{p} counters from weapons you control")
   const turnPlayer = state.players[state.activePlayer] as PlayerState;

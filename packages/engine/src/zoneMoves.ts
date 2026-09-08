@@ -130,6 +130,9 @@ function enterGraveyard(
   }
   // The graveyard is public and cards enter it face up. Determine leave-arena
   // abilities above using the source's prior orientation, then normalize it.
+  // Tap is an arena-only state and does not survive the object reset caused by
+  // entering an inactive zone (CR 3.0.9).
+  delete card.tapped;
   delete card.faceDown;
   owner.flags.graveThisTurn = true;
   const d = dataOf(state, card.cardId);
@@ -557,6 +560,9 @@ export function enterBanish(
 ): void {
   const owner = state.players[card.owner] as PlayerState;
   const causedBy = state.players[causedBySeat] as PlayerState | undefined;
+  // A card in banish is a new object (CR 3.0.9), so arena-only tap state must
+  // not follow a permanent there or survive a later play from this zone.
+  delete card.tapped;
   // CR 5.1.2 / 7.0.2a: announcing an attack puts it on the stack and opens
   // the combat chain before its effect-costs are paid. The engine keeps that
   // announced card in `resolving` until scripted additional costs finish, so

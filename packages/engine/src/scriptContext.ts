@@ -988,6 +988,7 @@ export function makeCtx(
       const found = runtime.commands.removeFromOwnerZones(state, instanceId);
       if (!found) return false;
       delete found.card.faceDown;
+      if (opts?.tapped === true) found.card.tapped = true;
       runtime.commands.settlePlayedCard(state, controller, found.card, opts);
       if (found.fromZone === "graveyard") {
         runtime.events.fireCardLeavesGraveyard(state, found.owner.seat, found.card, "arena");
@@ -2028,6 +2029,10 @@ export function makeCtx(
     cardData(cardId) {
       referencedLogCardIds.add(cardId);
       return dataOf(state, cardId);
+    },
+    printedCost(cardId) {
+      const variableCost = scriptOf(state, cardId)?.variablePlayCost;
+      return variableCost?.base ?? dataOf(state, cardId).cost;
     },
     arcaneDamageEffectAmounts(cardId) {
       return scriptOf(state, cardId)?.arcaneDamageEffectAmounts ?? [];

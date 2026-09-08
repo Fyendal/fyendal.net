@@ -18908,6 +18908,16 @@
       "value": "A defend trigger resolves without effect because the chain link is gone"
     }
   ],
+  "engine.log.trigger.delayed.destroy.card": [
+    {
+      "type": 0,
+      "value": "A delayed effect triggers: destroy "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
   "engine.log.trigger.delayed.lose.life": [
     {
       "type": 1,
@@ -19174,6 +19184,16 @@
     {
       "type": 0,
       "value": "Watery Grave resolves without effect because its source left the graveyard"
+    }
+  ],
+  "engine.term.card.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy "
+    },
+    {
+      "type": 1,
+      "value": "card"
     }
   ],
   "footer.legal": [
