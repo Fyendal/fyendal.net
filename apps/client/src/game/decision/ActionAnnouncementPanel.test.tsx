@@ -160,6 +160,26 @@ describe("activated ability mode choices", () => {
   });
 });
 
+describe("action or instant play method", () => {
+  it("puts the AP-free instant method first and states each method's action-point cost", () => {
+    const html = renderLocalized(
+      <ActionAnnouncementPanel
+        model={{
+          ...paymentModel(true),
+          step: "method",
+          playMethodChoiceRequired: true,
+        }}
+        viewerSeat={0}
+      />,
+    );
+
+    expect(html).toContain("Play card as…");
+    expect(html.indexOf("Play as instant (0 AP)")).toBeLessThan(
+      html.indexOf("Play as action (spends 1 AP)"),
+    );
+  });
+});
+
 describe("Boost choices", () => {
   it("presents Boost first and marks it as the default", () => {
     const html = renderLocalized(

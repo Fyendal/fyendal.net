@@ -45,7 +45,10 @@ function controlsSuspenseAura(ctx: ScriptCtx): boolean {
 }
 
 function crushTriggered(ctx: ScriptCtx): boolean {
-  return !!ctx.link && ctx.link.hit && ctx.link.damage >= 4;
+  return !!ctx.link
+    && ctx.link.targetAllyId === undefined
+    && ctx.link.hit
+    && ctx.link.damage >= 4;
 }
 
 /** Nameable damage sources for Oasis Respite's "source of your choice":

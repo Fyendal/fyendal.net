@@ -165,6 +165,21 @@ describe("WTR Guardian — crush attacks", () => {
       .expectResources(1, 2);
   });
 
+  it("Cartilage Crush does not trigger when it deals 4 or more damage to an ally", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["cartilage crush|3"], resources: 3 },
+        { hero: "dorinthea", board: ["barnacle|2"] },
+      ],
+    });
+
+    g.play("cartilage crush|3", { targetAlly: "barnacle|2" })
+      .expectNoLog("Cartilage Crush triggers: On hit")
+      .expectNoLog("Cartilage Crush: opponent's next action costs +{r}")
+      .expectInZone(1, "barnacle|2", "graveyard");
+    expect(g.state.players[1]!.hero.counters?.firstActionExtraCost).toBeUndefined();
+  });
+
   it("Crush Confidence crush disables opponent hero abilities", () => {
     const g = scenario({
       seats: [

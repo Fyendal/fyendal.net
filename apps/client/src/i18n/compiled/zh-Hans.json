@@ -2989,6 +2989,20 @@
       "value": "将一张攻击牌置于牌库顶向下第五张？"
     }
   ],
+  "card.evo.breaker.card.destroy.optional": [
+    {
+      "type": 0,
+      "value": "摧毁 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 下方的一张牌？"
+    }
+  ],
   "card.evo.card.discard": [
     {
       "type": 0,
@@ -19546,6 +19560,18 @@
       "value": "打出卡牌"
     }
   ],
+  "game.decision.playMethod.action": [
+    {
+      "type": 0,
+      "value": "作为行动打出（消耗 1 个行动点）"
+    }
+  ],
+  "game.decision.playMethod.instant": [
+    {
+      "type": 0,
+      "value": "作为瞬间打出（0 行动点）"
+    }
+  ],
   "game.decision.playerDeciding": [
     {
       "type": 1,
@@ -20730,6 +20756,12 @@
     {
       "type": 0,
       "value": "回合开始"
+    }
+  ],
+  "game.turn.endPassPending": [
+    {
+      "type": 0,
+      "value": "对手已让过优先权以结束回合。如果你现在行动，对手将重新获得优先权。"
     }
   ],
   "game.turn.named": [

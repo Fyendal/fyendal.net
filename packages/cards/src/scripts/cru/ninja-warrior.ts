@@ -48,6 +48,17 @@ function nextAttack(ctx: ScriptCtx, attack = 0, appliesTo?: "any" | "weapon"): v
   });
 }
 
+export function bitteringThorns(): CardScript {
+  return {
+    canTriggerOnHit(ctx) {
+      return ctx.link?.attackingCard.instanceId === ctx.self.instanceId;
+    },
+    onHit(ctx) {
+      nextAttack(ctx, 1);
+    },
+  };
+}
+
 function hitGoAgain(): CardScript {
   return {
     onHit(ctx) {
@@ -278,11 +289,7 @@ export const cruNinjaWarrior: Record<string, CardScript> = {
   "torrent of tempo|1": hitGoAgain(),
   "torrent of tempo|2": hitGoAgain(),
   "torrent of tempo|3": hitGoAgain(),
-  "bittering thorns|2": {
-    onHit(ctx) {
-      nextAttack(ctx, 1);
-    },
-  },
+  "bittering thorns|2": bitteringThorns(),
   "whirling mist blossom|2": {
     canTriggerOnHit(ctx) {
       const current = ctx.state.chain.length - 1;

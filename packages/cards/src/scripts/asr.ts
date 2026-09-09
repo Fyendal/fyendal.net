@@ -1,6 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, commonOptionMessages, decisionPrompt, opponentSeat, previousAttackHasName, previousAttackNameContains, yesNoPrompt } from "./shared-helpers.js";
-import { cruNinjaWarrior } from "./cru/ninja-warrior.js";
+import { commonOptionMessages, decisionPrompt, opponentSeat, previousAttackHasName, previousAttackNameContains, yesNoPrompt } from "./shared-helpers.js";
+import { bitteringThorns, cruNinjaWarrior } from "./cru/ninja-warrior.js";
 
 function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
   return ctx.cardData(card.cardId);
@@ -37,10 +37,6 @@ function seekVengeance(): CardScript {
       if (previousWasEdge(ctx)) ctx.grantGoAgain();
     },
   };
-}
-
-function bitteringThorns(): CardScript {
-  return { onHit(ctx) { buffNextAttack(ctx, { attack: 1 }); } };
 }
 
 export const asr: Record<string, CardScript> = {

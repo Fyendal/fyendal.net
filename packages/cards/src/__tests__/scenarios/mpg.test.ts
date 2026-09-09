@@ -476,4 +476,24 @@ describe("MPG — import and Guardian pressure", () => {
       .expectEquipped(0, "head", "ironrot helm|0")
       .expectNoEquipment(1, "head");
   });
+
+  it("Annexation of the Forge does not crush a non-Guardian hero", () => {
+    const g = scenario({
+      seats: [
+        {
+          ...valda,
+          hand: ["annexation of the forge|2", "thunder quake|3", "thunder quake|3"],
+          equipment: { head: null },
+        },
+        { hero: "dorinthea", equipment: { head: "ironrot helm|0" } },
+      ],
+    });
+
+    g.play("annexation of the forge|2", { pitch: ["thunder quake|3", "thunder quake|3"] })
+      .blockWith()
+      .settle()
+      .expectNoLog("Annexation of the Forge triggers: On hit")
+      .expectNoEquipment(0, "head")
+      .expectEquipped(1, "head", "ironrot helm|0");
+  });
 });

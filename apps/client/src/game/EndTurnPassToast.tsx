@@ -1,3 +1,5 @@
+import { FormattedMessage } from "react-intl";
+
 export function EndTurnPassToast({
   placement = "divider",
 }: {
@@ -9,7 +11,7 @@ export function EndTurnPassToast({
       role="status"
       aria-live="polite"
     >
-      Opponent is trying to end their turn
+      <FormattedMessage id="game.turn.endPassPending" />
     </div>
   );
 }

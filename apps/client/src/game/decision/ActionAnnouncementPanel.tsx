@@ -301,18 +301,18 @@ export function ActionAnnouncementPanel({
           </span>
           <div className="decision-buttons">
             <button
-              className={playMethod === "action" ? "btn-primary" : ""}
-              onClick={(event) =>
-                chooseWithoutFocus(event.currentTarget, () => onSelectPlayMethod("action"))}
-            >
-              {intl.formatMessage({ id: "game.cardType.action" })}
-            </button>
-            <button
               className={playMethod === "instant" ? "btn-primary" : ""}
               onClick={(event) =>
                 chooseWithoutFocus(event.currentTarget, () => onSelectPlayMethod("instant"))}
             >
-              {intl.formatMessage({ id: "game.cardType.instant" })}
+              {intl.formatMessage({ id: "game.decision.playMethod.instant" })}
+            </button>
+            <button
+              className={playMethod === "action" ? "btn-primary" : ""}
+              onClick={(event) =>
+                chooseWithoutFocus(event.currentTarget, () => onSelectPlayMethod("action"))}
+            >
+              {intl.formatMessage({ id: "game.decision.playMethod.action" })}
             </button>
             <button onClick={onCancel}>{intl.formatMessage({ id: "common.cancel" })}</button>
           </div>

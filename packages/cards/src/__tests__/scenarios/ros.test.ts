@@ -712,6 +712,54 @@ describe("ROS — Lightning and Runeblade", () => {
   });
 });
 
+describe("ROS — Warrior", () => {
+  it("Unsheathed gives an over-twice-base sword attack go again", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          weapons: ["dawnblade|0"],
+          resources: 2,
+          hand: ["steelblade supremacy|1", "unsheathed|1"],
+        },
+        { hero: "rhinar" },
+      ],
+    });
+
+    g.play("steelblade supremacy|1")
+      .chooseCard("dawnblade|0")
+      .play("unsheathed|1")
+      .attackWithWeapon("dawnblade|0")
+      .expectAttackValue(8);
+
+    expect(g.state.chain.at(-1)).toMatchObject({ goAgain: true });
+
+    g.blockWith()
+      .settle()
+      .expectAP(0, 1);
+  });
+
+  it("Unsheathed does not give go again at exactly twice base power", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          weapons: ["dawnblade|0"],
+          resources: 1,
+          hand: ["unsheathed|1"],
+        },
+        { hero: "rhinar" },
+      ],
+    });
+
+    g.play("unsheathed|1")
+      .attackWithWeapon("dawnblade|0")
+      .expectAttackValue(6);
+
+    expect(g.state.chain.at(-1)).toMatchObject({ goAgain: false });
+  });
+});
+
 describe("ROS — Wizard and generic", () => {
   it("Truce is destroyed and draws a card when its opponent attacks", () => {
     const g = scenario({

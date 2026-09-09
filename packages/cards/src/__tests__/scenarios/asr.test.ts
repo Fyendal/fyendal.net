@@ -48,6 +48,35 @@ describe("Armory Deck: Ira", () => {
       (card) => card.cardId === printingId("nimblism|1"),
     )).toBe(true);
   });
+
+  it.each([1, 2, 3] as const)(
+    "Bittering Thorns pitch %i buffs only the next attack and does not trigger again when it hits",
+    (pitch) => {
+      const g = scenario({
+        seats: [
+          {
+            hero: "rhinar",
+            hand: [`bittering thorns|${pitch}`, "scar for a scar|1"],
+            resources: 1,
+            equipment: NO_EQUIPMENT,
+          },
+          { hero: "dorinthea", hand: [], equipment: NO_EQUIPMENT },
+        ],
+      });
+
+      g.play(`bittering thorns|${pitch}`)
+        .blockWith()
+        .settle()
+        .play("scar for a scar|1")
+        .expectAttackValue(5)
+        .blockWith()
+        .settle();
+
+      expect(g.state.log.filter(
+        (entry) => entry.publicText?.includes("Bittering Thorns triggers: On hit"),
+      )).toHaveLength(1);
+    },
+  );
 });
 
 describe("ASR — Okana Scar Wraps", () => {

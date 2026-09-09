@@ -583,6 +583,49 @@ describe("PEN — import and set mechanics", () => {
       .expectFinalAttack(4);
   });
 
+  it("Swordmaster's Shine can target an axe weapon attack", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          weapons: ["decimator great axe|0"],
+          hand: ["swordmaster's shine|1"],
+          resources: 6,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "rhinar", equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.attackWithWeapon("decimator great axe|0")
+      .blockWith()
+      .react("swordmaster's shine|1")
+      .expectFinalAttack(9);
+  });
+
+  it("Swordmaster's Shine does not get cheaper from counters on an axe", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          weapons: ["decimator great axe|0"],
+          hand: ["swordmaster's shine|1"],
+          resources: 5,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "rhinar", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.state.players[0]!.weapons[0]!.counters = { power: 1 };
+
+    g.attackWithWeapon("decimator great axe|0").blockWith();
+
+    const shine = g.state.players[0]!.hand[0]!;
+    expect(legalIntents(g.state, 0).some((intent) =>
+      intent.kind === "play-card" && intent.instanceId === shine.instanceId,
+    )).toBe(false);
+  });
+
   it("Blunten triggers on the stack only when it defends a weapon attack", () => {
     const weaponAttack = scenario({
       seats: [
@@ -1094,6 +1137,39 @@ describe("PEN — generalized rules interactions", () => {
       .blockWith()
       .settle()
       .expectAP(0, 0);
+  });
+
+  it("Lighten the Load presents encoded item options as cards", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["lighten the load|1", "raging onslaught|3"],
+          board: ["golden cog|0"],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.play("lighten the load|1");
+
+    const decision = projectStateFor(g.state, 0).pendingDecision;
+    const cog = g.state.players[0]!.board.find(
+      (card) => functionalKeyOf(cardData[card.cardId]!) === "golden cog|0",
+    )!;
+    expect(decision?.options).toContain(`item:${cog.instanceId}`);
+    expect(decision?.optionCards?.map((card) => card?.cardId ?? null)).toEqual([
+      null,
+      printingId("raging onslaught|3"),
+      printingId("golden cog|0"),
+    ]);
+
+    g.chooseOption(`item:${cog.instanceId}`)
+      .expectZoneSize(0, "board", 0)
+      .blockWith()
+      .settle()
+      .expectAP(0, 1);
   });
 
   it("Become the Bottle copies the name Retrace the Past gained", () => {

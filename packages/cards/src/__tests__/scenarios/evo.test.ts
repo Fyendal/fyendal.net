@@ -83,6 +83,81 @@ describe("EVO — registration and core mechanics", () => {
     expect(evo.subcards![0]!.cardId).toBe(printingId("teklo base head|0"));
   });
 
+  it("Evo Face Breaker lets its controller decline or accept destroying a card after boosting", () => {
+    const setup = () => {
+      const s = scenario({
+        seats: [
+          {
+            hero: "rhinar",
+            hand: ["zero to sixty|1"],
+            deck: ["zipper hit|3"],
+            equipment: { arms: "evo face breaker|1" },
+          },
+          { hero: "dorinthea" },
+        ],
+      });
+      const arms = s.state.players[0]!.equipment.arms!;
+      arms.subcards = [{
+        instanceId: s.state.nextInstanceId++,
+        cardId: printingId("proto base arms|0"),
+        owner: 0,
+      }];
+      return s;
+    };
+
+    const declined = setup();
+    declined.play("zero to sixty|1", { boost: true, settle: false });
+    expect(declined.state.pendingDecision).toMatchObject({
+      chooseHook: "breaker-boost",
+      options: ["yes", "no"],
+    });
+    declined.chooseOption("no").expectAttackValue(4);
+    expect(declined.state.players[0]!.equipment.arms!.subcards).toHaveLength(1);
+    expect(declined.state.players[0]!.graveyard).not.toEqual(expect.arrayContaining([
+      expect.objectContaining({ cardId: printingId("proto base arms|0") }),
+    ]));
+
+    const accepted = setup();
+    accepted.play("zero to sixty|1", { boost: true, settle: false });
+    accepted.chooseOption("yes").expectAttackValue(6);
+    expect(accepted.state.players[0]!.equipment.arms!.subcards).toHaveLength(0);
+    expect(accepted.state.players[0]!.graveyard).toEqual(expect.arrayContaining([
+      expect.objectContaining({ cardId: printingId("proto base arms|0") }),
+    ]));
+  });
+
+  it("Evo Face Breaker handles both Twin Drive boosts without forcing or duplicating destruction", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 2,
+          hand: ["twin drive|1"],
+          deck: ["zipper hit|3", "zero to sixty|3"],
+          equipment: { arms: "evo face breaker|1" },
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    const arms = s.state.players[0]!.equipment.arms!;
+    arms.subcards = [{
+      instanceId: s.state.nextInstanceId++,
+      cardId: printingId("proto base arms|0"),
+      owner: 0,
+    }];
+
+    s.play("twin drive|1", { boost: true, boostCount: 2, settle: false });
+    expect(s.state.pendingDecision?.chooseHook).toBe("breaker-boost");
+
+    s.chooseOption("no");
+    expect(s.state.pendingDecision?.chooseHook).toBe("breaker-boost");
+    expect(s.state.players[0]!.equipment.arms!.subcards).toHaveLength(1);
+
+    s.chooseOption("yes").expectAttackValue(7);
+    expect(s.state.pendingDecision?.chooseHook).not.toBe("breaker-boost");
+    expect(s.state.players[0]!.equipment.arms!.subcards).toHaveLength(0);
+  });
+
   it("Fabricate lets its controller choose an Evo equipment to put it under", () => {
     const s = scenario({
       seats: [
@@ -271,6 +346,32 @@ describe("EVO — registration and core mechanics", () => {
     s.play("evo steel soul controller|3", { asInstant: false })
       .expectAP(0, 0)
       .expectEquipped(0, "arms", "evo steel soul controller|3");
+  });
+
+  it("does not spend an action point when Evo Face Breaker is played with Teklovossen's instant permission", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "teklovossen, esteemed magnate|0",
+          resources: 3,
+          hand: ["zero to sixty|1", "evo face breaker|1"],
+          deck: ["rotary ram|3"],
+          equipment: { arms: "proto base arms|0" },
+        },
+        { hero: "dorinthea", hand: ["wrecker romp|1", "wrecker romp|1"] },
+      ],
+    });
+
+    s.play("zero to sixty|1", { boost: true })
+      .blockWith("wrecker romp|1", "wrecker romp|1")
+      .settle()
+      .expectAP(0, 1);
+
+    s.activate("teklovossen, esteemed magnate|0")
+      .play("evo face breaker|1", { asInstant: true })
+      .expectAP(0, 1)
+      .expectEquipped(0, "arms", "evo face breaker|1");
   });
 
   it("advertises an unaffordable Steel Soul Controller over Adaptive Alpha Mold", () => {

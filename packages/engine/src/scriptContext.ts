@@ -2670,6 +2670,7 @@ export function makeCtx(
         if (owner.weapons.length + hands > 2) return false;
         removeFromArray(owner.graveyard, instanceId);
         owner.weapons.push(card);
+        resetActivatedAbilityUsage(owner, card.instanceId);
         runtime.events.fireCardLeavesGraveyard(state, owner.seat, card, "arena");
         logPublic(state, gameLogMessage(
           `${d.name} is equipped from the graveyard`,
@@ -2687,6 +2688,7 @@ export function makeCtx(
         if (!slot || owner.equipment[slot]) return false;
         removeFromArray(owner.graveyard, instanceId);
         owner.equipment[slot] = card;
+        resetActivatedAbilityUsage(owner, card.instanceId);
         runtime.events.fireCardLeavesGraveyard(state, owner.seat, card, "arena");
         logPublic(state, gameLogMessage(
           `${d.name} is equipped from the graveyard`,
