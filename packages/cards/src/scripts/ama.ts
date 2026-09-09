@@ -2,6 +2,7 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import { attackAbility, buffNextAttack, commonOptionMessages, decisionPrompt } from "./shared-helpers.js";
 
 const CORRUPTED_CORPSE = "IAR090";
+const GATE = "IAR222";
 
 function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
   return ctx.cardTypes(card).includes(type.toLowerCase());
@@ -55,6 +56,26 @@ function destroyingZombieAttack(marker: string): Pick<CardScript, "onFriendlyAtt
 
 const undeadGraspAttack = destroyingZombieAttack("amaUndeadGrasp");
 const digForSoulsAttack = destroyingZombieAttack("amaDigForSouls");
+
+function decay(): Pick<CardScript, "triggers"> {
+  return {
+    triggers: [{
+      event: "end-of-turn",
+      whose: "subject",
+      label: "Decay",
+      labelMessage: { id: "card.trigger.common.decay" },
+      effect(ctx) {
+        const life = ctx.self.life ?? 0;
+        if (life <= 1) {
+          ctx.destroySelf();
+          return;
+        }
+        ctx.setCounter("lifePenalty", ctx.getCounter("lifePenalty") + 1);
+        ctx.setPermanentLife(ctx.self.instanceId, life - 1);
+      },
+    }],
+  };
+}
 
 export const ama: Record<string, CardScript> = {
   "malice, domina of the dead|0": {
@@ -115,6 +136,36 @@ export const ama: Record<string, CardScript> = {
     },
   },
 
+  "drop dead bodice|0": {
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      destroySelfCost: true,
+      label: "Destroy: gain a resource when a zombie enters your graveyard",
+      onActivate(ctx) {
+        ctx.addModifier({ scope: "until-end-of-turn" });
+      },
+    },
+    triggers: [{
+      event: "card-put-into-graveyard",
+      label: "Gain 1 resource",
+      labelMessage: { id: "card.trigger.common.resource.gain", values: { amount: 1 } },
+      condition: (ctx, card) => !!card &&
+        card.owner === ctx.seat &&
+        hasType(ctx, card, "zombie") &&
+        ctx.state.modifiers.some((modifier) =>
+          modifier.sourceInstanceId === ctx.self.instanceId &&
+          modifier.scope === "until-end-of-turn" &&
+          !modifier.consumed
+        ),
+      effect(ctx) {
+        ctx.changeResources(ctx.seat, 1);
+      },
+    }],
+  },
+
   "undead grasp|0": {
     activated: {
       cost: 1,
@@ -133,6 +184,21 @@ export const ama: Record<string, CardScript> = {
       },
     },
     ...undeadGraspAttack,
+  },
+
+  "commit to corruption|1": {
+    onPlay(ctx) {
+      buffNextAttack(ctx, {
+        attack: 3,
+        onHitScriptHook: {
+          hook: "ama-commit-corruption",
+          label: "create a Corrupted Corpse in your banished zone",
+        },
+      });
+    },
+    onGrantedHit(ctx, hook) {
+      if (hook === "ama-commit-corruption") ctx.createCardInBanish(CORRUPTED_CORPSE);
+    },
   },
 
   "dig for souls|1": {
@@ -162,6 +228,20 @@ export const ama: Record<string, CardScript> = {
     ...digForSoulsAttack,
   },
 
+  "skeletal puppetry|1": {
+    alternativePlayCost: {
+      kind: "discard-hand-subtype",
+      subtype: "ally",
+    },
+    onPlay(ctx) {
+      buffNextAttack(ctx, {
+        attack: 3,
+        appliesToSubtype: "ally",
+        goAgain: true,
+      });
+    },
+  },
+
   "restless commander|1": {
     activated: attackAbility(1, {
       tap: true,
@@ -171,19 +251,92 @@ export const ama: Record<string, CardScript> = {
     onEnterArena(ctx) {
       ctx.addModifier({ scope: "static", attack: 1, appliesToSubtype: "zombie" });
     },
-    triggers: [{
-      event: "end-of-turn",
-      whose: "subject",
-      label: "Decay",
-      effect(ctx) {
-        const life = ctx.self.life ?? 0;
-        if (life <= 1) {
-          ctx.destroySelf();
-          return;
-        }
-        ctx.setCounter("lifePenalty", ctx.getCounter("lifePenalty") + 1);
-        ctx.setPermanentLife(ctx.self.instanceId, life - 1);
-      },
-    }],
+    ...decay(),
+  },
+
+  "restless steed|1": {
+    activated: attackAbility(1, {
+      tap: true,
+      oncePerTurn: false,
+      canActivate: controlsVox,
+    }),
+    onHit(ctx) {
+      ctx.grantGoAgain();
+    },
+    ...decay(),
+  },
+
+  "clambering corpses|3": {
+    onAttackDeclared(ctx) {
+      const choices = zombies(ctx, ctx.player(ctx.seat).hand);
+      if (choices.length === 0) return;
+      ctx.requestCardChoice(
+        "ama-clambering-discard",
+        decisionPrompt(
+          "Discard a zombie?",
+          "card.iar.zombie.discard.optional",
+          { optionMessages: commonOptionMessages("no") },
+        ),
+        ["no", ...choices.map((card) => card.instanceId)],
+      );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "ama-clambering-discard" || option === "no") return;
+      const zombie = ctx.player(ctx.seat).hand.find((card) =>
+        card.instanceId === Number(option) && hasType(ctx, card, "zombie")
+      );
+      if (!zombie || !ctx.discardCard(ctx.seat, zombie.instanceId)) return;
+      ctx.addCardTempPower(ctx.self.instanceId, 3);
+      ctx.grantGoAgain();
+    },
+    canTriggerOnHit(ctx) {
+      return ctx.link?.targetAllyId === undefined;
+    },
+    onHit(ctx) {
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        appliesToSubtype: "zombie",
+        goAgain: true,
+      });
+    },
+  },
+
+  "otherworldly ossuary|3": {
+    onPlay(ctx) {
+      ctx.createCardInBanish(CORRUPTED_CORPSE);
+    },
+  },
+
+  "rites of nightfall|3": {
+    onPlay(ctx) {
+      ctx.createToken(GATE);
+    },
+  },
+
+  "shadowrealm solace|3": {
+    onPlay(ctx) {
+      const banished = ctx.player(ctx.seat).banish.filter((card) => !card.faceDown);
+      if (banished.length === 0) return;
+      ctx.requestCardChoice(
+        "ama-solace-graveyard",
+        decisionPrompt(
+          "Put a banished card into your graveyard?",
+          "card.iar.banished.graveyard.put",
+          { optionMessages: commonOptionMessages("no") },
+        ),
+        ["no", ...banished.map((card) => card.instanceId)],
+      );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "ama-solace-graveyard" || option === "no") return;
+      const selected = ctx.player(ctx.seat).banish.find((card) =>
+        card.instanceId === Number(option) && !card.faceDown
+      );
+      if (!selected) return;
+      const isZombie = hasType(ctx, selected, "zombie");
+      if (ctx.moveToGraveyard(selected.instanceId, "banish") && isZombie) {
+        ctx.gainLife(ctx.seat, 1);
+      }
+    },
   },
 };

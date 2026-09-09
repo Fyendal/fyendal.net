@@ -30,6 +30,17 @@
     "set": "AMA"
   },
   {
+    "id": "AMA004",
+    "name": "Drop Dead Bodice",
+    "cardType": "equipment",
+    "text": "Instant - Destroy this: Until end of turn, whenever a zombie is put into your graveyard, gain {r}.\nArcane Barrier 1",
+    "defense": 0,
+    "classes": ["necromancer"],
+    "subtypes": ["shadow", "chest"],
+    "keywords": ["Arcane Barrier 1"],
+    "set": "AMA"
+  },
+  {
     "id": "AMA005",
     "name": "Undead Grasp",
     "cardType": "equipment",
@@ -51,6 +62,19 @@
     "set": "AMA"
   },
   {
+    "id": "AMA009",
+    "name": "Commit to Corruption",
+    "cardType": "action",
+    "text": "Your next attack this turn gets +3{p} and \"When this hits, create a Corrupted Corpse in your banished zone.\"\nGo again",
+    "pitch": 1,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["necromancer"],
+    "subtypes": ["shadow"],
+    "keywords": ["Go again"],
+    "set": "AMA"
+  },
+  {
     "id": "AMA011",
     "name": "Dig for Souls",
     "cardType": "action",
@@ -59,6 +83,18 @@
     "defense": 3,
     "classes": ["necromancer"],
     "subtypes": ["shadow"],
+    "keywords": ["Go again"],
+    "set": "AMA"
+  },
+  {
+    "id": "AMA013",
+    "name": "Skeletal Puppetry",
+    "cardType": "action",
+    "text": "You may discard an ally rather than pay this card's {r} cost.\nYour next ally attack this turn gets +3{p} and go again.\nGo again",
+    "pitch": 1,
+    "cost": 2,
+    "defense": 2,
+    "classes": ["necromancer"],
     "keywords": ["Go again"],
     "set": "AMA"
   },
@@ -74,6 +110,71 @@
     "subtypes": ["shadow", "zombie", "ally"],
     "keywords": ["Decay"],
     "life": 3,
+    "set": "AMA"
+  },
+  {
+    "id": "AMA019",
+    "name": "Restless Steed",
+    "cardType": "action",
+    "text": "When this hits, the attack gets go again.\nDecay (At the beginning of your end phase, put a -1{h} counter on this.)",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 3,
+    "classes": ["necromancer"],
+    "subtypes": ["shadow", "zombie", "ally"],
+    "keywords": ["Decay"],
+    "life": 3,
+    "set": "AMA"
+  },
+  {
+    "id": "AMA021",
+    "name": "Clambering Corpses",
+    "cardType": "action",
+    "text": "When this attacks, you may discard a zombie. If you do, this gets +3{p} and go again.\nWhen this hits a hero, your zombie attacks this turn get go again.",
+    "pitch": 3,
+    "cost": 0,
+    "attack": 1,
+    "defense": 3,
+    "classes": ["necromancer"],
+    "subtypes": ["shadow", "attack"],
+    "set": "AMA"
+  },
+  {
+    "id": "AMA022",
+    "name": "Otherworldly Ossuary",
+    "cardType": "action",
+    "text": "Create a Corrupted Corpse in your banished zone.\nGo again",
+    "pitch": 3,
+    "cost": 1,
+    "defense": 3,
+    "classes": ["necromancer"],
+    "subtypes": ["shadow"],
+    "keywords": ["Go again"],
+    "set": "AMA"
+  },
+  {
+    "id": "AMA024",
+    "name": "Rites of Nightfall",
+    "cardType": "action",
+    "text": "Create a Gate to i'Arathael token.\nGo again",
+    "pitch": 3,
+    "cost": 1,
+    "defense": 3,
+    "subtypes": ["shadow"],
+    "keywords": ["Go again"],
+    "set": "AMA"
+  },
+  {
+    "id": "AMA025",
+    "name": "Shadowrealm Solace",
+    "cardType": "action",
+    "text": "You may put a card from your banished zone into your graveyard. If it's a zombie, gain 1{h}.\nGo again",
+    "pitch": 3,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["necromancer"],
+    "subtypes": ["shadow"],
+    "keywords": ["Go again"],
     "set": "AMA"
   },
   {

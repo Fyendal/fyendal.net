@@ -394,4 +394,70 @@ describe("card-play announcement", () => {
       counters: { paidAllies: 6 },
     });
   });
+
+  it("offers only matching hand subtypes for an alternative discard cost", () => {
+    let state = makeGame(153);
+    state.cardsRef = {
+      ...state.cardsRef,
+      ALT_ACTION: {
+        id: "ALT_ACTION",
+        name: "Alternative Action",
+        cardType: "action",
+        classes: ["generic"],
+        pitch: 1,
+        cost: 2,
+        defense: 2,
+        text: "You may discard an ally rather than pay this card's resource cost.",
+      },
+      TEST_ALLY: {
+        id: "TEST_ALLY",
+        name: "Test Ally",
+        cardType: "action",
+        classes: ["generic"],
+        subtypes: ["ally"],
+        pitch: 1,
+        cost: 0,
+        attack: 1,
+        life: 1,
+        text: "",
+      },
+    };
+    state.scriptsRef = {
+      ...state.scriptsRef,
+      ALT_ACTION: {
+        alternativePlayCost: { kind: "discard-hand-subtype", subtype: "ally" },
+      },
+    };
+    const playerZero = player(state, 0);
+    playerZero.hand = [];
+    const actionId = giveCard(state, 0, "ALT_ACTION");
+    const allyId = giveCard(state, 0, "TEST_ALLY");
+    const nonAllyId = giveCard(state, 0, "BLUE");
+
+    const alternativeIntents = legalIntents(state, 0).filter(
+      (intent) => intent.kind === "play-card" &&
+        intent.instanceId === actionId &&
+        intent.alternativeCostCardInstanceIds !== undefined,
+    );
+    expect(alternativeIntents).toHaveLength(1);
+    expect(alternativeIntents[0]).toMatchObject({
+      alternativeCostCardInstanceIds: [allyId],
+      pitchInstanceIds: [],
+    });
+
+    expect(applyIntent(state, 0, {
+      kind: "play-card",
+      instanceId: actionId,
+      pitchInstanceIds: [],
+      alternativeCostCardInstanceIds: [nonAllyId],
+    })).toMatchObject({ ok: false });
+
+    const result = applyIntent(state, 0, alternativeIntents[0]!);
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(result.error);
+    state = result.state;
+    expect(player(state, 0).graveyard).toContainEqual(expect.objectContaining({ instanceId: allyId }));
+    expect(player(state, 0).hand).toContainEqual(expect.objectContaining({ instanceId: nonAllyId }));
+    expect(state.stack[0]?.card?.instanceId).toBe(actionId);
+  });
 });
