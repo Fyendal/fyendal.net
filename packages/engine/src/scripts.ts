@@ -293,6 +293,14 @@ export interface ScriptCtx {
     label: string | ScriptPrompt,
     subjectSeat?: number,
   ): void;
+  /** Schedule one of this script's delayed hooks for the start of the chosen
+   * hero's next turn. The source is snapshotted, so moving it later does not
+   * cancel the effect. */
+  scheduleStartOfNextTurnTrigger(
+    hook: string,
+    label: string | ScriptPrompt,
+    subjectSeat?: number,
+  ): void;
   /** Let the controller privately look at a card (e.g. the top of their deck)
    *  — its identity is logged to the controller only. */
   lookAt(instanceId: number): void;
@@ -572,13 +580,13 @@ export interface ScriptCtx {
   /** Whether the target hero has an empty arsenal zone, including any
    *  additional zones granted by active continuous effects. */
   hasArsenalSpace(targetSeat?: number): boolean;
-  /** Put one of the controller's cards (from hand, deck, or graveyard, by instance id)
+  /** Put one of the controller's cards (from hand, deck, graveyard, or banish, by instance id)
    *  into their arsenal face up, firing onEnterArsenal hooks (the entering
    *  card's own and the controller's permanents'). `from` names the source
-   *  zone ("hand" / "deck") for triggers that care ("from your deck").
+   *  zone for triggers that care ("from your deck").
    *  Returns false when the card isn't in the named zone or its owner's
    *  arsenal has no empty zone. */
-  putIntoArsenal(instanceId: number, from: "hand" | "deck" | "graveyard", opts?: { faceUp?: boolean }): boolean;
+  putIntoArsenal(instanceId: number, from: "hand" | "deck" | "graveyard" | "banish", opts?: { faceUp?: boolean }): boolean;
   /** Move a card from its owner's deck directly onto the current chain link as
    *  a defending card, firing its ordinary onDefend hook. */
   addDefenderFromDeck(instanceId: number): boolean;
@@ -1038,7 +1046,7 @@ export interface CardScript {
    *  observing active or lingering source, including when that source is the
    *  attacking object. */
   onFriendlyAttackDeclared?(ctx: ScriptCtx): void;
-  /** Resolve a trigger previously registered with scheduleEndOfTurnTrigger. */
+  /** Resolve a trigger previously registered with a delayed-trigger scheduler. */
   onDelayedTrigger?(ctx: ScriptCtx, hook: string): void;
   /** The current link's attack gained go again — at declaration or later
    *  (e.g. granted on hit). Called for the attacking card and the hero. */
@@ -1464,7 +1472,8 @@ export interface CardScript {
    *  effect (`ctx.putIntoArsenal`). Fires for the entering card itself ("when
    *  this is put face-up into your arsenal") and for the controller's
    *  permanents ("whenever an arrow is put face up into your arsenal from
-   *  your deck"). `from` names the zone it came from ("hand" / "deck"). */
+   *  your deck"). `from` names the zone it came from (for example, "hand",
+   *  "deck", or "banish"). */
   onEnterArsenal?(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, from: string): void;
   /** This permanent was destroyed. */
   onDestroyed?(ctx: ScriptCtx): void;

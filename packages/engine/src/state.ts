@@ -996,7 +996,9 @@ interface DelayedTrigger {
   source: CardInstance;
   seat: number;
   subjectSeat: number;
-  event: "end-of-turn";
+  event: "start-of-turn" | "end-of-turn";
+  /** Turn when the effect was scheduled. Start-of-turn effects become due on
+   * the subject's first later turn; end-of-turn effects are due this turn. */
   turn: number;
   hook: string;
   label: string;

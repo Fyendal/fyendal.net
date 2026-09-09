@@ -1673,7 +1673,31 @@ Object.assign(sea, {
   "redspine manta|0": { activated: { cost: 0, isAttack: false, goAgain: true, tap: true, canActivate: (ctx: ScriptCtx) => !ctx.player(ctx.seat).arsenal.length && ctx.player(ctx.seat).hand.some((card) => isArrow(ctx, card)), onActivate(ctx: ScriptCtx) { const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card)); ctx.requestCardChoice("manta", decisionPrompt("Put an arrow face-up into arsenal", "card.sea.arrow.hand.arsenal.required"), arrows.map((card) => card.instanceId)); } }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "manta") ctx.putIntoArsenal(Number(option), "hand"); } },
   "sealace sarong|0": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", tap: true, effectCardCosts: [{ zone: "arsenal", move: "turn-face-up", count: 1, pitch: 3, subtype: "arrow", prompt: decisionPrompt("Turn a blue arrow face-up", "card.common.cost.bluearrow.faceup") }], onActivate(ctx: ScriptCtx) { const arrow = ctx.player(ctx.seat).arsenal.find((card) => !card.faceDown && isArrow(ctx, card) && ctx.cardColor(card) === 3); if (arrow) ctx.grantCardKeyword(arrow.instanceId, "go again"); } } },
   "barbed barrage|1": { onPlayCostPaid(ctx: ScriptCtx, paid: readonly Card[]) { if (paid.length >= 2) ctx.setFlag("link", "additionalTarget", true); } },
-  "return fire|1": { onDefend(ctx: ScriptCtx) { const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card)); if (arrows.length) ctx.requestCardChoice("return-fire", decisionPrompt("Banish an arrow?", "card.sea.arrow.banish", { optionMessages: commonOptionMessages("pass") }), ["pass", ...arrows.map((card) => card.instanceId)]); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "return-fire" && option !== "pass" && ctx.banish(Number(option))) { ctx.allowPlayFrom(Number(option), "banish", { untilNextTurn: true }); ctx.addCardTempPower(Number(option), 3); } } },
+  "return fire|1": {
+    onDefend(ctx: ScriptCtx) {
+      const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card));
+      if (arrows.length) ctx.requestCardChoice(
+        "return-fire",
+        decisionPrompt("Banish an arrow?", "card.sea.arrow.banish", { optionMessages: commonOptionMessages("pass") }),
+        ["pass", ...arrows.map((card) => card.instanceId)],
+      );
+    },
+    onChoose(ctx: ScriptCtx, hook: string, option: string) {
+      if (hook !== "return-fire" || option === "pass" || !ctx.banish(Number(option))) return;
+      ctx.setCounter("returnFireArrow", Number(option));
+      ctx.scheduleStartOfNextTurnTrigger(
+        "return-fire-load",
+        decisionPrompt("Put the banished arrow face up into arsenal", "card.sea.returnfire.arrow.arsenal"),
+      );
+    },
+    onDelayedTrigger(ctx: ScriptCtx, hook: string) {
+      if (hook !== "return-fire-load") return;
+      const arrowId = ctx.getCounter("returnFireArrow");
+      if (arrowId > 0 && ctx.putIntoArsenal(arrowId, "banish", { faceUp: true })) {
+        ctx.addCardTempPower(arrowId, 3);
+      }
+    },
+  },
   "sticky fingers|0": { ...attackAbilityForAlly(0), onAttackDeclared(ctx: ScriptCtx) { const gold = controlledGold(ctx, opponentSeat(ctx))[0]; if (ctx.link?.targetAllyId === undefined && gold) ctx.steal(gold.instanceId, { duration: "indefinite" }); } },
   "gold-baited hook|0": {
     activated: {

@@ -547,6 +547,30 @@ describe("HVY — Heavy Hitters mechanics", () => {
       .expectLog("wins the wager");
   });
 
+  it("Hold 'em applies to Wage Gold through Universal", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          hand: ["hold 'em|1", "wage gold|1"],
+          resources: 4,
+        },
+        { hero: "rhinar" },
+      ],
+    });
+
+    g.play("hold 'em|1")
+      .play("wage gold|1")
+      .expectAttackValue(10)
+      .chooseOption("yes")
+      .chooseOption("yes");
+
+    expect(g.state.chain.at(-1)?.wagers).toHaveLength(2);
+    expect(projectStateFor(g.state, 0).chain.at(-1)?.wagerRewards).toEqual(
+      expect.arrayContaining(["Winner creates Gold", "Winner creates Vigor"]),
+    );
+  });
+
   it("Betsy creates a triggered payment after an attack wagers", () => {
     const g = scenario({
       seats: [

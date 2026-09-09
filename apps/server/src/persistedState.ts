@@ -97,7 +97,7 @@ export interface PersistedDelayedTriggerV1 {
   source: PersistedCardInstanceV1;
   seat: number;
   subjectSeat: number;
-  event: "end-of-turn";
+  event: "start-of-turn" | "end-of-turn";
   turn: number;
   hook: string;
   label: string;
@@ -1516,7 +1516,7 @@ function validateState(value: unknown, code: string): PersistedGameStateV1 {
       );
       validateCard(entry.source, code, `${entryPath}.source`);
       for (const key of ["seat", "subjectSeat", "turn"] as const) integer(entry[key], code, `${entryPath}.${key}`);
-      oneOf(entry.event, ["end-of-turn"] as const, code, `${entryPath}.event`);
+      oneOf(entry.event, ["start-of-turn", "end-of-turn"] as const, code, `${entryPath}.event`);
       string(entry.hook, code, `${entryPath}.hook`, 256);
       string(entry.label, code, `${entryPath}.label`, 512);
       optional(entry, "labelMessage", (message, messagePath) => {

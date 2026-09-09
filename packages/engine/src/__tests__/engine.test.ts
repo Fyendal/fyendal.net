@@ -486,6 +486,36 @@ describe("game setup & turn structure", () => {
     expect(cardTypesOf(s, card)).not.toContain("ice");
   });
 
+  it("gives Universal cards their controller's hero class in every face-up zone", () => {
+    const s = makeGame(105);
+    s.cardsRef = {
+      ...s.cardsRef,
+      ATK4: { ...s.cardsRef.ATK4!, keywords: ["Universal"] },
+    };
+    const p0 = player(s, 0);
+    const p1 = player(s, 1);
+    const id = giveCard(s, 0, "ATK4");
+    const card = p0.hand.find((candidate) => candidate.instanceId === id)!;
+
+    expect(cardTypesOf(s, card)).toEqual(expect.arrayContaining(["generic", "warrior"]));
+
+    makeCtx(s, engineRuntime, 0, p0.hero).addModifier({
+      scope: "until-end-of-turn",
+      seat: 0,
+      suppressesOwnedClassTalentTypes: true,
+    });
+    expect(cardTypesOf(s, card)).not.toContain("generic");
+    expect(cardTypesOf(s, card)).toContain("warrior");
+
+    p0.hand.splice(p0.hand.indexOf(card), 1);
+    p1.board.push(card);
+    expect(cardTypesOf(s, card)).toContain("brute");
+    expect(cardTypesOf(s, card)).not.toContain("warrior");
+
+    card.faceDown = true;
+    expect(cardTypesOf(s, card)).not.toContain("brute");
+  });
+
   it("applies generic friendly draw, life-gain, and ability-cost replacements", () => {
     const s = makeGame(100);
     s.scriptsRef = { ...s.scriptsRef, HERO_A: {

@@ -154,6 +154,43 @@ describe("CRU — Mechanologist attacks and Workshop", () => {
     expect(g.state.pendingDecision?.chooseHook).toBe("viz-top");
   });
 
+  it("Viziertronic Model i puts a card back for each Twin Drive Boost", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 2,
+          hand: ["twin drive|1"],
+          deck: [
+            "zero to sixty|1",
+            "payload|2",
+            "zero to fifty|2",
+            "maximum velocity|1",
+            BLUE,
+          ],
+          equipment: { head: "viziertronic model i|0" },
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.activate("viziertronic model i|0")
+      .play("twin drive|1", { boost: true, boostCount: 2 })
+      .expectHandSize(0, 2);
+    expect(g.state.pendingDecision?.chooseHook).toBe("viz-top");
+
+    g.chooseCard("payload|2").expectHandSize(0, 1);
+    expect(g.state.pendingDecision?.chooseHook).toBe("viz-top");
+
+    g.chooseCard("maximum velocity|1")
+      .expectHandSize(0, 0)
+      .expectDeckTop(0, "maximum velocity|1");
+    expect(g.state.pendingDecision?.kind).toBe("defend");
+    expect(g.state.log.some(
+      (entry) => entry.publicPayload?.message.id === "engine.log.decision.duplicate.skipped",
+    )).toBe(false);
+  });
+
   it("High Speed Impact gives the next boosted attack this chain dominate", () => {
     const g = scenario({
       seats: [

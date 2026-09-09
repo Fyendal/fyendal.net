@@ -373,12 +373,16 @@ export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRar
     friendlyDefendedTrigger: {
       label: "The first time Decimator Great Axe is defended by a non-equipment card this turn",
       condition(ctx, defenders) {
-        return ownAttack(ctx) && ctx.getCounter("usedTurn") !== ctx.state.turn &&
+        return ctx.link?.attackingCard.instanceId === ctx.self.instanceId &&
+          ctx.getCounter("usedTurn") !== ctx.state.turn &&
           defenders.some((card) => ctx.cardData(card.cardId).cardType !== "equipment");
       },
     },
     onFriendlyDefended(ctx) {
-      if (!ownAttack(ctx) || ctx.getCounter("usedTurn") === ctx.state.turn) return;
+      if (
+        ctx.link?.attackingCard.instanceId !== ctx.self.instanceId ||
+        ctx.getCounter("usedTurn") === ctx.state.turn
+      ) return;
       const cards = [
         ...ctx.link!.defendingCards,
         ...ctx.link!.defendingEquipment,

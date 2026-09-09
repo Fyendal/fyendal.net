@@ -11501,6 +11501,12 @@
       "value": "Tap target Pirate hero or ally"
     }
   ],
+  "card.sea.returnfire.arrow.arsenal": [
+    {
+      "type": 0,
+      "value": "Put the banished arrow face up into arsenal"
+    }
+  ],
   "card.sea.scooba.yellow.bottom": [
     {
       "type": 0,

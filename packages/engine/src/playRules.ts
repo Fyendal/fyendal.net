@@ -1,5 +1,5 @@
 import type { EngineRuntime } from "./runtimePorts.js";
-import { cardAbilitiesSuppressed, cardColorOf, cardHasName, cardHasType, cardNamesOf, cardTypesOf, dataOf, instanceDataOf, meldSideHasType, scriptOf } from "./cardProperties.js";
+import { cardAbilitiesSuppressed, cardColorOf, cardHasName, cardHasType, cardNamesOf, cardTypesOf, dataOf, hasKeyword, instanceDataOf, meldSideHasType, scriptOf } from "./cardProperties.js";
 import { controlledPermanents, lingeringModifierSources } from "./sourceQueries.js";
 import {
   gameLogMessage,
@@ -250,6 +250,31 @@ function modifierMatchesPlayedCard(
   }
   if (mod.excludesSubtype && tags.includes(mod.excludesSubtype.toLowerCase())) return false;
   return true;
+}
+
+/** Number of separately payable Boost abilities the card will have as it is
+ * announced. A next-play grant is part of the card's play-static abilities
+ * before costs are declared, and adds to any printed or previously granted
+ * copies (notably Twin Drive's two printed copies). */
+export function boostCountForCardPlay(
+  state: GameStateInternal,
+  seat: number,
+  card: CardInstance,
+): number {
+  const printedCount = hasKeyword(state, card, "boost")
+    ? Math.max(1, Math.floor(scriptOf(state, card.cardId, card)?.boostCount ?? 1))
+    : 0;
+  const grantedCount = (card.grantedKeywords ?? []).filter(
+    (keyword) => keyword.toLowerCase() === "boost",
+  ).length;
+  const pendingCount = state.modifiers.filter((modifier) =>
+    modifier.seat === seat &&
+    !modifier.consumed &&
+    modifier.scope === "next-play" &&
+    modifier.grantKeyword?.toLowerCase() === "boost" &&
+    modifierMatchesPlayedCard(state, modifier, card)
+  ).length;
+  return printedCount + grantedCount + pendingCount;
 }
 
 export function costModifierScopeApplies(modifier: Modifier): boolean {

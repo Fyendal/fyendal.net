@@ -7,7 +7,6 @@ import {
   cardHasType,
   cardTypesOf,
   dataOf,
-  hasKeyword,
   instanceDataOf,
   isArrowData,
   isChiCard,
@@ -40,7 +39,7 @@ import { windowInstantPlays } from "./triggers.js";
 import { runechantSkipStep } from "./runechantSkip.js";
 import { controlledPermanents } from "./sourceQueries.js";
 import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestrictedByModifier, activatedAbilityAvailable, activatedEffectCardCostOptions, canPayAbilityLifeCost, canPayActivatedEffectCardCosts, discardCostOptions, effectiveAbilityList } from "./abilityRules.js";
-import { alternativePlayCostOptions, canPlayAsInstant, canRuneGate, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, cardsPlayableFromArsenal, cardsPlayableFromZone, playFromZoneRequiresInstant, playTargetOptions } from "./playRules.js";
+import { alternativePlayCostOptions, boostCountForCardPlay, canPlayAsInstant, canRuneGate, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, cardsPlayableFromArsenal, cardsPlayableFromZone, playFromZoneRequiresInstant, playTargetOptions } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost, pitchProhibitedByEffect, pitchValueOfInstance } from "./resources.js";
 import { resolveVariableAbilityCost, variableResourceChoices } from "./costs.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
@@ -440,12 +439,12 @@ function playIntentsForCard(
       )), targetAllyId));
       if (
         isAttackAction &&
-        hasKeyword(state, card, "boost") &&
+        boostCountForCardPlay(state, player.seat, card) > 0 &&
         player.deck.length > 0
       ) {
         const maximumBoosts = Math.min(
           player.deck.length,
-          Math.max(1, Math.floor(scriptOf(state, card.cardId, card)?.boostCount ?? 1)),
+          boostCountForCardPlay(state, player.seat, card),
         );
         for (let boostCount = 1; boostCount <= maximumBoosts; boostCount++) {
           intents.push(...announceAttackTarget(playIntentsWithPitches(
@@ -489,12 +488,12 @@ function playIntentsForCard(
         ), targetAllyId));
         if (
           isAttackAction &&
-          hasKeyword(state, card, "boost") &&
+          boostCountForCardPlay(state, player.seat, card) > 0 &&
           player.deck.length > 0
         ) {
           const maximumBoosts = Math.min(
             player.deck.length,
-            Math.max(1, Math.floor(scriptOf(state, card.cardId, card)?.boostCount ?? 1)),
+            boostCountForCardPlay(state, player.seat, card),
           );
           for (let boostCount = 1; boostCount <= maximumBoosts; boostCount++) {
             intents.push(...announceAttackTarget(playIntentsWithPitches(

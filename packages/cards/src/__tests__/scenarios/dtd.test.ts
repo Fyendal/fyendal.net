@@ -862,6 +862,33 @@ describe("DTD — Prism and Figments", () => {
     expect(s.state.chain.at(-1)?.defendingEquipment[0]?.tempDefense).toBe(-1);
   });
 
+  it("Decimator Great Axe does not trigger when another attack is defended", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          weapons: ["decimator great axe|0"],
+          hand: ["head jab|1"],
+          equipment: NO_EQUIPMENT,
+        },
+        {
+          hero: "rhinar",
+          hand: ["raging onslaught|3"],
+          equipment: NO_EQUIPMENT,
+        },
+      ],
+    });
+
+    s.play("head jab|1")
+      .blockWith("raging onslaught|3")
+      .settle();
+
+    expect(s.state.pendingDecision).toBeNull();
+    expect(s.state.log.some((entry) =>
+      entry.publicText?.includes("Decimator Great Axe triggers")
+    )).toBe(false);
+  });
+
   it("Reality Refractor makes an Illusionist aura attack for 5", () => {
     const s = scenario({
       seats: [

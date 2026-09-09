@@ -2,7 +2,7 @@ import type { GameStateInternal } from "./runtimeState.js";
 import type { CardColor, CardData, CardType, MeldSide } from "@fyendal/shared";
 import type { CardScript } from "./scripts.js";
 import type { CardInstance, PlayerState } from "./state.js";
-import { currentLink } from "./zoneQueries.js";
+import { currentLink, findCardAnywhere } from "./zoneQueries.js";
 
 // Card data currently stores talent supertypes beside ordinary subtypes.
 // Keep this aligned with CR 2.11.6b so effects such as Erase Face can remove
@@ -212,11 +212,22 @@ export function cardTypesOf(state: GameStateInternal, card: CardInstance): strin
   const allZone = card.faceDown
     ? []
     : (scriptOf(state, card.cardId, card)?.allZoneTypes ?? []);
+  // CR 8.3.35: Universal continually gives a face-up card the classes of its
+  // controller's hero (or its owner's hero when it has no controller). This
+  // gain is applied after effects that remove printed class/talent types, so
+  // an effect such as Erase Face does not by itself remove the gained class.
+  const controllerSeat = findCardAnywhere(state, card.instanceId)?.seat ?? card.owner;
+  const controllerHero = state.players[controllerSeat]?.hero ?? state.players[card.owner]?.hero;
+  const universalClasses = !card.faceDown &&
+      instanceHasKeyword(state, card, "universal") && controllerHero
+    ? (instanceDataOf(state, controllerHero).classes ?? [])
+    : [];
   return [...new Set([
     ...(!suppressClassTalent ? (data.classes ?? []) : []),
     ...(data.subtypes ?? []).filter(
       (type) => !suppressClassTalent || !TALENT_SUPERTYPE_SET.has(type.toLowerCase()),
     ),
+    ...universalClasses,
     ...allZone,
     ...(card.grantedTypes ?? []),
     ...(card.temporaryAlly ? ["ally"] : []),

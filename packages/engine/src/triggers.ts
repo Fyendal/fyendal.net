@@ -1784,7 +1784,9 @@ export function collectEventTriggerLayers(
   const dueDelayed = state.delayedTriggers.filter(
     (delayed) =>
       delayed.event === event &&
-      delayed.turn === state.turn &&
+      (delayed.event === "start-of-turn"
+        ? delayed.turn < state.turn
+        : delayed.turn === state.turn) &&
       delayed.subjectSeat === subject,
   );
   if (dueDelayed.length > 0) {

@@ -161,6 +161,37 @@ describe("MST — Mechanologist", () => {
       ), evo).toBe(false);
     }
   });
+
+  it("Evo Speedslip gives Twin Drive a third Boost ability", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 2,
+          hand: ["evo speedslip|3", "twin drive|1"],
+          deck: ["zero to sixty|1", "zipper hit|2", "throttle|3"],
+          equipment: { legs: "cogwerx base legs|0" },
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("evo speedslip|3", { asInstant: true });
+
+    const twinDrive = g.state.players[0]!.hand.find(
+      (card) => card.cardId === printingId("twin drive|1"),
+    )!;
+    const boostCounts = legalIntents(g.state, 0)
+      .filter((intent): intent is Extract<ReturnType<typeof legalIntents>[number], { kind: "play-card" }> =>
+        intent.kind === "play-card" && intent.instanceId === twinDrive.instanceId,
+      )
+      .map((intent) => intent.boost === true ? (intent.boostCount ?? 1) : 0);
+    expect(new Set(boostCounts)).toEqual(new Set([0, 1, 2, 3]));
+
+    g.play("twin drive|1", { boost: true, boostCount: 3, settle: false });
+    expect(g.state.players[0]!.banish).toHaveLength(3);
+    expect(g.state.players[0]!.flags.boostCountThisTurn).toBe(3);
+  });
 });
 
 describe("MST — Assassin", () => {
