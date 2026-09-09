@@ -51,6 +51,30 @@ describe("HNT — Sound the Alarm", () => {
       .expectDeckTop(0, "sink below|1");
   });
 
+  it("does not shuffle the deck when the optional defense reaction search is declined", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 1,
+          hand: ["sound the alarm|1"],
+          deck: ["sink below|1", "fate foreseen|2", "wrecker romp|3"],
+        },
+        {
+          hero: "rhinar",
+          heroKey: "briar|0",
+          hand: ["razor reflex|1"],
+        },
+      ],
+    });
+    const originalDeckOrder = g.state.players[0]!.deck.map((card) => card.instanceId);
+
+    g.play("sound the alarm|1").chooseOption("pass");
+
+    expect(g.state.players[0]!.deck.map((card) => card.instanceId)).toEqual(originalDeckOrder);
+    expect(projectStateFor(g.state, 0).log).not.toContain("Rhinar shuffles their deck");
+  });
+
   it("reveals Briar's hand without offering a search for Lightning Press because it is an instant", () => {
     const g = scenario({
       seats: [
@@ -555,6 +579,39 @@ describe("HNT — marked heroes and daggers", () => {
 
     expect(g.state.players[0]!.weapons.map((card) => card.instanceId)).toContain(kunaiId);
     expect(g.state.players[0]!.graveyard.map((card) => card.instanceId)).not.toContain(kunaiId);
+  });
+
+  it("Cindra can attack again with a Kunai re-equipped from the graveyard", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "cindra|0",
+          resources: 4,
+          weapons: ["kunai of retribution|0"],
+          equipment: { arms: "flick knives|0" },
+          hand: ["head jab|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    const kunaiId = g.state.players[0]!.weapons[0]!.instanceId;
+
+    g.attackWithWeapon("kunai of retribution|0")
+      .blockWith()
+      .settle()
+      .play("head jab|1")
+      .blockWith()
+      .activate("flick knives|0")
+      .chooseCard("kunai of retribution|0")
+      .activate("cindra|0")
+      .chooseCard("kunai of retribution|0")
+      .settle()
+      .attackWithWeapon("kunai of retribution|0")
+      .blockWith()
+      .settle();
+
+    expect(g.state.chain.at(-1)?.attackingCard.instanceId).toBe(kunaiId);
   });
 
   it("Blood Splattered Vest is optional and is destroyed by its third stain counter", () => {

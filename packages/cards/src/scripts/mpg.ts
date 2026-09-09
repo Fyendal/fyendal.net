@@ -45,6 +45,10 @@ function crushTriggered(ctx: ScriptCtx): boolean {
   return !!ctx.link && ctx.link.targetAllyId === undefined && ctx.link.hit && ctx.link.damage >= 4;
 }
 
+function guardianCrushTriggered(ctx: ScriptCtx): boolean {
+  return crushTriggered(ctx) && hasType(ctx, ctx.player(opponentSeat(ctx)).hero, "guardian");
+}
+
 function controlsSeismicSurge(ctx: ScriptCtx, seat = ctx.seat): boolean {
   return ctx.player(seat).board.some((card) => isNamed(ctx, card, "Seismic Surge"));
 }
@@ -98,7 +102,7 @@ function guardianArsenalBuff(attack = 0, dominate = false): CardScript {
 
 function oldOneDestroyAuras(): CardScript {
   return {
-    canTriggerOnHit: crushTriggered,
+    canTriggerOnHit: guardianCrushTriggered,
     onHit(ctx) {
       for (const aura of [...ctx.player(opponentSeat(ctx)).board].filter((card) => isAura(ctx, card))) {
         ctx.destroyPermanent(aura.instanceId);
@@ -109,7 +113,7 @@ function oldOneDestroyAuras(): CardScript {
 
 function oldOneSmeltEquipment(): CardScript {
   return {
-    canTriggerOnHit: crushTriggered,
+    canTriggerOnHit: guardianCrushTriggered,
     onHit(ctx) {
       for (const equipment of equipmentCards(ctx, opponentSeat(ctx))) {
         if ((equipment.defCounters ?? 0) > 0) ctx.destroyPermanent(equipment.instanceId);
@@ -120,7 +124,7 @@ function oldOneSmeltEquipment(): CardScript {
 
 function blindOwnedCards(): CardScript {
   return {
-    canTriggerOnHit: crushTriggered,
+    canTriggerOnHit: guardianCrushTriggered,
     onHit(ctx) {
             ctx.suppressOwnedCardAbilitiesNextTurn(opponentSeat(ctx));
     },
@@ -129,7 +133,7 @@ function blindOwnedCards(): CardScript {
 
 function annexAura(): CardScript {
   return {
-    canTriggerOnHit: crushTriggered,
+    canTriggerOnHit: guardianCrushTriggered,
     onHit(ctx) {
       const auras = ctx.player(opponentSeat(ctx)).board.filter((card) => isAura(ctx, card));
       if (auras.length) {
@@ -148,7 +152,7 @@ function annexAura(): CardScript {
 
 function annexFaceUpArsenal(): CardScript {
   return {
-    canTriggerOnHit: crushTriggered,
+    canTriggerOnHit: guardianCrushTriggered,
     onHit(ctx) {
             ctx.annexFaceUpArsenalThroughNextTurn(opponentSeat(ctx));
     },
@@ -157,7 +161,7 @@ function annexFaceUpArsenal(): CardScript {
 
 function annexEquipment(): CardScript {
   return {
-    canTriggerOnHit: crushTriggered,
+    canTriggerOnHit: guardianCrushTriggered,
     onHit(ctx) {
       const equipment = equipmentCards(ctx, opponentSeat(ctx)).filter((card) => canEquip(ctx, card));
       if (equipment.length) {

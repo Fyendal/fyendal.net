@@ -703,7 +703,36 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "shallow water shark harpoon|2": { canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.getFlag("player", "activatedCannonThisTurn") === true; }, onHit(ctx) { const arsenal = ctx.player(opponentSeat(ctx)).arsenal[0]; if (arsenal) { ctx.moveToGraveyard(arsenal.instanceId, "arsenal"); create(ctx, GOLD); } } },
   "trench of watery depths|0": { onDefend(ctx) { const blues = ctx.player(ctx.seat).graveyard.filter((card) => ctx.cardColor(card) === 3); if (blues.length) ctx.requestCardChoice("pen-trench-pitch", decisionPrompt("Pitch a blue from graveyard?", "card.pen.graveyard.blue.pitch", { optionMessages: commonOptionMessages("no") }), ["no", ...blues.map((card) => card.instanceId)]); }, onChoose(ctx, hook, option) { if (hook === "pen-trench-pitch" && option !== "no") ctx.pitchCard(Number(option)); } },
   "break open the chests!|2": { onPlay(ctx) { let yellow = false; for (const player of ctx.state.players) for (const card of player.arsenal) { ctx.turnArsenalFaceUp(card.instanceId); if (ctx.cardColor(card) === 2) yellow = true; } if (yellow) create(ctx, GOLD, 2); } },
-  ...pitches("lighten the load", () => ({ onAttackDeclared(ctx) { const options: (number | string)[] = ["no", ...ctx.player(ctx.seat).hand.map((card) => card.instanceId), ...ctx.player(ctx.seat).board.filter((card) => hasTag(ctx, card, "item")).map((card) => `item:${card.instanceId}`)]; if (options.length > 1) ctx.requestCardChoice("pen-lighten", decisionPrompt("Discard a card or destroy an item for go again?", "card.pen.discardoritem.goagain", { optionMessages: commonOptionMessages("no") }), options); }, onChoose(ctx, hook, option) { if (hook !== "pen-lighten" || option === "no") return; const paid = option.startsWith("item:") ? ctx.destroyPermanent(Number(option.slice(5))) : !!ctx.discardCard(ctx.seat, Number(option)); if (paid) ctx.grantGoAgain(); } })),
+  ...pitches("lighten the load", () => ({
+    onAttackDeclared(ctx) {
+      const hand = ctx.player(ctx.seat).hand;
+      const items = ctx.player(ctx.seat).board.filter((card) => hasTag(ctx, card, "item"));
+      const options = [
+        "no",
+        ...hand.map((card) => String(card.instanceId)),
+        ...items.map((card) => `item:${card.instanceId}`),
+      ];
+      if (options.length <= 1) return;
+      ctx.requestChoice(
+        "pen-lighten",
+        decisionPrompt(
+          "Discard a card or destroy an item for go again?",
+          "card.pen.discardoritem.goagain",
+          { optionMessages: commonOptionMessages("no") },
+        ),
+        options,
+        undefined,
+        [null, ...hand.map((card) => card.instanceId), ...items.map((card) => card.instanceId)],
+      );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "pen-lighten" || option === "no") return;
+      const paid = option.startsWith("item:")
+        ? ctx.destroyPermanent(Number(option.slice(5)))
+        : !!ctx.discardCard(ctx.seat, Number(option));
+      if (paid) ctx.grantGoAgain();
+    },
+  })),
   ...pitches("submerge", () => ({ additionalCost(ctx) { const hand = ctx.player(ctx.seat).hand.filter((card) => card.instanceId !== ctx.self.instanceId); if (hand.length) ctx.requestCardChoice("pen-submerge", decisionPrompt("Put a card fifth from the top", "card.pen.card.fifthfromtop"), hand.map((card) => card.instanceId)); }, onChoose(ctx, hook, option) { if (hook === "pen-submerge") ctx.putOnDeckAtDepth(Number(option), 5); } })),
 
   "herald of victoria|2": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", fromHand: true, onActivate(ctx) { ctx.addModifier({ scope: "until-end-of-turn", seat: opponentSeat(ctx), attack: -1, appliesTo: "attack-action" }); } } },

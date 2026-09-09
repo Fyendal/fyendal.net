@@ -742,6 +742,20 @@ describe("SLY — attacks and defense", () => {
 });
 
 describe("SLY — crush cycle", () => {
+  it("does not trigger crush when the attack deals 4 or more damage to an ally", () => {
+    const g = scenario({
+      seats: [
+        lyath({ hand: ["villainous pose|1", "short shrift|2", "mocking blow|3"] }),
+        foe({ board: ["barnacle|2"], hand: ["raging onslaught|1"] }),
+      ],
+    });
+    g.play("villainous pose|1", { pitch: ["mocking blow|3"] });
+    g.play("short shrift|2", { targetAlly: "barnacle|2" })
+      .expectNoLog("Short Shrift triggers: On hit")
+      .expectHandSize(1, 1)
+      .expectInZone(1, "barnacle|2", "graveyard");
+  });
+
   it("Short Shrift crush makes the opponent discard a card of their choice", () => {
     const g = scenario({
       seats: [

@@ -9,6 +9,7 @@ import {
   opponentSeat,
   requestDiscardChoice,
   resolveDiscardChoice,
+  yesNoPrompt,
 } from "../shared-helpers.js";
 
 const QUICKEN = "EVO250";
@@ -161,6 +162,40 @@ function breakerEvo(extra: CardScript = {}): CardScript {
     },
   });
 }
+function optionalBreakerBoost(effect: (ctx: ScriptCtx, boostedInstanceId: number) => void): CardScript {
+  const requestChoice = (ctx: ScriptCtx) => ctx.requestChoice(
+    "breaker-boost",
+    yesNoPrompt(
+      `Destroy a card under ${ctx.data.name}?`,
+      "card.evo.breaker.card.destroy.optional",
+      { card: { kind: "card", cardId: ctx.self.cardId } },
+    ),
+    ["yes", "no"],
+  );
+  return {
+    onBoosted(ctx, boosted) {
+      if (!ctx.self.subcards?.length) return;
+      const pending = ctx.getCounter("breaker-boost-pending");
+      ctx.setCounter(`breaker-boosted-instance:${pending + 1}`, boosted.instanceId);
+      ctx.setCounter("breaker-boost-pending", pending + 1);
+      if (pending === 0) requestChoice(ctx);
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "breaker-boost") return;
+      const boostedInstanceId = ctx.getCounter("breaker-boosted-instance:1");
+      if (option === "yes" && boostedInstanceId > 0 && ctx.destroySubcard(ctx.self.instanceId)) {
+        effect(ctx, boostedInstanceId);
+      }
+      const pending = Math.max(0, ctx.getCounter("breaker-boost-pending") - 1);
+      for (let i = 1; i <= pending; i += 1) {
+        ctx.setCounter(`breaker-boosted-instance:${i}`, ctx.getCounter(`breaker-boosted-instance:${i + 1}`));
+      }
+      ctx.setCounter("breaker-boost-pending", pending);
+      if (pending > 0 && ctx.self.subcards?.length) requestChoice(ctx);
+      else if (pending > 0) ctx.setCounter("breaker-boost-pending", 0);
+    },
+  };
+}
 function evoThreshold(onHit?: (ctx: ScriptCtx) => void): CardScript {
   return {
     modifyPlayCost(ctx, base) { return equippedEvos(ctx) >= 2 ? Math.max(0, base - 3) : base; },
@@ -214,10 +249,19 @@ export const evoHighRarity: Record<string, CardScript> = {
   "evo steel soul processor|3": evoEquipment({ onTransform(ctx, _direction, other) { const count = steelSoulTriggerCount(ctx, other); if (count > 0) ctx.changeResources(ctx.seat, count * 3); } }),
   "evo steel soul controller|3": evoEquipment({ onTransform(ctx, _direction, other) { const count = steelSoulTriggerCount(ctx, other); if (count <= 0) return; ctx.setCounter("steel-controller-triggers", count); requestSteelControllerChoice(ctx); }, onChoose(ctx, hook, option) { if (hook !== "steel-controller") return; if (option !== "no") ctx.putOnDeckAtDepth(Number(option), 5); const remaining = Math.max(0, ctx.getCounter("steel-controller-triggers") - 1); ctx.setCounter("steel-controller-triggers", remaining); if (remaining > 0) requestSteelControllerChoice(ctx); } }),
   "evo steel soul tower|3": evoEquipment({ onTransform(ctx, _direction, other) { const count = steelSoulTriggerCount(ctx, other); if (count > 0) ctx.changeActionPoints(ctx.seat, count); } }),
-  "evo circuit breaker|1": breakerEvo({ additionalCost() {}, onBoosted(ctx) { if (!ctx.destroySubcard(ctx.self.instanceId)) return; const attacks = ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && isMechAttack(ctx, card)).slice(0, 2); for (const attack of attacks) ctx.putOnDeckBottom(attack.instanceId); if (attacks.length) ctx.shuffleDeck(); } }),
-  "evo atom breaker|1": breakerEvo({ onBoosted(ctx) { if (ctx.destroySubcard(ctx.self.instanceId)) ctx.changeResources(ctx.seat, 2); } }),
-  "evo face breaker|1": breakerEvo({ onBoosted(ctx, boosted) { if (ctx.destroySubcard(ctx.self.instanceId)) ctx.addCardTempPower(boosted.instanceId, 2); } }),
-  "evo mach breaker|1": breakerEvo({ onBoosted(ctx) { if (ctx.destroySubcard(ctx.self.instanceId)) ctx.createToken(QUICKEN); } }),
+  "evo circuit breaker|1": breakerEvo({
+    additionalCost() {},
+    ...optionalBreakerBoost((ctx) => {
+      const attacks = ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && isMechAttack(ctx, card)).slice(0, 2);
+      for (const attack of attacks) ctx.putOnDeckBottom(attack.instanceId);
+      if (attacks.length) ctx.shuffleDeck();
+    }),
+  }),
+  "evo atom breaker|1": breakerEvo(optionalBreakerBoost((ctx) => ctx.changeResources(ctx.seat, 2))),
+  "evo face breaker|1": breakerEvo(optionalBreakerBoost((ctx, boostedInstanceId) => {
+    ctx.addCardTempPower(boostedInstanceId, 2);
+  })),
+  "evo mach breaker|1": breakerEvo(optionalBreakerBoost((ctx) => ctx.createToken(QUICKEN))),
   "annihilator engine|1": evoThreshold((ctx) => { if (equippedEvos(ctx) >= 1 && ctx.link) for (const card of [...ctx.link.defendingCards, ...ctx.link.defendingEquipment]) ctx.moveToGraveyard(card.instanceId, "chain"); }),
   "terminator tank|1": { ...evoThreshold((ctx) => { if (equippedEvos(ctx) >= 1) requestDiscardChoice(ctx, "terminator-discard", decisionPrompt("Choose a card to discard", "card.evo.card.discard"), opponentSeat(ctx)); }), onChoose(ctx, hook, option) { if (hook === "terminator-discard") resolveDiscardChoice(ctx, option, opponentSeat(ctx)); } },
   "war machine|1": evoThreshold((ctx) => { if (equippedEvos(ctx) >= 1) for (const card of [...ctx.player(opponentSeat(ctx)).arsenal]) ctx.moveToGraveyard(card.instanceId, "arsenal"); }),

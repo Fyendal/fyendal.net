@@ -3093,6 +3093,20 @@
       "value": "Put an attack fifth from the top?"
     }
   ],
+  "card.evo.breaker.card.destroy.optional": [
+    {
+      "type": 0,
+      "value": "Destroy a card under "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "?"
+    }
+  ],
   "card.evo.card.discard": [
     {
       "type": 0,
@@ -20282,6 +20296,18 @@
       "value": "Play card"
     }
   ],
+  "game.decision.playMethod.action": [
+    {
+      "type": 0,
+      "value": "Play as action (spends 1 AP)"
+    }
+  ],
+  "game.decision.playMethod.instant": [
+    {
+      "type": 0,
+      "value": "Play as instant (0 AP)"
+    }
+  ],
   "game.decision.playerDeciding": [
     {
       "type": 1,
@@ -21520,6 +21546,12 @@
     {
       "type": 0,
       "value": "Turn begins"
+    }
+  ],
+  "game.turn.endPassPending": [
+    {
+      "type": 0,
+      "value": "Opponent passed to end their turn. If you act, they will regain priority."
     }
   ],
   "game.turn.named": [

@@ -32,8 +32,8 @@ function isAttack(ctx: ScriptCtx, card: Card): boolean {
   return ctx.hasCardType(card, "action") && has(ctx, card, "attack");
 }
 function cardIdNamed(ctx: ScriptCtx, name: string): string | undefined { return ctx.cardIdsNamed(name)[0]; }
-function swordAttack(ctx: ScriptCtx): boolean {
-  return ctx.link?.attackCardType === "weapon" && !!ctx.link && has(ctx, ctx.link.attackingCard, "sword");
+function weaponAttack(ctx: ScriptCtx): boolean {
+  return ctx.link?.attackCardType === "weapon";
 }
 function attacksAboveBaseControlled(ctx: ScriptCtx, seat: number): number {
   return ctx.state.chain.filter((link) => {
@@ -194,8 +194,12 @@ export const penHighRarity: Record<string, CardScript> = {
     } },
   },
   "swordmaster's shine|1": {
-    canPlay: (ctx) => swordAttack(ctx),
-    modifyPlayCost(ctx, base) { return Math.max(0, base - ctx.player(ctx.seat).weapons.reduce((n, card) => n + Number(card.counters?.power ?? 0), 0)); },
+    canPlay: (ctx) => weaponAttack(ctx),
+    modifyPlayCost(ctx, base) {
+      return Math.max(0, base - ctx.player(ctx.seat).weapons
+        .filter((card) => has(ctx, card, "sword"))
+        .reduce((n, card) => n + Number(card.counters?.power ?? 0), 0));
+    },
     onPlay: (ctx) => ctx.addModifier({ scope: "chain-link", attack: 5 }),
   },
   "blunten|2": {

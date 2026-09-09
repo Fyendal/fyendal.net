@@ -7,7 +7,10 @@ import { buffNextAttack, decisionMessage, decisionPrompt, localizedLog, opponent
 // 4 or more damage to a hero.
 
 function crushTriggered(ctx: ScriptCtx): boolean {
-  return !!ctx.link && ctx.link.damage >= 4 && ctx.link.hit;
+  return !!ctx.link
+    && ctx.link.targetAllyId === undefined
+    && ctx.link.damage >= 4
+    && ctx.link.hit;
 }
 
 

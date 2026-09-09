@@ -910,7 +910,26 @@ Object.assign(ros, {
     for (const card of traps) ctx.moveToHand(card.instanceId);
     ctx.shuffleDeck();
   } },
-  "unsheathed|1": { onPlay: (ctx: ScriptCtx) => buffNextAttack(ctx, { attack: 3, appliesToSubtype: "sword" }) },
+  "unsheathed|1": {
+    onPlay(ctx: ScriptCtx) {
+      buffNextAttack(ctx, { attack: 3, appliesToSubtype: "sword" });
+      // Keep the resolved card observable until its next-attack modifier binds
+      // so the ability it grants can trigger with that attack.
+      ctx.addModifier({ scope: "until-end-of-turn" });
+    },
+    triggers: [{
+      event: "attack-declared",
+      label: "Gain go again",
+      labelMessage: decisionMessage("card.trigger.common.goagain.gain"),
+      condition: (ctx: ScriptCtx) => !!ctx.link &&
+        ctx.state.modifiers.some((modifier) =>
+          modifier.sourceInstanceId === ctx.self.instanceId &&
+          modifier.scope === "chain-link"
+        ) &&
+        ctx.currentAttackPower() > 2 * ctx.basePower(ctx.link.attackingCard),
+      effect: (ctx: ScriptCtx) => ctx.grantGoAgain(),
+    }],
+  },
   "calming cloak|0": { activated: { cost: 1, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true, onActivate: (ctx: ScriptCtx) => ctx.addModifier({ scope: "next-play", playCostReduction: 2, appliesToSubtype: "aura" }) } },
   "calming gesture|0": { activated: { cost: 1, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true, onActivate: (ctx: ScriptCtx) => ctx.createToken(SPECTRAL_SHIELD) } },
   "fluttersteps|0": { onDestroyed: (ctx: ScriptCtx) => ctx.setPlayerFlag(ctx.seat, "nextAuraAsInstant", true) },

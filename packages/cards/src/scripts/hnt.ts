@@ -578,7 +578,14 @@ export const hnt: Record<string, CardScript> = {
       const reactions = ctx.player(ctx.seat).deck.filter((card) => ctx.cardData(card.cardId).cardType === "defense-reaction");
       if (reactions.length) ctx.requestCardChoice("sound-alarm", decisionPrompt("Search for a defense reaction?", "card.hnt.defensereaction.search", { optionMessages: commonOptionMessages("pass") }), ["pass", ...reactions.map((card) => card.instanceId)]);
     },
-    onChoose(ctx, hook, option) { if (hook !== "sound-alarm") return; if (option !== "pass") { const card = ctx.player(ctx.seat).deck.find((candidate) => candidate.instanceId === Number(option)); if (card) { ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(card.cardId).name} is revealed`, "card.log.common.card.revealed", { revealed: { kind: "card", cardId: card.cardId } }, { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" })); ctx.shuffleDeck(); ctx.putOnDeckTop(card.instanceId); return; } } ctx.shuffleDeck(); },
+    onChoose(ctx, hook, option) {
+      if (hook !== "sound-alarm" || option === "pass") return;
+      const card = ctx.player(ctx.seat).deck.find((candidate) => candidate.instanceId === Number(option));
+      if (!card) return;
+      ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(card.cardId).name} is revealed`, "card.log.common.card.revealed", { revealed: { kind: "card", cardId: card.cardId } }, { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" }));
+      ctx.shuffleDeck();
+      ctx.putOnDeckTop(card.instanceId);
+    },
   },
   "imperial seal of command|1": { activated: { cost: 0, isAttack: false, goAgain: true, destroySelfCost: true, onActivate(ctx) { ctx.setPlayerFlag(ctx.seat, "noDefenseReactionsThisTurn", true); if (dataTags(ctx, ctx.player(ctx.seat).hero).includes("royal")) ctx.addModifier({ scope: "until-end-of-turn" }); } }, canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.state.modifiers.some((modifier) => modifier.scope === "until-end-of-turn" && modifier.sourceInstanceId === ctx.self.instanceId && !modifier.consumed); }, onHit(ctx) { for (const card of [...ctx.player(opponentSeat(ctx)).arsenal]) ctx.banish(card.instanceId); const mod = ctx.state.modifiers.find((modifier) => modifier.scope === "until-end-of-turn" && modifier.sourceInstanceId === ctx.self.instanceId && !modifier.consumed)!; ctx.consumeModifier(mod.id); } },
   "relentless pursuit|3": { onPlay(ctx) { markHero(ctx, opponentSeat(ctx)); if (ctx.getFlag("player", "attackedHeroThisTurn")) ctx.putOnDeckBottom(ctx.self.instanceId); } },
