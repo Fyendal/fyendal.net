@@ -1513,6 +1513,19 @@ export function makeCtx(
         ...(presentation.promptMessage ? { labelMessage: presentation.promptMessage } : {}),
       });
     },
+    scheduleStartOfNextTurnTrigger(hook, label, subjectSeat = seat) {
+      const presentation = scriptPromptParts(label);
+      state.delayedTriggers.push({
+        source: runtime.commands.snapshotSerializable(self),
+        seat,
+        subjectSeat,
+        event: "start-of-turn",
+        turn: state.turn,
+        hook,
+        label: presentation.fallback,
+        ...(presentation.promptMessage ? { labelMessage: presentation.promptMessage } : {}),
+      });
+    },
     lookAt(instanceId) {
       const found = findCardAnywhere(state, instanceId);
       if (!found) return;
@@ -2270,14 +2283,17 @@ export function makeCtx(
       const owner = state.players.find((candidate) =>
         candidate.hand.some((card) => card.instanceId === instanceId) ||
         candidate.deck.some((card) => card.instanceId === instanceId) ||
-        candidate.graveyard.some((card) => card.instanceId === instanceId),
+        candidate.graveyard.some((card) => card.instanceId === instanceId) ||
+        candidate.banish.some((card) => card.instanceId === instanceId),
       ) as PlayerState | undefined;
       if (!owner) return false;
       if (owner.arsenal.length >= runtime.commands.arsenalCapacity(state, owner.seat)) return false;
       const fromGraveyard = owner.graveyard.some((card) => card.instanceId === instanceId);
-      const card =
-        removeFromArray(owner.hand, instanceId) ?? removeFromArray(owner.deck, instanceId) ??
-        removeFromArray(owner.graveyard, instanceId);
+      const source = from === "hand" ? owner.hand
+        : from === "deck" ? owner.deck
+        : from === "graveyard" ? owner.graveyard
+        : owner.banish;
+      const card = removeFromArray(source, instanceId);
       if (!card) return false;
       card.faceDown = opts?.faceUp === false ? true : undefined;
       card.arsenalSlot = nextArsenalSlot(owner);

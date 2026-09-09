@@ -1203,7 +1203,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       goAgain: false,
       timing: "instant",
       canActivate: (ctx) => ctx.getFlag("player", "physicalDamageDealtThisTurn") === true || ctx.getFlag("player", "physicalDamageTakenThisTurn") === true,
-      label: "Destroy after physical damage: gain 1 resource",
+      label: "Destroy after dealing or being dealt physical damage: gain 1 resource",
       onActivate(ctx) { ctx.changeResources(ctx.seat, 1); },
     },
   },

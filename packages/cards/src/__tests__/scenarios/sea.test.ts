@@ -1089,6 +1089,55 @@ describe("SEA — pirate and generic attacks", () => {
 });
 
 describe("SEA — rules regression coverage", () => {
+  it("Return Fire loads the banished arrow face up with +3 at the start of its controller's next turn", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["head jab|1"] },
+        {
+          hero: "dorinthea",
+          weapons: ["death dealer|0"],
+          hand: ["return fire|1", "swift shot|1"],
+        },
+      ],
+    });
+
+    g.play("head jab|1")
+      .blockWith("return fire|1")
+      .passPriority()
+      .passPriority()
+      .chooseCard("swift shot|1")
+      .expectInZone(1, "swift shot|1", "banish");
+    expect(g.state.players[1]!.banish[0]?.tempPower).toBeUndefined();
+
+    g.endTurn()
+      .expectInZone(1, "swift shot|1", "arsenal")
+      .expectFaceDown(1, "swift shot|1", false)
+      .play("swift shot|1", { fromArsenal: true })
+      .expectAttackValue(7);
+  });
+
+  it("Return Fire leaves the arrow banished without +3 when its controller's arsenal is full", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["head jab|1"] },
+        {
+          hero: "dorinthea",
+          hand: ["return fire|1", "swift shot|1"],
+          arsenal: ["nimblism|1"],
+        },
+      ],
+    });
+
+    g.play("head jab|1")
+      .blockWith("return fire|1")
+      .passPriority()
+      .passPriority()
+      .chooseCard("swift shot|1")
+      .endTurn()
+      .expectInZone(1, "swift shot|1", "banish");
+    expect(g.state.players[1]!.banish[0]?.tempPower).toBeUndefined();
+  });
+
   it("Hammerhead gives overpower only to its next arrow with Harpoon in its name", () => {
     const batteringBolt = scenario({
       seats: [

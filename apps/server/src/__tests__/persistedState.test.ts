@@ -1009,6 +1009,15 @@ describe("PersistedStateV1", () => {
       label: "Resolve delayed cleanup",
       labelMessage: { id: "card.trigger.common.runechants.destroy" },
     });
+    source.delayedTriggers.push({
+      source: jsonCopy(card),
+      seat: 0,
+      subjectSeat: 0,
+      event: "start-of-turn",
+      turn: source.turn,
+      hook: "test-next-turn",
+      label: "Resolve next-turn effect",
+    });
 
     const encoded = encodePersistedState(source);
     const decoded = decodePersistedState(jsonCopy(encoded), "ABC123", cardData, scripts);

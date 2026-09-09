@@ -192,6 +192,7 @@
   "card.sea.arrow.hand.arsenal": "将一张手牌中的 arrow 正面朝上放入 arsenal？",
   "card.sea.arrow.hand.arsenal.required": "将一张 arrow 正面朝上放入 arsenal",
   "card.sea.arrow.top.arsenal": "{card}：将该 arrow 正面朝上放入 arsenal？",
+  "card.sea.returnfire.arrow.arsenal": "将被放逐的 arrow 正面朝上放入 arsenal",
   "card.sea.bandana.blue.bottom": "将墓地中的一张蓝色牌置于你的牌库底部",
   "card.sea.bloodwater.choose": "弃置一张牌，或摧毁你的牌库顶牌？",
   "card.sea.bludger.cog.tap": "横置一个 cog 以获得 overpower？",

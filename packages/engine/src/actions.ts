@@ -9,7 +9,6 @@ import {
   cardHasType,
   cardTypesOf,
   dataOf,
-  hasKeyword,
   instanceDataOf,
   isArrowData,
   meldSideHasType,
@@ -78,7 +77,7 @@ import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestricted
 import { consumeNextActionGoAgain, noteActionPlayedOrActivated } from "./cardLifecycle.js";
 import { answerArcaneBarrier } from "./damageResolution.js";
 import { answerDieRollReplacement } from "./dieRoll.js";
-import { cardPlayRestrictedByModifier, cardPlayCost, cardPlayReductionForSeat, payAlternativePlayCost, preparePlayTarget, canPlayAsInstant, canRuneGate, consumeAttackCostReductions, mayPlayFromArsenal, mayPlayFromZone, playFromZoneRequiresInstant } from "./playRules.js";
+import { boostCountForCardPlay, cardPlayRestrictedByModifier, cardPlayCost, cardPlayReductionForSeat, payAlternativePlayCost, preparePlayTarget, canPlayAsInstant, canRuneGate, consumeAttackCostReductions, mayPlayFromArsenal, mayPlayFromZone, playFromZoneRequiresInstant } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost, scriptedPaymentOptions } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { actionLimitReached, consumeFirstActionExtraCost, controlsBow, firstActionExtraCost, firstAttackExtraCost, consumeFirstAttackExtraCost, isFrozen, opposingInstantsProhibited } from "./ruleQueries.js";
@@ -196,13 +195,12 @@ export function playCard(
   ) {
     return "cannot pitch an alternative-cost card";
   }
-  const canBoost = isAttackCard(data) && hasKeyword(state, card, "boost");
+  const availableBoosts = isAttackCard(data) ? boostCountForCardPlay(state, seat, card) : 0;
+  const canBoost = availableBoosts > 0;
   if (boost && !canBoost) return `${nameOf(state, card.cardId)} cannot boost`;
   if (!boost && boostCount !== undefined) return "cannot declare a Boost count without boosting";
   const declaredBoostCount = boost ? (boostCount ?? 1) : 0;
-  const maximumBoosts = canBoost
-    ? Math.max(1, Math.floor(script?.boostCount ?? 1))
-    : 0;
+  const maximumBoosts = canBoost ? availableBoosts : 0;
   if (
     !Number.isSafeInteger(declaredBoostCount) ||
     declaredBoostCount < 0 ||

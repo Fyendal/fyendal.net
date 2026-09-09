@@ -200,8 +200,16 @@ const viziertronic: CardScript = {
     );
     if (!activated) return;
     ctx.drawCards(ctx.seat, 1);
+    const pendingTopKey = `viziertronicPendingTops:${ctx.self.instanceId}`;
+    const pendingTops = Number(ctx.getPlayerFlag(ctx.seat, pendingTopKey));
+    if (pendingTops > 0) {
+      ctx.setPlayerFlag(ctx.seat, pendingTopKey, pendingTops + 1);
+      return;
+    }
     const hand = ctx.player(ctx.seat).hand;
-    if (hand.length > 0) ctx.requestCardChoice(
+    if (hand.length === 0) return;
+    ctx.setPlayerFlag(ctx.seat, pendingTopKey, 1);
+    ctx.requestCardChoice(
       "viz-top",
       decisionPrompt(
         "Viziertronic Model i: put a card on top",
@@ -210,7 +218,23 @@ const viziertronic: CardScript = {
       hand.map((card) => card.instanceId),
     );
   },
-  onChoose(ctx, hook, option) { if (hook === "viz-top") ctx.putOnDeckTop(Number(option)); },
+  onChoose(ctx, hook, option) {
+    if (hook !== "viz-top") return;
+    ctx.putOnDeckTop(Number(option));
+    const pendingTopKey = `viziertronicPendingTops:${ctx.self.instanceId}`;
+    const remaining = Math.max(0, Number(ctx.getPlayerFlag(ctx.seat, pendingTopKey)) - 1);
+    ctx.setPlayerFlag(ctx.seat, pendingTopKey, remaining);
+    const hand = ctx.player(ctx.seat).hand;
+    if (remaining === 0 || hand.length === 0) return;
+    ctx.requestCardChoice(
+      "viz-top",
+      decisionPrompt(
+        "Viziertronic Model i: put a card on top",
+        "card.cru.viziertronic.card.top",
+      ),
+      hand.map((card) => card.instanceId),
+    );
+  },
 };
 
 const plasmaPurifier: CardScript = {

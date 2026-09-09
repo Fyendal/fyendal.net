@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { legalIntents, projectStateFor } from "@fyendal/engine";
+import { actionCandidates, legalIntents, projectStateFor } from "@fyendal/engine";
 import { scenario } from "../harness.js";
 
 const BLUE = "raging onslaught|3";
@@ -598,6 +598,46 @@ describe("MON — Chane and banished-zone play", () => {
 });
 
 describe("MON — generic commons and rares", () => {
+  it("Blood Drop Brocade requires physical damage in the current turn", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["fry|1", SIX],
+          equipment: { chest: "blood drop brocade|0" },
+        },
+        { hero: "dorinthea", hand: ["fry|1"] },
+      ],
+    });
+
+    const brocade = s.state.players[0]!.equipment.chest!;
+    expect(actionCandidates(s.state, 0)).not.toContainEqual(expect.objectContaining({
+      kind: "activate-ability",
+      sourceInstanceId: brocade.instanceId,
+    }));
+
+    s.play("fry|1").blockWith().settle();
+    expect(s.state.players[0]!.flags.physicalDamageDealtThisTurn).toBe(true);
+    expect(actionCandidates(s.state, 0)).toContainEqual(expect.objectContaining({
+      kind: "activate-ability",
+      sourceInstanceId: brocade.instanceId,
+    }));
+
+    s.endTurn();
+    s.play("fry|1").blockWith(SIX).passPriority();
+
+    expect(s.state.players[0]!.flags.physicalDamageDealtThisTurn).not.toBe(true);
+    expect(s.state.players[0]!.flags.physicalDamageTakenThisTurn).not.toBe(true);
+    expect(actionCandidates(s.state, 0)).not.toContainEqual(expect.objectContaining({
+      kind: "activate-ability",
+      sourceInstanceId: brocade.instanceId,
+    }));
+    expect(legalIntents(s.state, 0)).not.toContainEqual(expect.objectContaining({
+      kind: "activate-ability",
+      sourceInstanceId: brocade.instanceId,
+    }));
+  });
+
   it("Pulping gains dominate from a random 6-power discard and go again under two defenders", () => {
     const s = scenario({
       seats: [

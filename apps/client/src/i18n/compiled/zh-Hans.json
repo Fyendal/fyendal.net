@@ -11015,6 +11015,12 @@
       "value": "横置目标 Pirate 英雄或 ally"
     }
   ],
+  "card.sea.returnfire.arrow.arsenal": [
+    {
+      "type": 0,
+      "value": "将被放逐的 arrow 正面朝上放入 arsenal"
+    }
+  ],
   "card.sea.scooba.yellow.bottom": [
     {
       "type": 0,
