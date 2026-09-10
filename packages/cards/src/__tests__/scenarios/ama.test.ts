@@ -327,6 +327,27 @@ describe("Malice Armory Deck spoiled cards", () => {
     expect(g.state.chain.at(-1)?.goAgain).toBe(true);
   });
 
+  it("blue Skeletal Puppetry gives the next ally attack +1 and go again", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["skeletal puppetry|3", "restless commander|1"],
+        board: ["restless steed|1"],
+        resources: 1,
+        weapons: ["vox necropolis|0"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("skeletal puppetry|3", { alternativeCost: "restless commander|1" })
+      .expectInZone(0, "restless commander|1", "graveyard")
+      .activate("restless steed|1")
+      .expectAttackValue(4);
+
+    expect(g.state.chain.at(-1)?.goAgain).toBe(true);
+  });
+
   it("Restless Steed gains go again when its attack hits", () => {
     const g = scenario({ seats: [
       {

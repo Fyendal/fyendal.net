@@ -17,6 +17,7 @@ import {
   resolveDiscardChoice,
   yesNoPrompt,
 } from "./shared-helpers.js";
+import { SHARPEN_FOLLOWUP, sharpenSword } from "./aha/warrior-sharpen.js";
 import { penHighRarity } from "./pen/high-rarity.js";
 
 // Compendium of Rathe (PEN) — complete set and required tokens.
@@ -548,11 +549,10 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     },
     onChoose(ctx, hook, option) {
       if (hook !== "pen-sharpen") return;
-      const id = Number(option);
-      ctx.addCounter(id, "power", 1);
-      ctx.setCardCounter(id, "sharpenedTurn", ctx.state.turn);
-      const sword = ctx.player(ctx.seat).weapons.find((card) => card.instanceId === id);
-      if (Number(sword?.counters?.power ?? 0) + 1 >= pitch) buffNextAttack(ctx, { dominate: true, appliesToInstanceId: id });
+      sharpenSword(ctx, Number(option), 1, {
+        threshold: pitch,
+        kind: SHARPEN_FOLLOWUP.DOMINATE,
+      });
     },
   })),
 

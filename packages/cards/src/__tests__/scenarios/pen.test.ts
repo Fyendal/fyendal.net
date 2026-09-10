@@ -101,6 +101,54 @@ describe("PEN — import and set mechanics", () => {
     expect(drivers.some((card) => card.counters?.steam === 2)).toBe(true);
   });
 
+  it("blue Cut n' Carve does not grant dominate with only two +1 counters", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        weapons: ["zenith blade|0"],
+        hand: ["cut n' carve|3"],
+        resources: 2,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+    g.state.players[0]!.weapons[0]!.counters = {
+      power: 1,
+      sharpenedTurn: g.state.turn,
+    };
+
+    g.play("cut n' carve|3")
+      .chooseCard("zenith blade|0")
+      .attackWithWeapon("zenith blade|0");
+
+    expect(g.state.players[0]!.weapons[0]!.counters?.power).toBe(2);
+    expect(projectStateFor(g.state, 0).chain.at(-1)?.dominate).toBe(false);
+  });
+
+  it("blue Cut n' Carve grants dominate when its sharpen reaches three +1 counters", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        weapons: ["zenith blade|0"],
+        hand: ["cut n' carve|3"],
+        resources: 2,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+    g.state.players[0]!.weapons[0]!.counters = {
+      power: 2,
+      sharpenedTurn: g.state.turn,
+    };
+
+    g.play("cut n' carve|3")
+      .chooseCard("zenith blade|0")
+      .attackWithWeapon("zenith blade|0");
+
+    expect(g.state.players[0]!.weapons[0]!.counters?.power).toBe(3);
+    expect(projectStateFor(g.state, 0).chain.at(-1)?.dominate).toBe(true);
+  });
+
   it("declares and pays Touch of Reality's X activation cost before tapping it", () => {
     const g = scenario({ seats: [
       { hero: "rhinar", hand: ["raging onslaught|3"], equipment: { ...NO_EQUIPMENT, arms: "touch of reality|0" } },

@@ -48,10 +48,13 @@ const CARD = {
   flickKnives: "flick knives|0",
   kunaiOfRetribution: "kunai of retribution|0",
   lavaBurst: "lava burst|1",
+  maskOfMomentum: "mask of momentum|0",
   ravenousRabble: "ravenous rabble|1",
   snatch: "snatch|1",
   throwDagger: "throw dagger|3",
 } as const;
+
+const MASK_ENDGAME_LIFE = 4;
 
 type CardPlayIntent = Extract<GameIntent,
   { kind: "play-card" | "play-from-arsenal" | "play-from-zone" }>;
@@ -287,7 +290,7 @@ function maskCanStillTrigger(input: BotPolicyInput): boolean {
   const head = me.equipment.head;
   const maskWasUsed = head && input.view.turnFacts?.players[input.seat]
     .usedOncePerTurnEffectSourceIds.includes(head.instanceId) === true;
-  return equipmentHasKey(input, "head", "mask of momentum|0") &&
+  return equipmentHasKey(input, "head", CARD.maskOfMomentum) &&
     me.deckCount > 0 && !maskWasUsed;
 }
 
@@ -1157,6 +1160,13 @@ function scoreDefend(
       if (candidate.chosen.every((card) => candidate.stagedIds.has(card.instanceId))) {
         return "allow";
       }
+      const spendsFreshMask = candidate.chosen.some((card) =>
+        key(candidate.input.cards[card.cardId]) === CARD.maskOfMomentum &&
+        !candidate.stagedIds.has(card.instanceId)
+      );
+      const lifeWithoutBlock = candidate.input.view.players[candidate.input.seat].life -
+        candidate.incoming;
+      if (spendsFreshMask && lifeWithoutBlock > MASK_ENDGAME_LIFE) return "forbid";
       const usesOnlyFlightPath = candidate.chosen.length === 1 &&
         key(candidate.input.cards[candidate.chosen[0]!.cardId]) === CARD.dragonscalerFlightPath &&
         flightPathWillBeConsumedNextTurn(candidate.input);
