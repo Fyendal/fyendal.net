@@ -22,8 +22,10 @@
  * room for testing Malice, Danse Macabre, the three Marks, and Restless zombies
  * against the standard Hala bot; and NITRO8 — a private CC room where alice
  * can construct Nitro Mechanoid, play Hit the Gas for 3 action points, attack
- * repeatedly, then pass to the standard Hala bot.
- * These fixtures count as 16 "players in game" in the
+ * repeatedly, then pass to the standard Hala bot; and BASEMT — a private CC
+ * room where alice can defend Ira's Edge of Autumn with Base of the Mountain
+ * and choose among three action cards while a defense reaction remains in hand.
+ * These fixtures count as 18 "players in game" in the
  * lobby stats — dev only.
  * Alice also receives one fixed, undismissed bug-report notification for
  * exercising the lobby UI.
@@ -66,6 +68,7 @@ const OKANA_TEST_ROOM_CODE = "OKANAS";
 const RALLY_TEST_ROOM_CODE = "RALLYC";
 const MARKS_TEST_ROOM_CODE = "MARKS3";
 const NITRO_TEST_ROOM_CODE = "NITRO8";
+const BASE_MOUNTAIN_TEST_ROOM_CODE = "BASEMT";
 
 /**
  * A lived-in mid-game board for the demo room: fixed seeds, random legal
@@ -460,6 +463,77 @@ function rallyTestGameState(): GameState {
   return state;
 }
 
+/** Ira is attacking with Edge of Autumn and alice is at the defend decision.
+ * Base of the Mountain is equipped; three actions and one defense reaction in
+ * hand make the ability's eligible-card filtering and partial selection easy
+ * to verify. */
+function baseMountainTestGameState(): GameState {
+  const ira = botDefinition("ira");
+  const iraPool = precon(ira?.deckId ?? "")?.pool;
+  if (!ira || !iraPool) throw new Error("Base of the Mountain test fixture bot deck is unavailable");
+
+  const valda = {
+    heroId: "MPG001",
+    weaponIds: [] as string[],
+    equipment: { legs: "MPG113" },
+    deck: [
+      "ROS046",
+      "WTR188",
+      "WTR189",
+      "WTR215",
+      ...Array<string>(56).fill("RNR020"),
+    ],
+  };
+  const iraPresentation = ira.presentationFor(valda, "first");
+  let state = createGame({
+    decklists: [valda, { heroId: iraPool.heroId, ...iraPresentation }],
+    seed: 1132026,
+    cards: cardData,
+    scripts,
+    startPlayer: 1,
+  });
+
+  const valdaPlayer = state.players[0]!;
+  const valdaCards = [...valdaPlayer.hand, ...valdaPlayer.deck];
+  const take = (cardId: string) => {
+    const index = valdaCards.findIndex((card) => card.cardId === cardId);
+    if (index < 0) throw new Error(`Base of the Mountain test fixture is missing ${cardId}`);
+    return valdaCards.splice(index, 1)[0]!;
+  };
+  valdaPlayer.hand = [take("ROS046"), take("WTR188"), take("WTR189"), take("WTR215")];
+  valdaPlayer.deck = valdaCards;
+
+  const applyLegal = (
+    current: GameState,
+    seat: number,
+    label: string,
+    predicate: (intent: ReturnType<typeof legalIntents>[number]) => boolean,
+  ): GameState => {
+    const intent = legalIntents(current, seat).find(predicate);
+    if (!intent) throw new Error(`Base of the Mountain test fixture cannot ${label}`);
+    const result = applyIntent(current, seat, intent);
+    if (!result.ok) throw new Error(`Base of the Mountain test fixture cannot ${label}: ${result.error}`);
+    return result.state;
+  };
+
+  const iraPlayer = state.players[1]!;
+  iraPlayer.resources = 1;
+  const weaponInstanceId = iraPlayer.weapons[0]!.instanceId;
+  state = applyLegal(state, 1, "attack with Edge of Autumn", (intent) =>
+    intent.kind === "activate-ability" &&
+    intent.sourceInstanceId === weaponInstanceId &&
+    intent.pitchInstanceIds.length === 0
+  );
+  for (let guard = 0; guard < 4 && state.pendingDecision?.kind !== "defend"; guard++) {
+    const actor = state.pendingDecision?.player ?? state.priorityPlayer;
+    state = applyLegal(state, actor, "pass attack activation priority", (intent) => intent.kind === "pass");
+  }
+  if (state.pendingDecision?.kind !== "defend" || state.pendingDecision.player !== 0) {
+    throw new Error("Base of the Mountain test fixture did not reach alice's defend step");
+  }
+  return state;
+}
+
 const pool = await createPool();
 try {
   const { rows: runtimeConfigRows } = await pool.query(
@@ -491,7 +565,7 @@ try {
   try {
     // These rooms are disposable local fixture data. Recreate them so rerunning
     // the seed also repairs stale ruleset envelopes and clears dependent history.
-    await pool.query("DELETE FROM rooms WHERE code IN ($1, $2, $3, $4, $5, $6, $7, $8)", [
+    await pool.query("DELETE FROM rooms WHERE code IN ($1, $2, $3, $4, $5, $6, $7, $8, $9)", [
       DEMO_ROOM_CODE,
       HUNTER_TEST_ROOM_CODE,
       SNAP_ARC_TEST_ROOM_CODE,
@@ -500,6 +574,7 @@ try {
       RALLY_TEST_ROOM_CODE,
       MARKS_TEST_ROOM_CODE,
       NITRO_TEST_ROOM_CODE,
+      BASE_MOUNTAIN_TEST_ROOM_CODE,
     ]);
     await pool.query(
       `INSERT INTO rooms
@@ -864,6 +939,51 @@ try {
         iraForRally.deckName,
       ],
     );
+    const baseMountainPrep = { rolls: [2, 6], dieWinner: 1, startPlayer: 1 };
+    const iraForBaseMountain = botDefinition("ira");
+    const iraPoolForBaseMountain = precon(iraForBaseMountain?.deckId ?? "")?.pool;
+    if (!iraForBaseMountain || !iraPoolForBaseMountain) {
+      throw new Error("Base of the Mountain test fixture room metadata is unavailable");
+    }
+    await pool.query(
+      `INSERT INTO rooms
+        (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at,
+         status, winner, is_private)
+       VALUES ($1, 'cc', '[]', $2, $3, $4, 0, $5, NULL, 'active', NULL, TRUE)`,
+      [
+        BASE_MOUNTAIN_TEST_ROOM_CODE,
+        JSON.stringify(dehydrateState(baseMountainTestGameState(), seedRulesetVersion)),
+        JSON.stringify(baseMountainPrep),
+        seedRulesetVersion,
+        Date.now(),
+      ],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, user_id, token_hash, username, hero_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 0, $2, $3, 'alice', 'MPG001', 'Base of the Mountain test',
+               FALSE, TRUE, 'human')`,
+      [
+        BASE_MOUNTAIN_TEST_ROOM_CODE,
+        aliceId,
+        hashReconnectToken(randomBytes(12).toString("hex")),
+      ],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, token_hash, username, hero_id, deck_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 1, $2, $3, $4, $5, $6, FALSE, TRUE, 'bot')`,
+      [
+        BASE_MOUNTAIN_TEST_ROOM_CODE,
+        hashReconnectToken(randomBytes(12).toString("hex")),
+        iraForBaseMountain.username,
+        iraPoolForBaseMountain.heroId,
+        iraForBaseMountain.deckId,
+        iraForBaseMountain.deckName,
+      ],
+    );
     const fixedAt = Date.now();
     await pool.query(
       `INSERT INTO bug_reports
@@ -911,6 +1031,7 @@ try {
   console.log(`seeded Rally the Coast Guard room ${RALLY_TEST_ROOM_CODE} — log in as alice and open /${RALLY_TEST_ROOM_CODE}`);
   console.log(`seeded Marks / Restless zombies room ${MARKS_TEST_ROOM_CODE} — log in as alice and open /${MARKS_TEST_ROOM_CODE}`);
   console.log(`seeded Nitro Mechanoid room ${NITRO_TEST_ROOM_CODE} — log in as alice and open /${NITRO_TEST_ROOM_CODE}`);
+  console.log(`seeded Base of the Mountain room ${BASE_MOUNTAIN_TEST_ROOM_CODE} — log in as alice and open /${BASE_MOUNTAIN_TEST_ROOM_CODE}`);
   console.log("seeded fixed bug notification for alice");
 } finally {
   await pool.end();

@@ -2428,6 +2428,45 @@ export function makeCtx(
       );
       return true;
     },
+    addDefendersFromBanish(instanceIds) {
+      const current = link ?? currentLink(state);
+      if (!current) return 0;
+      const defenders: CardInstance[] = [];
+      for (const instanceId of new Set(instanceIds)) {
+        const owner = state.players.find((candidate) =>
+          candidate.banish.some((card) => card.instanceId === instanceId),
+        ) as PlayerState | undefined;
+        if (!owner || owner.seat === current.attacker) continue;
+        const card = owner.banish.find((candidate) => candidate.instanceId === instanceId);
+        if (!card || card.faceDown) continue;
+        removeFromArray(owner.banish, instanceId);
+        runtime.transitions.move(
+          card,
+          transitionZone("banish", owner.seat),
+          transitionZone("chain", owner.seat),
+        );
+        current.defendingCards.push(card);
+        defenders.push(card);
+      }
+      if (!defenders.length) return 0;
+      runtime.commands.applyOneShotDefenseModifiers(state, current, defenders);
+      const events = defenders.map((card) => ({
+        card,
+        fragmentTriggered: runtime.commands.noteAttackDefendedBy(state, current, card),
+      }));
+      for (const card of defenders) logPublic(state, gameLogMessage(
+        `${nameOf(state, card.cardId)} is added to the chain link as a defending card`,
+        "engine.log.card.added.as.defender",
+        { card: logCardValue(card.cardId) },
+      ));
+      runtime.commands.queueDefendEventLayersAfterCurrent(
+        state,
+        current,
+        events,
+        false,
+      );
+      return defenders.length;
+    },
     addSelfAsDefender() {
       const current = link ?? currentLink(state);
       if (!current || current.attacker === seat) return false;

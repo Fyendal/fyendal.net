@@ -9369,6 +9369,12 @@
       "value": "Clash: put a -1 defense counter on an equipped off-hand"
     }
   ],
+  "card.mpg.hand.action.banish.defend": [
+    {
+      "type": 0,
+      "value": "Base of the Mountain: choose any number of action cards to banish and defend"
+    }
+  ],
   "card.mpg.heave.pay": [
     {
       "type": 1,

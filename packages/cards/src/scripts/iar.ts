@@ -898,11 +898,11 @@ const viseraiFront: CardScript = {
   triggers: [{
     event: "token-created",
     label: "Banish the top card of your deck, then traverse if you've created 3 Runechants",
-    condition: (ctx, token) => token !== undefined && named(ctx, token, "Runechant"),
+    condition: (ctx, token) => token !== undefined && ctx.isRunechant(token),
     effect(ctx) {
       const top = ctx.player(ctx.seat).deck[0];
       if (top) ctx.banish(top.instanceId);
-      if (Number(ctx.getFlag("player", "createdNameCount:runechant")) >= 3) {
+      if (Number(ctx.getFlag("player", "createdRunechantCount")) >= 3) {
         traverseToBack(ctx);
       }
     },

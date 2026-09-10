@@ -476,6 +476,29 @@ describe("HNT — marked heroes and daggers", () => {
       .expectAP(0, 1);
   });
 
+  it("Poisoned Blade visibly makes the opposing hero lose life when Flick Knives makes a dagger hit", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "cindra|0",
+          resources: 1,
+          weapons: ["kunai of retribution|0"],
+          equipment: { arms: "flick knives|0" },
+          hand: ["poisoned blade|2"],
+        },
+        { hero: "dorinthea", hand: ["wounding blow|1"] },
+      ],
+    });
+
+    g.play("poisoned blade|2")
+      .blockWith("wounding blow|1")
+      .activate("flick knives|0")
+      .chooseCard("kunai of retribution|0")
+      .expectLife(1, 18)
+      .expectLog("loses 1 life (18 life)");
+  });
+
   it("Throw Dagger cannot destroy the dagger on the active chain link", () => {
     const g = scenario({
       seats: [

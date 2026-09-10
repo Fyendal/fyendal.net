@@ -110,6 +110,8 @@ export function handCardChoiceOptions(
     decision === null ||
     decision.kind === "defend" ||
     decision.kind === "arsenal" ||
+    decision.minimumSelections !== undefined ||
+    decision.maximumSelections !== undefined ||
     optDecisionCards(decision) !== null ||
     !(decision.options?.length) ||
     decision.options.length !== (decision.optionCards?.length ?? 0)
@@ -123,4 +125,62 @@ export function handCardChoiceOptions(
     options.set(card.instanceId, decision.options[index]!);
   }
   return options;
+}
+
+export interface BoundedCardChoiceModel {
+  choices: Array<{ optionId: string; card: CardView }>;
+  minimumSelections: number;
+  maximumSelections: number;
+}
+
+export function toggleBoundedCardChoice(
+  selected: readonly string[],
+  optionId: string,
+  maximumSelections: number,
+): readonly string[] {
+  if (selected.includes(optionId)) {
+    return selected.filter((candidate) => candidate !== optionId);
+  }
+  if (selected.length >= maximumSelections) return selected;
+  return [...selected, optionId];
+}
+
+/** Decode one atomic bounded card choice for the decision float. Unlike a
+ * single hand-card choice, clicking a card only stages it locally; the whole
+ * subset is submitted together with a choose-many intent. */
+export function boundedCardChoiceModel(
+  decision: PendingDecision | null,
+): BoundedCardChoiceModel | null {
+  if (
+    decision?.kind !== "choose-target" ||
+    decision.minimumSelections === undefined ||
+    decision.maximumSelections === undefined ||
+    !(decision.options?.length) ||
+    decision.options.length !== (decision.optionCards?.length ?? 0)
+  ) return null;
+
+  const choices: BoundedCardChoiceModel["choices"] = [];
+  for (let index = 0; index < decision.options.length; index += 1) {
+    const card = decision.optionCards?.[index];
+    if (!card) return null;
+    choices.push({ optionId: decision.options[index]!, card });
+  }
+  return {
+    choices,
+    minimumSelections: decision.minimumSelections,
+    maximumSelections: decision.maximumSelections,
+  };
+}
+
+/** Return the card-to-option mapping only when every bounded choice is a card
+ * currently visible in the player's hand. */
+export function boundedHandCardChoiceOptions(
+  decision: PendingDecision | null,
+  hand: readonly CardView[],
+): Map<number, string> | null {
+  const choice = boundedCardChoiceModel(decision);
+  if (!choice) return null;
+  const handIds = new Set(hand.map((card) => card.instanceId));
+  if (!choice.choices.every(({ card }) => handIds.has(card.instanceId))) return null;
+  return new Map(choice.choices.map(({ card, optionId }) => [card.instanceId, optionId]));
 }

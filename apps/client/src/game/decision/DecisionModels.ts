@@ -19,6 +19,10 @@ export interface PendingDecisionModel {
   onDisableGuidance: () => void;
   onConfirmSkipArsenal: () => void;
   onCancelSkipArsenal: () => void;
+  /** Present only when this bounded card choice is staged directly from the
+   * player's hand instead of rendered again in the decision float. */
+  boundedChoiceSelectedOptionIds?: readonly string[];
+  onConfirmBoundedChoice?: () => void;
   onSend: (intent: GameIntent) => void;
 }
 

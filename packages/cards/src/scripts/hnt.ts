@@ -72,6 +72,17 @@ function markHero(ctx: ScriptCtx, seat: number): void {
   ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(hero.cardId).name} is marked`, "card.log.common.hero.marked", { target: { kind: "card", cardId: hero.cardId } }));
 }
 
+function loseLifeAndLog(ctx: ScriptCtx, targetSeat: number, amount: number): void {
+  ctx.loseLife(targetSeat, amount);
+  const target = ctx.player(targetSeat);
+  ctx.logPublic(localizedCardLog(
+    ctx,
+    `${ctx.cardData(target.heroCardId).name} loses ${amount} life (${target.life} life)`,
+    "card.log.common.hero.life.lost",
+    { target: { kind: "player", seat: targetSeat }, amount, life: target.life },
+  ));
+}
+
 function hitMarkedHero(ctx: ScriptCtx): boolean {
   return ctx.link?.flags.targetWasMarkedOnHit === true;
 }
@@ -537,9 +548,9 @@ export const hnt: Record<string, CardScript> = {
   ...pitchSeries("poisoned blade", () => ({
     onAttackDeclared(ctx) { ctx.addModifier({ scope: "until-end-of-turn", expiresOnChainClose: true }); },
     canTriggerOnHit(ctx) { return !!ctx.link && isDagger(ctx, ctx.link.attackingCard); },
-    onHit(ctx) { ctx.loseLife(opponentSeat(ctx), 1); },
+    onHit(ctx) { loseLifeAndLog(ctx, opponentSeat(ctx), 1); },
     onFriendlyEffectHitCondition(ctx, source) { return isDagger(ctx, source); },
-    onFriendlyEffectHit(ctx, _source, targetSeat) { ctx.loseLife(targetSeat, 1); },
+    onFriendlyEffectHit(ctx, _source, targetSeat) { loseLifeAndLog(ctx, targetSeat, 1); },
   })),
   ...pitchSeries("throw yourself at them", () => daggerDamageAttack("throw-dagger")),
   "red alert visor|0": { modifyDefense: (ctx) => ctx.getFlag("link", "reactionPlayedOrActivated") ? 1 : 0 },

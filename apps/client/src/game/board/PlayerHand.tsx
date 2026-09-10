@@ -94,6 +94,8 @@ export interface PlayerHandInteraction {
   defending: boolean;
   choosingArsenal: boolean;
   handPick: ReadonlyMap<number, string> | null;
+  boundedHandPick?: ReadonlyMap<number, string> | null;
+  selectedBoundedChoiceOptionIds?: ReadonlySet<string>;
   onCardClick: (card: CardView) => void;
   onActivate: (instanceId: number) => void;
   onSelect: (selection: Sel) => void;
@@ -226,7 +228,13 @@ export function PlayerHand({
                 interaction.selection.instanceId === card.instanceId) ||
               (interaction.selection.kind === "activate" &&
                 interaction.selection.sourceInstanceId === card.instanceId) ||
-              interaction.preStackSelectedInstanceId === card.instanceId;
+              interaction.preStackSelectedInstanceId === card.instanceId ||
+              (
+                interaction.boundedHandPick?.has(card.instanceId) === true &&
+                interaction.selectedBoundedChoiceOptionIds?.has(
+                  interaction.boundedHandPick.get(card.instanceId)!,
+                ) === true
+              );
             const resourcePitchable = interaction.resourcePayment !== undefined && (
               interaction.pitchSelection.includes(card.instanceId) ||
               canAddResourcePaymentPitch(
@@ -251,6 +259,7 @@ export function PlayerHand({
                 : resourcePitchable ||
                   interaction.choosingArsenal ||
                   interaction.handPick?.has(card.instanceId) === true ||
+                  interaction.boundedHandPick?.has(card.instanceId) === true ||
                   interaction.legalState.playableHand.has(card.instanceId) ||
                   interaction.legalState.activatable.has(card.instanceId);
             const explanation = !spectating && !replaying && !actionable &&

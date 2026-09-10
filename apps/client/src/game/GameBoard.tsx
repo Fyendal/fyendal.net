@@ -43,7 +43,12 @@ import {
   nonAttackActionPlayIds,
   useActionAnnouncement,
 } from "./useActionAnnouncement.js";
-import { handCardChoiceOptions } from "./decisionPresentation.js";
+import {
+  boundedCardChoiceModel,
+  boundedHandCardChoiceOptions,
+  handCardChoiceOptions,
+  toggleBoundedCardChoice,
+} from "./decisionPresentation.js";
 import { shouldHidePriorityGuidance } from "./decisionPass.js";
 import { hoverSurfaceLayout } from "./hoverSurfaceLayout.js";
 import { cardPreviewSurfaceSize } from "./cardPreviewFaces.js";
@@ -222,6 +227,10 @@ export function GameBoard() {
   // whenever a new winner is decided (fresh game in the same room)
   const [gameOverDismissed, setGameOverDismissed] = useState(false);
   const [confirmSkipArsenal, setConfirmSkipArsenal] = useState(false);
+  const [boundedChoiceSelection, setBoundedChoiceSelection] = useState<{
+    decisionKey: string;
+    optionIds: readonly string[];
+  } | null>(null);
   const showDeckCardEvents = screen !== "replay";
   const deckCardFeedback = useDeckCardFeedback(view, showDeckCardEvents);
   const winnerNow = view?.winner ?? null;
@@ -492,6 +501,24 @@ export function GameBoard() {
   /** scripted card-picks whose options all live in my hand (Death Dealer,
    *  Reload, …): the card is clicked in the hand row — instanceId → optionId */
   const handPick = replaying || !myDecision ? null : handCardChoiceOptions(pd, me.hand);
+  const boundedCardChoice = replaying || !myDecision ? null : boundedCardChoiceModel(pd);
+  const boundedHandPick = replaying || !myDecision
+    ? null
+    : boundedHandCardChoiceOptions(pd, me.hand);
+  const boundedHandChoiceKey = boundedHandPick && pd
+    ? JSON.stringify([
+        pd.player,
+        pd.promptMessage ?? pd.prompt,
+        pd.options,
+        pd.minimumSelections,
+        pd.maximumSelections,
+      ])
+    : null;
+  const boundedChoiceSelectedOptionIds =
+    boundedHandChoiceKey !== null && boundedChoiceSelection?.decisionKey === boundedHandChoiceKey
+      ? boundedChoiceSelection.optionIds
+      : [];
+  const selectedBoundedChoiceOptionIds = new Set(boundedChoiceSelectedOptionIds);
   const stagedDefenders: CardView[] = pd?.kind === "defend" ? (pd.stagedCards ?? []) : [];
   const stagedIds = new Set(stagedDefenders.map((c) => c.instanceId));
   /** live defense total of the staged defenders (0 for the opponent) */
@@ -513,6 +540,19 @@ export function GameBoard() {
     if (handPick) {
       const optionId = handPick.get(c.instanceId);
       if (optionId !== undefined) send({ kind: "choose", optionId });
+      return;
+    }
+    if (boundedHandPick && boundedHandChoiceKey && boundedCardChoice) {
+      const optionId = boundedHandPick.get(c.instanceId);
+      if (optionId === undefined) return;
+      setBoundedChoiceSelection((current) => ({
+        decisionKey: boundedHandChoiceKey,
+        optionIds: toggleBoundedCardChoice(
+          current?.decisionKey === boundedHandChoiceKey ? current.optionIds : [],
+          optionId,
+          boundedCardChoice.maximumSelections,
+        ),
+      }));
       return;
     }
     if (resourcePayment) {
@@ -1001,6 +1041,8 @@ export function GameBoard() {
             defending,
             choosingArsenal,
             handPick,
+            boundedHandPick,
+            selectedBoundedChoiceOptionIds,
             onCardClick: onHandClick,
             onActivate: (instanceId) => clickActivate(instanceId)(),
             onSelect: setSel,
@@ -1110,6 +1152,15 @@ export function GameBoard() {
           onDisableGuidance: () => updateLessGuidance(true),
           onConfirmSkipArsenal: () => send({ kind: "pass" }),
           onCancelSkipArsenal: () => setConfirmSkipArsenal(false),
+          ...(boundedHandPick
+            ? {
+                boundedChoiceSelectedOptionIds,
+                onConfirmBoundedChoice: () => send({
+                  kind: "choose-many",
+                  optionIds: [...boundedChoiceSelectedOptionIds],
+                }),
+              }
+            : {}),
           onSend: send,
         }}
         action={{

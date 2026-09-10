@@ -33,7 +33,14 @@ import {
   moveTriggerOrder,
   TriggerOrderDecision,
 } from "./decision/TriggerOrderDecision.js";
-import { bloodModeAllocation, handCardChoiceOptions, optDecisionCards } from "./decisionPresentation.js";
+import {
+  bloodModeAllocation,
+  boundedCardChoiceModel,
+  boundedHandCardChoiceOptions,
+  handCardChoiceOptions,
+  optDecisionCards,
+  toggleBoundedCardChoice,
+} from "./decisionPresentation.js";
 
 function renderLocalized(node: ReactNode) {
   return renderToStaticMarkup(<TestI18nProvider>{node}</TestI18nProvider>);
@@ -470,6 +477,81 @@ describe("priority guidance help", () => {
 });
 
 describe("scripted card-choice presentation", () => {
+  it("keeps bounded card choices out of the immediate single-card path", () => {
+    const first = { instanceId: 41, cardId: "TEST-A", owner: 0 };
+    const second = { instanceId: 42, cardId: "TEST-B", owner: 0 };
+    const decision = {
+      player: 0,
+      kind: "choose-target" as const,
+      prompt: "Choose any number of action cards",
+      options: ["41", "42"],
+      optionCards: [first, second],
+      minimumSelections: 0,
+      maximumSelections: 2,
+    };
+
+    expect(handCardChoiceOptions(decision, [first, second])).toBeNull();
+    expect(boundedCardChoiceModel(decision)).toEqual({
+      choices: [
+        { optionId: "41", card: first },
+        { optionId: "42", card: second },
+      ],
+      minimumSelections: 0,
+      maximumSelections: 2,
+    });
+    expect([...boundedHandCardChoiceOptions(decision, [first, second])!]).toEqual([
+      [41, "41"],
+      [42, "42"],
+    ]);
+    expect(toggleBoundedCardChoice([], "41", 2)).toEqual(["41"]);
+    expect(toggleBoundedCardChoice(["41"], "42", 2)).toEqual(["41", "42"]);
+    expect(toggleBoundedCardChoice(["41", "42"], "43", 2)).toEqual(["41", "42"]);
+    expect(toggleBoundedCardChoice(["41", "42"], "41", 2)).toEqual(["42"]);
+  });
+
+  it("keeps a bounded hand choice out of the float and renders one confirmation", () => {
+    const model: PendingDecisionModel = {
+      decision: {
+        player: 0,
+        kind: "choose-target",
+        prompt: "Base of the Mountain: choose any number of action cards",
+        options: ["41", "42"],
+        optionCards: [
+          { instanceId: 41, cardId: "TEST-A", owner: 0 },
+          { instanceId: 42, cardId: "TEST-B", owner: 0 },
+        ],
+        minimumSelections: 0,
+        maximumSelections: 2,
+      },
+      isMine: true,
+      decidingName: "Hero",
+      canPass: false,
+      defendPitchIds: new Set(),
+      hand: [],
+      defendSel: [],
+      selectedPitchIds: [],
+      onTogglePitch: () => undefined,
+      resourcePaymentSelected: 0,
+      resourcePaymentRequired: 0,
+      confirmSkipArsenal: false,
+      onRequestPass: () => undefined,
+      onDisableGuidance: () => undefined,
+      onConfirmSkipArsenal: () => undefined,
+      onCancelSkipArsenal: () => undefined,
+      boundedChoiceSelectedOptionIds: [],
+      onConfirmBoundedChoice: () => undefined,
+      onSend: () => undefined,
+    };
+
+    const html = renderLocalized(
+      <PendingDecisionPanel model={model} viewerSeat={0} />,
+    );
+
+    expect(html).not.toContain('data-cardid="TEST-A"');
+    expect(html).not.toContain('data-cardid="TEST-B"');
+    expect(html).toContain(">Done</button>");
+  });
+
   it("replaces a guidance dash with a line break", () => {
     const html = renderToStaticMarkup(createElement(DecisionPrompt, {
       prompt: "Command and Conquer triggers: On hit — play an instant or pass",

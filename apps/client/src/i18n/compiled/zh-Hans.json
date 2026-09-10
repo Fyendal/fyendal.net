@@ -8891,6 +8891,12 @@
       "value": "Clash：在已装备的副手装备上放置一个 -1 防御指示物"
     }
   ],
+  "card.mpg.hand.action.banish.defend": [
+    {
+      "type": 0,
+      "value": "山岳之基：选择任意数量的行动牌，将其放逐并用于防御"
+    }
+  ],
   "card.mpg.heave.pay": [
     {
       "type": 1,

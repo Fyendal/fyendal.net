@@ -40,6 +40,10 @@ function createTokenRaw(
   player.flags[`createdName:${createdName}`] = true;
   player.flags[`createdNameCount:${createdName}`] =
     (Number(player.flags[`createdNameCount:${createdName}`]) || 0) + 1;
+  if (scriptOf(state, cardId, token)?.runechantToken === true) {
+    player.flags.createdRunechantCount =
+      (Number(player.flags.createdRunechantCount) || 0) + 1;
+  }
   for (const subtype of dataOf(state, cardId).subtypes ?? []) {
     player.flags[`createdSubtype:${subtype.toLowerCase()}`] = true;
     player.flags[`createdSubtypeCount:${subtype.toLowerCase()}`] =

@@ -778,6 +778,31 @@ Object.assign(mpg, {
     onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "iron-discard") ctx.discardCard(opponentSeat(ctx), Number(option)); },
   },
   "base of the mountain|0": {
+    onDefend(ctx: ScriptCtx) {
+      const actions = ctx.player(ctx.seat).hand.filter((card) => ctx.hasCardType(card, "action"));
+      if (actions.length) ctx.requestCardChoices(
+        "base-banish",
+        decisionPrompt(
+          "Base of the Mountain: choose any number of action cards to banish and defend",
+          "card.mpg.hand.action.banish.defend",
+        ),
+        actions.map((card) => card.instanceId),
+        0,
+        actions.length,
+      );
+    },
+    onChooseMany(ctx: ScriptCtx, hook: string, options: readonly string[]) {
+      if (hook !== "base-banish") return;
+      const actionIds = new Set(ctx.player(ctx.seat).hand
+        .filter((card) => ctx.hasCardType(card, "action"))
+        .map((card) => card.instanceId));
+      const banished: number[] = [];
+      for (const option of options) {
+        const instanceId = Number(option);
+        if (actionIds.has(instanceId) && ctx.banish(instanceId)) banished.push(instanceId);
+      }
+      ctx.addDefendersFromBanish(banished);
+    },
     modifyDefense(ctx: ScriptCtx) { return ctx.link?.defendingCards.filter((card) => ctx.hasCardType(card, "action")).length ?? 0; },
   },
   "call for backup|1": {

@@ -10,9 +10,11 @@ import {
   shouldShowDecisionPass,
 } from "../decisionPass.js";
 import {
+  boundedCardChoiceModel,
   bloodModeAllocation,
   handCardChoiceOptions,
   optDecisionCards,
+  toggleBoundedCardChoice,
 } from "../decisionPresentation.js";
 import { decisionSpaceOption } from "../passHotkey.js";
 import { ArsenalSkipConfirmation, OptDecisionInstructions } from "./ActionConfirmations.js";
@@ -26,6 +28,83 @@ import { TriggerOrderDecision } from "./TriggerOrderDecision.js";
 const localizedOptionResolvers = {
   card: (cardId: string) => cardData[cardId]?.name ?? cardId,
 };
+
+function BoundedCardChoiceConfirm({
+  selectedOptionIds,
+  minimumSelections,
+  maximumSelections,
+  onConfirm,
+}: {
+  selectedOptionIds: readonly string[];
+  minimumSelections: number;
+  maximumSelections: number;
+  onConfirm: (optionIds: readonly string[]) => void;
+}) {
+  const intl = useIntl();
+  const canConfirm = selectedOptionIds.length >= minimumSelections &&
+    selectedOptionIds.length <= maximumSelections;
+  return (
+    <div className="decision-buttons">
+      <button
+        type="button"
+        className="btn-primary"
+        disabled={!canConfirm}
+        onClick={() => onConfirm(selectedOptionIds)}
+      >
+        {selectedOptionIds.length === 0
+          ? intl.formatMessage({ id: "common.done" })
+          : intl.formatMessage(
+              { id: "game.search.submit" },
+              { count: selectedOptionIds.length },
+            )}
+      </button>
+    </div>
+  );
+}
+
+function BoundedCardChoiceDecision({
+  choice,
+  viewerSeat,
+  onConfirm,
+}: {
+  choice: NonNullable<ReturnType<typeof boundedCardChoiceModel>>;
+  viewerSeat: number;
+  onConfirm: (optionIds: readonly string[]) => void;
+}) {
+  const [selectedOptionIds, setSelectedOptionIds] = useState<readonly string[]>([]);
+
+  return (
+    <>
+      <div className="decision-cards">
+        {choice.choices.map(({ optionId, card }) => {
+          const selected = selectedOptionIds.includes(optionId);
+          const canSelect = selected || selectedOptionIds.length < choice.maximumSelections;
+          return (
+            <CardFace
+              key={optionId}
+              card={card}
+              size="hand"
+              selected={selected}
+              highlighted={canSelect}
+              affiliation={cardAffiliation(card, viewerSeat)}
+              onClick={canSelect
+                ? () => setSelectedOptionIds((current) =>
+                    toggleBoundedCardChoice(current, optionId, choice.maximumSelections)
+                  )
+                : undefined}
+            />
+          );
+        })}
+      </div>
+      <BoundedCardChoiceConfirm
+        selectedOptionIds={selectedOptionIds}
+        minimumSelections={choice.minimumSelections}
+        maximumSelections={choice.maximumSelections}
+        onConfirm={onConfirm}
+      />
+    </>
+  );
+}
 
 function LocalizedDecisionOptionButton({
   message,
@@ -212,6 +291,8 @@ export function PendingDecisionPanel({
     onDisableGuidance,
     onConfirmSkipArsenal,
     onCancelSkipArsenal,
+    boundedChoiceSelectedOptionIds,
+    onConfirmBoundedChoice,
     onSend,
   } = model;
   if (!pd) return null;
@@ -220,6 +301,7 @@ export function PendingDecisionPanel({
   const optCards = optDecisionCards(pd);
   const optDecision = optCards !== null;
   const bloodAllocation = bloodModeAllocation(pd);
+  const boundedCardChoice = boundedCardChoiceModel(pd);
   const handPickDecision = handCardChoiceOptions(pd, hand) !== null;
   const revealedCards = pd.revealedCards ?? [];
   const revealedChoice = revealedCards.length > 0;
@@ -236,6 +318,7 @@ export function PendingDecisionPanel({
   const showChoiceGrid =
     !optDecision &&
     !bloodAllocation &&
+    !boundedCardChoice &&
     !handPickDecision &&
     !revealedChoice &&
     (pd.kind === "optional-effect" || pd.kind === "choose-target") &&
@@ -362,6 +445,29 @@ export function PendingDecisionPanel({
           allocation={bloodAllocation}
           viewerSeat={viewerSeat}
           onChoose={(optionId) => onSend({ kind: "choose", optionId })}
+        />
+      ) : null}
+      {boundedCardChoice &&
+      boundedChoiceSelectedOptionIds !== undefined &&
+      onConfirmBoundedChoice ? (
+        <BoundedCardChoiceConfirm
+          selectedOptionIds={boundedChoiceSelectedOptionIds}
+          minimumSelections={boundedCardChoice.minimumSelections}
+          maximumSelections={boundedCardChoice.maximumSelections}
+          onConfirm={onConfirmBoundedChoice}
+        />
+      ) : boundedCardChoice ? (
+        <BoundedCardChoiceDecision
+          key={JSON.stringify([
+            pd.player,
+            pd.promptMessage ?? pd.prompt,
+            pd.options,
+            pd.minimumSelections,
+            pd.maximumSelections,
+          ])}
+          choice={boundedCardChoice}
+          viewerSeat={viewerSeat}
+          onConfirm={(optionIds) => onSend({ kind: "choose-many", optionIds: [...optionIds] })}
         />
       ) : null}
       {optDecision ? (
