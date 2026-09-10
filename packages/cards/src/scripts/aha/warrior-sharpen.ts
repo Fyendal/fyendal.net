@@ -16,6 +16,7 @@ export const SHARPEN_FOLLOWUP = {
   TOP_ATTACK_REACTION: 6,
   ATTACK_WITH_SWORD: 7,
   DEFENDED_DAMAGE: 8,
+  DOMINATE: 9,
 } as const;
 
 export type SharpenFollowupKind = typeof SHARPEN_FOLLOWUP[keyof typeof SHARPEN_FOLLOWUP];
@@ -88,6 +89,9 @@ export function resolveSharpenFollowup(
         appliesToInstanceId: instanceId,
         onDefendedDealDamage: 1,
       }, source);
+      break;
+    case SHARPEN_FOLLOWUP.DOMINATE:
+      buffNextAttack(ctx, { dominate: true, appliesToInstanceId: instanceId }, source);
       break;
   }
 }

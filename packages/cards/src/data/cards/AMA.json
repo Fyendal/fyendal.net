@@ -189,5 +189,17 @@
     "subtypes": ["shadow"],
     "keywords": ["Go again"],
     "set": "AMA"
+  },
+  {
+    "id": "AMA027",
+    "name": "Skeletal Puppetry",
+    "cardType": "action",
+    "text": "You may discard an ally rather than pay this card's {r} cost.\nYour next ally attack this turn gets +1{p} and go again.\nGo again",
+    "pitch": 3,
+    "cost": 2,
+    "defense": 2,
+    "classes": ["necromancer"],
+    "keywords": ["Go again"],
+    "set": "AMA"
   }
 ]

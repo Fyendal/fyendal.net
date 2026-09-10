@@ -1798,7 +1798,7 @@ describe("August 31–September 1 IAR spoilers", () => {
     const g = scenario({ seats: [
       {
         hero: "rhinar",
-        hand: ["ingest the unknown|1"],
+        hand: ["ingest the unknown|2"],
         deck: ["raging onslaught|1"],
         resources: 1,
         equipment: NO_EQUIPMENT,
@@ -1806,7 +1806,7 @@ describe("August 31–September 1 IAR spoilers", () => {
       { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
     ] });
 
-    g.play("ingest the unknown|1")
+    g.play("ingest the unknown|2")
       .blockWith()
       .settle()
       .expectLife(1, 13)

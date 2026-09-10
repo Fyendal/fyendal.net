@@ -646,6 +646,67 @@ describe("Cindra Head Jabs policy", () => {
       .toEqual({ kind: "defend", instanceIds: [] });
   });
 
+  it("preserves Mask of Momentum rather than cashing it in for a nonlethal on-hit", () => {
+    const game = state();
+    const view = projectStateFor(game, 0);
+    opposingAttack(view, 5);
+    view.chain[0]!.onHitEffects = [{
+      sourceCardId: view.chain[0]!.attackingCard.cardId,
+      text: "When this hits, draw 2 cards.",
+    }];
+    const blocker: CardView = {
+      instanceId: 90_002,
+      cardId: "TEST_EXPENDABLE_BLOCKER",
+      owner: 0,
+      defense: 3,
+    };
+    view.players[0].hand = [blocker];
+    view.players[0].handCount = 1;
+    const mask = view.players[0].equipment.head!;
+    expect(cardData[mask.cardId]?.name).toBe("Mask of Momentum");
+    const legal: GameIntent[] = [
+      { kind: "defend", instanceIds: [] },
+      { kind: "stage-defenders", instanceIds: [blocker.instanceId] },
+      { kind: "stage-defenders", instanceIds: [mask.instanceId] },
+      { kind: "concede" },
+    ];
+    const cards = {
+      ...cardData,
+      TEST_EXPENDABLE_BLOCKER: {
+        id: "TEST_EXPENDABLE_BLOCKER",
+        name: "Test Expendable Blocker",
+        cardType: "action" as const,
+        text: "",
+        pitch: 1 as const,
+        cost: 0,
+        defense: 3,
+      },
+    };
+
+    expect(chooseCindraIntent({ seat: 0, view, legal, cards }))
+      .toEqual({ kind: "defend", instanceIds: [] });
+  });
+
+  it("uses Mask of Momentum for a valuable on-hit once the damage reaches endgame life", () => {
+    const game = state();
+    const view = projectStateFor(game, 0);
+    opposingAttack(view, 2);
+    view.players[0].life = 4;
+    view.chain[0]!.onHitEffects = [{
+      sourceCardId: view.chain[0]!.attackingCard.cardId,
+      text: "When this hits, draw 2 cards.",
+    }];
+    const mask = view.players[0].equipment.head!;
+    const legal: GameIntent[] = [
+      { kind: "defend", instanceIds: [] },
+      { kind: "stage-defenders", instanceIds: [mask.instanceId] },
+      { kind: "concede" },
+    ];
+
+    expect(chooseCindraIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual({ kind: "stage-defenders", instanceIds: [mask.instanceId] });
+  });
+
   it("blocks with Dragonscaler when the next hand will consume it for an attack chain", () => {
     const game = state();
     replaceHand(game, 0, ["HNT058", "HNT060", "SFA019", "ANQ031"]);

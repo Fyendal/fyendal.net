@@ -470,6 +470,26 @@ describe("validateDeck", () => {
     ]);
   });
 
+  it("resolves Ingest the Unknown as yellow from deck exports", () => {
+    const lines = parseDecklistText("3x Ingest the Unknown (yellow)");
+
+    expect(lines.map((line) => findPrinting(line.name, line.pitch)?.id)).toEqual([
+      "IAR007",
+    ]);
+  });
+
+  it("resolves both Skeletal Puppetry pitches from deck exports", () => {
+    const lines = parseDecklistText([
+      "1x Skeletal Puppetry (red)",
+      "1x Skeletal Puppetry (blue)",
+    ].join("\n"));
+
+    expect(lines.map((line) => findPrinting(line.name, line.pitch)?.id)).toEqual([
+      "AMA013",
+      "AMA027",
+    ]);
+  });
+
   it("rejects undersized decks per format", () => {
     const lines = parseDecklistText(
       [`Hero: ${hero.name}`, ...deckCards.slice(0, 10).map((c) => deckLine(c))].join("\n"),

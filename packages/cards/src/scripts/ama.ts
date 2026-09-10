@@ -77,6 +77,22 @@ function decay(): Pick<CardScript, "triggers"> {
   };
 }
 
+function skeletalPuppetry(power: number): CardScript {
+  return {
+    alternativePlayCost: {
+      kind: "discard-hand-subtype",
+      subtype: "ally",
+    },
+    onPlay(ctx) {
+      buffNextAttack(ctx, {
+        attack: power,
+        appliesToSubtype: "ally",
+        goAgain: true,
+      });
+    },
+  };
+}
+
 export const ama: Record<string, CardScript> = {
   "malice, domina of the dead|0": {
     activated: {
@@ -228,19 +244,8 @@ export const ama: Record<string, CardScript> = {
     ...digForSoulsAttack,
   },
 
-  "skeletal puppetry|1": {
-    alternativePlayCost: {
-      kind: "discard-hand-subtype",
-      subtype: "ally",
-    },
-    onPlay(ctx) {
-      buffNextAttack(ctx, {
-        attack: 3,
-        appliesToSubtype: "ally",
-        goAgain: true,
-      });
-    },
-  },
+  "skeletal puppetry|1": skeletalPuppetry(3),
+  "skeletal puppetry|3": skeletalPuppetry(1),
 
   "restless commander|1": {
     activated: attackAbility(1, {

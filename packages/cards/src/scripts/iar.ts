@@ -1114,7 +1114,7 @@ export const iar: Record<string, CardScript> = {
     },
   }),
 
-  "ingest the unknown|1": ingestTheUnknown(),
+  "ingest the unknown|2": ingestTheUnknown(),
   "hellbound assault|1": hellboundAssault(),
   "hellbound assault|2": hellboundAssault(),
   "hellbound assault|3": hellboundAssault(),
