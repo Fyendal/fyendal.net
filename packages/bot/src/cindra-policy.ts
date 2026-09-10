@@ -1166,6 +1166,8 @@ function scoreDefend(
       );
       const lifeWithoutBlock = candidate.input.view.players[candidate.input.seat].life -
         candidate.incoming;
+      // Keep the three-hit Mask mini-game live while life is still flexible;
+      // cash it in once taking the attack would cross the low-life breakpoint.
       if (spendsFreshMask && lifeWithoutBlock > MASK_ENDGAME_LIFE) return "forbid";
       const usesOnlyFlightPath = candidate.chosen.length === 1 &&
         key(candidate.input.cards[candidate.chosen[0]!.cardId]) === CARD.dragonscalerFlightPath &&

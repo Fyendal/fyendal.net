@@ -601,6 +601,29 @@ describe("IAR cards", () => {
     expect(g.state.players[0]!.heroCardId).toBe("IAR106");
   });
 
+  it("Viserai banishes when a token copy of a specialized Runechant is created", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        heroKey: "viserai, the forsaken|0",
+        hand: ["fractal creation|3", "runechant of pride|2"],
+        deck: ["raging onslaught|1"],
+        resources: 3,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("fractal creation|3", { settle: false })
+      .react("runechant of pride|2")
+      .blockWith()
+      .settle()
+      .chooseCard("runechant of pride|2");
+
+    expect(boardNames(g, 0).filter((name) => name === "Runechant of Pride")).toHaveLength(2);
+    expect(g.state.players[0]!.banish).toHaveLength(1);
+  });
+
   it("Viserai, Usurper gives the first blood-debt attack go again", () => {
     const g = scenario({ seats: [
       {
@@ -1681,7 +1704,7 @@ describe("August 29–31 IAR and GEM Pack 6 spoilers", () => {
     expect(boardNames(g, 0)).toContain("Gate to i'Arathael");
   });
 
-  it("Reach of the Abyss banishes every defending card when the chain closes", () => {
+  it("Reach of the Abyss banishes defending cards across the entire chain", () => {
     const g = scenario({
       active: 1,
       seats: [
@@ -1692,14 +1715,17 @@ describe("August 29–31 IAR and GEM Pack 6 spoilers", () => {
         },
         {
           hero: "dorinthea",
-          hand: ["snatch|1"],
+          hand: ["head jab|1", "snatch|1"],
           equipment: NO_EQUIPMENT,
         },
       ],
     });
 
-    g.play("snatch|1")
-      .blockWith("reach of the abyss|0", "raging onslaught|3")
+    g.play("head jab|1")
+      .blockWith("raging onslaught|3")
+      .settle()
+      .play("snatch|1")
+      .blockWith("reach of the abyss|0")
       .passPriority()
       .react("sink below|1")
       .chooseOption("pass")

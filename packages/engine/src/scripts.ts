@@ -595,6 +595,10 @@ export interface ScriptCtx {
   addDefenderFromArsenal(instanceId: number): boolean;
   /** Move a card from a defending hero's hand directly onto the chain link. */
   addDefenderFromHand(instanceId: number): boolean;
+  /** Move face-up cards from a defending hero's banished zone directly onto
+   * the current chain link as defending cards, firing their ordinary onDefend
+   * hooks as one defender-entry group. */
+  addDefendersFromBanish(instanceIds: readonly number[]): number;
   /** Add this equipment to the active chain link as a defending card without
    * moving it out of its equipment slot, then fire its ordinary onDefend hook. */
   addSelfAsDefender(): boolean;

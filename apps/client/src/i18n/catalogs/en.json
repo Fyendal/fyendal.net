@@ -1156,6 +1156,7 @@
   "card.mpg.equipment.defensecounter.head": "Clash: put a -1 defense counter on an equipped head",
   "card.mpg.equipment.defensecounter.legs": "Clash: put a -1 defense counter on equipped legs",
   "card.mpg.equipment.defensecounter.offhand": "Clash: put a -1 defense counter on an equipped off-hand",
+  "card.mpg.hand.action.banish.defend": "Base of the Mountain: choose any number of action cards to banish and defend",
   "card.mpg.heave.pay": "{card}: pay {amount} resource(s) to heave it?",
   "card.mpg.iron.card.discard": "Test of Iron Grip: discard a card",
   "card.mpg.opposing.equipment.equip": "Annexation of the Forge: equip opposing equipment",

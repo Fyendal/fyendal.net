@@ -230,6 +230,13 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
       [...link.defendingCards, ...link.defendingEquipment],
     ] as const),
   );
+  for (const [link, defenders] of defendingCloseHooks) {
+    for (const card of defenders) {
+      scriptOf(state, card.cardId, card)?.onDefendingCombatChainClosed?.(
+        runtime.makeCtx(state, card.owner, card, link),
+      );
+    }
+  }
   for (const link of state.chain) {
     delete link.attackingCard.grantedNames;
     const closingAttacker =
@@ -282,11 +289,6 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
           (card) => card.instanceId === link.attackingCard.instanceId,
         );
       if (liveAttacker) destroyPermanent(state, runtime, link.attacker, liveAttacker);
-    }
-    for (const c of defendingCloseHooks.get(link) ?? []) {
-      scriptOf(state, c.cardId, c)?.onDefendingCombatChainClosed?.(
-        runtime.makeCtx(state, c.owner, c, link),
-      );
     }
     for (const c of link.defendingCards) {
       if (link.flags[`banishOnClose:${c.instanceId}`] === true) {

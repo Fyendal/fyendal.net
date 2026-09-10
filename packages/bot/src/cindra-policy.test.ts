@@ -690,21 +690,42 @@ describe("Cindra Head Jabs policy", () => {
   it("uses Mask of Momentum for a valuable on-hit once the damage reaches endgame life", () => {
     const game = state();
     const view = projectStateFor(game, 0);
-    opposingAttack(view, 2);
-    view.players[0].life = 4;
+    opposingAttack(view, 5);
+    view.players[0].life = 7;
     view.chain[0]!.onHitEffects = [{
       sourceCardId: view.chain[0]!.attackingCard.cardId,
       text: "When this hits, draw 2 cards.",
     }];
+    const blocker: CardView = {
+      instanceId: 90_002,
+      cardId: "TEST_EXPENDABLE_BLOCKER",
+      owner: 0,
+      defense: 3,
+    };
+    view.players[0].hand = [blocker];
+    view.players[0].handCount = 1;
     const mask = view.players[0].equipment.head!;
     const legal: GameIntent[] = [
       { kind: "defend", instanceIds: [] },
+      { kind: "stage-defenders", instanceIds: [blocker.instanceId] },
       { kind: "stage-defenders", instanceIds: [mask.instanceId] },
       { kind: "concede" },
     ];
+    const cards = {
+      ...cardData,
+      TEST_EXPENDABLE_BLOCKER: {
+        id: "TEST_EXPENDABLE_BLOCKER",
+        name: "Test Expendable Blocker",
+        cardType: "action" as const,
+        text: "",
+        pitch: 1 as const,
+        cost: 0,
+        defense: 3,
+      },
+    };
 
-    expect(chooseCindraIntent({ seat: 0, view, legal, cards: cardData }))
-      .toEqual({ kind: "stage-defenders", instanceIds: [mask.instanceId] });
+    expect(chooseCindraIntent({ seat: 0, view, legal, cards }))
+      .toEqual({ kind: "stage-defenders", instanceIds: [blocker.instanceId, mask.instanceId] });
   });
 
   it("blocks with Dragonscaler when the next hand will consume it for an attack chain", () => {

@@ -122,6 +122,41 @@ describe("MPG — import and Guardian pressure", () => {
     g.play("head jab|1").blockWith("testament of valahai|0").settle().expectFinalDefense(5);
   });
 
+  it("Base of the Mountain banishes any number of hand actions, then adds them as defenders", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        {
+          ...valda,
+          hand: ["head jab|1", "raging onslaught|1", "raging onslaught|2", "sink below|1"],
+          equipment: { legs: "base of the mountain|0" },
+        },
+        { hero: "dorinthea", hand: ["head jab|1"] },
+      ],
+    });
+
+    g.play("head jab|1")
+      .blockWith("base of the mountain|0")
+      .settle()
+      .expectLog("Base of the Mountain triggers: When this defends");
+    expect(legalIntents(g.state, 0)).toContainEqual({ kind: "choose-many", optionIds: [] });
+    const selected = g.state.players[0]!.hand
+      .filter((card) => [
+        "head jab|1",
+        "raging onslaught|1",
+      ].includes(functionalKeyOf(cardData[card.cardId]!)))
+      .map((card) => String(card.instanceId));
+    expect(selected).toHaveLength(2);
+    g.doRaw({ kind: "choose-many", optionIds: selected })
+      .settle()
+      .expectFinalDefense(7)
+      .expectHandSize(0, 2)
+      .expectInZone(0, "raging onslaught|2", "hand")
+      .expectInZone(0, "sink below|1", "hand")
+      .expectLog("Head Jab is banished")
+      .expectLog("Raging Onslaught is added to the chain link as a defending card");
+  });
+
   it("Leave a Dent grants its deck-mill crush trigger to the next Guardian attack", () => {
     const g = scenario({
       seats: [
