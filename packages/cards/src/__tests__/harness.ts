@@ -395,15 +395,22 @@ export class Scenario {
     return c.instanceId;
   }
 
-  /** Resolve an attacking/defending card named by a target-aware play intent. */
+  /** Resolve a public card named by a target-aware play or activation intent. */
   private targetCardInstanceIdOf(key: string): number {
     const link = this.state.chain[this.state.chain.length - 1];
     const wanted = functionalKeyOf(cardData[printingId(key)]!);
     const card = (link ? [link.attackingCard, ...link.defendingCards] : [])
       .find((candidate) => functionalKeyOf(cardData[candidate.cardId]!) === wanted) ??
       this.state.stack.flatMap((layer) => layer.card ? [layer.card] : [])
-        .find((candidate) => functionalKeyOf(cardData[candidate.cardId]!) === wanted);
-    if (!card) throw new Error(`no current combat or stack card "${key}" to target`);
+        .find((candidate) => functionalKeyOf(cardData[candidate.cardId]!) === wanted) ??
+      this.state.players.flatMap((player) => [
+        ...player.banish,
+        ...player.graveyard,
+        ...player.board,
+        ...player.weapons,
+        ...Object.values(player.equipment).filter((candidate): candidate is CardInstance => !!candidate),
+      ]).find((candidate) => functionalKeyOf(cardData[candidate.cardId]!) === wanted);
+    if (!card) throw new Error(`no public card "${key}" to target`);
     return card.instanceId;
   }
 
@@ -501,7 +508,8 @@ export class Scenario {
   /** Activate a weapon/equipment/hero ability, including "while defending"
    *  abilities with an explicit discard cost.
    *  `ability` selects one of several activated abilities on the same card;
-   *  `targetAlly` aims an attack ability at an opposing ally. */
+   *  `targetAlly` aims an attack ability at an opposing ally; `targetCard`
+   *  declares a card target before activation costs are paid. */
   activate(
     key: string,
     opts: {
@@ -510,6 +518,7 @@ export class Scenario {
       settle?: boolean;
       ability?: number;
       targetAlly?: string;
+      targetCard?: string;
     } = {},
   ): this {
     if (opts.pitch !== undefined && opts.discard !== undefined) {
@@ -527,6 +536,9 @@ export class Scenario {
         (opts.targetAlly === undefined
           ? i.targetAllyId === undefined // default: aim at the hero
           : i.targetAllyId === this.targetAllyIdOf(seat, opts.targetAlly)) &&
+        (opts.targetCard === undefined
+          ? i.targetCardInstanceId === undefined
+          : i.targetCardInstanceId === this.targetCardInstanceIdOf(opts.targetCard)) &&
         (opts.discard === undefined || (
           i.deferActivationPresentation === true && i.pitchRequired === undefined
         )) &&

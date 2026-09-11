@@ -207,18 +207,19 @@ describe("ROS — Earth heroes and Decompose", () => {
 });
 
 describe("ROS — Lightning and Runeblade", () => {
-  it("Current Funnel gives the next action card go again", () => {
+  it("Current Funnel gives itself and the next action card go again after a Lightning action", () => {
     const g = scenario({
       seats: [
         {
           hero: "rhinar",
-          hand: ["current funnel|3", "wounding blow|1"],
+          hand: ["sizzle|1", "current funnel|3", "wounding blow|1"],
         },
         { hero: "dorinthea", hand: [] },
       ],
     });
 
-    g.play("current funnel|3")
+    g.play("sizzle|1")
+      .play("current funnel|3")
       .blockWith()
       .settle()
       .expectAP(0, 1)
@@ -229,6 +230,24 @@ describe("ROS — Lightning and Runeblade", () => {
     });
 
     g.blockWith().settle().expectAP(0, 1);
+  });
+
+  it("Current Funnel does not get go again after a non-Lightning action", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["nimblism|1", "current funnel|3"],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+
+    g.play("nimblism|1")
+      .play("current funnel|3")
+      .blockWith()
+      .settle()
+      .expectAP(0, 0);
   });
 
   it("Spellbound Creepers and Machinations stack their action points and give the next Runeblade attack go again", () => {

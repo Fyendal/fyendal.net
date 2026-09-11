@@ -23,6 +23,31 @@ function jsonCopy<T>(value: T): T {
 }
 
 describe("PersistedStateV1", () => {
+  it("round trips a declared activated-ability card target", () => {
+    const source = game();
+    const abilityCard = source.players[0]!.hero;
+    const target = source.players[1]!.hero;
+    source.stack = [{
+      sourceInstanceId: abilityCard.instanceId,
+      seat: 0,
+      triggerIndex: -1,
+      label: "Targeted ability",
+      optional: false,
+      ability: true,
+      abilityCard,
+      targetCardInstanceId: target.instanceId,
+    }];
+
+    const decoded = decodePersistedState(
+      jsonCopy(encodePersistedState(source)),
+      "ABC123",
+      cardData,
+      scripts,
+    );
+
+    expect(decoded.stack[0]?.targetCardInstanceId).toBe(target.instanceId);
+  });
+
   it("round trips structured audience-aware log payloads", () => {
     const source = game();
     source.log = [];

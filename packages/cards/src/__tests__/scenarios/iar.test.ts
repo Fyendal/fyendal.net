@@ -333,10 +333,54 @@ describe("IAR cards", () => {
       { hero: "dorinthea", equipment: NO_EQUIPMENT },
     ] });
 
-    g.activate("gate to i'arathael|0").chooseCard("rift bind|1");
+    g.activate("gate to i'arathael|0", { targetCard: "rift bind|1" });
 
     expect(g.state.players[0]!.banish[0]?.playableFrom).toContain("banish");
     expect(g.state.players[0]!.board).toHaveLength(0);
+  });
+
+  it("Gate declares its target before Baalghor banishes the pitched card", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        heroKey: "baalghor, omen of the end|0",
+        board: ["gate to i'arathael|0"],
+        hand: ["shadowrealm harvester|1"],
+        banish: ["rift bind|1"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    const player = g.state.players[0]!;
+    const pitched = player.hand[0]!;
+    const existingTarget = player.banish[0]!;
+    const gate = player.board[0]!;
+    const gateTargets = legalIntents(g.state, 0).flatMap((intent) =>
+      intent.kind === "activate-ability" &&
+        intent.sourceInstanceId === gate.instanceId &&
+        intent.pitchInstanceIds.includes(pitched.instanceId)
+        ? [intent.targetCardInstanceId]
+        : []
+    );
+    expect(gateTargets).toEqual([existingTarget.instanceId]);
+    expect(applyIntent(g.state, 0, {
+      kind: "activate-ability",
+      sourceInstanceId: gate.instanceId,
+      pitchInstanceIds: [pitched.instanceId],
+      targetCardInstanceId: pitched.instanceId,
+    })).toMatchObject({ ok: false, error: "not a legal card target" });
+
+    g.activate("gate to i'arathael|0", {
+      pitch: ["shadowrealm harvester|1"],
+      targetCard: "rift bind|1",
+    });
+
+    const resolvedPlayer = g.state.players[0]!;
+    expect(resolvedPlayer.banish.find((card) => card.instanceId === pitched.instanceId)?.playableFrom)
+      .toBeUndefined();
+    expect(resolvedPlayer.banish.find((card) => card.instanceId === existingTarget.instanceId)?.playableFrom)
+      .toContain("banish");
   });
 
   it("Soul of Existence pitches for 4 and its trigger costs 1 life", () => {
@@ -1025,11 +1069,11 @@ describe("IAR cards", () => {
       .toHaveLength(1);
   });
 
-  it("Apex Burster discards itself to destroy a defender of a 6-base-power attack", () => {
+  it("Apex Buster discards itself to destroy a defender of a 6-base-power attack", () => {
     const g = scenario({ seats: [
       {
         hero: "rhinar",
-        hand: ["raging onslaught|1", "apex burster|3"],
+        hand: ["raging onslaught|1", "apex buster|3"],
         resources: 5,
         equipment: NO_EQUIPMENT,
       },
@@ -1043,18 +1087,18 @@ describe("IAR cards", () => {
 
     g.play("raging onslaught|1")
       .blockWith("raging onslaught|2", "raging onslaught|3")
-      .activate("apex burster|3")
+      .activate("apex buster|3")
       .chooseCard("raging onslaught|2")
       .expectLife(1, 16)
-      .expectInZone(0, "apex burster|3", "graveyard")
+      .expectInZone(0, "apex buster|3", "graveyard")
       .expectInZone(1, "raging onslaught|2", "graveyard");
   });
 
-  it("Apex Burster does not count power above an attack's base power", () => {
+  it("Apex Buster does not count power above an attack's base power", () => {
     const g = scenario({ seats: [
       {
         hero: "rhinar",
-        hand: ["nimblism|1", "snatch|1", "apex burster|3"],
+        hand: ["nimblism|1", "snatch|1", "apex buster|3"],
         resources: 2,
         equipment: NO_EQUIPMENT,
       },
@@ -1066,7 +1110,7 @@ describe("IAR cards", () => {
     ] });
 
     g.play("nimblism|1").play("snatch|1").blockWith("raging onslaught|3");
-    expect(() => g.activate("apex burster|3"))
+    expect(() => g.activate("apex buster|3"))
       .toThrow(/no legal intent to activate/);
   });
 
@@ -1326,8 +1370,7 @@ describe("IAR cards", () => {
     ] });
 
     g.play("planar chaos|1")
-      .activate("gate to i'arathael|0")
-      .chooseCard("rift bind|1");
+      .activate("gate to i'arathael|0", { targetCard: "rift bind|1" });
 
     expect(g.state.players[1]!.banish[0]).toMatchObject({
       playableFrom: ["banish"],
@@ -2262,6 +2305,23 @@ describe("September 3 IAR spoilers", () => {
     ] });
 
     g.play("tome of necrosis|1", { alternativeCost: "restless outlaw|1" });
+
+    expect(boardNames(g, 0)).toContain("Gate to i'Arathael");
+  });
+
+  it("Restless Templar creates a Gate when it dies", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["tome of necrosis|1"],
+        board: ["restless templar|1"],
+        deck: ["snatch|1"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("tome of necrosis|1", { alternativeCost: "restless templar|1" });
 
     expect(boardNames(g, 0)).toContain("Gate to i'Arathael");
   });

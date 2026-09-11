@@ -747,7 +747,19 @@ Object.assign(ros, {
   "earth's embrace|3": { triggers: [{ event: "end-of-turn", label: "Create Embodiment of Earth", effect(ctx: ScriptCtx) { ctx.createToken(EARTH); if (ctx.getFlag("player", "banishedSubtype:earth") !== true) ctx.destroySelf(); } }] },
   "seeds of tomorrow|3": { additionalCost(ctx: ScriptCtx) { const arsenal = ctx.player(ctx.seat).arsenal; if (arsenal.length) ctx.requestCardChoice("seeds-arsenal", decisionPrompt("Put an arsenal card on the bottom", "card.ros.arsenal.card.bottom"), arsenal.map((card) => card.instanceId)); }, onChoose(ctx: ScriptCtx, hook: string, option: string) { if (hook === "seeds-arsenal") ctx.putOnDeckBottom(Number(option)); }, onPlay: (ctx: ScriptCtx) => ctx.preventNextDamage(ctx.seat, 5) },
   "lightning greaves|0": { activated: { cost: 1, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true, onActivate: (ctx: ScriptCtx) => ctx.addModifier({ scope: "until-end-of-turn", goAgain: true, appliesToCardType: "instant" }) } },
-  "current funnel|3": { onAttackDeclared(ctx: ScriptCtx) { if (ctx.getFlag("player", "lastActionWasType:lightning") === true) { ctx.grantGoAgain(); ctx.addModifier({ scope: "next-play", grantKeyword: "go again", appliesToCardType: "action" }); } } },
+  "current funnel|3": {
+    onAttackDeclared(ctx: ScriptCtx) {
+      const lastActionIsSelf =
+        Number(ctx.getFlag("player", "lastActionPlayedInstanceId")) === ctx.self.instanceId;
+      const typeFlag = lastActionIsSelf
+        ? "priorActionWasType:lightning"
+        : "lastActionWasType:lightning";
+      if (ctx.getFlag("player", typeFlag) === true) {
+        ctx.grantGoAgain();
+        ctx.addModifier({ scope: "next-play", grantKeyword: "go again", appliesToCardType: "action" });
+      }
+    },
+  },
   "eclectic magnetism|1": { onAttackDeclared: (ctx: ScriptCtx) => ctx.allowAbilitiesAsInstant("action") },
   "gone in a flash|1": {
     onAttackDeclared(ctx: ScriptCtx) {

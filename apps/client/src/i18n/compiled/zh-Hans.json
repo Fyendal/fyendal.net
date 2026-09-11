@@ -3979,6 +3979,18 @@
       "value": " 点资源"
     }
   ],
+  "card.hnt.longwhisker.dagger.additionalattack": [
+    {
+      "type": 0,
+      "value": "Long Whisker Loyalty：选择本回合可额外攻击一次的匕首"
+    }
+  ],
+  "card.hnt.longwhisker.dagger.mark": [
+    {
+      "type": 0,
+      "value": "Long Whisker Loyalty：选择命中英雄时进行标记的匕首"
+    }
+  ],
   "card.hnt.longwhisker.modes.choose": [
     {
       "type": 0,
@@ -9165,6 +9177,42 @@
     {
       "type": 0,
       "value": "移动 Restless Coalescence 的力量指示物？"
+    }
+  ],
+  "card.mst.supercell.construct.shuffle": [
+    {
+      "type": 0,
+      "value": "将一个被放逐的 Construct Nitro Mechanoid 洗入你的牌库？"
+    }
+  ],
+  "card.mst.supercell.hyperdriver.choose": [
+    {
+      "type": 0,
+      "value": "Supercell：选择第 "
+    },
+    {
+      "type": 1,
+      "value": "current"
+    },
+    {
+      "type": 0,
+      "value": " 个 Hyper Driver（共 "
+    },
+    {
+      "type": 1,
+      "value": "total"
+    },
+    {
+      "type": 0,
+      "value": " 个），放置 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 个 steam 指示物"
     }
   ],
   "card.mst.wardaura.choose": [

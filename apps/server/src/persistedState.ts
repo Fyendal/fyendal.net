@@ -71,6 +71,7 @@ export interface PersistedStackLayerV1 {
   ability?: boolean;
   abilityCard?: PersistedCardInstanceV1;
   abilityIndex?: number;
+  targetCardInstanceId?: number;
   resolvedReactionAbility?: true;
   fromHand?: boolean;
   meldStage?: 1 | 2;
@@ -929,7 +930,7 @@ function validateCards(value: unknown, code: string, path: string): void {
 }
 
 const STACK_REQUIRED = ["sourceInstanceId", "seat", "triggerIndex", "label", "optional"] as const;
-const STACK_OPTIONAL = ["triggerCount", "triggerBatchStarted", "triggerSource", "triggerEventCard", "defaultOption", "accepted", "card", "goAgain", "ability", "abilityCard", "abilityIndex", "resolvedReactionAbility", "fromHand", "meldStage", "engineEffect"] as const;
+const STACK_OPTIONAL = ["triggerCount", "triggerBatchStarted", "triggerSource", "triggerEventCard", "defaultOption", "accepted", "card", "goAgain", "ability", "abilityCard", "abilityIndex", "targetCardInstanceId", "resolvedReactionAbility", "fromHand", "meldStage", "engineEffect"] as const;
 function validateStackLayer(value: unknown, code: string, path: string): void {
   const layer = exact(value, code, path, STACK_REQUIRED, STACK_OPTIONAL);
   for (const key of ["sourceInstanceId", "seat", "triggerIndex"] as const) integer(layer[key], code, `${path}.${key}`);
@@ -953,6 +954,7 @@ function validateStackLayer(value: unknown, code: string, path: string): void {
   optional(layer, "defaultOption", (v, p) => { oneOf(v, ["yes", "no"] as const, code, p); }, path);
   for (const key of ["accepted", "goAgain", "ability", "resolvedReactionAbility", "fromHand"] as const) optional(layer, key, (v, p) => { bool(v, code, p); }, path);
   optional(layer, "abilityIndex", (v, p) => { integer(v, code, p); }, path);
+  optional(layer, "targetCardInstanceId", (v, p) => { integer(v, code, p); }, path);
   optional(layer, "meldStage", (v, p) => { if (v !== 1 && v !== 2) fail(code, p, "expected 1 or 2"); }, path);
   optional(layer, "card", (v, p) => validateCard(v, code, p), path);
   optional(layer, "abilityCard", (v, p) => validateCard(v, code, p), path);

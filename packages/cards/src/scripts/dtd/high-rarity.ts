@@ -310,8 +310,8 @@ export const dtdHighRarity: Record<string, CardScript> = {
   }),
   "diabolic offering|3": bloodDebt({ modifyAttack: (ctx) => ctx.getFlag("player", "banishedSixPlusThisTurn") === true ? 6 - (data(ctx, ctx.self).attack ?? 0) : 0, modifyDefense: (ctx) => ctx.getFlag("player", "banishedSixPlusThisTurn") === true ? 6 - (data(ctx, ctx.self).defense ?? 0) : -(data(ctx, ctx.self).defense ?? 0) }),
   "shaden death hydra|2": bloodDebt({ onAttackDeclared(ctx) { const count = ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && data(ctx, card).text.includes("Blood Debt")).length; ctx.dealDamage(ctx.seat, Math.max(0, 13 - count)); } }),
-  "slithering shadowpede|1": bloodDebt({ onCardBanished(ctx, card, from) { if (card.instanceId === ctx.self.instanceId && from === "hand") ctx.allowPlayFrom(card.instanceId, "banish"); } }),
-  "expendable limbs|3": { additionalCost(ctx) { const hand = ctx.player(ctx.seat).hand; const card = hand[ctx.randomInt(hand.length)]; if (card && ctx.banish(card.instanceId) && ctx.basePower(card) >= 6) ctx.allowPlayFrom(card.instanceId, "banish", { untilEndOfNextTurn: true }); } },
+  "slithering shadowpede|1": bloodDebt({ onSelfBanished(ctx, from) { if (from === "hand") ctx.allowPlayFrom(ctx.self.instanceId, "banish"); } }),
+  "expendable limbs|3": { requiredHandCardsForAdditionalCost: 1, additionalCost(ctx) { const hand = ctx.player(ctx.seat).hand; const card = hand[ctx.randomInt(hand.length)]; if (card && ctx.banish(card.instanceId) && ctx.basePower(card) >= 6) ctx.allowPlayFrom(card.instanceId, "banish", { untilEndOfNextTurn: true }); } },
   "blood dripping frenzy|3": { additionalCost(ctx) { let sixes = 0; let bloodDebtCards = 0; for (const card of [...ctx.player(ctx.seat).hand]) { if (ctx.basePower(card) >= 6) sixes++; if (data(ctx, card).text.includes("Blood Debt")) bloodDebtCards++; ctx.banish(card.instanceId); } ctx.drawCards(ctx.seat, bloodDebtCards); ctx.addModifier({ scope: "until-end-of-turn", attack: sixes, appliesToType: ["brute", "shadow"] }); } },
   "vynnset, iron maiden|0": {
     triggers: [

@@ -1053,7 +1053,7 @@ export const iar: Record<string, CardScript> = {
     },
   }),
 
-  "apex burster|3": {
+  "apex buster|3": {
     activated: {
       cost: 2,
       isAttack: false,
@@ -2348,36 +2348,28 @@ export const iar: Record<string, CardScript> = {
           !card.faceDown && isBloodDebtAction(ctx, card)
         ));
       },
+      targetCardOptions(ctx) {
+        const anyZone = ctx.getFlag("player", "iarPlanarChaosGate") === true;
+        const players = anyZone ? ctx.state.players : [ctx.player(ctx.seat)];
+        return players.flatMap((player) => player.banish
+          .filter((card) => !card.faceDown && isBloodDebtAction(ctx, card))
+          .map((card) => card.instanceId));
+      },
+      onCostPaid(ctx) {
+        const anyZone = ctx.getFlag("player", "iarPlanarChaosGate") === true;
+        ctx.setCounter("iarGateAnyZoneTarget", anyZone ? 1 : 0);
+        ctx.setFlag("player", "iarPlanarChaosGate", false);
+      },
       onActivate(ctx) {
         ctx.setFlag("player", "iarGateCreatedOrActivated", true);
-        const anyZone = ctx.getFlag("player", "iarPlanarChaosGate") === true;
-        ctx.setFlag("player", "iarPlanarChaosGate", false);
-        ctx.setFlag("player", "iarPlanarChaosGateSelection", anyZone);
-        const players = anyZone ? ctx.state.players : [ctx.player(ctx.seat)];
-        const choices = players.flatMap((player) => player.banish.filter((card) =>
-          !card.faceDown && isBloodDebtAction(ctx, card)
-        ));
-        if (choices.length > 0) {
-          ctx.requestCardChoice(
-            "iar-gate-target",
-            decisionPrompt(
-              "Choose an action card with blood debt",
-              "card.iar.blooddebt.action.choose",
-            ),
-            choices.map((card) => card.instanceId),
+        if (ctx.playTargetInstanceId !== undefined) {
+          ctx.allowPlayFrom(
+            ctx.playTargetInstanceId,
+            "banish",
+            ctx.getCounter("iarGateAnyZoneTarget") > 0 ? { forSeat: ctx.seat } : undefined,
           );
         }
       },
-    },
-    onChoose(ctx, hook, option) {
-      if (hook !== "iar-gate-target") return;
-      const anyZone = ctx.getFlag("player", "iarPlanarChaosGateSelection") === true;
-      ctx.setFlag("player", "iarPlanarChaosGateSelection", false);
-      ctx.allowPlayFrom(
-        Number(option),
-        "banish",
-        anyZone ? { forSeat: ctx.seat } : undefined,
-      );
     },
   },
 };

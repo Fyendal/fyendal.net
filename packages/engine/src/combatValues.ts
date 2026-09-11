@@ -1141,7 +1141,12 @@ export function attackBonusAboveBase(
 ): number {
   if (scriptOf(state, link.attackingCard.cardId, link.attackingCard)
     ?.unmodifiableCharacteristics?.includes("power")) return 0;
-  let n = activeModifiers(state, link, ["chain-link", "until-end-of-turn", "static"])
+  let n = activeModifiers(state, link, [
+    "chain-link",
+    "combat-chain",
+    "until-end-of-turn",
+    "static",
+  ])
     .reduce((total, modifier) => total + (modifier.attack ?? 0), 0);
   // +1{p} counters and this-turn power grants on the attacking card are
   // above-base too

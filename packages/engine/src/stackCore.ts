@@ -33,7 +33,7 @@ export function pushAbilityLayer(
   seat: number,
   source: CardInstance,
   label: string,
-  opts?: { abilityIndex?: number; triggerIndex?: number; optional?: boolean; goAgain?: boolean },
+  opts?: { abilityIndex?: number; triggerIndex?: number; optional?: boolean; goAgain?: boolean; targetCardInstanceId?: number },
 ): void {
   state.stack.unshift({
     sourceInstanceId: source.instanceId,
@@ -45,5 +45,8 @@ export function pushAbilityLayer(
     abilityCard: source,
     ...(opts?.abilityIndex && opts.abilityIndex > 0 ? { abilityIndex: opts.abilityIndex } : {}),
     ...(opts?.goAgain ? { goAgain: true } : {}),
+    ...(opts?.targetCardInstanceId !== undefined
+      ? { targetCardInstanceId: opts.targetCardInstanceId }
+      : {}),
   });
 }

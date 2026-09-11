@@ -73,7 +73,7 @@ import { answerDeckBottomOrder, enterBanish } from "./zoneMoves.js";
 import { lingeringModifierSources } from "./sourceQueries.js";
 import { continueFollowUpDecisions } from "./decisionQueue.js";
 
-import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestrictedByModifier, payActivatedAbilityCost, prepareActivatedDiscardCost, prepareActivatedEffectCardCosts } from "./abilityRules.js";
+import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestrictedByModifier, payActivatedAbilityCost, prepareActivatedAbilityTarget, prepareActivatedDiscardCost, prepareActivatedEffectCardCosts } from "./abilityRules.js";
 import { consumeNextActionGoAgain, noteActionPlayedOrActivated } from "./cardLifecycle.js";
 import { answerArcaneBarrier } from "./damageResolution.js";
 import { answerDieRollReplacement } from "./dieRoll.js";
@@ -579,6 +579,7 @@ export function activateAbility(
   alternativeCostCardInstanceIds?: number[],
   discardInstanceIds: number[] = [],
   declaredVariableX?: number,
+  targetCardInstanceId?: number,
 ): string | undefined {
   if (state.phase !== "action" || (state.pendingDecision && !resumingActivationCost)) {
     return "cannot activate an ability now";
@@ -603,6 +604,7 @@ export function activateAbility(
       alternativeCostCardInstanceIds,
       discardInstanceIds,
       declaredVariableX,
+      targetCardInstanceId,
     });
     if (result.status === "error") return result.error;
     if (result.status === "pending") return undefined;
@@ -656,6 +658,17 @@ export function activateAbility(
     return "cannot play or activate another action this turn";
   }
   if (costsAP && player.actionPoints < 1) return "not enough action points";
+  const declaredCardTarget = targetCardInstanceId ??
+    (resumingActivationCost ? card.playTargetInstanceId : undefined);
+  const targetErr = prepareActivatedAbilityTarget(
+    state,
+    runtime,
+    seat,
+    card,
+    ability,
+    declaredCardTarget,
+  );
+  if (targetErr) return targetErr;
   const ctx = runtime.makeCtx(state, seat, card);
   if (ability.canActivate && !ability.canActivate(ctx)) return "cannot activate now";
   if (alternativeCostCardInstanceIds !== undefined && !ability.alternativeEffectCardCosts) {
@@ -844,6 +857,7 @@ export function activateAbility(
   pushAbilityLayer(state, seat, card, nameOf(state, card.cardId), {
     abilityIndex,
     goAgain: ability.goAgain || nextActionGoAgain,
+    targetCardInstanceId: declaredCardTarget,
   });
   state.stackResume = "begin-action";
   // Paying an activation cost can make a permanent leave the arena and open

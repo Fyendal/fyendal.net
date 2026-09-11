@@ -101,6 +101,70 @@ describe("MST — Mystic heroes and cloaked equipment", () => {
 });
 
 describe("MST — Mechanologist", () => {
+  it("Supercell puts X counters on X Hyper Drivers and creates an X-counter token", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 2,
+          hand: ["supercell|3"],
+          board: ["hyper driver|2", "hyper driver|3"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    const [first, second] = g.state.players[0]!.board;
+    first!.counters = { steam: 2 };
+    second!.counters = { steam: 1 };
+
+    g.play("supercell|3")
+      .chooseOption("X = 2")
+      .chooseCard("hyper driver|2")
+      .chooseCard("hyper driver|3");
+
+    expect(g.state.players[0]!.board.find(
+      (card) => card.instanceId === first!.instanceId,
+    )?.counters?.steam).toBe(4);
+    expect(g.state.players[0]!.board.find(
+      (card) => card.instanceId === second!.instanceId,
+    )?.counters?.steam).toBe(3);
+    const created = g.state.players[0]!.board.find(
+      (card) => card.instanceId !== first!.instanceId && card.instanceId !== second!.instanceId,
+    );
+    expect(created).toMatchObject({ counters: { steam: 2 } });
+    expect(cardData[created!.cardId]!.name).toBe("Hyper Driver");
+  });
+
+  it("Supercell can recycle Construct Nitro Mechanoid when X is at least 3", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 3,
+          hand: ["supercell|3"],
+          board: ["hyper driver|1", "hyper driver|2", "hyper driver|3"],
+          banish: ["construct nitro mechanoid|2"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    const construct = g.state.players[0]!.banish[0]!;
+
+    g.play("supercell|3")
+      .chooseOption("X = 3")
+      .chooseCard("hyper driver|1")
+      .chooseCard("hyper driver|2")
+      .chooseCard("hyper driver|3")
+      .chooseCard("construct nitro mechanoid|2");
+
+    expect(g.state.players[0]!.banish).not.toContainEqual(
+      expect.objectContaining({ instanceId: construct.instanceId }),
+    );
+    expect(g.state.players[0]!.deck).toContainEqual(
+      expect.objectContaining({ instanceId: construct.instanceId }),
+    );
+  });
+
   it("Evo Recall plays as an instant, transforms a base head, and recalls a banished action", () => {
     const g = scenario({
       seats: [

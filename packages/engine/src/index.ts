@@ -586,11 +586,11 @@ export function applyIntent(
         );
         err = defending
           ? activateDefenseAbility(next, runtime, seat, intent.sourceInstanceId, intent.pitchInstanceIds)
-          : activateWindowAbility(next, runtime, seat, intent.sourceInstanceId, intent.pitchInstanceIds, ai, [], false, [], intent.alternativeCostCardInstanceIds);
+          : activateWindowAbility(next, runtime, seat, intent.sourceInstanceId, intent.pitchInstanceIds, ai, [], false, [], intent.alternativeCostCardInstanceIds, [], undefined, intent.targetCardInstanceId);
       } else if (next.phase === "layer") {
-        err = activateWindowAbility(next, runtime, seat, intent.sourceInstanceId, intent.pitchInstanceIds, ai, [], false, [], intent.alternativeCostCardInstanceIds);
+        err = activateWindowAbility(next, runtime, seat, intent.sourceInstanceId, intent.pitchInstanceIds, ai, [], false, [], intent.alternativeCostCardInstanceIds, [], undefined, intent.targetCardInstanceId);
       } else {
-        err = activateAbility(next, runtime, seat, intent.sourceInstanceId, intent.pitchInstanceIds, ai, intent.targetAllyId, [], false, [], intent.alternativeCostCardInstanceIds);
+        err = activateAbility(next, runtime, seat, intent.sourceInstanceId, intent.pitchInstanceIds, ai, intent.targetAllyId, [], false, [], intent.alternativeCostCardInstanceIds, [], undefined, intent.targetCardInstanceId);
       }
       break;
     }

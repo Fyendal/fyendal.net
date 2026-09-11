@@ -348,7 +348,7 @@ describe("Malice Armory Deck spoiled cards", () => {
     expect(g.state.chain.at(-1)?.goAgain).toBe(true);
   });
 
-  it("Restless Steed gains go again when its attack hits", () => {
+  it("Restless Steed gains go again when its activated attack hits", () => {
     const g = scenario({ seats: [
       {
         hero: "rhinar",
@@ -362,8 +362,54 @@ describe("Malice Armory Deck spoiled cards", () => {
 
     g.activate("restless steed|1");
     expect(g.state.chain.at(-1)?.goAgain).toBe(false);
+    expect(g.state.players[0]!.actionPoints).toBe(0);
 
     g.blockWith().settle();
+
+    expect(g.state.players[0]!.actionPoints).toBe(1);
+  });
+
+  it("Restless Steed gains go again when its Vox-generated attack hits", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        heroKey: "malice, domina of the dead|0",
+        graveyard: ["restless steed|1"],
+        resources: 2,
+        weapons: ["vox necropolis|0"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.activate("malice, domina of the dead|0")
+      .chooseCard("restless steed|1")
+      .play("restless steed|1", { fromZone: "graveyard" });
+    expect(g.state.chain.at(-1)?.goAgain).toBe(false);
+    expect(g.state.players[0]!.actionPoints).toBe(0);
+
+    g.blockWith().settle();
+
+    expect(g.state.players[0]!.actionPoints).toBe(1);
+  });
+
+  it("Restless Steed gains go again when it hits an ally", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        board: ["restless steed|1"],
+        resources: 1,
+        weapons: ["vox necropolis|0"],
+        equipment: NO_EQUIPMENT,
+      },
+      {
+        hero: "dorinthea",
+        board: ["restless commander|1"],
+        equipment: NO_EQUIPMENT,
+      },
+    ] });
+
+    g.activate("restless steed|1", { targetAlly: "restless commander|1" });
 
     expect(g.state.players[0]!.actionPoints).toBe(1);
   });

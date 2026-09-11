@@ -504,12 +504,21 @@ export function noteCardPlayed(
   // another effect (such as Fealty making this Draconic) remain effective.
   effectiveTypes = new Set(cardTypesOf(state, card));
   if (isAction) {
+    // Preserve one earlier action so a resolving effect can ask for the last
+    // action card played while excluding its own source card.
+    for (const key of Object.keys(player.flags)) {
+      if (key.startsWith("priorActionWasType:")) delete player.flags[key];
+      if (key.startsWith("lastActionWasType:")) {
+        player.flags[key.replace("lastActionWasType:", "priorActionWasType:")] = true;
+      }
+    }
     for (const key of Object.keys(player.flags)) {
       if (key.startsWith("lastActionWasType:")) delete player.flags[key];
     }
-    for (const type of cardTypesOf(state, card)) {
+    for (const type of effectiveTypes) {
       player.flags[`lastActionWasType:${type}`] = true;
     }
+    player.flags.lastActionPlayedInstanceId = card.instanceId;
   }
   if (isAction && (d.subtypes ?? []).includes("attack")) {
     const tags = effectiveTypes;

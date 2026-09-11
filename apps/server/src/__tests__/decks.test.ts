@@ -470,6 +470,22 @@ describe("validateDeck", () => {
     ]);
   });
 
+  it("resolves Apex Buster and every Cleave the Heavens pitch from deck exports", () => {
+    const lines = parseDecklistText([
+      "1x Apex Buster",
+      "1x Cleave the Heavens (red)",
+      "1x Cleave the Heavens (yellow)",
+      "1x Cleave the Heavens (blue)",
+    ].join("\n"));
+
+    expect(lines.map((line) => findPrinting(line.name, line.pitch)?.id)).toEqual([
+      "IAR039",
+      "IAR020",
+      "IAR021",
+      "IAR022",
+    ]);
+  });
+
   it("resolves Ingest the Unknown as yellow from deck exports", () => {
     const lines = parseDecklistText("3x Ingest the Unknown (yellow)");
 

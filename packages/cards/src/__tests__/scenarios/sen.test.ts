@@ -573,6 +573,19 @@ describe("SEN — created a card this turn", () => {
     plain.expectAP(0, 0); // no go again
   });
 
+  it("Fluid Motion gains go again when Zen creates a card during the reaction step", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "zen|0", hand: ["fluid motion|3", "inner chi|3"] },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.play("fluid motion|3").blockWith();
+    s.activate("zen|0", { pitch: ["inner chi|3"] });
+    s.expectInZone(0, "crouching tiger|0", "hand");
+    s.expectAP(0, 1);
+  });
+
   it("Manifest Muscle gets +1{p} only after you've created a card", () => {
     const created = scenario({
       seats: [

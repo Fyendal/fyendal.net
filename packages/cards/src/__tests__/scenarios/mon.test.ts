@@ -19,6 +19,21 @@ function chaneSeat(extra: Record<string, unknown> = {}) {
 }
 
 describe("MON — Light Illusionist", () => {
+  it("Seek Enlightenment puts the next attack into soul when its hit trigger resolves", () => {
+    const s = scenario({
+      seats: [
+        prismSeat({ hand: ["seek enlightenment|1", "snatch|1", BLUE] }),
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("seek enlightenment|1", { pitch: [BLUE] })
+      .play("snatch|1")
+      .blockWith()
+      .settle()
+      .expectInZone(0, "snatch|1", "soul");
+  });
+
   it("Prism banishes a soul card to create a Spectral Shield", () => {
     const s = scenario({
       seats: [

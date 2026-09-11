@@ -139,6 +139,7 @@ function randomBanishCost(ctx: ScriptCtx): DeepReadonly<CardInstance> | undefine
 }
 function randomBanishAttack(reward?: "go-again" | "power"): CardScript {
   return {
+    requiredHandCardsForAdditionalCost: 1,
     additionalCost: randomBanishCost,
     onAttackDeclared(ctx) {
       if (!ctx.getCounter("banishedSix")) return;
@@ -486,7 +487,7 @@ for (const [pitch, power] of [[1, 3], [2, 2], [3, 1]] as const) {
 
   dtd[`ram raider|${pitch}`] = bloodDebt(randomBanishAttack("go-again"));
   dtd[`wall breaker|${pitch}`] = bloodDebtAttack({ onAttackDeclared(ctx) { if (ctx.getFlag("player", "banishedSixPlusThisTurn") === true) ctx.setFlag("link", "overpower", true); } });
-  dtd[`shaden scream|${pitch}`] = { additionalCost: randomBanishCost, onPlay(ctx) { buffNextAttack(ctx, { attack: 6 - pitch, appliesToType: ["brute", "shadow"] }); } };
+  dtd[`shaden scream|${pitch}`] = { requiredHandCardsForAdditionalCost: 1, additionalCost: randomBanishCost, onPlay(ctx) { buffNextAttack(ctx, { attack: 6 - pitch, appliesToType: ["brute", "shadow"] }); } };
   dtd[`battlefield breaker|${pitch}`] = bloodDebt({ modifyAttack: (ctx) => ctx.getFlag("player", "banishedSixPlusThisTurn") === true ? 1 : 0 });
   dtd[`shaden swing|${pitch}`] = bloodDebt(randomBanishAttack());
   dtd[`tribute to demolition|${pitch}`] = bloodDebt(randomBanishAttack("power"));

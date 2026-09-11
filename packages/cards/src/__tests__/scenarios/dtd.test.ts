@@ -6,6 +6,13 @@ import { printingId, scenario } from "../harness.js";
 
 const BLUE = "wrecker romp|3";
 const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
+const RANDOM_BANISH_ACTION_COSTS = [
+  "ram raider",
+  "shaden scream",
+  "shaden swing",
+  "tribute to demolition",
+  "tribute to the legions of doom",
+].flatMap((name) => [1, 2, 3].map((pitch) => `${name}|${pitch}`));
 const SOUL_HERALD_KEYS = [...new Set(
   Object.values(cardData)
     .filter((card) =>
@@ -245,6 +252,25 @@ describe("DTD — registration and core mechanics", () => {
     }));
   });
 
+  it("Slithering Shadowpede can be played after Shadowrealm Bloodhound banishes it from hand", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["shadowrealm bloodhound|1", "slithering shadowpede|1"],
+          resources: 3,
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("shadowrealm bloodhound|1")
+      .chooseCard("slithering shadowpede|1")
+      .blockWith()
+      .settle()
+      .play("slithering shadowpede|1", { fromZone: "banish" });
+  });
+
   it("Envelop in Darkness buffs only the next rune-gated attack", () => {
     const s = scenario({
       seats: [
@@ -281,6 +307,37 @@ describe("DTD — registration and core mechanics", () => {
       ],
     });
     s.play("tribute to demolition|1").expectAttackValue(8);
+  });
+
+  it.each(RANDOM_BANISH_ACTION_COSTS)("%s requires another hand card for its random-banish cost", (key) => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", resources: 10, hand: [key] },
+        { hero: "dorinthea" },
+      ],
+    });
+    const card = s.state.players[0]!.hand[0]!;
+
+    expect(legalIntents(s.state, 0).some(
+      (intent) => intent.kind === "play-card" && intent.instanceId === card.instanceId,
+    )).toBe(false);
+  });
+
+  it("Expendable Limbs requires another hand card for its random-banish cost", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["expendable limbs|3"] },
+        { hero: "dorinthea", hand: ["head jab|1"] },
+      ],
+      active: 1,
+    });
+
+    s.play("head jab|1").blockWith().passPriority();
+    const limbs = s.state.players[0]!.hand[0]!;
+
+    expect(legalIntents(s.state, 0).some(
+      (intent) => intent.kind === "play-card" && intent.instanceId === limbs.instanceId,
+    )).toBe(false);
   });
 
   it("Blood Debt triggers from banish and adult Levia suppresses it after a six-power banish", () => {
