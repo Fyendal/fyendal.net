@@ -281,6 +281,47 @@ export function abilitiesAsInstantForCard(
   );
 }
 
+/** Live card targets that may be declared for an activated ability. */
+export function activatedAbilityTargetOptions(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  seat: number,
+  card: CardInstance,
+  ability: ActivatedAbility,
+  link?: ChainLinkState,
+): number[] {
+  if (!ability.targetCardOptions) return [];
+  return [...new Set(ability.targetCardOptions(runtime.makeCtx(state, seat, card, link)))]
+    .filter((instanceId) => Number.isSafeInteger(instanceId) && !!findCardAnywhere(state, instanceId));
+}
+
+/** Validate and retain an activation's declared card target before any of its
+ * costs are paid. The source snapshot carries it through stack resolution. */
+export function prepareActivatedAbilityTarget(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  seat: number,
+  card: CardInstance,
+  ability: ActivatedAbility,
+  targetCardInstanceId: number | undefined,
+  link?: ChainLinkState,
+): string | undefined {
+  if (!ability.targetCardOptions) {
+    delete card.playTargetInstanceId;
+    return targetCardInstanceId === undefined
+      ? undefined
+      : `${nameOf(state, card.cardId)} does not target a card`;
+  }
+  delete card.playTargetInstanceId;
+  if (targetCardInstanceId === undefined) return "choose a card target";
+  if (!activatedAbilityTargetOptions(state, runtime, seat, card, ability, link)
+    .includes(targetCardInstanceId)) {
+    return "not a legal card target";
+  }
+  card.playTargetInstanceId = targetCardInstanceId;
+  return undefined;
+}
+
 /** Whether a player has enough life points to pay an activated ability's
  * life asset-cost. Paying the hero's final life point is legal. */
 export function canPayAbilityLifeCost(

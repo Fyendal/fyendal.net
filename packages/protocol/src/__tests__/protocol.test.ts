@@ -360,7 +360,7 @@ describe("client messages", () => {
     },
     { kind: "play-from-arsenal", instanceId: 1, pitchInstanceIds: [], meldSide: "both", boost: true },
     { kind: "play-from-zone", zone: "deck", instanceId: 1, pitchInstanceIds: [], targetAllyId: 2, boost: true },
-    { kind: "activate-ability", sourceInstanceId: 1, pitchInstanceIds: [], abilityIndex: 0, alternativeCostCardInstanceIds: [2] },
+    { kind: "activate-ability", sourceInstanceId: 1, pitchInstanceIds: [], abilityIndex: 0, targetCardInstanceId: 3, alternativeCostCardInstanceIds: [2] },
     { kind: "pass" },
     { kind: "defend", instanceIds: [1], pitchInstanceIds: [2] },
     { kind: "stage-defenders", instanceIds: [1] },

@@ -200,13 +200,15 @@ function debilitate(): CardScript {
   return {
     canTriggerOnHit: crushTriggered,
     onHit(ctx) {
+      const target = opponentSeat(ctx);
       // seat-targeted debuff: rides the modifier list so it shows up as an
-      // ongoing effect and only applies to the opponent's attacks
-      buffNextAttack(ctx, { attack: -2, seat: opponentSeat(ctx) });
+      // ongoing effect and only applies to the opponent's first attack during
+      // their next turn
+      buffNextAttack(ctx, { attack: -2, seat: target, expiresAtEndOfSeatTurn: target });
       ctx.logPublic(localizedLog(
         "Debilitate: opponent's next attack gets -2{p}",
         "card.log.wtr.debilitate.attack",
-        { card: { kind: "card", cardId: ctx.self.cardId }, target: { kind: "player", seat: opponentSeat(ctx) }, amount: 2 },
+        { card: { kind: "card", cardId: ctx.self.cardId }, target: { kind: "player", seat: target }, amount: 2 },
       ));
     },
   };

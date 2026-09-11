@@ -311,10 +311,56 @@ describe("HNT — marked heroes and daggers", () => {
       options: ["additional attack", "mark on hit"],
     });
 
-    g.chooseOption("mark on hit").settle().expectFinalAttack(4);
+    g.chooseOption("mark on hit").chooseCard("obsidian fire vein|0").settle().expectFinalAttack(4);
 
     const dagger = g.state.players[0]!.weapons[0]!;
     expect(g.state.players[0]!.flags[`additionalActivations:${dagger.instanceId}:0`]).toBeUndefined();
+    expect(g.state.players[1]!.hero.counters?.marked).toBe(1);
+  });
+
+  it("Long Whisker Loyalty can target the non-attacking dagger for its lasting modes", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          heroKey: "fang|0",
+          weapons: ["obsidian fire vein|0", "kunai of retribution|0"],
+          resources: 2,
+          hand: ["oath of loyalty|1", "long whisker loyalty|1"],
+        },
+        { hero: "rhinar" },
+      ],
+    });
+
+    g.play("oath of loyalty|1")
+      .blockWith()
+      .settle()
+      .attackWithWeapon("obsidian fire vein|0", { settle: false })
+      .blockWith()
+      .react("long whisker loyalty|1", { settle: false })
+      .chooseOption("additional attack")
+      .chooseOption("mark on hit");
+
+    const attackingDagger = g.state.players[0]!.weapons[0]!;
+    const otherDagger = g.state.players[0]!.weapons[1]!;
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "long-whisker-additional-attack-target",
+      options: [String(attackingDagger.instanceId), String(otherDagger.instanceId)],
+    });
+
+    g.chooseOption(String(otherDagger.instanceId));
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "long-whisker-mark-target",
+      options: [String(attackingDagger.instanceId), String(otherDagger.instanceId)],
+    });
+
+    g.chooseOption(String(otherDagger.instanceId)).settle().expectFinalAttack(2);
+
+    expect(g.state.players[0]!.flags[`additionalActivations:${attackingDagger.instanceId}:0`]).toBeUndefined();
+    expect(g.state.players[0]!.flags[`additionalActivations:${otherDagger.instanceId}:0`]).toBe(1);
+    expect(g.state.players[1]!.hero.counters?.marked).toBeUndefined();
+
+    g.attackWithWeapon("kunai of retribution|0").blockWith().settle();
     expect(g.state.players[1]!.hero.counters?.marked).toBe(1);
   });
 

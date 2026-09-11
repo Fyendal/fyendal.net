@@ -162,6 +162,20 @@ describe("authoritative legal-intent selection", () => {
     expect(selectedActionIntent([first, second], sel, null, null, null, [])).toBeNull();
   });
 
+  it("selects the exact announced activated-ability card target", () => {
+    const first: GameIntent = {
+      kind: "activate-ability",
+      sourceInstanceId: 10,
+      pitchInstanceIds: [31],
+      targetCardInstanceId: 41,
+    };
+    const second: GameIntent = { ...first, targetCardInstanceId: 42 };
+    const sel = { kind: "activate", sourceInstanceId: 10, abilityIndex: 0 } as const;
+
+    expect(selectedActionIntent([first, second], sel, null, null, 42, [31])).toBe(second);
+    expect(selectedActionIntent([first, second], sel, null, null, null, [31])).toBeNull();
+  });
+
   it("only permits pitch selections that can become an offered payment", () => {
     const variants = actionVariants(
       [
@@ -257,6 +271,47 @@ describe("authoritative legal-intent selection", () => {
       null,
       pitchValue,
     )).toEqual({ ...candidate, pitchInstanceIds: [32, 31] });
+  });
+
+  it("prefers an exact server payment when bundled pitch data is stale", () => {
+    const compressed: GameIntent = {
+      kind: "play-card",
+      instanceId: 10,
+      pitchInstanceIds: [],
+      pitchRequired: 2,
+    };
+    const authoritative: GameIntent = {
+      ...compressed,
+      pitchInstanceIds: [31],
+    };
+    const variants = actionVariants(
+      [compressed, authoritative],
+      { kind: "play-hand", instanceId: 10 },
+      null,
+      null,
+      null,
+    );
+    const stalePitchValue = (id: number) => id === 31 ? 1 : 3;
+
+    expect(paidActionCandidates(variants, [31], stalePitchValue)).toContain(authoritative);
+    expect(selectedActionIntent(
+      [compressed, authoritative],
+      { kind: "play-hand", instanceId: 10 },
+      null,
+      null,
+      null,
+      [31],
+      0,
+      false,
+      null,
+      stalePitchValue,
+    )).toEqual(authoritative);
+    expect(canAddPaymentCard(variants, [31], 32, stalePitchValue)).toBe(false);
+    expect(actionPaymentProgress(variants, [31], stalePitchValue)).toEqual({
+      kind: "resource",
+      selected: 2,
+      required: 2,
+    });
   });
 
   it("reports compact resource progress for the tightest compatible payment", () => {

@@ -20,9 +20,8 @@ import { attackAbility, buffNextAttack, commonOptionMessages, decisionPrompt, lo
 //   flag), and the Agility/Courage/Flurry tokens (triggered auras; Flurry
 //   re-enables the weapon's once-per-turn attack by resetting its
 //   `activated:<id>` flag — the documented re-enable pattern).
-// - "Put it into your hero's soul" on-hit redirects (engine: the
-//   `attackToSoul` link flag, consumed by closeChain) and Roaring Beam's
-//   return-to-hand (engine: ctx.returnSelfToHand).
+// - "Put it into your hero's soul" on-hit moves and Roaring Beam's
+//   return-to-hand both use the engine's chain-aware zone movement helpers.
 // - Toe the Line's "if you prevent damage this way, create a Flurry token"
 //   (engine: Modifier.onPreventCreateToken on the generic prevention shield).
 
@@ -271,19 +270,19 @@ export const sbl: Record<string, CardScript> = {
   "engulfing light|1": chargeAttack({
     canTriggerOnHit: chargedThisTurn,
     onHit(ctx) {
-      ctx.setFlag("link", "attackToSoul", true);
+      ctx.putIntoSoul(ctx.self.instanceId);
     },
   }),
   "engulfing light|2": chargeAttack({
     canTriggerOnHit: chargedThisTurn,
     onHit(ctx) {
-      ctx.setFlag("link", "attackToSoul", true);
+      ctx.putIntoSoul(ctx.self.instanceId);
     },
   }),
 
   "illuminate|1": {
     onHit(ctx) {
-      ctx.setFlag("link", "attackToSoul", true);
+      ctx.putIntoSoul(ctx.self.instanceId);
     },
   },
 

@@ -48,7 +48,7 @@ import {
   isPermanentSource,
   removeFromArray,
 } from "./zoneQueries.js";
-import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestrictedByModifier, payActivatedAbilityCost, prepareActivatedDiscardCost, prepareActivatedEffectCardCosts } from "./abilityRules.js";
+import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestrictedByModifier, payActivatedAbilityCost, prepareActivatedAbilityTarget, prepareActivatedDiscardCost, prepareActivatedEffectCardCosts } from "./abilityRules.js";
 import { consumeNextActionGoAgain, noteActionPlayedOrActivated } from "./cardLifecycle.js";
 import { canPlayAsInstant, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, mayPlayFromArsenal, mayPlayFromZone, payAlternativePlayCost, preparePlayTarget } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost } from "./resources.js";
@@ -203,6 +203,7 @@ export function activateWindowAbility(
   alternativeCostCardInstanceIds?: number[],
   discardInstanceIds: number[] = [],
   declaredVariableX?: number,
+  targetCardInstanceId?: number,
 ): string | undefined {
   const link = currentLink(state);
   const inReaction = state.phase === "reaction" && !!link;
@@ -257,6 +258,7 @@ export function activateWindowAbility(
       discardInstanceIds,
       declaredVariableX,
       link,
+      targetCardInstanceId,
     });
     if (result.status === "error") return result.error;
     if (result.status === "pending") return undefined;
@@ -327,6 +329,18 @@ export function activateWindowAbility(
     return "only usable during your action phase";
   }
   if (ability.tap && card.tapped) return `${nameOf(state, card.cardId)} is already tapped`;
+  const declaredCardTarget = targetCardInstanceId ??
+    (resumingActivationCost ? card.playTargetInstanceId : undefined);
+  const targetErr = prepareActivatedAbilityTarget(
+    state,
+    runtime,
+    seat,
+    card,
+    ability,
+    declaredCardTarget,
+    link,
+  );
+  if (targetErr) return targetErr;
   if (ability.canActivate && !ability.canActivate(runtime.makeCtx(state, seat, card, link))) {
     return "cannot activate now";
   }
@@ -489,6 +503,7 @@ export function activateWindowAbility(
   pushAbilityLayer(state, seat, card, nameOf(state, card.cardId), {
     abilityIndex,
     goAgain: ability.goAgain || nextActionGoAgain,
+    targetCardInstanceId: declaredCardTarget,
   });
   if (timing === "attack-reaction") runtime.dispatchFlow("queueReactionEventTriggers", state, seat);
   // A leave-arena trigger opened while paying this activation cost must be

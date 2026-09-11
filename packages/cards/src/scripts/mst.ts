@@ -28,6 +28,10 @@ function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string)
   return ctx.cardTypes(card).includes(type.toLowerCase());
 }
 
+function named(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, name: string): boolean {
+  return data(ctx, card).name.trim().toLowerCase() === name.toLowerCase();
+}
+
 function hasKeyword(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, keyword: string): boolean {
   const normalized = keyword.toLowerCase();
   if ((card.suppressedKeywords ?? []).some((candidate) => candidate.toLowerCase() === normalized)) {
@@ -68,6 +72,50 @@ function instantEvoEquipment(extra: CardScript = {}): CardScript {
 
 function controlsIllusionistAura(ctx: ScriptCtx): boolean {
   return ctx.player(ctx.seat).board.some((card) => isIllusionistAura(ctx, card));
+}
+
+function supercellDrivers(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
+  return ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "Hyper Driver"));
+}
+
+function finishSupercell(ctx: ScriptCtx): void {
+  const x = ctx.getCounter("supercellX");
+  const id = tokenNamed(ctx, "Hyper Driver");
+  if (id) ctx.createToken(id, undefined, { steam: x });
+  if (x < 3) return;
+  const constructs = ctx.player(ctx.seat).banish.filter(
+    (card) => !card.faceDown && named(ctx, card, "Construct Nitro Mechanoid"),
+  );
+  if (constructs.length) {
+    ctx.requestCardChoice(
+      "supercell-construct",
+      decisionPrompt(
+        "Shuffle a Construct Nitro Mechanoid from your banished zone into your deck?",
+        "card.mst.supercell.construct.shuffle",
+        { optionMessages: commonOptionMessages("no") },
+      ),
+      ["no", ...constructs.map((card) => card.instanceId)],
+    );
+  }
+}
+
+function requestSupercellTarget(ctx: ScriptCtx): void {
+  const x = ctx.getCounter("supercellX");
+  const chosenCount = ctx.getCounter("supercellTargetsChosen");
+  const chosen = new Set(
+    Array.from({ length: chosenCount }, (_, index) => ctx.getCounter(`supercellTarget:${index}`)),
+  );
+  const drivers = supercellDrivers(ctx).filter((card) => !chosen.has(card.instanceId));
+  if (drivers.length === 0) return;
+  ctx.requestCardChoice(
+    "supercell-driver",
+    decisionPrompt(
+      `Supercell: choose Hyper Driver ${chosenCount + 1} of ${x} to receive ${x} steam counters`,
+      "card.mst.supercell.hyperdriver.choose",
+      { values: { current: chosenCount + 1, total: x, amount: x } },
+    ),
+    drivers.map((card) => card.instanceId),
+  );
 }
 
 function createInHand(ctx: ScriptCtx, cardId: string): void {
@@ -653,7 +701,8 @@ function enigmaNewMoon(): CardScript {
 mst["nuu, alluring desire|0"] = mst["nuu|0"]!;
 mst["zen, tamer of purpose|0"] = mst["zen|0"]!;
 
-const tokenNamed = (ctx: ScriptCtx, name: string): string | undefined => ctx.cardIdsNamed(name)[0];
+const tokenNamed = (ctx: ScriptCtx, name: string): string | undefined =>
+  ctx.cardIdsNamed(name).find((cardId) => ctx.cardData(cardId).cardType === "token");
 const createNamed = (ctx: ScriptCtx, name: string, count = 1): void => { const id = tokenNamed(ctx, name); if (id) ctx.createTokens(id, count); };
 const reactionCount = (ctx: ScriptCtx): number => Number(ctx.getFlag("link", "reactionCount"));
 
@@ -781,7 +830,42 @@ Object.assign(mst, {
   "prismatic leyline|2": { onPlay(ctx) { ctx.addModifier({ scope: "next-attack", attack: 1, appliesToPitch: 1 }); ctx.addModifier({ scope: "next-attack", attack: 2, appliesToPitch: 2 }); ctx.addModifier({ scope: "next-attack", attack: 3, appliesToPitch: 3 }); } },
   "visit goldmane estate|3": { onPlay(ctx) { createNamed(ctx, "Gold"); const player = ctx.player(ctx.seat); const gold = [...player.board, ...player.weapons, ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined)].filter((card) => ctx.cardNames(card).includes("gold")).length; if (gold >= 3) createNamed(ctx, "Might", gold); } },
   "visit the golden anvil|3": {},
-  "supercell|3": { variablePlayCost: { base: 0, counterKey: "supercellX", prompt: decisionPrompt("Choose X", "engine.decision.x.choose") }, onPlay(ctx) { const x = ctx.getCounter("supercellX"); const id = tokenNamed(ctx, "Hyper Driver"); if (id) ctx.createToken(id, undefined, { steam: x }); } },
+  "supercell|3": {
+    variablePlayCost: {
+      base: 0,
+      counterKey: "supercellX",
+      prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
+      maximum: (ctx) => supercellDrivers(ctx).length,
+    },
+    onPlay(ctx) {
+      if (ctx.getCounter("supercellX") > 0) requestSupercellTarget(ctx);
+      else finishSupercell(ctx);
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "supercell-driver") {
+        const target = supercellDrivers(ctx).find((card) => card.instanceId === Number(option));
+        if (!target) return;
+        const x = ctx.getCounter("supercellX");
+        const chosenCount = ctx.getCounter("supercellTargetsChosen");
+        const alreadyChosen = Array.from(
+          { length: chosenCount },
+          (_, index) => ctx.getCounter(`supercellTarget:${index}`),
+        ).includes(target.instanceId);
+        if (alreadyChosen) return;
+        ctx.addCounter(target.instanceId, "steam", x);
+        ctx.setCounter(`supercellTarget:${chosenCount}`, target.instanceId);
+        ctx.setCounter("supercellTargetsChosen", chosenCount + 1);
+        if (chosenCount + 1 < x) requestSupercellTarget(ctx);
+        else finishSupercell(ctx);
+        return;
+      }
+      if (hook !== "supercell-construct" || option === "no") return;
+      const construct = ctx.player(ctx.seat).banish.find(
+        (card) => card.instanceId === Number(option) && !card.faceDown && named(ctx, card, "Construct Nitro Mechanoid"),
+      );
+      if (construct && ctx.putOnDeckBottom(construct.instanceId)) ctx.shuffleDeck();
+    },
+  },
   "evo recall|3": instantEvoEquipment({ onEnterArena(ctx) { const cards = ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && hasType(ctx, card, "mechanologist") && ctx.hasCardType(card, "action")); if (cards.length) ctx.requestCardChoice("recall-card", decisionPrompt("Put a Mechanologist action on top", "card.mst.mechanologist.action.top", { optionMessages: commonOptionMessages("no") }), ["no", ...cards.map((card) => card.instanceId)]); }, onChoose(ctx, hook, option) { if (hook === "recall-card" && option !== "no") ctx.putOnDeckTop(Number(option)); } }),
   "evo heartdrive|3": instantEvoEquipment({ onEnterArena: (ctx) => ctx.addModifier({ scope: "next-play", playCostReduction: 1, appliesTo: "attack-action" }) }),
   "evo shortcircuit|3": instantEvoEquipment({ onEnterArena(ctx) { ctx.requestChoice("shortcircuit-target", decisionPrompt("Deal 1 damage to which hero?", "card.mst.hero.damage.choose", { values: { amount: 1 }, optionMessages: { "opposing hero": decisionMessage("common.option.opponent"), "your hero": decisionMessage("card.mst.option.yourhero") } }), ["opposing hero", "your hero"]); }, onChoose(ctx, hook, option) { if (hook === "shortcircuit-target") ctx.dealDamage(option === "your hero" ? ctx.seat : opponentSeat(ctx), 1); } }),
@@ -791,6 +875,7 @@ Object.assign(mst, {
   "kindle|1": { onPlay(ctx) { ampNextArcane(ctx, 1); if (ctx.player(ctx.seat).hand.length === 0) ctx.drawCards(ctx.seat, 1); } },
   "dust from stillwater shrine|1": { materialKeywords: ["phantasm"] },
   "shadowrealm horror|1": bloodDebt({
+    canPlay: (ctx) => ctx.player(ctx.seat).graveyard.length >= 3,
     additionalCost(ctx) {
       let sixPlusBanished = 0;
       const cards = [...ctx.player(ctx.seat).graveyard]

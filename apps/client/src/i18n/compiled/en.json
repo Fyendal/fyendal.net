@@ -4111,6 +4111,18 @@
       "value": " less resource to play or activate"
     }
   ],
+  "card.hnt.longwhisker.dagger.additionalattack": [
+    {
+      "type": 0,
+      "value": "Long Whisker Loyalty: choose a dagger to attack an additional time"
+    }
+  ],
+  "card.hnt.longwhisker.dagger.mark": [
+    {
+      "type": 0,
+      "value": "Long Whisker Loyalty: choose a dagger to mark on hit"
+    }
+  ],
   "card.hnt.longwhisker.modes.choose": [
     {
       "type": 0,
@@ -9643,6 +9655,64 @@
     {
       "type": 0,
       "value": "Move Restless Coalescence's power counters?"
+    }
+  ],
+  "card.mst.supercell.construct.shuffle": [
+    {
+      "type": 0,
+      "value": "Shuffle a Construct Nitro Mechanoid from your banished zone into your deck?"
+    }
+  ],
+  "card.mst.supercell.hyperdriver.choose": [
+    {
+      "type": 0,
+      "value": "Supercell: choose Hyper Driver "
+    },
+    {
+      "type": 1,
+      "value": "current"
+    },
+    {
+      "type": 0,
+      "value": " of "
+    },
+    {
+      "type": 1,
+      "value": "total"
+    },
+    {
+      "type": 0,
+      "value": " to receive "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " steam counter"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " steam counters"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "card.mst.wardaura.choose": [

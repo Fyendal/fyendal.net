@@ -199,7 +199,7 @@ describe("WTR Guardian — crush attacks", () => {
     const g = scenario({
       seats: [
         { hero: "rhinar", hand: ["debilitate|3", "titanium bauble|3", "barraging beatdown|2"] },
-        { hero: "rhinar", hand: [] },
+        { hero: "rhinar", hand: ["hundred winds|3"] },
       ],
     });
     g.play("debilitate|3")
@@ -207,7 +207,10 @@ describe("WTR Guardian — crush attacks", () => {
       .blockWith()
       .settle()
       .expectLog("Debilitate: opponent's next attack gets -2{p}")
-      .expectLife(1, 14);
+      .expectLife(1, 14)
+      .endTurn()
+      .play("hundred winds|3")
+      .expectAttackValue(0);
   });
 
   it("Disable crush puts the opponent's arsenal card on the bottom of their deck", () => {

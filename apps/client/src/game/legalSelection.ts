@@ -152,10 +152,7 @@ export function actionVariants(
 ): PaidIntent[] {
   return actionSelectionVariants(legal, sel, meldSide, asInstant).filter((intent) => {
     if ((intent.targetAllyId ?? null) !== targetAllyId) return false;
-    if (
-      intent.kind !== "activate-ability" &&
-      (intent.targetCardInstanceId ?? null) !== targetCardInstanceId
-    ) return false;
+    if ((intent.targetCardInstanceId ?? null) !== targetCardInstanceId) return false;
     return intentBoostCount(intent) === boostCount;
   });
 }
@@ -191,6 +188,13 @@ export function candidatePaymentReady(
   if (payment.kind === "discard") {
     return sameOrderedIds(payment.instanceIds, selected);
   }
+  // Exact resource sequences come from the server's executable legal intents.
+  // Prefer that authority over bundled client card data, which can briefly be
+  // stale across a compatible deployment that corrects a printed pitch value.
+  if (
+    intent.pitchInstanceIds.length > 0 &&
+    sameOrderedIds(intent.pitchInstanceIds, selected)
+  ) return true;
   if (intent.pitchRequired === undefined) {
     return sameOrderedIds(intent.pitchInstanceIds, selected);
   }
@@ -262,6 +266,14 @@ export function canAddPaymentCard(
     actionPayment(intent).kind === "discard" &&
     startsWithIds(intent.pitchInstanceIds, next)
   )) return true;
+  // Once the current order exactly matches a server-enumerated resource
+  // payment, another pitch would necessarily be overpitch even if this
+  // client's bundled metadata undercounts one of the selected cards.
+  if (variants.some((intent) =>
+    actionPayment(intent).kind === "resource" &&
+    intent.pitchInstanceIds.length > 0 &&
+    sameOrderedIds(intent.pitchInstanceIds, selected)
+  )) return false;
   if (pitchValue) {
     const selectedTotal = pitchTotal(selected, pitchValue);
     return variants.some((intent) =>
@@ -288,6 +300,17 @@ export function actionPaymentProgress(
       selected: selected.length,
       required: Math.min(...compatible.map((intent) => intent.pitchInstanceIds.length)),
     };
+  }
+  const exactResourceRequirements = variants.flatMap((intent) =>
+    intent.pitchInstanceIds.length > 0 &&
+      intent.pitchRequired !== undefined &&
+      sameOrderedIds(intent.pitchInstanceIds, selected)
+      ? [intent.pitchRequired]
+      : []
+  );
+  if (exactResourceRequirements.length > 0) {
+    const required = Math.min(...exactResourceRequirements);
+    return { kind: "resource", selected: required, required };
   }
   const explicitRequirements = variants.flatMap((intent) =>
     intent.pitchRequired === undefined ? [] : [intent.pitchRequired]

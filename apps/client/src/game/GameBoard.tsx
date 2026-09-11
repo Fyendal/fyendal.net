@@ -266,6 +266,7 @@ export function GameBoard() {
     : new Set<number>();
   const announcement = useActionAnnouncement({
     actionCandidates,
+    legalIntents: legal,
     hand: playerHand,
     chainClosingPlayIds,
     skipPlayConfirmation,
@@ -682,23 +683,31 @@ export function GameBoard() {
     ];
   })();
 
-  /** Card targets announced by target-aware play intents (for example,
-   * Blinding Beam's attacking/defending attack-action target). */
+  /** Card targets announced by target-aware plays and activated abilities. */
   const cardTargetChoices = (() => {
-    if (sel.kind === "none" || sel.kind === "activate") return [];
+    if (sel.kind === "none" || sel.kind === "choose-hand-action") return [];
     const ids = new Set<number>();
     for (const intent of targetVariants) {
-      if (
-        (intent.kind === "play-card" ||
-          intent.kind === "play-from-arsenal" ||
-          intent.kind === "play-from-zone") &&
-        intent.instanceId === sel.instanceId &&
-        intent.targetCardInstanceId !== undefined
-      ) ids.add(intent.targetCardInstanceId);
+      if (intent.targetCardInstanceId === undefined) continue;
+      if (intent.kind === "activate-ability") {
+        if (sel.kind === "activate" && intent.sourceInstanceId === sel.sourceInstanceId) {
+          ids.add(intent.targetCardInstanceId);
+        }
+      } else if (sel.kind !== "activate" && intent.instanceId === sel.instanceId) {
+        ids.add(intent.targetCardInstanceId);
+      }
     }
     const combatCards = view.chain.flatMap((link) => [link.attackingCard, ...link.defendingCards]);
+    const publicZoneCards = view.players.flatMap((player) => [
+      ...player.banish,
+      ...player.graveyard,
+      ...player.board,
+      ...player.weapons,
+      ...Object.values(player.equipment).filter((card): card is CardView => card !== undefined),
+    ]);
     return [...ids].flatMap((id) => {
-      const card = combatCards.find((candidate) => candidate.instanceId === id);
+      const card = [...combatCards, ...publicZoneCards]
+        .find((candidate) => candidate.instanceId === id);
       return card
         ? [{ id, label: cardData[card.cardId]?.name ?? "card", card, life: card.life }]
         : [];

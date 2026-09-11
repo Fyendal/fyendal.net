@@ -56,4 +56,22 @@ describe("discard implementation audit", () => {
       ).toBeGreaterThanOrEqual(1);
     }
   });
+
+  it("reserves a hand card for every mandatory random-banish additional cost", () => {
+    const checked = new Set<string>();
+    for (const card of cardList) {
+      if (!/as an additional cost to play this, banish a random card from (?:your )?hand/i.test(card.text)) {
+        continue;
+      }
+      const key = functionalKeyOf(card);
+      if (checked.has(key)) continue;
+      checked.add(key);
+
+      expect(
+        registry[key]?.requiredHandCardsForAdditionalCost,
+        `${key} must reserve its random-banish cost card after pitching`,
+      ).toBeGreaterThanOrEqual(1);
+    }
+    expect(checked.size).toBeGreaterThan(0);
+  });
 });

@@ -283,12 +283,16 @@ export function resolvePlayMethod(
 
 export function useActionAnnouncement({
   actionCandidates,
+  legalIntents,
   hand,
   chainClosingPlayIds,
   skipPlayConfirmation,
   sendIntent,
 }: {
   actionCandidates: readonly GameIntent[];
+  /** Executable server-enumerated intents. Exact pitch sequences here take
+   * precedence over locally calculated values from the bundled card catalog. */
+  legalIntents: readonly GameIntent[];
   hand: readonly CardView[];
   chainClosingPlayIds: ReadonlySet<number>;
   skipPlayConfirmation: boolean;
@@ -303,8 +307,9 @@ export function useActionAnnouncement({
     const card = hand.find((candidate) => candidate.instanceId === instanceId);
     return card ? (cardData[card.cardId]?.pitch ?? 0) : 0;
   };
-  const normalMethodVariants = actionSelectionVariants(actionCandidates, sel, meldSide, false);
-  const instantMethodVariants = actionSelectionVariants(actionCandidates, sel, meldSide, true);
+  const paymentCandidates = [...actionCandidates, ...legalIntents];
+  const normalMethodVariants = actionSelectionVariants(paymentCandidates, sel, meldSide, false);
+  const instantMethodVariants = actionSelectionVariants(paymentCandidates, sel, meldSide, true);
   const { choiceRequired: playMethodChoiceRequired, asInstant: effectiveAsInstant } =
     resolvePlayMethod(normalMethodVariants.length > 0, instantMethodVariants.length > 0, playMethod);
   const selectedAbilityIndexes = sel.kind === "activate"
@@ -376,7 +381,7 @@ export function useActionAnnouncement({
   );
   const allyTargetOffered = targetVariants.some((intent) => intent.targetAllyId !== undefined);
   const cardTargetOffered = targetVariants.some(
-    (intent) => intent.kind !== "activate-ability" && intent.targetCardInstanceId !== undefined,
+    (intent) => intent.targetCardInstanceId !== undefined,
   );
   const targetReady =
     (!allyTargetOffered || targetAllyId !== undefined) &&
@@ -384,7 +389,7 @@ export function useActionAnnouncement({
   const chosenActionIntent =
     targetReady
       ? selectedActionIntent(
-          actionCandidates,
+          paymentCandidates,
           sel,
           meldSide,
           targetAllyId ?? null,

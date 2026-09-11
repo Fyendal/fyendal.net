@@ -223,9 +223,7 @@ export const sen: Record<string, CardScript> = {
 
   "fluid motion|3": {
     // Go again is conditional (KEYWORD_OVERRIDES strips the printed keyword).
-    onAttackDeclared(ctx) {
-      if (createdThisTurn(ctx)) ctx.grantGoAgain();
-    },
+    hasConditionalGoAgain: createdThisTurn,
   },
 
   "manifest muscle|3": {

@@ -48,9 +48,16 @@ export function collectCardEventTriggerLayers(
     }
     for (const source of sources) {
       const { card } = source;
+      const isEventCard = event !== "card-played" &&
+        eventCard?.owner === seat &&
+        card.instanceId === eventCard.instanceId;
       if (maxSourceId !== undefined && card.instanceId >= maxSourceId) continue;
       scriptOf(state, card.cardId, card)?.triggers?.forEach((trigger, triggerIndex) => {
-        if (trigger.event !== event || !eventTriggerIsActive(source, trigger)) return;
+        if (
+          trigger.event !== event ||
+          (!eventTriggerIsActive(source, trigger) &&
+            !(isEventCard && trigger.sourceZone === "self"))
+        ) return;
         if ((trigger.whose ?? "subject") === "subject" && seat !== subject) return;
         const ctx = runtime.makeCtx(state, seat, card, currentLink(state));
         if (trigger.condition && !trigger.condition(ctx, eventCard, eventContext)) return;

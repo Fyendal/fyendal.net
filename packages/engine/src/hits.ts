@@ -91,7 +91,10 @@ function resolveGrantedOnHitEffect(
       moveToGraveyard(state, runtime, card, "deck", link.attacker);
     }
   }
-  if (mod.onHitToSoul) link.flags.attackToSoul = true;
+  if (mod.onHitToSoul && link.flags.attackGone !== true) {
+    runtime.makeCtx(state, link.attacker, link.attackingCard, link)
+      .putIntoSoul(link.attackingCard.instanceId);
+  }
   if (mod.onHitBottomDeck) link.flags.attackToBottom = true;
   if (mod.onHitMark && link.targetAllyId === undefined) {
     const hero = (state.players[opponent(link.attacker)] as PlayerState).hero;

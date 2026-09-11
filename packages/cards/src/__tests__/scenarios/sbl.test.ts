@@ -207,7 +207,6 @@ describe("SBL — soul payoffs", () => {
     s.play("engulfing light|1");
     s.chooseCard(YELLOW);
     s.blockWith().settle();
-    s.endTurn(); // closes the chain — the attack moves to the soul
     s.expectInZone(0, "engulfing light|1", "soul");
     s.expectNotInZone(0, "engulfing light|1", "graveyard");
     s.expectZoneSize(0, "soul", 2); // the charged card + Engulfing Light
@@ -219,7 +218,6 @@ describe("SBL — soul payoffs", () => {
     });
     s.play("illuminate|1");
     s.blockWith().settle();
-    s.endTurn();
     s.expectInZone(0, "illuminate|1", "soul");
     s.expectZoneSize(0, "soul", 1);
   });
@@ -274,6 +272,48 @@ describe("SBL — Boltyn", () => {
     s.expectZoneSize(0, "soul", 0);
     s.expectInZone(0, YELLOW, "banish");
     s.expectAP(0, 1); // go again refunded at resolution
+  });
+
+  it("reaction: recognizes V of the Vanguard's bonus on a later unblocked attack", () => {
+    const s = scenario({
+      seats: [
+        boltynSeat({
+          hand: [
+            "v of the vanguard|2",
+            "bolt of courage|2",
+            "beaming bravado|2",
+            "light the way|2",
+          ],
+          resources: 1,
+        }),
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("v of the vanguard|2")
+      .chooseCard("beaming bravado|2")
+      .chooseOption("no")
+      .blockWith();
+
+    // Give V go again so the reported follow-up attack can be made while the
+    // combat-chain modifier remains active.
+    s.activate(BOLTYN, { settle: false });
+    s.doRaw({
+      kind: "choose",
+      optionId: String(s.state.players[0]!.soul[0]!.instanceId),
+    });
+    s.passPriority();
+    s.passPriority();
+    s.settle();
+
+    s.play("bolt of courage|2")
+      .chooseCard("light the way|2")
+      .blockWith();
+
+    // Bolt is 3 power (2 base + V's +1) despite having no defending cards.
+    // Boltyn must therefore be available to grant it go again.
+    s.activate(BOLTYN, { settle: false });
+    expect(s.state.pendingDecision).toMatchObject({ kind: "choose-target", player: 0 });
   });
 });
 

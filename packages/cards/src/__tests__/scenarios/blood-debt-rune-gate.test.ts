@@ -153,6 +153,44 @@ describe("Blood Debt and Rune Gate", () => {
       .expectNotInZone(0, "shadowrealm horror|1", "banish");
   });
 
+  it("does not allow Shadowrealm Horror without 3 graveyard cards", () => {
+    for (const graveyard of [
+      [],
+      ["wounding blow|1"],
+      ["wounding blow|1", "wounding blow|2"],
+    ]) {
+      const g = scenario({
+        seats: [
+          { hero: "rhinar", hand: ["shadowrealm horror|1"], graveyard, resources: 2 },
+          { hero: "dorinthea" },
+        ],
+      });
+      const horror = g.state.players[0]!.hand[0]!;
+
+      expect(legalIntents(g.state, 0).some(
+        (intent) => intent.kind === "play-card" && intent.instanceId === horror.instanceId,
+      )).toBe(false);
+    }
+
+    const payable = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["shadowrealm horror|1"],
+          graveyard: ["wounding blow|1", "wounding blow|2", "wounding blow|3"],
+          resources: 2,
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    const horror = payable.state.players[0]!.hand[0]!;
+
+    expect(legalIntents(payable.state, 0)).toContainEqual(expect.objectContaining({
+      kind: "play-card",
+      instanceId: horror.instanceId,
+    }));
+  });
+
   it("Shadowrealm Horror gets go again only after banishing at least two 6-power cards", () => {
     const oneSix = scenario({
       seats: [

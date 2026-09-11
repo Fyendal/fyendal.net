@@ -212,6 +212,9 @@ export interface StackLayer {
   /** Which of the source's activated abilities this layer resolves (index into
    *  the script's activated array; absent = 0) */
   abilityIndex?: number;
+  /** Card target declared for this activated ability before its costs were
+   * paid. Kept on the layer so overlapping activations retain distinct targets. */
+  targetCardInstanceId?: number;
   /** A reaction-timed ability has begun resolving successfully. Its source is
    *  recorded on the chain only when this layer finishes any scripted choice. */
   resolvedReactionAbility?: true;

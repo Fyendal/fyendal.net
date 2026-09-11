@@ -189,6 +189,8 @@ const KEYWORD_OVERRIDES: Record<string, string[]> = {
   "entwine lightning|1": ["Lightning Fusion"],
   // Lightning Surge only GAINS go again if it was played from arsenal
   "lightning surge|1": [],
+  // Current Funnel only GAINS go again if the prior action card was Lightning.
+  "current funnel|3": [],
   // Path of Same Ends only GAINS go again if its arcane damage is dealt
   "path of same ends|1": [],
   "path of same ends|2": [],

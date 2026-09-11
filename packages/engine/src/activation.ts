@@ -4,7 +4,7 @@ import { activatedFlagKey } from "./scripts.js";
 import type { ChainLinkState, PlayerState } from "./state.js";
 import { nameOf } from "./gameLog.js";
 import { heroSoulCards } from "./zoneQueries.js";
-import { abilityResourceCost, effectiveAbilityList, payActivatedAbilityCost, prepareActivatedDiscardCost, prepareActivatedEffectCardCosts } from "./abilityRules.js";
+import { abilityResourceCost, effectiveAbilityList, payActivatedAbilityCost, prepareActivatedAbilityTarget, prepareActivatedDiscardCost, prepareActivatedEffectCardCosts } from "./abilityRules.js";
 import { pushAbilityLayer } from "./stackCore.js";
 import {
   DEFAULT_CHOOSE_X_PROMPT,
@@ -30,6 +30,7 @@ export function activateFromHandAbility(
     discardInstanceIds: number[];
     declaredVariableX?: number;
     link?: ChainLinkState;
+    targetCardInstanceId?: number;
   },
 ): { status: "activated" | "pending" } | { status: "error"; error: string } {
   const {
@@ -44,6 +45,7 @@ export function activateFromHandAbility(
     discardInstanceIds,
     declaredVariableX,
     link,
+    targetCardInstanceId,
   } = options;
   const player = state.players[seat] as PlayerState;
   const card = player.hand.find((candidate) => candidate.instanceId === sourceInstanceId);
@@ -65,6 +67,17 @@ export function activateFromHandAbility(
   if (ability.oncePerTurn && player.flags[flagKey]) {
     return { status: "error", error: "ability can only be activated once per turn" };
   }
+  const declaredCardTarget = targetCardInstanceId ?? card.playTargetInstanceId;
+  const targetErr = prepareActivatedAbilityTarget(
+    state,
+    runtime,
+    seat,
+    card,
+    ability,
+    declaredCardTarget,
+    link,
+  );
+  if (targetErr) return { status: "error", error: targetErr };
   const ctx = runtime.makeCtx(state, seat, card, link);
   if (ability.canActivate && !ability.canActivate(ctx)) {
     return { status: "error", error: "cannot activate now" };
@@ -208,6 +221,9 @@ export function activateFromHandAbility(
   if (variableSoul) (card.counters ??= {})[variableSoul.counterKey] = declaredVariableX!;
   if (ability.fromHandMove === "banish") ctx.banish(card.instanceId);
   else ctx.discardCard(seat, card.instanceId);
-  pushAbilityLayer(state, seat, card, nameOf(state, card.cardId), { abilityIndex });
+  pushAbilityLayer(state, seat, card, nameOf(state, card.cardId), {
+    abilityIndex,
+    targetCardInstanceId: declaredCardTarget,
+  });
   return { status: "activated" };
 }

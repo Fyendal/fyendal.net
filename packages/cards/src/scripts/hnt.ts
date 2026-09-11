@@ -131,6 +131,39 @@ function longWhiskerOptionMessages(): Record<(typeof LONG_WHISKER_MODES)[number]
   };
 }
 
+function requestLongWhiskerTarget(ctx: ScriptCtx): void {
+  const modes = ctx.getCounter("longWhiskerModes");
+  const daggers = daggerOptions(ctx);
+  if ((modes & 2) !== 0 && ctx.getCounter("longWhiskerAdditionalAttackTarget") === 0) {
+    ctx.requestCardChoice(
+      "long-whisker-additional-attack-target",
+      decisionPrompt(
+        "Long Whisker Loyalty: choose a dagger to attack an additional time",
+        "card.hnt.longwhisker.dagger.additionalattack",
+      ),
+      daggers,
+    );
+    return;
+  }
+  if ((modes & 4) !== 0 && ctx.getCounter("longWhiskerMarkTarget") === 0) {
+    ctx.requestCardChoice(
+      "long-whisker-mark-target",
+      decisionPrompt(
+        "Long Whisker Loyalty: choose a dagger to mark on hit",
+        "card.hnt.longwhisker.dagger.mark",
+      ),
+      daggers,
+    );
+  }
+}
+
+function longWhiskerTarget(ctx: ScriptCtx, counter: string): DeepReadonly<CardInstance> | undefined {
+  const targetId = ctx.getCounter(counter);
+  return ctx.player(ctx.seat).weapons.find((card) =>
+    card.instanceId === targetId && isDagger(ctx, card)
+  );
+}
+
 function currentAttackDraconic(ctx: ScriptCtx): boolean {
   return ctx.currentAttackHasType("draconic");
 }
@@ -734,6 +767,8 @@ Object.assign(hnt, {
       const count = Math.min(LONG_WHISKER_MODES.length, draconicLinks(ctx));
       ctx.setCounter("longWhiskerModes", 0);
       ctx.setCounter("longWhiskerModesRemaining", count);
+      ctx.setCounter("longWhiskerAdditionalAttackTarget", 0);
+      ctx.setCounter("longWhiskerMarkTarget", 0);
       if (count > 0) {
         ctx.requestChoice(
           "long-whisker-mode",
@@ -747,35 +782,52 @@ Object.assign(hnt, {
       }
     },
     onChoose(ctx, hook, option) {
-      if (hook !== "long-whisker-mode") return;
-      const bit = longWhiskerModeBit(option);
-      const selected = ctx.getCounter("longWhiskerModes");
-      if (bit === 0 || (selected & bit) !== 0) return;
-      const updated = selected | bit;
-      const remaining = ctx.getCounter("longWhiskerModesRemaining") - 1;
-      ctx.setCounter("longWhiskerModes", updated);
-      ctx.setCounter("longWhiskerModesRemaining", remaining);
-      if (remaining > 0) {
-        ctx.requestChoice(
-          "long-whisker-mode",
-          decisionPrompt(
-            `Long Whisker Loyalty: choose ${remaining} more mode${remaining === 1 ? "" : "s"}`,
-            "card.hnt.longwhisker.modes.more",
-            { values: { amount: remaining }, optionMessages: longWhiskerOptionMessages() },
-          ),
-          LONG_WHISKER_MODES.filter((mode) => (updated & longWhiskerModeBit(mode)) === 0),
-        );
+      if (hook === "long-whisker-mode") {
+        const bit = longWhiskerModeBit(option);
+        const selected = ctx.getCounter("longWhiskerModes");
+        if (bit === 0 || (selected & bit) !== 0) return;
+        const updated = selected | bit;
+        const remaining = ctx.getCounter("longWhiskerModesRemaining") - 1;
+        ctx.setCounter("longWhiskerModes", updated);
+        ctx.setCounter("longWhiskerModesRemaining", remaining);
+        if (remaining > 0) {
+          ctx.requestChoice(
+            "long-whisker-mode",
+            decisionPrompt(
+              `Long Whisker Loyalty: choose ${remaining} more mode${remaining === 1 ? "" : "s"}`,
+              "card.hnt.longwhisker.modes.more",
+              { values: { amount: remaining }, optionMessages: longWhiskerOptionMessages() },
+            ),
+            LONG_WHISKER_MODES.filter((mode) => (updated & longWhiskerModeBit(mode)) === 0),
+          );
+        } else {
+          requestLongWhiskerTarget(ctx);
+        }
+        return;
+      }
+      if (hook === "long-whisker-additional-attack-target") {
+        ctx.setCounter("longWhiskerAdditionalAttackTarget", Number(option));
+        requestLongWhiskerTarget(ctx);
+        return;
+      }
+      if (hook === "long-whisker-mark-target") {
+        ctx.setCounter("longWhiskerMarkTarget", Number(option));
       }
     },
     onPlay(ctx) {
       if (!ctx.link) return;
       const modes = ctx.getCounter("longWhiskerModes");
       if (modes & 1) ctx.addModifier({ scope: "chain-link", attack: 2 });
-      if (modes & 2) ctx.grantAdditionalActivation(ctx.link.attackingCard.instanceId);
+      const additionalAttackTarget = longWhiskerTarget(ctx, "longWhiskerAdditionalAttackTarget");
+      if ((modes & 2) !== 0 && additionalAttackTarget) {
+        ctx.grantAdditionalActivation(additionalAttackTarget.instanceId);
+      }
       if (modes & 4) {
+        const markTarget = longWhiskerTarget(ctx, "longWhiskerMarkTarget");
+        if (!markTarget) return;
         ctx.addModifier({
           scope: "until-end-of-turn",
-          appliesToInstanceId: ctx.link.attackingCard.instanceId,
+          appliesToInstanceId: markTarget.instanceId,
           onHitMark: true,
           once: true,
         });

@@ -58,8 +58,8 @@ export interface ScriptCtx {
   /** The current leave-arena hook was generated while this object paid its
    * own activated-ability movement cost. */
   leavingArenaAsActivationCost?: boolean;
-  /** Card target announced when this object was played, if its script declares
-   * card-target options. */
+  /** Card target announced when this object was played or its activated
+   * ability was activated, if the script declares card-target options. */
   playTargetInstanceId?: number;
   /** Add a modifier sourced by this card. If `appliesToInstanceId` names an
    *  attack on the combat chain and `seat` is omitted, the modifier applies
@@ -683,6 +683,9 @@ export interface ActivatedEffectCardCost {
 
 export interface ActivatedAbility {
   cost: number;
+  /** Card instances this activation may target. A hook requires one returned
+   * target to be announced before costs are paid. Must be pure. */
+  targetCardOptions?(ctx: ScriptCtx): readonly number[];
   /** Life point cost ({h}) paid in addition to resource and chi costs. */
   lifeCost?: number;
   /** Printed variable resource component of this activation cost. The engine
@@ -834,8 +837,10 @@ export interface TriggerDef {
   /** "subject": only fires for the player the event belongs to (turn player /
    *  attacker). "any": fires for either player (e.g. "whenever a hero attacks"). */
   whose?: "subject" | "any";
-  /** Zone the source must occupy when the event occurs. Defaults to an arena
-   *  permanent (including face-up/mentor arsenal where applicable). */
+  /** Zone the source must occupy when the event occurs. `self` means the card
+   *  that caused the event, even if the event has already moved it to its
+   *  destination zone. Defaults to an arena permanent (including
+   *  face-up/mentor arsenal where applicable). */
   sourceZone?: "arena" | "hand" | "banish" | "graveyard" | "pitch" | "self" | "any";
   /** Extra condition (e.g. "while face down in arsenal"). Card-played
    * triggers also receive the card that caused the event. */

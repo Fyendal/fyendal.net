@@ -805,7 +805,14 @@ export function resolveAbilityLayer(state: GameStateInternal,
   }
   const ability = effectiveAbilityList(state, layer.seat, found.card)[layer.abilityIndex ?? 0];
   const link = currentLink(state);
-  ability?.onActivate?.(runtime.makeCtx(state, layer.seat, found.card, link));
+  if (layer.targetCardInstanceId !== undefined) {
+    found.card.playTargetInstanceId = layer.targetCardInstanceId;
+  } else {
+    delete found.card.playTargetInstanceId;
+  }
+  ability?.onActivate?.(
+    runtime.makeCtx(state, layer.seat, found.card, link, undefined, layer.targetCardInstanceId),
+  );
   if (
     link &&
     (ability?.timing === "attack-reaction" || ability?.timing === "defense-reaction")

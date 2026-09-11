@@ -760,7 +760,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   "cross the line|1": chargeAttack(),
   "cross the line|2": chargeAttack(),
   "cross the line|3": chargeAttack(),
-  "engulfing light|3": chargeAttack({ canTriggerOnHit: chargedThisTurn, onHit(ctx) { ctx.setFlag("link", "attackToSoul", true); } }),
+  "engulfing light|3": chargeAttack({ canTriggerOnHit: chargedThisTurn, onHit(ctx) { ctx.putIntoSoul(ctx.self.instanceId); } }),
   "express lightning|1": chargeAttack(),
   "express lightning|2": chargeAttack(),
   "express lightning|3": chargeAttack(),

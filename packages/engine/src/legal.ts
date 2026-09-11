@@ -38,7 +38,7 @@ import type { ActivatedAbility } from "./scripts.js";
 import { windowInstantPlays } from "./triggers.js";
 import { runechantSkipStep } from "./runechantSkip.js";
 import { controlledPermanents } from "./sourceQueries.js";
-import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestrictedByModifier, activatedAbilityAvailable, activatedEffectCardCostOptions, canPayAbilityLifeCost, canPayActivatedEffectCardCosts, discardCostOptions, effectiveAbilityList } from "./abilityRules.js";
+import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestrictedByModifier, activatedAbilityAvailable, activatedAbilityTargetOptions, activatedEffectCardCostOptions, canPayAbilityLifeCost, canPayActivatedEffectCardCosts, discardCostOptions, effectiveAbilityList } from "./abilityRules.js";
 import { alternativePlayCostOptions, boostCountForCardPlay, canPlayAsInstant, canRuneGate, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, cardsPlayableFromArsenal, cardsPlayableFromZone, playFromZoneRequiresInstant, playTargetOptions } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost, pitchProhibitedByEffect, pitchValueOfInstance } from "./resources.js";
 import { resolveVariableAbilityCost, variableResourceChoices } from "./costs.js";
@@ -682,47 +682,54 @@ function windowAbilityIntents(
         [],
         includeUnaffordable,
       ).slice(0, 4);
-      for (const pitches of ability.variableCost ? pitchVariants.slice(0, 1).map(() => [] as number[]) : pitchVariants) {
-        intents.push({
-          kind: "activate-ability",
-          sourceInstanceId: card.instanceId,
-          pitchInstanceIds: pitches,
-          pitchRequired: ability.variableCost ? undefined : pitchRequired,
-          ...activationPresentationHint(ability),
-          ...(ai > 0 ? { abilityIndex: ai } : {}),
-        });
-      }
-      for (const alternativeCostCardInstanceIds of activatedEffectCardCostOptions(
-        state,
-        player,
-        card,
-        ability.alternativeEffectCardCosts ?? [],
-      )) {
-        const alternativeAbility = { ...ability, cost: 0 };
-        const alternativeCost = abilityResourceCost(
-          state, runtime,
-          player.seat,
-          card,
-          alternativeAbility,
-          link,
-        );
-        for (const pitches of activatedAbilityPitchOptions(
-          state,
-          player,
-          ability,
-          alternativeCost,
-          alternativeCostCardInstanceIds,
-          includeUnaffordable,
-        ).slice(0, 4)) {
+      const cardTargets: Array<number | undefined> = ability.targetCardOptions
+        ? activatedAbilityTargetOptions(state, runtime, player.seat, card, ability, link)
+        : [undefined];
+      for (const targetCardInstanceId of cardTargets) {
+        for (const pitches of ability.variableCost ? pitchVariants.slice(0, 1).map(() => [] as number[]) : pitchVariants) {
           intents.push({
             kind: "activate-ability",
             sourceInstanceId: card.instanceId,
             pitchInstanceIds: pitches,
-            pitchRequired: pitchRequirement(player, alternativeCost, ability.chiCost),
-            alternativeCostCardInstanceIds,
+            pitchRequired: ability.variableCost ? undefined : pitchRequired,
             ...activationPresentationHint(ability),
             ...(ai > 0 ? { abilityIndex: ai } : {}),
+            ...(targetCardInstanceId !== undefined ? { targetCardInstanceId } : {}),
           });
+        }
+        for (const alternativeCostCardInstanceIds of activatedEffectCardCostOptions(
+          state,
+          player,
+          card,
+          ability.alternativeEffectCardCosts ?? [],
+        )) {
+          const alternativeAbility = { ...ability, cost: 0 };
+          const alternativeCost = abilityResourceCost(
+            state, runtime,
+            player.seat,
+            card,
+            alternativeAbility,
+            link,
+          );
+          for (const pitches of activatedAbilityPitchOptions(
+            state,
+            player,
+            ability,
+            alternativeCost,
+            alternativeCostCardInstanceIds,
+            includeUnaffordable,
+          ).slice(0, 4)) {
+            intents.push({
+              kind: "activate-ability",
+              sourceInstanceId: card.instanceId,
+              pitchInstanceIds: pitches,
+              pitchRequired: pitchRequirement(player, alternativeCost, ability.chiCost),
+              alternativeCostCardInstanceIds,
+              ...activationPresentationHint(ability),
+              ...(ai > 0 ? { abilityIndex: ai } : {}),
+              ...(targetCardInstanceId !== undefined ? { targetCardInstanceId } : {}),
+            });
+          }
         }
       }
     }
@@ -755,22 +762,28 @@ function windowAbilityIntents(
       ) continue;
       if (!canPayActivatedEffectCardCosts(state, player, card, ability)) continue;
       const resourceCost = abilityResourceCost(state, runtime, player.seat, card, ability, link);
-      for (const pitches of pitchOptions(
-        state,
-        player,
-        resourceCost,
-        [card.instanceId],
-        0,
-        includeUnaffordable,
-      ).slice(0, 4)) {
-        intents.push({
-          kind: "activate-ability",
-          sourceInstanceId: card.instanceId,
-          pitchInstanceIds: pitches,
-          pitchRequired: pitchRequirement(player, resourceCost),
-          ...activationPresentationHint(ability),
-          ...(ai > 0 ? { abilityIndex: ai } : {}),
-        });
+      const cardTargets: Array<number | undefined> = ability.targetCardOptions
+        ? activatedAbilityTargetOptions(state, runtime, player.seat, card, ability, link)
+        : [undefined];
+      for (const targetCardInstanceId of cardTargets) {
+        for (const pitches of pitchOptions(
+          state,
+          player,
+          resourceCost,
+          [card.instanceId],
+          0,
+          includeUnaffordable,
+        ).slice(0, 4)) {
+          intents.push({
+            kind: "activate-ability",
+            sourceInstanceId: card.instanceId,
+            pitchInstanceIds: pitches,
+            pitchRequired: pitchRequirement(player, resourceCost),
+            ...activationPresentationHint(ability),
+            ...(ai > 0 ? { abilityIndex: ai } : {}),
+            ...(targetCardInstanceId !== undefined ? { targetCardInstanceId } : {}),
+          });
+        }
       }
     }
   }
@@ -1041,7 +1054,10 @@ function abilityIntents(
       // what applyIntent will accept (modifyAttackActivationCost / modifyCost
       // discounts)
       const targets = ability.isAttack ? attackTargets(state, runtime, player) : [undefined];
-      for (const targetAllyId of targets) {
+      const cardTargets: Array<number | undefined> = ability.targetCardOptions
+        ? activatedAbilityTargetOptions(state, runtime, player.seat, card, ability)
+        : [undefined];
+      for (const targetAllyId of targets) for (const targetCardInstanceId of cardTargets) {
         if (!variableAbilityHasChoice(
           state, runtime, player, card, ability, includeUnaffordable, undefined, targetAllyId,
         )) continue;
@@ -1077,6 +1093,7 @@ function abilityIntents(
                 ...activationPresentationHint(ability),
                 ...(ai > 0 ? { abilityIndex: ai } : {}),
                 ...(targetAllyId !== undefined ? { targetAllyId } : {}),
+                ...(targetCardInstanceId !== undefined ? { targetCardInstanceId } : {}),
               }) as GameIntent,
           );
         intents.push(...(ability.variableCost ? variants.slice(0, 1) : variants));
@@ -1106,6 +1123,7 @@ function abilityIntents(
               ...activationPresentationHint(ability),
               ...(ai > 0 ? { abilityIndex: ai } : {}),
               ...(targetAllyId !== undefined ? { targetAllyId } : {}),
+              ...(targetCardInstanceId !== undefined ? { targetCardInstanceId } : {}),
             });
           }
         }
@@ -1132,22 +1150,28 @@ function abilityIntents(
       ) continue;
       if (!canPayActivatedEffectCardCosts(state, player, card, ability)) continue;
       const resourceCost = abilityResourceCost(state, runtime, player.seat, card, ability);
-      for (const pitches of pitchOptions(
-        state,
-        player,
-        resourceCost,
-        [card.instanceId],
-        0,
-        includeUnaffordable,
-      ).slice(0, 4)) {
-        intents.push({
-          kind: "activate-ability",
-          sourceInstanceId: card.instanceId,
-          pitchInstanceIds: pitches,
-          pitchRequired: pitchRequirement(player, resourceCost),
-          ...activationPresentationHint(ability),
-          ...(ai > 0 ? { abilityIndex: ai } : {}),
-        });
+      const cardTargets: Array<number | undefined> = ability.targetCardOptions
+        ? activatedAbilityTargetOptions(state, runtime, player.seat, card, ability)
+        : [undefined];
+      for (const targetCardInstanceId of cardTargets) {
+        for (const pitches of pitchOptions(
+          state,
+          player,
+          resourceCost,
+          [card.instanceId],
+          0,
+          includeUnaffordable,
+        ).slice(0, 4)) {
+          intents.push({
+            kind: "activate-ability",
+            sourceInstanceId: card.instanceId,
+            pitchInstanceIds: pitches,
+            pitchRequired: pitchRequirement(player, resourceCost),
+            ...activationPresentationHint(ability),
+            ...(ai > 0 ? { abilityIndex: ai } : {}),
+            ...(targetCardInstanceId !== undefined ? { targetCardInstanceId } : {}),
+          });
+        }
       }
     }
   }

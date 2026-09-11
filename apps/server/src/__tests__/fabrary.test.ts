@@ -98,6 +98,27 @@ describe("Fabrary response decoding", () => {
     ].join("\n"));
   });
 
+  it("resolves current Levia IAR identifiers to their printed names", () => {
+    const source = parseFabraryDeckUrl(DECK_URL);
+    if (!source) throw new Error("test URL should parse");
+    expect(decodeFabraryDeck({
+      name: "Levia IAR",
+      cards: [
+        { identifier: "apex_buster_blue", total: 1, sideboardTotal: 0 },
+        { identifier: "cleave_the_heavens_red", total: 1, sideboardTotal: 0 },
+        { identifier: "cleave_the_heavens_yellow", total: 1, sideboardTotal: 0 },
+        { identifier: "cleave_the_heavens_blue", total: 1, sideboardTotal: 0 },
+      ],
+    }, source)?.text).toBe([
+      "Name: Levia IAR",
+      "Deck cards",
+      "1x Apex Buster (3)",
+      "1x Cleave the Heavens (1)",
+      "1x Cleave the Heavens (2)",
+      "1x Cleave the Heavens (3)",
+    ].join("\n"));
+  });
+
   it("rejects malformed or unbounded card data", () => {
     const source = parseFabraryDeckUrl(DECK_URL);
     if (!source) throw new Error("test URL should parse");
