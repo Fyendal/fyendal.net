@@ -104,7 +104,7 @@ describe("Fabrary response decoding", () => {
     expect(decodeFabraryDeck({
       name: "Levia IAR",
       cards: [
-        { identifier: "apex_buster_blue", total: 1, sideboardTotal: 0 },
+        { identifier: "apex_buster_yellow", total: 1, sideboardTotal: 0 },
         { identifier: "cleave_the_heavens_red", total: 1, sideboardTotal: 0 },
         { identifier: "cleave_the_heavens_yellow", total: 1, sideboardTotal: 0 },
         { identifier: "cleave_the_heavens_blue", total: 1, sideboardTotal: 0 },
@@ -112,7 +112,7 @@ describe("Fabrary response decoding", () => {
     }, source)?.text).toBe([
       "Name: Levia IAR",
       "Deck cards",
-      "1x Apex Buster (3)",
+      "1x Apex Buster (2)",
       "1x Cleave the Heavens (1)",
       "1x Cleave the Heavens (2)",
       "1x Cleave the Heavens (3)",

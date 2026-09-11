@@ -873,16 +873,6 @@ export function cardPlayCost(
     cost += Number(player.flags.nextDefenseReactionExtraCost || 0);
   }
   cost += Number(opts?.extraCost || 0);
-  const hook = script?.modifyPlayCost;
-  if (hook) {
-    cost = Math.max(
-      0,
-      hook(
-        runtime.makeCtx(state, seat, card, link, undefined, opts?.targetCardInstanceId),
-        cost,
-      ),
-    );
-  }
   const origin: "hand" | "arsenal" | PlayableZone = player.hand.some((candidate) => candidate.instanceId === card.instanceId)
     ? "hand"
     : player.arsenal.some((candidate) => candidate.instanceId === card.instanceId)
@@ -890,6 +880,17 @@ export function cardPlayCost(
       : (["banish", "graveyard", "deck"] as const).find((zone) =>
     player[zone].some((candidate) => candidate.instanceId === card.instanceId),
   ) ?? "hand";
+  const hook = script?.modifyPlayCost;
+  if (hook) {
+    cost = Math.max(
+      0,
+      hook(
+        runtime.makeCtx(state, seat, card, link, undefined, opts?.targetCardInstanceId),
+        cost,
+        origin,
+      ),
+    );
+  }
   {
     for (const source of controlledPermanents(state, seat, { faceDownEquipment: false })) {
       const adjust = scriptOf(state, source.cardId, source)?.modifyFriendlyCardPlayCost;

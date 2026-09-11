@@ -4459,6 +4459,12 @@
       "value": "Wager Vigor"
     }
   ],
+  "card.iar.ally.destroy.or.discard": [
+    {
+      "type": 0,
+      "value": "Destroy an ally you control or discard an ally?"
+    }
+  ],
   "card.iar.apex.defender.destroy": [
     {
       "type": 0,
@@ -4581,6 +4587,12 @@
       "value": "Give Forsaken Strike +2 power"
     }
   ],
+  "card.iar.freshforge.mark.optional": [
+    {
+      "type": 0,
+      "value": "Remove a +1 power counter to mark the hit hero?"
+    }
+  ],
   "card.iar.hand.banish": [
     {
       "type": 0,
@@ -4597,6 +4609,18 @@
     {
       "type": 0,
       "value": "Banish a card from hand?"
+    }
+  ],
+  "card.iar.hoodwink.cards.discard": [
+    {
+      "type": 0,
+      "value": "Discard any number of other cards"
+    }
+  ],
+  "card.iar.item.crank.steam.choose": [
+    {
+      "type": 0,
+      "value": "Put a steam counter on an item with crank?"
     }
   ],
   "card.iar.looter.discard.choose": [
@@ -4639,6 +4663,20 @@
     {
       "type": 0,
       "value": "Destroy a Ponder to draw a card and gain 1 action point?"
+    }
+  ],
+  "card.iar.shadow.banished.facedown.choose": [
+    {
+      "type": 0,
+      "value": "Choose "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " Shadow cards to turn face down"
     }
   ],
   "card.iar.sinspeaker.aura.search": [

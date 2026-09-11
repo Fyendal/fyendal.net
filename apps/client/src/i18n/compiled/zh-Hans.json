@@ -4283,6 +4283,12 @@
       "value": "以 Vigor 进行 wager"
     }
   ],
+  "card.iar.ally.destroy.or.discard": [
+    {
+      "type": 0,
+      "value": "摧毁一个由你操控的 ally，或弃置一个 ally？"
+    }
+  ],
   "card.iar.apex.defender.destroy": [
     {
       "type": 0,
@@ -4409,6 +4415,12 @@
       "value": "使 Forsaken Strike +2 力量"
     }
   ],
+  "card.iar.freshforge.mark.optional": [
+    {
+      "type": 0,
+      "value": "移除一个 +1 力量指示物以标记被命中的英雄？"
+    }
+  ],
   "card.iar.hand.banish": [
     {
       "type": 0,
@@ -4425,6 +4437,18 @@
     {
       "type": 0,
       "value": "放逐一张手牌？"
+    }
+  ],
+  "card.iar.hoodwink.cards.discard": [
+    {
+      "type": 0,
+      "value": "弃置任意数量的其他牌"
+    }
+  ],
+  "card.iar.item.crank.steam.choose": [
+    {
+      "type": 0,
+      "value": "在一个具有 crank 的 item 上放置一个 steam 指示物？"
     }
   ],
   "card.iar.looter.discard.choose": [
@@ -4467,6 +4491,20 @@
     {
       "type": 0,
       "value": "摧毁一个 Ponder，以抽一张牌并获得 1 个行动点？"
+    }
+  ],
+  "card.iar.shadow.banished.facedown.choose": [
+    {
+      "type": 0,
+      "value": "选择 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 张 Shadow 牌翻至面朝下"
     }
   ],
   "card.iar.sinspeaker.aura.search": [

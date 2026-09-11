@@ -249,6 +249,7 @@ export interface PersistedModifierV1 {
   onBoostAttack?: number;
   onBoostDominate?: boolean;
   onActionPlayedGainActionPoints?: number;
+  onAttackActionPlayedFromBanishCreateToken?: { cardId: string; count: number };
   onFriendlyActivateCreateToken?: string;
   extraDiceIgnoreLowest?: number;
   onHitClearHandAndArsenalAtEndPhase?: boolean;
@@ -1063,7 +1064,7 @@ const MODIFIER_REQUIRED = ["id", "sourceInstanceId", "seat", "scope"] as const;
 const MODIFIER_NUMBERS = ["expiresAtStartOfTurn", "expiresAtEndOfTurn", "expiresAtStartOfSeatTurn", "expiresAtEndOfSeatTurn", "createdTurn", "basePower", "attack", "powerGainBonus", "attackActivationCostReduction", "activationCostReduction", "attackCostReduction", "piercing", "defense", "damage", "intimidate", "preventNextDamageAmount", "preventNextDamagePool", "preventDamagePerEvent", "preventDamageEventsRemaining", "discardDamagePreventionAmount", "discardDamagePreventionDraw", "preventNextDamageFromPitch", "maxDamageEventAmount", "reflectPreventedDamageToSeat", "redirectDamageFromSeat", "redirectDamageToSeat", "redirectDamagePrevent", "onHitGainLife", "onHitGainResources", "onHitDraw", "attackActionCardCap", "nonAttackActionCardCap", "goAgainIfAttackPowerAtLeast", "onDefendedDealDamage", "onHitLoseLife", "onDestroyedDraw", "onBoostAttack", "onActionPlayedGainActionPoints", "extraDiceIgnoreLowest", "onHitDealDamage", "defendedLessThanNonEquip", "minCost", "maxCost", "maxBasePower", "minBasePower", "minimumAttackBasePower", "appliesToInstanceId", "suppressesActivatedAbilitiesOfInstanceId", "cannotDefendWithInstanceId", "appliesToPitch", "playCostReduction", "remainingCostUses", "maxNonBlockDefenders", "onDefendedByAttackActionPowerCounters"] as const satisfies readonly (keyof Modifier)[];
 const MODIFIER_BOOLEANS = ["appliesToEquipment", "appliesToFirstDefenderOnly", "damageUnpreventable", "goAgain", "dominate", "overpower", "preventAllDamageFromSource", "reflectPreventedDamageUnpreventable", "onHitGoAgain", "suppressesHeroAbilities", "suppressesHeroAbilitiesDuringActionPhase", "suppressesOwnedNames", "suppressesOwnedClassTalentTypes", "restrictActionsToWeaponOrAttack", "restrictActionsToNonWeaponNonAttack", "prohibitsDefenseReactionNamesInGraveyard", "goAgainIfDefendedByAttackAction", "suppressHitEffects", "onHitToSoul", "onHitBottomDeck", "onHitReenableAttacker", "onHitReenableAttackerIfMarked", "onHitMark", "onBoostDominate", "onHitClearHandAndArsenalAtEndPhase", "replaceCombatDamageWithDefendingEquipment", "appliesToMarkedHero", "appliesToFromArsenal", "appliesToRuneGated", "appliesToCharged", "noDefenseReactionsFromArsenal", "noDefenseReactionsFromHand", "once", "expiresOnChainClose", "consumed"] as const satisfies readonly (keyof Modifier)[];
 const MODIFIER_STRINGS = ["sourceCardId", "grantType", "grantName", "discardDamagePreventionCardType", "preventLethalDamageByBanishingNamedCard", "banishPreventedDamageSourceFaceDownIfType", "appliesToDamageSourceType", "appliesToDamageRecipientType", "grantKeyword", "suppressKeyword", "prohibitsName", "grantsTypeToName", "grantsType", "onFriendlyActivateCreateToken", "onDamageDealtCreateTokenPerPoint", "onPreventCreateToken", "appliesToClass", "appliesToKeyword", "appliesToName", "appliesToTargetType", "appliesToTargetNamePrefix", "excludesSubtype", "appliesToCardType", "restrictCardPlaysToType", "ongoingLabel", "grantsPlayFromNameContains", "goAgainIfPlayedOrCreatedSubtype", "overpowerIfNameContains"] as const satisfies readonly (keyof Modifier)[];
-const MODIFIER_OBJECTS = ["onHitCreateToken", "onHitDestroyTopDeckCards", "onHitScriptHook", "defendingPitchDefenseAdjustment", "appliesTo", "appliesToSubtype", "appliesToType", "grantsPlayFromZone"] as const satisfies readonly (keyof Modifier)[];
+const MODIFIER_OBJECTS = ["onHitCreateToken", "onAttackActionPlayedFromBanishCreateToken", "onHitDestroyTopDeckCards", "onHitScriptHook", "defendingPitchDefenseAdjustment", "appliesTo", "appliesToSubtype", "appliesToType", "grantsPlayFromZone"] as const satisfies readonly (keyof Modifier)[];
 type _ModifierValidatorIsExhaustive = Assert<
   SameKeys<
     Modifier,
@@ -1086,6 +1087,11 @@ function validateModifier(value: unknown, code: string, path: string): void {
   for (const key of MODIFIER_BOOLEANS) optional(modifier, key, (v, p) => { bool(v, code, p); }, path);
   for (const key of MODIFIER_STRINGS) optional(modifier, key, (v, p) => { string(v, code, p, 256); }, path);
   optional(modifier, "onHitCreateToken", (v, p) => {
+    const token = exact(v, code, p, ["cardId", "count"]);
+    string(token.cardId, code, `${p}.cardId`, 128);
+    integer(token.count, code, `${p}.count`);
+  }, path);
+  optional(modifier, "onAttackActionPlayedFromBanishCreateToken", (v, p) => {
     const token = exact(v, code, p, ["cardId", "count"]);
     string(token.cardId, code, `${p}.cardId`, 128);
     integer(token.count, code, `${p}.count`);

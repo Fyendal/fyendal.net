@@ -1201,7 +1201,15 @@ export interface CardScript {
    *  with more than one (intents disambiguate via `abilityIndex`). */
   activated?: ActivatedAbility | ActivatedAbility[];
   /** Ability usable while this card is defending (e.g. Rally the Rearguard); cost is discarding cards. */
-  defenseAbility?: { discard: number; oncePerTurn?: boolean };
+  defenseAbility?: {
+    discard: number;
+    oncePerTurn?: boolean;
+    /** Banish the selected hand card instead of discarding it. */
+    banishHandCard?: boolean;
+    /** Offer either a controlled permanent or a hand card with this subtype;
+     * the former is destroyed and the latter discarded as the ability cost. */
+    destroyOrDiscardSubtype?: string;
+  };
   /** Effect of the defenseAbility. */
   onDefendAbility?(ctx: ScriptCtx): void;
   /** Additional cost/effect paid when the card is played (discard random, reveal, ...). */
@@ -1344,6 +1352,9 @@ export interface CardScript {
     moveSource: "destroy" | "banish";
     /** Offer this replacement only for arcane damage (Arcane Shelter). */
     arcaneOnly?: boolean;
+    /** Offer only when the damage is controlled by a hero with this class or
+     * subtype (Shadow Resist). */
+    damageSourceHeroType?: string;
   };
   /** Quell N — during a damage event, its controller may pay the cost to
    * prevent damage, then this source is destroyed at the next end phase. */
@@ -1472,7 +1483,11 @@ export interface CardScript {
   ): void;
   /** Dynamic adjustment of this card's own play cost ("this costs {r} less
    *  to play if …"): consulted in enumeration AND validation — must be pure. */
-  modifyPlayCost?(ctx: ScriptCtx, baseCost: number): number;
+  modifyPlayCost?(
+    ctx: ScriptCtx,
+    baseCost: number,
+    origin?: "hand" | "arsenal" | PlayableZone,
+  ): number;
   /** This card became the controller's hero (an effect made their hero
    *  become this card) — fires once right after the swap ("when you become
    *  this, you may search your deck …"). */

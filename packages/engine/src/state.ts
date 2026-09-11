@@ -562,6 +562,9 @@ export interface Modifier {
   /** Delayed trigger: the next action card with at least `minCost` printed
    *  cost grants this many action points when this layer resolves. */
   onActionPlayedGainActionPoints?: number;
+  /** One-shot delayed effect when a matching attack action is played from
+   * banish. The token batch is created as part of the play announcement. */
+  onAttackActionPlayedFromBanishCreateToken?: { cardId: string; count: number };
   /** Delayed trigger installed on a hero: whenever that hero activates an
    * ability, create this token under their control. */
   onFriendlyActivateCreateToken?: string;

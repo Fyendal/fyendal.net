@@ -472,7 +472,7 @@ describe("validateDeck", () => {
 
   it("resolves Apex Buster and every Cleave the Heavens pitch from deck exports", () => {
     const lines = parseDecklistText([
-      "1x Apex Buster",
+      "1x Apex Buster (yellow)",
       "1x Cleave the Heavens (red)",
       "1x Cleave the Heavens (yellow)",
       "1x Cleave the Heavens (blue)",
@@ -494,15 +494,17 @@ describe("validateDeck", () => {
     ]);
   });
 
-  it("resolves both Skeletal Puppetry pitches from deck exports", () => {
+  it("resolves every Skeletal Puppetry pitch from deck exports", () => {
     const lines = parseDecklistText([
       "1x Skeletal Puppetry (red)",
+      "1x Skeletal Puppetry (yellow)",
       "1x Skeletal Puppetry (blue)",
     ].join("\n"));
 
     expect(lines.map((line) => findPrinting(line.name, line.pitch)?.id)).toEqual([
-      "AMA013",
-      "AMA027",
+      "IAR094",
+      "IAR095",
+      "IAR096",
     ]);
   });
 

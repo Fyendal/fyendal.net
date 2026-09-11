@@ -14,6 +14,7 @@ import {
   dealArcane,
   decisionMessage,
   decisionPrompt,
+  localizedCardLog,
   optN,
   optOnChoose,
   opponentSeat,
@@ -31,6 +32,8 @@ const CORRUPTED_CORPSE = "IAR090";
 const COURAGE = "DTD232";
 const EMBODIMENT_OF_EARTH = "AJV028";
 const FROSTBITE = "AJV029";
+const FLURRY = "SBL036";
+const GOLDEN_COG = "SEA042";
 const GRAPHENE_CHELICERA = "SAR033";
 const LIGHTNING_FLOW = "OMN203";
 const PONDER = "DYN244";
@@ -163,6 +166,7 @@ function decay(): Pick<CardScript, "triggers"> {
       event: "end-of-turn",
       whose: "subject",
       label: "Decay",
+      labelMessage: { id: "card.trigger.common.decay" },
       effect(ctx) {
         const life = ctx.self.life ?? 0;
         if (life <= 1) {
@@ -550,6 +554,428 @@ function revealTopForAttack(
   };
 }
 
+type ShadowbeastPayoff = "none" | "power" | "go-again";
+
+function shadowbeast(payoff: ShadowbeastPayoff): CardScript {
+  return bloodDebt({
+    onAttackDeclared(ctx) {
+      const top = ctx.player(ctx.seat).deck[0];
+      if (top) ctx.banish(top.instanceId);
+      if (ctx.getFlag("player", "banishedSixPlusThisTurn") !== true) return;
+      if (payoff === "power") ctx.addCardTempPower(ctx.self.instanceId, 2);
+      if (payoff === "go-again") ctx.grantGoAgain();
+    },
+  });
+}
+
+function rumblingHunger(): CardScript {
+  return bloodDebt({
+    canTriggerOnHit: (ctx) => selfHitsHero(ctx) &&
+      ctx.getFlag("player", "banishedSixPlusThisTurn") === true,
+    onHit(ctx) {
+      ctx.createToken(BLASMOPHET);
+      ctx.grantGoAgain();
+    },
+  });
+}
+
+function satiateBloodthirst(): CardScript {
+  return bloodDebt({
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      fromHand: true,
+      fromHandMove: "banish",
+      onActivate(ctx) { ctx.gainLife(ctx.seat, 1); },
+    },
+  });
+}
+
+function rocktopBellow(attack: number): CardScript {
+  return {
+    onPlay(ctx) {
+      const top = ctx.player(ctx.seat).deck[0];
+      let overpower = false;
+      if (top && ctx.revealCards([top.instanceId])) {
+        overpower = ctx.basePower(top) >= 6;
+        if (!overpower) ctx.putOnDeckBottom(top.instanceId);
+      }
+      buffNextAttack(ctx, { attack, ...(overpower ? { overpower: true } : {}) });
+    },
+  };
+}
+
+function riseToTheChallenge(): CardScript {
+  return {
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      fromHand: true,
+      fromHandMove: "discard",
+      onActivate(ctx) { buffNextAttack(ctx, { attack: 2 }); },
+    },
+    onDefend(ctx) {
+      const top = ctx.player(ctx.seat).deck[0];
+      if (!top || !ctx.revealCards([top.instanceId])) return;
+      if (ctx.basePower(top) >= 6) ctx.addCardTempDefense(ctx.self.instanceId, 2);
+      else ctx.putOnDeckBottom(top.instanceId);
+    },
+  };
+}
+
+function commitToCorruption(attack: number): CardScript {
+  return {
+    onPlay(ctx) {
+      buffNextAttack(ctx, {
+        attack,
+        onHitScriptHook: {
+          hook: "iar-commit-corruption",
+          label: "create a Corrupted Corpse in your banished zone",
+        },
+      });
+    },
+    onGrantedHit(ctx, hook) {
+      if (hook === "iar-commit-corruption") ctx.createCardInBanish(CORRUPTED_CORPSE);
+    },
+  };
+}
+
+function skeletalPuppetry(attack: number): CardScript {
+  return {
+    alternativePlayCost: { kind: "discard-hand-subtype", subtype: "ally" },
+    onPlay(ctx) {
+      buffNextAttack(ctx, { attack, appliesToSubtype: "ally", goAgain: true });
+    },
+  };
+}
+
+type AllyPaymentPayoff = "discard" | "life";
+
+function allyPaymentOnHit(payoff: AllyPaymentPayoff): CardScript {
+  return {
+    canTriggerOnHit: (ctx) => selfHitsHero(ctx),
+    onHit(ctx) {
+      const allies = [
+        ...ctx.player(ctx.seat).board.filter((card) => hasType(ctx, card, "ally")),
+        ...ctx.player(ctx.seat).hand.filter((card) => hasType(ctx, card, "ally")),
+      ];
+      if (allies.length === 0) return;
+      ctx.requestCardChoice(
+        "iar-ally-payment-hit",
+        decisionPrompt(
+          "Destroy an ally you control or discard an ally?",
+          "card.iar.ally.destroy.or.discard",
+          { optionMessages: commonOptionMessages("no") },
+        ),
+        ["no", ...allies.map((card) => card.instanceId)],
+      );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "iar-bonded-burial-discard") {
+        resolveDiscardChoice(ctx, option, opponentSeat(ctx));
+        return;
+      }
+      if (hook !== "iar-ally-payment-hit" || option === "no") return;
+      const id = Number(option);
+      const paid = ctx.player(ctx.seat).board.some((card) => card.instanceId === id)
+        ? ctx.destroyPermanent(id)
+        : ctx.discardCard(ctx.seat, id) !== undefined;
+      if (!paid) return;
+      if (payoff === "life") ctx.loseLife(opponentSeat(ctx), 2);
+      else requestDiscardChoice(
+        ctx,
+        "iar-bonded-burial-discard",
+        decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
+        opponentSeat(ctx),
+      );
+    },
+  };
+}
+
+function shadowakeGloomblade(): CardScript {
+  return bloodDebt({
+    staticPlayableFrom: ["banish"],
+    ...usurp(),
+    canTriggerOnHit: selfHitsHero,
+    onHit(ctx) { ctx.createToken(GATE); },
+    onChoose(ctx, hook, option) { resolveUsurp(ctx, hook, option); },
+  }, true);
+}
+
+function enshrineSin(extraCost: number): CardScript {
+  return bloodDebt({
+    staticPlayableFrom: ["banish"],
+    modifyPlayCost(_ctx, base, origin) {
+      return origin === "banish" ? base + extraCost : base;
+    },
+    onPlay(ctx) {
+      if (ctx.player(ctx.seat).deck.length === 0) ctx.createToken(RUNECHANT);
+      else optN(ctx, 1);
+    },
+    onChoose(ctx, hook, option) {
+      optOnChoose(ctx, hook, option, () => ctx.createToken(RUNECHANT));
+    },
+  });
+}
+
+function rallyTheShadowHorde(): CardScript {
+  return bloodDebt({
+    defenseAbility: { discard: 1, oncePerTurn: true, banishHandCard: true },
+    onDefendAbility(ctx) { ctx.addCardTempDefense(ctx.self.instanceId, 2); },
+  });
+}
+
+function permanentInterment(): CardScript {
+  return bloodDebt({
+    onAttackDeclared(ctx) {
+      const shadow = ctx.player(ctx.seat).banish.filter((card) =>
+        !card.faceDown && hasType(ctx, card, "shadow")
+      );
+      if (shadow.length > 0) {
+        ctx.requestXPayment(
+          "iar-permanent-interment-pay",
+          decisionPrompt("Pay up to 3", "card.sup.pay.up.to.generic", { values: { amount: 3 } }),
+          undefined,
+          Math.min(3, shadow.length),
+        );
+      }
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "iar-permanent-interment-pay") return;
+      const amount = Number(option.slice(2));
+      const shadow = ctx.player(ctx.seat).banish.filter((card) =>
+        !card.faceDown && hasType(ctx, card, "shadow")
+      );
+      if (amount > 0) {
+        ctx.requestCardChoices(
+          "iar-permanent-interment-cards",
+          decisionPrompt(
+            "Choose Shadow cards to turn face-down",
+            "card.iar.shadow.banished.facedown.choose",
+            { values: { amount } },
+          ),
+          shadow.map((card) => card.instanceId),
+          amount,
+          amount,
+        );
+      }
+    },
+    onChooseMany(ctx, hook, options) {
+      if (hook !== "iar-permanent-interment-cards") return;
+      let turned = 0;
+      for (const option of options) {
+        if (ctx.setCardFaceDown(Number(option), true)) turned++;
+      }
+      if (turned > 0) ctx.addCardTempPower(ctx.self.instanceId, turned);
+    },
+  });
+}
+
+function shadowBuff(opts: { attack?: number; overpower?: boolean; onHitGoAgain?: boolean }): CardScript {
+  return bloodDebt({
+    staticPlayableFrom: ["banish"],
+    onPlay(ctx) {
+      buffNextAttack(ctx, { appliesToType: ["shadow"], ...opts });
+    },
+  });
+}
+
+function stepThroughRealms(attack: number): CardScript {
+  return {
+    onPlay(ctx) {
+      buffNextAttack(ctx, {
+        attack,
+        appliesToType: ["shadow"],
+        onHitScriptHook: {
+          hook: "iar-step-through-realms",
+          label: "create a Gate to i'Arathael",
+        },
+      });
+    },
+    onGrantedHit(ctx, hook) {
+      if (hook === "iar-step-through-realms") ctx.createToken(GATE);
+    },
+  };
+}
+
+function damTheShadowake(): CardScript {
+  return {
+    canTriggerOnDefend(ctx) {
+      const attacker = ctx.link?.attacker;
+      return attacker !== undefined && hasType(ctx, ctx.player(attacker).hero, "shadow");
+    },
+    onDefend(ctx) { ctx.createToken(GATE); },
+  };
+}
+
+function shadowResist(): CardScript {
+  return {
+    optionalDamagePrevention: {
+      amount: 1,
+      moveSource: "destroy",
+      damageSourceHeroType: "shadow",
+    },
+  };
+}
+
+function windSlicer(): CardScript {
+  return {
+    activated: attackAbility(1, { tap: true, goAgain: true }),
+    onAttackDeclared(ctx) { ctx.setFlag("link", "destroyAttackerOnChainClose", true); },
+    canTriggerOnHit: selfHitsHero,
+    onHit(ctx) { ctx.suppressHeroAbilitiesThroughNextTurn(opponentSeat(ctx)); },
+  };
+}
+
+function cogwerxProngBot(): CardScript {
+  return {
+    activated: {
+      cost: 1,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      fromHand: true,
+      fromHandMove: "discard",
+      onActivate(ctx) { ctx.createToken(GOLDEN_COG); },
+    },
+    canTriggerOnHit: selfHitsHero,
+    onHit(ctx) {
+      const items = ctx.player(ctx.seat).board.filter((card) =>
+        hasType(ctx, card, "item") &&
+        (ctx.cardData(card.cardId).keywords ?? []).some((keyword) =>
+          keyword.toLowerCase() === "crank"
+        )
+      );
+      if (items.length > 0) {
+        ctx.requestCardChoice(
+          "iar-prong-bot-steam",
+          decisionPrompt(
+            "Put a steam counter on an item with crank?",
+            "card.iar.item.crank.steam.choose",
+            { optionMessages: commonOptionMessages("no") },
+          ),
+          ["no", ...items.map((card) => card.instanceId)],
+        );
+      }
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "iar-prong-bot-steam" && option !== "no") {
+        ctx.addCounter(Number(option), "steam", 1);
+      }
+    },
+  };
+}
+
+function freshFromTheForge(): CardScript {
+  return {
+    canPlay(ctx) {
+      return !!ctx.link && hasType(ctx, ctx.link.attackingCard, "dagger");
+    },
+    onPlay(ctx) {
+      for (const dagger of ctx.player(ctx.seat).weapons.filter((card) => hasType(ctx, card, "dagger"))) {
+        ctx.addCounter(dagger.instanceId, "power", 1);
+        ctx.setCardCounter(dagger.instanceId, "sharpenedTurn", ctx.state.turn);
+        ctx.setFlag(
+          "player",
+          "clearWeaponPowerCountersAtTurn",
+          ctx.state.activePlayer === ctx.seat ? ctx.state.turn : ctx.state.turn + 1,
+        );
+        ctx.logPublic(localizedCardLog(
+          ctx,
+          `${ctx.cardData(dagger.cardId).name} is sharpened`,
+          "card.log.aha.sword.sharpened",
+          { target: { kind: "card", cardId: dagger.cardId }, count: 1 },
+        ));
+      }
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        appliesToSubtype: "dagger",
+        once: true,
+        onHitScriptHook: {
+          hook: "iar-fresh-forge-mark",
+          label: "remove a +1 power counter to mark the hit hero",
+          heroOnly: true,
+        },
+      });
+    },
+    onGrantedHit(ctx, hook) {
+      if (hook !== "iar-fresh-forge-mark") return;
+      const dagger = ctx.link?.attackingCard;
+      if (!dagger || Number(dagger.counters?.power ?? 0) <= 0) return;
+      ctx.setCounter("iarFreshForgeDagger", dagger.instanceId);
+      ctx.requestChoice(
+        "iar-fresh-forge-remove",
+        decisionPrompt(
+          "Remove a +1 power counter to mark the hit hero?",
+          "card.iar.freshforge.mark.optional",
+          { optionMessages: commonOptionMessages("yes", "no") },
+        ),
+        ["yes", "no"],
+      );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "iar-fresh-forge-remove" || option !== "yes") return;
+      const daggerId = ctx.getCounter("iarFreshForgeDagger");
+      const dagger = ctx.link?.attackingCard;
+      if (!dagger || dagger.instanceId !== daggerId || Number(dagger.counters?.power ?? 0) <= 0) {
+        return;
+      }
+      ctx.addCounter(dagger.instanceId, "power", -1);
+      const target = opponentSeat(ctx);
+      const hero = ctx.player(target).hero;
+      if (Number(hero.counters?.marked ?? 0) === 0) {
+        ctx.addCounter(hero.instanceId, "marked", 1);
+        ctx.logPublic(localizedCardLog(
+          ctx,
+          `${ctx.cardData(hero.cardId).name} is marked`,
+          "card.log.common.hero.marked",
+          { target: { kind: "card", cardId: hero.cardId } },
+        ));
+      }
+    },
+  };
+}
+
+function hoodwink(): CardScript {
+  return {
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      fromHand: true,
+      fromHandMove: "discard",
+      onActivate(ctx) {
+        const hand = ctx.player(ctx.seat).hand;
+        ctx.requestCardChoices(
+          "iar-hoodwink-discard",
+          decisionPrompt("Discard any number of other cards", "card.iar.hoodwink.cards.discard"),
+          hand.map((card) => card.instanceId),
+          0,
+          hand.length,
+        );
+      },
+    },
+    onChooseMany(ctx, hook, options) {
+      if (hook !== "iar-hoodwink-discard") return;
+      let amount = ctx.data.defense ?? 0;
+      for (const option of options) {
+        const card = ctx.player(ctx.seat).hand.find((candidate) =>
+          candidate.instanceId === Number(option)
+        );
+        if (!card) continue;
+        amount += ctx.cardData(card.cardId).defense ?? 0;
+        ctx.discardCard(ctx.seat, card.instanceId);
+      }
+      if (amount > 0) ctx.preventNextArcaneDamage(ctx.seat, amount);
+    },
+  };
+}
+
 type ZombieDiscardPayoff = "corpse" | "next-attack" | "recover";
 
 function zombieDiscardAttack(payoff: ZombieDiscardPayoff): CardScript {
@@ -836,7 +1262,7 @@ function fromBanishBonus(extra?: (ctx: ScriptCtx) => void): CardScript {
   });
 }
 
-function shadowrealmStrength(attack: number): CardScript {
+function shadowrealmStrength(payoff: number | "go-again"): CardScript {
   return {
     onPlay(ctx) {
       const banished = ctx.player(ctx.seat).banish.filter((card) => !card.faceDown);
@@ -864,7 +1290,9 @@ function shadowrealmStrength(attack: number): CardScript {
         card.instanceId === instanceId
       );
       if (moved && ctx.cardTypes(moved).includes("zombie")) {
-        buffNextAttack(ctx, { attack });
+        buffNextAttack(ctx, payoff === "go-again"
+          ? { grantKeyword: "Go again" }
+          : { attack: payoff });
       }
     },
   };
@@ -1053,7 +1481,7 @@ export const iar: Record<string, CardScript> = {
     },
   }),
 
-  "apex buster|3": {
+  "apex buster|2": {
     activated: {
       cost: 2,
       isAttack: false,
@@ -1954,11 +2382,19 @@ export const iar: Record<string, CardScript> = {
   "viserai, usurper|0": viseraiBack,
 
   "blasmophet, the insatiable hunger|0": {
-    activated: attackAbility(1, {
-      goAgain: true,
-      oncePerTurn: false,
-      canActivate: (ctx) => ctx.getFlag("player", "gemConsumingAppetiteActive") === true,
-    }),
+    activated: [
+      ...attackAbility(1, {
+        goAgain: true,
+        oncePerTurn: false,
+        canActivate: (ctx) => ctx.getFlag("player", "gemConsumingAppetiteActive") === true,
+      }),
+      ...attackAbility(0, {
+        goAgain: true,
+        oncePerTurn: false,
+        tap: true,
+        canActivate: (ctx) => ctx.getFlag("player", "iarConsumingCommandActive") === true,
+      }),
+    ],
     allowsFriendlyCardPlayFrom(ctx, card, zone) {
       return zone === "banish" && !card.faceDown && isBloodDebtAction(ctx, card) &&
         ctx.getFlag("player", "iarBlasmophetPlayUsed") !== true;
@@ -1997,6 +2433,7 @@ export const iar: Record<string, CardScript> = {
   },
   "shadowrealm strength|1": shadowrealmStrength(3),
   "shadowrealm strength|3": shadowrealmStrength(1),
+  "shadowrealm swiftness|2": shadowrealmStrength("go-again"),
 
   "restless cleric|1": {
     activated: [
@@ -2317,6 +2754,156 @@ export const iar: Record<string, CardScript> = {
       if (ctx.getCounter("iarEarthBond") > 0) ctx.setFlag("link", "attackToBottom", true);
     },
   },
+
+  "rumbling hunger|1": rumblingHunger(),
+  "rumbling hunger|2": rumblingHunger(),
+  "rumbling hunger|3": rumblingHunger(),
+  "feasting shadowbeast|1": shadowbeast("power"),
+  "feasting shadowbeast|2": shadowbeast("power"),
+  "feasting shadowbeast|3": shadowbeast("power"),
+  "feeding frenzy|1": shadowbeast("go-again"),
+  "feeding frenzy|2": shadowbeast("go-again"),
+  "feeding frenzy|3": shadowbeast("go-again"),
+  "gorging shadowbeast|1": shadowbeast("none"),
+  "gorging shadowbeast|2": shadowbeast("none"),
+  "gorging shadowbeast|3": shadowbeast("none"),
+  "satiate bloodthirst|1": satiateBloodthirst(),
+  "satiate bloodthirst|2": satiateBloodthirst(),
+  "satiate bloodthirst|3": satiateBloodthirst(),
+  "blasmophet's boon|3": bloodDebt({
+    modifyAttack: (ctx) => controlsBlasmophet(ctx) ? 6 : 0,
+  }),
+  "consuming command|3": bloodDebt({
+    onPlay(ctx) { ctx.setFlag("player", "iarConsumingCommandActive", true); },
+  }),
+  "goremass summoning|3": {
+    onPlay(ctx) {
+      if (ctx.getFlag("player", "banishedSixPlusThisTurn") === true) {
+        ctx.createToken(BLASMOPHET);
+      }
+    },
+  },
+  "rocktop bellow|1": rocktopBellow(4),
+  "rocktop bellow|2": rocktopBellow(3),
+  "rocktop bellow|3": rocktopBellow(2),
+  "rise to the challenge|1": riseToTheChallenge(),
+  "rise to the challenge|2": riseToTheChallenge(),
+  "rise to the challenge|3": riseToTheChallenge(),
+  "commit to corruption|2": commitToCorruption(2),
+  "commit to corruption|3": commitToCorruption(1),
+  "restless plowman|1": {
+    activated: [
+      {
+        cost: 0,
+        isAttack: false,
+        goAgain: true,
+        tap: true,
+        label: "Gain 1 resource",
+        onActivate(ctx) { ctx.changeResources(ctx.seat, 1); },
+      },
+      ...zombieAttack().map((ability) => ({ ...ability, label: "Attack" })),
+    ],
+    ...decay(),
+  },
+  "restless shieldmaiden|1": {
+    activated: zombieAttack(),
+    ...shadowResist(),
+    ...decay(),
+  },
+  "skeletal puppetry|2": skeletalPuppetry(2),
+  "corpse cover|1": {
+    defenseAbility: { discard: 1, oncePerTurn: true, destroyOrDiscardSubtype: "ally" },
+    onDefendAbility(ctx) { ctx.preventNextDamage(ctx.seat, 2); },
+  },
+  "corpse cover|2": {
+    defenseAbility: { discard: 1, oncePerTurn: true, destroyOrDiscardSubtype: "ally" },
+    onDefendAbility(ctx) { ctx.preventNextDamage(ctx.seat, 2); },
+  },
+  "corpse cover|3": {
+    defenseAbility: { discard: 1, oncePerTurn: true, destroyOrDiscardSubtype: "ally" },
+    onDefendAbility(ctx) { ctx.preventNextDamage(ctx.seat, 2); },
+  },
+  "bonded burial|1": allyPaymentOnHit("discard"),
+  "bonded burial|2": allyPaymentOnHit("discard"),
+  "bonded burial|3": allyPaymentOnHit("discard"),
+  "mutual sacrifice|1": allyPaymentOnHit("life"),
+  "mutual sacrifice|2": allyPaymentOnHit("life"),
+  "mutual sacrifice|3": allyPaymentOnHit("life"),
+  "promise of power|2": {
+    onPlay(ctx) {
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        onAttackActionPlayedFromBanishCreateToken: { cardId: RUNECHANT, count: 2 },
+      });
+    },
+  },
+  "shadowake gloomblade|1": shadowakeGloomblade(),
+  "shadowake gloomblade|2": shadowakeGloomblade(),
+  "shadowake gloomblade|3": shadowakeGloomblade(),
+  "enshrine sin|1": enshrineSin(1),
+  "enshrine sin|2": enshrineSin(2),
+  "enshrine sin|3": enshrineSin(3),
+  "fallen herald|2": bloodDebt({
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      fromHand: true,
+      fromHandMove: "banish",
+      onActivate(ctx) { ctx.preventNextDamage(ctx.seat, 4); },
+    },
+  }),
+  "rally the shadow horde|1": rallyTheShadowHorde(),
+  "rally the shadow horde|2": rallyTheShadowHorde(),
+  "rally the shadow horde|3": rallyTheShadowHorde(),
+  "permanent interment|1": permanentInterment(),
+  "permanent interment|2": permanentInterment(),
+  "permanent interment|3": permanentInterment(),
+  "abyssal bite|3": shadowBuff({ attack: 1 }),
+  "abyssal force|3": shadowBuff({ overpower: true }),
+  "abyssal rush|3": shadowBuff({ onHitGoAgain: true }),
+  "step through realms|1": stepThroughRealms(4),
+  "step through realms|2": stepThroughRealms(3),
+  "step through realms|3": stepThroughRealms(2),
+  "dam the shadowake|1": damTheShadowake(),
+  "dam the shadowake|2": damTheShadowake(),
+  "dam the shadowake|3": damTheShadowake(),
+  "dark arcanite helm|0": shadowResist(),
+  "dark arcanite plating|0": shadowResist(),
+  "dark arcanite gloves|0": shadowResist(),
+  "dark arcanite boots|0": shadowResist(),
+  "murmur of i'arathael|1": {
+    onAttackDeclared(ctx) {
+      if (Number(ctx.getFlag("player", "banishedThisTurn")) > 0) ctx.grantGoAgain();
+    },
+  },
+  "rumbling of i'arathael|1": {
+    onAttackDeclared(ctx) {
+      if (Number(ctx.getFlag("player", "banishedThisTurn")) > 0) {
+        ctx.setFlag("link", "overpower", true);
+      }
+    },
+  },
+  "whispers within|1": { onDefend(ctx) { optN(ctx, 1); }, onChoose: optOnChoose },
+  "whispers within|2": { onDefend(ctx) { optN(ctx, 1); }, onChoose: optOnChoose },
+  "whispers within|3": { onDefend(ctx) { optN(ctx, 1); }, onChoose: optOnChoose },
+  "wind slicer|3": windSlicer(),
+  "cogwerx prong bot|2": cogwerxProngBot(),
+  "favorable winds|2": {
+    alternativePlayCost: {
+      kind: "discard-hand-named",
+      name: "Goldfin Harpoon",
+      replacesResourceCost: false,
+      required: true,
+    },
+    onPlay(ctx) { ctx.drawCards(ctx.seat, 2); },
+  },
+  "banneret of swordsmanship|2": {
+    onCharged(ctx) { ctx.createToken(FLURRY); },
+  },
+  "fresh from the forge|1": freshFromTheForge(),
+  "hoodwink|3": hoodwink(),
 
   "baalghor, omen of the end|0": {
     replacePitchResources(ctx, pitched, amount) {

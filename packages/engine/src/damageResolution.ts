@@ -772,12 +772,18 @@ function openQuellDecision(state: GameStateInternal, packet: PendingArcane): boo
 function optionalDamagePreventionPieces(
   state: GameStateInternal,
   player: PlayerState,
-  arcane: boolean,
+  packet: PendingArcane,
 ): { id: number; amount: number; moveSource: "destroy" | "banish" }[] {
   return controlledPermanents(state, player.seat, { faceDownEquipment: false })
     .flatMap((source) => {
       const replacement = scriptOf(state, source.cardId, source)?.optionalDamagePrevention;
-      return replacement && replacement.amount > 0 && (!replacement.arcaneOnly || arcane)
+      const sourceHeroMatches = !replacement?.damageSourceHeroType || (
+        packet.sourceSeat !== undefined &&
+        cardTypesOf(state, (state.players[packet.sourceSeat] as PlayerState).hero)
+          .includes(replacement.damageSourceHeroType.toLowerCase())
+      );
+      return replacement && replacement.amount > 0 &&
+          (!replacement.arcaneOnly || packet.arcane) && sourceHeroMatches
         ? [{ id: source.instanceId, amount: replacement.amount, moveSource: replacement.moveSource }]
         : [];
     });
@@ -855,7 +861,7 @@ function openOptionalDamagePrevention(
 ): boolean {
   if (packet.amount <= 0 || packet.unpreventable) return false;
   const target = state.players[packet.targetSeat] as PlayerState;
-  const pieces = optionalDamagePreventionPieces(state, target, packet.arcane);
+  const pieces = optionalDamagePreventionPieces(state, target, packet);
   if (pieces.length === 0) return false;
   state.pendingDecision = {
     player: target.seat,
@@ -1763,7 +1769,7 @@ export function answerArcaneBarrier(
       return undefined;
     }
     const id = Number(optionId.slice("use ".length));
-    const piece = optionalDamagePreventionPieces(state, player, arc.arcane)
+    const piece = optionalDamagePreventionPieces(state, player, arc)
       .find((candidate) => candidate.id === id);
     if (!piece) return "prevention source not found";
     const source = controlledPermanents(state, seat, { faceDownEquipment: false })

@@ -32,6 +32,7 @@ import {
 import type { CardInstance, PlayerState, StackLayer, StackResume } from "./state.js";
 import { currentLink, findCardAnywhere, findPermanent, opponent, removeFromArray } from "./zoneQueries.js";
 import { destroyPermanent, moveToGraveyard } from "./zoneMoves.js";
+import { createTokensFor } from "./tokens.js";
 
 import {
   applyOneShotDefenseModifiers,
@@ -720,6 +721,18 @@ export function announceCardPlayed(
       ...noteCardPlayed(state, player, card),
       ...collectCardPlayedTriggerLayers(state, runtime, seat, card, playEventNextId, origin),
     ];
+    if (
+      origin === "banish" &&
+      cardHasType(state, card, "action") &&
+      (instanceDataOf(state, card).subtypes ?? []).includes("attack")
+    ) {
+      for (const modifier of state.modifiers) {
+        const token = modifier.onAttackActionPlayedFromBanishCreateToken;
+        if (!token || modifier.consumed || modifier.seat !== seat) continue;
+        modifier.consumed = true;
+        createTokensFor(state, runtime, player, token.cardId, token.count);
+      }
+    }
     if (
       cardHasType(state, card, "action") &&
       Number(player.hero.counters?.loseLifeOnActionUntilTurn ?? 0) >= state.turn

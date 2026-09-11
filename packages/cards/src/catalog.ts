@@ -326,6 +326,23 @@ const KEYWORD_OVERRIDES: Record<string, string[]> = {
   // These IAR attacks gain combat keywords only after their printed conditions hold.
   "ice aged oak|3": ["Ice Bond"],
   "tribute to greater power|1": ["Blood Debt"],
+  // IAR attacks and permanents below gain these combat keywords only through
+  // their printed conditions or activated abilities.
+  "rumbling hunger|1": ["Blood Debt"],
+  "rumbling hunger|2": ["Blood Debt"],
+  "rumbling hunger|3": ["Blood Debt"],
+  "feeding frenzy|1": ["Blood Debt"],
+  "feeding frenzy|2": ["Blood Debt"],
+  "feeding frenzy|3": ["Blood Debt"],
+  "rocktop bellow|1": ["Go again"],
+  "rocktop bellow|2": ["Go again"],
+  "rocktop bellow|3": ["Go again"],
+  "restless plowman|1": ["Decay"],
+  "restless steed|1": ["Decay"],
+  "abyssal force|3": ["Go again", "Blood Debt"],
+  "murmur of i'arathael|1": [],
+  "rumbling of i'arathael|1": [],
+  "wind slicer|0": ["Legendary"],
   // Drinking Buddy gains go again only if at least two heroes find an item.
   "drinking buddy|1": [],
   // Fluid Motion only GAINS go again if you've created a card this turn
@@ -608,6 +625,7 @@ const SUBTYPE_OVERRIDES: Record<string, string[]> = {
   // CRU Guardian Action - Aura cards; the source dataset omits the subtype.
   "towering titan|1": ["aura"],
   "towering titan|2": ["aura"],
+  "restless steed|1": ["shadow", "zombie", "ally"],
   "towering titan|3": ["aura"],
   "emerging dominance|1": ["aura"],
   "emerging dominance|2": ["aura"],

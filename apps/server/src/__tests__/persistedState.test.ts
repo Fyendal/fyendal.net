@@ -23,6 +23,27 @@ function jsonCopy<T>(value: T): T {
 }
 
 describe("PersistedStateV1", () => {
+  it("round trips delayed attack-from-banish token effects", () => {
+    const source = game();
+    source.modifiers.push({
+      id: source.nextModifierId++,
+      sourceInstanceId: source.players[0]!.hero.instanceId,
+      sourceCardId: source.players[0]!.hero.cardId,
+      seat: 0,
+      scope: "until-end-of-turn",
+      onAttackActionPlayedFromBanishCreateToken: { cardId: "SBA036", count: 2 },
+    });
+
+    const decoded = decodePersistedState(
+      jsonCopy(encodePersistedState(source)),
+      "ABC123",
+      cardData,
+      scripts,
+    );
+
+    expect(decoded.modifiers).toEqual(source.modifiers);
+  });
+
   it("round trips a declared activated-ability card target", () => {
     const source = game();
     const abilityCard = source.players[0]!.hero;
