@@ -43,8 +43,8 @@ describe("IAR cards", () => {
 
   it.each([
     ["red", "shadowrealm strength|1", 10],
-    ["blue", "shadowrealm strength|3", 12],
-  ])("Shadowrealm Strength (%s) recovers a face-up zombie and buffs the next attack", (
+    ["yellow", "shadowrealm swiftness|2", 13],
+  ])("Shadowrealm Strength/Swiftness (%s) recovers a face-up zombie and buffs the next attack", (
     _color,
     strength,
     expectedLife,
@@ -1073,7 +1073,7 @@ describe("IAR cards", () => {
     const g = scenario({ seats: [
       {
         hero: "rhinar",
-        hand: ["raging onslaught|1", "apex buster|3"],
+        hand: ["raging onslaught|1", "apex buster|2"],
         resources: 5,
         equipment: NO_EQUIPMENT,
       },
@@ -1087,10 +1087,10 @@ describe("IAR cards", () => {
 
     g.play("raging onslaught|1")
       .blockWith("raging onslaught|2", "raging onslaught|3")
-      .activate("apex buster|3")
+      .activate("apex buster|2")
       .chooseCard("raging onslaught|2")
       .expectLife(1, 16)
-      .expectInZone(0, "apex buster|3", "graveyard")
+      .expectInZone(0, "apex buster|2", "graveyard")
       .expectInZone(1, "raging onslaught|2", "graveyard");
   });
 
@@ -1098,7 +1098,7 @@ describe("IAR cards", () => {
     const g = scenario({ seats: [
       {
         hero: "rhinar",
-        hand: ["nimblism|1", "snatch|1", "apex buster|3"],
+        hand: ["nimblism|1", "snatch|1", "apex buster|2"],
         resources: 2,
         equipment: NO_EQUIPMENT,
       },
@@ -1110,7 +1110,7 @@ describe("IAR cards", () => {
     ] });
 
     g.play("nimblism|1").play("snatch|1").blockWith("raging onslaught|3");
-    expect(() => g.activate("apex buster|3"))
+    expect(() => g.activate("apex buster|2"))
       .toThrow(/no legal intent to activate/);
   });
 
@@ -2396,5 +2396,247 @@ describe("September 3 IAR spoilers", () => {
 
     expect(boardNames(g, 1)).not.toContain("Runechant");
     expect(g.state.players[1]!.hand).toHaveLength(0);
+  });
+
+  it("Feeding Frenzy banishes the top card and gains go again after banishing a six-power card", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["feeding frenzy|1"],
+        deck: ["raging onslaught|1"],
+        resources: 2,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("feeding frenzy|1")
+      .blockWith()
+      .settle()
+      .expectLife(1, 14)
+      .expectAP(0, 1)
+      .expectInZone(0, "raging onslaught|1", "banish");
+  });
+
+  it("Rocktop Bellow bottoms a failed reveal and buffs the next attack", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["rocktop bellow|1", "snatch|1"],
+        deck: ["nimblism|1"],
+        resources: 2,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("rocktop bellow|1")
+      .expectDeckBottom(0, "nimblism|1")
+      .play("snatch|1")
+      .blockWith()
+      .settle()
+      .expectLife(1, 12);
+  });
+
+  it("Promise of Power creates two Runechants for the next attack played from banish", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["promise of power|2"],
+        banish: ["rift bind|1"],
+        board: ["blasmophet, the insatiable hunger|0"],
+        resources: 2,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("promise of power|2")
+      .play("rift bind|1", { fromZone: "banish" });
+
+    expect(boardNames(g, 0).filter((name) => name === "Runechant")).toHaveLength(2);
+  });
+
+  it("Enshrine Sin charges its extra banish cost, opts, and creates a Runechant", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        banish: ["enshrine sin|1"],
+        deck: ["nimblism|1"],
+        resources: 1,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("enshrine sin|1", { fromZone: "banish" })
+      .chooseOption("bottom")
+      .expectResources(0, 0);
+    expect(boardNames(g, 0)).toContain("Runechant");
+  });
+
+  it("Corpse Cover can destroy a controlled ally to prevent damage while defending", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["raging onslaught|1"],
+        resources: 3,
+        equipment: NO_EQUIPMENT,
+      },
+      {
+        hero: "dorinthea",
+        life: 20,
+        hand: ["corpse cover|1"],
+        board: ["restless cleric|1"],
+        equipment: NO_EQUIPMENT,
+      },
+    ] });
+
+    g.play("raging onslaught|1").blockWith("corpse cover|1").passPriority();
+    const cover = g.state.chain.at(-1)!.defendingCards[0]!;
+    const ally = g.state.players[1]!.board[0]!;
+    const activation = legalIntents(g.state, 1).find((intent) =>
+      intent.kind === "activate-ability" &&
+      intent.sourceInstanceId === cover.instanceId &&
+      intent.pitchInstanceIds?.[0] === ally.instanceId
+    );
+    expect(activation).toBeDefined();
+    g.doRaw(activation!).settle().expectLife(1, 18);
+    expect(g.state.players[1]!.board).toHaveLength(0);
+  });
+
+  it("Shadow Resist destroys its source and prevents damage from a Shadow hero", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        heroKey: "IAR002",
+        hand: ["head jab|1"],
+        equipment: NO_EQUIPMENT,
+      },
+      {
+        hero: "dorinthea",
+        life: 20,
+        equipment: { ...NO_EQUIPMENT, head: "dark arcanite helm|0" },
+      },
+    ] });
+
+    g.play("head jab|1").blockWith().settle().chooseOption("use").expectLife(1, 18);
+    g.expectNoEquipment(1, "head");
+  });
+
+  it("Wind Slicer attacks, suppresses the hit hero, and is destroyed when the chain closes", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        board: ["wind slicer|3"],
+        resources: 1,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.activate("wind slicer|3")
+      .blockWith()
+      .settle()
+      .expectLife(1, 19)
+      .doRaw({ kind: "close-chain" })
+      .expectInZone(0, "wind slicer|3", "graveyard");
+    expect(g.state.modifiers).toContainEqual(expect.objectContaining({
+      seat: 1,
+      suppressesHeroAbilities: true,
+    }));
+  });
+
+  it("Hoodwink counts the base defense of every discarded card", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["hoodwink|3", "raging onslaught|1"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.activate("hoodwink|3");
+    const other = g.state.players[0]!.hand[0]!;
+    g.doRaw({ kind: "choose-many", optionIds: [String(other.instanceId)] })
+      .settle()
+      .expectInZone(0, "raging onslaught|1", "graveyard");
+    expect(g.state.players[0]!.flags.preventNextArcaneDamage).toBe(6);
+  });
+
+  it("Rally the Shadow Horde banishes its ability cost while defending", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["raging onslaught|1"],
+        resources: 3,
+        equipment: NO_EQUIPMENT,
+      },
+      {
+        hero: "dorinthea",
+        life: 20,
+        hand: ["rally the shadow horde|1", "snatch|1"],
+        equipment: NO_EQUIPMENT,
+      },
+    ] });
+
+    g.play("raging onslaught|1")
+      .blockWith("rally the shadow horde|1")
+      .passPriority()
+      .activate("rally the shadow horde|1", { discard: ["snatch|1"] })
+      .expectInZone(1, "snatch|1", "banish")
+      .expectLife(1, 17);
+  });
+
+  it("Favorable Winds requires Goldfin Harpoon, pays it, and draws two", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["favorable winds|2", "SEA093"],
+        deck: ["snatch|1", "nimblism|1"],
+        resources: 1,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("favorable winds|2", { alternativeCost: "SEA093" })
+      .expectNotInZone(0, "goldfin harpoon|0", "graveyard")
+      .expectNotInZone(0, "goldfin harpoon|0", "banish")
+      .expectHandSize(0, 2)
+      .expectAP(0, 1);
+  });
+
+  it("Banneret of Swordsmanship creates a Flurry when charged", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["bravery of the blade|1", "banneret of swordsmanship|2"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("bravery of the blade|1")
+      .chooseCard("banneret of swordsmanship|2")
+      .expectInZone(0, "banneret of swordsmanship|2", "soul");
+    expect(boardNames(g, 0)).toContain("Flurry");
+  });
+
+  it("Cogwerx Prong Bot discards itself as an instant to create a Golden Cog", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["cogwerx prong bot|2"],
+        resources: 1,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.activate("cogwerx prong bot|2")
+      .expectInZone(0, "cogwerx prong bot|2", "graveyard");
+    expect(boardNames(g, 0)).toContain("Golden Cog");
   });
 });

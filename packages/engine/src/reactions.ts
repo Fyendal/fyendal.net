@@ -4,6 +4,7 @@ import type { MeldSide, PlayableZone } from "@fyendal/shared";
 import { activateFromHandAbility } from "./activation.js";
 import {
   activatedAbilitiesSuppressed,
+  cardTypesOf,
   dataOf,
   instanceDataOf,
   meldSideHasType,
@@ -852,8 +853,23 @@ export function activateDefenseAbility(
   }
   const ctx = runtime.makeCtx(state, seat, card, link);
   for (const id of discardInstanceIds) {
-    const discarded = ctx.discardCard(seat, id);
-    if (!discarded) return `card ${id} not in hand`;
+    const subtype = ability.destroyOrDiscardSubtype?.toLowerCase();
+    const inHand = player.hand.find((candidate) => candidate.instanceId === id);
+    const inArena = player.board.find((candidate) => candidate.instanceId === id);
+    const selected = inHand ?? inArena;
+    if (
+      !selected ||
+      (ability.banishHandCard && !inHand) ||
+      (subtype && !cardTypesOf(state, selected).includes(subtype))
+    ) {
+      return `card ${id} is not a valid ability cost`;
+    }
+    const paid = inArena
+      ? ctx.destroyPermanent(id)
+      : ability.banishHandCard
+        ? ctx.banish(id)
+        : ctx.discardCard(seat, id) !== undefined;
+    if (!paid) return `card ${id} could not pay the ability cost`;
   }
   player.flags[`defAbility:${card.instanceId}`] = true;
   script?.onDefendAbility?.(runtime.makeCtx(state, seat, card, link));

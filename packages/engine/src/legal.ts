@@ -839,7 +839,14 @@ function reactionIntents(
       if (!ability) continue;
       if (ability.oncePerTurn && player.flags[`defAbility:${c.instanceId}`]) continue;
       if (ability.discard === 1) {
-        for (const h of player.hand) {
+        const subtype = ability.destroyOrDiscardSubtype?.toLowerCase();
+        const candidates = subtype
+          ? [
+              ...player.hand.filter((card) => cardTypesOf(state, card).includes(subtype)),
+              ...player.board.filter((card) => cardTypesOf(state, card).includes(subtype)),
+            ]
+          : player.hand;
+        for (const h of candidates) {
           intents.push({
             kind: "activate-ability",
             sourceInstanceId: c.instanceId,
