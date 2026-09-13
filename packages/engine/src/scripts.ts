@@ -644,8 +644,9 @@ export interface ScriptCtx {
    *  player-level and carry over) and fires the new hero's onBecomeHero. */
   becomeHero(cardId: string): void;
   /** Transform using a hero card retained in inventory. The current hero is
-   * put into its soul and the new hero starts at its printed life/intellect. */
-  becomeHeroFromInventory(instanceId: number): boolean;
+   * put into its soul and the new hero starts at its printed life/intellect.
+   * `faceCardId` selects either registered face of a twin-card. */
+  becomeHeroFromInventory(instanceId: number, faceCardId?: string): boolean;
   /** Transform until the start of this hero's next turn, preserving life. */
   becomeHeroUntilNextTurn(cardId: string): void;
   /** Log information that is public to both players and spectators. */
@@ -772,7 +773,7 @@ export interface ActivatedAbility {
   };
   /** The ability turns its (face-down, Cloaked) source face up as part of the
    *  activation cost — the ONLY kind of ability usable while the permanent is
-   *  face-down (CR 8.3.36). Once face up, everything functions normally. */
+   *  face-down (CR 8.3.36). This cost cannot be paid once the source is face-up. */
   turnsFaceUp?: boolean;
   /** The ability functions while its source is face-down without turning the
    * source face-up (for Cloaked abilities whose destruction is the cost). */

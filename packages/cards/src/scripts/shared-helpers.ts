@@ -436,6 +436,31 @@ function blasmophetInInventory(
   );
 }
 
+/** Levia's visible proxy for the action ability of her private twin-card
+ * (CR 9.1.4a). The source card remains in inventory until resolution. */
+export const leviaRedeemedAbility: ActivatedAbility = {
+  cost: 0,
+  isAttack: false,
+  goAgain: false,
+  timing: "action",
+  label: "Transform into Levia, Redeemed",
+  canActivate(ctx) {
+    return blasmophetInInventory(ctx) !== undefined &&
+      ctx.player(ctx.seat).banish.filter((card) =>
+        !card.faceDown && ctx.cardData(card.cardId).text.includes("Blood Debt")
+      ).length >= 13;
+  },
+  onCostPaid(ctx) {
+    for (const card of ctx.player(ctx.seat).banish) {
+      ctx.setCardFaceDown(card.instanceId, true);
+    }
+  },
+  onActivate(ctx) {
+    const twinCard = blasmophetInInventory(ctx);
+    if (twinCard) ctx.becomeHeroFromInventory(twinCard.instanceId, "DTD164B");
+  },
+};
+
 /** Printed Blood Debt (CR 8.3.11), including Levia suppression and demi-hero
  * transformation/replacement interactions. */
 export function bloodDebtScript(extra: CardScript = {}, playableFromBanish = false): CardScript {

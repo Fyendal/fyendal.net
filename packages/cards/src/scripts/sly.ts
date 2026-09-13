@@ -55,12 +55,20 @@ function crushTriggered(ctx: ScriptCtx): boolean {
  * arena objects, the active attack, and objects currently on the stack. */
 function damageSourceCandidates(ctx: ScriptCtx): number[] {
   const ids: number[] = [];
-  for (const p of ctx.state.players) {
-    ids.push(p.hero.instanceId);
-    for (const c of [...p.weapons, ...p.board]) ids.push(c.instanceId);
-  }
+  // Put the active threat first. On a crowded board this keeps the attack a
+  // player is responding to from being buried after every arena permanent.
   if (ctx.link) ids.push(ctx.link.attackingCard.instanceId);
   for (const layer of ctx.state.stack) ids.push(layer.sourceInstanceId);
+  for (const p of ctx.state.players) {
+    ids.push(p.hero.instanceId);
+    for (const c of [
+      ...p.weapons,
+      ...p.board,
+      ...Object.values(p.equipment).filter((card) => card !== undefined),
+    ]) {
+      if (!c.faceDown) ids.push(c.instanceId);
+    }
+  }
   return [...new Set(ids)];
 }
 

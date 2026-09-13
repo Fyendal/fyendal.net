@@ -903,6 +903,15 @@ describe("cloaked", () => {
       s = apply(s, s.pendingDecision.player, { kind: "pass" });
     }
     expect(player(s, 1).life).toBe(21);
+    expect(legalIntents(s, 1).filter(
+      (intent) => intent.kind === "activate-ability" && intent.sourceInstanceId === eq.instanceId,
+    )).toHaveLength(0);
+    const reused = applyIntent(s, 1, {
+      kind: "activate-ability",
+      sourceInstanceId: eq.instanceId,
+      pitchInstanceIds: [],
+    });
+    expect(reused).toEqual({ ok: false, error: "Cloaked Arms is already face up" });
     // face up now: it can defend and its ward functions
     s = apply(s, 1, { kind: "pass" });
     s = apply(s, 0, { kind: "pass" });

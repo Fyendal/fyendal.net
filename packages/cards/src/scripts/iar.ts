@@ -1525,7 +1525,7 @@ export const iar: Record<string, CardScript> = {
       timing: "instant",
       fromHand: true,
       fromHandMove: "banish",
-      onActivate(ctx) { buffNextAttack(ctx, { grantKeyword: "Go again" }); },
+      onActivate(ctx) { buffNextAttack(ctx, { goAgain: true }); },
     },
   }),
 
@@ -2383,9 +2383,10 @@ export const iar: Record<string, CardScript> = {
 
   "blasmophet, the insatiable hunger|0": {
     activated: [
-      ...attackAbility(1, {
+      ...attackAbility(0, {
         goAgain: true,
         oncePerTurn: false,
+        tap: true,
         canActivate: (ctx) => ctx.getFlag("player", "gemConsumingAppetiteActive") === true,
       }),
       ...attackAbility(0, {

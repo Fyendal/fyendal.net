@@ -241,7 +241,7 @@ export const mpw: Record<string, CardScript> = {
     },
   },
   "longsword leggings|0": {
-    activated: { cost: 0, isAttack: false, goAgain: true, destroySelfCost: true, onActivate(ctx) {
+    activated: { cost: 0, isAttack: false, goAgain: false, destroySelfCost: true, onActivate(ctx) {
       ctx.requestChoice(
         "longsword-token",
         decisionPrompt(

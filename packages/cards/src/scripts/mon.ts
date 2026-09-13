@@ -10,6 +10,7 @@ import {
   ironhideScript,
   isCard,
   isSixPlus,
+  leviaRedeemedAbility,
   localizedCardLog,
   mergeSetScripts,
   optN,
@@ -822,7 +823,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   "second swing|3": secondSwing(2),
 
   // ── Shadow Brute ───────────────────────────────────────────────────────
-  "levia|0": {},
+  "levia|0": { activated: leviaRedeemedAbility },
   "hooves of the shadowbeast|0": {
     onCardBanished(ctx, card) {
       if (!isSixPlus(ctx, card)) return;

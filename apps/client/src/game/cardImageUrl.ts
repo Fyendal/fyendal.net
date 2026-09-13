@@ -65,7 +65,6 @@ const FABRARY_IMAGE_ID_OVERRIDES: Readonly<Record<string, string>> = {
   HER149: "HER149-RF",
   HER160: "HER160-MV",
   HER167: "HER167-MV",
-  IAR083: "AMA026",
   IAR091: "IAR091-RF",
   IAR159: "IAR159-RF",
   IAR222: "IAR222-MV",

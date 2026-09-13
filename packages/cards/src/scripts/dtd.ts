@@ -5,6 +5,7 @@ import {
   buffNextAttack,
   commonOptionMessages,
   decisionPrompt,
+  leviaRedeemedAbility,
   mergeSetScripts,
   opponentSeat,
   yesNoPrompt,
@@ -315,7 +316,7 @@ export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRar
   "banneret of vigor|2": banneret("resource"),
   "beaming bravado|3": chargeAttack({ modifyAttack: (ctx) => ctx.getCounter("chargedPitch") === 2 ? 1 : 0 }),
   "radiant view|0": radiantEquipment(), "radiant raiment|0": radiantEquipment(), "radiant flow|0": radiantEquipment(),
-  "levia, shadowborn abomination|0": {},
+  "levia, shadowborn abomination|0": { activated: leviaRedeemedAbility },
   "hell hammer|0": bloodDebt({
     activated: attackAbility(2),
     onCombatChainClosed(ctx) { ctx.banish(ctx.self.instanceId); },

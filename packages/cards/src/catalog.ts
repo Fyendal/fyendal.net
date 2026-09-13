@@ -564,6 +564,9 @@ const KEYWORD_OVERRIDES: Record<string, string[]> = {
   "rawhide rumble|1": ["Beat Chest"],
   "rawhide rumble|2": ["Beat Chest"],
   "rawhide rumble|3": ["Beat Chest"],
+  // Jaws of Victory only GAINS go again after its controller has been cheered
+  // during the current turn.
+  "jaws of victory|1": ["The Crowd Cheers"],
 };
 
 /** Functional text errata keyed by card identity so every printing is current. */

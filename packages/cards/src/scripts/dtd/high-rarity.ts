@@ -308,7 +308,10 @@ export const dtdHighRarity: Record<string, CardScript> = {
       ctx.allowPlayFrom(choices[ctx.randomInt(choices.length)]!, "banish");
     },
   }),
-  "diabolic offering|3": bloodDebt({ modifyAttack: (ctx) => ctx.getFlag("player", "banishedSixPlusThisTurn") === true ? 6 - (data(ctx, ctx.self).attack ?? 0) : 0, modifyDefense: (ctx) => ctx.getFlag("player", "banishedSixPlusThisTurn") === true ? 6 - (data(ctx, ctx.self).defense ?? 0) : -(data(ctx, ctx.self).defense ?? 0) }),
+  "diabolic offering|3": bloodDebt({
+    modifyBasePower: (ctx) => ctx.getFlag("player", "banishedSixPlusThisTurn") === true ? 6 : 0,
+    modifyBaseDefense: (ctx) => ctx.getFlag("player", "banishedSixPlusThisTurn") === true ? 6 : 0,
+  }),
   "shaden death hydra|2": bloodDebt({ onAttackDeclared(ctx) { const count = ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && data(ctx, card).text.includes("Blood Debt")).length; ctx.dealDamage(ctx.seat, Math.max(0, 13 - count)); } }),
   "slithering shadowpede|1": bloodDebt({ onSelfBanished(ctx, from) { if (from === "hand") ctx.allowPlayFrom(ctx.self.instanceId, "banish"); } }),
   "expendable limbs|3": { requiredHandCardsForAdditionalCost: 1, additionalCost(ctx) { const hand = ctx.player(ctx.seat).hand; const card = hand[ctx.randomInt(hand.length)]; if (card && ctx.banish(card.instanceId) && ctx.basePower(card) >= 6) ctx.allowPlayFrom(card.instanceId, "banish", { untilEndOfNextTurn: true }); } },
@@ -328,8 +331,12 @@ export const dtdHighRarity: Record<string, CardScript> = {
   "requiem for the damned|1": bloodDebt({ staticPlayableFrom: ["banish"], playAsInstant: (ctx) => ctx.state.players.some((player) => player.flags.lostLifeThisTurn === true), onPlay(ctx) { ctx.createToken(ELOQUENCE); } }),
   "oblivion|3": { canPlay: (ctx) => ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "runechant")).length === 6, onPlay(ctx) { ctx.createToken(NASRETH); } },
 
-  "blasmophet, levia consumed|0": { allowsFriendlyCardPlayFrom: (_ctx, card, zone) => zone === "banish" && !card.faceDown && data(_ctx, card).text.includes("Blood Debt"), onCardBanished(ctx, card) { ctx.setCardFaceDown(card.instanceId, true); } },
-  "levia, redeemed|0": { onGameStart(ctx) { ctx.setPlayerFlag(ctx.seat, "leviaRedeemedInInventory", true); }, activated: { cost: 0, isAttack: false, goAgain: false, timing: "action", label: "Transform into Levia, Redeemed", canActivate: (ctx) => ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && data(ctx, card).text.includes("Blood Debt")).length >= 13, onActivate(ctx) { for (const card of ctx.player(ctx.seat).banish) ctx.setCardFaceDown(card.instanceId, true); ctx.becomeHero("DTD164B"); } } },
+  "blasmophet, levia consumed|0": {
+    allowsFriendlyCardPlayFrom: (_ctx, card, zone) => zone === "banish" &&
+      !card.faceDown && data(_ctx, card).text.includes("Blood Debt"),
+    onCardBanished(ctx, card) { ctx.setCardFaceDown(card.instanceId, true); },
+  },
+  "levia, redeemed|0": {},
   "dabble in darkness|1": bloodDebt({ onAttackDeclared(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top && ctx.banish(top.instanceId)) ctx.addModifier({ scope: "chain-link", attack: -ctx.cardColor(top) }); } }),
   "chains of mephetis|3": bloodDebt({ staticPlayableFrom: ["banish"], onEnterArena(ctx) { ctx.setCounter("doom", 1); }, replaceFriendlyDraw(ctx, count) { return replaceActionPhaseDraw(ctx, ctx.seat, count); }, replaceOpponentDraw: replaceActionPhaseDraw, triggers: [{ event: "start-of-turn", whose: "subject", label: "Remove doom or destroy", effect(ctx) { if (ctx.getCounter("doom") > 0) ctx.addCounter(ctx.self.instanceId, "doom", -1); else ctx.destroySelf(); } }] }),
   "dimenxxional vortex|0": bloodDebt({ staticPlayableFrom: ["banish"], modifyPlayCost: (ctx, base) => ctx.player(ctx.seat).banish.some((card) => card.instanceId === ctx.self.instanceId) ? Math.max(0, base - 2) : base, onPlay(ctx) { for (const player of ctx.state.players) if (player.arsenal[0]) ctx.banish(player.arsenal[0].instanceId); } }),

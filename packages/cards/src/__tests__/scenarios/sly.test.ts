@@ -668,6 +668,41 @@ describe("SLY — attacks and defense", () => {
       .expectLife(0, 9);
   });
 
+  it("Oasis Respite prevents damage from Buckling Blow", () => {
+    const g = scenario({
+      seats: [
+        lyath({ hand: ["oasis respite|1", "goon beatdown|3"] }),
+        foe({ hand: ["buckling blow|3"], resources: 4 }),
+      ],
+      active: 1,
+    });
+    g.play("buckling blow|3");
+    g.blockWith();
+    g.passPriority();
+    g.react("oasis respite|1", { pitch: ["goon beatdown|3"] });
+    g.chooseCard("lyath goldmane|0");
+    expect(projectStateFor(g.state, 0).pendingDecision?.optionCards?.[0]).toMatchObject({
+      cardId: printingId("buckling blow|3"),
+    });
+    g.chooseCard("buckling blow|3")
+      .expectLog("is prevented (4)")
+      .expectLife(0, 18);
+  });
+
+  it("Oasis Respite can choose public equipment as a damage source", () => {
+    const g = scenario({
+      seats: [
+        lyath({ hand: ["oasis respite|1", "goon beatdown|3"] }),
+        foe({ equipment: { head: "ironrot helm|0" } }),
+      ],
+    });
+    g.play("oasis respite|1", { pitch: ["goon beatdown|3"] });
+    g.chooseCard("lyath goldmane|0");
+    expect(projectStateFor(g.state, 0).pendingDecision?.optionCards).toContainEqual(
+      expect.objectContaining({ cardId: printingId("ironrot helm|0") }),
+    );
+  });
+
   it("Oasis Respite prevents only the chosen source's damage (object, not name)", () => {
     const g = scenario({
       seats: [

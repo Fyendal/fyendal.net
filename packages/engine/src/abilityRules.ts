@@ -551,6 +551,9 @@ export function payActivatedAbilityCost(
       ? "ability can only be activated once per turn"
       : `ability can only be activated ${limit} times per turn`;
   }
+  if (ability.turnsFaceUp && !card.faceDown) {
+    return `${nameOf(state, card.cardId)} is already face up`;
+  }
   if (ability.tap && card.tapped) return `${nameOf(state, card.cardId)} is already tapped`;
   if (ability.tapHeroCost && player.hero.tapped) {
     return `${nameOf(state, player.hero.cardId)} is already tapped`;

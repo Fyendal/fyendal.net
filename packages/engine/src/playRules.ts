@@ -594,19 +594,32 @@ export function canPlayAsInstant(
   card: CardInstance,
   link?: ChainLinkState,
   fromOverride?: "hand" | "arsenal" | PlayableZone,
+  meldSideOverride?: MeldSide,
 ): boolean {
   const data = instanceDataOf(state, card);
   const meld = scriptOf(state, card.cardId, card)?.meld;
+  const meldSide = meldSideOverride ?? card.meldSide;
   // Before a split card is announced, ask whether it has an instant side at
-  // all. Legal-intent construction then filters the individual left/right/
-  // both announcements with meldSideHasType.
-  if (meld && !card.meldSide) {
-    return meld.leftCardType === "instant" || meld.rightCardType === "instant";
+  // all. Legal-intent construction then checks each individual left/right/
+  // both announcement, including effects that let its action side be played
+  // as though it were an instant.
+  if (meld && !meldSide && (
+    meld.leftCardType === "instant" || meld.rightCardType === "instant"
+  )) {
+    return true;
   }
-  if (cardHasType(state, card, "instant") && !cardHasType(state, card, "action")) return true;
+  const isAction = meld
+    ? meldSide === undefined
+      ? meld.leftCardType === "action" || meld.rightCardType === "action"
+      : meldSideHasType(state, card, meldSide, "action")
+    : cardHasType(state, card, "action");
+  const isInstant = meld
+    ? meldSide !== undefined && meldSideHasType(state, card, meldSide, "instant")
+    : cardHasType(state, card, "instant");
+  if (isInstant && !isAction) return true;
   const playableEquipment =
     data.cardType === "equipment" && scriptOf(state, card.cardId, card)?.playableEquipment === true;
-  if (!playableEquipment && (data.cardType !== "action" || (data.subtypes ?? []).includes("attack"))) return false;
+  if (!playableEquipment && (!isAction || (data.subtypes ?? []).includes("attack"))) return false;
   const player = state.players[seat] as PlayerState;
   if (card.playableAsInstant) return true;
   if (player.flags[`asInstant:${card.instanceId}`] === true) return true;

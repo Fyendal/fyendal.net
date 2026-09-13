@@ -42,7 +42,6 @@ describe("cardImageUrl", () => {
     ["FAB464", "FAB464-MV"],
     ["FAB469", "FAB469-CF"],
     ["FAB477", "FAB477-RF"],
-    ["IAR083", "AMA026"],
     ["IAR091", "IAR091-RF"],
     ["IAR222", "IAR222-MV"],
     ["IAR666", "IAR666-MV"],
@@ -74,6 +73,15 @@ describe("cardImageUrl", () => {
       "https://content.fabrary.net/cards/IAR084-RF.webp",
       "https://content.fabrary.net/cards/IAR084-CF.webp",
       "https://content.fabrary.net/cards/IAR084-MV.webp",
+    ]);
+  });
+
+  it("does not substitute a different card image for Shadowrealm Swiftness", () => {
+    expect(resolveCardImageUrls("IAR083", undefined)).toEqual([
+      "https://content.fabrary.net/cards/IAR083.webp",
+      "https://content.fabrary.net/cards/IAR083-RF.webp",
+      "https://content.fabrary.net/cards/IAR083-CF.webp",
+      "https://content.fabrary.net/cards/IAR083-MV.webp",
     ]);
   });
 

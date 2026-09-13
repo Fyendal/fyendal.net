@@ -1180,6 +1180,33 @@ describe("IAR cards", () => {
     expect(g.state.players[0]!.life).toBe(lifeBeforeEndPhase);
   });
 
+  it("Danse Macabre leaves excess resources from a pitched card floating", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        heroKey: "malice, domina of the dead|0",
+        graveyard: ["restless cleric|1"],
+        hand: ["fearless confrontation|3"],
+        resources: 1,
+        equipment: { ...NO_EQUIPMENT, legs: "danse macabre|0" },
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.activate("malice, domina of the dead|0")
+      .chooseCard("restless cleric|1")
+      .play("restless cleric|1", { fromZone: "graveyard" });
+
+    const blue = g.state.players[0]!.hand.find((card) => card.cardId === "MPG128")!;
+    const payment = g.state.pendingDecision?.resourcePayment?.options.find((option) =>
+      option.pitchInstanceIds.includes(blue.instanceId)
+    );
+    expect(payment).toBeDefined();
+
+    g.doRaw({ kind: "choose", optionId: payment!.optionId })
+      .expectResources(0, 1);
+  });
+
   it("Forsaken Strike destroys and discards zombies for independently chosen modes", () => {
     const g = scenario({ seats: [
       {
@@ -1701,7 +1728,7 @@ describe("August 29–31 IAR and GEM Pack 6 spoilers", () => {
     g.expectLife(1, 14).expectAP(0, 1);
   });
 
-  it("Consuming Appetite grants Blasmophet a repeatable go-again attack", () => {
+  it("Consuming Appetite grants Blasmophet a zero-cost tap attack with go again", () => {
     const g = scenario({ seats: [
       {
         hero: "rhinar",
@@ -1718,12 +1745,37 @@ describe("August 29–31 IAR and GEM Pack 6 spoilers", () => {
       .activate("blasmophet, the insatiable hunger|0")
       .blockWith()
       .settle()
-      .activate("blasmophet, the insatiable hunger|0")
+      .expectLife(1, 14)
+      .expectAP(0, 1)
+      .expectResources(0, 2);
+
+    const blasmophet = g.state.players[0]!.board[0]!;
+    expect(blasmophet.tapped).toBe(true);
+    expect(legalIntents(g.state, 0)).not.toContainEqual(expect.objectContaining({
+      kind: "activate-ability",
+      sourceInstanceId: blasmophet.instanceId,
+    }));
+  });
+
+  it("Consuming Lash gives the next attack go again", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["consuming lash|2", "hungering slaughterbeast|1"],
+        graveyard: ["raging onslaught|1", "raging onslaught|2", "raging onslaught|3"],
+        board: ["blasmophet, the insatiable hunger|0"],
+        resources: 3,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.activate("consuming lash|2")
+      .expectInZone(0, "consuming lash|2", "banish")
+      .play("hungering slaughterbeast|1")
       .blockWith()
       .settle()
-      .expectLife(1, 8)
-      .expectAP(0, 1)
-      .expectResources(0, 0);
+      .expectAP(0, 1);
   });
 
   it("Ominous Toll discards a zombie to create a Gate and has go again", () => {
