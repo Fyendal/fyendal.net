@@ -63,6 +63,20 @@ describe("MPW — import and Warrior mastery", () => {
       .expectNotInZone(0, "blade dance|0", "board");
   });
 
+  it("Longsword Leggings consumes an action point when it creates a token", () => {
+    const g = scenario({
+      seats: [
+        hala({ equipment: { ...NO_EQUIPMENT, legs: "longsword leggings|0" } }),
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.activate("longsword leggings|0")
+      .chooseOption("Flurry")
+      .expectAP(0, 0)
+      .expectInZone(0, "flurry|0", "board");
+  });
+
   it("Thwart removes the attacking sword's sharpen counters", () => {
     const g = scenario({
       seats: [

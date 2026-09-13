@@ -493,6 +493,7 @@ describe("SEN — Uphold Tradition (cloaked)", () => {
     s.chooseCard(SHIELD);
     expect(s.state.players[0]!.equipment.arms?.faceDown).toBe(false);
     expect(boardCard(s, 0, SHIELD).counters?.power).toBe(1);
+    expect(abilityIntents(s, 0, arms.instanceId)).toHaveLength(0);
   });
 
   it("Ward 1 functions once face-up", () => {

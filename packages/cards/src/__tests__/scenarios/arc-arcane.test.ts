@@ -186,6 +186,38 @@ describe("ARC — Wizard commons and rares", () => {
     expect(s.state.players[0]!.flags.nextWizardNonAttackAsInstant).toBe(true);
   });
 
+  it("Storm Striders lets Comet Storm be played as an instant with 2 resources floating", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          equipment: { legs: "storm striders|0" },
+          hand: ["comet storm // shock|1", BLUE],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.activate("storm striders|0", { pitch: [BLUE], settle: false })
+      .passPriority()
+      .passPriority()
+      .expectResources(0, 2);
+
+    const comet = s.state.players[0]!.hand.find(
+      (card) => card.cardId === printingId("comet storm // shock|1"),
+    )!;
+    expect(legalIntents(s.state, 0)).toContainEqual(expect.objectContaining({
+      kind: "play-card",
+      instanceId: comet.instanceId,
+      meldSide: "left",
+    }));
+
+    s.react("comet storm // shock|1", { meldSide: "left" })
+      .chooseOption("opposing hero")
+      .expectLife(1, 15);
+    expect(s.state.players[0]!.flags.nextWizardNonAttackAsInstant).toBe(false);
+  });
+
   it("Stir the Aetherwinds makes the next Wizard action instant-speed and amplifies it", () => {
     const s = scenario({
       seats: [

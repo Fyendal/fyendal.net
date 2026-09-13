@@ -3157,7 +3157,7 @@
   "id": "GEM193",
   "name": "Consuming Appetite",
   "cardType": "action",
-  "text": "Instant - {r}, banish this from your hand: Until end of turn, Blasmophet, the Insatiable Hunger tokens you control get \"Action - {r}: Attack. Go again.\"\nBlood Debt",
+  "text": "Instant - {r}, banish this from your hand: Until end of turn, Blasmophet, the Insatiable Hunger tokens you control get \"Action - {t}: Attack. Go again.\"\nBlood Debt",
   "pitch": 2,
   "cost": 3,
   "attack": 6,

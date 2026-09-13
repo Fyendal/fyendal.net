@@ -11,7 +11,61 @@ function script(key: string): CardScript {
 
 describe("DTD, EVO, and HVY rules regression coverage", () => {
   it("Empyrean discounts the first hero ability", () => expect(script("empyrean rapture|0").modifyAttackActivationCost).toBeTypeOf("function"));
-  it("Levia transforms from inventory", () => expect(script("levia, redeemed|0").onGameStart).toBeTypeOf("function"));
+  it("Levia transforms into Levia, Redeemed from inventory", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "levia, shadowborn abomination|0",
+          inventory: ["blasmophet, levia consumed|0"],
+          banish: Array<string>(13).fill("grim feast|1"),
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    const heroId = g.state.players[0]!.hero.instanceId;
+
+    expect(legalIntents(g.state, 0)).toContainEqual(
+      expect.objectContaining({ kind: "activate-ability", sourceInstanceId: heroId }),
+    );
+
+    g.activate("levia, shadowborn abomination|0", { settle: false });
+
+    expect(g.state.players[0]!.heroCardId)
+      .toBe(printingId("levia, shadowborn abomination|0"));
+    expect(g.state.players[0]!.banish.every((card) => card.faceDown)).toBe(true);
+
+    g.settle();
+
+    expect(g.state.players[0]!.heroCardId).toBe(printingId("levia, redeemed|0"));
+    expect(g.state.players[0]!.life).toBe(8);
+    expect(g.state.players[0]!.inventory).toEqual([]);
+    expect(g.state.players[0]!.soul).toEqual([
+      expect.objectContaining({ cardId: printingId("levia, shadowborn abomination|0") }),
+    ]);
+    expect(g.state.players[0]!.banish).toHaveLength(13);
+    expect(g.state.players[0]!.banish.every((card) => card.faceDown)).toBe(true);
+  });
+
+  it("Levia, Redeemed requires 13 face-up cards with blood debt", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "levia, shadowborn abomination|0",
+          inventory: ["blasmophet, levia consumed|0"],
+          banish: Array<string>(12).fill("grim feast|1"),
+          banishFaceDown: ["grim feast|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    const heroId = g.state.players[0]!.hero.instanceId;
+
+    expect(legalIntents(g.state, 0)).not.toContainEqual(
+      expect.objectContaining({ kind: "activate-ability", sourceInstanceId: heroId }),
+    );
+  });
   it("Chains replaces action phase draws", () => expect(script("chains of mephetis|3").replaceOpponentDraw).toBeTypeOf("function"));
   it("Singularity transforms all components", () => expect(script("singularity|1").onChoose).toBeTypeOf("function"));
   it("Hyper-X3 retains boosted drivers", () => expect(script("hyper-x3|0").onBanishedForBoost).toBeTypeOf("function"));

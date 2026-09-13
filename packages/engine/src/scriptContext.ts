@@ -2903,32 +2903,40 @@ export function makeCtx(
       ));
       scriptOf(state, cardId, player.hero)?.onBecomeHero?.(runtime.makeCtx(state, seat, player.hero));
     },
-    becomeHeroFromInventory(instanceId) {
+    becomeHeroFromInventory(instanceId, faceCardId) {
       const inventory = player.inventory;
       if (!inventory) return false;
       const inventoryCard = inventory.find((candidate) => candidate.instanceId === instanceId);
       if (!inventoryCard) return false;
-      const next = state.cardsRef[inventoryCard.cardId];
+      const registeredCardId = inventoryCard.cardId;
+      const registered = state.cardsRef[registeredCardId];
+      const nextCardId = faceCardId ?? registeredCardId;
+      if (
+        !registered ||
+        (nextCardId !== registeredCardId && registered.backId !== nextCardId)
+      ) return false;
+      const next = state.cardsRef[nextCardId];
       if (!next || next.cardType !== "hero") return false;
       removeFromArray(inventory, instanceId);
       const oldHero = player.hero;
       const oldHeroCardId = player.heroCardId;
       const oldName = nameOf(state, player.heroCardId);
       player.soul.push(oldHero);
-      inventoryCard.originalHeroCardId ??= inventoryCard.cardId;
+      inventoryCard.cardId = nextCardId;
+      inventoryCard.originalHeroCardId ??= nextCardId;
       player.hero = inventoryCard;
-      player.heroCardId = inventoryCard.cardId;
+      player.heroCardId = nextCardId;
       player.life = next.life ?? player.life;
       player.intellect = next.intellect ?? player.intellect;
       logPublic(state, gameLogMessage(
-        `${oldName} transforms into ${nameOf(state, inventoryCard.cardId)}`,
+        `${oldName} transforms into ${nameOf(state, nextCardId)}`,
         "engine.log.hero.transforms.into",
         {
           previous: logCardValue(oldHeroCardId),
-          hero: logCardValue(inventoryCard.cardId),
+          hero: logCardValue(nextCardId),
         },
       ));
-      scriptOf(state, inventoryCard.cardId, inventoryCard)?.onBecomeHero?.(
+      scriptOf(state, nextCardId, inventoryCard)?.onBecomeHero?.(
         runtime.makeCtx(state, seat, inventoryCard),
       );
       return true;

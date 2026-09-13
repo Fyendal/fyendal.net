@@ -208,6 +208,7 @@ function anyWindowAbility(
       if (ability.isAttack || ability.fromHand) continue;
       // Cloaked: only flip-up cost abilities function while face-down
       if (card.faceDown && !ability.turnsFaceUp && !ability.usableWhileFaceDown) continue;
+      if (ability.turnsFaceUp && !card.faceDown) continue;
       if ((ability.timing ?? "action") !== "instant") continue;
       if (!activatedAbilityAvailable(player, card.instanceId, ai, ability)) continue;
       if (ability.tap && card.tapped) continue;
@@ -519,13 +520,33 @@ export function playWindowInstant(
   const script = scriptOf(state, card.cardId, card);
   if (script?.meld && !meldSide) return "choose a meld side";
   if (!script?.meld && meldSide) return `${nameOf(state, card.cardId)} does not have meld`;
-  if (meldSide && meldSideHasType(state, card, meldSide, "action")) {
+  if (
+    meldSide &&
+    meldSideHasType(state, card, meldSide, "action") &&
+    !canPlayAsInstant(
+      state,
+      runtime,
+      seat,
+      card,
+      link,
+      fromZone ?? (fromArsenal ? "arsenal" : "hand"),
+      meldSide,
+    )
+  ) {
     return "only instants can be played in a priority window";
   }
   if (meldSide) card.meldSide = meldSide;
   if (data.cardType !== "instant") {
     // an action whose script allows it may be played as though it were an instant
-    const asInstant = canPlayAsInstant(state, runtime, seat, card, link, fromZone ?? (fromArsenal ? "arsenal" : "hand"));
+    const asInstant = canPlayAsInstant(
+      state,
+      runtime,
+      seat,
+      card,
+      link,
+      fromZone ?? (fromArsenal ? "arsenal" : "hand"),
+      meldSide,
+    );
     if (!asInstant) return "only instants can be played in a priority window";
   }
   if (card.faceDown && !fromArsenal && source !== player.banish) {

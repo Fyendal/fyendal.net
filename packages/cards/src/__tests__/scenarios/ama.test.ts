@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { legalIntents, projectStateFor } from "@fyendal/engine";
+import { actionCandidates, legalIntents, projectStateFor } from "@fyendal/engine";
 import { scenario } from "../harness.js";
 
 const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
@@ -23,6 +23,45 @@ describe("Malice Armory Deck spoiled cards", () => {
     expect(g.state.players[0]!.graveyard[0]?.playableFrom).toContain("graveyard");
     expect(g.state.players[0]!.hero.tapped).toBe(true);
     expect(g.state.players[0]!.actionPoints).toBe(1);
+  });
+
+  it("Malice can pitch Bridge of Damnation to activate and choose a graveyard zombie", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        heroKey: "malice, domina of the dead|0",
+        hand: ["bridge of damnation|3"],
+        graveyard: ["restless commander|1"],
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+    const player = g.state.players[0]!;
+    const heroId = player.hero.instanceId;
+    const bridgeId = player.hand[0]!.instanceId;
+
+    expect(legalIntents(g.state, 0)).toContainEqual(expect.objectContaining({
+      kind: "activate-ability",
+      sourceInstanceId: heroId,
+      pitchInstanceIds: [bridgeId],
+      pitchRequired: 1,
+    }));
+    expect(actionCandidates(g.state, 0)).toContainEqual(expect.objectContaining({
+      kind: "activate-ability",
+      sourceInstanceId: heroId,
+      pitchInstanceIds: [],
+      pitchRequired: 1,
+    }));
+
+    g.activate("malice, domina of the dead|0", { pitch: ["bridge of damnation|3"] })
+      .chooseCard("restless commander|1");
+
+    const activatedPlayer = g.state.players[0]!;
+    expect(activatedPlayer.pitch.map((card) => card.instanceId)).toEqual([bridgeId]);
+    expect(activatedPlayer.graveyard[0]?.playableFrom).toContain("graveyard");
+    expect(activatedPlayer.hero.tapped).toBe(true);
+    expect(activatedPlayer.actionPoints).toBe(1);
   });
 
   it("Malice creates a Corrupted Corpse in banish when another zombie dies", () => {

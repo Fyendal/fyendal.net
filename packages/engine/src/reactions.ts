@@ -647,7 +647,19 @@ export function playReaction(
   }
   if (script?.meld && !meldSide) return "choose a meld side";
   if (!script?.meld && meldSide) return `${nameOf(state, card.cardId)} does not have meld`;
-  if (meldSide && meldSideHasType(state, card, meldSide, "action")) {
+  if (
+    meldSide &&
+    meldSideHasType(state, card, meldSide, "action") &&
+    !canPlayAsInstant(
+      state,
+      runtime,
+      seat,
+      card,
+      link,
+      fromZone ?? (fromArsenal ? "arsenal" : "hand"),
+      meldSide,
+    )
+  ) {
     return "only instants can be played in a reaction window";
   }
   if (meldSide) card.meldSide = meldSide;

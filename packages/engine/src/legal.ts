@@ -629,6 +629,7 @@ function windowAbilityIntents(
       if (isFrozen(state, card)) continue;
       // Cloaked: only flip-up cost abilities function while face-down
       if (card.faceDown && !ability.turnsFaceUp && !ability.usableWhileFaceDown) continue;
+      if (ability.turnsFaceUp && !card.faceDown) continue;
       const timing = ability.timing ?? "action";
       if (timing === "action" && actionAbilityRestrictedByModifier(
         state,
@@ -899,7 +900,17 @@ function reactionIntents(
       }
       const meldSides: Array<MeldSide | undefined> = script?.meld
         ? (["left", "right", "both"] as MeldSide[]).filter(
-            (side) => !meldSideHasType(state, card, side, "action"),
+            (side) =>
+              !meldSideHasType(state, card, side, "action") ||
+              canPlayAsInstant(
+                state,
+                runtime,
+                player.seat,
+                card,
+                link,
+                fromZone ?? (fromArsenal ? "arsenal" : "hand"),
+                side,
+              ),
           )
         : [undefined];
       const alternativeCosts = alternativePlayCostOptions(state, player, card);
@@ -1032,6 +1043,7 @@ function abilityIntents(
       // Cloaked: while face-down, only abilities that turn the card face up
       // as part of their cost function (CR 8.3.36)
       if (card.faceDown && !ability.turnsFaceUp && !ability.usableWhileFaceDown) continue;
+      if (ability.turnsFaceUp && !card.faceDown) continue;
       const timing = ability.timing ?? "action";
       if (timing === "action" && actionAbilityRestrictedByModifier(
         state,
@@ -1318,7 +1330,17 @@ function enumerateIntents(
             );
           const meldSides: Array<MeldSide | undefined> = script?.meld
             ? (["left", "right", "both"] as MeldSide[]).filter(
-                (side) => !meldSideHasType(state, card, side, "action"),
+                (side) =>
+                  !meldSideHasType(state, card, side, "action") ||
+                  canPlayAsInstant(
+                    state,
+                    runtime,
+                    seat,
+                    card,
+                    currentLink(state),
+                    fromZone ?? (fromArsenal ? "arsenal" : "hand"),
+                    side,
+                  ),
               )
             : [undefined];
           const alternativeCosts = alternativePlayCostOptions(state, player, card);

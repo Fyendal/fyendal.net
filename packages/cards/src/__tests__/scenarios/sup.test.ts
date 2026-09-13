@@ -307,6 +307,45 @@ describe("SUP — heroes and the crowd", () => {
       .expectInZone(0, "toughness|0", "board");
   });
 
+  it("Jaws of Victory gets go again only after being cheered this turn", () => {
+    const staleCheer = scenario({
+      seats: [
+        hero("tuffnut, bumbling hulkster|0", {
+          life: 20,
+          hand: ["jaws of victory|1", "raging onslaught|3"],
+        }),
+        foe({ life: 10 }),
+      ],
+    });
+    staleCheer.state.players[0]!.flags.cheeredThisTurn = true;
+
+    staleCheer
+      .endTurn()
+      .endTurn()
+      .play("jaws of victory|1", { pitch: ["raging onslaught|3"] })
+      .blockWith()
+      .settle()
+      .expectAP(0, 0);
+
+    const currentCheer = scenario({
+      seats: [
+        hero("tuffnut, bumbling hulkster|0", {
+          life: 20,
+          hand: ["jaws of victory|1"],
+          resources: 2,
+        }),
+        foe({ life: 10 }),
+      ],
+    });
+    currentCheer.state.players[0]!.flags.cheeredThisTurn = true;
+
+    currentCheer
+      .play("jaws of victory|1")
+      .blockWith()
+      .settle()
+      .expectAP(0, 1);
+  });
+
   it("Cries of Encore lets its controller pay to play one suspense aura from graveyard", () => {
     const g = scenario({
       seats: [
@@ -527,6 +566,31 @@ describe("SUP — heroes and the crowd", () => {
       .passPriority()
       .passPriority()
       .expectAttackValue(6);
+  });
+
+  it("Gauntlets of Tyrannical Rex recognizes an active Diabolic Offering in pitch", () => {
+    const g = scenario({
+      seats: [
+        hero("tuffnut|0", {
+          equipment: { arms: "gauntlets of tyrannical rex|0" },
+          pitch: ["diabolic offering|3"],
+          resources: 1,
+        }),
+        foe(),
+      ],
+    });
+    const gauntlets = g.state.players[0]!.equipment.arms!;
+    expect(legalIntents(g.state, 0).some(
+      (intent) => intent.kind === "activate-ability" &&
+        intent.sourceInstanceId === gauntlets.instanceId,
+    )).toBe(false);
+
+    g.state.players[0]!.flags.banishedSixPlusThisTurn = true;
+
+    g.activate("gauntlets of tyrannical rex|0");
+
+    expect(g.state.players[0]!.equipment.arms?.tapped).toBe(true);
+    expect(g.state.modifiers).toContainEqual(expect.objectContaining({ attack: 1 }));
   });
 
   it("Beat of the Ironsong offers one mode with no Dawnblade counters", () => {
