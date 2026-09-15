@@ -350,6 +350,18 @@
   .mat-half.mat-opp .zone-head { grid-area: 3 / 1 !important; }
   .mat-half.mat-opp .zone-board { grid-area: 3 / 2 / 4 / 6 !important; }
   .mat-half.mat-opp .zone-graveyard { grid-area: 3 / 6 !important; }
+  .mat-half:has(> .zone-arsenal-multiple) .effects-row {
+    grid-area: 3 / 2 / 4 / 3 !important;
+  }
+  .mat-half:has(> .zone-arsenal-multiple) .zone-arsenal {
+    grid-area: 3 / 3 / 4 / 5 !important;
+  }
+  .mat-half.mat-opp:has(> .zone-arsenal-multiple) .effects-row {
+    grid-area: 1 / 2 / 2 / 3 !important;
+  }
+  .mat-half.mat-opp:has(> .zone-arsenal-multiple) .zone-arsenal {
+    grid-area: 1 / 3 / 2 / 5 !important;
+  }
   /* Keep head pieces and board cards an extra 4px from the center divider. */
   .mat-half:not(.mat-opp) .zone-head,
   .mat-half:not(.mat-opp) .zone-board { transform: translateY(6px); }

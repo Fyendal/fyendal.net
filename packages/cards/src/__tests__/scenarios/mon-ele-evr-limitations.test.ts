@@ -42,6 +42,11 @@ describe("Monarch, Tales of Aria, and Everfest rules regression coverage", () =>
     zones.activate("shiver|0").chooseCard("head shot|2").chooseOption("power");
     expect(zones.state.players[0]!.arsenal).toHaveLength(2);
     expect(zones.state.players[0]!.arsenal[1]?.arsenalSlot).toBe(1);
+    expect(projectStateFor(zones.state, 0).players[0]).toMatchObject({
+      arsenalCapacity: 2,
+      arsenalCount: 2,
+    });
+    expect(projectStateFor(zones.state, 1).players[0]!.arsenal[1]?.arsenalSlot).toBe(1);
 
     const destroyed = scenario({ active: 1, seats: [
       { hero: "rhinar", equipment: { ...NO_EQUIPMENT, head: "new horizon|0" }, arsenal: ["head shot|1"], arsenalFaceDown: ["head shot|2"] },
@@ -51,6 +56,7 @@ describe("Monarch, Tales of Aria, and Everfest rules regression coverage", () =>
       .doRaw({ kind: "close-chain" });
     expect(destroyed.state.players[0]!.arsenal).toHaveLength(0);
     expect(destroyed.state.players[0]!.graveyard.filter((card) => cardData[card.cardId]?.name === "Head Shot")).toHaveLength(2);
+    expect(projectStateFor(destroyed.state, 0).players[0]!.arsenalCapacity).toBe(1);
   });
   it("Arc Light Sentinel becomes the mandatory attack target", () => {
     const g = scenario({ seats: [

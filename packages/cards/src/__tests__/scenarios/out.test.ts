@@ -183,6 +183,52 @@ describe("OUT — registration and core mechanics", () => {
       .expectInZone(1, NON_ATTACK, "graveyard");
   });
 
+  it("Codex of Frailty fills New Horizon's empty additional arsenal zone", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "lexi, livewire|0",
+          equipment: { head: "new horizon|0" },
+          arsenal: ["head shot|1"],
+          hand: ["codex of frailty|2", BLUE],
+          graveyard: ["infect|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("codex of frailty|2")
+      .chooseCard("infect|1")
+      .chooseCard(BLUE)
+      .expectInZone(0, "head shot|1", "arsenal")
+      .expectInZone(0, "infect|1", "arsenal");
+    expect(s.state.players[0]!.arsenal).toHaveLength(2);
+    expect(s.state.players[0]!.arsenal[1]?.arsenalSlot).toBe(1);
+  });
+
+  it("Codex of Bloodrot fills New Horizon's empty additional arsenal zone", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "lexi, livewire|0",
+          equipment: { head: "new horizon|0" },
+          arsenal: ["head shot|1"],
+          hand: ["codex of bloodrot|2", BLUE],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("codex of bloodrot|2")
+      .chooseCard(BLUE)
+      .expectInZone(0, "head shot|1", "arsenal")
+      .expectInZone(0, BLUE, "arsenal");
+    expect(s.state.players[0]!.arsenal).toHaveLength(2);
+    expect(s.state.players[0]!.arsenal[1]?.arsenalSlot).toBe(1);
+  });
+
   it("Hurl attributes its optional effect hit to the chosen dagger and destroys it", () => {
     const s = scenario({
       seats: [

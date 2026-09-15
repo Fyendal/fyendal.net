@@ -450,6 +450,32 @@ describe("client messages", () => {
 });
 
 describe("GameView and server messages", () => {
+  it("accepts bounded arsenal slot metadata", () => {
+    const valid = gameView();
+    const validPlayer = valid.players[0] as unknown as {
+      arsenal: unknown[];
+      arsenalCount: number;
+      arsenalCapacity?: number;
+    };
+    validPlayer.arsenal = [{ instanceId: 30, cardId: "ELE213", owner: 0, arsenalSlot: 1 }];
+    validPlayer.arsenalCount = 1;
+    validPlayer.arsenalCapacity = 2;
+    expect(decodeGameView(valid)).not.toBeNull();
+
+    const invalidSlot = gameView();
+    const invalidSlotPlayer = invalidSlot.players[0] as unknown as {
+      arsenal: unknown[];
+      arsenalCount: number;
+    };
+    invalidSlotPlayer.arsenal = [{ instanceId: 30, cardId: "ELE213", owner: 0, arsenalSlot: 2 }];
+    invalidSlotPlayer.arsenalCount = 1;
+    expect(decodeGameView(invalidSlot)).toBeNull();
+
+    const invalidCapacity = gameView();
+    (invalidCapacity.players[0] as unknown as { arsenalCapacity?: number }).arsenalCapacity = 3;
+    expect(decodeGameView(invalidCapacity)).toBeNull();
+  });
+
   it("accepts server-grouped stack layers with a bounded count", () => {
     const grouped = gameView();
     (grouped.stack[0] as typeof grouped.stack[0] & { count: number }).count = 3;

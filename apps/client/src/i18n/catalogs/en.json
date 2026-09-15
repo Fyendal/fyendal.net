@@ -1833,6 +1833,7 @@
   "game.zone.pitch": "Pitch",
   "game.zone.deck": "Deck",
   "game.zone.arsenal": "Arsenal",
+  "game.zone.arsenalSlot": "Arsenal {slot}",
   "game.zone.mine": "Your {zone}",
   "game.zone.opponent": "Opponent's {zone}",
   "game.zone.deckMineOrder": "Your Deck — draw order, next card first",

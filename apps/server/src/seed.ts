@@ -24,8 +24,11 @@
  * can construct Nitro Mechanoid, play Hit the Gas for 3 action points, attack
  * repeatedly, then pass to the standard Hala bot; and FUNNEL — a private CC
  * room where Aurora can play Arc Lightning, red Rush of Power, then Current
- * Funnel into an empty-handed, unequipped Hala bot.
- * These fixtures count as 18 "players in game" in the
+ * Funnel into an empty-handed, unequipped Hala bot; and NEWHOR — a private CC
+ * room where Lexi controls New Horizon and a face-up arsenal arrow, with
+ * Shiver, another arrow, and both Outsiders Codices ready to exercise the
+ * additional arsenal zone.
+ * These fixtures count as 20 "players in game" in the
  * lobby stats — dev only.
  * Alice also receives one fixed, undismissed bug-report notification for
  * exercising the lobby UI.
@@ -69,6 +72,7 @@ const RALLY_TEST_ROOM_CODE = "RALLYC";
 const MARKS_TEST_ROOM_CODE = "MARKS3";
 const NITRO_TEST_ROOM_CODE = "NITRO8";
 const CURRENT_FUNNEL_TEST_ROOM_CODE = "FUNNEL";
+const NEW_HORIZON_TEST_ROOM_CODE = "NEWHOR";
 const RETIRED_TEST_ROOM_CODES = ["BASEMT"] as const;
 
 /**
@@ -280,6 +284,54 @@ function snapArcTestGameState(): GameState {
   const opponent = state.players[1]!;
   opponent.deck.push(...opponent.hand);
   opponent.hand = [];
+  return state;
+}
+
+/** Lexi starts with New Horizon active through a face-up Head Shot in arsenal.
+ * Shiver can load the second Head Shot, while either Codex can instead fill the
+ * empty additional zone. Raging Onslaught in graveyard gives Codex of Frailty
+ * a deterministic attack to recover. */
+function newHorizonTestGameState(): GameState {
+  const hala = botDefinition("hala");
+  const halaPool = precon(hala?.deckId ?? "")?.pool;
+  if (!hala || !halaPool) throw new Error("New Horizon test fixture bot deck is unavailable");
+  const lexi = {
+    heroId: "ELE031",
+    weaponIds: ["ELE033"],
+    equipment: { head: "ELE213" },
+    deck: [
+      "SEA111", "SEA112", "SEA113", "OUT159", "OUT160",
+      ...Array<string>(35).fill("RNR020"),
+    ],
+  };
+  const halaPresentation = hala.presentationFor(lexi, "second");
+  const state = createGame({
+    decklists: [lexi, { heroId: halaPool.heroId, ...halaPresentation }],
+    seed: 915213,
+    cards: cardData,
+    scripts,
+    startPlayer: 0,
+  });
+  const player = state.players[0]!;
+  const cards = [...player.hand, ...player.deck];
+  const take = (cardId: string) => {
+    const index = cards.findIndex((card) => card.cardId === cardId);
+    if (index < 0) throw new Error(`New Horizon test fixture is missing ${cardId}`);
+    return cards.splice(index, 1)[0]!;
+  };
+  const firstArrow = take("SEA111");
+  firstArrow.arsenalSlot = 0;
+  player.arsenal = [firstArrow];
+  player.hand = [take("OUT160"), take("OUT159"), take("SEA112"), take("SEA113")];
+  player.graveyard = [take("RNR020")];
+  player.deck = cards;
+  player.resources = 1;
+  player.actionPoints = 1;
+
+  const opponent = state.players[1]!;
+  opponent.deck.push(...opponent.hand);
+  opponent.hand = [];
+  opponent.equipment = {};
   return state;
 }
 
@@ -545,7 +597,7 @@ try {
   try {
     // These rooms are disposable local fixture data. Recreate them so rerunning
     // the seed also repairs stale ruleset envelopes and clears dependent history.
-    await pool.query("DELETE FROM rooms WHERE code IN ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)", [
+    await pool.query("DELETE FROM rooms WHERE code IN ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)", [
       DEMO_ROOM_CODE,
       HUNTER_TEST_ROOM_CODE,
       SNAP_ARC_TEST_ROOM_CODE,
@@ -555,6 +607,7 @@ try {
       MARKS_TEST_ROOM_CODE,
       NITRO_TEST_ROOM_CODE,
       CURRENT_FUNNEL_TEST_ROOM_CODE,
+      NEW_HORIZON_TEST_ROOM_CODE,
       ...RETIRED_TEST_ROOM_CODES,
     ]);
     await pool.query(
@@ -918,6 +971,51 @@ try {
         briar.deckName,
       ],
     );
+    const newHorizonPrep = { rolls: [6, 2], dieWinner: 0, startPlayer: 0 };
+    const halaForNewHorizon = botDefinition("hala");
+    const halaPoolForNewHorizon = precon(halaForNewHorizon?.deckId ?? "")?.pool;
+    if (!halaForNewHorizon || !halaPoolForNewHorizon) {
+      throw new Error("New Horizon test fixture room metadata is unavailable");
+    }
+    await pool.query(
+      `INSERT INTO rooms
+        (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at,
+         status, winner, is_private)
+       VALUES ($1, 'cc', '[]', $2, $3, $4, 0, $5, NULL, 'active', NULL, TRUE)`,
+      [
+        NEW_HORIZON_TEST_ROOM_CODE,
+        JSON.stringify(dehydrateState(newHorizonTestGameState(), seedRulesetVersion)),
+        JSON.stringify(newHorizonPrep),
+        seedRulesetVersion,
+        Date.now(),
+      ],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, user_id, token_hash, username, hero_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 0, $2, $3, 'alice', 'ELE031', 'New Horizon arsenal slots test',
+               FALSE, TRUE, 'human')`,
+      [
+        NEW_HORIZON_TEST_ROOM_CODE,
+        aliceId,
+        hashReconnectToken(randomBytes(12).toString("hex")),
+      ],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, token_hash, username, hero_id, deck_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 1, $2, $3, $4, $5, $6, FALSE, TRUE, 'bot')`,
+      [
+        NEW_HORIZON_TEST_ROOM_CODE,
+        hashReconnectToken(randomBytes(12).toString("hex")),
+        halaForNewHorizon.username,
+        halaPoolForNewHorizon.heroId,
+        halaForNewHorizon.deckId,
+        halaForNewHorizon.deckName,
+      ],
+    );
     const rallyPrep = { rolls: [2, 6], dieWinner: 1, startPlayer: 1 };
     const iraForRally = botDefinition("ira");
     const kayoPoolForRally = precon("precon-ska")?.pool;
@@ -1013,6 +1111,7 @@ try {
   console.log(`seeded Restless Steed / Mark of Ushering room ${MARKS_TEST_ROOM_CODE} — log in as alice and open /${MARKS_TEST_ROOM_CODE}`);
   console.log(`seeded Nitro Mechanoid room ${NITRO_TEST_ROOM_CODE} — log in as alice and open /${NITRO_TEST_ROOM_CODE}`);
   console.log(`seeded Current Funnel room ${CURRENT_FUNNEL_TEST_ROOM_CODE} — log in as alice and open /${CURRENT_FUNNEL_TEST_ROOM_CODE}`);
+  console.log(`seeded New Horizon room ${NEW_HORIZON_TEST_ROOM_CODE} — log in as alice and open /${NEW_HORIZON_TEST_ROOM_CODE}`);
   console.log("seeded fixed bug notification for alice");
 } finally {
   await pool.end();

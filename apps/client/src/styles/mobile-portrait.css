@@ -134,6 +134,18 @@
   .mat-half.mat-opp .zone-head { grid-area: 3 / 1 !important; }
   .mat-half.mat-opp .zone-board { grid-area: 3 / 2 / 4 / 7 !important; }
   .mat-half.mat-opp .zone-graveyard { grid-area: 3 / 7 !important; }
+  .mat-half:has(> .zone-arsenal-multiple) .effects-row {
+    grid-area: 3 / 2 / 4 / 4 !important;
+  }
+  .mat-half:has(> .zone-arsenal-multiple) .zone-arsenal {
+    grid-area: 3 / 4 / 4 / 6 !important;
+  }
+  .mat-half.mat-opp:has(> .zone-arsenal-multiple) .effects-row {
+    grid-area: 1 / 2 / 2 / 4 !important;
+  }
+  .mat-half.mat-opp:has(> .zone-arsenal-multiple) .zone-arsenal {
+    grid-area: 1 / 4 / 2 / 6 !important;
+  }
 
   .board {
     padding-top: calc(54px + env(safe-area-inset-top));

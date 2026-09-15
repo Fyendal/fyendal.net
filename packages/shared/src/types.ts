@@ -142,6 +142,8 @@ export interface CardView {
   defense?: number;
   /** Face-down arsenal cards (e.g. an unflipped mentor). Only ever set on own zones. */
   faceDown?: boolean;
+  /** Stable zero-based arsenal zone index while this card is in arsenal. */
+  arsenalSlot?: number;
   /** Face-down banished card returning to hand at the upcoming end phase.
    *  Public status: both players see the marker, only the owner sees the identity. */
   intimidated?: boolean;
@@ -299,8 +301,11 @@ export interface PlayerView {
   deckCount: number;
   /** Remaining deck in draw order (index 0 is next), exposed only after game end. */
   deck?: CardView[];
-  arsenal: CardView[]; // own face-down arsenal visible to self; empty for opponent
+  /** Own arsenal; opponents receive only face-up cards. */
+  arsenal: CardView[];
   arsenalCount: number;
+  /** Currently usable arsenal zones. Optional for older replay projections. */
+  arsenalCapacity?: number;
   pitch: CardView[]; // own pitch zone; opponent sees count only
   pitchCount: number;
   graveyard: CardView[];

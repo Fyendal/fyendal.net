@@ -206,6 +206,78 @@ describe("PlayerHalf", () => {
     expect(html).toContain('data-motion-card="1:arsenal:opaque"');
   });
 
+  it("renders New Horizon's two arsenal slots and both owned cards", () => {
+    const html = renderPlayerHalf({
+      ...player,
+      arsenal: [
+        { instanceId: 30, cardId: "TST-ARROW-1", owner: 0, arsenalSlot: 0 },
+        { instanceId: 31, cardId: "TST-ARROW-2", owner: 0, faceDown: true, arsenalSlot: 1 },
+      ],
+      arsenalCount: 2,
+      arsenalCapacity: 2,
+    });
+
+    expect(html).toContain("zone-arsenal-multiple");
+    expect(html).toContain('data-arsenal-slot="0"');
+    expect(html).toContain('data-arsenal-slot="1"');
+    expect(html).toContain('aria-label="Arsenal 1"');
+    expect(html).toContain('aria-label="Arsenal 2"');
+    expect(html).toContain('data-cardid="TST-ARROW-1"');
+    expect(html).toContain('data-cardid="TST-ARROW-2"');
+    expect(html).not.toContain("arsenal-slot-index");
+  });
+
+  it("shows New Horizon's empty additional arsenal slot", () => {
+    const html = renderPlayerHalf({
+      ...player,
+      arsenal: [{ instanceId: 30, cardId: "TST-ARROW-1", owner: 0, arsenalSlot: 0 }],
+      arsenalCount: 1,
+      arsenalCapacity: 2,
+    });
+
+    expect(html).toMatch(
+      /class="arsenal-slot arsenal-slot-empty" data-arsenal-slot="1"[^>]*aria-label="Arsenal 2"/,
+    );
+  });
+
+  it("renders an opponent's public and hidden arsenal cards in separate slots", () => {
+    const html = renderPlayerHalf({
+      ...player,
+      seat: 1,
+      arsenal: [{ instanceId: 30, cardId: "TST-FACE-UP", owner: 1, arsenalSlot: 1 }],
+      arsenalCount: 2,
+      arsenalCapacity: 2,
+    }, false);
+
+    expect(html).toContain('data-cardid="TST-FACE-UP"');
+    expect(html).toContain('<div class="c-backlabel">Arsenal</div>');
+    expect(html).not.toContain('<div class="c-backlabel">Arsenal 1</div>');
+    expect(html).toContain('data-motion-card="1:arsenal:opaque:1"');
+  });
+
+  it("makes the second arsenal card independently stageable", () => {
+    const secondArsenalCard = {
+      instanceId: 31,
+      cardId: "TST-AMBUSH-2",
+      owner: 0,
+      faceDown: true,
+      arsenalSlot: 1,
+    };
+    const html = renderPlayerHalf({
+      ...player,
+      arsenal: [
+        { instanceId: 30, cardId: "TST-ARROW-1", owner: 0, arsenalSlot: 0 },
+        secondArsenalCard,
+      ],
+      arsenalCount: 2,
+      arsenalCapacity: 2,
+    }, true, undefined, secondArsenalCard.instanceId);
+
+    expect(html).toMatch(
+      /card-highlight[^>]*data-cardid="TST-AMBUSH-2"|data-cardid="TST-AMBUSH-2"[^>]*card-highlight/,
+    );
+  });
+
   it("makes a stageable arsenal defender highlighted and clickable", () => {
     const arsenalCard = {
       instanceId: 30,

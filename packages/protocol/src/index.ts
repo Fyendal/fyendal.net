@@ -693,7 +693,7 @@ function cardView(value: unknown, depth = 0): value is CardView {
   if (depth > 8) return false;
   const card = object(value);
   if (!card || !exactKeys(card, [
-    "instanceId", "cardId", "name", "owner", "pitchCount", "attack", "defense", "faceDown", "tapped",
+    "instanceId", "cardId", "name", "owner", "pitchCount", "attack", "defense", "faceDown", "arsenalSlot", "tapped",
     "defCounters", "counters", "usedAbilityIndexes", "remainingAbilityActivations", "activatedAbilityLabels", "life", "hidden", "subcards", "grantedNames", "chosenName", "boundToInstanceId",
     "grantedTypes", "grantedColor", "playableFromSourceCardId", "intimidated",
   ], ["instanceId", "cardId", "owner"])) return false;
@@ -709,6 +709,7 @@ function cardView(value: unknown, depth = 0): value is CardView {
     && optional(card.pitchCount, nonNegativeInteger)
     && optional(card.attack, finite) && optional(card.defense, finite)
     && optional(card.faceDown, (v): v is boolean => typeof v === "boolean")
+    && optional(card.arsenalSlot, (v): v is number => v === 0 || v === 1)
     && optional(card.intimidated, (v): v is boolean => typeof v === "boolean")
     && optional(card.tapped, (v): v is boolean => typeof v === "boolean")
     && optional(card.defCounters, nonNegativeInteger) && optional(card.counters, numberRecord)
@@ -774,7 +775,7 @@ function playerView(value: unknown): value is PlayerView {
   if (!player || !exactKeys(player, [
     "seat", "heroCardId", "heroInstanceId", "heroTapped", "heroCounters", "heroDefCounters", "heroSubcards", "heroAbilityLabels", "heroName",
     "life", "actionPoints", "resources", "chi", "hand", "handCount", "deckCount", "deck",
-    "arsenal", "arsenalCount", "pitch", "pitchCount", "graveyard", "banish", "soul",
+    "arsenal", "arsenalCount", "arsenalCapacity", "pitch", "pitchCount", "graveyard", "banish", "soul",
     "visibleDeckTop", "equipment", "weapons", "board",
   ], [
     "seat", "heroCardId", "heroInstanceId", "heroName", "life", "actionPoints", "resources",
@@ -791,7 +792,9 @@ function playerView(value: unknown): value is PlayerView {
     && finite(player.life) && finite(player.actionPoints) && finite(player.resources)
     && optional(player.chi, finite) && cardViews(player.hand) && nonNegativeInteger(player.handCount)
     && nonNegativeInteger(player.deckCount) && optional(player.deck, cardViews) && cardViews(player.arsenal)
-    && nonNegativeInteger(player.arsenalCount) && cardViews(player.pitch)
+    && nonNegativeInteger(player.arsenalCount)
+    && optional(player.arsenalCapacity, (v): v is number => v === 1 || v === 2)
+    && cardViews(player.pitch)
     && nonNegativeInteger(player.pitchCount) && cardViews(player.graveyard) && cardViews(player.banish)
     && cardViews(player.soul)
     && optional(player.visibleDeckTop, cardView)

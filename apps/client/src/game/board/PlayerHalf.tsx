@@ -26,6 +26,48 @@ import { heroCard, MatZone, type BoardOverlay } from "./BoardPrimitives.js";
 
 const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
+interface ArsenalSlotView {
+  card?: CardView;
+  hidden: boolean;
+  opaqueOccurrence?: number;
+}
+
+function arsenalSlotViews(
+  player: PlayerView,
+  mine: boolean,
+  optimisticallyHiddenIds: ReadonlySet<number>,
+): ArsenalSlotView[] {
+  const visibleCards = player.arsenal.filter(
+    (card) => !card.hidden && !optimisticallyHiddenIds.has(card.instanceId),
+  );
+  const capacity = player.arsenalCapacity === 2 || player.arsenalCount > 1 ||
+      visibleCards.some((card) => card.arsenalSlot === 1)
+    ? 2
+    : 1;
+  const slots = Array.from({ length: capacity }, (): ArsenalSlotView => ({ hidden: false }));
+
+  for (const card of visibleCards) {
+    const requestedSlot = card.arsenalSlot;
+    const fallbackSlot = slots.findIndex((slot) => slot.card === undefined && !slot.hidden);
+    const slot = requestedSlot !== undefined && requestedSlot < slots.length &&
+        slots[requestedSlot]?.card === undefined && slots[requestedSlot]?.hidden === false
+      ? requestedSlot
+      : fallbackSlot;
+    if (slot >= 0) slots[slot] = { card, hidden: false };
+  }
+
+  let hiddenCards = mine ? 0 : Math.max(0, player.arsenalCount - visibleCards.length);
+  let opaqueOccurrence = visibleCards.length;
+  for (let slot = 0; slot < slots.length && hiddenCards > 0; slot++) {
+    if (slots[slot]?.card !== undefined) continue;
+    slots[slot] = { hidden: true, opaqueOccurrence };
+    hiddenCards--;
+    opaqueOccurrence++;
+  }
+
+  return slots;
+}
+
 interface PlayerHalfInteraction {
   legal: BoardLegalState;
   selection: Sel;
@@ -78,18 +120,14 @@ export function PlayerHalf({
     { zone: zoneLabel(zone) },
   );
   const optimisticallyHiddenIds = mine ? interaction.optimisticallyHiddenIds : EMPTY_INSTANCE_IDS;
-  const arsenalCard = player.arsenal.find((card) => !optimisticallyHiddenIds.has(card.instanceId));
+  const arsenalSlots = arsenalSlotViews(player, mine, optimisticallyHiddenIds);
+  const hasAdditionalArsenal = arsenalSlots.length === 2;
   const visibleReplayDeck = replaying || gameOver ? player.deck : undefined;
   const presentedDeckTop = visibleDeckTop && !optimisticallyHiddenIds.has(visibleDeckTop.instanceId)
     ? visibleDeckTop
     : undefined;
   const deckTopPlayable =
     presentedDeckTop !== undefined && interaction.legal.playableZones.get(presentedDeckTop.instanceId) === "deck";
-  const arsenalBlocking = arsenalCard !== undefined && interaction.stagedIds.has(arsenalCard.instanceId);
-  const arsenalCanBlock = mine && arsenalCard !== undefined && interaction.defending && !arsenalBlocking &&
-    interaction.legal.stageableDefenders.has(arsenalCard.instanceId);
-  const arsenalPlayable = arsenalCard !== undefined &&
-    interaction.legal.playableArsenal.has(arsenalCard.instanceId);
   const arenaBoard = boardCardsOutsideEquipmentZones(
     player.board.filter((card) => !optimisticallyHiddenIds.has(card.instanceId)),
   );
@@ -463,53 +501,67 @@ export function PlayerHalf({
       {equipmentZone("legs", `${row(3)} / 1`)}
       <EffectChips effects={ongoing} area={`${row(3)} / 2 / span 1 / span 3`} />
       <MatZone
-        area={`${row(3)} / 5`}
+        area={`${row(3)} / 5 / span 1 / span ${arsenalSlots.length}`}
         label={zoneLabel("arsenal")}
-        className="zone-arsenal"
+        className={`zone-arsenal${hasAdditionalArsenal ? " zone-arsenal-multiple" : ""}`}
         motionZone={motionLocationKey({ kind: "arsenal", seat: player.seat })}
       >
-        {mine ? (
-          arsenalCard ? (
-            <CardFace
-              card={arsenalCard}
-              size="zone"
-              motionKey={motionPresentationKey(
-                { kind: "arsenal", seat: player.seat },
-                arsenalCard.instanceId,
-              )}
-              dimmed={arsenalBlocking || (arsenalCard.faceDown && !arsenalPlayable && !arsenalCanBlock)}
-              highlighted={arsenalPlayable || arsenalCanBlock}
-              selected={
-                (interaction.selection.kind === "play-arsenal" &&
-                  interaction.selection.instanceId === arsenalCard.instanceId) ||
-                interaction.preStackSelectedInstanceId === arsenalCard.instanceId
-              }
-              onClick={arsenalCanBlock
-                ? () => interaction.onStage([...interaction.stagedIds, arsenalCard.instanceId])
-                : arsenalPlayable
-                  ? () => interaction.onSelect({ kind: "play-arsenal", instanceId: arsenalCard.instanceId })
-                  : undefined}
-              showFaceUp={!arsenalCard.faceDown}
-            />
-          ) : undefined
-        ) : arsenalCard ? (
-          <CardFace
-            card={arsenalCard}
-            size="zone"
-            motionKey={motionPresentationKey(
-              { kind: "arsenal", seat: player.seat },
-              arsenalCard.instanceId,
-            )}
-          />
-        ) : player.arsenalCount > 0 ? (
-          <CardBack
-            label={zoneLabel("arsenal")}
-            motionKey={opaqueMotionPresentationKey({
-              kind: "arsenal",
-              seat: player.seat,
-            })}
-          />
-        ) : undefined}
+        <div className="arsenal-slots" role="group" aria-label={zoneLabel("arsenal")}>
+          {arsenalSlots.map((slot, slotIndex) => {
+            const card = slot.card;
+            const slotLabel = hasAdditionalArsenal
+              ? intl.formatMessage({ id: "game.zone.arsenalSlot" }, { slot: slotIndex + 1 })
+              : zoneLabel("arsenal");
+            const blocking = card !== undefined && interaction.stagedIds.has(card.instanceId);
+            const canBlock = mine && card !== undefined && interaction.defending && !blocking &&
+              interaction.legal.stageableDefenders.has(card.instanceId);
+            const playable = card !== undefined && interaction.legal.playableArsenal.has(card.instanceId);
+
+            return (
+              <div
+                key={slotIndex}
+                className={`arsenal-slot${card === undefined && !slot.hidden ? " arsenal-slot-empty" : ""}`}
+                data-arsenal-slot={slotIndex}
+                role="group"
+                aria-label={slotLabel}
+              >
+                {card ? (
+                  <CardFace
+                    card={card}
+                    size="zone"
+                    motionKey={motionPresentationKey(
+                      { kind: "arsenal", seat: player.seat },
+                      card.instanceId,
+                    )}
+                    dimmed={mine && (blocking || (card.faceDown && !playable && !canBlock))}
+                    highlighted={playable || canBlock}
+                    selected={
+                      (interaction.selection.kind === "play-arsenal" &&
+                        interaction.selection.instanceId === card.instanceId) ||
+                      interaction.preStackSelectedInstanceId === card.instanceId
+                    }
+                    onClick={canBlock
+                      ? () => interaction.onStage([...interaction.stagedIds, card.instanceId])
+                      : playable
+                        ? () => interaction.onSelect({ kind: "play-arsenal", instanceId: card.instanceId })
+                        : undefined}
+                    showFaceUp={!card.faceDown}
+                  />
+                ) : slot.hidden ? (
+                  <CardBack
+                    label={zoneLabel("arsenal")}
+                    motionKey={opaqueMotionPresentationKey(
+                      { kind: "arsenal", seat: player.seat },
+                      slot.opaqueOccurrence,
+                    )}
+                  />
+                ) : (
+                  <span className="mat-zone-label">{zoneLabel("arsenal")}</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </MatZone>
       {pileZone(
         `${row(3)} / 9`,
