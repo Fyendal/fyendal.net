@@ -16,6 +16,7 @@ import type {
   TurnFactsView,
 } from "@fyendal/shared";
 import type { CardInstance, CombatValueModifier, Modifier, PendingDecisionState, PlayerState } from "./state.js";
+import { arsenalCapacity } from "./cardLifecycle.js";
 import { cardColorOf, cardTypesOf, dataOf, instanceDataOf, scriptOf } from "./cardProperties.js";
 import { pendingOnHitEffects } from "./hits.js";
 import {
@@ -156,6 +157,7 @@ function cardView(state: GameStateInternal,
     attack: d.attack !== undefined && power > 0 ? d.attack + power : d.attack,
     defense: includeCounters && c.defCounters ? effectiveDefense(state, c) : d.defense,
     ...(c.faceDown ? { faceDown: true } : {}),
+    ...(c.arsenalSlot !== undefined ? { arsenalSlot: c.arsenalSlot } : {}),
     ...(c.intimidated ? { intimidated: true } : {}),
     ...(c.tapped ? { tapped: true } : {}),
     ...(includeCounters && c.defCounters ? { defCounters: c.defCounters } : {}),
@@ -273,6 +275,7 @@ function playerView(
       ? p.arsenal.map((c) => cardView(state, runtime, c))
       : p.arsenal.filter((c) => !c.faceDown).map((c) => cardView(state, runtime, c)),
     arsenalCount: p.arsenal.length,
+    arsenalCapacity: arsenalCapacity(state, p.seat),
     pitch: p.pitch.map((c) => cardView(state, runtime, c)), // pitch zone is public
     pitchCount: p.pitch.length,
     // Watery Grave cards are public until their trigger turns them face down;

@@ -46,7 +46,7 @@ function flickKnivesDaggers(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
 function codexBloodrotChoice(ctx: ScriptCtx, seat: number): void {
   if (seat > 1) { ctx.createToken(PONDER); ctx.createToken(BLOODROT, opponentSeat(ctx)); return; }
   const player = ctx.player(seat);
-  if (!player.hand.length || player.arsenal.length) return codexBloodrotChoice(ctx, seat + 1);
+  if (!player.hand.length || !ctx.hasArsenalSpace(seat)) return codexBloodrotChoice(ctx, seat + 1);
   ctx.requestCardChoice(`codex-bloodrot:${seat}`, decisionPrompt("Choose a card for arsenal", "card.out.arsenal.card.choose"), player.hand.map((card) => card.instanceId), seat);
 }
 function codexFrailtyChoice(ctx: ScriptCtx, seat: number): void {
@@ -58,7 +58,7 @@ function codexFrailtyChoice(ctx: ScriptCtx, seat: number): void {
   }
   const player = ctx.player(seat);
   const attacks = player.graveyard.filter((card) => isAttack(ctx, card));
-  if (!attacks.length || player.arsenal.length) return codexFrailtyChoice(ctx, seat + 1);
+  if (!attacks.length || !ctx.hasArsenalSpace(seat)) return codexFrailtyChoice(ctx, seat + 1);
   ctx.requestCardChoice(`codex-frailty:${seat}`, decisionPrompt("Choose an attack for arsenal", "card.out.arsenal.attack.choose"), attacks.map((card) => card.instanceId), seat);
 }
 

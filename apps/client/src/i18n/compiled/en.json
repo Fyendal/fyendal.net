@@ -21796,6 +21796,16 @@
       "value": "Arsenal"
     }
   ],
+  "game.zone.arsenalSlot": [
+    {
+      "type": 0,
+      "value": "Arsenal "
+    },
+    {
+      "type": 1,
+      "value": "slot"
+    }
+  ],
   "game.zone.banished": [
     {
       "type": 0,

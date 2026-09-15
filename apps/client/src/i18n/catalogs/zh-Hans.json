@@ -1833,6 +1833,7 @@
   "game.zone.pitch": "扣置区",
   "game.zone.deck": "牌库",
   "game.zone.arsenal": "Arsenal",
+  "game.zone.arsenalSlot": "Arsenal 槽位 {slot}",
   "game.zone.mine": "你的{zone}",
   "game.zone.opponent": "对手的{zone}",
   "game.zone.deckMineOrder": "你的牌库 — 按抽牌顺序，下一张牌在最前",
