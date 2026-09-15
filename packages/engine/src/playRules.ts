@@ -505,15 +505,19 @@ export function noteCardPlayed(
   effectiveTypes = new Set(cardTypesOf(state, card));
   if (isAction) {
     // Preserve one earlier action so a resolving effect can ask for the last
-    // action card played while excluding its own source card.
+    // action card played while excluding its own source card. Snapshot before
+    // deleting: serialized object stores such as Postgres JSONB may reorder
+    // keys, so copying and deleting in one pass can erase a newly copied flag.
+    const lastActionTypes = Object.entries(player.flags)
+      .filter(([key, value]) => key.startsWith("lastActionWasType:") && value === true)
+      .map(([key]) => key.slice("lastActionWasType:".length));
     for (const key of Object.keys(player.flags)) {
-      if (key.startsWith("priorActionWasType:")) delete player.flags[key];
-      if (key.startsWith("lastActionWasType:")) {
-        player.flags[key.replace("lastActionWasType:", "priorActionWasType:")] = true;
+      if (key.startsWith("priorActionWasType:") || key.startsWith("lastActionWasType:")) {
+        delete player.flags[key];
       }
     }
-    for (const key of Object.keys(player.flags)) {
-      if (key.startsWith("lastActionWasType:")) delete player.flags[key];
+    for (const type of lastActionTypes) {
+      player.flags[`priorActionWasType:${type}`] = true;
     }
     for (const type of effectiveTypes) {
       player.flags[`lastActionWasType:${type}`] = true;

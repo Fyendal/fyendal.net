@@ -232,6 +232,35 @@ describe("ROS — Lightning and Runeblade", () => {
     g.blockWith().settle().expectAP(0, 1);
   });
 
+  it.each(["SBA018", "OMN068"])(
+    "Current Funnel gives itself go again after Arc Lightning grants it to red Rush of Power (%s)",
+    (rushOfPower) => {
+      const g = scenario({
+        seats: [
+          {
+            hero: "rhinar",
+            heroKey: "aurora|0",
+            weapons: [],
+            hand: ["arc lightning|2", rushOfPower, "current funnel|3"],
+          },
+          { hero: "dorinthea", hand: [] },
+        ],
+      });
+
+      g.play("arc lightning|2")
+        .chooseOption("opposing hero")
+        .play(rushOfPower)
+        .blockWith()
+        .settle()
+        .chooseOption("opposing hero")
+        .play("current funnel|3")
+        .blockWith()
+        .settle()
+        .chooseOption("opposing hero")
+        .expectAP(0, 1);
+    },
+  );
+
   it("Current Funnel does not get go again after a non-Lightning action", () => {
     const g = scenario({
       seats: [

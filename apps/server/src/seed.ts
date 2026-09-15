@@ -22,8 +22,10 @@
  * room for testing Restless Steed's on-hit go again, with Mark of Ushering in
  * hand and an undefended Hala bot; and NITRO8 — a private CC room where alice
  * can construct Nitro Mechanoid, play Hit the Gas for 3 action points, attack
- * repeatedly, then pass to the standard Hala bot.
- * These fixtures count as 16 "players in game" in the
+ * repeatedly, then pass to the standard Hala bot; and FUNNEL — a private CC
+ * room where Aurora can play Arc Lightning, red Rush of Power, then Current
+ * Funnel into an empty-handed, unequipped Hala bot.
+ * These fixtures count as 18 "players in game" in the
  * lobby stats — dev only.
  * Alice also receives one fixed, undismissed bug-report notification for
  * exercising the lobby UI.
@@ -66,6 +68,7 @@ const OKANA_TEST_ROOM_CODE = "OKANAS";
 const RALLY_TEST_ROOM_CODE = "RALLYC";
 const MARKS_TEST_ROOM_CODE = "MARKS3";
 const NITRO_TEST_ROOM_CODE = "NITRO8";
+const CURRENT_FUNNEL_TEST_ROOM_CODE = "FUNNEL";
 const RETIRED_TEST_ROOM_CODES = ["BASEMT"] as const;
 
 /**
@@ -172,6 +175,50 @@ function damageFxTestGameState(): GameState {
     return cards.splice(index, 1)[0]!;
   };
   player.hand = [take("SBA011"), take("SBA011"), take("SBA025"), take("SBA025")];
+  player.deck = cards;
+  player.resources = 0;
+  player.actionPoints = 1;
+
+  const opponent = state.players[1]!;
+  opponent.deck.push(...opponent.hand);
+  opponent.hand = [];
+  opponent.equipment = {};
+  return state;
+}
+
+/** Aurora can play Arc Lightning, choose the opposing hero for its first
+ * trigger, then play red Rush of Power with the granted go again. After Rush
+ * resolves and Arc Lightning deals its second point, Current Funnel is ready
+ * as the next card in hand. Hala cannot defend either attack. */
+function currentFunnelTestGameState(): GameState {
+  const auroraPool = precon("precon-ast")?.pool;
+  const hala = botDefinition("hala");
+  const halaPool = precon(hala?.deckId ?? "")?.pool;
+  if (!auroraPool || !hala || !halaPool) {
+    throw new Error("Current Funnel test fixture decks are unavailable");
+  }
+  const auroraDeck = {
+    heroId: auroraPool.heroId,
+    weaponIds: [...auroraPool.weaponIds],
+    equipment: {},
+    deck: [...auroraPool.deck, "OMN068", "ROS074"],
+  };
+  const halaPresentation = hala.presentationFor(auroraDeck, "second");
+  const state = createGame({
+    decklists: [auroraDeck, { heroId: halaPool.heroId, ...halaPresentation }],
+    seed: 9152026,
+    cards: cardData,
+    scripts,
+    startPlayer: 0,
+  });
+  const player = state.players[0]!;
+  const cards = [...player.hand, ...player.deck];
+  const take = (cardId: string) => {
+    const index = cards.findIndex((card) => card.cardId === cardId);
+    if (index < 0) throw new Error(`Current Funnel test fixture is missing ${cardId}`);
+    return cards.splice(index, 1)[0]!;
+  };
+  player.hand = [take("AST022"), take("OMN068"), take("ROS074")];
   player.deck = cards;
   player.resources = 0;
   player.actionPoints = 1;
@@ -498,7 +545,7 @@ try {
   try {
     // These rooms are disposable local fixture data. Recreate them so rerunning
     // the seed also repairs stale ruleset envelopes and clears dependent history.
-    await pool.query("DELETE FROM rooms WHERE code IN ($1, $2, $3, $4, $5, $6, $7, $8, $9)", [
+    await pool.query("DELETE FROM rooms WHERE code IN ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)", [
       DEMO_ROOM_CODE,
       HUNTER_TEST_ROOM_CODE,
       SNAP_ARC_TEST_ROOM_CODE,
@@ -507,6 +554,7 @@ try {
       RALLY_TEST_ROOM_CODE,
       MARKS_TEST_ROOM_CODE,
       NITRO_TEST_ROOM_CODE,
+      CURRENT_FUNNEL_TEST_ROOM_CODE,
       ...RETIRED_TEST_ROOM_CODES,
     ]);
     await pool.query(
@@ -609,6 +657,51 @@ try {
         ],
       );
     }
+    const currentFunnelPrep = { rolls: [6, 1], dieWinner: 0, startPlayer: 0 };
+    const halaForCurrentFunnel = botDefinition("hala");
+    const halaPoolForCurrentFunnel = precon(halaForCurrentFunnel?.deckId ?? "")?.pool;
+    if (!halaForCurrentFunnel || !halaPoolForCurrentFunnel) {
+      throw new Error("Current Funnel test fixture room metadata is unavailable");
+    }
+    await pool.query(
+      `INSERT INTO rooms
+        (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at,
+         status, winner, is_private)
+       VALUES ($1, 'cc', '[]', $2, $3, $4, 0, $5, NULL, 'active', NULL, TRUE)`,
+      [
+        CURRENT_FUNNEL_TEST_ROOM_CODE,
+        JSON.stringify(dehydrateState(currentFunnelTestGameState(), seedRulesetVersion)),
+        JSON.stringify(currentFunnelPrep),
+        seedRulesetVersion,
+        Date.now(),
+      ],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, user_id, token_hash, username, hero_id, deck_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 0, $2, $3, 'alice', 'AST001', 'precon-ast',
+               'Arc Lightning / Rush of Power / Current Funnel test', FALSE, TRUE, 'human')`,
+      [
+        CURRENT_FUNNEL_TEST_ROOM_CODE,
+        aliceId,
+        hashReconnectToken(randomBytes(12).toString("hex")),
+      ],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, token_hash, username, hero_id, deck_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 1, $2, $3, $4, $5, $6, FALSE, TRUE, 'bot')`,
+      [
+        CURRENT_FUNNEL_TEST_ROOM_CODE,
+        hashReconnectToken(randomBytes(12).toString("hex")),
+        halaForCurrentFunnel.username,
+        halaPoolForCurrentFunnel.heroId,
+        halaForCurrentFunnel.deckId,
+        halaForCurrentFunnel.deckName,
+      ],
+    );
     const marksPrep = { rolls: [6, 2], dieWinner: 0, startPlayer: 0 };
     const halaForMarks = botDefinition("hala");
     const halaPoolForMarks = precon(halaForMarks?.deckId ?? "")?.pool;
@@ -919,6 +1012,7 @@ try {
   console.log(`seeded Rally the Coast Guard room ${RALLY_TEST_ROOM_CODE} — log in as alice and open /${RALLY_TEST_ROOM_CODE}`);
   console.log(`seeded Restless Steed / Mark of Ushering room ${MARKS_TEST_ROOM_CODE} — log in as alice and open /${MARKS_TEST_ROOM_CODE}`);
   console.log(`seeded Nitro Mechanoid room ${NITRO_TEST_ROOM_CODE} — log in as alice and open /${NITRO_TEST_ROOM_CODE}`);
+  console.log(`seeded Current Funnel room ${CURRENT_FUNNEL_TEST_ROOM_CODE} — log in as alice and open /${CURRENT_FUNNEL_TEST_ROOM_CODE}`);
   console.log("seeded fixed bug notification for alice");
 } finally {
   await pool.end();

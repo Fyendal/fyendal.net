@@ -12,7 +12,7 @@ import { cardColorOf, cardHasType, cardTypesOf, TALENT_SUPERTYPES } from "../car
 import { logPrivate, logPublic } from "../gameLog.js";
 import { makeCtx } from "../scriptContext.js";
 import { abilityResourceCost } from "../abilityRules.js";
-import { mayPlayFromZone, playFromSourceCardId } from "../playRules.js";
+import { mayPlayFromZone, noteCardPlayed, playFromSourceCardId } from "../playRules.js";
 import { heroAbilitiesDisabled } from "../stateQueries.js";
 import { createGame as createGameState } from "../runtimeState.js";
 import { drawUpTo, finishEndPhase, startTurn } from "../turn.js";
@@ -2001,6 +2001,31 @@ describe("viewer projection secrecy", () => {
 });
 
 describe("pitch & costs", () => {
+  it("rotates last-action types independently of serialized flag key order", () => {
+    const state = makeGame(408);
+    const active = player(state, 0);
+    const attackId = giveCard(state, 0, "ATK4");
+    const attack = active.hand.find((card) => card.instanceId === attackId)!;
+    // Postgres JSONB can return last-action keys before the prior-action keys.
+    // The previous one-pass rotation then deleted the newly copied Lightning flag.
+    active.flags = {
+      "lastActionWasType:lightning": true,
+      "lastActionWasType:attack": true,
+      "priorActionWasType:lightning": true,
+      "priorActionWasType:runeblade": true,
+    };
+
+    noteCardPlayed(state, active, attack);
+
+    expect(active.flags).toMatchObject({
+      "priorActionWasType:lightning": true,
+      "priorActionWasType:attack": true,
+      "lastActionWasType:attack": true,
+      "lastActionWasType:generic": true,
+    });
+    expect(active.flags["priorActionWasType:runeblade"]).toBeUndefined();
+  });
+
   it("logs a played card before the cards pitched to pay for it", () => {
     const s = makeGame(409);
     const attack = giveCard(s, 0, "BIG");
