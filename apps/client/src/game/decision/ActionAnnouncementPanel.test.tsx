@@ -113,6 +113,34 @@ describe("alternative-cost payment choices", () => {
     expect(html).not.toContain("<span>Choose Restless Cleric</span>");
     expect(html).not.toContain("0/2");
   });
+
+  it("enables confirmation after choosing fewer than the maximum additional-cost cards", () => {
+    const html = renderLocalized(
+      <ActionAnnouncementPanel
+        model={{
+          ...paymentModel(true),
+          alternativeCostCardInstanceIds: [2],
+          stagedAdditionalCost: {
+            cardLabel: "zombies",
+            modes: [{
+              mode: "destroy",
+              maximum: 3,
+              cards: [
+                { instanceId: 2, cardId: "IAR084", owner: 0 },
+                { instanceId: 3, cardId: "IAR065", owner: 0 },
+                { instanceId: 4, cardId: "IAR087", owner: 0 },
+              ],
+            }],
+          },
+          canConfirmAdditionalCost: true,
+        }}
+        viewerSeat={0}
+      />,
+    );
+
+    expect(html).toContain("1/3");
+    expect(html).toMatch(/<button class="btn-primary">Confirm zombies<\/button>/);
+  });
 });
 
 describe("activated ability mode choices", () => {

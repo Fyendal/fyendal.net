@@ -6,6 +6,9 @@ export interface PendingDecisionModel {
   decision: PendingDecision | null;
   isMine: boolean;
   decidingName: string;
+  /** Viewer-local zone labels for live card choices whose artwork/name alone
+   * does not distinguish multiple copies (for example, two matching weapons). */
+  optionCardLabels?: ReadonlyMap<number, string>;
   canPass: boolean;
   defendPitchIds: ReadonlySet<number>;
   hand: CardView[];

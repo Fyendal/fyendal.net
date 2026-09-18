@@ -44,7 +44,7 @@ import {
 
 import { abilityResourceCost, activatedAbilityAvailable, canPayAbilityLifeCost, canPayActivatedEffectCardCosts, discardCostOptions, effectiveAbilityList } from "./abilityRules.js";
 import { settlesInArena, settlePlayedCard } from "./cardLifecycle.js";
-import { alternativePlayCostOptions, canPlayAsInstant, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, cardsPlayableFromArsenal, cardsPlayableFromZone, cardLayerGoAgain, mayPlayFromArsenal, mayPlayFromZone, modifierMatchesPlayedCard, noteCardPlayed, payAlternativePlayCost, playTargetOptions, preparePlayTarget } from "./playRules.js";
+import { alternativePlayCostOptions, canPlayAsInstant, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, cardsPlayableFromArsenal, cardsPlayableFromZone, cardLayerGoAgain, consumeSingleUsePlayFromGroup, mayPlayFromArsenal, mayPlayFromZone, modifierMatchesPlayedCard, noteCardPlayed, payAlternativePlayCost, playTargetOptions, preparePlayTarget } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost, pitchValueOfInstance } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { consumeFirstActionExtraCost, firstActionExtraCost, goAgainSuppressed, isFrozen, opposingInstantsProhibited, snapshotSerializable } from "./ruleQueries.js";
@@ -729,6 +729,7 @@ export function announceCardPlayed(
   );
   if (!alreadyResolving) state.resolving.push(card);
   try {
+    consumeSingleUsePlayFromGroup(state, card, origin);
     for (const modifier of state.modifiers) {
       if (
         modifier.seat === seat &&

@@ -62,6 +62,7 @@ export function startTurn(state: GameStateInternal, runtime: EngineRuntime): voi
           Number(card.playableFromGrantedTurn ?? -1) < state.turn;
         if (!absoluteExpired && !seatExpired) continue;
         delete card.playableFrom;
+        delete card.playableFromSingleUseGroup;
         delete card.playableBySeat;
         delete card.playCostReduction;
         delete card.playCostReductionSeat;
@@ -472,6 +473,7 @@ function completeEndPhase(state: GameStateInternal, runtime: EngineRuntime): voi
         if (!permissionSurvives) {
           delete c.playableFrom;
           delete c.playableFromSourceCardId;
+          delete c.playableFromSingleUseGroup;
           delete c.playableBySeat;
           delete c.playCostReduction;
           delete c.playCostReductionSeat;

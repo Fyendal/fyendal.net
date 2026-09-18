@@ -376,6 +376,7 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
         if (c.playableFromUntilChainClose !== true) continue;
         delete c.playableFrom;
         delete c.playableFromSourceCardId;
+        delete c.playableFromSingleUseGroup;
         delete c.playableBySeat;
         delete c.playCostReduction;
         delete c.playCostReductionSeat;

@@ -36,6 +36,7 @@ function renderPlayerHalf(
   visibleDeckTop?: PlayerView["visibleDeckTop"],
   stageableDefenderId?: number,
   locale: "en" | "zh-Hans" = "en",
+  activeChainAttackerInstanceId: number | null = null,
 ): string {
   return renderToStaticMarkup(
     <TestI18nProvider locale={locale}>
@@ -59,18 +60,22 @@ function renderPlayerHalf(
           canCloseChain: false,
         },
         selection: { kind: "none" },
+        paymentCandidateIds: new Set(),
+        paymentSelectedIds: new Set(),
         preStackSelectedInstanceId: null,
         stagedIds: new Set(),
         committedDefenderIds: new Set(),
         optimisticallyHiddenIds: new Set(),
         defending: stageableDefenderId !== undefined,
         onStage: () => undefined,
+        onSelectPaymentCard: () => undefined,
         onActivate: () => undefined,
         onSelect: () => undefined,
       }}
       latestEmote={null}
       canSendEmote={false}
       mobileFloatViewport={false}
+      activeChainAttackerInstanceId={activeChainAttackerInstanceId}
       onSendEmote={() => undefined}
       onOpenOverlay={() => undefined}
       />
@@ -87,6 +92,23 @@ describe("PlayerHalf", () => {
     expect(html).toContain('title="墓地"');
     expect(html).toContain('title="放逐区"');
     expect(html).toContain('title="武器"');
+  });
+
+  it("distinguishes matching weapon zones and spotlights the active chain weapon", () => {
+    const matchingDagger = { cardId: "TST-DAGGER", owner: 0 } as const;
+    const html = renderPlayerHalf({
+      ...player,
+      weapons: [
+        { ...matchingDagger, instanceId: 41 },
+        { ...matchingDagger, instanceId: 42 },
+      ],
+    }, true, undefined, undefined, "en", 42);
+
+    expect(html).toContain('title="Left weapon"');
+    expect(html).toContain('title="Right weapon"');
+    expect(html.match(/card-chain-source/g)).toHaveLength(2);
+    expect(html).toContain('class="card-chain-source-badge" title="On chain">On chain</div>');
+    expect(html).toMatch(/card-chain-source[^>]*data-cardid="TST-DAGGER"/);
   });
 
   it("marks tapped board-card wrappers with a landscape layout footprint", () => {
@@ -298,6 +320,55 @@ describe("PlayerHalf", () => {
 
   it("makes a stageable arena permanent highlighted and clickable", () => {
     const html = renderPlayerHalf(player, true, undefined, 2);
+
+    expect(html).toMatch(
+      /class="card card-zone [^"]*card-highlight[^"]*card-clickable"[^>]*data-cardid="TST-UPRIGHT"/,
+    );
+  });
+
+  it("makes an arena card offered as an ability cost highlighted and clickable", () => {
+    const html = renderToStaticMarkup(
+      <TestI18nProvider locale="en">
+        <PlayerHalf
+          player={player}
+          mine
+          mirrored={false}
+          ongoing={[]}
+          gameOver={false}
+          replaying={false}
+          deckShuffling={false}
+          interaction={{
+            legal: {
+              playableHand: new Set(),
+              playableArsenal: new Set(),
+              playableZones: new Map(),
+              activatable: new Set(),
+              stageableDefenders: new Set(),
+              canPass: false,
+              canCloseChain: false,
+            },
+            selection: { kind: "activate", sourceInstanceId: 99 },
+            paymentCandidateIds: new Set([2]),
+            paymentSelectedIds: new Set(),
+            preStackSelectedInstanceId: null,
+            stagedIds: new Set(),
+            committedDefenderIds: new Set(),
+            optimisticallyHiddenIds: new Set(),
+            defending: false,
+            onStage: () => undefined,
+            onSelectPaymentCard: () => undefined,
+            onActivate: () => undefined,
+            onSelect: () => undefined,
+          }}
+          latestEmote={null}
+          canSendEmote={false}
+          mobileFloatViewport={false}
+          activeChainAttackerInstanceId={null}
+          onSendEmote={() => undefined}
+          onOpenOverlay={() => undefined}
+        />
+      </TestI18nProvider>,
+    );
 
     expect(html).toMatch(
       /class="card card-zone [^"]*card-highlight[^"]*card-clickable"[^>]*data-cardid="TST-UPRIGHT"/,

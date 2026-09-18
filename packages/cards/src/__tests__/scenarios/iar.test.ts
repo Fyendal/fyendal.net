@@ -1274,6 +1274,46 @@ describe("IAR cards", () => {
       .toHaveLength(1);
   });
 
+  it.each([
+    {
+      paid: ["restless corporal|1"],
+      expectedLife: 15,
+      modes: ["Give Forsaken Strike +2 power"],
+    },
+    {
+      paid: ["restless cleric|1", "restless corporal|1"],
+      expectedLife: 13,
+      modes: [
+        "Give Forsaken Strike +2 power",
+        "Give Forsaken Strike +2 power",
+      ],
+    },
+  ])("Forsaken Strike may pay with $paid.length zombie(s)", ({ paid, expectedLife, modes }) => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: [
+          "forsaken strike|2",
+          "restless corporal|1",
+          "restless magister|1",
+        ],
+        board: ["restless cleric|1", "restless quartermaster|1"],
+        resources: 0,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("forsaken strike|2", { settle: false, alternativeCost: paid });
+    for (const mode of modes) g.chooseOption(mode);
+    g.blockWith()
+      .settle()
+      .expectLife(1, expectedLife)
+      .expectInZone(0, "restless corporal|1", "graveyard")
+      .expectInZone(0, "restless magister|1", "hand")
+      .expectInZone(0, "restless quartermaster|1", "board");
+  });
+
   it("Restless Outlaw creates a Corrupted Corpse when it dies", () => {
     const g = scenario({ active: 1, seats: [
       {
@@ -2468,6 +2508,27 @@ describe("September 3 IAR spoilers", () => {
       .expectLife(1, 14)
       .expectAP(0, 1)
       .expectInZone(0, "raging onslaught|1", "banish");
+  });
+
+  it("Blasmophet's Boon counts as six power when banished while controlling Blasmophet", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["feasting shadowbeast|1"],
+        deck: ["blasmophet's boon|3"],
+        board: ["blasmophet, the insatiable hunger|0"],
+        resources: 2,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("feasting shadowbeast|1")
+      .expectAttackValue(8)
+      .blockWith()
+      .settle()
+      .expectLife(1, 12)
+      .expectInZone(0, "blasmophet's boon|3", "banish");
   });
 
   it("Rocktop Bellow bottoms a failed reveal and buffs the next attack", () => {

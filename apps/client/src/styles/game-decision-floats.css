@@ -100,6 +100,17 @@
 .decision-priority-guidance {
   width: min(420px, calc(100vw - var(--rail-w) - 32px));
 }
+.decision-trigger-order {
+  max-height: calc(100dvh - clamp(132px, 19vh, 222px) - 12px);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.decision-trigger-order .trigger-order-list {
+  min-height: 0;
+  flex: 1 1 auto;
+  max-height: none;
+}
+.decision-trigger-order > .decision-buttons { flex: 0 0 auto; }
 .decision-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 .decision-buttons > button { white-space: nowrap; }
 .decision-buttons:empty { display: none; }

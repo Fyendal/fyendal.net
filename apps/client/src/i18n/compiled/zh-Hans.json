@@ -18926,6 +18926,12 @@
       "value": "此非攻击行动"
     }
   ],
+  "game.card.onchain": [
+    {
+      "type": 0,
+      "value": "位于 Chain 上"
+    }
+  ],
   "game.cardDetails": [
     {
       "type": 0,
@@ -21080,6 +21086,18 @@
     {
       "type": 0,
       "value": "武器"
+    }
+  ],
+  "game.zone.weapon.left": [
+    {
+      "type": 0,
+      "value": "左侧武器"
+    }
+  ],
+  "game.zone.weapon.right": [
+    {
+      "type": 0,
+      "value": "右侧武器"
     }
   ],
   "landing.accountAccess": [

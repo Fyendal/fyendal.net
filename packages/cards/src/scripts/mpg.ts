@@ -707,8 +707,10 @@ Object.assign(mpg, {
     onHit(ctx: ScriptCtx) {
       const head = ctx.player(opponentSeat(ctx)).equipment.head;
       if (!head) return;
-      ctx.addCardDefenseCounters(head.instanceId, -1);
-      if ((head.defCounters ?? 0) <= 1) ctx.destroyPermanent(head.instanceId);
+      ctx.addCardDefenseCounters(head.instanceId, 1);
+      if ((data(ctx, head).defense ?? 0) - (head.defCounters ?? 0) <= 0) {
+        ctx.destroyPermanent(head.instanceId);
+      }
     },
   },
   "pec perfect|1": {

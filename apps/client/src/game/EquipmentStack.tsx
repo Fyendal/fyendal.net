@@ -16,6 +16,7 @@ export function EquipmentStack({
   motionLocation,
   underCardMotionLocation,
   showActivationDots = false,
+  chainSourceLabel,
   soulCount,
   soulCountLabel,
   boundCount,
@@ -33,6 +34,8 @@ export function EquipmentStack({
   underCardMotionLocation?: MotionLocation;
   /** Show turn activation capacity for weapon abilities. */
   showActivationDots?: boolean;
+  /** Present only on the permanent supplying the current chain-link attack. */
+  chainSourceLabel?: string;
   /** Hero-only soul count. Defined even at zero so the icon stays visible. */
   soulCount?: number;
   soulCountLabel?: string;
@@ -85,6 +88,7 @@ export function EquipmentStack({
               highlighted={isTop ? highlighted : undefined}
               selected={isTop ? selected : undefined}
               dimmed={isTop ? dimmed : undefined}
+              chainSourceLabel={isTop ? chainSourceLabel : undefined}
               onClick={isTop ? onClick : undefined}
             />
           </div>

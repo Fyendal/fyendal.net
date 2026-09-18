@@ -19700,6 +19700,12 @@
       "value": "this non-attack action"
     }
   ],
+  "game.card.onchain": [
+    {
+      "type": 0,
+      "value": "On chain"
+    }
+  ],
   "game.cardDetails": [
     {
       "type": 0,
@@ -21928,6 +21934,18 @@
     {
       "type": 0,
       "value": "Weapon"
+    }
+  ],
+  "game.zone.weapon.left": [
+    {
+      "type": 0,
+      "value": "Left weapon"
+    }
+  ],
+  "game.zone.weapon.right": [
+    {
+      "type": 0,
+      "value": "Right weapon"
     }
   ],
   "landing.accountAccess": [

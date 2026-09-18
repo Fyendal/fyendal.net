@@ -53,6 +53,13 @@ describe("action announcement reducer", () => {
       additionalCostConfirmed: false,
     });
 
+    expect(actionAnnouncementReducer(targetChosen, {
+      type: "confirm-additional-cost",
+    })).toMatchObject({
+      alternativeCostCardInstanceIds: [5],
+      additionalCostConfirmed: true,
+    });
+
     const bothTargetsChosen = actionAnnouncementReducer(targetChosen, {
       type: "toggle-additional-cost-card",
       instanceId: 6,

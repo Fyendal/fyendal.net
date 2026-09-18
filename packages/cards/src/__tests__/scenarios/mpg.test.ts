@@ -271,6 +271,29 @@ describe("MPG — import and Guardian pressure", () => {
       .expectEquipmentDefense(1, "head", 0);
   });
 
+  it("Headbutt only destroys the equipped head when its defense reaches zero", () => {
+    const crown = scenario({
+      seats: [
+        { ...valda, hand: ["headbutt|3"], resources: 4 },
+        { hero: "dorinthea", equipment: { head: "crown of providence|0" } },
+      ],
+    });
+
+    crown.play("headbutt|3").blockWith().settle();
+
+    expect(crown.state.players[1]!.equipment.head?.defCounters).toBe(1);
+    crown.expectEquipped(1, "head", "crown of providence|0");
+
+    const ironrot = scenario({
+      seats: [
+        { ...valda, hand: ["headbutt|3"], resources: 4 },
+        { hero: "dorinthea", equipment: { head: "ironrot helm|0" } },
+      ],
+    });
+
+    ironrot.play("headbutt|3").blockWith().settle().expectNoEquipment(1, "head");
+  });
+
   it("Geyser removes its last energy counter, creates a Surge, and destroys itself", () => {
     const g = scenario({
       seats: [

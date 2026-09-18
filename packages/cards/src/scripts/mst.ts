@@ -878,11 +878,22 @@ Object.assign(mst, {
     canPlay: (ctx) => ctx.player(ctx.seat).graveyard.length >= 3,
     additionalCost(ctx) {
       let sixPlusBanished = 0;
+      const banished: number[] = [];
       const cards = [...ctx.player(ctx.seat).graveyard]
         .sort(() => ctx.randomInt(3) - 1)
         .slice(0, 3);
       for (const card of cards) {
-        if (ctx.banish(card.instanceId) && ctx.basePower(card) >= 6) sixPlusBanished++;
+        if (!ctx.banish(card.instanceId)) continue;
+        banished.push(card.instanceId);
+        if (ctx.basePower(card) >= 6) sixPlusBanished++;
+      }
+      if (sixPlusBanished >= 3) {
+        const grantSequence = Number(ctx.getFlag("player", "shadowrealmHorrorPlayGrantCount")) + 1;
+        ctx.setFlag("player", "shadowrealmHorrorPlayGrantCount", grantSequence);
+        const singleUseGroup = `shadowrealm-horror:${ctx.seat}:${ctx.state.turn}:${grantSequence}`;
+        for (const instanceId of banished) {
+          ctx.allowPlayFrom(instanceId, "banish", { singleUseGroup });
+        }
       }
       ctx.setCounter("shadowrealmSixPlusBanished", sixPlusBanished);
     },

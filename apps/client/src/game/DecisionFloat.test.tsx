@@ -399,6 +399,8 @@ describe("priority guidance help", () => {
     expect(orderHtml).not.toContain("Order your triggered abilities");
     expect(orderHtml).not.toContain("Add an energy counter");
     expect(orderHtml).not.toContain("Remove a steam counter or destroy this");
+    expect(orderHtml).toContain("decision-trigger-order");
+    expect(orderHtml).toContain("确认顺序");
   });
 
   it("localizes common literal option ids without changing their submitted values", () => {
@@ -477,6 +479,49 @@ describe("priority guidance help", () => {
 });
 
 describe("scripted card-choice presentation", () => {
+  it("labels matching weapon choices by their table position", () => {
+    const first = { instanceId: 41, cardId: "TST-DAGGER", owner: 0 };
+    const second = { instanceId: 42, cardId: "TST-DAGGER", owner: 0 };
+    const model: PendingDecisionModel = {
+      decision: {
+        player: 0,
+        kind: "choose-target",
+        prompt: "Choose a dagger",
+        options: ["41", "42"],
+        optionCards: [first, second],
+      },
+      isMine: true,
+      decidingName: "Hero",
+      optionCardLabels: new Map([
+        [41, "Left weapon"],
+        [42, "Right weapon"],
+      ]),
+      canPass: false,
+      defendPitchIds: new Set(),
+      hand: [],
+      defendSel: [],
+      selectedPitchIds: [],
+      onTogglePitch: () => undefined,
+      resourcePaymentSelected: 0,
+      resourcePaymentRequired: 0,
+      confirmSkipArsenal: false,
+      onRequestPass: () => undefined,
+      onDisableGuidance: () => undefined,
+      onConfirmSkipArsenal: () => undefined,
+      onCancelSkipArsenal: () => undefined,
+      onSend: () => undefined,
+    };
+
+    const html = renderLocalized(
+      <PendingDecisionPanel model={model} viewerSeat={0} />,
+    );
+
+    expect(html).toContain('aria-label="TST-DAGGER — Left weapon"');
+    expect(html).toContain('aria-label="TST-DAGGER — Right weapon"');
+    expect(html).toContain('class="c-zonelabel">Left weapon</div>');
+    expect(html).toContain('class="c-zonelabel">Right weapon</div>');
+  });
+
   it("keeps bounded card choices out of the immediate single-card path", () => {
     const first = { instanceId: 41, cardId: "TEST-A", owner: 0 };
     const second = { instanceId: 42, cardId: "TEST-B", owner: 0 };

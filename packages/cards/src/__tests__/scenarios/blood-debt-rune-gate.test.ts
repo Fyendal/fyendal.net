@@ -229,6 +229,42 @@ describe("Blood Debt and Rune Gate", () => {
       .expectAP(0, 1);
   });
 
+  it("Shadowrealm Horror lets its controller play one of three 6-power cards banished for its cost", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["shadowrealm horror|1"],
+          graveyard: ["raging onslaught|1", "raging onslaught|1", "raging onslaught|1"],
+          resources: 10,
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("shadowrealm horror|1")
+      .blockWith()
+      .settle();
+
+    const banished = g.state.players[0]!.banish;
+    expect(banished).toHaveLength(3);
+    for (const card of banished) {
+      expect(card.playableFrom).toContain("banish");
+      expect(legalIntents(g.state, 0)).toContainEqual(expect.objectContaining({
+        kind: "play-from-zone",
+        zone: "banish",
+        instanceId: card.instanceId,
+      }));
+    }
+
+    g.play("raging onslaught|1", { fromZone: "banish", settle: false });
+
+    for (const card of g.state.players[0]!.banish) {
+      expect(card.playableFrom).toBeUndefined();
+      expect(card.playableFromSingleUseGroup).toBeUndefined();
+    }
+  });
+
   it("Widespread Annihilation lets each affected hero choose their hand card", () => {
     const g = scenario({
       seats: [

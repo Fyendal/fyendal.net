@@ -278,6 +278,7 @@ export function PendingDecisionPanel({
     decision: pd,
     isMine,
     decidingName,
+    optionCardLabels,
     canPass,
     defendPitchIds,
     hand,
@@ -363,7 +364,9 @@ export function PendingDecisionPanel({
   return (
     <div className={`decision decision-options${
       priorityGuidanceDecision ? " decision-priority-guidance" : ""
-    }${pd.kind === "choose-name" ? " decision-name-choice" : ""}`}>
+    }${pd.kind === "choose-name" ? " decision-name-choice" : ""}${
+      pd.kind === "order-triggers" ? " decision-trigger-order" : ""
+    }`}>
       <DecisionPrompt
         prompt={pd.kind === "arsenal"
           ? intl.formatMessage({ id: "game.decision.arsenal.choosePrompt" })
@@ -500,6 +503,7 @@ export function PendingDecisionPanel({
                 key={card.instanceId}
                 card={card}
                 size="hand"
+                label={optionCardLabels?.get(card.instanceId)}
                 highlighted={optionId !== undefined}
                 affiliation={cardAffiliation(card, viewerSeat)}
                 onClick={optionId !== undefined

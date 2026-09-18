@@ -566,6 +566,8 @@ export interface ScriptCtx {
    *  controller's next turn (it survives this end phase's cleanup).
    *  `untilChainClose` keeps it only while the current combat chain remains
    *  open.
+   *  `singleUseGroup` links several eligible cards to one shared allowance:
+   *  playing any one of them consumes the grant from all cards in the group.
    *  `forSeat` grants the permission to that player even when another player
    *  owns the card. */
   allowPlayFrom(instanceId: number, zone: PlayableZone, opts?: {
@@ -576,6 +578,7 @@ export interface ScriptCtx {
     forSeat?: number;
     graveyardReplacement?: "banish";
     asInstant?: boolean;
+    singleUseGroup?: string;
   }): void;
   /** Whether the target hero has an empty arsenal zone, including any
    *  additional zones granted by active continuous effects. */

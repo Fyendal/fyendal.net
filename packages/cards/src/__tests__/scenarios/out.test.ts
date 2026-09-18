@@ -108,6 +108,50 @@ describe("OUT — registration and core mechanics", () => {
       .expectAttackValue(8);
   });
 
+  it("Spreading Plague counts defense reactions only after they resolve", () => {
+    const responding = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "arakni, solitary confinement|0",
+          resources: 2,
+          hand: ["leave no witnesses|1", "spreading plague|2"],
+        },
+        { hero: "dorinthea", hand: ["flic flak|1"] },
+      ],
+    });
+
+    responding.play("leave no witnesses|1")
+      .blockWith()
+      .passPriority() // defender's reaction window
+      .react("flic flak|1", { settle: false })
+      .passPriority() // defender passes priority after playing Flic Flak
+      .react("spreading plague|2", { settle: false })
+      .passPriority().passPriority(); // Spreading Plague resolves above Flic Flak
+
+    responding.expectZoneSize(1, "board", 0);
+
+    const afterResolution = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "arakni, solitary confinement|0",
+          resources: 2,
+          hand: ["leave no witnesses|1", "spreading plague|2"],
+        },
+        { hero: "dorinthea", hand: ["flic flak|1"] },
+      ],
+    });
+
+    afterResolution.play("leave no witnesses|1")
+      .blockWith()
+      .passPriority() // defender's reaction window
+      .react("flic flak|1", { settle: false })
+      .passPriority().passPriority() // Flic Flak resolves and becomes defending
+      .react("spreading plague|2")
+      .expectInZone(1, "bloodrot pox|0", "board");
+  });
+
   it("shows Flick Knives on the chain after its attack reaction resolves", () => {
     const s = scenario({
       seats: [

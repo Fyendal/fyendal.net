@@ -41,9 +41,10 @@ import {
  * the permission's provenance, duration, and discount, does not survive that
  * reset. Effects that grant permission to the new graveyard object do so
  * after moving it there. */
-function clearPlayFromZoneGrant(card: CardInstance): void {
+export function clearPlayFromZoneGrant(card: CardInstance): void {
   delete card.playableFrom;
   delete card.playableFromSourceCardId;
+  delete card.playableFromSingleUseGroup;
   delete card.playableBySeat;
   delete card.playableFromExpiry;
   delete card.playableFromEndTurnExpiry;

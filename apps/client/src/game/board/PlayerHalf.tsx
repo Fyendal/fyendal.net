@@ -71,12 +71,15 @@ function arsenalSlotViews(
 interface PlayerHalfInteraction {
   legal: BoardLegalState;
   selection: Sel;
+  paymentCandidateIds: ReadonlySet<number>;
+  paymentSelectedIds: ReadonlySet<number>;
   preStackSelectedInstanceId: number | null;
   stagedIds: ReadonlySet<number>;
   committedDefenderIds: ReadonlySet<number>;
   optimisticallyHiddenIds: ReadonlySet<number>;
   defending: boolean;
   onStage: (instanceIds: number[]) => void;
+  onSelectPaymentCard: (instanceId: number) => void;
   onActivate: (instanceId: number) => void;
   onSelect: (selection: Sel) => void;
 }
@@ -94,6 +97,7 @@ export function PlayerHalf({
   latestEmote,
   canSendEmote,
   mobileFloatViewport,
+  activeChainAttackerInstanceId,
   onSendEmote,
   onOpenOverlay,
 }: {
@@ -109,6 +113,7 @@ export function PlayerHalf({
   latestEmote: EmoteEvent | null;
   canSendEmote: boolean;
   mobileFloatViewport: boolean;
+  activeChainAttackerInstanceId: number | null;
   onSendEmote: (message: EmoteMessage) => void;
   onOpenOverlay: (overlay: BoardOverlay) => void;
 }) {
@@ -212,11 +217,16 @@ export function PlayerHalf({
     const canActivate = mine && card !== undefined && !interaction.defending &&
       interaction.legal.activatable.has(card.instanceId);
     const location = { kind: "weapon" as const, seat: player.seat, index };
+    const weaponLabel = player.weapons.length > 1
+      ? intl.formatMessage({
+          id: index === 0 ? "game.zone.weapon.left" : "game.zone.weapon.right",
+        })
+      : zoneLabel("weapon");
     return (
       <MatZone
         key={area}
         area={area}
-        label={zoneLabel("weapon")}
+        label={weaponLabel}
         className={`zone-weapon-${index}`}
         motionZone={motionLocationKey(location)}
       >
@@ -225,6 +235,9 @@ export function PlayerHalf({
             card={card}
             motionLocation={location}
             showActivationDots
+            chainSourceLabel={card.instanceId === activeChainAttackerInstanceId
+              ? intl.formatMessage({ id: "game.card.onchain" })
+              : undefined}
             highlighted={canActivate || canBlock}
             selected={mine && interaction.selection.kind === "activate" &&
               interaction.selection.sourceInstanceId === card.instanceId}
@@ -317,6 +330,17 @@ export function PlayerHalf({
                   )
                 : undefined;
               const canBlock = stageableDefenderId !== undefined;
+              const selectedPaymentCardId = mine
+                ? group.instanceIds.find((instanceId) =>
+                    interaction.paymentSelectedIds.has(instanceId)
+                  )
+                : undefined;
+              const paymentCardId = selectedPaymentCardId ?? (mine
+                ? group.instanceIds.find((instanceId) =>
+                    interaction.paymentCandidateIds.has(instanceId)
+                  )
+                : undefined);
+              const canPay = paymentCardId !== undefined;
               const canActivate = mine && !interaction.defending && group.activatable;
               return (
                 <div
@@ -349,15 +373,18 @@ export function PlayerHalf({
                           { count: underCardCount },
                         )
                       : undefined}
-                    highlighted={canActivate || canBlock}
-                    selected={mine && interaction.selection.kind === "activate" &&
-                      interaction.selection.sourceInstanceId === group.card.instanceId}
+                    highlighted={canActivate || canBlock || canPay}
+                    selected={(mine && interaction.selection.kind === "activate" &&
+                      interaction.selection.sourceInstanceId === group.card.instanceId) ||
+                      selectedPaymentCardId !== undefined}
                     dimmed={blocking || (mine && interaction.defending && !canBlock)}
                     onClick={canBlock
                       ? () => interaction.onStage([...interaction.stagedIds, stageableDefenderId])
-                      : canActivate
-                        ? activate(group.card.instanceId)
-                        : undefined}
+                      : canPay
+                        ? () => interaction.onSelectPaymentCard(paymentCardId)
+                        : canActivate
+                          ? activate(group.card.instanceId)
+                          : undefined}
                   />
                   {group.count > 1 ? (
                     <span

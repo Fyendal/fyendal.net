@@ -2262,6 +2262,7 @@ export function makeCtx(
       const playableFrom = card.playableFrom ??= [];
       if (!playableFrom.includes(zone)) playableFrom.push(zone);
       card.playableFromSourceCardId = self.cardId;
+      if (opts?.singleUseGroup !== undefined) card.playableFromSingleUseGroup = opts.singleUseGroup;
       if (opts?.forSeat !== undefined) card.playableBySeat = opts.forSeat;
       if (opts?.costReduction !== undefined) {
         card.playCostReduction = (card.playCostReduction ?? 0) + opts.costReduction;

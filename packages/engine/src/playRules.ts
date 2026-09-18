@@ -11,7 +11,7 @@ import {
 import type { GameStateInternal } from "./runtimeState.js";
 
 import type { CardInstance, ChainLinkState, Modifier, PlayerState, StackLayer } from "./state.js";
-import { destroyControlledCard, destroyPermanent, enterBanish } from "./zoneMoves.js";
+import { clearPlayFromZoneGrant, destroyControlledCard, destroyPermanent, enterBanish } from "./zoneMoves.js";
 import { currentLink, findCardAnywhere, opponent, removeFromArray } from "./zoneQueries.js";
 import type { MeldSide, PlayableZone } from "@fyendal/shared";
 import { noteActionPlayedOrActivated } from "./cardLifecycle.js";
@@ -58,6 +58,35 @@ export function mayPlayFromZone(
     if (hook?.(runtime.makeCtx(state, owner.seat, source), card, zone) === true) return true;
   }
   return !card.faceDown && scriptOf(state, card.cardId, card)?.staticPlayableFrom?.includes(zone) === true;
+}
+
+/** Consume a shared one-use play-from-zone allowance after one eligible card
+ * is successfully announced. Other independent ways to play those cards
+ * remain available after their card-scoped grant is removed. */
+export function consumeSingleUsePlayFromGroup(
+  state: GameStateInternal,
+  card: CardInstance,
+  zone: "hand" | "arsenal" | PlayableZone,
+): void {
+  const group = card.playableFromSingleUseGroup;
+  if (!group || !card.playableFrom?.includes(zone as PlayableZone)) return;
+  for (const player of state.players as PlayerState[]) {
+    const zones = [
+      player.hand,
+      player.deck,
+      player.arsenal,
+      player.pitch,
+      player.graveyard,
+      player.banish,
+      player.board,
+      player.weapons,
+      Object.values(player.equipment).filter((candidate): candidate is CardInstance => candidate !== undefined),
+    ];
+    for (const candidate of zones.flat()) {
+      if (candidate.playableFromSingleUseGroup === group) clearPlayFromZoneGrant(candidate);
+    }
+  }
+  clearPlayFromZoneGrant(card);
 }
 
 /** Whether the only active permission to play `card` from `zone` requires the

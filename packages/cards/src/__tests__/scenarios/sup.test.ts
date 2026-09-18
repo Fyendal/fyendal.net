@@ -683,6 +683,38 @@ describe("SUP — heroes and the crowd", () => {
     expect(g.state.players[0]!.board.every((card) => card.cardId.endsWith("036"))).toBe(true);
   });
 
+  it("Vigorous Smashup leaves its revealed card on top when its bottom choice is declined", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        hero("levia|0", {
+          hand: ["vigorous smashup|2", "rise to the challenge|3"],
+          deck: ["vigorous smashup|2", "vigorous smashup|3"],
+        }),
+        foe({
+          hand: ["path of same ends|1", "snatch|1"],
+        }),
+      ],
+    });
+
+    g.play("path of same ends|1")
+      .blockWith("vigorous smashup|2")
+      .settle()
+      .chooseOption("no");
+
+    expect(g.state.players[0]!.deck[0]?.cardId).toBe(printingId("vigorous smashup|2"));
+
+    const logLengthBeforeRise = g.state.log.length;
+    g.play("snatch|1")
+      .blockWith("rise to the challenge|3")
+      .settle();
+
+    expect(g.state.players[0]!.deck[0]?.cardId).toBe(printingId("vigorous smashup|2"));
+    expect(g.state.log.slice(logLengthBeforeRise).some(
+      (entry) => entry.publicText?.includes("SUP165"),
+    )).toBe(true);
+  });
+
   it("Clench the Upper Hand boos its controller when attacking with more life", () => {
     const g = scenario({
       seats: [

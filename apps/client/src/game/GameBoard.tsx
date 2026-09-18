@@ -366,6 +366,18 @@ export function GameBoard() {
   const authoritativeMe = view.players[seat]!;
   const me = presentedView.players[seat]!;
   const opp = presentedView.players[seat === 0 ? 1 : 0]!;
+  const arenaPaymentCandidateIds = new Set(
+    sel.kind !== "none" &&
+      actionStep === "payment" &&
+      (!stagedAdditionalCostDefinition || additionalCostConfirmed)
+      ? me.board
+          .filter((card) =>
+            pitchSel.includes(card.instanceId) ||
+            canAddPaymentCard(selectedPaymentVariants, pitchSel, card.instanceId)
+          )
+          .map((card) => card.instanceId)
+      : [],
+  );
   const authoritativeVisibleDeckTop = !spectating
     ? visibleDeckTop(authoritativeMe, deckCardFeedback.shuffledSeats.has(authoritativeMe.seat))
     : undefined;
@@ -415,6 +427,17 @@ export function GameBoard() {
       : intl.formatMessage({ id: "game.turn.opponent" });
   const combatChainLinks = presentedView.chain.filter((link) => !link.onStack);
   const hasActiveCombatChain = combatChainLinks.length > 0;
+  const activeChainAttackerInstanceId = combatChainLinks.length > 0
+    ? combatChainLinks[combatChainLinks.length - 1]!.attackingCard.instanceId
+    : null;
+  const optionCardLabels = me.weapons.length > 1
+    ? new Map(me.weapons.map((weapon, index) => [
+        weapon.instanceId,
+        intl.formatMessage({
+          id: index === 0 ? "game.zone.weapon.left" : "game.zone.weapon.right",
+        }),
+      ]))
+    : undefined;
   const showPriorityFloat = !spectating && !replaying && gameHasPriority(view);
   const hasOwnPriority = showPriorityFloat && view.priorityPlayer === seat;
   const priorityLabel = view.priorityPlayer === seat ? "YOUR PRIORITY" : "OPPONENT'S PRIORITY";
@@ -916,12 +939,15 @@ export function GameBoard() {
   const playerHalfInteraction = {
     legal: derived,
     selection: sel,
+    paymentCandidateIds: arenaPaymentCandidateIds,
+    paymentSelectedIds: new Set(pitchSel),
     preStackSelectedInstanceId,
     stagedIds,
     committedDefenderIds,
     optimisticallyHiddenIds,
     defending,
     onStage: stage,
+    onSelectPaymentCard: togglePitch,
     onActivate: (instanceId: number) => clickActivate(instanceId)(),
     onSelect: setSel,
   };
@@ -991,6 +1017,7 @@ export function GameBoard() {
           latestEmote={latestEmote}
           canSendEmote={canSendEmote}
           mobileFloatViewport={mobileFloatViewport}
+          activeChainAttackerInstanceId={activeChainAttackerInstanceId}
           onSendEmote={sendEmote}
           onOpenOverlay={setOverlay}
         />
@@ -1024,6 +1051,7 @@ export function GameBoard() {
           latestEmote={latestEmote}
           canSendEmote={canSendEmote}
           mobileFloatViewport={mobileFloatViewport}
+          activeChainAttackerInstanceId={activeChainAttackerInstanceId}
           onSendEmote={sendEmote}
           onOpenOverlay={setOverlay}
         />
@@ -1148,6 +1176,7 @@ export function GameBoard() {
           decision: hidePriorityGuidance || showCardSearchOverlay ? null : pd,
           isMine: myDecision,
           decidingName: pd ? (view.players[pd.player]?.heroName ?? "") : "",
+          optionCardLabels,
           canPass: derived.canPass,
           defendPitchIds,
           hand: me.hand,

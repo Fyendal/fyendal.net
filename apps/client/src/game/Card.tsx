@@ -220,6 +220,7 @@ export function CardFace({
   ghost,
   onClick,
   label,
+  chainSourceLabel,
   explanation,
   motionKey,
   motionZoneAnchor,
@@ -253,6 +254,8 @@ export function CardFace({
   ghost?: boolean;
   onClick?: () => void;
   label?: string;
+  /** Marks the arena card that supplied the current combat-chain attack. */
+  chainSourceLabel?: string;
   /** Availability context shown on hover or keyboard focus. */
   explanation?: string;
   /** Stable viewer-safe presentation key used only for board motion geometry. */
@@ -343,6 +346,7 @@ export function CardFace({
     showTapped && card.tapped ? "card-tapped" : "",
     ghost ? "card-ghost" : "",
     onClick ? "card-clickable" : "",
+    chainSourceLabel ? "card-chain-source" : "",
     explanation ? "card-explained" : "",
     hasOverlays ? "card-countered" : "",
     // the pitch strip is redundant when the real card image is shown
@@ -366,7 +370,7 @@ export function CardFace({
         <button
           type="button"
           className="card-action"
-          aria-label={name}
+          aria-label={label ? `${name} — ${label}` : name}
           aria-describedby={explanationId}
         />
       ) : null}
@@ -400,6 +404,11 @@ export function CardFace({
         </>
       )}
       {label && <div className="c-zonelabel">{label}</div>}
+      {chainSourceLabel ? (
+        <div className="card-chain-source-badge" title={chainSourceLabel}>
+          {chainSourceLabel}
+        </div>
+      ) : null}
       {marked ? (
         <div className="c-marked-token" title="Marked">
           <img

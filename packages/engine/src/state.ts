@@ -48,6 +48,9 @@ export interface CardInstance {
   playableFrom?: PlayableZone[];
   /** Card whose effect granted the temporary play-from-zone permission. */
   playableFromSourceCardId?: string;
+  /** Shared one-use permission. Playing any card carrying the same group key
+   *  consumes the play-from-zone grant from every card in that group. */
+  playableFromSingleUseGroup?: string;
   /** When present, the play-from-zone permission belongs to this seat rather
    * than the card's owner (e.g. Nuu playing an opponent-owned banished card). */
   playableBySeat?: number;

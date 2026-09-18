@@ -2772,7 +2772,7 @@ export const iar: Record<string, CardScript> = {
   "satiate bloodthirst|2": satiateBloodthirst(),
   "satiate bloodthirst|3": satiateBloodthirst(),
   "blasmophet's boon|3": bloodDebt({
-    modifyAttack: (ctx) => controlsBlasmophet(ctx) ? 6 : 0,
+    modifyBasePower: (ctx) => controlsBlasmophet(ctx) ? 6 : 0,
   }),
   "consuming command|3": bloodDebt({
     onPlay(ctx) { ctx.setFlag("player", "iarConsumingCommandActive", true); },

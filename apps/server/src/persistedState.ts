@@ -20,6 +20,7 @@ export interface PersistedCardInstanceV1 {
   chosenName?: string;
   playableFrom?: ("banish" | "graveyard" | "deck")[];
   playableFromSourceCardId?: string;
+  playableFromSingleUseGroup?: string;
   playableBySeat?: number;
   playableFromExpiry?: number;
   playableFromEndTurnExpiry?: number;
@@ -878,7 +879,7 @@ function validateFlags(value: unknown, code: string, path: string, numbersOnly =
 }
 
 const CARD_REQUIRED = ["instanceId", "cardId", "owner"] as const satisfies readonly (keyof CardInstance)[];
-const CARD_OPTIONAL = ["subcards", "pitchCount", "faceDown", "intimidated", "returnToHandAtTurn", "tapped", "defCounters", "counters", "chosenName", "playableFrom", "playableFromSourceCardId", "playableBySeat", "playableFromExpiry", "playableFromEndTurnExpiry", "playableFromUntilStartOfSeatTurn", "playableFromUntilEndOfSeatTurn", "playableFromGrantedTurn", "playableFromUntilChainClose", "playCostReduction", "playCostReductionSeat", "playTargetInstanceId", "boundToInstanceId", "grantedTypes", "grantedColor", "grantedNames", "originalHeroCardId", "temporaryHeroOriginalCardId", "temporaryHeroUntilTurn", "grantedBaseAbilitiesCardId", "grantedBaseAbilitiesCardIds", "copyOriginalCardId", "grantedKeywords", "suppressedKeywords", "tempPower", "tempDefense", "temporaryAlly", "meldSide", "life", "damagePrevented", "flipped", "arsenalSlot", "temporaryGraveyardReplacement", "playableAsInstant"] as const satisfies readonly (keyof CardInstance)[];
+const CARD_OPTIONAL = ["subcards", "pitchCount", "faceDown", "intimidated", "returnToHandAtTurn", "tapped", "defCounters", "counters", "chosenName", "playableFrom", "playableFromSourceCardId", "playableFromSingleUseGroup", "playableBySeat", "playableFromExpiry", "playableFromEndTurnExpiry", "playableFromUntilStartOfSeatTurn", "playableFromUntilEndOfSeatTurn", "playableFromGrantedTurn", "playableFromUntilChainClose", "playCostReduction", "playCostReductionSeat", "playTargetInstanceId", "boundToInstanceId", "grantedTypes", "grantedColor", "grantedNames", "originalHeroCardId", "temporaryHeroOriginalCardId", "temporaryHeroUntilTurn", "grantedBaseAbilitiesCardId", "grantedBaseAbilitiesCardIds", "copyOriginalCardId", "grantedKeywords", "suppressedKeywords", "tempPower", "tempDefense", "temporaryAlly", "meldSide", "life", "damagePrevented", "flipped", "arsenalSlot", "temporaryGraveyardReplacement", "playableAsInstant"] as const satisfies readonly (keyof CardInstance)[];
 type _CardValidatorIsExhaustive = Assert<
   SameKeys<CardInstance, Record<(typeof CARD_REQUIRED)[number] | (typeof CARD_OPTIONAL)[number], unknown>>
 >;
@@ -896,6 +897,7 @@ function validateCard(value: unknown, code: string, path: string, depth = 0): vo
   optional(card, "counters", (v, p) => validateFlags(v, code, p, true), path);
   optional(card, "chosenName", (v, p) => { string(v, code, p, 128); }, path);
   optional(card, "playableFromSourceCardId", (v, p) => { string(v, code, p, 128); }, path);
+  optional(card, "playableFromSingleUseGroup", (v, p) => { string(v, code, p, 128); }, path);
   optional(card, "temporaryGraveyardReplacement", (v, p) => { oneOf(v, ["banish"] as const, code, p); }, path);
   optional(card, "subcards", (v, p) => array(v, code, p, 16).forEach(
     (subcard, index) => validateCard(subcard, code, `${p}[${index}]`, depth + 1),
