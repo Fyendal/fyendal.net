@@ -11,6 +11,16 @@ describe("card data decoding", () => {
     }])).toHaveLength(1);
   });
 
+  it("accepts a printed color independently from pitch", () => {
+    expect(decodeCardDataList([{
+      id: "TST002",
+      name: "Unpitchable Yellow",
+      color: 2,
+      cardType: "action",
+      text: "This card can't be pitched.",
+    }])).toHaveLength(1);
+  });
+
   it("rejects null and non-finite numeric values at the JSON boundary", () => {
     for (const attack of [null, Number.NaN, Number.POSITIVE_INFINITY]) {
       expect(() => decodeCardDataList([{

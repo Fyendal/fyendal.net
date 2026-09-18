@@ -1180,6 +1180,34 @@ describe("IAR cards", () => {
     expect(g.state.players[0]!.life).toBe(lifeBeforeEndPhase);
   });
 
+  it("each Corrupted Corpse attack gets go again in the same turn", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        board: ["corrupted corpse|0", "corrupted corpse|0"],
+        resources: 2,
+        weapons: ["vox necropolis|0"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.activate("corrupted corpse|0")
+      .blockWith()
+      .settle()
+      .expectLife(1, 17)
+      .expectAP(0, 1)
+      .activate("corrupted corpse|0")
+      .blockWith()
+      .settle()
+      .expectLife(1, 14)
+      .expectAP(0, 1);
+
+    expect(g.state.log.filter((entry) =>
+      entry.publicText?.includes("Corrupted Corpse has Go again")
+    )).toHaveLength(2);
+  });
+
   it("Danse Macabre leaves excess resources from a pitched card floating", () => {
     const g = scenario({ seats: [
       {

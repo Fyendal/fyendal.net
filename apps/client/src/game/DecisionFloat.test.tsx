@@ -37,6 +37,7 @@ import {
   bloodModeAllocation,
   boundedCardChoiceModel,
   boundedHandCardChoiceOptions,
+  cardChoiceLocationLabels,
   handCardChoiceOptions,
   optDecisionCards,
   toggleBoundedCardChoice,
@@ -479,6 +480,18 @@ describe("priority guidance help", () => {
 });
 
 describe("scripted card-choice presentation", () => {
+  it("labels hero choices relative to the deciding player", () => {
+    expect(cardChoiceLocationLabels(11, 22, [], {
+      yourHero: "Your Hero",
+      opponentHero: "Opponent's Hero",
+      leftWeapon: "Left weapon",
+      rightWeapon: "Right weapon",
+    })).toEqual(new Map([
+      [11, "Your Hero"],
+      [22, "Opponent's Hero"],
+    ]));
+  });
+
   it("labels matching weapon choices by their table position", () => {
     const first = { instanceId: 41, cardId: "TST-DAGGER", owner: 0 };
     const second = { instanceId: 42, cardId: "TST-DAGGER", owner: 0 };

@@ -160,8 +160,9 @@ export function cardColorOf(
   if (Number(owner.hero.counters?.colorsSuppressedUntilTurn ?? 0) >= state.turn) return 0;
   if (card.grantedColor !== undefined) return card.grantedColor;
   const front = dataOf(state, card.cardId);
-  const pitch = (card.flipped && front.backId ? dataOf(state, front.backId) : front).pitch;
-  return pitch === 1 || pitch === 2 || pitch === 3 || pitch === 4 ? pitch : 0;
+  const data = card.flipped && front.backId ? dataOf(state, front.backId) : front;
+  const color = data.color ?? data.pitch;
+  return color === 1 || color === 2 || color === 3 || color === 4 ? color : 0;
 }
 
 /** Effective names of a card object. Amnesia-style suppression is stored on

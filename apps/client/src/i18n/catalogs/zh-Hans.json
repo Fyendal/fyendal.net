@@ -1266,6 +1266,7 @@
   "card.log.cru.riled.attack.dominate": "{card}：你的下一张 Guardian 攻击行动牌获得 +{amount} 力量和压制 (dominate)",
   "card.log.hnt.hand.revealed": "{target} 展示 {cards}",
   "card.log.hnt.hand.revealed.generic": "{target} 展示其手牌",
+  "card.log.hnt.longwhisker.mode.chosen": "{player} 为 {card} 选择“{mode}”",
   "card.log.mon.minnowism.found": "{card} 找到 {result} 并将其置入你的手牌",
   "card.log.mpg.auras.suppressed": "{card}：{target} 下回合不能生成灵气 (Aura) 衍生物",
   "card.log.mst.innerchi.found": "{card} 展示 {result} 并将其置入你的手牌",

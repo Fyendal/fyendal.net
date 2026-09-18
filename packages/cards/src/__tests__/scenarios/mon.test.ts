@@ -747,6 +747,46 @@ describe("MON — generic commons and rares", () => {
       .chooseCard("ghostly visit|1")
       .expectDeckTop(0, "ghostly visit|1");
   });
+
+  it("Nourishing Emptiness grants +1 intellect on hit with no attack action in graveyard", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["nourishing emptiness|1", BLUE],
+          deck: [SEVEN, SEVEN, SEVEN, SEVEN, SEVEN],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("nourishing emptiness|1", { pitch: [BLUE] })
+      .blockWith()
+      .settle()
+      .endTurn()
+      .expectHandSize(0, 5);
+  });
+
+  it("Nourishing Emptiness has neither conditional effect with an attack action in graveyard", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["nourishing emptiness|1", BLUE],
+          deck: [SEVEN, SEVEN, SEVEN, SEVEN, SEVEN],
+          graveyard: [SIX],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("nourishing emptiness|1", { pitch: [BLUE] })
+      .blockWith()
+      .settle();
+
+    expect(s.state.chain.at(-1)?.flags.dominateAtResolution).not.toBe(true);
+    s.endTurn().expectHandSize(0, 4);
+  });
 });
 
 describe("MON — rules regression coverage", () => {

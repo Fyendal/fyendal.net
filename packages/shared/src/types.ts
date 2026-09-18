@@ -37,6 +37,8 @@ export interface CardData {
   /** Stable id, e.g. "WTR004". */
   id: string;
   name: string;
+  /** Printed color when it differs from pitch, such as an unpitchable yellow card. */
+  color?: CardColor;
   pitch?: Pitch;
   cost?: number;
   cardType: CardType;

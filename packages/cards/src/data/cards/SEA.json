@@ -1691,6 +1691,7 @@
  {
   "id": "SEA093",
   "name": "Goldfin Harpoon",
+  "color": 2,
   "cardType": "action",
   "text": "If this would be put into a graveyard, instead remove it from the game.",
   "cost": 0,

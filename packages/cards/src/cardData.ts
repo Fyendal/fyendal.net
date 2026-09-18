@@ -17,6 +17,7 @@ const CARD_TYPES = new Set<CardType>([
 const CARD_KEYS = new Set([
   "id",
   "name",
+  "color",
   "pitch",
   "cost",
   "cardType",
@@ -55,6 +56,7 @@ function invalidField(card: Record<string, unknown>): string | null {
   if (!isString(card.name, false)) return "name";
   if (!CARD_TYPES.has(card.cardType as CardType)) return "cardType";
   if (!isString(card.text)) return "text";
+  if (!(card.color === undefined || card.color === 1 || card.color === 2 || card.color === 3 || card.color === 4)) return "color";
   if (!(card.pitch === undefined || card.pitch === 1 || card.pitch === 2 || card.pitch === 3 || card.pitch === 4)) return "pitch";
   for (const field of ["cost", "attack", "defense", "intellect", "life"] as const) {
     if (!isOptionalNonNegativeInteger(card[field])) return field;

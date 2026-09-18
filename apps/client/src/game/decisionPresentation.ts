@@ -1,5 +1,32 @@
 import type { CardView, PendingDecision } from "@fyendal/shared";
 
+export interface CardChoiceLocationLabelText {
+  yourHero: string;
+  opponentHero: string;
+  leftWeapon: string;
+  rightWeapon: string;
+}
+
+/** Viewer-relative labels for public permanents whose artwork alone can make
+ * a scripted card choice ambiguous. Hero labels are always included so an
+ * effect such as Oasis Respite cannot silently be assigned to the wrong hero. */
+export function cardChoiceLocationLabels(
+  yourHeroInstanceId: number,
+  opponentHeroInstanceId: number,
+  yourWeaponInstanceIds: readonly number[],
+  text: CardChoiceLocationLabelText,
+): ReadonlyMap<number, string> {
+  const labels = new Map<number, string>([
+    [yourHeroInstanceId, text.yourHero],
+    [opponentHeroInstanceId, text.opponentHero],
+  ]);
+  if (yourWeaponInstanceIds.length > 1) {
+    labels.set(yourWeaponInstanceIds[0]!, text.leftWeapon);
+    labels.set(yourWeaponInstanceIds[1]!, text.rightWeapon);
+  }
+  return labels;
+}
+
 export type BloodAllocationMode = "power" | "go-again" | "extra-attack";
 
 export interface BloodAllocationControl {

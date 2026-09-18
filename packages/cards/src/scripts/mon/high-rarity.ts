@@ -360,6 +360,21 @@ export const monHighRarity: Record<string, CardScript> = {
   "dread scythe|0": weapon(3, { onAttackDeclared(ctx) { ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true, sourceInstanceId: ctx.self.instanceId }); } }),
   "sonata arcanix|1": sonataArcanix,
   "exude confidence|1": { defendingHeroCannotRespondBelowPower: true, activated: { cost: 3, isAttack: false, goAgain: false, timing: "attack-reaction", oncePerTurn: false, onActivate(ctx) { ctx.addModifier({ scope: "chain-link", attack: 2 }); } } },
-  "nourishing emptiness|1": { onAttackDeclared(ctx) { if (!ctx.player(ctx.seat).graveyard.some((card) => isAttack(ctx, card))) ctx.addModifier({ scope: "chain-link", dominate: true }); }, onHit(ctx) { ctx.setPlayerFlag(ctx.seat, "nextEndPhaseIntellectBonus", 1); } },
+  "nourishing emptiness|1": {
+    onAttackDeclared(ctx) {
+      if (ctx.player(ctx.seat).graveyard.some((card) => isAttack(ctx, card))) {
+        ctx.suppressCardKeyword(ctx.self.instanceId, "dominate");
+      }
+    },
+    onHit(ctx) {
+      if (!ctx.player(ctx.seat).graveyard.some((card) => isAttack(ctx, card))) {
+        ctx.setPlayerFlag(
+          ctx.seat,
+          "bonusIntellect",
+          Number(ctx.getPlayerFlag(ctx.seat, "bonusIntellect")) + 1,
+        );
+      }
+    },
+  },
   "rouse the ancients|3": rouseTheAncients,
 };

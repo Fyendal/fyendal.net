@@ -6155,6 +6155,28 @@
       "value": " reveals their hand"
     }
   ],
+  "card.log.hnt.longwhisker.mode.chosen": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " chooses “"
+    },
+    {
+      "type": 1,
+      "value": "mode"
+    },
+    {
+      "type": 0,
+      "value": "” for "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
   "card.log.mon.minnowism.found": [
     {
       "type": 1,

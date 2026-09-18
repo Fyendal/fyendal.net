@@ -306,6 +306,19 @@ describe("HNT — marked heroes and daggers", () => {
     });
 
     g.chooseOption("+2 attack");
+    expect(g.state.log.at(-1)).toMatchObject({
+      publicText: "Fang chooses +2 attack for Long Whisker Loyalty⟦HNT102⟧",
+      publicPayload: {
+        message: {
+          id: "card.log.hnt.longwhisker.mode.chosen",
+          values: {
+            card: { kind: "card", cardId: "HNT102" },
+            player: { kind: "player", seat: 0 },
+            mode: { kind: "term", id: "card.hnt.longwhisker.option.attack" },
+          },
+        },
+      },
+    });
     expect(g.state.pendingDecision).toMatchObject({
       chooseHook: "long-whisker-mode",
       options: ["additional attack", "mark on hit"],

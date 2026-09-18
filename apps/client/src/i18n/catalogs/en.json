@@ -1266,6 +1266,7 @@
   "card.log.cru.riled.attack.dominate": "{card}: your next Guardian attack action gets +{amount} attack and dominate",
   "card.log.hnt.hand.revealed": "{target} reveals {cards}",
   "card.log.hnt.hand.revealed.generic": "{target} reveals their hand",
+  "card.log.hnt.longwhisker.mode.chosen": "{player} chooses “{mode}” for {card}",
   "card.log.mon.minnowism.found": "{card} finds {result} and puts it into your hand",
   "card.log.mpg.auras.suppressed": "{card}: {target} can't create Aura tokens next turn",
   "card.log.mst.innerchi.found": "{card} reveals {result} and puts it into your hand",

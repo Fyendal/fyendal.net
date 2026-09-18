@@ -180,10 +180,11 @@ function decay(): Pick<CardScript, "triggers"> {
   };
 }
 
-function zombieAttack() {
+function zombieAttack(goAgain = false) {
   return attackAbility(1, {
     tap: true,
     oncePerTurn: false,
+    goAgain,
     canActivate: controlsVox,
   });
 }
@@ -2489,10 +2490,7 @@ export const iar: Record<string, CardScript> = {
   },
 
   "corrupted corpse|0": bloodDebt({
-    activated: zombieAttack(),
-    onAttackDeclared(ctx) {
-      ctx.grantGoAgain();
-    },
+    activated: zombieAttack(true),
   }),
 
   "danse macabre|0": {

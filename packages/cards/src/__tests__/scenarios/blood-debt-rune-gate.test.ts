@@ -265,6 +265,71 @@ describe("Blood Debt and Rune Gate", () => {
     }
   });
 
+  it("offers the playable cards from the reported Shadowrealm Horror banish", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["shadowrealm horror|1"],
+          graveyard: ["beckoning hunger|1", "beast within|2", "shadowrealm horror|1"],
+          resources: 10,
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("shadowrealm horror|1")
+      .blockWith()
+      .settle()
+      .doRaw({ kind: "close-chain" });
+
+    const banished = g.state.players[0]!.banish;
+    expect(banished).toHaveLength(3);
+    for (const card of banished) expect(card.playableFrom).toContain("banish");
+
+    const playableIds = new Set(legalIntents(g.state, 0).flatMap((intent) =>
+      intent.kind === "play-from-zone" && intent.zone === "banish"
+        ? [intent.instanceId]
+        : []));
+    const isPlayable = (key: string) => banished.some((card) =>
+      card.cardId === printingId(key) && playableIds.has(card.instanceId));
+
+    expect(isPlayable("beckoning hunger|1")).toBe(true);
+    expect(isPlayable("beast within|2")).toBe(true);
+    expect(isPlayable("shadowrealm horror|1")).toBe(false);
+  });
+
+  it("keeps Shadowrealm Horror's play grant when Gate to i'Arathael was used to play it", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          board: ["gate to i'arathael|0"],
+          banish: ["shadowrealm horror|1"],
+          graveyard: ["raging onslaught|1", "raging onslaught|1", "raging onslaught|1"],
+          resources: 10,
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.activate("gate to i'arathael|0", { targetCard: "shadowrealm horror|1" })
+      .play("shadowrealm horror|1", { fromZone: "banish" })
+      .blockWith()
+      .settle()
+      .doRaw({ kind: "close-chain" });
+
+    const horrorCostCards = g.state.players[0]!.banish;
+    expect(horrorCostCards).toHaveLength(3);
+    for (const card of horrorCostCards) {
+      expect(legalIntents(g.state, 0)).toContainEqual(expect.objectContaining({
+        kind: "play-from-zone",
+        zone: "banish",
+        instanceId: card.instanceId,
+      }));
+    }
+  });
+
   it("Widespread Annihilation lets each affected hero choose their hand card", () => {
     const g = scenario({
       seats: [

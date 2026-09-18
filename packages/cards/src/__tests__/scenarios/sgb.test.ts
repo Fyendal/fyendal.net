@@ -98,6 +98,25 @@ describe("SGB — attack triggers", () => {
       .expectHandSize(0, 1); // battalion drawn off the discard
   });
 
+  it("Golden Tipple can discard the unpitchable yellow Goldfin Harpoon", () => {
+    const g = scenario({
+      seats: [
+        {
+          ...GRAVY,
+          hand: ["golden tipple|1", "goldfin harpoon|0", "saltwater swell|3"],
+          deck: ["battalion barque|1"],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+
+    g.play("golden tipple|1", { pitch: ["saltwater swell|3"] })
+      .chooseCard("goldfin harpoon|0")
+      .expectNotInZone(0, "goldfin harpoon|0", "graveyard")
+      .expectLog("creates Gold")
+      .expectHandSize(0, 1);
+  });
+
   it("Saltwater Swell pitches a revealed blue card off the deck", () => {
     const g = scenario({
       seats: [

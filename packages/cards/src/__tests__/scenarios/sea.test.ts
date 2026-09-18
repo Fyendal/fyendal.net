@@ -707,6 +707,37 @@ describe("SEA — High Seas heroes and cogs", () => {
     expect(g.state.players[0]!.arsenal).toHaveLength(2);
   });
 
+  it("Marlynn loads consecutive Three of a Kind arrows into distinct New Horizon slots", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "marlynn|0",
+          equipment: { head: "new horizon|0" },
+          hand: ["three of a kind|1"],
+          resources: 1,
+          deck: ["king kraken harpoon|1", "battering bolt|1", "rusty harpoon|3"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("three of a kind|1");
+    expect(g.state.pendingDecision?.chooseHook).toBe("marlynn-arrow");
+
+    g.chooseCard("king kraken harpoon|1");
+    expect(g.state.pendingDecision?.chooseHook).toBe("marlynn-arrow");
+
+    g.chooseCard("battering bolt|1");
+    expect(g.state.players[0]!.arsenal).toMatchObject([
+      { cardId: printingId("king kraken harpoon|1"), arsenalSlot: 0 },
+      { cardId: printingId("battering bolt|1"), arsenalSlot: 1 },
+    ]);
+    expect(g.state.players[0]!.hand).toEqual(expect.arrayContaining([
+      expect.objectContaining({ cardId: printingId("rusty harpoon|3") }),
+    ]));
+  });
+
   it("Rust Belt taps a cog as an effect cost before gaining a resource", () => {
     const g = scenario({
       seats: [

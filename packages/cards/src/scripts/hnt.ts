@@ -116,7 +116,11 @@ function draconicLinks(ctx: ScriptCtx): number {
 
 const LONG_WHISKER_MODES = ["+2 attack", "additional attack", "mark on hit"] as const;
 
-function longWhiskerModeBit(mode: string): number {
+function isLongWhiskerMode(mode: string): mode is (typeof LONG_WHISKER_MODES)[number] {
+  return LONG_WHISKER_MODES.some((candidate) => candidate === mode);
+}
+
+function longWhiskerModeBit(mode: (typeof LONG_WHISKER_MODES)[number]): number {
   if (mode === "+2 attack") return 1;
   if (mode === "additional attack") return 2;
   if (mode === "mark on hit") return 4;
@@ -783,9 +787,20 @@ Object.assign(hnt, {
     },
     onChoose(ctx, hook, option) {
       if (hook === "long-whisker-mode") {
+        if (!isLongWhiskerMode(option)) return;
         const bit = longWhiskerModeBit(option);
         const selected = ctx.getCounter("longWhiskerModes");
-        if (bit === 0 || (selected & bit) !== 0) return;
+        if ((selected & bit) !== 0) return;
+        const modeMessage = longWhiskerOptionMessages()[option];
+        ctx.logPublic(localizedCardLog(
+          ctx,
+          `${ctx.cardData(ctx.player(ctx.seat).heroCardId).name} chooses ${option} for ${ctx.data.name}`,
+          "card.log.hnt.longwhisker.mode.chosen",
+          {
+            player: { kind: "player", seat: ctx.seat },
+            mode: { kind: "term", id: modeMessage.id },
+          },
+        ));
         const updated = selected | bit;
         const remaining = ctx.getCounter("longWhiskerModesRemaining") - 1;
         ctx.setCounter("longWhiskerModes", updated);

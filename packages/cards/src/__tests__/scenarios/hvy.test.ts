@@ -744,6 +744,35 @@ describe("HVY — Heavy Hitters mechanics", () => {
       .expectZoneSize(0, "banish", 4);
   });
 
+  it("Kassai creates Gold when a later weapon hits after the first weapon misses", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          heroKey: "kassai of the golden sand|0",
+          weapons: ["hot streak|0", "cintari saber|0"],
+          resources: 2,
+          graveyard: ["wage gold|1", "wage might|1", "wage gold|2", "wage vigor|2"],
+        },
+        { hero: "rhinar", hand: ["raging onslaught|3"] },
+      ],
+    });
+
+    g.activate("kassai of the golden sand|0", { settle: false })
+      .chooseCard("wage gold|1")
+      .chooseCard("wage might|1")
+      .chooseCard("wage gold|2")
+      .chooseCard("wage vigor|2")
+      .attackWithWeapon("hot streak|0")
+      .blockWith("raging onslaught|3")
+      .settle()
+      .expectNotInZone(0, "gold|0", "board")
+      .attackWithWeapon("cintari saber|0")
+      .blockWith()
+      .settle()
+      .expectInZone(0, "gold|0", "board");
+  });
+
   it("Good Time Chapeau destroys a chosen Gold as an activation cost", () => {
     const g = scenario({
       seats: [

@@ -46,6 +46,7 @@ import {
 import {
   boundedCardChoiceModel,
   boundedHandCardChoiceOptions,
+  cardChoiceLocationLabels,
   handCardChoiceOptions,
   toggleBoundedCardChoice,
 } from "./decisionPresentation.js";
@@ -430,14 +431,23 @@ export function GameBoard() {
   const activeChainAttackerInstanceId = combatChainLinks.length > 0
     ? combatChainLinks[combatChainLinks.length - 1]!.attackingCard.instanceId
     : null;
-  const optionCardLabels = me.weapons.length > 1
-    ? new Map(me.weapons.map((weapon, index) => [
-        weapon.instanceId,
-        intl.formatMessage({
-          id: index === 0 ? "game.zone.weapon.left" : "game.zone.weapon.right",
-        }),
-      ]))
-    : undefined;
+  const optionCardLabels = cardChoiceLocationLabels(
+    me.heroInstanceId,
+    opp.heroInstanceId,
+    me.weapons.map((weapon) => weapon.instanceId),
+    {
+      yourHero: intl.formatMessage(
+        { id: "game.zone.mine" },
+        { zone: intl.formatMessage({ id: "game.zone.hero" }) },
+      ),
+      opponentHero: intl.formatMessage(
+        { id: "game.zone.opponent" },
+        { zone: intl.formatMessage({ id: "game.zone.hero" }) },
+      ),
+      leftWeapon: intl.formatMessage({ id: "game.zone.weapon.left" }),
+      rightWeapon: intl.formatMessage({ id: "game.zone.weapon.right" }),
+    },
+  );
   const showPriorityFloat = !spectating && !replaying && gameHasPriority(view);
   const hasOwnPriority = showPriorityFloat && view.priorityPlayer === seat;
   const priorityLabel = view.priorityPlayer === seat ? "YOUR PRIORITY" : "OPPONENT'S PRIORITY";
