@@ -10,6 +10,57 @@ const card = (
   set?: string,
 ): CardData => ({ id, name, cardType, ...(pitch ? { pitch } : {}), ...(set ? { set } : {}), text: "" });
 
+const SILVER_AGE_BANNED_NAMES = [
+  "Absorb in Aether",
+  "Aether Flare",
+  "Aether Ironweave",
+  "Ball Lightning",
+  "Beaten Trackers",
+  "Belittle",
+  "Bonds of Ancestry",
+  "Bracers of Belief",
+  "Count Your Blessings",
+  "Deadwood Dirge",
+  "Drone of Brutality",
+  "Ebon Fold",
+  "Electromagnetic Somersault",
+  "Emeritus Scolding",
+  "Fate Foreseen",
+  "Fiddler's Green",
+  "Flic Flak",
+  "Goliath Gauntlet",
+  "Harmonized Kodachi",
+  "Heartened Cross Strap",
+  "Honing Hood",
+  "Lightning Press",
+  "Mask of Three Tails",
+  "Nimby",
+  "Old Knocker",
+  "Plunder Run",
+  "Pulping",
+  "Ragamuffin's Hat",
+  "Reality Refractor",
+  "Reaping Blade",
+  "Rosetta Thorn",
+  "Sigil of Solace",
+  "Sigil of Suffering",
+  "Sink Below",
+  "Snapback",
+  "Snapdragon Scalers",
+  "Stubby Hammerers",
+  "Vest of the First Fist",
+  "Volzar, the Lightning Rod",
+  "Waning Moon",
+  "Zephyr Needle",
+] as const;
+
+const silverAgeBannedCards: Record<string, CardData> = Object.fromEntries(
+  SILVER_AGE_BANNED_NAMES.map((name, index) => {
+    const id = `SA_BANNED_${index}`;
+    return [id, card(id, name)];
+  }),
+);
+
 const cards: Record<string, CardData> = {
   HERO: card("HERO", "Rhinar, Reckless Rampage", "hero"),
   AZALEA: card("AZALEA", "Azalea, Ace in the Hole", "hero"),
@@ -40,6 +91,11 @@ const cards: Record<string, CardData> = {
   SOMERSAULT_BLUE: card("SOMERSAULT_BLUE", "Electromagnetic Somersault", "action", 3),
   NORMAL: card("NORMAL", "Wrecker Romp", "action", 3),
   FUTURE: card("FUTURE", "Tomorrow's Attack", "action", 1, "AMO"),
+  CHANE: card("CHANE", "Chane", "hero"),
+  BRIAR: card("BRIAR", "Briar", "hero"),
+  OLDHIM: card("OLDHIM", "Oldhim", "hero"),
+  OSCILIO: card("OSCILIO", "Oscilio", "hero"),
+  ...silverAgeBannedCards,
 };
 
 function pool(overrides: Partial<DeckPool> = {}): DeckPool {
@@ -147,5 +203,54 @@ describe("Classic Constructed format legality", () => {
       weaponIds: ["DEATH_DEALER"],
       deck: ["ART", "FUTURE"],
     }), "cc", { cardPoolMode: "open" })).toEqual([]);
+  });
+});
+
+describe("Silver Age format legality", () => {
+  it("rejects every currently benched hero", () => {
+    for (const heroId of ["CHANE", "BRIAR", "OLDHIM", "OSCILIO"]) {
+      expect(formatLegalityIssues(cards, pool({ heroId }), "silver-age")).toMatchObject([
+        {
+          kind: "benched-hero",
+          cardId: heroId,
+          message: `${cards[heroId]!.name} is benched and not legal in Silver Age`,
+        },
+      ]);
+    }
+  });
+
+  it("rejects every card on the Silver Age banned list at every pitch", () => {
+    const deck = Object.keys(silverAgeBannedCards);
+    const issues = formatLegalityIssues(cards, pool({ deck }), "silver-age");
+    expect(issues.map((issue) => issue.kind)).toEqual(deck.map(() => "banned-card"));
+    expect(issues.map((issue) => issue.cardName)).toEqual(SILVER_AGE_BANNED_NAMES);
+    expect(issues.map((issue) => issue.message)).toEqual(
+      SILVER_AGE_BANNED_NAMES.map((name) => `${name} is banned in Silver Age`),
+    );
+  });
+
+  it("keeps the Silver Age-only list out of Classic Constructed", () => {
+    const sinkBelowId = Object.keys(silverAgeBannedCards).find(
+      (id) => silverAgeBannedCards[id]!.name === "Sink Below",
+    )!;
+    expect(formatLegalityIssues(cards, pool({ heroId: "CHANE", deck: [sinkBelowId] }), "cc"))
+      .toEqual([]);
+  });
+
+  it("still enforces benches and bans in Future mode but permits them in Open mode", () => {
+    const bannedId = Object.keys(silverAgeBannedCards)[0]!;
+    const bannedPool = pool({ heroId: "CHANE", deck: [bannedId] });
+    expect(formatLegalityIssues(
+      cards,
+      bannedPool,
+      "silver-age",
+      { cardPoolMode: "future" },
+    ).map((issue) => issue.kind)).toEqual(["benched-hero", "banned-card"]);
+    expect(formatLegalityIssues(
+      cards,
+      bannedPool,
+      "silver-age",
+      { cardPoolMode: "open" },
+    )).toEqual([]);
   });
 });

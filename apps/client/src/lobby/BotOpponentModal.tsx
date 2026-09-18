@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useIntl } from "react-intl";
-import type { BotOpponent } from "@fyendal/shared";
+import type { BotOpponent, CardPoolMode } from "@fyendal/shared";
 import type { ConstructedFormat } from "../domain.js";
 import { heroImageUrl } from "./heroImage.js";
 
@@ -11,6 +11,7 @@ interface BotOption {
   heroName: string;
   deckType: DeckType;
   descriptionId: string;
+  requiresOpen?: boolean;
 }
 
 type DeckType = "beginner" | "midrange" | "aggro" | "elemental" | "guardian" | "boss";
@@ -66,6 +67,7 @@ const BOTS: Readonly<Record<ConstructedFormat, readonly BotOption[]>> = {
       heroName: "Briar",
       deckType: "elemental",
       descriptionId: "lobby.bot.briar.description",
+      requiresOpen: true,
     },
     {
       id: "bravo",
@@ -80,11 +82,14 @@ const BOTS: Readonly<Record<ConstructedFormat, readonly BotOption[]>> = {
 
 export function BotOpponentModal(props: {
   format: ConstructedFormat;
+  cardPoolMode: CardPoolMode;
   onSelect: (bot: BotOpponent, searchForPlayer: boolean) => void;
   onClose: () => void;
 }) {
   const intl = useIntl();
-  const bots = BOTS[props.format];
+  const bots = BOTS[props.format].filter(
+    (bot) => bot.requiresOpen !== true || props.cardPoolMode === "open",
+  );
   const [searchForPlayer, setSearchForPlayer] = useState(true);
   return (
     <div

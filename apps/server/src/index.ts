@@ -2,7 +2,7 @@ import http from "node:http";
 import { randomUUID } from "node:crypto";
 import { WebSocketServer, WebSocket } from "ws";
 import type { CardPoolMode, ClientMessage, Format, HeroId, ServerMessage } from "@fyendal/shared";
-import { cardData, formatLegalityIssues } from "@fyendal/cards";
+import { cardData, formatLegalityIssues, precon } from "@fyendal/cards";
 import { botDefinition } from "@fyendal/bot";
 import { deleteExpiredSessions, hashSessionToken, sessionForToken, type AuthUser } from "./auth.js";
 import type { Queryable } from "./db.js";
@@ -776,6 +776,18 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         const definition = botDefinition(botOpponent);
         if (!definition || definition.format !== botFormat) {
           send(ws, { type: "error", message: `choose a ${botFormat} bot` });
+          return;
+        }
+        const registeredBotDeck = precon(definition.deckId);
+        if (!registeredBotDeck || registeredBotDeck.format !== botFormat) {
+          send(ws, { type: "error", message: "bot precon is not available" });
+          return;
+        }
+        const botLegality = formatLegalityIssues(cardData, registeredBotDeck.pool, botFormat, {
+          cardPoolMode: definition.presentationCardPoolMode ?? msg.cardPoolMode ?? "legal",
+        });
+        if (botLegality.length > 0) {
+          send(ws, { type: "error", message: botLegality.map((issue) => issue.message).join("; ") });
           return;
         }
         const choice = await resolveChoice(

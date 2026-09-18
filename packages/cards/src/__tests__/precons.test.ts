@@ -2,9 +2,10 @@
  * The hardcoded silver-age precon pools (data/precons.json, official LSS
  * Silver Age decklists — Chapter 3, Chapter 2, and the imported Chapter 1
  * all five Chapter 1 decks): every id
- * must resolve, every card must be implemented, and each pool must be a legal
- * 55-card silver-age registration (weapons + equipment + main; main ≥ 40 at
- * presentation).
+ * must resolve, every card must be implemented, and each pool must remain a
+ * well-formed 55-card registration (weapons + equipment + main; main ≥ 40 at
+ * presentation). Seasonal benches and bans determine which are currently
+ * offered in legal-mode rooms.
  */
 import { describe, expect, it } from "vitest";
 import { cardData, isImplemented, precon, preconsForFormat, silverAgePrecon, silverAgePrecons } from "../index.js";
@@ -37,7 +38,22 @@ describe("silver-age precon pools", () => {
     expect(silverAgePrecon("nope")).toBeNull();
   });
 
-  it("every pool is a legal 55-card registration of implemented cards", () => {
+  it("offers only precons legal under the current Silver Age benches and bans", () => {
+    expect(preconsForFormat("silver-age").map((deck) => deck.id)).toEqual([
+      "precon-sly",
+      "precon-sgb",
+      "precon-sbl",
+      "precon-sen",
+      "precon-sfa",
+      "precon-saz",
+      "precon-sdo",
+      "precon-sar",
+      "precon-sda",
+      "precon-sbr",
+    ]);
+  });
+
+  it("keeps every pool as a well-formed 55-card registration of implemented cards", () => {
     for (const p of silverAgePrecons) {
       const { pool } = p;
       const total =

@@ -12,7 +12,7 @@ describe("BotOpponentModal", () => {
   it("offers Ira, Hala, Cindra, Jarl, and Starvo in a focused opponent dialog", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>
-        <BotOpponentModal format="cc" onSelect={vi.fn()} onClose={vi.fn()} />
+        <BotOpponentModal format="cc" cardPoolMode="legal" onSelect={vi.fn()} onClose={vi.fn()} />
       </TestI18nProvider>,
     );
 
@@ -46,7 +46,7 @@ describe("BotOpponentModal", () => {
   it("offers Briar and Bravo for Silver Age", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>
-        <BotOpponentModal format="silver-age" onSelect={vi.fn()} onClose={vi.fn()} />
+        <BotOpponentModal format="silver-age" cardPoolMode="open" onSelect={vi.fn()} onClose={vi.fn()} />
       </TestI18nProvider>,
     );
 
@@ -59,6 +59,22 @@ describe("BotOpponentModal", () => {
     expect(html).not.toContain("Scarlet Revenger");
   });
 
+  it("hides benched Briar outside Open mode", () => {
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <BotOpponentModal
+          format="silver-age"
+          cardPoolMode="legal"
+          onSelect={vi.fn()}
+          onClose={vi.fn()}
+        />
+      </TestI18nProvider>,
+    );
+
+    expect(html).not.toContain("Briar");
+    expect(html).toContain("Bravo");
+  });
+
   it("starts with matchmaking checked even when the saved preference is disabled", () => {
     const getItem = vi.fn((key: string) => key === BOT_MATCHMAKING_PREFERENCE_STORAGE_KEY
       ? JSON.stringify({ version: 1, searchForPlayer: false })
@@ -69,7 +85,7 @@ describe("BotOpponentModal", () => {
     });
     const html = renderToStaticMarkup(
       <TestI18nProvider>
-        <BotOpponentModal format="cc" onSelect={vi.fn()} onClose={vi.fn()} />
+        <BotOpponentModal format="cc" cardPoolMode="legal" onSelect={vi.fn()} onClose={vi.fn()} />
       </TestI18nProvider>,
     );
 

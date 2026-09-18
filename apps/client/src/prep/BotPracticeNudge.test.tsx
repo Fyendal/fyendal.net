@@ -52,6 +52,7 @@ describe("bot practice nudge", () => {
       <TestI18nProvider>
         <BotPracticeNudge
           format="cc"
+          cardPoolMode="legal"
           busy={false}
           onPlay={vi.fn()}
           onDismiss={vi.fn()}
@@ -72,6 +73,7 @@ describe("bot practice nudge", () => {
       <TestI18nProvider locale="zh-Hans">
         <BotPracticeNudge
           format="silver-age"
+          cardPoolMode="legal"
           busy={false}
           onPlay={vi.fn()}
           onDismiss={vi.fn()}
