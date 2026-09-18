@@ -574,6 +574,57 @@ describe("SEA — High Seas heroes and cogs", () => {
     )).toBe(false);
   });
 
+  it("Palantir Aeronought can destroy a defender from a previous chain link", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: [
+            "palantir aeronought|1",
+            "raging onslaught|3",
+            "hundred winds|1",
+          ],
+          board: ["golden cog|0", "golden cog|0", "golden cog|0"],
+        },
+        {
+          hero: "dorinthea",
+          equipment: { legs: "valiant dynamo|0" },
+        },
+      ],
+    });
+    g.state.players[0]!.actionPoints = 2;
+
+    const activatePalantir = () => {
+      g.activate("palantir aeronought|1", { settle: false });
+      const cogOption = g.state.pendingDecision?.options?.[0];
+      expect(cogOption).toBeDefined();
+      g.doRaw({ kind: "choose", optionId: cogOption! })
+        .passPriority()
+        .passPriority();
+    };
+
+    g.play("palantir aeronought|1", { pitch: ["raging onslaught|3"] })
+      .blockWith("valiant dynamo|0");
+    activatePalantir();
+    activatePalantir();
+    g.settle();
+
+    const dynamoId = g.state.chain[0]!.defendingEquipment[0]!.instanceId;
+    expect(g.state.chain[0]).toMatchObject({ resolved: true });
+
+    g.play("hundred winds|1")
+      .blockWith();
+    activatePalantir();
+
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "palantir",
+      options: expect.arrayContaining([String(dynamoId)]),
+    });
+    g.chooseCard("valiant dynamo|0")
+      .expectInZone(1, "valiant dynamo|0", "graveyard")
+      .expectNoEquipment(1, "legs");
+  });
+
   it("Cogwerx Dovetail uses one modal ability up to three times", () => {
     const g = scenario({
       seats: [

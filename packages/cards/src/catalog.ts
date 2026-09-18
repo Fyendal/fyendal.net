@@ -125,6 +125,7 @@ import { formatLegalityIssues } from "./formatLegality.js";
 export {
   CLASSIC_CONSTRUCTED_LEGALITY_CHECKED_ON,
   FUTURE_SET_CODES,
+  SILVER_AGE_LEGALITY_CHECKED_ON,
   formatLegalityErrors,
   formatLegalityIssues,
   type FormatLegalityIssue,

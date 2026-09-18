@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useIntl } from "react-intl";
-import type { BotOpponent, Format } from "@fyendal/shared";
+import type { BotOpponent, CardPoolMode, Format } from "@fyendal/shared";
 import type { ConstructedFormat } from "../domain.js";
 import { BotOpponentModal } from "../lobby/BotOpponentModal.js";
 
@@ -25,6 +25,7 @@ export function shouldOfferBotPractice(input: {
 
 export function BotPracticeNudge(props: {
   format: ConstructedFormat;
+  cardPoolMode: CardPoolMode;
   busy: boolean;
   onPlay: (bot: BotOpponent, searchForPlayer: boolean) => void;
   onDismiss: () => void;
@@ -78,6 +79,7 @@ export function BotPracticeNudge(props: {
         {choosingBot ? (
           <BotOpponentModal
             format={props.format}
+            cardPoolMode={props.cardPoolMode}
             onSelect={(bot, searchForPlayer) => {
               setChoosingBot(false);
               props.onPlay(bot, searchForPlayer);

@@ -1573,7 +1573,10 @@ Object.assign(sea, {
           ctx.link
         ) {
           ctx.setFlag("player", destroyedKey, true);
-          const cards = [...ctx.link.defendingCards, ...ctx.link.defendingEquipment];
+          const cards = ctx.state.chain.flatMap((link) => [
+            ...link.defendingCards,
+            ...link.defendingEquipment,
+          ]);
           if (cards.length) {
             ctx.requestCardChoice(
               "palantir",

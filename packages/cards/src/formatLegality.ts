@@ -14,6 +14,14 @@ export const FUTURE_SET_CODES: ReadonlySet<string> = new Set(["AMA", "AMO", "IAR
  */
 export const CLASSIC_CONSTRUCTED_LEGALITY_CHECKED_ON = "2026-08-12";
 
+/**
+ * Silver Age season snapshot beginning with the Usurp the Shadow Throne
+ * pre-release. Refresh the benched-hero and banned-card lists together when
+ * the next standalone booster season begins.
+ * https://fabtcg.com/rules-and-policy-center/card-legality-policy/
+ */
+export const SILVER_AGE_LEGALITY_CHECKED_ON = "2026-09-18";
+
 const LIVING_LEGEND_HEROES = new Set([
   "aurora, shooting star",
   "azalea, ace in the hole",
@@ -62,8 +70,8 @@ const LIVING_LEGEND_WEAPONS = new Set([
   "tiger taming khakkara",
 ]);
 
-/** Cards banned at every pitch. Pitch-specific bans are listed separately. */
-const BANNED_CARD_NAMES = new Set([
+/** Classic Constructed cards banned at every pitch. */
+const CLASSIC_CONSTRUCTED_BANNED_CARD_NAMES = new Set([
   "art of war",
   "awakening",
   "ball lightning",
@@ -96,7 +104,7 @@ const BANNED_CARD_NAMES = new Set([
   "zephyr needle",
 ]);
 
-const BANNED_FUNCTIONAL_KEYS = new Set([
+const CLASSIC_CONSTRUCTED_BANNED_FUNCTIONAL_KEYS = new Set([
   "bonds of ancestry|2",
   "bonds of ancestry|3",
   "electromagnetic somersault|1",
@@ -107,6 +115,58 @@ const BANNED_FUNCTIONAL_KEYS = new Set([
   "orb-weaver spinneret|3",
 ]);
 
+const SILVER_AGE_BENCHED_HERO_NAMES = new Set([
+  "chane",
+  "briar",
+  "oldhim",
+  "oscilio",
+]);
+
+/** Silver Age bans apply to every pitch of the named card. */
+const SILVER_AGE_BANNED_CARD_NAMES = new Set([
+  "absorb in aether",
+  "aether flare",
+  "aether ironweave",
+  "ball lightning",
+  "beaten trackers",
+  "belittle",
+  "bonds of ancestry",
+  "bracers of belief",
+  "count your blessings",
+  "deadwood dirge",
+  "drone of brutality",
+  "ebon fold",
+  "electromagnetic somersault",
+  "emeritus scolding",
+  "fate foreseen",
+  "fiddler's green",
+  "flic flak",
+  "goliath gauntlet",
+  "harmonized kodachi",
+  "heartened cross strap",
+  "honing hood",
+  "lightning press",
+  "mask of three tails",
+  "nimby",
+  "old knocker",
+  "plunder run",
+  "pulping",
+  "ragamuffin's hat",
+  "reality refractor",
+  "reaping blade",
+  "rosetta thorn",
+  "sigil of solace",
+  "sigil of suffering",
+  "sink below",
+  "snapback",
+  "snapdragon scalers",
+  "stubby hammerers",
+  "vest of the first fist",
+  "volzar, the lightning rod",
+  "waning moon",
+  "zephyr needle",
+]);
+
 const PITCH_NAMES: Record<NonNullable<CardData["pitch"]>, string> = {
   1: "Red",
   2: "Yellow",
@@ -115,7 +175,12 @@ const PITCH_NAMES: Record<NonNullable<CardData["pitch"]>, string> = {
 };
 
 export type FormatLegalityIssue = {
-  kind: "living-legend-hero" | "living-legend-weapon" | "banned-card" | "future-card";
+  kind:
+    | "living-legend-hero"
+    | "living-legend-weapon"
+    | "benched-hero"
+    | "banned-card"
+    | "future-card";
   cardId: string;
   cardName: string;
   message: string;
@@ -149,6 +214,20 @@ export function formatLegalityIssues(
     const card = cards[id];
     if (!card) continue;
     const name = normalizedName(card);
+    if (
+      mode !== "open" &&
+      format === "silver-age" &&
+      id === pool.heroId &&
+      SILVER_AGE_BENCHED_HERO_NAMES.has(name)
+    ) {
+      issues.push({
+        kind: "benched-hero",
+        cardId: id,
+        cardName: card.name,
+        message: `${card.name} is benched and not legal in Silver Age`,
+      });
+      continue;
+    }
     if (mode !== "open" && format === "cc" && id === pool.heroId && LIVING_LEGEND_HEROES.has(name)) {
       issues.push({
         kind: "living-legend-hero",
@@ -167,8 +246,8 @@ export function formatLegalityIssues(
       });
       continue;
     }
-    const bannedAtEveryPitch = BANNED_CARD_NAMES.has(name);
-    const bannedAtThisPitch = BANNED_FUNCTIONAL_KEYS.has(`${name}|${card.pitch ?? 0}`);
+    const bannedAtEveryPitch = CLASSIC_CONSTRUCTED_BANNED_CARD_NAMES.has(name);
+    const bannedAtThisPitch = CLASSIC_CONSTRUCTED_BANNED_FUNCTIONAL_KEYS.has(`${name}|${card.pitch ?? 0}`);
     if (mode !== "open" && format === "cc" && (bannedAtEveryPitch || bannedAtThisPitch)) {
       const pitchLabel = !bannedAtEveryPitch && card.pitch ? ` (${PITCH_NAMES[card.pitch]})` : "";
       issues.push({
@@ -176,6 +255,15 @@ export function formatLegalityIssues(
         cardId: id,
         cardName: card.name,
         message: `${card.name}${pitchLabel} is banned in Classic Constructed`,
+      });
+      continue;
+    }
+    if (mode !== "open" && format === "silver-age" && SILVER_AGE_BANNED_CARD_NAMES.has(name)) {
+      issues.push({
+        kind: "banned-card",
+        cardId: id,
+        cardName: card.name,
+        message: `${card.name} is banned in Silver Age`,
       });
       continue;
     }

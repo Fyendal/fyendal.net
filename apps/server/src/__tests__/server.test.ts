@@ -366,7 +366,12 @@ describe("auth gating", () => {
 describe("server rooms over websocket", () => {
   it("creates, sideboards, starts, and advances a Briar bot room", async () => {
     const a = await authedClient();
-    a.sendMsg({ type: "create-bot-room", format: "silver-age", deckId: "precon-svi" });
+    a.sendMsg({
+      type: "create-bot-room",
+      format: "silver-age",
+      deckId: "precon-svi",
+      cardPoolMode: "open",
+    });
     const created = (await a.next((m) => m.type === "room-created")) as Extract<
       ServerMessage,
       { type: "room-created" }
@@ -646,7 +651,7 @@ describe("server rooms over websocket", () => {
     a.sendMsg({
       type: "create-bot-room",
       format: "silver-age",
-      deckId: "precon-sba",
+      deckId: "precon-sly",
       bot: "bravo",
     });
     await a.next((message) => message.type === "room-created");
@@ -670,6 +675,22 @@ describe("server rooms over websocket", () => {
     });
     a.sendMsg({ type: "leave-room", endGame: true });
     expect(await a.next((message) => message.type === "left")).toEqual({ type: "left" });
+    a.ws.close();
+  });
+
+  it("rejects the benched Briar bot outside Open mode", async () => {
+    const a = await authedClient();
+    a.sendMsg({
+      type: "create-bot-room",
+      format: "silver-age",
+      deckId: "precon-sly",
+      bot: "briar",
+    });
+    const error = (await a.next((message) => message.type === "error")) as Extract<
+      ServerMessage,
+      { type: "error" }
+    >;
+    expect(error.message).toContain("Briar is benched and not legal in Silver Age");
     a.ws.close();
   });
 
@@ -1209,7 +1230,7 @@ describe("lobby and matchmaking", () => {
 
   it("queues a built-in precon instead of returning an internal error", async () => {
     const a = await authedClient();
-    a.sendMsg({ type: "queue-join", format: "silver-age", deckId: "precon-sba" });
+    a.sendMsg({ type: "queue-join", format: "silver-age", deckId: "precon-sly" });
 
     const queued = (await a.next((message) => message.type === "queued")) as Extract<
       ServerMessage,
@@ -1323,6 +1344,19 @@ describe("cc prep room", () => {
     expect(error.message).toContain(
       "Death Dealer is a Living Legend signature weapon and is not legal in Classic Constructed",
     );
+    c.ws.close();
+  });
+
+  it("rejects a benched or banned Silver Age deck before creating a room", async () => {
+    const c = await authedClient();
+    c.sendMsg({ type: "create-room", format: "silver-age", deckId: "precon-sba" });
+    const error = (await c.next((message) => message.type === "error")) as Extract<
+      ServerMessage,
+      { type: "error" }
+    >;
+    expect(error.message).toContain("Briar is benched and not legal in Silver Age");
+    expect(error.message).toContain("Sigil of Suffering is banned in Silver Age");
+    expect(error.message).toContain("Lightning Press is banned in Silver Age");
     c.ws.close();
   });
 

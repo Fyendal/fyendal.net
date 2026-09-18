@@ -498,6 +498,7 @@ export function DeckGrid(props: {
       {botDeckId ? (
         <BotOpponentModal
           format={props.format}
+          cardPoolMode={cardPoolMode}
           onSelect={(bot, searchForPlayer) => {
             createBotRoom(props.format, botDeckId, bot, searchForPlayer);
             setBotDeckId(null);

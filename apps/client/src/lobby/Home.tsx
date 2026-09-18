@@ -256,6 +256,7 @@ function PlayableDeckCard(props: {
       {choosingBot && selectedDeck ? (
         <BotOpponentModal
           format={props.format}
+          cardPoolMode={props.cardPoolMode}
           onSelect={(bot, searchForPlayer) => {
             props.onPlayBot(props.format, selectedDeck.id, bot, searchForPlayer);
             setChoosingBot(false);
