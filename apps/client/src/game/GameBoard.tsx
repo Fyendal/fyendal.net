@@ -285,6 +285,8 @@ export function GameBoard() {
     actionStep,
     alternativeCostSets,
     stagedAdditionalCost: stagedAdditionalCostDefinition,
+    stagedAdditionalCostCandidateIds,
+    stagedAdditionalCostSelectedIds,
     canConfirmAdditionalCost,
     normalCostPayableWithoutPitch,
     playMethodChoiceRequired,
@@ -643,8 +645,10 @@ export function GameBoard() {
     }
     if (sel.kind === "play-zone") {
       return [
-        ...me.banish,
-        ...me.graveyard,
+        ...presentedView.players.flatMap((player) => [
+          ...player.banish,
+          ...player.graveyard,
+        ]),
         ...(myVisibleDeckTop ? [myVisibleDeckTop] : []),
       ].find((x) => x.instanceId === sel.instanceId)?.cardId;
     }
@@ -760,27 +764,21 @@ export function GameBoard() {
     ),
   }));
   const stagedAdditionalCost = stagedAdditionalCostDefinition ? (() => {
-    const candidateIds = new Set([...alternativeCostSets.values()].flat());
-    const handCards = me.hand.filter((card) => candidateIds.has(card.instanceId));
+    const handCards = me.hand.filter((card) => stagedAdditionalCostCandidateIds.has(card.instanceId));
     const arenaCards = [
       ...me.board,
       ...me.weapons,
       ...Object.values(me.equipment).filter((card): card is CardView => card !== undefined),
-    ].filter((card) => candidateIds.has(card.instanceId));
+    ].filter((card) => stagedAdditionalCostCandidateIds.has(card.instanceId));
     return {
       cardLabel: stagedAdditionalCostDefinition.cardLabel,
-      modes: [
-        ...(arenaCards.length > 0 ? [{
-          mode: "destroy" as const,
-          maximum: stagedAdditionalCostDefinition.maximumDestroyed,
-          cards: arenaCards,
-        }] : []),
-        ...(handCards.length > 0 ? [{
-          mode: "discard" as const,
-          maximum: stagedAdditionalCostDefinition.maximumDiscarded,
-          cards: handCards,
-        }] : []),
-      ],
+      minimum: stagedAdditionalCostDefinition.minimum,
+      maximum: stagedAdditionalCostDefinition.maximum,
+      selectedInstanceIds: stagedAdditionalCostSelectedIds,
+      modes: stagedAdditionalCostDefinition.modes.flatMap((mode) => {
+        const cards = mode.kind === "destroy" ? arenaCards : handCards;
+        return cards.length > 0 ? [{ mode: mode.kind, maximum: mode.maximum, cards }] : [];
+      }),
     };
   })() : undefined;
   const defendIntent = selectedDefendIntent(legal, [...stagedIds], pitchSel);
@@ -1067,7 +1065,7 @@ export function GameBoard() {
         />
 
         <PlayerHand
-          view={view}
+          view={presentedView}
           player={me}
           viewerSeat={seat}
           spectating={spectating}

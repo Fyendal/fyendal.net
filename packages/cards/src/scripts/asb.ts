@@ -14,14 +14,10 @@ function chargeAdditionalCost(ctx: ScriptCtx): void {
   if (hand.length) {
     ctx.requestCardChoice(
       CHARGE_HOOK,
-      decisionPrompt(
-        `${ctx.data.name}: choose a card to charge, or decline`,
-        "card.asb.charge.choose",
-        {
-          values: { card: { kind: "card", cardId: ctx.self.cardId } },
-          optionMessages: { no: decisionMessage("common.option.decline") },
-        },
-      ),
+      decisionPrompt(`${ctx.data.name}: choose a card to charge, or decline`, "card.asb.charge.choose", {
+        values: { card: { kind: "card", cardId: ctx.self.cardId } },
+        optionMessages: { no: decisionMessage("common.option.decline") },
+      }),
       ["no", ...hand.map((card) => card.instanceId)],
     );
   }
@@ -43,14 +39,10 @@ function graceEquipment(effect: (ctx: ScriptCtx) => void): CardScript {
       if (hand.length) {
         ctx.requestCardChoice(
           "grace-charge",
-          decisionPrompt(
-            `${ctx.data.name}: charge a card, or decline`,
-            "card.asb.charge.choose",
-            {
-              values: { card: { kind: "card", cardId: ctx.self.cardId } },
-              optionMessages: { no: decisionMessage("common.option.decline") },
-            },
-          ),
+          decisionPrompt(`${ctx.data.name}: charge a card, or decline`, "card.asb.charge.choose", {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            optionMessages: { no: decisionMessage("common.option.decline") },
+          }),
           ["no", ...hand.map((card) => card.instanceId)],
         );
       }
@@ -104,7 +96,15 @@ export const asb: Record<string, CardScript> = {
     onHit(ctx) {
       const top = ctx.player(ctx.seat).deck[0];
       if (!top) return;
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} reveals ${ctx.cardData(top.cardId).name}`, "card.log.common.decktop.revealed", { revealed: { kind: "card", cardId: top.cardId } }, { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" }));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.data.name} reveals ${ctx.cardData(top.cardId).name}`,
+          "card.log.common.decktop.revealed",
+          { revealed: { kind: "card", cardId: top.cardId } },
+          { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
+        ),
+      );
       if (isLight(ctx, top)) {
         ctx.putIntoSoul(top.instanceId);
         ctx.gainLife(ctx.seat, 1);

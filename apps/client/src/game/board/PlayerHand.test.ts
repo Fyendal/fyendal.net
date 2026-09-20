@@ -289,4 +289,95 @@ describe("hand motion anchors", () => {
     expect(html).toContain("card-clickable");
     expect(html).not.toContain("no cards in hand");
   });
+
+  it("surfaces a legal opponent-owned banished card as a clickable ghost", () => {
+    const borrowedCard = {
+      instanceId: 319,
+      cardId: "SBA016",
+      owner: 1,
+    };
+    const player: PlayerView = {
+      seat: 0,
+      heroCardId: "HERO",
+      heroInstanceId: 100,
+      heroName: "Hero",
+      life: 20,
+      actionPoints: 1,
+      resources: 2,
+      hand: [],
+      handCount: 0,
+      deckCount: 0,
+      arsenal: [],
+      arsenalCount: 0,
+      pitch: [],
+      pitchCount: 0,
+      graveyard: [],
+      banish: [],
+      soul: [],
+      equipment: {},
+      weapons: [],
+      board: [],
+    };
+    const opponent = {
+      ...player,
+      seat: 1,
+      banish: [borrowedCard],
+    } as PlayerView;
+    const view: GameView = {
+      gameId: "borrowed-banish-play",
+      turn: 29,
+      phase: "action",
+      activePlayer: 0,
+      priorityPlayer: 0,
+      players: [player, opponent],
+      chain: [],
+      stack: [],
+      ongoing: [],
+      pendingDecision: null,
+      winner: null,
+      log: [],
+    };
+    const html = renderToStaticMarkup(createElement(TestI18nProvider, null, createElement(PlayerHand, {
+      view,
+      player,
+      viewerSeat: 0,
+      spectating: false,
+      replaying: false,
+      interaction: {
+        legalState: {
+          playableHand: new Set<number>(),
+          playableArsenal: new Set<number>(),
+          playableZones: new Map<number, "banish">([[borrowedCard.instanceId, "banish"]]),
+          activatable: new Set<number>(),
+          stageableDefenders: new Set<number>(),
+          canPass: true,
+          canCloseChain: false,
+        },
+        legalIntents: [{
+          kind: "play-from-zone",
+          zone: "banish",
+          instanceId: borrowedCard.instanceId,
+          pitchInstanceIds: [],
+        }],
+        selection: { kind: "none" },
+        preStackSelectedInstanceId: null,
+        pitchSelection: [],
+        selectedPaymentVariants: [],
+        stagedIds: new Set<number>(),
+        optimisticallyHiddenIds: new Set<number>(),
+        defending: false,
+        choosingArsenal: false,
+        handPick: null,
+        onCardClick: () => undefined,
+        onActivate: () => undefined,
+        onSelect: () => undefined,
+      },
+    })));
+
+    expect(html).toContain('data-cardid="SBA016"');
+    expect(html).toContain("card-ghost");
+    expect(html).toContain("card-highlight");
+    expect(html).toContain("card-clickable");
+    expect(html).not.toContain("no cards in hand");
+  });
 });

@@ -370,11 +370,15 @@ describe("card-play announcement", () => {
     );
     expect(play).toBeDefined();
     if (!play || play.kind !== "play-card") throw new Error("expected declared play intent");
-    expect(play.additionalCostSelection).toEqual({
-      kind: "destroy-controlled-and-or-discard-hand",
+    expect(play.cardCostSelection).toEqual({
+      kind: "choose-card-cost",
       cardLabel: "test allies",
-      maximumDestroyed: 3,
-      maximumDiscarded: 3,
+      minimum: 0,
+      maximum: 6,
+      modes: [
+        { kind: "destroy", maximum: 3 },
+        { kind: "discard", maximum: 3 },
+      ],
     });
     expect(play.pitchInstanceIds.some((id) => paidIds.includes(id))).toBe(false);
 

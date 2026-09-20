@@ -1,5 +1,12 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, buffNextAttack, commonOptionMessages, decisionPrompt, localizedCardLog, opponentSeat } from "./shared-helpers.js";
+import {
+  attackAbility,
+  buffNextAttack,
+  commonOptionMessages,
+  decisionPrompt,
+  localizedCardLog,
+  opponentSeat,
+} from "./shared-helpers.js";
 
 type Card = DeepReadonly<CardInstance>;
 
@@ -16,23 +23,31 @@ function markHero(ctx: ScriptCtx, seat: number): void {
   const hero = ctx.player(seat).hero;
   if ((hero.counters?.marked ?? 0) > 0) return;
   ctx.addCounter(hero.instanceId, "marked", 1);
-  ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(hero.cardId).name} is marked`, "card.log.common.hero.marked", { target: { kind: "card", cardId: hero.cardId } }));
+  ctx.logPublic(
+    localizedCardLog(ctx, `${ctx.cardData(hero.cardId).name} is marked`, "card.log.common.hero.marked", {
+      target: { kind: "card", cardId: hero.cardId },
+    }),
+  );
 }
 function myStealthAttack(ctx: ScriptCtx): boolean {
   return !!ctx.link && !ctx.link.resolved && ctx.link.attacker === ctx.seat && hasStealth(ctx, ctx.link.attackingCard);
 }
 function lingeringFromSelf(ctx: ScriptCtx): boolean {
-  return ctx.state.modifiers.some((modifier) =>
-    modifier.sourceInstanceId === ctx.self.instanceId &&
-    modifier.scope === "until-end-of-turn" &&
-    !modifier.consumed,
+  return ctx.state.modifiers.some(
+    (modifier) =>
+      modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "until-end-of-turn" && !modifier.consumed,
   );
 }
 
 export const aac: Record<string, CardScript> = {
   "arakni, 5l!p3d 7hru 7h3 cr4x|0": {
     onFriendlyAttackDeclared(ctx) {
-      if (!ctx.link || !hasStealth(ctx, ctx.link.attackingCard) || ctx.getFlag("player", "aacFirstStealthUsed") === true) return;
+      if (
+        !ctx.link ||
+        !hasStealth(ctx, ctx.link.attackingCard) ||
+        ctx.getFlag("player", "aacFirstStealthUsed") === true
+      )
+        return;
       ctx.setFlag("player", "aacFirstStealthUsed", true);
       ctx.grantGoAgain();
     },
@@ -48,12 +63,15 @@ export const aac: Record<string, CardScript> = {
   },
   "horrors of the past|2": {
     onAttackDeclared(ctx) {
-      const previous = [...ctx.state.chain].reverse().find((link) =>
-        link.attacker === ctx.seat &&
-        link.attackingCard.instanceId !== ctx.self.instanceId &&
-        link.attackCardType === "action" &&
-        hasStealth(ctx, link.attackingCard),
-      );
+      const previous = [...ctx.state.chain]
+        .reverse()
+        .find(
+          (link) =>
+            link.attacker === ctx.seat &&
+            link.attackingCard.instanceId !== ctx.self.instanceId &&
+            link.attackCardType === "action" &&
+            hasStealth(ctx, link.attackingCard),
+        );
       if (previous) {
         ctx.grantBaseAbilities(ctx.self.instanceId, previous.attackingCard.cardId);
       }
@@ -89,14 +107,18 @@ export const aac: Record<string, CardScript> = {
       goAgain: true,
       destroySelfCost: true,
       label: "Stealth attacks gain {r} this turn",
-      onActivate(ctx) { ctx.addModifier({ scope: "until-end-of-turn" }); },
+      onActivate(ctx) {
+        ctx.addModifier({ scope: "until-end-of-turn" });
+      },
     },
-    triggers: [{
-      event: "card-played",
-      label: "Gain 1 resource",
-      condition: (ctx, played) => lingeringFromSelf(ctx) && !!played && hasStealth(ctx, played),
-      effect: (ctx) => ctx.changeResources(ctx.seat, 1),
-    }],
+    triggers: [
+      {
+        event: "card-played",
+        label: "Gain 1 resource",
+        condition: (ctx, played) => lingeringFromSelf(ctx) && !!played && hasStealth(ctx, played),
+        effect: (ctx) => ctx.changeResources(ctx.seat, 1),
+      },
+    ],
   },
   "marked|0": {},
   "meet madness|1": {
@@ -108,9 +130,19 @@ export const aac: Record<string, CardScript> = {
       const opponent = ctx.player(target);
       const result = ctx.randomInt(3);
       if (result === 0 && opponent.hand.length) {
-        ctx.requestCardChoice("aac-madness-hand", decisionPrompt("Choose a card from your hand to banish", "card.aac.hand.card.banish"), opponent.hand.map((card) => card.instanceId), target);
+        ctx.requestCardChoice(
+          "aac-madness-hand",
+          decisionPrompt("Choose a card from your hand to banish", "card.aac.hand.card.banish"),
+          opponent.hand.map((card) => card.instanceId),
+          target,
+        );
       } else if (result === 1 && opponent.arsenal.length) {
-        ctx.requestCardChoice("aac-madness-arsenal", decisionPrompt("Choose a card from your arsenal to banish", "card.aac.arsenal.card.banish"), opponent.arsenal.map((card) => card.instanceId), target);
+        ctx.requestCardChoice(
+          "aac-madness-arsenal",
+          decisionPrompt("Choose a card from your arsenal to banish", "card.aac.arsenal.card.banish"),
+          opponent.arsenal.map((card) => card.instanceId),
+          target,
+        );
       } else if (result === 2 && opponent.deck[0]) {
         ctx.banish(opponent.deck[0].instanceId);
       }
@@ -132,7 +164,9 @@ export const aac: Record<string, CardScript> = {
       tap: true,
       canActivate: myStealthAttack,
       label: "Give mark on hit",
-      onActivate(ctx) { ctx.addModifier({ scope: "chain-link", onHitMark: true }); },
+      onActivate(ctx) {
+        ctx.addModifier({ scope: "chain-link", onHitMark: true });
+      },
     },
   },
   "take up the mantle|2": {
@@ -141,10 +175,17 @@ export const aac: Record<string, CardScript> = {
       const marked = isMarked(ctx, opponentSeat(ctx));
       ctx.addModifier({ scope: "chain-link", attack: marked ? 3 : 2 });
       if (!marked) return;
-      const options = ctx.player(ctx.seat).graveyard.filter((card) =>
-        ctx.hasCardType(card, "action") && hasStealth(ctx, card),
-      );
-      if (options.length) ctx.requestCardChoice("aac-mantle", decisionPrompt("Banish a stealth attack for the target to become its copy?", "card.aac.stealthattack.copy", { optionMessages: commonOptionMessages("pass") }), ["pass", ...options.map((card) => card.instanceId)]);
+      const options = ctx
+        .player(ctx.seat)
+        .graveyard.filter((card) => ctx.hasCardType(card, "action") && hasStealth(ctx, card));
+      if (options.length)
+        ctx.requestCardChoice(
+          "aac-mantle",
+          decisionPrompt("Banish a stealth attack for the target to become its copy?", "card.aac.stealthattack.copy", {
+            optionMessages: commonOptionMessages("pass"),
+          }),
+          ["pass", ...options.map((card) => card.instanceId)],
+        );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "aac-mantle" || option === "pass") return;
@@ -159,7 +200,12 @@ export const aac: Record<string, CardScript> = {
     },
     onHit(ctx) {
       const items = ctx.player(opponentSeat(ctx)).board.filter((card) => hasTag(ctx, card, "item"));
-      if (items.length) ctx.requestCardChoice("aac-steal-item", decisionPrompt("Steal an item", "card.aac.item.steal"), items.map((card) => card.instanceId));
+      if (items.length)
+        ctx.requestCardChoice(
+          "aac-steal-item",
+          decisionPrompt("Steal an item", "card.aac.item.steal"),
+          items.map((card) => card.instanceId),
+        );
     },
     onChoose(ctx, hook, option) {
       if (hook === "aac-steal-item") ctx.steal(Number(option), { duration: "indefinite" });

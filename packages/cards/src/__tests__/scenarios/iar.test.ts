@@ -90,6 +90,29 @@ describe("IAR cards", () => {
     g.play("raging onslaught|1").blockWith().settle().expectLife(1, 13);
   });
 
+  it("Shadowrealm Swiftness gives an already-controlled ally's next attack go again", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["shadowrealm swiftness|2"],
+        banish: ["corrupted corpse|0"],
+        board: ["restless magister|1"],
+        resources: 1,
+        weapons: ["vox necropolis|0"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("shadowrealm swiftness|2")
+      .chooseCard("corrupted corpse|0")
+      .activate("restless magister|1")
+      .blockWith()
+      .settle()
+      .expectLife(1, 17)
+      .expectAP(0, 1);
+  });
+
   it("Malignant Migration cannot choose a face-down banished card", () => {
     const g = scenario({ seats: [
       {
@@ -2641,7 +2664,18 @@ describe("September 3 IAR spoilers", () => {
       intent.sourceInstanceId === cover.instanceId &&
       intent.pitchInstanceIds?.[0] === ally.instanceId
     );
-    expect(activation).toBeDefined();
+    expect(activation).toMatchObject({
+      cardCostSelection: {
+        kind: "choose-card-cost",
+        cardLabel: "allies",
+        minimum: 1,
+        maximum: 1,
+        modes: [
+          { kind: "destroy", maximum: 1 },
+          { kind: "discard", maximum: 1 },
+        ],
+      },
+    });
     g.doRaw(activation!).settle().expectLife(1, 18);
     expect(g.state.players[1]!.board).toHaveLength(0);
   });
@@ -2724,8 +2758,24 @@ describe("September 3 IAR spoilers", () => {
 
     g.play("raging onslaught|1")
       .blockWith("rally the shadow horde|1")
-      .passPriority()
-      .activate("rally the shadow horde|1", { discard: ["snatch|1"] })
+      .passPriority();
+    const rally = g.state.chain.at(-1)!.defendingCards[0]!;
+    const snatch = g.state.players[1]!.hand[0]!;
+    expect(legalIntents(g.state, 1).find((intent) =>
+      intent.kind === "activate-ability" &&
+      intent.sourceInstanceId === rally.instanceId &&
+      intent.pitchInstanceIds[0] === snatch.instanceId
+    )).toMatchObject({
+      cardCostSelection: {
+        kind: "choose-card-cost",
+        cardLabel: "cards",
+        minimum: 1,
+        maximum: 1,
+        modes: [{ kind: "banish", maximum: 1 }],
+      },
+    });
+
+    g.activate("rally the shadow horde|1", { discard: ["snatch|1"] })
       .expectInZone(1, "snatch|1", "banish")
       .expectLife(1, 17);
   });

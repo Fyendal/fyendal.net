@@ -242,6 +242,10 @@ export function resolveLink(state: GameStateInternal, runtime: EngineRuntime): v
     runtime.dispatchFlow("finishLinkResolution", state, link);
     return;
   }
+  // Once combat damage is being calculated, CR 7.7.2c no longer closes the
+  // chain merely because the active attack later ceases to exist. This also
+  // distinguishes the Damage Step priority point from pre-damage windows.
+  link.flags.combatDamageCalculated = true;
   const defenderPlayer = state.players[opponent(link.attacker)] as PlayerState;
   const attack = computeAttack(state, runtime, link);
   const defense = computeDefense(state, runtime, link);

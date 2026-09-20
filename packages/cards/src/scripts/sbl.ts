@@ -1,6 +1,12 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import { SHARPEN_FOLLOWUP, sharpenSword } from "./aha/warrior-sharpen.js";
-import { attackAbility, buffNextAttack, commonOptionMessages, decisionPrompt, localizedCardLog } from "./shared-helpers.js";
+import {
+  attackAbility,
+  buffNextAttack,
+  commonOptionMessages,
+  decisionPrompt,
+  localizedCardLog,
+} from "./shared-helpers.js";
 
 // ── SBL (Silver Age: Boltyn precon) ─────────────────────────────────────────
 //
@@ -28,7 +34,6 @@ import { attackAbility, buffNextAttack, commonOptionMessages, decisionPrompt, lo
 const AGILITY = "SBL034";
 const COURAGE = "SBL035";
 const FLURRY = "SBL036";
-
 
 /** ctx.state is typed without the internal side tables; the runtime object has them. */
 
@@ -104,7 +109,9 @@ function unityEquipment(): CardScript {
       const selfWasFromHand = ctx.link.flags[`defendedFromHand:${ctx.self.instanceId}`] === true ? 1 : 0;
       return count > selfWasFromHand;
     },
-    onDefend(ctx) { ctx.addCardTempDefense(ctx.self.instanceId, 1); },
+    onDefend(ctx) {
+      ctx.addCardTempDefense(ctx.self.instanceId, 1);
+    },
   };
 }
 
@@ -138,7 +145,9 @@ export const sbl: Record<string, CardScript> = {
       },
       onActivate(ctx) {
         ctx.grantGoAgain();
-        ctx.logPublic(localizedCardLog(ctx, "Boltyn: target attack gains go again", "card.log.common.attack.goagain.gained"));
+        ctx.logPublic(
+          localizedCardLog(ctx, "Boltyn: target attack gains go again", "card.log.common.attack.goagain.gained"),
+        );
       },
     },
   },
@@ -169,7 +178,13 @@ export const sbl: Record<string, CardScript> = {
       onActivate(ctx) {
         const hand = ctx.player(ctx.seat).hand;
         if (hand.length === 0) {
-          ctx.logPublic(localizedCardLog(ctx, "Halo of Illumination: no card in hand to put into the soul", "card.log.sbl.halo.none"));
+          ctx.logPublic(
+            localizedCardLog(
+              ctx,
+              "Halo of Illumination: no card in hand to put into the soul",
+              "card.log.sbl.halo.none",
+            ),
+          );
           return;
         }
         ctx.requestCardChoice(
@@ -202,7 +217,11 @@ export const sbl: Record<string, CardScript> = {
       label: "Destroy: gain {r}",
       onActivate(ctx) {
         ctx.changeResources(ctx.seat, 1);
-        ctx.logPublic(localizedCardLog(ctx, "Garland of Spring: gain 1 resource", "card.log.common.resources.gained", { amount: 1 }));
+        ctx.logPublic(
+          localizedCardLog(ctx, "Garland of Spring: gain 1 resource", "card.log.common.resources.gained", {
+            amount: 1,
+          }),
+        );
       },
     },
   },
@@ -318,7 +337,11 @@ export const sbl: Record<string, CardScript> = {
       if (hand.length > 0) {
         ctx.requestCardChoice(
           "v-charge",
-          decisionPrompt("V of the Vanguard: choose a card from your hand to charge, or stop", "card.sbl.v.charge.first", { optionMessages: commonOptionMessages("no") }),
+          decisionPrompt(
+            "V of the Vanguard: choose a card from your hand to charge, or stop",
+            "card.sbl.v.charge.first",
+            { optionMessages: commonOptionMessages("no") },
+          ),
           ["no", ...hand.map((card) => card.instanceId)],
         );
       }
@@ -335,7 +358,9 @@ export const sbl: Record<string, CardScript> = {
           if (hand.length > 0) {
             ctx.requestCardChoice(
               "v-charge",
-              decisionPrompt("V of the Vanguard: choose another card to charge, or stop", "card.sbl.v.charge.next", { optionMessages: commonOptionMessages("no") }),
+              decisionPrompt("V of the Vanguard: choose another card to charge, or stop", "card.sbl.v.charge.next", {
+                optionMessages: commonOptionMessages("no"),
+              }),
               ["no", ...hand.map((card) => card.instanceId)],
             );
             return;
@@ -345,7 +370,14 @@ export const sbl: Record<string, CardScript> = {
       const n = ctx.getCounter("vLight");
       if (n > 0) {
         ctx.addModifier({ scope: "combat-chain", attack: n });
-        ctx.logPublic(localizedCardLog(ctx, `V of the Vanguard: attacks on this combat chain get +${n}{p}`, "card.log.sbl.vanguard.attack", { amount: n }));
+        ctx.logPublic(
+          localizedCardLog(
+            ctx,
+            `V of the Vanguard: attacks on this combat chain get +${n}{p}`,
+            "card.log.sbl.vanguard.attack",
+            { amount: n },
+          ),
+        );
       }
     },
   },
@@ -359,7 +391,14 @@ export const sbl: Record<string, CardScript> = {
   "banneret of salvation|2": {
     onCharged(ctx) {
       ctx.addModifier({ scope: "until-end-of-turn", onHitGainLife: 1 });
-      ctx.logPublic(localizedCardLog(ctx, "Banneret of Salvation: the next time you hit this turn, gain 1 life", "card.log.sbl.banneret.life", { amount: 1 }));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          "Banneret of Salvation: the next time you hit this turn, gain 1 life",
+          "card.log.sbl.banneret.life",
+          { amount: 1 },
+        ),
+      );
     },
   },
 
@@ -369,7 +408,11 @@ export const sbl: Record<string, CardScript> = {
     onPlay(ctx) {
       if (!chargedThisTurn(ctx)) return;
       ctx.addModifier({ scope: "chain-link", attack: 3 });
-      ctx.logPublic(localizedCardLog(ctx, "Courageous Steelhand: target attack gains +3{p}", "card.log.common.attack.gained", { amount: 3 }));
+      ctx.logPublic(
+        localizedCardLog(ctx, "Courageous Steelhand: target attack gains +3{p}", "card.log.common.attack.gained", {
+          amount: 3,
+        }),
+      );
     },
   },
 
@@ -407,23 +450,36 @@ export const sbl: Record<string, CardScript> = {
       }
       ctx.requestChoice(
         "glisten-dist",
-        decisionPrompt("Glisten: distribute up to four +1{p} counters among your weapons", "card.sbl.weapon.counters.distribute", { values: { count: 4 } }),
+        decisionPrompt(
+          "Glisten: distribute up to four +1{p} counters among your weapons",
+          "card.sbl.weapon.counters.distribute",
+          { values: { count: 4 } },
+        ),
         options,
       );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "glisten-dist") return;
       const weapons = ctx.player(ctx.seat).weapons;
-      option.split(":").map(Number).forEach((n, i) => {
-        const w = weapons[i];
-        if (n > 0 && w) ctx.addCounter(w.instanceId, "power", n);
-      });
+      option
+        .split(":")
+        .map(Number)
+        .forEach((n, i) => {
+          const w = weapons[i];
+          if (n > 0 && w) ctx.addCounter(w.instanceId, "power", n);
+        });
       ctx.setFlag(
         "player",
         "clearWeaponPowerCountersAtTurn",
         ctx.state.activePlayer === ctx.seat ? ctx.state.turn : ctx.state.turn + 1,
       );
-      ctx.logPublic(localizedCardLog(ctx, "Glisten: remove all +1{p} counters from your weapons at the beginning of your end phase", "card.log.sbl.glisten.remove"));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          "Glisten: remove all +1{p} counters from your weapons at the beginning of your end phase",
+          "card.log.sbl.glisten.remove",
+        ),
+      );
     },
   },
 
@@ -441,10 +497,7 @@ export const sbl: Record<string, CardScript> = {
         const hand = ctx.player(ctx.seat).hand;
         ctx.requestCardChoice(
           "roaring-beam-charge",
-          decisionPrompt(
-            "Roaring Beam: choose a card from your hand to charge",
-            "card.sbl.charge.required",
-          ),
+          decisionPrompt("Roaring Beam: choose a card from your hand to charge", "card.sbl.charge.required"),
           hand.map((card) => card.instanceId),
         );
       }
@@ -483,9 +536,8 @@ export const sbl: Record<string, CardScript> = {
       {
         event: "card-played",
         label: "Destroy Courage (attack +1{p})",
-        condition: (ctx, played) => !!played &&
-          ctx.hasCardType(played, "action") &&
-          ctx.cardTypes(played).includes("attack"),
+        condition: (ctx, played) =>
+          !!played && ctx.hasCardType(played, "action") && ctx.cardTypes(played).includes("attack"),
         effect(ctx) {
           ctx.destroySelf();
           ctx.addModifier({ scope: "chain-link", attack: 1 });
@@ -515,7 +567,13 @@ export const sbl: Record<string, CardScript> = {
             // Another Flurry sets that same limit; it does not add a third.
             ctx.setAttackActivationLimit(weaponId, 2);
           }
-          ctx.logPublic(localizedCardLog(ctx, "Flurry: you may attack with the weapon again this turn", "card.log.sbl.flurry.additionalattack"));
+          ctx.logPublic(
+            localizedCardLog(
+              ctx,
+              "Flurry: you may attack with the weapon again this turn",
+              "card.log.sbl.flurry.additionalattack",
+            ),
+          );
         },
       },
     ],

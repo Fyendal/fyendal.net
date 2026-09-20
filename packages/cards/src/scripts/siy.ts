@@ -1,9 +1,4 @@
-import type {
-  CardInstance,
-  CardScript,
-  DeepReadonly,
-  ScriptCtx,
-} from "@fyendal/engine";
+import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   commonOptionMessages,
   dealArcane,
@@ -24,9 +19,7 @@ const FROSTBITE = "SIY035";
 
 function isWizardNonAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return (
-    ctx.hasCardType(card, "action") &&
-    !ctx.cardTypes(card).includes("attack") &&
-    ctx.cardTypes(card).includes("wizard")
+    ctx.hasCardType(card, "action") && !ctx.cardTypes(card).includes("attack") && ctx.cardTypes(card).includes("wizard")
   );
 }
 
@@ -35,14 +28,10 @@ function fusionAdditionalCost(ctx: ScriptCtx): void {
   if (ice.length === 0) return;
   ctx.requestCardChoice(
     "ice-fusion",
-    decisionPrompt(
-      `${ctx.data.name}: reveal an Ice card from your hand to fuse?`,
-      "card.siy.fusion.reveal",
-      {
-        values: { card: { kind: "card", cardId: ctx.self.cardId } },
-        optionMessages: commonOptionMessages("no"),
-      },
-    ),
+    decisionPrompt(`${ctx.data.name}: reveal an Ice card from your hand to fuse?`, "card.siy.fusion.reveal", {
+      values: { card: { kind: "card", cardId: ctx.self.cardId } },
+      optionMessages: commonOptionMessages("no"),
+    }),
     [...ice.map((card) => card.instanceId), "no"],
   );
 }
@@ -61,7 +50,15 @@ function handleFusion(ctx: ScriptCtx, hook: string, option: string): boolean {
     ctx.createTokens(FROSTBITE, count, target);
     ctx.setPlayerFlag(ctx.seat, key, 0);
   }
-  ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} is fused (reveals ${ctx.cardData(revealed.cardId).name})`, "card.log.common.fusion.revealed", { revealed: { kind: "card", cardId: revealed.cardId } }, { kind: "cards-revealed", cards: [{ cardId: revealed.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" }));
+  ctx.logPublic(
+    localizedCardLog(
+      ctx,
+      `${ctx.data.name} is fused (reveals ${ctx.cardData(revealed.cardId).name})`,
+      "card.log.common.fusion.revealed",
+      { revealed: { kind: "card", cardId: revealed.cardId } },
+      { kind: "cards-revealed", cards: [{ cardId: revealed.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" },
+    ),
+  );
   return true;
 }
 
@@ -156,29 +153,30 @@ function arcaneSpell(damage: number): CardScript {
 function discardUnlessPay(ctx: ScriptCtx, target: number, cost: number, key: string): void {
   const player = ctx.state.players[target]!;
   if (player.hand.length === 0) return;
-  if (ctx.requestPayment(
-    `${key}:pay:${target}`,
-    decisionPrompt(
-      `${ctx.data.name}: pay ${cost} resource${cost === 1 ? "" : "s"} or discard a card?`,
-      "card.siy.discard.pay",
-      {
-        values: {
-          card: { kind: "card", cardId: ctx.self.cardId },
-          amount: cost,
+  if (
+    ctx.requestPayment(
+      `${key}:pay:${target}`,
+      decisionPrompt(
+        `${ctx.data.name}: pay ${cost} resource${cost === 1 ? "" : "s"} or discard a card?`,
+        "card.siy.discard.pay",
+        {
+          values: {
+            card: { kind: "card", cardId: ctx.self.cardId },
+            amount: cost,
+          },
+          optionMessages: commonOptionMessages("no"),
         },
-        optionMessages: commonOptionMessages("no"),
-      },
-    ),
-    cost,
-    target,
-  )) return;
+      ),
+      cost,
+      target,
+    )
+  )
+    return;
   ctx.requestCardChoice(
     `${key}:discard:${target}`,
-    decisionPrompt(
-      `${ctx.data.name}: choose a card to discard`,
-      "card.siy.discard.choose",
-      { values: { card: { kind: "card", cardId: ctx.self.cardId } } },
-    ),
+    decisionPrompt(`${ctx.data.name}: choose a card to discard`, "card.siy.discard.choose", {
+      values: { card: { kind: "card", cardId: ctx.self.cardId } },
+    }),
     player.hand.map((card) => card.instanceId),
     target,
   );
@@ -190,15 +188,20 @@ function handleDiscardUnlessPay(ctx: ScriptCtx, hook: string, option: string, ke
     const target = Number(pay[1]);
     const player = ctx.state.players[target]!;
     if (option === "paid") {
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(player.heroCardId).name} pays the resource cost`, "card.log.siy.hero.paid", { target: { kind: "player", seat: target } }));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.cardData(player.heroCardId).name} pays the resource cost`,
+          "card.log.siy.hero.paid",
+          { target: { kind: "player", seat: target } },
+        ),
+      );
     } else if (player.hand.length > 0) {
       ctx.requestCardChoice(
         `${key}:discard:${target}`,
-        decisionPrompt(
-          `${ctx.data.name}: choose a card to discard`,
-          "card.siy.discard.choose",
-          { values: { card: { kind: "card", cardId: ctx.self.cardId } } },
-        ),
+        decisionPrompt(`${ctx.data.name}: choose a card to discard`, "card.siy.discard.choose", {
+          values: { card: { kind: "card", cardId: ctx.self.cardId } },
+        }),
         player.hand.map((card) => card.instanceId),
         target,
       );
@@ -287,11 +290,9 @@ function offerFreezeTarget(ctx: ScriptCtx, target: number): void {
   if (options.length === 0) return;
   ctx.requestChoice(
     `cold-freeze:${target}`,
-    decisionPrompt(
-      `${ctx.data.name}: choose an arsenal card or ally to freeze`,
-      "card.siy.cold.freeze.choose",
-      { values: { card: { kind: "card", cardId: ctx.self.cardId } } },
-    ),
+    decisionPrompt(`${ctx.data.name}: choose an arsenal card or ally to freeze`, "card.siy.cold.freeze.choose", {
+      values: { card: { kind: "card", cardId: ctx.self.cardId } },
+    }),
     options,
     ctx.seat,
     cardOptions,
@@ -299,19 +300,17 @@ function offerFreezeTarget(ctx: ScriptCtx, target: number): void {
 }
 
 function offerColdPayment(ctx: ScriptCtx, target: number): void {
-  if (!ctx.requestPayment(
-    `cold-pay:${target}`,
-    decisionPrompt(
-      `${ctx.data.name}: pay 1 resource to avoid freezing a card?`,
-      "card.siy.cold.freeze.pay",
-      {
+  if (
+    !ctx.requestPayment(
+      `cold-pay:${target}`,
+      decisionPrompt(`${ctx.data.name}: pay 1 resource to avoid freezing a card?`, "card.siy.cold.freeze.pay", {
         values: { card: { kind: "card", cardId: ctx.self.cardId } },
         optionMessages: commonOptionMessages("no"),
-      },
-    ),
-    1,
-    target,
-  )) {
+      }),
+      1,
+      target,
+    )
+  ) {
     offerFreezeTarget(ctx, target);
   }
 }
@@ -324,24 +323,31 @@ function freezeChoice(ctx: ScriptCtx, target: number, option: string): void {
   const expiry = ctx.state.turn + (ctx.state.activePlayer === ctx.seat ? 2 : 1);
   const current = Number(card.counters?.frozenUntilTurn || 0);
   ctx.addCounter(card.instanceId, "frozenUntilTurn", Math.max(0, expiry - current));
-  ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(card.cardId).name} is frozen until the start of ${ctx.cardData(ctx.player(ctx.seat).heroCardId).name}'s next turn`, "card.log.siy.card.frozen", { target: { kind: "card", cardId: card.cardId }, player: { kind: "player", seat: ctx.seat } }));
+  ctx.logPublic(
+    localizedCardLog(
+      ctx,
+      `${ctx.cardData(card.cardId).name} is frozen until the start of ${
+        ctx.cardData(ctx.player(ctx.seat).heroCardId).name
+      }'s next turn`,
+      "card.log.siy.card.frozen",
+      { target: { kind: "card", cardId: card.cardId }, player: { kind: "player", seat: ctx.seat } },
+    ),
+  );
 }
 
 export const siy: Record<string, CardScript> = {
   "iyslander|0": {
-    triggers: [{
-      event: "card-played",
-      label: "Create a Frostbite",
-      condition: (ctx, played) => ctx.state.activePlayer !== ctx.seat &&
-        !!played &&
-        ctx.cardTypes(played).includes("ice"),
-      effect: (ctx) => ctx.createToken(FROSTBITE, ctx.state.activePlayer),
-    }],
+    triggers: [
+      {
+        event: "card-played",
+        label: "Create a Frostbite",
+        condition: (ctx, played) =>
+          ctx.state.activePlayer !== ctx.seat && !!played && ctx.cardTypes(played).includes("ice"),
+        effect: (ctx) => ctx.createToken(FROSTBITE, ctx.state.activePlayer),
+      },
+    ],
     onFriendlyPlay(ctx, played) {
-      if (
-        ctx.getFlag("player", "nextWizardNonAttackAsInstant") === true &&
-        isWizardNonAttack(ctx, played)
-      ) {
+      if (ctx.getFlag("player", "nextWizardNonAttackAsInstant") === true && isWizardNonAttack(ctx, played)) {
         ctx.setFlag("player", "nextWizardNonAttackAsInstant", false);
       }
     },
@@ -371,12 +377,8 @@ export const siy: Record<string, CardScript> = {
           choices.length
             ? "Brain Freeze: put a revealed cost 0 action on top of their deck"
             : "Brain Freeze: no revealed cost 0 action can be put on top",
-          choices.length
-            ? "card.siy.brainfreeze.action.choose"
-            : "card.siy.brainfreeze.action.none",
-          choices.length
-            ? {}
-            : { optionMessages: { Close: decisionMessage("common.option.close") } },
+          choices.length ? "card.siy.brainfreeze.action.choose" : "card.siy.brainfreeze.action.none",
+          choices.length ? {} : { optionMessages: { Close: decisionMessage("common.option.close") } },
         ),
         choices.length ? choices.map((card) => card.instanceId) : ["Close"],
         undefined,
@@ -395,12 +397,7 @@ export const siy: Record<string, CardScript> = {
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
       if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1);
-      requestHeroTarget(
-        ctx,
-        "cold-target",
-        "Cold Snap: choose a hero",
-        "card.siy.coldsnap.hero.choose",
-      );
+      requestHeroTarget(ctx, "cold-target", "Cold Snap: choose a hero", "card.siy.coldsnap.hero.choose");
     },
     onChoose(ctx, hook, option) {
       if (hook === "cold-target") {
@@ -414,7 +411,14 @@ export const siy: Record<string, CardScript> = {
           offerFreezeTarget(ctx, target);
         } else {
           const player = ctx.state.players[target]!;
-          ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(player.heroCardId).name} pays 1 resource`, "card.log.siy.hero.paid.amount", { target: { kind: "player", seat: target }, amount: 1 }));
+          ctx.logPublic(
+            localizedCardLog(
+              ctx,
+              `${ctx.cardData(player.heroCardId).name} pays 1 resource`,
+              "card.log.siy.hero.paid.amount",
+              { target: { kind: "player", seat: target }, amount: 1 },
+            ),
+          );
         }
         return;
       }
@@ -434,15 +438,14 @@ export const siy: Record<string, CardScript> = {
         }
       }
       if (options.length === 0) {
-        ctx.logPublic(localizedCardLog(ctx, "Frost Spike finds no exposed equipment zone", "card.log.siy.frostspike.none"));
+        ctx.logPublic(
+          localizedCardLog(ctx, "Frost Spike finds no exposed equipment zone", "card.log.siy.frostspike.none"),
+        );
         return;
       }
       ctx.requestChoice(
         "frost-spike-zone",
-        decisionPrompt(
-          "Frost Spike: choose an exposed equipment zone",
-          "card.siy.frostspike.zone.choose",
-        ),
+        decisionPrompt("Frost Spike: choose an exposed equipment zone", "card.siy.frostspike.zone.choose"),
         options,
       );
     },
@@ -468,9 +471,9 @@ export const siy: Record<string, CardScript> = {
         event: "end-of-turn",
         whose: "subject",
         condition(ctx) {
-          return ctx.player(ctx.seat).board.some((card) =>
-            ctx.cardData(card.cardId).name.toLowerCase() === "frost hex",
-          );
+          return ctx
+            .player(ctx.seat)
+            .board.some((card) => ctx.cardData(card.cardId).name.toLowerCase() === "frost hex");
         },
         label: "Frost Hex deals 1 arcane damage",
         effect(ctx) {
@@ -496,7 +499,12 @@ export const siy: Record<string, CardScript> = {
     arcaneDamageEffect: true,
     arcaneDamageEffectAmounts: [0],
     playAsInstant: wizardActionAsInstant,
-    variablePlayCost: { base: 0, resourcesPerX: 2, counterKey: "x", prompt: decisionPrompt("Choose X", "engine.decision.x.choose") },
+    variablePlayCost: {
+      base: 0,
+      resourcesPerX: 2,
+      counterKey: "x",
+      prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
+    },
     additionalCost: iceEternalAdditionalCost,
     onPlay(ctx) {
       const x = ctx.getCounter("x");
@@ -551,12 +559,7 @@ export const siy: Record<string, CardScript> = {
   "winter's bite|3": {
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
-      requestHeroTarget(
-        ctx,
-        "winter-target",
-        "Winter's Bite: choose a hero",
-        "card.siy.wintersbite.hero.choose",
-      );
+      requestHeroTarget(ctx, "winter-target", "Winter's Bite: choose a hero", "card.siy.wintersbite.hero.choose");
     },
     onChoose(ctx, hook, option) {
       if (hook === "winter-target") {

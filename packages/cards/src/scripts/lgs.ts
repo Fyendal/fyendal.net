@@ -33,15 +33,18 @@ export const lgs: Record<string, CardScript> = {
   "chief ruk'utan|0": {
     activeWhileFaceUpInArsenal: true,
     // Chief Ruk'utan — mentor: face down in arsenal, flips up at start of turn
-    triggers: [mentorFlipTrigger(), {
-      event: "card-played",
-      label: "Intimidate",
-      condition: (ctx, played) => ctx.self.faceDown !== true && isSixPlus(ctx, played),
-      effect(ctx) {
-      queueIntimidate(ctx);
-      if (lessonCounter(ctx) >= 2) mentorPayoff(ctx, "Alpha Rampage", 1);
+    triggers: [
+      mentorFlipTrigger(),
+      {
+        event: "card-played",
+        label: "Intimidate",
+        condition: (ctx, played) => ctx.self.faceDown !== true && isSixPlus(ctx, played),
+        effect(ctx) {
+          queueIntimidate(ctx);
+          if (lessonCounter(ctx) >= 2) mentorPayoff(ctx, "Alpha Rampage", 1);
+        },
       },
-    }],
+    ],
   },
   "batter to a pulp|1": {
     combatDamageUnpreventableAtLeast: 4,

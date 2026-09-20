@@ -138,7 +138,14 @@ export function PlayerHand({
       .filter((entry): entry is [number, Exclude<PlayableZone, "deck">] => entry[1] !== "deck")
       .flatMap(([instanceId, zone]) => {
         if (interaction.optimisticallyHiddenIds.has(instanceId)) return [];
-        const card = [...player.banish, ...player.graveyard]
+        // Effects such as Red Lure Harpoon and Nuu let this player play an
+        // opponent-owned card. The legal intent is authoritative, so search
+        // every public inactive zone instead of assuming the card is owned by
+        // the player whose hand strip surfaces the action.
+        const card = view.players.flatMap((zoneOwner) => [
+          ...zoneOwner.banish,
+          ...zoneOwner.graveyard,
+        ])
           .find((candidate) => candidate.instanceId === instanceId);
         return card ? [{ card, zone }] : [];
       });

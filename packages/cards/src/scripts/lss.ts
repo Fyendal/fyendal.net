@@ -1,10 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import {
-  decisionMessage,
-  decisionPrompt,
-  opponentSeat,
-  yesNoPrompt,
-} from "./shared-helpers.js";
+import { decisionMessage, decisionPrompt, opponentSeat, yesNoPrompt } from "./shared-helpers.js";
 
 function isPotionOrBrew(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   const data = ctx.cardData(card.cardId);
@@ -12,7 +7,10 @@ function isPotionOrBrew(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boole
 }
 
 function continueBuddySearch(ctx: ScriptCtx): void {
-  const order = [ctx.seat, ...ctx.state.players.filter((player) => player.seat !== ctx.seat).map((player) => player.seat)];
+  const order = [
+    ctx.seat,
+    ...ctx.state.players.filter((player) => player.seat !== ctx.seat).map((player) => player.seat),
+  ];
   let step = ctx.getCounter("buddySearchStep");
   while (step < order.length) {
     const target = order[step]!;
@@ -24,11 +22,9 @@ function continueBuddySearch(ctx: ScriptCtx): void {
     ctx.setCounter("buddySearchSeat", target);
     ctx.requestCardChoice(
       "buddy-search",
-      decisionPrompt(
-        "Drinking Buddy: search for a Potion or Brew item?",
-        "card.lss.drinking.buddy.search",
-        { optionMessages: { no: decisionMessage("common.option.decline") } },
-      ),
+      decisionPrompt("Drinking Buddy: search for a Potion or Brew item?", "card.lss.drinking.buddy.search", {
+        optionMessages: { no: decisionMessage("common.option.decline") },
+      }),
       ["no", ...choices.map((card) => card.instanceId)],
       target,
     );
@@ -69,10 +65,7 @@ export const lss: Record<string, CardScript> = {
         // cards in Fyendal are ungraded and take the printed "otherwise" path.
         ctx.requestChoice(
           "ruudi-draw",
-          yesNoPrompt(
-            "Ruu'di: draw a card?",
-            "card.lss.ruudi.draw",
-          ),
+          yesNoPrompt("Ruu'di: draw a card?", "card.lss.ruudi.draw"),
           ["yes", "no"],
           opponentSeat(ctx),
         );

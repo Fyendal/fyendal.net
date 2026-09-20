@@ -162,6 +162,8 @@ const KEYWORD_OVERRIDES: Record<string, string[]> = {
   // Wild Ride only GAINS go again if a 6+ card is discarded
   "wild ride|1": [],
   "wild ride|2": [],
+  // Rouse the Ancients gains go again only when its reveal cost succeeds.
+  "rouse the ancients|3": [],
   // Stone Rain gains dominate only while it has an aim counter.
   "stone rain|1": [],
   // Buckwild only GAINS go again while a 6+ card is in the pitch zone

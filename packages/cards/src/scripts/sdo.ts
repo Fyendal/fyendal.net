@@ -31,8 +31,6 @@ import {
 const AGILITY = "SDO035";
 const VIGOR = "SDO036";
 
-
-
 /** ctx.state is typed without the internal side tables; the runtime object has them. */
 
 /** Attack-reaction legality: my unresolved attack is on the chain and matches
@@ -52,7 +50,11 @@ function targetMyAttack(
     },
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: pump });
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: the attack gets +${pump}{p}`, "card.log.common.attack.gained", { amount: pump }));
+      ctx.logPublic(
+        localizedCardLog(ctx, `${ctx.data.name}: the attack gets +${pump}{p}`, "card.log.common.attack.gained", {
+          amount: pump,
+        }),
+      );
       onPlayExtra?.(ctx);
     },
   };
@@ -77,25 +79,37 @@ export const sdo: Record<string, CardScript> = {
       ctx.setFlag("player", key, (Number(ctx.getFlag("player", key)) || 0) + 1);
     },
     canTriggerOnHit(ctx) {
-      return ctx.link?.attackingCard.instanceId === ctx.self.instanceId &&
-        Number(ctx.getFlag("player", `hits:${ctx.self.instanceId}`)) === 2;
+      return (
+        ctx.link?.attackingCard.instanceId === ctx.self.instanceId &&
+        Number(ctx.getFlag("player", `hits:${ctx.self.instanceId}`)) === 2
+      );
     },
     onHit(ctx) {
       ctx.addCounter(ctx.self.instanceId, "power", 1);
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} gets a +1{p} counter`, "card.log.sdo.dawnblade.counter.gained", { amount: 1 }));
+      ctx.logPublic(
+        localizedCardLog(ctx, `${ctx.data.name} gets a +1{p} counter`, "card.log.sdo.dawnblade.counter.gained", {
+          amount: 1,
+        }),
+      );
     },
     triggers: [
       {
         event: "end-of-turn",
         condition: (ctx) =>
-          !ctx.getFlag("player", `hits:${ctx.self.instanceId}`) &&
-          (ctx.self.counters?.power ?? 0) > 0,
+          !ctx.getFlag("player", `hits:${ctx.self.instanceId}`) && (ctx.self.counters?.power ?? 0) > 0,
         label: "Dawnblade hasn't hit this turn — remove all +1{p} counters",
         effect(ctx) {
           const n = ctx.self.counters?.power ?? 0;
           if (n > 0) {
             ctx.addCounter(ctx.self.instanceId, "power", -n);
-            ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}'s +1{p} counters are removed`, "card.log.sdo.dawnblade.counters.removed", { amount: n }));
+            ctx.logPublic(
+              localizedCardLog(
+                ctx,
+                `${ctx.data.name}'s +1{p} counters are removed`,
+                "card.log.sdo.dawnblade.counters.removed",
+                { amount: n },
+              ),
+            );
           }
         },
       },
@@ -139,21 +153,25 @@ export const sdo: Record<string, CardScript> = {
       const card = opp.arsenal[0];
       if (!card) return;
       ctx.setCardFaceDown(card.instanceId, false);
-      ctx.logPublic(localizedCardLog(
-        ctx,
-        `Wreck Havoc: ${ctx.cardData(card.cardId).name} in their arsenal is turned face up`,
-        "card.log.sdo.wreckhavoc.revealed",
-        { result: { kind: "card", cardId: card.cardId }, target: { kind: "player", seat: opponentSeat(ctx) } },
-      ));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `Wreck Havoc: ${ctx.cardData(card.cardId).name} in their arsenal is turned face up`,
+          "card.log.sdo.wreckhavoc.revealed",
+          { result: { kind: "card", cardId: card.cardId }, target: { kind: "player", seat: opponentSeat(ctx) } },
+        ),
+      );
       if (ctx.cardData(card.cardId).cardType !== "defense-reaction") return;
       ctx.moveToGraveyard(card.instanceId, "arsenal");
-      ctx.logPublic(localizedCardLog(
-        ctx,
-        `Wreck Havoc: ${ctx.cardData(card.cardId).name} is destroyed`,
-        "card.log.sdo.wreckhavoc.destroyed",
-        { result: { kind: "card", cardId: card.cardId } },
-        { kind: "card-moved", cardId: card.cardId, ownerSeat: opponentSeat(ctx), from: "arsenal", to: "graveyard" },
-      ));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `Wreck Havoc: ${ctx.cardData(card.cardId).name} is destroyed`,
+          "card.log.sdo.wreckhavoc.destroyed",
+          { result: { kind: "card", cardId: card.cardId } },
+          { kind: "card-moved", cardId: card.cardId, ownerSeat: opponentSeat(ctx), from: "arsenal", to: "graveyard" },
+        ),
+      );
     },
   },
 
@@ -180,7 +198,14 @@ export const sdo: Record<string, CardScript> = {
       //  (already known when the reaction resolves).
       if (!reprise(ctx)) return;
       buffNextAttack(ctx, { attack: 1 });
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: reprise — your next attack this turn gets +1{p}`, "card.log.sdo.outforblood.reprise", { amount: 1 }));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.data.name}: reprise — your next attack this turn gets +1{p}`,
+          "card.log.sdo.outforblood.reprise",
+          { amount: 1 },
+        ),
+      );
     },
   ),
 
@@ -189,7 +214,14 @@ export const sdo: Record<string, CardScript> = {
     3,
     (ctx) => {
       ctx.addModifier({ scope: "chain-link", piercing: 1 });
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: the attack gains piercing 1`, "card.log.common.attack.piercing.gained", { amount: 1 }));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.data.name}: the attack gains piercing 1`,
+          "card.log.common.attack.piercing.gained",
+          { amount: 1 },
+        ),
+      );
     },
   ),
 
@@ -198,7 +230,14 @@ export const sdo: Record<string, CardScript> = {
     1,
     (ctx) => {
       ctx.addModifier({ scope: "chain-link", piercing: 1 });
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: the attack gains piercing 1`, "card.log.common.attack.piercing.gained", { amount: 1 }));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.data.name}: the attack gains piercing 1`,
+          "card.log.common.attack.piercing.gained",
+          { amount: 1 },
+        ),
+      );
     },
   ),
 
@@ -226,7 +265,14 @@ export const sdo: Record<string, CardScript> = {
     //  Go again (on Trot Along itself) is printed (native).
     onPlay(ctx) {
       buffNextAttack(ctx, { goAgain: true, maxBasePower: 3 });
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: your next attack with 3 or less base {p} this turn gets go again`, "card.log.sdo.trotalong.goagain", { amount: 3 }));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.data.name}: your next attack with 3 or less base {p} this turn gets go again`,
+          "card.log.sdo.trotalong.goagain",
+          { amount: 3 },
+        ),
+      );
     },
   },
 
@@ -241,7 +287,9 @@ export const sdo: Record<string, CardScript> = {
         effect(ctx) {
           ctx.destroySelf();
           ctx.changeResources(ctx.seat, 1);
-          ctx.logPublic(localizedCardLog(ctx, "Vigor is destroyed: gain {r}", "card.log.sdo.vigor.resources", { amount: 1 }));
+          ctx.logPublic(
+            localizedCardLog(ctx, "Vigor is destroyed: gain {r}", "card.log.sdo.vigor.resources", { amount: 1 }),
+          );
         },
       },
     ],

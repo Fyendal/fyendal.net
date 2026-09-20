@@ -1,11 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import {
-  ampNextArcane,
-  commonOptionMessages,
-  dealArcane,
-  decisionPrompt,
-  opponentSeat,
-} from "./shared-helpers.js";
+import { ampNextArcane, commonOptionMessages, dealArcane, decisionPrompt, opponentSeat } from "./shared-helpers.js";
 
 const FLOW = "OMN203";
 const EMBODIMENT = "ROS026";
@@ -22,23 +16,22 @@ function isLightningAura(ctx: ScriptCtx, card: Card): boolean {
 }
 
 function holoChoices(ctx: ScriptCtx): readonly Card[] {
-  return ctx.player(ctx.seat).board.filter((card) => isLightningAura(ctx, card) && Number(card.counters?.holo ?? 0) === 0);
+  return ctx
+    .player(ctx.seat)
+    .board.filter((card) => isLightningAura(ctx, card) && Number(card.counters?.holo ?? 0) === 0);
 }
 
 function requestHoloBlink(ctx: ScriptCtx, hook: string): void {
   const choices = holoChoices(ctx);
-  if (choices.length) ctx.requestCardChoice(
-    hook,
-    decisionPrompt(
-      `${ctx.data.name}: give a Lightning aura a holo counter?`,
-      "card.azs.holo.aura.choose",
-      {
+  if (choices.length)
+    ctx.requestCardChoice(
+      hook,
+      decisionPrompt(`${ctx.data.name}: give a Lightning aura a holo counter?`, "card.azs.holo.aura.choose", {
         values: { card: { kind: "card", cardId: ctx.self.cardId } },
         optionMessages: commonOptionMessages("no"),
-      },
-    ),
-    ["no", ...choices.map((card) => card.instanceId)],
-  );
+      }),
+      ["no", ...choices.map((card) => card.instanceId)],
+    );
 }
 
 function finishHoloBlink(ctx: ScriptCtx, hook: string, expected: string, option: string): boolean {
@@ -55,18 +48,40 @@ function finishHoloBlink(ctx: ScriptCtx, hook: string, expected: string, option:
 export const azs: Record<string, CardScript> = {
   "zyggy starlight|0": {
     activated: {
-      cost: 2, isAttack: false, goAgain: false, timing: "instant", tap: true,
+      cost: 2,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      tap: true,
       effectCardCosts: [
-        { zone: "arena", move: "destroy", count: 1, name: "Lightning Flow", prompt: decisionPrompt("Choose a Lightning Flow to destroy", "card.common.cost.lightningflow.destroy") },
-        { zone: "arena", move: "banish", count: 1, types: ["lightning", "aura"], withoutCounter: "holo", prompt: decisionPrompt("Choose another Lightning aura to banish", "card.common.cost.lightningaura.banish") },
+        {
+          zone: "arena",
+          move: "destroy",
+          count: 1,
+          name: "Lightning Flow",
+          prompt: decisionPrompt("Choose a Lightning Flow to destroy", "card.common.cost.lightningflow.destroy"),
+        },
+        {
+          zone: "arena",
+          move: "banish",
+          count: 1,
+          types: ["lightning", "aura"],
+          withoutCounter: "holo",
+          prompt: decisionPrompt("Choose another Lightning aura to banish", "card.common.cost.lightningaura.banish"),
+        },
       ],
       onCostPaid(ctx, paid) {
-        const aura = paid.find((card) => ctx.player(ctx.seat).banish.some((candidate) => candidate.instanceId === card.instanceId));
+        const aura = paid.find((card) =>
+          ctx.player(ctx.seat).banish.some((candidate) => candidate.instanceId === card.instanceId),
+        );
         if (aura) ctx.setCounter("zyggyAura", aura.instanceId);
       },
       onActivate(ctx) {
         const id = ctx.getCounter("zyggyAura");
-        if (id) { ctx.setCardCounter(id, "holo", 1); ctx.settleCard(id); }
+        if (id) {
+          ctx.setCardCounter(id, "holo", 1);
+          ctx.settleCard(id);
+        }
       },
     },
     onFriendlyPlay(ctx, played) {
@@ -77,32 +92,59 @@ export const azs: Record<string, CardScript> = {
   },
   "aphrodias|0": {
     activated: {
-      cost: 1, isAttack: false, goAgain: false, timing: "instant", tap: true,
+      cost: 1,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      tap: true,
       canActivate: (ctx) => ctx.getFlag("player", "azsHoloEntered") === true,
-      modifyCost: (ctx, base) => ctx.getFlag("player", "azsAphrodiasBoost") === true ? Math.max(0, base - 1) : base,
-      onActivate(ctx) { dealArcane(ctx, opponentSeat(ctx), 2); },
+      modifyCost: (ctx, base) => (ctx.getFlag("player", "azsAphrodiasBoost") === true ? Math.max(0, base - 1) : base),
+      onActivate(ctx) {
+        dealArcane(ctx, opponentSeat(ctx), 2);
+      },
     },
     onFriendlyEnterArena(ctx, entered) {
       if (isAura(ctx, entered) && Number(entered.counters?.holo) > 0) ctx.setFlag("player", "azsHoloEntered", true);
     },
     onDamageDealt(ctx, target, amount) {
-      if (amount > 0 && target !== ctx.seat && ctx.getFlag("player", "azsAphrodiasBoost") === true) ctx.createToken(FLOW);
+      if (amount > 0 && target !== ctx.seat && ctx.getFlag("player", "azsAphrodiasBoost") === true)
+        ctx.createToken(FLOW);
     },
   },
   "starfield veil|0": {
     activated: {
-      cost: 0, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true,
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      destroySelfCost: true,
       canActivate: (ctx) => ctx.getFlag("player", "fragmentedThisTurn") === true,
-      onActivate(ctx) { ctx.setFlag("player", "azsNextAuraHolo", true); },
+      onActivate(ctx) {
+        ctx.setFlag("player", "azsNextAuraHolo", true);
+      },
     },
   },
   "starfield carapace|0": {
-    activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true, onActivate(ctx) { ctx.setFlag("player", "azsAphrodiasBoost", true); } },
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      destroySelfCost: true,
+      onActivate(ctx) {
+        ctx.setFlag("player", "azsAphrodiasBoost", true);
+      },
+    },
   },
   "starfield touch|0": {
     activated: {
-      cost: 1, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true,
-      canActivate: (ctx) => ctx.player(ctx.seat).weapons.some((card) => ctx.cardData(card.cardId).name === "Aphrodias" && card.tapped),
+      cost: 1,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      destroySelfCost: true,
+      canActivate: (ctx) =>
+        ctx.player(ctx.seat).weapons.some((card) => ctx.cardData(card.cardId).name === "Aphrodias" && card.tapped),
       onActivate(ctx) {
         const weapon = ctx.player(ctx.seat).weapons.find((card) => ctx.cardData(card.cardId).name === "Aphrodias");
         if (weapon) ctx.untap(weapon.instanceId);
@@ -111,24 +153,25 @@ export const azs: Record<string, CardScript> = {
   },
   "blitz kicks|0": {
     activated: {
-      cost: 1, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true,
+      cost: 1,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      destroySelfCost: true,
       canActivate: (ctx) => ctx.getFlag("player", "playedCardType:instant") === true,
-      onActivate(ctx) { ctx.createToken(EMBODIMENT); },
+      onActivate(ctx) {
+        ctx.createToken(EMBODIMENT);
+      },
     },
   },
   "miraging metamorph|1": {
     destroyOnChainCloseWhenDefendedByHigherDefense: true,
     onDestroyed(ctx) {
-      const auras = ctx.player(ctx.seat).board.filter((card) =>
-        ctx.cardTypes(card).includes("aura")
-      );
+      const auras = ctx.player(ctx.seat).board.filter((card) => ctx.cardTypes(card).includes("aura"));
       if (auras.length > 0) {
         ctx.requestCardChoice(
           "miraging-copy",
-          decisionPrompt(
-            "Miraging Metamorph: choose an aura to copy",
-            "card.azs.miraging.aura.copy",
-          ),
+          decisionPrompt("Miraging Metamorph: choose an aura to copy", "card.azs.miraging.aura.copy"),
           auras.map((card) => card.instanceId),
         );
       }
@@ -138,14 +181,25 @@ export const azs: Record<string, CardScript> = {
     },
   },
   "shattering stardust|1": {
-    onFragment(ctx) { ampNextArcane(ctx, 1); },
-    canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined; },
-    onHit(ctx) { requestHoloBlink(ctx, "stardust-holo"); },
-    onChoose(ctx, hook, option) { finishHoloBlink(ctx, hook, "stardust-holo", option); },
+    onFragment(ctx) {
+      ampNextArcane(ctx, 1);
+    },
+    canTriggerOnHit(ctx) {
+      return ctx.link?.targetAllyId === undefined;
+    },
+    onHit(ctx) {
+      requestHoloBlink(ctx, "stardust-holo");
+    },
+    onChoose(ctx, hook, option) {
+      finishHoloBlink(ctx, hook, "stardust-holo", option);
+    },
   },
   "stardust spike|1": {
     wardValue: () => 2,
-    onLeaveArena(ctx) { ctx.changeResources(ctx.seat, 1); ampNextArcane(ctx, 1); },
+    onLeaveArena(ctx) {
+      ctx.changeResources(ctx.seat, 1);
+      ampNextArcane(ctx, 1);
+    },
   },
   "blur reality|3": {
     canPlay: (ctx) => holoChoices(ctx).length > 0,
@@ -153,18 +207,20 @@ export const azs: Record<string, CardScript> = {
       const choices = holoChoices(ctx);
       if (choices.length === 1) {
         const id = choices[0]!.instanceId;
-        if (ctx.banish(id)) { ctx.setCardCounter(id, "holo", 1); ctx.settleCard(id); }
+        if (ctx.banish(id)) {
+          ctx.setCardCounter(id, "holo", 1);
+          ctx.settleCard(id);
+        }
       } else if (choices.length > 1) {
         ctx.requestCardChoice(
           "blur-holo",
-          decisionPrompt(
-            "Blur Reality: choose a Lightning aura",
-            "card.azs.blur.aura.choose",
-          ),
+          decisionPrompt("Blur Reality: choose a Lightning aura", "card.azs.blur.aura.choose"),
           choices.map((card) => card.instanceId),
         );
       }
     },
-    onChoose(ctx, hook, option) { finishHoloBlink(ctx, hook, "blur-holo", option); },
+    onChoose(ctx, hook, option) {
+      finishHoloBlink(ctx, hook, "blur-holo", option);
+    },
   },
 };

@@ -605,21 +605,24 @@ export type PlayableZone = "banish" | "graveyard" | "deck";
  *  the base cost (CR 8.3.38). Required when the played card has Meld. */
 export type MeldSide = "left" | "right" | "both";
 
-/** Presentation metadata for a play cost whose arena and hand cards are
- * declared in separate groups before resources are paid. The engine remains
- * authoritative for the exact legal card sets. */
-export interface AdditionalPlayCostSelection {
-  kind: "destroy-controlled-and-or-discard-hand";
+/** Presentation metadata for a card cost chosen before resources are paid.
+ * The engine remains authoritative for the exact legal card sets. */
+export interface CardCostSelection {
+  kind: "choose-card-cost";
   cardLabel: string;
-  maximumDestroyed: number;
-  maximumDiscarded: number;
+  minimum: number;
+  maximum: number;
+  modes: Array<{
+    kind: "destroy" | "discard" | "banish";
+    maximum: number;
+  }>;
 }
 
 export type GameIntent =
-  | { kind: "play-card"; instanceId: number; pitchInstanceIds: number[]; pitchRequired?: number; meldSide?: MeldSide; targetAllyId?: number; targetCardInstanceId?: number; boost?: true; boostCount?: number; asInstant?: true; alternativeCostCardInstanceIds?: number[]; additionalCostSelection?: AdditionalPlayCostSelection; /** Presentation hint: this announcement may pause on a pre-stack choice. */ deferPlayPresentation?: true }
-  | { kind: "play-from-arsenal"; instanceId: number; pitchInstanceIds: number[]; pitchRequired?: number; meldSide?: MeldSide; targetAllyId?: number; targetCardInstanceId?: number; boost?: true; boostCount?: number; asInstant?: true; alternativeCostCardInstanceIds?: number[]; additionalCostSelection?: AdditionalPlayCostSelection; deferPlayPresentation?: true }
-  | { kind: "play-from-zone"; zone: PlayableZone; instanceId: number; pitchInstanceIds: number[]; pitchRequired?: number; meldSide?: MeldSide; targetAllyId?: number; targetCardInstanceId?: number; boost?: true; boostCount?: number; asInstant?: true; alternativeCostCardInstanceIds?: number[]; additionalCostSelection?: AdditionalPlayCostSelection; deferPlayPresentation?: true }
-  | { kind: "activate-ability"; sourceInstanceId: number; pitchInstanceIds: number[]; pitchRequired?: number; abilityIndex?: number; targetAllyId?: number; targetCardInstanceId?: number; alternativeCostCardInstanceIds?: number[]; /** Presentation hint: wait for the authoritative result instead of projecting this activation. */ deferActivationPresentation?: true }
+  | { kind: "play-card"; instanceId: number; pitchInstanceIds: number[]; pitchRequired?: number; meldSide?: MeldSide; targetAllyId?: number; targetCardInstanceId?: number; boost?: true; boostCount?: number; asInstant?: true; alternativeCostCardInstanceIds?: number[]; cardCostSelection?: CardCostSelection; /** Presentation hint: this announcement may pause on a pre-stack choice. */ deferPlayPresentation?: true }
+  | { kind: "play-from-arsenal"; instanceId: number; pitchInstanceIds: number[]; pitchRequired?: number; meldSide?: MeldSide; targetAllyId?: number; targetCardInstanceId?: number; boost?: true; boostCount?: number; asInstant?: true; alternativeCostCardInstanceIds?: number[]; cardCostSelection?: CardCostSelection; deferPlayPresentation?: true }
+  | { kind: "play-from-zone"; zone: PlayableZone; instanceId: number; pitchInstanceIds: number[]; pitchRequired?: number; meldSide?: MeldSide; targetAllyId?: number; targetCardInstanceId?: number; boost?: true; boostCount?: number; asInstant?: true; alternativeCostCardInstanceIds?: number[]; cardCostSelection?: CardCostSelection; deferPlayPresentation?: true }
+  | { kind: "activate-ability"; sourceInstanceId: number; pitchInstanceIds: number[]; pitchRequired?: number; abilityIndex?: number; targetAllyId?: number; targetCardInstanceId?: number; alternativeCostCardInstanceIds?: number[]; cardCostSelection?: CardCostSelection; /** Presentation hint: wait for the authoritative result instead of projecting this activation. */ deferActivationPresentation?: true }
   | { kind: "pass" }
   | { kind: "defend"; instanceIds: number[]; pitchInstanceIds?: number[] }
   | { kind: "stage-defenders"; instanceIds: number[] }

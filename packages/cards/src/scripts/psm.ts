@@ -16,7 +16,8 @@ export const psm: Record<string, CardScript> = {
       if (
         ctx.cardData(token.cardId).name !== "Spectral Shield" ||
         ctx.getPlayerFlag(ctx.seat, "librarianTriggeredThisTurn") === true
-      ) return;
+      )
+        return;
       ctx.setPlayerFlag(ctx.seat, "librarianTriggeredThisTurn", true);
       ctx.drawCards(ctx.seat, 1);
       if (lessonCounter(ctx) >= 3) mentorSpecializationPayoff(ctx, SEARCH_HOOK);

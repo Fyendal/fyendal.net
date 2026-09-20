@@ -31,32 +31,35 @@ function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boole
 
 function lessLifePlayTrigger(effect: { attack?: number; keyword?: string }): CardScript {
   return {
-    triggers: [{
-      event: "card-played",
-      sourceZone: "self",
-      label: effect.attack ? `Gain +${effect.attack} attack` : `Gain ${effect.keyword}`,
-      condition: (ctx) => ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0,
-      effect(ctx, played) {
-        if (!played) return;
-        if (effect.attack) ctx.addCardTempPower(played.instanceId, effect.attack);
-        if (effect.keyword === "dominate") {
-          ctx.addModifier({ scope: "chain-link", dominate: true });
-        }
-        else if (effect.keyword) ctx.grantCardKeyword(played.instanceId, effect.keyword);
+    triggers: [
+      {
+        event: "card-played",
+        sourceZone: "self",
+        label: effect.attack ? `Gain +${effect.attack} attack` : `Gain ${effect.keyword}`,
+        condition: (ctx) => ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0,
+        effect(ctx, played) {
+          if (!played) return;
+          if (effect.attack) ctx.addCardTempPower(played.instanceId, effect.attack);
+          if (effect.keyword === "dominate") {
+            ctx.addModifier({ scope: "chain-link", dominate: true });
+          } else if (effect.keyword) ctx.grantCardKeyword(played.instanceId, effect.keyword);
+        },
       },
-    }],
+    ],
   };
 }
 
 function invigoratingLight(): CardScript {
   return {
-    triggers: [{
-      event: "card-played",
-      sourceZone: "self",
-      label: "Put this into your hero's soul when the combat chain closes",
-      condition: (ctx) => ctx.player(ctx.seat).soul.length === 0,
-      effect: (ctx) => ctx.setFlag("link", "attackToSoul", true),
-    }],
+    triggers: [
+      {
+        event: "card-played",
+        sourceZone: "self",
+        label: "Put this into your hero's soul when the combat chain closes",
+        condition: (ctx) => ctx.player(ctx.seat).soul.length === 0,
+        effect: (ctx) => ctx.setFlag("link", "attackToSoul", true),
+      },
+    ],
   };
 }
 
@@ -65,15 +68,13 @@ function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string)
 }
 
 function hasKeyword(ctx: ScriptCtx, cardId: string, keyword: string): boolean {
-  return (ctx.cardData(cardId).keywords ?? []).some(
-    (candidate) => candidate.toLowerCase() === keyword.toLowerCase(),
-  );
+  return (ctx.cardData(cardId).keywords ?? []).some((candidate) => candidate.toLowerCase() === keyword.toLowerCase());
 }
 
 function blindingBeamTargets(ctx: ScriptCtx) {
-  return [ctx.link?.attackingCard, ...(ctx.link?.defendingCards ?? [])]
-    .filter((card): card is NonNullable<typeof card> =>
-      !!card && isAttackAction(ctx, card));
+  return [ctx.link?.attackingCard, ...(ctx.link?.defendingCards ?? [])].filter(
+    (card): card is NonNullable<typeof card> => !!card && isAttackAction(ctx, card),
+  );
 }
 
 function blindingBeam(powerReduction: number): CardScript {
@@ -82,19 +83,14 @@ function blindingBeam(powerReduction: number): CardScript {
       return blindingBeamTargets(ctx).map((card) => card.instanceId);
     },
     modifyPlayCost(ctx, baseCost) {
-      const target = blindingBeamTargets(ctx).find(
-        (card) => card.instanceId === ctx.playTargetInstanceId,
-      );
-      const shadow = target && (
-        hasType(ctx, target, "shadow") ||
-        (target.grantedTypes ?? []).some((type) => type.toLowerCase() === "shadow")
-      );
+      const target = blindingBeamTargets(ctx).find((card) => card.instanceId === ctx.playTargetInstanceId);
+      const shadow =
+        target &&
+        (hasType(ctx, target, "shadow") || (target.grantedTypes ?? []).some((type) => type.toLowerCase() === "shadow"));
       return shadow ? baseCost - 1 : baseCost;
     },
     onPlay(ctx) {
-      const target = blindingBeamTargets(ctx).find(
-        (card) => card.instanceId === ctx.playTargetInstanceId,
-      );
+      const target = blindingBeamTargets(ctx).find((card) => card.instanceId === ctx.playTargetInstanceId);
       if (target) ctx.addCardTempPower(target.instanceId, -powerReduction);
     },
   };
@@ -111,10 +107,14 @@ function chargeAttack(extra: CardScript = {}): CardScript {
       if (hand.length === 0) return;
       ctx.requestCardChoice(
         "mon-charge",
-        decisionPrompt(`${ctx.data.name}: choose a card from your hand to charge, or decline`, "card.mon.charge.choose", {
-          values: { card: { kind: "card", cardId: ctx.self.cardId } },
-          optionMessages: commonOptionMessages("no"),
-        }),
+        decisionPrompt(
+          `${ctx.data.name}: choose a card from your hand to charge, or decline`,
+          "card.mon.charge.choose",
+          {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            optionMessages: commonOptionMessages("no"),
+          },
+        ),
         ["no", ...hand.map((card) => card.instanceId)],
       );
     },
@@ -167,23 +167,37 @@ function glisten(count: number): CardScript {
       }
       ctx.requestChoice(
         "mon-glisten",
-        decisionPrompt(`${ctx.data.name}: distribute up to ${count} +1{p} counters among your weapons`, "card.mon.glisten.distribute", {
-          values: { card: { kind: "card", cardId: ctx.self.cardId }, count },
-          optionMessages: Object.fromEntries(options.map((option) => [
-            option,
-            decisionMessage("card.mon.glisten.option", { distribution: option.split(":").map((amount) => `+${amount}`).join(" / ") }),
-          ])),
-        }),
+        decisionPrompt(
+          `${ctx.data.name}: distribute up to ${count} +1{p} counters among your weapons`,
+          "card.mon.glisten.distribute",
+          {
+            values: { card: { kind: "card", cardId: ctx.self.cardId }, count },
+            optionMessages: Object.fromEntries(
+              options.map((option) => [
+                option,
+                decisionMessage("card.mon.glisten.option", {
+                  distribution: option
+                    .split(":")
+                    .map((amount) => `+${amount}`)
+                    .join(" / "),
+                }),
+              ]),
+            ),
+          },
+        ),
         options,
       );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "mon-glisten") return;
       const weapons = ctx.player(ctx.seat).weapons;
-      option.split(":").map(Number).forEach((amount, index) => {
-        const weapon = weapons[index];
-        if (weapon && amount > 0) ctx.addCounter(weapon.instanceId, "power", amount);
-      });
+      option
+        .split(":")
+        .map(Number)
+        .forEach((amount, index) => {
+          const weapon = weapons[index];
+          if (weapon && amount > 0) ctx.addCounter(weapon.instanceId, "power", amount);
+        });
       ctx.setFlag(
         "player",
         "clearWeaponPowerCountersAtTurn",
@@ -274,19 +288,21 @@ function banishThreeCost(extra: CardScript = {}): CardScript {
 }
 
 function shadowBruteBanishThree(kind: "plain" | "power" | "dominate" | "go-again"): CardScript {
-  return bloodDebt(banishThreeCost({
-    modifyAttack(ctx) {
-      return kind === "power" && ctx.getCounter("banishedSix") ? 3 : 0;
-    },
-    onAttackDeclared(ctx) {
-      if (!ctx.getCounter("banishedSix")) return;
-      if (kind === "dominate") {
-        ctx.addModifier({ scope: "chain-link", dominate: true });
-      } else if (kind === "go-again") {
-        ctx.grantGoAgain();
-      }
-    },
-  }));
+  return bloodDebt(
+    banishThreeCost({
+      modifyAttack(ctx) {
+        return kind === "power" && ctx.getCounter("banishedSix") ? 3 : 0;
+      },
+      onAttackDeclared(ctx) {
+        if (!ctx.getCounter("banishedSix")) return;
+        if (kind === "dominate") {
+          ctx.addModifier({ scope: "chain-link", dominate: true });
+        } else if (kind === "go-again") {
+          ctx.grantGoAgain();
+        }
+      },
+    }),
+  );
 }
 
 function convulsions(attack: number): CardScript {
@@ -325,7 +341,15 @@ function dimenxxionalGateway(opt: number): CardScript {
     const top = ctx.player(ctx.seat).deck[0];
     if (!top) return;
     const data = ctx.cardData(top.cardId);
-    ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} reveals ${data.name}`, "card.log.common.decktop.revealed", { revealed: { kind: "card", cardId: top.cardId } }, { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" }));
+    ctx.logPublic(
+      localizedCardLog(
+        ctx,
+        `${ctx.data.name} reveals ${data.name}`,
+        "card.log.common.decktop.revealed",
+        { revealed: { kind: "card", cardId: top.cardId } },
+        { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
+      ),
+    );
     const runeblade = hasType(ctx, top, "runeblade");
     const shadow = hasType(ctx, top, "shadow");
     if (runeblade && shadow) ctx.setCounter("gatewayShadowCard", top.instanceId);
@@ -342,11 +366,8 @@ function dimenxxionalGateway(opt: number): CardScript {
     },
     onChoose(ctx, hook, option) {
       if (optOnChoose(ctx, hook, option, () => reveal(ctx))) return;
-      if (
-        hook === "gateway-banish" &&
-        option !== "no" &&
-        ctx.player(ctx.seat).deck[0]?.instanceId === Number(option)
-      ) ctx.banish(Number(option));
+      if (hook === "gateway-banish" && option !== "no" && ctx.player(ctx.seat).deck[0]?.instanceId === Number(option))
+        ctx.banish(Number(option));
     },
     onDamageDealt(ctx) {
       const instanceId = ctx.getCounter("gatewayShadowCard");
@@ -360,101 +381,123 @@ function dimenxxionalGateway(opt: number): CardScript {
 }
 
 function seepingShadows(maxCost: number): CardScript {
-  return bloodDebt({
-    onPlay(ctx) {
-      buffNextAttack(ctx, {
-        attack: 1,
-        goAgain: true,
-        appliesTo: "attack-action",
-        maxCost,
-      });
+  return bloodDebt(
+    {
+      onPlay(ctx) {
+        buffNextAttack(ctx, {
+          attack: 1,
+          goAgain: true,
+          appliesTo: "attack-action",
+          maxCost,
+        });
+      },
     },
-  }, true);
+    true,
+  );
 }
 
 function boundingDemigon(): CardScript {
-  return bloodDebt({
-    canPlay(ctx) {
-      const inBanish = ctx.player(ctx.seat).banish.some(
-        (card) => card.instanceId === ctx.self.instanceId,
-      );
-      return !inBanish || ctx.getFlag("player", "playedNonAttackAction") === true;
+  return bloodDebt(
+    {
+      canPlay(ctx) {
+        const inBanish = ctx.player(ctx.seat).banish.some((card) => card.instanceId === ctx.self.instanceId);
+        return !inBanish || ctx.getFlag("player", "playedNonAttackAction") === true;
+      },
+      modifyAttack(ctx) {
+        return ctx.getFlag("link", "fromBanish") === true ? 1 : 0;
+      },
     },
-    modifyAttack(ctx) {
-      return ctx.getFlag("link", "fromBanish") === true ? 1 : 0;
-    },
-  }, true);
+    true,
+  );
 }
 
 function piercingShadowVise(): CardScript {
-  return bloodDebt({
-    modifyAttack(ctx) {
-      return ctx.getFlag("player", "arcaneDamageDealtToOpposingHeroThisTurn") === true ? 2 : 0;
+  return bloodDebt(
+    {
+      modifyAttack(ctx) {
+        return ctx.getFlag("player", "arcaneDamageDealtToOpposingHeroThisTurn") === true ? 2 : 0;
+      },
     },
-  }, true);
+    true,
+  );
 }
 
 function riftBind(): CardScript {
-  return bloodDebt({
-    modifyAttack(ctx) {
-      if (ctx.getFlag("link", "fromBanish") !== true) return 0;
-      return Number(ctx.getFlag("player", "nonAttackActionsPlayedThisTurn")) || 0;
+  return bloodDebt(
+    {
+      modifyAttack(ctx) {
+        if (ctx.getFlag("link", "fromBanish") !== true) return 0;
+        return Number(ctx.getFlag("player", "nonAttackActionsPlayedThisTurn")) || 0;
+      },
     },
-  }, true);
+    true,
+  );
 }
 
 function riftedTorment(): CardScript {
-  return bloodDebt({
-    onAttackDeclared(ctx) {
-      if (ctx.getFlag("link", "fromBanish") === true) {
-        dealArcane(ctx, opponentSeat(ctx), 1);
-      }
+  return bloodDebt(
+    {
+      onAttackDeclared(ctx) {
+        if (ctx.getFlag("link", "fromBanish") === true) {
+          dealArcane(ctx, opponentSeat(ctx), 1);
+        }
+      },
     },
-  }, true);
+    true,
+  );
 }
 
 function ripThroughReality(): CardScript {
-  return bloodDebt({
-    onAttackDeclared(ctx) {
-      if (ctx.getFlag("player", "arcaneDamageDealtToOpposingHeroThisTurn") === true) {
-        ctx.grantGoAgain();
-      }
+  return bloodDebt(
+    {
+      onAttackDeclared(ctx) {
+        if (ctx.getFlag("player", "arcaneDamageDealtToOpposingHeroThisTurn") === true) {
+          ctx.grantGoAgain();
+        }
+      },
     },
-  }, true);
+    true,
+  );
 }
 
 function seedsOfAgony(maxCost: number): CardScript {
-  return bloodDebt({
-    onPlay(ctx) {
-      ctx.addModifier({
-        scope: "until-end-of-turn",
-        appliesTo: "attack-action",
-        maxCost,
-      });
+  return bloodDebt(
+    {
+      onPlay(ctx) {
+        ctx.addModifier({
+          scope: "until-end-of-turn",
+          appliesTo: "attack-action",
+          maxCost,
+        });
+      },
+      onFriendlyAttackDeclared(ctx) {
+        const link = ctx.link;
+        if (!link || link.attackCardType !== "action") return;
+        if ((ctx.cardData(link.attackingCard.cardId).cost ?? 0) > maxCost) return;
+        const modifier = ctx.state.modifiers.find(
+          (candidate) =>
+            candidate.sourceInstanceId === ctx.self.instanceId &&
+            candidate.scope === "until-end-of-turn" &&
+            !candidate.consumed,
+        );
+        if (!modifier) return;
+        ctx.consumeModifier(modifier.id);
+        dealArcane(ctx, opponentSeat(ctx), 1);
+      },
     },
-    onFriendlyAttackDeclared(ctx) {
-      const link = ctx.link;
-      if (!link || link.attackCardType !== "action") return;
-      if ((ctx.cardData(link.attackingCard.cardId).cost ?? 0) > maxCost) return;
-      const modifier = ctx.state.modifiers.find(
-        (candidate) =>
-          candidate.sourceInstanceId === ctx.self.instanceId &&
-          candidate.scope === "until-end-of-turn" &&
-          !candidate.consumed,
-      );
-      if (!modifier) return;
-      ctx.consumeModifier(modifier.id);
-      dealArcane(ctx, opponentSeat(ctx), 1);
-    },
-  }, true);
+    true,
+  );
 }
 
 function howlFromBeyond(attack: number): CardScript {
-  return bloodDebt({
-    onPlay(ctx) {
-      buffNextAttack(ctx, { attack, appliesTo: "attack-action" });
+  return bloodDebt(
+    {
+      onPlay(ctx) {
+        buffNextAttack(ctx, { attack, appliesTo: "attack-action" });
+      },
     },
-  }, true);
+    true,
+  );
 }
 
 function bloodTribute(opt: number): CardScript {
@@ -496,10 +539,14 @@ function seekHorizon(): CardScript {
       if (hand.length === 0) return;
       ctx.requestCardChoice(
         "seek-horizon-top",
-        decisionPrompt(`${ctx.data.name}: put a card from your hand on top of your deck for go again?`, "card.mon.hand.top.goagain", {
-          values: { card: { kind: "card", cardId: ctx.self.cardId } },
-          optionMessages: commonOptionMessages("no"),
-        }),
+        decisionPrompt(
+          `${ctx.data.name}: put a card from your hand on top of your deck for go again?`,
+          "card.mon.hand.top.goagain",
+          {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            optionMessages: commonOptionMessages("no"),
+          },
+        ),
         ["no", ...hand.map((card) => card.instanceId)],
       );
     },
@@ -518,13 +565,17 @@ function captainsCall(maxCost: number): CardScript {
     additionalCost(ctx) {
       ctx.requestChoice(
         "captains-call-mode",
-        decisionPrompt(`${ctx.data.name}: choose +2{p} or go again for your next qualifying attack`, "card.mon.captainscall.mode", {
-          values: { card: { kind: "card", cardId: ctx.self.cardId } },
-          optionMessages: {
-            power: decisionMessage("card.mon.option.power.two"),
-            "go-again": decisionMessage("card.mon.option.goagain"),
+        decisionPrompt(
+          `${ctx.data.name}: choose +2{p} or go again for your next qualifying attack`,
+          "card.mon.captainscall.mode",
+          {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            optionMessages: {
+              power: decisionMessage("card.mon.option.power.two"),
+              "go-again": decisionMessage("card.mon.option.goagain"),
+            },
           },
-        }),
+        ),
         ["power", "go-again"],
       );
     },
@@ -564,18 +615,23 @@ function warmongersRecital(attack: number): CardScript {
 }
 
 function memorialGround(maxCost: number): CardScript {
-  const targets = (ctx: ScriptCtx) => ctx.player(ctx.seat).graveyard.filter((card) => {
-    const data = ctx.cardData(card.cardId);
-    return isAttackAction(ctx, card) && (data.cost ?? 0) <= maxCost;
-  });
+  const targets = (ctx: ScriptCtx) =>
+    ctx.player(ctx.seat).graveyard.filter((card) => {
+      const data = ctx.cardData(card.cardId);
+      return isAttackAction(ctx, card) && (data.cost ?? 0) <= maxCost;
+    });
   return {
     canPlay: (ctx) => targets(ctx).length > 0,
     onPlay(ctx) {
       ctx.requestCardChoice(
         "mon-memorial-ground",
-        decisionPrompt(`${ctx.data.name}: put a cost ${maxCost} or less attack action on top of your deck`, "card.mon.attack.top.maxcost", {
-          values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: maxCost },
-        }),
+        decisionPrompt(
+          `${ctx.data.name}: put a cost ${maxCost} or less attack action on top of your deck`,
+          "card.mon.attack.top.maxcost",
+          {
+            values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: maxCost },
+          },
+        ),
         targets(ctx).map((card) => card.instanceId),
       );
     },
@@ -590,25 +646,30 @@ function rallyTheRearguard(): CardScript {
     defenseAbility: { discard: 1, oncePerTurn: true },
     onDefendAbility(ctx) {
       ctx.addModifier({ scope: "chain-link", defense: 3 });
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} gets +3{d}`, "card.log.common.defense.gained", { defense: 3 }));
+      ctx.logPublic(
+        localizedCardLog(ctx, `${ctx.data.name} gets +3{d}`, "card.log.common.defense.gained", { defense: 3 }),
+      );
     },
   };
 }
 
 function belittle(): CardScript {
-  const revealable = (ctx: ScriptCtx) => ctx.player(ctx.seat).hand.filter(
-    (card) => isAttackAction(ctx, card) && ctx.basePower(card) <= 3,
-  );
+  const revealable = (ctx: ScriptCtx) =>
+    ctx.player(ctx.seat).hand.filter((card) => isAttackAction(ctx, card) && ctx.basePower(card) <= 3);
   return {
     additionalCost(ctx) {
       const cards = revealable(ctx);
       if (cards.length === 0) return;
       ctx.requestCardChoice(
         "belittle-reveal",
-        decisionPrompt(`${ctx.data.name}: reveal an attack action with 3 or less base {p}?`, "card.mon.attack.reveal.three", {
-          values: { card: { kind: "card", cardId: ctx.self.cardId } },
-          optionMessages: commonOptionMessages("no"),
-        }),
+        decisionPrompt(
+          `${ctx.data.name}: reveal an attack action with 3 or less base {p}?`,
+          "card.mon.attack.reveal.three",
+          {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            optionMessages: commonOptionMessages("no"),
+          },
+        ),
         ["no", ...cards.map((card) => card.instanceId)],
       );
     },
@@ -617,7 +678,15 @@ function belittle(): CardScript {
         if (option === "no") return;
         const revealed = revealable(ctx).find((card) => card.instanceId === Number(option));
         if (!revealed) return;
-        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} reveals ${ctx.cardData(revealed.cardId).name}`, "card.log.common.card.revealed", { revealed: { kind: "card", cardId: revealed.cardId } }, { kind: "cards-revealed", cards: [{ cardId: revealed.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" }));
+        ctx.logPublic(
+          localizedCardLog(
+            ctx,
+            `${ctx.data.name} reveals ${ctx.cardData(revealed.cardId).name}`,
+            "card.log.common.card.revealed",
+            { revealed: { kind: "card", cardId: revealed.cardId } },
+            { kind: "cards-revealed", cards: [{ cardId: revealed.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" },
+          ),
+        );
         const minnows = ctx.player(ctx.seat).deck.filter((card) => isCard(ctx, card.cardId, "Minnowism"));
         if (minnows.length === 0) {
           ctx.shuffleDeck();
@@ -635,7 +704,15 @@ function belittle(): CardScript {
       if (hook !== "belittle-search") return;
       const found = ctx.player(ctx.seat).deck.find((card) => card.instanceId === Number(option));
       if (found && ctx.moveToHand(found.instanceId)) {
-        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} finds Minnowism`, "card.log.mon.minnowism.found", { result: { kind: "card", cardId: found.cardId } }, { kind: "card-moved", cardId: found.cardId, ownerSeat: ctx.seat, from: "deck", to: "hand" }));
+        ctx.logPublic(
+          localizedCardLog(
+            ctx,
+            `${ctx.data.name} finds Minnowism`,
+            "card.log.mon.minnowism.found",
+            { result: { kind: "card", cardId: found.cardId } },
+            { kind: "card-moved", cardId: found.cardId, ownerSeat: ctx.seat, from: "deck", to: "hand" },
+          ),
+        );
       }
       ctx.shuffleDeck();
     },
@@ -662,11 +739,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
     onHit(ctx) {
       if (ctx.link?.targetAllyId !== undefined) return;
       const opponent = ctx.player(opponentSeat(ctx));
-      ctx.setCardCounter(
-        opponent.hero.instanceId,
-        "banishPlayLockedUntilTurn",
-        ctx.state.turn + 1,
-      );
+      ctx.setCardCounter(opponent.hero.instanceId, "banishPlayLockedUntilTurn", ctx.state.turn + 1);
     },
   }),
   "herald of triumph|1": putAttackIntoSoulOnHit({
@@ -717,32 +790,86 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       if (targetSeat !== ctx.seat && amount > 0) ctx.loseLife(targetSeat, 1);
     },
   },
-  "herald of protection|1": putAttackIntoSoulOnHit({ onHit: (ctx) => { ctx.createToken(SPECTRAL_SHIELD); } }),
-  "herald of protection|2": putAttackIntoSoulOnHit({ onHit: (ctx) => { ctx.createToken(SPECTRAL_SHIELD); } }),
-  "herald of protection|3": putAttackIntoSoulOnHit({ onHit: (ctx) => { ctx.createToken(SPECTRAL_SHIELD); } }),
-  "herald of ravages|1": putAttackIntoSoulOnHit({ onHit: (ctx) => { dealArcane(ctx, opponentSeat(ctx), 1); } }),
-  "herald of ravages|2": putAttackIntoSoulOnHit({ onHit: (ctx) => { dealArcane(ctx, opponentSeat(ctx), 1); } }),
-  "herald of ravages|3": putAttackIntoSoulOnHit({ onHit: (ctx) => { dealArcane(ctx, opponentSeat(ctx), 1); } }),
+  "herald of protection|1": putAttackIntoSoulOnHit({
+    onHit: (ctx) => {
+      ctx.createToken(SPECTRAL_SHIELD);
+    },
+  }),
+  "herald of protection|2": putAttackIntoSoulOnHit({
+    onHit: (ctx) => {
+      ctx.createToken(SPECTRAL_SHIELD);
+    },
+  }),
+  "herald of protection|3": putAttackIntoSoulOnHit({
+    onHit: (ctx) => {
+      ctx.createToken(SPECTRAL_SHIELD);
+    },
+  }),
+  "herald of ravages|1": putAttackIntoSoulOnHit({
+    onHit: (ctx) => {
+      dealArcane(ctx, opponentSeat(ctx), 1);
+    },
+  }),
+  "herald of ravages|2": putAttackIntoSoulOnHit({
+    onHit: (ctx) => {
+      dealArcane(ctx, opponentSeat(ctx), 1);
+    },
+  }),
+  "herald of ravages|3": putAttackIntoSoulOnHit({
+    onHit: (ctx) => {
+      dealArcane(ctx, opponentSeat(ctx), 1);
+    },
+  }),
   "herald of rebirth|1": putAttackIntoSoulOnHit({
     onHit(ctx) {
       const cards = ctx.player(ctx.seat).graveyard.filter((card) => hasKeyword(ctx, card.cardId, "phantasm"));
-      if (cards.length > 0) ctx.requestCardChoice("herald-rebirth", decisionPrompt(`${ctx.data.name}: put a phantasm card on top?`, "card.mon.phantasm.top", { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: commonOptionMessages("none") }), ["none", ...cards.map((card) => card.instanceId)]);
+      if (cards.length > 0)
+        ctx.requestCardChoice(
+          "herald-rebirth",
+          decisionPrompt(`${ctx.data.name}: put a phantasm card on top?`, "card.mon.phantasm.top", {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            optionMessages: commonOptionMessages("none"),
+          }),
+          ["none", ...cards.map((card) => card.instanceId)],
+        );
     },
-    onChoose(ctx, hook, option) { if (hook === "herald-rebirth" && option !== "none") ctx.putOnDeckTop(Number(option)); },
+    onChoose(ctx, hook, option) {
+      if (hook === "herald-rebirth" && option !== "none") ctx.putOnDeckTop(Number(option));
+    },
   }),
   "herald of rebirth|2": putAttackIntoSoulOnHit({
     onHit(ctx) {
       const cards = ctx.player(ctx.seat).graveyard.filter((card) => hasKeyword(ctx, card.cardId, "phantasm"));
-      if (cards.length > 0) ctx.requestCardChoice("herald-rebirth", decisionPrompt(`${ctx.data.name}: put a phantasm card on top?`, "card.mon.phantasm.top", { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: commonOptionMessages("none") }), ["none", ...cards.map((card) => card.instanceId)]);
+      if (cards.length > 0)
+        ctx.requestCardChoice(
+          "herald-rebirth",
+          decisionPrompt(`${ctx.data.name}: put a phantasm card on top?`, "card.mon.phantasm.top", {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            optionMessages: commonOptionMessages("none"),
+          }),
+          ["none", ...cards.map((card) => card.instanceId)],
+        );
     },
-    onChoose(ctx, hook, option) { if (hook === "herald-rebirth" && option !== "none") ctx.putOnDeckTop(Number(option)); },
+    onChoose(ctx, hook, option) {
+      if (hook === "herald-rebirth" && option !== "none") ctx.putOnDeckTop(Number(option));
+    },
   }),
   "herald of rebirth|3": putAttackIntoSoulOnHit({
     onHit(ctx) {
       const cards = ctx.player(ctx.seat).graveyard.filter((card) => hasKeyword(ctx, card.cardId, "phantasm"));
-      if (cards.length > 0) ctx.requestCardChoice("herald-rebirth", decisionPrompt(`${ctx.data.name}: put a phantasm card on top?`, "card.mon.phantasm.top", { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: commonOptionMessages("none") }), ["none", ...cards.map((card) => card.instanceId)]);
+      if (cards.length > 0)
+        ctx.requestCardChoice(
+          "herald-rebirth",
+          decisionPrompt(`${ctx.data.name}: put a phantasm card on top?`, "card.mon.phantasm.top", {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            optionMessages: commonOptionMessages("none"),
+          }),
+          ["none", ...cards.map((card) => card.instanceId)],
+        );
     },
-    onChoose(ctx, hook, option) { if (hook === "herald-rebirth" && option !== "none") ctx.putOnDeckTop(Number(option)); },
+    onChoose(ctx, hook, option) {
+      if (hook === "herald-rebirth" && option !== "none") ctx.putOnDeckTop(Number(option));
+    },
   }),
   "herald of tenacity|1": putAttackIntoSoulOnHit(),
   "herald of tenacity|2": putAttackIntoSoulOnHit(),
@@ -752,22 +879,56 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   "wartune herald|3": putAttackIntoSoulOnHit(),
 
   // ── Light Warrior / Light / Illusionist / Warrior ──────────────────────
-  "battlefield blitz|1": { onAttackDeclared(ctx) { if (chargedThisTurn(ctx)) ctx.grantGoAgain(); } },
-  "battlefield blitz|2": { onAttackDeclared(ctx) { if (chargedThisTurn(ctx)) ctx.grantGoAgain(); } },
-  "battlefield blitz|3": { onAttackDeclared(ctx) { if (chargedThisTurn(ctx)) ctx.grantGoAgain(); } },
-  "valiant thrust|1": { modifyAttack: (ctx) => chargedThisTurn(ctx) ? 3 : 0 },
-  "valiant thrust|3": { modifyAttack: (ctx) => chargedThisTurn(ctx) ? 3 : 0 },
-  "bolt of courage|3": chargeAttack({ canTriggerOnHit: chargedThisTurn, onHit(ctx) { ctx.drawCards(ctx.seat, 1); } }),
+  "battlefield blitz|1": {
+    onAttackDeclared(ctx) {
+      if (chargedThisTurn(ctx)) ctx.grantGoAgain();
+    },
+  },
+  "battlefield blitz|2": {
+    onAttackDeclared(ctx) {
+      if (chargedThisTurn(ctx)) ctx.grantGoAgain();
+    },
+  },
+  "battlefield blitz|3": {
+    onAttackDeclared(ctx) {
+      if (chargedThisTurn(ctx)) ctx.grantGoAgain();
+    },
+  },
+  "valiant thrust|1": { modifyAttack: (ctx) => (chargedThisTurn(ctx) ? 3 : 0) },
+  "valiant thrust|3": { modifyAttack: (ctx) => (chargedThisTurn(ctx) ? 3 : 0) },
+  "bolt of courage|3": chargeAttack({
+    canTriggerOnHit: chargedThisTurn,
+    onHit(ctx) {
+      ctx.drawCards(ctx.seat, 1);
+    },
+  }),
   "cross the line|1": chargeAttack(),
   "cross the line|2": chargeAttack(),
   "cross the line|3": chargeAttack(),
-  "engulfing light|3": chargeAttack({ canTriggerOnHit: chargedThisTurn, onHit(ctx) { ctx.putIntoSoul(ctx.self.instanceId); } }),
+  "engulfing light|3": chargeAttack({
+    canTriggerOnHit: chargedThisTurn,
+    onHit(ctx) {
+      ctx.putIntoSoul(ctx.self.instanceId);
+    },
+  }),
   "express lightning|1": chargeAttack(),
   "express lightning|2": chargeAttack(),
   "express lightning|3": chargeAttack(),
-  "take flight|3": chargeAttack({ onAttackDeclared(ctx) { if (chargedThisTurn(ctx)) ctx.grantGoAgain(); } }),
-  "courageous steelhand|2": { onPlay(ctx) { if (chargedThisTurn(ctx)) ctx.addModifier({ scope: "chain-link", attack: 2 }); } },
-  "courageous steelhand|3": { onPlay(ctx) { if (chargedThisTurn(ctx)) ctx.addModifier({ scope: "chain-link", attack: 1 }); } },
+  "take flight|3": chargeAttack({
+    onAttackDeclared(ctx) {
+      if (chargedThisTurn(ctx)) ctx.grantGoAgain();
+    },
+  }),
+  "courageous steelhand|2": {
+    onPlay(ctx) {
+      if (chargedThisTurn(ctx)) ctx.addModifier({ scope: "chain-link", attack: 2 });
+    },
+  },
+  "courageous steelhand|3": {
+    onPlay(ctx) {
+      if (chargedThisTurn(ctx)) ctx.addModifier({ scope: "chain-link", attack: 1 });
+    },
+  },
   "invigorating light|1": invigoratingLight(),
   "invigorating light|2": invigoratingLight(),
   "invigorating light|3": invigoratingLight(),
@@ -775,9 +936,21 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   "glisten|3": glisten(2),
   "illuminate|2": putAttackIntoSoulOnHit(),
   "illuminate|3": putAttackIntoSoulOnHit(),
-  "impenetrable belief|1": { modifyDefense(ctx) { return Number(ctx.getPlayerFlag(opponentSeat(ctx), "banishedThisTurn")) >= 3 ? 2 : 0; } },
-  "impenetrable belief|2": { modifyDefense(ctx) { return Number(ctx.getPlayerFlag(opponentSeat(ctx), "banishedThisTurn")) >= 3 ? 2 : 0; } },
-  "impenetrable belief|3": { modifyDefense(ctx) { return Number(ctx.getPlayerFlag(opponentSeat(ctx), "banishedThisTurn")) >= 3 ? 2 : 0; } },
+  "impenetrable belief|1": {
+    modifyDefense(ctx) {
+      return Number(ctx.getPlayerFlag(opponentSeat(ctx), "banishedThisTurn")) >= 3 ? 2 : 0;
+    },
+  },
+  "impenetrable belief|2": {
+    modifyDefense(ctx) {
+      return Number(ctx.getPlayerFlag(opponentSeat(ctx), "banishedThisTurn")) >= 3 ? 2 : 0;
+    },
+  },
+  "impenetrable belief|3": {
+    modifyDefense(ctx) {
+      return Number(ctx.getPlayerFlag(opponentSeat(ctx), "banishedThisTurn")) >= 3 ? 2 : 0;
+    },
+  },
   "rising solartide|1": putAttackIntoSoulOnHit(),
   "rising solartide|2": putAttackIntoSoulOnHit(),
   "rising solartide|3": putAttackIntoSoulOnHit(),
@@ -790,7 +963,10 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   "ray of hope|2": {
     onPlay(ctx) {
       ctx.addModifier({ scope: "until-end-of-turn", attack: 1, appliesToTargetType: "shadow" });
-      if (ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0 && hasType(ctx, ctx.player(opponentSeat(ctx)).hero, "shadow")) {
+      if (
+        ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0 &&
+        hasType(ctx, ctx.player(opponentSeat(ctx)).hero, "shadow")
+      ) {
         ctx.putIntoSoul(ctx.self.instanceId);
       }
     },
@@ -830,7 +1006,11 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       const pending = ctx.getCounter("pendingTriggers") + 1;
       ctx.setCounter("pendingTriggers", pending);
       if (pending === 1) {
-        ctx.requestChoice("hooves-shadowbeast", yesNoPrompt("Destroy Hooves of the Shadowbeast to gain 1 action point?", "card.mon.hooves.destroy"), ["yes", "no"]);
+        ctx.requestChoice(
+          "hooves-shadowbeast",
+          yesNoPrompt("Destroy Hooves of the Shadowbeast to gain 1 action point?", "card.mon.hooves.destroy"),
+          ["yes", "no"],
+        );
       }
     },
     onChoose(ctx, hook, option) {
@@ -841,7 +1021,11 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
         ctx.destroySelf();
         ctx.gainActionPoint();
       } else if (remaining > 0) {
-        ctx.requestChoice("hooves-shadowbeast", yesNoPrompt("Destroy Hooves of the Shadowbeast to gain 1 action point?", "card.mon.hooves.destroy"), ["yes", "no"]);
+        ctx.requestChoice(
+          "hooves-shadowbeast",
+          yesNoPrompt("Destroy Hooves of the Shadowbeast to gain 1 action point?", "card.mon.hooves.destroy"),
+          ["yes", "no"],
+        );
       }
     },
   },
@@ -863,9 +1047,18 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       const discarded = ctx.discardRandom(ctx.seat, 1)[0];
       if (!isSixPlus(ctx, discarded)) return;
       const graves = ctx.state.players.flatMap((player) => player.graveyard);
-      if (graves.length > 0) ctx.requestCardChoice("deadwood-banish", decisionPrompt(`${ctx.data.name}: banish a card from a graveyard`, "card.mon.graveyard.card.banish", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }), graves.map((card) => card.instanceId));
+      if (graves.length > 0)
+        ctx.requestCardChoice(
+          "deadwood-banish",
+          decisionPrompt(`${ctx.data.name}: banish a card from a graveyard`, "card.mon.graveyard.card.banish", {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+          }),
+          graves.map((card) => card.instanceId),
+        );
     },
-    onChoose(ctx, hook, option) { if (hook === "deadwood-banish") ctx.banish(Number(option)); },
+    onChoose(ctx, hook, option) {
+      if (hook === "deadwood-banish") ctx.banish(Number(option));
+    },
   }),
   "deadwood rumbler|2": bloodDebt({
     onAttackDeclared(ctx) {
@@ -873,9 +1066,18 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       const discarded = ctx.discardRandom(ctx.seat, 1)[0];
       if (!isSixPlus(ctx, discarded)) return;
       const graves = ctx.state.players.flatMap((player) => player.graveyard);
-      if (graves.length > 0) ctx.requestCardChoice("deadwood-banish", decisionPrompt(`${ctx.data.name}: banish a card from a graveyard`, "card.mon.graveyard.card.banish", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }), graves.map((card) => card.instanceId));
+      if (graves.length > 0)
+        ctx.requestCardChoice(
+          "deadwood-banish",
+          decisionPrompt(`${ctx.data.name}: banish a card from a graveyard`, "card.mon.graveyard.card.banish", {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+          }),
+          graves.map((card) => card.instanceId),
+        );
     },
-    onChoose(ctx, hook, option) { if (hook === "deadwood-banish") ctx.banish(Number(option)); },
+    onChoose(ctx, hook, option) {
+      if (hook === "deadwood-banish") ctx.banish(Number(option));
+    },
   }),
   "deadwood rumbler|3": bloodDebt({
     onAttackDeclared(ctx) {
@@ -883,9 +1085,18 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       const discarded = ctx.discardRandom(ctx.seat, 1)[0];
       if (!isSixPlus(ctx, discarded)) return;
       const graves = ctx.state.players.flatMap((player) => player.graveyard);
-      if (graves.length > 0) ctx.requestCardChoice("deadwood-banish", decisionPrompt(`${ctx.data.name}: banish a card from a graveyard`, "card.mon.graveyard.card.banish", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }), graves.map((card) => card.instanceId));
+      if (graves.length > 0)
+        ctx.requestCardChoice(
+          "deadwood-banish",
+          decisionPrompt(`${ctx.data.name}: banish a card from a graveyard`, "card.mon.graveyard.card.banish", {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+          }),
+          graves.map((card) => card.instanceId),
+        );
     },
-    onChoose(ctx, hook, option) { if (hook === "deadwood-banish") ctx.banish(Number(option)); },
+    onChoose(ctx, hook, option) {
+      if (hook === "deadwood-banish") ctx.banish(Number(option));
+    },
   }),
   "dread screamer|1": shadowBruteBanishThree("go-again"),
   "dread screamer|2": shadowBruteBanishThree("go-again"),
@@ -929,54 +1140,119 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
     },
   },
   "soul shackle|0": {
-    triggers: [{
-      event: "begin-action-phase",
-      label: "Banish the top card of your deck",
-      effect(ctx) {
-        const top = ctx.player(ctx.seat).deck[0];
-        if (top) ctx.banish(top.instanceId);
+    triggers: [
+      {
+        event: "begin-action-phase",
+        label: "Banish the top card of your deck",
+        effect(ctx) {
+          const top = ctx.player(ctx.seat).deck[0];
+          if (top) ctx.banish(top.instanceId);
+        },
       },
-    }],
+    ],
   },
-  "unhallowed rites|1": bloodDebt({
-    canPlay(ctx) {
-      const inBanish = ctx.player(ctx.seat).banish.some((card) => card.instanceId === ctx.self.instanceId);
-      return !inBanish || ctx.getFlag("player", "playedNonAttackAction") === true;
+  "unhallowed rites|1": bloodDebt(
+    {
+      canPlay(ctx) {
+        const inBanish = ctx.player(ctx.seat).banish.some((card) => card.instanceId === ctx.self.instanceId);
+        return !inBanish || ctx.getFlag("player", "playedNonAttackAction") === true;
+      },
+      onPlay(ctx) {
+        const cards = ctx.player(ctx.seat).graveyard.filter((card) => {
+          return (
+            ctx.hasCardType(card, "action") &&
+            !hasType(ctx, card, "attack") &&
+            hasKeyword(ctx, card.cardId, "blood debt")
+          );
+        });
+        if (cards.length > 0)
+          ctx.requestCardChoice(
+            "unhallowed-bottom",
+            decisionPrompt(
+              `${ctx.data.name}: put a blood-debt non-attack action on the bottom?`,
+              "card.mon.blooddebt.nonattack.bottom",
+              {
+                values: { card: { kind: "card", cardId: ctx.self.cardId } },
+                optionMessages: commonOptionMessages("none"),
+              },
+            ),
+            ["none", ...cards.map((card) => card.instanceId)],
+          );
+      },
+      onChoose(ctx, hook, option) {
+        if (hook === "unhallowed-bottom" && option !== "none") ctx.putOnDeckBottom(Number(option));
+      },
     },
-    onPlay(ctx) {
-      const cards = ctx.player(ctx.seat).graveyard.filter((card) => {
-        return ctx.hasCardType(card, "action") && !hasType(ctx, card, "attack") && hasKeyword(ctx, card.cardId, "blood debt");
-      });
-      if (cards.length > 0) ctx.requestCardChoice("unhallowed-bottom", decisionPrompt(`${ctx.data.name}: put a blood-debt non-attack action on the bottom?`, "card.mon.blooddebt.nonattack.bottom", { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: commonOptionMessages("none") }), ["none", ...cards.map((card) => card.instanceId)]);
+    true,
+  ),
+  "unhallowed rites|2": bloodDebt(
+    {
+      canPlay(ctx) {
+        const inBanish = ctx.player(ctx.seat).banish.some((card) => card.instanceId === ctx.self.instanceId);
+        return !inBanish || ctx.getFlag("player", "playedNonAttackAction") === true;
+      },
+      onPlay(ctx) {
+        const cards = ctx.player(ctx.seat).graveyard.filter((card) => {
+          return (
+            ctx.hasCardType(card, "action") &&
+            !hasType(ctx, card, "attack") &&
+            hasKeyword(ctx, card.cardId, "blood debt")
+          );
+        });
+        if (cards.length > 0)
+          ctx.requestCardChoice(
+            "unhallowed-bottom",
+            decisionPrompt(
+              `${ctx.data.name}: put a blood-debt non-attack action on the bottom?`,
+              "card.mon.blooddebt.nonattack.bottom",
+              {
+                values: { card: { kind: "card", cardId: ctx.self.cardId } },
+                optionMessages: commonOptionMessages("none"),
+              },
+            ),
+            ["none", ...cards.map((card) => card.instanceId)],
+          );
+      },
+      onChoose(ctx, hook, option) {
+        if (hook === "unhallowed-bottom" && option !== "none") ctx.putOnDeckBottom(Number(option));
+      },
     },
-    onChoose(ctx, hook, option) { if (hook === "unhallowed-bottom" && option !== "none") ctx.putOnDeckBottom(Number(option)); },
-  }, true),
-  "unhallowed rites|2": bloodDebt({
-    canPlay(ctx) {
-      const inBanish = ctx.player(ctx.seat).banish.some((card) => card.instanceId === ctx.self.instanceId);
-      return !inBanish || ctx.getFlag("player", "playedNonAttackAction") === true;
+    true,
+  ),
+  "unhallowed rites|3": bloodDebt(
+    {
+      canPlay(ctx) {
+        const inBanish = ctx.player(ctx.seat).banish.some((card) => card.instanceId === ctx.self.instanceId);
+        return !inBanish || ctx.getFlag("player", "playedNonAttackAction") === true;
+      },
+      onPlay(ctx) {
+        const cards = ctx.player(ctx.seat).graveyard.filter((card) => {
+          return (
+            ctx.hasCardType(card, "action") &&
+            !hasType(ctx, card, "attack") &&
+            hasKeyword(ctx, card.cardId, "blood debt")
+          );
+        });
+        if (cards.length > 0)
+          ctx.requestCardChoice(
+            "unhallowed-bottom",
+            decisionPrompt(
+              `${ctx.data.name}: put a blood-debt non-attack action on the bottom?`,
+              "card.mon.blooddebt.nonattack.bottom",
+              {
+                values: { card: { kind: "card", cardId: ctx.self.cardId } },
+                optionMessages: commonOptionMessages("none"),
+              },
+            ),
+            ["none", ...cards.map((card) => card.instanceId)],
+          );
+      },
+      onChoose(ctx, hook, option) {
+        if (hook === "unhallowed-bottom" && option !== "none") ctx.putOnDeckBottom(Number(option));
+      },
     },
-    onPlay(ctx) {
-      const cards = ctx.player(ctx.seat).graveyard.filter((card) => {
-        return ctx.hasCardType(card, "action") && !hasType(ctx, card, "attack") && hasKeyword(ctx, card.cardId, "blood debt");
-      });
-      if (cards.length > 0) ctx.requestCardChoice("unhallowed-bottom", decisionPrompt(`${ctx.data.name}: put a blood-debt non-attack action on the bottom?`, "card.mon.blooddebt.nonattack.bottom", { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: commonOptionMessages("none") }), ["none", ...cards.map((card) => card.instanceId)]);
-    },
-    onChoose(ctx, hook, option) { if (hook === "unhallowed-bottom" && option !== "none") ctx.putOnDeckBottom(Number(option)); },
-  }, true),
-  "unhallowed rites|3": bloodDebt({
-    canPlay(ctx) {
-      const inBanish = ctx.player(ctx.seat).banish.some((card) => card.instanceId === ctx.self.instanceId);
-      return !inBanish || ctx.getFlag("player", "playedNonAttackAction") === true;
-    },
-    onPlay(ctx) {
-      const cards = ctx.player(ctx.seat).graveyard.filter((card) => {
-        return ctx.hasCardType(card, "action") && !hasType(ctx, card, "attack") && hasKeyword(ctx, card.cardId, "blood debt");
-      });
-      if (cards.length > 0) ctx.requestCardChoice("unhallowed-bottom", decisionPrompt(`${ctx.data.name}: put a blood-debt non-attack action on the bottom?`, "card.mon.blooddebt.nonattack.bottom", { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: commonOptionMessages("none") }), ["none", ...cards.map((card) => card.instanceId)]);
-    },
-    onChoose(ctx, hook, option) { if (hook === "unhallowed-bottom" && option !== "none") ctx.putOnDeckBottom(Number(option)); },
-  }, true),
+    true,
+  ),
   "dimenxxional gateway|1": dimenxxionalGateway(3),
   "dimenxxional gateway|2": dimenxxionalGateway(2),
   "dimenxxional gateway|3": dimenxxionalGateway(1),
@@ -1013,7 +1289,13 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       canActivate: (ctx) => ctx.player(ctx.seat).hand.length > 0,
       label: "Banish a hand card; draw if it is Shadow",
       onActivate(ctx) {
-        ctx.requestCardChoice("ebon-fold-banish", decisionPrompt(`${ctx.data.name}: banish a card from your hand`, "card.mon.hand.card.banish", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }), ctx.player(ctx.seat).hand.map((card) => card.instanceId));
+        ctx.requestCardChoice(
+          "ebon-fold-banish",
+          decisionPrompt(`${ctx.data.name}: banish a card from your hand`, "card.mon.hand.card.banish", {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+          }),
+          ctx.player(ctx.seat).hand.map((card) => card.instanceId),
+        );
       },
     },
     onChoose(ctx, hook, option) {
@@ -1027,19 +1309,36 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   "consuming aftermath|1": {
     additionalCost(ctx) {
       const hand = ctx.player(ctx.seat).hand;
-      if (hand.length > 0) ctx.requestCardChoice("aftermath-banish", decisionPrompt(`${ctx.data.name}: banish a card from hand?`, "card.mon.hand.card.banish.optional", { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: commonOptionMessages("no") }), ["no", ...hand.map((card) => card.instanceId)]);
+      if (hand.length > 0)
+        ctx.requestCardChoice(
+          "aftermath-banish",
+          decisionPrompt(`${ctx.data.name}: banish a card from hand?`, "card.mon.hand.card.banish.optional", {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            optionMessages: commonOptionMessages("no"),
+          }),
+          ["no", ...hand.map((card) => card.instanceId)],
+        );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "aftermath-banish" || option === "no") return;
       const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
-      if (card && hasType(ctx, card, "shadow") && ctx.banish(card.instanceId)) ctx.grantCardKeyword(ctx.self.instanceId, "dominate");
+      if (card && hasType(ctx, card, "shadow") && ctx.banish(card.instanceId))
+        ctx.grantCardKeyword(ctx.self.instanceId, "dominate");
       else if (card) ctx.banish(card.instanceId);
     },
   },
   "consuming aftermath|2": {
     additionalCost(ctx) {
       const hand = ctx.player(ctx.seat).hand;
-      if (hand.length > 0) ctx.requestCardChoice("aftermath-banish", decisionPrompt(`${ctx.data.name}: banish a card from hand?`, "card.mon.hand.card.banish.optional", { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: commonOptionMessages("no") }), ["no", ...hand.map((card) => card.instanceId)]);
+      if (hand.length > 0)
+        ctx.requestCardChoice(
+          "aftermath-banish",
+          decisionPrompt(`${ctx.data.name}: banish a card from hand?`, "card.mon.hand.card.banish.optional", {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            optionMessages: commonOptionMessages("no"),
+          }),
+          ["no", ...hand.map((card) => card.instanceId)],
+        );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "aftermath-banish" || option === "no") return;
@@ -1052,7 +1351,15 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   "consuming aftermath|3": {
     additionalCost(ctx) {
       const hand = ctx.player(ctx.seat).hand;
-      if (hand.length > 0) ctx.requestCardChoice("aftermath-banish", decisionPrompt(`${ctx.data.name}: banish a card from hand?`, "card.mon.hand.card.banish.optional", { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: commonOptionMessages("no") }), ["no", ...hand.map((card) => card.instanceId)]);
+      if (hand.length > 0)
+        ctx.requestCardChoice(
+          "aftermath-banish",
+          decisionPrompt(`${ctx.data.name}: banish a card from hand?`, "card.mon.hand.card.banish.optional", {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            optionMessages: commonOptionMessages("no"),
+          }),
+          ["no", ...hand.map((card) => card.instanceId)],
+        );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "aftermath-banish" || option === "no") return;
@@ -1066,7 +1373,13 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
     canPlay: (ctx) => ctx.player(ctx.seat).graveyard.length >= 6,
     additionalCost(ctx) {
       ctx.setCounter("harvestRemaining", 6);
-      ctx.requestCardChoice("soul-harvest-banish", decisionPrompt(`${ctx.data.name}: choose 6 graveyard cards to banish`, "card.mon.graveyard.cards.banish", { values: { card: { kind: "card", cardId: ctx.self.cardId }, count: 6 } }), ctx.player(ctx.seat).graveyard.map((card) => card.instanceId));
+      ctx.requestCardChoice(
+        "soul-harvest-banish",
+        decisionPrompt(`${ctx.data.name}: choose 6 graveyard cards to banish`, "card.mon.graveyard.cards.banish", {
+          values: { card: { kind: "card", cardId: ctx.self.cardId }, count: 6 },
+        }),
+        ctx.player(ctx.seat).graveyard.map((card) => card.instanceId),
+      );
     },
     modifyAttack: (ctx) => ctx.getCounter("harvestBloodDebt"),
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
@@ -1079,19 +1392,27 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       if (hook !== "soul-harvest-banish") return;
       const card = ctx.player(ctx.seat).graveyard.find((candidate) => candidate.instanceId === Number(option));
       if (!card) return;
-      if (hasKeyword(ctx, card.cardId, "blood debt")) ctx.setCounter("harvestBloodDebt", ctx.getCounter("harvestBloodDebt") + 1);
+      if (hasKeyword(ctx, card.cardId, "blood debt"))
+        ctx.setCounter("harvestBloodDebt", ctx.getCounter("harvestBloodDebt") + 1);
       if (!ctx.banish(card.instanceId)) return;
       const remaining = ctx.getCounter("harvestRemaining") - 1;
       ctx.setCounter("harvestRemaining", remaining);
-      if (remaining > 0) ctx.requestCardChoice("soul-harvest-banish", decisionPrompt(`${ctx.data.name}: choose ${remaining} more card(s) to banish`, "card.mon.graveyard.cards.banish.more", { values: { card: { kind: "card", cardId: ctx.self.cardId }, count: remaining } }), ctx.player(ctx.seat).graveyard.map((candidate) => candidate.instanceId));
+      if (remaining > 0)
+        ctx.requestCardChoice(
+          "soul-harvest-banish",
+          decisionPrompt(
+            `${ctx.data.name}: choose ${remaining} more card(s) to banish`,
+            "card.mon.graveyard.cards.banish.more",
+            { values: { card: { kind: "card", cardId: ctx.self.cardId }, count: remaining } },
+          ),
+          ctx.player(ctx.seat).graveyard.map((candidate) => candidate.instanceId),
+        );
     },
   },
   "soul reaping|1": {
     alternativePlayCost: { kind: "banish-hand", min: 1 },
     onAlternativeCostPaid(ctx, paidCards) {
-      const bloodDebt = paidCards.filter((card) =>
-        hasKeyword(ctx, card.cardId, "blood debt"),
-      ).length;
+      const bloodDebt = paidCards.filter((card) => hasKeyword(ctx, card.cardId, "blood debt")).length;
       if (bloodDebt > 0) ctx.changeResources(ctx.seat, bloodDebt);
     },
     onAttackDeclared(ctx) {
@@ -1104,16 +1425,83 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   "ghostly visit|1": bloodDebt({}, true),
   "ghostly visit|2": bloodDebt({}, true),
   "ghostly visit|3": bloodDebt({}, true),
-  "lunartide plunderer|1": { canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined, onHit(ctx) { ctx.setFlag("link", "attackToBanish", true); const soul = ctx.player(opponentSeat(ctx)).soul; if (soul.length > 0) ctx.requestCardChoice("lunartide-soul", decisionPrompt(`${ctx.data.name}: banish a card from the defending hero's soul`, "card.mon.defending.soul.banish", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }), soul.map((card) => card.instanceId)); }, onChoose(ctx, hook, option) { if (hook === "lunartide-soul") ctx.banish(Number(option)); } },
-  "lunartide plunderer|2": { canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined, onHit(ctx) { ctx.setFlag("link", "attackToBanish", true); const soul = ctx.player(opponentSeat(ctx)).soul; if (soul.length > 0) ctx.requestCardChoice("lunartide-soul", decisionPrompt(`${ctx.data.name}: banish a card from the defending hero's soul`, "card.mon.defending.soul.banish", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }), soul.map((card) => card.instanceId)); }, onChoose(ctx, hook, option) { if (hook === "lunartide-soul") ctx.banish(Number(option)); } },
-  "lunartide plunderer|3": { canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined, onHit(ctx) { ctx.setFlag("link", "attackToBanish", true); const soul = ctx.player(opponentSeat(ctx)).soul; if (soul.length > 0) ctx.requestCardChoice("lunartide-soul", decisionPrompt(`${ctx.data.name}: banish a card from the defending hero's soul`, "card.mon.defending.soul.banish", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }), soul.map((card) => card.instanceId)); }, onChoose(ctx, hook, option) { if (hook === "lunartide-soul") ctx.banish(Number(option)); } },
+  "lunartide plunderer|1": {
+    canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
+    onHit(ctx) {
+      ctx.setFlag("link", "attackToBanish", true);
+      const soul = ctx.player(opponentSeat(ctx)).soul;
+      if (soul.length > 0)
+        ctx.requestCardChoice(
+          "lunartide-soul",
+          decisionPrompt(
+            `${ctx.data.name}: banish a card from the defending hero's soul`,
+            "card.mon.defending.soul.banish",
+            { values: { card: { kind: "card", cardId: ctx.self.cardId } } },
+          ),
+          soul.map((card) => card.instanceId),
+        );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "lunartide-soul") ctx.banish(Number(option));
+    },
+  },
+  "lunartide plunderer|2": {
+    canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
+    onHit(ctx) {
+      ctx.setFlag("link", "attackToBanish", true);
+      const soul = ctx.player(opponentSeat(ctx)).soul;
+      if (soul.length > 0)
+        ctx.requestCardChoice(
+          "lunartide-soul",
+          decisionPrompt(
+            `${ctx.data.name}: banish a card from the defending hero's soul`,
+            "card.mon.defending.soul.banish",
+            { values: { card: { kind: "card", cardId: ctx.self.cardId } } },
+          ),
+          soul.map((card) => card.instanceId),
+        );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "lunartide-soul") ctx.banish(Number(option));
+    },
+  },
+  "lunartide plunderer|3": {
+    canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
+    onHit(ctx) {
+      ctx.setFlag("link", "attackToBanish", true);
+      const soul = ctx.player(opponentSeat(ctx)).soul;
+      if (soul.length > 0)
+        ctx.requestCardChoice(
+          "lunartide-soul",
+          decisionPrompt(
+            `${ctx.data.name}: banish a card from the defending hero's soul`,
+            "card.mon.defending.soul.banish",
+            { values: { card: { kind: "card", cardId: ctx.self.cardId } } },
+          ),
+          soul.map((card) => card.instanceId),
+        );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "lunartide-soul") ctx.banish(Number(option));
+    },
+  },
   "void wraith|1": bloodDebt({}, true),
   "void wraith|2": bloodDebt({}, true),
   "void wraith|3": bloodDebt({}, true),
   "spew shadow|1": {
     onPlay(ctx) {
-      const cards = ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && isAttackAction(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) <= 2);
-      ctx.requestCardChoice("spew-shadow", decisionPrompt(`${ctx.data.name}: choose a banished attack action`, "card.mon.banished.attack.choose", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }), cards.map((card) => card.instanceId));
+      const cards = ctx
+        .player(ctx.seat)
+        .banish.filter(
+          (card) => !card.faceDown && isAttackAction(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) <= 2,
+        );
+      ctx.requestCardChoice(
+        "spew-shadow",
+        decisionPrompt(`${ctx.data.name}: choose a banished attack action`, "card.mon.banished.attack.choose", {
+          values: { card: { kind: "card", cardId: ctx.self.cardId } },
+        }),
+        cards.map((card) => card.instanceId),
+      );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "spew-shadow") return;
@@ -1124,8 +1512,18 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   },
   "spew shadow|2": {
     onPlay(ctx) {
-      const cards = ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && isAttackAction(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) <= 1);
-      ctx.requestCardChoice("spew-shadow", decisionPrompt(`${ctx.data.name}: choose a banished attack action`, "card.mon.banished.attack.choose", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }), cards.map((card) => card.instanceId));
+      const cards = ctx
+        .player(ctx.seat)
+        .banish.filter(
+          (card) => !card.faceDown && isAttackAction(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) <= 1,
+        );
+      ctx.requestCardChoice(
+        "spew-shadow",
+        decisionPrompt(`${ctx.data.name}: choose a banished attack action`, "card.mon.banished.attack.choose", {
+          values: { card: { kind: "card", cardId: ctx.self.cardId } },
+        }),
+        cards.map((card) => card.instanceId),
+      );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "spew-shadow") return;
@@ -1136,8 +1534,18 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   },
   "spew shadow|3": {
     onPlay(ctx) {
-      const cards = ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && isAttackAction(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) <= 0);
-      ctx.requestCardChoice("spew-shadow", decisionPrompt(`${ctx.data.name}: choose a banished attack action`, "card.mon.banished.attack.choose", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }), cards.map((card) => card.instanceId));
+      const cards = ctx
+        .player(ctx.seat)
+        .banish.filter(
+          (card) => !card.faceDown && isAttackAction(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) <= 0,
+        );
+      ctx.requestCardChoice(
+        "spew-shadow",
+        decisionPrompt(`${ctx.data.name}: choose a banished attack action`, "card.mon.banished.attack.choose", {
+          values: { card: { kind: "card", cardId: ctx.self.cardId } },
+        }),
+        cards.map((card) => card.instanceId),
+      );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "spew-shadow") return;
@@ -1154,7 +1562,15 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       ctx.addModifier({ scope: "until-end-of-turn" });
       if (ctx.compareLife(ctx.seat, opponentSeat(ctx)) > 0) {
         const actions = ctx.player(ctx.seat).graveyard.filter((card) => ctx.hasCardType(card, "action"));
-        if (actions.length > 0) ctx.requestCardChoice("eclipse-grave", decisionPrompt(`${ctx.data.name}: banish a graveyard action?`, "card.mon.graveyard.action.banish", { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: commonOptionMessages("none") }), ["none", ...actions.map((card) => card.instanceId)]);
+        if (actions.length > 0)
+          ctx.requestCardChoice(
+            "eclipse-grave",
+            decisionPrompt(`${ctx.data.name}: banish a graveyard action?`, "card.mon.graveyard.action.banish", {
+              values: { card: { kind: "card", cardId: ctx.self.cardId } },
+              optionMessages: commonOptionMessages("none"),
+            }),
+            ["none", ...actions.map((card) => card.instanceId)],
+          );
       }
     },
     canTriggerOnHit(ctx) {
@@ -1162,7 +1578,15 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
     },
     onHit(ctx) {
       const soul = ctx.player(opponentSeat(ctx)).soul;
-      if (soul.length > 0) ctx.requestCardChoice("eclipse-soul", decisionPrompt(`${ctx.data.name}: banish a card from the Light hero's soul?`, "card.mon.light.soul.banish", { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: commonOptionMessages("none") }), ["none", ...soul.map((card) => card.instanceId)]);
+      if (soul.length > 0)
+        ctx.requestCardChoice(
+          "eclipse-soul",
+          decisionPrompt(`${ctx.data.name}: banish a card from the Light hero's soul?`, "card.mon.light.soul.banish", {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            optionMessages: commonOptionMessages("none"),
+          }),
+          ["none", ...soul.map((card) => card.instanceId)],
+        );
     },
     onChoose(ctx, hook, option) {
       if (option === "none") return;
@@ -1173,11 +1597,17 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
 
   // ── Brute / Runeblade / Generic ────────────────────────────────────────
   "pulping|2": {
-    onAttackDeclared(ctx) { ctx.drawCards(ctx.seat, 1); if (isSixPlus(ctx, ctx.discardRandom(ctx.seat, 1)[0])) ctx.addModifier({ scope: "chain-link", dominate: true }); },
+    onAttackDeclared(ctx) {
+      ctx.drawCards(ctx.seat, 1);
+      if (isSixPlus(ctx, ctx.discardRandom(ctx.seat, 1)[0])) ctx.addModifier({ scope: "chain-link", dominate: true });
+    },
     ...conditionalGoAgain((ctx) => (ctx.link?.defendingCards.length ?? 0) < 2),
   },
   "pulping|3": {
-    onAttackDeclared(ctx) { ctx.drawCards(ctx.seat, 1); if (isSixPlus(ctx, ctx.discardRandom(ctx.seat, 1)[0])) ctx.addModifier({ scope: "chain-link", dominate: true }); },
+    onAttackDeclared(ctx) {
+      ctx.drawCards(ctx.seat, 1);
+      if (isSixPlus(ctx, ctx.discardRandom(ctx.seat, 1)[0])) ctx.addModifier({ scope: "chain-link", dominate: true });
+    },
     ...conditionalGoAgain((ctx) => (ctx.link?.defendingCards.length ?? 0) < 2),
   },
   "aether ironweave|0": {
@@ -1186,9 +1616,13 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       destroySelfCost: true,
       isAttack: false,
       goAgain: true,
-      canActivate: (ctx) => ctx.getFlag("player", "playedSubtype:attack") === true && ctx.getFlag("player", "playedNonAttackAction") === true,
+      canActivate: (ctx) =>
+        ctx.getFlag("player", "playedSubtype:attack") === true &&
+        ctx.getFlag("player", "playedNonAttackAction") === true,
       label: "Destroy after playing attack and non-attack actions: gain 2 resources",
-      onActivate(ctx) { ctx.changeResources(ctx.seat, 2); },
+      onActivate(ctx) {
+        ctx.changeResources(ctx.seat, 2);
+      },
     },
   },
   "vexing malice|1": arcanicAttack(2),
@@ -1203,9 +1637,13 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       isAttack: false,
       goAgain: false,
       timing: "instant",
-      canActivate: (ctx) => ctx.getFlag("player", "physicalDamageDealtThisTurn") === true || ctx.getFlag("player", "physicalDamageTakenThisTurn") === true,
+      canActivate: (ctx) =>
+        ctx.getFlag("player", "physicalDamageDealtThisTurn") === true ||
+        ctx.getFlag("player", "physicalDamageTakenThisTurn") === true,
       label: "Destroy after dealing or being dealt physical damage: gain 1 resource",
-      onActivate(ctx) { ctx.changeResources(ctx.seat, 1); },
+      onActivate(ctx) {
+        ctx.changeResources(ctx.seat, 1);
+      },
     },
   },
   "stubby hammerers|0": {
@@ -1215,7 +1653,9 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       isAttack: false,
       goAgain: true,
       label: "Attack actions with base 3 or less get +1 this turn",
-      onActivate(ctx) { ctx.addModifier({ scope: "until-end-of-turn", attack: 1, appliesTo: "attack-action", maxBasePower: 3 }); },
+      onActivate(ctx) {
+        ctx.addModifier({ scope: "until-end-of-turn", attack: 1, appliesTo: "attack-action", maxBasePower: 3 });
+      },
     },
   },
   "time skippers|0": {
@@ -1225,20 +1665,37 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       isAttack: false,
       goAgain: false,
       label: "Destroy: gain 2 action points",
-      onActivate(ctx) { ctx.changeActionPoints(ctx.seat, 2); },
+      onActivate(ctx) {
+        ctx.changeActionPoints(ctx.seat, 2);
+      },
     },
   },
   "ironhide helm|0": ironhideScript(),
   "ironhide plate|0": ironhideScript(),
-  "out muscle|1": conditionalGoAgain((ctx) => !(ctx.link?.defendingCards ?? []).some((card) => ctx.currentPower(card) >= ctx.basePower(ctx.self) + ctx.attackBonusAboveBase())),
-  "out muscle|2": conditionalGoAgain((ctx) => !(ctx.link?.defendingCards ?? []).some((card) => ctx.currentPower(card) >= ctx.basePower(ctx.self) + ctx.attackBonusAboveBase())),
-  "out muscle|3": conditionalGoAgain((ctx) => !(ctx.link?.defendingCards ?? []).some((card) => ctx.currentPower(card) >= ctx.basePower(ctx.self) + ctx.attackBonusAboveBase())),
+  "out muscle|1": conditionalGoAgain(
+    (ctx) =>
+      !(ctx.link?.defendingCards ?? []).some(
+        (card) => ctx.currentPower(card) >= ctx.basePower(ctx.self) + ctx.attackBonusAboveBase(),
+      ),
+  ),
+  "out muscle|2": conditionalGoAgain(
+    (ctx) =>
+      !(ctx.link?.defendingCards ?? []).some(
+        (card) => ctx.currentPower(card) >= ctx.basePower(ctx.self) + ctx.attackBonusAboveBase(),
+      ),
+  ),
+  "out muscle|3": conditionalGoAgain(
+    (ctx) =>
+      !(ctx.link?.defendingCards ?? []).some(
+        (card) => ctx.currentPower(card) >= ctx.basePower(ctx.self) + ctx.attackBonusAboveBase(),
+      ),
+  ),
   "seek horizon|1": seekHorizon(),
   "seek horizon|2": seekHorizon(),
   "seek horizon|3": seekHorizon(),
-  "tremor of i'arathael|1": { modifyAttack: (ctx) => Number(ctx.getFlag("player", "banishedThisTurn")) > 0 ? 2 : 0 },
-  "tremor of i'arathael|2": { modifyAttack: (ctx) => Number(ctx.getFlag("player", "banishedThisTurn")) > 0 ? 2 : 0 },
-  "tremor of i'arathael|3": { modifyAttack: (ctx) => Number(ctx.getFlag("player", "banishedThisTurn")) > 0 ? 2 : 0 },
+  "tremor of i'arathael|1": { modifyAttack: (ctx) => (Number(ctx.getFlag("player", "banishedThisTurn")) > 0 ? 2 : 0) },
+  "tremor of i'arathael|2": { modifyAttack: (ctx) => (Number(ctx.getFlag("player", "banishedThisTurn")) > 0 ? 2 : 0) },
+  "tremor of i'arathael|3": { modifyAttack: (ctx) => (Number(ctx.getFlag("player", "banishedThisTurn")) > 0 ? 2 : 0) },
   "rise above|1": { alternativePlayCost: { kind: "put-hand-card-on-deck-top" } },
   "rise above|2": { alternativePlayCost: { kind: "put-hand-card-on-deck-top" } },
   "rise above|3": { alternativePlayCost: { kind: "put-hand-card-on-deck-top" } },
@@ -1251,49 +1708,119 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   "belittle|1": belittle(),
   "belittle|2": belittle(),
   "belittle|3": belittle(),
-  "brandish|1": { onHit(ctx) { buffNextAttack(ctx, { attack: 1, appliesTo: "weapon" }); } },
-  "brandish|2": { onHit(ctx) { buffNextAttack(ctx, { attack: 1, appliesTo: "weapon" }); } },
-  "brandish|3": { onHit(ctx) { buffNextAttack(ctx, { attack: 1, appliesTo: "weapon" }); } },
+  "brandish|1": {
+    onHit(ctx) {
+      buffNextAttack(ctx, { attack: 1, appliesTo: "weapon" });
+    },
+  },
+  "brandish|2": {
+    onHit(ctx) {
+      buffNextAttack(ctx, { attack: 1, appliesTo: "weapon" });
+    },
+  },
+  "brandish|3": {
+    onHit(ctx) {
+      buffNextAttack(ctx, { attack: 1, appliesTo: "weapon" });
+    },
+  },
   "frontline scout|1": {
     onAttackDeclared(ctx) {
-      ctx.requestChoice("frontline-look", yesNoPrompt(`${ctx.data.name}: look at the defending hero's hand?`, "card.mon.defending.hand.look", { card: { kind: "card", cardId: ctx.self.cardId } }), ["yes", "no"]);
+      ctx.requestChoice(
+        "frontline-look",
+        yesNoPrompt(`${ctx.data.name}: look at the defending hero's hand?`, "card.mon.defending.hand.look", {
+          card: { kind: "card", cardId: ctx.self.cardId },
+        }),
+        ["yes", "no"],
+      );
       if (ctx.getFlag("link", "fromArsenal") === true) ctx.grantGoAgain();
     },
-    onChoose(ctx, hook, option) { if (hook === "frontline-look" && option === "yes") for (const card of ctx.player(opponentSeat(ctx)).hand) ctx.lookAt(card.instanceId); },
+    onChoose(ctx, hook, option) {
+      if (hook === "frontline-look" && option === "yes")
+        for (const card of ctx.player(opponentSeat(ctx)).hand) ctx.lookAt(card.instanceId);
+    },
   },
   "frontline scout|2": {
     onAttackDeclared(ctx) {
-      ctx.requestChoice("frontline-look", yesNoPrompt(`${ctx.data.name}: look at the defending hero's hand?`, "card.mon.defending.hand.look", { card: { kind: "card", cardId: ctx.self.cardId } }), ["yes", "no"]);
+      ctx.requestChoice(
+        "frontline-look",
+        yesNoPrompt(`${ctx.data.name}: look at the defending hero's hand?`, "card.mon.defending.hand.look", {
+          card: { kind: "card", cardId: ctx.self.cardId },
+        }),
+        ["yes", "no"],
+      );
       if (ctx.getFlag("link", "fromArsenal") === true) ctx.grantGoAgain();
     },
-    onChoose(ctx, hook, option) { if (hook === "frontline-look" && option === "yes") for (const card of ctx.player(opponentSeat(ctx)).hand) ctx.lookAt(card.instanceId); },
+    onChoose(ctx, hook, option) {
+      if (hook === "frontline-look" && option === "yes")
+        for (const card of ctx.player(opponentSeat(ctx)).hand) ctx.lookAt(card.instanceId);
+    },
   },
   "frontline scout|3": {
     onAttackDeclared(ctx) {
-      ctx.requestChoice("frontline-look", yesNoPrompt(`${ctx.data.name}: look at the defending hero's hand?`, "card.mon.defending.hand.look", { card: { kind: "card", cardId: ctx.self.cardId } }), ["yes", "no"]);
+      ctx.requestChoice(
+        "frontline-look",
+        yesNoPrompt(`${ctx.data.name}: look at the defending hero's hand?`, "card.mon.defending.hand.look", {
+          card: { kind: "card", cardId: ctx.self.cardId },
+        }),
+        ["yes", "no"],
+      );
       if (ctx.getFlag("link", "fromArsenal") === true) ctx.grantGoAgain();
     },
-    onChoose(ctx, hook, option) { if (hook === "frontline-look" && option === "yes") for (const card of ctx.player(opponentSeat(ctx)).hand) ctx.lookAt(card.instanceId); },
+    onChoose(ctx, hook, option) {
+      if (hook === "frontline-look" && option === "yes")
+        for (const card of ctx.player(opponentSeat(ctx)).hand) ctx.lookAt(card.instanceId);
+    },
   },
-  "overload|1": { onHit(ctx) { ctx.grantGoAgain(); } },
-  "overload|2": { onHit(ctx) { ctx.grantGoAgain(); } },
-  "overload|3": { onHit(ctx) { ctx.grantGoAgain(); } },
+  "overload|1": {
+    onHit(ctx) {
+      ctx.grantGoAgain();
+    },
+  },
+  "overload|2": {
+    onHit(ctx) {
+      ctx.grantGoAgain();
+    },
+  },
+  "overload|3": {
+    onHit(ctx) {
+      ctx.grantGoAgain();
+    },
+  },
   "pound for pound|1": lessLifePlayTrigger({ keyword: "dominate" }),
   "pound for pound|2": lessLifePlayTrigger({ keyword: "dominate" }),
   "pound for pound|3": lessLifePlayTrigger({ keyword: "dominate" }),
   "rally the rearguard|1": rallyTheRearguard(),
   "rally the rearguard|2": rallyTheRearguard(),
-  "stony woottonhog|1": { modifyAttack: (ctx) => (ctx.link?.defendingCards.length ?? 0) < 2 ? 1 : 0 },
-  "stony woottonhog|2": { modifyAttack: (ctx) => (ctx.link?.defendingCards.length ?? 0) < 2 ? 1 : 0 },
-  "stony woottonhog|3": { modifyAttack: (ctx) => (ctx.link?.defendingCards.length ?? 0) < 2 ? 1 : 0 },
+  "stony woottonhog|1": { modifyAttack: (ctx) => ((ctx.link?.defendingCards.length ?? 0) < 2 ? 1 : 0) },
+  "stony woottonhog|2": { modifyAttack: (ctx) => ((ctx.link?.defendingCards.length ?? 0) < 2 ? 1 : 0) },
+  "stony woottonhog|3": { modifyAttack: (ctx) => ((ctx.link?.defendingCards.length ?? 0) < 2 ? 1 : 0) },
   "surging militia|1": { modifyAttack: (ctx) => ctx.link?.defendingCards.length ?? 0 },
   "surging militia|2": { modifyAttack: (ctx) => ctx.link?.defendingCards.length ?? 0 },
   "surging militia|3": { modifyAttack: (ctx) => ctx.link?.defendingCards.length ?? 0 },
-  "yinti yanti|1": { modifyAttack: (ctx) => ctx.player(ctx.seat).board.some((card) => hasType(ctx, card, "aura")) ? 1 : 0, modifyDefense: (ctx) => ctx.player(ctx.seat).board.some((card) => hasType(ctx, card, "aura")) ? 1 : 0 },
-  "yinti yanti|2": { modifyAttack: (ctx) => ctx.player(ctx.seat).board.some((card) => hasType(ctx, card, "aura")) ? 1 : 0, modifyDefense: (ctx) => ctx.player(ctx.seat).board.some((card) => hasType(ctx, card, "aura")) ? 1 : 0 },
-  "yinti yanti|3": { modifyAttack: (ctx) => ctx.player(ctx.seat).board.some((card) => hasType(ctx, card, "aura")) ? 1 : 0, modifyDefense: (ctx) => ctx.player(ctx.seat).board.some((card) => hasType(ctx, card, "aura")) ? 1 : 0 },
-  "zealous belting|2": { onAttackDeclared(ctx) { const base = ctx.data.attack ?? 0; if (ctx.player(ctx.seat).pitch.some((card) => ctx.basePower(card) > base)) ctx.grantGoAgain(); } },
-  "zealous belting|3": { onAttackDeclared(ctx) { const base = ctx.data.attack ?? 0; if (ctx.player(ctx.seat).pitch.some((card) => ctx.basePower(card) > base)) ctx.grantGoAgain(); } },
+  "yinti yanti|1": {
+    modifyAttack: (ctx) => (ctx.player(ctx.seat).board.some((card) => hasType(ctx, card, "aura")) ? 1 : 0),
+    modifyDefense: (ctx) => (ctx.player(ctx.seat).board.some((card) => hasType(ctx, card, "aura")) ? 1 : 0),
+  },
+  "yinti yanti|2": {
+    modifyAttack: (ctx) => (ctx.player(ctx.seat).board.some((card) => hasType(ctx, card, "aura")) ? 1 : 0),
+    modifyDefense: (ctx) => (ctx.player(ctx.seat).board.some((card) => hasType(ctx, card, "aura")) ? 1 : 0),
+  },
+  "yinti yanti|3": {
+    modifyAttack: (ctx) => (ctx.player(ctx.seat).board.some((card) => hasType(ctx, card, "aura")) ? 1 : 0),
+    modifyDefense: (ctx) => (ctx.player(ctx.seat).board.some((card) => hasType(ctx, card, "aura")) ? 1 : 0),
+  },
+  "zealous belting|2": {
+    onAttackDeclared(ctx) {
+      const base = ctx.data.attack ?? 0;
+      if (ctx.player(ctx.seat).pitch.some((card) => ctx.basePower(card) > base)) ctx.grantGoAgain();
+    },
+  },
+  "zealous belting|3": {
+    onAttackDeclared(ctx) {
+      const base = ctx.data.attack ?? 0;
+      if (ctx.player(ctx.seat).pitch.some((card) => ctx.basePower(card) > base)) ctx.grantGoAgain();
+    },
+  },
   "minnowism|1": minnowism(3),
   "minnowism|2": minnowism(2),
   "minnowism|3": minnowism(1),

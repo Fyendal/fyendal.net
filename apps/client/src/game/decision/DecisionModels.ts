@@ -65,8 +65,11 @@ export interface ActionAnnouncementModel {
   onSelectAlternativeCost: (instanceIds: number[] | null) => void;
   stagedAdditionalCost: {
     cardLabel: string;
+    minimum: number;
+    maximum: number;
+    selectedInstanceIds: readonly number[];
     modes: {
-      mode: "destroy" | "discard";
+      mode: "destroy" | "discard" | "banish";
       maximum: number;
       cards: CardView[];
     }[];

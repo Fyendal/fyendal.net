@@ -1,5 +1,14 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, commonOptionMessages, decisionMessage, decisionPrompt, localizedCardLog, opponentSeat, optN, optOnChoose } from "./shared-helpers.js";
+import {
+  buffNextAttack,
+  commonOptionMessages,
+  decisionMessage,
+  decisionPrompt,
+  localizedCardLog,
+  opponentSeat,
+  optN,
+  optOnChoose,
+} from "./shared-helpers.js";
 
 // ── SAZ (Silver Age: Azalea precon, Chapter 2) ──────────────────────────────
 //
@@ -37,14 +46,10 @@ const INERTIA = "SAZ036";
 function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {
   const player = ctx.player(seat);
   return [
-    ...Object.values(player.equipment)
-      .filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
+    ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
     ...player.weapons.filter((card) => ctx.cardData(card.cardId).cardType === "equipment"),
   ];
 }
-
-
-
 
 /** ctx.state is typed without the internal side tables; the runtime object has them. */
 
@@ -59,9 +64,7 @@ function hasAimCounter(ctx: ScriptCtx): boolean {
 /** The granted "when this hits a hero" effect rides the link that picked up
  *  this card's next-attack modifier (Lace with X / Drop the Anchor). */
 function armedBySelf(ctx: ScriptCtx): boolean {
-  return ctx.state.modifiers.some(
-    (m) => m.scope === "chain-link" && m.sourceInstanceId === ctx.self.instanceId,
-  );
+  return ctx.state.modifiers.some((m) => m.scope === "chain-link" && m.sourceInstanceId === ctx.self.instanceId);
 }
 
 /** Reload (CR 8.5.23): if the player's arsenal is empty, they may move a card
@@ -71,7 +74,9 @@ function reload(ctx: ScriptCtx): void {
   if (p.arsenal.length > 0 || p.hand.length === 0) return;
   ctx.requestCardChoice(
     "reload",
-    decisionPrompt("Reload: put a card from your hand into your arsenal?", "card.common.reload", { optionMessages: commonOptionMessages("pass") }),
+    decisionPrompt("Reload: put a card from your hand into your arsenal?", "card.common.reload", {
+      optionMessages: commonOptionMessages("pass"),
+    }),
     ["pass", ...p.hand.map((c) => c.instanceId)],
   );
 }
@@ -90,7 +95,11 @@ function requestArrowToArsenal(ctx: ScriptCtx, hook: string, fallback: string): 
   const p = ctx.player(ctx.seat);
   const arrows = p.hand.filter((c) => isArrow(ctx, c));
   if (p.arsenal.length > 0 || arrows.length === 0) return;
-  ctx.requestCardChoice(hook, decisionPrompt(fallback, "card.common.arrow.arsenal", { optionMessages: commonOptionMessages("pass") }), ["pass", ...arrows.map((c) => c.instanceId)]);
+  ctx.requestCardChoice(
+    hook,
+    decisionPrompt(fallback, "card.common.arrow.arsenal", { optionMessages: commonOptionMessages("pass") }),
+    ["pass", ...arrows.map((c) => c.instanceId)],
+  );
 }
 
 /** "Your next arrow attack this turn gets +3{p} and <on-hit rider>" (Lace
@@ -153,13 +162,15 @@ export const saz: Record<string, CardScript> = {
         ctx.putIntoArsenal(top.instanceId, "deck");
         if (isArrow(ctx, top)) {
           ctx.grantCardKeyword(top.instanceId, "dominate");
-          ctx.logPublic(localizedCardLog(
-            ctx,
-            `Azalea: ${ctx.cardData(top.cardId).name} gains dominate until end of turn`,
-            "card.log.saz.azalea.dominate",
-            { target: { kind: "card", cardId: top.cardId } },
-            { kind: "card-moved", cardId: top.cardId, ownerSeat: ctx.seat, from: "deck", to: "arsenal" },
-          ));
+          ctx.logPublic(
+            localizedCardLog(
+              ctx,
+              `Azalea: ${ctx.cardData(top.cardId).name} gains dominate until end of turn`,
+              "card.log.saz.azalea.dominate",
+              { target: { kind: "card", cardId: top.cardId } },
+              { kind: "card-moved", cardId: top.cardId, ownerSeat: ctx.seat, from: "deck", to: "arsenal" },
+            ),
+          );
         }
       },
     },
@@ -178,14 +189,9 @@ export const saz: Record<string, CardScript> = {
       oncePerTurn: true,
       label: "Put an arrow from your hand into your arsenal; draw a card",
       canActivate: (ctx) =>
-        ctx.player(ctx.seat).arsenal.length === 0 &&
-        ctx.player(ctx.seat).hand.some((c) => isArrow(ctx, c)),
+        ctx.player(ctx.seat).arsenal.length === 0 && ctx.player(ctx.seat).hand.some((c) => isArrow(ctx, c)),
       onActivate(ctx) {
-        requestArrowToArsenal(
-          ctx,
-          "death-dealer",
-          "Death Dealer: put an arrow from your hand into your arsenal?",
-        );
+        requestArrowToArsenal(ctx, "death-dealer", "Death Dealer: put an arrow from your hand into your arsenal?");
       },
     },
     onChoose(ctx, hook, option) {
@@ -209,7 +215,9 @@ export const saz: Record<string, CardScript> = {
       if (from !== "deck" || !isArrow(ctx, card)) return;
       ctx.requestPayment(
         `crows-nest:${card.instanceId}`,
-        decisionPrompt("Crow's Nest: pay {r} to put an aim counter on the arrow?", "card.saz.crowsnest.pay", { optionMessages: commonOptionMessages("no") }),
+        decisionPrompt("Crow's Nest: pay {r} to put an aim counter on the arrow?", "card.saz.crowsnest.pay", {
+          optionMessages: commonOptionMessages("no"),
+        }),
         1,
       );
     },
@@ -232,8 +240,7 @@ export const saz: Record<string, CardScript> = {
       destroySelfCost: true,
       label: "Destroy: put an arrow from your hand into your arsenal — it gains +1{p} this turn",
       canActivate: (ctx) =>
-        ctx.player(ctx.seat).arsenal.length === 0 &&
-        ctx.player(ctx.seat).hand.some((c) => isArrow(ctx, c)),
+        ctx.player(ctx.seat).arsenal.length === 0 && ctx.player(ctx.seat).hand.some((c) => isArrow(ctx, c)),
       onActivate(ctx) {
         requestArrowToArsenal(
           ctx,
@@ -247,7 +254,14 @@ export const saz: Record<string, CardScript> = {
       const card = ctx.player(ctx.seat).hand.find((c) => c.instanceId === Number(option));
       if (!card || !ctx.putIntoArsenal(card.instanceId, "hand")) return;
       ctx.addCardTempPower(card.instanceId, 1);
-      ctx.logPublic(localizedCardLog(ctx, `Bull's Eye Bracers: ${ctx.cardData(card.cardId).name} gets +1{p} this turn`, "card.log.saz.bracers.attack", { target: { kind: "card", cardId: card.cardId }, amount: 1 }));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `Bull's Eye Bracers: ${ctx.cardData(card.cardId).name} gets +1{p} this turn`,
+          "card.log.saz.bracers.attack",
+          { target: { kind: "card", cardId: card.cardId }, amount: 1 },
+        ),
+      );
     },
   },
 
@@ -313,18 +327,26 @@ export const saz: Record<string, CardScript> = {
       if (equips.length === 0) return;
       ctx.requestCardChoice(
         "drill-shot",
-        decisionPrompt("Drill Shot: put a -1{d} counter on an equipment they control", "card.saz.drillshot.equipment.choose"),
+        decisionPrompt(
+          "Drill Shot: put a -1{d} counter on an equipment they control",
+          "card.saz.drillshot.equipment.choose",
+        ),
         equips.map((c) => c.instanceId),
       );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "drill-shot") return;
-      const eq = equipmentCards(ctx, opponentSeat(ctx)).find(
-        (c) => c.instanceId === Number(option),
-      );
+      const eq = equipmentCards(ctx, opponentSeat(ctx)).find((c) => c.instanceId === Number(option));
       if (!eq) return;
       ctx.addCardDefenseCounters(eq.instanceId, 1);
-      ctx.logPublic(localizedCardLog(ctx, `Drill Shot: ${ctx.cardData(eq.cardId).name} gets a -1{d} counter`, "card.log.saz.drillshot.counter", { target: { kind: "card", cardId: eq.cardId }, amount: 1 }));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `Drill Shot: ${ctx.cardData(eq.cardId).name} gets a -1{d} counter`,
+          "card.log.saz.drillshot.counter",
+          { target: { kind: "card", cardId: eq.cardId }, amount: 1 },
+        ),
+      );
     },
   },
 
@@ -332,7 +354,9 @@ export const saz: Record<string, CardScript> = {
     // "When this is put face-up into your arsenal, it gets +2{p} this turn."
     onEnterArsenal(ctx) {
       ctx.addCardTempPower(ctx.self.instanceId, 2);
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} gets +2{p} this turn`, "card.log.saz.card.attack.turn", { amount: 2 }));
+      ctx.logPublic(
+        localizedCardLog(ctx, `${ctx.data.name} gets +2{p} this turn`, "card.log.saz.card.attack.turn", { amount: 2 }),
+      );
     },
   },
 
@@ -341,7 +365,9 @@ export const saz: Record<string, CardScript> = {
     onEnterArsenal(ctx) {
       ctx.requestCardChoice(
         "entangling-shot",
-        decisionPrompt("Entangling Shot: tap target hero?", "card.saz.entangling.hero.choose", { optionMessages: commonOptionMessages("pass") }),
+        decisionPrompt("Entangling Shot: tap target hero?", "card.saz.entangling.hero.choose", {
+          optionMessages: commonOptionMessages("pass"),
+        }),
         ["pass", ...ctx.state.players.map((p) => p.hero.instanceId)],
       );
     },
@@ -396,7 +422,14 @@ export const saz: Record<string, CardScript> = {
       const seat = opponentSeat(ctx);
       ctx.loseLife(seat, 1);
       const opp = ctx.player(seat);
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(opp.heroCardId).name} loses 1 life (${opp.life} life)`, "card.log.common.hero.life.lost", { target: { kind: "player", seat }, amount: 1, life: opp.life }));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.cardData(opp.heroCardId).name} loses 1 life (${opp.life} life)`,
+          "card.log.common.hero.life.lost",
+          { target: { kind: "player", seat }, amount: 1, life: opp.life },
+        ),
+      );
     },
   },
 
@@ -405,7 +438,9 @@ export const saz: Record<string, CardScript> = {
     //  turn." (Go again is conditional — KEYWORD_OVERRIDES strips it.)
     onEnterArsenal(ctx) {
       ctx.grantCardKeyword(ctx.self.instanceId, "go again");
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} gets go again this turn`, "card.log.saz.card.goagain.turn"));
+      ctx.logPublic(
+        localizedCardLog(ctx, `${ctx.data.name} gets go again this turn`, "card.log.saz.card.goagain.turn"),
+      );
     },
   },
 
@@ -420,7 +455,12 @@ export const saz: Record<string, CardScript> = {
       if (top2.length < 2) return;
       ctx.requestChoice(
         "spire-sniping",
-        decisionPrompt("Spire Sniping: put the top 2 cards back in any order", "card.saz.spire.order", { optionMessages: { "keep order": decisionMessage("card.common.option.keeporder"), swap: decisionMessage("card.common.option.swap") } }),
+        decisionPrompt("Spire Sniping: put the top 2 cards back in any order", "card.saz.spire.order", {
+          optionMessages: {
+            "keep order": decisionMessage("card.common.option.keeporder"),
+            swap: decisionMessage("card.common.option.swap"),
+          },
+        }),
         ["keep order", "swap"],
       );
     },
@@ -502,9 +542,7 @@ export const saz: Record<string, CardScript> = {
     // "Your next arrow attack this turn gains +3{p} and 'Defense reactions
     //  can't be played from arsenal this chain link.'" Go again printed.
     onPlay(ctx) {
-      buffNextAttack(ctx, { attack: 3,
-        appliesToSubtype: "arrow",
-        noDefenseReactionsFromArsenal: true, });
+      buffNextAttack(ctx, { attack: 3, appliesToSubtype: "arrow", noDefenseReactionsFromArsenal: true });
     },
   },
 
@@ -512,9 +550,7 @@ export const saz: Record<string, CardScript> = {
     // "Look at the top card of target hero's deck. The next attack action
     //  card you play from arsenal this turn gains +3{p}." Go again printed.
     onPlay(ctx) {
-      buffNextAttack(ctx, { attack: 3,
-        appliesTo: "attack-action",
-        appliesToFromArsenal: true, });
+      buffNextAttack(ctx, { attack: 3, appliesTo: "attack-action", appliesToFromArsenal: true });
       ctx.requestCardChoice(
         "scout-the-periphery",
         decisionPrompt("Scout the Periphery: look at the top card of target hero's deck", "card.saz.scout.hero.choose"),
@@ -527,12 +563,14 @@ export const saz: Record<string, CardScript> = {
       const top = target?.deck[0];
       if (!target || !top) return;
       ctx.lookAt(top.instanceId);
-      ctx.logPublic(localizedCardLog(
-        ctx,
-        `${ctx.data.name}: look at the top card of ${ctx.cardData(target.heroCardId).name}'s deck`,
-        "card.log.saz.scout.look",
-        { target: { kind: "player", seat: target.seat } },
-      ));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.data.name}: look at the top card of ${ctx.cardData(target.heroCardId).name}'s deck`,
+          "card.log.saz.scout.look",
+          { target: { kind: "player", seat: target.seat } },
+        ),
+      );
     },
   },
 
@@ -540,9 +578,7 @@ export const saz: Record<string, CardScript> = {
     // "The next Ranger attack action card you play this turn gains +3{p}.
     //  Reload." Go again is printed (native).
     onPlay(ctx) {
-      buffNextAttack(ctx, { attack: 3,
-        appliesTo: "attack-action",
-        appliesToClass: "ranger", });
+      buffNextAttack(ctx, { attack: 3, appliesTo: "attack-action", appliesToClass: "ranger" });
       reload(ctx);
     },
     onChoose(ctx, hook, option) {
@@ -556,20 +592,19 @@ export const saz: Record<string, CardScript> = {
     canPlay: (ctx) =>
       ctx.player(ctx.seat).graveyard.some((c) => {
         const d = ctx.cardData(c.cardId);
-        return (
-          ctx.hasCardType(c, "action") && ctx.cardTypes(c).includes("attack") && (d.cost ?? 0) <= 1
-        );
+        return ctx.hasCardType(c, "action") && ctx.cardTypes(c).includes("attack") && (d.cost ?? 0) <= 1;
       }),
     onPlay(ctx) {
       const targets = ctx.player(ctx.seat).graveyard.filter((c) => {
         const d = ctx.cardData(c.cardId);
-        return (
-          ctx.hasCardType(c, "action") && ctx.cardTypes(c).includes("attack") && (d.cost ?? 0) <= 1
-        );
+        return ctx.hasCardType(c, "action") && ctx.cardTypes(c).includes("attack") && (d.cost ?? 0) <= 1;
       });
       ctx.requestCardChoice(
         "memorial-ground",
-        decisionPrompt("Memorial Ground: put an attack action with cost 1 or less from your graveyard on top of your deck", "card.saz.memorial.attack.top"),
+        decisionPrompt(
+          "Memorial Ground: put an attack action with cost 1 or less from your graveyard on top of your deck",
+          "card.saz.memorial.attack.top",
+        ),
         targets.map((c) => c.instanceId),
       );
     },
@@ -591,11 +626,15 @@ export const saz: Record<string, CardScript> = {
         event: "end-of-turn",
         label: "Destroy Bloodrot Pox — 2 damage unless you pay {r}{r}{r}",
         effect(ctx) {
-          if (!ctx.requestPayment(
-            "bloodrot-pox",
-            decisionPrompt("Bloodrot Pox: pay {r}{r}{r} or take 2 damage?", "card.saz.bloodrot.pay", { optionMessages: commonOptionMessages("no") }),
-            3,
-          )) {
+          if (
+            !ctx.requestPayment(
+              "bloodrot-pox",
+              decisionPrompt("Bloodrot Pox: pay {r}{r}{r} or take 2 damage?", "card.saz.bloodrot.pay", {
+                optionMessages: commonOptionMessages("no"),
+              }),
+              3,
+            )
+          ) {
             ctx.destroySelf();
             ctx.dealDamage(ctx.seat, 2);
           }
@@ -606,7 +645,9 @@ export const saz: Record<string, CardScript> = {
       if (hook !== "bloodrot-pox") return;
       ctx.destroySelf();
       if (option === "paid") {
-        ctx.logPublic(localizedCardLog(ctx, "Bloodrot Pox: {r}{r}{r} paid", "card.log.common.resources.paid", { amount: 3 }));
+        ctx.logPublic(
+          localizedCardLog(ctx, "Bloodrot Pox: {r}{r}{r} paid", "card.log.common.resources.paid", { amount: 3 }),
+        );
       } else {
         ctx.dealDamage(ctx.seat, 2);
       }

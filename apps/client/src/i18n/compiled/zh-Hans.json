@@ -10173,6 +10173,12 @@
       "value": "摧毁这张红色牌？"
     }
   ],
+  "card.pen.rendflesh.counter.remove": [
+    {
+      "type": 0,
+      "value": "血肉撕裂：移除一个 +1 力量指示物，使被命中的英雄失去 2 点生命？"
+    }
+  ],
   "card.pen.scrap.choose": [
     {
       "type": 0,
@@ -19260,16 +19266,6 @@
       "value": "启动瞬间能力"
     }
   ],
-  "game.decision.additionalCost.choose": [
-    {
-      "type": 0,
-      "value": "从每个区域选择最多 3 张"
-    },
-    {
-      "type": 1,
-      "value": "card"
-    }
-  ],
   "game.decision.additionalCost.destroy": [
     {
       "type": 0,
@@ -19486,6 +19482,66 @@
     {
       "type": 0,
       "value": " 次"
+    }
+  ],
+  "game.decision.cardCost.banish": [
+    {
+      "type": 0,
+      "value": "从手牌放逐"
+    }
+  ],
+  "game.decision.cardCost.chooseExact": [
+    {
+      "type": 0,
+      "value": "选择"
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "以支付此费用"
+    }
+  ],
+  "game.decision.cardCost.chooseUpTo": [
+    {
+      "type": 0,
+      "value": "选择最多 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张"
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "以支付此费用"
+    }
+  ],
+  "game.decision.cardCost.label.allies": [
+    {
+      "type": 0,
+      "value": "ally"
+    }
+  ],
+  "game.decision.cardCost.label.cards": [
+    {
+      "type": 0,
+      "value": "卡牌"
+    }
+  ],
+  "game.decision.cardCost.label.zombies": [
+    {
+      "type": 0,
+      "value": "zombie"
     }
   ],
   "game.decision.chooseCard": [

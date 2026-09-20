@@ -19,19 +19,25 @@ export const mpa: Record<string, CardScript> = {
       goAgain: false,
       timing: "attack-reaction",
       oncePerTurn: false,
-      effectCardCosts: [{
-        zone: "hand",
-        move: "put-on-deck-bottom",
-        count: 1,
-        prompt: decisionPrompt("Put a card from your hand on the bottom of your deck", "card.common.cost.hand.deckbottom"),
-      }],
+      effectCardCosts: [
+        {
+          zone: "hand",
+          move: "put-on-deck-bottom",
+          count: 1,
+          prompt: decisionPrompt(
+            "Put a card from your hand on the bottom of your deck",
+            "card.common.cost.hand.deckbottom",
+          ),
+        },
+      ],
       canActivate(ctx) {
         const attack = ctx.link?.attackingCard;
-        return !!attack &&
+        return (
+          !!attack &&
           ctx.link?.attacker === ctx.seat &&
           attack.instanceId !== ctx.self.instanceId &&
-          (ctx.cardData(attack.cardId).keywords ?? [])
-            .some((keyword) => keyword.toLowerCase() === "stealth");
+          (ctx.cardData(attack.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "stealth")
+        );
       },
       onCostPaid(ctx) {
         ctx.destroySelf();
@@ -59,10 +65,7 @@ export const mpa: Record<string, CardScript> = {
       if (hand.length > 0) {
         ctx.requestCardChoice(
           "mpa-remember-banish",
-          decisionPrompt(
-            "Choose a card to banish from the defending hero's hand",
-            "card.mpa.remember.hand.banish",
-          ),
+          decisionPrompt("Choose a card to banish from the defending hero's hand", "card.mpa.remember.hand.banish"),
           hand.map((card) => card.instanceId),
         );
       }
@@ -80,33 +83,33 @@ export const mpa: Record<string, CardScript> = {
   },
 
   "mutually assured destruction|1": {
-    ...contractWithSilver((ctx, card) =>
-      card.owner === opponentSeat(ctx) && isInfected(ctx, card.owner)
-    ),
+    ...contractWithSilver((ctx, card) => card.owner === opponentSeat(ctx) && isInfected(ctx, card.owner)),
     onAttackDeclared(ctx) {
       // Its reaction-play trigger must remain functional for every link while
       // this Contract attack stays face up on the combat chain.
       ctx.addModifier({ scope: "combat-chain" });
     },
-    triggers: [{
-      event: "card-played",
-      whose: "any",
-      label: "Infect each hero and banish the top card of each deck",
-      condition(ctx, played) {
-        if (!played || !isReaction(ctx, played)) return false;
-        if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId) return false;
-        return ctx.getCounter(`reaction:${played.owner}`) === 0;
+    triggers: [
+      {
+        event: "card-played",
+        whose: "any",
+        label: "Infect each hero and banish the top card of each deck",
+        condition(ctx, played) {
+          if (!played || !isReaction(ctx, played)) return false;
+          if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId) return false;
+          return ctx.getCounter(`reaction:${played.owner}`) === 0;
+        },
+        onTrigger(ctx, played) {
+          if (played) ctx.setCounter(`reaction:${played.owner}`, 1);
+        },
+        effect(ctx) {
+          for (const player of ctx.state.players) ctx.createToken(BLOODROT_POX, player.seat);
+          for (const player of ctx.state.players) {
+            const top = ctx.player(player.seat).deck[0];
+            if (top) ctx.banish(top.instanceId);
+          }
+        },
       },
-      onTrigger(ctx, played) {
-        if (played) ctx.setCounter(`reaction:${played.owner}`, 1);
-      },
-      effect(ctx) {
-        for (const player of ctx.state.players) ctx.createToken(BLOODROT_POX, player.seat);
-        for (const player of ctx.state.players) {
-          const top = ctx.player(player.seat).deck[0];
-          if (top) ctx.banish(top.instanceId);
-        }
-      },
-    }],
+    ],
   },
 };

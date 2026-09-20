@@ -149,6 +149,54 @@ describe("PEN — import and set mechanics", () => {
     expect(projectStateFor(g.state, 0).chain.at(-1)?.dominate).toBe(true);
   });
 
+  it("Rend Flesh may remove a sword's +1 power counter when it hits for the hero to lose 2 life", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        weapons: ["zenith blade|0"],
+        hand: ["rend flesh|3"],
+        resources: 1,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+    g.state.players[0]!.weapons[0]!.counters = { power: 1 };
+
+    g.play("rend flesh|3")
+      .attackWithWeapon("zenith blade|0")
+      .blockWith()
+      .settle();
+
+    expect(g.state.pendingDecision?.prompt).toContain("Rend Flesh");
+    g.chooseOption("yes");
+
+    expect(g.state.players[0]!.weapons[0]!.counters?.power).toBeUndefined();
+    g.expectLife(1, 14);
+  });
+
+  it("Rend Flesh leaves the counter and life total unchanged when its optional effect is declined", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        weapons: ["zenith blade|0"],
+        hand: ["rend flesh|3"],
+        resources: 1,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+    g.state.players[0]!.weapons[0]!.counters = { power: 1 };
+
+    g.play("rend flesh|3")
+      .attackWithWeapon("zenith blade|0")
+      .blockWith()
+      .settle()
+      .chooseOption("no");
+
+    expect(g.state.players[0]!.weapons[0]!.counters?.power).toBe(1);
+    g.expectLife(1, 16);
+  });
+
   it("declares and pays Touch of Reality's X activation cost before tapping it", () => {
     const g = scenario({ seats: [
       { hero: "rhinar", hand: ["raging onslaught|3"], equipment: { ...NO_EQUIPMENT, arms: "touch of reality|0" } },

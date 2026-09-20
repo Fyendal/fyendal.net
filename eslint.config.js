@@ -24,6 +24,15 @@ export default tseslint.config(
       ],
       "@typescript-eslint/no-empty-object-type": "off",
       "no-empty": ["warn", { allowEmptyCatch: true }],
+      "max-len": [
+        "warn",
+        {
+          code: 120,
+          comments: 120,
+          tabWidth: 2,
+          ignoreUrls: true,
+        },
+      ],
     },
   },
   {

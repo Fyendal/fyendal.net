@@ -6,12 +6,25 @@ import {
   committedActionIntent,
   handCardSelection,
   INITIAL_ANNOUNCEMENT,
+  isAnnouncementPaymentReady,
   nonAttackActionPlayIds,
   requiresAbilityChoice,
   requiresChainCloseConfirmation,
   resolvePlayMethod,
   shouldSkipPlayConfirmation,
 } from "./useActionAnnouncement.js";
+
+describe("announcement payment readiness", () => {
+  it("keeps a staged exact card cost open until the player confirms it", () => {
+    expect(isAnnouncementPaymentReady(1, false, true, false, false)).toBe(false);
+    expect(isAnnouncementPaymentReady(1, false, true, true, false)).toBe(true);
+  });
+
+  it("still requires a selected ungrouped alternative cost", () => {
+    expect(isAnnouncementPaymentReady(1, true, false, false, false)).toBe(false);
+    expect(isAnnouncementPaymentReady(1, true, false, false, true)).toBe(true);
+  });
+});
 
 describe("action announcement reducer", () => {
   it("clears payment-dependent choices when the payment method changes", () => {
@@ -47,6 +60,7 @@ describe("action announcement reducer", () => {
     const targetChosen = actionAnnouncementReducer(selected, {
       type: "toggle-additional-cost-card",
       instanceId: 5,
+      selectionSource: "alternative",
     });
     expect(targetChosen).toMatchObject({
       alternativeCostCardInstanceIds: [5],
@@ -63,6 +77,7 @@ describe("action announcement reducer", () => {
     const bothTargetsChosen = actionAnnouncementReducer(targetChosen, {
       type: "toggle-additional-cost-card",
       instanceId: 6,
+      selectionSource: "alternative",
     });
     expect(bothTargetsChosen).toMatchObject({
       alternativeCostCardInstanceIds: [5, 6],
@@ -74,6 +89,25 @@ describe("action announcement reducer", () => {
     })).toMatchObject({
       alternativeCostCardInstanceIds: [5, 6],
       additionalCostConfirmed: true,
+    });
+  });
+
+  it("collects a defense-ability card cost in the exact payment field", () => {
+    const selected = {
+      ...INITIAL_ANNOUNCEMENT,
+      sel: { kind: "activate" as const, sourceInstanceId: 1 },
+    };
+
+    const targetChosen = actionAnnouncementReducer(selected, {
+      type: "toggle-additional-cost-card",
+      instanceId: 5,
+      selectionSource: "payment",
+    });
+
+    expect(targetChosen).toMatchObject({
+      pitchSel: [5],
+      alternativeCostCardInstanceIds: undefined,
+      additionalCostConfirmed: false,
     });
   });
 

@@ -53,12 +53,14 @@ function delayedGuardianAura(attack: number, dominate = false): CardScript {
             appliesTo: "attack-action",
             appliesToClass: "guardian",
           });
-          ctx.logPublic(localizedCardLog(
-            ctx,
-            `${ctx.data.name}: next Guardian attack action gets +${attack}{p}${dominate ? " and dominate" : ""}`,
-            dominate ? "card.log.cru.riled.attack.dominate" : "card.log.cru.riled.attack",
-            { amount: attack },
-          ));
+          ctx.logPublic(
+            localizedCardLog(
+              ctx,
+              `${ctx.data.name}: next Guardian attack action gets +${attack}{p}${dominate ? " and dominate" : ""}`,
+              dominate ? "card.log.cru.riled.attack.dominate" : "card.log.cru.riled.attack",
+              { amount: attack },
+            ),
+          );
         },
       },
     ],
@@ -66,12 +68,7 @@ function delayedGuardianAura(attack: number, dominate = false): CardScript {
 }
 
 function crushTriggered(ctx: ScriptCtx): boolean {
-  return (
-    !!ctx.link &&
-    ctx.link?.targetAllyId === undefined &&
-    ctx.link.hit === true &&
-    (ctx.link.damage ?? 0) >= 4
-  );
+  return !!ctx.link && ctx.link?.targetAllyId === undefined && ctx.link.hit === true && (ctx.link.damage ?? 0) >= 4;
 }
 
 function crushTheWeak(): CardScript {
@@ -79,13 +76,16 @@ function crushTheWeak(): CardScript {
     canTriggerOnHit: crushTriggered,
     onHit(ctx) {
       const opponent = ctx.state.players[opponentSeat(ctx)]!;
-      ctx.setCardCounter(
-        opponent.hero.instanceId,
-        "attackActionBasePowerLimitUntilTurn",
-        ctx.state.turn + 1,
-      );
+      ctx.setCardCounter(opponent.hero.instanceId, "attackActionBasePowerLimitUntilTurn", ctx.state.turn + 1);
       ctx.setCardCounter(opponent.hero.instanceId, "attackActionBasePowerLimit", 3);
-      ctx.logPublic(localizedCardLog(ctx, "Crush the Weak: the opponent can't play attack actions with 3 or less base {p} next action phase", "card.log.sbr.crushtheweak.restricted", { amount: 3 }));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          "Crush the Weak: the opponent can't play attack actions with 3 or less base {p} next action phase",
+          "card.log.sbr.crushtheweak.restricted",
+          { amount: 3 },
+        ),
+      );
     },
   };
 }
@@ -95,12 +95,14 @@ function chokeslam(): CardScript {
     canTriggerOnHit: crushTriggered,
     onHit(ctx) {
       const opponent = ctx.state.players[opponentSeat(ctx)]!;
-      ctx.setCardCounter(
-        opponent.hero.instanceId,
-        "attackActionNoPowerGainUntilTurn",
-        ctx.state.turn + 1,
+      ctx.setCardCounter(opponent.hero.instanceId, "attackActionNoPowerGainUntilTurn", ctx.state.turn + 1);
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          "Chokeslam: opposing attack action cards can't gain {p} during their next action phase",
+          "card.log.sbr.chokeslam.suppressed",
+        ),
       );
-      ctx.logPublic(localizedCardLog(ctx, "Chokeslam: opposing attack action cards can't gain {p} during their next action phase", "card.log.sbr.chokeslam.suppressed"));
     },
   };
 }
@@ -115,42 +117,47 @@ function blessingOfSerenity(prevention: number): CardScript {
 
 export const cruBruteGuardian: Record<string, CardScript> = {
   "rhinar, reckless rampage|0": {
-    triggers: [{
-      event: "card-discarded",
-      label: "Intimidate",
-      publicLog: "Rhinar's ability triggers",
-      publicLogMessage: { id: "card.log.common.heroability.triggered" },
-      condition: (ctx, discarded) =>
-        ctx.state.activePlayer === ctx.seat &&
-        ctx.state.phase !== "start" &&
-        ctx.state.phase !== "end" &&
-        ctx.state.phase !== "game-over" &&
-        discarded !== undefined &&
-        ctx.basePower(discarded) >= 6,
-      effect: (ctx) => ctx.intimidate(),
-    }],
+    triggers: [
+      {
+        event: "card-discarded",
+        label: "Intimidate",
+        publicLog: "Rhinar's ability triggers",
+        publicLogMessage: { id: "card.log.common.heroability.triggered" },
+        condition: (ctx, discarded) =>
+          ctx.state.activePlayer === ctx.seat &&
+          ctx.state.phase !== "start" &&
+          ctx.state.phase !== "end" &&
+          ctx.state.phase !== "game-over" &&
+          discarded !== undefined &&
+          ctx.basePower(discarded) >= 6,
+        effect: (ctx) => ctx.intimidate(),
+      },
+    ],
   },
 
   "kayo, berserker runt|0": {
-    triggers: [{
-      event: "card-played",
-      label: "Roll a die for the attack's base power",
-      condition: (ctx, played) => !!played &&
-        ctx.hasCardType(played, "action") &&
-        ctx.cardTypes(played).includes("attack") &&
-        (ctx.cardData(played.cardId).attack ?? 0) >= 6,
-      effect(ctx, played) {
-      if (!played) return;
-      ctx.setCounter("kayoRolledAttack", played.instanceId);
-      ctx.requestDieRoll("kayo-power", 6);
+    triggers: [
+      {
+        event: "card-played",
+        label: "Roll a die for the attack's base power",
+        condition: (ctx, played) =>
+          !!played &&
+          ctx.hasCardType(played, "action") &&
+          ctx.cardTypes(played).includes("attack") &&
+          (ctx.cardData(played.cardId).attack ?? 0) >= 6,
+        effect(ctx, played) {
+          if (!played) return;
+          ctx.setCounter("kayoRolledAttack", played.instanceId);
+          ctx.requestDieRoll("kayo-power", 6);
+        },
       },
-    }],
+    ],
     onDieRollResolved(ctx, hook, roll) {
       if (hook !== "kayo-power") return;
       const playedId = ctx.getCounter("kayoRolledAttack");
       const played = [
         ...ctx.state.chain.map((link) => link.attackingCard),
-        ...ctx.state.stack.flatMap((layer) => layer.card ? [layer.card] : []),
+        ...ctx.state.stack.flatMap((layer) => (layer.card ? [layer.card] : [])),
         ...ctx.state.resolving,
       ].find((card) => card.instanceId === playedId);
       if (!played) return;
@@ -162,13 +169,15 @@ export const cruBruteGuardian: Record<string, CardScript> = {
       } else {
         ctx.setCardCounter(played.instanceId, "doubleBasePower", 1);
       }
-      ctx.logPublic(localizedCardLog(
-        ctx,
-        `${ctx.data.name}: rolled ${roll}; ${data.name}'s base {p} is ${roll <= 4 ? "halved" : "doubled"}`,
-        roll <= 4 ? "card.log.cru.knucklehead.halved" : "card.log.cru.knucklehead.doubled",
-        { result: roll, target: { kind: "card", cardId: played.cardId } },
-        { kind: "roll", result: roll, seat: ctx.seat, sides: 6 },
-      ));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.data.name}: rolled ${roll}; ${data.name}'s base {p} is ${roll <= 4 ? "halved" : "doubled"}`,
+          roll <= 4 ? "card.log.cru.knucklehead.halved" : "card.log.cru.knucklehead.doubled",
+          { result: roll, target: { kind: "card", cardId: played.cardId } },
+          { kind: "roll", result: roll, seat: ctx.seat, sides: 6 },
+        ),
+      );
     },
   },
 
@@ -180,27 +189,27 @@ export const cruBruteGuardian: Record<string, CardScript> = {
       oncePerTurn: true,
       label: "Attack",
     },
-    triggers: [{
-      event: "card-discarded",
-      label: "Get +1 power this turn",
-      condition(ctx, discarded) {
-        const flag = `rompingClubTriggered:${ctx.self.instanceId}`;
-        return discarded !== undefined &&
-          ctx.basePower(discarded) >= 6 &&
-          ctx.getFlag("player", flag) !== true;
+    triggers: [
+      {
+        event: "card-discarded",
+        label: "Get +1 power this turn",
+        condition(ctx, discarded) {
+          const flag = `rompingClubTriggered:${ctx.self.instanceId}`;
+          return discarded !== undefined && ctx.basePower(discarded) >= 6 && ctx.getFlag("player", flag) !== true;
+        },
+        onTrigger(ctx) {
+          ctx.setFlag("player", `rompingClubTriggered:${ctx.self.instanceId}`, true);
+        },
+        effect(ctx) {
+          ctx.addModifier({
+            scope: "until-end-of-turn",
+            attack: 1,
+            appliesTo: "weapon",
+            appliesToName: "romping club",
+          });
+        },
       },
-      onTrigger(ctx) {
-        ctx.setFlag("player", `rompingClubTriggered:${ctx.self.instanceId}`, true);
-      },
-      effect(ctx) {
-        ctx.addModifier({
-          scope: "until-end-of-turn",
-          attack: 1,
-          appliesTo: "weapon",
-          appliesToName: "romping club",
-        });
-      },
-    }],
+    ],
   },
 
   "barraging big horn|1": barragingBigHorn(),
@@ -232,7 +241,13 @@ export const cruBruteGuardian: Record<string, CardScript> = {
           appliesTo: "attack-action",
           minCost: 3,
         });
-        ctx.logPublic(localizedCardLog(ctx, "Bravo: attack action cards with cost 3 or more gain dominate this turn", "card.log.wtr.bravo.dominate"));
+        ctx.logPublic(
+          localizedCardLog(
+            ctx,
+            "Bravo: attack action cards with cost 3 or more gain dominate this turn",
+            "card.log.wtr.bravo.dominate",
+          ),
+        );
       },
     },
   },

@@ -28,13 +28,10 @@ import {
 
 const PONDER = "SBZ033";
 
-
-
 /** Opt wrapper for the set: charges Blaze, Firemind with energy counters when
  *  the opting player is Blaze (her "Whenever you opt, …" trigger). */
 function opt(ctx: ScriptCtx, n: number): void {
-  const heroIsBlaze =
-    ctx.cardData(ctx.player(ctx.seat).heroCardId).name === "Blaze, Firemind";
+  const heroIsBlaze = ctx.cardData(ctx.player(ctx.seat).heroCardId).name === "Blaze, Firemind";
   optN(ctx, n, heroIsBlaze);
 }
 
@@ -44,11 +41,7 @@ function viaBlaze(ctx: ScriptCtx): boolean {
   return wizardActionAsInstant(ctx);
 }
 
-function blazeMatches(
-  ctx: ScriptCtx,
-  card: DeepReadonly<CardInstance>,
-  amount: number,
-): boolean {
+function blazeMatches(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, amount: number): boolean {
   return (
     ctx.hasCardType(card, "action") &&
     !ctx.cardTypes(card).includes("attack") &&
@@ -202,27 +195,29 @@ export const sbz: Record<string, CardScript> = {
         counterKey: "blazeX",
         removeCounterKey: "energy",
         maximum: (ctx) => ctx.getCounter("energy"),
-        prompt: decisionPrompt(
-          "Blaze, Firemind: remove how many energy counters?",
-          "card.sbz.blaze.energy.choose",
-        ),
+        prompt: decisionPrompt("Blaze, Firemind: remove how many energy counters?", "card.sbz.blaze.energy.choose"),
       },
       canActivate: (ctx) =>
-        ctx.getCounter("energy") > 0 ||
-        ctx.player(ctx.seat).hand.some((card) => blazeMatches(ctx, card, 0)),
+        ctx.getCounter("energy") > 0 || ctx.player(ctx.seat).hand.some((card) => blazeMatches(ctx, card, 0)),
       onActivate(ctx) {
         const x = ctx.getCounter("blazeX");
-        const matches = ctx.player(ctx.seat).hand.filter((card) =>
-          blazeMatches(ctx, card, x)
-        );
+        const matches = ctx.player(ctx.seat).hand.filter((card) => blazeMatches(ctx, card, x));
         if (matches.length === 0) {
-          ctx.logPublic(localizedCardLog(ctx, `Blaze, Firemind: no Wizard non-attack action dealing ${x} arcane damage in hand`, "card.log.sbz.blaze.none", { amount: x }));
+          ctx.logPublic(
+            localizedCardLog(
+              ctx,
+              `Blaze, Firemind: no Wizard non-attack action dealing ${x} arcane damage in hand`,
+              "card.log.sbz.blaze.none",
+              { amount: x },
+            ),
+          );
           return;
         }
         ctx.requestCardChoice(
           "blaze-banish",
           decisionPrompt(
-            `Blaze, Firemind: banish a Wizard non-attack action dealing ${x} arcane damage (playable as an instant this turn)`,
+            `Blaze, Firemind: banish a Wizard non-attack action dealing ${x} arcane damage ` +
+              "(playable as an instant this turn)",
             "card.sbz.blaze.action.banish",
             { values: { amount: x } },
           ),
@@ -237,13 +232,19 @@ export const sbz: Record<string, CardScript> = {
         if (!found || !ctx.banish(id)) return;
         ctx.allowPlayFrom(id, "banish");
         ctx.setFlag("player", `asInstant:${id}`, true);
-        ctx.logPublic(localizedCardLog(
-          ctx,
-          `Blaze, Firemind: ${found ? ctx.cardData(found.cardId).name : "the chosen card"} may be played as an instant this turn`,
-          "card.log.sbz.blaze.playable",
-          found ? { result: { kind: "card", cardId: found.cardId } } : undefined,
-          found ? { kind: "card-moved", cardId: found.cardId, ownerSeat: ctx.seat, from: "hand", to: "banish" } : undefined,
-        ));
+        ctx.logPublic(
+          localizedCardLog(
+            ctx,
+            `Blaze, Firemind: ${
+              found ? ctx.cardData(found.cardId).name : "the chosen card"
+            } may be played as an instant this turn`,
+            "card.log.sbz.blaze.playable",
+            found ? { result: { kind: "card", cardId: found.cardId } } : undefined,
+            found
+              ? { kind: "card-moved", cardId: found.cardId, ownerSeat: ctx.seat, from: "hand", to: "banish" }
+              : undefined,
+          ),
+        );
         return;
       }
     },
@@ -293,7 +294,9 @@ export const sbz: Record<string, CardScript> = {
       canActivate: (ctx) => ctx.state.activePlayer !== ctx.seat,
       onActivate(ctx) {
         ctx.changeResources(ctx.seat, 1);
-        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: gained {r}`, "card.log.common.resources.gained", { amount: 1 }));
+        ctx.logPublic(
+          localizedCardLog(ctx, `${ctx.data.name}: gained {r}`, "card.log.common.resources.gained", { amount: 1 }),
+        );
       },
     },
   },
@@ -324,14 +327,18 @@ export const sbz: Record<string, CardScript> = {
     onAttackDeclared(ctx) {
       if (ctx.compareLife(ctx.seat, opponentSeat(ctx)) === -1) {
         ctx.gainLife(ctx.seat, 1);
-        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: gained 1{h}`, "card.log.common.life.gained", { amount: 1 }));
+        ctx.logPublic(
+          localizedCardLog(ctx, `${ctx.data.name}: gained 1{h}`, "card.log.common.life.gained", { amount: 1 }),
+        );
       }
     },
     canTriggerOnDefend: (ctx) => ctx.compareLife(ctx.seat, opponentSeat(ctx)) === -1,
     onDefend(ctx) {
       if (ctx.compareLife(ctx.seat, opponentSeat(ctx)) === -1) {
         ctx.gainLife(ctx.seat, 1);
-        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: gained 1{h}`, "card.log.common.life.gained", { amount: 1 }));
+        ctx.logPublic(
+          localizedCardLog(ctx, `${ctx.data.name}: gained 1{h}`, "card.log.common.life.gained", { amount: 1 }),
+        );
       }
     },
   },
@@ -339,25 +346,30 @@ export const sbz: Record<string, CardScript> = {
   // Look Tuff — "When this attacks, it gets -1{p} unless you pay {r}."
   "look tuff|1": {
     onAttackDeclared(ctx) {
-      if (!ctx.requestPayment(
-        "look-tuff",
-        decisionPrompt(
-          "Look Tuff: pay {r} or it gets -1{p}?",
-          "card.sbz.looktuff.pay",
-        ),
-        1,
-      )) {
+      if (
+        !ctx.requestPayment(
+          "look-tuff",
+          decisionPrompt("Look Tuff: pay {r} or it gets -1{p}?", "card.sbz.looktuff.pay"),
+          1,
+        )
+      ) {
         ctx.addModifier({ scope: "chain-link", attack: -1 });
-        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} gets -1{p}`, "card.log.common.attack.lost", { amount: 1 }));
+        ctx.logPublic(
+          localizedCardLog(ctx, `${ctx.data.name} gets -1{p}`, "card.log.common.attack.lost", { amount: 1 }),
+        );
       }
     },
     onChoose(ctx, hook, option) {
       if (hook !== "look-tuff") return;
       if (option === "paid") {
-        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: paid {r}`, "card.log.common.resources.paid", { amount: 1 }));
+        ctx.logPublic(
+          localizedCardLog(ctx, `${ctx.data.name}: paid {r}`, "card.log.common.resources.paid", { amount: 1 }),
+        );
       } else {
         ctx.addModifier({ scope: "chain-link", attack: -1 });
-        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} gets -1{p}`, "card.log.common.attack.lost", { amount: 1 }));
+        ctx.logPublic(
+          localizedCardLog(ctx, `${ctx.data.name} gets -1{p}`, "card.log.common.attack.lost", { amount: 1 }),
+        );
       }
     },
   },
@@ -383,9 +395,7 @@ export const sbz: Record<string, CardScript> = {
   "snapback|1": {
     arcaneDamageEffect: true,
     arcaneDamageEffectAmounts: [3],
-    playAsInstant: (ctx) =>
-      viaBlaze(ctx) ||
-      ctx.getFlag("player", "playedClassType:wizard:non-attack-action") === true,
+    playAsInstant: (ctx) => viaBlaze(ctx) || ctx.getFlag("player", "playedClassType:wizard:non-attack-action") === true,
     onPlay: (ctx) => requestHeroTarget(ctx, 3),
     onChoose(ctx, hook, option) {
       targetOnChoose(ctx, hook, option);
@@ -403,10 +413,7 @@ export const sbz: Record<string, CardScript> = {
       if (!arcane || amount <= 0) return;
       ctx.requestChoice(
         "mindfire-tap",
-        yesNoPrompt(
-          "Turn to Mindfire: tap your hero to create a Ponder token?",
-          "card.sbz.mindfire.hero.tap",
-        ),
+        yesNoPrompt("Turn to Mindfire: tap your hero to create a Ponder token?", "card.sbz.mindfire.hero.tap"),
         ["yes", "no"],
       );
     },
@@ -453,7 +460,9 @@ export const sbz: Record<string, CardScript> = {
     onDamageDealt(ctx, _target, amount, arcane) {
       if (!arcane || amount <= 1) return;
       ctx.drawCards(ctx.seat, 2);
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: Surge — draw 2 cards`, "card.log.sbz.surge.draw", { amount: 2 }));
+      ctx.logPublic(
+        localizedCardLog(ctx, `${ctx.data.name}: Surge — draw 2 cards`, "card.log.sbz.surge.draw", { amount: 2 }),
+      );
     },
     onChoose(ctx, hook, option) {
       targetOnChoose(ctx, hook, option);

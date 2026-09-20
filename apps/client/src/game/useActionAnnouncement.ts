@@ -54,7 +54,11 @@ export type AnnouncementAction =
   | { type: "confirm-chain-close" }
   | { type: "confirm-action" }
   | { type: "select-alternative-cost"; instanceIds: number[] | null }
-  | { type: "toggle-additional-cost-card"; instanceId: number }
+  | {
+      type: "toggle-additional-cost-card";
+      instanceId: number;
+      selectionSource: "alternative" | "payment";
+    }
   | { type: "confirm-additional-cost" };
 
 export const INITIAL_ANNOUNCEMENT: AnnouncementState = {
@@ -85,6 +89,18 @@ export function committedActionIntent(
     (chainCloseConfirmationRequired && !chainCloseConfirmed)
   ) return null;
   return intent;
+}
+
+export function isAnnouncementPaymentReady(
+  paidVariantCount: number,
+  hasAlternativeCosts: boolean,
+  hasStagedCardCost: boolean,
+  cardCostConfirmed: boolean,
+  alternativeCostSelected: boolean,
+): boolean {
+  if (paidVariantCount === 0) return false;
+  if (hasStagedCardCost) return cardCostConfirmed;
+  return !hasAlternativeCosts || alternativeCostSelected;
 }
 
 function clearChoices(state: AnnouncementState): AnnouncementState {
@@ -173,6 +189,15 @@ export function actionAnnouncementReducer(
         additionalCostConfirmed: true,
       });
     case "toggle-additional-cost-card": {
+      if (action.selectionSource === "payment") {
+        return clearChoices({
+          ...state,
+          pitchSel: state.pitchSel.includes(action.instanceId)
+            ? state.pitchSel.filter((id) => id !== action.instanceId)
+            : [...state.pitchSel, action.instanceId],
+          additionalCostConfirmed: false,
+        });
+      }
       const selected = Array.isArray(state.alternativeCostCardInstanceIds)
         ? state.alternativeCostCardInstanceIds
         : [];
@@ -333,14 +358,27 @@ export function useActionAnnouncement({
     const key = [...intent.alternativeCostCardInstanceIds].sort((a, b) => a - b).join(":");
     alternativeCostSets.set(key, intent.alternativeCostCardInstanceIds);
   }
-  const stagedAdditionalCost = actionChoiceVariants.flatMap((intent) =>
-    (intent.kind === "play-card" ||
-      intent.kind === "play-from-arsenal" ||
-      intent.kind === "play-from-zone") &&
-      intent.additionalCostSelection
-      ? [intent.additionalCostSelection]
-      : []
-  )[0];
+  const stagedAdditionalCostIntent = actionChoiceVariants.find(
+    (intent) => intent.cardCostSelection !== undefined,
+  );
+  const stagedAdditionalCost = stagedAdditionalCostIntent?.cardCostSelection;
+  const stagedAdditionalCostSelectionSource = stagedAdditionalCostIntent
+    ? stagedAdditionalCostIntent.alternativeCostCardInstanceIds === undefined
+      ? "payment" as const
+      : "alternative" as const
+    : undefined;
+  const stagedAdditionalCostCandidateIds = new Set(
+    stagedAdditionalCostSelectionSource === "payment"
+      ? actionChoiceVariants.flatMap((intent) =>
+          intent.cardCostSelection ? intent.pitchInstanceIds : []
+        )
+      : [...alternativeCostSets.values()].flat(),
+  );
+  const stagedAdditionalCostSelectedIds = stagedAdditionalCostSelectionSource === "payment"
+    ? pitchSel
+    : Array.isArray(alternativeCostCardInstanceIds)
+      ? alternativeCostCardInstanceIds
+      : [];
   const selectedPaymentVariants = actionChoiceVariants.filter(
     (intent) =>
       sameOptionalInstanceIds(
@@ -353,12 +391,13 @@ export function useActionAnnouncement({
     pitchSel,
     pitchValue,
   );
-  const paymentReady = paidVariants.length > 0 &&
-    (alternativeCostSets.size === 0 || (
-      stagedAdditionalCost
-        ? additionalCostConfirmed
-        : alternativeCostCardInstanceIds !== undefined
-    ));
+  const paymentReady = isAnnouncementPaymentReady(
+    paidVariants.length,
+    alternativeCostSets.size > 0,
+    stagedAdditionalCost !== undefined,
+    additionalCostConfirmed,
+    alternativeCostCardInstanceIds !== undefined,
+  );
   const paymentProgress = actionPaymentProgress(
     selectedPaymentVariants,
     pitchSel,
@@ -440,10 +479,18 @@ export function useActionAnnouncement({
     actionStep,
     alternativeCostSets,
     stagedAdditionalCost,
+    stagedAdditionalCostCandidateIds,
+    stagedAdditionalCostSelectedIds,
+    stagedAdditionalCostSelectionSource,
     canConfirmAdditionalCost:
-      Array.isArray(alternativeCostCardInstanceIds) &&
-      alternativeCostCardInstanceIds.length > 0 &&
-      selectedPaymentVariants.length > 0,
+      stagedAdditionalCost !== undefined &&
+      stagedAdditionalCostSelectedIds.length >= stagedAdditionalCost.minimum &&
+      stagedAdditionalCostSelectedIds.length <= stagedAdditionalCost.maximum &&
+      (stagedAdditionalCostSelectionSource === "payment"
+        ? paidVariants.length > 0
+        : stagedAdditionalCostSelectedIds.length === 0
+          ? normalCostPayableWithoutPitch
+          : selectedPaymentVariants.length > 0),
     normalCostPayableWithoutPitch,
     playMethodChoiceRequired,
     paymentProgress,
@@ -468,8 +515,14 @@ export function useActionAnnouncement({
     confirmAction: () => dispatch({ type: "confirm-action" }),
     selectAlternativeCost: (instanceIds: number[] | null) =>
       dispatch({ type: "select-alternative-cost", instanceIds }),
-    toggleAdditionalCostCard: (instanceId: number) =>
-      dispatch({ type: "toggle-additional-cost-card", instanceId }),
+    toggleAdditionalCostCard: (instanceId: number) => {
+      if (!stagedAdditionalCostSelectionSource) return;
+      dispatch({
+        type: "toggle-additional-cost-card",
+        instanceId,
+        selectionSource: stagedAdditionalCostSelectionSource,
+      });
+    },
     confirmAdditionalCost: () => dispatch({ type: "confirm-additional-cost" }),
   };
 }

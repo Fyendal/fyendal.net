@@ -47,11 +47,11 @@ const openTheCenter = ((): CardScript => ({
     if (!comboWith(ctx, "head jab")) return;
     ctx.grantGoAgain();
     ctx.addModifier({ scope: "chain-link", dominate: true });
-    ctx.logPublic(localizedLog(
-      "Open the Center: +1 attack, go again, dominate",
-      "card.log.wtr.openthecenter.combo",
-      { card: { kind: "card", cardId: ctx.self.cardId } },
-    ));
+    ctx.logPublic(
+      localizedLog("Open the Center: +1 attack, go again, dominate", "card.log.wtr.openthecenter.combo", {
+        card: { kind: "card", cardId: ctx.self.cardId },
+      }),
+    );
   },
 }))();
 
@@ -62,11 +62,11 @@ const risingKneeThrust = ((): CardScript => ({
   onAttackDeclared(ctx) {
     if (!comboWith(ctx, "leg tap")) return;
     ctx.grantGoAgain();
-    ctx.logPublic(localizedLog(
-      "Rising Knee Thrust: +2 attack and go again",
-      "card.log.wtr.risingkneethrust.combo",
-      { card: { kind: "card", cardId: ctx.self.cardId } },
-    ));
+    ctx.logPublic(
+      localizedLog("Rising Knee Thrust: +2 attack and go again", "card.log.wtr.risingkneethrust.combo", {
+        card: { kind: "card", cardId: ctx.self.cardId },
+      }),
+    );
   },
 }))();
 
@@ -78,17 +78,17 @@ const whelmingGustwave = ((): CardScript => ({
     if (!comboWith(ctx, "surging strike")) return;
     ctx.grantGoAgain();
     ctx.setFlag("link", "whelmingGustwaveCombo", true);
-    ctx.logPublic(localizedLog(
-      "Whelming Gustwave: +1 attack, go again, draw on hit",
-      "card.log.wtr.whelminggustwave.combo",
-      { card: { kind: "card", cardId: ctx.self.cardId } },
-    ));
+    ctx.logPublic(
+      localizedLog("Whelming Gustwave: +1 attack, go again, draw on hit", "card.log.wtr.whelminggustwave.combo", {
+        card: { kind: "card", cardId: ctx.self.cardId },
+      }),
+    );
   },
   canTriggerOnHit(ctx) {
     return ctx.getFlag("link", "whelmingGustwaveCombo") === true;
   },
   onHit(ctx) {
-        ctx.drawCards(ctx.seat, 1);
+    ctx.drawCards(ctx.seat, 1);
   },
 }))();
 
@@ -109,11 +109,12 @@ const breakingScales: CardScript = {
     },
     onActivate(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: 1 });
-      ctx.logPublic(localizedLog(
-        "Breaking Scales: target combo attack gains +1 attack",
-        "card.log.wtr.breakingscales.attack",
-        { card: { kind: "card", cardId: ctx.self.cardId }, amount: 1 },
-      ));
+      ctx.logPublic(
+        localizedLog("Breaking Scales: target combo attack gains +1 attack", "card.log.wtr.breakingscales.attack", {
+          card: { kind: "card", cardId: ctx.self.cardId },
+          amount: 1,
+        }),
+      );
     },
   },
 };
@@ -121,11 +122,13 @@ const breakingScales: CardScript = {
 const flicFlak = ((): CardScript => ({
   onPlay(ctx) {
     ctx.addModifier({ scope: "until-end-of-turn", defense: 2, appliesToKeyword: "combo", once: true });
-    ctx.logPublic(localizedLog(
-      "Flic Flak: the next combo card you defend with this turn gains +2 defense",
-      "card.log.wtr.flicflak.defense",
-      { card: { kind: "card", cardId: ctx.self.cardId }, amount: 2 },
-    ));
+    ctx.logPublic(
+      localizedLog(
+        "Flic Flak: the next combo card you defend with this turn gains +2 defense",
+        "card.log.wtr.flicflak.defense",
+        { card: { kind: "card", cardId: ctx.self.cardId }, amount: 2 },
+      ),
+    );
   },
 }))();
 
@@ -138,8 +141,11 @@ const katsu: CardScript = {
     }
   },
   canTriggerOnHit(ctx) {
-    return ctx.link?.attacker === ctx.seat && ctx.link.attackCardType === "action" &&
-      ctx.getFlag("player", "katsuTriggeredThisTurn") !== true;
+    return (
+      ctx.link?.attacker === ctx.seat &&
+      ctx.link.attackCardType === "action" &&
+      ctx.getFlag("player", "katsuTriggeredThisTurn") !== true
+    );
   },
   onHit(ctx) {
     ctx.setFlag("player", "katsuTriggeredThisTurn", true);
@@ -148,7 +154,9 @@ const katsu: CardScript = {
     if (zeroCost.length === 0) return;
     ctx.requestCardChoice(
       "katsu-discard",
-      decisionPrompt("Katsu: discard a card with cost 0 to search for a combo card?", "card.wtr.katsu.discard", { optionMessages: commonOptionMessages("pass") }),
+      decisionPrompt("Katsu: discard a card with cost 0 to search for a combo card?", "card.wtr.katsu.discard", {
+        optionMessages: commonOptionMessages("pass"),
+      }),
       ["pass", ...zeroCost.map((c) => c.instanceId)],
     );
   },
@@ -161,12 +169,14 @@ const katsu: CardScript = {
       const comboCards = p.deck.filter((c) => hasCombo(ctx, c.cardId));
       if (comboCards.length === 0) {
         ctx.shuffleDeck();
-        ctx.logPublic(localizedLog(
-          "Katsu: no combo card found; deck shuffled",
-          "card.log.wtr.katsu.search.none",
-          { card: { kind: "card", cardId: ctx.self.cardId } },
-          { kind: "shuffle", seat: ctx.seat },
-        ));
+        ctx.logPublic(
+          localizedLog(
+            "Katsu: no combo card found; deck shuffled",
+            "card.log.wtr.katsu.search.none",
+            { card: { kind: "card", cardId: ctx.self.cardId } },
+            { kind: "shuffle", seat: ctx.seat },
+          ),
+        );
         return;
       }
       ctx.requestCardChoice(
@@ -181,21 +191,23 @@ const katsu: CardScript = {
     if (!found) return;
     ctx.banish(found.instanceId);
     ctx.allowPlayFrom(found.instanceId, "banish");
-    ctx.logPublic(localizedLog(
-      `Katsu: banished ${ctx.cardData(found.cardId).name} face up — it may be played this turn`,
-      "card.log.wtr.katsu.search.banished",
-      {
-        card: { kind: "card", cardId: ctx.self.cardId },
-        result: { kind: "card", cardId: found.cardId },
-      },
-      {
-        kind: "card-moved",
-        cardId: found.cardId,
-        ownerSeat: ctx.seat,
-        from: "deck",
-        to: "banish",
-      },
-    ));
+    ctx.logPublic(
+      localizedLog(
+        `Katsu: banished ${ctx.cardData(found.cardId).name} face up — it may be played this turn`,
+        "card.log.wtr.katsu.search.banished",
+        {
+          card: { kind: "card", cardId: ctx.self.cardId },
+          result: { kind: "card", cardId: found.cardId },
+        },
+        {
+          kind: "card-moved",
+          cardId: found.cardId,
+          ownerSeat: ctx.seat,
+          from: "deck",
+          to: "banish",
+        },
+      ),
+    );
     ctx.shuffleDeck();
   },
 };

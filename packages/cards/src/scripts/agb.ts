@@ -23,7 +23,14 @@ export const agb: Record<string, CardScript> = {
   "tricorn of saltwater death|0": {
     onDefend(ctx) {
       const choices = ctx.player(ctx.seat).hand.filter((card) => wateryGrave(ctx, card));
-      if (choices.length) ctx.requestCardChoice("tricorn-discard", decisionPrompt("Discard a card with watery grave to draw?", "card.agb.waterygrave.discard.draw", { optionMessages: commonOptionMessages("pass") }), ["pass", ...choices.map((card) => card.instanceId)]);
+      if (choices.length)
+        ctx.requestCardChoice(
+          "tricorn-discard",
+          decisionPrompt("Discard a card with watery grave to draw?", "card.agb.waterygrave.discard.draw", {
+            optionMessages: commonOptionMessages("pass"),
+          }),
+          ["pass", ...choices.map((card) => card.instanceId)],
+        );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "tricorn-discard" || option === "pass") return;
@@ -38,7 +45,14 @@ export const agb: Record<string, CardScript> = {
       goAgain: false,
       timing: "instant",
       destroySelfCost: true,
-      effectCardCosts: [{ zone: "hand", move: "discard", count: 1, prompt: decisionPrompt("Choose a card to discard", "card.common.card.discard.choose") }],
+      effectCardCosts: [
+        {
+          zone: "hand",
+          move: "discard",
+          count: 1,
+          prompt: decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
+        },
+      ],
       onCostPaid(ctx, paidCards) {
         const discarded = paidCards[0];
         if (discarded) ctx.changeResources(ctx.seat, ctx.cardData(discarded.cardId).pitch ?? 0);
@@ -71,8 +85,18 @@ export const agb: Record<string, CardScript> = {
         timing: "instant",
         tap: true,
         label: "Instant — discard watery grave: punish next draw",
-        effectCardCosts: [{ zone: "hand", move: "discard", count: 1, keyword: "Watery Grave", prompt: decisionPrompt("Discard a card with watery grave", "card.common.cost.waterygrave.discard") }],
-        onCostPaid(ctx) { ctx.setCounter("ankaDrawTrap", ctx.state.turn); },
+        effectCardCosts: [
+          {
+            zone: "hand",
+            move: "discard",
+            count: 1,
+            keyword: "Watery Grave",
+            prompt: decisionPrompt("Discard a card with watery grave", "card.common.cost.waterygrave.discard"),
+          },
+        ],
+        onCostPaid(ctx) {
+          ctx.setCounter("ankaDrawTrap", ctx.state.turn);
+        },
       },
     ],
     onOpponentDraws(ctx, drawingSeat, count) {
@@ -81,7 +105,12 @@ export const agb: Record<string, CardScript> = {
       const hand = ctx.player(drawingSeat).hand;
       if (!hand.length) return;
       ctx.setCounter("ankaDrawingSeat", drawingSeat + 1);
-      ctx.requestCardChoice("anka-discard", decisionPrompt("Anka: discard a card", "card.agb.anka.card.discard"), hand.map((card) => card.instanceId), drawingSeat);
+      ctx.requestCardChoice(
+        "anka-discard",
+        decisionPrompt("Anka: discard a card", "card.agb.anka.card.discard"),
+        hand.map((card) => card.instanceId),
+        drawingSeat,
+      );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "anka-discard") return;
@@ -114,7 +143,12 @@ export const agb: Record<string, CardScript> = {
   "call to the grave|3": {
     onPlay(ctx) {
       const deck = ctx.player(ctx.seat).deck;
-      if (deck.length) ctx.requestCardChoice("call-grave", decisionPrompt("Choose a card to put into your graveyard", "card.agb.deck.card.graveyard"), deck.map((card) => card.instanceId));
+      if (deck.length)
+        ctx.requestCardChoice(
+          "call-grave",
+          decisionPrompt("Choose a card to put into your graveyard", "card.agb.deck.card.graveyard"),
+          deck.map((card) => card.instanceId),
+        );
       else ctx.shuffleDeck();
     },
     onChoose(ctx, hook, option) {

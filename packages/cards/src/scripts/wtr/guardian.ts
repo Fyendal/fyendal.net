@@ -1,5 +1,12 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, decisionMessage, decisionPrompt, localizedLog, opponentSeat, payForDefenseBoost } from "../shared-helpers.js";
+import {
+  buffNextAttack,
+  decisionMessage,
+  decisionPrompt,
+  localizedLog,
+  opponentSeat,
+  payForDefenseBoost,
+} from "../shared-helpers.js";
 
 // ── WTR Guardian cards ──────────────────────────────────────────────────────
 //
@@ -7,12 +14,8 @@ import { buffNextAttack, decisionMessage, decisionPrompt, localizedLog, opponent
 // 4 or more damage to a hero.
 
 function crushTriggered(ctx: ScriptCtx): boolean {
-  return !!ctx.link
-    && ctx.link.targetAllyId === undefined
-    && ctx.link.damage >= 4
-    && ctx.link.hit;
+  return !!ctx.link && ctx.link.targetAllyId === undefined && ctx.link.damage >= 4 && ctx.link.hit;
 }
-
 
 function opponentEquipmentOptions(ctx: ScriptCtx): string[] {
   const opp = ctx.player(opponentSeat(ctx));
@@ -46,16 +49,14 @@ function findOpponentEquipment(
 function blessingOfDeliverance(topN: number): CardScript {
   return {
     onPlay(ctx) {
-      const hasCost3 = ctx.state.players[ctx.seat]!.pitch.some(
-        (c) => (ctx.cardData(c.cardId).cost ?? 0) >= 3,
-      );
+      const hasCost3 = ctx.state.players[ctx.seat]!.pitch.some((c) => (ctx.cardData(c.cardId).cost ?? 0) >= 3);
       if (hasCost3) {
         ctx.drawCards(ctx.seat, 1);
-        ctx.logPublic(localizedLog(
-          "Blessing of Deliverance: drew a card",
-          "card.log.common.card.drawn",
-          { card: { kind: "card", cardId: ctx.self.cardId } },
-        ));
+        ctx.logPublic(
+          localizedLog("Blessing of Deliverance: drew a card", "card.log.common.card.drawn", {
+            card: { kind: "card", cardId: ctx.self.cardId },
+          }),
+        );
       }
     },
     triggers: [
@@ -72,11 +73,12 @@ function blessingOfDeliverance(topN: number): CardScript {
           }
           if (life > 0) {
             ctx.gainLife(ctx.seat, life);
-            ctx.logPublic(localizedLog(
-              `Blessing of Deliverance: gained ${life} life`,
-              "card.log.wtr.blessing.life",
-              { card: { kind: "card", cardId: ctx.self.cardId }, amount: life },
-            ));
+            ctx.logPublic(
+              localizedLog(`Blessing of Deliverance: gained ${life} life`, "card.log.wtr.blessing.life", {
+                card: { kind: "card", cardId: ctx.self.cardId },
+                amount: life,
+              }),
+            );
           }
         },
       },
@@ -92,14 +94,14 @@ function emergingPower(bonus: number): CardScript {
         label: "Destroy Emerging Power and buff next Guardian attack",
         effect(ctx) {
           ctx.destroySelf();
-          buffNextAttack(ctx, { attack: bonus,
-            appliesTo: "attack-action",
-            appliesToClass: "guardian", });
-          ctx.logPublic(localizedLog(
-            `Emerging Power: next Guardian attack action gets +${bonus} attack`,
-            "card.log.wtr.emergingpower.attack",
-            { card: { kind: "card", cardId: ctx.self.cardId }, amount: bonus },
-          ));
+          buffNextAttack(ctx, { attack: bonus, appliesTo: "attack-action", appliesToClass: "guardian" });
+          ctx.logPublic(
+            localizedLog(
+              `Emerging Power: next Guardian attack action gets +${bonus} attack`,
+              "card.log.wtr.emergingpower.attack",
+              { card: { kind: "card", cardId: ctx.self.cardId }, amount: bonus },
+            ),
+          );
         },
       },
     ],
@@ -110,15 +112,14 @@ function stonewallConfidence(bonus: number): CardScript {
   return {
     onEnterArena(ctx) {
       // The buff lives on the aura so it expires when the aura is destroyed.
-      ctx.addModifier(
-        { scope: "static", defense: bonus, minCost: 3 },
-        ctx.self,
+      ctx.addModifier({ scope: "static", defense: bonus, minCost: 3 }, ctx.self);
+      ctx.logPublic(
+        localizedLog(
+          `Stonewall Confidence: cards you control with cost 3 or more get +${bonus} defense while defending`,
+          "card.log.wtr.stonewall.defense",
+          { card: { kind: "card", cardId: ctx.self.cardId }, amount: bonus },
+        ),
       );
-      ctx.logPublic(localizedLog(
-        `Stonewall Confidence: cards you control with cost 3 or more get +${bonus} defense while defending`,
-        "card.log.wtr.stonewall.defense",
-        { card: { kind: "card", cardId: ctx.self.cardId }, amount: bonus },
-      ));
     },
     triggers: [
       {
@@ -142,10 +143,27 @@ function bucklingBlow(): CardScript {
       if (options.length === 0) return;
       ctx.requestChoice(
         "buckling-blow-target",
-        decisionPrompt("Buckling Blow: put a -1 defense counter on an equipment they control", "card.wtr.buckling.equipment.choose", { optionMessages: Object.fromEntries(options.flatMap((value) => {
-          const equipment = findOpponentEquipment(ctx, value);
-          return equipment ? [[value, decisionMessage("card.common.target.card", { card: { kind: "card", cardId: equipment.cardId } })]] : [];
-        })) }),
+        decisionPrompt(
+          "Buckling Blow: put a -1 defense counter on an equipment they control",
+          "card.wtr.buckling.equipment.choose",
+          {
+            optionMessages: Object.fromEntries(
+              options.flatMap((value) => {
+                const equipment = findOpponentEquipment(ctx, value);
+                return equipment
+                  ? [
+                      [
+                        value,
+                        decisionMessage("card.common.target.card", {
+                          card: { kind: "card", cardId: equipment.cardId },
+                        }),
+                      ],
+                    ]
+                  : [];
+              }),
+            ),
+          },
+        ),
         options,
       );
     },
@@ -154,15 +172,17 @@ function bucklingBlow(): CardScript {
       const eq = findOpponentEquipment(ctx, option);
       if (eq) {
         ctx.addCardDefenseCounters(eq.instanceId, 1);
-        ctx.logPublic(localizedLog(
-          `${ctx.cardData(eq.cardId).name} gets a -1 defense counter`,
-          "card.log.wtr.bucklingblow.counter",
-          {
-            card: { kind: "card", cardId: ctx.self.cardId },
-            target: { kind: "card", cardId: eq.cardId },
-            amount: 1,
-          },
-        ));
+        ctx.logPublic(
+          localizedLog(
+            `${ctx.cardData(eq.cardId).name} gets a -1 defense counter`,
+            "card.log.wtr.bucklingblow.counter",
+            {
+              card: { kind: "card", cardId: ctx.self.cardId },
+              target: { kind: "card", cardId: eq.cardId },
+              amount: 1,
+            },
+          ),
+        );
       }
     },
   };
@@ -173,11 +193,13 @@ function cartilageCrush(): CardScript {
     canTriggerOnHit: crushTriggered,
     onHit(ctx) {
       ctx.increaseFirstActionCostNextTurn(opponentSeat(ctx), 1);
-      ctx.logPublic(localizedLog(
-        "Cartilage Crush: opponent's next action costs +{r}",
-        "card.log.wtr.cartilagecrush.cost",
-        { card: { kind: "card", cardId: ctx.self.cardId }, target: { kind: "player", seat: opponentSeat(ctx) }, amount: 1 },
-      ));
+      ctx.logPublic(
+        localizedLog("Cartilage Crush: opponent's next action costs +{r}", "card.log.wtr.cartilagecrush.cost", {
+          card: { kind: "card", cardId: ctx.self.cardId },
+          target: { kind: "player", seat: opponentSeat(ctx) },
+          amount: 1,
+        }),
+      );
     },
   };
 }
@@ -187,11 +209,13 @@ function crushConfidence(): CardScript {
     canTriggerOnHit: crushTriggered,
     onHit(ctx) {
       ctx.suppressHeroAbilitiesThroughNextTurn(opponentSeat(ctx));
-      ctx.logPublic(localizedLog(
-        "Crush Confidence: opponent loses hero abilities until end of next turn",
-        "card.log.wtr.crushconfidence.suppressed",
-        { card: { kind: "card", cardId: ctx.self.cardId }, target: { kind: "player", seat: opponentSeat(ctx) } },
-      ));
+      ctx.logPublic(
+        localizedLog(
+          "Crush Confidence: opponent loses hero abilities until end of next turn",
+          "card.log.wtr.crushconfidence.suppressed",
+          { card: { kind: "card", cardId: ctx.self.cardId }, target: { kind: "player", seat: opponentSeat(ctx) } },
+        ),
+      );
     },
   };
 }
@@ -205,11 +229,13 @@ function debilitate(): CardScript {
       // ongoing effect and only applies to the opponent's first attack during
       // their next turn
       buffNextAttack(ctx, { attack: -2, seat: target, expiresAtEndOfSeatTurn: target });
-      ctx.logPublic(localizedLog(
-        "Debilitate: opponent's next attack gets -2{p}",
-        "card.log.wtr.debilitate.attack",
-        { card: { kind: "card", cardId: ctx.self.cardId }, target: { kind: "player", seat: target }, amount: 2 },
-      ));
+      ctx.logPublic(
+        localizedLog("Debilitate: opponent's next attack gets -2{p}", "card.log.wtr.debilitate.attack", {
+          card: { kind: "card", cardId: ctx.self.cardId },
+          target: { kind: "player", seat: target },
+          amount: 2,
+        }),
+      );
     },
   };
 }
@@ -222,17 +248,19 @@ function disable(): CardScript {
       if (opp.arsenal.length > 0) {
         const card = opp.arsenal[0]!;
         ctx.putOnDeckBottom(card.instanceId);
-        ctx.logPublic(localizedLog(
-          "Disable: put the arsenal card on the bottom of the deck",
-          "card.log.wtr.disable.arsenal.bottom",
-          { card: { kind: "card", cardId: ctx.self.cardId }, target: { kind: "player", seat: opponentSeat(ctx) } },
-          {
-            kind: "card-moved",
-            ownerSeat: opponentSeat(ctx),
-            from: "arsenal",
-            to: "deck",
-          },
-        ));
+        ctx.logPublic(
+          localizedLog(
+            "Disable: put the arsenal card on the bottom of the deck",
+            "card.log.wtr.disable.arsenal.bottom",
+            { card: { kind: "card", cardId: ctx.self.cardId }, target: { kind: "player", seat: opponentSeat(ctx) } },
+            {
+              kind: "card-moved",
+              ownerSeat: opponentSeat(ctx),
+              from: "arsenal",
+              to: "deck",
+            },
+          ),
+        );
       }
     },
   };
@@ -262,11 +290,13 @@ export const guardian: Record<string, CardScript> = {
           appliesTo: "attack-action",
           minCost: 3,
         });
-        ctx.logPublic(localizedLog(
-          "Bravo: attack action cards with cost 3 or more gain dominate this turn",
-          "card.log.wtr.bravo.dominate",
-          { card: { kind: "card", cardId: ctx.self.cardId } },
-        ));
+        ctx.logPublic(
+          localizedLog(
+            "Bravo: attack action cards with cost 3 or more gain dominate this turn",
+            "card.log.wtr.bravo.dominate",
+            { card: { kind: "card", cardId: ctx.self.cardId } },
+          ),
+        );
       },
     },
   },
@@ -280,11 +310,12 @@ export const guardian: Record<string, CardScript> = {
       destroySelfCost: true,
       onActivate(ctx) {
         ctx.setPlayerFlag(ctx.seat, "bonusIntellect", 1);
-        ctx.logPublic(localizedLog(
-          "Helm of Isen's Peak: +1 intellect this turn",
-          "card.log.wtr.helm.intellect",
-          { card: { kind: "card", cardId: ctx.self.cardId }, amount: 1 },
-        ));
+        ctx.logPublic(
+          localizedLog("Helm of Isen's Peak: +1 intellect this turn", "card.log.wtr.helm.intellect", {
+            card: { kind: "card", cardId: ctx.self.cardId },
+            amount: 1,
+          }),
+        );
       },
     },
   },

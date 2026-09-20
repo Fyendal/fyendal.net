@@ -1,11 +1,5 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import {
-  buffNextAttack,
-  decisionMessage,
-  decisionPrompt,
-  opponentSeat,
-  yesNoPrompt,
-} from "./shared-helpers.js";
+import { buffNextAttack, decisionMessage, decisionPrompt, opponentSeat, yesNoPrompt } from "./shared-helpers.js";
 
 function playedLightning(ctx: ScriptCtx): boolean {
   return ctx.getPlayerFlag(ctx.seat, "playedSubtype:lightning") === true;
@@ -32,7 +26,11 @@ function harnessLightning(amount: number): CardScript {
 }
 
 function photonRush(): CardScript {
-  return { onAttackDeclared(ctx) { if (playedLightning(ctx)) ctx.grantGoAgain(); } };
+  return {
+    onAttackDeclared(ctx) {
+      if (playedLightning(ctx)) ctx.grantGoAgain();
+    },
+  };
 }
 
 function sparkSpray(): CardScript {
@@ -40,14 +38,10 @@ function sparkSpray(): CardScript {
     onFriendlyDefended(ctx) {
       ctx.requestPayment(
         "spark-spray",
-        decisionPrompt(
-          `${ctx.data.name}: pay {r} for +1{p}?`,
-          "card.aur.spark.spray.pay",
-          {
-            values: { card: { kind: "card", cardId: ctx.self.cardId } },
-            optionMessages: { no: decisionMessage("common.option.no") },
-          },
-        ),
+        decisionPrompt(`${ctx.data.name}: pay {r} for +1{p}?`, "card.aur.spark.spray.pay", {
+          values: { card: { kind: "card", cardId: ctx.self.cardId } },
+          optionMessages: { no: decisionMessage("common.option.no") },
+        }),
         1,
       );
     },
@@ -65,7 +59,7 @@ function staticShock(): CardScript {
       return playedLightning(ctx) && ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
-            ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true });
+      ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true });
     },
   };
 }
@@ -77,7 +71,8 @@ export const aur: Record<string, CardScript> = {
         ctx.requestChoice(
           "aether-crackers",
           yesNoPrompt(
-            `Aether Crackers: destroy this to deal ${ctx.previewArcaneDamage(1)} arcane damage to the hero that was hit?`,
+            `Aether Crackers: destroy this to deal ${ctx.previewArcaneDamage(1)} ` +
+              "arcane damage to the hero that was hit?",
             "card.aur.aether.crackers.destroy",
             { amount: ctx.previewArcaneDamage(1) },
           ),

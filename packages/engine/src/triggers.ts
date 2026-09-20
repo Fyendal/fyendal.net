@@ -1126,6 +1126,15 @@ export function resolveTopStackCard(state: GameStateInternal, runtime: EngineRun
     card.meldSide = "right";
   }
   const isDefReact = dataOf(state, card.cardId).cardType === "defense-reaction";
+  if (layer.meldStage !== 1 && isDefReact && !link) {
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, card.cardId)} fails to resolve (it cannot defend this attack)`,
+      "engine.log.card.resolve.failed.cannot.defend",
+      { card: logCardValue(card.cardId) },
+    ));
+    finishStackCardResolution(state, runtime, seat, false);
+    return;
+  }
   if (layer.meldStage !== 1 && link && isDefReact) {
     const maxNonBlock = attackMaxNonBlockDefenders(state, link);
     if (
@@ -1171,7 +1180,15 @@ export function resolveTopStackCard(state: GameStateInternal, runtime: EngineRun
       return;
     }
   }
-  runtime.events.runHook(state, seat, card, "onPlay", link, !layer.fromHand);
+  const script = scriptOf(state, card.cardId, card);
+  const targetStillLegal =
+    card.playTargetInstanceId === undefined ||
+    !script?.playTargetOptions ||
+    playTargetOptions(state, runtime, seat, card, link, !layer.fromHand)
+      .includes(card.playTargetInstanceId);
+  if (targetStillLegal) {
+    runtime.events.runHook(state, seat, card, "onPlay", link, !layer.fromHand);
+  }
   const pd = state.pendingDecision;
   if (pd?.chooseHook) {
     // An item created or moved into the arena by this effect can offer Crank,
@@ -1395,6 +1412,27 @@ export function continueStack(state: GameStateInternal,
   // was being played (friendly-play triggers such as Magmatic Carapace).
   // Never replace that decision with a priority window.
   if (state.pendingDecision?.chooseHook) return;
+  // CR 7.7.2c: before combat damage, an active attack that ceases to exist
+  // closes the combat chain as a game-state action. Do this before placing
+  // newly generated triggers or reopening priority. Layers already on the
+  // stack remain there and continue resolving after the Close Step.
+  const activeLink = currentLink(state);
+  if (
+    activeLink?.flags.attackGone === true &&
+    activeLink.flags.combatDamageCalculated !== true
+  ) {
+    runtime.dispatchFlow("resolveLink", state);
+    const chainCloseDecision = state.pendingDecision;
+    if (chainCloseDecision?.chooseHook) {
+      chainCloseDecision.resume ??= {
+        kind: "continue-stack",
+        ...(prioritySeat !== undefined ? { seat: prioritySeat } : {}),
+      };
+      return;
+    }
+    continueStack(state, runtime, prioritySeat);
+    return;
+  }
   const pendingTriggerGroups = takePendingTriggerGroups(state);
   if (pendingTriggerGroups.length > 0) {
     const baseStack = state.stack.splice(0);

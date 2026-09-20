@@ -9,25 +9,17 @@ import {
   optOnChoose,
 } from "../shared-helpers.js";
 
-function isMechanologistItem(
-  ctx: ScriptCtx,
-  card: DeepReadonly<CardInstance>,
-  maxCost: number,
-): boolean {
+function isMechanologistItem(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, maxCost: number): boolean {
   const data = ctx.cardData(card.cardId);
   return (
-    ctx.cardTypes(card).includes("mechanologist") &&
-    ctx.cardTypes(card).includes("item") &&
-    (data.cost ?? 0) <= maxCost
+    ctx.cardTypes(card).includes("mechanologist") && ctx.cardTypes(card).includes("item") && (data.cost ?? 0) <= maxCost
   );
 }
 
 function dashSetup(): CardScript {
   return {
     onGameStart(ctx) {
-      const candidates = ctx.state.players[ctx.seat]!.deck.filter((card) =>
-        isMechanologistItem(ctx, card, 2),
-      );
+      const candidates = ctx.state.players[ctx.seat]!.deck.filter((card) => isMechanologistItem(ctx, card, 2));
       if (candidates.length === 0) return;
       ctx.requestCardChoice(
         "dash-start-item",
@@ -45,9 +37,7 @@ function dashSetup(): CardScript {
     onChoose(ctx, hook, option) {
       if (hook !== "dash-start-item" || option === "none") return;
       const instanceId = Number(option);
-      const card = ctx.state.players[ctx.seat]!.deck.find(
-        (candidate) => candidate.instanceId === instanceId,
-      );
+      const card = ctx.state.players[ctx.seat]!.deck.find((candidate) => candidate.instanceId === instanceId);
       if (!card || !isMechanologistItem(ctx, card, 2)) return;
       if (ctx.settleCard(instanceId)) ctx.shuffleDeck(ctx.seat);
     },
@@ -113,22 +103,22 @@ function combustibleCourier(): CardScript {
 }
 
 function boostedLinks(ctx: ScriptCtx): number {
-  return ctx.state.chain.filter(
-    (link) => link.attacker === ctx.seat && link.flags.boosted === true,
-  ).length;
+  return ctx.state.chain.filter((link) => link.attacker === ctx.seat && link.flags.boosted === true).length;
 }
 
 function finishWorkshop(ctx: ScriptCtx, maxCost: number): void {
   const top = ctx.state.players[ctx.seat]!.deck[0];
   if (!top) return;
   ctx.lookAt(top.instanceId);
-  ctx.logPublic(localizedCardLog(
-    ctx,
-    `${ctx.data.name} reveals ${ctx.cardData(top.cardId).name}`,
-    "card.log.common.decktop.revealed",
-    { revealed: { kind: "card", cardId: top.cardId } },
-    { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
-  ));
+  ctx.logPublic(
+    localizedCardLog(
+      ctx,
+      `${ctx.data.name} reveals ${ctx.cardData(top.cardId).name}`,
+      "card.log.common.decktop.revealed",
+      { revealed: { kind: "card", cardId: top.cardId } },
+      { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
+    ),
+  );
   if (isMechanologistItem(ctx, top, maxCost)) ctx.settleCard(top.instanceId);
 }
 
@@ -153,12 +143,7 @@ function isArrow(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.cardTypes(card).includes("arrow");
 }
 
-function requestArrow(
-  ctx: ScriptCtx,
-  hook: string,
-  fallback: string,
-  id: string,
-): void {
+function requestArrow(ctx: ScriptCtx, hook: string, fallback: string, id: string): void {
   const player = ctx.state.players[ctx.seat]!;
   if (player.arsenal.length > 0) return;
   const arrows = player.hand.filter((card) => isArrow(ctx, card));
@@ -193,9 +178,7 @@ function redLiner(): CardScript {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "red-liner-arrow") return;
-      const card = ctx.state.players[ctx.seat]!.hand.find(
-        (candidate) => candidate.instanceId === Number(option),
-      );
+      const card = ctx.state.players[ctx.seat]!.hand.find((candidate) => candidate.instanceId === Number(option));
       if (card && isArrow(ctx, card)) ctx.putIntoArsenal(card.instanceId, "hand");
     },
   };
@@ -225,9 +208,7 @@ function trapOnlyFromArsenal(extra: CardScript): CardScript {
   return {
     canPlay: (ctx) =>
       ctx.fromArsenal === true ||
-      ctx.state.players[ctx.seat]!.arsenal.some(
-        (card) => card.instanceId === ctx.self.instanceId,
-      ),
+      ctx.state.players[ctx.seat]!.arsenal.some((card) => card.instanceId === ctx.self.instanceId),
     ...extra,
   };
 }
@@ -238,16 +219,16 @@ function pitfallTrap(): CardScript {
       const attacker = ctx.link?.attacker;
       if (attacker === undefined) return;
       ctx.notifyTrapTriggered();
-      if (!ctx.requestPayment(
-        "pitfall-pay",
-        decisionPrompt(
-          "Pitfall Trap: pay {r} or take 2 damage?",
-          "card.cru.pitfall.pay",
-          { optionMessages: commonOptionMessages("no") },
-        ),
-        1,
-        attacker,
-      )) {
+      if (
+        !ctx.requestPayment(
+          "pitfall-pay",
+          decisionPrompt("Pitfall Trap: pay {r} or take 2 damage?", "card.cru.pitfall.pay", {
+            optionMessages: commonOptionMessages("no"),
+          }),
+          1,
+          attacker,
+        )
+      ) {
         ctx.dealDamage(attacker, 2);
       }
     },
@@ -265,16 +246,16 @@ function rockslideTrap(): CardScript {
       const attacker = ctx.link?.attacker;
       if (attacker === undefined) return;
       ctx.notifyTrapTriggered();
-      if (!ctx.requestPayment(
-        "rockslide-pay",
-        decisionPrompt(
-          "Rockslide Trap: pay {r} or the attack gets -2{p}?",
-          "card.cru.rockslide.pay",
-          { optionMessages: commonOptionMessages("no") },
-        ),
-        1,
-        attacker,
-      )) {
+      if (
+        !ctx.requestPayment(
+          "rockslide-pay",
+          decisionPrompt("Rockslide Trap: pay {r} or the attack gets -2{p}?", "card.cru.rockslide.pay", {
+            optionMessages: commonOptionMessages("no"),
+          }),
+          1,
+          attacker,
+        )
+      ) {
         ctx.addModifier({ scope: "chain-link", attack: -2, seat: attacker });
       }
     },
@@ -292,16 +273,16 @@ function tripwireTrap(): CardScript {
       const attacker = ctx.link?.attacker;
       if (attacker === undefined) return;
       ctx.notifyTrapTriggered();
-      if (!ctx.requestPayment(
-        "tripwire-pay",
-        decisionPrompt(
-          "Tripwire Trap: pay {r} to keep hit effects?",
-          "card.cru.tripwire.pay",
-          { optionMessages: commonOptionMessages("no") },
-        ),
-        1,
-        attacker,
-      )) {
+      if (
+        !ctx.requestPayment(
+          "tripwire-pay",
+          decisionPrompt("Tripwire Trap: pay {r} to keep hit effects?", "card.cru.tripwire.pay", {
+            optionMessages: commonOptionMessages("no"),
+          }),
+          1,
+          attacker,
+        )
+      ) {
         ctx.setFlag("link", "suppressHitEffects", true);
       }
     },
@@ -346,12 +327,16 @@ function sleepDart(): CardScript {
     onHit(ctx) {
       ctx.suppressHeroAbilitiesThroughNextTurn(opponentSeat(ctx));
       const target = opponentSeat(ctx);
-      ctx.logPublic(localizedCardLog(
-        ctx,
-        `${ctx.data.name}: ${ctx.cardData(ctx.state.players[target]!.heroCardId).name} loses hero abilities until the end of their next turn`,
-        "card.log.cru.hero.suppressed",
-        { target: { kind: "player", seat: target } },
-      ));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.data.name}: ${
+            ctx.cardData(ctx.state.players[target]!.heroCardId).name
+          } loses hero abilities until the end of their next turn`,
+          "card.log.cru.hero.suppressed",
+          { target: { kind: "player", seat: target } },
+        ),
+      );
     },
   };
 }

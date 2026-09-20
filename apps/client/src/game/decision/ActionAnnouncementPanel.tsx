@@ -11,6 +11,12 @@ import { ActionTargetCards } from "./CardChoices.js";
 import { CardRef, cardAffiliation, chooseWithoutFocus, handCardPlayLabel } from "./DecisionShared.js";
 import type { ActionAnnouncementModel } from "./DecisionModels.js";
 
+const CARD_COST_LABEL_MESSAGES = {
+  cards: "game.decision.cardCost.label.cards",
+  allies: "game.decision.cardCost.label.allies",
+  zombies: "game.decision.cardCost.label.zombies",
+} as const;
+
 export function ActionAnnouncementPanel({
   model,
   viewerSeat,
@@ -60,9 +66,16 @@ export function ActionAnnouncementPanel({
   const offersMultipleBoosts = boostOptions.some((count) => count > 1);
   const presentedBoostOptions = orderedBoostOptions(boostOptions);
   const presentedBoostCount = boostCount ?? presentedBoostOptions.find((count) => count > 0);
-  const selectedAlternativeCostIds = Array.isArray(alternativeCostCardInstanceIds)
-    ? alternativeCostCardInstanceIds
-    : [];
+  const selectedCardCostIds = stagedAdditionalCost?.selectedInstanceIds ?? [];
+  const cardCostLabel = stagedAdditionalCost
+    ? stagedAdditionalCost.cardLabel in CARD_COST_LABEL_MESSAGES
+      ? intl.formatMessage({
+          id: CARD_COST_LABEL_MESSAGES[
+            stagedAdditionalCost.cardLabel as keyof typeof CARD_COST_LABEL_MESSAGES
+          ],
+        })
+      : stagedAdditionalCost.cardLabel
+    : "";
   const showPayment = !stagedAdditionalCost || additionalCostConfirmed;
   const attackLabel = intl.formatMessage({ id: "game.chain.stat.attack" });
 
@@ -112,14 +125,21 @@ export function ActionAnnouncementPanel({
             <>
               <span className="decision-context">
                 {intl.formatMessage(
-                  { id: "game.decision.additionalCost.choose" },
-                  { card: stagedAdditionalCost.cardLabel },
+                  {
+                    id: stagedAdditionalCost.minimum === stagedAdditionalCost.maximum
+                      ? "game.decision.cardCost.chooseExact"
+                      : "game.decision.cardCost.chooseUpTo",
+                  },
+                  {
+                    card: cardCostLabel,
+                    count: stagedAdditionalCost.maximum,
+                  },
                 )}
               </span>
               <div className="decision-additional-cost-groups">
                 {stagedAdditionalCost.modes.map((mode) => {
                   const selectedInMode = mode.cards.filter((card) =>
-                    selectedAlternativeCostIds.includes(card.instanceId)
+                    selectedCardCostIds.includes(card.instanceId)
                   ).length;
                   return (
                     <section key={mode.mode} className="decision-additional-cost-group">
@@ -127,14 +147,17 @@ export function ActionAnnouncementPanel({
                         <span>{intl.formatMessage({
                           id: mode.mode === "destroy"
                             ? "game.decision.additionalCost.destroy"
-                            : "game.decision.additionalCost.discard",
+                            : mode.mode === "banish"
+                              ? "game.decision.cardCost.banish"
+                              : "game.decision.additionalCost.discard",
                         })}</span>
                         <small>{selectedInMode}/{mode.maximum}</small>
                       </div>
                       <div className="decision-target-cards">
                         {mode.cards.map((card) => {
-                          const selected = selectedAlternativeCostIds.includes(card.instanceId);
-                          const atMaximum = selectedInMode >= mode.maximum;
+                          const selected = selectedCardCostIds.includes(card.instanceId);
+                          const atMaximum = selectedInMode >= mode.maximum ||
+                            selectedCardCostIds.length >= stagedAdditionalCost.maximum;
                           const label = cardData[card.cardId]?.name ?? intl.formatMessage({ id: "game.card" });
                           return (
                             <button
@@ -165,14 +188,16 @@ export function ActionAnnouncementPanel({
                 })}
               </div>
               <div className="decision-buttons decision-additional-cost-actions">
-                <button
-                  onClick={(event) => chooseWithoutFocus(
-                    event.currentTarget,
-                    () => onSelectAlternativeCost(null),
-                  )}
-                >
-                  {intl.formatMessage({ id: "game.decision.chooseNone" })}
-                </button>
+                {stagedAdditionalCost.minimum === 0 ? (
+                  <button
+                    onClick={(event) => chooseWithoutFocus(
+                      event.currentTarget,
+                      () => onSelectAlternativeCost(null),
+                    )}
+                  >
+                    {intl.formatMessage({ id: "game.decision.chooseNone" })}
+                  </button>
+                ) : null}
                 <button
                   className="btn-primary"
                   disabled={!canConfirmAdditionalCost}
@@ -180,7 +205,7 @@ export function ActionAnnouncementPanel({
                 >
                   {intl.formatMessage(
                     { id: "game.decision.confirmNamed" },
-                    { name: stagedAdditionalCost.cardLabel },
+                    { name: cardCostLabel },
                   )}
                 </button>
                 <button onClick={onCancel}>{intl.formatMessage({ id: "common.cancel" })}</button>

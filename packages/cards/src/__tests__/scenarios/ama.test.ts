@@ -127,11 +127,17 @@ describe("Malice Armory Deck spoiled cards", () => {
 
     g.activate("malice, domina of the dead|0")
       .chooseCard("corrupted corpse|0")
-      .play("corrupted corpse|0", { fromZone: "graveyard" })
-      .blockWith()
+      .play("corrupted corpse|0", { fromZone: "graveyard" });
+
+    expect(projectStateFor(g.state, 0).chain.at(-1)?.goAgain).toBe(true);
+
+    g.blockWith()
       .settle();
 
     expect(g.state.players[0]!.actionPoints).toBe(1);
+    expect(g.state.log.some((entry) =>
+      entry.publicText?.includes("Corrupted Corpse has Go again")
+    )).toBe(true);
   });
 
   it("Malice's permission does not follow a Dig for Souls zombie through death", () => {

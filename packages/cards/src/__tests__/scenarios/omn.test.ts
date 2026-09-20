@@ -121,6 +121,41 @@ describe("OMN — import and set mechanics", () => {
     expect(g.state.players[0]!.board.some((card) => card.cardId === printingId("gold|0"))).toBe(false);
   });
 
+  it.each(["snatch|1", "nimblism|1"])(
+    "Red Lure Harpoon lets its controller play an opponent's banished %s",
+    (borrowedCard) => {
+      const g = scenario({
+        seats: [
+          hero("marlynn, treasure hunter|0", {
+            weapons: ["death dealer|0"],
+            arsenal: ["red lure harpoon|3"],
+            resources: 2,
+          }),
+          foe({ graveyard: [borrowedCard] }),
+        ],
+      });
+      g.state.players[0]!.flags.activatedCannonThisTurn = true;
+      g.state.players[0]!.flags.nextActionGoAgain = true;
+
+      g.play("red lure harpoon|3", { fromArsenal: true })
+        .blockWith()
+        .settle()
+        .chooseCard(borrowedCard)
+        .expectInZone(1, borrowedCard, "banish")
+        .expectAP(0, 1);
+
+      const borrowed = g.state.players[1]!.banish.find(
+        (card) => card.cardId === printingId(borrowedCard),
+      );
+      expect(borrowed).toMatchObject({ playableBySeat: 0 });
+      expect(legalIntents(g.state, 0)).toContainEqual(expect.objectContaining({
+        kind: "play-from-zone",
+        zone: "banish",
+        instanceId: borrowed!.instanceId,
+      }));
+    },
+  );
+
   it("Draco Fire makes the next Draconic weapon attack cost 1 less to activate", () => {
     const g = scenario({
       seats: [
@@ -597,6 +632,39 @@ describe("OMN — import and set mechanics", () => {
       .settle()
       .expectAP(0, 0);
     expect(g.state.chain[0]?.goAgain).toBe(false);
+  });
+
+  it("Quick Succession offsets Ravenous Rabble's revealed pitch penalty", () => {
+    const g = scenario({
+      seats: [
+        hero("briar|0", {
+          life: 9,
+          hand: ["quick succession|1", "fry|1", "scar for a scar|1", "ravenous rabble|1"],
+          deck: ["arcanic shockwave|1"],
+        }),
+        foe(),
+      ],
+    });
+
+    g.play("quick succession|1")
+      .play("fry|1")
+      .blockWith()
+      .settle()
+      .play("scar for a scar|1")
+      .blockWith()
+      .settle()
+      .play("ravenous rabble|1")
+      .expectLog("reveals Arcanic Shockwave (-1{p})")
+      .expectAttackValue(5); // 5 base + 1 from Quick Succession - 1 from the revealed red card
+    expect(projectStateFor(g.state, 0).chain.at(-1)?.attackModifiers).toEqual(
+      expect.arrayContaining([
+        { sourceCardId: printingId("quick succession|1"), amount: 1 },
+        { sourceCardId: printingId("ravenous rabble|1"), amount: -1 },
+      ]),
+    );
+    g.blockWith()
+      .settle()
+      .expectFinalAttack(5);
   });
 
   it("Quick Succession gives +1 when Path of Same Ends gains go again later", () => {

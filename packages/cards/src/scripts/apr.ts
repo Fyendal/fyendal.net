@@ -2,9 +2,7 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import { decisionPrompt } from "./shared-helpers.js";
 
 function isYellowAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardColor(card) === 2 &&
-    ctx.hasCardType(card, "action") &&
-    ctx.cardTypes(card).includes("aura");
+  return ctx.cardColor(card) === 2 && ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("aura");
 }
 
 export const apr: Record<string, CardScript> = {

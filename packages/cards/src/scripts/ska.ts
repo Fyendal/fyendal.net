@@ -21,12 +21,9 @@ function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boole
 
 function isOnCombatChain(ctx: ScriptCtx, card: { readonly instanceId: number; readonly cardId: string }): boolean {
   return ctx.state.chain.some((link) =>
-    [
-      link.attackingCard,
-      ...link.defendingCards,
-      ...link.defendingEquipment,
-      ...link.reactions,
-    ].some((onChain) => onChain.instanceId === card.instanceId),
+    [link.attackingCard, ...link.defendingCards, ...link.defendingEquipment, ...link.reactions].some(
+      (onChain) => onChain.instanceId === card.instanceId,
+    ),
   );
 }
 
@@ -100,13 +97,20 @@ function strongestSurvive(): CardScript {
         ctx.discardCard(opponentSeat(ctx), id);
       } else if (choice === "reveal") {
         const card = ctx.player(opponentSeat(ctx)).hand.find((candidate) => candidate.instanceId === id);
-        if (card) ctx.logPublic(localizedCardLog(
-          ctx,
-          `${ctx.cardData(card.cardId).name} is revealed`,
-          "card.log.common.card.revealed",
-          { revealed: { kind: "card", cardId: card.cardId } },
-          { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: opponentSeat(ctx) }], sourceZone: "hand" },
-        ));
+        if (card)
+          ctx.logPublic(
+            localizedCardLog(
+              ctx,
+              `${ctx.cardData(card.cardId).name} is revealed`,
+              "card.log.common.card.revealed",
+              { revealed: { kind: "card", cardId: card.cardId } },
+              {
+                kind: "cards-revealed",
+                cards: [{ cardId: card.cardId, ownerSeat: opponentSeat(ctx) }],
+                sourceZone: "hand",
+              },
+            ),
+          );
       }
     },
   };
@@ -130,19 +134,21 @@ export const ska: Record<string, CardScript> = {
       }
       return base + 1;
     },
-    triggers: [{
-      event: "card-discarded",
-      label: "Create a Might token",
-      condition: (ctx, discarded) =>
-        ctx.state.activePlayer === ctx.seat &&
-        ctx.state.phase !== "start" &&
-        ctx.state.phase !== "end" &&
-        ctx.state.phase !== "game-over" &&
-        ctx.getFlag("player", "kayoMightTriggered") !== true &&
-        isSixPlus(ctx, discarded),
-      onTrigger: (ctx) => ctx.setFlag("player", "kayoMightTriggered", true),
-      effect: (ctx) => ctx.createToken(MIGHT),
-    }],
+    triggers: [
+      {
+        event: "card-discarded",
+        label: "Create a Might token",
+        condition: (ctx, discarded) =>
+          ctx.state.activePlayer === ctx.seat &&
+          ctx.state.phase !== "start" &&
+          ctx.state.phase !== "end" &&
+          ctx.state.phase !== "game-over" &&
+          ctx.getFlag("player", "kayoMightTriggered") !== true &&
+          isSixPlus(ctx, discarded),
+        onTrigger: (ctx) => ctx.setFlag("player", "kayoMightTriggered", true),
+        effect: (ctx) => ctx.createToken(MIGHT),
+      },
+    ],
   },
 
   "mandible claw|0": {
@@ -167,8 +173,16 @@ export const ska: Record<string, CardScript> = {
     },
     onDieRollResolved(ctx, hook, roll) {
       if (hook !== "knucklehead") return;
-        ctx.setPlayerFlag(ctx.seat, "baseIntellectThisTurn", roll);
-        ctx.logPublic(localizedCardLog(ctx, `Knucklehead rolls ${roll}; base intellect is ${roll} this turn`, "card.log.ska.knucklehead.roll", { result: roll }, { kind: "roll", result: roll, seat: ctx.seat, sides: 6 }));
+      ctx.setPlayerFlag(ctx.seat, "baseIntellectThisTurn", roll);
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `Knucklehead rolls ${roll}; base intellect is ${roll} this turn`,
+          "card.log.ska.knucklehead.roll",
+          { result: roll },
+          { kind: "roll", result: roll, seat: ctx.seat, sides: 6 },
+        ),
+      );
     },
   },
 
@@ -189,31 +203,34 @@ export const ska: Record<string, CardScript> = {
           ...Object.values(player.equipment).filter((card) => card !== undefined),
           ...player.board,
         ];
-        return controlled.some((card) => ctx.currentPower(card) >= 6) ||
-          (current?.attacker === ctx.seat && ctx.currentAttackPower() >= 6);
+        return (
+          controlled.some((card) => ctx.currentPower(card) >= 6) ||
+          (current?.attacker === ctx.seat && ctx.currentAttackPower() >= 6)
+        );
       },
       onActivate(ctx) {
         ctx.changeResources(ctx.seat, 1);
-        ctx.logPublic(localizedCardLog(ctx, "Predatory Plating gains {r}", "card.log.common.resources.gained", { amount: 1 }));
+        ctx.logPublic(
+          localizedCardLog(ctx, "Predatory Plating gains {r}", "card.log.common.resources.gained", { amount: 1 }),
+        );
       },
     },
   },
 
   "beaten trackers|0": {
-    triggers: [{
-      event: "card-discarded",
-      label: "Destroy this to gain 1 action point?",
-      condition: (ctx, discarded, eventContext) =>
-        eventContext?.atRandom === true && isSixPlus(ctx, discarded),
-      effect: (ctx) => ctx.requestChoice(
-        "beaten-trackers",
-        yesNoPrompt(
-          "Destroy Beaten Trackers to gain 1 action point?",
-          "card.ska.beaten.trackers.destroy",
-        ),
-        ["yes", "no"],
-      ),
-    }],
+    triggers: [
+      {
+        event: "card-discarded",
+        label: "Destroy this to gain 1 action point?",
+        condition: (ctx, discarded, eventContext) => eventContext?.atRandom === true && isSixPlus(ctx, discarded),
+        effect: (ctx) =>
+          ctx.requestChoice(
+            "beaten-trackers",
+            yesNoPrompt("Destroy Beaten Trackers to gain 1 action point?", "card.ska.beaten.trackers.destroy"),
+            ["yes", "no"],
+          ),
+      },
+    ],
     onChoose(ctx, hook, option) {
       if (hook !== "beaten-trackers" || option !== "yes") return;
       ctx.destroySelf();
@@ -283,19 +300,25 @@ export const ska: Record<string, CardScript> = {
     defenseAbility: { discard: 1, oncePerTurn: true },
     onDefendAbility(ctx) {
       ctx.addModifier({ scope: "chain-link", defense: 3 });
-      ctx.logPublic(localizedCardLog(ctx, "Rally the Coast Guard gains +3 defense", "card.log.common.defense.gained", { defense: 3 }));
+      ctx.logPublic(
+        localizedCardLog(ctx, "Rally the Coast Guard gains +3 defense", "card.log.common.defense.gained", {
+          defense: 3,
+        }),
+      );
     },
   },
 
   "reincarnate|3": {
-    triggers: [{
-      event: "card-discarded",
-      sourceZone: "graveyard",
-      label: "Put this on the bottom of its owner's deck",
-      condition: (ctx, discarded, eventContext) =>
-        eventContext?.atRandom === true && discarded?.instanceId === ctx.self.instanceId,
-      effect: (ctx) => ctx.putOnDeckBottom(ctx.self.instanceId),
-    }],
+    triggers: [
+      {
+        event: "card-discarded",
+        sourceZone: "graveyard",
+        label: "Put this on the bottom of its owner's deck",
+        condition: (ctx, discarded, eventContext) =>
+          eventContext?.atRandom === true && discarded?.instanceId === ctx.self.instanceId,
+        effect: (ctx) => ctx.putOnDeckBottom(ctx.self.instanceId),
+      },
+    ],
   },
 
   "run roughshod|3": {

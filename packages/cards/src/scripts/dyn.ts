@@ -35,20 +35,21 @@ function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string)
 function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {
   const player = ctx.player(seat);
   return [
-    ...Object.values(player.equipment)
-      .filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
+    ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
     ...player.weapons.filter((card) => data(ctx, card).cardType === "equipment"),
   ];
 }
 
 function logDeckTopReveal(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): void {
-  ctx.logPublic(localizedCardLog(
-    ctx,
-    `${ctx.data.name} reveals ${data(ctx, card).name}`,
-    "card.log.common.decktop.revealed",
-    { revealed: { kind: "card", cardId: card.cardId } },
-    { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
-  ));
+  ctx.logPublic(
+    localizedCardLog(
+      ctx,
+      `${ctx.data.name} reveals ${data(ctx, card).name}`,
+      "card.log.common.decktop.revealed",
+      { revealed: { kind: "card", cardId: card.cardId } },
+      { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
+    ),
+  );
 }
 
 function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
@@ -92,8 +93,8 @@ function anyTargets(ctx: ScriptCtx): number[] {
   return [
     ...ctx.state.players.map((player) => player.hero.instanceId),
     ...ctx.state.players.flatMap((player) =>
-      player.board.filter((card) => hasType(ctx, card, "ally"))
-        .map((card) => card.instanceId)),
+      player.board.filter((card) => hasType(ctx, card, "ally")).map((card) => card.instanceId),
+    ),
   ];
 }
 
@@ -105,8 +106,7 @@ function dealToAnyTarget(ctx: ScriptCtx, option: string, amount: number, arcane 
     else ctx.dealDamage(hero.seat, amount);
     return;
   }
-  const owner = ctx.state.players.find((player) =>
-    player.board.some((card) => card.instanceId === id));
+  const owner = ctx.state.players.find((player) => player.board.some((card) => card.instanceId === id));
   if (!owner) return;
   if (arcane) dealArcane(ctx, owner.seat, amount, id);
   else ctx.dealDamage(owner.seat, amount, { targetAllyId: id });
@@ -114,15 +114,17 @@ function dealToAnyTarget(ctx: ScriptCtx, option: string, amount: number, arcane 
 
 function blessing(effect: (ctx: ScriptCtx) => void): CardScript {
   return {
-    triggers: [{
-      event: "start-of-turn",
-      whose: "subject",
-      label: "Destroy this Blessing",
-      effect(ctx) {
-        ctx.destroySelf();
-        effect(ctx);
+    triggers: [
+      {
+        event: "start-of-turn",
+        whose: "subject",
+        label: "Destroy this Blessing",
+        effect(ctx) {
+          ctx.destroySelf();
+          effect(ctx);
+        },
       },
-    }],
+    ],
   };
 }
 
@@ -158,16 +160,15 @@ function blessingFocus(amount: number): CardScript {
 
 function blessingIngenuity(count: number): CardScript {
   const offer = (ctx: ScriptCtx) => {
-    const candidates = [...ctx.player(ctx.seat).graveyard, ...ctx.player(ctx.seat).banish]
-      .filter((card) => data(ctx, card).name === "Hyper Driver");
+    const candidates = [...ctx.player(ctx.seat).graveyard, ...ctx.player(ctx.seat).banish].filter(
+      (card) => data(ctx, card).name === "Hyper Driver",
+    );
     if (ctx.getCounter("ingenuityRemaining") <= 0 || candidates.length === 0) return;
     ctx.requestCardChoice(
       "ingenuity",
-      decisionPrompt(
-        "Return a Hyper Driver to the arena?",
-        "card.dyn.ingenuity.hyperdriver.return",
-        { optionMessages: commonOptionMessages("done") },
-      ),
+      decisionPrompt("Return a Hyper Driver to the arena?", "card.dyn.ingenuity.hyperdriver.return", {
+        optionMessages: commonOptionMessages("done"),
+      }),
       ["done", ...candidates.map((card) => card.instanceId)],
     );
   };
@@ -199,47 +200,76 @@ function comboWithTiger(ctx: ScriptCtx): boolean {
 
 function pouncingQi(): CardScript {
   return {
-    modifyAttack: (ctx) => comboWithTiger(ctx) ? 1 : 0,
-    onAttackDeclared(ctx) { if (comboWithTiger(ctx)) ctx.grantGoAgain(); },
+    modifyAttack: (ctx) => (comboWithTiger(ctx) ? 1 : 0),
+    onAttackDeclared(ctx) {
+      if (comboWithTiger(ctx)) ctx.grantGoAgain();
+    },
   };
 }
 
 function qiUnleashed(): CardScript {
-  return { modifyAttack: (ctx) => comboWithTiger(ctx) ? 4 : 0 };
+  return { modifyAttack: (ctx) => (comboWithTiger(ctx) ? 4 : 0) };
 }
 
 function spectralProwler(): CardScript {
   return {
-    triggers: [{ event: "card-played", sourceZone: "self", label: "Gain go again", condition: (ctx) => controlsNamed(ctx, "Spectral Shield"), effect(ctx, played) { if (played) ctx.grantGoAgain(played.instanceId); } }],
+    triggers: [
+      {
+        event: "card-played",
+        sourceZone: "self",
+        label: "Gain go again",
+        condition: (ctx) => controlsNamed(ctx, "Spectral Shield"),
+        effect(ctx, played) {
+          if (played) ctx.grantGoAgain(played.instanceId);
+        },
+      },
+    ],
   };
 }
 
 function spectralRider(): CardScript {
   return {
-    triggers: [{ event: "card-played", sourceZone: "self", label: "Gain overpower", condition: (ctx) => controlsNamed(ctx, "Spectral Shield"), effect(ctx) { ctx.setFlag("link", "overpower", true); } }],
+    triggers: [
+      {
+        event: "card-played",
+        sourceZone: "self",
+        label: "Gain overpower",
+        condition: (ctx) => controlsNamed(ctx, "Spectral Shield"),
+        effect(ctx) {
+          ctx.setFlag("link", "overpower", true);
+        },
+      },
+    ],
   };
 }
 
 function hyperDriver(steam: number): CardScript {
   return {
     destroyAtZeroCounter: "steam",
-    onEnterArena(ctx) { ctx.setCounter("steam", steam); },
-    triggers: [{
-      event: "card-boosted",
-      label: "Remove a steam counter and gain 1 resource",
-      labelMessage: decisionMessage("card.trigger.hyperdriver.boost"),
-      condition(ctx) {
-        return ctx.getFlag("player", `hyperDriverBoost:${ctx.self.instanceId}`) !== true &&
-          ctx.getCounter("steam") > 0;
+    onEnterArena(ctx) {
+      ctx.setCounter("steam", steam);
+    },
+    triggers: [
+      {
+        event: "card-boosted",
+        label: "Remove a steam counter and gain 1 resource",
+        labelMessage: decisionMessage("card.trigger.hyperdriver.boost"),
+        condition(ctx) {
+          return (
+            ctx.getFlag("player", `hyperDriverBoost:${ctx.self.instanceId}`) !== true && ctx.getCounter("steam") > 0
+          );
+        },
+        onTrigger(ctx) {
+          ctx.setFlag("player", `hyperDriverBoost:${ctx.self.instanceId}`, true);
+        },
+        effect(ctx) {
+          const steam = ctx.getCounter("steam");
+          if (steam <= 0) return;
+          ctx.setCounter("steam", steam - 1);
+          ctx.changeResources(ctx.seat, 1);
+        },
       },
-      onTrigger(ctx) { ctx.setFlag("player", `hyperDriverBoost:${ctx.self.instanceId}`, true); },
-      effect(ctx) {
-        const steam = ctx.getCounter("steam");
-        if (steam <= 0) return;
-        ctx.setCounter("steam", steam - 1);
-        ctx.changeResources(ctx.seat, 1);
-      },
-    }],
+    ],
   };
 }
 
@@ -261,17 +291,17 @@ function drillShot(): CardScript {
     onAttackDeclared(ctx) {
       if (aimCounter(ctx)) ctx.addModifier({ scope: "chain-link", piercing: 1 });
     },
-    canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined; },
+    canTriggerOnHit(ctx) {
+      return ctx.link?.targetAllyId === undefined;
+    },
     onHit(ctx) {
       const equipment = equipmentCards(ctx, opponentSeat(ctx));
-      if (equipment.length) ctx.requestCardChoice(
-        "drill",
-        decisionPrompt(
-          "Put a -1 defense counter on equipment",
-          "card.dyn.drill.equipment.counter",
-        ),
-        equipment.map((card) => card.instanceId),
-      );
+      if (equipment.length)
+        ctx.requestCardChoice(
+          "drill",
+          decisionPrompt("Put a -1 defense counter on equipment", "card.dyn.drill.equipment.counter"),
+          equipment.map((card) => card.instanceId),
+        );
     },
     onChoose(ctx, hook, option) {
       if (hook === "drill") ctx.addCardDefenseCounters(Number(option), 1);
@@ -294,7 +324,8 @@ function contractAttack(test: ContractTest): CardScript {
 
 const contractAttackAction: ContractTest = (ctx, card) => isAttackAction(ctx, card);
 const contractLowDefense: ContractTest = (ctx, card) => (data(ctx, card).defense ?? Infinity) <= 2;
-const contractReaction: ContractTest = (ctx, card) => ["attack-reaction", "defense-reaction"].includes(data(ctx, card).cardType);
+const contractReaction: ContractTest = (ctx, card) =>
+  ["attack-reaction", "defense-reaction"].includes(data(ctx, card).cardType);
 const contractLowCost: ContractTest = (ctx, card) => {
   const cardData = data(ctx, card);
   if (cardData.cost !== undefined) return cardData.cost <= 1;
@@ -312,13 +343,9 @@ function arcaneTargetSpell(amount: number, surge: "go-again" | "opt" | "energy" 
     arcaneDamageEffectAmounts: [amount],
     onPlay(ctx) {
       const preview = ctx.previewArcaneDamage(amount);
-      chooseHero(
-        ctx,
-        "arcane-target",
-        `Deal ${preview} arcane damage to a hero`,
-        "card.dyn.arcane.hero.choose",
-        { amount: preview },
-      );
+      chooseHero(ctx, "arcane-target", `Deal ${preview} arcane damage to a hero`, "card.dyn.arcane.hero.choose", {
+        amount: preview,
+      });
     },
     onDamageDealt(ctx, target, dealt, arcane) {
       if (!arcane || dealt <= amount || surge === null) return;
@@ -328,18 +355,19 @@ function arcaneTargetSpell(amount: number, surge: "go-again" | "opt" | "energy" 
         const permanents = [
           ...ctx.player(target).board,
           ...ctx.player(target).weapons,
-          ...Object.values(ctx.player(target).equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
+          ...Object.values(ctx.player(target).equipment).filter(
+            (card): card is DeepReadonly<CardInstance> => card !== undefined,
+          ),
           ctx.player(target).hero,
         ].filter((card) => Number(card.counters?.energy ?? 0) > 0);
-        if (permanents.length) ctx.requestCardChoice(
-          "sap-energy",
-          decisionPrompt(
-            "Remove an energy counter",
-            "card.dyn.sap.energy.remove",
-            { optionMessages: commonOptionMessages("pass") },
-          ),
-          ["pass", ...permanents.map((card) => card.instanceId)],
-        );
+        if (permanents.length)
+          ctx.requestCardChoice(
+            "sap-energy",
+            decisionPrompt("Remove an energy counter", "card.dyn.sap.energy.remove", {
+              optionMessages: commonOptionMessages("pass"),
+            }),
+            ["pass", ...permanents.map((card) => card.instanceId)],
+          );
       }
     },
     onChoose(ctx, hook, option) {
@@ -360,11 +388,9 @@ function aetherSlash(): CardScript {
         const amount = ctx.previewArcaneDamage(1);
         ctx.requestCardChoice(
           "slash-target",
-          decisionPrompt(
-            `Deal ${amount} arcane damage to any target`,
-            "card.dyn.aetherslash.target.choose",
-            { values: { amount } },
-          ),
+          decisionPrompt(`Deal ${amount} arcane damage to any target`, "card.dyn.aetherslash.target.choose", {
+            values: { amount },
+          }),
           anyTargets(ctx),
         );
       }
@@ -411,15 +437,14 @@ function tranquilPassing(maxCost: number): CardScript {
         const d = data(ctx, card);
         return hasType(ctx, card, "aura") && (d.cost ?? 0) <= maxCost;
       });
-      if (targets.length) ctx.requestCardChoice(
-        "tranquil",
-        decisionPrompt(
-          "Banish an opposing aura until this leaves",
-          "card.dyn.tranquil.aura.banish",
-          { optionMessages: commonOptionMessages("pass") },
-        ),
-        ["pass", ...targets.map((card) => card.instanceId)],
-      );
+      if (targets.length)
+        ctx.requestCardChoice(
+          "tranquil",
+          decisionPrompt("Banish an opposing aura until this leaves", "card.dyn.tranquil.aura.banish", {
+            optionMessages: commonOptionMessages("pass"),
+          }),
+          ["pass", ...targets.map((card) => card.instanceId)],
+        );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "tranquil" || option === "pass") return;
@@ -440,29 +465,34 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
 
   // Heroes
   "arakni|0": {
-    triggers: [{
-      event: "card-played",
-      label: "Look at the opponent's top card?",
-      labelMessage: decisionMessage("card.dyn.arakni.opponenttop.look"),
-      optional: true,
-      defaultOption: "yes",
-      condition: (ctx, played) => !!played &&
-        (data(ctx, played).keywords ?? []).some((keyword) => keyword.toLowerCase() === "contract"),
-      effect(ctx) {
-        const top = ctx.player(opponentSeat(ctx)).deck[0];
-        if (!top) return;
-        ctx.lookAt(top.instanceId);
-        ctx.setCounter("arakniTop", top.instanceId);
-        ctx.requestChoice("arakni-top", bottomOrKeepPrompt(), ["bottom", "keep"]);
+    triggers: [
+      {
+        event: "card-played",
+        label: "Look at the opponent's top card?",
+        labelMessage: decisionMessage("card.dyn.arakni.opponenttop.look"),
+        optional: true,
+        defaultOption: "yes",
+        condition: (ctx, played) =>
+          !!played && (data(ctx, played).keywords ?? []).some((keyword) => keyword.toLowerCase() === "contract"),
+        effect(ctx) {
+          const top = ctx.player(opponentSeat(ctx)).deck[0];
+          if (!top) return;
+          ctx.lookAt(top.instanceId);
+          ctx.setCounter("arakniTop", top.instanceId);
+          ctx.requestChoice("arakni-top", bottomOrKeepPrompt(), ["bottom", "keep"]);
+        },
       },
-    }],
+    ],
     onChoose(ctx, hook, option) {
       if (hook === "arakni-top" && option === "bottom") ctx.putOnDeckBottom(ctx.getCounter("arakniTop"));
     },
   },
   "emperor, dracai of aesir|0": {
     activated: {
-      cost: 3, isAttack: false, goAgain: false, label: "Search for Command and Conquer",
+      cost: 3,
+      isAttack: false,
+      goAgain: false,
+      label: "Search for Command and Conquer",
       onActivate(ctx) {
         const card = ctx.player(ctx.seat).deck.find((candidate) => data(ctx, candidate).name === "Command and Conquer");
         if (card) {
@@ -475,13 +505,12 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
               { result: { kind: "card", cardId: card.cardId } },
               { kind: "card-moved", cardId: card.cardId, ownerSeat: ctx.seat, from: "deck", to: "chain" },
             ),
-            localizedCardLog(
-              ctx,
-              "Emperor searches for a card",
-              "card.log.dyn.emperor.search.public",
-              undefined,
-              { kind: "card-moved", ownerSeat: ctx.seat, from: "deck", to: "chain" },
-            ),
+            localizedCardLog(ctx, "Emperor searches for a card", "card.log.dyn.emperor.search.public", undefined, {
+              kind: "card-moved",
+              ownerSeat: ctx.seat,
+              from: "deck",
+              to: "chain",
+            }),
           );
           ctx.attackFromDeck(card.instanceId);
         }
@@ -491,7 +520,12 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   },
   "yoji, royal protector|0": {
     activated: {
-      cost: 3, isAttack: false, goAgain: false, oncePerTurn: true, timing: "instant", label: "Protect another hero",
+      cost: 3,
+      isAttack: false,
+      goAgain: false,
+      oncePerTurn: true,
+      timing: "instant",
+      label: "Protect another hero",
       onActivate(ctx) {
         ctx.redirectNextHeroDamage(opponentSeat(ctx), ctx.seat, 1);
       },
@@ -500,24 +534,28 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
 
   // Brute
   "reincarnate|1": {
-    triggers: [{
-      event: "card-discarded",
-      sourceZone: "graveyard",
-      label: "Put this on the bottom of its owner's deck",
-      condition: (ctx, discarded, eventContext) =>
-        eventContext?.atRandom === true && discarded?.instanceId === ctx.self.instanceId,
-      effect: (ctx) => ctx.putOnDeckBottom(ctx.self.instanceId),
-    }],
+    triggers: [
+      {
+        event: "card-discarded",
+        sourceZone: "graveyard",
+        label: "Put this on the bottom of its owner's deck",
+        condition: (ctx, discarded, eventContext) =>
+          eventContext?.atRandom === true && discarded?.instanceId === ctx.self.instanceId,
+        effect: (ctx) => ctx.putOnDeckBottom(ctx.self.instanceId),
+      },
+    ],
   },
   "reincarnate|2": {
-    triggers: [{
-      event: "card-discarded",
-      sourceZone: "graveyard",
-      label: "Put this on the bottom of its owner's deck",
-      condition: (ctx, discarded, eventContext) =>
-        eventContext?.atRandom === true && discarded?.instanceId === ctx.self.instanceId,
-      effect: (ctx) => ctx.putOnDeckBottom(ctx.self.instanceId),
-    }],
+    triggers: [
+      {
+        event: "card-discarded",
+        sourceZone: "graveyard",
+        label: "Put this on the bottom of its owner's deck",
+        condition: (ctx, discarded, eventContext) =>
+          eventContext?.atRandom === true && discarded?.instanceId === ctx.self.instanceId,
+        effect: (ctx) => ctx.putOnDeckBottom(ctx.self.instanceId),
+      },
+    ],
   },
   "madcap charger|1": randomDiscardAttack("go-again"),
   "madcap charger|2": randomDiscardAttack("go-again"),
@@ -525,34 +563,250 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "madcap muscle|1": randomDiscardAttack("power"),
   "madcap muscle|2": randomDiscardAttack("power"),
   "madcap muscle|3": randomDiscardAttack("power"),
-  "rumble grunting|1": { canPlay: (ctx) => ctx.getFlag("player", "discardedSixPlusThisTurn") === true, onPlay: (ctx) => buffNextAttack(ctx, { appliesTo: "attack", appliesToClass: "brute", attack: 4 }) },
-  "rumble grunting|2": { canPlay: (ctx) => ctx.getFlag("player", "discardedSixPlusThisTurn") === true, onPlay: (ctx) => buffNextAttack(ctx, { appliesTo: "attack", appliesToClass: "brute", attack: 3 }) },
-  "rumble grunting|3": { canPlay: (ctx) => ctx.getFlag("player", "discardedSixPlusThisTurn") === true, onPlay: (ctx) => buffNextAttack(ctx, { appliesTo: "attack", appliesToClass: "brute", attack: 2 }) },
+  "rumble grunting|1": {
+    canPlay: (ctx) => ctx.getFlag("player", "discardedSixPlusThisTurn") === true,
+    onPlay: (ctx) => buffNextAttack(ctx, { appliesTo: "attack", appliesToClass: "brute", attack: 4 }),
+  },
+  "rumble grunting|2": {
+    canPlay: (ctx) => ctx.getFlag("player", "discardedSixPlusThisTurn") === true,
+    onPlay: (ctx) => buffNextAttack(ctx, { appliesTo: "attack", appliesToClass: "brute", attack: 3 }),
+  },
+  "rumble grunting|3": {
+    canPlay: (ctx) => ctx.getFlag("player", "discardedSixPlusThisTurn") === true,
+    onPlay: (ctx) => buffNextAttack(ctx, { appliesTo: "attack", appliesToClass: "brute", attack: 2 }),
+  },
   "blessing of savagery|1": blessing((ctx) => buffNextAttack(ctx, { appliesTo: "attack", minBasePower: 6, attack: 3 })),
   "blessing of savagery|2": blessing((ctx) => buffNextAttack(ctx, { appliesTo: "attack", minBasePower: 6, attack: 2 })),
   "blessing of savagery|3": blessing((ctx) => buffNextAttack(ctx, { appliesTo: "attack", minBasePower: 6, attack: 1 })),
 
   // Guardian
-  "blessing of patience|1": { ...blessing((ctx) => chooseHero(ctx, "patience", "Choose a hero to gain 3 life", "card.dyn.patience.hero.choose", { amount: 3 })), onChoose(ctx, h, o) { if (h === "patience") ctx.gainLife(heroSeat(ctx, o), 3); } },
-  "blessing of patience|2": { ...blessing((ctx) => chooseHero(ctx, "patience", "Choose a hero to gain 2 life", "card.dyn.patience.hero.choose", { amount: 2 })), onChoose(ctx, h, o) { if (h === "patience") ctx.gainLife(heroSeat(ctx, o), 2); } },
-  "blessing of patience|3": { ...blessing((ctx) => chooseHero(ctx, "patience", "Choose a hero to gain 1 life", "card.dyn.patience.hero.choose", { amount: 1 })), onChoose(ctx, h, o) { if (h === "patience") ctx.gainLife(heroSeat(ctx, o), 1); } },
-  "shield bash|1": { onPlay(ctx) { const offhand = ctx.link?.defendingEquipment.some((card) => hasType(ctx, card, "off-hand")); if (!offhand) return; const hand = ctx.player(opponentSeat(ctx)).hand; ctx.requestCardChoice("shield-bash", decisionPrompt("Discard a card or take 1 damage", "card.dyn.shieldbash.discard", { optionMessages: commonOptionMessages("take damage") }), ["take damage", ...hand.map((card) => card.instanceId)], opponentSeat(ctx)); }, onChoose(ctx, h, o) { if (h !== "shield-bash") return; if (o === "take damage") ctx.dealDamage(opponentSeat(ctx), 1); else ctx.discardCard(opponentSeat(ctx), Number(o)); } },
-  "shield bash|2": { onPlay(ctx) { const offhand = ctx.link?.defendingEquipment.some((card) => hasType(ctx, card, "off-hand")); if (!offhand) return; const hand = ctx.player(opponentSeat(ctx)).hand; ctx.requestCardChoice("shield-bash", decisionPrompt("Discard a card or take 1 damage", "card.dyn.shieldbash.discard", { optionMessages: commonOptionMessages("take damage") }), ["take damage", ...hand.map((card) => card.instanceId)], opponentSeat(ctx)); }, onChoose(ctx, h, o) { if (h !== "shield-bash") return; if (o === "take damage") ctx.dealDamage(opponentSeat(ctx), 1); else ctx.discardCard(opponentSeat(ctx), Number(o)); } },
-  "shield bash|3": { onPlay(ctx) { const offhand = ctx.link?.defendingEquipment.some((card) => hasType(ctx, card, "off-hand")); if (!offhand) return; const hand = ctx.player(opponentSeat(ctx)).hand; ctx.requestCardChoice("shield-bash", decisionPrompt("Discard a card or take 1 damage", "card.dyn.shieldbash.discard", { optionMessages: commonOptionMessages("take damage") }), ["take damage", ...hand.map((card) => card.instanceId)], opponentSeat(ctx)); }, onChoose(ctx, h, o) { if (h !== "shield-bash") return; if (o === "take damage") ctx.dealDamage(opponentSeat(ctx), 1); else ctx.discardCard(opponentSeat(ctx), Number(o)); } },
-  "shield wall|1": { modifyDefense: (ctx) => equipmentCards(ctx, ctx.seat).some((card) => hasType(ctx, card, "guardian") && hasType(ctx, card, "off-hand")) ? 4 : 0 },
-  "shield wall|2": { modifyDefense: (ctx) => equipmentCards(ctx, ctx.seat).some((card) => hasType(ctx, card, "guardian") && hasType(ctx, card, "off-hand")) ? 4 : 0 },
-  "shield wall|3": { modifyDefense: (ctx) => equipmentCards(ctx, ctx.seat).some((card) => hasType(ctx, card, "guardian") && hasType(ctx, card, "off-hand")) ? 4 : 0 },
-  "reinforce steel|1": { onPlay(ctx) { const choices = equipmentCards(ctx, ctx.seat).filter((card) => hasType(ctx, card, "guardian") && hasType(ctx, card, "off-hand") && (data(ctx, card).defense ?? 0) <= 3 && (card.defCounters ?? 0) > 0); if (choices.length) ctx.requestCardChoice("reinforce", decisionPrompt("Remove a -1 defense counter", "card.dyn.reinforce.counter.remove"), choices.map((card) => card.instanceId)); }, onChoose(ctx, h, o) { if (h === "reinforce") ctx.addCardDefenseCounters(Number(o), -1); } },
-  "reinforce steel|2": { onPlay(ctx) { const choices = equipmentCards(ctx, ctx.seat).filter((card) => hasType(ctx, card, "guardian") && hasType(ctx, card, "off-hand") && (data(ctx, card).defense ?? 0) <= 2 && (card.defCounters ?? 0) > 0); if (choices.length) ctx.requestCardChoice("reinforce", decisionPrompt("Remove a -1 defense counter", "card.dyn.reinforce.counter.remove"), choices.map((card) => card.instanceId)); }, onChoose(ctx, h, o) { if (h === "reinforce") ctx.addCardDefenseCounters(Number(o), -1); } },
-  "reinforce steel|3": { onPlay(ctx) { const choices = equipmentCards(ctx, ctx.seat).filter((card) => hasType(ctx, card, "guardian") && hasType(ctx, card, "off-hand") && (data(ctx, card).defense ?? 0) <= 1 && (card.defCounters ?? 0) > 0); if (choices.length) ctx.requestCardChoice("reinforce", decisionPrompt("Remove a -1 defense counter", "card.dyn.reinforce.counter.remove"), choices.map((card) => card.instanceId)); }, onChoose(ctx, h, o) { if (h === "reinforce") ctx.addCardDefenseCounters(Number(o), -1); } },
-  "withstand|1": { onPlay(ctx) { const choices = equipmentCards(ctx, ctx.seat).filter((card) => hasType(ctx, card, "guardian") && hasType(ctx, card, "off-hand")); if (choices.length) ctx.requestCardChoice("withstand", decisionPrompt("Choose a Guardian off-hand", "card.dyn.withstand.offhand.choose"), choices.map((card) => card.instanceId)); }, onChoose(ctx, h, o) { if (h === "withstand") ctx.addCardTempDefense(Number(o), 6); } },
-  "withstand|2": { onPlay(ctx) { const choices = equipmentCards(ctx, ctx.seat).filter((card) => hasType(ctx, card, "guardian") && hasType(ctx, card, "off-hand")); if (choices.length) ctx.requestCardChoice("withstand", decisionPrompt("Choose a Guardian off-hand", "card.dyn.withstand.offhand.choose"), choices.map((card) => card.instanceId)); }, onChoose(ctx, h, o) { if (h === "withstand") ctx.addCardTempDefense(Number(o), 5); } },
-  "withstand|3": { onPlay(ctx) { const choices = equipmentCards(ctx, ctx.seat).filter((card) => hasType(ctx, card, "guardian") && hasType(ctx, card, "off-hand")); if (choices.length) ctx.requestCardChoice("withstand", decisionPrompt("Choose a Guardian off-hand", "card.dyn.withstand.offhand.choose"), choices.map((card) => card.instanceId)); }, onChoose(ctx, h, o) { if (h === "withstand") ctx.addCardTempDefense(Number(o), 4); } },
+  "blessing of patience|1": {
+    ...blessing((ctx) =>
+      chooseHero(ctx, "patience", "Choose a hero to gain 3 life", "card.dyn.patience.hero.choose", { amount: 3 }),
+    ),
+    onChoose(ctx, h, o) {
+      if (h === "patience") ctx.gainLife(heroSeat(ctx, o), 3);
+    },
+  },
+  "blessing of patience|2": {
+    ...blessing((ctx) =>
+      chooseHero(ctx, "patience", "Choose a hero to gain 2 life", "card.dyn.patience.hero.choose", { amount: 2 }),
+    ),
+    onChoose(ctx, h, o) {
+      if (h === "patience") ctx.gainLife(heroSeat(ctx, o), 2);
+    },
+  },
+  "blessing of patience|3": {
+    ...blessing((ctx) =>
+      chooseHero(ctx, "patience", "Choose a hero to gain 1 life", "card.dyn.patience.hero.choose", { amount: 1 }),
+    ),
+    onChoose(ctx, h, o) {
+      if (h === "patience") ctx.gainLife(heroSeat(ctx, o), 1);
+    },
+  },
+  "shield bash|1": {
+    onPlay(ctx) {
+      const offhand = ctx.link?.defendingEquipment.some((card) => hasType(ctx, card, "off-hand"));
+      if (!offhand) return;
+      const hand = ctx.player(opponentSeat(ctx)).hand;
+      ctx.requestCardChoice(
+        "shield-bash",
+        decisionPrompt("Discard a card or take 1 damage", "card.dyn.shieldbash.discard", {
+          optionMessages: commonOptionMessages("take damage"),
+        }),
+        ["take damage", ...hand.map((card) => card.instanceId)],
+        opponentSeat(ctx),
+      );
+    },
+    onChoose(ctx, h, o) {
+      if (h !== "shield-bash") return;
+      if (o === "take damage") ctx.dealDamage(opponentSeat(ctx), 1);
+      else ctx.discardCard(opponentSeat(ctx), Number(o));
+    },
+  },
+  "shield bash|2": {
+    onPlay(ctx) {
+      const offhand = ctx.link?.defendingEquipment.some((card) => hasType(ctx, card, "off-hand"));
+      if (!offhand) return;
+      const hand = ctx.player(opponentSeat(ctx)).hand;
+      ctx.requestCardChoice(
+        "shield-bash",
+        decisionPrompt("Discard a card or take 1 damage", "card.dyn.shieldbash.discard", {
+          optionMessages: commonOptionMessages("take damage"),
+        }),
+        ["take damage", ...hand.map((card) => card.instanceId)],
+        opponentSeat(ctx),
+      );
+    },
+    onChoose(ctx, h, o) {
+      if (h !== "shield-bash") return;
+      if (o === "take damage") ctx.dealDamage(opponentSeat(ctx), 1);
+      else ctx.discardCard(opponentSeat(ctx), Number(o));
+    },
+  },
+  "shield bash|3": {
+    onPlay(ctx) {
+      const offhand = ctx.link?.defendingEquipment.some((card) => hasType(ctx, card, "off-hand"));
+      if (!offhand) return;
+      const hand = ctx.player(opponentSeat(ctx)).hand;
+      ctx.requestCardChoice(
+        "shield-bash",
+        decisionPrompt("Discard a card or take 1 damage", "card.dyn.shieldbash.discard", {
+          optionMessages: commonOptionMessages("take damage"),
+        }),
+        ["take damage", ...hand.map((card) => card.instanceId)],
+        opponentSeat(ctx),
+      );
+    },
+    onChoose(ctx, h, o) {
+      if (h !== "shield-bash") return;
+      if (o === "take damage") ctx.dealDamage(opponentSeat(ctx), 1);
+      else ctx.discardCard(opponentSeat(ctx), Number(o));
+    },
+  },
+  "shield wall|1": {
+    modifyDefense: (ctx) =>
+      equipmentCards(ctx, ctx.seat).some((card) => hasType(ctx, card, "guardian") && hasType(ctx, card, "off-hand"))
+        ? 4
+        : 0,
+  },
+  "shield wall|2": {
+    modifyDefense: (ctx) =>
+      equipmentCards(ctx, ctx.seat).some((card) => hasType(ctx, card, "guardian") && hasType(ctx, card, "off-hand"))
+        ? 4
+        : 0,
+  },
+  "shield wall|3": {
+    modifyDefense: (ctx) =>
+      equipmentCards(ctx, ctx.seat).some((card) => hasType(ctx, card, "guardian") && hasType(ctx, card, "off-hand"))
+        ? 4
+        : 0,
+  },
+  "reinforce steel|1": {
+    onPlay(ctx) {
+      const choices = equipmentCards(ctx, ctx.seat).filter(
+        (card) =>
+          hasType(ctx, card, "guardian") &&
+          hasType(ctx, card, "off-hand") &&
+          (data(ctx, card).defense ?? 0) <= 3 &&
+          (card.defCounters ?? 0) > 0,
+      );
+      if (choices.length)
+        ctx.requestCardChoice(
+          "reinforce",
+          decisionPrompt("Remove a -1 defense counter", "card.dyn.reinforce.counter.remove"),
+          choices.map((card) => card.instanceId),
+        );
+    },
+    onChoose(ctx, h, o) {
+      if (h === "reinforce") ctx.addCardDefenseCounters(Number(o), -1);
+    },
+  },
+  "reinforce steel|2": {
+    onPlay(ctx) {
+      const choices = equipmentCards(ctx, ctx.seat).filter(
+        (card) =>
+          hasType(ctx, card, "guardian") &&
+          hasType(ctx, card, "off-hand") &&
+          (data(ctx, card).defense ?? 0) <= 2 &&
+          (card.defCounters ?? 0) > 0,
+      );
+      if (choices.length)
+        ctx.requestCardChoice(
+          "reinforce",
+          decisionPrompt("Remove a -1 defense counter", "card.dyn.reinforce.counter.remove"),
+          choices.map((card) => card.instanceId),
+        );
+    },
+    onChoose(ctx, h, o) {
+      if (h === "reinforce") ctx.addCardDefenseCounters(Number(o), -1);
+    },
+  },
+  "reinforce steel|3": {
+    onPlay(ctx) {
+      const choices = equipmentCards(ctx, ctx.seat).filter(
+        (card) =>
+          hasType(ctx, card, "guardian") &&
+          hasType(ctx, card, "off-hand") &&
+          (data(ctx, card).defense ?? 0) <= 1 &&
+          (card.defCounters ?? 0) > 0,
+      );
+      if (choices.length)
+        ctx.requestCardChoice(
+          "reinforce",
+          decisionPrompt("Remove a -1 defense counter", "card.dyn.reinforce.counter.remove"),
+          choices.map((card) => card.instanceId),
+        );
+    },
+    onChoose(ctx, h, o) {
+      if (h === "reinforce") ctx.addCardDefenseCounters(Number(o), -1);
+    },
+  },
+  "withstand|1": {
+    onPlay(ctx) {
+      const choices = equipmentCards(ctx, ctx.seat).filter(
+        (card) => hasType(ctx, card, "guardian") && hasType(ctx, card, "off-hand"),
+      );
+      if (choices.length)
+        ctx.requestCardChoice(
+          "withstand",
+          decisionPrompt("Choose a Guardian off-hand", "card.dyn.withstand.offhand.choose"),
+          choices.map((card) => card.instanceId),
+        );
+    },
+    onChoose(ctx, h, o) {
+      if (h === "withstand") ctx.addCardTempDefense(Number(o), 6);
+    },
+  },
+  "withstand|2": {
+    onPlay(ctx) {
+      const choices = equipmentCards(ctx, ctx.seat).filter(
+        (card) => hasType(ctx, card, "guardian") && hasType(ctx, card, "off-hand"),
+      );
+      if (choices.length)
+        ctx.requestCardChoice(
+          "withstand",
+          decisionPrompt("Choose a Guardian off-hand", "card.dyn.withstand.offhand.choose"),
+          choices.map((card) => card.instanceId),
+        );
+    },
+    onChoose(ctx, h, o) {
+      if (h === "withstand") ctx.addCardTempDefense(Number(o), 5);
+    },
+  },
+  "withstand|3": {
+    onPlay(ctx) {
+      const choices = equipmentCards(ctx, ctx.seat).filter(
+        (card) => hasType(ctx, card, "guardian") && hasType(ctx, card, "off-hand"),
+      );
+      if (choices.length)
+        ctx.requestCardChoice(
+          "withstand",
+          decisionPrompt("Choose a Guardian off-hand", "card.dyn.withstand.offhand.choose"),
+          choices.map((card) => card.instanceId),
+        );
+    },
+    onChoose(ctx, h, o) {
+      if (h === "withstand") ctx.addCardTempDefense(Number(o), 4);
+    },
+  },
 
   // Ninja
-  "flex claws|1": { onHit(ctx) { createTiger(ctx); } },
-  "flex claws|2": { onHit(ctx) { createTiger(ctx); } },
-  "flex claws|3": { onHit(ctx) { createTiger(ctx); } },
+  "flex claws|1": {
+    onHit(ctx) {
+      createTiger(ctx);
+    },
+  },
+  "flex claws|2": {
+    onHit(ctx) {
+      createTiger(ctx);
+    },
+  },
+  "flex claws|3": {
+    onHit(ctx) {
+      createTiger(ctx);
+    },
+  },
   "blessing of qi|1": blessing((ctx) => createTiger(ctx, 3)),
   "blessing of qi|2": blessing((ctx) => createTiger(ctx, 2)),
   "blessing of qi|3": blessing((ctx) => createTiger(ctx, 1)),
@@ -562,25 +816,95 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "qi unleashed|1": qiUnleashed(),
   "qi unleashed|2": qiUnleashed(),
   "qi unleashed|3": qiUnleashed(),
-  "predatory streak|1": { onPlay(ctx) { createTiger(ctx); createTiger(ctx); createTiger(ctx); } },
-  "predatory streak|2": { onPlay(ctx) { createTiger(ctx); createTiger(ctx); } },
-  "predatory streak|3": { onPlay(ctx) { createTiger(ctx); } },
+  "predatory streak|1": {
+    onPlay(ctx) {
+      createTiger(ctx);
+      createTiger(ctx);
+      createTiger(ctx);
+    },
+  },
+  "predatory streak|2": {
+    onPlay(ctx) {
+      createTiger(ctx);
+      createTiger(ctx);
+    },
+  },
+  "predatory streak|3": {
+    onPlay(ctx) {
+      createTiger(ctx);
+    },
+  },
 
   // Warrior
-  "quicksilver dagger|0": { activated: attackAbility(1), onAttackDeclared(ctx) { if (ctx.player(ctx.seat).weapons.some((weapon) => weapon.instanceId !== ctx.self.instanceId && ctx.getFlag("player", `weaponGainedGoAgain:${weapon.instanceId}`) === true)) ctx.grantGoAgain(); } },
+  "quicksilver dagger|0": {
+    activated: attackAbility(1),
+    onAttackDeclared(ctx) {
+      if (
+        ctx
+          .player(ctx.seat)
+          .weapons.some(
+            (weapon) =>
+              weapon.instanceId !== ctx.self.instanceId &&
+              ctx.getFlag("player", `weaponGainedGoAgain:${weapon.instanceId}`) === true,
+          )
+      )
+        ctx.grantGoAgain();
+    },
+  },
   "blessing of steel|1": blessing((ctx) => buffNextAttack(ctx, { appliesTo: "weapon", attack: 3 })),
   "blessing of steel|2": blessing((ctx) => buffNextAttack(ctx, { appliesTo: "weapon", attack: 2 })),
   "blessing of steel|3": blessing((ctx) => buffNextAttack(ctx, { appliesTo: "weapon", attack: 1 })),
-  "precision press|1": { onPlay(ctx) { buffNextAttack(ctx, { appliesToSubtype: ["sword", "dagger"], goAgain: true, piercing: 3 }); } },
-  "precision press|2": { onPlay(ctx) { buffNextAttack(ctx, { appliesToSubtype: ["sword", "dagger"], goAgain: true, piercing: 2 }); } },
-  "precision press|3": { onPlay(ctx) { buffNextAttack(ctx, { appliesToSubtype: ["sword", "dagger"], goAgain: true, piercing: 1 }); } },
-  "puncture|2": { canPlay: (ctx) => !!ctx.link && ["sword", "dagger"].some((type) => ctx.currentAttackHasType(type)), onPlay(ctx) { ctx.addModifier({ scope: "chain-link", attack: 2, piercing: 1 }); } },
-  "felling swing|1": { onPlay(ctx) { buffNextAttack(ctx, { appliesToSubtype: "axe", attack: 6 }); } },
-  "felling swing|2": { onPlay(ctx) { buffNextAttack(ctx, { appliesToSubtype: "axe", attack: 5 }); } },
-  "felling swing|3": { onPlay(ctx) { buffNextAttack(ctx, { appliesToSubtype: "axe", attack: 4 }); } },
-  "visit the imperial forge|1": { onPlay(ctx) { ctx.addModifier({ scope: "until-end-of-turn", appliesToSubtype: ["sword", "dagger"], piercing: 3 }); } },
-  "visit the imperial forge|2": { onPlay(ctx) { ctx.addModifier({ scope: "until-end-of-turn", appliesToSubtype: ["sword", "dagger"], piercing: 2 }); } },
-  "visit the imperial forge|3": { onPlay(ctx) { ctx.addModifier({ scope: "until-end-of-turn", appliesToSubtype: ["sword", "dagger"], piercing: 1 }); } },
+  "precision press|1": {
+    onPlay(ctx) {
+      buffNextAttack(ctx, { appliesToSubtype: ["sword", "dagger"], goAgain: true, piercing: 3 });
+    },
+  },
+  "precision press|2": {
+    onPlay(ctx) {
+      buffNextAttack(ctx, { appliesToSubtype: ["sword", "dagger"], goAgain: true, piercing: 2 });
+    },
+  },
+  "precision press|3": {
+    onPlay(ctx) {
+      buffNextAttack(ctx, { appliesToSubtype: ["sword", "dagger"], goAgain: true, piercing: 1 });
+    },
+  },
+  "puncture|2": {
+    canPlay: (ctx) => !!ctx.link && ["sword", "dagger"].some((type) => ctx.currentAttackHasType(type)),
+    onPlay(ctx) {
+      ctx.addModifier({ scope: "chain-link", attack: 2, piercing: 1 });
+    },
+  },
+  "felling swing|1": {
+    onPlay(ctx) {
+      buffNextAttack(ctx, { appliesToSubtype: "axe", attack: 6 });
+    },
+  },
+  "felling swing|2": {
+    onPlay(ctx) {
+      buffNextAttack(ctx, { appliesToSubtype: "axe", attack: 5 });
+    },
+  },
+  "felling swing|3": {
+    onPlay(ctx) {
+      buffNextAttack(ctx, { appliesToSubtype: "axe", attack: 4 });
+    },
+  },
+  "visit the imperial forge|1": {
+    onPlay(ctx) {
+      ctx.addModifier({ scope: "until-end-of-turn", appliesToSubtype: ["sword", "dagger"], piercing: 3 });
+    },
+  },
+  "visit the imperial forge|2": {
+    onPlay(ctx) {
+      ctx.addModifier({ scope: "until-end-of-turn", appliesToSubtype: ["sword", "dagger"], piercing: 2 });
+    },
+  },
+  "visit the imperial forge|3": {
+    onPlay(ctx) {
+      ctx.addModifier({ scope: "until-end-of-turn", appliesToSubtype: ["sword", "dagger"], piercing: 1 });
+    },
+  },
 
   // Mechanologist
   "crankshaft|2": crankshaft(),
@@ -592,9 +916,72 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "blessing of ingenuity|1": blessingIngenuity(3),
   "blessing of ingenuity|2": blessingIngenuity(2),
   "blessing of ingenuity|3": blessingIngenuity(1),
-  "urgent delivery|1": { onHit(ctx) { const boosts = ctx.state.chain.filter((link) => link.attacker === ctx.seat && link.flags.boosted).length; const items = ctx.player(ctx.seat).hand.filter((card) => hasType(ctx, card, "mechanologist") && hasType(ctx, card, "item") && (data(ctx, card).cost ?? 0) <= boosts); if (items.length) ctx.requestCardChoice("delivery", decisionPrompt("Put a Mechanologist item into the arena", "card.dyn.delivery.item.put", { optionMessages: commonOptionMessages("pass") }), ["pass", ...items.map((card) => card.instanceId)]); }, onChoose(ctx, h, o) { if (h === "delivery" && o !== "pass") ctx.settleCard(Number(o)); } },
-  "urgent delivery|2": { onHit(ctx) { const boosts = ctx.state.chain.filter((link) => link.attacker === ctx.seat && link.flags.boosted).length; const items = ctx.player(ctx.seat).hand.filter((card) => hasType(ctx, card, "mechanologist") && hasType(ctx, card, "item") && (data(ctx, card).cost ?? 0) <= boosts); if (items.length) ctx.requestCardChoice("delivery", decisionPrompt("Put a Mechanologist item into the arena", "card.dyn.delivery.item.put", { optionMessages: commonOptionMessages("pass") }), ["pass", ...items.map((card) => card.instanceId)]); }, onChoose(ctx, h, o) { if (h === "delivery" && o !== "pass") ctx.settleCard(Number(o)); } },
-  "urgent delivery|3": { onHit(ctx) { const boosts = ctx.state.chain.filter((link) => link.attacker === ctx.seat && link.flags.boosted).length; const items = ctx.player(ctx.seat).hand.filter((card) => hasType(ctx, card, "mechanologist") && hasType(ctx, card, "item") && (data(ctx, card).cost ?? 0) <= boosts); if (items.length) ctx.requestCardChoice("delivery", decisionPrompt("Put a Mechanologist item into the arena", "card.dyn.delivery.item.put", { optionMessages: commonOptionMessages("pass") }), ["pass", ...items.map((card) => card.instanceId)]); }, onChoose(ctx, h, o) { if (h === "delivery" && o !== "pass") ctx.settleCard(Number(o)); } },
+  "urgent delivery|1": {
+    onHit(ctx) {
+      const boosts = ctx.state.chain.filter((link) => link.attacker === ctx.seat && link.flags.boosted).length;
+      const items = ctx
+        .player(ctx.seat)
+        .hand.filter(
+          (card) =>
+            hasType(ctx, card, "mechanologist") && hasType(ctx, card, "item") && (data(ctx, card).cost ?? 0) <= boosts,
+        );
+      if (items.length)
+        ctx.requestCardChoice(
+          "delivery",
+          decisionPrompt("Put a Mechanologist item into the arena", "card.dyn.delivery.item.put", {
+            optionMessages: commonOptionMessages("pass"),
+          }),
+          ["pass", ...items.map((card) => card.instanceId)],
+        );
+    },
+    onChoose(ctx, h, o) {
+      if (h === "delivery" && o !== "pass") ctx.settleCard(Number(o));
+    },
+  },
+  "urgent delivery|2": {
+    onHit(ctx) {
+      const boosts = ctx.state.chain.filter((link) => link.attacker === ctx.seat && link.flags.boosted).length;
+      const items = ctx
+        .player(ctx.seat)
+        .hand.filter(
+          (card) =>
+            hasType(ctx, card, "mechanologist") && hasType(ctx, card, "item") && (data(ctx, card).cost ?? 0) <= boosts,
+        );
+      if (items.length)
+        ctx.requestCardChoice(
+          "delivery",
+          decisionPrompt("Put a Mechanologist item into the arena", "card.dyn.delivery.item.put", {
+            optionMessages: commonOptionMessages("pass"),
+          }),
+          ["pass", ...items.map((card) => card.instanceId)],
+        );
+    },
+    onChoose(ctx, h, o) {
+      if (h === "delivery" && o !== "pass") ctx.settleCard(Number(o));
+    },
+  },
+  "urgent delivery|3": {
+    onHit(ctx) {
+      const boosts = ctx.state.chain.filter((link) => link.attacker === ctx.seat && link.flags.boosted).length;
+      const items = ctx
+        .player(ctx.seat)
+        .hand.filter(
+          (card) =>
+            hasType(ctx, card, "mechanologist") && hasType(ctx, card, "item") && (data(ctx, card).cost ?? 0) <= boosts,
+        );
+      if (items.length)
+        ctx.requestCardChoice(
+          "delivery",
+          decisionPrompt("Put a Mechanologist item into the arena", "card.dyn.delivery.item.put", {
+            optionMessages: commonOptionMessages("pass"),
+          }),
+          ["pass", ...items.map((card) => card.instanceId)],
+        );
+    },
+    onChoose(ctx, h, o) {
+      if (h === "delivery" && o !== "pass") ctx.settleCard(Number(o));
+    },
+  },
 
   // Assassin
   "annihilate the armed|1": contractAttack(contractAttackAction),
@@ -618,12 +1005,122 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "slay the scholars|1": contractAttack(contractNonAttack),
   "slay the scholars|2": contractAttack(contractNonAttack),
   "slay the scholars|3": contractAttack(contractNonAttack),
-  "cut to the chase|1": { canPlay: (ctx) => !!ctx.link && hasType(ctx, ctx.link.attackingCard, "assassin") && (data(ctx, ctx.link.attackingCard).keywords ?? []).some((keyword) => keyword.toLowerCase() === "contract"), onPlay(ctx) { ctx.addModifier({ scope: "chain-link", attack: 3 }); const top = ctx.player(opponentSeat(ctx)).deck[0]; if (top) { ctx.lookAt(top.instanceId); ctx.setCounter("cutTop", top.instanceId); ctx.requestChoice("cut-top", bottomOrKeepPrompt(), ["bottom", "keep"]); } }, onChoose(ctx, h, o) { if (h === "cut-top" && o === "bottom") ctx.putOnDeckBottom(ctx.getCounter("cutTop")); } },
-  "cut to the chase|2": { canPlay: (ctx) => !!ctx.link && hasType(ctx, ctx.link.attackingCard, "assassin") && (data(ctx, ctx.link.attackingCard).keywords ?? []).some((keyword) => keyword.toLowerCase() === "contract"), onPlay(ctx) { ctx.addModifier({ scope: "chain-link", attack: 2 }); const top = ctx.player(opponentSeat(ctx)).deck[0]; if (top) { ctx.lookAt(top.instanceId); ctx.setCounter("cutTop", top.instanceId); ctx.requestChoice("cut-top", bottomOrKeepPrompt(), ["bottom", "keep"]); } }, onChoose(ctx, h, o) { if (h === "cut-top" && o === "bottom") ctx.putOnDeckBottom(ctx.getCounter("cutTop")); } },
-  "cut to the chase|3": { canPlay: (ctx) => !!ctx.link && hasType(ctx, ctx.link.attackingCard, "assassin") && (data(ctx, ctx.link.attackingCard).keywords ?? []).some((keyword) => keyword.toLowerCase() === "contract"), onPlay(ctx) { ctx.addModifier({ scope: "chain-link", attack: 1 }); const top = ctx.player(opponentSeat(ctx)).deck[0]; if (top) { ctx.lookAt(top.instanceId); ctx.setCounter("cutTop", top.instanceId); ctx.requestChoice("cut-top", bottomOrKeepPrompt(), ["bottom", "keep"]); } }, onChoose(ctx, h, o) { if (h === "cut-top" && o === "bottom") ctx.putOnDeckBottom(ctx.getCounter("cutTop")); } },
-  "shred|1": { canPlay: (ctx) => !!ctx.link && hasType(ctx, ctx.link.attackingCard, "assassin") && [...ctx.link.defendingCards, ...ctx.link.defendingEquipment].length > 0, onPlay(ctx) { const defenders = [...(ctx.link?.defendingCards ?? []), ...(ctx.link?.defendingEquipment ?? [])]; ctx.requestCardChoice("shred", decisionPrompt("Choose a defending card", "card.dyn.shred.defender.choose"), defenders.map((card) => card.instanceId)); }, onChoose(ctx, h, o) { if (h === "shred") ctx.addCardTempDefense(Number(o), -4); } },
-  "shred|2": { canPlay: (ctx) => !!ctx.link && hasType(ctx, ctx.link.attackingCard, "assassin") && [...ctx.link.defendingCards, ...ctx.link.defendingEquipment].length > 0, onPlay(ctx) { const defenders = [...(ctx.link?.defendingCards ?? []), ...(ctx.link?.defendingEquipment ?? [])]; ctx.requestCardChoice("shred", decisionPrompt("Choose a defending card", "card.dyn.shred.defender.choose"), defenders.map((card) => card.instanceId)); }, onChoose(ctx, h, o) { if (h === "shred") ctx.addCardTempDefense(Number(o), -3); } },
-  "spider's bite|0": { activated: attackAbility(2, { goAgain: true }), canTriggerOnHit(ctx) { return !!ctx.link && ctx.link.targetAllyId === undefined && ctx.link.attackingCard.instanceId === ctx.self.instanceId; }, onHit(ctx) { ctx.addModifier({ scope: "until-end-of-turn", seat: opponentSeat(ctx), defense: -1, appliesToCardType: "action", appliesToSubtype: "attack", once: true }); }, onEffectHit(ctx, targetSeat) { ctx.addModifier({ scope: "until-end-of-turn", seat: targetSeat, defense: -1, appliesToCardType: "action", appliesToSubtype: "attack", once: true }); } },
+  "cut to the chase|1": {
+    canPlay: (ctx) =>
+      !!ctx.link &&
+      hasType(ctx, ctx.link.attackingCard, "assassin") &&
+      (data(ctx, ctx.link.attackingCard).keywords ?? []).some((keyword) => keyword.toLowerCase() === "contract"),
+    onPlay(ctx) {
+      ctx.addModifier({ scope: "chain-link", attack: 3 });
+      const top = ctx.player(opponentSeat(ctx)).deck[0];
+      if (top) {
+        ctx.lookAt(top.instanceId);
+        ctx.setCounter("cutTop", top.instanceId);
+        ctx.requestChoice("cut-top", bottomOrKeepPrompt(), ["bottom", "keep"]);
+      }
+    },
+    onChoose(ctx, h, o) {
+      if (h === "cut-top" && o === "bottom") ctx.putOnDeckBottom(ctx.getCounter("cutTop"));
+    },
+  },
+  "cut to the chase|2": {
+    canPlay: (ctx) =>
+      !!ctx.link &&
+      hasType(ctx, ctx.link.attackingCard, "assassin") &&
+      (data(ctx, ctx.link.attackingCard).keywords ?? []).some((keyword) => keyword.toLowerCase() === "contract"),
+    onPlay(ctx) {
+      ctx.addModifier({ scope: "chain-link", attack: 2 });
+      const top = ctx.player(opponentSeat(ctx)).deck[0];
+      if (top) {
+        ctx.lookAt(top.instanceId);
+        ctx.setCounter("cutTop", top.instanceId);
+        ctx.requestChoice("cut-top", bottomOrKeepPrompt(), ["bottom", "keep"]);
+      }
+    },
+    onChoose(ctx, h, o) {
+      if (h === "cut-top" && o === "bottom") ctx.putOnDeckBottom(ctx.getCounter("cutTop"));
+    },
+  },
+  "cut to the chase|3": {
+    canPlay: (ctx) =>
+      !!ctx.link &&
+      hasType(ctx, ctx.link.attackingCard, "assassin") &&
+      (data(ctx, ctx.link.attackingCard).keywords ?? []).some((keyword) => keyword.toLowerCase() === "contract"),
+    onPlay(ctx) {
+      ctx.addModifier({ scope: "chain-link", attack: 1 });
+      const top = ctx.player(opponentSeat(ctx)).deck[0];
+      if (top) {
+        ctx.lookAt(top.instanceId);
+        ctx.setCounter("cutTop", top.instanceId);
+        ctx.requestChoice("cut-top", bottomOrKeepPrompt(), ["bottom", "keep"]);
+      }
+    },
+    onChoose(ctx, h, o) {
+      if (h === "cut-top" && o === "bottom") ctx.putOnDeckBottom(ctx.getCounter("cutTop"));
+    },
+  },
+  "shred|1": {
+    canPlay: (ctx) =>
+      !!ctx.link &&
+      hasType(ctx, ctx.link.attackingCard, "assassin") &&
+      [...ctx.link.defendingCards, ...ctx.link.defendingEquipment].length > 0,
+    onPlay(ctx) {
+      const defenders = [...(ctx.link?.defendingCards ?? []), ...(ctx.link?.defendingEquipment ?? [])];
+      ctx.requestCardChoice(
+        "shred",
+        decisionPrompt("Choose a defending card", "card.dyn.shred.defender.choose"),
+        defenders.map((card) => card.instanceId),
+      );
+    },
+    onChoose(ctx, h, o) {
+      if (h === "shred") ctx.addCardTempDefense(Number(o), -4);
+    },
+  },
+  "shred|2": {
+    canPlay: (ctx) =>
+      !!ctx.link &&
+      hasType(ctx, ctx.link.attackingCard, "assassin") &&
+      [...ctx.link.defendingCards, ...ctx.link.defendingEquipment].length > 0,
+    onPlay(ctx) {
+      const defenders = [...(ctx.link?.defendingCards ?? []), ...(ctx.link?.defendingEquipment ?? [])];
+      ctx.requestCardChoice(
+        "shred",
+        decisionPrompt("Choose a defending card", "card.dyn.shred.defender.choose"),
+        defenders.map((card) => card.instanceId),
+      );
+    },
+    onChoose(ctx, h, o) {
+      if (h === "shred") ctx.addCardTempDefense(Number(o), -3);
+    },
+  },
+  "spider's bite|0": {
+    activated: attackAbility(2, { goAgain: true }),
+    canTriggerOnHit(ctx) {
+      return (
+        !!ctx.link && ctx.link.targetAllyId === undefined && ctx.link.attackingCard.instanceId === ctx.self.instanceId
+      );
+    },
+    onHit(ctx) {
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        seat: opponentSeat(ctx),
+        defense: -1,
+        appliesToCardType: "action",
+        appliesToSubtype: "attack",
+        once: true,
+      });
+    },
+    onEffectHit(ctx, targetSeat) {
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        seat: targetSeat,
+        defense: -1,
+        appliesToCardType: "action",
+        appliesToSubtype: "attack",
+        once: true,
+      });
+    },
+  },
 
   // Ranger
   "blessing of focus|1": blessingFocus(3),
@@ -631,19 +1128,125 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "blessing of focus|3": blessingFocus(1),
   "drill shot|2": drillShot(),
   "drill shot|3": drillShot(),
-  "hemorrhage bore|1": { canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && aimCounter(ctx); }, onHit(ctx) { const arsenal = ctx.player(opponentSeat(ctx)).arsenal[0]; if (arsenal) ctx.moveToGraveyard(arsenal.instanceId, "arsenal"); } },
-  "hemorrhage bore|2": { canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && aimCounter(ctx); }, onHit(ctx) { const arsenal = ctx.player(opponentSeat(ctx)).arsenal[0]; if (arsenal) ctx.moveToGraveyard(arsenal.instanceId, "arsenal"); } },
-  "hemorrhage bore|3": { canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && aimCounter(ctx); }, onHit(ctx) { const arsenal = ctx.player(opponentSeat(ctx)).arsenal[0]; if (arsenal) ctx.moveToGraveyard(arsenal.instanceId, "arsenal"); } },
-  "long shot|1": { modifyAttack: (ctx) => aimCounter(ctx) ? 2 : 0 },
-  "long shot|2": { modifyAttack: (ctx) => aimCounter(ctx) ? 2 : 0 },
-  "long shot|3": { modifyAttack: (ctx) => aimCounter(ctx) ? 2 : 0 },
-  "point the tip|1": { onPlay(ctx) { const arrows = ctx.player(ctx.seat).arsenal.filter((card) => !card.faceDown && hasType(ctx, card, "arrow")); if (arrows.length) ctx.requestCardChoice("point", decisionPrompt("Choose a face-up arrow", "card.dyn.point.arrow.choose"), arrows.map((card) => card.instanceId)); }, onChoose(ctx, h, o) { if (h === "point") { ctx.addCardTempPower(Number(o), 3); ctx.addCounter(Number(o), "aim", 1); } } },
-  "point the tip|2": { onPlay(ctx) { const arrows = ctx.player(ctx.seat).arsenal.filter((card) => !card.faceDown && hasType(ctx, card, "arrow")); if (arrows.length) ctx.requestCardChoice("point", decisionPrompt("Choose a face-up arrow", "card.dyn.point.arrow.choose"), arrows.map((card) => card.instanceId)); }, onChoose(ctx, h, o) { if (h === "point") { ctx.addCardTempPower(Number(o), 2); ctx.addCounter(Number(o), "aim", 1); } } },
-  "point the tip|3": { onPlay(ctx) { const arrows = ctx.player(ctx.seat).arsenal.filter((card) => !card.faceDown && hasType(ctx, card, "arrow")); if (arrows.length) ctx.requestCardChoice("point", decisionPrompt("Choose a face-up arrow", "card.dyn.point.arrow.choose"), arrows.map((card) => card.instanceId)); }, onChoose(ctx, h, o) { if (h === "point") { ctx.addCardTempPower(Number(o), 1); ctx.addCounter(Number(o), "aim", 1); } } },
-  "hornet's sting|0": { onDefend(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (!top) return; logDeckTopReveal(ctx, top); if (hasType(ctx, top, "arrow")) { const targets = [ctx.player(opponentSeat(ctx)).hero.instanceId]; if (ctx.link?.attackCardType === "ally") targets.push(ctx.link.attackingCard.instanceId); ctx.requestCardChoice("hornet", decisionPrompt("Deal 1 damage to the attacking hero or ally", "card.dyn.hornet.target.choose"), targets); } else ctx.putOnDeckBottom(top.instanceId); }, onChoose(ctx, h, o) { if (h === "hornet") dealToAnyTarget(ctx, o, 1); } },
+  "hemorrhage bore|1": {
+    canTriggerOnHit(ctx) {
+      return ctx.link?.targetAllyId === undefined && aimCounter(ctx);
+    },
+    onHit(ctx) {
+      const arsenal = ctx.player(opponentSeat(ctx)).arsenal[0];
+      if (arsenal) ctx.moveToGraveyard(arsenal.instanceId, "arsenal");
+    },
+  },
+  "hemorrhage bore|2": {
+    canTriggerOnHit(ctx) {
+      return ctx.link?.targetAllyId === undefined && aimCounter(ctx);
+    },
+    onHit(ctx) {
+      const arsenal = ctx.player(opponentSeat(ctx)).arsenal[0];
+      if (arsenal) ctx.moveToGraveyard(arsenal.instanceId, "arsenal");
+    },
+  },
+  "hemorrhage bore|3": {
+    canTriggerOnHit(ctx) {
+      return ctx.link?.targetAllyId === undefined && aimCounter(ctx);
+    },
+    onHit(ctx) {
+      const arsenal = ctx.player(opponentSeat(ctx)).arsenal[0];
+      if (arsenal) ctx.moveToGraveyard(arsenal.instanceId, "arsenal");
+    },
+  },
+  "long shot|1": { modifyAttack: (ctx) => (aimCounter(ctx) ? 2 : 0) },
+  "long shot|2": { modifyAttack: (ctx) => (aimCounter(ctx) ? 2 : 0) },
+  "long shot|3": { modifyAttack: (ctx) => (aimCounter(ctx) ? 2 : 0) },
+  "point the tip|1": {
+    onPlay(ctx) {
+      const arrows = ctx.player(ctx.seat).arsenal.filter((card) => !card.faceDown && hasType(ctx, card, "arrow"));
+      if (arrows.length)
+        ctx.requestCardChoice(
+          "point",
+          decisionPrompt("Choose a face-up arrow", "card.dyn.point.arrow.choose"),
+          arrows.map((card) => card.instanceId),
+        );
+    },
+    onChoose(ctx, h, o) {
+      if (h === "point") {
+        ctx.addCardTempPower(Number(o), 3);
+        ctx.addCounter(Number(o), "aim", 1);
+      }
+    },
+  },
+  "point the tip|2": {
+    onPlay(ctx) {
+      const arrows = ctx.player(ctx.seat).arsenal.filter((card) => !card.faceDown && hasType(ctx, card, "arrow"));
+      if (arrows.length)
+        ctx.requestCardChoice(
+          "point",
+          decisionPrompt("Choose a face-up arrow", "card.dyn.point.arrow.choose"),
+          arrows.map((card) => card.instanceId),
+        );
+    },
+    onChoose(ctx, h, o) {
+      if (h === "point") {
+        ctx.addCardTempPower(Number(o), 2);
+        ctx.addCounter(Number(o), "aim", 1);
+      }
+    },
+  },
+  "point the tip|3": {
+    onPlay(ctx) {
+      const arrows = ctx.player(ctx.seat).arsenal.filter((card) => !card.faceDown && hasType(ctx, card, "arrow"));
+      if (arrows.length)
+        ctx.requestCardChoice(
+          "point",
+          decisionPrompt("Choose a face-up arrow", "card.dyn.point.arrow.choose"),
+          arrows.map((card) => card.instanceId),
+        );
+    },
+    onChoose(ctx, h, o) {
+      if (h === "point") {
+        ctx.addCardTempPower(Number(o), 1);
+        ctx.addCounter(Number(o), "aim", 1);
+      }
+    },
+  },
+  "hornet's sting|0": {
+    onDefend(ctx) {
+      const top = ctx.player(ctx.seat).deck[0];
+      if (!top) return;
+      logDeckTopReveal(ctx, top);
+      if (hasType(ctx, top, "arrow")) {
+        const targets = [ctx.player(opponentSeat(ctx)).hero.instanceId];
+        if (ctx.link?.attackCardType === "ally") targets.push(ctx.link.attackingCard.instanceId);
+        ctx.requestCardChoice(
+          "hornet",
+          decisionPrompt("Deal 1 damage to the attacking hero or ally", "card.dyn.hornet.target.choose"),
+          targets,
+        );
+      } else ctx.putOnDeckBottom(top.instanceId);
+    },
+    onChoose(ctx, h, o) {
+      if (h === "hornet") dealToAnyTarget(ctx, o, 1);
+    },
+  },
 
   // Runeblade
-  "annals of sutcliffe|0": { activated: { cost: 3, isAttack: false, goAgain: true, oncePerTurn: true, label: "Draw a card", onCostPaid(ctx, paid) { ctx.setCounter("annalsAttack", paid.some((card) => isAttackAction(ctx, card)) ? 1 : 0); ctx.setCounter("annalsNonAttack", paid.some((card) => isNonAttackAction(ctx, card)) ? 1 : 0); }, onActivate(ctx) { ctx.drawCards(ctx.seat, 1); if (ctx.getCounter("annalsAttack") && ctx.getCounter("annalsNonAttack")) ctx.createToken(RUNECHANT); } } },
+  "annals of sutcliffe|0": {
+    activated: {
+      cost: 3,
+      isAttack: false,
+      goAgain: true,
+      oncePerTurn: true,
+      label: "Draw a card",
+      onCostPaid(ctx, paid) {
+        ctx.setCounter("annalsAttack", paid.some((card) => isAttackAction(ctx, card)) ? 1 : 0);
+        ctx.setCounter("annalsNonAttack", paid.some((card) => isNonAttackAction(ctx, card)) ? 1 : 0);
+      },
+      onActivate(ctx) {
+        ctx.drawCards(ctx.seat, 1);
+        if (ctx.getCounter("annalsAttack") && ctx.getCounter("annalsNonAttack")) ctx.createToken(RUNECHANT);
+      },
+    },
+  },
   "aether slash|1": aetherSlash(),
   "aether slash|2": aetherSlash(),
   "aether slash|3": aetherSlash(),
@@ -656,9 +1259,33 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "blessing of occult|1": blessing((ctx) => createTokens(ctx, RUNECHANT, 3)),
   "blessing of occult|2": blessing((ctx) => createTokens(ctx, RUNECHANT, 2)),
   "blessing of occult|3": blessing((ctx) => createTokens(ctx, RUNECHANT, 1)),
-  "sky fire lanterns|1": { onPlay(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top) { logDeckTopReveal(ctx, top); if (ctx.cardColor(top) === 1) ctx.createToken(RUNECHANT); } } },
-  "sky fire lanterns|2": { onPlay(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top) { logDeckTopReveal(ctx, top); if (ctx.cardColor(top) === 2) ctx.createToken(RUNECHANT); } } },
-  "sky fire lanterns|3": { onPlay(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top) { logDeckTopReveal(ctx, top); if (ctx.cardColor(top) === 3) ctx.createToken(RUNECHANT); } } },
+  "sky fire lanterns|1": {
+    onPlay(ctx) {
+      const top = ctx.player(ctx.seat).deck[0];
+      if (top) {
+        logDeckTopReveal(ctx, top);
+        if (ctx.cardColor(top) === 1) ctx.createToken(RUNECHANT);
+      }
+    },
+  },
+  "sky fire lanterns|2": {
+    onPlay(ctx) {
+      const top = ctx.player(ctx.seat).deck[0];
+      if (top) {
+        logDeckTopReveal(ctx, top);
+        if (ctx.cardColor(top) === 2) ctx.createToken(RUNECHANT);
+      }
+    },
+  },
+  "sky fire lanterns|3": {
+    onPlay(ctx) {
+      const top = ctx.player(ctx.seat).deck[0];
+      if (top) {
+        logDeckTopReveal(ctx, top);
+        if (ctx.cardColor(top) === 3) ctx.createToken(RUNECHANT);
+      }
+    },
+  },
 
   // Wizard
   "aether quickening|1": arcaneTargetSpell(4, "go-again"),
@@ -672,10 +1299,87 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "blessing of aether|1": blessing((ctx) => buffNextArcaneDamageCard(ctx, 3)),
   "blessing of aether|2": blessing((ctx) => buffNextArcaneDamageCard(ctx, 2)),
   "blessing of aether|3": blessing((ctx) => buffNextArcaneDamageCard(ctx, 1)),
-  "tempest aurora|1": { onPlay(ctx) { ctx.setCounter("auroraMax", 2); ctx.addModifier({ scope: "until-end-of-turn" }); }, onFriendlyPlay(ctx, played) { if (ctx.getCounter("auroraMax") < 0 || (data(ctx, played).cost ?? 0) > ctx.getCounter("auroraMax") || !data(ctx, played).text.toLowerCase().includes("arcane damage")) return; ctx.addCounter(played.instanceId, "arcaneBonus", 1); ctx.setCounter("auroraMax", -1); const marker = ctx.state.modifiers.find((modifier) => modifier.sourceInstanceId === ctx.self.instanceId && !modifier.consumed); if (marker) ctx.consumeModifier(marker.id); } },
-  "tempest aurora|2": { onPlay(ctx) { ctx.setCounter("auroraMax", 1); ctx.addModifier({ scope: "until-end-of-turn" }); }, onFriendlyPlay(ctx, played) { if (ctx.getCounter("auroraMax") < 0 || (data(ctx, played).cost ?? 0) > ctx.getCounter("auroraMax") || !data(ctx, played).text.toLowerCase().includes("arcane damage")) return; ctx.addCounter(played.instanceId, "arcaneBonus", 1); ctx.setCounter("auroraMax", -1); const marker = ctx.state.modifiers.find((modifier) => modifier.sourceInstanceId === ctx.self.instanceId && !modifier.consumed); if (marker) ctx.consumeModifier(marker.id); } },
-  "tempest aurora|3": { onPlay(ctx) { ctx.setCounter("auroraMax", 0); ctx.addModifier({ scope: "until-end-of-turn" }); }, onFriendlyPlay(ctx, played) { if (ctx.getCounter("auroraMax") < 0 || (data(ctx, played).cost ?? 0) > ctx.getCounter("auroraMax") || !data(ctx, played).text.toLowerCase().includes("arcane damage")) return; ctx.addCounter(played.instanceId, "arcaneBonus", 1); ctx.setCounter("auroraMax", -1); const marker = ctx.state.modifiers.find((modifier) => modifier.sourceInstanceId === ctx.self.instanceId && !modifier.consumed); if (marker) ctx.consumeModifier(marker.id); } },
-  "seerstone|0": { activated: { cost: 3, isAttack: false, goAgain: false, label: "Look at the top card and create Ponder", onActivate(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top) { ctx.lookAt(top.instanceId); ctx.setCounter("seerTop", top.instanceId); ctx.requestChoice("seerstone", bottomOrKeepPrompt(), ["bottom", "keep"]); } else ctx.createToken("DYN244"); } }, onChoose(ctx, h, o) { if (h !== "seerstone") return; if (o === "bottom") ctx.putOnDeckBottom(ctx.getCounter("seerTop")); ctx.createToken("DYN244"); } },
+  "tempest aurora|1": {
+    onPlay(ctx) {
+      ctx.setCounter("auroraMax", 2);
+      ctx.addModifier({ scope: "until-end-of-turn" });
+    },
+    onFriendlyPlay(ctx, played) {
+      if (
+        ctx.getCounter("auroraMax") < 0 ||
+        (data(ctx, played).cost ?? 0) > ctx.getCounter("auroraMax") ||
+        !data(ctx, played).text.toLowerCase().includes("arcane damage")
+      )
+        return;
+      ctx.addCounter(played.instanceId, "arcaneBonus", 1);
+      ctx.setCounter("auroraMax", -1);
+      const marker = ctx.state.modifiers.find(
+        (modifier) => modifier.sourceInstanceId === ctx.self.instanceId && !modifier.consumed,
+      );
+      if (marker) ctx.consumeModifier(marker.id);
+    },
+  },
+  "tempest aurora|2": {
+    onPlay(ctx) {
+      ctx.setCounter("auroraMax", 1);
+      ctx.addModifier({ scope: "until-end-of-turn" });
+    },
+    onFriendlyPlay(ctx, played) {
+      if (
+        ctx.getCounter("auroraMax") < 0 ||
+        (data(ctx, played).cost ?? 0) > ctx.getCounter("auroraMax") ||
+        !data(ctx, played).text.toLowerCase().includes("arcane damage")
+      )
+        return;
+      ctx.addCounter(played.instanceId, "arcaneBonus", 1);
+      ctx.setCounter("auroraMax", -1);
+      const marker = ctx.state.modifiers.find(
+        (modifier) => modifier.sourceInstanceId === ctx.self.instanceId && !modifier.consumed,
+      );
+      if (marker) ctx.consumeModifier(marker.id);
+    },
+  },
+  "tempest aurora|3": {
+    onPlay(ctx) {
+      ctx.setCounter("auroraMax", 0);
+      ctx.addModifier({ scope: "until-end-of-turn" });
+    },
+    onFriendlyPlay(ctx, played) {
+      if (
+        ctx.getCounter("auroraMax") < 0 ||
+        (data(ctx, played).cost ?? 0) > ctx.getCounter("auroraMax") ||
+        !data(ctx, played).text.toLowerCase().includes("arcane damage")
+      )
+        return;
+      ctx.addCounter(played.instanceId, "arcaneBonus", 1);
+      ctx.setCounter("auroraMax", -1);
+      const marker = ctx.state.modifiers.find(
+        (modifier) => modifier.sourceInstanceId === ctx.self.instanceId && !modifier.consumed,
+      );
+      if (marker) ctx.consumeModifier(marker.id);
+    },
+  },
+  "seerstone|0": {
+    activated: {
+      cost: 3,
+      isAttack: false,
+      goAgain: false,
+      label: "Look at the top card and create Ponder",
+      onActivate(ctx) {
+        const top = ctx.player(ctx.seat).deck[0];
+        if (top) {
+          ctx.lookAt(top.instanceId);
+          ctx.setCounter("seerTop", top.instanceId);
+          ctx.requestChoice("seerstone", bottomOrKeepPrompt(), ["bottom", "keep"]);
+        } else ctx.createToken("DYN244");
+      },
+    },
+    onChoose(ctx, h, o) {
+      if (h !== "seerstone") return;
+      if (o === "bottom") ctx.putOnDeckBottom(ctx.getCounter("seerTop"));
+      ctx.createToken("DYN244");
+    },
+  },
 
   // Illusionist
   "blessing of spirits|1": blessing((ctx) => createTokens(ctx, SPECTRAL_SHIELD, 3)),
@@ -689,11 +1393,60 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "tranquil passing|1": tranquilPassing(3),
   "tranquil passing|2": tranquilPassing(2),
   "tranquil passing|3": tranquilPassing(1),
-  "water glow lanterns|1": { onPlay(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top) { logDeckTopReveal(ctx, top); if (ctx.cardColor(top) === 1) ctx.createToken(SPECTRAL_SHIELD); } } },
-  "water glow lanterns|2": { onPlay(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top) { logDeckTopReveal(ctx, top); if (ctx.cardColor(top) === 2) ctx.createToken(SPECTRAL_SHIELD); } } },
-  "water glow lanterns|3": { onPlay(ctx) { const top = ctx.player(ctx.seat).deck[0]; if (top) { logDeckTopReveal(ctx, top); if (ctx.cardColor(top) === 3) ctx.createToken(SPECTRAL_SHIELD); } } },
-  "wave of reality|0": { onDestroyed(ctx) { ctx.createToken(SPECTRAL_SHIELD); } },
+  "water glow lanterns|1": {
+    onPlay(ctx) {
+      const top = ctx.player(ctx.seat).deck[0];
+      if (top) {
+        logDeckTopReveal(ctx, top);
+        if (ctx.cardColor(top) === 1) ctx.createToken(SPECTRAL_SHIELD);
+      }
+    },
+  },
+  "water glow lanterns|2": {
+    onPlay(ctx) {
+      const top = ctx.player(ctx.seat).deck[0];
+      if (top) {
+        logDeckTopReveal(ctx, top);
+        if (ctx.cardColor(top) === 2) ctx.createToken(SPECTRAL_SHIELD);
+      }
+    },
+  },
+  "water glow lanterns|3": {
+    onPlay(ctx) {
+      const top = ctx.player(ctx.seat).deck[0];
+      if (top) {
+        logDeckTopReveal(ctx, top);
+        if (ctx.cardColor(top) === 3) ctx.createToken(SPECTRAL_SHIELD);
+      }
+    },
+  },
+  "wave of reality|0": {
+    onDestroyed(ctx) {
+      ctx.createToken(SPECTRAL_SHIELD);
+    },
+  },
 
   // Generic
-  "ornate tessen|0": { activated: { cost: 1, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true, label: "Cycle a hand card", onActivate(ctx) { const hand = ctx.player(ctx.seat).hand; if (hand.length) ctx.requestCardChoice("tessen", decisionPrompt("Put a hand card on the bottom", "card.dyn.tessen.hand.bottom"), hand.map((card) => card.instanceId)); } }, onChoose(ctx, h, o) { if (h === "tessen" && ctx.putOnDeckBottom(Number(o))) ctx.drawCards(ctx.seat, 1); } },
+  "ornate tessen|0": {
+    activated: {
+      cost: 1,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      destroySelfCost: true,
+      label: "Cycle a hand card",
+      onActivate(ctx) {
+        const hand = ctx.player(ctx.seat).hand;
+        if (hand.length)
+          ctx.requestCardChoice(
+            "tessen",
+            decisionPrompt("Put a hand card on the bottom", "card.dyn.tessen.hand.bottom"),
+            hand.map((card) => card.instanceId),
+          );
+      },
+    },
+    onChoose(ctx, h, o) {
+      if (h === "tessen" && ctx.putOnDeckBottom(Number(o))) ctx.drawCards(ctx.seat, 1);
+    },
+  },
 });

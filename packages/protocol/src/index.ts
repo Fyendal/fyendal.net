@@ -466,20 +466,30 @@ function decodeGameIntentValue(value: unknown): value is GameIntent {
   const presenceFlag = (v: unknown): boolean => v === undefined || v === true;
   const boostCount = (v: unknown): boolean =>
     v === undefined || (nonNegativeInteger(v) && v >= 2 && v <= 8);
-  const additionalCostSelection = (v: unknown): boolean => {
+  const cardCostSelection = (v: unknown): boolean => {
     if (v === undefined) return true;
     const selection = object(v);
+    const modes = selection && Array.isArray(selection.modes) ? selection.modes : null;
     return !!selection &&
-      exactKeys(selection, ["kind", "cardLabel", "maximumDestroyed", "maximumDiscarded"]) &&
-      selection.kind === "destroy-controlled-and-or-discard-hand" &&
+      exactKeys(selection, ["kind", "cardLabel", "minimum", "maximum", "modes"]) &&
+      selection.kind === "choose-card-cost" &&
       string(selection.cardLabel, MAX_SHORT_TEXT, false) &&
-      nonNegativeInteger(selection.maximumDestroyed) && selection.maximumDestroyed <= 16 &&
-      nonNegativeInteger(selection.maximumDiscarded) && selection.maximumDiscarded <= 16;
+      nonNegativeInteger(selection.minimum) && selection.minimum <= 16 &&
+      nonNegativeInteger(selection.maximum) && selection.maximum <= 16 &&
+      selection.minimum <= selection.maximum &&
+      !!modes && modes.length > 0 && modes.length <= 3 &&
+      modes.every((value) => {
+        const mode = object(value);
+        return !!mode && exactKeys(mode, ["kind", "maximum"]) &&
+          (mode.kind === "destroy" || mode.kind === "discard" || mode.kind === "banish") &&
+          nonNegativeInteger(mode.maximum) && mode.maximum <= 16;
+      }) &&
+      new Set(modes.map((value) => object(value)?.kind)).size === modes.length;
   };
   switch (intent.kind) {
     case "play-card":
     case "play-from-arsenal":
-      return exactKeys(intent, ["kind", "instanceId", "pitchInstanceIds", "pitchRequired", "meldSide", "targetAllyId", "targetCardInstanceId", "boost", "boostCount", "asInstant", "alternativeCostCardInstanceIds", "additionalCostSelection", "deferPlayPresentation"], ["kind", "instanceId", "pitchInstanceIds"])
+      return exactKeys(intent, ["kind", "instanceId", "pitchInstanceIds", "pitchRequired", "meldSide", "targetAllyId", "targetCardInstanceId", "boost", "boostCount", "asInstant", "alternativeCostCardInstanceIds", "cardCostSelection", "deferPlayPresentation"], ["kind", "instanceId", "pitchInstanceIds"])
         && instanceId(intent.instanceId) && instanceIds(intent.pitchInstanceIds)
         && optional(intent.pitchRequired, nonNegativeInteger)
         && meld(intent.meldSide) && target(intent.targetAllyId) && target(intent.targetCardInstanceId)
@@ -488,9 +498,9 @@ function decodeGameIntentValue(value: unknown): value is GameIntent {
         && presenceFlag(intent.asInstant)
         && presenceFlag(intent.deferPlayPresentation)
         && optional(intent.alternativeCostCardInstanceIds, instanceIds)
-        && additionalCostSelection(intent.additionalCostSelection);
+        && cardCostSelection(intent.cardCostSelection);
     case "play-from-zone":
-      return exactKeys(intent, ["kind", "zone", "instanceId", "pitchInstanceIds", "pitchRequired", "meldSide", "targetAllyId", "targetCardInstanceId", "boost", "boostCount", "asInstant", "alternativeCostCardInstanceIds", "additionalCostSelection", "deferPlayPresentation"], ["kind", "zone", "instanceId", "pitchInstanceIds"])
+      return exactKeys(intent, ["kind", "zone", "instanceId", "pitchInstanceIds", "pitchRequired", "meldSide", "targetAllyId", "targetCardInstanceId", "boost", "boostCount", "asInstant", "alternativeCostCardInstanceIds", "cardCostSelection", "deferPlayPresentation"], ["kind", "zone", "instanceId", "pitchInstanceIds"])
         && PLAYABLE_ZONES.has(String(intent.zone)) && instanceId(intent.instanceId)
         && instanceIds(intent.pitchInstanceIds) && optional(intent.pitchRequired, nonNegativeInteger)
         && meld(intent.meldSide)
@@ -500,14 +510,15 @@ function decodeGameIntentValue(value: unknown): value is GameIntent {
         && presenceFlag(intent.asInstant)
         && presenceFlag(intent.deferPlayPresentation)
         && optional(intent.alternativeCostCardInstanceIds, instanceIds)
-        && additionalCostSelection(intent.additionalCostSelection);
+        && cardCostSelection(intent.cardCostSelection);
     case "activate-ability":
-      return exactKeys(intent, ["kind", "sourceInstanceId", "pitchInstanceIds", "pitchRequired", "abilityIndex", "targetAllyId", "targetCardInstanceId", "alternativeCostCardInstanceIds", "deferActivationPresentation"], ["kind", "sourceInstanceId", "pitchInstanceIds"])
+      return exactKeys(intent, ["kind", "sourceInstanceId", "pitchInstanceIds", "pitchRequired", "abilityIndex", "targetAllyId", "targetCardInstanceId", "alternativeCostCardInstanceIds", "cardCostSelection", "deferActivationPresentation"], ["kind", "sourceInstanceId", "pitchInstanceIds"])
         && instanceId(intent.sourceInstanceId) && instanceIds(intent.pitchInstanceIds)
         && optional(intent.pitchRequired, nonNegativeInteger)
         && (intent.abilityIndex === undefined || (nonNegativeInteger(intent.abilityIndex) && intent.abilityIndex <= 32))
         && target(intent.targetAllyId) && target(intent.targetCardInstanceId)
         && presenceFlag(intent.deferActivationPresentation)
+        && cardCostSelection(intent.cardCostSelection)
         && optional(intent.alternativeCostCardInstanceIds, instanceIds);
     case "defend":
       return exactKeys(intent, ["kind", "instanceIds", "pitchInstanceIds"], ["kind", "instanceIds"])

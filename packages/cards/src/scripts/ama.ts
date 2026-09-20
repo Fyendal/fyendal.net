@@ -13,34 +13,30 @@ function zombies(ctx: ScriptCtx, zone: readonly DeepReadonly<CardInstance>[]) {
 }
 
 function controlsVox(ctx: ScriptCtx): boolean {
-  return ctx.player(ctx.seat).weapons.some((card) =>
-    ctx.cardData(card.cardId).name === "Vox Necropolis"
-  );
+  return ctx.player(ctx.seat).weapons.some((card) => ctx.cardData(card.cardId).name === "Vox Necropolis");
 }
 
-function grantDestroyingZombieAttack(
-  ctx: ScriptCtx,
-  power: number,
-  marker: string,
-): void {
+function grantDestroyingZombieAttack(ctx: ScriptCtx, power: number, marker: string): void {
   buffNextAttack(ctx, { attack: power, appliesToSubtype: "zombie" });
   ctx.addModifier({ scope: "until-end-of-turn" });
   ctx.setFlag("player", marker, (Number(ctx.getFlag("player", marker)) || 0) + 1);
 }
 
-function destroyingZombieAttack(marker: string): Pick<CardScript, "onFriendlyAttackDeclared" | "canTriggerOnHit" | "onHit"> {
+function destroyingZombieAttack(
+  marker: string,
+): Pick<CardScript, "onFriendlyAttackDeclared" | "canTriggerOnHit" | "onHit"> {
   return {
     onFriendlyAttackDeclared(ctx) {
       const link = ctx.link;
       const remaining = Number(ctx.getFlag("player", marker)) || 0;
-      if (!link || link.attacker !== ctx.seat || remaining <= 0 ||
-        !hasType(ctx, link.attackingCard, "zombie")) return;
+      if (!link || link.attacker !== ctx.seat || remaining <= 0 || !hasType(ctx, link.attackingCard, "zombie")) return;
       ctx.setFlag("player", marker, remaining - 1);
       ctx.setFlag("link", marker, (Number(ctx.getFlag("link", marker)) || 0) + 1);
-      const modifier = ctx.state.modifiers.find((candidate) =>
-        candidate.sourceInstanceId === ctx.self.instanceId &&
-        candidate.scope === "until-end-of-turn" &&
-        !candidate.consumed
+      const modifier = ctx.state.modifiers.find(
+        (candidate) =>
+          candidate.sourceInstanceId === ctx.self.instanceId &&
+          candidate.scope === "until-end-of-turn" &&
+          !candidate.consumed,
       );
       if (modifier) ctx.consumeModifier(modifier.id);
     },
@@ -59,21 +55,23 @@ const digForSoulsAttack = destroyingZombieAttack("amaDigForSouls");
 
 function decay(): Pick<CardScript, "triggers"> {
   return {
-    triggers: [{
-      event: "end-of-turn",
-      whose: "subject",
-      label: "Decay",
-      labelMessage: { id: "card.trigger.common.decay" },
-      effect(ctx) {
-        const life = ctx.self.life ?? 0;
-        if (life <= 1) {
-          ctx.destroySelf();
-          return;
-        }
-        ctx.setCounter("lifePenalty", ctx.getCounter("lifePenalty") + 1);
-        ctx.setPermanentLife(ctx.self.instanceId, life - 1);
+    triggers: [
+      {
+        event: "end-of-turn",
+        whose: "subject",
+        label: "Decay",
+        labelMessage: { id: "card.trigger.common.decay" },
+        effect(ctx) {
+          const life = ctx.self.life ?? 0;
+          if (life <= 1) {
+            ctx.destroySelf();
+            return;
+          }
+          ctx.setCounter("lifePenalty", ctx.getCounter("lifePenalty") + 1);
+          ctx.setPermanentLife(ctx.self.instanceId, life - 1);
+        },
       },
-    }],
+    ],
   };
 }
 
@@ -122,8 +120,12 @@ export const ama: Record<string, CardScript> = {
 
   "vox necropolis|0": {
     onFriendlyPlay(ctx, played, from) {
-      if (ctx.state.phase !== "action" || (from !== "graveyard" && from !== "banish") ||
-        !hasType(ctx, played, "zombie")) return;
+      if (
+        ctx.state.phase !== "action" ||
+        (from !== "graveyard" && from !== "banish") ||
+        !hasType(ctx, played, "zombie")
+      )
+        return;
       ctx.setCardCounter(played.instanceId, "voxAttackOnEnter", 1);
     },
     onFriendlyEnterArena(ctx, entered) {
@@ -140,7 +142,9 @@ export const ama: Record<string, CardScript> = {
       if (hand.length > 0) {
         ctx.requestCardChoice(
           "ama-crown-banish",
-          decisionPrompt("Banish a card for +1 defense?", "card.ama.crown.card.banish", { optionMessages: commonOptionMessages("no") }),
+          decisionPrompt("Banish a card for +1 defense?", "card.ama.crown.card.banish", {
+            optionMessages: commonOptionMessages("no"),
+          }),
           ["no", ...hand.map((card) => card.instanceId)],
         );
       }
@@ -164,22 +168,26 @@ export const ama: Record<string, CardScript> = {
         ctx.addModifier({ scope: "until-end-of-turn" });
       },
     },
-    triggers: [{
-      event: "card-put-into-graveyard",
-      label: "Gain 1 resource",
-      labelMessage: { id: "card.trigger.common.resource.gain", values: { amount: 1 } },
-      condition: (ctx, card) => !!card &&
-        card.owner === ctx.seat &&
-        hasType(ctx, card, "zombie") &&
-        ctx.state.modifiers.some((modifier) =>
-          modifier.sourceInstanceId === ctx.self.instanceId &&
-          modifier.scope === "until-end-of-turn" &&
-          !modifier.consumed
-        ),
-      effect(ctx) {
-        ctx.changeResources(ctx.seat, 1);
+    triggers: [
+      {
+        event: "card-put-into-graveyard",
+        label: "Gain 1 resource",
+        labelMessage: { id: "card.trigger.common.resource.gain", values: { amount: 1 } },
+        condition: (ctx, card) =>
+          !!card &&
+          card.owner === ctx.seat &&
+          hasType(ctx, card, "zombie") &&
+          ctx.state.modifiers.some(
+            (modifier) =>
+              modifier.sourceInstanceId === ctx.self.instanceId &&
+              modifier.scope === "until-end-of-turn" &&
+              !modifier.consumed,
+          ),
+        effect(ctx) {
+          ctx.changeResources(ctx.seat, 1);
+        },
       },
-    }],
+    ],
   },
 
   "undead grasp|0": {
@@ -188,13 +196,15 @@ export const ama: Record<string, CardScript> = {
       isAttack: false,
       goAgain: true,
       destroySelfCost: true,
-      effectCardCosts: [{
-        zone: "hand",
-        move: "discard",
-        count: 1,
-        subtype: "zombie",
-        prompt: decisionPrompt("Discard a zombie", "card.common.cost.zombie.discard"),
-      }],
+      effectCardCosts: [
+        {
+          zone: "hand",
+          move: "discard",
+          count: 1,
+          subtype: "zombie",
+          prompt: decisionPrompt("Discard a zombie", "card.common.cost.zombie.discard"),
+        },
+      ],
       onActivate(ctx) {
         grantDestroyingZombieAttack(ctx, 3, "amaUndeadGrasp");
       },
@@ -226,7 +236,9 @@ export const ama: Record<string, CardScript> = {
       const choices = zombies(ctx, looked);
       ctx.requestCardChoice(
         "ama-dig-zombie",
-        decisionPrompt("Put a zombie into your graveyard?", "card.ama.dig.zombie.choose", { optionMessages: commonOptionMessages("no") }),
+        decisionPrompt("Put a zombie into your graveyard?", "card.ama.dig.zombie.choose", {
+          optionMessages: commonOptionMessages("no"),
+        }),
         ["no", ...choices.map((card) => card.instanceId)],
       );
     },
@@ -238,7 +250,10 @@ export const ama: Record<string, CardScript> = {
       const rest = looked
         .filter((card) => card.instanceId !== Number(option))
         .filter((card) => ctx.player(ctx.seat).deck.some((candidate) => candidate.instanceId === card.instanceId));
-      ctx.putOnDeckBottomInChosenOrder(rest.map((card) => card.instanceId), "Order the remaining cards");
+      ctx.putOnDeckBottomInChosenOrder(
+        rest.map((card) => card.instanceId),
+        "Order the remaining cards",
+      );
       grantDestroyingZombieAttack(ctx, 4, "amaDigForSouls");
     },
     ...digForSoulsAttack,
@@ -277,19 +292,17 @@ export const ama: Record<string, CardScript> = {
       if (choices.length === 0) return;
       ctx.requestCardChoice(
         "ama-clambering-discard",
-        decisionPrompt(
-          "Discard a zombie?",
-          "card.iar.zombie.discard.optional",
-          { optionMessages: commonOptionMessages("no") },
-        ),
+        decisionPrompt("Discard a zombie?", "card.iar.zombie.discard.optional", {
+          optionMessages: commonOptionMessages("no"),
+        }),
         ["no", ...choices.map((card) => card.instanceId)],
       );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "ama-clambering-discard" || option === "no") return;
-      const zombie = ctx.player(ctx.seat).hand.find((card) =>
-        card.instanceId === Number(option) && hasType(ctx, card, "zombie")
-      );
+      const zombie = ctx
+        .player(ctx.seat)
+        .hand.find((card) => card.instanceId === Number(option) && hasType(ctx, card, "zombie"));
       if (!zombie || !ctx.discardCard(ctx.seat, zombie.instanceId)) return;
       ctx.addCardTempPower(ctx.self.instanceId, 3);
       ctx.grantGoAgain();
@@ -324,19 +337,15 @@ export const ama: Record<string, CardScript> = {
       if (banished.length === 0) return;
       ctx.requestCardChoice(
         "ama-solace-graveyard",
-        decisionPrompt(
-          "Put a banished card into your graveyard?",
-          "card.iar.banished.graveyard.put",
-          { optionMessages: commonOptionMessages("no") },
-        ),
+        decisionPrompt("Put a banished card into your graveyard?", "card.iar.banished.graveyard.put", {
+          optionMessages: commonOptionMessages("no"),
+        }),
         ["no", ...banished.map((card) => card.instanceId)],
       );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "ama-solace-graveyard" || option === "no") return;
-      const selected = ctx.player(ctx.seat).banish.find((card) =>
-        card.instanceId === Number(option) && !card.faceDown
-      );
+      const selected = ctx.player(ctx.seat).banish.find((card) => card.instanceId === Number(option) && !card.faceDown);
       if (!selected) return;
       const isZombie = hasType(ctx, selected, "zombie");
       if (ctx.moveToGraveyard(selected.instanceId, "banish") && isZombie) {

@@ -1,5 +1,11 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { commonOptionMessages, decisionMessage, decisionPrompt, localizedCardLog, yesNoPrompt } from "./shared-helpers.js";
+import {
+  commonOptionMessages,
+  decisionMessage,
+  decisionPrompt,
+  localizedCardLog,
+  yesNoPrompt,
+} from "./shared-helpers.js";
 
 function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
   return ctx.cardData(card.cardId);
@@ -23,7 +29,12 @@ function crankItem(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
 
 function addSteamChoice(ctx: ScriptCtx, hook: string): void {
   const items = ctx.player(ctx.seat).board.filter((card) => crankItem(ctx, card));
-  if (items.length) ctx.requestCardChoice(hook, decisionPrompt("Put a steam counter on an item with crank", "card.aio.crankitem.steam"), items.map((card) => card.instanceId));
+  if (items.length)
+    ctx.requestCardChoice(
+      hook,
+      decisionPrompt("Put a steam counter on an item with crank", "card.aio.crankitem.steam"),
+      items.map((card) => card.instanceId),
+    );
 }
 
 function maintenanceItem(steam: number, extra: CardScript = {}): CardScript {
@@ -41,7 +52,14 @@ function maintenanceItem(steam: number, extra: CardScript = {}): CardScript {
         labelMessage: decisionMessage("card.trigger.steam.maintain"),
         effect(ctx) {
           if (ctx.getCounter("steam") <= 0) ctx.destroySelf();
-          else ctx.requestChoice("aio-maintenance", decisionPrompt("Remove a steam counter or destroy this?", "card.aio.maintenance.choose", { optionMessages: commonOptionMessages("remove", "destroy") }), ["remove", "destroy"]);
+          else
+            ctx.requestChoice(
+              "aio-maintenance",
+              decisionPrompt("Remove a steam counter or destroy this?", "card.aio.maintenance.choose", {
+                optionMessages: commonOptionMessages("remove", "destroy"),
+              }),
+              ["remove", "destroy"],
+            );
         },
       },
       ...(extra.triggers ?? []),
@@ -61,21 +79,41 @@ export const aio: Record<string, CardScript> = {
   "dash i/o|0": {
     lookAtTopDeck: true,
     allowsFriendlyCardPlayFrom(ctx, card, zone) {
-      return zone === "deck" && ctx.player(ctx.seat).deck[0]?.instanceId === card.instanceId &&
+      return (
+        zone === "deck" &&
+        ctx.player(ctx.seat).deck[0]?.instanceId === card.instanceId &&
         ctx.getFlag("player", "dashTopItemPlayedThisTurn") !== true &&
-        isItem(ctx, card) && isMech(ctx, card) && (data(ctx, card).cost ?? 0) <= 1;
+        isItem(ctx, card) &&
+        isMech(ctx, card) &&
+        (data(ctx, card).cost ?? 0) <= 1
+      );
     },
     modifyFriendlyCardPlayCost(ctx, card, zone, baseCost) {
-      return zone === "deck" && ctx.getFlag("player", "dashTopItemPlayedThisTurn") !== true &&
-        isItem(ctx, card) && isMech(ctx, card) && (data(ctx, card).cost ?? 0) <= 1 ? baseCost + 1 : baseCost;
+      return zone === "deck" &&
+        ctx.getFlag("player", "dashTopItemPlayedThisTurn") !== true &&
+        isItem(ctx, card) &&
+        isMech(ctx, card) &&
+        (data(ctx, card).cost ?? 0) <= 1
+        ? baseCost + 1
+        : baseCost;
     },
     allowsFriendlyCardPlayAsInstant(ctx, card, zone) {
-      return zone === "deck" && ctx.getFlag("player", "dashTopItemPlayedThisTurn") !== true &&
-        isItem(ctx, card) && isMech(ctx, card) && (data(ctx, card).cost ?? 0) <= 1;
+      return (
+        zone === "deck" &&
+        ctx.getFlag("player", "dashTopItemPlayedThisTurn") !== true &&
+        isItem(ctx, card) &&
+        isMech(ctx, card) &&
+        (data(ctx, card).cost ?? 0) <= 1
+      );
     },
     requiresFriendlyCardPlayAsInstant(ctx, card, zone) {
-      return zone === "deck" && ctx.getFlag("player", "dashTopItemPlayedThisTurn") !== true &&
-        isItem(ctx, card) && isMech(ctx, card) && (data(ctx, card).cost ?? 0) <= 1;
+      return (
+        zone === "deck" &&
+        ctx.getFlag("player", "dashTopItemPlayedThisTurn") !== true &&
+        isItem(ctx, card) &&
+        isMech(ctx, card) &&
+        (data(ctx, card).cost ?? 0) <= 1
+      );
     },
     onFriendlyPlay(ctx, played, from) {
       if (from === "deck" && isItem(ctx, played) && isMech(ctx, played) && (data(ctx, played).cost ?? 0) <= 1) {
@@ -93,7 +131,14 @@ export const aio: Record<string, CardScript> = {
     },
     onFriendlyEnterArena(ctx, entered) {
       if (!isItem(ctx, entered) || !isMech(ctx, entered) || ctx.getCounter("steam") >= 6) return;
-      ctx.requestChoice("symbiosis-steam", yesNoPrompt("Put a steam counter on Symbiosis Shot?", "card.aio.symbiosisshot.steam"), ["yes", "no"], undefined, undefined, "yes");
+      ctx.requestChoice(
+        "symbiosis-steam",
+        yesNoPrompt("Put a steam counter on Symbiosis Shot?", "card.aio.symbiosisshot.steam"),
+        ["yes", "no"],
+        undefined,
+        undefined,
+        "yes",
+      );
     },
     onChoose(ctx, hook, option) {
       if (hook === "symbiosis-steam" && option === "yes" && ctx.getCounter("steam") < 6) {
@@ -103,7 +148,12 @@ export const aio: Record<string, CardScript> = {
   },
   "heavy industry surveillance|0": {
     onDefend(ctx) {
-      if (ctx.player(ctx.seat).deck.length) ctx.requestChoice("surveillance", yesNoPrompt("Banish the top card of your deck?", "card.aio.deck.top.banish"), ["yes", "no"]);
+      if (ctx.player(ctx.seat).deck.length)
+        ctx.requestChoice(
+          "surveillance",
+          yesNoPrompt("Banish the top card of your deck?", "card.aio.deck.top.banish"),
+          ["yes", "no"],
+        );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "surveillance" || option !== "yes") return;
@@ -118,22 +168,35 @@ export const aio: Record<string, CardScript> = {
       isAttack: false,
       goAgain: true,
       destroySelfCost: true,
-      onActivate(ctx) { ctx.addModifier({ scope: "until-end-of-turn" }); },
+      onActivate(ctx) {
+        ctx.addModifier({ scope: "until-end-of-turn" });
+      },
     },
     onBoosted(ctx) {
-      const activated = ctx.state.modifiers.some((modifier) =>
-        modifier.sourceInstanceId === ctx.self.instanceId &&
-        modifier.scope === "until-end-of-turn" &&
-        !modifier.consumed
+      const activated = ctx.state.modifiers.some(
+        (modifier) =>
+          modifier.sourceInstanceId === ctx.self.instanceId &&
+          modifier.scope === "until-end-of-turn" &&
+          !modifier.consumed,
       );
       if (!activated) return;
       ctx.changeResources(ctx.seat, 1);
-      ctx.logPublic(localizedCardLog(ctx, "Heavy Industry Power Plant: gain {r}", "card.log.common.resources.gained", { amount: 1 }));
+      ctx.logPublic(
+        localizedCardLog(ctx, "Heavy Industry Power Plant: gain {r}", "card.log.common.resources.gained", {
+          amount: 1,
+        }),
+      );
     },
   },
   "heavy industry ram stop|0": {
     defendCost: 1,
-    onDefend(ctx) { ctx.requestPayment("ram-stop", decisionPrompt("Pay 1 resource for +1 defense?", "card.aio.defense.pay", { values: { amount: 1 } }), 1); },
+    onDefend(ctx) {
+      ctx.requestPayment(
+        "ram-stop",
+        decisionPrompt("Pay 1 resource for +1 defense?", "card.aio.defense.pay", { values: { amount: 1 } }),
+        1,
+      );
+    },
     onChoose(ctx, hook, option) {
       if (hook === "ram-stop" && option === "paid") ctx.addCardTempDefense(ctx.self.instanceId, 1);
     },
@@ -157,14 +220,18 @@ export const aio: Record<string, CardScript> = {
     },
   },
   "fast and furious|1": {
-    modifyAttack: (ctx) => ctx.getFlag("player", "crankedThisTurn") === true ? 1 : 0,
-    triggers: [{
-      event: "card-banished-for-boost",
-      sourceZone: "banish",
-      label: "Put a steam counter on an item with crank",
-      labelMessage: decisionMessage("card.aio.crankitem.steam"),
-      effect(ctx) { addSteamChoice(ctx, "fast-furious-steam"); },
-    }],
+    modifyAttack: (ctx) => (ctx.getFlag("player", "crankedThisTurn") === true ? 1 : 0),
+    triggers: [
+      {
+        event: "card-banished-for-boost",
+        sourceZone: "banish",
+        label: "Put a steam counter on an item with crank",
+        labelMessage: decisionMessage("card.aio.crankitem.steam"),
+        effect(ctx) {
+          addSteamChoice(ctx, "fast-furious-steam");
+        },
+      },
+    ],
     onChoose(ctx, hook, option) {
       if (hook === "fast-furious-steam") ctx.addCounter(Number(option), "steam", 1);
     },
@@ -178,7 +245,9 @@ export const aio: Record<string, CardScript> = {
       isAttack: false,
       goAgain: false,
       oncePerTurn: true,
-      onActivate(ctx) { ctx.drawCards(ctx.seat, 1); },
+      onActivate(ctx) {
+        ctx.drawCards(ctx.seat, 1);
+      },
     },
   }),
 };

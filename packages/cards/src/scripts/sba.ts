@@ -1,5 +1,14 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, commonOptionMessages, dealArcane, decisionPrompt, isWeaponAttack, localizedCardLog, nextAttack, opponentSeat } from "./shared-helpers.js";
+import {
+  attackAbility,
+  commonOptionMessages,
+  dealArcane,
+  decisionPrompt,
+  isWeaponAttack,
+  localizedCardLog,
+  nextAttack,
+  opponentSeat,
+} from "./shared-helpers.js";
 
 // ── SBA (Silver Age: Briar precon) ──────────────────────────────────────────
 //
@@ -14,9 +23,6 @@ import { attackAbility, commonOptionMessages, dealArcane, decisionPrompt, isWeap
 const EMBODIMENT_OF_EARTH = "SBA034";
 const EMBODIMENT_OF_LIGHTNING = "SBA035";
 const RUNECHANT = "SBA036";
-
-
-
 
 // dealArcane comes from shared-helpers (applies the "next arcane card +N" pool)
 
@@ -79,9 +85,7 @@ function dealArcaneToTarget(ctx: ScriptCtx, option: string, amount: number): voi
  *  choice and resumes via finishPlayCard. */
 function fusionAdditionalCost(supertype: string) {
   return (ctx: ScriptCtx) => {
-    const matches = ctx.player(ctx.seat).hand.filter((c) =>
-      ctx.cardTypes(c).includes(supertype.toLowerCase()),
-    );
+    const matches = ctx.player(ctx.seat).hand.filter((c) => ctx.cardTypes(c).includes(supertype.toLowerCase()));
     if (matches.length === 0) return;
     ctx.requestCardChoice(
       "fusion",
@@ -105,13 +109,15 @@ function fusionOnChoose(ctx: ScriptCtx, hook: string, option: string): void {
       ctx.setFlag("player", `${type}FusedThisTurn`, true);
     }
   }
-  ctx.logPublic(localizedCardLog(
-    ctx,
-    `${ctx.data.name} is fused (reveals ${ctx.cardData(card.cardId).name})`,
-    "card.log.common.fusion.revealed",
-    { revealed: { kind: "card", cardId: card.cardId } },
-    { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" },
-  ));
+  ctx.logPublic(
+    localizedCardLog(
+      ctx,
+      `${ctx.data.name} is fused (reveals ${ctx.cardData(card.cardId).name})`,
+      "card.log.common.fusion.revealed",
+      { revealed: { kind: "card", cardId: card.cardId } },
+      { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" },
+    ),
+  );
 }
 
 // ── Meld split cards ────────────────────────────────────────────────────────
@@ -168,9 +174,11 @@ export const sba: Record<string, CardScript> = {
       }
     },
     canTriggerOnHit(ctx) {
-      return ctx.link?.attackCardType === "action" &&
+      return (
+        ctx.link?.attackCardType === "action" &&
         ctx.link.targetAllyId === undefined &&
-        ctx.getFlag("player", "briarEarthThisTurn") !== true;
+        ctx.getFlag("player", "briarEarthThisTurn") !== true
+      );
     },
     onHit(ctx) {
       // the first time an attack action card you control deals damage to an
@@ -178,15 +186,18 @@ export const sba: Record<string, CardScript> = {
       ctx.setFlag("player", "briarEarthThisTurn", true);
       ctx.createToken(EMBODIMENT_OF_EARTH);
     },
-    triggers: [{
-      event: "card-played",
-      label: "Create an Embodiment of Lightning",
-      condition: (ctx, played) => !!played &&
-        ctx.hasCardType(played, "action") &&
-        !ctx.cardTypes(played).includes("attack") &&
-        Number(ctx.getFlag("player", "nonAttackActionsPlayedThisTurn")) === 2,
-      effect: (ctx) => ctx.createToken(EMBODIMENT_OF_LIGHTNING),
-    }],
+    triggers: [
+      {
+        event: "card-played",
+        label: "Create an Embodiment of Lightning",
+        condition: (ctx, played) =>
+          !!played &&
+          ctx.hasCardType(played, "action") &&
+          !ctx.cardTypes(played).includes("attack") &&
+          Number(ctx.getFlag("player", "nonAttackActionsPlayedThisTurn")) === 2,
+        effect: (ctx) => ctx.createToken(EMBODIMENT_OF_LIGHTNING),
+      },
+    ],
   },
 
   // Scorpio, Comet Tail — tap to attack while you control a Lightning attack;
@@ -196,9 +207,7 @@ export const sba: Record<string, CardScript> = {
       tap: true,
       canActivate(ctx) {
         return ctx.state.chain.some(
-          (l) =>
-            l.attacker === ctx.seat &&
-            ctx.cardTypes(l.attackingCard).includes("lightning"),
+          (l) => l.attacker === ctx.seat && ctx.cardTypes(l.attackingCard).includes("lightning"),
         );
       },
     }),
@@ -221,7 +230,14 @@ export const sba: Record<string, CardScript> = {
       if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId) return;
       if (!playedLightning(ctx)) return;
       ctx.grantGoAgain();
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: +1{p} and go again (played a Lightning card this turn)`, "card.log.sba.starfall.lightning", { amount: 1 }));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.data.name}: +1{p} and go again (played a Lightning card this turn)`,
+          "card.log.sba.starfall.lightning",
+          { amount: 1 },
+        ),
+      );
     },
     onFriendlyPlay(ctx, played) {
       if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId) return;
@@ -265,16 +281,17 @@ export const sba: Record<string, CardScript> = {
         );
       },
       onActivate(ctx) {
-        const attacks = ctx.player(ctx.seat).graveyard.filter((c) =>
-          isRunebladeAction(ctx, c, true),
-        );
+        const attacks = ctx.player(ctx.seat).graveyard.filter((c) => isRunebladeAction(ctx, c, true));
         if (attacks.length === 0) {
           crownPickNonAttack(ctx);
           return;
         }
         ctx.requestCardChoice(
           "crown-attack",
-          decisionPrompt("Crown of Dichotomy: put a Runeblade attack action from your graveyard on top of your deck", "card.sba.crown.attack.top"),
+          decisionPrompt(
+            "Crown of Dichotomy: put a Runeblade attack action from your graveyard on top of your deck",
+            "card.sba.crown.attack.top",
+          ),
           attacks.map((c) => c.instanceId),
         );
       },
@@ -294,12 +311,17 @@ export const sba: Record<string, CardScript> = {
         // the chosen card goes on top: put the other one there first
         const chosen = Number(option);
         const other =
-          chosen === ctx.getCounter("crownAttack")
-            ? ctx.getCounter("crownNonAttack")
-            : ctx.getCounter("crownAttack");
+          chosen === ctx.getCounter("crownAttack") ? ctx.getCounter("crownNonAttack") : ctx.getCounter("crownAttack");
         crownPutOnTop(ctx, other);
         crownPutOnTop(ctx, chosen);
-        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: put two cards from the graveyard on top of the deck`, "card.log.sba.crown.graveyard.top", { amount: 2 }));
+        ctx.logPublic(
+          localizedCardLog(
+            ctx,
+            `${ctx.data.name}: put two cards from the graveyard on top of the deck`,
+            "card.log.sba.crown.graveyard.top",
+            { amount: 2 },
+          ),
+        );
       }
     },
   },
@@ -355,13 +377,15 @@ export const sba: Record<string, CardScript> = {
   // Jack Be Quick — may banish a Nimblism from graveyard for +1{p} and go again
   "jack be quick|1": {
     onAttackDeclared(ctx) {
-      const nimblisms = ctx.player(ctx.seat).graveyard.filter((c) =>
-        isNamed(ctx, c.cardId, "Nimblism"),
-      );
+      const nimblisms = ctx.player(ctx.seat).graveyard.filter((c) => isNamed(ctx, c.cardId, "Nimblism"));
       if (nimblisms.length === 0) return;
       ctx.requestCardChoice(
         "jack-banish",
-        decisionPrompt("Jack Be Quick: banish a Nimblism from your graveyard for +1{p} and go again?", "card.sba.jack.nimblism.banish", { optionMessages: commonOptionMessages("no") }),
+        decisionPrompt(
+          "Jack Be Quick: banish a Nimblism from your graveyard for +1{p} and go again?",
+          "card.sba.jack.nimblism.banish",
+          { optionMessages: commonOptionMessages("no") },
+        ),
         [...nimblisms.map((c) => c.instanceId), "no"],
       );
     },
@@ -377,13 +401,15 @@ export const sba: Record<string, CardScript> = {
       ctx.banish(card.instanceId);
       ctx.setCounter("jackBuff", 1);
       ctx.grantGoAgain();
-      ctx.logPublic(localizedCardLog(
-        ctx,
-        `${ctx.data.name}: banishes Nimblism — +1{p} and go again`,
-        "card.log.sba.jack.nimblism",
-        { result: { kind: "card", cardId: card.cardId }, amount: 1 },
-        { kind: "card-moved", cardId: card.cardId, ownerSeat: ctx.seat, from: "graveyard", to: "banish" },
-      ));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.data.name}: banishes Nimblism — +1{p} and go again`,
+          "card.log.sba.jack.nimblism",
+          { result: { kind: "card", cardId: card.cardId }, amount: 1 },
+          { kind: "card-moved", cardId: card.cardId, ownerSeat: ctx.seat, from: "graveyard", to: "banish" },
+        ),
+      );
     },
     modifyAttack(ctx) {
       return ctx.getCounter("jackBuff") ? 1 : 0;
@@ -394,9 +420,7 @@ export const sba: Record<string, CardScript> = {
     onHit(ctx) {
       // "When this hits a hero, {u} an ally they control, then steal it until
       // the end of this action phase."
-      const allies = ctx.player(opponentSeat(ctx)).board.filter((c) =>
-        ctx.cardTypes(c).includes("ally"),
-      );
+      const allies = ctx.player(opponentSeat(ctx)).board.filter((c) => ctx.cardTypes(c).includes("ally"));
       if (allies.length === 0) return;
       if (allies.length === 1) {
         ctx.untap(allies[0]!.instanceId);
@@ -405,7 +429,10 @@ export const sba: Record<string, CardScript> = {
       }
       ctx.requestCardChoice(
         "jack-steal",
-        decisionPrompt("Jack Be Quick: untap and steal an ally until the end of this action phase", "card.sba.jack.ally.steal"),
+        decisionPrompt(
+          "Jack Be Quick: untap and steal an ally until the end of this action phase",
+          "card.sba.jack.ally.steal",
+        ),
         allies.map((c) => c.instanceId),
       );
     },
@@ -422,7 +449,13 @@ export const sba: Record<string, CardScript> = {
     onAttackDeclared(ctx) {
       if (!ctx.getCounter("fromArsenal")) return;
       ctx.grantGoAgain();
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: gains go again (played from arsenal)`, "card.log.common.goagain.from.arsenal"));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.data.name}: gains go again (played from arsenal)`,
+          "card.log.common.goagain.from.arsenal",
+        ),
+      );
     },
   },
 
@@ -435,7 +468,9 @@ export const sba: Record<string, CardScript> = {
     onDamageDealt(ctx, _target, amount, arcane) {
       if (!arcane || amount <= 0) return;
       ctx.grantGoAgain();
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: gains go again (arcane damage dealt)`, "card.log.sba.arcane.goagain"));
+      ctx.logPublic(
+        localizedCardLog(ctx, `${ctx.data.name}: gains go again (arcane damage dealt)`, "card.log.sba.arcane.goagain"),
+      );
     },
     activated: {
       cost: 1,
@@ -457,13 +492,16 @@ export const sba: Record<string, CardScript> = {
     onAttackDeclared(ctx) {
       const top = ctx.player(ctx.seat).deck[0];
       const x = top ? (ctx.cardData(top.cardId).pitch ?? 0) : 0;
-      if (top) ctx.logPublic(localizedCardLog(
-        ctx,
-        `${ctx.data.name} reveals ${ctx.cardData(top.cardId).name} (-${x}{p})`,
-        "card.log.sba.rabble.revealed",
-        { revealed: { kind: "card", cardId: top.cardId }, amount: x },
-        { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
-      ));
+      if (top)
+        ctx.logPublic(
+          localizedCardLog(
+            ctx,
+            `${ctx.data.name} reveals ${ctx.cardData(top.cardId).name} (-${x}{p})`,
+            "card.log.sba.rabble.revealed",
+            { revealed: { kind: "card", cardId: top.cardId }, amount: x },
+            { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
+          ),
+        );
       ctx.setFlag("link", "rabbleX", x);
     },
     modifyAttack(ctx) {
@@ -489,7 +527,14 @@ export const sba: Record<string, CardScript> = {
       if (ctx.getFlag("player", "dealtDamageThisTurn") !== true) return;
       ctx.addModifier({ scope: "chain-link", attack: 1 });
       ctx.grantGoAgain();
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: +1{p} and go again (dealt damage this turn)`, "card.log.sba.secondstrike.damage", { amount: 1 }));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.data.name}: +1{p} and go again (dealt damage this turn)`,
+          "card.log.sba.secondstrike.damage",
+          { amount: 1 },
+        ),
+      );
     },
   },
 
@@ -550,9 +595,11 @@ export const sba: Record<string, CardScript> = {
       if (hook === "burn-up-shock-target") dealArcaneToTarget(ctx, option, 1);
     },
     canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined &&
+      return (
+        ctx.link?.targetAllyId === undefined &&
         ctx.link?.attacker === ctx.seat &&
-        ctx.getFlag("player", "burnUpArmed") === true;
+        ctx.getFlag("player", "burnUpArmed") === true
+      );
     },
     onHit(ctx) {
       ctx.setFlag("player", "burnUpArmed", false);
@@ -593,15 +640,22 @@ export const sba: Record<string, CardScript> = {
       const subs = ctx.cardTypes(link.attackingCard);
       if (!subs.includes("lightning") && !subs.includes("elemental")) return;
       ctx.setFlag("player", "weaveGoAgain", false);
-      const marker = ctx.state.modifiers.find((modifier) =>
-        modifier.sourceInstanceId === ctx.self.instanceId &&
-        modifier.scope === "until-end-of-turn" &&
-        !modifier.consumed
+      const marker = ctx.state.modifiers.find(
+        (modifier) =>
+          modifier.sourceInstanceId === ctx.self.instanceId &&
+          modifier.scope === "until-end-of-turn" &&
+          !modifier.consumed,
       );
       if (marker) ctx.consumeModifier(marker.id);
       if ((link.attackingCard.counters?.fused ?? 0) > 0) {
         ctx.grantGoAgain();
-        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: the fused attack gains go again`, "card.log.sba.fused.attack.goagain"));
+        ctx.logPublic(
+          localizedCardLog(
+            ctx,
+            `${ctx.data.name}: the fused attack gains go again`,
+            "card.log.sba.fused.attack.goagain",
+          ),
+        );
       }
     },
   },
@@ -619,7 +673,14 @@ export const sba: Record<string, CardScript> = {
     onPlay(ctx) {
       const cur = Number(ctx.getFlag("player", "preventNextDamage")) || 0;
       ctx.setFlag("player", "preventNextDamage", cur + 3);
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: the next 3 damage dealt to you this turn is prevented`, "card.log.common.damage.next.prevented", { amount: 3 }));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.data.name}: the next 3 damage dealt to you this turn is prevented`,
+          "card.log.common.damage.next.prevented",
+          { amount: 3 },
+        ),
+      );
     },
   },
 
@@ -627,10 +688,11 @@ export const sba: Record<string, CardScript> = {
   "lightning press|1": {
     playTargetOptions(ctx) {
       return ctx.state.chain
-        .filter((link) =>
-          link.flags.attackGone !== true &&
-          link.attackCardType === "action" &&
-          (ctx.cardData(link.attackingCard.cardId).cost ?? 99) <= 1
+        .filter(
+          (link) =>
+            link.flags.attackGone !== true &&
+            link.attackCardType === "action" &&
+            (ctx.cardData(link.attackingCard.cardId).cost ?? 99) <= 1,
         )
         .map((link) => link.attackingCard.instanceId);
     },
@@ -643,7 +705,11 @@ export const sba: Record<string, CardScript> = {
         appliesToInstanceId: ctx.playTargetInstanceId,
         maxCost: 1,
       });
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: the attack gains +3{p}`, "card.log.common.attack.gained", { amount: 3 }));
+      ctx.logPublic(
+        localizedCardLog(ctx, `${ctx.data.name}: the attack gains +3{p}`, "card.log.common.attack.gained", {
+          amount: 3,
+        }),
+      );
     },
   },
 
@@ -678,19 +744,20 @@ export const sba: Record<string, CardScript> = {
       {
         event: "card-played",
         label: "Destroy Embodiment of Lightning (attack gains go again)",
-        condition: (ctx, played) => !!played &&
-          ctx.hasCardType(played, "action") &&
-          ctx.cardTypes(played).includes("attack"),
+        condition: (ctx, played) =>
+          !!played && ctx.hasCardType(played, "action") && ctx.cardTypes(played).includes("attack"),
         effect(ctx) {
           ctx.destroySelf();
           ctx.grantGoAgain();
-          ctx.logPublic(localizedCardLog(
-            ctx,
-            `${ctx.data.name} is destroyed — the attack gains go again`,
-            "card.log.common.destroyed.attack.goagain",
-            undefined,
-            { kind: "card-moved", cardId: ctx.self.cardId, ownerSeat: ctx.seat, from: "board", to: "graveyard" },
-          ));
+          ctx.logPublic(
+            localizedCardLog(
+              ctx,
+              `${ctx.data.name} is destroyed — the attack gains go again`,
+              "card.log.common.destroyed.attack.goagain",
+              undefined,
+              { kind: "card-moved", cardId: ctx.self.cardId, ownerSeat: ctx.seat, from: "board", to: "graveyard" },
+            ),
+          );
         },
       },
     ],
@@ -705,9 +772,8 @@ export const sba: Record<string, CardScript> = {
       {
         event: "card-played",
         label: "Destroy Runechant: 1 arcane damage to the opposing hero",
-        condition: (ctx, played) => !!played &&
-          ctx.hasCardType(played, "action") &&
-          ctx.cardTypes(played).includes("attack"),
+        condition: (ctx, played) =>
+          !!played && ctx.hasCardType(played, "action") && ctx.cardTypes(played).includes("attack"),
         effect(ctx) {
           ctx.destroySelf();
           const unpreventable = ctx.getFlag("player", "nextRunechantUnpreventable") === true;
@@ -732,9 +798,7 @@ export const sba: Record<string, CardScript> = {
 // ── Crown of Dichotomy choice chain ─────────────────────────────────────────
 
 function crownPickNonAttack(ctx: ScriptCtx): void {
-  const nonAttacks = ctx.player(ctx.seat).graveyard.filter((c) =>
-    isRunebladeAction(ctx, c, false),
-  );
+  const nonAttacks = ctx.player(ctx.seat).graveyard.filter((c) => isRunebladeAction(ctx, c, false));
   if (nonAttacks.length === 0) {
     // only an attack action was available: straight to the top
     const picked = ctx.getCounter("crownAttack");
@@ -743,7 +807,10 @@ function crownPickNonAttack(ctx: ScriptCtx): void {
   }
   ctx.requestCardChoice(
     "crown-non-attack",
-    decisionPrompt("Crown of Dichotomy: put a Runeblade 'non-attack' action from your graveyard on top of your deck", "card.sba.crown.nonattack.top"),
+    decisionPrompt(
+      "Crown of Dichotomy: put a Runeblade 'non-attack' action from your graveyard on top of your deck",
+      "card.sba.crown.nonattack.top",
+    ),
     nonAttacks.map((c) => c.instanceId),
   );
 }

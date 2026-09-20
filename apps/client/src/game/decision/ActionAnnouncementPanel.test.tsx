@@ -83,6 +83,9 @@ describe("alternative-cost payment choices", () => {
           ...paymentModel(true),
           stagedAdditionalCost: {
             cardLabel: "zombies",
+            minimum: 0,
+            maximum: 6,
+            selectedInstanceIds: [],
             modes: [
               {
                 mode: "destroy",
@@ -105,7 +108,7 @@ describe("alternative-cost payment choices", () => {
     expect(html).toContain("decision-additional-cost");
     expect(html).toContain("decision-additional-cost-groups");
     expect(html).toContain("decision-additional-cost-group");
-    expect(html).toContain("Choose up to 3 zombies from each zone");
+    expect(html).toContain("Choose up to 6 zombies to pay this cost");
     expect(html).toContain("Destroy from arena");
     expect(html).toContain("Discard from hand");
     expect(html).toContain("Confirm zombies");
@@ -122,6 +125,9 @@ describe("alternative-cost payment choices", () => {
           alternativeCostCardInstanceIds: [2],
           stagedAdditionalCost: {
             cardLabel: "zombies",
+            minimum: 0,
+            maximum: 3,
+            selectedInstanceIds: [2],
             modes: [{
               mode: "destroy",
               maximum: 3,
@@ -144,22 +150,70 @@ describe("alternative-cost payment choices", () => {
 });
 
 describe("activated ability mode choices", () => {
-  it("presents an exact defense-ability cost as a plain discard prompt", () => {
+  it("presents an exact defense-ability cost in the same card chooser", () => {
     const html = renderLocalized(
       <ActionAnnouncementPanel
         model={{
           ...paymentModel(false),
           sel: { kind: "activate", sourceInstanceId: 1 },
           alternativeCostChoices: [],
+          stagedAdditionalCost: {
+            cardLabel: "allies",
+            minimum: 1,
+            maximum: 1,
+            selectedInstanceIds: [],
+            modes: [
+              {
+                mode: "destroy",
+                maximum: 1,
+                cards: [{ instanceId: 2, cardId: "IAR084", owner: 0 }],
+              },
+              {
+                mode: "discard",
+                maximum: 1,
+                cards: [{ instanceId: 3, cardId: "IAR084", owner: 0 }],
+              },
+            ],
+          },
           paymentProgress: { kind: "discard", selected: 0, required: 1 },
         }}
         viewerSeat={0}
       />,
     );
 
-    expect(html).toContain("Choose a card to discard");
-    expect(html).not.toContain("0/1");
+    expect(html).toContain("Choose allies to pay this cost");
+    expect(html).toContain("Destroy from arena");
+    expect(html).toContain("Discard from hand");
+    expect(html).not.toContain("Choose none");
+    expect(html.match(/0\/1/g)).toHaveLength(2);
     expect(html).not.toContain("pitch resources selected");
+  });
+
+  it("labels a banish-from-hand defense cost accurately", () => {
+    const html = renderLocalized(
+      <ActionAnnouncementPanel
+        model={{
+          ...paymentModel(false),
+          sel: { kind: "activate", sourceInstanceId: 1 },
+          alternativeCostChoices: [],
+          stagedAdditionalCost: {
+            cardLabel: "cards",
+            minimum: 1,
+            maximum: 1,
+            selectedInstanceIds: [],
+            modes: [{
+              mode: "banish",
+              maximum: 1,
+              cards: [{ instanceId: 2, cardId: "WTR167", owner: 0 }],
+            }],
+          },
+        }}
+        viewerSeat={0}
+      />,
+    );
+
+    expect(html).toContain("Banish from hand");
+    expect(html).not.toContain("Discard from hand");
   });
 
   it("shows the mode prompt before pitch progress", () => {

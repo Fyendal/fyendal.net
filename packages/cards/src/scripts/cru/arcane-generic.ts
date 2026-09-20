@@ -55,10 +55,7 @@ function consumingVolition(): CardScript {
       if (hand.length === 0) return;
       ctx.requestCardChoice(
         "consuming-discard",
-        decisionPrompt(
-          "Consuming Volition: choose a card to discard",
-          "card.cru.consuming.discard.choose",
-        ),
+        decisionPrompt("Consuming Volition: choose a card to discard", "card.cru.consuming.discard.choose"),
         hand.map((card) => card.instanceId),
         target,
       );
@@ -90,10 +87,7 @@ function requestResearchOrder(ctx: ScriptCtx, ids: number[]): void {
   if (ids.length === 0) return;
   ctx.requestCardChoice(
     `research-order:${ids.join(",")}`,
-    decisionPrompt(
-      "Sutcliffe's Research Notes: choose the bottommost card first",
-      "card.cru.research.order.choose",
-    ),
+    decisionPrompt("Sutcliffe's Research Notes: choose the bottommost card first", "card.cru.research.order.choose"),
     ids,
   );
 }
@@ -104,7 +98,10 @@ function researchNotes(count: number): CardScript {
       const cards = ctx.state.players[ctx.seat]!.deck.slice(0, count);
       for (const card of cards) ctx.lookAt(card.instanceId);
       createRunechants(ctx, cards.filter((card) => isRunebladeAttack(ctx, card)).length);
-      requestResearchOrder(ctx, cards.map((card) => card.instanceId));
+      requestResearchOrder(
+        ctx,
+        cards.map((card) => card.instanceId),
+      );
     },
     onChoose(ctx, hook, option) {
       const match = /^research-order:([\d,]+)$/.exec(hook);
@@ -112,7 +109,10 @@ function researchNotes(count: number): CardScript {
       const ids = match[1]!.split(",").map(Number);
       const chosen = Number(option);
       if (!ids.includes(chosen) || !ctx.putOnDeckTop(chosen)) return;
-      requestResearchOrder(ctx, ids.filter((id) => id !== chosen));
+      requestResearchOrder(
+        ctx,
+        ids.filter((id) => id !== chosen),
+      );
     },
   };
 }
@@ -191,8 +191,7 @@ function snapback(damage: number): CardScript {
     arcaneDamageEffect: true,
     arcaneDamageEffectAmounts: [damage],
     playAsInstant: (ctx) =>
-      wizardActionAsInstant(ctx) ||
-      ctx.getFlag("player", "playedClassType:wizard:non-attack-action") === true,
+      wizardActionAsInstant(ctx) || ctx.getFlag("player", "playedClassType:wizard:non-attack-action") === true,
     onPlay(ctx) {
       const amount = ctx.previewArcaneDamage(damage);
       requestHeroTarget(
@@ -256,24 +255,25 @@ function reinforceTheLine(defense: number): CardScript {
 
 export const cruArcaneGeneric: Record<string, CardScript> = {
   "viserai, rune blood|0": {
-    triggers: [{
-      event: "card-played",
-      label: "Create a Runechant",
-      condition(ctx, played) {
-        if (!played) return false;
-      const currentIsNonAttack = isNonAttackAction(ctx, played);
-      const priorNonAttacks = Number(ctx.getFlag("player", "nonAttackActionsPlayedThisTurn")) -
-        (currentIsNonAttack ? 1 : 0);
-        return ctx.cardTypes(played).includes("runeblade") && priorNonAttacks > 0;
+    triggers: [
+      {
+        event: "card-played",
+        label: "Create a Runechant",
+        condition(ctx, played) {
+          if (!played) return false;
+          const currentIsNonAttack = isNonAttackAction(ctx, played);
+          const priorNonAttacks =
+            Number(ctx.getFlag("player", "nonAttackActionsPlayedThisTurn")) - (currentIsNonAttack ? 1 : 0);
+          return ctx.cardTypes(played).includes("runeblade") && priorNonAttacks > 0;
+        },
+        effect: (ctx) => createRunechants(ctx, 1),
       },
-      effect: (ctx) => createRunechants(ctx, 1),
-    }],
+    ],
   },
 
   "nebula blade|0": {
     activated: { cost: 2, isAttack: true, goAgain: false, oncePerTurn: true, label: "Attack" },
-    modifyAttack: (ctx) =>
-      ctx.getFlag("player", "playedNonAttackAction") === true ? 3 : 0,
+    modifyAttack: (ctx) => (ctx.getFlag("player", "playedNonAttackAction") === true ? 3 : 0),
     onHit: (ctx) => createRunechants(ctx, 1),
   },
 

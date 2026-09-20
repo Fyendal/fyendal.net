@@ -29,20 +29,22 @@ function equippedEvos(ctx: ScriptCtx): number {
 
 function guardianAura(power: number, reduction = 0): CardScript {
   return {
-    triggers: [{
-      event: "start-of-turn",
-      whose: "subject",
-      label: `Destroy this — next Guardian attack gets +${power}{p}`,
-      effect(ctx) {
-        ctx.destroySelf();
-        buffNextAttack(ctx, {
-          attack: power,
-          ...(reduction > 0 ? { attackCostReduction: reduction } : {}),
-          appliesTo: "attack-action",
-          appliesToClass: "guardian",
-        });
+    triggers: [
+      {
+        event: "start-of-turn",
+        whose: "subject",
+        label: `Destroy this — next Guardian attack gets +${power}{p}`,
+        effect(ctx) {
+          ctx.destroySelf();
+          buffNextAttack(ctx, {
+            attack: power,
+            ...(reduction > 0 ? { attackCostReduction: reduction } : {}),
+            appliesTo: "attack-action",
+            appliesToClass: "guardian",
+          });
+        },
       },
-    }],
+    ],
   };
 }
 
@@ -57,7 +59,11 @@ function boulderDrop(): CardScript {
       if (hand.length) {
         ctx.requestCardChoice(
           "boulder-drop-top",
-          decisionPrompt(`${ctx.data.name}: put a card from your hand on top of your deck`, "card.tcc.boulder.hand.top", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }),
+          decisionPrompt(
+            `${ctx.data.name}: put a card from your hand on top of your deck`,
+            "card.tcc.boulder.hand.top",
+            { values: { card: { kind: "card", cardId: ctx.self.cardId } } },
+          ),
           hand.map((card) => card.instanceId),
           target,
         );
@@ -103,7 +109,17 @@ function interlude(amount: number): CardScript {
     onPlay(ctx) {
       ctx.requestChoice(
         "interlude-target",
-        decisionPrompt(`${ctx.data.name}: choose a hero to prevent the next ${amount} damage to`, "card.tcc.interlude.hero.choose", { values: { card: { kind: "card", cardId: ctx.self.cardId }, amount }, optionMessages: { you: decisionMessage("common.option.self"), opponent: decisionMessage("common.option.opponent") } }),
+        decisionPrompt(
+          `${ctx.data.name}: choose a hero to prevent the next ${amount} damage to`,
+          "card.tcc.interlude.hero.choose",
+          {
+            values: { card: { kind: "card", cardId: ctx.self.cardId }, amount },
+            optionMessages: {
+              you: decisionMessage("common.option.self"),
+              opponent: decisionMessage("common.option.opponent"),
+            },
+          },
+        ),
         ["you", "opponent"],
       );
     },
@@ -120,7 +136,11 @@ function interlude(amount: number): CardScript {
 }
 
 function song(effect: (ctx: ScriptCtx, target: number) => void): CardScript {
-  return { onPlay(ctx) { effect(ctx, opponentSeat(ctx)); } };
+  return {
+    onPlay(ctx) {
+      effect(ctx, opponentSeat(ctx));
+    },
+  };
 }
 
 function tigerEyeReflex(): CardScript {
@@ -169,12 +189,14 @@ export const tcc: Record<string, CardScript> = {
   "crowd control|3": payForDefenseBoost(3, 1),
 
   "melody, sing-along|0": {
-    triggers: [{
-      event: "card-played",
-      label: "Create Copper tokens",
-      condition: (ctx, played) => !!played && hasType(ctx, played, "song"),
-      effect: (ctx) => ctx.createTokens(COPPER, ctx.state.players.length - 1),
-    }],
+    triggers: [
+      {
+        event: "card-played",
+        label: "Create Copper tokens",
+        condition: (ctx, played) => !!played && hasType(ctx, played, "song"),
+        effect: (ctx) => ctx.createTokens(COPPER, ctx.state.players.length - 1),
+      },
+    ],
   },
   "jinglewood, smash hit|0": {
     activated: [
@@ -224,12 +246,14 @@ export const tcc: Record<string, CardScript> = {
   "encore|2": {
     onPlay(ctx) {
       const cards = ctx.player(ctx.seat).graveyard.filter((card) => {
-        return ctx.hasCardType(card, "action") &&
-          hasType(ctx, card, "attack") &&
-          hasType(ctx, card, "bard");
+        return ctx.hasCardType(card, "action") && hasType(ctx, card, "attack") && hasType(ctx, card, "bard");
       });
       if (cards.length) {
-        ctx.requestCardChoice("encore", decisionPrompt("Encore: return a Bard attack action to your hand", "card.tcc.encore.attack.return"), cards.map((card) => card.instanceId));
+        ctx.requestCardChoice(
+          "encore",
+          decisionPrompt("Encore: return a Bard attack action to your hand", "card.tcc.encore.attack.return"),
+          cards.map((card) => card.instanceId),
+        );
       }
     },
     onChoose(ctx, hook, option) {
@@ -239,11 +263,21 @@ export const tcc: Record<string, CardScript> = {
   "interlude|1": interlude(3),
   "interlude|2": interlude(2),
   "interlude|3": interlude(1),
-  "song of jack-be-quick|3": song((ctx, target) => { ctx.createToken(QUICKEN, target); }),
-  "song of sweet nectar|3": song((ctx, target) => { ctx.gainLife(target, 1); }),
-  "song of the rosen matador|3": song((ctx, target) => { ctx.createToken(VIGOR, target); }),
-  "song of the shining knight|3": song((ctx, target) => { ctx.createToken(MIGHT, target); }),
-  "song of the wandering mind|3": song((ctx, target) => { ctx.drawCards(target, 1); }),
+  "song of jack-be-quick|3": song((ctx, target) => {
+    ctx.createToken(QUICKEN, target);
+  }),
+  "song of sweet nectar|3": song((ctx, target) => {
+    ctx.gainLife(target, 1);
+  }),
+  "song of the rosen matador|3": song((ctx, target) => {
+    ctx.createToken(VIGOR, target);
+  }),
+  "song of the shining knight|3": song((ctx, target) => {
+    ctx.createToken(MIGHT, target);
+  }),
+  "song of the wandering mind|3": song((ctx, target) => {
+    ctx.drawCards(target, 1);
+  }),
   "mask of three tails|0": {
     activated: {
       cost: 0,
@@ -253,7 +287,9 @@ export const tcc: Record<string, CardScript> = {
       destroySelfCost: true,
       label: "Destroy: draw a card",
       canActivate: (ctx) => ctx.hitsThisCombatChain(ctx.seat) >= 3,
-      onActivate(ctx) { ctx.drawCards(ctx.seat, 1); },
+      onActivate(ctx) {
+        ctx.drawCards(ctx.seat, 1);
+      },
     },
   },
   "growl|1": {
@@ -284,7 +320,13 @@ export const tcc: Record<string, CardScript> = {
       const attacks = ctx.player(target).graveyard.filter((card) => {
         return ctx.hasCardType(card, "action") && hasType(ctx, card, "attack");
       });
-      if (attacks.length) ctx.requestCardChoice("yesteryears", decisionPrompt("Put an attack action on the bottom of your deck", "card.tcc.attack.bottom"), attacks.map((card) => card.instanceId), target);
+      if (attacks.length)
+        ctx.requestCardChoice(
+          "yesteryears",
+          decisionPrompt("Put an attack action on the bottom of your deck", "card.tcc.attack.bottom"),
+          attacks.map((card) => card.instanceId),
+          target,
+        );
     }),
     onChoose(ctx, hook, option) {
       if (hook === "yesteryears") ctx.putOnDeckBottom(Number(option));

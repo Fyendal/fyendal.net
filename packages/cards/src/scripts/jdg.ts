@@ -10,9 +10,7 @@ function nonHeroPermanents(ctx: ScriptCtx, seat: number): DeepReadonly<CardInsta
   return [
     ...player.board,
     ...player.weapons,
-    ...Object.values(player.equipment).filter(
-      (card): card is DeepReadonly<CardInstance> => card !== undefined,
-    ),
+    ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
   ];
 }
 
@@ -38,10 +36,7 @@ export const jdg: Record<string, CardScript> = {
         if (tomes.length) {
           ctx.requestCardChoice(
             "librarian-tome",
-            decisionPrompt(
-              "The Librarian: reveal a Tome from inventory",
-              "card.jdg.librarian.tome.choose",
-            ),
+            decisionPrompt("The Librarian: reveal a Tome from inventory", "card.jdg.librarian.tome.choose"),
             tomes.map((card) => card.instanceId),
           );
         }
@@ -63,7 +58,8 @@ export const jdg: Record<string, CardScript> = {
         destroyingSeat === undefined ||
         destroyingSeat === ctx.seat ||
         ctx.getFlag("player", "theryonObservedDestruction") === true
-      ) return;
+      )
+        return;
       ctx.setFlag("player", "theryonObservedDestruction", true);
       ctx.setCounter("theryonDestroyingSeat", destroyingSeat);
       ctx.requestPayment(
@@ -82,10 +78,7 @@ export const jdg: Record<string, CardScript> = {
         if (permanents.length) {
           ctx.requestCardChoice(
             "theryon-destroy",
-            decisionPrompt(
-              "Choose a non-hero permanent you control to destroy",
-              "card.jdg.theryon.permanent.choose",
-            ),
+            decisionPrompt("Choose a non-hero permanent you control to destroy", "card.jdg.theryon.permanent.choose"),
             permanents.map((card) => card.instanceId),
             destroyingSeat,
           );

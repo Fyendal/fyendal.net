@@ -15,7 +15,9 @@ export const fab: Record<string, CardScript> = {
       oncePerTurn: false,
       destroySelfCost: true,
       label: "Destroy: draw a card",
-      onActivate(ctx) { ctx.drawCards(ctx.seat, 1); },
+      onActivate(ctx) {
+        ctx.drawCards(ctx.seat, 1);
+      },
     },
   },
 };

@@ -6,22 +6,17 @@ function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string)
 }
 
 function hasContract(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return (ctx.cardData(card.cardId).keywords ?? []).some(
-    (keyword) => keyword.toLowerCase() === "contract",
-  );
+  return (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "contract");
 }
 
-function applyContractBonus(
-  ctx: ScriptCtx,
-  attacking: DeepReadonly<CardInstance>,
-  duringAttack = false,
-): void {
+function applyContractBonus(ctx: ScriptCtx, attacking: DeepReadonly<CardInstance>, duringAttack = false): void {
   if (
     !ctx.hasCardType(attacking, "action") ||
     !ctx.cardTypes(attacking).includes("attack") ||
     !hasContract(ctx, attacking) ||
     ctx.getPlayerFlag(ctx.seat, "handContractAttackThisTurn") === true
-  ) return;
+  )
+    return;
 
   ctx.setPlayerFlag(ctx.seat, "handContractAttackThisTurn", true);
   if (duringAttack) {
@@ -58,18 +53,20 @@ export const ark: Record<string, CardScript> = {
     onFriendlyPlay(ctx, played) {
       applyContractBonus(ctx, played);
     },
-    triggers: [{
-      event: "end-of-turn",
-      whose: "subject",
-      label: "Destroy a Silver or put this on the bottom and draw",
-      effect(ctx) {
-        const silver = ctx.player(ctx.seat).board.find((card) => ctx.cardData(card.cardId).name === "Silver");
-        if (silver) ctx.destroyPermanent(silver.instanceId);
-        else {
-          ctx.putOnDeckBottom(ctx.self.instanceId);
-          ctx.drawCards(ctx.seat, 1);
-        }
+    triggers: [
+      {
+        event: "end-of-turn",
+        whose: "subject",
+        label: "Destroy a Silver or put this on the bottom and draw",
+        effect(ctx) {
+          const silver = ctx.player(ctx.seat).board.find((card) => ctx.cardData(card.cardId).name === "Silver");
+          if (silver) ctx.destroyPermanent(silver.instanceId);
+          else {
+            ctx.putOnDeckBottom(ctx.self.instanceId);
+            ctx.drawCards(ctx.seat, 1);
+          }
+        },
       },
-    }],
+    ],
   },
 };

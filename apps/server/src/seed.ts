@@ -20,7 +20,9 @@
  * and RALLYC — a private Silver Age room with Rally the Coast Guard already
  * defending and two cards available to discard; and MARKS3 — a private CC
  * room for testing Restless Steed's on-hit go again, with Mark of Ushering in
- * hand and an undefended Hala bot; and NITRO8 — a private CC room where alice
+ * hand and an undefended Hala bot; and FLASH1 — a private CC room where
+ * Oscilio has Lightning Press ready over Cindra's stacked Sink Below while
+ * Gone in a Flash is attacking; and NITRO8 — a private CC room where alice
  * can construct Nitro Mechanoid, play Hit the Gas for 3 action points, attack
  * repeatedly, then pass to the standard Hala bot; and FUNNEL — a private CC
  * room where Aurora can play Arc Lightning, red Rush of Power, then Current
@@ -73,6 +75,7 @@ const MARKS_TEST_ROOM_CODE = "MARKS3";
 const NITRO_TEST_ROOM_CODE = "NITRO8";
 const CURRENT_FUNNEL_TEST_ROOM_CODE = "FUNNEL";
 const NEW_HORIZON_TEST_ROOM_CODE = "NEWHOR";
+const GONE_IN_A_FLASH_TEST_ROOM_CODE = "FLASH1";
 const RETIRED_TEST_ROOM_CODES = ["BASEMT"] as const;
 
 /**
@@ -231,6 +234,94 @@ function currentFunnelTestGameState(): GameState {
   opponent.deck.push(...opponent.hand);
   opponent.hand = [];
   opponent.equipment = {};
+  return state;
+}
+
+/** Gone in a Flash is attacking Cindra with Sink Below already on the stack.
+ * Alice has priority and Lightning Press in hand; playing it reproduces the
+ * reported ordering while the ordinary Cindra policy drives every bot choice. */
+function goneInAFlashTestGameState(): GameState {
+  const cindra = botDefinition("cindra");
+  const cindraPool = precon(cindra?.deckId ?? "")?.pool;
+  if (!cindra || !cindraPool) throw new Error("Gone in a Flash test fixture bot deck is unavailable");
+  const oscilio = {
+    heroId: "ROS019",
+    weaponIds: ["ROS021"],
+    equipment: {},
+    deck: ["ROS076", "AST021", ...Array<string>(58).fill("RNR020")],
+  };
+  const cindraPresentation = cindra.presentationFor(oscilio, "second");
+  let state = createGame({
+    decklists: [
+      oscilio,
+      {
+        heroId: cindraPool.heroId,
+        ...cindraPresentation,
+        deck: [...cindraPresentation.deck, "ANQ034", "PEN321"],
+      },
+    ],
+    seed: 9172026,
+    cards: cardData,
+    scripts,
+    startPlayer: 0,
+  });
+
+  const oscilioPlayer = state.players[0]!;
+  const oscilioCards = [...oscilioPlayer.hand, ...oscilioPlayer.deck];
+  const takeOscilio = (cardId: string) => {
+    const index = oscilioCards.findIndex((card) => card.cardId === cardId);
+    if (index < 0) throw new Error(`Gone in a Flash test fixture is missing ${cardId}`);
+    return oscilioCards.splice(index, 1)[0]!;
+  };
+  oscilioPlayer.hand = [takeOscilio("ROS076"), takeOscilio("AST021")];
+  oscilioPlayer.deck = oscilioCards;
+
+  const cindraPlayer = state.players[1]!;
+  const cindraCards = [...cindraPlayer.hand, ...cindraPlayer.deck];
+  const takeCindra = (cardId: string) => {
+    const index = cindraCards.findIndex((card) => card.cardId === cardId);
+    if (index < 0) throw new Error(`Gone in a Flash test fixture is missing ${cardId}`);
+    return cindraCards.splice(index, 1)[0]!;
+  };
+  cindraPlayer.hand = [takeCindra("ANQ034"), takeCindra("PEN321")];
+  cindraPlayer.deck = cindraCards;
+
+  const applyLegal = (
+    current: GameState,
+    seat: number,
+    label: string,
+    predicate: (intent: ReturnType<typeof legalIntents>[number]) => boolean,
+  ): GameState => {
+    const intent = legalIntents(current, seat).find(predicate);
+    if (!intent) throw new Error(`Gone in a Flash test fixture cannot ${label}`);
+    const result = applyIntent(current, seat, intent);
+    if (!result.ok) throw new Error(`Gone in a Flash test fixture cannot ${label}: ${result.error}`);
+    return result.state;
+  };
+
+  const goneInAFlash = oscilioPlayer.hand.find((card) => card.cardId === "ROS076")!;
+  state = applyLegal(state, 0, "play Gone in a Flash", (intent) =>
+    intent.kind === "play-card" && intent.instanceId === goneInAFlash.instanceId
+  );
+  for (let guard = 0; guard < 8 && state.pendingDecision?.kind !== "defend"; guard++) {
+    const actor = state.pendingDecision?.player ?? state.priorityPlayer;
+    state = applyLegal(state, actor, "pass to the defend step", (intent) => intent.kind === "pass");
+  }
+  if (state.pendingDecision?.kind !== "defend" || state.pendingDecision.player !== 1) {
+    throw new Error("Gone in a Flash test fixture did not reach Cindra's defend step");
+  }
+  state = applyLegal(state, 1, "take the attack", (intent) =>
+    intent.kind === "defend" && intent.instanceIds.length === 0
+  );
+  state = applyLegal(state, 0, "pass attack-reaction priority", (intent) => intent.kind === "pass");
+  const sinkBelow = state.players[1]!.hand.find((card) => card.cardId === "ANQ034")!;
+  state = applyLegal(state, 1, "play Sink Below", (intent) =>
+    intent.kind === "play-card" && intent.instanceId === sinkBelow.instanceId
+  );
+  state = applyLegal(state, 1, "pass priority over Sink Below", (intent) => intent.kind === "pass");
+  if (state.pendingDecision?.kind !== "attack-reaction" || state.pendingDecision.player !== 0) {
+    throw new Error("Gone in a Flash test fixture did not return priority to Oscilio");
+  }
   return state;
 }
 
@@ -597,7 +688,7 @@ try {
   try {
     // These rooms are disposable local fixture data. Recreate them so rerunning
     // the seed also repairs stale ruleset envelopes and clears dependent history.
-    await pool.query("DELETE FROM rooms WHERE code IN ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)", [
+    await pool.query("DELETE FROM rooms WHERE code IN ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)", [
       DEMO_ROOM_CODE,
       HUNTER_TEST_ROOM_CODE,
       SNAP_ARC_TEST_ROOM_CODE,
@@ -608,6 +699,7 @@ try {
       NITRO_TEST_ROOM_CODE,
       CURRENT_FUNNEL_TEST_ROOM_CODE,
       NEW_HORIZON_TEST_ROOM_CODE,
+      GONE_IN_A_FLASH_TEST_ROOM_CODE,
       ...RETIRED_TEST_ROOM_CODES,
     ]);
     await pool.query(
@@ -727,6 +819,51 @@ try {
         JSON.stringify(currentFunnelPrep),
         seedRulesetVersion,
         Date.now(),
+      ],
+    );
+    const goneInAFlashPrep = { rolls: [6, 1], dieWinner: 0, startPlayer: 0 };
+    const cindraForGoneInAFlash = botDefinition("cindra");
+    const cindraPoolForGoneInAFlash = precon(cindraForGoneInAFlash?.deckId ?? "")?.pool;
+    if (!cindraForGoneInAFlash || !cindraPoolForGoneInAFlash) {
+      throw new Error("Gone in a Flash test fixture room metadata is unavailable");
+    }
+    await pool.query(
+      `INSERT INTO rooms
+        (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at,
+         status, winner, is_private)
+       VALUES ($1, 'cc', '[]', $2, $3, $4, 0, $5, NULL, 'active', NULL, TRUE)`,
+      [
+        GONE_IN_A_FLASH_TEST_ROOM_CODE,
+        JSON.stringify(dehydrateState(goneInAFlashTestGameState(), seedRulesetVersion)),
+        JSON.stringify(goneInAFlashPrep),
+        seedRulesetVersion,
+        Date.now(),
+      ],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, user_id, token_hash, username, hero_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 0, $2, $3, 'alice', 'ROS019', 'Gone in a Flash chain-close test',
+               FALSE, TRUE, 'human')`,
+      [
+        GONE_IN_A_FLASH_TEST_ROOM_CODE,
+        aliceId,
+        hashReconnectToken(randomBytes(12).toString("hex")),
+      ],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, token_hash, username, hero_id, deck_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 1, $2, $3, $4, $5, $6, FALSE, TRUE, 'bot')`,
+      [
+        GONE_IN_A_FLASH_TEST_ROOM_CODE,
+        hashReconnectToken(randomBytes(12).toString("hex")),
+        cindraForGoneInAFlash.username,
+        cindraPoolForGoneInAFlash.heroId,
+        cindraForGoneInAFlash.deckId,
+        cindraForGoneInAFlash.deckName,
       ],
     );
     await pool.query(
@@ -1112,6 +1249,7 @@ try {
   console.log(`seeded Nitro Mechanoid room ${NITRO_TEST_ROOM_CODE} — log in as alice and open /${NITRO_TEST_ROOM_CODE}`);
   console.log(`seeded Current Funnel room ${CURRENT_FUNNEL_TEST_ROOM_CODE} — log in as alice and open /${CURRENT_FUNNEL_TEST_ROOM_CODE}`);
   console.log(`seeded New Horizon room ${NEW_HORIZON_TEST_ROOM_CODE} — log in as alice and open /${NEW_HORIZON_TEST_ROOM_CODE}`);
+  console.log(`seeded Gone in a Flash room ${GONE_IN_A_FLASH_TEST_ROOM_CODE} — log in as alice and open /${GONE_IN_A_FLASH_TEST_ROOM_CODE}`);
   console.log("seeded fixed bug notification for alice");
 } finally {
   await pool.end();

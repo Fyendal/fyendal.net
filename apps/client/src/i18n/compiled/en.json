@@ -10681,6 +10681,12 @@
       "value": "Destroy the red card?"
     }
   ],
+  "card.pen.rendflesh.counter.remove": [
+    {
+      "type": 0,
+      "value": "Rend Flesh: remove a +1 power counter for the hit hero to lose 2 life?"
+    }
+  ],
   "card.pen.scrap.choose": [
     {
       "type": 0,
@@ -20030,20 +20036,6 @@
       "value": "Activate instant ability"
     }
   ],
-  "game.decision.additionalCost.choose": [
-    {
-      "type": 0,
-      "value": "Choose up to 3 "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": " from each zone"
-    }
-  ],
   "game.decision.additionalCost.destroy": [
     {
       "type": 0,
@@ -20248,6 +20240,66 @@
     {
       "type": 0,
       "value": " times"
+    }
+  ],
+  "game.decision.cardCost.banish": [
+    {
+      "type": 0,
+      "value": "Banish from hand"
+    }
+  ],
+  "game.decision.cardCost.chooseExact": [
+    {
+      "type": 0,
+      "value": "Choose "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " to pay this cost"
+    }
+  ],
+  "game.decision.cardCost.chooseUpTo": [
+    {
+      "type": 0,
+      "value": "Choose up to "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " to pay this cost"
+    }
+  ],
+  "game.decision.cardCost.label.allies": [
+    {
+      "type": 0,
+      "value": "allies"
+    }
+  ],
+  "game.decision.cardCost.label.cards": [
+    {
+      "type": 0,
+      "value": "cards"
+    }
+  ],
+  "game.decision.cardCost.label.zombies": [
+    {
+      "type": 0,
+      "value": "zombies"
     }
   ],
   "game.decision.chooseCard": [

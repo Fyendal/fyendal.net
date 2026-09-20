@@ -1,6 +1,6 @@
 import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
-import type { AdditionalPlayCostSelection, CardData, GameIntent, MeldSide, PlayableZone } from "@fyendal/shared";
+import type { CardCostSelection, CardData, GameIntent, MeldSide, PlayableZone } from "@fyendal/shared";
 import type { CardInstance, PlayerState } from "./state.js";
 import {
   activatedAbilitiesSuppressed,
@@ -266,14 +266,18 @@ function playIntentsWithPitches(
   const effectiveCost = cost ?? dataOf(state, card.cardId).cost ?? 0;
   const pitchRequired = pitchRequirement(player, effectiveCost);
   const declaredCost = scriptOf(state, card.cardId, card)?.alternativePlayCost;
-  const additionalCostSelection: AdditionalPlayCostSelection | undefined =
+  const cardCostSelection: CardCostSelection | undefined =
     alternativeCostCardInstanceIds !== undefined &&
       declaredCost?.kind === "destroy-controlled-and-or-discard-hand-subtype"
       ? {
-          kind: "destroy-controlled-and-or-discard-hand",
+          kind: "choose-card-cost",
           cardLabel: declaredCost.cardLabel,
-          maximumDestroyed: declaredCost.maximumDestroyed,
-          maximumDiscarded: declaredCost.maximumDiscarded,
+          minimum: 0,
+          maximum: declaredCost.maximumDestroyed + declaredCost.maximumDiscarded,
+          modes: [
+            { kind: "destroy", maximum: declaredCost.maximumDestroyed },
+            { kind: "discard", maximum: declaredCost.maximumDiscarded },
+          ],
         }
       : undefined;
   return pitchOptions(state, player, effectiveCost, excluded, 0, includeUnaffordable)
@@ -298,7 +302,7 @@ function playIntentsWithPitches(
             ...(alternativeCostCardInstanceIds !== undefined
               ? { alternativeCostCardInstanceIds }
               : {}),
-            ...(additionalCostSelection ? { additionalCostSelection } : {}),
+            ...(cardCostSelection ? { cardCostSelection } : {}),
           } as GameIntent)
         : ({
             kind: "play-from-zone",
@@ -313,7 +317,7 @@ function playIntentsWithPitches(
             ...(alternativeCostCardInstanceIds !== undefined
               ? { alternativeCostCardInstanceIds }
               : {}),
-            ...(additionalCostSelection ? { additionalCostSelection } : {}),
+            ...(cardCostSelection ? { cardCostSelection } : {}),
           } as GameIntent),
     );
 }
@@ -847,6 +851,21 @@ function reactionIntents(
               ...player.board.filter((card) => cardTypesOf(state, card).includes(subtype)),
             ]
           : player.hand;
+        const cardCostSelection: CardCostSelection = {
+          kind: "choose-card-cost",
+          cardLabel: subtype === "ally" ? "allies" : subtype ? `${subtype}s` : "cards",
+          minimum: ability.discard,
+          maximum: ability.discard,
+          modes: subtype
+            ? [
+                { kind: "destroy", maximum: ability.discard },
+                { kind: "discard", maximum: ability.discard },
+              ]
+            : [{
+                kind: ability.banishHandCard ? "banish" : "discard",
+                maximum: ability.discard,
+              }],
+        };
         for (const h of candidates) {
           intents.push({
             kind: "activate-ability",
@@ -856,6 +875,7 @@ function reactionIntents(
             // clients from projecting it as a resource pitch.
             pitchInstanceIds: [h.instanceId],
             deferActivationPresentation: true,
+            cardCostSelection,
           });
         }
       }

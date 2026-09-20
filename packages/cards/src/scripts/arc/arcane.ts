@@ -101,10 +101,12 @@ function opposingArcaneSpell(damage: number, extra: CardScript = {}): CardScript
     arcaneDamageEffect: true,
     arcaneDamageEffectAmounts: [damage],
     playAsInstant: wizardActionAsInstant,
-    prospectiveHeroDamage: (ctx) => [{
-      targetSeat: opponentSeat(ctx),
-      amount: damage + ctx.getCounter("arcaneBonus"),
-    }],
+    prospectiveHeroDamage: (ctx) => [
+      {
+        targetSeat: opponentSeat(ctx),
+        amount: damage + ctx.getCounter("arcaneBonus"),
+      },
+    ],
     onPlay: (ctx) => dealArcane(ctx, opponentSeat(ctx), damage),
     ...extra,
     onChoose(ctx, hook, option) {
@@ -121,7 +123,14 @@ function targetHeroArcaneSpell(damage: number): CardScript {
     onPlay(ctx) {
       ctx.requestChoice(
         `arc-target:${damage}`,
-        decisionPrompt(`${ctx.data.name}: deal ${ctx.previewArcaneDamage(damage)} arcane damage to which hero?`, "card.arc.arcane.hero.choose", { values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: ctx.previewArcaneDamage(damage) }, optionMessages: commonOptionMessages("opposing hero", "your hero") }),
+        decisionPrompt(
+          `${ctx.data.name}: deal ${ctx.previewArcaneDamage(damage)} arcane damage to which hero?`,
+          "card.arc.arcane.hero.choose",
+          {
+            values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: ctx.previewArcaneDamage(damage) },
+            optionMessages: commonOptionMessages("opposing hero", "your hero"),
+          },
+        ),
         ["opposing hero", "your hero"],
       );
     },
@@ -154,9 +163,7 @@ function aetherSpindle(damage: number): CardScript {
 
 function isWizardNonAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return (
-    ctx.hasCardType(card, "action") &&
-    !ctx.cardTypes(card).includes("attack") &&
-    ctx.cardTypes(card).includes("wizard")
+    ctx.hasCardType(card, "action") && !ctx.cardTypes(card).includes("attack") && ctx.cardTypes(card).includes("wizard")
   );
 }
 
@@ -170,16 +177,18 @@ function reverberate(damage: number): CardScript {
       if (eligible.length === 0) return;
       ctx.requestCardChoice(
         "reverberate-banish",
-        decisionPrompt(`${ctx.data.name}: banish a Wizard non-attack action to play as an instant this turn?`, "card.arc.wizard.banish", { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: commonOptionMessages("no") }),
+        decisionPrompt(
+          `${ctx.data.name}: banish a Wizard non-attack action to play as an instant this turn?`,
+          "card.arc.wizard.banish",
+          { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: commonOptionMessages("no") },
+        ),
         ["no", ...eligible.map((card) => card.instanceId)],
       );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "reverberate-banish" || option === "no") return;
       const instanceId = Number(option);
-      const card = ctx.state.players[ctx.seat]!.hand.find(
-        (candidate) => candidate.instanceId === instanceId,
-      );
+      const card = ctx.state.players[ctx.seat]!.hand.find((candidate) => candidate.instanceId === instanceId);
       if (!card || !isWizardNonAttack(ctx, card) || !ctx.banish(instanceId)) return;
       ctx.allowPlayFrom(instanceId, "banish");
       ctx.setFlag("player", `asInstant:${instanceId}`, true);
@@ -194,7 +203,9 @@ function requestIndexChoice(ctx: ScriptCtx, count: number): void {
   const ids = cards.map((card) => card.instanceId);
   ctx.requestCardChoice(
     `index-top:${ids.join(",")}`,
-    decisionPrompt(`${ctx.data.name}: choose a card to put on top of your deck`, "card.arc.index.top", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }),
+    decisionPrompt(`${ctx.data.name}: choose a card to put on top of your deck`, "card.arc.index.top", {
+      values: { card: { kind: "card", cardId: ctx.self.cardId } },
+    }),
     ids,
   );
 }
@@ -203,7 +214,11 @@ function requestIndexBottomOrder(ctx: ScriptCtx, ids: number[]): void {
   if (ids.length === 0) return;
   ctx.requestCardChoice(
     `index-bottom:${ids.join(",")}`,
-    decisionPrompt(`${ctx.data.name}: choose the next card to put on the bottom of your deck`, "card.arc.index.bottom.next", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }),
+    decisionPrompt(
+      `${ctx.data.name}: choose the next card to put on the bottom of your deck`,
+      "card.arc.index.bottom.next",
+      { values: { card: { kind: "card", cardId: ctx.self.cardId } } },
+    ),
     ids,
   );
 }
@@ -219,7 +234,10 @@ function indexScript(count: number): CardScript {
         const chosen = Number(option);
         if (!ids.includes(chosen)) return;
         ctx.putOnDeckTop(chosen);
-        requestIndexBottomOrder(ctx, ids.filter((id) => id !== chosen));
+        requestIndexBottomOrder(
+          ctx,
+          ids.filter((id) => id !== chosen),
+        );
         return;
       }
       const bottomMatch = /^index-bottom:([\d,]+)$/.exec(hook);
@@ -228,7 +246,10 @@ function indexScript(count: number): CardScript {
       const chosen = Number(option);
       if (!ids.includes(chosen)) return;
       ctx.putOnDeckBottom(chosen);
-      requestIndexBottomOrder(ctx, ids.filter((id) => id !== chosen));
+      requestIndexBottomOrder(
+        ctx,
+        ids.filter((id) => id !== chosen),
+      );
     },
   };
 }
@@ -265,7 +286,11 @@ export const arcArcane: Record<string, CardScript> = {
       label: "Destroy: gain 3 resources",
       onActivate(ctx) {
         ctx.changeResources(ctx.seat, 3);
-        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: gained {r}{r}{r}`, "card.log.common.resources.gained", { amount: 3 }));
+        ctx.logPublic(
+          localizedCardLog(ctx, `${ctx.data.name}: gained {r}{r}{r}`, "card.log.common.resources.gained", {
+            amount: 3,
+          }),
+        );
       },
     },
   },

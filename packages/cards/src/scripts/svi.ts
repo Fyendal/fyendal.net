@@ -35,10 +35,7 @@ function runeCount(ctx: ScriptCtx): number {
 }
 
 function playedOrCreatedAura(ctx: ScriptCtx): boolean {
-  return (
-    ctx.getFlag("player", "playedSubtype:aura") === true ||
-    ctx.getFlag("player", "createdSubtype:aura") === true
-  );
+  return ctx.getFlag("player", "playedSubtype:aura") === true || ctx.getFlag("player", "createdSubtype:aura") === true;
 }
 
 function createRunechants(ctx: ScriptCtx, count: number): void {
@@ -59,24 +56,28 @@ function maleficIncantation(verses: number): CardScript {
     onEnterArena(ctx) {
       ctx.setCounter("verse", verses);
     },
-    triggers: [{
-      event: "card-played",
-      label: "Remove a verse counter and create a Runechant",
-      condition(ctx, played) {
-        const onceKey = `maleficUsed:${ctx.self.instanceId}`;
-        return !!played &&
-          isAttackAction(ctx, played) &&
-          ctx.getFlag("player", onceKey) !== true &&
-          ctx.getCounter("verse") > 0;
+    triggers: [
+      {
+        event: "card-played",
+        label: "Remove a verse counter and create a Runechant",
+        condition(ctx, played) {
+          const onceKey = `maleficUsed:${ctx.self.instanceId}`;
+          return (
+            !!played &&
+            isAttackAction(ctx, played) &&
+            ctx.getFlag("player", onceKey) !== true &&
+            ctx.getCounter("verse") > 0
+          );
+        },
+        onTrigger(ctx) {
+          ctx.setFlag("player", `maleficUsed:${ctx.self.instanceId}`, true);
+        },
+        effect(ctx) {
+          ctx.setCounter("verse", ctx.getCounter("verse") - 1);
+          createRunechants(ctx, 1);
+        },
       },
-      onTrigger(ctx) {
-        ctx.setFlag("player", `maleficUsed:${ctx.self.instanceId}`, true);
-      },
-      effect(ctx) {
-        ctx.setCounter("verse", ctx.getCounter("verse") - 1);
-        createRunechants(ctx, 1);
-      },
-    }],
+    ],
   };
 }
 
@@ -88,14 +89,10 @@ function condemnToSlaughter(amount: number): CardScript {
       if (auras.length > 0) {
         ctx.requestCardChoice(
           "condemn-own-aura",
-          decisionPrompt(
-            `${ctx.data.name}: destroy an aura you control?`,
-            "card.svi.condemn.own.aura.destroy",
-            {
-              values: { card: { kind: "card", cardId: ctx.self.cardId } },
-              optionMessages: commonOptionMessages("no"),
-            },
-          ),
+          decisionPrompt(`${ctx.data.name}: destroy an aura you control?`, "card.svi.condemn.own.aura.destroy", {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            optionMessages: commonOptionMessages("no"),
+          }),
           ["no", ...auras.map((card) => card.instanceId)],
         );
       }
@@ -110,11 +107,9 @@ function condemnToSlaughter(amount: number): CardScript {
         if (opposingAuras.length > 0) {
           ctx.requestCardChoice(
             "condemn-opposing-aura",
-            decisionPrompt(
-              `${ctx.data.name}: destroy an aura you control`,
-              "card.svi.condemn.opposing.aura.destroy",
-              { values: { card: { kind: "card", cardId: ctx.self.cardId } } },
-            ),
+            decisionPrompt(`${ctx.data.name}: destroy an aura you control`, "card.svi.condemn.opposing.aura.destroy", {
+              values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            }),
             opposingAuras.map((card) => card.instanceId),
             opponentSeat(ctx),
           );
@@ -144,9 +139,9 @@ function mauvrionSkies(runechants: number): CardScript {
 }
 
 function sigilOfSilphidaeTrigger(ctx: ScriptCtx): void {
-  const auras = ctx.player(ctx.seat).graveyard.filter(
-    (card) => card.instanceId !== ctx.self.instanceId && isAura(ctx, card),
-  );
+  const auras = ctx
+    .player(ctx.seat)
+    .graveyard.filter((card) => card.instanceId !== ctx.self.instanceId && isAura(ctx, card));
   if (auras.length === 0) return;
   ctx.requestCardChoice(
     "silphidae-banish",
@@ -167,18 +162,20 @@ function sigilOfSilphidaeTrigger(ctx: ScriptCtx): void {
 
 export const svi: Record<string, CardScript> = {
   "viserai|0": {
-    triggers: [{
-      event: "card-played",
-      label: "Create a Runechant",
-      condition(ctx, played) {
-        if (!played) return false;
-      const currentIsNonAttack = isNonAttackAction(ctx, played);
-      const priorNonAttacks = Number(ctx.getFlag("player", "nonAttackActionsPlayedThisTurn")) -
-        (currentIsNonAttack ? 1 : 0);
-        return ctx.cardTypes(played).includes("runeblade") && priorNonAttacks > 0;
+    triggers: [
+      {
+        event: "card-played",
+        label: "Create a Runechant",
+        condition(ctx, played) {
+          if (!played) return false;
+          const currentIsNonAttack = isNonAttackAction(ctx, played);
+          const priorNonAttacks =
+            Number(ctx.getFlag("player", "nonAttackActionsPlayedThisTurn")) - (currentIsNonAttack ? 1 : 0);
+          return ctx.cardTypes(played).includes("runeblade") && priorNonAttacks > 0;
+        },
+        effect: (ctx) => createRunechants(ctx, 1),
       },
-      effect: (ctx) => createRunechants(ctx, 1),
-    }],
+    ],
   },
 
   "reaping blade|0": {
@@ -214,9 +211,9 @@ export const svi: Record<string, CardScript> = {
         maximum: 10,
         prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
         canDeclareX(ctx, x) {
-          return ctx.player(ctx.seat).graveyard.some(
-            (card) => isAura(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) === x,
-          );
+          return ctx
+            .player(ctx.seat)
+            .graveyard.some((card) => isAura(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) === x);
         },
       },
       isAttack: false,
@@ -224,9 +221,9 @@ export const svi: Record<string, CardScript> = {
       destroySelfCost: true,
       onActivate(ctx) {
         const x = ctx.getCounter("beckoningX");
-        const auras = ctx.player(ctx.seat).graveyard.filter(
-          (card) => isAura(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) === x,
-        );
+        const auras = ctx
+          .player(ctx.seat)
+          .graveyard.filter((card) => isAura(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) === x);
         ctx.requestCardChoice(
           "beckoning-return",
           decisionPrompt(
@@ -248,7 +245,15 @@ export const svi: Record<string, CardScript> = {
       const aura = ctx.player(ctx.seat).graveyard.find((card) => card.instanceId === Number(option));
       if (!aura || !isAura(ctx, aura)) return;
       ctx.moveToHand(aura.instanceId);
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: return ${ctx.cardData(aura.cardId).name} to hand`, "card.log.svi.aura.returned", { result: { kind: "card", cardId: aura.cardId } }, { kind: "card-moved", cardId: aura.cardId, ownerSeat: ctx.seat, from: "graveyard", to: "hand" }));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.data.name}: return ${ctx.cardData(aura.cardId).name} to hand`,
+          "card.log.svi.aura.returned",
+          { result: { kind: "card", cardId: aura.cardId } },
+          { kind: "card-moved", cardId: aura.cardId, ownerSeat: ctx.seat, from: "graveyard", to: "hand" },
+        ),
+      );
     },
   },
 

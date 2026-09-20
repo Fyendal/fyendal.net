@@ -1,27 +1,24 @@
 import type { CardScript } from "@fyendal/engine";
-import {
-  discardRandomCost,
-  isSixPlus,
-  nextAttack,
-  queueIntimidate,
-} from "./shared-helpers.js";
+import { discardRandomCost, isSixPlus, nextAttack, queueIntimidate } from "./shared-helpers.js";
 
 // ── Rhinar (hero / deck cards present in RNR) ──
 export const rnr: Record<string, CardScript> = {
   "rhinar|0": {
-    triggers: [{
-      event: "card-discarded",
-      label: "Intimidate",
-      publicLog: "Rhinar's ability triggers",
-      publicLogMessage: { id: "card.log.common.heroability.triggered" },
-      condition: (ctx, discarded) =>
-        ctx.state.activePlayer === ctx.seat &&
-        ctx.state.phase !== "start" &&
-        ctx.state.phase !== "end" &&
-        ctx.state.phase !== "game-over" &&
-        isSixPlus(ctx, discarded),
-      effect: (ctx) => ctx.intimidate(),
-    }],
+    triggers: [
+      {
+        event: "card-discarded",
+        label: "Intimidate",
+        publicLog: "Rhinar's ability triggers",
+        publicLogMessage: { id: "card.log.common.heroability.triggered" },
+        condition: (ctx, discarded) =>
+          ctx.state.activePlayer === ctx.seat &&
+          ctx.state.phase !== "start" &&
+          ctx.state.phase !== "end" &&
+          ctx.state.phase !== "game-over" &&
+          isSixPlus(ctx, discarded),
+        effect: (ctx) => ctx.intimidate(),
+      },
+    ],
   },
   "awakening bellow|1": {
     // Awakening Bellow (red)
@@ -39,7 +36,21 @@ export const rnr: Record<string, CardScript> = {
   },
   "wounded bull|2": {
     // Wounded Bull (yellow)
-    triggers: [{ event: "card-played", sourceZone: "self", label: "Gain +1 attack", condition(ctx) { const me = ctx.state.players[ctx.seat]!; const opp = ctx.state.players[ctx.seat === 0 ? 1 : 0]!; return me.life < opp.life; }, effect(ctx, played) { if (played) ctx.addCardTempPower(played.instanceId, 1); } }],
+    triggers: [
+      {
+        event: "card-played",
+        sourceZone: "self",
+        label: "Gain +1 attack",
+        condition(ctx) {
+          const me = ctx.state.players[ctx.seat]!;
+          const opp = ctx.state.players[ctx.seat === 0 ? 1 : 0]!;
+          return me.life < opp.life;
+        },
+        effect(ctx, played) {
+          if (played) ctx.addCardTempPower(played.instanceId, 1);
+        },
+      },
+    ],
   },
   "wrecker romp|3": {
     // Wrecker Romp (blue)

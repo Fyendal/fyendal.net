@@ -1,9 +1,5 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import {
-  bloodDebtScript as bloodDebt,
-  decisionMessage,
-  decisionPrompt,
-} from "./shared-helpers.js";
+import { bloodDebtScript as bloodDebt, decisionMessage, decisionPrompt } from "./shared-helpers.js";
 
 const RUNECHANT = "SBA036";
 const GATE = "IAR222";
@@ -20,23 +16,27 @@ function specializedRunechant(
         sourceZone: "any",
         label: "Create a Runechant",
         labelMessage: { id: "card.trigger.common.runechant.create" },
-        condition: (ctx, left, event) =>
-          left?.instanceId === ctx.self.instanceId && event?.to === "graveyard",
-        effect(ctx) { ctx.createToken(RUNECHANT); },
+        condition: (ctx, left, event) => left?.instanceId === ctx.self.instanceId && event?.to === "graveyard",
+        effect(ctx) {
+          ctx.createToken(RUNECHANT);
+        },
       },
       {
         event: "begin-action-phase",
         whose: "subject",
         label: "Destroy this and create a Runechant",
-        effect(ctx) { ctx.destroySelf(); },
+        effect(ctx) {
+          ctx.destroySelf();
+        },
       },
       {
         event: "card-played",
         label: "Destroy this and create a Runechant",
-        condition: (ctx, played) => !!played &&
-          ctx.hasCardType(played, "action") &&
-          ctx.cardTypes(played).includes("attack"),
-        effect(ctx) { ctx.destroySelf(); },
+        condition: (ctx, played) =>
+          !!played && ctx.hasCardType(played, "action") && ctx.cardTypes(played).includes("attack"),
+        effect(ctx) {
+          ctx.destroySelf();
+        },
       },
     ],
   };
@@ -44,26 +44,22 @@ function specializedRunechant(
 
 const ominousToll: CardScript = {
   onAttackDeclared(ctx) {
-    const zombies = ctx.player(ctx.seat).hand.filter((card) =>
-      ctx.cardTypes(card).includes("zombie")
-    );
+    const zombies = ctx.player(ctx.seat).hand.filter((card) => ctx.cardTypes(card).includes("zombie"));
     if (zombies.length > 0) {
       ctx.requestCardChoice(
         "gem-ominous-toll-discard",
-        decisionPrompt(
-          "Discard a zombie to create a Gate to i'Arathael?",
-          "card.gem.ominous.toll.discard",
-          { optionMessages: { no: decisionMessage("common.option.decline") } },
-        ),
+        decisionPrompt("Discard a zombie to create a Gate to i'Arathael?", "card.gem.ominous.toll.discard", {
+          optionMessages: { no: decisionMessage("common.option.decline") },
+        }),
         ["no", ...zombies.map((card) => card.instanceId)],
       );
     }
   },
   onChoose(ctx, hook, option) {
     if (hook !== "gem-ominous-toll-discard" || option === "no") return;
-    const card = ctx.player(ctx.seat).hand.find((candidate) =>
-      candidate.instanceId === Number(option) && ctx.cardTypes(candidate).includes("zombie")
-    );
+    const card = ctx
+      .player(ctx.seat)
+      .hand.find((candidate) => candidate.instanceId === Number(option) && ctx.cardTypes(candidate).includes("zombie"));
     if (card && ctx.discardCard(ctx.seat, card.instanceId)) ctx.createToken(GATE);
   },
 };
@@ -93,20 +89,16 @@ export const gem: Record<string, CardScript> = {
       if (hand.length > 0) {
         ctx.requestCardChoice(
           "gem-embrace-ursur-banish",
-          decisionPrompt(
-            "Banish a card from your hand?",
-            "card.gem.embrace.ursur.banish",
-            { optionMessages: { no: decisionMessage("common.option.decline") } },
-          ),
+          decisionPrompt("Banish a card from your hand?", "card.gem.embrace.ursur.banish", {
+            optionMessages: { no: decisionMessage("common.option.decline") },
+          }),
           ["no", ...hand.map((card) => card.instanceId)],
         );
       }
     },
     onChoose(ctx, hook, option) {
       if (hook !== "gem-embrace-ursur-banish" || option === "no") return;
-      const card = ctx.player(ctx.seat).hand.find((candidate) =>
-        candidate.instanceId === Number(option)
-      );
+      const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
       if (!card) return;
       const types = ctx.cardTypes(card);
       if (!ctx.banish(card.instanceId)) return;

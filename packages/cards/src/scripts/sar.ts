@@ -51,9 +51,6 @@ const BLOODROT_POX = "SAZ034";
 const FRAILTY = "SAZ035";
 const INERTIA = "SAZ036";
 
-
-
-
 /** ctx.state is typed without the internal side tables; the runtime object has them. */
 
 function isMarked(ctx: ScriptCtx, seat: number): boolean {
@@ -70,21 +67,17 @@ function markHero(ctx: ScriptCtx, seat: number): void {
   const hero = ctx.state.players[seat]!.hero;
   if ((hero.counters?.marked ?? 0) > 0) return;
   ctx.addCounter(hero.instanceId, "marked", 1);
-  ctx.logPublic(localizedCardLog(
-    ctx,
-    `${ctx.cardData(hero.cardId).name} is marked`,
-    "card.log.common.hero.marked",
-    { target: { kind: "card", cardId: hero.cardId } },
-  ));
+  ctx.logPublic(
+    localizedCardLog(ctx, `${ctx.cardData(hero.cardId).name} is marked`, "card.log.common.hero.marked", {
+      target: { kind: "card", cardId: hero.cardId },
+    }),
+  );
 }
 
 function requestHuntsmanMark(ctx: ScriptCtx): void {
   ctx.requestChoice(
     "huntsman-mark",
-    yesNoPrompt(
-      "Mark of the Huntsman: destroy this and mark them?",
-      "card.sar.huntsman.destroy",
-    ),
+    yesNoPrompt("Mark of the Huntsman: destroy this and mark them?", "card.sar.huntsman.destroy"),
     ["yes", "no"],
   );
 }
@@ -109,9 +102,7 @@ function myAttack(ctx: ScriptCtx): boolean {
 
 /** A rider granted by a chain-link modifier sourced from this card/hero. */
 function armedBySelf(ctx: ScriptCtx): boolean {
-  return ctx.state.modifiers.some(
-    (m) => m.scope === "chain-link" && m.sourceInstanceId === ctx.self.instanceId,
-  );
+  return ctx.state.modifiers.some((m) => m.scope === "chain-link" && m.sourceInstanceId === ctx.self.instanceId);
 }
 
 /** "At the beginning of your end phase, return to the brood" (CR 8.5.52). */
@@ -139,7 +130,11 @@ function broodReaction(target: (ctx: ScriptCtx) => boolean, label: string): Acti
     canActivate: (ctx) => myAttack(ctx) && target(ctx),
     onActivate(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: 3 });
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: the attack gets +3{p}`, "card.log.common.attack.gained", { amount: 3 }));
+      ctx.logPublic(
+        localizedCardLog(ctx, `${ctx.data.name}: the attack gets +3{p}`, "card.log.common.attack.gained", {
+          amount: 3,
+        }),
+      );
     },
   };
 }
@@ -164,11 +159,7 @@ function artOfDesire(pitchValue: number): CardScript {
 
 /** Attack-reaction pump on the controller's attack with an armed on-hit
  *  rider (Scar Tissue / Spike with Bloodrot). */
-function pumpWithRider(
-  target: (ctx: ScriptCtx) => boolean,
-  pump: number,
-  rider: (ctx: ScriptCtx) => void,
-): CardScript {
+function pumpWithRider(target: (ctx: ScriptCtx) => boolean, pump: number, rider: (ctx: ScriptCtx) => void): CardScript {
   return {
     canPlay: (ctx) => myAttack(ctx) && target(ctx),
     onPlay(ctx) {
@@ -203,8 +194,7 @@ export const sar: Record<string, CardScript> = {
     },
     canTriggerOnHit(ctx) {
       const link = ctx.link;
-      return !!link && link.targetAllyId === undefined &&
-        link.attackingCard.instanceId === ctx.self.instanceId;
+      return !!link && link.targetAllyId === undefined && link.attackingCard.instanceId === ctx.self.instanceId;
     },
     onHit(ctx) {
       requestHuntsmanMark(ctx);
@@ -263,7 +253,13 @@ export const sar: Record<string, CardScript> = {
       label: "Destroy: top-of-deck puts go on the bottom this turn",
       onActivate(ctx) {
         for (const p of ctx.state.players) ctx.setPlayerFlag(p.seat, "topDeckToBottom", true);
-        ctx.logPublic(localizedCardLog(ctx, "Topsy Turvy: cards put on top of a deck go on the bottom this turn", "card.log.sar.topsyturvy.replacement"));
+        ctx.logPublic(
+          localizedCardLog(
+            ctx,
+            "Topsy Turvy: cards put on top of a deck go on the bottom this turn",
+            "card.log.sar.topsyturvy.replacement",
+          ),
+        );
       },
     },
   },
@@ -282,15 +278,15 @@ export const sar: Record<string, CardScript> = {
       canActivate(ctx) {
         const link = ctx.link;
         if (!myAttack(ctx)) return false;
-        return ctx.player(ctx.seat).weapons.some(
-          (w) => isDagger(ctx, w) && w.instanceId !== link?.attackingCard.instanceId,
-        );
+        return ctx
+          .player(ctx.seat)
+          .weapons.some((w) => isDagger(ctx, w) && w.instanceId !== link?.attackingCard.instanceId);
       },
       onActivate(ctx) {
         const link = ctx.link;
-        const daggers = ctx.player(ctx.seat).weapons.filter(
-          (w) => isDagger(ctx, w) && w.instanceId !== link?.attackingCard.instanceId,
-        );
+        const daggers = ctx
+          .player(ctx.seat)
+          .weapons.filter((w) => isDagger(ctx, w) && w.instanceId !== link?.attackingCard.instanceId);
         ctx.requestCardChoice(
           "danger-digits",
           decisionPrompt(
@@ -347,13 +343,15 @@ export const sar: Record<string, CardScript> = {
         if (!top || p.arsenal.length > 0) continue;
         ctx.putIntoArsenal(top.instanceId, "deck", { faceUp: false });
         puts++;
-        ctx.logPublic(localizedCardLog(
-          ctx,
-          `${ctx.cardData(p.heroCardId).name} puts the top card of their deck face-down into their arsenal`,
-          "card.log.sar.hero.arsenal",
-          { target: { kind: "player", seat: p.seat } },
-          { kind: "card-moved", ownerSeat: p.seat, from: "deck", to: "arsenal", faceDown: true },
-        ));
+        ctx.logPublic(
+          localizedCardLog(
+            ctx,
+            `${ctx.cardData(p.heroCardId).name} puts the top card of their deck face-down into their arsenal`,
+            "card.log.sar.hero.arsenal",
+            { target: { kind: "player", seat: p.seat } },
+            { kind: "card-moved", ownerSeat: p.seat, from: "deck", to: "arsenal", faceDown: true },
+          ),
+        );
       }
       if (puts >= 2) ctx.grantGoAgain();
     },
@@ -371,7 +369,14 @@ export const sar: Record<string, CardScript> = {
           playCostReduction: -1,
         });
       }
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: cards cost {r} more to play this turn`, "card.log.sar.hyperinflation.cost", { amount: 1 }));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.data.name}: cards cost {r} more to play this turn`,
+          "card.log.sar.hyperinflation.cost",
+          { amount: 1 },
+        ),
+      );
     },
   },
 
@@ -391,10 +396,7 @@ export const sar: Record<string, CardScript> = {
       if (opp.hand.length === 0) return;
       ctx.requestCardChoice(
         "black-widow",
-        decisionPrompt(
-          "Mark of the Black Widow: banish a card from your hand",
-          "card.sar.blackwidow.hand.banish",
-        ),
+        decisionPrompt("Mark of the Black Widow: banish a card from your hand", "card.sar.blackwidow.hand.banish"),
         opp.hand.map((c) => c.instanceId),
         opponentSeat(ctx),
       );
@@ -412,10 +414,7 @@ export const sar: Record<string, CardScript> = {
       if (opp.hand.length === 0) return;
       ctx.requestCardChoice(
         "black-widow",
-        decisionPrompt(
-          "Mark of the Black Widow: banish a card from your hand",
-          "card.sar.blackwidow.hand.banish",
-        ),
+        decisionPrompt("Mark of the Black Widow: banish a card from your hand", "card.sar.blackwidow.hand.banish"),
         opp.hand.map((c) => c.instanceId),
         opponentSeat(ctx),
       );
@@ -475,8 +474,7 @@ export const sar: Record<string, CardScript> = {
 
   "stains of the redback|1": {
     // "If the defending hero is marked, this costs {r} less to play."
-    modifyPlayCost: (ctx, base) =>
-      ctx.link && isMarked(ctx, ctx.link.attacker === 0 ? 1 : 0) ? base - 1 : base,
+    modifyPlayCost: (ctx, base) => (ctx.link && isMarked(ctx, ctx.link.attacker === 0 ? 1 : 0) ? base - 1 : base),
     // "Target attack with stealth gets +3{p} and go again."
     canPlay: (ctx) => myAttack(ctx) && hasStealth(ctx, ctx.link!.attackingCard.cardId),
     onPlay(ctx) {
@@ -496,33 +494,24 @@ export const sar: Record<string, CardScript> = {
     additionalCost(ctx) {
       const link = ctx.link!;
       const dagger = isDagger(ctx, link.attackingCard);
-      const stealthAction =
-        link.attackCardType === "action" && hasStealth(ctx, link.attackingCard.cardId);
+      const stealthAction = link.attackCardType === "action" && hasStealth(ctx, link.attackingCard.cardId);
       if (dagger && stealthAction) {
         ctx.requestChoice(
           "two-sides",
-          decisionPrompt(
-            "Two Sides to the Blade: choose 1",
-            "card.sar.twosides.mode.choose",
-            {
-              optionMessages: {
-                "Dagger attack gets +3{p}": decisionMessage("card.sar.twosides.option.dagger"),
-                "Stealth attack gets +3{p} and mark on hit": decisionMessage("card.sar.twosides.option.stealth"),
-              },
+          decisionPrompt("Two Sides to the Blade: choose 1", "card.sar.twosides.mode.choose", {
+            optionMessages: {
+              "Dagger attack gets +3{p}": decisionMessage("card.sar.twosides.option.dagger"),
+              "Stealth attack gets +3{p} and mark on hit": decisionMessage("card.sar.twosides.option.stealth"),
             },
-          ),
-          [
-            "Dagger attack gets +3{p}",
-            "Stealth attack gets +3{p} and mark on hit",
-          ],
+          }),
+          ["Dagger attack gets +3{p}", "Stealth attack gets +3{p} and mark on hit"],
         );
       }
     },
     onPlay(ctx) {
       const link = ctx.link!;
       const dagger = isDagger(ctx, link.attackingCard);
-      const stealthAction =
-        link.attackCardType === "action" && hasStealth(ctx, link.attackingCard.cardId);
+      const stealthAction = link.attackCardType === "action" && hasStealth(ctx, link.attackingCard.cardId);
       const selectedStealth = ctx.getCounter("twoSidesMode") === 2;
       ctx.addModifier({ scope: "chain-link", attack: 3 });
       if (stealthAction && (!dagger || selectedStealth)) {
@@ -559,10 +548,7 @@ export const sar: Record<string, CardScript> = {
       const link = ctx.link!;
       ctx.requestCardChoice(
         "shred",
-        decisionPrompt(
-          "Shred: target defending card gets -2{d} this combat chain",
-          "card.sar.shred.defender.choose",
-        ),
+        decisionPrompt("Shred: target defending card gets -2{d} this combat chain", "card.sar.shred.defender.choose"),
         [...link.defendingCards, ...link.defendingEquipment].map((c) => c.instanceId),
       );
     },
@@ -574,12 +560,14 @@ export const sar: Record<string, CardScript> = {
       );
       if (!card) return;
       ctx.addCardTempDefense(card.instanceId, -2);
-      ctx.logPublic(localizedCardLog(
-        ctx,
-        `Shred: ${ctx.cardData(card.cardId).name} gets -2{d} this combat chain`,
-        "card.log.sar.shred.defense",
-        { target: { kind: "card", cardId: card.cardId }, amount: 2 },
-      ));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `Shred: ${ctx.cardData(card.cardId).name} gets -2{d} this combat chain`,
+          "card.log.sar.shred.defense",
+          { target: { kind: "card", cardId: card.cardId }, amount: 2 },
+        ),
+      );
     },
   },
 
@@ -660,19 +648,16 @@ export const sar: Record<string, CardScript> = {
     //  +3 modifier on the link marks the ability as armed.
     canTriggerOnHit(ctx) {
       const link = ctx.link;
-      return !!link && link.targetAllyId === undefined &&
-        armedBySelf(ctx) &&
-        hasStealth(ctx, link.attackingCard.cardId);
+      return (
+        !!link && link.targetAllyId === undefined && armedBySelf(ctx) && hasStealth(ctx, link.attackingCard.cardId)
+      );
     },
     onHit(ctx) {
       const opp = ctx.player(opponentSeat(ctx));
       if (opp.hand.length === 0) return;
       ctx.requestCardChoice(
         "brood-black-widow",
-        decisionPrompt(
-          "Arakni, Black Widow: banish a card from your hand",
-          "card.sar.brood.blackwidow.hand.banish",
-        ),
+        decisionPrompt("Arakni, Black Widow: banish a card from your hand", "card.sar.brood.blackwidow.hand.banish"),
         opp.hand.map((c) => c.instanceId),
         opponentSeat(ctx),
       );
@@ -693,9 +678,9 @@ export const sar: Record<string, CardScript> = {
     //  their arsenal.'"
     canTriggerOnHit(ctx) {
       const link = ctx.link;
-      return !!link && link.targetAllyId === undefined &&
-        armedBySelf(ctx) &&
-        hasStealth(ctx, link.attackingCard.cardId);
+      return (
+        !!link && link.targetAllyId === undefined && armedBySelf(ctx) && hasStealth(ctx, link.attackingCard.cardId)
+      );
     },
     onHit(ctx) {
       const opp = ctx.player(opponentSeat(ctx));
@@ -750,16 +735,25 @@ export const sar: Record<string, CardScript> = {
     // "Whenever a dagger you own hits a hero, they lose 1{h}."
     canTriggerOnHit(ctx) {
       const link = ctx.link;
-      return !!link &&
+      return (
+        !!link &&
         link.targetAllyId === undefined &&
         isDagger(ctx, link.attackingCard) &&
-        link.attackingCard.owner === ctx.seat;
+        link.attackingCard.owner === ctx.seat
+      );
     },
     onHit(ctx) {
       const targetSeat = opponentSeat(ctx);
       ctx.loseLife(targetSeat, 1);
       const opp = ctx.player(targetSeat);
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(opp.heroCardId).name} loses 1 life (${opp.life} life)`, "card.log.common.hero.life.lost", { target: { kind: "player", seat: targetSeat }, amount: 1, life: opp.life }));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.cardData(opp.heroCardId).name} loses 1 life (${opp.life} life)`,
+          "card.log.common.hero.life.lost",
+          { target: { kind: "player", seat: targetSeat }, amount: 1, life: opp.life },
+        ),
+      );
     },
     onFriendlyEffectHitCondition(ctx, source) {
       return isDagger(ctx, source) && source.owner === ctx.seat;
@@ -767,7 +761,14 @@ export const sar: Record<string, CardScript> = {
     onFriendlyEffectHit(ctx, _source, targetSeat) {
       ctx.loseLife(targetSeat, 1);
       const target = ctx.player(targetSeat);
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(target.heroCardId).name} loses 1 life (${target.life} life)`, "card.log.common.hero.life.lost", { target: { kind: "player", seat: targetSeat }, amount: 1, life: target.life }));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.cardData(target.heroCardId).name} loses 1 life (${target.life} life)`,
+          "card.log.common.hero.life.lost",
+          { target: { kind: "player", seat: targetSeat }, amount: 1, life: target.life },
+        ),
+      );
     },
     activated: broodReaction(
       (ctx) => isDagger(ctx, ctx.link!.attackingCard),
@@ -798,17 +799,25 @@ export const sar: Record<string, CardScript> = {
       const card = ctx.player(ctx.seat).deck.find((c) => c.instanceId === Number(option));
       if (!card) return;
       ctx.banish(card.instanceId, { faceDown: true });
-      ctx.logPublic(localizedCardLog(
-        ctx,
-        "Arakni, Trap-Door: a card is banished face-down",
-        "card.log.sar.trapdoor.banished",
-        undefined,
-        { kind: "card-moved", ownerSeat: ctx.seat, from: "deck", to: "banish", faceDown: true },
-      ));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          "Arakni, Trap-Door: a card is banished face-down",
+          "card.log.sar.trapdoor.banished",
+          undefined,
+          { kind: "card-moved", ownerSeat: ctx.seat, from: "deck", to: "banish", faceDown: true },
+        ),
+      );
       ctx.shuffleDeck();
       if (ctx.cardTypes(card).includes("trap")) {
         ctx.allowPlayFrom(card.instanceId, "banish", { untilNextTurn: true });
-        ctx.logPublic(localizedCardLog(ctx, "Arakni, Trap-Door: the trap may be played until the start of your next turn", "card.log.sar.trapdoor.playable"));
+        ctx.logPublic(
+          localizedCardLog(
+            ctx,
+            "Arakni, Trap-Door: the trap may be played until the start of your next turn",
+            "card.log.sar.trapdoor.playable",
+          ),
+        );
       }
     },
     triggers: [returnToBrood()],

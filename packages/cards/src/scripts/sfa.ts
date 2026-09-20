@@ -1,5 +1,15 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, buffNextAttack, commonOptionMessages, decisionMessage, decisionPrompt, isCard, localizedCardLog, opponentSeat, yesNoPrompt } from "./shared-helpers.js";
+import {
+  attackAbility,
+  buffNextAttack,
+  commonOptionMessages,
+  decisionMessage,
+  decisionPrompt,
+  isCard,
+  localizedCardLog,
+  opponentSeat,
+  yesNoPrompt,
+} from "./shared-helpers.js";
 
 // ── SFA (Silver Age: Fai precon, Chapter 2) ─────────────────────────────────
 //
@@ -31,9 +41,7 @@ import { attackAbility, buffNextAttack, commonOptionMessages, decisionMessage, d
 const CROUCHING_TIGER = "SFA036";
 const FEALTY = "SFA037";
 
-
 /** ctx.state is typed without the internal side tables; the runtime object has them. */
-
 
 /** "Draconic chain links you control" — incl. the current attacking card. */
 function draconicLinks(ctx: ScriptCtx): number {
@@ -54,11 +62,7 @@ function isPhoenixFlame(ctx: ScriptCtx, cardId: string): boolean {
 function livingAllyIds(ctx: ScriptCtx): number[] {
   return ctx.state.players.flatMap((p) =>
     p.board
-      .filter(
-        (c) =>
-          ctx.cardTypes(c).includes("ally") &&
-          ctx.cardData(c.cardId).life !== undefined,
-      )
+      .filter((c) => ctx.cardTypes(c).includes("ally") && ctx.cardData(c.cardId).life !== undefined)
       .map((c) => c.instanceId),
   );
 }
@@ -83,13 +87,15 @@ function destroyGainResource(canActivate: (ctx: ScriptCtx) => boolean, label: st
       canActivate,
       onActivate(ctx) {
         ctx.changeResources(ctx.seat, 1);
-        ctx.logPublic(localizedCardLog(
-          ctx,
-          `${ctx.data.name} is destroyed: gain {r}`,
-          "card.log.common.destroyed.resources",
-          { amount: 1 },
-          { kind: "card-moved", cardId: ctx.self.cardId, ownerSeat: ctx.seat, from: "equipment", to: "graveyard" },
-        ));
+        ctx.logPublic(
+          localizedCardLog(
+            ctx,
+            `${ctx.data.name} is destroyed: gain {r}`,
+            "card.log.common.destroyed.resources",
+            { amount: 1 },
+            { kind: "card-moved", cardId: ctx.self.cardId, ownerSeat: ctx.seat, from: "equipment", to: "graveyard" },
+          ),
+        );
       },
     },
   };
@@ -105,17 +111,14 @@ function banishAttackOnHit(hook: string, reward: string): CardScript {
       if (n <= 0) return;
       const targets = ctx.player(ctx.seat).hand.filter((c) => {
         const d = ctx.cardData(c.cardId);
-        return (
-          ctx.hasCardType(c, "action") &&
-          ctx.cardTypes(c).includes("attack") &&
-          (d.cost ?? 0) < n
-        );
+        return ctx.hasCardType(c, "action") && ctx.cardTypes(c).includes("attack") && (d.cost ?? 0) < n;
       });
       if (targets.length === 0) return;
       ctx.requestCardChoice(
         hook,
         decisionPrompt(
-          `${ctx.data.name}: banish an attack action with cost less than ${n} — it ${reward} and you may play it this turn`,
+          `${ctx.data.name}: banish an attack action with cost less than ${n} — ` +
+            `it ${reward} and you may play it this turn`,
           reward === "gains +1{p}" ? "card.sfa.attack.banish.power" : "card.sfa.attack.banish.discount",
           {
             values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: n },
@@ -137,13 +140,15 @@ function banishAttackOnHit(hook: string, reward: string): CardScript {
       } else {
         ctx.allowPlayFrom(id, "banish", { costReduction: 1 });
       }
-      ctx.logPublic(localizedCardLog(
-        ctx,
-        `${ctx.data.name}: the banished card ${reward} — you may play it this turn`,
-        reward === "gains +1{p}" ? "card.log.sfa.banished.power" : "card.log.sfa.banished.discount",
-        { result: { kind: "card", cardId: selected.cardId }, amount: 1 },
-        { kind: "card-moved", cardId: selected.cardId, ownerSeat: ctx.seat, from: "hand", to: "banish" },
-      ));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.data.name}: the banished card ${reward} — you may play it this turn`,
+          reward === "gains +1{p}" ? "card.log.sfa.banished.power" : "card.log.sfa.banished.discount",
+          { result: { kind: "card", cardId: selected.cardId }, amount: 1 },
+          { kind: "card-moved", cardId: selected.cardId, ownerSeat: ctx.seat, from: "hand", to: "banish" },
+        ),
+      );
     },
   };
 }
@@ -153,7 +158,13 @@ function banishAttackOnHit(hook: string, reward: string): CardScript {
 const brandWithCinderclaw: CardScript = {
   onAttackDeclared(ctx) {
     buffNextAttack(ctx, { grantType: "draconic", expiresOnChainClose: true });
-    ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: your next attack this combat chain is Draconic`, "card.log.sfa.nextattack.draconic"));
+    ctx.logPublic(
+      localizedCardLog(
+        ctx,
+        `${ctx.data.name}: your next attack this combat chain is Draconic`,
+        "card.log.sfa.nextattack.draconic",
+      ),
+    );
   },
 };
 
@@ -200,26 +211,30 @@ export const sfa: Record<string, CardScript> = {
         if (!flame) return;
         ctx.moveToGraveyard(flame.instanceId, "deck");
         ctx.shuffleDeck();
-        ctx.logPublic(localizedCardLog(
-          ctx,
-          "Fai: a Phoenix Flame starts the game in your graveyard",
-          "card.log.sfa.fai.flame.start",
-          { result: { kind: "card", cardId: flame.cardId } },
-          { kind: "card-moved", cardId: flame.cardId, ownerSeat: ctx.seat, from: "deck", to: "graveyard" },
-        ));
+        ctx.logPublic(
+          localizedCardLog(
+            ctx,
+            "Fai: a Phoenix Flame starts the game in your graveyard",
+            "card.log.sfa.fai.flame.start",
+            { result: { kind: "card", cardId: flame.cardId } },
+            { kind: "card-moved", cardId: flame.cardId, ownerSeat: ctx.seat, from: "deck", to: "graveyard" },
+          ),
+        );
         return;
       }
       if (hook !== "fai-return") return;
       const flame = ctx.player(ctx.seat).graveyard.find((c) => c.instanceId === Number(option));
       if (!flame) return;
       ctx.moveToHand(flame.instanceId);
-      ctx.logPublic(localizedCardLog(
-        ctx,
-        `Fai: ${ctx.cardData(flame.cardId).name} returns to your hand`,
-        "card.log.common.card.returned.hand",
-        { result: { kind: "card", cardId: flame.cardId } },
-        { kind: "card-moved", cardId: flame.cardId, ownerSeat: ctx.seat, from: "graveyard", to: "hand" },
-      ));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `Fai: ${ctx.cardData(flame.cardId).name} returns to your hand`,
+          "card.log.common.card.returned.hand",
+          { result: { kind: "card", cardId: flame.cardId } },
+          { kind: "card-moved", cardId: flame.cardId, ownerSeat: ctx.seat, from: "graveyard", to: "hand" },
+        ),
+      );
     },
   },
 
@@ -269,7 +284,14 @@ export const sfa: Record<string, CardScript> = {
       label: "Destroy: the next Crouching Tiger you play gets +2{p}",
       onActivate(ctx) {
         buffNextAttack(ctx, { attack: 2, appliesToName: "crouching tiger" });
-        ctx.logPublic(localizedCardLog(ctx, "Tearing Shuko: the next Crouching Tiger you play this turn gets +2{p}", "card.log.sfa.shuko.attack", { amount: 2 }));
+        ctx.logPublic(
+          localizedCardLog(
+            ctx,
+            "Tearing Shuko: the next Crouching Tiger you play this turn gets +2{p}",
+            "card.log.sfa.shuko.attack",
+            { amount: 2 },
+          ),
+        );
       },
     },
   },
@@ -289,13 +311,15 @@ export const sfa: Record<string, CardScript> = {
         if (!tiger) return;
         ctx.banish(tiger.instanceId);
         ctx.allowPlayFrom(tiger.instanceId, "banish");
-        ctx.logPublic(localizedCardLog(
-          ctx,
-          "Pouncing Paws: the Crouching Tiger may be played this turn",
-          "card.log.sfa.paws.tiger.playable",
-          { result: { kind: "card", cardId: tiger.cardId } },
-          { kind: "card-moved", cardId: tiger.cardId, ownerSeat: ctx.seat, from: "board", to: "banish" },
-        ));
+        ctx.logPublic(
+          localizedCardLog(
+            ctx,
+            "Pouncing Paws: the Crouching Tiger may be played this turn",
+            "card.log.sfa.paws.tiger.playable",
+            { result: { kind: "card", cardId: tiger.cardId } },
+            { kind: "card-moved", cardId: tiger.cardId, ownerSeat: ctx.seat, from: "board", to: "banish" },
+          ),
+        );
       },
     },
   },
@@ -309,7 +333,9 @@ export const sfa: Record<string, CardScript> = {
       if (!currentAttackIsDraconic(ctx)) return;
       ctx.requestCardChoice(
         "art-of-the-dragon",
-        decisionPrompt("Art of the Dragon: Fire — deal 2 damage to any target", "card.sfa.dragonfire.target", { values: { amount: 2 } }),
+        decisionPrompt("Art of the Dragon: Fire — deal 2 damage to any target", "card.sfa.dragonfire.target", {
+          values: { amount: 2 },
+        }),
         [...ctx.state.players.map((p) => p.hero.instanceId), ...livingAllyIds(ctx)],
       );
     },
@@ -358,7 +384,13 @@ export const sfa: Record<string, CardScript> = {
       if (n >= 2) ctx.grantGoAgain();
       if (n >= 3) {
         ctx.addModifier({ scope: "combat-chain", grantType: "draconic" });
-        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: your attacks are Draconic this combat chain`, "card.log.sfa.attacks.draconic"));
+        ctx.logPublic(
+          localizedCardLog(
+            ctx,
+            `${ctx.data.name}: your attacks are Draconic this combat chain`,
+            "card.log.sfa.attacks.draconic",
+          ),
+        );
       }
       if (n >= 4) ctx.addModifier({ scope: "chain-link", attack: 2 });
     },
@@ -373,33 +405,48 @@ export const sfa: Record<string, CardScript> = {
         appliesToSubtype: "draconic",
         expiresOnChainClose: true,
       });
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: your next Draconic attack this combat chain gets +1{p}`, "card.log.sfa.nextdraconic.attack", { amount: 1 }));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.data.name}: your next Draconic attack this combat chain gets +1{p}`,
+          "card.log.sfa.nextdraconic.attack",
+          { amount: 1 },
+        ),
+      );
     },
   },
 
   "fire that burns within|1": {
     // "When this attacks, you may discard a Phoenix Flame. If you do, draw a
     //  card and this gets +2{p}." Go again is printed (native).
-    triggers: [{
-      event: "attack-declared",
-      sourceZone: "self",
-      label: "Discard a Phoenix Flame to draw a card and get +2{p}?",
-      labelMessage: decisionMessage("card.sfa.flame.discard.draw"),
-      effect(ctx) {
-        const flames = ctx.player(ctx.seat).hand.filter((c) => isPhoenixFlame(ctx, c.cardId));
-        ctx.requestCardChoice(
-          "fire-that-burns",
-          decisionPrompt("Fire that Burns Within: discard a Phoenix Flame to draw a card and get +2{p}?", "card.sfa.flame.discard.draw", { optionMessages: commonOptionMessages("pass") }),
-          ["pass", ...flames.map((c) => c.instanceId)],
-        );
+    triggers: [
+      {
+        event: "attack-declared",
+        sourceZone: "self",
+        label: "Discard a Phoenix Flame to draw a card and get +2{p}?",
+        labelMessage: decisionMessage("card.sfa.flame.discard.draw"),
+        effect(ctx) {
+          const flames = ctx.player(ctx.seat).hand.filter((c) => isPhoenixFlame(ctx, c.cardId));
+          ctx.requestCardChoice(
+            "fire-that-burns",
+            decisionPrompt(
+              "Fire that Burns Within: discard a Phoenix Flame to draw a card and get +2{p}?",
+              "card.sfa.flame.discard.draw",
+              { optionMessages: commonOptionMessages("pass") },
+            ),
+            ["pass", ...flames.map((c) => c.instanceId)],
+          );
+        },
       },
-    }],
+    ],
     onChoose(ctx, hook, option) {
       if (hook !== "fire-that-burns" || option === "pass") return;
       if (!ctx.discardCard(ctx.seat, Number(option))) return;
       ctx.drawCards(ctx.seat, 1);
       ctx.addModifier({ scope: "chain-link", attack: 2 });
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: draw a card and get +2{p}`, "card.log.sfa.draw.attack", { amount: 2 }));
+      ctx.logPublic(
+        localizedCardLog(ctx, `${ctx.data.name}: draw a card and get +2{p}`, "card.log.sfa.draw.attack", { amount: 2 }),
+      );
     },
   },
 
@@ -413,11 +460,10 @@ export const sfa: Record<string, CardScript> = {
       if (!p.deck.some((c) => isPhoenixFlame(ctx, c.cardId))) return;
       ctx.requestCardChoice(
         "flamecall-search",
-        decisionPrompt("Flamecall Awakening: search your deck for a Phoenix Flame?", "card.sfa.flame.search", { optionMessages: commonOptionMessages("pass") }),
-        [
-          "pass",
-          ...p.deck.filter((c) => isPhoenixFlame(ctx, c.cardId)).map((c) => c.instanceId),
-        ],
+        decisionPrompt("Flamecall Awakening: search your deck for a Phoenix Flame?", "card.sfa.flame.search", {
+          optionMessages: commonOptionMessages("pass"),
+        }),
+        ["pass", ...p.deck.filter((c) => isPhoenixFlame(ctx, c.cardId)).map((c) => c.instanceId)],
       );
     },
     onChoose(ctx, hook, option) {
@@ -426,13 +472,15 @@ export const sfa: Record<string, CardScript> = {
         const flame = ctx.player(ctx.seat).deck.find((c) => c.instanceId === Number(option));
         if (flame) {
           ctx.moveToHand(flame.instanceId);
-          ctx.logPublic(localizedCardLog(
-            ctx,
-            `${ctx.data.name}: ${ctx.cardData(flame.cardId).name} is revealed and put into your hand`,
-            "card.log.sfa.flame.revealed.hand",
-            { result: { kind: "card", cardId: flame.cardId } },
-            { kind: "card-moved", cardId: flame.cardId, ownerSeat: ctx.seat, from: "deck", to: "hand" },
-          ));
+          ctx.logPublic(
+            localizedCardLog(
+              ctx,
+              `${ctx.data.name}: ${ctx.cardData(flame.cardId).name} is revealed and put into your hand`,
+              "card.log.sfa.flame.revealed.hand",
+              { result: { kind: "card", cardId: flame.cardId } },
+              { kind: "card-moved", cardId: flame.cardId, ownerSeat: ctx.seat, from: "deck", to: "hand" },
+            ),
+          );
         }
       }
       ctx.shuffleDeck();
@@ -454,15 +502,18 @@ export const sfa: Record<string, CardScript> = {
       const hero = ctx.player(opponentSeat(ctx)).hero;
       if ((hero.counters?.marked ?? 0) > 0) return;
       ctx.addCounter(hero.instanceId, "marked", 1);
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(hero.cardId).name} is marked`, "card.log.common.hero.marked", { target: { kind: "card", cardId: hero.cardId } }));
+      ctx.logPublic(
+        localizedCardLog(ctx, `${ctx.cardData(hero.cardId).name} is marked`, "card.log.common.hero.marked", {
+          target: { kind: "card", cardId: hero.cardId },
+        }),
+      );
     },
   },
 
   "lava burst|1": {
     // Rupture — "If Lava Burst is played as chain link 4 or higher, it has
     //  +3{p}."
-    modifyAttack: (ctx) =>
-      ctx.currentChainLinkNumber() >= 4 ? 3 : 0,
+    modifyAttack: (ctx) => (ctx.currentChainLinkNumber() >= 4 ? 3 : 0),
   },
 
   "mounting anger|1": banishAttackOnHit("mounting-anger", "gains +1{p}"),
@@ -500,14 +551,16 @@ export const sfa: Record<string, CardScript> = {
     //  +3{p}. You may return a Phoenix Flame from your graveyard to your
     //  hand." Go again is printed (native).
     onPlay(ctx) {
-      buffNextAttack(ctx, { attack: 3,
-        appliesTo: "attack-action",
-        appliesToType: ["draconic", "ninja"], });
+      buffNextAttack(ctx, { attack: 3, appliesTo: "attack-action", appliesToType: ["draconic", "ninja"] });
       const flames = ctx.player(ctx.seat).graveyard.filter((c) => isPhoenixFlame(ctx, c.cardId));
       if (flames.length > 0) {
         ctx.requestCardChoice(
           "rise-from-the-ashes",
-          decisionPrompt("Rise from the Ashes: return a Phoenix Flame from your graveyard to your hand?", "card.sfa.flame.return", { optionMessages: commonOptionMessages("pass") }),
+          decisionPrompt(
+            "Rise from the Ashes: return a Phoenix Flame from your graveyard to your hand?",
+            "card.sfa.flame.return",
+            { optionMessages: commonOptionMessages("pass") },
+          ),
           ["pass", ...flames.map((c) => c.instanceId)],
         );
       }
@@ -517,13 +570,15 @@ export const sfa: Record<string, CardScript> = {
       const flame = ctx.player(ctx.seat).graveyard.find((c) => c.instanceId === Number(option));
       if (!flame) return;
       ctx.moveToHand(flame.instanceId);
-      ctx.logPublic(localizedCardLog(
-        ctx,
-        `${ctx.data.name}: ${ctx.cardData(flame.cardId).name} returns to your hand`,
-        "card.log.common.card.returned.hand",
-        { result: { kind: "card", cardId: flame.cardId } },
-        { kind: "card-moved", cardId: flame.cardId, ownerSeat: ctx.seat, from: "graveyard", to: "hand" },
-      ));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.data.name}: ${ctx.cardData(flame.cardId).name} returns to your hand`,
+          "card.log.common.card.returned.hand",
+          { result: { kind: "card", cardId: flame.cardId } },
+          { kind: "card-moved", cardId: flame.cardId, ownerSeat: ctx.seat, from: "graveyard", to: "hand" },
+        ),
+      );
     },
   },
 
@@ -548,7 +603,11 @@ export const sfa: Record<string, CardScript> = {
     },
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: 1 });
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: the attack gets +1{p}`, "card.log.common.attack.gained", { amount: 1 }));
+      ctx.logPublic(
+        localizedCardLog(ctx, `${ctx.data.name}: the attack gets +1{p}`, "card.log.common.attack.gained", {
+          amount: 1,
+        }),
+      );
     },
   },
 
@@ -565,7 +624,9 @@ export const sfa: Record<string, CardScript> = {
       label: "Destroy: the next card you play this turn is Draconic",
       onActivate(ctx) {
         ctx.addModifier({ scope: "next-play", grantType: "draconic" });
-        ctx.logPublic(localizedCardLog(ctx, "Fealty: the next card you play this turn is Draconic", "card.log.sfa.fealty.draconic"));
+        ctx.logPublic(
+          localizedCardLog(ctx, "Fealty: the next card you play this turn is Draconic", "card.log.sfa.fealty.draconic"),
+        );
       },
     },
     // "At the beginning of your end phase, if you haven't created a Fealty

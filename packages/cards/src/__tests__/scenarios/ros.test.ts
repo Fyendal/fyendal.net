@@ -441,7 +441,7 @@ describe("ROS — Lightning and Runeblade", () => {
       .expectNotInZone(0, "fry|1", "graveyard");
   });
 
-  it("Gone in a Flash returns before damage, remains projected on the link, and deals no damage", () => {
+  it("Gone in a Flash returns before damage, closes the chain, and deals no damage", () => {
     const g = scenario({
       seats: [
         { hero: "rhinar", hand: ["gone in a flash|1", "sigil of lightning|3"] },
@@ -461,15 +461,45 @@ describe("ROS — Lightning and Runeblade", () => {
     });
 
     g.doRaw({ kind: "choose", optionId: "yes" });
-    expect(g.state.chain).toHaveLength(1);
-    expect(g.state.chain[0]!.flags.attackGone).toBe(true);
-    expect(g.state.chain[0]!.attackingCard.cardId).toBe(printingId("gone in a flash|1"));
-    expect(projectStateFor(g.state, 0).chain[0]?.attackingCard.cardId)
-      .toBe(printingId("gone in a flash|1"));
+    expect(g.state.chain).toHaveLength(0);
     g.expectInZone(0, "gone in a flash|1", "hand")
       .settle()
       .expectLife(1, 20)
       .expectAP(0, 0);
+    expect(g.state.chain).toHaveLength(0);
+  });
+
+  it("Gone in a Flash closes the chain immediately when it returns above stacked reactions", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["gone in a flash|1", "lightning press|1"] },
+        { hero: "dorinthea", hand: ["sink below|1", "shelter from the storm|1", "snatch|1"] },
+      ],
+    });
+
+    g.play("gone in a flash|1")
+      .blockWith()
+      .passPriority()
+      .react("sink below|1", { settle: false })
+      .passPriority()
+      .react("lightning press|1", { settle: false })
+      .passPriority()
+      .passPriority();
+    expect(g.state.pendingDecision).toMatchObject({
+      kind: "optional-effect",
+      options: ["yes", "no"],
+    });
+
+    g.doRaw({ kind: "choose", optionId: "yes" });
+
+    expect(g.state.chain).toHaveLength(0);
+    g.expectInZone(0, "gone in a flash|1", "hand")
+      .settle()
+      .expectLife(1, 20)
+      .expectInZone(1, "sink below|1", "graveyard")
+      .expectInZone(1, "shelter from the storm|1", "hand")
+      .expectInZone(1, "snatch|1", "hand");
+    expect(g.state.log.some((entry) => entry.publicText?.includes("the attack gains +3"))).toBe(false);
     expect(g.state.chain).toHaveLength(0);
   });
 

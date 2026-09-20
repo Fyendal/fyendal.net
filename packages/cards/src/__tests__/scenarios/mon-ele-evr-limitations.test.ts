@@ -108,13 +108,24 @@ describe("Monarch, Tales of Aria, and Everfest rules regression coverage", () =>
     expect(g.state.players[1]!.life).toBe(19);
   });
 
-  it("Rouse the Ancients reveals a qualifying group for its bonus", () => {
-    const g = scenario({ seats: [
+  it("Rouse the Ancients gains its bonus and go again only after a qualifying reveal", () => {
+    const revealed = scenario({ seats: [
       { hero: "rhinar", hand: ["rouse the ancients|3", "swing big|1", "raging onslaught|1"], resources: 3, equipment: NO_EQUIPMENT },
       { hero: "dorinthea", equipment: NO_EQUIPMENT },
     ] });
-    g.play("rouse the ancients|3").chooseOption("reveal:");
-    g.expectAttackValue(7);
+    revealed.play("rouse the ancients|3").chooseOption("reveal:");
+    revealed.expectAttackValue(7);
+    revealed.blockWith().settle();
+    expect(revealed.state.players[0]!.actionPoints).toBe(1);
+
+    const declined = scenario({ seats: [
+      { hero: "rhinar", hand: ["rouse the ancients|3", "swing big|1", "raging onslaught|1"], resources: 3, equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+    declined.play("rouse the ancients|3").chooseOption("no");
+    declined.expectAttackValue(0);
+    declined.blockWith().settle();
+    expect(declined.state.players[0]!.actionPoints).toBe(0);
   });
 
   it("Exude Confidence suppresses responses until sufficiently defended", () => {

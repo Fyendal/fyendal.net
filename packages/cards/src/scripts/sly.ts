@@ -1,5 +1,16 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, buffNextAttack, decisionPrompt, isWeaponAttack, localizedCardLog, opponentSeat, payForDefenseBoost, queueIntimidate, suspenseAura, yesNoPrompt } from "./shared-helpers.js";
+import {
+  attackAbility,
+  buffNextAttack,
+  decisionPrompt,
+  isWeaponAttack,
+  localizedCardLog,
+  opponentSeat,
+  payForDefenseBoost,
+  queueIntimidate,
+  suspenseAura,
+  yesNoPrompt,
+} from "./shared-helpers.js";
 
 // ── SLY (Silver Age: Lyath Goldmane precon) ─────────────────────────────────
 //
@@ -23,15 +34,10 @@ import { attackAbility, buffNextAttack, decisionPrompt, isWeaponAttack, localize
 const CONFIDENCE = "SLY034";
 const MIGHT = "SLY035";
 
-
-
-
 /** ctx.state is typed without the internal side tables; the runtime object has them. */
 
 function hasKeyword(ctx: ScriptCtx, cardId: string, keyword: string): boolean {
-  return (ctx.cardData(cardId).keywords ?? []).some(
-    (k) => k.toLowerCase() === keyword.toLowerCase(),
-  );
+  return (ctx.cardData(cardId).keywords ?? []).some((k) => k.toLowerCase() === keyword.toLowerCase());
 }
 
 /** Auras you control (aura-subtype board cards: Suspense auras, Booze!, tokens). */
@@ -45,10 +51,7 @@ function controlsSuspenseAura(ctx: ScriptCtx): boolean {
 }
 
 function crushTriggered(ctx: ScriptCtx): boolean {
-  return !!ctx.link
-    && ctx.link.targetAllyId === undefined
-    && ctx.link.hit
-    && ctx.link.damage >= 4;
+  return !!ctx.link && ctx.link.targetAllyId === undefined && ctx.link.hit && ctx.link.damage >= 4;
 }
 
 /** Nameable damage sources for Oasis Respite's "source of your choice":
@@ -61,11 +64,7 @@ function damageSourceCandidates(ctx: ScriptCtx): number[] {
   for (const layer of ctx.state.stack) ids.push(layer.sourceInstanceId);
   for (const p of ctx.state.players) {
     ids.push(p.hero.instanceId);
-    for (const c of [
-      ...p.weapons,
-      ...p.board,
-      ...Object.values(p.equipment).filter((card) => card !== undefined),
-    ]) {
+    for (const c of [...p.weapons, ...p.board, ...Object.values(p.equipment).filter((card) => card !== undefined)]) {
       if (!c.faceDown) ids.push(c.instanceId);
     }
   }
@@ -174,7 +173,14 @@ export const sly: Record<string, CardScript> = {
       onActivate(ctx) {
         ctx.crowdBoo(ctx.seat);
         ctx.addModifier({ scope: "until-end-of-turn", defense: 1, appliesToCardType: "action" });
-        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: defending action cards you control get +1{d} this turn`, "card.log.sly.defenders.defense", { amount: 1 }));
+        ctx.logPublic(
+          localizedCardLog(
+            ctx,
+            `${ctx.data.name}: defending action cards you control get +1{d} this turn`,
+            "card.log.sly.defenders.defense",
+            { amount: 1 },
+          ),
+        );
       },
     },
     onBooed(ctx) {
@@ -242,7 +248,9 @@ export const sly: Record<string, CardScript> = {
   "drag down|1": {
     onDefend(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: -3, seat: opponentSeat(ctx) });
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: the attack gets -3{p}`, "card.log.common.attack.lost", { amount: 3 }));
+      ctx.logPublic(
+        localizedCardLog(ctx, `${ctx.data.name}: the attack gets -3{p}`, "card.log.common.attack.lost", { amount: 3 }),
+      );
     },
   },
 
@@ -296,12 +304,16 @@ export const sly: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook === "target-hero") {
-        const target = ctx.state.players.find(
-          (player) => player.hero.instanceId === Number(option),
-        );
+        const target = ctx.state.players.find((player) => player.hero.instanceId === Number(option));
         if (!target) return;
         ctx.setCounter("oasisTarget", target.seat);
-        ctx.requestCardChoice("source", decisionPrompt("Prevent the next 4 damage from which source?", "card.sly.damage.source.choose", { values: { amount: 4 } }), damageSourceCandidates(ctx));
+        ctx.requestCardChoice(
+          "source",
+          decisionPrompt("Prevent the next 4 damage from which source?", "card.sly.damage.source.choose", {
+            values: { amount: 4 },
+          }),
+          damageSourceCandidates(ctx),
+        );
         return;
       }
       if (hook === "source") {
@@ -310,7 +322,12 @@ export const sly: Record<string, CardScript> = {
         // "If they have less life than each other hero, they may gain 1{h}" —
         // the targeted hero's controller decides
         if (ctx.compareLife(target, target === 0 ? 1 : 0) < 0) {
-          ctx.requestChoice("gain-life", yesNoPrompt("Oasis Respite: gain 1 life?", "card.sly.oasis.life.gain", { amount: 1 }), ["yes", "no"], target);
+          ctx.requestChoice(
+            "gain-life",
+            yesNoPrompt("Oasis Respite: gain 1 life?", "card.sly.oasis.life.gain", { amount: 1 }),
+            ["yes", "no"],
+            target,
+          );
         }
         return;
       }
@@ -327,7 +344,13 @@ export const sly: Record<string, CardScript> = {
     // flag cleanup and covers the rest of this turn plus their next turn
     const hero = ctx.player(opponentSeat(ctx)).hero;
     ctx.setCardCounter(hero.instanceId, "halveBaseAttackActionUntil", ctx.state.turn + 1);
-    ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: opponent's attack action cards' base {p}/{d} are halved until end of their next turn`, "card.log.sly.hero.stats.halved"));
+    ctx.logPublic(
+      localizedCardLog(
+        ctx,
+        `${ctx.data.name}: opponent's attack action cards' base {p}/{d} are halved until end of their next turn`,
+        "card.log.sly.hero.stats.halved",
+      ),
+    );
   }),
 
   "wee wrecking ball|2": slyCrush((ctx) => {
@@ -335,13 +358,15 @@ export const sly: Record<string, CardScript> = {
     const c = opp.arsenal[0];
     if (!c) return;
     ctx.moveToGraveyard(c.instanceId, "arsenal");
-    ctx.logPublic(localizedCardLog(
-      ctx,
-      `${ctx.data.name} destroys a card in their arsenal`,
-      "card.log.sly.arsenal.destroyed",
-      { target: { kind: "player", seat: opponentSeat(ctx) } },
-      { kind: "card-moved", ownerSeat: opponentSeat(ctx), from: "arsenal", to: "graveyard" },
-    ));
+    ctx.logPublic(
+      localizedCardLog(
+        ctx,
+        `${ctx.data.name} destroys a card in their arsenal`,
+        "card.log.sly.arsenal.destroyed",
+        { target: { kind: "player", seat: opponentSeat(ctx) } },
+        { kind: "card-moved", ownerSeat: opponentSeat(ctx), from: "arsenal", to: "graveyard" },
+      ),
+    );
   }),
 
   "brothers in arms|3": {
@@ -367,13 +392,15 @@ export const sly: Record<string, CardScript> = {
     const opp = ctx.player(opponentSeat(ctx));
     const top = opp.deck[0];
     if (!top) return;
-    ctx.logPublic(localizedCardLog(
-      ctx,
-      `${ctx.data.name} destroys the top card of their deck (${ctx.cardData(top.cardId).name})`,
-      "card.log.sly.decktop.destroyed",
-      { result: { kind: "card", cardId: top.cardId }, target: { kind: "player", seat: opponentSeat(ctx) } },
-      { kind: "card-moved", cardId: top.cardId, ownerSeat: opponentSeat(ctx), from: "deck", to: "graveyard" },
-    ));
+    ctx.logPublic(
+      localizedCardLog(
+        ctx,
+        `${ctx.data.name} destroys the top card of their deck (${ctx.cardData(top.cardId).name})`,
+        "card.log.sly.decktop.destroyed",
+        { result: { kind: "card", cardId: top.cardId }, target: { kind: "player", seat: opponentSeat(ctx) } },
+        { kind: "card-moved", cardId: top.cardId, ownerSeat: opponentSeat(ctx), from: "deck", to: "graveyard" },
+      ),
+    );
     ctx.moveToGraveyard(top.instanceId, "deck");
   }),
 
@@ -421,7 +448,11 @@ export const sly: Record<string, CardScript> = {
         const link = ctx.link;
         if (!link) return;
         ctx.addModifier({ scope: "chain-link", attack: 1, seat: link.attacker });
-        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: target attack gets +1{p}`, "card.log.common.attack.gained", { amount: 1 }));
+        ctx.logPublic(
+          localizedCardLog(ctx, `${ctx.data.name}: target attack gets +1{p}`, "card.log.common.attack.gained", {
+            amount: 1,
+          }),
+        );
       },
     },
     triggers: [

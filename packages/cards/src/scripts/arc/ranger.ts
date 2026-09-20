@@ -19,7 +19,9 @@ function reload(ctx: ScriptCtx): void {
   if (player.arsenal.length > 0 || player.hand.length === 0) return;
   ctx.requestCardChoice(
     "arc-reload",
-    decisionPrompt("Reload: put a card from your hand into your arsenal?", "card.common.reload", { optionMessages: commonOptionMessages("pass") }),
+    decisionPrompt("Reload: put a card from your hand into your arsenal?", "card.common.reload", {
+      optionMessages: commonOptionMessages("pass"),
+    }),
     ["pass", ...player.hand.map((card) => card.instanceId)],
   );
 }
@@ -67,16 +69,20 @@ function silverTheTip(look: number): CardScript {
       const looked = player.deck.slice(0, look);
       if (looked.length === 0) return;
       for (const card of looked) ctx.lookAt(card.instanceId);
-      const arrowIds = looked
-        .filter((card) => isArrow(ctx, card))
-        .map((card) => card.instanceId);
+      const arrowIds = looked.filter((card) => isArrow(ctx, card)).map((card) => card.instanceId);
       if (arrowIds.length === 0) {
-        orderSilverBottoms(ctx, 0, looked.map((card) => card.instanceId));
+        orderSilverBottoms(
+          ctx,
+          0,
+          looked.map((card) => card.instanceId),
+        );
         return;
       }
       ctx.requestCardChoice(
         `silver-select:${looked.map((card) => card.instanceId).join(",")}`,
-        decisionPrompt("Silver the Tip: put an arrow face up into your arsenal?", "card.arc.silver.arrow.arsenal", { optionMessages: commonOptionMessages("pass") }),
+        decisionPrompt("Silver the Tip: put an arrow face up into your arsenal?", "card.arc.silver.arrow.arsenal", {
+          optionMessages: commonOptionMessages("pass"),
+        }),
         ["pass", ...arrowIds],
       );
     },
@@ -127,7 +133,9 @@ function takeAim(attack: number): CardScript {
 const headShot: CardScript = {
   onEnterArsenal(ctx) {
     ctx.addCardTempPower(ctx.self.instanceId, 2);
-    ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} gets +2{p} this turn`, "card.log.saz.card.attack.turn", { amount: 2 }));
+    ctx.logPublic(
+      localizedCardLog(ctx, `${ctx.data.name} gets +2{p} this turn`, "card.log.saz.card.attack.turn", { amount: 2 }),
+    );
   },
 };
 
@@ -138,7 +146,16 @@ const hamstringShot: CardScript = {
   onHit(ctx) {
     const target = opponentSeat(ctx);
     ctx.increaseFirstAttackCostNextTurn(target, 1);
-    ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: ${ctx.cardData(ctx.state.players[target]!.heroCardId).name}'s first attack next turn costs an additional {r}`, "card.log.arc.firstattack.cost", { target: { kind: "player", seat: target }, amount: 1 }));
+    ctx.logPublic(
+      localizedCardLog(
+        ctx,
+        `${ctx.data.name}: ${
+          ctx.cardData(ctx.state.players[target]!.heroCardId).name
+        }'s first attack next turn costs an additional {r}`,
+        "card.log.arc.firstattack.cost",
+        { target: { kind: "player", seat: target }, amount: 1 },
+      ),
+    );
   },
 };
 
@@ -165,7 +182,14 @@ const searingShot: CardScript = {
     const seat = opponentSeat(ctx);
     ctx.loseLife(seat, 1);
     const hero = ctx.player(seat);
-    ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(hero.heroCardId).name} loses 1 life (${hero.life} life)`, "card.log.common.hero.life.lost", { target: { kind: "player", seat }, amount: 1, life: hero.life }));
+    ctx.logPublic(
+      localizedCardLog(
+        ctx,
+        `${ctx.cardData(hero.heroCardId).name} loses 1 life (${hero.life} life)`,
+        "card.log.common.hero.life.lost",
+        { target: { kind: "player", seat }, amount: 1, life: hero.life },
+      ),
+    );
   },
 };
 

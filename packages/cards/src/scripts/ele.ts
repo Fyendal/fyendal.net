@@ -39,21 +39,20 @@ function fusionAdditionalCost(type: "earth" | "ice" | "lightning") {
     if (matches.length === 0) return;
     ctx.requestCardChoice(
       `${type}-fusion`,
-      decisionPrompt(`${ctx.data.name}: reveal a ${type[0]!.toUpperCase()}${type.slice(1)} card to fuse?`, "card.ele.fusion.reveal.named", {
-        values: { card: { kind: "card", cardId: ctx.self.cardId }, type: type[0]!.toUpperCase() + type.slice(1) },
-        optionMessages: commonOptionMessages("no"),
-      }),
+      decisionPrompt(
+        `${ctx.data.name}: reveal a ${type[0]!.toUpperCase()}${type.slice(1)} card to fuse?`,
+        "card.ele.fusion.reveal.named",
+        {
+          values: { card: { kind: "card", cardId: ctx.self.cardId }, type: type[0]!.toUpperCase() + type.slice(1) },
+          optionMessages: commonOptionMessages("no"),
+        },
+      ),
       [...matches.map((card) => card.instanceId), "no"],
     );
   };
 }
 
-function fusionOnChoose(
-  ctx: ScriptCtx,
-  hook: string,
-  option: string,
-  type: "earth" | "ice" | "lightning",
-): boolean {
+function fusionOnChoose(ctx: ScriptCtx, hook: string, option: string, type: "earth" | "ice" | "lightning"): boolean {
   if (hook !== `${type}-fusion`) return false;
   if (option === "no") return true;
   const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
@@ -61,7 +60,15 @@ function fusionOnChoose(
   ctx.setCounter("fused", 1);
   ctx.setFlag("player", "fusedThisTurn", true);
   ctx.setFlag("player", `${type}FusedThisTurn`, true);
-  ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name} is fused (reveals ${ctx.cardData(card.cardId).name})`, "card.log.common.fusion.revealed", { revealed: { kind: "card", cardId: card.cardId } }, { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" }));
+  ctx.logPublic(
+    localizedCardLog(
+      ctx,
+      `${ctx.data.name} is fused (reveals ${ctx.cardData(card.cardId).name})`,
+      "card.log.common.fusion.revealed",
+      { revealed: { kind: "card", cardId: card.cardId } },
+      { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" },
+    ),
+  );
   return true;
 }
 
@@ -78,24 +85,24 @@ function createFrostbites(ctx: ScriptCtx, seat: number, count = 1): void {
   ctx.createTokens(FROSTBITE, count, seat);
 }
 
-function discardUnlessPay(
-  ctx: ScriptCtx,
-  target: number,
-  cost: number,
-  key: string,
-): void {
+function discardUnlessPay(ctx: ScriptCtx, target: number, cost: number, key: string): void {
   const hand = ctx.player(target).hand;
   if (hand.length === 0) return;
   if (
     ctx.requestPayment(
       `${key}:pay:${target}`,
-      decisionPrompt(`${ctx.data.name}: pay ${cost} resource${cost === 1 ? "" : "s"} or discard a card?`, "card.ele.pay.or.discard", {
-        values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: cost },
-      }),
+      decisionPrompt(
+        `${ctx.data.name}: pay ${cost} resource${cost === 1 ? "" : "s"} or discard a card?`,
+        "card.ele.pay.or.discard",
+        {
+          values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: cost },
+        },
+      ),
       cost,
       target,
     )
-  ) return;
+  )
+    return;
   ctx.requestCardChoice(
     `${key}:discard:${target}`,
     decisionPrompt(`${ctx.data.name}: choose a card to discard`, "card.ele.discard.choose", {
@@ -106,12 +113,7 @@ function discardUnlessPay(
   );
 }
 
-function discardUnlessPayOnChoose(
-  ctx: ScriptCtx,
-  hook: string,
-  option: string,
-  key: string,
-): boolean {
+function discardUnlessPayOnChoose(ctx: ScriptCtx, hook: string, option: string, key: string): boolean {
   const payment = new RegExp(`^${key}:pay:(\\d+)$`).exec(hook);
   if (payment) {
     const target = Number(payment[1]);
@@ -176,7 +178,7 @@ function fusedHitFrostbite(type: "ice", count = 1): CardScript {
       return isFused(ctx) && ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
-            createFrostbites(ctx, opponentSeat(ctx), count);
+      createFrostbites(ctx, opponentSeat(ctx), count);
     },
     onChoose(ctx, hook, option) {
       fusionOnChoose(ctx, hook, option, type);
@@ -198,11 +200,7 @@ function entangle(): CardScript {
   };
 }
 
-function delayedGuardianAura(
-  type: "earth" | "ice",
-  attack: number,
-  creates?: "frostbite" | "seismic",
-): CardScript {
+function delayedGuardianAura(type: "earth" | "ice", attack: number, creates?: "frostbite" | "seismic"): CardScript {
   return {
     additionalCost: fusionAdditionalCost(type),
     onEnterArena(ctx) {
@@ -219,14 +217,16 @@ function delayedGuardianAura(
       }
       if (creates === "seismic") ctx.createToken(SEISMIC_SURGE);
     },
-    triggers: [{
-      event: "begin-action-phase",
-      label: "Destroy this — next attack action gets +3 power",
-      effect(ctx) {
-        ctx.destroySelf();
-        buffNextAttack(ctx, { attack, appliesTo: "attack-action" });
+    triggers: [
+      {
+        event: "begin-action-phase",
+        label: "Destroy this — next attack action gets +3 power",
+        effect(ctx) {
+          ctx.destroySelf();
+          buffNextAttack(ctx, { attack, appliesTo: "attack-action" });
+        },
       },
-    }],
+    ],
     onChoose(ctx, hook, option) {
       if (hook === "avalanche-target") {
         createFrostbites(ctx, option === "self" ? ctx.seat : opponentSeat(ctx));
@@ -237,11 +237,7 @@ function delayedGuardianAura(
   };
 }
 
-function fusedAttackWatcher(
-  type: "ice" | "lightning",
-  key: string,
-  onHit: (ctx: ScriptCtx) => void,
-): CardScript {
+function fusedAttackWatcher(type: "ice" | "lightning", key: string, onHit: (ctx: ScriptCtx) => void): CardScript {
   return {
     additionalCost: fusionAdditionalCost(type),
     onAttackDeclared(ctx) {
@@ -296,13 +292,14 @@ function requestRitesAttack(ctx: ScriptCtx): void {
   if (!ctx.getCounter("ritesAttack")) return;
   const attacks = ctx.player(ctx.seat).graveyard.filter((card) => isAttack(ctx, card));
   if (attacks.length > 0) {
-    ctx.requestCardChoice("rites-attack", decisionPrompt(`${ctx.data.name}: put an attack action on the bottom?`, "card.ele.attack.bottom", {
-      values: { card: { kind: "card", cardId: ctx.self.cardId } },
-      optionMessages: commonOptionMessages("none"),
-    }), [
-      "none",
-      ...attacks.map((card) => card.instanceId),
-    ]);
+    ctx.requestCardChoice(
+      "rites-attack",
+      decisionPrompt(`${ctx.data.name}: put an attack action on the bottom?`, "card.ele.attack.bottom", {
+        values: { card: { kind: "card", cardId: ctx.self.cardId } },
+        optionMessages: commonOptionMessages("none"),
+      }),
+      ["none", ...attacks.map((card) => card.instanceId)],
+    );
   }
 }
 
@@ -312,10 +309,7 @@ function ritesOfReplenishment(): CardScript {
     onAttackDeclared(ctx) {
       ctx.setCounter("ritesAttack", isFused(ctx) ? 1 : 0);
       const nonAttacks = ctx.player(ctx.seat).graveyard.filter((card) => isNonAttackAction(ctx, card));
-      if (
-        ctx.getFlag("player", "arcaneDamageDealtThisTurn") === true &&
-        nonAttacks.length > 0
-      ) {
+      if (ctx.getFlag("player", "arcaneDamageDealtThisTurn") === true && nonAttacks.length > 0) {
         ctx.requestCardChoice(
           "rites-non-attack",
           decisionPrompt(`${ctx.data.name}: put a non-attack action on the bottom?`, "card.ele.nonattack.bottom", {
@@ -400,10 +394,11 @@ function weaveLightning(attack: number): CardScript {
       const card = ctx.link.attackingCard;
       if (!hasType(ctx, card, "lightning") && !hasType(ctx, card, "elemental")) return;
       ctx.setCounter("weaveLightningArmed", 0);
-      const marker = ctx.state.modifiers.find((modifier) =>
-        modifier.sourceInstanceId === ctx.self.instanceId &&
-        modifier.scope === "until-end-of-turn" &&
-        !modifier.consumed
+      const marker = ctx.state.modifiers.find(
+        (modifier) =>
+          modifier.sourceInstanceId === ctx.self.instanceId &&
+          modifier.scope === "until-end-of-turn" &&
+          !modifier.consumed,
       );
       if (marker) ctx.consumeModifier(marker.id);
       if ((card.counters?.fused ?? 0) > 0) ctx.grantGoAgain();
@@ -423,10 +418,11 @@ function lightningPress(attack: number): CardScript {
   return {
     playTargetOptions(ctx) {
       return ctx.state.chain
-        .filter((link) =>
-          link.flags.attackGone !== true &&
-          link.attackCardType === "action" &&
-          (ctx.cardData(link.attackingCard.cardId).cost ?? 99) <= 1
+        .filter(
+          (link) =>
+            link.flags.attackGone !== true &&
+            link.attackCardType === "action" &&
+            (ctx.cardData(link.attackingCard.cardId).cost ?? 99) <= 1,
         )
         .map((link) => link.attackingCard.instanceId);
     },
@@ -446,10 +442,13 @@ function lightningPress(attack: number): CardScript {
 function reload(ctx: ScriptCtx, hook = "ele-reload"): void {
   const player = ctx.player(ctx.seat);
   if (player.arsenal.length > 0 || player.hand.length === 0) return;
-  ctx.requestCardChoice(hook, decisionPrompt("Reload: put a card from your hand into your arsenal?", "card.ele.reload", { optionMessages: commonOptionMessages("pass") }), [
-    "pass",
-    ...player.hand.map((card) => card.instanceId),
-  ]);
+  ctx.requestCardChoice(
+    hook,
+    decisionPrompt("Reload: put a card from your hand into your arsenal?", "card.ele.reload", {
+      optionMessages: commonOptionMessages("pass"),
+    }),
+    ["pass", ...player.hand.map((card) => card.instanceId)],
+  );
 }
 
 function reloadOnChoose(ctx: ScriptCtx, hook: string, option: string, wanted = "ele-reload"): boolean {
@@ -494,9 +493,11 @@ function sowTomorrow(minCost: number): CardScript {
       if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1);
       const cards = ctx.player(ctx.seat).graveyard.filter((card) => {
         const data = ctx.cardData(card.cardId);
-        return ctx.hasCardType(card, "action") &&
+        return (
+          ctx.hasCardType(card, "action") &&
           (data.cost ?? 0) >= minCost &&
-          (hasType(ctx, card, "earth") || hasType(ctx, card, "elemental"));
+          (hasType(ctx, card, "earth") || hasType(ctx, card, "elemental"))
+        );
       });
       if (cards.length > 0) {
         ctx.requestCardChoice(
@@ -560,7 +561,9 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   },
   "biting gale|1": {
     ...fusionOnly("ice"),
-    onPlay(ctx) { if (isFused(ctx) && ctx.link) discardUnlessPay(ctx, ctx.link.attacker, 2, "biting-gale"); },
+    onPlay(ctx) {
+      if (isFused(ctx) && ctx.link) discardUnlessPay(ctx, ctx.link.attacker, 2, "biting-gale");
+    },
     onChoose(ctx, hook, option) {
       if (fusionOnChoose(ctx, hook, option, "ice")) return;
       discardUnlessPayOnChoose(ctx, hook, option, "biting-gale");
@@ -568,7 +571,9 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   },
   "biting gale|2": {
     ...fusionOnly("ice"),
-    onPlay(ctx) { if (isFused(ctx) && ctx.link) discardUnlessPay(ctx, ctx.link.attacker, 2, "biting-gale"); },
+    onPlay(ctx) {
+      if (isFused(ctx) && ctx.link) discardUnlessPay(ctx, ctx.link.attacker, 2, "biting-gale");
+    },
     onChoose(ctx, hook, option) {
       if (fusionOnChoose(ctx, hook, option, "ice")) return;
       discardUnlessPayOnChoose(ctx, hook, option, "biting-gale");
@@ -576,15 +581,17 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   },
   "biting gale|3": {
     ...fusionOnly("ice"),
-    onPlay(ctx) { if (isFused(ctx) && ctx.link) discardUnlessPay(ctx, ctx.link.attacker, 2, "biting-gale"); },
+    onPlay(ctx) {
+      if (isFused(ctx) && ctx.link) discardUnlessPay(ctx, ctx.link.attacker, 2, "biting-gale");
+    },
     onChoose(ctx, hook, option) {
       if (fusionOnChoose(ctx, hook, option, "ice")) return;
       discardUnlessPayOnChoose(ctx, hook, option, "biting-gale");
     },
   },
-  "turn timber|1": { ...fusionOnly("earth"), modifyDefense: (ctx) => isFused(ctx) ? 2 : 0 },
-  "turn timber|2": { ...fusionOnly("earth"), modifyDefense: (ctx) => isFused(ctx) ? 2 : 0 },
-  "turn timber|3": { ...fusionOnly("earth"), modifyDefense: (ctx) => isFused(ctx) ? 2 : 0 },
+  "turn timber|1": { ...fusionOnly("earth"), modifyDefense: (ctx) => (isFused(ctx) ? 2 : 0) },
+  "turn timber|2": { ...fusionOnly("earth"), modifyDefense: (ctx) => (isFused(ctx) ? 2 : 0) },
+  "turn timber|3": { ...fusionOnly("earth"), modifyDefense: (ctx) => (isFused(ctx) ? 2 : 0) },
   "entangle|1": entangle(),
   "entangle|2": entangle(),
   "entangle|3": entangle(),
@@ -593,18 +600,33 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   "glacial footsteps|3": fusedDominate("ice"),
   "mulch|1": {
     ...fusionOnly("earth"),
-    canTriggerOnHit(ctx) { return isFused(ctx) && ctx.link?.targetAllyId === undefined; },
-    onHit(ctx) { const card = ctx.player(opponentSeat(ctx)).arsenal[0]; if (card) ctx.putOnDeckBottom(card.instanceId); },
+    canTriggerOnHit(ctx) {
+      return isFused(ctx) && ctx.link?.targetAllyId === undefined;
+    },
+    onHit(ctx) {
+      const card = ctx.player(opponentSeat(ctx)).arsenal[0];
+      if (card) ctx.putOnDeckBottom(card.instanceId);
+    },
   },
   "mulch|2": {
     ...fusionOnly("earth"),
-    canTriggerOnHit(ctx) { return isFused(ctx) && ctx.link?.targetAllyId === undefined; },
-    onHit(ctx) { const card = ctx.player(opponentSeat(ctx)).arsenal[0]; if (card) ctx.putOnDeckBottom(card.instanceId); },
+    canTriggerOnHit(ctx) {
+      return isFused(ctx) && ctx.link?.targetAllyId === undefined;
+    },
+    onHit(ctx) {
+      const card = ctx.player(opponentSeat(ctx)).arsenal[0];
+      if (card) ctx.putOnDeckBottom(card.instanceId);
+    },
   },
   "mulch|3": {
     ...fusionOnly("earth"),
-    canTriggerOnHit(ctx) { return isFused(ctx) && ctx.link?.targetAllyId === undefined; },
-    onHit(ctx) { const card = ctx.player(opponentSeat(ctx)).arsenal[0]; if (card) ctx.putOnDeckBottom(card.instanceId); },
+    canTriggerOnHit(ctx) {
+      return isFused(ctx) && ctx.link?.targetAllyId === undefined;
+    },
+    onHit(ctx) {
+      const card = ctx.player(opponentSeat(ctx)).arsenal[0];
+      if (card) ctx.putOnDeckBottom(card.instanceId);
+    },
   },
   "snow under|1": fusedHitFrostbite("ice"),
   "snow under|2": fusedHitFrostbite("ice"),
@@ -623,10 +645,16 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       isAttack: false,
       goAgain: true,
       oncePerTurn: true,
-      canActivate(ctx) { return ctx.player(ctx.seat).arsenal.some((card) => card.faceDown); },
+      canActivate(ctx) {
+        return ctx.player(ctx.seat).arsenal.some((card) => card.faceDown);
+      },
       onActivate(ctx) {
         const cards = ctx.player(ctx.seat).arsenal.filter((card) => card.faceDown);
-        ctx.requestCardChoice("lexi-flip", decisionPrompt("Lexi: turn a face-down arsenal card face up", "card.ele.lexi.arsenal.faceup"), cards.map((card) => card.instanceId));
+        ctx.requestCardChoice(
+          "lexi-flip",
+          decisionPrompt("Lexi: turn a face-down arsenal card face up", "card.ele.lexi.arsenal.faceup"),
+          cards.map((card) => card.instanceId),
+        );
       },
     },
     onChoose(ctx, hook, option) {
@@ -637,7 +665,14 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
         const ice = hasType(ctx, card, "ice");
         ctx.turnArsenalFaceUp(card.instanceId);
         if (lightning) buffNextAttack(ctx, { goAgain: true });
-        if (ice) ctx.requestChoice("lexi-ice-target", decisionPrompt("Lexi: create Frostbite under which hero?", "card.ele.lexi.frostbite.hero", { optionMessages: commonOptionMessages("opponent", "self") }), ["opponent", "self"]);
+        if (ice)
+          ctx.requestChoice(
+            "lexi-ice-target",
+            decisionPrompt("Lexi: create Frostbite under which hero?", "card.ele.lexi.frostbite.hero", {
+              optionMessages: commonOptionMessages("opponent", "self"),
+            }),
+            ["opponent", "self"],
+          );
       } else if (hook === "lexi-ice-target") {
         createFrostbites(ctx, option === "self" ? ctx.seat : opponentSeat(ctx));
       }
@@ -645,15 +680,36 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   },
   "cold wave|1": {
     ...fusionOnly("ice"),
-    onAttackDeclared(ctx) { if (isFused(ctx)) ctx.setPlayerFlag(opponentSeat(ctx), "costMoreThisTurn", Number(ctx.getPlayerFlag(opponentSeat(ctx), "costMoreThisTurn")) + 1); },
+    onAttackDeclared(ctx) {
+      if (isFused(ctx))
+        ctx.setPlayerFlag(
+          opponentSeat(ctx),
+          "costMoreThisTurn",
+          Number(ctx.getPlayerFlag(opponentSeat(ctx), "costMoreThisTurn")) + 1,
+        );
+    },
   },
   "cold wave|2": {
     ...fusionOnly("ice"),
-    onAttackDeclared(ctx) { if (isFused(ctx)) ctx.setPlayerFlag(opponentSeat(ctx), "costMoreThisTurn", Number(ctx.getPlayerFlag(opponentSeat(ctx), "costMoreThisTurn")) + 1); },
+    onAttackDeclared(ctx) {
+      if (isFused(ctx))
+        ctx.setPlayerFlag(
+          opponentSeat(ctx),
+          "costMoreThisTurn",
+          Number(ctx.getPlayerFlag(opponentSeat(ctx), "costMoreThisTurn")) + 1,
+        );
+    },
   },
   "cold wave|3": {
     ...fusionOnly("ice"),
-    onAttackDeclared(ctx) { if (isFused(ctx)) ctx.setPlayerFlag(opponentSeat(ctx), "costMoreThisTurn", Number(ctx.getPlayerFlag(opponentSeat(ctx), "costMoreThisTurn")) + 1); },
+    onAttackDeclared(ctx) {
+      if (isFused(ctx))
+        ctx.setPlayerFlag(
+          opponentSeat(ctx),
+          "costMoreThisTurn",
+          Number(ctx.getPlayerFlag(opponentSeat(ctx), "costMoreThisTurn")) + 1,
+        );
+    },
   },
   "snap shot|1": snapShot(),
   "snap shot|2": snapShot(),
@@ -661,12 +717,24 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   "blizzard bolt|1": fusedAttackWatcher("ice", "blizzard", (ctx) => createFrostbites(ctx, opponentSeat(ctx))),
   "blizzard bolt|2": fusedAttackWatcher("ice", "blizzard", (ctx) => createFrostbites(ctx, opponentSeat(ctx))),
   "blizzard bolt|3": fusedAttackWatcher("ice", "blizzard", (ctx) => createFrostbites(ctx, opponentSeat(ctx))),
-  "buzz bolt|1": fusedAttackWatcher("lightning", "buzz", (ctx) => ctx.dealDamage(opponentSeat(ctx), 1, { sourceInstanceId: ctx.link!.attackingCard.instanceId })),
-  "buzz bolt|2": fusedAttackWatcher("lightning", "buzz", (ctx) => ctx.dealDamage(opponentSeat(ctx), 1, { sourceInstanceId: ctx.link!.attackingCard.instanceId })),
-  "buzz bolt|3": fusedAttackWatcher("lightning", "buzz", (ctx) => ctx.dealDamage(opponentSeat(ctx), 1, { sourceInstanceId: ctx.link!.attackingCard.instanceId })),
-  "chilling icevein|1": fusedAttackWatcher("ice", "icevein", (ctx) => discardUnlessPay(ctx, opponentSeat(ctx), 1, "icevein")),
-  "chilling icevein|2": fusedAttackWatcher("ice", "icevein", (ctx) => discardUnlessPay(ctx, opponentSeat(ctx), 1, "icevein")),
-  "chilling icevein|3": fusedAttackWatcher("ice", "icevein", (ctx) => discardUnlessPay(ctx, opponentSeat(ctx), 1, "icevein")),
+  "buzz bolt|1": fusedAttackWatcher("lightning", "buzz", (ctx) =>
+    ctx.dealDamage(opponentSeat(ctx), 1, { sourceInstanceId: ctx.link!.attackingCard.instanceId }),
+  ),
+  "buzz bolt|2": fusedAttackWatcher("lightning", "buzz", (ctx) =>
+    ctx.dealDamage(opponentSeat(ctx), 1, { sourceInstanceId: ctx.link!.attackingCard.instanceId }),
+  ),
+  "buzz bolt|3": fusedAttackWatcher("lightning", "buzz", (ctx) =>
+    ctx.dealDamage(opponentSeat(ctx), 1, { sourceInstanceId: ctx.link!.attackingCard.instanceId }),
+  ),
+  "chilling icevein|1": fusedAttackWatcher("ice", "icevein", (ctx) =>
+    discardUnlessPay(ctx, opponentSeat(ctx), 1, "icevein"),
+  ),
+  "chilling icevein|2": fusedAttackWatcher("ice", "icevein", (ctx) =>
+    discardUnlessPay(ctx, opponentSeat(ctx), 1, "icevein"),
+  ),
+  "chilling icevein|3": fusedAttackWatcher("ice", "icevein", (ctx) =>
+    discardUnlessPay(ctx, opponentSeat(ctx), 1, "icevein"),
+  ),
   "dazzling crescendo|1": fusedGoAgain("lightning"),
   "dazzling crescendo|2": fusedGoAgain("lightning"),
   "dazzling crescendo|3": fusedGoAgain("lightning"),
@@ -675,41 +743,65 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   "flake out|3": fusedDominate("ice"),
   "frazzle|1": {
     ...fusionOnly("lightning"),
-    onAttackDeclared(ctx) { if (isFused(ctx)) ctx.addModifier({ scope: "until-end-of-turn", damage: 1, appliesTo: "attack" }); },
+    onAttackDeclared(ctx) {
+      if (isFused(ctx)) ctx.addModifier({ scope: "until-end-of-turn", damage: 1, appliesTo: "attack" });
+    },
   },
   "frazzle|2": {
     ...fusionOnly("lightning"),
-    onAttackDeclared(ctx) { if (isFused(ctx)) ctx.addModifier({ scope: "until-end-of-turn", damage: 1, appliesTo: "attack" }); },
+    onAttackDeclared(ctx) {
+      if (isFused(ctx)) ctx.addModifier({ scope: "until-end-of-turn", damage: 1, appliesTo: "attack" });
+    },
   },
   "frazzle|3": {
     ...fusionOnly("lightning"),
-    onAttackDeclared(ctx) { if (isFused(ctx)) ctx.addModifier({ scope: "until-end-of-turn", damage: 1, appliesTo: "attack" }); },
+    onAttackDeclared(ctx) {
+      if (isFused(ctx)) ctx.addModifier({ scope: "until-end-of-turn", damage: 1, appliesTo: "attack" });
+    },
   },
 
   // Elemental Runeblade
   "explosive growth|1": {
     arcaneDamageEffect: true,
     ...fusionOnly("earth"),
-    onAttackDeclared(ctx) { dealArcane(ctx, opponentSeat(ctx), 1); },
-    onDamageDealt(ctx, _target, amount) { if (amount > 0 && isFused(ctx)) ctx.addModifier({ scope: "combat-chain", attack: 1 }); },
+    onAttackDeclared(ctx) {
+      dealArcane(ctx, opponentSeat(ctx), 1);
+    },
+    onDamageDealt(ctx, _target, amount) {
+      if (amount > 0 && isFused(ctx)) ctx.addModifier({ scope: "combat-chain", attack: 1 });
+    },
     canTriggerOnHit: isFused,
-    onHit(ctx) { ctx.addModifier({ scope: "combat-chain", attack: 1 }); },
+    onHit(ctx) {
+      ctx.addModifier({ scope: "combat-chain", attack: 1 });
+    },
   },
   "explosive growth|2": {
     arcaneDamageEffect: true,
     ...fusionOnly("earth"),
-    onAttackDeclared(ctx) { dealArcane(ctx, opponentSeat(ctx), 1); },
-    onDamageDealt(ctx, _target, amount) { if (amount > 0 && isFused(ctx)) ctx.addModifier({ scope: "combat-chain", attack: 1 }); },
+    onAttackDeclared(ctx) {
+      dealArcane(ctx, opponentSeat(ctx), 1);
+    },
+    onDamageDealt(ctx, _target, amount) {
+      if (amount > 0 && isFused(ctx)) ctx.addModifier({ scope: "combat-chain", attack: 1 });
+    },
     canTriggerOnHit: isFused,
-    onHit(ctx) { ctx.addModifier({ scope: "combat-chain", attack: 1 }); },
+    onHit(ctx) {
+      ctx.addModifier({ scope: "combat-chain", attack: 1 });
+    },
   },
   "explosive growth|3": {
     arcaneDamageEffect: true,
     ...fusionOnly("earth"),
-    onAttackDeclared(ctx) { dealArcane(ctx, opponentSeat(ctx), 1); },
-    onDamageDealt(ctx, _target, amount) { if (amount > 0 && isFused(ctx)) ctx.addModifier({ scope: "combat-chain", attack: 1 }); },
+    onAttackDeclared(ctx) {
+      dealArcane(ctx, opponentSeat(ctx), 1);
+    },
+    onDamageDealt(ctx, _target, amount) {
+      if (amount > 0 && isFused(ctx)) ctx.addModifier({ scope: "combat-chain", attack: 1 });
+    },
     canTriggerOnHit: isFused,
-    onHit(ctx) { ctx.addModifier({ scope: "combat-chain", attack: 1 }); },
+    onHit(ctx) {
+      ctx.addModifier({ scope: "combat-chain", attack: 1 });
+    },
   },
   "rites of lightning|1": ritesOfLightning(),
   "rites of lightning|2": ritesOfLightning(),
@@ -718,30 +810,48 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   "arcanic shockwave|3": arcanicShockwave(),
   "vela flash|1": {
     ...fusionOnly("lightning"),
-    onAttackDeclared(ctx) { if (isFused(ctx)) ctx.setFlag("player", "nextNonAttackAsInstant", true); },
+    onAttackDeclared(ctx) {
+      if (isFused(ctx)) ctx.setFlag("player", "nextNonAttackAsInstant", true);
+    },
   },
   "vela flash|2": {
     ...fusionOnly("lightning"),
-    onAttackDeclared(ctx) { if (isFused(ctx)) ctx.setFlag("player", "nextNonAttackAsInstant", true); },
+    onAttackDeclared(ctx) {
+      if (isFused(ctx)) ctx.setFlag("player", "nextNonAttackAsInstant", true);
+    },
   },
   "vela flash|3": {
     ...fusionOnly("lightning"),
-    onAttackDeclared(ctx) { if (isFused(ctx)) ctx.setFlag("player", "nextNonAttackAsInstant", true); },
+    onAttackDeclared(ctx) {
+      if (isFused(ctx)) ctx.setFlag("player", "nextNonAttackAsInstant", true);
+    },
   },
   "rites of replenishment|1": ritesOfReplenishment(),
   "rites of replenishment|2": ritesOfReplenishment(),
   "rites of replenishment|3": ritesOfReplenishment(),
   "stir the wildwood|1": {
     ...fusionOnly("earth"),
-    modifyAttack(ctx) { return (isFused(ctx) ? 2 : 0) + (ctx.getFlag("player", "arcaneDamageDealtToOpposingHeroThisTurn") === true ? 2 : 0); },
+    modifyAttack(ctx) {
+      return (
+        (isFused(ctx) ? 2 : 0) + (ctx.getFlag("player", "arcaneDamageDealtToOpposingHeroThisTurn") === true ? 2 : 0)
+      );
+    },
   },
   "stir the wildwood|2": {
     ...fusionOnly("earth"),
-    modifyAttack(ctx) { return (isFused(ctx) ? 2 : 0) + (ctx.getFlag("player", "arcaneDamageDealtToOpposingHeroThisTurn") === true ? 2 : 0); },
+    modifyAttack(ctx) {
+      return (
+        (isFused(ctx) ? 2 : 0) + (ctx.getFlag("player", "arcaneDamageDealtToOpposingHeroThisTurn") === true ? 2 : 0)
+      );
+    },
   },
   "stir the wildwood|3": {
     ...fusionOnly("earth"),
-    modifyAttack(ctx) { return (isFused(ctx) ? 2 : 0) + (ctx.getFlag("player", "arcaneDamageDealtToOpposingHeroThisTurn") === true ? 2 : 0); },
+    modifyAttack(ctx) {
+      return (
+        (isFused(ctx) ? 2 : 0) + (ctx.getFlag("player", "arcaneDamageDealtToOpposingHeroThisTurn") === true ? 2 : 0)
+      );
+    },
   },
   "bramble spark|1": brambleSpark(3),
   "bramble spark|2": brambleSpark(2),
@@ -749,17 +859,23 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   "inspire lightning|1": {
     arcaneDamageEffect: true,
     ...fusionOnly("lightning"),
-    onPlay(ctx) { if (isFused(ctx)) dealArcane(ctx, opponentSeat(ctx), 3); },
+    onPlay(ctx) {
+      if (isFused(ctx)) dealArcane(ctx, opponentSeat(ctx), 3);
+    },
   },
   "inspire lightning|2": {
     arcaneDamageEffect: true,
     ...fusionOnly("lightning"),
-    onPlay(ctx) { if (isFused(ctx)) dealArcane(ctx, opponentSeat(ctx), 2); },
+    onPlay(ctx) {
+      if (isFused(ctx)) dealArcane(ctx, opponentSeat(ctx), 2);
+    },
   },
   "inspire lightning|3": {
     arcaneDamageEffect: true,
     ...fusionOnly("lightning"),
-    onPlay(ctx) { if (isFused(ctx)) dealArcane(ctx, opponentSeat(ctx), 1); },
+    onPlay(ctx) {
+      if (isFused(ctx)) dealArcane(ctx, opponentSeat(ctx), 1);
+    },
   },
 
   // Elemental and Earth
@@ -772,7 +888,10 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   "entwine lightning|2": fusedGoAgain("lightning"),
   "entwine lightning|3": fusedGoAgain("lightning"),
   "invigorate|1": {
-    onPlay(ctx) { ctx.setCounter("invigorateArmed", 1); ctx.addModifier({ scope: "until-end-of-turn" }); },
+    onPlay(ctx) {
+      ctx.setCounter("invigorateArmed", 1);
+      ctx.addModifier({ scope: "until-end-of-turn" });
+    },
     onFriendlyAttackDeclared(ctx) {
       if (!ctx.getCounter("invigorateArmed") || !(ctx.link?.attackingCard.counters?.fused ?? 0)) return;
       ctx.setCounter("invigorateArmed", 0);
@@ -780,7 +899,10 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
     },
   },
   "invigorate|2": {
-    onPlay(ctx) { ctx.setCounter("invigorateArmed", 1); ctx.addModifier({ scope: "until-end-of-turn" }); },
+    onPlay(ctx) {
+      ctx.setCounter("invigorateArmed", 1);
+      ctx.addModifier({ scope: "until-end-of-turn" });
+    },
     onFriendlyAttackDeclared(ctx) {
       if (!ctx.getCounter("invigorateArmed") || !(ctx.link?.attackingCard.counters?.fused ?? 0)) return;
       ctx.setCounter("invigorateArmed", 0);
@@ -788,16 +910,28 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
     },
   },
   "invigorate|3": {
-    onPlay(ctx) { ctx.setCounter("invigorateArmed", 1); ctx.addModifier({ scope: "until-end-of-turn" }); },
+    onPlay(ctx) {
+      ctx.setCounter("invigorateArmed", 1);
+      ctx.addModifier({ scope: "until-end-of-turn" });
+    },
     onFriendlyAttackDeclared(ctx) {
       if (!ctx.getCounter("invigorateArmed") || !(ctx.link?.attackingCard.counters?.fused ?? 0)) return;
       ctx.setCounter("invigorateArmed", 0);
       ctx.addModifier({ scope: "chain-link", attack: 2 });
     },
   },
-  "rejuvenate|1": { playAsInstant: (ctx) => ctx.getFlag("player", "fusedThisTurn") === true, onPlay: (ctx) => ctx.gainLife(ctx.seat, 3) },
-  "rejuvenate|2": { playAsInstant: (ctx) => ctx.getFlag("player", "fusedThisTurn") === true, onPlay: (ctx) => ctx.gainLife(ctx.seat, 2) },
-  "rejuvenate|3": { playAsInstant: (ctx) => ctx.getFlag("player", "fusedThisTurn") === true, onPlay: (ctx) => ctx.gainLife(ctx.seat, 1) },
+  "rejuvenate|1": {
+    playAsInstant: (ctx) => ctx.getFlag("player", "fusedThisTurn") === true,
+    onPlay: (ctx) => ctx.gainLife(ctx.seat, 3),
+  },
+  "rejuvenate|2": {
+    playAsInstant: (ctx) => ctx.getFlag("player", "fusedThisTurn") === true,
+    onPlay: (ctx) => ctx.gainLife(ctx.seat, 2),
+  },
+  "rejuvenate|3": {
+    playAsInstant: (ctx) => ctx.getFlag("player", "fusedThisTurn") === true,
+    onPlay: (ctx) => ctx.gainLife(ctx.seat, 1),
+  },
   "plume of evergrowth|0": {
     activated: {
       cost: 3,
@@ -807,77 +941,156 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       destroySelfCost: true,
       canActivate(ctx) {
         return ctx.player(ctx.seat).graveyard.some((card) => {
-          return hasType(ctx, card, "earth") &&
-            (ctx.hasCardType(card, "action") || ctx.hasCardType(card, "instant"));
+          return hasType(ctx, card, "earth") && (ctx.hasCardType(card, "action") || ctx.hasCardType(card, "instant"));
         });
       },
       onActivate(ctx) {
         const cards = ctx.player(ctx.seat).graveyard.filter((card) => {
-          return hasType(ctx, card, "earth") &&
-            (ctx.hasCardType(card, "action") || ctx.hasCardType(card, "instant"));
+          return hasType(ctx, card, "earth") && (ctx.hasCardType(card, "action") || ctx.hasCardType(card, "instant"));
         });
-        ctx.requestCardChoice("plume-return", decisionPrompt("Plume of Evergrowth: return an Earth card to your hand", "card.ele.plume.earth.return"), cards.map((card) => card.instanceId));
+        ctx.requestCardChoice(
+          "plume-return",
+          decisionPrompt("Plume of Evergrowth: return an Earth card to your hand", "card.ele.plume.earth.return"),
+          cards.map((card) => card.instanceId),
+        );
       },
     },
-    onChoose(ctx, hook, option) { if (hook === "plume-return") ctx.moveToHand(Number(option)); },
+    onChoose(ctx, hook, option) {
+      if (hook === "plume-return") ctx.moveToHand(Number(option));
+    },
   },
   "evergreen|1": {
-    onAttackDeclared(ctx) { ctx.setCounter("evergreenArsenal", ctx.getFlag("link", "fromArsenal") === true ? 1 : 0); },
-    graveyardReplacement: (ctx) => ctx.getCounter("evergreenArsenal") ? "bottom-of-deck" : undefined,
+    onAttackDeclared(ctx) {
+      ctx.setCounter("evergreenArsenal", ctx.getFlag("link", "fromArsenal") === true ? 1 : 0);
+    },
+    graveyardReplacement: (ctx) => (ctx.getCounter("evergreenArsenal") ? "bottom-of-deck" : undefined),
   },
   "evergreen|2": {
-    onAttackDeclared(ctx) { ctx.setCounter("evergreenArsenal", ctx.getFlag("link", "fromArsenal") === true ? 1 : 0); },
-    graveyardReplacement: (ctx) => ctx.getCounter("evergreenArsenal") ? "bottom-of-deck" : undefined,
+    onAttackDeclared(ctx) {
+      ctx.setCounter("evergreenArsenal", ctx.getFlag("link", "fromArsenal") === true ? 1 : 0);
+    },
+    graveyardReplacement: (ctx) => (ctx.getCounter("evergreenArsenal") ? "bottom-of-deck" : undefined),
   },
   "evergreen|3": {
-    onAttackDeclared(ctx) { ctx.setCounter("evergreenArsenal", ctx.getFlag("link", "fromArsenal") === true ? 1 : 0); },
-    graveyardReplacement: (ctx) => ctx.getCounter("evergreenArsenal") ? "bottom-of-deck" : undefined,
+    onAttackDeclared(ctx) {
+      ctx.setCounter("evergreenArsenal", ctx.getFlag("link", "fromArsenal") === true ? 1 : 0);
+    },
+    graveyardReplacement: (ctx) => (ctx.getCounter("evergreenArsenal") ? "bottom-of-deck" : undefined),
   },
   "weave earth|1": weave("earth", 3),
   "weave earth|2": weave("earth", 2),
   "weave earth|3": weave("earth", 1),
   "summerwood shelter|1": {
     onPlay(ctx) {
-      const cards = ctx.link?.defendingCards.filter((card) =>
-        ctx.hasCardType(card, "action") &&
-        (hasType(ctx, card, "earth") || hasType(ctx, card, "elemental"))) ?? [];
-      if (cards.length > 0) ctx.requestCardChoice("shelter", decisionPrompt("Summerwood Shelter: choose a defending Earth or Elemental card", "card.ele.shelter.defender.choose"), cards.map((card) => card.instanceId));
+      const cards =
+        ctx.link?.defendingCards.filter(
+          (card) => ctx.hasCardType(card, "action") && (hasType(ctx, card, "earth") || hasType(ctx, card, "elemental")),
+        ) ?? [];
+      if (cards.length > 0)
+        ctx.requestCardChoice(
+          "shelter",
+          decisionPrompt(
+            "Summerwood Shelter: choose a defending Earth or Elemental card",
+            "card.ele.shelter.defender.choose",
+          ),
+          cards.map((card) => card.instanceId),
+        );
     },
-    onChoose(ctx, hook, option) { if (hook === "shelter") ctx.addCardTempDefense(Number(option), 4); },
+    onChoose(ctx, hook, option) {
+      if (hook === "shelter") ctx.addCardTempDefense(Number(option), 4);
+    },
   },
   "summerwood shelter|2": {
     onPlay(ctx) {
-      const cards = ctx.link?.defendingCards.filter((card) =>
-        ctx.hasCardType(card, "action") &&
-        (hasType(ctx, card, "earth") || hasType(ctx, card, "elemental"))) ?? [];
-      if (cards.length > 0) ctx.requestCardChoice("shelter", decisionPrompt("Summerwood Shelter: choose a defending Earth or Elemental card", "card.ele.shelter.defender.choose"), cards.map((card) => card.instanceId));
+      const cards =
+        ctx.link?.defendingCards.filter(
+          (card) => ctx.hasCardType(card, "action") && (hasType(ctx, card, "earth") || hasType(ctx, card, "elemental")),
+        ) ?? [];
+      if (cards.length > 0)
+        ctx.requestCardChoice(
+          "shelter",
+          decisionPrompt(
+            "Summerwood Shelter: choose a defending Earth or Elemental card",
+            "card.ele.shelter.defender.choose",
+          ),
+          cards.map((card) => card.instanceId),
+        );
     },
-    onChoose(ctx, hook, option) { if (hook === "shelter") ctx.addCardTempDefense(Number(option), 3); },
+    onChoose(ctx, hook, option) {
+      if (hook === "shelter") ctx.addCardTempDefense(Number(option), 3);
+    },
   },
   "summerwood shelter|3": {
     onPlay(ctx) {
-      const cards = ctx.link?.defendingCards.filter((card) =>
-        ctx.hasCardType(card, "action") &&
-        (hasType(ctx, card, "earth") || hasType(ctx, card, "elemental"))) ?? [];
-      if (cards.length > 0) ctx.requestCardChoice("shelter", decisionPrompt("Summerwood Shelter: choose a defending Earth or Elemental card", "card.ele.shelter.defender.choose"), cards.map((card) => card.instanceId));
+      const cards =
+        ctx.link?.defendingCards.filter(
+          (card) => ctx.hasCardType(card, "action") && (hasType(ctx, card, "earth") || hasType(ctx, card, "elemental")),
+        ) ?? [];
+      if (cards.length > 0)
+        ctx.requestCardChoice(
+          "shelter",
+          decisionPrompt(
+            "Summerwood Shelter: choose a defending Earth or Elemental card",
+            "card.ele.shelter.defender.choose",
+          ),
+          cards.map((card) => card.instanceId),
+        );
     },
-    onChoose(ctx, hook, option) { if (hook === "shelter") ctx.addCardTempDefense(Number(option), 2); },
+    onChoose(ctx, hook, option) {
+      if (hook === "shelter") ctx.addCardTempDefense(Number(option), 2);
+    },
   },
   "break ground|1": {
-    onAttackDeclared(ctx) { const card = ctx.player(ctx.seat).arsenal[0]; if (card) ctx.requestCardChoice("break-ground", decisionPrompt("Break Ground: bottom your arsenal and draw?", "card.ele.breakground.arsenal.bottom", { optionMessages: commonOptionMessages("no") }), ["no", card.instanceId]); },
-    onChoose(ctx, hook, option) { if (hook === "break-ground" && option !== "no" && ctx.putOnDeckBottom(Number(option))) ctx.drawCards(ctx.seat, 1); },
+    onAttackDeclared(ctx) {
+      const card = ctx.player(ctx.seat).arsenal[0];
+      if (card)
+        ctx.requestCardChoice(
+          "break-ground",
+          decisionPrompt("Break Ground: bottom your arsenal and draw?", "card.ele.breakground.arsenal.bottom", {
+            optionMessages: commonOptionMessages("no"),
+          }),
+          ["no", card.instanceId],
+        );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "break-ground" && option !== "no" && ctx.putOnDeckBottom(Number(option))) ctx.drawCards(ctx.seat, 1);
+    },
   },
   "break ground|2": {
-    onAttackDeclared(ctx) { const card = ctx.player(ctx.seat).arsenal[0]; if (card) ctx.requestCardChoice("break-ground", decisionPrompt("Break Ground: bottom your arsenal and draw?", "card.ele.breakground.arsenal.bottom", { optionMessages: commonOptionMessages("no") }), ["no", card.instanceId]); },
-    onChoose(ctx, hook, option) { if (hook === "break-ground" && option !== "no" && ctx.putOnDeckBottom(Number(option))) ctx.drawCards(ctx.seat, 1); },
+    onAttackDeclared(ctx) {
+      const card = ctx.player(ctx.seat).arsenal[0];
+      if (card)
+        ctx.requestCardChoice(
+          "break-ground",
+          decisionPrompt("Break Ground: bottom your arsenal and draw?", "card.ele.breakground.arsenal.bottom", {
+            optionMessages: commonOptionMessages("no"),
+          }),
+          ["no", card.instanceId],
+        );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "break-ground" && option !== "no" && ctx.putOnDeckBottom(Number(option))) ctx.drawCards(ctx.seat, 1);
+    },
   },
   "break ground|3": {
-    onAttackDeclared(ctx) { const card = ctx.player(ctx.seat).arsenal[0]; if (card) ctx.requestCardChoice("break-ground", decisionPrompt("Break Ground: bottom your arsenal and draw?", "card.ele.breakground.arsenal.bottom", { optionMessages: commonOptionMessages("no") }), ["no", card.instanceId]); },
-    onChoose(ctx, hook, option) { if (hook === "break-ground" && option !== "no" && ctx.putOnDeckBottom(Number(option))) ctx.drawCards(ctx.seat, 1); },
+    onAttackDeclared(ctx) {
+      const card = ctx.player(ctx.seat).arsenal[0];
+      if (card)
+        ctx.requestCardChoice(
+          "break-ground",
+          decisionPrompt("Break Ground: bottom your arsenal and draw?", "card.ele.breakground.arsenal.bottom", {
+            optionMessages: commonOptionMessages("no"),
+          }),
+          ["no", card.instanceId],
+        );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "break-ground" && option !== "no" && ctx.putOnDeckBottom(Number(option))) ctx.drawCards(ctx.seat, 1);
+    },
   },
-  "burgeoning|1": { modifyAttack: (ctx) => ctx.getFlag("link", "fromArsenal") === true ? 1 : 0 },
-  "burgeoning|2": { modifyAttack: (ctx) => ctx.getFlag("link", "fromArsenal") === true ? 1 : 0 },
-  "burgeoning|3": { modifyAttack: (ctx) => ctx.getFlag("link", "fromArsenal") === true ? 1 : 0 },
+  "burgeoning|1": { modifyAttack: (ctx) => (ctx.getFlag("link", "fromArsenal") === true ? 1 : 0) },
+  "burgeoning|2": { modifyAttack: (ctx) => (ctx.getFlag("link", "fromArsenal") === true ? 1 : 0) },
+  "burgeoning|3": { modifyAttack: (ctx) => (ctx.getFlag("link", "fromArsenal") === true ? 1 : 0) },
   "earthlore surge|1": { onPlay: (ctx) => buffNextAttack(ctx, { attack: 5, appliesTo: "attack-action" }) },
   "earthlore surge|2": { onPlay: (ctx) => buffNextAttack(ctx, { attack: 4, appliesTo: "attack-action" }) },
   "earthlore surge|3": { onPlay: (ctx) => buffNextAttack(ctx, { attack: 3, appliesTo: "attack-action" }) },
@@ -892,84 +1105,226 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       timing: "instant",
       destroySelfCost: true,
       canActivate: (ctx) => ctx.getFlag("player", "earthFusedThisTurn") === true,
-      onActivate(ctx) { ctx.addModifier({ scope: "until-end-of-turn", attack: 1, defense: 1, appliesToCardType: "action" }); },
+      onActivate(ctx) {
+        ctx.addModifier({ scope: "until-end-of-turn", attack: 1, defense: 1, appliesToCardType: "action" });
+      },
     },
   },
 
   // Ice
   "coat of frost|0": {
-    activated: { cost: 0, isAttack: false, goAgain: true, destroySelfCost: true, onActivate: (ctx) => createFrostbites(ctx, opponentSeat(ctx)) },
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: true,
+      destroySelfCost: true,
+      onActivate: (ctx) => createFrostbites(ctx, opponentSeat(ctx)),
+    },
   },
   "frost fang|1": {
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
-    onHit(ctx) { discardUnlessPay(ctx, opponentSeat(ctx), 2, "frost-fang"); },
-    onChoose(ctx, hook, option) { discardUnlessPayOnChoose(ctx, hook, option, "frost-fang"); },
+    onHit(ctx) {
+      discardUnlessPay(ctx, opponentSeat(ctx), 2, "frost-fang");
+    },
+    onChoose(ctx, hook, option) {
+      discardUnlessPayOnChoose(ctx, hook, option, "frost-fang");
+    },
   },
   "frost fang|2": {
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
-    onHit(ctx) { discardUnlessPay(ctx, opponentSeat(ctx), 2, "frost-fang"); },
-    onChoose(ctx, hook, option) { discardUnlessPayOnChoose(ctx, hook, option, "frost-fang"); },
+    onHit(ctx) {
+      discardUnlessPay(ctx, opponentSeat(ctx), 2, "frost-fang");
+    },
+    onChoose(ctx, hook, option) {
+      discardUnlessPayOnChoose(ctx, hook, option, "frost-fang");
+    },
   },
   "frost fang|3": {
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
-    onHit(ctx) { discardUnlessPay(ctx, opponentSeat(ctx), 2, "frost-fang"); },
-    onChoose(ctx, hook, option) { discardUnlessPayOnChoose(ctx, hook, option, "frost-fang"); },
+    onHit(ctx) {
+      discardUnlessPay(ctx, opponentSeat(ctx), 2, "frost-fang");
+    },
+    onChoose(ctx, hook, option) {
+      discardUnlessPayOnChoose(ctx, hook, option, "frost-fang");
+    },
   },
   "ice quake|1": {
-    onPlay(ctx) { buffNextAttack(ctx, { attack: 3 }); ctx.setCounter("iceQuake", 1); ctx.addModifier({ scope: "until-end-of-turn" }); },
-    canTriggerOnHit(ctx) { return ctx.getCounter("iceQuake") > 0 && ctx.link?.targetAllyId === undefined; },
-    onHit(ctx) { createFrostbites(ctx, opponentSeat(ctx)); },
+    onPlay(ctx) {
+      buffNextAttack(ctx, { attack: 3 });
+      ctx.setCounter("iceQuake", 1);
+      ctx.addModifier({ scope: "until-end-of-turn" });
+    },
+    canTriggerOnHit(ctx) {
+      return ctx.getCounter("iceQuake") > 0 && ctx.link?.targetAllyId === undefined;
+    },
+    onHit(ctx) {
+      createFrostbites(ctx, opponentSeat(ctx));
+    },
   },
   "ice quake|2": {
-    onPlay(ctx) { buffNextAttack(ctx, { attack: 2 }); ctx.setCounter("iceQuake", 1); ctx.addModifier({ scope: "until-end-of-turn" }); },
-    canTriggerOnHit(ctx) { return ctx.getCounter("iceQuake") > 0 && ctx.link?.targetAllyId === undefined; },
-    onHit(ctx) { createFrostbites(ctx, opponentSeat(ctx)); },
+    onPlay(ctx) {
+      buffNextAttack(ctx, { attack: 2 });
+      ctx.setCounter("iceQuake", 1);
+      ctx.addModifier({ scope: "until-end-of-turn" });
+    },
+    canTriggerOnHit(ctx) {
+      return ctx.getCounter("iceQuake") > 0 && ctx.link?.targetAllyId === undefined;
+    },
+    onHit(ctx) {
+      createFrostbites(ctx, opponentSeat(ctx));
+    },
   },
   "ice quake|3": {
-    onPlay(ctx) { buffNextAttack(ctx, { attack: 1 }); ctx.setCounter("iceQuake", 1); ctx.addModifier({ scope: "until-end-of-turn" }); },
-    canTriggerOnHit(ctx) { return ctx.getCounter("iceQuake") > 0 && ctx.link?.targetAllyId === undefined; },
-    onHit(ctx) { createFrostbites(ctx, opponentSeat(ctx)); },
+    onPlay(ctx) {
+      buffNextAttack(ctx, { attack: 1 });
+      ctx.setCounter("iceQuake", 1);
+      ctx.addModifier({ scope: "until-end-of-turn" });
+    },
+    canTriggerOnHit(ctx) {
+      return ctx.getCounter("iceQuake") > 0 && ctx.link?.targetAllyId === undefined;
+    },
+    onHit(ctx) {
+      createFrostbites(ctx, opponentSeat(ctx));
+    },
   },
   "weave ice|1": weave("ice", 3),
   "weave ice|2": weave("ice", 2),
   "weave ice|3": weave("ice", 1),
-  "icy encounter|1": { canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined, onHit: (ctx) => { createFrostbites(ctx, opponentSeat(ctx)); } },
-  "icy encounter|2": { canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined, onHit: (ctx) => { createFrostbites(ctx, opponentSeat(ctx)); } },
-  "icy encounter|3": { canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined, onHit: (ctx) => { createFrostbites(ctx, opponentSeat(ctx)); } },
+  "icy encounter|1": {
+    canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
+    onHit: (ctx) => {
+      createFrostbites(ctx, opponentSeat(ctx));
+    },
+  },
+  "icy encounter|2": {
+    canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
+    onHit: (ctx) => {
+      createFrostbites(ctx, opponentSeat(ctx));
+    },
+  },
+  "icy encounter|3": {
+    canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
+    onHit: (ctx) => {
+      createFrostbites(ctx, opponentSeat(ctx));
+    },
+  },
   "chill to the bone|1": {
-    onPlay(ctx) { ctx.setCounter("chill", 1); ctx.addModifier({ scope: "until-end-of-turn" }); },
-    canTriggerOnHit(ctx) { return ctx.getCounter("chill") > 0 && ctx.link?.targetAllyId === undefined && (ctx.currentAttackHasType("ice") || ctx.currentAttackHasType("elemental")); },
-    onHit(ctx) { ctx.setCounter("chill", 0); createFrostbites(ctx, opponentSeat(ctx), 3); },
+    onPlay(ctx) {
+      ctx.setCounter("chill", 1);
+      ctx.addModifier({ scope: "until-end-of-turn" });
+    },
+    canTriggerOnHit(ctx) {
+      return (
+        ctx.getCounter("chill") > 0 &&
+        ctx.link?.targetAllyId === undefined &&
+        (ctx.currentAttackHasType("ice") || ctx.currentAttackHasType("elemental"))
+      );
+    },
+    onHit(ctx) {
+      ctx.setCounter("chill", 0);
+      createFrostbites(ctx, opponentSeat(ctx), 3);
+    },
   },
   "chill to the bone|2": {
-    onPlay(ctx) { ctx.setCounter("chill", 1); ctx.addModifier({ scope: "until-end-of-turn" }); },
-    canTriggerOnHit(ctx) { return ctx.getCounter("chill") > 0 && ctx.link?.targetAllyId === undefined && (ctx.currentAttackHasType("ice") || ctx.currentAttackHasType("elemental")); },
-    onHit(ctx) { ctx.setCounter("chill", 0); createFrostbites(ctx, opponentSeat(ctx), 2); },
+    onPlay(ctx) {
+      ctx.setCounter("chill", 1);
+      ctx.addModifier({ scope: "until-end-of-turn" });
+    },
+    canTriggerOnHit(ctx) {
+      return (
+        ctx.getCounter("chill") > 0 &&
+        ctx.link?.targetAllyId === undefined &&
+        (ctx.currentAttackHasType("ice") || ctx.currentAttackHasType("elemental"))
+      );
+    },
+    onHit(ctx) {
+      ctx.setCounter("chill", 0);
+      createFrostbites(ctx, opponentSeat(ctx), 2);
+    },
   },
   "chill to the bone|3": {
-    onPlay(ctx) { ctx.setCounter("chill", 1); ctx.addModifier({ scope: "until-end-of-turn" }); },
-    canTriggerOnHit(ctx) { return ctx.getCounter("chill") > 0 && ctx.link?.targetAllyId === undefined && (ctx.currentAttackHasType("ice") || ctx.currentAttackHasType("elemental")); },
-    onHit(ctx) { ctx.setCounter("chill", 0); createFrostbites(ctx, opponentSeat(ctx), 1); },
+    onPlay(ctx) {
+      ctx.setCounter("chill", 1);
+      ctx.addModifier({ scope: "until-end-of-turn" });
+    },
+    canTriggerOnHit(ctx) {
+      return (
+        ctx.getCounter("chill") > 0 &&
+        ctx.link?.targetAllyId === undefined &&
+        (ctx.currentAttackHasType("ice") || ctx.currentAttackHasType("elemental"))
+      );
+    },
+    onHit(ctx) {
+      ctx.setCounter("chill", 0);
+      createFrostbites(ctx, opponentSeat(ctx), 1);
+    },
   },
   "polar blast|1": {
-    onPlay(ctx) { if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1); if (!ctx.requestPayment("polar-pay", decisionPrompt("Polar Blast: pay 3 resources?", "card.ele.polar.pay", { values: { amount: 3 } }), 3, opponentSeat(ctx))) buffNextAttack(ctx, { dominate: true }); },
-    onChoose(ctx, hook, option) { if (hook === "polar-pay" && option !== "paid") buffNextAttack(ctx, { dominate: true }); },
+    onPlay(ctx) {
+      if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1);
+      if (
+        !ctx.requestPayment(
+          "polar-pay",
+          decisionPrompt("Polar Blast: pay 3 resources?", "card.ele.polar.pay", { values: { amount: 3 } }),
+          3,
+          opponentSeat(ctx),
+        )
+      )
+        buffNextAttack(ctx, { dominate: true });
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "polar-pay" && option !== "paid") buffNextAttack(ctx, { dominate: true });
+    },
   },
   "polar blast|2": {
-    onPlay(ctx) { if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1); if (!ctx.requestPayment("polar-pay", decisionPrompt("Polar Blast: pay 2 resources?", "card.ele.polar.pay", { values: { amount: 2 } }), 2, opponentSeat(ctx))) buffNextAttack(ctx, { dominate: true }); },
-    onChoose(ctx, hook, option) { if (hook === "polar-pay" && option !== "paid") buffNextAttack(ctx, { dominate: true }); },
+    onPlay(ctx) {
+      if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1);
+      if (
+        !ctx.requestPayment(
+          "polar-pay",
+          decisionPrompt("Polar Blast: pay 2 resources?", "card.ele.polar.pay", { values: { amount: 2 } }),
+          2,
+          opponentSeat(ctx),
+        )
+      )
+        buffNextAttack(ctx, { dominate: true });
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "polar-pay" && option !== "paid") buffNextAttack(ctx, { dominate: true });
+    },
   },
   "polar blast|3": {
-    onPlay(ctx) { if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1); if (!ctx.requestPayment("polar-pay", decisionPrompt("Polar Blast: pay 1 resource?", "card.ele.polar.pay", { values: { amount: 1 } }), 1, opponentSeat(ctx))) buffNextAttack(ctx, { dominate: true }); },
-    onChoose(ctx, hook, option) { if (hook === "polar-pay" && option !== "paid") buffNextAttack(ctx, { dominate: true }); },
+    onPlay(ctx) {
+      if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1);
+      if (
+        !ctx.requestPayment(
+          "polar-pay",
+          decisionPrompt("Polar Blast: pay 1 resource?", "card.ele.polar.pay", { values: { amount: 1 } }),
+          1,
+          opponentSeat(ctx),
+        )
+      )
+        buffNextAttack(ctx, { dominate: true });
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "polar-pay" && option !== "paid") buffNextAttack(ctx, { dominate: true });
+    },
   },
   "winter's bite|1": {
-    onPlay(ctx) { discardUnlessPay(ctx, opponentSeat(ctx), 3, "winters-bite"); },
-    onChoose(ctx, hook, option) { discardUnlessPayOnChoose(ctx, hook, option, "winters-bite"); },
+    onPlay(ctx) {
+      discardUnlessPay(ctx, opponentSeat(ctx), 3, "winters-bite");
+    },
+    onChoose(ctx, hook, option) {
+      discardUnlessPayOnChoose(ctx, hook, option, "winters-bite");
+    },
   },
   "winter's bite|2": {
-    onPlay(ctx) { discardUnlessPay(ctx, opponentSeat(ctx), 2, "winters-bite"); },
-    onChoose(ctx, hook, option) { discardUnlessPayOnChoose(ctx, hook, option, "winters-bite"); },
+    onPlay(ctx) {
+      discardUnlessPay(ctx, opponentSeat(ctx), 2, "winters-bite");
+    },
+    onChoose(ctx, hook, option) {
+      discardUnlessPayOnChoose(ctx, hook, option, "winters-bite");
+    },
   },
   "amulet of ice|3": {
     activated: {
@@ -981,78 +1336,184 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       canActivate: (ctx) => ctx.getFlag("player", "iceFusedThisTurn") === true,
       onActivate: (ctx) => discardUnlessPay(ctx, opponentSeat(ctx), 2, "amulet-ice"),
     },
-    onChoose(ctx, hook, option) { discardUnlessPayOnChoose(ctx, hook, option, "amulet-ice"); },
+    onChoose(ctx, hook, option) {
+      discardUnlessPayOnChoose(ctx, hook, option, "amulet-ice");
+    },
   },
 
   // Lightning
   "mark of lightning|0": {
-    triggers: [{
-      event: "attack-defended",
-      optional: true,
-      label: "Destroy this to have the attack deal 1 damage to the defending hero?",
-      condition(ctx) {
-        return ctx.link?.flags.defendedFromHand === true &&
-          (ctx.currentAttackHasType("lightning") || ctx.currentAttackHasType("elemental"));
+    triggers: [
+      {
+        event: "attack-defended",
+        optional: true,
+        label: "Destroy this to have the attack deal 1 damage to the defending hero?",
+        condition(ctx) {
+          return (
+            ctx.link?.flags.defendedFromHand === true &&
+            (ctx.currentAttackHasType("lightning") || ctx.currentAttackHasType("elemental"))
+          );
+        },
+        effect(ctx) {
+          const link = ctx.link;
+          const stillControlled = Object.values(ctx.player(ctx.seat).equipment).some(
+            (card) => card?.instanceId === ctx.self.instanceId,
+          );
+          if (!link || !stillControlled) return;
+          ctx.destroySelf();
+          ctx.dealDamage(opponentSeat(ctx), 1, {
+            sourceInstanceId: link.attackingCard.instanceId,
+          });
+        },
       },
-      effect(ctx) {
-        const link = ctx.link;
-        const stillControlled = Object.values(ctx.player(ctx.seat).equipment)
-          .some((card) => card?.instanceId === ctx.self.instanceId);
-        if (!link || !stillControlled) return;
-        ctx.destroySelf();
-        ctx.dealDamage(opponentSeat(ctx), 1, {
-          sourceInstanceId: link.attackingCard.instanceId,
-        });
-      },
-    }],
+    ],
   },
-  "flash|1": { onPlay: (ctx) => ctx.addModifier({ scope: "next-play", grantKeyword: "go again", appliesToCardType: "action", minCost: 0 }) },
-  "flash|2": { onPlay: (ctx) => ctx.addModifier({ scope: "next-play", grantKeyword: "go again", appliesToCardType: "action", minCost: 1 }) },
-  "flash|3": { onPlay: (ctx) => ctx.addModifier({ scope: "next-play", grantKeyword: "go again", appliesToCardType: "action", minCost: 2 }) },
+  "flash|1": {
+    onPlay: (ctx) =>
+      ctx.addModifier({ scope: "next-play", grantKeyword: "go again", appliesToCardType: "action", minCost: 0 }),
+  },
+  "flash|2": {
+    onPlay: (ctx) =>
+      ctx.addModifier({ scope: "next-play", grantKeyword: "go again", appliesToCardType: "action", minCost: 1 }),
+  },
+  "flash|3": {
+    onPlay: (ctx) =>
+      ctx.addModifier({ scope: "next-play", grantKeyword: "go again", appliesToCardType: "action", minCost: 2 }),
+  },
   "weave lightning|2": weaveLightning(2),
   "weave lightning|3": weaveLightning(1),
   "lightning press|2": lightningPress(2),
   "lightning press|3": lightningPress(1),
   "ball lightning|1": {
-    onAttackDeclared(ctx) { ctx.addModifier({ scope: "combat-chain", damage: 1, appliesToCardType: "action", appliesToType: ["lightning", "elemental"] }); },
+    onAttackDeclared(ctx) {
+      ctx.addModifier({
+        scope: "combat-chain",
+        damage: 1,
+        appliesToCardType: "action",
+        appliesToType: ["lightning", "elemental"],
+      });
+    },
   },
   "ball lightning|2": {
-    onAttackDeclared(ctx) { ctx.addModifier({ scope: "combat-chain", damage: 1, appliesToCardType: "action", appliesToType: ["lightning", "elemental"] }); },
+    onAttackDeclared(ctx) {
+      ctx.addModifier({
+        scope: "combat-chain",
+        damage: 1,
+        appliesToCardType: "action",
+        appliesToType: ["lightning", "elemental"],
+      });
+    },
   },
   "ball lightning|3": {
-    onAttackDeclared(ctx) { ctx.addModifier({ scope: "combat-chain", damage: 1, appliesToCardType: "action", appliesToType: ["lightning", "elemental"] }); },
+    onAttackDeclared(ctx) {
+      ctx.addModifier({
+        scope: "combat-chain",
+        damage: 1,
+        appliesToCardType: "action",
+        appliesToType: ["lightning", "elemental"],
+      });
+    },
   },
   "lightning surge|2": fromArsenalGoAgain(),
   "lightning surge|3": fromArsenalGoAgain(),
   "shock striker|1": {
-    activated: { cost: 2, isAttack: false, goAgain: false, timing: "instant", oncePerTurn: true, canActivate: (ctx) => ctx.link?.attackingCard.instanceId === ctx.self.instanceId, onActivate: (ctx) => ctx.setFlag("link", "shockStriker", true) },
-    canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "shockStriker") === true; },
-    onHit(ctx) { ctx.dealDamage(opponentSeat(ctx), 1); },
+    activated: {
+      cost: 2,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      oncePerTurn: true,
+      canActivate: (ctx) => ctx.link?.attackingCard.instanceId === ctx.self.instanceId,
+      onActivate: (ctx) => ctx.setFlag("link", "shockStriker", true),
+    },
+    canTriggerOnHit(ctx) {
+      return ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "shockStriker") === true;
+    },
+    onHit(ctx) {
+      ctx.dealDamage(opponentSeat(ctx), 1);
+    },
   },
   "shock striker|2": {
-    activated: { cost: 2, isAttack: false, goAgain: false, timing: "instant", oncePerTurn: true, canActivate: (ctx) => ctx.link?.attackingCard.instanceId === ctx.self.instanceId, onActivate: (ctx) => ctx.setFlag("link", "shockStriker", true) },
-    canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "shockStriker") === true; },
-    onHit(ctx) { ctx.dealDamage(opponentSeat(ctx), 1); },
+    activated: {
+      cost: 2,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      oncePerTurn: true,
+      canActivate: (ctx) => ctx.link?.attackingCard.instanceId === ctx.self.instanceId,
+      onActivate: (ctx) => ctx.setFlag("link", "shockStriker", true),
+    },
+    canTriggerOnHit(ctx) {
+      return ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "shockStriker") === true;
+    },
+    onHit(ctx) {
+      ctx.dealDamage(opponentSeat(ctx), 1);
+    },
   },
   "shock striker|3": {
-    activated: { cost: 2, isAttack: false, goAgain: false, timing: "instant", oncePerTurn: true, canActivate: (ctx) => ctx.link?.attackingCard.instanceId === ctx.self.instanceId, onActivate: (ctx) => ctx.setFlag("link", "shockStriker", true) },
-    canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "shockStriker") === true; },
-    onHit(ctx) { ctx.dealDamage(opponentSeat(ctx), 1); },
+    activated: {
+      cost: 2,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      oncePerTurn: true,
+      canActivate: (ctx) => ctx.link?.attackingCard.instanceId === ctx.self.instanceId,
+      onActivate: (ctx) => ctx.setFlag("link", "shockStriker", true),
+    },
+    canTriggerOnHit(ctx) {
+      return ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "shockStriker") === true;
+    },
+    onHit(ctx) {
+      ctx.dealDamage(opponentSeat(ctx), 1);
+    },
   },
   "electrify|1": {
-    onPlay(ctx) { if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1); ctx.setCounter("electrify", 1); ctx.addModifier({ scope: "until-end-of-turn" }); },
-    canTriggerOnHit(ctx) { return ctx.getCounter("electrify") > 0 && ctx.link?.targetAllyId === undefined && ctx.link?.attackCardType === "action"; },
-    onHit(ctx) { ctx.setCounter("electrify", 0); ctx.dealDamage(opponentSeat(ctx), 3, { sourceInstanceId: ctx.link!.attackingCard.instanceId }); },
+    onPlay(ctx) {
+      if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1);
+      ctx.setCounter("electrify", 1);
+      ctx.addModifier({ scope: "until-end-of-turn" });
+    },
+    canTriggerOnHit(ctx) {
+      return (
+        ctx.getCounter("electrify") > 0 && ctx.link?.targetAllyId === undefined && ctx.link?.attackCardType === "action"
+      );
+    },
+    onHit(ctx) {
+      ctx.setCounter("electrify", 0);
+      ctx.dealDamage(opponentSeat(ctx), 3, { sourceInstanceId: ctx.link!.attackingCard.instanceId });
+    },
   },
   "electrify|2": {
-    onPlay(ctx) { if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1); ctx.setCounter("electrify", 1); ctx.addModifier({ scope: "until-end-of-turn" }); },
-    canTriggerOnHit(ctx) { return ctx.getCounter("electrify") > 0 && ctx.link?.targetAllyId === undefined && ctx.link?.attackCardType === "action"; },
-    onHit(ctx) { ctx.setCounter("electrify", 0); ctx.dealDamage(opponentSeat(ctx), 2, { sourceInstanceId: ctx.link!.attackingCard.instanceId }); },
+    onPlay(ctx) {
+      if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1);
+      ctx.setCounter("electrify", 1);
+      ctx.addModifier({ scope: "until-end-of-turn" });
+    },
+    canTriggerOnHit(ctx) {
+      return (
+        ctx.getCounter("electrify") > 0 && ctx.link?.targetAllyId === undefined && ctx.link?.attackCardType === "action"
+      );
+    },
+    onHit(ctx) {
+      ctx.setCounter("electrify", 0);
+      ctx.dealDamage(opponentSeat(ctx), 2, { sourceInstanceId: ctx.link!.attackingCard.instanceId });
+    },
   },
   "electrify|3": {
-    onPlay(ctx) { if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1); ctx.setCounter("electrify", 1); ctx.addModifier({ scope: "until-end-of-turn" }); },
-    canTriggerOnHit(ctx) { return ctx.getCounter("electrify") > 0 && ctx.link?.targetAllyId === undefined && ctx.link?.attackCardType === "action"; },
-    onHit(ctx) { ctx.setCounter("electrify", 0); ctx.dealDamage(opponentSeat(ctx), 1, { sourceInstanceId: ctx.link!.attackingCard.instanceId }); },
+    onPlay(ctx) {
+      if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1);
+      ctx.setCounter("electrify", 1);
+      ctx.addModifier({ scope: "until-end-of-turn" });
+    },
+    canTriggerOnHit(ctx) {
+      return (
+        ctx.getCounter("electrify") > 0 && ctx.link?.targetAllyId === undefined && ctx.link?.attackCardType === "action"
+      );
+    },
+    onHit(ctx) {
+      ctx.setCounter("electrify", 0);
+      ctx.dealDamage(opponentSeat(ctx), 1, { sourceInstanceId: ctx.link!.attackingCard.instanceId });
+    },
   },
   "amulet of lightning|3": {
     activated: {
@@ -1062,9 +1523,11 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       timing: "instant",
       destroySelfCost: true,
       canActivate(ctx) {
-        return ctx.getFlag("player", "lightningFusedThisTurn") === true &&
+        return (
+          ctx.getFlag("player", "lightningFusedThisTurn") === true &&
           (ctx.link?.attackCardType === "action" ||
-            ctx.state.stack.some((layer) => layer.card && ctx.hasCardType(layer.card, "action")));
+            ctx.state.stack.some((layer) => layer.card && ctx.hasCardType(layer.card, "action")))
+        );
       },
       onActivate(ctx) {
         const ids = new Set<number>();
@@ -1072,48 +1535,168 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
         for (const layer of ctx.state.stack) {
           if (layer.card && ctx.hasCardType(layer.card, "action")) ids.add(layer.card.instanceId);
         }
-        ctx.requestCardChoice("amulet-lightning", decisionPrompt("Amulet of Lightning: choose an action card to gain go again", "card.ele.amulet.action.choose"), [...ids]);
+        ctx.requestCardChoice(
+          "amulet-lightning",
+          decisionPrompt(
+            "Amulet of Lightning: choose an action card to gain go again",
+            "card.ele.amulet.action.choose",
+          ),
+          [...ids],
+        );
       },
     },
-    onChoose(ctx, hook, option) { if (hook === "amulet-lightning") ctx.grantCardKeyword(Number(option), "go again"); },
+    onChoose(ctx, hook, option) {
+      if (hook === "amulet-lightning") ctx.grantCardKeyword(Number(option), "go again");
+    },
   },
 
   // Class and generic equipment / attacks
   "embolden|1": {
     onEnterArena(ctx) {
-      if (ctx.player(ctx.seat).board.some((card) => card.instanceId !== ctx.self.instanceId && ctx.cardData(card.cardId).cardType !== "token" && hasType(ctx, card, "aura"))) ctx.drawCards(ctx.seat, 1);
+      if (
+        ctx
+          .player(ctx.seat)
+          .board.some(
+            (card) =>
+              card.instanceId !== ctx.self.instanceId &&
+              ctx.cardData(card.cardId).cardType !== "token" &&
+              hasType(ctx, card, "aura"),
+          )
+      )
+        ctx.drawCards(ctx.seat, 1);
     },
-    triggers: [{ event: "begin-action-phase", label: "Destroy Embolden — next Guardian attack gets +5 power", effect(ctx) { ctx.destroySelf(); buffNextAttack(ctx, { attack: 5, appliesTo: "attack-action", appliesToClass: "guardian" }); } }],
+    triggers: [
+      {
+        event: "begin-action-phase",
+        label: "Destroy Embolden — next Guardian attack gets +5 power",
+        effect(ctx) {
+          ctx.destroySelf();
+          buffNextAttack(ctx, { attack: 5, appliesTo: "attack-action", appliesToClass: "guardian" });
+        },
+      },
+    ],
   },
   "embolden|2": {
     onEnterArena(ctx) {
-      if (ctx.player(ctx.seat).board.some((card) => card.instanceId !== ctx.self.instanceId && ctx.cardData(card.cardId).cardType !== "token" && hasType(ctx, card, "aura"))) ctx.drawCards(ctx.seat, 1);
+      if (
+        ctx
+          .player(ctx.seat)
+          .board.some(
+            (card) =>
+              card.instanceId !== ctx.self.instanceId &&
+              ctx.cardData(card.cardId).cardType !== "token" &&
+              hasType(ctx, card, "aura"),
+          )
+      )
+        ctx.drawCards(ctx.seat, 1);
     },
-    triggers: [{ event: "begin-action-phase", label: "Destroy Embolden — next Guardian attack gets +4 power", effect(ctx) { ctx.destroySelf(); buffNextAttack(ctx, { attack: 4, appliesTo: "attack-action", appliesToClass: "guardian" }); } }],
+    triggers: [
+      {
+        event: "begin-action-phase",
+        label: "Destroy Embolden — next Guardian attack gets +4 power",
+        effect(ctx) {
+          ctx.destroySelf();
+          buffNextAttack(ctx, { attack: 4, appliesTo: "attack-action", appliesToClass: "guardian" });
+        },
+      },
+    ],
   },
   "embolden|3": {
     onEnterArena(ctx) {
-      if (ctx.player(ctx.seat).board.some((card) => card.instanceId !== ctx.self.instanceId && ctx.cardData(card.cardId).cardType !== "token" && hasType(ctx, card, "aura"))) ctx.drawCards(ctx.seat, 1);
+      if (
+        ctx
+          .player(ctx.seat)
+          .board.some(
+            (card) =>
+              card.instanceId !== ctx.self.instanceId &&
+              ctx.cardData(card.cardId).cardType !== "token" &&
+              hasType(ctx, card, "aura"),
+          )
+      )
+        ctx.drawCards(ctx.seat, 1);
     },
-    triggers: [{ event: "begin-action-phase", label: "Destroy Embolden — next Guardian attack gets +3 power", effect(ctx) { ctx.destroySelf(); buffNextAttack(ctx, { attack: 3, appliesTo: "attack-action", appliesToClass: "guardian" }); } }],
+    triggers: [
+      {
+        event: "begin-action-phase",
+        label: "Destroy Embolden — next Guardian attack gets +3 power",
+        effect(ctx) {
+          ctx.destroySelf();
+          buffNextAttack(ctx, { attack: 3, appliesTo: "attack-action", appliesToClass: "guardian" });
+        },
+      },
+    ],
   },
   "thump|1": {
-    onAttackDeclared(ctx) { if (ctx.attackBonusAboveBase(ctx.self.instanceId) > 0) { ctx.addModifier({ scope: "chain-link", dominate: true }); ctx.setFlag("link", "thumpDiscard", true); } },
-    canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "thumpDiscard") === true; },
-    onHit(ctx) { const hand = ctx.player(opponentSeat(ctx)).hand; if (hand.length > 0) ctx.requestCardChoice("thump-discard", decisionPrompt("Thump: choose a card to discard", "card.ele.thump.discard"), hand.map((card) => card.instanceId), opponentSeat(ctx)); },
-    onChoose(ctx, hook, option) { if (hook === "thump-discard") ctx.discardCard(opponentSeat(ctx), Number(option)); },
+    onAttackDeclared(ctx) {
+      if (ctx.attackBonusAboveBase(ctx.self.instanceId) > 0) {
+        ctx.addModifier({ scope: "chain-link", dominate: true });
+        ctx.setFlag("link", "thumpDiscard", true);
+      }
+    },
+    canTriggerOnHit(ctx) {
+      return ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "thumpDiscard") === true;
+    },
+    onHit(ctx) {
+      const hand = ctx.player(opponentSeat(ctx)).hand;
+      if (hand.length > 0)
+        ctx.requestCardChoice(
+          "thump-discard",
+          decisionPrompt("Thump: choose a card to discard", "card.ele.thump.discard"),
+          hand.map((card) => card.instanceId),
+          opponentSeat(ctx),
+        );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "thump-discard") ctx.discardCard(opponentSeat(ctx), Number(option));
+    },
   },
   "thump|2": {
-    onAttackDeclared(ctx) { if (ctx.attackBonusAboveBase(ctx.self.instanceId) > 0) { ctx.addModifier({ scope: "chain-link", dominate: true }); ctx.setFlag("link", "thumpDiscard", true); } },
-    canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "thumpDiscard") === true; },
-    onHit(ctx) { const hand = ctx.player(opponentSeat(ctx)).hand; if (hand.length > 0) ctx.requestCardChoice("thump-discard", decisionPrompt("Thump: choose a card to discard", "card.ele.thump.discard"), hand.map((card) => card.instanceId), opponentSeat(ctx)); },
-    onChoose(ctx, hook, option) { if (hook === "thump-discard") ctx.discardCard(opponentSeat(ctx), Number(option)); },
+    onAttackDeclared(ctx) {
+      if (ctx.attackBonusAboveBase(ctx.self.instanceId) > 0) {
+        ctx.addModifier({ scope: "chain-link", dominate: true });
+        ctx.setFlag("link", "thumpDiscard", true);
+      }
+    },
+    canTriggerOnHit(ctx) {
+      return ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "thumpDiscard") === true;
+    },
+    onHit(ctx) {
+      const hand = ctx.player(opponentSeat(ctx)).hand;
+      if (hand.length > 0)
+        ctx.requestCardChoice(
+          "thump-discard",
+          decisionPrompt("Thump: choose a card to discard", "card.ele.thump.discard"),
+          hand.map((card) => card.instanceId),
+          opponentSeat(ctx),
+        );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "thump-discard") ctx.discardCard(opponentSeat(ctx), Number(option));
+    },
   },
   "thump|3": {
-    onAttackDeclared(ctx) { if (ctx.attackBonusAboveBase(ctx.self.instanceId) > 0) { ctx.addModifier({ scope: "chain-link", dominate: true }); ctx.setFlag("link", "thumpDiscard", true); } },
-    canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "thumpDiscard") === true; },
-    onHit(ctx) { const hand = ctx.player(opponentSeat(ctx)).hand; if (hand.length > 0) ctx.requestCardChoice("thump-discard", decisionPrompt("Thump: choose a card to discard", "card.ele.thump.discard"), hand.map((card) => card.instanceId), opponentSeat(ctx)); },
-    onChoose(ctx, hook, option) { if (hook === "thump-discard") ctx.discardCard(opponentSeat(ctx), Number(option)); },
+    onAttackDeclared(ctx) {
+      if (ctx.attackBonusAboveBase(ctx.self.instanceId) > 0) {
+        ctx.addModifier({ scope: "chain-link", dominate: true });
+        ctx.setFlag("link", "thumpDiscard", true);
+      }
+    },
+    canTriggerOnHit(ctx) {
+      return ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "thumpDiscard") === true;
+    },
+    onHit(ctx) {
+      const hand = ctx.player(opponentSeat(ctx)).hand;
+      if (hand.length > 0)
+        ctx.requestCardChoice(
+          "thump-discard",
+          decisionPrompt("Thump: choose a card to discard", "card.ele.thump.discard"),
+          hand.map((card) => card.instanceId),
+          opponentSeat(ctx),
+        );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "thump-discard") ctx.discardCard(opponentSeat(ctx), Number(option));
+    },
   },
   "honing hood|0": {
     activated: {
@@ -1122,38 +1705,83 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       goAgain: false,
       timing: "instant",
       destroySelfCost: true,
-      canActivate: (ctx) =>
-        ctx.player(ctx.seat).arsenal.length > 0 || ctx.player(ctx.seat).hand.length > 0,
+      canActivate: (ctx) => ctx.player(ctx.seat).arsenal.length > 0 || ctx.player(ctx.seat).hand.length > 0,
       onActivate(ctx) {
         for (const card of [...ctx.player(ctx.seat).arsenal]) ctx.moveToHand(card.instanceId);
         const hand = ctx.player(ctx.seat).hand;
-        if (hand.length > 0) ctx.requestCardChoice("honing-arsenal", decisionPrompt("Honing Hood: put a card face down into arsenal", "card.ele.honing.arsenal"), hand.map((card) => card.instanceId));
+        if (hand.length > 0)
+          ctx.requestCardChoice(
+            "honing-arsenal",
+            decisionPrompt("Honing Hood: put a card face down into arsenal", "card.ele.honing.arsenal"),
+            hand.map((card) => card.instanceId),
+          );
       },
     },
-    onChoose(ctx, hook, option) { if (hook === "honing-arsenal") ctx.putIntoArsenal(Number(option), "hand", { faceUp: false }); },
+    onChoose(ctx, hook, option) {
+      if (hook === "honing-arsenal") ctx.putIntoArsenal(Number(option), "hand", { faceUp: false });
+    },
   },
   "bolt'n' shot|2": boltNShot(),
   "bolt'n' shot|3": boltNShot(),
   "over flex|1": {
-    onPlay(ctx) { buffNextAttack(ctx, { attack: 4, appliesTo: "attack-action", appliesToSubtype: "arrow" }); reload(ctx, "over-flex-reload"); },
-    onChoose(ctx, hook, option) { reloadOnChoose(ctx, hook, option, "over-flex-reload"); },
+    onPlay(ctx) {
+      buffNextAttack(ctx, { attack: 4, appliesTo: "attack-action", appliesToSubtype: "arrow" });
+      reload(ctx, "over-flex-reload");
+    },
+    onChoose(ctx, hook, option) {
+      reloadOnChoose(ctx, hook, option, "over-flex-reload");
+    },
   },
   "over flex|2": {
-    onPlay(ctx) { buffNextAttack(ctx, { attack: 3, appliesTo: "attack-action", appliesToSubtype: "arrow" }); reload(ctx, "over-flex-reload"); },
-    onChoose(ctx, hook, option) { reloadOnChoose(ctx, hook, option, "over-flex-reload"); },
+    onPlay(ctx) {
+      buffNextAttack(ctx, { attack: 3, appliesTo: "attack-action", appliesToSubtype: "arrow" });
+      reload(ctx, "over-flex-reload");
+    },
+    onChoose(ctx, hook, option) {
+      reloadOnChoose(ctx, hook, option, "over-flex-reload");
+    },
   },
   "over flex|3": {
-    onPlay(ctx) { buffNextAttack(ctx, { attack: 2, appliesTo: "attack-action", appliesToSubtype: "arrow" }); reload(ctx, "over-flex-reload"); },
-    onChoose(ctx, hook, option) { reloadOnChoose(ctx, hook, option, "over-flex-reload"); },
+    onPlay(ctx) {
+      buffNextAttack(ctx, { attack: 2, appliesTo: "attack-action", appliesToSubtype: "arrow" });
+      reload(ctx, "over-flex-reload");
+    },
+    onChoose(ctx, hook, option) {
+      reloadOnChoose(ctx, hook, option, "over-flex-reload");
+    },
   },
   "sutcliffe's suede hides|0": {
-    activated: { cost: 1, isAttack: false, goAgain: false, timing: "attack-reaction", destroySelfCost: true, canActivate: (ctx) => ctx.getFlag("player", "playedNonAttackAction") === true && ctx.link?.attackCardType === "action", onActivate: (ctx) => ctx.grantGoAgain() },
+    activated: {
+      cost: 1,
+      isAttack: false,
+      goAgain: false,
+      timing: "attack-reaction",
+      destroySelfCost: true,
+      canActivate: (ctx) =>
+        ctx.getFlag("player", "playedNonAttackAction") === true && ctx.link?.attackCardType === "action",
+      onActivate: (ctx) => ctx.grantGoAgain(),
+    },
   },
   "sigil of suffering|2": sigilOfSuffering(),
   "sigil of suffering|3": sigilOfSuffering(),
-  "singeing steelblade|1": { arcaneDamageEffect: true, onAttackDeclared: (ctx) => { dealArcane(ctx, opponentSeat(ctx), 1); } },
-  "singeing steelblade|2": { arcaneDamageEffect: true, onAttackDeclared: (ctx) => { dealArcane(ctx, opponentSeat(ctx), 1); } },
-  "singeing steelblade|3": { arcaneDamageEffect: true, onAttackDeclared: (ctx) => { dealArcane(ctx, opponentSeat(ctx), 1); } },
+  "singeing steelblade|1": {
+    arcaneDamageEffect: true,
+    onAttackDeclared: (ctx) => {
+      dealArcane(ctx, opponentSeat(ctx), 1);
+    },
+  },
+  "singeing steelblade|2": {
+    arcaneDamageEffect: true,
+    onAttackDeclared: (ctx) => {
+      dealArcane(ctx, opponentSeat(ctx), 1);
+    },
+  },
+  "singeing steelblade|3": {
+    arcaneDamageEffect: true,
+    onAttackDeclared: (ctx) => {
+      dealArcane(ctx, opponentSeat(ctx), 1);
+    },
+  },
   "ragamuffin's hat|0": {
     activated: {
       cost: 0,
@@ -1167,12 +1795,26 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
         const hand = ctx.player(ctx.seat).hand;
         ctx.requestChoice(
           "ragamuffin-place",
-          decisionPrompt("Ragamuffin's Hat: put a card on the top or bottom of your deck", "card.ele.ragamuffin.position", {
-            optionMessages: Object.fromEntries(hand.flatMap((card) => [
-              [`top:${card.instanceId}`, decisionMessage("card.ele.ragamuffin.option.top", { card: { kind: "card", cardId: card.cardId } })],
-              [`bottom:${card.instanceId}`, decisionMessage("card.ele.ragamuffin.option.bottom", { card: { kind: "card", cardId: card.cardId } })],
-            ])),
-          }),
+          decisionPrompt(
+            "Ragamuffin's Hat: put a card on the top or bottom of your deck",
+            "card.ele.ragamuffin.position",
+            {
+              optionMessages: Object.fromEntries(
+                hand.flatMap((card) => [
+                  [
+                    `top:${card.instanceId}`,
+                    decisionMessage("card.ele.ragamuffin.option.top", { card: { kind: "card", cardId: card.cardId } }),
+                  ],
+                  [
+                    `bottom:${card.instanceId}`,
+                    decisionMessage("card.ele.ragamuffin.option.bottom", {
+                      card: { kind: "card", cardId: card.cardId },
+                    }),
+                  ],
+                ]),
+              ),
+            },
+          ),
           hand.flatMap((card) => [`top:${card.instanceId}`, `bottom:${card.instanceId}`]),
           undefined,
           hand.flatMap((card) => [card.instanceId, card.instanceId]),
@@ -1193,14 +1835,36 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       goAgain: true,
       destroySelfCost: true,
       canActivate: (ctx) => ctx.player(ctx.seat).hand.length > 0,
-      onActivate(ctx) { ctx.requestCardChoice("deep-blue-bottom", decisionPrompt("Deep Blue: put a card from hand on the bottom", "card.ele.deepblue.hand.bottom"), ctx.player(ctx.seat).hand.map((card) => card.instanceId)); },
+      onActivate(ctx) {
+        ctx.requestCardChoice(
+          "deep-blue-bottom",
+          decisionPrompt("Deep Blue: put a card from hand on the bottom", "card.ele.deepblue.hand.bottom"),
+          ctx.player(ctx.seat).hand.map((card) => card.instanceId),
+        );
+      },
     },
-    onChoose(ctx, hook, option) { if (hook === "deep-blue-bottom" && ctx.putOnDeckBottom(Number(option))) ctx.changeResources(ctx.seat, 3); },
+    onChoose(ctx, hook, option) {
+      if (hook === "deep-blue-bottom" && ctx.putOnDeckBottom(Number(option))) ctx.changeResources(ctx.seat, 3);
+    },
   },
   "cracker jax|0": {
-    activated: { cost: 0, isAttack: false, goAgain: true, destroySelfCost: true, onActivate: (ctx) => buffNextAttack(ctx, { attack: 1, appliesTo: "attack-action" }) },
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: true,
+      destroySelfCost: true,
+      onActivate: (ctx) => buffNextAttack(ctx, { attack: 1, appliesTo: "attack-action" }),
+    },
   },
   "runaways|0": {
-    activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true, canActivate: (ctx) => ctx.getFlag("player", "damageTakenThisTurn") === true, onActivate: (ctx) => ctx.preventNextDamage(ctx.seat, 1) },
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      destroySelfCost: true,
+      canActivate: (ctx) => ctx.getFlag("player", "damageTakenThisTurn") === true,
+      onActivate: (ctx) => ctx.preventNextDamage(ctx.seat, 1),
+    },
   },
 });

@@ -13,10 +13,8 @@ export const bol: Record<string, CardScript> = {
     activeWhileFaceUpInArsenal: true,
     triggers: [mentorFlipTrigger()],
     onFriendlyAttackDeclared(ctx) {
-      if (
-        ctx.link?.attackCardType === "weapon" &&
-        ctx.cardTypes(ctx.link.attackingCard).includes("1h")
-      ) ctx.addModifier({ scope: "chain-link", attack: 1 });
+      if (ctx.link?.attackCardType === "weapon" && ctx.cardTypes(ctx.link.attackingCard).includes("1h"))
+        ctx.addModifier({ scope: "chain-link", attack: 1 });
     },
     canTriggerOnHit(ctx) {
       return ctx.link?.attackCardType === "weapon";

@@ -30,10 +30,7 @@ export const ddd: Record<string, CardScript> = {
       if (!swordHit(ctx, source.cardId, amount)) return;
       ctx.requestChoice(
         "cutting-couriers",
-        yesNoPrompt(
-          "Cutting Couriers: destroy this so the attack gets go again?",
-          "card.ddd.cutting.couriers.destroy",
-        ),
+        yesNoPrompt("Cutting Couriers: destroy this so the attack gets go again?", "card.ddd.cutting.couriers.destroy"),
         ["yes", "no"],
       );
     },

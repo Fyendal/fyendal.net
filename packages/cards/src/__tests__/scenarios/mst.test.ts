@@ -9,6 +9,25 @@ it("registers every MST printing as implemented", () => {
   expect(cards.filter((card) => !isImplemented(card)).map((card) => card.id)).toEqual([]);
 });
 
+it("First Tenet of Chi: Wind gives the next blue action card go again", () => {
+  const g = scenario({
+    seats: [
+      {
+        hero: "rhinar",
+        hand: ["first tenet of chi: wind|3", "wounding blow|3"],
+        resources: 2,
+      },
+      { hero: "dorinthea" },
+    ],
+  });
+
+  g.play("first tenet of chi: wind|3")
+    .play("wounding blow|3")
+    .blockWith()
+    .settle()
+    .expectAP(0, 1);
+});
+
 describe("MST — Mystic heroes and cloaked equipment", () => {
   it("Enigma, New Moon turns Ward equipment face-up and creates three Spectral Shields", () => {
     const g = scenario({

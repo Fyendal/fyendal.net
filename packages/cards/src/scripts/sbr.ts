@@ -13,9 +13,7 @@ const SEISMIC_SURGE = "SBR035";
 const VIGOR = "SBR036";
 
 function hasKeyword(ctx: ScriptCtx, cardId: string, keyword: string): boolean {
-  return (ctx.cardData(cardId).keywords ?? []).some(
-    (candidate) => candidate.toLowerCase() === keyword.toLowerCase(),
-  );
+  return (ctx.cardData(cardId).keywords ?? []).some((candidate) => candidate.toLowerCase() === keyword.toLowerCase());
 }
 
 function hasCrush(ctx: ScriptCtx, card: { readonly cardId: string }): boolean {
@@ -46,7 +44,9 @@ function boulderDrop(): CardScript {
       if (hand.length === 0) return;
       ctx.requestCardChoice(
         "boulder-drop-top",
-        decisionPrompt(`${ctx.data.name}: put a card from your hand on top of your deck`, "card.sbr.hand.card.top", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }),
+        decisionPrompt(`${ctx.data.name}: put a card from your hand on top of your deck`, "card.sbr.hand.card.top", {
+          values: { card: { kind: "card", cardId: ctx.self.cardId } },
+        }),
         hand.map((card) => card.instanceId),
         opponentSeat(ctx),
       );
@@ -63,7 +63,13 @@ function chokeslam(): CardScript {
     onHit(ctx) {
       const hero = ctx.player(opponentSeat(ctx)).hero;
       ctx.setCardCounter(hero.instanceId, "attackActionNoPowerGainUntilTurn", ctx.state.turn + 1);
-      ctx.logPublic(localizedCardLog(ctx, "Chokeslam: opposing attack action cards can't gain {p} during their next action phase", "card.log.sbr.chokeslam.suppressed"));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          "Chokeslam: opposing attack action cards can't gain {p} during their next action phase",
+          "card.log.sbr.chokeslam.suppressed",
+        ),
+      );
     },
   };
 }
@@ -80,9 +86,7 @@ export const sbr: Record<string, CardScript> = {
         return ctx.player(ctx.seat).arsenal.some((card) => card.faceDown && hasCrush(ctx, card));
       },
       onActivate(ctx) {
-        const cards = ctx.player(ctx.seat).arsenal.filter(
-          (card) => card.faceDown && hasCrush(ctx, card),
-        );
+        const cards = ctx.player(ctx.seat).arsenal.filter((card) => card.faceDown && hasCrush(ctx, card));
         ctx.requestCardChoice(
           "bravo-reveal-crush",
           decisionPrompt("Bravo: turn a crush card in your arsenal face up", "card.sbr.bravo.crush.faceup"),
@@ -92,14 +96,19 @@ export const sbr: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "bravo-reveal-crush") return;
-      const card = ctx.player(ctx.seat).arsenal.find(
-        (candidate) => candidate.instanceId === Number(option),
-      );
+      const card = ctx.player(ctx.seat).arsenal.find((candidate) => candidate.instanceId === Number(option));
       if (!card?.faceDown || !hasCrush(ctx, card)) return;
       if (!ctx.turnArsenalFaceUp(card.instanceId)) return;
       ctx.addCardTempPower(card.instanceId, 2);
       ctx.grantCardKeyword(card.instanceId, "dominate");
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.cardData(card.cardId).name} is turned face up and gets +2{p} and dominate`, "card.log.sbr.bravo.crush", { target: { kind: "card", cardId: card.cardId }, amount: 2 }));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.cardData(card.cardId).name} is turned face up and gets +2{p} and dominate`,
+          "card.log.sbr.bravo.crush",
+          { target: { kind: "card", cardId: card.cardId }, amount: 2 },
+        ),
+      );
     },
   },
 
@@ -108,23 +117,35 @@ export const sbr: Record<string, CardScript> = {
   },
 
   "magmatic carapace|0": {
-    triggers: [{
-      event: "card-played",
-      label: "Pay 1 and tap this to create a Seismic Surge?",
-      condition: (ctx, played) => !!played && isAura(ctx, played) && !ctx.self.tapped,
-      effect(ctx) {
-        ctx.requestPayment(
-          "magmatic-carapace",
-          decisionPrompt("Magmatic Carapace: pay {r} and tap it to create a Seismic Surge?", "card.sbr.carapace.pay.surge"),
-          1,
-        );
+    triggers: [
+      {
+        event: "card-played",
+        label: "Pay 1 and tap this to create a Seismic Surge?",
+        condition: (ctx, played) => !!played && isAura(ctx, played) && !ctx.self.tapped,
+        effect(ctx) {
+          ctx.requestPayment(
+            "magmatic-carapace",
+            decisionPrompt(
+              "Magmatic Carapace: pay {r} and tap it to create a Seismic Surge?",
+              "card.sbr.carapace.pay.surge",
+            ),
+            1,
+          );
+        },
       },
-    }],
+    ],
     onChoose(ctx, hook, option) {
       if (hook !== "magmatic-carapace" || option !== "paid" || ctx.self.tapped) return;
       ctx.tap(ctx.self.instanceId);
       ctx.createToken(SEISMIC_SURGE);
-      ctx.logPublic(localizedCardLog(ctx, "Magmatic Carapace: paid {r}, tapped, and created a Seismic Surge", "card.log.sbr.carapace.surge", { amount: 1, result: { kind: "card", cardId: SEISMIC_SURGE } }));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          "Magmatic Carapace: paid {r}, tapped, and created a Seismic Surge",
+          "card.log.sbr.carapace.surge",
+          { amount: 1, result: { kind: "card", cardId: SEISMIC_SURGE } },
+        ),
+      );
     },
   },
 
@@ -186,7 +207,11 @@ export const sbr: Record<string, CardScript> = {
       if (crushCards.length === 0) return;
       ctx.requestCardChoice(
         "crash-reveal-crush",
-        decisionPrompt("Crash and Bash: reveal a card with crush to create a Seismic Surge?", "card.sbr.crush.reveal.surge", { optionMessages: commonOptionMessages("no") }),
+        decisionPrompt(
+          "Crash and Bash: reveal a card with crush to create a Seismic Surge?",
+          "card.sbr.crush.reveal.surge",
+          { optionMessages: commonOptionMessages("no") },
+        ),
         ["no", ...crushCards.map((card) => card.instanceId)],
       );
     },
@@ -195,13 +220,15 @@ export const sbr: Record<string, CardScript> = {
       const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
       if (!card || !hasCrush(ctx, card)) return;
       ctx.createToken(SEISMIC_SURGE);
-      ctx.logPublic(localizedCardLog(
-        ctx,
-        `Crash and Bash reveals ${ctx.cardData(card.cardId).name} from hand`,
-        "card.log.sbr.crash.revealed",
-        { revealed: { kind: "card", cardId: card.cardId } },
-        { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" },
-      ));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `Crash and Bash reveals ${ctx.cardData(card.cardId).name} from hand`,
+          "card.log.sbr.crash.revealed",
+          { revealed: { kind: "card", cardId: card.cardId } },
+          { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" },
+        ),
+      );
     },
   },
 
@@ -220,7 +247,14 @@ export const sbr: Record<string, CardScript> = {
       const hero = ctx.player(opponentSeat(ctx)).hero;
       ctx.setCardCounter(hero.instanceId, "attackActionBasePowerLimitUntilTurn", ctx.state.turn + 1);
       ctx.setCardCounter(hero.instanceId, "attackActionBasePowerLimit", 3);
-      ctx.logPublic(localizedCardLog(ctx, "Crush the Weak: the opponent can't play attack actions with 3 or less base {p} next action phase", "card.log.sbr.crushtheweak.restricted", { amount: 3 }));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          "Crush the Weak: the opponent can't play attack actions with 3 or less base {p} next action phase",
+          "card.log.sbr.crushtheweak.restricted",
+          { amount: 3 },
+        ),
+      );
     },
   },
 
@@ -244,12 +278,13 @@ export const sbr: Record<string, CardScript> = {
         },
         effect(ctx) {
           const player = ctx.player(ctx.seat);
-          if (player.arsenal.length > 0 || !player.hand.some((card) =>
-            card.instanceId === ctx.self.instanceId
-          )) return;
+          if (player.arsenal.length > 0 || !player.hand.some((card) => card.instanceId === ctx.self.instanceId)) return;
           ctx.requestPayment(
             "thunder-quake-heave",
-            decisionPrompt("Thunder Quake: pay {r}{r}{r} to heave it face up into your arsenal?", "card.sbr.thunderquake.heave"),
+            decisionPrompt(
+              "Thunder Quake: pay {r}{r}{r} to heave it face up into your arsenal?",
+              "card.sbr.thunderquake.heave",
+            ),
             3,
             undefined,
             [ctx.self.instanceId],
@@ -261,13 +296,15 @@ export const sbr: Record<string, CardScript> = {
       if (hook !== "thunder-quake-heave" || option !== "paid") return;
       if (!ctx.putIntoArsenal(ctx.self.instanceId, "hand")) return;
       ctx.createTokens(SEISMIC_SURGE, 3);
-      ctx.logPublic(localizedCardLog(
-        ctx,
-        "Thunder Quake is heaved: create 3 Seismic Surge tokens",
-        "card.log.sbr.thunderquake.heaved",
-        { amount: 3, result: { kind: "card", cardId: SEISMIC_SURGE } },
-        { kind: "card-moved", cardId: ctx.self.cardId, ownerSeat: ctx.seat, from: "hand", to: "arsenal" },
-      ));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          "Thunder Quake is heaved: create 3 Seismic Surge tokens",
+          "card.log.sbr.thunderquake.heaved",
+          { amount: 3, result: { kind: "card", cardId: SEISMIC_SURGE } },
+          { kind: "card-moved", cardId: ctx.self.cardId, ownerSeat: ctx.seat, from: "hand", to: "arsenal" },
+        ),
+      );
     },
   },
 
@@ -290,13 +327,15 @@ export const sbr: Record<string, CardScript> = {
             appliesTo: "attack-action",
             appliesToClass: "guardian",
           });
-          ctx.logPublic(localizedCardLog(
-            ctx,
-            "Seismic Surge is destroyed: the next Guardian attack costs {r} less",
-            "card.log.sbr.seismicsurge.discount",
-            { amount: 1 },
-            { kind: "card-moved", cardId: ctx.self.cardId, ownerSeat: ctx.seat, from: "board", to: "graveyard" },
-          ));
+          ctx.logPublic(
+            localizedCardLog(
+              ctx,
+              "Seismic Surge is destroyed: the next Guardian attack costs {r} less",
+              "card.log.sbr.seismicsurge.discount",
+              { amount: 1 },
+              { kind: "card-moved", cardId: ctx.self.cardId, ownerSeat: ctx.seat, from: "board", to: "graveyard" },
+            ),
+          );
         },
       },
     ],

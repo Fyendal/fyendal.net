@@ -1,5 +1,13 @@
 import type { CardScript } from "@fyendal/engine";
-import { commonOptionMessages, decisionPrompt, isWeaponAttack, localizedLog, nextAttack, reprise, yesNoPrompt } from "../shared-helpers.js";
+import {
+  commonOptionMessages,
+  decisionPrompt,
+  isWeaponAttack,
+  localizedLog,
+  nextAttack,
+  reprise,
+  yesNoPrompt,
+} from "../shared-helpers.js";
 
 // ── Welcome to Rathe (WTR) warrior-class cards ──
 //
@@ -31,7 +39,9 @@ function strokeOfForesight(bonus: number): CardScript {
         ctx.setCounter("strokeCard", Number(option));
         ctx.requestChoice(
           "stroke-position",
-          decisionPrompt("Stroke of Foresight: put it on the top or bottom of your deck?", "card.wtr.stroke.position", { optionMessages: commonOptionMessages("top", "bottom") }),
+          decisionPrompt("Stroke of Foresight: put it on the top or bottom of your deck?", "card.wtr.stroke.position", {
+            optionMessages: commonOptionMessages("top", "bottom"),
+          }),
           ["top", "bottom"],
         );
         return;
@@ -41,20 +51,24 @@ function strokeOfForesight(bonus: number): CardScript {
       if (!card) return;
       if (option === "top") {
         ctx.putOnDeckTop(card.instanceId);
-        ctx.logPublic(localizedLog(
-          "Stroke of Foresight: card put on top of deck",
-          "card.log.wtr.stroke.card.top",
-          { card: { kind: "card", cardId: ctx.self.cardId } },
-          { kind: "card-moved", ownerSeat: ctx.seat, from: "hand", to: "deck" },
-        ));
+        ctx.logPublic(
+          localizedLog(
+            "Stroke of Foresight: card put on top of deck",
+            "card.log.wtr.stroke.card.top",
+            { card: { kind: "card", cardId: ctx.self.cardId } },
+            { kind: "card-moved", ownerSeat: ctx.seat, from: "hand", to: "deck" },
+          ),
+        );
       } else {
         ctx.putOnDeckBottom(card.instanceId);
-        ctx.logPublic(localizedLog(
-          "Stroke of Foresight: card put on bottom of deck",
-          "card.log.wtr.stroke.card.bottom",
-          { card: { kind: "card", cardId: ctx.self.cardId } },
-          { kind: "card-moved", ownerSeat: ctx.seat, from: "hand", to: "deck" },
-        ));
+        ctx.logPublic(
+          localizedLog(
+            "Stroke of Foresight: card put on bottom of deck",
+            "card.log.wtr.stroke.card.bottom",
+            { card: { kind: "card", cardId: ctx.self.cardId } },
+            { kind: "card-moved", ownerSeat: ctx.seat, from: "hand", to: "deck" },
+          ),
+        );
       }
     },
   };
@@ -83,33 +97,37 @@ function naturesPathPilgrimage(attack: number): CardScript {
         return;
       }
       const data = ctx.cardData(top.cardId);
-      ctx.logPublic(localizedLog(
-        `Nature's Path Pilgrimage reveals ${data.name}`,
-        "card.log.wtr.naturespath.reveals",
-        {
-          card: { kind: "card", cardId: ctx.self.cardId },
-          revealed: { kind: "card", cardId: top.cardId },
-        },
-        { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
-      ));
-      if (ctx.hasCardType(top, "action")) {
-        ctx.putIntoArsenal(top.instanceId, "deck", { faceUp: false });
-        ctx.logPublic(localizedLog(
-          "Nature's Path Pilgrimage: action card put face down into arsenal",
-          "card.log.wtr.naturespath.arsenal",
+      ctx.logPublic(
+        localizedLog(
+          `Nature's Path Pilgrimage reveals ${data.name}`,
+          "card.log.wtr.naturespath.reveals",
           {
             card: { kind: "card", cardId: ctx.self.cardId },
-            result: { kind: "card", cardId: top.cardId },
+            revealed: { kind: "card", cardId: top.cardId },
           },
-          {
-            kind: "card-moved",
-            cardId: top.cardId,
-            ownerSeat: ctx.seat,
-            from: "deck",
-            to: "arsenal",
-            faceDown: true,
-          },
-        ));
+          { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
+        ),
+      );
+      if (ctx.hasCardType(top, "action")) {
+        ctx.putIntoArsenal(top.instanceId, "deck", { faceUp: false });
+        ctx.logPublic(
+          localizedLog(
+            "Nature's Path Pilgrimage: action card put face down into arsenal",
+            "card.log.wtr.naturespath.arsenal",
+            {
+              card: { kind: "card", cardId: ctx.self.cardId },
+              result: { kind: "card", cardId: top.cardId },
+            },
+            {
+              kind: "card-moved",
+              cardId: top.cardId,
+              ownerSeat: ctx.seat,
+              from: "deck",
+              to: "arsenal",
+              faceDown: true,
+            },
+          ),
+        );
       }
       ctx.setFlag("player", "naturesPathPilgrimageActive", false);
     },
@@ -133,17 +151,17 @@ export const warrior: Record<string, CardScript> = {
     onHit(ctx) {
       const link = ctx.link!;
       const p = ctx.state.players[ctx.seat]!;
-      const weapon = p.weapons.find(
-        (w) => w.instanceId === link.attackingCard.instanceId,
-      );
+      const weapon = p.weapons.find((w) => w.instanceId === link.attackingCard.instanceId);
       if (!weapon) return;
       ctx.setFlag("player", "dorintheaWtrTriggered", true);
       ctx.grantAdditionalActivation(weapon.instanceId);
-      ctx.logPublic(localizedLog(
-        "Dorinthea's ability: the weapon may attack an additional time this turn",
-        "card.log.wtr.dorinthea.additionalattack",
-        { card: { kind: "card", cardId: ctx.self.cardId } },
-      ));
+      ctx.logPublic(
+        localizedLog(
+          "Dorinthea's ability: the weapon may attack an additional time this turn",
+          "card.log.wtr.dorinthea.additionalattack",
+          { card: { kind: "card", cardId: ctx.self.cardId } },
+        ),
+      );
     },
   },
 
@@ -154,7 +172,13 @@ export const warrior: Record<string, CardScript> = {
       ctx.addModifier({ scope: "chain-link", attack: 3 });
       if (reprise(ctx)) {
         ctx.addModifier({ scope: "until-end-of-turn", attack: 1, appliesTo: "weapon" });
-        ctx.logPublic(localizedLog("Biting Blade (Reprise): weapons you control gain +1 attack", "card.log.wtr.bitingblade.reprise", { card: { kind: "card", cardId: ctx.self.cardId }, amount: 1 }));
+        ctx.logPublic(
+          localizedLog(
+            "Biting Blade (Reprise): weapons you control gain +1 attack",
+            "card.log.wtr.bitingblade.reprise",
+            { card: { kind: "card", cardId: ctx.self.cardId }, amount: 1 },
+          ),
+        );
       }
     },
   },
@@ -164,7 +188,13 @@ export const warrior: Record<string, CardScript> = {
       ctx.addModifier({ scope: "chain-link", attack: 2 });
       if (reprise(ctx)) {
         ctx.addModifier({ scope: "until-end-of-turn", attack: 1, appliesTo: "weapon" });
-        ctx.logPublic(localizedLog("Biting Blade (Reprise): weapons you control gain +1 attack", "card.log.wtr.bitingblade.reprise", { card: { kind: "card", cardId: ctx.self.cardId }, amount: 1 }));
+        ctx.logPublic(
+          localizedLog(
+            "Biting Blade (Reprise): weapons you control gain +1 attack",
+            "card.log.wtr.bitingblade.reprise",
+            { card: { kind: "card", cardId: ctx.self.cardId }, amount: 1 },
+          ),
+        );
       }
     },
   },
@@ -174,7 +204,13 @@ export const warrior: Record<string, CardScript> = {
       ctx.addModifier({ scope: "chain-link", attack: 1 });
       if (reprise(ctx)) {
         ctx.addModifier({ scope: "until-end-of-turn", attack: 1, appliesTo: "weapon" });
-        ctx.logPublic(localizedLog("Biting Blade (Reprise): weapons you control gain +1 attack", "card.log.wtr.bitingblade.reprise", { card: { kind: "card", cardId: ctx.self.cardId }, amount: 1 }));
+        ctx.logPublic(
+          localizedLog(
+            "Biting Blade (Reprise): weapons you control gain +1 attack",
+            "card.log.wtr.bitingblade.reprise",
+            { card: { kind: "card", cardId: ctx.self.cardId }, amount: 1 },
+          ),
+        );
       }
     },
   },
@@ -184,7 +220,13 @@ export const warrior: Record<string, CardScript> = {
     onPlay(ctx) {
       const bonus = reprise(ctx) ? 6 : 4;
       ctx.addModifier({ scope: "chain-link", attack: bonus });
-      if (reprise(ctx)) ctx.logPublic(localizedLog("Overpower (Reprise): +6 attack", "card.log.wtr.reprise.attack", { card: { kind: "card", cardId: ctx.self.cardId }, amount: 6 }));
+      if (reprise(ctx))
+        ctx.logPublic(
+          localizedLog("Overpower (Reprise): +6 attack", "card.log.wtr.reprise.attack", {
+            card: { kind: "card", cardId: ctx.self.cardId },
+            amount: 6,
+          }),
+        );
     },
   },
   "overpower|2": {
@@ -192,7 +234,13 @@ export const warrior: Record<string, CardScript> = {
     onPlay(ctx) {
       const bonus = reprise(ctx) ? 5 : 3;
       ctx.addModifier({ scope: "chain-link", attack: bonus });
-      if (reprise(ctx)) ctx.logPublic(localizedLog("Overpower (Reprise): +5 attack", "card.log.wtr.reprise.attack", { card: { kind: "card", cardId: ctx.self.cardId }, amount: 5 }));
+      if (reprise(ctx))
+        ctx.logPublic(
+          localizedLog("Overpower (Reprise): +5 attack", "card.log.wtr.reprise.attack", {
+            card: { kind: "card", cardId: ctx.self.cardId },
+            amount: 5,
+          }),
+        );
     },
   },
   "overpower|3": {
@@ -200,7 +248,13 @@ export const warrior: Record<string, CardScript> = {
     onPlay(ctx) {
       const bonus = reprise(ctx) ? 4 : 2;
       ctx.addModifier({ scope: "chain-link", attack: bonus });
-      if (reprise(ctx)) ctx.logPublic(localizedLog("Overpower (Reprise): +4 attack", "card.log.wtr.reprise.attack", { card: { kind: "card", cardId: ctx.self.cardId }, amount: 4 }));
+      if (reprise(ctx))
+        ctx.logPublic(
+          localizedLog("Overpower (Reprise): +4 attack", "card.log.wtr.reprise.attack", {
+            card: { kind: "card", cardId: ctx.self.cardId },
+            amount: 4,
+          }),
+        );
     },
   },
 
@@ -209,7 +263,12 @@ export const warrior: Record<string, CardScript> = {
     onPlay(ctx) {
       if (reprise(ctx)) {
         ctx.addModifier({ scope: "chain-link", attack: 2 });
-        ctx.logPublic(localizedLog("Ironsong Response (Reprise): +2 attack", "card.log.wtr.reprise.attack", { card: { kind: "card", cardId: ctx.self.cardId }, amount: 2 }));
+        ctx.logPublic(
+          localizedLog("Ironsong Response (Reprise): +2 attack", "card.log.wtr.reprise.attack", {
+            card: { kind: "card", cardId: ctx.self.cardId },
+            amount: 2,
+          }),
+        );
       }
     },
   },
@@ -218,7 +277,12 @@ export const warrior: Record<string, CardScript> = {
     onPlay(ctx) {
       if (reprise(ctx)) {
         ctx.addModifier({ scope: "chain-link", attack: 1 });
-        ctx.logPublic(localizedLog("Ironsong Response (Reprise): +1 attack", "card.log.wtr.reprise.attack", { card: { kind: "card", cardId: ctx.self.cardId }, amount: 1 }));
+        ctx.logPublic(
+          localizedLog("Ironsong Response (Reprise): +1 attack", "card.log.wtr.reprise.attack", {
+            card: { kind: "card", cardId: ctx.self.cardId },
+            amount: 1,
+          }),
+        );
       }
     },
   },
@@ -261,7 +325,24 @@ export const warrior: Record<string, CardScript> = {
       if (!isWeaponAttack(ctx)) return;
       const attacker = ctx.state.players[ctx.link!.attacker]!;
       ctx.dealDamage(attacker.seat, 1);
-      ctx.logPublic(localizedLog("Steelblade Shunt deals 1 damage to the attacking hero", "card.log.wtr.steelbladeshunt.damage", { card: { kind: "card", cardId: ctx.self.cardId }, target: { kind: "player", seat: attacker.seat }, amount: 1 }, { kind: "damage", targetSeat: attacker.seat, amount: 1, damageType: "physical", sourceCardId: ctx.self.cardId }));
+      ctx.logPublic(
+        localizedLog(
+          "Steelblade Shunt deals 1 damage to the attacking hero",
+          "card.log.wtr.steelbladeshunt.damage",
+          {
+            card: { kind: "card", cardId: ctx.self.cardId },
+            target: { kind: "player", seat: attacker.seat },
+            amount: 1,
+          },
+          {
+            kind: "damage",
+            targetSeat: attacker.seat,
+            amount: 1,
+            damageType: "physical",
+            sourceCardId: ctx.self.cardId,
+          },
+        ),
+      );
     },
   },
   "steelblade shunt|2": {
@@ -269,7 +350,24 @@ export const warrior: Record<string, CardScript> = {
       if (!isWeaponAttack(ctx)) return;
       const attacker = ctx.state.players[ctx.link!.attacker]!;
       ctx.dealDamage(attacker.seat, 1);
-      ctx.logPublic(localizedLog("Steelblade Shunt deals 1 damage to the attacking hero", "card.log.wtr.steelbladeshunt.damage", { card: { kind: "card", cardId: ctx.self.cardId }, target: { kind: "player", seat: attacker.seat }, amount: 1 }, { kind: "damage", targetSeat: attacker.seat, amount: 1, damageType: "physical", sourceCardId: ctx.self.cardId }));
+      ctx.logPublic(
+        localizedLog(
+          "Steelblade Shunt deals 1 damage to the attacking hero",
+          "card.log.wtr.steelbladeshunt.damage",
+          {
+            card: { kind: "card", cardId: ctx.self.cardId },
+            target: { kind: "player", seat: attacker.seat },
+            amount: 1,
+          },
+          {
+            kind: "damage",
+            targetSeat: attacker.seat,
+            amount: 1,
+            damageType: "physical",
+            sourceCardId: ctx.self.cardId,
+          },
+        ),
+      );
     },
   },
   "steelblade shunt|3": {
@@ -277,7 +375,24 @@ export const warrior: Record<string, CardScript> = {
       if (!isWeaponAttack(ctx)) return;
       const attacker = ctx.state.players[ctx.link!.attacker]!;
       ctx.dealDamage(attacker.seat, 1);
-      ctx.logPublic(localizedLog("Steelblade Shunt deals 1 damage to the attacking hero", "card.log.wtr.steelbladeshunt.damage", { card: { kind: "card", cardId: ctx.self.cardId }, target: { kind: "player", seat: attacker.seat }, amount: 1 }, { kind: "damage", targetSeat: attacker.seat, amount: 1, damageType: "physical", sourceCardId: ctx.self.cardId }));
+      ctx.logPublic(
+        localizedLog(
+          "Steelblade Shunt deals 1 damage to the attacking hero",
+          "card.log.wtr.steelbladeshunt.damage",
+          {
+            card: { kind: "card", cardId: ctx.self.cardId },
+            target: { kind: "player", seat: attacker.seat },
+            amount: 1,
+          },
+          {
+            kind: "damage",
+            targetSeat: attacker.seat,
+            amount: 1,
+            damageType: "physical",
+            sourceCardId: ctx.self.cardId,
+          },
+        ),
+      );
     },
   },
 
@@ -296,11 +411,13 @@ export const warrior: Record<string, CardScript> = {
       // the link is already resolved when the choice is answered, so grant
       // the action point directly (resolveLink's go-again check has passed)
       ctx.gainActionPoint();
-      ctx.logPublic(localizedLog(
-        "Refraction Bolters: the attack gains go again (+1 action point)",
-        "card.log.wtr.refractionbolters.goagain",
-        { card: { kind: "card", cardId: ctx.self.cardId }, amount: 1 },
-      ));
+      ctx.logPublic(
+        localizedLog(
+          "Refraction Bolters: the attack gains go again (+1 action point)",
+          "card.log.wtr.refractionbolters.goagain",
+          { card: { kind: "card", cardId: ctx.self.cardId }, amount: 1 },
+        ),
+      );
       ctx.destroySelf();
     },
   },

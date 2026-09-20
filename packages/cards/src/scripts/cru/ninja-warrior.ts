@@ -19,9 +19,7 @@ function isAttackAction(ctx: ScriptCtx, card: CardRef): boolean {
 }
 
 function hasCombo(ctx: ScriptCtx, card: CardRef): boolean {
-  return (ctx.cardData(card.cardId).keywords ?? []).some(
-    (keyword) => keyword.toLowerCase() === "combo",
-  );
+  return (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "combo");
 }
 
 function isWeaponAttack(ctx: ScriptCtx): boolean {
@@ -73,7 +71,13 @@ function craneDance(): CardScript {
       if (!comboWith(ctx, "soulbead strike")) return;
       ctx.setFlag("link", "craneCombo", true);
       ctx.grantGoAgain();
-      ctx.logPublic(localizedCardLog(ctx, "Crane Dance: combo — attack action defenders with too much base power are restricted", "card.log.cru.cranedance.combo"));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          "Crane Dance: combo — attack action defenders with too much base power are restricted",
+          "card.log.cru.cranedance.combo",
+        ),
+      );
     },
     modifyAttack(ctx) {
       return ctx.getFlag("link", "craneCombo") === true ? 1 : 0;
@@ -93,10 +97,7 @@ function rushingRiver(): CardScript {
     if (hand.length === 0) return;
     ctx.requestCardChoice(
       "rushing-top",
-      decisionPrompt(
-        "Rushing River: put a card from your hand on top of your deck",
-        "card.cru.rushing.card.top",
-      ),
+      decisionPrompt("Rushing River: put a card from your hand on top of your deck", "card.cru.rushing.card.top"),
       hand.map((card) => card.instanceId),
     );
   };
@@ -144,7 +145,14 @@ function dauntless(attack: number): CardScript {
       const defender = opponentSeat(ctx);
       const current = Number(ctx.getPlayerFlag(defender, "nextDefenseReactionExtraCost"));
       ctx.setPlayerFlag(defender, "nextDefenseReactionExtraCost", current + 1);
-      ctx.logPublic(localizedCardLog(ctx, "Dauntless: the defending hero's next defense reaction costs {r} more", "card.log.cru.dauntless.cost", { amount: 1, target: { kind: "player", seat: defender } }));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          "Dauntless: the defending hero's next defense reaction costs {r} more",
+          "card.log.cru.dauntless.cost",
+          { amount: 1, target: { kind: "player", seat: defender } },
+        ),
+      );
     },
   };
 }
@@ -177,22 +185,17 @@ export const cruNinjaWarrior: Record<string, CardScript> = {
       }
     },
     canTriggerOnHit(ctx) {
-      return ctx.link?.attackCardType === "action" &&
-        ctx.getFlag("player", "katsuWandererUsed") !== true;
+      return ctx.link?.attackCardType === "action" && ctx.getFlag("player", "katsuWandererUsed") !== true;
     },
     onHit(ctx) {
       ctx.setFlag("player", "katsuWandererUsed", true);
-      const zeroes = ctx.state.players[ctx.seat]!.hand.filter(
-        (card) => (ctx.cardData(card.cardId).cost ?? 0) === 0,
-      );
+      const zeroes = ctx.state.players[ctx.seat]!.hand.filter((card) => (ctx.cardData(card.cardId).cost ?? 0) === 0);
       if (zeroes.length === 0) return;
       ctx.requestCardChoice(
         "katsu-discard",
-        decisionPrompt(
-          "Katsu: discard a cost 0 card to search for a combo card?",
-          "card.cru.katsu.discard",
-          { optionMessages: commonOptionMessages("pass") },
-        ),
+        decisionPrompt("Katsu: discard a cost 0 card to search for a combo card?", "card.cru.katsu.discard", {
+          optionMessages: commonOptionMessages("pass"),
+        }),
         ["pass", ...zeroes.map((card) => card.instanceId)],
       );
     },
@@ -206,10 +209,7 @@ export const cruNinjaWarrior: Record<string, CardScript> = {
         }
         ctx.requestCardChoice(
           "katsu-search",
-          decisionPrompt(
-            "Katsu: choose a combo card to banish face up",
-            "card.cru.katsu.combo.choose",
-          ),
+          decisionPrompt("Katsu: choose a combo card to banish face up", "card.cru.katsu.combo.choose"),
           combo.map((card) => card.instanceId),
         );
         return;
@@ -221,7 +221,13 @@ export const cruNinjaWarrior: Record<string, CardScript> = {
       if (!ctx.banish(id)) return;
       ctx.allowPlayFrom(id, "banish");
       ctx.shuffleDeck(ctx.seat);
-      ctx.logPublic(localizedCardLog(ctx, "Katsu: the searched combo card is banished and may be played this turn", "card.log.cru.katsu.banished"));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          "Katsu: the searched combo card is banished and may be played this turn",
+          "card.log.cru.katsu.banished",
+        ),
+      );
     },
   },
 
@@ -239,8 +245,7 @@ export const cruNinjaWarrior: Record<string, CardScript> = {
       return ctx.currentAttackPower() > 2;
     },
     canTriggerOnHit(ctx) {
-      return ctx.link?.attackCardType === "action" &&
-        ctx.getFlag("player", "benjiHitUsed") !== true;
+      return ctx.link?.attackCardType === "action" && ctx.getFlag("player", "benjiHitUsed") !== true;
     },
     onHit(ctx) {
       ctx.setFlag("player", "benjiHitUsed", true);
@@ -258,9 +263,7 @@ export const cruNinjaWarrior: Record<string, CardScript> = {
     // Go again is conditional (KEYWORD_OVERRIDES strips the catalog keyword).
     onAttackDeclared(ctx) {
       if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId) return;
-      const hasZero = ctx.state.players[ctx.seat]!.pitch.some(
-        (card) => ctx.cardData(card.cardId).cost === 0,
-      );
+      const hasZero = ctx.state.players[ctx.seat]!.pitch.some((card) => ctx.cardData(card.cardId).cost === 0);
       if (hasZero) ctx.grantGoAgain();
     },
   },
@@ -295,7 +298,9 @@ export const cruNinjaWarrior: Record<string, CardScript> = {
       const current = ctx.state.chain.length - 1;
       return current > 0 && ctx.state.chain[current - 1]?.hit === true;
     },
-    onHit(ctx) { ctx.drawCards(ctx.seat, 2); },
+    onHit(ctx) {
+      ctx.drawCards(ctx.seat, 2);
+    },
   },
   "zen state|0": {
     fixedDamagePrevention: { amount: 1 },
@@ -314,11 +319,9 @@ export const cruNinjaWarrior: Record<string, CardScript> = {
           }
           ctx.requestChoice(
             "zen-maintenance",
-            decisionPrompt(
-              "Zen State: remove a balance counter or destroy it?",
-              "card.cru.zen.maintenance",
-              { optionMessages: commonOptionMessages("remove", "destroy") },
-            ),
+            decisionPrompt("Zen State: remove a balance counter or destroy it?", "card.cru.zen.maintenance", {
+              optionMessages: commonOptionMessages("remove", "destroy"),
+            }),
             ["remove", "destroy"],
           );
         },
@@ -353,11 +356,7 @@ export const cruNinjaWarrior: Record<string, CardScript> = {
     },
     canTriggerOnHit: isWeaponAttack,
     onHit(ctx) {
-      ctx.setFlag(
-        "player",
-        "kassaiWeaponHits",
-        Number(ctx.getFlag("player", "kassaiWeaponHits")) + 1,
-      );
+      ctx.setFlag("player", "kassaiWeaponHits", Number(ctx.getFlag("player", "kassaiWeaponHits")) + 1);
     },
     triggers: [
       {
@@ -381,8 +380,10 @@ export const cruNinjaWarrior: Record<string, CardScript> = {
     friendlyDefendedTrigger: {
       label: "When Cintari Saber is defended by an attack action card",
       condition(ctx, defenders) {
-        return ctx.link?.attackingCard.instanceId === ctx.self.instanceId &&
-          defenders.some((card) => isAttackAction(ctx, card));
+        return (
+          ctx.link?.attackingCard.instanceId === ctx.self.instanceId &&
+          defenders.some((card) => isAttackAction(ctx, card))
+        );
       },
     },
     onFriendlyDefended(ctx) {

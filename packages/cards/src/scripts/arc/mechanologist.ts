@@ -15,22 +15,22 @@ function boostedThisTurn(ctx: ScriptCtx): boolean {
 function mechanicItemAtMost(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, maxCost: number): boolean {
   const data = ctx.cardData(card.cardId);
   return (
-    ctx.cardTypes(card).includes("mechanologist") &&
-    ctx.cardTypes(card).includes("item") &&
-    (data.cost ?? 0) <= maxCost
+    ctx.cardTypes(card).includes("mechanologist") && ctx.cardTypes(card).includes("item") && (data.cost ?? 0) <= maxCost
   );
 }
 
 function pourTheMold(maxCost: number): CardScript {
   return {
     onPlay(ctx) {
-      const candidates = ctx.player(ctx.seat).hand.filter((card) =>
-        mechanicItemAtMost(ctx, card, maxCost),
-      );
+      const candidates = ctx.player(ctx.seat).hand.filter((card) => mechanicItemAtMost(ctx, card, maxCost));
       if (candidates.length === 0) return;
       ctx.requestCardChoice(
         "pour-item",
-        decisionPrompt(`${ctx.data.name}: put a Mechanologist item with cost ${maxCost} or less into the arena`, "card.arc.mechanologist.item.put", { values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: maxCost } }),
+        decisionPrompt(
+          `${ctx.data.name}: put a Mechanologist item with cost ${maxCost} or less into the arena`,
+          "card.arc.mechanologist.item.put",
+          { values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: maxCost } },
+        ),
         candidates.map((card) => card.instanceId),
       );
     },
@@ -39,13 +39,15 @@ function pourTheMold(maxCost: number): CardScript {
       const item = ctx.player(ctx.seat).hand.find((card) => card.instanceId === Number(option));
       if (!item || !mechanicItemAtMost(ctx, item, maxCost) || !ctx.settleCard(item.instanceId)) return;
       if (boostedThisTurn(ctx)) ctx.addCounter(item.instanceId, "steam", 1);
-      ctx.logPublic(localizedCardLog(
-        ctx,
-        `${ctx.data.name}: ${ctx.cardData(item.cardId).name} is put into the arena`,
-        "card.log.arc.item.arena",
-        { result: { kind: "card", cardId: item.cardId } },
-        { kind: "card-moved", cardId: item.cardId, ownerSeat: ctx.seat, from: "hand", to: "board" },
-      ));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.data.name}: ${ctx.cardData(item.cardId).name} is put into the arena`,
+          "card.log.arc.item.arena",
+          { result: { kind: "card", cardId: item.cardId } },
+          { kind: "card-moved", cardId: item.cardId, ownerSeat: ctx.seat, from: "hand", to: "board" },
+        ),
+      );
     },
   };
 }
@@ -110,7 +112,14 @@ export const arcMechanologist: Record<string, CardScript> = {
         removeCounterCost: { key: "steam", amount: 1 },
         onActivate(ctx) {
           ctx.grantCardKeyword(ctx.self.instanceId, "arcane barrier 2");
-          ctx.logPublic(localizedCardLog(ctx, "Aether Sink gains Arcane Barrier 2 until end of turn", "card.log.arc.aethersink.barrier", { amount: 2 }));
+          ctx.logPublic(
+            localizedCardLog(
+              ctx,
+              "Aether Sink gains Arcane Barrier 2 until end of turn",
+              "card.log.arc.aethersink.barrier",
+              { amount: 2 },
+            ),
+          );
         },
       },
     ],
@@ -135,8 +144,7 @@ export const arcMechanologist: Record<string, CardScript> = {
         timing: "attack-reaction",
         removeCounterCost: { key: "steam", amount: 1 },
         label: "Remove a steam counter: put the attacking card on deck bottom when it hits",
-        canActivate: (ctx) =>
-          ctx.getCounter("steam") > 0 && ctx.link?.attackCardType === "action",
+        canActivate: (ctx) => ctx.getCounter("steam") > 0 && ctx.link?.attackCardType === "action",
         onActivate(ctx) {
           ctx.setFlag("link", "attackToBottom", true);
         },
@@ -186,7 +194,11 @@ export const arcMechanologist: Record<string, CardScript> = {
           }
           ctx.requestChoice(
             "dissipation-maintenance",
-            decisionPrompt("Dissipation Shield: remove a steam counter or destroy it?", "card.arc.dissipation.maintain", { optionMessages: commonOptionMessages("remove", "destroy") }),
+            decisionPrompt(
+              "Dissipation Shield: remove a steam counter or destroy it?",
+              "card.arc.dissipation.maintain",
+              { optionMessages: commonOptionMessages("remove", "destroy") },
+            ),
             ["remove", "destroy"],
           );
         },

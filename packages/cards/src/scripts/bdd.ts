@@ -14,14 +14,16 @@ export const bdd: Record<string, CardScript> = {
     },
   },
   "crash down|1": {
-    triggers: [{
-      event: "start-of-turn",
-      whose: "subject",
-      label: "Destroy Crash Down — next Guardian attack gets +6{p}",
-      effect(ctx) {
-        ctx.destroySelf();
-        buffNextAttack(ctx, { attack: 6, appliesToClass: "guardian", appliesTo: "attack-action" });
+    triggers: [
+      {
+        event: "start-of-turn",
+        whose: "subject",
+        label: "Destroy Crash Down — next Guardian attack gets +6{p}",
+        effect(ctx) {
+          ctx.destroySelf();
+          buffNextAttack(ctx, { attack: 6, appliesToClass: "guardian", appliesTo: "attack-action" });
+        },
       },
-    }],
+    ],
   },
 };

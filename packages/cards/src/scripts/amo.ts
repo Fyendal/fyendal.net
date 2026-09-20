@@ -39,10 +39,7 @@ export const amo: Record<string, CardScript> = {
         onActivate(ctx) {
           ctx.requestCardChoice(
             "amo-mortimer-cure",
-            decisionPrompt(
-              "Choose a disease to cure",
-              "card.amo.mortimer.disease.choose",
-            ),
+            decisionPrompt("Choose a disease to cure", "card.amo.mortimer.disease.choose"),
             opposingDiseases(ctx).map((card) => card.instanceId),
           );
         },
@@ -54,17 +51,19 @@ export const amo: Record<string, CardScript> = {
         timing: "attack-reaction",
         tap: true,
         label: "Destroy 2 Silver: give go again",
-        effectCardCosts: [{
-          zone: "arena",
-          move: "destroy",
-          count: 2,
-          name: "Silver",
-          prompt: decisionPrompt("Destroy 2 Silver", "card.common.cost.silver.destroy.two"),
-        }],
+        effectCardCosts: [
+          {
+            zone: "arena",
+            move: "destroy",
+            count: 2,
+            name: "Silver",
+            prompt: decisionPrompt("Destroy 2 Silver", "card.common.cost.silver.destroy.two"),
+          },
+        ],
         canActivate(ctx) {
-          return !!ctx.link &&
-            ctx.link.attacker === ctx.seat &&
-            ctx.cardTypes(ctx.link.attackingCard).includes("assassin");
+          return (
+            !!ctx.link && ctx.link.attacker === ctx.seat && ctx.cardTypes(ctx.link.attackingCard).includes("assassin")
+          );
         },
         onActivate(ctx) {
           ctx.grantGoAgain();

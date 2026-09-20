@@ -1,9 +1,5 @@
 import type { CardScript, DeepReadonly, CardInstance, ScriptCtx } from "@fyendal/engine";
-import {
-  decisionMessage,
-  decisionPrompt,
-  yesNoPrompt,
-} from "./shared-helpers.js";
+import { decisionMessage, decisionPrompt, yesNoPrompt } from "./shared-helpers.js";
 
 const MIGHT = "TER028";
 
@@ -68,23 +64,23 @@ function seedsOfStrength(base: number): CardScript {
 
 export const ter: Record<string, CardScript> = {
   "terra|0": {
-    triggers: [{
-      event: "end-of-turn",
-      whose: "any",
-      condition: (ctx) => ctx.player(ctx.seat).pitch.some((card) => hasType(ctx, card, "earth")),
-      label: "Pay {r} to create a Might",
-      effect(ctx) {
-        ctx.requestPayment(
-          "terra-might",
-          decisionPrompt(
-            "Terra: pay {r} to create a Might token?",
-            "card.ter.terra.might.pay",
-            { optionMessages: { no: decisionMessage("common.option.no") } },
-          ),
-          1,
-        );
+    triggers: [
+      {
+        event: "end-of-turn",
+        whose: "any",
+        condition: (ctx) => ctx.player(ctx.seat).pitch.some((card) => hasType(ctx, card, "earth")),
+        label: "Pay {r} to create a Might",
+        effect(ctx) {
+          ctx.requestPayment(
+            "terra-might",
+            decisionPrompt("Terra: pay {r} to create a Might token?", "card.ter.terra.might.pay", {
+              optionMessages: { no: decisionMessage("common.option.no") },
+            }),
+            1,
+          );
+        },
       },
-    }],
+    ],
     onChoose(ctx, hook, option) {
       if (hook === "terra-might" && option === "paid") ctx.createToken(MIGHT);
     },
@@ -105,25 +101,22 @@ export const ter: Record<string, CardScript> = {
     },
   },
   "hard knuckle|0": {
-    triggers: [{
-      event: "card-played",
-      label: "Destroy this to give the attack +1?",
-      condition: (ctx, played) => !!played &&
-        ctx.hasCardType(played, "action") &&
-        hasType(ctx, played, "attack"),
-      effect(ctx, played) {
-        if (!played) return;
-        ctx.setCounter("hard-knuckle-attack", played.instanceId);
-        ctx.requestChoice(
-          "hard-knuckle",
-          yesNoPrompt(
-            "Hard Knuckle: destroy this to give the attack +1{p}?",
-            "card.ter.hard.knuckle.destroy",
-          ),
-          ["yes", "no"],
-        );
+    triggers: [
+      {
+        event: "card-played",
+        label: "Destroy this to give the attack +1?",
+        condition: (ctx, played) => !!played && ctx.hasCardType(played, "action") && hasType(ctx, played, "attack"),
+        effect(ctx, played) {
+          if (!played) return;
+          ctx.setCounter("hard-knuckle-attack", played.instanceId);
+          ctx.requestChoice(
+            "hard-knuckle",
+            yesNoPrompt("Hard Knuckle: destroy this to give the attack +1{p}?", "card.ter.hard.knuckle.destroy"),
+            ["yes", "no"],
+          );
+        },
       },
-    }],
+    ],
     onChoose(ctx, hook, option) {
       if (hook !== "hard-knuckle" || option !== "yes") return;
       const attackId = ctx.getCounter("hard-knuckle-attack");
@@ -142,7 +135,19 @@ export const ter: Record<string, CardScript> = {
   "thrive|2": powerGainReplacement(1, false),
   "seeds of strength|2": seedsOfStrength(2),
   "seeds of strength|3": seedsOfStrength(1),
-  "sigil of shelter|2": { onPlay(ctx) { ctx.preventNextDamage(ctx.seat, 2); } },
-  "sigil of shelter|3": { onPlay(ctx) { ctx.preventNextDamage(ctx.seat, 1); } },
-  "canopy shelter|3": { onDefend(ctx) { ctx.createToken(MIGHT); } },
+  "sigil of shelter|2": {
+    onPlay(ctx) {
+      ctx.preventNextDamage(ctx.seat, 2);
+    },
+  },
+  "sigil of shelter|3": {
+    onPlay(ctx) {
+      ctx.preventNextDamage(ctx.seat, 1);
+    },
+  },
+  "canopy shelter|3": {
+    onDefend(ctx) {
+      ctx.createToken(MIGHT);
+    },
+  },
 };

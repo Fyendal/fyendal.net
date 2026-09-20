@@ -9,11 +9,7 @@ import type {
   ScriptPrompt,
   TriggerDef,
 } from "@fyendal/engine";
-import type {
-  GameLogEvent,
-  GameLogPayload,
-  GameMessage,
-} from "@fyendal/shared";
+import type { GameLogEvent, GameLogPayload, GameMessage } from "@fyendal/shared";
 import { functionalKey, functionalKeyOf } from "../functional.js";
 
 export interface DecisionPromptOptions {
@@ -50,10 +46,7 @@ export type CommonDecisionOption = keyof typeof commonDecisionOptionIds;
 /** Construct semantic text metadata without coupling card scripts to any
  * locale catalog. The client resolves the id; the engine preserves fallback
  * text for old clients, persisted state, logs, and diagnostics. */
-export function decisionMessage(
-  id: string,
-  values?: GameMessage["values"],
-): GameMessage {
+export function decisionMessage(id: string, values?: GameMessage["values"]): GameMessage {
   return { id, ...(values === undefined ? {} : { values }) };
 }
 
@@ -100,10 +93,7 @@ export function localizedCardLog(
 export function commonOptionMessages(
   ...options: readonly CommonDecisionOption[]
 ): Readonly<Record<string, GameMessage>> {
-  return Object.fromEntries(options.map((option) => [
-    option,
-    decisionMessage(commonDecisionOptionIds[option]),
-  ]));
+  return Object.fromEntries(options.map((option) => [option, decisionMessage(commonDecisionOptionIds[option])]));
 }
 
 /** Describe a localizable decision prompt and any localized option labels.
@@ -116,19 +106,13 @@ export function decisionPrompt(
   return {
     fallback,
     message: decisionMessage(id, options.values),
-    ...(options.optionMessages
-      ? { optionMessagesByValue: options.optionMessages }
-      : {}),
+    ...(options.optionMessages ? { optionMessagesByValue: options.optionMessages } : {}),
   };
 }
 
 /** Common optional-effect presentation. Stable yes/no option values remain
  * engine-facing while their labels use the shared catalog messages. */
-export function yesNoPrompt(
-  fallback: string,
-  id: string,
-  values?: GameMessage["values"],
-): ScriptDecisionPrompt {
+export function yesNoPrompt(fallback: string, id: string, values?: GameMessage["values"]): ScriptDecisionPrompt {
   return decisionPrompt(fallback, id, {
     values,
     optionMessages: commonOptionMessages("yes", "no"),
@@ -137,9 +121,7 @@ export function yesNoPrompt(
 
 /** Shared presentation for effects that inspect a deck top and either keep it
  * there or move it to the bottom. */
-export function bottomOrKeepPrompt(
-  fallback = "Put the looked-at card on the bottom?",
-): ScriptDecisionPrompt {
+export function bottomOrKeepPrompt(fallback = "Put the looked-at card on the bottom?"): ScriptDecisionPrompt {
   return decisionPrompt(fallback, "card.common.lookedcard.bottom", {
     optionMessages: commonOptionMessages("bottom", "keep"),
   });
@@ -171,11 +153,13 @@ export function opponentSeat(ctx: ScriptCtx): number {
 
 /** Shared Suspense lifecycle (CR 8.3.42). Card-specific enter/leave effects
  * remain callbacks so the engine only sees the generic counter behavior. */
-export function suspenseAura(options: {
-  onEnter?: ((ctx: ScriptCtx) => void) | undefined;
-  onLeave?: ((ctx: ScriptCtx) => void) | undefined;
-  logCounterRemoval?: boolean;
-} = {}): CardScript {
+export function suspenseAura(
+  options: {
+    onEnter?: ((ctx: ScriptCtx) => void) | undefined;
+    onLeave?: ((ctx: ScriptCtx) => void) | undefined;
+    logCounterRemoval?: boolean;
+  } = {},
+): CardScript {
   return {
     destroyAtZeroCounter: "suspense",
     onEnterArena(ctx) {
@@ -190,36 +174,36 @@ export function suspenseAura(options: {
       );
       options.onLeave?.(ctx);
     },
-    triggers: [{
-      event: "start-of-turn",
-      label: "Remove a suspense counter",
-      effect(ctx) {
-        const next = Math.max(0, ctx.getCounter("suspense") - 1);
-        ctx.setCounter("suspense", next);
-        if (options.logCounterRemoval) {
-          ctx.logPublic(localizedLog(
-            `${ctx.data.name}: a suspense counter is removed (${next} left)`,
-            "card.log.common.suspense.counter.removed",
-            {
-              card: { kind: "card", cardId: ctx.self.cardId },
-              remaining: next,
-            },
-          ));
-        }
-        if (next === 0) ctx.destroySelf();
+    triggers: [
+      {
+        event: "start-of-turn",
+        label: "Remove a suspense counter",
+        effect(ctx) {
+          const next = Math.max(0, ctx.getCounter("suspense") - 1);
+          ctx.setCounter("suspense", next);
+          if (options.logCounterRemoval) {
+            ctx.logPublic(
+              localizedLog(
+                `${ctx.data.name}: a suspense counter is removed (${next} left)`,
+                "card.log.common.suspense.counter.removed",
+                {
+                  card: { kind: "card", cardId: ctx.self.cardId },
+                  remaining: next,
+                },
+              ),
+            );
+          }
+          if (next === 0) ctx.destroySelf();
+        },
       },
-    }],
+    ],
   };
 }
 
 /** Record a Contract completion for turn-wide checks such as Pay Day. */
 export function markContractCompleted(ctx: ScriptCtx): void {
   ctx.setFlag("player", "completedContractThisTurn", true);
-  ctx.setFlag(
-    "player",
-    "contractCompletionsThisTurn",
-    contractCompletionCount(ctx) + 1,
-  );
+  ctx.setFlag("player", "contractCompletionsThisTurn", contractCompletionCount(ctx) + 1);
 }
 
 /** Number of Contracts this player has completed during the current turn. */
@@ -243,15 +227,15 @@ export function contractWithSilver(
 }
 
 /** Ask the affected hero to choose one of their hand cards to discard. */
-export function requestDiscardChoice(
-  ctx: ScriptCtx,
-  hook: string,
-  prompt: ScriptPrompt,
-  targetSeat: number,
-): boolean {
+export function requestDiscardChoice(ctx: ScriptCtx, hook: string, prompt: ScriptPrompt, targetSeat: number): boolean {
   const hand = ctx.player(targetSeat).hand;
   if (hand.length === 0) return false;
-  ctx.requestCardChoice(hook, prompt, hand.map((card) => card.instanceId), targetSeat);
+  ctx.requestCardChoice(
+    hook,
+    prompt,
+    hand.map((card) => card.instanceId),
+    targetSeat,
+  );
   return true;
 }
 
@@ -285,19 +269,14 @@ export function previousAttackHasName(ctx: ScriptCtx, ...names: readonly string[
 
 /** Match "with WORDS in its name" Combo conditions using whole words, as
  * required by the name-property rules, across every effective name. */
-export function previousAttackNameContains(
-  ctx: ScriptCtx,
-  ...parts: readonly string[]
-): boolean {
+export function previousAttackNameContains(ctx: ScriptCtx, ...parts: readonly string[]): boolean {
   const previous = previousAttack(ctx);
   if (!previous) return false;
   return ctx.cardNames(previous).some((name) => {
     const words = name.split(/\s+/);
     return parts.some((part) => {
       const wanted = part.trim().toLowerCase().split(/\s+/);
-      return words.some((_, index) =>
-        wanted.every((word, offset) => words[index + offset] === word)
-      );
+      return words.some((_, index) => wanted.every((word, offset) => words[index + offset] === word));
     });
   });
 }
@@ -308,10 +287,9 @@ export function markedStealthHeroScript(agentCardIds: readonly string[]): CardSc
     if ((card.suppressedKeywords ?? []).some((keyword) => keyword.toLowerCase() === "stealth")) {
       return false;
     }
-    return [
-      ...(ctx.cardData(card.cardId).keywords ?? []),
-      ...(card.grantedKeywords ?? []),
-    ].some((keyword) => keyword.toLowerCase() === "stealth");
+    return [...(ctx.cardData(card.cardId).keywords ?? []), ...(card.grantedKeywords ?? [])].some(
+      (keyword) => keyword.toLowerCase() === "stealth",
+    );
   };
   return {
     modifyAttack(ctx) {
@@ -321,22 +299,26 @@ export function markedStealthHeroScript(agentCardIds: readonly string[]): CardSc
     },
     canTriggerOnHit(ctx) {
       const link = ctx.link;
-      return !!link &&
+      return (
+        !!link &&
         link.targetAllyId === undefined &&
         hasStealth(ctx, link.attackingCard) &&
-        link.flags.targetWasMarkedOnHit === true;
+        link.flags.targetWasMarkedOnHit === true
+      );
     },
     onHit(ctx) {
       ctx.grantGoAgain();
     },
-    triggers: [{
-      event: "end-of-turn",
-      condition: (ctx) => (ctx.player(opponentSeat(ctx)).hero.counters?.marked ?? 0) > 0,
-      label: "Become a random Agent of Chaos",
-      effect(ctx) {
-        ctx.becomeHero(agentCardIds[ctx.randomInt(agentCardIds.length)]!);
+    triggers: [
+      {
+        event: "end-of-turn",
+        condition: (ctx) => (ctx.player(opponentSeat(ctx)).hero.counters?.marked ?? 0) > 0,
+        label: "Become a random Agent of Chaos",
+        effect(ctx) {
+          ctx.becomeHero(agentCardIds[ctx.randomInt(agentCardIds.length)]!);
+        },
       },
-    }],
+    ],
   };
 }
 
@@ -345,23 +327,17 @@ function weaponHands(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): number {
 }
 
 function canEquipDagger(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  if (
-    card.faceDown
-    || !ctx.cardTypes(card).includes("dagger")
-    || ctx.cardData(card.cardId).cardType !== "weapon"
-  ) {
+  if (card.faceDown || !ctx.cardTypes(card).includes("dagger") || ctx.cardData(card.cardId).cardType !== "weapon") {
     return false;
   }
-  const occupiedHands = ctx.player(ctx.seat).weapons.reduce(
-    (total, weapon) => total + weaponHands(ctx, weapon),
-    0,
-  );
+  const occupiedHands = ctx.player(ctx.seat).weapons.reduce((total, weapon) => total + weaponHands(ctx, weapon), 0);
   return occupiedHands + weaponHands(ctx, card) <= 2;
 }
 
 export function retrievableDaggerIds(ctx: ScriptCtx): number[] {
-  return ctx.player(ctx.seat).graveyard
-    .filter((card) => canEquipDagger(ctx, card))
+  return ctx
+    .player(ctx.seat)
+    .graveyard.filter((card) => canEquipDagger(ctx, card))
     .map((card) => card.instanceId);
 }
 
@@ -370,28 +346,27 @@ export function retrievableDaggerIds(ctx: ScriptCtx): number[] {
 export function offerRetrieveDagger(ctx: ScriptCtx, hook: string): void {
   const ids = retrievableDaggerIds(ctx);
   if (ids.length === 0) return;
-  ctx.requestCardChoice(hook, decisionPrompt(
-    "Retrieve a dagger from your graveyard?",
-    "card.common.retrieve.dagger",
-    { optionMessages: commonOptionMessages("pass") },
-  ), ["pass", ...ids]);
+  ctx.requestCardChoice(
+    hook,
+    decisionPrompt("Retrieve a dagger from your graveyard?", "card.common.retrieve.dagger", {
+      optionMessages: commonOptionMessages("pass"),
+    }),
+    ["pass", ...ids],
+  );
 }
 
-export function resolveRetrieveDagger(
-  ctx: ScriptCtx,
-  hook: string,
-  option: string,
-  expected: string,
-): boolean {
+export function resolveRetrieveDagger(ctx: ScriptCtx, hook: string, option: string, expected: string): boolean {
   if (hook === expected) {
     if (option === "pass") return true;
     const id = Number(option);
     if (!retrievableDaggerIds(ctx).includes(id)) return true;
-    ctx.requestPayment(`retrieve-pay:${expected}:${id}`, decisionPrompt(
-      "Retrieve: pay {r} to equip this dagger?",
-      "card.common.retrieve.dagger.pay",
-      { values: { amount: 1 } },
-    ), 1);
+    ctx.requestPayment(
+      `retrieve-pay:${expected}:${id}`,
+      decisionPrompt("Retrieve: pay {r} to equip this dagger?", "card.common.retrieve.dagger.pay", {
+        values: { amount: 1 },
+      }),
+      1,
+    );
     return true;
   }
   const prefix = `retrieve-pay:${expected}:`;
@@ -417,23 +392,17 @@ function activeHeroName(ctx: ScriptCtx): string {
 }
 
 function isOriginalLevia(heroName: string): boolean {
-  return (
-    heroName === BLOOD_DEBT.youngLeviaName ||
-    heroName === BLOOD_DEBT.adultLeviaName
-  );
+  return heroName === BLOOD_DEBT.youngLeviaName || heroName === BLOOD_DEBT.adultLeviaName;
 }
 
 function leviaRemovesBloodDebt(ctx: ScriptCtx, heroName: string): boolean {
-  return isOriginalLevia(heroName) &&
-    ctx.getFlag("player", "banishedSixPlusThisTurn") === true;
+  return isOriginalLevia(heroName) && ctx.getFlag("player", "banishedSixPlusThisTurn") === true;
 }
 
-function blasmophetInInventory(
-  ctx: ScriptCtx,
-): DeepReadonly<CardInstance> | undefined {
-  return ctx.player(ctx.seat).inventory?.find((card) =>
-    ctx.cardData(card.cardId).name.toLowerCase() === BLOOD_DEBT.blasmophetName
-  );
+function blasmophetInInventory(ctx: ScriptCtx): DeepReadonly<CardInstance> | undefined {
+  return ctx
+    .player(ctx.seat)
+    .inventory?.find((card) => ctx.cardData(card.cardId).name.toLowerCase() === BLOOD_DEBT.blasmophetName);
 }
 
 /** Levia's visible proxy for the action ability of her private twin-card
@@ -445,10 +414,12 @@ export const leviaRedeemedAbility: ActivatedAbility = {
   timing: "action",
   label: "Transform into Levia, Redeemed",
   canActivate(ctx) {
-    return blasmophetInInventory(ctx) !== undefined &&
-      ctx.player(ctx.seat).banish.filter((card) =>
-        !card.faceDown && ctx.cardData(card.cardId).text.includes("Blood Debt")
-      ).length >= 13;
+    return (
+      blasmophetInInventory(ctx) !== undefined &&
+      ctx
+        .player(ctx.seat)
+        .banish.filter((card) => !card.faceDown && ctx.cardData(card.cardId).text.includes("Blood Debt")).length >= 13
+    );
   },
   onCostPaid(ctx) {
     for (const card of ctx.player(ctx.seat).banish) {
@@ -478,9 +449,7 @@ export function bloodDebtScript(extra: CardScript = {}, playableFromBanish = fal
     onChoose(ctx, hook, option) {
       if (hook.startsWith(BLOOD_DEBT.transformHookPrefix)) {
         if (option === "yes") {
-          ctx.becomeHeroFromInventory(
-            Number(hook.slice(BLOOD_DEBT.transformHookPrefix.length)),
-          );
+          ctx.becomeHeroFromInventory(Number(hook.slice(BLOOD_DEBT.transformHookPrefix.length)));
         }
         return;
       }
@@ -536,17 +505,14 @@ export function isCard(ctx: ScriptCtx, cardId: string, name: string, pitch?: num
 export function queueIntimidate(ctx: ScriptCtx): void {
   const n = Number(ctx.getFlag("player", "pendingIntimidate")) || 0;
   ctx.setFlag("player", "pendingIntimidate", n + 1);
-  ctx.logPublic(localizedLog(
-    `${ctx.data.name}: intimidate`,
-    "card.log.common.intimidate",
-    { card: { kind: "card", cardId: ctx.self.cardId } },
-  ));
+  ctx.logPublic(
+    localizedLog(`${ctx.data.name}: intimidate`, "card.log.common.intimidate", {
+      card: { kind: "card", cardId: ctx.self.cardId },
+    }),
+  );
 }
 
-export function isSixPlus(
-  ctx: ScriptCtx,
-  card: DeepReadonly<CardInstance> | undefined,
-): boolean {
+export function isSixPlus(ctx: ScriptCtx, card: DeepReadonly<CardInstance> | undefined): boolean {
   if (!card) return false;
   return ctx.basePower(card) >= 6;
 }
@@ -573,34 +539,38 @@ export function revealTopSixPlusStays(ctx: ScriptCtx): void {
   if (!top) return;
   const d = ctx.cardData(top.cardId);
   if ((d.attack ?? 0) >= 6) {
-    ctx.logPublic(localizedLog(
-      `${ctx.data.name} reveals ${d.name} — it stays on top`,
-      "card.log.common.reveal.top.stays",
-      {
-        card: { kind: "card", cardId: ctx.self.cardId },
-        revealed: { kind: "card", cardId: top.cardId },
-      },
-      {
-        kind: "cards-revealed",
-        cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }],
-        sourceZone: "deck",
-      },
-    ));
+    ctx.logPublic(
+      localizedLog(
+        `${ctx.data.name} reveals ${d.name} — it stays on top`,
+        "card.log.common.reveal.top.stays",
+        {
+          card: { kind: "card", cardId: ctx.self.cardId },
+          revealed: { kind: "card", cardId: top.cardId },
+        },
+        {
+          kind: "cards-revealed",
+          cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }],
+          sourceZone: "deck",
+        },
+      ),
+    );
   } else {
     ctx.putOnDeckBottom(top.instanceId);
-    ctx.logPublic(localizedLog(
-      `${ctx.data.name} reveals ${d.name} — put on the bottom of the deck`,
-      "card.log.common.reveal.top.bottom",
-      {
-        card: { kind: "card", cardId: ctx.self.cardId },
-        revealed: { kind: "card", cardId: top.cardId },
-      },
-      {
-        kind: "cards-revealed",
-        cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }],
-        sourceZone: "deck",
-      },
-    ));
+    ctx.logPublic(
+      localizedLog(
+        `${ctx.data.name} reveals ${d.name} — put on the bottom of the deck`,
+        "card.log.common.reveal.top.bottom",
+        {
+          card: { kind: "card", cardId: ctx.self.cardId },
+          revealed: { kind: "card", cardId: top.cardId },
+        },
+        {
+          kind: "cards-revealed",
+          cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }],
+          sourceZone: "deck",
+        },
+      ),
+    );
   }
 }
 
@@ -609,18 +579,20 @@ export function mentorPayoff(ctx: ScriptCtx, searchName: string, searchPitch?: n
   const p = ctx.player(ctx.seat);
   if (p.arsenal.some((c) => c.instanceId === ctx.self.instanceId)) {
     ctx.banish(ctx.self.instanceId);
-    ctx.logPublic(localizedLog(
-      `${ctx.data.name} is banished`,
-      "card.log.common.banished",
-      { card: { kind: "card", cardId: ctx.self.cardId } },
-      {
-        kind: "card-moved",
-        cardId: ctx.self.cardId,
-        ownerSeat: ctx.seat,
-        from: "arsenal",
-        to: "banish",
-      },
-    ));
+    ctx.logPublic(
+      localizedLog(
+        `${ctx.data.name} is banished`,
+        "card.log.common.banished",
+        { card: { kind: "card", cardId: ctx.self.cardId } },
+        {
+          kind: "card-moved",
+          cardId: ctx.self.cardId,
+          ownerSeat: ctx.seat,
+          from: "arsenal",
+          to: "banish",
+        },
+      ),
+    );
   }
   const key = functionalKey(searchName, searchPitch);
   const found = p.deck.find((c) => functionalKeyOf(ctx.cardData(c.cardId)) === key);
@@ -639,26 +611,19 @@ export function mentorPayoff(ctx: ScriptCtx, searchName: string, searchPitch?: n
           to: "arsenal",
         },
       ),
-      localizedLog(
-        "searched a card into arsenal",
-        "card.log.common.mentor.search.public",
-        undefined,
-        {
-          kind: "card-moved",
-          ownerSeat: ctx.seat,
-          from: "deck",
-          to: "arsenal",
-        },
-      ),
+      localizedLog("searched a card into arsenal", "card.log.common.mentor.search.public", undefined, {
+        kind: "card-moved",
+        ownerSeat: ctx.seat,
+        from: "deck",
+        to: "arsenal",
+      }),
     );
   }
   ctx.shuffleDeck();
 }
 
 function isSpecialization(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return (ctx.cardData(card.cardId).keywords ?? []).some((keyword) =>
-    keyword.toLowerCase().includes("specialization")
-  );
+  return (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase().includes("specialization"));
 }
 
 /** Mentor payoff for the generic "search your deck for a specialization"
@@ -667,18 +632,20 @@ function isSpecialization(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boo
 export function mentorSpecializationPayoff(ctx: ScriptCtx, hook: string): void {
   if (ctx.player(ctx.seat).arsenal.some((card) => card.instanceId === ctx.self.instanceId)) {
     ctx.banish(ctx.self.instanceId);
-    ctx.logPublic(localizedLog(
-      `${ctx.data.name} is banished`,
-      "card.log.common.banished",
-      { card: { kind: "card", cardId: ctx.self.cardId } },
-      {
-        kind: "card-moved",
-        cardId: ctx.self.cardId,
-        ownerSeat: ctx.seat,
-        from: "arsenal",
-        to: "banish",
-      },
-    ));
+    ctx.logPublic(
+      localizedLog(
+        `${ctx.data.name} is banished`,
+        "card.log.common.banished",
+        { card: { kind: "card", cardId: ctx.self.cardId } },
+        {
+          kind: "card-moved",
+          cardId: ctx.self.cardId,
+          ownerSeat: ctx.seat,
+          from: "arsenal",
+          to: "banish",
+        },
+      ),
+    );
   }
   const choices = ctx.player(ctx.seat).deck.filter((card) => isSpecialization(ctx, card));
   if (choices.length === 0) {
@@ -704,9 +671,9 @@ export function resolveMentorSpecializationChoice(
   option: string,
 ): boolean {
   if (receivedHook !== hook) return false;
-  const card = ctx.player(ctx.seat).deck.find(
-    (candidate) => candidate.instanceId === Number(option) && isSpecialization(ctx, candidate),
-  );
+  const card = ctx
+    .player(ctx.seat)
+    .deck.find((candidate) => candidate.instanceId === Number(option) && isSpecialization(ctx, candidate));
   if (card && ctx.putIntoArsenal(card.instanceId, "deck")) {
     ctx.logPrivate(
       ctx.seat,
@@ -722,17 +689,12 @@ export function resolveMentorSpecializationChoice(
           to: "arsenal",
         },
       ),
-      localizedLog(
-        "searched a card into arsenal",
-        "card.log.common.mentor.search.public",
-        undefined,
-        {
-          kind: "card-moved",
-          ownerSeat: ctx.seat,
-          from: "deck",
-          to: "arsenal",
-        },
-      ),
+      localizedLog("searched a card into arsenal", "card.log.common.mentor.search.public", undefined, {
+        kind: "card-moved",
+        ownerSeat: ctx.seat,
+        from: "deck",
+        to: "arsenal",
+      }),
     );
   }
   ctx.shuffleDeck();
@@ -761,14 +723,12 @@ export function discardRandomCost(ctx: ScriptCtx): void {
 export function lessonCounter(ctx: ScriptCtx): number {
   const n = ctx.getCounter("lessons") + 1;
   ctx.setCounter("lessons", n);
-  ctx.logPublic(localizedLog(
-    `${ctx.data.name} gets a lesson counter (${n})`,
-    "card.log.common.lesson.counter.gained",
-    {
+  ctx.logPublic(
+    localizedLog(`${ctx.data.name} gets a lesson counter (${n})`, "card.log.common.lesson.counter.gained", {
       card: { kind: "card", cardId: ctx.self.cardId },
       count: n,
-    },
-  ));
+    }),
+  );
   return n;
 }
 
@@ -803,9 +763,7 @@ export function attackAbility(
       isAttack: true,
       goAgain: opts?.goAgain ?? false,
       oncePerTurn: opts?.oncePerTurn ?? true,
-      ...(opts?.activationsPerTurn === undefined
-        ? {}
-        : { activationsPerTurn: opts.activationsPerTurn }),
+      ...(opts?.activationsPerTurn === undefined ? {} : { activationsPerTurn: opts.activationsPerTurn }),
       tap: opts?.tap,
       label: "Attack",
       ...(opts?.canActivate ? { canActivate: opts.canActivate } : {}),
@@ -837,15 +795,11 @@ export function payForDefenseBoost(
 ): CardScript {
   const resourceString = Array(cost).fill("{r}").join("");
   const resolve = (v: string | ((ctx: ScriptCtx) => string) | undefined, ctx: ScriptCtx, fallback: string) =>
-    typeof v === "function" ? v(ctx) : v ?? fallback;
+    typeof v === "function" ? v(ctx) : (v ?? fallback);
   const request = (ctx: ScriptCtx) => {
     ctx.requestPayment(
       "pay-boost",
-      resolve(
-        opts?.message,
-        ctx,
-        `${ctx.data.name}: pay ${resourceString} for +${defense}{d}?`,
-      ),
+      resolve(opts?.message, ctx, `${ctx.data.name}: pay ${resourceString} for +${defense}{d}?`),
       cost,
     );
   };
@@ -855,26 +809,25 @@ export function payForDefenseBoost(
     if (opts?.destroyOnClose) {
       ctx.setFlag("link", `destroyOnClose:${ctx.self.instanceId}`, true);
     }
-    ctx.logPublic(localizedLog(
-      resolve(opts?.logMessage, ctx, `${ctx.data.name} gains +${defense} defense`),
-      "card.log.common.defense.gained",
-      {
-        card: { kind: "card", cardId: ctx.self.cardId },
-        defense,
-      },
-    ));
+    ctx.logPublic(
+      localizedLog(
+        resolve(opts?.logMessage, ctx, `${ctx.data.name} gains +${defense} defense`),
+        "card.log.common.defense.gained",
+        {
+          card: { kind: "card", cardId: ctx.self.cardId },
+          defense,
+        },
+      ),
+    );
   };
-  return opts?.onPlay
-    ? { onPlay: request, onChoose }
-    : { defendCost: cost, onDefend: request, onChoose };
+  return opts?.onPlay ? { onPlay: request, onChoose } : { defendCost: cost, onDefend: request, onChoose };
 }
 
 /** Ironhide-style: "when you defend with this, you may pay {r}: +2{d}, destroy when the chain closes" */
 export function ironhideScript(): CardScript {
   return payForDefenseBoost(1, 2, {
     destroyOnClose: true,
-    message: (ctx) =>
-      `${ctx.data.name}: pay {r} for +2 defense? (it is destroyed when the combat chain closes)`,
+    message: (ctx) => `${ctx.data.name}: pay {r} for +2 defense? (it is destroyed when the combat chain closes)`,
   });
 }
 
@@ -882,11 +835,7 @@ type NextAttackMod = Omit<Modifier, "id" | "sourceInstanceId" | "sourceCardId" |
 type NextAttackModWithSeat = NextAttackMod & { seat?: number };
 
 /** Apply a modifier scoped to the controller's next attack this turn. */
-export function buffNextAttack(
-  ctx: ScriptCtx,
-  mod: NextAttackModWithSeat,
-  source?: DeepReadonly<CardInstance>,
-): void {
+export function buffNextAttack(ctx: ScriptCtx, mod: NextAttackModWithSeat, source?: DeepReadonly<CardInstance>): void {
   ctx.addModifier({ scope: "next-attack", seat: ctx.seat, ...mod }, source);
 }
 
@@ -906,14 +855,16 @@ export function buffNextArcaneDamageCard(ctx: ScriptCtx, n: number): void {
   const sourceKey = `nextArcaneCardBonusSource:${ctx.self.instanceId}`;
   const sourceBonus = Number(ctx.getPlayerFlag(ctx.seat, sourceKey)) + n;
   ctx.setPlayerFlag(ctx.seat, sourceKey, sourceBonus);
-  ctx.logPublic(localizedLog(
-    `${ctx.data.name}: your next arcane damage card this turn gets +${n}`,
-    "card.log.common.arcane.card.bonus",
-    {
-      card: { kind: "card", cardId: ctx.self.cardId },
-      amount: n,
-    },
-  ));
+  ctx.logPublic(
+    localizedLog(
+      `${ctx.data.name}: your next arcane damage card this turn gets +${n}`,
+      "card.log.common.arcane.card.bonus",
+      {
+        card: { kind: "card", cardId: ctx.self.cardId },
+        amount: n,
+      },
+    ),
+  );
 }
 
 /** Add to the controller's Amp pool: the next positive arcane-damage event
@@ -924,14 +875,16 @@ export function ampNextArcane(ctx: ScriptCtx, n: number): void {
   const sourceKey = `nextArcaneBonusSource:${ctx.self.instanceId}`;
   const sourceBonus = Number(ctx.getPlayerFlag(ctx.seat, sourceKey)) + n;
   ctx.setPlayerFlag(ctx.seat, sourceKey, sourceBonus);
-  ctx.logPublic(localizedLog(
-    `${ctx.data.name}: your next arcane damage event this turn gets +${n}`,
-    "card.log.common.arcane.event.bonus",
-    {
-      card: { kind: "card", cardId: ctx.self.cardId },
-      amount: n,
-    },
-  ));
+  ctx.logPublic(
+    localizedLog(
+      `${ctx.data.name}: your next arcane damage event this turn gets +${n}`,
+      "card.log.common.arcane.event.bonus",
+      {
+        card: { kind: "card", cardId: ctx.self.cardId },
+        amount: n,
+      },
+    ),
+  );
 }
 
 /** Shared Wizard instant permission used by the Blaze and Iyslander pools.
@@ -941,9 +894,7 @@ export function ampNextArcane(ctx: ScriptCtx, n: number): void {
  * because private arsenal cards are still face-down while legality is built. */
 export function wizardActionAsInstant(ctx: ScriptCtx): boolean {
   if (ctx.getFlag("player", `asInstant:${ctx.self.instanceId}`) === true) return true;
-  const nonAttackAction =
-    ctx.hasCardType(ctx.self, "action") &&
-    !ctx.cardTypes(ctx.self).includes("attack");
+  const nonAttackAction = ctx.hasCardType(ctx.self, "action") && !ctx.cardTypes(ctx.self).includes("attack");
   if (!nonAttackAction) return false;
   const player = ctx.state.players[ctx.seat]!;
   if (
@@ -951,7 +902,8 @@ export function wizardActionAsInstant(ctx: ScriptCtx): boolean {
     ctx.state.activePlayer !== ctx.seat &&
     ctx.cardColor(ctx.self) === 3 &&
     player.arsenal.some((card) => card.instanceId === ctx.self.instanceId)
-  ) return true;
+  )
+    return true;
   const wizardNonAttack = ctx.cardTypes(ctx.self).includes("wizard");
   if (!wizardNonAttack) return false;
   if (ctx.getFlag("player", "nextWizardNonAttackAsInstant") === true) return true;
@@ -960,12 +912,7 @@ export function wizardActionAsInstant(ctx: ScriptCtx): boolean {
 
 /** Deal arcane effect damage. Source-side arcane bonuses are applied by the
  * engine so every card script follows the same first-positive-event rule. */
-export function dealArcane(
-  ctx: ScriptCtx,
-  targetSeat: number,
-  n: number,
-  targetAllyId?: number,
-): number {
+export function dealArcane(ctx: ScriptCtx, targetSeat: number, n: number, targetAllyId?: number): number {
   return ctx.dealDamage(targetSeat, n, { arcane: true, targetAllyId });
 }
 
@@ -996,10 +943,12 @@ function optOptions(ids: number[]): { options: string[]; cardOptions: (number | 
 
 function optOptionMessages(ids: number[]): Readonly<Record<string, GameMessage>> {
   return {
-    ...Object.fromEntries(ids.flatMap((id) => [
-      [`top:${id}`, decisionMessage("common.option.top")],
-      [`bottom:${id}`, decisionMessage("common.option.bottom")],
-    ])),
+    ...Object.fromEntries(
+      ids.flatMap((id) => [
+        [`top:${id}`, decisionMessage("common.option.top")],
+        [`bottom:${id}`, decisionMessage("common.option.bottom")],
+      ]),
+    ),
     pass: decisionMessage("common.option.pass"),
   };
 }
@@ -1009,8 +958,7 @@ export function optN(ctx: ScriptCtx, n: number, chargeHero = false): void {
   const looked = p.deck.slice(0, n).map((c) => c.instanceId);
   if (looked.length === 0) return;
   const { options, cardOptions } = optOptions(looked);
-  const chargesBlaze =
-    chargeHero || ctx.cardData(p.heroCardId).name === "Blaze, Firemind";
+  const chargesBlaze = chargeHero || ctx.cardData(p.heroCardId).name === "Blaze, Firemind";
   ctx.requestChoice(
     `${chargesBlaze ? "optc" : "opt"}:${looked.length}:${looked.join(",")}`,
     decisionPrompt(`${ctx.data.name}: Opt ${looked.length}`, "card.common.opt", {
@@ -1026,41 +974,36 @@ export function optN(ctx: ScriptCtx, n: number, chargeHero = false): void {
 
 /** Handles the per-card top/bottom choices queued by optN; returns true when
  *  the hook was an opt hook. */
-export function optOnChoose(
-  ctx: ScriptCtx,
-  hook: string,
-  option: string,
-  onComplete?: () => void,
-): boolean {
+export function optOnChoose(ctx: ScriptCtx, hook: string, option: string, onComplete?: () => void): boolean {
   const m = /^(optc?):(\d+):([\d,]+)$/.exec(hook);
   if (!m) return false;
   const charge = m[1] === "optc";
   const total = Number(m[2]);
   const ids = m[3]!.split(",").map(Number);
   const finish = (): void => {
-    ctx.logPublic(localizedLog(
-      `${ctx.data.name}: opt ${total}`,
-      "card.log.common.opt.completed",
-      {
+    ctx.logPublic(
+      localizedLog(`${ctx.data.name}: opt ${total}`, "card.log.common.opt.completed", {
         card: { kind: "card", cardId: ctx.self.cardId },
         count: total,
-      },
-    ));
+      }),
+    );
     if (charge && total > 0) {
       // Blaze, Firemind: "Whenever you opt, put energy counters on Blaze equal
       // to the number of cards looked at this way."
       const hero = ctx.player(ctx.seat).hero;
       const n = (hero.counters?.energy ?? 0) + total;
       ctx.setCardCounter(hero.instanceId, "energy", n);
-      ctx.logPublic(localizedLog(
-        `${ctx.cardData(hero.cardId).name} gets ${total} energy counter(s) (${n})`,
-        "card.log.common.energy.counters.gained",
-        {
-          card: { kind: "card", cardId: hero.cardId },
-          amount: total,
-          count: n,
-        },
-      ));
+      ctx.logPublic(
+        localizedLog(
+          `${ctx.cardData(hero.cardId).name} gets ${total} energy counter(s) (${n})`,
+          "card.log.common.energy.counters.gained",
+          {
+            card: { kind: "card", cardId: hero.cardId },
+            amount: total,
+            count: n,
+          },
+        ),
+      );
     }
     onComplete?.();
   };

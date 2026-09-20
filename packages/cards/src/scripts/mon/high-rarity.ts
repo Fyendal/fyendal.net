@@ -32,9 +32,7 @@ function requestInvertExistenceChoice(ctx: ScriptCtx, another = false): void {
       another
         ? "Invert Existence: choose another opposing graveyard card to banish, or finish"
         : "Invert Existence: choose up to 2 opposing graveyard cards to banish",
-      another
-        ? "card.mon.opposing.graveyard.banish.next"
-        : "card.mon.opposing.graveyard.banish.upto",
+      another ? "card.mon.opposing.graveyard.banish.next" : "card.mon.opposing.graveyard.banish.upto",
       {
         values: { card: { kind: "card", cardId: ctx.self.cardId }, count: 2 },
         optionMessages: commonOptionMessages("done"),
@@ -73,7 +71,7 @@ function hatchet(otherCode: 1 | 2): CardScript {
 
 function randomDiscardSix(ctx: ScriptCtx): boolean {
   const card = ctx.discardRandom(ctx.seat, 1)[0];
-  return !!card && (ctx.basePower(card) >= 6);
+  return !!card && ctx.basePower(card) >= 6;
 }
 
 function requestSoulBanish(ctx: ScriptCtx, hook: string, another = false): void {
@@ -90,17 +88,13 @@ function requestSoulBanish(ctx: ScriptCtx, hook: string, another = false): void 
 const beaconOfVictory: CardScript = {
   canPlay: (ctx) => ctx.player(ctx.seat).soul.length > 0,
   additionalCost(ctx) {
-    const options = Array.from(
-      { length: ctx.player(ctx.seat).soul.length },
-      (_, index) => `x:${index + 1}`,
-    );
+    const options = Array.from({ length: ctx.player(ctx.seat).soul.length }, (_, index) => `x:${index + 1}`);
     ctx.requestChoice(
       "beacon-x",
       decisionPrompt("Choose a nonzero X to banish from soul", "card.mon.soul.x.choose", {
-        optionMessages: Object.fromEntries(options.map((option, index) => [
-          option,
-          decisionMessage("card.mon.soul.x.option", { count: index + 1 }),
-        ])),
+        optionMessages: Object.fromEntries(
+          options.map((option, index) => [option, decisionMessage("card.mon.soul.x.option", { count: index + 1 })]),
+        ),
       }),
       options,
     );
@@ -113,7 +107,12 @@ const beaconOfVictory: CardScript = {
       const data = ctx.cardData(card.cardId);
       return ctx.hasCardType(card, "action") && (data.cost ?? 0) <= x;
     });
-    if (cards.length) ctx.requestCardChoice("beacon-search", decisionPrompt("Search for an action card", "card.mon.action.search"), cards.map((card) => card.instanceId));
+    if (cards.length)
+      ctx.requestCardChoice(
+        "beacon-search",
+        decisionPrompt("Search for an action card", "card.mon.action.search"),
+        cards.map((card) => card.instanceId),
+      );
     else ctx.shuffleDeck();
   },
   onChoose(ctx, hook, option) {
@@ -151,24 +150,38 @@ const celestialCataclysm: CardScript = {
 };
 
 function finishSonata(ctx: ScriptCtx): void {
-  ctx.dealDamage(opponentSeat(ctx), ctx.getCounter("sonataChosen"), { arcane: true, sourceInstanceId: ctx.self.instanceId });
+  ctx.dealDamage(opponentSeat(ctx), ctx.getCounter("sonataChosen"), {
+    arcane: true,
+    sourceInstanceId: ctx.self.instanceId,
+  });
   ctx.shuffleDeck();
   ctx.banish(ctx.self.instanceId);
 }
 
 function requestSonataAttack(ctx: ScriptCtx): void {
-  const attacks = ctx.player(ctx.seat).deck.filter((card) =>
-    ctx.getCounter(`sonata:${card.instanceId}`) > 0 && isAttack(ctx, card)
-  );
+  const attacks = ctx
+    .player(ctx.seat)
+    .deck.filter((card) => ctx.getCounter(`sonata:${card.instanceId}`) > 0 && isAttack(ctx, card));
   if (ctx.getCounter("sonataRemaining") <= 0 || attacks.length === 0) {
     finishSonata(ctx);
     return;
   }
-  ctx.requestCardChoice("sonata-pick", decisionPrompt("Choose a revealed attack action", "card.mon.revealed.attack.choose", { optionMessages: commonOptionMessages("done") }), ["done", ...attacks.map((card) => card.instanceId)]);
+  ctx.requestCardChoice(
+    "sonata-pick",
+    decisionPrompt("Choose a revealed attack action", "card.mon.revealed.attack.choose", {
+      optionMessages: commonOptionMessages("done"),
+    }),
+    ["done", ...attacks.map((card) => card.instanceId)],
+  );
 }
 
 const sonataArcanix: CardScript = {
-  variablePlayCost: { base: 0, resourcesPerX: 2, counterKey: "sonataX", prompt: decisionPrompt("Choose X", "engine.decision.x.choose") },
+  variablePlayCost: {
+    base: 0,
+    resourcesPerX: 2,
+    counterKey: "sonataX",
+    prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
+  },
   onPlay(ctx) {
     const revealed = ctx.player(ctx.seat).deck.slice(0, ctx.getCounter("sonataX") + 3);
     ctx.revealCards(revealed.map((card) => card.instanceId));
@@ -213,16 +226,25 @@ function rouseRevealOptions(ctx: ScriptCtx): string[] {
 
 const rouseTheAncients: CardScript = {
   additionalCost(ctx) {
-    ctx.suppressCardKeyword(ctx.self.instanceId, "go again");
     const options = rouseRevealOptions(ctx);
-    if (options.length) ctx.requestChoice("rouse-reveal", decisionPrompt("Reveal attacks with at least 13 total power?", "card.mon.rouse.reveal", {
-      optionMessages: {
-        ...commonOptionMessages("no"),
-        ...Object.fromEntries(options.map((option) => [option, decisionMessage("card.mon.rouse.option.reveal", { count: option.split(":").length - 1 })])),
-      },
-    }), ["no", ...options]);
+    if (options.length)
+      ctx.requestChoice(
+        "rouse-reveal",
+        decisionPrompt("Reveal attacks with at least 13 total power?", "card.mon.rouse.reveal", {
+          optionMessages: {
+            ...commonOptionMessages("no"),
+            ...Object.fromEntries(
+              options.map((option) => [
+                option,
+                decisionMessage("card.mon.rouse.option.reveal", { count: option.split(":").length - 1 }),
+              ]),
+            ),
+          },
+        }),
+        ["no", ...options],
+      );
   },
-  modifyAttack: (ctx) => ctx.getCounter("roused") ? 7 : 0,
+  modifyAttack: (ctx) => (ctx.getCounter("roused") ? 7 : 0),
   onChoose(ctx, hook, option) {
     if (hook !== "rouse-reveal" || option === "no") return;
     const ids = option.split(":").slice(1).map(Number);
@@ -233,32 +255,152 @@ const rouseTheAncients: CardScript = {
 };
 
 export const monHighRarity: Record<string, CardScript> = {
-  "great library of solana|0": { global: true, activated: { cost: 0, isAttack: false, goAgain: true, oncePerTurn: false, effectCardCosts: [{ zone: "hand", move: "discard", count: 2, pitch: 2, prompt: decisionPrompt("Discard two yellow cards", "card.common.cost.yellow.discard.two") }], onActivate(ctx) { ctx.destroyGlobal(ctx.self.instanceId); } }, triggers: [{ event: "end-of-turn", whose: "any", label: "Great Library intellect", condition(ctx) { return ctx.player(ctx.seat).pitch.filter((card) => ctx.cardColor(card) === 2).length >= 2; }, effect(ctx) { ctx.setPlayerFlag(ctx.seat, "bonusIntellect", Number(ctx.getPlayerFlag(ctx.seat, "bonusIntellect")) + 1); } }] },
-  "prism, sculptor of arc light|0": { activated: { cost: 2, isAttack: false, goAgain: false, timing: "instant", oncePerTurn: true, banishSoulCost: 1, onActivate(ctx) { ctx.createToken(SPECTRAL_SHIELD); } } },
-  "luminaris|0": { grantsAuraAttack: { cost: 0, basePower: 1, requiresClass: "illusionist" }, onFriendlyAttackDeclared(ctx) { if (ctx.currentAttackHasType("illusionist") && ctx.player(ctx.seat).pitch.some((card) => ctx.cardColor(card) === 2)) ctx.grantGoAgain(); } },
-  "herald of erudition|2": { onHit(ctx) { ctx.drawCards(ctx.seat, 2); ctx.putIntoSoul(ctx.self.instanceId); } },
+  "great library of solana|0": {
+    global: true,
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: true,
+      oncePerTurn: false,
+      effectCardCosts: [
+        {
+          zone: "hand",
+          move: "discard",
+          count: 2,
+          pitch: 2,
+          prompt: decisionPrompt("Discard two yellow cards", "card.common.cost.yellow.discard.two"),
+        },
+      ],
+      onActivate(ctx) {
+        ctx.destroyGlobal(ctx.self.instanceId);
+      },
+    },
+    triggers: [
+      {
+        event: "end-of-turn",
+        whose: "any",
+        label: "Great Library intellect",
+        condition(ctx) {
+          return ctx.player(ctx.seat).pitch.filter((card) => ctx.cardColor(card) === 2).length >= 2;
+        },
+        effect(ctx) {
+          ctx.setPlayerFlag(ctx.seat, "bonusIntellect", Number(ctx.getPlayerFlag(ctx.seat, "bonusIntellect")) + 1);
+        },
+      },
+    ],
+  },
+  "prism, sculptor of arc light|0": {
+    activated: {
+      cost: 2,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      oncePerTurn: true,
+      banishSoulCost: 1,
+      onActivate(ctx) {
+        ctx.createToken(SPECTRAL_SHIELD);
+      },
+    },
+  },
+  "luminaris|0": {
+    grantsAuraAttack: { cost: 0, basePower: 1, requiresClass: "illusionist" },
+    onFriendlyAttackDeclared(ctx) {
+      if (
+        ctx.currentAttackHasType("illusionist") &&
+        ctx.player(ctx.seat).pitch.some((card) => ctx.cardColor(card) === 2)
+      )
+        ctx.grantGoAgain();
+    },
+  },
+  "herald of erudition|2": {
+    onHit(ctx) {
+      ctx.drawCards(ctx.seat, 2);
+      ctx.putIntoSoul(ctx.self.instanceId);
+    },
+  },
   "arc light sentinel|2": { mandatoryAttackTarget: true },
-  "genesis|2": { triggers: [{ event: "start-of-turn", optional: true, label: "Put a card from hand into soul?", effect(ctx) { const cards = ctx.player(ctx.seat).hand; if (cards.length) ctx.requestCardChoice("genesis-soul", decisionPrompt("Choose a card for your soul", "card.mon.soul.card.choose"), cards.map((card) => card.instanceId)); } }], onChoose(ctx, hook, option) { if (hook !== "genesis-soul") return; const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option)); if (!card || !ctx.putIntoSoul(card.instanceId)) return; if (ctx.cardTypes(card).includes("illusionist")) ctx.createToken(SPECTRAL_SHIELD); if (ctx.cardTypes(card).includes("light")) ctx.drawCards(ctx.seat, 1); } },
-  "bolting blade|2": { modifyPlayCost(ctx, base) { return Math.max(0, base - 2 * Number(ctx.getFlag("player", "chargedCountThisTurn"))); } },
+  "genesis|2": {
+    triggers: [
+      {
+        event: "start-of-turn",
+        optional: true,
+        label: "Put a card from hand into soul?",
+        effect(ctx) {
+          const cards = ctx.player(ctx.seat).hand;
+          if (cards.length)
+            ctx.requestCardChoice(
+              "genesis-soul",
+              decisionPrompt("Choose a card for your soul", "card.mon.soul.card.choose"),
+              cards.map((card) => card.instanceId),
+            );
+        },
+      },
+    ],
+    onChoose(ctx, hook, option) {
+      if (hook !== "genesis-soul") return;
+      const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
+      if (!card || !ctx.putIntoSoul(card.instanceId)) return;
+      if (ctx.cardTypes(card).includes("illusionist")) ctx.createToken(SPECTRAL_SHIELD);
+      if (ctx.cardTypes(card).includes("light")) ctx.drawCards(ctx.seat, 1);
+    },
+  },
+  "bolting blade|2": {
+    modifyPlayCost(ctx, base) {
+      return Math.max(0, base - 2 * Number(ctx.getFlag("player", "chargedCountThisTurn")));
+    },
+  },
   "beacon of victory|2": beaconOfVictory,
-  "vestige of sol|0": { replacePitchResources(ctx, pitched, amount) { return ctx.cardTypes(pitched).includes("light") && ctx.player(ctx.seat).soul.length > 0 ? amount + 1 : amount; } },
+  "vestige of sol|0": {
+    replacePitchResources(ctx, pitched, amount) {
+      return ctx.cardTypes(pitched).includes("light") && ctx.player(ctx.seat).soul.length > 0 ? amount + 1 : amount;
+    },
+  },
   "celestial cataclysm|2": celestialCataclysm,
   "soul shield|2": { settlesToSoulOnChainClose: true },
-  "soul food|2": { onPlay(ctx) { for (const card of [...ctx.player(ctx.seat).hand]) ctx.putIntoSoul(card.instanceId); ctx.putIntoSoul(ctx.self.instanceId); } },
-  "tome of divinity|2": { onPlay(ctx) { ctx.drawCards(ctx.seat, Number(ctx.getFlag("player", "chargedThisTurn")) ? 3 : 2); } },
-  "iris of reality|0": { grantsAuraAttack: { cost: 3, basePower: 4, requiresClass: "illusionist", requiresSubtype: "aura", requiresWard: false, goAgain: true } },
+  "soul food|2": {
+    onPlay(ctx) {
+      for (const card of [...ctx.player(ctx.seat).hand]) ctx.putIntoSoul(card.instanceId);
+      ctx.putIntoSoul(ctx.self.instanceId);
+    },
+  },
+  "tome of divinity|2": {
+    onPlay(ctx) {
+      ctx.drawCards(ctx.seat, Number(ctx.getFlag("player", "chargedThisTurn")) ? 3 : 2);
+    },
+  },
+  "iris of reality|0": {
+    grantsAuraAttack: {
+      cost: 3,
+      basePower: 4,
+      requiresClass: "illusionist",
+      requiresSubtype: "aura",
+      requiresWard: false,
+      goAgain: true,
+    },
+  },
   "phantasmal footsteps|0": {
     onDefend(ctx) {
-      ctx.requestPayment("footsteps-defense", decisionPrompt("Pay 1 to make Phantasmal Footsteps defend for 1?", "card.mon.footsteps.defense.pay"), 1);
+      ctx.requestPayment(
+        "footsteps-defense",
+        decisionPrompt("Pay 1 to make Phantasmal Footsteps defend for 1?", "card.mon.footsteps.defense.pay"),
+        1,
+      );
       if (!ctx.link) return;
-      if (!ctx.cardTypes(ctx.link.attackingCard).includes("illusionist") && ctx.basePower(ctx.link.attackingCard) >= 6) {
+      if (
+        !ctx.cardTypes(ctx.link.attackingCard).includes("illusionist") &&
+        ctx.basePower(ctx.link.attackingCard) >= 6
+      ) {
         ctx.setFlag("link", `destroyOnClose:${ctx.self.instanceId}`, true);
       }
     },
     onFriendlyAttackLost(ctx, card, cause) {
       if (cause !== "phantasm" || !ctx.cardTypes(card).includes("illusionist")) return;
       if (ctx.getCounter("actionPointTurn") === ctx.state.turn) return;
-      ctx.requestPayment("footsteps-action", decisionPrompt("Pay 1 to gain an action point?", "card.mon.actionpoint.pay"), 1);
+      ctx.requestPayment(
+        "footsteps-action",
+        decisionPrompt("Pay 1 to gain an action point?", "card.mon.actionpoint.pay"),
+        1,
+      );
     },
     onChoose(ctx, hook, option) {
       if (option !== "paid") return;
@@ -269,68 +411,239 @@ export const monHighRarity: Record<string, CardScript> = {
       }
     },
   },
-  "phantasmaclasm|1": { onAttackDeclared(ctx) { const hand = ctx.player(opponentSeat(ctx)).hand; for (const card of hand) ctx.lookAt(card.instanceId); if (hand.length) ctx.requestCardChoice("phantasmaclasm-bottom", decisionPrompt("Choose a defending hero's card to bottom", "card.mon.defending.hand.bottom"), hand.map((card) => card.instanceId)); }, onChoose(ctx, hook, option) { if (hook === "phantasmaclasm-bottom" && ctx.putOnDeckBottom(Number(option))) ctx.drawCards(opponentSeat(ctx), 1); } },
-  "hatchet of body|0": hatchet(2),
-  "hatchet of mind|0": hatchet(1),
-  "valiant dynamo|0": { triggers: [{ event: "end-of-turn", optional: true, defaultOption: "yes", condition: (ctx) => weaponAttackCount(ctx) >= 2, label: "Recover Valiant Dynamo", effect(ctx) { ctx.addCardDefenseCounters(ctx.self.instanceId, -1); } }] },
-  "spill blood|1": { onPlay(ctx) { ctx.addModifier({ scope: "until-end-of-turn", attack: 2, appliesTo: "weapon" }); ctx.addModifier({ scope: "until-end-of-turn", dominate: true, appliesTo: "weapon" }); } },
-  "hexagore, the death hydra|0": weapon(2, { onAttackDeclared(ctx) { const blood = ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "blood debt")).length; ctx.dealDamage(ctx.seat, Math.max(0, 6 - blood), { sourceInstanceId: ctx.self.instanceId }); } }),
-  "deep rooted evil|2": bloodDebt({ 
-    staticPlayableFrom: ["banish"],
-    canPlay: (ctx) => {
-      const inBanish = ctx.player(ctx.seat).banish.some((card) => card.instanceId === ctx.self.instanceId);
-      return !inBanish || ctx.getFlag("player", "banishedSixPlusThisTurn") === true;
-  }}, true),
-  "mark of the beast|2": bloodDebt({ graveyardReplacement: "banish" }),
-  "shadow of blasmophet|1": bloodDebt({ onAttackDeclared(ctx) { ctx.drawCards(ctx.seat, 1); if (randomDiscardSix(ctx)) { const cards = ctx.player(ctx.seat).deck.filter((card) => (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "blood debt")); if (cards.length) ctx.requestCardChoice("blasmophet-search", decisionPrompt("Choose a Blood Debt card", "card.mon.blooddebt.card.choose"), cards.map((card) => card.instanceId)); } }, onChoose(ctx, hook, option) { if (hook === "blasmophet-search" && ctx.banish(Number(option))) ctx.shuffleDeck(); } }),
-  "chane, bound by shadow|0": { activated: { cost: 0, isAttack: false, goAgain: true, oncePerTurn: true, onActivate(ctx) { ctx.createToken(SOUL_SHACKLE); buffNextAttack(ctx, { goAgain: true, appliesToType: ["runeblade", "shadow"] }); } } },
-  "galaxxi black|0": weapon(1, { modifyAttack(ctx) { return ctx.getFlag("player", "playedFromBanishThisTurn") === true ? 2 : 0; }, onHit(ctx) { ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true, sourceInstanceId: ctx.self.instanceId }); } }),
-  "shadow of ursur|3": bloodDebt({ additionalCost(ctx) { const cards = ctx.player(ctx.seat).hand.filter((card) => (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "blood debt")); if (cards.length) ctx.requestCardChoice("ursur-banish", decisionPrompt("Banish a Blood Debt card for go again?", "card.mon.blooddebt.banish.goagain", { optionMessages: commonOptionMessages("no") }), ["no", ...cards.map((card) => card.instanceId)]); }, onChoose(ctx, hook, option) { if (hook === "ursur-banish" && option !== "no" && ctx.banish(Number(option))) ctx.grantGoAgain(); } }, true),
-  "dimenxxional crossroads|2": { triggers: [{ event: "card-played", label: "Deal 1 arcane damage", condition(ctx, played, event) { if (!played || event?.from !== "banish" || !ctx.hasCardType(played, "action")) return false; const kind = ctx.cardTypes(played).includes("attack") ? "attack" : "nonattack"; return !ctx.getCounter(`crossroads:${kind}`); }, onTrigger(ctx, played) { if (!played) return; const kind = ctx.cardTypes(played).includes("attack") ? "attack" : "nonattack"; ctx.setCounter(`crossroads:${kind}`, 1); }, effect(ctx) { ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true, sourceInstanceId: ctx.self.instanceId }); } }] },
-  "invert existence|3": bloodDebt({
-    staticPlayableFrom: ["banish"],
-    arcaneDamageEffect: true,
-    arcaneDamageEffectAmounts: [2],
-    onPlay(ctx) {
-      requestInvertExistenceChoice(ctx);
+  "phantasmaclasm|1": {
+    onAttackDeclared(ctx) {
+      const hand = ctx.player(opponentSeat(ctx)).hand;
+      for (const card of hand) ctx.lookAt(card.instanceId);
+      if (hand.length)
+        ctx.requestCardChoice(
+          "phantasmaclasm-bottom",
+          decisionPrompt("Choose a defending hero's card to bottom", "card.mon.defending.hand.bottom"),
+          hand.map((card) => card.instanceId),
+        );
     },
     onChoose(ctx, hook, option) {
-      if (hook !== "invert-existence-banish" || option === "done") return;
-      const card = ctx.player(opponentSeat(ctx)).graveyard.find((candidate) =>
-        candidate.instanceId === Number(option)
-      );
-      if (!card) return;
-      const attack = isAttack(ctx, card);
-      const nonAttack = isNonAttackAction(ctx, card);
-      if (!ctx.banish(card.instanceId)) return;
-      if (attack) ctx.setCounter("invertExistenceAttack", 1);
-      if (nonAttack) ctx.setCounter("invertExistenceNonAttack", 1);
-      const count = ctx.getCounter("invertExistenceCount") + 1;
-      ctx.setCounter("invertExistenceCount", count);
-      if (count < 2 && ctx.player(opponentSeat(ctx)).graveyard.length) {
-        requestInvertExistenceChoice(ctx, true);
-        return;
-      }
-      if (ctx.getCounter("invertExistenceAttack") && ctx.getCounter("invertExistenceNonAttack")) {
-        dealArcane(ctx, opponentSeat(ctx), 2);
+      if (hook === "phantasmaclasm-bottom" && ctx.putOnDeckBottom(Number(option))) ctx.drawCards(opponentSeat(ctx), 1);
+    },
+  },
+  "hatchet of body|0": hatchet(2),
+  "hatchet of mind|0": hatchet(1),
+  "valiant dynamo|0": {
+    triggers: [
+      {
+        event: "end-of-turn",
+        optional: true,
+        defaultOption: "yes",
+        condition: (ctx) => weaponAttackCount(ctx) >= 2,
+        label: "Recover Valiant Dynamo",
+        effect(ctx) {
+          ctx.addCardDefenseCounters(ctx.self.instanceId, -1);
+        },
+      },
+    ],
+  },
+  "spill blood|1": {
+    onPlay(ctx) {
+      ctx.addModifier({ scope: "until-end-of-turn", attack: 2, appliesTo: "weapon" });
+      ctx.addModifier({ scope: "until-end-of-turn", dominate: true, appliesTo: "weapon" });
+    },
+  },
+  "hexagore, the death hydra|0": weapon(2, {
+    onAttackDeclared(ctx) {
+      const blood = ctx
+        .player(ctx.seat)
+        .banish.filter(
+          (card) =>
+            !card.faceDown &&
+            (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "blood debt"),
+        ).length;
+      ctx.dealDamage(ctx.seat, Math.max(0, 6 - blood), { sourceInstanceId: ctx.self.instanceId });
+    },
+  }),
+  "deep rooted evil|2": bloodDebt(
+    {
+      staticPlayableFrom: ["banish"],
+      canPlay: (ctx) => {
+        const inBanish = ctx.player(ctx.seat).banish.some((card) => card.instanceId === ctx.self.instanceId);
+        return !inBanish || ctx.getFlag("player", "banishedSixPlusThisTurn") === true;
+      },
+    },
+    true,
+  ),
+  "mark of the beast|2": bloodDebt({ graveyardReplacement: "banish" }),
+  "shadow of blasmophet|1": bloodDebt({
+    onAttackDeclared(ctx) {
+      ctx.drawCards(ctx.seat, 1);
+      if (randomDiscardSix(ctx)) {
+        const cards = ctx
+          .player(ctx.seat)
+          .deck.filter((card) =>
+            (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "blood debt"),
+          );
+        if (cards.length)
+          ctx.requestCardChoice(
+            "blasmophet-search",
+            decisionPrompt("Choose a Blood Debt card", "card.mon.blooddebt.card.choose"),
+            cards.map((card) => card.instanceId),
+          );
       }
     },
-  }, true),
+    onChoose(ctx, hook, option) {
+      if (hook === "blasmophet-search" && ctx.banish(Number(option))) ctx.shuffleDeck();
+    },
+  }),
+  "chane, bound by shadow|0": {
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: true,
+      oncePerTurn: true,
+      onActivate(ctx) {
+        ctx.createToken(SOUL_SHACKLE);
+        buffNextAttack(ctx, { goAgain: true, appliesToType: ["runeblade", "shadow"] });
+      },
+    },
+  },
+  "galaxxi black|0": weapon(1, {
+    modifyAttack(ctx) {
+      return ctx.getFlag("player", "playedFromBanishThisTurn") === true ? 2 : 0;
+    },
+    onHit(ctx) {
+      ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true, sourceInstanceId: ctx.self.instanceId });
+    },
+  }),
+  "shadow of ursur|3": bloodDebt(
+    {
+      additionalCost(ctx) {
+        const cards = ctx
+          .player(ctx.seat)
+          .hand.filter((card) =>
+            (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "blood debt"),
+          );
+        if (cards.length)
+          ctx.requestCardChoice(
+            "ursur-banish",
+            decisionPrompt("Banish a Blood Debt card for go again?", "card.mon.blooddebt.banish.goagain", {
+              optionMessages: commonOptionMessages("no"),
+            }),
+            ["no", ...cards.map((card) => card.instanceId)],
+          );
+      },
+      onChoose(ctx, hook, option) {
+        if (hook === "ursur-banish" && option !== "no" && ctx.banish(Number(option))) ctx.grantGoAgain();
+      },
+    },
+    true,
+  ),
+  "dimenxxional crossroads|2": {
+    triggers: [
+      {
+        event: "card-played",
+        label: "Deal 1 arcane damage",
+        condition(ctx, played, event) {
+          if (!played || event?.from !== "banish" || !ctx.hasCardType(played, "action")) return false;
+          const kind = ctx.cardTypes(played).includes("attack") ? "attack" : "nonattack";
+          return !ctx.getCounter(`crossroads:${kind}`);
+        },
+        onTrigger(ctx, played) {
+          if (!played) return;
+          const kind = ctx.cardTypes(played).includes("attack") ? "attack" : "nonattack";
+          ctx.setCounter(`crossroads:${kind}`, 1);
+        },
+        effect(ctx) {
+          ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true, sourceInstanceId: ctx.self.instanceId });
+        },
+      },
+    ],
+  },
+  "invert existence|3": bloodDebt(
+    {
+      staticPlayableFrom: ["banish"],
+      arcaneDamageEffect: true,
+      arcaneDamageEffectAmounts: [2],
+      onPlay(ctx) {
+        requestInvertExistenceChoice(ctx);
+      },
+      onChoose(ctx, hook, option) {
+        if (hook !== "invert-existence-banish" || option === "done") return;
+        const card = ctx
+          .player(opponentSeat(ctx))
+          .graveyard.find((candidate) => candidate.instanceId === Number(option));
+        if (!card) return;
+        const attack = isAttack(ctx, card);
+        const nonAttack = isNonAttackAction(ctx, card);
+        if (!ctx.banish(card.instanceId)) return;
+        if (attack) ctx.setCounter("invertExistenceAttack", 1);
+        if (nonAttack) ctx.setCounter("invertExistenceNonAttack", 1);
+        const count = ctx.getCounter("invertExistenceCount") + 1;
+        ctx.setCounter("invertExistenceCount", count);
+        if (count < 2 && ctx.player(opponentSeat(ctx)).graveyard.length) {
+          requestInvertExistenceChoice(ctx, true);
+          return;
+        }
+        if (ctx.getCounter("invertExistenceAttack") && ctx.getCounter("invertExistenceNonAttack")) {
+          dealArcane(ctx, opponentSeat(ctx), 2);
+        }
+      },
+    },
+    true,
+  ),
   "carrion husk|0": bloodDebt({
     onDefend(ctx) {
       ctx.setFlag("link", `banishOnClose:${ctx.self.instanceId}`, true);
     },
-    triggers: [{
-      event: "start-of-turn",
-      label: "Banish Carrion Husk",
-      condition: (ctx) => ctx.player(ctx.seat).life <= 13,
-      effect(ctx) { ctx.banish(ctx.self.instanceId); },
-    }],
+    triggers: [
+      {
+        event: "start-of-turn",
+        label: "Banish Carrion Husk",
+        condition: (ctx) => ctx.player(ctx.seat).life <= 13,
+        effect(ctx) {
+          ctx.banish(ctx.self.instanceId);
+        },
+      },
+    ],
   }),
-  "doomsday|3": { canPlay: (ctx) => ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "blood debt")).length >= 6, onPlay(ctx) { ctx.createToken(BLASMOPHET); } },
-  "eclipse|3": { staticPlayableFrom: ["banish"], canPlay: (ctx) => Number(ctx.getFlag("player", "bloodDebtCardsPlayedThisTurn")) >= 6, onPlay(ctx) { ctx.createToken(URSUR); } },
-  "mutated mass|3": bloodDebt({ staticPlayableFrom: ["banish"], modifyAttack(ctx) { return 2 * new Set(ctx.player(ctx.seat).pitch.map((card) => ctx.cardData(card.cardId).cost ?? 0)).size - (ctx.data.attack ?? 0); }, modifyDefense(ctx) { return 2 * new Set(ctx.player(ctx.seat).pitch.map((card) => ctx.cardData(card.cardId).cost ?? 0)).size - (ctx.data.defense ?? 0); } }, true),
-  "guardian of the shadowrealm|1": bloodDebt({ activated: { cost: 2, isAttack: false, goAgain: false, fromBanish: true, returnSelfToHandCost: true } }),
+  "doomsday|3": {
+    canPlay: (ctx) =>
+      ctx
+        .player(ctx.seat)
+        .banish.filter(
+          (card) =>
+            !card.faceDown &&
+            (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "blood debt"),
+        ).length >= 6,
+    onPlay(ctx) {
+      ctx.createToken(BLASMOPHET);
+    },
+  },
+  "eclipse|3": {
+    staticPlayableFrom: ["banish"],
+    canPlay: (ctx) => Number(ctx.getFlag("player", "bloodDebtCardsPlayedThisTurn")) >= 6,
+    onPlay(ctx) {
+      ctx.createToken(URSUR);
+    },
+  },
+  "mutated mass|3": bloodDebt(
+    {
+      staticPlayableFrom: ["banish"],
+      modifyAttack(ctx) {
+        return (
+          2 * new Set(ctx.player(ctx.seat).pitch.map((card) => ctx.cardData(card.cardId).cost ?? 0)).size -
+          (ctx.data.attack ?? 0)
+        );
+      },
+      modifyDefense(ctx) {
+        return (
+          2 * new Set(ctx.player(ctx.seat).pitch.map((card) => ctx.cardData(card.cardId).cost ?? 0)).size -
+          (ctx.data.defense ?? 0)
+        );
+      },
+    },
+    true,
+  ),
+  "guardian of the shadowrealm|1": bloodDebt({
+    activated: { cost: 2, isAttack: false, goAgain: false, fromBanish: true, returnSelfToHandCost: true },
+  }),
   "shadow puppetry|1": {
     onPlay(ctx) {
       buffNextAttack(ctx, {
@@ -338,7 +651,10 @@ export const monHighRarity: Record<string, CardScript> = {
         goAgain: true,
         // "If this attack hits, look at the top card of your deck. You may
         // banish it." — routed to onGrantedHit below when the buffed attack hits
-        onHitScriptHook: { hook: "shadow-puppetry-hit", label: "look at the top card of your deck and you may banish it" },
+        onHitScriptHook: {
+          hook: "shadow-puppetry-hit",
+          label: "look at the top card of your deck and you may banish it",
+        },
       });
     },
     onGrantedHit(ctx, hook) {
@@ -346,20 +662,74 @@ export const monHighRarity: Record<string, CardScript> = {
       const top = ctx.player(ctx.seat).deck[0];
       if (!top) return;
       ctx.lookAt(top.instanceId);
-      ctx.requestCardChoice("shadow-puppetry-banish", decisionPrompt("Shadow Puppetry: you may banish the top card", "card.mon.shadowpuppetry.banish", { optionMessages: commonOptionMessages("no") }), ["no", top.instanceId]);
+      ctx.requestCardChoice(
+        "shadow-puppetry-banish",
+        decisionPrompt("Shadow Puppetry: you may banish the top card", "card.mon.shadowpuppetry.banish", {
+          optionMessages: commonOptionMessages("no"),
+        }),
+        ["no", top.instanceId],
+      );
     },
     onChoose(ctx, hook, option) {
       if (hook === "shadow-puppetry-banish" && option !== "no") ctx.banish(Number(option));
     },
   },
-  "tome of torment|1": bloodDebt({ onPlay(ctx) { ctx.drawCards(ctx.seat, 1); } }, true),
-  "blasmophet, the soul harvester|0": { activated: { cost: 0, isAttack: true, goAgain: false, oncePerTurn: true, onCostPaid(ctx, cards) { ctx.setCounter("shadowDiscarded", cards.some((card) => ctx.cardTypes(card).includes("shadow")) ? 1 : 0); } } },
-  "ursur, the soul reaper|0": { activated: { cost: 0, isAttack: true, goAgain: false, oncePerTurn: true }, onAttackDeclared(ctx) { if (ctx.link?.targetAllyId === undefined && ctx.player(opponentSeat(ctx)).soul.length) ctx.grantGoAgain(); } },
-  "ravenous meataxe|0": weapon(2, { onAttackDeclared(ctx) { ctx.drawCards(ctx.seat, 1); if (randomDiscardSix(ctx)) ctx.addModifier({ scope: "chain-link", attack: 2 }); } }),
-  "tear limb from limb|3": { onPlay(ctx) { ctx.drawCards(ctx.seat, 1); if (randomDiscardSix(ctx)) buffNextAttack(ctx, { attack: 6, appliesToType: ["brute"] }); } },
-  "dread scythe|0": weapon(3, { onAttackDeclared(ctx) { ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true, sourceInstanceId: ctx.self.instanceId }); } }),
+  "tome of torment|1": bloodDebt(
+    {
+      onPlay(ctx) {
+        ctx.drawCards(ctx.seat, 1);
+      },
+    },
+    true,
+  ),
+  "blasmophet, the soul harvester|0": {
+    activated: {
+      cost: 0,
+      isAttack: true,
+      goAgain: false,
+      oncePerTurn: true,
+      onCostPaid(ctx, cards) {
+        ctx.setCounter("shadowDiscarded", cards.some((card) => ctx.cardTypes(card).includes("shadow")) ? 1 : 0);
+      },
+    },
+  },
+  "ursur, the soul reaper|0": {
+    activated: { cost: 0, isAttack: true, goAgain: false, oncePerTurn: true },
+    onAttackDeclared(ctx) {
+      if (ctx.link?.targetAllyId === undefined && ctx.player(opponentSeat(ctx)).soul.length) ctx.grantGoAgain();
+    },
+  },
+  "ravenous meataxe|0": weapon(2, {
+    onAttackDeclared(ctx) {
+      ctx.drawCards(ctx.seat, 1);
+      if (randomDiscardSix(ctx)) ctx.addModifier({ scope: "chain-link", attack: 2 });
+    },
+  }),
+  "tear limb from limb|3": {
+    onPlay(ctx) {
+      ctx.drawCards(ctx.seat, 1);
+      if (randomDiscardSix(ctx)) buffNextAttack(ctx, { attack: 6, appliesToType: ["brute"] });
+    },
+  },
+  "dread scythe|0": weapon(3, {
+    onAttackDeclared(ctx) {
+      ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true, sourceInstanceId: ctx.self.instanceId });
+    },
+  }),
   "sonata arcanix|1": sonataArcanix,
-  "exude confidence|1": { defendingHeroCannotRespondBelowPower: true, activated: { cost: 3, isAttack: false, goAgain: false, timing: "attack-reaction", oncePerTurn: false, onActivate(ctx) { ctx.addModifier({ scope: "chain-link", attack: 2 }); } } },
+  "exude confidence|1": {
+    defendingHeroCannotRespondBelowPower: true,
+    activated: {
+      cost: 3,
+      isAttack: false,
+      goAgain: false,
+      timing: "attack-reaction",
+      oncePerTurn: false,
+      onActivate(ctx) {
+        ctx.addModifier({ scope: "chain-link", attack: 2 });
+      },
+    },
+  },
   "nourishing emptiness|1": {
     onAttackDeclared(ctx) {
       if (ctx.player(ctx.seat).graveyard.some((card) => isAttack(ctx, card))) {
@@ -368,11 +738,7 @@ export const monHighRarity: Record<string, CardScript> = {
     },
     onHit(ctx) {
       if (!ctx.player(ctx.seat).graveyard.some((card) => isAttack(ctx, card))) {
-        ctx.setPlayerFlag(
-          ctx.seat,
-          "bonusIntellect",
-          Number(ctx.getPlayerFlag(ctx.seat, "bonusIntellect")) + 1,
-        );
+        ctx.setPlayerFlag(ctx.seat, "bonusIntellect", Number(ctx.getPlayerFlag(ctx.seat, "bonusIntellect")) + 1);
       }
     },
   },

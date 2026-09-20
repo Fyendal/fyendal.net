@@ -18,17 +18,28 @@ const SPELLBANE = "DTD235";
 
 type Card = DeepReadonly<CardInstance>;
 
-function data(ctx: ScriptCtx, card: Card) { return ctx.cardData(card.cardId); }
+function data(ctx: ScriptCtx, card: Card) {
+  return ctx.cardData(card.cardId);
+}
 function has(ctx: ScriptCtx, card: Card, type: string): boolean {
   return ctx.cardTypes(card).some((candidate) => candidate.toLowerCase() === type.toLowerCase());
 }
 function named(ctx: ScriptCtx, card: Card, name: string): boolean {
   return ctx.cardNames(card).some((candidate) => candidate.toLowerCase() === name.toLowerCase());
 }
-function isAura(ctx: ScriptCtx, card: Card): boolean { return has(ctx, card, "aura"); }
-function isInstant(ctx: ScriptCtx, card: Card): boolean { return ctx.hasCardType(card, "instant"); }
-function consumeMarker(ctx: ScriptCtx, scope: "until-end-of-turn" | "chain-link" | "combat-chain" = "until-end-of-turn") {
-  const marker = ctx.state.modifiers.find((modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === scope && !modifier.consumed);
+function isAura(ctx: ScriptCtx, card: Card): boolean {
+  return has(ctx, card, "aura");
+}
+function isInstant(ctx: ScriptCtx, card: Card): boolean {
+  return ctx.hasCardType(card, "instant");
+}
+function consumeMarker(
+  ctx: ScriptCtx,
+  scope: "until-end-of-turn" | "chain-link" | "combat-chain" = "until-end-of-turn",
+) {
+  const marker = ctx.state.modifiers.find(
+    (modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === scope && !modifier.consumed,
+  );
   if (marker) ctx.consumeModifier(marker.id);
   return marker;
 }
@@ -37,99 +48,226 @@ function swordAttack(ctx: ScriptCtx): boolean {
 }
 function shuriken(extra: CardScript = {}): CardScript {
   return {
-    onPlay(ctx) { ctx.settleCard(ctx.self.instanceId); extra.onPlay?.(ctx); },
+    onPlay(ctx) {
+      ctx.settleCard(ctx.self.instanceId);
+      extra.onPlay?.(ctx);
+    },
     activated: { cost: 1, isAttack: true, goAgain: true, tap: true, oncePerTurn: false },
-    onCombatChainClosed(ctx) { if (ctx.link?.attackingCard.instanceId === ctx.self.instanceId) ctx.destroyPermanent(ctx.self.instanceId); },
+    onCombatChainClosed(ctx) {
+      if (ctx.link?.attackingCard.instanceId === ctx.self.instanceId) ctx.destroyPermanent(ctx.self.instanceId);
+    },
     ...extra,
   };
 }
 
 export const omnHighRarity: Record<string, CardScript> = {
-  "voltaris|3": { triggers: [{ event: "card-pitched", sourceZone: "pitch", label: "Create a Lightning Flow token", condition: (ctx, pitched) => pitched?.instanceId === ctx.self.instanceId, effect: (ctx) => { ctx.createToken(FLOW); } }] },
+  "voltaris|3": {
+    triggers: [
+      {
+        event: "card-pitched",
+        sourceZone: "pitch",
+        label: "Create a Lightning Flow token",
+        condition: (ctx, pitched) => pitched?.instanceId === ctx.self.instanceId,
+        effect: (ctx) => {
+          ctx.createToken(FLOW);
+        },
+      },
+    ],
+  },
   "unwinding finality|1": {
-    onHit: (ctx) => { ctx.drawCards(ctx.seat, 1); },
-    onFragment(ctx) {
-      const cards = ctx.player(ctx.seat).graveyard.filter((card) => isInstant(ctx, card) && has(ctx, card, "lightning"));
-      if (cards.length) ctx.requestCardChoice("unwinding-top", decisionPrompt(
-        "Put a Lightning instant on top?",
-        "card.omn.lightning.instant.top",
-        { optionMessages: commonOptionMessages("no") },
-      ), ["no", ...cards.map((card) => card.instanceId)]);
+    onHit: (ctx) => {
+      ctx.drawCards(ctx.seat, 1);
     },
-    onChoose(ctx, hook, option) { if (hook === "unwinding-top" && option !== "no") ctx.putOnDeckTop(Number(option)); },
+    onFragment(ctx) {
+      const cards = ctx
+        .player(ctx.seat)
+        .graveyard.filter((card) => isInstant(ctx, card) && has(ctx, card, "lightning"));
+      if (cards.length)
+        ctx.requestCardChoice(
+          "unwinding-top",
+          decisionPrompt("Put a Lightning instant on top?", "card.omn.lightning.instant.top", {
+            optionMessages: commonOptionMessages("no"),
+          }),
+          ["no", ...cards.map((card) => card.instanceId)],
+        );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "unwinding-top" && option !== "no") ctx.putOnDeckTop(Number(option));
+    },
   },
   "flicker reality|3": {
     wardValue: () => 1,
     onLeaveArena(ctx) {
-      const auras = ctx.player(ctx.seat).board.filter((card) => card.instanceId !== ctx.self.instanceId && has(ctx, card, "lightning") && isAura(ctx, card) && Number(card.counters?.holo ?? 0) === 0);
-      if (auras.length) ctx.requestCardChoice("flicker-holo", decisionPrompt(
-        "Blink a Lightning aura with a holo counter?",
-        "card.omn.lightning.aura.holo.blink",
-        { optionMessages: commonOptionMessages("no") },
-      ), ["no", ...auras.map((card) => card.instanceId)]);
+      const auras = ctx
+        .player(ctx.seat)
+        .board.filter(
+          (card) =>
+            card.instanceId !== ctx.self.instanceId &&
+            has(ctx, card, "lightning") &&
+            isAura(ctx, card) &&
+            Number(card.counters?.holo ?? 0) === 0,
+        );
+      if (auras.length)
+        ctx.requestCardChoice(
+          "flicker-holo",
+          decisionPrompt("Blink a Lightning aura with a holo counter?", "card.omn.lightning.aura.holo.blink", {
+            optionMessages: commonOptionMessages("no"),
+          }),
+          ["no", ...auras.map((card) => card.instanceId)],
+        );
     },
-    onChoose(ctx, hook, option) { if (hook === "flicker-holo" && option !== "no" && ctx.banish(Number(option))) { ctx.setCardCounter(Number(option), "holo", 1); ctx.settleCard(Number(option)); } },
+    onChoose(ctx, hook, option) {
+      if (hook === "flicker-holo" && option !== "no" && ctx.banish(Number(option))) {
+        ctx.setCardCounter(Number(option), "holo", 1);
+        ctx.settleCard(Number(option));
+      }
+    },
   },
   "fractal creation|3": {
-    onHit(ctx) { const auras = ctx.player(ctx.seat).board.filter((card) => isAura(ctx, card)); if (auras.length) ctx.requestCardChoice("fractal-copy", decisionPrompt("Create a token copy of an aura?", "card.omn.aura.token.copy", { optionMessages: commonOptionMessages("no") }), ["no", ...auras.map((card) => card.instanceId)]); },
-    onChoose(ctx, hook, option) { if (hook === "fractal-copy" && option !== "no") ctx.createTokenCopy(Number(option)); },
+    onHit(ctx) {
+      const auras = ctx.player(ctx.seat).board.filter((card) => isAura(ctx, card));
+      if (auras.length)
+        ctx.requestCardChoice(
+          "fractal-copy",
+          decisionPrompt("Create a token copy of an aura?", "card.omn.aura.token.copy", {
+            optionMessages: commonOptionMessages("no"),
+          }),
+          ["no", ...auras.map((card) => card.instanceId)],
+        );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "fractal-copy" && option !== "no") ctx.createTokenCopy(Number(option));
+    },
   },
   "aurora, legacy of tempest|0": {
     activated: {
-      cost: 2, isAttack: false, goAgain: false, timing: "instant", tap: true,
-      effectCardCosts: [{ zone: "arena", move: "destroy", count: 1, name: "Lightning Flow", prompt: decisionPrompt("Destroy a Lightning Flow", "card.common.cost.lightningflow.destroy") }],
-      onActivate: (ctx) => { ctx.createToken(EMBODIMENT); },
+      cost: 2,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      tap: true,
+      effectCardCosts: [
+        {
+          zone: "arena",
+          move: "destroy",
+          count: 1,
+          name: "Lightning Flow",
+          prompt: decisionPrompt("Destroy a Lightning Flow", "card.common.cost.lightningflow.destroy"),
+        },
+      ],
+      onActivate: (ctx) => {
+        ctx.createToken(EMBODIMENT);
+      },
     },
   },
   "tempestuous kiss|1": {
-    modifyAttack: (ctx) => ctx.link?.goAgain ? 1 : 0,
-    onAttackDeclared(ctx) { if (ctx.link?.goAgain && ctx.link.targetAllyId === undefined) ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true }); },
+    modifyAttack: (ctx) => (ctx.link?.goAgain ? 1 : 0),
+    onAttackDeclared(ctx) {
+      if (ctx.link?.goAgain && ctx.link.targetAllyId === undefined)
+        ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true });
+    },
     onDealsDamage(ctx, target, amount) {
       if (amount <= 0 || target === ctx.seat || ctx.getFlag("link", "tempestDiscard") === true) return;
-      ctx.setFlag("link", "tempestDiscard", true); const hand = ctx.player(target).hand;
-      if (hand.length) ctx.requestCardChoice("tempest-discard", decisionPrompt(
-        "Discard a card",
-        "card.omn.card.discard",
-      ), hand.map((card) => card.instanceId), target);
+      ctx.setFlag("link", "tempestDiscard", true);
+      const hand = ctx.player(target).hand;
+      if (hand.length)
+        ctx.requestCardChoice(
+          "tempest-discard",
+          decisionPrompt("Discard a card", "card.omn.card.discard"),
+          hand.map((card) => card.instanceId),
+          target,
+        );
     },
-    onChoose(ctx, hook, option) { if (hook === "tempest-discard") ctx.discardCard(opponentSeat(ctx), Number(option)); },
+    onChoose(ctx, hook, option) {
+      if (hook === "tempest-discard") ctx.discardCard(opponentSeat(ctx), Number(option));
+    },
   },
   "arcanic reproach|3": {
     onHeroDealtDamage(ctx) {
       if (ctx.getFlag("player", "arcanicReproachUsed") === true) return;
       const cards = ctx.player(ctx.seat).hand.filter((card) => has(ctx, card, "lightning"));
-      if (cards.length) ctx.requestCardChoice("reproach-reveal", decisionPrompt(
-        "Reveal a Lightning card?",
-        "card.omn.lightning.card.reveal",
-        { optionMessages: commonOptionMessages("no") },
-      ), ["no", ...cards.map((card) => card.instanceId)]);
+      if (cards.length)
+        ctx.requestCardChoice(
+          "reproach-reveal",
+          decisionPrompt("Reveal a Lightning card?", "card.omn.lightning.card.reveal", {
+            optionMessages: commonOptionMessages("no"),
+          }),
+          ["no", ...cards.map((card) => card.instanceId)],
+        );
     },
-    onChoose(ctx, hook, option) { if (hook === "reproach-reveal" && option !== "no") { ctx.revealCards([Number(option)], ctx.seat); ctx.setFlag("player", "arcanicReproachUsed", true); ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true }); } },
-    triggers: [{ event: "begin-action-phase", label: "Destroy an aura", effect(ctx) { const aura = ctx.player(ctx.seat).board.find((card) => isAura(ctx, card)); if (aura) ctx.destroyPermanent(aura.instanceId); } }],
+    onChoose(ctx, hook, option) {
+      if (hook === "reproach-reveal" && option !== "no") {
+        ctx.revealCards([Number(option)], ctx.seat);
+        ctx.setFlag("player", "arcanicReproachUsed", true);
+        ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true });
+      }
+    },
+    triggers: [
+      {
+        event: "begin-action-phase",
+        label: "Destroy an aura",
+        effect(ctx) {
+          const aura = ctx.player(ctx.seat).board.find((card) => isAura(ctx, card));
+          if (aura) ctx.destroyPermanent(aura.instanceId);
+        },
+      },
+    ],
   },
   "gauntlet of sword and sorcery|0": {
-    activated: { cost: 2, isAttack: false, goAgain: true, tap: true, tapHeroCost: true, onActivate(ctx) { buffNextAttack(ctx, { appliesTo: "attack-action" }); ctx.addModifier({ scope: "until-end-of-turn" }); } },
+    activated: {
+      cost: 2,
+      isAttack: false,
+      goAgain: true,
+      tap: true,
+      tapHeroCost: true,
+      onActivate(ctx) {
+        buffNextAttack(ctx, { appliesTo: "attack-action" });
+        ctx.addModifier({ scope: "until-end-of-turn" });
+      },
+    },
     onFriendlyAttackDeclared(ctx) {
-      if (!ctx.state.modifiers.some((modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "chain-link") || ctx.link?.targetAllyId !== undefined) return;
-      const dealt = ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true }); if (dealt > 0) ctx.addModifier({ scope: "chain-link", attack: 1 });
+      if (
+        !ctx.state.modifiers.some(
+          (modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "chain-link",
+        ) ||
+        ctx.link?.targetAllyId !== undefined
+      )
+        return;
+      const dealt = ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true });
+      if (dealt > 0) ctx.addModifier({ scope: "chain-link", attack: 1 });
     },
   },
   "caress of the reaper|1": {
-    onDealsDamage(ctx, target, amount) { if (amount <= 0 || target === ctx.seat) return; const aura = ctx.player(target).board.find((card) => isAura(ctx, card)); if (aura) ctx.destroyPermanent(aura.instanceId); },
+    onDealsDamage(ctx, target, amount) {
+      if (amount <= 0 || target === ctx.seat) return;
+      const aura = ctx.player(target).board.find((card) => isAura(ctx, card));
+      if (aura) ctx.destroyPermanent(aura.instanceId);
+    },
   },
   "oscilio, forked continuum|0": {
     activated: {
-      cost: 1, isAttack: false, goAgain: false, timing: "instant", tap: true,
+      cost: 1,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      tap: true,
       effectCardCosts: [
-        { zone: "arena", move: "destroy", count: 1, name: "Lightning Flow", prompt: decisionPrompt("Destroy a Lightning Flow", "card.common.cost.lightningflow.destroy") },
+        {
+          zone: "arena",
+          move: "destroy",
+          count: 1,
+          name: "Lightning Flow",
+          prompt: decisionPrompt("Destroy a Lightning Flow", "card.common.cost.lightningflow.destroy"),
+        },
       ],
       onActivate(ctx) {
         const hand = ctx.player(ctx.seat).hand;
         if (hand.length) {
-          ctx.requestCardChoice("oscilio-discard", decisionPrompt(
-            "Discard a card",
-            "card.omn.card.discard",
-          ), hand.map((card) => card.instanceId));
+          ctx.requestCardChoice(
+            "oscilio-discard",
+            decisionPrompt("Discard a card", "card.omn.card.discard"),
+            hand.map((card) => card.instanceId),
+          );
           return;
         }
         ctx.createToken(PONDER);
@@ -142,110 +280,326 @@ export const omnHighRarity: Record<string, CardScript> = {
       if (discarded && isInstant(ctx, discarded)) ctx.allowPlayFrom(discarded.instanceId, "graveyard");
     },
   },
-  "volzar, meteor storm|0": { activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", tap: true, canActivate: (ctx) => ctx.getFlag("player", "graveCardType:instant") === true, onActivate: (ctx) => ampNextArcane(ctx, 1) } },
-  "astral bridge|1": { arcaneDamageEffect: true, onPlay(ctx) {
-    const top = ctx.player(ctx.seat).deck[0]; if (top && ctx.moveToGraveyard(top.instanceId, "deck") && isInstant(ctx, top)) ctx.allowPlayFrom(top.instanceId, "graveyard");
-    if (ctx.getFlag("player", "graveCardType:instant") === true) ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true });
-  } },
+  "volzar, meteor storm|0": {
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      tap: true,
+      canActivate: (ctx) => ctx.getFlag("player", "graveCardType:instant") === true,
+      onActivate: (ctx) => ampNextArcane(ctx, 1),
+    },
+  },
+  "astral bridge|1": {
+    arcaneDamageEffect: true,
+    onPlay(ctx) {
+      const top = ctx.player(ctx.seat).deck[0];
+      if (top && ctx.moveToGraveyard(top.instanceId, "deck") && isInstant(ctx, top))
+        ctx.allowPlayFrom(top.instanceId, "graveyard");
+      if (ctx.getFlag("player", "graveCardType:instant") === true)
+        ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true });
+    },
+  },
   "echoflash|2": {
     arcaneDamageEffect: true,
-    onPlay: (ctx) => { ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true }); },
-    triggers: [{
-      event: "card-put-into-graveyard",
-      sourceZone: "graveyard",
-      label: "Your hero deals 1 arcane damage",
-      condition: (ctx, card) => card?.instanceId === ctx.self.instanceId,
-      effect: (ctx) => ctx.dealDamage(opponentSeat(ctx), 1, {
-        arcane: true,
-        sourceInstanceId: ctx.player(ctx.seat).hero.instanceId,
-      }),
-    }],
+    onPlay: (ctx) => {
+      ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true });
+    },
+    triggers: [
+      {
+        event: "card-put-into-graveyard",
+        sourceZone: "graveyard",
+        label: "Your hero deals 1 arcane damage",
+        condition: (ctx, card) => card?.instanceId === ctx.self.instanceId,
+        effect: (ctx) =>
+          ctx.dealDamage(opponentSeat(ctx), 1, {
+            arcane: true,
+            sourceInstanceId: ctx.player(ctx.seat).hero.instanceId,
+          }),
+      },
+    ],
   },
-  "tome of quandaries|3": { onPlay: (ctx) => { ctx.createTokens(PONDER, 2); } },
+  "tome of quandaries|3": {
+    onPlay: (ctx) => {
+      ctx.createTokens(PONDER, 2);
+    },
+  },
   "third eye of the sphinx|0": {
-    activated: { cost: 1, isAttack: false, goAgain: false, timing: "instant", tap: true, effectCardCosts: [{ zone: "arena", move: "destroy", count: 1, name: "Ponder", prompt: decisionPrompt("Destroy a Ponder", "card.common.cost.ponder.destroy") }], onActivate: (ctx) => ctx.drawCards(ctx.seat, 1) },
+    activated: {
+      cost: 1,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      tap: true,
+      effectCardCosts: [
+        {
+          zone: "arena",
+          move: "destroy",
+          count: 1,
+          name: "Ponder",
+          prompt: decisionPrompt("Destroy a Ponder", "card.common.cost.ponder.destroy"),
+        },
+      ],
+      onActivate: (ctx) => ctx.drawCards(ctx.seat, 1),
+    },
   },
   "plutonic starplate|0": {
-    triggers: [{
-      event: "card-played",
-      whose: "any",
-      label: "Gain {r}",
-      condition(ctx, played, event) {
-        return ctx.state.activePlayer !== ctx.seat &&
-          event?.causedBySeat === ctx.seat &&
-          played !== undefined &&
-          has(ctx, played, "lightning") &&
-          ctx.getFlag("player", "plutonicResource") !== true;
+    triggers: [
+      {
+        event: "card-played",
+        whose: "any",
+        label: "Gain {r}",
+        condition(ctx, played, event) {
+          return (
+            ctx.state.activePlayer !== ctx.seat &&
+            event?.causedBySeat === ctx.seat &&
+            played !== undefined &&
+            has(ctx, played, "lightning") &&
+            ctx.getFlag("player", "plutonicResource") !== true
+          );
+        },
+        onTrigger(ctx) {
+          ctx.setFlag("player", "plutonicResource", true);
+        },
+        effect(ctx) {
+          ctx.changeResources(ctx.seat, 1);
+        },
       },
-      onTrigger(ctx) {
-        ctx.setFlag("player", "plutonicResource", true);
-      },
-      effect(ctx) {
-        ctx.changeResources(ctx.seat, 1);
-      },
-    }],
+    ],
   },
   "astral strike|1": {
-    onAttackDeclared(ctx) { if (ctx.getFlag("player", "destroyedName:lightning flow") === true) ctx.requestChoice("astral-mode", decisionPrompt("Choose a mode", "card.omn.mode.choose", { optionMessages: { draw: decisionMessage("card.omn.option.draw"), "+2": decisionMessage("card.omn.option.plus2power"), "go again": decisionMessage("card.omn.option.goagain") } }), ["draw", "+2", "go again"]); },
-    onChoose(ctx, hook, option) { if (hook !== "astral-mode") return; if (option === "draw") ctx.drawCards(ctx.seat, 1); else if (option === "+2") ctx.addModifier({ scope: "chain-link", attack: 2 }); else ctx.grantGoAgain(); },
+    onAttackDeclared(ctx) {
+      if (ctx.getFlag("player", "destroyedName:lightning flow") === true)
+        ctx.requestChoice(
+          "astral-mode",
+          decisionPrompt("Choose a mode", "card.omn.mode.choose", {
+            optionMessages: {
+              draw: decisionMessage("card.omn.option.draw"),
+              "+2": decisionMessage("card.omn.option.plus2power"),
+              "go again": decisionMessage("card.omn.option.goagain"),
+            },
+          }),
+          ["draw", "+2", "go again"],
+        );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "astral-mode") return;
+      if (option === "draw") ctx.drawCards(ctx.seat, 1);
+      else if (option === "+2") ctx.addModifier({ scope: "chain-link", attack: 2 });
+      else ctx.grantGoAgain();
+    },
   },
   "flowstate embodiment|1": {
     onAttackDeclared: (ctx) => ctx.addModifier({ scope: "combat-chain" }),
-    triggers: [{ event: "card-played", label: "Create an Embodiment of Lightning or Lightning Flow", condition: (ctx, played) => ctx.link?.attackingCard.instanceId === ctx.self.instanceId && !!played && isInstant(ctx, played), effect(ctx) { ctx.requestChoice("flowstate-token", decisionPrompt("Create which token?", "card.omn.token.choose", { optionMessages: { [EMBODIMENT]: decisionMessage("card.omn.option.embodimentoflightning"), [FLOW]: decisionMessage("card.omn.option.lightningflow") } }), [EMBODIMENT, FLOW]); } }],
-    onChoose(ctx, hook, option) { if (hook === "flowstate-token") ctx.createToken(option); },
+    triggers: [
+      {
+        event: "card-played",
+        label: "Create an Embodiment of Lightning or Lightning Flow",
+        condition: (ctx, played) =>
+          ctx.link?.attackingCard.instanceId === ctx.self.instanceId && !!played && isInstant(ctx, played),
+        effect(ctx) {
+          ctx.requestChoice(
+            "flowstate-token",
+            decisionPrompt("Create which token?", "card.omn.token.choose", {
+              optionMessages: {
+                [EMBODIMENT]: decisionMessage("card.omn.option.embodimentoflightning"),
+                [FLOW]: decisionMessage("card.omn.option.lightningflow"),
+              },
+            }),
+            [EMBODIMENT, FLOW],
+          );
+        },
+      },
+    ],
+    onChoose(ctx, hook, option) {
+      if (hook === "flowstate-token") ctx.createToken(option);
+    },
   },
-  "static shelter|2": { defendCost: 1, onDefend(ctx) { if (ctx.requestPayment("static-flow", decisionPrompt("Pay 1 to create Lightning Flow?", "card.omn.resource.pay.flow", { values: { amount: 1 } }), 1)) return; }, onChoose(ctx, hook, option) { if (hook === "static-flow" && option === "paid") ctx.createToken(FLOW); } },
+  "static shelter|2": {
+    defendCost: 1,
+    onDefend(ctx) {
+      if (
+        ctx.requestPayment(
+          "static-flow",
+          decisionPrompt("Pay 1 to create Lightning Flow?", "card.omn.resource.pay.flow", { values: { amount: 1 } }),
+          1,
+        )
+      )
+        return;
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "static-flow" && option === "paid") ctx.createToken(FLOW);
+    },
+  },
   "boots of omnis ward|0": {
-    modifyDefense: (ctx) => ctx.getFlag("player", "arcaneDamageTakenThisTurn") === true ? 1 : 0,
-    activated: { cost: 0, isAttack: false, goAgain: false, timing: "instant", destroySelfCost: true, tapHeroCost: true, onActivate: (ctx) => ctx.preventNextDamage(ctx.seat, 1) },
+    modifyDefense: (ctx) => (ctx.getFlag("player", "arcaneDamageTakenThisTurn") === true ? 1 : 0),
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      destroySelfCost: true,
+      tapHeroCost: true,
+      onActivate: (ctx) => ctx.preventNextDamage(ctx.seat, 1),
+    },
   },
   "browbeat|3": { modifyAttack: (ctx) => ctx.player(ctx.seat).hand.length },
   "step between|1": {
     opponentsCannotPlayOrActivateInstantsWhileActive: true,
-    activated: { cost: 1, isAttack: false, goAgain: false, timing: "instant", tapHeroCost: true, canActivate: (ctx) => ctx.link?.attackingCard.instanceId === ctx.self.instanceId, onActivate(ctx) { ctx.addModifier({ scope: "chain-link", attack: 1 }); ctx.setFlag("link", "unpreventable", true); } },
+    activated: {
+      cost: 1,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      tapHeroCost: true,
+      canActivate: (ctx) => ctx.link?.attackingCard.instanceId === ctx.self.instanceId,
+      onActivate(ctx) {
+        ctx.addModifier({ scope: "chain-link", attack: 1 });
+        ctx.setFlag("link", "unpreventable", true);
+      },
+    },
   },
-  "tempt over|2": { onAttackDeclared(ctx) {
-    if (ctx.link?.targetAllyId !== undefined) return; const auras = ctx.player(opponentSeat(ctx)).board.filter((card) => isAura(ctx, card) && has(ctx, card, "token"));
-    if (auras.length) ctx.requestCardChoice("tempt-steal", decisionPrompt(
-      "Steal an aura token",
-      "card.omn.aura.token.steal",
-    ), auras.map((card) => card.instanceId));
-  }, onChoose(ctx, hook, option) { if (hook === "tempt-steal") ctx.steal(Number(option)); } },
+  "tempt over|2": {
+    onAttackDeclared(ctx) {
+      if (ctx.link?.targetAllyId !== undefined) return;
+      const auras = ctx.player(opponentSeat(ctx)).board.filter((card) => isAura(ctx, card) && has(ctx, card, "token"));
+      if (auras.length)
+        ctx.requestCardChoice(
+          "tempt-steal",
+          decisionPrompt("Steal an aura token", "card.omn.aura.token.steal"),
+          auras.map((card) => card.instanceId),
+        );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "tempt-steal") ctx.steal(Number(option));
+    },
+  },
   "unmake the underlings|3": {
-    onAttackDeclared(ctx) { if (ctx.link?.targetAllyId !== undefined) return; const ally = ctx.player(opponentSeat(ctx)).graveyard.find((card) => has(ctx, card, "ally")); if (ally) ctx.setCardFaceDown(ally.instanceId, true); },
+    onAttackDeclared(ctx) {
+      if (ctx.link?.targetAllyId !== undefined) return;
+      const ally = ctx.player(opponentSeat(ctx)).graveyard.find((card) => has(ctx, card, "ally"));
+      if (ally) ctx.setCardFaceDown(ally.instanceId, true);
+    },
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId !== undefined,
-    onHit(ctx) { ctx.destroyPermanent(ctx.link!.targetAllyId!); },
+    onHit(ctx) {
+      ctx.destroyPermanent(ctx.link!.targetAllyId!);
+    },
   },
-  "feral instinct|2": { modifyPlayCost: (ctx, base) => ctx.getFlag("player", "intimidatedThisTurn") === true ? Math.max(0, base - 3) : base },
+  "feral instinct|2": {
+    modifyPlayCost: (ctx, base) =>
+      ctx.getFlag("player", "intimidatedThisTurn") === true ? Math.max(0, base - 3) : base,
+  },
   "pile driver|0": {
     activated: attackAbility(4, { tap: true }),
-    triggers: [{ event: "attack-declared", optional: true, label: "Wager a Gold?", condition: (ctx) => ctx.link?.attackingCard.instanceId === ctx.self.instanceId, effect: (ctx) => ctx.wager(opponentSeat(ctx), [GOLD]) }],
+    triggers: [
+      {
+        event: "attack-declared",
+        optional: true,
+        label: "Wager a Gold?",
+        condition: (ctx) => ctx.link?.attackingCard.instanceId === ctx.self.instanceId,
+        effect: (ctx) => ctx.wager(opponentSeat(ctx), [GOLD]),
+      },
+    ],
   },
-  "swift pickup|1": { onAttackDeclared(ctx) {
-    const item = ctx.player(ctx.seat).graveyard.find((card) => has(ctx, card, "shuriken") && has(ctx, card, "item"));
-    if (item && ctx.putOnDeckBottom(item.instanceId)) ctx.addModifier({ scope: "chain-link", attack: 1 });
-  } },
-  "evasive nageboshi|3": shuriken({ cannotBeDefendedByEquipment: true, canBeDefendedBy(ctx, defending) { return ctx.link?.attackingCard.instanceId !== ctx.self.instanceId || (data(ctx, defending).cardType !== "attack-reaction" && data(ctx, defending).cardType !== "defense-reaction"); } }),
-  "razor ring|3": shuriken({ canTriggerOnHit(ctx) { return ctx.link?.attackingCard.instanceId === ctx.self.instanceId && ctx.link.targetAllyId === undefined; }, onHit(ctx) { ctx.addModifier({ scope: "until-end-of-turn", seat: opponentSeat(ctx), defense: -1, appliesToCardType: "action", once: true, expiresOnChainClose: true }); } }),
-  "stun star|3": shuriken({ canTriggerOnHit(ctx) { return ctx.link?.attackingCard.instanceId === ctx.self.instanceId && ctx.link.targetAllyId === undefined; }, onHit(ctx) { ctx.tap(ctx.player(opponentSeat(ctx)).hero.instanceId); } }),
-  "gear turner|1": { onHit(ctx) {
-    const cog = ctx.player(ctx.seat).deck.find((card) => has(ctx, card, "cog")); if (cog) ctx.settleCard(cog.instanceId); ctx.shuffleDeck();
-  } },
+  "swift pickup|1": {
+    onAttackDeclared(ctx) {
+      const item = ctx.player(ctx.seat).graveyard.find((card) => has(ctx, card, "shuriken") && has(ctx, card, "item"));
+      if (item && ctx.putOnDeckBottom(item.instanceId)) ctx.addModifier({ scope: "chain-link", attack: 1 });
+    },
+  },
+  "evasive nageboshi|3": shuriken({
+    cannotBeDefendedByEquipment: true,
+    canBeDefendedBy(ctx, defending) {
+      return (
+        ctx.link?.attackingCard.instanceId !== ctx.self.instanceId ||
+        (data(ctx, defending).cardType !== "attack-reaction" && data(ctx, defending).cardType !== "defense-reaction")
+      );
+    },
+  }),
+  "razor ring|3": shuriken({
+    canTriggerOnHit(ctx) {
+      return ctx.link?.attackingCard.instanceId === ctx.self.instanceId && ctx.link.targetAllyId === undefined;
+    },
+    onHit(ctx) {
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        seat: opponentSeat(ctx),
+        defense: -1,
+        appliesToCardType: "action",
+        once: true,
+        expiresOnChainClose: true,
+      });
+    },
+  }),
+  "stun star|3": shuriken({
+    canTriggerOnHit(ctx) {
+      return ctx.link?.attackingCard.instanceId === ctx.self.instanceId && ctx.link.targetAllyId === undefined;
+    },
+    onHit(ctx) {
+      ctx.tap(ctx.player(opponentSeat(ctx)).hero.instanceId);
+    },
+  }),
+  "gear turner|1": {
+    onHit(ctx) {
+      const cog = ctx.player(ctx.seat).deck.find((card) => has(ctx, card, "cog"));
+      if (cog) ctx.settleCard(cog.instanceId);
+      ctx.shuffleDeck();
+    },
+  },
   "arcbane grasp|3": {
     playableEquipment: true,
     playAsInstant: (ctx) => ctx.getPlayerFlag(ctx.seat, "nextEvoAsInstant") === true,
-    onEnterArena(ctx) { ctx.createToken(SPELLBANE); },
+    onEnterArena(ctx) {
+      ctx.createToken(SPELLBANE);
+    },
   },
   "settle the bill|1": {
-    onPlay(ctx) { const arrows = ctx.player(ctx.seat).hand.filter((card) => has(ctx, card, "arrow")); if (arrows.length && ctx.player(ctx.seat).arsenal.length === 0) ctx.requestCardChoice("settle-arrow", decisionPrompt("Put an arrow into arsenal?", "card.omn.arrow.arsenal", { optionMessages: commonOptionMessages("no") }), ["no", ...arrows.map((card) => card.instanceId)]); },
-    onChoose(ctx, hook, option) { if (hook === "settle-arrow" && option !== "no" && ctx.putIntoArsenal(Number(option), "hand", { faceUp: true })) { ctx.addCardTempPower(Number(option), 3); ctx.addModifier({ scope: "until-end-of-turn", appliesToInstanceId: Number(option) }); } },
-    canTriggerOnHit(ctx) { const arrow = ctx.link?.attackingCard.instanceId; return ctx.link?.targetAllyId === undefined && ctx.state.modifiers.some((modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "until-end-of-turn" && modifier.appliesToInstanceId === arrow); },
-    onHit(ctx) { for (const card of [...ctx.player(opponentSeat(ctx)).arsenal]) ctx.moveToGraveyard(card.instanceId, "arsenal"); },
+    onPlay(ctx) {
+      const arrows = ctx.player(ctx.seat).hand.filter((card) => has(ctx, card, "arrow"));
+      if (arrows.length && ctx.player(ctx.seat).arsenal.length === 0)
+        ctx.requestCardChoice(
+          "settle-arrow",
+          decisionPrompt("Put an arrow into arsenal?", "card.omn.arrow.arsenal", {
+            optionMessages: commonOptionMessages("no"),
+          }),
+          ["no", ...arrows.map((card) => card.instanceId)],
+        );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "settle-arrow" && option !== "no" && ctx.putIntoArsenal(Number(option), "hand", { faceUp: true })) {
+        ctx.addCardTempPower(Number(option), 3);
+        ctx.addModifier({ scope: "until-end-of-turn", appliesToInstanceId: Number(option) });
+      }
+    },
+    canTriggerOnHit(ctx) {
+      const arrow = ctx.link?.attackingCard.instanceId;
+      return (
+        ctx.link?.targetAllyId === undefined &&
+        ctx.state.modifiers.some(
+          (modifier) =>
+            modifier.sourceInstanceId === ctx.self.instanceId &&
+            modifier.scope === "until-end-of-turn" &&
+            modifier.appliesToInstanceId === arrow,
+        )
+      );
+    },
+    onHit(ctx) {
+      for (const card of [...ctx.player(opponentSeat(ctx)).arsenal]) ctx.moveToGraveyard(card.instanceId, "arsenal");
+    },
   },
   "beckon steel|3": {
     canPlay: (ctx) => ctx.link?.attacker === ctx.seat && swordAttack(ctx),
     onPlay: (ctx) => ctx.addModifier({ scope: "chain-link" }),
-    canTriggerOnHit(ctx) { return !!ctx.link && ctx.state.modifiers.some((modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "chain-link" && !modifier.consumed); },
+    canTriggerOnHit(ctx) {
+      return (
+        !!ctx.link &&
+        ctx.state.modifiers.some(
+          (modifier) =>
+            modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "chain-link" && !modifier.consumed,
+        )
+      );
+    },
     onHit(ctx) {
       consumeMarker(ctx, "chain-link");
       const attacker = ctx.link!.attackingCard;
@@ -256,48 +610,182 @@ export const omnHighRarity: Record<string, CardScript> = {
     },
   },
   "crash site salvage|2": {
-    declareAdditionalCost(ctx) { const choices = ctx.player(ctx.seat).graveyard.filter((card) => has(ctx, card, "item") || data(ctx, card).cardType === "equipment"); if (choices.length) ctx.requestCardChoice("salvage-scrap", decisionPrompt("Scrap an item or equipment from your graveyard?", "card.omn.permanent.scrap", { optionMessages: commonOptionMessages("no") }), ["no", ...choices.map((card) => card.instanceId)]); },
-    onChoose(ctx, hook, option) { if (hook !== "salvage-scrap" || option === "no") return; const card = ctx.player(ctx.seat).graveyard.find((candidate) => candidate.instanceId === Number(option) && (has(ctx, candidate, "item") || data(ctx, candidate).cardType === "equipment")); if (card && ctx.banish(card.instanceId)) { ctx.setCounter("scrapped", 1); if (has(ctx, card, "cog")) ctx.setCounter("scrappedCog", 1); } },
-    onAttackDeclared(ctx) { if (ctx.getCounter("scrapped")) ctx.grantGoAgain(); if (ctx.getCounter("scrappedCog")) ctx.createToken(GOLD); },
+    declareAdditionalCost(ctx) {
+      const choices = ctx
+        .player(ctx.seat)
+        .graveyard.filter((card) => has(ctx, card, "item") || data(ctx, card).cardType === "equipment");
+      if (choices.length)
+        ctx.requestCardChoice(
+          "salvage-scrap",
+          decisionPrompt("Scrap an item or equipment from your graveyard?", "card.omn.permanent.scrap", {
+            optionMessages: commonOptionMessages("no"),
+          }),
+          ["no", ...choices.map((card) => card.instanceId)],
+        );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "salvage-scrap" || option === "no") return;
+      const card = ctx
+        .player(ctx.seat)
+        .graveyard.find(
+          (candidate) =>
+            candidate.instanceId === Number(option) &&
+            (has(ctx, candidate, "item") || data(ctx, candidate).cardType === "equipment"),
+        );
+      if (card && ctx.banish(card.instanceId)) {
+        ctx.setCounter("scrapped", 1);
+        if (has(ctx, card, "cog")) ctx.setCounter("scrappedCog", 1);
+      }
+    },
+    onAttackDeclared(ctx) {
+      if (ctx.getCounter("scrapped")) ctx.grantGoAgain();
+      if (ctx.getCounter("scrappedCog")) ctx.createToken(GOLD);
+    },
   },
   "golden skull|2": { allZoneNames: ["Gold"] },
-  "red lure harpoon|3": { canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.getFlag("player", "activatedCannonThisTurn") === true; }, onHit(ctx) {
-    const cards = ctx.player(opponentSeat(ctx)).graveyard.filter((card) => ctx.cardColor(card) === 1 && ctx.hasCardType(card, "action"));
-    if (cards.length) ctx.requestCardChoice("harpoon-banish", decisionPrompt(
-      "Banish a red action",
-      "card.omn.red.action.banish",
-    ), cards.map((card) => card.instanceId));
-  }, onChoose(ctx, hook, option) { if (hook === "harpoon-banish" && ctx.banish(Number(option))) ctx.allowPlayFrom(Number(option), "banish", { forSeat: ctx.seat, untilEndOfNextTurn: true }); } },
-  "fortitude of anvilheim|0": { activated: {
-    cost: 2, isAttack: false, goAgain: false, timing: "attack-reaction", destroySelfCost: true, tapHeroCost: true,
-    canActivate: (ctx) => ctx.link?.attackCardType === "weapon" && ctx.link.defendingCards.some((card) => ctx.hasCardType(card, "action")),
-    onActivate(ctx) { const cards = ctx.link?.defendingCards.filter((card) => ctx.hasCardType(card, "action")) ?? []; if (cards.length) ctx.requestCardChoice("fortitude-return", decisionPrompt("Return an action defender", "card.omn.action.defender.return"), cards.map((card) => card.instanceId)); },
-  }, onChoose(ctx, hook, option) { if (hook === "fortitude-return") ctx.moveToHand(Number(option)); } },
+  "red lure harpoon|3": {
+    canTriggerOnHit(ctx) {
+      return ctx.link?.targetAllyId === undefined && ctx.getFlag("player", "activatedCannonThisTurn") === true;
+    },
+    onHit(ctx) {
+      const cards = ctx
+        .player(opponentSeat(ctx))
+        .graveyard.filter((card) => ctx.cardColor(card) === 1 && ctx.hasCardType(card, "action"));
+      if (cards.length)
+        ctx.requestCardChoice(
+          "harpoon-banish",
+          decisionPrompt("Banish a red action", "card.omn.red.action.banish"),
+          cards.map((card) => card.instanceId),
+        );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "harpoon-banish" && ctx.banish(Number(option)))
+        ctx.allowPlayFrom(Number(option), "banish", { forSeat: ctx.seat, untilEndOfNextTurn: true });
+    },
+  },
+  "fortitude of anvilheim|0": {
+    activated: {
+      cost: 2,
+      isAttack: false,
+      goAgain: false,
+      timing: "attack-reaction",
+      destroySelfCost: true,
+      tapHeroCost: true,
+      canActivate: (ctx) =>
+        ctx.link?.attackCardType === "weapon" &&
+        ctx.link.defendingCards.some((card) => ctx.hasCardType(card, "action")),
+      onActivate(ctx) {
+        const cards = ctx.link?.defendingCards.filter((card) => ctx.hasCardType(card, "action")) ?? [];
+        if (cards.length)
+          ctx.requestCardChoice(
+            "fortitude-return",
+            decisionPrompt("Return an action defender", "card.omn.action.defender.return"),
+            cards.map((card) => card.instanceId),
+          );
+      },
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "fortitude-return") ctx.moveToHand(Number(option));
+    },
+  },
   "a bit off the side|1": {
     onPlay: (ctx) => ctx.addModifier({ scope: "until-end-of-turn", appliesToSubtype: "axe" }),
-    canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined && ctx.state.modifiers.some((modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "chain-link"); },
-    onHit(ctx) { const hand = ctx.player(opponentSeat(ctx)).hand; if (hand.length) ctx.requestCardChoice("axe-discard", decisionPrompt("Discard a card", "card.omn.card.discard"), hand.map((card) => card.instanceId), opponentSeat(ctx)); },
-    onChoose(ctx, hook, option) { if (hook === "axe-discard") ctx.discardCard(opponentSeat(ctx), Number(option)); },
+    canTriggerOnHit(ctx) {
+      return (
+        ctx.link?.targetAllyId === undefined &&
+        ctx.state.modifiers.some(
+          (modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "chain-link",
+        )
+      );
+    },
+    onHit(ctx) {
+      const hand = ctx.player(opponentSeat(ctx)).hand;
+      if (hand.length)
+        ctx.requestCardChoice(
+          "axe-discard",
+          decisionPrompt("Discard a card", "card.omn.card.discard"),
+          hand.map((card) => card.instanceId),
+          opponentSeat(ctx),
+        );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "axe-discard") ctx.discardCard(opponentSeat(ctx), Number(option));
+    },
   },
   "blessing of aegis|2": {
     onCardPutIntoSoul: (ctx) => ctx.gainLife(ctx.seat, 1),
-    triggers: [{ event: "start-of-turn", label: "Put Blessing of Aegis into soul", effect: (ctx) => { ctx.putIntoSoul(ctx.self.instanceId); } }],
+    triggers: [
+      {
+        event: "start-of-turn",
+        label: "Put Blessing of Aegis into soul",
+        effect: (ctx) => {
+          ctx.putIntoSoul(ctx.self.instanceId);
+        },
+      },
+    ],
   },
   "draco fire|1": {
-    onPlay(ctx) { buffNextAttack(ctx, { attack: 2, attackCostReduction: 1, appliesToType: ["draconic"] }); },
-    triggers: [{ event: "start-of-turn", sourceZone: "graveyard", optional: true, label: "Banish 2 Draco Fire to gain 1 resource", condition(ctx) { return ctx.player(ctx.seat).graveyard.filter((card) => named(ctx, card, "Draco Fire")).length >= 2; }, canAccept(ctx) { return ctx.player(ctx.seat).graveyard.filter((card) => named(ctx, card, "Draco Fire")).length >= 2; }, onAccept(ctx) { const cards = ctx.player(ctx.seat).graveyard.filter((card) => named(ctx, card, "Draco Fire")).slice(0, 2); if (cards.length < 2) return; for (const card of cards) ctx.banish(card.instanceId); ctx.changeResources(ctx.seat, 1); } }],
+    onPlay(ctx) {
+      buffNextAttack(ctx, { attack: 2, attackCostReduction: 1, appliesToType: ["draconic"] });
+    },
+    triggers: [
+      {
+        event: "start-of-turn",
+        sourceZone: "graveyard",
+        optional: true,
+        label: "Banish 2 Draco Fire to gain 1 resource",
+        condition(ctx) {
+          return ctx.player(ctx.seat).graveyard.filter((card) => named(ctx, card, "Draco Fire")).length >= 2;
+        },
+        canAccept(ctx) {
+          return ctx.player(ctx.seat).graveyard.filter((card) => named(ctx, card, "Draco Fire")).length >= 2;
+        },
+        onAccept(ctx) {
+          const cards = ctx
+            .player(ctx.seat)
+            .graveyard.filter((card) => named(ctx, card, "Draco Fire"))
+            .slice(0, 2);
+          if (cards.length < 2) return;
+          for (const card of cards) ctx.banish(card.instanceId);
+          ctx.changeResources(ctx.seat, 1);
+        },
+      },
+    ],
   },
   "induce panic|2": {
-    onDefend: (ctx) => ctx.requestChoice("panic-color", decisionPrompt("Choose a color", "card.omn.color.choose", { optionMessages: { red: decisionMessage("card.omn.option.red"), yellow: decisionMessage("card.omn.option.yellow"), blue: decisionMessage("card.omn.option.blue") } }), ["red", "yellow", "blue"]),
+    onDefend: (ctx) =>
+      ctx.requestChoice(
+        "panic-color",
+        decisionPrompt("Choose a color", "card.omn.color.choose", {
+          optionMessages: {
+            red: decisionMessage("card.omn.option.red"),
+            yellow: decisionMessage("card.omn.option.yellow"),
+            blue: decisionMessage("card.omn.option.blue"),
+          },
+        }),
+        ["red", "yellow", "blue"],
+      ),
     onChoose(ctx, hook, option) {
-      if (hook !== "panic-color") return; const wanted = option === "red" ? 1 : option === "yellow" ? 2 : 3;
-      for (const player of ctx.state.players) { if (!player.hand.length) continue; const card = player.hand[ctx.randomInt(player.hand.length)]!; ctx.revealCards([card.instanceId], player.seat); if (ctx.cardColor(card) === wanted) ctx.discardCard(player.seat, card.instanceId); }
+      if (hook !== "panic-color") return;
+      const wanted = option === "red" ? 1 : option === "yellow" ? 2 : 3;
+      for (const player of ctx.state.players) {
+        if (!player.hand.length) continue;
+        const card = player.hand[ctx.randomInt(player.hand.length)]!;
+        ctx.revealCards([card.instanceId], player.seat);
+        if (ctx.cardColor(card) === wanted) ctx.discardCard(player.seat, card.instanceId);
+      }
     },
   },
   "lionclaw maul|0": {
     activated: attackAbility(2, { tap: true }),
-    modifyAttack(ctx) { return ctx.link?.attackingCard.instanceId === ctx.self.instanceId && ctx.attackBonusAboveBase() > 0 ? 1 : 0; },
-    canTriggerOnHit(ctx) { return ctx.link?.targetAllyId === undefined; },
-    onHit(ctx) { ctx.crowdBoo(ctx.seat); },
+    modifyAttack(ctx) {
+      return ctx.link?.attackingCard.instanceId === ctx.self.instanceId && ctx.attackBonusAboveBase() > 0 ? 1 : 0;
+    },
+    canTriggerOnHit(ctx) {
+      return ctx.link?.targetAllyId === undefined;
+    },
+    onHit(ctx) {
+      ctx.crowdBoo(ctx.seat);
+    },
   },
 };

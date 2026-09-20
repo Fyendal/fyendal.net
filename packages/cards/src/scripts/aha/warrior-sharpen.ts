@@ -19,7 +19,7 @@ export const SHARPEN_FOLLOWUP = {
   DOMINATE: 9,
 } as const;
 
-export type SharpenFollowupKind = typeof SHARPEN_FOLLOWUP[keyof typeof SHARPEN_FOLLOWUP];
+export type SharpenFollowupKind = (typeof SHARPEN_FOLLOWUP)[keyof typeof SHARPEN_FOLLOWUP];
 
 export interface SharpenFollowup {
   threshold: number;
@@ -31,9 +31,7 @@ function isSword(ctx: ScriptCtx, card: Card): boolean {
 }
 
 function controlledSword(ctx: ScriptCtx, instanceId: number): Card | undefined {
-  return ctx.player(ctx.seat).weapons.find((card) =>
-    card.instanceId === instanceId && isSword(ctx, card)
-  );
+  return ctx.player(ctx.seat).weapons.find((card) => card.instanceId === instanceId && isSword(ctx, card));
 }
 
 export function resolveSharpenFollowup(
@@ -60,21 +58,26 @@ export function resolveSharpenFollowup(
       ctx.createToken(MPW_FLURRY);
       break;
     case SHARPEN_FOLLOWUP.DRAW_ON_HIT:
-      ctx.addModifier({
-        scope: "until-end-of-turn",
-        appliesToInstanceId: instanceId,
-        onHitDraw: 1,
-        once: true,
-      }, source);
+      ctx.addModifier(
+        {
+          scope: "until-end-of-turn",
+          appliesToInstanceId: instanceId,
+          onHitDraw: 1,
+          once: true,
+        },
+        source,
+      );
       break;
     case SHARPEN_FOLLOWUP.TOP_ATTACK_REACTION: {
-      const reactions = ctx.player(ctx.seat).graveyard.filter((card) =>
-        ctx.cardData(card.cardId).cardType === "attack-reaction"
-      );
+      const reactions = ctx
+        .player(ctx.seat)
+        .graveyard.filter((card) => ctx.cardData(card.cardId).cardType === "attack-reaction");
       if (reactions.length) {
         ctx.requestCardChoice(
           "rerebrace-honed-top",
-          decisionPrompt("Put an attack reaction on top?", "card.aha.attackreaction.top", { optionMessages: commonOptionMessages("no") }),
+          decisionPrompt("Put an attack reaction on top?", "card.aha.attackreaction.top", {
+            optionMessages: commonOptionMessages("no"),
+          }),
           ["no", ...reactions.map((card) => card.instanceId)],
         );
       }
@@ -84,11 +87,14 @@ export function resolveSharpenFollowup(
       ctx.attackWithPermanent(instanceId);
       break;
     case SHARPEN_FOLLOWUP.DEFENDED_DAMAGE:
-      ctx.addModifier({
-        scope: "next-attack",
-        appliesToInstanceId: instanceId,
-        onDefendedDealDamage: 1,
-      }, source);
+      ctx.addModifier(
+        {
+          scope: "next-attack",
+          appliesToInstanceId: instanceId,
+          onDefendedDealDamage: 1,
+        },
+        source,
+      );
       break;
     case SHARPEN_FOLLOWUP.DOMINATE:
       buffNextAttack(ctx, { dominate: true, appliesToInstanceId: instanceId }, source);
@@ -98,12 +104,7 @@ export function resolveSharpenFollowup(
 
 /** Apply the Sharpen keyword and the Hala armory-deck interactions that can
  * replace or continuously react to that event. */
-export function sharpenSword(
-  ctx: ScriptCtx,
-  instanceId: number,
-  count = 1,
-  followup?: SharpenFollowup,
-): void {
+export function sharpenSword(ctx: ScriptCtx, instanceId: number, count = 1, followup?: SharpenFollowup): void {
   const sword = controlledSword(ctx, instanceId);
   if (!sword) return;
 
@@ -117,7 +118,12 @@ export function sharpenSword(
     "clearWeaponPowerCountersAtTurn",
     ctx.state.activePlayer === ctx.seat ? ctx.state.turn : ctx.state.turn + 1,
   );
-  ctx.logPublic(localizedLog(`${ctx.cardData(sword.cardId).name} is sharpened ${total} time(s)`, "card.log.aha.sword.sharpened", { target: { kind: "card", cardId: sword.cardId }, count: total }));
+  ctx.logPublic(
+    localizedLog(`${ctx.cardData(sword.cardId).name} is sharpened ${total} time(s)`, "card.log.aha.sword.sharpened", {
+      target: { kind: "card", cardId: sword.cardId },
+      count: total,
+    }),
+  );
 
   const isZenithBlade = ctx.cardData(sword.cardId).name === "Zenith Blade";
   if (
@@ -129,8 +135,8 @@ export function sharpenSword(
   }
 
   const rerebrace = isZenithBlade
-    ? Object.values(ctx.player(ctx.seat).equipment).find((card) =>
-        card && ctx.cardData(card.cardId).name === "Reverent Rerebrace"
+    ? Object.values(ctx.player(ctx.seat).equipment).find(
+        (card) => card && ctx.cardData(card.cardId).name === "Reverent Rerebrace",
       )
     : undefined;
   if (rerebrace) {
@@ -141,7 +147,11 @@ export function sharpenSword(
     const requested = ctx.requestPaymentFrom(
       rerebrace.instanceId,
       "rerebrace-sharpen",
-      decisionPrompt("Reverent Rerebrace: pay 1 and destroy this to sharpen an additional time?", "card.aha.rerebrace.pay.sharpen", { values: { amount: 1 } }),
+      decisionPrompt(
+        "Reverent Rerebrace: pay 1 and destroy this to sharpen an additional time?",
+        "card.aha.rerebrace.pay.sharpen",
+        { values: { amount: 1 } },
+      ),
       1,
     );
     if (requested) return;

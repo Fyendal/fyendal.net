@@ -44,8 +44,7 @@ function isAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
 }
 
 function auraActivity(ctx: ScriptCtx): boolean {
-  return ctx.getFlag("player", "playedSubtype:aura") === true ||
-    ctx.getFlag("player", "createdSubtype:aura") === true;
+  return ctx.getFlag("player", "playedSubtype:aura") === true || ctx.getFlag("player", "createdSubtype:aura") === true;
 }
 
 function makeCopies(ctx: ScriptCtx, cardId: string, count: number): void {
@@ -57,9 +56,10 @@ function currentWeaponIsOneHanded(ctx: ScriptCtx): boolean {
 }
 
 function currentWeaponIsSwordOrDagger(ctx: ScriptCtx): boolean {
-  return isWeaponAttack(ctx) && !!ctx.link && (
-    hasType(ctx, ctx.link.attackingCard, "sword") ||
-    hasType(ctx, ctx.link.attackingCard, "dagger")
+  return (
+    isWeaponAttack(ctx) &&
+    !!ctx.link &&
+    (hasType(ctx, ctx.link.attackingCard, "sword") || hasType(ctx, ctx.link.attackingCard, "dagger"))
   );
 }
 
@@ -70,7 +70,15 @@ function badBeats(threshold: number): CardScript {
     },
     onDieRollResolved(ctx, hook, roll) {
       if (hook !== "bad-beats") return;
-      ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: rolled ${roll}`, "card.log.common.die.rolled", { result: roll }, { kind: "roll", result: roll, seat: ctx.seat, sides: 6 }));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.data.name}: rolled ${roll}`,
+          "card.log.common.die.rolled",
+          { result: roll },
+          { kind: "roll", result: roll, seat: ctx.seat, sides: 6 },
+        ),
+      );
       if (roll >= threshold) {
         buffNextAttack(ctx, { attack: 5, appliesTo: "attack-action", appliesToClass: "brute" });
       }
@@ -92,19 +100,28 @@ function highRoller(threshold: number): CardScript {
 
 function heaveThree(): CardScript {
   return {
-    triggers: [{
-      event: "end-of-turn",
-      sourceZone: "hand",
-      label: "Heave 3",
-      condition: (ctx) => ctx.player(ctx.seat).arsenal.length === 0,
-      effect(ctx) {
-        const player = ctx.player(ctx.seat);
-        if (player.arsenal.length > 0 || !player.hand.some((card) =>
-          card.instanceId === ctx.self.instanceId
-        )) return;
-        ctx.requestPayment("heave-three", decisionPrompt(`${ctx.data.name}: pay {r}{r}{r} to put it face up into arsenal?`, "card.evr.heave.pay", { values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: 3 }, optionMessages: commonOptionMessages("no") }), 3, undefined, [ctx.self.instanceId]);
+    triggers: [
+      {
+        event: "end-of-turn",
+        sourceZone: "hand",
+        label: "Heave 3",
+        condition: (ctx) => ctx.player(ctx.seat).arsenal.length === 0,
+        effect(ctx) {
+          const player = ctx.player(ctx.seat);
+          if (player.arsenal.length > 0 || !player.hand.some((card) => card.instanceId === ctx.self.instanceId)) return;
+          ctx.requestPayment(
+            "heave-three",
+            decisionPrompt(`${ctx.data.name}: pay {r}{r}{r} to put it face up into arsenal?`, "card.evr.heave.pay", {
+              values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: 3 },
+              optionMessages: commonOptionMessages("no"),
+            }),
+            3,
+            undefined,
+            [ctx.self.instanceId],
+          );
+        },
       },
-    }],
+    ],
     onChoose(ctx, hook, option) {
       if (hook !== "heave-three" || option !== "paid") return;
       if (!ctx.putIntoArsenal(ctx.self.instanceId, "hand")) return;
@@ -127,14 +144,17 @@ function steadfast(amount: number): CardScript {
         ...Object.values(player.equipment).filter((card) => card !== undefined),
         ...player.board,
       ]);
-      const options = [...new Map(
-        [...(current ? [current.attackingCard] : []), ...publicSources]
-          .map((card) => [card.instanceId, card]),
-      ).values()];
+      const options = [
+        ...new Map(
+          [...(current ? [current.attackingCard] : []), ...publicSources].map((card) => [card.instanceId, card]),
+        ).values(),
+      ];
       if (options.length === 0) return;
       ctx.requestCardChoice(
         "steadfast-source",
-        decisionPrompt(`${ctx.data.name}: choose a damage source`, "card.evr.damage.source.choose", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }),
+        decisionPrompt(`${ctx.data.name}: choose a damage source`, "card.evr.damage.source.choose", {
+          values: { card: { kind: "card", cardId: ctx.self.cardId } },
+        }),
         options.map((card) => card.instanceId),
       );
       ctx.setCounter("steadfastAmount", amount);
@@ -153,10 +173,11 @@ function hundredWinds(): CardScript {
       const chain = ctx.state.chain;
       if (chain.length < 2) return;
       if (!previousAttackHasName(ctx, "hundred winds")) return;
-      const bonus = chain.slice(0, -1).filter((link) =>
-        link.attacker === ctx.seat &&
-        ctx.cardNames(link.attackingCard).includes("hundred winds")
-      ).length;
+      const bonus = chain
+        .slice(0, -1)
+        .filter(
+          (link) => link.attacker === ctx.seat && ctx.cardNames(link.attackingCard).includes("hundred winds"),
+        ).length;
       if (bonus > 0) ctx.addModifier({ scope: "chain-link", attack: bonus });
     },
   };
@@ -179,7 +200,17 @@ function rideTailwind(): CardScript {
 function twinTwisters(): CardScript {
   return {
     onAttackDeclared(ctx) {
-      ctx.requestChoice("twin-mode", decisionPrompt(`${ctx.data.name}: choose a mode`, "card.evr.twin.mode.choose", { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: { "next attack": decisionMessage("card.evr.twin.option.next"), "+1": decisionMessage("card.evr.twin.option.power") } }), ["next attack", "+1"]);
+      ctx.requestChoice(
+        "twin-mode",
+        decisionPrompt(`${ctx.data.name}: choose a mode`, "card.evr.twin.mode.choose", {
+          values: { card: { kind: "card", cardId: ctx.self.cardId } },
+          optionMessages: {
+            "next attack": decisionMessage("card.evr.twin.option.next"),
+            "+1": decisionMessage("card.evr.twin.option.power"),
+          },
+        }),
+        ["next attack", "+1"],
+      );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "twin-mode") return;
@@ -298,7 +329,9 @@ function genis(): CardScript {
         const hand = ctx.player(target).hand;
         ctx.requestCardChoice(
           "genis-bottom",
-          decisionPrompt("Genis: put a card from your hand on the bottom of your deck?", "card.evr.genis.hand.bottom", { optionMessages: commonOptionMessages("decline") }),
+          decisionPrompt("Genis: put a card from your hand on the bottom of your deck?", "card.evr.genis.hand.bottom", {
+            optionMessages: commonOptionMessages("decline"),
+          }),
           ["decline", ...hand.map((card) => card.instanceId)],
           target,
         );
@@ -371,19 +404,21 @@ function runebloodIncantation(verses: number): CardScript {
     onEnterArena(ctx) {
       ctx.setCounter("verse", verses);
     },
-    triggers: [{
-      event: "begin-action-phase",
-      label: "Runeblood Incantation",
-      effect(ctx) {
-        const remaining = ctx.getCounter("verse");
-        if (remaining <= 0) {
-          ctx.destroySelf();
-          return;
-        }
-        ctx.setCounter("verse", remaining - 1);
-        ctx.createToken(RUNECHANT);
+    triggers: [
+      {
+        event: "begin-action-phase",
+        label: "Runeblood Incantation",
+        effect(ctx) {
+          const remaining = ctx.getCounter("verse");
+          if (remaining <= 0) {
+            ctx.destroySelf();
+            return;
+          }
+          ctx.setCounter("verse", remaining - 1);
+          ctx.createToken(RUNECHANT);
+        },
       },
-    }],
+    ],
   };
 }
 
@@ -399,7 +434,11 @@ function drowningDire(): CardScript {
       if (options.length === 0) return;
       ctx.requestCardChoice(
         "drowning-bottom",
-        decisionPrompt(`${ctx.data.name}: put a non-attack action from your graveyard on the bottom?`, "card.evr.nonattack.bottom", { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: commonOptionMessages("pass") }),
+        decisionPrompt(
+          `${ctx.data.name}: put a non-attack action from your graveyard on the bottom?`,
+          "card.evr.nonattack.bottom",
+          { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: commonOptionMessages("pass") },
+        ),
         ["pass", ...options.map((card) => card.instanceId)],
       );
     },
@@ -420,7 +459,9 @@ function reekOfCorruption(): CardScript {
       if (hand.length > 0) {
         ctx.requestCardChoice(
           "reek-discard",
-          decisionPrompt(`${ctx.data.name}: choose a card to discard`, "card.evr.discard.choose", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }),
+          decisionPrompt(`${ctx.data.name}: choose a card to discard`, "card.evr.discard.choose", {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+          }),
           hand.map((card) => card.instanceId),
           target,
         );
@@ -437,7 +478,11 @@ function pry(revealCount: number): CardScript {
     if (!ctx.revealCards(ids, target)) return;
     ctx.requestCardChoice(
       "pry-bottom",
-      decisionPrompt(`${ctx.data.name}: put a revealed card on the bottom of its owner's deck?`, "card.evr.revealed.bottom", { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: commonOptionMessages("pass") }),
+      decisionPrompt(
+        `${ctx.data.name}: put a revealed card on the bottom of its owner's deck?`,
+        "card.evr.revealed.bottom",
+        { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: commonOptionMessages("pass") },
+      ),
       ["pass", ...ids],
       undefined,
       ids,
@@ -458,7 +503,9 @@ function pry(revealCount: number): CardScript {
     ctx.setCounter("pryRevealRemaining", remaining);
     ctx.requestCardChoice(
       "pry-reveal",
-      decisionPrompt(`${ctx.data.name}: choose a card to reveal`, "card.evr.reveal.choose", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }),
+      decisionPrompt(`${ctx.data.name}: choose a card to reveal`, "card.evr.reveal.choose", {
+        values: { card: { kind: "card", cardId: ctx.self.cardId } },
+      }),
       hand.map((card) => card.instanceId),
       target,
     );
@@ -468,7 +515,9 @@ function pry(revealCount: number): CardScript {
     onPlay(ctx) {
       ctx.requestCardChoice(
         "pry-target",
-        decisionPrompt(`${ctx.data.name}: choose a hero`, "card.evr.hero.choose", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }),
+        decisionPrompt(`${ctx.data.name}: choose a hero`, "card.evr.hero.choose", {
+          values: { card: { kind: "card", cardId: ctx.self.cardId } },
+        }),
         ctx.state.players.map((player) => player.hero.instanceId),
       );
     },
@@ -478,9 +527,10 @@ function pry(revealCount: number): CardScript {
         if (target === undefined) return;
         ctx.setCounter("pryTarget", target);
         ctx.setCounter("pryRevealedCount", 0);
-        const count = ctx.state.activePlayer !== ctx.seat
-          ? ctx.player(target).hand.length
-          : Math.min(revealCount, ctx.player(target).hand.length);
+        const count =
+          ctx.state.activePlayer !== ctx.seat
+            ? ctx.player(target).hand.length
+            : Math.min(revealCount, ctx.player(target).hand.length);
         revealNext(ctx, target, count);
         return;
       }
@@ -510,12 +560,14 @@ function pyroglyphic(amount: number): CardScript {
   return {
     playAsInstant: wizardActionAsInstant,
     preventArcaneDamage: amount,
-    triggers: [{
-      event: "begin-action-phase",
-      whose: "subject",
-      label: "Destroy Pyroglyphic Protection",
-      effect: (ctx) => ctx.destroySelf(),
-    }],
+    triggers: [
+      {
+        event: "begin-action-phase",
+        whose: "subject",
+        label: "Destroy Pyroglyphic Protection",
+        effect: (ctx) => ctx.destroySelf(),
+      },
+    ],
   };
 }
 
@@ -530,7 +582,11 @@ function timekeepersWhim(amount: number): CardScript {
     onPlay(ctx) {
       ctx.requestCardChoice(
         "whim-target",
-        decisionPrompt(`${ctx.data.name}: deal ${ctx.previewArcaneDamage(amount)} arcane damage to a hero`, "card.evr.arcane.hero.choose", { values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: ctx.previewArcaneDamage(amount) } }),
+        decisionPrompt(
+          `${ctx.data.name}: deal ${ctx.previewArcaneDamage(amount)} arcane damage to a hero`,
+          "card.evr.arcane.hero.choose",
+          { values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: ctx.previewArcaneDamage(amount) } },
+        ),
         ctx.state.players.map((player) => player.hero.instanceId),
       );
     },
@@ -555,7 +611,8 @@ function hazeBending(): CardScript {
         data.cardType === "token" ||
         !hasType(ctx, destroyed, "illusionist") ||
         !isAura(ctx, destroyed)
-      ) return;
+      )
+        return;
       ctx.setFlag("player", `hazeBending:${ctx.self.instanceId}`, true);
       ctx.createToken(SPECTRAL_SHIELD);
     },
@@ -565,15 +622,23 @@ function hazeBending(): CardScript {
 function coalescenceMirage(): CardScript {
   return {
     onDestroyed(ctx) {
-      const auras = ctx.player(ctx.seat).hand.filter((card) =>
-        hasType(ctx, card, "illusionist") &&
-        isAura(ctx, card) &&
-        (ctx.cardData(card.cardId).cost ?? 0) === 0,
-      );
+      const auras = ctx
+        .player(ctx.seat)
+        .hand.filter(
+          (card) =>
+            hasType(ctx, card, "illusionist") && isAura(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) === 0,
+        );
       if (auras.length > 0) {
         ctx.requestCardChoice(
           "coalescence-aura",
-          decisionPrompt(`${ctx.data.name}: put a cost-0 Illusionist aura into the arena?`, "card.evr.illusionist.aura.put", { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: commonOptionMessages("pass") }),
+          decisionPrompt(
+            `${ctx.data.name}: put a cost-0 Illusionist aura into the arena?`,
+            "card.evr.illusionist.aura.put",
+            {
+              values: { card: { kind: "card", cardId: ctx.self.cardId } },
+              optionMessages: commonOptionMessages("pass"),
+            },
+          ),
           ["pass", ...auras.map((card) => card.instanceId)],
         );
       }
@@ -616,11 +681,20 @@ function lifeOfParty(): CardScript {
       const mode = allModes ? -1 : ctx.randomInt(3);
       if (allModes || mode === 0) {
         ctx.setCounter("lifeOnHit", 1);
-        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: gains "When this hits, gain 2 life"`, "card.log.evr.phantasmaclasm.life", { amount: 2 }));
+        ctx.logPublic(
+          localizedCardLog(
+            ctx,
+            `${ctx.data.name}: gains "When this hits, gain 2 life"`,
+            "card.log.evr.phantasmaclasm.life",
+            { amount: 2 },
+          ),
+        );
       }
       if (allModes || mode === 1) {
         ctx.addModifier({ scope: "chain-link", attack: 2 });
-        ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: gains +2{p}`, "card.log.common.attack.gained", { amount: 2 }));
+        ctx.logPublic(
+          localizedCardLog(ctx, `${ctx.data.name}: gains +2{p}`, "card.log.common.attack.gained", { amount: 2 }),
+        );
       }
       if (allModes || mode === 2) {
         ctx.grantGoAgain();
@@ -661,7 +735,13 @@ function pickACard(repeats: number): CardScript {
       if (hand.length === 0) return;
       hand.forEach((card) => ctx.lookAt(card.instanceId));
       const names = [...new Set(hand.map((card) => ctx.cardData(card.cardId).name))];
-      ctx.requestChoice("pick-name", decisionPrompt(`${ctx.data.name}: name a card`, "card.evr.card.name", { values: { card: { kind: "card", cardId: ctx.self.cardId } } }), names);
+      ctx.requestChoice(
+        "pick-name",
+        decisionPrompt(`${ctx.data.name}: name a card`, "card.evr.card.name", {
+          values: { card: { kind: "card", cardId: ctx.self.cardId } },
+        }),
+        names,
+      );
       ctx.setCounter("pickRepeats", repeats);
     },
     onChoose(ctx, hook, option) {
@@ -670,13 +750,15 @@ function pickACard(repeats: number): CardScript {
       for (let i = 0; i < ctx.getCounter("pickRepeats") && hand.length > 0; i++) {
         const card = hand[ctx.randomInt(hand.length)]!;
         const name = ctx.cardData(card.cardId).name;
-        ctx.logPublic(localizedCardLog(
-          ctx,
-          `${ctx.data.name} reveals ${name}`,
-          "card.log.common.card.revealed",
-          { revealed: { kind: "card", cardId: card.cardId } },
-          { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" },
-        ));
+        ctx.logPublic(
+          localizedCardLog(
+            ctx,
+            `${ctx.data.name} reveals ${name}`,
+            "card.log.common.card.revealed",
+            { revealed: { kind: "card", cardId: card.cardId } },
+            { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" },
+          ),
+        );
         if (name === option) ctx.createToken(SILVER);
       }
     },
@@ -693,19 +775,24 @@ function smashingGoodTime(amount: number): CardScript {
       }
     },
     canTriggerOnHit(ctx) {
-      return ctx.getCounter("smashingReady") > 0 &&
+      return (
+        ctx.getCounter("smashingReady") > 0 &&
         ctx.link?.attackCardType === "action" &&
-        ctx.link.targetAllyId === undefined;
+        ctx.link.targetAllyId === undefined
+      );
     },
     onHit(ctx) {
       ctx.setCounter("smashingReady", 0);
-      const items = ctx.player(opponentSeat(ctx)).board.filter((card) =>
-        hasType(ctx, card, "item") && (ctx.cardData(card.cardId).cost ?? 0) <= 2,
-      );
+      const items = ctx
+        .player(opponentSeat(ctx))
+        .board.filter((card) => hasType(ctx, card, "item") && (ctx.cardData(card.cardId).cost ?? 0) <= 2);
       if (items.length > 0) {
         ctx.requestCardChoice(
           "smashing-item",
-          decisionPrompt(`${ctx.data.name}: destroy an opposing item with cost 2 or less?`, "card.evr.item.destroy", { values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: 2 }, optionMessages: commonOptionMessages("pass") }),
+          decisionPrompt(`${ctx.data.name}: destroy an opposing item with cost 2 or less?`, "card.evr.item.destroy", {
+            values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: 2 },
+            optionMessages: commonOptionMessages("pass"),
+          }),
           ["pass", ...items.map((card) => card.instanceId)],
         );
       }
@@ -721,13 +808,15 @@ function evenBigger(opt: number): CardScript {
     const top = ctx.player(ctx.seat).deck[0];
     if (!top) return;
     const power = ctx.basePower(top);
-    ctx.logPublic(localizedCardLog(
-      ctx,
-      `${ctx.data.name} reveals ${ctx.cardData(top.cardId).name}`,
-      "card.log.common.decktop.revealed",
-      { revealed: { kind: "card", cardId: top.cardId } },
-      { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
-    ));
+    ctx.logPublic(
+      localizedCardLog(
+        ctx,
+        `${ctx.data.name} reveals ${ctx.cardData(top.cardId).name}`,
+        "card.log.common.decktop.revealed",
+        { revealed: { kind: "card", cardId: top.cardId } },
+        { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
+      ),
+    );
     const dealt = Number(ctx.getFlag("player", "physicalDamageAmountDealtThisTurn")) || 0;
     if (power > dealt) {
       ctx.createToken(QUICKEN);
@@ -766,8 +855,7 @@ const amuletAssertiveness: CardScript = {
     },
   },
   canTriggerOnHit(ctx) {
-    return !!ctx.link &&
-      ctx.getCounter("assertivenessAttack") === ctx.link.attackingCard.instanceId;
+    return !!ctx.link && ctx.getCounter("assertivenessAttack") === ctx.link.attackingCard.instanceId;
   },
   onHit(ctx) {
     ctx.setCounter("assertivenessAttack", 0);
@@ -785,17 +873,19 @@ const amuletEchoes: CardScript = {
     timing: "instant",
     destroySelfCost: true,
     canActivate(ctx) {
-      return ctx.state.players.some((player) => Object.entries(player.flags).some(
-        ([key, value]) => key.startsWith("playedNameCount:") && Number(value) >= 2,
-      ));
+      return ctx.state.players.some((player) =>
+        Object.entries(player.flags).some(([key, value]) => key.startsWith("playedNameCount:") && Number(value) >= 2),
+      );
     },
     onActivate(ctx) {
-      const heroes = ctx.state.players.filter((player) => Object.entries(player.flags).some(
-        ([key, value]) => key.startsWith("playedNameCount:") && Number(value) >= 2,
-      ));
+      const heroes = ctx.state.players.filter((player) =>
+        Object.entries(player.flags).some(([key, value]) => key.startsWith("playedNameCount:") && Number(value) >= 2),
+      );
       ctx.requestCardChoice(
         "echoes-target",
-        decisionPrompt("Amulet of Echoes: choose a hero to discard 2 cards", "card.evr.echoes.hero.choose", { values: { amount: 2 } }),
+        decisionPrompt("Amulet of Echoes: choose a hero to discard 2 cards", "card.evr.echoes.hero.choose", {
+          values: { amount: 2 },
+        }),
         heroes.map((player) => player.hero.instanceId),
       );
     },
@@ -806,7 +896,12 @@ const amuletEchoes: CardScript = {
       if (!target) return;
       ctx.setCounter("echoes-target-seat", target.seat);
       ctx.setCounter("echoes-discards-left", 2);
-      requestDiscardChoice(ctx, "echoes-discard", decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"), target.seat);
+      requestDiscardChoice(
+        ctx,
+        "echoes-discard",
+        decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
+        target.seat,
+      );
       return;
     }
     if (hook !== "echoes-discard") return;
@@ -814,7 +909,13 @@ const amuletEchoes: CardScript = {
     if (!resolveDiscardChoice(ctx, option, targetSeat)) return;
     const left = ctx.getCounter("echoes-discards-left") - 1;
     ctx.setCounter("echoes-discards-left", left);
-    if (left > 0) requestDiscardChoice(ctx, "echoes-discard", decisionPrompt("Choose another card to discard", "card.evr.discard.next"), targetSeat);
+    if (left > 0)
+      requestDiscardChoice(
+        ctx,
+        "echoes-discard",
+        decisionPrompt("Choose another card to discard", "card.evr.discard.next"),
+        targetSeat,
+      );
   },
 };
 
@@ -826,8 +927,12 @@ const amuletHavencall: CardScript = {
     timing: "defense-reaction",
     destroySelfCost: true,
     canActivate(ctx) {
-      return !!ctx.link && ctx.link.attacker !== ctx.seat && ctx.player(ctx.seat).hand.length === 0 &&
-        ctx.player(ctx.seat).deck.some((card) => isNamed(ctx, card.cardId, "Rally the Rearguard"));
+      return (
+        !!ctx.link &&
+        ctx.link.attacker !== ctx.seat &&
+        ctx.player(ctx.seat).hand.length === 0 &&
+        ctx.player(ctx.seat).deck.some((card) => isNamed(ctx, card.cardId, "Rally the Rearguard"))
+      );
     },
     onActivate(ctx) {
       const rally = ctx.player(ctx.seat).deck.find((card) => isNamed(ctx, card.cardId, "Rally the Rearguard"));
@@ -845,8 +950,10 @@ const amuletIgnition: CardScript = {
     timing: "instant",
     destroySelfCost: true,
     canActivate(ctx) {
-      return ctx.getFlag("player", "playedCardThisTurn") !== true &&
-        ctx.getFlag("player", "activatedAbilityThisTurn") !== true;
+      return (
+        ctx.getFlag("player", "playedCardThisTurn") !== true &&
+        ctx.getFlag("player", "activatedAbilityThisTurn") !== true
+      );
     },
     onActivate(ctx) {
       ctx.setFlag("player", "nextAbilityCostReduction", 1);
@@ -879,8 +986,7 @@ const amuletOblation: CardScript = {
     timing: "instant",
     destroySelfCost: true,
     canActivate(ctx) {
-      return ctx.getFlag("player", "graveThisTurn") === true &&
-        !!ctx.link && ctx.link.attackCardType === "action";
+      return ctx.getFlag("player", "graveThisTurn") === true && !!ctx.link && ctx.link.attackCardType === "action";
     },
     onActivate(ctx) {
       ctx.setFlag("link", "attackToBottom", true);
@@ -932,13 +1038,20 @@ const potionSeeing: CardScript = {
     const target = ctx.state.players.find((player) => player.hero.instanceId === Number(option));
     if (!target) return;
     target.hand.forEach((card) => ctx.lookAt(card.instanceId));
-    ctx.logPrivate(ctx.seat, localizedCardLog(
-      ctx,
-      `Potion of Seeing: ${target.hand.map((card) => ctx.cardData(card.cardId).name).join(", ")}`,
-      "card.log.evr.potionseeing.private",
-      { cards: target.hand.map((card) => ctx.cardData(card.cardId).name).join(", ") },
-      { kind: "cards-revealed", cards: target.hand.map((card) => ({ cardId: card.cardId, ownerSeat: target.seat })), sourceZone: "hand" },
-    ));
+    ctx.logPrivate(
+      ctx.seat,
+      localizedCardLog(
+        ctx,
+        `Potion of Seeing: ${target.hand.map((card) => ctx.cardData(card.cardId).name).join(", ")}`,
+        "card.log.evr.potionseeing.private",
+        { cards: target.hand.map((card) => ctx.cardData(card.cardId).name).join(", ") },
+        {
+          kind: "cards-revealed",
+          cards: target.hand.map((card) => ({ cardId: card.cardId, ownerSeat: target.seat })),
+          sourceZone: "hand",
+        },
+      ),
+    );
   },
 };
 
@@ -954,7 +1067,10 @@ const potionDejaVu: CardScript = {
       if (pitch.length > 0) {
         ctx.requestCardChoice(
           "deja-top",
-          decisionPrompt("Potion of Déjà Vu: choose the next pitch card to put on top (the last choice ends on top)", "card.evr.dejavu.pitch.first"),
+          decisionPrompt(
+            "Potion of Déjà Vu: choose the next pitch card to put on top (the last choice ends on top)",
+            "card.evr.dejavu.pitch.first",
+          ),
           pitch.map((card) => card.instanceId),
         );
       }
@@ -966,7 +1082,10 @@ const potionDejaVu: CardScript = {
     if (pitch.length > 0) {
       ctx.requestCardChoice(
         "deja-top",
-        decisionPrompt("Choose the next pitch card to put on top (the last choice ends on top)", "card.evr.dejavu.pitch.next"),
+        decisionPrompt(
+          "Choose the next pitch card to put on top (the last choice ends on top)",
+          "card.evr.dejavu.pitch.next",
+        ),
         pitch.map((card) => card.instanceId),
       );
     }
@@ -1004,34 +1123,47 @@ const potionLuck: CardScript = {
 };
 
 const talismanBalance: CardScript = {
-  triggers: [{
-    event: "end-of-turn",
-    label: "Talisman of Balance",
-    condition(ctx) {
-      const own = ctx.player(ctx.seat).arsenal.length;
-      return own === 0 && ctx.state.players.some((player) => player.seat !== ctx.seat && player.arsenal.length > own);
+  triggers: [
+    {
+      event: "end-of-turn",
+      label: "Talisman of Balance",
+      condition(ctx) {
+        const own = ctx.player(ctx.seat).arsenal.length;
+        return own === 0 && ctx.state.players.some((player) => player.seat !== ctx.seat && player.arsenal.length > own);
+      },
+      effect(ctx) {
+        const top = ctx.player(ctx.seat).deck[0];
+        ctx.destroySelf();
+        if (top) ctx.putIntoArsenal(top.instanceId, "deck", { faceUp: false });
+      },
     },
-    effect(ctx) {
-      const top = ctx.player(ctx.seat).deck[0];
-      ctx.destroySelf();
-      if (top) ctx.putIntoArsenal(top.instanceId, "deck", { faceUp: false });
-    },
-  }],
+  ],
 };
 
 const talismanCremation: CardScript = {
-  triggers: [{
-    event: "card-played",
-    label: "Destroy this and name a card",
-    condition: (_ctx, _played, event) => event?.from === "banish",
-    effect(ctx) {
-    ctx.destroySelf();
-    const names = [...new Set(ctx.state.players
-      .filter((player) => player.seat !== ctx.seat)
-      .flatMap((player) => player.graveyard.map((card) => ctx.cardData(card.cardId).name)))];
-    if (names.length > 0) ctx.requestChoice("cremation-name", decisionPrompt("Talisman of Cremation: name a card", "card.evr.cremation.card.name"), names);
+  triggers: [
+    {
+      event: "card-played",
+      label: "Destroy this and name a card",
+      condition: (_ctx, _played, event) => event?.from === "banish",
+      effect(ctx) {
+        ctx.destroySelf();
+        const names = [
+          ...new Set(
+            ctx.state.players
+              .filter((player) => player.seat !== ctx.seat)
+              .flatMap((player) => player.graveyard.map((card) => ctx.cardData(card.cardId).name)),
+          ),
+        ];
+        if (names.length > 0)
+          ctx.requestChoice(
+            "cremation-name",
+            decisionPrompt("Talisman of Cremation: name a card", "card.evr.cremation.card.name"),
+            names,
+          );
+      },
     },
-  }],
+  ],
   onChoose(ctx, hook, option) {
     if (hook !== "cremation-name") return;
     for (const player of ctx.state.players) {
@@ -1055,7 +1187,14 @@ const talismanRecompense: CardScript = {
   replacePitchResources(ctx, _pitched, amount) {
     if (amount !== 1) return undefined;
     ctx.destroySelf();
-    ctx.logPublic(localizedCardLog(ctx, "Talisman of Recompense replaces 1 resource with 3 resources", "card.log.evr.recompense.resources", { from: 1, to: 3 }));
+    ctx.logPublic(
+      localizedCardLog(
+        ctx,
+        "Talisman of Recompense replaces 1 resource with 3 resources",
+        "card.log.evr.recompense.resources",
+        { from: 1, to: 3 },
+      ),
+    );
     return 3;
   },
 };
@@ -1063,12 +1202,17 @@ const talismanRecompense: CardScript = {
 const talismanTithes: CardScript = {
   replaceOpponentDraw(ctx, _drawingSeat, count) {
     const duringActionPhase =
-      ctx.state.phase !== "start" &&
-      ctx.state.phase !== "end" &&
-      ctx.state.phase !== "game-over";
+      ctx.state.phase !== "start" && ctx.state.phase !== "end" && ctx.state.phase !== "game-over";
     if (count <= 0 || ctx.state.activePlayer !== ctx.seat || !duringActionPhase) return undefined;
     ctx.destroySelf();
-    ctx.logPublic(localizedCardLog(ctx, `Talisman of Tithes reduces the draw from ${count} to ${Math.max(0, count - 1)}`, "card.log.evr.tithes.draw", { from: count, to: Math.max(0, count - 1) }));
+    ctx.logPublic(
+      localizedCardLog(
+        ctx,
+        `Talisman of Tithes reduces the draw from ${count} to ${Math.max(0, count - 1)}`,
+        "card.log.evr.tithes.draw",
+        { from: count, to: Math.max(0, count - 1) },
+      ),
+    );
     return count - 1;
   },
 };
@@ -1115,20 +1259,22 @@ export const evr: Record<string, CardScript> = mergeSetScripts("EVR", evrHighRar
         makeCopies(ctx, SEISMIC_SURGE, count);
       }
     },
-    triggers: [{
-      event: "start-of-turn",
-      label: "Valda Brightaxe",
-      condition(ctx) {
-        return ctx.player(ctx.seat).board.filter((card) => isCard(ctx, card.cardId, "Seismic Surge")).length >= 3;
+    triggers: [
+      {
+        event: "start-of-turn",
+        label: "Valda Brightaxe",
+        condition(ctx) {
+          return ctx.player(ctx.seat).board.filter((card) => isCard(ctx, card.cardId, "Seismic Surge")).length >= 3;
+        },
+        effect(ctx) {
+          ctx.addModifier({
+            scope: "until-end-of-turn",
+            dominate: true,
+            appliesToKeyword: "crush",
+          });
+        },
       },
-      effect(ctx) {
-        ctx.addModifier({
-          scope: "until-end-of-turn",
-          dominate: true,
-          appliesToKeyword: "crush",
-        });
-      },
-    }],
+    ],
   },
   "thunder quake|1": heaveThree(),
   "thunder quake|2": heaveThree(),
@@ -1162,9 +1308,21 @@ export const evr: Record<string, CardScript> = mergeSetScripts("EVR", evrHighRar
   "outland skirmish|2": outlandSkirmish(2),
   "outland skirmish|3": outlandSkirmish(1),
 
-  "t-bone|1": { onAttackDeclared(ctx) { if (boostedLinks(ctx) > 0) ctx.setFlag("link", "mustDefendWithEquipment", true); } },
-  "t-bone|2": { onAttackDeclared(ctx) { if (boostedLinks(ctx) > 0) ctx.setFlag("link", "mustDefendWithEquipment", true); } },
-  "t-bone|3": { onAttackDeclared(ctx) { if (boostedLinks(ctx) > 0) ctx.setFlag("link", "mustDefendWithEquipment", true); } },
+  "t-bone|1": {
+    onAttackDeclared(ctx) {
+      if (boostedLinks(ctx) > 0) ctx.setFlag("link", "mustDefendWithEquipment", true);
+    },
+  },
+  "t-bone|2": {
+    onAttackDeclared(ctx) {
+      if (boostedLinks(ctx) > 0) ctx.setFlag("link", "mustDefendWithEquipment", true);
+    },
+  },
+  "t-bone|3": {
+    onAttackDeclared(ctx) {
+      if (boostedLinks(ctx) > 0) ctx.setFlag("link", "mustDefendWithEquipment", true);
+    },
+  },
   "payload|1": payload(),
   "payload|2": payload(),
   "payload|3": payload(),
