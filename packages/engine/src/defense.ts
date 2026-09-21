@@ -169,6 +169,15 @@ export function attackAllowsDefender(
   return true;
 }
 
+/** A printed value or a scripted defining/modifying ability gives a card the
+ * defense property, including when the resulting value is 0. */
+function cardHasDefenseProperty(state: GameStateInternal, card: CardInstance): boolean {
+  const script = scriptOf(state, card.cardId, card);
+  return instanceDataOf(state, card).defense !== undefined ||
+    script?.modifyBaseDefense !== undefined ||
+    script?.modifyDefense !== undefined;
+}
+
 export function legalDefenderCards(
   state: GameStateInternal,
   runtime: EngineRuntime,
@@ -189,10 +198,7 @@ export function legalDefenderCards(
     (!link || attackAllowsDefender(state, runtime, link, c, fromHand));
   const hand = player.hand.filter((c) => {
     const d = instanceDataOf(state, c);
-    if (
-      d.cardType === "defense-reaction" ||
-      (d.defense === undefined && scriptOf(state, c.cardId, c)?.modifyDefense === undefined)
-    ) return false;
+    if (d.cardType === "defense-reaction" || !cardHasDefenseProperty(state, c)) return false;
     return allowed(c, true);
   });
   const arsenal = player.arsenal.filter((c) => {
@@ -208,7 +214,7 @@ export function legalDefenderCards(
     const attackActionPermission = player.flags.attackActionsDefendFromArsenal === true &&
       d.cardType === "action" && (d.subtypes ?? []).includes("attack");
     return (attackActionPermission || ambush) &&
-      d.defense !== undefined && allowed(c, false);
+      cardHasDefenseProperty(state, c) && allowed(c, false);
   });
   // Equipment may defend regardless of its defense value — even 0 (Ironhide)
   // or negative after Battleworn counters (it then defends for 0). A defining
@@ -237,8 +243,7 @@ export function legalDefenderCards(
         !modifier.consumed && modifier.cannotDefendWithInstanceId === c.instanceId
       ) &&
       scriptOf(state, link?.attackingCard.cardId ?? "", link?.attackingCard)?.cannotBeDefendedByEquipment !== true &&
-      (dataOf(state, c.cardId).defense !== undefined ||
-        scriptOf(state, c.cardId, c)?.modifyDefense !== undefined) &&
+      cardHasDefenseProperty(state, c) &&
       allowed(c, false),
   );
   return { hand, arsenal, equipment };

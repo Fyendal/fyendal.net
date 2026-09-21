@@ -282,6 +282,27 @@ describe("Armory Decks — AIO, AJV, and AST", () => {
       .toMatchObject({ counters: { steam: 1 } });
   });
 
+  it("Fast and Furious in banish does not trigger for later Boosts", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          board: ["hyper driver|2"],
+          hand: ["zero to sixty|1"],
+          deck: ["zipper hit|3"],
+          banish: ["fast and furious|1"],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.play("zero to sixty|1", { boost: true });
+
+    expect(g.state.pendingDecision?.kind).toBe("defend");
+    expect(g.state.log.some((entry) => entry.publicText?.includes("Fast and Furious triggers"))).toBe(false);
+  });
+
   it("Jarl creates a Frostbite in an exposed zone when he plays an Ice card", () => {
     const g = scenario({
       seats: [
@@ -1343,6 +1364,30 @@ describe("Armory Decks — rules regression coverage", () => {
       .activate("sawbones, dock hand|2", { ability: 1 });
     const barnacle = g.state.players[0]!.board.find((card) => functionalKeyOf(cardData[card.cardId]!) === "barnacle|2");
     expect(barnacle?.life).toBe(2);
+  });
+
+  it("stacks two Sawbones prevention effects on damage to their controller", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "gravy bones|0",
+          board: ["sawbones, dock hand|2", "sawbones, dock hand|2"],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "rhinar", hand: ["head jab|1"], equipment: NO_EQUIPMENT },
+      ],
+      active: 1,
+    });
+
+    g.play("head jab|1", { settle: false })
+      .passPriority()
+      .activate("sawbones, dock hand|2", { ability: 1, settle: false })
+      .activate("sawbones, dock hand|2", { ability: 1 })
+      .blockWith()
+      .settle();
+
+    g.expectLife(0, 19);
   });
 
   it("Standing Ovation grants an extra turn after three suspense auras leave", () => {

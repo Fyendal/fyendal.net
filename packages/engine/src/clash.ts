@@ -11,7 +11,7 @@ import {
 import type { CardInstance, PendingDecisionState, PlayerState } from "./state.js";
 import { currentLink, findCardAnywhere, opponent } from "./zoneQueries.js";
 import { destroyPermanent } from "./zoneMoves.js";
-import { controlledPermanents } from "./sourceQueries.js";
+import { controlledPermanents, hookSources } from "./sourceQueries.js";
 
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { transitionZone } from "./transitions.js";
@@ -33,7 +33,7 @@ export function crowdBoo(state: GameStateInternal,
 }
 
 /** The crowd cheers a hero: sets their per-turn `cheeredThisTurn` flag and
- *  fires their hero's onCheered hook. */
+ *  fires onCheered for their active arena sources. */
 export function crowdCheer(state: GameStateInternal,
   runtime: EngineRuntime, seat: number): void {
   const p = state.players[seat] as PlayerState;
@@ -43,7 +43,13 @@ export function crowdCheer(state: GameStateInternal,
     "engine.log.crowd.cheers",
     { hero: logCardValue(p.heroCardId) },
   ));
-  runtime.events.runHook(state, seat, p.hero, "onCheered");
+  for (const source of hookSources(state, seat, {
+    board: true,
+    equipment: true,
+    weapons: true,
+  })) {
+    runtime.events.runHook(state, seat, source, "onCheered");
+  }
 }
 
 type ClashState = NonNullable<PendingDecisionState["clash"]>;

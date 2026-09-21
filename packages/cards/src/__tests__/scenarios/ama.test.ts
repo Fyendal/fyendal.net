@@ -497,9 +497,14 @@ describe("Malice Armory Deck spoiled cards", () => {
       .expectAttackValue(4);
     expect(g.state.chain.at(-1)?.goAgain).toBe(true);
 
-    g.blockWith().settle().activate("restless steed|1");
+    g.blockWith().settle().activate("restless steed|1").blockWith().settle();
 
-    expect(g.state.chain.at(-1)?.goAgain).toBe(true);
+    expect(
+      g.state.log.filter((entry) =>
+        entry.publicText?.includes("Clambering Corpses triggers: On hit") === true
+      ),
+    ).toHaveLength(1);
+    expect(g.state.players[0]!.actionPoints).toBe(1);
   });
 
   it("Otherworldly Ossuary and Rites of Nightfall create their named objects", () => {

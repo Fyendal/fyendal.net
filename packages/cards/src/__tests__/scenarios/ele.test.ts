@@ -740,6 +740,39 @@ describe("ELE — delayed and replacement effects", () => {
     }));
   });
 
+  it("Spellbound Creepers waits until an attack action becomes attacking", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 2,
+          equipment: { legs: "spellbound creepers|0" },
+          hand: ["eloquent eulogy|1"],
+          board: ["runechant|0"],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    const creepers = g.state.players[0]!.equipment.legs!;
+
+    g.play("eloquent eulogy|1", { settle: false });
+
+    expect(g.state.players[0]!.flags["playedSubtype:attack"]).toBe(true);
+    expect(g.state.players[0]!.flags.attackedWithAttackActionThisTurn).not.toBe(true);
+    expect(legalIntents(g.state, 0)).not.toContainEqual(expect.objectContaining({
+      kind: "activate-ability",
+      sourceInstanceId: creepers.instanceId,
+    }));
+
+    g.settle().blockWith();
+
+    expect(g.state.players[0]!.flags.attackedWithAttackActionThisTurn).toBe(true);
+    expect(legalIntents(g.state, 0)).toContainEqual(expect.objectContaining({
+      kind: "activate-ability",
+      sourceInstanceId: creepers.instanceId,
+    }));
+  });
+
   it("activated Spellbound Creepers still perform their end-phase check", () => {
     const g = scenario({
       seats: [

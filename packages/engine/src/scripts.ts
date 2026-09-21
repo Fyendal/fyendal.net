@@ -260,7 +260,7 @@ export interface ScriptCtx {
    *  hero's onBooed hook. Has no other material effect on its own (SUP notes). */
   crowdBoo(targetSeat: number): void;
   /** The crowd cheers a hero: sets their `cheeredThisTurn` flag and fires
-   *  their hero's onCheered hook. */
+   *  onCheered for their active arena sources. */
   crowdCheer(targetSeat: number): void;
   /** Clash with another hero (8.5.45). The result is delivered to this
    *  script's `onClashResult` hook, allowing replacement decisions to pause
@@ -1574,7 +1574,7 @@ export interface CardScript {
   modifyActivatedAbilityCost?(ctx: ScriptCtx, source: DeepReadonly<CardInstance>, baseCost: number): number;
   /** The crowd booed this hero (fires on the hero script after the flag is set). */
   onBooed?(ctx: ScriptCtx): void;
-  /** The crowd cheered this hero (fires on the hero script after the flag is set). */
+  /** The crowd cheered this source's controller (fires on active arena sources after the flag is set). */
   onCheered?(ctx: ScriptCtx): void;
   /** This card was revealed for a clash. `won` is false for a loss or tie. */
   onClashRevealed?(ctx: ScriptCtx, won: boolean, opposingSeat: number): void;

@@ -1485,6 +1485,12 @@
       "value": "弃置一个 zombie"
     }
   ],
+  "card.common.hyperdriver.steam.add": [
+    {
+      "type": 0,
+      "value": "在一个 Hyper Driver 上放置一个 steam 指示物"
+    }
+  ],
   "card.common.levia.transform": [
     {
       "type": 0,
@@ -2331,6 +2337,12 @@
     {
       "type": 0,
       "value": "选择一张 Nitro Mechanoid 下方的牌并放逐"
+    }
+  ],
+  "card.dyn.nitromechanoid.hyperdrivers.transform": [
+    {
+      "type": 0,
+      "value": "选择 3 个要进行转化的 Hyper Driver"
     }
   ],
   "card.dyn.patience.hero.choose": [
@@ -18357,7 +18369,7 @@
       "type": 6,
       "value": "occurrences",
       "options": {
-        "one": {
+        "=1": {
           "value": []
         },
         "other": {
@@ -18680,6 +18692,12 @@
       "value": "因来源已离开墓地，Watery Grave 结算时不产生效果"
     }
   ],
+  "engine.term.attack.defended": [
+    {
+      "type": 0,
+      "value": "受影响的攻击被至少 1 张牌防守时"
+    }
+  ],
   "engine.term.card.destroy": [
     {
       "type": 0,
@@ -18688,6 +18706,30 @@
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "engine.term.delayed.effect": [
+    {
+      "type": 0,
+      "value": "延迟效果"
+    }
+  ],
+  "engine.term.triggered.ability": [
+    {
+      "type": 0,
+      "value": "触发能力"
+    }
+  ],
+  "engine.term.when.this.defends": [
+    {
+      "type": 0,
+      "value": "当此牌进行防守时"
+    }
+  ],
+  "engine.term.whenever.this.fragments": [
+    {
+      "type": 0,
+      "value": "每当此牌 Fragment 时"
     }
   ],
   "footer.legal": [

@@ -477,15 +477,51 @@ export const dynHighRarity: Record<string, CardScript> = {
         return card && has(ctx, card, "mechanologist") ? [card] : [];
       });
       const weaponCard = ctx.player(ctx.seat).weapons.find((card) => has(ctx, card, "mechanologist"));
-      const drivers = ctx
-        .player(ctx.seat)
-        .board.filter((card) => named(ctx, card, "hyper driver"))
-        .slice(0, 3);
-      if (equipment.length === 4 && weaponCard && drivers.length === 3)
+      const drivers = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "hyper driver"));
+      if (equipment.length !== 4 || !weaponCard || drivers.length < 3) return;
+      if (drivers.length === 3) {
         ctx.transformInto(
           "DYN092B",
           [...equipment, weaponCard, ...drivers].map((card) => card.instanceId),
         );
+      } else {
+        ctx.requestCardChoices(
+          "nitro-mechanoid-drivers",
+          decisionPrompt(
+            "Choose 3 Hyper Drivers to transform",
+            "card.dyn.nitromechanoid.hyperdrivers.transform",
+          ),
+          drivers.map((card) => card.instanceId),
+          3,
+          3,
+        );
+      }
+    },
+    onChooseMany(ctx, hook, options) {
+      if (hook !== "nitro-mechanoid-drivers") return;
+      const chosenIds = options.map(Number);
+      const equipment = ["head", "chest", "arms", "legs"].flatMap((slot) => {
+        const card = ctx.player(ctx.seat).equipment[slot as "head" | "chest" | "arms" | "legs"];
+        return card && has(ctx, card, "mechanologist") ? [card] : [];
+      });
+      const weaponCard = ctx.player(ctx.seat).weapons.find((card) => has(ctx, card, "mechanologist"));
+      const driverIds = new Set(
+        ctx.player(ctx.seat).board
+          .filter((card) => named(ctx, card, "hyper driver"))
+          .map((card) => card.instanceId),
+      );
+      if (
+        equipment.length === 4 &&
+        weaponCard &&
+        chosenIds.length === 3 &&
+        new Set(chosenIds).size === 3 &&
+        chosenIds.every((instanceId) => driverIds.has(instanceId))
+      )
+        ctx.transformInto("DYN092B", [
+          ...equipment.map((card) => card.instanceId),
+          weaponCard.instanceId,
+          ...chosenIds,
+        ]);
     },
   },
   "nitro mechanoid|0": {

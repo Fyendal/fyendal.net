@@ -290,6 +290,59 @@ describe("transformed permanent stacks", () => {
     }
   });
 
+  it("chooses which three Hyper Drivers transform into Nitro Mechanoid", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 4,
+          hand: ["construct nitro mechanoid|2"],
+          weapons: ["teklo plasma pistol|0"],
+          equipment: {
+            head: "teklo base head|0",
+            chest: "teklo base chest|0",
+            arms: "teklo base arms|0",
+            legs: "teklo base legs|0",
+          },
+          board: ["hyper driver|0", "hyper driver|1", "hyper driver|2", "hyper driver|3"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    const unselected = g.state.players[0]!.board.find(
+      (card) => card.cardId === printingId("hyper driver|0"),
+    )!;
+    const selected = ["hyper driver|1", "hyper driver|2", "hyper driver|3"].map(
+      (key) => g.state.players[0]!.board.find((card) => card.cardId === printingId(key))!,
+    );
+
+    g.play("construct nitro mechanoid|2", { settle: false }).settle();
+
+    expect(g.state.pendingDecision).toMatchObject({
+      kind: "choose-target",
+      chooseHook: "nitro-mechanoid-drivers",
+      minimumSelections: 3,
+      maximumSelections: 3,
+    });
+    expect(projectStateFor(g.state, 0).pendingDecision?.optionCards).toHaveLength(4);
+    g.doRaw({
+      kind: "choose-many",
+      optionIds: selected.map((card) => String(card.instanceId)),
+    }).settle();
+
+    expect(g.state.players[0]!.board).toContainEqual(
+      expect.objectContaining({ instanceId: unselected.instanceId }),
+    );
+    const nitro = g.state.players[0]!.board.find(
+      (card) => card.cardId === printingId("nitro mechanoid|0"),
+    );
+    expect(nitro?.subcards).toEqual(
+      expect.arrayContaining(
+        selected.map((card) => expect.objectContaining({ cardId: card.cardId })),
+      ),
+    );
+  });
+
   it("allows Nitro Mechanoid to defend from the arena", () => {
     const g = scenario({
       seats: [

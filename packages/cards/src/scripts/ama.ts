@@ -311,7 +311,10 @@ export const ama: Record<string, CardScript> = {
       ctx.grantGoAgain();
     },
     canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined;
+      return (
+        ctx.link?.attackingCard.instanceId === ctx.self.instanceId &&
+        ctx.link.targetAllyId === undefined
+      );
     },
     onHit(ctx) {
       ctx.addModifier({

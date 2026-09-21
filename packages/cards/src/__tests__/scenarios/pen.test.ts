@@ -40,6 +40,29 @@ describe("PEN — import and set mechanics", () => {
     expect(g.state.players[1]!.equipment.chest?.counters?.energy).toBe(0);
   });
 
+  it("Comeback Kicks offers its action point when the crowd cheers its lower-life hero", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "tuffnut|0",
+          life: 10,
+          deck: ["old leather and vim|1"],
+          equipment: { ...NO_EQUIPMENT, legs: "comeback kicks|0" },
+        },
+        { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.activate("tuffnut|0");
+    expect(g.state.pendingDecision?.prompt).toContain("Destroy Comeback Kicks");
+
+    g.chooseOption("yes")
+      .expectAP(0, 2)
+      .expectInZone(0, "comeback kicks|0", "graveyard");
+    expect(g.state.players[0]!.equipment.legs).toBeUndefined();
+  });
+
   it("Blessing of Bellona's newly created Courage does not trigger for the attack that charged", () => {
     const g = scenario({ seats: [
       {

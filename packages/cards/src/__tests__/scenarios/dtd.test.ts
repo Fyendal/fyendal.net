@@ -359,6 +359,37 @@ describe("DTD — registration and core mechanics", () => {
     levia.endTurn().expectLife(0, cardData["DTD103"]!.life!);
   });
 
+  it("Diabolic Offering can defend for 0 before a six-power card is banished", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["diabolic offering|3"] },
+        { hero: "dorinthea", hand: ["head jab|1"] },
+      ],
+      active: 1,
+    });
+
+    s.play("head jab|1")
+      .blockWith("diabolic offering|3")
+      .settle()
+      .expectFinalDefense(0);
+  });
+
+  it("Diabolic Offering defends for 6 after a six-power card is banished", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["diabolic offering|3"] },
+        { hero: "dorinthea", hand: ["head jab|1"] },
+      ],
+      active: 1,
+    });
+    s.state.players[0]!.flags.banishedSixPlusThisTurn = true;
+
+    s.play("head jab|1")
+      .blockWith("diabolic offering|3")
+      .settle()
+      .expectFinalDefense(6);
+  });
+
   it("Levia does not erase Blood Debt already triggered before an end-phase six-power banish", () => {
     const s = scenario({
       seats: [

@@ -80,6 +80,41 @@ describe("SDA — Boost", () => {
     g.expectLog("Hyper Driver gains a steam counter (1 → 2)");
     g.expectLog("remove a steam counter (2 → 1)");
   });
+
+  it.each([
+    "crankshaft|1",
+    "crankshaft|2",
+    "crankshaft|3",
+    "big bertha|1",
+    "big bertha|2",
+    "big bertha|3",
+  ])("%s banished for Boost chooses which Hyper Driver gains steam", (banished) => {
+    const g = scenario({
+      seats: [
+        {
+          ...dash,
+          board: ["hyper driver|1", "hyper driver|2"],
+          hand: ["zero to sixty|1"],
+          deck: [banished],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    const first = boardCard(g, "hyper driver|1");
+    const second = boardCard(g, "hyper driver|2");
+    first.counters = { steam: 3 };
+    second.counters = { steam: 3 };
+
+    g.play("zero to sixty|1", { boost: true });
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "common-hyper-driver-steam-from-boost",
+      options: [String(first.instanceId), String(second.instanceId)],
+    });
+    g.chooseCard("hyper driver|2");
+
+    expect(boardCard(g, "hyper driver|1").counters?.steam).toBe(2);
+    expect(boardCard(g, "hyper driver|2").counters?.steam).toBe(3);
+  });
 });
 
 describe("SDA — Dash attack and item effects", () => {

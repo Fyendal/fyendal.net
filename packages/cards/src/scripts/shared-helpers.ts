@@ -88,6 +88,48 @@ export function localizedCardLog(
   );
 }
 
+const HYPER_DRIVER_STEAM_FROM_BOOST_HOOK = "common-hyper-driver-steam-from-boost";
+
+/** Shared "banished from boosting" effect used by Crankshaft and Big Bertha.
+ * A lone Hyper Driver is unambiguous; multiple copies require their controller
+ * to choose the one that receives the counter. */
+export function hyperDriverCounterFromBoostBanish(): CardScript {
+  const hyperDrivers = (ctx: ScriptCtx) =>
+    ctx.player(ctx.seat).board.filter((card) => ctx.cardData(card.cardId).name === "Hyper Driver");
+  const addCounter = (ctx: ScriptCtx, instanceId: number) => {
+    const driver = hyperDrivers(ctx).find((card) => card.instanceId === instanceId);
+    if (!driver) return;
+    const steam = driver.counters?.steam ?? 0;
+    ctx.addCounter(driver.instanceId, "steam", 1);
+    ctx.logPublic(
+      localizedCardLog(
+        ctx,
+        `${ctx.data.name}: Hyper Driver gains a steam counter (${steam} → ${steam + 1})`,
+        "card.log.sda.hyperdriver.counter",
+        { from: steam, to: steam + 1 },
+      ),
+    );
+  };
+
+  return {
+    onBanishedForBoost(ctx) {
+      const drivers = hyperDrivers(ctx);
+      if (drivers.length === 1) {
+        addCounter(ctx, drivers[0]!.instanceId);
+      } else if (drivers.length > 1) {
+        ctx.requestCardChoice(
+          HYPER_DRIVER_STEAM_FROM_BOOST_HOOK,
+          decisionPrompt("Put a steam counter on a Hyper Driver", "card.common.hyperdriver.steam.add"),
+          drivers.map((card) => card.instanceId),
+        );
+      }
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === HYPER_DRIVER_STEAM_FROM_BOOST_HOOK) addCounter(ctx, Number(option));
+    },
+  };
+}
+
 /** Localize recurring option values without changing the stable value sent
  * back to card scripts. */
 export function commonOptionMessages(

@@ -11,6 +11,7 @@ import {
   decisionMessage,
   decisionPrompt,
   discardRandomCost,
+  hyperDriverCounterFromBoostBanish,
   localizedCardLog,
   mergeSetScripts,
   opponentSeat,
@@ -270,15 +271,6 @@ function hyperDriver(steam: number): CardScript {
         },
       },
     ],
-  };
-}
-
-function crankshaft(): CardScript {
-  return {
-    onBanishedForBoost(ctx) {
-      const driver = ctx.player(ctx.seat).board.find((card) => data(ctx, card).name === "Hyper Driver");
-      if (driver) ctx.addCounter(driver.instanceId, "steam", 1);
-    },
   };
 }
 
@@ -907,7 +899,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   },
 
   // Mechanologist
-  "crankshaft|2": crankshaft(),
+  "crankshaft|2": hyperDriverCounterFromBoostBanish(),
   "hyper driver|2": hyperDriver(2),
   "hyper driver|3": hyperDriver(1),
   "scramble pulse|1": { modifyDefendingEquipmentDefense: () => -1 },

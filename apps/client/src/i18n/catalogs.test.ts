@@ -133,10 +133,12 @@ describe("locale catalogs", () => {
     ).toEqual([]);
   });
 
-  it("contains every semantic log message referenced by engine producers", () => {
+  it("contains every semantic message referenced by engine producers", () => {
     const referencedIds = new Set([...scriptFiles(engineSourceDirectory), serverStoreFile].flatMap((path) =>
       Array.from(
-        readFileSync(path, "utf8").matchAll(/["']((?:engine|server)\.log\.[a-zA-Z0-9.]+)["']/g),
+        readFileSync(path, "utf8").matchAll(
+          /["']((?:engine\.(?:log|term)|server\.log)\.[a-zA-Z0-9.]+)["']/g,
+        ),
         (match) => match[1]!,
       )
     ));

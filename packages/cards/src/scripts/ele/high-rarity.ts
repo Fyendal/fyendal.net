@@ -893,7 +893,7 @@ export const eleHighRarity: Record<string, CardScript> = {
       putCounterCost: { key: "bind", amount: 1 },
       canActivate(ctx) {
         return (
-          ctx.getFlag("player", "playedSubtype:attack") === true ||
+          ctx.getFlag("player", "attackedWithAttackActionThisTurn") === true ||
           ctx.getFlag("player", "defendedWithAttackActionThisTurn") === true
         );
       },

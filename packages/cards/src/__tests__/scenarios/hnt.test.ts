@@ -279,6 +279,41 @@ describe("HNT — marked heroes and daggers", () => {
     expect(g.state.players[0]!.flags[`additionalActivations:${emberblade.instanceId}:0`]).toBe(1);
   });
 
+  it("Dragonscaler Flight Path cannot restore go again suppressed by Spinal Crush", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["spinal crush|1"],
+          resources: 5,
+        },
+        {
+          hero: "dorinthea",
+          heroKey: "cindra, dracai of retribution|0",
+          equipment: { legs: "dragonscaler flight path|0" },
+          hand: ["ignite|1", "wrecker romp|3"],
+        },
+      ],
+    });
+
+    g.play("spinal crush|1")
+      .blockWith()
+      .settle()
+      .endTurn()
+      .play("ignite|1")
+      .blockWith()
+      .activate("dragonscaler flight path|0", { pitch: ["wrecker romp|3"], settle: false })
+      .settle();
+
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "dragonscaler-flight-path",
+      options: ["chain:0"],
+    });
+
+    g.chooseOption("chain:0").expectAP(1, 0);
+    expect(g.state.chain[0]!.goAgain).toBe(false);
+  });
+
   it("Long Whisker Loyalty chooses distinct modes for its Draconic chain links", () => {
     const g = scenario({
       seats: [

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createGame, legalIntents, projectStateFor } from "@fyendal/engine";
+import { actionCandidates, createGame, legalIntents, projectStateFor } from "@fyendal/engine";
 import { cardData, decklists, isImplemented, scripts } from "../../index.js";
 import { functionalKeyOf } from "../../functional.js";
 import { printingId, scenario, type SeatSpec } from "../harness.js";
@@ -155,6 +155,47 @@ describe("OMN — import and set mechanics", () => {
       }));
     },
   );
+
+  it("Red Lure Harpoon keeps the opponent's banished card playable through the controller's next turn", () => {
+    const borrowedCard = "nimblism|1";
+    const g = scenario({
+      seats: [
+        hero("marlynn, treasure hunter|0", {
+          weapons: ["death dealer|0"],
+          arsenal: ["red lure harpoon|3"],
+          resources: 2,
+        }),
+        foe({ graveyard: [borrowedCard] }),
+      ],
+    });
+    g.state.players[0]!.flags.activatedCannonThisTurn = true;
+
+    g.play("red lure harpoon|3", { fromArsenal: true })
+      .blockWith()
+      .settle()
+      .chooseCard(borrowedCard)
+      .expectAP(0, 0)
+      .endTurn()
+      .endTurn();
+
+    const borrowed = g.state.players[1]!.banish.find(
+      (card) => card.cardId === printingId(borrowedCard),
+    );
+    expect(borrowed).toMatchObject({
+      playableBySeat: 0,
+      playableFromUntilEndOfSeatTurn: 0,
+    });
+    expect(actionCandidates(g.state, 0)).toContainEqual(expect.objectContaining({
+      kind: "play-from-zone",
+      zone: "banish",
+      instanceId: borrowed!.instanceId,
+    }));
+    expect(legalIntents(g.state, 0)).toContainEqual(expect.objectContaining({
+      kind: "play-from-zone",
+      zone: "banish",
+      instanceId: borrowed!.instanceId,
+    }));
+  });
 
   it("Draco Fire makes the next Draconic weapon attack cost 1 less to activate", () => {
     const g = scenario({

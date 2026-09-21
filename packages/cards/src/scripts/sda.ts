@@ -1,5 +1,11 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import { decisionMessage, decisionPrompt, localizedCardLog, opponentSeat } from "./shared-helpers.js";
+import {
+  decisionMessage,
+  decisionPrompt,
+  hyperDriverCounterFromBoostBanish,
+  localizedCardLog,
+  opponentSeat,
+} from "./shared-helpers.js";
 
 // SDA — Silver Age Chapter 1 Dash precon.
 // Boost is engine-native: the play intent carries the optional cost and fires
@@ -38,11 +44,7 @@ function boostedLinks(ctx: ScriptCtx): number {
   return ctx.state.chain.filter((l) => l.attacker === ctx.seat && l.flags.boosted === true).length;
 }
 
-const hyperCounterFromBanish: CardScript = {
-  onBanishedForBoost(ctx) {
-    addHyperSteam(ctx);
-  },
-};
+const hyperCounterFromBanish = hyperDriverCounterFromBoostBanish();
 
 const jumpStart: CardScript = {
   modifyPlayCost: (ctx, base) => Math.max(0, base - (controlsHyperDriver(ctx) ? 1 : 0)),

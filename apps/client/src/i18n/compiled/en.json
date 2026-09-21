@@ -1481,6 +1481,12 @@
       "value": "Discard a zombie"
     }
   ],
+  "card.common.hyperdriver.steam.add": [
+    {
+      "type": 0,
+      "value": "Put a steam counter on a Hyper Driver"
+    }
+  ],
   "card.common.levia.transform": [
     {
       "type": 0,
@@ -2327,6 +2333,12 @@
     {
       "type": 0,
       "value": "Choose a card to banish from under Nitro Mechanoid"
+    }
+  ],
+  "card.dyn.nitromechanoid.hyperdrivers.transform": [
+    {
+      "type": 0,
+      "value": "Choose 3 Hyper Drivers to transform"
     }
   ],
   "card.dyn.patience.hero.choose": [
@@ -19414,6 +19426,12 @@
       "value": "Watery Grave resolves without effect because its source left the graveyard"
     }
   ],
+  "engine.term.attack.defended": [
+    {
+      "type": 0,
+      "value": "When the affected attack is defended by 1 or more cards"
+    }
+  ],
   "engine.term.card.destroy": [
     {
       "type": 0,
@@ -19422,6 +19440,30 @@
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "engine.term.delayed.effect": [
+    {
+      "type": 0,
+      "value": "Delayed effect"
+    }
+  ],
+  "engine.term.triggered.ability": [
+    {
+      "type": 0,
+      "value": "Triggered ability"
+    }
+  ],
+  "engine.term.when.this.defends": [
+    {
+      "type": 0,
+      "value": "When this defends"
+    }
+  ],
+  "engine.term.whenever.this.fragments": [
+    {
+      "type": 0,
+      "value": "Whenever this fragments"
     }
   ],
   "footer.legal": [

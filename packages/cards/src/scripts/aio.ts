@@ -224,7 +224,7 @@ export const aio: Record<string, CardScript> = {
     triggers: [
       {
         event: "card-banished-for-boost",
-        sourceZone: "banish",
+        sourceZone: "self",
         label: "Put a steam counter on an item with crank",
         labelMessage: decisionMessage("card.aio.crankitem.steam"),
         effect(ctx) {

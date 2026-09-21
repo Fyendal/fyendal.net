@@ -1,3 +1,4 @@
+import type { GameMessage } from "@fyendal/shared";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { createTestIntl, TestI18nProvider } from "./TestI18nProvider.js";
@@ -20,5 +21,25 @@ describe("localized game-message symbols", () => {
     expect(html).toContain(`alt="${attackLabel}"`);
     expect(html).not.toContain("{p}");
     expect(formatGameMessage(createTestIntl(locale), message)).toBe(`+1 ${attackLabel}`);
+  });
+});
+
+describe("localized game-message terms", () => {
+  it.each([
+    ["en", "Stalagmite, Bastion of Isenloft triggers: When this defends"],
+    ["zh-Hans", "Stalagmite, Bastion of Isenloft 触发：当此牌进行防守时"],
+  ] as const)("composes nested trigger terms in %s", (locale, expected) => {
+    const message = {
+      id: "engine.log.trigger.card",
+      values: {
+        triggerSource: { kind: "card", cardId: "EVR018" },
+        triggerEffect: { kind: "term", id: "engine.term.when.this.defends" },
+        occurrences: 1,
+      },
+    } satisfies GameMessage;
+
+    expect(formatGameMessage(createTestIntl(locale), message, {
+      card: () => "Stalagmite, Bastion of Isenloft",
+    })).toBe(expected);
   });
 });

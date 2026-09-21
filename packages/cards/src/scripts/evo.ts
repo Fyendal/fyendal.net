@@ -4,6 +4,7 @@ import {
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  hyperDriverCounterFromBoostBanish,
   localizedCardLog,
   mergeSetScripts,
   opponentSeat,
@@ -738,8 +739,8 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
     },
   })),
 
-  "big bertha|1": { onBanishedForBoost: addHyperSteam },
-  "big bertha|2": { onBanishedForBoost: addHyperSteam },
+  "big bertha|1": hyperDriverCounterFromBoostBanish(),
+  "big bertha|2": hyperDriverCounterFromBoostBanish(),
   "fender bender|2": { modifyAttack: (ctx) => ctx.link?.defendingEquipment.length ?? 0 },
   "fender bender|3": { modifyAttack: (ctx) => ctx.link?.defendingEquipment.length ?? 0 },
   "out pace|2": { cannotBeDefendedByEquipment: true },
