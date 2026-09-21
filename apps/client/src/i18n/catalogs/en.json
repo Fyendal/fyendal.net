@@ -203,6 +203,7 @@
   "card.sea.bludger.cog.tap": "Tap a cog for overpower?",
   "card.sea.bow.untap": "Untap a bow you control?",
   "card.sea.cog.steam.add": "Put a steam counter on a cog you control",
+  "card.sea.cog.maintenance.choose": "Remove a steam counter or destroy this?",
   "card.sea.cog.tap": "{card}: tap a cog you control?",
   "card.sea.cog.untap": "Untap a cog you control",
   "card.sea.cog.untap.optional": "Untap a cog you control?",

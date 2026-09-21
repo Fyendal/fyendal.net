@@ -185,6 +185,34 @@ describe("SEA — High Seas heroes and cogs", () => {
       .expectInZone(0, "rusty harpoon|3", "hand");
   });
 
+  it("Copper Cog may be destroyed instead of removing its steam counter", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        { hero: "rhinar", board: ["copper cog|3"] },
+        { hero: "dorinthea" },
+      ],
+    });
+    g.state.players[0]!.board[0]!.counters = { steam: 1 };
+
+    g.endTurn();
+
+    expect(g.state.pendingDecision).toMatchObject({
+      player: 0,
+      chooseHook: "sea-cog-maintenance",
+      options: ["remove", "destroy"],
+      promptMessage: { id: "card.sea.cog.maintenance.choose" },
+      optionMessages: [
+        { id: "common.option.remove" },
+        { id: "common.option.destroy" },
+      ],
+    });
+
+    g.chooseOption("destroy")
+      .expectNotInZone(0, "copper cog|3", "board")
+      .expectInZone(0, "copper cog|3", "graveyard");
+  });
+
   it("defaults a created Golden Cog token to Crank", () => {
     const g = scenario({
       seats: [
@@ -207,6 +235,34 @@ describe("SEA — High Seas heroes and cogs", () => {
     ]);
     expect(projectStateFor(g.state, 0).pendingDecision?.promptMessage).toBeDefined();
     expect(projectStateFor(g.state, 1).pendingDecision?.promptMessage).toBeUndefined();
+  });
+
+  it("Polly Cranka's crank does not refund a second action point", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "puffin|0",
+          board: ["gold|0", "polly cranka|0"],
+          deck: ["rusty harpoon|3"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.activate("puffin|0", { settle: false })
+      .chooseCard("gold|0")
+      .chooseOption("yes");
+    expect(g.state.players[0]!.actionPoints).toBe(1);
+
+    g.activate("polly cranka|0", { settle: false })
+      .passPriority()
+      .passPriority();
+    expect(g.state.pendingDecision?.chooseHook).toBe("engine-crank");
+
+    g.chooseOption("yes")
+      .expectInZone(0, "rusty harpoon|3", "hand");
+    expect(g.state.players[0]!.actionPoints).toBe(1);
   });
 
   it("Polly Cranka returns to its owner tapped with steam and offers Crank", () => {
@@ -268,7 +324,7 @@ describe("SEA — High Seas heroes and cogs", () => {
     g.activate("polly cranka|0", { settle: false })
       .passPriority()
       .passPriority()
-      .chooseOption("no")
+      .chooseOption("yes")
       .activate("pearl amulet|3")
       .chooseCard("polly cranka|0");
 

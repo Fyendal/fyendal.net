@@ -414,6 +414,26 @@ describe("Malice Armory Deck spoiled cards", () => {
     expect(g.state.players[0]!.actionPoints).toBe(1);
   });
 
+  it("Restless Steed does not grant go again when another zombie hits", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        board: ["restless steed|1", "restless templar|1"],
+        resources: 1,
+        weapons: ["vox necropolis|0"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.activate("restless templar|1").blockWith().settle();
+
+    expect(g.state.players[0]!.actionPoints).toBe(0);
+    expect(
+      g.state.log.some((entry) => entry.publicText?.includes("Restless Steed triggers: On hit") === true),
+    ).toBe(false);
+  });
+
   it("Restless Steed gains go again when its Vox-generated attack hits", () => {
     const g = scenario({ seats: [
       {

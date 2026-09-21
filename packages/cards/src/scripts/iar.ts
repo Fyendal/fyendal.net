@@ -2617,7 +2617,10 @@ export const iar: Record<string, CardScript> = {
       );
     },
     onChoose(ctx, hook, option) {
-      if (hook === "iar-bravery-charge" && option !== "no") ctx.charge(Number(option));
+      if (hook === "iar-bravery-charge" && option !== "no") {
+        const charged = ctx.charge(Number(option));
+        if (charged) ctx.setCounter("chargedPitch", ctx.cardColor(charged));
+      }
     },
     onAttackDeclared(ctx) {
       if (ctx.getFlag("player", "chargedThisTurn") === true) ctx.grantGoAgain();

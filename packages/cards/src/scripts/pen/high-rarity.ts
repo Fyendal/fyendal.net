@@ -39,6 +39,14 @@ function cardIdNamed(ctx: ScriptCtx, name: string): string | undefined {
 function weaponAttack(ctx: ScriptCtx): boolean {
   return ctx.link?.attackCardType === "weapon";
 }
+function nonHeroPermanents(ctx: ScriptCtx, seat: number): Card[] {
+  const player = ctx.player(seat);
+  return [
+    ...player.board,
+    ...player.weapons,
+    ...Object.values(player.equipment).filter((card): card is Card => card !== undefined),
+  ];
+}
 function attacksAboveBaseControlled(ctx: ScriptCtx, seat: number): number {
   return ctx.state.chain.filter((link) => {
     if (link.attacker !== seat) return false;
@@ -940,13 +948,13 @@ export const penHighRarity: Record<string, CardScript> = {
   },
   "high current currency|3": {
     playTargetOptions(ctx) {
-      return ctx
-        .player(opponentSeat(ctx))
-        .board.filter((card) => !has(ctx, card, "hero") && Number(card.counters?.energy ?? 0) > 0)
+      return nonHeroPermanents(ctx, opponentSeat(ctx))
+        .filter((card) => Number(card.counters?.energy ?? 0) > 0)
         .map((card) => card.instanceId);
     },
     onPlay(ctx) {
-      const target = ctx.player(opponentSeat(ctx)).board.find((card) => card.instanceId === ctx.playTargetInstanceId);
+      const target = nonHeroPermanents(ctx, opponentSeat(ctx))
+        .find((card) => card.instanceId === ctx.playTargetInstanceId);
       if (!target) return;
       const n = Number(target.counters?.energy ?? 0);
       ctx.setCardCounter(target.instanceId, "energy", 0);

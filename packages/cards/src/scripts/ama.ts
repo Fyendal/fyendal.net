@@ -280,6 +280,9 @@ export const ama: Record<string, CardScript> = {
       oncePerTurn: false,
       canActivate: controlsVox,
     }),
+    canTriggerOnHit(ctx) {
+      return ctx.link?.attackingCard.instanceId === ctx.self.instanceId;
+    },
     onHit(ctx) {
       ctx.grantGoAgain();
     },

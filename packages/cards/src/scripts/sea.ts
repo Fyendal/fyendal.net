@@ -113,10 +113,22 @@ function maintenanceCog(steam: number): CardScript {
         labelMessage: decisionMessage("card.trigger.steam.maintain"),
         effect(ctx) {
           if (ctx.getCounter("steam") <= 0) ctx.destroySelf();
-          else ctx.setCounter("steam", ctx.getCounter("steam") - 1);
+          else
+            ctx.requestChoice(
+              "sea-cog-maintenance",
+              decisionPrompt("Remove a steam counter or destroy this?", "card.sea.cog.maintenance.choose", {
+                optionMessages: commonOptionMessages("remove", "destroy"),
+              }),
+              ["remove", "destroy"],
+            );
         },
       },
     ],
+    onChoose(ctx, hook, option) {
+      if (hook !== "sea-cog-maintenance") return;
+      if (option === "remove") ctx.setCounter("steam", Math.max(0, ctx.getCounter("steam") - 1));
+      else ctx.destroySelf();
+    },
   };
 }
 
@@ -1930,7 +1942,7 @@ Object.assign(sea, {
     activated: {
       cost: 0,
       isAttack: false,
-      goAgain: true,
+      goAgain: false,
       tap: true,
       banishSelfCost: true,
       onActivate(ctx: ScriptCtx) {

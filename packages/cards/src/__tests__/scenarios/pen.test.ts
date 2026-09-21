@@ -15,6 +15,31 @@ describe("PEN — import and set mechanics", () => {
     expect(new Set(cards.map(functionalKeyOf))).toHaveLength(348);
   });
 
+  it("High Current Currency can target energy counters on opposing equipment", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["high current currency|3"],
+        equipment: NO_EQUIPMENT,
+      },
+      {
+        hero: "dorinthea",
+        equipment: { ...NO_EQUIPMENT, chest: "fyendal's spring tunic|0" },
+      },
+    ] });
+    const tunic = g.state.players[1]!.equipment.chest!;
+    tunic.counters = { energy: 3 };
+
+    expect(legalIntents(g.state, 0)).toContainEqual(expect.objectContaining({
+      kind: "play-card",
+      targetCardInstanceId: tunic.instanceId,
+    }));
+
+    g.play("high current currency|3", { targetPermanent: "fyendal's spring tunic|0" })
+      .expectZoneSize(0, "board", 3);
+    expect(g.state.players[1]!.equipment.chest?.counters?.energy).toBe(0);
+  });
+
   it("Blessing of Bellona's newly created Courage does not trigger for the attack that charged", () => {
     const g = scenario({ seats: [
       {

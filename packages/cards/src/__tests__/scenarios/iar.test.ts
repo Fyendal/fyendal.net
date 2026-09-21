@@ -2174,6 +2174,25 @@ describe("September 2 IAR spoilers", () => {
     expect(boardNames(g, 0)).toContain("Courage");
   });
 
+  it("Bravery of the Blade receives Charge of the Light Brigade's charged-attack bonus", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["charge of the light brigade|1", "bravery of the blade|1", "raging onslaught|1"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("charge of the light brigade|1")
+      .play("bravery of the blade|1")
+      .chooseCard("raging onslaught|1")
+      .blockWith()
+      .settle()
+      .expectFinalAttack(6)
+      .expectLife(1, 14);
+  });
+
   it("Bravery of the Blade keeps its charge rewards when Spirit of Eirina replaces the soul move", () => {
     const g = scenario({ seats: [
       {

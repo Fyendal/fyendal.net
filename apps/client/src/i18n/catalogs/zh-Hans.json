@@ -203,6 +203,7 @@
   "card.sea.bludger.cog.tap": "横置一个 cog 以获得 overpower？",
   "card.sea.bow.untap": "重置一把由你操控的弓？",
   "card.sea.cog.steam.add": "为一个由你操控的 cog 放置 steam 指示物",
+  "card.sea.cog.maintenance.choose": "移除一个 steam 指示物，或摧毁此牌？",
   "card.sea.cog.tap": "{card}：横置一个由你操控的 cog？",
   "card.sea.cog.untap": "重置一个由你操控的 cog",
   "card.sea.cog.untap.optional": "重置一个由你操控的 cog？",

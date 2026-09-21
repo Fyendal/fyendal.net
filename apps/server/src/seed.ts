@@ -29,7 +29,9 @@
  * Funnel into an empty-handed, unequipped Hala bot; and NEWHOR — a private CC
  * room where Lexi controls New Horizon and a face-up arsenal arrow, with
  * Shiver, another arrow, and both Outsiders Codices ready to exercise the
- * additional arsenal zone.
+ * additional arsenal zone; and LURE01 — a private CC room where Marlynn can
+ * hit an undefended Cindra with Red Lure Harpoon, banish Fire Tenet: Strike
+ * First from Cindra's graveyard, and play it from Cindra's banished zone.
  * These fixtures count as 20 "players in game" in the
  * lobby stats — dev only.
  * Alice also receives one fixed, undismissed bug-report notification for
@@ -76,6 +78,7 @@ const NITRO_TEST_ROOM_CODE = "NITRO8";
 const CURRENT_FUNNEL_TEST_ROOM_CODE = "FUNNEL";
 const NEW_HORIZON_TEST_ROOM_CODE = "NEWHOR";
 const GONE_IN_A_FLASH_TEST_ROOM_CODE = "FLASH1";
+const RED_LURE_TEST_ROOM_CODE = "LURE01";
 const RETIRED_TEST_ROOM_CODES = ["BASEMT"] as const;
 
 /**
@@ -322,6 +325,64 @@ function goneInAFlashTestGameState(): GameState {
   if (state.pendingDecision?.kind !== "attack-reaction" || state.pendingDecision.player !== 0) {
     throw new Error("Gone in a Flash test fixture did not return priority to Oscilio");
   }
+  return state;
+}
+
+/** Marlynn can immediately play Red Lure Harpoon from arsenal. Cindra cannot
+ * defend, and Fire Tenet: Strike First is the only red action in her graveyard,
+ * making the on-hit choice deterministic. The granted go again leaves an
+ * action point available to exercise the opponent-owned banished-card UI. */
+function redLureHarpoonTestGameState(): GameState {
+  const cindra = botDefinition("cindra");
+  const cindraPool = precon(cindra?.deckId ?? "")?.pool;
+  if (!cindra || !cindraPool) {
+    throw new Error("Red Lure Harpoon test fixture bot deck is unavailable");
+  }
+  const marlynn = {
+    heroId: "SEA082",
+    weaponIds: ["SEA084"],
+    equipment: {},
+    deck: ["OMN241", ...Array<string>(59).fill("RNR020")],
+  };
+  const cindraPresentation = cindra.presentationFor(marlynn, "second");
+  const state = createGame({
+    decklists: [
+      marlynn,
+      {
+        heroId: cindraPool.heroId,
+        ...cindraPresentation,
+        deck: [...cindraPresentation.deck, "HNT083"],
+      },
+    ],
+    seed: 9202026,
+    cards: cardData,
+    scripts,
+    startPlayer: 0,
+  });
+
+  const player = state.players[0]!;
+  const playerCards = [...player.hand, ...player.deck];
+  const harpoonIndex = playerCards.findIndex((card) => card.cardId === "OMN241");
+  if (harpoonIndex < 0) throw new Error("Red Lure Harpoon test fixture is missing OMN241");
+  const harpoon = playerCards.splice(harpoonIndex, 1)[0]!;
+  harpoon.arsenalSlot = 0;
+  player.arsenal = [harpoon];
+  player.hand = [];
+  player.deck = playerCards;
+  player.resources = 2;
+  player.actionPoints = 1;
+  player.flags.activatedCannonThisTurn = true;
+  player.flags.nextActionGoAgain = true;
+
+  const opponent = state.players[1]!;
+  const opponentCards = [...opponent.hand, ...opponent.deck];
+  const fireTenetIndex = opponentCards.findIndex((card) => card.cardId === "HNT083");
+  if (fireTenetIndex < 0) throw new Error("Red Lure Harpoon test fixture is missing HNT083");
+  const fireTenet = opponentCards.splice(fireTenetIndex, 1)[0]!;
+  opponent.hand = [];
+  opponent.deck = opponentCards;
+  opponent.graveyard = [fireTenet];
+  opponent.equipment = {};
   return state;
 }
 
@@ -688,7 +749,7 @@ try {
   try {
     // These rooms are disposable local fixture data. Recreate them so rerunning
     // the seed also repairs stale ruleset envelopes and clears dependent history.
-    await pool.query("DELETE FROM rooms WHERE code IN ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)", [
+    await pool.query("DELETE FROM rooms WHERE code IN ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)", [
       DEMO_ROOM_CODE,
       HUNTER_TEST_ROOM_CODE,
       SNAP_ARC_TEST_ROOM_CODE,
@@ -700,6 +761,7 @@ try {
       CURRENT_FUNNEL_TEST_ROOM_CODE,
       NEW_HORIZON_TEST_ROOM_CODE,
       GONE_IN_A_FLASH_TEST_ROOM_CODE,
+      RED_LURE_TEST_ROOM_CODE,
       ...RETIRED_TEST_ROOM_CODES,
     ]);
     await pool.query(
@@ -864,6 +926,51 @@ try {
         cindraPoolForGoneInAFlash.heroId,
         cindraForGoneInAFlash.deckId,
         cindraForGoneInAFlash.deckName,
+      ],
+    );
+    const redLurePrep = { rolls: [6, 1], dieWinner: 0, startPlayer: 0 };
+    const cindraForRedLure = botDefinition("cindra");
+    const cindraPoolForRedLure = precon(cindraForRedLure?.deckId ?? "")?.pool;
+    if (!cindraForRedLure || !cindraPoolForRedLure) {
+      throw new Error("Red Lure Harpoon test fixture room metadata is unavailable");
+    }
+    await pool.query(
+      `INSERT INTO rooms
+        (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at,
+         status, winner, is_private)
+       VALUES ($1, 'cc', '[]', $2, $3, $4, 0, $5, NULL, 'active', NULL, TRUE)`,
+      [
+        RED_LURE_TEST_ROOM_CODE,
+        JSON.stringify(dehydrateState(redLureHarpoonTestGameState(), seedRulesetVersion)),
+        JSON.stringify(redLurePrep),
+        seedRulesetVersion,
+        Date.now(),
+      ],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, user_id, token_hash, username, hero_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 0, $2, $3, 'alice', 'SEA082', 'Red Lure Harpoon borrowed-card test',
+               FALSE, TRUE, 'human')`,
+      [
+        RED_LURE_TEST_ROOM_CODE,
+        aliceId,
+        hashReconnectToken(randomBytes(12).toString("hex")),
+      ],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, token_hash, username, hero_id, deck_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 1, $2, $3, $4, $5, $6, FALSE, TRUE, 'bot')`,
+      [
+        RED_LURE_TEST_ROOM_CODE,
+        hashReconnectToken(randomBytes(12).toString("hex")),
+        cindraForRedLure.username,
+        cindraPoolForRedLure.heroId,
+        cindraForRedLure.deckId,
+        cindraForRedLure.deckName,
       ],
     );
     await pool.query(
@@ -1250,6 +1357,7 @@ try {
   console.log(`seeded Current Funnel room ${CURRENT_FUNNEL_TEST_ROOM_CODE} — log in as alice and open /${CURRENT_FUNNEL_TEST_ROOM_CODE}`);
   console.log(`seeded New Horizon room ${NEW_HORIZON_TEST_ROOM_CODE} — log in as alice and open /${NEW_HORIZON_TEST_ROOM_CODE}`);
   console.log(`seeded Gone in a Flash room ${GONE_IN_A_FLASH_TEST_ROOM_CODE} — log in as alice and open /${GONE_IN_A_FLASH_TEST_ROOM_CODE}`);
+  console.log(`seeded Red Lure Harpoon room ${RED_LURE_TEST_ROOM_CODE} — log in as alice and open /${RED_LURE_TEST_ROOM_CODE}`);
   console.log("seeded fixed bug notification for alice");
 } finally {
   await pool.end();

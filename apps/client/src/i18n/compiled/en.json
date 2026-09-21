@@ -11393,6 +11393,12 @@
       "value": "Untap a bow you control?"
     }
   ],
+  "card.sea.cog.maintenance.choose": [
+    {
+      "type": 0,
+      "value": "Remove a steam counter or destroy this?"
+    }
+  ],
   "card.sea.cog.steam.add": [
     {
       "type": 0,
