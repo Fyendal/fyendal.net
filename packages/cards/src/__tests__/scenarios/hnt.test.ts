@@ -593,7 +593,7 @@ describe("HNT — marked heroes and daggers", () => {
       .expectLog("loses 1 life (18 life)");
   });
 
-  it("Throw Dagger cannot destroy the dagger on the active chain link", () => {
+  it("Throw Dagger targets an off-link dagger when it is played", () => {
     const g = scenario({
       seats: [
         {
@@ -606,18 +606,57 @@ describe("HNT — marked heroes and daggers", () => {
       ],
     });
     g.attackWithWeapon("kunai of retribution|0")
-      .blockWith()
-      .react("throw dagger|3");
+      .blockWith();
 
     const attackingDaggerId = g.state.chain.at(-1)!.attackingCard.instanceId;
     const otherDaggerId = g.state.players[0]!.weapons.find((card) =>
       card.instanceId !== attackingDaggerId
     )!.instanceId;
-    expect(g.state.pendingDecision?.options).toEqual([String(otherDaggerId)]);
-    expect(g.state.pendingDecision?.options).not.toContain(String(attackingDaggerId));
-    g.chooseCard("kunai of retribution|0");
+    const throwDagger = g.state.players[0]!.hand.find(
+      (card) => card.cardId === printingId("throw dagger|3"),
+    )!;
+    const intents = legalIntents(g.state, 0).filter((intent) =>
+      intent.kind === "play-card" && intent.instanceId === throwDagger.instanceId
+    );
+    expect(intents).toHaveLength(1);
+    expect(intents[0]).toMatchObject({ targetCardInstanceId: otherDaggerId });
+
+    g.react("throw dagger|3");
+
     expect(g.state.players[0]!.weapons.some((card) => card.instanceId === attackingDaggerId))
       .toBe(true);
+    expect(g.state.players[0]!.graveyard.some((card) => card.instanceId === otherDaggerId))
+      .toBe(true);
+  });
+
+  it("Boots of Omnis Ward prevention is consumed by Throw Dagger", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 1,
+          weapons: ["kunai of retribution|0", "kunai of retribution|0"],
+          hand: ["throw dagger|3"],
+        },
+        {
+          hero: "dorinthea",
+          equipment: { legs: "boots of omnis ward|0" },
+        },
+      ],
+    });
+
+    g.attackWithWeapon("kunai of retribution|0")
+      .blockWith()
+      .react("throw dagger|3", { settle: false })
+      .passPriority()
+      .activate("boots of omnis ward|0", { settle: false })
+      .settle();
+
+    expect(g.state.players[1]!.flags.preventNextDamage).toBe(0);
+    expect(projectStateFor(g.state, 1).ongoing.some((effect) =>
+      effect.label.includes("prevent next 1 damage")
+    )).toBe(false);
+    g.expectHandSize(0, 0);
   });
 
   it("Throw Dagger cannot be played without an off-link dagger", () => {

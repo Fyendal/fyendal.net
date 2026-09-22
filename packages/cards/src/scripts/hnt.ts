@@ -1196,11 +1196,11 @@ hnt["fang, dracai of blades|0"] = hnt["fang|0"]!;
 
 const AGENTS = ["HNT003", "HNT004", "HNT005", "HNT006", "HNT007", "HNT008"] as const;
 const randomAgent = (ctx: ScriptCtx) => ctx.becomeHero(AGENTS[ctx.randomInt(AGENTS.length)]!);
-const dealWithDagger = (ctx: ScriptCtx, draw = false) => {
-  const daggers = draw ? offLinkDaggerOptions(ctx) : daggerOptions(ctx);
+const dealWithDagger = (ctx: ScriptCtx) => {
+  const daggers = daggerOptions(ctx);
   if (daggers.length)
     ctx.requestCardChoice(
-      draw ? "deal-dagger-draw" : "deal-dagger",
+      "deal-dagger",
       decisionPrompt("Choose a dagger", "card.hnt.dagger.choose"),
       daggers,
     );
@@ -1629,11 +1629,10 @@ Object.assign(hnt, {
   },
   "throw dagger|3": {
     canPlay: (ctx) => !!ctx.link && ctx.link.attacker === ctx.seat && offLinkDaggerOptions(ctx).length > 0,
-    onPlay: (ctx) => dealWithDagger(ctx, true),
-    onChoose(ctx, hook, option) {
-      if (hook !== "deal-dagger-draw") return;
-      const id = Number(option);
-      if (!offLinkDaggerOptions(ctx).includes(id)) return;
+    playTargetOptions: offLinkDaggerOptions,
+    onPlay(ctx) {
+      const id = ctx.playTargetInstanceId;
+      if (id === undefined || !offLinkDaggerOptions(ctx).includes(id)) return;
       if (ctx.dealDamage(opponentSeat(ctx), 1, { sourceInstanceId: id, countsAsHit: true }) > 0) {
         ctx.drawCards(ctx.seat, 1);
       }
