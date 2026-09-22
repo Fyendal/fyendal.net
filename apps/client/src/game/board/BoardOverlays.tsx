@@ -1,12 +1,12 @@
 import type { GameView } from "@fyendal/shared";
 import { useIntl } from "react-intl";
-import { CardFace, InactiveZoneCard } from "../Card.js";
 import { DeckCardToast, type useDeckCardFeedback } from "../DeckCardToast.js";
 import { GameOver } from "../GameOver.js";
 import { HoverCardPreview, type BoardPreview } from "../HoverCardPreview.js";
 import { MobileCardInspect } from "../MobileCardInspect.js";
 import { PostGameFriendAction } from "../../social/PostGameFriendAction.js";
 import type { BoardOverlay } from "./BoardPrimitives.js";
+import { ZoneOverlay } from "./ZoneOverlay.js";
 
 export type { BoardPreview } from "../HoverCardPreview.js";
 
@@ -77,50 +77,12 @@ export function BoardOverlays({
         </div>
       ) : null}
       {overlay ? (
-        <div className="overlay zone-overlay" onClick={onCloseOverlay}>
-          <div
-            className="overlay-panel zone-overlay-panel"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="zone-overlay-title"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="zone-overlay-header">
-              <div className="overlay-title" id="zone-overlay-title">{overlay.title}</div>
-              <button
-                type="button"
-                className="zone-overlay-close"
-                aria-label={intl.formatMessage({ id: "common.closeNamed" }, { title: overlay.title })}
-                onClick={onCloseOverlay}
-              >
-                ×
-              </button>
-            </div>
-            <div
-              className="overlay-cards"
-              onClick={(event) => {
-                if (!window.matchMedia("(max-width: 700px)").matches) return;
-                const cardId = (event.target as HTMLElement)
-                  .closest<HTMLElement>("[data-cardid]")
-                  ?.dataset.cardid;
-                if (cardId) onInspectCard(cardId);
-              }}
-            >
-              {overlay.cards.map((card) => overlay.inactiveZone ? (
-                <InactiveZoneCard
-                  key={card.instanceId}
-                  card={card}
-                  showFaceDownIdentity={
-                    overlay.showOwnedFaceDownIdentities === true &&
-                    yourSeat !== null &&
-                    card.owner === yourSeat
-                  }
-                  revealOwnerIntimidated={yourSeat !== null && card.owner === yourSeat}
-                />
-              ) : <CardFace key={card.instanceId} card={card} size="zone" />)}
-            </div>
-          </div>
-        </div>
+        <ZoneOverlay
+          overlay={overlay}
+          yourSeat={yourSeat}
+          onClose={onCloseOverlay}
+          onInspectCard={onInspectCard}
+        />
       ) : null}
       <MobileCardInspect
         cardId={inspectedCardId}

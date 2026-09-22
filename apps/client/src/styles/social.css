@@ -55,7 +55,10 @@
   background: radial-gradient(circle at 35% 25%, #4a3419, #211508 68%);
   box-shadow: 0 8px 26px #000c, inset 0 1px #ffe7a838;
   color: var(--gold);
+  cursor: grab;
+  touch-action: none;
 }
+.social-dock[data-dragging="true"] .social-bubble { cursor: grabbing; }
 .social-bubble:hover,
 .social-bubble[aria-expanded="true"] { background: radial-gradient(circle at 35% 25%, #604521, #2b1b0a 68%); }
 .social-bubble svg { width: 27px; height: 27px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
@@ -718,4 +721,31 @@
   .chat-log { height: min(46dvh, 350px); }
   .chat-compose { padding-bottom: max(14px, env(safe-area-inset-bottom)); }
   .chat-compose button { width: 32px; min-width: 32px; padding: 0; }
+}
+
+/* A user drag overrides the automatic playmat-aware anchor for this page
+   session. Keep its attached surfaces opening toward the larger free side. */
+.social-dock[data-user-position="true"] { transition: none !important; }
+.social-dock[data-user-position="true"] .social-panel {
+  max-height: var(--social-panel-available-height);
+}
+.social-dock[data-user-position="true"][data-panel-horizontal="start"] .social-panel,
+.social-dock[data-user-position="true"][data-panel-horizontal="start"] .social-message-toast {
+  right: auto;
+  left: 0;
+}
+.social-dock[data-user-position="true"][data-panel-horizontal="end"] .social-panel,
+.social-dock[data-user-position="true"][data-panel-horizontal="end"] .social-message-toast {
+  right: 0;
+  left: auto;
+}
+.social-dock[data-user-position="true"][data-panel-vertical="below"] .social-panel,
+.social-dock[data-user-position="true"][data-panel-vertical="below"] .social-message-toast {
+  top: 64px;
+  bottom: auto;
+}
+.social-dock[data-user-position="true"][data-panel-vertical="above"] .social-panel,
+.social-dock[data-user-position="true"][data-panel-vertical="above"] .social-message-toast {
+  top: auto;
+  bottom: 64px;
 }

@@ -39,7 +39,7 @@ vi.mock("../store.js", () => ({
 }));
 vi.mock("./FriendRoomModal.js", () => ({ FriendRoomModal: () => null }));
 
-import { SocialDock } from "./SocialDock.js";
+import { clampSocialDockPosition, SocialDock } from "./SocialDock.js";
 import { PostGameFriendAction } from "./PostGameFriendAction.js";
 
 function render(): string {
@@ -49,6 +49,19 @@ function render(): string {
 }
 
 describe("SocialDock", () => {
+  it("keeps a dragged bubble within the viewport", () => {
+    expect(clampSocialDockPosition(
+      { x: -100, y: 500 },
+      { width: 52, height: 52 },
+      { width: 320, height: 240 },
+    )).toEqual({ x: 8, y: 180 });
+    expect(clampSocialDockPosition(
+      { x: 20, y: 20 },
+      { width: 52, height: 52 },
+      { width: 40, height: 40 },
+    )).toEqual({ x: 0, y: 0 });
+  });
+
   it("collapses to an accessible bubble and caps the aggregate badge", () => {
     Object.assign(mocks.state, {
       socialOpen: false,
@@ -60,6 +73,7 @@ describe("SocialDock", () => {
     expect(html).toContain('aria-expanded="false"');
     expect(html).toContain("99+");
     expect(html).not.toContain("social-panel-header");
+    expect(html).not.toContain("data-user-position");
   });
 
   it("shows requests, live invitations, and friends without a busy status", () => {

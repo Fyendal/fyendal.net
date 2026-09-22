@@ -21198,6 +21198,30 @@
       "value": "扣置区"
     }
   ],
+  "game.zone.sort.cardName": [
+    {
+      "type": 0,
+      "value": "名称"
+    }
+  ],
+  "game.zone.sort.label": [
+    {
+      "type": 0,
+      "value": "排序方式"
+    }
+  ],
+  "game.zone.sort.pitch": [
+    {
+      "type": 0,
+      "value": "扣置"
+    }
+  ],
+  "game.zone.sort.zoneOrder": [
+    {
+      "type": 0,
+      "value": "区域顺序"
+    }
+  ],
   "game.zone.stackedCards": [
     {
       "type": 0,

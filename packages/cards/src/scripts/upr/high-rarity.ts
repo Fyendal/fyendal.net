@@ -92,6 +92,9 @@ const fai: CardScript = {
         "fai-start-flame",
         yesNoPrompt("Start the game with a Phoenix Flame in your graveyard?", "card.upr.fai.startflame"),
         ["yes", "no"],
+        undefined,
+        undefined,
+        "yes",
       );
     }
   },

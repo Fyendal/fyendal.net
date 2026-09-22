@@ -102,6 +102,7 @@ describe("UPR — registration and heroes", () => {
       player: 0,
       chooseHook: "fai-start-flame",
       options: ["yes", "no"],
+      defaultOption: "yes",
     });
 
     const answered = applyIntent(setup, 0, { kind: "choose", optionId });

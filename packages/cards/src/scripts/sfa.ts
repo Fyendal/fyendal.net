@@ -181,6 +181,9 @@ export const sfa: Record<string, CardScript> = {
         "fai-start-flame",
         yesNoPrompt("Fai: start the game with a Phoenix Flame in your graveyard?", "card.sfa.fai.flame.start"),
         ["yes", "no"],
+        undefined,
+        undefined,
+        "yes",
       );
     },
     // "Once per Turn Instant — {r}{r}{r}: Return a Phoenix Flame from your

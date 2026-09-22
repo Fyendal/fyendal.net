@@ -34,6 +34,32 @@
   background: #1a120a;
 }
 .zone-overlay-header .overlay-title { margin-bottom: 0; }
+.zone-overlay-toolbar {
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+.zone-overlay-sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font: 700 12px/1 var(--font-lobby-ui);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.zone-overlay-sort select {
+  min-height: 36px;
+  padding: 6px 30px 6px 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 2px;
+  background: var(--surface-control);
+  color: var(--text-primary);
+  font: 500 14px/1.2 var(--font-lobby-ui);
+  letter-spacing: normal;
+  text-transform: none;
+}
 .zone-overlay-close {
   display: grid;
   flex: 0 0 auto;

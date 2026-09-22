@@ -22020,6 +22020,30 @@
       "value": "Pitch"
     }
   ],
+  "game.zone.sort.cardName": [
+    {
+      "type": 0,
+      "value": "Name"
+    }
+  ],
+  "game.zone.sort.label": [
+    {
+      "type": 0,
+      "value": "Sort by"
+    }
+  ],
+  "game.zone.sort.pitch": [
+    {
+      "type": 0,
+      "value": "Pitch"
+    }
+  ],
+  "game.zone.sort.zoneOrder": [
+    {
+      "type": 0,
+      "value": "Zone order"
+    }
+  ],
   "game.zone.stackedCards": [
     {
       "type": 6,

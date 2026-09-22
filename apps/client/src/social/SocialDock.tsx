@@ -1,10 +1,49 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import { ModalSurface } from "../components/ModalSurface.js";
 import { formatLabel } from "../lobby/FormatBadge.js";
 import { useStore } from "../store.js";
 import { FriendRoomModal } from "./FriendRoomModal.js";
+
+const SOCIAL_DOCK_MARGIN = 8;
+const SOCIAL_DOCK_DRAG_THRESHOLD = 5;
+
+interface DockPosition {
+  x: number;
+  y: number;
+}
+
+interface DockDrag {
+  pointerId: number;
+  startX: number;
+  startY: number;
+  originX: number;
+  originY: number;
+  width: number;
+  height: number;
+  moved: boolean;
+}
+
+function axisBounds(viewportSize: number, itemSize: number) {
+  const available = Math.max(0, viewportSize - itemSize);
+  const inset = Math.min(SOCIAL_DOCK_MARGIN, available / 2);
+  return { min: inset, max: available - inset };
+}
+
+export function clampSocialDockPosition(
+  position: DockPosition,
+  dockSize: { width: number; height: number },
+  viewportSize: { width: number; height: number },
+): DockPosition {
+  const horizontal = axisBounds(viewportSize.width, dockSize.width);
+  const vertical = axisBounds(viewportSize.height, dockSize.height);
+  return {
+    x: Math.max(horizontal.min, Math.min(position.x, horizontal.max)),
+    y: Math.max(vertical.min, Math.min(position.y, vertical.max)),
+  };
+}
 
 const SOCIAL_ERROR_IDS = {
   USER_NOT_FOUND: "social.error.userNotFound",
@@ -19,6 +58,8 @@ const SOCIAL_ERROR_IDS = {
 export function SocialDock() {
   const intl = useIntl();
   const dockRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<DockDrag | null>(null);
+  const suppressBubbleClickRef = useRef(false);
   const {
     authUser,
     screen,
@@ -63,6 +104,7 @@ export function SocialDock() {
     acceptInvite: state.acceptFriendGameInvite,
   })));
   const [username, setUsername] = useState("");
+  const [dockPosition, setDockPosition] = useState<DockPosition | null>(null);
   const incoming = requests.filter((request) => request.direction === "incoming");
   const outgoing = requests.filter((request) => request.direction === "outgoing");
   const sortedFriends = useMemo(() => [...friends].sort((a, b) =>
@@ -78,6 +120,25 @@ export function SocialDock() {
     const timeout = window.setTimeout(dismissIncomingChatToast, 6_000);
     return () => window.clearTimeout(timeout);
   }, [dismissIncomingChatToast, incomingChatToast]);
+
+  useEffect(() => {
+    if (!authUser) return;
+    const keepDockInViewport = () => {
+      const dock = dockRef.current;
+      if (!dock) return;
+      setDockPosition((current) => {
+        if (!current) return null;
+        const rect = dock.getBoundingClientRect();
+        const next = clampSocialDockPosition(current, rect, {
+          width: window.innerWidth,
+          height: window.innerHeight,
+        });
+        return next;
+      });
+    };
+    window.addEventListener("resize", keepDockInViewport);
+    return () => window.removeEventListener("resize", keepDockInViewport);
+  }, [authUser]);
 
   useEffect(() => {
     if (!open) return;
@@ -117,6 +178,59 @@ export function SocialDock() {
 
   if (!authUser) return null;
 
+  const panelHorizontal = dockPosition
+    ? dockPosition.x <= window.innerWidth - dockPosition.x - 52 ? "start" : "end"
+    : undefined;
+  const panelVertical = dockPosition
+    ? dockPosition.y <= window.innerHeight - dockPosition.y - 52 ? "below" : "above"
+    : undefined;
+  const dockStyle: (CSSProperties & { "--social-panel-available-height"?: string }) | undefined = dockPosition
+    ? {
+        top: dockPosition.y,
+        right: "auto",
+        bottom: "auto",
+        left: dockPosition.x,
+        "--social-panel-available-height": `${Math.max(
+          0,
+          panelVertical === "below"
+            ? window.innerHeight - dockPosition.y - 72
+            : dockPosition.y - 20,
+        )}px`,
+      }
+    : undefined;
+
+  const moveBubble = (event: React.PointerEvent<HTMLButtonElement>) => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const deltaX = event.clientX - drag.startX;
+    const deltaY = event.clientY - drag.startY;
+    if (!drag.moved && Math.hypot(deltaX, deltaY) < SOCIAL_DOCK_DRAG_THRESHOLD) return;
+    if (!drag.moved) {
+      drag.moved = true;
+      suppressBubbleClickRef.current = true;
+      dockRef.current?.setAttribute("data-dragging", "true");
+      if (open) setOpen(false);
+    }
+    event.preventDefault();
+    const next = clampSocialDockPosition(
+      { x: drag.originX + deltaX, y: drag.originY + deltaY },
+      drag,
+      { width: window.innerWidth, height: window.innerHeight },
+    );
+    setDockPosition(next);
+  };
+
+  const finishBubbleDrag = (event: React.PointerEvent<HTMLButtonElement>, canceled = false) => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    dragRef.current = null;
+    dockRef.current?.removeAttribute("data-dragging");
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    if (canceled) suppressBubbleClickRef.current = false;
+  };
+
   const submitRequest = (event: React.FormEvent) => {
     event.preventDefault();
     const target = username.trim();
@@ -130,6 +244,10 @@ export function SocialDock() {
       <div
         ref={dockRef}
         className="social-dock"
+        data-user-position={dockPosition ? "true" : undefined}
+        data-panel-horizontal={panelHorizontal}
+        data-panel-vertical={panelVertical}
+        style={dockStyle}
         onBlur={(event) => {
           if (!open) return;
           const nextFocus = event.relatedTarget;
@@ -313,7 +431,31 @@ export function SocialDock() {
           className="social-bubble"
           aria-label={intl.formatMessage({ id: "social.friends" })}
           aria-expanded={open}
+          onPointerDown={(event) => {
+            if (event.button !== 0) return;
+            const rect = dockRef.current?.getBoundingClientRect();
+            if (!rect) return;
+            suppressBubbleClickRef.current = false;
+            dragRef.current = {
+              pointerId: event.pointerId,
+              startX: event.clientX,
+              startY: event.clientY,
+              originX: rect.left,
+              originY: rect.top,
+              width: rect.width,
+              height: rect.height,
+              moved: false,
+            };
+            event.currentTarget.setPointerCapture(event.pointerId);
+          }}
+          onPointerMove={moveBubble}
+          onPointerUp={finishBubbleDrag}
+          onPointerCancel={(event) => finishBubbleDrag(event, true)}
           onClick={() => {
+            if (suppressBubbleClickRef.current) {
+              suppressBubbleClickRef.current = false;
+              return;
+            }
             if (!open) dismissIncomingChatToast();
             setOpen(!open);
           }}

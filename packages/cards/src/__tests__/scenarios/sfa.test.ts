@@ -93,6 +93,12 @@ describe("SFA — Fai", () => {
       cards: cardData,
       scripts,
     });
+    expect(state.pendingDecision).toMatchObject({
+      player: 0,
+      chooseHook: "fai-start-flame",
+      options: ["yes", "no"],
+      defaultOption: "yes",
+    });
     const accepted = applyIntent(state, 0, { kind: "choose", optionId: "yes" });
     expect(accepted.ok).toBe(true);
     if (accepted.ok) state = accepted.state;
