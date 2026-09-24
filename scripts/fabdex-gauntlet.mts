@@ -19,7 +19,12 @@
  *
  *   pnpm --filter @fyendal/server exec node --import tsx ../../scripts/fabdex-gauntlet.mts \
  *     --corpus /path/to/fyendal_corpus.jsonl --games 2 [--bots ira,hala] [--limit 50] \
- *     [--out /path/to/summary.json]
+ *     [--force-open] [--shard 0/8] [--out /path/to/summary.json]
+ *
+ * `--force-open` presents the human deck in `open` mode for play. The META corpus is
+ * historical, so many decks hold cards banned today; the native-mode legality verdict is still
+ * counted (`nativePresentationFailures`), and play then exercises the engine on every deck.
+ * `--shard i/N` plays every N-th deck starting at i, so N processes can split one run.
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { performance } from "node:perf_hooks";
@@ -85,6 +90,8 @@ const { values: args } = parseArgs({
     "seed-base": { type: "string", default: "20260924" },
     "max-steps": { type: "string", default: "6000" },
     out: { type: "string" },
+    "force-open": { type: "boolean", default: false },
+    shard: { type: "string" },
   },
 });
 if (!args.corpus) {
@@ -97,11 +104,24 @@ const MAX_STEPS = Number(args["max-steps"]);
 const BOT_FILTER = args.bots ? new Set(args.bots.split(",")) : null;
 const EQUIPMENT_SLOTS: EquipmentSlot[] = ["head", "chest", "arms", "legs"];
 
+const [SHARD_I, SHARD_N] = (args.shard ?? "0/1").split("/").map(Number) as [number, number];
 const decks: CorpusDeck[] = readFileSync(args.corpus, "utf8")
   .split("\n")
   .filter((line) => line.trim())
   .map((line) => JSON.parse(line) as CorpusDeck)
-  .slice(0, args.limit ? Number(args.limit) : undefined);
+  .slice(0, args.limit ? Number(args.limit) : undefined)
+  .filter((_deck, idx) => idx % SHARD_N === SHARD_I);
+
+function lastLog(state: GameState, n = 4): string {
+  return state.log.slice(-n).map((entry) => entry.publicText
+    ?? entry.seatText?.filter((text): text is string => text !== null).join(" / ")
+    ?? "(private)").join(" | ");
+}
+
+function pendingOf(state: GameState): string {
+  const pending = state.pendingDecision as { kind?: string; player?: number } | null;
+  return pending ? `${pending.kind ?? "?"}@${pending.player ?? "?"}` : `priority@${state.priorityPlayer}`;
+}
 
 function makeRand(seed: number) {
   const carrier = { rngState: seed | 0 };
@@ -150,9 +170,14 @@ function percentile(sorted: number[], q: number): number {
 
 const importFailures: { deck: string; errors: string[]; missing: string[]; unimplemented: string[] }[] = [];
 const presentationFailures: { deck: string; side: string; error: string }[] = [];
+const nativePresentationFailures: { deck: string; error: string }[] = [];
 const missingByName = new Map<string, number>();
 const games: GameRecord[] = [];
 const botMs: number[] = [];
+// `choose-name` is free-form (the client submits a registered card name), so `legalIntents`
+// offers nothing but concede. The random seat answers like a human would: it names a card from
+// the opponent's deck. Counted, so a run can say how often it happened.
+let namedCards = 0;
 const botMsByBot = new Map<string, number[]>();
 
 function playOne(deck: CorpusDeck, human: Decklist, bot: BotDefinition, botDeck: Decklist, seed: number, humanFirst: boolean): GameRecord {
@@ -178,9 +203,24 @@ function playOne(deck: CorpusDeck, human: Decklist, bot: BotDefinition, botDeck:
   try {
     while (state.winner === null && steps < MAX_STEPS) {
       const seat = state.pendingDecision?.player ?? state.priorityPlayer;
-      const legal = legalIntents(state, seat).filter((intent) => intent.kind !== "concede");
+      const all = legalIntents(state, seat);
+      let legal = all.filter((intent) => intent.kind !== "concede");
+      const pendingKind = (state.pendingDecision as { kind?: string } | null)?.kind;
+      if (!legal.length && pendingKind === "choose-name" && seat === humanSeat) {
+        const names = botDeck.deck.map((id) => cardData[id]?.name).filter((n): n is string => !!n);
+        const name = names[Math.floor(rand() * names.length)] ?? cardData[botDeck.heroId]?.name ?? "";
+        legal = [{ kind: "choose", optionId: name } as GameIntent];
+        namedCards++;
+      }
       if (!legal.length) {
-        return { ...base, outcome: "rejected", winner: null, turns: state.turn, steps, detail: `no legal intents for seat ${seat}` };
+        return {
+          ...base,
+          outcome: "rejected",
+          winner: null,
+          turns: state.turn,
+          steps,
+          detail: `no legal intents for seat ${seat} (pending ${pendingOf(state)}, unfiltered ${JSON.stringify(all.map((i) => i.kind))}, phase ${state.phase}, active ${state.activePlayer}, stack ${state.stack.length}, chain ${state.chain.length}, other seat ${JSON.stringify(legalIntents(state, 1 - seat).map((i) => i.kind))}) · last: ${lastLog(state, 6)}`,
+        };
       }
       let intent: GameIntent;
       if (seat === botSeat) {
@@ -209,7 +249,7 @@ function playOne(deck: CorpusDeck, human: Decklist, bot: BotDefinition, botDeck:
           winner: null,
           turns: state.turn,
           steps,
-          detail: `${who} ${JSON.stringify(intent)} → ${result.error}`,
+          detail: `${who} ${JSON.stringify(intent)} → ${result.error} (pending ${pendingOf(state)}, legal ${JSON.stringify(legal.map((i) => i.kind))}) · last: ${lastLog(state)}`,
         };
       }
       state = result.state;
@@ -234,7 +274,12 @@ function playOne(deck: CorpusDeck, human: Decklist, bot: BotDefinition, botDeck:
 }
 
 const started = performance.now();
+let decksDone = 0;
 for (const deck of decks) {
+  if (decksDone++ % 25 === 0) {
+    const secs = ((performance.now() - started) / 1000).toFixed(0);
+    console.error(`[shard ${SHARD_I}/${SHARD_N}] deck ${decksDone}/${decks.length} · games ${games.length} · ${secs}s`);
+  }
   const validation = validateDeck(deck.lines, deck.format);
   if (!validation.ok) {
     importFailures.push({ deck: deck.hostRef, errors: validation.errors, missing: validation.missing, unimplemented: validation.unimplemented });
@@ -244,9 +289,12 @@ for (const deck of decks) {
     continue;
   }
   const pool = validation.decklist;
-  const presented = validatePresentation(pool, presentFromPool(pool, deck.format), deck.format, {
-    cardPoolMode: deck.cardPoolMode,
-  });
+  const carved = presentFromPool(pool, deck.format);
+  const native = validatePresentation(pool, carved, deck.format, { cardPoolMode: deck.cardPoolMode });
+  if (!native.ok) nativePresentationFailures.push({ deck: deck.hostRef, error: native.error });
+  const presented = args["force-open"]
+    ? validatePresentation(pool, carved, deck.format, { cardPoolMode: "open" })
+    : native;
   if (!presented.ok) {
     presentationFailures.push({ deck: deck.hostRef, side: "human", error: presented.error });
     continue;
@@ -294,10 +342,14 @@ const summary = {
   importRate: decks.length ? imported / decks.length : 0,
   byFormat: Object.fromEntries(byFormat),
   presentationFailures: presentationFailures.length,
+  nativePresentationFailures: nativePresentationFailures.length,
+  forceOpen: args["force-open"],
+  shard: `${SHARD_I}/${SHARD_N}`,
   games: games.length,
   outcomes: Object.fromEntries(byOutcome),
   turnsP50: percentile(turns, 0.5),
   turnsP90: percentile(turns, 0.9),
+  namedCards,
   botDecisionMs: { n: botMs.length, p50: percentile(botMs, 0.5), p99: percentile(botMs, 0.99), max: botMs.at(-1) ?? 0 },
   botDecisionMsByBot: Object.fromEntries(
     [...botMsByBot].map(([id, list]) => {
@@ -314,7 +366,7 @@ const summary = {
 
 console.log(`decks ${summary.decks} · imported ${imported} (${(100 * summary.importRate).toFixed(1)}%)`);
 for (const [key, row] of byFormat) console.log(`  ${key}: ${row.imported}/${row.total}`);
-console.log(`presentation failures ${presentationFailures.length}`);
+console.log(`presentation failures ${presentationFailures.length} (native-mode legality failures ${nativePresentationFailures.length}${args["force-open"] ? ", played open" : ""})`);
 console.log(`games ${games.length} · outcomes ${JSON.stringify(summary.outcomes)} · turns p50 ${summary.turnsP50} p90 ${summary.turnsP90}`);
 console.log(`bot decision ms p50 ${summary.botDecisionMs.p50.toFixed(1)} p99 ${summary.botDecisionMs.p99.toFixed(1)} max ${summary.botDecisionMs.max.toFixed(1)} (n ${botMs.length})`);
 console.log(`elapsed ${elapsed.toFixed(1)}s`);
