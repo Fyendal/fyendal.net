@@ -30,6 +30,12 @@ function named(ctx: ScriptCtx, card: Card, name: string): boolean {
 function isAura(ctx: ScriptCtx, card: Card): boolean {
   return has(ctx, card, "aura");
 }
+function isFlickerBlinkTarget(ctx: ScriptCtx, card: Card): boolean {
+  return card.instanceId !== ctx.self.instanceId &&
+    has(ctx, card, "lightning") &&
+    isAura(ctx, card) &&
+    Number(card.counters?.holo ?? 0) === 0;
+}
 function isInstant(ctx: ScriptCtx, card: Card): boolean {
   return ctx.hasCardType(card, "instant");
 }
@@ -97,30 +103,35 @@ export const omnHighRarity: Record<string, CardScript> = {
   },
   "flicker reality|3": {
     wardValue: () => 1,
-    onLeaveArena(ctx) {
-      const auras = ctx
-        .player(ctx.seat)
-        .board.filter(
-          (card) =>
-            card.instanceId !== ctx.self.instanceId &&
-            has(ctx, card, "lightning") &&
-            isAura(ctx, card) &&
-            Number(card.counters?.holo ?? 0) === 0,
-        );
-      if (auras.length)
-        ctx.requestCardChoice(
-          "flicker-holo",
-          decisionPrompt("Blink a Lightning aura with a holo counter?", "card.omn.lightning.aura.holo.blink", {
-            optionMessages: commonOptionMessages("no"),
-          }),
-          ["no", ...auras.map((card) => card.instanceId)],
-        );
-    },
+    triggers: [
+      {
+        event: "card-left-arena",
+        sourceZone: "any",
+        label: "Blink another Lightning aura with a holo counter",
+        labelMessage: decisionMessage("card.omn.lightning.aura.holo.blink"),
+        condition: (ctx, left) => left?.instanceId === ctx.self.instanceId,
+        effect(ctx) {
+          const auras = ctx.player(ctx.seat).board.filter((card) => isFlickerBlinkTarget(ctx, card));
+          if (auras.length)
+            ctx.requestCardChoice(
+              "flicker-holo",
+              decisionPrompt("Blink a Lightning aura with a holo counter?", "card.omn.lightning.aura.holo.blink", {
+                optionMessages: commonOptionMessages("no"),
+              }),
+              ["no", ...auras.map((card) => card.instanceId)],
+            );
+        },
+      },
+    ],
     onChoose(ctx, hook, option) {
-      if (hook === "flicker-holo" && option !== "no" && ctx.banish(Number(option))) {
-        ctx.setCardCounter(Number(option), "holo", 1);
-        ctx.settleCard(Number(option));
-      }
+      if (hook !== "flicker-holo" || option === "no") return;
+      const id = Number(option);
+      const aura = ctx.player(ctx.seat).board.find(
+        (card) => card.instanceId === id && isFlickerBlinkTarget(ctx, card),
+      );
+      if (!aura || !ctx.banish(id)) return;
+      ctx.setCardCounter(id, "holo", 1);
+      ctx.settleCard(id);
     },
   },
   "fractal creation|3": {

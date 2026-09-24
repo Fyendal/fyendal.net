@@ -256,6 +256,7 @@ const KEYWORD_OVERRIDES: Record<string, string[]> = {
   "seek vengeance|3": ["Combo"],
   "vengeance never rests|3": ["Combo"],
   // High Seas keywords below are granted only after their printed conditions hold.
+  "cogwerx dovetail|1": [],
   "cloud skiff|1": [],
   "cloud skiff|2": [],
   "cloud skiff|3": [],

@@ -2580,6 +2580,34 @@ describe("September 3 IAR spoilers", () => {
       .expectInZone(0, "raging onslaught|1", "banish");
   });
 
+  it("Feeding Frenzy gains go again when Hex Gauntlet is banished after it attacks", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["feeding frenzy|1"],
+        deck: ["snatch|1"],
+        resources: 2,
+        equipment: {
+          ...NO_EQUIPMENT,
+          arms: "hex gauntlet|0",
+          legs: "hooves of the shadowbeast|0",
+        },
+      },
+      { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("feeding frenzy|1")
+      .blockWith()
+      .activate("hex gauntlet|0")
+      .chooseOption("yes")
+      .chooseCard("hex gauntlet|0")
+      .settle()
+      .expectAP(0, 2)
+      .expectNoEquipment(0, "arms")
+      .expectNoEquipment(0, "legs")
+      .expectInZone(0, "hex gauntlet|0", "banish");
+  });
+
   it("Blasmophet's Boon counts as six power when banished while controlling Blasmophet", () => {
     const g = scenario({ seats: [
       {

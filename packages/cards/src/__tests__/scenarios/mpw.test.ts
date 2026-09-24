@@ -63,6 +63,32 @@ describe("MPW — import and Warrior mastery", () => {
       .expectNotInZone(0, "blade dance|0", "board");
   });
 
+  it("Blade Dance still grants go again after Twinning Blade grants another sword attack", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          weapons: ["dawnblade|0"],
+          equipment: NO_EQUIPMENT,
+          resources: 2,
+          hand: ["twinning blade|2"],
+          board: ["blade dance|0"],
+        },
+        hala(),
+      ],
+    });
+
+    g.activate("dawnblade|0")
+      .blockWith()
+      .react("twinning blade|2", { settle: false })
+      .expectAP(0, 0)
+      .settle()
+      .expectAP(0, 1)
+      .activate("dawnblade|0")
+      .blockWith()
+      .settle();
+  });
+
   it("Longsword Leggings consumes an action point when it creates a token", () => {
     const g = scenario({
       seats: [

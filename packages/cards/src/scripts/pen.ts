@@ -86,6 +86,15 @@ function named(ctx: ScriptCtx, card: Card | string, name: string): boolean {
     : ctx.cardNames(card).includes(wanted);
 }
 
+function hitWithDaggerThisChain(ctx: ScriptCtx): boolean {
+  return ctx.state.chain.some(
+    (link) =>
+      link.attacker === ctx.seat &&
+      ((link.damage > 0 && hasTag(ctx, link.attackingCard, "dagger")) ||
+        Number(link.flags["effectDamageBySubtype:dagger"]) > 0),
+  );
+}
+
 function requestDeepRecessesBanish(ctx: ScriptCtx, startSeat = 0): void {
   for (let seat = startSeat; seat < ctx.state.players.length; seat++) {
     const player = ctx.player(seat);
@@ -1118,9 +1127,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   },
   ...pitches("excessive bloodloss", () => contractColor(1, true)),
   ...pitches("knife through", () => ({
-    onAttackDeclared(ctx) {
-      if (ctx.hitsThisCombatChain() > 0) ctx.grantGoAgain();
-    },
+    hasConditionalGoAgain: (ctx) => hitWithDaggerThisChain(ctx),
   })),
   "song of larinkmorth white|3": {
     onPlay(ctx) {

@@ -1121,6 +1121,63 @@ describe("OMN — import and set mechanics", () => {
       .expectInZone(0, "corrosive space dust|1", "board");
   });
 
+  it("resolves Flicker Reality after Ward and excludes a destroyed aura", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        hero("zyggy|0", {
+          board: [
+            "flicker reality|3",
+            "fleeing starbreeze|3",
+            "corrosive space dust|1",
+          ],
+        }),
+        foe({ hand: ["head jab|2"] }),
+      ],
+    });
+    const flicker = g.state.players[0]!.board.find(
+      (card) => functionalKeyOf(cardData[card.cardId]!) === "flicker reality|3",
+    );
+    const starbreeze = g.state.players[0]!.board.find(
+      (card) => functionalKeyOf(cardData[card.cardId]!) === "fleeing starbreeze|3",
+    );
+    const spaceDust = g.state.players[0]!.board.find(
+      (card) => functionalKeyOf(cardData[card.cardId]!) === "corrosive space dust|1",
+    );
+    expect(flicker).toBeDefined();
+    expect(starbreeze).toBeDefined();
+    expect(spaceDust).toBeDefined();
+
+    g.play("head jab|2").blockWith().settle();
+    expect(g.state.pendingDecision).toMatchObject({
+      player: 0,
+      chooseHook: "ward",
+    });
+
+    g.doRaw({ kind: "choose", optionId: `destroy ${flicker!.instanceId}` }).settle();
+    expect(g.state.pendingDecision).toMatchObject({
+      player: 0,
+      chooseHook: "ward",
+    });
+
+    g.doRaw({ kind: "choose", optionId: `destroy ${starbreeze!.instanceId}` }).settle();
+    expect(g.state.pendingDecision).toMatchObject({
+      player: 0,
+      chooseHook: "flicker-holo",
+      options: ["no", String(spaceDust!.instanceId)],
+    });
+    expect(g.state.pendingDecision?.options).not.toContain(String(starbreeze!.instanceId));
+
+    g.chooseCard("corrosive space dust|1")
+      .chooseOption("opposing hero")
+      .expectInZone(0, "corrosive space dust|1", "board")
+      .expectLife(1, 19);
+    const returnedSpaceDust = g.state.players[0]!.board.find(
+      (card) => functionalKeyOf(cardData[card.cardId]!) === "corrosive space dust|1",
+    );
+    expect(returnedSpaceDust?.counters?.holo).toBe(1);
+  });
+
   it("Cosmic Duality can be discarded from hand for its instant ability", () => {
     const g = scenario({
       seats: [

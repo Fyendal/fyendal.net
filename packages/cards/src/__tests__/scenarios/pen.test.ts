@@ -63,6 +63,34 @@ describe("PEN — import and set mechanics", () => {
     expect(g.state.players[0]!.equipment.legs).toBeUndefined();
   });
 
+  it("Knife Through gets go again when Flick Knives makes a dagger hit during reactions", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["kunai of retribution|0"],
+          equipment: { ...NO_EQUIPMENT, arms: "flick knives|0" },
+          hand: ["knife through|1"],
+        },
+        {
+          hero: "dorinthea",
+          hand: ["wounding blow|1"],
+          equipment: NO_EQUIPMENT,
+        },
+      ],
+    });
+    const kunaiId = g.state.players[0]!.weapons[0]!.instanceId;
+
+    g.play("knife through|1")
+      .blockWith("wounding blow|1")
+      .expectAP(0, 0)
+      .activate("flick knives|0")
+      .doRaw({ kind: "choose", optionId: String(kunaiId) })
+      .expectAP(0, 0)
+      .settle()
+      .expectAP(0, 1);
+  });
+
   it("Blessing of Bellona's newly created Courage does not trigger for the attack that charged", () => {
     const g = scenario({ seats: [
       {

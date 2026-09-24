@@ -696,6 +696,8 @@ describe("SEA — High Seas heroes and cogs", () => {
     g.play("cogwerx dovetail|1", { pitch: ["en garde|1"] })
       .blockWith();
     const attackId = g.state.chain.at(-1)!.attackingCard.instanceId;
+    expect(g.state.chain.at(-1)?.goAgain).toBe(false);
+    expect(projectStateFor(g.state, 0).chain.at(-1)?.goAgain).toBe(false);
 
     const activateDovetail = (mode: "power" | "go-again") => {
       g.activate("cogwerx dovetail|1", { settle: false });
@@ -709,7 +711,10 @@ describe("SEA — High Seas heroes and cogs", () => {
     };
 
     activateDovetail("power");
+    expect(g.state.chain.at(-1)?.goAgain).toBe(false);
     activateDovetail("go-again");
+    expect(g.state.chain.at(-1)?.goAgain).toBe(true);
+    expect(projectStateFor(g.state, 0).chain.at(-1)?.goAgain).toBe(true);
     activateDovetail("power");
     g.expectAttackValue(7);
     expect(legalIntents(g.state, 0).some((intent) =>

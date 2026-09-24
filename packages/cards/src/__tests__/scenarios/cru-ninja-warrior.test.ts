@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyIntent, legalIntents, projectStateFor } from "@fyendal/engine";
+import { actionCandidates, applyIntent, legalIntents, projectStateFor } from "@fyendal/engine";
 import { printingId, scenario } from "../harness.js";
 import type { Scenario } from "../harness.js";
 
@@ -341,6 +341,40 @@ describe("CRU — Ninja attack actions and token", () => {
 });
 
 describe("CRU — Warrior heroes, weapons, and actions", () => {
+  it("Twinning Blade permits another fully defended Dawnblade attack with Blade Dance go again", () => {
+    const g = scenario({
+      seats: [
+        {
+          ...warrior,
+          weapons: ["dawnblade|0"],
+          hand: ["lead with speed|1", "hit and run|3", "twinning blade|2"],
+          board: ["blade dance|0"],
+        },
+        {
+          hero: "rhinar",
+          weapons: [],
+          hand: ["raging onslaught|1", "swing big|1"],
+        },
+      ],
+    });
+
+    g.play("lead with speed|1", { pitch: ["hit and run|3"] })
+      .attackWithWeapon("dawnblade|0")
+      .blockWith("raging onslaught|1", "swing big|1")
+      .react("twinning blade|2")
+      .settle()
+      .expectAP(0, 1)
+      .expectResources(0, 1);
+
+    const dawnblade = g.state.players[0]!.weapons[0]!;
+    expect(g.state.players[0]!.flags[`additionalActivations:${dawnblade.instanceId}:0`]).toBe(1);
+    expect(actionCandidates(g.state, 0)).toContainEqual(expect.objectContaining({
+      kind: "activate-ability",
+      sourceInstanceId: dawnblade.instanceId,
+    }));
+    g.attackWithWeapon("dawnblade|0");
+  });
+
   it("Dorinthea re-enables a weapon after its first hit", () => {
     const g = scenario({
       seats: [

@@ -105,6 +105,45 @@ describe("MPG — import and Guardian pressure", () => {
     )).toBe(true);
   });
 
+  it("offers arsenal Solid Ground after Bravo passes priority on a dominated attack", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "bravo, star of the show|0",
+          hand: ["autumn's touch|1", "channel lake frigid|3", "heaven's claws|3"],
+        },
+        {
+          ...valda,
+          hand: ["disable|3"],
+          arsenalFaceDown: ["solid ground|3"],
+          board: Array.from({ length: 3 }, () => "seismic surge|0"),
+        },
+      ],
+    });
+
+    g.endTurn().chooseOption("yes");
+    g.chooseOption(g.state.pendingDecision!.options![0]!);
+    g.play("autumn's touch|1", {
+      pitch: ["channel lake frigid|3"],
+    }).blockWith("disable|3");
+
+    expect(g.state.pendingDecision).toMatchObject({
+      player: 0,
+      kind: "attack-reaction",
+    });
+    g.passPriority();
+
+    const solidGround = g.state.players[1]!.arsenal[0]!;
+    expect(legalIntents(g.state, 1)).toContainEqual({
+      kind: "play-from-arsenal",
+      instanceId: solidGround.instanceId,
+      pitchInstanceIds: [],
+      pitchRequired: 0,
+    });
+  });
+
   it("Testament of Valahai gets +4 defense with six Seismic Surges", () => {
     const g = scenario({
       active: 1,

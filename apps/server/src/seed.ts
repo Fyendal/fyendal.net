@@ -31,8 +31,12 @@
  * Shiver, another arrow, and both Outsiders Codices ready to exercise the
  * additional arsenal zone; and LURE01 — a private CC room where Marlynn can
  * hit an undefended Cindra with Red Lure Harpoon, banish Fire Tenet: Strike
- * First from Cindra's graveyard, and play it from Cindra's banished zone.
- * These fixtures count as 20 "players in game" in the
+ * First from Cindra's graveyard, and play it from Cindra's banished zone; and
+ * TWINAP — a private CC room where Dorinthea can reproduce the Blade Dance /
+ * Twinning Blade action-point timing reported in bug 53177d1b; and FLICKR — a
+ * private Silver Age room paused at the first Ward choice for reproducing the
+ * Flicker Reality / Fleeing Starbreeze / Corrosive Space Dust interaction.
+ * These fixtures count as 28 "players in game" in the
  * lobby stats — dev only.
  * Alice also receives one fixed, undismissed bug-report notification for
  * exercising the lobby UI.
@@ -79,6 +83,8 @@ const CURRENT_FUNNEL_TEST_ROOM_CODE = "FUNNEL";
 const NEW_HORIZON_TEST_ROOM_CODE = "NEWHOR";
 const GONE_IN_A_FLASH_TEST_ROOM_CODE = "FLASH1";
 const RED_LURE_TEST_ROOM_CODE = "LURE01";
+const TWINNING_BLADE_TEST_ROOM_CODE = "TWINAP";
+const FLICKER_WARD_TEST_ROOM_CODE = "FLICKR";
 const RETIRED_TEST_ROOM_CODES = ["BASEMT"] as const;
 
 /**
@@ -718,6 +724,132 @@ function rallyTestGameState(): GameState {
   return state;
 }
 
+/** Dorinthea can play Ironsong Determination and red Warrior's Valor, attack
+ * with Dawnblade, then play Twinning Blade in the reaction step. Blade Dance
+ * grants the attack go again, but its action point appears only when combat
+ * reaches the Resolution Step. Hala cannot defend, keeping the path short. */
+function twinningBladeTestGameState(): GameState {
+  const hala = botDefinition("hala");
+  const halaPool = precon(hala?.deckId ?? "")?.pool;
+  if (!hala || !halaPool) {
+    throw new Error("Twinning Blade test fixture bot deck is unavailable");
+  }
+  const dorinthea = {
+    heroId: "WTR113B",
+    weaponIds: ["WTR115"],
+    equipment: {},
+    deck: [
+      "WTR122",
+      "DVR011",
+      "CRU082",
+      "MPW134",
+      ...Array<string>(56).fill("RNR020"),
+    ],
+  };
+  const halaPresentation = hala.presentationFor(dorinthea, "second");
+  const state = createGame({
+    decklists: [dorinthea, { heroId: halaPool.heroId, ...halaPresentation }],
+    seed: 9232026,
+    cards: cardData,
+    scripts,
+    startPlayer: 0,
+  });
+
+  const player = state.players[0]!;
+  const cards = [...player.hand, ...player.deck];
+  const take = (cardId: string) => {
+    const index = cards.findIndex((card) => card.cardId === cardId);
+    if (index < 0) throw new Error(`Twinning Blade test fixture is missing ${cardId}`);
+    return cards.splice(index, 1)[0]!;
+  };
+  player.hand = [take("WTR122"), take("DVR011"), take("CRU082")];
+  player.board = [take("MPW134")];
+  player.deck = cards;
+  player.resources = 2;
+  player.actionPoints = 1;
+
+  const opponent = state.players[1]!;
+  opponent.deck.push(...opponent.hand);
+  opponent.hand = [];
+  opponent.equipment = {};
+  return state;
+}
+
+/** Zyggy is defending a 2-power Head Jab with three Ward 1 auras. After
+ * Flicker Reality and Fleeing Starbreeze are destroyed, Flicker's trigger must
+ * offer Corrosive Space Dust but not the destroyed Starbreeze. */
+function flickerWardTestGameState(): GameState {
+  let state = createGame({
+    decklists: [
+      {
+        heroId: "OMN002",
+        weaponIds: [],
+        equipment: {},
+        deck: ["OMN005", "AZS027", "AZS016", ...Array<string>(57).fill("RNR020")],
+      },
+      {
+        heroId: "ASR001",
+        weaponIds: [],
+        equipment: {},
+        deck: ["OUT078", ...Array<string>(59).fill("RNR020")],
+      },
+    ],
+    seed: 9342026,
+    cards: cardData,
+    scripts,
+    startPlayer: 1,
+  });
+
+  const zyggy = state.players[0]!;
+  const zyggyCards = [...zyggy.hand, ...zyggy.deck];
+  const takeZyggy = (cardId: string) => {
+    const index = zyggyCards.findIndex((card) => card.cardId === cardId);
+    if (index < 0) throw new Error(`Flicker Ward test fixture is missing ${cardId}`);
+    return zyggyCards.splice(index, 1)[0]!;
+  };
+  zyggy.board = [takeZyggy("OMN005"), takeZyggy("AZS027"), takeZyggy("AZS016")];
+  zyggy.hand = [];
+  zyggy.deck = zyggyCards;
+
+  const ira = state.players[1]!;
+  const iraCards = [...ira.hand, ...ira.deck];
+  const headJabIndex = iraCards.findIndex((card) => card.cardId === "OUT078");
+  if (headJabIndex < 0) throw new Error("Flicker Ward test fixture is missing OUT078");
+  const headJab = iraCards.splice(headJabIndex, 1)[0]!;
+  ira.hand = [headJab];
+  ira.deck = iraCards;
+
+  const applyLegal = (
+    current: GameState,
+    seat: number,
+    label: string,
+    predicate: (intent: ReturnType<typeof legalIntents>[number]) => boolean,
+  ): GameState => {
+    const intent = legalIntents(current, seat).find(predicate);
+    if (!intent) throw new Error(`Flicker Ward test fixture cannot ${label}`);
+    const result = applyIntent(current, seat, intent);
+    if (!result.ok) throw new Error(`Flicker Ward test fixture cannot ${label}: ${result.error}`);
+    return result.state;
+  };
+
+  state = applyLegal(state, 1, "play Head Jab", (intent) =>
+    intent.kind === "play-card" && intent.instanceId === headJab.instanceId
+  );
+  for (let guard = 0; guard < 20 && state.pendingDecision?.chooseHook !== "ward"; guard++) {
+    const pending = state.pendingDecision;
+    const actor = pending?.player ?? state.priorityPlayer;
+    state = pending?.kind === "defend"
+      ? applyLegal(state, actor, "take the attack", (intent) =>
+          intent.kind === "defend" && intent.instanceIds.length === 0
+        )
+      : applyLegal(state, actor, "pass toward Ward", (intent) => intent.kind === "pass");
+  }
+  if (state.pendingDecision?.chooseHook !== "ward" || state.pendingDecision.player !== 0) {
+    throw new Error("Flicker Ward test fixture did not reach Zyggy's Ward choice");
+  }
+  return state;
+}
+
 const pool = await createPool();
 try {
   const { rows: runtimeConfigRows } = await pool.query(
@@ -749,21 +881,26 @@ try {
   try {
     // These rooms are disposable local fixture data. Recreate them so rerunning
     // the seed also repairs stale ruleset envelopes and clears dependent history.
-    await pool.query("DELETE FROM rooms WHERE code IN ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)", [
-      DEMO_ROOM_CODE,
-      HUNTER_TEST_ROOM_CODE,
-      SNAP_ARC_TEST_ROOM_CODE,
-      DAMAGE_FX_TEST_ROOM_CODE,
-      OKANA_TEST_ROOM_CODE,
-      RALLY_TEST_ROOM_CODE,
-      MARKS_TEST_ROOM_CODE,
-      NITRO_TEST_ROOM_CODE,
-      CURRENT_FUNNEL_TEST_ROOM_CODE,
-      NEW_HORIZON_TEST_ROOM_CODE,
-      GONE_IN_A_FLASH_TEST_ROOM_CODE,
-      RED_LURE_TEST_ROOM_CODE,
-      ...RETIRED_TEST_ROOM_CODES,
-    ]);
+    await pool.query(
+      "DELETE FROM rooms WHERE code IN ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)",
+      [
+        DEMO_ROOM_CODE,
+        HUNTER_TEST_ROOM_CODE,
+        SNAP_ARC_TEST_ROOM_CODE,
+        DAMAGE_FX_TEST_ROOM_CODE,
+        OKANA_TEST_ROOM_CODE,
+        RALLY_TEST_ROOM_CODE,
+        MARKS_TEST_ROOM_CODE,
+        NITRO_TEST_ROOM_CODE,
+        CURRENT_FUNNEL_TEST_ROOM_CODE,
+        NEW_HORIZON_TEST_ROOM_CODE,
+        GONE_IN_A_FLASH_TEST_ROOM_CODE,
+        RED_LURE_TEST_ROOM_CODE,
+        TWINNING_BLADE_TEST_ROOM_CODE,
+        FLICKER_WARD_TEST_ROOM_CODE,
+        ...RETIRED_TEST_ROOM_CODES,
+      ],
+    );
     await pool.query(
       `INSERT INTO rooms
         (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at, status, winner)
@@ -788,6 +925,96 @@ try {
     );
     const aliceId = Number(aliceRows[0]?.id);
     if (!Number.isSafeInteger(aliceId)) throw new Error("seeded alice account is missing");
+    const flickerWardPrep = { rolls: [1, 6], dieWinner: 1, startPlayer: 1 };
+    const iraForFlickerWard = botDefinition("ira");
+    const iraPoolForFlickerWard = precon(iraForFlickerWard?.deckId ?? "")?.pool;
+    if (!iraForFlickerWard || !iraPoolForFlickerWard) {
+      throw new Error("Flicker Ward test fixture room metadata is unavailable");
+    }
+    await pool.query(
+      `INSERT INTO rooms
+        (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at,
+         status, winner, is_private)
+       VALUES ($1, 'silver-age', '[]', $2, $3, $4, 0, $5, NULL, 'active', NULL, TRUE)`,
+      [
+        FLICKER_WARD_TEST_ROOM_CODE,
+        JSON.stringify(dehydrateState(flickerWardTestGameState(), seedRulesetVersion)),
+        JSON.stringify(flickerWardPrep),
+        seedRulesetVersion,
+        Date.now(),
+      ],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, user_id, token_hash, username, hero_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 0, $2, $3, 'alice', 'OMN002', 'Flicker Reality Ward test',
+               FALSE, TRUE, 'human')`,
+      [
+        FLICKER_WARD_TEST_ROOM_CODE,
+        aliceId,
+        hashReconnectToken(randomBytes(12).toString("hex")),
+      ],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, token_hash, username, hero_id, deck_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 1, $2, $3, $4, $5, $6, FALSE, TRUE, 'bot')`,
+      [
+        FLICKER_WARD_TEST_ROOM_CODE,
+        hashReconnectToken(randomBytes(12).toString("hex")),
+        iraForFlickerWard.username,
+        iraPoolForFlickerWard.heroId,
+        iraForFlickerWard.deckId,
+        iraForFlickerWard.deckName,
+      ],
+    );
+    const twinningBladePrep = { rolls: [6, 1], dieWinner: 0, startPlayer: 0 };
+    const halaForTwinningBlade = botDefinition("hala");
+    const halaPoolForTwinningBlade = precon(halaForTwinningBlade?.deckId ?? "")?.pool;
+    if (!halaForTwinningBlade || !halaPoolForTwinningBlade) {
+      throw new Error("Twinning Blade test fixture room metadata is unavailable");
+    }
+    await pool.query(
+      `INSERT INTO rooms
+        (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at,
+         status, winner, is_private)
+       VALUES ($1, 'cc', '[]', $2, $3, $4, 0, $5, NULL, 'active', NULL, TRUE)`,
+      [
+        TWINNING_BLADE_TEST_ROOM_CODE,
+        JSON.stringify(dehydrateState(twinningBladeTestGameState(), seedRulesetVersion)),
+        JSON.stringify(twinningBladePrep),
+        seedRulesetVersion,
+        Date.now(),
+      ],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, user_id, token_hash, username, hero_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 0, $2, $3, 'alice', 'WTR113B', 'Blade Dance / Twinning Blade AP test',
+               FALSE, TRUE, 'human')`,
+      [
+        TWINNING_BLADE_TEST_ROOM_CODE,
+        aliceId,
+        hashReconnectToken(randomBytes(12).toString("hex")),
+      ],
+    );
+    await pool.query(
+      `INSERT INTO room_seats
+        (room_code, seat, token_hash, username, hero_id, deck_id, deck_name,
+         from_queue, ready, controller)
+       VALUES ($1, 1, $2, $3, $4, $5, $6, FALSE, TRUE, 'bot')`,
+      [
+        TWINNING_BLADE_TEST_ROOM_CODE,
+        hashReconnectToken(randomBytes(12).toString("hex")),
+        halaForTwinningBlade.username,
+        halaPoolForTwinningBlade.heroId,
+        halaForTwinningBlade.deckId,
+        halaForTwinningBlade.deckName,
+      ],
+    );
     const crowd: Array<{ username: string; userId: number; tokenHash: string }> = [];
     for (const username of ["bob", "charlie", "diana"]) {
       const { rows } = await pool.query(
@@ -1358,6 +1585,12 @@ try {
   console.log(`seeded New Horizon room ${NEW_HORIZON_TEST_ROOM_CODE} — log in as alice and open /${NEW_HORIZON_TEST_ROOM_CODE}`);
   console.log(`seeded Gone in a Flash room ${GONE_IN_A_FLASH_TEST_ROOM_CODE} — log in as alice and open /${GONE_IN_A_FLASH_TEST_ROOM_CODE}`);
   console.log(`seeded Red Lure Harpoon room ${RED_LURE_TEST_ROOM_CODE} — log in as alice and open /${RED_LURE_TEST_ROOM_CODE}`);
+  console.log(`seeded Blade Dance / Twinning Blade room ${TWINNING_BLADE_TEST_ROOM_CODE} — log in as alice and open /${TWINNING_BLADE_TEST_ROOM_CODE}`);
+  console.log(
+    `seeded Flicker Reality Ward room ${FLICKER_WARD_TEST_ROOM_CODE} — ` +
+      `log in as alice and open /${FLICKER_WARD_TEST_ROOM_CODE}; ` +
+      "choose Flicker Reality, then Fleeing Starbreeze",
+  );
   console.log("seeded fixed bug notification for alice");
 } finally {
   await pool.end();

@@ -541,10 +541,15 @@ function shadowbeast(payoff: ShadowbeastPayoff): CardScript {
     onAttackDeclared(ctx) {
       const top = ctx.player(ctx.seat).deck[0];
       if (top) ctx.banish(top.instanceId);
-      if (ctx.getFlag("player", "banishedSixPlusThisTurn") !== true) return;
-      if (payoff === "power") ctx.addCardTempPower(ctx.self.instanceId, 2);
-      if (payoff === "go-again") ctx.grantGoAgain();
+      if (
+        payoff === "power" &&
+        ctx.getFlag("player", "banishedSixPlusThisTurn") === true
+      ) ctx.addCardTempPower(ctx.self.instanceId, 2);
     },
+    ...(payoff === "go-again" ? {
+      hasConditionalGoAgain: (ctx: ScriptCtx) =>
+        ctx.getFlag("player", "banishedSixPlusThisTurn") === true,
+    } : {}),
   });
 }
 
