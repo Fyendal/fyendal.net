@@ -391,7 +391,7 @@ function glyphOverlay(base: number): CardScript {
       }
     },
     onDamageDealt(ctx, _target, dealt, arcane) {
-      if (!arcane || dealt <= 3) return;
+      if (!arcane || dealt <= base) return;
       ctx.gainLife(ctx.seat, 1);
       const cards = sigils(ctx);
       for (const card of cards) ctx.putOnDeckBottom(card.instanceId);
@@ -403,7 +403,7 @@ function glyphOverlay(base: number): CardScript {
 function popBubble(amount: number): CardScript {
   const base = arcaneAnyTarget(amount, {
     onDamageDealt(ctx, target, dealt, arcane) {
-      if (!arcane || dealt <= 3 || ctx.getCounter("lastTargetWasAlly")) return;
+      if (!arcane || dealt <= amount || ctx.getCounter("lastTargetWasAlly")) return;
       const auras = ctx.player(target).board.filter((card) => isAura(ctx, card));
       if (auras.length) ctx.requestCardChoice("pop-aura", decisionPrompt("Destroy an aura permanent", "card.ros.aura.destroy"), auras.map((card) => card.instanceId));
     },

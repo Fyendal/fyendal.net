@@ -2698,7 +2698,7 @@
   "id": "HVY161",
   "name": "Run into Trouble",
   "cardType": "block",
-  "text": "When this defends, if you control an Agility token, deal damage to the attacking hero.",
+  "text": "When this defends, if you control an Agility token, deal 1 damage to the attacking hero.",
   "pitch": 1,
   "defense": 3,
   "classes": [
