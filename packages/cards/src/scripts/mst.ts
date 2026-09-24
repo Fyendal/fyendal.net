@@ -508,7 +508,7 @@ export const mst: Record<string, CardScript> = {
   "haze shelter|1": hazeShelter(4), "haze shelter|2": hazeShelter(3), "haze shelter|3": hazeShelter(2),
   "waning vengeance|2": waning(), "waning vengeance|3": waning(), "waxing specter|2": waxing(), "waxing specter|3": waxing(),
   "zen|0": zen(), "heirloom of tiger hide|0": lastLifeCloak(), "stride of reprisal|0": { onDefend(ctx) { createInHand(ctx, CROUCHING_TIGER); } },
-  "wind chakra|1": nextTiger(3, true), "wind chakra|2": nextTiger(2, true), "wind chakra|3": nextTiger(2, true),
+  "wind chakra|1": nextTiger(3, true), "wind chakra|2": nextTiger(2, true), "wind chakra|3": nextTiger(1, true),
   "companion of the claw|1": tigerCreatorAttack(), "companion of the claw|2": tigerCreatorAttack(), "companion of the claw|3": tigerCreatorAttack(),
   "harmony of the hunt|1": tigerCreatorAttack(), "harmony of the hunt|2": tigerCreatorAttack(), "harmony of the hunt|3": tigerCreatorAttack(),
   "tiger form incantation|1": tigerIncantation(3), "tiger form incantation|2": tigerIncantation(2), "tiger form incantation|3": tigerIncantation(1),

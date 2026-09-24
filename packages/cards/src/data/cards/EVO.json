@@ -2655,7 +2655,7 @@
   "id": "EVO141",
   "name": "Steel Street Hoons",
   "cardType": "action",
-  "text": "Boost\nIf an item you control has been destroyed this turn, this gets +2{p}.\nGalvanize - When this defends, you may destroy an item you control. If you do, this gets +2{d).",
+  "text": "Boost\nIf an item you control has been destroyed this turn, this gets +2{p}.\nGalvanize - When this defends, you may destroy an item you control. If you do, this gets +2{d}.",
   "pitch": 3,
   "cost": 3,
   "attack": 3,

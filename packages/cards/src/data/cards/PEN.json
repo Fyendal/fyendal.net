@@ -1830,7 +1830,7 @@
   "text": "You may banish an aura from your graveyard. If you do, deal 1 arcane damage to target hero.",
   "pitch": 2,
   "cost": 0,
-  "defense": 3,
+  "defense": 2,
   "classes": [
    "runeblade"
   ],
@@ -1843,7 +1843,7 @@
   "text": "You may banish an aura from your graveyard. If you do, deal 1 arcane damage to target hero.",
   "pitch": 3,
   "cost": 0,
-  "defense": 3,
+  "defense": 1,
   "classes": [
    "runeblade"
   ],
