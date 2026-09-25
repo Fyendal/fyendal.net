@@ -1225,6 +1225,9 @@ export function makeCtx(
       if (normalized === "go again") {
         const layer = state.stack.find((candidate) => candidate.card?.instanceId === instanceId);
         if (layer) layer.goAgain = true;
+        if (active?.attackingCard.instanceId === instanceId && active.flags.attackGone !== true) {
+          runtime.events.grantLinkGoAgain(state, active);
+        }
       }
       return true;
     },

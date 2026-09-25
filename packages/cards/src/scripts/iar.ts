@@ -1779,6 +1779,7 @@ export const iar: Record<string, CardScript> = {
     alternativePlayCost: {
       kind: "discard-or-destroy-controlled-subtype",
       subtype: "ally",
+      cardLabel: "allies",
       replacesResourceCost: false,
       required: true,
     },
@@ -1908,7 +1909,7 @@ export const iar: Record<string, CardScript> = {
         if (hook !== "iar-plundersong-arsenal") return;
         const arsenal = ctx.player(opponentSeat(ctx)).arsenal;
         if (arsenal.some((card) => card.instanceId === Number(option))) {
-          ctx.banish(Number(option));
+          ctx.banish(Number(option), { faceDown: false });
         }
       },
     },

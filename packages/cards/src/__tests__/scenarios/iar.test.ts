@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyIntent, legalIntents, projectStateFor } from "@fyendal/engine";
+import { actionCandidates, applyIntent, legalIntents, projectStateFor } from "@fyendal/engine";
 import { cardData, isImplemented } from "../../index.js";
 import { scenario } from "../harness.js";
 
@@ -737,6 +737,30 @@ describe("IAR cards", () => {
     expect(g.state.players[0]!.actionPoints).toBe(1);
   });
 
+  it("Viserai, Usurper gives go again when Murmuring Gloomblade creates the third Runechant mid attack", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        heroKey: "viserai, between worlds|0",
+        hand: ["otherworldly sins|1", "otherworldly sins|1", "murmuring gloomblade|1"],
+        deck: ["raging onslaught|1", "raging onslaught|2", "raging onslaught|3"],
+        resources: 4,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", life: 30, equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("otherworldly sins|1")
+      .play("otherworldly sins|1")
+      .play("murmuring gloomblade|1")
+      .chooseCard("runechant|0")
+      .blockWith()
+      .settle();
+
+    expect(g.state.players[0]!.heroCardId).toBe("IAR107B");
+    expect(g.state.players[0]!.actionPoints).toBe(1);
+  });
+
   it("Viserai, Usurper counts a blood-debt attack played before traversing", () => {
     const g = scenario({ seats: [
       {
@@ -1405,7 +1429,7 @@ describe("IAR cards", () => {
     expect(g.state.players[0]!.board[0]?.tapped).toBe(true);
   });
 
-  it("Plundersong Gloomblade banishes a card chosen by the arsenal's owner", () => {
+  it("Plundersong Gloomblade banishes a card chosen by the arsenal's owner face up", () => {
     const g = scenario({ seats: [
       {
         hero: "rhinar",
@@ -1428,6 +1452,16 @@ describe("IAR cards", () => {
     g.chooseCard("wounding blow|1")
       .expectLife(1, 18)
       .expectInZone(1, "wounding blow|1", "banish");
+    const banished = g.state.players[1]!.banish.find(
+      (card) => cardData[card.cardId]?.name === "Wounding Blow",
+    );
+    expect(banished).toBeDefined();
+    expect(banished?.faceDown).not.toBe(true);
+    expect(projectStateFor(g.state, 0).players[1]!.banish).toContainEqual(
+      expect.objectContaining({ cardId: banished?.cardId }),
+    );
+    expect(g.state.log.some((entry) => entry.publicText?.includes("Wounding Blow is banished")))
+      .toBe(true);
   });
 
   it("Countdown to Extinction creates a Gate and may search for Darkest Hour", () => {
@@ -2513,6 +2547,42 @@ describe("September 3 IAR spoilers", () => {
       .expectInZone(0, "restless outlaw|1", "graveyard")
       .expectInZone(0, "snatch|1", "hand");
     expect(g.state.players[0]!.hero.tapped).toBeUndefined();
+  });
+
+  it("Tome of Necrosis offers a grouped prompt to destroy or discard one ally", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["tome of necrosis|1", "restless outlaw|1"],
+        board: ["restless templar|1"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    const tome = g.state.players[0]!.hand.find((card) => card.cardId === "IAR092")!;
+    const handAlly = g.state.players[0]!.hand.find((card) => card.cardId === "IAR086")!;
+    const boardAlly = g.state.players[0]!.board.find((card) => card.cardId === "IAR059")!;
+    const intents = legalIntents(g.state, 0)
+      .filter((intent) => intent.kind === "play-card")
+      .filter((intent) => intent.instanceId === tome.instanceId);
+
+    expect(intents.map((intent) => intent.alternativeCostCardInstanceIds)).toEqual(
+      expect.arrayContaining([[handAlly.instanceId], [boardAlly.instanceId]]),
+    );
+    expect(intents.every((intent) => intent.cardCostSelection &&
+      intent.cardCostSelection.kind === "choose-card-cost" &&
+      intent.cardCostSelection.cardLabel === "allies" &&
+      intent.cardCostSelection.minimum === 1 &&
+      intent.cardCostSelection.maximum === 1 &&
+      intent.cardCostSelection.modes.some((mode) => mode.kind === "destroy") &&
+      intent.cardCostSelection.modes.some((mode) => mode.kind === "discard")
+    )).toBe(true);
+    expect(actionCandidates(g.state, 0).some((intent) =>
+      intent.kind === "play-card" &&
+      intent.instanceId === tome.instanceId &&
+      intent.cardCostSelection?.minimum === 1
+    )).toBe(true);
   });
 
   it("Restless Looter discards, draws, and taps as an instant", () => {

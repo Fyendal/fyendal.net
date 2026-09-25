@@ -914,7 +914,12 @@ export const evrHighRarity: Record<string, CardScript> = {
   },
   "knick knack bric-a-brac|1": knickKnack,
   "this round's on me|3": {
-    modifyOpposingAttack: () => -1,
+    modifyOpposingAttack(ctx) {
+      if (ctx.link?.targetAllyId !== undefined) return 0;
+      return ctx.state.modifiers.some((modifier) =>
+        modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "until-end-of-turn"
+      ) ? -1 : 0;
+    },
     onPlay(ctx) {
       for (const player of ctx.state.players) ctx.drawCards(player.seat, 1);
       ctx.addModifier({ scope: "until-end-of-turn", expiresAtStartOfTurn: ctx.state.turn + 2 });

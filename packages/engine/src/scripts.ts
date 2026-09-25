@@ -898,7 +898,7 @@ type AlternativePlayCost = (
   | { kind: "discard-hand-named"; name: string }
   | { kind: "discard-hand-subtype"; subtype: string }
   | { kind: "discard-or-destroy-controlled-named"; name: string }
-  | { kind: "discard-or-destroy-controlled-subtype"; subtype: string }
+  | { kind: "discard-or-destroy-controlled-subtype"; subtype: string; cardLabel: string }
   | {
       kind: "destroy-controlled-and-or-discard-hand-subtype";
       subtype: string;

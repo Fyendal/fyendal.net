@@ -351,6 +351,23 @@ describe("Monarch, Tales of Aria, and Everfest rules regression coverage", () =>
     g.play("this round's on me|3").endTurn().play("head jab|1").blockWith().settle();
     expect(g.state.chain.at(-1)?.finalAttack).toBe(2);
   });
+  it("This Round's on Me does not weaken an attack when used only to defend", () => {
+    const g = scenario({ active: 1, seats: [
+      { hero: "rhinar", hand: ["this round's on me|3"], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", hand: ["head jab|1"], equipment: NO_EQUIPMENT },
+    ] });
+    g.play("head jab|1").blockWith("this round's on me|3").settle();
+    expect(g.state.chain.at(-1)?.finalAttack).toBe(3);
+  });
+  it("This Round's on Me does not weaken attacks targeting an ally", () => {
+    const g = scenario({ seats: [
+      { hero: "rhinar", board: ["restless magister|1"], hand: ["this round's on me|3"], resources: 1, equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", hand: ["head jab|1"], equipment: NO_EQUIPMENT },
+    ] });
+    g.play("this round's on me|3").endTurn()
+      .play("head jab|1", { targetAlly: "restless magister|1" });
+    expect(g.state.chain.at(-1)?.finalAttack).toBe(3);
+  });
 
   it("Channel Lake Frigid taxes only opposing cards and abilities", () => {
     const locked = scenario({ active: 1, seats: [

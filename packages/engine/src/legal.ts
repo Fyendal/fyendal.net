@@ -279,6 +279,18 @@ function playIntentsWithPitches(
             { kind: "discard", maximum: declaredCost.maximumDiscarded },
           ],
         }
+      : alternativeCostCardInstanceIds !== undefined &&
+          declaredCost?.kind === "discard-or-destroy-controlled-subtype"
+        ? {
+            kind: "choose-card-cost",
+            cardLabel: declaredCost.cardLabel,
+            minimum: 1,
+            maximum: 1,
+            modes: [
+              { kind: "destroy", maximum: 1 },
+              { kind: "discard", maximum: 1 },
+            ],
+          }
       : undefined;
   return pitchOptions(state, player, effectiveCost, excluded, 0, includeUnaffordable)
     .filter((pitches) => canPayRequiredHandCardsForAdditionalCost(
