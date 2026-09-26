@@ -208,7 +208,7 @@ export function Lobby() {
       <header className="topbar lobby-topbar lobby-topbar-authenticated">
         <LobbyBrand />
         {bugReportNotification ? (
-          <BugFixedNotification onDismiss={() => void dismissBugReportNotifications()} />
+          <BugFixedNotification notifications={bugReportNotifications} onDismiss={() => void dismissBugReportNotifications()} />
         ) : null}
         <div className="topbar-actions">
           <div className="topbar-tools">

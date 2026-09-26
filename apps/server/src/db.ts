@@ -639,6 +639,19 @@ export const MIGRATIONS: Migration[] = [
     CREATE INDEX replay_participants_favorite_user_idx
       ON replay_participants(user_id, replay_id) WHERE favorite = TRUE;`,
   },
+  {
+    version: 36,
+    sql: `CREATE TABLE global_notice (
+      singleton BOOLEAN PRIMARY KEY DEFAULT TRUE CHECK (singleton = TRUE),
+      notice JSONB NOT NULL
+    );`,
+  },
+  {
+    version: 37,
+    sql: `ALTER TABLE bug_reports ADD COLUMN resolution_message VARCHAR(2000);
+    ALTER TABLE bug_reports ADD CONSTRAINT bug_reports_message_check
+      CHECK (resolution_message IS NULL OR resolution_message <> '');`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

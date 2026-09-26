@@ -251,6 +251,17 @@ describe("initial schema", () => {
     )).rows).toEqual([{ column_name: "favorite" }]);
   });
 
+  it("adds reporter clarification messages to a version 36 database", async () => {
+    const db = rawDb();
+    await applyMigrations(db, MIGRATIONS.filter((migration) => migration.version <= 36));
+    await applyMigrations(db, MIGRATIONS);
+    await applyMigrations(db, MIGRATIONS);
+    expect((await db.query(
+      `SELECT column_name FROM information_schema.columns
+       WHERE table_name = 'bug_reports' AND column_name = 'resolution_message'`,
+    )).rows).toEqual([{ column_name: "resolution_message" }]);
+  });
+
   it("adds Starvo to durable pending bot starts", async () => {
     const db = rawDb();
     await applyMigrations(db, MIGRATIONS.filter((migration) => migration.version <= 28));

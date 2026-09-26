@@ -5,6 +5,7 @@ import { Lobby } from "./lobby/Lobby.js";
 import { RoomLoading } from "./lobby/RoomLoading.js";
 import { savedReplayIdFromPath } from "./replay/route.js";
 import { BackgroundMatchOffer } from "./matchmaking/BackgroundMatchOffer.js";
+import { GlobalNoticeBanner } from "./notices/GlobalNoticeBanner.js";
 
 const WaitingRoom = lazy(() => import("./lobby/WaitingRoom.js").then((module) => ({ default: module.WaitingRoom })));
 const PrepRoom = lazy(() => import("./prep/PrepRoom.js").then((module) => ({ default: module.PrepRoom })));
@@ -74,6 +75,10 @@ function ScreenFallback() {
 }
 
 export function App() {
+  return <><GlobalNoticeBanner /><AppContent /></>;
+}
+
+function AppContent() {
   const intl = useIntl();
   const authUser = useStore((state) => state.authUser);
   const authToken = useStore((state) => state.authToken);

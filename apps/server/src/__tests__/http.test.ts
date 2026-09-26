@@ -48,6 +48,25 @@ function postLogin(url: string, xff?: string): Promise<Response> {
   });
 }
 
+describe("public global notice", () => {
+  it("serves notices without login and cannot publish through the public API", async () => {
+    const noticeDb = await freshDb();
+    const url = await startApi({ db: noticeDb });
+    expect(await (await fetch(`${url}/api/notice`)).json()).toEqual({ ok: true, notice: null });
+    const notice = { id: "test-notice", message: "Maintenance soon", expiresAt: null };
+    await noticeDb.query("INSERT INTO global_notice(singleton, notice) VALUES (TRUE, $1)", [JSON.stringify(notice)]);
+    const response = await fetch(`${url}/api/notice`);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(await response.json()).toEqual({ ok: true, notice });
+    expect((await fetch(`${url}/api/notice`, { method: "POST", body: "{}" })).status).toBe(404);
+  });
+  it("throttles public notice reads", async () => {
+    const url = await startApi({ noticeRateLimiter: createRateLimiter(1, 60_000) });
+    expect((await fetch(`${url}/api/notice`)).status).toBe(200);
+    expect((await fetch(`${url}/api/notice`)).status).toBe(429);
+  });
+});
+
 describe("rate limiter client key", () => {
   it("peels only the configured trusted suffix instead of trusting the first XFF value", async () => {
     const url = await startApi({
@@ -733,7 +752,7 @@ describe("account rights", () => {
     expect(reported.status).toBe(200);
     const reportedBody = await reported.json() as { ok: true; reportId: string };
     expect(reportedBody).toMatchObject({ ok: true, reportId: expect.any(String) });
-    await db.query("UPDATE bug_reports SET fixed_at = $2 WHERE id = $1", [
+    await db.query("UPDATE bug_reports SET fixed_at = $2, resolution_message = 'The issue has been corrected.' WHERE id = $1", [
       reportedBody.reportId,
       123,
     ]);
@@ -742,7 +761,7 @@ describe("account rights", () => {
     expect(notifications.status).toBe(200);
     expect(await notifications.json()).toEqual({
       ok: true,
-      notifications: [{ reportId: reportedBody.reportId, fixedAt: 123 }],
+      notifications: [{ reportId: reportedBody.reportId, fixedAt: 123, message: "The issue has been corrected." }],
     });
     const dismissed = await fetch(`${url}/api/bug-report-notifications/dismiss`, {
       method: "POST",
@@ -774,6 +793,7 @@ describe("account rights", () => {
         fixedAt: 123,
         closedAt: null,
         dismissedAt: expect.any(Number),
+        resolutionMessage: "The issue has been corrected.",
       }),
     ]);
 

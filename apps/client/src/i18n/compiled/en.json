@@ -22608,6 +22608,24 @@
       "value": "Bug fixed"
     }
   ],
+  "lobby.bugreport.dismiss": [
+    {
+      "type": 0,
+      "value": "Dismiss bug report notifications"
+    }
+  ],
+  "lobby.bugreport.reviewed": [
+    {
+      "type": 0,
+      "value": "We reviewed a bug you reported. Thanks for helping us improve Fyendal!"
+    }
+  ],
+  "lobby.bugreport.updated": [
+    {
+      "type": 0,
+      "value": "Bug report update"
+    }
+  ],
   "lobby.cardPool.future": [
     {
       "type": 0,
@@ -23802,6 +23820,18 @@
     {
       "type": 0,
       "value": "Play Flesh and Blood Online Free | Fyendal"
+    }
+  ],
+  "notice.dismiss": [
+    {
+      "type": 0,
+      "value": "Dismiss notice"
+    }
+  ],
+  "notice.label": [
+    {
+      "type": 0,
+      "value": "Notice"
     }
   ],
   "prep.accept.accepted": [

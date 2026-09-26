@@ -50,6 +50,20 @@
   color: #badd94;
   font-size: 15px;
 }
+.bug-fixed-notification-content {
+  max-height: min(60vh, 480px);
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+}
+.bug-fixed-notification-report + .bug-fixed-notification-report {
+  border-top: 1px solid #657d46;
+  margin-top: 10px;
+  padding-top: 10px;
+}
+.bug-fixed-notification-report p {
+  margin: 8px 0 0;
+  white-space: pre-wrap;
+}
 .bug-fixed-notification-icon {
   display: grid;
   width: 24px;

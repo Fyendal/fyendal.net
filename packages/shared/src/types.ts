@@ -953,3 +953,9 @@ export type ErrorCode =
   | "MESSAGE_BOUNDS"
   | "MESSAGE_RATE_LIMITED"
   | "INTERNAL_ERROR";
+/** Operator-authored plain text shown to every visitor. */
+export interface GlobalNotice {
+  id: string;
+  message: string;
+  expiresAt: number | null;
+}

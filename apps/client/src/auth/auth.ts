@@ -15,6 +15,8 @@ import {
   decodeReplayNotesResponse,
   decodeReplaysResponse,
   decodeStatsResponse,
+  decodeGlobalNoticeResponse,
+  type GlobalNoticeResponse,
   type AccountBadgesResponse,
   type AccountExport,
   type ApiError,
@@ -98,6 +100,10 @@ function get<T extends { ok: boolean }>(
   options: Omit<RequestOptions, "body" | "method"> = {},
 ): Promise<T | ApiError> {
   return request(path, decode, options);
+}
+
+export function apiGlobalNotice(signal?: AbortSignal): Promise<GlobalNoticeResponse | ApiError> {
+  return get("notice", decodeGlobalNoticeResponse, { signal });
 }
 
 export function apiRegister(username: string, password: string): Promise<RegisterResult> {

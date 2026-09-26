@@ -18,6 +18,7 @@ import type {
   GameTransitionView,
   GameTurnStatsView,
   GameView,
+  GlobalNotice,
   FriendGameInvite,
   FriendRequestSummary,
   FriendSummary,
@@ -42,6 +43,26 @@ export interface ApiError { ok: false; error: string }
 export interface OkResponse { ok: true }
 export interface LoginResponse { ok: true; token: string; username: string }
 export interface StatsResponse { ok: true; inGame: number; openRooms: number }
+export interface GlobalNoticeResponse { ok: true; notice: GlobalNotice | null }
+export const MAX_GLOBAL_NOTICE_LENGTH = 1_000;
+
+export function decodeGlobalNotice(value: unknown): GlobalNotice | null {
+  const notice = object(value);
+  if (!notice || !exactKeys(notice, ["id", "message", "expiresAt"])
+    || !id(notice.id) || !string(notice.message, MAX_GLOBAL_NOTICE_LENGTH, false)
+    || notice.message.trim().length === 0
+    || !(notice.expiresAt === null || (nonNegativeInteger(notice.expiresAt)
+      && notice.expiresAt <= 8_640_000_000_000_000))) return null;
+  return { id: notice.id, message: notice.message, expiresAt: notice.expiresAt };
+}
+
+export function decodeGlobalNoticeResponse(value: unknown): GlobalNoticeResponse | null {
+  const data = object(value);
+  if (!data || !exactKeys(data, ["ok", "notice"]) || data.ok !== true) return null;
+  if (data.notice === null) return { ok: true, notice: null };
+  const notice = decodeGlobalNotice(data.notice);
+  return notice ? { ok: true, notice } : null;
+}
 export interface DeckSummary {
   id: string;
   name: string;
@@ -81,7 +102,9 @@ export interface DeckInvalidResponse {
 export interface BugReportResponse { ok: true; reportId: string }
 export interface FixedBugReportNotification {
   reportId: string;
-  fixedAt: number;
+  fixedAt: number | null;
+  closedAt?: number;
+  message?: string;
 }
 export interface BugReportNotificationsResponse {
   ok: true;
@@ -181,6 +204,7 @@ export interface AccountExport {
     fixedAt: number | null;
     closedAt: number | null;
     dismissedAt: number | null;
+    resolutionMessage?: string | null;
   }>;
   replays: Array<{
     id: string;
@@ -1421,12 +1445,19 @@ export const decodeBugReportNotificationsResponse: Decoder<BugReportNotification
     || !Array.isArray(data.notifications) || data.notifications.length > MAX_ROOMS) return null;
   const notifications = data.notifications.map((value): FixedBugReportNotification | null => {
     const notification = object(value);
-    return notification
-      && exactKeys(notification, ["reportId", "fixedAt"])
-      && id(notification.reportId)
-      && nonNegativeInteger(notification.fixedAt)
-      ? { reportId: notification.reportId, fixedAt: notification.fixedAt }
-      : null;
+    if (!notification
+      || !exactKeys(notification, ["reportId", "fixedAt", "closedAt", "message"], ["reportId", "fixedAt"])
+      || !id(notification.reportId)) return null;
+    const { fixedAt, closedAt, message } = notification;
+    if (fixedAt !== null && !nonNegativeInteger(fixedAt)) return null;
+    if (closedAt !== undefined && !nonNegativeInteger(closedAt)) return null;
+    if (message !== undefined && !string(message, 2_000, false)) return null;
+    if (fixedAt === null ? closedAt === undefined || message === undefined : closedAt !== undefined) return null;
+    return {
+      reportId: notification.reportId, fixedAt,
+      ...(closedAt === undefined ? {} : { closedAt }),
+      ...(message === undefined ? {} : { message }),
+    };
   });
   return notifications.every(
     (notification): notification is FixedBugReportNotification => notification !== null,
@@ -1647,7 +1678,8 @@ function exportRoom(value: unknown): boolean {
 function exportBugReport(value: unknown): boolean {
   const report = object(value);
   return !!report
-    && exactKeys(report, ["id", "roomCode", "roomVersion", "rulesetVersion", "description", "createdAt", "fixedAt", "closedAt", "dismissedAt"])
+    && exactKeys(report, ["id", "roomCode", "roomVersion", "rulesetVersion", "description", "createdAt", "fixedAt", "closedAt", "dismissedAt", "resolutionMessage"], ["id", "roomCode", "roomVersion", "rulesetVersion", "description", "createdAt", "fixedAt", "closedAt", "dismissedAt"])
+    && optional(report.resolutionMessage, (v): v is string | null => v === null || string(v, 2_000, false))
     && id(report.id) && string(report.roomCode, 6, false) && nonNegativeInteger(report.roomVersion)
     && string(report.rulesetVersion, MAX_SHORT_TEXT, false) && string(report.description, MAX_TEXT, false)
     && nonNegativeInteger(report.createdAt)

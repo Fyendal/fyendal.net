@@ -902,6 +902,19 @@ describe("replays and HTTP responses", () => {
       ok: true,
       notifications: [{ reportId: "report-id", fixedAt: 123 }],
     });
+    const clarification = { reportId: "report-id", fixedAt: null, closedAt: 123, message: "This is intended behavior." };
+    expect(decodeBugReportNotificationsResponse({ ok: true, notifications: [clarification] }))
+      .toEqual({ ok: true, notifications: [clarification] });
+    for (const notification of [
+      { ...clarification, message: "x".repeat(2001) },
+      { ...clarification, message: "" },
+      { ...clarification, message: 123 },
+      { ...clarification, closedAt: -1 },
+      { ...clarification, fixedAt: 123 },
+      { reportId: "report-id", fixedAt: null },
+    ]) {
+      expect(decodeBugReportNotificationsResponse({ ok: true, notifications: [notification] })).toBeNull();
+    }
     expect(decodeDecksResponse({
       ok: true,
       decks: [{ ...summary, bannedCards: ["Art of War"], futureCards: ["Tomorrow's Attack"] }],

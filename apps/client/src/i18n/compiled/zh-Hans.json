@@ -21744,6 +21744,24 @@
       "value": "问题已修复"
     }
   ],
+  "lobby.bugreport.dismiss": [
+    {
+      "type": 0,
+      "value": "关闭问题报告通知"
+    }
+  ],
+  "lobby.bugreport.reviewed": [
+    {
+      "type": 0,
+      "value": "我们已查看你报告的问题。感谢你帮助我们改进 Fyendal！"
+    }
+  ],
+  "lobby.bugreport.updated": [
+    {
+      "type": 0,
+      "value": "问题报告更新"
+    }
+  ],
   "lobby.cardPool.future": [
     {
       "type": 0,
@@ -22778,6 +22796,18 @@
     {
       "type": 0,
       "value": "免费在线畅玩 Flesh and Blood | Fyendal"
+    }
+  ],
+  "notice.dismiss": [
+    {
+      "type": 0,
+      "value": "关闭公告"
+    }
+  ],
+  "notice.label": [
+    {
+      "type": 0,
+      "value": "公告"
     }
   ],
   "prep.accept.accepted": [

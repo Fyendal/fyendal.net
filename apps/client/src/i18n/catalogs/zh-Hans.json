@@ -1,4 +1,6 @@
 {
+  "notice.label": "公告",
+  "notice.dismiss": "关闭公告",
   "language.label": "语言",
   "brand.subtitle": "赤魂战纪在线对战",
   "landing.title": "在线畅玩赤魂战纪 (Flesh & Blood)",
@@ -2350,6 +2352,9 @@
   "game.search.minimizedPrompt": "{prompt} · 已选择 {selected}/{maximum}",
   "game.search.short": "卡牌搜索",
   "game.search.restore": "恢复搜索",
+  "lobby.bugreport.updated": "问题报告更新",
+  "lobby.bugreport.reviewed": "我们已查看你报告的问题。感谢你帮助我们改进 Fyendal！",
+  "lobby.bugreport.dismiss": "关闭问题报告通知",
   "lobby.bugFixed.title": "问题已修复",
   "lobby.bugFixed.body": "你报告的问题已经修复。感谢你帮助我们改进 Fyendal！",
   "lobby.bugFixed.dismiss": "关闭问题已修复通知",

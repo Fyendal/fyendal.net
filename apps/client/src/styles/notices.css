@@ -1,0 +1,49 @@
+:root { --global-notice-height: 0px; }
+.global-notice-container {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+}
+.global-notice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px max(16px, env(safe-area-inset-right)) 8px max(16px, env(safe-area-inset-left));
+  border-bottom: 1px solid #b8933f;
+  background: #38280d;
+  color: #fff0c6;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.global-notice strong { flex: 0 0 auto; }
+.global-notice-message {
+  flex: 1;
+  min-width: 0;
+  max-height: 20vh;
+  overflow: auto;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.global-notice button {
+  flex: 0 0 auto;
+  width: 32px;
+  min-height: 32px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid #b8933f88;
+  color: inherit;
+  font-size: 22px;
+  cursor: pointer;
+}
+.global-notice button:focus-visible { outline: 2px solid #fff0c6; outline-offset: 2px; }
+.table { height: calc(100dvh - var(--global-notice-height)); }
+/* Top-anchored game controls share the space reserved by the banner. */
+.player-nameplate-opponent, .status-float, .deck-card-toast {
+  translate: 0 var(--global-notice-height);
+}
+@media (max-width: 700px) {
+  .global-notice { gap: 8px; font-size: 13px; }
+  .global-notice strong { display: none; }
+  .global-notice button { width: 44px; min-height: 44px; }
+  .stack-float { translate: 0 var(--global-notice-height); }
+}

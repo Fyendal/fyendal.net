@@ -3,17 +3,13 @@ import { cardData, scripts } from "@fyendal/cards";
 import { withTransaction, type Queryable } from "./db.js";
 import { decodePersistedState, encodePersistedState } from "./persistedState.js";
 import { asRecord } from "./validation.js";
+import type { FixedBugReportNotification } from "@fyendal/protocol";
 
 export const BUG_REPORT_DESCRIPTION_MAX = 2_000;
 
 export type CreateBugReportResult =
   | { ok: true; reportId: string }
   | { ok: false; error: "invalid description" | "room not found" };
-
-export interface FixedBugReportNotification {
-  reportId: string;
-  fixedAt: number;
-}
 
 function requiredString(value: unknown, field: string): string {
   if (typeof value !== "string") throw new Error(`invalid bug-report ${field}`);
@@ -121,17 +117,18 @@ export async function createBugReport(
   });
 }
 
-/** Return only the status needed by the lobby notification. Report text and
+/** Return only the resolution needed by the lobby notification. Report text and
  * captured traces stay out of this player-facing response. */
 export async function listFixedBugReportNotifications(
   db: Queryable,
   reporterUserId: number,
 ): Promise<FixedBugReportNotification[]> {
   const { rows } = await db.query(
-    `SELECT id, fixed_at
+    `SELECT id, fixed_at, closed_at, resolution_message
      FROM bug_reports
-     WHERE reporter_user_id = $1 AND fixed_at IS NOT NULL AND dismissed_at IS NULL
-     ORDER BY fixed_at, id
+     WHERE reporter_user_id = $1 AND dismissed_at IS NULL
+       AND (fixed_at IS NOT NULL OR (closed_at IS NOT NULL AND resolution_message IS NOT NULL))
+     ORDER BY COALESCE(fixed_at, closed_at), id
      LIMIT 100`,
     [reporterUserId],
   );
@@ -140,12 +137,14 @@ export async function listFixedBugReportNotifications(
     if (!row) throw new Error("invalid fixed bug-report row");
     return {
       reportId: requiredString(row.id, "id"),
-      fixedAt: requiredInteger(row.fixed_at, "fixed at"),
+      fixedAt: row.fixed_at == null ? null : requiredInteger(row.fixed_at, "fixed at"),
+      ...(row.closed_at == null ? {} : { closedAt: requiredInteger(row.closed_at, "closed at") }),
+      ...(row.resolution_message == null ? {} : { message: requiredString(row.resolution_message, "resolution message") }),
     };
   });
 }
 
-/** Acknowledge the account's current batch of fixed reports. Reports fixed
+/** Acknowledge the account's current batch of resolved reports. Reports resolved
  * after this update retain a null dismissal timestamp and surface later. */
 export async function dismissFixedBugReportNotifications(
   db: Queryable,
@@ -154,7 +153,8 @@ export async function dismissFixedBugReportNotifications(
   const { rows } = await db.query(
     `UPDATE bug_reports
      SET dismissed_at = $2
-     WHERE reporter_user_id = $1 AND fixed_at IS NOT NULL AND dismissed_at IS NULL
+     WHERE reporter_user_id = $1 AND dismissed_at IS NULL
+       AND (fixed_at IS NOT NULL OR (closed_at IS NOT NULL AND resolution_message IS NOT NULL))
      RETURNING id`,
     [reporterUserId, Date.now()],
   );

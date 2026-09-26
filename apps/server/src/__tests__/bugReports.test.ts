@@ -139,4 +139,26 @@ describe("bug reports", () => {
       [result.reportId, 654],
     )).rejects.toThrow();
   });
+
+  it("delivers and dismisses clarification messages only for the reporter", async () => {
+    const closed = await createBugReport(db, userId, "ABC123", "The interaction appears incorrect.");
+    const fixed = await createBugReport(db, userId, "ABC123", "The attack resolved with wrong damage.");
+    if (!closed.ok || !fixed.ok) throw new Error("report creation failed");
+    await db.query(
+      "UPDATE bug_reports SET closed_at = $2, resolution_message = $3 WHERE id = $1",
+      [closed.reportId, 100, "This is intended behavior. Go again applies at resolution."],
+    );
+    await db.query(
+      "UPDATE bug_reports SET fixed_at = $2, resolution_message = $3 WHERE id = $1",
+      [fixed.reportId, 101, "Damage now resolves correctly."],
+    );
+    await expect(listFixedBugReportNotifications(db, userId + 1)).resolves.toEqual([]);
+    await expect(listFixedBugReportNotifications(db, userId)).resolves.toEqual([
+      { reportId: closed.reportId, fixedAt: null, closedAt: 100, message: "This is intended behavior. Go again applies at resolution." },
+      { reportId: fixed.reportId, fixedAt: 101, message: "Damage now resolves correctly." },
+    ]);
+    await expect(dismissFixedBugReportNotifications(db, userId + 1)).resolves.toBe(0);
+    await expect(dismissFixedBugReportNotifications(db, userId)).resolves.toBe(2);
+    await expect(listFixedBugReportNotifications(db, userId)).resolves.toEqual([]);
+  });
 });

@@ -104,6 +104,7 @@ export interface AccountExport {
     fixedAt: number | null;
     closedAt: number | null;
     dismissedAt: number | null;
+    resolutionMessage: string | null;
   }>;
   replays: Array<{
     id: string;
@@ -178,7 +179,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
     ),
     db.query(
       `SELECT id, room_code, room_version, ruleset_version, description, created_at,
-              fixed_at, closed_at, dismissed_at
+              fixed_at, closed_at, dismissed_at, resolution_message
        FROM bug_reports WHERE reporter_user_id = $1 ORDER BY created_at, id`,
       [userId],
     ),
@@ -217,6 +218,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
       fixedAt: row.fixed_at == null ? null : Number(row.fixed_at),
       closedAt: row.closed_at == null ? null : Number(row.closed_at),
       dismissedAt: row.dismissed_at == null ? null : Number(row.dismissed_at),
+      resolutionMessage: row.resolution_message == null ? null : String(row.resolution_message),
     });
   }
   const replaySummaries = await listReplays(db, userId);

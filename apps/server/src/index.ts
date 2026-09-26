@@ -162,6 +162,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
     trustedProxyHops,
     rateLimiter: new PgRateLimiter(deps.db, "http-ip", 10, 10 * 60 * 1000),
     accountRateLimiter: new PgRateLimiter(deps.db, "login-account", 10, 10 * 60 * 1000),
+    noticeRateLimiter: new PgRateLimiter(deps.db, "notice-ip", 600, 10 * 60 * 1000),
     statsRateLimiter: new PgRateLimiter(
       deps.db,
       "stats-ip",

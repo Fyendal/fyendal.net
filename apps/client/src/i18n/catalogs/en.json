@@ -1,4 +1,6 @@
 {
+  "notice.label": "Notice",
+  "notice.dismiss": "Dismiss notice",
   "language.label": "Language",
   "brand.subtitle": "Flesh and Blood Online",
   "landing.title": "Play Flesh and Blood Online",
@@ -2350,6 +2352,9 @@
   "game.search.minimizedPrompt": "{prompt} · {selected}/{maximum} selected",
   "game.search.short": "Card search",
   "game.search.restore": "Restore search",
+  "lobby.bugreport.updated": "Bug report update",
+  "lobby.bugreport.reviewed": "We reviewed a bug you reported. Thanks for helping us improve Fyendal!",
+  "lobby.bugreport.dismiss": "Dismiss bug report notifications",
   "lobby.bugFixed.title": "Bug fixed",
   "lobby.bugFixed.body": "A bug you reported has been fixed. Thanks for helping us improve Fyendal!",
   "lobby.bugFixed.dismiss": "Dismiss bug fixed notification",

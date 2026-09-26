@@ -27,6 +27,7 @@ import {
   listFixedBugReportNotifications,
 } from "./bugReports.js";
 import { consoleError } from "./logging.js";
+import { getGlobalNotice } from "./globalNotice.js";
 import { asRecord } from "./validation.js";
 import {
   deleteReplay,
@@ -112,6 +113,8 @@ export interface ApiDeps {
   accountRateLimiter?: RateLimiter;
   /** separate throttle for GET /api/stats (defaults: 60 per 10 min per IP) */
   statsRateLimiter?: RateLimiter;
+  /** Public notice polling permits several browsers behind a shared IP. */
+  noticeRateLimiter?: RateLimiter;
   /** live lobby stats for the logged-out landing view (queue depth is held by
    *  the ws gateway, so it's injected rather than queried) */
   stats?: () => Promise<Record<string, unknown>>;
@@ -303,6 +306,7 @@ export function createApiServer(deps: ApiDeps): http.Server {
   const limiter = deps.rateLimiter ?? createRateLimiter();
   const accountLimiter = deps.accountRateLimiter ?? createRateLimiter();
   const fabraryClient = deps.fabraryClient ?? createFabraryClient();
+  const noticeLimiter = deps.noticeRateLimiter ?? createRateLimiter(600);
   // /api/stats is public and hits the DB — throttle it separately from the
   // auth limiter (the logged-out landing polls it every 30s, so the budget
   // is generous). /api/health stays unlimited: Cloud Run probes depend on it.
@@ -528,6 +532,14 @@ export function createApiServer(deps: ApiDeps): http.Server {
       return;
     }
     const url = new URL(req.url ?? "/", "http://localhost");
+    if (req.method === "GET" && url.pathname === "/api/notice") {
+      Promise.resolve(noticeLimiter.allow(clientIp(req.headers, req.socket.remoteAddress, trustedProxyHops), "/api/notice"))
+        .then(async (allowed) => allowed
+          ? sendJson(res, 200, { ok: true, notice: await getGlobalNotice(deps.db) })
+          : sendJson(res, 429, { ok: false, error: "too many attempts, try again later" }))
+        .catch((e) => internalError(res, e));
+      return;
+    }
     // Liveness/readiness probe (Docker HEALTHCHECK, load balancers): not
     // rate-limited, verifies pool connectivity with a trivial query.
     if (req.method === "GET" && url.pathname === "/api/health") {
