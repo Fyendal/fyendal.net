@@ -1,5 +1,5 @@
 import { cardData, equipmentFitsSlot, weaponSelectionError } from "@fyendal/cards/client";
-import type { DeckPool, EquipmentSlot } from "@fyendal/shared";
+import type { DeckPool, EquipmentSlot, PresentedArena, PresentedDeck } from "@fyendal/shared";
 import { EQUIPMENT_SLOTS } from "../domain.js";
 
 export interface PrepSelection {
@@ -78,4 +78,24 @@ export function adjustMainCount(
   if (next === 0) updated.delete(id);
   else updated.set(id, next);
   return updated;
+}
+
+/** Compose Ready from the committed arena, independently of the active preset. */
+export function presentedDeckFromSelection(
+  selection: Pick<PrepSelection, "main">,
+  arena: PresentedArena,
+): PresentedDeck {
+  return {
+    weaponIds: [...arena.weaponIds],
+    equipment: { ...arena.equipment },
+    deck: [...selection.main].flatMap(([id, count]) => Array<string>(count).fill(id)),
+  };
+}
+
+/** Opening a reconnect restores only the owner's previously presented main deck. */
+export function restoreMainDeck(selection: PrepSelection, deck: readonly string[] | undefined): PrepSelection {
+  if (!deck) return selection;
+  const main = new Map<string, number>();
+  for (const id of deck) main.set(id, (main.get(id) ?? 0) + 1);
+  return { ...selection, main };
 }

@@ -408,32 +408,35 @@ async function setupGame(
   }
   await Promise.all([hostPrep, guestPrep]);
 
-  const present = async (actor: LoadClient, other: LoadClient, hero: "rhinar" | "dorinthea") => {
-    const beforeVersion = Math.max(actor.latestRoomVersion, other.latestRoomVersion);
-    const actorPrep = prepAfter(actor, beforeVersion, `${actor.name} ready state`);
-    const otherPrep = prepAfter(other, beforeVersion, `${other.name} opponent ready state`);
-    const deck = decklists[hero];
-    actor.send({
-      type: "present-deck",
-      deck: { weaponIds: deck.weaponIds, equipment: deck.equipment, deck: deck.deck },
-    });
-    await Promise.all([actorPrep, otherPrep]);
-  };
-  await present(host, guest, "rhinar");
-  await present(guest, host, "dorinthea");
-
-  if (!host.latestPrep?.seats.every((seat) => seat?.ready)) {
-    await host.waitFor(
+  if (viaMatchmaking) {
+    const accepted = [host, guest].map((client) => client.waitFor(
       (message): message is Extract<ServerMessage, { type: "prep-state" }> =>
-        message.type === "prep-state" && message.prep.seats.every((seat) => seat?.ready),
-      `${host.name} both players ready`,
-    );
+        message.type === "prep-state" && message.prep.phase === "choose-first",
+      `${client.name} match accepted`,
+    ));
+    host.send({ type: "accept-match" });
+    guest.send({ type: "accept-match" });
+    await Promise.all(accepted);
   }
-
-  const dieWinner = host.latestPrep?.die?.winner;
+  const dieWinner = guest.latestPrep?.die?.winner;
   const hostSeat = host.latestPrep?.yourSeat;
   if (dieWinner === undefined || hostSeat === undefined) throw new Error(`game ${index} has no die result`);
   const chooser = dieWinner === hostSeat ? host : guest;
+  const choosingArena = [host, guest].map((client) => client.waitFor(
+    (message): message is Extract<ServerMessage, { type: "prep-state" }> =>
+      message.type === "prep-state" && message.prep.phase === "select-arena",
+    `${client.name} arena selection`,
+  ));
+  chooser.send({ type: "choose-first", first: true });
+  await Promise.all(choosingArena);
+  const revealed = [host, guest].map((client) => client.waitFor(
+    (message): message is Extract<ServerMessage, { type: "prep-state" }> =>
+      message.type === "prep-state" && message.prep.phase === "select-deck",
+    `${client.name} arena reveal`,
+  ));
+  host.send({ type: "present-arena", arena: { weaponIds: decklists.rhinar.weaponIds, equipment: decklists.rhinar.equipment } });
+  guest.send({ type: "present-arena", arena: { weaponIds: decklists.dorinthea.weaponIds, equipment: decklists.dorinthea.equipment } });
+  await Promise.all(revealed);
   const started = [host, guest].map((client) => client.waitFor(
     (message): message is Extract<ServerMessage, { type: "game-started" }> => message.type === "game-started",
     `${client.name} game start`,
@@ -442,7 +445,10 @@ async function setupGame(
     (message): message is StateMessage => message.type === "state",
     `${client.name} initial state`,
   ));
-  chooser.send({ type: "choose-first", first: true });
+  for (const [client, hero] of [[host, "rhinar"], [guest, "dorinthea"]] as const) {
+    const deck = decklists[hero];
+    client.send({ type: "present-deck", deck: { weaponIds: deck.weaponIds, equipment: deck.equipment, deck: deck.deck } });
+  }
   await Promise.all([...started, ...states]);
   return { index, host, guest, pending: false, lastActor: null };
 }

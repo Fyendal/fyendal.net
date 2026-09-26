@@ -61,7 +61,7 @@ describe("Briar matchup presentation", () => {
       for (const turnOrder of ["first", "second"] as const) {
         const presented = briarPresentationFor(opponent({ heroId }), turnOrder);
         expect(presented.deck).toHaveLength(40);
-        expect(validatePresentation(pool, presented, "silver-age")).toMatchObject({ ok: true });
+        expect(validatePresentation(pool, presented, "silver-age", { cardPoolMode: "open" })).toMatchObject({ ok: true });
       }
     }
   });

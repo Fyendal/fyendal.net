@@ -110,18 +110,20 @@ const staleState = {
   lastActionAt: [0, 0],
 };
 
-function matchPrep(accepted: [boolean, boolean], phase: "accept" | "prepare") {
+function matchPrep(accepted: [boolean, boolean], phase: "accept" | "select-deck") {
   return {
     format: "cc",
     seats: [
-      { username: "Alice", heroId: "HERO0", heroName: "Hero 0", ready: false, connected: true, accepted: accepted[0] },
-      { username: "Bob", heroId: "HERO1", heroName: "Hero 1", ready: false, connected: true, accepted: accepted[1] },
+      { username: "Alice", heroId: "HERO0", heroName: "Hero 0", ready: false, arenaLocked: phase === "select-deck", ...(phase === "select-deck" ? { arena: { weaponIds: [], equipment: {} } } : {}), connected: true, accepted: accepted[0] },
+      { username: "Bob", heroId: "HERO1", heroName: "Hero 1", ready: false, arenaLocked: phase === "select-deck", ...(phase === "select-deck" ? { arena: { weaponIds: [], equipment: {} } } : {}), connected: true, accepted: accepted[1] },
     ],
     yourSeat: 1,
+    ...(phase === "select-deck" ? { yourArena: { weaponIds: [], equipment: {} } } : {}),
     die: { rolls: [3, 5], winner: 1 },
-    startPlayer: null,
+    startPlayer: phase === "select-deck" ? 0 : null,
     deadlineAt: Date.now() + 30_000,
     deadlinePhase: phase,
+    phase,
   };
 }
 
@@ -515,7 +517,7 @@ describe("client connection and account race fences", () => {
       matchAcceptanceRole: "joining",
     });
 
-    socket.message({ type: "prep-state", prep: matchPrep([true, true], "prepare"), version: 4 });
+    socket.message({ type: "prep-state", prep: matchPrep([true, true], "select-deck"), version: 4 });
     expect(useStore.getState()).toMatchObject({
       screen: "prep",
       matchAcceptanceRole: null,

@@ -1,5 +1,7 @@
 /* ── prep room (cc/silver-age pre-game sideboarding) ── */
 .prep-page {
+  --prep-content-width: 1265px;
+  --prep-content-gutter: 25px;
   max-width: 100%;
   overflow-x: clip;
   padding-bottom: 132px;
@@ -8,8 +10,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 25px 0;
-  max-width: 1265px;
+  padding: 16px var(--prep-content-gutter) 0;
+  max-width: var(--prep-content-width);
   width: 100%;
   margin: 0 auto;
 }
@@ -39,10 +41,10 @@
   display: grid;
   grid-template-columns: clamp(280px, 28vw, 345px) minmax(0, 1fr);
   gap: 21px;
-  max-width: 1265px;
+  max-width: var(--prep-content-width);
   width: 100%;
   margin: 21px auto 0;
-  padding: 0 25px;
+  padding: 0 var(--prep-content-gutter);
   align-items: start;
 }
 .prep-opponent {
@@ -50,6 +52,21 @@
   top: 18px;
   text-align: center;
 }
+.prep-selection-column { min-width: 0; display: grid; gap: 16px; }
+.prep-arena-stage .prep-cardrow { flex-wrap: wrap; }
+.prep-desktop-arena-action {
+  position: sticky;
+  bottom: max(18px, env(safe-area-inset-bottom));
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+.prep-desktop-arena-action button { max-width: 100%; white-space: normal; }
+.prep-cloaked-card { display: grid; place-items: center; padding: 12px; text-align: center; }
+.prep-card-choice:disabled { cursor: default; }
 .prep-versus { display: flex; align-items: flex-start; justify-content: center; gap: 14px; }
 .prep-vs-side { max-width: 138px; }
 .prep-vs {
@@ -422,14 +439,15 @@
 .prep-decision-status.pending { color: #b7a78b; }
 .prep-float-pick {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
+  min-width: 0;
 }
 .prep-float-pick button {
   min-height: 36px;
   padding: 6px 8px;
   font-size: 11px;
-  white-space: nowrap;
+  white-space: normal;
 }
 .prep-errors {
   grid-area: errors;
@@ -449,13 +467,14 @@
 @media (max-width: 1035px) and (orientation: portrait) {
   .prep-columns { grid-template-columns: 1fr; }
   .prep-opponent { position: static; order: 1; }
-  .prep-pool { order: 2; }
+  .prep-selection-column { order: 2; }
 }
 
 @media (max-width: 700px) {
   .prep-topbar { padding-inline: 14px; }
   .prep-code { margin-left: 8px; }
   .prep-columns {
+    grid-template-columns: 1fr;
     width: 100%;
     min-width: 0;
     padding-inline: 10px;
@@ -468,10 +487,10 @@
   .prep-zone-heading { align-items: flex-start; flex-direction: column; gap: 4px; }
   .prep-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .prep-ready-float {
-    right: auto;
+    right: max(12px, env(safe-area-inset-right));
     bottom: max(12px, env(safe-area-inset-bottom));
-    left: 50%;
-    width: calc(100vw - 24px);
+    left: max(12px, env(safe-area-inset-left));
+    width: auto;
     max-height: calc(100dvh - 24px);
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -480,15 +499,34 @@
       "count controls"
       "status status"
       "errors errors";
-    transform: translateX(-50%);
+    transform: none;
+  }
+  .prep-ready-float.prep-arena-mobile {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "controls" "status" "errors";
   }
   .prep-match-status {
-    grid-template-columns: minmax(0, 1fr) minmax(140px, 1.2fr);
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
     border-top: 1px solid #8b6c374d;
     border-left: 0;
     padding-top: 9px;
     padding-left: 0;
   }
+  .prep-float-pick { width: 100%; }
+  .prep-ready-controls { min-width: 0; }
+  .prep-ready-controls button { max-width: 100%; white-space: normal; }
+  .prep-arena-mobile .prep-ready-controls .btn-primary { width: 100%; }
+  .prep-mobile-match-status .prep-mobile-opponent-copy { gap: 3px; }
+  .prep-mobile-match-status .prep-decision-status {
+    color: var(--gold);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.35;
+    text-align: left;
+    white-space: normal;
+  }
+  .prep-mobile-match-status .prep-decision-status.pending { color: #b7a78b; }
   .prep-group,
   .prep-cardrow { max-width: 100%; min-width: 0; }
   .waiting-panel.match-accept-panel { padding: 20px; }

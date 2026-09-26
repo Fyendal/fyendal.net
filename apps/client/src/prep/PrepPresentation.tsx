@@ -97,6 +97,7 @@ export const PrepPresentation = memo(function PrepPresentation({
   selection,
   selectionKey,
   locked,
+  sections,
   mainCount,
   minimumMainCount,
   exactMainCount,
@@ -111,6 +112,7 @@ export const PrepPresentation = memo(function PrepPresentation({
   selection: PrepSelection;
   selectionKey: string;
   locked: boolean;
+  sections: "arena" | "deck";
   mainCount: number;
   minimumMainCount: number;
   exactMainCount?: number;
@@ -125,11 +127,14 @@ export const PrepPresentation = memo(function PrepPresentation({
   const mainRequirement = exactMainCount === undefined
     ? intl.formatMessage({ id: "prep.presentation.minimum" }, { count: minimumMainCount })
     : intl.formatMessage({ id: "prep.presentation.exact" }, { count: exactMainCount });
+  const Container = sections === "arena" ? "div" : "section";
 
   return (
-    <section className="panel prep-pool">
-      <h3 className="panel-title">{intl.formatMessage({ id: "prep.presentation.title" })}</h3>
-      <div className="prep-section">
+    <Container className={sections === "arena" ? "prep-arena-selection" : "panel prep-pool"}>
+      {sections === "deck" ? (
+        <h3 className="panel-title">{intl.formatMessage({ id: "prep.presentation.title" })}</h3>
+      ) : null}
+      {sections !== "deck" ? <div className="prep-section">
         <span className="play-label">{intl.formatMessage({ id: "prep.presentation.hero" })}</span>
         <div className="prep-cardrow">
           <CardArtwork
@@ -140,8 +145,8 @@ export const PrepPresentation = memo(function PrepPresentation({
             height={PREP_CARD_HEIGHT}
           />
         </div>
-      </div>
-      <div className="prep-section">
+      </div> : null}
+      {sections !== "deck" ? <div className="prep-section">
         <WrappingPrepGroups key={selectionKey}>
           <div className="prep-group">
             <span className="play-label">
@@ -158,6 +163,7 @@ export const PrepPresentation = memo(function PrepPresentation({
                     key={`${id}-${index}`}
                     type="button"
                     className={`prep-card-choice${selected ? " selected" : ""}`}
+                    disabled={locked}
                     aria-pressed={selected}
                     aria-label={intl.formatMessage(
                       { id: selected ? "prep.presentation.removeCard" : "prep.presentation.selectCard" },
@@ -194,6 +200,7 @@ export const PrepPresentation = memo(function PrepPresentation({
                       key={`${id}-${index}`}
                       type="button"
                       className={`prep-card-choice${selection.equipment[slot] === id ? " selected" : ""}`}
+                      disabled={locked}
                       aria-pressed={selection.equipment[slot] === id}
                       aria-label={intl.formatMessage(
                         {
@@ -224,8 +231,8 @@ export const PrepPresentation = memo(function PrepPresentation({
             );
           })}
         </WrappingPrepGroups>
-      </div>
-      <div className="prep-section">
+      </div> : null}
+      {sections !== "arena" ? <div className="prep-section">
         <div className="prep-deck-zone">
           <div className="prep-zone-heading">
             <h4>{intl.formatMessage(
@@ -279,16 +286,7 @@ export const PrepPresentation = memo(function PrepPresentation({
             ) : null}
           </div>
         </div>
-      </div>
-    </section>
+      </div> : null}
+    </Container>
   );
-}, (previous, current) =>
-  previous.pool === current.pool &&
-  previous.selection === current.selection &&
-  previous.selectionKey === current.selectionKey &&
-  previous.locked === current.locked &&
-  previous.mainCount === current.mainCount &&
-  previous.minimumMainCount === current.minimumMainCount &&
-  previous.exactMainCount === current.exactMainCount &&
-  previous.inventoryCount === current.inventoryCount
-);
+});

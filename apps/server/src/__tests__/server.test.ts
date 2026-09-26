@@ -116,6 +116,11 @@ async function startCbGameOverWs(
   }
   (prepA.prep.die!.winner === prepA.prep.yourSeat ? a : b).sendMsg({ type: "choose-first", first: true });
   await a.next((m) => m.type === "prep-state" && m.prep.startPlayer !== null);
+  for (const [c, prep] of [[a, prepA], [b, prepB]] as const) {
+    const deck = decklists[prep.prep.seats[prep.prep.yourSeat]!.hero!];
+    c.sendMsg({ type: "present-arena", arena: { weaponIds: deck.weaponIds, equipment: deck.equipment } });
+  }
+  await a.next((m) => m.type === "prep-state" && m.prep.phase === "select-deck");
   const present = async (c: Client, known?: Extract<ServerMessage, { type: "prep-state" }>) => {
     const prep = known ?? (await c.next(
       (m) => m.type === "prep-state" && m.prep.seats[m.prep.yourSeat]?.hero != null,
@@ -402,6 +407,8 @@ describe("server rooms over websocket", () => {
     const pool = silverAgePrecon("precon-svi")!.pool;
     a.sendMsg({ type: "choose-first", first: false });
     await a.next((m) => m.type === "prep-state" && m.prep.startPlayer === 1);
+    a.sendMsg({ type: "present-arena", arena: { weaponIds: pool.weaponIds.slice(0, 1), equipment: {} } });
+    await a.next((m) => m.type === "prep-state" && m.prep.phase === "select-deck");
     a.sendMsg({
       type: "present-deck",
       deck: {
@@ -445,6 +452,8 @@ describe("server rooms over websocket", () => {
     const pool = precon("precon-asb")!.pool;
     a.sendMsg({ type: "choose-first", first: false });
     await a.next((message) => message.type === "prep-state" && message.prep.startPlayer === 1);
+    a.sendMsg({ type: "present-arena", arena: { weaponIds: pool.weaponIds, equipment: {} } });
+    await a.next((m) => m.type === "prep-state" && m.prep.phase === "select-deck");
     a.sendMsg({
       type: "present-deck",
       deck: { weaponIds: pool.weaponIds, equipment: {}, deck: pool.deck },
@@ -648,6 +657,8 @@ describe("server rooms over websocket", () => {
     const pool = precon("precon-asb")!.pool;
     a.sendMsg({ type: "choose-first", first: false });
     await a.next((message) => message.type === "prep-state" && message.prep.startPlayer === 1);
+    a.sendMsg({ type: "present-arena", arena: { weaponIds: pool.weaponIds, equipment: {} } });
+    await a.next((m) => m.type === "prep-state" && m.prep.phase === "select-deck");
     a.sendMsg({
       type: "present-deck",
       deck: { weaponIds: pool.weaponIds, equipment: {}, deck: pool.deck },
@@ -1464,6 +1475,11 @@ describe("cc prep room", () => {
     winnerC.sendMsg({ type: "choose-first", first: true });
     await a.next((m) => m.type === "prep-state" && m.prep.startPlayer === winner);
 
+    const arenaA = await presentedFor(aDeck);
+    const arenaB = await presentedFor(bDeck);
+    a.sendMsg({ type: "present-arena", arena: { weaponIds: arenaA.weaponIds, equipment: arenaA.equipment } });
+    b.sendMsg({ type: "present-arena", arena: { weaponIds: arenaB.weaponIds, equipment: arenaB.equipment } });
+    await a.next((m) => m.type === "prep-state" && m.prep.phase === "select-deck");
     a.sendMsg({ type: "present-deck", deck: await presentedFor(aDeck) });
     await a.next((m) =>
       m.type === "prep-state" && m.prep.seats[m.prep.yourSeat]?.ready === true

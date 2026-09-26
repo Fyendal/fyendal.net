@@ -1,6 +1,11 @@
 import { cardData, precon } from "@fyendal/cards";
-import type { CardData, Decklist, EquipmentSlot, PresentedDeck } from "@fyendal/shared";
+import type { CardData, EquipmentSlot, PresentedDeck, RevealedArena } from "@fyendal/shared";
 import { briarMatchupForHeroName } from "./briar-strategy.js";
+
+/** Only information visible after arena reveal; never the opponent's deck. */
+export interface BotPrepOpponent extends RevealedArena {
+  heroId: string;
+}
 
 const BRIAR_BOT_DECK_ID = "bot-briar-broccoli";
 const BRAVO_BOT_DECK_ID = "bot-bravo-flarvo";
@@ -109,14 +114,14 @@ const HALA_DEFENSIVE_PACKAGE = [
 ];
 
 function opponentHeroName(
-  opponent: Decklist,
+  opponent: BotPrepOpponent,
   cards: Readonly<Record<string, CardData>>,
 ): string {
   return cards[opponent.heroId]?.name.trim().toLowerCase() ?? "";
 }
 
 function briarMatchupFor(
-  opponent: Decklist,
+  opponent: BotPrepOpponent,
   cards: Readonly<Record<string, CardData>>,
 ): ReturnType<typeof briarMatchupForHeroName> {
   return briarMatchupForHeroName(opponentHeroName(opponent, cards));
@@ -146,7 +151,7 @@ function swapCards(
  * Source: https://fabrary.net/decks/01KSQ4VJB4J94KJYYWCPMY996H
  */
 export function briarPresentationFor(
-  opponent: Decklist,
+  opponent: BotPrepOpponent,
   turnOrder: "first" | "second" = "first",
   cards: Readonly<Record<string, CardData>> = cardData,
 ): PresentedDeck {
@@ -192,7 +197,7 @@ export function briarPresentationFor(
 }
 
 function cindraMatchupFor(
-  opponent: Decklist,
+  opponent: BotPrepOpponent,
   cards: Readonly<Record<string, CardData>>,
 ): CindraMatchup {
   const name = opponentHeroName(opponent, cards);
@@ -227,7 +232,7 @@ function swapCindraCards(
  * Source: https://fabrary.net/decks/01KPKJKVM3ZRYQE7N6KZJS24CT
  */
 export function cindraPresentationFor(
-  opponent: Decklist,
+  opponent: BotPrepOpponent,
   cards: Readonly<Record<string, CardData>> = cardData,
 ): PresentedDeck {
   const registered = precon(CINDRA_BOT_DECK_ID);
@@ -276,7 +281,7 @@ export function cindraPresentationFor(
 }
 
 function jarlMatchupFor(
-  opponent: Decklist,
+  opponent: BotPrepOpponent,
   cards: Readonly<Record<string, CardData>>,
 ): JarlMatchup {
   const name = opponentHeroName(opponent, cards);
@@ -337,7 +342,7 @@ function jarlRunebladeEquipment(): Partial<Record<EquipmentSlot, string>> {
  * Source: https://fabrary.net/decks/01M0K4BKRHN7J89ZSB6XGDHRSH
  */
 export function jarlPresentationFor(
-  opponent: Decklist,
+  opponent: BotPrepOpponent,
   cards: Readonly<Record<string, CardData>> = cardData,
 ): PresentedDeck {
   const registered = precon(JARL_BOT_DECK_ID);
@@ -383,7 +388,7 @@ export function jarlPresentationFor(
 }
 
 function bravoMatchupFor(
-  opponent: Decklist,
+  opponent: BotPrepOpponent,
   cards: Readonly<Record<string, CardData>>,
 ): BravoMatchup {
   const name = opponentHeroName(opponent, cards);
@@ -426,7 +431,7 @@ function bravoArcaneEquipment(): Partial<Record<EquipmentSlot, string>> {
  * Source: https://fabrary.net/decks/01KZKV4909PJJ6PNK8PJQRY630
  */
 export function bravoPresentationFor(
-  opponent: Decklist,
+  opponent: BotPrepOpponent,
   cards: Readonly<Record<string, CardData>> = cardData,
 ): PresentedDeck {
   const registered = precon(BRAVO_BOT_DECK_ID);
@@ -472,16 +477,6 @@ export function bravoPresentationFor(
   };
 }
 
-function opponentHasAttackActions(
-  opponent: Decklist,
-  cards: Readonly<Record<string, CardData>>,
-): boolean {
-  return opponent.deck.some((id) => {
-    const card = cards[id];
-    return card?.cardType === "action" && card.subtypes?.includes("attack");
-  });
-}
-
 /**
  * Present Yuki Lee Bender's Hala Masterclass pool using the article's public
  * matchup packages. The registered sixty is the proactive default; the
@@ -491,7 +486,7 @@ function opponentHasAttackActions(
  * Deck setup: https://fabrary.net/decks/01M0EVE7YR9FCMQQCE438QF3E8
  */
 export function halaPresentationFor(
-  opponent: Decklist,
+  opponent: BotPrepOpponent,
   cards: Readonly<Record<string, CardData>> = cardData,
 ): PresentedDeck {
   const registered = precon(HALA_MASTERCLASS_PRECON_ID);
@@ -540,7 +535,7 @@ export function halaPresentationFor(
       ...HALA_DEFENSIVE_PACKAGE,
       "PEN049", "PEN049", "PEN049",
     ];
-  } else if (oscilio && opponentHasAttackActions(opponent, cards)) {
+  } else if (oscilio) {
     matchup = [
       "MST192", "MST192",
       "MPW089", "MPW089",
@@ -551,18 +546,19 @@ export function halaPresentationFor(
     matchup = [...HALA_ASSERTIVE_PACKAGE];
   }
 
-  const allArcaneOscilio = oscilio && !opponentHasAttackActions(opponent, cards);
+  // Oscilio's hidden deck cannot inform preparation. Use the guide's arcane
+  // equipment package against the publicly revealed Wizard hero.
   const aurora = heroName.includes("aurora");
   const vynnset = heroName.includes("vynnset");
   const equipment: Partial<Record<EquipmentSlot, string>> = {
     head: warrior && !heroName.includes("olympia")
       ? "HNT115"
-      : allArcaneOscilio || aurora || vynnset
+      : oscilio || aurora || vynnset
       ? "ARC155"
       : "PEN310",
-    chest: allArcaneOscilio ? "ARC156" : "MPW010",
+    chest: oscilio ? "ARC156" : "MPW010",
     arms: "AHA005",
-    legs: allArcaneOscilio ? "ARC158" : "MPW012",
+    legs: oscilio ? "ARC158" : "MPW012",
   };
   return {
     weaponIds: ["MPW005"],
@@ -598,7 +594,7 @@ export function iraPresentation(): PresentedDeck {
  * Source: https://www.tcgplayer.com/content/article/Living-Legend-Library-Bravo-Star-of-the-Show/20ef7f41-bec2-4042-bb76-3a4d723bcc90/
  */
 export function starvoPresentationFor(
-  opponent: Decklist,
+  opponent: BotPrepOpponent,
   cards: Readonly<Record<string, CardData>> = cardData,
 ): PresentedDeck {
   const registered = precon(STARVO_BOT_DECK_ID);

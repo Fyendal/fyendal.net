@@ -100,12 +100,22 @@ export interface DeckPool {
 }
 
 /** The cards a player brings into one game, chosen from their `DeckPool`. */
-export interface PresentedDeck {
+export interface PresentedArena {
   /** Weapon-zone cards selected from pool.weaponIds (at most two objects). */
   weaponIds: string[];
   /** slot -> cardId, each ⊆ pool equipmentPool and legal for that slot
    *  (matching subtype, or any equipment slot for Modular equipment) */
   equipment: Partial<Record<EquipmentSlot, string>>;
+}
+
+/** Arena cards that have been revealed; null identifies a Cloaked card. */
+export interface RevealedArena {
+  weaponIds: (string | null)[];
+  equipment: Partial<Record<EquipmentSlot, string | null>>;
+}
+
+/** Main-deck selection made after arena cards are committed and revealed. */
+export interface PresentedDeck extends PresentedArena {
   /** ⊆ pool deck+sideboard, at least the format's minimum main-deck size */
   deck: string[];
 }
@@ -705,16 +715,25 @@ export interface PrepSeatView {
   /** classic-battles: which preconstructed hero this seat plays */
   hero?: HeroId;
   ready: boolean;
+  arenaLocked: boolean;
+  /** Present only after both players commit their arena cards. */
+  arena?: RevealedArena;
   connected: boolean;
   /** Matchmade rooms only: this player acknowledged the pairing. */
   accepted?: boolean;
 }
 
-export type MatchPrepPhase = "accept" | "prepare" | "choose-first";
+export type MatchPrepPhase = "accept" | "choose-first" | "select-arena" | "select-deck";
+export type PrepPhase = "waiting" | MatchPrepPhase;
 
 /** Pre-game prep room state: sideboarding, die roll and first-player pick. */
 export interface PrepView {
   format: Format;
+  phase: PrepPhase;
+  /** Owner-only committed arena selection, including Cloaked identities. */
+  yourArena?: PresentedArena;
+  /** Owner-only main deck already presented, for reconnect/edit recovery. */
+  yourPresentedDeck?: string[];
   /** Omitted for the tournament-legal default. */
   cardPoolMode?: Exclude<CardPoolMode, "legal">;
   /** This room has a synthetic AI opponent and is deleted when its human ends it. */
@@ -868,7 +887,9 @@ export type ClientMessage =
   | { type: "decline-pending-bot-match"; roomCode: string }
   /** Matchmade prep room: acknowledge the pairing before sideboarding. */
   | { type: "accept-match" }
-  /** prep room: after first-player choice, present a deck and set ready */
+  /** prep room: commit arena cards before either player sees the other selection */
+  | { type: "present-arena"; arena: PresentedArena }
+  /** prep room: after arena reveal, present a deck and set ready */
   | { type: "present-deck"; deck: PresentedDeck }
   /** prep room: withdraw readiness to edit the presented deck again */
   | { type: "prep-unready" }

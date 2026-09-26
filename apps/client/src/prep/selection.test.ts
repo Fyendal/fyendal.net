@@ -5,6 +5,8 @@ import {
   defaultSelection,
   defaultWeapons,
   poolCounts,
+  presentedDeckFromSelection,
+  restoreMainDeck,
 } from "./selection.js";
 
 const pool: DeckPool = {
@@ -16,6 +18,22 @@ const pool: DeckPool = {
 };
 
 describe("prep deck selection", () => {
+  it("preserves committed arena cards when a preset has different weapons and equipment", () => {
+    const draft = defaultSelection({ ...pool, weaponIds: ["WTR003"] }, "preset");
+    const arena = { weaponIds: ["GEM003", "GEM003"], equipment: { head: "LOCKED" } };
+    expect(presentedDeckFromSelection(draft, arena)).toEqual({ ...arena, deck: pool.deck });
+    expect(draft.weaponIndexes).toEqual([0]);
+    expect(draft.equipment).toEqual({});
+  });
+
+  it("restores the owner's main deck without changing the preset's arena draft", () => {
+    const draft = defaultSelection(pool, "deck-1");
+    const restored = restoreMainDeck(draft, ["SIDE", "SHARED", "SHARED"]);
+    expect(restored.main).toEqual(new Map([["SIDE", 1], ["SHARED", 2]]));
+    expect(restored.equipment).toBe(draft.equipment);
+    expect(draft.main).toEqual(new Map([["MAIN", 2], ["SHARED", 1]]));
+  });
+
   it("starts with the registered deck in main and the sideboard in inventory", () => {
     const selection = defaultSelection(pool, "deck-1");
 

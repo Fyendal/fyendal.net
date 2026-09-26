@@ -24036,6 +24036,60 @@
       "value": "Waiting for your opponent"
     }
   ],
+  "prep.arena.cloaked": [
+    {
+      "type": 0,
+      "value": "Face-down equipment"
+    }
+  ],
+  "prep.arena.lock": [
+    {
+      "type": 0,
+      "value": "Lock arena cards"
+    }
+  ],
+  "prep.arena.lockHint": [
+    {
+      "type": 0,
+      "value": "Choose your weapons and equipment. Both selections are revealed after both players lock them."
+    }
+  ],
+  "prep.arena.locked": [
+    {
+      "type": 0,
+      "value": "Arena cards locked"
+    }
+  ],
+  "prep.arena.opponent": [
+    {
+      "type": 0,
+      "value": "Opponent’s arena cards"
+    }
+  ],
+  "prep.arena.revealed": [
+    {
+      "type": 0,
+      "value": "Arena cards revealed"
+    }
+  ],
+  "prep.arena.select": [
+    {
+      "type": 0,
+      "value": "Select arena cards"
+    }
+  ],
+  "prep.arena.waiting": [
+    {
+      "type": 0,
+      "value": "Your arena cards are locked. Waiting for your opponent to lock theirs."
+    }
+  ],
+  "prep.arena.yours": [
+    {
+      "type": 0,
+      "value": "Your arena cards"
+    }
+  ],
   "prep.botNudge.description": [
     {
       "type": 0,

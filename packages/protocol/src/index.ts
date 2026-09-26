@@ -28,6 +28,9 @@ import type {
   PlayerBadge,
   PlayerView,
   PrepView,
+  MatchPrepPhase,
+  PresentedArena,
+  RevealedArena,
   ReplayFile,
   ReplayNote,
   RoomSummary,
@@ -475,6 +478,24 @@ function decodeDeckPoolValue(value: unknown): value is DeckPool {
     && optional(deck.sideboard, (v): v is string[] => array(v, id, MAX_CARDS));
 }
 
+function presentedArena(value: unknown): value is PresentedArena {
+  const arena = object(value);
+  return !!arena && exactKeys(arena, ["weaponIds", "equipment"])
+    && array(arena.weaponIds, id, 2) && equipmentRecord(arena.equipment, id);
+}
+
+/** Decode durable arena commitments with the same bounds as wire commands. */
+export function decodePresentedArena(value: unknown): PresentedArena | null {
+  return presentedArena(value) ? value : null;
+}
+
+function revealedArena(value: unknown): value is RevealedArena {
+  const arena = object(value);
+  const visibleId = (value: unknown): value is string | null => value === null || id(value);
+  return !!arena && exactKeys(arena, ["weaponIds", "equipment"])
+    && array(arena.weaponIds, visibleId, 2) && equipmentRecord(arena.equipment, visibleId);
+}
+
 function presentedDeck(value: unknown): boolean {
   const deck = object(value);
   return !!deck && exactKeys(deck, ["weaponIds", "equipment", "deck"])
@@ -717,6 +738,9 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
     case "inspect-room":
       valid = exactKeys(message, ["type", "code"])
         && typeof message.code === "string" && /^[A-Za-z0-9]{6}$/.test(message.code);
+      break;
+    case "present-arena":
+      valid = exactKeys(message, ["type", "arena"]) && presentedArena(message.arena);
       break;
     case "present-deck":
       valid = exactKeys(message, ["type", "deck"]) && presentedDeck(message.deck);
@@ -1168,19 +1192,25 @@ function friendGameInvite(value: unknown): value is FriendGameInvite {
     && nonNegativeInteger(invite.sentAt);
 }
 
+function matchPrepPhase(value: unknown): value is MatchPrepPhase {
+  return value === "accept" || value === "choose-first" || value === "select-arena" || value === "select-deck";
+}
+
 function prepSeat(value: unknown): boolean {
   const item = object(value);
-  return !!item && exactKeys(item, ["username", "heroId", "heroName", "hero", "ready", "connected", "accepted"], ["username", "heroId", "heroName", "ready", "connected"])
+  return !!item && exactKeys(item, ["username", "heroId", "heroName", "hero", "ready", "connected", "accepted", "arenaLocked", "arena"], ["username", "heroId", "heroName", "ready", "connected", "arenaLocked"])
     && string(item.username, MAX_SHORT_TEXT, false) && id(item.heroId)
     && string(item.heroName, MAX_SHORT_TEXT, false)
     && (item.hero === undefined || HEROES.has(String(item.hero)))
+    && typeof item.arenaLocked === "boolean"
+    && optional(item.arena, revealedArena)
     && typeof item.ready === "boolean" && typeof item.connected === "boolean"
     && optional(item.accepted, (v): v is boolean => typeof v === "boolean");
 }
 
 function prepView(value: unknown): value is PrepView {
   const prep = object(value);
-  if (!prep || !exactKeys(prep, ["format", "seats", "yourSeat", "yourDeckId", "die", "startPlayer", "botGame", "cardPoolMode", "deadlineAt", "deadlinePhase"], ["format", "seats", "yourSeat", "die", "startPlayer"])) return false;
+  if (!prep || !exactKeys(prep, ["format", "seats", "yourSeat", "yourDeckId", "die", "startPlayer", "botGame", "cardPoolMode", "deadlineAt", "deadlinePhase", "phase", "yourArena", "yourPresentedDeck"], ["format", "seats", "yourSeat", "die", "startPlayer", "phase"])) return false;
   let dieValid = prep.die === null;
   if (!dieValid) {
     const die = object(prep.die);
@@ -1195,10 +1225,29 @@ function prepView(value: unknown): value is PrepView {
     && optional(prep.botGame, (v): v is boolean => typeof v === "boolean")
     && optional(prep.cardPoolMode, (v): v is "future" | "open" => v === "future" || v === "open")
     && optional(prep.deadlineAt, nonNegativeInteger)
-    && optional(prep.deadlinePhase, (v): v is "accept" | "prepare" | "choose-first" =>
-      v === "accept" || v === "prepare" || v === "choose-first")
+    && (prep.phase === "waiting" || matchPrepPhase(prep.phase))
+    && optional(prep.yourArena, presentedArena)
+    && optional(prep.yourPresentedDeck, (v): v is string[] => array(v, id, MAX_INPUT_CARDS))
+    && optional(prep.deadlinePhase, matchPrepPhase)
     && ((prep.deadlineAt === undefined) === (prep.deadlinePhase === undefined))
-    && dieValid && nullableSeat(prep.startPlayer);
+    && dieValid && nullableSeat(prep.startPlayer)
+    && (prep.phase === "waiting"
+      ? prep.seats.some((item) => item === null) && prep.die === null
+      : prep.seats.every((item) => item !== null) && prep.die !== null)
+    && ((prep.phase === "select-arena" || prep.phase === "select-deck") === (prep.startPlayer !== null))
+    && (prep.phase !== "select-arena" || !prep.seats.every((item) => object(item)?.arenaLocked === true))
+    && prep.seats.every((item) => {
+      if (item === null) return prep.phase !== "select-deck";
+      const member = object(item);
+      return !!member
+        && (member.arena === undefined || (prep.phase === "select-deck" && member.arenaLocked === true))
+        && (prep.phase !== "select-deck" || member.arena !== undefined)
+        && (member.arenaLocked !== true || prep.phase === "select-arena" || prep.phase === "select-deck")
+        && (member.ready !== true || prep.phase === "select-deck");
+    })
+    && ((prep.yourArena !== undefined) === (object(prep.seats[Number(prep.yourSeat)])?.arenaLocked === true))
+    && (prep.yourPresentedDeck === undefined || prep.phase === "select-deck")
+    && (prep.deadlinePhase === undefined || prep.deadlinePhase === prep.phase);
 }
 
 function backgroundMatchmakingStatus(value: unknown): boolean {

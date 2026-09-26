@@ -509,7 +509,6 @@ function okanaTestGameState(): GameState {
     heroId: halaPool.heroId,
     weaponIds: [...halaPool.weaponIds],
     equipment: {},
-    deck: [...halaPool.deck],
   }, "first");
   const iraDeck = { heroId: iraPool.heroId, ...iraPresentation };
   const halaPresentation = hala.presentationFor(iraDeck, "second");
@@ -876,7 +875,7 @@ try {
 
   // phantom seats: random tokens nobody holds, so all joins are spectators
   const seats = [randomBytes(12).toString("hex"), randomBytes(12).toString("hex")];
-  const prep = { rolls: [4, 2], dieWinner: 0, startPlayer: 0 };
+  const prep = { rolls: [4, 2], dieWinner: 0, startPlayer: 0, arenas: [null, null] };
   await pool.query("BEGIN");
   try {
     // These rooms are disposable local fixture data. Recreate them so rerunning
@@ -925,7 +924,7 @@ try {
     );
     const aliceId = Number(aliceRows[0]?.id);
     if (!Number.isSafeInteger(aliceId)) throw new Error("seeded alice account is missing");
-    const flickerWardPrep = { rolls: [1, 6], dieWinner: 1, startPlayer: 1 };
+    const flickerWardPrep = { rolls: [1, 6], dieWinner: 1, startPlayer: 1, arenas: [null, null] };
     const iraForFlickerWard = botDefinition("ira");
     const iraPoolForFlickerWard = precon(iraForFlickerWard?.deckId ?? "")?.pool;
     if (!iraForFlickerWard || !iraPoolForFlickerWard) {
@@ -970,7 +969,7 @@ try {
         iraForFlickerWard.deckName,
       ],
     );
-    const twinningBladePrep = { rolls: [6, 1], dieWinner: 0, startPlayer: 0 };
+    const twinningBladePrep = { rolls: [6, 1], dieWinner: 0, startPlayer: 0, arenas: [null, null] };
     const halaForTwinningBlade = botDefinition("hala");
     const halaPoolForTwinningBlade = precon(halaForTwinningBlade?.deckId ?? "")?.pool;
     if (!halaForTwinningBlade || !halaPoolForTwinningBlade) {
@@ -1031,7 +1030,7 @@ try {
         tokenHash: hashReconnectToken(randomBytes(12).toString("hex")),
       });
     }
-    const damageFxPrep = { rolls: [6, 1], dieWinner: 0, startPlayer: 0 };
+    const damageFxPrep = { rolls: [6, 1], dieWinner: 0, startPlayer: 0, arenas: [null, null] };
     const damageFxBot = botDefinition("briar");
     const damageFxBotPool = precon(damageFxBot?.deckId ?? "")?.pool;
     if (!damageFxBot || !damageFxBotPool) {
@@ -1091,7 +1090,7 @@ try {
         ],
       );
     }
-    const currentFunnelPrep = { rolls: [6, 1], dieWinner: 0, startPlayer: 0 };
+    const currentFunnelPrep = { rolls: [6, 1], dieWinner: 0, startPlayer: 0, arenas: [null, null] };
     const halaForCurrentFunnel = botDefinition("hala");
     const halaPoolForCurrentFunnel = precon(halaForCurrentFunnel?.deckId ?? "")?.pool;
     if (!halaForCurrentFunnel || !halaPoolForCurrentFunnel) {
@@ -1110,7 +1109,7 @@ try {
         Date.now(),
       ],
     );
-    const goneInAFlashPrep = { rolls: [6, 1], dieWinner: 0, startPlayer: 0 };
+    const goneInAFlashPrep = { rolls: [6, 1], dieWinner: 0, startPlayer: 0, arenas: [null, null] };
     const cindraForGoneInAFlash = botDefinition("cindra");
     const cindraPoolForGoneInAFlash = precon(cindraForGoneInAFlash?.deckId ?? "")?.pool;
     if (!cindraForGoneInAFlash || !cindraPoolForGoneInAFlash) {
@@ -1155,7 +1154,7 @@ try {
         cindraForGoneInAFlash.deckName,
       ],
     );
-    const redLurePrep = { rolls: [6, 1], dieWinner: 0, startPlayer: 0 };
+    const redLurePrep = { rolls: [6, 1], dieWinner: 0, startPlayer: 0, arenas: [null, null] };
     const cindraForRedLure = botDefinition("cindra");
     const cindraPoolForRedLure = precon(cindraForRedLure?.deckId ?? "")?.pool;
     if (!cindraForRedLure || !cindraPoolForRedLure) {
@@ -1226,7 +1225,7 @@ try {
         halaForCurrentFunnel.deckName,
       ],
     );
-    const marksPrep = { rolls: [6, 2], dieWinner: 0, startPlayer: 0 };
+    const marksPrep = { rolls: [6, 2], dieWinner: 0, startPlayer: 0, arenas: [null, null] };
     const halaForMarks = botDefinition("hala");
     const halaPoolForMarks = precon(halaForMarks?.deckId ?? "")?.pool;
     if (!halaForMarks || !halaPoolForMarks) {
@@ -1271,7 +1270,7 @@ try {
         halaForMarks.deckName,
       ],
     );
-    const nitroPrep = { rolls: [6, 2], dieWinner: 0, startPlayer: 0 };
+    const nitroPrep = { rolls: [6, 2], dieWinner: 0, startPlayer: 0, arenas: [null, null] };
     const halaForNitro = botDefinition("hala");
     const halaPoolForNitro = precon(halaForNitro?.deckId ?? "")?.pool;
     if (!halaForNitro || !halaPoolForNitro) {
@@ -1316,7 +1315,7 @@ try {
         halaForNitro.deckName,
       ],
     );
-    const hunterPrep = { rolls: [2, 5], dieWinner: 1, startPlayer: 1 };
+    const hunterPrep = { rolls: [2, 5], dieWinner: 1, startPlayer: 1, arenas: [null, null] };
     await pool.query(
       `INSERT INTO rooms
         (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at,
@@ -1350,7 +1349,7 @@ try {
         hashReconnectToken(randomBytes(12).toString("hex")),
       ],
     );
-    const okanaPrep = { rolls: [6, 1], dieWinner: 0, startPlayer: 0 };
+    const okanaPrep = { rolls: [6, 1], dieWinner: 0, startPlayer: 0, arenas: [null, null] };
     const ira = botDefinition("ira");
     const halaForOkana = botDefinition("hala");
     if (!ira || !halaForOkana) throw new Error("Okana test fixture bots are unavailable");
@@ -1398,7 +1397,7 @@ try {
         halaForOkana.deckName,
       ],
     );
-    const snapArcPrep = { rolls: [6, 2], dieWinner: 0, startPlayer: 0 };
+    const snapArcPrep = { rolls: [6, 2], dieWinner: 0, startPlayer: 0, arenas: [null, null] };
     const briar = botDefinition("briar");
     if (!briar) throw new Error("Snap/Arc test fixture bot is unavailable");
     const briarPool = precon(briar.deckId)?.pool;
@@ -1442,7 +1441,7 @@ try {
         briar.deckName,
       ],
     );
-    const newHorizonPrep = { rolls: [6, 2], dieWinner: 0, startPlayer: 0 };
+    const newHorizonPrep = { rolls: [6, 2], dieWinner: 0, startPlayer: 0, arenas: [null, null] };
     const halaForNewHorizon = botDefinition("hala");
     const halaPoolForNewHorizon = precon(halaForNewHorizon?.deckId ?? "")?.pool;
     if (!halaForNewHorizon || !halaPoolForNewHorizon) {
@@ -1487,7 +1486,7 @@ try {
         halaForNewHorizon.deckName,
       ],
     );
-    const rallyPrep = { rolls: [2, 6], dieWinner: 1, startPlayer: 1 };
+    const rallyPrep = { rolls: [2, 6], dieWinner: 1, startPlayer: 1, arenas: [null, null] };
     const iraForRally = botDefinition("ira");
     const kayoPoolForRally = precon("precon-ska")?.pool;
     const iraPoolForRally = precon(iraForRally?.deckId ?? "")?.pool;

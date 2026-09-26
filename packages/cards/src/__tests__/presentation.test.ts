@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { CardData, DeckPool, Format, PresentedDeck } from "@fyendal/shared";
-import { validatePresentationAgainstCards } from "../presentation.js";
+import { validateArenaAgainstCards, validatePresentationAgainstCards } from "../presentation.js";
 
 const card = (id: string, cardType: CardData["cardType"], subtypes: string[] = []): CardData => ({
   id,
@@ -46,6 +46,15 @@ const presentation = (deckSize = 60): PresentedDeck => ({
 });
 
 describe("shared presentation validation", () => {
+  it("validates arena cards without requiring a main deck", () => {
+    expect(validateArenaAgainstCards(cards, basePool(0), { weaponIds: ["ONE", "ONE"], equipment: { head: "HEAD" } }, "cc"))
+      .toEqual({ ok: true });
+    expect(validateArenaAgainstCards(cards, basePool(), { weaponIds: ["TWO", "ONE"], equipment: {} }, "cc").ok).toBe(false);
+    expect(validateArenaAgainstCards(cards, basePool(), { weaponIds: ["OUT"], equipment: {} }, "cc").ok).toBe(false);
+    expect(validateArenaAgainstCards(cards, basePool(), { weaponIds: [], equipment: { arms: "HEAD" } }, "cc").ok).toBe(false);
+    expect(validateArenaAgainstCards(cards, { ...basePool(), heroId: "KAYO" }, { weaponIds: ["ONE", "ONE"], equipment: {} }, "cc").ok).toBe(false);
+  });
+
   it("applies the room's future-card rule while always validating the pool", () => {
     const pool = basePool();
     pool.deck[0] = "FUTURE";

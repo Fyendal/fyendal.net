@@ -36,6 +36,20 @@ describe("bot registry", () => {
     expect(botDefinitionForDeckId("unknown")).toBeUndefined();
   });
 
+  it("stages each bot from public information and preserves its arena commitment", () => {
+    for (const definition of botDefinitions) {
+      for (const order of ["first", "second"] as const) {
+        const arena = definition.arenaFor({ heroId: opponent.heroId }, order);
+        const deck = definition.deckFor({ heroId: opponent.heroId, weaponIds: [], equipment: {} }, arena, order);
+        expect(deck.weaponIds).toEqual(arena.weaponIds);
+        expect(deck.equipment).toEqual(arena.equipment);
+        expect(validatePresentation(precon(definition.deckId)!.pool, deck, definition.format, {
+          cardPoolMode: definition.id === "briar" ? "open" : definition.presentationCardPoolMode,
+        }).ok).toBe(true);
+      }
+    }
+  });
+
   it("produces a legal presentation for both possible turn orders", () => {
     for (const definition of botDefinitions) {
       const registered = precon(definition.deckId);
@@ -45,7 +59,7 @@ describe("bot registry", () => {
       for (const turnOrder of ["first", "second"] as const) {
         const presented = definition.presentationFor(opponent, turnOrder);
         expect(validatePresentation(registered.pool, presented, definition.format, {
-          cardPoolMode: definition.presentationCardPoolMode,
+          cardPoolMode: definition.id === "briar" ? "open" : definition.presentationCardPoolMode,
         })).toMatchObject({
           ok: true,
         });

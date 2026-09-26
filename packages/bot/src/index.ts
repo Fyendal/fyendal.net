@@ -1,3 +1,4 @@
+export type { BotPrepOpponent } from "./sideboard.js";
 export {
   bravoPresentationFor,
   briarPresentationFor,

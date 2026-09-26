@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
-import type { EquipmentSlot, PresentedDeck } from "@fyendal/shared";
+import type { EquipmentSlot } from "@fyendal/shared";
 import {
   cardData,
   EXACT_DECK_SIZE,
   MIN_DECK_SIZE,
   validatePresentation,
+  validateArena,
 } from "@fyendal/cards/client";
 import { useStore } from "../store.js";
 import {
@@ -21,6 +22,8 @@ import { formatLabel } from "../lobby/FormatBadge.js";
 import {
   adjustMainCount,
   defaultSelection,
+  presentedDeckFromSelection,
+  restoreMainDeck,
   poolCounts,
   type PrepSelection,
 } from "./selection.js";
@@ -35,6 +38,7 @@ import {
   shouldOfferBotPractice,
 } from "./BotPracticeNudge.js";
 import { PrepPresentation } from "./PrepPresentation.js";
+import { PrepArenaCards } from "./PrepArenaCards.js";
 
 function heroKey(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
@@ -84,16 +88,14 @@ function FirstPlayerChoice({
 }
 
 /**
- * Pre-game preparation room: sideboard your registered pool (or the fixed
- * Classic Battles box list) down to the presented deck while waiting for an
- * opponent, see their hero once paired, then the die-roll winner picks who
- * goes first. In bot games, the human always makes that choice.
+ * Pre-game preparation: choose the first player, commit arena cards, then
+ * select the main deck after both arena selections are revealed.
  */
 export function PrepRoom() {
   const intl = useIntl();
   const {
     prepDeck, prep, roomCode, queueCounts, matchmakingActive, matchAcceptanceRole,
-    acceptMatch, declineMatch, playBotFromPrep, presentDeck, prepUnready,
+    acceptMatch, declineMatch, playBotFromPrep, presentArena, presentDeck, prepUnready,
     chooseFirst, leave, selectPrepMatchup,
   } = useStore(useShallow((state) => ({
     prepDeck: state.prepDeck,
@@ -105,6 +107,7 @@ export function PrepRoom() {
     acceptMatch: state.acceptMatch,
     declineMatch: state.declineMatch,
     playBotFromPrep: state.playBotFromPrep,
+    presentArena: state.presentArena,
     presentDeck: state.presentDeck,
     prepUnready: state.prepUnready,
     chooseFirst: state.chooseFirst,
@@ -112,6 +115,7 @@ export function PrepRoom() {
     selectPrepMatchup: state.selectPrepMatchup,
   })));
   const [sel, setSel] = useState<PrepSelection | null>(null);
+  const [restoredPresentationRoom, setRestoredPresentationRoom] = useState<string | null>(null);
   const [preview, setPreview] = useState<{ id: string; x: number; y: number } | null>(null);
   const [inspectedCardId, setInspectedCardId] = useState<string | null>(null);
   const cardLongPressHandlers = useMobileCardLongPress((cardId) => setInspectedCardId(cardId));
@@ -173,11 +177,18 @@ export function PrepRoom() {
     );
   }
   // adjust state during render when the pool (re)loads — React-sanctioned pattern
-  const selectionKey = `${prepDeck.id}:${prepDeck.updatedAt}:${prepDeck.selectedMatchupId ?? "default"}`;
-  if (sel?.forDeck !== selectionKey) setSel(defaultSelection(prepDeck.decklist, selectionKey));
-  const selection = sel?.forDeck === selectionKey
+  const roomSelectionKey = `${roomCode ?? "queue"}:${prepDeck.id}`;
+  const selectionKey = `${roomSelectionKey}:${prepDeck.updatedAt}:${prepDeck.selectedMatchupId ?? "default"}`;
+  let selection = sel?.forDeck === selectionKey
     ? sel
     : defaultSelection(prepDeck.decklist, selectionKey);
+  // The server presentation can arrive after the local pool on reconnect.
+  // Restore it once per room so subsequent preset changes keep their main deck.
+  if (prep?.yourPresentedDeck && restoredPresentationRoom !== roomSelectionKey) {
+    selection = restoreMainDeck(selection, prep.yourPresentedDeck);
+    setRestoredPresentationRoom(roomSelectionKey);
+  }
+  if (selection !== sel) setSel(selection);
 
   const pool = prepDeck.decklist;
   const min = MIN_DECK_SIZE[prepDeck.format];
@@ -187,8 +198,14 @@ export function PrepRoom() {
   const me = prep?.seats[yourSeat] ?? null;
   const opp = prep?.seats[1 - yourSeat] ?? null;
   const ready = me?.ready ?? false;
-  const accepting = prep?.deadlinePhase === "accept";
-  const locked = ready || accepting; // editing requires acceptance and an unlocked presentation
+  const accepting = prep?.phase === "accept";
+  const deckStage = prep?.phase === "select-deck";
+  const arenaStage = prep?.phase === "select-arena";
+  const arenaLocked = prep?.phase !== "select-arena" || me?.arenaLocked === true;
+  const locked = ready || !deckStage;
+  const matchupLocked = ready || accepting || (me?.arenaLocked === true && !deckStage);
+  const desktopArenaAction = !mobilePrepLayout && arenaStage;
+  const floatingFooter = deckStage || (mobilePrepLayout && !accepting && opp !== null);
   const matchups = prepDeck.matchups ?? [];
   const selectedMatchup = matchups.find((matchup) => matchup.id === prepDeck.selectedMatchupId);
   const suggestedMatchups = opp
@@ -234,7 +251,7 @@ export function PrepRoom() {
   };
 
   const toggleWeapon = (index: number) => {
-    if (locked) return;
+    if (arenaLocked) return;
     const has = selection.weaponIndexes.includes(index);
     setErrors([]);
     setSel({
@@ -246,7 +263,7 @@ export function PrepRoom() {
   };
 
   const toggleEquipment = (slot: EquipmentSlot, id: string) => {
-    if (locked) return;
+    if (arenaLocked) return;
     const equipment = { ...selection.equipment };
     if (equipment[slot] === id) delete equipment[slot];
     else equipment[slot] = id;
@@ -260,14 +277,23 @@ export function PrepRoom() {
     setSel({ ...selection, main: adjustMainCount(selection.main, poolMain, id, delta) });
   };
 
-  const onReady = () => {
-    const deck: string[] = [];
-    for (const [id, n] of selection.main) for (let i = 0; i < n; i++) deck.push(id);
-    const presented: PresentedDeck = {
+  const onLockArena = () => {
+    if (arenaLocked) return;
+    const arena = {
       weaponIds: selection.weaponIndexes.map((index) => pool.weaponIds[index]!),
       equipment: selection.equipment,
-      deck,
     };
+    const validation = validateArena(pool, arena, prepDeck.format, { cardPoolMode: prep?.cardPoolMode ?? "legal" });
+    if (!validation.ok) {
+      setErrors([validation.error]);
+      return;
+    }
+    presentArena(arena);
+  };
+
+  const onReady = () => {
+    if (locked || !prep?.yourArena) return;
+    const presented = presentedDeckFromSelection(selection, prep.yourArena);
     const validation = validatePresentation(pool, presented, prepDeck.format, {
       cardPoolMode: prep?.cardPoolMode ?? "legal",
     });
@@ -305,7 +331,7 @@ export function PrepRoom() {
     ready,
     startPlayer: prep?.startPlayer ?? null,
   });
-  const canReady = readiness.canReady;
+  const canReady = deckStage && readiness.canReady;
   const inviteUrl = roomCode ? `${location.origin}/${roomCode}` : "";
 
   const copyInviteUrl = async () => {
@@ -316,13 +342,51 @@ export function PrepRoom() {
   };
 
   const chooseMatchup = async (matchupId: string) => {
-    if (locked || matchupBusy) return;
+    if (matchupLocked || matchupBusy) return;
     setMatchupBusy(true);
     setErrors([]);
     const error = await selectPrepMatchup(matchupId || null);
     setMatchupBusy(false);
     if (error) setErrors([error]);
   };
+
+  const presentation = (
+    <PrepPresentation
+      pool={pool}
+      selection={selection}
+      selectionKey={selectionKey}
+      locked={deckStage ? locked : arenaLocked}
+      sections={deckStage ? "deck" : "arena"}
+      mainCount={mainCount}
+      minimumMainCount={min}
+      exactMainCount={exact}
+      inventoryCount={inventoryCount}
+      poolMainEntries={poolMainEntries}
+      fixedInventoryCounts={fixedInventoryCounts}
+      onToggleWeapon={toggleWeapon}
+      onToggleEquipment={toggleEquipment}
+      onMoveMainCopy={moveMainCopy}
+    />
+  );
+  const arenaLockButton = (
+    <button type="button" className="btn-primary" onClick={onLockArena} disabled={arenaLocked}>
+      {intl.formatMessage({ id: me?.arenaLocked ? "prep.arena.locked" : "prep.arena.lock" })}
+      {prep?.deadlineAt && arenaStage ? <> · <DeadlineCountdown deadlineAt={prep.deadlineAt} /></> : null}
+    </button>
+  );
+  const turnStatus = pickPending && iChooseFirst ? null : (
+    <strong
+      className={`prep-decision-status${prep?.startPlayer == null ? " pending" : ""}`}
+      aria-live="polite"
+    >
+      {decisionStatusLabel}
+    </strong>
+  );
+  const prepErrors = errors.length > 0 ? (
+    <ul className="prep-errors">
+      {errors.map((error) => <li key={error}>{error}</li>)}
+    </ul>
+  ) : null;
 
   return (
     <div
@@ -360,7 +424,10 @@ export function PrepRoom() {
             <>
               <div className="prep-versus">
                 <div className="prep-vs-side">
-                  <CardArtwork className="prep-hero" cardId={pool.heroId} alt={intl.formatMessage({ id: "prep.yourHero" })} width={126} height={174} />
+                  <CardArtwork
+                    className="prep-hero" cardId={pool.heroId}
+                    alt={intl.formatMessage({ id: "prep.yourHero" })} width={126} height={174}
+                  />
                   <div className="prep-opp-name">
                     {cardData[pool.heroId]?.name ?? intl.formatMessage({ id: "prep.yourHero" })}
                   </div>
@@ -431,7 +498,7 @@ export function PrepRoom() {
               <select
                 id="fabrary-matchup"
                 value={prepDeck.selectedMatchupId ?? ""}
-                disabled={locked || matchupBusy}
+                disabled={matchupLocked || matchupBusy}
                 onChange={(event) => void chooseMatchup(event.target.value)}
               >
                 <option value="">{intl.formatMessage({ id: "prep.defaultDeck" })}</option>
@@ -465,21 +532,28 @@ export function PrepRoom() {
           ) : null}
         </section> : null}
 
-        <PrepPresentation
-          pool={pool}
-          selection={selection}
-          selectionKey={selectionKey}
-          locked={locked}
-          mainCount={mainCount}
-          minimumMainCount={min}
-          exactMainCount={exact}
-          inventoryCount={inventoryCount}
-          poolMainEntries={poolMainEntries}
-          fixedInventoryCounts={fixedInventoryCounts}
-          onToggleWeapon={toggleWeapon}
-          onToggleEquipment={toggleEquipment}
-          onMoveMainCopy={moveMainCopy}
-        />
+        <div className="prep-selection-column">
+          <section className="panel prep-arena-stage" aria-live="polite">
+            <h3 className="panel-title">
+              {intl.formatMessage({ id: deckStage ? "prep.arena.revealed" : "prep.arena.select" })}
+            </h3>
+            {!deckStage ? <p className="muted">{intl.formatMessage({
+              id: me?.arenaLocked ? "prep.arena.waiting" : "prep.arena.lockHint",
+            })}</p> : null}
+            {prep?.yourArena ? <PrepArenaCards arena={prep.yourArena} owner="you" /> : null}
+            {opp?.arena ? <PrepArenaCards arena={opp.arena} owner="opponent" /> : null}
+            {!deckStage && !me?.arenaLocked ? presentation : null}
+            {desktopArenaAction ? (
+              <div className="prep-desktop-arena-action">
+                {arenaLockButton}
+                {prepErrors}
+              </div>
+            ) : null}
+            {!floatingFooter && !desktopArenaAction ? prepErrors : null}
+          </section>
+
+          {deckStage ? presentation : null}
+        </div>
       </div>
 
       {botNudgeKey
@@ -537,8 +611,8 @@ export function PrepRoom() {
         </div>
       ) : null}
 
-      <div className="prep-ready-float">
-        <div
+      {floatingFooter ? <div className={`prep-ready-float${deckStage ? "" : " prep-arena-mobile"}`}>
+        {deckStage ? <div
           className={`prep-main-count${mainCountValid ? " valid" : " invalid"}`}
           aria-live="polite"
           aria-label={intl.formatMessage(
@@ -548,9 +622,11 @@ export function PrepRoom() {
         >
           <span>{intl.formatMessage({ id: "prep.zone.main" })}</span>
           <strong>{mainCount} / {mainCountRequirement}</strong>
-        </div>
-        <div className="prep-ready-controls">
-          {ready ? (
+        </div> : null}
+        {deckStage || arenaStage ? <div className="prep-ready-controls">
+          {!deckStage ? (
+            arenaLockButton
+          ) : ready ? (
             <>
               <span className="prep-ready-badge">
                 {intl.formatMessage({ id: "prep.status.ready" })} ✓
@@ -563,18 +639,12 @@ export function PrepRoom() {
               onClick={onReady}
               disabled={!canReady}
             >
-              {accepting ? intl.formatMessage({ id: "prep.waitingOpponentNoEllipsis" }) : (
-                <>
-                  {intl.formatMessage({ id: "prep.status.ready" })}
-                  {prep?.deadlinePhase === "prepare" && prep.deadlineAt
-                    ? <> · <DeadlineCountdown deadlineAt={prep.deadlineAt} /></>
-                    : null}
-                </>
-              )}
+              {intl.formatMessage({ id: "prep.status.ready" })}
+              {prep?.deadlineAt ? <> · <DeadlineCountdown deadlineAt={prep.deadlineAt} /></> : null}
             </button>
           )}
-        </div>
-        {!accepting && mobilePrepLayout ? (
+        </div> : null}
+        {mobilePrepLayout ? (
           <div className={`prep-match-status prep-mobile-match-status${opp ? "" : " no-opponent"}`}>
             {opp ? (
               <div className="prep-ready-opponent">
@@ -585,34 +655,24 @@ export function PrepRoom() {
                   width={38}
                   height={52}
                 />
-                <div>
+                <div className="prep-mobile-opponent-copy">
                   <span>{intl.formatMessage({ id: "prep.opponent" })}</span>
                   <strong title={opp.heroName}>
                     {opp.heroName} · {intl.formatMessage({
                       id: `prep.opponentStatus.${readiness.opponentStatus}`,
                     })}
                   </strong>
+                  {turnStatus}
                 </div>
               </div>
             ) : null}
             {pickPending && iChooseFirst ? (
               <FirstPlayerChoice className="prep-float-pick" onChoose={chooseFirst} />
-            ) : (
-              <strong
-                className={`prep-decision-status${prep?.startPlayer == null ? " pending" : ""}`}
-                aria-live="polite"
-              >
-                {decisionStatusLabel}
-              </strong>
-            )}
+            ) : !opp ? turnStatus : null}
           </div>
         ) : null}
-        {errors.length > 0 ? (
-          <ul className="prep-errors">
-            {errors.map((error) => <li key={error}>{error}</li>)}
-          </ul>
-        ) : null}
-      </div>
+        {prepErrors}
+      </div> : null}
 
       {preview && cardData[preview.id] && (
         <div

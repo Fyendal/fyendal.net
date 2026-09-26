@@ -2652,5 +2652,14 @@
   "play.starting": "Starting your game…",
   "play.back": "Back to lobby",
   "play.cards.banned": "{count, plural, one {# banned card} other {# banned cards}}",
-  "play.cards.future": "{count, plural, one {# future card} other {# future cards}}"
+  "play.cards.future": "{count, plural, one {# future card} other {# future cards}}",
+  "prep.arena.select": "Select arena cards",
+  "prep.arena.revealed": "Arena cards revealed",
+  "prep.arena.lock": "Lock arena cards",
+  "prep.arena.locked": "Arena cards locked",
+  "prep.arena.lockHint": "Choose your weapons and equipment. Both selections are revealed after both players lock them.",
+  "prep.arena.waiting": "Your arena cards are locked. Waiting for your opponent to lock theirs.",
+  "prep.arena.yours": "Your arena cards",
+  "prep.arena.opponent": "Opponent’s arena cards",
+  "prep.arena.cloaked": "Face-down equipment"
 }

@@ -15,6 +15,9 @@ import {
   type MatchPrepPhase,
   type PendingDecision,
   type PresentedDeck,
+  type PresentedArena,
+  type PrepPhase,
+  type RevealedArena,
   type PlayerBadge,
   type PrepSeatView,
   type PrepView,
@@ -46,8 +49,9 @@ import {
   formatLegalityErrors,
   precon,
   scripts,
+  validateArena,
 } from "@fyendal/cards";
-import { MAX_MATCHMAKING_AVOID_ROOM_CODES } from "@fyendal/protocol";
+import { decodePresentedArena, MAX_MATCHMAKING_AVOID_ROOM_CODES } from "@fyendal/protocol";
 import { recordGameCompletion } from "./analytics.js";
 import { resolveDeck, validatePresentation } from "./decks.js";
 import { appendClusterEvent, type ClusterEvent } from "./clusterEvents.js";
@@ -166,6 +170,8 @@ export interface PrepState {
   rolls: [number, number];
   dieWinner: 0 | 1;
   startPlayer: 0 | 1 | null;
+  /** Private commitments; reveal only when both entries are present. */
+  arenas: [PresentedArena | null, PresentedArena | null];
 }
 
 export interface RoomRow {
@@ -265,8 +271,9 @@ export const PRESENCE_TIMEOUT_MS = 3 * 60 * 1000;
 /** …and the gateway re-stamps its attached sockets this often. */
 export const PRESENCE_HEARTBEAT_MS = 60 * 1000;
 export const MATCH_ACCEPT_MS = 30 * 1000;
-export const MATCH_PREP_MS = 2 * 60 * 1000;
 export const MATCH_FIRST_PICK_MS = 30 * 1000;
+/** Arena and deck selection share the remainder of one five-minute budget. */
+export const MATCH_PREP_MS = 5 * 60 * 1000 - MATCH_FIRST_PICK_MS;
 
 /** Presence check against a `lastSeenAt` timestamp (0/missing = absent). */
 function isPresent(lastSeenAt: number | undefined, now: number): boolean {
@@ -569,19 +576,30 @@ function decodeRawRoomRow(value: unknown): RawRoomRow {
   let decodedPrep: PrepState | null = null;
   if (row.prep !== null) {
     const prep = dbObject(row.prep, code, "row.prep");
-    if (Object.keys(prep).some((key) => !["rolls", "dieWinner", "startPlayer"].includes(key))) {
+    if (Object.keys(prep).some((key) => !["rolls", "dieWinner", "startPlayer", "arenas"].includes(key))) {
       throw new CorruptRoomError(code, "row.prep", "unknown field");
     }
-    if (!Array.isArray(prep.rolls) || prep.rolls.length !== 2 || !prep.rolls.every((roll) => Number.isFinite(roll))) {
+    if (!Array.isArray(prep.rolls) || prep.rolls.length !== 2
+      || !prep.rolls.every((roll) => Number.isSafeInteger(roll) && roll >= 1 && roll <= 6)) {
       throw new CorruptRoomError(code, "row.prep.rolls", "expected two numbers");
     }
     if (!(prep.dieWinner === 0 || prep.dieWinner === 1) || !(prep.startPlayer === null || prep.startPlayer === 0 || prep.startPlayer === 1)) {
       throw new CorruptRoomError(code, "row.prep", "invalid seat value");
     }
+    if (!Array.isArray(prep.arenas) || prep.arenas.length !== 2) {
+      throw new CorruptRoomError(code, "row.prep.arenas", "invalid arena commitments");
+    }
+    const decodeArena = (value: unknown): PresentedArena | null => {
+      if (value === null) return null;
+      const arena = decodePresentedArena(value);
+      if (!arena) throw new CorruptRoomError(code, "row.prep.arenas", "invalid arena commitment");
+      return arena;
+    };
     decodedPrep = {
       rolls: [Number(prep.rolls[0]), Number(prep.rolls[1])],
       dieWinner: prep.dieWinner,
       startPlayer: prep.startPlayer,
+      arenas: [decodeArena(prep.arenas[0]), decodeArena(prep.arenas[1])],
     };
   }
   return {
@@ -745,15 +763,39 @@ function rollDice(): PrepState {
   const b = randomBytes(3);
   const rolls: [number, number] = [1 + (b[0]! % 6), 1 + (b[1]! % 6)];
   const dieWinner = rolls[0] === rolls[1] ? ((b[2]! % 2) as 0 | 1) : rolls[0] > rolls[1] ? 0 : 1;
-  return { rolls, dieWinner, startPlayer: null };
+  return { rolls, dieWinner, startPlayer: null, arenas: [null, null] };
+}
+
+/** The preparation phase is authoritative in every room, not just matchmaking. */
+function prepPhase(room: RoomRow): PrepPhase {
+  if (!room.seats.every(Boolean) || !room.prep) return "waiting";
+  if (room.seats.every((seat) => seat?.fromQueue === true)
+    && !room.seats.every((seat) => seat?.accepted === true)) return "accept";
+  if (room.prep.startPlayer === null) return "choose-first";
+  return room.prep.arenas.every(Boolean) ? "select-deck" : "select-arena";
+}
+
+function resetPreparation(member: SeatRow): void {
+  member.accepted = false;
+  member.ready = false;
+  delete member.presented;
 }
 
 function matchPrepPhase(room: RoomRow): MatchPrepPhase | null {
-  if (room.prepDeadlineAt === null || room.state || !room.seats.every(Boolean)
+  if (room.prepDeadlineAt === null || room.state
     || !room.seats.every((seat) => seat?.fromQueue === true)) return null;
-  if (!room.seats.every((seat) => seat?.accepted === true)) return "accept";
-  if (room.prep?.startPlayer == null) return "choose-first";
-  return room.seats.every((seat) => seat?.ready === true) ? null : "prepare";
+  const phase = prepPhase(room);
+  return phase === "waiting" ? null : phase;
+}
+
+/** Public arena projection respects Cloaked even after the commitment barrier. */
+function revealArena(arena: PresentedArena): RevealedArena {
+  const visible = (id: string): string | null =>
+    cardData[id]?.keywords?.some((keyword) => keyword.toLowerCase() === "cloaked") ? null : id;
+  return {
+    weaponIds: arena.weaponIds.map(visible),
+    equipment: Object.fromEntries(Object.entries(arena.equipment).map(([slot, id]) => [slot, visible(id)])),
+  };
 }
 
 /**
@@ -784,7 +826,7 @@ function maybeStart(room: RoomRow): boolean {
   const [a, b] = room.seats;
   if (!a?.ready || !a.presented || !b?.ready || !b.presented) return false;
   const startPlayer = room.prep?.startPlayer;
-  if (startPlayer == null) return false;
+  if (startPlayer == null || !room.prep?.arenas.every(Boolean)) return false;
   room.state = createGame(gameConfig([a.presented, b.presented], startPlayer));
   // both seats count as active from the first turn (idle-claim baseline)
   a.lastActionAt = Date.now();
@@ -1776,7 +1818,7 @@ export class PgRoomStore {
         const freeSeat = retained?.seats[0] === null ? 0 : retained?.seats[1] === null ? 1 : -1;
         if (retained && !retained.state && ownerSeat !== -1 && freeSeat !== -1) {
           retained.seats[freeSeat] = incomingSeat;
-          for (const member of retained.seats) if (member) member.accepted = false;
+          for (const member of retained.seats) if (member) resetPreparation(member);
           retained.prep = rollDice();
           retained.prepDeadlineAt = Date.now() + MATCH_ACCEPT_MS;
           updateGc(retained);
@@ -2082,7 +2124,7 @@ export class PgRoomStore {
       const member = room.seats[seat]!;
       room.seats[seat] = null;
       const survivor = room.seats[1 - seat];
-      if (survivor) survivor.accepted = false;
+      if (survivor) resetPreparation(survivor);
       room.prep = null;
       room.prepDeadlineAt = null;
       updateGc(room);
@@ -2677,6 +2719,40 @@ export class PgRoomStore {
     return r.ok ? { ...r.result, version: r.version } : { ok: false, error: r.error };
   }
 
+  /** Commit arena cards without accepting or revealing any main-deck selection.
+   * Source: https://fabtcg.com/articles/rules-update-17-09-26/ */
+  async presentArena(
+    code: string,
+    credentials: SeatCredentials,
+    arena: PresentedArena,
+  ): Promise<{ ok: true; version: number } | { ok: false; error: string }> {
+    const r = await this.withRetry<undefined>(code.toUpperCase(), async (room) => {
+      if (room.state) return { error: "game has already started" };
+      const seatIdx = seatForCredentials(room, credentials);
+      if (seatIdx === null) return { error: "not a player in this room" };
+      if (prepPhase(room) !== "select-arena" || !room.prep) {
+        return { error: "the room is not in arena selection" };
+      }
+      if (room.prepDeadlineAt !== null && Date.now() >= room.prepDeadlineAt) {
+        return { error: "preparation expired" };
+      }
+      if (room.prep.arenas[seatIdx]) return { error: "arena cards are already locked" };
+      const member = room.seats[seatIdx]!;
+      const pool = room.format === "classic-battles"
+        ? deckPoolForHero(member.hero ?? "rhinar")
+        : (member.deckId ? await resolveDeck(this.db, member.deckId) : null)?.decklist;
+      if (!pool) return { error: "your deck is no longer available" };
+      if (pool.heroId !== heroIdForSeat(member)) {
+        return { error: "your registered hero changed; leave and rejoin the room" };
+      }
+      const validation = validateArena(pool, arena, room.format, { cardPoolMode: room.cardPoolMode });
+      if (!validation.ok) return { error: validation.error };
+      room.prep.arenas[seatIdx] = { weaponIds: [...arena.weaponIds], equipment: { ...arena.equipment } };
+      return { room, result: undefined };
+    });
+    return r.ok ? { ok: true, version: r.version } : { ok: false, error: r.error };
+  }
+
   /**
    * Prep room: present a deck (validated against the seat's pool — the saved
    * pool for cc/silver-age, the fixed box list for classic-battles) and lock
@@ -2693,9 +2769,10 @@ export class PgRoomStore {
       const seatIdx = seatForCredentials(room, credentials);
       if (seatIdx === null) return { error: "not a player in this room" };
       const seat = room.seats[seatIdx]!;
+      if (seat.ready) return { error: "reopen deck selection before changing a ready deck" };
       if (seat.fromQueue && room.seats.every((member) => member?.fromQueue === true)) {
         if (!seat.accepted) return { error: "accept the match first" };
-        if (matchPrepPhase(room) !== "prepare") return { error: "the match is not in deck preparation" };
+        if (matchPrepPhase(room) !== "select-deck") return { error: "the match is not in deck preparation" };
         if (room.prepDeadlineAt !== null && Date.now() >= room.prepDeadlineAt) {
           return { error: "deck preparation expired" };
         }
@@ -2703,12 +2780,24 @@ export class PgRoomStore {
       if (room.prep?.startPlayer == null) {
         return { error: "choose who goes first before readying up" };
       }
+      if (prepPhase(room) !== "select-deck" || !room.prep) {
+        return { error: "both players must lock arena cards before presenting a deck" };
+      }
+      const arena = room.prep.arenas[seatIdx]!;
+      const sameWeapons = arena.weaponIds.length === presented.weaponIds.length
+        && arena.weaponIds.every((id, index) => id === presented.weaponIds[index]);
+      const sameEquipment = (["head", "chest", "arms", "legs"] as const)
+        .every((slot) => arena.equipment[slot] === presented.equipment[slot]);
+      if (!sameWeapons || !sameEquipment) return { error: "arena cards cannot change after locking" };
       const pool =
         room.format === "classic-battles"
           ? deckPoolForHero(seat.hero ?? "rhinar")
           : (seat.deckId ? await resolveDeck(this.db, seat.deckId) : null)?.decklist;
       if (!pool) return { error: "your deck is no longer available" };
-      const v = validatePresentation(pool, presented, room.format, {
+      if (pool.heroId !== heroIdForSeat(seat)) {
+        return { error: "your registered hero changed; leave and rejoin the room" };
+      }
+      const v = validatePresentation(pool, { ...arena, deck: presented.deck }, room.format, {
         cardPoolMode: room.cardPoolMode,
       });
       if (!v.ok) return { error: v.error };
@@ -2726,8 +2815,9 @@ export class PgRoomStore {
         if (!definition || definition.format !== room.format) {
           return { error: "bot precon is not supported" };
         }
-        const botPresentation = definition.presentationFor(
-          v.decklist,
+        const botPresentation = definition.deckFor(
+          { heroId: pool.heroId, ...revealArena(arena) },
+          room.prep.arenas[botSeat]!,
           room.prep.startPlayer === botSeat ? "first" : "second",
         );
         const botValidation = validatePresentation(registered.pool, botPresentation, room.format, {
@@ -2769,6 +2859,8 @@ export class PgRoomStore {
       if (room.state) return { error: "game has already started" };
       const seatIdx = seatForCredentials(room, credentials);
       if (seatIdx === null) return { error: "not a player in this room" };
+      if (prepPhase(room) !== "select-deck") return { error: "the room is not in deck selection" };
+      if (room.prepDeadlineAt !== null && Date.now() >= room.prepDeadlineAt) return { error: "preparation expired" };
       const seat = room.seats[seatIdx]!;
       seat.ready = false;
       return {
@@ -2807,51 +2899,28 @@ export class PgRoomStore {
       }
       room.prep.startPlayer = (first ? seatIdx : 1 - seatIdx) as 0 | 1;
       if (room.seats.every((member) => member?.fromQueue === true)) {
-        room.prepDeadlineAt = Date.now() + MATCH_PREP_MS;
+        room.prepDeadlineAt = (room.prepDeadlineAt ?? Date.now()) + MATCH_PREP_MS;
       }
-      let refreshedBotSeat: SeatIndex | null = null;
       if (botSeat !== -1) {
         const bot = room.seats[botSeat]!;
-        const human = room.seats[1 - botSeat];
+        const human = room.seats[1 - botSeat]!;
         const definition = botDefinitionForDeckId(bot.deckId);
         const registered = bot.deckId ? precon(bot.deckId) : null;
-        if (!definition || !registered) {
-          return { error: "bot deck is not available" };
-        }
-        // The turn-order decision now comes before Ready. Build the bot's
-        // matchup presentation here only for legacy rooms whose human deck was
-        // already presented; the normal path defers it to presentDeck.
-        if (human?.presented) {
-          const presentation = definition.presentationFor(
-            human.presented,
-            room.prep.startPlayer === botSeat ? "first" : "second",
-          );
-          const validation = validatePresentation(registered.pool, presentation, room.format, {
-            cardPoolMode: definition.presentationCardPoolMode ?? room.cardPoolMode,
-          });
-          if (!validation.ok) return { error: validation.error };
-          bot.presented = validation.decklist;
-          refreshedBotSeat = botSeat as SeatIndex;
-        }
+        const heroId = heroIdForSeat(human);
+        if (!definition || !registered || !heroId) return { error: "bot deck is not available" };
+        const arena = definition.arenaFor(
+          { heroId }, room.prep.startPlayer === botSeat ? "first" : "second",
+        );
+        const validation = validateArena(registered.pool, arena, room.format, {
+          cardPoolMode: definition.presentationCardPoolMode ?? room.cardPoolMode,
+        });
+        if (!validation.ok) return { error: validation.error };
+        room.prep.arenas[botSeat] = arena;
       }
-      const started = maybeStart(room);
-      if (started) room.prepDeadlineAt = null;
-      if (started) this.applyServerShortcuts(room);
       return {
         room,
-        result: { started },
-        ...(started ? { replay: { kind: "start" as const } } : {}),
-        seatWrites: started
-          ? ([0, 1] as const).map((seat) => seat === refreshedBotSeat
-              ? { kind: "full" as const, seat, mode: "update" as const }
-              : {
-                  kind: "activity" as const,
-                  seat,
-                  lastActionAt: room.seats[seat]!.lastActionAt!,
-                })
-          : refreshedBotSeat === null
-          ? []
-          : [{ kind: "full" as const, seat: refreshedBotSeat, mode: "update" as const }],
+        result: { started: false },
+        seatWrites: [],
       };
     });
     return r.ok ? { ok: true, started: r.result.started, version: r.version } : { ok: false, error: r.error };
@@ -2859,8 +2928,7 @@ export class PgRoomStore {
 
   /**
    * Leave a room before its game started: free the seat (or drop the
-   * spectator), clear the prep die. The remaining seat keeps its presentation
-   * so a re-queued player doesn't redo sideboarding.
+   * spectator), clear commitments and presentations for the next pairing.
    */
   async leaveRoom(
     code: string,
@@ -2880,11 +2948,12 @@ export class PgRoomStore {
         if (seatIdx !== null) {
           const otherSeat = (1 - seatIdx) as SeatIndex;
           const removesBot = room.seats[otherSeat]?.controller === "bot";
-          const resetsAcceptance = room.seats[otherSeat]?.accepted === true;
+          const survivor = room.seats[otherSeat];
+          const resetsSurvivor = survivor?.accepted === true || survivor?.ready === true || survivor?.presented !== undefined;
           room.seats[seatIdx] = null;
           room.prep = null;
           room.prepDeadlineAt = null;
-          if (room.seats[otherSeat]) room.seats[otherSeat]!.accepted = false;
+          if (survivor) resetPreparation(survivor);
           // A bot room is private to its human creator. If that player leaves
           // prep, remove the synthetic seat as well instead of listing an
           // orphaned Briar room for matchmaking.
@@ -2895,7 +2964,7 @@ export class PgRoomStore {
             room,
             seatWrites: [
               { kind: "delete", seat: seatIdx },
-              ...(room.seats[otherSeat] && !removesBot && resetsAcceptance
+              ...(room.seats[otherSeat] && !removesBot && resetsSurvivor
                 ? [{ kind: "full" as const, seat: otherSeat, mode: "update" as const }]
                 : []),
               ...(removesBot ? [{ kind: "delete" as const, seat: otherSeat }] : []),
@@ -2964,20 +3033,21 @@ export class PgRoomStore {
         if (phase === "choose-first") {
           if (!room.prep) return { error: "matchmade prep room has no die roll" };
           room.prep.startPlayer = room.prep.dieWinner;
-          room.prepDeadlineAt = now + MATCH_PREP_MS;
+          room.prepDeadlineAt += MATCH_PREP_MS;
           return {
             room,
             result: { started: false, survivor: null },
           };
         }
-        if (phase !== "accept" && phase !== "prepare") {
+        if (phase !== "accept" && phase !== "select-arena" && phase !== "select-deck") {
           room.prepDeadlineAt = null;
           return { room, result: { started: false, survivor: null } };
         }
 
         const timedOut = ([0, 1] as const).filter((seat) => {
           const member = room.seats[seat];
-          return phase === "accept" ? member?.accepted !== true : member?.ready !== true;
+          return phase === "accept" ? member?.accepted !== true
+            : phase === "select-arena" ? !room.prep?.arenas[seat] : member?.ready !== true;
         });
         const events: ClusterEvent[] = timedOut.flatMap((seat) => {
           const userId = room.seats[seat]?.userId;
@@ -3003,7 +3073,7 @@ export class PgRoomStore {
           },
         };
         for (const seat of timedOut) room.seats[seat] = null;
-        if (survivorRow) survivorRow.accepted = false;
+        if (survivorRow) resetPreparation(survivorRow);
         room.prep = null;
         room.prepDeadlineAt = null;
         return {
@@ -4091,7 +4161,7 @@ export function stateMessage(room: RoomRow, seat: number | null): ServerMessage 
 /** Per-player prep-room projection (game not started). */
 export function prepViewFor(room: RoomRow, seat: number): PrepView {
   const now = Date.now();
-  const seatView = (s: SeatRow | null): PrepSeatView | null => {
+  const seatView = (s: SeatRow | null, index: 0 | 1): PrepSeatView | null => {
     if (!s) return null;
     const heroId = heroIdForSeat(s) ?? "";
     return {
@@ -4100,6 +4170,9 @@ export function prepViewFor(room: RoomRow, seat: number): PrepView {
       heroName: heroId ? (cardData[heroId]?.name ?? "") : "",
       hero: s.hero,
       ready: s.ready ?? false,
+      arenaLocked: !!room.prep?.arenas[index],
+      ...(room.prep?.arenas.every(Boolean)
+        ? { arena: revealArena(room.prep.arenas[index]!) } : {}),
       connected: s.controller === "bot" || isPresent(s.lastSeenAt, now),
       ...(s.fromQueue ? { accepted: s.accepted === true } : {}),
     };
@@ -4108,7 +4181,10 @@ export function prepViewFor(room: RoomRow, seat: number): PrepView {
     format: room.format,
     ...(room.cardPoolMode === "legal" ? {} : { cardPoolMode: room.cardPoolMode }),
     ...(room.seats.some((member) => member?.controller === "bot") ? { botGame: true } : {}),
-    seats: [seatView(room.seats[0]), seatView(room.seats[1])],
+    phase: prepPhase(room),
+    ...(room.seats[seat]?.presented ? { yourPresentedDeck: [...room.seats[seat]!.presented!.deck] } : {}),
+    ...(room.prep?.arenas[seat] ? { yourArena: room.prep.arenas[seat]! } : {}),
+    seats: [seatView(room.seats[0], 0), seatView(room.seats[1], 1)],
     yourSeat: seat,
     yourDeckId: room.seats[seat]?.deckId,
     die: room.prep ? { rolls: room.prep.rolls, winner: room.prep.dieWinner } : null,

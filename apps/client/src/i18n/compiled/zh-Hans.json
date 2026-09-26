@@ -22968,6 +22968,60 @@
       "value": "正在等待你的对手"
     }
   ],
+  "prep.arena.cloaked": [
+    {
+      "type": 0,
+      "value": "牌面朝下的装备"
+    }
+  ],
+  "prep.arena.lock": [
+    {
+      "type": 0,
+      "value": "锁定场上卡牌"
+    }
+  ],
+  "prep.arena.lockHint": [
+    {
+      "type": 0,
+      "value": "选择武器和装备。双方锁定后，将同时公开所选卡牌。"
+    }
+  ],
+  "prep.arena.locked": [
+    {
+      "type": 0,
+      "value": "场上卡牌已锁定"
+    }
+  ],
+  "prep.arena.opponent": [
+    {
+      "type": 0,
+      "value": "对手的场上卡牌"
+    }
+  ],
+  "prep.arena.revealed": [
+    {
+      "type": 0,
+      "value": "场上卡牌已公开"
+    }
+  ],
+  "prep.arena.select": [
+    {
+      "type": 0,
+      "value": "选择场上卡牌"
+    }
+  ],
+  "prep.arena.waiting": [
+    {
+      "type": 0,
+      "value": "你的场上卡牌已锁定。等待对手锁定。"
+    }
+  ],
+  "prep.arena.yours": [
+    {
+      "type": 0,
+      "value": "你的场上卡牌"
+    }
+  ],
   "prep.botNudge.description": [
     {
       "type": 0,

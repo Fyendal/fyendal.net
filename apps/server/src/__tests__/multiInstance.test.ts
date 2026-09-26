@@ -209,6 +209,7 @@ describe("multi-instance gateways", () => {
     expect(await practiceStore.chooseFirst(source.code, { token: source.token, userId }, true))
       .toMatchObject({ ok: true, started: false });
     const boltyn = precon("precon-asb")!.pool;
+    expect(await practiceStore.presentArena(source.code, { token: source.token, userId }, { weaponIds: boltyn.weaponIds, equipment: {} })).toMatchObject({ ok: true });
     expect(await practiceStore.presentDeck(source.code, { token: source.token, userId }, {
       weaponIds: boltyn.weaponIds,
       equipment: {},

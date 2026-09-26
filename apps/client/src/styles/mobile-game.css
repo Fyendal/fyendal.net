@@ -1177,5 +1177,4 @@
   }
   .prep-ready-controls { justify-content: space-between; }
   .prep-ready-controls .btn-primary:only-child { width: 100%; }
-  .prep-match-status { grid-template-columns: minmax(0, 1fr) 160px; }
 }

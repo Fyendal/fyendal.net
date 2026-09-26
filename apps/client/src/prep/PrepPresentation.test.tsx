@@ -6,6 +6,29 @@ import { PrepPresentation } from "./PrepPresentation.js";
 import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 
 describe("PrepPresentation equipment controls", () => {
+  it("hides main-deck controls during arena selection and disables equipment after lock", () => {
+    const props = {
+      pool: { heroId: "HVY195", weaponIds: ["SEA045"], equipmentPool: ["HVY195"], deck: ["HVY103"] },
+      selection: { forDeck: "deck", weaponIndexes: [0], equipment: {}, main: new Map([["HVY103", 1]]) },
+      selectionKey: "deck",
+      mainCount: 1, minimumMainCount: 60, inventoryCount: 0, poolMainEntries: [["HVY103", 1]] as [string, number][],
+      fixedInventoryCounts: new Map<string, number>(),
+      onToggleWeapon: vi.fn(), onToggleEquipment: vi.fn(), onMoveMainCopy: vi.fn(),
+    };
+    const render = (sections: "arena" | "deck") => renderToStaticMarkup(createElement(
+      TestI18nProvider, null,
+      createElement(PrepPresentation, { ...props, sections, locked: sections === "arena" }),
+    ));
+    expect(render("arena")).not.toContain("prep-deck-zone");
+    expect(render("arena")).not.toContain("panel prep-pool");
+    expect(render("arena")).not.toContain("Your presentation");
+    expect(render("arena")).toContain('disabled="" aria-pressed="true"');
+    expect(render("deck")).not.toContain("prep-card-choice");
+    expect(render("deck")).not.toContain("SEA045.webp");
+    expect(render("deck")).toContain("prep-deck-zone");
+    expect(render("deck")).toContain("Move one copy of Up the Ante to Inventory");
+  });
+
   it("exposes weapon and equipment selection as pressed buttons", () => {
     const pool: DeckPool = {
       heroId: "HVY195",
@@ -14,6 +37,7 @@ describe("PrepPresentation equipment controls", () => {
       deck: [],
     };
     const html = renderToStaticMarkup(createElement(TestI18nProvider, null, createElement(PrepPresentation, {
+      sections: "arena",
       pool,
       selection: {
         forDeck: "deck",
@@ -50,6 +74,7 @@ describe("PrepPresentation equipment controls", () => {
       deck: [],
     };
     const html = renderToStaticMarkup(createElement(TestI18nProvider, null, createElement(PrepPresentation, {
+      sections: "deck",
       pool,
       selection: {
         forDeck: "deck",
@@ -70,8 +95,8 @@ describe("PrepPresentation equipment controls", () => {
     })));
 
     expect(html.match(/HVY103\.webp/g)).toHaveLength(3);
-    expect(html.match(/loading="eager"/g)).toHaveLength(4);
-    expect(html.match(/card-artwork-placeholder/g)).toHaveLength(4);
+    expect(html.match(/loading="eager"/g)).toHaveLength(3);
+    expect(html.match(/card-artwork-placeholder/g)).toHaveLength(3);
     expect(html).toContain("Up the Ante");
     expect(html).not.toContain("prep-stack-count");
   });
@@ -84,6 +109,7 @@ describe("PrepPresentation equipment controls", () => {
       deck: [],
     };
     const html = renderToStaticMarkup(createElement(TestI18nProvider, null, createElement(PrepPresentation, {
+      sections: "arena",
       pool,
       selection: {
         forDeck: "deck",
@@ -119,6 +145,7 @@ describe("PrepPresentation equipment controls", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider locale="zh-Hans">
         <PrepPresentation
+          sections="deck"
           pool={pool}
           selection={{
             forDeck: "deck",

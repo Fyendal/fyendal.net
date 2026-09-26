@@ -583,6 +583,11 @@ describe("replay transport compression", () => {
     if (!chosen.ok || chosen.started) throw new Error("turn order was not recorded");
     for (const seat of [0, 1] as const) {
       const deck = decklists[seat === 0 ? "rhinar" : "dorinthea"];
+      const locked = await store.presentArena(host.code, { token: roomTokens[seat], userId: users[seat].id }, { weaponIds: deck.weaponIds, equipment: deck.equipment });
+      if (!locked.ok) throw new Error(locked.error);
+    }
+    for (const seat of [0, 1] as const) {
+      const deck = decklists[seat === 0 ? "rhinar" : "dorinthea"];
       const presented = await store.presentDeck(
         host.code,
         { token: roomTokens[seat], userId: users[seat].id },

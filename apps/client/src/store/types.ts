@@ -14,6 +14,7 @@ import type {
   PlayerProfileView,
   HeroId,
   PresentedDeck,
+  PresentedArena,
   PrepView,
   PriorityWindowMode,
   PlayerBadge,
@@ -225,6 +226,7 @@ export interface StoreState {
   declineBackgroundMatch: () => void;
   acceptMatch: () => void;
   declineMatch: () => void;
+  presentArena: (arena: PresentedArena) => void;
   presentDeck: (deck: PresentedDeck) => void;
   prepUnready: () => void;
   chooseFirst: (first: boolean) => void;

@@ -2652,5 +2652,14 @@
   "play.starting": "正在开始游戏…",
   "play.back": "返回大厅",
   "play.cards.banned": "{count} 张禁牌",
-  "play.cards.future": "{count} 张未来卡牌"
+  "play.cards.future": "{count} 张未来卡牌",
+  "prep.arena.select": "选择场上卡牌",
+  "prep.arena.revealed": "场上卡牌已公开",
+  "prep.arena.lock": "锁定场上卡牌",
+  "prep.arena.locked": "场上卡牌已锁定",
+  "prep.arena.lockHint": "选择武器和装备。双方锁定后，将同时公开所选卡牌。",
+  "prep.arena.waiting": "你的场上卡牌已锁定。等待对手锁定。",
+  "prep.arena.yours": "你的场上卡牌",
+  "prep.arena.opponent": "对手的场上卡牌",
+  "prep.arena.cloaked": "牌面朝下的装备"
 }

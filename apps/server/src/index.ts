@@ -1045,6 +1045,17 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         clusterConsumer?.nudge();
         return;
       }
+      case "present-arena": {
+        const player = requirePlayer(ws, ctx);
+        if (!player) return;
+        const r = await rooms.presentArena(player.code, player.credentials, msg.arena);
+        if (!r.ok) {
+          send(ws, { type: "error", message: r.error });
+          return;
+        }
+        await publishRoomEvent({ code: player.code, kind: "prep", version: r.version });
+        return;
+      }
       case "present-deck": {
         const player = requirePlayer(ws, ctx);
         if (!player) return;

@@ -1583,6 +1583,10 @@ export const useStore = create<StoreState>((set, get) => {
       send({ type: "background-match-decline", roomCode: status.roomCode });
       set({ backgroundMatchmaking: { state: "searching", format: status.format } });
     },
+    presentArena: (arena) => {
+      get().clearError();
+      send({ type: "present-arena", arena });
+    },
     presentDeck: (deck) => {
       get().clearError();
       send({ type: "present-deck", deck });

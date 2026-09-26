@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { decklists, precon, preconsForFormat, silverAgePrecon } from "@fyendal/cards";
 import { legalIntents } from "@fyendal/engine";
 import { decodeServerMessage, replayFileViews } from "@fyendal/protocol";
+import type { PresentedDeck } from "@fyendal/shared";
+import type { SeatCredentials } from "../store.js";
 import type { Queryable } from "../db.js";
 import { finalizeReplay, getReplay, listReplays } from "../replays.js";
 import {
@@ -136,6 +138,7 @@ async function startGame(code: string, tokens: [string, string]): Promise<void> 
   const winner = room!.prep!.dieWinner;
   const chosen = await store.chooseFirst(code, { token: tokens[winner] }, true);
   if (!chosen.ok || chosen.started) throw new Error("turn order was not recorded before ready-up");
+  await lockClassicArenas(code, tokens);
   for (const seat of [0, 1] as const) {
     const deck = decklists[room!.seats[seat]!.hero!];
     const result = await store.presentDeck(code, { token: tokens[seat] }, {
@@ -156,6 +159,24 @@ async function chooseBotTurn(
 ): Promise<void> {
   const chosen = await store.chooseFirst(code, { token, userId }, humanFirst);
   if (!chosen.ok || chosen.started) throw new Error("bot turn order was not recorded before ready-up");
+}
+
+async function lockClassicArenas(code: string, tokens: readonly [string, string]): Promise<void> {
+  const room = (await store.getRoom(code))!;
+  for (const seat of [0, 1] as const) {
+    const deck = decklists[room.seats[seat]!.hero!];
+    const result = await store.presentArena(code, { token: tokens[seat], userId: room.seats[seat]?.userId }, {
+      weaponIds: deck.weaponIds, equipment: deck.equipment,
+    });
+    if (!result.ok) throw new Error(result.error);
+  }
+}
+
+/** Convenience for unrelated bot-game tests; both commands still use the real store. */
+async function presentBotDeck(target: PgRoomStore, code: string, credentials: SeatCredentials, deck: PresentedDeck) {
+  const locked = await target.presentArena(code, credentials, { weaponIds: deck.weaponIds, equipment: deck.equipment });
+  if (!locked.ok) throw new Error(locked.error);
+  return target.presentDeck(code, credentials, deck);
 }
 
 function normalizedSql(text: string): string {
@@ -311,10 +332,10 @@ describe("PgRoomStore storage", () => {
       deckId: "precon-svi",
       username: "BotOwner",
       userId,
-    });
+    }, "open");
     await db.query("UPDATE rooms SET prep = $2 WHERE code = $1", [
       created.code,
-      JSON.stringify({ rolls: [1, 6], dieWinner: 1, startPlayer: null }),
+      JSON.stringify({ rolls: [1, 6], dieWinner: 1, startPlayer: null, arenas: [null, null] }),
     ]);
     let room = await store.getRoom(created.code);
     expect(room?.seats[1]).toMatchObject({
@@ -337,7 +358,7 @@ describe("PgRoomStore storage", () => {
     )).toEqual({ ok: false, error: "choose who goes first before readying up" });
     await chooseBotTurn(created.code, created.token, userId);
     const prepQueries: string[] = [];
-    const ready = await tracedStore(prepQueries).presentDeck(
+    const ready = await presentBotDeck(tracedStore(prepQueries),
       created.code,
       { token: created.token, userId },
       presented,
@@ -416,7 +437,7 @@ describe("PgRoomStore storage", () => {
       deckId: "precon-sba",
       username: "BravoOwner",
       userId,
-    }, "legal", "bravo");
+    }, "open", "bravo");
     let room = await store.getRoom(created.code);
     expect(room?.seats[1]).toMatchObject({
       controller: "bot",
@@ -426,7 +447,7 @@ describe("PgRoomStore storage", () => {
 
     const briar = silverAgePrecon("precon-sba")!.pool;
     await chooseBotTurn(created.code, created.token, userId);
-    const ready = await store.presentDeck(created.code, { token: created.token, userId }, {
+    const ready = await presentBotDeck(store, created.code, { token: created.token, userId }, {
       weaponIds: briar.weaponIds.slice(0, 1),
       equipment: {},
       deck: briar.deck.slice(0, 40),
@@ -473,7 +494,7 @@ describe("PgRoomStore storage", () => {
 
     const boltyn = precon("precon-asb")!.pool;
     await chooseBotTurn(created.code, created.token, userId);
-    const ready = await store.presentDeck(
+    const ready = await presentBotDeck(store,
       created.code,
       { token: created.token, userId },
       { weaponIds: boltyn.weaponIds, equipment: {}, deck: boltyn.deck },
@@ -554,7 +575,7 @@ describe("PgRoomStore storage", () => {
 
     const boltyn = precon("precon-asb")!.pool;
     await chooseBotTurn(created.code, created.token, userId);
-    const ready = await store.presentDeck(
+    const ready = await presentBotDeck(store,
       created.code,
       { token: created.token, userId },
       { weaponIds: boltyn.weaponIds, equipment: {}, deck: boltyn.deck },
@@ -603,7 +624,7 @@ describe("PgRoomStore storage", () => {
 
     const boltyn = precon("precon-asb")!.pool;
     await chooseBotTurn(created.code, created.token, userId);
-    const ready = await store.presentDeck(
+    const ready = await presentBotDeck(store,
       created.code,
       { token: created.token, userId },
       { weaponIds: boltyn.weaponIds, equipment: {}, deck: boltyn.deck },
@@ -633,10 +654,10 @@ describe("PgRoomStore storage", () => {
       deckId: "precon-sda",
       username: "DashOwner",
       userId,
-    });
+    }, "open");
     const dash = silverAgePrecon("precon-sda")!.pool;
     await chooseBotTurn(created.code, created.token, userId);
-    const ready = await store.presentDeck(
+    const ready = await presentBotDeck(store,
       created.code,
       { token: created.token, userId },
       {
@@ -685,10 +706,10 @@ describe("PgRoomStore storage", () => {
       deckId: "precon-svi",
       username: "UndoOwner",
       userId,
-    });
+    }, "open");
     const viserai = silverAgePrecon("precon-svi")!.pool;
     await chooseBotTurn(created.code, created.token, userId);
-    const ready = await store.presentDeck(created.code, { token: created.token, userId }, {
+    const ready = await presentBotDeck(store, created.code, { token: created.token, userId }, {
       weaponIds: viserai.weaponIds.slice(0, 1),
       equipment: {},
       deck: viserai.deck.slice(0, 40),
@@ -880,6 +901,7 @@ describe("PgRoomStore storage", () => {
       ok: true,
       started: false,
     });
+    await lockClassicArenas(code, tokens);
     const deck0 = decklists[room!.seats[0]!.hero!];
     const queries: string[] = [];
     const measured = tracedStore(queries);
@@ -1575,7 +1597,7 @@ describe("PgRoomStore storage", () => {
       deckId: "precon-svi",
       username: "AutoPassBot",
       userId,
-    });
+    }, "open");
     const viserai = silverAgePrecon("precon-svi")!.pool;
     const presented = {
       weaponIds: viserai.weaponIds.slice(0, 1),
@@ -1584,7 +1606,7 @@ describe("PgRoomStore storage", () => {
     };
     const credentials = { token: created.token, userId };
     await chooseBotTurn(created.code, created.token, userId);
-    expect((await store.presentDeck(created.code, credentials, presented)).ok).toBe(true);
+    expect((await presentBotDeck(store, created.code, credentials, presented)).ok).toBe(true);
     if (!(await store.getRoom(created.code))!.state) {
       const started = await store.chooseFirst(created.code, credentials, false);
       expect(started).toMatchObject({ ok: true, started: true });
@@ -1877,7 +1899,7 @@ describe("PgRoomStore storage", () => {
     }, "legal", "ira");
     await chooseBotTurn(firstBot.code, firstBot.token, firstId);
     const boltyn = precon("precon-asb")!.pool;
-    expect(await store.presentDeck(firstBot.code, { token: firstBot.token, userId: firstId }, {
+    expect(await presentBotDeck(store, firstBot.code, { token: firstBot.token, userId: firstId }, {
       weaponIds: boltyn.weaponIds,
       equipment: {},
       deck: boltyn.deck,
@@ -2499,37 +2521,15 @@ describe("PgRoomStore storage", () => {
     });
   });
 
-  it("keeps Ready gated but lets a locked sideboard reopen while turn order is pending", async () => {
+  it("requires arena reveal before opening main-deck selection", async () => {
     const match = await matchedRoom();
     for (const seat of [0, 1] as const) {
       await store.acceptMatch(match.code, { token: match.tokens[seat], userId: match.userIds[seat] });
     }
-    const initial = (await store.getRoom(match.code))!;
-    const waitingSeat = (1 - initial.prep!.dieWinner) as 0 | 1;
-    const deck = decklists[initial.seats[waitingSeat]!.hero!];
-    const presented = {
-      weaponIds: deck.weaponIds,
-      equipment: deck.equipment,
-      deck: deck.deck,
-    };
-
-    expect(await store.presentDeck(match.code, {
-      token: match.tokens[waitingSeat],
-      userId: match.userIds[waitingSeat],
-    }, presented)).toEqual({ ok: false, error: "the match is not in deck preparation" });
-
-    // A retained matchmaking seat can carry its prior locked presentation into
-    // a new pairing. It must be able to unlock while the new die winner decides.
-    await db.query(
-      "UPDATE room_seats SET ready = TRUE, presented = $3 WHERE room_code = $1 AND seat = $2",
-      [match.code, waitingSeat, JSON.stringify({ ...deck, inventory: [] })],
-    );
-
-    expect(await store.unready(match.code, {
-      token: match.tokens[waitingSeat],
-      userId: match.userIds[waitingSeat],
-    })).toMatchObject({ ok: true });
-    expect((await store.getRoom(match.code))!.seats[waitingSeat]!.ready).toBe(false);
+    expect(await store.unready(match.code, { token: match.tokens[0], userId: match.userIds[0] }))
+      .toEqual({ ok: false, error: "the room is not in deck selection" });
+    expect(await store.presentDeck(match.code, { token: match.tokens[0], userId: match.userIds[0] }, decklists.rhinar))
+      .toEqual({ ok: false, error: "the match is not in deck preparation" });
   });
 
   it("evicts an acceptance no-show and requeues the survivor in the retained room", async () => {
@@ -2566,7 +2566,7 @@ describe("PgRoomStore storage", () => {
     )).rows).toEqual(match.userIds.map((subject_user_id) => ({ subject_user_id })));
   });
 
-  it("evicts an unready player after accepted-match preparation expires", async () => {
+  it("evicts a player who has not locked arena cards before preparation expires", async () => {
     const match = await matchedRoom();
     for (const seat of [0, 1] as const) {
       await store.acceptMatch(match.code, { token: match.tokens[seat], userId: match.userIds[seat] });
@@ -2577,18 +2577,39 @@ describe("PgRoomStore storage", () => {
       userId: match.userIds[prep.dieWinner],
     }, true);
     const deck = decklists.rhinar;
-    await store.presentDeck(match.code, { token: match.tokens[0], userId: match.userIds[0] }, {
+    await store.presentArena(match.code, { token: match.tokens[0], userId: match.userIds[0] }, {
       weaponIds: deck.weaponIds,
       equipment: deck.equipment,
-      deck: deck.deck,
     });
     const deadline = (await store.getRoom(match.code))!.prepDeadlineAt!;
 
     await store.sweepMatchmadePrep(deadline + 1);
     const room = await store.getRoom(match.code);
     expect(room?.seats.map((seat) => seat?.userId ?? null)).toEqual([match.userIds[0], null]);
-    expect(room?.seats[0]?.ready).toBe(true);
+    expect(room?.seats[0]?.ready).toBe(false);
     expect(await store.matchmakingCounts()).toMatchObject({ "classic-battles": 1 });
+  });
+
+  it("shares one five-minute start budget across first-player choice, arena reveal, and deck selection", async () => {
+    const match = await matchedRoom();
+    for (const seat of [0, 1] as const) {
+      await store.acceptMatch(match.code, { token: match.tokens[seat], userId: match.userIds[seat] });
+    }
+    const initial = (await store.getRoom(match.code))!;
+    const winner = initial.prep!.dieWinner;
+    expect(await store.chooseFirst(match.code, { token: match.tokens[winner], userId: match.userIds[winner] }, true))
+      .toMatchObject({ ok: true });
+    const deadline = (await store.getRoom(match.code))!.prepDeadlineAt!;
+    expect(deadline).toBe(initial.prepDeadlineAt! + 270_000);
+    await lockClassicArenas(match.code, match.tokens);
+    expect((await store.getRoom(match.code))!.prepDeadlineAt).toBe(deadline);
+    expect(prepViewFor((await store.getRoom(match.code))!, 0).deadlinePhase).toBe("select-deck");
+    await store.presentDeck(match.code, { token: match.tokens[0], userId: match.userIds[0] }, decklists.rhinar);
+    await store.sweepMatchmadePrep(deadline + 1);
+    const survivor = (await store.getRoom(match.code))!;
+    expect(survivor.seats[1]).toBeNull();
+    expect(survivor.prep).toBeNull();
+    expect(survivor.seats[0]?.ready).toBe(false);
   });
 
   it("auto-selects the die winner when the first-player deadline expires", async () => {
@@ -2604,7 +2625,8 @@ describe("PgRoomStore storage", () => {
     ]);
     const decided = await store.getRoom(match.code);
     expect(decided?.prep?.startPlayer).toBe(prep?.prep?.dieWinner);
-    expect(prepViewFor(decided!, 0).deadlinePhase).toBe("prepare");
+    expect(prepViewFor(decided!, 0).deadlinePhase).toBe("select-arena");
+    await lockClassicArenas(match.code, match.tokens);
     for (const seat of [0, 1] as const) {
       const deck = decklists[seat === 0 ? "rhinar" : "dorinthea"];
       expect(await store.presentDeck(match.code, { token: match.tokens[seat], userId: match.userIds[seat] }, {

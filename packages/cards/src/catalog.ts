@@ -119,7 +119,7 @@ import cardsXXX from "./data/cards/XXX.json" with { type: "json" };
 import cardsZEN from "./data/cards/ZEN.json" with { type: "json" };
 import rawDecklists from "./data/decklists.json" with { type: "json" };
 import rawPreconsJson from "./data/precons.json" with { type: "json" };
-import { validatePresentationAgainstCards } from "./presentation.js";
+import { validateArenaAgainstCards, validatePresentationAgainstCards } from "./presentation.js";
 export { equipmentFitsSlot, isWeaponZoneCard } from "./equipment.js";
 import { formatLegalityIssues } from "./formatLegality.js";
 export {
@@ -812,6 +812,16 @@ export const cardList = rawCardList.map((c) => {
 export const cardData: Record<string, CardData> = Object.fromEntries(
   cardList.map((c) => [c.id, c]),
 );
+
+/** Validate arena cards independently of the later main-deck selection. */
+export function validateArena(
+  pool: DeckPool,
+  arena: import("@fyendal/shared").PresentedArena,
+  format: Format,
+  options: { cardPoolMode?: import("@fyendal/shared").CardPoolMode } = {},
+) {
+  return validateArenaAgainstCards(cardData, pool, arena, format, options);
+}
 
 /** Validate a game's presented deck against its registered pool. */
 export function validatePresentation(

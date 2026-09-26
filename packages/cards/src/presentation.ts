@@ -6,6 +6,7 @@ import type {
   EquipmentSlot,
   Format,
   PresentedDeck,
+  PresentedArena,
 } from "@fyendal/shared";
 import { formatLegalityIssues } from "./formatLegality.js";
 import { equipmentFitsSlot, isWeaponZoneCard } from "./equipment.js";
@@ -80,13 +81,13 @@ export function weaponSelectionError(
 }
 
 /** Pure presentation validator shared by browser and server. */
-export function validatePresentationAgainstCards(
+export function validateArenaAgainstCards(
   cards: Record<string, CardData>,
   pool: DeckPool,
-  presented: PresentedDeck,
+  presented: PresentedArena,
   format: Format,
   options: { cardPoolMode?: CardPoolMode } = {},
-): PresentationResult {
+): { ok: true } | { ok: false; error: string } {
   const legalityIssue = formatLegalityIssues(cards, pool, format, options)[0];
   if (legalityIssue) return { ok: false, error: legalityIssue.message };
 
@@ -119,6 +120,23 @@ export function validatePresentationAgainstCards(
       return { ok: false, error: `${card?.name ?? cardId} is not a ${slot} equipment` };
     }
   }
+
+  return { ok: true };
+}
+
+/** Pure presentation validator shared by browser and server. */
+export function validatePresentationAgainstCards(
+  cards: Record<string, CardData>,
+  pool: DeckPool,
+  presented: PresentedDeck,
+  format: Format,
+  options: { cardPoolMode?: CardPoolMode } = {},
+): PresentationResult {
+  const arena = validateArenaAgainstCards(cards, pool, presented, format, options);
+  if (!arena.ok) return arena;
+  const selectedEquipment = Object.values(presented.equipment).filter(
+    (id): id is string => id !== undefined,
+  );
 
   const mainPool = counts([...pool.deck, ...(pool.sideboard ?? [])]);
   const badMain = outsideSubset(cards, counts(presented.deck), mainPool);

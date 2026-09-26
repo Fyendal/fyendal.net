@@ -349,6 +349,7 @@ describe("client messages", () => {
     { type: "background-match-decline", roomCode: "ABC123" },
     { type: "decline-pending-bot-match", roomCode: "ABC123" },
     { type: "accept-match" },
+    { type: "present-arena", arena: { weaponIds: [], equipment: {} } },
     { type: "present-deck", deck: { weaponIds: [], equipment: {}, deck: [] } },
     { type: "prep-unready" },
     { type: "choose-first", first: true },
@@ -819,13 +820,58 @@ describe("GameView and server messages", () => {
         acceptedByYou: false,
         opponentAccepted: true,
       } },
-      { type: "prep-state", version: 1, prep: { format: "cc", seats: [null, null], yourSeat: 0, die: null, startPlayer: null, botGame: true, cardPoolMode: "open", deadlineAt: 30_000, deadlinePhase: "accept" } },
+      { type: "prep-state", version: 1, prep: {
+        format: "cc", phase: "accept", yourSeat: 0,
+        seats: [0, 1].map((seat) => ({
+          username: `Player ${seat}`, heroId: `HERO${seat}`, heroName: `Hero ${seat}`,
+          ready: false, arenaLocked: false, connected: true, accepted: false,
+        })),
+        die: { rolls: [3, 5], winner: 1 }, startPlayer: null,
+        cardPoolMode: "open", deadlineAt: 30_000, deadlinePhase: "accept",
+      } },
       { type: "left" }, { type: "error", code: "ROOM_NOT_FOUND", message: "gone" },
     ];
     for (const message of variants) {
       expect(decodeServerMessage(message)).not.toBeNull();
       expect(decodeServerMessage({ ...message, unknown: true })).toBeNull();
     }
+  });
+
+  it("decodes arena stages and rejects premature reveals and malformed commitments", () => {
+    const arena = { weaponIds: ["WTR001"], equipment: { head: "WTR002" } };
+    expect(decodeClientMessage({ type: "present-arena", arena })).not.toBeNull();
+    for (const invalid of [
+      { ...arena, deck: [] }, { ...arena, weaponIds: ["a", "b", "c"] },
+      { ...arena, equipment: { crown: "x" } }, { ...arena, equipment: { head: null } },
+      { ...arena, weaponIds: ["x".repeat(300)] },
+    ]) expect(decodeClientMessage({ type: "present-arena", arena: invalid })).toBeNull();
+    const prep = {
+      format: "cc", phase: "select-arena", yourSeat: 0,
+      seats: [
+        { username: "Alice", heroId: "HERO0", heroName: "Hero 0", ready: false, arenaLocked: true, connected: true },
+        { username: "Bob", heroId: "HERO1", heroName: "Hero 1", ready: false, arenaLocked: false, connected: true },
+      ],
+      yourArena: arena, die: { rolls: [3, 5], winner: 1 }, startPlayer: 0,
+    };
+    const wire = (value: unknown) => ({ type: "prep-state", version: 1, prep: value });
+    expect(decodeServerMessage(wire(prep))).not.toBeNull();
+    expect(decodeServerMessage(wire({ ...prep, phase: "prepare" }))).toBeNull();
+    expect(decodeServerMessage(wire({ ...prep, yourArena: { ...arena, extra: true } }))).toBeNull();
+    expect(decodeServerMessage(wire({ ...prep, seats: [{ ...prep.seats[0], arena }, prep.seats[1]] }))).toBeNull();
+    const revealed = { ...prep, phase: "select-deck", seats: prep.seats.map((s) => ({ ...s, arenaLocked: true, arena })) };
+    expect(decodeServerMessage(wire(revealed))).not.toBeNull();
+    expect(decodeServerMessage(wire({ ...revealed, deadlineAt: 1, deadlinePhase: "select-arena" }))).toBeNull();
+    for (const invalid of [
+      { ...prep, phase: { toString: "select-arena" } },
+      { ...prep, startPlayer: null },
+      { ...prep, yourArena: undefined },
+      { ...prep, phase: "choose-first", startPlayer: null },
+      { ...prep, phase: "waiting", die: null, startPlayer: null },
+      { ...revealed, phase: "select-arena" },
+      { ...revealed, startPlayer: null },
+      { ...revealed, die: null },
+      { ...revealed, seats: [revealed.seats[0], null] },
+    ]) expect(decodeServerMessage(wire(invalid))).toBeNull();
   });
 
   it("rejects unknown fields, oversized collections, unsafe versions, and bad Boost", () => {

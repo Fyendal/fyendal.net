@@ -720,6 +720,7 @@ describe("validatePresentation", () => {
       pool,
       { weaponIds: pool.weaponIds, equipment: {}, deck },
       "silver-age",
+      { cardPoolMode: "open" },
     );
     expect(both).toMatchObject({ ok: false });
     if (!both.ok) expect(both.error).toContain("two-hand");
@@ -728,6 +729,7 @@ describe("validatePresentation", () => {
         pool,
         { weaponIds: pool.weaponIds.slice(0, 1), equipment: {}, deck },
         "silver-age",
+        { cardPoolMode: "open" },
       ),
     ).toMatchObject({ ok: true });
   });

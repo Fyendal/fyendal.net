@@ -1,9 +1,9 @@
 import type {
   BotOpponent,
   CardPoolMode,
-  Decklist,
   GameIntent,
   PresentedDeck,
+  PresentedArena,
 } from "@fyendal/shared";
 import { chooseBravoIntent, chooseBravoIntentWithTrace } from "./bravo-policy.js";
 import { chooseBriarIntent, chooseBriarIntentWithTrace } from "./briar-policy.js";
@@ -20,6 +20,7 @@ import {
   chooseStarvoIntent,
   chooseStarvoIntentWithTrace,
 } from "./starvo-policy.js";
+import type { BotPrepOpponent } from "./sideboard.js";
 import type { BotPolicyInput } from "./policy.js";
 import {
   MAX_BOT_CONTINUATION_STEPS,
@@ -63,8 +64,10 @@ export interface BotDefinition {
   chooseDecision(input: BotPolicyInput): BotDecision;
   /** Reapply hero-specific root guardrails to an exactly matched cached step. */
   chooseContinuationIntent?(input: BotPolicyInput, proposed: GameIntent): GameIntent;
+  arenaFor(opponent: Pick<BotPrepOpponent, "heroId">, botTurnOrder: "first" | "second"): PresentedArena;
+  deckFor(opponent: BotPrepOpponent, arena: PresentedArena, botTurnOrder: "first" | "second"): PresentedDeck;
   presentationFor(
-    opponent: Decklist,
+    opponent: BotPrepOpponent,
     botTurnOrder: "first" | "second",
   ): PresentedDeck;
 }
@@ -97,8 +100,24 @@ function botDecisionFromTrace(
   };
 }
 
+/** Stage the existing matchup plans while keeping equipment fixed at reveal. */
+function stagedDefinition(definition: Omit<BotDefinition, "arenaFor" | "deckFor">): BotDefinition {
+  return {
+    ...definition,
+    arenaFor: (opponent, order) => {
+      const selection = definition.presentationFor({ ...opponent, weaponIds: [], equipment: {} }, order);
+      return { weaponIds: [...selection.weaponIds], equipment: { ...selection.equipment } };
+    },
+    deckFor: (opponent, arena, order) => ({
+      weaponIds: [...arena.weaponIds],
+      equipment: { ...arena.equipment },
+      deck: definition.presentationFor(opponent, order).deck,
+    }),
+  };
+}
+
 export const BOT_DEFINITIONS = {
-  bravo: {
+  bravo: stagedDefinition({
     id: "bravo",
     format: "silver-age",
     deckId: "bot-bravo-flarvo",
@@ -107,8 +126,8 @@ export const BOT_DEFINITIONS = {
     chooseIntent: chooseBravoIntent,
     chooseDecision: (input) => botDecisionFromTrace(chooseBravoIntentWithTrace(input)),
     presentationFor: (opponent) => bravoPresentationFor(opponent),
-  },
-  briar: {
+  }),
+  briar: stagedDefinition({
     id: "briar",
     format: "silver-age",
     deckId: "bot-briar-broccoli",
@@ -117,8 +136,8 @@ export const BOT_DEFINITIONS = {
     chooseIntent: chooseBriarIntent,
     chooseDecision: (input) => botDecisionFromTrace(chooseBriarIntentWithTrace(input)),
     presentationFor: (opponent, botTurnOrder) => briarPresentationFor(opponent, botTurnOrder),
-  },
-  cindra: {
+  }),
+  cindra: stagedDefinition({
     id: "cindra",
     format: "cc",
     deckId: "bot-cindra-head-jabs",
@@ -129,8 +148,8 @@ export const BOT_DEFINITIONS = {
       botDecisionFromTrace(chooseCindraIntentWithTrace(input), true),
     chooseContinuationIntent: chooseCindraContinuationIntent,
     presentationFor: (opponent) => cindraPresentationFor(opponent),
-  },
-  ira: {
+  }),
+  ira: stagedDefinition({
     id: "ira",
     format: "cc",
     deckId: "precon-asr",
@@ -139,8 +158,8 @@ export const BOT_DEFINITIONS = {
     chooseIntent: chooseIraIntent,
     chooseDecision: (input) => botDecisionFromTrace(chooseIraIntentWithTrace(input)),
     presentationFor: () => iraPresentation(),
-  },
-  hala: {
+  }),
+  hala: stagedDefinition({
     id: "hala",
     format: "cc",
     deckId: "precon-hala-masterclass",
@@ -149,8 +168,8 @@ export const BOT_DEFINITIONS = {
     chooseIntent: chooseHalaIntent,
     chooseDecision: (input) => botDecisionFromTrace(chooseHalaIntentWithTrace(input)),
     presentationFor: (opponent) => halaPresentationFor(opponent),
-  },
-  jarl: {
+  }),
+  jarl: stagedDefinition({
     id: "jarl",
     format: "cc",
     deckId: "bot-jarl",
@@ -159,8 +178,8 @@ export const BOT_DEFINITIONS = {
     chooseIntent: chooseJarlIntent,
     chooseDecision: (input) => botDecisionFromTrace(chooseJarlIntentWithTrace(input)),
     presentationFor: (opponent) => jarlPresentationFor(opponent),
-  },
-  starvo: {
+  }),
+  starvo: stagedDefinition({
     id: "starvo",
     format: "cc",
     deckId: "bot-starvo-boss",
@@ -171,7 +190,7 @@ export const BOT_DEFINITIONS = {
     chooseDecision: (input) => botDecisionFromTrace(chooseStarvoIntentWithTrace(input), true),
     chooseContinuationIntent: chooseStarvoContinuationIntent,
     presentationFor: (opponent) => starvoPresentationFor(opponent),
-  },
+  }),
 } as const satisfies Readonly<Record<BotOpponent, BotDefinition>>;
 
 export const botDefinitions: readonly BotDefinition[] = Object.values(BOT_DEFINITIONS);
