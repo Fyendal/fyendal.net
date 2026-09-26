@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useIntl } from "react-intl";
 import type {
   CardView,
@@ -24,6 +25,8 @@ import {
 } from "../motion/motionTypes.js";
 import type { Sel } from "../useActionAnnouncement.js";
 import type { BoardLegalState } from "./boardModel.js";
+import { useHandReorder } from "./useHandReorder.js";
+import { canPlayHandDrop } from "./handOrder.js";
 
 type ResourcePayment = NonNullable<PendingDecision["resourcePayment"]>;
 
@@ -99,6 +102,8 @@ export interface PlayerHandInteraction {
   onCardClick: (card: CardView) => void;
   onActivate: (instanceId: number) => void;
   onSelect: (selection: Sel) => void;
+  onPlayDrop?: (instanceId: number) => void;
+  onDragStart?: () => void;
 }
 
 export function PlayerHand({
@@ -118,20 +123,42 @@ export function PlayerHand({
 }) {
   const intl = useIntl();
   const handMotionLocation = { kind: "hand" as const, seat: player.seat };
+  const handRef = useRef<HTMLDivElement>(null);
   const previousHandOrderRef = useRef<readonly number[]>([]);
-  const currentVisibleCards = player.hand.filter((card) =>
-    !interaction.stagedIds.has(card.instanceId)
-    && !interaction.optimisticallyHiddenIds.has(card.instanceId)
-  );
-  const visibleCards = preservePreStackHandOrder(
-    currentVisibleCards,
+  const preStackCards = preservePreStackHandOrder(
+    player.hand,
     previousHandOrderRef.current,
     interaction.preStackSelectedInstanceId,
   );
-  const visibleCardOrderKey = visibleCards.map((card) => card.instanceId).join(":");
+  const reorderEnabled = !spectating && !replaying;
+  const { order, handlers: reorderHandlers, floatingCard, floatingCardRef, playOnRelease } = useHandReorder(
+    handRef,
+    preStackCards.map((card) => card.instanceId),
+    reorderEnabled,
+    interaction.onPlayDrop ? {
+      canPlay: (instanceId) => canPlayHandDrop(
+        instanceId,
+        interaction.legalState.playableHand,
+        interaction.selection,
+        view.pendingDecision !== null || interaction.defending || interaction.choosingArsenal ||
+          interaction.handPick !== null || interaction.boundedHandPick != null ||
+          interaction.resourcePayment !== undefined || interaction.preStackSelectedInstanceId !== null,
+      ),
+      onPlay: interaction.onPlayDrop,
+      onDragStart: interaction.onDragStart,
+    } : undefined,
+  );
+  const handCards = new Map(player.hand.map((card) => [card.instanceId, card]));
+  const visibleCards = order.flatMap((id) => {
+    const card = handCards.get(id);
+    return card ? [card] : [];
+  }).filter((card) =>
+    !interaction.stagedIds.has(card.instanceId)
+    && !interaction.optimisticallyHiddenIds.has(card.instanceId)
+  );
   useEffect(() => {
     previousHandOrderRef.current = visibleCards.map((card) => card.instanceId);
-  }, [visibleCardOrderKey]);
+  });
   const playableZoneCards = spectating
     ? []
     : [...interaction.legalState.playableZones]
@@ -156,7 +183,6 @@ export function PlayerHand({
       interaction.legalState.activatable.has(card.instanceId) &&
       !interaction.legalState.playableZones.has(card.instanceId)
     );
-  const handRef = useRef<HTMLDivElement>(null);
   const [scrollAvailability, setScrollAvailability] = useState<HandScrollAvailability>({
     left: false,
     right: false,
@@ -208,14 +234,27 @@ export function PlayerHand({
     return card ? (cardData[card.cardId]?.pitch ?? 0) : 0;
   };
   const discardPayment = isDiscardPayment(interaction.selectedPaymentVariants);
+  const draggedCard = floatingCard ? handCards.get(floatingCard.instanceId) : undefined;
 
   return (
     <>
+      {draggedCard && floatingCard ? createPortal(
+        <div
+          ref={floatingCardRef}
+          className={`hand-drag-card${playOnRelease ? " hand-drag-card-playable" : ""}`}
+          style={{ width: floatingCard.width, height: floatingCard.height }}
+          aria-hidden="true"
+        >
+          <CardFace card={draggedCard} showOverlays={false} />
+        </div>,
+        document.body,
+      ) : null}
       <div
         className="hand"
         id="player-hand"
         ref={handRef}
         data-motion-zone={motionLocationKey(handMotionLocation)}
+        {...reorderHandlers}
       >
         {spectating && view.winner === null && !(replaying && player.hand.length > 0)
           ? Array.from({ length: player.handCount }, (_, index) => (
@@ -278,6 +317,9 @@ export function PlayerHand({
                 key={card.instanceId}
                 card={card}
                 motionKey={motionPresentationKey(handMotionLocation, card.instanceId)}
+                handReorderHint={reorderEnabled
+                  ? intl.formatMessage({ id: "game.hand.reorderHint" })
+                  : undefined}
                 onClick={actionable ? () => interaction.onCardClick(card) : undefined}
                 explanation={explanation}
                 selected={selected || (

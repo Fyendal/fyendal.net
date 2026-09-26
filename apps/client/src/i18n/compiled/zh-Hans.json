@@ -20106,6 +20106,12 @@
       "value": "收起手牌"
     }
   ],
+  "game.hand.reorderHint": [
+    {
+      "type": 0,
+      "value": "拖动以调整手牌顺序，或在竞技场内松开以打出。Alt + 左右方向键调整顺序；Escape 取消拖动。"
+    }
+  ],
   "game.hand.scrollLeft": [
     {
       "type": 0,

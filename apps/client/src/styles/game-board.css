@@ -8,6 +8,7 @@
   --game-z-stack-motion: 9;
   --game-z-prompt: 10;
   --game-z-waiting: 11;
+  --game-z-card-drag: 40;
 }
 
 .table {
@@ -751,6 +752,37 @@
 .hand .card-hand.card-selected:hover { transform: translateY(calc(-1 * var(--hand-selected-lift))); }
 .hand .card-hand.card-pitched,
 .hand .card-hand.card-pitched:hover { transform: translateY(calc(-1 * var(--hand-selected-lift))); }
+.hand [data-hand-instance-id] {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.hand [data-hand-instance-id] .card-action { cursor: grab; }
+.hand .card-hand[data-hand-instance-id].hand-card-dragging,
+.hand .card-hand[data-hand-instance-id].hand-card-dragging:hover {
+  opacity: 0;
+}
+.hand-drag-card {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: var(--game-z-card-drag);
+  pointer-events: none;
+  will-change: transform;
+}
+.hand-drag-card .card-hand {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  transform: none;
+  border-color: #b7ac98;
+  box-shadow: 0 12px 28px #000b;
+}
+.hand-drag-card-playable .card-hand {
+  border-color: #ffdb7b;
+  box-shadow: 0 0 0 2px #ffdb7b, 0 0 18px 5px #efb844b3, 0 12px 28px #000b;
+}
 .hand .muted { transform: translateY(calc(-1 * var(--hand-selected-lift))); }
 .hand-scroll-button {
   position: absolute;

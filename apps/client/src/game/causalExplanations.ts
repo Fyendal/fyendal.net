@@ -44,12 +44,13 @@ export function gameTimingLabel(view: GameView): string {
   return phase;
 }
 
-/** Whether the game is at priority, excluding mandatory non-priority choices. */
+/** Whether to show priority attention cues, including the defender choosing blocks. */
 export function gameHasPriority(view: GameView): boolean {
   if (view.winner !== null) return false;
   const decision = view.pendingDecision?.kind;
   if (decision === undefined) return view.phase === "action";
   return (
+    decision === "defend" ||
     decision === "priority-window" ||
     decision === "attack-reaction" ||
     decision === "defense-reaction"

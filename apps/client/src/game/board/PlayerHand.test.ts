@@ -123,6 +123,8 @@ describe("hand motion anchors", () => {
     expect(html).toContain('data-motion-zone="0:hand"');
     expect(html).toContain('data-motion-card="0:hand:7"');
     expect(html).toContain("card-selected");
+    expect(html).toContain('data-hand-instance-id="7"');
+    expect(html).toContain('aria-keyshortcuts="Alt+ArrowLeft Alt+ArrowRight"');
   });
 
   it("renders a spectator's hidden cards in the player-hand layout with opaque anchors", () => {
@@ -199,6 +201,7 @@ describe("hand motion anchors", () => {
     expect(html).toContain('class="card card-hand card-back ');
     expect(html).toContain('data-motion-card="0:hand:opaque"');
     expect(html).toContain('data-motion-card="0:hand:opaque:1"');
+    expect(html).not.toContain("data-hand-instance-id");
   });
 
   it("surfaces an activatable graveyard card as a clickable ghost", () => {
@@ -287,6 +290,7 @@ describe("hand motion anchors", () => {
     expect(html).toContain("card-ghost");
     expect(html).toContain("card-highlight");
     expect(html).toContain("card-clickable");
+    expect(html).not.toContain("data-hand-instance-id");
     expect(html).not.toContain("no cards in hand");
   });
 

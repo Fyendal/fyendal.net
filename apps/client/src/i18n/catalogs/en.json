@@ -2174,6 +2174,7 @@
   "game.hand.empty": "no cards in hand",
   "game.hand.scrollLeft": "Scroll hand left",
   "game.hand.scrollRight": "Scroll hand right",
+  "game.hand.reorderHint": "Drag to reorder your hand or release over the arena to play. Alt + Left or Right arrow reorders; Escape cancels a drag.",
   "game.playerNumber": "Player {number}",
   "game.card": "card",
   "game.card.nonAttack": "this non-attack action",

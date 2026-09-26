@@ -71,6 +71,7 @@ export class BrowserBotController {
   offer(code: string, runtimeId: string): void {
     if (this.code !== code) this.reset();
     this.code = code;
+    const wasCompatible = this.compatible;
     this.compatible = runtimeId === this.deps.runtimeId;
     if (!this.compatible) {
       this.clearTimers();
@@ -79,6 +80,7 @@ export class BrowserBotController {
       this.deps.status("refresh-required");
       return;
     }
+    if (!wasCompatible) this.deps.status(null);
     this.deps.send({ type: "bot-ready", runtimeId });
   }
 

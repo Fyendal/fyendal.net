@@ -224,6 +224,7 @@ export function CardFace({
   explanation,
   motionKey,
   motionZoneAnchor,
+  handReorderHint,
 }: {
   card: CardView;
   size?: "hand" | "zone" | "preview";
@@ -262,6 +263,8 @@ export function CardFace({
   motionKey?: string;
   /** Card-sized endpoint for a surrounding motion zone. */
   motionZoneAnchor?: string;
+  /** Local hand sorting affordance, supplied only by the player's hand. */
+  handReorderHint?: string;
 }) {
   // Try temporary Fabrary variants before falling back to the text layout.
   const [imageFailure, setImageFailure] = useState<{ cardId: string; attempts: number } | null>(null);
@@ -362,8 +365,11 @@ export function CardFace({
       data-cardid={card.cardId}
       data-motion-card={motionKey}
       data-motion-zone-anchor={motionZoneAnchor}
-      tabIndex={!onClick && explanation ? 0 : undefined}
+      data-hand-instance-id={handReorderHint ? card.instanceId : undefined}
+      tabIndex={!onClick && (explanation || handReorderHint) ? 0 : undefined}
       aria-describedby={!onClick ? explanationId : undefined}
+      aria-description={!onClick ? handReorderHint : undefined}
+      aria-keyshortcuts={handReorderHint ? "Alt+ArrowLeft Alt+ArrowRight" : undefined}
       onClick={onClick}
     >
       {onClick ? (
@@ -372,6 +378,8 @@ export function CardFace({
           className="card-action"
           aria-label={label ? `${name} — ${label}` : name}
           aria-describedby={explanationId}
+          aria-description={handReorderHint}
+          aria-keyshortcuts={handReorderHint ? "Alt+ArrowLeft Alt+ArrowRight" : undefined}
         />
       ) : null}
       {showImg ? (

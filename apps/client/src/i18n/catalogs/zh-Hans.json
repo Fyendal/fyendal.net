@@ -2174,6 +2174,7 @@
   "game.hand.empty": "手牌为空",
   "game.hand.scrollLeft": "向左滚动手牌",
   "game.hand.scrollRight": "向右滚动手牌",
+  "game.hand.reorderHint": "拖动以调整手牌顺序，或在竞技场内松开以打出。Alt + 左右方向键调整顺序；Escape 取消拖动。",
   "game.playerNumber": "玩家 {number}",
   "game.card": "卡牌",
   "game.card.nonAttack": "此非攻击行动",

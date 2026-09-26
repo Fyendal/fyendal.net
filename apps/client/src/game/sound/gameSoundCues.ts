@@ -30,8 +30,8 @@ export interface GameSoundCue {
 
 const MAX_REPEATED_DRAW_SOUNDS = 6;
 
-/** Alert only when a live transition gives this player priority. Initial
- * snapshots and mandatory decisions must remain silent. */
+/** Alert when a live transition gives this player priority or the blocking
+ * choice. Initial snapshots and other mandatory decisions remain silent. */
 export function prioritySoundCueForViews(
   previous: GameView,
   current: GameView,

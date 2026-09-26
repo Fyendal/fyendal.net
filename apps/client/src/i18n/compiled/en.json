@@ -20852,6 +20852,12 @@
       "value": "Hide hand"
     }
   ],
+  "game.hand.reorderHint": [
+    {
+      "type": 0,
+      "value": "Drag to reorder your hand or release over the arena to play. Alt + Left or Right arrow reorders; Escape cancels a drag."
+    }
+  ],
   "game.hand.scrollLeft": [
     {
       "type": 0,

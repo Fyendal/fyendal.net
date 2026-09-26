@@ -41,6 +41,25 @@ describe("PriorityFloat", () => {
     expect(html).not.toContain("priority-float-mine");
   });
 
+  it("highlights the defender's priority in the timing float and combat chain", () => {
+    const props = {
+      timingLabel: "ACTION PHASE · DEFEND STEP",
+      priorityLabel: "YOUR PRIORITY" as const,
+    };
+    const float = renderLocalized(createElement(PriorityFloat, {
+      ...props,
+      turn: 1,
+      turnLabel: "Opponent's turn",
+    }));
+    const chain = renderLocalized(createElement(ChainPriorityStatus, props));
+
+    expect(float).toContain("DEFEND STEP · YOUR PRIORITY");
+    expect(float).toContain("priority-float-mine");
+    expect(chain).toContain(">DEFEND STEP</span>");
+    expect(chain).toContain(">YOUR PRIORITY</span>");
+    expect(chain).toContain("chain-priority-status-mine");
+  });
+
   it("keeps turn and timing visible without claiming a mandatory decision is priority", () => {
     const html = renderLocalized(createElement(TurnTimingFloat, {
       turn: 1,

@@ -17,6 +17,7 @@ import { freshDb } from "./testdb.js";
 import { hashPassword, login } from "../auth.js";
 import { closeGameServer, createGameServer } from "../index.js";
 import { BOT_RUNTIME_ID } from "@fyendal/bot/runtime-id";
+import { ClusterEventConsumer } from "../clusterEvents.js";
 import type { AddressInfo } from "node:net";
 import WebSocket from "ws";
 import type { ClientMessage } from "@fyendal/shared";
@@ -282,6 +283,42 @@ async function socketClient(port: number) {
 }
 
 describe("browser bot gateways", () => {
+  it("negotiates and recovers bot work on rejoin without cluster polling", async () => {
+    const { db, store, room, credentials } = await fixture();
+    await db.query("UPDATE users SET pass_hash = $1 WHERE id = $2", [await hashPassword("password1"), credentials.userId]);
+    const session = await login(db, "ClientBot", "password1");
+    if (!session.ok) throw new Error("login failed");
+    const start = vi.spyOn(ClusterEventConsumer.prototype, "start").mockImplementation(() => undefined);
+    const nudge = vi.spyOn(ClusterEventConsumer.prototype, "nudge").mockImplementation(() => undefined);
+    const server = createGameServer(0, { db, rooms: store, botDelayMs: 0 });
+    let client: Awaited<ReturnType<typeof socketClient>> | undefined;
+    try {
+      await new Promise<void>((resolve) => server.once("listening", resolve));
+      client = await socketClient((server.address() as AddressInfo).port);
+      client.send({ type: "auth", token: session.token });
+      await client.next((m) => m.type === "authed");
+      client.send({ type: "join-room", code: room.code, token: credentials.token });
+      expect(await client.next((m) => m.type === "joined")).toMatchObject({ resumed: true });
+      await client.next((m) => m.type === "state");
+      expect(await client.next((m) => m.type === "bot-runtime")).toMatchObject({ runtimeId: BOT_RUNTIME_ID });
+      client.send({ type: "bot-ready", runtimeId: BOT_RUNTIME_ID });
+      const input = await client.next((m) => m.type === "bot-task");
+      if (input.type !== "bot-task") throw new Error("missing task");
+      client.send({
+        type: "bot-intent", runtimeId: BOT_RUNTIME_ID, commandId: "rejoined-fallback",
+        expectedVersion: input.version, elapsedMs: 0, failure: "timeout",
+      });
+      expect(await client.next((m) => m.type === "bot-result")).toMatchObject({ status: "applied" });
+      expect((await store.getRoom(room.code))!.version).toBe(input.version + 1);
+    } finally {
+      client?.ws.close();
+      await closeGameServer(server);
+      start.mockRestore();
+      nudge.mockRestore();
+      await (db as typeof db & { end(): Promise<void> }).end();
+    }
+  }, 15_000);
+
   it("recovers across gateways and fences replaced sockets without server search", async () => {
     const { db, store, room, credentials } = await fixture();
     await db.query("UPDATE users SET pass_hash = $1 WHERE id = $2", [await hashPassword("password1"), credentials.userId]);

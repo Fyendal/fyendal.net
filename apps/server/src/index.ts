@@ -893,13 +893,10 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         });
         if (r.reconnected) {
           const room = await rooms.getRoom(code);
-          const state = room ? stateMessage(room, r.seat) : null;
-          if (state) send(ws, state);
           if (room) send(ws, spectatorListMessage(room));
-          // reconnecting into a prep room restores the prep screen
-          if (room && !room.state && r.seat !== null) {
-            send(ws, { type: "prep-state", prep: prepViewFor(room, r.seat), version: room.version });
-          }
+          // Join's durable sync may be consumed before this socket attaches.
+          // Reload locally to restore prep/state and negotiate browser bot work.
+          await broadcaster.afterCommit({ code, kind: "sync", version });
           await publishRoomEvent({ code, kind: "presence", seat: r.seat, connected: true, version });
           return;
         }

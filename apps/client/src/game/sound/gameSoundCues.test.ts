@@ -66,16 +66,28 @@ describe("game sound cues", () => {
     )).toEqual([{ kind: "priority", delayMs: 0 }]);
   });
 
-  it("keeps foreground, repeated, spectator, and mandatory-decision priority quiet", () => {
+  it("alerts the unattended defender once when choosing blocks", () => {
+    const blocking = view({
+      phase: "defend",
+      priorityPlayer: 0,
+      pendingDecision: { player: 0, kind: "defend", prompt: "Choose blocking cards" },
+    });
+    expect(prioritySoundCueForViews(view({ priorityPlayer: 1 }), blocking, 0, true))
+      .toEqual([{ kind: "priority", delayMs: 0 }]);
+    expect(prioritySoundCueForViews(blocking, blocking, 0, true)).toEqual([]);
+    expect(prioritySoundCueForViews(view({ priorityPlayer: 1 }), blocking, 1, true)).toEqual([]);
+    expect(prioritySoundCueForViews(view({ priorityPlayer: 1 }), blocking, 0, false)).toEqual([]);
+  });
+
+  it("keeps foreground, repeated, spectator, and effect-choice priority quiet", () => {
     const opponentPriority = view({ priorityPlayer: 1 });
     const ownPriority = view({ priorityPlayer: 0 });
     expect(prioritySoundCueForViews(opponentPriority, ownPriority, 0, false)).toEqual([]);
     expect(prioritySoundCueForViews(ownPriority, ownPriority, 0, true)).toEqual([]);
     expect(prioritySoundCueForViews(opponentPriority, ownPriority, null, true)).toEqual([]);
     expect(prioritySoundCueForViews(opponentPriority, view({
-      phase: "defend",
       priorityPlayer: 0,
-      pendingDecision: { player: 0, kind: "defend", prompt: "Defend" },
+      pendingDecision: { player: 0, kind: "choose-target", prompt: "Choose a target" },
     }), 0, true)).toEqual([]);
   });
 

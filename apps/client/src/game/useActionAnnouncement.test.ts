@@ -12,6 +12,7 @@ import {
   requiresChainCloseConfirmation,
   resolvePlayMethod,
   shouldSkipPlayConfirmation,
+  shouldAutoCommitAnnouncement,
 } from "./useActionAnnouncement.js";
 
 describe("announcement payment readiness", () => {
@@ -27,6 +28,36 @@ describe("announcement payment readiness", () => {
 });
 
 describe("action announcement reducer", () => {
+  it("remembers an arena drop through payment and boost, and clears it on a new click selection", () => {
+    const dropped = actionAnnouncementReducer(INITIAL_ANNOUNCEMENT, {
+      type: "play-hand-from-drop", instanceId: 1,
+    });
+    const pitched = actionAnnouncementReducer(dropped, { type: "toggle-pitch", instanceId: 2 });
+    const boosted = actionAnnouncementReducer(pitched, { type: "select-boost", boostCount: 1 });
+    expect(boosted).toMatchObject({
+      sel: { kind: "play-hand", instanceId: 1 },
+      pitchSel: [2],
+      boostCount: 1,
+      playConfirmedByDrop: true,
+    });
+    expect(actionAnnouncementReducer(boosted, {
+      type: "select", sel: { kind: "play-hand", instanceId: 3 },
+    }).playConfirmedByDrop).toBe(false);
+    expect(actionAnnouncementReducer(boosted, { type: "reset" })).toEqual(INITIAL_ANNOUNCEMENT);
+  });
+
+  it("preserves the selected card's choices when it is dropped to confirm its play", () => {
+    const selected = {
+      ...INITIAL_ANNOUNCEMENT,
+      sel: { kind: "play-hand" as const, instanceId: 1 },
+      pitchSel: [2],
+      boostCount: 1,
+      targetCardInstanceId: 3,
+    };
+    expect(actionAnnouncementReducer(selected, {
+      type: "play-hand-from-drop", instanceId: 1,
+    })).toEqual({ ...selected, playConfirmedByDrop: true });
+  });
   it("clears payment-dependent choices when the payment method changes", () => {
     const selected = {
       ...INITIAL_ANNOUNCEMENT,
@@ -217,6 +248,24 @@ describe("action announcement reducer", () => {
       pitchSel: [],
       alternativeCostCardInstanceIds: undefined,
     });
+  });
+});
+
+describe("arena drop play confirmation", () => {
+  it("commits after required choices without enabling the user's fast-play setting", () => {
+    const sel = { kind: "play-hand" as const, instanceId: 1 };
+    expect(shouldAutoCommitAnnouncement(sel, "confirm", false, true)).toBe(true);
+    expect(shouldAutoCommitAnnouncement(sel, "confirm", false, false)).toBe(false);
+    for (const step of ["method", "ability", "payment", "boost", "target", "close-chain"] as const) {
+      expect(shouldAutoCommitAnnouncement(sel, step, false, true)).toBe(false);
+    }
+  });
+
+  it("retains the existing fast-play behavior and keeps drop confirmation specific to card plays", () => {
+    const sel = { kind: "play-hand" as const, instanceId: 1 };
+    expect(shouldAutoCommitAnnouncement(sel, "close-chain", true, false)).toBe(true);
+    expect(shouldAutoCommitAnnouncement({ kind: "activate", sourceInstanceId: 1 }, "confirm", false, true))
+      .toBe(false);
   });
 });
 

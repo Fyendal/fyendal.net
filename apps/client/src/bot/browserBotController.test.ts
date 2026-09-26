@@ -198,6 +198,7 @@ describe("BrowserBotController", () => {
     controller.reset(); controller.offer("ABC123", "b".repeat(64)); controller.receive({ ...task(), runtimeId: "b".repeat(64) });
     expect(status).toHaveBeenLastCalledWith("refresh-required"); expect(workers).toEqual([]);
     controller.offer("ABC123", runtimeId);
+    expect(status).toHaveBeenLastCalledWith(null);
     controller.receive({ type: "bot-fallback-needed", code: "ABC123", version: 2, runtimeId, delayMs: 0 });
     vi.advanceTimersByTime(0);
     expect(messages[0]).toMatchObject({ failure: "oversized" }); expect(workers).toEqual([]);

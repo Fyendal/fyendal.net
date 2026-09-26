@@ -187,10 +187,17 @@ describe("gameHasPriority", () => {
     }))).toBe(true);
   });
 
-  it("excludes mandatory decisions and completed games", () => {
+  it("includes choosing blocks so the defender receives priority attention cues", () => {
     expect(gameHasPriority(view({
       phase: "defend",
       pendingDecision: { player: 1, kind: "defend", prompt: "Defend" },
+      priorityPlayer: 1,
+    }))).toBe(true);
+  });
+
+  it("excludes effect choices and completed games", () => {
+    expect(gameHasPriority(view({
+      pendingDecision: { player: 1, kind: "choose-target", prompt: "Choose a target" },
       priorityPlayer: 1,
     }))).toBe(false);
     expect(gameHasPriority(view({ winner: 0 }))).toBe(false);

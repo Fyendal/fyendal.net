@@ -36,6 +36,8 @@ export interface AnnouncementState {
   playMethod: PlayMethod | null;
   chainCloseConfirmed: boolean;
   commitConfirmed: boolean;
+  /** An arena drop confirms the play once its required choices are complete. */
+  playConfirmedByDrop: boolean;
   alternativeCostCardInstanceIds: number[] | null | undefined;
   additionalCostConfirmed: boolean;
 }
@@ -43,6 +45,7 @@ export interface AnnouncementState {
 export type AnnouncementAction =
   | { type: "reset" }
   | { type: "select"; sel: Sel }
+  | { type: "play-hand-from-drop"; instanceId: number }
   | { type: "toggle-pitch"; instanceId: number }
   | { type: "clear-pitch" }
   | { type: "select-ability"; abilityIndex: number }
@@ -71,6 +74,7 @@ export const INITIAL_ANNOUNCEMENT: AnnouncementState = {
   playMethod: null,
   chainCloseConfirmed: false,
   commitConfirmed: false,
+  playConfirmedByDrop: false,
   alternativeCostCardInstanceIds: undefined,
   additionalCostConfirmed: false,
 };
@@ -123,6 +127,14 @@ export function actionAnnouncementReducer(
       return INITIAL_ANNOUNCEMENT;
     case "select":
       return { ...INITIAL_ANNOUNCEMENT, sel: action.sel };
+    case "play-hand-from-drop":
+      return {
+        ...(state.sel.kind === "play-hand" && state.sel.instanceId === action.instanceId
+          ? state
+          : INITIAL_ANNOUNCEMENT),
+        sel: { kind: "play-hand", instanceId: action.instanceId },
+        playConfirmedByDrop: true,
+      };
     case "toggle-pitch":
       return {
         ...state,
@@ -295,6 +307,20 @@ export function shouldSkipPlayConfirmation(sel: Sel, enabled: boolean): boolean 
   );
 }
 
+export function shouldAutoCommitAnnouncement(
+  sel: Sel,
+  step: ActionStep,
+  skipPlayConfirmation: boolean,
+  playConfirmedByDrop: boolean,
+): boolean {
+  if (shouldSkipPlayConfirmation(sel, skipPlayConfirmation)) {
+    return step === "confirm" || step === "close-chain";
+  }
+  // Dropping expresses intent to play, while still preserving the explicit
+  // warning when a play would close an existing combat chain.
+  return playConfirmedByDrop && sel.kind === "play-hand" && step === "confirm";
+}
+
 export function resolvePlayMethod(
   normalOffered: boolean,
   instantOffered: boolean,
@@ -458,8 +484,7 @@ export function useActionAnnouncement({
     chosenActionIntent !== null &&
     paymentReady &&
     targetReady &&
-    shouldSkipPlayConfirmation(sel, skipPlayConfirmation) &&
-    (actionStep === "confirm" || actionStep === "close-chain");
+    shouldAutoCommitAnnouncement(sel, actionStep, skipPlayConfirmation, state.playConfirmedByDrop);
 
   const reset = useCallback(() => dispatch({ type: "reset" }), []);
   const intentToSend = committedActionIntent(
@@ -502,6 +527,7 @@ export function useActionAnnouncement({
     autoCommitPending,
     reset,
     select: (sel: Sel) => dispatch({ type: "select", sel }),
+    playHandFromDrop: (instanceId: number) => dispatch({ type: "play-hand-from-drop", instanceId }),
     togglePitch: (instanceId: number) => dispatch({ type: "toggle-pitch", instanceId }),
     clearPitch: () => dispatch({ type: "clear-pitch" }),
     selectAbility: (abilityIndex: number) => dispatch({ type: "select-ability", abilityIndex }),

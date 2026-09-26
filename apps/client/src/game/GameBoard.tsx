@@ -300,6 +300,7 @@ export function GameBoard() {
     autoCommitPending,
     reset: resetSel,
     select: setSel,
+    playHandFromDrop,
     togglePitch,
     clearPitch,
     selectAbility,
@@ -1067,6 +1068,7 @@ export function GameBoard() {
         />
 
         <PlayerHand
+          key={`${presentedView.gameId}:${me.seat}`}
           view={presentedView}
           player={me}
           viewerSeat={seat}
@@ -1093,6 +1095,8 @@ export function GameBoard() {
             onCardClick: onHandClick,
             onActivate: (instanceId) => clickActivate(instanceId)(),
             onSelect: setSel,
+            onPlayDrop: playHandFromDrop,
+            onDragStart: () => setPreview(null),
           }}
         />
       </div>
