@@ -14,7 +14,8 @@ Icons
 apps/server/data
 .github
 deploy
-scripts
+scripts/*
+!scripts/generate-bot-runtime.mjs
 *.md
 Dockerfile
 docker-compose.yml
