@@ -395,10 +395,12 @@ export const evoHighRarity: Record<string, CardScript> = {
     },
   },
   "hyper-x3|0": {
-    onBanishedForBoost(ctx) {
-      ctx.addCounter(ctx.self.instanceId, "drivers", 1);
-      if (ctx.getCounter("drivers") >= 3 && ctx.getPlayerFlag(ctx.seat, "hyperX3Drawn") !== true) {
-        ctx.setPlayerFlag(ctx.seat, "hyperX3Drawn", true);
+    onBoosted(ctx, _boosted, banished) {
+      if (!named(ctx, banished, "Hyper Driver") ||
+          !ctx.putBanishedUnder(banished.instanceId, ctx.self.instanceId)) return;
+      const driverCount = ctx.self.subcards?.filter((card) => named(ctx, card, "Hyper Driver")).length ?? 0;
+      if (driverCount >= 3 && !ctx.oncePerTurnEffectUsed()) {
+        ctx.markOncePerTurnEffectUsed();
         ctx.drawCards(ctx.seat, 1);
       }
     },

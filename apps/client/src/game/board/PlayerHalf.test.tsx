@@ -393,4 +393,25 @@ describe("PlayerHalf", () => {
     expect(html).toContain('aria-label="3 cards underneath"');
     expect(html).toContain('class="under-pip-count">×3</span>');
   });
+
+  it("shows public cards under equipment to either player", () => {
+    const equippedPlayer = {
+      ...player,
+      equipment: {
+        head: {
+          instanceId: 40,
+          cardId: "EVO011",
+          owner: 0,
+          subcards: [{ instanceId: 41, cardId: "SDA014", owner: 0 }],
+        },
+      },
+    };
+
+    for (const mine of [true, false]) {
+      const html = renderPlayerHalf(equippedPlayer, mine);
+      expect(html).toContain('aria-label="1 card underneath"');
+      expect(html).toContain('class="under-pip-count">×1</span>');
+      expect(html).toContain('data-cardid="SDA014"');
+    }
+  });
 });

@@ -849,6 +849,23 @@ export function makeCtx(
       ));
       return true;
     },
+    putBanishedUnder(instanceId, permanentInstanceId) {
+      const target = findPermanent(state, permanentInstanceId);
+      const player = state.players[seat] as PlayerState;
+      const card = player.banish.find((candidate) => candidate.instanceId === instanceId);
+      if (!target || target.seat !== seat || !card || card.faceDown) return false;
+      removeFromArray(player.banish, instanceId);
+      (target.card.subcards ??= []).push(card);
+      logPublic(state, gameLogMessage(
+        `${nameOf(state, card.cardId)} is put under ${nameOf(state, target.card.cardId)}`,
+        "engine.log.card.put.under",
+        {
+          card: logCardValue(card.cardId),
+          parent: logCardValue(target.card.cardId),
+        },
+      ));
+      return true;
+    },
     globalCards() {
       return globalCardInstances(state, seat);
     },
@@ -1762,6 +1779,9 @@ export function makeCtx(
     },
     banish(instanceId, opts) {
       const before = findCardAnywhere(state, instanceId);
+      const source = opts?.asAttackingCard && link?.attacker === seat && link.flags.attackGone !== true
+        ? link.attackingCard
+        : self;
       const moved = runtime.commands.banishCard(
         state,
         instanceId,
@@ -1771,6 +1791,12 @@ export function makeCtx(
       );
       if (moved && before && before.card.owner !== seat) {
         fireFriendlyBanishesOpponentCard(state, runtime, seat, before.card);
+      }
+      if (moved && before) {
+        scriptOf(state, source.cardId, source)?.onBanishedCard?.(
+          runtime.makeCtx(state, seat, source, currentLink(state)),
+          before.card,
+        );
       }
       return moved;
     },

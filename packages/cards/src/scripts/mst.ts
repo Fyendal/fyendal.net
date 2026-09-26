@@ -293,13 +293,22 @@ function topBanishDesire(matches: (ctx: ScriptCtx, card: DeepReadonly<CardInstan
       const top = ctx.player(opponentSeat(ctx)).deck[0];
       if (!top) return;
       ctx.banish(top.instanceId);
-      if (matches(ctx, top)) ctx.gainLife(ctx.seat, 1);
+    },
+    onBanishedCard(ctx, card) {
+      if (matches(ctx, card)) ctx.gainLife(ctx.seat, 1);
     },
   };
 }
 
 function bonds(kind: "pitch" | "name"): CardScript {
   return {
+    onBanishedCard(ctx, card) {
+      const value = kind === "pitch" ? ctx.cardColor(card) : data(ctx, card).name;
+      if (kind === "pitch" && value === 0) return;
+      const key = `bonds:${ctx.self.instanceId}:${kind}:${value}`;
+      if (ctx.getFlag("link", key) === true) ctx.gainLife(ctx.seat, 1);
+      ctx.setFlag("link", key, true);
+    },
     canTriggerOnHit(ctx) {
       return ctx.link?.targetAllyId === undefined;
     },
@@ -308,7 +317,6 @@ function bonds(kind: "pitch" | "name"): CardScript {
       const top = opponent.deck[0];
       if (!top) return;
       ctx.banish(top.instanceId);
-      ctx.setCounter("bondsTop", top.instanceId);
       if (opponent.graveyard.length) {
         ctx.requestCardChoice(
           "bonds",
@@ -323,16 +331,9 @@ function bonds(kind: "pitch" | "name"): CardScript {
     onChoose(ctx, hook, option) {
       if (hook !== "bonds") return;
       const opponent = ctx.player(opponentSeat(ctx));
-      const first = opponent.banish.find((card) => card.instanceId === ctx.getCounter("bondsTop"));
       const second = opponent.graveyard.find((card) => card.instanceId === Number(option));
       if (!second) return;
-      const matches =
-        first &&
-        (kind === "pitch"
-          ? ctx.cardColor(first) !== 0 && ctx.cardColor(first) === ctx.cardColor(second)
-          : data(ctx, first).name === data(ctx, second).name);
       ctx.banish(second.instanceId);
-      if (matches) ctx.gainLife(ctx.seat, 1);
     },
   };
 }
@@ -614,7 +615,7 @@ export const mst: Record<string, CardScript> = {
       if (!ctx.link || !hasKeyword(ctx, ctx.link.attackingCard, "stealth")) return;
       const defenders = [...ctx.link.defendingCards, ...ctx.link.defendingEquipment];
       for (const defender of defenders) {
-        if (ctx.hasCardType(defender, "action")) ctx.banish(defender.instanceId);
+        if (ctx.hasCardType(defender, "action")) ctx.banish(defender.instanceId, { asAttackingCard: true });
       }
     },
     activated: {
@@ -1118,7 +1119,9 @@ function artSoul(): CardScript {
       const top = ctx.player(opponentSeat(ctx)).deck[0];
       if (!top) return;
       ctx.banish(top.instanceId);
-      if (ctx.cardColor(top) === 2) {
+    },
+    onBanishedCard(ctx, card) {
+      if (ctx.cardColor(card) === 2) {
         ctx.drawCards(ctx.seat, 1);
         ctx.gainLife(ctx.seat, 1);
       }
@@ -1520,6 +1523,9 @@ Object.assign(mst, {
     },
   },
   "persuasive prognosis|3": {
+    onBanishedCard(ctx, card) {
+      if (ctx.hasCardType(card, "action")) ctx.gainLife(ctx.seat, 1);
+    },
     canTriggerOnHit(ctx) {
       return ctx.link?.targetAllyId === undefined;
     },
@@ -1527,7 +1533,6 @@ Object.assign(mst, {
       const target = opponentSeat(ctx);
       const top = ctx.player(target).deck[0];
       if (!top || !ctx.banish(top.instanceId)) return;
-      if (isAttackAction(ctx, top)) ctx.gainLife(ctx.seat, 1);
       const hand = ctx.player(target).hand;
       for (const card of hand) ctx.lookAt(card.instanceId);
       const same = hand.filter((card) => ctx.cardColor(card) === ctx.cardColor(top));
@@ -1539,10 +1544,7 @@ Object.assign(mst, {
         );
     },
     onChoose(ctx, hook, option) {
-      if (hook === "prognosis-hand" && ctx.banish(Number(option))) {
-        const card = ctx.player(opponentSeat(ctx)).banish.find((candidate) => candidate.instanceId === Number(option));
-        if (card && isAttackAction(ctx, card)) ctx.gainLife(ctx.seat, 1);
-      }
+      if (hook === "prognosis-hand") ctx.banish(Number(option));
     },
   },
   "just a nick|1": {

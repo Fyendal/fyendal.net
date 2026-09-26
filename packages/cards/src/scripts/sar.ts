@@ -149,7 +149,9 @@ function artOfDesire(pitchValue: number): CardScript {
       const top = opp.deck[0];
       if (!top) return;
       ctx.banish(top.instanceId);
-      if (ctx.cardColor(top) === pitchValue) {
+    },
+    onBanishedCard(ctx, card) {
+      if (ctx.cardColor(card) === pitchValue) {
         ctx.drawCards(ctx.seat, 1);
         ctx.gainLife(ctx.seat, 1);
       }

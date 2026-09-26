@@ -158,6 +158,10 @@ export function PlayerHalf({
         />
       );
     }
+    const underCardCount = equipmentStackCards(card).length - 1;
+    const underCardCountLabel = underCardCount > 0
+      ? intl.formatMessage({ id: "game.under.count" }, { count: underCardCount })
+      : undefined;
     if (!mine) {
       return (
         <MatZone
@@ -170,6 +174,7 @@ export function PlayerHalf({
           <EquipmentStack
             card={card}
             motionLocation={cardLocation}
+            underCardCountLabel={underCardCountLabel}
             dimmed={interaction.stagedIds.has(card.instanceId) ||
               interaction.committedDefenderIds.has(card.instanceId)}
           />
@@ -192,6 +197,7 @@ export function PlayerHalf({
         <EquipmentStack
           card={card}
           motionLocation={cardLocation}
+          underCardCountLabel={underCardCountLabel}
           highlighted={canActivate || canBlock}
           selected={interaction.selection.kind === "activate" &&
             interaction.selection.sourceInstanceId === card.instanceId}

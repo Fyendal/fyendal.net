@@ -68,7 +68,6 @@ describe("DTD, EVO, and HVY rules regression coverage", () => {
   });
   it("Chains replaces action phase draws", () => expect(script("chains of mephetis|3").replaceOpponentDraw).toBeTypeOf("function"));
   it("Singularity transforms all components", () => expect(script("singularity|1").onChoose).toBeTypeOf("function"));
-  it("Hyper-X3 retains boosted drivers", () => expect(script("hyper-x3|0").onBanishedForBoost).toBeTypeOf("function"));
   it("Breaker Evos retain Hyper Drivers", () => expect(script("evo circuit breaker|1").additionalCost).toBeTypeOf("function"));
   it("Stasis Cell triggers when it leaves the arena", () => {
     const g = scenario({

@@ -278,6 +278,111 @@ describe("MST — Mechanologist", () => {
 });
 
 describe("MST — Assassin", () => {
+  it.each([
+    ["art of desire: body|1", "wounding blow|1"],
+    ["art of desire: soul|2", "wounding blow|2"],
+    ["art of desire: mind|3", "wounding blow|3"],
+  ])("Nuu's banish triggers %s's matching-color reward without a hit", (attack, defender) => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "nuu|0", hand: [attack], deck: ["wounding blow|3"] },
+        { hero: "dorinthea", hand: [defender] },
+      ],
+    });
+
+    g.play(attack)
+      .blockWith(defender)
+      .settle()
+      .expectInZone(1, defender, "banish")
+      .expectInZone(0, "wounding blow|3", "hand")
+      .expectLife(0, 21);
+  });
+
+  it("Nuu's banish does not trigger Art of Desire for the wrong color", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "nuu|0", hand: ["art of desire: body|1"], deck: ["wounding blow|3"] },
+        { hero: "dorinthea", hand: ["wounding blow|2"] },
+      ],
+    });
+
+    g.play("art of desire: body|1")
+      .blockWith("wounding blow|2")
+      .settle()
+      .expectInZone(1, "wounding blow|2", "banish")
+      .expectZoneSize(0, "hand", 0)
+      .expectLife(0, 20);
+  });
+
+  it("Art of Desire rewards both its on-hit banish and Nuu's defender banish", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "nuu|0",
+          hand: ["art of desire: body|1"],
+          deck: ["wounding blow|2", "wounding blow|3"],
+        },
+        { hero: "dorinthea", hand: ["ball lightning|1"], deck: ["wounding blow|1"] },
+      ],
+    });
+
+    g.play("art of desire: body|1")
+      .blockWith("ball lightning|1")
+      .settle()
+      .expectInZone(1, "wounding blow|1", "banish")
+      .expectInZone(1, "ball lightning|1", "banish")
+      .expectZoneSize(0, "hand", 2)
+      .expectLife(0, 22);
+  });
+
+  it("Nuu's banish triggers other stealth attacks' banish rewards", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "nuu|0", hand: ["desires of flesh|1"] },
+        { hero: "dorinthea", hand: ["wounding blow|1"] },
+      ],
+    });
+
+    g.play("desires of flesh|1")
+      .blockWith("wounding blow|1")
+      .settle()
+      .expectInZone(1, "wounding blow|1", "banish")
+      .expectLife(0, 21);
+  });
+
+  it.each([
+    ["bonds of attraction|1", "wounding blow|1", "raging onslaught|1"],
+    ["bonds of memory|1", "wounding blow|1", "wounding blow|2"],
+  ])("%s counts matching cards banished by Nuu", (attack, first, second) => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "nuu|0", hand: [attack] },
+        { hero: "dorinthea", hand: [first, second] },
+      ],
+    });
+
+    g.play(attack)
+      .blockWith(first, second)
+      .settle()
+      .expectLife(0, 21);
+  });
+
+  it("Persuasive Prognosis gains life when Nuu banishes a non-attack action", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "nuu|0", hand: ["persuasive prognosis|3"] },
+        { hero: "dorinthea", hand: ["barraging beatdown|1"] },
+      ],
+    });
+
+    g.play("persuasive prognosis|3")
+      .blockWith("barraging beatdown|1")
+      .settle()
+      .expectInZone(1, "barraging beatdown|1", "banish")
+      .expectLife(0, 21);
+  });
+
   it("Nuu banishes action cards defending a stealth attack when the link resolves", () => {
     const g = scenario({
       seats: [

@@ -83,6 +83,47 @@ describe("EVO — registration and core mechanics", () => {
     expect(evo.subcards![0]!.cardId).toBe(printingId("teklo base head|0"));
   });
 
+  it("Hyper-X3 puts boosted Hyper Drivers under itself and draws at three", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 2,
+          hand: ["twin drive|1", "zero to sixty|1", "zero to sixty|1"],
+          deck: ["hyper driver|1", "hyper driver|2", "hyper driver|3", "zipper hit|3", "hyper driver|1", "zipper hit|3"],
+          equipment: { head: "hyper-x3|0" },
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    const drivers = s.state.players[0]!.deck.slice(0, 3).map((card) => card.instanceId);
+    const fourthDriver = s.state.players[0]!.deck[4]!.instanceId;
+    const headId = s.state.players[0]!.equipment.head!.instanceId;
+
+    s.play("twin drive|1", { boost: true, boostCount: 2, settle: false });
+    expect(s.state.players[0]!.equipment.head!.subcards?.map((card) => card.instanceId)).toEqual(drivers.slice(0, 2));
+    expect(s.state.players[0]!.banish).toHaveLength(0);
+    expect(s.state.players[0]!.hand).toHaveLength(2);
+
+    s.blockWith().settle().play("zero to sixty|1", { boost: true, settle: false });
+    expect(s.state.players[0]!.equipment.head!.subcards?.map((card) => card.instanceId)).toEqual(drivers);
+    expect(s.state.players[0]!.banish).toHaveLength(0);
+    expect(s.state.players[0]!.hand.map((card) => card.cardId)).toEqual([
+      printingId("zero to sixty|1"), printingId("zipper hit|3"),
+    ]);
+    for (const seat of [0, 1] as const) {
+      const head = projectStateFor(s.state, seat).players[0]!.equipment.head!;
+      expect(head.instanceId).toBe(headId);
+      expect(head.subcards?.map((card) => card.instanceId)).toEqual(drivers);
+    }
+
+    s.blockWith().settle().play("zero to sixty|1", { boost: true, settle: false });
+    expect(s.state.players[0]!.equipment.head!.subcards?.map((card) => card.instanceId)).toEqual([
+      ...drivers, fourthDriver,
+    ]);
+    expect(s.state.players[0]!.hand.map((card) => card.cardId)).toEqual([printingId("zipper hit|3")]);
+  });
+
   it("Evo Face Breaker lets its controller decline or accept destroying a card after boosting", () => {
     const setup = () => {
       const s = scenario({

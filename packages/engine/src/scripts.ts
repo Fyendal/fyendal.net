@@ -135,6 +135,9 @@ export interface ScriptCtx {
    * this hero. The card becomes a public sub-card and won't enter its default
    * post-resolution zone. */
   putSelfUnder(instanceId: number): boolean;
+  /** Put one of this hero's face-up banished cards under a permanent they
+   * control. The card becomes a public sub-card. */
+  putBanishedUnder(instanceId: number, permanentInstanceId: number): boolean;
   /** Public shared objects supplied by the current rules configuration. */
   globalCards(): readonly DeepReadonly<CardInstance>[];
   /** Remove a declared public shared object from the game. */
@@ -357,8 +360,9 @@ export interface ScriptCtx {
   moveEquipmentToZone(instanceId: number, slot: EquipmentSlot): boolean;
   /** Banish a card from any of its owner's zones (hand/soul/equipment/board/…).
    *  `faceDown` overrides the card's face state in the banished zone; omit it
-   *  to keep the state the card already had. */
-  banish(instanceId: number, opts?: { faceDown?: boolean }): boolean;
+   *  to keep the state the card already had. `asAttackingCard` attributes the
+   *  banish to the active attack when resolving an ability granted to it. */
+  banish(instanceId: number, opts?: { faceDown?: boolean; asAttackingCard?: boolean }): boolean;
   /** Mark every card currently defending on the open combat chain to be
    *  banished by the ordinary chain-close settlement flow. */
   banishAllDefendingCardsOnChainClose(): void;
@@ -1517,6 +1521,8 @@ export interface CardScript {
   ): void;
   /** A card owned by this source's controller entered their banished zone. */
   onCardBanished?(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, from: string): void;
+  /** This card's effect banished a card, including an ability granted to the active attack. */
+  onBanishedCard?(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): void;
   /** This card entered its owner's banished zone. Unlike onCardBanished, the
    * source need not remain active after the move. */
   onSelfBanished?(ctx: ScriptCtx, from: string): void;
