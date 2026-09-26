@@ -86,7 +86,8 @@ const LEGAL_ROUTES = [
 
 function replaceMetaContent(html: string, key: "name" | "property", name: string, content: string): string {
   const pattern = new RegExp(`<meta\\s+${key}="${name}"\\s+content="[^"]*"\\s*/?>`);
-  return html.replace(pattern, `<meta ${key}="${name}" content="${content}" />`);
+  const tag = `<meta ${key}="${name}" content="${content}" />`;
+  return pattern.test(html) ? html.replace(pattern, tag) : html.replace("</head>", `${tag}\n</head>`);
 }
 
 function replaceRootMarkup(html: string, markup: string): string {
@@ -139,6 +140,16 @@ function seoPrerender() {
           source: legalRouteHtml(index.source, route),
         });
       }
+      // A concrete shell lets static hosts serve the entry route directly.
+      // Deck and account data are loaded only after the client starts.
+      const playHtml = replaceRootMarkup(
+        replaceMetaContent(index.source, "name", "robots", "noindex, nofollow"),
+        "",
+      ).replace(
+        /\s*<!-- fyendal-structured-data:start -->[\s\S]*?<!-- fyendal-structured-data:end -->/,
+        "",
+      );
+      this.emitFile({ type: "asset", fileName: "play/index.html", source: playHtml });
     },
   };
 }

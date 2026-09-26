@@ -83,6 +83,7 @@ const BOTS: Readonly<Record<ConstructedFormat, readonly BotOption[]>> = {
 export function BotOpponentModal(props: {
   format: ConstructedFormat;
   cardPoolMode: CardPoolMode;
+  initialSearchForPlayer?: boolean;
   onSelect: (bot: BotOpponent, searchForPlayer: boolean) => void;
   onClose: () => void;
 }) {
@@ -90,7 +91,7 @@ export function BotOpponentModal(props: {
   const bots = BOTS[props.format].filter(
     (bot) => bot.requiresOpen !== true || props.cardPoolMode === "open",
   );
-  const [searchForPlayer, setSearchForPlayer] = useState(true);
+  const [searchForPlayer, setSearchForPlayer] = useState(props.initialSearchForPlayer ?? true);
   return (
     <div
       className="modal-backdrop bot-opponent-backdrop"

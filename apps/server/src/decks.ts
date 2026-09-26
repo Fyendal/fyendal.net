@@ -12,8 +12,8 @@ import {
 } from "@fyendal/cards";
 import type { FabraryMatchup } from "@fyendal/protocol";
 export { validatePresentation } from "@fyendal/cards";
-import type { Queryable } from "./db.js";
-import type { FabraryClient, FabraryDeckResult } from "./fabrary.js";
+import { withTransaction, type Queryable } from "./db.js";
+import { parseFabraryDeckUrl, type FabraryClient, type FabraryDeckResult } from "./fabrary.js";
 
 /**
  * Saved user decks ("cc" / "silver-age" formats). Users import Fabrary export
@@ -493,6 +493,46 @@ export async function listDecks(db: Queryable, userId: number): Promise<DeckRow[
     [userId],
   );
   return rows.map(toDeck);
+}
+
+/** A play link refreshes the account's linked deck, or creates it once. Fetch
+ * before taking the account lock so provider latency never holds a DB lock.
+ * The account row serializes concurrent links across gateway instances. */
+export async function resolveFabraryPlayDeck(
+  db: Queryable,
+  userId: number,
+  format: "cc" | "silver-age",
+  url: string,
+  fabraryClient: FabraryClient,
+): Promise<FreshDeckResult> {
+  const source = parseFabraryDeckUrl(url);
+  if (!source) return { ok: false, status: 400, error: "enter a valid https://fabrary.net/decks/... URL" };
+  const fetched = await fabraryClient.fetchDeck(source.canonicalUrl);
+  if (!fetched.ok) return fabraryFailure(fetched);
+  const validation = validateDeck(parseDecklistText(fetched.deck.text), format);
+  if (!validation.ok) {
+    return {
+      ok: false, status: 422, error: "the Fabrary deck is not playable in Fyendal",
+      errors: validation.errors, missing: validation.missing, unimplemented: validation.unimplemented,
+    };
+  }
+  return withTransaction(db, async (tx) => {
+    const account = await tx.query("SELECT id FROM users WHERE id=$1 FOR UPDATE", [userId]);
+    if (!account.rows.length) return { ok: false, status: 404, error: "account not found" };
+    const existing = (await listDecks(tx, userId)).find((deck) =>
+      deck.format === format && deck.fabraryUrl !== null
+      && parseFabraryDeckUrl(deck.fabraryUrl)?.canonicalUrl === source.canonicalUrl);
+    const result = existing
+      ? await updateDeck(tx, userId, existing.id, { fabraryUrl: source.canonicalUrl, text: fetched.deck.text })
+      : await importDeck(tx, userId, {
+        name: fetched.deck.name, format, fabraryUrl: source.canonicalUrl, text: fetched.deck.text,
+      });
+    if (!result.ok) {
+      return { ok: false, status: 422, error: "invalid deck", errors: result.errors,
+        missing: result.missing, unimplemented: result.unimplemented };
+    }
+    return { ok: true, deck: result.deck, matchups: fetched.deck.matchups };
+  });
 }
 
 export type ImportResult =

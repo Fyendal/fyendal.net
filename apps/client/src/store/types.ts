@@ -29,6 +29,7 @@ import type {
   FixedBugReportNotification,
   DeckDetailResponse,
   DeckSummary,
+  FabraryDeckPreviewResponse,
   ReplaySummary,
   ReplayServerNote,
 } from "@fyendal/protocol";
@@ -42,6 +43,17 @@ import type {
   RegisterResult,
 } from "../auth/auth.js";
 import type { ConstructedFormat } from "../domain.js";
+import type { FabraryPlayRoute } from "../play/route.js";
+
+export interface PendingFabraryPlay {
+  route: FabraryPlayRoute;
+  status: "idle" | "loading" | "ready" | "starting" | "error";
+  result: DeckResult | null;
+  preview?: {
+    status: "loading" | "ready" | "error";
+    result: FabraryDeckPreviewResponse | ApiError | null;
+  };
+}
 
 export type Screen = "lobby" | "room-loading" | "waiting" | "prep" | "game" | "replay";
 export type LobbyRail = "home" | "all" | "cc" | "silver-age" | "replays" | "account";
@@ -133,6 +145,11 @@ export interface StoreState {
 
   decks: DeckSummary[];
   decksLoading: boolean;
+  pendingFabraryPlay: PendingFabraryPlay | null;
+  resolveFabraryPlay: (refresh?: boolean) => Promise<void>;
+  previewFabraryPlay: () => Promise<void>;
+  dismissFabraryPlay: () => void;
+  startFabraryPlay: (choice: { kind: "player" } | { kind: "bot"; bot: BotOpponent; searchForPlayer: boolean }) => void;
   refreshDecks: () => Promise<void>;
   importDeck: (input: {
     name: string;

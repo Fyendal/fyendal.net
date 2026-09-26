@@ -23834,6 +23834,172 @@
       "value": "Notice"
     }
   ],
+  "play.back": [
+    {
+      "type": 0,
+      "value": "Back to lobby"
+    }
+  ],
+  "play.banned": [
+    {
+      "type": 0,
+      "value": "Choose Open to play."
+    }
+  ],
+  "play.bot": [
+    {
+      "type": 0,
+      "value": "Play a bot"
+    }
+  ],
+  "play.cards.banned": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " banned card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " banned cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "play.cards.future": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " future card"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " future cards"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    }
+  ],
+  "play.error.format": [
+    {
+      "type": 0,
+      "value": "This format is not supported. Fabrary play links support Classic Constructed and Silver Age."
+    }
+  ],
+  "play.error.import": [
+    {
+      "type": 0,
+      "value": "The deck could not be imported. Check that it is public and try again."
+    }
+  ],
+  "play.error.link": [
+    {
+      "type": 0,
+      "value": "This play link is invalid. It needs a public Fabrary deck URL and a supported format."
+    }
+  ],
+  "play.find.player": [
+    {
+      "type": 0,
+      "value": "Find a player"
+    }
+  ],
+  "play.future": [
+    {
+      "type": 0,
+      "value": "Choose Future or Open to play."
+    }
+  ],
+  "play.importing": [
+    {
+      "type": 0,
+      "value": "Loading your latest Fabrary deck…"
+    }
+  ],
+  "play.preview.loading": [
+    {
+      "type": 0,
+      "value": "Loading deck preview…"
+    }
+  ],
+  "play.refresh": [
+    {
+      "type": 0,
+      "value": "Reload deck"
+    }
+  ],
+  "play.retry": [
+    {
+      "type": 0,
+      "value": "Try again"
+    }
+  ],
+  "play.sign.in": [
+    {
+      "type": 0,
+      "value": "Log in or create an account to play this deck."
+    }
+  ],
+  "play.source": [
+    {
+      "type": 0,
+      "value": "From Fabrary"
+    }
+  ],
+  "play.starting": [
+    {
+      "type": 0,
+      "value": "Starting your game…"
+    }
+  ],
+  "play.title": [
+    {
+      "type": 0,
+      "value": "Play your Fabrary deck"
+    }
+  ],
+  "play.view.deck": [
+    {
+      "type": 0,
+      "value": "View on Fabrary"
+    }
+  ],
   "prep.accept.accepted": [
     {
       "type": 0,

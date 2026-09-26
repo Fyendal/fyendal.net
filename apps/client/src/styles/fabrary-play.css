@@ -1,0 +1,181 @@
+.fabrary-play-main {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: clamp(24px, 5vh, 48px) 16px;
+  flex: 1;
+}
+
+.fabrary-play-panel {
+  padding: clamp(20px, 5vw, 40px);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.fabrary-play-panel h1 {
+  margin: 0 0 8px;
+  font-size: clamp(23px, 5vw, 28px);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.fabrary-play-identity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.fabrary-play-names {
+  min-width: 0;
+  flex: 1;
+}
+
+.fabrary-play-portrait {
+  width: clamp(64px, 14vw, 80px);
+  height: clamp(64px, 14vw, 80px);
+  flex: none;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid var(--gold);
+}
+
+.fabrary-play-eyebrow {
+  color: var(--text-muted);
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.fabrary-play-source,
+.fabrary-play-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.fabrary-play-source {
+  justify-content: space-between;
+  gap: 8px 16px;
+  font-size: 13px;
+  margin: 16px 0 28px;
+}
+
+.fabrary-play-source a {
+  color: var(--gold);
+}
+
+.fabrary-play-hero {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.fabrary-play-settings {
+  display: grid;
+  gap: 10px;
+}
+
+.fabrary-play-label {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.fabrary-play-mode-hint {
+  margin: 0;
+  color: var(--gold);
+  font-size: 13px;
+}
+
+.fabrary-play-actions {
+  margin: 24px 0 0;
+}
+
+.fabrary-play-actions button {
+  flex: 1;
+  min-width: 160px;
+  min-height: 48px;
+  letter-spacing: .03em;
+  font-size: 15px;
+}
+
+.fabrary-play-actions .fabrary-play-bot {
+  color: #211507;
+  background: var(--gold);
+  border-color: var(--gold);
+}
+
+.fabrary-play-actions .fabrary-play-bot:hover:not(:disabled) {
+  background: #ffe3a6;
+  border-color: #ffe3a6;
+}
+
+.fabrary-play-card-notes {
+  margin-top: 24px;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 8px;
+}
+
+.fabrary-play-card-note summary {
+  padding: 10px 0;
+  min-height: 44px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.fabrary-play-card-note summary:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.fabrary-play-card-note ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 24px;
+  max-height: 220px;
+  overflow-y: auto;
+  margin: 0 0 12px;
+  padding: 4px 16px 4px 20px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.fabrary-play-cancel {
+  display: block;
+  margin: 28px auto 0;
+  font-size: 13px;
+}
+
+@media (max-width: 700px) {
+  /* The play page keeps controls in the header because it has no lobby nav. */
+  .fabrary-play-page .lobby-topbar-authenticated {
+    grid-template-areas: "brand account" "tools tools";
+    padding: max(9px, env(safe-area-inset-top)) 12px 9px;
+  }
+
+  .fabrary-play-page .lobby-topbar-authenticated .topbar-tools,
+  .fabrary-play-page .lobby-topbar-authenticated .user-chip {
+    display: flex;
+  }
+
+  .fabrary-play-page .lobby-topbar-authenticated .topbar-account {
+    max-width: 48vw;
+  }
+
+  .fabrary-play-page .mobile-user-name {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .fabrary-play-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .fabrary-play-card-note ul {
+    grid-template-columns: 1fr;
+  }
+}

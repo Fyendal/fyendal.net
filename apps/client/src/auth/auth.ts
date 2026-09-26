@@ -9,6 +9,7 @@ import {
   decodeDeckInvalidResponse,
   decodeDeckResponse,
   decodeDecksResponse,
+  decodeFabraryDeckPreviewResponse,
   decodeLoginResponse,
   decodeOkResponse,
   decodeReplayResponse,
@@ -26,6 +27,7 @@ import {
   type DeckInvalidResponse,
   type DeckResponse,
   type DecksResponse,
+  type FabraryDeckPreviewResponse,
   type LoginResponse,
   type OkResponse,
   type ReplayResponse,
@@ -276,6 +278,25 @@ export function apiImportDeck(
   return post<DeckResult>(
     "decks/import",
     input,
+    (value) => decodeDeckResponse(value) ?? decodeDeckInvalidResponse(value),
+    { token, signal },
+  );
+}
+
+export function apiFabraryDeckPreview(
+  url: string,
+  signal?: AbortSignal,
+): Promise<FabraryDeckPreviewResponse | ApiError> {
+  return post("decks/preview", { url }, decodeFabraryDeckPreviewResponse, { signal });
+}
+
+export function apiFabraryPlayDeck(
+  token: string,
+  input: { format: ConstructedFormat; url: string },
+  signal?: AbortSignal,
+): Promise<DeckResult> {
+  return post<DeckResult>(
+    "decks/play", input,
     (value) => decodeDeckResponse(value) ?? decodeDeckInvalidResponse(value),
     { token, signal },
   );

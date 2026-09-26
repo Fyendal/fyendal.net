@@ -53,6 +53,17 @@ function jsonResponse(value: unknown): Response {
   });
 }
 
+const fabraryUrl = "https://fabrary.net/decks/01M1WZTPC64GDCMN2GX752E3R7";
+const fabraryDeck = {
+  id: "linked-deck", name: "Fabrary deck", format: "cc" as const, fabraryUrl,
+  heroName: "Rhinar, Reckless Rampage", deckSize: 80, updatedAt: 1,
+};
+
+function stubPlayLocation(): void {
+  vi.stubGlobal("location", { hostname: "localhost", pathname: "/play",
+    search: `?${new URLSearchParams({ fabrary: fabraryUrl, format: "cc" })}` });
+}
+
 function deferred<T>(): {
   promise: Promise<T>;
   resolve: (value: T) => void;
@@ -128,6 +139,247 @@ afterEach(async () => {
   vi.useRealTimers();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
+});
+
+describe("Fabrary play handoff", () => {
+  it("loads a public guest preview once without importing or saving a deck", async () => {
+    stubPlayLocation();
+    const fetcher = vi.fn(async () => jsonResponse({ ok: true, deck: {
+      name: "Public deck", heroName: "Rhinar",
+    } }));
+    vi.stubGlobal("fetch", fetcher);
+    const { useStore } = await import("../store.js");
+    await useStore.getState().previewFabraryPlay();
+    await useStore.getState().previewFabraryPlay();
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    expect(fetcher.mock.calls[0]).toEqual([expect.stringContaining("/api/decks/preview"),
+      expect.objectContaining({ body: JSON.stringify({ url: fabraryUrl }),
+        headers: { "content-type": "application/json" } })]);
+    expect(useStore.getState().pendingFabraryPlay?.preview).toEqual({ status: "ready", result: {
+      ok: true, deck: { name: "Public deck", heroName: "Rhinar" },
+    } });
+    expect(useStore.getState().decks).toEqual([]);
+    expect(useStore.getState().pendingFabraryPlay?.status).toBe("idle");
+  });
+
+  it("retries failed guest previews and drops a late result after leaving", async () => {
+    stubPlayLocation();
+    const late = deferred<Response>();
+    const fetcher = vi.fn().mockResolvedValueOnce(jsonResponse({ ok: false, error: "Unavailable" }))
+      .mockReturnValueOnce(late.promise);
+    vi.stubGlobal("fetch", fetcher);
+    const { useStore } = await import("../store.js");
+    await useStore.getState().previewFabraryPlay();
+    expect(useStore.getState().pendingFabraryPlay?.preview?.status).toBe("error");
+    const retry = useStore.getState().previewFabraryPlay();
+    await useStore.getState().previewFabraryPlay();
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    useStore.getState().dismissFabraryPlay();
+    late.resolve(jsonResponse({ ok: true, deck: { name: "Old deck", heroName: "Rhinar" } }));
+    await retry;
+    expect(useStore.getState().pendingFabraryPlay).toBeNull();
+  });
+
+  it("does not let a guest preview overwrite an authenticated import", async () => {
+    stubPlayLocation();
+    const late = deferred<Response>();
+    vi.stubGlobal("fetch", vi.fn((input: string | URL | Request) =>
+      String(input).endsWith("/api/decks/preview") ? late.promise
+        : Promise.resolve(jsonResponse({ ok: true, deck: fabraryDeck }))));
+    const { useStore } = await import("../store.js");
+    const loading = useStore.getState().previewFabraryPlay();
+    useStore.setState({ authToken: "token-a", authUser: "Alice" });
+    await useStore.getState().resolveFabraryPlay();
+    late.resolve(jsonResponse({ ok: true, deck: { name: "Old deck", heroName: "Rhinar" } }));
+    await loading;
+    expect(useStore.getState().pendingFabraryPlay).toMatchObject({ status: "ready", result: { deck: fabraryDeck } });
+  });
+
+  it("reloads a deck-list snapshot that predates the play import", async () => {
+    stubPlayLocation();
+    localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+    const oldList = deferred<Response>();
+    let lists = 0;
+    vi.stubGlobal("fetch", vi.fn(async (input: string | URL | Request) => {
+      if (String(input).endsWith("/api/decks")) {
+        lists += 1;
+        return lists === 1 ? oldList.promise : jsonResponse({ ok: true, decks: [fabraryDeck] });
+      }
+      return jsonResponse({ ok: true, deck: fabraryDeck });
+    }));
+    const { useStore } = await import("../store.js");
+    const refresh = useStore.getState().refreshDecks();
+    await useStore.getState().resolveFabraryPlay();
+    oldList.resolve(jsonResponse({ ok: true, decks: [] }));
+    await refresh;
+    expect(lists).toBe(2);
+    expect(useStore.getState().decks).toEqual([fabraryDeck]);
+  });
+  it.each(["login", "register"] as const)("preserves the link through %s and resolves after authentication", async (method) => {
+    stubPlayLocation();
+    const fetcher = vi.fn(async (input: string | URL | Request) => {
+      if (String(input).endsWith("/api/register")) return jsonResponse({ ok: true });
+      if (String(input).endsWith("/api/login")) return jsonResponse({ ok: true, username: "Alice", token: "token-a" });
+      if (String(input).endsWith("/api/decks/play")) return jsonResponse({ ok: true, deck: fabraryDeck });
+      return jsonResponse({ ok: true, decks: [] });
+    });
+    vi.stubGlobal("fetch", fetcher);
+    const { useStore } = await import("../store.js");
+    await useStore.getState().resolveFabraryPlay();
+    expect(fetcher).not.toHaveBeenCalled();
+    await useStore.getState()[method]("Alice", "password1");
+    await useStore.getState().resolveFabraryPlay();
+    expect(useStore.getState().pendingFabraryPlay).toMatchObject({ status: "ready", result: { deck: fabraryDeck } });
+    expect(history.replaceState).not.toHaveBeenCalled();
+  });
+
+  it("coalesces overlapping resolution and permits retry after failure", async () => {
+    stubPlayLocation();
+    localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+    const response = deferred<Response>();
+    const fetcher = vi.fn().mockReturnValueOnce(response.promise)
+      .mockResolvedValue(jsonResponse({ ok: true, deck: fabraryDeck }));
+    vi.stubGlobal("fetch", fetcher);
+    const { useStore } = await import("../store.js");
+    const first = useStore.getState().resolveFabraryPlay();
+    await useStore.getState().resolveFabraryPlay();
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    response.resolve(jsonResponse({ ok: false, error: "Fabrary is busy" }));
+    await first;
+    expect(useStore.getState().pendingFabraryPlay?.status).toBe("error");
+    await useStore.getState().resolveFabraryPlay();
+    await useStore.getState().resolveFabraryPlay();
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    expect(useStore.getState().decks).toEqual([fabraryDeck]);
+  });
+
+  it("discards a late import after cancellation", async () => {
+    stubPlayLocation();
+    localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+    const response = deferred<Response>();
+    vi.stubGlobal("fetch", vi.fn(() => response.promise));
+    const { useStore } = await import("../store.js");
+    const loading = useStore.getState().resolveFabraryPlay();
+    useStore.getState().dismissFabraryPlay();
+    response.resolve(jsonResponse({ ok: true, deck: fabraryDeck }));
+    await loading;
+    expect(useStore.getState().pendingFabraryPlay).toBeNull();
+    expect(useStore.getState().decks).toEqual([]);
+    expect(history.replaceState).toHaveBeenLastCalledWith(null, "", "/");
+  });
+
+  it("discards old-account results and preserves the request when the socket session expires", async () => {
+    stubPlayLocation();
+    localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+    const response = deferred<Response>();
+    vi.stubGlobal("fetch", vi.fn(() => response.promise));
+    const { useStore } = await import("../store.js");
+    useStore.getState().listRooms();
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    const loading = useStore.getState().resolveFabraryPlay();
+    socket.message({ type: "auth-failed" });
+    response.resolve(jsonResponse({ ok: true, deck: fabraryDeck }));
+    await loading;
+    expect(useStore.getState()).toMatchObject({ authToken: null, decks: [],
+      pendingFabraryPlay: { status: "idle", result: null } });
+    expect(history.replaceState).not.toHaveBeenCalled();
+  });
+
+  it("returns an expired HTTP session to login without losing the link", async () => {
+    stubPlayLocation();
+    localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+    vi.stubGlobal("fetch", vi.fn(async () => jsonResponse({ ok: false, error: "not logged in" })));
+    const { useStore } = await import("../store.js");
+    await useStore.getState().resolveFabraryPlay();
+    expect(useStore.getState()).toMatchObject({ authUser: null,
+      pendingFabraryPlay: { status: "idle", result: null } });
+    expect(history.replaceState).not.toHaveBeenCalled();
+  });
+
+  it("requires Future mode for future cards and consumes the link only after queue acknowledgement", async () => {
+    stubPlayLocation();
+    localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+    vi.stubGlobal("fetch", vi.fn(async () => jsonResponse({ ok: true, deck: { ...fabraryDeck, futureCards: ["Future card"] } })));
+    const { useStore } = await import("../store.js");
+    await useStore.getState().resolveFabraryPlay();
+    useStore.getState().startFabraryPlay({ kind: "player" });
+    expect(FakeWebSocket.instances).toHaveLength(0);
+    useStore.getState().setCardPoolMode("cc", "future");
+    useStore.getState().startFabraryPlay({ kind: "player" });
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    useStore.getState().startFabraryPlay({ kind: "player" });
+    expect(socket.sent.map((value) => JSON.parse(value)).filter((message) => message.type === "queue-join"))
+      .toEqual([{ type: "queue-join", format: "cc", deckId: fabraryDeck.id, cardPoolMode: "future" }]);
+    expect(useStore.getState().pendingFabraryPlay?.status).toBe("starting");
+    socket.message({ type: "queued", format: "cc" });
+    expect(useStore.getState().pendingFabraryPlay).toBeNull();
+    expect(useStore.getState().screen).toBe("prep");
+    expect(history.replaceState).toHaveBeenLastCalledWith(null, "", "/");
+  });
+
+  it("requires Open mode for banned cards and starts a bot without player search", async () => {
+    stubPlayLocation();
+    localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+    vi.stubGlobal("fetch", vi.fn(async () => jsonResponse({ ok: true, deck: { ...fabraryDeck,
+      bannedCards: ["Art of War"], futureCards: ["Future card"] } })));
+    const { useStore } = await import("../store.js");
+    await useStore.getState().resolveFabraryPlay();
+    const choice = { kind: "bot" as const, bot: "ira" as const, searchForPlayer: false };
+    useStore.getState().setCardPoolMode("cc", "future");
+    useStore.getState().startFabraryPlay(choice);
+    expect(FakeWebSocket.instances).toHaveLength(0);
+    useStore.getState().setCardPoolMode("cc", "open");
+    useStore.getState().startFabraryPlay(choice);
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    expect(socket.sent.map((value) => JSON.parse(value))).toContainEqual({ type: "create-bot-room",
+      format: "cc", deckId: fabraryDeck.id, bot: "ira", cardPoolMode: "open" });
+    socket.message({ type: "room-created", code: "AAAAAA", token: "room-token", seat: 0, version: 1 });
+    expect(useStore.getState()).toMatchObject({ screen: "prep", pendingFabraryPlay: null });
+    expect(history.replaceState).toHaveBeenLastCalledWith(null, "", "/AAAAAA");
+  });
+
+  it.each(["player", "bot"] as const)("starts a %s game while preserving other games", async (kind) => {
+    stubPlayLocation();
+    localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+    const existingSession = JSON.stringify({ code: "OLD123", token: "old-seat-token" });
+    localStorage.setItem("fyendal-room-session:OLD123", existingSession);
+    vi.stubGlobal("fetch", vi.fn(async () => jsonResponse({ ok: true, deck: fabraryDeck })));
+    const { useStore } = await import("../store.js");
+    await useStore.getState().resolveFabraryPlay();
+    useStore.setState({ rooms: [{ code: "OLD123", format: "cc", heroes: ["Rhinar", "Bravo"],
+      createdAt: 0, started: true, yours: true }] });
+    useStore.getState().startFabraryPlay(kind === "player"
+      ? { kind: "player" } : { kind: "bot", bot: "ira", searchForPlayer: false });
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    const messages = socket.sent.map((value) => JSON.parse(value));
+    expect(messages).toContainEqual(kind === "player"
+      ? { type: "queue-join", format: "cc", deckId: fabraryDeck.id }
+      : { type: "create-bot-room", format: "cc", deckId: fabraryDeck.id, bot: "ira" });
+    expect(messages.some((message) => message.type === "leave-room")).toBe(false);
+    socket.message({ type: "room-created", code: "NEW123", token: "new-seat-token", seat: 0, version: 1 });
+    expect(localStorage.getItem("fyendal-room-session:OLD123")).toBe(existingSession);
+    expect(useStore.getState()).toMatchObject({ screen: "prep", pendingFabraryPlay: null, roomCode: "NEW123" });
+  });
+
+  it("recovers from rejected game creation", async () => {
+    stubPlayLocation();
+    localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+    vi.stubGlobal("fetch", vi.fn(async () => jsonResponse({ ok: true, deck: fabraryDeck })));
+    const { useStore } = await import("../store.js");
+    await useStore.getState().resolveFabraryPlay();
+    useStore.getState().startFabraryPlay({ kind: "player" });
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    socket.message({ type: "error", code: "INVALID_MESSAGE", message: "deck changed; try again" });
+    expect(useStore.getState()).toMatchObject({ pendingFabraryPlay: { status: "ready" },
+      matchmakingActive: false, error: "deck changed; try again" });
+    await useStore.getState().resolveFabraryPlay(true);
+    expect(useStore.getState()).toMatchObject({ pendingFabraryPlay: { status: "ready" }, error: null });
+  });
 });
 
 describe("client connection and account race fences", () => {

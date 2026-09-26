@@ -9,6 +9,16 @@ afterEach(() => {
 });
 
 describe("BotOpponentModal", () => {
+  it("can start Fabrary practice with player search disabled", () => {
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <BotOpponentModal format="cc" cardPoolMode="open" initialSearchForPlayer={false}
+          onSelect={vi.fn()} onClose={vi.fn()} />
+      </TestI18nProvider>,
+    );
+    expect(html).toContain('type="checkbox"');
+    expect(html).not.toContain('type="checkbox" checked=""');
+  });
   it("offers Ira, Hala, Cindra, Jarl, and Starvo in a focused opponent dialog", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>

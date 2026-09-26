@@ -1601,6 +1601,22 @@ export const decodeDecksResponse: Decoder<DecksResponse> = (value) => {
   return decks.every((deck): deck is DeckSummary => deck !== null) ? { ok: true, decks } : null;
 };
 
+export interface FabraryDeckPreviewResponse {
+  ok: true;
+  deck: { name: string; heroName: string | null };
+}
+
+export const decodeFabraryDeckPreviewResponse: Decoder<FabraryDeckPreviewResponse> = (value) => {
+  const data = object(value);
+  const deck = object(data?.deck);
+  return data && exactKeys(data, ["ok", "deck"]) && data.ok === true
+    && deck && exactKeys(deck, ["name", "heroName"])
+    && string(deck.name, MAX_SHORT_TEXT, false)
+    && (deck.heroName === null || string(deck.heroName, MAX_SHORT_TEXT, false))
+    ? { ok: true, deck: { name: deck.name, heroName: deck.heroName } }
+    : null;
+};
+
 export const decodeDeckResponse: Decoder<DeckResponse> = (value) => {
   const data = object(value);
   if (!data || !exactKeys(data, ["ok", "deck"]) || data.ok !== true) return null;

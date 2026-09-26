@@ -6,16 +6,14 @@ import { apiStats, type StatsOk } from "../auth/auth.js";
 import { Auth } from "../auth/AuthCard.js";
 import { CONSTRUCTED_FORMATS, type ConstructedFormat } from "../domain.js";
 import { SiteFooter } from "../legal/SiteFooter.js";
-import { DiscordLink } from "./DiscordLink.js";
+import { LobbyHeader } from "./LobbyHeader.js";
 import { FormatName } from "./FormatBadge.js";
 import { ModalSurface } from "../components/ModalSurface.js";
 import { LanguagePicker } from "../i18n/LanguagePicker.js";
-import { BugFixedNotification } from "./BugFixedNotification.js";
 import { mobileDeckDestination, mobileLobbyDestinationSelected } from "./mobileNavigation.js";
 import {
   GuestLandingDetails,
   GuestLandingHero,
-  LobbyBrand,
 } from "./GuestLanding.js";
 
 const RoomList = lazy(() => import("./RoomList.js").then((module) => ({ default: module.RoomList })));
@@ -88,9 +86,6 @@ export function Lobby() {
     savedReplays,
     rail,
     setRail,
-    bugReportNotifications,
-    refreshBugReportNotifications,
-    dismissBugReportNotifications,
   } = useStore(useShallow((state) => ({
     error: state.error,
     spectatorKicked: state.spectatorKicked,
@@ -105,9 +100,6 @@ export function Lobby() {
     savedReplays: state.savedReplays,
     rail: state.lobbyRail,
     setRail: state.setLobbyRail,
-    bugReportNotifications: state.bugReportNotifications,
-    refreshBugReportNotifications: state.refreshBugReportNotifications,
-    dismissBugReportNotifications: state.dismissBugReportNotifications,
   })));
   /** selected saved deck per constructed format */
   const [deckFor, setDeckFor] = useState<Record<ConstructedFormat, string>>({
@@ -117,7 +109,6 @@ export function Lobby() {
   const [stats, setStats] = useState<StatsOk | null>(null);
   const [lastDeckFormat, setLastDeckFormat] = useState<ConstructedFormat>("cc");
   const [showMobileMore, setShowMobileMore] = useState(false);
-  const bugReportNotification = bugReportNotifications[0];
   const rejoinRoomCount = rooms.reduce(
     (count, room) => count + (room.yours === true ? 1 : 0),
     0,
@@ -128,11 +119,6 @@ export function Lobby() {
   useEffect(() => {
     if (authUser) listRooms();
   }, [authUser, listRooms]);
-
-  useEffect(() => {
-    if (!authUser) return;
-    void refreshBugReportNotifications();
-  }, [authUser, refreshBugReportNotifications]);
 
   // logged-out landing: live stats over HTTP, refreshed periodically
   useEffect(() => {
@@ -171,15 +157,7 @@ export function Lobby() {
   if (!authUser) {
     return (
       <div className="lobby-page">
-        <header className="topbar lobby-topbar lobby-topbar-guest">
-          <LobbyBrand />
-          <div className="topbar-actions">
-            <div className="topbar-tools">
-              <LanguagePicker />
-              <DiscordLink />
-            </div>
-          </div>
-        </header>
+        <LobbyHeader />
 
         <main id="main-content" className="guest-landing">
           <div className="intro-grid">
@@ -205,33 +183,7 @@ export function Lobby() {
 
   return (
     <div className="lobby-page lobby-page-authenticated">
-      <header className="topbar lobby-topbar lobby-topbar-authenticated">
-        <LobbyBrand />
-        {bugReportNotification ? (
-          <BugFixedNotification notifications={bugReportNotifications} onDismiss={() => void dismissBugReportNotifications()} />
-        ) : null}
-        <div className="topbar-actions">
-          <div className="topbar-tools">
-            <LanguagePicker />
-            <DiscordLink />
-          </div>
-          <div className="topbar-account">
-            <span className="user-chip">
-              <span className="user-name">{authUser}</span>
-              <button className="linklike" onClick={() => void logout()}>
-                {intl.formatMessage({ id: "common.logOut" })}
-              </button>
-            </span>
-            <span className="mobile-user-name" title={authUser ?? undefined}>{authUser}</span>
-            <span
-              className={`conn-dot${connected ? " on" : ""}`}
-              title={intl.formatMessage({
-                id: connected ? "common.connection.connected" : "common.connection.disconnected",
-              })}
-            />
-          </div>
-        </div>
-      </header>
+      <LobbyHeader />
 
       <div className="lobby-grid">
         <div className="lobby-rail">

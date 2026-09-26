@@ -51,6 +51,7 @@ export function initialStoreProjection(
     matchAcceptanceRole: null,
     decks: [],
     decksLoading: auth !== null,
+    pendingFabraryPlay: null,
     bugReportNotifications: [],
     friends: [],
     friendRequests: [],

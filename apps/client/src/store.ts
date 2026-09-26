@@ -15,6 +15,7 @@ import {
   removeUnsupportedLocalReplays,
 } from "./replay/recorder.js";
 import { savedReplayIdFromPath } from "./replay/route.js";
+import { fabraryPlayRoute } from "./play/route.js";
 import { RoomVersionGate } from "./versionGate.js";
 import {
   decodeServerMessage,
@@ -303,7 +304,7 @@ export const useStore = create<StoreState>((set, get) => {
     roomEntryRetryable = false;
     joiningRoomCode = null;
     closeCurrentSocket();
-    history.replaceState(null, "", "/");
+    if (!get().pendingFabraryPlay) history.replaceState(null, "", "/");
     replayRuntime.discard();
     prepDeckId = null;
     prepHero = null;
@@ -316,6 +317,9 @@ export const useStore = create<StoreState>((set, get) => {
       connected: false,
       authToken: null,
       authUser: null,
+      pendingFabraryPlay: get().pendingFabraryPlay
+        ? { route: get().pendingFabraryPlay!.route, status: "idle", result: null }
+        : null,
       decks: [],
       decksLoading: false,
       bugReportNotifications: [],
@@ -345,6 +349,12 @@ export const useStore = create<StoreState>((set, get) => {
       authedToken = token;
       send({ type: "auth", token });
     }
+  }
+
+  function completeFabraryPlay(): void {
+    if (get().pendingFabraryPlay?.status !== "starting") return;
+    history.replaceState(null, "", "/");
+    set({ pendingFabraryPlay: null });
   }
 
   function connect(onOpen: () => void): void {
@@ -382,6 +392,11 @@ export const useStore = create<StoreState>((set, get) => {
       joiningRoomCode = null;
       resetRoomCommandPipeline();
       set({ connected: false });
+      const pendingPlay = get().pendingFabraryPlay;
+      if (pendingPlay?.status === "starting") {
+        set({ pendingFabraryPlay: { ...pendingPlay, status: "ready" },
+          matchmakingActive: false, botGame: false, pendingBotStart: false });
+      }
       if (roomEntryPending && !roomEntryRetryable) {
         failPendingRoomEntry("connection to room failed");
         return;
@@ -803,6 +818,7 @@ export const useStore = create<StoreState>((set, get) => {
         clearAuthenticatedState();
         break;
       case "room-created": {
+        completeFabraryPlay();
         liveBotParticipant = true;
         const fromMatchmaking = get().queuedFormat !== null || get().matchmakingActive;
         roomEntryPending = false;
@@ -831,6 +847,7 @@ export const useStore = create<StoreState>((set, get) => {
         break;
       }
       case "joined": {
+        completeFabraryPlay();
         liveBotParticipant = msg.spectator !== true;
         const fromMatchmaking = get().queuedFormat !== null || get().matchmakingActive;
         saveRoomSession(localStorage, { code: msg.code, token: msg.token });
@@ -1002,6 +1019,7 @@ export const useStore = create<StoreState>((set, get) => {
         set({ queueCounts: msg.counts });
         break;
       case "queued":
+        completeFabraryPlay();
         set({ queuedFormat: msg.format, matchmakingActive: true });
         // queueing lives on the prep screen (sideboard while waiting)
         enterPrep();
@@ -1100,6 +1118,11 @@ export const useStore = create<StoreState>((set, get) => {
           set({ socialError: msg.code });
           break;
         }
+        const pendingPlay = get().pendingFabraryPlay;
+        if (pendingPlay?.status === "starting") {
+          set({ pendingFabraryPlay: { ...pendingPlay, status: "ready" },
+            matchmakingActive: false, botGame: false, pendingBotStart: false });
+        }
         if (failPendingRoomEntry(msg.message)) break;
         resetRoomCommandPipeline();
         const staleVersion = msg.message === "stale room version";
@@ -1176,6 +1199,7 @@ export const useStore = create<StoreState>((set, get) => {
   };
 
   const accountActions = createAccountActions({ set, get, authRequest, isCurrentAuth });
+  const initialPlayRoute = fabraryPlayRoute(location.pathname, location.search ?? "");
   const replayActions = createReplayActions({
     set,
     get,
@@ -1187,8 +1211,27 @@ export const useStore = create<StoreState>((set, get) => {
 
   return {
     ...initialStoreProjection(stored, lobbySettings),
+    pendingFabraryPlay: initialPlayRoute ? { route: initialPlayRoute, status: "idle", result: null } : null,
     ...accountActions,
     ...replayActions,
+    dismissFabraryPlay: () => {
+      history.replaceState(null, "", "/");
+      set({ pendingFabraryPlay: null });
+    },
+    startFabraryPlay: (choice) => {
+      const pending = get().pendingFabraryPlay;
+      if (!pending?.route.ok || pending.status !== "ready" || !pending.result?.ok
+        || !get().authUser || get().roomCode || get().queuedFormat || get().matchmakingActive) return;
+      const { deck } = pending.result;
+      const { format } = pending.route.request;
+      const mode = get().cardPoolModes[format];
+      if (deck.format !== format || (mode !== "open" && deck.bannedCards?.length)
+        || (mode === "legal" && deck.futureCards?.length)) return;
+      errors.clear();
+      set({ pendingFabraryPlay: { ...pending, status: "starting" } });
+      if (choice.kind === "player") get().queueJoin(format, { deckId: deck.id });
+      else get().createBotRoom(format, deck.id, choice.bot, choice.searchForPlayer);
+    },
     setSocialOpen: (socialOpen) => set({ socialOpen }),
     clearSocialError: () => set({ socialError: null }),
     sendFriendRequest: (username) => {
@@ -1326,6 +1369,9 @@ export const useStore = create<StoreState>((set, get) => {
       set({
         authToken: res.token,
         authUser: res.username,
+        pendingFabraryPlay: get().pendingFabraryPlay
+          ? { route: get().pendingFabraryPlay!.route, status: "idle", result: null }
+          : null,
         decks: [],
         decksLoading: true,
         bugReportNotifications: [],

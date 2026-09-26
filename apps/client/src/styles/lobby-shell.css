@@ -95,6 +95,16 @@
   outline-offset: 1px;
 }
 .brand { display: flex; min-width: 0; align-items: center; gap: 11px; }
+.brand-home {
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 6px;
+}
+.brand-home:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 5px;
+}
 .brand-logo {
   width: 46px;
   height: 46px;

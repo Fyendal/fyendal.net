@@ -10,6 +10,7 @@ import {
   decodeDeckInvalidResponse,
   decodeDeckResponse,
   decodeDecksResponse,
+  decodeFabraryDeckPreviewResponse,
   decodeGameView,
   decodeGameLogViewEntry,
   decodeGameMessage,
@@ -23,6 +24,27 @@ import {
   decodeServerMessage,
   decodeStatsResponse,
 } from "../index.js";
+
+describe("Fabrary deck previews", () => {
+  it("decodes bounded public metadata, including a missing hero", () => {
+    const value = { ok: true, deck: { name: "Public deck", heroName: "Rhinar" } };
+    expect(decodeFabraryDeckPreviewResponse(value)).toEqual(value);
+    expect(decodeFabraryDeckPreviewResponse({ ok: true, deck: { name: "Public deck", heroName: null } }))
+      .not.toBeNull();
+  });
+
+  it("rejects extra keys and malformed or unbounded metadata", () => {
+    for (const value of [null, { ok: false }, { ok: true, deck: { name: "Deck" } },
+      { ok: true, deck: { name: "", heroName: null } },
+      { ok: true, deck: { name: "x".repeat(257), heroName: null } },
+      { ok: true, deck: { name: "Deck", heroName: 1 } },
+      { ok: true, deck: { name: "Deck", heroName: "x".repeat(257) } },
+      { ok: true, deck: { name: "Deck", heroName: "Rhinar", userId: 1 } },
+      { ok: true, deck: { name: "Deck", heroName: "Rhinar" }, extra: true }]) {
+      expect(decodeFabraryDeckPreviewResponse(value)).toBeNull();
+    }
+  });
+});
 
 describe("semantic game messages", () => {
   it("accepts bounded primitive and typed reference values", () => {

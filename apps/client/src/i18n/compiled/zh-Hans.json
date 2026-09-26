@@ -22810,6 +22810,128 @@
       "value": "公告"
     }
   ],
+  "play.back": [
+    {
+      "type": 0,
+      "value": "返回大厅"
+    }
+  ],
+  "play.banned": [
+    {
+      "type": 0,
+      "value": "选择开放模式以开始游戏。"
+    }
+  ],
+  "play.bot": [
+    {
+      "type": 0,
+      "value": "与机器人对战"
+    }
+  ],
+  "play.cards.banned": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张禁牌"
+    }
+  ],
+  "play.cards.future": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张未来卡牌"
+    }
+  ],
+  "play.error.format": [
+    {
+      "type": 0,
+      "value": "不支持此赛制。Fabrary 游戏链接支持经典构筑赛和白银时代。"
+    }
+  ],
+  "play.error.import": [
+    {
+      "type": 0,
+      "value": "无法导入牌组。请确认牌组已公开，然后重试。"
+    }
+  ],
+  "play.error.link": [
+    {
+      "type": 0,
+      "value": "此游戏链接无效。链接需包含公开的 Fabrary 牌组网址及支持的赛制。"
+    }
+  ],
+  "play.find.player": [
+    {
+      "type": 0,
+      "value": "寻找玩家"
+    }
+  ],
+  "play.future": [
+    {
+      "type": 0,
+      "value": "选择未来或开放模式以开始游戏。"
+    }
+  ],
+  "play.importing": [
+    {
+      "type": 0,
+      "value": "正在加载最新的 Fabrary 牌组…"
+    }
+  ],
+  "play.preview.loading": [
+    {
+      "type": 0,
+      "value": "正在加载牌组预览…"
+    }
+  ],
+  "play.refresh": [
+    {
+      "type": 0,
+      "value": "重新加载牌组"
+    }
+  ],
+  "play.retry": [
+    {
+      "type": 0,
+      "value": "重试"
+    }
+  ],
+  "play.sign.in": [
+    {
+      "type": 0,
+      "value": "登录或创建账号以使用此牌组。"
+    }
+  ],
+  "play.source": [
+    {
+      "type": 0,
+      "value": "来自 Fabrary"
+    }
+  ],
+  "play.starting": [
+    {
+      "type": 0,
+      "value": "正在开始游戏…"
+    }
+  ],
+  "play.title": [
+    {
+      "type": 0,
+      "value": "使用 Fabrary 牌组开始游戏"
+    }
+  ],
+  "play.view.deck": [
+    {
+      "type": 0,
+      "value": "在 Fabrary 查看"
+    }
+  ],
   "prep.accept.accepted": [
     {
       "type": 0,

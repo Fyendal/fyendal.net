@@ -2,7 +2,7 @@ import http from "node:http";
 import { promisify } from "node:util";
 import { gunzip as gunzipCallback } from "node:zlib";
 import type { DeckPool, Format } from "@fyendal/shared";
-import { cardData, formatLegalityIssues } from "@fyendal/cards";
+import { cardData, findPrinting, formatLegalityIssues } from "@fyendal/cards";
 import { decodeReplayNoteInput } from "@fyendal/protocol";
 import type { Queryable } from "./db.js";
 import {
@@ -13,7 +13,9 @@ import {
   sessionForToken,
   type AuthUser,
 } from "./auth.js";
-import { deleteDeck, getDeck, importDeck, listDecks, resolveFreshDeck, updateDeck } from "./decks.js";
+import {
+  deleteDeck, getDeck, importDeck, listDecks, parseDecklistText, resolveFabraryPlayDeck, resolveFreshDeck, updateDeck,
+} from "./decks.js";
 import { clientIp, configuredTrustedProxyHops } from "./network.js";
 import {
   deleteAccount,
@@ -406,6 +408,35 @@ export function createApiServer(deps: ApiDeps): http.Server {
       if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };
       await dismissFixedBugReportNotifications(deps.db, user.id);
       return { status: 200, body: { ok: true } };
+    },
+    "/api/decks/preview": async (body) => {
+      const source = parseFabraryDeckUrl(field(body, "url"));
+      if (!source) {
+        return { status: 400, body: { ok: false, error: "enter a valid https://fabrary.net/decks/... URL" } };
+      }
+      const fetched = await fabraryClient.fetchDeck(source.canonicalUrl);
+      if (!fetched.ok) return { status: fetched.status, body: { ok: false, error: fetched.error } };
+      // A public preview does not validate playability or save account data.
+      const lines = parseDecklistText(fetched.deck.text);
+      const hero = lines.map((line) => findPrinting(line.name, line.pitch)).find((card) =>
+        card?.cardType === "hero" && !/\bwhile this is in your inventory\b/i.test(card.text));
+      const heroName = hero?.name ?? lines.find((line) => line.section === "hero")?.name ?? null;
+      return { status: 200, body: { ok: true, deck: { name: fetched.deck.name, heroName } } };
+    },
+    "/api/decks/play": async (body, user) => {
+      if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };
+      const format = field(body, "format");
+      if (format !== "cc" && format !== "silver-age") {
+        return { status: 400, body: { ok: false, error: "format must be cc or silver-age" } };
+      }
+      const result = await resolveFabraryPlayDeck(deps.db, user.id, format, field(body, "url"), fabraryClient);
+      if (!result.ok) {
+        return result.status === 422
+          ? { status: 422, body: { ok: false, errors: result.errors ?? [],
+            missing: result.missing ?? [], unimplemented: result.unimplemented ?? [] } }
+          : { status: result.status, body: { ok: false, error: result.error } };
+      }
+      return { status: 200, body: { ok: true, deck: deckOut(result.deck) } };
     },
     "/api/decks/import": async (body, user) => {
       if (!user) return { status: 401, body: { ok: false, error: "not logged in" } };

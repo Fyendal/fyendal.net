@@ -13,6 +13,8 @@ const GameBoard = lazy(() => import("./game/GameBoard.js").then((module) => ({ d
 const ReplayBar = lazy(() => import("./replay/ReplayBar.js").then((module) => ({ default: module.ReplayBar })));
 const LegalPage = lazy(() => import("./legal/LegalPage.js").then((module) => ({ default: module.LegalPage })));
 const SocialDock = lazy(() => import("./social/SocialDock.js").then((module) => ({ default: module.SocialDock })));
+const FabraryPlayPage = lazy(() => import("./play/FabraryPlayPage.js")
+  .then((module) => ({ default: module.FabraryPlayPage })));
 
 function setMetaContent(selector: string, content: string): void {
   let element = document.head.querySelector<HTMLMetaElement>(selector);
@@ -83,6 +85,7 @@ function AppContent() {
   const authUser = useStore((state) => state.authUser);
   const authToken = useStore((state) => state.authToken);
   const screen = useStore((state) => state.screen);
+  const pendingFabraryPlay = useStore((state) => state.pendingFabraryPlay);
   const roomCode = useStore((state) => state.roomCode);
   const activeSavedReplayId = useStore((state) => state.activeSavedReplayId);
   const inspectRoom = useStore((state) => state.inspectRoom);
@@ -97,7 +100,7 @@ function AppContent() {
   const savedReplayId = savedReplayIdFromPath(path);
   useRouteMetadata(
     path,
-    routeRoomCode !== null || savedReplayId !== null,
+    routeRoomCode !== null || savedReplayId !== null || pendingFabraryPlay !== null,
     intl.formatMessage({ id: "meta.home.title" }),
     intl.formatMessage({ id: "meta.home.description" }),
   );
@@ -172,6 +175,7 @@ function AppContent() {
   }
   else if (screen === "waiting") content = <WaitingRoom />;
   else if (screen === "prep") content = <PrepRoom />;
+  else if (pendingFabraryPlay) content = <FabraryPlayPage key={authUser ?? "guest"} />;
   else content = <Lobby />;
   return (
     <Suspense fallback={<ScreenFallback />}>
