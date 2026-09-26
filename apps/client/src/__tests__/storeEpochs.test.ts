@@ -1285,6 +1285,44 @@ describe("client connection and account race fences", () => {
     });
   });
 
+  it("continues live bot computation while the participant watches a replay", async () => {
+    vi.useFakeTimers();
+    class FakeBotWorker {
+      static instances: FakeBotWorker[] = [];
+      onmessage: ((event: { data: unknown }) => void) | null = null;
+      onerror = null;
+      onmessageerror = null;
+      postMessage = vi.fn();
+      terminate = vi.fn();
+      constructor() { FakeBotWorker.instances.push(this); }
+    }
+    vi.stubGlobal("Worker", FakeBotWorker);
+    const { useStore } = await import("../store.js");
+    const { BOT_RUNTIME_ID } = await import("@fyendal/bot/runtime-id");
+    useStore.getState().createBotRoom("silver-age", "precon-svi");
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    socket.message({ type: "room-created", code: "BOT001", seat: 0, token: "seat", version: 1 });
+    const view = { ...staleState.view, gameId: "BOT001", turn: 2 };
+    socket.message({ type: "game-started", version: 2 });
+    socket.message({ ...staleState, version: 2, botGame: true, view });
+    await useStore.getState().watchReplay();
+    expect(useStore.getState()).toMatchObject({ screen: "replay", spectating: true });
+    expect(useStore.getState().openReplayText(JSON.stringify({ version: 1, seat: 0, views: [view] }))).toBeNull();
+    socket.message({ type: "bot-runtime", code: "BOT001", runtimeId: BOT_RUNTIME_ID });
+    const task = { type: "bot-task", code: "BOT001", version: 2, runtimeId: BOT_RUNTIME_ID, botId: "bravo", seat: 1, view, legal: [{ kind: "pass" }], delayMs: 1_000 };
+    socket.message(task);
+    const worker = FakeBotWorker.instances[0]!;
+    worker.onmessage?.({ data: { type: "ready" } });
+    expect(worker.postMessage).toHaveBeenCalledWith(task);
+    worker.onmessage?.({ data: { type: "decision", code: "BOT001", version: 2, intent: { kind: "pass" }, computeMs: 1 } });
+    vi.advanceTimersByTime(1_000);
+    expect(socket.sent.map((text) => JSON.parse(text))).toContainEqual(expect.objectContaining({ type: "bot-intent", expectedVersion: 2 }));
+    expect(useStore.getState().screen).toBe("replay");
+    expect(JSON.stringify(useStore.getState())).not.toContain("bot-task");
+    socket.close();
+  });
+
   it("clears all private and account-owned state after auth failure", async () => {
     localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
     const { useStore } = await import("../store.js");

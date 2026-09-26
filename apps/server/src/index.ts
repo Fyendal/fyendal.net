@@ -1,3 +1,4 @@
+import { BOT_RUNTIME_ID } from "@fyendal/bot/runtime-id";
 import http from "node:http";
 import { randomUUID } from "node:crypto";
 import { WebSocketServer, WebSocket } from "ws";
@@ -15,12 +16,6 @@ import { encodeWireMessage, type WireServerMessage } from "./errors.js";
 import { RoomBroadcaster } from "./roomBroadcaster.js";
 import { ConnectionRegistry, type ClientCtx } from "./gateway/connectionSession.js";
 import { composeProductionGateway } from "./gateway/composition.js";
-import { BotRunner } from "./botRunner.js";
-import {
-  consoleBotPolicyMetric,
-  WorkerBotPolicyExecutor,
-  type BotPolicyExecutor,
-} from "./botPolicyExecutor.js";
 import { ReplayFinalizer, sweepReplays } from "./replays.js";
 import { appendClusterEvent, ClusterEventConsumer, sweepClusterEvents, type ClusterEvent } from "./clusterEvents.js";
 import { tryAcquireLease } from "./leases.js";
@@ -85,8 +80,6 @@ interface ServerDeps {
   wsPingIntervalMs?: number;
   /** Test/UI pacing override; production defaults to a short visible pause. */
   botDelayMs?: number;
-  /** Test seam; production creates one worker-backed executor per gateway. */
-  botPolicyExecutor?: BotPolicyExecutor;
   /** Injectable upstream used by both HTTP deck detail and game entry. */
   fabraryClient?: FabraryClient;
   /** Unique Cloud Run container identity; generated per gateway when omitted. */
@@ -191,8 +184,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
   const disconnectTasks = new Set<Promise<void>>();
   disconnectTasksByServer.set(server, disconnectTasks);
   const trackDisconnectTask = (task: Promise<unknown>, failureMessage: string): void => {
-    let tracked!: Promise<void>;
-    tracked = task
+    const tracked = task
       .then(() => undefined)
       .catch((error: Error) => consoleError(failureMessage, error))
       .finally(() => disconnectTasks.delete(tracked));
@@ -267,14 +259,14 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
     detach: (client) => connections.detach(client),
     broadcastLobby,
     logError: consoleError,
+    botRuntimeId: BOT_RUNTIME_ID,
+    botDelayMs: deps.botDelayMs,
+    botReady: (client) => client.botRuntimeId === BOT_RUNTIME_ID,
   });
   clusterConsumer = new ClusterEventConsumer(deps.db, async (event) => {
     switch (event.type) {
       case "room":
         await broadcaster.afterCommit(event.event);
-        if (event.event.kind === "sync" || event.event.kind === "state" || event.event.kind === "game-started") {
-          botRunner.schedule(event.event.code);
-        }
         return;
       case "queue-changed":
         await broadcastQueueStatus();
@@ -447,19 +439,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
     }
     await publishRoomEvent({ code, kind: "state", version });
   };
-  const botRunner = new BotRunner({
-    rooms,
-    delayMs: deps.botDelayMs,
-    afterCommit: afterStateCommit,
-    logError: consoleError,
-    claim: (code) => tryAcquireLease(deps.db, `bot:${code}`, instanceId, 30_000),
-    policyExecutor: deps.botPolicyExecutor ?? new WorkerBotPolicyExecutor({
-      metricLogger: consoleBotPolicyMetric,
-      instanceId,
-    }),
-  });
   server.on("close", () => {
-    botRunner.stop();
     replayFinalizer.stop();
     clusterConsumer?.stop();
   });
@@ -1082,7 +1062,6 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           return;
         }
         await publishRoomEvent({ code: player.code, kind: r.started ? "game-started" : "prep", version: r.version });
-        if (r.started) botRunner.schedule(player.code);
         return;
       }
       case "accept-match": {
@@ -1117,7 +1096,6 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           return;
         }
         await publishRoomEvent({ code: player.code, kind: r.started ? "game-started" : "prep", version: r.version });
-        if (r.started) botRunner.schedule(player.code);
         return;
       }
       case "leave-room": {
@@ -1196,6 +1174,49 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         }
         return;
       }
+      case "bot-ready": {
+        const player = requirePlayer(ws, ctx);
+        if (!player) return;
+        const room = await rooms.getRoom(player.code);
+        if (!room || authorizedProjectionSeat(room, ctx) == null
+          || !room.seats.some((s) => s?.controller === "bot")) return;
+        if (msg.runtimeId !== BOT_RUNTIME_ID) {
+          ctx.send({ type: "error", code: "INVALID_MESSAGE", message: "Refresh this page to update browser bot computation." });
+          return;
+        }
+        ctx.botRuntimeId = msg.runtimeId;
+        await broadcaster.afterCommit({ code: player.code, kind: "sync", version: room.version });
+        return;
+      }
+      case "bot-intent": {
+        const player = requirePlayer(ws, ctx);
+        if (!player) return;
+        if (msg.runtimeId !== BOT_RUNTIME_ID || ctx.botRuntimeId !== BOT_RUNTIME_ID) {
+          ctx.send({ type: "error", code: "INVALID_MESSAGE", message: "Refresh this page to update browser bot computation." });
+          return;
+        }
+        const r = await rooms.applyBotIntent(
+          player.code, msg.expectedVersion, "intent" in msg ? msg.intent : null,
+          { credentials: player.credentials, command: { id: msg.commandId, expectedVersion: msg.expectedVersion } },
+        );
+        const staleErrors = ["stale bot observation", "stale room version", "bot does not have priority"];
+        const status = r.ok ? "applied" : staleErrors.includes(r.error) ? "stale" : "rejected";
+        ctx.send({
+          type: "bot-result", code: player.code, commandId: msg.commandId,
+          version: r.ok ? r.version : msg.expectedVersion, status,
+        });
+        console.log(JSON.stringify({
+          severity: "INFO", event: "client_bot_submission", status,
+          elapsedMs: msg.elapsedMs, computeMs: msg.computeMs,
+          ...("failure" in msg ? { fallbackReason: msg.failure } : {}),
+        }));
+        if (r.ok) await afterStateCommit(player.code, r.version, r.replayFinalizationId);
+        else if (status === "stale") {
+          const room = await rooms.getRoom(player.code);
+          if (room) await broadcaster.afterCommit({ code: player.code, kind: "sync", version: room.version });
+        }
+        return;
+      }
       case "intent": {
         const player = requirePlayer(ws, ctx);
         if (!player) return;
@@ -1209,7 +1230,6 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           return;
         }
         await afterStateCommit(player.code, r.version, r.replayFinalizationId);
-        botRunner.schedule(player.code);
         return;
       }
       case "priority-mode": {
@@ -1228,10 +1248,9 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           return;
         }
         // The durable preference commit is propagated by its transactional
-        // cluster sync event; only an immediate auto-pass needs bot follow-up.
+        // cluster sync event; an immediate auto-pass also publishes new state.
         if (r.autoPassed) {
           await afterStateCommit(player.code, r.version, r.replayFinalizationId);
-          botRunner.schedule(player.code);
         }
         return;
       }
@@ -1252,7 +1271,6 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         }
         if (r.advanced) {
           await afterStateCommit(player.code, r.version, r.replayFinalizationId);
-          botRunner.schedule(player.code);
         }
         return;
       }
@@ -1272,7 +1290,6 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           return;
         }
         await afterStateCommit(player.code, r.version, r.replayFinalizationId);
-        botRunner.schedule(player.code);
         return;
       }
       case "emote": {
@@ -1479,12 +1496,6 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
     .catch((error) => server.emit("error", error));
 
   if (!process.env.VITEST) {
-    // Timers are process-local, but bot ownership is durable. Recover any bot
-    // that held priority when a production instance recycled.
-    void rooms.botRoomCodes()
-      .then((codes) => codes.forEach((code) => botRunner.schedule(code)))
-      .catch((error: Error) => consoleError("bot room recovery failed", error));
-
     // Expired sessions otherwise accumulate until their individual token is
     // presented again. One gateway owns each sweep window through a lease.
     const sweepSessions = (): void => {

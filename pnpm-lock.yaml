@@ -41,6 +41,9 @@ importers:
 
   apps/client:
     dependencies:
+      '@fyendal/bot':
+        specifier: workspace:*
+        version: link:../../packages/bot
       '@fyendal/cards':
         specifier: workspace:*
         version: link:../../packages/cards
@@ -142,9 +145,15 @@ importers:
       '@fyendal/engine':
         specifier: workspace:*
         version: link:../engine
+      '@fyendal/protocol':
+        specifier: workspace:*
+        version: link:../protocol
       '@fyendal/shared':
         specifier: workspace:*
         version: link:../shared
+      '@noble/hashes':
+        specifier: 2.0.1
+        version: 2.0.1
     devDependencies:
       '@types/node':
         specifier: ^26.1.2
@@ -583,6 +592,10 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@noble/hashes@2.0.1':
+    resolution: {integrity: sha512-XlOlEbQcE9fmuXxrVTXCTlG2nlRXa9Rj3rr5Ue/+tX+nmkgbX720YHh0VR3hBF9xDvwnb8D2shVGOwNx+ulArw==}
+    engines: {node: '>= 20.19.0'}
 
   '@oxc-project/types@0.143.0':
     resolution: {integrity: sha512-u6JZdLBTLotrNC9Vd6vPssINdzcCzleKAH6EJKImQb7GtYvX5keN2dxkoK44stCc4tffE6QQRtZTXVSzsLUlWA==}
@@ -2002,6 +2015,8 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  '@noble/hashes@2.0.1': {}
 
   '@oxc-project/types@0.143.0': {}
 

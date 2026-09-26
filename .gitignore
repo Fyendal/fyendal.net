@@ -8,3 +8,5 @@ dist/
 .env
 .env.*
 !.env.example
+
+packages/bot/src/generated-runtime-id.ts

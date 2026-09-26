@@ -4,6 +4,7 @@ import type { WireServerMessage } from "../errors.js";
 
 /** Mutable state owned by exactly one local WebSocket connection. */
 export interface ClientCtx {
+  botRuntimeId?: string;
   closed: boolean;
   code: string | null;
   seat: number | null;
@@ -66,5 +67,6 @@ export class ConnectionRegistry {
     ctx.seat = null;
     ctx.token = null;
     ctx.presenceLeaseId = null;
+    ctx.botRuntimeId = undefined;
   }
 }

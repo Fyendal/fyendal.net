@@ -2624,5 +2624,9 @@
   "social.error.friendRequired": "You must be friends to do that.",
   "social.error.unavailable": "That friend is offline.",
   "social.error.messageBounds": "Messages must contain 1 to 1,000 characters.",
-  "social.error.rateLimited": "Too many social actions. Try again later."
+  "social.error.rateLimited": "Too many social actions. Try again later.",
+  "game.bot.fallback": "The bot is using simpler moves while browser computation recovers.",
+  "game.bot.refresh.required": "Refresh this page to update the bot.",
+  "game.bot.retry": "Retry bot",
+  "game.bot.refresh": "Refresh"
 }

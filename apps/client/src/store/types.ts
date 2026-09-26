@@ -160,6 +160,8 @@ export interface StoreState {
   spectatorCount: number;
   spectatorUsernames: Array<string | null>;
   spectatorKicked: boolean;
+  browserBotStatus: "fallback" | "refresh-required" | null;
+  retryBrowserBot: () => void;
   botGame: boolean;
   playerProfiles: [PlayerProfileView, PlayerProfileView] | null;
   view: GameView | null;

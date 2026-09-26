@@ -1,3 +1,4 @@
+import type { ClientBotTask, BotSubmission, BotSubmissionResult } from "./botTasks.js";
 // ── Card static data ────────────────────────────────────────────────────────
 
 /** Heroes the platform supports for the preconstructed Classic Battles format. */
@@ -833,6 +834,8 @@ export interface FriendGameInvite {
 export type PriorityWindowMode = "auto-pass" | "always-pause";
 
 export type ClientMessage =
+  | { type: "bot-ready"; runtimeId: string }
+  | BotSubmission
   | { type: "auth"; token: string }
   | { type: "social-sync" }
   | { type: "friend-request"; username: string }
@@ -891,6 +894,10 @@ export type ClientMessage =
   | { type: "claim-victory"; commandId?: string; expectedVersion?: number };
 
 export type ServerMessage =
+  | { type: "bot-runtime"; code: string; runtimeId: string }
+  | { type: "bot-fallback-needed"; code: string; version: number; runtimeId: string; delayMs: number }
+  | ClientBotTask
+  | BotSubmissionResult
   | { type: "authed"; username: string }
   | { type: "auth-failed" }
   | { type: "social-snapshot"; snapshot: SocialSnapshot }

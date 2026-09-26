@@ -19650,6 +19650,30 @@
       "value": " life"
     }
   ],
+  "game.bot.fallback": [
+    {
+      "type": 0,
+      "value": "The bot is using simpler moves while browser computation recovers."
+    }
+  ],
+  "game.bot.refresh": [
+    {
+      "type": 0,
+      "value": "Refresh"
+    }
+  ],
+  "game.bot.refresh.required": [
+    {
+      "type": 0,
+      "value": "Refresh this page to update the bot."
+    }
+  ],
+  "game.bot.retry": [
+    {
+      "type": 0,
+      "value": "Retry bot"
+    }
+  ],
   "game.bound.count": [
     {
       "type": 6,

@@ -18898,6 +18898,30 @@
       "value": " 点生命"
     }
   ],
+  "game.bot.fallback": [
+    {
+      "type": 0,
+      "value": "浏览器计算恢复期间，机器人暂时使用较简单的行动。"
+    }
+  ],
+  "game.bot.refresh": [
+    {
+      "type": 0,
+      "value": "刷新"
+    }
+  ],
+  "game.bot.refresh.required": [
+    {
+      "type": 0,
+      "value": "请刷新页面以更新机器人。"
+    }
+  ],
+  "game.bot.retry": [
+    {
+      "type": 0,
+      "value": "重试机器人"
+    }
+  ],
   "game.bound.count": [
     {
       "type": 0,

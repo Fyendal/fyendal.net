@@ -45,3 +45,4 @@ export { chooseJarlIntent, chooseJarlIntentWithTrace } from "./jarl-policy.js";
 export type { JarlIntentDecision } from "./jarl-policy.js";
 export { chooseStarvoIntent, chooseStarvoIntentWithTrace } from "./starvo-policy.js";
 export type { StarvoIntentDecision } from "./starvo-policy.js";
+export { cloneStateForBotSimulation } from "./turn-planner.js";

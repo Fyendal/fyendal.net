@@ -8,13 +8,13 @@
   ],
   "scripts": {
     "clean": "node --input-type=module -e \"import { rmSync } from 'node:fs'; rmSync('dist', { recursive: true, force: true })\"",
-    "build": "pnpm clean && tsc -p tsconfig.build.json && esbuild src/index.ts src/botPolicyWorker.ts --bundle --platform=node --target=node24 --format=esm --outdir=dist --external:pg --external:ws",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "dev": "APP_ORIGIN=${APP_ORIGIN:-http://localhost:5173} RULESET_VERSION=${RULESET_VERSION:-development-seed} WS_MAX_PER_IP=100 tsx watch src/index.ts",
+    "build": "pnpm -w generate:bot-runtime && pnpm clean && tsc -p tsconfig.build.json && esbuild src/index.ts --bundle --platform=node --target=node24 --format=esm --outdir=dist --external:pg --external:ws",
+    "typecheck": "pnpm -w generate:bot-runtime && tsc -p tsconfig.json --noEmit",
+    "dev": "APP_ORIGIN=${APP_ORIGIN:-http://localhost:5173} RULESET_VERSION=${RULESET_VERSION:-development-seed} WS_MAX_PER_IP=100 tsx watch src/dev.ts",
     "seed": "tsx src/seed.ts",
     "activate-ruleset": "tsx src/activateRuleset.ts",
     "start": "node dist/index.js",
-    "test": "vitest run src"
+    "test": "pnpm -w generate:bot-runtime && vitest run src"
   },
   "dependencies": {
     "pg": "^8.22.0",

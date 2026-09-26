@@ -6,18 +6,23 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./evaluation": "./src/evaluation.ts"
+    "./evaluation": "./src/evaluation.ts",
+    "./intents": "./src/intents.ts",
+    "./client-task": "./src/client-task.ts",
+    "./runtime-id": "./src/generated-runtime-id.ts"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "pnpm -w generate:bot-runtime && tsc -p tsconfig.json",
     "evaluate": "vitest run src/evaluation.test.ts --reporter=verbose",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run src --maxWorkers=2"
+    "typecheck": "pnpm -w generate:bot-runtime && tsc -p tsconfig.json --noEmit",
+    "test": "pnpm -w generate:bot-runtime && vitest run src --maxWorkers=2"
   },
   "dependencies": {
     "@fyendal/cards": "workspace:*",
     "@fyendal/engine": "workspace:*",
-    "@fyendal/shared": "workspace:*"
+    "@fyendal/shared": "workspace:*",
+    "@noble/hashes": "2.0.1",
+    "@fyendal/protocol": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^26.1.2",

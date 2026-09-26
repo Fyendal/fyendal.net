@@ -1,6 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import WebSocket from "ws";
 import type { AddressInfo } from "node:net";
+import { randomUUID } from "node:crypto";
+import { ClientBotPolicy } from "@fyendal/bot/client-task";
 import type { ClientMessage, PresentedDeck, ServerMessage } from "@fyendal/shared";
 import { cardData, decklists, formatLegalityIssues, precon, silverAgePrecon } from "@fyendal/cards";
 import { broadcastCommittedRoom, createGameServer } from "../index.js";
@@ -70,6 +72,22 @@ function client(): Promise<{
 
 type Client = Awaited<ReturnType<typeof client>>;
 type AuthedClient = Client & { authToken: string; username: string };
+
+async function submitBotDecision(player: Client): Promise<void> {
+  const offer = await player.next((message) => message.type === "bot-runtime");
+  if (offer.type !== "bot-runtime") throw new Error("expected bot runtime offer");
+  player.sendMsg({ type: "bot-ready", runtimeId: offer.runtimeId });
+  const task = await player.next((message) => message.type === "bot-task");
+  if (task.type !== "bot-task") throw new Error("expected bot task");
+  const commandId = randomUUID();
+  player.sendMsg({
+    type: "bot-intent", runtimeId: task.runtimeId, commandId,
+    expectedVersion: task.version, elapsedMs: 0,
+    intent: new ClientBotPolicy().decide(task),
+  });
+  expect(await player.next((message) => message.type === "bot-result" && message.commandId === commandId))
+    .toMatchObject({ status: "applied" });
+}
 
 /**
  * Classic-battles prep over ws: the die winner chooses first, then both seats
@@ -397,6 +415,7 @@ describe("server rooms over websocket", () => {
     expect(initial.view.gameId).toBe(created.code);
     expect(initial.view.activePlayer).toBe(1);
     expect(initial.botGame).toBe(true);
+    await submitBotDecision(a);
     const advanced = (await a.next(
       (m) => m.type === "state" && m.version > initial.version,
     )) as Extract<ServerMessage, { type: "state" }>;
@@ -439,6 +458,7 @@ describe("server rooms over websocket", () => {
     expect(initial.view.players[1].heroName).toBe("Hala, Bladesaint of the Vow");
     expect(initial.view.activePlayer).toBe(1);
     expect(initial.botGame).toBe(true);
+    await submitBotDecision(a);
     const advanced = (await a.next(
       (message) => message.type === "state" && message.version > initial.version,
     )) as Extract<ServerMessage, { type: "state" }>;
@@ -639,6 +659,7 @@ describe("server rooms over websocket", () => {
     >;
     expect(initial.view.players[1].heroName).toBe("Bravo, Star of the Show");
     expect(initial.view.activePlayer).toBe(1);
+    await submitBotDecision(a);
     const advanced = (await a.next(
       (message) => message.type === "state" && message.version > initial.version,
     )) as Extract<ServerMessage, { type: "state" }>;

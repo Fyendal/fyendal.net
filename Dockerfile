@@ -15,6 +15,7 @@ RUN pnpm install --frozen-lockfile --filter @fyendal/server...
 
 COPY packages packages
 COPY apps/server apps/server
+COPY scripts/generate-bot-runtime.mjs scripts/generate-bot-runtime.mjs
 # Workspace packages export their TypeScript sources, so the server's tsc and
 # esbuild steps already traverse the package graph it uses. Building every
 # workspace here only recompiles that graph and unnecessarily builds the client.

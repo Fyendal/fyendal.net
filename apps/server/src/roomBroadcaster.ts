@@ -1,3 +1,4 @@
+import { clientBotTask } from "./clientBotTask.js";
 import type { ServerMessage } from "@fyendal/shared";
 import type { ErrorLogger } from "./logging.js";
 import {
@@ -28,6 +29,9 @@ interface RoomBroadcasterDeps<Client extends RoomBroadcastClient> {
   detach(client: Client): void;
   broadcastLobby(): Promise<void>;
   logError?: ErrorLogger;
+  botRuntimeId: string;
+  botDelayMs?: number;
+  botReady(client: Client): boolean;
 }
 
 /**
@@ -110,6 +114,18 @@ export class RoomBroadcaster<Client extends RoomBroadcastClient> {
       if (sendState) {
         const payload = encoded(`state-${projectionKey}`, () => stateMessage(room, projectionSeat));
         if (payload) client.sendRaw(payload);
+        if (room.state?.winner === null && projectionSeat !== null
+          && room.seats[projectionSeat]?.controller !== "bot"
+          && room.seats.some((seat) => seat?.controller === "bot")) {
+          if (this.deps.botReady(client)) {
+            const task = encoded("bot-task", () =>
+              clientBotTask(room, this.deps.botRuntimeId, this.deps.botDelayMs ?? 1_000));
+            if (task) client.sendRaw(task);
+          } else {
+            client.send({ type: "bot-runtime", code: room.code, runtimeId: this.deps.botRuntimeId });
+            client.send({ type: "error", code: "INVALID_MESSAGE", message: "Refresh this page to enable browser bot computation." });
+          }
+        }
       }
       if (sendPrep && projectionSeat !== null) {
         client.sendRaw(encoded(`prep-${projectionKey}`, () => ({

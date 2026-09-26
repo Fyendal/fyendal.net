@@ -323,7 +323,6 @@ describe("PgRoomStore storage", () => {
       deckId: "bot-briar-broccoli",
     });
     expect(prepViewFor(room!, 0).botGame).toBe(true);
-    expect((await store.botRoomCodes())).toContain(created.code);
 
     const viserai = silverAgePrecon("precon-svi")!.pool;
     const presented = {
@@ -370,7 +369,10 @@ describe("PgRoomStore storage", () => {
     expect(room!.state!.activePlayer).toBe(1);
     const legal = legalIntents(room!.state!, 1).filter((intent) => intent.kind !== "concede");
     const botQueries: string[] = [];
-    const applied = await tracedStore(botQueries).applyBotIntent(created.code, room!.version, legal[0]!);
+    const applied = await tracedStore(botQueries).applyBotIntent(created.code, room!.version, legal[0]!, {
+      credentials: { token: created.token, userId },
+      command: { id: "store-bot-command", expectedVersion: room!.version },
+    });
     expect(applied.ok).toBe(true);
     expect(seatDml(botQueries)).toEqual([
       "UPDATE room_seats SET last_action_at = $3 WHERE room_code = $1 AND seat = $2",

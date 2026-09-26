@@ -4,6 +4,6 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["src/index.ts", "src/botPolicyWorker.ts"],
+  "include": ["src/index.ts"],
   "exclude": ["src/**/*.test.ts", "src/**/__tests__/**"]
 }

@@ -2624,5 +2624,9 @@
   "social.error.friendRequired": "只有好友之间可以进行此操作。",
   "social.error.unavailable": "该好友当前离线。",
   "social.error.messageBounds": "消息必须包含 1 到 1,000 个字符。",
-  "social.error.rateLimited": "操作过于频繁，请稍后再试。"
+  "social.error.rateLimited": "操作过于频繁，请稍后再试。",
+  "game.bot.fallback": "浏览器计算恢复期间，机器人暂时使用较简单的行动。",
+  "game.bot.refresh.required": "请刷新页面以更新机器人。",
+  "game.bot.retry": "重试机器人",
+  "game.bot.refresh": "刷新"
 }

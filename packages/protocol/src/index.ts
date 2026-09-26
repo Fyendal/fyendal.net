@@ -1,3 +1,5 @@
+import type { ClientBotTask, BotWorkerResponse } from "@fyendal/shared";
+import { decodeSerializedStateEnvelope } from "./simulationState.js";
 import type {
   CardView,
   CardPoolMode,
@@ -275,7 +277,6 @@ const id = (value: unknown): value is string => string(value, MAX_ID, false);
 const integer = (value: unknown): value is number => Number.isSafeInteger(value);
 const nonNegativeInteger = (value: unknown): value is number => integer(value) && (value as number) >= 0;
 const positiveInteger = (value: unknown): value is number => integer(value) && (value as number) > 0;
-const roomCode = (value: unknown): value is string => typeof value === "string" && /^[A-Z0-9]{6}$/.test(value);
 const finite = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value);
 const seat = (value: unknown): value is 0 | 1 => value === 0 || value === 1;
 const nullableSeat = (value: unknown): value is 0 | 1 | null => value === null || seat(value);
@@ -544,11 +545,56 @@ function decodeGameIntentValue(value: unknown): value is GameIntent {
   }
 }
 
+const commandId = (value: unknown): value is string =>
+  typeof value === "string" && /^[A-Za-z0-9_-]{8,64}$/.test(value);
+
 function commandFields(message: Record<string, unknown>): boolean {
   if (message.commandId === undefined && message.expectedVersion === undefined) return true;
-  return typeof message.commandId === "string"
-    && /^[A-Za-z0-9_-]{8,64}$/.test(message.commandId)
-    && nonNegativeInteger(message.expectedVersion);
+  return commandId(message.commandId) && nonNegativeInteger(message.expectedVersion);
+}
+
+export const MAX_BOT_TASK_BYTES = 256 * 1024;
+const BOT_FAILURES = new Set([
+  "loading", "crash", "timeout", "invalid-result", "rejected", "circuit-open", "oversized",
+]);
+const BOT_RESULT_STATUSES = new Set(["applied", "stale", "rejected"]);
+const roomCode = (value: unknown): value is string => typeof value === "string" && /^[A-Z0-9]{6}$/.test(value);
+const runtimeId = (value: unknown): value is string => typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
+
+export function decodeBotTask(value: unknown): ClientBotTask | null {
+  const message = object(value);
+  const required = ["type", "code", "version", "runtimeId", "botId", "seat", "view", "legal", "delayMs"];
+  if (!message || !exactKeys(message, [...required, "simulation"], required)) return null;
+  try {
+    if (new TextEncoder().encode(JSON.stringify(value)).byteLength > MAX_BOT_TASK_BYTES) return null;
+    const view = decodeGameView(message.view);
+    if (message.type !== "bot-task" || !roomCode(message.code) || !nonNegativeInteger(message.version)
+      || !runtimeId(message.runtimeId) || typeof message.botId !== "string" || !BOT_OPPONENTS.has(message.botId)
+      || !seat(message.seat) || !view || view.gameId !== message.code
+      || !array(message.legal, decodeGameIntentValue, MAX_CARDS)
+      || !nonNegativeInteger(message.delayMs) || message.delayMs > 10_000) return null;
+    if (message.simulation !== undefined) decodeSerializedStateEnvelope(message.simulation, message.code);
+    return message as unknown as ClientBotTask;
+  } catch { return null; }
+}
+
+export function decodeBotWorkerResponse(value: unknown): BotWorkerResponse | null {
+  const message = object(value);
+  if (!message) return null;
+  if (message.type === "ready" && exactKeys(message, ["type"])) return { type: "ready" };
+  if (!roomCode(message.code) || !nonNegativeInteger(message.version)) return null;
+  if (message.type === "failed" && exactKeys(message, ["type", "code", "version"])) {
+    return { type: "failed", code: message.code, version: message.version };
+  }
+  if (message.type === "decision" && exactKeys(message, ["type", "code", "version", "intent", "computeMs"])
+    && decodeGameIntentValue(message.intent) && finite(message.computeMs)
+    && message.computeMs >= 0 && message.computeMs <= 60_000) {
+    return {
+      type: "decision", code: message.code, version: message.version,
+      intent: message.intent, computeMs: message.computeMs,
+    };
+  }
+  return null;
 }
 
 export function decodeClientMessage(value: unknown): ClientMessage | null {
@@ -556,6 +602,16 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
   if (!message || !string(message.type, 32, false)) return null;
   let valid = false;
   switch (message.type) {
+    case "bot-ready":
+      valid = exactKeys(message, ["type", "runtimeId"]) && runtimeId(message.runtimeId);
+      break;
+    case "bot-intent":
+      valid = exactKeys(message, ["type", "runtimeId", "commandId", "expectedVersion", "elapsedMs", "computeMs", "intent", "failure"], ["type", "runtimeId", "commandId", "expectedVersion", "elapsedMs"])
+        && runtimeId(message.runtimeId) && commandFields(message)
+        && finite(message.elapsedMs) && message.elapsedMs >= 0 && message.elapsedMs <= 60_000
+        && optional(message.computeMs, (v): v is number => finite(v) && v >= 0 && v <= 60_000)
+        && ((message.failure === undefined && decodeGameIntentValue(message.intent)) || (message.intent === undefined && typeof message.failure === "string" && BOT_FAILURES.has(message.failure)));
+      break;
     case "auth":
       valid = exactKeys(message, ["type", "token"]) && string(message.token, 128, false);
       break;
@@ -1153,6 +1209,19 @@ export function decodeServerMessage(value: unknown): ServerMessage | null {
   const version = () => nonNegativeInteger(message.version);
   let valid = false;
   switch (message.type) {
+    case "bot-fallback-needed":
+      valid = exactKeys(message, ["type", "code", "version", "runtimeId", "delayMs"]) && roomCode(message.code) && version() && runtimeId(message.runtimeId) && nonNegativeInteger(message.delayMs) && Number(message.delayMs) <= 10_000;
+      break;
+    case "bot-task":
+      return decodeBotTask(value);
+    case "bot-runtime":
+      valid = exactKeys(message, ["type", "code", "runtimeId"]) && roomCode(message.code) && runtimeId(message.runtimeId);
+      break;
+    case "bot-result":
+      valid = exactKeys(message, ["type", "code", "commandId", "version", "status"])
+        && roomCode(message.code) && commandId(message.commandId) && version()
+        && typeof message.status === "string" && BOT_RESULT_STATUSES.has(message.status);
+      break;
     case "authed":
       valid = exactKeys(message, ["type", "username"]) && string(message.username, MAX_SHORT_TEXT, false);
       break;
@@ -1677,3 +1746,5 @@ export const decodeAccountExportResponse: Decoder<AccountExportResponse> = (valu
 };
 
 export { decodeGameIntentValue as isGameIntent };
+
+export { decodeSerializedStateEnvelope, CorruptRoomError, PERSISTED_STATE_VERSION, MAX_PERSISTED_STATE_BYTES } from "./simulationState.js";

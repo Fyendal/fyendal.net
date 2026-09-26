@@ -1,3 +1,5 @@
+import { BOT_RUNTIME_ID } from "@fyendal/bot/runtime-id";
+import { BrowserBotController, type BotWorkerPort } from "./bot/browserBotController.js";
 import { create } from "zustand";
 import type {
   BotOpponent,
@@ -68,6 +70,7 @@ import { replayViewerProjection, snapshotBeforeReplay } from "./store/replayView
 import { createErrorController } from "./store/errorController.js";
 import { withReplayNotes } from "./replay/replayFileNotes.js";
 
+let disposeBrowserBot: (() => void) | null = null;
 let ws: WebSocket | null = null;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 let reconnectNoticeTimer: ReturnType<typeof setTimeout> | null = null;
@@ -103,6 +106,7 @@ removeUnsupportedLocalReplays(localStorage);
 // never schedules a reconnect) or dev sessions pile connections up against
 // the server's per-IP cap (WS_MAX_PER_IP)
 import.meta.hot?.dispose(() => {
+  disposeBrowserBot?.();
   const orphaned = ws;
   ws = null;
   if (reconnectTimer) clearTimeout(reconnectTimer);
@@ -175,8 +179,23 @@ export const useStore = create<StoreState>((set, get) => {
    *  after the authoritative state. */
   let inFlightRoomCommand: { expectedVersion: number; defenderStageIds?: number[] } | null = null;
   let queuedDefenderStageIds: number[] | null = null;
+  let liveBotParticipant = false;
+
+  const browserBot = new BrowserBotController({
+    runtimeId: BOT_RUNTIME_ID,
+    createWorker: () => new Worker(new URL("./bot/bot.worker.ts", import.meta.url), { type: "module" }) as unknown as BotWorkerPort,
+    send,
+    resync: () => ws?.close(1012, "bot resync"),
+    status: (browserBotStatus) => set({ browserBotStatus }),
+  });
+  disposeBrowserBot = () => browserBot.reset();
+
+  function canComputeBot(code: string): boolean {
+    return code === get().roomCode && liveBotParticipant;
+  }
 
   function advanceAuthEpoch(): { epoch: number; signal: AbortSignal } {
+    browserBot.reset();
     authEpoch += 1;
     authRequests.abort();
     authRequests = new AbortController();
@@ -209,6 +228,8 @@ export const useStore = create<StoreState>((set, get) => {
   }
 
   function resetRoomVersionState(): void {
+    liveBotParticipant = false;
+    browserBot.reset();
     roomVersions.reset();
     resetRoomCommandPipeline();
   }
@@ -352,7 +373,8 @@ export const useStore = create<StoreState>((set, get) => {
       for (const cb of cbs) cb();
     };
     socket.onclose = () => {
-      if (ws !== socket || connectionEpoch !== epoch) return; // superseded by a newer socket
+      if (ws !== socket || connectionEpoch !== epoch) return;
+      browserBot.reset();
       ws = null;
       connectionEpoch += 1;
       pendingOpen = [];
@@ -663,6 +685,17 @@ export const useStore = create<StoreState>((set, get) => {
   }
 
   function handleMessage(msg: ServerMessage): void {
+    if (msg.type === "bot-runtime") {
+      if (canComputeBot(msg.code)) browserBot.offer(msg.code, msg.runtimeId);
+      return;
+    }
+    if (msg.type === "bot-result") { browserBot.result(msg); return; }
+    if (msg.type === "bot-task" || msg.type === "bot-fallback-needed") {
+      if (canComputeBot(msg.code)) browserBot.receive(msg);
+      return;
+    }
+    if (msg.type === "error" && msg.code === "INVALID_MESSAGE" && msg.message.startsWith("Refresh this page to")) return;
+
     if (msg.type === "room-created" || msg.type === "joined") resetRoomVersionState();
     if ("version" in msg && !roomVersions.accept(msg.type, msg.version)) return;
     switch (msg.type) {
@@ -770,6 +803,7 @@ export const useStore = create<StoreState>((set, get) => {
         clearAuthenticatedState();
         break;
       case "room-created": {
+        liveBotParticipant = true;
         const fromMatchmaking = get().queuedFormat !== null || get().matchmakingActive;
         roomEntryPending = false;
         roomEntryRetryable = false;
@@ -797,6 +831,7 @@ export const useStore = create<StoreState>((set, get) => {
         break;
       }
       case "joined": {
+        liveBotParticipant = msg.spectator !== true;
         const fromMatchmaking = get().queuedFormat !== null || get().matchmakingActive;
         saveRoomSession(localStorage, { code: msg.code, token: msg.token });
         history.replaceState(null, "", `/${msg.code}`);
@@ -858,6 +893,8 @@ export const useStore = create<StoreState>((set, get) => {
         });
         break;
       case "state": {
+        const liveCode = get().roomCode;
+        if (liveCode) browserBot.observe(liveCode, msg.version, msg.transition?.kind === "replace", msg.view.winner !== null);
         roomEntryPending = false;
         roomEntryRetryable = false;
         joiningRoomCode = null;
@@ -1527,6 +1564,8 @@ export const useStore = create<StoreState>((set, get) => {
     },
     prepUnready: () => send({ type: "prep-unready" }),
     chooseFirst: (first) => send({ type: "choose-first", first }),
+    browserBotStatus: null,
+    retryBrowserBot: () => browserBot.retry(),
     sendIntent: (intent) => {
       get().clearError();
       if (intent.kind === "stage-defenders") {

@@ -1,3 +1,5 @@
+import { fallbackBotIntent } from "./botFallback.js";
+import { isAdvertisedBotIntent } from "@fyendal/bot/intents";
 import { randomBytes } from "node:crypto";
 import {
   IDLE_VICTORY_MS,
@@ -117,8 +119,9 @@ export interface SpectatorRow {
   lastSeenAt: number;
 }
 
-/** Credentials presented for a player-seat mutation. The token is rotated on
- * reconnect; account-bound seats additionally require the owning account. */
+/** Credentials presented for a player-seat mutation. Account-bound seats
+ * require the owning account. Bot-room tabs may reuse a valid credential;
+ * other reconnects and account recovery rotate it. */
 export interface SeatCredentials {
   token: string;
   userId?: number;
@@ -2518,7 +2521,9 @@ export class PgRoomStore {
           if (seatRow.userId != null && seatRow.userId !== opts.userId) {
             return { error: "seat belongs to another account" };
           }
-          const rotatedToken = newToken();
+          const reuseCredential = seatRow.userId != null && seatRow.controller !== "bot"
+            && room.seats.some((candidate) => candidate?.controller === "bot");
+          const rotatedToken = reuseCredential ? token : newToken();
           seatRow.tokenHash = hashReconnectToken(rotatedToken);
           return {
             room,
@@ -3451,19 +3456,32 @@ export class PgRoomStore {
       : { ok: false, error: r.error };
   }
 
-  /** Apply one policy-selected bot action against the exact observed version. */
+  /** Apply an authenticated bot submission against the exact observed version. */
   async applyBotIntent(
     code: string,
     expectedVersion: number,
-    intent: GameIntent,
+    intent: GameIntent | null,
+    delegation: { credentials: SeatCredentials; command: RoomCommand },
   ): Promise<{ ok: true; version: number; replayFinalizationId?: string } | { ok: false; error: string }> {
     const r = await this.withRetry(code.toUpperCase(), (room) => {
+      const human = seatForCredentials(room, delegation.credentials);
+      if (human === null || room.seats[human]?.controller === "bot" || room.seats[human]?.userId == null) {
+        return { error: "not a player in this room" };
+      }
       if (room.version !== expectedVersion) return { error: "stale bot observation" };
       if (!room.state) return { error: "game has not started" };
       const seat = room.seats.findIndex((candidate) => candidate?.controller === "bot");
       if (seat === -1) return { error: "room has no bot" };
       const actor = room.state.pendingDecision?.player ?? room.state.priorityPlayer;
       if (actor !== seat) return { error: "bot does not have priority" };
+      const message = stateMessage(room, seat);
+      if (message?.type !== "state") return { error: "game has not started" };
+      if (!intent) {
+        intent = fallbackBotIntent({
+          seat: seat as SeatIndex, view: message.view, legal: message.legal, cards: cardData,
+        }) ?? null;
+      }
+      if (!intent || !isAdvertisedBotIntent(intent, message.legal)) return { error: "unadvertised bot intent" };
       const res = engineApplyIntent(room.state, seat, intent);
       if (!res.ok) return { error: res.error };
       const snapshot = intent.kind === "stage-defenders" ? undefined : room.state;
@@ -3481,23 +3499,15 @@ export class PgRoomStore {
         replay: { kind: "frame" },
         seatWrites: [{ kind: "activity", seat: botSeat, lastActionAt }],
       };
+    }, {
+      meta: delegation.command,
+      credentials: delegation.credentials,
+      type: "bot-intent",
+      duplicateResult: () => undefined,
     });
     return r.ok
       ? { ok: true, version: r.version, ...(r.replayFinalizationId ? { replayFinalizationId: r.replayFinalizationId } : {}) }
       : { ok: false, error: r.error };
-  }
-
-  /** Active bot rooms are recoverable work after a gateway restart. */
-  async botRoomCodes(): Promise<string[]> {
-    const { rows } = await this.db.query(
-      `SELECT DISTINCT rs.room_code
-       FROM room_seats rs
-       JOIN rooms r ON r.code = rs.room_code
-       WHERE rs.controller = 'bot' AND r.status IN ('prep', 'active')
-         AND r.ruleset_version = $1`,
-      [this.rulesetVersion],
-    );
-    return rows.map((row) => String(row.room_code));
   }
 
   /** Revert the last applied intent or rewind to an available turn-start

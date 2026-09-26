@@ -1,3 +1,4 @@
+import { BrowserBotNotice } from "../bot/BrowserBotNotice.js";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
@@ -975,6 +976,7 @@ export function GameBoard() {
       {hasOwnPriority ? <div className="own-priority-arrival" aria-hidden="true" /> : null}
       {/* ── playmat board: opponent half on top, your half below ── */}
       <div className="board">
+        <BrowserBotNotice />
         {playerProfiles ? (
           <>
             <PlayerNameplate placement="opponent" profile={playerProfiles[1 - seat]!} />

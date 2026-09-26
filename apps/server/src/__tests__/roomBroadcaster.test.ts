@@ -41,6 +41,8 @@ describe("RoomBroadcaster", () => {
       authorize: () => null,
       detach: () => undefined,
       broadcastLobby,
+      botRuntimeId: "a".repeat(64),
+      botReady: () => false,
     });
 
     queries.length = 0;
@@ -62,6 +64,8 @@ describe("RoomBroadcaster", () => {
       authorize: () => 0,
       detach: (value) => { detached.push(value); value.code = null; },
       broadcastLobby: async () => undefined,
+      botRuntimeId: "a".repeat(64),
+      botReady: () => false,
       logError: (message) => { errors.push(message); },
     });
 

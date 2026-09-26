@@ -841,3 +841,22 @@
     width: 19.35vh;
   }
 }
+
+.browser-bot-notice {
+  position: absolute;
+  top: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: max-content;
+  max-width: calc(100% - 1rem);
+  padding: 0.5rem 0.75rem;
+  background: var(--panel, #252525);
+  border: 1px solid var(--border, #666);
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+}
+.browser-bot-notice button { flex-shrink: 0; }

@@ -143,8 +143,43 @@ function seoPrerender() {
   };
 }
 
+function botRuntimeWatch(): Plugin {
+  return {
+    name: "fyendal-bot-runtime-watch",
+    configureServer(server) {
+      const packageRoot = resolve(clientRoot, "../../packages");
+      const configFiles = ["pnpm-lock.yaml", "tsconfig.base.json"]
+        .map((name) => resolve(clientRoot, "../..", name));
+      server.watcher.add([packageRoot, ...configFiles]);
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      let generation = Promise.resolve();
+      const regenerate = (file: string) => {
+        if (file.endsWith("generated-runtime-id.ts")
+          || file.endsWith(".test.ts") || file.includes("/__tests__/")) return;
+        const runtimeSource = file.startsWith(packageRoot)
+          && /(?:\/src\/.*\.(?:ts|json)|\/package\.json)$/.test(file);
+        if (runtimeSource || configFiles.includes(file)) {
+          if (timer) clearTimeout(timer);
+          timer = setTimeout(() => {
+            generation = generation.then(() => new Promise<void>((resolvePromise, reject) => {
+              execFile("pnpm", ["--workspace-root", "generate:bot-runtime"], { cwd: clientRoot }, (error) => {
+                if (error) reject(error);
+                else resolvePromise();
+              });
+            })).catch((error: unknown) => {
+              server.config.logger.error(`[bot runtime] ${error instanceof Error ? error.message : String(error)}`);
+            });
+          }, 50);
+        }
+      };
+      for (const event of ["add", "change", "unlink"]) server.watcher.on(event, regenerate);
+      server.httpServer?.once("close", () => { if (timer) clearTimeout(timer); });
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [react(), i18nCompileWatch(), seoPrerender()],
+  plugins: [react(), i18nCompileWatch(), botRuntimeWatch(), seoPrerender()],
   resolve: {
     // Every runtime catalog is compiled to ICU AST by `pnpm i18n:compile`.
     // Excluding the parser keeps the client i18n runtime substantially smaller.

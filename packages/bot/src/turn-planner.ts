@@ -1,4 +1,5 @@
-import { createHash } from "node:crypto";
+import { sha256 } from "@noble/hashes/sha2.js";
+import { bytesToHex, utf8ToBytes } from "@noble/hashes/utils.js";
 import { applyIntent, legalIntents, projectStateFor, type GameState } from "@fyendal/engine";
 import type { CardView, GameIntent } from "@fyendal/shared";
 import { strategicPitchIntents, type BotPolicyInput } from "./policy.js";
@@ -329,6 +330,7 @@ export function cloneStateForBotSimulation(state: GameState, publicGameId: strin
   for (const player of copy.players) {
     player.deck.sort((left, right) =>
       rank(left.cardId, left.instanceId) - rank(right.cardId, right.instanceId)
+      || left.instanceId - right.instanceId
     );
   }
   return copy;
@@ -379,7 +381,7 @@ export function botObservationKey(input: Pick<BotPolicyInput, "view" | "legal">)
     },
     legal: input.legal,
   });
-  return createHash("sha256").update(serialized).digest("hex");
+  return bytesToHex(sha256(utf8ToBytes(serialized)));
 }
 
 export function isBotObservationKey(value: unknown): value is string {
