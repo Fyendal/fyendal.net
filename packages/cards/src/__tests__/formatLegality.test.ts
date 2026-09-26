@@ -91,6 +91,8 @@ const cards: Record<string, CardData> = {
   SOMERSAULT_BLUE: card("SOMERSAULT_BLUE", "Electromagnetic Somersault", "action", 3),
   NORMAL: card("NORMAL", "Wrecker Romp", "action", 3),
   FUTURE: card("FUTURE", "Tomorrow's Attack", "action", 1, "AMO"),
+  IAR_RELEASED: card("IAR000", "Soul of Existence", "resource", undefined, "IAR"),
+  MALICE_RELEASED: card("AMA001", "Malice, Domina of the Dead", "hero", undefined, "AMA"),
   CHANE: card("CHANE", "Chane", "hero"),
   BRIAR: card("BRIAR", "Briar", "hero"),
   OLDHIM: card("OLDHIM", "Oldhim", "hero"),
@@ -181,6 +183,15 @@ describe("Classic Constructed format legality", () => {
 
   it("does not apply the Classic Constructed list to other formats", () => {
     expect(formatLegalityIssues(cards, pool({ deck: ["ART"] }), "silver-age")).toEqual([]);
+  });
+
+  it("allows released IAR and Malice Armory Deck cards in Legal mode", () => {
+    for (const format of ["cc", "silver-age"] as const) {
+      expect(formatLegalityIssues(cards, pool({
+        heroId: "MALICE_RELEASED",
+        deck: ["IAR_RELEASED"],
+      }), format, { cardPoolMode: "legal" })).toEqual([]);
+    }
   });
 
   it("rejects unreleased-set cards unless the room allows future cards", () => {

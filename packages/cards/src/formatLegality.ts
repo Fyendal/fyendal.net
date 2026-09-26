@@ -5,7 +5,7 @@ import type { CardData, CardPoolMode, DeckPool, Format } from "@fyendal/shared";
  * yet. Remove a code when the product releases; imports remain usable either
  * way because release legality is checked when a game starts.
  */
-export const FUTURE_SET_CODES: ReadonlySet<string> = new Set(["AMA", "AMO", "IAR", "MPA"]);
+export const FUTURE_SET_CODES: ReadonlySet<string> = new Set(["AMO", "MPA"]);
 
 /**
  * Official policy source for this snapshot. Living Legend changes are checked
