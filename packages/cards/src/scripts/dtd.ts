@@ -305,10 +305,9 @@ export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRar
   "prism, advent of thrones|0": {
     onCardPutIntoSoul(ctx, card) {
       if (!duringActionPhase(ctx) || !data(ctx, card).name.toLowerCase().includes("herald")) return;
-      const controlledNames = new Set(ctx.player(ctx.seat).board.map((permanent) => data(ctx, permanent).name));
       const figments = ctx
         .player(ctx.seat)
-        .deck.filter((candidate) => has(ctx, candidate, "figment") && !controlledNames.has(data(ctx, candidate).name));
+        .deck.filter((candidate) => has(ctx, candidate, "figment"));
       if (figments.length > 0) {
         ctx.requestCardChoice(
           "prism-figment-search",

@@ -55,6 +55,7 @@ import { rnr } from "./rnr.js";
 import { ros } from "./ros.js";
 import { rvd } from "./rvd.js";
 import { sar } from "./sar.js";
+import { sat } from "./sat.js";
 import { saz } from "./saz.js";
 import { sba } from "./sba.js";
 import { sbl } from "./sbl.js";
@@ -134,6 +135,7 @@ const setModules: Record<string, Record<string, CardScript>> = {
   ROS: ros,
   RVD: rvd,
   SAR: sar,
+  SAT: sat,
   SAZ: saz,
   SBA: sba,
   SBL: sbl,

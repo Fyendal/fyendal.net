@@ -782,7 +782,7 @@ describe("DTD — Prism and Figments", () => {
   });
 
   it.each(SOUL_HERALD_KEYS)("%s enters soul on hit and triggers Prism's Figment search", (heraldKey) => {
-    expect(SOUL_HERALD_KEYS).toHaveLength(20);
+    expect(SOUL_HERALD_KEYS).toHaveLength(23);
     const s = scenario({
       seats: [
         {

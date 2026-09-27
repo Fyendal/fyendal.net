@@ -1,0 +1,631 @@
+[
+  {
+    "id": "SAT001",
+    "name": "Prism, Advent of Thrones",
+    "cardType": "hero",
+    "text": "Whenever a card with Herald in its name is put into your soul during an action phase, you may search your deck for a figment, put it into the arena, then shuffle.\nOnce per Turn Instant - {r}{r}, banish a card from Prism's soul: Awaken target figment you control.",
+    "intellect": 4,
+    "life": 16,
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "light"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT002",
+    "name": "Iris of Reality",
+    "cardType": "weapon",
+    "text": "During your action phase, Illusionist auras you control are weapons with 4 base {p} and \"Once per Turn Action - {r}{r}{r}: Attack. Go again\"",
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "orb",
+      "2h"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT003",
+    "name": "Luminaris, Celestial Fury",
+    "cardType": "weapon",
+    "text": "Once per Turn Instant - {r}{r}: Target angel attack or attack action card with Herald in its name gets go again.",
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "light",
+      "scepter",
+      "2h"
+    ],
+    "keywords": [
+      "Instant",
+      "Go again"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT004",
+    "name": "Halo of Illumination",
+    "cardType": "equipment",
+    "text": "Instant - {r}, destroy this: Put a card from your hand into your soul. If it's Light, draw a card.\nSpellvoid 2",
+    "defense": 0,
+    "subtypes": [
+      "light",
+      "head"
+    ],
+    "keywords": [
+      "Spellvoid 2"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT005",
+    "name": "Blossom of Spring",
+    "cardType": "equipment",
+    "text": "Action - Destroy this: Gain {r}. Go again",
+    "defense": 0,
+    "classes": [
+      "generic"
+    ],
+    "subtypes": [
+      "chest"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT006",
+    "name": "Dream Weavers",
+    "cardType": "equipment",
+    "text": "Action - Destroy this: The next Illusionist attack action card you play this turn loses and can't gain phantasm. Go again\nSpellvoid 1",
+    "defense": 0,
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "arms"
+    ],
+    "keywords": [
+      "Spellvoid 1"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT007",
+    "name": "Ironhide Gauntlet",
+    "cardType": "equipment",
+    "text": "When this defends, you may pay {r}. If you do, it gets +2{d} and \"When the combat chain closes, destroy this.\"",
+    "defense": 0,
+    "classes": [
+      "generic"
+    ],
+    "subtypes": [
+      "arms"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT008",
+    "name": "Wave of Reality",
+    "cardType": "equipment",
+    "text": "When this is destroyed, create a Spectral Shield token.\nWard 1",
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "arms"
+    ],
+    "keywords": [
+      "Ward 1"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT009",
+    "name": "Blade Beckoner Boots",
+    "cardType": "equipment",
+    "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
+    "defense": 1,
+    "classes": [
+      "generic"
+    ],
+    "subtypes": [
+      "legs"
+    ],
+    "keywords": [
+      "Guardwell"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT010",
+    "name": "Silent Stilettos",
+    "cardType": "equipment",
+    "text": "Whenever an attacking ally you control dies or an attack action card you control is destroyed by phantasm, you may pay {r}{r}{r}. If you do, destroy this and gain 1 action point.\nArcane Barrier 1",
+    "defense": 0,
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "legs"
+    ],
+    "keywords": [
+      "Arcane Barrier 1"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT011",
+    "name": "Herald of Hope",
+    "cardType": "action",
+    "text": "When this hits, put it into your soul and gain 1{h}.\nPhantasm",
+    "pitch": 1,
+    "cost": 1,
+    "attack": 6,
+    "defense": 3,
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "light",
+      "attack"
+    ],
+    "keywords": [
+      "Phantasm"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT012",
+    "name": "Herald of Protection",
+    "cardType": "action",
+    "text": "When this hits, put it into your soul and create a Spectral Shield token.\nPhantasm",
+    "pitch": 1,
+    "cost": 2,
+    "attack": 7,
+    "defense": 3,
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "light",
+      "attack"
+    ],
+    "keywords": [
+      "Phantasm"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT013",
+    "name": "Herald of Ravages",
+    "cardType": "action",
+    "text": "When this hits, put it into your soul and deal 1 arcane damage to target hero.\nPhantasm",
+    "pitch": 1,
+    "cost": 2,
+    "attack": 7,
+    "defense": 3,
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "light",
+      "attack"
+    ],
+    "keywords": [
+      "Phantasm"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT014",
+    "name": "Herald of Triumph",
+    "cardType": "action",
+    "text": "Attack action cards get -1{p} while defending this.\nWhen this hits, put it into your soul.\nPhantasm",
+    "pitch": 1,
+    "cost": 2,
+    "attack": 7,
+    "defense": 3,
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "light",
+      "attack"
+    ],
+    "keywords": [
+      "Phantasm"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT015",
+    "name": "Wartune Herald",
+    "cardType": "action",
+    "text": "When this hits, put it into your soul.\nPhantasm",
+    "pitch": 1,
+    "cost": 1,
+    "attack": 7,
+    "defense": 3,
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "light",
+      "attack"
+    ],
+    "keywords": [
+      "Phantasm"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT016",
+    "name": "Spectral Manifestations",
+    "cardType": "action",
+    "text": "Create a Spectral Shield token, then if you control no other Illusionist auras, put three +1{p} counters on it.\nGo again",
+    "pitch": 1,
+    "cost": 2,
+    "defense": 2,
+    "classes": [
+      "illusionist"
+    ],
+    "keywords": [
+      "Go again"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT017",
+    "name": "Herald of Hope",
+    "cardType": "action",
+    "text": "When this hits, put it into your soul and gain 1{h}.\nPhantasm",
+    "pitch": 2,
+    "cost": 1,
+    "attack": 5,
+    "defense": 3,
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "light",
+      "attack"
+    ],
+    "keywords": [
+      "Phantasm"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT018",
+    "name": "Herald of Judgment",
+    "cardType": "action",
+    "text": "Prism Specialization\nWhen this hits, put it into your soul and the defending hero can't play cards from their banished zone until the end of their next turn.\nPhantasm",
+    "pitch": 2,
+    "cost": 2,
+    "attack": 6,
+    "defense": 3,
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "light",
+      "attack"
+    ],
+    "keywords": [
+      "Prism Specialization",
+      "Phantasm"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT019",
+    "name": "Herald of Protection",
+    "cardType": "action",
+    "text": "When this hits, put it into your soul and create a Spectral Shield token.\nPhantasm",
+    "pitch": 2,
+    "cost": 2,
+    "attack": 6,
+    "defense": 3,
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "light",
+      "attack"
+    ],
+    "keywords": [
+      "Phantasm"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT020",
+    "name": "Herald of Victoria",
+    "cardType": "action",
+    "text": "Instant - Discard this: Until end of turn, attack action cards your opponents control get -1{p} while attacking and defending.\nPhantasm (When this is defended by a non-Illusionist attack action card with 6 or more {p}, destroy this.)",
+    "pitch": 2,
+    "cost": 2,
+    "attack": 7,
+    "defense": 3,
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "light",
+      "attack"
+    ],
+    "keywords": [
+      "Phantasm"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT021",
+    "name": "Wartune Herald",
+    "cardType": "action",
+    "text": "When this hits, put it into your soul.\nPhantasm",
+    "pitch": 2,
+    "cost": 1,
+    "attack": 6,
+    "defense": 3,
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "light",
+      "attack"
+    ],
+    "keywords": [
+      "Phantasm"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT022",
+    "name": "Lay Low",
+    "cardType": "defense-reaction",
+    "text": "If you are marked, you can't play this.\nIf the attacking hero is marked, their next attack this turn gets -1{p}.",
+    "pitch": 2,
+    "cost": 0,
+    "defense": 3,
+    "classes": [
+      "generic"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT023",
+    "name": "Figment of Hope",
+    "cardType": "instant",
+    "text": "Unlimited",
+    "pitch": 2,
+    "cost": 4,
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "light",
+      "figment"
+    ],
+    "keywords": [
+      "Unlimited"
+    ],
+    "set": "SAT",
+    "backId": "SAT023B"
+  },
+  {
+    "id": "SAT023B",
+    "name": "Suraya, Archangel of Endless Hope",
+    "cardType": "action",
+    "text": "When this is awakened, gain 1{h}.\nOnce per Turn Action - {r}{r}: Attack\nWard 4",
+    "attack": 4,
+    "life": 4,
+    "subtypes": [
+      "light",
+      "angel",
+      "ally"
+    ],
+    "keywords": [
+      "Ward 4"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT024",
+    "name": "Herald of Hope",
+    "cardType": "action",
+    "text": "When this hits, put it into your soul and gain 1{h}.\nPhantasm",
+    "pitch": 3,
+    "cost": 1,
+    "attack": 4,
+    "defense": 3,
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "light",
+      "attack"
+    ],
+    "keywords": [
+      "Phantasm"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT025",
+    "name": "Herald of Protection",
+    "cardType": "action",
+    "text": "When this hits, put it into your soul and create a Spectral Shield token.\nPhantasm",
+    "pitch": 3,
+    "cost": 2,
+    "attack": 5,
+    "defense": 3,
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "light",
+      "attack"
+    ],
+    "keywords": [
+      "Phantasm"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT026",
+    "name": "Herald of Ravages",
+    "cardType": "action",
+    "text": "When this hits, put it into your soul and deal 1 arcane damage to target hero.\nPhantasm",
+    "pitch": 3,
+    "cost": 2,
+    "attack": 5,
+    "defense": 3,
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "light",
+      "attack"
+    ],
+    "keywords": [
+      "Phantasm"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT027",
+    "name": "Herald of Triumph",
+    "cardType": "action",
+    "text": "Attack action cards get -1{p} while defending this.\nWhen this hits, put it into your soul.\nPhantasm",
+    "pitch": 3,
+    "cost": 2,
+    "attack": 5,
+    "defense": 3,
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "light",
+      "attack"
+    ],
+    "keywords": [
+      "Phantasm"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT028",
+    "name": "Phantasmal Haze",
+    "cardType": "action",
+    "text": "Phantasm\nWhen this is destroyed, create a Spectral Shield token.",
+    "pitch": 3,
+    "cost": 3,
+    "attack": 6,
+    "defense": 3,
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "attack"
+    ],
+    "keywords": [
+      "Phantasm"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT029",
+    "name": "Wartune Herald",
+    "cardType": "action",
+    "text": "When this hits, put it into your soul.\nPhantasm",
+    "pitch": 3,
+    "cost": 1,
+    "attack": 5,
+    "defense": 3,
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "light",
+      "attack"
+    ],
+    "keywords": [
+      "Phantasm"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT030",
+    "name": "Passing Mirage",
+    "cardType": "action",
+    "text": "Your first Illusionist attack each turn loses and can't gain phantasm.\nSpectra",
+    "pitch": 3,
+    "cost": 0,
+    "defense": 2,
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "keywords": [
+      "Spectra"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT031",
+    "name": "Pierce Reality",
+    "cardType": "action",
+    "text": "The first Illusionist attack action card you play each turn gets +2{p}.\nSpectra",
+    "pitch": 3,
+    "cost": 0,
+    "defense": 2,
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "keywords": [
+      "Spectra"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT032",
+    "name": "Angelic Wrath",
+    "cardType": "instant",
+    "text": "Target attack action card with Herald in its name gets +2{p}.",
+    "pitch": 3,
+    "cost": 0,
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "light"
+    ],
+    "set": "SAT"
+  },
+  {
+    "id": "SAT033",
+    "name": "Spectral Shield",
+    "cardType": "token",
+    "text": "Ward 1",
+    "classes": [
+      "illusionist"
+    ],
+    "subtypes": [
+      "aura"
+    ],
+    "keywords": [
+      "Ward 1"
+    ],
+    "set": "SAT"
+  }
+]

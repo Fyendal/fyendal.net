@@ -2029,6 +2029,11 @@ export function makeCtx(
       }
 
       if (permanent) {
+        // A face change also transforms the existing object, without making
+        // its old face a sub-card (for example, when a permanent awakens).
+        if (uniqueIds.length === 0 && permanent.cardId !== cardId) {
+          transformEvents.push({ seat, from: { ...permanent } });
+        }
         if (existingPermanentInstanceId !== undefined && uniqueIds.includes(existingPermanentInstanceId)) {
           delete permanent.subcards;
         }

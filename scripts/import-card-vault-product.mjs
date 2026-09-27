@@ -6,7 +6,7 @@
  * Usage:
  *   node scripts/import-card-vault-product.mjs <SET> <snapshot.json> [baseline-ref]
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
@@ -20,6 +20,17 @@ if (!setId || !snapshotPath) {
     "usage: node scripts/import-card-vault-product.mjs <SET> <snapshot.json> [baseline-ref]",
   );
   process.exit(2);
+}
+
+// Reprints retain the registry's curated keyword metadata. Card Vault bolds
+// references and activated-ability text as well as abilities of the card,
+// whereas our keywords describe the card's own engine characteristics.
+const knownKeywords = new Map();
+for (const file of readdirSync(join(root, "packages/cards/src/data/cards"))) {
+  if (!file.endsWith(".json") || file === `${setId}.json`) continue;
+  for (const card of JSON.parse(readFileSync(join(root, "packages/cards/src/data/cards", file), "utf8"))) {
+    knownKeywords.set(`${card.name.toLowerCase()}|${card.pitch ?? 0}`, card.keywords);
+  }
 }
 
 const snapshot = JSON.parse(readFileSync(snapshotPath, "utf8"));
@@ -51,6 +62,8 @@ const canonicalKeyword = new Map([
   ["opt 2", "Opt 2"],
   ["overpower", "Overpower"],
   ["phantasm", "Phantasm"],
+  ["spectra", "Spectra"],
+  ["guardwell", "Guardwell"],
   ["shadow resist 1", "Shadow Resist 1"],
   ["sharpen", "Sharpen"],
   ["solflare", "Solflare"],
@@ -59,6 +72,7 @@ const canonicalKeyword = new Map([
   ["temper", "Temper"],
   ["traverse", "Traverse"],
   ["unique", "Unique"],
+  ["unlimited", "Unlimited"],
   ["usurp", "Usurp"],
   ["viserai specialization", "Viserai Specialization"],
 ]);
@@ -88,7 +102,10 @@ function keywordsOf(text) {
       ["dominate", "go again", "overpower"].includes(normalized) &&
       /\b(?:get|gets|gain|gains|grant|grants)\s*$/.test(prefix)
     ) continue;
-    const keyword = canonicalKeyword.get(normalized);
+    const numericKeyword = /^(arcane barrier|spellvoid|ward) (\d+)$/.exec(normalized);
+    const keyword = numericKeyword
+      ? `${numericKeyword[1].replace(/\b\w/g, (letter) => letter.toUpperCase())} ${numericKeyword[2]}`
+      : canonicalKeyword.get(normalized);
     if (keyword && !keywords.includes(keyword)) keywords.push(keyword);
   }
   return keywords;
@@ -114,6 +131,7 @@ function cardTypeOf(core) {
   if (types.includes("Mentor")) return "mentor";
   if (types.includes("Token") || subtypes.includes("Token")) return "token";
   if (types.includes("Action")) return "action";
+  if (subtypes.includes("Ally")) return "action";
   throw new Error(`unsupported Card Vault type line: ${core.typebox}`);
 }
 
@@ -121,20 +139,20 @@ function normalizedPrintId(printId) {
   return printId.replace(/-(?:RF|CF|GF)$/i, "");
 }
 
-function toCardData(print, detail) {
-  const core = detail.cores.find((candidate) => candidate.layout_position === 10) ?? detail.cores[0];
+function toCardData(print, detail, core, backFace = false) {
   if (!core) throw new Error(`${print.card_id}: Card Vault record has no front face`);
   const printedFace = detail.card_prints
     .flatMap((cardPrint) => cardPrint.faces ?? [])
-    .find((face) => face.face_language === "en" && face.face_id === print.print_id);
-  const rulesText = printedFace?.printed_rules_text ?? core.textbox ?? "";
+    .find((face) => face.face_language === "en" &&
+      face.face_id === `${print.print_id}${backFace ? "_BACK" : ""}`);
+  const rulesText = core.textbox ?? printedFace?.printed_rules_text ?? "";
   const data = {
-    id: normalizedPrintId(print.print_id),
-    name: print.printed_name,
+    id: `${normalizedPrintId(print.print_id)}${backFace ? "B" : ""}`,
+    name: backFace ? core.name : print.printed_name,
     cardType: cardTypeOf(core),
     text: normalizeText(rulesText),
   };
-  const pitch = numeric(core.pitch);
+  const pitch = numeric(printedFace?.printed_pitch ?? core.pitch);
   if (pitch) data.pitch = pitch;
   for (const [source, target] of [
     ["cost", "cost"],
@@ -143,12 +161,12 @@ function toCardData(print, detail) {
     ["intellect", "intellect"],
     ["life", "life"],
   ]) {
-    const value = numeric(core[source]);
+    const value = numeric(printedFace?.[`printed_${source}`]) ?? numeric(core[source]);
     if (value !== undefined) data[target] = value;
   }
   const classes = core.core_classes.map((type) => (type.name_en ?? type.name).toLowerCase());
   if (classes.length) data.classes = [...new Set(classes)];
-  const printedTypebox = (print.printed_typebox ?? core.typebox ?? "").toLowerCase();
+  const printedTypebox = (backFace ? core.typebox : print.printed_typebox ?? core.typebox ?? "").toLowerCase();
   const orderedCoreSubtypes = [...core.core_subtypes].sort((left, right) => {
     const leftAt = printedTypebox.indexOf((left.name_en ?? left.name).toLowerCase());
     const rightAt = printedTypebox.indexOf((right.name_en ?? right.name).toLowerCase());
@@ -158,25 +176,34 @@ function toCardData(print, detail) {
   });
   const subtypes = [
     ...core.core_talents.map((type) => (type.name_en ?? type.name).toLowerCase()),
-    ...orderedCoreSubtypes.map((type) => (type.name_en ?? type.name).toLowerCase()),
+    ...orderedCoreSubtypes
+      .map((type) => (type.name_en ?? type.name).toLowerCase().replace(/[()]/g, ""))
+      .filter((type) => type !== "young" && type !== "adult"),
   ];
   if (subtypes.length) data.subtypes = [...new Set(subtypes)];
-  const keywords = keywordsOf(rulesText);
-  if (keywords.length) data.keywords = keywords;
+  const key = `${data.name.toLowerCase()}|${data.pitch ?? 0}`;
+  const keywords = knownKeywords.has(key) ? knownKeywords.get(key) : keywordsOf(rulesText);
+  if (keywords?.length) data.keywords = keywords;
   data.set = setId;
   return data;
 }
 
 const detailsById = new Map(snapshot.details.map((detail) => [detail.card_id, detail]));
-const imported = snapshot.product.cards.map((print) => {
+const imported = snapshot.product.cards.flatMap((print) => {
   const detail = detailsById.get(print.card_id);
   if (!detail) throw new Error(`${print.card_id}: missing detail record`);
-  return toCardData(print, detail);
+  const frontCore = detail.cores.find((core) => core.layout_position === 10) ?? detail.cores[0];
+  const front = toCardData(print, detail, frontCore);
+  const backCore = detail.cores.find((core) => core.layout_position === 20);
+  if (!backCore) return [front];
+  const back = toCardData(print, detail, backCore, true);
+  front.backId = back.id;
+  return [front, back];
 });
 const uniqueImported = [...new Map(imported.map((card) => [card.id, card])).values()];
 
 const outputPath = join(root, `packages/cards/src/data/cards/${setId}.json`);
-const existing = JSON.parse(readFileSync(outputPath, "utf8"));
+const existing = existsSync(outputPath) ? JSON.parse(readFileSync(outputPath, "utf8")) : [];
 const existingIds = new Set(existing.map((card) => card.id));
 const additions = uniqueImported.filter((card) => !existingIds.has(card.id));
 const baselineIds = baselineRef

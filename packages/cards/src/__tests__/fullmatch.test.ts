@@ -196,6 +196,42 @@ function makeRand(seed: number) {
   return () => rngNext(carrier);
 }
 
+describe("Prism vs Viserai (IAR Silver Age product cards)", () => {
+  it("plays a fixed-seed match with both imported double-faced cards", () => {
+    // Forty-card test presentations from each product's checklist. These are
+    // integration fixtures, not claims about the packaged deck quantities.
+    const prism: Decklist = {
+      heroId: "SAT001", weaponIds: ["SAT003"],
+      equipment: { head: "SAT004", chest: "SAT005", arms: "SAT006", legs: "SAT010" },
+      deck: Array.from({ length: 22 }, (_, i) => i + 11)
+        .filter((number) => number !== 22 && number !== 31)
+        .flatMap((number) => Array<string>(2).fill(`SAT${String(number).padStart(3, "0")}`)),
+    };
+    const viserai: Decklist = {
+      heroId: "SBW001", weaponIds: ["SBW003"],
+      equipment: { head: "SBW004", chest: "SBW006", arms: "SBW007", legs: "SBW009" },
+      deck: Array.from({ length: 24 }, (_, i) => i + 10)
+        .filter((number) => ![13, 14, 16, 19].includes(number))
+        .flatMap((number) => Array<string>(2).fill(`SBW${String(number).padStart(3, "0")}`)),
+    };
+    const rand = makeRand(27000);
+    let state = createGame({ decklists: [prism, viserai], seed: 27001, cards: cardData, scripts });
+    let steps = 0;
+    while (state.winner === null && steps < 3000) {
+      const seat = state.pendingDecision?.player ?? state.priorityPlayer;
+      const options = legalIntents(state, seat).filter((intent) => intent.kind !== "concede");
+      expect(options.length, `no legal intents at step ${steps}`).toBeGreaterThan(0);
+      const intent = options[Math.floor(rand() * options.length)]!;
+      const result = applyIntent(state, seat, intent);
+      expect(result.ok, `step ${steps}: ${JSON.stringify(intent)}: ${result.ok ? "" : result.error}`).toBe(true);
+      if (!result.ok) return;
+      state = result.state;
+      steps++;
+    }
+    expect(state.winner, `no winner after ${steps} steps`).not.toBeNull();
+  });
+});
+
 describe("Classic Battles full match (real decks)", () => {
   it("plays seeded random matches to completion without errors", () => {
     for (let game = 0; game < 10; game++) {

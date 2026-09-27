@@ -66,6 +66,8 @@ import cardsSFA from "./data/cards/SFA.json" with { type: "json" };
 import cardsSAZ from "./data/cards/SAZ.json" with { type: "json" };
 import cardsSDO from "./data/cards/SDO.json" with { type: "json" };
 import cardsSAR from "./data/cards/SAR.json" with { type: "json" };
+import cardsSAT from "./data/cards/SAT.json" with { type: "json" };
+import cardsSBW from "./data/cards/SBW.json" with { type: "json" };
 import cardsSDA from "./data/cards/SDA.json" with { type: "json" };
 import cardsSGB from "./data/cards/SGB.json" with { type: "json" };
 import cardsSKA from "./data/cards/SKA.json" with { type: "json" };
@@ -793,6 +795,8 @@ const rawCardList = decodeCardDataList([
   ...cardsWOD,
   ...cardsXXX,
   ...cardsZEN,
+  ...cardsSAT,
+  ...cardsSBW,
 ], "packages/cards/src/data/cards");
 
 export const cardList = rawCardList.map((c) => {
