@@ -24596,6 +24596,12 @@
       "value": "在线"
     }
   ],
+  "social.open": [
+    {
+      "type": 0,
+      "value": "社交"
+    }
+  ],
   "social.pending": [
     {
       "type": 0,
@@ -24642,6 +24648,16 @@
     {
       "type": 0,
       "value": "已发送请求"
+    }
+  ],
+  "social.unreadMessages": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 条未读消息"
     }
   ],
   "social.username": [

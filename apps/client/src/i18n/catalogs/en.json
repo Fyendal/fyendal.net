@@ -2596,6 +2596,8 @@
   "settings.guidance.tooltip": "Uncheck Show guidance in Settings, or select Disable now.",
   "settings.guidance.disableHint": "Uncheck Show guidance in Settings, or",
   "settings.guidance.disableNow": "disable now",
+  "social.open": "Social",
+  "social.unreadMessages": "{count, plural, one {# unread message} other {# unread messages}}",
   "social.friends": "Friends",
   "social.friendCount": "{count, plural, one {# friend} other {# friends}}",
   "social.addFriend": "Add Friend",

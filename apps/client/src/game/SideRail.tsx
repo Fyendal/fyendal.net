@@ -20,6 +20,7 @@ import { PrimaryActionButton, type PrimaryAction } from "./StatusFloat.js";
 import { GameMessageText } from "../i18n/GameMessage.js";
 import { BackgroundMatchSearch } from "../matchmaking/BackgroundMatchSearch.js";
 import { MAX_REPLAY_NOTE_LENGTH } from "@fyendal/protocol";
+import { SocialMenuButton, UnreadMessageBadge } from "../social/MobileSocialControls.js";
 
 type StructuredLogEntry = Extract<GameLogViewEntry, { message: unknown }>;
 
@@ -231,6 +232,8 @@ export function SideRail({
   onMobilePrimaryAction,
   backgroundSearching,
   onStopBackgroundSearch,
+  unreadMessageCount = 0,
+  onOpenSocial,
 }: {
   collapsed: boolean;
   onToggleCollapsed: () => void;
@@ -286,6 +289,8 @@ export function SideRail({
   onMobilePrimaryAction: () => void;
   backgroundSearching: boolean;
   onStopBackgroundSearch: () => void;
+  unreadMessageCount?: number;
+  onOpenSocial?: () => void;
 }) {
   const intl = useIntl();
   const [showSettings, setShowSettings] = useState(false);
@@ -369,10 +374,13 @@ export function SideRail({
             />
           ) : null}
           <button
+            className="mobile-more-button"
             aria-label={intl.formatMessage({ id: "game.controls.more" })}
+            aria-expanded={showUtilities}
             onClick={() => setShowUtilities(true)}
           >
             {intl.formatMessage({ id: "lobby.nav.more" })}
+            <UnreadMessageBadge count={unreadMessageCount} />
           </button>
         </div>
       </nav>
@@ -658,6 +666,10 @@ export function SideRail({
             <BackgroundMatchSearch placement="menu" onStop={onStopBackgroundSearch} />
           ) : null}
           <div className="game-utilities-actions">
+            {onOpenSocial ? <SocialMenuButton onOpen={() => {
+              setShowUtilities(false);
+              onOpenSocial();
+            }} /> : null}
             {noteFrame !== null && noteRoomVersion !== null && onSetFrameNote ? (
               <button
                 onClick={() => {

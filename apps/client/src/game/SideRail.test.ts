@@ -84,6 +84,13 @@ describe("undo focus", () => {
 });
 
 describe("game control icons", () => {
+  it("shows unread messages on the mobile More button", () => {
+    const html = renderSideRail(sideRailProps({ unreadMessageCount: 3 }));
+    expect(html).toContain('class="mobile-more-button"');
+    expect(html).toContain('aria-label="3 unread messages">3</span>');
+    expect(renderSideRail(sideRailProps())).not.toContain('class="social-unread-badge"');
+  });
+
   it("uses the same SVG sizing hook for mobile emotes and the other icon controls", () => {
     const html = renderSideRail(sideRailProps());
 

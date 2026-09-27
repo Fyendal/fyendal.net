@@ -88,7 +88,7 @@ const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
   const intl = useIntl();
-  const { view, viewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, sendIntent, sendPriorityMode, sendRunechantSkip, sendEmote, kickSpectator, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, backgroundSearching, stopBackgroundMatchmaking } = useStore(
+  const { view, viewUpdate, playerProfiles, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, sendIntent, sendPriorityMode, sendRunechantSkip, sendEmote, kickSpectator, latestEmote, undo, error, leave, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, backgroundSearching, stopBackgroundMatchmaking, authUser, unreadMessageCount, setSocialOpen } = useStore(
     useShallow((state) => ({
       view: state.view,
       viewUpdate: state.viewUpdate,
@@ -128,6 +128,9 @@ export function GameBoard() {
       reportBug: state.reportBug,
       backgroundSearching: state.backgroundMatchmaking.state === "searching",
       stopBackgroundMatchmaking: state.stopBackgroundMatchmaking,
+      authUser: state.authUser,
+      unreadMessageCount: state.friends.reduce((total, friend) => total + friend.unreadCount, 0),
+      setSocialOpen: state.setSocialOpen,
     })),
   );
   const tableRef = useRef<HTMLDivElement>(null);
@@ -1306,6 +1309,8 @@ export function GameBoard() {
 
       {/* ── side panel: status + log ── */}
       <SideRail
+        unreadMessageCount={authUser && !replaying ? unreadMessageCount : 0}
+        onOpenSocial={authUser && !replaying ? () => setSocialOpen(true) : undefined}
         collapsed={railCollapsed}
         onToggleCollapsed={() => setRailCollapsed((collapsed) => !collapsed)}
         turn={view.turn}

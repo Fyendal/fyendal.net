@@ -25804,6 +25804,12 @@
       "value": "Online"
     }
   ],
+  "social.open": [
+    {
+      "type": 0,
+      "value": "Social"
+    }
+  ],
   "social.pending": [
     {
       "type": 0,
@@ -25850,6 +25856,38 @@
     {
       "type": 0,
       "value": "Sent requests"
+    }
+  ],
+  "social.unreadMessages": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " unread message"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " unread messages"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "social.username": [

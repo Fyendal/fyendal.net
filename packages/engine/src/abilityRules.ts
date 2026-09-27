@@ -665,10 +665,12 @@ export function payActivatedAbilityCost(
     counters[counterCost.key] = Math.max(0, remaining);
   }
   if (attackCounterCost && attackingCard) {
-    const counters = (attackingCard.counters ??= {});
-    counters[attackCounterCost.key] = Math.max(
-      0,
-      (counters[attackCounterCost.key] ?? 0) - attackCounterCost.amount,
+    // The arena object and active link are distinct after JSON cloning.
+    // Counter costs must update both, just like scripted counter changes.
+    runtime.makeCtx(state, seat, card).setCardCounter(
+      attackingCard.instanceId,
+      attackCounterCost.key,
+      Math.max(0, (attackingCard.counters?.[attackCounterCost.key] ?? 0) - attackCounterCost.amount),
     );
   }
   const putCounterCost = ability.putCounterCost;

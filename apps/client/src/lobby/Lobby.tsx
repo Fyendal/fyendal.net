@@ -10,6 +10,7 @@ import { LobbyHeader } from "./LobbyHeader.js";
 import { FormatName } from "./FormatBadge.js";
 import { ModalSurface } from "../components/ModalSurface.js";
 import { LanguagePicker } from "../i18n/LanguagePicker.js";
+import { SocialMenuButton, UnreadMessageBadge } from "../social/MobileSocialControls.js";
 import { mobileDeckDestination, mobileLobbyDestinationSelected } from "./mobileNavigation.js";
 import {
   GuestLandingDetails,
@@ -86,6 +87,8 @@ export function Lobby() {
     savedReplays,
     rail,
     setRail,
+    unreadMessageCount,
+    setSocialOpen,
   } = useStore(useShallow((state) => ({
     error: state.error,
     spectatorKicked: state.spectatorKicked,
@@ -100,6 +103,8 @@ export function Lobby() {
     savedReplays: state.savedReplays,
     rail: state.lobbyRail,
     setRail: state.setLobbyRail,
+    unreadMessageCount: state.friends.reduce((total, friend) => total + friend.unreadCount, 0),
+    setSocialOpen: state.setSocialOpen,
   })));
   /** selected saved deck per constructed format */
   const [deckFor, setDeckFor] = useState<Record<ConstructedFormat, string>>({
@@ -317,6 +322,7 @@ export function Lobby() {
           onClick={() => setShowMobileMore(true)}
         >
           <MobileLobbyIcon kind="more" />
+          <UnreadMessageBadge count={unreadMessageCount} />
           <span className="mobile-lobby-nav-label">{intl.formatMessage({ id: "lobby.nav.more" })}</span>
         </button>
       </nav>
@@ -335,6 +341,10 @@ export function Lobby() {
             </strong>
           </div>
           <div className="mobile-more-actions">
+            <SocialMenuButton onOpen={() => {
+              setShowMobileMore(false);
+              setSocialOpen(true);
+            }} />
             <LanguagePicker />
             <button
               onClick={() => {

@@ -483,7 +483,10 @@
     overflow-x: auto;
     overflow-y: hidden;
     padding: calc(9px + var(--hand-outline-clearance)) 12px 9px;
-    pointer-events: auto;
+    /* Keep clearance for card glows and selected-card lift, while letting
+       taps in the tray's padding and gaps reach the arsenal underneath.
+       The cards themselves retain pointer-events: auto from game-board.css. */
+    pointer-events: none;
     scrollbar-width: none;
     /* The tray overlaps the player's bottom row. Keep horizontal card
        browsing, but let vertical swipes bubble to the root scroller so the

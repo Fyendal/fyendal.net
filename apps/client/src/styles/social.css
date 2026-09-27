@@ -78,6 +78,32 @@
 }
 .social-bubble > span { position: absolute; top: -5px; right: -5px; }
 
+.social-unread-badge {
+  display: grid;
+  min-width: 18px;
+  height: 18px;
+  place-items: center;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--blood-hi);
+  color: #fff7e8;
+  font: 800 10px/1 var(--font-lobby-ui);
+}
+.mobile-lobby-nav .social-unread-badge {
+  position: absolute;
+  top: 2px;
+  left: calc(50% + 8px);
+}
+.mobile-gamebar-actions .mobile-more-button {
+  position: relative;
+  overflow: visible;
+}
+.mobile-more-button .social-unread-badge {
+  position: absolute;
+  top: -5px;
+  right: -3px;
+}
+
 .social-message-toast {
   position: absolute;
   bottom: 63px;
@@ -748,4 +774,26 @@
 .social-dock[data-user-position="true"][data-panel-vertical="above"] .social-message-toast {
   top: auto;
   bottom: 64px;
+}
+
+@media (max-width: 700px) {
+  /* These screens open Social through More; keep received-message previews
+     anchored above the mobile navigation even after a desktop dock drag. */
+  #root:has(.mobile-lobby-nav, .mobile-gamebar) .social-dock {
+    top: auto !important;
+    right: max(16px, env(safe-area-inset-right)) !important;
+    bottom: calc(84px + env(safe-area-inset-bottom)) !important;
+    left: auto !important;
+  }
+  #root:has(.mobile-lobby-nav, .mobile-gamebar) .social-bubble { display: none; }
+  #root:has(.mobile-lobby-nav, .mobile-gamebar) .social-panel,
+  #root:has(.mobile-lobby-nav, .mobile-gamebar) .social-message-toast {
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: auto;
+  }
+  #root:has(.mobile-lobby-nav, .mobile-gamebar) .social-panel {
+    max-height: min(460px, calc(100dvh - 120px));
+  }
 }

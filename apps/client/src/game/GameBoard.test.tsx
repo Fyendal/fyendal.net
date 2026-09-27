@@ -82,6 +82,9 @@ function interactiveView(): GameView {
 
 function liveState(roomCommandPending: boolean): StoreState {
   return {
+    authUser: null,
+    friends: [],
+    setSocialOpen: vi.fn(),
     view: interactiveView(),
     viewUpdate: { sequence: 1, source: "server", transition: "replace" },
     playerProfiles: null,
@@ -131,9 +134,29 @@ function cardClasses(html: string, cardId: string): string {
   return match[1];
 }
 
+describe("GameBoard social notifications", () => {
+  it("counts unread messages across friends on More without counting invitations", () => {
+    vi.stubGlobal("localStorage", { getItem: () => null });
+    gameStore.state = {
+      ...liveState(false),
+      authUser: "CurrentUser",
+      friends: [
+        { username: "Alice", presence: "online", friendsSince: 1, unreadCount: 2 },
+        { username: "Bob", presence: "offline", friendsSince: 1, unreadCount: 3 },
+      ],
+      friendRequests: [{ username: "Charlie", direction: "incoming", createdAt: 1 }],
+    };
+    const html = renderToStaticMarkup(<TestI18nProvider><GameBoard /></TestI18nProvider>);
+    expect(html).toContain('aria-label="5 unread messages">5</span>');
+  });
+});
+
 describe("GameBoard spectator presentation", () => {
   it("shows hidden arsenal card backs for both players", () => {
     gameStore.state = {
+      authUser: null,
+      friends: [],
+      setSocialOpen: vi.fn(),
       view: spectatorView(),
       viewUpdate: { sequence: 1, source: "server", transition: "replace" },
       playerProfiles: null,

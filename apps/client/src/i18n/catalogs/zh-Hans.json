@@ -2596,6 +2596,8 @@
   "settings.guidance.tooltip": "在设置中关闭“显示引导”，或选择“立即关闭”。",
   "settings.guidance.disableHint": "在设置中关闭“显示引导”，或",
   "settings.guidance.disableNow": "立即关闭",
+  "social.open": "社交",
+  "social.unreadMessages": "{count} 条未读消息",
   "social.friends": "好友",
   "social.friendCount": "{count} 位好友",
   "social.addFriend": "添加好友",

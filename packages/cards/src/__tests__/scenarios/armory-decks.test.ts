@@ -593,8 +593,46 @@ describe("Armory Decks — AHA, AZS, and AOL", () => {
     g.attackWithWeapon("zenith blade|0").blockWith().activate("paragon plate|0", { settle: false });
 
     expect(g.state.chain.at(-1)?.attackingCard.counters?.power).toBe(0);
+    expect(g.state.players[0]!.weapons[0]!.counters?.power).toBe(0);
+    g.expectAttackValue(3);
     g.passPriority().passPriority();
     g.expectResources(0, 1);
+    g.settle().expectFinalAttack(3).expectLife(1, 17);
+  });
+
+  it("Paragon Plate reduces both Zenith Blade attacks enabled by Flurry", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "hala, bladesaint of the vow|0",
+          weapons: ["zenith blade|0"],
+          hand: ["edict of steel|1"],
+          resources: 2,
+          equipment: { ...NO_EQUIPMENT, chest: "paragon plate|0" },
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.play("edict of steel|1")
+      .attackWithWeapon("zenith blade|0")
+      .expectAttackValue(4)
+      .blockWith()
+      .activate("paragon plate|0", { settle: false })
+      .expectAttackValue(3)
+      .settle()
+      .expectFinalAttack(3)
+      .expectLife(1, 17)
+      .expectAP(0, 1);
+
+    g.attackWithWeapon("zenith blade|0")
+      .expectAttackValue(3)
+      .blockWith()
+      .settle()
+      .expectFinalAttack(3)
+      .expectLife(1, 14)
+      .expectAP(0, 0);
   });
 
   it("Zenith Blade only gets go again on its first attack when Flurry enables a second", () => {
