@@ -423,7 +423,7 @@ export function PlayerHalf({
               );
             })}
           </div>
-        ) : undefined}
+        ) : <span aria-hidden="true" />}
       </MatZone>
       {pileZone(
         `${row(1)} / 9`,
@@ -605,7 +605,9 @@ export function PlayerHalf({
                     )}
                   />
                 ) : (
-                  <span className="mat-zone-label">{zoneLabel("arsenal")}</span>
+                  <span className="card-zone equipment-zone-empty" aria-hidden="true">
+                    <span className="equipment-zone-icon equipment-zone-icon-arsenal" />
+                  </span>
                 )}
               </div>
             );

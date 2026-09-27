@@ -336,6 +336,12 @@
 .equipment-zone-icon-arms { mask-image: url("/icons/equipment-arms.svg"); }
 .equipment-zone-icon-legs { mask-image: url("/icons/equipment-legs.svg"); }
 .equipment-zone-icon-weapon { mask-image: url("/icons/equipment-weapon.svg"); }
+.equipment-zone-icon-arsenal { mask-image: url("/icons/arsenal.png"); }
+.equipment-zone-icon-weapon,
+.equipment-zone-icon-arsenal {
+  width: 38%;
+  max-width: 40px;
+}
 .zone-weapon-1 .equipment-zone-icon-weapon { transform: scaleX(-1); }
 .arsenal-slots {
   display: flex;
@@ -354,15 +360,6 @@
   align-items: center;
   justify-content: center;
   border-radius: 6px;
-}
-.zone-arsenal-multiple .arsenal-slot-empty::before {
-  content: "";
-  position: absolute;
-  inset: 3px;
-  border: 1px dashed #c2ad7866;
-  border-radius: 6px;
-  box-shadow: inset 0 0 12px #0003;
-  pointer-events: none;
 }
 /* board-state strip right of the helmet: tokens/auras/items/allies */
 .board-strip {
