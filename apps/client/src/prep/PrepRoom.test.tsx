@@ -46,6 +46,28 @@ function render(prep: PrepView | null, mobile: boolean): string {
 }
 
 describe("preparation stage layout", () => {
+  it.each([false, true])("allows arena drafting before either player chooses turn order (mobile: %s)", (mobile) => {
+    for (const winner of [0, 1] as const) {
+      const prep = pairedPrep("choose-first");
+      prep.botGame = false;
+      prep.die = { rolls: winner === 0 ? [5, 3] : [3, 5], winner };
+      const html = render(prep, mobile);
+      const choices = html.match(/<button\b[^>]*class="prep-card-choice[^>]*>/g) ?? [];
+      expect(choices.length).toBeGreaterThan(0);
+      for (const choice of choices) expect(choice).not.toContain("disabled");
+      expect(html).not.toContain("Lock arena cards");
+    }
+  });
+
+  it("keeps arena drafting disabled during match acceptance", () => {
+    const prep = pairedPrep("accept");
+    prep.startPlayer = null;
+    const html = render(prep, false);
+    const choices = html.match(/<button\b[^>]*class="prep-card-choice[^>]*>/g) ?? [];
+    expect(choices.length).toBeGreaterThan(0);
+    for (const choice of choices) expect(choice).toContain("disabled");
+  });
+
   it("keeps desktop arena selection and its sticky action in one panel", () => {
     const html = render(pairedPrep("select-arena"), false);
     expect(html).toContain("prep-desktop-arena-action");

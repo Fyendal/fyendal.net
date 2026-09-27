@@ -201,7 +201,7 @@ export function PrepRoom() {
   const accepting = prep?.phase === "accept";
   const deckStage = prep?.phase === "select-deck";
   const arenaStage = prep?.phase === "select-arena";
-  const arenaLocked = prep?.phase !== "select-arena" || me?.arenaLocked === true;
+  const arenaLocked = accepting || deckStage || me?.arenaLocked === true;
   const locked = ready || !deckStage;
   const matchupLocked = ready || accepting || (me?.arenaLocked === true && !deckStage);
   const desktopArenaAction = !mobilePrepLayout && arenaStage;
@@ -278,7 +278,7 @@ export function PrepRoom() {
   };
 
   const onLockArena = () => {
-    if (arenaLocked) return;
+    if (!arenaStage || arenaLocked) return;
     const arena = {
       weaponIds: selection.weaponIndexes.map((index) => pool.weaponIds[index]!),
       equipment: selection.equipment,
@@ -369,7 +369,7 @@ export function PrepRoom() {
     />
   );
   const arenaLockButton = (
-    <button type="button" className="btn-primary" onClick={onLockArena} disabled={arenaLocked}>
+    <button type="button" className="btn-primary" onClick={onLockArena} disabled={!arenaStage || arenaLocked}>
       {intl.formatMessage({ id: me?.arenaLocked ? "prep.arena.locked" : "prep.arena.lock" })}
       {prep?.deadlineAt && arenaStage ? <> · <DeadlineCountdown deadlineAt={prep.deadlineAt} /></> : null}
     </button>
