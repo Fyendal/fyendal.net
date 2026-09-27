@@ -4,9 +4,11 @@ import {
   handDragStarted,
   handDragLocation,
   canPlayHandDrop,
+  handPlayDropTargetAllowed,
   moveHandCard,
   moveVisibleHandCard,
   reconcileHandOrder,
+  rememberHandOrder,
 } from "./handOrder.js";
 
 describe("local hand ordering", () => {
@@ -17,9 +19,18 @@ describe("local hand ordering", () => {
     expect(reconcileHandOrder([2, 3, 4, 5], custom)).toEqual([4, 2, 3, 5]);
   });
 
-  it("places a returning card after survivors once its old instance has departed", () => {
-    const surviving = reconcileHandOrder([1, 3], [3, 2, 1]);
-    expect(reconcileHandOrder([1, 2, 3], surviving)).toEqual([3, 1, 2]);
+  it("restores played and pitched cards to their prior slots after undo", () => {
+    const custom = [3, 2, 1, 4];
+    const remembered = rememberHandOrder(reconcileHandOrder([1, 3], custom), custom);
+    expect(reconcileHandOrder([1, 2, 3, 4], remembered)).toEqual(custom);
+    expect(reconcileHandOrder([], remembered)).toEqual([]);
+    expect(reconcileHandOrder([1, 2, 3, 4], rememberHandOrder([], remembered))).toEqual(custom);
+  });
+
+  it("retains absent slots through subsequent reorders and appends new draws", () => {
+    const remembered = rememberHandOrder([1, 3, 5], [3, 2, 1, 4]);
+    expect(remembered).toEqual([1, 2, 3, 4, 5]);
+    expect(reconcileHandOrder([1, 2, 3, 4, 5], remembered)).toEqual([1, 2, 3, 4, 5]);
   });
 
   it("moves physical instances independently and never mutates the input order", () => {
@@ -67,6 +78,22 @@ describe("hand drag gestures", () => {
 describe("arena hand drops", () => {
   const arena = { left: 0, right: 800, top: 0, bottom: 700 };
   const hand = { left: 0, right: 800, top: 500, bottom: 700 };
+
+  it("accepts arena HUD siblings while keeping overlays and controls out of play drops", () => {
+    const table = {} as Element;
+    const arena = { closest: () => table } as unknown as Element;
+    const hud = {
+      closest: (selector: string) => selector === ".table" ? table : null,
+    } as unknown as Element;
+    // The life/AP panel has no .board ancestor. Geometry already placed this
+    // release inside the arena; belonging to the same table is sufficient.
+    expect(handPlayDropTargetAllowed(hud, arena)).toBe(true);
+    const overlay = { closest: () => table } as unknown as Element;
+    expect(handPlayDropTargetAllowed(overlay, arena)).toBe(false);
+    const outside = { closest: () => null } as unknown as Element;
+    expect(handPlayDropTargetAllowed(outside, arena)).toBe(false);
+    expect(handPlayDropTargetAllowed(null, arena)).toBe(false);
+  });
 
   it("distinguishes hand sorting from arena plays and drops outside the board", () => {
     expect(handDragLocation(400, 600, hand, arena)).toBe("hand");

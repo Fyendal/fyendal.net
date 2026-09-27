@@ -27,6 +27,8 @@ import type { Sel } from "../useActionAnnouncement.js";
 import type { BoardLegalState } from "./boardModel.js";
 import { useHandReorder } from "./useHandReorder.js";
 import { canPlayHandDrop } from "./handOrder.js";
+import type { MotionPreference } from "../../storage.js";
+import { useMotionPreference } from "../motion/useMotionPreference.js";
 
 type ResourcePayment = NonNullable<PendingDecision["resourcePayment"]>;
 
@@ -112,6 +114,7 @@ export function PlayerHand({
   viewerSeat,
   spectating,
   replaying,
+  motionPreference = "system",
   interaction,
 }: {
   view: GameView;
@@ -119,9 +122,11 @@ export function PlayerHand({
   viewerSeat: number;
   spectating: boolean;
   replaying: boolean;
+  motionPreference?: MotionPreference;
   interaction: PlayerHandInteraction;
 }) {
   const intl = useIntl();
+  const reducedMotion = useMotionPreference(motionPreference);
   const handMotionLocation = { kind: "hand" as const, seat: player.seat };
   const handRef = useRef<HTMLDivElement>(null);
   const previousHandOrderRef = useRef<readonly number[]>([]);
@@ -147,6 +152,7 @@ export function PlayerHand({
       onPlay: interaction.onPlayDrop,
       onDragStart: interaction.onDragStart,
     } : undefined,
+    reducedMotion,
   );
   const handCards = new Map(player.hand.map((card) => [card.instanceId, card]));
   const visibleCards = order.flatMap((id) => {
@@ -241,7 +247,10 @@ export function PlayerHand({
       {draggedCard && floatingCard ? createPortal(
         <div
           ref={floatingCardRef}
-          className={`hand-drag-card${playOnRelease ? " hand-drag-card-playable" : ""}`}
+          className={`hand-drag-card${playOnRelease ? " hand-drag-card-playable" : ""}${
+            floatingCard.returning ? " hand-drag-card-returning" : ""
+          }`}
+          data-reduced-motion={reducedMotion ? "true" : undefined}
           style={{ width: floatingCard.width, height: floatingCard.height }}
           aria-hidden="true"
         >
@@ -254,6 +263,7 @@ export function PlayerHand({
         id="player-hand"
         ref={handRef}
         data-motion-zone={motionLocationKey(handMotionLocation)}
+        data-reduced-motion={reducedMotion ? "true" : undefined}
         {...reorderHandlers}
       >
         {spectating && view.winner === null && !(replaying && player.hand.length > 0)

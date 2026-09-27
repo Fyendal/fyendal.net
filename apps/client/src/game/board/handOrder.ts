@@ -12,6 +12,18 @@ export function reconcileHandOrder(
   return [...surviving, ...instanceIds.filter((id) => !ordered.has(id))];
 }
 
+/** Remember absent cards' slots so undo can restore them in the same order. */
+export function rememberHandOrder(
+  instanceIds: readonly number[],
+  preferredOrder: readonly number[],
+): number[] {
+  const known = new Set(preferredOrder);
+  const slots = [...preferredOrder, ...instanceIds.filter((id) => !known.has(id))];
+  const present = new Set(instanceIds);
+  let index = 0;
+  return slots.map((id) => present.has(id) ? instanceIds[index++]! : id);
+}
+
 export function moveHandCard(
   order: readonly number[],
   instanceId: number,
@@ -74,6 +86,15 @@ export function canPlayHandDrop(
   return selection.kind === "none" ||
     ((selection.kind === "play-hand" || selection.kind === "choose-hand-action")
       && selection.instanceId === instanceId);
+}
+
+/** Arena HUD floats are siblings of the board, but still valid drop surfaces.
+ * Modal choices and hand controls must retain their own interactions. */
+export function handPlayDropTargetAllowed(target: Element | null, arena: Element): boolean {
+  const table = arena.closest(".table");
+  return table !== null && target?.closest(".table") === table && !target.closest(
+    ".overlay, .modal-surface-backdrop, .card-search-overlay, .hand-scroll-button, .mobile-hand-toggle",
+  );
 }
 
 /** Scroll proportionally near an edge, including while the pointer is still. */

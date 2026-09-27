@@ -1074,6 +1074,7 @@ export function GameBoard() {
           viewerSeat={seat}
           spectating={spectating}
           replaying={replaying}
+          motionPreference={motionPreference}
           interaction={{
             legalState: derived,
             legalIntents: legal,

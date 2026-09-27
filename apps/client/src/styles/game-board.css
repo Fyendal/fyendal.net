@@ -762,6 +762,7 @@
 .hand .card-hand[data-hand-instance-id].hand-card-dragging,
 .hand .card-hand[data-hand-instance-id].hand-card-dragging:hover {
   opacity: 0;
+  transition: none;
 }
 .hand-drag-card {
   position: fixed;
@@ -775,7 +776,11 @@
   width: 100%;
   height: 100%;
   margin: 0;
-  transform: none;
+  transform: rotate(var(--hand-drag-tilt, 0deg));
+  scale: 1.04;
+  transition: transform 150ms cubic-bezier(.22, .8, .25, 1), scale 150ms cubic-bezier(.22, .8, .25, 1),
+    box-shadow 140ms ease, border-color 140ms ease;
+  animation: hand-card-pickup 150ms cubic-bezier(.22, .8, .25, 1);
   border-color: #b7ac98;
   box-shadow: 0 12px 28px #000b;
 }
@@ -783,6 +788,21 @@
   border-color: #ffdb7b;
   box-shadow: 0 0 0 2px #ffdb7b, 0 0 18px 5px #efb844b3, 0 12px 28px #000b;
 }
+.hand-drag-card-returning .card-hand {
+  transform: none;
+  scale: 1;
+  animation: none;
+}
+@keyframes hand-card-pickup {
+  from { scale: 1; }
+  to { scale: 1.04; }
+}
+.hand[data-reduced-motion="true"] .card-hand,
+.hand-drag-card[data-reduced-motion="true"] .card-hand {
+  transition: none;
+  animation: none;
+}
+.hand-drag-card[data-reduced-motion="true"] .card-hand { transform: none; scale: 1; }
 .hand .muted { transform: translateY(calc(-1 * var(--hand-selected-lift))); }
 .hand-scroll-button {
   position: absolute;
