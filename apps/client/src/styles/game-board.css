@@ -737,9 +737,10 @@
 }
 .hand::-webkit-scrollbar { display: none; }
 /* Auto margins center a hand while it fits. They resolve to zero once the row
-   overflows, keeping the first and last cards reachable by horizontal scroll. */
-.hand > :first-child { margin-left: auto; }
-.hand > :last-child { margin-right: auto; }
+   overflows, keeping the first and last cards reachable by horizontal scroll.
+   A focused card remains in the DOM but no longer occupies a hand slot. */
+.hand > :nth-child(1 of :not(.pitch-focus-source-hidden)) { margin-left: auto; }
+.hand > :nth-last-child(1 of :not(.pitch-focus-source-hidden)) { margin-right: auto; }
 .hand .card-hand {
   width: clamp(131px, 19.65vh, 240px);
   height: var(--hand-card-height);

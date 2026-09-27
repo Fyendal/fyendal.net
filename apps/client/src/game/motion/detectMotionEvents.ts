@@ -1,5 +1,6 @@
 import type { CardView, GameView } from "@fyendal/shared";
 import { extractGamePresentations, type GamePresentations } from "./extractPresentations.js";
+import { handReflows } from "./handReflow.js";
 import {
   countedMotionLocation,
   motionLocationKey,
@@ -342,19 +343,20 @@ export function detectGameMotionEvents(
   previous: GameView,
   current: GameView,
 ): GameMotionEvent[] {
-  const events = detectFromPresentations(
-    extractGamePresentations(previous),
-    extractGamePresentations(current),
-  );
+  const source = extractGamePresentations(previous);
+  const destination = extractGamePresentations(current);
+  const events = detectFromPresentations(source, destination);
   const endPhaseBoundary = previous.phase === "end"
     || current.phase === "end"
     || previous.pendingDecision?.kind === "arsenal"
     || current.turn !== previous.turn;
-  if (!endPhaseBoundary) return events;
 
   // Legacy snapshots have no causal edge. During cleanup, multiple private
   // movements can cancel in the counts (Ponder/Inertia are the canonical
   // examples), so retain exact identity motion and omit inferred paths.
   // Versioned semantic transitions bypass this legacy-only safeguard.
-  return events.filter((event) => event.kind !== "move" || event.confidence === "exact");
+  const movements = endPhaseBoundary
+    ? events.filter((event) => event.kind !== "move" || event.confidence === "exact")
+    : events;
+  return [...movements, ...handReflows(source, destination, movements)];
 }

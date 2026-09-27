@@ -491,12 +491,12 @@
     touch-action: pan-x pan-y;
     -webkit-overflow-scrolling: touch;
   }
-  /* Center only short hands. Four or more cards keep the existing left-aligned,
-     horizontally scrollable presentation. */
-  .hand > :first-child { margin-left: 0; }
-  .hand > :last-child { margin-right: 0; }
-  .hand > :first-child:nth-last-child(-n + 3) { margin-left: auto; }
-  .hand > :last-child:nth-child(-n + 3) { margin-right: auto; }
+  /* Count visible slots: the focus source stays in the DOM without taking
+     hand space. Four or more visible cards remain horizontally scrollable. */
+  .hand > :nth-child(1 of :not(.pitch-focus-source-hidden)) { margin-left: 0; }
+  .hand > :nth-last-child(1 of :not(.pitch-focus-source-hidden)) { margin-right: 0; }
+  .hand > :nth-child(1 of :not(.pitch-focus-source-hidden)):nth-last-child(-n + 3 of :not(.pitch-focus-source-hidden)) { margin-left: auto; }
+  .hand > :nth-last-child(1 of :not(.pitch-focus-source-hidden)):nth-child(-n + 3 of :not(.pitch-focus-source-hidden)) { margin-right: auto; }
   .hand::-webkit-scrollbar { display: none; }
   .hand .card-hand { width: 90px; height: 124px; transform: none; }
   .hand .card-hand:hover { transform: none; }

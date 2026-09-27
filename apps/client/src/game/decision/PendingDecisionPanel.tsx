@@ -20,7 +20,7 @@ import { decisionSpaceOption } from "../passHotkey.js";
 import { ArsenalSkipConfirmation, OptDecisionInstructions } from "./ActionConfirmations.js";
 import { BloodModeDecision } from "./BloodModeDecision.js";
 import { RevealedChoiceCards } from "./CardChoices.js";
-import { CardRef, cardAffiliation, DecisionPrompt } from "./DecisionShared.js";
+import { CardRef, cardAffiliation, DecisionPrompt, PitchPaymentProgress } from "./DecisionShared.js";
 import type { PendingDecisionModel } from "./DecisionModels.js";
 import { NameChoiceAutocomplete } from "./NameChoiceAutocomplete.js";
 import { TriggerOrderDecision } from "./TriggerOrderDecision.js";
@@ -428,20 +428,7 @@ export function PendingDecisionPanel({
         </span>
       ) : null}
       {pd.resourcePayment ? (
-        <>
-          <span className="decision-context">
-            {intl.formatMessage({ id: "game.decision.choosePitch" })}
-          </span>
-          <strong
-            className="decision-resource-progress"
-            aria-label={intl.formatMessage(
-              { id: "game.decision.pitchProgress" },
-              { selected: resourcePaymentSelected, required: resourcePaymentRequired },
-            )}
-          >
-            {resourcePaymentSelected}/{resourcePaymentRequired}
-          </strong>
-        </>
+        <PitchPaymentProgress selected={resourcePaymentSelected} required={resourcePaymentRequired} />
       ) : null}
       {bloodAllocation ? (
         <BloodModeDecision

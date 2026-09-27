@@ -50,7 +50,7 @@ describe("hand scroll controls", () => {
 });
 
 describe("hand motion anchors", () => {
-  it("anchors the hand zone and each projected physical card", () => {
+  it.each([false, true])("anchors physical cards and locks reordering in pitch mode (%s)", (choosingPitch) => {
     const player: PlayerView = {
       seat: 0,
       heroCardId: "HERO",
@@ -107,6 +107,7 @@ describe("hand motion anchors", () => {
         legalIntents: [],
         selection: { kind: "none" },
         preStackSelectedInstanceId: 7,
+        choosingPitch,
         pitchSelection: [],
         selectedPaymentVariants: [],
         stagedIds: new Set<number>(),
@@ -123,8 +124,13 @@ describe("hand motion anchors", () => {
     expect(html).toContain('data-motion-zone="0:hand"');
     expect(html).toContain('data-motion-card="0:hand:7"');
     expect(html).toContain("card-selected");
-    expect(html).toContain('data-hand-instance-id="7"');
-    expect(html).toContain('aria-keyshortcuts="Alt+ArrowLeft Alt+ArrowRight"');
+    if (choosingPitch) {
+      expect(html).not.toContain("data-hand-instance-id");
+      expect(html).not.toContain('aria-keyshortcuts="Alt+ArrowLeft Alt+ArrowRight"');
+    } else {
+      expect(html).toContain('data-hand-instance-id="7"');
+      expect(html).toContain('aria-keyshortcuts="Alt+ArrowLeft Alt+ArrowRight"');
+    }
   });
 
   it("renders a spectator's hidden cards in the player-hand layout with opaque anchors", () => {

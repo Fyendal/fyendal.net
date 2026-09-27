@@ -12,6 +12,7 @@ import {
 } from "./motionTimeline.js";
 
 export const MOTION_TRAVEL_MS = 320;
+export const MOTION_HAND_CLOSE_MS = 220;
 export const MOTION_DECK_BOTTOM_MS = 560;
 export const MOTION_PITCH_GATHER_MS = 180;
 export const MOTION_STAGGER_MS = 45;
@@ -31,6 +32,8 @@ export interface MotionRect {
 export interface MotionAnchorSnapshot {
   cards: ReadonlyMap<string, MotionRect>;
   zones: ReadonlyMap<string, MotionRect>;
+  /** Local announcement geometry; never changes the card's actual zone. */
+  focusSources?: ReadonlyMap<number, MotionRect>;
 }
 
 export interface MeasuredMotionAnchors {
@@ -113,6 +116,7 @@ export function measureMotionAnchors(root: ParentNode): MeasuredMotionAnchors {
   const cards = new Map<string, MotionRect>();
   const zones = new Map<string, MotionRect>();
   const cardElements = new Map<string, HTMLElement>();
+  const focusSources = new Map<number, MotionRect>();
   for (const element of root.querySelectorAll<HTMLElement>("[data-motion-card]")) {
     const key = element.dataset.motionCard;
     if (!key) continue;
@@ -143,7 +147,14 @@ export function measureMotionAnchors(root: ParentNode): MeasuredMotionAnchors {
     const rect = motionRect(element);
     if (rect) zones.set(key, rect);
   }
-  return { snapshot: { cards, zones }, cardElements };
+  for (const element of root.querySelectorAll<HTMLElement>("[data-motion-focus-source]")) {
+    const rawId = element.dataset.motionFocusSource;
+    if (rawId === undefined) continue;
+    const instanceId = Number(rawId);
+    const rect = motionRect(element);
+    if (Number.isSafeInteger(instanceId) && instanceId >= 0 && rect) focusSources.set(instanceId, rect);
+  }
+  return { snapshot: { cards, zones, focusSources }, cardElements };
 }
 
 function endpoint(
@@ -200,9 +211,14 @@ export function resolveMotionBatch(
   const boardAppearances = new Map<string, MotionFlight>();
 
   for (const event of events) {
+    if (event.kind === "reflow" && event.instanceId !== undefined &&
+      (previous.focusSources?.has(event.instanceId) || current.focusSources?.has(event.instanceId))) continue;
     const phase = motionTimelinePhase(event);
     if (event.kind === "connect") {
-      const source = endpoint(current, event.sourcePresentationKey, event.source)
+      const focusSource = motionLayerForDestination(event.destination) === "stack"
+        ? previous.focusSources?.get(event.instanceId) : undefined;
+      const source = (focusSource ? { rect: focusSource, exact: true } : null)
+        ?? endpoint(current, event.sourcePresentationKey, event.source)
         ?? endpoint(previous, event.sourcePresentationKey, event.source);
       const destination = endpoint(
         current,
@@ -288,7 +304,11 @@ export function resolveMotionBatch(
       continue;
     }
 
-    const source = endpoint(previous, event.sourcePresentationKey, event.source);
+    const focusSource = event.kind === "move" && event.instanceId !== undefined &&
+      motionLayerForDestination(event.destination) === "stack"
+      ? previous.focusSources?.get(event.instanceId) : undefined;
+    const source = (focusSource ? { rect: focusSource, exact: true } : null)
+      ?? endpoint(previous, event.sourcePresentationKey, event.source);
     const destination = endpoint(
       current,
       event.destinationPresentationKey,
@@ -318,6 +338,7 @@ export function resolveMotionBatch(
       id: `${batchId}:flight:${flights.length}`,
       phase,
       mode,
+      ...(event.kind === "reflow" && event.phase === "movement" ? { durationMs: MOTION_HAND_CLOSE_MS } : {}),
       start,
       end,
       visual: event.visual,

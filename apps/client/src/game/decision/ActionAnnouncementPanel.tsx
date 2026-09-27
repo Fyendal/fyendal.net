@@ -8,7 +8,7 @@ import {
   orderedBoostOptions,
 } from "./ActionConfirmations.js";
 import { ActionTargetCards } from "./CardChoices.js";
-import { CardRef, cardAffiliation, chooseWithoutFocus, handCardPlayLabel } from "./DecisionShared.js";
+import { CardRef, cardAffiliation, chooseWithoutFocus, handCardPlayLabel, PitchPaymentProgress } from "./DecisionShared.js";
 import type { ActionAnnouncementModel } from "./DecisionModels.js";
 
 const CARD_COST_LABEL_MESSAGES = {
@@ -266,15 +266,7 @@ export function ActionAnnouncementPanel({
             </span>
           ) : null}
           {showPayment && paymentProgress.kind === "resource" && paymentProgress.required > 0 ? (
-            <strong
-              className="decision-resource-progress"
-              aria-label={intl.formatMessage(
-                { id: "game.decision.pitchProgress" },
-                { selected: paymentProgress.selected, required: paymentProgress.required },
-              )}
-            >
-              {paymentProgress.selected}/{paymentProgress.required}
-            </strong>
+            <PitchPaymentProgress selected={paymentProgress.selected} required={paymentProgress.required} />
           ) : null}
           {stagedAdditionalCost && !additionalCostConfirmed ? null : (
             <div className="decision-buttons">

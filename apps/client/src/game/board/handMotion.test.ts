@@ -31,17 +31,17 @@ function hand(cards: HTMLElement[], left = 0, scrollLeft = 0) {
 }
 
 describe("hand reorder motion", () => {
-  it("keeps the play boundary fixed when undo restores a raised or hovered card", () => {
+  it("keeps the play boundary fixed when hover or selection raises a card", () => {
     const row = {
       scrollTop: 0,
       getBoundingClientRect: () => ({ top: 500 }),
     } as unknown as HTMLElement;
-    const restored = {
+    const raised = {
       offsetTop: 23,
       getBoundingClientRect: vi.fn(() => ({ top: 505 })),
     } as unknown as HTMLElement;
-    expect(handCardSlotTop(row, restored)).toBe(523);
-    expect(restored.getBoundingClientRect).not.toHaveBeenCalled();
+    expect(handCardSlotTop(row, raised)).toBe(523);
+    expect(raised.getBoundingClientRect).not.toHaveBeenCalled();
   });
   it("slides neighboring cards from their previous positions while the dragged source stays hidden", () => {
     const dragged = card(1, 100, 100);
@@ -75,7 +75,9 @@ describe("hand reorder motion", () => {
     const moving = card(2, 100, 0);
     const oldAnimation = { cancel: vi.fn() } as unknown as Animation;
     const animations = new Map([[moving.element, oldAnimation]]);
-    animateHandReorder(hand([moving.element]), new Map([[2, 0]]), animations, null, true);
+    const row = hand([moving.element]);
+    row.getBoundingClientRect = vi.fn(() => { throw new Error("Unnecessary geometry read"); });
+    animateHandReorder(row, new Map([[2, 0]]), animations, null, true);
 
     expect(oldAnimation.cancel).toHaveBeenCalledOnce();
     expect(moving.animate).not.toHaveBeenCalled();

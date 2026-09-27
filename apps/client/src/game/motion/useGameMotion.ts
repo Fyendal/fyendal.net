@@ -12,6 +12,8 @@ import type { MotionPreference } from "../../storage.js";
 import { classifyViewUpdate } from "./classifyViewUpdate.js";
 import { detectGameMotionEvents } from "./detectMotionEvents.js";
 import { transitionMotionEvents } from "./transitionMotionEvents.js";
+import { extractGamePresentations } from "./extractPresentations.js";
+import { focusHandReflows } from "./handReflow.js";
 import {
   completeMotionBatch,
   EMPTY_MOTION_BATCH_QUEUE,
@@ -65,6 +67,7 @@ export function useGameMotion({
   const [batch, setBatch] = useState<GameMotionBatch | null>(null);
   const [turnStartUiReady, setTurnStartUiReady] = useState(true);
   const previousViewRef = useRef<GameView | null>(null);
+  const layoutMotionSequenceRef = useRef(0);
   const previousAnchorsRef = useRef<MotionAnchorSnapshot>(EMPTY_ANCHORS);
   const processedUpdateKeyRef = useRef<string | null>(null);
   const previousViewUpdateSequenceRef = useRef<number | null>(null);
@@ -153,8 +156,8 @@ export function useGameMotion({
   }, []);
 
   // Run after every commit: view-independent layout changes (hand collapse,
-  // float dragging, rail collapse) must refresh the baseline for the next
-  // authoritative update without becoming motion events themselves.
+  // float dragging, rail collapse) refresh the next authoritative baseline.
+  // Entering/leaving pitch focus also closes/opens a visible hand slot.
   useLayoutEffect(() => {
     const updateKey = `${viewUpdate.sequence}:${presentationKey}`;
     const root = rootRef.current;
@@ -176,13 +179,22 @@ export function useGameMotion({
       reduceMotionRef.current = reduceMotion;
       cancelMotionQueue();
     }
-    if (processedUpdateKeyRef.current === updateKey) {
+    const previousView = previousViewRef.current;
+    const previousFocusIds = [...(previousAnchorsRef.current.focusSources?.keys() ?? [])];
+    const currentFocusIds = [...(measured.snapshot.focusSources?.keys() ?? [])];
+    const focusChanged = previousFocusIds.length !== currentFocusIds.length ||
+      previousFocusIds.some((id) => !currentFocusIds.includes(id));
+    const focusReflows = previousView && focusChanged ? focusHandReflows(
+      extractGamePresentations(previousView), extractGamePresentations(view),
+      previousFocusIds, currentFocusIds,
+    ) : [];
+    const isFocusLayoutUpdate = processedUpdateKeyRef.current === updateKey && focusReflows.length > 0;
+    if (processedUpdateKeyRef.current === updateKey && !isFocusLayoutUpdate) {
       previousViewRef.current = view;
       previousAnchorsRef.current = measured.snapshot;
       return;
     }
 
-    const previousView = previousViewRef.current;
     const isLocalPresentationUpdate =
       previousViewUpdateSequenceRef.current === viewUpdate.sequence;
     const motionUpdate: ViewUpdate = isLocalPresentationUpdate
@@ -203,11 +215,14 @@ export function useGameMotion({
             },
           )
         : detectGameMotionEvents(previousView, view);
+      const eventKeys = new Set(events.filter((event) => event.kind === "reflow")
+        .map((event) => event.destinationPresentationKey));
+      events.push(...focusReflows.filter((event) => !eventKeys.has(event.destinationPresentationKey)));
       nextBatches = resolveMotionBatches(
         events,
         previousAnchorsRef.current,
         measured.snapshot,
-        updateKey,
+        isFocusLayoutUpdate ? `${updateKey}:layout:${++layoutMotionSequenceRef.current}` : updateKey,
       );
       if (reduceMotion) {
         nextBatches = nextBatches.flatMap((candidate) => {

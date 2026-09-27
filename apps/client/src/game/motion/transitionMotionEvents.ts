@@ -7,13 +7,13 @@ import type {
 } from "@fyendal/shared";
 import { detectGameMotionEvents } from "./detectMotionEvents.js";
 import { extractGamePresentations } from "./extractPresentations.js";
+import { handReflows } from "./handReflow.js";
 import {
   countedMotionLocation,
   motionLocationKey,
   opaqueMotionPresentationKey,
   type CardPresentation,
   type GameMotionEvent,
-  type HandReflowMotionEvent,
   type MotionLocation,
   type MotionVisual,
 } from "./motionTypes.js";
@@ -237,86 +237,12 @@ export function transitionMotionEvents(
   }
 
   const inferred = detectGameMotionEvents(previous, current).filter((event) => (
+    event.kind !== "reflow" &&
     !semantic.some((candidate) => sameMove(event, candidate))
   ));
 
-  const drawSeats = new Set<number>();
-  const arsenalSeats = new Set<number>();
-  const handDepartures = new Map<number, number>();
-  const handArrivals = new Map<number, number>();
-  for (const event of semantic) {
-    if (event.kind !== "move") continue;
-    if (event.source.kind === "hand" && event.destination.kind !== "hand") {
-      handDepartures.set(
-        event.source.seat,
-        (handDepartures.get(event.source.seat) ?? 0) + event.count,
-      );
-    }
-    if (event.destination.kind === "hand" && event.source.kind !== "hand") {
-      handArrivals.set(
-        event.destination.seat,
-        (handArrivals.get(event.destination.seat) ?? 0) + event.count,
-      );
-    }
-    if (event.source.kind === "deck" && event.destination.kind === "hand") {
-      drawSeats.add(event.destination.seat);
-    }
-    if (event.source.kind === "hand" && event.destination.kind === "arsenal") {
-      arsenalSeats.add(event.source.seat);
-    }
-  }
-  const reflows: HandReflowMotionEvent[] = [];
-  for (const before of source.cards) {
-    if (before.location.kind !== "hand") continue;
-    const beforeHand = before.location;
-    const after = destination.cards.find((candidate) => (
-      candidate.instanceId === before.instanceId && candidate.location.kind === "hand"
-      && candidate.location.seat === beforeHand.seat
-    ));
-    if (!after) continue;
-    const seat = beforeHand.seat;
-    const phase = drawSeats.has(seat) ? "draw" : arsenalSeats.has(seat) ? "arsenal" : null;
-    if (!phase) continue;
-    reflows.push({
-      kind: "reflow",
-      source: beforeHand,
-      destination: after.location as Extract<MotionLocation, { kind: "hand" }>,
-      visual: cardVisible(after.card) ? { kind: "face", card: after.card } : { kind: "back" },
-      instanceId: before.instanceId,
-      sourcePresentationKey: before.key,
-      destinationPresentationKey: after.key,
-      phase,
-    });
-  }
-  for (const seat of new Set([...drawSeats, ...arsenalSeats])) {
-    const hand = { kind: "hand" as const, seat };
-    // Hidden hands have stable presentation slots but no card identities. A
-    // slot that departs and is replaced in the same transition is not a card
-    // that remained in hand: reflowing it would leave a second back behind
-    // while its arsenal flight is already moving away.
-    const persistentSourceCount = Math.max(
-      0,
-      countFor(source, hand) - (handDepartures.get(seat) ?? 0),
-    );
-    const persistentDestinationCount = Math.max(
-      0,
-      countFor(destination, hand) - (handArrivals.get(seat) ?? 0),
-    );
-    const shared = Math.min(persistentSourceCount, persistentDestinationCount);
-    for (let index = 0; index < shared; index++) {
-      const key = opaqueMotionPresentationKey(hand, index);
-      reflows.push({
-        kind: "reflow",
-        source: hand,
-        destination: hand,
-        visual: { kind: "back" },
-        sourcePresentationKey: key,
-        destinationPresentationKey: key,
-        phase: drawSeats.has(seat) ? "draw" : "arsenal",
-      });
-    }
-  }
-  const events = [...semantic, ...inferred, ...reflows];
+  const movesAndEffects = [...semantic, ...inferred];
+  const events = [...movesAndEffects, ...handReflows(source, destination, movesAndEffects)];
   // End-phase cleanup and startTurn are committed as one authoritative edge.
   // A trigger already visible on the new turn's stack must nevertheless wait
   // for arsenal, pitch-bottoming, draw-up, and hand reflow to finish playing.

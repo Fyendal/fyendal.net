@@ -1,8 +1,26 @@
 import { cardData } from "@fyendal/cards/client";
 import type { CardView, GameMessage } from "@fyendal/shared";
 import type { ReactNode } from "react";
-import type { IntlShape } from "react-intl";
+import { useIntl, type IntlShape } from "react-intl";
 import { GameMessageText } from "../../i18n/GameMessage.js";
+
+export function PitchPaymentProgress({ selected, required }: { selected: number; required: number }) {
+  const intl = useIntl();
+  return (
+    <>
+      <span className="decision-context">
+        {intl.formatMessage({ id: "game.decision.choosePitch" })}
+      </span>
+      <strong
+        className="decision-resource-progress"
+        role="status"
+        aria-label={intl.formatMessage({ id: "game.decision.pitchProgress" }, { selected, required })}
+      >
+        {selected}/{required}
+      </strong>
+    </>
+  );
+}
 
 /** Inline card name that triggers the hover preview (via data-cardid delegation). */
 export function CardRef({ id, name }: { id: string; name?: string }) {

@@ -1,0 +1,55 @@
+.pitch-focus {
+  position: absolute;
+  inset: 0;
+  z-index: var(--game-z-prompt);
+  pointer-events: none;
+}
+.pitch-focus-position {
+  position: absolute;
+  left: 35%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.pitch-focus-card {
+  width: min(260px, 27vw, 31vh);
+  aspect-ratio: 300 / 413;
+  transform-origin: top left;
+  pointer-events: auto;
+  filter: drop-shadow(0 12px 26px #000b);
+}
+.pitch-focus-card > .card {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border-color: #d5b564;
+}
+.pitch-focus-source-hidden { display: none !important; }
+.pitch-focus-connector { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.pitch-focus-connector line { stroke: #e7c775; stroke-width: 2; stroke-dasharray: 2 8; stroke-linecap: round; }
+.pitch-focus-connector circle { fill: #ffdf8e; }
+.decision-float.decision-float-pitch {
+  left: calc(var(--mat-cx) * 1.36) !important;
+  right: auto !important;
+  top: 50% !important;
+  bottom: auto !important;
+  transform: translate(-50%, -50%) !important;
+  width: min(320px, calc(var(--mat-cx) * .6));
+  cursor: default;
+}
+.decision-float-pitch > .decision {
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 18px;
+  border-color: #d5b56499;
+  box-shadow: 0 10px 30px #0008;
+}
+.decision-float-pitch .decision-resource-progress { font-size: clamp(32px, 5vh, 54px); }
+@media (max-width: 700px) {
+  .pitch-focus-card { width: min(30vw, 29vh); }
+  .pitch-focus-position { left: 30%; top: 44%; }
+  .decision-float.decision-float-pitch { top: 44% !important; width: 38vw; }
+  .decision-float-pitch > .decision { padding: 10px; gap: 8px; }
+  .decision-float-pitch .decision-prompt { font-size: 12px; }
+}

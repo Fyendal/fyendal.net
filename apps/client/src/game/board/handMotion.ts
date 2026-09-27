@@ -10,7 +10,7 @@ export function handCardSlotLeft(
   return handLeft + card.offsetLeft - hand.scrollLeft;
 }
 
-/** The full raised hand area stays fixed through hover, selection and undo. */
+/** The full raised hand area stays fixed through hover and selection. */
 export function handCardSlotTop(hand: HTMLElement, card: HTMLElement): number {
   return hand.getBoundingClientRect().top + card.offsetTop - hand.scrollTop;
 }
@@ -18,6 +18,11 @@ export function handCardSlotTop(hand: HTMLElement, card: HTMLElement): number {
 export function captureHandPositions(hand: HTMLElement): ReadonlyMap<number, number> {
   return new Map([...hand.querySelectorAll<HTMLElement>("[data-hand-instance-id]")]
     .map((card) => [Number(card.dataset.handInstanceId), card.getBoundingClientRect().left]));
+}
+
+export function cancelHandReorderAnimations(animations: Map<HTMLElement, Animation>): void {
+  for (const animation of animations.values()) animation.cancel();
+  animations.clear();
 }
 
 /** Animate from the previous visual position to the new layout slot. Retarget
@@ -29,6 +34,8 @@ export function animateHandReorder(
   draggedInstanceId: number | null,
   reducedMotion: boolean,
 ): void {
+  cancelHandReorderAnimations(animations);
+  if (reducedMotion) return;
   const handLeft = hand.getBoundingClientRect().left - hand.scrollLeft;
   const moves = [...hand.querySelectorAll<HTMLElement>("[data-hand-instance-id]")].map((card) => {
     const id = Number(card.dataset.handInstanceId);
@@ -39,9 +46,6 @@ export function animateHandReorder(
       delta: previousLeft === undefined ? 0 : previousLeft - (handLeft + card.offsetLeft),
     };
   });
-  for (const animation of animations.values()) animation.cancel();
-  animations.clear();
-  if (reducedMotion) return;
   for (const { card, id, delta } of moves) {
     if (id === draggedInstanceId || Math.abs(delta) < 1 || typeof card.animate !== "function") continue;
     // Individual translate composes with the existing hover/selection transform.

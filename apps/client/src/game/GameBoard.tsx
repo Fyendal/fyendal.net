@@ -81,6 +81,8 @@ import { useGameMotion } from "./motion/useGameMotion.js";
 import { useGameSounds } from "./sound/useGameSounds.js";
 import { handChoiceDismissal } from "./handChoiceDismissal.js";
 import { hoverPreviewTarget } from "./hoverPreviewTarget.js";
+import { PitchFocus } from "./PitchFocus.js";
+import { usePitchFocus } from "./usePitchFocus.js";
 
 const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
@@ -315,6 +317,23 @@ export function GameBoard() {
     toggleAdditionalCostCard,
     confirmAdditionalCost,
   } = announcement;
+  const localPitchPayment = sel.kind !== "none" && !autoCommitPending && actionStep === "payment" &&
+    (!stagedAdditionalCostDefinition || additionalCostConfirmed) &&
+    paymentProgress.kind === "resource" && paymentProgress.required > 0;
+  const pendingPitchPayment = view?.pendingDecision?.player === yourSeat
+    ? view.pendingDecision?.resourcePayment : undefined;
+  const pitchFocusEnabled = !spectating && screen !== "replay";
+  const choosingPitch = pitchFocusEnabled && (
+    localPitchPayment || (pendingPitchPayment !== undefined &&
+      pendingPitchPayment.cost > (playerView?.resources ?? 0) + (playerView?.chi ?? 0))
+  );
+  const submittedIntent = presentedInteraction?.intent;
+  const submittedPitchSourceId = submittedIntent?.kind === "activate-ability" ? submittedIntent.sourceInstanceId
+    : submittedIntent?.kind === "play-card" || submittedIntent?.kind === "play-from-arsenal" ||
+      submittedIntent?.kind === "play-from-zone" ? submittedIntent.instanceId : undefined;
+  const pitchSource = usePitchFocus(
+    presentedView, yourSeat, sel, choosingPitch, pitchFocusEnabled, submittedPitchSourceId,
+  );
   const defaultBoostCount = boostOptions.find((count) => count > 0) ?? null;
   const actionShortcutReady =
     sel.kind !== "none" &&
@@ -423,6 +442,9 @@ export function GameBoard() {
   const resourcePaymentRequired = resourcePayment
     ? Math.max(0, resourcePayment.cost - me.resources - (me.chi ?? 0))
     : 0;
+  // An open resource payment is a hand-card choice, rather than an invitation
+  // to start another play or ability from the arena or inactive zones.
+  const boardActionState = choosingPitch ? deriveBoardLegalState([], legal, true) : derived;
   const myTurn = view.activePlayer === seat;
   const activeHeroName = view.players[view.activePlayer]?.heroName ?? "";
   const turnLabel = spectating
@@ -851,7 +873,7 @@ export function GameBoard() {
     const target = e.target as HTMLElement;
     // Counter icons have their own focused tooltip. Suppress the large card
     // preview while the pointer is on one so the two surfaces never collide.
-    if (target.closest(".c-ovl")) {
+    if (target.closest(".c-ovl, .pitch-focus-card")) {
       setPreview(null);
       return;
     }
@@ -929,7 +951,7 @@ export function GameBoard() {
 
     const target = event.target as HTMLElement;
     const insideChoiceSurface = target.closest(
-      "#player-hand, .decision-float, .card-search-overlay",
+      "#player-hand, .decision-float, .card-search-overlay, .pitch-focus-card",
     ) !== null;
     const dismissal = handChoiceDismissal(
       sel.kind === "play-hand" || sel.kind === "choose-hand-action",
@@ -947,9 +969,9 @@ export function GameBoard() {
   };
 
   const playerHalfInteraction = {
-    legal: derived,
+    legal: boardActionState,
     selection: sel,
-    paymentCandidateIds: arenaPaymentCandidateIds,
+    paymentCandidateIds: choosingPitch ? EMPTY_INSTANCE_IDS : arenaPaymentCandidateIds,
     paymentSelectedIds: new Set(pitchSel),
     preStackSelectedInstanceId,
     stagedIds,
@@ -977,6 +999,9 @@ export function GameBoard() {
       {hasOwnPriority ? <div className="own-priority-arrival" aria-hidden="true" /> : null}
       {/* ── playmat board: opponent half on top, your half below ── */}
       <div className="board">
+        {gameMotion.turnStartUiReady && pitchSource ? (
+          <PitchFocus key={pitchSource.card.instanceId} source={pitchSource} motionPreference={motionPreference} />
+        ) : null}
         <BrowserBotNotice />
         {playerProfiles ? (
           <>
@@ -1076,11 +1101,12 @@ export function GameBoard() {
           replaying={replaying}
           motionPreference={motionPreference}
           interaction={{
-            legalState: derived,
+            legalState: boardActionState,
             legalIntents: legal,
             selection: sel,
             preStackSelectedInstanceId,
             pitchSelection: pitchSel,
+            choosingPitch,
             selectedPaymentVariants:
               stagedAdditionalCostDefinition && !additionalCostConfirmed
                 ? []
@@ -1175,7 +1201,7 @@ export function GameBoard() {
             }
           : undefined}
         onCloseChain={derived.canCloseChain ? () => send({ kind: "close-chain" }) : null}
-        activatableCardIds={derived.activatable}
+        activatableCardIds={boardActionState.activatable}
         selectedAbilitySourceInstanceId={
           sel.kind === "activate" ? sel.sourceInstanceId : null
         }
@@ -1187,6 +1213,7 @@ export function GameBoard() {
       {/* ── floating decision window: prompts, choices, pitch selection ── */}
       {gameMotion.turnStartUiReady ? <DecisionFloat
         viewerSeat={seat}
+        choosingPitch={choosingPitch}
         pending={{
           decision: hidePriorityGuidance || showCardSearchOverlay ? null : pd,
           isMine: myDecision,
@@ -1356,7 +1383,7 @@ export function GameBoard() {
       ) : null}
 
       <BoardOverlays
-        preview={preview}
+        preview={pitchSource && preview?.id === pitchSource.card.cardId ? null : preview}
         overlay={showCardSearchOverlay ? null : overlay}
         inspectedCardId={inspectedCardId}
         seat={seat}

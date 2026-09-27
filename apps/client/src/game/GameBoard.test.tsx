@@ -191,6 +191,80 @@ describe("GameBoard spectator presentation", () => {
 });
 
 describe("GameBoard pending interactions", () => {
+  it("highlights only pitchable hand cards during payment and restores ordinary action cues afterwards", () => {
+    vi.stubGlobal("localStorage", { getItem: () => null });
+    const state = liveState(false);
+    const view = interactiveView();
+    const me = view.players[0]!;
+    me.hand.push({ instanceId: 11, cardId: "WTR171", owner: 0 });
+    me.handCount = 2;
+    me.equipment.head = { instanceId: 40, cardId: "TST-EQUIPMENT", owner: 0 };
+    me.weapons = [{ instanceId: 41, cardId: "TST-WEAPON", owner: 0 }];
+    me.arsenal = [{ instanceId: 42, cardId: "TST-ARSENAL", owner: 0 }];
+    me.visibleDeckTop = { instanceId: 43, cardId: "TST-DECK", owner: 0 };
+    const actionCandidates = [
+      ...state.actionCandidates,
+      { kind: "activate-ability" as const, sourceInstanceId: me.heroInstanceId, pitchInstanceIds: [] },
+      { kind: "activate-ability" as const, sourceInstanceId: 40, pitchInstanceIds: [] },
+      { kind: "activate-ability" as const, sourceInstanceId: 41, pitchInstanceIds: [] },
+      { kind: "play-from-arsenal" as const, instanceId: 42, pitchInstanceIds: [] },
+      { kind: "play-from-zone" as const, zone: "deck" as const, instanceId: 43, pitchInstanceIds: [] },
+    ];
+    gameStore.state = { ...state, view, actionCandidates };
+    const render = () => renderToStaticMarkup(<TestI18nProvider><GameBoard /></TestI18nProvider>);
+    const normal = render();
+    const otherCards = ["TST-HAND", "TST-EQUIPMENT", "TST-WEAPON", "TST-HERO-0",
+      "TST-BOARD", "TST-CHAIN", "TST-ARSENAL", "TST-DECK"];
+    for (const cardId of otherCards) expect(cardClasses(normal, cardId)).toContain("card-highlight");
+
+    view.pendingDecision = {
+      player: 0, kind: "choose-target", prompt: "Pay 2 resources", options: ["pitch"],
+      resourcePayment: { cost: 2, options: [{ optionId: "pitch", pitchInstanceIds: [11] }] },
+    };
+    const payment = render();
+    for (const cardId of otherCards) {
+      expect(cardClasses(payment, cardId)).not.toContain("card-highlight");
+      expect(cardClasses(payment, cardId)).not.toContain("card-clickable");
+    }
+    expect(cardClasses(payment, "WTR171")).toContain("card-highlight");
+    expect(cardClasses(payment, "WTR171")).toContain("card-clickable");
+
+    view.pendingDecision = null;
+    const restored = render();
+    for (const cardId of otherCards) expect(cardClasses(restored, cardId)).toContain("card-highlight");
+  });
+
+  it("focuses a pre-stack payment source and locks hand reordering while retaining pitch choices", () => {
+    vi.stubGlobal("localStorage", { getItem: () => null });
+    const state = liveState(false);
+    const view = interactiveView();
+    const source = view.players[0]!.hand[0]!;
+    const pitch = { instanceId: 11, cardId: "WTR171", owner: 0 };
+    view.players[0]!.hand = [source, pitch];
+    view.players[0]!.handCount = 2;
+    view.pendingDecision = {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Pay 2 resources",
+      options: ["pitch"],
+      preStackSource: { card: source, zone: "hand" },
+      resourcePayment: { cost: 2, options: [{ optionId: "pitch", pitchInstanceIds: [11] }] },
+    };
+    gameStore.state = { ...state, view, legal: [{ kind: "choose", optionId: "pitch" }], actionCandidates: [] };
+    const html = renderToStaticMarkup(<TestI18nProvider><GameBoard /></TestI18nProvider>);
+    expect(html).toContain('class="pitch-focus-card"');
+    expect(html).toContain("decision-float-pitch");
+    expect(html).toContain('aria-label="0 of 2 pitch resources selected"');
+    expect(html).not.toContain("data-hand-instance-id");
+    expect(html).not.toContain('aria-keyshortcuts="Alt+ArrowLeft Alt+ArrowRight"');
+    expect(cardClasses(html, "WTR171")).toContain("card-clickable");
+
+    gameStore.state = { ...gameStore.state, spectating: true, yourSeat: null };
+    const spectatorHtml = renderToStaticMarkup(<TestI18nProvider><GameBoard /></TestI18nProvider>);
+    expect(spectatorHtml).not.toContain('class="pitch-focus-card"');
+    expect(spectatorHtml).not.toContain("decision-float-pitch");
+  });
+
   it("keeps a disabled Pass action in both HUD layouts while waiting on the opponent", () => {
     vi.stubGlobal("localStorage", {
       getItem: () => null,

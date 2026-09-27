@@ -68,7 +68,7 @@ export interface HandReflowMotionEvent {
   instanceId?: number;
   sourcePresentationKey: string;
   destinationPresentationKey: string;
-  phase: "arsenal" | "draw";
+  phase: "arsenal" | "draw" | "movement";
 }
 
 export interface AppearMotionEvent {

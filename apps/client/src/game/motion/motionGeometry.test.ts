@@ -27,6 +27,88 @@ function anchors({
 }
 
 describe("motion geometry", () => {
+  it("slides surviving hand cards together as cards depart", () => {
+    const pitched = [7, 8].map((instanceId): GameMotionEvent => ({
+      kind: "move", source: { kind: "hand", seat: 0 }, destination: { kind: "pitch", seat: 0 },
+      instanceId, sourcePresentationKey: `0:hand:${instanceId}`, destinationPresentationKey: `0:pitch:${instanceId}`,
+      visual: { kind: "face", card: { instanceId, cardId: "SBA016", owner: 0 } }, count: 1, confidence: "exact",
+    }));
+    const reflows = [9, 10].map((instanceId): GameMotionEvent => ({
+      kind: "reflow", source: { kind: "hand", seat: 0 }, destination: { kind: "hand", seat: 0 },
+      instanceId, sourcePresentationKey: `0:hand:${instanceId}`, destinationPresentationKey: `0:hand:${instanceId}`,
+      visual: { kind: "face", card: { instanceId, cardId: "SBA016", owner: 0 } }, phase: "movement",
+    }));
+    const previous = anchors({ cards: [7, 8, 9, 10].map((id) => [`0:hand:${id}`, rect(id * 110, 600)]) });
+    const current = anchors({ cards: [
+      ["0:pitch:7", rect(800, 300)], ["0:pitch:8", rect(800, 300)],
+      ["0:hand:9", rect(300, 600)], ["0:hand:10", rect(410, 600)],
+    ] });
+    const batch = resolveMotionBatch([...pitched, ...reflows], previous, current, "pitch");
+    const slides = batch!.flights.filter((flight) => flight.mode === "reflow");
+    expect(slides).toHaveLength(2);
+    expect(slides.map((flight) => flight.delayMs)).toEqual([0, 0]);
+    expect(slides.every((flight) => flight.durationMs === 220 && flight.holdAtSource)).toBe(true);
+    expect(batch!.durationMs).toBeGreaterThanOrEqual(220);
+
+    current.focusSources = new Map([[9, rect(360, 240, 260, 358)]]);
+    const focusedBatch = resolveMotionBatch([...pitched, ...reflows], previous, current, "focus");
+    expect(focusedBatch?.flights.filter((flight) => flight.mode === "reflow")
+      .map((flight) => flight.destinationPresentationKey)).toEqual(["0:hand:10"]);
+  });
+
+  it.each(["stack-layer", "stack-attack"] as const)("flies a focused play to %s from its enlarged presentation", (kind) => {
+    const destination = kind === "stack-layer" ? { kind, index: 0 } : { kind };
+    const focus = rect(360, 240, 260, 358);
+    const previous = anchors({ cards: [["0:hand:7", rect(40, 600, 160, 220)]] });
+    previous.focusSources = new Map([[7, focus]]);
+    const batch = resolveMotionBatch([{
+      kind: "move", source: { kind: "hand", seat: 0 }, destination,
+      instanceId: 7, sourcePresentationKey: "0:hand:7", destinationPresentationKey: "stack:7",
+      visual: { kind: "face", card: { instanceId: 7, cardId: "SBA016", owner: 0 } },
+      count: 1, confidence: "exact",
+    }], previous, anchors({ cards: [["stack:7", rect(720, 320, 124, 170)]] }), "focus");
+    expect(batch?.flights[0]).toEqual(expect.objectContaining({
+      start: focus, end: rect(720, 320, 124, 170), destinationLayer: "stack",
+    }));
+  });
+
+  it("connects focused board abilities to the stack without redirecting pitched cards", () => {
+    const focus = rect(360, 240, 260, 358);
+    const original = rect(40, 600, 160, 220);
+    const previous = anchors({ cards: [["0:board:7", original], ["0:hand:8", original]] });
+    previous.focusSources = new Map([[7, focus], [8, focus]]);
+    const current = anchors({ cards: [
+      ["0:board:7", original], ["stack:layer:7", rect(720, 320)], ["0:pitch:8", rect(900, 420)],
+    ] });
+    const batch = resolveMotionBatch([{
+      kind: "connect", source: { kind: "board", seat: 0 }, destination: { kind: "stack-layer", index: 0 },
+      instanceId: 7, sourcePresentationKey: "0:board:7", destinationPresentationKey: "stack:layer:7",
+    }, {
+      kind: "move", source: { kind: "hand", seat: 0 }, destination: { kind: "pitch", seat: 0 },
+      instanceId: 8, sourcePresentationKey: "0:hand:8", destinationPresentationKey: "0:pitch:8",
+      visual: { kind: "face", card: { instanceId: 8, cardId: "SBA016", owner: 0 } },
+      count: 1, confidence: "exact",
+    }], previous, current, "focus");
+    expect(batch?.connectors[0]?.start).toEqual(focus);
+    expect(batch?.flights[0]?.start).toEqual(original);
+  });
+
+  it("measures focus geometry separately from physical card and mask anchors", () => {
+    const original = rect(40, 600, 160, 220);
+    const focus = rect(360, 240, 260, 358);
+    const card = { dataset: { motionCard: "0:hand:7" }, getBoundingClientRect: () => original };
+    const focused = { dataset: { motionFocusSource: "7" }, getBoundingClientRect: () => focus };
+    const root = { querySelectorAll: (selector: string) => {
+      if (selector === "[data-motion-card]") return [card];
+      if (selector === "[data-motion-focus-source]") return [focused];
+      return [];
+    } } as unknown as ParentNode;
+    const measured = measureMotionAnchors(root);
+    expect(measured.snapshot.focusSources?.get(7)).toEqual(focus);
+    expect(measured.snapshot.cards.get("0:hand:7")).toEqual(original);
+    expect(measured.cardElements.get("0:hand:7")).toBe(card);
+  });
+
   it("resolves exact card anchors into a scaled viewport flight", () => {
     const event: GameMotionEvent = {
       kind: "move",

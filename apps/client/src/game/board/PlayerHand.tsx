@@ -94,6 +94,7 @@ export interface PlayerHandInteraction {
   pitchSelection: readonly number[];
   selectedPaymentVariants: Parameters<typeof canAddPaymentCard>[0];
   resourcePayment?: ResourcePayment;
+  choosingPitch?: boolean;
   stagedIds: ReadonlySet<number>;
   optimisticallyHiddenIds: ReadonlySet<number>;
   defending: boolean;
@@ -135,7 +136,8 @@ export function PlayerHand({
     previousHandOrderRef.current,
     interaction.preStackSelectedInstanceId,
   );
-  const reorderEnabled = !spectating && !replaying;
+  const reorderEnabled = !spectating && !replaying && !interaction.choosingPitch &&
+    interaction.resourcePayment === undefined;
   const { order, handlers: reorderHandlers, floatingCard, floatingCardRef, playOnRelease } = useHandReorder(
     handRef,
     preStackCards.map((card) => card.instanceId),
@@ -308,16 +310,18 @@ export function PlayerHand({
                 pitchValue,
               )
             );
-            const actionable = interaction.defending
-              ? stageable
-              : interaction.selection.kind !== "none"
-                ? pitchable || selected
-                : resourcePitchable ||
-                  interaction.choosingArsenal ||
-                  interaction.handPick?.has(card.instanceId) === true ||
-                  interaction.boundedHandPick?.has(card.instanceId) === true ||
-                  interaction.legalState.playableHand.has(card.instanceId) ||
-                  interaction.legalState.activatable.has(card.instanceId);
+            const actionable = interaction.choosingPitch
+              ? !selected && (interaction.resourcePayment ? resourcePitchable : pitchable)
+              : interaction.defending
+                ? stageable
+                : interaction.selection.kind !== "none"
+                  ? pitchable || selected
+                  : resourcePitchable ||
+                    interaction.choosingArsenal ||
+                    interaction.handPick?.has(card.instanceId) === true ||
+                    interaction.boundedHandPick?.has(card.instanceId) === true ||
+                    interaction.legalState.playableHand.has(card.instanceId) ||
+                    interaction.legalState.activatable.has(card.instanceId);
             const explanation = !spectating && !replaying && !actionable &&
               interaction.selection.kind === "none"
               ? cardLegalityExplanation(view, viewerSeat, interaction.legalIntents, card).text

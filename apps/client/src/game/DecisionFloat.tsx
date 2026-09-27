@@ -46,10 +46,12 @@ export function DecisionFloat({
   pending,
   action,
   viewerSeat,
+  choosingPitch = false,
 }: {
   pending: PendingDecisionModel;
   action: ActionAnnouncementModel;
   viewerSeat: number;
+  choosingPitch?: boolean;
 }) {
   const decisionFloat = useFloatDrag({
     resetKey: decisionFloatDragKey(
@@ -63,7 +65,11 @@ export function DecisionFloat({
   }
 
   return (
-    <div className="float decision-float" style={decisionFloat.style} {...decisionFloat.dragProps}>
+    <div
+      className={`float decision-float${choosingPitch ? " decision-float-pitch" : ""}`}
+      style={choosingPitch ? undefined : decisionFloat.style}
+      {...(choosingPitch ? {} : decisionFloat.dragProps)}
+    >
       <PendingDecisionPanel model={pending} viewerSeat={viewerSeat} />
       <ActionAnnouncementPanel model={action} viewerSeat={viewerSeat} />
     </div>

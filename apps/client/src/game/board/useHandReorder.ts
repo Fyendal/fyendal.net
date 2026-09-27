@@ -10,6 +10,7 @@ import {
 } from "./handOrder.js";
 import {
   animateHandReorder,
+  cancelHandReorderAnimations,
   captureHandPositions,
   handCardSlotLeft,
   handCardSlotTop,
@@ -71,9 +72,10 @@ export function useHandReorder(
   const idsKey = [...instanceIds].sort((left, right) => left - right).join(":");
   const previousIdsKeyRef = useRef(idsKey);
 
-  const rememberHandPositions = () => {
+  const reorderHand = (next: readonly number[]) => {
     const hand = handRef.current;
     if (hand) positionsBeforeReorderRef.current = captureHandPositions(hand);
+    setPreferredOrder((current) => rememberHandOrder(next, current));
   };
 
   const finishReturn = () => {
@@ -112,10 +114,7 @@ export function useHandReorder(
     if (drag.started) {
       suppressClickUntilRef.current = Date.now() + 750;
       if (cancelled) {
-        rememberHandPositions();
-        setPreferredOrder((current) => rememberHandOrder(
-          reconcileHandOrder(orderRef.current, drag.originalOrder), current,
-        ));
+        reorderHand(reconcileHandOrder(orderRef.current, drag.originalOrder));
       }
     }
   };
@@ -145,11 +144,10 @@ export function useHandReorder(
       fill: "forwards",
     });
     returning.animation = animation;
-    void animation.finished.then(() => {
+    const completeReturn = () => {
       if (returningRef.current === returning) finishReturnRef.current();
-    }, () => {
-      if (returningRef.current === returning) finishReturnRef.current();
-    });
+    };
+    void animation.finished.then(completeReturn, completeReturn);
   };
 
   const dragLocation = (drag: HandDrag) => {
@@ -187,8 +185,7 @@ export function useHandReorder(
 
   useLayoutEffect(() => {
     orderRef.current = order;
-    if (!enabled) finishDragRef.current(true);
-    if (previousIdsKeyRef.current !== idsKey) {
+    if (!enabled || previousIdsKeyRef.current !== idsKey) {
       finishDragRef.current(true);
     }
     previousIdsKeyRef.current = idsKey;
@@ -198,10 +195,8 @@ export function useHandReorder(
       positionsBeforeReorderRef.current = null;
       animateHandReorder(hand, positions, reorderAnimationsRef.current,
         dragRef.current?.instanceId ?? returningRef.current?.drag.instanceId ?? null, reducedMotion);
-    }
-    if (reducedMotion) {
-      for (const animation of reorderAnimationsRef.current.values()) animation.cancel();
-      reorderAnimationsRef.current.clear();
+    } else if (reducedMotion) {
+      cancelHandReorderAnimations(reorderAnimationsRef.current);
     }
     positionDraggedCard();
     startReturn();
@@ -227,8 +222,7 @@ export function useHandReorder(
       returningRef.current = null;
       returning?.animation?.cancel();
       returning?.drag.element.classList.remove("hand-card-dragging");
-      for (const animation of reorderAnimations.values()) animation.cancel();
-      reorderAnimations.clear();
+      cancelHandReorderAnimations(reorderAnimations);
     };
   }, []);
 
@@ -257,19 +251,17 @@ export function useHandReorder(
     hand.scrollLeft += handDragScrollSpeed(drag.x, bounds.left, bounds.right) * elapsed / 1000;
     // Read all slot geometry before moving the dragged card.
     const center = drag.x - drag.grabOffset + drag.element.offsetWidth / 2;
-    const others = [...hand.querySelectorAll<HTMLElement>("[data-hand-instance-id]")]
-      .filter((element) => element !== drag.element);
+    const cards = [...hand.querySelectorAll<HTMLElement>("[data-hand-instance-id]")];
+    const others = cards.filter((element) => element !== drag.element);
     const targetIndex = others.filter((element) => {
       return center > handCardSlotLeft(hand, element, bounds.left) + element.offsetWidth / 2;
     }).length;
-    const visibleOrder = [...hand.querySelectorAll<HTMLElement>("[data-hand-instance-id]")]
-      .map((element) => Number(element.dataset.handInstanceId));
+    const visibleOrder = cards.map((element) => Number(element.dataset.handInstanceId));
     const currentIndex = visibleOrder.indexOf(drag.instanceId);
     if (currentIndex !== targetIndex) {
       // Staged/hidden hand cards retain their slots in the full local order.
       const next = moveVisibleHandCard(orderRef.current, visibleOrder, drag.instanceId, targetIndex);
-      rememberHandPositions();
-      setPreferredOrder((current) => rememberHandOrder(next, current));
+      reorderHand(next);
     }
     positionDraggedCard();
     drag.frame = requestAnimationFrame(tick);
@@ -303,10 +295,10 @@ export function useHandReorder(
           y: event.clientY,
           grabOffset: event.clientX - rect.left,
           grabOffsetY: event.clientY - rect.top,
-          handTop: Math.max(event.currentTarget.getBoundingClientRect().top, Math.min(
-            ...[...event.currentTarget.querySelectorAll<HTMLElement>("[data-hand-instance-id]")]
-              .map((card) => handCardSlotTop(event.currentTarget, card)),
-          )),
+          handTop: Math.max(
+            event.currentTarget.getBoundingClientRect().top,
+            handCardSlotTop(event.currentTarget, element),
+          ),
           started: false,
           originalOrder: orderRef.current,
           frame: 0,
@@ -384,10 +376,7 @@ export function useHandReorder(
         const targetIndex = visibleOrder.indexOf(id) + (event.key === "ArrowLeft" ? -1 : 1);
         if (visibleOrder[targetIndex] === undefined) return;
         finishReturn();
-        rememberHandPositions();
-        setPreferredOrder((current) => rememberHandOrder(
-          moveVisibleHandCard(orderRef.current, visibleOrder, id, targetIndex), current,
-        ));
+        reorderHand(moveVisibleHandCard(orderRef.current, visibleOrder, id, targetIndex));
         requestAnimationFrame(() => element.scrollIntoView({ block: "nearest", inline: "nearest" }));
       },
     },

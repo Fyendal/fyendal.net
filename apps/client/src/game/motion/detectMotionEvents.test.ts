@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import type { CardView, GameView, PlayerView } from "@fyendal/shared";
 import { detectGameMotionEvents } from "./detectMotionEvents.js";
 import { transitionMotionEvents } from "./transitionMotionEvents.js";
+import { extractGamePresentations } from "./extractPresentations.js";
+import { focusHandReflows } from "./handReflow.js";
+import { resolveMotionBatch } from "./motionGeometry.js";
 
 function player(seat: 0 | 1, overrides: Partial<PlayerView> = {}): PlayerView {
   return {
@@ -57,6 +60,64 @@ const face = (instanceId: number, owner = 0): CardView => ({
 });
 
 describe("game motion detection", () => {
+  it.each(["pitch", "graveyard", "banish", "stack"] as const)("closes hand gaps for cards leaving for %s", (zone) => {
+    const cards = [face(1), face(2), face(3)];
+    const previous = view([player(0, { hand: cards, handCount: 3 }), player(1)]);
+    const current = view([player(0, {
+      hand: [cards[0]!, cards[2]!], handCount: 2,
+      ...(zone === "pitch" ? { pitch: [cards[1]!], pitchCount: 1 } : {}),
+      ...(zone === "graveyard" ? { graveyard: [cards[1]!] } : {}),
+      ...(zone === "banish" ? { banish: [cards[1]!] } : {}),
+    }), player(1)], zone === "stack"
+      ? { stack: [{ card: cards[1]!, seat: 0, label: "Played card", optional: false }] } : {});
+    const reflows = detectGameMotionEvents(previous, current).flatMap((event) =>
+      event.kind === "reflow" && event.instanceId !== undefined ? [event.instanceId] : []);
+    expect(reflows).toEqual([1, 3]);
+  });
+
+  it("closes the focus gap without a game update or a duplicate hand copy of the focused card", () => {
+    const game = view([player(0, { hand: [face(1), face(2), face(3)], handCount: 3 }), player(1)]);
+    const presentations = extractGamePresentations(game);
+    const events = focusHandReflows(presentations, presentations, [], [2]);
+    const rect = (left: number, width = 100) => ({ left, top: 600, width, height: 138 });
+    const batch = resolveMotionBatch(events, {
+      cards: new Map([["0:hand:1", rect(100)], ["0:hand:2", rect(210)], ["0:hand:3", rect(320)]]),
+      zones: new Map(), focusSources: new Map(),
+    }, {
+      cards: new Map([["0:hand:1", rect(155)], ["0:hand:3", rect(265)]]),
+      zones: new Map(), focusSources: new Map([[2, rect(360, 260)]]),
+    }, "focus-gap");
+    expect(batch?.flights.map((flight) => flight.destinationPresentationKey)).toEqual(["0:hand:1", "0:hand:3"]);
+    expect(batch?.flights.every((flight) => flight.mode === "reflow" && flight.delayMs === 0)).toBe(true);
+    expect(focusHandReflows(presentations, presentations, [2], [2])).toEqual([]);
+    expect(focusHandReflows(presentations, presentations, [2], []).length).toBeGreaterThan(0);
+  });
+
+  it("slides only surviving hand cards after optimistic and authoritative pitching", () => {
+    const cards = [face(1), face(2), face(3)];
+    const previous = view([player(0, { hand: cards, handCount: 3 }), player(1)]);
+    const current = view([player(0, { hand: [cards[0]!, cards[2]!], handCount: 2,
+      pitch: [cards[1]!], pitchCount: 1 }), player(1)]);
+    const semantic = { fromVersion: 1, kind: "forward" as const, events: [{
+      kind: "move" as const, from: { kind: "hand" as const, seat: 0 },
+      to: { kind: "pitch" as const, seat: 0 }, instanceId: 2, count: 1,
+    }] };
+    for (const events of [detectGameMotionEvents(previous, current), transitionMotionEvents(previous, current, semantic, "forward")]) {
+      expect(events.flatMap((event) => event.kind === "reflow" && event.instanceId !== undefined
+        ? [[event.instanceId, event.phase]] : [])).toEqual([[1, "movement"], [3, "movement"]]);
+    }
+    expect(transitionMotionEvents(current, current, semantic, "forward", { sourceIncludesPredictedTransition: true }))
+      .toEqual([]);
+  });
+
+  it("slides anonymous opponent hand slots without assigning identities to them", () => {
+    const previous = view([player(0), player(1, { handCount: 4 })]);
+    const current = view([player(0), player(1, { handCount: 2, pitch: [face(8, 1), face(9, 1)], pitchCount: 2 })]);
+    const reflows = detectGameMotionEvents(previous, current).filter((event) => event.kind === "reflow");
+    expect(reflows.map((event) => event.sourcePresentationKey)).toEqual(["1:hand:opaque", "1:hand:opaque:1"]);
+    expect(reflows.every((event) => event.visual.kind === "back" && event.instanceId === undefined)).toBe(true);
+  });
+
   it("matches a visible card moving from hand to pitch by instance id", () => {
     const card = face(1);
     const previous = view([
@@ -296,7 +357,7 @@ describe("game motion detection", () => {
     }]);
   });
 
-  it("infers an anonymous deck-to-hand draw from a unique count change", () => {
+  it("infers an anonymous draw and reflows only the pre-existing hand slots", () => {
     const previous = view([
       player(0),
       player(1, { deckCount: 20, handCount: 2 }),
@@ -306,7 +367,8 @@ describe("game motion detection", () => {
       player(1, { deckCount: 19, handCount: 3 }),
     ]);
 
-    expect(detectGameMotionEvents(previous, current)).toEqual([{
+    const events = detectGameMotionEvents(previous, current);
+    expect(events.filter((event) => event.kind === "move")).toEqual([{
       kind: "move",
       source: { kind: "deck", seat: 1 },
       destination: { kind: "hand", seat: 1 },
@@ -314,6 +376,9 @@ describe("game motion detection", () => {
       count: 1,
       confidence: "inferred",
     }]);
+    expect(events.flatMap((event) => event.kind === "reflow"
+      ? [[event.sourcePresentationKey, event.phase, event.visual.kind]] : []))
+      .toEqual([["1:hand:opaque", "draw", "back"], ["1:hand:opaque:1", "draw", "back"]]);
   });
 
   it("settles silently instead of inventing an ambiguous private path", () => {

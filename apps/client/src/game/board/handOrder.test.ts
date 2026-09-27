@@ -33,6 +33,13 @@ describe("local hand ordering", () => {
     expect(reconcileHandOrder([1, 2, 3, 4, 5], remembered)).toEqual([1, 2, 3, 4, 5]);
   });
 
+  it("keeps the same state reference when departures or undo do not change remembered slots", () => {
+    const remembered = [3, 2, 1, 4];
+    expect(rememberHandOrder([3, 1], remembered)).toBe(remembered);
+    expect(rememberHandOrder([], remembered)).toBe(remembered);
+    expect(rememberHandOrder([3, 2, 1, 4], remembered)).toBe(remembered);
+  });
+
   it("moves physical instances independently and never mutates the input order", () => {
     const order = [10, 11, 12];
     expect(moveHandCard(order, 10, 2)).toEqual([11, 12, 10]);

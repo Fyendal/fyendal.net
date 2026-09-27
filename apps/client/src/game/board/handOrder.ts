@@ -16,12 +16,15 @@ export function reconcileHandOrder(
 export function rememberHandOrder(
   instanceIds: readonly number[],
   preferredOrder: readonly number[],
-): number[] {
+): readonly number[] {
   const known = new Set(preferredOrder);
   const slots = [...preferredOrder, ...instanceIds.filter((id) => !known.has(id))];
   const present = new Set(instanceIds);
   let index = 0;
-  return slots.map((id) => present.has(id) ? instanceIds[index++]! : id);
+  const next = slots.map((id) => present.has(id) ? instanceIds[index++]! : id);
+  return next.length === preferredOrder.length && next.every((id, slot) => id === preferredOrder[slot])
+    ? preferredOrder
+    : next;
 }
 
 export function moveHandCard(
