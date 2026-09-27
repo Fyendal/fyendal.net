@@ -651,6 +651,9 @@ export const mst: Record<string, CardScript> = {
   },
   "beckoning mistblade|0": {
     activated: attackAbility(2, { goAgain: true }),
+    canTriggerOnHit(ctx) {
+      return ctx.link?.attackingCard.instanceId === ctx.self.instanceId;
+    },
     onHit(ctx) {
       ctx.addModifier({ scope: "next-attack", attack: 1, goAgain: true, appliesToPitch: 3 });
     },

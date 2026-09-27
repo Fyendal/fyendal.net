@@ -28,6 +28,56 @@ it("First Tenet of Chi: Wind gives the next blue action card go again", () => {
     .expectAP(0, 1);
 });
 
+describe("Beckoning Mistblade", () => {
+  it.each([false, true])("buffs only the next blue attack, even when that attack hits: %s", (hits) => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["beckoning mistblade|0"],
+          hand: ["wounding blow|3", "wounding blow|3"],
+          resources: 2,
+        },
+        { hero: "dorinthea", hand: ["wrecker romp|3"] },
+      ],
+    });
+    const mistbladeId = printingId("beckoning mistblade|0");
+
+    g.attackWithWeapon().blockWith().settle().expectAP(0, 1);
+    g.play("wounding blow|3").expectAttackValue(3);
+    const firstBlue = projectStateFor(g.state, 0).chain.at(-1)!;
+    expect(firstBlue.goAgain).toBe(true);
+    expect(firstBlue.onHitEffects?.some((effect) => effect.sourceCardId === mistbladeId) ?? false)
+      .toBe(false);
+    g.blockWith(...(hits ? [] : ["wrecker romp|3"])).settle().expectAP(0, 1);
+
+    g.play("wounding blow|3").expectAttackValue(2);
+    expect(projectStateFor(g.state, 0).chain.at(-1)!.goAgain).toBe(false);
+    g.blockWith().settle().expectAP(0, 0);
+    expect(g.state.log.filter((entry) => entry.publicText?.includes("Beckoning Mistblade triggers: On hit")))
+      .toHaveLength(1);
+  });
+
+  it("does not grant a bonus when the weapon misses", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["beckoning mistblade|0"],
+          hand: ["wounding blow|3"],
+          resources: 2,
+        },
+        { hero: "dorinthea", hand: ["wrecker romp|3"] },
+      ],
+    });
+
+    g.attackWithWeapon().blockWith("wrecker romp|3").settle().expectAP(0, 1);
+    g.play("wounding blow|3").expectAttackValue(2);
+    expect(projectStateFor(g.state, 0).chain.at(-1)!.goAgain).toBe(false);
+    g.blockWith().settle().expectAP(0, 0);
+  });
+});
+
 describe("MST — Mystic heroes and cloaked equipment", () => {
   it("Enigma, New Moon turns Ward equipment face-up and creates three Spectral Shields", () => {
     const g = scenario({

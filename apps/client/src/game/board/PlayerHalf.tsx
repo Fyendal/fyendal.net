@@ -155,7 +155,15 @@ export function PlayerHalf({
           label={zoneLabel(slot)}
           className={`zone-${slot}`}
           motionZone={motionLocationKey(zoneLocation)}
-        />
+        >
+          <span
+            className="card-zone equipment-zone-empty"
+            role="img"
+            aria-label={zoneLabel(slot)}
+          >
+            <span className={`equipment-zone-icon equipment-zone-icon-${slot}`} aria-hidden="true" />
+          </span>
+        </MatZone>
       );
     }
     const underCardCount = equipmentStackCards(card).length - 1;
@@ -254,7 +262,15 @@ export function PlayerHalf({
                 ? activate(card.instanceId)
                 : undefined}
           />
-        ) : undefined}
+        ) : (
+          <span
+            className="card-zone equipment-zone-empty"
+            role="img"
+            aria-label={weaponLabel}
+          >
+            <span className="equipment-zone-icon equipment-zone-icon-weapon" aria-hidden="true" />
+          </span>
+        )}
       </MatZone>
     );
   };
