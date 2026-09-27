@@ -586,13 +586,21 @@ export function activateAbility(
   }
   if (seat !== state.activePlayer || seat !== state.priorityPlayer) return "not your turn";
   const player = state.players[seat] as PlayerState;
+  const sharedActionSource = state.players
+    .filter((controller) => controller.seat !== seat)
+    .flatMap((controller) => controller.board)
+    .find((candidate) => {
+      const ability = abilityList(scriptOf(state, candidate.cardId, candidate))[abilityIndex];
+      return candidate.instanceId === sourceInstanceId && ability?.anyHeroAction === true &&
+        (ability.timing ?? "action") === "action";
+    });
   const permanent =
     findCard(player, sourceInstanceId) ??
-    (player.hero.instanceId === sourceInstanceId ? player.hero : undefined);
+    (player.hero.instanceId === sourceInstanceId ? player.hero : undefined) ?? sharedActionSource;
   const isBanishSource = !!permanent && player.banish.some(
     (candidate) => candidate.instanceId === permanent.instanceId,
   );
-  if (!permanent || (!isPermanentSource(player, permanent.instanceId) && !isBanishSource)) {
+  if (!permanent || (!isPermanentSource(player, permanent.instanceId) && !isBanishSource && !sharedActionSource)) {
     const result = activateFromHandAbility(state, runtime, {
       mode: "action",
       seat,

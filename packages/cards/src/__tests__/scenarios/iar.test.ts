@@ -11,6 +11,41 @@ function boardNames(game: ReturnType<typeof scenario>, seat: number): string[] {
 }
 
 describe("IAR cards", () => {
+  it("Shadowrealm Harvester's overpower counts Burn Up // Shock as an action defender", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        heroKey: "baalghor, omen of the end|0",
+        board: ["gate to i'arathael|0"],
+        banish: ["shadowrealm harvester|1"],
+        resources: 3,
+        equipment: NO_EQUIPMENT,
+      },
+      {
+        hero: "dorinthea",
+        heroKey: "briar|0",
+        hand: ["burn up // shock|1", "lightning surge|1"],
+        equipment: NO_EQUIPMENT,
+      },
+    ] });
+    g.activate("gate to i'arathael|0", { targetCard: "shadowrealm harvester|1" })
+      .play("shadowrealm harvester|1", { fromZone: "banish" });
+    expect(projectStateFor(g.state, 1).chain.at(-1)?.overpower).toBe(true);
+
+    const [split, action] = g.state.players[1]!.hand;
+    g.doRaw({ kind: "stage-defenders", instanceIds: [split!.instanceId] });
+    expect(legalIntents(g.state, 1)).not.toContainEqual({
+      kind: "stage-defenders", instanceIds: [action!.instanceId],
+    });
+    for (const kind of ["stage-defenders", "defend"] as const) {
+      expect(applyIntent(g.state, 1, {
+        kind, instanceIds: [split!.instanceId, action!.instanceId],
+      })).toMatchObject({ ok: false, error: expect.stringContaining("Overpower") });
+    }
+    g.blockWith("burn up // shock|1");
+    expect(g.state.chain.at(-1)?.defendingCards.map((card) => card.cardId)).toEqual([split!.cardId]);
+  });
+
   it("registers every IAR card as implemented", () => {
     const cards = Object.values(cardData).filter((card) => card.set === "IAR");
     expect(cards.length).toBeGreaterThan(0);

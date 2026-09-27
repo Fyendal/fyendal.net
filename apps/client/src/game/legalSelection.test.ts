@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { GameIntent } from "@fyendal/shared";
+import { actionAnnouncementReducer, INITIAL_ANNOUNCEMENT, isAnnouncementPaymentReady } from "./useActionAnnouncement.js";
 import {
   actionSelectionVariants,
   actionVariants,
@@ -125,6 +126,38 @@ describe("authoritative legal-intent selection", () => {
 
     expect(selectedActionIntent(legal, sel, null, null, null, [])).toBe(normal);
     expect(selectedActionIntent(legal, sel, null, null, null, [], 0, false, [33, 32])).toBe(second);
+  });
+
+  it("can finish Skeletal Puppetry payment by choosing any one of three allies", () => {
+    const normal: GameIntent = {
+      kind: "play-card", instanceId: 10, pitchInstanceIds: [], pitchRequired: 2,
+    };
+    const alternatives: GameIntent[] = [31, 32, 33].map((id) => ({
+      ...normal,
+      pitchRequired: 0,
+      alternativeCostCardInstanceIds: [id],
+    }));
+    const candidates = [normal, ...alternatives];
+    const sel = { kind: "play-hand", instanceId: 10 } as const;
+    for (const allyId of [31, 32, 33]) {
+      const state = actionAnnouncementReducer({ ...INITIAL_ANNOUNCEMENT, sel }, {
+        type: "select-alternative-cost", instanceIds: [allyId],
+      });
+      const intent = selectedActionIntent(
+        candidates, sel, null, null, null, state.pitchSel, 0, false,
+        state.alternativeCostCardInstanceIds ?? null, () => 1,
+      );
+      expect(intent).toMatchObject({
+        alternativeCostCardInstanceIds: [allyId], pitchInstanceIds: [], pitchRequired: 0,
+      });
+      expect(isAnnouncementPaymentReady(
+        intent ? 1 : 0, true, false, state.additionalCostConfirmed,
+        state.alternativeCostCardInstanceIds !== undefined,
+      )).toBe(true);
+    }
+    expect(selectedActionIntent(
+      candidates, sel, null, null, null, [], 0, false, [31, 32], () => 1,
+    )).toBeNull();
   });
 
   it("selects resource or card payment for an activated ability", () => {

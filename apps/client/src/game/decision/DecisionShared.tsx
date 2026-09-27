@@ -7,7 +7,7 @@ import { GameMessageText } from "../../i18n/GameMessage.js";
 export function PitchPaymentProgress({ selected, required }: { selected: number; required: number }) {
   const intl = useIntl();
   return (
-    <>
+    <div className="decision-pitch-payment">
       <span className="decision-context">
         {intl.formatMessage({ id: "game.decision.choosePitch" })}
       </span>
@@ -18,7 +18,7 @@ export function PitchPaymentProgress({ selected, required }: { selected: number;
       >
         {selected}/{required}
       </strong>
-    </>
+    </div>
   );
 }
 

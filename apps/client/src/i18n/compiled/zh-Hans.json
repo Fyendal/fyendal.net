@@ -19350,6 +19350,12 @@
       "value": "从手牌弃置"
     }
   ],
+  "game.decision.alternativeCost": [
+    {
+      "type": 0,
+      "value": "选择替代费用"
+    }
+  ],
   "game.decision.arsenal.action": [
     {
       "type": 0,

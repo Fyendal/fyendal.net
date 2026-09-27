@@ -212,19 +212,14 @@ export function ActionAnnouncementPanel({
               </div>
             </>
           ) : !stagedAdditionalCost && alternativeCostChoices.length > 0 ? (
-            <>
-              <div className="decision-buttons">
-                {normalCostPayableWithoutPitch ? (
-                  <button
-                    className={alternativeCostCardInstanceIds === null ? "btn-primary" : ""}
-                    onClick={(event) =>
-                      chooseWithoutFocus(event.currentTarget, () => onSelectAlternativeCost(null))}
-                  >
-                    {intl.formatMessage({ id: "game.decision.payResources" })}
-                  </button>
-                ) : null}
-              </div>
-              <div className="decision-target-cards">
+            <section
+              className="decision-alternative-cost"
+              aria-label={intl.formatMessage({ id: "game.decision.alternativeCost" })}
+            >
+              <span className="decision-context">
+                {intl.formatMessage({ id: "game.decision.alternativeCost" })}
+              </span>
+              <div className="decision-alternative-cost-cards">
                 {alternativeCostChoices.map((choice) => {
                   const selected =
                     Array.isArray(alternativeCostCardInstanceIds) &&
@@ -238,27 +233,40 @@ export function ActionAnnouncementPanel({
                   return (
                     <button
                       key={choice.key}
-                      className={`decision-target-card ${selected ? "decision-target-selected" : ""}`}
+                      className={`decision-target-card decision-alternative-cost-card ${selected ? "decision-target-selected" : ""}`}
                       aria-label={intl.formatMessage({ id: "game.decision.useNamed" }, { name: label })}
                       aria-pressed={selected}
                       onClick={(event) =>
                         chooseWithoutFocus(event.currentTarget, () =>
                           onSelectAlternativeCost(choice.instanceIds))}
                     >
-                      {choice.cards.map((card, index) => card ? (
-                        <CardFace
-                          key={choice.instanceIds[index]}
-                          card={card}
-                          size="hand"
-                          affiliation={cardAffiliation(card, viewerSeat)}
-                        />
-                      ) : null)}
-                      <span>{intl.formatMessage({ id: "game.decision.useNamed" }, { name: label })}</span>
+                      <div className="decision-alternative-cost-faces">
+                        {choice.cards.map((card, index) => card ? (
+                          <CardFace
+                            key={choice.instanceIds[index]}
+                            card={card}
+                            size="hand"
+                            affiliation={cardAffiliation(card, viewerSeat)}
+                          />
+                        ) : null)}
+                      </div>
+                      <span>{label}</span>
                     </button>
                   );
                 })}
               </div>
-            </>
+              {normalCostPayableWithoutPitch ? (
+                <div className="decision-buttons">
+                  <button
+                    className={alternativeCostCardInstanceIds === null ? "btn-primary" : ""}
+                    onClick={(event) =>
+                      chooseWithoutFocus(event.currentTarget, () => onSelectAlternativeCost(null))}
+                  >
+                    {intl.formatMessage({ id: "game.decision.payResources" })}
+                  </button>
+                </div>
+              ) : null}
+            </section>
           ) : null}
           {showPayment && paymentProgress.kind === "discard" && paymentProgress.required > 0 ? (
             <span className="decision-context">

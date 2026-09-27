@@ -977,6 +977,56 @@ describe("DTD — Prism and Figments", () => {
     )).toBe(false);
   });
 
+  it("Decimator Great Axe does not halve Sink Below defending Chest Puff", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          weapons: ["decimator great axe|0"],
+          hand: ["chest puff|1"],
+          resources: 2,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "rhinar", hand: ["sink below|1"], equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    s.play("chest puff|1")
+      .blockWith()
+      .passPriority()
+      .react("sink below|1")
+      .chooseOption("pass")
+      .settle()
+      .expectFinalDefense(4);
+
+    expect(s.state.log.some((entry) =>
+      entry.publicText?.includes("Decimator Great Axe triggers")
+    )).toBe(false);
+  });
+
+  it("Decimator Great Axe halves Sink Below when it is the first defending card", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          weapons: ["decimator great axe|0"],
+          resources: 3,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "rhinar", hand: ["sink below|1"], equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    s.attackWithWeapon("decimator great axe|0")
+      .blockWith()
+      .passPriority()
+      .react("sink below|1")
+      .chooseOption("pass")
+      .chooseCard("sink below|1")
+      .settle()
+      .expectFinalDefense(2);
+  });
+
   it("Reality Refractor makes an Illusionist aura attack for 5", () => {
     const s = scenario({
       seats: [

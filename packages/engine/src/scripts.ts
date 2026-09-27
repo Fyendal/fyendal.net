@@ -691,6 +691,9 @@ export interface ActivatedEffectCardCost {
 
 export interface ActivatedAbility {
   cost: number;
+  /** An action ability that explicitly permits any hero to activate it,
+   * including when its arena source is controlled by the opponent. */
+  anyHeroAction?: boolean;
   /** Card instances this activation may target. A hook requires one returned
    * target to be announced before costs are paid. Must be pure. */
   targetCardOptions?(ctx: ScriptCtx): readonly number[];

@@ -265,8 +265,10 @@ export function defenderSelectionError(
   const seen = new Set<number>();
   let handCount = 0;
   let nonBlockCount = attackNonBlockDefenderCount(state, link);
-  let actionDefenders = link.defendingCards.filter(
-    (card) => dataOf(state, card.cardId).cardType === "action",
+  // Split cards have both sides' types while defending (CR 9.2.2), and
+  // Overpower restricts every action card regardless of its defending zone.
+  let actionDefenders = [...link.defendingCards, ...link.defendingEquipment].filter(
+    (card) => cardHasType(state, card, "action"),
   ).length;
 
   for (const id of instanceIds) {
@@ -291,7 +293,7 @@ export function defenderSelectionError(
         return "Dominate: at most 1 card from hand may defend";
       }
     }
-    if ((handCard || arsenalCard) && cardType === "action") {
+    if (cardHasType(state, card, "action")) {
       actionDefenders++;
       if (overpower && actionDefenders > 1) {
         return "Overpower: this attack can't be defended by more than one action card";

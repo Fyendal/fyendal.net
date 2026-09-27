@@ -11,6 +11,8 @@ import { drawUpTo, startTurn } from "../turn.js";
 // ── fixture cards ────────────────────────────────────────────────────────────
 
 const cards: Record<string, CardData> = {
+  SPLIT_ACTION: { id: "SPLIT_ACTION", name: "Test Action // Test Instant", cardType: "instant", classes: ["generic"], pitch: 1, cost: 0, defense: 3, keywords: ["Meld"], text: "Meld" },
+  INSTANT_DEF: { id: "INSTANT_DEF", name: "Defending Instant", cardType: "instant", classes: ["generic"], pitch: 1, cost: 0, defense: 2, text: "" },
   HERO_A: { id: "HERO_A", name: "Hero A", cardType: "hero", classes: ["warrior"], intellect: 4, life: 20, text: "" },
   HERO_B: { id: "HERO_B", name: "Hero B", cardType: "hero", classes: ["brute"], intellect: 4, life: 20, text: "" },
   HERO_CHI: { id: "HERO_CHI", name: "Chi Hero", cardType: "hero", classes: ["mystic"], intellect: 4, life: 20, text: "Instant — {c}{c}{c}: Gain 1 life" },
@@ -56,6 +58,15 @@ const cards: Record<string, CardData> = {
 };
 
 const scripts: Record<string, CardScript> = {
+  SPLIT_ACTION: {
+    canDefendFromArsenal: true,
+    meld: {
+      leftName: "Test Action",
+      rightName: "Test Instant",
+      leftCardType: "action",
+      rightCardType: "instant",
+    },
+  },
   HERO_CHI: {
     activated: {
       cost: 0,
@@ -590,6 +601,65 @@ function noDefendResolveAfterDefend(s: GameStateInternal): GameStateInternal {
 // ── overpower ────────────────────────────────────────────────────────────────
 
 describe("overpower", () => {
+  it.each([
+    ["SPLIT_ACTION", "BLOCK3"],
+    ["BLOCK3", "SPLIT_ACTION"],
+    ["SPLIT_ACTION", "SPLIT_ACTION"],
+  ])("counts both types of split cards when defending with %s and %s", (first, second) => {
+    let s = makeGame();
+    s = declareAttack(s, 0, "OVER");
+    const b1 = giveCard(s, 1, first);
+    const b2 = giveCard(s, 1, second);
+    s = apply(s, 1, { kind: "stage-defenders", instanceIds: [b1] });
+
+    expect(legalIntents(s, 1)).not.toContainEqual({
+      kind: "stage-defenders", instanceIds: [b2],
+    });
+    for (const kind of ["stage-defenders", "defend"] as const) {
+      expect(applyIntent(s, 1, { kind, instanceIds: [b1, b2] })).toMatchObject({
+        ok: false,
+        error: "Overpower: this attack can't be defended by more than one action card",
+      });
+    }
+    expect(player(s, 1).hand.some((card) => card.instanceId === b2)).toBe(true);
+  });
+
+  it("allows one split action card alongside an instant and equipment", () => {
+    let s = makeGame({ p1equipment: { head: "HELM" } });
+    s = declareAttack(s, 0, "OVER");
+    const split = giveCard(s, 1, "SPLIT_ACTION");
+    const instant = giveCard(s, 1, "INSTANT_DEF");
+    const helm = player(s, 1).equipment.head!;
+    const instanceIds = [split, instant, helm.instanceId];
+    s = apply(s, 1, { kind: "stage-defenders", instanceIds });
+    expect(legalIntents(s, 1)).toContainEqual({ kind: "defend", instanceIds });
+    s = apply(s, 1, { kind: "defend", instanceIds });
+    expect(s.chain[0]?.defendingCards.map((card) => card.instanceId)).toEqual([split, instant]);
+    expect(s.chain[0]?.defendingEquipment[0]?.instanceId).toBe(helm.instanceId);
+  });
+
+  it("counts split actions defending from arsenal and action equipment", () => {
+    let s = makeGame({ p1equipment: { head: "HELM" } });
+    s.scriptsRef = { ...s.scriptsRef, HELM: { additionalCardTypes: ["action"] } };
+    const split = giveCard(s, 1, "SPLIT_ACTION");
+    const defender = player(s, 1);
+    defender.arsenal.push(defender.hand.splice(
+      defender.hand.findIndex((card) => card.instanceId === split), 1,
+    )[0]!);
+    s = declareAttack(s, 0, "OVER");
+    const action = giveCard(s, 1, "BLOCK3");
+    const helm = player(s, 1).equipment.head!;
+    for (const other of [action, helm.instanceId]) {
+      expect(applyIntent(s, 1, { kind: "defend", instanceIds: [split, other] })).toMatchObject({
+        ok: false, error: expect.stringContaining("Overpower"),
+      });
+    }
+    s = apply(s, 1, { kind: "stage-defenders", instanceIds: [split] });
+    expect(legalIntents(s, 1)).toContainEqual({ kind: "defend", instanceIds: [split] });
+    s = apply(s, 1, { kind: "defend", instanceIds: [split] });
+    expect(s.chain[0]?.defendingCards[0]?.instanceId).toBe(split);
+  });
+
   it("projects overpower before and after the attack resolves", () => {
     let s = makeGame();
     s = declareAttack(s, 0, "OVERFLAG");

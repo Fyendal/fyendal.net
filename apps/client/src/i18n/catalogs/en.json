@@ -2294,6 +2294,7 @@
   "game.decision.chooseNone": "Choose none",
   "game.decision.confirmNamed": "Confirm {name}",
   "game.decision.payResources": "Pay resources",
+  "game.decision.alternativeCost": "Choose an alternative cost",
   "game.decision.payAmount": "Pay {amount}",
   "game.decision.useNamed": "Use {name}",
   "game.decision.pitchProgress": "{selected} of {required} pitch resources selected",

@@ -256,9 +256,9 @@ const rouseTheAncients: CardScript = {
 
 export const monHighRarity: Record<string, CardScript> = {
   "great library of solana|0": {
-    global: true,
     activated: {
       cost: 0,
+      anyHeroAction: true,
       isAttack: false,
       goAgain: true,
       oncePerTurn: false,
@@ -272,7 +272,7 @@ export const monHighRarity: Record<string, CardScript> = {
         },
       ],
       onActivate(ctx) {
-        ctx.destroyGlobal(ctx.self.instanceId);
+        ctx.destroyPermanent(ctx.self.instanceId);
       },
     },
     triggers: [
@@ -280,11 +280,21 @@ export const monHighRarity: Record<string, CardScript> = {
         event: "end-of-turn",
         whose: "any",
         label: "Great Library intellect",
+        labelMessage: { id: "card.trigger.common.greatlibrary.intellect" },
         condition(ctx) {
-          return ctx.player(ctx.seat).pitch.filter((card) => ctx.cardColor(card) === 2).length >= 2;
+          return ctx.state.players.some((player) =>
+            player.pitch.filter((card) => ctx.cardColor(card) === 2).length >= 2
+          );
         },
         effect(ctx) {
-          ctx.setPlayerFlag(ctx.seat, "bonusIntellect", Number(ctx.getPlayerFlag(ctx.seat, "bonusIntellect")) + 1);
+          for (const player of ctx.state.players) {
+            if (player.pitch.filter((card) => ctx.cardColor(card) === 2).length < 2) continue;
+            ctx.setPlayerFlag(
+              player.seat,
+              "bonusIntellect",
+              Number(ctx.getPlayerFlag(player.seat, "bonusIntellect") || 0) + 1,
+            );
+          }
         },
       },
     ],

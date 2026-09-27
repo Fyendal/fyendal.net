@@ -298,7 +298,8 @@ export function canUntapPermanent(
 
 /**
  * Played cards with these subtypes enter the arena as permanents when they
- * resolve (aura 8.2.4a, item 8.2.5a, ally 8.2.8) instead of going to the graveyard.
+ * resolve (aura 8.2.4a, item 8.2.5a, ally 8.2.8, landmark 8.2.9a)
+ * instead of going to the graveyard.
  */
 export function entersArena(data: CardData): boolean {
   const subtypes = data.subtypes ?? [];
@@ -306,6 +307,7 @@ export function entersArena(data: CardData): boolean {
     subtypes.includes("item") ||
     subtypes.includes("ally") ||
     subtypes.includes("aura") ||
+    subtypes.includes("landmark") ||
     subtypes.includes("invocation") ||
     subtypes.includes("figment")
   );
@@ -358,6 +360,20 @@ export function settlePlayedCard(
     stampEnteringLife(state, card);
     player.board.push(card);
     stampControlledName(state, player, card);
+    // CR 8.2.9b: entering a landmark clears every other landmark permanent.
+    // Clearing is a zone move, not destruction.
+    if ((data.subtypes ?? []).includes("landmark")) {
+      for (const controller of state.players) {
+        for (const previous of [...controller.board]) {
+          if (previous.instanceId === card.instanceId) continue;
+          if (!(dataOf(state, previous.cardId).subtypes ?? []).includes("landmark")) continue;
+          const removed = runtime.commands.removeFromOwnerZones(state, previous.instanceId);
+          if (!removed) continue;
+          runtime.commands.moveToGraveyard(state, previous, "arena");
+          runtime.commands.fireLeaveArena(state, controller.seat, previous, "graveyard");
+        }
+      }
+    }
     logPublic(state, cardEntersArenaLogMessage(state, card.cardId));
     runtime.events.runHook(state, player.seat, card, "onEnterArena", currentLink(state));
     if (!offerCrankDecision(state, runtime, player, card, opts?.allowCrank !== false)) {

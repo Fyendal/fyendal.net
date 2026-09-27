@@ -946,10 +946,13 @@ export function GameBoard() {
   };
 
   const onTableClickCapture = (event: React.MouseEvent) => {
+    const target = event.target as HTMLElement;
+    // Modal controls own the tap, including dismissal of a card inspection.
+    // Capture runs before their close handlers and must not reset the action.
+    if (target.closest(".modal-surface-backdrop")) return;
     cardLongPressHandlers.onClickCapture(event);
     if (event.defaultPrevented) return;
 
-    const target = event.target as HTMLElement;
     const insideChoiceSurface = target.closest(
       "#player-hand, .decision-float, .card-search-overlay, .pitch-focus-card",
     ) !== null;

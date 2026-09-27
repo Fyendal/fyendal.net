@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { actionCandidates, legalIntents, projectStateFor } from "@fyendal/engine";
+import { actionCandidates, applyIntent, legalIntents, projectStateFor } from "@fyendal/engine";
 import { scenario } from "../harness.js";
 
 const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
@@ -370,6 +370,57 @@ describe("Malice Armory Deck spoiled cards", () => {
       .expectAttackValue(6);
 
     expect(g.state.chain.at(-1)?.goAgain).toBe(true);
+  });
+
+  it.each([1, 2, 3])("Skeletal Puppetry pitch %i discards exactly one of three allies in hand", (pitch) => {
+    const allies = ["restless commander|1", "restless cleric|1", "restless steed|1"];
+    for (const chosenAlly of allies) {
+      const g = scenario({ seats: [
+        {
+          hero: "rhinar",
+          heroKey: "malice, domina of the dead|0",
+          hand: [`skeletal puppetry|${pitch}`, ...allies],
+          resources: 0,
+          weapons: [],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ] });
+      const [puppetry, ...allyCards] = g.state.players[0]!.hand;
+      const allyIds = allyCards.map((card) => card.instanceId);
+      for (const intents of [
+        legalIntents(g.state, 0),
+        actionCandidates(g.state, 0),
+      ]) {
+        const alternatives = intents.filter((intent) =>
+          intent.kind === "play-card" && intent.instanceId === puppetry!.instanceId &&
+          intent.alternativeCostCardInstanceIds !== undefined
+        );
+        expect(alternatives).toHaveLength(3);
+        for (const id of allyIds) {
+          expect(alternatives).toContainEqual(expect.objectContaining({
+            alternativeCostCardInstanceIds: [id],
+            pitchInstanceIds: [],
+            pitchRequired: 0,
+          }));
+        }
+      }
+      for (const invalidPayment of [allyIds.slice(0, 2), allyIds]) {
+        expect(applyIntent(g.state, 0, {
+          kind: "play-card",
+          instanceId: puppetry!.instanceId,
+          pitchInstanceIds: [],
+          alternativeCostCardInstanceIds: invalidPayment,
+        }).ok).toBe(false);
+      }
+
+      g.play(`skeletal puppetry|${pitch}`, { alternativeCost: chosenAlly })
+        .expectInZone(0, chosenAlly, "graveyard");
+      expect(g.state.players[0]!.hand).toHaveLength(2);
+      expect(g.state.players[0]!.pitch).toHaveLength(0);
+      expect(g.state.players[0]!.resources).toBe(0);
+      expect(g.state.players[0]!.actionPoints).toBe(1);
+    }
   });
 
   it("blue Skeletal Puppetry gives the next ally attack +1 and go again", () => {

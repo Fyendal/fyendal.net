@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { actionCandidates, legalIntents, projectStateFor } from "@fyendal/engine";
+import { actionCandidates, applyIntent, legalIntents, projectStateFor } from "@fyendal/engine";
 import { scenario } from "../harness.js";
 
 const BLUE = "raging onslaught|3";
@@ -19,6 +19,97 @@ function chaneSeat(extra: Record<string, unknown> = {}) {
 }
 
 describe("MON — Light Illusionist", () => {
+  it("Great Library resolves into the arena and draws to five after pitching two yellows", () => {
+    const library = "great library of solana|0";
+    const s = scenario({
+      seats: [
+        prismSeat({
+          hand: [library, "herald of protection|2"],
+          pitch: ["arc light sentinel|2"],
+          deck: Array(8).fill(BLUE),
+        }),
+        { hero: "dorinthea" },
+      ],
+    });
+    s.play(library, { pitch: ["herald of protection|2"] })
+      .expectInZone(0, library, "board")
+      .expectZoneSize(0, "graveyard", 0)
+      .endTurn()
+      .expectZoneSize(0, "hand", 5);
+    expect(s.state.players[0]!.flags.bonusIntellect).toBeUndefined();
+  });
+
+  it.each([0, 1] as const)("Great Library benefits qualifying hero %i regardless of controller", (active) => {
+    const s = scenario({
+      active,
+      seats: [
+        prismSeat({ board: ["great library of solana|0"], pitch: [SIX, SIX], deck: Array(8).fill(BLUE) }),
+        { hero: "dorinthea", pitch: [SIX, SIX], deck: Array(8).fill(BLUE) },
+      ],
+    });
+    s.endTurn().expectZoneSize(0, "hand", 5).expectZoneSize(1, "hand", 5);
+  });
+
+  it("Great Library does not increase intellect with fewer than two yellows", () => {
+    const s = scenario({
+      seats: [
+        prismSeat({ hand: ["great library of solana|0", BLUE], deck: Array(8).fill(BLUE) }),
+        { hero: "dorinthea" },
+      ],
+    });
+    s.play("great library of solana|0", { pitch: [BLUE] }).endTurn().expectZoneSize(0, "hand", 4);
+  });
+
+  it.each([0, 1] as const)("Hero %i can discard two yellows to destroy a played Great Library", (active) => {
+    const library = "great library of solana|0";
+    const s = scenario({
+      active,
+      seats: [
+        prismSeat({ board: [library], hand: [SIX, SIX] }),
+        { hero: "dorinthea", hand: [SIX, SIX] },
+      ],
+    });
+    s.activate(library).chooseCard(SIX).chooseCard(SIX).settle()
+      .expectZoneSize(0, "board", 0)
+      .expectInZone(0, library, "graveyard")
+      .expectZoneSize(active, "hand", 0);
+    expect(s.state.players[active]!.actionPoints).toBe(1);
+  });
+
+  it("A resolving landmark clears the previous landmark across both boards", () => {
+    const library = "great library of solana|0";
+    const s = scenario({
+      seats: [
+        prismSeat({ board: [library], hand: [library, BLUE] }),
+        { hero: "dorinthea", board: [library] },
+      ],
+    });
+    s.play(library, { pitch: [BLUE] }).expectZoneSize(0, "board", 1)
+      .expectZoneSize(1, "board", 0)
+      .expectInZone(0, library, "graveyard")
+      .expectInZone(1, library, "graveyard");
+    expect(s.state.log.some((entry) => entry.publicText?.includes("is destroyed"))).toBe(false);
+  });
+
+  it("Shared landmark activation still requires two yellows and preserves other sources' control", () => {
+    const s = scenario({
+      active: 1,
+      seats: [
+        { hero: "rhinar", board: ["great library of solana|0"] },
+        { hero: "dorinthea", hand: [SIX, BLUE] },
+      ],
+    });
+    const libraryId = s.state.players[0]!.board[0]!.instanceId;
+    expect(legalIntents(s.state, 1).some((intent) =>
+      intent.kind === "activate-ability" && intent.sourceInstanceId === libraryId
+    )).toBe(false);
+    for (const sourceInstanceId of [libraryId, s.state.players[0]!.hero.instanceId]) {
+      expect(applyIntent(s.state, 1, {
+        kind: "activate-ability", sourceInstanceId, pitchInstanceIds: [],
+      }).ok).toBe(false);
+    }
+  });
+
   it("Seek Enlightenment puts the next attack into soul when its hit trigger resolves", () => {
     const s = scenario({
       seats: [

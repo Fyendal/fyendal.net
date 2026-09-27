@@ -16,7 +16,7 @@ describe("mobile card long press", () => {
 
   it("finds an actionable card for long-press inspection", () => {
     const target = {
-      closest: (selector: string) => selector === ".overlay"
+      closest: (selector: string) => selector === ".overlay, .modal-surface-backdrop"
         ? null
         : selector === "[data-cardid]"
           ? { dataset: { cardid: "SEA225" }, className: "card-clickable" }
@@ -28,9 +28,21 @@ describe("mobile card long press", () => {
 
   it("does not inspect a card through an open overlay", () => {
     const target = {
-      closest: (selector: string) => selector === ".overlay"
+      closest: (selector: string) => selector === ".overlay, .modal-surface-backdrop"
         ? { className: "overlay" }
         : { dataset: { cardid: "SEA225" } },
+    } as unknown as HTMLElement;
+
+    expect(mobileCardLongPressCardId(target)).toBeNull();
+  });
+
+  it("does not start another inspection from the enlarged card modal", () => {
+    const target = {
+      closest: (selector: string) => selector.split(", ").includes(".modal-surface-backdrop")
+        ? { className: "modal-surface-backdrop" }
+        : selector === "[data-cardid]"
+          ? { dataset: { cardid: "SEA225" } }
+          : null,
     } as unknown as HTMLElement;
 
     expect(mobileCardLongPressCardId(target)).toBeNull();

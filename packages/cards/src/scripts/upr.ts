@@ -1,6 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
-  attackAbility,
   buffNextAttack,
   commonOptionMessages,
   dealArcane,
@@ -16,6 +15,7 @@ import {
   yesNoPrompt,
 } from "./shared-helpers.js";
 import { uprHighRarity } from "./upr/high-rarity.js";
+import { dragonAttack } from "./upr/dragon-attack.js";
 
 // Uprising commons, rares, and young heroes. Invocation back faces use a
 // synthetic `B` registry id linked from the playable front by CardData.backId.
@@ -178,14 +178,6 @@ function invocation(backId: string): CardScript {
       if (hook === "invoke") transformAsh(ctx, Number(option), backId, 0, ctx.self.instanceId);
     },
   };
-}
-
-function dragonAttack() {
-  return attackAbility(0, {
-    canActivate(ctx) {
-      return ctx.player(ctx.seat).weapons.some((weapon) => ctx.cardData(weapon.cardId).name === "Storm of Sandikai");
-    },
-  });
 }
 
 function fusionAdditionalCost(ctx: ScriptCtx): void {

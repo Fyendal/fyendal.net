@@ -9,6 +9,7 @@ import {
   wizardActionAsInstant,
   yesNoPrompt,
 } from "../shared-helpers.js";
+import { dragonAttack } from "./dragon-attack.js";
 
 const ASH = "UPR043";
 const FROSTBITE = "SIY035";
@@ -71,10 +72,6 @@ function fusedIce(): Pick<CardScript, "additionalCost" | "onChoose"> {
     },
   };
 }
-function dragonAttack(extra: CardScript): CardScript {
-  return { activated: { cost: 3, isAttack: true, goAgain: false, oncePerTurn: true }, ...extra };
-}
-
 const dromai: CardScript = {
   replacePitchResources(ctx, card, amount) {
     if (ctx.cardData(card.cardId).pitch === 1) ctx.createToken(ASH);
@@ -166,14 +163,16 @@ export const uprHighRarity: Record<string, CardScript> = {
     },
   },
   "invoke dracona optimai|1": invoke("UPR006B"),
-  "dracona optimai|0": dragonAttack({
+  "dracona optimai|0": {
+    activated: dragonAttack(),
     onAttackDeclared(ctx) {
       const red = revealRed(ctx, 3);
       if (red) dealArcane(ctx, opponentSeat(ctx), red * 2);
     },
-  }),
+  },
   "invoke tomeltai|1": invoke("UPR007B"),
-  "tomeltai|0": dragonAttack({
+  "tomeltai|0": {
+    activated: dragonAttack(),
     onAttackDeclared(ctx) {
       const red = revealRed(ctx, 2);
       if (red <= 0) return;
@@ -195,9 +194,10 @@ export const uprHighRarity: Record<string, CardScript> = {
         ctx.destroyPermanent(equipment.instanceId);
       }
     },
-  }),
+  },
   "invoke dominia|1": invoke("UPR008B"),
-  "dominia|0": dragonAttack({
+  "dominia|0": {
+    activated: dragonAttack(),
     onAttackDeclared(ctx) {
       if (revealRed(ctx, 1) <= 0) return;
       const hand = ctx.player(opponentSeat(ctx)).hand;
@@ -212,7 +212,7 @@ export const uprHighRarity: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook === "dominia-banish") ctx.banish(Number(option));
     },
-  }),
+  },
   "fai, rising rebellion|0": fai,
   "phoenix form|1": {
     modifyAttack(ctx) {

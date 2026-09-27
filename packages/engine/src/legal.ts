@@ -1055,8 +1055,15 @@ function abilityIntents(
   includeUnaffordable = false,
 ): GameIntent[] {
   const intents: GameIntent[] = [];
+  const controlledSources = controlledPermanents(state, player.seat);
+  const controlledIds = new Set(controlledSources.map((card) => card.instanceId));
   const sources = [
-    ...controlledPermanents(state, player.seat),
+    ...controlledSources,
+    ...state.players.filter((controller) => controller.seat !== player.seat)
+      .flatMap((controller) => controller.board)
+      .filter((card) => abilityList(scriptOf(state, card.cardId, card)).some((ability) =>
+        ability.anyHeroAction === true && (ability.timing ?? "action") === "action"
+      )),
     ...player.banish.filter((card) =>
       abilityList(scriptOf(state, card.cardId, card)).some((ability) => ability.fromBanish === true)
     ),
@@ -1068,6 +1075,9 @@ function abilityIntents(
     const abilities = abilityList(script);
     for (let ai = 0; ai < abilities.length; ai++) {
       const ability = abilities[ai]!;
+      if (!controlledIds.has(card.instanceId) &&
+        !player.banish.some((source) => source.instanceId === card.instanceId) &&
+        (ability.anyHeroAction !== true || (ability.timing ?? "action") !== "action")) continue;
       if (ability.isAttack && player.flags[`cannotAttackInstance:${card.instanceId}`] === true) continue;
       if (ability.isAttack && cardHasType(state, card, "weapon") && weaponAttacksProhibited(player)) continue;
       const fromBanish = player.banish.some((candidate) => candidate.instanceId === card.instanceId);

@@ -26,7 +26,7 @@ export function cardLongPressMoved(
  * owns its own interactions, while both actionable and inert cards remain
  * inspectable by long press. */
 export function mobileCardLongPressCardId(target: HTMLElement): string | null {
-  if (target.closest(".overlay")) return null;
+  if (target.closest(".overlay, .modal-surface-backdrop")) return null;
   return target.closest<HTMLElement>("[data-cardid]")?.dataset.cardid ?? null;
 }
 

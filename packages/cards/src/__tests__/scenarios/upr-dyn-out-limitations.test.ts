@@ -12,7 +12,7 @@ function implementation(key: string, check: (script: CardScript) => boolean): vo
 describe("Uprising, Dynasty, and Outsiders rules regression coverage", () => {
   it("Tomeltai applies defense counters and destroys zero-defense equipment", () => {
     const g = scenario({ seats: [
-      { hero: "rhinar", resources: 3, board: ["tomeltai|0"], deck: ["wrecker romp|1", "wrecker romp|1"], weapons: [] },
+      { hero: "rhinar", resources: 0, board: ["tomeltai|0"], deck: ["wrecker romp|1", "wrecker romp|1"], weapons: ["storm of sandikai|0"] },
       { hero: "dorinthea", equipment: { head: "ironrot helm|0" } },
     ] });
     g.activate("tomeltai|0").chooseCard("ironrot helm|0").blockWith().settle();
@@ -20,7 +20,7 @@ describe("Uprising, Dynasty, and Outsiders rules regression coverage", () => {
   });
   it("Tomeltai does not destroy equipment that still has defense", () => {
     const g = scenario({ seats: [
-      { hero: "rhinar", resources: 3, board: ["tomeltai|0"], deck: ["wrecker romp|1", "wrecker romp|1"], weapons: [] },
+      { hero: "rhinar", resources: 0, board: ["tomeltai|0"], deck: ["wrecker romp|1", "wrecker romp|1"], weapons: ["storm of sandikai|0"] },
       { hero: "dorinthea", equipment: { chest: "heirloom of tiger hide|0" } },
     ] });
     g.activate("tomeltai|0").chooseCard("heirloom of tiger hide|0");
@@ -28,7 +28,7 @@ describe("Uprising, Dynasty, and Outsiders rules regression coverage", () => {
   });
   it("Tomeltai can choose off-hand equipment in a weapon zone", () => {
     const g = scenario({ seats: [
-      { hero: "rhinar", resources: 3, board: ["tomeltai|0"], deck: ["wrecker romp|1"], weapons: [] },
+      { hero: "rhinar", resources: 0, board: ["tomeltai|0"], deck: ["wrecker romp|1"], weapons: ["storm of sandikai|0"] },
       { hero: "dorinthea", weapons: ["seasoned saviour|0"] },
     ] });
     g.activate("tomeltai|0").chooseCard("seasoned saviour|0");
@@ -36,7 +36,7 @@ describe("Uprising, Dynasty, and Outsiders rules regression coverage", () => {
   });
   it("Dominia privately banishes a chosen defending-hand card", () => {
     const g = scenario({ seats: [
-      { hero: "rhinar", resources: 3, board: ["dominia|0"], deck: ["wrecker romp|1"], weapons: [] },
+      { hero: "rhinar", resources: 0, board: ["dominia|0"], deck: ["wrecker romp|1"], weapons: ["storm of sandikai|0"] },
       { hero: "dorinthea", hand: ["snatch|1"] },
     ] });
     g.activate("dominia|0").chooseCard("snatch|1").blockWith().settle();

@@ -60,6 +60,34 @@ function paymentModel(
 }
 
 describe("alternative-cost payment choices", () => {
+  it("separates compact alternative-cost cards from resource pitching", () => {
+    const html = renderLocalized(
+      <ActionAnnouncementPanel
+        model={{
+          ...paymentModel(false),
+          alternativeCostChoices: [{
+            key: "2:3",
+            instanceIds: [2, 3],
+            cards: [
+              { instanceId: 2, cardId: "IAR084", owner: 0 },
+              { instanceId: 3, cardId: "IAR084", owner: 0 },
+            ],
+          }],
+          alternativeCostCardInstanceIds: [2, 3],
+        }}
+        viewerSeat={0}
+      />,
+    );
+
+    expect(html).toContain('aria-label="Choose an alternative cost"');
+    expect(html).toContain('aria-label="Use Restless Cleric, Restless Cleric" aria-pressed="true"');
+    expect(html).toContain('class="decision-alternative-cost-faces"');
+    expect(html).toContain("<span>Restless Cleric, Restless Cleric</span>");
+    expect(html).not.toContain("<span>Use Restless Cleric");
+    expect(html).toMatch(/<\/section><div class="decision-pitch-payment"><span class="decision-context">Choose cards from your hand to pitch\./);
+    expect(html).toContain("0/2");
+  });
+
   it("hides normal resource payment while the player still needs to pitch", () => {
     const html = renderLocalized(
       <ActionAnnouncementPanel model={paymentModel(false)} viewerSeat={0} />,

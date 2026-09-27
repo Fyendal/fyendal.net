@@ -46,10 +46,128 @@
   box-shadow: 0 10px 30px #0008;
 }
 .decision-float-pitch .decision-resource-progress { font-size: clamp(32px, 5vh, 54px); }
+.decision-pitch-payment {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.decision-alternative-cost {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #b8933f55;
+}
+.decision-alternative-cost-cards {
+  display: flex;
+  gap: 8px;
+  max-width: 100%;
+  padding: 4px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+}
+.decision-target-card.decision-alternative-cost-card {
+  flex: 1 0 76px;
+  min-width: min-content;
+  padding: 6px;
+  font-size: 11px;
+  line-height: 1.25;
+  letter-spacing: normal;
+  text-transform: none;
+}
+.decision-alternative-cost-faces {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.decision-alternative-cost-card .card-hand {
+  flex: 0 0 auto;
+  width: clamp(54px, 8vh, 72px);
+  height: auto;
+  aspect-ratio: 300 / 413;
+}
+.decision-alternative-cost-card:has(.card-tapped) .decision-alternative-cost-faces {
+  padding-inline: 10px;
+}
+.decision-alternative-cost-card > span {
+  max-width: 100px;
+  overflow-wrap: anywhere;
+}
 @media (max-width: 700px) {
-  .pitch-focus-card { width: min(30vw, 29vh); }
-  .pitch-focus-position { left: 30%; top: 44%; }
-  .decision-float.decision-float-pitch { top: 44% !important; width: 38vw; }
-  .decision-float-pitch > .decision { padding: 10px; gap: 8px; }
-  .decision-float-pitch .decision-prompt { font-size: 12px; }
+  .table {
+    --pitch-mobile-bottom: 214px;
+    --pitch-mobile-top: 72px;
+    --pitch-mobile-card-width: min(30vw, 18dvh, 110px);
+  }
+  .table.mobile-hand-is-hidden { --pitch-mobile-bottom: 12px; }
+  .pitch-focus { z-index: calc(var(--game-z-prompt) + 1); }
+  .pitch-focus-position {
+    position: fixed;
+    left: 50%;
+    top: calc(var(--pitch-mobile-top) + 12px);
+    bottom: auto;
+    transform: translateX(-50%);
+  }
+  .pitch-focus-card { width: var(--pitch-mobile-card-width); }
+  .decision-float.decision-float-pitch {
+    left: 2vw !important;
+    right: 2vw !important;
+    top: var(--pitch-mobile-top) !important;
+    bottom: auto !important;
+    transform: none !important;
+    width: 96vw;
+    max-height: none;
+    overflow: visible;
+    padding: 0;
+  }
+  .decision-float-pitch > .decision {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    min-height: 0;
+    max-height: calc(100dvh - var(--pitch-mobile-top) - var(--pitch-mobile-bottom));
+    padding: calc(var(--pitch-mobile-card-width) * 413 / 300 + 24px) 10px 10px;
+    gap: 8px;
+  }
+  .decision-float-pitch .decision-prompt,
+  .decision-float-pitch .decision-alternative-cost {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+  .decision-float-pitch .decision-prompt { grid-row: 1; font-size: 12px; }
+  .decision-float-pitch .decision-alternative-cost {
+    grid-row: 2;
+    gap: 6px;
+    padding-bottom: 0;
+    border-bottom: 0;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  .decision-float-pitch .decision-alternative-cost-card .card-hand { width: 54px; }
+  .decision-float-pitch .decision-pitch-payment {
+    grid-column: 1;
+    grid-row: 3;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .decision-float-pitch .decision-pitch-payment .decision-context {
+    font-size: 11px;
+    text-align: left;
+  }
+  .decision-float-pitch .decision-resource-progress { font-size: 32px; white-space: nowrap; }
+  .decision-float-pitch .decision-pitch-payment + .decision-buttons {
+    grid-column: 2;
+    grid-row: 3;
+  }
+  .decision-float-pitch .decision-pitch-payment + .decision-buttons > button {
+    min-height: 44px;
+    padding: 7px 10px;
+    font-size: 12px;
+  }
 }

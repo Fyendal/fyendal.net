@@ -1,11 +1,50 @@
 import { describe, expect, it } from "vitest";
-import { applyIntent, createGame, legalIntents, projectStateFor } from "@fyendal/engine";
+import { actionCandidates, applyIntent, createGame, legalIntents, projectStateFor } from "@fyendal/engine";
 import type { Decklist } from "@fyendal/shared";
 import { cardData, decklists, scripts } from "../../index.js";
 import { printingId, scenario } from "../harness.js";
 
 const BLUE = "wrecker romp|3";
 const RED = "wrecker romp|1";
+
+describe("UPR — Crown of Providence reaction transition", () => {
+  it("offers a face-down arsenal defense reaction after bottoming a hand card", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["raging onslaught|1"], resources: 3 },
+        {
+          hero: "dorinthea",
+          hand: ["swordmaster's path|1"],
+          deck: ["provoke|3"],
+          arsenalFaceDown: ["shelter from the storm|1"],
+          equipment: { head: "crown of providence|0" },
+        },
+      ],
+    });
+    const arsenalId = s.state.players[1]!.arsenal[0]!.instanceId;
+    s.play("raging onslaught|1").blockWith("crown of providence|0").settle();
+    const choice = {
+      kind: "choose" as const,
+      optionId: String(s.state.players[1]!.hand[0]!.instanceId),
+    };
+    expect(legalIntents(s.state, 1)).toContainEqual(choice);
+    // chooseCard() also passes reaction windows; keep priority under test control.
+    s.doRaw(choice);
+    expect(s.state.pendingDecision?.kind).toBe("attack-reaction");
+    s.passPriority();
+    expect(s.state.pendingDecision?.kind).toBe("defense-reaction");
+    const intent = expect.objectContaining({
+      kind: "play-from-arsenal", instanceId: arsenalId, pitchInstanceIds: [],
+    });
+    expect(legalIntents(s.state, 1)).toContainEqual(intent);
+    expect(actionCandidates(s.state, 1)).toContainEqual(intent);
+    expect(projectStateFor(s.state, 1).players[1]!.arsenal[0]).toMatchObject({
+      instanceId: arsenalId, faceDown: true,
+    });
+    s.react("shelter from the storm|1", { settle: false });
+    expect(s.state.players[1]!.arsenal).toHaveLength(0);
+  });
+});
 
 describe("UPR — registration and heroes", () => {
   it("registers every printing, invocation back, and hero", () => {
@@ -67,6 +106,48 @@ describe("UPR — registration and heroes", () => {
     s.activate("aether ashwing|0").blockWith().settle();
     s.expectLife(1, 19);
   });
+
+  it.each(["dominia|0", "tomeltai|0", "dracona optimai|0"])(
+    "Storm of Sandikai lets %s attack without resources or pitching",
+    (dragon) => {
+      const s = scenario({ seats: [
+        { hero: "rhinar", board: [dragon], resources: 0, hand: [], deck: [], weapons: ["storm of sandikai|0"] },
+        { hero: "dorinthea" },
+      ] });
+      s.activate(dragon).blockWith().settle();
+      expect(s.state.players[0]!.resources).toBe(0);
+      expect(s.state.players[0]!.pitch).toHaveLength(0);
+      s.expectLife(1, 20 - cardData[printingId(dragon)]!.attack!);
+    },
+  );
+
+  it.each(["dominia|0", "tomeltai|0", "dracona optimai|0"])(
+    "%s has no attack ability without Storm of Sandikai",
+    (dragon) => {
+      const s = scenario({ seats: [
+        { hero: "rhinar", board: [dragon], resources: 3, weapons: [] },
+        { hero: "dorinthea", weapons: ["storm of sandikai|0"] },
+      ] });
+      const dragonId = s.state.players[0]!.board[0]!.instanceId;
+      for (const intents of [legalIntents(s.state, 0), actionCandidates(s.state, 0)]) {
+        expect(intents.some((intent) => intent.kind === "activate-ability" && intent.sourceInstanceId === dragonId)).toBe(false);
+      }
+    },
+  );
+
+  it.each(["dominia|0", "tomeltai|0", "dracona optimai|0"])(
+    "%s can attack only once per turn even with an action point remaining",
+    (dragon) => {
+      const s = scenario({ seats: [
+        { hero: "rhinar", board: [dragon], resources: 3, deck: [], weapons: ["storm of sandikai|0"], equipment: { legs: "time skippers|0" } },
+        { hero: "dorinthea" },
+      ] });
+      s.activate("time skippers|0").activate(dragon).blockWith().settle();
+      expect(s.state.players[0]!.actionPoints).toBe(1);
+      const dragonId = s.state.players[0]!.board[0]!.instanceId;
+      expect(legalIntents(s.state, 0).some((intent) => intent.kind === "activate-ability" && intent.sourceInstanceId === dragonId)).toBe(false);
+    },
+  );
 
   it("Fai returns a Phoenix Flame from his graveyard", () => {
     const s = scenario({

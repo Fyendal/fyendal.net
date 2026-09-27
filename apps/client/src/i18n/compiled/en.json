@@ -20120,6 +20120,12 @@
       "value": "Discard from hand"
     }
   ],
+  "game.decision.alternativeCost": [
+    {
+      "type": 0,
+      "value": "Choose an alternative cost"
+    }
+  ],
   "game.decision.arsenal.action": [
     {
       "type": 0,

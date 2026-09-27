@@ -2294,6 +2294,7 @@
   "game.decision.chooseNone": "不选择",
   "game.decision.confirmNamed": "确认{name}",
   "game.decision.payResources": "支付资源",
+  "game.decision.alternativeCost": "选择替代费用",
   "game.decision.payAmount": "支付 {amount} 点资源",
   "game.decision.useNamed": "使用{name}",
   "game.decision.pitchProgress": "已选择 {selected}/{required} 点资源",
