@@ -12,7 +12,7 @@ export type Format = "classic-battles" | "cc" | "silver-age";
 export type CardPoolMode = "legal" | "future" | "open";
 
 /** Stable identities for the supported practice opponents. */
-export type BotOpponent = "bravo" | "briar" | "cindra" | "ira" | "hala" | "jarl" | "starvo";
+export type BotOpponent = "bravo" | "briar" | "kayo" | "cindra" | "ira" | "hala" | "jarl" | "starvo";
 
 /** Numeric resources produced when pitched. Colored cards use their red/
  * yellow/blue/purple color value (1/2/3/4). */
@@ -472,6 +472,8 @@ export interface PendingDecision {
   resourcePayment?: {
     cost: number;
     options: { optionId: string; pitchInstanceIds: number[] }[];
+    /** Source of a scripted payment; clients resolve it against visible cards. */
+    sourceInstanceId?: number;
   };
   /** Card whose play is paused on a declaration or additional-cost choice
    * before it becomes a stack layer. Private to the deciding player. */

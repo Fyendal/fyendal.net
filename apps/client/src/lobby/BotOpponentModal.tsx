@@ -61,6 +61,14 @@ const BOTS: Readonly<Record<ConstructedFormat, readonly BotOption[]>> = {
   ],
   "silver-age": [
     {
+      id: "kayo",
+      name: "Kayo",
+      title: "SAGE Kayo",
+      heroName: "Kayo",
+      deckType: "aggro",
+      descriptionId: "lobby.bot.kayo.description",
+    },
+    {
       id: "briar",
       name: "Briar",
       title: "Elemental Runeblade",

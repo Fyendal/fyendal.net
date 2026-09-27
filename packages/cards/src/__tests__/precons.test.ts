@@ -118,4 +118,30 @@ describe("silver-age precon pools", () => {
       expect(isImplemented(cardData[id]!), id).toBe(true);
     }
   });
+  it("preserves the supplied SAGE Kayo pool only for practice", () => {
+    const entry = precon("bot-kayo-sage")!;
+    expect(entry).toMatchObject({ name: "SAGE Kayo", format: "silver-age", botOnly: true });
+    expect(preconsForFormat("silver-age").map((deck) => deck.id)).not.toContain(entry.id);
+    expect(silverAgePrecon(entry.id)).toBeNull();
+    const pool = entry.pool;
+    expect(pool.deck).toHaveLength(46);
+    expect(pool.weaponIds).toHaveLength(1);
+    expect(pool.equipmentPool).toHaveLength(8);
+    for (const id of [pool.heroId, ...pool.weaponIds, ...pool.equipmentPool, ...pool.deck]) {
+      expect(cardData[id], id).toBeTruthy();
+      expect(isImplemented(cardData[id]!), id).toBe(true);
+    }
+    const counts = new Map<string, number>();
+    for (const id of pool.deck) {
+      const card = cardData[id]!;
+      const identity = `${card.name}|${card.pitch}`;
+      counts.set(identity, (counts.get(identity) ?? 0) + 1);
+    }
+    expect(counts.size).toBe(23);
+    expect([...counts.values()].every((count) => count === 2)).toBe(true);
+    for (const excluded of ["Beaten Trackers", "Pulping", "Savage Feast"]) {
+      expect([...pool.deck, ...pool.equipmentPool].map((id) => cardData[id]!.name)).not.toContain(excluded);
+    }
+  });
+
 });

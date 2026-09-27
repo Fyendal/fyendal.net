@@ -29,7 +29,8 @@ export function retainedPitchFocus(
   const activeSourceId = selection.kind === "activate" ? selection.sourceInstanceId
     : selection.kind !== "none" ? selection.instanceId
       : submittedSourceId ?? (view.pendingDecision?.player === seat
-        ? view.pendingDecision.preStackSource?.card.instanceId : undefined);
+        ? view.pendingDecision.preStackSource?.card.instanceId
+          ?? view.pendingDecision.resourcePayment?.sourceInstanceId : undefined);
   if (previous.source.card.instanceId !== activeSourceId ||
     view.stack.some((layer) => layer.card?.instanceId === activeSourceId) ||
     view.chain.some((link) => link.onStack && link.attackingCard.instanceId === activeSourceId)) return null;

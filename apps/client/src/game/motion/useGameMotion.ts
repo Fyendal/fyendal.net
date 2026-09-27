@@ -27,8 +27,10 @@ import {
   resolveMotionBatches,
   type GameMotionBatch,
   type MotionAnchorSnapshot,
+  type MotionRect,
 } from "./motionGeometry.js";
 import { useMotionPreference } from "./useMotionPreference.js";
+import { rememberStackFocusOrigins } from "../pitchFocusMotion.js";
 import {
   activateMotionDestinationMasks,
   motionDestinationsRequiringEarlyMask,
@@ -62,6 +64,7 @@ export function useGameMotion({
   turnStartUiReady: boolean;
   arriveFlight: (batchId: string, destinationPresentationKey?: string) => void;
   completeBatch: (batchId: string) => void;
+  getStackFocusOrigin: (instanceId: number) => MotionRect | undefined;
 } {
   const reduceMotion = useMotionPreference(motionPreference);
   const [batch, setBatch] = useState<GameMotionBatch | null>(null);
@@ -69,12 +72,26 @@ export function useGameMotion({
   const previousViewRef = useRef<GameView | null>(null);
   const layoutMotionSequenceRef = useRef(0);
   const previousAnchorsRef = useRef<MotionAnchorSnapshot>(EMPTY_ANCHORS);
+  const stackFocusOriginsRef = useRef<ReadonlyMap<number, MotionRect>>(new Map());
   const processedUpdateKeyRef = useRef<string | null>(null);
   const previousViewUpdateSequenceRef = useRef<number | null>(null);
   const previousViewPredictedSemanticTransitionRef = useRef(false);
   const reduceMotionRef = useRef(reduceMotion);
   const batchQueueRef = useRef<MotionBatchQueue>(EMPTY_MOTION_BATCH_QUEUE);
   const maskedElementsRef = useRef<MaskedElementsByBatch>(new Map());
+  const gameId = view?.gameId;
+  const getStackFocusOrigin = useCallback((instanceId: number) => {
+    if (previousViewRef.current?.gameId !== gameId) return undefined;
+    return stackFocusOriginsRef.current.get(instanceId);
+  }, [gameId]);
+  const refreshStackFocusOrigins = useCallback((currentView: GameView, anchors: MotionAnchorSnapshot) => {
+    stackFocusOriginsRef.current = rememberStackFocusOrigins(
+      previousViewRef.current?.gameId === currentView.gameId ? stackFocusOriginsRef.current : new Map(),
+      anchors,
+      currentView.stack.flatMap((layer) => layer.card ? [layer.card.instanceId] : []),
+      currentView.pendingDecision?.resourcePayment?.sourceInstanceId,
+    );
+  }, []);
 
   const activateBatchMasks = useCallback((
     candidate: GameMotionBatch | null,
@@ -164,6 +181,7 @@ export function useGameMotion({
     if (!root || !view) {
       previousViewRef.current = view;
       previousAnchorsRef.current = EMPTY_ANCHORS;
+      stackFocusOriginsRef.current = new Map();
       processedUpdateKeyRef.current = updateKey;
       previousViewUpdateSequenceRef.current = viewUpdate.sequence;
       previousViewPredictedSemanticTransitionRef.current = predictsSemanticTransition;
@@ -174,6 +192,7 @@ export function useGameMotion({
     // Read every current rect first. Class writes happen only after the batch
     // has been completely resolved, avoiding read/write layout interleaving.
     const measured = measureMotionAnchors(root);
+    refreshStackFocusOrigins(view, measured.snapshot);
     refreshMotionDestinationMasks(maskedElementsRef.current, measured.cardElements);
     if (reduceMotionRef.current !== reduceMotion) {
       reduceMotionRef.current = reduceMotion;
@@ -274,18 +293,23 @@ export function useGameMotion({
     const settleAfterResize = () => {
       cancelMotionQueue();
       const root = rootRef.current;
-      if (root) previousAnchorsRef.current = measureMotionAnchors(root).snapshot;
+      if (root) {
+        const anchors = measureMotionAnchors(root).snapshot;
+        previousAnchorsRef.current = anchors;
+        if (previousViewRef.current) refreshStackFocusOrigins(previousViewRef.current, anchors);
+      }
     };
     window.addEventListener("resize", settleAfterResize);
     return () => {
       window.removeEventListener("resize", settleAfterResize);
     };
-  }, [cancelMotionQueue, rootRef]);
+  }, [cancelMotionQueue, rootRef, refreshStackFocusOrigins]);
 
   return {
     batch,
     turnStartUiReady,
     arriveFlight,
     completeBatch,
+    getStackFocusOrigin,
   };
 }

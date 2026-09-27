@@ -1003,7 +1003,12 @@ export function GameBoard() {
       {/* ── playmat board: opponent half on top, your half below ── */}
       <div className="board">
         {gameMotion.turnStartUiReady && pitchSource ? (
-          <PitchFocus key={pitchSource.card.instanceId} source={pitchSource} motionPreference={motionPreference} />
+          <PitchFocus
+            key={pitchSource.card.instanceId}
+            source={pitchSource}
+            motionPreference={motionPreference}
+            getStackFocusOrigin={gameMotion.getStackFocusOrigin}
+          />
         ) : null}
         <BrowserBotNotice />
         {playerProfiles ? (

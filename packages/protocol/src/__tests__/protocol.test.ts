@@ -331,6 +331,7 @@ describe("client messages", () => {
     { type: "create-room", format: "classic-battles", hero: "rhinar" },
     { type: "create-room", format: "silver-age", deckId: "deck", private: true },
     { type: "create-bot-room", format: "silver-age", deckId: "precon-sba", bot: "briar" },
+    { type: "create-bot-room", format: "silver-age", deckId: "precon-ska", bot: "kayo" },
     { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "ira" },
     { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "cindra" },
     { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "jarl" },
@@ -452,7 +453,7 @@ describe("client messages", () => {
   it("rejects unknown fields, unsafe integers, oversized data, bad nesting, and non-literal Boost", () => {
     expect(decodeClientMessage({ type: "list-rooms", extra: true })).toBeNull();
     expect(decodeClientMessage({ type: "create-bot-room", format: "classic-battles", deckId: "precon-asr" })).toBeNull();
-    expect(decodeClientMessage({ type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "kayo" })).toBeNull();
+    expect(decodeClientMessage({ type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "unknown" })).toBeNull();
     expect(decodeClientMessage({ type: "auth", token: "x".repeat(129) })).toBeNull();
     expect(decodeClientMessage({ type: "friend-request", username: "has space" })).toBeNull();
     expect(decodeClientMessage({ type: "chat-send", username: "Alice", text: "x".repeat(1_001), clientMessageId: "message-1" })).toBeNull();
@@ -710,6 +711,17 @@ describe("GameView and server messages", () => {
       },
     };
     expect(decodeGameView(resourcePayment)).not.toBeNull();
+    for (const sourceInstanceId of [2, -1, 1.5, "2"]) {
+      const decoded = decodeGameView({
+        ...resourcePayment,
+        pendingDecision: {
+          ...resourcePayment.pendingDecision,
+          resourcePayment: { ...resourcePayment.pendingDecision.resourcePayment, sourceInstanceId },
+        },
+      });
+      if (sourceInstanceId === 2) expect(decoded).not.toBeNull();
+      else expect(decoded).toBeNull();
+    }
     expect(decodeGameView({
       ...gameView(),
       pendingDecision: {

@@ -845,5 +845,51 @@
                 "UPR139", "ELE114", "ROS106", "DTD230", "AJV016"
             ]
         }
+    },
+    "_comment_bot_kayo": "Source: https://fabrary.net/decks/01M31Z058ZJKSZREQANG1564PS. User-supplied SAGE Kayo list replaces the older guide's banned cards; all 46 main-deck cards and nine arena cards are preserved. Matchup presentation selects forty.",
+    "bot-kayo-sage": {
+        "name": "SAGE Kayo",
+        "format": "silver-age",
+        "botOnly": true,
+        "pool": {
+            "heroId": "SKA001",
+            "weaponIds": ["SKA002"],
+            "equipmentPool": [
+                "SKA007",
+                "SBL009",
+                "SKA003",
+                "SKA008",
+                "SKA004",
+                "SKA006",
+                "PEN004",
+                "PEN318"
+            ],
+            "deck": [
+                "SKA010", "SKA010",
+                "PEN012", "PEN012",
+                "SUP221", "SUP221",
+                "SKA011", "SKA011",
+                "SKA012", "SKA012",
+                "SKA013", "SKA013",
+                "SKA014", "SKA014",
+                "SKA016", "SKA016",
+                "SKA019", "SKA019",
+                "HVY164", "HVY164",
+                "SUP144", "SUP144",
+                "SKA023", "SKA023",
+                "SUP165", "SUP165",
+                "SKA024", "SKA024",
+                "SKA025", "SKA025",
+                "HVY028", "HVY028",
+                "SKA026", "SKA026",
+                "SKA027", "SKA027",
+                "HVY145", "HVY145",
+                "SKA030", "SKA030",
+                "SKA033", "SKA033",
+                "SUP166", "SUP166",
+                "WTR031", "WTR031"
+            ],
+            "sideboard": []
+        }
     }
 }

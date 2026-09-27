@@ -38,6 +38,7 @@ it("does not expose internal bot decks through player deck resolution", async ()
   const db = await freshDb();
   for (const id of [
     "bot-briar-broccoli",
+    "bot-kayo-sage",
     "bot-bravo-flarvo",
     "bot-cindra-head-jabs",
     "precon-hala-masterclass",

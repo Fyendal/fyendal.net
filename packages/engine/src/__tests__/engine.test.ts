@@ -135,6 +135,24 @@ describe("game setup & turn structure", () => {
     ]);
   });
 
+  it("projects an arena payment source only to the paying player and replay", () => {
+    const state = makeGame(904);
+    const source = player(state, 0).weapons[0]!;
+    player(state, 0).resources = 0;
+    giveCard(state, 0, "BLUE");
+    expect(makeCtx(state, engineRuntime, 0, source).requestPayment(
+      "arena-payment", "Pay 2?", 2,
+    )).toBe(true);
+
+    expect(projectStateFor(state, 0).pendingDecision?.resourcePayment).toMatchObject({
+      cost: 2, sourceInstanceId: source.instanceId,
+    });
+    expect(projectStateFor(state, 1).pendingDecision?.resourcePayment).toBeUndefined();
+    expect(projectStateFor(state, null).pendingDecision?.resourcePayment).toBeUndefined();
+    expect(projectStateForReplay(state).pendingDecision?.resourcePayment?.sourceInstanceId)
+      .toBe(source.instanceId);
+  });
+
   it("supports semantic prompts across card, name, and payment decisions", () => {
     const cardState = makeGame(902);
     const cardSource = player(cardState, 0).hero;

@@ -1323,7 +1323,12 @@ function projectState(
                 }
               : {}),
             ...((revealAll || pd.player === seat) && pd.resourcePayment
-              ? { resourcePayment: pd.resourcePayment }
+              ? {
+                  resourcePayment: {
+                    ...pd.resourcePayment,
+                    ...(pd.sourceInstanceId !== undefined ? { sourceInstanceId: pd.sourceInstanceId } : {}),
+                  },
+                }
               : {}),
             ...(privateDecision && preStackFlow && preStackCard
               ? {

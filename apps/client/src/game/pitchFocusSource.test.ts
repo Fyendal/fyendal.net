@@ -37,7 +37,7 @@ describe("pitch focus source", () => {
     expect(retainedPitchFocus(view, 0, { kind: "none" }, false, true, focused, 2)).toBeNull();
   });
 
-  it("moves hand plays and hand abilities, but connects arena sources", () => {
+  it("distinguishes hand plays and hand abilities from arena sources", () => {
     const view = paymentView();
     expect(pitchFocusSource(view, 0, { kind: "play-hand", instanceId: 2 }))
       .toEqual({ card: view.players[0]!.hand[0], fromHand: true });
@@ -58,6 +58,44 @@ describe("pitch focus source", () => {
     };
     expect(pitchFocusSource(view, 0, { kind: "none" })).toEqual({ card, fromHand: true });
     expect(pitchFocusSource(view, 1, { kind: "none" })).toBeNull();
+  });
+
+  it("focuses the visible arena source of a scripted payment without a local selection", () => {
+    const view = paymentView();
+    view.pendingDecision = {
+      player: 0, kind: "optional-effect", prompt: "Pay 2?",
+      resourcePayment: { cost: 2, options: [], sourceInstanceId: 3 },
+    };
+    const selection = { kind: "none" as const };
+    expect(pitchFocusSource(view, 0, selection)).toEqual({
+      card: view.players[0]!.board[0], fromHand: false,
+    });
+    expect(pitchFocusSource(view, 1, selection)).toBeNull();
+    const focus = retainedPitchFocus(view, 0, selection, true, true, null);
+    expect(retainedPitchFocus(view, 0, selection, false, true, focus)).toBe(focus);
+    view.pendingDecision = null;
+    expect(retainedPitchFocus(view, 0, selection, false, true, focus)).toBeNull();
+  });
+
+  it("does not focus a hidden arena payment source", () => {
+    const view = paymentView();
+    view.players[0]!.board[0]!.hidden = true;
+    view.pendingDecision = {
+      player: 0, kind: "optional-effect", prompt: "Pay 2?",
+      resourcePayment: { cost: 2, options: [], sourceInstanceId: 3 },
+    };
+    expect(pitchFocusSource(view, 0, { kind: "none" })).toBeNull();
+  });
+
+  it("resolves a payment source that is only visible on the stack", () => {
+    const view = paymentView();
+    const card = { instanceId: 8, cardId: "STACK", owner: 0 };
+    view.stack = [{ card, seat: 0, label: "Effect", optional: true }];
+    view.pendingDecision = {
+      player: 0, kind: "optional-effect", prompt: "Pay 2?",
+      resourcePayment: { cost: 2, options: [], sourceInstanceId: 8 },
+    };
+    expect(pitchFocusSource(view, 0, { kind: "none" })).toEqual({ card, fromHand: false });
   });
 
   it("does not invent a source for a hidden or missing card", () => {

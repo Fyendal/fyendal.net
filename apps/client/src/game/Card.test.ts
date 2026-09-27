@@ -136,7 +136,9 @@ describe("CardBack", () => {
     }));
 
     expect(visible).toContain('data-motion-card="0:hand:7"');
+    expect(visible).toContain('data-card-instance-id="7"');
     expect(hidden).toContain('data-motion-card="1:arsenal:8"');
+    expect(hidden).not.toContain("data-card-instance-id");
   });
 
   it("uses native button semantics when it is interactive", () => {

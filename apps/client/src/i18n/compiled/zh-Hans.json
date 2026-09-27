@@ -21678,6 +21678,12 @@
       "value": "耐心的土冰守护者，擅长高效防御并用两卡手牌发动干扰性攻击。"
     }
   ],
+  "lobby.bot.kayo.description": [
+    {
+      "type": 0,
+      "value": "以 go again 起手，衔接 Mandible Claw，再用高攻击力终结的进攻型蛮族牌组。"
+    }
+  ],
   "lobby.bot.prompt": [
     {
       "type": 0,

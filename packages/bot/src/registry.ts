@@ -6,6 +6,7 @@ import type {
   PresentedArena,
 } from "@fyendal/shared";
 import { chooseBravoIntent, chooseBravoIntentWithTrace } from "./bravo-policy.js";
+import { chooseKayoIntent, chooseKayoIntentWithTrace } from "./kayo-policy.js";
 import { chooseBriarIntent, chooseBriarIntentWithTrace } from "./briar-policy.js";
 import {
   chooseCindraContinuationIntent,
@@ -30,6 +31,7 @@ import {
 import {
   bravoPresentationFor,
   briarPresentationFor,
+  kayoPresentationFor,
   cindraPresentationFor,
   halaPresentationFor,
   iraPresentation,
@@ -126,6 +128,16 @@ export const BOT_DEFINITIONS = {
     chooseIntent: chooseBravoIntent,
     chooseDecision: (input) => botDecisionFromTrace(chooseBravoIntentWithTrace(input)),
     presentationFor: (opponent) => bravoPresentationFor(opponent),
+  }),
+  kayo: stagedDefinition({
+    id: "kayo",
+    format: "silver-age",
+    deckId: "bot-kayo-sage",
+    username: "Kayo Bot",
+    deckName: "SAGE Kayo",
+    chooseIntent: chooseKayoIntent,
+    chooseDecision: (input) => botDecisionFromTrace(chooseKayoIntentWithTrace(input)),
+    presentationFor: (opponent) => kayoPresentationFor(opponent),
   }),
   briar: stagedDefinition({
     id: "briar",

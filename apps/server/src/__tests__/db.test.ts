@@ -22,6 +22,24 @@ async function tables(db: Queryable): Promise<string[]> {
 }
 
 describe("initial schema", () => {
+  it("upgrades durable matchmaking to accept Kayo while retaining existing bot ids", async () => {
+    const db = rawDb();
+    await applyMigrations(db, MIGRATIONS.filter((migration) => migration.version <= 37));
+    await applyMigrations(db, MIGRATIONS);
+    const user = await db.query(`INSERT INTO users (username, username_lc, pass_hash, created_at)
+      VALUES ('KayoOwner', 'kayoowner', 'hash', 1) RETURNING id`);
+    await db.query(`INSERT INTO matchmaking_entries (user_id, format, deck_id, joined_at)
+      VALUES ($1, 'silver-age', 'precon-ska', 1)`, [user.rows[0]!.id]);
+    for (const bot of ["kayo", "briar", "starvo"]) {
+      await db.query(`INSERT INTO pending_bot_starts (user_id, format, deck_id, bot, card_pool_mode, requested_at)
+        VALUES ($1, 'silver-age', 'precon-ska', $2, 'legal', 1)`, [user.rows[0]!.id, bot]);
+      expect((await db.query("SELECT bot FROM pending_bot_starts")).rows).toEqual([{ bot }]);
+      await db.query("DELETE FROM pending_bot_starts");
+    }
+    await expect(db.query(`INSERT INTO pending_bot_starts (user_id, format, deck_id, bot, card_pool_mode, requested_at)
+      VALUES ($1, 'silver-age', 'precon-ska', 'unknown', 'legal', 1)`, [user.rows[0]!.id])).rejects.toThrow();
+  });
+
   it("uses an already checked-out client without reconnecting or releasing it", async () => {
     const statements: string[] = [];
     let released = false;

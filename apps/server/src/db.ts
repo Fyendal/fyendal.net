@@ -652,6 +652,15 @@ export const MIGRATIONS: Migration[] = [
     ALTER TABLE bug_reports ADD CONSTRAINT bug_reports_message_check
       CHECK (resolution_message IS NULL OR resolution_message <> '');`,
   },
+  {
+    version: 38,
+    // Extend durable matchmaking bot ids without changing applied migrations.
+    sql: `ALTER TABLE pending_bot_starts
+      DROP CONSTRAINT IF EXISTS pending_bot_starts_bot_check;
+    ALTER TABLE pending_bot_starts
+      ADD CONSTRAINT pending_bot_starts_bot_check
+      CHECK (bot IN ('ira', 'hala', 'cindra', 'jarl', 'briar', 'bravo', 'starvo', 'kayo'));`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

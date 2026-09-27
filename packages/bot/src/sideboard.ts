@@ -620,3 +620,47 @@ export function starvoPresentationFor(
     deck,
   };
 }
+
+/** Adapt the old guide's aggro/slow split to the supplied current list.
+ * Keep the supplied pool; do not restore cards from the old article list.
+ * Sources: https://www.age.events/articles/i-dont-have-enough-arms-for-all-these-gold-foils-a-sage-kayo-deck-tech
+ * https://fabrary.net/decks/01M31Z058ZJKSZREQANG1564PS
+ */
+export function kayoPresentationFor(
+  opponent: BotPrepOpponent,
+  cards: Readonly<Record<string, CardData>> = cardData,
+): PresentedDeck {
+  const registered = precon("bot-kayo-sage");
+  if (!registered || registered.botOnly !== true || registered.format !== "silver-age") {
+    throw new Error("Kayo bot deck is not registered");
+  }
+  const name = opponentHeroName(opponent, cards);
+  const slow = /oldhim|dorinthea|enigma|nuu|terra|riptide/.test(name);
+  const wizard = /kano|blaze|iyslander/.test(name);
+  const dominate = /bravo|azalea|valda/.test(name);
+  const omit = slow
+    ? new Set(["clash of agility|1", "clash of might|1", "bear hug|1"])
+    : new Set(["agile windup|2", "buckwild|2", "mighty windup|3"]);
+  const deck = registered.pool.deck.filter((id) => {
+    const data = cards[id]!;
+    return !omit.has(`${data.name.toLowerCase()}|${data.pitch ?? 0}`);
+  });
+  if (deck.length !== 40) throw new Error(`Kayo presentation has ${deck.length} cards, expected 40`);
+  const equipmentId = (equipmentName: string): string => {
+    const id = registered.pool.equipmentPool.find((candidate) => cards[candidate]?.name === equipmentName);
+    if (!id) throw new Error(`Kayo equipment missing: ${equipmentName}`);
+    return id;
+  };
+  return {
+    weaponIds: [...registered.pool.weaponIds],
+    equipment: {
+      head: equipmentId(wizard ? "Nullrune Hood" : "Knucklehead"),
+      chest: equipmentId("Predatory Plating"),
+      arms: equipmentId(wizard
+        ? name.includes("iyslander") ? "Nullrune Gloves" : "Skera Strapping"
+        : "Blade Beckoner Gauntlets"),
+      legs: equipmentId(dominate ? "Unflinching Foothold" : "Flat Trackers"),
+    },
+    deck,
+  };
+}

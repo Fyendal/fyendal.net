@@ -53,7 +53,7 @@ describe("BotOpponentModal", () => {
     expect(html.match(/aria-hidden="true"/g)).toHaveLength(5);
   });
 
-  it("offers Briar and Bravo for Silver Age", () => {
+  it("offers Kayo, Briar, and Bravo for Silver Age", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>
         <BotOpponentModal format="silver-age" cardPoolMode="open" onSelect={vi.fn()} onClose={vi.fn()} />
@@ -61,6 +61,7 @@ describe("BotOpponentModal", () => {
     );
 
     expect(html).toContain("Briar");
+    expect(html).toContain("Kayo");
     expect(html).toContain("Elemental Runeblade");
     expect(html).toContain("Aggro");
     expect(html).toContain("Bravo");
@@ -82,6 +83,7 @@ describe("BotOpponentModal", () => {
     );
 
     expect(html).not.toContain("Briar");
+    expect(html).toContain("Kayo");
     expect(html).toContain("Bravo");
   });
 

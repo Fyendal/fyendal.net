@@ -254,7 +254,7 @@ const CARD_POOL_MODES = new Set(["legal", "future", "open"]);
 const HEROES = new Set(["dorinthea", "rhinar"]);
 const PHASES = new Set(["start", "action", "layer", "reaction", "defend", "end", "game-over"]);
 const MELD_SIDES = new Set(["left", "right", "both"]);
-const BOT_OPPONENTS = new Set(["bravo", "briar", "cindra", "ira", "hala", "jarl", "starvo"]);
+const BOT_OPPONENTS = new Set(["bravo", "briar", "kayo", "cindra", "ira", "hala", "jarl", "starvo"]);
 const PLAYABLE_ZONES = new Set(["banish", "graveyard", "deck"]);
 const EQUIPMENT_SLOTS = new Set(["head", "chest", "arms", "legs"]);
 const DECISION_KINDS = new Set([
@@ -1065,13 +1065,11 @@ function pendingDecision(value: unknown): boolean {
     && optional(decision.revealedCards, cardViews)
     && optional(decision.lookedCards, cardViews)
     && optional(decision.stagedCards, cardViews) && optional(decision.stagedDefense, finite)
-    && optional(decision.resourcePayment, (value): value is {
-      cost: number;
-      options: { optionId: string; pitchInstanceIds: number[] }[];
-    } => {
+    && optional(decision.resourcePayment, (value): value is PendingDecision["resourcePayment"] => {
       const payment = object(value);
-      return !!payment && exactKeys(payment, ["cost", "options"])
+      return !!payment && exactKeys(payment, ["cost", "options", "sourceInstanceId"], ["cost", "options"])
         && nonNegativeInteger(payment.cost)
+        && optional(payment.sourceInstanceId, instanceId)
         && array(payment.options, (entry): entry is {
           optionId: string;
           pitchInstanceIds: number[];

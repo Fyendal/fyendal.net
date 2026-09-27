@@ -363,6 +363,7 @@ export function CardFace({
     <div
       className={cls}
       data-cardid={card.cardId}
+      data-card-instance-id={card.instanceId}
       data-motion-card={motionKey}
       data-motion-zone-anchor={motionZoneAnchor}
       data-hand-instance-id={handReorderHint ? card.instanceId : undefined}

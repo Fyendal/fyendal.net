@@ -24,9 +24,6 @@
   border-color: #d5b564;
 }
 .pitch-focus-source-hidden { display: none !important; }
-.pitch-focus-connector { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-.pitch-focus-connector line { stroke: #e7c775; stroke-width: 2; stroke-dasharray: 2 8; stroke-linecap: round; }
-.pitch-focus-connector circle { fill: #ffdf8e; }
 .decision-float.decision-float-pitch {
   left: calc(var(--mat-cx) * 1.36) !important;
   right: auto !important;
@@ -100,7 +97,7 @@
 }
 @media (max-width: 700px) {
   .table {
-    --pitch-mobile-bottom: 214px;
+    --pitch-mobile-bottom: 230px;
     --pitch-mobile-top: 72px;
     --pitch-mobile-card-width: min(30vw, 18dvh, 110px);
   }
@@ -109,7 +106,7 @@
   .pitch-focus-position {
     position: fixed;
     left: 50%;
-    top: calc(var(--pitch-mobile-top) + 12px);
+    top: var(--pitch-mobile-focus-top, calc(var(--pitch-mobile-top) + 12px));
     bottom: auto;
     transform: translateX(-50%);
   }
@@ -117,8 +114,8 @@
   .decision-float.decision-float-pitch {
     left: 2vw !important;
     right: 2vw !important;
-    top: var(--pitch-mobile-top) !important;
-    bottom: auto !important;
+    top: auto !important;
+    bottom: var(--pitch-mobile-bottom) !important;
     transform: none !important;
     width: 96vw;
     max-height: none;

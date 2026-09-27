@@ -22542,6 +22542,12 @@
       "value": "A patient Earth and Ice Guardian that blocks efficiently and attacks with disruptive two-card hands."
     }
   ],
+  "lobby.bot.kayo.description": [
+    {
+      "type": 0,
+      "value": "An aggressive Brute deck that leads with go again, swings Mandible Claw, and finishes with big attacks."
+    }
+  ],
   "lobby.bot.prompt": [
     {
       "type": 0,

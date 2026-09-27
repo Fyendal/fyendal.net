@@ -19,14 +19,19 @@ export function pitchFocusSource(view: GameView, seat: number, selection: Sel): 
       fromHand: pending.preStackSource.zone === "hand",
     };
   }
-  if (selection.kind === "none" || selection.kind === "choose-hand-action") return null;
-  const id = selection.kind === "activate" ? selection.sourceInstanceId : selection.instanceId;
+  const paymentSourceId = pending?.player === seat && pending.resourcePayment
+    ? pending.resourcePayment.sourceInstanceId : undefined;
+  const id = paymentSourceId ?? (selection.kind === "activate" ? selection.sourceInstanceId
+    : selection.kind !== "none" && selection.kind !== "choose-hand-action" ? selection.instanceId : undefined);
+  if (id === undefined) return null;
   const card = [
-    heroCard(player), ...player.hand, ...player.arsenal, ...player.weapons,
-    ...Object.values(player.equipment), ...player.board,
+    ...player.hand, ...player.arsenal,
+    ...view.players.flatMap((owner) => [heroCard(owner), ...owner.weapons,
+      ...Object.values(owner.equipment), ...owner.board]),
     ...view.players.flatMap((owner) => [...owner.banish, ...owner.graveyard]),
     ...(player.visibleDeckTop ? [player.visibleDeckTop] : []),
     ...view.chain.flatMap((link) => [link.attackingCard, ...link.defendingCards, ...link.reactions]),
+    ...view.stack.map((layer) => layer.card),
   ].find((candidate) => candidate?.instanceId === id);
   if (!card || card.hidden) return null;
   return { card, fromHand: player.hand.some((candidate) => candidate.instanceId === id) };

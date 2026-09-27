@@ -433,6 +433,55 @@ describe("server rooms over websocket", () => {
     a.ws.close();
   });
 
+  it("creates, sideboards, starts, and advances a legal Silver Age Kayo bot room", async () => {
+    const a = await authedClient();
+    a.sendMsg({
+      type: "create-bot-room",
+      format: "silver-age",
+      deckId: "precon-sly",
+      cardPoolMode: "legal",
+      bot: "kayo",
+    });
+    const outcome = await a.next((m) => m.type === "room-created" || m.type === "error");
+    expect(outcome, JSON.stringify(outcome)).toMatchObject({ type: "room-created" });
+    const created = outcome as Extract<
+      ServerMessage,
+      { type: "room-created" }
+    >;
+    const prep = (await a.next(
+      (m) => m.type === "prep-state" && m.prep.seats[1]?.username === "Kayo Bot",
+    )) as Extract<ServerMessage, { type: "prep-state" }>;
+    expect(prep.prep.seats[1]).toMatchObject({ heroName: "Kayo", connected: true });
+
+    const pool = silverAgePrecon("precon-sly")!.pool;
+    a.sendMsg({ type: "choose-first", first: false });
+    await a.next((m) => m.type === "prep-state" && m.prep.startPlayer === 1);
+    a.sendMsg({ type: "present-arena", arena: { weaponIds: pool.weaponIds.slice(0, 1), equipment: {} } });
+    await a.next((m) => m.type === "prep-state" && m.prep.phase === "select-deck");
+    a.sendMsg({
+      type: "present-deck",
+      deck: {
+        weaponIds: pool.weaponIds.slice(0, 1),
+        equipment: {},
+        deck: pool.deck.slice(0, 40),
+      },
+    });
+    await a.next((m) => m.type === "game-started");
+    const initial = (await a.next((m) => m.type === "state")) as Extract<ServerMessage, { type: "state" }>;
+    expect(initial.view.gameId).toBe(created.code);
+    expect(initial.view.activePlayer).toBe(1);
+    expect(initial.botGame).toBe(true);
+    await submitBotDecision(a);
+    const advanced = (await a.next(
+      (m) => m.type === "state" && m.version > initial.version,
+    )) as Extract<ServerMessage, { type: "state" }>;
+    expect(advanced.version).toBeGreaterThan(initial.version);
+    a.sendMsg({ type: "leave-room", endGame: true });
+    expect(await a.next((m) => m.type === "left")).toEqual({ type: "left" });
+    expect((await db.query("SELECT 1 FROM rooms WHERE code = $1", [created.code])).rows).toHaveLength(0);
+    a.ws.close();
+  });
+
   it("creates, starts, and advances a Classic Constructed Hala bot room", async () => {
     const a = await authedClient();
     a.sendMsg({ type: "create-bot-room", format: "cc", deckId: "precon-asb" });

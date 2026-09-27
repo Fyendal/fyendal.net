@@ -2,6 +2,7 @@ export type { BotPrepOpponent } from "./sideboard.js";
 export {
   bravoPresentationFor,
   briarPresentationFor,
+  kayoPresentationFor,
   cindraPresentationFor,
   halaPresentationFor,
   iraPresentation,
@@ -47,3 +48,4 @@ export type { JarlIntentDecision } from "./jarl-policy.js";
 export { chooseStarvoIntent, chooseStarvoIntentWithTrace } from "./starvo-policy.js";
 export type { StarvoIntentDecision } from "./starvo-policy.js";
 export { cloneStateForBotSimulation } from "./turn-planner.js";
+export { chooseKayoIntent, chooseKayoIntentWithTrace } from "./kayo-policy.js";
