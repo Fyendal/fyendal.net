@@ -97,11 +97,17 @@
 }
 @media (max-width: 700px) {
   .table {
-    --pitch-mobile-bottom: 230px;
+    --pitch-mobile-bottom: 260px;
     --pitch-mobile-top: 72px;
     --pitch-mobile-card-width: min(30vw, 18dvh, 110px);
   }
   .table.mobile-hand-is-hidden { --pitch-mobile-bottom: 12px; }
+  #root:has(.replay-bar:not(.replay-bar-collapsed)) .table {
+    --pitch-mobile-bottom: 346px;
+  }
+  #root:has(.replay-bar:not(.replay-bar-collapsed)) .table.mobile-hand-is-hidden {
+    --pitch-mobile-bottom: 200px;
+  }
   .pitch-focus { z-index: calc(var(--game-z-prompt) + 1); }
   .pitch-focus-position {
     position: fixed;
@@ -121,6 +127,9 @@
     max-height: none;
     overflow: visible;
     padding: 0;
+  }
+  #root:has(.replay-bar:not(.replay-bar-collapsed)) .decision-float.decision-float-pitch {
+    bottom: var(--pitch-mobile-bottom) !important;
   }
   .decision-float-pitch > .decision {
     display: grid;
@@ -166,5 +175,20 @@
     min-height: 44px;
     padding: 7px 10px;
     font-size: 12px;
+  }
+}
+
+@media (max-width: 700px) and (orientation: portrait) {
+  .table {
+    --pitch-mobile-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 260px);
+  }
+  .table.mobile-hand-is-hidden {
+    --pitch-mobile-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 116px);
+  }
+  #root:has(.replay-bar:not(.replay-bar-collapsed)) .table {
+    --pitch-mobile-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 348px);
+  }
+  #root:has(.replay-bar:not(.replay-bar-collapsed)) .table.mobile-hand-is-hidden {
+    --pitch-mobile-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 202px);
   }
 }
